@@ -1,0 +1,67 @@
+ <script>
+$(document).ready(function() {
+    $("#taxolb").select2({
+        ajax: {
+            url: "/search/taxo",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 3
+    }); // Select2 Ajax
+    $('#TaxoModal').on('show.bs.modal', function (e) {
+         $("#TaxoModalBody").html("Loading...");
+         $("#TaxoModalBody").load("/search/taxotree");
+    });
+    }); // Ready
+ </script>
+<style> {# On agrandi la taile de la drop down de la popup #}
+    UL#select2-taxolb-results {max-height: 500px; }
+</style>
+
+ {# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
+ Taxonomy Filter :<br>
+ <div class="row">
+     <div class="col-lg-12">
+        <div class="input-group">
+            <select id="taxolb" multiple="multiple" style="width: 210px" > </select>
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button"  data-toggle="modal" data-target="#TaxoModal">
+                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></button>
+                </span>
+        </div><!-- /input-group -->
+    </div><!-- /.col-lg-12 -->
+</div><!-- /.row -->
+
+
+
+<script>
+$(document).ready(function() {
+    $("#BtSearch").click(function(){
+
+        //req={in:["17157378", "12735967", "17062333", "17137151"]};
+        req={in:$("#taxolb").val()};
+
+        $("#column-right").load("/search/taxofinal",req);
+    });
+    }); // Ready
+ </script>
+ <button id="BtSearch" type="button" class="btn btn-primary">Search</button>
+
+
+<!-- Modal -->
+<div class="modal " id="TaxoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <div id="TaxoModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
