@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div id="ajaxImage" style="display: inline;"><img src="{{ url_for('static', filename='AjaxLoading.gif') }}" /></div>
+<div id="statusDiv"></div>
+<div id="progressbar" style="height: 20px; width: 200px;"></div>
+
+<script>
+
+function StartMonitor(TaskID)
+{
+    var $ajaxImage = $("#ajaxImage");
+    var $progressbar = $("#progressbar");
+    var $statusDiv = $("#statusDiv");
+// Set up a recurring timer to keep running this code every second
+        // We use intervalHandle later via clearInterval to turn off this timer
+        intervalHandle = setInterval(function () {
+            // Go hit the web service to get the latest status
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "/Task/GetStatus/"+TaskID,
+                //data:{TaskID:TaskID,Action:'GetStatus'},
+                contentType: "application/json; charset=utf-8",
+                success: function (response, status, xhr) {
+                    if (response.d != null) {
+                        // We're running and have status - so:
+
+                        // Show the AJAX spinner image and progress bar
+                        $ajaxImage.show();
+                        $progressbar.show();
+
+                        // Set the status text and the progress back value
+                        $statusDiv.html(response.d.PercentComplete + "% " + response.d.WorkDescription);
+                        $progressbar.progressbar({
+                            value: response.d.PercentComplete
+                        });
+
+                        // Process is complete, start to reset the UI (the response.d == null above, will do the rest).
+                        if (response.d.IsComplete) {
+                            $statusDiv.html('<div class="alert alert-success" role="alert">Task Complete <a href="/Task/Show/{{ TaskID }}" class="btn btn-primary btn-sm " role="button">Show Task</a></div>');
+                            $ajaxImage.hide();
+                            $progressbar.hide();
+                            clearInterval(intervalHandle);
+                        }
+                        if (response.d.IsError) {
+                            $statusDiv.html('<div class="alert alert-danger" role="alert">'+response.d.WorkDescription+'<a href="/Task/Show/{{ TaskID }}" class="btn btn-primary btn-sm " role="button">Show Task</a></div>');
+                            $ajaxImage.hide();
+                            $progressbar.hide();
+                            clearInterval(intervalHandle);
+                        }
+                    }
+                    else if (response.q != null) {
+                        // Redirection vers question
+                        $statusDiv.html('<div class="alert alert-warning" role="alert">'+response.q.Message+' <a href="'+response.q.Url+'" class="btn btn-primary btn-sm " role="button">Answer Question</a></div>');
+                        $ajaxImage.hide();
+                        $progressbar.hide();
+                        clearInterval(intervalHandle);
+                    }
+                    else {
+                        // The background process isn't running or there was a problem - reset.
+                        $statusDiv.html("?");
+
+                        // Stop this setInterval loop that we're in.
+                        clearInterval(intervalHandle);
+                        $ajaxImage.hide();
+                        $progressbar.hide();
+                    }
+                }
+            });
+
+        }, 1000);
+}
+// Wait until the DOM is loaded
+$().ready(function () {
+
+    // Go get handles to the UI elements that we need.
+    var $ajaxImage = $("#ajaxImage");
+    var $progressbar = $("#progressbar");
+    var $statusDiv = $("#statusDiv");
+
+    // Hide the AJAX spinner image and the progress bar, by default.
+    $ajaxImage.hide();
+    $progressbar.hide();
+
+    // Turn off AJAX caching. When we make an AJAX call, we always want the latest.
+    //$.ajaxSetup({ cache: false });
+
+    // Simple error handling. If an AJAX error occurs, it wil show in our statusDiv.
+    $(document).ajaxError(function (e, jqxhr, settings, exception) {
+        $statusDiv.html("Error from AJAX call: " + jqxhr.statusText);
+    });
+    StartMonitor({{ TaskID }});
+});
+</script>
+{% endblock %}

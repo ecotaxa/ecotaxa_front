@@ -1,0 +1,65 @@
+<link rel="stylesheet" href="/static/jstree/themes/default/style.min.css" />
+<script src="/static/jstree/jstree.min.js"></script>
+
+<style>
+    .tree li a {
+    padding-right:20px !important;
+    background:url(icons/Star-icon.png) top right no-repeat;
+}
+.tree li.clicked a {
+    padding-right:20px !important;
+    background:url(icons/Star-icon.png) top right no-repeat #BEEBFF;
+}
+.tree li a.hover,
+.tree li a:hover {
+    padding-right:20px !important;
+    background:url(icons/Star-icon.png) top right no-repeat #D8F0FA;
+}
+</style>
+
+Id = <div id="SelectedID">----</div> Name = <div id="SelectedName">----</div>
+
+  <div id="jstree">
+  </div>
+
+<script>
+
+    $(function () {
+        $('#jstree').jstree({
+            'core': {
+                "animation" : 0,
+                "themes" : { "stripes" : false, "icons": false  },
+                'data': {
+                    'dataType': 'JSON',
+                    'url': '/search/taxotreejson',
+                    'data': function (node) {
+                        return {'id': node.id};
+                    }
+                }
+            }
+        });
+
+        $("#jstree").delegate(".TaxoSel",'click',
+                function(o){
+                    o.preventDefault();
+                    var id= $(o.target).closest("li").attr("id");
+                    var valeur= $(o.target).prev().html();
+                   $('#SelectedID').html(id);
+                   $('#SelectedName').html(valeur);
+                   $('#taxolb').append($('<option>', {    value: id,    text: valeur}));
+                   $("ul.select2-selection__rendered").children().last().prev().after('<li class="select2-selection__choice"><span role="presentation" class="select2-selection__choice__remove">×</span>'+valeur+'</li>');
+//<li class="select2-selection__choice"><span role="presentation" class="select2-selection__choice__remove">×</span>My option</li>
+                    var sel=$("#taxolb").val();
+                    sel.push(id);
+                    $("#taxolb").val(sel);
+                    $('#TaxoModal').modal("hide");
+                });
+
+        $("#jstree").bind("select_node.jstree", function (e, data) {
+            $("#jstree").jstree('open_node', data.node);
+        })
+
+    });
+</script>
+
+

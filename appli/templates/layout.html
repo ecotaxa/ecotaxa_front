@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+{% macro input(name, value='', smcol='2', type='text', size=20) -%}
+    <div class="col-sm-{{ smcol }}">
+        <input type="{{ type }}"  class="form-control" id="{{ name }}" name="{{ name }}" value="{{ value|e }}" size="{{ size }}">
+    </div>
+{%- endmacro %}
+
+{% macro label(txt, smcol='2') -%}
+     <label for="port" class="col-sm-{{ smcol }} control-label">{{ txt }}</label>
+{%- endmacro %}
+
+<html>
+<head lang="en">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui/jquery-ui.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2/css/select2.css') }}">
+
+
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EcoTaxa</title>
+</head>
+<body>
+
+<script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='jquery-ui/jquery-ui.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='select2/js/select2.min.js') }}"></script>
+<script src="{{ url_for('static', filename='jquery.lazy.min.js') }}"></script>
+{# <script src="{{ url_for('static', filename='jquery.elevatezoom.js') }}"></script>  #}
+<link rel="stylesheet" href="/static/multizoom.css" type="text/css" />
+<script type="text/javascript" src="/static/multizoom.js"></script>
+
+<script>
+function AddZoom(element)
+{
+//console.log( "AddZoom " + element.attr('src')+" "+element.attr('data-zoom-image') );
+//    element.css('display','inline');
+//return;
+index=element.attr("id").substring(1,10)
+var pos='right'
+if((index%5)>=3) pos='left'
+
+element.addimagezoom({ // single image zoom
+		zoomrange: [4, 10],
+		magnifiersize: [400,400],
+		magnifierpos: pos,
+		cursorshade: true,
+		largeimage: '/vault/'+element.attr('data-zoom-image')
+	});
+}
+
+    $(document).ready(function() {
+        $("img.lazy").lazy({
+            afterLoad: function(element) {AddZoom(element);}
+        });
+
+{#        jQuery("div#column-right img.lazy").lazy({appendScroll: jQuery("div#column-right")  });#}
+});
+</script>
+
+{#  <link rel="stylesheet" type="text/css" href="/static/lazyloading/bttrlazyloading.min.css" />
+<link rel="stylesheet" type="text/css" href="/static/lazyloading/animate.min.css" />
+<script src="/static/lazyloading/jquery.bttrlazyloading.min.js"></script>
+#}
+<div class="headinfo">
+<div class="headinfo panel panel-default">  <div class="panel-body">
+<table width="100%"><tr>
+    <td width="200px"><h1><a href="/">Ecotaxa</a></h1></td>
+    <td>&nbsp;</td>
+    <td align="right" width="200px">
+        {% if not  current_user.is_authenticated() %}
+            Not logged ( <a href="{{ url_for_security('login') }}">log in</a> )
+        {% else %}
+            {{ current_user.name }} (<a href="{{ url_for_security('logout') }}">log out</a>)
+{% if g.menu %}
+    <br><div class="btn-group" style="margin-right: 10px">
+    <button type="button" class="btn btn-default">Action</button>
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+      {%   for m in g.menu %}
+          {% if m[1]=="SEP"%}
+            <li class="divider"></li>
+          {% else %}
+            <li><a href="{{ m[0] }}">{{ m[1] }}</a></li>
+          {% endif %}
+      {%  endfor %}
+  </ul>
+</div>
+{% endif %} {# If menu #}
+{% endif %}  {# If Authenticated #}
+    </td>
+</tr></table>
+</div></div>
+  {% for message in get_flashed_messages(true) %}
+    <div class="alert alert-{{ message[0]|replace("message","info")|replace("error","danger") }} alert-dismissible" role="alert" >{{ message[1] }}</div>
+  {% endfor %}
+    {{ header|safe }}
+</div> {# headinfo #}
+
+    {% block body %}{% endblock %}
+    {{ bodycontent|safe }}
+{% if bodyleft %} {# si pas de left on ne desinne pas cette zone ni la droite, on utilisera body ou bodycontent  #}
+	<div id="bodycontainer">
+		<div id="column-left"  class="panel panel-default"
+             style="position: absolute;	top: 150px;	left: 2px;	bottom: 0px;	width: 260px;
+	                overflow-y: auto; overflow-x: hidden;  margin-bottom: 0px; " >
+            <div class="bodyleft" style="margin-left: 2px; width: 251px;">
+			  {{ bodyleft|safe }}
+            </div>
+		</div>
+{#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
+        <div id="column-right" style="margin-left: 270px;">
+            {{ bodyright|safe }}
+		</div>
+    </div> {# Container #}
+{% endif %}
+</body>
+</html>
