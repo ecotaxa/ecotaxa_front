@@ -17,7 +17,7 @@
 // Nov 28th, 2012: Version 2.1 w/Multi Zoom, updates - new features and bug fixes
 
 var featuredimagezoomer = { // the two options for Featured Image Zoomer:
-	loadinggif: 'spinningred.gif', // full path or URL to "loading" gif
+	loadinggif: 'static/spinningred.gif', // full path or URL to "loading" gif
 	magnifycursor: 'crosshair' // value for CSS's 'cursor' property when over the zoomable image
 };
 
