@@ -87,6 +87,7 @@ class TaskTaxoSync(AsyncTask):
         self.dt_debut=datetime.now()
         Data=[]
         for row in cursor:
+            #  Fabrication d'une ligne au format TSV
             tabbedstr=functools.reduce(lambda a,b:str(a)+"\t"+str(b) if a else str(b),row,"")
             Data.append(tabbedstr)
             #bench 1.87M par 1k:55s ,par 10k:52s ,par 50k:52s, par 100k:56s

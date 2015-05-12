@@ -17,7 +17,7 @@
 }
 </style>
 
-Id = <div id="SelectedID">----</div> Name = <div id="SelectedName">----</div>
+Id = <span id="SelectedID">----</span> Name = <span id="SelectedName">----</span>
 
   <div id="jstree">
   </div>
@@ -47,11 +47,13 @@ Id = <div id="SelectedID">----</div> Name = <div id="SelectedName">----</div>
                    $('#SelectedID').html(id);
                    $('#SelectedName').html(valeur);
                    $('#taxolb').append($('<option>', {    value: id,    text: valeur}));
-                   $("ul.select2-selection__rendered").children().last().prev().after('<li class="select2-selection__choice"><span role="presentation" class="select2-selection__choice__remove">×</span>'+valeur+'</li>');
+//                   $("ul.select2-selection__rendered").children().last().prev().after('<li class="select2-selection__choice"><span role="presentation" class="select2-selection__choice__remove">×</span>'+valeur+'</li>');
 //<li class="select2-selection__choice"><span role="presentation" class="select2-selection__choice__remove">×</span>My option</li>
                     var sel=$("#taxolb").val();
+                    if(sel==null) sel=[];
                     sel.push(id);
                     $("#taxolb").val(sel);
+                    $("#taxolb").change();
                     $('#TaxoModal').modal("hide");
                 });
 

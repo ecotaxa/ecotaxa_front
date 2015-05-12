@@ -44,15 +44,10 @@ def taxotreerootjson():
 
 @app.route('/search/taxofinal', methods=['GET', 'POST'])
 def taxofinal():
-    if gvp("in"):
-        print("in="+gvp("in"))
-        print(request.form)
+    if gvp("in[]"):
         resin=",".join(request.form.getlist("in[]"))
-        print(request.form.getlist("in[]"))
-        print (resin)
         res = GetAll("SELECT id, nom FROM taxonomy WHERE  id in ("+resin+")  order by nom ")
-        print(str(res))
-        txt=str(res)
+        txt="Taxonomy = "+",".join((x[1] for x in res))
     else:txt="No Criteria"
     Imgs=GetAll("""SELECT o.objid, i.imgid, i.file_name, coalesce(i.thumb_file_name,i.file_name), coalesce(i.thumb_width,i.width), coalesce(i.thumb_height,i.height), taxo.nom
               FROM public.objects o, public.images i, public.taxonomy taxo
