@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<table class="table">
+    <tr><th>ID</th><th>Task Type</th><th>Owner</th>
+    <th>State</th><th>Step</th></tr>
+ {% for t in tasks %}
+    <tr><td><a href="{{ t.id }}">{{ t.id }}</a></td><td>{{ t.taskclass }}</td><td>{{ t.owner_id }}</td>
+    <td>{{ t.taskstate }}</td><td>{{ t.taskstep }}</td></tr>
+  {% endfor %}
+
+{% endblock %}

@@ -44,17 +44,22 @@ def taxotreerootjson():
 
 @app.route('/search/taxofinal', methods=['GET', 'POST'])
 def taxofinal():
-    if gvp("in[]"):
-        resin=",".join(request.form.getlist("in[]"))
+    if gvp("taxo[]"):
+        resin=",".join(request.form.getlist("taxo[]"))
         res = GetAll("SELECT id, nom FROM taxonomy WHERE  id in ("+resin+")  order by nom ")
         txt="Taxonomy = "+",".join((x[1] for x in res))
     else:txt="No Criteria"
     Imgs=GetAll("""SELECT o.objid, i.imgid, i.file_name, coalesce(i.thumb_file_name,i.file_name), coalesce(i.thumb_width,i.width), coalesce(i.thumb_height,i.height), taxo.nom
               FROM public.objects o, public.images i, public.taxonomy taxo
               WHERE o.objid = i.objid AND o.classif_id = taxo.id;""")
+    txt+=" (%d response)"%(len(Imgs))
     txt+="\n<table><tr>"
+    try:
+        NbrCol=int(gvp("resultwidth"))//160
+    except:
+        NbrCol=4;
     for Img,i in zip(Imgs,range(0,9999999)):
-        if i>0 and (i%5)==0:
+        if i>0 and (i%NbrCol)==0:
             txt+="\n</tr><tr>"
         # txt+="\n<td valign=bottom witdth=160px><img class='lazy' src='' data-src='/vault/%s?3' width=%s height=%s data-zoom-image='/vault/%s'><br>%s</td>"%(Img[3],Img[4],Img[5],Img[2],Img[6])
         txt+="\n<td valign=bottom witdth=160px><img class='lazy' id=I%d src='' data-src='/vault/%s?3' width=%s height=%s data-zoom-image='%s'><br>%s</td>"%(i,Img[3],Img[4],Img[5],Img[2],Img[6])

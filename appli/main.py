@@ -21,11 +21,15 @@ app.register_blueprint(vaultBP)
 
 @app.route('/')
 def index():
-    flash('Flash Test','info')
-    flash('Flash Message')
-    txt = "<a href="+url_for("test1")+">Test 1</a><br>"
-    txt += "<a href="+url_for("test2")+">Test 2</a><br>"
-    txt += "<a href="+url_for("test3")+">Test 3</a><br>"
+    flash('Flash Test Info','info')
+    flash('Flash Test Erreur','error')
+    flash('Flash Test warning','warning')
+    #flash('Flash Message')
+    txt = "<a href=/Task/Create/TaskTest>Task/Create/TaskTest</a><br>"
+    txt += "<a href=/Task/Create/TaskTaxoSync>Task/Create/TaskTaxoSync</a><br>"
+    txt += "<a href="+url_for("test1")+">Test 1</a><br>"
+    txt += "<a href="+url_for("test2")+">Test 2 : Layout seul</a><br>"
+    txt += "<a href="+url_for("test3")+">Test 3 : Recherche et affichage</a><br>"
     return PrintInCharte(txt)
     # return render_template('layout.html',bodycontent=txt)
 
@@ -41,7 +45,7 @@ def test1():
     txt += "Name =" + getattr(current_user,'name',"???")+"<br>"
     txt += "Id ="+str(getattr(current_user,'id',-1))+"<br>"
     txt += ObjectToStr(current_user)
-    txt += "<br><img src='vault/test.jpg' width=500>"+5
+    txt += "<br><img src='vault/test.jpg' width=500>"
     return render_template('layout.html',bodycontent=txt)
 
 @app.route('/test2')
