@@ -42,7 +42,7 @@ $(document).ready(function() {
     $("#BtSearch").click(function(){
 
         //req={in:["17157378", "12735967", "17062333", "17137151"]};
-        req={in:$("#taxolb").val()};
+        req={taxo:$("#taxolb").val(),resultwidth:$("#column-right").width()};
 
         $("#column-right").load("/search/taxofinal",req);
     });

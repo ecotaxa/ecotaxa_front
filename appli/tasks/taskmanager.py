@@ -86,9 +86,16 @@ def LoadTask(taskid):
     return TaskFactory(task.taskclass,task)
 
 
-@app.route('/task/listall')
+@app.route('/Task/listall')
 def ListTasks(owner=None):
-    pass
+     tasks=Task.query.all()
+     txt = str(tasks)
+     for t in tasks:
+         txt += "<br>"+str(t.taskclass)+"-"+str(t.id)+"-"+str(t.owner_id)+"-"+str(t.taskstate)
+     txt += "<br>"+str(len(tasks))
+#     return render_template('layout.html',bodycontent=txt)
+     return render_template('task/listall.html',tasks=tasks)
+
 
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
 def TaskCreateRouter(ClassName):

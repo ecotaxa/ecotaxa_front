@@ -7,11 +7,11 @@ from flask.ext.admin.contrib import sqla
 from flask.ext.admin.contrib.sqla import ModelView,filters
 from wtforms  import TextField, PasswordField
 from flask.ext.security.utils import encrypt_password
-
+from flask.ext.admin import base
 
 class UsersView(ModelView):
     # Disable model creation
-    can_create = False
+    can_create = True
 
     # Override displayed fields
     column_list = ('email', 'name','organisation','active', 'roles')
@@ -34,10 +34,11 @@ class UsersView(ModelView):
         return super(UsersView, self).update_model(form, model)
 
 # Create admin
-admin = admin.Admin(app, name='Ecotaxa Administration')
+adminApp = admin.Admin(app, name='Ecotaxa Administration')
 
 # Add views
 #admin.add_view(sqla.ModelView(database.users, db.session))
-admin.add_view(UsersView(db.session))
+adminApp.add_view(UsersView(db.session))
+adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
 
 #admin.add_view(CategoriesAdmin(Categories, db.session))
