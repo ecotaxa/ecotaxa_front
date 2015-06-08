@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+<form class="form-horizontal" method="post">
+  <div class="form-group">
+{{ label("Project ID")+ input('ProjectId', data.ProjectId, '1', 'text', 40)  }} TODO HIDDEN
+  </div>
+  <div class="form-group">
+      {{ label("Input Folder/File")+ input('InData', data.InData, '4', 'text', 200)  }} TODO Explorateur
+  </div>
+  <div class="form-group">
+      {{ label("Taxonomy Mapping\nImportVal=TaxoVal") }}
+    <div class="col-sm-4">
+        <textarea  class="form-control" id="TaxoMap" name="TaxoMap"  rows="4">{{ data.TaxoMap }}</textarea>
+    </div>
+
+  </div>
+
+
+    <input type="hidden" name="starttask" value="Y">
+    <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-2">
+      <button type="submit" class="btn btn-primary">Start Task</button>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

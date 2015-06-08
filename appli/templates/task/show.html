@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<table class="table-bordered">
+<tr>
+    <th width="150px">Class</th><td>{{ task.taskclass }}</td>
+</tr><tr>
+    <th>State</th><td>{{ task.taskstate }}
+    {% if task.taskstate=="Question" %}
+        <a href="/Task/Question/{{ task.id }}"><span class="label label-warning">Answer Question</span></a>
+    {% endif %}
+    {% if task.taskstate=="Error" %}
+        <a href="/Task/ForceRestart/{{ task.id }}"><span class="label label-warning">Force Restart</span></a>
+    {% endif %}
+
+</td>
+</tr><tr>
+    <th>Step</th><td>{{ task.taskstep }}</td>
+</tr><tr>
+    <th>Progress (%)</th><td>{{ task.progresspct }}</td>
+</tr><tr>
+    <th>Message</th><td>{{ task.progressmsg }}</td>
+</tr><tr class="collapse">
+    <th>Input Param</th><td>{{ task.inputparam }}</td>
+</tr>
+</tr><tr class="collapse">
+    <th>Question Data</th><td>{{ task.questiondata }}</td>
+</tr>
+</tr><tr class="collapse">
+    <th>Answer Data</th><td>{{ task.answerdata }}</td>
+</tr>
+</table>
+
+<p><a class="btn" data-toggle="collapse" data-target=".collapse">View internal details &raquo;</a></p>
+
+{% endblock %}

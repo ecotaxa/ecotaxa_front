@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, g, flash,request,url_for
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte
+from appli import app,ObjectToStr,PrintInCharte,database
 import appli.search.taxo
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_security.decorators import roles_accepted
@@ -75,7 +75,7 @@ def test3():
 
 
 @app.route('/testadmin')
-@roles_accepted('admin')
+@roles_accepted(database.AdministratorLabel)
 def testadmin():
     return "Admin OK"
 
@@ -91,7 +91,7 @@ def before_request_security():
     g.menu = []
     g.menu.append((url_for("index"),"Home / Explore"))
     g.menu.append(("/selectproject","Select Project"))
-    if current_user.has_role("admin"):
+    if current_user.has_role(database.AdministratorLabel):
         g.menu.append(("/admin","Admin Screen"))
     g.menu.append(("","SEP"))
     g.menu.append(("/change","Change Password"))

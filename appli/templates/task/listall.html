@@ -1,4 +1,15 @@
 {% extends "layout.html" %}
+{% macro PutInLabel(LblType,Txt,id)  -%}
+    {% if LblType=="Question" %}
+        <a href="/Task/Question/{{ id }}"><span class="label label-warning">{{ Txt }}</span></a>
+    {% elif LblType=="Error" %}
+        <a href="/Task/Show/{{ id }}"><span class="label label-danger">{{ Txt }}</span></a>
+    {% elif LblType=="Running" %}
+        <a href="/Task/Show/{{ id }}"><span class="label label-info">{{ Txt }}</span></a>
+    {% else %}
+        {{ Txt }}
+    {% endif %}
+{%- endmacro %}
 
 {% block body %}
 
@@ -7,7 +18,7 @@
     <th>State</th><th>Step</th></tr>
  {% for t in tasks %}
     <tr><td><a href="{{ t.id }}">{{ t.id }}</a></td><td>{{ t.taskclass }}</td><td>{{ t.owner_id }}</td>
-    <td>{{ t.taskstate }}</td><td>{{ t.taskstep }}</td></tr>
+    <td>{{ PutInLabel(t.taskstate,t.taskstate,t.id) }}</td><td>{{ t.taskstep }}</td><td><a href="/Task/Show/{{ t.id }}"><span class="label label-primary">View </span></a></td></tr>
   {% endfor %}
 
 {% endblock %}

@@ -1,21 +1,65 @@
 # -*- coding: utf-8 -*-
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp
 from PIL import Image
-from flask import Blueprint, render_template, g, flash
+from flask import Blueprint, render_template, g, flash,request
 from io import StringIO
-import html,functools,logging,json,time,os
+import html,functools,logging,json,time,os,csv
 import datetime,shutil,random
+from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,LoadTask
 from flask_wtf import Form
 from wtforms import StringField
 from wtforms.validators import DataRequired
 
+
+PredefinedTables=['object','sample','process','acq']
+PredefinedTypes={'[float]':'n','[int]':'n','[text]':'t'}
+PredefinedFields={
+    'object_id':{'table':'object','field':'orig_id','type':'t'},
+    'sample_id':{'table':'sample','field':'orig_id','type':'t'},
+    'acq_id':{'table':'acq','field':'orig_id','type':'t'},
+    'process_id':{'table':'process','field':'orig_id','type':'t'},
+    'object_lat':{'table':'object','field':'latitude','type':'n'},
+    'object_lon':{'table':'object','field':'longitude','type':'n'},
+    'object_date':{'table':'object','field':'objdate','type':'t'},
+    'object_time':{'table':'object','field':'objtime','type':'t'},
+    'object_depth_min':{'table':'object','field':'depth_min','type':'n'},
+    'object_depth_max':{'table':'object','field':'depth_max','type':'n'},
+    'annotation_name':{'table':'object','field':'tmp_annotname','type':'t'},
+    'annotation_email':{'table':'object','field':'tmp_annotemail','type':'t'},
+    'annotation_date':{'table':'object','field':'tmp_annotdate','type':'t'},
+    'annotation_time':{'table':'object','field':'tmp_annottime','type':'t'},
+    'annotation_person_last_name':{'table':'object','field':'tmp_annotauthor','type':'t'},
+    'annotation_status':{'table':'object','field':'classif_qual','type':'t'},
+    'img_rank':{'table':'image','field':'imgrank','type':'n'},
+    'img_file_name':{'table':'image','field':'tmp_file','type':'t'},
+    'annotation_person_first_name':{'table':'object','field':'tmp_todelete1','type':'t'},
+}
+# Purge les espace et converti le Nan en vide
+def CleanValue(v):
+    v=v.strip()
+    if v.lower()=='nan':
+        v=''
+    return v;
+# retourne le flottant image de la chaine en faisant la conversion ou None
+def ToFloat(value):
+    if value=='': return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
 class TaskImport(AsyncTask):
     class Params (AsyncTask.Params):
         def __init__(self,InitStr=None):
+            self.steperrors=[]
             super().__init__(InitStr)
             if InitStr==None: # Valeurs par defaut ou vide pour init
                 self.InData='My In Data'
+                self.ProjectId=1
+                # self.Mapping={x:{} for x in PredefinedTables}
+                self.Mapping={}
+                self.TaxoMap={}
 
     def __init__(self,task=None):
         super().__init__(task)
@@ -24,56 +68,241 @@ class TaskImport(AsyncTask):
         else:
             self.param=self.Params(task.inputparam)
 
+    def LogErrorForUser(self,Msg):
+        # On ne trace dans les 2 zones ques les milles premieres erreurs.
+        if len(self.param.steperrors)<1000:
+            self.param.steperrors.append(Msg)
+            logging.warning("%s",Msg)
+        elif len(self.param.steperrors)==1000:
+            self.param.steperrors.append("More errors truncated")
+            logging.warning("More errors truncated")
     def SPCommon(self):
         logging.info("Execute SPCommon")
-
+        self.pgcur=db.engine.raw_connection().cursor()
 
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__))
         logging.info("Start Step 1")
-        progress=0
-        for i in range(10):
-            time.sleep(0.5)
-            progress+=2
-            self.UpdateProgress(progress,"My Message %d"%(progress))
-        logging.info("End Step 1")
-        self.task.taskstate="Question"
-        db.session.commit()
+        if getattr(self.param,'IntraStep',0)==0:
+            #Sous tache 1 Copie
+            if self.param.InData.lower().endswith("zip"):
+                logging.info("SubTask1 : TODO Unzip File on temporary folder")
+                #TODO penser à renseigner self.param.SourceDir
+            else:
+                self.param.SourceDir=self.param.InData
+            self.param.IntraStep=1
+
+        if self.param.IntraStep==1:
+            self.param.Mapping={} # Reset à chaque Tentative
+            self.param.TaxoFound={} # Reset à chaque Tentative
+            self.param.UserFound={} # Reset à chaque Tentative
+            self.param.steperrors=[] # Reset des erreurs
+            # recuperation de toutes les paire objet/Images du projet
+            self.ExistingObject=set()
+            self.pgcur.execute(
+                "SELECT concat(o.orig_id,'*',i.file_name) from images i join objects o on i.objid=o.objid where o.projid=1")
+            for rec in self.pgcur:
+                self.ExistingObject.add(r[0])
+            logging.info("SubTask1 : Analyze CSV Files")
+            #Todo importer le mapping existant pour le completer
+            self.LastNum={x:{'n':0,'t':0} for x in PredefinedTables}
+            #Todo extraire les max du mapping existant.
+            sd=Path(self.param.SourceDir)
+            for CsvFile in sd.glob("**/*.csv"):
+                relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
+                logging.info("Analyzing file %s"%(relname.as_posix()))
+                with open(CsvFile.as_posix()) as csvfile:
+                    # lecture en mode dictionnaire basé sur la premiere ligne
+                    rdr = csv.DictReader(csvfile, delimiter=';', quotechar='"')
+                    #lecture la la ligne des types (2nd ligne du fichier
+                    LType=rdr.__next__()
+                    # Fabrication du mapping
+                    for champ in rdr.fieldnames:
+                        if champ in self.param.Mapping:
+                            continue # Le champ à déjà été détecté
+                        ColName=champ.strip(" .\t").lower()
+                        ColSplitted=ColName.split("_",1)
+                        if len(ColSplitted)!=2:
+                            self.LogErrorForUser("Invalid Header '%s' in file %s. Format must be Table_Field. Field ignored"%(ColName,relname.as_posix()))
+                            continue
+                        Table=ColSplitted[0] # On isole la partie table avant le premier _
+                        if ColName in PredefinedFields:
+                            Table=PredefinedFields[champ]['table']
+                            self.param.Mapping[champ]=PredefinedFields[champ]
+                        else: # champs non predefinis donc dans nXX ou tXX
+                            if not Table in PredefinedTables:
+                                self.LogErrorForUser("Invalid Header '%s' in file %s. Table Incorrect. Field ignored"%(ColName,relname.as_posix()))
+                                continue
+                            if Table!='object': # Dans les autres tables les types sont forcés à texte
+                                SelType='t'
+                            else:
+                                if LType[champ] not in PredefinedTypes:
+                                    self.LogErrorForUser("Invalid Type '%s' for Field '%s' in file %s. Incorrect Type. Field ignored"%(LType[champ],ColName,relname.as_posix()))
+                                    continue
+                                SelType=PredefinedTypes[LType[champ]]
+                            self.LastNum[Table][SelType]+=1
+                            self.param.Mapping[champ]={'table':Table,'field':SelType+"%02d"%self.LastNum[Table][SelType],'type':SelType,'title':ColSplitted[1]}
+                            logging.info("New field %s found in file %s",champ,relname.as_posix())
+                    # Test du contenu du fichier
+                    RowCount=0
+                    for lig in rdr:
+                        RowCount+=1
+                        for champ in rdr.fieldnames:
+                            m=self.param.Mapping.get(champ,None)
+                            if m is None:
+                                continue # Le champ n'est pas considéré
+                            v=CleanValue(lig[champ])
+                            if v!="": # si pas de valeurs, pas de controle
+                                if m.get('Seen',None)==None: #marque si on a vu au moins une valeur.
+                                    self.param.Mapping[champ]["Seen"]=True
+                                if m['type']=='n':
+                                    vf=ToFloat(v)
+                                    if vf==None:
+                                        self.LogErrorForUser("Invalid float value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
+                                    elif champ=='object_lat':
+                                        if vf<-90 or vf>90:
+                                            self.LogErrorForUser("Invalid Lat. value '%s' for Field '%s' in file %s. Incorrect range -90/+90°."%(v,champ,relname.as_posix()))
+                                    elif champ=='object_long':
+                                        if vf<-180 or vf>180:
+                                            self.LogErrorForUser("Invalid Long. value '%s' for Field '%s' in file %s. Incorrect range -180/+180°."%(v,champ,relname.as_posix()))
+                                elif champ=='object_date':
+                                    try:
+                                        datetime.date(int(v[0:4]), int(v[4:6]), int(v[6:8]))
+                                    except ValueError:
+                                        self.LogErrorForUser("Invalid Date value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
+                                elif champ=='object_time':
+                                    try:
+                                        v=v.zfill(6)
+                                        datetime.time(int(v[0:2]), int(v[2:4]), int(v[4:6]))
+                                    except ValueError:
+                                        self.LogErrorForUser("Invalid Time value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
+                                elif champ=='annotation_name':
+                                    v=self.param.TaxoMap.get(v,v) # Applique le mapping
+                                    self.param.TaxoFound[v]=None #creation d'une entrée dans le dictionnaire.
+                                elif champ=='annotation_person_last_name':
+                                    self.param.UserFound[v]={'email':CleanValue(lig.get('annotation_email',''))}
+
+                        #Analyse l'existance du fichier Image
+                        ObjectId=CleanValue(lig.get('object_id',''))
+                        if ObjectId=='':
+                            self.LogErrorForUser("Missing ObjectId on line '%s' in file %s. Incorrect Type. Field ignored"%(RowCount,relname.as_posix()))
+                        ImgFileName=CleanValue(lig.get('img_file_name','MissingField img_file_name'))
+                        ImgFilePath=CsvFile.with_name(ImgFileName)
+                        if not ImgFilePath.exists():
+                            self.LogErrorForUser("Missing Image '%s' in file %s. Incorrect Type. Field ignored"%(ImgFileName,relname.as_posix()))
+                        CleExistObj=ObjectId+'*'+ImgFileName
+                        if CleExistObj in self.ExistingObject:
+                            self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. Incorrect Type. Field ignored"%(ImgFileName,relname.as_posix()))
+                        self.ExistingObject.add(CleExistObj)
+                    logging.info("File %s : %d row analysed",relname.as_posix(),RowCount)
+
+            self.UpdateProgress(15,"CSV File Parsed"%())
+            print(self.param.Mapping)
+            logging.info("Taxo Found = %s",self.param.TaxoFound)
+            logging.info("Users Found = %s",self.param.UserFound)
+            logging.info("For Information Not Seen Fields %s",
+                         [k for k,v in self.param.Mapping.items() if not v.get('Seen')])
+            self.param.IntraStep=2
+            #TODO Compter le Nbr de fichier pour ProgressBar plus tard, Verifier >0
+        if self.param.IntraStep==2:
+            logging.info("Start Sub Step 1.2")
+            logging.info("Users Found = %s",self.param.UserFound)
+            #todo Resoudre les Nom
+            # récuperation des ID des taxo trouvées
+            self.pgcur.execute("select id,name from taxonomy where name = any(%s) ",([x for x in self.param.TaxoFound.keys()],))
+            for rec in self.pgcur:
+                self.param.TaxoFound[rec[1]]=rec[0]
+            logging.info("Taxo Found = %s",self.param.TaxoFound)
+            self.param.TaxoFound['agreia pratensis']=None #todo Pour TEST A EFFACER
+            NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
+            if len(NotFoundTaxo)>0:
+                logging.info("Some Taxo Not Found = %s",NotFoundTaxo)
+            self.task.taskstate="Question"
+            self.UpdateProgress(20,"Taxo automatic resolution Done"%())
+            #Recherche des valeurs dans la Taxo
+            #Remplissage du dico avec ce qui existe
+            #Essayer de resoudre les Noms
+            #s'il reste des choses à résoudre Faire une Question Phase 1
+            #Sinon Basculer Auto en Step 2
 
 
     def SPStep2(self):
-        logging.info("Start Step 2")
-        for i in range(20,102,2):
-            time.sleep(0.1)
-            self.UpdateProgress(i,"My Step 2 Message %d"%(i))
-        logging.info("End Step 2")
+        logging.info("Start Step 2 : Effective data import")
+        logging.info("Taxo Mapping = %s",self.param.TaxoFound)
+        logging.info("Users Mapping = %s",self.param.UserFound)
+
+
+        # for i in range(20,100,20):
+        #     time.sleep(0.1)
+        #     self.UpdateProgress(i,"My Step 2 Message %d"%(i))
+        # logging.info("End Step 2")
+        # raise Exception("A Finir")
 
 
     def QuestionProcess(self):
-        txt="<h1>Test Task</h1>"
+        txt="<h1>Text File Importation Task</h1>"
+        errors=[]
         if self.task.taskstep==0:
             txt+="<h3>Task Creation</h3>"
             if gvp('starttask')=="Y":
                 for k,v  in self.param.__dict__.items():
                     setattr(self.param,k,gvp(k))
+                TaxoMap={}
+                for l in gvp('TaxoMap').splitlines():
+                    ls=l.split('=',1)
+                    if len(ls)!=2:
+                        errors.append("Taxonomy Mapping : Invalid format for line %s"%(l))
+                    TaxoMap[ls[0].strip().lower()]=ls[1].strip().lower()
                 # Verifier la coherence des données
-                if(len(self.param.InData)<5):
-                    flash("Champ In Data trop court","error")
+                #TODO verifier que le repertoire existe
+                #TODO traiter l'import d'un fichier par HTTP
+                #TODO verifier les droits sur le projet.
+                #TODO Passer le projet en données entrante + Hidden
+                if len(self.param.InData)<5:
+                    errors.append("Input Folder/File Too Short")
+                if len(errors)>0:
+                    for e in errors:
+                        flash(e,"error")
                 else:
+                    self.param.TaxoMap=TaxoMap # on stocke le dictionnaire et pas la chaine
                     return self.StartTask(self.param)
-            return render_template('task/testcreate.html',header=txt,data=self.param)
+            return render_template('task/import_create.html',header=txt,data=self.param)
         if self.task.taskstep==1:
-            txt+="<h3>Task Question 1</h3>"
+            self.param.TaxoFound['agreia pratensis']=None #todo Pour TEST A EFFACER
+            NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
+            NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
+            app.logger.info("Pending Taxo Not Found = %s",NotFoundTaxo)
+            app.logger.info("Pending Users Not Found = %s",NotFoundUsers)
             if gvp('starttask')=="Y":
-                self.param.InData2=gvp("InData2")
+                app.logger.info("Form Data = %s",request.form)
+                for i in range(1,1+len(NotFoundTaxo)):
+                    orig=gvp("orig%d"%(i)) #Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
+                    newvalue=gvp("taxolb%d"%(i))
+                    if orig in NotFoundTaxo and newvalue!="":
+                        t=database.Taxonomy.query.filter(database.Taxonomy.id==int(newvalue)).first()
+                        app.logger.info(orig+" associated to "+t.name)
+                        self.param.TaxoFound[orig]=t.id
+                    else:
+                        errors.append("Taxonomy Manual Mapping : Invalid value '%s' for '%s'"%(newvalue,orig))
+                for i in range(1,1+len(NotFoundUsers)):
+                    orig=gvp("origuser%d"%(i)) #Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
+                    newvalue=gvp("userlb%d"%(i))
+                    if orig in NotFoundUsers and newvalue!="":
+                        t=database.users.query.filter(database.users.id==int(newvalue)).first()
+                        app.logger.info("User "+orig+" associated to "+t.name)
+                        self.param.UserFound[orig]['id']=t.id
+                    else:
+                        errors.append("User Manual Mapping : Invalid value '%s' for '%s'"%(newvalue,orig))
+                app.logger.info("Final Taxofound = %s",self.param.TaxoFound)
+                self.UpdateParam() # On met à jour ce qui à été accepté
                 # Verifier la coherence des données
-                if(len(self.param.InData2)<5):
-                    flash("Champ In Data 2 trop court","error")
-                else:
+                if len(errors)==0:
                     return self.StartTask(self.param,step=2)
-            return render_template('task/testquestion1.html',header=txt,data=self.param)
-
-
+                for e in errors:
+                    flash(e,"error")
+                NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
+                NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
+            return render_template('task/import_question1.html',header=txt,taxo=NotFoundTaxo,users=NotFoundUsers)
         return PrintInCharte(txt)
 
 MappingObj= {'object_id':'orig_id',
@@ -185,7 +414,12 @@ def LoadFile():
 
 
 if __name__ == '__main__':
-    # t=LoadTask(1)
-    # t.Process()
+    t=LoadTask(1)
+    # t.task.taskstate="Running" # permet de forcer l'état
+    # print(ObjectToStr(t.param))
+    # t.param.IntraStep=1
+    # t.UpdateProgress(25,"Test 1")
+
+    t.Process()
     # LoadHeader()
-    LoadFile()
+    #LoadFile()

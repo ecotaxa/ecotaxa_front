@@ -22,11 +22,15 @@ class SQLAlchemyUserDatastoreCACHED (SQLAlchemyUserDatastore):
     def find_user(self, **kwargs):
         # print("******************* find_user  ********************* %s"%kwargs)
         with self.lock:
-            u=self.cache_users.get(kwargs["id"])
+            if "id" in kwargs:
+                u=self.cache_users.get(kwargs["id"])
+            else:
+                u=None
             if u is None:
                 u=self.user_model.query.filter_by(**kwargs).first()
-                tmprole=u.roles # used to force quering Database
-                self.cache_users.set(kwargs["id"],u)
+                if (u is not None) and (id in kwargs):
+                    tmprole=u.roles # used to force quering Database
+                    self.cache_users.set(kwargs["id"],u)
             return u
 
 

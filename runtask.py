@@ -28,6 +28,7 @@ if __name__ == '__main__':
         # raise Exception("TEST")
         # On crée la tache à partir de la base
         task=LoadTask(taskid)
+        task.task.taskstate="Running"
         # on execute SPCommon s'il existe
         fct=getattr(task,"SPCommon",None)
         if fct!=None:
