@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+<form class="form-horizontal" method="post">
+{%   if (taxo|length())>0 %}
+    <h3>Taxonomy Manual Mapping</h3>
+    {% for T in taxo %}
+  <div class="form-group">
+{{ label(loop.index~" - "+T)  }}
+      <input type="hidden" name="orig{{ loop.index }}" value="{{ T }}">
+  <div class="col-lg-2">
+    <div class="input-group">
+       <select id="taxolb{{ loop.index }}" name="taxolb{{ loop.index }}" style="width: 210px" class='taxolb' > </select>
+            <span class="input-group-btn">
+                <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolb{{ loop.index }}">
+                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></button>
+                </span>
+        </div><!-- /input-group -->
+  </div>
+  </div>
+    {% endfor %}
+
+{% endif %}
+
+
+{%   if (users|length())>0 %}
+    <h3>Users Manual Mapping</h3>
+    {% for U in users %}
+  <div class="form-group">
+{{ label(loop.index~" - "+U)  }}
+      <input type="hidden" name="origuser{{ loop.index }}" value="{{ U }}">
+  <div class="col-lg-2">
+       <select id="userlb{{ loop.index }}" name="userlb{{ loop.index }}" style="width: 210px" class='userlb' > </select>
+  </div>
+  </div>
+    {% endfor %}
+
+{% endif %}
+
+
+    <input type="hidden" name="starttask" value="Y">
+    <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-2">
+      <button type="submit" class="btn btn-primary">Continue Task</button>
+    </div>
+  </div>
+</form>
+
+
+ <script>
+$(document).ready(function() {
+    $(".taxolb").select2({
+        ajax: {
+            url: "/search/taxo",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 3
+    }); // Select2 Ajax
+    $(".userlb").select2({
+        ajax: {
+            url: "/search/users",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 2
+    }); // Select2 Ajax
+    $('#TaxoModal').on('show.bs.modal', function (e) {
+        var button = $(e.relatedTarget); // Button that triggered the modal
+        var targetid = button.data('mytargetid');
+         $("#TaxoModalBody").html("Loading...");
+         $("#TaxoModalBody").load("/search/taxotree?target="+targetid);
+    });
+    }); // Ready
+ </script>
+
+
+<!-- Modal -->
+<div class="modal " id="TaxoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <div id="TaxoModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

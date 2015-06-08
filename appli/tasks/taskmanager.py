@@ -32,13 +32,20 @@ class AsyncTask:
     def Process(self):
         pass
 
+    def UpdateParam(self):
+        if hasattr(self, 'param'):
+            self.task.inputparam = json.dumps(self.param.__dict__)
+        db.session.commit()
+
     def UpdateProgress(self,pct,msg=""):
         self.task.progresspct=pct
         self.task.progressmsg=msg
-        db.session.commit()
+        self.UpdateParam()
 
-    def StartTask(self,param,step=1):
-        self.task.inputparam=json.dumps(param.__dict__)
+    #Permet de lancer le sous process
+    def StartTask(self,param=None,step=1):
+        if param is not None:
+            self.task.inputparam=json.dumps(param.__dict__)
         self.task.taskstep=step
         self.task.taskstate="Running"
         if self.task.id==None:
@@ -51,11 +58,9 @@ class AsyncTask:
         # os.spawnv(os.P_NOWAIT,  sys.executable, (sys.executable,cmd, str(self.task.id))) # Ne marche pas
         # system marche, mais c'est un appel bloquant donc on le met dans une thread separé
         import _thread
-        # def RunProcess(cmd):
-        #     os.system(cmd)
-        # _thread.start_new_thread(RunProcess,(cmd,));
         _thread.start_new_thread(os.system,(cmd,));
-        flash("Taks %d Created : %s"%(self.task.id,cmd),"success")
+        # flash("Taks %d Created : %s"%(self.task.id,cmd),"success")
+        flash("Taks %d subprocess Created "%(self.task.id),"success")
         return render_template('task/monitor.html',TaskID=self.task.id)
 
     class Params:
@@ -72,6 +77,9 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.test  import TaskTest
     if ClassName=="TaskTest":
         return TaskTest(task)
+    from appli.tasks.taskimport import TaskImport
+    if ClassName=="TaskImport":
+        return TaskImport(task)
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName))
 
 def LoadTask(taskid):
@@ -93,7 +101,6 @@ def ListTasks(owner=None):
      for t in tasks:
          txt += "<br>"+str(t.taskclass)+"-"+str(t.id)+"-"+str(t.owner_id)+"-"+str(t.taskstate)
      txt += "<br>"+str(len(tasks))
-#     return render_template('layout.html',bodycontent=txt)
      return render_template('task/listall.html',tasks=tasks)
 
 
@@ -106,6 +113,16 @@ def TaskCreateRouter(ClassName):
 def TaskQuestionRouter(TaskID):
     task=LoadTask(TaskID)
     return task.QuestionProcess()
+
+@app.route('/Task/Show/<int:TaskID>', methods=['GET'])
+def TaskShow(TaskID):
+    task=LoadTask(TaskID)
+    return render_template('task/show.html',task=task.task)
+
+@app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
+def TaskForceRestart(TaskID):
+    task=LoadTask(TaskID)
+    return task.StartTask(step=task.task.taskstep)
 
 @app.route('/Task/GetStatus/<int:TaskID>', methods=['GET'])
 def TaskGetStatus(TaskID):
@@ -124,12 +141,13 @@ def TaskGetStatus(TaskID):
             rep={'d':{
                 'PercentComplete':Progress,
                 'WorkDescription': task.task.progressmsg}}
-            if Progress>=100:
+            if task.task.taskstate=="Complete":
                 rep['d']['IsComplete']="Y"
-            if Progress==-1:
+            if task.task.taskstate=="Error":
                 rep['d']['IsError']="Y"
     except Exception as e:
         rep={'Error':str(e) }
+    #app.logger.info("Getstatus=%s",rep)
     return jsonify(rep)
 
 @app.route('/Task/Test', methods=['GET'])

@@ -7,9 +7,11 @@ import psycopg2,psycopg2.extras
 
 def GetAll(sql,params=None):
     cur = db.engine.raw_connection().cursor()
-    cur.execute(sql,params)
-    res = cur.fetchall()
-    cur.close()  #TODO ajouter un Finaly
+    try:
+        cur.execute(sql,params)
+        res = cur.fetchall()
+    finally:
+        cur.close()
     return res
 
 
@@ -19,24 +21,24 @@ def searchtaxo():
     if len(term)<=2:
         return "[]"
     term+=R"%"
-    res = GetAll("SELECT id, nom FROM taxonomy WHERE  nom LIKE %s order by nom limit 1000", (term,))
+    res = GetAll("SELECT id, name FROM taxonomy WHERE  name LIKE %s order by name limit 1000", (term,))
     return json.dumps([dict(id=r[0],text=r[1]) for r in res])
 
 
 @app.route('/search/taxotree')
 def searchtaxotree():
-    res = GetAll("SELECT id, nom FROM taxonomy WHERE  parent_id is null order by nom ")
+    res = GetAll("SELECT id, name FROM taxonomy WHERE  parent_id is null order by name ")
     print(res)
-    return render_template('search/taxopopup.html',root_elements=res)
+    return render_template('search/taxopopup.html',root_elements=res,targetid=gvg("target","taxolb"))
 
 
 @app.route('/search/taxotreejson')
 def taxotreerootjson():
     parent=gvg("id")
-    sql="SELECT id, nom,parent_id FROM taxonomy WHERE "
+    sql="SELECT id, name,parent_id FROM taxonomy WHERE "
     if parent=='#': sql+="parent_id is null"
     else: sql+="parent_id ="+parent
-    sql+=" order by nom "
+    sql+=" order by name "
     res = GetAll(sql)
     print(res)
     return json.dumps([dict(id=str(r[0]),text="<span class=v>"+r[1]+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=r[2] or "#",children=True) for r in res])

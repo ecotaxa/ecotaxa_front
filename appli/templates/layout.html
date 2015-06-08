@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-{% macro input(name, value='', smcol='2', type='text', size=20) -%}
+{% macro input(name, value='', smcol='2', type='text', size=20, extra="") -%}
     <div class="col-sm-{{ smcol }}">
-        <input type="{{ type }}"  class="form-control" id="{{ name }}" name="{{ name }}" value="{{ value|e }}" size="{{ size }}">
+        <input type="{{ type }}"  class="form-control" id="{{ name }}" name="{{ name }}" value="{{ value|e }}" size="{{ size }}" {{ extra }}>
     </div>
 {%- endmacro %}
 
