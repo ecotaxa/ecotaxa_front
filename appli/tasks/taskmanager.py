@@ -117,7 +117,11 @@ def TaskQuestionRouter(TaskID):
 @app.route('/Task/Show/<int:TaskID>', methods=['GET'])
 def TaskShow(TaskID):
     task=LoadTask(TaskID)
-    return render_template('task/show.html',task=task.task)
+    try:
+        decodedsteperrors=json.loads(task.task.inputparam).get("steperrors")
+    except:
+        decodedsteperrors=["Task Decoding Error"]
+    return render_template('task/show.html',task=task.task,steperror=decodedsteperrors)
 
 @app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
 def TaskForceRestart(TaskID):

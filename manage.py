@@ -2,10 +2,15 @@
 
 from flask.ext.script import Manager
 from flask.ext.security.utils import encrypt_password
+from flask.ext.migrate import Migrate, MigrateCommand
+from appli import db,user_datastore,database
 
 from appli import app
 
 manager = Manager(app)
+
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
 
 @manager.command
 def hello():
@@ -16,7 +21,7 @@ def createadminuser():
     """
     Create Admin User in the database admin/password
     """
-    from appli import db,user_datastore,database
+
     from appli.database import roles
     r=roles.query.filter_by(id=1).first()
     if r is None:
