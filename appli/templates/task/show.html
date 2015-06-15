@@ -20,7 +20,12 @@
 </tr><tr>
     <th>Progress (%)</th><td>{{ task.progresspct }}</td>
 </tr><tr>
-    <th>Message</th><td>{{ task.progressmsg }}</td>
+    <th>Message</th><td>{{ task.progressmsg }}
+    {% for e in steperror  %}
+        <br>- {{ e }}
+    {% endfor %}
+
+</td>
 </tr><tr class="collapse">
     <th>Input Param</th><td>{{ task.inputparam }}</td>
 </tr>

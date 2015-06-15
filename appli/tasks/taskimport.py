@@ -4,16 +4,18 @@ from PIL import Image
 from flask import Blueprint, render_template, g, flash,request
 from io import StringIO
 import html,functools,logging,json,time,os,csv
-import datetime,shutil,random
+import datetime,shutil,random,zipfile
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,LoadTask
+from appli.database import GetAll
 from flask_wtf import Form
 from wtforms import StringField
 from wtforms.validators import DataRequired
 
 
 PredefinedTables=['object','sample','process','acq']
-PredefinedTypes={'[float]':'n','[int]':'n','[text]':'t'}
+# PredefinedTypes={'[float]':'n','[int]':'n','[text]':'t'}
+PredefinedTypes={'[f]':'n','[t]':'t'}
 PredefinedFields={
     'object_id':{'table':'object','field':'orig_id','type':'t'},
     'sample_id':{'table':'sample','field':'orig_id','type':'t'},
@@ -23,16 +25,17 @@ PredefinedFields={
     'object_lon':{'table':'object','field':'longitude','type':'n'},
     'object_date':{'table':'object','field':'objdate','type':'t'},
     'object_time':{'table':'object','field':'objtime','type':'t'},
+    'object_link':{'table':'object','field':'objlink','type':'t'},
     'object_depth_min':{'table':'object','field':'depth_min','type':'n'},
     'object_depth_max':{'table':'object','field':'depth_max','type':'n'},
-    'annotation_name':{'table':'object','field':'tmp_annotname','type':'t'},
-    'annotation_email':{'table':'object','field':'tmp_annotemail','type':'t'},
-    'annotation_date':{'table':'object','field':'tmp_annotdate','type':'t'},
-    'annotation_time':{'table':'object','field':'tmp_annottime','type':'t'},
-    'annotation_person_last_name':{'table':'object','field':'tmp_annotauthor','type':'t'},
-    'annotation_status':{'table':'object','field':'classif_qual','type':'t'},
+    'object_annotation_category':{'table':'object','field':'classif_id','type':'t'},
+    'object_annotation_person_email':{'table':'object','field':'tmp_annotemail','type':'t'},
+    'object_annotation_date':{'table':'object','field':'classif_when','type':'t'},
+    'object_annotation_time':{'table':'object','field':'tmp_annottime','type':'t'},
+    'object_annotation_person_name':{'table':'object','field':'classif_who','type':'t'},
+    'object_annotation_status':{'table':'object','field':'classif_qual','type':'t'},
     'img_rank':{'table':'image','field':'imgrank','type':'n'},
-    'img_file_name':{'table':'image','field':'tmp_file','type':'t'},
+    'img_file_name':{'table':'image','field':'orig_file_name','type':'t'},
     'annotation_person_first_name':{'table':'object','field':'tmp_todelete1','type':'t'},
 }
 # Purge les espace et converti le Nan en vide
@@ -61,6 +64,7 @@ class TaskImport(AsyncTask):
                 self.Mapping={}
                 self.TaxoMap={}
 
+
     def __init__(self,task=None):
         super().__init__(task)
         if task==None:
@@ -72,10 +76,10 @@ class TaskImport(AsyncTask):
         # On ne trace dans les 2 zones ques les milles premieres erreurs.
         if len(self.param.steperrors)<1000:
             self.param.steperrors.append(Msg)
-            logging.warning("%s",Msg)
+            app.logging.warning("%s",Msg)
         elif len(self.param.steperrors)==1000:
             self.param.steperrors.append("More errors truncated")
-            logging.warning("More errors truncated")
+            app.logging.warning("More errors truncated")
     def SPCommon(self):
         logging.info("Execute SPCommon")
         self.pgcur=db.engine.raw_connection().cursor()
@@ -88,6 +92,11 @@ class TaskImport(AsyncTask):
             if self.param.InData.lower().endswith("zip"):
                 logging.info("SubTask1 : TODO Unzip File on temporary folder")
                 #TODO penser à renseigner self.param.SourceDir
+                self.param.SourceDir=workingdir=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../temptask/task%06d/data"%(int(self.task.id))))
+                if not os.path.exists(self.param.SourceDir):
+                    os.mkdir(self.param.SourceDir)
+                with zipfile.ZipFile(self.param.InData, 'r') as z:
+                    z.extractall(self.param.SourceDir)
             else:
                 self.param.SourceDir=self.param.InData
             self.param.IntraStep=1
@@ -100,20 +109,21 @@ class TaskImport(AsyncTask):
             # recuperation de toutes les paire objet/Images du projet
             self.ExistingObject=set()
             self.pgcur.execute(
-                "SELECT concat(o.orig_id,'*',i.file_name) from images i join objects o on i.objid=o.objid where o.projid=1")
+                "SELECT concat(o.orig_id,'*',i.file_name) from images i join objects o on i.objid=o.objid where o.projid="+str(self.param.ProjectId))
             for rec in self.pgcur:
-                self.ExistingObject.add(r[0])
+                self.ExistingObject.add(rec[0])
             logging.info("SubTask1 : Analyze CSV Files")
             #Todo importer le mapping existant pour le completer
             self.LastNum={x:{'n':0,'t':0} for x in PredefinedTables}
             #Todo extraire les max du mapping existant.
             sd=Path(self.param.SourceDir)
-            for CsvFile in sd.glob("**/*.csv"):
+            self.param.TotalRowCount=0
+            for CsvFile in sd.glob("**/*.tsv"):
                 relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
                 logging.info("Analyzing file %s"%(relname.as_posix()))
                 with open(CsvFile.as_posix()) as csvfile:
                     # lecture en mode dictionnaire basé sur la premiere ligne
-                    rdr = csv.DictReader(csvfile, delimiter=';', quotechar='"')
+                    rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
                     #lecture la la ligne des types (2nd ligne du fichier
                     LType=rdr.__next__()
                     # Fabrication du mapping
@@ -145,6 +155,7 @@ class TaskImport(AsyncTask):
                             logging.info("New field %s found in file %s",champ,relname.as_posix())
                     # Test du contenu du fichier
                     RowCount=0
+                    Seen=set()
                     for lig in rdr:
                         RowCount+=1
                         for champ in rdr.fieldnames:
@@ -153,8 +164,9 @@ class TaskImport(AsyncTask):
                                 continue # Le champ n'est pas considéré
                             v=CleanValue(lig[champ])
                             if v!="": # si pas de valeurs, pas de controle
-                                if m.get('Seen',None)==None: #marque si on a vu au moins une valeur.
-                                    self.param.Mapping[champ]["Seen"]=True
+                                Seen.add(champ)
+                                # if m.get('Seen',None)==None: #marque si on a vu au moins une valeur.
+                                #     self.param.Mapping[champ]["Seen"]=True
                                 if m['type']=='n':
                                     vf=ToFloat(v)
                                     if vf==None:
@@ -181,6 +193,9 @@ class TaskImport(AsyncTask):
                                     self.param.TaxoFound[v]=None #creation d'une entrée dans le dictionnaire.
                                 elif champ=='annotation_person_last_name':
                                     self.param.UserFound[v]={'email':CleanValue(lig.get('annotation_email',''))}
+                                elif champ=='object_annotation_status':
+                                    if v.lower() not in database.ClassifQualRevert:
+                                        self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
 
                         #Analyse l'existance du fichier Image
                         ObjectId=CleanValue(lig.get('object_id',''))
@@ -195,13 +210,21 @@ class TaskImport(AsyncTask):
                             self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. Incorrect Type. Field ignored"%(ImgFileName,relname.as_posix()))
                         self.ExistingObject.add(CleExistObj)
                     logging.info("File %s : %d row analysed",relname.as_posix(),RowCount)
-
+                    self.param.TotalRowCount+=RowCount
+            if self.param.TotalRowCount==0:
+                self.LogErrorForUser("No object found")
             self.UpdateProgress(15,"CSV File Parsed"%())
             print(self.param.Mapping)
             logging.info("Taxo Found = %s",self.param.TaxoFound)
             logging.info("Users Found = %s",self.param.UserFound)
             logging.info("For Information Not Seen Fields %s",
-                         [k for k,v in self.param.Mapping.items() if not v.get('Seen')])
+                         [k for k in self.param.Mapping if k not in Seen])
+                        # [k for k,v in self.param.Mapping.items() if not v.get('Seen')])
+            if len(self.param.steperrors)>0:
+                self.task.taskstate="Error"
+                self.task.progressmsg="Some errors founds during file parsing "
+                db.session.commit()
+                return
             self.param.IntraStep=2
             #TODO Compter le Nbr de fichier pour ProgressBar plus tard, Verifier >0
         if self.param.IntraStep==2:
@@ -230,14 +253,131 @@ class TaskImport(AsyncTask):
         logging.info("Start Step 2 : Effective data import")
         logging.info("Taxo Mapping = %s",self.param.TaxoFound)
         logging.info("Users Mapping = %s",self.param.UserFound)
+        Ids={"acq":{"tbl":"acquisitions","pk":"acquisid"},"sample":{"tbl":"samples","pk":"sampleid"},"process":{"tbl":"process","pk":"processid"}}
+        #recupération des orig_id des acq,sample,process
+        for i in Ids:
+            sql="select orig_id,"+Ids[i]['pk']+" from "+Ids[i]['tbl']+" where projid="+str(self.param.ProjectId)
+            Ids[i]["ID"]={}
+            for r in GetAll(sql):
+                Ids[i]["ID"][r[0]]=int(r[1])
+        # recuperation de les ID objet du projet
+        self.ExistingObject={}
+        self.pgcur.execute(
+            "SELECT o.orig_id,o.objid from objects o where o.projid="+str(self.param.ProjectId))
+        for rec in self.pgcur:
+            self.ExistingObject[r[0]]=r[1]
+        #logging.info("Ids = %s",Ids)
+        sd=Path(self.param.SourceDir)
+        for CsvFile in sd.glob("**/*.tsv"):
+            relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
+            logging.info("Analyzing file %s"%(relname.as_posix()))
+            with open(CsvFile.as_posix()) as csvfile:
+                # lecture en mode dictionnaire basé sur la premiere ligne
+                rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
+                #lecture la la ligne des types (2nd ligne du fichier
+                LType=rdr.__next__()
+                # Chargement du contenu du fichier
+                RowCount=0
+                for lig in rdr:
+                    Objs={"acq":database.Acquisitions(),"sample":database.Samples(),"process":database.Process()
+                        ,"object":database.Objects(),"image":database.Images()}
+                    RowCount+=1
+                    for champ in rdr.fieldnames:
+                        m=self.param.Mapping.get(champ,None)
+                        FieldName=m.get("field",None)
+                        FieldTable=m.get("table",None)
+                        FieldValue=None
+                        if m is None:
+                            continue # Le champ n'est pas considéré
+                        v=CleanValue(lig[champ])
+                        if v!="": # si pas de valeurs, on laisse le champ null
+                            if m['type']=='n':
+                                FieldValue=ToFloat(v)
+                            elif champ=='object_date':
+                                FieldValue=datetime.date(int(v[0:4]), int(v[4:6]), int(v[6:8]))
+                            elif champ=='object_time':
+                                    v=v.zfill(6)
+                                    FieldValue=datetime.time(int(v[0:2]), int(v[2:4]), int(v[4:6]))
+                            elif FieldName=='classif_when':
+                                v2=CleanValue(lig.get('object_annotation_time','000000')).zfill(6)
+                                FieldValue=datetime.datetime(int(v[0:4]), int(v[4:6]), int(v[6:8]),int(v2[0:2]), int(v2[2:4]), int(v2[4:6]))
+                            elif FieldName=='classif_id':
+                                v=self.param.TaxoMap.get(v,v) # Applique le mapping initial d'entrée
+                                FieldValue=self.param.TaxoFound[v]
+                            elif FieldName=='classif_who':
+                                FieldValue=self.param.UserFound[v].get('id',None)
+                            elif FieldName=='classif_qual':
+                                FieldValue=database.ClassifQualRevert.get(v.lower())
+                            else: # c'est un champ texte sans rien de special
+                                FieldValue=v
+                            if FieldTable in Objs:
+                                # if FieldName in Objs[FieldTable].__dict__:
+                                if  hasattr(Objs[FieldTable],FieldName):
+                                    setattr(Objs[FieldTable],FieldName,FieldValue)
+                                    # logging.info("setattr %s %s %s",FieldTable,FieldName,FieldValue)
+                                # else:
+                                    # logging.info("skip F %s %s %s",FieldTable,FieldName,FieldValue)
+                            else:
+                                logging.info("skip T %s %s %s",FieldTable,FieldName,FieldValue)
+                    # Affectation des ID Sample, Acq & Process et creation de ces dernier si necessaire
+                    for t in Ids:
+                        if Objs[t].orig_id is not None:
+                            if Objs[t].orig_id in Ids[t]["ID"]:
+                                setattr(Objs["object"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
+                            else:
+                                Objs[t].projid=self.param.ProjectId
+                                db.session.add(Objs[t])
+                                db.session.commit()
+                                Ids[t]["ID"][Objs[t].orig_id]=getattr(Objs[t],Ids[t]["pk"])
+                                setattr(Objs["object"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
+                                logging.info("IDS %s %s",t,Ids[t])
+                    self.pgcur.execute("select nextval('seq_images')" )
+                    Objs["image"].imgid=self.pgcur.fetchone()[0]
+                    # Recherche de l'objet si c'est une images complementaire
+                    if Objs["object"].orig_id in self.ExistingObject:
+                        Objs["object"].objid=self.ExistingObject[Objs["object"].orig_id]
+                    else: # ou Creation de l'objet
+                        Objs["object"].projid=self.param.ProjectId
+                        Objs["object"].img0id=Objs["image"].imgid
+                        db.session.add(Objs["object"])
+                        db.session.commit()
+                        self.ExistingObject[Objs["object"].orig_id]=Objs["object"].objid # Provoque un select object....
+                    #Gestion de l'image, creation DB et fichier dans Vault
+                    Objs["image"].objid=Objs["object"].objid
+                    ImgFilePath=CsvFile.with_name(Objs["image"].orig_file_name)
+                    VaultFolder="%04d"%(Objs["image"].imgid//10000)
+                    vaultroot=Path("../../vault")
+                    #creation du repertoire contenant les images si necessaire
+                    if not vaultroot.joinpath(VaultFolder).exists():
+                        vaultroot.joinpath(VaultFolder).mkdir()
+                    vaultfilename     ="%s/%04d%s"     %(VaultFolder,Objs["image"].imgid%10000,ImgFilePath.suffix)
+                    vaultfilenameThumb="%s/%04d_mini%s"%(VaultFolder,Objs["image"].imgid%10000,ImgFilePath.suffix)
+                    Objs["image"].file_name=vaultfilename
+                    #copie du fichier image
+                    shutil.copyfile(ImgFilePath.as_posix(),vaultroot.joinpath(vaultfilename).as_posix())
+                    im=Image.open(vaultroot.joinpath(vaultfilename).as_posix())
+                    Objs["image"].width=im.size[0]
+                    Objs["image"].height=im.size[1]
+                    SizeLimit=app.config['THUMBSIZELIMIT']
+                    # génération d'une miniature si une image est trop grande.
+                    if (im.size[0]>SizeLimit) or (im.size[1]>SizeLimit) :
+                            im.thumbnail((SizeLimit,SizeLimit))
+                            im.save(vaultroot.joinpath(vaultfilenameThumb).as_posix())
+                            Objs["image"].thumb_file_name=vaultfilenameThumb
+                            Objs["image"].thumb_width=im.size[0]
+                            Objs["image"].thumb_height=im.size[1]
+                    #ajoute de l'image en DB
+                    db.session.add(Objs["image"])
+                    db.session.commit()
+                    #break # TODO TEST à Supprimmer
+                logging.info("File %s : %d row Loaded",relname.as_posix(),RowCount)
 
-
-        # for i in range(20,100,20):
-        #     time.sleep(0.1)
-        #     self.UpdateProgress(i,"My Step 2 Message %d"%(i))
-        # logging.info("End Step 2")
-        # raise Exception("A Finir")
-
+        self.UpdateProgress(15,"CSV File Parsed"%())
+        self.pgcur.execute("""update objects o
+                            set imgcount=(select count(*) from images where objid=o.objid)
+                            ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
+                            where projid="""+str(self.param.ProjectId))
+        self.pgcur.connection.commit()
 
     def QuestionProcess(self):
         txt="<h1>Text File Importation Task</h1>"
@@ -304,114 +444,6 @@ class TaskImport(AsyncTask):
                 NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
             return render_template('task/import_question1.html',header=txt,taxo=NotFoundTaxo,users=NotFoundUsers)
         return PrintInCharte(txt)
-
-MappingObj= {'object_id':'orig_id',
-'object_lat':'latitude ',
-'object_lon':'longitude ',
-'object_date':'objdate',
-'object_time':'objtime',
-'object_depth_min':'depth_min',
-'object_depth_max':'depth_max',
-'object_lat_end':'n01',
-'object_lon_end':'n02',
-'object_bx':'n03',
-'object_by':'n04',
-'object_width':'n05',
-'object_height':'n06',
-'object_area':'n07',
-'object_mean':'n08',
-'object_major':'n09',
-'object_minor':'n10',
-'object_feret':'n11',
-'object_area_exc':'n12',
-'object_thickr':'n13' }
-directory=R"D:\dev\_Client\LOV\EcoTaxa\TestData\Zooscan_ptb_jb_2014_pelagos\ecotaxa\jb2014112_tot_1"
-fichier=R"ecotaxa_jb2014112_tot_1_dat1_validated.csv"
-
-def LoadHeader():
-    NomFichier=os.path.join(directory,fichier)
-    print("NomFichier="+NomFichier)
-    import csv
-    with open(NomFichier) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024))
-        csvfile.seek(0)
-        reader = csv.reader(csvfile, dialect)
-        cols=next(reader)
-        reader = csv.DictReader(csvfile,cols, dialect=dialect)
-        # reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-        for row in reader:
-            # print(', '.join(row))
-            print(row)
-def LoadFile():
-    TestTaxo=[(17118424, 'acartia'), (6982464, 'calanus glacialis'), (17119739, 'candacia'), (17152215, 'corycaeus'), (17058254, 'echinodermata'), (17179541, 'poeciloacanthum')]
-    NomFichier=os.path.join(directory,fichier)
-    print("NomFichier="+NomFichier)
-    import csv
-    with open(NomFichier) as csvfile:
-        dialect = csv.Sniffer().sniff(csvfile.read(1024))
-        csvfile.seek(0)
-        reader = csv.reader(csvfile, dialect)
-        cols=next(reader)
-        types=next(reader)
-        rows=[]
-        for row in reader:
-            if row[0]!="":
-                rows.append(row)
-        print("%d rows to process"%len(rows))
-        pgcur=db.engine.raw_connection().cursor()
-        pgcur.execute("select nextval('seq_images') from generate_series(1,%d)"%len(rows))
-        imagesid=pgcur.fetchall()
-        for ImgId,row in zip([x[0] for x in imagesid],rows):
-            Obj=database.Objects()
-            vaultroot="../../vault"
-            #TODO attention pas que du JPG
-            vaultfilename="0000/%04d.JPG"%ImgId
-            vaultfilenameThumb="0000/%04d_mini.JPG"%ImgId
-            for colname,cid in zip(cols,range(0,500)):
-                v=row[cid]
-                if colname=="img_file_name":
-                    shutil.copyfile(os.path.join(directory,v),os.path.join(vaultroot,vaultfilename))
-                if "object_" in colname:
-                    destcol=MappingObj[colname]
-                    if v=="":
-                        v=None
-                    elif destcol=="objdate":
-                        print("%s %s %s %s "%(v,int(v[0:4]),int(v[4:6]),int(v[6:8])))
-                        v=datetime.date(int(v[0:4]),int(v[4:6]),int(v[6:8]))
-                    elif destcol=="objtime":
-                        v=v.zfill(6)
-                        v=datetime.time(int(v[0:2]),int(v[2:4]),int(v[4:6]))
-                    elif "NAN" == v.upper():
-                        v=None
-                    setattr(Obj,destcol,v)
-            Obj.images=[]
-            Obj.classif_id=TestTaxo[random.randint(0,4)][0]
-            Obj.img0id=ImgId
-            Img=database.Images()
-            Img.imgid=ImgId
-            Img.file_name=vaultfilename
-            Img.imgrank=0
-            # TODO si le format en entrée est un BMP le convertir en PNG
-            #Calcul de la taille de l'image + generation de la miniature si besoin
-            im=Image.open(os.path.join(vaultroot,vaultfilename))
-            Img.width=im.size[0]
-            Img.height=im.size[1]
-            SizeLimit=150
-            if (im.size[0]>SizeLimit) or (im.size[1]>SizeLimit) :
-                    im.thumbnail((SizeLimit,SizeLimit))
-                    im.save(os.path.join(vaultroot,vaultfilenameThumb))
-                    Img.thumb_file_name=vaultfilenameThumb
-                    Img.thumb_width=im.size[0]
-                    Img.thumb_height=im.size[1]
-                    Obj.classif_id=17179541 # TEST pour les reperer facilement
-
-            Obj.images.append(Img)
-            db.session.add(Obj)
-            db.session.commit()
-
-            # break # pour test
-
-
 
 if __name__ == '__main__':
     t=LoadTask(1)

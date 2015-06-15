@@ -2,9 +2,14 @@
 from appli import db
 from flask.ext.security import  UserMixin, RoleMixin
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
-from sqlalchemy import Index
+from sqlalchemy import Index,Sequence
 
 AdministratorLabel="Application Administrator"
+ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
+ClassifQualRevert={}
+for(k,v) in ClassifQual.items():
+    ClassifQualRevert[v]=k
+
 
 users_roles = db.Table('users_roles',
         db.Column('user_id', db.Integer(), db.ForeignKey('users.id'), primary_key=True),
@@ -110,6 +115,7 @@ class Objects(db.Model):
     longitude = db.Column(DOUBLE_PRECISION)
     objdate = db.Column(DATE)
     objtime = db.Column(TIME)
+    object_link= db.Column(VARCHAR(255))
     depth_min = db.Column(FLOAT)
     depth_max = db.Column(FLOAT)
     images=db.relationship("Images")
@@ -120,6 +126,7 @@ class Objects(db.Model):
     classif_auto_id = db.Column(INTEGER)
     classif_auto_score = db.Column(DOUBLE_PRECISION)
     classif_auto_when = db.Column(TIMESTAMP)
+    classif_crossvalidation_id = db.Column(INTEGER)
     img0id = db.Column(BIGINT)
     img0=db.relationship("Images",foreign_keys="Images.objid")
     imgcount = db.Column(INTEGER)
@@ -127,6 +134,7 @@ class Objects(db.Model):
     weblink = db.Column(VARCHAR)
     similarity = db.Column(DOUBLE_PRECISION)
     sunpos = db.Column(CHAR(1))  # position du soleil
+    random_value = db.Column(INTEGER)
     sampleid = db.Column(INTEGER,db.ForeignKey('samples.sampleid'))
     sample=db.relationship("Samples")
     acquisid = db.Column(INTEGER,db.ForeignKey('acquisitions.acquisid'))
@@ -146,18 +154,31 @@ Index('IS_ObjectsClassif',Objects.__table__.c.classif_id,Objects.__table__.c.pro
 Index('IS_ObjectsDepth',Objects.__table__.c.projid,Objects.__table__.c.classif_qual,Objects.__table__.c.depth_max,Objects.__table__.c.depth_min)
 Index('IS_ObjectsTime',Objects.__table__.c.projid,Objects.__table__.c.classif_qual,Objects.__table__.c.objtime)
 Index('IS_ObjectsDate',Objects.__table__.c.objdate,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
+Index('IS_ObjectsDate',Objects.__table__.c.objdate,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
+Index('IS_ObjectsRandom',Objects.__table__.c.random_value,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
 
 class Images(db.Model):
     __tablename__ = 'images'
-    imgid = db.Column(BIGINT, primary_key=True) # manuel ,db.Sequence('seq_images')
+    imgid = db.Column(BIGINT,db.Sequence('seq_images'), primary_key=True) # manuel ,db.Sequence('seq_images')
     objid = db.Column(BIGINT, db.ForeignKey('objects.objid'))
     imgrank=db.Column(INTEGER)
     file_name = db.Column(VARCHAR(255))
+    orig_file_name = db.Column(VARCHAR(255))
     width = db.Column(INTEGER)
     height = db.Column(INTEGER)
     thumb_file_name = db.Column(VARCHAR(255))
     thumb_width = db.Column(INTEGER)
     thumb_height = db.Column(INTEGER)
 Index('IS_ImagesObjects',Images.__table__.c.objid)
+#Sequence("seq_images",1,1)
 
-
+def GetAll(sql,params=None,debug=False):
+    cur = db.engine.raw_connection().cursor()
+    try:
+        if debug:
+            app.logger.debug("GetAll SQL = %s",sql)
+        cur.execute(sql,params)
+        res = cur.fetchall()
+    finally:
+        cur.close()
+    return res
