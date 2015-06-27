@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp
+from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
 from PIL import Image
 from flask import Blueprint, render_template, g, flash,request
 from io import StringIO
@@ -59,7 +59,7 @@ class TaskImport(AsyncTask):
             super().__init__(InitStr)
             if InitStr==None: # Valeurs par defaut ou vide pour init
                 self.InData='My In Data'
-                self.ProjectId=1
+                self.ProjectId=None
                 # self.Mapping={x:{} for x in PredefinedTables}
                 self.Mapping={}
                 self.TaxoMap={}
@@ -76,10 +76,12 @@ class TaskImport(AsyncTask):
         # On ne trace dans les 2 zones ques les milles premieres erreurs.
         if len(self.param.steperrors)<1000:
             self.param.steperrors.append(Msg)
-            app.logging.warning("%s",Msg)
+            logging.warning("%s",Msg)
+            # app.logging.warning("%s",Msg) c'est fait depuis la tache qui est dans un process séparé
         elif len(self.param.steperrors)==1000:
             self.param.steperrors.append("More errors truncated")
-            app.logging.warning("More errors truncated")
+            logging.warning("More errors truncated")
+            # app.logging.warning("More errors truncated")
     def SPCommon(self):
         logging.info("Execute SPCommon")
         self.pgcur=db.engine.raw_connection().cursor()
@@ -88,11 +90,11 @@ class TaskImport(AsyncTask):
         logging.info("Input Param = %s"%(self.param.__dict__))
         logging.info("Start Step 1")
         if getattr(self.param,'IntraStep',0)==0:
-            #Sous tache 1 Copie
+            #Sous tache 1 On dezippe ou on pointe sur le repertoire source.
             if self.param.InData.lower().endswith("zip"):
-                logging.info("SubTask1 : TODO Unzip File on temporary folder")
-                #TODO penser à renseigner self.param.SourceDir
-                self.param.SourceDir=workingdir=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../temptask/task%06d/data"%(int(self.task.id))))
+                logging.info("SubTask0 : Unzip File on temporary folder")
+                self.UpdateProgress(1,"Unzip File on temporary folder")
+                self.param.SourceDir=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../temptask/task%06d/data"%(int(self.task.id))))
                 if not os.path.exists(self.param.SourceDir):
                     os.mkdir(self.param.SourceDir)
                 with zipfile.ZipFile(self.param.InData, 'r') as z:
@@ -103,21 +105,32 @@ class TaskImport(AsyncTask):
 
         if self.param.IntraStep==1:
             self.param.Mapping={} # Reset à chaque Tentative
+            # Import du mapping existant dans le projet
+            Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
+            for k,v in DecodeEqualList(Prj.mappingobj).items():
+                self.param.Mapping['object_'+v]={'table': 'object', 'title': v, 'type': k[0], 'field': k}
+            for k,v in DecodeEqualList(Prj.mappingsample).items():
+                self.param.Mapping['sample_'+v]={'table': 'sample', 'title': v, 'type': k[0], 'field': k}
+            for k,v in DecodeEqualList(Prj.mappingacq).items():
+                self.param.Mapping['acq_'+v]={'table': 'acq', 'title': v, 'type': k[0], 'field': k}
+            for k,v in DecodeEqualList(Prj.mappingprocess).items():
+                self.param.Mapping['process_'+v]={'table': 'process', 'title': v, 'type': k[0], 'field': k}
             self.param.TaxoFound={} # Reset à chaque Tentative
             self.param.UserFound={} # Reset à chaque Tentative
             self.param.steperrors=[] # Reset des erreurs
             # recuperation de toutes les paire objet/Images du projet
             self.ExistingObject=set()
             self.pgcur.execute(
-                "SELECT concat(o.orig_id,'*',i.file_name) from images i join objects o on i.objid=o.objid where o.projid="+str(self.param.ProjectId))
+                "SELECT concat(o.orig_id,'*',i.orig_file_name) from images i join objects o on i.objid=o.objid where o.projid="+str(self.param.ProjectId))
             for rec in self.pgcur:
                 self.ExistingObject.add(rec[0])
             logging.info("SubTask1 : Analyze CSV Files")
-            #Todo importer le mapping existant pour le completer
+            self.UpdateProgress(2,"Analyze CSV Files")
             self.LastNum={x:{'n':0,'t':0} for x in PredefinedTables}
             #Todo extraire les max du mapping existant.
             sd=Path(self.param.SourceDir)
             self.param.TotalRowCount=0
+            Seen=set()
             for CsvFile in sd.glob("**/*.tsv"):
                 relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
                 logging.info("Analyzing file %s"%(relname.as_posix()))
@@ -130,7 +143,7 @@ class TaskImport(AsyncTask):
                     for champ in rdr.fieldnames:
                         if champ in self.param.Mapping:
                             continue # Le champ à déjà été détecté
-                        ColName=champ.strip(" .\t").lower()
+                        ColName=champ.strip(" \t").lower()
                         ColSplitted=ColName.split("_",1)
                         if len(ColSplitted)!=2:
                             self.LogErrorForUser("Invalid Header '%s' in file %s. Format must be Table_Field. Field ignored"%(ColName,relname.as_posix()))
@@ -155,7 +168,6 @@ class TaskImport(AsyncTask):
                             logging.info("New field %s found in file %s",champ,relname.as_posix())
                     # Test du contenu du fichier
                     RowCount=0
-                    Seen=set()
                     for lig in rdr:
                         RowCount+=1
                         for champ in rdr.fieldnames:
@@ -188,11 +200,11 @@ class TaskImport(AsyncTask):
                                         datetime.time(int(v[0:2]), int(v[2:4]), int(v[4:6]))
                                     except ValueError:
                                         self.LogErrorForUser("Invalid Time value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
-                                elif champ=='annotation_name':
+                                elif champ=='object_annotation_category':
                                     v=self.param.TaxoMap.get(v,v) # Applique le mapping
                                     self.param.TaxoFound[v]=None #creation d'une entrée dans le dictionnaire.
-                                elif champ=='annotation_person_last_name':
-                                    self.param.UserFound[v]={'email':CleanValue(lig.get('annotation_email',''))}
+                                elif champ=='object_annotation_person_name':
+                                    self.param.UserFound[v]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
                                 elif champ=='object_annotation_status':
                                     if v.lower() not in database.ClassifQualRevert:
                                         self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
@@ -200,14 +212,14 @@ class TaskImport(AsyncTask):
                         #Analyse l'existance du fichier Image
                         ObjectId=CleanValue(lig.get('object_id',''))
                         if ObjectId=='':
-                            self.LogErrorForUser("Missing ObjectId on line '%s' in file %s. Incorrect Type. Field ignored"%(RowCount,relname.as_posix()))
+                            self.LogErrorForUser("Missing ObjectId on line '%s' in file %s. "%(RowCount,relname.as_posix()))
                         ImgFileName=CleanValue(lig.get('img_file_name','MissingField img_file_name'))
                         ImgFilePath=CsvFile.with_name(ImgFileName)
                         if not ImgFilePath.exists():
-                            self.LogErrorForUser("Missing Image '%s' in file %s. Incorrect Type. Field ignored"%(ImgFileName,relname.as_posix()))
+                            self.LogErrorForUser("Missing Image '%s' in file %s. "%(ImgFileName,relname.as_posix()))
                         CleExistObj=ObjectId+'*'+ImgFileName
                         if CleExistObj in self.ExistingObject:
-                            self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. Incorrect Type. Field ignored"%(ImgFileName,relname.as_posix()))
+                            self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. "%(ObjectId,ImgFileName,relname.as_posix()))
                         self.ExistingObject.add(CleExistObj)
                     logging.info("File %s : %d row analysed",relname.as_posix(),RowCount)
                     self.param.TotalRowCount+=RowCount
@@ -219,40 +231,50 @@ class TaskImport(AsyncTask):
             logging.info("Users Found = %s",self.param.UserFound)
             logging.info("For Information Not Seen Fields %s",
                          [k for k in self.param.Mapping if k not in Seen])
-                        # [k for k,v in self.param.Mapping.items() if not v.get('Seen')])
             if len(self.param.steperrors)>0:
                 self.task.taskstate="Error"
                 self.task.progressmsg="Some errors founds during file parsing "
                 db.session.commit()
                 return
             self.param.IntraStep=2
-            #TODO Compter le Nbr de fichier pour ProgressBar plus tard, Verifier >0
         if self.param.IntraStep==2:
             logging.info("Start Sub Step 1.2")
+            self.pgcur.execute("select id,lower(name),email from users where lower(name) = any(%s) or email= any(%s) ",([x for x in self.param.UserFound.keys()],[x.get('email') for x in self.param.UserFound.values()]))
+            # Résolution des noms à partir du nom ou de l'email
+            for rec in self.pgcur:
+                for u in self.param.UserFound:
+                    if u==rec[1] or self.param.UserFound[u].get('email')==rec[2]:
+                        self.param.UserFound[u]['id']=rec[0]
             logging.info("Users Found = %s",self.param.UserFound)
-            #todo Resoudre les Nom
+            NotFoundUser=[k for k,v in self.param.UserFound.items() if v.get("id")==None]
+            if len(NotFoundUser)>0:
+                logging.info("Some Users Not Found = %s",NotFoundUser)
             # récuperation des ID des taxo trouvées
             self.pgcur.execute("select id,name from taxonomy where name = any(%s) ",([x for x in self.param.TaxoFound.keys()],))
             for rec in self.pgcur:
                 self.param.TaxoFound[rec[1]]=rec[0]
             logging.info("Taxo Found = %s",self.param.TaxoFound)
-            self.param.TaxoFound['agreia pratensis']=None #todo Pour TEST A EFFACER
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             if len(NotFoundTaxo)>0:
                 logging.info("Some Taxo Not Found = %s",NotFoundTaxo)
             self.task.taskstate="Question"
             self.UpdateProgress(20,"Taxo automatic resolution Done"%())
-            #Recherche des valeurs dans la Taxo
-            #Remplissage du dico avec ce qui existe
-            #Essayer de resoudre les Noms
-            #s'il reste des choses à résoudre Faire une Question Phase 1
-            #Sinon Basculer Auto en Step 2
+            if len(NotFoundUser)==0 and len(NotFoundTaxo)==0: # si tout est déjà résolue on enchaine sur la phase 2
+                self.SPStep2()
+            #sinon on pose une question
 
 
     def SPStep2(self):
         logging.info("Start Step 2 : Effective data import")
         logging.info("Taxo Mapping = %s",self.param.TaxoFound)
         logging.info("Users Mapping = %s",self.param.UserFound)
+        # Mise à jour du mapping en base
+        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
+        Prj.mappingobj=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='object' and v['field'][0]in ('t','n') and v.get('title')!=None})
+        Prj.mappingsample=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='sample' and v['field'][0]in ('t','n') and v.get('title')!=None})
+        Prj.mappingacq=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='acq' and v['field'][0]in ('t','n') and v.get('title')!=None})
+        Prj.mappingprocess=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='process' and v['field'][0]in ('t','n') and v.get('title')!=None})
+        db.session.commit()
         Ids={"acq":{"tbl":"acquisitions","pk":"acquisid"},"sample":{"tbl":"samples","pk":"sampleid"},"process":{"tbl":"process","pk":"processid"}}
         #recupération des orig_id des acq,sample,process
         for i in Ids:
@@ -267,7 +289,9 @@ class TaskImport(AsyncTask):
         for rec in self.pgcur:
             self.ExistingObject[r[0]]=r[1]
         #logging.info("Ids = %s",Ids)
+        random.seed()
         sd=Path(self.param.SourceDir)
+        TotalRowCount=0
         for CsvFile in sd.glob("**/*.tsv"):
             relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
             logging.info("Analyzing file %s"%(relname.as_posix()))
@@ -282,6 +306,7 @@ class TaskImport(AsyncTask):
                     Objs={"acq":database.Acquisitions(),"sample":database.Samples(),"process":database.Process()
                         ,"object":database.Objects(),"image":database.Images()}
                     RowCount+=1
+                    TotalRowCount+=1
                     for champ in rdr.fieldnames:
                         m=self.param.Mapping.get(champ,None)
                         FieldName=m.get("field",None)
@@ -338,10 +363,11 @@ class TaskImport(AsyncTask):
                         Objs["object"].objid=self.ExistingObject[Objs["object"].orig_id]
                     else: # ou Creation de l'objet
                         Objs["object"].projid=self.param.ProjectId
+                        Objs["object"].random_value=random.randint(1,99999999)
                         Objs["object"].img0id=Objs["image"].imgid
                         db.session.add(Objs["object"])
                         db.session.commit()
-                        self.ExistingObject[Objs["object"].orig_id]=Objs["object"].objid # Provoque un select object....
+                        self.ExistingObject[Objs["object"].orig_id]=Objs["object"].objid # Provoque un select object sauf si 'expire_on_commit':False
                     #Gestion de l'image, creation DB et fichier dans Vault
                     Objs["image"].objid=Objs["object"].objid
                     ImgFilePath=CsvFile.with_name(Objs["image"].orig_file_name)
@@ -369,46 +395,65 @@ class TaskImport(AsyncTask):
                     #ajoute de l'image en DB
                     db.session.add(Objs["image"])
                     db.session.commit()
-                    #break # TODO TEST à Supprimmer
+                    if (TotalRowCount%100)==0:
+                        self.UpdateProgress(100*TotalRowCount/self.param.TotalRowCount,"Processing files %d/%d"%(TotalRowCount,self.param.TotalRowCount))
+                    # break # TODO TEST à Supprimmer
                 logging.info("File %s : %d row Loaded",relname.as_posix(),RowCount)
-
-        self.UpdateProgress(15,"CSV File Parsed"%())
         self.pgcur.execute("""update objects o
                             set imgcount=(select count(*) from images where objid=o.objid)
                             ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
                             where projid="""+str(self.param.ProjectId))
         self.pgcur.connection.commit()
+        self.task.taskstate="Done"
+        self.UpdateProgress(100,"Processing done")
 
     def QuestionProcess(self):
+        ServerRoot=Path(app.config['SERVERLOADAREA'])
         txt="<h1>Text File Importation Task</h1>"
         errors=[]
         if self.task.taskstep==0:
             txt+="<h3>Task Creation</h3>"
+            Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
+            if Prj.CheckRight(2)==False:
+                return PrintInCharte("ACCESS DENIED for this project");
             if gvp('starttask')=="Y":
-                for k,v  in self.param.__dict__.items():
-                    setattr(self.param,k,gvp(k))
+                FileToSave=None
+                FileToSaveFileName=None
+                self.param.ProjectId=gvg("p")
+                # for k,v  in self.param.__dict__.items():
+                #     setattr(self.param,k,gvp(k))
                 TaxoMap={}
-                for l in gvp('TaxoMap').splitlines():
+                for l in gvp('TxtTaxoMap').splitlines():
                     ls=l.split('=',1)
                     if len(ls)!=2:
                         errors.append("Taxonomy Mapping : Invalid format for line %s"%(l))
-                    TaxoMap[ls[0].strip().lower()]=ls[1].strip().lower()
+                    else:
+                        TaxoMap[ls[0].strip().lower()]=ls[1].strip().lower()
                 # Verifier la coherence des données
-                #TODO verifier que le repertoire existe
-                #TODO traiter l'import d'un fichier par HTTP
-                #TODO verifier les droits sur le projet.
-                #TODO Passer le projet en données entrante + Hidden
-                if len(self.param.InData)<5:
+                uploadfile=request.files.get("uploadfile")
+                if uploadfile is not None and uploadfile.filename!='' : # import d'un fichier par HTTP
+                    FileToSave=uploadfile # La copie est faite plus tard, car à ce moment là, le repertoire de la tache n'est pas encore créé
+                    FileToSaveFileName="uploaded.zip"
+                    self.param.InData="uploaded.zip"
+                elif len(gvp("ServerPath"))<2:
                     errors.append("Input Folder/File Too Short")
+                else:
+                    sp=ServerRoot.joinpath(Path(gvp("ServerPath")))
+                    if not sp.exists(): #verifie que le repertoire existe
+                        errors.append("Input Folder/File Invalid")
+                    else:
+                        self.param.InData=sp.as_posix()
                 if len(errors)>0:
                     for e in errors:
                         flash(e,"error")
                 else:
                     self.param.TaxoMap=TaxoMap # on stocke le dictionnaire et pas la chaine
-                    return self.StartTask(self.param)
-            return render_template('task/import_create.html',header=txt,data=self.param)
+                    return self.StartTask(self.param,FileToSave=FileToSave,FileToSaveFileName=FileToSaveFileName)
+            else: # valeurs par default
+                self.param.ProjectId=gvg("p")
+            return render_template('task/import_create.html',header=txt,data=self.param,ServerPath=gvp("ServerPath"),TxtTaxoMap=gvp("TxtTaxoMap"))
         if self.task.taskstep==1:
-            self.param.TaxoFound['agreia pratensis']=None #todo Pour TEST A EFFACER
+            # self.param.TaxoFound['agreia pratensis']=None #todo Pour TEST A EFFACER
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
             app.logger.info("Pending Taxo Not Found = %s",NotFoundTaxo)

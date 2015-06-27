@@ -38,6 +38,10 @@ class UsersView(ModelView):
             form._fields['password'].data =encrypt_password(form._fields['password'].data)
         return super(UsersView, self).update_model(form, model)
 
+    def create_model(self, form):
+        form._fields['password'].data =encrypt_password(form._fields['password'].data)
+        return super(UsersView, self).create_model(form)
+
 # Permet de presenter la Vue Inline sous forme de tableau sans les titres.
 class ProjectsViewCustomInlineModelConverter(InlineModelConverter):
     inline_field_list_type = InlineModelFormList

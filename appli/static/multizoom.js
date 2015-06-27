@@ -17,7 +17,7 @@
 // Nov 28th, 2012: Version 2.1 w/Multi Zoom, updates - new features and bug fixes
 
 var featuredimagezoomer = { // the two options for Featured Image Zoomer:
-	loadinggif: 'static/spinningred.gif', // full path or URL to "loading" gif
+	loadinggif: '/static/spinningred.gif', // full path or URL to "loading" gif
 	magnifycursor: 'crosshair' // value for CSS's 'cursor' property when over the zoomable image
 };
 
@@ -88,7 +88,8 @@ var featuredimagezoomer = { // the two options for Featured Image Zoomer:
 
 		this.click(function(e){
 			e.preventDefault();
-			var src = $imgObj.attr('src'), ms, zr, cs, opacityObj = {opacity: 0};
+			// Ajout LN opacity 1 au lieu de 0 car ca faisait disparaitre les vignettes avant des les rafficher
+			var src = $imgObj.attr('src'), ms, zr, cs, opacityObj = {opacity: 1};
 			if(!first && (src === this.href || src === this.getAttribute('href'))){return;}
 			if(first && !options.initzoomablefade || !options.zoomablefade){opacityObj = {};}
 			first = false;
@@ -141,7 +142,12 @@ var featuredimagezoomer = { // the two options for Featured Image Zoomer:
 			} else if(d==='left' && magcoords.left < specs.ro) { //if there's no room on the left, move to the right
 				magcoords.left = coords.left + $tracker.width() + specs.ro;
 			}
-			$mag.css({left: magcoords.left, top:coords.top}).show(); //position magnifier DIV on page
+			// Modif LN, permet de remonter le Zoom en bas de page pour qu'il soit visible.
+			var CurrentViewBottom=$(window).scrollTop()+$(window).height();
+			magcoords.top=coords.top;
+			if((coords.top+$mag.height())>CurrentViewBottom)
+				magcoords.top=CurrentViewBottom-$mag.height();
+			$mag.css({left: magcoords.left, top:magcoords.top}).show(); //position magnifier DIV on page
 			specs.$statusdiv.html('Current Zoom: '+specs.curpower+'<div style="font-size:80%">Use Mouse Wheel to Zoom In/Out</div>');
 			if (showstatus) //show status DIV? (only when a range of zoom is defined)
 				fiz.showstatusdiv(specs, 400, 2000);

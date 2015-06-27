@@ -30,7 +30,7 @@ def taxotreerootjson():
     else: sql+="parent_id ="+parent
     sql+=" order by name "
     res = GetAll(sql)
-    print(res)
+    # print(res)
     return json.dumps([dict(id=str(r[0]),text="<span class=v>"+r[1]+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=r[2] or "#",children=True) for r in res])
 
 
@@ -41,7 +41,7 @@ def taxofinal():
         res = GetAll("SELECT id, nom FROM taxonomy WHERE  id in ("+resin+")  order by nom ")
         txt="Taxonomy = "+",".join((x[1] for x in res))
     else:txt="No Criteria"
-    Imgs=GetAll("""SELECT o.objid, i.imgid, i.file_name, coalesce(i.thumb_file_name,i.file_name), coalesce(i.thumb_width,i.width), coalesce(i.thumb_height,i.height), taxo.nom
+    Imgs=GetAll("""SELECT o.objid, i.imgid, i.file_name, coalesce(i.thumb_file_name,i.file_name), coalesce(i.thumb_width,i.width), coalesce(i.thumb_height,i.height), taxo.name
               FROM public.objects o, public.images i, public.taxonomy taxo
               WHERE o.objid = i.objid AND o.classif_id = taxo.id;""")
     txt+=" (%d response)"%(len(Imgs))

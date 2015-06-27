@@ -1,0 +1,26 @@
+<table class="classiftab">
+{% for v in res %}
+<tr><td> {{ v[1] }} <p  class="ra3 label label-info">{{ v[2] }}</p></td></tr>
+{% endfor %}
+</table>
+
+  <script>
+  $(function() {
+
+    $( ".classiftab td" ).droppable({
+      drop: function( event, ui ) {
+          console.log(ui.draggable);
+          ui.draggable.each(function (e,o) {
+              var td=$(o).parent();
+              var id=td.find('img').attr('id');
+              td.css('background-color','green')
+              console.log(o,id);
+          });
+        $( this )
+          .addClass( "ui-state-highlight" )
+          .find( "p" )
+            .html( "Dropped!" );
+      }
+    });
+  });
+  </script>

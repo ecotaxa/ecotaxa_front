@@ -2,15 +2,20 @@
 
 {% block body %}
 
+<a href="/Task/Clean/{{ task.id }}"><span class="label label-warning">Clean Task Temporary Data & Results</span></a>
+<a href="/Task/listall"><span class="label label-info"> Back to Task List</span></a>
+<br><br>
 <table class="table-bordered">
 <tr>
+    <th>Taks ID</th><td>{{ task.id }}</td>
+</tr><tr>
     <th width="150px">Class</th><td>{{ task.taskclass }}</td>
 </tr><tr>
     <th>State</th><td>{{ task.taskstate }}
     {% if task.taskstate=="Question" %}
         <a href="/Task/Question/{{ task.id }}"><span class="label label-warning">Answer Question</span></a>
     {% endif %}
-    {% if task.taskstate=="Error" %}
+    {% if task.taskstate=="Error" or task.taskstate=="Running" %}
         <a href="/Task/ForceRestart/{{ task.id }}"><span class="label label-warning">Force Restart</span></a>
     {% endif %}
 

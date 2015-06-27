@@ -2,13 +2,15 @@
 from flask import Flask,render_template,request
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security #, SQLAlchemyUserDatastore
-import inspect,html
+import inspect,html,sys
 import appli.securitycachedstore
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')
 
-db = SQLAlchemy(app)
+PythonExecutable="TEST"
+
+db = SQLAlchemy(app,session_options={'expire_on_commit':True}) # expire_on_commit évite d'avoir des select quand on manipule les objets aprés un commit.
 
 import appli.database
 # Setup Flask-Security
@@ -35,6 +37,7 @@ def gvg(varname,defvalue=''):
     :return: Chaine de la variable ou valeur par default si elle n'existe pas
     """
     return request.args.get(varname, defvalue)
+
 def gvp(varname,defvalue=''):
     """
     Permet de récuperer une variable dans la Chaine POST ou de retourner une valeur par defaut
@@ -44,11 +47,24 @@ def gvp(varname,defvalue=''):
     """
     return request.form.get(varname, defvalue)
 
+def DecodeEqualList(txt):
+    res={}
+    for l in str(txt).splitlines():
+        ls=l.split('=',1)
+        if len(ls)==2:
+            res[ls[0].strip().lower()]=ls[1].strip().lower()
+    return res
+def EncodeEqualList(map):
+    l=["%s=%s"%(k,v) for k,v in map.items()]
+    l.sort()
+    return "\n".join(l)
+
 # Ici les imports des modules qui definissent des routes
 import appli.main
 import appli.adminusers
 import appli.tasks.view
 import appli.search.view
+import appli.project.view
 
 @app.errorhandler(404)
 def not_found(e):
@@ -75,3 +91,9 @@ def unhandled_exception(e):
         s += "\n" + html.escape(i)
     return render_template('errors/500.html' ,trace=s), 500
 
+def JinjaFormatDateTime(d,format='%Y-%m-%d %H:%M:%S'):
+    if d is None:
+        return ""
+    return d.strftime(format)
+
+app.jinja_env.filters['datetime'] = JinjaFormatDateTime

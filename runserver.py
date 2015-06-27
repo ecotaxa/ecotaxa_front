@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from appli import app
-import logging
+import logging,sys
 import logging.handlers
+
+
 
 if __name__ == '__main__':
     app.debug = True
@@ -12,4 +14,9 @@ if __name__ == '__main__':
     handler.setFormatter(logging.Formatter(LoggingFormat))
     app.logger.addHandler(handler)
     app.logger.info("App Startup")
+    # L'executable est l'interpreteur qui à permis de lancer, mais en WSGI c'est écrasé par le lanceur WSGI
+    app.PythonExecutable=sys.executable
+
+
+
     app.run()

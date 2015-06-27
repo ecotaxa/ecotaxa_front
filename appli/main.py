@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, render_template, g, flash,request,url_for
+from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database
-import appli.search.taxo
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp
+from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_security.decorators import roles_accepted
-import time
+import os,time
 
 # Load default config and override config from an environment variable
 # app.config.update(dict(
@@ -30,6 +30,8 @@ def index():
     txt += "<a href="+url_for("test1")+">Test 1</a><br>"
     txt += "<a href="+url_for("test2")+">Test 2 : Layout seul</a><br>"
     txt += "<a href="+url_for("test3")+">Test 3 : Recherche et affichage</a><br>"
+    txt += "<a href=/Task/Create/TaskImport?p=1>Create task Import</a><br>"
+
     return PrintInCharte(txt)
     # return render_template('layout.html',bodycontent=txt)
 
@@ -80,6 +82,32 @@ def testadmin():
     return "Admin OK"
 
 
+@app.route('/common/ServerFolderSelect')
+def ServerFolderSelect():
+    ServerRoot=app.config['SERVERLOADAREA']
+    res = []
+    print(res)
+    return render_template('common/fileserverpopup.html',root_elements=res,targetid=gvg("target","ServerPath"))
+    return "Admin OK : "+ServerRoot
+
+@app.route('/common/ServerFolderSelectJSON')
+def ServerFolderSelectJSON():
+    ServerRoot=Path(app.config['SERVERLOADAREA'])
+    CurrentPath=ServerRoot
+    parent=gvg("id")
+    if parent!='#':
+        CurrentPath=ServerRoot.joinpath(Path(parent))
+    res=[]
+    for x in CurrentPath.iterdir():
+        rr=x.relative_to(ServerRoot).as_posix()
+        rc=x.relative_to(CurrentPath).as_posix()
+        if x.is_dir():
+            res.append(dict(id=rr,text="<span class=v>"+rc+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=parent,children=True))
+        if x.suffix.lower()==".zip":
+            fi=os.stat( x.as_posix())
+            res.append(dict(id=rr,text="<span class=v>"+"%s (%.1f Mb : %s)"%(rc,fi.st_size/1048576,time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(fi.st_mtime)))+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=parent,children=False))
+    return json.dumps(res);
+
 @app.before_request
 def before_request_security():
     # time.sleep(0.1)
@@ -90,7 +118,7 @@ def before_request_security():
     current_user.is_authenticated()
     g.menu = []
     g.menu.append((url_for("index"),"Home / Explore"))
-    g.menu.append(("/selectproject","Select Project"))
+    g.menu.append(("/prj/","Select Project"))
     if current_user.has_role(database.AdministratorLabel):
         g.menu.append(("/admin","Admin Screen"))
     g.menu.append(("","SEP"))

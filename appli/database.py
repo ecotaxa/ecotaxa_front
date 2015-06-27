@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from appli import db
+from appli import db,app
 from flask.ext.security import  UserMixin, RoleMixin
+from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence
 
@@ -58,8 +59,31 @@ class Projects(db.Model):
     pctvalidated = db.Column(DOUBLE_PRECISION)
     classifsettings  = db.Column(VARCHAR)
     projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects')) #
+    comments  = db.Column(VARCHAR)
+    projtype  = db.Column(VARCHAR(50))
     def __str__(self):
         return "{0} ({1})".format(self.title,self.projid)
+    def CheckRight(self,Level,userid=None): # Level 0 = Read, 1 = Annotate, 2 = Admin . userid=None = current user
+        # pp=self.projmembers.filter(member=userid).first()
+        if userid is None:
+            u=current_user
+            userid=u.id
+        else:
+            u=users.query.filter_by(id=userid).first()
+        if len([x for x in u.roles if x=='Application Administrator'])>0:
+            return True # Admin à tous les droits
+        pp=[x for x in self.projmembers if x.member==userid]
+        if len(pp)==0: # oas de privileges pour cet utilisateur
+            return False
+        pp=pp[0] #on recupere la premiere ligne seulement.
+        if pp.privilege=='Manage':
+            return True
+        if pp.privilege=='Annotate' and Level<=1:
+            return True
+        if Level<=0:
+            return True
+        return False
+
 
 class ProjectsPriv(db.Model):
     __tablename__ = 'projectspriv'
