@@ -1,0 +1,109 @@
+{% macro selectinput(name, values, value='') -%}
+    <select name="{{ name }}" id="{{ name }}">
+    {% for v in values %}
+        <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
+    {% endfor %}
+    </select>
+
+{%- endmacro %}
+
+{% extends "layout.html" %}
+
+{% block body %}
+    Img /page : {{ selectinput("ipp",['50','100','200','500','1000'],data.ipp) }}
+{{ top|safe }}
+	<div id="bodycontainer">
+		<div id="column-left"  class="panel panel-default" style="position: absolute;	top: 150px;	left: 2px;	bottom: 0px;	width: 260px;
+	                overflow-y: auto; overflow-x: hidden;  margin-bottom: 0px; " >
+            <div class="bodyleft" style="margin-left: 2px; width: 251px;">
+                <script>
+                $('#myTabs a').click(function (e) {
+                  e.preventDefault()
+                  $(this).tab('show')
+                });
+                $('#myTabs a:first').tab('show'); // Select first tab
+                $('#myTabs a:last').tab('show'); // Select last tab
+                </script>
+                <div id="myTabs">  <!-- Nav tabs -->
+                  <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Annotate</a></li>
+                    <li role="presentation"><a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filter</a></li>
+                  </ul>
+                  <div class="tab-content"> <!-- Tab panes -->
+                    <div role="tabpanel" class="tab-pane active" id="TabA">
+                        Annotate... {{ lefta|safe }}
+ <style>
+  #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
+  #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
+  .ui-selecting { background: #FECA40; }
+  .ui-selected { background: #F39814; color: white; }
+  </style>
+
+
+  <script>
+  $(function() {
+    $( "#draggable" ).draggable();
+    $( "#droppable" ).droppable({
+      drop: function( event, ui ) {
+          console.log(ui.draggable);
+          ui.draggable.each(function (e) {
+              console.log(e);
+          });
+        $( this )
+          .addClass( "ui-state-highlight" )
+          .find( "p" )
+            .html( "Dropped!" );
+      }
+    });
+  });
+  </script>
+<div id="droppable" class="ui-widget-header">
+  <p>Drop here</p>
+</div>
+ <div id="draggable" class="ui-widget-content">
+  <p>Drag me to my target</p>
+</div>
+
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="TabB">Search... {{ leftb|safe }}</div>
+                  </div>
+                </div>
+            </div>
+		</div>
+{#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
+<style>
+.ra3 {float:right; margin-right: 3px;}
+table.classiftab td {padding: 2px 3px 2px 3px ;  border-width:1px;border-style:solid;border-color:#c5c5c5;}
+table.imgtab {margin-bottom: 5px;}
+table.imgtab td {vertical-align:bottom;text-align: center;
+   border-width:1px;
+   border-style:solid;
+   border-color:#c5c5c5; }
+</style>
+<script>
+function LoadRightPane(){
+        //req={in:["17157378", "12735967", "17062333", "17137151"]};
+        req={taxo:$("#taxolb").val(),resultwidth:$("#column-right").width()};
+        $("#column-right").load("/prj/LoadRightPane",req);
+    }
+
+
+</script>
+
+
+        <div id="column-right" style="margin-left: 270px;">
+            RIGHT
+            {% if right=='dodefault' %}
+                <script>
+                $(document).ready(function() {
+                        LoadRightPane();
+                       }); // Ready
+                 </script>
+                Loading ....
+            {% else %}
+                {{ right|safe }}
+            {% endif %}
+		</div>
+    </div> {# Container #}
+
+{% endblock %}

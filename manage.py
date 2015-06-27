@@ -43,20 +43,26 @@ def createadminuser():
 
 @manager.command
 def dbdrop():
-    from appli import db,user_datastore
     db.drop_all()
 @manager.command
 def dbcreate():
-    from appli import db,user_datastore
     db.create_all()
 
 @manager.command
 def createsampledata():
-    from appli import db,database
     r=database.Projects.query.filter_by(projid=1).first()
     if r is None:
         db.session.add(database.Projects(projid=1,title="Test Project 1"))
         db.session.commit()
+
+@manager.command
+def ForceTest1Values():
+    from appli import ObjectToStr
+    from appli.tasks.taskmanager import AsyncTask,LoadTask
+    t=LoadTask(16)
+    t.param.IntraStep=0
+    t.task.taskstep=1
+    t.UpdateParam()
 
 
 if __name__ == "__main__":

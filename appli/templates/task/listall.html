@@ -6,6 +6,8 @@
         <a href="/Task/Show/{{ id }}"><span class="label label-danger">{{ Txt }}</span></a>
     {% elif LblType=="Running" %}
         <a href="/Task/Show/{{ id }}"><span class="label label-info">{{ Txt }}</span></a>
+    {% elif LblType=="Done" %}
+        <a href="/Task/Show/{{ id }}"><span class="label label-success">{{ Txt }}</span></a>
     {% else %}
         {{ Txt }}
     {% endif %}
@@ -15,10 +17,19 @@
 
 <table class="table">
     <tr><th>ID</th><th>Task Type</th><th>Owner</th>
-    <th>State</th><th>Step</th></tr>
+    <th>State</th><th>Step</th><th width="60px">%</th><th>Message</th><th>Creation Date</th><th>Last Update</th></tr>
  {% for t in tasks %}
-    <tr><td><a href="{{ t.id }}">{{ t.id }}</a></td><td>{{ t.taskclass }}</td><td>{{ t.owner_id }}</td>
-    <td>{{ PutInLabel(t.taskstate,t.taskstate,t.id) }}</td><td>{{ t.taskstep }}</td><td><a href="/Task/Show/{{ t.id }}"><span class="label label-primary">View </span></a></td></tr>
+
+    <tr><td><a href="/Task/Show/{{ t.id }}"> {{ t.id }} <span class="label label-primary">View</span></a></td>
+    <td>{{ t.taskclass }}</td>
+    <td>{{ t.owner_rel.name }}</td>
+    <td>{{ PutInLabel(t.taskstate,t.taskstate,t.id) }}</td><td>{{ t.taskstep }}</td>
+        <td>{{ t.progresspct }} %</td>
+        <td>{{ t.progressmsg }}</td>
+        <td>{{ t.creationdate|datetime }}</td>
+        <td>{{ t.lastupdate|datetime }}</td>
+
   {% endfor %}
+</table>
 
 {% endblock %}

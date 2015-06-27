@@ -1,19 +1,22 @@
-from appli import db,ObjectToStr,app,PrintInCharte
+from appli import db,ObjectToStr,app,PrintInCharte,PythonExecutable
 from flask.ext.login import current_user
 from flask import Blueprint, render_template, g, flash,jsonify
-import json,os,sys
-
+import json,os,sys,datetime,shutil
+from flask.ext.security import login_required
 
 class Task(db.Model):
     __tablename__ = 'temp_tasks'
     id = db.Column(db.Integer(),db.Sequence('seq_temp_tasks'), primary_key=True)
-    owner_id = db.Column(db.Integer())
+    owner_id = db.Column(db.Integer(),db.ForeignKey('users.id'))
+    owner_rel=db.relationship("users")
     taskclass = db.Column(db.String(80) )
     taskstate = db.Column(db.String(80) )
     taskstep = db.Column(db.Integer())
     progresspct = db.Column(db.Integer())
     progressmsg = db.Column(db.String() )
     inputparam = db.Column(db.String())
+    creationdate = db.Column(db.DateTime())
+    lastupdate = db.Column(db.DateTime())
     def __str__(self):
         return self.name
 
@@ -27,6 +30,7 @@ class AsyncTask:
             self.task.taskclass=self.__class__.__name__
             self.task.taskstate="Question"
             self.task.taskstep=0
+            self.task.creationdate=datetime.datetime.now()
         else:
             self.task=task
     def Process(self):
@@ -35,6 +39,7 @@ class AsyncTask:
     def UpdateParam(self):
         if hasattr(self, 'param'):
             self.task.inputparam = json.dumps(self.param.__dict__)
+        self.task.lastupdate=datetime.datetime.now()
         db.session.commit()
 
     def UpdateProgress(self,pct,msg=""):
@@ -42,8 +47,11 @@ class AsyncTask:
         self.task.progressmsg=msg
         self.UpdateParam()
 
+    def GetWorkingDir(self):
+        return os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../temptask/task%06d"%(int(self.task.id))))
+
     #Permet de lancer le sous process
-    def StartTask(self,param=None,step=1):
+    def StartTask(self,param=None,step=1,FileToSave=None,FileToSaveFileName=None):
         if param is not None:
             self.task.inputparam=json.dumps(param.__dict__)
         self.task.taskstep=step
@@ -51,10 +59,14 @@ class AsyncTask:
         if self.task.id==None:
             db.session.add(self.task)
         db.session.commit()
-        workingdir=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../temptask/task%06d"%(int(self.task.id))))
+        workingdir=self.GetWorkingDir()
         if not os.path.exists(workingdir):
             os.mkdir(workingdir)
-        cmd=sys.executable+" "+os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../runtask.py "+str(self.task.id)))
+        if FileToSave is not None:
+            FileToSave.save(os.path.join(self.GetWorkingDir(),FileToSaveFileName))
+        cmd=app.PythonExecutable+" "+os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../runtask.py "+str(self.task.id)))
+        app.logger.info("Start Task process : %s "%(cmd,))
+
         # os.spawnv(os.P_NOWAIT,  sys.executable, (sys.executable,cmd, str(self.task.id))) # Ne marche pas
         # system marche, mais c'est un appel bloquant donc on le met dans une thread separé
         import _thread
@@ -95,8 +107,9 @@ def LoadTask(taskid):
 
 
 @app.route('/Task/listall')
+@login_required
 def ListTasks(owner=None):
-     tasks=Task.query.all()
+     tasks=Task.query.order_by("id").all()
      txt = str(tasks)
      for t in tasks:
          txt += "<br>"+str(t.taskclass)+"-"+str(t.id)+"-"+str(t.owner_id)+"-"+str(t.taskstate)
@@ -105,16 +118,20 @@ def ListTasks(owner=None):
 
 
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
+@login_required
 def TaskCreateRouter(ClassName):
     t=TaskFactory(ClassName)
+    t.task.owner_id=current_user.get_id()
     return t.QuestionProcess()
 
 @app.route('/Task/Question/<int:TaskID>', methods=['GET', 'POST'])
+@login_required
 def TaskQuestionRouter(TaskID):
     task=LoadTask(TaskID)
     return task.QuestionProcess()
 
 @app.route('/Task/Show/<int:TaskID>', methods=['GET'])
+@login_required
 def TaskShow(TaskID):
     task=LoadTask(TaskID)
     try:
@@ -124,9 +141,30 @@ def TaskShow(TaskID):
     return render_template('task/show.html',task=task.task,steperror=decodedsteperrors)
 
 @app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
+@login_required
 def TaskForceRestart(TaskID):
     task=LoadTask(TaskID)
     return task.StartTask(step=task.task.taskstep)
+
+@app.route('/Task/Clean/<int:TaskID>', methods=['GET'])
+@login_required
+def TaskClean(TaskID):
+    task=LoadTask(TaskID)
+    WorkingDir=task.GetWorkingDir()
+    Msg="Erasing "+WorkingDir+"<br>"
+    try:
+        shutil.rmtree(WorkingDir)
+        Msg+="Temp Folder Erased<br>"
+        db.session.delete(task.task)
+        db.session.commit()
+        Msg+="DB Record Erased<br>"
+    except:
+        flash("Error While erasing "+str(sys.exc_info()),'error')
+
+    Msg+='<br><a href="/Task/listall"><span class="label label-info"> Back to Task List</span></a>'
+    return PrintInCharte(Msg);
+
+
 
 @app.route('/Task/GetStatus/<int:TaskID>', methods=['GET'])
 def TaskGetStatus(TaskID):
@@ -145,7 +183,7 @@ def TaskGetStatus(TaskID):
             rep={'d':{
                 'PercentComplete':Progress,
                 'WorkDescription': task.task.progressmsg}}
-            if task.task.taskstate=="Complete":
+            if task.task.taskstate=="Done":
                 rep['d']['IsComplete']="Y"
             if task.task.taskstate=="Error":
                 rep['d']['IsError']="Y"

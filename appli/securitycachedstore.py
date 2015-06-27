@@ -28,7 +28,7 @@ class SQLAlchemyUserDatastoreCACHED (SQLAlchemyUserDatastore):
                 u=None
             if u is None:
                 u=self.user_model.query.filter_by(**kwargs).first()
-                if (u is not None) and (id in kwargs):
+                if (u is not None) and ("id" in kwargs):
                     tmprole=u.roles # used to force quering Database
                     self.cache_users.set(kwargs["id"],u)
             return u
