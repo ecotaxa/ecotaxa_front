@@ -16,8 +16,6 @@
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2/css/select2.css') }}">
 
-
-
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,13 +35,8 @@
 <script>
 function AddZoom(element)
 {
-//console.log( "AddZoom " + element.attr('src')+" "+element.attr('data-zoom-image') );
-//    element.css('display','inline');
-//return;
-index=element.attr("id").substring(1,10)
-var pos='right'
-if((index%5)>=3) pos='left'
-
+//index=element.attr("id").substring(1,10)
+var pos=element.attr("pos");
 element.addimagezoom({ // single image zoom
 		zoomrange: [4, 10],
 		magnifiersize: [400,400],
@@ -53,24 +46,16 @@ element.addimagezoom({ // single image zoom
 	});
 };
 
-    $(document).ready(function() {
-/*        $("img.lazy").lazy({
-            afterLoad: function(element) {AddZoom(element);}
-        });
-*/
-{#        jQuery("div#column-right img.lazy").lazy({appendScroll: jQuery("div#column-right")  });#}
+$(document).ready(function() {
 });
 </script>
 
-{#  <link rel="stylesheet" type="text/css" href="/static/lazyloading/bttrlazyloading.min.css" />
-<link rel="stylesheet" type="text/css" href="/static/lazyloading/animate.min.css" />
-<script src="/static/lazyloading/jquery.bttrlazyloading.min.js"></script>
-#}
+
 <div class="headinfo">
 <div class="headinfo panel panel-default">  <div class="panel-body">
 <table width="100%"><tr>
     <td width="200px"><h1><a href="/">Ecotaxa</a></h1></td>
-    <td>&nbsp;</td>
+    <td>&nbsp;{% block headcenter %}{% endblock %}</td>
     <td align="right" width="200px">
         {% if not  current_user.is_authenticated() %}
             Not logged ( <a href="{{ url_for_security('login') }}">log in</a> )
@@ -102,9 +87,7 @@ element.addimagezoom({ // single image zoom
     <div class="alert alert-{{ message[0]|replace("message","info")|replace("error","danger") }} alert-dismissible" role="alert" >{{ message[1] }}</div>
   {% endfor %}
     {{ header|safe }}
-</div> {# headinfo #}
-
-    {% block body %}{% endblock %}
+</div>{# headinfo #}{% block body %}{% endblock %}
     {{ bodycontent|safe }}
 {% if bodyleft %} {# si pas de left on ne desinne pas cette zone ni la droite, on utilisera body ou bodycontent  #}
 	<div id="bodycontainer">

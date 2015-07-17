@@ -32,5 +32,18 @@ class SQLAlchemyUserDatastoreCACHED (SQLAlchemyUserDatastore):
                     tmprole=u.roles # used to force quering Database
                     self.cache_users.set(kwargs["id"],u)
             return u
+    def ClearCache(self):
+        with self.lock:
+            self.cache_users.clear()
+    # MAJ impossible  les objets ne sont pas muttable et current user n'est pas picklable
+    # donc on prend la strategie de clear du cache quand c'est requis.
+    # def update_user(self,user):
+    #     with self.lock:
+    #         u=self.cache_users.get(str(getattr(user,"id")))
+    #         if u is not None:
+    #             for k in user.__dict__.keys():
+    #                 u[k]=user.__dict__.get(k)
+    #             self.cache_users.set(getattr(user,"id"),u)
+
 
 
