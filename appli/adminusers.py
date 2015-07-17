@@ -63,7 +63,7 @@ class ProjectsView(ModelView):
     column_list = ('projid', 'title')
     inline_model_form_converter = ProjectsViewCustomInlineModelConverter
     inline_models = (ProjectsViewPrivInlineModelForm(),)
-    form_overrides = dict(mappingobj  =TextAreaField,mappingsample  =TextAreaField,mappingacq=TextAreaField,mappingprocess  =TextAreaField)
+    form_overrides = dict(mappingobj  =TextAreaField,mappingsample  =TextAreaField,mappingacq=TextAreaField,mappingprocess  =TextAreaField,classiffieldlist=TextAreaField  )
 
     def __init__(self, session, **kwargs):
         super(ProjectsView, self).__init__(database.Projects, session, **kwargs)

@@ -4,13 +4,17 @@ from flask.ext.security import  UserMixin, RoleMixin
 from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence
+import json
 
 AdministratorLabel="Application Administrator"
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
 ClassifQualRevert={}
 for(k,v) in ClassifQual.items():
     ClassifQualRevert[v]=k
-
+def GetClassifQualClass(q):
+    if q in ClassifQual:
+        return 'status-'+ClassifQual[q]
+    return 'status-unknown'
 
 users_roles = db.Table('users_roles',
         db.Column('user_id', db.Integer(), db.ForeignKey('users.id'), primary_key=True),
@@ -32,8 +36,29 @@ class users(db.Model, UserMixin):
     active = db.Column(db.Boolean(),default=True)
     roles = db.relationship('roles', secondary=users_roles,
                             backref=db.backref('users', lazy='dynamic')) #
+    preferences= db.Column(db.String(2000))
     def __str__(self):
         return "{0} ({1})".format(self.name,self.email)
+    def GetPref(self,name,defval):
+        try:
+            tmp=json.loads(self.preferences)
+            if isinstance(defval, (int)):
+                return int(tmp.get(name,defval))
+            if isinstance(defval, (float)):
+                return float(tmp.get(name,defval))
+            return tmp.get(name,defval)
+        except:
+            return defval
+    def SetPref(self,name,newval):
+        try:
+            tmp=json.loads(self.preferences)
+            if tmp.get(name,-99999)==newval:
+                return 0# déjà la bonne valeur donc il n'y a rien à faire
+        except:
+            tmp={}
+        tmp[name]=newval
+        self.preferences=json.dumps(tmp)
+        return 1
 
 class Taxonomy(db.Model):
     __tablename__ = 'taxonomy'
@@ -58,6 +83,8 @@ class Projects(db.Model):
     mappingprocess   = db.Column(VARCHAR)
     pctvalidated = db.Column(DOUBLE_PRECISION)
     classifsettings  = db.Column(VARCHAR)
+    initclassiflist  = db.Column(VARCHAR) # Initial list of categories
+    classiffieldlist  = db.Column(VARCHAR) # Fields available on Manual classif screen
     projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects')) #
     comments  = db.Column(VARCHAR)
     projtype  = db.Column(VARCHAR(50))
@@ -200,9 +227,20 @@ def GetAll(sql,params=None,debug=False):
     cur = db.engine.raw_connection().cursor()
     try:
         if debug:
-            app.logger.debug("GetAll SQL = %s",sql)
+            app.logger.debug("GetAll SQL = %s %s",sql,params)
         cur.execute(sql,params)
         res = cur.fetchall()
     finally:
         cur.close()
     return res
+
+def ExecSQL(sql,params=None,debug=False):
+    cur = db.engine.raw_connection().cursor()
+    try:
+        if debug:
+            app.logger.debug("ExecSQL SQL = %s %s",sql,params)
+        cur.execute(sql,params)
+        cur.connection.commit()
+    finally:
+        cur.close()
+

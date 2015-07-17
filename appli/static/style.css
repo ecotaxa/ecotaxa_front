@@ -1,0 +1,4 @@
+.status-validated { background: #80FF80; }
+.status-dubious { background: #FFB84D; }
+.status-predicted { background: #BCBCBC; }
+.status-unknown { background: #FF2424; }

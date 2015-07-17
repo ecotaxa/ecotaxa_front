@@ -1,26 +1,78 @@
+<span id="taxoclearspan"></span>
 <table class="classiftab">
 {% for v in res %}
-<tr><td> {{ v[1] }} <p  class="ra3 label label-info">{{ v[2] }}</p></td></tr>
+<tr><td taxoid="{{ v[0] }}"> <span class="taxo">{{ v[1] }}</span> <p  class="ra3 label {{ "label-info" if v[3]>0 else "label-success"}}">{{ v[2] }}{{ " ("~v[3]~")" if v[3]>0 }}</p></td></tr>
 {% endfor %}
 </table>
 
   <script>
-  $(function() {
-
-    $( ".classiftab td" ).droppable({
-      drop: function( event, ui ) {
-          console.log(ui.draggable);
-          ui.draggable.each(function (e,o) {
-              var td=$(o).parent();
-              var id=td.find('img').attr('id');
-              td.css('background-color','green')
-              console.log(o,id);
-          });
-        $( this )
-          .addClass( "ui-state-highlight" )
-          .find( "p" )
-            .html( "Dropped!" );
+  function SetTaxoFilter(taxofiltervalue,taxofilterlabel){
+      //debugger;
+      if(taxofiltervalue==false){
+          $("#taxofilter").val("");
+          $('#taxoclearspan').html("");
+          if(taxofilterlabel==-1) LoadRightPane();
+          return;
       }
+      $("#taxofilter").val(taxofiltervalue);
+      $('#taxoclearspan').html('<span class="label label-default" onclick="SetTaxoFilter(false,-1)">Clear '+taxofilterlabel+'</span>')
+  }
+  $(function() {
+    $("#taxofilter").val("");
+    $( ".classiftab td" ).droppable({
+      tolerance: "pointer",
+      drop: function( event, ui ) {
+          //console.log(ui.draggable);
+          //console.log(this);
+          var droptaxoid=$(this).attr('taxoid');
+          var droptaxoname=$(this).find(".taxo").text();
+          var TrSet = new Set();
+          var NbrChanged=0;
+          var  LstTd=[];
+          ui.draggable.each(function (e,o) {
+              if( $(o).hasClass( "zoomtracker" )) {
+                  LstTd.push(  $($(o).data("specs").origImg.closest('td')));
+              } else if( $(o).hasClass( "subimg" )) {  // Sinon c'est le div subimg
+                  LstTd.push(  $(o).closest('td'));
+              }
+              //Si c'est un item selected, on le supprime car va Ãªtre ajoutÃ© par
+              if(LstTd.length>0)
+                if(LstTd[0].hasClass( "ui-selected" ))
+                    LstTd.pop();
+              // On ajoute tout ceux qui sont selectionnÃ©s.
+              $(".ui-selected").each(function(){LstTd.push($(this));});
+          });
+        // Traitement des cellules
+          for(var i= 0; i < LstTd.length; i++) {
+              var td=LstTd[i];
+              td.removeClass("ui-selected");
+              var id = td.find('img').attr('id');
+              td.find('.taxo').text(droptaxoname);
+              td.find('.subimg').css("height",'').css("width",'').css("left",'').css("top",'').css("right",'').css("bottom",'');
+              td.find('.subimg').attr('class','subimg status-validated');
+              TrSet.add(td.closest('tr').attr('id'))
+              //td.css('background-color', '#80FF80')
+              //console.log(o, id ,droptaxoid,droptaxoname);
+          }
+          NbrChanged=LstTd.length;
+          // Ces resizes ralentissent mais permettent de recaller les zoom tracker suite au changement de taille des taille de taxo
+          // sur table 1000 image à 10% ligne 42 ca Freeze 4s
+          // sur table 200 images à 10% ca Freeze 1s
+          // Sur 50&100 ca ne se voit pas
+          for ( trid of TrSet)
+          {
+              $('#' + trid).find('td img').resize();
+              console.log("resize #"+trid);
+          }
+        // Highlight only the last
+        $( "#TabA .ui-state-highlight").removeClass( "ui-state-highlight");
+        var n=  parseInt($( this ).find( "p").text())||0;
+        $( this ).addClass( "ui-state-highlight" ).find( "p" ).html(n+NbrChanged );
+      }
+    }).click(function(){
+        //$("#taxofilter").val($(this).attr('taxoid'));
+        SetTaxoFilter($(this).attr('taxoid'),$(this).find('.taxo').text());
+        LoadRightPane();
     });
   });
   </script>
