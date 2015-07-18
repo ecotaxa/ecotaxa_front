@@ -1,8 +1,10 @@
-#TODO Ajouter colonne InitClassif
-#TODO Ajouter colonne Champs affichable du projet
+#TODO Gestion securité
+#Todo gérer le save de la classif.
+#Todo gérer une listbox d'annotation
+#todo gérer les multiple pages.
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay
 from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
@@ -57,10 +59,11 @@ def indexPrj(PrjId):
     data["fieldlist"]=fieldlist
     data["sortlist"]=collections.OrderedDict({"":""})
     for k,v in fieldlist.items():data["sortlist"][k]=v
+    data["sortlist"]["classifname"]="Category Name"
     data["sortlist"]["random_value"]="Random"
 
     right='dodefault'
-    classiftab=GetClassifTab(PrjId)
+    classiftab=GetClassifTab(Prj)
     g.headmenu = []
     g.headmenu.append(("/prj/%d"%(PrjId,),"Project home/Annotation"))
     g.headmenu.append(("","SEP"))
@@ -76,6 +79,7 @@ def LoadRightPane():
     # récupération des parametres d'affichage
     ipp=int(gvp("ipp","10"))
     zoom=int(gvp("zoom","100"))
+    pageoffset=int(gvp("pageoffset","0"))
     sortby=gvp("sortby","")
     sortorder=gvp("sortorder","")
     dispfield=gvp("dispfield","")
@@ -109,10 +113,13 @@ where o.projid=%(projid)s
         sqlparam['taxo']=gvp("taxo")
     sqlcount="select count(*) from ("+sql+") q"
     nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
+    pagecount=math.ceil(nbrtotal/ipp)
     # TODO affiche le total
-    if sortby!="":
+    if sortby=="classifname":
+        sql+=" order by t.name "+sortorder
+    elif sortby!="":
         sql+=" order by o."+sortby+" "+sortorder
-    sql+=" Limit %d offset 0 "%(ipp,)
+    sql+=" Limit %d offset %d "%(ipp,pageoffset*ipp)
     res=GetAll(sql,sqlparam,True)
     trcount=1
     t.append("<table class=imgtab><tr id=tr1>")
@@ -132,8 +139,8 @@ where o.projid=%(projid)s
     # Calcul des dimmensions et affichage des images
     for r in res:
         filename=r[4]
-        origwidth=r[6]
-        origheight=r[5]
+        origwidth=r['width']
+        origheight=r['height']
         width=origwidth*zoom//100
         height=origheight*zoom//100
         if max(width,height)<20: # en dessous de 20 px de coté on ne fait plus le scaling
@@ -152,11 +159,11 @@ where o.projid=%(projid)s
         # On limite les images pour qu'elles tiennent toujours dans l'écran
         if width>PageWidth:
             width=PageWidth
-            height=math.trunc(r[5]*width/r[6])
+            height=math.trunc(r['height']*width/r['width'])
             if height==0: height=1
         if height>WindowHeight:
             height=WindowHeight
-            width=math.trunc(r[6]*height/r[5])
+            width=math.trunc(r['width']*height/r['height'])
             if width==0: width=1
         if WidthOnRow!=0 and (WidthOnRow+width)>PageWidth:
             trcount+=1
@@ -168,30 +175,43 @@ where o.projid=%(projid)s
             pos='left'
         else: pos='right'
         #TODO Si l'image affiché est plus petite que la miniature, afficher la miniature.
-        # txt="<td width={3}><div class='divtodrag'><img class='lazy' id=I{4} data-src='/vault/{0}' data-zoom-image='{0}' width={1} height={2}></div>"\
+
         txt="<td width={3}><img class='lazy' id=I{4} data-src='/vault/{0}' data-zoom-image='{0}' width={1} height={2} pos={5}>"\
-            .format(filename,width,height,cellwidth,r[0],pos)
-        poptxt=("<p style='white-space: nowrap;'>cat. %s")%(r[1],)
+            .format(filename,width,height,cellwidth,r['objid'],pos)
+        # Génération de la popover qui apparait pour donner quelques détails sur l'image
+        poptxt=("<p style='white-space: nowrap;'>cat. %s")%(r['taxoname'],)
         if r[3]!="":
             poptxt+="<br>Identified by %s"%(r[3])
-        colid=17
         for k,v in fieldlist.items():
-            if isinstance(r[colid], (float)):
-                if(abs(r[colid])<100):
-                    poptxt+="<br>%s : %0.2f"%(v,r[colid])
-                else: poptxt+="<br>%s : %0.f"%(v,r[colid])
-            else:
-                poptxt+="<br>%s : %s"%(v,r[colid])
-            colid+=1
-        txt+="<div class='subimg {1}'><span class=taxo data-title=\"{2}\" data-content=\"{3}\">{0}</span></div>".format(r[1],GetClassifQualClass(r[2]),r[12],poptxt)
+            poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
+        # Génération du texte sous l'image qui contient la taxo + les champs à afficher
+        bottomtxt=""
+        for k,v in fieldlist.items():
+            if k in dispfield:
+                bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
+
+        txt+="<div class='subimg {1}' data-title=\"{2}\" data-content=\"{3}\"><span class=taxo >{0}</span>{4}<div class=ddet>Details</div></div>"\
+            .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),r['orig_id'],poptxt,bottomtxt)
         txt+="</td>"
+
         WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
         t.append(txt)
 
     t.append("</tr></table>")
+    if(pagecount>1):
+        t.append("<p align=center> Page %d/%d - Go to page : "%(pageoffset+1,pagecount))
+        if pageoffset>0:
+            t.append("<a href='javascript:gotopage(%d);'>&lt;</a>"%(pageoffset-1))
+        for i in range(0,pagecount-1,math.ceil(pagecount/20)):
+            t.append("<a href='javascript:gotopage(%d);'>%d</a> "%(i,i+1))
+        t.append("<a href='javascript:gotopage(%d);'>%d</a>"%(pagecount-1,pagecount))
+        if pageoffset<pagecount-1:
+            t.append("<a href='javascript:gotopage(%d);'>&gt;</a>"%(pageoffset+1))
+        t.append("</p>")
     t.append("""
         <style>
         .lazy {margin: 10 5 10 0;}
+        .ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
         </style>
         <script>
         // Add Zoom
@@ -235,19 +255,29 @@ where o.projid=%(projid)s
         observer.observe(target, config);
         // Enable the popover
         var option={'placement':'bottom','trigger':'hover','html':true};
-        $('span.taxo').popover(option);
+        $('div.subimg').popover(option);
+        $('div.ddet').click(function(e){
+            e.stopPropagation();
+            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
+            var win = window.open(url, '_blank');
+            });
         </script>""")
     return "\n".join(t)
 
-def GetClassifTab(PrjId):
+def GetClassifTab(Prj):
+    if Prj.initclassiflist is None:
+        InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
+    else:
+        InitClassif=Prj.initclassiflist
+    InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
     sql="""select t.id,t.name taxoname,Nbr,NbrNotV
     from (  SELECT    o.classif_id,   c.id,count(classif_id) Nbr,count(case when classif_qual='V' then NULL else o.classif_id end) NbrNotV
         FROM (select * from objects where projid=%(projid)s) o
-        FULL JOIN (VALUES (6), (8), (12), (21), (23), (17059011)) c(id) ON o.classif_id = c.id
+        FULL JOIN (VALUES """+InitClassif+""") c(id) ON o.classif_id = c.id
         GROUP BY classif_id, c.id
       ) o
-    left JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
+    JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
     order by t.name       """
-    param={'projid':PrjId} #TODO InitClassif="6,8,12,21,23"
-    res=GetAll(sql,param)
+    param={'projid':Prj.projid}
+    res=GetAll(sql,param,True)
     return render_template('project/classiftab.html',res=res)

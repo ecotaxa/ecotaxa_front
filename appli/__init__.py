@@ -59,6 +59,20 @@ def EncodeEqualList(map):
     l.sort()
     return "\n".join(l)
 
+def ScaleForDisplay(v):
+    """
+    Permet de supprimer les decimales supplementaires des flottant en fonctions de la valeur et de ne rien faire au reste
+    :param v: valeur à ajuste
+    :return: Texte formaté
+    """
+    if isinstance(v, (float)):
+        if(abs(v)<100):
+            return "%0.2f"%(v)
+        else: return "%0.f"%(v)
+    else:
+        return v
+
+
 # Ici les imports des modules qui definissent des routes
 import appli.main
 import appli.adminusers

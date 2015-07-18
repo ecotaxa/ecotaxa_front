@@ -4,7 +4,7 @@ from flask.ext.security import  UserMixin, RoleMixin
 from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence
-import json
+import json,psycopg2.extras
 
 AdministratorLabel="Application Administrator"
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
@@ -224,7 +224,7 @@ Index('IS_ImagesObjects',Images.__table__.c.objid)
 #Sequence("seq_images",1,1)
 
 def GetAll(sql,params=None,debug=False):
-    cur = db.engine.raw_connection().cursor()
+    cur = db.engine.raw_connection().cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         if debug:
             app.logger.debug("GetAll SQL = %s %s",sql,params)

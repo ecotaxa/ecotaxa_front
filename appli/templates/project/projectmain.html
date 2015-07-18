@@ -34,6 +34,7 @@
 {% block body %}<div id="topbar" style="margin-top: -15px;margin-bottom: 3px;">
 <input type="hidden" id="projid" value="{{ projid }}">
 <input type="hidden" id="taxofilter" value="">
+<input type="hidden" id="pageoffset" value="0">
     Sort by :<select name="sortby" id="sortby">
 {% for key, value in data.sortlist.items() %}
     <option value="{{ key|e }}" {{ 'selected' if value==data.sortby }}> {{ value|e }}</option>
@@ -119,6 +120,7 @@ function LoadRightPane(){
         req['ipp']=$("#ipp").val();
         req['zoom']=$("#zoom").val();
         req['sortby']=$("#sortby").val();
+        req['pageoffset']=$("#pageoffset").val();
         req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
         req['dispfield']="";
         $("#dispfieldlist .glyphicon-ok").closest("li").each(function () {
@@ -140,6 +142,12 @@ function ToggleDispField(caller){
     $('#'+caller).find('span').toggleClass("glyphicon-ok");
     //return false;
 }
+function gotopage(nopage)
+{
+    $("#pageoffset").val(nopage);
+    LoadRightPane();
+}
+
 $(document).ready(function() {
     if ("{{data.sortorder}}"=="desc") SortToggle();
     $('#dispfield').select2();

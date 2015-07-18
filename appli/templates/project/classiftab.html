@@ -1,5 +1,5 @@
 <span id="taxoclearspan"></span>
-<table class="classiftab">
+<table class="classiftab" width="95%">
 {% for v in res %}
 <tr><td taxoid="{{ v[0] }}"> <span class="taxo">{{ v[1] }}</span> <p  class="ra3 label {{ "label-info" if v[3]>0 else "label-success"}}">{{ v[2] }}{{ " ("~v[3]~")" if v[3]>0 }}</p></td></tr>
 {% endfor %}
