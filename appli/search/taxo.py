@@ -36,14 +36,19 @@ def taxotreerootjson():
 
 @app.route('/search/taxofinal', methods=['GET', 'POST'])
 def taxofinal():
+    sql="""SELECT o.objid, i.imgid, i.file_name, coalesce(i.thumb_file_name,i.file_name), coalesce(i.thumb_width,i.width), coalesce(i.thumb_height,i.height), taxo.name
+              FROM objects o
+              join taxonomy taxo on o.classif_id = taxo.id
+              join images i on o.img0id=i.imgid
+              WHERE  1=1 """
     if gvp("taxo[]"):
         resin=",".join(request.form.getlist("taxo[]"))
-        res = GetAll("SELECT id, nom FROM taxonomy WHERE  id in ("+resin+")  order by nom ")
+        res = GetAll("SELECT id, name FROM taxonomy WHERE  id in ("+resin+")  order by name ")
         txt="Taxonomy = "+",".join((x[1] for x in res))
+        sql+=" and o.classif_id in ("+",".join(request.form.getlist("taxo[]"))+")"
     else:txt="No Criteria"
-    Imgs=GetAll("""SELECT o.objid, i.imgid, i.file_name, coalesce(i.thumb_file_name,i.file_name), coalesce(i.thumb_width,i.width), coalesce(i.thumb_height,i.height), taxo.name
-              FROM public.objects o, public.images i, public.taxonomy taxo
-              WHERE o.objid = i.objid AND o.classif_id = taxo.id;""")
+    sql+=" limit 100"
+    Imgs=GetAll(sql)
     txt+=" (%d response)"%(len(Imgs))
     txt+="\n<table><tr>"
     try:

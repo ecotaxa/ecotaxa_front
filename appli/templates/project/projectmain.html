@@ -88,23 +88,17 @@
                     <li role="presentation"><a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filter</a></li>
                   </ul>
                   <div class="tab-content"> <!-- Tab panes -->
-                    <div role="tabpanel" class="tab-pane active" id="TabA">{{ lefta|safe }}
- <style>
-  #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
-  #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
-  .ui-selecting { background: #FECA40; }
-  .ui-selected { background: #FFAD33; color: white; }
-  </style>
-
-
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="TabB">Search... {{ leftb|safe }}</div>
+                    <div role="tabpanel" class="tab-pane active" id="TabA">{{ lefta|safe }}</div>
+                    <div role="tabpanel" class="tab-pane" id="TabB"> {{ leftb|safe }}</div>
                   </div>
                 </div>
             </div>
 		</div>
 {#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
 <style>
+.lazy {margin: 10 5 10 0;}
+.ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
+.ui-selected { background: #FFAD33; color: white; }
 .ra3 {float:right; margin-right: 3px;}
 table.classiftab td {padding: 2px 3px 2px 3px ;  border-width:1px;border-style:solid;border-color:#c5c5c5;}
 table.imgtab {margin-bottom: 5px;}
@@ -112,8 +106,12 @@ table.imgtab td {vertical-align:bottom;text-align: center;
    border-width:1px;
    border-style:solid;
    border-color:#c5c5c5; }
+
 </style>
 <script>
+var PendingChanges={};
+var PendingChangesTaxoName={};
+
 function LoadRightPane(){
         //req={in:["17157378", "12735967", "17062333", "17137151"]};
         req={taxo:$("#taxofilter").val(),resultwidth:$("#column-right").width(),windowheight:$(window).height()};
@@ -128,6 +126,8 @@ function LoadRightPane(){
         });
         req['projid']=$("#projid").val();
         $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
+        PendingChanges={}; // After load there's no pending changes
+        PendingChangesTaxoName={};
         $("#column-right").load("/prj/LoadRightPane",req);
     }
 
@@ -149,8 +149,13 @@ function gotopage(nopage)
 }
 
 $(document).ready(function() {
-    if ("{{data.sortorder}}"=="desc") SortToggle();
-    $('#dispfield').select2();
+    if ("{{data.sortorder}}"=="desc")
+        SortToggle();
+    {#  Plus style sous FFX mais plus de ressource et la dropdown est moins compacte
+    $('#sortby').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
+    $('#ipp').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
+    $('#zoom').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
+     #}
 });
 </script>
 
