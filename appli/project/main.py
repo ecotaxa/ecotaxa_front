@@ -1,7 +1,6 @@
-#TODO Gestion securité
-#Todo gérer le save de la classif.
-#Todo gérer une listbox d'annotation
-#todo gérer les multiple pages.
+#Todo details
+#Todo filtres
+#todo validate
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay
@@ -46,6 +45,7 @@ def GetFieldList(Prj):
     return fieldlist
 
 @app.route('/prj/<int:PrjId>')
+@login_required
 def indexPrj(PrjId):
     data={ 'ipp':str(current_user.GetPref('ipp',100))
           ,'zoom':str(current_user.GetPref('zoom',100))
@@ -61,13 +61,17 @@ def indexPrj(PrjId):
     for k,v in fieldlist.items():data["sortlist"][k]=v
     data["sortlist"]["classifname"]="Category Name"
     data["sortlist"]["random_value"]="Random"
-
+    if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
+        flash('You cannot view this project','error')
+        return PrintInCharte("<a href=/prj/>Select annother project</a>")
+    g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
+    if not g.PrjManager: g.PrjAnnotate=Prj.CheckRight(1)
     right='dodefault'
     classiftab=GetClassifTab(Prj)
     g.headmenu = []
     g.headmenu.append(("/prj/%d"%(PrjId,),"Project home/Annotation"))
     g.headmenu.append(("","SEP"))
-    if Prj.CheckRight(2):
+    if g.PrjManager:
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
 
 
@@ -75,6 +79,7 @@ def indexPrj(PrjId):
                            ,right=right,data=data,projid=PrjId)
 
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
+@login_required
 def LoadRightPane():
     # récupération des parametres d'affichage
     ipp=int(gvp("ipp","10"))
@@ -114,13 +119,12 @@ where o.projid=%(projid)s
     sqlcount="select count(*) from ("+sql+") q"
     nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
     pagecount=math.ceil(nbrtotal/ipp)
-    # TODO affiche le total
     if sortby=="classifname":
         sql+=" order by t.name "+sortorder
     elif sortby!="":
         sql+=" order by o."+sortby+" "+sortorder
     sql+=" Limit %d offset %d "%(ipp,pageoffset*ipp)
-    res=GetAll(sql,sqlparam,True)
+    res=GetAll(sql,sqlparam,False)
     trcount=1
     t.append("<table class=imgtab><tr id=tr1>")
     WidthOnRow=0
@@ -138,9 +142,12 @@ where o.projid=%(projid)s
     #print("PageWidth=%s, WindowHeight=%s"%(PageWidth,WindowHeight))
     # Calcul des dimmensions et affichage des images
     for r in res:
-        filename=r[4]
+        filename=r['file_name']
         origwidth=r['width']
         origheight=r['height']
+        thumbfilename=r['thumb_file_name']
+        thumbwidth=r['thumb_width']
+        thumbheight=r['thumb_height']
         width=origwidth*zoom//100
         height=origheight*zoom//100
         if max(width,height)<20: # en dessous de 20 px de coté on ne fait plus le scaling
@@ -174,10 +181,12 @@ where o.projid=%(projid)s
         if (WidthOnRow+cellwidth)>(PageWidth/2):
             pos='left'
         else: pos='right'
-        #TODO Si l'image affiché est plus petite que la miniature, afficher la miniature.
+        #Si l'image affiché est plus petite que la miniature, afficher la miniature.
+        if thumbwidth is None or thumbwidth<width or thumbfilename is None: # sinon (si la miniature est plus petite que l'image à afficher )
+            thumbfilename=filename # la miniature est l'image elle même
 
-        txt="<td width={3}><img class='lazy' id=I{4} data-src='/vault/{0}' data-zoom-image='{0}' width={1} height={2} pos={5}>"\
-            .format(filename,width,height,cellwidth,r['objid'],pos)
+        txt="<td width={3}><img class='lazy' id=I{4} data-src='/vault/{6}' data-zoom-image='{0}' width={1} height={2} pos={5}>"\
+            .format(filename,width,height,cellwidth,r['objid'],pos,thumbfilename)
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
         poptxt=("<p style='white-space: nowrap;'>cat. %s")%(r['taxoname'],)
         if r[3]!="":
@@ -198,6 +207,10 @@ where o.projid=%(projid)s
         t.append(txt)
 
     t.append("</tr></table>")
+    t.append("""<span id=PendingChanges></span><br>
+        <button class='btn btn-primary' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changes</button>
+        <button class='btn btn-success'><span class='glyphicon glyphicon-ok' /> Validate all objects</button>""")
+    # Gestion de la navigation entre les pages
     if(pagecount>1):
         t.append("<p align=center> Page %d/%d - Go to page : "%(pageoffset+1,pagecount))
         if pageoffset>0:
@@ -209,11 +222,7 @@ where o.projid=%(projid)s
             t.append("<a href='javascript:gotopage(%d);'>&gt;</a>"%(pageoffset+1))
         t.append("</p>")
     t.append("""
-        <style>
-        .lazy {margin: 10 5 10 0;}
-        .ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
-        </style>
-        <script>
+    <script>
         // Add Zoom
         jQuery('div#column-right img.lazy').Lazy({bind: 'event',afterLoad: function(element) {
             if($('#magenabled').prop("checked")==false)
@@ -279,5 +288,5 @@ def GetClassifTab(Prj):
     JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
     order by t.name       """
     param={'projid':Prj.projid}
-    res=GetAll(sql,param,True)
+    res=GetAll(sql,param,False)
     return render_template('project/classiftab.html',res=res)

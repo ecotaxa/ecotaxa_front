@@ -54,7 +54,7 @@ class ProjectsViewPrivInlineModelForm(InlineFormAdmin):
     form_args = dict(
         # Pass the choices to the `SelectField`
         privilege=dict(
-            choices=[(0, 'View'), ('Annotate', 'Annotate'), ('Manage', 'Manage')]
+            choices=[('View', 'View'), ('Annotate', 'Annotate'), ('Manage', 'Manage')]
         ))
     def __init__(self):
         return super(ProjectsViewPrivInlineModelForm, self).__init__(database.ProjectsPriv)
