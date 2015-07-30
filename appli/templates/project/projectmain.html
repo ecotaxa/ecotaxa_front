@@ -4,16 +4,74 @@
         <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
     {% endfor %}
     </select>
-
+{%- endmacro %}
+{% macro checkboxinput(name, checkedvalue, value='') -%}
+    <input type="checkbox" name="{{ name }}" id="{{ name }}" value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }}>
 {%- endmacro %}
 
 {% extends "layout.html" %}
+{% block headcenter %}
+{% if g.headmenu %}
+    <br><div class="btn-group" style="margin-right: 10px">
+    <button type="button" class="btn btn-default">Project Action</button>
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+      {%   for m in g.headmenu %}
+          {% if m[1]=="SEP"%}
+            <li class="divider"></li>
+          {% else %}
+            <li><a href="{{ m[0] }}">{{ m[1] }}</a></li>
+          {% endif %}
+      {%  endfor %}
+  </ul>
+</div>
+{% endif %} {# If headmenu #}
+{% endblock %}
 
-{% block body %}
+{% block body %}<div id="topbar" style="margin-top: -15px;margin-bottom: 3px;">
+<input type="hidden" id="projid" value="{{ projid }}">
+<input type="hidden" id="taxofilter" value="">
+<input type="hidden" id="pageoffset" value="0">
+    Sort by :<select name="sortby" id="sortby">
+{% for key, value in data.sortlist.items() %}
+    <option value="{{ key|e }}" {{ 'selected' if key==data.sortby }}> {{ value|e }}</option>
+{% endfor %}
+</select>
+
+<button type="button" class="btn btn-xs " onclick="SortToggle();" title="Current Sort : Ascending">
+        <span id="sortorder" class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span></button>
+
+
+ Display :
+<div class="btn-group">
+  <button type="button" class="btn btn-sm">Displayed field</button>
+  <button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <span class="caret"></span>
+    <span class="sr-only">Toggle Dropdown</span>
+  </button>
+  <ul id="dispfieldlist" class="dropdown-menu">
+{% for key, value in data.fieldlist.items() %}
+    <li id="dispfield_{{ key }}"  > <a href="javascript:ToggleDispField('dispfield_{{ key }}');">
+        <span class="glyphicon {{ 'glyphicon-ok' if key in data.dispfield }}"></span>
+        {{ value|e }}</a></li>
+{% endfor %}
+  </ul>
+</div>
+
+
+
     Img /page : {{ selectinput("ipp",['50','100','200','500','1000'],data.ipp) }}
+    Zoom : {{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}
+    Magnifier Enabled : {{ checkboxinput("magenabled","1",data.magenabled) }}
+    <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</button>
 {{ top|safe }}
+    </div>
 	<div id="bodycontainer">
-		<div id="column-left"  class="panel panel-default" style="position: absolute;	top: 150px;	left: 2px;	bottom: 0px;	width: 260px;
+		<div id="column-left"  class="panel panel-default" style="position: fixed;	top: 150px;	left: 2px;	bottom: 0px;	width: 260px;
 	                overflow-y: auto; overflow-x: hidden;  margin-bottom: 0px; " >
             <div class="bodyleft" style="margin-left: 2px; width: 251px;">
                 <script>
@@ -30,48 +88,17 @@
                     <li role="presentation"><a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filter</a></li>
                   </ul>
                   <div class="tab-content"> <!-- Tab panes -->
-                    <div role="tabpanel" class="tab-pane active" id="TabA">
-                        Annotate... {{ lefta|safe }}
- <style>
-  #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
-  #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
-  .ui-selecting { background: #FECA40; }
-  .ui-selected { background: #F39814; color: white; }
-  </style>
-
-
-  <script>
-  $(function() {
-    $( "#draggable" ).draggable();
-    $( "#droppable" ).droppable({
-      drop: function( event, ui ) {
-          console.log(ui.draggable);
-          ui.draggable.each(function (e) {
-              console.log(e);
-          });
-        $( this )
-          .addClass( "ui-state-highlight" )
-          .find( "p" )
-            .html( "Dropped!" );
-      }
-    });
-  });
-  </script>
-<div id="droppable" class="ui-widget-header">
-  <p>Drop here</p>
-</div>
- <div id="draggable" class="ui-widget-content">
-  <p>Drag me to my target</p>
-</div>
-
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="TabB">Search... {{ leftb|safe }}</div>
+                    <div role="tabpanel" class="tab-pane active" id="TabA">{{ lefta|safe }}</div>
+                    <div role="tabpanel" class="tab-pane" id="TabB"> {{ leftb|safe }}</div>
                   </div>
                 </div>
             </div>
 		</div>
 {#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
 <style>
+.lazy {margin: 10 5 10 0;}
+.ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
+.ui-selected { background: #FFAD33; color: white; }
 .ra3 {float:right; margin-right: 3px;}
 table.classiftab td {padding: 2px 3px 2px 3px ;  border-width:1px;border-style:solid;border-color:#c5c5c5;}
 table.imgtab {margin-bottom: 5px;}
@@ -79,15 +106,57 @@ table.imgtab td {vertical-align:bottom;text-align: center;
    border-width:1px;
    border-style:solid;
    border-color:#c5c5c5; }
+
 </style>
 <script>
+var PendingChanges={};
+var PendingChangesTaxoName={};
+
 function LoadRightPane(){
         //req={in:["17157378", "12735967", "17062333", "17137151"]};
-        req={taxo:$("#taxolb").val(),resultwidth:$("#column-right").width()};
+        req={taxo:$("#taxofilter").val(),resultwidth:$("#column-right").width(),windowheight:$(window).height()};
+        req['ipp']=$("#ipp").val();
+        req['zoom']=$("#zoom").val();
+        req['sortby']=$("#sortby").val();
+        req['pageoffset']=$("#pageoffset").val();
+        req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
+        req['dispfield']="";
+        $("#dispfieldlist .glyphicon-ok").closest("li").each(function () {
+            req['dispfield'] += " " + $(this).prop("id");
+        });
+        req['projid']=$("#projid").val();
+        $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
+        PendingChanges={}; // After load there's no pending changes
+        PendingChangesTaxoName={};
         $("#column-right").load("/prj/LoadRightPane",req);
     }
 
+    function SortToggle() {
+        if($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
+             $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title","Current Sort : Descending");
+        else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title","Current Sort : Ascending");
+    }
 
+function ToggleDispField(caller){
+    console.log(caller);
+    $('#'+caller).find('span').toggleClass("glyphicon-ok");
+    //return false;
+}
+function gotopage(nopage)
+{
+    $("#pageoffset").val(nopage);
+    LoadRightPane();
+}
+
+$(document).ready(function() {
+    if ("{{data.sortorder}}"=="desc")
+        SortToggle();
+    {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
+    $('#sortby').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
+    $('#ipp').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
+    $('#zoom').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
+     #}
+});
 </script>
 
 
@@ -105,5 +174,14 @@ function LoadRightPane(){
             {% endif %}
 		</div>
     </div> {# Container #}
+
+
+<div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      ...
+    </div>
+  </div>
+</div>
 
 {% endblock %}

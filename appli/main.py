@@ -31,6 +31,7 @@ def index():
     txt += "<a href="+url_for("test2")+">Test 2 : Layout seul</a><br>"
     txt += "<a href="+url_for("test3")+">Test 3 : Recherche et affichage</a><br>"
     txt += "<a href=/Task/Create/TaskImport?p=1>Create task Import</a><br>"
+    txt += "<a href=/prj/2>Go to project 2</a><br>"
 
     return PrintInCharte(txt)
     # return render_template('layout.html',bodycontent=txt)

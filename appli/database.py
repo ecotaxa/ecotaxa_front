@@ -4,13 +4,17 @@ from flask.ext.security import  UserMixin, RoleMixin
 from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence
+import json,psycopg2.extras
 
 AdministratorLabel="Application Administrator"
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
 ClassifQualRevert={}
 for(k,v) in ClassifQual.items():
     ClassifQualRevert[v]=k
-
+def GetClassifQualClass(q):
+    if q in ClassifQual:
+        return 'status-'+ClassifQual[q]
+    return 'status-unknown'
 
 users_roles = db.Table('users_roles',
         db.Column('user_id', db.Integer(), db.ForeignKey('users.id'), primary_key=True),
@@ -32,8 +36,29 @@ class users(db.Model, UserMixin):
     active = db.Column(db.Boolean(),default=True)
     roles = db.relationship('roles', secondary=users_roles,
                             backref=db.backref('users', lazy='dynamic')) #
+    preferences= db.Column(db.String(2000))
     def __str__(self):
         return "{0} ({1})".format(self.name,self.email)
+    def GetPref(self,name,defval):
+        try:
+            tmp=json.loads(self.preferences)
+            if isinstance(defval, (int)):
+                return int(tmp.get(name,defval))
+            if isinstance(defval, (float)):
+                return float(tmp.get(name,defval))
+            return tmp.get(name,defval)
+        except:
+            return defval
+    def SetPref(self,name,newval):
+        try:
+            tmp=json.loads(self.preferences)
+            if tmp.get(name,-99999)==newval:
+                return 0# déjà la bonne valeur donc il n'y a rien à faire
+        except:
+            tmp={}
+        tmp[name]=newval
+        self.preferences=json.dumps(tmp)
+        return 1
 
 class Taxonomy(db.Model):
     __tablename__ = 'taxonomy'
@@ -58,6 +83,8 @@ class Projects(db.Model):
     mappingprocess   = db.Column(VARCHAR)
     pctvalidated = db.Column(DOUBLE_PRECISION)
     classifsettings  = db.Column(VARCHAR)
+    initclassiflist  = db.Column(VARCHAR) # Initial list of categories
+    classiffieldlist  = db.Column(VARCHAR) # Fields available on Manual classif screen
     projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects')) #
     comments  = db.Column(VARCHAR)
     projtype  = db.Column(VARCHAR(50))
@@ -144,8 +171,10 @@ class Objects(db.Model):
     depth_max = db.Column(FLOAT)
     images=db.relationship("Images")
     classif_id = db.Column(INTEGER)
+    classif=db.relationship("Taxonomy",primaryjoin="Taxonomy.id==Objects.classif_id",foreign_keys="Taxonomy.id" ,uselist=False,)
     classif_qual = db.Column(CHAR(1))
     classif_who = db.Column(db.Integer,db.ForeignKey('users.id'))
+    classiffier=db.relationship("users",primaryjoin="users.id==Objects.classif_who",foreign_keys="users.id" ,uselist=False,)
     classif_when = db.Column(TIMESTAMP)
     classif_auto_id = db.Column(INTEGER)
     classif_auto_score = db.Column(DOUBLE_PRECISION)
@@ -181,6 +210,17 @@ Index('IS_ObjectsDate',Objects.__table__.c.objdate,Objects.__table__.c.projid,Ob
 Index('IS_ObjectsDate',Objects.__table__.c.objdate,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
 Index('IS_ObjectsRandom',Objects.__table__.c.random_value,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
 
+class ObjectsClassifHisto(db.Model):
+    __tablename__ = 'objectsclassifhisto'
+    objid = db.Column(BIGINT,db.ForeignKey('objects.objid'), primary_key=True)
+    classif_date = db.Column(TIMESTAMP, primary_key=True)
+    classif_type = db.Column(CHAR(1)) # A : Auto, M : Manu
+    classif_id = db.Column(INTEGER)
+    classif_qual = db.Column(CHAR(1))
+    classif_who = db.Column(db.Integer,db.ForeignKey('users.id'))
+    classif_score = db.Column(DOUBLE_PRECISION)
+
+
 class Images(db.Model):
     __tablename__ = 'images'
     imgid = db.Column(BIGINT,db.Sequence('seq_images'), primary_key=True) # manuel ,db.Sequence('seq_images')
@@ -196,13 +236,24 @@ class Images(db.Model):
 Index('IS_ImagesObjects',Images.__table__.c.objid)
 #Sequence("seq_images",1,1)
 
-def GetAll(sql,params=None,debug=False):
-    cur = db.engine.raw_connection().cursor()
+def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
+    cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
         if debug:
-            app.logger.debug("GetAll SQL = %s",sql)
+            app.logger.debug("GetAll SQL = %s %s",sql,params)
         cur.execute(sql,params)
         res = cur.fetchall()
     finally:
         cur.close()
     return res
+
+def ExecSQL(sql,params=None,debug=False):
+    cur = db.engine.raw_connection().cursor()
+    try:
+        if debug:
+            app.logger.debug("ExecSQL SQL = %s %s",sql,params)
+        cur.execute(sql,params)
+        cur.connection.commit()
+    finally:
+        cur.close()
+
