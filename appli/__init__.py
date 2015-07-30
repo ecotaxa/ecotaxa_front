@@ -2,7 +2,7 @@
 from flask import Flask,render_template,request
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security #, SQLAlchemyUserDatastore
-import inspect,html,sys
+import inspect,html,sys,math
 import appli.securitycachedstore
 
 app = Flask("appli")
@@ -58,6 +58,33 @@ def EncodeEqualList(map):
     l=["%s=%s"%(k,v) for k,v in map.items()]
     l.sort()
     return "\n".join(l)
+
+def ScaleForDisplay(v):
+    """
+    Permet de supprimer les decimales supplementaires des flottant en fonctions de la valeur et de ne rien faire au reste
+    :param v: valeur à ajuste
+    :return: Texte formaté
+    """
+    if isinstance(v, (float)):
+        if(abs(v)<100):
+            return "%0.2f"%(v)
+        else: return "%0.f"%(v)
+    else:
+        return v
+
+def ComputeLimitForImage(imgwidth,imgheight,LimitWidth,LimitHeight):
+    width=imgwidth
+    height=imgheight
+    if width>LimitWidth:
+        width=LimitWidth
+        height=math.trunc(imgheight*width/imgwidth)
+        if height==0: height=1
+    if height>LimitHeight:
+        height=LimitHeight
+        width=math.trunc(imgwidth*height/imgheight)
+        if width==0: width=1
+    return width,height
+
 
 # Ici les imports des modules qui definissent des routes
 import appli.main

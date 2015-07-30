@@ -54,7 +54,7 @@ class ProjectsViewPrivInlineModelForm(InlineFormAdmin):
     form_args = dict(
         # Pass the choices to the `SelectField`
         privilege=dict(
-            choices=[(0, 'View'), ('Annotate', 'Annotate'), ('Manage', 'Manage')]
+            choices=[('View', 'View'), ('Annotate', 'Annotate'), ('Manage', 'Manage')]
         ))
     def __init__(self):
         return super(ProjectsViewPrivInlineModelForm, self).__init__(database.ProjectsPriv)
@@ -63,7 +63,7 @@ class ProjectsView(ModelView):
     column_list = ('projid', 'title')
     inline_model_form_converter = ProjectsViewCustomInlineModelConverter
     inline_models = (ProjectsViewPrivInlineModelForm(),)
-    form_overrides = dict(mappingobj  =TextAreaField,mappingsample  =TextAreaField,mappingacq=TextAreaField,mappingprocess  =TextAreaField)
+    form_overrides = dict(mappingobj  =TextAreaField,mappingsample  =TextAreaField,mappingacq=TextAreaField,mappingprocess  =TextAreaField,classiffieldlist=TextAreaField  )
 
     def __init__(self, session, **kwargs):
         super(ProjectsView, self).__init__(database.Projects, session, **kwargs)

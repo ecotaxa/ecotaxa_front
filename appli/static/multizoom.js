@@ -275,6 +275,8 @@ var featuredimagezoomer = { // the two options for Featured Image Zoomer:
 					magpos: setting.magnifierpos,
 					imagesize: imagesize,
 					curpower: power,
+					// LN Ajout reference vers image originale
+					origImg: $img,
 					coords: getcoords(),
 					csborder: $cursorshade.outerWidth(),
 					lo: setting.leftoffset,
