@@ -26,8 +26,8 @@ def PrjManualClassif(PrjId):
             VALUES (%(objid)s,%(classif_when)s,'M',%(classif_id)s,%(classif_qual)s,%(classif_who)s )"""
     for k,v in changes.items():
         ki=int(k)
-        if(v=="-1"): # utilisé dans validate all
-            v=prev[ki]['classif_id'];
+        if v=="-1": # utilisé dans validate all
+            v=prev[ki]['classif_id']
         if prev[ki]['classif_qual']!=gvp('qual') or prev[ki]['classif_who']!=current_user.id or prev[ki]['classif_id']!=int(v):
             # il y a eu au moins un changement
             params={'objid':k,'classif_id':v,'classif_who':current_user.id,'classif_qual':gvp('qual')}
