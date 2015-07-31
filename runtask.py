@@ -40,6 +40,7 @@ if __name__ == '__main__':
             raise Exception ("Procedure Missing :"+fctname)
         fct()
     except:
+        db.session.rollback()
         if task is not None:
             task.task.taskstate="Error"
             task.task.progresspct=-1

@@ -17,4 +17,4 @@ from appli import app as application
 if sys.platform.startswith('win32'):
     application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Scripts\python.exe"))
 else:
-    application.PythonExecutable='python3'
+    application.PythonExecutable='/usr/local/bin/python3'
