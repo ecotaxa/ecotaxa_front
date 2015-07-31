@@ -1,2 +1,2 @@
 import appli.tasks.taskmanager
-import appli.tasks.taxosync
+#import appli.tasks.taxosync
