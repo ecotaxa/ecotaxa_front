@@ -158,7 +158,7 @@ $(document).ready(function() {
     # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenete isolée
     # Sinon affichage sans lien dans la charte.
     if gvg("ajax","0")=="1":
-        return """<table width=100%><tr><td><a href='/objectdetails/%d?w=%s&h=%s' target=_blank>Open in a separate window</a>
+        return """<table width=100%><tr><td><a href='/objectdetails/{0}?w={1}&h={2}' target=_blank>Open in a separate window</a>
         </td><td align><button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>
-        </td></tr></table>"""%(objid,gvg("w"),gvg("h"))+"\n".join(t)
+        </td></tr></table>""".format(objid,gvg("w"),gvg("h"))+"\n".join(t)
     return PrintInCharte("\n".join(t))
