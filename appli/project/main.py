@@ -200,7 +200,7 @@ where o.projid=%(projid)s
 
         txt+="<div class='subimg {1}' data-title=\"{2}\" data-content=\"{3}\"><span class=taxo >{0}</span>{4}<div class=ddet>Details {5}</div></div>"\
             .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),r['orig_id'],poptxt,bottomtxt
-                    ,"(%d)"%(r['imgcount'],) if r['imgcount']>1 else "")
+                    ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
         txt+="</td>"
 
         WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
