@@ -1,4 +1,4 @@
-#Todo details histo & Save change
+#Todo details Save change Conditionnel
 #Todo filtres
 #todo icone refresh annotation
 from flask import Blueprint, render_template, g, flash,request,url_for,json
@@ -17,7 +17,7 @@ def indexProjects():
     txt = "<h3>Select your Project</h3>"
     sql="select p.projid,title,status,pctvalidated from projects p"
     if not current_user.has_role(database.AdministratorLabel):
-        sql+=" Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id)
+        sql+=" Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
     sql+=" order by title"
     res = GetAll(sql) #,debug=True
     txt+="""<table class='table table-bordered table-hover'>
@@ -113,7 +113,7 @@ LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
 where o.projid=%(projid)s
 """
-    if(gvp("taxo")!=""):
+    if gvp("taxo")!="":
         sql+=" and o.classif_id=%(taxo)s "
         sqlparam['taxo']=gvp("taxo")
     sqlcount="select count(*) from ("+sql+") q"
@@ -133,12 +133,12 @@ where o.projid=%(projid)s
         PageWidth=int(gvp("resultwidth"))-40 # on laisse un peu de marge à droite et la scroolbar
         if PageWidth<200 : PageWidth=200
     except:
-        PageWidth=200;
+        PageWidth=200
     try:
         WindowHeight=int(gvp("windowheight"))-100 # on enleve le bandeau du haut
         if WindowHeight<200 : WindowHeight=200
     except:
-        WindowHeight=200;
+        WindowHeight=200
     #print("PageWidth=%s, WindowHeight=%s"%(PageWidth,WindowHeight))
     # Calcul des dimmensions et affichage des images
     for r in res:
@@ -147,7 +147,6 @@ where o.projid=%(projid)s
         origheight=r['height']
         thumbfilename=r['thumb_file_name']
         thumbwidth=r['thumb_width']
-        thumbheight=r['thumb_height']
         width=origwidth*zoom//100
         height=origheight*zoom//100
         if max(width,height)<20: # en dessous de 20 px de coté on ne fait plus le scaling
@@ -188,7 +187,7 @@ where o.projid=%(projid)s
         txt="<td width={3}><img class='lazy' id=I{4} data-src='/vault/{6}' data-zoom-image='{0}' width={1} height={2} pos={5}>"\
             .format(filename,width,height,cellwidth,r['objid'],pos,thumbfilename)
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
-        poptxt=("<p style='white-space: nowrap;'>cat. %s")%(r['taxoname'],)
+        poptxt="<p style='white-space: nowrap;'>cat. %s"%(r['taxoname'],)
         if r[3]!="":
             poptxt+="<br>Identified by %s"%(r[3])
         for k,v in fieldlist.items():
@@ -208,11 +207,12 @@ where o.projid=%(projid)s
         t.append(txt)
 
     t.append("</tr></table>")
-    t.append("""<span id=PendingChanges></span><br>
+    if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
+        t.append("""<span id=PendingChanges></span><br>
         <button class='btn btn-primary' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changes</button>
         <button class='btn btn-success' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> Validate all objects</button>""")
     # Gestion de la navigation entre les pages
-    if(pagecount>1):
+    if pagecount>1:
         t.append("<p align=center> Page %d/%d - Go to page : "%(pageoffset+1,pagecount))
         if pageoffset>0:
             t.append("<a href='javascript:gotopage(%d);'>&lt;</a>"%(pageoffset-1))

@@ -24,7 +24,7 @@ def objectdetails(objid):
         WindowHeight=20000;
 
     obj=database.Objects.query.filter_by(objid=objid).first()
-    t=[]
+    t=list()
     # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
     t.append("<script src='/static/jquery.elevateZoom.js'></script>")
     t.append("Object #{0} , Original Object ID : {1}".format(objid,obj.orig_id))
@@ -32,7 +32,7 @@ def objectdetails(objid):
     if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot view this project','error')
         return PrintInCharte("<a href=/>Back to home</a>")
-    t.append("<br>Part of project %s"%(Prj.title))
+    t.append("<br>Part of project %s"%(Prj.title,))
     t.append("<br>Classification : %s (%s)"%(obj.classif.name if obj.classif else "Unknown",database.ClassifQual.get(obj.classif_qual,"???")))
     if obj.classiffier is not None:
         t.append(" by %s (%s) "%(obj.classiffier.name,obj.classiffier.email))
@@ -65,9 +65,10 @@ def objectdetails(objid):
     <li role="presentation" ><a href="#tabdsample" aria-controls="tabdsample" role="tab" data-toggle="tab"> Sample details</a></li>
     <li role="presentation" ><a href="#tabdacquis" aria-controls="tabdacquis" role="tab" data-toggle="tab"> Acquisition details</a></li>
     <li role="presentation" ><a href="#tabdprocess" aria-controls="tabdprocess" role="tab" data-toggle="tab"> Processing details</a></li>
-    <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>
-    <li role="presentation" ><a href="#tabdclassif" aria-controls="tabdclassif" role="tab" data-toggle="tab">Change classification</a></li>
-    </ul>
+    <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>""")
+    if Prj.CheckRight(1):
+        t.append("""<li role="presentation" ><a href="#tabdclassif" aria-controls="tabdclassif" role="tab" data-toggle="tab">Change classification</a></li>""")
+    t.append("""</ul>
     <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
     <table class='table table-bordered'><tr>""")
@@ -105,7 +106,8 @@ order by classif_date desc""",{"objid":objid})
     t.append("</table></div>")
 
     # Affichage de l'onglet de classification
-    t.append("""    <div role="tabpanel" class="tab-pane" id="tabdclassif">
+    if Prj.CheckRight(1):
+        t.append("""    <div role="tabpanel" class="tab-pane" id="tabdclassif">
 Set a new classification :
  <div style="width: 230px;">
        <select id="taxolbpop" name="taxolbpop" style="width: 170px" class='taxolb' > </select>
@@ -156,5 +158,7 @@ $(document).ready(function() {
     # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenete isolée
     # Sinon affichage sans lien dans la charte.
     if gvg("ajax","0")=="1":
-        return "<a href='/objectdetails/%d?w=%s&h=%s' target=_blank>Open in a separate window</a><br>"%(objid,gvg("w"),gvg("h"))+"\n".join(t)
+        return """<table width=100%><tr><td><a href='/objectdetails/%d?w=%s&h=%s' target=_blank>Open in a separate window</a>
+        </td><td align><button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>
+        </td></tr></table>"""%(objid,gvg("w"),gvg("h"))+"\n".join(t)
     return PrintInCharte("\n".join(t))
