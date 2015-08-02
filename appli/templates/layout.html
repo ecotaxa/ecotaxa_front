@@ -60,7 +60,7 @@ $(document).ready(function() {
         {% if not  current_user.is_authenticated() %}
             Not logged ( <a href="{{ url_for_security('login') }}">log in</a> )
         {% else %}
-            {%  if task %} <a href="/Tasl/listall">
+            {%  if task %} <a href="/Task/listall">
             {%  if task.Question  %}<span class="label label-warning">Question : {{task['Question']}}</span>{% endif %}
             {%  if task.Running  %}<span class="label label-info">Run : {{task['Running']}}</span>{% endif %}
             {%  if task.Error  %}<span class="label label-danger">Error :{{task['Error']}}</span>{% endif %}
