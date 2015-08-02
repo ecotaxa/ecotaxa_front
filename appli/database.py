@@ -236,6 +236,34 @@ class Images(db.Model):
 Index('IS_ImagesObjects',Images.__table__.c.objid)
 #Sequence("seq_images",1,1)
 
+
+def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
+    cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
+    try:
+        if debug:
+            app.logger.debug("GetAssoc SQL = %s %s",sql,params)
+        cur.execute(sql,params)
+        res=dict()
+        for r in cur:
+            res[r[0]]=r
+    finally:
+        cur.close()
+    return res
+
+def GetAssoc2Col(sql,params=None,debug=False):
+    cur = db.engine.raw_connection().cursor()
+    try:
+        if debug:
+            app.logger.debug("GetAssoc2Col SQL = %s %s",sql,params)
+        cur.execute(sql,params)
+        res=dict()
+        for r in cur:
+            res[r[0]]=r[1]
+    finally:
+        cur.close()
+    return res
+
+
 def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
     cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:

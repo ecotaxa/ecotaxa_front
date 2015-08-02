@@ -1,4 +1,4 @@
-from appli import db,ObjectToStr,app,PrintInCharte,PythonExecutable
+from appli import db,ObjectToStr,app,PrintInCharte,PythonExecutable,gvg
 from flask.ext.login import current_user
 from flask import Blueprint, render_template, g, flash,jsonify
 import json,os,sys,datetime,shutil
@@ -25,7 +25,7 @@ setattr(Task,"answerdata",db.Column(db.String()))
 
 class AsyncTask:
     def __init__(self,task=None):
-        if task==None:
+        if task is None:
             self.task=Task()
             self.task.taskclass=self.__class__.__name__
             self.task.taskstate="Question"
@@ -56,7 +56,7 @@ class AsyncTask:
             self.task.inputparam=json.dumps(param.__dict__)
         self.task.taskstep=step
         self.task.taskstate="Running"
-        if self.task.id==None:
+        if self.task.id is None:
             db.session.add(self.task)
         db.session.commit()
         workingdir=self.GetWorkingDir()
@@ -70,9 +70,9 @@ class AsyncTask:
         # os.spawnv(os.P_NOWAIT,  sys.executable, (sys.executable,cmd, str(self.task.id))) # Ne marche pas
         # system marche, mais c'est un appel bloquant donc on le met dans une thread separé
         import _thread
-        _thread.start_new_thread(os.system,(cmd,));
+        _thread.start_new_thread(os.system,(cmd,))
         # flash("Taks %d Created : %s"%(self.task.id,cmd),"success")
-        flash("Taks %d subprocess Created "%(self.task.id),"success")
+        flash("Taks %d subprocess Created "%(self.task.id,),"success")
         return render_template('task/monitor.html',TaskID=self.task.id)
 
     class Params:
@@ -92,7 +92,7 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.taskimport import TaskImport
     if ClassName=="TaskImport":
         return TaskImport(task)
-    raise Exception("Invalid class name in TaskFactory : %s"%(ClassName))
+    raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 
 def LoadTask(taskid):
     """
@@ -101,20 +101,25 @@ def LoadTask(taskid):
     :return:objet AsyncTask associé à la tache
     """
     task=Task.query.filter_by(id=taskid).first()
-    if task==None:
-        raise Exception("Task %d not exists in database"%(taskid))
+    if task is None:
+        raise Exception("Task %d not exists in database"%(taskid,))
     return TaskFactory(task.taskclass,task)
 
 
 @app.route('/Task/listall')
 @login_required
 def ListTasks(owner=None):
-     tasks=Task.query.order_by("id").all()
-     txt = str(tasks)
-     for t in tasks:
-         txt += "<br>"+str(t.taskclass)+"-"+str(t.id)+"-"+str(t.owner_id)+"-"+str(t.taskstate)
-     txt += "<br>"+str(len(tasks))
-     return render_template('task/listall.html',tasks=tasks)
+     tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
+     txt=""
+     if gvg("cleandone")=='Y' or gvg("cleanerror")=='Y':
+        txt="Cleanning process result :<br>"
+        for t in tasks:
+            if (gvg("cleandone")=='Y' and t.taskstate=='Done') \
+            or (gvg("cleanerror")=='Y' and t.taskstate=='Error')  :
+                txt+=DoTaskClean(t.id)
+        tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
+     txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default' href=?cleanerror=Y>Clean All Error</a>  Task count : "+str(len(tasks))
+     return render_template('task/listall.html',tasks=tasks,header=txt)
 
 
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
@@ -149,21 +154,24 @@ def TaskForceRestart(TaskID):
 @app.route('/Task/Clean/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskClean(TaskID):
-    task=LoadTask(TaskID)
-    WorkingDir=task.GetWorkingDir()
-    Msg="Erasing "+WorkingDir+"<br>"
+    Msg = DoTaskClean(TaskID)
+    Msg+='<br><a href="/Task/listall"><span class="label label-info"> Back to Task List</span></a>'
+    return PrintInCharte(Msg)
+
+def DoTaskClean(TaskID):
+    task = LoadTask(TaskID)
+    WorkingDir = task.GetWorkingDir()
+    Msg = "Erasing Task %d <br>"%TaskID
     try:
-        shutil.rmtree(WorkingDir)
-        Msg+="Temp Folder Erased<br>"
+        if os.path.exists(WorkingDir):
+            shutil.rmtree(WorkingDir)
+            Msg += "Temp Folder Erased (%s)<br>"%WorkingDir
         db.session.delete(task.task)
         db.session.commit()
-        Msg+="DB Record Erased<br>"
+        Msg += "DB Record Erased<br>"
     except:
-        flash("Error While erasing "+str(sys.exc_info()),'error')
-
-    Msg+='<br><a href="/Task/listall"><span class="label label-info"> Back to Task List</span></a>'
-    return PrintInCharte(Msg);
-
+        flash("Error While erasing " + str(sys.exc_info()), 'error')
+    return Msg
 
 
 @app.route('/Task/GetStatus/<int:TaskID>', methods=['GET'])
@@ -171,9 +179,9 @@ def TaskGetStatus(TaskID):
     try:
         task=LoadTask(TaskID)
         Progress=task.task.progresspct
-        if Progress==None:
+        if Progress is None:
             Progress=0
-        if task.task.progressmsg==None:
+        if task.task.progressmsg is None:
             task.task.progressmsg="In Progress"
         if task.task.taskstate=="Question":
             rep={'q':{
