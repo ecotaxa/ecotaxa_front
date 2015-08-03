@@ -8,7 +8,7 @@ from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
 from flask_security.decorators import roles_accepted
-import os,time,math,collections
+import os,time,math,collections,appli
 from appli.database import GetAll,GetClassifQualClass,db
 
 @app.route('/prj/')
@@ -74,7 +74,7 @@ def indexPrj(PrjId):
     if g.PrjManager:
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
 
-
+    appli.AddTaskSummaryForTemplate()
     return render_template('project/projectmain.html',top="",lefta=classiftab
                            ,right=right,data=data,projid=PrjId)
 
