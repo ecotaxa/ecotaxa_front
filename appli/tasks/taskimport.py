@@ -202,7 +202,7 @@ class TaskImport(AsyncTask):
                                         self.LogErrorForUser("Invalid Time value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
                                 elif champ=='object_annotation_category':
                                     v=self.param.TaxoMap.get(v,v) # Applique le mapping
-                                    self.param.TaxoFound[v]=None #creation d'une entrée dans le dictionnaire.
+                                    self.param.TaxoFound[v.lower()]=None #creation d'une entrée dans le dictionnaire.
                                 elif champ=='object_annotation_person_name':
                                     self.param.UserFound[v]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
                                 elif champ=='object_annotation_status':
@@ -250,7 +250,7 @@ class TaskImport(AsyncTask):
             if len(NotFoundUser)>0:
                 logging.info("Some Users Not Found = %s",NotFoundUser)
             # récuperation des ID des taxo trouvées
-            self.pgcur.execute("select id,name from taxonomy where name = any(%s) ",([x for x in self.param.TaxoFound.keys()],))
+            self.pgcur.execute("select id,name from taxonomy where lower(name) = any(%s) ",([x.lower() for x in self.param.TaxoFound.keys()],))
             for rec in self.pgcur:
                 self.param.TaxoFound[rec[1]]=rec[0]
             logging.info("Taxo Found = %s",self.param.TaxoFound)

@@ -123,6 +123,7 @@ def unhandled_exception(e):
     s = "<b>Error:</b> %s <br><b>Description: </b>%s \n<b>Traceback:</b>" % (html.escape(str(e.__class__)), html.escape(str(e)))
     for i in tb_list[::-1]:
         s += "\n" + html.escape(i)
+    db.session.rollback()
     return render_template('errors/500.html' ,trace=s), 500
 
 def JinjaFormatDateTime(d,format='%Y-%m-%d %H:%M:%S'):

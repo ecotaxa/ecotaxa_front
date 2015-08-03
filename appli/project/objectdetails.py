@@ -26,7 +26,7 @@ def objectdetails(objid):
     obj=database.Objects.query.filter_by(objid=objid).first()
     t=list()
     # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
-    t.append("<script src='/static/jquery.elevateZoom.js'></script>")
+    t.append("<script src='/static/jquery.elevatezoom.js'></script>")
     t.append("Object #{0} , Original Object ID : {1}".format(objid,obj.orig_id))
     Prj=obj.project
     if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin

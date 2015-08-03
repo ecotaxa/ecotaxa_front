@@ -3,7 +3,7 @@ from appli import db,app
 from flask.ext.security import  UserMixin, RoleMixin
 from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
-from sqlalchemy import Index,Sequence
+from sqlalchemy import Index,Sequence,func
 import json,psycopg2.extras
 
 AdministratorLabel="Application Administrator"
@@ -69,7 +69,7 @@ class Taxonomy(db.Model):
     def __str__(self):
         return "{0} ({1})".format(self.name,self.id)
 Index('IS_TaxonomyParent',Taxonomy.__table__.c.parent_id)
-Index('IS_TaxonomyName',Taxonomy.__table__.c.name)
+Index('IS_TaxonomyNameLow',func.lower(Taxonomy.__table__.c.name))
 
 class Projects(db.Model):
     __tablename__ = 'projects'
@@ -246,6 +246,10 @@ def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCurs
         res=dict()
         for r in cur:
             res[r[0]]=r
+    except:
+        app.logger.debug("GetAssoc Exception SQL = %s %s",sql,params)
+        cur.connection.rollback()
+        raise
     finally:
         cur.close()
     return res
@@ -259,6 +263,10 @@ def GetAssoc2Col(sql,params=None,debug=False):
         res=dict()
         for r in cur:
             res[r[0]]=r[1]
+    except:
+        app.logger.debug("GetAssoc2Col Exception SQL = %s %s",sql,params)
+        cur.connection.rollback()
+        raise
     finally:
         cur.close()
     return res
@@ -271,6 +279,10 @@ def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor
             app.logger.debug("GetAll SQL = %s %s",sql,params)
         cur.execute(sql,params)
         res = cur.fetchall()
+    except:
+        app.logger.debug("GetAll Exception SQL = %s %s",sql,params)
+        cur.connection.rollback()
+        raise
     finally:
         cur.close()
     return res
@@ -282,6 +294,10 @@ def ExecSQL(sql,params=None,debug=False):
             app.logger.debug("ExecSQL SQL = %s %s",sql,params)
         cur.execute(sql,params)
         cur.connection.commit()
+    except:
+        app.logger.debug("ExecSQL Exception SQL = %s %s",sql,params)
+        cur.connection.rollback()
+        raise
     finally:
         cur.close()
 
