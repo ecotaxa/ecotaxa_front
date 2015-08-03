@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,g
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security #, SQLAlchemyUserDatastore
 import inspect,html,sys,math
@@ -28,14 +28,18 @@ def PrintInCharte(txt):
     :param txt: Texte à affiche
     :return: Texte rendu
     """
+    AddTaskSummaryForTemplate()
+    return render_template('layout.html',bodycontent=txt)
+
+
+def AddTaskSummaryForTemplate():
     from flask.ext.login import current_user
-    if getattr(current_user,'id',-1)>0:
-        task=appli.database.GetAssoc2Col("SELECT taskstate,count(*) from temp_tasks WHERE owner_id=%(owner_id)s group by taskstate"
-                                ,{'owner_id':current_user.id})
-    else: task=dict()
-    app.logger.info("-- task= --")
-    app.logger.info(task)
-    return render_template('layout.html',bodycontent=txt,task=task)
+    if getattr(current_user, 'id', -1) > 0:
+        g.tasksummary = appli.database.GetAssoc2Col(
+            "SELECT taskstate,count(*) from temp_tasks WHERE owner_id=%(owner_id)s group by taskstate"
+            , {'owner_id': current_user.id})
+
+
 def gvg(varname,defvalue=''):
     """
     Permet de récuperer une variable dans la Chaine GET ou de retourner une valeur par defaut

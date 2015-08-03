@@ -1,7 +1,7 @@
 from appli import db,ObjectToStr,app,PrintInCharte,PythonExecutable,gvg
 from flask.ext.login import current_user
 from flask import Blueprint, render_template, g, flash,jsonify
-import json,os,sys,datetime,shutil
+import json,os,sys,datetime,shutil,flask
 from flask.ext.security import login_required
 
 class Task(db.Model):
@@ -139,6 +139,10 @@ def TaskQuestionRouter(TaskID):
 @login_required
 def TaskShow(TaskID):
     task=LoadTask(TaskID)
+    if gvg('log')=="Y":
+        WorkingDir = task.GetWorkingDir()
+        # app.send_static_file(os.path.join(WorkingDir,"TaskLog.txt"))
+        return flask.send_from_directory(WorkingDir,"TaskLog.txt")
     try:
         decodedsteperrors=json.loads(task.task.inputparam).get("steperrors")
     except:

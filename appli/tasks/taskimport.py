@@ -134,7 +134,7 @@ class TaskImport(AsyncTask):
             for CsvFile in sd.glob("**/*.tsv"):
                 relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
                 logging.info("Analyzing file %s"%(relname.as_posix()))
-                with open(CsvFile.as_posix()) as csvfile:
+                with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
                     # lecture en mode dictionnaire basé sur la premiere ligne
                     rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
                     #lecture la la ligne des types (2nd ligne du fichier
@@ -295,7 +295,7 @@ class TaskImport(AsyncTask):
         for CsvFile in sd.glob("**/*.tsv"):
             relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
             logging.info("Analyzing file %s"%(relname.as_posix()))
-            with open(CsvFile.as_posix()) as csvfile:
+            with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
                 # lecture en mode dictionnaire basé sur la premiere ligne
                 rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
                 #lecture la la ligne des types (2nd ligne du fichier
