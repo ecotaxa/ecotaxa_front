@@ -16,6 +16,8 @@ def PrjManualClassif(PrjId):
         return "You cannot Annotate this project"
 
     changes={k[8:-1]:v for k,v in request.form.items() if k[0:7]=="changes"}
+    if len(changes)==0:
+        return '<span class="label label-warning">No pending change to update</span>'
 
     sql="""select o.objid,o.classif_auto_id,o.classif_auto_when,o.classif_auto_score,o.classif_id,o.classif_qual,o.classif_when,o.classif_who
           from objects o

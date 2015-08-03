@@ -11,7 +11,7 @@ def searchtaxo():
     if len(term)<=2:
         return "[]"
     term+=R"%"
-    res = GetAll("SELECT id, name FROM taxonomy WHERE  name LIKE %s order by name limit 1000", (term,))
+    res = GetAll("SELECT id, name FROM taxonomy WHERE  lower(name) LIKE %s order by name limit 200", (term.lower(),))
     return json.dumps([dict(id=r[0],text=r[1]) for r in res])
 
 
