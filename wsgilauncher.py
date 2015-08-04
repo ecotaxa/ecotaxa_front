@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys,os
-from appli import app
+from appli import app as application
 import logging,sys
 import logging.handlers
 # on fait le activate avant de lancer apache car sinon il trouve pas python 3.4 car sur mon PC default = 2.7
@@ -21,10 +21,10 @@ handler = logging.handlers.RotatingFileHandler('Ecotaxa.log', maxBytes=1000000, 
 handler.setLevel(logging.INFO)
 LoggingFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 handler.setFormatter(logging.Formatter(LoggingFormat))
-app.logger.addHandler(handler)
-app.logger.info("App WSGI Startup")
+application.logger.addHandler(handler)
+application.logger.info("App WSGI Startup")
 
 if sys.platform.startswith('win32'):
-    app.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Scripts\python.exe"))
+    application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Scripts\python.exe"))
 else:
-    app.PythonExecutable='/usr/local/bin/python3'
+    application.PythonExecutable='/usr/local/bin/python3'
