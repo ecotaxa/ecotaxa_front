@@ -1003,11 +1003,15 @@ if ( typeof Object.create !== 'function' ) {
 					// adjust images less than the window height
 
 					if (self.options.zoomType == "window") {
-						if (self.largeHeight < self.options.zoomWindowHeight) {
+						self.heightRatio
+//						if (self.largeHeight < self.options.zoomWindowHeight) {
+						// Change LN on 2015-08-04 to work correctly on image smaller than the window zoom
+						if ((self.largeHeight*self.heightRatio) < self.options.zoomWindowHeight) {
 
 							self.windowTopPos = 0;
 						}
-						if (self.largeWidth < self.options.zoomWindowWidth) {
+//						if (self.largeWidth < self.options.zoomWindowWidth) {
+						if ((self.largeWidth*self.widthRatio) < self.options.zoomWindowWidth) {
 							self.windowLeftPos = 0;
 						}
 					}

@@ -58,6 +58,16 @@ def gvp(varname,defvalue=''):
     """
     return request.form.get(varname, defvalue)
 
+def ntcv(v):
+    """
+    Permet de récuperer une chaine que la source soit une chaine ou un None issue d'une DB
+    :param v: Chaine potentiellement None
+    :return: V ou chaine vide
+    """
+    if v is None:
+        return ""
+    return v
+
 def DecodeEqualList(txt):
     res={}
     for l in str(txt).splitlines():
