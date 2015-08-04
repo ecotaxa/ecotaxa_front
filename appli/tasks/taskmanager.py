@@ -143,11 +143,14 @@ def TaskShow(TaskID):
         WorkingDir = task.GetWorkingDir()
         # app.send_static_file(os.path.join(WorkingDir,"TaskLog.txt"))
         return flask.send_from_directory(WorkingDir,"TaskLog.txt")
+    if gvg('CustomDetails')=="Y":
+        return task.ShowCustomDetails()
+    CustomDetailsAvail="ShowCustomDetails" in dir(task)
     try:
         decodedsteperrors=json.loads(task.task.inputparam).get("steperrors")
     except:
         decodedsteperrors=["Task Decoding Error"]
-    return render_template('task/show.html',task=task.task,steperror=decodedsteperrors)
+    return render_template('task/show.html',task=task.task,steperror=decodedsteperrors,CustomDetailsAvail=CustomDetailsAvail)
 
 @app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
 @login_required

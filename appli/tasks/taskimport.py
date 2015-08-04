@@ -37,6 +37,7 @@ PredefinedFields={
     'img_rank':{'table':'image','field':'imgrank','type':'n'},
     'img_file_name':{'table':'image','field':'orig_file_name','type':'t'},
     'annotation_person_first_name':{'table':'object','field':'tmp_todelete1','type':'t'},
+    'sample_dataportal_descriptor':{'table':'sample','field':'dataportal_descriptor','type':'t'},
 }
 # Purge les espace et converti le Nan en vide
 def CleanValue(v):
@@ -488,6 +489,14 @@ class TaskImport(AsyncTask):
                 NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
                 NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
             return render_template('task/import_question1.html',header=txt,taxo=NotFoundTaxo,users=NotFoundUsers)
+        return PrintInCharte(txt)
+    def ShowCustomDetails(self):
+        txt="<h3>Import Task details view</h3>"
+        txt="<p><u>Used mapping, usable for next import</u></p>"
+        taxo=database.GetAssoc2Col("select id,name from taxonomy where id = any(%s)",(list(set(self.param.TaxoFound.values())),))
+        for k,v in self.param.TaxoFound.items():
+            if v in taxo:
+                txt+="{0}={1}<br>".format(k,taxo[v])
         return PrintInCharte(txt)
 
 if __name__ == '__main__':

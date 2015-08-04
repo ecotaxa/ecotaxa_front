@@ -5,7 +5,7 @@ from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
 from flask_security.decorators import roles_accepted
-import os,time,math,collections
+import os,time,math,collections,html
 from appli.database import GetAll,GetClassifQualClass,db
 
 
@@ -84,6 +84,16 @@ def objectdetails(objid):
     for r in (("Sample","mappingsample","sample") ,("Acquisition","mappingacq","acquis"),("Processing","mappingprocess","process") ):
         t.append('<div role="tabpanel" class="tab-pane" id="tabd'+r[2]+'">'+r[0]+" details :<table class='table table-bordered'><tr>")
         cpt=0
+        if r[2]=="sample":
+            t.append("<td><b>{0}</td><td>{1}</td><td><b>{2}</td><td>{3}</td><td><b>{4}</td><td>{5}</td></tr><tr>"
+                     .format("Original ID",ScaleForDisplay(obj.sample.orig_id),
+                             "latitude",ScaleForDisplay(obj.sample.latitude),
+                             "Original ID",ScaleForDisplay(obj.sample.longitude),))
+            t.append("<td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
+                     .format("Dataportal Desc.",ScaleForDisplay(html.escape(obj.sample.dataportal_descriptor))))
+        else:
+            t.append("<td><b>{0}</td><td>{1}</td></tr><tr>"
+                     .format("Original ID.",ScaleForDisplay(getattr(getattr(obj,r[2]),"orig_id","???"))))
         for k,v in  collections.OrderedDict(sorted(DecodeEqualList(getattr(Prj,r[1])).items())).items():
             if cpt>0 and cpt%4==0:
                 t.append("</tr><tr>")

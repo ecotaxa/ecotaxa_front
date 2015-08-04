@@ -132,6 +132,7 @@ class Samples(db.Model):
     orig_id = db.Column(VARCHAR(255))
     latitude = db.Column(DOUBLE_PRECISION)
     longitude = db.Column(DOUBLE_PRECISION)
+    dataportal_descriptor= db.Column(VARCHAR(8000))
 for i in range(1,31):
     setattr(Samples,"t%02d"%i,db.Column(VARCHAR(250)))
 Index('IS_SamplesProject',Samples.__table__.c.projid)

@@ -52,11 +52,11 @@ $(document).ready(function() {
 
 
 <div class="headinfo">
-<div class="headinfo panel panel-default">  <div class="panel-body">
+<div class="headinfo panel panel-default">  <div class="panel-body" style="padding: 5px;">
 <table width="100%"><tr>
     <td width="200px"><h1><a href="/">Ecotaxa</a></h1></td>
     <td>&nbsp;{% block headcenter %}{% endblock %}</td>
-    <td align="right" width="200px">
+    <td align="right" width="300px">
         {% if not  current_user.is_authenticated() %}
             Not logged ( <a href="{{ url_for_security('login') }}">log in</a> )
         {% else %}
