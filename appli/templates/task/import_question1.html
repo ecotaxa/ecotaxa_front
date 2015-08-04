@@ -6,9 +6,11 @@
 <form class="form-horizontal" method="post">
 {%   if (taxo|length())>0 %}
     <h3>Taxonomy Manual Mapping</h3>
+    <p>Note : If needed, Taxonomy element creation must but handled by administrator prior execution of import task</p>
     {% for T in taxo %}
   <div class="form-group">
-{{ label(loop.index~" - "+T)  }}
+  <label class="col-sm-3 control-label" for="taxolb{{ loop.index }}">{{ loop.index~" - "+T }}</label>
+{#   {{ label(loop.index~" - "+T)  }} #}
       <input type="hidden" name="orig{{ loop.index }}" value="{{ T }}">
   <div class="col-lg-2">
     <div class="input-group">

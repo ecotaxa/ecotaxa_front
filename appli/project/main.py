@@ -55,15 +55,18 @@ def indexPrj(PrjId):
           ,'magenabled':str(current_user.GetPref('magenabled',1))
           }
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    if Prj is None:
+        flash("Project doesn't exists",'error')
+        return PrintInCharte("<a href=/prj/>Select another project</a>")
+    if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
+        flash('You cannot view this project','error')
+        return PrintInCharte("<a href=/prj/>Select another project</a>")
     fieldlist=GetFieldList(Prj)
     data["fieldlist"]=fieldlist
     data["sortlist"]=collections.OrderedDict({"":""})
     for k,v in fieldlist.items():data["sortlist"][k]=v
     data["sortlist"]["classifname"]="Category Name"
     data["sortlist"]["random_value"]="Random"
-    if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
-        flash('You cannot view this project','error')
-        return PrintInCharte("<a href=/prj/>Select annother project</a>")
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
     if not g.PrjManager: g.PrjAnnotate=Prj.CheckRight(1)
     right='dodefault'
