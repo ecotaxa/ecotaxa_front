@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,ntcv,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
 from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
@@ -90,7 +90,7 @@ def objectdetails(objid):
                              "latitude",ScaleForDisplay(obj.sample.latitude),
                              "Original ID",ScaleForDisplay(obj.sample.longitude),))
             t.append("<td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
-                     .format("Dataportal Desc.",ScaleForDisplay(html.escape(obj.sample.dataportal_descriptor))))
+                     .format("Dataportal Desc.",ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
         else:
             t.append("<td><b>{0}</td><td>{1}</td></tr><tr>"
                      .format("Original ID.",ScaleForDisplay(getattr(getattr(obj,r[2]),"orig_id","???"))))
