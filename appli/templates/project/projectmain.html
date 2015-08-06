@@ -60,12 +60,17 @@
 {% endfor %}
   </ul>
 </div>
+    Status :<select name="statusfilter" id="statusfilter">
+{% for key, value in data.statuslist.items() %}
+    <option value="{{ key|e }}" {{ 'selected' if key==data.statusfilter }}> {{ value|e }}</option>
+{% endfor %}
+</select>
 
 
 
     Img /page : {{ selectinput("ipp",['50','100','200','500','1000'],data.ipp) }}
     Zoom : {{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}
-    Magnifier Enabled : {{ checkboxinput("magenabled","1",data.magenabled) }}
+    Magnifier : {{ checkboxinput("magenabled","1",data.magenabled) }}
     <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
         <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</button>
 {{ top|safe }}
@@ -118,6 +123,7 @@ function LoadRightPane(){
         req['ipp']=$("#ipp").val();
         req['zoom']=$("#zoom").val();
         req['sortby']=$("#sortby").val();
+        req['statusfilter']=$("#statusfilter").val();
         req['pageoffset']=$("#pageoffset").val();
         req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
         req['dispfield']="";

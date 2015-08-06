@@ -140,7 +140,8 @@ function Save1Object(classqual) {
                 $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-validated');
             else
                 $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-dubious');
-            $('#I'+objid).parents('td').find('.taxo').text($("#taxolbpop").text());
+            if($("#taxolbpop").text().trim()!="")
+                $('#I'+objid).parents('td').find('.taxo').text($("#taxolbpop").text());
             $('#PopupDetails').modal('hide');
         }
     });
@@ -169,6 +170,6 @@ $(document).ready(function() {
     # Sinon affichage sans lien dans la charte.
     if gvg("ajax","0")=="1":
         return """<table width=100%><tr><td><a href='/objectdetails/{0}?w={1}&h={2}' target=_blank>Open in a separate window</a>
-        </td><td align><button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>
+        </td><td align='right'><button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
         </td></tr></table>""".format(objid,gvg("w"),gvg("h"))+"\n".join(t)
     return PrintInCharte("\n".join(t))
