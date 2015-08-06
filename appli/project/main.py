@@ -52,6 +52,7 @@ def indexPrj(PrjId):
           ,'sortby':current_user.GetPref('sortby',"")
           ,'dispfield':current_user.GetPref('dispfield',"")
           ,'sortorder':current_user.GetPref('sortorder',"")
+          ,'statusfilter':current_user.GetPref('statusfilter',"")
           ,'magenabled':str(current_user.GetPref('magenabled',1))
           }
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
@@ -67,6 +68,12 @@ def indexPrj(PrjId):
     for k,v in fieldlist.items():data["sortlist"][k]=v
     data["sortlist"]["classifname"]="Category Name"
     data["sortlist"]["random_value"]="Random"
+    data["statuslist"]=collections.OrderedDict({"":""})
+    data["statuslist"]["NV"]="Not Validated"
+    data["statuslist"]["NVM"]="Not valid. by me"
+    data["statuslist"]["P"]="Predicted"
+    data["statuslist"]["D"]="Dubious"
+    data["statuslist"]["V"]="Validated"
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
     if not g.PrjManager: g.PrjAnnotate=Prj.CheckRight(1)
     right='dodefault'
@@ -91,6 +98,7 @@ def LoadRightPane():
     sortby=gvp("sortby","")
     sortorder=gvp("sortorder","")
     dispfield=gvp("dispfield","")
+    statusfilter=gvp("statusfilter","")
     PrjId=gvp("projid")
     # dispfield=" dispfield_orig_id dispfield_n07"
     # on sauvegarde les parametres dans le profil utilisateur
@@ -119,6 +127,14 @@ where o.projid=%(projid)s
     if gvp("taxo")!="":
         sql+=" and o.classif_id=%(taxo)s "
         sqlparam['taxo']=gvp("taxo")
+    if gvp("statusfilter")!="":
+        sql+=" and classif_qual"
+        if gvp("statusfilter")=="NV":
+            sql+="!='V'"
+        elif gvp("statusfilter")=="NVM":
+            sql+="='V' and classif_who!="+str(current_user.id)
+        else:
+            sql+="='"+gvp("statusfilter")+"'"
     sqlcount="select count(*) from ("+sql+") q"
     nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
     pagecount=math.ceil(nbrtotal/ipp)
