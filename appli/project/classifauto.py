@@ -42,7 +42,7 @@ where projid =%d and classif_qual='V'"""%PrjId
     TotalObj=CatPred.shape[0]
     D=np.diag(cm)
 
-    t=["<table class='table table-bordered table-condensed rightfixedfonttd '><tr><th>Predicted =><br>True category</th>"]
+    t=[txtbacktoproject+"<table class='table table-bordered table-condensed rightfixedfonttd '><tr><th>Predicted =><br>True category</th>"]
     # ligne titre des categorie
     for c in CatAll:
         t.append("<th>%s</th>"%c)
@@ -81,7 +81,7 @@ where projid =%d and classif_qual='V'"""%PrjId
     RamImage = io.BytesIO()
     g.Fig.savefig(RamImage , dpi=100, format='png')
     t.append("<h4>Confusion Matrix On Precision</h4><img src='data:image/png;base64,{}'/>".format(base64.encodebytes(RamImage.getvalue()).decode()) )
-
+    t.append(txtbacktoproject)
     return PrintInCharte("\n".join(t))
 
 
