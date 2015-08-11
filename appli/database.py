@@ -82,7 +82,7 @@ class Projects(db.Model):
     mappingacq   = db.Column(VARCHAR)
     mappingprocess   = db.Column(VARCHAR)
     pctvalidated = db.Column(DOUBLE_PRECISION)
-    classifsettings  = db.Column(VARCHAR)
+    classifsettings  = db.Column(VARCHAR) # Settings for Automatic classification.
     initclassiflist  = db.Column(VARCHAR) # Initial list of categories
     classiffieldlist  = db.Column(VARCHAR) # Fields available on Manual classif screen
     projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects')) #

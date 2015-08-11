@@ -73,16 +73,6 @@ class TaskImport(AsyncTask):
         else:
             self.param=self.Params(task.inputparam)
 
-    def LogErrorForUser(self,Msg):
-        # On ne trace dans les 2 zones ques les milles premieres erreurs.
-        if len(self.param.steperrors)<1000:
-            self.param.steperrors.append(Msg)
-            logging.warning("%s",Msg)
-            # app.logging.warning("%s",Msg) c'est fait depuis la tache qui est dans un process séparé
-        elif len(self.param.steperrors)==1000:
-            self.param.steperrors.append("More errors truncated")
-            logging.warning("More errors truncated")
-            # app.logging.warning("More errors truncated")
     def SPCommon(self):
         logging.info("Execute SPCommon")
         self.pgcur=db.engine.raw_connection().cursor()

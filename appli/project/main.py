@@ -80,9 +80,12 @@ def indexPrj(PrjId):
     classiftab=GetClassifTab(Prj)
     g.headmenu = []
     g.headmenu.append(("/prj/%d"%(PrjId,),"Project home/Annotation"))
+    g.headmenu.append(("/prjcm/%d"%(PrjId,),"Show Confusion Matrix"))
     g.headmenu.append(("","SEP"))
     if g.PrjManager:
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
+        g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
+
 
     appli.AddTaskSummaryForTemplate()
     return render_template('project/projectmain.html',top="",lefta=classiftab

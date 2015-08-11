@@ -1,7 +1,7 @@
 from appli import db,ObjectToStr,app,PrintInCharte,PythonExecutable,gvg
 from flask.ext.login import current_user
 from flask import Blueprint, render_template, g, flash,jsonify
-import json,os,sys,datetime,shutil,flask
+import json,os,sys,datetime,shutil,flask,logging
 from flask.ext.security import login_required
 
 class Task(db.Model):
@@ -50,6 +50,17 @@ class AsyncTask:
     def GetWorkingDir(self):
         return os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../temptask/task%06d"%(int(self.task.id))))
 
+    def LogErrorForUser(self,Msg):
+        # On ne trace dans les 2 zones ques les milles premieres erreurs.
+        if len(self.param.steperrors)<1000:
+            self.param.steperrors.append(Msg)
+            logging.warning("%s",Msg)
+            # app.logging.warning("%s",Msg) c'est fait depuis la tache qui est dans un process séparé
+        elif len(self.param.steperrors)==1000:
+            self.param.steperrors.append("More errors truncated")
+            logging.warning("More errors truncated")
+            # app.logging.warning("More errors truncated")
+
     #Permet de lancer le sous process
     def StartTask(self,param=None,step=1,FileToSave=None,FileToSaveFileName=None):
         if param is not None:
@@ -92,6 +103,9 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.taskimport import TaskImport
     if ClassName=="TaskImport":
         return TaskImport(task)
+    from appli.tasks.taskclassifauto import TaskClassifAuto
+    if ClassName=="TaskClassifAuto":
+        return TaskClassifAuto(task)
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 
 def LoadTask(taskid):
