@@ -214,10 +214,13 @@ def TaskGetStatus(TaskID):
                 'WorkDescription': task.task.progressmsg}}
             if task.task.taskstate=="Done":
                 rep['d']['IsComplete']="Y"
+                rep['d']['ExtraAction']="<a href='/Task/Show/%d' class='btn btn-primary btn-sm ' role='button'>Show Task</a>"%TaskID
+                if "GetDoneExtraAction" in dir(task):
+                    rep['d']['ExtraAction']=task.GetDoneExtraAction()
             if task.task.taskstate=="Error":
                 rep['d']['IsError']="Y"
     except Exception as e:
-        rep={'Error':str(e) }
+        rep={'d':{'IsError':'Y','WorkDescription':str(e) }}
     #app.logger.info("Getstatus=%s",rep)
     return jsonify(rep)
 
