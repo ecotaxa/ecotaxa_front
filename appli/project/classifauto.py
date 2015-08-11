@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#TODO lien back to project
 from appli import db,app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
 from appli.database import GetAll,GetAssoc2Col
 from time import time
@@ -63,7 +65,9 @@ where projid =%d and classif_qual='V'"""%PrjId
 
 
     cm_normalized = cm.astype('float') / SommeHNoZero[:, np.newaxis]
-    g.Fig=plt.figure(figsize=(8,8), dpi=100) # 800x800 px
+    FigSize=int(SommeHNoZero.shape[0]/3)
+    if FigSize<8: FigSize=8 # 800x800 px
+    g.Fig=plt.figure(figsize=(FigSize,FigSize), dpi=100)
     plot_confusion_matrix(cm_normalized,CatAll)
     RamImage = io.BytesIO()
     g.Fig.savefig(RamImage , dpi=100, format='png')

@@ -39,7 +39,7 @@ function StartMonitor(TaskID)
 
                         // Process is complete, start to reset the UI (the response.d == null above, will do the rest).
                         if (response.d.IsComplete) {
-                            $statusDiv.html('<div class="alert alert-success" role="alert">Task Complete <a href="/Task/Show/{{ TaskID }}" class="btn btn-primary btn-sm " role="button">Show Task</a></div>');
+                            $statusDiv.html('<div class="alert alert-success" role="alert">Task Complete :'+response.d.WorkDescription+'<br>  '+ response.d.ExtraAction +'</div>');
                             $ajaxImage.hide();
                             $progressbar.hide();
                             clearInterval(intervalHandle);
