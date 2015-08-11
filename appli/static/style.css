@@ -2,3 +2,5 @@
 .status-dubious { background: #FFB84D; }
 .status-predicted { background: #BCBCBC; }
 .status-unknown { background: #FF2424; }
+.rightfixedfont{text-align: right; font-family: Courier;}
+.rightfixedfonttd td {text-align: right; font-family: Courier;}
