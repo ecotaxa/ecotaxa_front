@@ -209,7 +209,8 @@ where o.projid=%(projid)s
         txt="<td width={3}><img class='lazy' id=I{4} data-src='/vault/{6}' data-zoom-image='{0}' width={1} height={2} pos={5}>"\
             .format(filename,width,height,cellwidth,r['objid'],pos,thumbfilename)
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
-        poptxt="<p style='white-space: nowrap;'>cat. %s"%(r['taxoname'],)
+        poptitletxt="<p style='color:black;'>%s"%(r['orig_id'],)
+        poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
         if r[3]!="":
             poptxt+="<br>Identified by %s"%(r[3])
         for k,v in fieldlist.items():
@@ -221,7 +222,7 @@ where o.projid=%(projid)s
                 bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
 
         txt+="<div class='subimg {1}' data-title=\"{2}\" data-content=\"{3}\"><span class=taxo >{0}</span>{4}<div class=ddet>Details {5}</div></div>"\
-            .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),r['orig_id'],poptxt,bottomtxt
+            .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),poptitletxt,poptxt,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
         txt+="</td>"
 
@@ -288,7 +289,7 @@ where o.projid=%(projid)s
         var config = {attributes: true,childList: true,characterData: true};
         observer.observe(target, config);
         // Enable the popover
-        var option={'placement':'bottom','trigger':'hover','html':true};
+        var option={'placement':'left','trigger':'hover','html':true};
         $('div.subimg').popover(option);
         $('div.ddet').click(function(e){
             e.stopPropagation();

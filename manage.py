@@ -47,6 +47,11 @@ def dbdrop():
 @manager.command
 def dbcreate():
     db.create_all()
+    from flask.ext.migrate import _get_config
+    config = _get_config(None)
+    from alembic import command
+    command.stamp(config, 'head')
+
 
 @manager.command
 def createsampledata():

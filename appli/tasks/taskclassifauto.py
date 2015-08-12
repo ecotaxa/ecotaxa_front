@@ -219,14 +219,9 @@ class TaskClassifAuto(AsyncTask):
             revobjmap = self.GetReverseObjMap(Prj)
             PrjBase=database.Projects.query.filter_by(projid=gvg("src")).first()
             revobjmapbase = self.GetReverseObjMap(PrjBase)
-            #TODO ne proposer que les variables communes
             g.critlist=list(k for k in revobjmap.keys() if k in revobjmapbase)
             g.critlist.sort()
-
-            # objmap['depth_min']="Depth Min"
-            # objmap['depth_max']="Depth Max"
-            # objmapitems=sorted(objmap.items(), key=lambda x: x[1].lower())
-            app.logger.info(revobjmap)
+            # app.logger.info(revobjmap)
             return render_template('task/classifauto_create.html',header=txt,data=self.param)
 
     def GetReverseObjMap(self, Prj):
