@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+<form class="form-horizontal" method="post" enctype=multipart/form-data>
+
+<div class="form-group">
+      {{ label("Taxonomy .txt File to upload")}}
+    <div class="col-sm-4">
+        <input type="file"  id="uploadfile" name="uploadfile"  size="200" >
+    </div> <!-- col-sm-4 -->
+  </div><!-- /form-group -->
+
+    <input type="hidden" name="starttask" value="Y">
+    <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-2">
+      <button type="submit" class="btn btn-primary">Start Task</button>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

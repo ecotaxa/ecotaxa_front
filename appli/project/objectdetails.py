@@ -33,7 +33,7 @@ def objectdetails(objid):
         flash('You cannot view this project','error')
         return PrintInCharte("<a href=/>Back to home</a>")
     t.append("<br>Part of project %s"%(Prj.title,))
-    t.append("<br>Classification : %s (%s)"%(obj.classif.name if obj.classif else "Unknown",database.ClassifQual.get(obj.classif_qual,"???")))
+    t.append("<br>Classification : %s (%s)"%(obj.classif.name if obj.classif else "Unknown",database.ClassifQual.get(obj.classif_qual,"To be classified")))
     if obj.classiffier is not None:
         t.append(" by %s (%s) "%(obj.classiffier.name,obj.classiffier.email))
         if obj.classif_when is not None:

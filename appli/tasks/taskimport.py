@@ -197,7 +197,7 @@ class TaskImport(AsyncTask):
                                 elif champ=='object_annotation_person_name':
                                     self.param.UserFound[v]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
                                 elif champ=='object_annotation_status':
-                                    if v.lower() not in database.ClassifQualRevert:
+                                    if v!='noid' and v.lower() not in database.ClassifQualRevert:
                                         self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
 
                         #Analyse l'existance du fichier Image

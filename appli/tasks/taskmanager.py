@@ -106,6 +106,9 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.taskclassifauto import TaskClassifAuto
     if ClassName=="TaskClassifAuto":
         return TaskClassifAuto(task)
+    from appli.tasks.tasktaxoimport import TaskTaxoImport
+    if ClassName=="TaskTaxoImport":
+        return TaskTaxoImport(task)
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 
 def LoadTask(taskid):

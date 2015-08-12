@@ -208,7 +208,6 @@ Index('IS_ObjectsClassif',Objects.__table__.c.classif_id,Objects.__table__.c.pro
 Index('IS_ObjectsDepth',Objects.__table__.c.projid,Objects.__table__.c.classif_qual,Objects.__table__.c.depth_max,Objects.__table__.c.depth_min)
 Index('IS_ObjectsTime',Objects.__table__.c.projid,Objects.__table__.c.classif_qual,Objects.__table__.c.objtime)
 Index('IS_ObjectsDate',Objects.__table__.c.objdate,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
-Index('IS_ObjectsDate',Objects.__table__.c.objdate,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
 Index('IS_ObjectsRandom',Objects.__table__.c.random_value,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
 
 class ObjectsClassifHisto(db.Model):
@@ -237,6 +236,16 @@ class Images(db.Model):
 Index('IS_ImagesObjects',Images.__table__.c.objid)
 #Sequence("seq_images",1,1)
 
+class TempTaxo(db.Model):
+    __tablename__ = 'temp_taxo'
+    idtaxo = db.Column(VARCHAR(20), primary_key=True)
+    idparent = db.Column(VARCHAR(20))
+    name = db.Column(VARCHAR(100))
+    status = db.Column(CHAR(1))
+    typetaxo = db.Column(VARCHAR(20))
+    idfinal = db.Column(INTEGER)
+Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
+Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
     cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
@@ -294,6 +303,7 @@ def ExecSQL(sql,params=None,debug=False):
         if debug:
             app.logger.debug("ExecSQL SQL = %s %s",sql,params)
         cur.execute(sql,params)
+        LastRowCount=cur.rowcount;
         cur.connection.commit()
     except:
         app.logger.debug("ExecSQL Exception SQL = %s %s",sql,params)
@@ -301,4 +311,4 @@ def ExecSQL(sql,params=None,debug=False):
         raise
     finally:
         cur.close()
-
+    return LastRowCount
