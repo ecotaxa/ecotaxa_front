@@ -75,14 +75,14 @@ class AsyncTask:
             os.mkdir(workingdir)
         if FileToSave is not None:
             FileToSave.save(os.path.join(self.GetWorkingDir(),FileToSaveFileName))
-        cmd=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../runtask.py "+str(self.task.id)))
-        app.logger.info("Start Task process : %s "%(cmd,))
+        cmd=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../runtask.py "))
+        cmdfull=app.PythonExecutable+" "+os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../runtask.py "+str(self.task.id)))
+        app.logger.info("Start Task process : %s - %s"%(cmd,cmdfull))
 
         # os.spawnv(os.P_NOWAIT,  sys.executable, (sys.executable,cmd, str(self.task.id))) # Ne marche pas
         # system marche, mais c'est un appel bloquant donc on le met dans une thread separé
         if sys.platform.startswith('win32'):
             import _thread
-            cmdfull=app.PythonExecutable+" "+os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../runtask.py "+str(self.task.id)))
             _thread.start_new_thread(os.system,(cmdfull,))
         else: # sous linux, sinon en fait ca fait un appel bloquant.
             pid=os.spawnl(os.P_NOWAIT,  app.PythonExecutable, app.PythonExecutable,cmd, str(self.task.id)) # Ne marche pas
