@@ -38,7 +38,7 @@ class TaskTaxoImport(AsyncTask):
         logging.info("Input Param = %s"%(self.param.__dict__))
         logging.info("Start Step 1")
 
-        # self.param.IntraStep=0
+        self.param.IntraStep=0
         if getattr(self.param,'IntraStep',0)==0:
             fichier=os.path.join(self.GetWorkingDir(),"uploaded.txt")
             logging.info("Analyzing file %s"%(fichier))
@@ -52,8 +52,10 @@ class TaskTaxoImport(AsyncTask):
                 ExecSQL("truncate table temp_taxo")
                 sqlinsert="INSERT INTO temp_taxo(idparent,idtaxo,name,status,typetaxo) values(%s,%s,%s,%s,%s)"
                 for lig in rdr:
-                    database.ExecSQL(sqlinsert,(lig[0].strip(),lig[1].strip(),lig[2].strip(),lig[3].strip(),lig[4].strip()) )
-                    if RowCount%1000==0:
+                    if lig[0].strip()=='': # Ligne vide
+                        continue
+                    database.ExecSQL(sqlinsert,(lig[0].strip(),lig[1].strip(),lig[2].replace('+',' ').replace('_',' ').strip(),lig[3].strip(),lig[4].strip()) )
+                    if RowCount>0 and RowCount%1000==0:
                         logging.info("Inserted %s lines"% RowCount)
 
                     RowCount+=1
@@ -64,12 +66,12 @@ class TaskTaxoImport(AsyncTask):
 
             # MAJ des IDFinal dans la table temp pour tout ce qui existe.
             n=ExecSQL("""UPDATE temp_taxo tt set idfinal=tf.id
-                        from taxonomy tf where tf.id_source=tt.idtaxo or lower(tf.name)=lower(tt.name)""")
+                        from taxonomy tf where tf.id_source=tt.idtaxo or (lower(tf.name)=lower(tt.name) and tf.id_source is null)""")
             logging.info("%d Nodes already exists "%n)
 
             # insertion des nouveaux noeud racines
             n=ExecSQL("""INSERT INTO taxonomy (id, parent_id, name, id_source)
-            select nextval('seq_taxonomy'),NULL,t.name,t.idtaxo from temp_taxo t where idparent='-1' and idfinal is null""")
+            select nextval('seq_taxonomy'),NULL,t.name,t.idtaxo from temp_taxo t where idparent='-1' and idfinal is null and status='1'""")
             logging.info("Inserted %d Root Nodes"%n)
 
             # MAJ de la table import existante
@@ -80,20 +82,57 @@ class TaskTaxoImport(AsyncTask):
 
             while True:
                 # insertion des nouveaux noeud enfants à partir des parents deja insérés
+                # n=ExecSQL("""INSERT INTO taxonomy (id, parent_id, name, id_source)
+                #     select nextval('seq_taxonomy'),ttp.idfinal,tt.name,tt.idtaxo from temp_taxo tt join temp_taxo ttp on tt.idparent=ttp.idtaxo
+                #     where tt.idfinal is null and ttp.idfinal is not null and status='1'""")
                 n=ExecSQL("""INSERT INTO taxonomy (id, parent_id, name, id_source)
-                    select nextval('seq_taxonomy'),ttp.idfinal,tt.name,tt.idtaxo from temp_taxo tt join temp_taxo ttp on tt.idparent=ttp.idtaxo
-                    where tt.idfinal is null and ttp.idfinal is not null""")
-                logging.info("Inserted %d Root Nodes"%n)
+                    select nextval('seq_taxonomy'),ttp.id,tt.name,tt.idtaxo
+                    from temp_taxo tt join taxonomy ttp on tt.idparent=ttp.id_source
+                    where tt.idfinal is null and status='1'""")
+                if n==0:
+                    logging.info("No more data to import")
+                    break;
+                else:
+                    logging.info("Inserted %d Child Nodes"%n)
 
                 # MAJ de la table import existante
                 n=ExecSQL("""UPDATE temp_taxo tt set idfinal=tf.id
                             from taxonomy tf where tf.id_source=tt.idtaxo
                             and tt.idfinal is null """)
-                logging.info("Updated %d inserted Root Nodes"%n)
+                logging.info("Updated %d inserted Child Nodes"%n)
 
+
+            n=ExecSQL("""UPDATE taxonomy tf set name=tt.name
+                        from temp_taxo tt where tf.id_source=tt.idtaxo
+                        and tt.status='1' and tf.name!=tt.name""")
+            logging.info("Updated %d Nodes names"%n)
+
+            n=ExecSQL("""UPDATE taxonomy tfu set parent_id=sq.idfinal
+                        from (select tf.id, ttp.idfinal from taxonomy tf
+                        ,temp_taxo tt LEFT JOIN temp_taxo ttp on tt.idparent=ttp.idtaxo  where tf.id_source=tt.idtaxo
+                        and tt.status='1' and coalesce(tf.parent_id,-1)!=coalesce(ttp.idfinal,-1)
+                        and (ttp.idfinal is not null or tt.idparent='-1' )) sq where tfu.id=sq.id""")
+            logging.info("Updated %d Nodes Parents"%n)
+
+
+            while True:
+                n=ExecSQL("""delete from taxonomy t
+                        using temp_taxo tt
+                        where t.id=tt.idfinal and tt.status='0'
+                        and not exists (select 1 from taxonomy where parent_id=t.id )
+                        and not exists (select 1 from objects where classif_id=t.id or classif_auto_id=t.id)""")
                 if n==0:
-                    logging.info("No more data to import")
+                    logging.info("No more data to delete")
                     break;
+                else:
+                    logging.info("Deleted %d Nodes"%n)
+
+            Lst=GetAll("""select t.name from taxonomy t,temp_taxo tt
+                        where t.id=tt.idfinal and tt.status='0'
+                        and (exists (select 1 from taxonomy where parent_id=t.id )
+                        or exists (select 1 from objects where classif_id=t.id or classif_auto_id=t.id))""")
+            for r in Lst:
+                logging.info("Can't Delete '%s' because it's used "%r[0])
 
         self.task.taskstate="Error"
         self.UpdateProgress(10,"Test Error")

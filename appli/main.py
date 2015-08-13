@@ -121,7 +121,9 @@ def before_request_security():
     g.menu.append((url_for("index"),"Home / Explore"))
     g.menu.append(("/prj/","Select Project"))
     if current_user.has_role(database.AdministratorLabel):
+        g.menu.append(("","SEP"))
         g.menu.append(("/admin","Admin Screen"))
+        g.menu.append(("/Task/Create/TaskTaxoImport","Import Taxonomy"))
     g.menu.append(("","SEP"))
     g.menu.append(("/change","Change Password"))
     # g.machaine="ABC"+str(current_user)

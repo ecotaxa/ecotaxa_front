@@ -69,6 +69,7 @@ class Taxonomy(db.Model):
     def __str__(self):
         return "{0} ({1})".format(self.name,self.id)
 Index('IS_TaxonomyParent',Taxonomy.__table__.c.parent_id)
+Index('IS_TaxonomySource',Taxonomy.__table__.c.id_source)
 Index('IS_TaxonomyNameLow',func.lower(Taxonomy.__table__.c.name))
 
 class Projects(db.Model):
