@@ -38,7 +38,7 @@ class TaskTaxoImport(AsyncTask):
         logging.info("Input Param = %s"%(self.param.__dict__))
         logging.info("Start Step 1")
 
-        self.param.IntraStep=0
+        # self.param.IntraStep=0
         if getattr(self.param,'IntraStep',0)==0:
             fichier=os.path.join(self.GetWorkingDir(),"uploaded.txt")
             logging.info("Analyzing file %s"%(fichier))
