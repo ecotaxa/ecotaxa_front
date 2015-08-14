@@ -67,6 +67,7 @@ def indexPrj(PrjId):
     for k,v in fieldlist.items():data["sortlist"][k]=v
     data["sortlist"]["classifname"]="Category Name"
     data["sortlist"]["random_value"]="Random"
+    data["sortlist"]["classif_when"]="Classification date"
     data["statuslist"]=collections.OrderedDict({"":"All"})
     data["statuslist"]["U"]="To be classified"
     data["statuslist"]["P"]="Predicted"
@@ -152,6 +153,8 @@ where o.projid=%(projid)s
         sql+=" order by t.name "+sortorder
     elif sortby!="":
         sql+=" order by o."+sortby+" "+sortorder
+    else:
+        sql+=" order by o.orig_id"
     sql+=" Limit %d offset %d "%(ipp,pageoffset*ipp)
     res=GetAll(sql,sqlparam,False)
     trcount=1
