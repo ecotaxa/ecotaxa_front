@@ -248,10 +248,11 @@ class TaskImport(AsyncTask):
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             if len(NotFoundTaxo)>0:
                 logging.info("Some Taxo Not Found = %s",NotFoundTaxo)
-            self.task.taskstate="Question"
-            self.UpdateProgress(20,"Taxo automatic resolution Done"%())
             if len(NotFoundUser)==0 and len(NotFoundTaxo)==0: # si tout est déjà résolue on enchaine sur la phase 2
                 self.SPStep2()
+            else:
+                self.task.taskstate="Question"
+            self.UpdateProgress(20,"Taxo automatic resolution Done"%())
             #sinon on pose une question
 
 
