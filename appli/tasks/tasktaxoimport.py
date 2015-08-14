@@ -134,8 +134,10 @@ class TaskTaxoImport(AsyncTask):
             for r in Lst:
                 logging.info("Can't Delete '%s' because it's used "%r[0])
 
-        self.task.taskstate="Error"
-        self.UpdateProgress(10,"Test Error")
+        self.task.taskstate="Done"
+        self.UpdateProgress(100,"Processing done")
+        # self.task.taskstate="Error"
+        # self.UpdateProgress(10,"Test Error")
 
     def QuestionProcess(self):
         txt="<h1>Taxonomy Text File Importation Task</h1>"
