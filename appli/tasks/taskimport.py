@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
 from PIL import Image
-from flask import Blueprint, render_template, g, flash,request
-from io import StringIO
-import html,functools,logging,json,time,os,csv
+from flask import render_template,  flash,request
+import logging,os,csv,sys
 import datetime,shutil,random,zipfile
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,LoadTask
 from appli.database import GetAll
-from flask_wtf import Form
-from wtforms import StringField
-from wtforms.validators import DataRequired
 
 
 PredefinedTables=['object','sample','process','acq']
@@ -208,6 +204,11 @@ class TaskImport(AsyncTask):
                         ImgFilePath=CsvFile.with_name(ImgFileName)
                         if not ImgFilePath.exists():
                             self.LogErrorForUser("Missing Image '%s' in file %s. "%(ImgFileName,relname.as_posix()))
+                        else:
+                            try:
+                                im=Image.open(ImgFilePath.as_posix())
+                            except:
+                                self.LogErrorForUser("Error while reading Image '%s' in file %s. %s"%(ImgFileName,relname.as_posix(),sys.exc_info()[0]))
                         CleExistObj=ObjectId+'*'+ImgFileName
                         if CleExistObj in self.ExistingObject:
                             self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. "%(ObjectId,ImgFileName,relname.as_posix()))
