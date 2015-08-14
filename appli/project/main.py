@@ -253,7 +253,7 @@ where o.projid=%(projid)s
         <button class='btn btn-success btn-sm' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>
         """)
     # Gestion de la navigation entre les pages
-    if pagecount>1:
+    if pagecount>1 or pageoffset>0:
         t.append("<p align=center> Page %d/%d - Go to page : "%(pageoffset+1,pagecount))
         if pageoffset>0:
             t.append("<a href='javascript:gotopage(%d);'>&lt;</a>"%(pageoffset-1))
@@ -414,4 +414,4 @@ def prjPurge(PrjId):
         no=ExecSQL(sqldo,SqlParam)
         txt+="Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files"%(no,noh,ni,nbrfile)
 
-    return PrintInCharte(txt)
+    return PrintInCharte(txt+ ("<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId)))

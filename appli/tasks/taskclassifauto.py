@@ -79,7 +79,7 @@ class TaskClassifAuto(AsyncTask):
         else:
             raise Exception ("Classifier '%s' not implemented "%self.param.Methode)
         if self.param.Perimeter!='all':
-            PerimeterWhere=" and classif_qual not in ('D','V') "
+            PerimeterWhere=" and ( classif_qual='P' or classif_qual is null)  "
         else: PerimeterWhere=""
         TStep = time()
         # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
@@ -119,8 +119,8 @@ class TaskClassifAuto(AsyncTask):
             TStep3 = time()
             # MAJ dans la base, Si pas de classif devient predicted , Si vide ou predicted, MAJ de la classif
             upcur.executemany("""update objects set classif_auto_id=%(cat)s,classif_auto_score=%(p)s,classif_auto_when=now()
-                                    ,classif_qual=case when classif_qual in ('','P') then  'P' else classif_qual END
-                                    ,classif_id=case when classif_qual in ('','P') then %(cat)s else classif_id end
+                                    ,classif_qual=case when classif_qual in ('D','V') then  classif_qual else 'P'  END
+                                    ,classif_id=case when classif_qual in ('D','V') then classif_id  else %(cat)s end
                                     where objid=%(id)s""",SqlParam)
             upcur.connection.commit()
             logging.info('Chunk Db Extract %d/%d, Classification and Db Save :  %0.3f s %0.3f+%0.3f+%0.3f'
