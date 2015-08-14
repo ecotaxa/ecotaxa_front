@@ -1,6 +1,5 @@
-#Todo details Save change Conditionnel
 #Todo filtres
-#todo icone refresh annotation
+
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
@@ -68,16 +67,19 @@ def indexPrj(PrjId):
     for k,v in fieldlist.items():data["sortlist"][k]=v
     data["sortlist"]["classifname"]="Category Name"
     data["sortlist"]["random_value"]="Random"
-    data["statuslist"]=collections.OrderedDict({"":""})
-    data["statuslist"]["NV"]="Not Validated"
-    data["statuslist"]["NVM"]="Not valid. by me"
+    data["statuslist"]=collections.OrderedDict({"":"All"})
+    data["statuslist"]["U"]="To be classified"
     data["statuslist"]["P"]="Predicted"
+    data["statuslist"]["NV"]="Not Validated"
+    data["statuslist"]["V"]="All Validated"
+    data["statuslist"]["NVM"]="Validated by others"
+    data["statuslist"]["VM"]="Validated by me"
     data["statuslist"]["D"]="Dubious"
-    data["statuslist"]["V"]="Validated"
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
     if not g.PrjManager: g.PrjAnnotate=Prj.CheckRight(1)
     right='dodefault'
     classiftab=GetClassifTab(Prj)
+    g.ProjectTitle=Prj.title
     g.headmenu = []
     g.headmenu.append(("/prj/%d"%(PrjId,),"Project home/Annotation"))
     g.headmenu.append(("/prjcm/%d"%(PrjId,),"Show Confusion Matrix"))
@@ -136,8 +138,13 @@ where o.projid=%(projid)s
             sql+="!='V'"
         elif gvp("statusfilter")=="NVM":
             sql+="='V' and classif_who!="+str(current_user.id)
+        elif gvp("statusfilter")=="VM":
+            sql+="='V' and classif_who="+str(current_user.id)
+        elif gvp("statusfilter")=="U":
+            sql+=" is null "
         else:
             sql+="='"+gvp("statusfilter")+"'"
+
     sqlcount="select count(*) from ("+sql+") q"
     nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
     pagecount=math.ceil(nbrtotal/ipp)
@@ -148,6 +155,10 @@ where o.projid=%(projid)s
     sql+=" Limit %d offset %d "%(ipp,pageoffset*ipp)
     res=GetAll(sql,sqlparam,False)
     trcount=1
+    if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
+        t.append("""<button class='btn btn-primary btn-xs' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
+        <span id=PendingChanges2 class=PendingChangesClass style="font-size:12px;"></span>""")
+
     t.append("<table class=imgtab><tr id=tr1>")
     WidthOnRow=0
     #récuperation et ajustement des dimensions de la zone d'affichage
@@ -215,13 +226,13 @@ where o.projid=%(projid)s
             poptxt+="<br>Identified by %s"%(r[3])
         for k,v in fieldlist.items():
             poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
+        poptxt+="<br>Sample : "+r['samplename']
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher
         bottomtxt=""
         for k,v in fieldlist.items():
             if k in dispfield:
                 bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
-
-        txt+="<div class='subimg {1}' data-title=\"{2}\" data-content=\"{3}\"><span class=taxo >{0}</span>{4}<div class=ddet>Details {5}</div></div>"\
+        txt+="<div class='subimg {1}' data-title=\"{2}\" data-content=\"{3}\"><span class=taxo >{0}</span>{4}<div class=ddet><span class=ddets>View {5}</div></div>"\
             .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),poptitletxt,poptxt,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
         txt+="</td>"
@@ -231,9 +242,11 @@ where o.projid=%(projid)s
 
     t.append("</tr></table>")
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
-        t.append("""<span id=PendingChanges></span><br>
-        <button class='btn btn-primary' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changes</button>
-        <button class='btn btn-success' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> Validate all objects</button>""")
+        t.append("""<span id=PendingChanges class=PendingChangesClass></span><br>
+        <button class='btn btn-primary btn-sm' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
+        <button class='btn btn-success btn-sm' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> Save changed annotations &amp; Validate all objects in page</button>
+        <button class='btn btn-success btn-sm' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>
+        """)
     # Gestion de la navigation entre les pages
     if pagecount>1:
         t.append("<p align=center> Page %d/%d - Go to page : "%(pageoffset+1,pagecount))
@@ -291,7 +304,7 @@ where o.projid=%(projid)s
         // Enable the popover
         var option={'placement':'left','trigger':'hover','html':true};
         $('div.subimg').popover(option);
-        $('div.ddet').click(function(e){
+        $('.ddets').click(function(e){
             e.stopPropagation();
 //            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
 //            var win = window.open(url, '_blank');
@@ -327,3 +340,14 @@ def GetClassifTab(Prj):
     param={'projid':Prj.projid}
     res=GetAll(sql,param,False)
     return render_template('project/classiftab.html',res=res)
+
+@app.route('/prjGetClassifTab/<int:PrjId>', methods=['GET', 'POST'])
+@login_required
+def prjGetClassifTab(PrjId):
+    Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    if Prj is None:
+        return "Project doesn't exists"
+    g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
+    if gvp("taxo")!="":
+        g.taxoclearspan="<span class='label label-default' onclick='SetTaxoFilter(false,-1)'>Clear "+gvp("taxofilterlabel")+"</span>"
+    return GetClassifTab(Prj)

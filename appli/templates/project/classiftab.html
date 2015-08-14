@@ -1,4 +1,4 @@
-<span id="taxoclearspan"></span>
+<span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
   <div style="width: 230px;">
     <div class="input-group">
        <select id="taxolbanno" name="taxolbanno" style="width: 170px" class='taxolb' > </select>
@@ -28,10 +28,12 @@
       if(taxofiltervalue==false){
           $("#taxofilter").val("");
           $('#taxoclearspan').html("");
+          $("#taxofilterlabel").val("");
           if(taxofilterlabel==-1) LoadRightPane();
           return;
       }
       $("#taxofilter").val(taxofiltervalue);
+      $("#taxofilterlabel").val(taxofilterlabel);
       $('#taxoclearspan').html('<span class="label label-default" onclick="SetTaxoFilter(false,-1)">Clear '+taxofilterlabel+'</span>')
   }
 
@@ -44,6 +46,7 @@
           for(var i= 0; i < LstTd.length; i++) {
               var td=LstTd[i];
               td.removeClass("ui-selected");
+              td.addClass("ToBeSaved")
               var id = td.find('img').attr('id');
               td.find('.taxo').text(droptaxoname);
               td.find('.subimg').css("height",'').css("width",'').css("left",'').css("top",'').css("right",'').css("bottom",'');
@@ -73,33 +76,35 @@
         PendingChangesTaxoName[-1]="Unchanged";
         for (var k in calctotaux)
             Msg=Msg+calctotaux[k]+" "+PendingChangesTaxoName[k]+", ";
-        $('#PendingChanges').text(Msg);
+        $('.PendingChangesClass').text(Msg);
 
     }
-function SavePendingChanges() {
+function SavePendingChanges(NextPage) {
     {#  console.log("prev",PendingChanges); #}
     req={changes:PendingChanges,qual:'V'}
-    $("#PendingChanges").html('<span class="label label-info">Server update in progress...</span>');
+    $(".PendingChangesClass").html('<span class="label label-info">Server update in progress...</span>');
     $("#PendingChanges").load("/prj/ManualClassif/"+$("#projid").val(),req,function(){
+        $("#PendingChanges2").html($("#PendingChanges").html());
         if ($("#PendingChanges").html().indexOf("Successfull")>0) {
             PendingChanges={}; // After successfull update no pending changes.
+            if(NextPage==1)
+               $("#pageoffset").val(parseInt($("#pageoffset").val())+1);
             LoadRightPane();
         }
     });
 }
-function ValidateAll() {
+function ValidateAll(NextPage) {
     {# On valide tout ce qui est predicted ou validated et qui n'est pas déjà en attente de save #}
     $(".status-validated,.status-predicted").parents('td').find('img.lazy').each(function (e,o) {
         //console.log($(o).attr("id").substr(1));
         if(PendingChanges[$(o).attr("id").substr(1)]===undefined)
             PendingChanges[$(o).attr("id").substr(1)]=-1; {# Set unchanged but validate #}
     });
-    SavePendingChanges();
+    SavePendingChanges(NextPage);
 }
 
 {% endif %}
   $(function() {
-    $("#taxofilter").val("");
     $( ".classiftab td"
 {% if g.PrjAnnotate %}
     ).droppable({
