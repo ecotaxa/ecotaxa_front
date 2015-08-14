@@ -8,7 +8,7 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
 from flask_security.decorators import roles_accepted
 import os,time,math,collections,appli
-from appli.database import GetAll,GetClassifQualClass,db
+from appli.database import GetAll,GetClassifQualClass,ExecSQL,db
 
 @app.route('/prj/')
 @login_required
@@ -88,6 +88,8 @@ def indexPrj(PrjId):
     if g.PrjManager:
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
         g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
+        g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
+
 
 
     appli.AddTaskSummaryForTemplate()
@@ -354,3 +356,62 @@ def prjGetClassifTab(PrjId):
     if gvp("taxo")!="":
         g.taxoclearspan="<span class='label label-default' onclick='SetTaxoFilter(false,-1)'>Clear "+gvp("taxofilterlabel")+"</span>"
     return GetClassifTab(Prj)
+
+@app.route('/prjPurge/<int:PrjId>', methods=['GET', 'POST'])
+@login_required
+def prjPurge(PrjId):
+    Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    if Prj is None:
+        return "Project doesn't exists"
+    if not Prj.CheckRight(2): # Level 0 = Read, 1 = Annotate, 2 = Admin
+        flash('You cannot Purge this project','error')
+        return PrintInCharte("<a href=/prj/>Select another project</a>")
+    txt=""
+    if gvp("objlist")=="":
+        txt+="""<form action=? method=post>
+        Enter the list of internal object id you want to delete. Or DELETEALL to erase all object of this project.<br>
+        <textarea name=objlist cols=15 rows=20></textarea><br>
+        <input type="submit" class="btn btn-danger" value='ERASE THESES OBJECTS !!! IRREVERSIBLE !!!!!'>
+        <a href ="/prj/{0}" class="btn btn-success">Cancel, Back to project home</a>
+        </form>
+        """.format(PrjId)
+    else:
+        if gvp("objlist")=="DELETEALL":
+            sqlsi="select file_name,thumb_file_name from images i,objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
+            sqldi="delete from images i using objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
+            sqldoh="delete from objectsclassifhisto i using objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
+            sqldo="delete from objects where projid={0}".format(PrjId)
+            objs=()
+            SqlParam={}
+        else:
+            sqlsi="select file_name,thumb_file_name from images i,objects o where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
+            sqldi="delete from images i using objects o where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
+            sqldoh="delete from objectsclassifhisto i using objects o where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
+            sqldo="delete from objects where projid={0} and objid = any(%(objs)s)".format(PrjId)
+            objs=[int(x.strip()) for x in gvp("objlist").splitlines() if x.strip()!=""]
+            if len(objs)==0:
+                raise Exception("No Objects ID specified")
+            SqlParam={"objs":objs}
+            app.logger.info("Erase %s"%(objs,))
+        cur = db.engine.raw_connection().cursor()
+        try:
+            app.logger.info("Erase SQL=%s"%(sqlsi,))
+            cur.execute(sqlsi,SqlParam)
+            vaultroot=Path("./vault")
+            nbrfile=0
+            for r in cur:  # chaque enregistrement
+                for f in r: # chacun des 2 champs
+                    if f:  # si pas null
+                        img=vaultroot.joinpath(f)
+                        if img.exists():
+                            os.remove(img.as_posix())
+                            nbrfile+=1
+        finally:
+            cur.close()
+
+        ni=ExecSQL(sqldi,SqlParam)
+        noh=ExecSQL(sqldoh,SqlParam)
+        no=ExecSQL(sqldo,SqlParam)
+        txt+="Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files"%(no,noh,ni,nbrfile)
+
+    return PrintInCharte(txt)
