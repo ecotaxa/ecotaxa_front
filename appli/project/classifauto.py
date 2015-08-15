@@ -96,7 +96,7 @@ def plot_confusion_matrix(cm, labels, cmap=plt.cm.YlGnBu):
     ax.set_xticklabels(labels, rotation=45, rotation_mode='anchor', ha='right',size=9)
     # g.Fig.yticks(tick_marks, labels)
     ax.set_yticks(tick_marks)
-    ax.set_yticklabels(labels,size=9)
+    ax.set_yticklabels(labels,size=9,rotation=45,verticalalignment ='top')
     g.Fig.tight_layout()
     ax.set_ylabel('True category')
     ax.set_xlabel('Predicted category')
