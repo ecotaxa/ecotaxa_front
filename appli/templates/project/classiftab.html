@@ -162,6 +162,7 @@ function AssignTaxoLbToSelection() {
 }
 
 $(document).ready(function() {
+    EnableSelect2Taxolb();
     // Ctrl + A affecte la valeur selectionnée
     $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function(e) {
        if((e.keyCode === 65)&& e.ctrlKey) {

@@ -1,6 +1,6 @@
 
 <script>
-$(document).ready(function() {
+function EnableSelect2Taxolb() {
     $(".taxolb").select2({
         ajax: {
             url: "/search/taxo",
@@ -12,6 +12,9 @@ $(document).ready(function() {
         },
         minimumInputLength: 3
     }); // Select2 Ajax
+}
+$(document).ready(function() {
+    EnableSelect2Taxolb();
 
     $('#TaxoModal').on('show.bs.modal', function (e) {
         var button = $(e.relatedTarget); // Button that triggered the modal

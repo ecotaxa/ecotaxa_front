@@ -13,7 +13,7 @@
 {% block headcenter %}
 {% if g.headmenu %}
 <span style="font-size: 18px;">{{ g.ProjectTitle }}</span><br>
-    <span id="headersubtitle">xxx</span>
+    <span id="headersubtitle" style="color:#FF6600;">xxx</span>
     </td><td width="160px">
     <br><div class="btn-group" style="margin-right: 10px">
     <button type="button" class="btn btn-default">Project Action</button>
@@ -65,15 +65,15 @@
 {% endfor %}
   </ul>
 </div>
-    <span id="statuslabelspan" data-placement="bottom"
+    <span id="statuslabelspan"
 data-content="<b>All</b> : display all images <br>
-<b>To be classified</b> :  display 'unclassified' images (just imported)<br>
-<b>Predicted</b> :  display 'predicted' images (from automatic identification tool)<br>
-<b>Not Validated</b> :  display 'To be classified', 'Predicted' and 'Dubious' images <br>
-<b>All Validated</b> : display images whose identification has been checked by users <br>
-<b>Validated by others</b> :  display 'validated' images whose identification has only been checked by other users <br>
-<b>Validated by me</b> :   display 'validated' images whose identification has only been checked by me <br>
-<b>Dubious</b> :  display 'Dubious' images
+<b>Unclassified</b> : display 'Unclassified' images (unpredicted & unvalidated)<br>
+<b>Predicted</b> : display 'predicted' images (from automatic identification tool)<br>
+<b>Not Validated</b> : display 'Unclassified', 'Predicted' and 'Dubious' images <br>
+<b>Validated</b> : display images whose identification has been checked by any users <br>
+<b>Validated by others</b> : display 'validated' images whose identification has only been checked by other users <br>
+<b>Validated by me</b> :  display 'validated' images whose identification has only been checked by me<br>
+<b>Dubious</b> : display 'Dubious' images
 ">Status :
     </span><select name="statusfilter" id="statusfilter">
 {% for key, value in data.statuslist.items() %}
@@ -85,11 +85,13 @@ data-content="<b>All</b> : display all images <br>
 
     Img /page : {{ selectinput("ipp",['50','100','200','500','1000'],data.ipp) }}
     Zoom : {{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}
-    Magnifier : {{ checkboxinput("magenabled","1",data.magenabled) }}
+    Magnifier: {{ checkboxinput("magenabled","1",data.magenabled) }}
     <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
         <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</button>
 {{ top|safe }}
     </div>
+{% include "common/taxopopup.html" %}
+
 	<div id="bodycontainer">
 		<div id="column-left"  class="panel panel-default" style="position: fixed;	top: 150px;	left: 2px;	bottom: 0px;	width: 260px;
 	                overflow-y: auto; overflow-x: hidden;  margin-bottom: 0px; " >
@@ -134,37 +136,42 @@ table.imgtab td {vertical-align:bottom;text-align: center;
 <script>
 var PendingChanges={};
 var PendingChangesTaxoName={};
-
+var PrevTxtFilter=""
 function LoadRightPane(){
-        //req={in:["17157378", "12735967", "17062333", "17137151"]};
-        if(Object.keys(PendingChanges).length>0)
-          if(confirm("Some changes are pending, if you refresh they'll be lost !\nWould you like to continue ?")==false)
-            return;
-        var TxtFilter=""
-        req={taxo:$("#taxofilter").val(),resultwidth:$("#column-right").width(),windowheight:$(window).height()};
-        if($("#taxofilterlabel").val()!="")
-            TxtFilter+=" Taxo="+$("#taxofilterlabel").val()
-        req['ipp']=$("#ipp").val();
-        req['zoom']=$("#zoom").val();
-        req['sortby']=$("#sortby").val();
-        req['statusfilter']=$("#statusfilter").val();
-        if($("#statusfilter").val()!="")
-            TxtFilter+=" Status="+$("#statusfilter option:selected").text()
-        req['pageoffset']=$("#pageoffset").val();
-        req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
-        req['dispfield']="";
-        $("#dispfieldlist .glyphicon-ok").closest("li").each(function () {
-            req['dispfield'] += " " + $(this).prop("id");
-        });
-        req['projid']=$("#projid").val();
-        $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
-        PendingChanges={}; // After load there's no pending changes
-        PendingChangesTaxoName={};
-        $("#column-right").load("/prj/LoadRightPane",req);
-        if(TxtFilter!="")
-            TxtFilter="Filter: "+TxtFilter
-        $('#headersubtitle').html(TxtFilter);
+    //req={in:["17157378", "12735967", "17062333", "17137151"]};
+    if(Object.keys(PendingChanges).length>0)
+      if(confirm("Some changes are pending, if you refresh they'll be lost !\nWould you like to continue ?")==false)
+        return;
+    var TxtFilter=""
+    req={taxo:$("#taxofilter").val(),resultwidth:$("#column-right").width(),windowheight:$(window).height()};
+    if($("#taxofilterlabel").val()!="")
+        TxtFilter+=" Taxo="+$("#taxofilterlabel").val()
+    req['ipp']=$("#ipp").val();
+    req['zoom']=$("#zoom").val();
+    req['sortby']=$("#sortby").val();
+    req['magenabled']=$("#magenabled").prop("checked")?"1":"0";
+    req['statusfilter']=$("#statusfilter").val();
+    if($("#statusfilter").val()!="")
+        TxtFilter+=" Status="+$("#statusfilter option:selected").text()
+    req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
+    req['dispfield']="";
+    $("#dispfieldlist .glyphicon-ok").closest("li").each(function () {
+        req['dispfield'] += " " + $(this).prop("id");
+    });
+    req['projid']=$("#projid").val();
+    $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
+    PendingChanges={}; {# After load there's no pending changes #}
+    PendingChangesTaxoName={};
+    if(TxtFilter!="")
+        TxtFilter="Filter: "+TxtFilter
+    if(TxtFilter!=PrevTxtFilter) { {# Si une condition change on revient page 1 #}
+        $("#pageoffset").val(0);
+        PrevTxtFilter=TxtFilter;
     }
+    req['pageoffset']=$("#pageoffset").val();
+    $("#column-right").load("/prj/LoadRightPane",req);
+    $('#headersubtitle').html(TxtFilter);
+}
 
 function RefreshClassifTab()
 {
@@ -192,7 +199,9 @@ function gotopage(nopage)
 $(document).ready(function() {
     if ("{{data.sortorder}}"=="desc")
         SortToggle();
-    $('#statuslabelspan').popover({html:true,trigger:'hover'});
+    $('#statuslabelspan').popover({html:true,trigger:'hover',placement:"left"});
+    $('#statusfilter').data('content',$('#statuslabelspan').data('content'))
+    $('#statusfilter').popover({html:true,trigger:'hover',placement:"left"});
     $("#taxofilter").val("");
 
     {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
@@ -220,7 +229,6 @@ $(document).ready(function() {
     </div> {# Container #}
 
 
-{% include "common/taxopopup.html" %}
 
 <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
   <div class="modal-dialog modal-lg">

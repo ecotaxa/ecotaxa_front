@@ -107,17 +107,19 @@ def LoadRightPane():
     sortorder=gvp("sortorder","")
     dispfield=gvp("dispfield","")
     statusfilter=gvp("statusfilter","")
+    magenabled=gvp("magenabled","0")
     PrjId=gvp("projid")
     # dispfield=" dispfield_orig_id dispfield_n07"
     # on sauvegarde les parametres dans le profil utilisateur
     if current_user.SetPref("ipp",ipp) + current_user.SetPref("zoom",zoom)+ current_user.SetPref("sortby",sortby)\
-            + current_user.SetPref("sortorder",sortorder)+ current_user.SetPref("dispfield",dispfield) >0:
+            + current_user.SetPref("sortorder",sortorder)+ current_user.SetPref("dispfield",dispfield) \
+            + current_user.SetPref("statusfilter",statusfilter)+ current_user.SetPref("magenabled",magenabled)>0:
         database.ExecSQL("update users set preferences=%s where id=%s",(current_user.preferences,current_user.id),True)
         user_datastore.ClearCache()
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     fieldlist=GetFieldList(Prj)
     fieldlist.pop('orig_id','')
-    t=[]
+    t=["<a name='toppage'/>"]
     sqlparam={'projid':gvp("projid")}
     sql="""select o.objid,t.name taxoname,o.classif_qual,u.name classifwhoname,i.file_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
@@ -228,7 +230,7 @@ where o.projid=%(projid)s
         poptitletxt="<p style='color:black;'>%s"%(r['orig_id'],)
         poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
         if r[3]!="":
-            poptxt+="<br>Identified by %s"%(r[3])
+            poptxt+="<br>By %s"%(r[3])
         for k,v in fieldlist.items():
             poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
         poptxt+="<br>Sample : "+r['samplename']
@@ -256,12 +258,12 @@ where o.projid=%(projid)s
     if pagecount>1 or pageoffset>0:
         t.append("<p align=center> Page %d/%d - Go to page : "%(pageoffset+1,pagecount))
         if pageoffset>0:
-            t.append("<a href='javascript:gotopage(%d);'>&lt;</a>"%(pageoffset-1))
+            t.append("<a href='#toppage' onclick='gotopage(%d);'>&lt;</a>"%(pageoffset-1))
         for i in range(0,pagecount-1,math.ceil(pagecount/20)):
-            t.append("<a href='javascript:gotopage(%d);'>%d</a> "%(i,i+1))
-        t.append("<a href='javascript:gotopage(%d);'>%d</a>"%(pagecount-1,pagecount))
+            t.append("<a href='#toppage' onclick='gotopage(%d);'>%d</a> "%(i,i+1))
+        t.append("<a href='#toppage' onclick='gotopage(%d);'>%d</a>"%(pagecount-1,pagecount))
         if pageoffset<pagecount-1:
-            t.append("<a href='javascript:gotopage(%d);'>&gt;</a>"%(pageoffset+1))
+            t.append("<a href='#toppage' onclick='gotopage(%d);'>&gt;</a>"%(pageoffset+1))
         t.append("</p>")
     t.append("""
     <script>
