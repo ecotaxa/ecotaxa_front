@@ -10,6 +10,7 @@ from flask_security.decorators import roles_accepted
 import os,time,math,collections,appli
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db
 
+######################################################################################################################
 @app.route('/prj/')
 @login_required
 def indexProjects():
@@ -31,6 +32,7 @@ def indexProjects():
 
     return PrintInCharte(txt)
 
+######################################################################################################################
 def GetFieldList(Prj):
     fieldlist=collections.OrderedDict()
     fieldlist["orig_id"]="Image Name"
@@ -43,6 +45,7 @@ def GetFieldList(Prj):
                 fieldlist[ok]=dispname
     return fieldlist
 
+######################################################################################################################
 @app.route('/prj/<int:PrjId>')
 @login_required
 def indexPrj(PrjId):
@@ -89,13 +92,11 @@ def indexPrj(PrjId):
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
         g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
-
-
-
     appli.AddTaskSummaryForTemplate()
     return render_template('project/projectmain.html',top="",lefta=classiftab
                            ,right=right,data=data,projid=PrjId)
 
+######################################################################################################################
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
 @login_required
 def LoadRightPane():
@@ -275,7 +276,7 @@ where o.projid=%(projid)s
                 return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
             AddZoom(element);}});
         // Make sub image draggable
-        jQuery('.imgtab td .subimg').draggable({revert:true,revertDuration:0});
+        jQuery('.imgtab td .subimg .taxo').draggable({revert:true,revertDuration:0});
         // Make the cell clickable for selection
         jQuery('.imgtab td').click(function(e){
             if (!e.ctrlKey)
@@ -330,6 +331,7 @@ $('#PopupDetails').on('hidden.bs.modal', function (e) {
         </script>""")
     return "\n".join(t)
 
+######################################################################################################################
 def GetClassifTab(Prj):
     if Prj.initclassiflist is None:
         InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
@@ -348,6 +350,7 @@ def GetClassifTab(Prj):
     res=GetAll(sql,param,False)
     return render_template('project/classiftab.html',res=res)
 
+######################################################################################################################
 @app.route('/prjGetClassifTab/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def prjGetClassifTab(PrjId):
@@ -359,6 +362,7 @@ def prjGetClassifTab(PrjId):
         g.taxoclearspan="<span class='label label-default' onclick='SetTaxoFilter(false,-1)'>Clear "+gvp("taxofilterlabel")+"</span>"
     return GetClassifTab(Prj)
 
+######################################################################################################################
 @app.route('/prjPurge/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def prjPurge(PrjId):

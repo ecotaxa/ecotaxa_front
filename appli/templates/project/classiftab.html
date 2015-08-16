@@ -120,7 +120,7 @@ function ValidateAll(NextPage) {
           ui.draggable.each(function (e,o) {
               if( $(o).hasClass( "zoomtracker" )) {
                   LstTd.push(  $($(o).data("specs").origImg.closest('td')));
-              } else if( $(o).hasClass( "subimg" )) {  // Sinon c'est le div subimg
+              } else if( $(o).hasClass( "taxo" )) {  // Sinon c'est le div subimg
                   LstTd.push(  $(o).closest('td'));
               }
               //Si c'est un item selected, on le supprime car va être ajouté par
