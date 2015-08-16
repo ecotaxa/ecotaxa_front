@@ -94,9 +94,6 @@ class AsyncTask:
                     setattr(self,k,tmp.get(k,''))
 
 def TaskFactory(ClassName,task=None):
-    # from appli.tasks.taxosync import TaskTaxoSync
-    # if ClassName=="TaskTaxoSync":
-    #     return TaskTaxoSync(task)
     from appli.tasks.test  import TaskTest
     if ClassName=="TaskTest":
         return TaskTest(task)

@@ -138,20 +138,21 @@ class TaskClassifAuto(AsyncTask):
 
 
     def QuestionProcess(self):
-        txt="<h1>Automatic Classification Task</h1>"
+        txt="<h3>Automatic Classification Task creation</h3>"
+        Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
+        if not Prj.CheckRight(2):
+            return PrintInCharte("ACCESS DENIED for this project")
+        txt+="<h5>Target Project : #%d - %s</h5>"%(Prj.projid,Prj.title)
         errors=[]
         if self.task.taskstep==0:
-            Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
-            if not Prj.CheckRight(2):
-                return PrintInCharte("ACCESS DENIED for this project")
             if gvg('src')=="":
                 # Premier écran de configuration, choix du projet de base
-                txt+="<h3>Base project selection</h3>"
+                txt+="<h4>Reference project selection</h4>"
                 d=DecodeEqualList(Prj.classifsettings)
                 if d.get("baseproject","")!="":
                     BasePrj=GetAll("select projid,title from projects where projid=%s",(d.get("baseproject"),))
                     if len(BasePrj):
-                        txt+="<a class='btn btn-primary' href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>Select Previous base project selection : #{1} : {2}</a>".format(Prj.projid,*BasePrj[0])
+                        txt+="<a class='btn btn-primary' href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>Use Previous reference project selection : #{1} : {2}</a><br><br>".format(Prj.projid,*BasePrj[0])
                 from flask.ext.login import current_user
                 sql="select projid,title from projects "
                 if not current_user.has_role(database.AdministratorLabel):
@@ -166,7 +167,6 @@ class TaskClassifAuto(AsyncTask):
                 txt+="</table>"
                 return PrintInCharte(txt)
             # Le projet de base est choisi second écran ou validation du second ecran
-            txt+="<h3>Task Creation</h3>"
             if gvp('starttask')=="Y":
                 # validation du second ecran
                 self.param.ProjectId=gvg("p")

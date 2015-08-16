@@ -110,7 +110,7 @@ def ComputeLimitForImage(imgwidth,imgheight,LimitWidth,LimitHeight):
 # Ici les imports des modules qui definissent des routes
 import appli.main
 import appli.adminusers
-import appli.tasks.view
+import appli.tasks.taskmanager
 import appli.search.view
 import appli.project.view
 
