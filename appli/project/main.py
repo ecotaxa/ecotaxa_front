@@ -166,8 +166,8 @@ where o.projid=%(projid)s
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
         t.append("""<button class='btn btn-primary btn-xs' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
         <span id=PendingChanges2 class=PendingChangesClass style="font-size:12px;"></span>""")
-
-    t.append("<table class=imgtab><tr id=tr1>")
+    LineStart="<td class=linestart>&gt;<br>&gt;<br>&gt;<br></td>"
+    t.append("<table class=imgtab><tr id=tr1>"+LineStart)
     WidthOnRow=0
     #récuperation et ajustement des dimensions de la zone d'affichage
     try:
@@ -214,7 +214,7 @@ where o.projid=%(projid)s
             if width==0: width=1
         if WidthOnRow!=0 and (WidthOnRow+width)>PageWidth:
             trcount+=1
-            t.append("</tr></table><table class=imgtab><tr id=tr%d>"%(trcount,))
+            t.append("</tr></table><table class=imgtab><tr id=tr%d>%s"%(trcount,LineStart))
             WidthOnRow=0
         cellwidth=width+22
         # Met la fenetre de zoon la ou il y plus de place, sachant qu'elle fait 400px et ne peut donc pas être callée à gauche des premieres images.
@@ -280,7 +280,9 @@ where o.projid=%(projid)s
         // Make the cell clickable for selection
         jQuery('.imgtab td').click(function(e){
             if (!e.ctrlKey)
-                $('.ui-selected').toggleClass('ui-selected');
+                $('.ui-selected').removeClass('ui-selected');
+            if($(e.target).hasClass('linestart'))
+                $(e.target).closest('tr').find('td').addClass('ui-selected');
             $(e.target).closest('td').toggleClass('ui-selected');
             //alert('test');
             });
