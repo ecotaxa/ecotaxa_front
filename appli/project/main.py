@@ -37,12 +37,15 @@ def GetFieldList(Prj):
     fieldlist=collections.OrderedDict()
     fieldlist["orig_id"]="Image Name"
     objmap=DecodeEqualList(Prj.mappingobj)
+    for v in ('objtime','depth_min','depth_max','depth_min'):
+        objmap[v]=v
     #fieldlist fait le mapping entre le nom fonctionnel et le nom à affiche
     # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe.
     for field,dispname in DecodeEqualList(Prj.classiffieldlist).items():
         for ok,on in objmap.items():
             if field==on :
                 fieldlist[ok]=dispname
+    fieldlist["classif_auto_score"]="Score"
     return fieldlist
 
 ######################################################################################################################
