@@ -1,0 +1,26 @@
+<table class="table" >
+  <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN"></td></tr>
+  <tr>
+    <td>W <input type="text" size="7" id="filt_MapOutW"></td>
+    <td>E <input type="text" size="7" id="filt_MapOutE"></td></tr>
+  <tr><td colspan="2" align="Center">S <input type="text" size="7" id="filt_MapOutS"></td></tr>
+  <tr><td colspan="2" align="Center">
+    <button type="button" class="btn btn-primary" onClick="OpenMap({{ g.Projid }});">Open Map</button>
+    <button type="button" class="btn " onClick="ClearCoord();">Clear</button>
+  </td></tr>
+</table>
+
+<script>
+function OpenMap(projid) {
+    $("#PopupDetails .modal-content").html("Loading...");
+    $('#PopupDetails .modal-lg').css('width',$(window).width()-40);
+    $('#PopupDetails').modal({});
+    var url="/search/mappopup/"
+    if(typeof (projid)!="undefined")
+      url+="?projid="+projid
+    $("#PopupDetails .modal-content").load(url);
+}
+function ClearCoord() {
+  $("#filt_MapOutN,#filt_MapOutW,#filt_MapOutE,#filt_MapOutS").val("");
+}
+</script>

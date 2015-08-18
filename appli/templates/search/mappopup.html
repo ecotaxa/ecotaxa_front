@@ -1,0 +1,162 @@
+<link rel="stylesheet" href="http://openlayers.org/en/v3.8.2/css/ol.css" type="text/css">
+{#<script src="http://openlayers.org/en/v3.8.2/build/ol.js"></script>#}
+<table width=100%><tr><td>Area Selection Map Popup
+        </td><td align='right'><button type="button" class="btn btn-default btn-sm"  onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
+        </td></tr></table>
+
+<div id="map" class="map" style="width: 100%; height: 500px;"></div>
+<p> Use mouse drag to Pan, Shift+drag for Rectangle Zooming, Use Alt+drag for Rectangle Selection</p>
+
+<table><tr>
+  <td>
+<table class="table" style="width:300px;">
+  <tr><td colspan="2" align="Center">North <input type="text" size="7" id="MapOutN"></td></tr>
+  <tr>
+    <td>West <input type="text" size="7" id="MapOutW"></td>
+    <td>East <input type="text" size="7" id="MapOutE"></td></tr>
+  <tr><td colspan="2" align="Center">South <input type="text" size="7" id="MapOutS"></td></tr>
+</table>
+    </td><td>
+<button type="button" class="btn btn-primary" onClick="DrawInputOnMap();">Draw On Map</button> <br><br>
+<button type="button" class="btn btn-success" onClick="ReturnMapArea();">Return this Area</button>
+  </td>
+{% if g.Projid %}
+<td>
+  <button type="button" class="btn btn-primary" onClick="ShowSample({projid:{{g.Projid}} });">Show Samples Position</button> <br><br>
+  </td>{% endif %}
+</tr></table>
+<script>
+
+var map,vectorSource,SampleSource;
+
+function InitMap() {
+var mousePositionControl = new ol.control.MousePosition({
+  coordinateFormat: ol.coordinate.createStringXY(4),
+  projection: 'EPSG:4326',
+  undefinedHTML: '&nbsp;'
+});
+
+map = new ol.Map({
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM()
+    })
+  ],
+  controls: ol.control.defaults({
+    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+      collapsible: false
+    })
+  }).extend([mousePositionControl]),
+  target: 'map',
+  view: new ol.View({
+    center: [0, 47],
+    zoom: 2
+  })
+});
+
+
+// a DragBox interaction used to select features by drawing boxes
+var dragBox = new ol.interaction.DragBox({
+  condition: ol.events.condition.altKeyOnly,
+  style: new ol.style.Style({
+    stroke: new ol.style.Stroke({
+      color: [0, 0, 255, 1]
+    })
+  })
+});
+
+map.addInteraction(dragBox);
+
+var infoBox = document.getElementById('info');
+
+dragBox.on('boxend', function(e) {
+  // features that intersect the box are added to the collection of
+  // selected features, and their names are displayed in the "info"
+  // div
+  var info = [];
+  var extent = dragBox.getGeometry().getExtent();
+  var s=extent+" / ";
+  // Calcule les tableau sous forme X/Longitude , Y/Lattitude
+  bottomleft= ol.proj.transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326') ;
+  topright= ol.proj.transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326') ;
+  if((bottomleft[0]<-180)||(bottomleft[0]>180))
+      bottomleft[0]=(bottomleft[0]+180)%360-180;
+  if((topright[0]<-180)||(topright[0]>180))
+      topright[0]=(topright[0]+180)%360-180;
+  if(topright[0]<-180) topright[0]+=360;
+  $("#MapOutN").val(topright[1].toFixed(4));
+  $("#MapOutW").val(bottomleft[0].toFixed(4));
+  $("#MapOutE").val(topright[0].toFixed(4));
+  $("#MapOutS").val(bottomleft[1].toFixed(4));
+  DrawInputOnMap();
+{#  console.log(extent);#}
+});
+
+// Create vector source and the feature to it.
+vectorSource = new ol.source.Vector();
+var vectorLayer= new ol.layer.Vector({
+  source: vectorSource
+});
+
+SampleSource = new ol.source.Vector();
+var SampleLayer= new ol.layer.Vector({
+  source:SampleSource
+});
+
+// Add the vector layer to the map.
+map.addLayer(vectorLayer);
+map.addLayer(SampleLayer);
+
+} //InitMap
+
+function DrawSelectionRectangle(a){ {# X Y X Y  #}
+  var ring = [ [a[0], a[1]], [a[2], a[1]],  [a[2], a[3]], [a[0], a[3]] , [a[0], a[1]] ];
+  var polygon = new ol.geom.Polygon([ring]);
+  polygon.transform('EPSG:4326', 'EPSG:3857');
+  // Create feature with polygon.
+  var feature = new ol.Feature(polygon);
+  vectorSource.clear();
+  vectorSource.addFeature(feature);
+}
+
+function DrawInputOnMap()
+{
+DrawSelectionRectangle([
+    parseFloat($("#MapOutW").val()),
+    parseFloat($("#MapOutN").val()),
+    parseFloat($("#MapOutE").val()),
+    parseFloat($("#MapOutS").val()) ]);
+}
+
+ $.getScript("http://openlayers.org/en/v3.8.2/build/ol.js", function(){
+  InitMap();
+  $("#MapOutW").val($("#filt_MapOutW").val());
+  $("#MapOutN").val($("#filt_MapOutN").val());
+  $("#MapOutE").val($("#filt_MapOutE").val());
+  $("#MapOutS").val($("#filt_MapOutS").val());
+  DrawInputOnMap();
+ });
+
+function ReturnMapArea() {
+    $("#filt_MapOutW").val($("#MapOutW").val());
+    $("#filt_MapOutN").val($("#MapOutN").val());
+    $("#filt_MapOutE").val($("#MapOutE").val());
+    $("#filt_MapOutS").val($("#MapOutS").val());
+    $('#PopupDetails').modal('hide');
+}
+
+function ShowSample(p){
+{#  console.log(p);#}
+$.getJSON( "/search/mappopup/samples/",p, function( data ) {
+  SampleSource.clear();
+  $.each( data, function( key, val ) {
+{#    console.log(key,val);#}
+    var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform(val, 'EPSG:4326','EPSG:3857')) });
+    SampleSource.addFeature(iconFeature);
+
+  });
+
+});
+}
+
+</script>
