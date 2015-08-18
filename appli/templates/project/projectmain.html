@@ -112,7 +112,9 @@ data-content="<b>All</b> : display all images <br>
                   </ul>
                   <div class="tab-content"> <!-- Tab panes -->
                     <div role="tabpanel" class="tab-pane active" id="TabA">{{ lefta|safe }}</div>
-                    <div role="tabpanel" class="tab-pane" id="TabB"> {{ leftb|safe }}</div>
+                    <div role="tabpanel" class="tab-pane" id="TabB"> {{ leftb|safe }}
+
+                    </div>
                   </div>
                 </div>
             </div>
@@ -153,6 +155,12 @@ function LoadRightPane(){
     req['statusfilter']=$("#statusfilter").val();
     if($("#statusfilter").val()!="")
         TxtFilter+=" Status="+$("#statusfilter option:selected").text()
+    req['MapN']=$("#filt_MapOutN").val();
+    req['MapW']=$("#filt_MapOutW").val();
+    req['MapE']=$("#filt_MapOutE").val();
+    req['MapS']=$("#filt_MapOutS").val();
+    if((req['MapN']!="")&&(req['MapW']!="")&&(req['MapE']!="")&&(req['MapS']!=""))
+        TxtFilter+=" Position=("+req['MapN']+","+req['MapW']+","+req['MapE']+","+req['MapS']+")"
     req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
     req['dispfield']="";
     $("#dispfieldlist .glyphicon-ok").closest("li").each(function () {
@@ -210,6 +218,7 @@ $(document).ready(function() {
     $('#zoom').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
      #}
 });
+
 </script>
 
 

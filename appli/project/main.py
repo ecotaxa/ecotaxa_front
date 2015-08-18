@@ -7,6 +7,7 @@ from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
 from flask_security.decorators import roles_accepted
+from appli.search.leftfilters import getcommonfilters
 import os,time,math,collections,appli
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db
 
@@ -37,7 +38,7 @@ def GetFieldList(Prj):
     fieldlist=collections.OrderedDict()
     fieldlist["orig_id"]="Image Name"
     objmap=DecodeEqualList(Prj.mappingobj)
-    for v in ('objtime','depth_min','depth_max','depth_min'):
+    for v in ('objtime','depth_min','depth_max'):
         objmap[v]=v
     #fieldlist fait le mapping entre le nom fonctionnel et le nom à affiche
     # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe.
@@ -67,6 +68,7 @@ def indexPrj(PrjId):
     if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot view this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
+    g.Projid=Prj.projid
     fieldlist=GetFieldList(Prj)
     data["fieldlist"]=fieldlist
     data["sortlist"]=collections.OrderedDict({"":""})
@@ -96,7 +98,8 @@ def indexPrj(PrjId):
         g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
     appli.AddTaskSummaryForTemplate()
-    return render_template('project/projectmain.html',top="",lefta=classiftab
+    filtertab=getcommonfilters()
+    return render_template('project/projectmain.html',top="",lefta=classiftab,leftb=filtertab
                            ,right=right,data=data,projid=PrjId)
 
 ######################################################################################################################
@@ -153,9 +156,15 @@ where o.projid=%(projid)s
             sql+=" is null "
         else:
             sql+="='"+gvp("statusfilter")+"'"
+    if gvp("MapN")!="" and gvp("MapW")!="" and gvp("MapE")!="" and gvp("MapS")!="":
+        sql+=" and o.latitude between %(MapS)s and %(MapN)s and o.longitude between %(MapW)s and %(MapE)s  "
+        sqlparam['MapN']=gvp("MapN")
+        sqlparam['MapW']=gvp("MapW")
+        sqlparam['MapE']=gvp("MapE")
+        sqlparam['MapS']=gvp("MapS")
 
     sqlcount="select count(*) from ("+sql+") q"
-    nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
+    nbrtotal=GetAll(sqlcount,sqlparam,True)[0][0]
     pagecount=math.ceil(nbrtotal/ipp)
     if sortby=="classifname":
         sql+=" order by t.name "+sortorder

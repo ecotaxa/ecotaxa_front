@@ -397,6 +397,12 @@ class TaskImport(AsyncTask):
                             ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
                             where projid="""+str(self.param.ProjectId))
         self.pgcur.connection.commit()
+        self.pgcur.execute("""update samples s set latitude=sll.latitude,longitude=sll.longitude
+              from (select o.sampleid,min(o.latitude) latitude,min(o.longitude) longitude
+              from objects o
+              where projid=%(projid)s and o.latitude is not null and o.longitude is not null
+              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s and s.longitude is null""",{'projid':self.param.ProjectId})
+        self.pgcur.connection.commit()
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Processing done")
 
