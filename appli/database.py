@@ -4,6 +4,7 @@ from flask.ext.security import  UserMixin, RoleMixin
 from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence,func
+from sqlalchemy.orm import foreign,remote
 import json,psycopg2.extras
 
 AdministratorLabel="Application Administrator"
@@ -181,12 +182,14 @@ class Objects(db.Model):
     classif_auto_id = db.Column(INTEGER)
     classif_auto_score = db.Column(DOUBLE_PRECISION)
     classif_auto_when = db.Column(TIMESTAMP)
+    # classif_auto=db.relationship("Taxonomy",primaryjoin=foreign(classif_auto_id)==remote(id),uselist=False,)
+    classif_auto=db.relationship("Taxonomy",primaryjoin="Taxonomy.id==foreign(Objects.classif_auto_id)",uselist=False,)
     classif_crossvalidation_id = db.Column(INTEGER)
     img0id = db.Column(BIGINT)
     img0=db.relationship("Images",foreign_keys="Images.objid")
     imgcount = db.Column(INTEGER)
     complement_info = db.Column(VARCHAR)
-    weblink = db.Column(VARCHAR)
+    # weblink = db.Column(VARCHAR) doublons avec object link
     similarity = db.Column(DOUBLE_PRECISION)
     sunpos = db.Column(CHAR(1))  # position du soleil
     random_value = db.Column(INTEGER)

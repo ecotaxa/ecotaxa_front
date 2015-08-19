@@ -1,4 +1,4 @@
-<span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
+{#<span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>#}
   <div style="width: 230px;">
     <div class="input-group">
        <select id="taxolbanno" name="taxolbanno" style="width: 170px" class='taxolb' > </select>
@@ -18,7 +18,7 @@
 
 <table class="classiftab" width="95%">
 {% for v in res %}
-<tr><td taxoid="{{ v[0] }}"> <span class="taxo">{{ v[1] }}</span> <p  class="ra3 label {{ "label-info" if v[3]>0 else "label-success"}}">{{ v[2] }}{{ " ("~v[3]~")" if v[3]>0 }}</p></td></tr>
+<tr><td taxoid="{{ v[0] }}"> <span class="taxodrop">{{ v[1] }}</span> <p  class="ra3 label {{ "label-info" if v[3]>0 else "label-success"}}">{{ v[2] }}{{ " ("~v[3]~")" if v[3]>0 }}</p></td></tr>
 {% endfor %}
 </table>
 
@@ -113,14 +113,23 @@ function ValidateAll(NextPage) {
           //console.log(ui.draggable);
           //console.log(this);
           var droptaxoid=$(this).attr('taxoid');
-          var droptaxoname=$(this).find(".taxo").text();
+          var droptaxoname=$(this).find(".taxodrop").text();
+
+         $('#taxolbanno').append($('<option>', {    value: droptaxoid,    text: droptaxoname}));
+          var sel=[];
+          sel.push(droptaxoid);
+          $('#taxolbanno').val(sel);
+          $('#taxolbanno').change();
+
 
           var NbrChanged=0;
           var  LstTd=[];
           ui.draggable.each(function (e,o) {
               if( $(o).hasClass( "zoomtracker" )) {
                   LstTd.push(  $($(o).data("specs").origImg.closest('td')));
-              } else if( $(o).hasClass( "taxo" )) {  // Sinon c'est le div subimg
+              } else if( $(o).hasClass( "taxo" )) {  // Sinon c'est le taxo du div subimg
+                  LstTd.push(  $(o).closest('td'));
+              } else if( $(o).hasClass( "lazy" )) {  // Sinon c'est l'image
                   LstTd.push(  $(o).closest('td'));
               }
               //Si c'est un item selected, on le supprime car va être ajouté par
@@ -140,7 +149,7 @@ function ValidateAll(NextPage) {
 {% endif %}
     ).click(function(){
         //$("#taxofilter").val($(this).attr('taxoid'));
-        SetTaxoFilter($(this).attr('taxoid'),$(this).find('.taxo').text());
+        SetTaxoFilter($(this).attr('taxoid'),$(this).find('.taxodrop').text());
         LoadRightPane();
     });
 
@@ -157,14 +166,15 @@ function AssignTaxoLbToSelection() {
         $(".ui-selected").each(function () {
             LstTd.push($(this));
         });
-        ProcessList(LstTd, droptaxoid, $('#taxolbanno').text());
+        ProcessList(LstTd, droptaxoid, $('#taxolbanno  option:selected').text());
     }
 }
 
 $(document).ready(function() {
     EnableSelect2Taxolb();
-    // Ctrl + A affecte la valeur selectionnée
-    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function(e) {
+{#     Ctrl + A affecte la valeur selectionnée#}
+{#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function(e) {#}
+    $(document).bind('keydown', 'Test1', function(e) {
        if((e.keyCode === 65)&& e.ctrlKey) {
           AssignTaxoLbToSelection();
           e.preventDefault();

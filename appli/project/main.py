@@ -77,10 +77,10 @@ def indexPrj(PrjId):
     data["sortlist"]["random_value"]="Random"
     data["sortlist"]["classif_when"]="Classification date"
     data["statuslist"]=collections.OrderedDict({"":"All"})
-    data["statuslist"]["U"]="To be classified"
+    data["statuslist"]["U"]="Unclassified"
     data["statuslist"]["P"]="Predicted"
     data["statuslist"]["NV"]="Not Validated"
-    data["statuslist"]["V"]="All Validated"
+    data["statuslist"]["V"]="Validated"
     data["statuslist"]["NVM"]="Validated by others"
     data["statuslist"]["VM"]="Validated by me"
     data["statuslist"]["D"]="Dubious"
@@ -156,6 +156,7 @@ where o.projid=%(projid)s
             sql+=" is null "
         else:
             sql+="='"+gvp("statusfilter")+"'"
+
     if gvp("MapN")!="" and gvp("MapW")!="" and gvp("MapE")!="" and gvp("MapS")!="":
         sql+=" and o.latitude between %(MapS)s and %(MapN)s and o.longitude between %(MapW)s and %(MapE)s  "
         sqlparam['MapN']=gvp("MapN")
@@ -163,8 +164,13 @@ where o.projid=%(projid)s
         sqlparam['MapE']=gvp("MapE")
         sqlparam['MapS']=gvp("MapS")
 
+    if gvp("depthmin")!="" and gvp("depthmax")!="" :
+        sql+=" and o.depth_min between %(depthmin)s and %(depthmax)s and o.depth_max between %(depthmin)s and %(depthmax)s  "
+        sqlparam['depthmin']=gvp("depthmin")
+        sqlparam['depthmax']=gvp("depthmax")
+
     sqlcount="select count(*) from ("+sql+") q"
-    nbrtotal=GetAll(sqlcount,sqlparam,True)[0][0]
+    nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
     pagecount=math.ceil(nbrtotal/ipp)
     if sortby=="classifname":
         sql+=" order by t.name "+sortorder
@@ -175,10 +181,11 @@ where o.projid=%(projid)s
     sql+=" Limit %d offset %d "%(ipp,pageoffset*ipp)
     res=GetAll(sql,sqlparam,False)
     trcount=1
+    LineStart=""
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
-        t.append("""<button class='btn btn-primary btn-xs' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
+        t.append("""<span id=SpanSelectAll style="background:#FFFF00;">[Select All]</span> <button class='btn btn-primary btn-xs' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
         <span id=PendingChanges2 class=PendingChangesClass style="font-size:12px;"></span>""")
-    LineStart="<td class=linestart>&gt;<br>&gt;<br>&gt;<br></td>"
+        LineStart="<td class=linestart>&gt;<br>&gt;<br>&gt;<br></td>"
     t.append("<table class=imgtab><tr id=tr1>"+LineStart)
     WidthOnRow=0
     #récuperation et ajustement des dimensions de la zone d'affichage
@@ -280,69 +287,8 @@ where o.projid=%(projid)s
         t.append("</p>")
     t.append("""
     <script>
-        // Required to  have Select2 component working on Bootstrap Popup
-        $.fn.modal.Constructor.prototype.enforceFocus = function() {};
-        // Add Zoom
-        jQuery('div#column-right img.lazy').Lazy({bind: 'event',afterLoad: function(element) {
-            if($('#magenabled').prop("checked")==false)
-                return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
-            AddZoom(element);}});
-        // Make sub image draggable
-        jQuery('.imgtab td .subimg .taxo').draggable({revert:true,revertDuration:0});
-        // Make the cell clickable for selection
-        jQuery('.imgtab td').click(function(e){
-            if (!e.ctrlKey)
-                $('.ui-selected').removeClass('ui-selected');
-            if($(e.target).hasClass('linestart'))
-                $(e.target).closest('tr').find('td').addClass('ui-selected');
-            $(e.target).closest('td').toggleClass('ui-selected');
-            //alert('test');
-            });
-        // Make ZoomTracker Clickable for selection
-        jQuery('body').delegate('.zoomtracker','click',function(e){
-            if (!e.ctrlKey)
-                $('.ui-selected').toggleClass('ui-selected');
-            $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected')
-            });
-        // setup zoomtracker creation tracking to make them draggable
-        var target = $( "body" )[0];
-        var observer = new MutationObserver(function( mutations ) {
-          mutations.forEach(function( mutation ) {
-            var newNodes = mutation.addedNodes; // DOM NodeList
-            if( newNodes !== null ) { // If there are new nodes added
-                var $nodes = $( newNodes ); // jQuery set
-                $nodes.each(function() {
-                    var $node = $( this );
-                    if( $node.hasClass( "zoomtracker" ) ) {
-                        //console.log("zoomtracker");
-                        jQuery($node).draggable({revert:true,revertDuration:0});
-                    }
-                });
-            }
-          });
-        });
-        var config = {attributes: true,childList: true,characterData: true};
-        observer.observe(target, config);
-        // Enable the popover
-        var option={'placement':'left','trigger':'hover','html':true};
-        $('div.subimg').popover(option);
-        $('.ddets').click(function(e){
-            e.stopPropagation();
-//            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
-//            var win = window.open(url, '_blank');
-            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1)+"?w="+($(window).width()-400)+"&h="+($(window).height()-40)+"&ajax=1";
-            var options={}
-            $("#PopupDetails .modal-content").html("Loading...");
-
-            $('#PopupDetails .modal-lg').css('width',$(window).width()-40);
-            $('#PopupDetails').modal(options);
-            $("#PopupDetails .modal-content").load(url);
-            });
-$('#PopupDetails').on('hidden.bs.modal', function (e) {
-    $("#PopupDetails .modal-content").html("CLEAN");
-    $(".zoomContainer").remove();
-})
-        </script>""")
+        PostAddImages();
+    </script>""")
     return "\n".join(t)
 
 ######################################################################################################################

@@ -38,6 +38,8 @@ def objectdetails(objid):
         t.append(" by %s (%s) "%(obj.classiffier.name,obj.classiffier.email))
         if obj.classif_when is not None:
             t.append(" on %s "%(obj.classif_when.strftime("%Y-%m-%d %H:%M")))
+    if obj.object_link is not None:
+        t.append("<br>External link :<a href='{0}' target=_blank> {0}</a>".format(obj.object_link))
     # On affiche la liste des images, en selectionnant une image on changera le contenu de l'image Img1 + Redim
     # l'approche avec des onglets de marchait pas car les images sont superposées
     obj.images.sort(key=lambda x: x.imgrank)
@@ -59,6 +61,55 @@ def objectdetails(objid):
     }
     </script>
     """)
+    # Affichage de l'onglet de classification
+    if Prj.CheckRight(1):
+        t.append("""<script>
+function Save1Object(classqual) {
+    var classid=$("#taxolbpop").val();
+    var objid='"""+str(objid)+"""';
+    if(classid=='') {
+        alert('Select a new category first');
+        return;
+    }
+    req={changes:{},qual:classqual}
+    req['changes'][objid]=classid;
+    $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>');
+    $("#PendingChangesPop").load("/prj/ManualClassif/"""+str(Prj.projid)+"""",req,function(){
+        if ($("#PendingChangesPop").html().indexOf("Successfull")>0) {
+            PendingChanges={}; // After successfull update no pending changes.
+            if(classqual=='V')
+                $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-validated');
+            else
+                $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-dubious');
+            if($("#taxolbpop").text().trim()!="")
+                $('#I'+objid).parents('td').find('.taxo').text($("#taxolbpop").text());
+            $('#PopupDetails').modal('hide');
+        }
+    });
+}
+$(document).ready(function() {
+    $("#taxolbpop").select2({
+        ajax: {
+            url: "/search/taxo",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 3
+    }); // Select2 Ajax
+});
+ </script>
+<table><tr><td>Set a new classification :</td>
+ <td style="width: 230px;">
+       <select id="taxolbpop" name="taxolbpop" style="width: 170px" class='taxolb' > </select>
+ <br><span id=PendingChangesPop></span></td><td>
+    <button type="button" class="btn btn-success" onclick="Save1Object('V');">Save as Validated</button>
+    <button type="button" class="btn btn-danger" onclick="Save1Object('D');">Save as dubious</button>
+    <button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>
+    </td></tr></table>
+    """)
     # Ajout des Onglets sous l'image
     t.append("""<br><div><ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#tabdobj" aria-controls="tabdobj" role="tab" data-toggle="tab"> Object details</a></li>
@@ -66,12 +117,15 @@ def objectdetails(objid):
     <li role="presentation" ><a href="#tabdacquis" aria-controls="tabdacquis" role="tab" data-toggle="tab"> Acquisition details</a></li>
     <li role="presentation" ><a href="#tabdprocess" aria-controls="tabdprocess" role="tab" data-toggle="tab"> Processing details</a></li>
     <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>""")
-    if Prj.CheckRight(1):
-        t.append("""<li role="presentation" ><a href="#tabdclassif" aria-controls="tabdclassif" role="tab" data-toggle="tab">Change classification</a></li>""")
     t.append("""</ul>
     <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
-    <table class='table table-bordered'><tr>""")
+    <table class='table table-bordered'><tr>
+    <td><b>longitude</td><td>{0}</td><td><b>latitude</td><td>{1}</td><td><b>Date</td><td>{2}</td><td><b>Time</td><td>{3}</td>
+    </tr><tr><td><b>Depth min</td><td>{4}</td><td><b>Depth max</td><td>{5}</td><td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
+    </tr><tr>""".format(obj.longitude,obj.latitude,obj.objdate,obj.objtime
+                        ,obj.depth_min,obj.depth_max
+                        ,obj.classif_auto.name+" ("+str(obj.classif_auto_score)+")" if obj.classif_auto else "",obj.classif_auto_when))
     cpt=0
     # Insertion des champs object
     for k,v in  collections.OrderedDict(sorted(DecodeEqualList(Prj.mappingobj).items())).items():
@@ -112,59 +166,8 @@ def objectdetails(objid):
 WHERE objid=%(objid)s
 order by classif_date desc""",{"objid":objid})
     for r in Histo:
-        t.append("<tr><td>"+("</td><td>".join(r)) +"</td></tr>")
+        t.append("<tr><td>"+("</td><td>".join([str(x) if x else "-" for x in r])) +"</td></tr>")
     t.append("</table></div>")
-
-    # Affichage de l'onglet de classification
-    if Prj.CheckRight(1):
-        t.append("""    <div role="tabpanel" class="tab-pane" id="tabdclassif">
-Set a new classification :
- <div style="width: 230px;">
-       <select id="taxolbpop" name="taxolbpop" style="width: 170px" class='taxolb' > </select>
- </div><span id=PendingChangesPop></span><br>
-<script>
-function Save1Object(classqual) {
-    var classid=$("#taxolbpop").val();
-    var objid='"""+str(objid)+"""';
-    if(classid=='') {
-        alert('Select a new category first');
-        return;
-    }
-    req={changes:{},qual:classqual}
-    req['changes'][objid]=classid;
-    $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>');
-    $("#PendingChangesPop").load("/prj/ManualClassif/"""+str(Prj.projid)+"""",req,function(){
-        if ($("#PendingChangesPop").html().indexOf("Successfull")>0) {
-            PendingChanges={}; // After successfull update no pending changes.
-            if(classqual=='V')
-                $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-validated');
-            else
-                $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-dubious');
-            if($("#taxolbpop").text().trim()!="")
-                $('#I'+objid).parents('td').find('.taxo').text($("#taxolbpop").text());
-            $('#PopupDetails').modal('hide');
-        }
-    });
-}
-$(document).ready(function() {
-    $("#taxolbpop").select2({
-        ajax: {
-            url: "/search/taxo",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {  return { q: params.term, page: params.page };  },
-            processResults: function (data, page) { return { results: data};  },
-            cache: true
-        },
-        minimumInputLength: 3
-    }); // Select2 Ajax
-});
- </script>
-    <button type="button" class="btn btn-success" onclick="Save1Object('V');">Save as Validated</button>
-    <button type="button" class="btn btn-danger" onclick="Save1Object('D');">Save as dubious</button>
-    <button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>
-    </div>
-    </div>""")
 
     # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenete isolée
     # Sinon affichage sans lien dans la charte.
