@@ -13,7 +13,8 @@
 {% block headcenter %}
 {% if g.headmenu %}
 <span style="font-size: 18px;">{{ g.ProjectTitle }}</span><br>
-    <span id="headersubtitle" style="color:#FF6600;">xxx</span>
+    <span id="headersubtitle" style="color:#FF6600;">xxx</span><br>
+    <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
     </td><td width="160px">
     <br><div class="btn-group" style="margin-right: 10px">
     <button type="button" class="btn btn-default">Project Action</button>
@@ -93,7 +94,7 @@ data-content="<b>All</b> : display all images <br>
 {% include "common/taxopopup.html" %}
 
 	<div id="bodycontainer">
-		<div id="column-left"  class="panel panel-default" style="position: fixed;	top: 150px;	left: 2px;	bottom: 0px;	width: 260px;
+		<div id="column-left"  class="panel panel-default" style="position: fixed;	top: 125px;	left: 2px;	bottom: 0px;	width: 260px;
 	                overflow-y: auto; overflow-x: hidden;  margin-bottom: 0px; " >
             <div class="bodyleft" style="margin-left: 2px; width: 251px;">
                 <script>
@@ -121,13 +122,13 @@ data-content="<b>All</b> : display all images <br>
 		</div>
 {#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
 <style>
-.lazy {margin: 10 5 10 0;}
+.lazy {margin: 10px 5px 0px 5px; cursor: -webkit-grab; cursor:grab;}
 .ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
 .ddets {cursor:pointer;}
 .taxo {cursor: -webkit-grab; cursor:grab;}
 .ui-selected { background: #FFFF00; color: white; }
 .ra3 {float:right; margin-right: 3px;}
-table.classiftab td {padding: 2px 3px 2px 3px ;  border-width:1px;border-style:solid;border-color:#c5c5c5;}
+table.classiftab td {padding: 2px 3px 0px 3px ;  border-width:1px;border-style:solid;border-color:#c5c5c5;}
 table.imgtab {margin-bottom: 5px;}
 table.imgtab td {vertical-align:bottom;text-align: center;
    border-width:1px;
@@ -161,6 +162,12 @@ function LoadRightPane(){
     req['MapS']=$("#filt_MapOutS").val();
     if((req['MapN']!="")&&(req['MapW']!="")&&(req['MapE']!="")&&(req['MapS']!=""))
         TxtFilter+=" Position=("+req['MapN']+","+req['MapW']+","+req['MapE']+","+req['MapS']+")"
+
+    req['depthmin']=$("#filt_depthmin").val();
+    req['depthmax']=$("#filt_depthmax").val();
+    if((req['depthmin']!="")&&(req['depthmax']!=""))
+        TxtFilter+=" Depth in("+req['depthmin']+"-"+req['depthmax']+")"
+
     req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
     req['dispfield']="";
     $("#dispfieldlist .glyphicon-ok").closest("li").each(function () {
@@ -218,6 +225,92 @@ $(document).ready(function() {
     $('#zoom').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
      #}
 });
+
+function PostAddImages(){
+        // Required to  have Select2 component working on Bootstrap Popup
+        $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+        // Add Zoom
+        jQuery('div#column-right img.lazy').Lazy({bind: 'event',afterLoad: function(element) {
+            if($('#magenabled').prop("checked")==false)
+                return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
+            AddZoom(element);}});
+        // Make sub image draggable
+        jQuery('.imgtab td .subimg .taxo').draggable({revert:true,revertDuration:0});
+        jQuery('.imgtab td img').draggable({revert:true,revertDuration:0});
+        // Make the cell clickable for selection
+        jQuery('.imgtab td').click(function(e){
+            if($(e.target).hasClass('linestart'))
+                if (e.shiftKey) { // Unselect line
+                    $(e.target).closest('tr').find('td').removeClass('ui-selected');
+                    if (window.getSelection) {
+                      if (window.getSelection().empty) {  // Chrome
+                        window.getSelection().empty();
+                      } else if (window.getSelection().removeAllRanges) {  // Firefox
+                        window.getSelection().removeAllRanges();
+                      }
+                    } else if (document.selection) {  // IE?
+                      document.selection.empty();
+                    }
+                  return;
+                }
+            if (!e.ctrlKey)
+                $('.ui-selected').removeClass('ui-selected');
+            if($(e.target).hasClass('linestart')) // select line (except this first column)
+                $(e.target).closest('tr').find('td').addClass('ui-selected');
+            $(e.target).closest('td').toggleClass('ui-selected');
+            });
+        // Make ZoomTracker Clickable for selection
+        jQuery('body').delegate('.zoomtracker','click',function(e){
+            if (!e.ctrlKey)
+                $('.ui-selected').toggleClass('ui-selected');
+            $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected')
+            });
+        // setup zoomtracker creation tracking to make them draggable
+        var target = $( "body" )[0];
+        var observer = new MutationObserver(function( mutations ) {
+          mutations.forEach(function( mutation ) {
+            var newNodes = mutation.addedNodes; // DOM NodeList
+            if( newNodes !== null ) { // If there are new nodes added
+                var $nodes = $( newNodes ); // jQuery set
+                $nodes.each(function() {
+                    var $node = $( this );
+                    if( $node.hasClass( "zoomtracker" ) ) {
+                        //console.log("zoomtracker");
+                        jQuery($node).draggable({revert:true,revertDuration:0});
+                    }
+                });
+            }
+          });
+        });
+        var config = {attributes: true,childList: true,characterData: true};
+        observer.observe(target, config);
+        // Enable the popover
+        var option={'placement':'left','trigger':'hover','html':true};
+        $('div.subimg').popover(option);
+        $('.ddets').click(function(e){
+            e.stopPropagation();
+//            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
+//            var win = window.open(url, '_blank');
+            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1)+"?w="+($(window).width()-400)+"&h="+($(window).height()-40)+"&ajax=1";
+            var options={}
+            $("#PopupDetails .modal-content").html("Loading...");
+
+            $('#PopupDetails .modal-lg').css('width',$(window).width()-40);
+            $('#PopupDetails').modal(options);
+            $("#PopupDetails .modal-content").load(url);
+            });
+$('#PopupDetails').on('hidden.bs.modal', function (e) {
+    $("#PopupDetails .modal-content").html("CLEAN");
+    $(".zoomContainer").remove();
+})
+
+jQuery('#SpanSelectAll').click(function(e){
+            if (!e.shiftKey)
+                jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
+            else
+                jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
+                });
+}  //PostAddImages
 
 </script>
 

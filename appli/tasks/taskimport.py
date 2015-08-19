@@ -111,8 +111,8 @@ class TaskImport(AsyncTask):
                 "SELECT concat(o.orig_id,'*',i.orig_file_name) from images i join objects o on i.objid=o.objid where o.projid="+str(self.param.ProjectId))
             for rec in self.pgcur:
                 self.ExistingObject.add(rec[0])
-            logging.info("SubTask1 : Analyze CSV Files")
-            self.UpdateProgress(2,"Analyze CSV Files")
+            logging.info("SubTask1 : Analyze TSV Files")
+            self.UpdateProgress(2,"Analyze TSV Files")
             self.LastNum={x:{'n':0,'t':0} for x in PredefinedTables}
             #Todo extraire les max du mapping existant.
             sd=Path(self.param.SourceDir)
@@ -217,7 +217,7 @@ class TaskImport(AsyncTask):
                     self.param.TotalRowCount+=RowCount
             if self.param.TotalRowCount==0:
                 self.LogErrorForUser("No object found")
-            self.UpdateProgress(15,"CSV File Parsed"%())
+            self.UpdateProgress(15,"TSV File Parsed"%())
             print(self.param.Mapping)
             logging.info("Taxo Found = %s",self.param.TaxoFound)
             logging.info("Users Found = %s",self.param.UserFound)

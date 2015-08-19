@@ -1,3 +1,4 @@
+<p>Depth <span id="spaninfodepth" style="color: blue;" class="glyphicon glyphicon-info-sign"></span></span> Min: <input type="text" id="filt_depthmin" style="width:50px;"> Max: <input type="text" id="filt_depthmax" style="width:50px;"></p>
 <table class="table" >
   <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN"></td></tr>
   <tr>
@@ -23,4 +24,7 @@ function OpenMap(projid) {
 function ClearCoord() {
   $("#filt_MapOutN,#filt_MapOutW,#filt_MapOutE,#filt_MapOutS").val("");
 }
+$(document).ready(function() {
+  $('#spaninfodepth').popover({html: true, trigger: 'hover', placement: "bottom",content:"Positive values, both values are required. Both Detph min&max of objects must be in the filter range to be selected"});
+});
 </script>
