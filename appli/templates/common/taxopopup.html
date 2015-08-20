@@ -1,5 +1,10 @@
 
 <script>
+function FormatTaxoItem(t) {
+  if (t.pr==1)
+    return $("<u>"+ t.text+"</u>")
+  else return t.text;
+}
 function EnableSelect2Taxolb() {
     $(".taxolb").select2({
         ajax: {
@@ -10,6 +15,7 @@ function EnableSelect2Taxolb() {
             processResults: function (data, page) { return { results: data};  },
             cache: true
         },
+        templateResult: FormatTaxoItem,
         minimumInputLength: 3
     }); // Select2 Ajax
 }
@@ -21,7 +27,7 @@ $(document).ready(function() {
         var targetid = button.data('mytargetid');
          $("#TaxoModalBody").html("Loading...");
          $("#TaxoModalBody").load("/search/taxotree?target="+targetid);
-    });
+      });
     }); // Ready
  </script>
 

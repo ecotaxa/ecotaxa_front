@@ -5,7 +5,7 @@ from flask import render_template,  flash,request
 import logging,os,csv,sys
 import datetime,shutil,random,zipfile
 from pathlib import Path
-from appli.tasks.taskmanager import AsyncTask,LoadTask
+from appli.tasks.taskmanager import AsyncTask,LoadTask,DoTaskClean
 from appli.database import GetAll
 
 
@@ -413,6 +413,7 @@ class TaskImport(AsyncTask):
         if self.task.taskstep==0:
             txt+="<h3>Task Creation</h3>"
             Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
+            txt="<a href='/prj/%d'>Back to project</a>"%Prj.projid
             if Prj.CheckRight(2)==False:
                 return PrintInCharte("ACCESS DENIED for this project");
             if gvp('starttask')=="Y":
@@ -497,13 +498,10 @@ class TaskImport(AsyncTask):
                 txt+="{0}={1}<br>".format(k,taxo[v])
         return PrintInCharte(txt)
 
-if __name__ == '__main__':
-    t=LoadTask(1)
-    # t.task.taskstate="Running" # permet de forcer l'état
-    # print(ObjectToStr(t.param))
-    # t.param.IntraStep=1
-    # t.UpdateProgress(25,"Test 1")
-
-    t.Process()
-    # LoadHeader()
-    #LoadFile()
+    def GetDoneExtraAction(self):
+        # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
+        # on efface donc la tache et on lui propose d'aller sur la classif manuelle
+        PrjId=self.param.ProjectId
+        DoTaskClean(self.task.id)
+        return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
+        <a href='/Task/Create/TaskClassifAuto?p={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a> """.format(PrjId)

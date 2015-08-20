@@ -180,6 +180,19 @@ $(document).ready(function() {
           e.preventDefault();
       }
     });
+{#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvle la popup#}
+    $(document).bind('keydown', function(e) {
+      if(document.activeElement.nodeName=='BODY')
+       if((e.keyCode >= 65)&&(e.keyCode <= 90)&& !e.ctrlKey)
+         if($(".ui-selected").length>0)
+       {
+         $('#taxolbanno').select2("open");
+         $('.select2-search__field').val(String.fromCharCode(e.keyCode));
+          //console.log(e);
+          e.preventDefault();
+      }
+    });
+
 }); // Ready
 
 
