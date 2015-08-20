@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,gvg,db,gvp
+from appli import app,ObjectToStr,PrintInCharte,gvg,db,gvp,database
 from appli.database import GetAll
 import psycopg2,psycopg2.extras
 
@@ -11,14 +11,31 @@ def searchtaxo():
     if len(term)<=2:
         return "[]"
     term+=R"%"
-    res = GetAll("SELECT id, name FROM taxonomy WHERE  lower(name) LIKE %s order by name limit 200", (term.lower(),))
-    return json.dumps([dict(id=r[0],text=r[1]) for r in res])
+    param={'term':term.lower()}
+    sql="SELECT id, name FROM taxonomy WHERE  lower(name) LIKE %(term)s order by name limit 200"
+
+    PrjId=1 #todo from gvg
+    if PrjId>0:
+        Prj=database.Projects.query.filter_by(projid=PrjId).first()
+        if Prj.initclassiflist is not None:
+            InitClassif=Prj.initclassiflist
+            InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
+            sql="""
+            SELECT tf.id, name, case when id2 is null then 0 else 1 end inpreset FROM taxonomy tf
+            join (select t.id id1,c.id id2 FROM taxonomy t
+            full JOIN (VALUES ("""+InitClassif+""")) c(id) ON t.id = c.id
+                 WHERE  lower(name) LIKE %(term)s) t2
+            on tf.id=coalesce(id1,id2)
+              WHERE  lower(name) LIKE %(term)s
+            order by inpreset desc,name limit 200 """
+    res = GetAll(sql, param)
+    return json.dumps([dict(id=r[0],text=r[1],pr=r[2]) for r in res])
 
 
 @app.route('/search/taxotree')
 def searchtaxotree():
     res = GetAll("SELECT id, name FROM taxonomy WHERE  parent_id is null order by name ")
-    print(res)
+    # print(res)
     return render_template('search/taxopopup.html',root_elements=res,targetid=gvg("target","taxolb"))
 
 

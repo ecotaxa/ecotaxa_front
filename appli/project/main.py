@@ -60,6 +60,7 @@ def indexPrj(PrjId):
           ,'sortorder':current_user.GetPref('sortorder',"")
           ,'statusfilter':current_user.GetPref('statusfilter',"")
           ,'magenabled':str(current_user.GetPref('magenabled',1))
+          ,'popupenabled':str(current_user.GetPref('popupenabled',1))
           }
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     if Prj is None:
@@ -75,7 +76,7 @@ def indexPrj(PrjId):
     for k,v in fieldlist.items():data["sortlist"][k]=v
     data["sortlist"]["classifname"]="Category Name"
     data["sortlist"]["random_value"]="Random"
-    data["sortlist"]["classif_when"]="Classification date"
+    data["sortlist"]["classif_when"]="Validation date"
     data["statuslist"]=collections.OrderedDict({"":"All"})
     data["statuslist"]["U"]="Unclassified"
     data["statuslist"]["P"]="Predicted"
@@ -115,12 +116,14 @@ def LoadRightPane():
     dispfield=gvp("dispfield","")
     statusfilter=gvp("statusfilter","")
     magenabled=gvp("magenabled","0")
+    popupenabled=gvp("popupenabled","0")
     PrjId=gvp("projid")
     # dispfield=" dispfield_orig_id dispfield_n07"
     # on sauvegarde les parametres dans le profil utilisateur
     if current_user.SetPref("ipp",ipp) + current_user.SetPref("zoom",zoom)+ current_user.SetPref("sortby",sortby)\
             + current_user.SetPref("sortorder",sortorder)+ current_user.SetPref("dispfield",dispfield) \
-            + current_user.SetPref("statusfilter",statusfilter)+ current_user.SetPref("magenabled",magenabled)>0:
+            + current_user.SetPref("statusfilter",statusfilter)+ current_user.SetPref("magenabled",magenabled)\
+            + current_user.SetPref("popupenabled",popupenabled)>0:
         database.ExecSQL("update users set preferences=%s where id=%s",(current_user.preferences,current_user.id),True)
         user_datastore.ClearCache()
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
@@ -247,20 +250,25 @@ where o.projid=%(projid)s
         txt="<td width={3}><img class='lazy' id=I{4} data-src='/vault/{6}' data-zoom-image='{0}' width={1} height={2} pos={5}>"\
             .format(filename,width,height,cellwidth,r['objid'],pos,thumbfilename)
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
-        poptitletxt="<p style='color:black;'>%s"%(r['orig_id'],)
-        poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
-        if r[3]!="":
-            poptxt+="<br>By %s"%(r[3])
-        for k,v in fieldlist.items():
-            poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
-        poptxt+="<br>Sample : "+r['samplename']
+        if popupenabled=="1":
+            poptitletxt="<p style='color:black;'>%s"%(r['orig_id'],)
+            poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
+            if r[3]!="":
+                poptxt+="<br>By %s"%(r[3])
+            for k,v in fieldlist.items():
+                poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
+            poptxt+="<br>Sample : "+r['samplename']
+            popattribute="data-title=\"{0}\" data-content=\"{1}\"".format(poptitletxt,poptxt)
+        else: popattribute=""
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher
         bottomtxt=""
+        if 'orig_id' in dispfield:
+            bottomtxt+="<br>%s"%(r['orig_id'],)
         for k,v in fieldlist.items():
             if k in dispfield:
                 bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
-        txt+="<div class='subimg {1}' data-title=\"{2}\" data-content=\"{3}\"><span class=taxo >{0}</span>{4}<div class=ddet><span class=ddets>View {5}</div></div>"\
-            .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),poptitletxt,poptxt,bottomtxt
+        txt+="<div class='subimg {1}' {2}><span class=taxo >{0}</span>{3}<div class=ddet><span class=ddets>View {4}</div></div>"\
+            .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
         txt+="</td>"
 

@@ -103,8 +103,16 @@ $(document).ready(function() {
  </script>
 <table><tr><td>Set a new classification :</td>
  <td style="width: 230px;">
-       <select id="taxolbpop" name="taxolbpop" style="width: 170px" class='taxolb' > </select>
- <br><span id=PendingChangesPop></span></td><td>
+     <div class="input-group">
+       <select id="taxolbpop" name="taxolbpop" style="width: 200px" class='taxolb' > </select>""")
+    if gvg("ajax","0")=="0":
+        t.append("""<span class="input-group-btn">
+                <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbpop" title="Search on Taxonomy Tree">
+                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
+                </span>""")
+    else: t.append("<br>")
+    t.append("""</div><!-- /input-group -->
+ <span id=PendingChangesPop></span></td><td width=30px></td><td valign=top>
     <button type="button" class="btn btn-success" onclick="Save1Object('V');">Save as Validated</button>
     <button type="button" class="btn btn-danger" onclick="Save1Object('D');">Save as dubious</button>
     <button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>
@@ -141,8 +149,8 @@ $(document).ready(function() {
         if r[2]=="sample":
             t.append("<td><b>{0}</td><td>{1}</td><td><b>{2}</td><td>{3}</td><td><b>{4}</td><td>{5}</td></tr><tr>"
                      .format("Original ID",ScaleForDisplay(obj.sample.orig_id),
-                             "latitude",ScaleForDisplay(obj.sample.latitude),
-                             "Original ID",ScaleForDisplay(obj.sample.longitude),))
+                             "longitude",ScaleForDisplay(obj.sample.longitude),
+                             "latitude",ScaleForDisplay(obj.sample.latitude),))
             t.append("<td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
                      .format("Dataportal Desc.",ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
         else:
@@ -172,7 +180,7 @@ order by classif_date desc""",{"objid":objid})
     # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenete isolée
     # Sinon affichage sans lien dans la charte.
     if gvg("ajax","0")=="1":
-        return """<table width=100%><tr><td><a href='/objectdetails/{0}?w={1}&h={2}' target=_blank>Open in a separate window</a>
+        return """<table width=100%><tr><td><a href='/objectdetails/{0}?w={1}&h={2}' target=_blank><b>Open in a separate window</b> (right click to copy link)</a>
         </td><td align='right'><button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
         </td></tr></table>""".format(objid,gvg("w"),gvg("h"))+"\n".join(t)
-    return PrintInCharte("\n".join(t))
+    return PrintInCharte("\n".join(t)+render_template('common/taxopopup.html'))

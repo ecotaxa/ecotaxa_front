@@ -138,10 +138,11 @@ class TaskClassifAuto(AsyncTask):
 
 
     def QuestionProcess(self):
-        txt="<h3>Automatic Classification Task creation</h3>"
         Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
+        txt="<a href='/prj/%d'>Back to project</a>"%Prj.projid
         if not Prj.CheckRight(2):
-            return PrintInCharte("ACCESS DENIED for this project")
+            return PrintInCharte("ACCESS DENIED for this project<br>"+txt)
+        txt+="<h3>Automatic Classification Task creation</h3>"
         txt+="<h5>Target Project : #%d - %s</h5>"%(Prj.projid,Prj.title)
         errors=[]
         if self.task.taskstep==0:
