@@ -12,7 +12,7 @@ def searchtaxo():
         return "[]"
     term+=R"%"
     param={'term':term.lower()}
-    sql="SELECT id, name FROM taxonomy WHERE  lower(name) LIKE %(term)s order by name limit 200"
+    sql="SELECT id, name,0 FROM taxonomy WHERE  lower(name) LIKE %(term)s order by name limit 200"
 
     PrjId=1 #todo from gvg
     if PrjId>0:
