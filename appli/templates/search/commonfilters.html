@@ -1,16 +1,34 @@
 <p>Sample  <select id="sampleid" name="sampleid" style="width: 170px"  multiple> </select></p>
 <p>Depth <span id="spaninfodepth" style="color: blue;" class="glyphicon glyphicon-info-sign"></span></span> Min: <input type="text" id="filt_depthmin" style="width:50px;"> Max: <input type="text" id="filt_depthmax" style="width:50px;"></p>
 <table class="table" >
-  <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN"></td></tr>
+  <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN" name="filt_MapOutN"></td></tr>
   <tr>
-    <td>W <input type="text" size="7" id="filt_MapOutW"></td>
-    <td>E <input type="text" size="7" id="filt_MapOutE"></td></tr>
-  <tr><td colspan="2" align="Center">S <input type="text" size="7" id="filt_MapOutS"></td></tr>
+    <td>W <input type="text" size="7" id="filt_MapOutW" name="filt_MapOutW"></td>
+    <td>E <input type="text" size="7" id="filt_MapOutE" name="filt_MapOutE"></td></tr>
+  <tr><td colspan="2" align="Center">S <input type="text" size="7" id="filt_MapOutS" name="filt_MapOutS"></td></tr>
   <tr><td colspan="2" align="Center">
     <button type="button" class="btn btn-primary" onClick="OpenMap({{ g.Projid }});">Open Map</button>
     <button type="button" class="btn " onClick="ClearCoord();">Clear</button>
   </td></tr>
 </table>
+
+<table width="100%">
+  <tr><td><b>Date</b> </td><td align="right"><a href='javascript:ClearDates();'>Clear</a>
+   </td></tr>
+</table>
+<label for="filt_fromdate">From </label> <input type="text" style="width: 80px" id="filt_fromdate" name="filt_fromdate">
+<label for="filt_todate"> to </label> <input type="text" style="width: 80px" id="filt_todate" name="filt_todate">
+
+<table width="100%">
+  <tr><td><b>Time</b>
+  </td><td align="right"><a href='javascript:ClearTimes();'>Clear</a>
+   </td></tr>
+</table>
+<div id="time-slider-range"></div>
+<label for="filt_fromtime">From </label> <input type="text" style="width: 45px" id="filt_fromtime" name="filt_fromtime">
+<label for="filt_totime"> to </label> <input type="text" style="width: 45px" id="filt_totime" name="filt_totime">
+<label for="filt_inverttime"> Invert </label> <input type="checkbox" value="Y" style="width: 45px" id="filt_inverttime" name="filt_inverttime">
+
 
 <script>
 function OpenMap(projid) {
@@ -25,6 +43,13 @@ function OpenMap(projid) {
 function ClearCoord() {
   $("#filt_MapOutN,#filt_MapOutW,#filt_MapOutE,#filt_MapOutS").val("");
 }
+function ClearDates(){
+  $( "#filt_fromdate,#filt_todate" ).val("");
+}
+function ClearTimes(){
+  $("#filt_fromtime,#filt_totime" ).val("");
+  $("#filt_inverttime").prop("checked",false);
+}
 $(document).ready(function() {
   $('#spaninfodepth').popover({html: true, trigger: 'hover', placement: "bottom",content:"Positive values, both values are required. Both Detph min&max of objects must be in the filter range to be selected"});
 
@@ -38,6 +63,25 @@ $(document).ready(function() {
             cache: true
         },
     }); // Select2 Ajax
+
+      $( "#filt_fromdate,#filt_todate" ).datepicker({
+      showButtonPanel: true,changeMonth: true,changeYear: true,dateFormat:"yy-mm-dd"
+    });
+
+    $( "#time-slider-range" ).slider({
+      range: true,
+      min: 0,
+      max: 1439,
+      values: [ 0, 1439 ],
+      slide: function( event, ui ) {
+        v=ui.values[ 0 ];
+        v=Math.floor(v/60)+":"+(("00"+(v% 60)).substr(-2));
+        $( "#filt_fromtime" ).val(  v);
+        v=ui.values[1];
+        v=Math.floor(v/60)+":"+(("00"+(v% 60)).substr(-2));
+        $( "#filt_totime" ).val( v );
+      }
+    });
 
 });
 </script>
