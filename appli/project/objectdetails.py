@@ -32,6 +32,7 @@ def objectdetails(objid):
     if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot view this project','error')
         return PrintInCharte("<a href=/>Back to home</a>")
+    g.Projid=Prj.projid
     t.append("<br>Part of project %s"%(Prj.title,))
     t.append("<br>Classification : %s (%s)"%(obj.classif.name if obj.classif else "Unknown",database.ClassifQual.get(obj.classif_qual,"To be classified")))
     if obj.classiffier is not None:
