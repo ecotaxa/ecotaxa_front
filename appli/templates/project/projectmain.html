@@ -172,12 +172,30 @@ function LoadRightPane(){
     req['depthmin']=$("#filt_depthmin").val();
     req['depthmax']=$("#filt_depthmax").val();
     if((req['depthmin']!="")&&(req['depthmax']!=""))
-        TxtFilter+=" Depth in("+req['depthmin']+"-"+req['depthmax']+")"
+        TxtFilter+=" Depth in("+req['depthmin']+"-"+req['depthmax']+")";
     if($('#sampleid').val()!=null)
       req['samples']=String($('#sampleid').val())
     else req['samples']="";
     if(req['samples']!="")
         TxtFilter+=" Samples="+$.map( $('#sampleid  option:selected'), function (element) { return $(element).text() }).join(', ');
+    req['fromdate']=$("#filt_fromdate").val();
+    if(req['fromdate']!="")
+        TxtFilter+=" Date >= "+req['fromdate'];
+    req['todate']=$("#filt_todate").val();
+    if(req['todate']!="")
+        TxtFilter+=" Date <= "+req['todate'];
+
+    req['fromtime']=$("#filt_fromtime").val();
+    if(req['fromtime']!="")
+        TxtFilter+=" Time >= "+req['fromtime'];
+    req['totime']=$("#filt_totime").val();
+    if(req['totime']!="")
+        TxtFilter+=" Time <= "+req['totime'];
+    req['inverttime']=$("#filt_inverttime").prop("checked")?"1":"0";
+    if(req['inverttime']=="1")
+        TxtFilter+=" Time Invert ";
+
+
     req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
     req['dispfield']="";
     $("#dispfieldlist .glyphicon-ok").closest("li").each(function () {

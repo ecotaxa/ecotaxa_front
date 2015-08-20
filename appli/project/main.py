@@ -129,11 +129,12 @@ def LoadRightPane():
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     fieldlist=GetFieldList(Prj)
     fieldlist.pop('orig_id','')
+    fieldlist.pop('objtime','')
     t=["<a name='toppage'/>"]
     sqlparam={'projid':gvp("projid")}
     sql="""select o.objid,t.name taxoname,o.classif_qual,u.name classifwhoname,i.file_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
-  ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,o.objtime
+  ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,to_char(o.objtime,'HH24:MI') objtime
   ,o.latitude,o.orig_id,o.imgcount"""
     for k in fieldlist.keys():
         sql+=",o."+k+" as extra_"+k
@@ -175,6 +176,28 @@ where o.projid=%(projid)s
     if gvp("samples")!="":
         sql+=" and o.sampleid= any (%(samples)s) "
         sqlparam['samples']=[int(x) for x in gvp("samples").split(',')]
+
+    if gvp("fromdate")!="":
+        sql+=" and objdate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
+        sqlparam['fromdate']=gvp("fromdate")
+    if gvp("todate")!="":
+        sql+=" and objdate<= to_date(%(todate)s,'YYYY-MM-DD') "
+        sqlparam['todate']=gvp("todate")
+
+    if gvp("inverttime")=="1":
+        if gvp("fromtime")!="" and gvp("totime")!="":
+            sql+=" and (objtime<= time %(fromtime)s or objtime>= time %(totime)s)"
+            sqlparam['fromtime']=gvp("fromtime")
+            sqlparam['totime']=gvp("totime")
+    else:
+        if gvp("fromtime")!="":
+            sql+=" and objtime>= time %(fromtime)s "
+            sqlparam['fromtime']=gvp("fromtime")
+        if gvp("totime")!="":
+            sql+=" and objtime<= time %(totime)s "
+            sqlparam['totime']=gvp("totime")
+
+    #filt_fromdate,#filt_todate
 
     sqlcount="select count(*) from ("+sql+") q"
     nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
@@ -268,9 +291,13 @@ where o.projid=%(projid)s
         bottomtxt=""
         if 'orig_id' in dispfield:
             bottomtxt+="<br>%s"%(r['orig_id'],)
+        if 'objtime' in dispfield:
+            bottomtxt+="<br>Time %s"%(r['objtime'],)
         for k,v in fieldlist.items():
             if k in dispfield:
                 bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
+        if bottomtxt!="":
+            bottomtxt="<span style='font-size:12px;'>"+bottomtxt+"</span>"
         txt+="<div class='subimg {1}' {2}><span class=taxo >{0}</span>{3}<div class=ddet><span class=ddets>View {4}</div></div>"\
             .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
