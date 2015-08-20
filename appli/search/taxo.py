@@ -14,8 +14,9 @@ def searchtaxo():
     param={'term':term.lower()}
     sql="SELECT id, name,0 FROM taxonomy WHERE  lower(name) LIKE %(term)s order by name limit 200"
 
-    PrjId=1 #todo from gvg
-    if PrjId>0:
+    PrjId=gvg("projid")
+    if PrjId!="":
+        PrjId=int(PrjId)
         Prj=database.Projects.query.filter_by(projid=PrjId).first()
         if Prj.initclassiflist is not None:
             InitClassif=Prj.initclassiflist

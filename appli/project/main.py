@@ -326,6 +326,7 @@ def prjGetClassifTab(PrjId):
     if Prj is None:
         return "Project doesn't exists"
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
+    g.Projid=Prj.projid
     if gvp("taxo")!="":
         g.taxoclearspan="<span class='label label-default' onclick='SetTaxoFilter(false,-1)'>Clear "+gvp("taxofilterlabel")+"</span>"
     return GetClassifTab(Prj)
