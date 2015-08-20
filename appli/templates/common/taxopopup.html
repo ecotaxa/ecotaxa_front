@@ -11,7 +11,7 @@ function EnableSelect2Taxolb() {
             url: "/search/taxo",
             dataType: 'json',
             delay: 250,
-            data: function (params) {  return { q: params.term, page: params.page };  },
+            data: function (params) {  return { q: params.term {% if g.Projid %} ,projid:{{ g.Projid }} {% endif %} };  },
             processResults: function (data, page) { return { results: data};  },
             cache: true
         },
