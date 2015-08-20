@@ -101,7 +101,7 @@ def indexPrj(PrjId):
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters()
     return render_template('project/projectmain.html',top="",lefta=classiftab,leftb=filtertab
-                           ,right=right,data=data,projid=PrjId)
+                           ,right=right,data=data)
 
 ######################################################################################################################
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
@@ -171,6 +171,10 @@ where o.projid=%(projid)s
         sql+=" and o.depth_min between %(depthmin)s and %(depthmax)s and o.depth_max between %(depthmin)s and %(depthmax)s  "
         sqlparam['depthmin']=gvp("depthmin")
         sqlparam['depthmax']=gvp("depthmax")
+
+    if gvp("samples")!="":
+        sql+=" and o.sampleid= any (%(samples)s) "
+        sqlparam['samples']=[int(x) for x in gvp("samples").split(',')]
 
     sqlcount="select count(*) from ("+sql+") q"
     nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
