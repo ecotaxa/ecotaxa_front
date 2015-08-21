@@ -106,6 +106,9 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.tasktaxoimport import TaskTaxoImport
     if ClassName=="TaskTaxoImport":
         return TaskTaxoImport(task)
+    from appli.tasks.taskexporttxt import TaskExportTxt
+    if ClassName=="TaskExportTxt":
+        return TaskExportTxt(task)
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 
 def LoadTask(taskid):
@@ -166,6 +169,13 @@ def TaskShow(TaskID):
         decodedsteperrors=["Task Decoding Error"]
     return render_template('task/show.html',task=task.task,steperror=decodedsteperrors,CustomDetailsAvail=CustomDetailsAvail)
 
+@app.route('/Task/GetFile/<int:TaskID>/<filename>', methods=['GET'])
+@login_required
+def TaskGetFile(TaskID,filename):
+    task=LoadTask(TaskID)
+    WorkingDir = task.GetWorkingDir()
+    return flask.send_from_directory(WorkingDir,task.GetResultFile())
+
 @app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskForceRestart(TaskID):
@@ -217,6 +227,15 @@ def TaskGetStatus(TaskID):
                 rep['d']['ExtraAction']="<a href='/Task/Show/%d' class='btn btn-primary btn-sm ' role='button'>Show Task</a>"%TaskID
                 if "GetDoneExtraAction" in dir(task):
                     rep['d']['ExtraAction']=task.GetDoneExtraAction()
+                if "GetResultFile" in dir(task):
+                    f=task.GetResultFile()
+                    if f is None:
+                        rep['d']['ExtraAction']="Error, final file not available"
+                    else:
+                        rep['d']['ExtraAction']="<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' role='button'>Get file %s</a>"%(TaskID,f,f)
+                        rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d' class='btn btn-primary btn-sm ' role='button'>Clean the result</a>"%(TaskID,)
+
+
             if task.task.taskstate=="Error":
                 rep['d']['IsError']="Y"
     except Exception as e:

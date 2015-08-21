@@ -93,8 +93,11 @@ def indexPrj(PrjId):
     g.headmenu = []
     g.headmenu.append(("/prj/%d"%(PrjId,),"Project home/Annotation"))
     g.headmenu.append(("/prjcm/%d"%(PrjId,),"Show Confusion Matrix"))
-    g.headmenu.append(("","SEP"))
+    if g.PrjAnnotate:
+        g.headmenu.append(("","SEP"))
+        g.headmenu.append(("/Task/Create/TaskExportTxt?p=%d"%(PrjId,),"Export data as text"))
     if g.PrjManager:
+        g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
         g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
