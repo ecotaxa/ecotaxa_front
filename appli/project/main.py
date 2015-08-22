@@ -98,7 +98,9 @@ def indexPrj(PrjId):
         g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
         g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
+        g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit Project settings"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
+
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters()
     return render_template('project/projectmain.html',top="",lefta=classiftab,leftb=filtertab
@@ -347,6 +349,7 @@ def GetClassifTab(Prj):
     JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
     order by t.name       """
     param={'projid':Prj.projid}
+    #TODO Mettre à jour pctvalidated s'il a changé
     res=GetAll(sql,param,False)
     return render_template('project/classiftab.html',res=res)
 

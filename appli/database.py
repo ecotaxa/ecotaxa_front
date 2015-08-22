@@ -268,13 +268,13 @@ def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCurs
         cur.close()
     return res
 
-def GetAssoc2Col(sql,params=None,debug=False):
+def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
     cur = db.engine.raw_connection().cursor()
     try:
         if debug:
             app.logger.debug("GetAssoc2Col SQL = %s %s",sql,params)
         cur.execute(sql,params)
-        res=dict()
+        res=dicttype()
         for r in cur:
             res[r[0]]=r[1]
     except:
