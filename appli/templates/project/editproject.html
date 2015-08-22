@@ -23,7 +23,7 @@
 <form class="form-horizontal" method="post">
     <h3>Edit project # {{ data.projid }}</h3>
   <table class=table width="100%">
-    <tr><td width="150px">Project Title </td><td width="300px">
+    <tr><td width="160px">Project Title </td><td width="300px">
         <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}">
     </td></tr>
     <tr><td>Visible</td><td>
@@ -39,9 +39,14 @@
 
   <tr><td>Initial Classification list</td><td>
         <input type="text"  class="form-control" id="initclassiflist" name="initclassiflist"  value="{{ data.initclassiflist|default('',true) }}">
+    <br><select name='inittaxo' id='inittaxo' class="taxolb" style="width: 280px;" multiple>
+    {% for r in g.predeftaxo %}
+      <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
+    {% endfor %}
+  </select>
     </td></tr>
 
-  <tr><td>field available for sorting & Display</td><td>
+  <tr><td>field available for<br>sorting & Display</td><td>
         <textarea  class="form-control" id="classiffieldlist" name="classiffieldlist"  rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
     </td><td>
     Format : Field=title (1 per line)<br>Available fields :
@@ -127,6 +132,15 @@ $(document).ready(function() {
          $("#TaxoModalBody").load("/search/taxotree?target="+targetid);
     });
     }); // Ready
+
+ $('#inittaxo').on("change", function (e) {
+  var selected=[];
+   $('#inittaxo :selected').each(function(){
+     selected.push($(this).val())
+      });
+   $("#initclassiflist").val(selected.join())
+ });
+
  </script>
 
 
