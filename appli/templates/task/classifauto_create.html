@@ -9,7 +9,9 @@
 {% extends "layout.html" %}
 
 {% block body %}
-
+<style>
+.table-condensed tr td {padding-top: 0px  !important;padding-bottom: 0px  !important; } {# On condense encore plus #}
+</style>
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
   <div class="form-group">
@@ -85,7 +87,7 @@ Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'check
 <table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
     <tr><th >Select</th><th width="200">Name</th><th >Nbr</th><th >%</th></tr>
     {%   for r in g.TaxoList %}
-        <tr><td><input type="checkbox" value="Y" name="taxo{{ r[0] }}" data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" checked></td><td>{{ r[1] }}</td><td class="rightfixedfont">{{ r[2] }}</td><td class="rightfixedfont">{{ r[3] }} %</td></tr>
+        <tr><td><input type="checkbox" value="Y" name="taxo{{ r[0] }}" data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" {{ r[4] }}></td><td>{{ r[1] }}</td><td class="rightfixedfont">{{ r[2] }}</td><td class="rightfixedfont">{{ r[3] }} %</td></tr>
     {% endfor %}
 </table>
 </td><td width="20"></td><td valign="top">
