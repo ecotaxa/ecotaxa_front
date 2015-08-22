@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#TODO lien back to project
 from appli import db,app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
 from appli.database import GetAll,GetAssoc2Col
 from time import time

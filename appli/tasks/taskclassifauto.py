@@ -25,7 +25,7 @@ class TaskClassifAuto(AsyncTask):
                 self.ProjectId=None
                 self.BaseProject=None
                 self.CritVar=None
-                self.Taxo=None
+                self.Taxo=""
 
     def __init__(self,task=None):
         super().__init__(task)
@@ -192,6 +192,7 @@ class TaskClassifAuto(AsyncTask):
                     d['methode']=self.param.Methode
                     d['perimeter']=self.param.Perimeter
                     d['baseproject']=self.param.BaseProject
+                    d['seltaxo']=self.param.Taxo
                     Prj.classifsettings=EncodeEqualList(d)
                     return self.StartTask(self.param)
             else: # valeurs par default
@@ -199,10 +200,12 @@ class TaskClassifAuto(AsyncTask):
                 # Certaines variable on leur propre zone d'edition, les autres sont dans la zone texte custom settings
                 self.param.CritVar=d.get("critvar","")
                 self.param.Methode=d.get("methode","")
+                self.param.Taxo=d.get("seltaxo","")
                 self.param.Perimeter=d.get("perimeter","nmc")
                 if "critvar" in d : del d["critvar"]
                 if "methode" in d : del d["methode"]
                 if "perimeter" in d : del d["perimeter"]
+                if "seltaxo" in d : del d["seltaxo"]
                 if "baseproject" in d : del d["baseproject"]
                 g.TxtCustSettings=EncodeEqualList(d)
             # Le projet de base est choisi second écran
@@ -215,7 +218,13 @@ class TaskClassifAuto(AsyncTask):
                     order by nbr desc,name"""
             g.TaxoList=GetAll(sql,{"projid":gvg("src")},cursor_factory=None)
             s=sum([r[2] for r in g.TaxoList])  # Nbr total d'objet par categorie
-            g.TaxoList=[(r[0],r[1],r[2],round(100*r[2]/s,1)) for r in g.TaxoList] # Ajout du % d'objet par categorie
+            g.TaxoList=[[r[0],r[1],r[2],round(100*r[2]/s,1),'checked'] for r in g.TaxoList] # Ajout du % d'objet par categorie
+            print("taxo ="+self.param.Taxo)
+            if self.param.Taxo!='':
+                TaxoSel=set([int(x) for x in self.param.Taxo.split(",")])
+                for i,r in zip(range(10000),g.TaxoList):
+                    if r[0] not in TaxoSel:
+                        g.TaxoList[i][4]=""
             # Determination des criteres/variables utilisées par l'algo de learning
             revobjmap = self.GetReverseObjMap(Prj)
             PrjBase=database.Projects.query.filter_by(projid=gvg("src")).first()

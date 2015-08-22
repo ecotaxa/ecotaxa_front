@@ -114,7 +114,11 @@ class TaskImport(AsyncTask):
             logging.info("SubTask1 : Analyze TSV Files")
             self.UpdateProgress(2,"Analyze TSV Files")
             self.LastNum={x:{'n':0,'t':0} for x in PredefinedTables}
-            #Todo extraire les max du mapping existant.
+            # Extraction des Max des champs
+            for m in self.param.Mapping.values():
+                v=int(m['field'][1:])
+                if v>self.LastNum[m['table']][m['field'][0]]:
+                    self.LastNum[m['table']][m['field'][0]]=v
             sd=Path(self.param.SourceDir)
             self.param.TotalRowCount=0
             Seen=set()
@@ -390,7 +394,6 @@ class TaskImport(AsyncTask):
                     db.session.commit()
                     if (TotalRowCount%100)==0:
                         self.UpdateProgress(100*TotalRowCount/self.param.TotalRowCount,"Processing files %d/%d"%(TotalRowCount,self.param.TotalRowCount))
-                    # break # TODO TEST à Supprimmer
                 logging.info("File %s : %d row Loaded",relname.as_posix(),RowCount)
         self.pgcur.execute("""update objects o
                             set imgcount=(select count(*) from images where objid=o.objid)
@@ -453,7 +456,7 @@ class TaskImport(AsyncTask):
                 self.param.ProjectId=gvg("p")
             return render_template('task/import_create.html',header=txt,data=self.param,ServerPath=gvp("ServerPath"),TxtTaxoMap=gvp("TxtTaxoMap"))
         if self.task.taskstep==1:
-            # self.param.TaxoFound['agreia pratensis']=None #todo Pour TEST A EFFACER
+            # self.param.TaxoFound['agreia pratensis']=None #Pour TEST A EFFACER
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
             app.logger.info("Pending Taxo Not Found = %s",NotFoundTaxo)
