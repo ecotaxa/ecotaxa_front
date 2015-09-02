@@ -1,11 +1,11 @@
 <p>Sample  <select id="sampleid" name="sampleid" style="width: 170px"  multiple> </select></p>
 <p>Depth <span id="spaninfodepth" style="color: blue;" class="glyphicon glyphicon-info-sign"></span></span> Min: <input type="text" id="filt_depthmin" style="width:50px;"> Max: <input type="text" id="filt_depthmax" style="width:50px;"></p>
 <table class="table" >
-  <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN" name="filt_MapOutN"></td></tr>
+  <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN" name="filt_MapOutN" autocomplete="off"></td></tr>
   <tr>
-    <td>W <input type="text" size="7" id="filt_MapOutW" name="filt_MapOutW"></td>
-    <td>E <input type="text" size="7" id="filt_MapOutE" name="filt_MapOutE"></td></tr>
-  <tr><td colspan="2" align="Center">S <input type="text" size="7" id="filt_MapOutS" name="filt_MapOutS"></td></tr>
+    <td>W <input type="text" size="7" id="filt_MapOutW" name="filt_MapOutW" autocomplete="off"></td>
+    <td>E <input type="text" size="7" id="filt_MapOutE" name="filt_MapOutE" autocomplete="off"></td></tr>
+  <tr><td colspan="2" align="Center">S <input type="text" size="7" id="filt_MapOutS" name="filt_MapOutS" autocomplete="off"></td></tr>
   <tr><td colspan="2" align="Center">
     <button type="button" class="btn btn-primary" onClick="OpenMap({{ g.Projid }});">Open Map</button>
     <button type="button" class="btn " onClick="ClearCoord();">Clear</button>
@@ -16,8 +16,8 @@
   <tr><td><b>Date</b> </td><td align="right"><a href='javascript:ClearDates();'>Clear</a>
    </td></tr>
 </table>
-<label for="filt_fromdate">From </label> <input type="text" style="width: 80px" id="filt_fromdate" name="filt_fromdate">
-<label for="filt_todate"> to </label> <input type="text" style="width: 80px" id="filt_todate" name="filt_todate">
+<label for="filt_fromdate">From </label> <input type="text" style="width: 80px" id="filt_fromdate" name="filt_fromdate" autocomplete="off">
+<label for="filt_todate"> to </label> <input type="text" style="width: 80px" id="filt_todate" name="filt_todate" autocomplete="off">
 
 <table width="100%">
   <tr><td><b>Time</b>
@@ -25,9 +25,9 @@
    </td></tr>
 </table>
 <div id="time-slider-range"></div>
-<label for="filt_fromtime">From </label> <input type="text" style="width: 45px" id="filt_fromtime" name="filt_fromtime">
-<label for="filt_totime"> to </label> <input type="text" style="width: 45px" id="filt_totime" name="filt_totime">
-<label for="filt_inverttime"> Invert </label> <input type="checkbox" value="Y" style="width: 45px" id="filt_inverttime" name="filt_inverttime">
+<label for="filt_fromtime">From </label> <input type="text" style="width: 45px" id="filt_fromtime" name="filt_fromtime" autocomplete="off">
+<label for="filt_totime"> to </label> <input type="text" style="width: 45px" id="filt_totime" name="filt_totime" autocomplete="off">
+<label for="filt_inverttime"> Invert </label> <input type="checkbox" value="Y" style="width: 45px" id="filt_inverttime" name="filt_inverttime" autocomplete="off">
 
 
 <script>
@@ -65,7 +65,7 @@ $(document).ready(function() {
     }); // Select2 Ajax
 
       $( "#filt_fromdate,#filt_todate" ).datepicker({
-      showButtonPanel: true,changeMonth: true,changeYear: true,dateFormat:"yy-mm-dd"
+      showButtonPanel: true,changeMonth: true,changeYear: true,dateFormat:"yy-mm-dd",
     });
 
     $( "#time-slider-range" ).slider({

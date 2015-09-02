@@ -26,8 +26,8 @@
 <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='jquery-ui/jquery-ui.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
-{# <script src="{{ url_for('static', filename='select2/js/select2.min.js') }}"></script> #}
-<script src="{{ url_for('static', filename='select2/js/select2.js') }}"></script>
+{# <script src="{{ url_for('static', filename='select2/js/select2.full.min.js') }}"></script> #}
+<script src="{{ url_for('static', filename='select2/js/select2.full.js') }}"></script>
 <script src="{{ url_for('static', filename='jquery.lazy.min.js') }}"></script>
 {# <script src="{{ url_for('static', filename='jquery.elevatezoom.js') }}"></script>  #}
 <link rel="stylesheet" href="/static/multizoom.css" type="text/css" />
@@ -52,7 +52,7 @@ $(document).ready(function() {
 </script>
 
 
-<div class="headinfo">
+<div id="divheadinfo" class="headinfo">
 <div class="headinfo panel panel-default">  <div class="panel-body" style="padding: 1px 5px 1px 5px;">
 <table width="100%"><tr>
     <td width="200px"><h1><a href="/">Ecotaxa</a></h1></td>

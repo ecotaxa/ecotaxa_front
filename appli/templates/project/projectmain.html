@@ -12,10 +12,7 @@
 {% extends "layout.html" %}
 {% block headcenter %}
 {% if g.headmenu %}
-<span style="font-size: 18px;">{{ g.ProjectTitle }}</span><br>
-    <span id="headersubtitle" style="color:#FF6600;">xxx</span><br>
-    <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
-    </td><td width="160px">
+    <table width="100%"><tr><td width="160px">
     <br><div class="btn-group" style="margin-right: 10px">
     <button type="button" class="btn btn-default">Project Action</button>
     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -32,11 +29,15 @@
       {%  endfor %}
   </ul>
 </div>
+    </td><td><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><br>
+    <span id="headersubtitle" style="color:#FF6600;"> </span><br>
+    <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
+    </td></tr></table>
 {% endif %} {# If headmenu #}
 
 {% endblock %}
 
-{% block body %}<div id="topbar" style="margin-top: -15px;margin-bottom: 3px;">
+{% block body %}<div id="topbar" >
 <input type="hidden" id="projid" value="{{ g.Projid }}">
 <input type="hidden" id="taxofilter" value="">
 <input type="hidden" id="taxofilterlabel" value="">
@@ -139,6 +140,14 @@ table.classiftab td {padding: 2px 3px 0px 3px ;  border-width:1px;border-style:s
 table.imgtab {margin-bottom: 5px;}
 table.imgtab td {vertical-align:bottom;text-align: center;
    border-width:1px;   border-style:solid; border-color:#c5c5c5;  }
+#column-right {margin-left: 270px;}
+#divheadinfo {position:fixed;top:0px;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;}
+#topbar {position:fixed;top:80px;left: 1px;width:100%; height:40px;z-index:10; background-color: #fff;}
+body {margin-top: 125px;}
+{#Permet de fixer la largeur de la dropdown Taxo Annotation#}
+.width240{ width: 240px !important; }
+{#Permet de reduire la taille et l'espace du texte du dropdown Taxo Annotation#}
+#select2-taxolbanno-results li {font-size: 12px; padding: 3px;}
 
 </style>
 <script>
@@ -241,9 +250,9 @@ function gotopage(nopage)
 $(document).ready(function() {
     if ("{{data.sortorder}}"=="desc")
         SortToggle();
-    $('#statuslabelspan').popover({html:true,trigger:'hover',placement:"left"});
+    $('#statuslabelspan').popover({html:true,trigger:'hover',placement:"left",container: 'body'});
     $('#statusfilter').data('content',$('#statuslabelspan').data('content'))
-    $('#statusfilter').popover({html:true,trigger:'hover',placement:"left"});
+    $('#statusfilter').popover({html:true,trigger:'hover',placement:"left",container: 'body'});
     $("#taxofilter").val("");
 
     {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
@@ -254,6 +263,7 @@ $(document).ready(function() {
 });
 
 function PostAddImages(){
+        $(document).scrollTop(0);
         // Required to  have Select2 component working on Bootstrap Popup
         $.fn.modal.Constructor.prototype.enforceFocus = function() {};
         // Add Zoom
@@ -344,7 +354,7 @@ jQuery('#SpanSelectAll').click(function(e){
 </script>
 
 
-        <div id="column-right" style="margin-left: 270px;">
+        <div id="column-right" >
             RIGHT
             {% if right=='dodefault' %}
                 <script>
