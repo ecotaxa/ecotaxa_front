@@ -32,19 +32,22 @@ def indexProjects():
     return PrintInCharte(txt)
 
 ######################################################################################################################
-def GetFieldList(Prj):
+def GetFieldList(Prj,champ='classiffieldlist'):
     fieldlist=collections.OrderedDict()
     fieldlist["orig_id"]="Image Name"
+    fieldlist["classif_auto_score"]="Score"
     objmap=DecodeEqualList(Prj.mappingobj)
     for v in ('objtime','depth_min','depth_max'):
         objmap[v]=v
     #fieldlist fait le mapping entre le nom fonctionnel et le nom à affiche
     # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe.
-    for field,dispname in DecodeEqualList(Prj.classiffieldlist).items():
+    fieldlist2={}
+    for field,dispname in DecodeEqualList(getattr(Prj,champ)).items():
         for ok,on in objmap.items():
             if field==on :
-                fieldlist[ok]=dispname
-    fieldlist["classif_auto_score"]="Score"
+                fieldlist2[ok]=dispname
+    for k,v in sorted(fieldlist2.items(), key=lambda t: t[1]):
+        fieldlist[k]=v
     return fieldlist
 
 ######################################################################################################################
@@ -71,10 +74,10 @@ def indexPrj(PrjId):
     fieldlist=GetFieldList(Prj)
     data["fieldlist"]=fieldlist
     data["sortlist"]=collections.OrderedDict({"":""})
-    for k,v in fieldlist.items():data["sortlist"][k]=v
     data["sortlist"]["classifname"]="Category Name"
     data["sortlist"]["random_value"]="Random"
     data["sortlist"]["classif_when"]="Validation date"
+    for k,v in fieldlist.items():data["sortlist"][k]=v
     data["statuslist"]=collections.OrderedDict({"":"All"})
     data["statuslist"]["U"]="Unclassified"
     data["statuslist"]["P"]="Predicted"
@@ -203,7 +206,7 @@ where o.projid=%(projid)s
     #filt_fromdate,#filt_todate
 
     sqlcount="select count(*) from ("+sql+") q"
-    nbrtotal=GetAll(sqlcount,sqlparam,False)[0][0]
+    nbrtotal=GetAll(sqlcount,sqlparam,debug=False)[0][0]
     pagecount=math.ceil(nbrtotal/ipp)
     if sortby=="classifname":
         sql+=" order by t.name "+sortorder
@@ -281,14 +284,20 @@ where o.projid=%(projid)s
             .format(filename,width,height,cellwidth,r['objid'],pos,thumbfilename)
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
         if popupenabled=="1":
-            poptitletxt="<p style='color:black;'>%s"%(r['orig_id'],)
+            popoverfieldlist=GetFieldList(Prj,champ='popoverfieldlist')
+            popoverfieldlist.pop('orig_id','')
+            popoverfieldlist.pop('objtime','')
+            poptitletxt="<p style='color:black;font-size:12px;'>%s"%(r['orig_id'],)
             poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
             if r[3]!="":
                 poptxt+="<br>By %s"%(r[3])
-            for k,v in fieldlist.items():
-                poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
+            for k,v in popoverfieldlist.items():
+                if k=='classif_auto_score' and r["classif_qual"]=='V':
+                    poptxt+="<br>%s : %s"%(v,"-")
+                else:
+                    poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
             poptxt+="<br>Sample : "+r['samplename']
-            popattribute="data-title=\"{0}\" data-content=\"{1}\"".format(poptitletxt,poptxt)
+            popattribute="data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'".format(poptitletxt,poptxt,'left' if WidthOnRow>500 else 'right')
         else: popattribute=""
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher
         bottomtxt=""
@@ -298,7 +307,10 @@ where o.projid=%(projid)s
             bottomtxt+="<br>Time %s"%(r['objtime'],)
         for k,v in fieldlist.items():
             if k in dispfield:
-                bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
+                if k=='classif_auto_score' and r["classif_qual"]=='V':
+                    bottomtxt+="<br>%s : -"%v
+                else:
+                    bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
         if bottomtxt!="":
             bottomtxt="<span style='font-size:12px;'>"+bottomtxt+"</span>"
         txt+="<div class='subimg {1}' {2}><span class=taxo >{0}</span>{3}<div class=ddet><span class=ddets>View {4}</div></div>"\

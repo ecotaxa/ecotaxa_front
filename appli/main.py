@@ -2,10 +2,9 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp
-from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_security.decorators import roles_accepted
-import os,time
+
 
 # Load default config and override config from an environment variable
 # app.config.update(dict(
@@ -90,31 +89,6 @@ def testadmin():
     return "Admin OK"
 
 
-@app.route('/common/ServerFolderSelect')
-def ServerFolderSelect():
-    ServerRoot=app.config['SERVERLOADAREA']
-    res = []
-    print(res)
-    return render_template('common/fileserverpopup.html',root_elements=res,targetid=gvg("target","ServerPath"))
-    return "Admin OK : "+ServerRoot
-
-@app.route('/common/ServerFolderSelectJSON')
-def ServerFolderSelectJSON():
-    ServerRoot=Path(app.config['SERVERLOADAREA'])
-    CurrentPath=ServerRoot
-    parent=gvg("id")
-    if parent!='#':
-        CurrentPath=ServerRoot.joinpath(Path(parent))
-    res=[]
-    for x in CurrentPath.iterdir():
-        rr=x.relative_to(ServerRoot).as_posix()
-        rc=x.relative_to(CurrentPath).as_posix()
-        if x.is_dir():
-            res.append(dict(id=rr,text="<span class=v>"+rc+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=parent,children=True))
-        if x.suffix.lower()==".zip":
-            fi=os.stat( x.as_posix())
-            res.append(dict(id=rr,text="<span class=v>"+"%s (%.1f Mb : %s)"%(rc,fi.st_size/1048576,time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(fi.st_mtime)))+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=parent,children=False))
-    return json.dumps(res);
 
 @app.before_request
 def before_request_security():

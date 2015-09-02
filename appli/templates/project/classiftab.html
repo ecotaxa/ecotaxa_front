@@ -1,7 +1,7 @@
 {#<span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>#}
   <div style="width: 230px;">
     <div class="input-group">
-       <select id="taxolbanno" name="taxolbanno" style="width: 170px" class='taxolb' > </select>
+       <select id="taxolbanno" name="taxolbanno" style="width: 170px" class='taxolb'  autocomplete="off"> </select>
             <span class="input-group-btn">
                 <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbanno" title="Search on Taxonomy Tree">
                     <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
@@ -109,6 +109,7 @@ function ValidateAll(NextPage) {
 {% if g.PrjAnnotate %}
     ).droppable({
       tolerance: "pointer",
+      hoverClass: "taxodrop_hover",
       drop: function( event, ui ) {
           //console.log(ui.draggable);
           //console.log(this);
@@ -127,8 +128,9 @@ function ValidateAll(NextPage) {
           ui.draggable.each(function (e,o) {
               if( $(o).hasClass( "zoomtracker" )) {
                   LstTd.push(  $($(o).data("specs").origImg.closest('td')));
-              } else if( $(o).hasClass( "taxo" )) {  // Sinon c'est le taxo du div subimg
-                  LstTd.push(  $(o).closest('td'));
+{#              } else if( $(o).hasClass( "taxo" )) {  // Sinon c'est le taxo du div subimg#}
+              } else if( $(o).is( "td" )) {  // Sinon c'est le taxo du div subimg
+                  LstTd.push(  $(o));
               } else if( $(o).hasClass( "lazy" )) {  // Sinon c'est l'image
                   LstTd.push(  $(o).closest('td'));
               }
@@ -147,10 +149,14 @@ function ValidateAll(NextPage) {
       }
     }
 {% endif %}
-    ).click(function(){
-        //$("#taxofilter").val($(this).attr('taxoid'));
-        SetTaxoFilter($(this).attr('taxoid'),$(this).find('.taxodrop').text());
-        LoadRightPane();
+    ).click(function() {
+                //$("#taxofilter").val($(this).attr('taxoid'));
+                if ($(this).hasClass('activeTaxo'))
+                    SetTaxoFilter(false, -1);
+                else {
+                SetTaxoFilter($(this).attr('taxoid'), $(this).find('.taxodrop').text());
+                LoadRightPane();
+            }
     });
 
   });
@@ -172,18 +178,28 @@ function AssignTaxoLbToSelection() {
 
 $(document).ready(function() {
     EnableSelect2Taxolb();
+{#    Le fait de choisir un item fait l'assignation/CTRL+A#}
+    $('#taxolbanno').on("select2:select", function (e) {
+        AssignTaxoLbToSelection();
+        $(".ui-state-highlight").removeClass("ui-state-highlight");
+    });
 {#     Ctrl + A affecte la valeur selectionnée#}
 {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function(e) {#}
     $(document).bind('keydown', 'Test1', function(e) {
-       if((e.keyCode === 65)&& e.ctrlKey) {
+       if((e.keyCode === 65)&& (e.ctrlKey||e.metaKey)) { {# CTRL+A #}
           AssignTaxoLbToSelection();
           e.preventDefault();
       }
+       if((e.keyCode === 83)&& (e.ctrlKey||e.metaKey)) { {# CTRL+S #}
+          SavePendingChanges();
+          e.preventDefault();
+      }
+
     });
 {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvle la popup#}
     $(document).bind('keydown', function(e) {
       if(document.activeElement.nodeName=='BODY')
-       if((e.keyCode >= 65)&&(e.keyCode <= 90)&& !e.ctrlKey)
+       if((e.keyCode >= 65)&&(e.keyCode <= 90)&& !e.ctrlKey&& !e.metaKey)
          if($(".ui-selected").length>0)
        {
          $('#taxolbanno').select2("open");

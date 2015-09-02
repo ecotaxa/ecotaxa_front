@@ -46,11 +46,17 @@
   </select>
     </td></tr>
 
-  <tr><td>field available for<br>sorting & Display</td><td>
+  <tr><td>Fields available for<br>sorting & Display</td><td>
         <textarea  class="form-control" id="classiffieldlist" name="classiffieldlist"  rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
     </td><td>
     Format : Field=title (1 per line)<br>Available fields :
     {% for x in  g.maplist %}{{ x }}, {% endfor %}
+
+   </td></tr>
+  <tr><td>Fields displayed in popover</td><td>
+        <textarea  class="form-control" id="popoverfieldlist" name="popoverfieldlist"  rows="8">{{ data.popoverfieldlist|default('',true) }}</textarea>
+    </td><td>
+    Format : Field=title (1 per line), same as previous field.
 
    </td></tr>
   <tr><td>Comments</td><td>

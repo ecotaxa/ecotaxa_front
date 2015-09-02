@@ -1,5 +1,23 @@
-<p>Sample  <select id="sampleid" name="sampleid" style="width: 170px"  multiple> </select></p>
-<p>Depth <span id="spaninfodepth" style="color: blue;" class="glyphicon glyphicon-info-sign"></span></span> Min: <input type="text" id="filt_depthmin" style="width:50px;"> Max: <input type="text" id="filt_depthmax" style="width:50px;"></p>
+
+<style>
+{#Permet de reduire la taille et l'espace du texte du dropdown Taxo Sample#}
+#select2-sampleid-results li {font-size: 12px; padding: 3px;}
+#TabB .select2-selection__rendered {font-size: 12px; }
+</style>
+
+<table width="100%">
+  <tr><td><b>Sample</b> </td><td align="right"><a href='javascript:ClearSamples();'>Clear</a>
+   </td></tr>
+</table>
+
+<p style="border-bottom: 1px solid #ddd;padding-bottom: 4px;">
+<select id="sampleid" name="sampleid" style="width: 250px"  multiple> </select>
+</p>
+<p>Depth <span id="spaninfodepth" style="color: blue;" class="glyphicon glyphicon-info-sign"></span>
+    Min: <input type="text" id="filt_depthmin" style="width:50px;" autocomplete="off">
+    Max: <input type="text" id="filt_depthmax" style="width:50px;" autocomplete="off">
+    <a href='javascript:ClearDepths();' title="Clear"><span class="glyphicon glyphicon-erase"></span></a>
+</p>
 <table class="table" >
   <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN" name="filt_MapOutN" autocomplete="off"></td></tr>
   <tr>
@@ -12,14 +30,14 @@
   </td></tr>
 </table>
 
-<table width="100%">
+<table width="100%" style="border-top: 1px solid #ddd;padding-top: 4px;">
   <tr><td><b>Date</b> </td><td align="right"><a href='javascript:ClearDates();'>Clear</a>
    </td></tr>
 </table>
 <label for="filt_fromdate">From </label> <input type="text" style="width: 80px" id="filt_fromdate" name="filt_fromdate" autocomplete="off">
 <label for="filt_todate"> to </label> <input type="text" style="width: 80px" id="filt_todate" name="filt_todate" autocomplete="off">
 
-<table width="100%">
+<table width="100%" style="border-top: 1px solid #ddd;padding-top: 4px;">
   <tr><td><b>Time</b>
   </td><td align="right"><a href='javascript:ClearTimes();'>Clear</a>
    </td></tr>
@@ -46,10 +64,26 @@ function ClearCoord() {
 function ClearDates(){
   $( "#filt_fromdate,#filt_todate" ).val("");
 }
+function ClearDepths(){
+  $( "#filt_depthmin,#filt_depthmax" ).val("");
+}
 function ClearTimes(){
   $("#filt_fromtime,#filt_totime" ).val("");
   $("#filt_inverttime").prop("checked",false);
 }
+function ClearSamples(){
+  $( "#sampleid" ).val(null).trigger("change");
+}
+function UpdateTimeSliderColor(){
+    if($("#filt_inverttime").prop("checked")) {
+       $("#time-slider-range .ui-slider-range").css('background-color','#fff')
+       $("#time-slider-range").css('background-color','#337ab7')
+    } else    {
+       $("#time-slider-range .ui-slider-range").css('background-color','#337ab7')
+       $("#time-slider-range").css('background-color','#fff')
+    }
+}
+
 $(document).ready(function() {
   $('#spaninfodepth').popover({html: true, trigger: 'hover', placement: "bottom",content:"Positive values, both values are required. Both Detph min&max of objects must be in the filter range to be selected"});
 
@@ -82,6 +116,7 @@ $(document).ready(function() {
         $( "#filt_totime" ).val( v );
       }
     });
-
+    $("#filt_inverttime").change(function(){UpdateTimeSliderColor();});
+    UpdateTimeSliderColor();
 });
 </script>

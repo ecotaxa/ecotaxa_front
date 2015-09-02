@@ -25,7 +25,7 @@ def PrjEdit(PrjId):
         for f in request.form:
             if f in dir(Prj):
                 setattr(Prj,f,gvp(f))
-        print(request.form)
+        # print(request.form)
         for m in Prj.projmembers:
             if gvp('priv_%s_delete'%m.id)=='Y':
                 db.session.delete(m)

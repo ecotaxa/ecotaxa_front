@@ -29,9 +29,10 @@
       {%  endfor %}
   </ul>
 </div>
+     <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
     </td><td><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><br>
     <span id="headersubtitle" style="color:#FF6600;"> </span><br>
-    <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
+
     </td></tr></table>
 {% endif %} {# If headmenu #}
 
@@ -39,9 +40,9 @@
 
 {% block body %}<div id="topbar" >
 <input type="hidden" id="projid" value="{{ g.Projid }}">
-<input type="hidden" id="taxofilter" value="">
-<input type="hidden" id="taxofilterlabel" value="">
-<input type="hidden" id="pageoffset" value="0">
+<input type="hidden" id="taxofilter" value=""  autocomplete="off">
+<input type="hidden" id="taxofilterlabel" value=""  autocomplete="off">
+<input type="hidden" id="pageoffset" value="0"  autocomplete="off">
 <table><tr><td>
     Sort by :<select name="sortby" id="sortby">
 {% for key, value in data.sortlist.items() %}
@@ -94,7 +95,7 @@ data-content="<b>All</b> : display all images <br>
 <br>{{ checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
 </td><td>&nbsp;
     <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
-        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</button>
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update View</button>
 {{ top|safe }}
 </td></tr></table>
     </div>
@@ -120,7 +121,14 @@ data-content="<b>All</b> : display all images <br>
                   </ul>
                   <div class="tab-content"> <!-- Tab panes -->
                     <div role="tabpanel" class="tab-pane active" id="TabA">{{ lefta|safe }}</div>
-                    <div role="tabpanel" class="tab-pane" id="TabB"> {{ leftb|safe }}
+                    <div role="tabpanel" class="tab-pane" id="TabB">
+                        <a href='javascript:ClearAllFilterCriteria();'>Clear all filter &amp; update view/refresh</a><br>
+                        {{ leftb|safe }}
+                        <br>
+                        <p align="center" style="border-top: 1px solid #ddd;padding-top: 4px;">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
+                            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Apply Filter / Update View</button>
+                        </p>
 
                     </div>
                   </div>
@@ -148,7 +156,7 @@ body {margin-top: 125px;}
 .width240{ width: 240px !important; }
 {#Permet de reduire la taille et l'espace du texte du dropdown Taxo Annotation#}
 #select2-taxolbanno-results li {font-size: 12px; padding: 3px;}
-
+.popover {max-width: 500px;}
 </style>
 <script>
 var PendingChanges={};
@@ -162,7 +170,11 @@ function LoadRightPane(){
     var TxtFilter=""
     req={taxo:$("#taxofilter").val(),resultwidth:$("#column-right").width(),windowheight:$(window).height()};
     if($("#taxofilterlabel").val()!="")
-        TxtFilter+=" Taxo="+$("#taxofilterlabel").val()
+        TxtFilter+=" Taxo="+$("#taxofilterlabel").val();
+    $(".ui-state-highlight").removeClass("ui-state-highlight");
+    $(".activeTaxo").removeClass("activeTaxo");
+    if($("#taxofilter").val()!="")
+        $("#TabA [taxoid="+$("#taxofilter").val()+"]").addClass("activeTaxo");
     req['ipp']=$("#ipp").val();
     req['zoom']=$("#zoom").val();
     req['sortby']=$("#sortby").val();
@@ -254,6 +266,10 @@ $(document).ready(function() {
     $('#statusfilter').data('content',$('#statuslabelspan').data('content'))
     $('#statusfilter').popover({html:true,trigger:'hover',placement:"left",container: 'body'});
     $("#taxofilter").val("");
+{#Si on choisi un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields#}
+    $('#sortby').change(function(){
+        $("#dispfield_"+$(this).val()+"  .glyphicon").addClass('glyphicon-ok');
+    });
 
     {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
     $('#sortby').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
@@ -272,8 +288,10 @@ function PostAddImages(){
                 return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
             AddZoom(element);}});
         // Make sub image draggable
-        jQuery('.imgtab td .subimg .taxo').draggable({revert:true,revertDuration:0});
-        jQuery('.imgtab td img').draggable({revert:true,revertDuration:0});
+        jQuery('.imgtab td').draggable({revert:true,revertDuration:0,cursor: "move",
+      	    cursorAt: { top: 0, left: 0 },
+			helper: function( ev ) {return $( "<img src='/static/drag_cursor.png'>" );}   });
+{#        jQuery('.imgtab td img').draggable({revert:true,revertDuration:0});#}
         // Make the cell clickable for selection
         jQuery('.imgtab td').click(function(e){
             if($(e.target).hasClass('linestart'))
@@ -290,7 +308,7 @@ function PostAddImages(){
                     }
                   return;
                 }
-            if (!e.ctrlKey)
+            if ((!e.ctrlKey)&&(!e.metaKey))
                 $('.ui-selected').removeClass('ui-selected');
             if($(e.target).hasClass('linestart')) // select line (except this first column)
                 $(e.target).closest('tr').find('td').addClass('ui-selected');
@@ -298,7 +316,7 @@ function PostAddImages(){
             });
         // Make ZoomTracker Clickable for selection
         jQuery('body').delegate('.zoomtracker','click',function(e){
-            if (!e.ctrlKey)
+            if ((!e.ctrlKey)&&(!e.metaKey))
                 $('.ui-selected').toggleClass('ui-selected');
             $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected')
             });
@@ -313,7 +331,9 @@ function PostAddImages(){
                     var $node = $( this );
                     if( $node.hasClass( "zoomtracker" ) ) {
                         //console.log("zoomtracker");
-                        jQuery($node).draggable({revert:true,revertDuration:0});
+                        jQuery($node).draggable({revert:true,revertDuration:0,cursor: "move",
+                            cursorAt: { top: 0, left: 0 },
+                            helper: function( ev ) {return $( "<img src='/static/drag_cursor.png'>" );}});
                     }
                 });
             }
@@ -322,7 +342,7 @@ function PostAddImages(){
         var config = {attributes: true,childList: true,characterData: true};
         observer.observe(target, config);
         // Enable the popover
-        var option={'placement':'left','trigger':'hover','html':true};
+        var option={'trigger':'hover','html':true};
         $('div.subimg').popover(option);
         $('.ddets').click(function(e){
             e.stopPropagation();
@@ -347,9 +367,16 @@ jQuery('#SpanSelectAll').click(function(e){
             else
                 jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
                 });
-
-
 }  //PostAddImages
+
+function ClearAllFilterCriteria(){
+    ClearCoord();
+    ClearDates();
+    ClearTimes();
+    ClearSamples();
+    ClearDepths();
+    LoadRightPane();
+}
 
 </script>
 
