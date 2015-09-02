@@ -5,7 +5,7 @@ from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence,func
 from sqlalchemy.orm import foreign,remote
-import json,psycopg2.extras
+import json,psycopg2.extras,datetime
 
 AdministratorLabel="Application Administrator"
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
@@ -86,7 +86,8 @@ class Projects(db.Model):
     pctvalidated = db.Column(DOUBLE_PRECISION)
     classifsettings  = db.Column(VARCHAR) # Settings for Automatic classification.
     initclassiflist  = db.Column(VARCHAR) # Initial list of categories
-    classiffieldlist  = db.Column(VARCHAR) # Fields available on Manual classif screen
+    classiffieldlist  = db.Column(VARCHAR) # Fields available on sort & displayed field of Manual classif screen
+    popoverfieldlist  = db.Column(VARCHAR) # Fields available on popover of Manual classif screen
     projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects')) #
     comments  = db.Column(VARCHAR)
     projtype  = db.Column(VARCHAR(50))
@@ -213,6 +214,7 @@ Index('IS_ObjectsDepth',Objects.__table__.c.projid,Objects.__table__.c.classif_q
 Index('IS_ObjectsTime',Objects.__table__.c.projid,Objects.__table__.c.classif_qual,Objects.__table__.c.objtime)
 Index('IS_ObjectsDate',Objects.__table__.c.objdate,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
 Index('IS_ObjectsRandom',Objects.__table__.c.random_value,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
+Index('IS_ObjectsOrigID',Objects.__table__.c.projid,Objects.__table__.c.orig_id,Objects.__table__.c.classif_qual,Objects.__table__.c.classif_who) # Pour le tri par defaut
 
 class ObjectsClassifHisto(db.Model):
     __tablename__ = 'objectsclassifhisto'
@@ -251,11 +253,11 @@ class TempTaxo(db.Model):
 Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
 Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
+GlobalDebugSQL=False
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
     cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
-        if debug:
-            app.logger.debug("GetAssoc SQL = %s %s",sql,params)
+        starttime=datetime.datetime.now()
         cur.execute(sql,params)
         res=dict()
         for r in cur:
@@ -265,23 +267,26 @@ def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCurs
         cur.connection.rollback()
         raise
     finally:
+        if debug or GlobalDebugSQL:
+            app.logger.debug("GetAssoc (%s) SQL = %s %s",(datetime.datetime.now()-starttime).total_seconds(),sql,params)
         cur.close()
     return res
 
 def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
     cur = db.engine.raw_connection().cursor()
     try:
-        if debug:
-            app.logger.debug("GetAssoc2Col SQL = %s %s",sql,params)
+        starttime=datetime.datetime.now()
         cur.execute(sql,params)
         res=dicttype()
         for r in cur:
             res[r[0]]=r[1]
     except:
-        app.logger.debug("GetAssoc2Col Exception SQL = %s %s",sql,params)
+        app.logger.debug("GetAssoc2Col  Exception SQL = %s %s",sql,params)
         cur.connection.rollback()
         raise
     finally:
+        if debug or GlobalDebugSQL:
+            app.logger.debug("GetAssoc2Col (%s) SQL = %s %s",(datetime.datetime.now()-starttime).total_seconds(),sql,params)
         cur.close()
     return res
 
@@ -289,8 +294,7 @@ def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
 def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
     cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
-        if debug:
-            app.logger.debug("GetAll SQL = %s %s",sql,params)
+        starttime=datetime.datetime.now()
         cur.execute(sql,params)
         res = cur.fetchall()
     except:
@@ -298,14 +302,15 @@ def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor
         cur.connection.rollback()
         raise
     finally:
+        if debug or GlobalDebugSQL:
+            app.logger.debug("GetAll (%s) SQL = %s %s",(datetime.datetime.now()-starttime).total_seconds(),sql,params)
         cur.close()
     return res
 
 def ExecSQL(sql,params=None,debug=False):
     cur = db.engine.raw_connection().cursor()
     try:
-        if debug:
-            app.logger.debug("ExecSQL SQL = %s %s",sql,params)
+        starttime=datetime.datetime.now()
         cur.execute(sql,params)
         LastRowCount=cur.rowcount;
         cur.connection.commit()
@@ -314,5 +319,7 @@ def ExecSQL(sql,params=None,debug=False):
         cur.connection.rollback()
         raise
     finally:
+        if debug or GlobalDebugSQL:
+            app.logger.debug("ExecSQL (%s) SQL = %s %s",(datetime.datetime.now()-starttime).total_seconds(),sql,params)
         cur.close()
     return LastRowCount

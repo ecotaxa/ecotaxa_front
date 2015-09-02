@@ -103,6 +103,8 @@ def ScaleForDisplay(v):
         if(abs(v)<100):
             return "%0.2f"%(v)
         else: return "%0.f"%(v)
+    elif v is None:
+        return ""
     else:
         return v
 

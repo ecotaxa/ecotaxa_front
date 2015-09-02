@@ -8,3 +8,6 @@
 .linestart{font-weight: bold; background: #aaaaaa;}
 
 .ui-datepicker {  z-index: 4 !important; } /*Fix issue of Slider button over calendar on filter on FFX*/
+
+.taxodrop_hover { background: #5cb85c; }
+.activeTaxo { background: #BCBCBC; }

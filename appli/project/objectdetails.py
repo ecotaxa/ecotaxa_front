@@ -47,7 +47,7 @@ def objectdetails(objid):
     t.append("""<BR>Image list : """)
     for img in obj.images:
         (width,height)=ComputeLimitForImage(img.width,img.height,PageWidth,WindowHeight)
-        t.append("""<a href="javascript:SwapImg1('{1}',{2},{3});" >Rank {0}</a> """
+        t.append("""<a href="javascript:SwapImg1('{1}',{2},{3});" >Miniature {0}</a> """
                  .format(img.imgrank+1,img.file_name,width,height))
     # Ajout de la 1ère image
     (width,height)=ComputeLimitForImage(obj.images[0].width,obj.images[0].height,PageWidth,WindowHeight)
@@ -134,7 +134,7 @@ $(document).ready(function() {
     </tr><tr><td><b>Depth min</td><td>{4}</td><td><b>Depth max</td><td>{5}</td><td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
     </tr><tr>""".format(obj.longitude,obj.latitude,obj.objdate,obj.objtime
                         ,obj.depth_min,obj.depth_max
-                        ,obj.classif_auto.name+" ("+str(obj.classif_auto_score)+")" if obj.classif_auto else "",obj.classif_auto_when))
+                        ,obj.classif_auto.name+" (%0.3f)"%obj.classif_auto_score if obj.classif_auto else "",obj.classif_auto_when))
     cpt=0
     # Insertion des champs object
     for k,v in  collections.OrderedDict(sorted(DecodeEqualList(Prj.mappingobj).items())).items():
