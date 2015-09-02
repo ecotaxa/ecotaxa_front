@@ -24,12 +24,12 @@ def searchtaxo():
             sql="""
             SELECT tf.id, name, case when id2 is null then 0 else 1 end inpreset FROM taxonomy tf
             join (select t.id id1,c.id id2 FROM taxonomy t
-            full JOIN (VALUES ("""+InitClassif+""")) c(id) ON t.id = c.id
+            full JOIN (VALUES """+InitClassif+""") c(id) ON t.id = c.id
                  WHERE  lower(name) LIKE %(term)s) t2
             on tf.id=coalesce(id1,id2)
               WHERE  lower(name) LIKE %(term)s
             order by inpreset desc,name limit 200 """
-    res = GetAll(sql, param)
+    res = GetAll(sql, param,debug=True)
     return json.dumps([dict(id=r[0],text=r[1],pr=r[2]) for r in res])
 
 

@@ -320,12 +320,12 @@ where o.projid=%(projid)s
     if pagecount>1 or pageoffset>0:
         t.append("<p align=center> Page %d/%d - Go to page : "%(pageoffset+1,pagecount))
         if pageoffset>0:
-            t.append("<a href='#toppage' onclick='gotopage(%d);'>&lt;</a>"%(pageoffset-1))
+            t.append("<a href='javascript:gotopage(%d);' >&lt;</a>"%(pageoffset-1))
         for i in range(0,pagecount-1,math.ceil(pagecount/20)):
-            t.append("<a href='#toppage' onclick='gotopage(%d);'>%d</a> "%(i,i+1))
-        t.append("<a href='#toppage' onclick='gotopage(%d);'>%d</a>"%(pagecount-1,pagecount))
+            t.append("<a href='javascript:gotopage(%d);' >%d</a> "%(i,i+1))
+        t.append("<a href='javascript:gotopage(%d);' >%d</a>"%(pagecount-1,pagecount))
         if pageoffset<pagecount-1:
-            t.append("<a href='#toppage' onclick='gotopage(%d);'>&gt;</a>"%(pageoffset+1))
+            t.append("<a href='javascript:gotopage(%d);' >&gt;</a>"%(pageoffset+1))
         t.append("</p>")
     t.append("""
     <script>

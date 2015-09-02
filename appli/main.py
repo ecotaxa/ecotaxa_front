@@ -21,17 +21,24 @@ app.register_blueprint(vaultBP)
 
 @app.route('/')
 def index():
-    flash('Flash Test Info','info')
-    flash('Flash Test Erreur','error')
-    flash('Flash Test warning','warning')
-    #flash('Flash Message')
-    txt = "<a href=/Task/Create/TaskTest>Task/Create/TaskTest</a><br>"
-    txt += "<a href=/Task/Create/TaskTaxoSync>Task/Create/TaskTaxoSync</a><br>"
-    txt += "<a href="+url_for("test1")+">Test 1</a><br>"
-    txt += "<a href="+url_for("test2")+">Test 2 : Layout seul</a><br>"
-    txt += "<a href="+url_for("test3")+">Test 3 : Recherche et affichage</a><br>"
-    txt += "<a href=/Task/Create/TaskImport?p=1>Create task Import</a><br>"
-    txt += "<a href=/prj/2>Go to project 2</a><br>"
+    # flash('Flash Test Info','info')
+    # flash('Flash Test Erreur','error')
+    # flash('Flash Test warning','warning')
+    # #flash('Flash Message')
+    # txt = "<a href=/Task/Create/TaskTest>Task/Create/TaskTest</a><br>"
+    # txt += "<a href=/Task/Create/TaskTaxoSync>Task/Create/TaskTaxoSync</a><br>"
+    # txt += "<a href="+url_for("test1")+">Test 1</a><br>"
+    # txt += "<a href="+url_for("test2")+">Test 2 : Layout seul</a><br>"
+    # txt += "<a href="+url_for("test3")+">Test 3 : Recherche et affichage</a><br>"
+    # txt += "<a href=/Task/Create/TaskImport?p=1>Create task Import</a><br>"
+    # txt += "<a href=/prj/2>Go to project 2</a><br>"
+    with open('appli/static/home/home.html', 'r') as f:
+        txt= f.read()
+    txt+="""<p align=center>
+    <a href="/explore/" class="btn btn-info btn-lg">Explore All Images</a>
+    <a href="/prj/" class="btn btn-info btn-lg">Select a project</a>
+     </p>"""
+
 
     return PrintInCharte(txt)
     # return render_template('layout.html',bodycontent=txt)

@@ -1,4 +1,4 @@
-.status-validated { background: #80FF80; }
+.status-validated { background: #5cb85c; }
 .status-dubious { background: #FFB84D; }
 .status-predicted { background: #BCBCBC; }
 .status-unknown { background: #FF2424; }
@@ -7,3 +7,4 @@
 .ToBeSaved .taxo {color:red;}
 .linestart{font-weight: bold; background: #aaaaaa;}
 
+.ui-datepicker {  z-index: 4 !important; } /*Fix issue of Slider button over calendar on filter on FFX*/
