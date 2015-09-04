@@ -198,12 +198,12 @@ $(document).ready(function() {
     });
 {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvle la popup#}
     $(document).bind('keydown', function(e) {
-      if(document.activeElement.nodeName=='BODY')
+      if((document.activeElement.nodeName=='BODY')||(document.activeElement.nodeName=='SPAN'))
        if((e.keyCode >= 65)&&(e.keyCode <= 90)&& !e.ctrlKey&& !e.metaKey)
          if($(".ui-selected").length>0)
        {
          $('#taxolbanno').select2("open");
-         $('.select2-search__field').val(String.fromCharCode(e.keyCode));
+         $('.taxopopup .select2-search__field').val(String.fromCharCode(e.keyCode));
           //console.log(e);
           e.preventDefault();
       }

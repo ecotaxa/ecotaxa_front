@@ -69,6 +69,21 @@ def ForceTest1Values():
     t.task.taskstep=1
     t.UpdateParam()
 
+@manager.command
+def ResetDBSequence():
+    print("Start Sequence Reset")
+    db.session.execute("SELECT setval('seq_acquisitions', (SELECT max(acquisid) FROM acquisitions), true)")
+    db.session.execute("SELECT setval('seq_images', (SELECT max(imgid) FROM images), true)")
+    db.session.execute("SELECT setval('seq_objects', (SELECT max(objid) FROM objects), true)")
+    db.session.execute("SELECT setval('seq_process', (SELECT max(processid) FROM process), true)")
+    db.session.execute("SELECT setval('seq_projects', (SELECT max(projid) FROM projects), true)")
+    db.session.execute("SELECT setval('seq_projectspriv', (SELECT max(id) FROM projectspriv), true)")
+    db.session.execute("SELECT setval('seq_roles', (SELECT max(id) FROM roles), true)")
+    db.session.execute("SELECT setval('seq_samples', (SELECT max(sampleid) FROM samples), true)")
+    db.session.execute("SELECT setval('seq_taxonomy', (SELECT max(id) FROM taxonomy), true)")
+    db.session.execute("SELECT setval('seq_temp_tasks', (SELECT max(id) FROM temp_tasks), true)")
+    db.session.execute("SELECT setval('seq_users', (SELECT max(id) FROM users), true)")
+    print("Sequence Reset Done")
 
 if __name__ == "__main__":
     manager.run()
