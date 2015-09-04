@@ -130,7 +130,7 @@ $(document).ready(function() {
     <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
     <table class='table table-bordered'><tr>
-    <td><b>longitude</td><td>{0}</td><td><b>latitude</td><td>{1}</td><td><b>Date</td><td>{2}</td><td><b>Time</td><td>{3}</td>
+    <td><b>longitude</td><td>{0:.5f}</td><td><b>latitude</td><td>{1:.5f}</td><td><b>Date</td><td>{2}</td><td><b>Time</td><td>{3}</td>
     </tr><tr><td><b>Depth min</td><td>{4}</td><td><b>Depth max</td><td>{5}</td><td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
     </tr><tr>""".format(obj.longitude,obj.latitude,obj.objdate,obj.objtime
                         ,obj.depth_min,obj.depth_max
@@ -144,7 +144,7 @@ $(document).ready(function() {
         t.append("<td><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(obj,k,"???"))))
     t.append("</tr></table></div>")
     # insertion des champs Sample, Acquisition & Processing dans leurs onglets respectifs
-    for r in (("Sample","mappingsample","sample") ,("Acquisition","mappingacq","acquis"),("Processing","mappingprocess","process") ):
+    for r in (("Sample","mappingsample","sample") ,("Acquisition","mappingacq","acquis"),("Processing","mappingprocess","processrel") ):
         t.append('<div role="tabpanel" class="tab-pane" id="tabd'+r[2]+'">'+r[0]+" details :<table class='table table-bordered'><tr>")
         cpt=0
         if r[2]=="sample":

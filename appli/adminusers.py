@@ -69,6 +69,47 @@ class ProjectsView(ModelView):
         super(ProjectsView, self).__init__(database.Projects, session, **kwargs)
 
 
+class SamplesView(ModelView):
+    column_list = ('sampleid','projid', 'orig_id','latitude','longitude','t01','t02','t03')
+    column_filters = ('sampleid','projid', 'orig_id')
+    column_searchable_list = ('orig_id',)
+    form_overrides = dict(dataportal_descriptor  =TextAreaField )
+    def __init__(self, session, **kwargs):
+        super(SamplesView, self).__init__(database.Samples, session, **kwargs)
+
+class ProcessView(ModelView):
+    column_list = ('processid','projid', 'orig_id','t01','t02','t03')
+    column_filters = ('processid','projid', 'orig_id')
+    column_searchable_list = ('orig_id',)
+    def __init__(self, session, **kwargs):
+        super(ProcessView, self).__init__(database.Process, session, **kwargs)
+
+class AcquisitionsView(ModelView):
+    column_list = ('acquisid','projid', 'orig_id','t01','t02','t03')
+    column_filters = ('acquisid','projid', 'orig_id')
+    column_searchable_list = ('orig_id',)
+    def __init__(self, session, **kwargs):
+        super(AcquisitionsView, self).__init__(database.Acquisitions, session, **kwargs)
+
+class TaxonomyView(ModelView):
+    column_list = ('id','parent_id', 'name','id_source')
+    column_filters = ('id','parent_id', 'name','id_source')
+    column_searchable_list = ('name',)
+    page_size = 100
+    # form_columns = ('id','parent_id', 'name','id_source')
+    # form_overrides = dict(dataportal_descriptor  =TextAreaField )
+    def __init__(self, session, **kwargs):
+        super(TaxonomyView, self).__init__(database.Taxonomy, session, **kwargs)
+
+class ObjectsView(ModelView):
+    column_list = ('objid','projid', 'orig_id','sampleid','classif_qual','objdate','acquisid','processid')
+    column_filters = ('objid','projid','sampleid', 'orig_id','classif_qual','acquisid','processid')
+    column_searchable_list = ('orig_id',)
+    form_overrides = dict(complement_info  =TextAreaField )
+    form_excluded_columns=('classif','classif_auto','processrel','acquis','img0','images','sample','classiffier')
+    def __init__(self, session, **kwargs):
+        super(ObjectsView, self).__init__(database.Objects, session, **kwargs)
+
 # Create admin
 adminApp = admin.Admin(app, name='Ecotaxa Administration')
 
@@ -76,6 +117,13 @@ adminApp = admin.Admin(app, name='Ecotaxa Administration')
 #admin.add_view(sqla.ModelView(database.users, db.session))
 adminApp.add_view(UsersView(db.session))
 adminApp.add_view(ProjectsView(db.session))
+adminApp.add_view(SamplesView(db.session))
+adminApp.add_view(ProcessView(db.session))
+adminApp.add_view(AcquisitionsView(db.session))
+adminApp.add_view(ObjectsView(db.session))
+adminApp.add_view(TaxonomyView(db.session))
 adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
+
+
 
 #admin.add_view(CategoriesAdmin(Categories, db.session))
