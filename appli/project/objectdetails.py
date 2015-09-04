@@ -124,7 +124,7 @@ $(document).ready(function() {
     <li role="presentation" class="active"><a href="#tabdobj" aria-controls="tabdobj" role="tab" data-toggle="tab"> Object details</a></li>
     <li role="presentation" ><a href="#tabdsample" aria-controls="tabdsample" role="tab" data-toggle="tab"> Sample details</a></li>
     <li role="presentation" ><a href="#tabdacquis" aria-controls="tabdacquis" role="tab" data-toggle="tab"> Acquisition details</a></li>
-    <li role="presentation" ><a href="#tabdprocess" aria-controls="tabdprocess" role="tab" data-toggle="tab"> Processing details</a></li>
+    <li role="presentation" ><a href="#tabdprocessrel" aria-controls="tabdprocess" role="tab" data-toggle="tab"> Processing details</a></li>
     <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>""")
     t.append("""</ul>
     <div class="tab-content">
