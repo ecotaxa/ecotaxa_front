@@ -136,6 +136,8 @@ class Samples(db.Model):
     latitude = db.Column(DOUBLE_PRECISION)
     longitude = db.Column(DOUBLE_PRECISION)
     dataportal_descriptor= db.Column(VARCHAR(8000))
+    def __str__(self):
+        return "{0} ({1})".format(self.orig_id,self.processid)
 for i in range(1,31):
     setattr(Samples,"t%02d"%i,db.Column(VARCHAR(250)))
 Index('IS_SamplesProject',Samples.__table__.c.projid)
@@ -146,6 +148,8 @@ class Acquisitions(db.Model):
     projid = db.Column(INTEGER,db.ForeignKey('projects.projid'))
     project=db.relationship("Projects")
     orig_id = db.Column(VARCHAR(255))
+    def __str__(self):
+        return "{0} ({1})".format(self.orig_id,self.processid)
 for i in range(1,31):
     setattr(Acquisitions,"t%02d"%i,db.Column(VARCHAR(250)))
 Index('IS_AcquisitionsProject',Acquisitions.__table__.c.projid)
@@ -156,6 +160,8 @@ class Process(db.Model):
     projid = db.Column(INTEGER,db.ForeignKey('projects.projid'))
     project=db.relationship("Projects")
     orig_id = db.Column(VARCHAR(255))
+    def __str__(self):
+        return "{0} ({1})".format(self.orig_id,self.processid)
 for i in range(1,31):
     setattr(Process,"t%02d"%i,db.Column(VARCHAR(250)))
 Index('IS_ProcessProject',Process.__table__.c.projid)
@@ -183,14 +189,12 @@ class Objects(db.Model):
     classif_auto_id = db.Column(INTEGER)
     classif_auto_score = db.Column(DOUBLE_PRECISION)
     classif_auto_when = db.Column(TIMESTAMP)
-    # classif_auto=db.relationship("Taxonomy",primaryjoin=foreign(classif_auto_id)==remote(id),uselist=False,)
     classif_auto=db.relationship("Taxonomy",primaryjoin="Taxonomy.id==foreign(Objects.classif_auto_id)",uselist=False,)
     classif_crossvalidation_id = db.Column(INTEGER)
     img0id = db.Column(BIGINT)
     img0=db.relationship("Images",foreign_keys="Images.objid")
     imgcount = db.Column(INTEGER)
     complement_info = db.Column(VARCHAR)
-    # weblink = db.Column(VARCHAR) doublons avec object link
     similarity = db.Column(DOUBLE_PRECISION)
     sunpos = db.Column(CHAR(1))  # position du soleil
     random_value = db.Column(INTEGER)
@@ -199,7 +203,7 @@ class Objects(db.Model):
     acquisid = db.Column(INTEGER,db.ForeignKey('acquisitions.acquisid'))
     acquis=db.relationship("Acquisitions")
     processid = db.Column(INTEGER,db.ForeignKey('process.processid'))
-    process=db.relationship("Process")
+    processrel=db.relationship("Process")
 
 # Ajout des colonnes numériques & textuelles libres
 for i in range(1,501):
