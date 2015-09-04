@@ -29,7 +29,7 @@ def searchtaxo():
             on tf.id=coalesce(id1,id2)
               WHERE  lower(name) LIKE %(term)s
             order by inpreset desc,name limit 200 """
-    res = GetAll(sql, param,debug=True)
+    res = GetAll(sql, param,debug=False)
     return json.dumps([dict(id=r[0],text=r[1],pr=r[2]) for r in res])
 
 
