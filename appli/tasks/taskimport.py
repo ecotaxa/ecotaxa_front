@@ -21,7 +21,7 @@ PredefinedFields={
     'object_lon':{'table':'object','field':'longitude','type':'n'},
     'object_date':{'table':'object','field':'objdate','type':'t'},
     'object_time':{'table':'object','field':'objtime','type':'t'},
-    'object_link':{'table':'object','field':'objlink','type':'t'},
+    'object_link':{'table':'object','field':'object_link','type':'t'},
     'object_depth_min':{'table':'object','field':'depth_min','type':'n'},
     'object_depth_max':{'table':'object','field':'depth_max','type':'n'},
     'object_annotation_category':{'table':'object','field':'classif_id','type':'t'},
@@ -374,7 +374,7 @@ class TaskImport(AsyncTask):
                     if not vaultroot.joinpath(VaultFolder).exists():
                         vaultroot.joinpath(VaultFolder).mkdir()
                     vaultfilename     ="%s/%04d%s"     %(VaultFolder,Objs["image"].imgid%10000,ImgFilePath.suffix)
-                    vaultfilenameThumb="%s/%04d_mini%s"%(VaultFolder,Objs["image"].imgid%10000,ImgFilePath.suffix)
+                    vaultfilenameThumb="%s/%04d_mini%s"%(VaultFolder,Objs["image"].imgid%10000,'.jpg') #on Impose le format de la miniature
                     Objs["image"].file_name=vaultfilename
                     #copie du fichier image
                     shutil.copyfile(ImgFilePath.as_posix(),vaultroot.joinpath(vaultfilename).as_posix())
