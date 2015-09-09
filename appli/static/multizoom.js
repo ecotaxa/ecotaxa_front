@@ -201,8 +201,15 @@ var featuredimagezoomer = { // the two options for Featured Image Zoomer:
 		},
 
 		magnifyimage: function($tracker, e, zoomrange){
-			if (!e.detail && !e.wheelDelta){e = e.originalEvent;}
-			var delta=e.detail? e.detail*(-120) : e.wheelDelta //delta returns +120 when wheel is scrolled up, -120 when scrolled down
+			var delta=0; // Modif LN la molette ne marchait pas bien dans certains navigateurs
+			if(e.originalEvent.deltaY!=0)
+				delta=e.originalEvent.deltaY* (-120);
+			else {
+				if (!e.detail && !e.wheelDelta) {
+					e = e.originalEvent;
+				}
+				delta = e.detail ? e.detail * (-120) : e.wheelDelta //delta returns +120 when wheel is scrolled up, -120 when scrolled down
+			}
 			var zoomdir=(delta<=-120)? "out" : "in"
 			var specs=$tracker.data('specs')
 			var magnifier=specs.magnifier, od=specs.imagesize, power=specs.curpower
