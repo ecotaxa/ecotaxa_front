@@ -503,7 +503,14 @@ if ( typeof Object.create !== 'function' ) {
 							//do something
 						}, 250));
 
-						var theEvent = e.originalEvent.wheelDelta || e.originalEvent.detail*-1
+//						var theEvent = e.originalEvent.wheelDelta || e.originalEvent.detail*-1
+// Modif LN le MouseWheelDown ne marchait pas sur certains navigateurs
+						var theEvent = e.originalEvent.wheelDelta;
+						if(theEvent==undefined)
+							theEvent=-e.originalEvent.deltaY;
+						if(theEvent==undefined)
+							theEvent=e.originalEvent.detail*-1;
+
 
 
 						//this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
