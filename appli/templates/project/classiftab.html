@@ -61,8 +61,11 @@
           // sur table 1000 image à 10% ligne 42 ca Freeze 4s
           // sur table 200 images à 10% ca Freeze 1s
           // Sur 50&100 ca ne se voit pas
-          for ( trid of TrSet)
+          //for ( trid of TrSet) Marche pas sous IE
+          TRArray=Array.from(TrSet)
+          for(var i= 0; i < TRArray.length; i++)
           {
+              var trid=TRArray[i];
               $('#' + trid).find('td img').resize();
               //console.log("resize #"+trid);
           }
