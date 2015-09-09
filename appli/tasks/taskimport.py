@@ -235,11 +235,11 @@ class TaskImport(AsyncTask):
             self.param.IntraStep=2
         if self.param.IntraStep==2:
             logging.info("Start Sub Step 1.2")
-            self.pgcur.execute("select id,lower(name),email from users where lower(name) = any(%s) or email= any(%s) ",([x for x in self.param.UserFound.keys()],[x.get('email') for x in self.param.UserFound.values()]))
+            self.pgcur.execute("select id,lower(name),lower(email) from users where lower(name) = any(%s) or email= any(%s) ",([x for x in self.param.UserFound.keys()],[x.get('email') for x in self.param.UserFound.values()]))
             # Résolution des noms à partir du nom ou de l'email
             for rec in self.pgcur:
                 for u in self.param.UserFound:
-                    if u==rec[1] or self.param.UserFound[u].get('email')==rec[2]:
+                    if u==rec[1] or ntcv(self.param.UserFound[u].get('email')).lower()==rec[2]:
                         self.param.UserFound[u]['id']=rec[0]
             logging.info("Users Found = %s",self.param.UserFound)
             NotFoundUser=[k for k,v in self.param.UserFound.items() if v.get("id")==None]
@@ -327,7 +327,7 @@ class TaskImport(AsyncTask):
                                 v=self.param.TaxoMap.get(v,v) # Applique le mapping initial d'entrée
                                 FieldValue=self.param.TaxoFound[ntcv(v).lower()]
                             elif FieldName=='classif_who':
-                                FieldValue=self.param.UserFound[v].get('id',None)
+                                FieldValue=self.param.UserFound[ntcv(v).lower()].get('id',None)
                             elif FieldName=='classif_qual':
                                 FieldValue=database.ClassifQualRevert.get(v.lower())
                             else: # c'est un champ texte sans rien de special
