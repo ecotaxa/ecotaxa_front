@@ -246,7 +246,7 @@ class TaskImport(AsyncTask):
             if len(NotFoundUser)>0:
                 logging.info("Some Users Not Found = %s",NotFoundUser)
             # récuperation des ID des taxo trouvées
-            self.pgcur.execute("select id,name from taxonomy where lower(name) = any(%s) ",([x.lower() for x in self.param.TaxoFound.keys()],))
+            self.pgcur.execute("select id,lower(name) from taxonomy where lower(name) = any(%s) ",([x.lower() for x in self.param.TaxoFound.keys()],))
             for rec in self.pgcur:
                 self.param.TaxoFound[rec[1]]=rec[0]
             logging.info("Taxo Found = %s",self.param.TaxoFound)
