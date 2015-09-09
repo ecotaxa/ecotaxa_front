@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
+from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv
 from PIL import Image
 from flask import render_template,  flash,request
 import logging,os,csv,sys
@@ -195,7 +195,7 @@ class TaskImport(AsyncTask):
                                     v=self.param.TaxoMap.get(v,v) # Applique le mapping
                                     self.param.TaxoFound[v.lower()]=None #creation d'une entrée dans le dictionnaire.
                                 elif champ=='object_annotation_person_name':
-                                    self.param.UserFound[v]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
+                                    self.param.UserFound[v.lower()]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
                                 elif champ=='object_annotation_status':
                                     if v!='noid' and v.lower() not in database.ClassifQualRevert:
                                         self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
@@ -325,7 +325,7 @@ class TaskImport(AsyncTask):
                                 FieldValue=datetime.datetime(int(v[0:4]), int(v[4:6]), int(v[6:8]),int(v2[0:2]), int(v2[2:4]), int(v2[4:6]))
                             elif FieldName=='classif_id':
                                 v=self.param.TaxoMap.get(v,v) # Applique le mapping initial d'entrée
-                                FieldValue=self.param.TaxoFound[v]
+                                FieldValue=self.param.TaxoFound[ntcv(v).lower()]
                             elif FieldName=='classif_who':
                                 FieldValue=self.param.UserFound[v].get('id',None)
                             elif FieldName=='classif_qual':
