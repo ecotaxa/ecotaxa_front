@@ -109,6 +109,10 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.taskexporttxt import TaskExportTxt
     if ClassName=="TaskExportTxt":
         return TaskExportTxt(task)
+    from appli.tasks.tasksubset import TaskSubset
+    if ClassName=="TaskSubset":
+        return TaskSubset(task)
+
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 
 def LoadTask(taskid):

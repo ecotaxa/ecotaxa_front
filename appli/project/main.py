@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,ntcv
 from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
@@ -102,6 +102,7 @@ def indexPrj(PrjId):
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
         g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit Project settings"))
+        g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract Subset"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
 
     appli.AddTaskSummaryForTemplate()
@@ -145,7 +146,7 @@ def LoadRightPane():
     for k in fieldlist.keys():
         sql+=",o."+k+" as extra_"+k
     sql+=""" from objects o
-Join images i on o.img0id=i.imgid
+left Join images i on o.img0id=i.imgid
 left JOIN taxonomy t on o.classif_id=t.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
@@ -243,8 +244,12 @@ where o.projid=%(projid)s
         origheight=r['height']
         thumbfilename=r['thumb_file_name']
         thumbwidth=r['thumb_width']
-        width=origwidth*zoom//100
-        height=origheight*zoom//100
+        if origwidth is None: # pas d'image associé, pas trés normal mais arrive pour les subset sans images
+            width=80
+            height=40
+        else:
+            width=origwidth*zoom//100
+            height=origheight*zoom//100
         if max(width,height)<20: # en dessous de 20 px de coté on ne fait plus le scaling
             if max(origwidth,origheight)<20:
                 width=origwidth   # si l'image originale est petite on l'affiche telle quelle
@@ -279,9 +284,12 @@ where o.projid=%(projid)s
         #Si l'image affiché est plus petite que la miniature, afficher la miniature.
         if thumbwidth is None or thumbwidth<width or thumbfilename is None: # sinon (si la miniature est plus petite que l'image à afficher )
             thumbfilename=filename # la miniature est l'image elle même
-
-        txt="<td width={3}><img class='lazy' id=I{4} data-src='/vault/{6}' data-zoom-image='{0}' width={1} height={2} pos={5}>"\
-            .format(filename,width,height,cellwidth,r['objid'],pos,thumbfilename)
+        txt="<td width={0}>".format(cellwidth)
+        if filename:
+            txt+="<img class='lazy' id=I{3} data-src='/vault/{5}' data-zoom-image='{0}' width={1} height={2} pos={4}>"\
+                .format(filename,width,height,r['objid'],pos,thumbfilename)
+        else:
+            txt+="No Image"
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
         if popupenabled=="1":
             popoverfieldlist=GetFieldList(Prj,champ='popoverfieldlist')
@@ -296,7 +304,7 @@ where o.projid=%(projid)s
                     poptxt+="<br>%s : %s"%(v,"-")
                 else:
                     poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
-            poptxt+="<br>Sample : "+r['samplename']
+            poptxt+="<br>Sample : "+ntcv(r['samplename'])
             popattribute="data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'".format(poptitletxt,poptxt,'left' if WidthOnRow>500 else 'right')
         else: popattribute=""
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher

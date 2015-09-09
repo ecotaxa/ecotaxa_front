@@ -1,0 +1,113 @@
+{% macro checkboxinputinlist(name, checkedvalue, value='',extra='') -%}
+    <input type="checkbox" name="{{ name }}" id="{{ name }}" value="{{ checkedvalue }}"  {{ 'checked' if checkedvalue in value  }} {{ extra|safe }}>
+{%- endmacro %}
+
+
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+<form class="form-horizontal" method="post" enctype=multipart/form-data>
+extraprojects={{ data.extraprojects }}
+<input type="hidden" name="extraprojects" value="{{ data.extraprojects }}">
+  <table class="table table-bordered table-condensed " style="width: 300px">
+    <tr>
+        <td rowspan="2" style="vertical-align:middle;">Randomly select </td>
+      <td><input type="radio" name="valtype" value="P" {{ 'checked' if data.valtype=='P' }}></td>
+      <td>
+           <input type="text" size=5 name="pvaleur" value="{{ prevpost.pvaleur }}"> % of values
+      </td>
+    </tr>
+    <tr>
+      <td><input type="radio" name="valtype" value="V" {{'checked' if data.valtype=='V'}} ></td>
+      <td><input type="text" size=5 name="vvaleur" value="{{ prevpost.vvaleur }}">  objects </td>
+    </tr>
+
+</table>
+<b>Select object with flag</b><br>
+&nbsp;{{ checkboxinputinlist("what_v","V",data.what) }} Validated<br>
+&nbsp;{{ checkboxinputinlist("what_d","D",data.what) }} Dubious<br>
+&nbsp;{{ checkboxinputinlist("what_p","P",data.what) }} Predicted<br>
+&nbsp;{{ checkboxinputinlist("what_n","N",data.what) }} NoFlag<br>
+
+<b>Image inclusion :</b> <input type="radio" name="withimg" value="Y" {{'checked' if data.withimg=='Y'}} > Yes : Duplicate images ,
+<input type="radio" name="withimg" value="N" {{'checked' if data.withimg=='N'}} > No : Data only (used for classification)<br>
+<b>Subset project title :</b> <input name="subsetprojecttitle" value="{{ data.subsetprojecttitle }}" size="100" maxlength="255"><br>
+
+
+<script>
+
+    function ComputeSampleList() {
+        var cv="";
+        $('#TblVar input').each(function (){
+           if($(this).prop("checked")){
+               if(cv!="")
+                   cv+=",";
+               cv+=$(this).data("var");
+           }
+        });
+        $('#SampleList').val(cv);
+    }
+    function CheckBasedOnText() {
+        var cv=$('#SampleList').val();
+        var cvl=cv.split(",");
+        //console.log(cvl);
+        $('#TblVar input').each(function (){
+           if($(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)){
+               if(cv!="")
+                   cv+=",";
+               cv+=$(this).data("var");
+           }
+        });
+    }
+</script>
+
+<table>
+<tr>
+{% if not data.extraprojects  %}
+
+    <td valign="top">
+Exported Samples :<br>
+<input type="text" name="samplelist" id="SampleList" value="{{ data.samplelist }}" style="width: 400px;"><br>
+
+Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', true );ComputeSampleList();">All</a>
+    / <a href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', false );ComputeSampleList();">None</a>
+    / <a href="#tbltop2" onclick="CheckBasedOnText();" title="Usefull to copy setting from a previous export" >Text field content</a>
+
+<table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
+    <tr><th >Select</th><th width="200">Sample</th></tr>
+    {%   for r in g.SampleList %}
+        <tr><td><input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[1] }}" ></td><td>{{ r[1] }}</td></tr>
+    {% endfor %}
+</table>
+</td>
+{% endif %}
+<td valign="top">
+  <br><br><br>
+    <input type="hidden" name="starttask" value="Y">
+    <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-2">
+      <button type="submit" class="btn btn-primary">Start Task</button>
+    </div>
+  </div>
+
+</td>
+
+</tr>
+
+</table>
+
+
+</form>
+
+   <script>
+$(document).ready(function() {
+        $('#TblVar input').click(ComputeSampleList);
+        CheckBasedOnText();
+
+    }); // Ready
+ </script>
+
+
+{% endblock %}
