@@ -38,13 +38,16 @@
       </td></tr>
 
   <tr><td>Initial Classification list</td><td>
-        <input type="text"  class="form-control" id="initclassiflist" name="initclassiflist"  value="{{ data.initclassiflist|default('',true) }}">
-    <br><select name='inittaxo' id='inittaxo' class="taxolb" style="width: 280px;" multiple>
+        <input type="text"  class="form-control" id="initclassiflist" name="initclassiflist"  value="{{ data.initclassiflist|default('',true) }}"><br>
+      <select name='inittaxo' id='inittaxo' class="taxolb" style="width: 280px;" multiple>
     {% for r in g.predeftaxo %}
       <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
     {% endfor %}
   </select>
-    </td></tr>
+    </td><td>
+      First line contains IDs and cab be easily copied between projects.
+      <br><br>Second line is an helper with auto-completion by name, in normal case you should use this area.
+  </td></tr>
 
   <tr><td>Fields available for<br>sorting & Display</td><td>
         <textarea  class="form-control" id="classiffieldlist" name="classiffieldlist"  rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
