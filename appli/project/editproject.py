@@ -45,7 +45,7 @@ def PrjEdit(PrjId):
     if Prj.initclassiflist is None:
         lst=[]
     else:
-        lst=[int(x) for x in Prj.initclassiflist.split(",")]
+        lst=[int(x) for x in Prj.initclassiflist.split(",") if x.isdigit()]
 
     g.predeftaxo=GetAll("select id,name from taxonomy where id= any(%s) order by name ",(lst,))
     g.users=GetAssoc2Col("select id,name from users order by lower(name)",dicttype=collections.OrderedDict)

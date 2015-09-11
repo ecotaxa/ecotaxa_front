@@ -359,7 +359,12 @@ def GetClassifTab(Prj):
     if Prj.initclassiflist is None:
         InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
     else:
-        InitClassif=Prj.initclassiflist
+        InitClassif=[x for x in Prj.initclassiflist.split(",") if x.isdigit()]
+        if len(InitClassif):
+            InitClassif=",".join(InitClassif)
+        else:
+            InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
+
     InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
     sql="""select t.id,t.name taxoname,Nbr,NbrNotV
     from (  SELECT    o.classif_id,   c.id,count(classif_id) Nbr,count(case when classif_qual='V' then NULL else o.classif_id end) NbrNotV
