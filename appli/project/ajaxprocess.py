@@ -43,3 +43,19 @@ def PrjManualClassif(PrjId):
 
     return '<span class="label label-success">Database update Successfull</span>'
 
+
+@app.route('/prj/UpdateComment/<int:ObjId>', methods=['GET', 'POST'])
+@login_required
+def PrjUpdateComment(ObjId):
+    Obj=database.Objects.query.filter_by(objid=ObjId).first()
+    if Obj is None:
+        return "Object doesnt exists"
+    Prj=database.Projects.query.filter_by(projid=Obj.projid).first()
+    if not Prj.CheckRight(1): # Level 0 = Read, 1 = Annotate, 2 = Admin
+        return "You cannot Annotate this project"
+
+    Obj.complement_info=gvp('comment')
+    db.session.commit()
+
+    return '<span class="label label-success">Database update Successfull</span>'
+
