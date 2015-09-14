@@ -104,6 +104,7 @@ def indexPrj(PrjId):
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit Project settings"))
         g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract Subset"))
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))
+        g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit/erase annotations massively"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
 
     appli.AddTaskSummaryForTemplate()

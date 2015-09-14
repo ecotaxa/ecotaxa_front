@@ -41,10 +41,11 @@ def objectdetails(objid):
             t.append(" on %s "%(obj.classif_when.strftime("%Y-%m-%d %H:%M")))
     if obj.object_link is not None:
         t.append("<br>External link :<a href='{0}' target=_blank> {0}</a>".format(obj.object_link))
+    t.append("<table><tr><td valign=top>Complementaty information : </td><td> <span id=spancomplinfo> {0}</span></td></tr></table>".format(ntcv( obj.complement_info).replace('\n','<br>\n')))
     # On affiche la liste des images, en selectionnant une image on changera le contenu de l'image Img1 + Redim
     # l'approche avec des onglets de marchait pas car les images sont superposées
     obj.images.sort(key=lambda x: x.imgrank)
-    t.append("""<BR>Image list : """)
+    t.append("""Image list : """)
     for img in obj.images:
         (width,height)=ComputeLimitForImage(img.width,img.height,PageWidth,WindowHeight)
         t.append("""<a href="javascript:SwapImg1('{1}',{2},{3});" >Miniature {0}</a> """
@@ -126,6 +127,8 @@ $(document).ready(function() {
     <li role="presentation" ><a href="#tabdacquis" aria-controls="tabdacquis" role="tab" data-toggle="tab"> Acquisition details</a></li>
     <li role="presentation" ><a href="#tabdprocessrel" aria-controls="tabdprocess" role="tab" data-toggle="tab"> Processing details</a></li>
     <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>""")
+    if Prj.CheckRight(1):
+        t.append("""<li role="presentation" ><a href="#tabdaddcomments" aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")
     t.append("""</ul>
     <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
@@ -177,7 +180,26 @@ order by classif_date desc""",{"objid":objid})
     for r in Histo:
         t.append("<tr><td>"+("</td><td>".join([str(x) if x else "-" for x in r])) +"</td></tr>")
     t.append("</table></div>")
-
+    if Prj.CheckRight(1):
+        t.append("""<div role="tabpanel" class="tab-pane" id="tabdaddcomments">
+        <script>
+            function nl2br (str, is_xhtml) {
+                var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+                return (str + '').replace(/([^>\\r\\n]?)(\\r\\n|\\n\\r|\\r|\\n)/g, '$1' + breakTag + '$2');
+            }
+          function UpdateComment() {
+            req={comment:$('#compinfo').val()}
+            $("#ajaxresultcomment").html('<span class="label label-info">Server update in progress...</span>');
+            $("#ajaxresultcomment").load("/prj/UpdateComment/%s",req,function(){
+                $('#spancomplinfo').html(nl2br($('#compinfo').val()));
+            })
+          }
+        </script>
+        <textarea id=compinfo rows=5 cols=120 autocomplete=off>%s</textarea><br>
+        <button type="button" class='btn btn-primary' onclick="UpdateComment();">Save additional comment</button>
+        <span id=ajaxresultcomment></span>
+        """%(obj.objid,ntcv( obj.complement_info)))
+        t.append("</div>")
     # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenete isolée
     # Sinon affichage sans lien dans la charte.
     if gvg("ajax","0")=="1":
