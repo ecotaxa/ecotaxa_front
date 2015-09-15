@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,ntcv,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,ntcv,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,nonetoformat
 from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
@@ -129,15 +129,20 @@ $(document).ready(function() {
     <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>""")
     if Prj.CheckRight(1):
         t.append("""<li role="presentation" ><a href="#tabdaddcomments" aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")
+    if obj.classif_auto:
+        classif_auto_name=obj.classif_auto.name
+        if obj.classif_auto_score:
+            classif_auto_name+= " (%0.3f)"%(obj.classif_auto_score,)
+    else: classif_auto_name=''
     t.append("""</ul>
     <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
     <table class='table table-bordered'><tr>
-    <td><b>longitude</td><td>{0:.5f}</td><td><b>latitude</td><td>{1:.5f}</td><td><b>Date</td><td>{2}</td><td><b>Time</td><td>{3}</td>
+    <td><b>longitude</td><td>{0}</td><td><b>latitude</td><td>{1}</td><td><b>Date</td><td>{2}</td><td><b>Time</td><td>{3}</td>
     </tr><tr><td><b>Depth min</td><td>{4}</td><td><b>Depth max</td><td>{5}</td><td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
-    </tr><tr>""".format(obj.longitude,obj.latitude,obj.objdate,obj.objtime
+    </tr><tr>""".format(nonetoformat(obj.longitude,'.5f'),nonetoformat(obj.latitude,'.5f'),obj.objdate,obj.objtime
                         ,obj.depth_min,obj.depth_max
-                        ,obj.classif_auto.name+" (%0.3f)"%obj.classif_auto_score if obj.classif_auto else "",obj.classif_auto_when))
+                        ,classif_auto_name,obj.classif_auto_when))
     cpt=0
     # Insertion des champs object
     for k,v in  collections.OrderedDict(sorted(DecodeEqualList(Prj.mappingobj).items())).items():

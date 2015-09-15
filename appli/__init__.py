@@ -81,6 +81,17 @@ def ntcv(v):
         return ""
     return v
 
+def nonetoformat(v,fmt :str):
+    """
+    Permet de faire un formatage qui n'aura lieu que si la donnée n'est pas nulle et permet récuperer une chaine que la source soit une données ou un None issue d'une DB
+    :param v: Chaine potentiellement None
+    :param fmt: clause de formatage qui va etre générée par {0:fmt}
+    :return: V ou chaine vide
+    """
+    if v is None:
+        return ""
+    return ("{0:"+fmt+"}").format(v)
+
 def DecodeEqualList(txt):
     res={}
     for l in str(txt).splitlines():

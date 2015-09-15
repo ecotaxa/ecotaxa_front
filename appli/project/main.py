@@ -449,6 +449,10 @@ def prjPurge(PrjId):
         ni=ExecSQL(sqldi,SqlParam)
         noh=ExecSQL(sqldoh,SqlParam)
         no=ExecSQL(sqldo,SqlParam)
+        if gvp("objlist")=="DELETEALL":
+            ExecSQL("delete from samples where projid={0}".format(PrjId))
+            ExecSQL("delete from acquisitions where projid={0}".format(PrjId))
+            ExecSQL("delete from process where projid={0}".format(PrjId))
         txt+="Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files"%(no,noh,ni,nbrfile)
 
     return PrintInCharte(txt+ ("<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId)))

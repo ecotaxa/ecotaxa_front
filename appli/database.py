@@ -5,7 +5,7 @@ from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence,func
 from sqlalchemy.orm import foreign,remote
-import json,psycopg2.extras,datetime
+import json,psycopg2.extras,datetime,os
 
 AdministratorLabel="Application Administrator"
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
@@ -258,14 +258,14 @@ Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
 Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
 GlobalDebugSQL=False
-def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
+def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,keyid=0):
     cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
         res=dict()
         for r in cur:
-            res[r[0]]=r
+            res[r[keyid]]=r
     except:
         app.logger.debug("GetAssoc Exception SQL = %s %s",sql,params)
         cur.connection.rollback()
@@ -327,3 +327,11 @@ def ExecSQL(sql,params=None,debug=False):
             app.logger.debug("ExecSQL (%s) SQL = %s %s",(datetime.datetime.now()-starttime).total_seconds(),sql,params)
         cur.close()
     return LastRowCount
+
+def GetDBToolsDir():
+    toolsdir=app.config['DB_TOOLSDIR']
+    if len(toolsdir)>0:
+        if toolsdir[0]=='.': # si chemin relatif on calcule le path absolu par rapport à la racine de l'appli
+            toolsdir=os.path.join( os.path.dirname(os.path.realpath(__file__)),"..",toolsdir)
+            toolsdir=os.path.normpath(toolsdir)
+    return toolsdir

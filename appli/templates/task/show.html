@@ -45,4 +45,5 @@
 <p><a class="btn" data-toggle="collapse" data-target=".collapse">View internal details &raquo;</a></p>
 <p><a class="btn" href="?log=Y">View Log File &raquo;</a></p>
 {% if CustomDetailsAvail %}<p><a class="btn" href="?CustomDetails=Y">View Custom details &raquo;</a></p>{% endif %}
+<br> {{ extratext|safe  }}
 {% endblock %}
