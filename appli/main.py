@@ -105,6 +105,9 @@ def before_request_security():
         g.menu.append(("","SEP"))
         g.menu.append(("/admin","Admin Screen"))
         g.menu.append(("/Task/Create/TaskTaxoImport","Import Taxonomy"))
+        g.menu.append(("/Task/Create/TaskExportDb","Export Database"))
+        g.menu.append(("/Task/Create/TaskImportDB","Import Database"))
+
     g.menu.append(("","SEP"))
     g.menu.append(("/change","Change Password"))
     # g.machaine="ABC"+str(current_user)

@@ -49,6 +49,8 @@ class AsyncTask:
 
     def GetWorkingDir(self):
         return os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../temptask/task%06d"%(int(self.task.id))))
+    def GetWorkingSchema(self):
+        return  "task%06d"%(int(self.task.id))
 
     def LogErrorForUser(self,Msg):
         # On ne trace dans les 2 zones ques les milles premieres erreurs.
@@ -112,6 +114,12 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.tasksubset import TaskSubset
     if ClassName=="TaskSubset":
         return TaskSubset(task)
+    from appli.tasks.taskexportdb import TaskExportDb
+    if ClassName=="TaskExportDb":
+        return TaskExportDb(task)
+    from appli.tasks.taskimportdb import TaskImportDB
+    if ClassName=="TaskImportDB":
+        return TaskImportDB(task)
 
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 
@@ -160,18 +168,26 @@ def TaskQuestionRouter(TaskID):
 @login_required
 def TaskShow(TaskID):
     task=LoadTask(TaskID)
+    txt=""
     if gvg('log')=="Y":
         WorkingDir = task.GetWorkingDir()
         # app.send_static_file(os.path.join(WorkingDir,"TaskLog.txt"))
         return flask.send_from_directory(WorkingDir,"TaskLog.txt")
     if gvg('CustomDetails')=="Y":
         return task.ShowCustomDetails()
+    if "GetResultFile" in dir(task):
+        f=task.GetResultFile()
+        if f is None:
+            txt+="Error, final file not available"
+        else:
+            txt+="<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' role='button'>Get file %s</a>"%(TaskID,f,f)
+
     CustomDetailsAvail="ShowCustomDetails" in dir(task)
     try:
         decodedsteperrors=json.loads(task.task.inputparam).get("steperrors")
     except:
         decodedsteperrors=["Task Decoding Error"]
-    return render_template('task/show.html',task=task.task,steperror=decodedsteperrors,CustomDetailsAvail=CustomDetailsAvail)
+    return render_template('task/show.html',task=task.task,steperror=decodedsteperrors,CustomDetailsAvail=CustomDetailsAvail,extratext=txt)
 
 @app.route('/Task/GetFile/<int:TaskID>/<filename>', methods=['GET'])
 @login_required

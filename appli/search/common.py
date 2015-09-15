@@ -30,7 +30,7 @@ def ServerFolderSelect():
     ServerRoot=app.config['SERVERLOADAREA']
     res = []
     print(res)
-    return render_template('common/fileserverpopup.html',root_elements=res,targetid=gvg("target","ServerPath"))
+    return render_template('common/fileserverpopup.html',root_elements=res,targetid=gvg("target","ServerPath"),ziponly=gvg('ZipOnly','N'))
     return "Admin OK : "+ServerRoot
 
 @app.route('/common/ServerFolderSelectJSON')
@@ -45,7 +45,10 @@ def ServerFolderSelectJSON():
         rr=x.relative_to(ServerRoot).as_posix()
         rc=x.relative_to(CurrentPath).as_posix()
         if x.is_dir():
-            res.append(dict(id=rr,text="<span class=v>"+rc+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=parent,children=True))
+            if gvg('ZipOnly')=='Y':
+                res.append(dict(id=rr,text="<span class=v>"+rc+"</span> ",parent=parent,children=True))
+            else:
+                res.append(dict(id=rr,text="<span class=v>"+rc+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=parent,children=True))
         if x.suffix.lower()==".zip":
             fi=os.stat( x.as_posix())
             res.append(dict(id=rr,text="<span class=v>"+"%s (%.1f Mb : %s)"%(rc,fi.st_size/1048576,time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(fi.st_mtime)))+"</span> <span class='TaxoSel label label-default'>Select</span>",parent=parent,children=False))
