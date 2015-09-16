@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
 from flask import  render_template, g, flash,request
-import logging,copy,psycopg2.extras,shutil,datetime
+import logging,copy,psycopg2.extras,shutil,datetime,time
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll
@@ -274,6 +274,7 @@ class TaskSubset(AsyncTask):
         # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
         PrjId=self.param.ProjectId
+        time.sleep(1)
         DoTaskClean(self.task.id)
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Original project</a>
         <a href='/prj/{1}' class='btn btn-primary btn-sm'  role=button>Go to Subset Project</a> """.format(PrjId,self.param.subsetproject)

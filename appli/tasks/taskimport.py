@@ -2,7 +2,7 @@
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv
 from PIL import Image
 from flask import render_template,  flash,request
-import logging,os,csv,sys
+import logging,os,csv,sys,time
 import datetime,shutil,random,zipfile
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,LoadTask,DoTaskClean
@@ -506,5 +506,6 @@ class TaskImport(AsyncTask):
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
         PrjId=self.param.ProjectId
         DoTaskClean(self.task.id)
+        time.sleep(1)
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
         <a href='/Task/Create/TaskClassifAuto?p={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a> """.format(PrjId)

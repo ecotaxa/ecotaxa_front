@@ -6,9 +6,9 @@
 <form class="form-horizontal" method="post">
 {%   if (taxo|length())>0 %}
     <h3>Taxonomy Manual Mapping</h3>
-    <p>Note : If needed, Taxonomy element creation must but handled by administrator prior execution of import task</p>
+    <p>Note : If needed, for complex cases, Taxonomy element creation must but handled by administrator prior execution of import task</p>
     <table class="table table-bordered table-condensed" style="width: 700px">
-    <tr><td width="300">Imported Taxonomy</td><th>Map</th><th >Create<br>Under</th><th>Create<br>Tree</th><th >Target Taxonomy</th></tr>
+    <tr><td width="300">Imported Taxonomy</td><th>Map</th><th >Create<br>Under</th><th >Target Taxonomy</th></tr>
 
     {% for T in taxo %}
   <tr><td width="300">
@@ -34,6 +34,7 @@
 
 {%   if (users|length())>0 %}
     <h3>Users Manual Mapping</h3>
+    <p>Note : If needed, Users creation must but handled by administrator prior execution of import task</p>
     {% for U in users %}
   <div class="form-group">
 {{ label(loop.index~" - "+U)  }}
