@@ -1,8 +1,9 @@
-from appli import db,ObjectToStr,app,PrintInCharte,PythonExecutable,gvg
+from appli import db,app,PrintInCharte,gvg
 from flask.ext.login import current_user
-from flask import Blueprint, render_template, g, flash,jsonify
+from flask import  render_template, g, flash,jsonify
 import json,os,sys,datetime,shutil,flask,logging
 from flask.ext.security import login_required
+from appli.database import ExecSQL
 
 class Task(db.Model):
     __tablename__ = 'temp_tasks'
@@ -214,6 +215,7 @@ def DoTaskClean(TaskID):
     WorkingDir = task.GetWorkingDir()
     Msg = "Erasing Task %d <br>"%TaskID
     try:
+        ExecSQL("DROP SCHEMA  IF EXISTS  task%06d CASCADE"%TaskID)
         if os.path.exists(WorkingDir):
             shutil.rmtree(WorkingDir)
             Msg += "Temp Folder Erased (%s)<br>"%WorkingDir

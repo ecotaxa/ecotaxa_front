@@ -51,7 +51,7 @@ class TaskExportDb(AsyncTask):
 
         cmd+=" -h "+app.config['DB_HOST']+" -U "+app.config['DB_USER']+" -w "   #+" -W "+app.config['DB_PASSWORD']
         # -s = le schema , -F le format -f le fichier
-        cmd+="  --schema-only --format=p  -f schema.sql -E LATIN1 -n public --no-owner  --no-privileges --no-security-labels --no-tablespaces  "+app.config['DB_DATABASE']
+        cmd+="  --schema-only --format=p  -f schema.sql -E LATIN1 -n public --no-owner  --no-privileges --no-security-labels --no-tablespaces  "+app.config['DB_DATABASE']+"  >dumpschemaout.txt"
         logging.info("Export Schema : %s",cmd)
         os.system(cmd)
         zfile=ZipFile('ecotaxadb.zip', 'w',allowZip64 = True,compression= zipfile.ZIP_DEFLATED)

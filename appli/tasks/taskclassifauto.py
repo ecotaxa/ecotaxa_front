@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
-from PIL import Image
-from flask import Blueprint, render_template, g, flash,request
-from io import StringIO
-import html,functools,logging,json,time,os,csv
-import datetime,shutil,random,zipfile
+from appli import db, database , PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
+from flask import  render_template, g, flash,request
+import logging
 from time import time
-from pathlib import Path
-from appli.tasks.taskmanager import AsyncTask,LoadTask,DoTaskClean
+from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
-from collections import Counter
-from sklearn.preprocessing import Imputer
 
 class TaskClassifAuto(AsyncTask):
     class Params (AsyncTask.Params):
@@ -244,6 +238,7 @@ class TaskClassifAuto(AsyncTask):
         # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
         PrjId=self.param.ProjectId
+        time.sleep(1)
         DoTaskClean(self.task.id)
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
         <a href='/prjcm/{0}' class='btn btn-primary btn-sm'  role=button>Go to Confusion Matrix</a> """.format(PrjId)

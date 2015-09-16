@@ -29,6 +29,9 @@ class TaskImportDB(AsyncTask):
                 self.ProjectId=None # Destination project
                 self.ProjectSrcId=None # Source project
                 self.TaxoMap={}
+                self.TaxoFound={}
+                self.UserFound={}
+
 
     # #############################################################################################################
     def __init__(self,task=None):
@@ -106,6 +109,7 @@ class TaskImportDB(AsyncTask):
         newschema=self.GetWorkingSchema()
         if getattr(self.param,'IntraStep',1)==1:
             logging.info("SubStep 1 : Create Sample, process & Acquisition")
+            self.UpdateProgress(6,"Create Sample, process & Acquisition")
             Ids={"acq":{"tbl":"acquisitions","pk":"acquisid"},"sample":{"tbl":"samples","pk":"sampleid"},"process":{"tbl":"process","pk":"processid"}}
             #Creation des lignes des tables
             for r in Ids.values():
@@ -131,13 +135,19 @@ class TaskImportDB(AsyncTask):
             for k,v in self.param.UserFound.items():
                 logging.info("Assign NewId to user %s"%(k,))
                 ExecSQL("Update {0}.users set newid={1} where lower(name)=(%s)".format(newschema,v['id']),(k,),debug=False)
+            logging.info("SubStep 2 : Assign NewId to Taxo")
+            for k,v in self.param.TaxoFound.items():
+                logging.info("Assign Taxo  %s/%s"%(k,v['name']))
+                ExecSQL("Update {0}.taxonomy set newid={1} where id=(%s)".format(newschema,v['newid']),(k,),debug=False)
 
             logging.info("SubStep 2 : Create Objects")
+            self.UpdateProgress(10,"Create Objects")
             ExecSQL("UPDATE {0}.objects set newid=nextval('seq_objects') where projid={1}".format(newschema,self.param.ProjectSrcId))
             TblSrc=GetColsForTable(newschema,'objects')
             TblDst=GetColsForTable('public','objects')
             CustomMapping={"objid":"o.newid","projid":str(self.param.ProjectId),"sampleid":"samples.newid"
-                           ,"processid":"process.newid","acquisid":"acquisitions.newid","classif_who":"users.newid"}
+                           ,"processid":"process.newid","acquisid":"acquisitions.newid","classif_who":"users.newid"
+                           ,"classif_id":"t1.newid","classif_auto_id":"t2.newid"}
             InsClause=[]
             SelClause=[]
             for c in TblSrc:
@@ -150,6 +160,8 @@ class TaskImportDB(AsyncTask):
              left join {1}.process on o.processid=process.processid
              left join {1}.acquisitions on o.acquisid=acquisitions.acquisid
              left join {1}.users on o.classif_who=users.id
+             left join {1}.taxonomy t1 on o.classif_id=t1.id
+             left join {1}.taxonomy t2 on o.classif_auto_id=t2.id
             where o.projid={2}""".format(",".join(SelClause),newschema,self.param.ProjectSrcId)
             N=ExecSQL(sql)
             logging.info("Created %s Objects",N)
@@ -157,7 +169,10 @@ class TaskImportDB(AsyncTask):
 
         if self.param.IntraStep==3:
             logging.info("SubStep 3 : Create Images")
-            ExecSQL("""UPDATE {0}.images set newid=nextval('seq_images') from {0}.objects o
+            self.UpdateProgress(40,"Import Images")
+            PrevPct=40
+            NbrProcessed=0
+            NbrToProcess=ExecSQL("""UPDATE {0}.images set newid=nextval('seq_images') from {0}.objects o
                     where images.objid=o.objid and o.projid={1}""".format(newschema,self.param.ProjectSrcId))
             TblSrc=GetColsForTable(newschema,'images')
             TblDst=GetColsForTable('public','images')
@@ -191,20 +206,22 @@ class TaskImportDB(AsyncTask):
                             setattr(Img,c,r[c])
                 db.session.add(Img)
                 db.session.commit()
+                NbrProcessed+=1
+                NewPct=int(40+59*(NbrProcessed/NbrToProcess))
+                if NewPct!=PrevPct:
+                    self.UpdateProgress(NewPct,"Import Images %d/%d"%(NbrProcessed,NbrToProcess))
             # Recalcule les valeurs de Img0
+            self.UpdateProgress(99,"Remap Images")
             self.pgcur.execute("""update objects o
                                 set imgcount=(select count(*) from images where objid=o.objid)
                                 ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
                                 where projid="""+str(self.param.ProjectId))
             self.pgcur.connection.commit()
-
-
-
             cur.close()
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Processing done")
-        self.task.taskstate="Error"
-        self.UpdateProgress(10,"Test Error")
+        # self.task.taskstate="Error"
+        # self.UpdateProgress(10,"Test Error")
 
     # ******************************************************************************************************
     def QuestionProcess(self):
@@ -213,6 +230,9 @@ class TaskImportDB(AsyncTask):
         ServerRoot=Path(app.config['SERVERLOADAREA'])
         txt="<h1>Database Importation Task</h1>"
         errors=[]
+        if gvg("restart")=='Y': # force redemarrage
+            self.task.taskstep=1
+            self.UpdateParam()
         if self.task.taskstep==0: # ################## Question Creation
             txt+="<h3>Task Creation</h3>"
 
@@ -389,7 +409,7 @@ class TaskImportDB(AsyncTask):
                         return self.StartTask(self.param,step=2)
                     for e in errors:
                         flash(e,"error")
-                    NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
+                    NotFoundTaxo=[v["name"] for k,v in self.param.TaxoFound.items() if v["newid"]==None]
                     NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
                 return render_template('task/importdb_question1.html',header=txt,taxo=NotFoundTaxo,users=NotFoundUsers)
             return PrintInCharte(txt)
@@ -407,6 +427,9 @@ class TaskImportDB(AsyncTask):
         # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
         PrjId=self.param.ProjectId
-        DoTaskClean(self.task.id)
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
-        <a href='/Task/Create/TaskClassifAuto?p={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a> """.format(PrjId)
+        <a href='/Task/Create/TaskClassifAuto?p={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a>
+        <a href='/Task/Question/{1}?restart=Y' class='btn btn-primary btn-sm'  role=button>Import Another project from the same database</a>
+        <a href='/Task/Clean/{1}' class='btn btn-primary btn-sm'  role=button>Clean temporary data</a>
+
+        """.format(PrjId,self.task.id)
