@@ -13,7 +13,7 @@ class TaskExportTxt(AsyncTask):
         def __init__(self,InitStr=None):
             self.steperrors=[]
             super().__init__(InitStr)
-            if InitStr==None: # Valeurs par defaut ou vide pour init
+            if InitStr is None: # Valeurs par defaut ou vide pour init
                 self.ProjectId=None
                 self.what=None  # TSV, XML, IMG , Summary
                 self.Details=None
@@ -35,10 +35,15 @@ class TaskExportTxt(AsyncTask):
         self.UpdateProgress(1,"Start export")
         TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        sql1="""SELECT o.objid,o.orig_id,o.latitude,o.longitude,objdate,objtime,object_link,depth_min,depth_max
-                ,o.classif_id,to1.name classif_name,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubios' ELSE o.classif_qual end classif_qual
-                ,o.classif_who,uo1.name classif_who_name,uo1.email classif_who_email
-                ,o.classif_when
+        sql1="""SELECT o.objid ,o.orig_id as object_id,o.latitude as object_lat,o.longitude as object_lon
+                ,to_char(objdate,'YYYYMMDD') as object_date
+                ,to_char(objtime,'HH24MISS') as object_time
+                ,object_link,depth_min as object_depth_min,depth_max as object_depth_max
+                ,o.classif_id,to1.name as object_annotation_category
+                ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubios' ELSE o.classif_qual end object_annotation_status
+                ,o.classif_who,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
+                ,to_char(o.classif_when,'YYYYMMDD') object_annotation_date
+                ,to_char(o.classif_when,'HH24MISS') object_annotation_time
                 ,o.classif_auto_id,to2.name classif_auto_name,classif_auto_score,classif_auto_when
                 ,random_value,sunpos     """
         sql2=""" FROM objects o
@@ -61,28 +66,24 @@ class TaskExportTxt(AsyncTask):
             for k,v in Mapping.items() :
                 sql1+=",o.%s as object_%s "%(k,re.sub("[^a-zA-Z]","_",v))
         if self.param.sampledata=='1':
-            sql1+="\n,s.sampleid,s.orig_id sample_orig_id,s.latitude sample_latitude,s.longitude sample_longitude"
+            sql1+="\n,s.sampleid as sampleid_internal,s.orig_id sample_id,s.latitude sample_latitude,s.longitude sample_longitude,s.dataportal_descriptor as sample_dataportal_descriptor "
             Mapping=DecodeEqualList(Prj.mappingsample)
             for k,v in Mapping.items() :
                 sql1+=",s.%s as sample_%s "%(k,re.sub("[^a-zA-Z]","_",v))
         if self.param.processdata=='1':
-            sql1+="\n,p.processid,p.orig_id process_orig_id"
+            sql1+="\n,p.processid as processid_internal,p.orig_id process_id"
             Mapping=DecodeEqualList(Prj.mappingprocess)
             for k,v in Mapping.items() :
                 sql1+=",s.%s as process_%s "%(k,re.sub("[^a-zA-Z]","_",v))
             sql2+=" left join process p on o.processid=p.processid "
         if self.param.acqdata=='1':
-            sql1+="\n,o.acquisid,a.orig_id acquis_orig_id"
+            sql1+="\n,o.acquisid as acquisid_internal,a.orig_id acquis_id"
             Mapping=DecodeEqualList(Prj.mappingprocess)
             for k,v in Mapping.items() :
                 sql1+=",s.%s as acquis_%s "%(k,re.sub("[^a-zA-Z]","_",v))
             sql2+=" left join acquisitions a on o.acquisid=a.acquisid "
 
         if self.param.histodata=='1':
-            sql1+="\n,o.acquisid,a.orig_id acquis_orig_id"
-            Mapping=DecodeEqualList(Prj.mappingprocess)
-            for k,v in Mapping.items() :
-                sql1+=",s.%s as acquis_%s "%(k,re.sub("[^a-zA-Z]","_",v))
             if self.param.samplelist!="":
                 samplefilter=" join samples s on o.sampleid=s.sampleid and s.orig_id= any(%(samplelist)s) "
             else: samplefilter=""
