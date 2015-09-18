@@ -11,19 +11,19 @@
 </table>
 
 <p style="border-bottom: 1px solid #ddd;padding-bottom: 4px;">
-<select id="sampleid" name="sampleid" style="width: 250px"  multiple> </select>
+<select id="sampleid" name="sampleid" style="width: 250px"  multiple autocomplete="off"> {{ data.sample_for_select|safe }}</select>
 </p>
 <p>Depth <span id="spaninfodepth" style="color: blue;" class="glyphicon glyphicon-info-sign"></span>
-    Min: <input type="text" id="filt_depthmin" style="width:50px;" autocomplete="off">
-    Max: <input type="text" id="filt_depthmax" style="width:50px;" autocomplete="off">
+    Min: <input type="text" id="filt_depthmin" style="width:50px;" autocomplete="off" value="{{ data.depthmin }}">
+    Max: <input type="text" id="filt_depthmax" style="width:50px;" autocomplete="off" value="{{ data.depthmax }}">
     <a href='javascript:ClearDepths();' title="Clear"><span class="glyphicon glyphicon-erase"></span></a>
 </p>
 <table class="table" >
-  <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN" name="filt_MapOutN" autocomplete="off"></td></tr>
+  <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN" name="filt_MapOutN"  value="{{ data.MapN }}" autocomplete="off"></td></tr>
   <tr>
-    <td>W <input type="text" size="7" id="filt_MapOutW" name="filt_MapOutW" autocomplete="off"></td>
-    <td>E <input type="text" size="7" id="filt_MapOutE" name="filt_MapOutE" autocomplete="off"></td></tr>
-  <tr><td colspan="2" align="Center">S <input type="text" size="7" id="filt_MapOutS" name="filt_MapOutS" autocomplete="off"></td></tr>
+    <td>W <input type="text" size="7" id="filt_MapOutW" name="filt_MapOutW" autocomplete="off" value="{{ data.MapW }}"></td>
+    <td>E <input type="text" size="7" id="filt_MapOutE" name="filt_MapOutE" autocomplete="off" value="{{ data.MapE }}"></td></tr>
+  <tr><td colspan="2" align="Center">S <input type="text" size="7" id="filt_MapOutS" name="filt_MapOutS" value="{{ data.MapS }}" autocomplete="off"></td></tr>
   <tr><td colspan="2" align="Center">
     <button type="button" class="btn btn-primary" onClick="OpenMap({{ g.Projid }});">Open Map</button>
     <button type="button" class="btn " onClick="ClearCoord();">Clear</button>
@@ -34,8 +34,8 @@
   <tr><td><b>Date</b> </td><td align="right"><a href='javascript:ClearDates();'>Clear</a>
    </td></tr>
 </table>
-<label for="filt_fromdate">From </label> <input type="text" style="width: 80px" id="filt_fromdate" name="filt_fromdate" autocomplete="off">
-<label for="filt_todate"> to </label> <input type="text" style="width: 80px" id="filt_todate" name="filt_todate" autocomplete="off">
+<label for="filt_fromdate">From </label> <input type="text" style="width: 80px" id="filt_fromdate" name="filt_fromdate" value="{{ data.fromdate }}"  autocomplete="off">
+<label for="filt_todate"> to </label> <input type="text" style="width: 80px" id="filt_todate" name="filt_todate" value="{{ data.todate }}" autocomplete="off">
 
 <table width="100%" style="border-top: 1px solid #ddd;padding-top: 4px;">
   <tr><td><b>Time</b>
@@ -43,9 +43,9 @@
    </td></tr>
 </table>
 <div id="time-slider-range"></div>
-<label for="filt_fromtime">From </label> <input type="text" style="width: 45px" id="filt_fromtime" name="filt_fromtime" autocomplete="off">
-<label for="filt_totime"> to </label> <input type="text" style="width: 45px" id="filt_totime" name="filt_totime" autocomplete="off">
-<label for="filt_inverttime"> Invert </label> <input type="checkbox" value="Y" style="width: 45px" id="filt_inverttime" name="filt_inverttime" autocomplete="off">
+<label for="filt_fromtime">From </label> <input type="text" style="width: 45px" id="filt_fromtime" name="filt_fromtime" autocomplete="off" value="{{ data.fromtime }}">
+<label for="filt_totime"> to </label> <input type="text" style="width: 45px" id="filt_totime" name="filt_totime" autocomplete="off" value="{{ data.totime }}">
+<label for="filt_inverttime"> Invert </label> <input type="checkbox" value="Y" style="width: 45px" id="filt_inverttime" name="filt_inverttime" autocomplete="off" {{ "checked" if data.inverttime=='1' }}>
 
 
 <script>

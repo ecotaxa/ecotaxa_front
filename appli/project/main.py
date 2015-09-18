@@ -49,20 +49,21 @@ def GetFieldList(Prj,champ='classiffieldlist'):
     for k,v in sorted(fieldlist2.items(), key=lambda t: t[1]):
         fieldlist[k]=v
     return fieldlist
-
+# Contient la liste des flitre & parametres de cet écrans avec les valeurs par degaut
+FilterList={"MapN":"","MapW":"","MapE":"","MapS":"","depthmin":"","depthmax":"","samples":"","fromdate":"","todate":""
+               ,"inverttime":"","fromtime":"","totime":"","sortby":"","sortorder":"","dispfield":"","statusfilter":""
+            ,'ipp':100,'zoom':100,'magenabled':1,'popupenabled':1}
 ######################################################################################################################
 @app.route('/prj/<int:PrjId>')
 @login_required
 def indexPrj(PrjId):
-    data={ 'ipp':str(current_user.GetPref('ipp',100))
-          ,'zoom':str(current_user.GetPref('zoom',100))
-          ,'sortby':current_user.GetPref('sortby',"")
-          ,'dispfield':current_user.GetPref('dispfield',"")
-          ,'sortorder':current_user.GetPref('sortorder',"")
-          ,'statusfilter':current_user.GetPref('statusfilter',"")
-          ,'magenabled':str(current_user.GetPref('magenabled',1))
-          ,'popupenabled':str(current_user.GetPref('popupenabled',1))
-          }
+    data={'pageoffset':gvg("pageoffset","0")}
+    for k,v in FilterList.items():
+        data[k]=gvg(k,str(current_user.GetPref(k,v)))
+    if data["samples"]:
+        data["sample_for_select"]=""
+        for r in GetAll("select sampleid,orig_id from samples where projid=%d and sampleid in(%s)"%(PrjId,data["samples"])):
+            data["sample_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     if Prj is None:
         flash("Project doesn't exists",'error')
@@ -108,7 +109,7 @@ def indexPrj(PrjId):
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
 
     appli.AddTaskSummaryForTemplate()
-    filtertab=getcommonfilters()
+    filtertab=getcommonfilters(data)
     return render_template('project/projectmain.html',top="",lefta=classiftab,leftb=filtertab
                            ,right=right,data=data)
 
@@ -117,24 +118,23 @@ def indexPrj(PrjId):
 @login_required
 def LoadRightPane():
     # récupération des parametres d'affichage
-    ipp=int(gvp("ipp","10"))
-    zoom=int(gvp("zoom","100"))
     pageoffset=int(gvp("pageoffset","0"))
-    sortby=gvp("sortby","")
-    sortorder=gvp("sortorder","")
-    dispfield=gvp("dispfield","")
-    statusfilter=gvp("statusfilter","")
-    magenabled=gvp("magenabled","0")
-    popupenabled=gvp("popupenabled","0")
     PrjId=gvp("projid")
-    # dispfield=" dispfield_orig_id dispfield_n07"
+    Filt={}
+    PrefToSave=0
+    for k,v in FilterList.items():
+        Filt[k]=gvp(k,v)
+        PrefToSave+=current_user.SetPref(k,Filt[k])
     # on sauvegarde les parametres dans le profil utilisateur
-    if current_user.SetPref("ipp",ipp) + current_user.SetPref("zoom",zoom)+ current_user.SetPref("sortby",sortby)\
-            + current_user.SetPref("sortorder",sortorder)+ current_user.SetPref("dispfield",dispfield) \
-            + current_user.SetPref("statusfilter",statusfilter)+ current_user.SetPref("magenabled",magenabled)\
-            + current_user.SetPref("popupenabled",popupenabled)>0:
+    if PrefToSave>0 and gvp("saveinprofile")=="Y":
         database.ExecSQL("update users set preferences=%s where id=%s",(current_user.preferences,current_user.id),True)
         user_datastore.ClearCache()
+    sortby=Filt["sortby"]
+    sortorder=Filt["sortorder"]
+    dispfield=Filt["dispfield"]
+    ipp=int(Filt["ipp"])
+    zoom=int(Filt["zoom"])
+    popupenabled=Filt["popupenabled"]
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     fieldlist=GetFieldList(Prj)
     fieldlist.pop('orig_id','')

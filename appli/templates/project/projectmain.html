@@ -42,7 +42,7 @@
 <input type="hidden" id="projid" value="{{ g.Projid }}">
 <input type="hidden" id="taxofilter" value=""  autocomplete="off">
 <input type="hidden" id="taxofilterlabel" value=""  autocomplete="off">
-<input type="hidden" id="pageoffset" value="0"  autocomplete="off">
+<input type="hidden" id="pageoffset" value="{{ data.pageoffset }}"  autocomplete="off">
 <table><tr><td>
     Sort by :<select name="sortby" id="sortby">
 {% for key, value in data.sortlist.items() %}
@@ -129,6 +129,11 @@ data-content="<b>All</b> : display all images <br>
                         <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
                             <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Apply Filter / Update View</button>
                         </p>
+                        <p><button type="button" class="btn btn-sm btn-info" onclick="LoadRightPane(true);">
+                            Apply filter by page reload (copiable URL)</button></p>
+                        <p><button type="button" class="btn btn-sm btn-info" onclick="LoadRightPane(false,true);">
+                            Apply filter and save in my profile</button></p>
+                        <p><a href=? class="btn btn-sm btn-info" >Apply my profile</a></p>
 
                     </div>
                   </div>
@@ -163,9 +168,8 @@ body {margin-top: 125px;}
 <script>
 var PendingChanges={};
 var PendingChangesTaxoName={};
-var PrevTxtFilter=""
-function LoadRightPane(){
-    //req={in:["17157378", "12735967", "17062333", "17137151"]};
+var PrevTxtFilter="INITIAL"
+function LoadRightPane(NoAjax,SaveInProfile){
     if(Object.keys(PendingChanges).length>0)
       if(confirm("Some changes are pending, if you refresh they'll be lost !\nWould you like to continue ?")==false)
         return;
@@ -214,7 +218,7 @@ function LoadRightPane(){
     req['totime']=$("#filt_totime").val();
     if(req['totime']!="")
         TxtFilter+=" Time <= "+req['totime'];
-    req['inverttime']=$("#filt_inverttime").prop("checked")?"1":"0";
+    req['inverttime']=$("#filt_inverttime").prop("checked")?"1":"";
     if(req['inverttime']=="1")
         TxtFilter+=" Time Invert ";
 
@@ -231,10 +235,23 @@ function LoadRightPane(){
     if(TxtFilter!="")
         TxtFilter="Filter: "+TxtFilter
     if(TxtFilter!=PrevTxtFilter) { {# Si une condition change on revient page 1 #}
-        $("#pageoffset").val(0);
+        if(PrevTxtFilter!="INITIAL") // Mais pas sur le premier load de page qui peut être avec une URL qui met un filtre
+            $("#pageoffset").val(0);
         PrevTxtFilter=TxtFilter;
     }
     req['pageoffset']=$("#pageoffset").val();
+    if(NoAjax==true) {
+        delete req["resultwidth"];
+        delete req["windowheight"];
+        var urlparam={};
+        for	(var k in req)
+{#            if(req[k]!=="") // Il faut tous les laisser pour pouvoir forcer leur effacement par rapport aux users settings  #}
+                urlparam[k]=req[k];
+        window.location="?"+$.param(urlparam);
+        return;
+    }
+    if(SaveInProfile==true)
+        req["saveinprofile"]='Y';
     $("#column-right").load("/prj/LoadRightPane",req);
     $('#headersubtitle').html(TxtFilter);
 }
@@ -381,8 +398,6 @@ function ClearAllFilterCriteria(){
 }
 
 </script>
-
-
         <div id="column-right" >
             RIGHT
             {% if right=='dodefault' %}

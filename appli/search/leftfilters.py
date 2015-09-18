@@ -22,5 +22,5 @@ def search_mappopup_samples():
     return json.dumps(res)
 
 
-def getcommonfilters():
-    return render_template('search/commonfilters.html')
+def getcommonfilters(data):
+    return render_template('search/commonfilters.html',data=data)
