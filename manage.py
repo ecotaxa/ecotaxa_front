@@ -70,20 +70,36 @@ def ForceTest1Values():
     t.UpdateParam()
 
 @manager.command
-def ResetDBSequence():
+def ResetDBSequence(cur=None):
     print("Start Sequence Reset")
-    db.session.execute("SELECT setval('seq_acquisitions', (SELECT max(acquisid) FROM acquisitions), true)")
-    db.session.execute("SELECT setval('seq_images', (SELECT max(imgid) FROM images), true)")
-    db.session.execute("SELECT setval('seq_objects', (SELECT max(objid) FROM objects), true)")
-    db.session.execute("SELECT setval('seq_process', (SELECT max(processid) FROM process), true)")
-    db.session.execute("SELECT setval('seq_projects', (SELECT max(projid) FROM projects), true)")
-    db.session.execute("SELECT setval('seq_projectspriv', (SELECT max(id) FROM projectspriv), true)")
-    db.session.execute("SELECT setval('seq_roles', (SELECT max(id) FROM roles), true)")
-    db.session.execute("SELECT setval('seq_samples', (SELECT max(sampleid) FROM samples), true)")
-    db.session.execute("SELECT setval('seq_taxonomy', (SELECT max(id) FROM taxonomy), true)")
-    db.session.execute("SELECT setval('seq_temp_tasks', (SELECT max(id) FROM temp_tasks), true)")
-    db.session.execute("SELECT setval('seq_users', (SELECT max(id) FROM users), true)")
+    if cur is None:
+        cur=db.session
+    cur.execute("SELECT setval('seq_acquisitions', (SELECT max(acquisid) FROM acquisitions), true)")
+    cur.execute("SELECT setval('seq_images', (SELECT max(imgid) FROM images), true)")
+    cur.execute("SELECT setval('seq_objects', (SELECT max(objid) FROM objects), true)")
+    cur.execute("SELECT setval('seq_process', (SELECT max(processid) FROM process), true)")
+    cur.execute("SELECT setval('seq_projects', (SELECT max(projid) FROM projects), true)")
+    cur.execute("SELECT setval('seq_projectspriv', (SELECT max(id) FROM projectspriv), true)")
+    cur.execute("SELECT setval('seq_samples', (SELECT max(sampleid) FROM samples), true)")
+    cur.execute("SELECT setval('seq_taxonomy', (SELECT max(id) FROM taxonomy), true)")
+    cur.execute("SELECT setval('seq_temp_tasks', (SELECT max(id) FROM temp_tasks), true)")
+    cur.execute("SELECT setval('seq_users', (SELECT max(id) FROM users), true)")
+    cur.execute("SELECT setval('roles_id_seq', (SELECT max(id) FROM roles), true)")
     print("Sequence Reset Done")
+
+
+@manager.command
+def FullDBRestore():
+    """
+    Will restore an exported DB as is and replace all existing data
+    """
+    from appli.tasks.taskimportdb import RestoreDBFull
+    if input("This operation will import an exported DB and DESTROY all existings data of the existing database.\nAre you SURE ? Confirm by Y !").lower()!="y":
+        print("Import Aborted !!!")
+        exit()
+    RestoreDBFull()
+
+
 
 if __name__ == "__main__":
     manager.run()

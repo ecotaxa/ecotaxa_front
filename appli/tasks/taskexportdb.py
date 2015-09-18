@@ -64,7 +64,7 @@ class TaskExportDb(AsyncTask):
                               and attnum>0  and c.relname='{0}'  order by attnum""".format(t))
 
             logging.info("Save table %s"%t)
-            with open("temp.copy","w") as f:
+            with open("temp.copy","w",encoding='latin_1') as f:
                 query="select %s from %s t"%(",".join(["t."+x[0] for x in ColList]),t)
                 if t in ('projects','projectspriv',"process","acquisitions","samples","objects"):
                     query+=" where projid in (%s)"%(self.param.ProjectId,)
