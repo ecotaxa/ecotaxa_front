@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv
 from flask import render_template,  flash,request
-import logging,os,csv,sys
-import shutil,os
+import logging,datetime,sys,shutil,os
 from pathlib import Path
 from zipfile import ZipFile
 from flask.ext.login import current_user
@@ -10,6 +9,7 @@ from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll,ExecSQL,GetDBToolsDir,GetAssoc,GetAssoc2Col
 from appli.tasks.taskexportdb import table_list
 from psycopg2.extras import  RealDictCursor
+import psycopg2
 
 def GetColsForTable(schema:str,table:str):
     ColList=GetAll("""select a.attname from pg_namespace ns
@@ -140,6 +140,16 @@ class TaskImportDB(AsyncTask):
                 logging.info("Assign Taxo  %s/%s"%(k,v['name']))
                 ExecSQL("Update {0}.taxonomy set newid={1} where id=(%s)".format(newschema,v['newid']),(k,),debug=False)
 
+            logging.info("SubStep 2 : Import privileges on project")
+            ExecSQL("""Insert into projectspriv (id,projid,member,privilege)
+                      SELECT nextval('seq_projectspriv'),{1},u.newid,min(privilege)
+                      FROM {0}.projectspriv pp join {0}.users u on pp.member=u.id
+                      WHERE pp.projid={2} and u.newid is not null
+                      and u.newid not in (select member from projectspriv where projid={1})
+                      group by u.newid
+                      """.format(newschema,self.param.ProjectId,self.param.ProjectSrcId),None,debug=False)
+
+
             logging.info("SubStep 2 : Create Objects")
             self.UpdateProgress(10,"Create Objects")
             ExecSQL("UPDATE {0}.objects set newid=nextval('seq_objects') where projid={1}".format(newschema,self.param.ProjectSrcId))
@@ -218,8 +228,10 @@ class TaskImportDB(AsyncTask):
                                 where projid="""+str(self.param.ProjectId))
             self.pgcur.connection.commit()
             cur.close()
-        self.task.taskstate="Done"
-        self.UpdateProgress(100,"Processing done")
+        # self.task.taskstate="Done"
+        # self.UpdateProgress(100,"Processing done")
+        self.task.taskstate="Question"
+        self.UpdateProgress(99,"Processing done, Answer question to import another project from the same database")
         # self.task.taskstate="Error"
         # self.UpdateProgress(10,"Test Error")
 
@@ -309,10 +321,11 @@ class TaskImportDB(AsyncTask):
                 # Controle du mapping Taxo
                 sql="""select DISTINCT t.id,lower(t.name) as name,t.parent_id
                           from {0}.objects o join {0}.taxonomy t on o.classif_id=t.id
-                        where o.projid={1}
+                        where o.projid={1} and t.newid is null
                         union select DISTINCT t.id,lower(t.name) as name,t.parent_id
                           from {0}.objects o join {0}.taxonomy t on o.classif_auto_id=t.id
-                        where o.projid={1} order by 2""".format(newschema,gvg("src"))
+                        where o.projid={1}  and t.newid is null
+                        order by 2""".format(newschema,gvg("src"))
                 self.param.TaxoFound=GetAssoc(sql,cursor_factory=RealDictCursor,keyid='id')
                 app.logger.info("TaxoFound=%s",self.param.TaxoFound)
                 TaxoInDest=GetAssoc2Col("select id,lower(name) as name from taxonomy where id = any (%s)",( list(self.param.TaxoFound.keys()) ,) )
@@ -331,9 +344,14 @@ class TaskImportDB(AsyncTask):
                 NotFoundTaxo=[t["name"] for t in self.param.TaxoFound.values() if t["newid"] is None] # liste des Taxon sans mapping restant
                 app.logger.info("NotFoundTaxo=%s",NotFoundTaxo)
                 # Controle du mapping utilisateur
-                sql="""select DISTINCT lower(t.name) as name,lower(email) as email
+                sql="""select DISTINCT lower(t.name) as name,lower(email) as email,t.password,t.organisation
                           from {0}.objects o join {0}.users t on o.classif_who=t.id
-                        where o.projid={1}""".format(newschema,gvg("src"))
+                        where o.projid={1}  and t.newid is null
+                        union
+                        select DISTINCT lower(t.name) as name,lower(email) as email,t.password,t.organisation
+                          from {0}.projectspriv pp join {0}.users t on pp.member=t.id
+                        where pp.projid={1}  and t.newid is null
+                        """.format(newschema,gvg("src"))
                 self.param.UserFound=GetAssoc(sql,cursor_factory=RealDictCursor,keyid='name')
                 self.pgcur=db.engine.raw_connection().cursor()
                 self.pgcur.execute("select id,lower(name),lower(email) from users where lower(name) = any(%s) or email= any(%s) "
@@ -363,6 +381,7 @@ class TaskImportDB(AsyncTask):
 
                 if gvp('starttask')=="Y" or gvg("prjok")=="2":
                     app.logger.info("Form Data = %s",request.form)
+                    # Traitement des reponses sur la taxonomy
                     for i in range(1,1+len(NotFoundTaxo)):
                         orig=gvp("orig%d"%(i)) #Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
                         action=gvp("action%d"%(i))
@@ -384,19 +403,31 @@ class TaskImportDB(AsyncTask):
                                     t.parent_id=int(newvalue)
                                     db.session.add(t)
                                     db.session.commit()
-                                    self.param.TaxoFound[orig]=t.id
+                                    self.param.TaxoFound[orig]['newid']=t.id
                                     app.logger.info(orig+" created under "+t.name)
                             else:
                                 errors.append("Taxonomy Manual Mapping : No Action Selected  for '%s'"%(orig,))
                         else:
                             errors.append("Taxonomy Manual Mapping : Invalid value '%s' for '%s'"%(newvalue,orig))
+                    # Traitement des reponses sur les utilisateurs
                     for i in range(1,1+len(NotFoundUsers)):
                         orig=gvp("origuser%d"%(i)) #Le nom original est dans origuserXX et la nouvelle valeur dans userlbXX
+                        action=gvp("useraction%d"%(i))
                         newvalue=gvp("userlb%d"%(i))
-                        if orig in NotFoundUsers and newvalue!="":
-                            t=database.users.query.filter(database.users.id==int(newvalue)).first()
-                            app.logger.info("User "+orig+" associated to "+t.name)
-                            self.param.UserFound[orig]['id']=t.id
+                        if orig in NotFoundUsers and (newvalue!="" or action=="C"):
+                            if action=="C":
+                                u=database.users()
+                                u.email=self.param.UserFound[orig]["email"]
+                                u.name=self.param.UserFound[orig]["name"]
+                                u.password=self.param.UserFound[orig]["password"]
+                                u.organisation=ntcv(self.param.UserFound[orig]["organisation"])+" Imported on "+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                                u.active=True
+                                db.session.add(u)
+                                db.session.commit()
+                            else:
+                                u=database.users.query.filter(database.users.id==int(newvalue)).first()
+                            app.logger.info("User "+orig+" associated to "+u.name)
+                            self.param.UserFound[orig]['id']=u.id
                         else:
                             errors.append("User Manual Mapping : Invalid value '%s' for '%s'"%(newvalue,orig))
                     app.logger.info("Final Taxofound = %s",self.param.TaxoFound)
@@ -413,6 +444,9 @@ class TaskImportDB(AsyncTask):
                     NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
                 return render_template('task/importdb_question1.html',header=txt,taxo=NotFoundTaxo,users=NotFoundUsers)
             return PrintInCharte(txt)
+        if self.task.taskstep==2: # ################## Question Post Import Effectif d'un projet
+            # Propose de voir le projet, de cleanner, ou d'importer un autre projet
+            return PrintInCharte(self.GetDoneExtraAction())
     # #############################################################################################################
     def ShowCustomDetails(self):
         txt="<h3>Import Task details view</h3>"
@@ -433,3 +467,67 @@ class TaskImportDB(AsyncTask):
         <a href='/Task/Clean/{1}' class='btn btn-primary btn-sm'  role=button>Clean temporary data</a>
 
         """.format(PrjId,self.task.id)
+
+# #############################################################################################################
+# Restore une base complete, à vocation à être appellé depuis depuis manage
+def RestoreDBFull():
+    print("Configuration is Database:",app.config['DB_DATABASE'])
+    print("Login: ",app.config['DB_USER'],"/",app.config['DB_PASSWORD'])
+    print("Host: ",app.config['DB_HOST'])
+    print("Current directory: ",os.getcwd())
+
+    if not os.path.exists("ecotaxadb.zip"):
+        print("File ecotaxadb.zip must be in the current directory")
+        return
+    print("Connect Database")
+    # On se loggue en postgres pour dropper/creer les bases qui doit être déclaré trust dans hba_conf
+    conn=psycopg2.connect(user='postgres',host=app.config['DB_HOST'])
+    cur=conn.cursor()
+
+    print("Open ZipFile")
+    if os.path.exists("DBFullRestore"):
+        shutil.rmtree("DBFullRestore")
+    os.mkdir("DBFullRestore")
+    os.chdir("DBFullRestore")
+    zfile=ZipFile("../ecotaxadb.zip" , 'r',allowZip64 = True)
+
+    print("Extract schema")
+    zfile.extract('schema.sql')
+
+    conn.set_session(autocommit=True)
+    print("Drop the existing database")
+    sql="DROP DATABASE IF EXISTS "+app.config['DB_DATABASE']
+    cur.execute(sql)
+
+    print("Create the new database")
+    sql="create DATABASE "+app.config['DB_DATABASE']+" WITH ENCODING='LATIN1'  OWNER="+app.config['DB_USER']+" TEMPLATE=template0 CONNECTION LIMIT=-1"
+    cur.execute(sql)
+
+    toolsdir=GetDBToolsDir()
+    cmd=os.path.join( toolsdir,"psql")
+    cmd+=" -h "+app.config['DB_HOST']+" -U "+app.config['DB_USER']+" -w --file=schema.sql "+app.config['DB_DATABASE']+" >createschemaout.txt"
+    print("Import Schema : %s",cmd)
+    os.system(cmd)
+
+    conn.close()
+    conn=psycopg2.connect(user=app.config['DB_USER'],password=app.config['DB_PASSWORD'],host=app.config['DB_HOST'],database=app.config['DB_DATABASE'])
+    cur=conn.cursor()
+    print("Encoding = ",conn.encoding)
+    print("Restore data")
+    for t in table_list:
+        ColList=GetColsForTable('public',t)
+        print("Restore table %s "%(t,))
+        try:
+            zfile.extract(t+".copy")
+            with open(t+".copy","r",encoding='latin_1') as f:
+                cur.copy_from(f,'public'+"."+t,columns=ColList)
+                cur.connection.commit()
+        except:
+            print("Error while data restoration %s",str(sys.exc_info()))
+
+    import manage
+    manage.ResetDBSequence(cur)
+    #Clean Up du repertoire
+    os.chdir("..")
+    shutil.rmtree("DBFullRestore")
+

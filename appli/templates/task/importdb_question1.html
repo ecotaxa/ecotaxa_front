@@ -35,16 +35,18 @@
 {%   if (users|length())>0 %}
     <h3>Users Manual Mapping</h3>
     <p>Note : If needed, Users creation must but handled by administrator prior execution of import task</p>
+    <table class="table table-bordered table-condensed" style="width: 600px">
+    <tr><td width="300">Imported User Name</td><th>Map to</th><th >Create</th></tr>
     {% for U in users %}
-  <div class="form-group">
-{{ label(loop.index~" - "+U)  }}
+  <tr><td >
+<label class="control-label" for="userlb{{ loop.index }}">{{ loop.index~" - "+U }}</label>
       <input type="hidden" name="origuser{{ loop.index }}" value="{{ U }}">
-  <div class="col-lg-2">
+  </td><td>
        <select id="userlb{{ loop.index }}" name="userlb{{ loop.index }}" style="width: 210px" class='userlb' > </select>
-  </div>
-  </div>
+  </td><td align="center">      <input type="radio" name="useraction{{ loop.index }}" value="C">
+  </tr>
     {% endfor %}
-
+</table>
 {% endif %}
 
 
