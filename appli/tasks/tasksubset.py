@@ -98,6 +98,11 @@ class TaskSubset(AsyncTask):
             NewPrj.visible=False
             db.session.add(NewPrj)
             db.session.commit()
+            pp=database.ProjectsPriv()
+            pp.member=self.task.owner_id
+            pp.privilege="Manage"
+            NewPrj.projmembers.append(pp)
+            db.session.commit()
             self.param.subsetproject=NewPrj.projid
             self.UpdateProgress(5,"Subset Project %d Created : %s"%(NewPrj.projid,NewPrj.title))
 

@@ -2,7 +2,7 @@
 from appli import db, database , PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
 from flask import  render_template, g, flash,request
 import logging
-from time import time
+import time
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll
 import numpy as np
@@ -36,7 +36,7 @@ class TaskClassifAuto(AsyncTask):
         logging.info("Input Param = %s"%(self.param.__dict__))
         logging.info("Start Step 1")
         self.UpdateProgress(1,"Retrieve Data from Learning Set")
-        TInit = time()
+        TInit = time.time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         PrjBase=database.Projects.query.filter_by(projid=self.param.BaseProject).first()
         MapPrj=self.GetReverseObjMap(Prj)
@@ -62,7 +62,7 @@ class TaskClassifAuto(AsyncTask):
         learn_cat = DBRes[:,1] # Que la classif
         learn_var = DBRes[:,2:] # exclu l'objid & la classif
         DBRes=None # libere la mémoire
-        logging.info('DB Conversion to NP : %0.3f s', time() - TInit)
+        logging.info('DB Conversion to NP : %0.3f s', time.time() - TInit)
         logging.info("Variable shape %d Row, %d Col",*learn_var.shape)
 
         # Note : La multiplication des jobs n'est pas forcement plus performente, en tous cas sur un petit ensemble.
@@ -75,15 +75,15 @@ class TaskClassifAuto(AsyncTask):
         if self.param.Perimeter!='all':
             PerimeterWhere=" and ( classif_qual='P' or classif_qual is null)  "
         else: PerimeterWhere=""
-        TStep = time()
+        TStep = time.time()
         # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
         # toute la colonne et du coup la colonne est supprimé car on ne peut pas calculer la moyenne.
         # learn_var = Imputer().fit_transform(learn_var)
         #learn_var[learn_var==np.nan] = -99999 Les Nan sont des NULL dans la base traités parle coalesce
-        logging.info('Clean input variables :  %0.3f s', time() - TStep)
-        TStep = time()
+        logging.info('Clean input variables :  %0.3f s', time.time() - TStep)
+        TStep = time.time()
         Classifier.fit(learn_var, learn_cat)
-        logging.info('Model fit duration :  %0.3f s', time() - TStep)
+        logging.info('Model fit duration :  %0.3f s', time.time() - TStep)
         NbrItem=GetAll("select count(*) from objects where projid={0} {1} ".format(Prj.projid,PerimeterWhere))[0][0]
         if NbrItem==0:
             raise Exception ("No object to classify, perhaps all object already classified or you should adjust the perimeter settings ")
@@ -95,7 +95,7 @@ class TaskClassifAuto(AsyncTask):
         ProcessedRows=0
         while True:
             self.UpdateProgress(15+90*(ProcessedRows/NbrItem),"Processed %d/%d"%(ProcessedRows,NbrItem))
-            TStep = time()
+            TStep = time.time()
             # recupère les variables des objets à classifier
             DBRes=np.array(self.pgcur.fetchmany(100))
             if len(DBRes)==0:
@@ -103,14 +103,14 @@ class TaskClassifAuto(AsyncTask):
             ProcessedRows+=len(DBRes)
             Tget_Ids = DBRes[:,0] # Que l'objid
             Tget_var = DBRes[:,1:] # exclu l'objid
-            TStep2 = time()
+            TStep2 = time.time()
             # Tget_var= Imputer().fit_transform(Tget_var) # voir commentaire sur learn_var
             # Tget_var[Tget_var==np.nan] = -99999
             Result=Classifier.predict_proba(Tget_var)
             ResultMaxCol=np.argmax(Result,axis=1)
             # Typage important pour les perf postgresql
             SqlParam=[{'cat':int(Classifier.classes_[mc]),'p':r[mc],'id':int(i)} for i,mc,r in zip(Tget_Ids,ResultMaxCol,Result)]
-            TStep3 = time()
+            TStep3 = time.time()
             # MAJ dans la base, Si pas de classif devient predicted , Si vide ou predicted, MAJ de la classif
             upcur.executemany("""update objects set classif_auto_id=%(cat)s,classif_auto_score=%(p)s,classif_auto_when=now()
                                     ,classif_qual=case when classif_qual in ('D','V') then  classif_qual else 'P'  END
@@ -119,7 +119,7 @@ class TaskClassifAuto(AsyncTask):
             upcur.connection.commit()
             logging.info('Chunk Db Extract %d/%d, Classification and Db Save :  %0.3f s %0.3f+%0.3f+%0.3f'
                          , ProcessedRows ,NbrItem
-                         , time() - TStep,TStep2 - TStep,TStep3 - TStep2,time() - TStep3)
+                         , time.time() - TStep,TStep2 - TStep,TStep3 - TStep2,time.time() - TStep3)
 
 
 
