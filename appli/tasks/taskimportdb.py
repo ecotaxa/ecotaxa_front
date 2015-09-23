@@ -28,7 +28,6 @@ class TaskImportDB(AsyncTask):
                 self.InData='My In Data'
                 self.ProjectId=None # Destination project
                 self.ProjectSrcId=None # Source project
-                self.TaxoMap={}
                 self.TaxoFound={}
                 self.UserFound={}
 
@@ -251,13 +250,6 @@ class TaskImportDB(AsyncTask):
             if gvp('starttask')=="Y":
                 FileToSave=None
                 FileToSaveFileName=None
-                TaxoMap={}
-                for l in gvp('TxtTaxoMap').splitlines():
-                    ls=l.split('=',1)
-                    if len(ls)!=2:
-                        errors.append("Taxonomy Mapping : Invalid format for line %s"%(l))
-                    else:
-                        TaxoMap[ls[0].strip().lower()]=ls[1].strip().lower()
                 # Verifier la coherence des données
                 uploadfile=request.files.get("uploadfile")
                 if uploadfile is not None and uploadfile.filename!='' : # import d'un fichier par HTTP
@@ -276,9 +268,8 @@ class TaskImportDB(AsyncTask):
                     for e in errors:
                         flash(e,"error")
                 else:
-                    self.param.TaxoMap=TaxoMap # on stocke le dictionnaire et pas la chaine
                     return self.StartTask(self.param,FileToSave=FileToSave,FileToSaveFileName=FileToSaveFileName)
-            return render_template('task/importdb_create.html',header=txt,data=self.param,ServerPath=gvp("ServerPath"),TxtTaxoMap=gvp("TxtTaxoMap"))
+            return render_template('task/importdb_create.html',header=txt,data=self.param,ServerPath=gvp("ServerPath"))
 
         newschema=self.GetWorkingSchema()
         # self.task.taskstep=1
@@ -323,8 +314,10 @@ class TaskImportDB(AsyncTask):
                           from {0}.objects o join {0}.taxonomy t on o.classif_id=t.id
                         where o.projid={1} and t.newid is null
                         union select DISTINCT t.id,lower(t.name) as name,t.parent_id
-                          from {0}.objects o join {0}.taxonomy t on o.classif_auto_id=t.id
-                        where o.projid={1}  and t.newid is null
+                          from {0}.objects o
+                          join {0}.taxonomy t on o.classif_auto_id=t.id
+                          left join taxonomy tt on t.newid =tt.id
+                        where o.projid={1}  and tt.id is null
                         order by 2""".format(newschema,gvg("src"))
                 self.param.TaxoFound=GetAssoc(sql,cursor_factory=RealDictCursor,keyid='id')
                 app.logger.info("TaxoFound=%s",self.param.TaxoFound)
@@ -376,6 +369,7 @@ class TaskImportDB(AsyncTask):
             if gvg("prjok")=="1" or gvg("prjok")=="2": # 2 pas de mapping requis, simule un start task
                 NotFoundTaxo=[t["name"] for t in self.param.TaxoFound.values() if t["newid"] is None] # liste des Taxon sans mapping restant
                 NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get("id")==None]
+                app.logger.info("TaxoFound=%s",self.param.TaxoFound)
                 app.logger.info("NotFoundTaxo=%s",NotFoundTaxo)
                 app.logger.info("NotFoundUser=%s",NotFoundUsers)
 
@@ -384,9 +378,10 @@ class TaskImportDB(AsyncTask):
                     # Traitement des reponses sur la taxonomy
                     for i in range(1,1+len(NotFoundTaxo)):
                         orig=gvp("orig%d"%(i)) #Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
+                        origname=gvp("origname%d"%(i)) #Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
                         action=gvp("action%d"%(i))
                         newvalue=gvp("taxolb%d"%(i))
-                        if orig in NotFoundTaxo and action!="":
+                        if origname in NotFoundTaxo and action!="":
                             if action=="M":
                                 if newvalue=="":
                                     errors.append("Taxonomy Manual Mapping : No Value Selected  for '%s'"%(orig,))
@@ -399,7 +394,7 @@ class TaskImportDB(AsyncTask):
                                     errors.append("Taxonomy Manual Mapping : No Parent Value Selected  for '%s'"%(orig,))
                                 else:
                                     t=database.Taxonomy()
-                                    t.name=orig
+                                    t.name=origname
                                     t.parent_id=int(newvalue)
                                     db.session.add(t)
                                     db.session.commit()
@@ -442,7 +437,9 @@ class TaskImportDB(AsyncTask):
                         flash(e,"error")
                     NotFoundTaxo=[v["name"] for k,v in self.param.TaxoFound.items() if v["newid"]==None]
                     NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
-                return render_template('task/importdb_question1.html',header=txt,taxo=NotFoundTaxo,users=NotFoundUsers)
+                    app.logger.info("Final NotFoundTaxo = %s",NotFoundTaxo)
+                NotFoundTaxoForTemplate=[{'id':v["id"],'name':v["name"]} for k,v in self.param.TaxoFound.items() if v["newid"]==None]
+                return render_template('task/importdb_question1.html',header=txt,taxo=NotFoundTaxoForTemplate,users=NotFoundUsers)
             return PrintInCharte(txt)
         if self.task.taskstep==2: # ################## Question Post Import Effectif d'un projet
             # Propose de voir le projet, de cleanner, ou d'importer un autre projet
