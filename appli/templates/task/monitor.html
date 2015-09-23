@@ -13,6 +13,7 @@ function StartMonitor(TaskID)
     var $ajaxImage = $("#ajaxImage");
     var $progressbar = $("#progressbar");
     var $statusDiv = $("#statusDiv");
+    var $StopTimer=false;
 // Set up a recurring timer to keep running this code every second
         // We use intervalHandle later via clearInterval to turn off this timer
         intervalHandle = setInterval(function () {
@@ -24,6 +25,9 @@ function StartMonitor(TaskID)
                 //data:{TaskID:TaskID,Action:'GetStatus'},
                 contentType: "application/json; charset=utf-8",
                 success: function (response, status, xhr) {
+{# $StopTimer permet de traiter le fait qu'il y a parfois un timer de 1s coté serveur pour laisser la tache se finir,
+et du coup une seconde requete ajax est emise par le client et retourne le fait que la tache n'existe plus plutot que l'affichage prevu #}
+                    if($StopTimer) return;
                     if (response.d != null) {
                         // We're running and have status - so:
 
@@ -39,12 +43,14 @@ function StartMonitor(TaskID)
 
                         // Process is complete, start to reset the UI (the response.d == null above, will do the rest).
                         if (response.d.IsComplete) {
+                            $StopTimer=true;
                             $statusDiv.html('<div class="alert alert-success" role="alert">Task Complete :'+response.d.WorkDescription+'<br>  '+ response.d.ExtraAction +'</div>');
                             $ajaxImage.hide();
                             $progressbar.hide();
                             clearInterval(intervalHandle);
                         }
                         if (response.d.IsError) {
+                            $StopTimer=true;
                             $statusDiv.html('<div class="alert alert-danger" role="alert">'+response.d.WorkDescription+'<a href="/Task/Show/{{ TaskID }}" class="btn btn-primary btn-sm " role="button">Show Task</a></div>');
                             $ajaxImage.hide();
                             $progressbar.hide();
@@ -52,6 +58,7 @@ function StartMonitor(TaskID)
                         }
                     }
                     else if (response.q != null) {
+                        $StopTimer=true;
                         // Redirection vers question
                         $statusDiv.html('<div class="alert alert-warning" role="alert">'+response.q.Message+' <a href="'+response.q.Url+'" class="btn btn-primary btn-sm " role="button">Answer Question</a></div>');
                         $ajaxImage.hide();
@@ -59,6 +66,7 @@ function StartMonitor(TaskID)
                         clearInterval(intervalHandle);
                     }
                     else {
+                        $StopTimer=true;
                         // The background process isn't running or there was a problem - reset.
                         $statusDiv.html("?");
 
