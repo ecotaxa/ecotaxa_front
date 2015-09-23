@@ -279,6 +279,7 @@ where o.projid=%(projid)s
             t.append("</tr></table><table class=imgtab><tr id=tr%d>%s"%(trcount,LineStart))
             WidthOnRow=0
         cellwidth=width+22
+        if cellwidth<80: cellwidth=80 # on considère au moins 80 car avec les label c'est rarement moins
         # Met la fenetre de zoon la ou il y plus de place, sachant qu'elle fait 400px et ne peut donc pas être callée à gauche des premieres images.
         if (WidthOnRow+cellwidth)>(PageWidth/2):
             pos='left'
@@ -328,7 +329,8 @@ where o.projid=%(projid)s
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
         txt+="</td>"
 
-        WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
+        # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
+        WidthOnRow+=cellwidth
         t.append(txt)
 
     t.append("</tr></table>")
