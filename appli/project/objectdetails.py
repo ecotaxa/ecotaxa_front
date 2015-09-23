@@ -48,8 +48,14 @@ def objectdetails(objid):
     t.append("""Image list : """)
     for img in obj.images:
         (width,height)=ComputeLimitForImage(img.width,img.height,PageWidth,WindowHeight)
-        t.append("""<a href="javascript:SwapImg1('{1}',{2},{3});" >Miniature {0}</a> """
-                 .format(img.imgrank+1,img.file_name,width,height))
+        if img.thumb_file_name:
+            minifile=img.thumb_file_name
+            (miniwidth,miniheight)=ComputeLimitForImage(img.thumb_width,img.thumb_height,30,30)
+        else:
+            minifile=img.file_name
+            (miniwidth,miniheight)=ComputeLimitForImage(img.width,img.height,30,30)
+        t.append("""<a href="javascript:SwapImg1('{1}',{2},{3});" >{0} <img src=/vault/{4} width={5} height={6}></a> """
+                 .format(img.imgrank+1,img.file_name,width,height,minifile,miniwidth,miniheight))
     # Ajout de la 1ère image
     (width,height)=ComputeLimitForImage(obj.images[0].width,obj.images[0].height,PageWidth,WindowHeight)
     t.append("<br><img id=img1 src=/vault/{1} data-zoom-image=/vault/{1} width={2} height={0}><br>"

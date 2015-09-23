@@ -154,6 +154,7 @@ function ValidateAll(NextPage) {
 {% endif %}
     ).click(function() {
                 //$("#taxofilter").val($(this).attr('taxoid'));
+                $(".ui-state-highlight").removeClass("ui-state-highlight");
                 if ($(this).hasClass('activeTaxo'))
                     SetTaxoFilter(false, -1);
                 else {
