@@ -12,9 +12,10 @@
 
     {% for T in taxo %}
   <tr><td width="300">
-  <label class="control-label" for="taxolb{{ loop.index }}">{{ loop.index~" - "+T }}</label>
+  <label class="control-label" for="taxolb{{ loop.index }}">{{ loop.index~" - "~T.name }}</label>
 {#   {{ label(loop.index~" - "+T)  }} #}
-      <input type="hidden" name="orig{{ loop.index }}" value="{{ T }}">
+      <input type="hidden" name="orig{{ loop.index }}" value="{{ T.id }}">
+      <input type="hidden" name="origname{{ loop.index }}" value="{{ T.name }}">
   </td><td align="center">      <input type="radio" name="action{{ loop.index }}" value="M">
   </td><td align="center">      <input type="radio" name="action{{ loop.index }}" value="U">
   </td><td width="250">
