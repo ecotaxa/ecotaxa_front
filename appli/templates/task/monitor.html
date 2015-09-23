@@ -25,7 +25,7 @@ function StartMonitor(TaskID)
                 //data:{TaskID:TaskID,Action:'GetStatus'},
                 contentType: "application/json; charset=utf-8",
                 success: function (response, status, xhr) {
-{# $StopTimer permet de traiter le fait qu'il y a parfois un timer de 1s coté serveur pour laisser la tache se finir,
+{# $StopTimer permet de traiter le fait qu'il y a parfois un timer de 1s cotÃ© serveur pour laisser la tache se finir,
 et du coup une seconde requete ajax est emise par le client et retourne le fait que la tache n'existe plus plutot que l'affichage prevu #}
                     if($StopTimer) return;
                     if (response.d != null) {
