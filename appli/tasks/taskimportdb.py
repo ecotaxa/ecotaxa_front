@@ -497,7 +497,7 @@ def RestoreDBFull():
     cur.execute(sql)
 
     print("Create the new database")
-    sql="create DATABASE "+app.config['DB_DATABASE']+" WITH ENCODING='LATIN1'  OWNER="+app.config['DB_USER']+" TEMPLATE=template0 LC_CTYPE=C LC_COLLATE=C CONNECTION LIMIT=-1 "
+    sql="create DATABASE "+app.config['DB_DATABASE']+" WITH ENCODING='LATIN1'  OWNER="+app.config['DB_USER']+" TEMPLATE=template0 LC_CTYPE='C' LC_COLLATE='C' CONNECTION LIMIT=-1 "
     cur.execute(sql)
 
     toolsdir=GetDBToolsDir()
@@ -508,7 +508,7 @@ def RestoreDBFull():
 
     conn.close()
     conn=psycopg2.connect(user=app.config['DB_USER'],password=app.config['DB_PASSWORD'],host=app.config['DB_HOST'],database=app.config['DB_DATABASE'])
-    cur=conn.cursor()
+    cur=conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     print("Encoding = ",conn.encoding)
     print("Restore data")
     for t in table_list:
@@ -524,7 +524,26 @@ def RestoreDBFull():
 
     import manage
     manage.ResetDBSequence(cur)
-    #Clean Up du repertoire
+    # Copie des Images
+    print("Restore Images")
+    cur.execute("select images.* from images ")
+    # vaultroot=Path("../vault")
+    vaultroot=Path(os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"../../vault")))
+    for r in cur:
+        if r['file_name']:
+            zipimagefile="images/%s.img"%r['imgid']
+            zfile.extract(zipimagefile)
+            VaultFolder="%04d"%(r['imgid']//10000)
+            #creation du repertoire contenant les images si necessaire
+            if not vaultroot.joinpath(VaultFolder).exists():
+                vaultroot.joinpath(VaultFolder).mkdir()
+            shutil.move(zipimagefile,vaultroot.joinpath(r['file_name']).as_posix())
+            if r['thumb_file_name']:
+                zipimagefile="images/%s.thumb"%r['imgid']
+                zfile.extract(zipimagefile)
+                shutil.move(zipimagefile,vaultroot.joinpath(r['thumb_file_name']).as_posix())
+
+    # Clean Up du repertoire
     os.chdir("..")
     shutil.rmtree("DBFullRestore")
 
