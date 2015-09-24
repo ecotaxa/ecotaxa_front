@@ -497,7 +497,7 @@ def RestoreDBFull():
     cur.execute(sql)
 
     print("Create the new database")
-    sql="create DATABASE "+app.config['DB_DATABASE']+" WITH ENCODING='LATIN1'  OWNER="+app.config['DB_USER']+" TEMPLATE=template0 CONNECTION LIMIT=-1"
+    sql="create DATABASE "+app.config['DB_DATABASE']+" WITH ENCODING='LATIN1'  OWNER="+app.config['DB_USER']+" TEMPLATE=template0 CONNECTION LIMIT=-1 LC_TYPE=C LC_COLLATE=C"
     cur.execute(sql)
 
     toolsdir=GetDBToolsDir()
