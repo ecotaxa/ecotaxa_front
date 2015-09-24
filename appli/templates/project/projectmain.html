@@ -397,6 +397,11 @@ function ClearAllFilterCriteria(){
     LoadRightPane();
 }
 
+jQuery(window).bind('beforeunload', function(){
+    if(Object.keys(PendingChanges).length>0)
+      return "Some changes are pending, if you refresh they'll be lost !\nWould you like to continue ?"
+});
+
 </script>
         <div id="column-right" >
             RIGHT
