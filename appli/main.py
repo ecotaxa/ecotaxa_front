@@ -97,7 +97,7 @@ def before_request_security():
     if "/static" in request.url:
         return
     # print(request.form)
-    current_user.is_authenticated
+    current_user.is_authenticated()
     g.menu = []
     g.menu.append((url_for("index"),"Home / Explore"))
     g.menu.append(("/prj/","Select Project"))
