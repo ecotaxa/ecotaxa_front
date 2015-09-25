@@ -11,6 +11,9 @@
 
 {% extends "layout.html" %}
 {% block headcenter %}
+    <script src="/static/jquerycontextmenu/jquery.ui.position.min.js" type="text/javascript"></script>
+    <script src="/static/jquerycontextmenu/jquery.contextMenu.min.js" type="text/javascript"></script>
+     <link href="/static/jquerycontextmenu/jquery.contextMenu.css" rel="stylesheet" type="text/css" />
 {% if g.headmenu %}
     <table width="100%"><tr><td width="160px">
     <br><div class="btn-group" style="margin-right: 10px">
@@ -30,7 +33,7 @@
   </ul>
 </div>
      <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
-    </td><td><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><br>
+    </td><td><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><span style="font-size: 12px;"> (<span id=objcount></span>)</span><br>
     <span id="headersubtitle" style="color:#FF6600;"> </span><br>
 
     </td></tr></table>
