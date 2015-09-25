@@ -99,6 +99,15 @@ def FullDBRestore():
         exit()
     RestoreDBFull()
 
+@manager.command
+def RecomputeStats():
+    """
+    Recompute stats related on Taxonomy and Projects
+    """
+    import appli.cron
+    appli.cron.RefreshAllProjectsStat()
+    appli.cron.RefreshTaxoStat()
+
 
 
 if __name__ == "__main__":

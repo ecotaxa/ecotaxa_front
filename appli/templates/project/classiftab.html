@@ -18,7 +18,7 @@
 
 <table class="classiftab" width="95%">
 {% for v in res %}
-<tr><td taxoid="{{ v[0] }}"> <span class="taxodrop">{{ v[1] }}</span> <p  class="ra3 label {{ "label-info" if v[3]>0 else "label-success"}}">{{ v[2] }}{{ " ("~v[3]~")" if v[3]>0 }}</p></td></tr>
+<tr><td taxoid="{{ v['id'] }}"><b>{{ ("&#8226;"*v['dist'])|safe }}</b><span class="taxodrop">{{ v['taxoname'] }}</span> <p  class="ra3 label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</p></td></tr>
 {% endfor %}
 </table>
 
@@ -213,8 +213,43 @@ $(document).ready(function() {
       }
     });
 
+{#  Initialisation Context Menu  #}
+    $.contextMenu({
+    // define which elements trigger this menu
+    selector: ".classiftab td",
+    // define the elements of the menu
+    build: function($trigger, e) {
+        res= {
+            callback: function (key, options) {
+                var taxoid=parseInt(key.substr(1));
+                var taxoname=taxotree[taxoid][1];
+                $('#taxolbanno').append($('<option>', { value: taxoid,text: taxoname}));
+                var sel=[];
+                sel.push(taxoid);
+                $('#taxolbanno').val(sel);
+                $('#taxolbanno').change();
+                AssignTaxoLbToSelection();
+            },
+            items: {}
+        };
+         var taxoid=$(e.currentTarget).attr('taxoid');
+         var taxoname=$(e.currentTarget).find(".taxodrop").text();
+         res["items"]["o"+taxoid]={name:taxoname}
+        for(var i=0;i<50;i++) {
+            taxoid=taxotree[taxoid][2]; // Go to parent
+            if (taxoid==null) break;
+            taxoname=taxotree[taxoid][1];
+            res["items"]["o"+taxoid]={name:taxoname};
+        }
+        console.log(res["items"]);
+        return res;
+    }
+});
+
 }); // Ready
 
+
+var taxotree={{ taxotree|safe }};
 
 </script>
 {% endif %}

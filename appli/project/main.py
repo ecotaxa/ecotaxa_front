@@ -6,31 +6,46 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
 from flask_security.decorators import roles_accepted
 from appli.search.leftfilters import getcommonfilters
-import os,time,math,collections,appli
-from appli.database import GetAll,GetClassifQualClass,ExecSQL,db
+import os,time,math,collections,appli,psycopg2.extras
+from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 
 ######################################################################################################################
 @app.route('/prj/')
 @login_required
 def indexProjects():
     txt = "<h3>Select your Project</h3>"
-    sql="select p.projid,title,status,pctvalidated from projects p"
+    sql="select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects p"
     if not current_user.has_role(database.AdministratorLabel):
         sql+=" Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
-    sql+=" order by title"
+    sql+=" order by lower(title)"
     res = GetAll(sql) #,debug=True
     txt+="""<table class='table table-bordered table-hover'>
-            <tr><th width=100>ID</td><th>Title</td><th width=100>Status</td><th width=100>Progress</td></tr>"""
+            <tr><th width=100>ID</td><th>Title</td><th width=100>Status</td><th width=100>Nbr Obj</td>
+            <th width=100>% Validated</td><th width=100>% Classified</td></tr>"""
     for r in res:
         txt+="""<tr><td><a class="btn btn-primary" href='/prj/{0}'>Go !</a> {0}</td>
         <td>{1}</td>
         <td>{2}</td>
-        <td>{3}</td>
+        <td>{3:0.0f}</td>
+        <td>{4:0.2f}</td>
+        <td>{5:0.2f}</td>
         </tr>""".format(*r)
     txt+="</table>"
 
     return PrintInCharte(txt)
 
+
+######################################################################################################################
+def UpdateProjectStat(PrjId):
+    ExecSQL("""UPDATE projects
+         SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
+         from projects p
+         left join
+         (select projid, count(*) nbr,count(classif_id) nbrclassified,count(case when classif_qual='V' then 1 end) nbrvalidated
+              from objects o
+              where projid=%(projid)s
+              group by projid )q on p.projid=q.projid
+         where projects.projid=%(projid)s and p.projid=%(projid)s""",{'projid':PrjId})
 ######################################################################################################################
 def GetFieldList(Prj,champ='classiffieldlist'):
     fieldlist=collections.OrderedDict()
@@ -110,6 +125,7 @@ def indexPrj(PrjId):
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
+    UpdateProjectStat(Prj.projid)
     return render_template('project/projectmain.html',top="",lefta=classiftab,leftb=filtertab
                            ,right=right,data=data)
 
@@ -354,7 +370,8 @@ where o.projid=%(projid)s
     t.append("""
     <script>
         PostAddImages();
-    </script>""")
+        $('#objcount').text(%d);
+    </script>"""%(nbrtotal,))
     return "\n".join(t)
 
 ######################################################################################################################
@@ -369,7 +386,7 @@ def GetClassifTab(Prj):
             InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
 
     InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
-    sql="""select t.id,t.name taxoname,Nbr,NbrNotV
+    sql="""select t.id,t.name taxoname,nbr,nbrnotv
     from (  SELECT    o.classif_id,   c.id,count(classif_id) Nbr,count(case when classif_qual='V' then NULL else o.classif_id end) NbrNotV
         FROM (select * from objects where projid=%(projid)s) o
         FULL JOIN (VALUES """+InitClassif+""") c(id) ON o.classif_id = c.id
@@ -379,8 +396,39 @@ def GetClassifTab(Prj):
     order by t.name       """
     param={'projid':Prj.projid}
     #TODO Mettre à jour pctvalidated s'il a changé
-    res=GetAll(sql,param,False)
-    return render_template('project/classiftab.html',res=res)
+    res=GetAll(sql,param,debug=False,cursor_factory=psycopg2.extras.RealDictCursor)
+    ids=[x['id'] for x in res]
+    print(ids)
+    sql="""WITH RECURSIVE rq as (
+                SELECT DISTINCT t.id,t.name,t.parent_id
+                FROM taxonomy t where t.id = any (%s)
+              union
+                SELECT t.id,t.name,t.parent_id
+                FROM rq JOIN taxonomy t ON rq.parent_id = t.id
+            )
+            select * from rq  """
+    taxotree=GetAssoc(sql,(ids,))
+    for k,v in enumerate(res):
+        res[k]['cp']=None  #cp = Closest parent
+        res[k]['cpdist']=0
+        id=v["id"]
+        for i in range(50): # 50 pour arreter en cas de boucle
+            id=taxotree[id]['parent_id']
+            if id is None:
+                break
+            if id in ids:
+                res[k]['cp']=id
+                res[k]['cpdist']=i+1
+                break
+    restree=[]
+    def AddChild(Src,Parent,Res,Deep):
+        for r in Src:
+            if r['cp'] ==Parent:
+                r['dist']=Deep+r['cpdist']
+                Res.append(r)
+                AddChild(Src,r['id'],Res,r['dist'])
+    AddChild(res,None,restree,0)
+    return render_template('project/classiftab.html',res=restree,taxotree=json.dumps(taxotree))
 
 ######################################################################################################################
 @app.route('/prjGetClassifTab/<int:PrjId>', methods=['GET', 'POST'])
@@ -456,5 +504,5 @@ def prjPurge(PrjId):
             ExecSQL("delete from acquisitions where projid={0}".format(PrjId))
             ExecSQL("delete from process where projid={0}".format(PrjId))
         txt+="Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files"%(no,noh,ni,nbrfile)
-
+        UpdateProjectStat(Prj.projid)
     return PrintInCharte(txt+ ("<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId)))

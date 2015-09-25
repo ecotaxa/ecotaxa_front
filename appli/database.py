@@ -67,6 +67,8 @@ class Taxonomy(db.Model):
     parent_id  = db.Column(INTEGER)
     name   = db.Column(VARCHAR(100),nullable=False)
     id_source  = db.Column(VARCHAR(20))
+    nbrobj  = db.Column(INTEGER)
+    nbrobjcum  = db.Column(INTEGER)
     def __str__(self):
         return "{0} ({1})".format(self.name,self.id)
 Index('IS_TaxonomyParent',Taxonomy.__table__.c.parent_id)
@@ -83,7 +85,9 @@ class Projects(db.Model):
     mappingsample   = db.Column(VARCHAR)
     mappingacq   = db.Column(VARCHAR)
     mappingprocess   = db.Column(VARCHAR)
+    objcount = db.Column(DOUBLE_PRECISION)
     pctvalidated = db.Column(DOUBLE_PRECISION)
+    pctclassified = db.Column(DOUBLE_PRECISION)
     classifsettings  = db.Column(VARCHAR) # Settings for Automatic classification.
     initclassiflist  = db.Column(VARCHAR) # Initial list of categories
     classiffieldlist  = db.Column(VARCHAR) # Fields available on sort & displayed field of Manual classif screen
@@ -148,6 +152,7 @@ class Acquisitions(db.Model):
     projid = db.Column(INTEGER,db.ForeignKey('projects.projid'))
     project=db.relationship("Projects")
     orig_id = db.Column(VARCHAR(255))
+    instrument = db.Column(VARCHAR(255))
     def __str__(self):
         return "{0} ({1})".format(self.orig_id,self.processid)
 for i in range(1,31):
