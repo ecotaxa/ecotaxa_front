@@ -4,6 +4,7 @@ from flask.ext.login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_security.decorators import roles_accepted
+from appli.database import db
 
 
 # Load default config and override config from an environment variable
@@ -110,4 +111,4 @@ def before_request_security():
 
     g.menu.append(("","SEP"))
     g.menu.append(("/change","Change Password"))
-    # g.machaine="ABC"+str(current_user)
+

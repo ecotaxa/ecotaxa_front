@@ -14,26 +14,27 @@ class TaskClassifAuto(AsyncTask):
         def __init__(self,InitStr=None):
             self.steperrors=[]
             super().__init__(InitStr)
-            if InitStr==None: # Valeurs par defaut ou vide pour init
+            if InitStr is None: # Valeurs par defaut ou vide pour init
                 self.Methode='randomforest'
                 self.ProjectId=None
                 self.BaseProject=None
                 self.CritVar=None
                 self.Taxo=""
+                self.Perimeter=""
 
     def __init__(self,task=None):
         super().__init__(task)
-        if task==None:
+        self.pgcur=db.engine.raw_connection().cursor()
+        if task is None:
             self.param=self.Params()
         else:
             self.param=self.Params(task.inputparam)
 
     def SPCommon(self):
-        logging.info("Execute SPCommon for Automatic Classification")
-        self.pgcur=db.engine.raw_connection().cursor()
+        logging.info("Execute SPCommon for Automatic Classification Task %d"%self.task.id)
 
     def SPStep1(self):
-        logging.info("Input Param = %s"%(self.param.__dict__))
+        logging.info("Input Param = %s"%(self.param.__dict__,))
         logging.info("Start Step 1")
         self.UpdateProgress(1,"Retrieve Data from Learning Set")
         TInit = time.time()
@@ -41,9 +42,12 @@ class TaskClassifAuto(AsyncTask):
         PrjBase=database.Projects.query.filter_by(projid=self.param.BaseProject).first()
         MapPrj=self.GetReverseObjMap(Prj)
         MapPrjBase=self.GetReverseObjMap(PrjBase)
+        logging.info("MapPrj %s",MapPrj)
+        logging.info("MapPrjBase %s",MapPrjBase)
         CritVar=self.param.CritVar.split(",")
-        ColsPrj=[]
+        ColsPrj=[]  # contient les colonnes communes au deux projets dans le même ordre
         ColsPrjBase=[]
+        MapColTargetToBase={}
         for c in CritVar:
             if c not in MapPrj:
                 logging.info("Variable %s not available in the classified project",c)
@@ -52,20 +56,28 @@ class TaskClassifAuto(AsyncTask):
             else:
                 ColsPrjBase.append(MapPrjBase[c])
                 ColsPrj.append(MapPrj[c])
-        sql="""select objid,classif_id,coalesce({0},-99999) from objects
+                MapColTargetToBase[MapPrj[c]]=MapPrjBase[c]
+        sql="select 1"
+        for c in ColsPrjBase:
+            sql+=",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {0}".format(c)
+        sql+=" from objects where projid={0} and classif_id is not null and classif_qual='V'".format(PrjBase.projid)
+        DefVal=GetAll(sql)[0]
+        sql="select objid,classif_id"
+        for c in ColsPrjBase:
+            sql+=",coalesce({0},{1}) ".format(c,DefVal[c])
+        sql+=""" from objects
                     where classif_id is not null and classif_qual='V'
-                    and projid={1}
-                    and classif_id in ({2})
-                    order by objid""".format(",-99999),coalesce(".join(ColsPrjBase),PrjBase.projid,self.param.Taxo)
+                    and projid={0}
+                    and classif_id in ({1})
+                    order by objid""".format(PrjBase.projid,self.param.Taxo)
         DBRes=np.array(GetAll(sql))
-        Ids = DBRes[:,0] # Que l'objid
+        # Ids = DBRes[:,0] # Que l'objid
         learn_cat = DBRes[:,1] # Que la classif
         learn_var = DBRes[:,2:] # exclu l'objid & la classif
         DBRes=None # libere la mémoire
         logging.info('DB Conversion to NP : %0.3f s', time.time() - TInit)
         logging.info("Variable shape %d Row, %d Col",*learn_var.shape)
-
-        # Note : La multiplication des jobs n'est pas forcement plus performente, en tous cas sur un petit ensemble.
+        # Note : La multiplication des jobs n'est pas forcement plus performante, en tous cas sur un petit ensemble.
         if  self.param.Methode=='randomforest':
             Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=5, min_samples_split=10, n_jobs=1)
         elif  self.param.Methode=='svm':
@@ -75,21 +87,24 @@ class TaskClassifAuto(AsyncTask):
         if self.param.Perimeter!='all':
             PerimeterWhere=" and ( classif_qual='P' or classif_qual is null)  "
         else: PerimeterWhere=""
-        TStep = time.time()
+        # TStep = time.time()
         # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
         # toute la colonne et du coup la colonne est supprimé car on ne peut pas calculer la moyenne.
         # learn_var = Imputer().fit_transform(learn_var)
         #learn_var[learn_var==np.nan] = -99999 Les Nan sont des NULL dans la base traités parle coalesce
-        logging.info('Clean input variables :  %0.3f s', time.time() - TStep)
+        # logging.info('Clean input variables :  %0.3f s', time.time() - TStep)
         TStep = time.time()
         Classifier.fit(learn_var, learn_cat)
         logging.info('Model fit duration :  %0.3f s', time.time() - TStep)
         NbrItem=GetAll("select count(*) from objects where projid={0} {1} ".format(Prj.projid,PerimeterWhere))[0][0]
         if NbrItem==0:
             raise Exception ("No object to classify, perhaps all object already classified or you should adjust the perimeter settings ")
-        sql="""select objid,coalesce({0},-99999) from objects
-                    where projid={1} {2}
-                    order by objid""".format(",-99999),coalesce(".join(ColsPrj),Prj.projid,PerimeterWhere)
+        sql="select objid"
+        for c in ColsPrj:
+            sql+=",coalesce({0},{1}) ".format(c,DefVal[MapColTargetToBase[c]])
+        sql+=""" from objects
+                    where projid={0} {1}
+                    order by objid""".format(Prj.projid,PerimeterWhere)
         self.pgcur.execute(sql)
         upcur=db.engine.raw_connection().cursor()
         ProcessedRows=0
@@ -120,7 +135,6 @@ class TaskClassifAuto(AsyncTask):
             logging.info('Chunk Db Extract %d/%d, Classification and Db Save :  %0.3f s %0.3f+%0.3f+%0.3f'
                          , ProcessedRows ,NbrItem
                          , time.time() - TStep,TStep2 - TStep,TStep3 - TStep2,time.time() - TStep3)
-
 
 
         self.task.taskstate="Done"
@@ -213,7 +227,7 @@ class TaskClassifAuto(AsyncTask):
             g.TaxoList=GetAll(sql,{"projid":gvg("src")},cursor_factory=None)
             s=sum([r[2] for r in g.TaxoList])  # Nbr total d'objet par categorie
             g.TaxoList=[[r[0],r[1],r[2],round(100*r[2]/s,1),'checked'] for r in g.TaxoList] # Ajout du % d'objet par categorie
-            print("taxo ="+self.param.Taxo)
+            # print("taxo ="+self.param.Taxo)
             if self.param.Taxo!='':
                 TaxoSel=set([int(x) for x in self.param.Taxo.split(",")])
                 for i,r in zip(range(10000),g.TaxoList):
@@ -223,8 +237,34 @@ class TaskClassifAuto(AsyncTask):
             revobjmap = self.GetReverseObjMap(Prj)
             PrjBase=database.Projects.query.filter_by(projid=gvg("src")).first()
             revobjmapbase = self.GetReverseObjMap(PrjBase)
-            g.critlist=list(k for k in revobjmap.keys() if k in revobjmapbase)
-            g.critlist.sort()
+            critlist={k:[k,"","","",""] for k in revobjmap.keys() if k in revobjmapbase}
+            sql="select count(*) nbrtot,count(case classif_qual when 'V' then null else 1 end) nbrnotval"
+            for k,v in revobjmap.items():
+                if k in revobjmapbase:
+                    sql+=",count({0}) {0}_nbr,count(distinct case classif_qual when 'V' then {0} end) {0}_nbrdist,count(case classif_qual when 'V' then null else {0} end) {0}_nbrnv".format(v)
+            sql+=" from objects where projid={0}".format(Prj.projid)
+            stat=GetAll(sql)[0]
+            for k,v in revobjmap.items():
+                if k in revobjmapbase:
+                    if stat["nbrtot"]:
+                        critlist[k][3]="%.0f"%(100*stat[v+"_nbr"]/stat["nbrtot"],)
+                    if stat["nbrnotval"]:
+                        critlist[k][4]="%.0f"%(100*stat[v+"_nbrnv"]/stat["nbrnotval"],)
+            if Prj.projid!=PrjBase.projid:
+                sql="select count(*) nbrtot,0 nbrnotval"
+                for k,v in revobjmap.items():
+                    if k in revobjmapbase:
+                        sql+=",count({0}) {0}_nbr,0 {0}_nbrnv,count(distinct {0}) {0}_nbrdist".format(v)
+                sql+=" from objects where projid={0} and classif_qual='V'".format(PrjBase.projid)
+                stat=GetAll(sql)[0]
+            if (stat["nbrtot"]-stat["nbrnotval"])>0:
+                for k,v in revobjmap.items():
+                    if k in revobjmapbase:
+                        critlist[k][1]="%.0f"%(100*(stat[v+"_nbr"]-stat[v+"_nbrnv"])/(stat["nbrtot"]-stat["nbrnotval"]),)
+                        critlist[k][2]="%.0f"%(stat[v+"_nbrdist"],)
+
+            g.critlist=list(critlist.values())
+            g.critlist.sort(key=lambda t: t[0])
             # app.logger.info(revobjmap)
             return render_template('task/classifauto_create.html',header=txt,data=self.param)
 
@@ -242,3 +282,4 @@ class TaskClassifAuto(AsyncTask):
         DoTaskClean(self.task.id)
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
         <a href='/prjcm/{0}' class='btn btn-primary btn-sm'  role=button>Go to Confusion Matrix</a> """.format(PrjId)
+

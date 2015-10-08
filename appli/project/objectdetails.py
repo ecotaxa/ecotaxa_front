@@ -11,7 +11,6 @@ from appli.database import GetAll,GetClassifQualClass,db
 
 
 @app.route('/objectdetails/<int:objid>')
-@login_required
 def objectdetails(objid):
     #récuperation et ajustement des dimensions de la zone d'affichage
     try:
@@ -29,7 +28,7 @@ def objectdetails(objid):
     t.append("<script src='/static/jquery.elevatezoom.js'></script>")
     t.append("Object #{0} , Original Object ID : {1}".format(objid,obj.orig_id))
     Prj=obj.project
-    if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
+    if Prj.visible==False and  not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot view this project','error')
         return PrintInCharte("<a href=/>Back to home</a>")
     g.Projid=Prj.projid
@@ -113,13 +112,13 @@ $(document).ready(function() {
  <td style="width: 230px;">
      <div class="input-group">
        <select id="taxolbpop" name="taxolbpop" style="width: 200px" class='taxolb' > </select>""")
-    if gvg("ajax","0")=="0":
-        t.append("""<span class="input-group-btn">
-                <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbpop" title="Search on Taxonomy Tree">
-                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
-                </span>""")
-    else: t.append("<br>")
-    t.append("""</div><!-- /input-group -->
+        if gvg("ajax","0")=="0":
+            t.append("""<span class="input-group-btn">
+                    <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbpop" title="Search on Taxonomy Tree">
+                        <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
+                    </span>""")
+        else: t.append("<br>")
+        t.append("""</div><!-- /input-group -->
  <span id=PendingChangesPop></span></td><td width=30px></td><td valign=top>
     <button type="button" class="btn btn-success" onclick="Save1Object('V');">Save as Validated</button>
     <button type="button" class="btn btn-danger" onclick="Save1Object('D');">Save as dubious</button>

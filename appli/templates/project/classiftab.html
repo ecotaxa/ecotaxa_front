@@ -16,11 +16,14 @@
         </div><!-- /input-group -->
   </div>
 
+  <div id='divclassiftab' style="width: 250px;overflow-y:auto;">
 <table class="classiftab" width="95%">
 {% for v in res %}
-<tr><td taxoid="{{ v['id'] }}"><b>{{ ("&#8226;"*v['dist'])|safe }}</b><span class="taxodrop">{{ v['taxoname'] }}</span> <p  class="ra3 label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</p></td></tr>
+<tr><td taxoid="{{ v['id'] }}" class="{{  v['parentclasses'] }}">{% if v['haschild'] %}<span class="glyphicon glyphicon-triangle-bottom categexpander" ></span>{% endif %}
+    <b>{{ ("&#8226;"*v['dist'])|safe }}</b><span class="taxodrop">{{ v['taxoname'] }}</span> <p  class="ra3 label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</p></td></tr>
 {% endfor %}
 </table>
+  </div>
 
   <script>
   function SetTaxoFilter(taxofiltervalue,taxofilterlabel){
@@ -36,6 +39,20 @@
       $("#taxofilterlabel").val(taxofilterlabel);
       $('#taxoclearspan').html('<span class="label label-default" onclick="SetTaxoFilter(false,-1)">Clear '+taxofilterlabel+'</span>')
   }
+function CategExpanderClick(e){
+    e.stopPropagation();
+    e.preventDefault();
+    if($(this).hasClass("glyphicon-triangle-bottom")){
+        $(this).removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
+        $('#divclassiftab .visib'+$(this).closest("td").attr("taxoid")).hide();
+    }
+    else {
+        $(this).removeClass("glyphicon-triangle-right").addClass("glyphicon-triangle-bottom");
+        $('#divclassiftab .visib'+$(this).closest("td").attr("taxoid")).show();
+
+    }
+
+}
 
 {% if g.PrjAnnotate %}
     {# Traitement de la Liste des objets TD à traiter. #}
@@ -234,17 +251,27 @@ $(document).ready(function() {
         };
          var taxoid=$(e.currentTarget).attr('taxoid');
          var taxoname=$(e.currentTarget).find(".taxodrop").text();
-         res["items"]["o"+taxoid]={name:taxoname}
+        var Arr=[]
+         //res["items"]["o"+taxoid]={name:taxoname}
+        Arr.unshift({key:"o"+taxoid,name:taxoname})
         for(var i=0;i<50;i++) {
             taxoid=taxotree[taxoid][2]; // Go to parent
             if (taxoid==null) break;
             taxoname=taxotree[taxoid][1];
-            res["items"]["o"+taxoid]={name:taxoname};
+            //res["items"]["o"+taxoid]={name:taxoname};
+            //res["items"].unshift("o"+taxoid])={name:taxoname};
+            Arr.unshift({key:"o"+taxoid,name:taxoname})
         }
+        for	(index = 0; index < Arr.length; index++)
+            res["items"][Arr[index]["key"]]={name:Arr[index]["name"]}
+
         console.log(res["items"]);
         return res;
     }
 });
+
+    $("#divclassiftab").outerHeight( $("#column-left").innerHeight()-$("#divclassiftab").position().top );
+    $("#divclassiftab .categexpander").click(CategExpanderClick);
 
 }); // Ready
 

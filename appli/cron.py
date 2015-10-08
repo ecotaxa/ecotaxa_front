@@ -16,7 +16,9 @@ def RefreshTaxoStat():
 
     n=ExecSQL("""UPDATE taxonomy
                 SET  nbrobj=q.nbr
-                from (select classif_id, count(*) nbr from objects o group by classif_id )q
+                from (select classif_id, count(*) nbr from objects o
+                        join projects p on o.projid=p.projid and p.visible=true
+                        where classif_qual='V' group by classif_id )q
                 where taxonomy.id=q.classif_id""")
     print("RefreshTaxoStat updated %d 1st level taxo"%(n))
 
