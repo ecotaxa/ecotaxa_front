@@ -168,7 +168,11 @@ def TaskQuestionRouter(TaskID):
 @app.route('/Task/Show/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskShow(TaskID):
-    task=LoadTask(TaskID)
+    try:
+        task=LoadTask(TaskID)
+    except:
+        return PrintInCharte("This task doesn't exists anymore, peraphs it was automaticaly purged")
+
     txt=""
     if gvg('log')=="Y":
         WorkingDir = task.GetWorkingDir()

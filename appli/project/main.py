@@ -105,6 +105,13 @@ def indexPrj(PrjId):
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
     if not g.PrjManager: g.PrjAnnotate=Prj.CheckRight(1)
     right='dodefault'
+    if gvg("taxo")!="":
+        g.taxofilter=gvg("taxo")
+        g.taxofilterlabel= GetAll("select name from taxonomy where id=%s ",(gvg("taxo"),))[0][0]
+    else:
+        g.taxofilter=""
+        g.taxofilterlabel=""
+
     classiftab=GetClassifTab(Prj)
     g.ProjectTitle=Prj.title
     g.headmenu = []
@@ -125,7 +132,6 @@ def indexPrj(PrjId):
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
-    UpdateProjectStat(Prj.projid)
     return render_template('project/projectmain.html',top="",lefta=classiftab,leftb=filtertab
                            ,right=right,data=data)
 
@@ -156,6 +162,7 @@ def LoadRightPane():
     fieldlist.pop('orig_id','')
     fieldlist.pop('objtime','')
     t=["<a name='toppage'/>"]
+    whereclause=" where o.projid=%(projid)s "
     sqlparam={'projid':gvp("projid")}
     sql="""select o.objid,t.name taxoname,o.classif_qual,u.name classifwhoname,i.file_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
@@ -168,63 +175,62 @@ left Join images i on o.img0id=i.imgid
 left JOIN taxonomy t on o.classif_id=t.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
-where o.projid=%(projid)s
 """
     if gvp("taxo")!="":
-        sql+=" and o.classif_id=%(taxo)s "
+        whereclause+=" and o.classif_id=%(taxo)s "
         sqlparam['taxo']=gvp("taxo")
     if gvp("statusfilter")!="":
-        sql+=" and classif_qual"
+        whereclause+=" and classif_qual"
         if gvp("statusfilter")=="NV":
-            sql+="!='V'"
+            whereclause+="!='V'"
         elif gvp("statusfilter")=="NVM":
-            sql+="='V' and classif_who!="+str(current_user.id)
+            whereclause+="='V' and classif_who!="+str(current_user.id)
         elif gvp("statusfilter")=="VM":
-            sql+="='V' and classif_who="+str(current_user.id)
+            whereclause+="='V' and classif_who="+str(current_user.id)
         elif gvp("statusfilter")=="U":
-            sql+=" is null "
+            whereclause+=" is null "
         else:
-            sql+="='"+gvp("statusfilter")+"'"
+            whereclause+="='"+gvp("statusfilter")+"'"
 
     if gvp("MapN")!="" and gvp("MapW")!="" and gvp("MapE")!="" and gvp("MapS")!="":
-        sql+=" and o.latitude between %(MapS)s and %(MapN)s and o.longitude between %(MapW)s and %(MapE)s  "
+        whereclause+=" and o.latitude between %(MapS)s and %(MapN)s and o.longitude between %(MapW)s and %(MapE)s  "
         sqlparam['MapN']=gvp("MapN")
         sqlparam['MapW']=gvp("MapW")
         sqlparam['MapE']=gvp("MapE")
         sqlparam['MapS']=gvp("MapS")
 
     if gvp("depthmin")!="" and gvp("depthmax")!="" :
-        sql+=" and o.depth_min between %(depthmin)s and %(depthmax)s and o.depth_max between %(depthmin)s and %(depthmax)s  "
+        whereclause+=" and o.depth_min between %(depthmin)s and %(depthmax)s and o.depth_max between %(depthmin)s and %(depthmax)s  "
         sqlparam['depthmin']=gvp("depthmin")
         sqlparam['depthmax']=gvp("depthmax")
 
     if gvp("samples")!="":
-        sql+=" and o.sampleid= any (%(samples)s) "
+        whereclause+=" and o.sampleid= any (%(samples)s) "
         sqlparam['samples']=[int(x) for x in gvp("samples").split(',')]
 
     if gvp("fromdate")!="":
-        sql+=" and objdate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
+        whereclause+=" and objdate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
         sqlparam['fromdate']=gvp("fromdate")
     if gvp("todate")!="":
-        sql+=" and objdate<= to_date(%(todate)s,'YYYY-MM-DD') "
+        whereclause+=" and objdate<= to_date(%(todate)s,'YYYY-MM-DD') "
         sqlparam['todate']=gvp("todate")
 
     if gvp("inverttime")=="1":
         if gvp("fromtime")!="" and gvp("totime")!="":
-            sql+=" and (objtime<= time %(fromtime)s or objtime>= time %(totime)s)"
+            whereclause+=" and (objtime<= time %(fromtime)s or objtime>= time %(totime)s)"
             sqlparam['fromtime']=gvp("fromtime")
             sqlparam['totime']=gvp("totime")
     else:
         if gvp("fromtime")!="":
-            sql+=" and objtime>= time %(fromtime)s "
+            whereclause+=" and objtime>= time %(fromtime)s "
             sqlparam['fromtime']=gvp("fromtime")
         if gvp("totime")!="":
-            sql+=" and objtime<= time %(totime)s "
+            whereclause+=" and objtime<= time %(totime)s "
             sqlparam['totime']=gvp("totime")
-
+    sql+=whereclause
     #filt_fromdate,#filt_todate
 
-    sqlcount="select count(*) from ("+sql+") q"
+    sqlcount="select count(*) from objects o  "+whereclause
     nbrtotal=GetAll(sqlcount,sqlparam,debug=False)[0][0]
     pagecount=math.ceil(nbrtotal/ipp)
     if sortby=="classifname":
@@ -395,10 +401,9 @@ def GetClassifTab(Prj):
     JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
     order by t.name       """
     param={'projid':Prj.projid}
-    #TODO Mettre à jour pctvalidated s'il a changé
     res=GetAll(sql,param,debug=False,cursor_factory=psycopg2.extras.RealDictCursor)
     ids=[x['id'] for x in res]
-    print(ids)
+    # print(ids)
     sql="""WITH RECURSIVE rq as (
                 SELECT DISTINCT t.id,t.name,t.parent_id
                 FROM taxonomy t where t.id = any (%s)
@@ -421,13 +426,18 @@ def GetClassifTab(Prj):
                 res[k]['cpdist']=i+1
                 break
     restree=[]
-    def AddChild(Src,Parent,Res,Deep):
+    def AddChild(Src,Parent,Res,Deep,ParentClasses):
         for r in Src:
             if r['cp'] ==Parent:
                 r['dist']=Deep+r['cpdist']
+                r['parentclasses']=ParentClasses
+                r["haschild"]=False
+                for p,i in zip(Res,range(10000)):
+                    if p['id']==Parent:
+                        Res[i]["haschild"]=True
                 Res.append(r)
-                AddChild(Src,r['id'],Res,r['dist'])
-    AddChild(res,None,restree,0)
+                AddChild(Src,r['id'],Res,r['dist'],ParentClasses+(" visib%s"%(r['id'],)))
+    AddChild(res,None,restree,0,"")
     return render_template('project/classiftab.html',res=restree,taxotree=json.dumps(taxotree))
 
 ######################################################################################################################
@@ -438,6 +448,7 @@ def prjGetClassifTab(PrjId):
     if Prj is None:
         return "Project doesn't exists"
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
+    UpdateProjectStat(Prj.projid)
     g.Projid=Prj.projid
     if gvp("taxo")!="":
         g.taxoclearspan="<span class='label label-default' onclick='SetTaxoFilter(false,-1)'>Clear "+gvp("taxofilterlabel")+"</span>"

@@ -71,6 +71,21 @@
            }
         });
     }
+    function UncheckNonPertinent(){
+        $('#TblVar tr').each(function (){
+           var v=parseInt($(this).find("td:nth-child(3)").text() ) || 0;
+           if(v<=75) {# Clean si moins de 25% de données sources remplis #}
+               $(this).find("input").prop("checked",false);
+           v=parseInt($(this).find("td:nth-child(4)").text() ) || 0;
+           if(v<=1) {# Clean si pas assez de valeur distincte #}
+               $(this).find("input").prop("checked",false);
+           v=parseInt($(this).find("td:nth-child(6)").text() ) || 0;
+           if(v<=75) {# Clean si pas assez de valeur distincte #}
+               $(this).find("input").prop("checked",false);
+        });
+
+        ComputeCritVar();
+    }
 </script>
 
 <table>
@@ -98,11 +113,14 @@ Using variables :<br>
 Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', true );ComputeCritVar();">All</a>
     / <a href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', false );ComputeCritVar();">None</a>
     / <a href="#tbltop2" onclick="CheckBasedOnText();" title="Usefull to copy setting from another project" >Text field content</a>
+    / <a href="#tbltop2" onclick="UncheckNonPertinent();" title="uncheck distinct<1 and %<25%" >Uncheck non pertinent variable</a>
 
 <table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
-    <tr><th >Select</th><th width="200">Variable</th></tr>
+    <tr><th rowspan="2">Select</th><th width="200" rowspan="2">Variable</th><th width="100" colspan="2">Source</th><th width="100" colspan="2">Target % Populated</th></tr>
+    <tr><th >% Pop.</th><th >Distinct</th><th >All</th><th>Not Valid.</th></tr>
     {%   for r in g.critlist %}
-        <tr><td><input type="checkbox" value="Y" name="var{{ r }}" data-var="{{ r }}" ></td><td>{{ r }}</td></tr>
+        <tr><td><input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[0] }}" ></td><td>{{ r[0] }}</td>
+        <td class="rightfixedfont">{{ r[1] }}</td><td class="rightfixedfont">{{ r[2] }}</td><td class="rightfixedfont">{{ r[3] }}</td><td class="rightfixedfont">{{ r[4] }}</td></tr>
     {% endfor %}
 </table>
 
@@ -130,6 +148,7 @@ $(document).ready(function() {
         CheckBasedOnText();
 
     }); // Ready
+
  </script>
 
 

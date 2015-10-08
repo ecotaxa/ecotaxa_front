@@ -4,6 +4,7 @@ from flask.ext.security import  UserMixin, RoleMixin
 from flask.ext.login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence,func
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import foreign,remote
 import json,psycopg2.extras,datetime,os
 
@@ -101,7 +102,9 @@ class Projects(db.Model):
         # pp=self.projmembers.filter(member=userid).first()
         if userid is None:
             u=current_user
-            userid=u.id
+            userid=getattr(u,'id',None)
+            if userid is None: # correspond à anonymous
+                return False
         else:
             u=users.query.filter_by(id=userid).first()
         if len([x for x in u.roles if x=='Application Administrator'])>0:
@@ -216,6 +219,8 @@ for i in range(1,501):
 for i in range(1,21):
     setattr(Objects,"t%02d"%i,db.Column(VARCHAR(250)))
 Index('IS_ObjectsProject',Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
+#utile pour home de  classif manu, car PG ne sait pas utiliser les Skip scan index.
+Index('IS_ObjectsProjectOnly',Objects.__table__.c.projid)
 Index('IS_ObjectsLatLong',Objects.__table__.c.latitude,Objects.__table__.c.longitude)
 Index('IS_ObjectsSample',Objects.__table__.c.sampleid,Objects.__table__.c.classif_qual)
 Index('IS_ObjectsClassif',Objects.__table__.c.classif_id,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
@@ -263,6 +268,7 @@ Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
 Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
 GlobalDebugSQL=False
+# GlobalDebugSQL=True
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,keyid=0):
     cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
@@ -271,6 +277,10 @@ def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCurs
         res=dict()
         for r in cur:
             res[r[keyid]]=r
+    except psycopg2.InterfaceError:
+        app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
+        db.engine.connect()
+        raise
     except:
         app.logger.debug("GetAssoc Exception SQL = %s %s",sql,params)
         cur.connection.rollback()
@@ -289,6 +299,10 @@ def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
         res=dicttype()
         for r in cur:
             res[r[0]]=r[1]
+    except psycopg2.InterfaceError:
+        app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
+        db.engine.connect()
+        raise
     except:
         app.logger.debug("GetAssoc2Col  Exception SQL = %s %s",sql,params)
         cur.connection.rollback()
@@ -306,6 +320,10 @@ def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
         res = cur.fetchall()
+    except psycopg2.InterfaceError:
+        app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
+        db.engine.connect()
+        raise
     except:
         app.logger.debug("GetAll Exception SQL = %s %s",sql,params)
         cur.connection.rollback()
@@ -323,6 +341,10 @@ def ExecSQL(sql,params=None,debug=False):
         cur.execute(sql,params)
         LastRowCount=cur.rowcount;
         cur.connection.commit()
+    except psycopg2.InterfaceError:
+        app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
+        db.engine.connect()
+        raise
     except:
         app.logger.debug("ExecSQL Exception SQL = %s %s",sql,params)
         cur.connection.rollback()

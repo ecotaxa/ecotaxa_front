@@ -123,6 +123,10 @@ adminApp.add_view(AcquisitionsView(db.session))
 adminApp.add_view(ObjectsView(db.session))
 adminApp.add_view(TaxonomyView(db.session))
 adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
+adminApp.add_link(base.MenuLink('View DB Size', category='Database', url='/dbadmin/viewsizes'))
+adminApp.add_link(base.MenuLink('View DB Bloat', category='Database', url='/dbadmin/viewbloat'))
+adminApp.add_link(base.MenuLink('Recompute Projects and Taxo stat (can be long)', category='Database', url='/dbadmin/recomputestat'))
+
 
 
 
