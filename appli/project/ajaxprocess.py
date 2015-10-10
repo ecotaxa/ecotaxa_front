@@ -20,10 +20,10 @@ def PrjManualClassif(PrjId):
         return '<span class="label label-warning">No pending change to update</span>'
 
     sql="""select o.objid,o.classif_auto_id,o.classif_auto_when,o.classif_auto_score,o.classif_id,o.classif_qual,o.classif_when,o.classif_who
-          from objects o
+          from obj_head o
           where o.objid in ("""+",".join(changes.keys())+")"
     prev={r['objid']:r for r in GetAll(sql,debug=False)}
-    sql="update objects set classif_id=%(classif_id)s,classif_qual=%(classif_qual)s,classif_who=%(classif_who)s,classif_when=now() where objid=%(objid)s "
+    sql="update obj_head set classif_id=%(classif_id)s,classif_qual=%(classif_qual)s,classif_who=%(classif_who)s,classif_when=now() where objid=%(objid)s "
     sqli="""INSERT INTO objectsclassifhisto (objid, classif_date, classif_type, classif_id, classif_qual, classif_who)
             VALUES (%(objid)s,%(classif_when)s,'M',%(classif_id)s,%(classif_qual)s,%(classif_who)s )"""
     for k,v in changes.items():

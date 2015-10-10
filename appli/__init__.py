@@ -171,4 +171,7 @@ def JinjaFormatDateTime(d,format='%Y-%m-%d %H:%M:%S'):
         return ""
     return d.strftime(format)
 
+def JinjaNl2BR(t):
+    return t.replace('\n', '<br>\n');
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
+app.jinja_env.filters['nl2br'] = JinjaNl2BR

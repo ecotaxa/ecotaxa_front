@@ -64,7 +64,7 @@ def createsampledata():
 def ForceTest1Values():
     from appli import ObjectToStr
     from appli.tasks.taskmanager import AsyncTask,LoadTask
-    t=LoadTask(16)
+    t=LoadTask(14)
     t.param.IntraStep=0
     t.task.taskstep=1
     t.UpdateParam()
@@ -76,7 +76,7 @@ def ResetDBSequence(cur=None):
         cur=db.session
     cur.execute("SELECT setval('seq_acquisitions', (SELECT max(acquisid) FROM acquisitions), true)")
     cur.execute("SELECT setval('seq_images', (SELECT max(imgid) FROM images), true)")
-    cur.execute("SELECT setval('seq_objects', (SELECT max(objid) FROM objects), true)")
+    cur.execute("SELECT setval('seq_objects', (SELECT max(objid) FROM obj_head), true)")
     cur.execute("SELECT setval('seq_process', (SELECT max(processid) FROM process), true)")
     cur.execute("SELECT setval('seq_projects', (SELECT max(projid) FROM projects), true)")
     cur.execute("SELECT setval('seq_projectspriv', (SELECT max(id) FROM projectspriv), true)")

@@ -138,6 +138,7 @@ class TaskSubset(AsyncTask):
             NbrObjects=0
             for objid in LstObjects:
                 obj=db.session.query(database.Objects).filter_by(objid=objid[0] ).first()
+                objf=db.session.query(database.ObjectsFields).filter_by(objfid=objid[0] ).first()
                 NbrObjects+=1
                 oldobjid=obj.objid
                 if self.param.withimg=='Y':
@@ -169,11 +170,16 @@ class TaskSubset(AsyncTask):
                 obj.acquisid=self.GetAcquisID(obj.acquisid)
                 db.session.add(obj)
                 db.session.commit()
+                db.session.expunge(objf)
+                make_transient(objf)
+                objf.objfid=obj.objid
+                db.session.add(objf)
+                db.session.commit()
                 if NbrObjects %20 ==0:
                     self.UpdateProgress(5+95*NbrObjects/len(LstObjects),"Subset creation in progress")
                 # print (oldobjid,obj.objid)
             # Recalcule les valeurs de Img0
-            self.pgcur.execute("""update objects o
+            self.pgcur.execute("""update obj_head o
                                 set imgcount=(select count(*) from images where objid=o.objid)
                                 ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
                                 where projid="""+str(self.param.subsetproject))

@@ -96,6 +96,7 @@ class Projects(db.Model):
     projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects')) #
     comments  = db.Column(VARCHAR)
     projtype  = db.Column(VARCHAR(50))
+    fileloaded  = db.Column(VARCHAR)
     def __str__(self):
         return "{0} ({1})".format(self.title,self.projid)
     def CheckRight(self,Level,userid=None): # Level 0 = Read, 1 = Annotate, 2 = Admin . userid=None = current user
@@ -175,16 +176,14 @@ for i in range(1,31):
 Index('IS_ProcessProject',Process.__table__.c.projid)
 
 class Objects(db.Model):
-    __tablename__ = 'objects'
+    __tablename__ = 'obj_head'
     objid = db.Column(BIGINT,db.Sequence('seq_objects'), primary_key=True)
     projid = db.Column(INTEGER,db.ForeignKey('projects.projid'),nullable=False)
     project=db.relationship("Projects")
-    orig_id = db.Column(VARCHAR(255))
     latitude = db.Column(DOUBLE_PRECISION)
     longitude = db.Column(DOUBLE_PRECISION)
     objdate = db.Column(DATE)
     objtime = db.Column(TIME)
-    object_link= db.Column(VARCHAR(255))
     depth_min = db.Column(FLOAT)
     depth_max = db.Column(FLOAT)
     images=db.relationship("Images")
@@ -213,26 +212,34 @@ class Objects(db.Model):
     processid = db.Column(INTEGER,db.ForeignKey('process.processid'))
     processrel=db.relationship("Process")
 
+class ObjectsFields(db.Model):
+    __tablename__ = 'obj_field'
+    objfid = db.Column(BIGINT,db.ForeignKey('obj_head.objid'), primary_key=True)
+    objhrel=db.relationship("Objects",foreign_keys="Objects.objid",primaryjoin="ObjectsFields.objfid==Objects.objid" ,uselist=False, backref="objfrel")
+    orig_id = db.Column(VARCHAR(255))
+    object_link= db.Column(VARCHAR(255))
+
 # Ajout des colonnes numériques & textuelles libres
 for i in range(1,501):
-    setattr(Objects,"n%02d"%i,db.Column(FLOAT))
+    setattr(ObjectsFields,"n%02d"%i,db.Column(FLOAT))
 for i in range(1,21):
-    setattr(Objects,"t%02d"%i,db.Column(VARCHAR(250)))
-Index('IS_ObjectsProject',Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
+    setattr(ObjectsFields,"t%02d"%i,db.Column(VARCHAR(250)))
+
+# Index('IS_ObjectsProject',Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
 #utile pour home de  classif manu, car PG ne sait pas utiliser les Skip scan index.
-Index('IS_ObjectsProjectOnly',Objects.__table__.c.projid)
-Index('IS_ObjectsLatLong',Objects.__table__.c.latitude,Objects.__table__.c.longitude)
-Index('IS_ObjectsSample',Objects.__table__.c.sampleid,Objects.__table__.c.classif_qual)
-Index('IS_ObjectsClassif',Objects.__table__.c.classif_id,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
-Index('IS_ObjectsDepth',Objects.__table__.c.projid,Objects.__table__.c.classif_qual,Objects.__table__.c.depth_max,Objects.__table__.c.depth_min)
-Index('IS_ObjectsTime',Objects.__table__.c.projid,Objects.__table__.c.classif_qual,Objects.__table__.c.objtime)
-Index('IS_ObjectsDate',Objects.__table__.c.objdate,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
-Index('IS_ObjectsRandom',Objects.__table__.c.random_value,Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
-Index('IS_ObjectsOrigID',Objects.__table__.c.projid,Objects.__table__.c.orig_id,Objects.__table__.c.classif_qual,Objects.__table__.c.classif_who) # Pour le tri par defaut
+Index('is_objectsprojectonly',Objects.__table__.c.projid)
+Index('is_objectsprojclassifqual',Objects.__table__.c.projid,Objects.__table__.c.classif_id,Objects.__table__.c.classif_qual)
+Index('is_objectslatlong',Objects.__table__.c.latitude,Objects.__table__.c.longitude)
+Index('is_objectssample',Objects.__table__.c.sampleid)
+Index('is_objectsdepth',Objects.__table__.c.depth_max,Objects.__table__.c.depth_min,Objects.__table__.c.projid)
+Index('is_objectstime',Objects.__table__.c.objtime,Objects.__table__.c.projid)
+Index('is_objectsdate',Objects.__table__.c.objdate,Objects.__table__.c.projid)
+Index('is_objectsprojrandom',Objects.__table__.c.projid,Objects.__table__.c.random_value,Objects.__table__.c.classif_qual)
+Index('is_objectfieldsorigid',ObjectsFields.__table__.c.orig_id)
 
 class ObjectsClassifHisto(db.Model):
     __tablename__ = 'objectsclassifhisto'
-    objid = db.Column(BIGINT,db.ForeignKey('objects.objid'), primary_key=True)
+    objid = db.Column(BIGINT,db.ForeignKey('obj_head.objid'), primary_key=True)
     classif_date = db.Column(TIMESTAMP, primary_key=True)
     classif_type = db.Column(CHAR(1)) # A : Auto, M : Manu
     classif_id = db.Column(INTEGER)
@@ -244,7 +251,7 @@ class ObjectsClassifHisto(db.Model):
 class Images(db.Model):
     __tablename__ = 'images'
     imgid = db.Column(BIGINT,db.Sequence('seq_images'), primary_key=True) # manuel ,db.Sequence('seq_images')
-    objid = db.Column(BIGINT, db.ForeignKey('objects.objid'))
+    objid = db.Column(BIGINT, db.ForeignKey('obj_head.objid'))
     imgrank=db.Column(INTEGER)
     file_name = db.Column(VARCHAR(255))
     orig_file_name = db.Column(VARCHAR(255))

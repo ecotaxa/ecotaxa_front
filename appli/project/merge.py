@@ -74,7 +74,7 @@ def PrjMerge(PrjId):
         ExecSQL("update acquisitions set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
         ExecSQL("update process set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
         ExecSQL("update samples set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
-        ExecSQL("update objects set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
+        ExecSQL("update obj_head set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
         ExecSQL("delete from projectspriv where projid={0}".format(PrjSrc.projid))
         ExecSQL("delete from projects where projid={0}".format(PrjSrc.projid))
         txt+="<div class='alert alert-success' role='alert'>Fusion Done successfully</div>"

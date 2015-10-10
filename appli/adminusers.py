@@ -102,13 +102,20 @@ class TaxonomyView(ModelView):
         super(TaxonomyView, self).__init__(database.Taxonomy, session, **kwargs)
 
 class ObjectsView(ModelView):
-    column_list = ('objid','projid', 'orig_id','sampleid','classif_qual','objdate','acquisid','processid')
-    column_filters = ('objid','projid','sampleid', 'orig_id','classif_qual','acquisid','processid')
-    column_searchable_list = ('orig_id',)
+    column_list = ('objid','projid', 'sampleid','classif_qual','objdate','acquisid','processid')
+    column_filters = ('objid','projid','sampleid', 'classif_qual','acquisid','processid')
     form_overrides = dict(complement_info  =TextAreaField )
-    form_excluded_columns=('classif','classif_auto','processrel','acquis','img0','images','sample','classiffier')
+    form_excluded_columns=('classif','classif_auto','processrel','acquis','img0','images','sample','classiffier','objfrel')
     def __init__(self, session, **kwargs):
         super(ObjectsView, self).__init__(database.Objects, session, **kwargs)
+
+class ObjectsFieldsView(ModelView):
+    column_list = ('objfid','orig_id')
+    column_filters = ('objfid','orig_id')
+    column_searchable_list = ('orig_id',)
+    form_excluded_columns=('objhrel', )
+    def __init__(self, session, **kwargs):
+        super(ObjectsFieldsView, self).__init__(database.ObjectsFields, session, **kwargs)
 
 # Create admin
 adminApp = admin.Admin(app, name='Ecotaxa Administration')
@@ -117,10 +124,11 @@ adminApp = admin.Admin(app, name='Ecotaxa Administration')
 #admin.add_view(sqla.ModelView(database.users, db.session))
 adminApp.add_view(UsersView(db.session))
 adminApp.add_view(ProjectsView(db.session))
-adminApp.add_view(SamplesView(db.session))
-adminApp.add_view(ProcessView(db.session))
-adminApp.add_view(AcquisitionsView(db.session))
-adminApp.add_view(ObjectsView(db.session))
+adminApp.add_view(ObjectsView(db.session,category='Objects'))
+adminApp.add_view(ObjectsFieldsView(db.session,category='Objects'))
+adminApp.add_view(SamplesView(db.session,category='Objects'))
+adminApp.add_view(ProcessView(db.session,category='Objects'))
+adminApp.add_view(AcquisitionsView(db.session,category='Objects'))
 adminApp.add_view(TaxonomyView(db.session))
 adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
 adminApp.add_link(base.MenuLink('View DB Size', category='Database', url='/dbadmin/viewsizes'))

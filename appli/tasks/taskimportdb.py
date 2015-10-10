@@ -78,7 +78,7 @@ class TaskImportDB(AsyncTask):
             for r in Constraints:
                 ExecSQL('alter table {0}.{1} drop CONSTRAINT {2}'.format(newschema,*r),debug=False)
             logging.info("Drop Index") # for faster insert and not needed for DB Merge
-            for t in ("IS_ObjectsRandom","IS_ObjectsLatLong","IS_ObjectsDepth","IS_ObjectsDate","IS_ObjectsTime","IS_TaxonomySource"):
+            for t in ("is_objectssample","is_objectslatlong","is_objectsdepth","is_objectsdate","is_objectstime","is_objectfieldsorigid","is_objectsprojrandom","IS_TaxonomySource"):
                 ExecSQL('drop index {0}."{1}" '.format(newschema,t),debug=False)
 
             logging.info("Restore data")
@@ -94,7 +94,7 @@ class TaskImportDB(AsyncTask):
                     logging.error("Error while data restoration %s",str(sys.exc_info()))
 
             logging.info("Add newid columns")
-            for t in ("process","acquisitions","samples","objects","images","users","taxonomy"):
+            for t in ("process","acquisitions","samples","obj_head","images","users","taxonomy"):
                 ExecSQL("alter table {0}.{1} add column newid bigint".format(newschema,t),debug=False)
 
         self.task.taskstate="Question"
@@ -151,9 +151,9 @@ class TaskImportDB(AsyncTask):
 
             logging.info("SubStep 2 : Create Objects")
             self.UpdateProgress(10,"Create Objects")
-            ExecSQL("UPDATE {0}.objects set newid=nextval('seq_objects') where projid={1}".format(newschema,self.param.ProjectSrcId))
-            TblSrc=GetColsForTable(newschema,'objects')
-            TblDst=GetColsForTable('public','objects')
+            ExecSQL("UPDATE {0}.obj_head set newid=nextval('seq_objects') where projid={1}".format(newschema,self.param.ProjectSrcId))
+            TblSrc=GetColsForTable(newschema,'obj_head')
+            TblDst=GetColsForTable('public','obj_head')
             CustomMapping={"objid":"o.newid","projid":str(self.param.ProjectId),"sampleid":"samples.newid"
                            ,"processid":"process.newid","acquisid":"acquisitions.newid","classif_who":"users.newid"
                            ,"classif_id":"t1.newid","classif_auto_id":"t2.newid"}
@@ -163,8 +163,8 @@ class TaskImportDB(AsyncTask):
                 if c in TblDst:
                     InsClause.append(c)
                     SelClause.append(CustomMapping.get(c,"o."+c))
-            sql="insert into public.objects (%s)"%(",".join(InsClause),)
-            sql+=""" select {0} from {1}.objects o
+            sql="insert into public.obj_head (%s)"%(",".join(InsClause),)
+            sql+=""" select {0} from {1}.obj_head o
              left join {1}.samples on o.sampleid=samples.sampleid
              left join {1}.process on o.processid=process.processid
              left join {1}.acquisitions on o.acquisid=acquisitions.acquisid
@@ -173,7 +173,24 @@ class TaskImportDB(AsyncTask):
              left join {1}.taxonomy t2 on o.classif_auto_id=t2.id
             where o.projid={2}""".format(",".join(SelClause),newschema,self.param.ProjectSrcId)
             N=ExecSQL(sql)
-            logging.info("Created %s Objects",N)
+            logging.info("Created %s Objects Phase 1",N)
+            # Traitement table obj_field
+            TblSrc=GetColsForTable(newschema,'obj_field')
+            TblDst=GetColsForTable('public','obj_field')
+            CustomMapping={"objfid":"obj_head.newid"}
+            InsClause=[]
+            SelClause=[]
+            for c in TblSrc:
+                if c in TblDst:
+                    InsClause.append(c)
+                    SelClause.append(CustomMapping.get(c,"o."+c))
+
+            sql="insert into public.obj_field (%s)"%(",".join(InsClause),)
+            sql+=""" select {0} from {1}.obj_field o
+             left join {1}.obj_head on o.objfid=obj_head.objid
+            where obj_head.projid={2}""".format(",".join(SelClause),newschema,self.param.ProjectSrcId)
+            N=ExecSQL(sql)
+            logging.info("Created %s Objects Phase 2",N)
             self.param.IntraStep=3
 
         if self.param.IntraStep==3:
@@ -181,14 +198,14 @@ class TaskImportDB(AsyncTask):
             self.UpdateProgress(40,"Import Images")
             PrevPct=40
             NbrProcessed=0
-            NbrToProcess=ExecSQL("""UPDATE {0}.images set newid=nextval('seq_images') from {0}.objects o
+            NbrToProcess=ExecSQL("""UPDATE {0}.images set newid=nextval('seq_images') from {0}.obj_head o
                     where images.objid=o.objid and o.projid={1}""".format(newschema,self.param.ProjectSrcId))
             TblSrc=GetColsForTable(newschema,'images')
             TblDst=GetColsForTable('public','images')
             zfile=ZipFile(self.param.InData , 'r',allowZip64 = True)
             vaultroot=Path("../../vault")
             cur = db.engine.raw_connection().cursor(cursor_factory=RealDictCursor)
-            cur.execute("select images.*,o.newid newobjid from {0}.images join {0}.objects o on images.objid=o.objid where o.projid={1} ".format(newschema,self.param.ProjectSrcId),)
+            cur.execute("select images.*,o.newid newobjid from {0}.images join {0}.obj_head o on images.objid=o.objid where o.projid={1} ".format(newschema,self.param.ProjectSrcId),)
             for r in cur:
                 Img=database.Images()
                 Img.imgid=r['newid']
@@ -221,7 +238,7 @@ class TaskImportDB(AsyncTask):
                     self.UpdateProgress(NewPct,"Import Images %d/%d"%(NbrProcessed,NbrToProcess))
             # Recalcule les valeurs de Img0
             self.UpdateProgress(99,"Remap Images")
-            self.pgcur.execute("""update objects o
+            self.pgcur.execute("""update obj_head o
                                 set imgcount=(select count(*) from images where objid=o.objid)
                                 ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
                                 where projid="""+str(self.param.ProjectId))
@@ -300,7 +317,7 @@ class TaskImportDB(AsyncTask):
                     db.session.add(Prj)
                 else: # MAJ du projet
                     Prj=database.Projects.query.filter_by(projid=int(gvg("dest"))).first()
-                    NbrObj=GetAll("select count(*) from objects WHERE projid="+gvg("dest"))[0][0]
+                    NbrObj=GetAll("select count(*) from obj_head WHERE projid="+gvg("dest"))[0][0]
                     if NbrObj>0:
                         flash("Destination project must be empty",'error')
                         return PrintInCharte("<a href='#' onclick='history.back();'>Back</a>")
@@ -311,10 +328,10 @@ class TaskImportDB(AsyncTask):
                 flash("Project %s:%s created or updated successfuly"%(Prj.projid,Prj.title),'success')
                 # Controle du mapping Taxo
                 sql="""select DISTINCT t.id,lower(t.name) as name,t.parent_id
-                          from {0}.objects o join {0}.taxonomy t on o.classif_id=t.id
+                          from {0}.obj_head o join {0}.taxonomy t on o.classif_id=t.id
                         where o.projid={1} and t.newid is null
                         union select DISTINCT t.id,lower(t.name) as name,t.parent_id
-                          from {0}.objects o
+                          from {0}.obj_head o
                           join {0}.taxonomy t on o.classif_auto_id=t.id
                           left join taxonomy tt on t.newid =tt.id
                         where o.projid={1}  and tt.id is null
@@ -338,7 +355,7 @@ class TaskImportDB(AsyncTask):
                 app.logger.info("NotFoundTaxo=%s",NotFoundTaxo)
                 # Controle du mapping utilisateur
                 sql="""select DISTINCT lower(t.name) as name,lower(email) as email,t.password,t.organisation
-                          from {0}.objects o join {0}.users t on o.classif_who=t.id
+                          from {0}.obj_head o join {0}.users t on o.classif_who=t.id
                         where o.projid={1}  and t.newid is null
                         union
                         select DISTINCT lower(t.name) as name,lower(email) as email,t.password,t.organisation

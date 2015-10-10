@@ -96,7 +96,7 @@ class TaskClassifAuto(AsyncTask):
         TStep = time.time()
         Classifier.fit(learn_var, learn_cat)
         logging.info('Model fit duration :  %0.3f s', time.time() - TStep)
-        NbrItem=GetAll("select count(*) from objects where projid={0} {1} ".format(Prj.projid,PerimeterWhere))[0][0]
+        NbrItem=GetAll("select count(*) from obj_head where projid={0} {1} ".format(Prj.projid,PerimeterWhere))[0][0]
         if NbrItem==0:
             raise Exception ("No object to classify, perhaps all object already classified or you should adjust the perimeter settings ")
         sql="select objid"
@@ -127,7 +127,7 @@ class TaskClassifAuto(AsyncTask):
             SqlParam=[{'cat':int(Classifier.classes_[mc]),'p':r[mc],'id':int(i)} for i,mc,r in zip(Tget_Ids,ResultMaxCol,Result)]
             TStep3 = time.time()
             # MAJ dans la base, Si pas de classif devient predicted , Si vide ou predicted, MAJ de la classif
-            upcur.executemany("""update objects set classif_auto_id=%(cat)s,classif_auto_score=%(p)s,classif_auto_when=now()
+            upcur.executemany("""update obj_head set classif_auto_id=%(cat)s,classif_auto_score=%(p)s,classif_auto_when=now()
                                     ,classif_qual=case when classif_qual in ('D','V') then  classif_qual else 'P'  END
                                     ,classif_id=case when classif_qual in ('D','V') then classif_id  else %(cat)s end
                                     where objid=%(id)s""",SqlParam)
@@ -220,7 +220,7 @@ class TaskClassifAuto(AsyncTask):
             #recupere les categories et le nombre d'occurence dans le projet de base/learning
             sql="""select n.classif_id,t.name,n.nbr
                     from (select o.classif_id,count(*) nbr
-                          from objects o where projid =%(projid)s
+                          from obj_head o where projid =%(projid)s
                           group by classif_id) n
                     JOIN taxonomy t on n.classif_id=t.id
                     order by nbr desc,name"""
@@ -242,7 +242,7 @@ class TaskClassifAuto(AsyncTask):
             for k,v in revobjmap.items():
                 if k in revobjmapbase:
                     sql+=",count({0}) {0}_nbr,count(distinct case classif_qual when 'V' then {0} end) {0}_nbrdist,count(case classif_qual when 'V' then null else {0} end) {0}_nbrnv".format(v)
-            sql+=" from objects where projid={0}".format(Prj.projid)
+            sql+=" from obj_head where projid={0}".format(Prj.projid)
             stat=GetAll(sql)[0]
             for k,v in revobjmap.items():
                 if k in revobjmapbase:
@@ -255,7 +255,7 @@ class TaskClassifAuto(AsyncTask):
                 for k,v in revobjmap.items():
                     if k in revobjmapbase:
                         sql+=",count({0}) {0}_nbr,0 {0}_nbrnv,count(distinct {0}) {0}_nbrdist".format(v)
-                sql+=" from objects where projid={0} and classif_qual='V'".format(PrjBase.projid)
+                sql+=" from obj_head where projid={0} and classif_qual='V'".format(PrjBase.projid)
                 stat=GetAll(sql)[0]
             if (stat["nbrtot"]-stat["nbrnotval"])>0:
                 for k,v in revobjmap.items():

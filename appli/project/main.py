@@ -244,7 +244,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     trcount=1
     LineStart=""
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
-        t.append("""<span id=SpanSelectAll style="background:#FFFF00;">[Select All]</span> <button class='btn btn-primary btn-xs' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
+        t.append("""<span class=SpanSelectAll style="background:#FFFF00;">[Select All]</span> <button class='btn btn-primary btn-xs' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
         <span id=PendingChanges2 class=PendingChangesClass style="font-size:12px;"></span>""")
         LineStart="<td class=linestart>&gt;<br>&gt;<br>&gt;<br></td>"
     t.append("<table class=imgtab><tr id=tr1>"+LineStart)
@@ -357,7 +357,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
 
     t.append("</tr></table>")
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
-        t.append("""<span id=PendingChanges class=PendingChangesClass></span><br>
+        t.append("""<span class=SpanSelectAll style="background:#FFFF00;">[Select All]</span> <span id=PendingChanges class=PendingChangesClass></span><br>
         <button class='btn btn-primary btn-sm' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
         <button class='btn btn-success btn-sm' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> Save changed annotations &amp; Validate all objects in page</button>
         <button class='btn btn-success btn-sm' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>
@@ -478,14 +478,14 @@ def prjPurge(PrjId):
             sqlsi="select file_name,thumb_file_name from images i,objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
             sqldi="delete from images i using objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
             sqldoh="delete from objectsclassifhisto i using objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
-            sqldo="delete from objects where projid={0}".format(PrjId)
+            sqldo="delete from obj_head where projid={0}".format(PrjId)
             objs=()
             SqlParam={}
         else:
             sqlsi="select file_name,thumb_file_name from images i,objects o where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
             sqldi="delete from images i using objects o where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
             sqldoh="delete from objectsclassifhisto i using objects o where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
-            sqldo="delete from objects where projid={0} and objid = any(%(objs)s)".format(PrjId)
+            sqldo="delete from obj_head where projid={0} and objid = any(%(objs)s)".format(PrjId)
             objs=[int(x.strip()) for x in gvp("objlist").splitlines() if x.strip()!=""]
             if len(objs)==0:
                 raise Exception("No Objects ID specified")
