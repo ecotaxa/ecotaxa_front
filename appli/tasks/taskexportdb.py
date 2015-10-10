@@ -12,7 +12,7 @@ from appli.database import GetAll,ExecSQL,GetDBToolsDir
 
 table_list=("taxonomy","users","roles","users_roles"
             ,"projects","projectspriv","process","acquisitions","samples"
-            ,"objects","images","objectsclassifhisto","alembic_version")
+            ,"obj_head","obj_field","images","objectsclassifhisto","alembic_version")
 
 class TaskExportDb(AsyncTask):
     class Params (AsyncTask.Params):
@@ -66,15 +66,17 @@ class TaskExportDb(AsyncTask):
             logging.info("Save table %s"%t)
             with open("temp.copy","w",encoding='latin_1') as f:
                 query="select %s from %s t"%(",".join(["t."+x[0] for x in ColList]),t)
-                if t in ('projects','projectspriv',"process","acquisitions","samples","objects"):
+                if t in ('projects','projectspriv',"process","acquisitions","samples","obj_head"):
                     query+=" where projid in (%s)"%(self.param.ProjectId,)
                 if t in ('objectsclassifhisto','images'):
-                    query+=" join objects o on o.objid=t.objid where o.projid in (%s)"%(self.param.ProjectId,)
+                    query+=" join obj_head o on o.objid=t.objid where o.projid in (%s)"%(self.param.ProjectId,)
+                if t in ("obj_field"):
+                    query+=" join obj_head o on o.objid=t.objfid where o.projid in (%s)"%(self.param.ProjectId,)
                 self.pgcur.copy_to(f,"("+query+")")
             zfile.write("temp.copy",arcname=t+".copy")
         logging.info("Save Images")
         vaultroot=Path("../../vault")
-        self.pgcur.execute("select imgid,file_name,thumb_file_name from images i join objects o on o.objid=i.objid where o.projid in (%s)"%(self.param.ProjectId,))
+        self.pgcur.execute("select imgid,file_name,thumb_file_name from images i join obj_head o on o.objid=i.objid where o.projid in (%s)"%(self.param.ProjectId,))
         for r in self.pgcur:
             if r[1]:
                 zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="images/%s.img"%r[0])

@@ -26,7 +26,7 @@ def objectdetails(objid):
     t=list()
     # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
     t.append("<script src='/static/jquery.elevatezoom.js'></script>")
-    t.append("Object #{0} , Original Object ID : {1}".format(objid,obj.orig_id))
+    t.append("Object #{0} , Original Object ID : {1}".format(objid,obj.objfrel.orig_id))
     Prj=obj.project
     if Prj.visible==False and  not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot view this project','error')
@@ -38,8 +38,8 @@ def objectdetails(objid):
         t.append(" by %s (%s) "%(obj.classiffier.name,obj.classiffier.email))
         if obj.classif_when is not None:
             t.append(" on %s "%(obj.classif_when.strftime("%Y-%m-%d %H:%M")))
-    if obj.object_link is not None:
-        t.append("<br>External link :<a href='{0}' target=_blank> {0}</a>".format(obj.object_link))
+    if obj.objfrel.object_link is not None:
+        t.append("<br>External link :<a href='{0}' target=_blank> {0}</a>".format(obj.objfrel.object_link))
     t.append("<table><tr><td valign=top>Complementaty information : </td><td> <span id=spancomplinfo> {0}</span></td></tr></table>".format(ntcv( obj.complement_info).replace('\n','<br>\n')))
     # On affiche la liste des images, en selectionnant une image on changera le contenu de l'image Img1 + Redim
     # l'approche avec des onglets de marchait pas car les images sont superposées
@@ -154,7 +154,7 @@ $(document).ready(function() {
         if cpt>0 and cpt%4==0:
             t.append("</tr><tr>")
         cpt+=1
-        t.append("<td><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(obj,k,"???"))))
+        t.append("<td><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(obj.objfrel,k,"???"))))
     t.append("</tr></table></div>")
     # insertion des champs Sample, Acquisition & Processing dans leurs onglets respectifs
     for r in (("Sample","mappingsample","sample") ,("Acquisition","mappingacq","acquis"),("Processing","mappingprocess","processrel") ):

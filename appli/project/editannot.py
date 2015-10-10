@@ -116,10 +116,10 @@ $(document).ready(function() {{
         """.format(gvg('OldAuthor'),gvg('NewAuthor'),gvg('filt_date'),gvg('filt_hour'),gvg('filt_min'))
         sql="""
         select t.id,t.name, count(*) Nbr
-        from objects o
+        from obj_head o
         {jointype} join (select rank() over(PARTITION BY och.objid order by och.classif_date desc) ochrank,och.*
               from objectsclassifhisto och
-              join objects ooch on ooch.objid=och.objid and ooch.projid={projid}
+              join obj_head ooch on ooch.objid=och.objid and ooch.projid={projid}
         where och.classif_type='M' {retrictsq}) newclassif on newclassif.objid=o.objid and newclassif.ochrank=1
         join taxonomy t on o.classif_id=t.id
         where o.projid={projid} {retrictq}
@@ -147,17 +147,17 @@ Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'check
             flash("You must select at least one categorie to do the replacement",'error')
             return PrintInCharte("<a href='#' onclick='history.back();'>Back</a>")
         sql="""
-        update objects as ou
+        update obj_head as ou
             set classif_who=newclassif.classif_who,
             classif_when=coalesce(newclassif.classif_date,ou.classif_auto_when),
             classif_id=coalesce(newclassif.classif_id,ou.classif_auto_id),
             classif_qual=case when newclassif.classif_qual is not null then newclassif.classif_qual
                                  when ou.classif_auto_id is not null then 'P'
                                  else null end
-        from objects o {jointype} join
+        from obj_head o {jointype} join
         (select rank() over(PARTITION BY och.objid order by och.classif_date desc) ochrank,och.*
               from objectsclassifhisto och
-              join objects ooch on ooch.objid=och.objid and ooch.projid={projid}
+              join obj_head ooch on ooch.objid=och.objid and ooch.projid={projid}
         where och.classif_type='M' {retrictsq}) newclassif on newclassif.objid=o.objid and newclassif.ochrank=1
         join taxonomy t on o.classif_id=t.id
         where  o.projid={projid} {retrictq} and o.classif_id in ({taxoin})

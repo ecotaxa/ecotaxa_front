@@ -25,7 +25,7 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 # ... etc.
 
 def include_object(object, name, type_, reflected, compare_to):
-    if type_ == "table" and name in ('taxonomy_old',):
+    if type_ == "table" and name in ('taxonomy_old','objects','objects_old'):
         return False
     else:
         return True

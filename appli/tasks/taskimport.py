@@ -7,32 +7,33 @@ import datetime,shutil,random,zipfile
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,LoadTask,DoTaskClean
 from appli.database import GetAll
+import appli.project.main
 
 
-PredefinedTables=['object','sample','process','acq']
+PredefinedTables=['obj_field','sample','process','acq']
 # PredefinedTypes={'[float]':'n','[int]':'n','[text]':'t'}
 PredefinedTypes={'[f]':'n','[t]':'t'}
 PredefinedFields={
-    'object_id':{'table':'object','field':'orig_id','type':'t'},
+    'object_id':{'table':'obj_field','field':'orig_id','type':'t'},
     'sample_id':{'table':'sample','field':'orig_id','type':'t'},
     'acq_id':{'table':'acq','field':'orig_id','type':'t'},
     'process_id':{'table':'process','field':'orig_id','type':'t'},
-    'object_lat':{'table':'object','field':'latitude','type':'n'},
-    'object_lon':{'table':'object','field':'longitude','type':'n'},
-    'object_date':{'table':'object','field':'objdate','type':'t'},
-    'object_time':{'table':'object','field':'objtime','type':'t'},
-    'object_link':{'table':'object','field':'object_link','type':'t'},
-    'object_depth_min':{'table':'object','field':'depth_min','type':'n'},
-    'object_depth_max':{'table':'object','field':'depth_max','type':'n'},
-    'object_annotation_category':{'table':'object','field':'classif_id','type':'t'},
-    'object_annotation_person_email':{'table':'object','field':'tmp_annotemail','type':'t'},
-    'object_annotation_date':{'table':'object','field':'classif_when','type':'t'},
-    'object_annotation_time':{'table':'object','field':'tmp_annottime','type':'t'},
-    'object_annotation_person_name':{'table':'object','field':'classif_who','type':'t'},
-    'object_annotation_status':{'table':'object','field':'classif_qual','type':'t'},
+    'object_lat':{'table':'obj_head','field':'latitude','type':'n'},
+    'object_lon':{'table':'obj_head','field':'longitude','type':'n'},
+    'object_date':{'table':'obj_head','field':'objdate','type':'t'},
+    'object_time':{'table':'obj_head','field':'objtime','type':'t'},
+    'object_link':{'table':'obj_head','field':'object_link','type':'t'},
+    'object_depth_min':{'table':'obj_head','field':'depth_min','type':'n'},
+    'object_depth_max':{'table':'obj_head','field':'depth_max','type':'n'},
+    'object_annotation_category':{'table':'obj_head','field':'classif_id','type':'t'},
+    'object_annotation_person_email':{'table':'obj_head','field':'tmp_annotemail','type':'t'},
+    'object_annotation_date':{'table':'obj_head','field':'classif_when','type':'t'},
+    'object_annotation_time':{'table':'obj_head','field':'tmp_annottime','type':'t'},
+    'object_annotation_person_name':{'table':'obj_head','field':'classif_who','type':'t'},
+    'object_annotation_status':{'table':'obj_head','field':'classif_qual','type':'t'},
     'img_rank':{'table':'image','field':'imgrank','type':'n'},
     'img_file_name':{'table':'image','field':'orig_file_name','type':'t'},
-    'annotation_person_first_name':{'table':'object','field':'tmp_todelete1','type':'t'},
+    'annotation_person_first_name':{'table':'obj_head','field':'tmp_todelete1','type':'t'},
     'sample_dataportal_descriptor':{'table':'sample','field':'dataportal_descriptor','type':'t'},
 }
 # Purge les espace et converti le Nan en vide
@@ -57,6 +58,7 @@ class TaskImport(AsyncTask):
             if InitStr==None: # Valeurs par defaut ou vide pour init
                 self.InData='My In Data'
                 self.ProjectId=None
+                self.SkipAlreadyLoadedFile="N" # permet de dire si on
                 # self.Mapping={x:{} for x in PredefinedTables}
                 self.Mapping={}
                 self.TaxoMap={}
@@ -73,9 +75,14 @@ class TaskImport(AsyncTask):
         logging.info("Execute SPCommon")
         self.pgcur=db.engine.raw_connection().cursor()
 
+
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__))
         logging.info("Start Step 1")
+        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
+        LoadedFiles=ntcv(Prj.fileloaded).splitlines()
+        logging.info("LoadedFiles = %s",LoadedFiles)
+        WarnMessages=[]
         if getattr(self.param,'IntraStep',0)==0:
             #Sous tache 1 On dezippe ou on pointe sur le repertoire source.
             if self.param.InData.lower().endswith("zip"):
@@ -93,9 +100,8 @@ class TaskImport(AsyncTask):
         if self.param.IntraStep==1:
             self.param.Mapping={} # Reset à chaque Tentative
             # Import du mapping existant dans le projet
-            Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
             for k,v in DecodeEqualList(Prj.mappingobj).items():
-                self.param.Mapping['object_'+v]={'table': 'object', 'title': v, 'type': k[0], 'field': k}
+                self.param.Mapping['object_'+v]={'table': 'obj_field', 'title': v, 'type': k[0], 'field': k}
             for k,v in DecodeEqualList(Prj.mappingsample).items():
                 self.param.Mapping['sample_'+v]={'table': 'sample', 'title': v, 'type': k[0], 'field': k}
             for k,v in DecodeEqualList(Prj.mappingacq).items():
@@ -124,6 +130,9 @@ class TaskImport(AsyncTask):
             Seen=set()
             for CsvFile in sd.glob("**/*.tsv"):
                 relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
+                if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
+                    logging.info("File %s skipped, already loaded"%(relname.as_posix()))
+                    continue
                 logging.info("Analyzing file %s"%(relname.as_posix()))
                 with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
                     # lecture en mode dictionnaire basé sur la premiere ligne
@@ -144,10 +153,12 @@ class TaskImport(AsyncTask):
                             Table=PredefinedFields[champ]['table']
                             self.param.Mapping[champ]=PredefinedFields[champ]
                         else: # champs non predefinis donc dans nXX ou tXX
+                            if Table=="object":
+                                Table="obj_field"
                             if not Table in PredefinedTables:
                                 self.LogErrorForUser("Invalid Header '%s' in file %s. Table Incorrect. Field ignored"%(ColName,relname.as_posix()))
                                 continue
-                            if Table!='object': # Dans les autres tables les types sont forcés à texte
+                            if Table!='obj_head' and Table!='obj_field': # Dans les autres tables les types sont forcés à texte
                                 SelType='t'
                             else:
                                 if LType[champ] not in PredefinedTypes:
@@ -157,6 +168,7 @@ class TaskImport(AsyncTask):
                             self.LastNum[Table][SelType]+=1
                             self.param.Mapping[champ]={'table':Table,'field':SelType+"%02d"%self.LastNum[Table][SelType],'type':SelType,'title':ColSplitted[1]}
                             logging.info("New field %s found in file %s",champ,relname.as_posix())
+                            WarnMessages.append("New field %s found in file %s"%(champ,relname.as_posix()))
                     # Test du contenu du fichier
                     RowCount=0
                     for lig in rdr:
@@ -222,7 +234,7 @@ class TaskImport(AsyncTask):
             if self.param.TotalRowCount==0:
                 self.LogErrorForUser("No object found")
             self.UpdateProgress(15,"TSV File Parsed"%())
-            print(self.param.Mapping)
+            # print(self.param.Mapping)
             logging.info("Taxo Found = %s",self.param.TaxoFound)
             logging.info("Users Found = %s",self.param.UserFound)
             logging.info("For Information Not Seen Fields %s",
@@ -253,13 +265,15 @@ class TaskImport(AsyncTask):
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             if len(NotFoundTaxo)>0:
                 logging.info("Some Taxo Not Found = %s",NotFoundTaxo)
-            if len(NotFoundUser)==0 and len(NotFoundTaxo)==0: # si tout est déjà résolue on enchaine sur la phase 2
+            if len(NotFoundUser)==0 and len(NotFoundTaxo)==0 and len(WarnMessages)==0: # si tout est déjà résolue on enchaine sur la phase 2
                 self.SPStep2()
             else:
                 self.task.taskstate="Question"
-            self.UpdateProgress(20,"Taxo automatic resolution Done"%())
+            if len(WarnMessages)>0:
+                self.UpdateProgress(20,"Taxo automatic resolution Done, Some Warning :\n-%s"%("\n-".join(WarnMessages)))
+            else:
+                self.UpdateProgress(20,"Taxo automatic resolution Done"%())
             #sinon on pose une question
-
 
     def SPStep2(self):
         logging.info("Start Step 2 : Effective data import")
@@ -267,7 +281,9 @@ class TaskImport(AsyncTask):
         logging.info("Users Mapping = %s",self.param.UserFound)
         # Mise à jour du mapping en base
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        Prj.mappingobj=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='object' and v['field'][0]in ('t','n') and v.get('title')!=None})
+        LoadedFiles=ntcv(Prj.fileloaded).splitlines()
+        logging.info("LoadedFiles = %s",LoadedFiles)
+        Prj.mappingobj=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='obj_field' and v['field'][0]in ('t','n') and v.get('title')!=None})
         Prj.mappingsample=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='sample' and v['field'][0]in ('t','n') and v.get('title')!=None})
         Prj.mappingacq=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='acq' and v['field'][0]in ('t','n') and v.get('title')!=None})
         Prj.mappingprocess=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='process' and v['field'][0]in ('t','n') and v.get('title')!=None})
@@ -291,6 +307,9 @@ class TaskImport(AsyncTask):
         TotalRowCount=0
         for CsvFile in sd.glob("**/*.tsv"):
             relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
+            if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
+                logging.info("File %s skipped, already loaded"%(relname.as_posix()))
+                continue
             logging.info("Analyzing file %s"%(relname.as_posix()))
             with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
                 # lecture en mode dictionnaire basé sur la premiere ligne
@@ -301,7 +320,7 @@ class TaskImport(AsyncTask):
                 RowCount=0
                 for lig in rdr:
                     Objs={"acq":database.Acquisitions(),"sample":database.Samples(),"process":database.Process()
-                        ,"object":database.Objects(),"image":database.Images()}
+                        ,"obj_head":database.Objects(),"obj_field":database.ObjectsFields(),"image":database.Images()}
                     RowCount+=1
                     TotalRowCount+=1
                     for champ in rdr.fieldnames:
@@ -345,28 +364,31 @@ class TaskImport(AsyncTask):
                     for t in Ids:
                         if Objs[t].orig_id is not None:
                             if Objs[t].orig_id in Ids[t]["ID"]:
-                                setattr(Objs["object"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
+                                setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
                             else:
                                 Objs[t].projid=self.param.ProjectId
                                 db.session.add(Objs[t])
                                 db.session.commit()
                                 Ids[t]["ID"][Objs[t].orig_id]=getattr(Objs[t],Ids[t]["pk"])
-                                setattr(Objs["object"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
+                                setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
                                 logging.info("IDS %s %s",t,Ids[t])
                     self.pgcur.execute("select nextval('seq_images')" )
                     Objs["image"].imgid=self.pgcur.fetchone()[0]
                     # Recherche de l'objet si c'est une images complementaire
-                    if Objs["object"].orig_id in self.ExistingObject:
-                        Objs["object"].objid=self.ExistingObject[Objs["object"].orig_id]
+                    if Objs["obj_field"].orig_id in self.ExistingObject:
+                        Objs["obj_field"].objid=self.ExistingObject[Objs["obj_field"].orig_id]
                     else: # ou Creation de l'objet
-                        Objs["object"].projid=self.param.ProjectId
-                        Objs["object"].random_value=random.randint(1,99999999)
-                        Objs["object"].img0id=Objs["image"].imgid
-                        db.session.add(Objs["object"])
+                        Objs["obj_head"].projid=self.param.ProjectId
+                        Objs["obj_head"].random_value=random.randint(1,99999999)
+                        Objs["obj_head"].img0id=Objs["image"].imgid
+                        db.session.add(Objs["obj_head"])
                         db.session.commit()
-                        self.ExistingObject[Objs["object"].orig_id]=Objs["object"].objid # Provoque un select object sauf si 'expire_on_commit':False
+                        Objs["obj_field"].objfid=Objs["obj_head"].objid
+                        db.session.add(Objs["obj_field"])
+                        db.session.commit()
+                        self.ExistingObject[Objs["obj_field"].orig_id]=Objs["obj_head"].objid # Provoque un select object sauf si 'expire_on_commit':False
                     #Gestion de l'image, creation DB et fichier dans Vault
-                    Objs["image"].objid=Objs["object"].objid
+                    Objs["image"].objid=Objs["obj_head"].objid
                     ImgFilePath=CsvFile.with_name(Objs["image"].orig_file_name)
                     VaultFolder="%04d"%(Objs["image"].imgid//10000)
                     vaultroot=Path("../../vault")
@@ -395,17 +417,22 @@ class TaskImport(AsyncTask):
                     if (TotalRowCount%100)==0:
                         self.UpdateProgress(100*TotalRowCount/self.param.TotalRowCount,"Processing files %d/%d"%(TotalRowCount,self.param.TotalRowCount))
                 logging.info("File %s : %d row Loaded",relname.as_posix(),RowCount)
-        self.pgcur.execute("""update objects o
+                LoadedFiles.append(relname.as_posix())
+                Prj.fileloaded="\n".join(LoadedFiles)
+                db.session.commit()
+
+        self.pgcur.execute("""update obj_head o
                             set imgcount=(select count(*) from images where objid=o.objid)
                             ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
                             where projid="""+str(self.param.ProjectId))
         self.pgcur.connection.commit()
         self.pgcur.execute("""update samples s set latitude=sll.latitude,longitude=sll.longitude
               from (select o.sampleid,min(o.latitude) latitude,min(o.longitude) longitude
-              from objects o
+              from obj_head o
               where projid=%(projid)s and o.latitude is not null and o.longitude is not null
               group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s and s.longitude is null""",{'projid':self.param.ProjectId})
         self.pgcur.connection.commit()
+        appli.project.main.UpdateProjectStat(Prj.projid)
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Processing done")
 
@@ -423,8 +450,7 @@ class TaskImport(AsyncTask):
                 FileToSave=None
                 FileToSaveFileName=None
                 self.param.ProjectId=gvg("p")
-                # for k,v  in self.param.__dict__.items():
-                #     setattr(self.param,k,gvp(k))
+                self.param.SkipAlreadyLoadedFile=gvp("skiploaded")
                 TaxoMap={}
                 for l in gvp('TxtTaxoMap').splitlines():
                     ls=l.split('=',1)
@@ -490,7 +516,7 @@ class TaskImport(AsyncTask):
                     flash(e,"error")
                 NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
                 NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
-            return render_template('task/import_question1.html',header=txt,taxo=NotFoundTaxo,users=NotFoundUsers)
+            return render_template('task/import_question1.html',header=txt,taxo=NotFoundTaxo,users=NotFoundUsers,task=self.task)
         return PrintInCharte(txt)
     def ShowCustomDetails(self):
         txt="<h3>Import Task details view</h3>"

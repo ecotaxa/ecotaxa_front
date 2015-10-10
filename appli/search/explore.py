@@ -65,8 +65,8 @@ def ExploreLoadRightPane():
 # """
     whereclause=""
     sql="""select o.objid,o.classif_qual  ,o.objdate,to_char(o.objtime,'HH24:MI') objtime
-  ,o.orig_id,o.imgcount,o.img0id,o.classif_id,o.classif_who,o.sampleid,random_value,o.projid
-   from objects o
+  ,o.imgcount,o.img0id,o.classif_id,o.classif_who,o.sampleid,random_value,o.projid
+   from obj_head o
 where o.classif_qual='V'
 """
     if gvp("taxo[]"):
@@ -127,18 +127,19 @@ where o.classif_qual='V'
     sql+=whereclause
     if whereclause=="": # si aucune clause, on prend un projet au hasard
         sql+=" and o.projid= %s "%(GetAll("select projid from projects where visible=true and pctvalidated>1 order by random() limit 1")[0][0])
-    # sql+="  order by random_value Limit %d"%(2*ipp,)
+    sql+="  order by random_value Limit %d"%(2*ipp,)
     # pour de meilleure perf plus de random ici et du coup on prend 20xipp pour créer un peu d'aléa
-    sql+="  Limit %d"%(20*ipp,)
+    # sql+="  Limit %d"%(20*ipp,) # desactivé suite à split table objects mais pourrait devoir revenir.
 
     #filt_fromdate,#filt_todate
     sql="""select o.*,t.name taxoname,u.name classifwhoname,i.file_name,s.orig_id samplename
-                  ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
+                  ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width,ofi.orig_id
                   from ("""+sql+""")o
 left Join images i on o.img0id=i.imgid
 left JOIN taxonomy t on o.classif_id=t.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
+left Join obj_field ofi on ofi.objfid=o.objid
 where o.projid in (select projid from projects where visible=true)"""
     # if whereclause!="": # on ne tri pas en random global s'il n'y a aucune criteres, impact de perf
     sql+=" order by random_value  "
@@ -227,7 +228,7 @@ where o.projid in (select projid from projects where visible=true)"""
         if bottomtxt!="":
             bottomtxt="<span style='font-size:12px;'>"+bottomtxt+"</span>"
         txt+="<div class='subimg {1}' {2}><span class=taxo >{0}</span>{3}<div class=ddet><span class=ddets>View {4}</div></div>"\
-            .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
+            .format(r['taxoname'],"",popattribute,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
         txt+="</td>"
 
@@ -258,7 +259,7 @@ def GetClassifTab(Prj):
     InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
     sql="""select t.id,t.name taxoname,nbr,nbrnotv
     from (  SELECT    o.classif_id,   c.id,count(classif_id) Nbr,count(case when classif_qual='V' then NULL else o.classif_id end) NbrNotV
-        FROM (select * from objects where projid=%(projid)s) o
+        FROM (select * from obj_head where projid=%(projid)s) o
         FULL JOIN (VALUES """+InitClassif+""") c(id) ON o.classif_id = c.id
         GROUP BY classif_id, c.id
       ) o

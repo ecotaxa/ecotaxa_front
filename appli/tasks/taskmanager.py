@@ -141,14 +141,14 @@ def LoadTask(taskid):
 def ListTasks(owner=None):
      tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
      txt=""
-     if gvg("cleandone")=='Y' or gvg("cleanerror")=='Y':
+     if gvg("cleandone")=='Y' or gvg("cleanerror")=='Y' or gvg("cleanall")=='Y':
         txt="Cleanning process result :<br>"
         for t in tasks:
-            if (gvg("cleandone")=='Y' and t.taskstate=='Done') \
-            or (gvg("cleanerror")=='Y' and t.taskstate=='Error')  :
+            if (gvg("cleandone")=='Y' and t.taskstate=='Done') or (gvg("cleanall")=='Y') \
+            or (gvg("cleanerror")=='Y' and t.taskstate=='Error') :
                 txt+=DoTaskClean(t.id)
         tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
-     txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default' href=?cleanerror=Y>Clean All Error</a>  Task count : "+str(len(tasks))
+     txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default' href=?cleanerror=Y>Clean All Error</a>   <a class='btn btn-default' href=?cleanall=Y>Clean All (warning !!!)</a>  Task count : "+str(len(tasks))
      return render_template('task/listall.html',tasks=tasks,header=txt)
 
 
@@ -216,6 +216,7 @@ def TaskClean(TaskID):
 
 def DoTaskClean(TaskID):
     task = LoadTask(TaskID)
+    ProjectID=getattr(task.param,'ProjectId',None)
     WorkingDir = task.GetWorkingDir()
     Msg = "Erasing Task %d <br>"%TaskID
     try:
@@ -228,6 +229,8 @@ def DoTaskClean(TaskID):
         Msg += "DB Record Erased<br>"
     except:
         flash("Error While erasing " + str(sys.exc_info()), 'error')
+    if ProjectID:
+        Msg += "<a href='/prj/%s'>Back to project</a><br>"%ProjectID
     return Msg
 
 

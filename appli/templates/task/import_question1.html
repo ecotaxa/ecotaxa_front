@@ -2,6 +2,7 @@
 
 {% block body %}
 
+    {{ task.progressmsg |nl2br|safe }}
 
 <form class="form-horizontal" method="post">
 {%   if (taxo|length())>0 %}

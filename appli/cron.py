@@ -6,7 +6,7 @@ def RefreshAllProjectsStat():
     ExecSQL("""UPDATE projects
      SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
      from (select projid, count(*) nbr,count(classif_id) nbrclassified,count(case when classif_qual='V' then 1 end) nbrvalidated
-          from objects o
+          from obj_head o
           group by projid )q
      where projects.projid=q.projid""")
 
@@ -16,7 +16,7 @@ def RefreshTaxoStat():
 
     n=ExecSQL("""UPDATE taxonomy
                 SET  nbrobj=q.nbr
-                from (select classif_id, count(*) nbr from objects o
+                from (select classif_id, count(*) nbr from obj_head o
                         join projects p on o.projid=p.projid and p.visible=true
                         where classif_qual='V' group by classif_id )q
                 where taxonomy.id=q.classif_id""")
