@@ -46,6 +46,7 @@ class TaskSubset(AsyncTask):
         db.session.expunge(r)
         make_transient(r)
         r.sampleid=None
+        r.projid=self.param.subsetproject
         db.session.add(r)
         db.session.commit()
         self.samples[oldid]=r.sampleid
@@ -60,6 +61,7 @@ class TaskSubset(AsyncTask):
         db.session.expunge(r)
         make_transient(r)
         r.processid=None
+        r.projid=self.param.subsetproject
         db.session.add(r)
         db.session.commit()
         self.process[oldid]=r.processid
@@ -74,6 +76,7 @@ class TaskSubset(AsyncTask):
         db.session.expunge(r)
         make_transient(r)
         r.acquisid=None
+        r.projid=self.param.subsetproject
         db.session.add(r)
         db.session.commit()
         self.acquisition[oldid]=r.acquisid
