@@ -3,6 +3,7 @@ from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqu
 from flask import Blueprint, render_template, g, flash,request
 import logging,os,csv,re,datetime
 import zipfile,psycopg2.extras
+from pathlib import Path
 from time import time
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll
@@ -105,7 +106,8 @@ class TaskExportTxt(AsyncTask):
         logging.info("Params : %s"%(params))
         self.pgcur.execute(sql,params)
 
-        self.param.OutFile="export.tsv"
+        self.param.OutFile= "export_{0:d}_{1:s}.tsv".format(Prj.projid,
+                                                             datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
         logging.info("Creating file %s"%(fichier))
         with open(fichier,'w',encoding='latin_1') as csvfile:
@@ -127,7 +129,7 @@ class TaskExportTxt(AsyncTask):
         logging.info("Extracted %d rows",self.pgcur.rowcount)
 
     def CreateXML(self):
-        self.UpdateProgress(1,"Start export")
+        self.UpdateProgress(1,"Start XML export")
         TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
 
@@ -187,7 +189,81 @@ class TaskExportTxt(AsyncTask):
                 ET.SubElement(taxoel, 'taxonomicassignment',taxon=r[0])
 
         ET.ElementTree(root).write(fichier,encoding="UTF-8", xml_declaration=True)
-        ET.dump(root)
+
+    def CreateIMG(self):
+        self.UpdateProgress(1,"Start Image export")
+        TInit = time()
+        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
+
+        self.param.OutFile= "export_{0:d}_{1:s}.zip".format(Prj.projid,
+                                                             datetime.datetime.now().strftime("%Y%m%d_%H%M"))
+        fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
+        logging.info("Creating file %s"%(fichier))
+        zfile=zipfile.ZipFile(fichier, 'w',allowZip64 = True,compression= zipfile.ZIP_DEFLATED)
+
+        sql="""SELECT i.objid,i.file_name,i.orig_file_name
+                 From objects o left join samples s on o.sampleid=s.sampleid
+                 join images i on o.objid=i.objid
+                   where o.projid=%(projid)s """
+        params={'projid':int(self.param.ProjectId)}
+        if self.param.samplelist!="":
+            sql+=" and s.orig_id= any(%(samplelist)s) "
+            params['samplelist']=self.param.samplelist.split(",")
+
+        logging.info("Execute SQL : %s"%(sql))
+        logging.info("Params : %s"%(params))
+        self.pgcur.execute(sql,params)
+        vaultroot=Path("../../vault")
+        for r in self.pgcur:
+            zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{0}_{1}".format(r[0],r[2]))
+
+    def CreateSUM(self):
+        self.UpdateProgress(1,"Start Summary export")
+        TInit = time()
+        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
+        grp="to1.name"
+        if self.param.sumsubtotal=="A":
+            grp="a.orig_id,"+grp
+        if self.param.sumsubtotal=="S":
+            grp="s.orig_id,"+grp
+        sql1="SELECT "+grp+" ,count(*) Nbr "
+        sql2=""" FROM objects o
+                LEFT JOIN taxonomy to1 on o.classif_id=to1.id
+                LEFT JOIN samples s on o.sampleid=s.sampleid
+                LEFT JOIN acquisitions a on o.acquisid=a.acquisid """
+        sql3=" where o.projid=%(projid)s "
+        params={'projid':int(self.param.ProjectId)}
+        if self.param.samplelist!="":
+            sql3+=" and s.orig_id= any(%(samplelist)s) "
+            params['samplelist']=self.param.samplelist.split(",")
+        sql3+=" group by "+grp
+        sql3+=" order by "+grp
+        sql=sql1+" "+sql2+" "+sql3
+        logging.info("Execute SQL : %s"%(sql))
+        logging.info("Params : %s"%(params))
+        self.pgcur.execute(sql,params)
+
+        self.param.OutFile= "export_summary_{0:d}_{1:s}.tsv".format(Prj.projid,
+                                                             datetime.datetime.now().strftime("%Y%m%d_%H%M"))
+        fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
+        logging.info("Creating file %s"%(fichier))
+        with open(fichier,'w',encoding='latin_1') as csvfile:
+            # lecture en mode dictionnaire basé sur la premiere ligne
+            wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n' )
+            colnames = [desc[0] for desc in self.pgcur.description]
+            coltypes=[desc[1] for desc in self.pgcur.description]
+            FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
+            wtr.writerow(colnames)
+            for r in self.pgcur:
+                # on supprime les CR des commentaires.
+                if self.param.commentsdata=='1' and r['complement_info']:
+                    r['complement_info']=' '.join(r['complement_info'].splitlines())
+                if self.param.usecomasepa=='1': # sur les decimaux on remplace . par ,
+                    for i,t in zip(range(1000),coltypes):
+                        if t==FloatType and r[i] is not None:
+                            r[i]=str(r[i]).replace('.',',')
+                wtr.writerow(r)
+        logging.info("Extracted %d rows",self.pgcur.rowcount)
 
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__))
@@ -195,6 +271,10 @@ class TaskExportTxt(AsyncTask):
             self.CreateTSV()
         elif self.param.what=="XML":
             self.CreateXML()
+        elif self.param.what=="IMG":
+            self.CreateIMG()
+        elif self.param.what=="SUM":
+            self.CreateSUM()
         else:
             raise Exception("Unsupported exportation type : %s"%(self.param.what,))
 
@@ -227,6 +307,8 @@ class TaskExportTxt(AsyncTask):
                 self.param.histodata=gvp("histodata")
                 self.param.commentsdata=gvp("commentsdata")
                 self.param.usecomasepa=gvp("usecomasepa")
+                self.param.sumsubtotal=gvp("sumsubtotal")
+
 
                 # Verifier la coherence des données
                 # errors.append("TEST ERROR")
