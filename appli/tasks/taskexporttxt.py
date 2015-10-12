@@ -67,7 +67,7 @@ class TaskExportTxt(AsyncTask):
             for k,v in Mapping.items() :
                 sql1+=",o.%s as object_%s "%(k,re.sub("[^a-zA-Z]","_",v))
         if self.param.sampledata=='1':
-            sql1+="\n,s.sampleid as sampleid_internal,s.orig_id sample_id,s.latitude sample_latitude,s.longitude sample_longitude,s.dataportal_descriptor as sample_dataportal_descriptor "
+            sql1+="\n,s.sampleid as sampleid_internal,s.orig_id sample_id,s.latitude sample_latitude,s.longitude sample_longitude,s.dataportal_descriptor as sample_dataportal_descriptor,s.instrument as sample_instrument "
             Mapping=DecodeEqualList(Prj.mappingsample)
             for k,v in Mapping.items() :
                 sql1+=",s.%s as sample_%s "%(k,re.sub("[^a-zA-Z]","_",v))
@@ -75,13 +75,13 @@ class TaskExportTxt(AsyncTask):
             sql1+="\n,p.processid as processid_internal,p.orig_id process_id"
             Mapping=DecodeEqualList(Prj.mappingprocess)
             for k,v in Mapping.items() :
-                sql1+=",s.%s as process_%s "%(k,re.sub("[^a-zA-Z]","_",v))
+                sql1+=",p.%s as process_%s "%(k,re.sub("[^a-zA-Z]","_",v))
             sql2+=" left join process p on o.processid=p.processid "
         if self.param.acqdata=='1':
             sql1+="\n,o.acquisid as acquisid_internal,a.orig_id acquis_id"
-            Mapping=DecodeEqualList(Prj.mappingprocess)
+            Mapping=DecodeEqualList(Prj.mappingacq)
             for k,v in Mapping.items() :
-                sql1+=",s.%s as acquis_%s "%(k,re.sub("[^a-zA-Z]","_",v))
+                sql1+=",a.%s as acquis_%s "%(k,re.sub("[^a-zA-Z]","_",v))
             sql2+=" left join acquisitions a on o.acquisid=a.acquisid "
 
         if self.param.histodata=='1':
