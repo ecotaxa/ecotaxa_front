@@ -173,6 +173,7 @@ class TaskSubset(AsyncTask):
                 obj.acquisid=self.GetAcquisID(obj.acquisid)
                 db.session.add(obj)
                 db.session.commit()
+                dummy=objf.n01  #permet de forcer l'etat de objf sinon perd ses données sur les instruction suivantes.
                 db.session.expunge(objf)
                 make_transient(objf)
                 objf.objfid=obj.objid
