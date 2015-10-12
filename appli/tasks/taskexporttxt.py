@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
 from flask import Blueprint, render_template, g, flash,request
-import logging,os,csv,re
+import logging,os,csv,re,datetime
 import zipfile,psycopg2.extras
 from time import time
-from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll
+import xml.etree.ElementTree as ET
 
 class TaskExportTxt(AsyncTask):
     class Params (AsyncTask.Params):
@@ -126,11 +126,75 @@ class TaskExportTxt(AsyncTask):
                 wtr.writerow(r)
         logging.info("Extracted %d rows",self.pgcur.rowcount)
 
+    def CreateXML(self):
+        self.UpdateProgress(1,"Start export")
+        TInit = time()
+        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
+
+        self.param.OutFile= "export_{0:d}_{1:s}.xml".format(Prj.projid,
+                                                             datetime.datetime.now().strftime("%Y%m%d_%H%M"))
+        fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
+        logging.info("Creating file %s"%(fichier))
+        root = ET.Element('projects',{ "xmlns":"http://typo.oceanomics.abims.sbr.fr/ecotaxa­export"
+                 ,"xmlns:xsi":"http://www.w3.org/2001/XMLSchema­instance"
+                 ,"xsi:schemaLocation":"http://typo.oceanomics.abims.sbr.fr/ecotaxa­-export platform:/resource/typo­-shared/src/main/resources/ecotaxa­export­1.0.xsd"})
+
+        Project=ET.SubElement(root, 'project',{'id':"ecotaxa:%d"%Prj.projid})
+        projectdescription=ET.SubElement(Project, 'projectdescription')
+        projectdescriptionname=ET.SubElement(projectdescription, 'name')
+        projectdescriptionname.text=Prj.title
+        ET.SubElement(projectdescription, 'link',{"url":"http://ecotaxa.oceanomics.fr/prj/%d"%Prj.projid})
+        projectdescriptionmanagers=ET.SubElement(projectdescription, 'managers')
+        projectdescriptionanno=ET.SubElement(projectdescription, 'contributors')
+        for pm in Prj.projmembers:
+            if pm.privilege=="Manage":
+                m=ET.SubElement(projectdescriptionmanagers, 'manager')
+            elif pm.privilege=="Annotate":
+                m=ET.SubElement(projectdescriptionanno, 'contributor')
+            else: continue
+            ET.SubElement(m, 'name').text=pm.memberrel.name
+            ET.SubElement(m, 'email').text=pm.memberrel.email
+
+        sql1="""SELECT s.sampleid,s.orig_id,s.dataportal_descriptor
+                 From samples s
+                   where projid=%(projid)s """
+        sql3=" "
+        params={'projid':int(self.param.ProjectId)}
+        if self.param.samplelist!="":
+            sql3+=" and s.orig_id= any(%(samplelist)s) "
+            params['samplelist']=self.param.samplelist.split(",")
+
+        sql=sql1+" "+sql3
+        logging.info("Execute SQL : %s"%(sql))
+        logging.info("Params : %s"%(params))
+        self.pgcur.execute(sql,params)
+
+        samples=ET.SubElement(Project, 'samples')
+        for r in self.pgcur:
+            sel=ET.SubElement(samples, 'sample')
+            dtpdesc=ET.fromstring(r['dataportal_descriptor'])
+            sel.append(dtpdesc)
+            ET.SubElement(sel, 'sampleregistryreference',barcode=r['orig_id'])
+
+            sql= """SELECT distinct to1.name
+                FROM objects o
+                LEFT JOIN taxonomy to1 on o.classif_id=to1.id
+                where o.sampleid={0:d}
+                """.format(r['sampleid'], )
+            taxo=GetAll(sql)
+            taxoel=ET.SubElement(sel, 'taxonomicassignments')
+            for r in taxo:
+                ET.SubElement(taxoel, 'taxonomicassignment',taxon=r[0])
+
+        ET.ElementTree(root).write(fichier,encoding="UTF-8", xml_declaration=True)
+        ET.dump(root)
 
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__))
         if self.param.what=="TSV":
             self.CreateTSV()
+        elif self.param.what=="XML":
+            self.CreateXML()
         else:
             raise Exception("Unsupported exportation type : %s"%(self.param.what,))
 
