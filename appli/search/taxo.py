@@ -12,7 +12,11 @@ def searchtaxo():
         return "[]"
     term+=R"%"
     param={'term':term.lower()}
-    sql="SELECT id, name,0 FROM taxonomy WHERE  lower(name) LIKE %(term)s order by name limit 200"
+    sql="""SELECT tf.id, tf.name||case when t3.name is not null and tf.name not like '%% %%'  then ' ('||t3.name||')' else ' ' end as name
+          ,0 FROM taxonomy tf
+          left join taxonomy t3 on tf.parent_id=t3.id
+          WHERE  lower(tf.name) LIKE %(term)s
+          order by tf.name limit 200"""
 
     PrjId=gvg("projid")
     if PrjId!="":
@@ -22,13 +26,16 @@ def searchtaxo():
             InitClassif=Prj.initclassiflist
             InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
             sql="""
-            SELECT tf.id, name, case when id2 is null then 0 else 1 end inpreset FROM taxonomy tf
+            SELECT tf.id
+            ,tf.name||case when t3.name is not null and tf.name not like '%% %%'  then ' ('||t3.name||')' else ' ' end as name
+            , case when id2 is null then 0 else 1 end inpreset FROM taxonomy tf
             join (select t.id id1,c.id id2 FROM taxonomy t
             full JOIN (VALUES """+InitClassif+""") c(id) ON t.id = c.id
                  WHERE  lower(name) LIKE %(term)s) t2
             on tf.id=coalesce(id1,id2)
-              WHERE  lower(name) LIKE %(term)s
-            order by inpreset desc,name limit 200 """
+            left join taxonomy t3 on tf.parent_id=t3.id
+              WHERE  lower(tf.name) LIKE %(term)s
+            order by inpreset desc,tf.name limit 200 """
     res = GetAll(sql, param,debug=False)
     return json.dumps([dict(id=r[0],text=r[1],pr=r[2]) for r in res])
 

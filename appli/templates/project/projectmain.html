@@ -34,7 +34,7 @@
 </div>
      <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
     </td><td><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><span style="font-size: 12px;"> (<span id=objcount></span>)</span><br>
-    <span id="headersubtitle" style="color:#FF6600;"> </span><br>
+    <div id="headersubtitle" style="color:#FF6600;overflow-y: auto;height: 40px;"> </div>
 
     </td></tr></table>
 {% endif %} {# If headmenu #}
@@ -148,6 +148,7 @@ data-content="<b>All</b> : display all images <br>
 .lazy {margin: 10px 5px 0px 5px; cursor: -webkit-grab; cursor:grab;}
 .ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
 .ddets {cursor:pointer;}
+.categexpander {cursor:pointer;}
 .taxo {cursor: -webkit-grab; cursor:grab;}
 #dispfieldlist li a {    padding-top:0px;}
 .ui-selected { background: #FFFF00; color: white; }
@@ -172,7 +173,8 @@ body {margin-top: 125px;}
 <script>
 var PendingChanges={};
 var PendingChangesTaxoName={};
-var PrevTxtFilter="INITIAL"
+var PrevTxtFilter="INITIAL";
+DragInProgress=false;
 function LoadRightPane(NoAjax,SaveInProfile){
     if(Object.keys(PendingChanges).length>0)
       if(confirm("Some changes are pending, if you refresh they'll be lost !\nWould you like to continue ?")==false)
@@ -303,7 +305,6 @@ $(document).ready(function() {
     $('#zoom').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
      #}
 });
-
 function PostAddImages(){
         $(document).scrollTop(0);
         // Required to  have Select2 component working on Bootstrap Popup
@@ -316,6 +317,8 @@ function PostAddImages(){
         // Make sub image draggable
         jQuery('.imgtab td').draggable({revert:true,revertDuration:0,cursor: "move",
       	    cursorAt: { top: 0, left: 0 },
+            start: function( event, ui ) { DragInProgress=true;},
+            stop: function( event, ui ) { DragInProgress=false;},
 			helper: function( ev ) {return $( "<img src='/static/drag_cursor.png'>" );}   });
 {#        jQuery('.imgtab td img').draggable({revert:true,revertDuration:0});#}
         // Make the cell clickable for selection

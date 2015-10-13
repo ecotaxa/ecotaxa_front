@@ -271,7 +271,13 @@ $(document).ready(function() {
 });
 
     $("#divclassiftab").outerHeight( $("#column-left").innerHeight()-$("#divclassiftab").position().top );
-    $("#divclassiftab .categexpander").click(CategExpanderClick);
+    $("#divclassiftab .categexpander").click(CategExpanderClick).hover(function(e){
+        if((DragInProgress)&&($(this).hasClass("glyphicon-triangle-right"))) {
+            {# Quand on passe sur un triange fermé sur un Drag&Drop on simule un clic sur le triangle pour l'ouvrir #}
+            $(this).click();
+
+        }
+    });
 
 }); // Ready
 

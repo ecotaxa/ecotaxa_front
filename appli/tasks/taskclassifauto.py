@@ -247,9 +247,9 @@ class TaskClassifAuto(AsyncTask):
             for k,v in revobjmap.items():
                 if k in revobjmapbase:
                     if stat["nbrtot"]:
-                        critlist[k][3]="%.0f"%(100*stat[v+"_nbr"]/stat["nbrtot"],)
+                        critlist[k][3]=round(100*stat[v+"_nbr"]/stat["nbrtot"])
                     if stat["nbrnotval"]:
-                        critlist[k][4]="%.0f"%(100*stat[v+"_nbrnv"]/stat["nbrnotval"],)
+                        critlist[k][4]=round(100*stat[v+"_nbrnv"]/stat["nbrnotval"])
             if Prj.projid!=PrjBase.projid:
                 sql="select count(*) nbrtot,0 nbrnotval"
                 for k,v in revobjmap.items():
@@ -260,8 +260,8 @@ class TaskClassifAuto(AsyncTask):
             if (stat["nbrtot"]-stat["nbrnotval"])>0:
                 for k,v in revobjmap.items():
                     if k in revobjmapbase:
-                        critlist[k][1]="%.0f"%(100*(stat[v+"_nbr"]-stat[v+"_nbrnv"])/(stat["nbrtot"]-stat["nbrnotval"]),)
-                        critlist[k][2]="%.0f"%(stat[v+"_nbrdist"],)
+                        critlist[k][1]=round(100*(stat[v+"_nbr"]-stat[v+"_nbrnv"])/(stat["nbrtot"]-stat["nbrnotval"]))
+                        critlist[k][2]=round(stat[v+"_nbrdist"])
 
             g.critlist=list(critlist.values())
             g.critlist.sort(key=lambda t: t[0])
