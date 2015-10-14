@@ -107,7 +107,7 @@ data-content="<b>All</b> : display all images <br>
 	<div id="bodycontainer">
 		<div id="column-left"  class="panel panel-default" style="position: fixed;	top: 125px;	left: 2px;	bottom: 0px;	width: 260px;
 	                overflow-y: hidden; overflow-x: hidden;  margin-bottom: 0px; " >
-            <div class="bodyleft" style="margin-left: 2px; width: 251px;">
+            <div class="bodyleft" style="margin-left: 2px; width: 257px;">
                 <script>
                 $('#myTabs a').click(function (e) {
                   e.preventDefault()
@@ -120,11 +120,12 @@ data-content="<b>All</b> : display all images <br>
                   <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Annotate</a></li>
                     <li><a href="javascript:RefreshClassifTab();"><span class="glyphicon glyphicon-refresh"></span></a></li>
-                    <li role="presentation"><a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filter</a></li>
+                    <li role="presentation"><a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filters</a></li>
                   </ul>
                   <div class="tab-content"> <!-- Tab panes -->
                     <div role="tabpanel" class="tab-pane active" id="TabA">{{ lefta|safe }}</div>
-                    <div role="tabpanel" class="tab-pane" id="TabB">
+                    <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;">
+                        <div id="TabBInner" style="width: 240px;">
                         <a href='javascript:ClearAllFilterCriteria();'>Clear all filter &amp; update view/refresh</a><br>
                         {{ leftb|safe }}
                         <br>
@@ -137,7 +138,7 @@ data-content="<b>All</b> : display all images <br>
                         <p><button type="button" class="btn btn-sm btn-info" onclick="LoadRightPane(false,true);">
                             Apply filter and save in my profile</button></p>
                         <p><a href=? class="btn btn-sm btn-info" >Apply my profile</a></p>
-
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -289,6 +290,7 @@ $(document).ready(function() {
     $('#statuslabelspan').popover({html:true,trigger:'hover',placement:"left",container: 'body'});
     $('#statusfilter').data('content',$('#statuslabelspan').data('content'))
     $('#statusfilter').popover({html:true,trigger:'hover',placement:"left",container: 'body'});
+    $("#TabB").outerHeight( $("#column-left").innerHeight()-$("#TabB").position().top );
     {% if g.taxofilter %}
     SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}");
     {% endif %}

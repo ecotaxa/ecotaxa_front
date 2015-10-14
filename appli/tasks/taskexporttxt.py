@@ -33,7 +33,7 @@ class TaskExportTxt(AsyncTask):
         self.pgcur=db.engine.raw_connection().cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     def CreateTSV(self):
-        self.UpdateProgress(1,"Start export")
+        self.UpdateProgress(1,"Start TSV export")
         TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         sql1="""SELECT o.objid ,o.orig_id as object_id,o.latitude as object_lat,o.longitude as object_lon
@@ -191,19 +191,22 @@ class TaskExportTxt(AsyncTask):
         ET.ElementTree(root).write(fichier,encoding="UTF-8", xml_declaration=True)
 
     def CreateIMG(self):
+        self.CreateTSV()
+        tsvfile=self.param.OutFile
         self.UpdateProgress(1,"Start Image export")
         TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-
         self.param.OutFile= "export_{0:d}_{1:s}.zip".format(Prj.projid,
                                                              datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
         logging.info("Creating file %s"%(fichier))
         zfile=zipfile.ZipFile(fichier, 'w',allowZip64 = True,compression= zipfile.ZIP_DEFLATED)
+        zfile.write(tsvfile)
 
-        sql="""SELECT i.objid,i.file_name,i.orig_file_name
-                 From objects o left join samples s on o.sampleid=s.sampleid
+        sql="""SELECT i.objid,i.file_name,i.orig_file_name,t.name
+                 From obj_head o left join samples s on o.sampleid=s.sampleid
                  join images i on o.objid=i.objid
+                 left join taxonomy t on o.classif_id=t.id
                    where o.projid=%(projid)s """
         params={'projid':int(self.param.ProjectId)}
         if self.param.samplelist!="":
@@ -215,7 +218,7 @@ class TaskExportTxt(AsyncTask):
         self.pgcur.execute(sql,params)
         vaultroot=Path("../../vault")
         for r in self.pgcur:
-            zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{0}_{1}".format(r[0],r[2]))
+            zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[3]))
 
     def CreateSUM(self):
         self.UpdateProgress(1,"Start Summary export")

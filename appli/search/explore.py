@@ -17,8 +17,8 @@ def indexExplore():
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
         data[k]=gvg(k,v)
-    data["projid"]=gvg("projid",v)
-    data["taxochild"]=gvg("taxochild",v)
+    data["projid"]=gvg("projid",0)
+    data["taxochild"]=gvg("taxochild",0)
     data["sample_for_select"]=""
     if data["samples"]:
         for r in GetAll("select sampleid,orig_id from samples where sampleid in(%s)"%(data["samples"],)):
@@ -244,59 +244,4 @@ where o.projid in (select projid from projects where visible=true)"""
         PostAddImages();
     </script>""")
     return "\n".join(t)
-
-######################################################################################################################
-def GetClassifTab(Prj):
-    if Prj.initclassiflist is None:
-        InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
-    else:
-        InitClassif=[x for x in Prj.initclassiflist.split(",") if x.isdigit()]
-        if len(InitClassif):
-            InitClassif=",".join(InitClassif)
-        else:
-            InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
-
-    InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
-    sql="""select t.id,t.name taxoname,nbr,nbrnotv
-    from (  SELECT    o.classif_id,   c.id,count(classif_id) Nbr,count(case when classif_qual='V' then NULL else o.classif_id end) NbrNotV
-        FROM (select * from obj_head where projid=%(projid)s) o
-        FULL JOIN (VALUES """+InitClassif+""") c(id) ON o.classif_id = c.id
-        GROUP BY classif_id, c.id
-      ) o
-    JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
-    order by t.name       """
-    param={'projid':Prj.projid}
-    res=GetAll(sql,param,debug=False,cursor_factory=psycopg2.extras.RealDictCursor)
-    ids=[x['id'] for x in res]
-    print(ids)
-    sql="""WITH RECURSIVE rq as (
-                SELECT DISTINCT t.id,t.name,t.parent_id
-                FROM taxonomy t where t.id = any (%s)
-              union
-                SELECT t.id,t.name,t.parent_id
-                FROM rq JOIN taxonomy t ON rq.parent_id = t.id
-            )
-            select * from rq  """
-    taxotree=GetAssoc(sql,(ids,))
-    for k,v in enumerate(res):
-        res[k]['cp']=None  #cp = Closest parent
-        res[k]['cpdist']=0
-        id=v["id"]
-        for i in range(50): # 50 pour arreter en cas de boucle
-            id=taxotree[id]['parent_id']
-            if id is None:
-                break
-            if id in ids:
-                res[k]['cp']=id
-                res[k]['cpdist']=i+1
-                break
-    restree=[]
-    def AddChild(Src,Parent,Res,Deep):
-        for r in Src:
-            if r['cp'] ==Parent:
-                r['dist']=Deep+r['cpdist']
-                Res.append(r)
-                AddChild(Src,r['id'],Res,r['dist'])
-    AddChild(res,None,restree,0)
-    return render_template('project/classiftab.html',res=restree,taxotree=json.dumps(taxotree))
 

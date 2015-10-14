@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
-from flask import Flask
 from appli import db,app, database
-
-from flask.ext import admin
-from flask.ext.admin.contrib import sqla
+import flask.ext.admin
 from flask.ext.admin.contrib.sqla import ModelView,filters
-from wtforms  import TextField, PasswordField,TextAreaField
+from wtforms  import TextAreaField
 from flask.ext.security.utils import encrypt_password
 from flask.ext.admin import base
-from flask_admin.form import RenderTemplateWidget
 from flask_admin.contrib.sqla.form import InlineModelConverter
 from flask_admin.contrib.sqla.fields import InlineModelFormList
 from flask_admin.model.form import InlineFormAdmin
-from wtforms.fields import SelectField
+from wtforms.fields import SelectField,TextField,PasswordField
+from wtforms.validators import ValidationError
 
 class UsersView(ModelView):
     # Disable model creation
@@ -20,7 +17,7 @@ class UsersView(ModelView):
 
     # Override displayed fields
     column_list = ('email', 'name','organisation','active', 'roles')
-    form_columns = ('email', 'name','organisation', 'active', 'password', 'roles')
+    form_columns = ('email', 'name','organisation', 'active', 'roles', 'password')
     form_overrides = {
         'email': TextField,
         'password': PasswordField,
@@ -41,6 +38,17 @@ class UsersView(ModelView):
     def create_model(self, form):
         form._fields['password'].data =encrypt_password(form._fields['password'].data)
         return super(UsersView, self).create_model(form)
+    def checkpasswordequal(form, field):
+        if field.data !=form._fields['password_confirm'].data:
+            raise ValidationError("Password Confirmation doesn't match")
+
+    def scaffold_form(self):
+        form_class = super(UsersView, self).scaffold_form()
+        form_class.password_confirm = PasswordField('Password Confirmation')
+        return form_class
+    form_args = dict(
+        password=dict( validators=[checkpasswordequal])
+    )
 
 # Permet de presenter la Vue Inline sous forme de tableau sans les titres.
 class ProjectsViewCustomInlineModelConverter(InlineModelConverter):
@@ -118,7 +126,7 @@ class ObjectsFieldsView(ModelView):
         super(ObjectsFieldsView, self).__init__(database.ObjectsFields, session, **kwargs)
 
 # Create admin
-adminApp = admin.Admin(app, name='Ecotaxa Administration')
+adminApp = flask.ext.admin.Admin(app, name='Ecotaxa Administration')
 
 # Add views
 #admin.add_view(sqla.ModelView(database.users, db.session))

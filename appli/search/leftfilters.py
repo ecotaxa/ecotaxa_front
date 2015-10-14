@@ -18,7 +18,14 @@ def search_mappopup():
 @app.route('/search/mappopup/samples/')
 def search_mappopup_samples():
     app.logger.info(request.args)
-    res=GetAll("SELECT distinct longitude,latitude from samples where latitude is not NULL and longitude is not NULL  and projid=%s",(gvg('projid'),))
+    if gvg('projid'):
+        res=GetAll("SELECT distinct longitude,latitude from samples where latitude is not NULL and longitude is not NULL  and projid=%s",(gvg('projid'),))
+    else:
+        res=GetAll("""SELECT distinct cast(round(CAST (s.longitude AS numeric),1) as double PRECISION)
+                      ,cast(round(cast(s.latitude AS numeric) ,1)as double PRECISION)
+                      from samples s
+                       join projects p on s.projid=p.projid and p.visible=true
+                      where s.latitude is not NULL and s.longitude is not NULL  """)
     return json.dumps(res)
 
 

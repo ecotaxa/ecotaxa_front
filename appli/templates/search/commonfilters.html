@@ -11,11 +11,11 @@
 </table>
 
 <p style="border-bottom: 1px solid #ddd;padding-bottom: 4px;">
-<select id="sampleid" name="sampleid" style="width: 250px"  multiple autocomplete="off"> {{ data.sample_for_select|safe }}</select>
+<select id="sampleid" name="sampleid" style="width: 240px"  multiple autocomplete="off"> {{ data.sample_for_select|safe }}</select>
 </p>
 <p>Depth <span id="spaninfodepth" style="color: blue;" class="glyphicon glyphicon-info-sign"></span>
-    Min: <input type="text" id="filt_depthmin" style="width:50px;" autocomplete="off" value="{{ data.depthmin }}">
-    Max: <input type="text" id="filt_depthmax" style="width:50px;" autocomplete="off" value="{{ data.depthmax }}">
+    Min: <input type="text" id="filt_depthmin" style="width:45px;" autocomplete="off" value="{{ data.depthmin }}">
+    Max: <input type="text" id="filt_depthmax" style="width:45px;" autocomplete="off" value="{{ data.depthmax }}">
     <a href='javascript:ClearDepths();' title="Clear"><span class="glyphicon glyphicon-erase"></span></a>
 </p>
 <table class="table" >
@@ -45,7 +45,7 @@
 <div id="time-slider-range"></div>
 <label for="filt_fromtime">From </label> <input type="text" style="width: 45px" id="filt_fromtime" name="filt_fromtime" autocomplete="off" value="{{ data.fromtime }}">
 <label for="filt_totime"> to </label> <input type="text" style="width: 45px" id="filt_totime" name="filt_totime" autocomplete="off" value="{{ data.totime }}">
-<label for="filt_inverttime"> Invert </label> <input type="checkbox" value="Y" style="width: 45px" id="filt_inverttime" name="filt_inverttime" autocomplete="off" {{ "checked" if data.inverttime=='1' }}>
+<label for="filt_inverttime"> Invert </label> <input type="checkbox" value="Y" style="width: 25px" id="filt_inverttime" name="filt_inverttime" autocomplete="off" {{ "checked" if data.inverttime=='1' }}>
 
 
 <script>
