@@ -32,12 +32,19 @@ def objectdetails(objid):
         flash('You cannot view this project','error')
         return PrintInCharte("<a href=/>Back to home</a>")
     g.Projid=Prj.projid
-    t.append("<br>Part of project %s"%(Prj.title,))
-    t.append("<br>Classification : %s (%s)"%(obj.classif.name if obj.classif else "Unknown",database.ClassifQual.get(obj.classif_qual,"To be classified")))
+    t.append("<br>Part of project <b>%s</b> (managed by : %s)"%(Prj.title
+                     ,",".join(("<a href ='mailto:%s'>%s</a>"%(m.memberrel.email,m.memberrel.name) for m in Prj.projmembers  if m.privilege=='Manage'))))
+    t.append("<br>Classification : <b>%s</b> (%s)"%(obj.classif.name if obj.classif else "Unknown",database.ClassifQual.get(obj.classif_qual,"To be classified")))
     if obj.classiffier is not None:
         t.append(" by %s (%s) "%(obj.classiffier.name,obj.classiffier.email))
         if obj.classif_when is not None:
             t.append(" on %s "%(obj.classif_when.strftime("%Y-%m-%d %H:%M")))
+    if obj.classif:
+        TaxoHierarchie=(r[0] for r in GetAll("""WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id FROM taxonomy where id =%(taxoid)s
+                        union
+                        SELECT t.id,t.name,t.parent_id FROM rq JOIN taxonomy t ON t.id = rq.parent_id )
+                        select name from rq""",{"taxoid":obj.classif.id}))
+        t.append("<br>Hierarchy : "+ " &gt; ".join(TaxoHierarchie))
     if obj.objfrel.object_link is not None:
         t.append("<br>External link :<a href='{0}' target=_blank> {0}</a>".format(obj.objfrel.object_link))
     t.append("<table><tr><td valign=top>Complementaty information : </td><td> <span id=spancomplinfo> {0}</span></td></tr></table>".format(ntcv( obj.complement_info).replace('\n','<br>\n')))
@@ -121,7 +128,7 @@ $(document).ready(function() {
         t.append("""</div><!-- /input-group -->
  <span id=PendingChangesPop></span></td><td width=30px></td><td valign=top>
     <button type="button" class="btn btn-success" onclick="Save1Object('V');">Save as Validated</button>
-    <button type="button" class="btn btn-danger" onclick="Save1Object('D');">Save as dubious</button>
+    <button type="button" class="btn btn-warning" onclick="Save1Object('D');">Save as dubious</button>
     <button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>
     </td></tr></table>
     """)

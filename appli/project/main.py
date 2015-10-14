@@ -429,14 +429,15 @@ def GetClassifTab(Prj):
     def AddChild(Src,Parent,Res,Deep,ParentClasses):
         for r in Src:
             if r['cp'] ==Parent:
-                r['dist']=Deep+r['cpdist']
+                # r['dist']=Deep+r['cpdist']
+                r['dist']=Deep
                 r['parentclasses']=ParentClasses
                 r["haschild"]=False
                 for p,i in zip(Res,range(10000)):
                     if p['id']==Parent:
                         Res[i]["haschild"]=True
                 Res.append(r)
-                AddChild(Src,r['id'],Res,r['dist'],ParentClasses+(" visib%s"%(r['id'],)))
+                AddChild(Src,r['id'],Res,r['dist']+1,ParentClasses+(" visib%s"%(r['id'],)))
     AddChild(res,None,restree,0,"")
     return render_template('project/classiftab.html',res=restree,taxotree=json.dumps(taxotree))
 
