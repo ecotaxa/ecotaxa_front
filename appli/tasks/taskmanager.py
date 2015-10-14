@@ -210,8 +210,16 @@ def TaskForceRestart(TaskID):
 @app.route('/Task/Clean/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskClean(TaskID):
+    if gvg('thengotoproject')=='Y':
+        task = LoadTask(TaskID)
+        ProjectID=getattr(task.param,'ProjectId',None)
+    else: ProjectID=''
     Msg = DoTaskClean(TaskID)
     Msg+='<br><a href="/Task/listall"><span class="label label-info"> Back to Task List</span></a>'
+    if ProjectID:
+        Msg+=""""<script>
+            window.location.href = "/prj/%s"
+        </script>"""%(ProjectID,)
     return PrintInCharte(Msg)
 
 def DoTaskClean(TaskID):
@@ -262,7 +270,7 @@ def TaskGetStatus(TaskID):
                         rep['d']['ExtraAction']="Error, final file not available"
                     else:
                         rep['d']['ExtraAction']="<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' role='button'>Get file %s</a>"%(TaskID,f,f)
-                        rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d' class='btn btn-primary btn-sm ' role='button'>Clean the result</a>"%(TaskID,)
+                        rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d?thengotoproject=Y' class='btn btn-primary btn-sm ' role='button'>Clean the result and back to project (No Danger) </a>"%(TaskID,)
 
 
             if task.task.taskstate=="Error":
