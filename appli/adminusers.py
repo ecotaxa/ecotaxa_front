@@ -113,7 +113,9 @@ class ObjectsView(ModelView):
     column_list = ('objid','projid', 'sampleid','classif_qual','objdate','acquisid','processid')
     column_filters = ('objid','projid','sampleid', 'classif_qual','acquisid','processid')
     form_overrides = dict(complement_info  =TextAreaField )
-    form_excluded_columns=('classif','classif_auto','processrel','acquis','img0','images','sample','classiffier','objfrel')
+    form_excluded_columns=('classif_id','classif_auto','processrel','acquis','img0','images','sample','classiffier','objfrel')
+    form_ajax_refs = { 'classif': { 'fields': ( 'name',) } }
+
     def __init__(self, session, **kwargs):
         super(ObjectsView, self).__init__(database.Objects, session, **kwargs)
 
