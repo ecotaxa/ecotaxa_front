@@ -22,7 +22,7 @@ def searchtaxo():
     if PrjId!="":
         PrjId=int(PrjId)
         Prj=database.Projects.query.filter_by(projid=PrjId).first()
-        if Prj.initclassiflist is not None:
+        if str(Prj.initclassiflist) != "":
             InitClassif=Prj.initclassiflist
             InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
             sql="""

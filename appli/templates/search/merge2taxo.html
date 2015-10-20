@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+
+{% block body %}
+
+ <script>
+$(document).ready(function() {
+    $("#src,#dest").select2({
+        ajax: {
+            url: "/search/taxo",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 3
+    }); // Select2 Ajax
+    $('#TaxoModal').on('show.bs.modal', function (e) {
+         $("#TaxoModalBody").html("Loading...");
+         $("#TaxoModalBody").load("/search/taxotree");
+    });
+    }); // Ready
+ </script>
+<style> {# On agrandi la taile de la drop down de la popup #}
+    UL#select2-taxolb-results {max-height: 500px; }
+</style>
+
+ {# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
+<form method="get" action="?">
+<h3>
+    This function allow to replace a Taxon by another in the objects list and Taxonomy Tree by replacing parent relationship and deleting the source Taxon.
+</h3>
+<table>
+    <tr>
+        <td>Select source Taxon (will be deleted after merge) :</td>
+        <td>
+            <select id="src" name="src"  style="width: 210px" > </select>
+       </td>
+    </tr>
+    <tr>
+        <td>Select Target Taxon :</td>
+        <td>
+            <select id="dest" name="dest"  style="width: 210px" > </select>
+       </td>
+    </tr>
+</table>
+
+
+
+ <input type=submit class="btn btn-primary" value="Replace source by target">
+<p style='font-size: 18px;color:red;'><span class='glyphicon glyphicon-warning-sign'></span> Warning This operation his irreversible !!!</p>
+    </form>
+{% endblock %}
