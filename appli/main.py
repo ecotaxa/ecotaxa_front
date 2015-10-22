@@ -95,6 +95,7 @@ def testadmin():
 def before_request_security():
     # time.sleep(0.1)
     # print("URL="+request.url)
+    # app.logger.info("URL="+request.url)
     if "/static" in request.url:
         return
     # print(request.form)

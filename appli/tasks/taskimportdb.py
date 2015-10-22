@@ -10,6 +10,7 @@ from appli.database import GetAll,ExecSQL,GetDBToolsDir,GetAssoc,GetAssoc2Col
 from appli.tasks.taskexportdb import table_list
 from psycopg2.extras import  RealDictCursor
 import psycopg2
+from flask.ext.security.utils import encrypt_password
 
 def GetColsForTable(schema:str,table:str):
     ColList=GetAll("""select a.attname from pg_namespace ns
@@ -538,6 +539,8 @@ def RestoreDBFull():
                 cur.connection.commit()
         except:
             print("Error while data restoration %s",str(sys.exc_info()))
+    cur.execute("update public.users set password=%s where email='admin'",(encrypt_password('ecotaxa'),))
+    cur.connection.commit()
 
     import manage
     manage.ResetDBSequence(cur)
