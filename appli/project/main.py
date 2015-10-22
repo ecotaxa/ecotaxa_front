@@ -470,6 +470,7 @@ def prjPurge(PrjId):
         txt+="""<form action=? method=post>
         Enter the list of internal object id you want to delete. Or DELETEALL to erase all object of this project.<br>
         <textarea name=objlist cols=15 rows=20></textarea><br>
+        <input type=checkbox name=destroyproject value=Y> Once purged, destroy the project (only if DELETEALL).<br>
         <input type="submit" class="btn btn-danger" value='ERASE THESES OBJECTS !!! IRREVERSIBLE !!!!!'>
         <a href ="/prj/{0}" class="btn btn-success">Cancel, Back to project home</a>
         </form>
@@ -516,5 +517,10 @@ def prjPurge(PrjId):
             ExecSQL("delete from acquisitions where projid={0}".format(PrjId))
             ExecSQL("delete from process where projid={0}".format(PrjId))
         txt+="Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files"%(no,noh,ni,nbrfile)
+        if gvp("objlist")=="DELETEALL" and gvp("destroyproject")=="Y" :
+            ExecSQL("delete from projectspriv where projid={0}".format(PrjId))
+            ExecSQL("delete from projects where projid={0}".format(PrjId))
+            txt+="<br>Project and associated privileges, destroyed"
+            return PrintInCharte(txt+ ("<br><br><a href ='/prj/'>Back to project list</a>"))
         UpdateProjectStat(Prj.projid)
     return PrintInCharte(txt+ ("<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId)))

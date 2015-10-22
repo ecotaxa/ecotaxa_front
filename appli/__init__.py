@@ -4,13 +4,21 @@ import os,sys
 # Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL
 if sys.platform.startswith('win32'):
     virtualprefix = sys.base_prefix
-    sys.base_prefix = sys.real_prefix
+    if hasattr(sys, 'real_prefix'):
+        sys.base_prefix = sys.real_prefix
     from tkinter import _fix
     if "TCL_LIBRARY" not in os.environ:
         # reload module, so that sys.real_prefix be used
         from imp import reload
         reload(_fix)
     sys.base_prefix = virtualprefix
+
+VaultRootDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\vault")
+if not os.path.exists(VaultRootDir):
+    os.mkdir(VaultRootDir)
+TempTaskDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\temptask")
+if not os.path.exists(TempTaskDir):
+    os.mkdir(TempTaskDir)
 
 from flask import Flask,render_template,request,g
 from flask.ext.sqlalchemy import SQLAlchemy
