@@ -109,7 +109,7 @@ class TaskClassifAuto(AsyncTask):
         upcur=db.engine.raw_connection().cursor()
         ProcessedRows=0
         while True:
-            self.UpdateProgress(15+90*(ProcessedRows/NbrItem),"Processed %d/%d"%(ProcessedRows,NbrItem))
+            self.UpdateProgress(15+85*(ProcessedRows/NbrItem),"Processed %d/%d"%(ProcessedRows,NbrItem))
             TStep = time.time()
             # recupère les variables des objets à classifier
             DBRes=np.array(self.pgcur.fetchmany(100))
@@ -150,6 +150,7 @@ class TaskClassifAuto(AsyncTask):
         txt="<a href='/prj/%d'>Back to project</a>"%Prj.projid
         if not Prj.CheckRight(2):
             return PrintInCharte("ACCESS DENIED for this project<br>"+txt)
+        g.prjtitle=Prj.title
         txt+="<h3>Automatic Classification Task creation</h3>"
         txt+="<h5>Target Project : #%d - %s</h5>"%(Prj.projid,Prj.title)
         errors=[]
@@ -220,7 +221,7 @@ class TaskClassifAuto(AsyncTask):
             #recupere les categories et le nombre d'occurence dans le projet de base/learning
             sql="""select n.classif_id,t.name,n.nbr
                     from (select o.classif_id,count(*) nbr
-                          from obj_head o where projid =%(projid)s
+                          from obj_head o where projid =%(projid)s and classif_qual='V'
                           group by classif_id) n
                     JOIN taxonomy t on n.classif_id=t.id
                     order by nbr desc,name"""

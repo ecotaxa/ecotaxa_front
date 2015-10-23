@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block headcenter %}
+  <h4>Project :  {{  g.prjtitle  }} </h4>
+{% endblock %}
+
 {% block body %}
 
     {{ task.progressmsg |nl2br|safe }}
@@ -8,23 +12,24 @@
 {%   if (taxo|length())>0 %}
     <h3>Taxonomy Manual Mapping</h3>
     <p>Note : If needed, Taxonomy element creation must but handled by administrator prior execution of import task</p>
+<table >
     {% for T in taxo %}
-  <div class="form-group">
-  <label class="col-sm-3 control-label" for="taxolb{{ loop.index }}">{{ loop.index~" - "+T }}</label>
+  <tr><td>
+  {{ loop.index~" - "+T }}
 {#   {{ label(loop.index~" - "+T)  }} #}
       <input type="hidden" name="orig{{ loop.index }}" value="{{ T }}">
-  <div class="col-lg-2">
+    </td><td>
     <div class="input-group">
        <select id="taxolb{{ loop.index }}" name="taxolb{{ loop.index }}" style="width: 210px" class='taxolb' > </select>
             <span class="input-group-btn">
                 <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolb{{ loop.index }}">
                     <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></button>
                 </span>
-        </div><!-- /input-group -->
-  </div>
-  </div>
+    </div><!-- /input-group -->
+    </td>
+  </tr>
     {% endfor %}
-
+</table>
 {% endif %}
 
 
