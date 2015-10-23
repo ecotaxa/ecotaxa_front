@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,gvg,db,gvp,database
+from appli import app,ObjectToStr,PrintInCharte,gvg,db,gvp,database,ntcv
 from appli.database import GetAll
 import psycopg2,psycopg2.extras
 
@@ -22,7 +22,7 @@ def searchtaxo():
     if PrjId!="":
         PrjId=int(PrjId)
         Prj=database.Projects.query.filter_by(projid=PrjId).first()
-        if str(Prj.initclassiflist) != "":
+        if ntcv(Prj.initclassiflist) != "":
             InitClassif=Prj.initclassiflist
             InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
             sql="""

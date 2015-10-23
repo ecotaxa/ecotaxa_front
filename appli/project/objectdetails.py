@@ -43,8 +43,8 @@ def objectdetails(objid):
         TaxoHierarchie=(r[0] for r in GetAll("""WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id FROM taxonomy where id =%(taxoid)s
                         union
                         SELECT t.id,t.name,t.parent_id FROM rq JOIN taxonomy t ON t.id = rq.parent_id )
-                        select name from rq""",{"taxoid":obj.classif.id}))
-        t.append("<br>Hierarchy : "+ " &gt; ".join(TaxoHierarchie))
+                        select name from rq""",{"taxoid":obj.classif.id})[::-1])
+        t.append("<br>Hierarchy : "+ (" &gt; ".join(TaxoHierarchie))+" (%s)"%obj.classif_id )
     if obj.objfrel.object_link is not None:
         t.append("<br>External link :<a href='{0}' target=_blank> {0}</a>".format(obj.objfrel.object_link))
     t.append("<table><tr><td valign=top>Complementaty information : </td><td> <span id=spancomplinfo> {0}</span></td></tr></table>".format(ntcv( obj.complement_info).replace('\n','<br>\n')))

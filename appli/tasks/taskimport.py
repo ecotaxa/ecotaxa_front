@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv
 from PIL import Image
-from flask import render_template,  flash,request
+from flask import render_template,  flash,request,g
 import logging,os,csv,sys,time
 import datetime,shutil,random,zipfile
 from pathlib import Path
@@ -108,6 +108,7 @@ class TaskImport(AsyncTask):
                 self.param.Mapping['acq_'+v]={'table': 'acq', 'title': v, 'type': k[0], 'field': k}
             for k,v in DecodeEqualList(Prj.mappingprocess).items():
                 self.param.Mapping['process_'+v]={'table': 'process', 'title': v, 'type': k[0], 'field': k}
+            ProjectWasEmpty=len(self.param.Mapping)==0
             self.param.TaxoFound={} # Reset à chaque Tentative
             self.param.UserFound={} # Reset à chaque Tentative
             self.param.steperrors=[] # Reset des erreurs
@@ -168,7 +169,8 @@ class TaskImport(AsyncTask):
                             self.LastNum[Table][SelType]+=1
                             self.param.Mapping[champ]={'table':Table,'field':SelType+"%02d"%self.LastNum[Table][SelType],'type':SelType,'title':ColSplitted[1]}
                             logging.info("New field %s found in file %s",champ,relname.as_posix())
-                            WarnMessages.append("New field %s found in file %s"%(champ,relname.as_posix()))
+                            if not ProjectWasEmpty:
+                                WarnMessages.append("New field %s found in file %s"%(champ,relname.as_posix()))
                     # Test du contenu du fichier
                     RowCount=0
                     for lig in rdr:
@@ -482,6 +484,9 @@ class TaskImport(AsyncTask):
                 self.param.ProjectId=gvg("p")
             return render_template('task/import_create.html',header=txt,data=self.param,ServerPath=gvp("ServerPath"),TxtTaxoMap=gvp("TxtTaxoMap"))
         if self.task.taskstep==1:
+            PrjId=self.param.ProjectId
+            Prj=database.Projects.query.filter_by(projid=PrjId).first()
+            g.prjtitle=Prj.title
             # self.param.TaxoFound['agreia pratensis']=None #Pour TEST A EFFACER
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]

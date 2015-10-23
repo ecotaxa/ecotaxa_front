@@ -274,17 +274,17 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         else:
             width=origwidth*zoom//100
             height=origheight*zoom//100
-        if max(width,height)<20: # en dessous de 20 px de coté on ne fait plus le scaling
-            if max(origwidth,origheight)<20:
+        if max(width,height)<75: # en dessous de 75 px de coté on ne fait plus le scaling
+            if max(origwidth,origheight)<75:
                 width=origwidth   # si l'image originale est petite on l'affiche telle quelle
                 height=origheight
             elif max(origwidth,origheight)==origwidth:
-                width=20
-                height=origheight*20//origwidth
+                width=75
+                height=origheight*75//origwidth
                 if height<1 : height=1
             else:
-                height=20
-                width=origwidth*20//origheight
+                height=75
+                width=origwidth*75//origheight
                 if width<1 : width=1
 
         # On limite les images pour qu'elles tiennent toujours dans l'écran
@@ -345,7 +345,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
                 else:
                     bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
         if bottomtxt!="":
-            bottomtxt="<span style='font-size:12px;'>"+bottomtxt+"</span>"
+            bottomtxt="<p style='font-size:12px; word-break: break-all;'>"+bottomtxt[4::]+"</p>" #[4::] supprime le premier <BR>
         txt+="<div class='subimg {1}' {2}><span class=taxo >{0}</span>{3}<div class=ddet><span class=ddets>View {4}</div></div>"\
             .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
@@ -392,13 +392,14 @@ def GetClassifTab(Prj):
             InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
 
     InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
-    sql="""select t.id,t.name taxoname,nbr,nbrnotv
+    sql="""select t.id,t.name as taxoname,case when tp.name is not null and t.name not like '%% %%'  then ' ('||tp.name||')' else ' ' end as  taxoparent,nbr,nbrnotv
     from (  SELECT    o.classif_id,   c.id,count(classif_id) Nbr,count(case when classif_qual='V' then NULL else o.classif_id end) NbrNotV
         FROM (select * from objects where projid=%(projid)s) o
         FULL JOIN (VALUES """+InitClassif+""") c(id) ON o.classif_id = c.id
         GROUP BY classif_id, c.id
       ) o
     JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
+    left JOIN taxonomy tp ON t.parent_id = tp.id
     order by t.name       """
     param={'projid':Prj.projid}
     res=GetAll(sql,param,debug=False,cursor_factory=psycopg2.extras.RealDictCursor)

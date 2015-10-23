@@ -175,17 +175,17 @@ where o.projid in (select projid from projects where visible=true)"""
         else:
             width=origwidth*zoom//100
             height=origheight*zoom//100
-        if max(width,height)<20: # en dessous de 20 px de coté on ne fait plus le scaling
-            if max(origwidth,origheight)<20:
+        if max(width,height)<120: # en dessous de 120 px de coté on ne fait plus le scaling
+            if max(origwidth,origheight)<120:
                 width=origwidth   # si l'image originale est petite on l'affiche telle quelle
                 height=origheight
             elif max(origwidth,origheight)==origwidth:
-                width=20
-                height=origheight*20//origwidth
+                width=120
+                height=origheight*120//origwidth
                 if height<1 : height=1
             else:
-                height=20
-                width=origwidth*20//origheight
+                height=120
+                width=origwidth*120//origheight
                 if width<1 : width=1
 
         # On limite les images pour qu'elles tiennent toujours dans l'écran

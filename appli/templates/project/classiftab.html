@@ -22,7 +22,7 @@
 <tr><td taxoid="{{ v['id'] }}" class="{{  v['parentclasses'] }}">
         <b>{{ ("&#8226;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>
         {% if v['haschild'] %}<span class="glyphicon glyphicon-triangle-bottom categexpander" ></span>{% endif %}
-    <span class="taxodrop">{{ v['taxoname'] }}</span> <p  class="ra3 label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</p></td></tr>
+    <span class="taxodrop">{{ v['taxoname'] }}</span> {{ v['taxoparent'] }} <p  class="ra3 label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</p></td></tr>
 {% endfor %}
 </table>
   </div>
