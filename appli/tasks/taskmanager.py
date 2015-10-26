@@ -270,7 +270,10 @@ def TaskGetStatus(TaskID):
                         rep['d']['ExtraAction']="Error, final file not available"
                     else:
                         rep['d']['ExtraAction']="<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' role='button'>Get file %s</a>"%(TaskID,f,f)
-                        rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d?thengotoproject=Y' class='btn btn-primary btn-sm ' role='button'>Clean the result and back to project (No Danger) </a>"%(TaskID,)
+                        if getattr(task.param,'ProjectId',None):
+                            rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d?thengotoproject=Y' class='btn btn-primary btn-sm ' role='button'>Clean the result and back to project (No Danger) </a>"%(TaskID,)
+                        else:
+                            rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d' class='btn btn-primary btn-sm ' role='button'>Clean the result (No Danger) </a>"%(TaskID,)
 
 
             if task.task.taskstate=="Error":

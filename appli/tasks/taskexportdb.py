@@ -20,7 +20,7 @@ class TaskExportDb(AsyncTask):
             self.steperrors=[]
             super().__init__(InitStr)
             if InitStr==None: # Valeurs par defaut ou vide pour init
-                self.ProjectId=()
+                self.ProjectIds=()
 
 
     def __init__(self,task=None):
@@ -67,16 +67,16 @@ class TaskExportDb(AsyncTask):
             with open("temp.copy","w",encoding='latin_1') as f:
                 query="select %s from %s t"%(",".join(["t."+x[0] for x in ColList]),t)
                 if t in ('projects','projectspriv',"process","acquisitions","samples","obj_head"):
-                    query+=" where projid in (%s)"%(self.param.ProjectId,)
+                    query+=" where projid in (%s)"%(self.param.ProjectIds,)
                 if t in ('objectsclassifhisto','images'):
-                    query+=" join obj_head o on o.objid=t.objid where o.projid in (%s)"%(self.param.ProjectId,)
+                    query+=" join obj_head o on o.objid=t.objid where o.projid in (%s)"%(self.param.ProjectIds,)
                 if t in ("obj_field"):
-                    query+=" join obj_head o on o.objid=t.objfid where o.projid in (%s)"%(self.param.ProjectId,)
+                    query+=" join obj_head o on o.objid=t.objfid where o.projid in (%s)"%(self.param.ProjectIds,)
                 self.pgcur.copy_to(f,"("+query+")")
             zfile.write("temp.copy",arcname=t+".copy")
         logging.info("Save Images")
         vaultroot=Path("../../vault")
-        self.pgcur.execute("select imgid,file_name,thumb_file_name from images i join obj_head o on o.objid=i.objid where o.projid in (%s)"%(self.param.ProjectId,))
+        self.pgcur.execute("select imgid,file_name,thumb_file_name from images i join obj_head o on o.objid=i.objid where o.projid in (%s)"%(self.param.ProjectIds,))
         for r in self.pgcur:
             if r[1]:
                 zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="images/%s.img"%r[0])
@@ -100,11 +100,11 @@ class TaskExportDb(AsyncTask):
             # Le projet de base est choisi second écran ou validation du second ecran
             if gvp('starttask')=="Y":
                 # validation du second ecran
-                self.param.ProjectId=",".join( (x[4:] for x in request.form if x[0:4]=="prj_") )
+                self.param.ProjectIds=",".join( (x[4:] for x in request.form if x[0:4]=="prj_") )
 
                 # Verifier la coherence des données
                 # errors.append("TEST ERROR")
-                if self.param.ProjectId=='' : errors.append("You must select at least one project")
+                if self.param.ProjectIds=='' : errors.append("You must select at least one project")
                 if len(errors)>0:
                     for e in errors:
                         flash(e,"error")

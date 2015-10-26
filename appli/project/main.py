@@ -468,14 +468,16 @@ def prjPurge(PrjId):
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     txt=""
     if gvp("objlist")=="":
-        txt+="""<form action=? method=post>
+        txt+="""
+        <h3>Project #{0} : {1}</h3>
+        <form action=? method=post>
         Enter the list of internal object id you want to delete. Or DELETEALL to erase all object of this project.<br>
-        <textarea name=objlist cols=15 rows=20></textarea><br>
+        <textarea name=objlist cols=15 rows=20 autocomplete=off></textarea><br>
         <input type=checkbox name=destroyproject value=Y> Once purged, destroy the project (only if DELETEALL).<br>
         <input type="submit" class="btn btn-danger" value='ERASE THESES OBJECTS !!! IRREVERSIBLE !!!!!'>
         <a href ="/prj/{0}" class="btn btn-success">Cancel, Back to project home</a>
         </form>
-        """.format(PrjId)
+        """.format(PrjId,Prj.title)
     else:
         if gvp("objlist")=="DELETEALL":
             sqlsi="select file_name,thumb_file_name from images i,objects o where o.objid=i.objid and o.projid={0}".format(PrjId)

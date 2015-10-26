@@ -14,6 +14,7 @@ import appli.cron
 
 @app.route('/dbadmin/viewsizes')
 @login_required
+@roles_accepted(database.AdministratorLabel)
 def dbadmin_viewsizes():
     txt = "<h6>Database objects size (public schema only)</h6>"
     sql="""SELECT c.relname, c.relkind, CASE WHEN c.relkind='i' THEN c2.tablename ELSE c.relname END fromtable,pg_relation_size(('"' || c.relname || '"')::regclass)/(1024*1024) szMB
@@ -42,6 +43,7 @@ ORDER BY c.relkind DESC, pg_relation_size(('"' || c.relname || '"')::regclass) D
 
 @app.route('/dbadmin/viewbloat')
 @login_required
+@roles_accepted(database.AdministratorLabel)
 def dbadmin_viewbloat():
     txt = "<h6>Database objects wasted space</h6>"
     sql="""SELECT
@@ -109,6 +111,7 @@ def dbadmin_viewbloat():
 
 @app.route('/dbadmin/recomputestat')
 @login_required
+@roles_accepted(database.AdministratorLabel)
 def dbadmin_recomputestat():
     appli.cron.RefreshAllProjectsStat()
     appli.cron.RefreshTaxoStat()
@@ -117,6 +120,7 @@ def dbadmin_recomputestat():
 
 @app.route('/dbadmin/merge2taxon')
 @login_required
+@roles_accepted(database.AdministratorLabel)
 def dbadmin_merge2taxon():
     if gvg("src","")=="" or gvg("dest","")=="":
         txt="Select source Taxon (will be deleted after merge) :"

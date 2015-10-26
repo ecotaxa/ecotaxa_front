@@ -9,6 +9,7 @@ from sqlalchemy.orm import foreign,remote
 import json,psycopg2.extras,datetime,os
 
 AdministratorLabel="Application Administrator"
+UserAdministratorLabel="Users Administrator"
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
 ClassifQualRevert={}
 for(k,v) in ClassifQual.items():

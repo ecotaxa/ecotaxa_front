@@ -167,21 +167,24 @@ $(document).ready(function() {
     for r in (("Sample","mappingsample","sample") ,("Acquisition","mappingacq","acquis"),("Processing","mappingprocess","processrel") ):
         t.append('<div role="tabpanel" class="tab-pane" id="tabd'+r[2]+'">'+r[0]+" details :<table class='table table-bordered'><tr>")
         cpt=0
-        if r[2]=="sample":
-            t.append("<td><b>{0}</td><td>{1}</td><td><b>{2}</td><td>{3}</td><td><b>{4}</td><td>{5}</td></tr><tr>"
-                     .format("Original ID",ScaleForDisplay(obj.sample.orig_id),
-                             "longitude",ScaleForDisplay(obj.sample.longitude),
-                             "latitude",ScaleForDisplay(obj.sample.latitude),))
-            t.append("<td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
-                     .format("Dataportal Desc.",ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
+        if getattr(obj,r[2]):
+            if r[2]=="sample":
+                t.append("<td><b>{0}</td><td>{1}</td><td><b>{2}</td><td>{3}</td><td><b>{4}</td><td>{5}</td></tr><tr>"
+                         .format("Original ID",ScaleForDisplay(obj.sample.orig_id),
+                                 "longitude",ScaleForDisplay(obj.sample.longitude),
+                                 "latitude",ScaleForDisplay(obj.sample.latitude),))
+                t.append("<td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
+                         .format("Dataportal Desc.",ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
+            else:
+                t.append("<td><b>{0}</td><td>{1}</td></tr><tr>"
+                         .format("Original ID.",ScaleForDisplay(getattr(getattr(obj,r[2]),"orig_id","???"))))
+            for k,v in  collections.OrderedDict(sorted(DecodeEqualList(getattr(Prj,r[1])).items())).items():
+                if cpt>0 and cpt%4==0:
+                    t.append("</tr><tr>")
+                cpt+=1
+                t.append("<td><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(getattr(obj,r[2]),k,"???"))))
         else:
-            t.append("<td><b>{0}</td><td>{1}</td></tr><tr>"
-                     .format("Original ID.",ScaleForDisplay(getattr(getattr(obj,r[2]),"orig_id","???"))))
-        for k,v in  collections.OrderedDict(sorted(DecodeEqualList(getattr(Prj,r[1])).items())).items():
-            if cpt>0 and cpt%4==0:
-                t.append("</tr><tr>")
-            cpt+=1
-            t.append("<td><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(getattr(obj,r[2]),k,"???"))))
+            t.append("<td>No {0}</td>".format(r[0]))
         t.append("</tr></table></div>")
 
     # Affichage de l'historique des classification
