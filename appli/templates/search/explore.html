@@ -63,7 +63,7 @@ $(document).ready(function() {
 </style>
 
        <div id="column-left"  class="panel panel-default" style="position: fixed;	top: 125px;	left: 2px;	bottom: 0px;	width: 280px;
-                overflow-y: auto; overflow-x: hidden;  margin-bottom: 0px; " >
+                overflow-y: auto; overflow-x: auto;  margin-bottom: 0px; " >
         <div class="bodyleft" style="margin-left: 2px; width: 251px;">
         <a href='?'>Clear all filter &amp; update view/refresh</a><br>
  {# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
@@ -73,7 +73,7 @@ $(document).ready(function() {
    </td></tr>
 </table>
 
- <div class="row">
+ <div class="row" style="width: 270px;">
      <div class="col-lg-12">
         <div class="input-group">
             <select id="taxolb" multiple="multiple" style="width: 210px"  autocomplete="off"> {{ data.taxo_for_select|safe }} </select>

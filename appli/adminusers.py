@@ -10,6 +10,7 @@ from flask_admin.contrib.sqla.fields import InlineModelFormList
 from flask_admin.model.form import InlineFormAdmin
 from wtforms.fields import SelectField,TextField,PasswordField
 from wtforms.validators import ValidationError
+from flask.ext.login import current_user
 
 class UsersView(ModelView):
     # Disable model creation
@@ -18,6 +19,7 @@ class UsersView(ModelView):
     # Override displayed fields
     column_list = ('email', 'name','organisation','active', 'roles')
     form_columns = ('email', 'name','organisation', 'active', 'roles', 'password')
+    column_searchable_list = ('email', 'name')
     form_overrides = {
         'email': TextField,
         'password': PasswordField,
@@ -49,6 +51,16 @@ class UsersView(ModelView):
     form_args = dict(
         password=dict( validators=[checkpasswordequal])
     )
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
+
+class UsersViewRestricted(UsersView):
+    form_columns = ('email', 'name','organisation', 'active',  'password')
+    def __init__(self, session, **kwargs):
+        # You can pass name and other parameters if you want to
+        super(UsersViewRestricted, self).__init__(session, **kwargs)
+    def is_accessible(self):
+        return (not current_user.has_role(database.AdministratorLabel)) and current_user.has_role(database.UserAdministratorLabel)
 
 # Permet de presenter la Vue Inline sous forme de tableau sans les titres.
 class ProjectsViewCustomInlineModelConverter(InlineModelConverter):
@@ -75,6 +87,8 @@ class ProjectsView(ModelView):
 
     def __init__(self, session, **kwargs):
         super(ProjectsView, self).__init__(database.Projects, session, **kwargs)
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
 
 
 class SamplesView(ModelView):
@@ -84,6 +98,8 @@ class SamplesView(ModelView):
     form_overrides = dict(dataportal_descriptor  =TextAreaField )
     def __init__(self, session, **kwargs):
         super(SamplesView, self).__init__(database.Samples, session, **kwargs)
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
 
 class ProcessView(ModelView):
     column_list = ('processid','projid', 'orig_id','t01','t02','t03')
@@ -91,6 +107,8 @@ class ProcessView(ModelView):
     column_searchable_list = ('orig_id',)
     def __init__(self, session, **kwargs):
         super(ProcessView, self).__init__(database.Process, session, **kwargs)
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
 
 class AcquisitionsView(ModelView):
     column_list = ('acquisid','projid', 'orig_id','t01','t02','t03')
@@ -98,6 +116,8 @@ class AcquisitionsView(ModelView):
     column_searchable_list = ('orig_id',)
     def __init__(self, session, **kwargs):
         super(AcquisitionsView, self).__init__(database.Acquisitions, session, **kwargs)
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
 
 class TaxonomyView(ModelView):
     column_list = ('id','parent_id', 'name','id_source')
@@ -108,6 +128,8 @@ class TaxonomyView(ModelView):
     # form_overrides = dict(dataportal_descriptor  =TextAreaField )
     def __init__(self, session, **kwargs):
         super(TaxonomyView, self).__init__(database.Taxonomy, session, **kwargs)
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
 
 class ObjectsView(ModelView):
     column_list = ('objid','projid', 'sampleid','classif_qual','objdate','acquisid','processid')
@@ -118,6 +140,8 @@ class ObjectsView(ModelView):
 
     def __init__(self, session, **kwargs):
         super(ObjectsView, self).__init__(database.Objects, session, **kwargs)
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
 
 class ObjectsFieldsView(ModelView):
     column_list = ('objfid','orig_id')
@@ -126,13 +150,16 @@ class ObjectsFieldsView(ModelView):
     form_excluded_columns=('objhrel', )
     def __init__(self, session, **kwargs):
         super(ObjectsFieldsView, self).__init__(database.ObjectsFields, session, **kwargs)
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
 
 # Create admin
 adminApp = flask.ext.admin.Admin(app, name='Ecotaxa Administration')
 
 # Add views
 #admin.add_view(sqla.ModelView(database.users, db.session))
-adminApp.add_view(UsersView(db.session))
+adminApp.add_view(UsersView(db.session,name="Users"))
+adminApp.add_view(UsersViewRestricted(db.session,name="users",endpoint="userrest"))
 adminApp.add_view(ProjectsView(db.session))
 adminApp.add_view(ObjectsView(db.session,category='Objects'))
 adminApp.add_view(ObjectsFieldsView(db.session,category='Objects'))

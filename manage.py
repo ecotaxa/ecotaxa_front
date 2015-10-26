@@ -29,7 +29,7 @@ def createadminuser():
         db.session.commit()
     r=roles.query.filter_by(id=2).first()
     if r is None:
-        db.session.add(roles(id=2,name='Users Administrator'))
+        db.session.add(roles(id=2,name=database.UserAdministratorLabel))
         db.session.commit()
 
     u=user_datastore.find_user(email='admin')

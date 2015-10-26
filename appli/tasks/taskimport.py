@@ -414,6 +414,8 @@ class TaskImport(AsyncTask):
                             Objs["image"].thumb_width=im.size[0]
                             Objs["image"].thumb_height=im.size[1]
                     #ajoute de l'image en DB
+                    if Objs["image"].imgrank is None:
+                        Objs["image"].imgrank =0 # valeur par defaut
                     db.session.add(Objs["image"])
                     db.session.commit()
                     if (TotalRowCount%100)==0:
@@ -445,6 +447,7 @@ class TaskImport(AsyncTask):
         if self.task.taskstep==0:
             txt+="<h3>Task Creation</h3>"
             Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
+            g.prjtitle=Prj.title
             txt="<a href='/prj/%d'>Back to project</a>"%Prj.projid
             if Prj.CheckRight(2)==False:
                 return PrintInCharte("ACCESS DENIED for this project");
