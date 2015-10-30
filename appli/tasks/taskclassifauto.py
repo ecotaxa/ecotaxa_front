@@ -21,6 +21,7 @@ class TaskClassifAuto(AsyncTask):
                 self.CritVar=None
                 self.Taxo=""
                 self.Perimeter=""
+                self.keeplog="no"
 
     def __init__(self,task=None):
         super().__init__(task)
@@ -127,6 +128,12 @@ class TaskClassifAuto(AsyncTask):
             SqlParam=[{'cat':int(Classifier.classes_[mc]),'p':r[mc],'id':int(i)} for i,mc,r in zip(Tget_Ids,ResultMaxCol,Result)]
             TStep3 = time.time()
             # MAJ dans la base, Si pas de classif devient predicted , Si vide ou predicted, MAJ de la classif
+            if self.param.keeplog:
+                upcur.executemany("""insert into objectsclassifhisto(objid,classif_date,classif_type,classif_id,classif_qual,classif_score)
+                                      select objid,classif_auto_when,'A', classif_auto_id,classif_qual,classif_auto_score
+                                        from obj_head
+                                        where objid=%(id)s and classif_auto_id!=%(cat)s and classif_auto_id is not null
+                                        and classif_auto_when is not null """,SqlParam)
             upcur.executemany("""update obj_head set classif_auto_id=%(cat)s,classif_auto_score=%(p)s,classif_auto_when=now()
                                     ,classif_qual=case when classif_qual in ('D','V') then  classif_qual else 'P'  END
                                     ,classif_id=case when classif_qual in ('D','V') then classif_id  else %(cat)s end
@@ -184,6 +191,7 @@ class TaskClassifAuto(AsyncTask):
                 self.param.Methode=gvp("Methode")
                 self.param.CritVar=gvp("CritVar")
                 self.param.Perimeter=gvp("Perimeter")
+                self.param.keeplog=gvp("keeplog")
                 self.param.Taxo=",".join( (x[4:] for x in request.form if x[0:4]=="taxo") )
                 self.param.CustSettings=DecodeEqualList(gvp("TxtCustSettings"))
                 g.TxtCustSettings=gvp("TxtCustSettings")
@@ -238,7 +246,7 @@ class TaskClassifAuto(AsyncTask):
             revobjmap = self.GetReverseObjMap(Prj)
             PrjBase=database.Projects.query.filter_by(projid=gvg("src")).first()
             revobjmapbase = self.GetReverseObjMap(PrjBase)
-            critlist={k:[k,"","","",""] for k in revobjmap.keys() if k in revobjmapbase}
+            critlist={k:[k,0,0,0,0] for k in revobjmap.keys() if k in revobjmapbase}
             sql="select count(*) nbrtot,count(case classif_qual when 'V' then null else 1 end) nbrnotval"
             for k,v in revobjmap.items():
                 if k in revobjmapbase:

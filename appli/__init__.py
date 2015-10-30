@@ -23,7 +23,7 @@ if not os.path.exists(TempTaskDir):
 from flask import Flask,render_template,request,g
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security #, SQLAlchemyUserDatastore
-import inspect,html,sys,math
+import inspect,html,math,threading,time,traceback
 import appli.securitycachedstore
 
 app = Flask("appli")
@@ -165,7 +165,6 @@ def internal_server_error(e):
 def unhandled_exception(e):
     # Ceci est imperatif si on veux pouvoir avoir des messages d'erreurs à l'écran sous apache
     app.logger.exception(e)
-    import traceback,sys
     # Ajout des informations d'exception dans le template custom
     tb_list = traceback.format_tb(e.__traceback__)
     s = "<b>Error:</b> %s <br><b>Description: </b>%s \n<b>Traceback:</b>" % (html.escape(str(e.__class__)), html.escape(str(e)))
@@ -183,3 +182,29 @@ def JinjaNl2BR(t):
     return t.replace('\n', '<br>\n');
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
+
+# Traitement du sheduler
+from appli import schedule
+
+def scheduler_daily_task():
+    app.logger.info("Start Daily Task")
+    try:
+        import appli.cron
+        appli.cron.RefreshAllProjectsStat()
+        appli.cron.RefreshTaxoStat()
+    except Exception as e:
+        s=str(e)
+        tb_list = traceback.format_tb(e.__traceback__)
+        for i in tb_list[::-1]:
+            s += "\n" + i
+        app.logger.error("Exception on Daily Task : %s"%s)
+    app.logger.info("End Daily Task")
+def scheduler_func():
+    #schedule.every(10).seconds.do(scheduler_daily_task)
+    schedule.every().day.at("01:15").do(scheduler_daily_task)
+    while 1:
+        schedule.run_pending()
+        time.sleep(1)
+scheduler_thread = threading.Thread(target=scheduler_func,name="Scheduler")
+scheduler_thread.daemon=True
+scheduler_thread.start()

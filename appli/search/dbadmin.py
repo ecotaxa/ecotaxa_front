@@ -16,7 +16,8 @@ import appli.cron
 @login_required
 @roles_accepted(database.AdministratorLabel)
 def dbadmin_viewsizes():
-    txt = "<h6>Database objects size (public schema only)</h6>"
+    g.headcenter="Database objects size (public schema only)<br><a href=/admin>Back to admin home</a>"
+
     sql="""SELECT c.relname, c.relkind, CASE WHEN c.relkind='i' THEN c2.tablename ELSE c.relname END fromtable,pg_relation_size(('"' || c.relname || '"')::regclass)/(1024*1024) szMB
 FROM
  pg_namespace ns,
@@ -28,7 +29,7 @@ WHERE c.relnamespace = ns.oid
 ORDER BY c.relkind DESC, pg_relation_size(('"' || c.relname || '"')::regclass) DESC
 """
     res = GetAll(sql) #,debug=True
-    txt+="""<table class='table table-bordered table-condensed table-hover' style="width:500px;">
+    txt="""<table class='table table-bordered table-condensed table-hover' style="width:500px;">
             <tr><th width=200>Object</td><th witdth=200>Table</td><th width=100>Size (Mb)</td></tr>"""
     for r in res:
         txt+="""<tr><td>{0}</td>
@@ -45,7 +46,7 @@ ORDER BY c.relkind DESC, pg_relation_size(('"' || c.relname || '"')::regclass) D
 @login_required
 @roles_accepted(database.AdministratorLabel)
 def dbadmin_viewbloat():
-    txt = "<h6>Database objects wasted space</h6>"
+    g.headcenter="Database objects wasted space<br><a href=/admin>Back to admin home</a>"
     sql="""SELECT
         schemaname, tablename, reltuples::bigint, relpages::bigint, otta,
         ROUND(CASE WHEN otta=0 THEN 0.0 ELSE sml.relpages/otta::numeric END,1) AS tbloat,
@@ -140,3 +141,50 @@ def dbadmin_merge2taxon():
     <br>%d Taxonomy child updated
     <br>%d Taxonomy Node deleted
     """%(TaxoSrc.name,TaxoDest.name,N1,N2,N3,N4,N5))
+
+
+@app.route('/dbadmin/console', methods=['GET', 'POST'])
+@login_required
+@roles_accepted(database.AdministratorLabel)
+def dbadmin_console():
+    g.headcenter="<font color=red style='font-size:18px;'>Warning : This screen must be used only by experts</font><br><a href=/admin>Back to admin home</a>"
+    txt="<form method=post>SQL : <textarea name=sql rows=15 cols=100>%s</textarea><br>"%gvp("sql")
+    txt+="""<input type=submit class='btn btn-primary' name=doselect value='Execute Select'>
+    <input type=submit class='btn btn-primary' name=dodml value='Execute DML'>
+    Note : For DML ; can be used, but only the result of the last query dis displayed
+    </form>"""
+    if gvp("doselect"):
+        txt+="<br>Select Result :"
+        cur = db.engine.raw_connection().cursor()
+        try:
+            cur.execute(gvp("sql"))
+            txt+="<table class='table table-condensed table-bordered'>"
+            for c in cur.description:
+                txt+="<td>%s</td>"%c[0]
+            for r in cur:
+                s="<tr>"
+                for c in r:
+                    s+="<td>%s</td>"%c
+                txt+=s+"</tr>"
+            txt+="</table>"
+
+        except Exception as e :
+            txt+="<br>Error = %s"%e
+            cur.connection.rollback()
+        finally:
+            cur.close()
+    if gvp("dodml"):
+        txt+="<br>DML Result :"
+        cur = db.engine.raw_connection().cursor()
+        try:
+            cur.execute(gvp("sql"))
+            txt+="%s rows impacted"%cur.rowcount
+            cur.connection.commit()
+        except Exception as e :
+            txt+="<br>Error = %s"%e
+            cur.connection.rollback()
+        finally:
+            cur.close()
+
+
+    return PrintInCharte(txt)
