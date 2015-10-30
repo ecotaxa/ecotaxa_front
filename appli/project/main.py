@@ -237,8 +237,8 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         sql+=" order by t.name "+sortorder
     elif sortby!="":
         sql+=" order by o."+sortby+" "+sortorder
-    else:
-        sql+=" order by o.orig_id"
+    # else:  # pas de tri par defaut pour améliorer les performances sur les gros projets
+    #     sql+=" order by o.orig_id"
     sql+=" Limit %d offset %d "%(ipp,pageoffset*ipp)
     res=GetAll(sql,sqlparam,False)
     trcount=1

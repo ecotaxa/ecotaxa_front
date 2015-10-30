@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv
 from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
@@ -37,7 +37,8 @@ def PrjManualClassif(PrjId):
             params={'objid':k,'classif_id':prev[ki]['classif_id'],'classif_who':prev[ki]['classif_who']
                 ,'classif_qual':prev[ki]['classif_qual'],'classif_when':prev[ki]['classif_when']}
             try:
-                ExecSQL(sqli,params,True)
+                if ntcv(params['classif_when']) !="" : # si pas de date, violation PK
+                    ExecSQL(sqli,params,True)
             except:
                 app.logger.warning("Unable to add historical information, non-blocking %s"%(prev,))
 
