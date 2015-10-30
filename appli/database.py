@@ -347,7 +347,7 @@ def ExecSQL(sql,params=None,debug=False):
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
-        LastRowCount=cur.rowcount;
+        LastRowCount=cur.rowcount
         cur.connection.commit()
     except psycopg2.InterfaceError:
         app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")

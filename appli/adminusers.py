@@ -171,6 +171,7 @@ adminApp.add_link(base.MenuLink('Merge 2 Taxonomy items', category='Taxonomy', u
 adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
 adminApp.add_link(base.MenuLink('View DB Size', category='Database', url='/dbadmin/viewsizes'))
 adminApp.add_link(base.MenuLink('View DB Bloat', category='Database', url='/dbadmin/viewbloat'))
+adminApp.add_link(base.MenuLink('SQL Console', category='Database', url='/dbadmin/console'))
 adminApp.add_link(base.MenuLink('Recompute Projects and Taxo stat (can be long)', category='Database', url='/dbadmin/recomputestat'))
 
 
