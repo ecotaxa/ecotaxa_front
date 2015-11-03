@@ -120,10 +120,10 @@ def indexPrj(PrjId):
     if g.PrjAnnotate:
         g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskExportTxt?p=%d"%(PrjId,),"Export data as text"))
+        g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
     if g.PrjManager:
         g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
-        g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit Project settings"))
         g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract Subset"))
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))

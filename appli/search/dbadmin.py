@@ -114,6 +114,7 @@ def dbadmin_viewbloat():
 @login_required
 @roles_accepted(database.AdministratorLabel)
 def dbadmin_recomputestat():
+    g.headcenter="Statistics recompute<br><a href=/admin>Back to admin home</a>"
     appli.cron.RefreshAllProjectsStat()
     appli.cron.RefreshTaxoStat()
     return PrintInCharte("Statistics recompute done")
