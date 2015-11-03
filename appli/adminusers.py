@@ -80,7 +80,9 @@ class ProjectsViewPrivInlineModelForm(InlineFormAdmin):
         return super(ProjectsViewPrivInlineModelForm, self).__init__(database.ProjectsPriv)
 
 class ProjectsView(ModelView):
-    column_list = ('projid', 'title')
+    column_list = ('projid', 'title','visible','status','objcount','pctvalidated','pctclassified')
+    column_searchable_list = ('title',)
+    column_default_sort = 'projid'
     inline_model_form_converter = ProjectsViewCustomInlineModelConverter
     inline_models = (ProjectsViewPrivInlineModelForm(),)
     form_overrides = dict(mappingobj  =TextAreaField,mappingsample  =TextAreaField,mappingacq=TextAreaField,mappingprocess  =TextAreaField,classiffieldlist=TextAreaField,classifsettings=TextAreaField  )

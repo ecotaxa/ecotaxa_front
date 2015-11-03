@@ -139,6 +139,7 @@ def LoadTask(taskid):
 @app.route('/Task/listall')
 @login_required
 def ListTasks(owner=None):
+     g.headcenter="<H3>Task Monitor</h3>"
      tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
      txt=""
      if gvg("cleandone")=='Y' or gvg("cleanerror")=='Y' or gvg("cleanall")=='Y':
