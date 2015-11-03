@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from appli import db,app, database
+from appli.database import GetAll
 import flask.ext.admin
 from flask.ext.admin.contrib.sqla import ModelView,filters
 from wtforms  import TextAreaField
@@ -176,7 +177,11 @@ adminApp.add_link(base.MenuLink('View DB Bloat', category='Database', url='/dbad
 adminApp.add_link(base.MenuLink('SQL Console', category='Database', url='/dbadmin/console'))
 adminApp.add_link(base.MenuLink('Recompute Projects and Taxo stat (can be long)', category='Database', url='/dbadmin/recomputestat'))
 
-
+def GetAdminList():
+    LstUsers=GetAll("""select name||'('||email||')' nom from users u
+                        join users_roles r on u.id=r.user_id where r.role_id=1""")
+    return ", ".join([r[0] for r in LstUsers])
+app.jinja_env.globals.update(GetAdminList=GetAdminList)
 
 
 #admin.add_view(CategoriesAdmin(Categories, db.session))
