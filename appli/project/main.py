@@ -440,6 +440,35 @@ def GetClassifTab(Prj):
                 Res.append(r)
                 AddChild(Src,r['id'],Res,r['dist']+1,ParentClasses+(" visib%s"%(r['id'],)))
     AddChild(res,None,restree,0,"")
+    # Cette section de code à pour but de trier le niveau final (qui n'as pas d'enfant) par parent s'il un parent apparait plus d'une fois sinon par enfant
+    # on isole d'abord les branche
+    parents=set([x['parentclasses'] for x in restree])
+    # on ne garde que les branches sans enfants
+    parentsnochild=parents.copy()
+    for p in parents:
+        for r in restree:
+            if r['parentclasses']==p and r['haschild'] :
+                parentsnochild.discard(p)
+    for p in parentsnochild:
+        # on recherche dans le tableau à plats les bornes de chaques branche et on met la branche dans subset
+        d=f=0
+        for (r,i) in zip(restree,range(0,1000)):
+            if r['parentclasses']==p :
+                f=i
+                if d==0: d=i
+        subset=restree[d:f+1]
+        # on cherche les parents presents plus d'une fois
+        NbrParent={x['taxoparent']:0 for x in subset}
+        for r in subset:
+            NbrParent[r['taxoparent']]+=1
+        # on calcule une clause de tri en fonction du fait que le parent est present plusieurs fois ou pas
+        for (r,i) in zip(subset,range(0,1000)):
+            if NbrParent[r['taxoparent']]>1:
+                subset[i]['sortclause']=r['taxoparent'][1:99]+r['taxoname']
+            else:
+                subset[i]['sortclause']=r['taxoname']
+        # on tri le subset et on le remet dans le tableau original.
+        restree[d:f+1]=sorted(subset,key=lambda t:t['sortclause'])
     return render_template('project/classiftab.html',res=restree,taxotree=json.dumps(taxotree))
 
 ######################################################################################################################
