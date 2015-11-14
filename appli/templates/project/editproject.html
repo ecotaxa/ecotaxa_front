@@ -20,7 +20,7 @@
 {% block body %}
 
 <a href="/prj/{{ data.projid }}" >Back to project</a>
-<form class="form-horizontal" method="post">
+<form class="form-horizontal" method="post" action="?" id="form1">
     <h3>Edit project # {{ data.projid }}</h3>
   <table class=table width="100%">
     <tr><td width="160px">Project Title </td><td width="300px">
@@ -101,7 +101,7 @@
     <input type="hidden" name="save" value="Y">
     <div class="form-group">
     <div class="col-sm-offset-2 col-sm-1">
-      <button type="submit" class="btn btn-primary">Save</button>
+      <button type="button" onclick="SubmitForm();" class="btn btn-primary">Save</button>
     </div>
     <div class="col-sm-2">
       <a href="/prj/{{ data.projid }}" class="btn btn-warning">Cancel, back to project</a>
@@ -149,7 +149,11 @@ $(document).ready(function() {
       });
    $("#initclassiflist").val(selected.join())
  });
-
+function SubmitForm()
+{ {# On passe par cette fonction intermediare car quand on avait le focus sur un select2 dans certaines situations ca ne fesait pas le post #}
+    document.getElementById("comments").focus();
+    document.getElementById("form1").submit();
+}
  </script>
 
 
