@@ -93,22 +93,10 @@ $(document).ready(function() {
     <div class="alert alert-{{ message[0]|replace("message","info")|replace("error","danger") }} alert-dismissible" role="alert" >{{ message[1] }}</div>
   {% endfor %}
     {{ header|safe }}
-</div>{# headinfo #}{% block body %}{% endblock %}
+</div>{# headinfo #}
+<!-- Main body -->
+{% block body %}{% endblock %}
     {{ bodycontent|safe }}
-{% if bodyleft %} {# si pas de left on ne desinne pas cette zone ni la droite, on utilisera body ou bodycontent  #}
-	<div id="bodycontainer">
-		<div id="column-left"  class="panel panel-default"
-             style="position: absolute;	top: 130px;	left: 2px;	bottom: 0px;	width: 260px;
-	                overflow-y: auto; overflow-x: hidden;  margin-bottom: 0px; " >
-            <div class="bodyleft" style="margin-left: 2px; width: 251px;">
-			  {{ bodyleft|safe }}
-            </div>
-		</div>
-{#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
-        <div id="column-right" style="margin-left: 270px;">
-            {{ bodyright|safe }}
-		</div>
-    </div> {# Container #}
-{% endif %}
+
 </body>
 </html>
