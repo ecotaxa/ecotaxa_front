@@ -1,5 +1,5 @@
 /*!
- * Select2 4.0.1-rc.1
+ * Select2 4.0.0
  * https://select2.github.io
  *
  * Released under the MIT license
@@ -784,13 +784,7 @@ S2.define('select2/results',[
       )
     );
 
-    $message[0].className += ' select2-results__message';
-
     this.$results.append($message);
-  };
-
-  Results.prototype.hideMessages = function () {
-    this.$results.find('.select2-results__message').remove();
   };
 
   Results.prototype.append = function (data) {
@@ -992,7 +986,6 @@ S2.define('select2/results',[
     });
 
     container.on('query', function (params) {
-      self.hideMessages();
       self.showLoading(params);
     });
 
@@ -1048,7 +1041,7 @@ S2.define('select2/results',[
       var data = $highlighted.data('data');
 
       if ($highlighted.attr('aria-selected') == 'true') {
-        self.trigger('close', {});
+        self.trigger('close');
       } else {
         self.trigger('select', {
           data: data
@@ -1170,7 +1163,7 @@ S2.define('select2/results',[
             data: data
           });
         } else {
-          self.trigger('close', {});
+          self.trigger('close');
         }
 
         return;
@@ -1376,7 +1369,7 @@ S2.define('select2/selection/base',[
   BaseSelection.prototype._handleBlur = function (evt) {
     var self = this;
 
-    // This needs to be delayed as the active element is the body when the tab
+    // This needs to be delayed as the actve element is the body when the tab
     // key is pressed, possibly along with others.
     window.setTimeout(function () {
       // Don't trigger `blur` if the focus is still in the selection
@@ -1563,26 +1556,18 @@ S2.define('select2/selection/multiple',[
       });
     });
 
-    this.$selection.on(
-      'click',
-      '.select2-selection__choice__remove',
+    this.$selection.on('click', '.select2-selection__choice__remove',
       function (evt) {
-        // Ignore the event if it is disabled
-        if (self.options.get('disabled')) {
-          return;
-        }
+      var $remove = $(this);
+      var $selection = $remove.parent();
 
-        var $remove = $(this);
-        var $selection = $remove.parent();
+      var data = $selection.data('data');
 
-        var data = $selection.data('data');
-
-        self.trigger('unselect', {
-          originalEvent: evt,
-          data: data
-        });
-      }
-    );
+      self.trigger('unselect', {
+        originalEvent: evt,
+        data: data
+      });
+    });
   };
 
   MultipleSelection.prototype.clear = function () {
@@ -1753,7 +1738,7 @@ S2.define('select2/selection/allowClear',[
 
     this.$element.val(this.placeholder.id).trigger('change');
 
-    this.trigger('toggle', {});
+    this.trigger('toggle');
   };
 
   AllowClear.prototype._handleKeyboardClear = function (_, evt, container) {
@@ -1874,61 +1859,30 @@ S2.define('select2/selection/search',[
       }
     });
 
-    // Try to detect the IE version should the `documentMode` property that
-    // is stored on the document. This is only implemented in IE and is
-    // slightly cleaner than doing a user agent check.
-    // This property is not available in Edge, but Edge also doesn't have
-    // this bug.
-    var msie = document.documentMode;
-    var disableInputEvents = msie && msie <= 11;
-
     // Workaround for browsers which do not support the `input` event
     // This will prevent double-triggering of events for browsers which support
     // both the `keyup` and `input` events.
-    this.$selection.on(
-      'input.searchcheck',
-      '.select2-search--inline',
-      function (evt) {
-        // IE will trigger the `input` event when a placeholder is used on a
-        // search box. To get around this issue, we are forced to ignore all
-        // `input` events in IE and keep using `keyup`.
-        if (disableInputEvents) {
-          self.$selection.off('input.search input.searchcheck');
-          return;
-        }
+    this.$selection.on('input', '.select2-search--inline', function (evt) {
+      // Unbind the duplicated `keyup` event
+      self.$selection.off('keyup.search');
+    });
 
-        // Unbind the duplicated `keyup` event
-        self.$selection.off('keyup.search');
+    this.$selection.on('keyup.search input', '.select2-search--inline',
+        function (evt) {
+      var key = evt.which;
+
+      // We can freely ignore events from modifier keys
+      if (key == KEYS.SHIFT || key == KEYS.CTRL || key == KEYS.ALT) {
+        return;
       }
-    );
 
-    this.$selection.on(
-      'keyup.search input.search',
-      '.select2-search--inline',
-      function (evt) {
-        // IE will trigger the `input` event when a placeholder is used on a
-        // search box. To get around this issue, we are forced to ignore all
-        // `input` events in IE and keep using `keyup`.
-        if (disableInputEvents && evt.type === 'input') {
-          self.$selection.off('input.search input.searchcheck');
-          return;
-        }
-
-        var key = evt.which;
-
-        // We can freely ignore events from modifier keys
-        if (key == KEYS.SHIFT || key == KEYS.CTRL || key == KEYS.ALT) {
-          return;
-        }
-
-        // Tabbing will be handled during the `keydown` phase
-        if (key == KEYS.TAB) {
-          return;
-        }
-
-        self.handleSearch(evt);
+      // Tabbing will be handled during the `keydown` phase
+      if (key == KEYS.TAB) {
+        return;
       }
-    );
+
+      self.handleSearch(evt);
+    });
   };
 
   /**
@@ -1982,7 +1936,7 @@ S2.define('select2/selection/search',[
       data: item
     });
 
-    this.trigger('open', {});
+    this.trigger('open');
 
     this.$search.val(item.text + ' ');
   };
@@ -3320,7 +3274,7 @@ S2.define('select2/data/array',[
         var existingData = this.item($existingOption);
         var newData = $.extend(true, {}, existingData, item);
 
-        var $newOption = this.option(newData);
+        var $newOption = this.option(existingData);
 
         $existingOption.replaceWith($newOption);
 
@@ -3364,9 +3318,9 @@ S2.define('select2/data/ajax',[
   AjaxAdapter.prototype._applyDefaults = function (options) {
     var defaults = {
       data: function (params) {
-        return $.extend({}, params, {
+        return {
           q: params.term
-        });
+        };
       },
       transport: function (params, success, failure) {
         var $request = $.ajax(params);
@@ -3403,11 +3357,11 @@ S2.define('select2/data/ajax',[
     }, this.ajaxOptions);
 
     if (typeof options.url === 'function') {
-      options.url = options.url.call(this.$element, params);
+      options.url = options.url(params);
     }
 
     if (typeof options.data === 'function') {
-      options.data = options.data.call(this.$element, params);
+      options.data = options.data(params);
     }
 
     function request () {
@@ -3590,9 +3544,7 @@ S2.define('select2/data/tokenizer',[
     var self = this;
 
     function select (data) {
-      self.trigger('select', {
-        data: data
-      });
+      self.select(data);
     }
 
     params.term = params.term || '';
@@ -3639,11 +3591,6 @@ S2.define('select2/data/tokenizer',[
       });
 
       var data = createTag(partParams);
-
-      if (data == null) {
-        i++;
-        continue;
-      }
 
       callback(data);
 
@@ -3780,10 +3727,6 @@ S2.define('select2/dropdown',[
     this.$dropdown = $dropdown;
 
     return $dropdown;
-  };
-
-  Dropdown.prototype.bind = function () {
-    // Should be implemented in subclasses
   };
 
   Dropdown.prototype.position = function ($dropdown, $container) {
@@ -4012,9 +3955,7 @@ S2.define('select2/dropdown/infiniteScroll',[
 
   InfiniteScroll.prototype.createLoadingMore = function () {
     var $option = $(
-      '<li ' +
-      'class="select2-results__option select2-results__option--load-more"' +
-      'role="treeitem" aria-disabled="true"></li>'
+      '<li class="option load-more" role="treeitem"></li>'
     );
 
     var message = this.options.get('translations').get('loadingMore');
@@ -4071,12 +4012,6 @@ S2.define('select2/dropdown/attachBody',[
     this.$dropdownContainer.on('mousedown', function (evt) {
       evt.stopPropagation();
     });
-  };
-
-  AttachBody.prototype.destroy = function (decorated) {
-    decorated.call(this);
-
-    this.$dropdownContainer.remove();
   };
 
   AttachBody.prototype.position = function (decorated, $dropdown, $container) {
@@ -4212,6 +4147,8 @@ S2.define('select2/dropdown/attachBody',[
   };
 
   AttachBody.prototype._resizeDropdown = function () {
+    this.$dropdownContainer.width();
+
     var css = {
       width: this.$container.outerWidth(false) + 'px'
     };
@@ -4331,7 +4268,7 @@ S2.define('select2/dropdown/closeOnSelect',[
       return;
     }
 
-    this.trigger('close', {});
+    this.trigger('close');
   };
 
   return CloseOnSelect;
@@ -5178,7 +5115,7 @@ S2.define('select2/core',[
 
     this.on('query', function (params) {
       if (!self.isOpen()) {
-        self.trigger('open', {});
+        self.trigger('open');
       }
 
       this.dataAdapter.query(params, function (data) {
@@ -5208,19 +5145,19 @@ S2.define('select2/core',[
 
           evt.preventDefault();
         } else if (key === KEYS.ENTER) {
-          self.trigger('results:select', {});
+          self.trigger('results:select');
 
           evt.preventDefault();
         } else if ((key === KEYS.SPACE && evt.ctrlKey)) {
-          self.trigger('results:toggle', {});
+          self.trigger('results:toggle');
 
           evt.preventDefault();
         } else if (key === KEYS.UP) {
-          self.trigger('results:previous', {});
+          self.trigger('results:previous');
 
           evt.preventDefault();
         } else if (key === KEYS.DOWN) {
-          self.trigger('results:next', {});
+          self.trigger('results:next');
 
           evt.preventDefault();
         }
@@ -5243,9 +5180,9 @@ S2.define('select2/core',[
         this.close();
       }
 
-      this.trigger('disable', {});
+      this.trigger('disable');
     } else {
-      this.trigger('enable', {});
+      this.trigger('enable');
     }
   };
 
@@ -5261,10 +5198,6 @@ S2.define('select2/core',[
       'select': 'selecting',
       'unselect': 'unselecting'
     };
-    
-    if (args === undefined) {
-      args = {};
-    }
 
     if (name in preTriggerMap) {
       var preTriggerName = preTriggerMap[name];
@@ -5304,6 +5237,8 @@ S2.define('select2/core',[
     }
 
     this.trigger('query', {});
+
+    this.trigger('open');
   };
 
   Select2.prototype.close = function () {
@@ -5311,7 +5246,7 @@ S2.define('select2/core',[
       return;
     }
 
-    this.trigger('close', {});
+    this.trigger('close');
   };
 
   Select2.prototype.isOpen = function () {
@@ -5329,7 +5264,7 @@ S2.define('select2/core',[
     }
 
     this.$container.addClass('select2-container--focus');
-    this.trigger('focus', {});
+    this.trigger('focus');
   };
 
   Select2.prototype.enable = function (args) {
@@ -5970,22 +5905,18 @@ S2.define('jquery.select2',[
 
         return this;
       } else if (typeof options === 'string') {
-        var ret;
+        var instance = this.data('select2');
 
-        this.each(function () {
-          var instance = $(this).data('select2');
+        if (instance == null && window.console && console.error) {
+          console.error(
+            'The select2(\'' + options + '\') method was called on an ' +
+            'element that is not using Select2.'
+          );
+        }
 
-          if (instance == null && window.console && console.error) {
-            console.error(
-              'The select2(\'' + options + '\') method was called on an ' +
-              'element that is not using Select2.'
-            );
-          }
+        var args = Array.prototype.slice.call(arguments, 1);
 
-          var args = Array.prototype.slice.call(arguments, 1);
-
-          ret = instance[options].apply(instance, args);
-        });
+        var ret = instance[options](args);
 
         // Check if we should be returning `this`
         if ($.inArray(options, thisMethods) > -1) {
