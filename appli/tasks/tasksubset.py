@@ -6,6 +6,7 @@ from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll
 from sqlalchemy.orm.session import make_transient
+from sqlalchemy import text
 
 
 class TaskSubset(AsyncTask):
@@ -238,14 +239,18 @@ class TaskSubset(AsyncTask):
                 self.param.subsetprojecttitle=gvp("subsetprojecttitle")
                 self.param.valtype=gvp("valtype")
                 if self.param.valtype=='V':
-                    self.param.valeur=int(gvp("vvaleur"))
+                    try:
+                        self.param.valeur=int(gvp("vvaleur"))
+                        if self.param.valeur<=0 :
+                            errors.append("Absolute value not in range")
+                    except: errors.append("Invalid Absolute value")
                 if self.param.valtype=='P':
-                    self.param.valeur=int(gvp("pvaleur"))
-                    if self.param.valeur<=0 :
-                        errors.append("Absolute value not in range")
+                    try:
+                        self.param.valeur=int(gvp("pvaleur"))
+                        if self.param.valeur<=0 or self.param.valeur>100:
+                            errors.append("% value not in range")
+                    except: errors.append("Invalid % value")
 
-                    if self.param.valeur<=0 or self.param.valeur>100:
-                        errors.append("% value not in range")
                 tmp=[]
                 if gvp('what_v'):tmp.append('V')
                 if gvp('what_d'):tmp.append('D')
@@ -266,16 +271,17 @@ class TaskSubset(AsyncTask):
                 self.param.subsetprojecttitle=("Subset of "+Prj.title+" created on "+(datetime.date.today().strftime('%Y-%m-%d')))[0:255]
                 self.param.extraprojects=",".join(request.form.getlist('extraprojects'))
             if self.param.extraprojects:
-                ExtraPrj=database.Projects.query.filter(database.Projects.projid.in_(request.form.getlist('extraprojects'))).all()
+                ExtraPrj=database.Projects.query.filter(text("projid in (%s)"%self.param.extraprojects)).all()
+                g.dispextraprojects="; ".join(["{1} ({0}) ".format(r.projid,r.title) for r in ExtraPrj ])
                 for p in ExtraPrj:
                     if p.mappingobj!=Prj.mappingobj:
-                        flash("Object mapping differ on project %d"%p.projid,"warning")
+                        flash("TASK CANNOT BE PERFORMED : Object mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
                     if p.mappingsample!=Prj.mappingsample:
-                        flash("Sample mapping differ on project %d"%p.projid,"warning")
+                        flash("TASK CANNOT BE PERFORMED : Sample mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
                     if p.mappingacq!=Prj.mappingacq:
-                        flash("Acquisition mapping differ on project %d"%p.projid,"warning")
+                        flash("TASK CANNOT BE PERFORMED : Acquisition mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
                     if p.mappingprocess!=Prj.mappingprocess:
-                        flash("Process mapping differ on project %d"%p.projid,"warning")
+                        flash("TASK CANNOT BE PERFORMED : Process mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
             else:
                 #recupere les samples
                 sql="""select sampleid,orig_id
