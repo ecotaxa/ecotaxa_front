@@ -28,17 +28,21 @@ def PrjMerge(PrjId):
     if not gvg('src'):
         txt += """<h4>Select the project to merge with this project, this project will be destroy.<br>Next screen will check for compatibility.</h4>
                 """
-        sql="select p.projid,title,status,pctvalidated from projects p"
+        sql="select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects p"
         if not current_user.has_role(database.AdministratorLabel):
             sql+=" Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
         sql+=" where p.projid!=%d order by title"%Prj.projid
         res = GetAll(sql) #,debug=True
         txt+="""<table class='table table-bordered table-hover'>
-                <tr><th width=120>ID</td><th>Title</td><th width=100>Status</td></tr>"""
+                <tr><th width=120>ID</td><th>Title</td><th width=100>Status</th><th width=100>Nbr Obj</th>
+            <th width=100>% Validated</th><th width=100>% Classified</th></tr>"""
         for r in res:
             txt+="""<tr><td><a class="btn btn-primary" href='/prj/merge/{0}?src={1}'>Select</a> {1}</td>
             <td>{2}</td>
             <td>{3}</td>
+            <td>{4:0.0f}</td>
+            <td>{5:0.2f}</td>
+            <td>{6:0.2f}</td>
             </tr>""".format(Prj.projid,*r)
         txt+="</table>"
         return PrintInCharte(txt)
