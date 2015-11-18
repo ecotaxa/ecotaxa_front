@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv
+from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv,GetAppManagerMailto
 from PIL import Image
 from flask import render_template,  flash,request,g
 import logging,os,csv,sys,time
@@ -129,110 +129,111 @@ class TaskImport(AsyncTask):
             sd=Path(self.param.SourceDir)
             self.param.TotalRowCount=0
             Seen=set()
-            for CsvFile in sd.glob("**/*.tsv"):
-                relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
-                if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
-                    logging.info("File %s skipped, already loaded"%(relname.as_posix()))
-                    continue
-                logging.info("Analyzing file %s"%(relname.as_posix()))
-                with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
-                    # lecture en mode dictionnaire basé sur la premiere ligne
-                    rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
-                    #lecture la la ligne des types (2nd ligne du fichier
-                    LType=rdr.__next__()
-                    # Fabrication du mapping
-                    for champ in rdr.fieldnames:
-                        if champ in self.param.Mapping:
-                            continue # Le champ à déjà été détecté
-                        ColName=champ.strip(" \t").lower()
-                        ColSplitted=ColName.split("_",1)
-                        if len(ColSplitted)!=2:
-                            self.LogErrorForUser("Invalid Header '%s' in file %s. Format must be Table_Field. Field ignored"%(ColName,relname.as_posix()))
-                            continue
-                        Table=ColSplitted[0] # On isole la partie table avant le premier _
-                        if ColName in PredefinedFields:
-                            Table=PredefinedFields[champ]['table']
-                            self.param.Mapping[champ]=PredefinedFields[champ]
-                        else: # champs non predefinis donc dans nXX ou tXX
-                            if Table=="object":
-                                Table="obj_field"
-                            if not Table in PredefinedTables:
-                                self.LogErrorForUser("Invalid Header '%s' in file %s. Table Incorrect. Field ignored"%(ColName,relname.as_posix()))
-                                continue
-                            if Table!='obj_head' and Table!='obj_field': # Dans les autres tables les types sont forcés à texte
-                                SelType='t'
-                            else:
-                                if LType[champ] not in PredefinedTypes:
-                                    self.LogErrorForUser("Invalid Type '%s' for Field '%s' in file %s. Incorrect Type. Field ignored"%(LType[champ],ColName,relname.as_posix()))
-                                    continue
-                                SelType=PredefinedTypes[LType[champ]]
-                            self.LastNum[Table][SelType]+=1
-                            self.param.Mapping[champ]={'table':Table,'field':SelType+"%02d"%self.LastNum[Table][SelType],'type':SelType,'title':ColSplitted[1]}
-                            logging.info("New field %s found in file %s",champ,relname.as_posix())
-                            if not ProjectWasEmpty:
-                                WarnMessages.append("New field %s found in file %s"%(champ,relname.as_posix()))
-                    # Test du contenu du fichier
-                    RowCount=0
-                    for lig in rdr:
-                        RowCount+=1
+            for filter in ("**/*.txt","**/*.tsv"):
+                for CsvFile in sd.glob(filter):
+                    relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
+                    if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
+                        logging.info("File %s skipped, already loaded"%(relname.as_posix()))
+                        continue
+                    logging.info("Analyzing file %s"%(relname.as_posix()))
+                    with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
+                        # lecture en mode dictionnaire basé sur la premiere ligne
+                        rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
+                        #lecture la la ligne des types (2nd ligne du fichier
+                        LType=rdr.__next__()
+                        # Fabrication du mapping
                         for champ in rdr.fieldnames:
-                            m=self.param.Mapping.get(champ,None)
-                            if m is None:
-                                continue # Le champ n'est pas considéré
-                            v=CleanValue(lig[champ])
-                            if v!="": # si pas de valeurs, pas de controle
-                                Seen.add(champ)
-                                # if m.get('Seen',None)==None: #marque si on a vu au moins une valeur.
-                                #     self.param.Mapping[champ]["Seen"]=True
-                                if m['type']=='n':
-                                    vf=ToFloat(v)
-                                    if vf==None:
-                                        self.LogErrorForUser("Invalid float value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
-                                    elif champ=='object_lat':
-                                        if vf<-90 or vf>90:
-                                            self.LogErrorForUser("Invalid Lat. value '%s' for Field '%s' in file %s. Incorrect range -90/+90°."%(v,champ,relname.as_posix()))
-                                    elif champ=='object_long':
-                                        if vf<-180 or vf>180:
-                                            self.LogErrorForUser("Invalid Long. value '%s' for Field '%s' in file %s. Incorrect range -180/+180°."%(v,champ,relname.as_posix()))
-                                elif champ=='object_date':
-                                    try:
-                                        datetime.date(int(v[0:4]), int(v[4:6]), int(v[6:8]))
-                                    except ValueError:
-                                        self.LogErrorForUser("Invalid Date value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
-                                elif champ=='object_time':
-                                    try:
-                                        v=v.zfill(6)
-                                        datetime.time(int(v[0:2]), int(v[2:4]), int(v[4:6]))
-                                    except ValueError:
-                                        self.LogErrorForUser("Invalid Time value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
-                                elif champ=='object_annotation_category':
-                                    v=self.param.TaxoMap.get(v,v) # Applique le mapping
-                                    self.param.TaxoFound[v.lower()]=None #creation d'une entrée dans le dictionnaire.
-                                elif champ=='object_annotation_person_name':
-                                    self.param.UserFound[v.lower()]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
-                                elif champ=='object_annotation_status':
-                                    if v!='noid' and v.lower() not in database.ClassifQualRevert:
-                                        self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
+                            if champ in self.param.Mapping:
+                                continue # Le champ à déjà été détecté
+                            ColName=champ.strip(" \t").lower()
+                            ColSplitted=ColName.split("_",1)
+                            if len(ColSplitted)!=2:
+                                self.LogErrorForUser("Invalid Header '%s' in file %s. Format must be Table_Field. Field ignored"%(ColName,relname.as_posix()))
+                                continue
+                            Table=ColSplitted[0] # On isole la partie table avant le premier _
+                            if ColName in PredefinedFields:
+                                Table=PredefinedFields[champ]['table']
+                                self.param.Mapping[champ]=PredefinedFields[champ]
+                            else: # champs non predefinis donc dans nXX ou tXX
+                                if Table=="object":
+                                    Table="obj_field"
+                                if not Table in PredefinedTables:
+                                    self.LogErrorForUser("Invalid Header '%s' in file %s. Table Incorrect. Field ignored"%(ColName,relname.as_posix()))
+                                    continue
+                                if Table!='obj_head' and Table!='obj_field': # Dans les autres tables les types sont forcés à texte
+                                    SelType='t'
+                                else:
+                                    if LType[champ] not in PredefinedTypes:
+                                        self.LogErrorForUser("Invalid Type '%s' for Field '%s' in file %s. Incorrect Type. Field ignored"%(LType[champ],ColName,relname.as_posix()))
+                                        continue
+                                    SelType=PredefinedTypes[LType[champ]]
+                                self.LastNum[Table][SelType]+=1
+                                self.param.Mapping[champ]={'table':Table,'field':SelType+"%02d"%self.LastNum[Table][SelType],'type':SelType,'title':ColSplitted[1]}
+                                logging.info("New field %s found in file %s",champ,relname.as_posix())
+                                if not ProjectWasEmpty:
+                                    WarnMessages.append("New field %s found in file %s"%(champ,relname.as_posix()))
+                        # Test du contenu du fichier
+                        RowCount=0
+                        for lig in rdr:
+                            RowCount+=1
+                            for champ in rdr.fieldnames:
+                                m=self.param.Mapping.get(champ,None)
+                                if m is None:
+                                    continue # Le champ n'est pas considéré
+                                v=CleanValue(lig[champ])
+                                if v!="": # si pas de valeurs, pas de controle
+                                    Seen.add(champ)
+                                    # if m.get('Seen',None)==None: #marque si on a vu au moins une valeur.
+                                    #     self.param.Mapping[champ]["Seen"]=True
+                                    if m['type']=='n':
+                                        vf=ToFloat(v)
+                                        if vf==None:
+                                            self.LogErrorForUser("Invalid float value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
+                                        elif champ=='object_lat':
+                                            if vf<-90 or vf>90:
+                                                self.LogErrorForUser("Invalid Lat. value '%s' for Field '%s' in file %s. Incorrect range -90/+90°."%(v,champ,relname.as_posix()))
+                                        elif champ=='object_long':
+                                            if vf<-180 or vf>180:
+                                                self.LogErrorForUser("Invalid Long. value '%s' for Field '%s' in file %s. Incorrect range -180/+180°."%(v,champ,relname.as_posix()))
+                                    elif champ=='object_date':
+                                        try:
+                                            datetime.date(int(v[0:4]), int(v[4:6]), int(v[6:8]))
+                                        except ValueError:
+                                            self.LogErrorForUser("Invalid Date value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
+                                    elif champ=='object_time':
+                                        try:
+                                            v=v.zfill(6)
+                                            datetime.time(int(v[0:2]), int(v[2:4]), int(v[4:6]))
+                                        except ValueError:
+                                            self.LogErrorForUser("Invalid Time value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
+                                    elif champ=='object_annotation_category':
+                                        v=self.param.TaxoMap.get(v,v) # Applique le mapping
+                                        self.param.TaxoFound[v.lower()]=None #creation d'une entrée dans le dictionnaire.
+                                    elif champ=='object_annotation_person_name':
+                                        self.param.UserFound[v.lower()]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
+                                    elif champ=='object_annotation_status':
+                                        if v!='noid' and v.lower() not in database.ClassifQualRevert:
+                                            self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
 
-                        #Analyse l'existance du fichier Image
-                        ObjectId=CleanValue(lig.get('object_id',''))
-                        if ObjectId=='':
-                            self.LogErrorForUser("Missing ObjectId on line '%s' in file %s. "%(RowCount,relname.as_posix()))
-                        ImgFileName=CleanValue(lig.get('img_file_name','MissingField img_file_name'))
-                        ImgFilePath=CsvFile.with_name(ImgFileName)
-                        if not ImgFilePath.exists():
-                            self.LogErrorForUser("Missing Image '%s' in file %s. "%(ImgFileName,relname.as_posix()))
-                        else:
-                            try:
-                                im=Image.open(ImgFilePath.as_posix())
-                            except:
-                                self.LogErrorForUser("Error while reading Image '%s' in file %s. %s"%(ImgFileName,relname.as_posix(),sys.exc_info()[0]))
-                        CleExistObj=ObjectId+'*'+ImgFileName
-                        if CleExistObj in self.ExistingObject:
-                            self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. "%(ObjectId,ImgFileName,relname.as_posix()))
-                        self.ExistingObject.add(CleExistObj)
-                    logging.info("File %s : %d row analysed",relname.as_posix(),RowCount)
-                    self.param.TotalRowCount+=RowCount
+                            #Analyse l'existance du fichier Image
+                            ObjectId=CleanValue(lig.get('object_id',''))
+                            if ObjectId=='':
+                                self.LogErrorForUser("Missing ObjectId on line '%s' in file %s. "%(RowCount,relname.as_posix()))
+                            ImgFileName=CleanValue(lig.get('img_file_name','MissingField img_file_name'))
+                            ImgFilePath=CsvFile.with_name(ImgFileName)
+                            if not ImgFilePath.exists():
+                                self.LogErrorForUser("Missing Image '%s' in file %s. "%(ImgFileName,relname.as_posix()))
+                            else:
+                                try:
+                                    im=Image.open(ImgFilePath.as_posix())
+                                except:
+                                    self.LogErrorForUser("Error while reading Image '%s' in file %s. %s"%(ImgFileName,relname.as_posix(),sys.exc_info()[0]))
+                            CleExistObj=ObjectId+'*'+ImgFileName
+                            if CleExistObj in self.ExistingObject:
+                                self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. "%(ObjectId,ImgFileName,relname.as_posix()))
+                            self.ExistingObject.add(CleExistObj)
+                        logging.info("File %s : %d row analysed",relname.as_posix(),RowCount)
+                        self.param.TotalRowCount+=RowCount
             if self.param.TotalRowCount==0:
                 self.LogErrorForUser("No object found")
             self.UpdateProgress(15,"TSV File Parsed"%())
@@ -307,124 +308,124 @@ class TaskImport(AsyncTask):
         random.seed()
         sd=Path(self.param.SourceDir)
         TotalRowCount=0
-        for CsvFile in sd.glob("**/*.tsv"):
-            relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
-            if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
-                logging.info("File %s skipped, already loaded"%(relname.as_posix()))
-                continue
-            logging.info("Analyzing file %s"%(relname.as_posix()))
-            with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
-                # lecture en mode dictionnaire basé sur la premiere ligne
-                rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
-                #lecture la la ligne des types (2nd ligne du fichier
-                LType=rdr.__next__()
-                # Chargement du contenu du fichier
-                RowCount=0
-                for lig in rdr:
-                    Objs={"acq":database.Acquisitions(),"sample":database.Samples(),"process":database.Process()
-                        ,"obj_head":database.Objects(),"obj_field":database.ObjectsFields(),"image":database.Images()}
-                    RowCount+=1
-                    TotalRowCount+=1
-                    for champ in rdr.fieldnames:
-                        m=self.param.Mapping.get(champ,None)
-                        FieldName=m.get("field",None)
-                        FieldTable=m.get("table",None)
-                        FieldValue=None
-                        if m is None:
-                            continue # Le champ n'est pas considéré
-                        v=CleanValue(lig[champ])
-                        if v!="": # si pas de valeurs, on laisse le champ null
-                            if m['type']=='n':
-                                FieldValue=ToFloat(v)
-                            elif champ=='object_date':
-                                FieldValue=datetime.date(int(v[0:4]), int(v[4:6]), int(v[6:8]))
-                            elif champ=='object_time':
-                                    v=v.zfill(6)
-                                    FieldValue=datetime.time(int(v[0:2]), int(v[2:4]), int(v[4:6]))
-                            elif FieldName=='classif_when':
-                                v2=CleanValue(lig.get('object_annotation_time','000000')).zfill(6)
-                                FieldValue=datetime.datetime(int(v[0:4]), int(v[4:6]), int(v[6:8]),int(v2[0:2]), int(v2[2:4]), int(v2[4:6]))
-                            elif FieldName=='classif_id':
-                                v=self.param.TaxoMap.get(v,v) # Applique le mapping initial d'entrée
-                                FieldValue=self.param.TaxoFound[ntcv(v).lower()]
-                            elif FieldName=='classif_who':
-                                FieldValue=self.param.UserFound[ntcv(v).lower()].get('id',None)
-                            elif FieldName=='classif_qual':
-                                FieldValue=database.ClassifQualRevert.get(v.lower())
-                            else: # c'est un champ texte sans rien de special
-                                FieldValue=v
-                            if FieldTable in Objs:
-                                # if FieldName in Objs[FieldTable].__dict__:
-                                if  hasattr(Objs[FieldTable],FieldName):
-                                    setattr(Objs[FieldTable],FieldName,FieldValue)
-                                    # logging.info("setattr %s %s %s",FieldTable,FieldName,FieldValue)
-                                # else:
-                                    # logging.info("skip F %s %s %s",FieldTable,FieldName,FieldValue)
-                            else:
-                                logging.info("skip T %s %s %s",FieldTable,FieldName,FieldValue)
-                    # Affectation des ID Sample, Acq & Process et creation de ces dernier si necessaire
-                    for t in Ids:
-                        if Objs[t].orig_id is not None:
-                            if Objs[t].orig_id in Ids[t]["ID"]:
-                                setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
-                            else:
-                                Objs[t].projid=self.param.ProjectId
-                                db.session.add(Objs[t])
-                                db.session.commit()
-                                Ids[t]["ID"][Objs[t].orig_id]=getattr(Objs[t],Ids[t]["pk"])
-                                setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
-                                logging.info("IDS %s %s",t,Ids[t])
-                    self.pgcur.execute("select nextval('seq_images')" )
-                    Objs["image"].imgid=self.pgcur.fetchone()[0]
-                    # Recherche de l'objet si c'est une images complementaire
-                    if Objs["obj_field"].orig_id in self.ExistingObject:
-                        Objs["obj_field"].objid=self.ExistingObject[Objs["obj_field"].orig_id]
-                    else: # ou Creation de l'objet
-                        Objs["obj_head"].projid=self.param.ProjectId
-                        Objs["obj_head"].random_value=random.randint(1,99999999)
-                        Objs["obj_head"].img0id=Objs["image"].imgid
-                        db.session.add(Objs["obj_head"])
+        for filter in ("**/*.txt","**/*.tsv"):
+            for CsvFile in sd.glob(filter):
+                relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
+                if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
+                    logging.info("File %s skipped, already loaded"%(relname.as_posix()))
+                    continue
+                logging.info("Analyzing file %s"%(relname.as_posix()))
+                with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
+                    # lecture en mode dictionnaire basé sur la premiere ligne
+                    rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
+                    #lecture la la ligne des types (2nd ligne du fichier
+                    LType=rdr.__next__()
+                    # Chargement du contenu du fichier
+                    RowCount=0
+                    for lig in rdr:
+                        Objs={"acq":database.Acquisitions(),"sample":database.Samples(),"process":database.Process()
+                            ,"obj_head":database.Objects(),"obj_field":database.ObjectsFields(),"image":database.Images()}
+                        RowCount+=1
+                        TotalRowCount+=1
+                        for champ in rdr.fieldnames:
+                            m=self.param.Mapping.get(champ,None)
+                            FieldName=m.get("field",None)
+                            FieldTable=m.get("table",None)
+                            FieldValue=None
+                            if m is None:
+                                continue # Le champ n'est pas considéré
+                            v=CleanValue(lig[champ])
+                            if v!="": # si pas de valeurs, on laisse le champ null
+                                if m['type']=='n':
+                                    FieldValue=ToFloat(v)
+                                elif champ=='object_date':
+                                    FieldValue=datetime.date(int(v[0:4]), int(v[4:6]), int(v[6:8]))
+                                elif champ=='object_time':
+                                        v=v.zfill(6)
+                                        FieldValue=datetime.time(int(v[0:2]), int(v[2:4]), int(v[4:6]))
+                                elif FieldName=='classif_when':
+                                    v2=CleanValue(lig.get('object_annotation_time','000000')).zfill(6)
+                                    FieldValue=datetime.datetime(int(v[0:4]), int(v[4:6]), int(v[6:8]),int(v2[0:2]), int(v2[2:4]), int(v2[4:6]))
+                                elif FieldName=='classif_id':
+                                    v=self.param.TaxoMap.get(v,v) # Applique le mapping initial d'entrée
+                                    FieldValue=self.param.TaxoFound[ntcv(v).lower()]
+                                elif FieldName=='classif_who':
+                                    FieldValue=self.param.UserFound[ntcv(v).lower()].get('id',None)
+                                elif FieldName=='classif_qual':
+                                    FieldValue=database.ClassifQualRevert.get(v.lower())
+                                else: # c'est un champ texte sans rien de special
+                                    FieldValue=v
+                                if FieldTable in Objs:
+                                    # if FieldName in Objs[FieldTable].__dict__:
+                                    if  hasattr(Objs[FieldTable],FieldName):
+                                        setattr(Objs[FieldTable],FieldName,FieldValue)
+                                        # logging.info("setattr %s %s %s",FieldTable,FieldName,FieldValue)
+                                    # else:
+                                        # logging.info("skip F %s %s %s",FieldTable,FieldName,FieldValue)
+                                else:
+                                    logging.info("skip T %s %s %s",FieldTable,FieldName,FieldValue)
+                        # Affectation des ID Sample, Acq & Process et creation de ces dernier si necessaire
+                        for t in Ids:
+                            if Objs[t].orig_id is not None:
+                                if Objs[t].orig_id in Ids[t]["ID"]:
+                                    setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
+                                else:
+                                    Objs[t].projid=self.param.ProjectId
+                                    db.session.add(Objs[t])
+                                    db.session.commit()
+                                    Ids[t]["ID"][Objs[t].orig_id]=getattr(Objs[t],Ids[t]["pk"])
+                                    setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
+                                    logging.info("IDS %s %s",t,Ids[t])
+                        self.pgcur.execute("select nextval('seq_images')" )
+                        Objs["image"].imgid=self.pgcur.fetchone()[0]
+                        # Recherche de l'objet si c'est une images complementaire
+                        if Objs["obj_field"].orig_id in self.ExistingObject:
+                            Objs["obj_head"].objid=self.ExistingObject[Objs["obj_field"].orig_id]
+                        else: # ou Creation de l'objet
+                            Objs["obj_head"].projid=self.param.ProjectId
+                            Objs["obj_head"].random_value=random.randint(1,99999999)
+                            Objs["obj_head"].img0id=Objs["image"].imgid
+                            db.session.add(Objs["obj_head"])
+                            db.session.commit()
+                            Objs["obj_field"].objfid=Objs["obj_head"].objid
+                            db.session.add(Objs["obj_field"])
+                            db.session.commit()
+                            self.ExistingObject[Objs["obj_field"].orig_id]=Objs["obj_head"].objid # Provoque un select object sauf si 'expire_on_commit':False
+                        #Gestion de l'image, creation DB et fichier dans Vault
+                        Objs["image"].objid=Objs["obj_head"].objid
+                        ImgFilePath=CsvFile.with_name(Objs["image"].orig_file_name)
+                        VaultFolder="%04d"%(Objs["image"].imgid//10000)
+                        vaultroot=Path("../../vault")
+                        #creation du repertoire contenant les images si necessaire
+                        if not vaultroot.joinpath(VaultFolder).exists():
+                            vaultroot.joinpath(VaultFolder).mkdir()
+                        vaultfilename     ="%s/%04d%s"     %(VaultFolder,Objs["image"].imgid%10000,ImgFilePath.suffix)
+                        vaultfilenameThumb="%s/%04d_mini%s"%(VaultFolder,Objs["image"].imgid%10000,'.jpg') #on Impose le format de la miniature
+                        Objs["image"].file_name=vaultfilename
+                        #copie du fichier image
+                        shutil.copyfile(ImgFilePath.as_posix(),vaultroot.joinpath(vaultfilename).as_posix())
+                        im=Image.open(vaultroot.joinpath(vaultfilename).as_posix())
+                        Objs["image"].width=im.size[0]
+                        Objs["image"].height=im.size[1]
+                        SizeLimit=app.config['THUMBSIZELIMIT']
+                        # génération d'une miniature si une image est trop grande.
+                        if (im.size[0]>SizeLimit) or (im.size[1]>SizeLimit) :
+                                im.thumbnail((SizeLimit,SizeLimit))
+                                im.save(vaultroot.joinpath(vaultfilenameThumb).as_posix())
+                                Objs["image"].thumb_file_name=vaultfilenameThumb
+                                Objs["image"].thumb_width=im.size[0]
+                                Objs["image"].thumb_height=im.size[1]
+                        #ajoute de l'image en DB
+                        if Objs["image"].imgrank is None:
+                            Objs["image"].imgrank =0 # valeur par defaut
+                        db.session.add(Objs["image"])
                         db.session.commit()
-                        Objs["obj_field"].objfid=Objs["obj_head"].objid
-                        db.session.add(Objs["obj_field"])
-                        db.session.commit()
-                        self.ExistingObject[Objs["obj_field"].orig_id]=Objs["obj_head"].objid # Provoque un select object sauf si 'expire_on_commit':False
-                    #Gestion de l'image, creation DB et fichier dans Vault
-                    Objs["image"].objid=Objs["obj_head"].objid
-                    ImgFilePath=CsvFile.with_name(Objs["image"].orig_file_name)
-                    VaultFolder="%04d"%(Objs["image"].imgid//10000)
-                    vaultroot=Path("../../vault")
-                    #creation du repertoire contenant les images si necessaire
-                    if not vaultroot.joinpath(VaultFolder).exists():
-                        vaultroot.joinpath(VaultFolder).mkdir()
-                    vaultfilename     ="%s/%04d%s"     %(VaultFolder,Objs["image"].imgid%10000,ImgFilePath.suffix)
-                    vaultfilenameThumb="%s/%04d_mini%s"%(VaultFolder,Objs["image"].imgid%10000,'.jpg') #on Impose le format de la miniature
-                    Objs["image"].file_name=vaultfilename
-                    #copie du fichier image
-                    shutil.copyfile(ImgFilePath.as_posix(),vaultroot.joinpath(vaultfilename).as_posix())
-                    im=Image.open(vaultroot.joinpath(vaultfilename).as_posix())
-                    Objs["image"].width=im.size[0]
-                    Objs["image"].height=im.size[1]
-                    SizeLimit=app.config['THUMBSIZELIMIT']
-                    # génération d'une miniature si une image est trop grande.
-                    if (im.size[0]>SizeLimit) or (im.size[1]>SizeLimit) :
-                            im.thumbnail((SizeLimit,SizeLimit))
-                            im.save(vaultroot.joinpath(vaultfilenameThumb).as_posix())
-                            Objs["image"].thumb_file_name=vaultfilenameThumb
-                            Objs["image"].thumb_width=im.size[0]
-                            Objs["image"].thumb_height=im.size[1]
-                    #ajoute de l'image en DB
-                    if Objs["image"].imgrank is None:
-                        Objs["image"].imgrank =0 # valeur par defaut
-                    db.session.add(Objs["image"])
+                        if (TotalRowCount%100)==0:
+                            self.UpdateProgress(100*TotalRowCount/self.param.TotalRowCount,"Processing files %d/%d"%(TotalRowCount,self.param.TotalRowCount))
+                    logging.info("File %s : %d row Loaded",relname.as_posix(),RowCount)
+                    LoadedFiles.append(relname.as_posix())
+                    Prj.fileloaded="\n".join(LoadedFiles)
                     db.session.commit()
-                    if (TotalRowCount%100)==0:
-                        self.UpdateProgress(100*TotalRowCount/self.param.TotalRowCount,"Processing files %d/%d"%(TotalRowCount,self.param.TotalRowCount))
-                logging.info("File %s : %d row Loaded",relname.as_posix(),RowCount)
-                LoadedFiles.append(relname.as_posix())
-                Prj.fileloaded="\n".join(LoadedFiles)
-                db.session.commit()
-
         self.pgcur.execute("""update obj_head o
                             set imgcount=(select count(*) from images where objid=o.objid)
                             ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
@@ -448,7 +449,8 @@ class TaskImport(AsyncTask):
             txt+="<h3>Task Creation</h3>"
             Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
             g.prjtitle=Prj.title
-            txt="<a href='/prj/%d'>Back to project</a>"%Prj.projid
+            g.prjmanagermailto=Prj.GetFirstManagerMailto()
+            txt=""
             if Prj.CheckRight(2)==False:
                 return PrintInCharte("ACCESS DENIED for this project");
             if gvp('starttask')=="Y":
@@ -490,6 +492,7 @@ class TaskImport(AsyncTask):
             PrjId=self.param.ProjectId
             Prj=database.Projects.query.filter_by(projid=PrjId).first()
             g.prjtitle=Prj.title
+            g.appmanagermailto=GetAppManagerMailto()
             # self.param.TaxoFound['agreia pratensis']=None #Pour TEST A EFFACER
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]

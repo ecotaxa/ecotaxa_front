@@ -171,15 +171,20 @@ class TaskClassifAuto(AsyncTask):
                     if len(BasePrj):
                         txt+="<a class='btn btn-primary' href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>Use Previous reference project selection : #{1} : {2}</a><br><br>".format(Prj.projid,*BasePrj[0])
                 from flask.ext.login import current_user
-                sql="select projid,title from projects "
+                sql="select projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects "
                 if not current_user.has_role(database.AdministratorLabel):
                     sql+=" where projid in (select projid from projectspriv where member=%d)"%current_user.id
                 sql+=" order by title"
                 ProjList=database.GetAll(sql)
-                txt+="""<table class='table table-bordered table-hover'><tr><th width=100>ID</td><th>Title</td></tr>"""
+                txt+="""<table class='table table-bordered table-hover'><tr><th width=100>ID</td><th>Title</td><th width=100>Status</td><th width=100>Nbr Obj</td>
+            <th width=100>% Validated</td><th width=100>% Classified</td></tr>"""
                 for r in ProjList:
                     txt+="""<tr><td><a class="btn btn-xs btn-primary" href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>Select #{1}</a></td>
                     <td>{2}</td>
+                    <td>{3}</td>
+                    <td>{4:0.0f}</td>
+                    <td>{5:0.2f}</td>
+                    <td>{6:0.2f}</td>
                     </tr>""".format(Prj.projid,*r)
                 txt+="</table>"
                 return PrintInCharte(txt)

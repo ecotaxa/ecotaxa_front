@@ -26,28 +26,32 @@ def objectdetails(objid):
     t=list()
     # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
     t.append("<script src='/static/jquery.elevatezoom.js'></script>")
-    t.append("Object #{0} , Original Object ID : {1}".format(objid,obj.objfrel.orig_id))
     Prj=obj.project
     if Prj.visible==False and  not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot view this project','error')
         return PrintInCharte("<a href=/>Back to home</a>")
     g.Projid=Prj.projid
-    t.append("<br>Part of project <b>%s</b> (managed by : %s)"%(Prj.title
+    t.append("<p>Project: <b>%s</b> (managed by : %s)</p>"%(Prj.title
                      ,",".join(("<a href ='mailto:%s'>%s</a>"%(m.memberrel.email,m.memberrel.name) for m in Prj.projmembers  if m.privilege=='Manage'))))
-    t.append("<br>Classification : <b>%s</b> (%s)"%(obj.classif.name if obj.classif else "Unknown",database.ClassifQual.get(obj.classif_qual,"To be classified")))
-    if obj.classiffier is not None:
-        t.append(" by %s (%s) "%(obj.classiffier.name,obj.classiffier.email))
-        if obj.classif_when is not None:
-            t.append(" on %s "%(obj.classif_when.strftime("%Y-%m-%d %H:%M")))
+    t.append("<p>Classification :")
     if obj.classif:
+        t.append("<br>&emsp;<b>%s</b>"%obj.classif.name)
         TaxoHierarchie=(r[0] for r in GetAll("""WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id FROM taxonomy where id =%(taxoid)s
                         union
                         SELECT t.id,t.name,t.parent_id FROM rq JOIN taxonomy t ON t.id = rq.parent_id )
                         select name from rq""",{"taxoid":obj.classif.id})[::-1])
-        t.append("<br>Hierarchy : "+ (" &gt; ".join(TaxoHierarchie))+" (%s)"%obj.classif_id )
+        t.append("<br>&emsp;"+ (" &gt; ".join(TaxoHierarchie))+" (id=%s)"%obj.classif_id )
+    else:
+        t.append("<br>&emsp;<b>Unknown</b>")
+    if obj.classiffier is not None:
+        t.append("<br>&emsp;%s "%(database.ClassifQual.get(obj.classif_qual,"To be classified")))
+        t.append(" by %s (%s) "%(obj.classiffier.name,obj.classiffier.email))
+        if obj.classif_when is not None:
+            t.append(" on %s "%(obj.classif_when.strftime("%Y-%m-%d %H:%M")))
+    t.append("</p>")
     if obj.objfrel.object_link is not None:
-        t.append("<br>External link :<a href='{0}' target=_blank> {0}</a>".format(obj.objfrel.object_link))
-    t.append("<table><tr><td valign=top>Complementaty information : </td><td> <span id=spancomplinfo> {0}</span></td></tr></table>".format(ntcv( obj.complement_info).replace('\n','<br>\n')))
+        t.append("<p>External link :<a href='{0}' target=_blank> {0}</a></p>".format(obj.objfrel.object_link))
+    t.append("<table><tr><td valign=top>Complementaty information <a href='javascript:gotocommenttab();' > ( edit )</a>: </td><td> <span id=spancomplinfo> {0}</span></td></tr></table>".format(ntcv( obj.complement_info).replace('\n','<br>\n')))
     # On affiche la liste des images, en selectionnant une image on changera le contenu de l'image Img1 + Redim
     # l'approche avec des onglets de marchait pas car les images sont superposées
     obj.images.sort(key=lambda x: x.imgrank)
@@ -140,7 +144,7 @@ $(document).ready(function() {
     <li role="presentation" ><a href="#tabdprocessrel" aria-controls="tabdprocess" role="tab" data-toggle="tab"> Processing details</a></li>
     <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>""")
     if Prj.CheckRight(1):
-        t.append("""<li role="presentation" ><a href="#tabdaddcomments" aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")
+        t.append("""<li role="presentation" ><a id=linktabdaddcomments href="#tabdaddcomments" aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")
     if obj.classif_auto:
         classif_auto_name=obj.classif_auto.name
         if obj.classif_auto_score:
@@ -149,12 +153,13 @@ $(document).ready(function() {
     t.append("""</ul>
     <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
-    <table class='table table-bordered'><tr>
-    <td><b>longitude</td><td>{0}</td><td><b>latitude</td><td>{1}</td><td><b>Date</td><td>{2}</td><td><b>Time</td><td>{3}</td>
-    </tr><tr><td><b>Depth min</td><td>{4}</td><td><b>Depth max</td><td>{5}</td><td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
-    </tr><tr>""".format(nonetoformat(obj.longitude,'.5f'),nonetoformat(obj.latitude,'.5f'),obj.objdate,obj.objtime
+    <table class='table table-bordered table-condensed'><tr>
+    <td style=' background-color: #f2f2f2;'><b>longitude</td><td>{0}</td><td style=' background-color: #f2f2f2;'><b>latitude</td><td>{1}</td>
+      <td style=' background-color: #f2f2f2;'><b>Date</td><td>{2}</td><td style=' background-color: #f2f2f2;'><b>Time</td><td>{3}</td>
+    </tr><tr><td style=' background-color: #f2f2f2;'><b>Depth min</td><td>{4}</td><td style=' background-color: #f2f2f2;'><b>Depth max</td><td>{5}</td><td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
+    </tr><tr><td><b>Object #</td><td>{8}</td><td><b>Original Object ID</td><td colspan=5>{9}</td></tr><tr>""".format(nonetoformat(obj.longitude,'.5f'),nonetoformat(obj.latitude,'.5f'),obj.objdate,obj.objtime
                         ,obj.depth_min,obj.depth_max
-                        ,classif_auto_name,obj.classif_auto_when))
+                        ,classif_auto_name,obj.classif_auto_when,objid,obj.objfrel.orig_id))
     cpt=0
     # Insertion des champs object
     for k,v in  collections.OrderedDict(sorted(DecodeEqualList(Prj.mappingobj).items())).items():
@@ -165,16 +170,14 @@ $(document).ready(function() {
     t.append("</tr></table></div>")
     # insertion des champs Sample, Acquisition & Processing dans leurs onglets respectifs
     for r in (("Sample","mappingsample","sample") ,("Acquisition","mappingacq","acquis"),("Processing","mappingprocess","processrel") ):
-        t.append('<div role="tabpanel" class="tab-pane" id="tabd'+r[2]+'">'+r[0]+" details :<table class='table table-bordered'><tr>")
+        t.append('<div role="tabpanel" class="tab-pane" id="tabd'+r[2]+'">'+r[0]+" details :<table class='table table-bordered table-condensed'><tr>")
         cpt=0
         if getattr(obj,r[2]):
             if r[2]=="sample":
-                t.append("<td><b>{0}</td><td>{1}</td><td><b>{2}</td><td>{3}</td><td><b>{4}</td><td>{5}</td></tr><tr>"
+                t.append("<td><b>{0}</td><td colspan=3>{1}</td><td><b>{2}</td><td>{3}</td><td><b>{4}</td><td>{5}</td></tr><tr>"
                          .format("Original ID",ScaleForDisplay(obj.sample.orig_id),
                                  "longitude",ScaleForDisplay(obj.sample.longitude),
                                  "latitude",ScaleForDisplay(obj.sample.latitude),))
-                t.append("<td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
-                         .format("Dataportal Desc.",ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
             else:
                 t.append("<td><b>{0}</td><td>{1}</td></tr><tr>"
                          .format("Original ID.",ScaleForDisplay(getattr(getattr(obj,r[2]),"orig_id","???"))))
@@ -183,13 +186,16 @@ $(document).ready(function() {
                     t.append("</tr><tr>")
                 cpt+=1
                 t.append("<td><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(getattr(obj,r[2]),k,"???"))))
+            if r[2]=="sample":
+                t.append("</tr><tr><td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
+                         .format("Dataportal Desc.",ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
         else:
             t.append("<td>No {0}</td>".format(r[0]))
         t.append("</tr></table></div>")
 
     # Affichage de l'historique des classification
     t.append("""<div role="tabpanel" class="tab-pane" id="tabdclassiflog">
-    <table class='table table-bordered'><tr>
+    <table class='table table-bordered table-condensed'><tr>
     <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""")
     Histo=GetAll("""SELECT to_char(classif_date,'YYYY-MM-DD HH24:MI:SS') datetxt,classif_type ,t.name,u.name username,classif_qual
   from objectsclassifhisto h
@@ -214,6 +220,10 @@ order by classif_date desc""",{"objid":objid})
                 $('#spancomplinfo').html(nl2br($('#compinfo').val()));
             })
           }
+          function gotocommenttab() {
+            $("#linktabdaddcomments").click();
+            window.scrollTo(0,document.body.scrollHeight);
+          }
         </script>
         <textarea id=compinfo rows=5 cols=120 autocomplete=off>%s</textarea><br>
         <button type="button" class='btn btn-primary' onclick="UpdateComment();">Save additional comment</button>
@@ -226,4 +236,4 @@ order by classif_date desc""",{"objid":objid})
         return """<table width=100%><tr><td><a href='/objectdetails/{0}?w={1}&h={2}' target=_blank><b>Open in a separate window</b> (right click to copy link)</a>
         </td><td align='right'><button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
         </td></tr></table>""".format(objid,gvg("w"),gvg("h"))+"\n".join(t)
-    return PrintInCharte("\n".join(t)+render_template('common/taxopopup.html'))
+    return PrintInCharte("<div style='margin-left:10px;'>"+"\n".join(t)+render_template('common/taxopopup.html'))

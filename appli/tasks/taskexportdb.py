@@ -113,7 +113,7 @@ class TaskExportDb(AsyncTask):
             else: # valeurs par default
                 pass
             #recupere les projets
-            sql="""select projid,title,status
+            sql="""select projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0)
                     from projects
                     order by lower(title)"""
             PrjList=GetAll(sql,cursor_factory=None)
@@ -123,9 +123,15 @@ class TaskExportDb(AsyncTask):
 
             Select <a name="tbltop" href="#tbltop" onclick="$('#TblPrj input').prop( 'checked', true )">All</a> /
              <a href="#tbltop" onclick="$('#TblPrj input').prop( 'checked', false );">None</a>
-            <table id=TblPrj class='table table-condensed table-bordered' style='width:600px;'>"""
+            <table id=TblPrj class='table table-condensed table-bordered' >
+             <tr><th width=100>ID</td><th>Title</td><th width=100>Status</th><th width=100>Nbr Obj</th>
+            <th width=100>% Validated</th><th width=100>% Classified</th></tr>"""
             for r in PrjList:
-                txt+="<tr><td><input type=checkbox name=prj_{0}>{0}</td><td>{1}</td><td>{2}</td></tr>".format(*r)
+                txt+="""<tr><td><input type=checkbox name=prj_{0}>{0}</td><td>{1}</td><td>{2}</td>
+                <td>{3:0.0f}</td>
+                <td>{4:0.2f}</td>
+                <td>{5:0.2f}</td>
+                </tr>""".format(*r)
             txt+="""</table>
             <input type=submit class='btn btn-primary' value='Start Database Export'>
             </form>

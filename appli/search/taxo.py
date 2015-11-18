@@ -50,13 +50,16 @@ def searchtaxotree():
 @app.route('/search/taxotreejson')
 def taxotreerootjson():
     parent=gvg("id")
-    sql="SELECT id, name,parent_id,coalesce(nbrobj,0)+coalesce(nbrobjcum,0) FROM taxonomy WHERE "
+    sql="""SELECT id, name,parent_id,coalesce(nbrobj,0)+coalesce(nbrobjcum,0)
+          ,exists(select 1 from taxonomy te where te.parent_id=taxonomy.id)
+          FROM taxonomy
+          WHERE """
     if parent=='#': sql+="parent_id is null"
     else: sql+="parent_id ="+parent
     sql+=" order by name "
     res = GetAll(sql)
     # print(res)
-    return json.dumps([dict(id=str(r[0]),text="<span class=v>"+r[1]+"</span> ("+str(r[3])+") <span class='TaxoSel label label-default'>Select</span>",parent=r[2] or "#",children=True) for r in res])
+    return json.dumps([dict(id=str(r[0]),text="<span class=v>"+r[1]+"</span> ("+str(r[3])+") <span class='TaxoSel label label-default'><span class='glyphicon glyphicon-ok'></span></span>",parent=r[2] or "#",children=r[4]) for r in res])
 
 
 @app.route('/search/taxofinal', methods=['GET', 'POST'])

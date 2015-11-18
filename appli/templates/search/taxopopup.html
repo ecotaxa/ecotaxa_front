@@ -44,6 +44,8 @@
                     o.preventDefault();
                     var id= $(o.target).closest("li").attr("id");
                     var valeur= $(o.target).prev().html();
+                    if($(o.target).hasClass("glyphicon"))
+                        valeur= $(o.target).parent().prev().html();
                    $('#SelectedID').html(id);
                    $('#SelectedName').html(valeur);
                    $('#{{ targetid }}').append($('<option>', {    value: id,    text: valeur}));

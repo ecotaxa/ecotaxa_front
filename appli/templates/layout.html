@@ -51,11 +51,10 @@ $(document).ready(function() {
 });
 </script>
 
-<img src="/static/beta.png" style="position: fixed;z-index: 50;top:0;left: 0;">
 <div id="divheadinfo" class="headinfo">
 <div class="headinfo panel panel-default">  <div class="panel-body" style="padding: 1px 5px 1px 5px;">
 <table width="100%"><tr>
-    <td width="200px"><h1><a href="/">Ecotaxa</a></h1></td>
+    <td width="200px"><h1><a href="/"><img height="30" src="/static/logo_ecotaxa.png"></a></h1></td>
     <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
     <td align="right" width="300px">
         {% if not  current_user.is_authenticated() %}

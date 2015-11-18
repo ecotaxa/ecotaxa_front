@@ -1,24 +1,42 @@
 {% extends "layout.html" %}
 
 {% block headcenter %}
-  <h4>Project :  {{  g.prjtitle  }} </h4>
+  <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
 {% endblock %}
 
 {% block body %}
 
+<h2>Import data (step 2 of 2)</h2>
+
+
+<h3>Warnings</h3>
     {{ task.progressmsg |nl2br|safe }}
 
+<h3>Taxonomy manual mapping</h3>
 <form class="form-horizontal" method="post">
 {%   if (taxo|length())>0 %}
-    <h3>Taxonomy Manual Mapping</h3>
-    <p>Note : If needed, Taxonomy element creation must but handled by administrator prior execution of import task</p>
+
+<p class="help-block">If you <em>really</em> cannot find a suitable category
+<ol>
+	<li>map your category into one of the temporary categories for now (<code>temporary_1</code>, <code>temporary_2</code>, etc.)</li>
+	<li>then contact the application manager ({{g.appmanagermailto |safe }}) and request the creation of the category</li>
+</ol>
+Once the category is created, you will be able to move your objects from <code>temporary_*</code> to the newly created category.
+</p>
+<!--
+	TODO add email of application manager
+-->
+
 <table >
     {% for T in taxo %}
-  <tr><td>
-  {{ loop.index~" - "+T }}
+  <tr>
+		<td>
+				{{ T }}
+				{# {{ loop.index~" - "+T }} #}
 {#   {{ label(loop.index~" - "+T)  }} #}
       <input type="hidden" name="orig{{ loop.index }}" value="{{ T }}">
-    </td><td>
+    </td>
+		<td>
     <div class="input-group">
        <select id="taxolb{{ loop.index }}" name="taxolb{{ loop.index }}" style="width: 210px" class='taxolb' > </select>
             <span class="input-group-btn">
@@ -34,10 +52,11 @@
 
 
 {%   if (users|length())>0 %}
-    <h3>Users Manual Mapping</h3>
+    <h3>Users manual mapping</h3>
     {% for U in users %}
   <div class="form-group">
-{{ label(loop.index~" - "+U)  }}
+{{ U  }}
+{#{{ label(loop.index~" - "+U)  }} #}
       <input type="hidden" name="origuser{{ loop.index }}" value="{{ U }}">
   <div class="col-lg-2">
        <select id="userlb{{ loop.index }}" name="userlb{{ loop.index }}" style="width: 210px" class='userlb' > </select>
@@ -51,7 +70,7 @@
     <input type="hidden" name="starttask" value="Y">
     <div class="form-group">
     <div class="col-sm-offset-2 col-sm-2">
-      <button type="submit" class="btn btn-primary">Continue Task</button>
+      <button type="submit" class="btn btn-primary btn-block">Continue</button>
     </div>
   </div>
 </form>

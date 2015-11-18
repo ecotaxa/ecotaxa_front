@@ -1,5 +1,5 @@
 {#<span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>#}
-  <div style="width: 230px;">
+  <div style="width: 230px;    margin-top: 5px; margin-bottom: 5px;">
     <div class="input-group">
        <select id="taxolbanno" name="taxolbanno" style="width: 170px" class='taxolb'  autocomplete="off"> </select>
             <span class="input-group-btn">
@@ -19,10 +19,23 @@
   <div id='divclassiftab' style="width: 255px;overflow-y:auto;">
 <table class="classiftab" width="98%">
 {% for v in res %}
-<tr><td taxoid="{{ v['id'] }}" class="{{  v['parentclasses'] }}">
-        <b>{{ ("&#8226;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>
-        {% if v['haschild'] %}<span class="glyphicon glyphicon-triangle-bottom categexpander" ></span>{% endif %}
-    <span class="taxodrop">{{ v['taxoname'] }}</span> {{ v['taxoparent'] }} <p  class="ra3 label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</p></td></tr>
+<tr>
+<td taxoid="{{ v['id'] }}" class="{{  v['parentclasses'] }}">
+        
+	<b>{{ ("&emsp;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>
+        {% if v['parentclasses'] %}
+			<span style="width: 7px; display: inline-block;" ></span>
+		{% endif %}
+        {% if v['haschild'] %}
+			<small><span style="width: 7px;"  class="glyphicon glyphicon-triangle-bottom categexpander" ></span></small>
+		{% endif %}
+	  <span class="taxodrop {% if v['haschild'] %}haschild{% endif %}">
+		{{ v['taxoname'] }}
+	</span> 
+	<span class="taxoparent">{{ v['taxoparent'] }}</span>
+		<span class="counter label {{ "label-primary" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</span>
+	</td>
+</tr>
 {% endfor %}
 </table>
   </div>

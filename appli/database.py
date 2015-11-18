@@ -94,7 +94,7 @@ class Projects(db.Model):
     initclassiflist  = db.Column(VARCHAR) # Initial list of categories
     classiffieldlist  = db.Column(VARCHAR) # Fields available on sort & displayed field of Manual classif screen
     popoverfieldlist  = db.Column(VARCHAR) # Fields available on popover of Manual classif screen
-    projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects')) #
+    projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects'),cascade='delete') #
     comments  = db.Column(VARCHAR)
     projtype  = db.Column(VARCHAR(50))
     fileloaded  = db.Column(VARCHAR)
@@ -122,12 +122,23 @@ class Projects(db.Model):
         if Level<=0:
             return True
         return False
+    def GetFirstManager(self):
+        # retourne le utilisateur créé avec un privilege Manage
+        lst=sorted([(r.id,r.memberrel.email,r.memberrel.name) for r in self.projmembers if r.privilege=='Manage'],key=lambda r: r[0])
+        if lst:
+            return lst[0]
+        return None
+    def GetFirstManagerMailto(self):
+        r=self.GetFirstManager()
+        if r:
+            return "<a href='mailto:{1}'>{2} ({1})</a>".format(*r)
+        return ""
 
 
 class ProjectsPriv(db.Model):
     __tablename__ = 'projectspriv'
     id = db.Column(db.Integer,db.Sequence('seq_projectspriv'), primary_key=True)
-    projid = db.Column(INTEGER,db.ForeignKey('projects.projid'),nullable=False)
+    projid = db.Column(INTEGER,db.ForeignKey('projects.projid',ondelete="CASCADE"),nullable=False)
     member = db.Column(db.Integer,db.ForeignKey('users.id'))
     privilege = db.Column(VARCHAR(255),nullable=False)
     memberrel=db.relationship("users")

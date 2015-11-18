@@ -1,5 +1,5 @@
 {% macro selectinput(name, values, value='') -%}
-    <select name="{{ name }}" id="{{ name }}">
+    <select class="form-control" name="{{ name }}" id="{{ name }}">
     {% for v in values %}
         <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
     {% endfor %}
@@ -47,20 +47,28 @@
 <input type="hidden" id="taxofilterlabel" value=""  autocomplete="off">
 <input type="hidden" id="pageoffset" value="{{ data.pageoffset }}"  autocomplete="off">
 <table><tr><td>
-    Sort by :<select name="sortby" id="sortby">
+    <button type="button" class="btn btn-xs btn-primary" onclick="LoadRightPane();" style="width: 260px;">
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update view</button>
+{{ top|safe }}
+</td><td>
+    &nbsp;
+    <span class="btn btn-xs SpanSelectAll">Select all</span>
+    &nbsp;
+    <span class="glyphicon glyphicon-sort"></span>&nbsp;
+</td><td>
+    <select name="sortby" id="sortby" style="width: 100px" class="form-control">
+
 {% for key, value in data.sortlist.items() %}
     <option value="{{ key|e }}" {{ 'selected' if key==data.sortby }}> {{ value|e }}</option>
 {% endfor %}
 </select>
-
-<button type="button" class="btn btn-xs " onclick="SortToggle();" title="Current Sort : Ascending">
+</td><td>&nbsp;
+<button type="button" class="btn btn-default btn-xs " onclick="SortToggle();" title="Current Sort : Ascending">
         <span id="sortorder" class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span></button>
 
-
- Display :
 <div class="btn-group">
-  <button type="button" class="btn btn-sm">Displayed field</button>
-  <button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  <button type="button" class="btn btn-default btn-xs">Display</button>
+  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <span class="caret"></span>
     <span class="sr-only">Toggle Dropdown</span>
   </button>
@@ -72,40 +80,49 @@
 {% endfor %}
   </ul>
 </div>
-    <span id="statuslabelspan"
-data-content="<b>All</b> : display all images <br>
-<b>Unclassified</b> : display 'Unclassified' images (unpredicted & unvalidated)<br>
-<b>Predicted</b> : display 'predicted' images (from automatic identification tool)<br>
-<b>Not Validated</b> : display 'Unclassified', 'Predicted' and 'Dubious' images <br>
-<b>Validated</b> : display images whose identification has been checked by any users <br>
-<b>Validated by others</b> : display 'validated' images whose identification has only been checked by other users <br>
-<b>Validated by me</b> :  display 'validated' images whose identification has only been checked by me<br>
-<b>Dubious</b> : display 'Dubious' images
-">Status :
-    </span><select name="statusfilter" id="statusfilter">
+          <label for="statusfilter" data-toggle="tooltip" data-placement="bottom" data-html="true"
+        title="
+        <p style='text-align: left'>
+        <b>All</b>: all images</br>
+        <b>Unvalidated</b>: all images to validate (unclassified, predicted only and dubious)</br>
+        <b>Predicted</b>: predicted by automatic classification</br>
+        <b>Unclassified</b>: unpredicted and unvalidated</br>
+        <b>Validated</b>: images with a human-made identification</br>
+        <b>Valid. by others</b>: identification done by other users</br>
+        <b>Valid. by me</b>: identification done by me</br>
+        <b>Dubious</b>: dubious identification</div>">
+      Status &nbsp;</td><td style="padding-right: 5px;">
+      </label><select name="statusfilter" id="statusfilter"  class="form-control" data-original-title="" title="" style="width: 100px">
 {% for key, value in data.statuslist.items() %}
     <option value="{{ key|e }}" {{ 'selected' if key==data.statusfilter }}> {{ value|e }}</option>
 {% endfor %}
-</select>
-
-
-
-    Img /page : {{ selectinput("ipp",['5','10','20','50','100','200','500','1000'],data.ipp) }}
-    Zoom : {{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}
-</td><td style="font-size: 12px; padding:0px 2px 4px 5px;">Magnifier:<br>Det. popup:</td>
-<td style="font-size: 12px">
-    {{ checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
-<br>{{ checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
-</td><td>&nbsp;
-    <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
-        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update View</button>
-{{ top|safe }}
-</td></tr></table>
+</select></td><td style="padding-right: 5px;">
+    <label for="ipp"><span class="glyphicon glyphicon-th"></span></label>
+    </td><td style="padding-right: 5px;">{{ selectinput("ipp",['1','5','10','20','50','100','200','500','1000'],data.ipp) }}
+    </td><td style="padding-right: 5px;">    <label for="zoom"><span class="glyphicon glyphicon-zoom-in"></span>%</label>
+    </td><td style="padding-right: 5px;">{{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}</td><td>
+</td><td>
+      <label for="magenabled">
+      	<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+      </label>
+      {{ checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
+    </td><td>&nbsp;
+      <label for="popupenabled">
+        <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+      </label>
+      {{ checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
+    </td><td>&nbsp;
+    <button type=button class="btn btn-primary btn-xs" onclick="LoadRightPane();">
+      <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+    </button>
+</td>
+</tr>
+</table>
     </div>
 {% include "common/taxopopup.html" %}
 
 	<div id="bodycontainer">
-		<div id="column-left"  class="panel panel-default" style="position: fixed;	top: 125px;	left: 2px;	bottom: 0px;	width: 260px;
+		<div id="column-left"  class="panelzzz " style="position: fixed;	top: 120px;	bottom: 0px;	width: 260px;
 	                overflow-y: hidden; overflow-x: hidden;  margin-bottom: 0px; " >
             <div class="bodyleft" style="margin-left: 2px; width: 257px;">
                 <script>
@@ -117,27 +134,36 @@ data-content="<b>All</b> : display all images <br>
                 $('#myTabs a:last').tab('show'); // Select last tab
                 </script>
                 <div id="myTabs">  <!-- Nav tabs -->
-                  <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active"><a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Annotate</a></li>
+                  <ul class="nav nav-tabs nav-justified" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Classify</a>
+                    </li>
                     <li><a href="javascript:RefreshClassifTab();"><span class="glyphicon glyphicon-refresh"></span></a></li>
-                    <li role="presentation"><a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filters</a></li>
+                    <li role="presentation">
+                        <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filters</a>
+                    </li>
                   </ul>
                   <div class="tab-content"> <!-- Tab panes -->
-                    <div role="tabpanel" class="tab-pane active" id="TabA">{{ lefta|safe }}</div>
+                    {# Classification #}
+                    <div role="tabpanel" class="tab-pane active" id="TabA">
+                        {{ lefta|safe }}
+                    </div>
+                    {# Filters #}
                     <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;">
                         <div id="TabBInner" style="width: 240px;">
-                        <a href='javascript:ClearAllFilterCriteria();'>Clear all filter &amp; update view/refresh</a><br>
-                        {{ leftb|safe }}
+                        
+
+                          <a href='javascript:ClearAllFilterCriteria();' class="btn btn-default " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
+                           <button class="btn btn-default" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
                         <br>
-                        <p align="center" style="border-top: 1px solid #ddd;padding-top: 4px;">
-                        <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
-                            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Apply Filter / Update View</button>
-                        </p>
-                        <p><button type="button" class="btn btn-sm btn-info" onclick="LoadRightPane(true);">
-                            Apply filter by page reload (copiable URL)</button></p>
-                        <p><button type="button" class="btn btn-sm btn-info" onclick="LoadRightPane(false,true);">
-                            Apply filter and save in my profile</button></p>
-                        <p><a href=? class="btn btn-sm btn-info" >Apply my profile</a></p>
+                        {{ leftb|safe }}
+                      <div class="row">
+                        <div class="col-sm-12">
+                           <button class="btn btn-default btn-block" onclick="LoadRightPane(false,true);">Save filters configuration</button>
+                           <a href='?' type="button" class="btn btn-default btn-block">Apply saved filters</a>
+                        </div>
+                      </div>
+
                       </div>
                     </div>
                   </div>
@@ -146,19 +172,19 @@ data-content="<b>All</b> : display all images <br>
 		</div>
 {#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
 <style>
-.lazy {margin: 10px 5px 0px 5px; cursor: -webkit-grab; cursor:grab;}
+.lazy {margin: 15px 5px 0px 5px; cursor: -webkit-grab; cursor:grab;}
 .ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
 .ddets {cursor:pointer;}
 .categexpander {cursor:pointer;}
 .taxo {cursor: -webkit-grab; cursor:grab;}
 #dispfieldlist li a {    padding-top:0px;}
-.ui-selected { background: #FFFF00; color: white; }
-.ra3 {float:right; margin-right: 3px;}
-table.classiftab td {padding: 2px 3px 0px 3px ;  border-width:1px;border-style:solid;border-color:#c5c5c5;font-size: 12px;}
+.ui-selected { background-color: #E9D6D7;}
+.ra3 {float:right; margin-right: 3px;} {#TODO voir necessite de conserver#}
+
 table.imgtab {margin-bottom: 5px;}
 table.imgtab td {vertical-align:bottom;text-align: center;
    border-width:1px;   border-style:solid; border-color:#c5c5c5;  }
-#column-right {margin-left: 270px;}
+#column-right {margin-left: 260px;}
 #divheadinfo {position:fixed;top:0px;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;}
 #topbar {position:fixed;top:80px;left: 1px;width:100%; height:40px;z-index:10; background-color: #fff;}
 body {margin-top: 125px;}
@@ -169,7 +195,6 @@ body {margin-top: 125px;}
 {#Permet de reduire la taille et l'espace du texte du dropdown Taxo Annotation#}
 #select2-taxolbanno-results li {font-size: 12px; padding: 3px;}
 .popover {max-width: 500px;}
-{#.subimg {word-break:break-all;}#}
 </style>
 <script>
 var PendingChanges={};
@@ -178,7 +203,7 @@ var PrevTxtFilter="INITIAL";
 DragInProgress=false;
 function LoadRightPane(NoAjax,SaveInProfile){
     if(Object.keys(PendingChanges).length>0)
-      if(confirm("Some changes are pending, if you refresh they'll be lost !\nWould you like to continue ?")==false)
+      if(confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?")==false)
         return;
     var TxtFilter=""
     req={taxo:$("#taxofilter").val(),resultwidth:$("#column-right").width(),windowheight:$(window).height()};
@@ -201,11 +226,13 @@ function LoadRightPane(NoAjax,SaveInProfile){
     req['MapS']=$("#filt_MapOutS").val();
     if((req['MapN']!="")&&(req['MapW']!="")&&(req['MapE']!="")&&(req['MapS']!=""))
         TxtFilter+=" Position=("+req['MapN']+","+req['MapW']+","+req['MapE']+","+req['MapS']+")"
+    else {delete req['MapN']; delete req['MapW'];delete req['MapE']; delete req['MapS']; }
 
     req['depthmin']=$("#filt_depthmin").val();
     req['depthmax']=$("#filt_depthmax").val();
     if((req['depthmin']!="")&&(req['depthmax']!=""))
         TxtFilter+=" Depth in("+req['depthmin']+"-"+req['depthmax']+")";
+    else {delete req['depthmin']; delete req['depthmax']; }
     if($('#sampleid').val()!=null)
       req['samples']=String($('#sampleid').val())
     else req['samples']="";
@@ -214,19 +241,24 @@ function LoadRightPane(NoAjax,SaveInProfile){
     req['fromdate']=$("#filt_fromdate").val();
     if(req['fromdate']!="")
         TxtFilter+=" Date >= "+req['fromdate'];
+    else delete req['fromdate'];
     req['todate']=$("#filt_todate").val();
     if(req['todate']!="")
         TxtFilter+=" Date <= "+req['todate'];
+    else delete req['todate'];
 
     req['fromtime']=$("#filt_fromtime").val();
     if(req['fromtime']!="")
         TxtFilter+=" Time >= "+req['fromtime'];
+    else delete req['fromtime'];
     req['totime']=$("#filt_totime").val();
     if(req['totime']!="")
         TxtFilter+=" Time <= "+req['totime'];
+    else delete req['totime'];
     req['inverttime']=$("#filt_inverttime").prop("checked")?"1":"";
     if(req['inverttime']=="1")
         TxtFilter+=" Time Invert ";
+    else delete req['inverttime'];
 
 
     req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
@@ -253,11 +285,14 @@ function LoadRightPane(NoAjax,SaveInProfile){
         for	(var k in req)
 {#            if(req[k]!=="") // Il faut tous les laisser pour pouvoir forcer leur effacement par rapport aux users settings  #}
                 urlparam[k]=req[k];
-        window.location="?"+$.param(urlparam);
+{#        window.location="?"+$.param(urlparam);#}
+        var url=window.location.protocol+"//"+window.location.host+window.location.pathname+"?"+$.param(urlparam);
+        window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
         return;
     }
     if(SaveInProfile==true)
         req["saveinprofile"]='Y';
+    $("#column-right").html("<img src='/static/spinningred.gif'> Loading");
     $("#column-right").load("/prj/LoadRightPane",req);
     $('#headersubtitle').html(TxtFilter);
 }
@@ -287,9 +322,7 @@ function gotopage(nopage)
 $(document).ready(function() {
     if ("{{data.sortorder}}"=="desc")
         SortToggle();
-    $('#statuslabelspan').popover({html:true,trigger:'hover',placement:"left",container: 'body'});
-    $('#statusfilter').data('content',$('#statuslabelspan').data('content'))
-    $('#statusfilter').popover({html:true,trigger:'hover',placement:"left",container: 'body'});
+    $('[data-toggle="tooltip"]').tooltip();
     $("#TabB").outerHeight( $("#column-left").innerHeight()-$("#TabB").position().top );
     {% if g.taxofilter %}
     SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}");
@@ -411,7 +444,7 @@ function ClearAllFilterCriteria(){
 
 jQuery(window).bind('beforeunload', function(){
     if(Object.keys(PendingChanges).length>0)
-      return "Some changes are pending, if you refresh they'll be lost !\nWould you like to continue ?"
+      return "Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?"
 });
 
 </script>

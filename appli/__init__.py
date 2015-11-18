@@ -140,6 +140,10 @@ def ComputeLimitForImage(imgwidth,imgheight,LimitWidth,LimitHeight):
         if width==0: width=1
     return width,height
 
+def GetAppManagerMailto():
+    if 'APPMANAGER_EMAIL' in app.config and 'APPMANAGER_NAME' in app.config:
+        return "<a href='mailto:{APPMANAGER_EMAIL}'>{APPMANAGER_NAME} ({APPMANAGER_EMAIL})</a>".format(**app.config)
+    return ""
 
 # Ici les imports des modules qui definissent des routes
 import appli.main
@@ -180,8 +184,18 @@ def JinjaFormatDateTime(d,format='%Y-%m-%d %H:%M:%S'):
 
 def JinjaNl2BR(t):
     return t.replace('\n', '<br>\n');
+
+def JinjaGetManagerList():
+    LstUsers=database.GetAll("""select distinct u.email,u.name,Lower(u.name)
+FROM projectspriv pp join users u on pp.member=u.id
+where pp.privilege='Manage'
+and u.active=TRUE
+order by Lower(u.name) """)
+    return " ".join(["<li><a href='mailto:{0}'>{1} ({0})</a></li> ".format(*r) for r in LstUsers if '@' in r[0]])
+
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
+app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList)
 
 # Traitement du sheduler
 from appli import schedule

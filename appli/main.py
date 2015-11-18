@@ -21,25 +21,24 @@ app.register_blueprint(vaultBP)
 
 @app.route('/')
 def index():
-    txt="""
-	<div class="row" id="homeContent">
-		<div class="col-sm-12">
-"""
+    txt="""<div style='margin:5px;'><div id="homeText"'>"""
     with open('appli/static/home/home.html', 'r') as f:
         txt+=f.read()
     txt+="""
-		</div>
 	</div>
-	<div class="row" id="homeSelectors">
+	<div class="row" id="homeSelectors" style="margin-top: 20px; margin-bottom: 20px;">
 		<div class="col-sm-6">
-			<a href="/explore/" class="btn btn-primary btn-block btn-lg">Explore all images</a>
+        <a href="/explore/" class="btn btn-primary btn-lg btn-block">Explore images</a>
 		</div>
 		<div class="col-sm-6">
-			<a href="/prj/" class="btn btn-primary btn-block btn-lg">Select a project</a>
+        <a href="/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
 		</div>		
 	</div>
 """
-
+    txt+="""<div class="row" id="homeLegal"><div class="col-sm-12">"""
+    with open('appli/static/home/homebottom.html', 'r') as f:
+        txt+=f.read()
+    txt+="""</div></div></div>"""
 
     return PrintInCharte(txt)
     # return render_template('layout.html',bodycontent=txt)

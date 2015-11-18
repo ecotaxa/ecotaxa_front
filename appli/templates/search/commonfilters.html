@@ -5,48 +5,76 @@
 #TabB .select2-selection__rendered {font-size: 12px; }
 </style>
 
-<table width="100%">
-  <tr><td><b>Sample</b> </td><td align="right"><a href='javascript:ClearSamples();'>Clear</a>
-   </td></tr>
-</table>
+{# ------- Sample ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
+		<label class="title">Sample</label>
+		<span title="Available only when a project is selected" data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
+		<a class="pull-right clear" href='javascript:ClearSamples();'></a>
+		<select class="form-control" id="sampleid" name="sampleid" style="width: 100%" multiple autocomplete="off"> {{ data.sample_for_select|safe }}</select>
+	</div>
+</div>
+{# ------- Depth ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
+		<label class="title">Depth</label>
+		<span title="Positive values. Both values are required. Each object has a min and max depths. Both values must be in the selected range for the object to be displayed." data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
+		<a class="pull-right clear" href='javascript:ClearDepths();'></a>
 
-<p style="border-bottom: 1px solid #ddd;padding-bottom: 4px;">
-<select id="sampleid" name="sampleid" style="width: 240px"  multiple autocomplete="off"> {{ data.sample_for_select|safe }}</select>
-</p>
-<p>Depth <span id="spaninfodepth" style="color: blue;" class="glyphicon glyphicon-info-sign"></span>
-    Min: <input type="text" id="filt_depthmin" style="width:45px;" autocomplete="off" value="{{ data.depthmin }}">
-    Max: <input type="text" id="filt_depthmax" style="width:45px;" autocomplete="off" value="{{ data.depthmax }}">
-    <a href='javascript:ClearDepths();' title="Clear"><span class="glyphicon glyphicon-erase"></span></a>
-</p>
-<table class="table" >
-  <tr><td colspan="2" align="Center">N <input type="text" size="7" id="filt_MapOutN" name="filt_MapOutN"  value="{{ data.MapN }}" autocomplete="off"></td></tr>
-  <tr>
-    <td>W <input type="text" size="7" id="filt_MapOutW" name="filt_MapOutW" autocomplete="off" value="{{ data.MapW }}"></td>
-    <td>E <input type="text" size="7" id="filt_MapOutE" name="filt_MapOutE" autocomplete="off" value="{{ data.MapE }}"></td></tr>
-  <tr><td colspan="2" align="Center">S <input type="text" size="7" id="filt_MapOutS" name="filt_MapOutS" value="{{ data.MapS }}" autocomplete="off"></td></tr>
-  <tr><td colspan="2" align="Center">
-    <button type="button" class="btn btn-primary" onClick="OpenMap({{ g.Projid }});">Open Map</button>
-    <button type="button" class="btn " onClick="ClearCoord();">Clear</button>
-  </td></tr>
-</table>
+		<div class="form-inline">
+			<div class="input-group" style="width: 49%" >
+				<div class="input-group-addon"><span class="glyphicon glyphicon-triangle-bottom"></span></div>
+				<input class="form-control" type="text" id="filt_depthmin" autocomplete="off" value="{{ data.depthmin }}" placeholder="Min [m]">
+			</div>
+			<div class="input-group" style="width: 49%">
+				<div class="input-group-addon"><span class="glyphicon glyphicon-triangle-top"></span></div>
+				<input class="form-control"  type="text" id="filt_depthmax" autocomplete="off" value="{{ data.depthmax }}"  placeholder="Max [m]">
+			</div>
+		</div>
+	</div>
+</div>
+{# ------- Position ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
+		<label class="title">Location</label>
+		<a class="pull-right clear" href='javascript:ClearCoords();'></a>
 
-<table width="100%" style="border-top: 1px solid #ddd;padding-top: 4px;">
-  <tr><td><b>Date</b> </td><td align="right"><a href='javascript:ClearDates();'>Clear</a>
-   </td></tr>
-</table>
-<label for="filt_fromdate">From </label> <input type="text" style="width: 80px" id="filt_fromdate" name="filt_fromdate" value="{{ data.fromdate }}"  autocomplete="off">
-<label for="filt_todate"> to </label> <input type="text" style="width: 80px" id="filt_todate" name="filt_todate" value="{{ data.todate }}" autocomplete="off">
+		<table>
+			<tr>
+				<td><input class="form-control" type="text" id="filt_MapOutW" name="filt_MapOutW" value="{{ data.MapW }}" placeholder="West"></td>
+				<td><input class="form-control" type="text" id="filt_MapOutN" name="filt_MapOutN"  value="{{ data.MapN }}" placeholder="North">
+				<input class="form-control" type="text" id="filt_MapOutS" name="filt_MapOutS" value="{{ data.MapS }}" placeholder="South"></td>
+				<td><input class="form-control" type="text" id="filt_MapOutE" name="filt_MapOutE" autocomplete="off" value="{{ data.MapE }}" placeholder="East"></td>
+			</tr>
+		</table>
 
-<table width="100%" style="border-top: 1px solid #ddd;padding-top: 4px;">
-  <tr><td><b>Time</b>
-  </td><td align="right"><a href='javascript:ClearTimes();'>Clear</a>
-   </td></tr>
-</table>
-<div id="time-slider-range"></div>
-<label for="filt_fromtime">From </label> <input type="text" style="width: 45px" id="filt_fromtime" name="filt_fromtime" autocomplete="off" value="{{ data.fromtime }}">
-<label for="filt_totime"> to </label> <input type="text" style="width: 45px" id="filt_totime" name="filt_totime" autocomplete="off" value="{{ data.totime }}">
-<label for="filt_inverttime"> Invert </label> <input type="checkbox" value="Y" style="width: 25px" id="filt_inverttime" name="filt_inverttime" autocomplete="off" {{ "checked" if data.inverttime=='1' }}>
+		<button type="button" class="btn btn-sm btn-default btn-block" onClick="OpenMap({{ g.Projid }});">Open map</button>
+	</div>
+</div>
+{# ------- Dates ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
+		<label class="title">Date</label>
+		<a class="pull-right clear" href='javascript:ClearDates();'></a>
+		<input class="form-control" type="text" style="width: 100%" id="filt_fromdate" name="filt_fromdate" value="{{ data.fromdate }}" autocomplete="off" placeholder="Begin">
+		<input class="form-control" type="text" style="width: 100%" id="filt_todate" name="filt_todate" value="{{ data.todate }}" autocomplete="off" placeholder="End">
+	</div>
+</div>
+{# ------- Times ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
 
+		<label class="title">Time</label>
+		<input type="checkbox" value="Y" id="filt_inverttime" name="filt_inverttime" autocomplete="off" {{ "checked" if data.inverttime=='1' }}> <label for="filt_inverttime">invert</label>
+		<a class="pull-right clear" href='javascript:ClearTimes();'></a>
+		<form class="form-inline">
+			<input class="form-control" type="text" style="width: 49%" id="filt_fromtime" name="filt_fromtime" autocomplete="off" value="{{ data.fromtime }}" placeholder="Begin">
+			<input class="form-control" type="text" style="width: 49%" id="filt_totime" name="filt_totime" autocomplete="off" value="{{ data.totime }}" placeholder="End">
+		</form>
+
+		<div style="margin: 7px" id="time-slider-range"></div>
+	</div>
+</div>
 
 <script>
 function OpenMap(projid) {
@@ -77,15 +105,15 @@ function ClearSamples(){
 function UpdateTimeSliderColor(){
     if($("#filt_inverttime").prop("checked")) {
        $("#time-slider-range .ui-slider-range").css('background-color','#fff')
-       $("#time-slider-range").css('background-color','#337ab7')
+       $("#time-slider-range").css('background-color','#555')
     } else    {
-       $("#time-slider-range .ui-slider-range").css('background-color','#337ab7')
+       $("#time-slider-range .ui-slider-range").css('background-color','#555')
        $("#time-slider-range").css('background-color','#fff')
     }
 }
 
 $(document).ready(function() {
-  $('#spaninfodepth').popover({html: true, trigger: 'hover', placement: "bottom",content:"Positive values, both values are required. Both Detph min&max of objects must be in the filter range to be selected"});
+  
 
     $("#sampleid").select2({
         ajax: {
@@ -117,7 +145,9 @@ $(document).ready(function() {
         $( "#filt_totime" ).val( v );
       }
     });
-    $("#filt_inverttime").change(function(){UpdateTimeSliderColor();});
+    $("#filt_inverttime").change(function(){
+			UpdateTimeSliderColor();
+		});
     UpdateTimeSliderColor();
 });
 </script>
