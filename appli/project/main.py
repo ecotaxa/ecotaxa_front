@@ -247,8 +247,12 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     sql+=whereclause
     #filt_fromdate,#filt_todate
 
-    sqlcount="select count(*),count(case when classif_qual='V' then NULL else 1 end) from objects o  "+whereclause
-    (nbrtotal,nbrvalid)=GetAll(sqlcount,sqlparam,debug=False)[0]
+    sqlcount="""select count(*)
+        ,count(case when classif_qual='V' then 1 end) NbValidated
+        ,count(case when classif_qual='D' then 1 end) NbDubious
+        ,count(case when classif_qual='P' then 1 end) NbPredicted
+        from objects o  """+whereclause
+    (nbrtotal,nbrvalid,nbrdubious,nbrpredict)=GetAll(sqlcount,sqlparam,debug=False)[0]
     pagecount=math.ceil(nbrtotal/ipp)
     if sortby=="classifname":
         sql+=" order by t.name "+sortorder
@@ -406,13 +410,13 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             t.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>"%(pageoffset+1))
         t.append("</ul></nav>")
     if nbrtotal>0:
-        pctvalid="%0.1f %%"%(100*nbrvalid/nbrtotal,)
+        pctvalid="<font color=#0A0>%0.1f %%</font>, <font color=#00A>%0.1f %%</font>, <font color=#A00>%0.1f %%</font>"%(100*nbrvalid/nbrtotal,100*nbrpredict/nbrtotal,100*nbrdubious/nbrtotal)
     else: pctvalid="-"
     t.append("""
     <script>
         PostAddImages();
-        $('#objcount').text('%d (%s) ');
-    </script>"""%(nbrtotal,pctvalid))
+        $('#objcount').html('%s / %d ');
+    </script>"""%(pctvalid,nbrtotal))
     return "\n".join(t)
 
 ######################################################################################################################

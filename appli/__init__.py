@@ -187,11 +187,11 @@ def JinjaNl2BR(t):
 
 def JinjaGetManagerList():
     LstUsers=database.GetAll("""select distinct u.email,u.name,Lower(u.name)
-FROM projectspriv pp join users u on pp.member=u.id
-where pp.privilege='Manage'
-and u.active=TRUE
-order by Lower(u.name) """)
-    return " ".join(["<li><a href='mailto:{0}'>{1} ({0})</a></li> ".format(*r) for r in LstUsers if '@' in r[0]])
+FROM users_roles ur join users u on ur.user_id=u.id
+where ur.role_id=2
+and u.active=TRUE and email like '%@%'
+order by Lower(u.name)""")
+    return " ".join(["<li><a href='mailto:{0}'>{1} ({0})</a></li> ".format(*r) for r in LstUsers ])
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
