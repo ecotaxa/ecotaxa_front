@@ -20,24 +20,29 @@
 <table class="classiftab" width="98%">
 {% for v in res %}
 <tr>
-<td taxoid="{{ v['id'] }}" class="{{  v['parentclasses'] }}">
+<td taxoid="{{ v['id'] }}" class="{{  v['parentclasses'] }} {{ 'zerocount' if v['nbr']==0  }}">
         
-	<b>{{ ("&emsp;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>
-        {% if v['parentclasses'] %}
-			<span style="width: 7px; display: inline-block;" ></span>
-		{% endif %}
         {% if v['haschild'] %}
 			<small><span style="width: 7px;"  class="glyphicon glyphicon-triangle-bottom categexpander" ></span></small>
+		{% else %}
+			<span style="width: 7px; display: inline-block;" ></span>
 		{% endif %}
+	<b>{{ ("&emsp;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>
 	  <span class="taxodrop {% if v['haschild'] %}haschild{% endif %}">
 		{{ v['taxoname'] }}
-	</span> 
+	</span>
 	<span class="taxoparent">{{ v['taxoparent'] }}</span>
 		<span class="counter label {{ "label-primary" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</span>
 	</td>
 </tr>
 {% endfor %}
 </table>
+<div style="margin-top: 3px;">
+<a href="javascript:RefreshClassifTab();" class="btn btn-default btn-xs" style="width: 45%;">Update counts <span class="glyphicon glyphicon-repeat"></span></a>
+<button type="button" class="btn btn-xs btn-default" id="zeroshowhide" onclick="ToggleZeroCount()" data-show="0">Hide empty categories</button>
+
+</div>
+
   </div>
 
   <script>
@@ -209,6 +214,16 @@ function AssignTaxoLbToSelection() {
             LstTd.push($(this));
         });
         ProcessList(LstTd, droptaxoid, $('#taxolbanno  option:selected').text());
+    }
+}
+function ToggleZeroCount(){
+    if($('#zeroshowhide').data("show")=="0") {
+        $(".zerocount").hide();
+        $('#zeroshowhide').data("show","1").text("Show empty categories");
+    }
+    else {
+        $('#zeroshowhide').data("show", "0").text("Hide empty categories");
+        $(".zerocount").show();
     }
 }
 

@@ -52,24 +52,23 @@
 {{ top|safe }}
 </td><td>
     &nbsp;
-    <span class="btn btn-xs SpanSelectAll">Select all</span>
-    &nbsp;
-    <span class="glyphicon glyphicon-sort"></span>&nbsp;
+    <span class="btn btn-xs SpanSelectAll rm5">Select all</span>
+
+    <span class="glyphicon glyphicon-sort rm5"></span>
 </td><td>
-    <select name="sortby" id="sortby" style="width: 100px" class="form-control">
+    <select name="sortby" id="sortby" style="width: 100px" class="form-control rm5">
 
 {% for key, value in data.sortlist.items() %}
     <option value="{{ key|e }}" {{ 'selected' if key==data.sortby }}> {{ value|e }}</option>
 {% endfor %}
 </select>
-</td><td>&nbsp;
-<button type="button" class="btn btn-default btn-xs " onclick="SortToggle();" title="Current Sort : Ascending">
+</td><td>
+<button type="button" class="btn btn-default btn-xs rm5" onclick="SortToggle();" title="Current Sort : Ascending">
         <span id="sortorder" class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span></button>
 
-<div class="btn-group">
-  <button type="button" class="btn btn-default btn-xs">Display</button>
+<div class="btn-group rm5">
   <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    <span class="caret"></span>
+    Display &nbsp;<span class="caret"></span>
     <span class="sr-only">Toggle Dropdown</span>
   </button>
   <ul id="dispfieldlist" class="dropdown-menu">
@@ -80,7 +79,8 @@
 {% endfor %}
   </ul>
 </div>
-          <label for="statusfilter" data-toggle="tooltip" data-placement="bottom" data-html="true"
+</td><td >
+          <label for="statusfilter" data-toggle="tooltip" data-placement="bottom" data-html="true" class="rm5" style="margin-bottom: 0px;"
         title="
         <p style='text-align: left'>
         <b>All</b>: all images</br>
@@ -91,23 +91,23 @@
         <b>Valid. by others</b>: identification done by other users</br>
         <b>Valid. by me</b>: identification done by me</br>
         <b>Dubious</b>: dubious identification</div>">
-      Status &nbsp;</td><td style="padding-right: 5px;">
+      Status </label></td><td style="padding-right: 5px;" class="rm5">
       </label><select name="statusfilter" id="statusfilter"  class="form-control" data-original-title="" title="" style="width: 100px">
 {% for key, value in data.statuslist.items() %}
     <option value="{{ key|e }}" {{ 'selected' if key==data.statusfilter }}> {{ value|e }}</option>
 {% endfor %}
 </select></td><td style="padding-right: 5px;">
-    <label for="ipp"><span class="glyphicon glyphicon-th"></span></label>
+    <label for="ipp" style="margin-bottom: 0px;"><span class="glyphicon glyphicon-th"></span></label>
     </td><td style="padding-right: 5px;">{{ selectinput("ipp",['1','5','10','20','50','100','200','500','1000'],data.ipp) }}
-    </td><td style="padding-right: 5px;">    <label for="zoom"><span class="glyphicon glyphicon-zoom-in"></span>%</label>
+    </td><td style="padding-right: 5px;">    <label for="zoom" style="margin-bottom: 0px;"><span class="glyphicon glyphicon-zoom-in"></span>%</label>
     </td><td style="padding-right: 5px;">{{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}</td><td>
 </td><td>
-      <label for="magenabled">
+      <label for="magenabled" style="margin-bottom: 0px;">
       	<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
       </label>
       {{ checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
-    </td><td>&nbsp;
-      <label for="popupenabled">
+    </td><td>
+      <label for="popupenabled" style="margin-bottom: 0px;padding-left: 8px;">
         <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
       </label>
       {{ checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
@@ -138,7 +138,6 @@
                     <li role="presentation" class="active">
                         <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Classify</a>
                     </li>
-                    <li><a href="javascript:RefreshClassifTab();"><span class="glyphicon glyphicon-refresh"></span></a></li>
                     <li role="presentation">
                         <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filters</a>
                     </li>
@@ -159,8 +158,8 @@
                         {{ leftb|safe }}
                       <div class="row">
                         <div class="col-sm-12">
-                           <button class="btn btn-default btn-block" onclick="LoadRightPane(false,true);">Save filters configuration</button>
-                           <a href='?' type="button" class="btn btn-default btn-block">Apply saved filters</a>
+                           <button class="btn btn-default btn-block btn-sm active" onclick="LoadRightPane(false,true);">Save filters configuration</button>
+                           <a href='?' type="button" class="btn btn-default btn-sm btn-block active">Apply saved filters</a>
                         </div>
                       </div>
 
@@ -181,9 +180,7 @@
 .ui-selected { background-color: #E9D6D7;}
 .ra3 {float:right; margin-right: 3px;} {#TODO voir necessite de conserver#}
 
-table.imgtab {margin-bottom: 5px;}
-table.imgtab td {vertical-align:bottom;text-align: center;
-   border-width:1px;   border-style:solid; border-color:#c5c5c5;  }
+
 #column-right {margin-left: 260px;}
 #divheadinfo {position:fixed;top:0px;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;}
 #topbar {position:fixed;top:80px;left: 1px;width:100%; height:40px;z-index:10; background-color: #fff;}

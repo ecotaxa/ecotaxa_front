@@ -38,7 +38,8 @@
        url('/static/fonts/source-sans-pro-v9-latin-600.ttf') format('truetype'), /* Safari, Android, iOS */
        url('/static/fonts/source-sans-pro-v9-latin-600.svg#SourceSansPro') format('svg'); /* Legacy iOS */
 }
-
+.rm5 { margin-right: 5px; }
+	
 code {
 	color: #555;
 	/* no not color in red by default */
