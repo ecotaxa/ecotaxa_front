@@ -1,5 +1,5 @@
 {% macro selectinput(name, values, value='') -%}
-    <select name="{{ name }}" id="{{ name }}">
+    <select class="form-control" name="{{ name }}" id="{{ name }}">
     {% for v in values %}
         <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
     {% endfor %}
@@ -24,15 +24,21 @@
 
 {% block body %}<div id="topbar" >
 <table><tr><td>
+    <button type="button" class="btn btn-xs btn-primary" onclick="LoadRightPane();" style="width: 260px;">
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update view</button>
 
-    Img /page : {{ selectinput("ipp",['50','100','200','500','1000'],data.ipp) }}
-    Zoom : {{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}
-</td><td style="font-size: 12px; padding:0px 2px 4px 5px;">Magnifier:</td>
-<td style="font-size: 12px">
+    Img /page : 
+	</td><td style="padding-right: 5px;">{{ selectinput("ipp",['50','100','200','500','1000'],data.ipp) }}
+    </td><td style="padding-right: 5px;">Zoom : 
+	</td><td style="padding-right: 5px;">{{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}
+</td><td>
+      <label for="magenabled">
+      	<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+      </label>
+
     {{ checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
 </td><td>&nbsp;
-    <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
-        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update View</button>
+
 {{ top|safe }}
 </td></tr></table>
     </div>
@@ -62,53 +68,48 @@ $(document).ready(function() {
     UL#select2-taxolb-results {max-height: 500px; }
 </style>
 
-       <div id="column-left"  class="panel panel-default" style="position: fixed;	top: 125px;	left: 2px;	bottom: 0px;	width: 280px;
+       <div id="column-left"  class="" style="position: fixed;	top: 120px;	left: 2px;	bottom: 0px;	width: 260px;
                 overflow-y: auto; overflow-x: auto;  margin-bottom: 0px; " >
-        <div class="bodyleft" style="margin-left: 2px; width: 251px;">
-        <a href='?'>Clear all filter &amp; update view/refresh</a><br>
+        <div class="bodyleft" style="margin-left: 2px; width: 231px; margin-top: 3px;">
+          <a href='?' class="btn btn-default " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
+           <button class="btn btn-default" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
+        <br>
+
  {# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
 
-<table width="100%">
-  <tr><td><b>Taxonomy Filter</b> </td><td align="right"><a href='javascript:ClearTaxo();'>Clear</a>
-   </td></tr>
-</table>
+<div class="filter">
+    <button class="btn btn-block btn-xs left-button" onclick="$('.filter').toggle();">Hide filters</button>
+</div>
+<div class="filter" style="display: none">
+    <button class="btn btn-block btn-xs left-button" onclick="$('.filter').toggle();">Show filters</button>
+</div>
 
- <div class="row" style="width: 270px;">
-     <div class="col-lg-12">
-        <div class="input-group">
-            <select id="taxolb" multiple="multiple" style="width: 210px"  autocomplete="off"> {{ data.taxo_for_select|safe }} </select>
-            <span class="input-group-btn">
-                <button class="btn btn-default" type="button"  data-toggle="modal" data-target="#TaxoModal">
-                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></span></button>
-                </span>
-        </div><!-- /input-group -->
-    </div><!-- /.col-lg-12 -->
-</div><!-- /.row -->
-Include taxonomy childs {{ checkboxinput("taxochild","1",data.taxochild,"style='margin:0px;'") }}
+{# ------- Project ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
+		<label class="title">Project</label>
+		<a class="pull-right clear" href='javascript:ClearProjects();'></a>
+		<select class="form-control" id="projid" name="projid" style="width: 100%" multiple autocomplete="off"> {{ data.projects_for_select|safe }}</select>
+	</div>
+</div>
+
+{{ leftb|safe }}
+
+{# ------- Taxo Filter ------------#}
+<div >
+	<div class="form-group-sm">
+		<label class="title">Taxonomy Filter</label>
+		<a class="pull-right clear" href='javascript:ClearTaxo();'></a>
+        <select id="taxolb" multiple="multiple" style="width: 100%"  autocomplete="off"> {{ data.taxo_for_select|safe }} </select>
+	</div>
+</div>
+<div >
+{{ checkboxinput("taxochild","1",data.taxochild,"style='margin:0px;'") }} Also display children
+</div>
+
 <div class="FilterToggle" style="display:none;cursor:pointer;">
     <span onclick="$('.FilterToggle').toggle();"><span class="glyphicon glyphicon-triangle-right"></span>Show filters</span>
 </div>
-<div class="FilterToggle">
-
-<table width="100%">
-  <tr><td><span style="cursor:pointer;" class="glyphicon glyphicon-triangle-bottom" onclick="$('.FilterToggle').toggle();"></span>
-      <b>Project</b> </td><td align="right"><a href='javascript:ClearProjects();'>Clear</a>
-   </td></tr>
-</table>
-<p style="border-bottom: 1px solid #ddd;padding-bottom: 4px;">
-<select id="projid" name="projid" style="width: 250px"  multiple autocomplete="off"> {{ data.projects_for_select|safe }}</select>
-</p>
-
-
-        {{ leftb|safe }}
-        <br>
-</div> {#FilterToggle    #}
-        <p align="center" style="border-top: 1px solid #ddd;padding-top: 4px;">
-        <button type="button" class="btn btn-sm btn-primary" onclick="LoadRightPane();">
-            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Apply Filter / Update View</button>
-        </p>
-        <p><button type="button" class="btn btn-sm btn-info" onclick="LoadRightPane(true);">
-            Apply filter by page reload (copiable URL)</button></p>
 
 
 <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css" />
@@ -160,6 +161,8 @@ Include taxonomy childs {{ checkboxinput("taxochild","1",data.taxochild,"style='
                     o.preventDefault();
                     var id= $(o.target).closest("li").attr("id");
                     var valeur= $(o.target).prev().html();
+                    if($(o.target).hasClass("glyphicon"))
+                        valeur= $(o.target).parent().prev().html();
                    $('#SelectedID').html(id);
                    $('#SelectedName').html(valeur);
                    $('#taxolb').append($('<option>', {    value: id,    text: valeur}));
@@ -183,16 +186,17 @@ Include taxonomy childs {{ checkboxinput("taxochild","1",data.taxochild,"style='
     </div>
 {#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
 <style>
-.lazy {margin: 10px 5px 0px 5px; }
+.lazy {margin: 15px 5px 0px 5px; }
 .ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
+.ddets {cursor:pointer;}
 #dispfieldlist li a {    padding-top:0px;}
-.ui-selected { background: #FFFF00; color: white; }
-.ra3 {float:right; margin-right: 3px;}
-table.classiftab td {padding: 2px 3px 0px 3px ;  border-width:1px;border-style:solid;border-color:#c5c5c5;font-size: 12px;}
+
+
+
 table.imgtab {margin-bottom: 5px;}
 table.imgtab td {vertical-align:bottom;text-align: center;
-   border-width:1px;   border-style:solid; border-color:#c5c5c5; background-color: #e6e6e6;  }
-#column-right {margin-left: 290px;}
+   border-width:1px;   border-style:solid; border-color:#c5c5c5;  }
+#column-right {margin-left: 260px;}
 #divheadinfo {position:fixed;top:0px;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;}
 #topbar {position:fixed;top:80px;left: 1px;width:100%; height:40px;z-index:10; background-color: #fff;}
 body {margin-top: 125px;}
@@ -227,37 +231,50 @@ function LoadRightPane(NoAjax){
     req['MapS']=$("#filt_MapOutS").val();
     if((req['MapN']!="")&&(req['MapW']!="")&&(req['MapE']!="")&&(req['MapS']!=""))
         TxtFilter+=" Position=("+req['MapN']+","+req['MapW']+","+req['MapE']+","+req['MapS']+")"
+    else {delete req['MapN']; delete req['MapW'];delete req['MapE']; delete req['MapS']; }
 
     req['depthmin']=$("#filt_depthmin").val();
     req['depthmax']=$("#filt_depthmax").val();
     if((req['depthmin']!="")&&(req['depthmax']!=""))
         TxtFilter+=" Depth in("+req['depthmin']+"-"+req['depthmax']+")";
+    else {delete req['depthmin']; delete req['depthmax']; }
+
     if($('#sampleid').val()!=null)
       req['samples']=String($('#sampleid').val())
     else req['samples']="";
     if(req['samples']!="")
         TxtFilter+=" Samples="+$.map( $('#sampleid  option:selected'), function (element) { return $(element).text() }).join(', ');
+
     if($('#projid').val()!=null)
       req['projid']=String($('#projid').val())
     else req['projid']="";
     if(req['projid']!="")
         TxtFilter+=" Project="+$('#projid').val().join(', ');
+
     req['fromdate']=$("#filt_fromdate").val();
     if(req['fromdate']!="")
         TxtFilter+=" Date >= "+req['fromdate'];
+    else delete req['fromdate'];
+
     req['todate']=$("#filt_todate").val();
     if(req['todate']!="")
         TxtFilter+=" Date <= "+req['todate'];
+    else delete req['todate'];
 
     req['fromtime']=$("#filt_fromtime").val();
     if(req['fromtime']!="")
         TxtFilter+=" Time >= "+req['fromtime'];
+    else delete req['fromtime'];
+
     req['totime']=$("#filt_totime").val();
     if(req['totime']!="")
         TxtFilter+=" Time <= "+req['totime'];
+    else delete req['totime'];
+
     req['inverttime']=$("#filt_inverttime").prop("checked")?"1":"";
     if(req['inverttime']=="1")
         TxtFilter+=" Time Invert ";
+    else delete req['inverttime'];
 
 
     $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
@@ -270,10 +287,12 @@ function LoadRightPane(NoAjax){
         for	(var k in req)
 {#            if(req[k]!=="") // Il faut tous les laisser pour pouvoir forcer leur effacement par rapport aux users settings  #}
                 urlparam[k]=req[k];
-        window.location="?"+$.param(urlparam);
+        {#      window.location="?"+$.param(urlparam);  Version ouvrant dans une popup#}
+        var url=window.location.protocol+"//"+window.location.host+"/explore/?"+$.param(urlparam);
+        window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
         return;
     }
-    $("#column-right").html("Loading...")
+    $("#column-right").html("<img src='/static/spinningred.gif'> Loading");
     $("#column-right").load("/explore/LoadRightPane",req);
     $('#headersubtitle').html(TxtFilter);
 }

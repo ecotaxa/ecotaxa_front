@@ -13,24 +13,41 @@ from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 @app.route('/prj/')
 @login_required
 def indexProjects():
-    txt = "<h3>Select your Project</h3>"
+    txt = "<h3>Select your Project</h3>" #,pp.member
     sql="select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects p"
     if not current_user.has_role(database.AdministratorLabel):
-        sql+=" Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
-    sql+=" order by lower(title)"
+        sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
+    sql+=" order by lower(title)" #pp.member nulls last,
     res = GetAll(sql) #,debug=True
-    txt+="""<table class='table table-bordered table-hover'>
-            <tr><th width=100>ID</td><th>Title</td><th width=100>Status</td><th width=100>Nbr Obj</td>
-            <th width=100>% Validated</td><th width=100>% Classified</td></tr>"""
+    txt+="""
+    <p>To create a new project and upload images in it, please contact the application manager(s): list of emails</p>
+    """ # TODO ajouter la liste des administrateurs
+
+    txt+="""
+    <table class='table table-hover table-verycondensed projectsList'>
+        <thead><tr>
+                <th></th>
+                <th>Title [ID]</th>
+                <th>Status</th>
+                <th>Nb objects</th>
+                <th>%&nbsp;validated</th>
+                <th>%&nbsp;classified</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
     for r in res:
-        txt+="""<tr><td><a class="btn btn-primary" href='/prj/{0}'>Go !</a> {0}</td>
-        <td>{1}</td>
+        # if r[6] is None:
+        #     txt+="<tr><td><a class='btn btn-primary' href='/prj/{0}'>Request !</a> {0}</td>".format(*r)
+        # else:
+        txt+="<tr><td><a class='btn btn-primary' href='/prj/{0}'>Go !</a></td>".format(*r)
+        txt+="""<td>{1} [{0}]</td>
         <td>{2}</td>
         <td>{3:0.0f}</td>
         <td>{4:0.2f}</td>
         <td>{5:0.2f}</td>
         </tr>""".format(*r)
-    txt+="</table>"
+    txt+="</tbody></table>"
 
     return PrintInCharte(txt)
 
@@ -230,8 +247,8 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     sql+=whereclause
     #filt_fromdate,#filt_todate
 
-    sqlcount="select count(*) from objects o  "+whereclause
-    nbrtotal=GetAll(sqlcount,sqlparam,debug=False)[0][0]
+    sqlcount="select count(*),count(case when classif_qual='V' then NULL else 1 end) from objects o  "+whereclause
+    (nbrtotal,nbrvalid)=GetAll(sqlcount,sqlparam,debug=False)[0]
     pagecount=math.ceil(nbrtotal/ipp)
     if sortby=="classifname":
         sql+=" order by t.name "+sortorder
@@ -239,14 +256,17 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         sql+=" order by o."+sortby+" "+sortorder
     # else:  # pas de tri par defaut pour améliorer les performances sur les gros projets
     #     sql+=" order by o.orig_id"
+    # app.logger.info("pageoffset/pagecount %s / %s",pageoffset,pagecount)
+    if pageoffset>=pagecount:
+        pageoffset=pagecount-1
+        if pageoffset<0:
+            pageoffset=0
     sql+=" Limit %d offset %d "%(ipp,pageoffset*ipp)
     res=GetAll(sql,sqlparam,False)
     trcount=1
     LineStart=""
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
-        t.append("""<span class=SpanSelectAll style="background:#FFFF00;">[Select All]</span> <button class='btn btn-primary btn-xs' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
-        <span id=PendingChanges2 class=PendingChangesClass style="font-size:12px;"></span>""")
-        LineStart="<td class=linestart>&gt;<br>&gt;<br>&gt;<br></td>"
+        LineStart="<td class='linestart'></td>"
     t.append("<table class=imgtab><tr id=tr1>"+LineStart)
     WidthOnRow=0
     #récuperation et ajustement des dimensions de la zone d'affichage
@@ -320,16 +340,17 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             popoverfieldlist=GetFieldList(Prj,champ='popoverfieldlist')
             popoverfieldlist.pop('orig_id','')
             popoverfieldlist.pop('objtime','')
-            poptitletxt="<p style='color:black;font-size:12px;'>%s"%(r['orig_id'],)
-            poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
+            poptitletxt="%s"%(r['orig_id'],)
+            poptxt=""
+            #poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
             if r[3]!="":
-                poptxt+="<br>By %s"%(r[3])
+                poptxt+="<em>by</em> %s"%(r[3])
+            poptxt+="<br><em>in</em> "+ntcv(r['samplename'])
             for k,v in popoverfieldlist.items():
                 if k=='classif_auto_score' and r["classif_qual"]=='V':
                     poptxt+="<br>%s : %s"%(v,"-")
                 else:
                     poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
-            poptxt+="<br>Sample : "+ntcv(r['samplename'])
             popattribute="data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'".format(poptitletxt,poptxt,'left' if WidthOnRow>500 else 'right')
         else: popattribute=""
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher
@@ -345,39 +366,53 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
                 else:
                     bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
         if bottomtxt!="":
-            bottomtxt="<p style='font-size:12px; word-break: break-all;'>"+bottomtxt[4::]+"</p>" #[4::] supprime le premier <BR>
-        txt+="<div class='subimg {1}' {2}><span class=taxo >{0}</span>{3}<div class=ddet><span class=ddets>View {4}</div></div>"\
+            bottomtxt=bottomtxt[4::] #[4::] supprime le premier <BR>
+        txt+="""<div class='subimg {1}' {2}>
+<div class='taxo'>{0}</div>
+<div class='displayedFields'>{3}</div></div>
+<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4}</div>"""\
             .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
         txt+="</td>"
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
-        WidthOnRow+=cellwidth
+        WidthOnRow+=cellwidth+5 # 5 = border-spacing = espace inter image
         t.append(txt)
 
     t.append("</tr></table>")
+    if len(res)==0:
+        t.append("<b>No Result</b><br>")
+
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
-        t.append("""<span class=SpanSelectAll style="background:#FFFF00;">[Select All]</span> <span id=PendingChanges class=PendingChangesClass></span><br>
-        <button class='btn btn-primary btn-sm' onclick='SavePendingChanges();'><span class='glyphicon glyphicon-floppy-open' /> Save changed annotations </button>
-        <button class='btn btn-success btn-sm' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> Save changed annotations &amp; Validate all objects in page</button>
-        <button class='btn btn-success btn-sm' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>
+        t.append("""
+		<div id='PendingChanges' class='PendingChangesClass text-danger'></div>
+        <button class='btn btn-primary' onclick='SavePendingChanges();' title='CTRL+S'><span class='glyphicon glyphicon-save' /> Save pending changes [CTRL+S]</button>
+        <button class='btn btn-success' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> <span class='glyphicon glyphicon-arrow-right' /> Save changes, validate the rest and move to next page</button>
+        <!--<button class='btn btn-success' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>-->
         """)
     # Gestion de la navigation entre les pages
     if pagecount>1 or pageoffset>0:
-        t.append("<p align=center> Page %d/%d - Go to page : "%(pageoffset+1,pagecount))
+        t.append("<p class='inliner'> Page %d / %d</p>"%(pageoffset+1,pagecount))
+        t.append("<nav><ul class='pagination'>")
         if pageoffset>0:
-            t.append("<a href='javascript:gotopage(%d);' >&lt;</a>"%(pageoffset-1))
+            t.append("<li><a href='javascript:gotopage(%d);' >&laquo;</a></li>"%(pageoffset-1))
         for i in range(0,pagecount-1,math.ceil(pagecount/20)):
-            t.append("<a href='javascript:gotopage(%d);' >%d</a> "%(i,i+1))
-        t.append("<a href='javascript:gotopage(%d);' >%d</a>"%(pagecount-1,pagecount))
+            if i == pageoffset:
+                t.append("<li class='active'><a href='javascript:gotopage(%d);'>%d</a></li>"%(i,i+1))
+            else:
+                t.append("<li><a href='javascript:gotopage(%d);'>%d</a></li>"%(i,i+1))
+        t.append("<li><a href='javascript:gotopage(%d);'>%d</a></li>"%(pagecount-1,pagecount))
         if pageoffset<pagecount-1:
-            t.append("<a href='javascript:gotopage(%d);' >&gt;</a>"%(pageoffset+1))
-        t.append("</p>")
+            t.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>"%(pageoffset+1))
+        t.append("</ul></nav>")
+    if nbrtotal>0:
+        pctvalid="%0.1f %%"%(100*nbrvalid/nbrtotal,)
+    else: pctvalid="-"
     t.append("""
     <script>
         PostAddImages();
-        $('#objcount').text(%d);
-    </script>"""%(nbrtotal,))
+        $('#objcount').text('%d (%s) ');
+    </script>"""%(nbrtotal,pctvalid))
     return "\n".join(t)
 
 ######################################################################################################################

@@ -1,54 +1,217 @@
 {% extends "layout.html" %}
 {% block headcenter %}
-  <h4>Project :  {{  g.prjtitle  }} </h4>
+  <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
 {% endblock %}
 
 {% block body %}
 
+<h2>Import data (step 1)</h2>
 
-<form class="form-horizontal" method="post" enctype=multipart/form-data>
+<div class="help-block">
+	<div class="row">
+		<div class="col-sm-12">
+
+			<p><a href="#general-help" data-toggle="collapse" class="help">General help</a></p>
+			<div id="general-help" class="collapse">
+			
+			<p>Use this page to import images and associated metadata into the current project.</p>
+			
+			In a folder place:
+			<dl style="margin-left: 40px;">
+				
+				<dt>image files</dt>
+					<dd>
+						<p>Colour and 8-bits greyscale images are supported, in <code>jpg</code>, <code>png</code>,<code>gif</code> (possibly animated) formats.</p>
+					</dd>
+					
+				<dt>a <code><a href="https://en.wikipedia.org/wiki/Tab-separated_values">tsv</a></code> file (can be .txt or .tsv extension)</dt>
+					<dd>
+						<p>It contains the metadata for each image. This file can be created in a spreadsheet application.</p>
+						<ul>
+							<li>Line 1 contains column headers</li>
+							<li>Line 2 contains data format codes; [f] for floats, [t] for text</li>
+							<li>Line 3...n contain data for each image</li>
+						</ul>
+					</dd>
+			</dl>
+
+			<p>
+				The metadata and data for each image is organised in various levels (image, object, process, sample, etc.). All column names must be prefixed with the level name (<code>img_***</code>, <code>object_***</code>, etc.). Some common fields, used to filter data, must be named and sometimes formatted in a certain way (required format in blue), which is documented below. But, overall, the only two mandatory fields are <code  class="text-danger">img_file_name</code> and <code class="text-danger">object_id</code> (in red).
+				
+				<ul>
+					<il>IMAGE</il>
+					<ul>
+						<li><code class="text-danger">img_file_name</code> [t]: name of the image file in the folder (including extension)</li>
+						<li><code>img_rank</code> [f] : rank of image to be displayed, in case of existence of multiples (&lt;10) images for one object. Starts at 1.</li>
+					</ul>
+
+					<il>OBJECT: one object to be classified, usually one organism. One object can be represented by several images. In this <code>tsv</code> file, there is one line per image which means the object data gets repeated on several lines.</il>
+					<ul>
+						<li><code class="text-danger">object_id</code> [t] : unique object name (will be displayed in Ecotaxa object page)</li>
+						<li><code>object_link</code> [f] : URL of an associated website</li>
+						<li><code>object_lat</code> [f] : latitude, <span class="text-info">decimal degrees</span></li>
+						<li><code>object_lon</code> [f] : longitude, <span class="text-info">decimal degrees</span></li>
+						<li><code>object_date</code> [f] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+						<li><code>object_time</code> [f] : ISO8601 <span class="text-info">HHMMSS</span> UTC</li>
+						<li><code>object_depth_min</code> [f] : minimum depth of object, <span class="text-info">meters</span></li>
+						<li><code>object_depth_max</code> [f] : maximum depth of object, <span class="text-info">meters</span></li>
+					</ul>
+					And, for already classified objects
+					<ul>
+						<li><code>object_annotation_date</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+						<li><code>object_annotation_time</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+						<li><code>object_annotation_category</code> [t] : class of the object</li>
+						<li><code>object_annotation_person_name</code> [t] : name of the person who identified the object</li>
+						<li><code>object_annotation_person_email</code> [t] : email of the person who identified the object</li>
+						<li><code>object_annotation_status</code> [t] : <span class="text-info">predicted</span>, <span class="text-info">dubious</span>, or <span="text-info">validated</span="text-info"></li>
+					</ul>
+					And additional object-related fields
+					<ul>
+						<li><code>object_***</code> [f] or</code> [t] : other fields relative to the object</li>
+					</ul>
+
+					<li>ACQUISITION: metadata relative to the image acquisition</li>
+					<ul>
+						<li><code>acq_id</code> [t] : unique identifier</li>
+						<li><code>acq_instrument</code> [t] : name of the instrument (UVP, ZOOSCAN, FLOWCAM, etc.)</li>
+						<li><code>acq_***</code> [f] or</code> [t] : other fields relative to the acquisition</li>
+					</ul>
+
+					<li>PROCESS: metadata relative to the processing of the raw images</li>
+					<ul>
+						<li><code>process_id</code> [t] : unique identifier</li>
+						<li><code>process_***</code> [f] or</code> [t] : other fields relative to the process</li>
+					</ul>
+					
+					<li>SAMPLE: a collection event</li>
+					<ul>
+						<li><code>sample_id</code> [t] : unique identifier</li>
+						<li><code>sample_***</code> [f] or</code> [t] : other fields relative to the sample</li>
+					</ul>
+					
+				</ul>
+			</p>
+
+			<p>You can download example tsv files
+			<ul>
+				<li><a href="/static/examples/table_minimum.csv">Minimal example</a>, for fully manual entry</li>
+				<li><a href="/static/examples/table_without_classification.csv">Full featured example, with unknown</a> objects only</li>
+				<li><a href="/static/examples/table_with_classification.csv">Full featured example, with already classified</a> objects</li>
+			</ul>
+			</p>
+		
+			<p>Several such importation folders can be placed alongside each other in a main folder. Pointing at that main folder will import all subfolders recursively. EcoTaxa will read all <code>tsv</code> files and then import the images they point to. When "Skip <code>tsv</code> that have already been imported" is ticked, the names of <code>tsv</code> files are recorded and those already imported are not re-imported. For ongoing projects, this allows to simply put new data alongside the old import folders and have EcoTaxa only import the new ones.</p>
+			
+			So overall, the hierarchy can look like
+			<ul style="list-style: none">
+				<li><span class="glyphicon glyphicon-folder-open"> import_folder</span></li>
+				<ul style="list-style: none">
+					<li><span class="glyphicon glyphicon-folder-open"> my_data_1</span></li>
+					<ul style="list-style: none">
+						<li><span class="glyphicon glyphicon-file"></span> img_1.jpg</li>
+						<li><span class="glyphicon glyphicon-file"></span> img_2.jpg</li>
+						<li><span class="glyphicon glyphicon-file"></span> img_3.jpg</li>
+						<li><span class="glyphicon glyphicon-file"></span> table.tsv</li>
+					</ul>
+					<li><span class="glyphicon glyphicon-folder-open"> my_data_2</span></li>
+					<ul style="list-style: none">
+						<li><span class="glyphicon glyphicon-file"></span> description.tsv</li>
+						<li><span class="glyphicon glyphicon-file"></span> DCN001.jpg</li>
+						<li><span class="glyphicon glyphicon-file"></span> IMG234.png</li>
+						<li><span class="glyphicon glyphicon-file"></span> anim.gif</li>
+					</ul>
+				</ul>
+			</ul>
+			
+			
+			</div>
+			
+			<p><a href="#zooprocess-help" data-toggle="collapse" class="help">Zooprocess user help</a></p>
+			<div id="zooprocess-help" class="collapse">
+				<p>Use version > 7.21.</p>
+				<p><h5>Importation of previously validated samples <small>(vignettes sorted in "sorted_vignettes” folder and identification loaded in dat1.tsv files)</small></h5>
+				<ul>
+					<li>Check that ALL metadata are correct</li>
+					<li>Select project</li>
+					<li>Switch to Advanced mode</li>
+					<li>Run "Create tables for Ecotaxa” (from "Other tools” menu for Zooscan users) and run option "ALL sorted vignettes…” to create the Ecotaxa folder in the root of your project. This Ecotaxa folder will contain and TSV tables sorted by samples</li>
+					<li>Load the "ecotaxa” folder on the server</li>
+				</ul>
+				</p>
+
+			<p><h5>Importation from unvalidated samples <small>(on-going projects)</small></h5> 
+				<ul>
+					<li>Check that ALL metadata are correct</li>
+					<li>Zooscan : TSV tables are automatically created along with PID files in each sample folder during the process of the images</li>
+					<li>All instruments: Run "Create tables for Ecotaxa” (from "Other tools” menu for Zooscan users) and run option "ALL unpredicted/validated…” to create the TSV tables in the sample folders along with PID files</li>
+					<li>Load the "_work” folder on the server</li>
+					<li>When importing, tick the "Skip <code>tsv</code> files" option</li>
+				</ul>
+			</p>
+			</div>
+		
+		</div>
+	</div>
+</div>
+
+<form class="form" method="post" enctype="multipart/form-data">
+
+	<div class="row" style="margin: 5px">
+		<div class="col-sm-5">
   <div class="form-group">
-      {{ label("Server side Input Folder/File")}}
-    <div class="col-sm-4">
+				<label class="control-label">Choose a folder or zip file on the server</label>
       <div class="input-group">
-        <input type="text"  class="form-control" id="ServerPath" name="ServerPath" value="{{ ServerPath|e }}" size="200" >
+					<input type="text" class="form-control" id="ServerPath" name="ServerPath" value="" size="200">
             <span class="input-group-btn">
                 <button class="btn btn-default" type="button"  data-toggle="modal" data-target="#FileModal">
-                    <span id=OpenTaxoLB class="glyphicon glyphicon-folder-open" aria-hidden="true"></button>
+					<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button>
                 </span>
-      </div> <!-- /input-group -->
-    </div> <!-- col-sm-4 -->
-  </div><!-- /form-group -->
+				</div>
+				<p class="help-block">Contact the project manager to know where and how to upload your data. Once the import is complete, all data folders/files can be safely erased on the server.
+				<br>Project manager : {{ g.prjmanagermailto |safe }}</p>
+			</div>
+		</div>
 
-<div class="form-group">
-      {{ label("OR Local zip File to upload")}}
-    <div class="col-sm-4">
-        <input type="file"  id="uploadfile" name="uploadfile"  size="200" >
-    </div> <!-- col-sm-4 -->
-  </div><!-- /form-group -->
+		<div class="col-sm-2" style="text-align: center">
+			<label class="control-label">OR</label>
+		</div>
 
+		<div class="col-sm-5">
 <div class="form-group">
-      {{ label("Skip file already loaded")}}
-    <div class="col-sm-4">
-        <input type="checkbox"  id="skiploaded" name="skiploaded" value="Y" checked >
-    </div> <!-- col-sm-4 -->
-  </div><!-- /form-group -->
+				<label class="control-label">Upload a local zip file</label>
+				<input style="width: 100%;" type="file" id="uploadfile" name="uploadfile" size="200">
+				<p class="help-block">Only for &lt;&nbsp;100MB zip files.</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-8 col-sm-offset-2">
 
   <div class="form-group">
-      {{ label("Taxonomy Mapping\nImport\nVal=TaxoVal") }}
-    <div class="col-sm-4">
-        <textarea  class="form-control" id="TxtTaxoMap" name="TxtTaxoMap"  rows="4">{{ TxtTaxoMap }}</textarea>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" id="skiploaded" name="skiploaded" value="Y">Skip <code>tsv</code> files that have already been imported
+					</label>
     </div>
-
   </div>
 
+			<p><a href="#advanced" data-toggle="collapse" class="help">Advanced options</a></p>
+			<div id="advanced" class="collapse">
+				<div class="form-group">
+					<label for="port" class="control-label">Optional taxonomy mapping</label>
+					<p class="help-block">This allows to change the name of the categories of previously classified objects to match the names in the UniEuk taxonomic framework included in the application.<br>Examples:<br>
+					crust_cop = Copepoda<br>
+					gelatinous medusae = Cnidaria</p>
+					<textarea class="form-control" id="TxtTaxoMap" name="TxtTaxoMap" rows="4" placeholder="oldname = UniEuk name"></textarea>
+				</div>
+			</div>
 
     <input type="hidden" name="starttask" value="Y">
-    <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-2">
-      <button type="submit" class="btn btn-primary">Start Task</button>
+			<button type="submit" class="btn btn-lg btn-block btn-primary">Start import</button>
     </div>
   </div>
+
 </form>
 
    <script>
@@ -62,11 +225,11 @@ $(document).ready(function() {
 
 <!-- Modal -->
 <div class="modal " id="FileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog-lg">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="ModalLabel">Select a File</h4>
+        <h4 class="modal-title" id="ModalLabel">Select a folder or a zip file</h4>
       </div>
       <div class="modal-body">
         <div id="FileModalBody">...</div>

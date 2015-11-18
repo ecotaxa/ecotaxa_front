@@ -223,17 +223,16 @@ where o.projid in (select projid from projects where visible=true)"""
             poptxt+="<br>By %s"%(r[3])
         poptxt+="<br>Sample : "+ntcv(r['samplename'])
         popattribute="data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'".format(poptitletxt,poptxt,'left' if WidthOnRow>500 else 'right')
-        # Génération du texte sous l'image qui contient la taxo + les champs à afficher
-        bottomtxt=""
-        if bottomtxt!="":
-            bottomtxt="<span style='font-size:12px;'>"+bottomtxt+"</span>"
-        txt+="<div class='subimg {1}' {2}><span class=taxo >{0}</span>{3}<div class=ddet><span class=ddets>View {4}</div></div>"\
-            .format(r['taxoname'],"",popattribute,bottomtxt
+
+        txt+="""<div class='subimg {1}' {2}>
+<div class='taxo'>{0}</div> </div>
+<div class=ddet><span class=ddets><span class='glyphicon glyphicon-eye-open'></span> {3}</div>"""\
+            .format(r['taxoname'],"",popattribute
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
         txt+="</td>"
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
-        WidthOnRow+=cellwidth
+        WidthOnRow+=cellwidth+5 # 5 = border-spacing = espace inter image
         t.append(txt)
 
     t.append("</tr></table>")

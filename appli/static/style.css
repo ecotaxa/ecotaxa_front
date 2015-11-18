@@ -1,10 +1,244 @@
-.status-validated { background: #5cb85c; }
-.status-dubious { background: #FFB84D; }
-.status-predicted { background: #BCBCBC; }
-.status-unknown { background: #FF2424; }
+/*Extracted using https://google-webfonts-helper.herokuapp.com/ */
+/* source-sans-pro-300 - latin */
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/static/fonts/source-sans-pro-v9-latin-300.eot'); /* IE9 Compat Modes */
+  src: local('Source Sans Pro Light'), local('SourceSansPro-Light'),
+       url('/static/fonts/source-sans-pro-v9-latin-300.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('/static/fonts/source-sans-pro-v9-latin-300.woff2') format('woff2'), /* Super Modern Browsers */
+       url('/static/fonts/source-sans-pro-v9-latin-300.woff') format('woff'), /* Modern Browsers */
+       url('/static/fonts/source-sans-pro-v9-latin-300.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('/static/fonts/source-sans-pro-v9-latin-300.svg#SourceSansPro') format('svg'); /* Legacy iOS */
+}
+/* source-sans-pro-regular - latin */
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/static/fonts/source-sans-pro-v9-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local('Source Sans Pro'), local('SourceSansPro-Regular'),
+       url('/static/fonts/source-sans-pro-v9-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('/static/fonts/source-sans-pro-v9-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('/static/fonts/source-sans-pro-v9-latin-regular.woff') format('woff'), /* Modern Browsers */
+       url('/static/fonts/source-sans-pro-v9-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('/static/fonts/source-sans-pro-v9-latin-regular.svg#SourceSansPro') format('svg'); /* Legacy iOS */
+}
+/* source-sans-pro-600 - latin */
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/static/fonts/source-sans-pro-v9-latin-600.eot'); /* IE9 Compat Modes */
+  src: local('Source Sans Pro Semibold'), local('SourceSansPro-Semibold'),
+       url('/static/fonts/source-sans-pro-v9-latin-600.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('/static/fonts/source-sans-pro-v9-latin-600.woff2') format('woff2'), /* Super Modern Browsers */
+       url('/static/fonts/source-sans-pro-v9-latin-600.woff') format('woff'), /* Modern Browsers */
+       url('/static/fonts/source-sans-pro-v9-latin-600.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('/static/fonts/source-sans-pro-v9-latin-600.svg#SourceSansPro') format('svg'); /* Legacy iOS */
+}
+
+code {
+	color: #555;
+	/* no not color in red by default */
+}
+
+* {
+	font-family: "Source Sans Pro", Helvetica, Sans;
+}
+/* Object page */
+.tab-pane {
+	font-size: 80%;
+}
+/* Nicer project list table */
+.projectsList td {
+	vertical-align: baseline !important;
+}
+.table-verycondensed td,
+.table-verycondensed tr,
+.table-verycondensed th {
+	padding-top: 2px    !important;
+	padding-bottom: 1px !important;
+}
+/* Add (i) after help labels */
+.help {
+	font-weight: bold;
+}
+.help:after {
+  font-family: "Glyphicons Halflings";
+	font-size: 80%;
+  content:" \e086";
+}
+/* Topbar, with tools */
+#topbar .form-control{
+	height: 22px;
+	padding: 0px;
+}
+#topbar label {
+	font-size: 100%;
+	font-weight: normal;
+}
+
+/* Filters */
+.jstree li {
+  /* reduce indent in taxonomic tree */
+	margin-left: 10px !important;
+}
+
+.filter {
+/*	width: 270px;*/
+	/* why 270px here is equal to 240px in the update button... */
+	margin-bottom: 10px;
+}
+
+.filter a.clear {
+	color: black;
+	text-decoration: none;
+}
+.filter a.clear:after {
+	font-family: "Glyphicons Halflings";
+	content: "\e014";
+	color: #555;
+}
+.filter label {
+	font-weight: normal;
+}
+.filter label.title {
+	font-weight: bold;
+}
+
+
+/* Image gallery */
+#column-right .imgtab {
+	border-collapse: separate;
+	border-spacing: 5px 0px;
+}
+
+/*#column-right .classiftab td {padding: 2px 3px 0px 3px ;  border-width:1px;border-style:solid;border-color:#c5c5c5;font-size: 12px;}*/
+#column-right .imgtab {
+	margin-bottom: 5px;
+}
+
+#column-right .imgtab td {
+	vertical-align:bottom;
+	background-color: #f2f2f2;
+	text-align: center;
+
+}
+
+#column-right .subimg {
+	padding: 5px;
+	font-size: 80%;
+}
+#column-right .taxo {
+	font-weight: bold;
+}
+#column-right .subimg .displayedFields {
+	text-align: left;
+	font-size: 80%;
+}
+#column-right .popover-title {
+	font-size: 80%;
+}
+#column-right .popover-content {
+	white-space: nowrap;
+	font-size: 80%;
+}
+#column-right .imgtab td {
+	position: relative;
+}
+#column-right .ddet {
+	position: absolute;
+	top: 2px;
+	left: 5px;
+	color: #999;
+	text-decoration: none;
+	font-size: 100%;
+}
+#column-right .ddet:hover {
+	color: #428bca;
+}
+
+.classiftab td {
+	border-width:1px;
+	border-style:solid;
+	border-color:#eee;
+	padding: 2px;
+	vertical-align: middle;
+	height: 27px;
+}
+.classiftab .categexpander {
+	color: #999;
+}
+.classiftab .haschild {
+	font-weight: bold;
+}
+.classiftab .taxoparent {
+	font-size: 80%;
+	color: #999;
+}
+.classiftab .activeTaxo .taxoparent {
+	color: white;
+}
+.classiftab .counter {
+	float:right;
+}
+.nav-tabs > li > a {
+    /* adjust padding for height*/
+    padding-top: 2px; 
+    padding-bottom: 2px;
+}
+.ui-selected,
+#column-right table.imgtab td.ui-selected {
+	background-color: #E9D6D7;
+}
+.SpanSelectAll {
+	background-color: #E9D6D7;
+	border: 1px solid #d9534f;
+}
+.SpanSelectAll:hover {
+	color: white;
+	background-color: #d9534f;
+	border: 1px solid #d9534f;
+}
+
+#column-right .linestart:after {
+	content: ".";
+}
+#column-right td.linestart {
+	font-weight: bold;
+	font-size: 200%;
+	color: #999;
+	border: 1px solid #d9534f;
+	border-radius: 4px;
+	padding: 0;
+	vertical-align: middle !important;
+	background-color: #E9D6D7;
+}
+#column-right td.linestart:hover {
+	background-color: #D9534F;
+	color: white;
+}
+
+.PendingChangesClass {
+	font-size: 80%;
+}
+
+.pagination {
+	margin-top: 5px;
+	margin-bottom: 0;
+}
+.pagination > li > a {
+	padding: 2px 5px;
+}
+.status-validated { background: #d7edcf; }
+.status-dubious { background: #F0AD4E; }
+.status-predicted { background: #d0e8f4; }
+.status-unknown { }
 .rightfixedfont{text-align: right; font-family: Courier;}
 .rightfixedfonttd td {text-align: right; font-family: Courier;}
-.ToBeSaved .taxo {color:red;}
+.ToBeSaved .taxo {color: #D9534F;}
 .linestart{font-weight: bold; background: #aaaaaa;}
 
 .ui-datepicker {  z-index: 4 !important; } /*Fix issue of Slider button over calendar on filter on FFX*/
