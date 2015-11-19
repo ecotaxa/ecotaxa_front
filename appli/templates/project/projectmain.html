@@ -74,8 +74,7 @@
   <ul id="dispfieldlist" class="dropdown-menu">
 {% for key, value in data.fieldlist.items() %}
     <li id="dispfield_{{ key }}"  > <a href="javascript:ToggleDispField('dispfield_{{ key }}');">
-        <span class="glyphicon {{ 'glyphicon-ok' if key in data.dispfield }}"></span>
-        {{ value|e }}</a></li>
+        {{ value|e }} <span class="glyphicon {{ 'glyphicon-ok' if key in data.dispfield }}"></span></a></li>
 {% endfor %}
   </ul>
 </div>

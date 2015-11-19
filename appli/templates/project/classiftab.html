@@ -32,7 +32,7 @@
 		{{ v['taxoname'] }}
 	</span>
 	<span class="taxoparent">{{ v['taxoparent'] }}</span>
-		<span class="counter label {{ "label-primary" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</span>
+		<span class="counter label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</span>
 	</td>
 </tr>
 {% endfor %}
