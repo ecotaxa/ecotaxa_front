@@ -40,7 +40,7 @@ def indexProjects():
         # if r[6] is None:
         #     txt+="<tr><td><a class='btn btn-primary' href='/prj/{0}'>Request !</a> {0}</td>".format(*r)
         # else:
-        txt+="<tr><td><a class='btn btn-primary' href='/prj/{0}'>Go !</a></td>".format(*r)
+        txt+="<tr><td><a class='btn btn-primary' href='/prj/{0}'>Select</a></td>".format(*r)
         txt+="""<td>{1} [{0}]</td>
         <td>{2}</td>
         <td>{3:0.0f}</td>
@@ -410,7 +410,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             t.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>"%(pageoffset+1))
         t.append("</ul></nav>")
     if nbrtotal>0:
-        pctvalid="<font color=#0A0>%0.1f %%</font>, <font color=#00A>%0.1f %%</font>, <font color=#A00>%0.1f %%</font>"%(100*nbrvalid/nbrtotal,100*nbrpredict/nbrtotal,100*nbrdubious/nbrtotal)
+        pctvalid="<font color=#0A0>%0.1f %%</font>, <font color=#5bc0de>%0.1f %%</font>, <font color=#F0AD4E>%0.1f %%</font>"%(100*nbrvalid/nbrtotal,100*nbrpredict/nbrtotal,100*nbrdubious/nbrtotal)
     else: pctvalid="-"
     t.append("""
     <script>
@@ -458,7 +458,10 @@ def GetClassifTab(Prj):
         res[k]['cpdist']=0
         id=v["id"]
         for i in range(50): # 50 pour arreter en cas de boucle
-            id=taxotree[id]['parent_id']
+            if id in taxotree:
+                id=taxotree[id]['parent_id']
+            else:
+                id=None
             if id is None:
                 break
             if id in ids:

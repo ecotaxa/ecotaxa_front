@@ -171,9 +171,11 @@ adminApp.add_view(ProcessView(db.session,category='Objects'))
 adminApp.add_view(AcquisitionsView(db.session,category='Objects'))
 adminApp.add_view(TaxonomyView(db.session,category='Taxonomy',name="Edit Taxonomy"))
 adminApp.add_link(base.MenuLink('Merge 2 Taxonomy items', category='Taxonomy', url='/dbadmin/merge2taxon'))
+adminApp.add_link(base.MenuLink('Taxonomy errors', category='Taxonomy', url='/dbadmin/viewtaxoerror'))
 adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
 adminApp.add_link(base.MenuLink('View DB Size', category='Database', url='/dbadmin/viewsizes'))
 adminApp.add_link(base.MenuLink('View DB Bloat', category='Database', url='/dbadmin/viewbloat'))
+
 adminApp.add_link(base.MenuLink('SQL Console', category='Database', url='/dbadmin/console'))
 adminApp.add_link(base.MenuLink('Recompute Projects and Taxo stat (can be long)', category='Database', url='/dbadmin/recomputestat'))
 

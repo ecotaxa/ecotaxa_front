@@ -217,12 +217,13 @@ where o.projid in (select projid from projects where visible=true)"""
         else:
             txt+="No Image"
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
-        poptitletxt="<p style='color:black;font-size:12px;'>%s"%(r['orig_id'],)
-        poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
-        if r[3]!="":
-            poptxt+="<br>By %s"%(r[3])
-        poptxt+="<br>Sample : "+ntcv(r['samplename'])
-        popattribute="data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'".format(poptitletxt,poptxt,'left' if WidthOnRow>500 else 'right')
+        poptitletxt="%s"%(r['orig_id'],)
+        # poptxt="%s"%(r['taxoname'],)
+        poptxt=""
+        if r[12]!="":
+            poptxt+="<em>by</em> %s"%(r[12])
+        poptxt+="<br><em>in</em> "+ntcv(r['samplename'])
+        popattribute="data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'".format(poptitletxt, poptxt, 'left' if WidthOnRow > 500 else 'right')
 
         txt+="""<div class='subimg {1}' {2}>
 <div class='taxo'>{0}</div> </div>

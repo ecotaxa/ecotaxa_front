@@ -42,6 +42,29 @@ ORDER BY c.relkind DESC, pg_relation_size(('"' || c.relname || '"')::regclass) D
     return PrintInCharte(txt)
 
 
+@app.route('/dbadmin/viewtaxoerror')
+@login_required
+@roles_accepted(database.AdministratorLabel)
+def dbadmin_viewtaxoerror():
+    g.headcenter="Database Taxonomy errors<br><a href=/admin>Back to admin home</a>"
+
+    sql="""Select 'Missing parent' reason,t.id,t.parent_id,t.name,t.id_source
+from taxonomy t where parent_id not in (select id from taxonomy);
+"""
+    cur = db.engine.raw_connection().cursor()
+    try:
+        txt="<table class='table table-bordered table-condensed table-hover'>"
+        cur.execute(sql)
+        txt+="<tr><td>"+("</td><td>".join([x[0] for x in cur.description]))+"</td></tr>"
+        for r in cur:
+            txt+="<tr><td>"+("</td><td>".join([str(x) for x in r]))+"</td></tr>"
+        txt+="</table>"
+    finally:
+        cur.close()
+
+    return PrintInCharte(txt)
+
+
 @app.route('/dbadmin/viewbloat')
 @login_required
 @roles_accepted(database.AdministratorLabel)
