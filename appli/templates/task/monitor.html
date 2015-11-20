@@ -60,7 +60,7 @@ et du coup une seconde requete ajax est emise par le client et retourne le fait 
                     else if (response.q != null) {
                         $StopTimer=true;
                         // Redirection vers question
-                        $statusDiv.html('<div class="alert alert-warning" role="alert">'+response.q.Message+' <a href="'+response.q.Url+'" class="btn btn-primary btn-sm " role="button">Answer Question</a></div>');
+                        $statusDiv.html('<div class="alert alert-warning" role="alert">'+response.q.Message+' <a href="'+response.q.Url+'" class="btn btn-primary btn-sm " role="button">Go</a></div>');
                         $ajaxImage.hide();
                         $progressbar.hide();
                         clearInterval(intervalHandle);

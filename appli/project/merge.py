@@ -79,6 +79,18 @@ def PrjMerge(PrjId):
         ExecSQL("update process set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
         ExecSQL("update samples set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
         ExecSQL("update obj_head set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
+        # garde le privilege le plus elevé des 2 projets
+        ExecSQL("""UPDATE projectspriv ppdst
+                  set privilege=case when 'Manage' in (ppsrc.privilege,ppdst.privilege) then 'Manage'
+                        when 'Annotate' in (ppsrc.privilege,ppdst.privilege) then 'Annotate'
+                        else 'View' end
+                from projectspriv  ppsrc
+                where ppsrc.projid={1} and ppdst.projid={0} and ppsrc.member=ppdst.member""".format(Prj.projid,PrjSrc.projid),debug=True)
+        # Transfere les privilege depuis le projet source
+        ExecSQL("""update projectspriv
+                set projid={0}
+                where projid={1} and member not in (select member from projectspriv where projid={0})""".format(Prj.projid,PrjSrc.projid))
+        # Efface ceux qui etait des 2 cotés
         ExecSQL("delete from projectspriv where projid={0}".format(PrjSrc.projid))
         ExecSQL("delete from projects where projid={0}".format(PrjSrc.projid))
         txt+="<div class='alert alert-success' role='alert'>Fusion Done successfully</div>"

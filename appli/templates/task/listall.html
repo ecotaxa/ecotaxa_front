@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% macro PutInLabel(LblType,Txt,id)  -%}
     {% if LblType=="Question" %}
-        <a href="/Task/Question/{{ id }}"><span class="label label-warning">{{ Txt }}</span></a>
+        <a href="/Task/Question/{{ id }}"><button class="btn btn-xs btn-warning">{{ Txt }}</button></a>
     {% elif LblType=="Error" %}
-        <a href="/Task/Show/{{ id }}"><span class="label label-danger">{{ Txt }}</span></a>
+        <a href="/Task/Show/{{ id }}"><button class="btn btn-xs btn-danger">{{ Txt }}</button></a>
     {% elif LblType=="Running" %}
-        <a href="/Task/Show/{{ id }}"><span class="label label-info">{{ Txt }}</span></a>
+        <a href="/Task/Show/{{ id }}"><button class="btn btn-xs btn-info">{{ Txt }}</button></a>
     {% elif LblType=="Done" %}
-        <a href="/Task/Show/{{ id }}"><span class="label label-success">{{ Txt }}</span></a>
+        <a href="/Task/Show/{{ id }}"><button class="btn btn-xs btn-success">{{ Txt }}</button></a>
     {% else %}
         {{ Txt }}
     {% endif %}
@@ -16,11 +16,11 @@
 {% block body %}
 
 <table class="table">
-    <tr><th>ID</th><th>Task Type</th><th>Owner</th>
-    <th>State</th><th>Step</th><th width="60px">%</th><th>Message</th><th>Creation Date</th><th>Last Update</th></tr>
+    <tr><th>ID</th><th>Task type</th><th>Owner</th>
+    <th>State</th><th>Step</th><th width="60px">%</th><th>Message</th><th>Creation date</th><th>Last update</th></tr>
  {% for t in tasks %}
 
-    <tr><td><a href="/Task/Show/{{ t.id }}"> {{ t.id }} <span class="label label-primary">View</span></a></td>
+    <tr><td><a href="/Task/Show/{{ t.id }}"> {{ t.id }} <button class="btn btn-xs btn-primary">View</button></a></td>
     <td>{{ t.taskclass }}</td>
     <td>{{ t.owner_rel.name }}</td>
     <td>{{ PutInLabel(t.taskstate,t.taskstate,t.id) }}</td><td>{{ t.taskstep }}</td>

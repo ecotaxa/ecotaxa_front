@@ -2,34 +2,43 @@
 
 {% block body %}
 
-<a href="/Task/Clean/{{ task.id }}"><span class="label label-warning">Clean Task Temporary Data & Results</span></a>
-<a href="/Task/listall"><span class="label label-info"> Back to Task List</span></a>
-<br><br>
-<table class="table-bordered">
+<p>
+	<a href="/Task/Clean/{{ task.id }}"><button class="btn btn-danger">Clean task data</button></a>
+	<a href="/Task/listall"><button class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span> Back to tasks list</button></a>
+</p>
+
+{% if task.taskstate=="Error" or task.taskstate=="Running" %}
+<div class="alert alert-danger" >
+	<p>This taks has errors. Check the error messages below, fix these errors, go back to your project and restart your task.</p>
+</div>
+{% endif %}
+
+<table class="table table-condensed">
 <tr>
-    <th>Taks ID</th><td>{{ task.id }}</td>
+    <th>Task ID</th><td>{{ task.id }}</td>
 </tr><tr>
     <th width="150px">Class</th><td>{{ task.taskclass }}</td>
 </tr><tr>
     <th>State</th><td>{{ task.taskstate }}
     {% if task.taskstate=="Question" %}
-        <a href="/Task/Question/{{ task.id }}"><span class="label label-warning">Answer Question</span></a>
+        <a href="/Task/Question/{{ task.id }}"><span class="label label-warning">Go</span></a>
     {% endif %}
     {% if task.taskstate=="Error" or task.taskstate=="Running" %}
-        <a href="/Task/ForceRestart/{{ task.id }}"><span class="label label-warning">Force Restart</span></a>
+        <a href="/Task/ForceRestart/{{ task.id }}"><button class="btn btn-danger btn-sm">Force restart</button></a>
     {% endif %}
 
 </td>
 </tr><tr>
     <th>Step</th><td>{{ task.taskstep }}</td>
 </tr><tr>
-    <th>Progress (%)</th><td>{{ task.progresspct }}</td>
+    <th>Progress</th><td>{{ task.progresspct }}%</td>
 </tr><tr>
     <th>Message</th><td>{{ task.progressmsg }}
+    <ul>
     {% for e in steperror  %}
-        <br>- {{ e }}
+        <li>{{ e }}</li>
     {% endfor %}
-
+		</ul>
 </td>
 </tr><tr class="collapse">
     <th>Input Param</th><td>{{ task.inputparam }}</td>
@@ -43,7 +52,12 @@
 </table>
 
 <p><a class="btn" data-toggle="collapse" data-target=".collapse">View internal details &raquo;</a></p>
-<p><a class="btn" href="?log=Y">View Log File &raquo;</a></p>
-{% if CustomDetailsAvail %}<p><a class="btn" href="?CustomDetails=Y">View Custom details &raquo;</a></p>{% endif %}
-<br> {{ extratext|safe  }}
+
+<p><a class="btn" href="?log=Y">View log file &raquo;</a></p>
+
+{% if CustomDetailsAvail %}<p><a class="btn" href="?CustomDetails=Y">View custom details &raquo;</a></p>{% endif %}
+
+<p>{{ extratext|safe }}</p>
+
 {% endblock %}
+

@@ -166,6 +166,7 @@ function ValidateAll(NextPage) {
           var NbrChanged=0;
           var  LstTd=[];
           ui.draggable.each(function (e,o) {
+              NbrChanged++;
               if( $(o).hasClass( "zoomtracker" )) {
                   LstTd.push(  $($(o).data("specs").origImg.closest('td')));
 {#              } else if( $(o).hasClass( "taxo" )) {  // Sinon c'est le taxo du div subimg#}
@@ -179,13 +180,13 @@ function ValidateAll(NextPage) {
                 if(LstTd[0].hasClass( "ui-selected" ))
                     LstTd.pop();
               // On ajoute tout ceux qui sont selectionnés.
-              $(".ui-selected").each(function(){LstTd.push($(this));});
+              $(".ui-selected").each(function(){LstTd.push($(this));NbrChanged++;});
           });
         ProcessList(LstTd,droptaxoid,droptaxoname);
         // Highlight only the last
         $( "#TabA .ui-state-highlight").removeClass( "ui-state-highlight");
-        var n=  parseInt($( this ).find( "p").text())||0;
-        $( this ).addClass( "ui-state-highlight" ).find( "p" ).html(n+NbrChanged );
+        var n=  parseInt($( this ).find( ".counter").text())||0;
+        $( this ).addClass( "ui-state-highlight" ).find( ".counter" ).html(n+NbrChanged );
       }
     }
 {% endif %}
@@ -209,6 +210,8 @@ function ValidateAll(NextPage) {
 function AssignTaxoLbToSelection() {
     droptaxoid = $('#taxolbanno').val();
     if (droptaxoid) {
+        $(".ui-state-highlight").removeClass("ui-state-highlight");
+        $("td[taxoid='"+$('#taxolbanno').val()+"']").addClass( "ui-state-highlight" );
         var LstTd = [];
         $(".ui-selected").each(function () {
             LstTd.push($(this));
@@ -232,7 +235,7 @@ $(document).ready(function() {
 {#    Le fait de choisir un item fait l'assignation/CTRL+A#}
     $('#taxolbanno').on("select2:select", function (e) {
         AssignTaxoLbToSelection();
-        $(".ui-state-highlight").removeClass("ui-state-highlight");
+
     });
 {#     Ctrl + A affecte la valeur selectionnée#}
 {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function(e) {#}

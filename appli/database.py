@@ -94,7 +94,6 @@ class Projects(db.Model):
     initclassiflist  = db.Column(VARCHAR) # Initial list of categories
     classiffieldlist  = db.Column(VARCHAR) # Fields available on sort & displayed field of Manual classif screen
     popoverfieldlist  = db.Column(VARCHAR) # Fields available on popover of Manual classif screen
-    projmembers=db.relationship('ProjectsPriv',backref=db.backref('projects'),cascade='delete') #
     comments  = db.Column(VARCHAR)
     projtype  = db.Column(VARCHAR(50))
     fileloaded  = db.Column(VARCHAR)
@@ -142,7 +141,8 @@ class ProjectsPriv(db.Model):
     member = db.Column(db.Integer,db.ForeignKey('users.id'))
     privilege = db.Column(VARCHAR(255),nullable=False)
     memberrel=db.relationship("users")
-    #project= db.relation(Projects, backref='projectspriv')
+    refproject=db.relationship('Projects',backref=db.backref('projmembers',cascade="all, delete-orphan", single_parent=True)) # ,cascade='delete'
+
     def __str__(self):
         return "{0} ({1})".format(self.member,self.privilege)
 Index('IS_ProjectsPriv',ProjectsPriv.__table__.c.projid,ProjectsPriv.__table__.c.member, unique=True)

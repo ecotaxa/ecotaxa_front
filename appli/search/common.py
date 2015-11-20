@@ -31,7 +31,7 @@ def searchsamples():
 @app.route("/search/exploreproject")
 def searchexploreproject():
     term="%"+gvg("q")+"%"
-    res = database.GetAll("SELECT projid, title FROM projects WHERE  title like %s order by lower(title) ", (term,),debug=True)
+    res = database.GetAll("SELECT projid, title FROM projects WHERE  title like %s and visible=true order by lower(title) ", (term,),debug=True)
     return json.dumps([dict(id=r[0],text=r[1]) for r in res])
 
 
