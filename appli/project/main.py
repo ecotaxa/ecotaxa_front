@@ -48,8 +48,58 @@ def indexProjects():
         <td>{5:0.2f}</td>
         </tr>""".format(*r)
     txt+="</tbody></table>"
-
+    txt+="""<div class="col-sm-6 col-sm-offset-3">
+			<a href="/prjothers/" class="btn  btn-block btn-primary">Show Others projects</a>
+        </div>"""
     return PrintInCharte(txt)
+######################################################################################################################
+@app.route('/prjothers/')
+@login_required
+def ProjectsOthers():
+    txt = "<h3>Other projects</h3>" #,pp.member
+    sql="""select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),qpp.email,qpp.name
+           from projects p
+           left Join projectspriv pp on p.projid = pp.projid and pp.member=%d
+           left join ( select * from (
+                        select u.email,u.name,pp.projid,rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
+                        from projectspriv pp join users u on pp.member=u.id
+                        where pp.privilege='Manage' and u.active=true ) q where rang=1
+                      ) qpp on qpp.projid=p.projid
+           where pp.member is null
+           order by lower(title)"""%(current_user.id,)
+    res = GetAll(sql) #,debug=True
+    txt+="""
+    <p>To have acces to theses projects, request access to the project manager.</p>
+    <table class='table table-hover table-verycondensed projectsList'>
+        <thead><tr>
+                <th></th>
+                <th>Title [ID]</th>
+                <th>Status</th>
+                <th>Nb objects</th>
+                <th>%&nbsp;validated</th>
+                <th>%&nbsp;classified</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+    for r in res:
+        if r[6] is None:
+            txt+="<tr><td> </td>"
+        else:
+            txt+="<tr><td><a class='btn btn-primary' href='mailto:{6}?subject=Project%20access%20request'>REQUEST ACCESS</a></td>".format(*r)
+        txt+="<td>{1} [{0}]".format(*r)
+        if r['name']: txt+="<br>"+r['name']
+        txt+="""</td><td>{2}</td>
+        <td>{3:0.0f}</td>
+        <td>{4:0.2f}</td>
+        <td>{5:0.2f}</td>
+        </tr>""".format(*r)
+    txt+="</tbody></table>"
+    txt+="""<div class="col-sm-6 col-sm-offset-3">
+			<a href="/prj/" class="btn  btn-block btn-primary">Back to projects list</a>
+        </div>"""
+    return PrintInCharte(txt)
+
 
 
 ######################################################################################################################

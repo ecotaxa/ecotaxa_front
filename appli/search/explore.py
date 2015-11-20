@@ -25,12 +25,12 @@ def indexExplore():
             data["sample_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
     data["projects_for_select"]=""
     if data["projid"]:
-        for r in GetAll("select projid,title from projects where projid in(%s)"%(data["projid"],)):
+        for r in GetAll("select projid,title from projects where projid in(%s) and visible=true"%(data["projid"],)):
             data["projects_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
     data["taxo_for_select"]=""
     if gvg("taxo[]"):
         print(gvg("taxo[]"))
-        for r in GetAll("SELECT id, name FROM taxonomy WHERE  id in(%s) order by name"%(",".join((str(int(x)) for x in request.args.getlist("taxo[]"))),),debug=True):
+        for r in GetAll("SELECT id, name FROM taxonomy WHERE  id in(%s) order by name"%(",".join((str(int(x)) for x in request.args.getlist("taxo[]"))),),debug=False):
             data["taxo_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
             print(data["taxo_for_select"])
 
@@ -125,8 +125,13 @@ where o.classif_qual='V'
             whereclause+=" and objtime<= time %(totime)s "
             sqlparam['totime']=gvp("totime")
     sql+=whereclause
+    ExtraEndScript=""
     if whereclause=="": # si aucune clause, on prend un projet au hasard
-        sql+=" and o.projid= %s "%(GetAll("select projid from projects where visible=true and pctvalidated>1 order by random() limit 1")[0][0])
+        randomproject=GetAll("select projid,title from projects where visible=true and pctvalidated>1 order by random() limit 1")
+        if randomproject:
+            randomproject=randomproject[0]
+            sql+=" and o.projid= %s "%(randomproject[0])
+            ExtraEndScript="""$('#headersubtitle').html('Randomly selected project : <a href="?projid={0}">{1}</a>');""".format(*randomproject)
     sql+="  order by random_value Limit %d"%(2*ipp,)
     # pour de meilleure perf plus de random ici et du coup on prend 20xipp pour créer un peu d'aléa
     # sql+="  Limit %d"%(20*ipp,) # desactivé suite à split table objects mais pourrait devoir revenir.
@@ -145,7 +150,7 @@ where o.projid in (select projid from projects where visible=true)"""
     sql+=" order by random_value  "
     # sql+=" order by random()  "
     sql+=" Limit %d  "%(ipp,)
-    res=GetAll(sql,sqlparam,debug=True)
+    res=GetAll(sql,sqlparam,debug=False)
     trcount=1
     LineStart=""
     t.append("<table class=imgtab><tr id=tr1>"+LineStart)
@@ -242,6 +247,7 @@ where o.projid in (select projid from projects where visible=true)"""
     t.append("""
     <script>
         PostAddImages();
-    </script>""")
+        %s
+    </script>"""%ExtraEndScript)
     return "\n".join(t)
 

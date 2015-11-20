@@ -87,9 +87,26 @@ class ProjectsView(ModelView):
     inline_model_form_converter = ProjectsViewCustomInlineModelConverter
     inline_models = (ProjectsViewPrivInlineModelForm(),)
     form_overrides = dict(mappingobj  =TextAreaField,mappingsample  =TextAreaField,mappingacq=TextAreaField,mappingprocess  =TextAreaField,classiffieldlist=TextAreaField,classifsettings=TextAreaField  )
+    # edit_template = 'admin/projects_edit.html'
+    # create_template = 'admin/projects_create.html'
 
     def __init__(self, session, **kwargs):
         super(ProjectsView, self).__init__(database.Projects, session, **kwargs)
+    def is_accessible(self):
+        return current_user.has_role(database.AdministratorLabel)
+
+class ProjectsViewLight(ModelView):
+    column_list = ('projid', 'title','visible','status','objcount','pctvalidated','pctclassified')
+    form_columns = ('title','visible','status')
+    column_searchable_list = ('title',)
+    column_default_sort = 'projid'
+    inline_model_form_converter = ProjectsViewCustomInlineModelConverter
+    inline_models = (ProjectsViewPrivInlineModelForm(),)
+    # edit_template = 'admin/projects_edit.html'
+    # create_template = 'admin/projects_create.html'
+
+    def __init__(self, session, **kwargs):
+        super(ProjectsViewLight, self).__init__(database.Projects, session, **kwargs)
     def is_accessible(self):
         return current_user.has_role(database.AdministratorLabel)
 
@@ -163,21 +180,25 @@ adminApp = flask.ext.admin.Admin(app, name='Ecotaxa Administration')
 #admin.add_view(sqla.ModelView(database.users, db.session))
 adminApp.add_view(UsersView(db.session,name="Users"))
 adminApp.add_view(UsersViewRestricted(db.session,name="users",endpoint="userrest"))
-adminApp.add_view(ProjectsView(db.session))
+
+adminApp.add_view(ProjectsViewLight(db.session,endpoint="projectlight",category='Projects'))
+adminApp.add_view(ProjectsView(db.session,name="Projects (Full)",category='Projects'))
 adminApp.add_view(ObjectsView(db.session,category='Objects'))
 adminApp.add_view(ObjectsFieldsView(db.session,category='Objects'))
 adminApp.add_view(SamplesView(db.session,category='Objects'))
 adminApp.add_view(ProcessView(db.session,category='Objects'))
 adminApp.add_view(AcquisitionsView(db.session,category='Objects'))
 adminApp.add_view(TaxonomyView(db.session,category='Taxonomy',name="Edit Taxonomy"))
-adminApp.add_link(base.MenuLink('Merge 2 Taxonomy items', category='Taxonomy', url='/dbadmin/merge2taxon'))
-adminApp.add_link(base.MenuLink('Taxonomy errors', category='Taxonomy', url='/dbadmin/viewtaxoerror'))
-adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
-adminApp.add_link(base.MenuLink('View DB Size', category='Database', url='/dbadmin/viewsizes'))
-adminApp.add_link(base.MenuLink('View DB Bloat', category='Database', url='/dbadmin/viewbloat'))
 
-adminApp.add_link(base.MenuLink('SQL Console', category='Database', url='/dbadmin/console'))
-adminApp.add_link(base.MenuLink('Recompute Projects and Taxo stat (can be long)', category='Database', url='/dbadmin/recomputestat'))
+adminApp.add_link(base.MenuLink('Import Taxonomy (admin only)', category='Taxonomy', url='/Task/Create/TaskTaxoImport'))
+adminApp.add_link(base.MenuLink('Merge 2 Taxonomy items (admin only)', category='Taxonomy', url='/dbadmin/merge2taxon'))
+adminApp.add_link(base.MenuLink('Taxonomy errors (admin only)', category='Taxonomy', url='/dbadmin/viewtaxoerror'))
+adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
+adminApp.add_link(base.MenuLink('View DB Size (admin only)', category='Database', url='/dbadmin/viewsizes'))
+adminApp.add_link(base.MenuLink('View DB Bloat (admin only)', category='Database', url='/dbadmin/viewbloat'))
+
+adminApp.add_link(base.MenuLink('SQL Console (admin only)', category='Database', url='/dbadmin/console'))
+adminApp.add_link(base.MenuLink('Recompute Projects and Taxo stat (can be long)(admin only)', category='Database', url='/dbadmin/recomputestat'))
 
 def GetAdminList():
     LstUsers=GetAll("""select name||'('||email||')' nom from users u
