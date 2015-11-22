@@ -6,7 +6,7 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
 from flask_security.decorators import roles_accepted
 from appli.search.leftfilters import getcommonfilters
-import os,time,math,collections,appli,psycopg2.extras
+import os,time,math,collections,appli,psycopg2.extras,urllib
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 
 ######################################################################################################################
@@ -20,8 +20,8 @@ def indexProjects():
     sql+=" order by lower(title)" #pp.member nulls last,
     res = GetAll(sql) #,debug=True
     txt+="""
-    <p>To create a new project and upload images in it, please contact the application manager(s): list of emails</p>
-    """ # TODO ajouter la liste des administrateurs
+    <p>To create a new project and upload images in it, please contact the application manager(s): {0}</p>
+    """.format(appli.GetAppManagerMailto())
 
     txt+="""
     <table class='table table-hover table-verycondensed projectsList'>
@@ -86,7 +86,11 @@ def ProjectsOthers():
         if r[6] is None:
             txt+="<tr><td> </td>"
         else:
-            txt+="<tr><td><a class='btn btn-primary' href='mailto:{6}?subject=Project%20access%20request'>REQUEST ACCESS</a></td>".format(*r)
+            txt+="<tr><td><a class='btn btn-primary' href='mailto:{7}?{0}'>REQUEST ACCESS</a></td>".format(
+                urllib.parse.urlencode({'body':"Please provide me privileges to project : "+ntcv(r[1])
+                                           ,'subject':'Project access request'}
+                                       ).replace('+','%20') # replace car urlencode mais des + pour les espaces qui sont mal traitrés par le navigateur
+                ,*r)
         txt+="<td>{1} [{0}]".format(*r)
         if r['name']: txt+="<br>"+r['name']
         txt+="""</td><td>{2}</td>
@@ -182,20 +186,19 @@ def indexPrj(PrjId):
     classiftab=GetClassifTab(Prj)
     g.ProjectTitle=Prj.title
     g.headmenu = []
-    g.headmenu.append(("/prj/%d"%(PrjId,),"Project home/Annotation"))
     g.headmenu.append(("/prjcm/%d"%(PrjId,),"Show Confusion Matrix"))
     if g.PrjAnnotate:
         g.headmenu.append(("","SEP"))
-        g.headmenu.append(("/Task/Create/TaskExportTxt?p=%d"%(PrjId,),"Export data as text"))
         g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
+        g.headmenu.append(("/Task/Create/TaskExportTxt?p=%d"%(PrjId,),"Export data as text"))
     if g.PrjManager:
         g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit Project settings"))
-        g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract Subset"))
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))
         g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit/erase annotations massively"))
-        g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects"))
+        g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects / Delete project"))
+        g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract Subset"))
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
@@ -588,17 +591,19 @@ def prjPurge(PrjId):
         flash('You cannot Purge this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     txt=""
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
     if gvp("objlist")=="":
         txt+="""
-        <h3>Project #{0} : {1}</h3>
+        <h3>ERASE OBJECTS TOOL </h3>
         <form action=? method=post>
-        Enter the list of internal object id you want to delete. Or DELETEALL to erase all object of this project.<br>
+        Enter the list of internal object id you want to delete. <br>Or type in ‘’DELETEALL’’ to remove all object from this project.<br>
+        You can retrieve object id from a TSV export file using export data from project action menu<br>
         <textarea name=objlist cols=15 rows=20 autocomplete=off></textarea><br>
-        <input type=checkbox name=destroyproject value=Y> Once purged, destroy the project (only if DELETEALL).<br>
+        <input type=checkbox name=destroyproject value=Y> DELETE project after DELETEALL action.<br>
         <input type="submit" class="btn btn-danger" value='ERASE THESES OBJECTS !!! IRREVERSIBLE !!!!!'>
         <a href ="/prj/{0}" class="btn btn-success">Cancel, Back to project home</a>
         </form>
-        """.format(PrjId,Prj.title)
+        """.format(PrjId)
     else:
         if gvp("objlist")=="DELETEALL":
             sqlsi="select file_name,thumb_file_name from images i,objects o where o.objid=i.objid and o.projid={0}".format(PrjId)

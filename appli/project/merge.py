@@ -20,13 +20,19 @@ def PrjMerge(PrjId):
     if not Prj.CheckRight(2): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot edit settings for this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
-
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
     txt = """<h3>Project Merge / Fusion </h3>
             <h4>Target Project : {0} - {1}</h4>
             """.format(Prj.projid,Prj.title)
 
     if not gvg('src'):
-        txt += """<h4>Select the project to merge with this project, this project will be destroy.<br>Next screen will check for compatibility.</h4>
+        txt += """<ul><li>You are allowed to merge projects that you are allowed to manage
+<li>User privileges from both projects will be added
+<li>This tool allow to merge two projects in a single projet (called Current project). The added project will then be automatically deleted. If object data are not consistent between both projects :
+<ul><li>New data fields are added to the Current project
+    <li>The resulting project will thus contain partially documented datafields.
+</ul><li>Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.
+</ul>
                 """
         sql="select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects p"
         if not current_user.has_role(database.AdministratorLabel):

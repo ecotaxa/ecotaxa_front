@@ -154,29 +154,38 @@ class TaskClassifAuto(AsyncTask):
 
     def QuestionProcess(self):
         Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
-        txt="<a href='/prj/%d'>Back to project</a>"%Prj.projid
         if not Prj.CheckRight(1):
             return PrintInCharte("ACCESS DENIED for this project<br>"+txt)
         g.prjtitle=Prj.title
-        txt+="<h3>Automatic Classification Task creation</h3>"
-        txt+="<h5>Target Project : #%d - %s</h5>"%(Prj.projid,Prj.title)
+        g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+        txt=""
         errors=[]
         if self.task.taskstep==0:
             if gvg('src')=="":
                 # Premier écran de configuration, choix du projet de base
-                txt+="<h4>Reference project selection</h4>"
+                txt+="""<h3>AUTOMATIC CLASSIFICATION : Selection of Learning Set</h3>
+                <p>A Learning set is a project containing validated data &nbsp;<span data-toggle="tooltip" data-placement="right" data-html="true" title="
+        <p style='text-align: left'>You can run the SUBSET tool to :<br><ul style='text-align: left'>
+        <li>Create a Learning set that you will later improve
+        <li>Check validation of a project using a randomly limited number of objects from the project</ul></p>"
+        class="glyphicon glyphicon-question-sign"></span></p>
+        <script>
+        $(function () {  $('[data-toggle="tooltip"]').tooltip()})
+        </script>
+                """
                 d=DecodeEqualList(Prj.classifsettings)
                 if d.get("baseproject","")!="":
                     BasePrj=GetAll("select projid,title from projects where projid=%s",(d.get("baseproject"),))
                     if len(BasePrj):
-                        txt+="<a class='btn btn-primary' href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>Use Previous reference project selection : #{1} : {2}</a><br><br>".format(Prj.projid,*BasePrj[0])
+                        txt+="""<a class='btn btn-primary' href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>
+                        USE previous Learning Set : #{1} - {2}</a><br><br>OR USE another project<br><br>""".format(Prj.projid,*BasePrj[0])
                 from flask.ext.login import current_user
                 sql="select projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects "
                 if not current_user.has_role(database.AdministratorLabel):
                     sql+=" where projid in (select projid from projectspriv where member=%d)"%current_user.id
                 sql+=" order by title"
                 ProjList=database.GetAll(sql)
-                txt+="""<table class='table table-bordered table-hover'><tr><th width=100>ID</td><th>Title</td><th width=100>Status</td><th width=100>Nbr Obj</td>
+                txt+="""<table class='table table-bordered table-verycondensed table-hover'><tr><th width=100>ID</td><th>Title</td><th width=100>Status</td><th width=100>Nbr Obj</td>
             <th width=100>% Validated</td><th width=100>% Classified</td></tr>"""
                 for r in ProjList:
                     txt+="""<tr><td><a class="btn btn-xs btn-primary" href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>Select #{1}</a></td>

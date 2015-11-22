@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block headcenter %}
+  <h4>MERGE 2 CATEGORIES</h4><a href=/admin>Back to admin home</a>
+{% endblock %}
+
 
 {% block body %}
 
@@ -29,17 +33,20 @@ $(document).ready(function() {
  {# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
 <form method="get" action="?">
 <h3>
-    This function allow to replace a Taxon by another in the objects list and Taxonomy Tree by replacing parent relationship and deleting the source Taxon.
+This tool permits
+<ul><li>To transfer all objects from a category into another category
+<li>Remove the emptied category from Ecotaxa</ul>
+
 </h3>
 <table>
     <tr>
-        <td>Select source Taxon (will be deleted after merge) :</td>
+        <td>Select source Category (will be deleted after merge) :</td>
         <td>
             <select id="src" name="src"  style="width: 210px" > </select>
        </td>
     </tr>
     <tr>
-        <td>Select Target Taxon :</td>
+        <td>Select Target Category :</td>
         <td>
             <select id="dest" name="dest"  style="width: 210px" > </select>
        </td>
@@ -48,7 +55,7 @@ $(document).ready(function() {
 
 
 
- <input type=submit class="btn btn-primary" value="Replace source by target">
+ <input type=submit class="btn btn-primary" value="GO">
 <p style='font-size: 18px;color:red;'><span class='glyphicon glyphicon-warning-sign'></span> Warning This operation his irreversible !!!</p>
     </form>
 {% endblock %}
