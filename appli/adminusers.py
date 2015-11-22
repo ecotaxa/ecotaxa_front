@@ -87,8 +87,9 @@ class ProjectsView(ModelView):
     inline_model_form_converter = ProjectsViewCustomInlineModelConverter
     inline_models = (ProjectsViewPrivInlineModelForm(),)
     form_overrides = dict(mappingobj  =TextAreaField,mappingsample  =TextAreaField,mappingacq=TextAreaField,mappingprocess  =TextAreaField,classiffieldlist=TextAreaField,classifsettings=TextAreaField  )
-    # edit_template = 'admin/projects_edit.html'
-    # create_template = 'admin/projects_create.html'
+    form_excluded_columns=('objcount','pctvalidated','pctclassified')
+    edit_template = 'admin/projects_edit.html'
+    create_template = 'admin/projects_create.html'
 
     def __init__(self, session, **kwargs):
         super(ProjectsView, self).__init__(database.Projects, session, **kwargs)
@@ -98,12 +99,13 @@ class ProjectsView(ModelView):
 class ProjectsViewLight(ModelView):
     column_list = ('projid', 'title','visible','status','objcount','pctvalidated','pctclassified')
     form_columns = ('title','visible','status')
+    column_descriptions={'title':"My title"}
     column_searchable_list = ('title',)
     column_default_sort = 'projid'
     inline_model_form_converter = ProjectsViewCustomInlineModelConverter
     inline_models = (ProjectsViewPrivInlineModelForm(),)
-    # edit_template = 'admin/projects_edit.html'
-    # create_template = 'admin/projects_create.html'
+    edit_template = 'admin/projects_edit.html'
+    create_template = 'admin/projects_create.html'
 
     def __init__(self, session, **kwargs):
         super(ProjectsViewLight, self).__init__(database.Projects, session, **kwargs)
@@ -191,7 +193,7 @@ adminApp.add_view(AcquisitionsView(db.session,category='Objects'))
 adminApp.add_view(TaxonomyView(db.session,category='Taxonomy',name="Edit Taxonomy"))
 
 adminApp.add_link(base.MenuLink('Import Taxonomy (admin only)', category='Taxonomy', url='/Task/Create/TaskTaxoImport'))
-adminApp.add_link(base.MenuLink('Merge 2 Taxonomy items (admin only)', category='Taxonomy', url='/dbadmin/merge2taxon'))
+adminApp.add_link(base.MenuLink('Merge 2 categories (admin only)', category='Taxonomy', url='/dbadmin/merge2taxon'))
 adminApp.add_link(base.MenuLink('Taxonomy errors (admin only)', category='Taxonomy', url='/dbadmin/viewtaxoerror'))
 adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))
 adminApp.add_link(base.MenuLink('View DB Size (admin only)', category='Database', url='/dbadmin/viewsizes'))

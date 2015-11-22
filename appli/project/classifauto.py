@@ -23,6 +23,8 @@ join taxonomy tr on tr.id=o.classif_id
 where projid =%d and classif_qual='V'"""%PrjId
     DBRes=np.array(GetAll(sql))
     txtbacktoproject="<a href='/prj/%d'>Back to project</a>"%PrjId
+    Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
     if len(DBRes)==0:
         flash("No validated objects with prediction",'error')
         return PrintInCharte(txtbacktoproject)
@@ -41,10 +43,25 @@ where projid =%d and classif_qual='V'"""%PrjId
     TotalObj=CatPred.shape[0]
     D=np.diag(cm)
 
-    t=[txtbacktoproject+"<table class='table table-bordered table-condensed rightfixedfonttd '><tr><th>Predicted =><br>True category</th>"]
+    t=["""<style>
+th.rotate {
+  /* Something you can count on */
+  height: 140px;
+  white-space: nowrap;
+  vertical-align: bottom !important;
+}
+
+th.rotate > div {
+  transform:
+    rotate(270deg);
+  width: 15px;
+}
+  </style>
+  This matrix is refreshed every time you access it.
+    <table class='table table-bordered table-verycondensed rightfixedfonttd' style='font-size:12px;'><tr><th>Predicted =><br>True category</th>"""]
     # ligne titre des categorie
     for c in CatAll:
-        t.append("<th>%s</th>"%c)
+        t.append("<th  class=rotate><div>%s</div></th>"%c)
     t.append("<th>Nbr True</th><th>% True</th><th>Recall</th>")
     for c,cml,s,recall in zip(CatAll,cm,SommeH,100*D/SommeHNoZero):
         t.append("</tr><tr><th>%s</th>"%c)

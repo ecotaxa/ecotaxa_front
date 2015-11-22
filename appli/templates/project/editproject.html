@@ -1,12 +1,12 @@
 {% macro selectinput(name, values, value='') -%}
-    <select name="{{ name }}" id="{{ name }}" class="form-control" >
+    <select name="{{ name }}" id="{{ name }}" > {# class="form-control"  #}
     {% for v in values %}
         <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
     {% endfor %}
     </select>
 {%- endmacro %}
 {% macro selectinputdict(name, values, value='',emptyitem=false) -%}
-    <select name="{{ name }}" id="{{ name }}" class="form-control" >
+    <select name="{{ name }}" id="{{ name }}"  > {# class="form-control"  #}
     {{  '<option/>'|safe if emptyitem }}
     {% for k,v in values.items() %}
         <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
@@ -18,26 +18,24 @@
 {% extends "layout.html" %}
 
 {% block body %}
-
-<a href="/prj/{{ data.projid }}" >Back to project</a>
 <form class="form-horizontal" method="post" action="?" id="form1">
     <h3>Edit project # {{ data.projid }}</h3>
   <table class=table width="100%">
-    <tr><td width="160px">Project Title </td><td width="300px">
-        <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}">
+    <tr><td width="200px">Project Title </td><td colspan=2 width="500px">
+        <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}" style="width: 500px" >
     </td></tr>
-    <tr><td>Visible</td><td>
+    <tr><td>Visible for all visitors<br>(only validated objects)</td><td>
            <input type="checkbox"  style="height:20px;" id="visible" name="visible"  value="Y" {{ 'checked' if data.visible else "" }}>
     </td></tr>
 
-<tr><td>Status</td><td>
+<tr><td>Status</td><td width="300px">
         {{ selectinput('status', ("Annotate", "ExploreOnly"), value=data.status)  }}
   </td></tr>
-<tr><td>Project Type</td><td>
+<tr><td>Project Description</td><td>
         <input type="text"  class="form-control" id="projtype" name="projtype"  value="{{ data.projtype|default('',true) }}">
       </td></tr>
 
-  <tr><td>Initial Classification list</td><td>
+  <tr><td>Definition of preset for manual sorting </td><td>
         <input type="text"  class="form-control" id="initclassiflist" name="initclassiflist"  value="{{ data.initclassiflist|default('',true) }}"><br>
       <select name='inittaxo' id='inittaxo' class="taxolb" style="width: 280px;" multiple>
     {% for r in g.predeftaxo %}
@@ -47,19 +45,39 @@
     </td><td>
       First line contains IDs separated by coma (1,2,3) and can be easily copied between projects.
       <br><br>Second line is an helper with auto-completion by name, in normal case you should use this area.
-  </td></tr>
+      <br><div class="panel panel-default" style="margin-top: 5px;margin-bottom:5px;">
+The PRESET tool permits to create a pre-defined list of categories for the sorting of the images from the project
+<ul><li>The list can be directly copied from another project (Copy / Paste)
+    <li>New categories can be added using the auto completion function
+</ul>
+  </div></td></tr>
 
-  <tr><td>Fields available for<br>sorting & Display</td><td>
+  <tr><td>Fields available for<br>sorting & Display<br>In the manual classification page</td><td>
         <textarea  class="form-control" id="classiffieldlist" name="classiffieldlist"  rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
     </td><td>
-    Format : Field=title (1 per line)<br>Available fields :
+    Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
+<br>Example : depth_min=minimum depth [m] where
+<ul><li>depth_min is the variable from the imported TSV file
+<li>minimum depth [m] is the displayed name</ul>
+Notes :
+<ul><li>the table can be copied from another project (opened in a different tab)
+<li>only LOWER CASE</ul>
+Available fields :
     {% for x in  g.maplist %}{{ x }}, {% endfor %}
 
    </td></tr>
-  <tr><td>Fields displayed in popover</td><td>
+  <tr><td>Fields displayed in image popover<br>in the manual classification page</td><td>
         <textarea  class="form-control" id="popoverfieldlist" name="popoverfieldlist"  rows="8">{{ data.popoverfieldlist|default('',true) }}</textarea>
     </td><td>
-    Format : Field=title (1 per line), same as previous field.
+        Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
+<br>Example : depth_min=minimum depth [m] where
+<ul><li>depth_min is the variable from the imported TSV file
+<li>minimum depth [m] is the displayed name</ul>
+Notes :
+<ul><li>the table can be copied from another project (opened in a different tab)
+<li>only LOWER CASE</ul>
+Available fields :
+    {% for x in  g.maplist %}{{ x }}, {% endfor %}
 
    </td></tr>
   <tr><td>Comments</td><td>
@@ -68,7 +86,7 @@
     </td></tr>
 
   <tr><td>Privileges</td><td colspan="2">
-        <table class="table table-bordered" style="width:500px;">
+        <table class="table table-bordered table-verycondensed" style="width:500px;">
           <tr>
             <td >Name</td>
             <td>Privilege</td>

@@ -50,8 +50,9 @@ code {
 }
 /* Object page */
 .tab-pane {
-	font-size: 80%;
+	font-size: 90%;
 }
+
 /* Nicer project list table */
 .projectsList td {
 	vertical-align: baseline !important;

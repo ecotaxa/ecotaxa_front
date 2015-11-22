@@ -27,6 +27,7 @@ def MakeHTMLSelect(selname,Values,SelValue="",ExtraTags="",AddEmptyLineFirst=Fal
 @login_required
 def PrjEditAnnot(PrjId):
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
     if Prj is None:
         flash("Project doesn't exists",'error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
@@ -34,17 +35,13 @@ def PrjEditAnnot(PrjId):
         flash('You cannot edit settings for this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
 
-    txt = """
-            <a href="/prj/{0}">Back to project</a>
-            <h3>Project Edit / Erase annotation massively </h3>
-            <h4>Target Project : {0} - {1}</h4>
-            """.format(Prj.projid,Prj.title)
+    txt = "<h3>Project Edit / Erase annotation massively </h3>"
     ################ 1er Ecran
     if not gvg('NewAuthor') or not gvg('OldAuthor'):
         LstUser=GetAssoc2Col("select id,name from users order by lower(name)")
         LstUserOld=OrderedDict({'anyuser':"Any User"})
         for k,v in LstUser.items():LstUserOld[k]=v
-        LstUserNew=OrderedDict({'lastannot':"Last Annotation available, or prediction, or Nothing"})
+        LstUserNew=OrderedDict({'lastannot':"Previous Annotation available, or prediction, or Nothing"})
         for k,v in LstUser.items():LstUserNew[k]=v
         LBOld=MakeHTMLSelect("OldAuthor",LstUserOld,AddEmptyLineFirst=True)
         LBNew=MakeHTMLSelect("NewAuthor",LstUserNew,AddEmptyLineFirst=True)
@@ -61,6 +58,15 @@ def PrjEditAnnot(PrjId):
                   <input type=submit class='btn btn-primary' value="Compute an estimation of the impact"><br>
                     On the next screen you will be able to apply the change only on some categories
                   <form>
+<br><br>
+<div class='panel panel-default' style="width:1000px;margin-left:10px;">
+This correction tool permits to erase the validation jobs for selected categories, selected Annotators and period of time and replace it by the one of a selected Annotator<br>
+EXAMPLES of possibilities :<br>
+<ul>
+<li>Replace validation done by Mr X for all Copepoda by the validation done by Mrs. Y whos is well known specialist of this group
+<li>Replace validation done by Mr W before 2015 November, 15th (which is the date of his taxonomy training course) by prediction or validation by anyone else
+</ul>
+</div>
 
 <script>
 $(document).ready(function() {{

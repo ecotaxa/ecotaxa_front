@@ -112,7 +112,8 @@ class TaskExportTxt(AsyncTask):
         logging.info("Creating file %s"%(fichier))
         with open(fichier,'w',encoding='latin_1') as csvfile:
             # lecture en mode dictionnaire basé sur la premiere ligne
-            wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n' )
+            # ,escapechar ='\\',doublequote =False marche pas sous excel
+            wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_NONNUMERIC  )
             colnames = [desc[0] for desc in self.pgcur.description]
             coltypes=[desc[1] for desc in self.pgcur.description]
             FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double

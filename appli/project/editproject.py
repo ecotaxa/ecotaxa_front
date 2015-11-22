@@ -14,6 +14,7 @@ from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc2Col
 @login_required
 def PrjEdit(PrjId):
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
     if Prj is None:
         flash("Project doesn't exists",'error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
@@ -25,6 +26,7 @@ def PrjEdit(PrjId):
         for f in request.form:
             if f in dir(Prj):
                 setattr(Prj,f,gvp(f))
+        Prj.visible=gvp('visible',False)
         # print(request.form)
         for m in Prj.projmembers:
             if gvp('priv_%s_delete'%m.id)=='Y':

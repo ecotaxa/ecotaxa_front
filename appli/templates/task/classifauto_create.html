@@ -8,36 +8,47 @@
 
 {% extends "layout.html" %}
 
-{% block headcenter %}
-  <h4>Target project :  {{  g.prjtitle  }} </h4>
-{% endblock %}
 
 {% block body %}
 <style>
 .table-condensed tr td {padding-top: 0px  !important;padding-bottom: 0px  !important; } {# On condense encore plus #}
 </style>
-
+<h3>AUTOMATIC CLASSIFICATION : SETTINGS </h3>
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
+<div class="row">
+  <div class="col-md-4">
   <div class="form-group">
-      {{ label("Classification Method")}}
-    <div class="col-sm-4">
+    <label class="col-sm-6 control-label" >Classification Method</label>
+    <div class="col-sm-6">
         {{ selectinputdict("Methode",{'':'','randomforest':"Random Forest",'svm':"SVM"},data.Methode) }}
-    </div> <!-- col-sm-4 -->
+    </div>
   </div><!-- /form-group -->
 
   <div class="form-group">
-      {{ label("Apply to ")}}
-    <div class="col-sm-4">
-        {{ selectinputdict("Perimeter",{'nmc':"All UN Validated Objects",'all':"All Objects"},data.Perimeter) }}
-    </div> <!-- col-sm-4 -->
+    <label class="col-sm-6 control-label" >OBJECTS to PREDICT</label>
+    <div class="col-sm-6">
+        {{ selectinputdict("Perimeter",{'nmc':"NOT Validated Objects",'all':"ALL Objects"},data.Perimeter) }}
+    </div>
   </div><!-- /form-group -->
 <div class="form-group">
-      {{ label("Keep log of previous automatic classification")}}
+    <label class="col-sm-6 control-label" >Keep log of previous automatic classification</label>
     <div class="col-sm-4">
         {{ selectinputdict("keeplog",{'no':"No",'yes':"Yes"},"no") }}
     </div> <!-- col-sm-4 -->
   </div><!-- /form-group -->
-
+</div>  <div class="col-md-8">
+    <p style="padding-left: 100px;">
+    <button type="submit" class="btn btn-primary">START Automatic PREDICTION of IDs</button>
+        </p>
+<div class="panel  panel-default">    <ul>
+<li>The prediction (automatic classification) will never replace the manual validation
+<li>Default settings for the classification have been validated by experts. User should keep them in most cases
+<li>Classification settings are recorded in Ecotaxa for the next prediction
+<li>Categories selected for the prediction should be correctly validated by expert
+<li>The experience shows that it is often more efficient to automatically classify into a limited number of categories and then validate in detail using more categories
+</ul></div>
+</div>
+</div> {#ROW#}
 
 <script>
     function Applyfilter(){
@@ -105,10 +116,10 @@ select Categories with more than <input type="text" id="selectlimit" value="5" s
         <option value="P">% of objects</option>
     </select>
 <input type="button" class="btn" value="Select" onclick="Applyfilter()"><br>
-Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'checked', true )">All</a>
+Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'checked', true )">ALL</a>
     / <a href="#tbltop" onclick="$('#TblTaxo input').prop( 'checked', false );">None</a>
 <table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
-    <tr><th >Select</th><th width="200">Name</th><th >Nbr</th><th >%</th></tr>
+    <tr><th >Select</th><th width="200" style="text-align: center;">Category</th><th style="text-align: center;">Nbr</th><th  style="text-align: center;">%</th></tr>
     {%   for r in g.TaxoList %}
         <tr><td><input type="checkbox" value="Y" name="taxo{{ r[0] }}" data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" {{ r[4] }}></td><td>{{ r[1] }}</td><td class="rightfixedfont">{{ r[2] }}</td><td class="rightfixedfont">{{ r[3] }} %</td></tr>
     {% endfor %}
@@ -118,14 +129,17 @@ Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'check
 Using variables :<br>
 <input type="text" name="CritVar" id="CritVar" value="{{ data.CritVar }}" style="width: 400px;"><br>
 
-Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', true );UncheckNonPertinent();ComputeCritVar();">All</a>
+Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', true );UncheckNonPertinent();ComputeCritVar();">ALL</a>
     / <a href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', false );ComputeCritVar();">None</a>
     / <a href="#tbltop2" onclick="CheckBasedOnText();" title="Usefull to copy setting from another project" >Text field content</a>
     / <a href="#tbltop2" onclick="UncheckNonPertinent();" title="uncheck distinct<1 and %<25%" >Uncheck non pertinent variable</a>
 
 <table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
-    <tr><th rowspan="2">Select</th><th width="200" rowspan="2">Variable</th><th width="100" colspan="2">Source</th><th width="100" colspan="2">Target % Populated</th></tr>
-    <tr><th >% Pop.</th><th >Distinct</th><th >All</th><th>Not Valid.</th></tr>
+    <tr><th rowspan="2">Select</th>
+        <th width="200" rowspan="2" style="text-align: center;">Object variable</th>
+        <th width="100" colspan="2" style="text-align: center;">Learning set</th>
+        <th width="100" colspan="2" style="text-align: center;">Objects to predict<br> % Populated</th></tr>
+    <tr><th >% Pop.</th><th >Distinct</th><th >ALL</th><th>NOT Validated</th></tr>
     {%   for r in g.critlist %}
         <tr><td> {% if (r[2]>1) %}
             <input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[0] }}" >
@@ -148,7 +162,7 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
     <input type="hidden" name="starttask" value="Y">
     <div class="form-group">
     <div class="col-sm-offset-2 col-sm-2">
-      <button type="submit" class="btn btn-primary">Start Task</button>
+        <button type="submit" class="btn btn-primary">START Automatic PREDICTION of IDs</button>
     </div>
   </div>
 </form>

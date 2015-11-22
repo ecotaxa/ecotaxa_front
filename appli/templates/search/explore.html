@@ -14,7 +14,14 @@
 <table width="100%"><tr><td width="160px">
 <br>
  <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
-</td><td><span style="font-size: 18px;">Exploration</span><br>
+</td><td><span style="font-size: 22px;">Exploration </span><span data-toggle="tooltip" data-placement="bottom" data-html="true" title="
+        <p style='text-align: left'><ul style='text-align: left'>
+        <li>By default, the Explore Mode proposes a selection of images from a randomly selected project. You may however select any project and samples from this (these) project(s). Several additional filters can be activated whereas only 1000 objects can be displayed. You may request a full access to a project of interest by contacting the project manager by email (get contact in an object page or “Contribute to Project” page).
+<li>Only annotated objects from public projects are visible.
+<li>The abundance statistics in the taxonomic tree are updated daily.
+</ul>
+</p>"
+        class="glyphicon glyphicon-question-sign"></span><br>
 <span id="headersubtitle" style="color:#FF6600;"> </span><br>
 
 </td></tr></table>
@@ -62,6 +69,7 @@ $(document).ready(function() {
          $("#TaxoModalBody").html("Loading...");
          $("#TaxoModalBody").load("/search/taxotree");
     });
+    $('[data-toggle="tooltip"]').tooltip();
     }); // Ready
  </script>
 <style> {# On agrandi la taile de la drop down de la popup #}
@@ -98,7 +106,15 @@ $(document).ready(function() {
 {# ------- Taxo Filter ------------#}
 <div >
 	<div class="form-group-sm">
-		<label class="title">Taxonomy Filter</label>
+		<label class="title">Taxonomy Filter &nbsp;<span data-toggle="tooltip" data-placement="top" data-html="true" title="
+        <p style='text-align: left'><ul style='text-align: left'>
+        <li>Each lineage can have different length and the usual levels of taxonomic hierarchy are not considered.
+<li>The species is the lower level. However subspecies details can be mentioned. Only the species name encompasses two words: “Genus species”. The “sp.” is used whenever the species name is not available.
+<li>If a taxon is not yet named, we then merge the suffix 'X' with the parent Id:  'Parent_X'. Whenever several children are unknown, the suffix become “_X1”, “_X2” …
+<li>Some morphological categories (detritus, artefact, larvae, sex…) are also integrated.
+</ul>
+</p>"
+        class="glyphicon glyphicon-question-sign"></span> </label>
 		<a class="pull-right clear" href='javascript:ClearTaxo();'></a>
         <select id="taxolb" multiple="multiple" style="width: 100%"  autocomplete="off"> {{ data.taxo_for_select|safe }} </select>
 	</div>
@@ -190,7 +206,7 @@ $(document).ready(function() {
 .ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
 .ddets {cursor:pointer;}
 #dispfieldlist li a {    padding-top:0px;}
-
+.tooltip-inner { max-width: 500px; }
 
 
 #column-right {margin-left: 260px;}
@@ -246,7 +262,7 @@ function LoadRightPane(NoAjax){
       req['projid']=String($('#projid').val())
     else req['projid']="";
     if(req['projid']!="")
-        TxtFilter+=" Project="+$('#projid').val().join(', ');
+        TxtFilter+=" Project="+$.map( $('#projid  option:selected'), function (element) { return $(element).text() }).join(', ');
 
     req['fromdate']=$("#filt_fromdate").val();
     if(req['fromdate']!="")

@@ -197,16 +197,16 @@ class TaskSubset(AsyncTask):
 
     def QuestionProcess(self):
         Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
-        txt="<a href='/prj/%d'>Back to project</a>"%Prj.projid
         if not Prj.CheckRight(1):
-            return PrintInCharte("ACCESS DENIED for this project<br>"+txt)
-        txt+="<h3>Subset Extraction</h3>"
-        txt+="<h5>Base Project : #%d - %s</h5>"%(Prj.projid,Prj.title)
+            return PrintInCharte("ACCESS DENIED for this project<br>"+Prj.title)
+        txt=""
+        g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
         errors=[]
         if self.task.taskstep==0:
             if gvg('eps')=="": # eps = Extra Project selected
                 # Premier écran de configuration, choix du projet de base
-                txt+="""<h4>Extra project to include in the subset</h4>
+                txt="<h3>SUBSET PROJECT SELECTION Page (1/2)</h3>"
+                txt+="""<h4>SELECT ADDITIONAL PROJECT TO INCLUDE IN THE SUBSET</h4>
                 <form action="?p={0}&eps=y" method=post>
                 """.format(Prj.projid)
 
@@ -226,7 +226,17 @@ class TaskSubset(AsyncTask):
                         $("#extraprojects").select2();
                         });
                 </script>
-                </form>"""
+                </form>
+                <br><br>
+                <div class='panel panel-default' style="width:600px;margin-left:10px;">
+A SUBSET is a selection of images (objects) randomly copied from one or more source projects<br>
+A SUBSET can have different usages:<br>
+<ul>
+<li>It can be utilized as a Learning Set for the automatic classification
+<li>It can be utilized as a Test Set to evaluate the quality of the prediction or the validation
+</ul>
+                </div>
+                """
                 return PrintInCharte(txt)
 
             # Le projet de base est choisi second écran ou validation du second ecran
@@ -270,6 +280,7 @@ class TaskSubset(AsyncTask):
                 self.param.what="V"
                 self.param.subsetprojecttitle=("Subset of "+Prj.title+" created on "+(datetime.date.today().strftime('%Y-%m-%d')))[0:255]
                 self.param.extraprojects=",".join(request.form.getlist('extraprojects'))
+            txt="<h3>SUBSET SETTINGS Page (2/2)</h3>"
             if self.param.extraprojects:
                 ExtraPrj=database.Projects.query.filter(text("projid in (%s)"%self.param.extraprojects)).all()
                 g.dispextraprojects="; ".join(["{1} ({0}) ".format(r.projid,r.title) for r in ExtraPrj ])

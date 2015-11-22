@@ -55,7 +55,7 @@ def objectdetails(objid):
     # On affiche la liste des images, en selectionnant une image on changera le contenu de l'image Img1 + Redim
     # l'approche avec des onglets de marchait pas car les images sont superposées
     obj.images.sort(key=lambda x: x.imgrank)
-    t.append("""Image list : """)
+    t.append("""<p>Image list : """)
     for img in obj.images:
         (width,height)=ComputeLimitForImage(img.width,img.height,PageWidth,WindowHeight)
         if img.thumb_file_name:
@@ -68,7 +68,7 @@ def objectdetails(objid):
                  .format(img.imgrank+1,img.file_name,width,height,minifile,miniwidth,miniheight))
     # Ajout de la 1ère image
     (width,height)=ComputeLimitForImage(obj.images[0].width,obj.images[0].height,PageWidth,WindowHeight)
-    t.append("<br><img id=img1 src=/vault/{1} data-zoom-image=/vault/{1} width={2} height={0}><br>"
+    t.append("</p><p><img id=img1 src=/vault/{1} data-zoom-image=/vault/{1} width={2} height={0}></p>"
              .format(height,obj.images[0].file_name,width))
     t.append("""<script>
     $("#img1").elevateZoom({scrollZoom : true});
@@ -131,9 +131,9 @@ $(document).ready(function() {
         else: t.append("<br>")
         t.append("""</div><!-- /input-group -->
  <span id=PendingChangesPop></span></td><td width=30px></td><td valign=top>
-    <button type="button" class="btn btn-success" onclick="Save1Object('V');">Save as Validated</button>
-    <button type="button" class="btn btn-warning" onclick="Save1Object('D');">Save as dubious</button>
-    <button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>
+    <button type="button" class="btn btn-success btn-xs" onclick="Save1Object('V');">Save as Validated</button>
+    <button type="button" class="btn btn-warning btn-xs" onclick="Save1Object('D');">Save as dubious</button>
+    <button type="button" class="btn btn-default btn-xs"  onclick="$('#PopupDetails').modal('hide');">Close</button>
     </td></tr></table>
     """)
     # Ajout des Onglets sous l'image
