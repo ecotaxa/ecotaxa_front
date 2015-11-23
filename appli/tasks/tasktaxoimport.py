@@ -22,7 +22,6 @@ class TaskTaxoImport(AsyncTask):
             if InitStr==None: # Valeurs par defaut ou vide pour init
                 self.InData='My In Data'
 
-
     def __init__(self,task=None):
         super().__init__(task)
         if task==None:
@@ -140,10 +139,11 @@ class TaskTaxoImport(AsyncTask):
         # self.UpdateProgress(10,"Test Error")
 
     def QuestionProcess(self):
+        g.headcenter="<h3>TAXONOMY IMPORTATION</h3><a href=/admin>Back to admin home</a>"
         txt="<h1>Taxonomy Text File Importation Task</h1>"
         errors=[]
         if self.task.taskstep==0:
-            txt+="<h3>Task Creation</h3>"
+            # txt+="<h3>Task Creation</h3>"
             if not current_user.has_role(database.AdministratorLabel):
                 return PrintInCharte("ACCESS DENIED reserved to administrators");
             if gvp('starttask')=="Y":

@@ -412,8 +412,6 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         else: popattribute=""
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher
         bottomtxt=""
-        if 'orig_id' in dispfield:
-            bottomtxt+="<br>%s"%(r['orig_id'],)
         if 'objtime' in dispfield:
             bottomtxt+="<br>Time %s"%(r['objtime'],)
         for k,v in fieldlist.items():
@@ -424,6 +422,8 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
                     bottomtxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
         if bottomtxt!="":
             bottomtxt=bottomtxt[4::] #[4::] supprime le premier <BR>
+        if 'orig_id' in dispfield:
+            bottomtxt="<div style='word-break: break-all;'>X%s</div>"%(r['orig_id'],)+bottomtxt
         txt+="""<div class='subimg {1}' {2}>
 <div class='taxo'>{0}</div>
 <div class='displayedFields'>{3}</div></div>
@@ -446,6 +446,12 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         <button class='btn btn-primary' onclick='SavePendingChanges();' title='CTRL+S'><span class='glyphicon glyphicon-save' /> Save pending changes [CTRL+S]</button>
         <button class='btn btn-success' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> <span class='glyphicon glyphicon-arrow-right' /> Save changes, validate the rest and move to next page</button>
         <!--<button class='btn btn-success' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>-->
+        <button class='btn btn-default' onclick="$('#bottomhelp').toggle()" ><span class='glyphicon glyphicon-question-sign' /> Undo</button>
+        <div id="bottomhelp" class="panel panel-default" style="margin:10px 0px 0px 40px;width:500px;display:none;">To correct validation mistakes (no UNDO button in Ecotaxa):
+<br>1.	Select Validated Status
+<br>2.	Sort by : Validation date
+<br>3.	Move the most recent (erroneous) validated objects into the suitable category
+</div>
         """)
     # Gestion de la navigation entre les pages
     if pagecount>1 or pageoffset>0:

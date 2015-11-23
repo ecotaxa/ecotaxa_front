@@ -21,9 +21,7 @@ def PrjMerge(PrjId):
         flash('You cannot edit settings for this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
-    txt = """<h3>Project Merge / Fusion </h3>
-            <h4>Target Project : {0} - {1}</h4>
-            """.format(Prj.projid,Prj.title)
+    txt = "<h3>Project Merge / Fusion </h3>"
 
     if not gvg('src'):
         txt += """<ul><li>You are allowed to merge projects that you are allowed to manage
@@ -39,7 +37,7 @@ def PrjMerge(PrjId):
             sql+=" Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
         sql+=" where p.projid!=%d order by title"%Prj.projid
         res = GetAll(sql) #,debug=True
-        txt+="""<table class='table table-bordered table-hover'>
+        txt+="""<table class='table table-bordered table-hover table-verycondensed'>
                 <tr><th width=120>ID</td><th>Title</td><th width=100>Status</th><th width=100>Nbr Obj</th>
             <th width=100>% Validated</th><th width=100>% Classified</th></tr>"""
         for r in res:

@@ -283,16 +283,16 @@ A SUBSET can have different usages:<br>
             txt="<h3>SUBSET SETTINGS Page (2/2)</h3>"
             if self.param.extraprojects:
                 ExtraPrj=database.Projects.query.filter(text("projid in (%s)"%self.param.extraprojects)).all()
-                g.dispextraprojects="; ".join(["{1} ({0}) ".format(r.projid,r.title) for r in ExtraPrj ])
+                g.dispextraprojects=" ".join(["<br>- {1} ({0}) ".format(r.projid,r.title) for r in ExtraPrj ])
                 for p in ExtraPrj:
                     if p.mappingobj!=Prj.mappingobj:
-                        flash("TASK CANNOT BE PERFORMED : Object mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
+                        flash("Object variables and metadata differ on project %d (%s). The subset should not be utilized as a Learning Set"%(p.projid,p.title),"warning")
                     if p.mappingsample!=Prj.mappingsample:
-                        flash("TASK CANNOT BE PERFORMED : Sample mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
+                        flash("Sample variables mapping differ on project %d (%s)."%(p.projid,p.title),"warning")
                     if p.mappingacq!=Prj.mappingacq:
-                        flash("TASK CANNOT BE PERFORMED : Acquisition mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
+                        flash("Acquisition variables mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
                     if p.mappingprocess!=Prj.mappingprocess:
-                        flash("TASK CANNOT BE PERFORMED : Process mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
+                        flash("Process variables mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
             else:
                 #recupere les samples
                 sql="""select sampleid,orig_id
