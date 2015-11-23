@@ -14,7 +14,7 @@
 <table width="100%"><tr><td width="160px">
 <br>
  <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
-</td><td><span style="font-size: 22px;">Exploration </span><span data-toggle="tooltip" data-placement="bottom" data-html="true" title="
+</td><td><span style="font-size: 24px;">Exploration </span><span data-toggle="tooltip" data-placement="bottom" data-html="true" title="
         <p style='text-align: left'><ul style='text-align: left'>
         <li>By default, the Explore Mode proposes a selection of images from a randomly selected project. You may however select any project and samples from this (these) project(s). Several additional filters can be activated whereas only 1000 objects can be displayed. You may request a full access to a project of interest by contacting the project manager by email (get contact in an object page or “Contribute to Project” page).
 <li>Only annotated objects from public projects are visible.
@@ -32,9 +32,9 @@
 {% block body %}<div id="topbar" >
 <table><tr><td>
     <button type="button" class="btn btn-xs btn-primary" onclick="LoadRightPane();" style="width: 260px;">
-        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update view</button>
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update view & apply filters</button>
 
-    Img /page : 
+    Img /page :
 	</td><td style="padding-right: 5px;">{{ selectinput("ipp",['50','100','200','500','1000'],data.ipp) }}
     </td><td style="padding-right: 5px;">Zoom : 
 	</td><td style="padding-right: 5px;">{{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}
@@ -79,17 +79,17 @@ $(document).ready(function() {
        <div id="column-left"  class="" style="position: fixed;	top: 120px;	left: 2px;	bottom: 0px;	width: 260px;
                 overflow-y: auto; overflow-x: auto;  margin-bottom: 0px; " >
         <div class="bodyleft" style="margin-left: 2px; width: 231px; margin-top: 3px;">
-          <a href='?' class="btn btn-default " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
-           <button class="btn btn-default" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
+          <a href='?' class="btn btn-info " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
+           <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
         <br>
 
  {# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
 
-<div class="filter">
-    <button class="btn btn-block btn-xs left-button" onclick="$('.filter').toggle();">Hide filters</button>
+<div class="filter" style="margin-top: 3px;">
+    <button class="btn btn-block btn-xs btn-info left-button" onclick="$('.filter').toggle();">Hide filters</button>
 </div>
-<div class="filter" style="display: none">
-    <button class="btn btn-block btn-xs left-button" onclick="$('.filter').toggle();">Show filters</button>
+<div class="filter" style="display: none;margin-top: 3px;">
+    <button class="btn btn-block btn-xs btn-info left-button" onclick="$('.filter').toggle();">Show filters</button>
 </div>
 
 {# ------- Project ------------#}

@@ -33,7 +33,7 @@
   </ul>
 </div>
      <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
-    </td><td><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><span style="font-size: 12px;"> (<span id=objcount></span>)</span><br>
+    </td><td><div id="titlediv" style="width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><span style="font-size: 12px;"> (<span id=objcount></span>)</span></div>
     <div id="headersubtitle" style="color:#FF6600;overflow-y: auto;height: 40px;"> </div>
 
     </td></tr></table>
@@ -151,8 +151,8 @@
                         <div id="TabBInner" style="width: 240px;">
                         
 
-                          <a href='javascript:ClearAllFilterCriteria();' class="btn btn-default " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
-                           <button class="btn btn-default" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
+                          <a href='javascript:ClearAllFilterCriteria();' class="btn btn-info " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
+                           <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
                         <br>
                         {{ leftb|safe }}
                       <div class="row">
@@ -320,6 +320,7 @@ $(document).ready(function() {
         SortToggle();
     $('[data-toggle="tooltip"]').tooltip();
     $("#TabB").outerHeight( $("#column-left").innerHeight()-$("#TabB").position().top );
+    $("#titlediv").width($("#titlediv").parent().width());
     {% if g.taxofilter %}
     SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}");
     {% endif %}

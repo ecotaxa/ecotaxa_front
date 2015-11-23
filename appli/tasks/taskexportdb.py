@@ -94,7 +94,8 @@ class TaskExportDb(AsyncTask):
     def QuestionProcess(self):
         if not current_user.has_role(database.AdministratorLabel):
             return PrintInCharte("ACCESS DENIED for this feature, Admin Required")
-        txt="<h3>Database export Task creation</h3>"
+        g.headcenter="<h3>DATABASE EXPORT TOOL</h3><a href=/admin>Back to admin home</a>"
+        txt=""
         errors=[]
         if self.task.taskstep==0:
             # Le projet de base est choisi second écran ou validation du second ecran
@@ -121,13 +122,13 @@ class TaskExportDb(AsyncTask):
             <form method=post action=?>
             <input type=hidden name=starttask value=Y>
 
-            Select <a name="tbltop" href="#tbltop" onclick="$('#TblPrj input').prop( 'checked', true )">All</a> /
+            SELECT PROJECT(S) TO INCLUDE IN EXPORTED DATABASE <a name="tbltop" href="#tbltop" onclick="$('#TblPrj input').prop( 'checked', true )">All</a> /
              <a href="#tbltop" onclick="$('#TblPrj input').prop( 'checked', false );">None</a>
-            <table id=TblPrj class='table table-condensed table-bordered' >
-             <tr><th width=100>ID</td><th>Title</td><th width=100>Status</th><th width=100>Nbr Obj</th>
-            <th width=100>% Validated</th><th width=100>% Classified</th></tr>"""
+            <table id=TblPrj class='table table-verycondensed table-bordered' >
+             <tr><th width=70px>ID</td><th>Title</td><th width=100px>Status</th><th width=100px>Nbr Obj</th>
+            <th width=100px>% Validated</th><th width=100>% Classified</th></tr>"""
             for r in PrjList:
-                txt+="""<tr><td><input type=checkbox name=prj_{0}>{0}</td><td>{1}</td><td>{2}</td>
+                txt+="""<tr><td><input type=checkbox name=prj_{0}> {0}</td><td>{1}</td><td>{2}</td>
                 <td>{3:0.0f}</td>
                 <td>{4:0.2f}</td>
                 <td>{5:0.2f}</td>
@@ -135,6 +136,29 @@ class TaskExportDb(AsyncTask):
             txt+="""</table>
             <input type=submit class='btn btn-primary' value='Start Database Export'>
             </form>
+<div class="panel panel-default " style="margin-left: 20px;width: 800px;margin-top:5px;">
+<div style="margin:5px;">
+Help on common usage of this feature :
+<br><span class="glyphicon glyphicon-info-sign"></span> <b>MOVE Project to ANOTHER INSTANCE of APPLICATION</b>
+<ul><li>TO MOVE a project :
+<br>1.	Export database from one or more project
+<br>2.	Import the database into another instance of Ecotaxa
+<br>3.	Delete the project from source instance of Ecotaxa (because one project should exists in one database only)
+<li>TO PREPARE a mobile version of Ecotaxa for people going at sea for example
+<br>1.	Create a NEW project in Ecotaxa (empty)
+<br>2.	Move the project into the mobile application as described above (no need to delete the project because it is empty
+<br>3.	After the cruise, move (see above) the (full) project from the mobile application to the server application and delete it from the mobile application
+</ul><span class="glyphicon glyphicon-info-sign"></span> <b>BACKUP project</b>
+<ul><li>TO BACK UP a project :
+<ul><li>Export database and save it !
+</ul></ul>
+<span class="glyphicon glyphicon-info-sign"></span> <b>Export Configurations to another instance of application</b>
+<ul><li>TO EXPORT Ecotaxa USER LIST and TAXONOMY
+<ul><li>Create an new project from the source application (keep it empty)
+<li>Move it into the other instance of EcoTaxa
+</ul></ul>
+</div>
+</div>
             """;
             return PrintInCharte(txt);
 

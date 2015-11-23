@@ -9,7 +9,7 @@
 
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
-Additionnal Selected projects={{ g.dispextraprojects }}
+Additionnal Selected projects : {{ g.dispextraprojects|safe }}
 <input type="hidden" name="extraprojects" value="{{ data.extraprojects }}">
 <table><tr><td>
   <table class="table table-bordered table-condensed " style="width: 400px">
@@ -25,7 +25,7 @@ Additionnal Selected projects={{ g.dispextraprojects }}
       <td><input type="text" size=5 name="vvaleur" value="{{ prevpost.vvaleur }}">  objects </td>
     </tr>
 </table>
-<b>Select object with flag</b><br>
+<b>Select object with status</b><br>
 &nbsp;{{ checkboxinputinlist("what_v","V",data.what) }} Validated<br>
 &nbsp;{{ checkboxinputinlist("what_d","D",data.what) }} Dubious<br>
 &nbsp;{{ checkboxinputinlist("what_p","P",data.what) }} Predicted<br>
@@ -72,7 +72,7 @@ Additionnal Selected projects={{ g.dispextraprojects }}
         });
     }
 </script>
-
+<br>
 <table>
 <tr>
 {% if not data.extraprojects  %}

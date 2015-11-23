@@ -272,9 +272,9 @@ def TaskGetStatus(TaskID):
                     else:
                         rep['d']['ExtraAction']="<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' role='button'>Get file %s</a>"%(TaskID,f,f)
                         if getattr(task.param,'ProjectId',None):
-                            rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d?thengotoproject=Y' class='btn btn-primary btn-sm ' role='button'>Clean the result and back to project (No Danger) </a>"%(TaskID,)
+                            rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d?thengotoproject=Y' class='btn btn-primary btn-sm ' role='button'>FORCE Delete of %s and back to project (no danger for the original database) </a>"%(TaskID,f)
                         else:
-                            rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d' class='btn btn-primary btn-sm ' role='button'>Clean the result (No Danger) </a>"%(TaskID,)
+                            rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d' class='btn btn-primary btn-sm ' role='button'>FORCE Delete of %s (no danger for the original database) </a>"%(TaskID,f)
 
 
             if task.task.taskstate=="Error":

@@ -20,4 +20,34 @@
   </div>
 </form>
 
+<div class="panel panel-default " style="margin-left: 20px;width: 800px">
+<div style="margin:5px;">
+To create/import/delete additional categories such as nauplii, like, female… you can either:
+<ul><li>Edit categories in the application
+<li>Create a table to import/delete multiple categories
+</ul>
+
+
+Example of table: table_import.txt
+Format of table:
+<table class="table table-bordered table-verycondensed" style="width: 400px;">
+<tr><td>ID_SourceParent </td><td>ID_Source </td><td>Name</td><td>Status</td><td>Type</td></tr>
+<tr><td>67815</td><td>m104</td><td>like</td><td>1</td><td>morpho</td></tr>
+<tr><td>46068</td><td>m130</td><td>nauplii</td><td>1</td><td>morpho</td></tr>
+<tr><td>69363</td><td>m138</td><td>bell</td><td>0</td><td>morpho</td></tr>
+</table>
+
+<b>ID_SourceParent</b> : id of the parent from the UniEuk taxonomy (or any other Id), for example M104  (like) is child of Cnidaria (Id 67815)
+<br><b>ID_Source</b> : your givent Id
+<br><b>Name</b> : the given name for the new category (this name can be changed if necessary)
+<br><b>Status</b> :
+<ul><li>1 : to create or keep active
+<li>0 : to remove
+</ul>
+<b>Type</b> : free text (not utilized by Ecotaxa)
+<br><br><b>NOTE</b> : « _ » et « + » are automatically replaced by «  »
+
+</div>
+</div>
+
 {% endblock %}

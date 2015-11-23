@@ -1,39 +1,41 @@
-{#<span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>#}
-  <div style="width: 230px;    margin-top: 5px; margin-bottom: 5px;">
-    <div class="input-group">
-       <select id="taxolbanno" name="taxolbanno" style="width: 170px" class='taxolb'  autocomplete="off"> </select>
-            <span class="input-group-btn">
-                <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbanno" title="Search on Taxonomy Tree">
-                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
-                </span>
-            <span class="input-group-btn">
-                <button class="btn btn-default btn-sm" type="button" title="or Ctrl+A to assign to selection" onclick="AssignTaxoLbToSelection();">
-                    <span id=AssignTaxo class="glyphicon glyphicon-tags" aria-hidden="true"/></button>
-                </span>
+<div style="width: 230px;    margin-top: 5px; margin-bottom: 5px;">
+ <div class="input-group">
+  <select id="taxolbanno" name="taxolbanno" style="width: 170px" class='taxolb'  autocomplete="off"> </select>
+    <span class="input-group-btn">
+        <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbanno" title="Search on Taxonomy Tree">
+            <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
+        </span>
+    <span class="input-group-btn">
+        <button class="btn btn-default btn-sm" type="button" title="Ctrl+A shortcut can also be utilized to assign category name to one or more vignettes" onclick="AssignTaxoLbToSelection();">
+            <span id=AssignTaxo class="glyphicon glyphicon-tags" aria-hidden="true"/></button>
+        </span>
+<table style="cursor:pointer;">
+    <tr><td style="line-height:1.0;">
+        <span class="label label-info" style="padding: 0px 3px 0px 3px; ; margin-left: 2px;" title="Update Counter" onclick="RefreshClassifTab();">UC</span></td>
+    <tr><td style="line-height:1.2;">
+        <span class="label label-info" style="padding: 0px 3px 0px 3px; ; margin-left: 2px;" title="Hide Empty Category" onclick="ToggleZeroCount();">HC</span></td>
+            </tr>
+</table>
+</div><!-- /input-group -->
+</div>
 
-
-
-        </div><!-- /input-group -->
-  </div>
-
-  <div id='divclassiftab' style="width: 255px;overflow-y:auto;">
+<div id='divclassiftab' style="width: 255px;overflow-y:auto;">
 <table class="classiftab" width="98%">
 {% for v in res %}
 <tr>
 <td taxoid="{{ v['id'] }}" class="{{  v['parentclasses'] }} {{ 'zerocount' if v['nbr']==0  }}">
-        
-        {% if v['haschild'] %}
-			<small><span style="width: 7px;"  class="glyphicon glyphicon-triangle-bottom categexpander" ></span></small>
-		{% else %}
-			<span style="width: 7px; display: inline-block;" ></span>
-		{% endif %}
-	<b>{{ ("&emsp;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>
-	  <span class="taxodrop {% if v['haschild'] %}haschild{% endif %}">
-		{{ v['taxoname'] }}
-	</span>
-	<span class="taxoparent">{{ v['taxoparent'] }}</span>
-		<span class="counter label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</span>
-	</td>
+ {% if v['haschild'] %}
+ <small><span style="width: 7px;"  class="glyphicon glyphicon-triangle-bottom categexpander" ></span></small>
+ {% else %}
+ <span style="width: 7px; display: inline-block;" ></span>
+ {% endif %}
+<b>{{ ("&emsp;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>
+  <span class="taxodrop {% if v['haschild'] %}haschild{% endif %}">
+    {{ v['taxoname'] }}
+</span>
+<span class="taxoparent">{{ v['taxoparent'] }}</span>
+    <span class="counter label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</span>
+</td>
 </tr>
 {% endfor %}
 </table>
