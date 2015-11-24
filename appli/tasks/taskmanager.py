@@ -1,9 +1,9 @@
-from appli import db,app,PrintInCharte,gvg
+from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate
 from flask.ext.login import current_user
 from flask import  render_template, g, flash,jsonify
 import json,os,sys,datetime,shutil,flask,logging
 from flask.ext.security import login_required
-from appli.database import ExecSQL
+from appli.database import ExecSQL,GetAll
 
 class Task(db.Model):
     __tablename__ = 'temp_tasks'
@@ -140,6 +140,7 @@ def LoadTask(taskid):
 @login_required
 def ListTasks(owner=None):
      g.headcenter="<H3>Task Monitor</h3>"
+     AddTaskSummaryForTemplate()
      tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
      txt=""
      if gvg("cleandone")=='Y' or gvg("cleanerror")=='Y' or gvg("cleanall")=='Y':
@@ -156,6 +157,7 @@ def ListTasks(owner=None):
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
 @login_required
 def TaskCreateRouter(ClassName):
+    AddTaskSummaryForTemplate()
     t=TaskFactory(ClassName)
     t.task.owner_id=current_user.get_id()
     return t.QuestionProcess()
@@ -163,12 +165,14 @@ def TaskCreateRouter(ClassName):
 @app.route('/Task/Question/<int:TaskID>', methods=['GET', 'POST'])
 @login_required
 def TaskQuestionRouter(TaskID):
+    AddTaskSummaryForTemplate()
     task=LoadTask(TaskID)
     return task.QuestionProcess()
 
 @app.route('/Task/Show/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskShow(TaskID):
+    AddTaskSummaryForTemplate()
     try:
         task=LoadTask(TaskID)
     except:
@@ -205,12 +209,14 @@ def TaskGetFile(TaskID,filename):
 @app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskForceRestart(TaskID):
+    AddTaskSummaryForTemplate()
     task=LoadTask(TaskID)
     return task.StartTask(step=task.task.taskstep)
 
 @app.route('/Task/Clean/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskClean(TaskID):
+    AddTaskSummaryForTemplate()
     if gvg('thengotoproject')=='Y':
         task = LoadTask(TaskID)
         ProjectID=getattr(task.param,'ProjectId',None)
@@ -245,6 +251,7 @@ def DoTaskClean(TaskID):
 
 @app.route('/Task/GetStatus/<int:TaskID>', methods=['GET'])
 def TaskGetStatus(TaskID):
+    AddTaskSummaryForTemplate()
     try:
         task=LoadTask(TaskID)
         Progress=task.task.progresspct
@@ -284,6 +291,16 @@ def TaskGetStatus(TaskID):
     #app.logger.info("Getstatus=%s",rep)
     return jsonify(rep)
 
-@app.route('/Task/Test', methods=['GET'])
-def TaskTestRouter():
-    return render_template('task/monitor.html',TaskID=38)
+@app.route('/Task/autoclean/')
+def AutoCleanManual():
+    return PrintInCharte(AutoClean())
+
+def AutoClean():
+    TaskList=GetAll("""SELECT id, owner_id, taskclass, taskstate, taskstep, progresspct, progressmsg,
+       inputparam, creationdate, lastupdate, questiondata, answerdata
+  FROM temp_tasks
+  where lastupdate<current_timestamp - interval '7 days' or ( creationdate<current_timestamp - interval '1 days' and lastupdate is null)""")
+    txt="Cleanning process result :<br>"
+    for t in TaskList:
+        txt+=DoTaskClean(t['id'])
+    return txt
