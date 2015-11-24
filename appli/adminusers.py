@@ -54,6 +54,8 @@ class UsersView(ModelView):
     )
     def is_accessible(self):
         return current_user.has_role(database.AdministratorLabel)
+    edit_template = 'admin/users_edit.html'
+    create_template = 'admin/users_create.html'
 
 class UsersViewRestricted(UsersView):
     form_columns = ('email', 'name','organisation', 'active',  'password')

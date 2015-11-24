@@ -133,6 +133,19 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
     / <a href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', false );ComputeCritVar();">None</a>
     / <a href="#tbltop2" onclick="CheckBasedOnText();" title="Usefull to copy setting from another project" >Text field content</a>
     / <a href="#tbltop2" onclick="UncheckNonPertinent();" title="uncheck distinct<1 and %<25%" >Uncheck non pertinent variable</a>
+ - <a href="#variable-help" data-toggle="collapse" class="help">Variable help</a>
+<div id=variable-help class="panel panel-default collapse " style="margin-left: 0px;margin-top: 5px;width: 500px" >
+<div style="margin:5px;">
+<span class=" glyphicon glyphicon-info-sign"></span> <ul><li>Objects variable are used for prediction. Only variables with more than one distinct value in the learning set are available.
+<li>Non pertinent variables are variable with less than 75% populated in the learning set or in the target scope. They can be automatically unchecked using the link "Uncheck non pertinent variable".
+<li>Missing variable values for both learning set and predicted objects are replaced by the median value computed from the learning set.
+<li>%Pop is the % of populated values for a variable.
+<li>Distinct is the number of distinct populated values for a variable
+
+
+</div>
+</div>
+
 
 <table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
     <tr><th rowspan="2">Select</th>

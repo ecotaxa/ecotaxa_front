@@ -152,11 +152,7 @@ Help on common usage of this feature :
 <ul><li>TO BACK UP a project :
 <ul><li>Export database and save it !
 </ul></ul>
-<span class="glyphicon glyphicon-info-sign"></span> <b>Export Configurations to another instance of application</b>
-<ul><li>TO EXPORT Ecotaxa USER LIST and TAXONOMY
-<ul><li>Create an new project from the source application (keep it empty)
-<li>Move it into the other instance of EcoTaxa
-</ul></ul>
+
 </div>
 </div>
             """;

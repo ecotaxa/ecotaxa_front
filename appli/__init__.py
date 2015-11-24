@@ -204,8 +204,10 @@ def scheduler_daily_task():
     app.logger.info("Start Daily Task")
     try:
         import appli.cron
+
         appli.cron.RefreshAllProjectsStat()
         appli.cron.RefreshTaxoStat()
+        app.logger.info(appli.tasks.taskmanager.AutoClean())
     except Exception as e:
         s=str(e)
         tb_list = traceback.format_tb(e.__traceback__)
@@ -214,7 +216,7 @@ def scheduler_daily_task():
         app.logger.error("Exception on Daily Task : %s"%s)
     app.logger.info("End Daily Task")
 def scheduler_func():
-    #schedule.every(10).seconds.do(scheduler_daily_task)
+    # schedule.every(10).seconds.do(scheduler_daily_task)
     schedule.every().day.at("01:15").do(scheduler_daily_task)
     while 1:
         schedule.run_pending()
