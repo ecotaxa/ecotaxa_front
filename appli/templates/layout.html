@@ -67,7 +67,7 @@ $(document).ready(function() {
             {%  if g.tasksummary.Done  %}<span class="label label-success">Done :{{g.tasksummary['Done']}}</span>{% endif %}</a><br>{% endif %}
             {{ current_user.name }} (<a href="{{ url_for_security('logout') }}">log out</a>)
 {% if g.menu %}
-    <br><div class="btn-group" style="margin-right: 10px">
+    <br><div class="btn-group" style="width:100px;margin-right: 10px">
     <button type="button" class="btn btn-default">Action</button>
     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
         <span class="caret"></span>
