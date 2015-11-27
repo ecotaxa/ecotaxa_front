@@ -88,7 +88,7 @@ class TaskImportDB(AsyncTask):
                 logging.info("Restore table %s "%(t,))
                 try:
                     zfile.extract(t+".copy")
-                    with open(t+".copy","r") as f:
+                    with open(t+".copy","r",encoding='latin_1') as f:
                         self.pgcur.copy_from(f,newschema+"."+t,columns=ColList)
                         self.pgcur.connection.commit()
                 except:
