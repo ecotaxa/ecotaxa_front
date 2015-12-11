@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# This file is part of Ecotaxa, see license.txt in the application root directory for license informations.
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp

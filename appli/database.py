@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# This file is part of Ecotaxa, see license.txt in the application root directory for license informations.
 from appli import db,app
 from flask.ext.security import  UserMixin, RoleMixin
 from flask.ext.login import current_user

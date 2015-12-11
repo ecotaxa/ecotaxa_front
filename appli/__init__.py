@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# This file is part of Ecotaxa, see license.txt in the application root directory for license informations.
 
 import os,sys
 # Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL

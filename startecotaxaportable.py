@@ -1,3 +1,4 @@
+# This file is part of Ecotaxa, see license.txt in the application root directory for license informations.
 import os,subprocess,time,sys
 from threading import Thread
 from pathlib import Path

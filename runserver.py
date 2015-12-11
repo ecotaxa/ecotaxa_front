@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# This file is part of Ecotaxa, see license.txt in the application root directory for license informations.
+
 from appli import app
 import logging,sys
 import logging.handlers
