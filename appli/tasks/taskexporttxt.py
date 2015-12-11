@@ -42,6 +42,11 @@ class TaskExportTxt(AsyncTask):
                 ,object_link,depth_min as object_depth_min,depth_max as object_depth_max
                 ,o.classif_id,to1.name as object_annotation_category
                 ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubios' ELSE o.classif_qual end object_annotation_status
+                ,to1p.name as object_annotation_parent_category
+                ,(WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id,1 rang FROM taxonomy where id =o.classif_id
+                        union
+                        SELECT t.id,t.name,t.parent_id, rang+1 rang FROM rq JOIN taxonomy t ON t.id = rq.parent_id)
+                        select string_agg(name,'>') from (select name from rq order by rang desc)q) object_annotation_hierarchy
                 ,o.classif_who,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
                 ,to_char(o.classif_when,'YYYYMMDD') object_annotation_date
                 ,to_char(o.classif_when,'HH24MISS') object_annotation_time
@@ -49,6 +54,7 @@ class TaskExportTxt(AsyncTask):
                 ,random_value,sunpos     """
         sql2=""" FROM objects o
                 LEFT JOIN taxonomy to1 on o.classif_id=to1.id
+                LEFT JOIN taxonomy to1p on to1.parent_id=to1p.id
                 LEFT JOIN users uo1 on o.classif_who=uo1.id
                 LEFT JOIN taxonomy to2 on o.classif_auto_id=to2.id
                 LEFT JOIN samples s on o.sampleid=s.sampleid """
