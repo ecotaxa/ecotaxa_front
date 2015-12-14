@@ -308,7 +308,7 @@ class TaskImport(AsyncTask):
         random.seed()
         sd=Path(self.param.SourceDir)
         TotalRowCount=0
-        for filter in ("**/*.txt","**/*.tsv"):
+        for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv"):
             for CsvFile in sd.glob(filter):
                 relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
                 if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
