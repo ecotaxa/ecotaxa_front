@@ -10,6 +10,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from collections import Counter
 from sklearn import metrics, cross_validation
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
