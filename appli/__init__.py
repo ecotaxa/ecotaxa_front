@@ -30,7 +30,10 @@ import appli.securitycachedstore
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')
 
-PythonExecutable="TEST"
+if 'PYTHONEXECUTABLE' in app.config:
+    app.PythonExecutable=app.config['PYTHONEXECUTABLE']
+else:
+    app.PythonExecutable="TBD"
 
 db = SQLAlchemy(app,session_options={'expire_on_commit':True}) # expire_on_commit évite d'avoir des select quand on manipule les objets aprés un commit.
 
