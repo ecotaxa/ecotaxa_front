@@ -17,7 +17,8 @@ if __name__ == '__main__':
     app.logger.addHandler(handler)
     app.logger.info("App Startup")
     # L'executable est l'interpreteur qui à permis de lancer, mais en WSGI c'est écrasé par le lanceur WSGI
-    app.PythonExecutable=sys.executable
+    if app.PythonExecutable=="TBD": # si pas forcé par un fichier de configuration
+        app.PythonExecutable=sys.executable
 
 
 

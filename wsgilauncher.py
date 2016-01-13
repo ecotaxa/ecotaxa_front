@@ -24,10 +24,11 @@ handler.setFormatter(logging.Formatter(LoggingFormat))
 application.logger.addHandler(handler)
 application.logger.info("App WSGI Startup")
 
-if sys.platform.startswith('win32'):
-    # version Virtual Env
-    application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Scripts\python.exe"))
-    if not Path(application.PythonExecutable).exists(): # version Ecotaxa portable
-        application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python34\python.exe"))
-else:
-    application.PythonExecutable='/usr/local/bin/python3'
+if application.PythonExecutable=="TBD":
+    if sys.platform.startswith('win32'):
+        # version Virtual Env
+        # application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Scripts\python.exe"))
+        if not Path(application.PythonExecutable).exists(): # version Ecotaxa portable
+            application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python34\python.exe"))
+    else:
+        application.PythonExecutable='/usr/local/bin/python3'
