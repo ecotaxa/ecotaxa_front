@@ -54,6 +54,8 @@ def dbcreate():
     config = _get_config(None)
     from alembic import command
     command.stamp(config, 'head')
+    database.ExecSQL("""create view objects as select oh.*,ofi.*
+    from obj_head oh left join obj_field ofi on oh.objid=ofi.objfid""")
 
 
 @manager.command
