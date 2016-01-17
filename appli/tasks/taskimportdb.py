@@ -328,30 +328,39 @@ class TaskImportDB(AsyncTask):
                 db.session.commit()
                 flash("Project %s:%s created or updated successfuly"%(Prj.projid,Prj.title),'success')
                 # Controle du mapping Taxo
-                sql="""select DISTINCT t.id,lower(t.name) as name,t.parent_id
+                sql="""select DISTINCT t.id,lower(t.name) as name,t.parent_id,lower(t.name)||' ('||lower(t2.name)||')' as namefull
                           from {0}.obj_head o join {0}.taxonomy t on o.classif_id=t.id
+                          left join {0}.taxonomy t2 on t.parent_id=t2.id
                         where o.projid={1} and t.newid is null
-                        union select DISTINCT t.id,lower(t.name) as name,t.parent_id
+                        union select DISTINCT t.id,lower(t.name) as name,t.parent_id,lower(t.name)||' ('||lower(t2.name)||')' as namefull
                           from {0}.obj_head o
                           join {0}.taxonomy t on o.classif_auto_id=t.id
+                          left join {0}.taxonomy t2 on t.parent_id=t2.id
                           left join taxonomy tt on t.newid =tt.id
                         where o.projid={1}  and tt.id is null
                         order by 2""".format(newschema,gvg("src"))
-                self.param.TaxoFound=GetAssoc(sql,cursor_factory=RealDictCursor,keyid='id')
+                self.param.TaxoFound=GetAssoc(sql,cursor_factory=RealDictCursor,keyid='id',debug=False)
                 app.logger.info("TaxoFound=%s",self.param.TaxoFound)
-                TaxoInDest=GetAssoc2Col("select id,lower(name) as name from taxonomy where id = any (%s)",( list(self.param.TaxoFound.keys()) ,) )
+                TaxoInDest=GetAssoc2Col("""select t.id,lower(t.name)||' ('||lower(t2.name)||')' as name
+                                            from taxonomy t
+                                            left join taxonomy t2 on t.parent_id=t2.id
+                                            where t.id = any (%s)"""
+                                            ,( list(self.param.TaxoFound.keys()) ,) )
                 # print(TaxoInDest)
                 for id,v in self.param.TaxoFound.items():
                     self.param.TaxoFound[id]['newid']=None # par defaut pas de correspondance
                     if id in TaxoInDest:
-                        if TaxoInDest[id].lower()==v['name']:
+                        if TaxoInDest[id].lower()==v['namefull']:
                             self.param.TaxoFound[id]['newid']=id # ID inchangé
                 lst=[t["name"] for t in self.param.TaxoFound.values() if t["newid"] is None] # liste des Taxon sans mapping
-                TaxoInDest=GetAssoc2Col("select lower(name) as name,id from taxonomy where lower(name) = any (%s)",(lst ,) )
+                TaxoInDest=GetAssoc2Col("""select lower(t.name)||' ('||lower(t2.name)||')' as name,t.id
+                                            from taxonomy t
+                                            left join taxonomy t2 on t.parent_id=t2.id
+                                            where lower(t.name) = any (%s)""",(lst ,) )
                 for id,v in self.param.TaxoFound.items() :
                     if v['newid'] is None:
-                        if v["name"] in TaxoInDest:
-                                self.param.TaxoFound[id]['newid']=TaxoInDest[v["name"]] # ID du même nom dans la base de destination
+                        if v["namefull"] in TaxoInDest:
+                                self.param.TaxoFound[id]['newid']=TaxoInDest[v["namefull"]] # ID du même nom dans la base de destination
                 NotFoundTaxo=[t["name"] for t in self.param.TaxoFound.values() if t["newid"] is None] # liste des Taxon sans mapping restant
                 app.logger.info("NotFoundTaxo=%s",NotFoundTaxo)
                 # Controle du mapping utilisateur
@@ -456,7 +465,7 @@ class TaskImportDB(AsyncTask):
                     NotFoundTaxo=[v["name"] for k,v in self.param.TaxoFound.items() if v["newid"]==None]
                     NotFoundUsers=[k for k,v in self.param.UserFound.items() if v.get('id')==None]
                     app.logger.info("Final NotFoundTaxo = %s",NotFoundTaxo)
-                NotFoundTaxoForTemplate=[{'id':v["id"],'name':v["name"]} for k,v in self.param.TaxoFound.items() if v["newid"]==None]
+                NotFoundTaxoForTemplate=[{'id':v["id"],'name':v["name"],'namefull':v["namefull"]} for k,v in self.param.TaxoFound.items() if v["newid"]==None]
                 return render_template('task/importdb_question1.html',header=txt,taxo=NotFoundTaxoForTemplate,users=NotFoundUsers)
             return PrintInCharte(txt)
         if self.task.taskstep==2: # ################## Question Post Import Effectif d'un projet

@@ -227,7 +227,7 @@ class Objects(db.Model):
 
 class ObjectsFields(db.Model):
     __tablename__ = 'obj_field'
-    objfid = db.Column(BIGINT,db.ForeignKey('obj_head.objid'), primary_key=True)
+    objfid = db.Column(BIGINT,db.ForeignKey('obj_head.objid',ondelete="CASCADE"), primary_key=True)
     objhrel=db.relationship("Objects",foreign_keys="Objects.objid",primaryjoin="ObjectsFields.objfid==Objects.objid" ,uselist=False, backref="objfrel")
     orig_id = db.Column(VARCHAR(255))
     object_link= db.Column(VARCHAR(255))
@@ -252,7 +252,7 @@ Index('is_objectfieldsorigid',ObjectsFields.__table__.c.orig_id)
 
 class ObjectsClassifHisto(db.Model):
     __tablename__ = 'objectsclassifhisto'
-    objid = db.Column(BIGINT,db.ForeignKey('obj_head.objid'), primary_key=True)
+    objid = db.Column(BIGINT,db.ForeignKey('obj_head.objid',ondelete="CASCADE"), primary_key=True)
     classif_date = db.Column(TIMESTAMP, primary_key=True)
     classif_type = db.Column(CHAR(1)) # A : Auto, M : Manu
     classif_id = db.Column(INTEGER)
