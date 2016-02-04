@@ -144,9 +144,9 @@ class TaskExportTxt(AsyncTask):
                                                              datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
         logging.info("Creating file %s"%(fichier))
-        root = ET.Element('projects',{ "xmlns":"http://typo.oceanomics.abims.sbr.fr/ecotaxa­export"
-                 ,"xmlns:xsi":"http://www.w3.org/2001/XMLSchema­instance"
-                 ,"xsi:schemaLocation":"http://typo.oceanomics.abims.sbr.fr/ecotaxa­-export platform:/resource/typo­-shared/src/main/resources/ecotaxa­export­1.0.xsd"})
+        root = ET.Element('projects',{ "xmlns":"http://typo.oceanomics.abims.sbr.fr/ecotaxa-export"
+                 ,"xmlns:xsi":"http://www.w3.org/2001/XMLSchema-instance"
+                 ,"xsi:schemaLocation":"http://typo.oceanomics.abims.sbr.fr/ecotaxa-export platform:/resource/typo-shared/src/main/resources/ecotaxa-export-1.1.xsd"})
 
         Project=ET.SubElement(root, 'project',{'id':"ecotaxa:%d"%Prj.projid})
         projectdescription=ET.SubElement(Project, 'projectdescription')
