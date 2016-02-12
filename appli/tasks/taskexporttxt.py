@@ -152,7 +152,7 @@ class TaskExportTxt(AsyncTask):
         projectdescription=ET.SubElement(Project, 'projectdescription')
         projectdescriptionname=ET.SubElement(projectdescription, 'name')
         projectdescriptionname.text=Prj.title
-        ET.SubElement(projectdescription, 'link',{"url":"http://ecotaxa.oceanomics.fr/prj/%d"%Prj.projid})
+        ET.SubElement(projectdescription, 'link',{"url":"%sprj/%d"%(app.config['SERVERURL'],Prj.projid)})
         projectdescriptionmanagers=ET.SubElement(projectdescription, 'managers')
         projectdescriptionanno=ET.SubElement(projectdescription, 'contributors')
         for pm in Prj.projmembers:
