@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.txt in the application root directory for license informations.
 
-import os,sys
+import os,sys,pathlib
 # Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL
 if sys.platform.startswith('win32'):
     virtualprefix = sys.base_prefix
@@ -130,6 +130,20 @@ def ScaleForDisplay(v):
         return ""
     else:
         return v
+
+def CreateDirConcurrentlyIfNeeded(DirPath:pathlib.Path):
+    """
+    Permets de créer le répertoire passé en paramètre s'il n'existe pas et le crée si nécessaire.
+    Si la création échoue, il teste s'il n'a pas été créé par un autre processus, et dans ce cas ne remonte pas d'erreur.
+    :param DirPath: répertoire à créer sous forme de path
+    """
+    try:
+        if not DirPath.exists():
+            DirPath.mkdir()
+    except Exception as e:
+        if not DirPath.exists():
+            raise e
+
 
 def ComputeLimitForImage(imgwidth,imgheight,LimitWidth,LimitHeight):
     width=imgwidth

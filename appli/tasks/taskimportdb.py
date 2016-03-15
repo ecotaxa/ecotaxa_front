@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv
+from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv,CreateDirConcurrentlyIfNeeded
 from flask import render_template,  flash,request
 import logging,datetime,sys,shutil,os
 from pathlib import Path
@@ -218,8 +218,7 @@ class TaskImportDB(AsyncTask):
                     SrcImgMini=r['thumb_file_name']
                     VaultFolder="%04d"%(Img.imgid//10000)
                     #creation du repertoire contenant les images si necessaire
-                    if not vaultroot.joinpath(VaultFolder).exists():
-                        vaultroot.joinpath(VaultFolder).mkdir()
+                    CreateDirConcurrentlyIfNeeded(vaultroot.joinpath(VaultFolder))
                     Img.file_name     ="%s/%04d%s"     %(VaultFolder,Img.imgid%10000,Path(SrcImg).suffix)
                     shutil.move(zipimagefile,vaultroot.joinpath(Img.file_name).as_posix())
                     if r['thumb_file_name']:

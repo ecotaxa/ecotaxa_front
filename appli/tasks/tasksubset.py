@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
+from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,CreateDirConcurrentlyIfNeeded
 from flask import  render_template, g, flash,request
 import logging,copy,psycopg2.extras,shutil,datetime,time
 from pathlib import Path
@@ -156,8 +156,7 @@ class TaskSubset(AsyncTask):
                         SrcImgMini=img.thumb_file_name
                         VaultFolder="%04d"%(img.imgid//10000)
                         #creation du repertoire contenant les images si necessaire
-                        if not vaultroot.joinpath(VaultFolder).exists():
-                            vaultroot.joinpath(VaultFolder).mkdir()
+                        CreateDirConcurrentlyIfNeeded(vaultroot.joinpath(VaultFolder))
                         img.file_name     ="%s/%04d%s"     %(VaultFolder,img.imgid%10000,Path(SrcImg).suffix)
                         shutil.copyfile(vaultroot.joinpath(SrcImg).as_posix(),vaultroot.joinpath(img.file_name).as_posix())
                         if SrcImgMini is not None:
