@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv,GetAppManagerMailto
+from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv,GetAppManagerMailto,CreateDirConcurrentlyIfNeeded
 from PIL import Image
 from flask import render_template,  flash,request,g
 import logging,os,csv,sys,time
@@ -397,8 +397,7 @@ class TaskImport(AsyncTask):
                         VaultFolder="%04d"%(Objs["image"].imgid//10000)
                         vaultroot=Path("../../vault")
                         #creation du repertoire contenant les images si necessaire
-                        if not vaultroot.joinpath(VaultFolder).exists():
-                            vaultroot.joinpath(VaultFolder).mkdir()
+                        CreateDirConcurrentlyIfNeeded(vaultroot.joinpath(VaultFolder))
                         vaultfilename     ="%s/%04d%s"     %(VaultFolder,Objs["image"].imgid%10000,ImgFilePath.suffix)
                         vaultfilenameThumb="%s/%04d_mini%s"%(VaultFolder,Objs["image"].imgid%10000,'.jpg') #on Impose le format de la miniature
                         Objs["image"].file_name=vaultfilename
