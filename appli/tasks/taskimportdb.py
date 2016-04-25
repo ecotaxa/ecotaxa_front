@@ -327,11 +327,11 @@ class TaskImportDB(AsyncTask):
                 db.session.commit()
                 flash("Project %s:%s created or updated successfuly"%(Prj.projid,Prj.title),'success')
                 # Controle du mapping Taxo
-                sql="""select DISTINCT t.id,lower(t.name) as name,t.parent_id,lower(t.name)||' ('||lower(t2.name)||')' as namefull
+                sql="""select DISTINCT t.id,lower(t.name) as name,t.parent_id,lower(t.name)||' ('||coalesce(lower(t2.name),'No Parent')||')' as namefull
                           from {0}.obj_head o join {0}.taxonomy t on o.classif_id=t.id
                           left join {0}.taxonomy t2 on t.parent_id=t2.id
                         where o.projid={1} and t.newid is null
-                        union select DISTINCT t.id,lower(t.name) as name,t.parent_id,lower(t.name)||' ('||lower(t2.name)||')' as namefull
+                        union select DISTINCT t.id,lower(t.name) as name,t.parent_id,lower(t.name)||' ('||coalesce(lower(t2.name),'No Parent')||')' as namefull
                           from {0}.obj_head o
                           join {0}.taxonomy t on o.classif_auto_id=t.id
                           left join {0}.taxonomy t2 on t.parent_id=t2.id
@@ -340,7 +340,7 @@ class TaskImportDB(AsyncTask):
                         order by 2""".format(newschema,gvg("src"))
                 self.param.TaxoFound=GetAssoc(sql,cursor_factory=RealDictCursor,keyid='id',debug=False)
                 app.logger.info("TaxoFound=%s",self.param.TaxoFound)
-                TaxoInDest=GetAssoc2Col("""select t.id,lower(t.name)||' ('||lower(t2.name)||')' as name
+                TaxoInDest=GetAssoc2Col("""select t.id,lower(t.name)||' ('||coalesce(lower(t2.name),'No Parent')||')' as name
                                             from taxonomy t
                                             left join taxonomy t2 on t.parent_id=t2.id
                                             where t.id = any (%s)"""
@@ -352,7 +352,7 @@ class TaskImportDB(AsyncTask):
                         if TaxoInDest[id].lower()==v['namefull']:
                             self.param.TaxoFound[id]['newid']=id # ID inchangé
                 lst=[t["name"] for t in self.param.TaxoFound.values() if t["newid"] is None] # liste des Taxon sans mapping
-                TaxoInDest=GetAssoc2Col("""select lower(t.name)||' ('||lower(t2.name)||')' as name,t.id
+                TaxoInDest=GetAssoc2Col("""select lower(t.name)||' ('||coalesce(lower(t2.name),'No Parent')||')' as name,t.id
                                             from taxonomy t
                                             left join taxonomy t2 on t.parent_id=t2.id
                                             where lower(t.name) = any (%s)""",(lst ,) )
