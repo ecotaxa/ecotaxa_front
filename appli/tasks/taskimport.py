@@ -410,6 +410,8 @@ class TaskImport(AsyncTask):
                         # génération d'une miniature si une image est trop grande.
                         if (im.size[0]>SizeLimit) or (im.size[1]>SizeLimit) :
                                 im.thumbnail((SizeLimit,SizeLimit))
+                                if im.mode=='P':
+                                    im=im.convert("RGB")
                                 im.save(vaultroot.joinpath(vaultfilenameThumb).as_posix())
                                 Objs["image"].thumb_file_name=vaultfilenameThumb
                                 Objs["image"].thumb_width=im.size[0]
