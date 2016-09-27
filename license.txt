@@ -1,8 +1,0 @@
-License of EcoTaxa Software
-Copyright (c) 2015 [Océanomics/CNRS/Altidev]- All Rights Reserved
-Unauthorized copying of this file, via any medium is  strictly prohibited
-Proprietary and confidential.
-Written by Laurent NAVARRO<ln@altidev.com>
-Some files, mainly in the static directory or identified in their Header are third party software and submitted to their own license.
-
-For any question you can contact : Picheral Marc <marc.picheral@obs-vlfr.fr> or Sebastien Colin <colin@sb-roscoff.fr> or Mark Hoebeke <mark.hoebeke@sb-roscoff.fr>

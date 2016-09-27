@@ -1,8 +1,12 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-  <p>Ecotaxa Version : 2016.03.15</p>
+  <p>Ecotaxa Version : 2016.06.10</p>
 {# Log :
+2016.06.10 : Removed X before Object name
+             if file home.html or homebottom.html is missing use home-model.html and homebottom-model.html
+             Theses file are read as UTF-8 Format instead of target platform settings.
+             Integration of licenses files as md format before integration to GitHub
 2016.03.15 : Added CreateDirConcurrentlyIfNeeded to avoid conflinct in creation of images directory by concurrent task
 2016.01.17 : Added parameter PYTHONEXECUTABLE in Config.cfg
              Added objects view creation in Manage CreateDB
