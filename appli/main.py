@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-# This file is part of Ecotaxa, see license.txt in the application root directory for license informations.
+# This file is part of Ecotaxa, see license.md in the application root directory for license informations.
+# Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask.ext.login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_security.decorators import roles_accepted
 from appli.database import db
-
+import os
 
 # Load default config and override config from an environment variable
 # app.config.update(dict(
@@ -23,7 +24,10 @@ app.register_blueprint(vaultBP)
 @app.route('/')
 def index():
     txt="""<div style='margin:5px;'><div id="homeText"'>"""
-    with open('appli/static/home/home.html', 'r') as f:
+    NomFichier='appli/static/home/home.html'
+    if not os.path.exists(NomFichier):
+        NomFichier='appli/static/home/home-model.html'
+    with open(NomFichier, 'r',encoding='utf8') as f:
         txt+=f.read()
     txt+="""
 	</div>
@@ -36,8 +40,11 @@ def index():
 		</div>		
 	</div>
 """
+    NomFichier='appli/static/home/homebottom.html'
+    if not os.path.exists(NomFichier):
+        NomFichier='appli/static/home/homebottom-model.html'
     txt+="""<div class="row" id="homeLegal"><div class="col-sm-12">"""
-    with open('appli/static/home/homebottom.html', 'r') as f:
+    with open(NomFichier, 'r',encoding='utf8') as f:
         txt+=f.read()
     txt+="""</div></div></div>"""
 

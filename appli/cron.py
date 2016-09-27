@@ -1,4 +1,5 @@
-# This file is part of Ecotaxa, see license.txt in the application root directory for license informations.
+# This file is part of Ecotaxa, see license.md in the application root directory for license informations.
+# Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from appli.database import ExecSQL
 
 

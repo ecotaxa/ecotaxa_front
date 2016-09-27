@@ -423,7 +423,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         if bottomtxt!="":
             bottomtxt=bottomtxt[4::] #[4::] supprime le premier <BR>
         if 'orig_id' in dispfield:
-            bottomtxt="<div style='word-break: break-all;'>X%s</div>"%(r['orig_id'],)+bottomtxt
+            bottomtxt="<div style='word-break: break-all;'>%s</div>"%(r['orig_id'],)+bottomtxt
         txt+="""<div class='subimg {1}' {2}>
 <div class='taxo'>{0}</div>
 <div class='displayedFields'>{3}</div></div>
