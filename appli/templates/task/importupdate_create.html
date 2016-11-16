@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block headcenter %}
+  <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
+{% endblock %}
+
+{% block body %}
+
+<h2>Update MetaData (step 1)</h2>
+
+<div class="help-block">
+	<div class="row">
+		<div class="col-sm-12">
+
+			<p><a href="#general-help" data-toggle="collapse" class="help">General help</a></p>
+			<div id="general-help" class="collapse">
+			
+			<p>Use this page to update metada associated to already importer images .<br>
+                Process is similar to import process except you cannot handle images.<br>
+                Link with existing objects is done using the field object_id
+
+            </p>
+
+			
+			
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<form class="form" method="post" enctype="multipart/form-data">
+
+	<div class="row" style="margin: 5px">
+		<div class="col-sm-5">
+  <div class="form-group">
+				<label class="control-label">Choose a folder or zip file on the server</label>
+      <div class="input-group">
+					<input type="text" class="form-control" id="ServerPath" name="ServerPath" value="" size="200">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button"  data-toggle="modal" data-target="#FileModal">
+					<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button>
+                </span>
+				</div>
+				<p class="help-block">Contact the project manager to know where and how to upload your data. Once the import is complete, all data folders/files can be safely erased on the server.
+				<br>Project manager : {{ g.prjmanagermailto |safe }}</p>
+			</div>
+		</div>
+
+		<div class="col-sm-2" style="text-align: center">
+			<label class="control-label">OR</label>
+		</div>
+
+		<div class="col-sm-5">
+<div class="form-group">
+				<label class="control-label">Upload a local zip file</label>
+				<input class="form-control" type="file" id="uploadfile" name="uploadfile" size="200">
+				<p class="help-block">Only for &lt;&nbsp;100MB zip files.</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-8 col-sm-offset-2">
+
+			<p><a href="#advanced" data-toggle="collapse" class="help">Advanced options</a></p>
+			<div id="advanced" class="collapse">
+				<div class="form-group">
+					<label for="port" class="control-label">Optional taxonomy mapping</label>
+					<p class="help-block">This allows to change the name of the categories of previously classified objects to match the names in the UniEuk taxonomic framework included in the application.<br>Examples:<br>
+					crust_cop = Copepoda<br>
+					gelatinous medusae = Cnidaria</p>
+					<textarea class="form-control" id="TxtTaxoMap" name="TxtTaxoMap" rows="4" placeholder="oldname = UniEuk name"></textarea>
+				</div>
+			</div>
+
+    <input type="hidden" name="starttask" value="Y">
+			<button type="submit" class="btn btn-lg btn-block btn-primary">Start import</button>
+    </div>
+  </div>
+
+</form>
+
+   <script>
+$(document).ready(function() {
+    $('#FileModal').on('show.bs.modal', function (e) {
+         $("#FileModalBody").html("Loading...");
+         $("#FileModalBody").load("/common/ServerFolderSelect");
+    });
+    }); // Ready
+ </script>
+
+<!-- Modal -->
+<div class="modal " id="FileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Select a folder or a zip file</h4>
+      </div>
+      <div class="modal-body">
+        <div id="FileModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
