@@ -121,6 +121,9 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.taskimportdb import TaskImportDB
     if ClassName=="TaskImportDB":
         return TaskImportDB(task)
+    from .taskimportupdate import TaskImportUpdate
+    if ClassName=="TaskImportUpdate":
+        return TaskImportUpdate(task)
 
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 

@@ -5,6 +5,14 @@
     {% endfor %}
     </select>
 {%- endmacro %}
+{% macro selectinputtuple(name, values, value='') -%}
+    <select class="form-control" name="{{ name }}" id="{{ name }}">
+    {% for v in values %}
+        <option value="{{ v[0] }}"  {{ 'selected' if value==v[0] }}>{{ v[1] }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}
+
 {% macro checkboxinput(name, checkedvalue, value='',extra='') -%}
     <input type="checkbox" name="{{ name }}" id="{{ name }}" value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }} {{ extra|safe }}>
 {%- endmacro %}
@@ -52,7 +60,7 @@
 {{ top|safe }}
 </td><td>
     &nbsp;
-    <span class="btn btn-xs SpanSelectAll rm5">Select all</span>
+    <span class="btn btn-xs SpanSelectAll rm5" title="CTRL+A shortcut to select all. Hold shift key to unselect all">Select all</span>
 
     <span class="glyphicon glyphicon-sort rm5"></span>
 </td><td>
@@ -97,9 +105,9 @@
 {% endfor %}
 </select></td><td style="padding-right: 5px;">
     <label for="ipp" style="margin-bottom: 0px;"><span class="glyphicon glyphicon-th"></span></label>
-    </td><td style="padding-right: 5px;">{{ selectinput("ipp",['1','5','10','20','50','100','200','500','1000'],data.ipp) }}
+    </td><td style="padding-right: 5px;">{{ selectinputtuple("ipp",[('0','Fit'),('1','1'),('5','5'),('10','10'),('20','20'),('50','50'),('100','100'),('200','200'),('500','500'),('1000','1000')],data.ipp) }}
     </td><td style="padding-right: 5px;">    <label for="zoom" style="margin-bottom: 0px;"><span class="glyphicon glyphicon-zoom-in"></span>%</label>
-    </td><td style="padding-right: 5px;">{{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100'],data.zoom) }}</td><td>
+    </td><td style="padding-right: 5px;">{{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100','200'],data.zoom) }}</td><td>
 </td><td>
       <label for="magenabled" style="margin-bottom: 0px;">
       	<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
@@ -123,50 +131,73 @@
 	<div id="bodycontainer">
 		<div id="column-left"  class="panelzzz " style="position: fixed;	top: 120px;	bottom: 0px;	width: 260px;
 	                overflow-y: hidden; overflow-x: hidden;  margin-bottom: 0px; " >
-            <div class="bodyleft" style="margin-left: 2px; width: 257px;">
-                <script>
-                $('#myTabs a').click(function (e) {
-                  e.preventDefault()
-                  $(this).tab('show')
-                });
-                $('#myTabs a:first').tab('show'); // Select first tab
-                $('#myTabs a:last').tab('show'); // Select last tab
-                </script>
-                <div id="myTabs">  <!-- Nav tabs -->
-                  <ul class="nav nav-tabs nav-justified" role="tablist">
-                    <li role="presentation" class="active">
-                        <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Classify</a>
-                    </li>
-                    <li role="presentation">
-                        <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filters</a>
-                    </li>
-                  </ul>
-                  <div class="tab-content"> <!-- Tab panes -->
-                    {# Classification #}
-                    <div role="tabpanel" class="tab-pane active" id="TabA">
-                        {{ lefta|safe }}
-                    </div>
-                    {# Filters #}
-                    <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;">
-                        <div id="TabBInner" style="width: 240px;">
-                        
+      <div class="bodyleft" style="margin-left: 2px; width: 257px;">
+        <script>
+        $(document).ready(function () {
+          $('#myTabs a').click(function (e) {
+            e.preventDefault()
+            $(this).tab('show')
+          });
 
-                          <a href='javascript:ClearAllFilterCriteria();' class="btn btn-info " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
-                           <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
-                        <br>
-                        {{ leftb|safe }}
-                      <div class="row">
-                        <div class="col-sm-12">
-                           <button class="btn btn-default btn-block btn-sm active" onclick="LoadRightPane(false,true);">Save filters configuration</button>
-                           <a href='?' type="button" class="btn btn-default btn-sm btn-block active">Apply saved filters</a>
-                        </div>
-                      </div>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-            </div>
+          $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            if($(e.target).attr('href')=='#TabB') {# Doit être fait dans le changement de tab car au debut l'onglet n'est pas visible et le calcul est faut #}
+                $("#TabB").outerHeight( $("#column-left").innerHeight()-$("#TabB").position().top);
+            });
+        }); {# ready #}
+        </script>
+          <div id="myTabs">  <!-- Nav tabs -->
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                  <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Classify</a>
+              </li>
+              <li role="presentation">
+                  <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filters</a>
+              </li>
+            </ul>
+            <div class="tab-content"> <!-- Tab panes -->
+              {# Classification #}
+              <div role="tabpanel" class="tab-pane active" id="TabA">
+                  {{ lefta|safe }}
+              </div>
+              {# Filters #}
+              <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;overflow-x: hidden;">
+                  <div id="TabBInner" style="width: 240px;">
+                    <a href=# onclick='ClearAllFilterCriteria();return false;' class="btn btn-info " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
+                     <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
+                  <br>
+                  {{ leftb|safe }}
+{# ------- Annotator / Freefilter ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
+		<label class="title">Annotator / Free filters</label>
+		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearAnnotFree();return false;'>Clear</a>
+    <select class="form-control" id="filt_annot" name="filt_annot" style="width: 100%" multiple autocomplete="off">{{ data.filt_annot_for_select|safe }}</select>
+	</div>
+</div>
+<form class="form-inline">
+  <select class="form-control" id="filt_freenum" name="filt_freenum" style="width: 49%" autocomplete="off">
+      {{ data.filt_freenum_for_select|safe }}
+  </select>
+  <input class="form-control" type="text" style="width: 24%" id="filt_freenumst" name="filt_freenumst" value="{{ data.freenumst }}" autocomplete="off" placeholder=">=">
+  <input class="form-control" type="text" style="width: 24%" id="filt_freenumend" name="filt_freenumend" value="{{ data.freenumend }}" autocomplete="off" placeholder="<=">
+</form>
+<form class="form-inline">
+  <select class="form-control" id="filt_freetxt" name="filt_freetxt" style="width: 59%" autocomplete="off">
+      {{ data.filt_freetxt_for_select|safe }}
+  </select>
+  <input class="form-control" type="text" style="width: 39%" id="filt_freetxtval" name="filt_freetxtval" value="{{ data.freetxtval }}" autocomplete="off" placeholder="contains">
+</form>
+    <div class="row">
+      <div class="col-sm-12">
+         <button class="btn btn-default btn-block btn-sm active" onclick="LoadRightPane(false,true);">Save filters configuration</button>
+         <a href='?' type="button" class="btn btn-default btn-sm btn-block active">Apply saved filters</a>
+      </div>
+    </div>
+           </div>
+        </div>
+       </div>
+      </div>
+     </div>
 		</div>
 {#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
 <style>
@@ -201,27 +232,28 @@ function LoadRightPane(NoAjax,SaveInProfile){
     if(Object.keys(PendingChanges).length>0)
       if(confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?")==false)
         return;
-    var TxtFilter=""
-    req={taxo:$("#taxofilter").val(),resultwidth:$("#column-right").width(),windowheight:$(window).height()};
-    if($("#taxofilterlabel").val()!="")
-        TxtFilter+=" Taxo="+$("#taxofilterlabel").val();
+    var TxtFilter="",jqtaxofilter=$("#taxofilter"),jqtaxofilterlbl=$("#taxofilterlabel"),jqcolumnright=$("#column-right");
+    var req={taxo:jqtaxofilter.val(),resultwidth:jqcolumnright.width(),windowheight:$(window).height()};
+    if(jqtaxofilterlbl.val()!="")
+        TxtFilter+=" Taxo="+jqtaxofilterlbl.val();
     $(".activeTaxo").removeClass("activeTaxo");
-    if($("#taxofilter").val()!="")
-        $("#TabA [taxoid="+$("#taxofilter").val()+"]").addClass("activeTaxo");
+    if(jqtaxofilter.val()!="")
+        $("#TabA").find("[taxoid="+jqtaxofilter.val()+"]").addClass("activeTaxo");
     req['ipp']=$("#ipp").val();
     req['zoom']=$("#zoom").val();
     req['sortby']=$("#sortby").val();
     req['magenabled']=$("#magenabled").prop("checked")?"1":"0";
     req['popupenabled']=$("#popupenabled").prop("checked")?"1":"0";
-    req['statusfilter']=$("#statusfilter").val();
-    if($("#statusfilter").val()!="")
-        TxtFilter+=" Status="+$("#statusfilter option:selected").text()
+    var jqstatusfilter=$("#statusfilter");
+    req['statusfilter']=jqstatusfilter.val();
+    if(jqstatusfilter.val()!="")
+        TxtFilter+=" Status="+jqstatusfilter.find("option:selected").text();
     req['MapN']=$("#filt_MapOutN").val();
     req['MapW']=$("#filt_MapOutW").val();
     req['MapE']=$("#filt_MapOutE").val();
     req['MapS']=$("#filt_MapOutS").val();
     if((req['MapN']!="")&&(req['MapW']!="")&&(req['MapE']!="")&&(req['MapS']!=""))
-        TxtFilter+=" Position=("+req['MapN']+","+req['MapW']+","+req['MapE']+","+req['MapS']+")"
+        TxtFilter+=" Position=("+req['MapN']+","+req['MapW']+","+req['MapE']+","+req['MapS']+")";
     else {delete req['MapN']; delete req['MapW'];delete req['MapE']; delete req['MapS']; }
 
     req['depthmin']=$("#filt_depthmin").val();
@@ -229,11 +261,43 @@ function LoadRightPane(NoAjax,SaveInProfile){
     if((req['depthmin']!="")&&(req['depthmax']!=""))
         TxtFilter+=" Depth in("+req['depthmin']+"-"+req['depthmax']+")";
     else {delete req['depthmin']; delete req['depthmax']; }
-    if($('#sampleid').val()!=null)
-      req['samples']=String($('#sampleid').val())
+    jqfreenum=$("#filt_freenum")
+    req['freenum']=jqfreenum.val();
+    req['freenumst']=$("#filt_freenumst").val();
+    req['freenumend']=$("#filt_freenumend").val();
+    if((req['freenum']!="")&&((req['freenumst']!="")||(req['freenumend']!="")))
+        TxtFilter+=jqfreenum.find("option:selected").text()+" in("+req['freenumst']+"-"+req['freenumend']+")";
+    else {delete req['freenum']; delete req['freenumst'];delete req['freenumend']; }
+    jqfreetxt=$("#filt_freetxt")
+    req['freetxt']=jqfreetxt.val();
+    req['freetxtval']=$("#filt_freetxtval").val();
+    if((req['freetxt']!="")&&(req['freetxtval']!=""))
+        TxtFilter+=jqfreetxt.find("option:selected").text()+" contains "+req['freetxtval'];
+    else {delete req['freetxt']; delete req['freetxtval']; }
+
+    var sampleid=$('#sampleid');
+    if(sampleid.val()!=null)
+      req['samples']=String(sampleid.val());
     else req['samples']="";
     if(req['samples']!="")
-        TxtFilter+=" Samples="+$.map( $('#sampleid  option:selected'), function (element) { return $(element).text() }).join(', ');
+        TxtFilter+=" Samples="+$.map(sampleid.find('option:selected'), function (element) { return $(element).text() }).join(', ');
+    req['instrum']=$("#filt_instrum").val();
+    if(req['instrum']!="")
+        TxtFilter+=" Instrument ="+req['instrum'];
+    var jqmonth=$('#month');
+    if(jqmonth.val()!=null) {
+      req['month'] = String(jqmonth.val());
+      TxtFilter += " Month=" + $.map(jqmonth.find('option:selected'), function (element) {
+            return $(element).text()
+          }).join(', ');
+    }
+    var jqannot=$('#filt_annot');
+    if(jqannot.val()!=null) {
+      req['filt_annot'] = String(jqannot.val());
+      TxtFilter += " Annotateur=" + $.map(jqannot.find('option:selected'), function (element) {
+            return $(element).text()
+          }).join(', ');
+    }
     req['fromdate']=$("#filt_fromdate").val();
     if(req['fromdate']!="")
         TxtFilter+=" Date >= "+req['fromdate'];
@@ -255,11 +319,15 @@ function LoadRightPane(NoAjax,SaveInProfile){
     if(req['inverttime']=="1")
         TxtFilter+=" Time Invert ";
     else delete req['inverttime'];
-
+    var jqdaytime=$('#daytime');
+    if(jqdaytime.val()!=null) {
+      req['daytime'] = String(jqdaytime.val());
+      TxtFilter+=" DayTime="+$.map(jqdaytime.find('option:selected'), function (element) { return $(element).text() }).join(', ');
+    }
 
     req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
     req['dispfield']="";
-    $("#dispfieldlist .glyphicon-ok").closest("li").each(function () {
+    $("#dispfieldlist").find(".glyphicon-ok").closest("li").each(function () {
         req['dispfield'] += " " + $(this).prop("id");
     });
     req['projid']=$("#projid").val();
@@ -267,13 +335,14 @@ function LoadRightPane(NoAjax,SaveInProfile){
     PendingChanges={}; {# After load there's no pending changes #}
     PendingChangesTaxoName={};
     if(TxtFilter!="")
-        TxtFilter="Filter: "+TxtFilter
+        TxtFilter="Filter: "+TxtFilter;
+    var jqpageoffset=$("#pageoffset");
     if(TxtFilter!=PrevTxtFilter) { {# Si une condition change on revient page 1 #}
         if(PrevTxtFilter!="INITIAL") // Mais pas sur le premier load de page qui peut être avec une URL qui met un filtre
-            $("#pageoffset").val(0);
+            jqpageoffset.val(0);
         PrevTxtFilter=TxtFilter;
     }
-    req['pageoffset']=$("#pageoffset").val();
+    req['pageoffset']=jqpageoffset.val();
     if(NoAjax==true) {
         delete req["resultwidth"];
         delete req["windowheight"];
@@ -288,21 +357,36 @@ function LoadRightPane(NoAjax,SaveInProfile){
     }
     if(SaveInProfile==true)
         req["saveinprofile"]='Y';
-    $("#column-right").html("<img src='/static/spinningred.gif'> Loading");
-    $("#column-right").load("/prj/LoadRightPane",req);
+    jqcolumnright.html("<img src='/static/spinningred.gif'> Loading");
+    jqcolumnright.load("/prj/LoadRightPane",req);
     $('#headersubtitle').html(TxtFilter);
 }
 
-function RefreshClassifTab()
+function RefreshClassifTab(KeepHiddens)
 {
+    var HiddenItems=$('.classiftab td').filter(function() { return $(this).css('display') == 'none';}).map(function() { return $(this).attr('taxoid'); }).get();
+    var HorizArrow=$('.classiftab td span.glyphicon-triangle-right').closest('td').map(function() { return $(this).attr('taxoid'); }).get();
+    var PosScrollBar=$('#divclassiftab').scrollTop();
     req={taxo:$("#taxofilter").val(),taxofilterlabel:$("#taxofilterlabel").val()};
-    $("#TabA").load("/prjGetClassifTab/"+$("#projid").val(),req);
+    $("#TabA").load("/prjGetClassifTab/"+$("#projid").val(),req,function() {
+        $.each(HiddenItems, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
+            $('.classiftab td[taxoid=' + v + ']').css('display', 'none');
+            console.log(v);
+        });
+        $.each(HorizArrow, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
+            $('.classiftab td[taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
+            console.log("R", v);
+        });
+        $('#divclassiftab').scrollTop(PosScrollBar);
+    });
+
 }
 
     function SortToggle() {
         if($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
              $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title","Current Sort : Descending");
         else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title","Current Sort : Ascending");
+        $("#pageoffset").val(0); {# Force le retour à la premiere page #}
     }
 
 function ToggleDispField(caller){
@@ -319,7 +403,6 @@ $(document).ready(function() {
     if ("{{data.sortorder}}"=="desc")
         SortToggle();
     $('[data-toggle="tooltip"]').tooltip();
-    $("#TabB").outerHeight( $("#column-left").innerHeight()-$("#TabB").position().top );
     $("#titlediv").width($("#titlediv").parent().width());
     {% if g.taxofilter %}
     SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}");
@@ -329,6 +412,7 @@ $(document).ready(function() {
 {#Si on choisi un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields#}
     $('#sortby').change(function(){
         $("#dispfield_"+$(this).val()+"  .glyphicon").addClass('glyphicon-ok');
+        $("#pageoffset").val(0); {# Changement d'ordre on revient à la première page #}
     });
 
     {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
@@ -336,6 +420,38 @@ $(document).ready(function() {
     $('#ipp').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
     $('#zoom').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
      #}
+
+    $("#filt_annot").select2({
+        ajax: {
+            url: "/search/users",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 2
+      ,placeholder: "Annotator"
+    }); // Select2 Ajax
+    $("#filt_freenum").select2({
+        ajax: {
+            url: "/prj/GetFieldList/1/n",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },placeholder: "Num. field",dropdownCssClass:"width240"});
+    $("#filt_freetxt").select2({
+        ajax: {
+            url: "/prj/GetFieldList/1/t",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },placeholder: "Text field",dropdownCssClass:"width240"});
+
 });
 function PostAddImages(){
         $(document).scrollTop(0);
@@ -347,7 +463,7 @@ function PostAddImages(){
                 return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
             AddZoom(element);}});
         // Make sub image draggable
-        jQuery('.imgtab td').draggable({revert:true,revertDuration:0,cursor: "move",
+        jQuery('.imgtab td').draggable({revert:true,revertDuration:0,cursor: "move",refreshPositions:true,
       	    cursorAt: { top: 0, left: 0 },
             start: function( event, ui ) { DragInProgress=true;},
             stop: function( event, ui ) { DragInProgress=false;},
@@ -369,7 +485,7 @@ function PostAddImages(){
                     }
                   return;
                 }
-            if ((!e.ctrlKey)&&(!e.metaKey))
+            if ((e.ctrlKey)||(e.metaKey)) {#  20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple #}
                 $('.ui-selected').removeClass('ui-selected');
             if($(e.target).hasClass('linestart')) // select line (except this first column)
                 $(e.target).closest('tr').find('td').addClass('ui-selected');
@@ -377,7 +493,8 @@ function PostAddImages(){
             });
         // Make ZoomTracker Clickable for selection
         jQuery('body').delegate('.zoomtracker','click',function(e){
-            if ((!e.ctrlKey)&&(!e.metaKey))
+            {# if ((!e.ctrlKey)&&(!e.metaKey))   20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple#}
+            if ((e.ctrlKey)||(e.metaKey))
                 $('.ui-selected').toggleClass('ui-selected');
             $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected')
             });
@@ -392,7 +509,7 @@ function PostAddImages(){
                     var $node = $( this );
                     if( $node.hasClass( "zoomtracker" ) ) {
                         //console.log("zoomtracker");
-                        jQuery($node).draggable({revert:true,revertDuration:0,cursor: "move",
+                        jQuery($node).draggable({revert:true,revertDuration:0,cursor: "move",refreshPositions:true,
                             cursorAt: { top: 0, left: 0 },
                             helper: function( ev ) {return $( "<img src='/static/drag_cursor.png'>" );}});
                     }
@@ -422,13 +539,15 @@ $('#PopupDetails').on('hidden.bs.modal', function (e) {
     $(".zoomContainer").remove();
 })
 
-jQuery('.SpanSelectAll').click(function(e){
+jQuery('.SpanSelectAll').click(SelectAll);
+}  //PostAddImages
+
+function SelectAll(e){
             if (!e.shiftKey)
                 jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
             else
                 jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
-                });
-}  //PostAddImages
+                }
 
 function ClearAllFilterCriteria(){
     ClearCoord();
@@ -436,7 +555,12 @@ function ClearAllFilterCriteria(){
     ClearTimes();
     ClearSamples();
     ClearDepths();
+    ClearAnnotFree();
     LoadRightPane();
+}
+function ClearAnnotFree(){
+  $( "#filt_freenumst,#filt_freenumend,#filt_freetxtval" ).val("");
+  $( "#filt_annot,#filt_freenum,#filt_freetxt" ).val(null).trigger("change");
 }
 
 jQuery(window).bind('beforeunload', function(){

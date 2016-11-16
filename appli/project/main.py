@@ -138,7 +138,9 @@ def GetFieldList(Prj,champ='classiffieldlist'):
 # Contient la liste des flitre & parametres de cet écrans avec les valeurs par degaut
 FilterList={"MapN":"","MapW":"","MapE":"","MapS":"","depthmin":"","depthmax":"","samples":"","fromdate":"","todate":""
                ,"inverttime":"","fromtime":"","totime":"","sortby":"","sortorder":"","dispfield":"","statusfilter":""
-            ,'ipp':100,'zoom':100,'magenabled':1,'popupenabled':1}
+            ,'ipp':100,'zoom':100,'magenabled':1,'popupenabled':1,'instrum':'','month':'','daytime':''
+            ,'freenum':'','freenumst':'','freenumend':'','freetxt':'','freetxtval':'','filt_annot':''}
+FilterListAutoSave=("sortby","sortorder","dispfield","statusfilter",'ipp','zoom','magenabled','popupenabled')
 ######################################################################################################################
 @app.route('/prj/<int:PrjId>')
 @login_required
@@ -146,18 +148,50 @@ def indexPrj(PrjId):
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
         data[k]=gvg(k,str(current_user.GetPref(k,v)))
+    print('%s',data)
     if data["samples"]:
         data["sample_for_select"]=""
         for r in GetAll("select sampleid,orig_id from samples where projid=%d and sampleid in(%s)"%(PrjId,data["samples"])):
             data["sample_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
+    data["month_for_select"] = ""
+    # print("%s",data['month'])
+    for (k,v) in enumerate(('January','February','March','April','May','June','July','August','September','October','November','December'),start=1):
+        data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['month'].split(',') else '',k,v)
+    data["daytime_for_select"] = ""
+    for (k,v) in database.DayTimeList.items():
+        data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['daytime'].split(',') else '',k,v)
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     if Prj is None:
         flash("Project doesn't exists",'error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
-        flash('You cannot view this project','error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
+        MainContact=GetAll("""select u.email,u.name
+                        from projectspriv pp join users u on pp.member=u.id
+                        where pp.privilege='Manage' and u.active=true and pp.projid=%s""",(PrjId,))
+        # flash("",'error')
+        msg="""<div class="alert alert-danger alert-dismissible" role="alert">
+        You cannot view this project : {1} [{2}] <a class='btn btn-primary' href='mailto:{3}?{0}' style='margin-left:15px;'>REQUEST ACCESS to {4}</a>
+        </div>""".format(
+                urllib.parse.urlencode({'body':"Please provide me privileges to project : "+ntcv(Prj.title)
+                                           ,'subject':'Project access request'}
+                                       ).replace('+','%20') # replace car urlencode mais des + pour les espaces qui sont mal traitrés par le navigateur
+                ,Prj.title,Prj.projid,MainContact[0]['email'],MainContact[0]['name'])
+        return PrintInCharte(msg+"<a href=/prj/>Select another project</a>")
     g.Projid=Prj.projid
+    data["filt_freenum_for_select"] = ""
+    if data['freenum']!="":
+        for r in PrjGetFieldList(Prj,'n',''):
+            if r['id']==data['freenum']:
+                data["filt_freenum_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['text'])
+    data["filt_freetxt_for_select"] = ""
+    if data['freetxt']!="":
+        for r in PrjGetFieldList(Prj,'t',''):
+            if r['id']==data['freetxt']:
+                data["filt_freetxt_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['text'])
+    data["filt_annot_for_select"] = ""
+    if data['filt_annot']!="":
+        for r in GetAll("select id,name from users where id =any (%s)",([int(x) for x in data["filt_annot"].split(',')],)):
+                data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['name'])
     fieldlist=GetFieldList(Prj)
     data["fieldlist"]=fieldlist
     data["sortlist"]=collections.OrderedDict({"":""})
@@ -199,6 +233,7 @@ def indexPrj(PrjId):
         g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit/erase annotations massively"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects / Delete project"))
         g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract Subset"))
+        g.headmenu.append(("/Task/Create/TaskImportUpdate?p=%d" % (PrjId,), "Re-import attribute"))
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
@@ -216,15 +251,18 @@ def LoadRightPane():
     PrefToSave=0
     for k,v in FilterList.items():
         Filt[k]=gvp(k,v)
-        PrefToSave+=current_user.SetPref(k,Filt[k])
+        if k in FilterListAutoSave or gvp("saveinprofile")=="Y":
+            PrefToSave+=current_user.SetPref(k,Filt[k])
+
     # on sauvegarde les parametres dans le profil utilisateur
-    if PrefToSave>0 and gvp("saveinprofile")=="Y":
+    if PrefToSave>0 :
         database.ExecSQL("update users set preferences=%s where id=%s",(current_user.preferences,current_user.id),True)
         user_datastore.ClearCache()
     sortby=Filt["sortby"]
     sortorder=Filt["sortorder"]
     dispfield=Filt["dispfield"]
     ipp=int(Filt["ipp"])
+    ippdb=ipp if ipp>0 else 200 # Fit to page envoi un ipp de 0 donc on se comporte comme du 200 d'un point de vue DB
     zoom=int(Filt["zoom"])
     popupenabled=Filt["popupenabled"]
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
@@ -237,6 +275,7 @@ def LoadRightPane():
     sql="""select o.objid,t.name taxoname,o.classif_qual,u.name classifwhoname,i.file_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
   ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,to_char(o.objtime,'HH24:MI') objtime
+  ,case when o.complement_info is not null and o.complement_info!='' then 1 else 0 end commentaires
   ,o.latitude,o.orig_id,o.imgcount"""
     for k in fieldlist.keys():
         sql+=",o."+k+" as extra_"+k
@@ -278,6 +317,18 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         whereclause+=" and o.sampleid= any (%(samples)s) "
         sqlparam['samples']=[int(x) for x in gvp("samples").split(',')]
 
+    if gvp("instrum")!="":
+        whereclause += " and o.acquisid in (select acquisid  from acquisitions  where instrument ilike %(instrum)s and projid=%(projid)s )"
+        sqlparam['instrum']='%'+gvp("instrum")+'%'
+
+    if gvp("daytime")!="":
+        whereclause+=" and o.sunpos= any (%(daytime)s) "
+        sqlparam['daytime']=[x for x in gvp("daytime").split(',')]
+
+    if gvp("month")!="":
+        whereclause+=" and extract(month from o.objdate) = any (%(month)s) "
+        sqlparam['month']=[int(x) for x in gvp("month").split(',')]
+
     if gvp("fromdate")!="":
         whereclause+=" and objdate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
         sqlparam['fromdate']=gvp("fromdate")
@@ -297,6 +348,28 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         if gvp("totime")!="":
             whereclause+=" and objtime<= time %(totime)s "
             sqlparam['totime']=gvp("totime")
+
+    if gvp("freenum")!="" and  gvp("freenumst")!="" :
+        whereclause+=" and o.n"+("%02d"%int(gvp("freenum")[2:]))+" >=%(freenumst)s  "
+        sqlparam['freenumst']=gvp("freenumst")
+    if gvp("freenum")!="" and  gvp("freenumend")!="" :
+        whereclause+=" and o.n"+("%02d"%int(gvp("freenum")[2:]))+" <=%(freenumend)s  "
+        sqlparam['freenumend']=gvp("freenumend")
+    if gvp("freetxt")!="" and  gvp("freetxtval")!="" :
+        sqlparam['freetxtval']='%'+gvp("freetxtval")+'%'
+        if gvp("freetxt")[0]=='o':
+            whereclause += " and .t"+("%02d"%int(gvp("freetxt")[2:]))+" ilike %(freetxtval)s  "
+        elif gvp("freetxt")[0]=='a':
+            whereclause+=" and o.acquisid in (select acquisid  from acquisitions s where t" + ("%02d" % int(gvp("freetxt")[2:])) + "  ilike %(freetxtval)s  and projid=%(projid)s )"
+        elif gvp("freetxt")[0]=='s':
+            whereclause+=" and o.sampleid in (select sampleid  from samples s where t" + ("%02d" % int(gvp("freetxt")[2:])) + "  ilike %(freetxtval)s  and projid=%(projid)s )"
+        elif gvp("freetxt")[0]=='p':
+            whereclause+=" and o.processid in (select processid  from process s where t" + ("%02d" % int(gvp("freetxt")[2:])) + "  ilike %(freetxtval)s  and projid=%(projid)s )"
+    if gvp('filt_annot')!='':
+        whereclause+=" and (o.classif_who = any (%(filt_annot)s)  or exists (select classif_who from objectsclassifhisto oh where oh.objid=o.objid and classif_who = any (%(filt_annot)s) ) )"
+        sqlparam['filt_annot'] = [int(x) for x in gvp("filt_annot").split(',')]
+
+
     sql+=whereclause
     #filt_fromdate,#filt_todate
 
@@ -304,9 +377,11 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         ,count(case when classif_qual='V' then 1 end) NbValidated
         ,count(case when classif_qual='D' then 1 end) NbDubious
         ,count(case when classif_qual='P' then 1 end) NbPredicted
-        from objects o  """+whereclause
+        from objects o
+        LEFT JOIN  acquisitions acq on o.acquisid=acq.acquisid
+        """+whereclause
     (nbrtotal,nbrvalid,nbrdubious,nbrpredict)=GetAll(sqlcount,sqlparam,debug=False)[0]
-    pagecount=math.ceil(nbrtotal/ipp)
+    pagecount=math.ceil(nbrtotal/ippdb)
     if sortby=="classifname":
         sql+=" order by t.name "+sortorder
     elif sortby!="":
@@ -318,9 +393,12 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         pageoffset=pagecount-1
         if pageoffset<0:
             pageoffset=0
-    sql+=" Limit %d offset %d "%(ipp,pageoffset*ipp)
+    sql+=" Limit %d offset %d "%(ippdb,pageoffset*ippdb)
     res=GetAll(sql,sqlparam,False)
     trcount=1
+    fitlastclosedtr=0 # index de t de la derniere création de ligne qu'il faudrat effacer quand la page sera pleine
+    fitheight=100 # hauteur déjà occupé dans la page plus les header footer (hors premier header)
+    fitcurrentlinemaxheight=0
     LineStart=""
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
         LineStart="<td class='linestart'></td>"
@@ -375,9 +453,17 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             if width==0: width=1
         if WidthOnRow!=0 and (WidthOnRow+width)>PageWidth:
             trcount+=1
+            fitheight+=fitcurrentlinemaxheight
+            if(ipp==0) and (fitheight>WindowHeight): # en mode fit quand la page est pleine
+                if fitlastclosedtr>0 : #dans tous les cas on laisse une ligne
+                    del t[fitlastclosedtr:]
+                break;
+            fitlastclosedtr=len(t)
+            fitcurrentlinemaxheight=0
             t.append("</tr></table><table class=imgtab><tr id=tr%d>%s"%(trcount,LineStart))
             WidthOnRow=0
         cellwidth=width+22
+        fitcurrentlinemaxheight=max(fitcurrentlinemaxheight,height+45+14*len(dispfield.split())) #45 espace sur le dessus et le dessous de l'image + 14px par info affichée
         if cellwidth<80: cellwidth=80 # on considère au moins 80 car avec les label c'est rarement moins
         # Met la fenetre de zoon la ou il y plus de place, sachant qu'elle fait 400px et ne peut donc pas être callée à gauche des premieres images.
         if (WidthOnRow+cellwidth)>(PageWidth/2):
@@ -427,9 +513,10 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         txt+="""<div class='subimg {1}' {2}>
 <div class='taxo'>{0}</div>
 <div class='displayedFields'>{3}</div></div>
-<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4}</div>"""\
+<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div>"""\
             .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
-                    ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else "")
+                    ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else ""
+                    ,"<b>!</b> "if r['commentaires'] >0 else "" )
         txt+="</td>"
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
@@ -439,13 +526,14 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     t.append("</tr></table>")
     if len(res)==0:
         t.append("<b>No Result</b><br>")
-
     if Prj.CheckRight(1): # si annotateur on peut sauver les changements.
         t.append("""
 		<div id='PendingChanges' class='PendingChangesClass text-danger'></div>
-        <button class='btn btn-primary' onclick='SavePendingChanges();' title='CTRL+S'><span class='glyphicon glyphicon-save' /> Save pending changes [CTRL+S]</button>
-        <button class='btn btn-success' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> <span class='glyphicon glyphicon-arrow-right' /> Save changes, validate the rest and move to next page</button>
+		<button class='btn btn-default' onclick="$(window).scrollTop(0);"><span class='glyphicon glyphicon-arrow-up ' ></span></button>
+        <button class='btn btn-primary' onclick='SavePendingChanges();' title='CTRL+S' id=BtnSave disabled><span class='glyphicon glyphicon-save' /> Save pending changes [CTRL+S]</button>
+        <button class='btn btn-success' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> <span class='glyphicon glyphicon-arrow-right' /> <span id=TxtBtnValidateAll>Validate all and move to next page</span></button>
         <!--<button class='btn btn-success' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>-->
+        <button class='btn btn-success' onclick='ValidateSelection();'><span class='glyphicon glyphicon-ok' />  Validate Selection</button>
         <button class='btn btn-default' onclick="$('#bottomhelp').toggle()" ><span class='glyphicon glyphicon-question-sign' /> Undo</button>
         <div id="bottomhelp" class="panel panel-default" style="margin:10px 0px 0px 40px;width:500px;display:none;">To correct validation mistakes (no UNDO button in Ecotaxa):
 <br>1.	Select Validated Status
@@ -659,3 +747,24 @@ def prjPurge(PrjId):
             return PrintInCharte(txt+ ("<br><br><a href ='/prj/'>Back to project list</a>"))
         UpdateProjectStat(Prj.projid)
     return PrintInCharte(txt+ ("<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId)))
+
+def PrjGetFieldList(Prj,typefield,term):
+    fieldlist = []
+    MapList = {'o': 'mappingobj', 's': 'mappingsample', 'a': 'mappingacq', 'p': 'mappingprocess'}
+    MapPrefix = {'o': '', 's': 'sample ', 'a': 'acquis. ', 'p': 'process. '}
+    for mapk, mapv in MapList.items():
+        for k, v in sorted(DecodeEqualList(getattr(Prj, mapv, "")).items(), key=lambda t: t[1]):
+            if k[0] == typefield and v != "" and term in v:
+                fieldlist.append({'id': mapk + k, 'text': MapPrefix[mapk] + v})
+    return fieldlist
+
+@app.route('/prj/GetFieldList/<int:PrjId>/<string:typefield>')
+@login_required
+def PrjGetFieldListAjax(PrjId,typefield):
+    Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    if Prj is None:
+        return "Project doesn't exists"
+    term=gvg("q")
+    fieldlist=PrjGetFieldList(Prj, typefield, term)
+    return json.dumps(fieldlist)
+

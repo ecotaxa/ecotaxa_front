@@ -13,6 +13,7 @@ import json,psycopg2.extras,datetime,os
 AdministratorLabel="Application Administrator"
 UserAdministratorLabel="Users Administrator"
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
+DayTimeList={'A':'Dawn','D':'Day','U':'Dust','N':'Night'}
 ClassifQualRevert={}
 for(k,v) in ClassifQual.items():
     ClassifQualRevert[v]=k
@@ -289,7 +290,7 @@ Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
 Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
 GlobalDebugSQL=False
-# GlobalDebugSQL=True
+GlobalDebugSQL=True
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,keyid=0):
     cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:

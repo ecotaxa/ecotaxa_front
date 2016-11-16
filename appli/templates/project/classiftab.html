@@ -6,7 +6,7 @@
             <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
         </span>
     <span class="input-group-btn">
-        <button class="btn btn-default btn-sm" type="button" title="Ctrl+A shortcut can also be utilized to assign category name to one or more vignettes" onclick="AssignTaxoLbToSelection();">
+        <button class="btn btn-default btn-sm" type="button" title="Ctrl+E shortcut can also be utilized to assign category name to one or more vignettes" onclick="AssignTaxoLbToSelection();">
             <span id=AssignTaxo class="glyphicon glyphicon-tags" aria-hidden="true"/></button>
         </span>
 
@@ -24,16 +24,20 @@
 <tr>
 <td taxoid="{{ v['id'] }}" class="{{  v['parentclasses'] }} {{ 'zerocount' if v['nbr']==0  }}">
  {% if v['haschild'] %}
- <small><span style="width: 7px;"  class="glyphicon glyphicon-triangle-bottom categexpander" ></span></small>
- {% else %}
- <span style="width: 7px; display: inline-block;" ></span>
+ <small><span style="width: 1em;"  class="glyphicon glyphicon-triangle-bottom categexpander" ></span></small>
+{# {% else %}
+ <span style="width: 1em; display: inline-block;" ></span> #}
  {% endif %}
-<b>{{ ("&emsp;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>
-  <span class="taxodrop {% if v['haschild'] %}haschild{% endif %}">
+{# <b>{{ ("&emsp;"*v['dist'] if v['dist']>0 else "" ) |safe }}</b>  #}
+  <span class="taxodrop {% if v['haschild'] %}haschild{% endif %}" style="margin-left: {{ (0 if v['haschild'] else 1)+ v['dist']*0.9 }}em">
     {{ v['taxoname'] }}
 </span>
 <span class="taxoparent">{{ v['taxoparent'] }}</span>
-    <span class="counter label {{ "label-info" if v['nbrnotv']>0 else "label-success"}}">{{ v['nbr'] }}{{ " ("~v['nbrnotv']~")" if v['nbrnotv']>0 }}</span>
+ {% if v['nbrnotv']>0 %}
+  <span class="counter label label-info"><span style="color: #b1ffa8;">{{ v['nbr']-v['nbrnotv'] }}</span> + {{v['nbrnotv']}}</span>
+ {% else %}
+  <span class="counter label label-success">{{ v['nbr'] }}</span>
+ {% endif %}
 </td>
 </tr>
 {% endfor %}
@@ -118,7 +122,8 @@ function CategExpanderClick(e){
         for (var k in calctotaux)
             Msg=Msg+calctotaux[k]+" "+PendingChangesTaxoName[k]+", ";
         $('.PendingChangesClass').text(Msg);
-
+        document.getElementById("BtnSave").disabled = false;
+        $("#TxtBtnValidateAll").text("Save changes, validate rest and move to next page");
     }
 function SavePendingChanges(NextPage) {
     {#  console.log("prev",PendingChanges); #}
@@ -143,6 +148,14 @@ function ValidateAll(NextPage) {
     });
     SavePendingChanges(NextPage);
 }
+function ValidateSelection() {
+    {# On valide tout ce qui est selectionné et qui n'est pas déjà en attente de save #}
+    $(".ui-selected").find('img.lazy').each(function (e,o) {
+        if(PendingChanges[$(o).attr("id").substr(1)]===undefined)
+            PendingChanges[$(o).attr("id").substr(1)]=-1; {# Set unchanged but validate #}
+    });
+    SavePendingChanges();
+}
 
 {% endif %}
   $(function() {
@@ -150,6 +163,7 @@ function ValidateAll(NextPage) {
 {% if g.PrjAnnotate %}
     ).droppable({
       tolerance: "pointer",
+{#      classes:{"ui-droppable-hover":"taxodrop_hover"}, Utile pour JQuery UI >=1.12 car hoverClass deprecated#}
       hoverClass: "taxodrop_hover",
       drop: function( event, ui ) {
           //console.log(ui.draggable);
@@ -192,22 +206,27 @@ function ValidateAll(NextPage) {
     }
 {% endif %}
     ).click(function() {
-                //$("#taxofilter").val($(this).attr('taxoid'));
-                $(".ui-state-highlight").removeClass("ui-state-highlight");
-                if ($(this).hasClass('activeTaxo'))
-                    SetTaxoFilter(false, -1);
-                else {
-                SetTaxoFilter($(this).attr('taxoid'), $(this).find('.taxodrop').text());
-                LoadRightPane();
-            }
+        //$("#taxofilter").val($(this).attr('taxoid'));
+        $(".ui-state-highlight").removeClass("ui-state-highlight");
+        if ($(this).hasClass('activeTaxo'))
+            SetTaxoFilter(false, -1);
+        else {
+        SetTaxoFilter($(this).attr('taxoid'), $(this).find('.taxodrop').text());
+        LoadRightPane();
+        }
     });
 
-  });
-  </script>
+    $("#divclassiftab").outerHeight( $("#column-left").innerHeight()-$("#divclassiftab").position().top );
+    $("#divclassiftab .categexpander").click(CategExpanderClick).hover(function(e){
+        if((DragInProgress)&&($(this).hasClass("glyphicon-triangle-right"))) {
+            {# Quand on passe sur un triange fermé sur un Drag&Drop on simule un clic sur le triangle pour l'ouvrir #}
+            $(this).click();
+        }
+    });
 
+  }); {# Ready #}
 
 {% if g.PrjAnnotate %}
-<script>
 function AssignTaxoLbToSelection() {
     droptaxoid = $('#taxolbanno').val();
     if (droptaxoid) {
@@ -218,16 +237,6 @@ function AssignTaxoLbToSelection() {
             LstTd.push($(this));
         });
         ProcessList(LstTd, droptaxoid, $('#taxolbanno  option:selected').text());
-    }
-}
-function ToggleZeroCount(){
-    if($('#zeroshowhide').data("show")=="0") {
-        $(".zerocount").hide();
-        $('#zeroshowhide').data("show","1").text("Show empty categories");
-    }
-    else {
-        $('#zeroshowhide').data("show", "0").text("Hide empty categories");
-        $(".zerocount").show();
     }
 }
 
@@ -242,6 +251,10 @@ $(document).ready(function() {
 {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function(e) {#}
     $(document).bind('keydown', 'Test1', function(e) {
        if((e.keyCode === 65)&& (e.ctrlKey||e.metaKey)) { {# CTRL+A #}
+          SelectAll(e);
+          e.preventDefault();
+      }
+       if((e.keyCode === 69)&& (e.ctrlKey||e.metaKey)) { {# CTRL+E #}
           AssignTaxoLbToSelection();
           e.preventDefault();
       }
@@ -264,7 +277,28 @@ $(document).ready(function() {
       }
     });
 
-{#  Initialisation Context Menu  #}
+
+{# Gestion de la scrollbar de la liste taxo quand la souris est en bas ou en haut de la zone#}
+$(window).mousemove(function (e) {
+  var divclassiftab=$('#divclassiftab');
+  var pagebottom=$(this).scrollTop()+$(this).innerHeight()-50;
+  if(e.pageX<235)
+  {
+    if(e.pageY>pagebottom)
+      divclassiftab.scrollTop(divclassiftab.scrollTop()+10);
+    if((e.pageY>divclassiftab.offset().top)&&(e.pageY<divclassiftab.offset().top+25)&&(e.pageX>180))
+      divclassiftab.scrollTop(divclassiftab.scrollTop()-10);
+  }
+  });
+
+}); // Ready
+
+{% endif %} {# if g.PrjAnnotate #}
+
+var taxotree={{ taxotree|safe }};
+
+$(document).ready(function() {
+    {#  Initialisation Context Menu  #}
     $.contextMenu({
     // define which elements trigger this menu
     selector: ".classiftab td",
@@ -302,21 +336,19 @@ $(document).ready(function() {
         console.log(res["items"]);
         return res;
     }
-});
+}); {#  Initialisation Context Menu  #}
+}); {#  Ready  #}
 
-    $("#divclassiftab").outerHeight( $("#column-left").innerHeight()-$("#divclassiftab").position().top );
-    $("#divclassiftab .categexpander").click(CategExpanderClick).hover(function(e){
-        if((DragInProgress)&&($(this).hasClass("glyphicon-triangle-right"))) {
-            {# Quand on passe sur un triange fermé sur un Drag&Drop on simule un clic sur le triangle pour l'ouvrir #}
-            $(this).click();
+function ToggleZeroCount(){
+    if($('#zeroshowhide').data("show")=="0") {
+        $(".zerocount").hide();
+        $('#zeroshowhide').data("show","1").text("Show empty categories");
+    }
+    else {
+        $('#zeroshowhide').data("show", "0").text("Hide empty categories");
+        $(".zerocount").show();
+    }
+}
 
-        }
-    });
-
-}); // Ready
-
-
-var taxotree={{ taxotree|safe }};
 
 </script>
-{% endif %}
