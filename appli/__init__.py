@@ -15,10 +15,10 @@ if sys.platform.startswith('win32'):
         reload(_fix)
     sys.base_prefix = virtualprefix
 
-VaultRootDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\vault")
+VaultRootDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), "..","vault")
 if not os.path.exists(VaultRootDir):
     os.mkdir(VaultRootDir)
-TempTaskDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\temptask")
+TempTaskDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), "..","temptask")
 if not os.path.exists(TempTaskDir):
     os.mkdir(TempTaskDir)
 
@@ -43,6 +43,8 @@ import appli.database
 user_datastore = appli.securitycachedstore.SQLAlchemyUserDatastoreCACHED(db, database.users, database.roles)
 security = Security(app, user_datastore)
 
+app.MRUClassif = {} # Dictionnaire des valeurs recement utilisé par les classifications
+app.MRUClassif_lock = threading.Lock()
 
 def ObjectToStr(o):
 #    return str([(n, v) for n, v in inspect.getmembers(o) if((not inspect.ismethod(v))and  (not inspect.isfunction(v))and  (n!='__module__')and  (n!='__doc__') and  (n!='__dict__') and  (n!='__dir__')and  (n!='__delattr__')and  (n!='__dir__')and  (n!='__dir__') )])
@@ -163,6 +165,35 @@ def GetAppManagerMailto():
     if 'APPMANAGER_EMAIL' in app.config and 'APPMANAGER_NAME' in app.config:
         return "<a href='mailto:{APPMANAGER_EMAIL}'>{APPMANAGER_NAME} ({APPMANAGER_EMAIL})</a>".format(**app.config)
     return ""
+
+def CalcAstralDayTime(Date,Time,Latitude,Longitude):
+    """
+    Calcule la position du soleil pour l'heure donnée.
+    :param Date: Date UTC
+    :param Time:  Heure UTC
+    :param Latitude: Latitude
+    :param Longitude: Longitude
+    :return: D pour Day, U pour Dusk/crépuscule, N pour Night/Nuit, A pour Aube/Dawn
+    """
+    from astral import Location
+    l = Location()
+    l.solar_depression= 'nautical'
+    l.latitude = Latitude
+    l.longitude = Longitude
+    s = l.sun(date=Date, local=False)
+    # print(Date,Time,Latitude,Longitude,s,)
+    Result = '?'
+    Inter=( {'d': 'sunrise', 'f': 'sunset' , 'r': 'D'}
+          , {'d': 'sunset' , 'f': 'dusk'   , 'r': 'U'}
+          , {'d': 'dusk'   , 'f': 'dawn'   , 'r': 'N'}
+          , {'d': 'dawn'   , 'f': 'sunrise', 'r': 'A'}
+           )
+    for I in Inter:
+        if s[I['d']].time()<s[I['f']].time() and (Time>=s[I['d']].time() and Time<=s[I['f']].time() ) :
+            Result=I['r']
+        elif s[I['d']].time() > s[I['f']].time() and (Time >= s[I['d']].time() or Time <= s[I['f']].time()):
+            Result = I['r'] # Changement de jour entre les 2 parties de l'intervalle
+    return Result
 
 # Ici les imports des modules qui definissent des routes
 import appli.main

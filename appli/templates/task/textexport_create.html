@@ -20,7 +20,12 @@
 {{ checkboxinput("histodata","1",data.histodata) }} Historical Data <br>
 {{ checkboxinput("commentsdata","1",data.commentsdata) }} Comments<br>
 {{ checkboxinput("usecomasepa","1",data.usecomasepa) }} Use comma as decimal separator<br>
-
+{{ checkboxinput("internalids","1",data.internalids) }} Internal IDs<br>
+Split in multiple files by <select name="splitcsvby" >
+        <option value=""></option>
+        <option value="sample">Sample</option>
+        <option value="taxo">Taxonomy (parent_child)</option>
+      </select><br>
       </td>
     </tr>
     <tr>

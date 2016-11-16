@@ -35,7 +35,7 @@ PredefinedFields={
     'img_file_name':{'table':'image','field':'orig_file_name','type':'t'},
     'annotation_person_first_name':{'table':'obj_head','field':'tmp_todelete1','type':'t'},
     'sample_dataportal_descriptor':{'table':'sample','field':'dataportal_descriptor','type':'t'},
-    'acq_instrument': {'table': 'acq', 'field': 'instrument', 'type': 't'},
+    'acquis_instrument': {'table': 'acq', 'field': 'instrument', 'type': 't'},
 }
 # Purge les espace et converti le Nan en vide
 def CleanValue(v):
@@ -51,7 +51,7 @@ def ToFloat(value):
     except ValueError:
         return None
 
-class TaskImport(AsyncTask):
+class TaskImportUpdate(AsyncTask):
     class Params (AsyncTask.Params):
         def __init__(self,InitStr=None):
             self.steperrors=[]
@@ -59,8 +59,6 @@ class TaskImport(AsyncTask):
             if InitStr==None: # Valeurs par defaut ou vide pour init
                 self.InData='My In Data'
                 self.ProjectId=None
-                self.SkipAlreadyLoadedFile="N" # permet de dire si on
-                # self.Mapping={x:{} for x in PredefinedTables}
                 self.Mapping={}
                 self.TaxoMap={}
 
@@ -114,11 +112,6 @@ class TaskImport(AsyncTask):
             self.param.UserFound={} # Reset à chaque Tentative
             self.param.steperrors=[] # Reset des erreurs
             # recuperation de toutes les paire objet/Images du projet
-            self.ExistingObject=set()
-            self.pgcur.execute(
-                "SELECT concat(o.orig_id,'*',i.orig_file_name) from images i join objects o on i.objid=o.objid where o.projid="+str(self.param.ProjectId))
-            for rec in self.pgcur:
-                self.ExistingObject.add(rec[0])
             logging.info("SubTask1 : Analyze TSV Files")
             self.UpdateProgress(2,"Analyze TSV Files")
             self.LastNum={x:{'n':0,'t':0} for x in PredefinedTables}
@@ -133,9 +126,6 @@ class TaskImport(AsyncTask):
             for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv"):
                 for CsvFile in sd.glob(filter):
                     relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
-                    if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
-                        logging.info("File %s skipped, already loaded"%(relname.as_posix()))
-                        continue
                     logging.info("Analyzing file %s"%(relname.as_posix()))
                     with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
                         # lecture en mode dictionnaire basé sur la premiere ligne
@@ -219,19 +209,6 @@ class TaskImport(AsyncTask):
                             ObjectId=CleanValue(lig.get('object_id',''))
                             if ObjectId=='':
                                 self.LogErrorForUser("Missing object_id on line '%s' in file %s. "%(RowCount,relname.as_posix()))
-                            ImgFileName=CleanValue(lig.get('img_file_name','MissingField img_file_name'))
-                            ImgFilePath=CsvFile.with_name(ImgFileName)
-                            if not ImgFilePath.exists():
-                                self.LogErrorForUser("Missing Image '%s' in file %s. "%(ImgFileName,relname.as_posix()))
-                            else:
-                                try:
-                                    im=Image.open(ImgFilePath.as_posix())
-                                except:
-                                    self.LogErrorForUser("Error while reading Image '%s' in file %s. %s"%(ImgFileName,relname.as_posix(),sys.exc_info()[0]))
-                            CleExistObj=ObjectId+'*'+ImgFileName
-                            if CleExistObj in self.ExistingObject:
-                                self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. "%(ObjectId,ImgFileName,relname.as_posix()))
-                            self.ExistingObject.add(CleExistObj)
                         logging.info("File %s : %d row analysed",relname.as_posix(),RowCount)
                         self.param.TotalRowCount+=RowCount
             if self.param.TotalRowCount==0:
@@ -278,11 +255,12 @@ class TaskImport(AsyncTask):
                 self.UpdateProgress(20,"Taxo automatic resolution Done"%())
             #sinon on pose une question
 
+    class EmptyObject(object):
+        pass
     def SPStep2(self):
         logging.info("Start Step 2 : Effective data import")
         logging.info("Taxo Mapping = %s",self.param.TaxoFound)
         logging.info("Users Mapping = %s",self.param.UserFound)
-        AstralCache={'date':None,'time':None,'long':None,'lat':None,'r':''}
         # Mise à jour du mapping en base
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         LoadedFiles=ntcv(Prj.fileloaded).splitlines()
@@ -299,7 +277,7 @@ class TaskImport(AsyncTask):
             Ids[i]["ID"]={}
             for r in GetAll(sql):
                 Ids[i]["ID"][r[0]]=int(r[1])
-        # recuperation de les ID objet du projet
+        # recuperation des ID des objet du projet
         self.ExistingObject={}
         self.pgcur.execute(
             "SELECT o.orig_id,o.objid from objects o where o.projid="+str(self.param.ProjectId))
@@ -312,9 +290,6 @@ class TaskImport(AsyncTask):
         for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv"):
             for CsvFile in sd.glob(filter):
                 relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
-                if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
-                    logging.info("File %s skipped, already loaded"%(relname.as_posix()))
-                    continue
                 logging.info("Analyzing file %s"%(relname.as_posix()))
                 with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
                     # lecture en mode dictionnaire basé sur la premiere ligne
@@ -325,7 +300,7 @@ class TaskImport(AsyncTask):
                     RowCount=0
                     for lig in rdr:
                         Objs={"acq":database.Acquisitions(),"sample":database.Samples(),"process":database.Process()
-                            ,"obj_head":database.Objects(),"obj_field":database.ObjectsFields(),"image":database.Images()}
+                            ,"obj_head":self.EmptyObject(),"obj_field":self.EmptyObject()}
                         RowCount+=1
                         TotalRowCount+=1
                         for champ in rdr.fieldnames:
@@ -357,26 +332,17 @@ class TaskImport(AsyncTask):
                                     FieldValue=database.ClassifQualRevert.get(v.lower())
                                 else: # c'est un champ texte sans rien de special
                                     FieldValue=v
-                                if FieldTable in Objs:
-                                    # if FieldName in Objs[FieldTable].__dict__:
-                                    if  hasattr(Objs[FieldTable],FieldName):
+                                if FieldTable in ('image', 'sample'):
+                                    pass  # les champs images sont ignorés lors d'un update
+                                elif FieldTable in Objs:
+                                    # if  hasattr(Objs[FieldTable],FieldName):
+                                    if FieldName in db.metadata.tables[FieldTable].columns:
                                         setattr(Objs[FieldTable],FieldName,FieldValue)
                                         # logging.info("setattr %s %s %s",FieldTable,FieldName,FieldValue)
                                     # else:
                                         # logging.info("skip F %s %s %s",FieldTable,FieldName,FieldValue)
                                 else:
                                     logging.info("skip T %s %s %s",FieldTable,FieldName,FieldValue)
-                        # Calcul de la position du soleil
-                        if not (AstralCache['date']==Objs["obj_head"].objdate and AstralCache['time']==Objs["obj_head"].objtime \
-                            and AstralCache['long']==Objs["obj_head"].longitude and AstralCache['lat']==Objs["obj_head"].latitude) :
-                            AstralCache = {'date': Objs["obj_head"].objdate, 'time': Objs["obj_head"].objtime
-                                , 'long': Objs["obj_head"].longitude, 'lat': Objs["obj_head"].latitude, 'r': ''}
-                            from astral import AstralError
-                            try:
-                                AstralCache['r'] = appli.CalcAstralDayTime(AstralCache['date'], AstralCache['time'], AstralCache['lat'], AstralCache['long'])
-                            except AstralError as e: # dans certains endoit du globe il n'y a jamais de changement nuit/jour certains jours, ca provoque une erreur
-                                app.logger.error("Astral error : %s for %s", e,AstralCache)
-                        Objs["obj_head"].sunpos = AstralCache['r']
                         # Affectation des ID Sample, Acq & Process et creation de ces dernier si necessaire
                         for t in Ids:
                             if Objs[t].orig_id is not None:
@@ -389,54 +355,35 @@ class TaskImport(AsyncTask):
                                     Ids[t]["ID"][Objs[t].orig_id]=getattr(Objs[t],Ids[t]["pk"])
                                     setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
                                     logging.info("IDS %s %s",t,Ids[t])
-                        self.pgcur.execute("select nextval('seq_images')" )
-                        Objs["image"].imgid=self.pgcur.fetchone()[0]
                         # Recherche de l'objet si c'est une images complementaire
                         if Objs["obj_field"].orig_id in self.ExistingObject:
-                            Objs["obj_head"].objid=self.ExistingObject[Objs["obj_field"].orig_id]
+                            # Objs["obj_head"].objid=self.ExistingObject[Objs["obj_field"].orig_id]
+                            # Todo Traiter header
+                            ObjField=database.ObjectsFields.query.filter_by(objfid=self.ExistingObject[Objs["obj_field"].orig_id]).first()
+                            for attr, value in Objs["obj_field"].__dict__.items():
+                                if hasattr(ObjField,attr):
+                                    setattr(ObjField,attr,value);
+                            ObjHead=database.Objects.query.filter_by(objid=self.ExistingObject[Objs["obj_field"].orig_id]).first()
+                            for attr, value in Objs["obj_head"].__dict__.items():
+                                if hasattr(ObjHead,attr):
+                                    setattr(ObjHead,attr,value);
+                            db.session.commit()
+
                         else: # ou Creation de l'objet
-                            Objs["obj_head"].projid=self.param.ProjectId
-                            Objs["obj_head"].random_value=random.randint(1,99999999)
-                            Objs["obj_head"].img0id=Objs["image"].imgid
-                            db.session.add(Objs["obj_head"])
-                            db.session.commit()
-                            Objs["obj_field"].objfid=Objs["obj_head"].objid
-                            db.session.add(Objs["obj_field"])
-                            db.session.commit()
-                            self.ExistingObject[Objs["obj_field"].orig_id]=Objs["obj_head"].objid # Provoque un select object sauf si 'expire_on_commit':False
-                        #Gestion de l'image, creation DB et fichier dans Vault
-                        Objs["image"].objid=Objs["obj_head"].objid
-                        ImgFilePath=CsvFile.with_name(Objs["image"].orig_file_name)
-                        VaultFolder="%04d"%(Objs["image"].imgid//10000)
-                        vaultroot=Path("../../vault")
-                        #creation du repertoire contenant les images si necessaire
-                        CreateDirConcurrentlyIfNeeded(vaultroot.joinpath(VaultFolder))
-                        vaultfilename     ="%s/%04d%s"     %(VaultFolder,Objs["image"].imgid%10000,ImgFilePath.suffix)
-                        vaultfilenameThumb="%s/%04d_mini%s"%(VaultFolder,Objs["image"].imgid%10000,'.jpg') #on Impose le format de la miniature
-                        Objs["image"].file_name=vaultfilename
-                        #copie du fichier image
-                        shutil.copyfile(ImgFilePath.as_posix(),vaultroot.joinpath(vaultfilename).as_posix())
-                        im=Image.open(vaultroot.joinpath(vaultfilename).as_posix())
-                        Objs["image"].width=im.size[0]
-                        Objs["image"].height=im.size[1]
-                        SizeLimit=app.config['THUMBSIZELIMIT']
-                        # génération d'une miniature si une image est trop grande.
-                        if (im.size[0]>SizeLimit) or (im.size[1]>SizeLimit) :
-                                im.thumbnail((SizeLimit,SizeLimit))
-                                if im.mode=='P':
-                                    im=im.convert("RGB")
-                                im.save(vaultroot.joinpath(vaultfilenameThumb).as_posix())
-                                Objs["image"].thumb_file_name=vaultfilenameThumb
-                                Objs["image"].thumb_width=im.size[0]
-                                Objs["image"].thumb_height=im.size[1]
-                        #ajoute de l'image en DB
-                        if Objs["image"].imgrank is None:
-                            Objs["image"].imgrank =0 # valeur par defaut
-                        db.session.add(Objs["image"])
-                        db.session.commit()
+                            logging.warning("Object '%s' not found, can't be updated, row skipped", Objs["obj_field"].orig_id)
+                            continue
+                            # Objs["obj_head"].projid=self.param.ProjectId
+                            # Objs["obj_head"].random_value=random.randint(1,99999999)
+                            # Objs["obj_head"].img0id=Objs["image"].imgid
+                            # db.session.add(Objs["obj_head"])
+                            # db.session.commit()
+                            # Objs["obj_field"].objfid=Objs["obj_head"].objid
+                            # db.session.add(Objs["obj_field"])
+                            # db.session.commit()
+                            # self.ExistingObject[Objs["obj_field"].orig_id]=Objs["obj_head"].objid # Provoque un select object sauf si 'expire_on_commit':False
                         if (TotalRowCount%100)==0:
                             self.UpdateProgress(100*TotalRowCount/self.param.TotalRowCount,"Processing files %d/%d"%(TotalRowCount,self.param.TotalRowCount))
-                    logging.info("File %s : %d row Loaded",relname.as_posix(),RowCount)
+                    logging.info("File %s : %d row Processed",relname.as_posix(),RowCount)
                     LoadedFiles.append(relname.as_posix())
                     Prj.fileloaded="\n".join(LoadedFiles)
                     db.session.commit()
@@ -501,7 +448,7 @@ class TaskImport(AsyncTask):
                     return self.StartTask(self.param,FileToSave=FileToSave,FileToSaveFileName=FileToSaveFileName)
             else: # valeurs par default
                 self.param.ProjectId=gvg("p")
-            return render_template('task/import_create.html',header=txt,data=self.param,ServerPath=gvp("ServerPath"),TxtTaxoMap=gvp("TxtTaxoMap"))
+            return render_template('task/importupdate_create.html',header=txt,data=self.param,ServerPath=gvp("ServerPath"),TxtTaxoMap=gvp("TxtTaxoMap"))
         if self.task.taskstep==1:
             PrjId=self.param.ProjectId
             Prj=database.Projects.query.filter_by(projid=PrjId).first()

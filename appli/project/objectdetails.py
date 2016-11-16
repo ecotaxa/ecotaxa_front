@@ -155,11 +155,11 @@ $(document).ready(function() {
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
     <table class='table table-bordered table-condensed'><tr>
     <td style=' background-color: #f2f2f2;'><b>longitude</td><td>{0}</td><td style=' background-color: #f2f2f2;'><b>latitude</td><td>{1}</td>
-      <td style=' background-color: #f2f2f2;'><b>Date</td><td>{2}</td><td style=' background-color: #f2f2f2;'><b>Time</td><td>{3}</td>
+      <td style=' background-color: #f2f2f2;'><b>Date</td><td>{2}</td><td style=' background-color: #f2f2f2;'><b>Time (daytime)</td><td>{3} ({10})</td>
     </tr><tr><td style=' background-color: #f2f2f2;'><b>Depth min</td><td>{4}</td><td style=' background-color: #f2f2f2;'><b>Depth max</td><td>{5}</td><td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
     </tr><tr><td><b>Object #</td><td>{8}</td><td><b>Original Object ID</td><td colspan=5>{9}</td></tr><tr>""".format(nonetoformat(obj.longitude,'.5f'),nonetoformat(obj.latitude,'.5f'),obj.objdate,obj.objtime
                         ,obj.depth_min,obj.depth_max
-                        ,classif_auto_name,obj.classif_auto_when,objid,obj.objfrel.orig_id))
+                        ,classif_auto_name,obj.classif_auto_when,objid,obj.objfrel.orig_id,database.DayTimeList.get(obj.sunpos,'?') ))
     cpt=0
     # Insertion des champs object
     for k,v in  collections.OrderedDict(sorted(DecodeEqualList(Prj.mappingobj).items())).items():
@@ -178,6 +178,12 @@ $(document).ready(function() {
                          .format("Original ID",ScaleForDisplay(obj.sample.orig_id),
                                  "longitude",ScaleForDisplay(obj.sample.longitude),
                                  "latitude",ScaleForDisplay(obj.sample.latitude),))
+            elif r[2] == "acquis":
+                t.append(
+                    "<td><b>{0}</td><td colspan=3>{1}</td><td><b>{2}</td><td>{3}</td></tr><tr>"
+                    .format("Original ID", ScaleForDisplay(obj.acquis.orig_id),
+                            "Instrument", ScaleForDisplay(obj.acquis.instrument),
+                             ))
             else:
                 t.append("<td><b>{0}</td><td>{1}</td></tr><tr>"
                          .format("Original ID.",ScaleForDisplay(getattr(getattr(obj,r[2]),"orig_id","???"))))

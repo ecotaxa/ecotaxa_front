@@ -36,22 +36,21 @@ class TaskExportTxt(AsyncTask):
         self.UpdateProgress(1,"Start TSV export")
         TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        sql1="""SELECT o.objid ,o.orig_id as object_id,o.latitude as object_lat,o.longitude as object_lon
+        sql1="""SELECT o.orig_id as object_id,o.latitude as object_lat,o.longitude as object_lon
                 ,to_char(objdate,'YYYYMMDD') as object_date
                 ,to_char(objtime,'HH24MISS') as object_time
                 ,object_link,depth_min as object_depth_min,depth_max as object_depth_max
-                ,o.classif_id,to1.name as object_annotation_category
-                ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubios' ELSE o.classif_qual end object_annotation_status
+                ,to1.name as object_annotation_category
+                ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubious' ELSE o.classif_qual end object_annotation_status
                 ,to1p.name as object_annotation_parent_category
                 ,(WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id,1 rang FROM taxonomy where id =o.classif_id
                         union
                         SELECT t.id,t.name,t.parent_id, rang+1 rang FROM rq JOIN taxonomy t ON t.id = rq.parent_id)
                         select string_agg(name,'>') from (select name from rq order by rang desc)q) object_annotation_hierarchy
-                ,o.classif_who,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
+                ,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
                 ,to_char(o.classif_when,'YYYYMMDD') object_annotation_date
                 ,to_char(o.classif_when,'HH24MISS') object_annotation_time
-                ,o.classif_auto_id,to2.name classif_auto_name,classif_auto_score,classif_auto_when
-                ,random_value,sunpos     """
+                    """
         sql2=""" FROM objects o
                 LEFT JOIN taxonomy to1 on o.classif_id=to1.id
                 LEFT JOIN taxonomy to1p on to1.parent_id=to1p.id
@@ -71,24 +70,30 @@ class TaskExportTxt(AsyncTask):
             sql1+="\n"
             Mapping=DecodeEqualList(Prj.mappingobj)
             for k,v in Mapping.items() :
-                sql1+=",o.%s as object_%s "%(k,re.sub("[^a-zA-Z]","_",v))
+                sql1+=',o.%s as "object_%s" '%(k,re.sub("[^a-zA-Z0-9\\.]","_",v))
         if self.param.sampledata=='1':
-            sql1+="\n,s.sampleid as sampleid_internal,s.orig_id sample_id,s.latitude sample_latitude,s.longitude sample_longitude,s.dataportal_descriptor as sample_dataportal_descriptor "
+            sql1+="\n,s.orig_id sample_id,s.dataportal_descriptor as sample_dataportal_descriptor "
             Mapping=DecodeEqualList(Prj.mappingsample)
             for k,v in Mapping.items() :
-                sql1+=",s.%s as sample_%s "%(k,re.sub("[^a-zA-Z]","_",v))
+                sql1+=',s.%s as "sample_%s" '%(k,re.sub("[^a-zA-Z0-9\\.]","_",v))
         if self.param.processdata=='1':
-            sql1+="\n,p.processid as processid_internal,p.orig_id process_id"
+            sql1+="\n,p.orig_id process_id"
             Mapping=DecodeEqualList(Prj.mappingprocess)
             for k,v in Mapping.items() :
-                sql1+=",p.%s as process_%s "%(k,re.sub("[^a-zA-Z]","_",v))
+                sql1+=',p.%s as "process_%s" '%(k,re.sub("[^a-zA-Z0-9\\.]","_",v))
             sql2+=" left join process p on o.processid=p.processid "
         if self.param.acqdata=='1':
-            sql1+="\n,o.acquisid as acquisid_internal,a.orig_id acquis_id,a.instrument as acquis_instrument"
+            sql1+="\n,a.orig_id acq_id,a.instrument as acq_instrument"
             Mapping=DecodeEqualList(Prj.mappingacq)
             for k,v in Mapping.items() :
-                sql1+=",a.%s as acquis_%s "%(k,re.sub("[^a-zA-Z]","_",v))
+                sql1+=',a.%s as "acquis_%s" '%(k,re.sub("[^a-zA-Z0-9\\.]","_",v))
             sql2+=" left join acquisitions a on o.acquisid=a.acquisid "
+        if self.param.internalids == '1':
+            sql1 += """\n,o.objid,o.acquisid as acq_id_internal,o.processid as processid_internal,o.sampleid as sample_id_internal,o.classif_id,o.classif_who
+                        ,o.classif_auto_id,to2.name classif_auto_name,classif_auto_score,classif_auto_when
+                        ,o.random_value object_random_value,o.sunpos object_sunpos """
+            if self.param.sampledata == '1':
+                sql1 += "\n,s.latitude sample_lat,s.longitude sample_long "
 
         if self.param.histodata=='1':
             if self.param.samplelist!="":
@@ -105,35 +110,61 @@ class TaskExportTxt(AsyncTask):
                     LEFT JOIN taxonomy to3 on oh.classif_id=to3.id
                     LEFT JOIN users uo3 on oh.classif_who=uo3.id
                     """.format(samplefilter)
-
+        splitfield="object_id" # cette valeur permet d'éviter des erreurs plus loins dans r[splitfield]
+        if self.param.splitcsvby=="sample":
+            sql3+=" order by s.orig_id, o.objid "
+            splitfield = "sample_id"
+        if self.param.splitcsvby=="taxo":
+            sql1 += "\n,concat(to1p.name,'_',to1.name) taxo_parent_child "
+            sql3+=" order by taxo_parent_child, o.objid "
+            splitfield = "taxo_parent_child"
 
         sql=sql1+" "+sql2+" "+sql3
         logging.info("Execute SQL : %s"%(sql))
         logging.info("Params : %s"%(params))
         self.pgcur.execute(sql,params)
-
-        self.param.OutFile= "export_{0:d}_{1:s}.tsv".format(Prj.projid,
-                                                             datetime.datetime.now().strftime("%Y%m%d_%H%M"))
-        fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
-        logging.info("Creating file %s"%(fichier))
-        with open(fichier,'w',encoding='latin_1') as csvfile:
-            # lecture en mode dictionnaire basé sur la premiere ligne
-            # ,escapechar ='\\',doublequote =False marche pas sous excel
-            wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_NONNUMERIC  )
-            colnames = [desc[0] for desc in self.pgcur.description]
-            coltypes=[desc[1] for desc in self.pgcur.description]
-            FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
-            wtr.writerow(colnames)
-            for r in self.pgcur:
-                # on supprime les CR des commentaires.
-                if self.param.commentsdata=='1' and r['complement_info']:
-                    r['complement_info']=' '.join(r['complement_info'].splitlines())
-                if self.param.usecomasepa=='1': # sur les decimaux on remplace . par ,
-                    for i,t in zip(range(1000),coltypes):
-                        if t==FloatType and r[i] is not None:
-                            r[i]=str(r[i]).replace('.',',')
-                wtr.writerow(r)
-        logging.info("Extracted %d rows",self.pgcur.rowcount)
+        splitcsv = (self.param.splitcsvby != "")
+        self.param.OutFile= "export_{0:d}_{1:s}.{2}".format(Prj.projid
+                                                            ,datetime.datetime.now().strftime("%Y%m%d_%H%M")
+                                                            ,"zip" if splitcsv else "tsv" )
+        if splitcsv  :
+            zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(),self.param.OutFile)
+                                    , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+            csvfilename='temp.tsv'
+        else:
+            csvfilename=self.param.OutFile
+            zfile=None
+        fichier=os.path.join(self.GetWorkingDir(),csvfilename)
+        prevvalue="NotAssigned"
+        csvfile=None
+        for r in self.pgcur:
+            if (csvfile is None and (splitcsv == False)) or ((prevvalue!=r[splitfield]) and splitcsv ):
+                if csvfile :
+                    csvfile.close()
+                    if zfile :
+                        zfile.write(fichier,prevvalue+".tsv")
+                prevvalue = r[splitfield]
+                logging.info("Creating file %s" % (fichier))
+                csvfile=open(fichier,'w',encoding='latin_1')
+                wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_NONNUMERIC  )
+                colnames = [desc[0] for desc in self.pgcur.description]
+                coltypes=[desc[1] for desc in self.pgcur.description]
+                FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
+                wtr.writerow(colnames)
+            # on supprime les CR des commentaires.
+            if self.param.commentsdata == '1' and r['complement_info']:
+                r['complement_info'] = ' '.join(r['complement_info'].splitlines())
+            if self.param.usecomasepa == '1':  # sur les decimaux on remplace . par ,
+                for i, t in zip(range(1000), coltypes):
+                    if t == FloatType and r[i] is not None:
+                        r[i] = str(r[i]).replace('.', ',')
+            wtr.writerow(r)
+        if csvfile:
+            csvfile.close()
+            if zfile:
+                zfile.write(fichier, prevvalue + ".tsv")
+                zfile.close();
+        logging.info("Extracted %d rows", self.pgcur.rowcount)
 
     def CreateXML(self):
         self.UpdateProgress(1,"Start XML export")
@@ -203,17 +234,18 @@ class TaskExportTxt(AsyncTask):
         self.UpdateProgress(1,"Start Image export")
         TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        self.param.OutFile= "export_{0:d}_{1:s}.zip".format(Prj.projid,
+        self.param.OutFile= "exportimg_{0:d}_{1:s}.zip".format(Prj.projid,
                                                              datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
         logging.info("Creating file %s"%(fichier))
         zfile=zipfile.ZipFile(fichier, 'w',allowZip64 = True,compression= zipfile.ZIP_DEFLATED)
         zfile.write(tsvfile)
 
-        sql="""SELECT i.objid,i.file_name,i.orig_file_name,t.name
+        sql="""SELECT i.objid,i.file_name,i.orig_file_name,t.name,concat(to1p.name,'_',t.name) taxo_parent_child
                  From obj_head o left join samples s on o.sampleid=s.sampleid
                  join images i on o.objid=i.objid
                  left join taxonomy t on o.classif_id=t.id
+                 LEFT JOIN taxonomy to1p on t.parent_id=to1p.id
                    where o.projid=%(projid)s """
         params={'projid':int(self.param.ProjectId)}
         if self.param.samplelist!="":
@@ -225,7 +257,7 @@ class TaskExportTxt(AsyncTask):
         self.pgcur.execute(sql,params)
         vaultroot=Path("../../vault")
         for r in self.pgcur:
-            zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[3]))
+            zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[4]))
 
     def CreateSUM(self):
         self.UpdateProgress(1,"Start Summary export")
@@ -318,8 +350,10 @@ class TaskExportTxt(AsyncTask):
                 self.param.commentsdata=gvp("commentsdata")
                 self.param.usecomasepa=gvp("usecomasepa")
                 self.param.sumsubtotal=gvp("sumsubtotal")
-
-
+                self.param.internalids = gvp("internalids")
+                self.param.splitcsvby = gvp("splitcsvby")
+                if self.param.splitcsvby=='sample': # si on splitte par sample, il faut les données du sample
+                    self.param.sampledata='1'
                 # Verifier la coherence des données
                 # errors.append("TEST ERROR")
                 if self.param.what=='' : errors.append("You must select What you want to export")
