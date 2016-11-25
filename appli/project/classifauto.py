@@ -46,39 +46,65 @@ where projid =%d and classif_qual='V'"""%PrjId
     D=np.diag(cm)
 
     t=["""<style>
-th.rotate {
-  /* Something you can count on */
-  height: 140px;
-  white-space: nowrap;
-  vertical-align: bottom !important;
-}
-
-th.rotate > div {
-  transform:
-    rotate(270deg);
-  width: 15px;
-}
+    th {
+      vertical-align: bottom !important;
+      background-color: #ddd
+    }
+    .table > tbody > tr > th.rotate {
+      height: 140px;
+      white-space: nowrap;
+    }
+    .table > tbody > tr > th.row_header{
+      height: 140px;
+      white-space: nowrap;
+      vertical-align: top !important;
+    }
+    th.rotate > div {
+      transform:
+        rotate(270deg);
+      width: 15px;
+    }
+    th.row_header > div {
+      transform:
+        translate(0px, 200px)
+        rotate(270deg);
+      width: 15px;
+    }
+  .margin {
+      font-style: italic;
+    }
   </style>
-  This matrix is refreshed every time you access it.
-    <table class='table table-bordered table-verycondensed rightfixedfonttd' style='font-size:12px;'><tr><th>Predicted =><br>True category</th>"""]
+  <h2>Confusion matrix</h2>
+  <p>This matrix is refreshed every time you access it. For more information on confusion statistics, please see the <a href='https://en.wikipedia.org/wiki/Precision_and_recall'>very well written Wikipedia page</a>.</p>
+  
+    <table class='table table-bordered table-hover table-condensed' style='font-size:12px;'>
+    <tr>
+      <th>&nbsp;</th>
+      <th>&nbsp;</th>
+      <th class='column_header' colspan='1000'>Predicted category</th>
+    </tr>
+    <tr>
+      <th class='row_header' rowspan='1000'><div>True category</div></th>
+      <th>&nbsp;</th>
+    """]
     # ligne titre des categorie
     for c in CatAll:
-        t.append("<th  class=rotate><div>%s</div></th>"%c)
-    t.append("<th>Nbr True</th><th>% True</th><th>Recall</th>")
+        t.append("<th class='rotate'><div>%s</div></th>"%c)
+    t.append("<th>Nb. true</th><th>% true</th><th><a href='https://en.wikipedia.org/wiki/Precision_and_recall#Recall' target='_blank'>Recall</a></th>")
     for c,cml,s,recall in zip(CatAll,cm,SommeH,100*D/SommeHNoZero):
         t.append("</tr><tr><th>%s</th>"%c)
         for v in cml:
             t.append("<td>%s</td>"%v)
-        t.append("<td>%s</td><td>%0.1f</td><td>%0.1f</td>"%(s,100*s/TotalObj,recall)) # Ajoute le total & Pct de la ligne
-    t.append("</tr><tr><th>Nbr Predicted</th>")
+        t.append("<td class='margin'>%s</td><td class='margin'>%0.1f</td class='margin'><td>%0.1f</td>"%(s,100*s/TotalObj,recall)) # Ajoute le total & Pct de la ligne
+    t.append("</tr><tr><th>Nb. predicted</th>")
     for s in SommeV:
-        t.append("<td>%s</td>"%(s)) # Ajoute le total de la Colonne
-    t.append("</tr><tr><th>% of Predicted</th>")
+        t.append("<td class='margin'>%s</td>"%(s)) # Ajoute le total de la Colonne
+    t.append("</tr><tr><th>% of predicted</th>")
     for s in SommeV:
-        t.append("<td>%0.1f</td>"%(100*s/TotalObj)) # Ajoute le % de la Colonne
-    t.append("</tr><tr><th>Precision</th>")
+        t.append("<td class='margin'>%0.1f</td>"%(100*s/TotalObj)) # Ajoute le % de la Colonne
+    t.append("</tr><tr><th><a href='https://en.wikipedia.org/wiki/Precision_and_recall#Precision' target='_blank' >Precision</a></th>")
     for s in 100*D/SommeVNoZero:
-        t.append("<td>%0.1f</td>"%(s)) # Ajoute la precision
+        t.append("<td class='margin'>%0.1f</td>"%(s)) # Ajoute la precision
     t.append("</tr></table>")
 
 
@@ -89,7 +115,7 @@ th.rotate > div {
     plot_confusion_matrix(cm_normalized,CatAll)
     RamImage = io.BytesIO()
     g.Fig.savefig(RamImage , dpi=100, format='png')
-    t.append("<h4>Confusion Matrix Name On Recall</h4><img src='data:image/png;base64,{}'/>".format(base64.encodebytes(RamImage.getvalue()).decode()) )
+    t.append("<h3>Confusion matrix divided by sum of lines</h3><p>The diagonal contains the <a href='https://en.wikipedia.org/wiki/Precision_and_recall#Recall' target='_blank'>recall</a> rate.</p><img src='data:image/png;base64,{}'/>".format(base64.encodebytes(RamImage.getvalue()).decode()) )
 
     # Version division par axe des prediction pas de div pas zero possible et permet de voir ce que c'est devenu (somme Vert.)
     cm_normalized = cm.astype('float')/SommeVNoZero
@@ -98,8 +124,8 @@ th.rotate > div {
     plot_confusion_matrix(cm_normalized,CatAll)
     RamImage = io.BytesIO()
     g.Fig.savefig(RamImage , dpi=100, format='png')
-    t.append("<h4>Confusion Matrix On Precision</h4><img src='data:image/png;base64,{}'/>".format(base64.encodebytes(RamImage.getvalue()).decode()) )
-    t.append("<br>"+txtbacktoproject)
+    t.append("<h3>Confusion matrix divided by sum of columns</h3><p>The diagonal contains the <a href='https://en.wikipedia.org/wiki/Precision_and_recall#Precision' target='_blank'>precision</a> rate.</p><img src='data:image/png;base64,{}'/>".format(base64.encodebytes(RamImage.getvalue()).decode()) )
+    # t.append("<br>"+txtbacktoproject)
     return PrintInCharte("\n".join(t))
 
 

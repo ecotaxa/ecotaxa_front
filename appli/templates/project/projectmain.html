@@ -148,10 +148,10 @@
           <div id="myTabs">  <!-- Nav tabs -->
             <ul class="nav nav-tabs nav-justified" role="tablist">
               <li role="presentation" class="active">
-                  <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Classify</a>
+                  <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Taxonomy filter</a>
               </li>
               <li role="presentation">
-                  <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Filters</a>
+                  <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Other filters</a>
               </li>
             </ul>
             <div class="tab-content"> <!-- Tab panes -->
@@ -162,8 +162,8 @@
               {# Filters #}
               <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;overflow-x: hidden;">
                   <div id="TabBInner" style="width: 240px;">
-                    <a href=# onclick='ClearAllFilterCriteria();return false;' class="btn btn-info " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
-                     <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane('mail');"><span class="glyphicon glyphicon-link"></span> Share page</button>
+                     <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane('mail'); " title="Email a link to this page, including the current filters"><span class="glyphicon glyphicon-link"></span> Share page</button>
+                     <button onclick='ClearAllFilterCriteria();return false;' class="btn btn-info" style="width: 49%" title="Remove all selection criteria"><span class="glyphicon glyphicon-remove" ></span> Clear all filters</button>
                   <br>
                   {{ leftb|safe }}
 {# ------- Annotator / Freefilter ------------#}
@@ -189,8 +189,8 @@
 </form>
     <div class="row">
       <div class="col-sm-12">
-         <button class="btn btn-default btn-block btn-sm active" onclick="LoadRightPane(false,true);">Save filters configuration</button>
-         <a href='?' type="button" class="btn btn-default btn-sm btn-block active">Apply saved filters</a>
+         <button class="btn btn-info btn-block" onclick="LoadRightPane(false,true);" title="Save current settings for the filters, in this project">Save filters</button>
+         <a href='?' type="button" class="btn btn-info btn-block" title="Load saved filter criteria and reload the page">Apply saved filters and update view</a>
       </div>
     </div>
            </div>
