@@ -7,8 +7,9 @@ import logging,sys,os
 
 
 if __name__ == '__main__':
+    task = None
+    taskid=-9999
     try:
-        task=None
         # print("%s %s"%(sys.argv,len(sys.argv)))
         # print(os.getcwd())
         # On verifie qu'il y a au moins un parametre, c'est le taskid
@@ -43,7 +44,9 @@ if __name__ == '__main__':
         fct()
     except:
         db.session.rollback()
+        db.engine.begin()
         if task is not None:
+            task = LoadTask(taskid)
             task.task.taskstate="Error"
             task.task.progresspct=-1
             task.task.progressmsg="Unhandled SubProcess Exception : "+str(sys.exc_info())

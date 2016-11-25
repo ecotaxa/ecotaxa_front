@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
-from flask import Blueprint, render_template, g, flash,request
+from appli import db,app, database ,PrintInCharte,gvp,gvg,DecodeEqualList
+from flask import render_template, g, flash
 import logging,os,csv,re,datetime
 import zipfile,psycopg2.extras
 from pathlib import Path
-from time import time
-from appli.tasks.taskmanager import AsyncTask,DoTaskClean
+from appli.tasks.taskmanager import AsyncTask
 from appli.database import GetAll
 import xml.etree.ElementTree as ET
+import appli.project.sharedfilter as sharedfilter
 
 class TaskExportTxt(AsyncTask):
     class Params (AsyncTask.Params):
@@ -19,11 +19,25 @@ class TaskExportTxt(AsyncTask):
                 self.what=None  # TSV, XML, IMG , Summary
                 self.Details=None
                 self.OutFile=None
+                self.filtres={}
+                self.samplelist=""
+                self.commentsdata = ''
+                self.objectdata = ''
+                self.sampledata = ''
+                self.processdata = ''
+                self.acqdata=''
+                self.histodata = ''
+                self.splitcsvby=''
+                self.usecomasepa=''
+                self.sumsubtotal=''
+                self.internalids=''
+                self.typeline=''
 
 
     def __init__(self,task=None):
+        self.pgcur =None
         super().__init__(task)
-        if task==None:
+        if task is None:
             self.param=self.Params()
         else:
             self.param=self.Params(task.inputparam)
@@ -34,7 +48,6 @@ class TaskExportTxt(AsyncTask):
 
     def CreateTSV(self):
         self.UpdateProgress(1,"Start TSV export")
-        TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         sql1="""SELECT o.orig_id as object_id,o.latitude as object_lat,o.longitude as object_lon
                 ,to_char(objdate,'YYYYMMDD') as object_date
@@ -70,23 +83,23 @@ class TaskExportTxt(AsyncTask):
             sql1+="\n"
             Mapping=DecodeEqualList(Prj.mappingobj)
             for k,v in Mapping.items() :
-                sql1+=',o.%s as "object_%s" '%(k,re.sub("[^a-zA-Z0-9\\.]","_",v))
+                sql1+=',o.%s as "object_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
         if self.param.sampledata=='1':
             sql1+="\n,s.orig_id sample_id,s.dataportal_descriptor as sample_dataportal_descriptor "
             Mapping=DecodeEqualList(Prj.mappingsample)
             for k,v in Mapping.items() :
-                sql1+=',s.%s as "sample_%s" '%(k,re.sub("[^a-zA-Z0-9\\.]","_",v))
+                sql1+=',s.%s as "sample_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
         if self.param.processdata=='1':
             sql1+="\n,p.orig_id process_id"
             Mapping=DecodeEqualList(Prj.mappingprocess)
             for k,v in Mapping.items() :
-                sql1+=',p.%s as "process_%s" '%(k,re.sub("[^a-zA-Z0-9\\.]","_",v))
+                sql1+=',p.%s as "process_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
             sql2+=" left join process p on o.processid=p.processid "
         if self.param.acqdata=='1':
             sql1+="\n,a.orig_id acq_id,a.instrument as acq_instrument"
             Mapping=DecodeEqualList(Prj.mappingacq)
             for k,v in Mapping.items() :
-                sql1+=',a.%s as "acquis_%s" '%(k,re.sub("[^a-zA-Z0-9\\.]","_",v))
+                sql1+=',a.%s as "acq_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
             sql2+=" left join acquisitions a on o.acquisid=a.acquisid "
         if self.param.internalids == '1':
             sql1 += """\n,o.objid,o.acquisid as acq_id_internal,o.processid as processid_internal,o.sampleid as sample_id_internal,o.classif_id,o.classif_who
@@ -96,7 +109,7 @@ class TaskExportTxt(AsyncTask):
                 sql1 += "\n,s.latitude sample_lat,s.longitude sample_long "
 
         if self.param.histodata=='1':
-            if self.param.samplelist!="":
+            if self.param.samplelist!="": # injection du filtre sur les echantillons dans les historique
                 samplefilter=" join samples s on o.sampleid=s.sampleid and s.orig_id= any(%(samplelist)s) "
             else: samplefilter=""
             sql1+=" ,oh.classif_date histoclassif_date,classif_type histoclassif_type,to3.name histoclassif_name,oh.classif_qual histoclassif_qual,uo3.name histoclassif_who,classif_score histoclassif_score"
@@ -110,6 +123,8 @@ class TaskExportTxt(AsyncTask):
                     LEFT JOIN taxonomy to3 on oh.classif_id=to3.id
                     LEFT JOIN users uo3 on oh.classif_who=uo3.id
                     """.format(samplefilter)
+
+        sql3+=sharedfilter.GetSQLFilter(self.param.filtres,params,self.task.owner_id)
         splitfield="object_id" # cette valeur permet d'éviter des erreurs plus loins dans r[splitfield]
         if self.param.splitcsvby=="sample":
             sql3+=" order by s.orig_id, o.objid "
@@ -120,8 +135,8 @@ class TaskExportTxt(AsyncTask):
             splitfield = "taxo_parent_child"
 
         sql=sql1+" "+sql2+" "+sql3
-        logging.info("Execute SQL : %s"%(sql))
-        logging.info("Params : %s"%(params))
+        logging.info("Execute SQL : %s"%(sql,))
+        logging.info("Params : %s"%(params,))
         self.pgcur.execute(sql,params)
         splitcsv = (self.param.splitcsvby != "")
         self.param.OutFile= "export_{0:d}_{1:s}.{2}".format(Prj.projid
@@ -144,13 +159,15 @@ class TaskExportTxt(AsyncTask):
                     if zfile :
                         zfile.write(fichier,prevvalue+".tsv")
                 prevvalue = r[splitfield]
-                logging.info("Creating file %s" % (fichier))
+                logging.info("Creating file %s" % (fichier,))
                 csvfile=open(fichier,'w',encoding='latin_1')
                 wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_NONNUMERIC  )
                 colnames = [desc[0] for desc in self.pgcur.description]
                 coltypes=[desc[1] for desc in self.pgcur.description]
                 FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
                 wtr.writerow(colnames)
+                if self.param.typeline=='1':
+                    wtr.writerow(['[f]' if x==FloatType else '[t]' for x in coltypes])
             # on supprime les CR des commentaires.
             if self.param.commentsdata == '1' and r['complement_info']:
                 r['complement_info'] = ' '.join(r['complement_info'].splitlines())
@@ -163,18 +180,17 @@ class TaskExportTxt(AsyncTask):
             csvfile.close()
             if zfile:
                 zfile.write(fichier, prevvalue + ".tsv")
-                zfile.close();
+                zfile.close()
         logging.info("Extracted %d rows", self.pgcur.rowcount)
 
     def CreateXML(self):
         self.UpdateProgress(1,"Start XML export")
-        TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
 
         self.param.OutFile= "export_{0:d}_{1:s}.xml".format(Prj.projid,
                                                              datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
-        logging.info("Creating file %s"%(fichier))
+        logging.info("Creating file %s"%(fichier,))
         root = ET.Element('projects',{ "xmlns":"http://typo.oceanomics.abims.sbr.fr/ecotaxa-export"
                  ,"xmlns:xsi":"http://www.w3.org/2001/XMLSchema-instance"
                  ,"xsi:schemaLocation":"http://typo.oceanomics.abims.sbr.fr/ecotaxa-export platform:/resource/typo-shared/src/main/resources/ecotaxa-export-1.1.xsd"})
@@ -205,8 +221,8 @@ class TaskExportTxt(AsyncTask):
             params['samplelist']=self.param.samplelist.split(",")
 
         sql=sql1+" "+sql3
-        logging.info("Execute SQL : %s"%(sql))
-        logging.info("Params : %s"%(params))
+        logging.info("Execute SQL : %s"%(sql,))
+        logging.info("Params : %s"%(params,))
         self.pgcur.execute(sql,params)
 
         samples=ET.SubElement(Project, 'samples')
@@ -232,17 +248,16 @@ class TaskExportTxt(AsyncTask):
         self.CreateTSV()
         tsvfile=self.param.OutFile
         self.UpdateProgress(1,"Start Image export")
-        TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         self.param.OutFile= "exportimg_{0:d}_{1:s}.zip".format(Prj.projid,
                                                              datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
-        logging.info("Creating file %s"%(fichier))
+        logging.info("Creating file %s"%(fichier,))
         zfile=zipfile.ZipFile(fichier, 'w',allowZip64 = True,compression= zipfile.ZIP_DEFLATED)
         zfile.write(tsvfile)
 
         sql="""SELECT i.objid,i.file_name,i.orig_file_name,t.name,concat(to1p.name,'_',t.name) taxo_parent_child
-                 From obj_head o left join samples s on o.sampleid=s.sampleid
+                 From objects o left join samples s on o.sampleid=s.sampleid
                  join images i on o.objid=i.objid
                  left join taxonomy t on o.classif_id=t.id
                  LEFT JOIN taxonomy to1p on t.parent_id=to1p.id
@@ -252,8 +267,10 @@ class TaskExportTxt(AsyncTask):
             sql+=" and s.orig_id= any(%(samplelist)s) "
             params['samplelist']=self.param.samplelist.split(",")
 
-        logging.info("Execute SQL : %s"%(sql))
-        logging.info("Params : %s"%(params))
+        sql+=sharedfilter.GetSQLFilter(self.param.filtres,params,self.task.owner_id)
+
+        logging.info("Execute SQL : %s"%(sql,))
+        logging.info("Params : %s"%(params,))
         self.pgcur.execute(sql,params)
         vaultroot=Path("../../vault")
         for r in self.pgcur:
@@ -261,7 +278,6 @@ class TaskExportTxt(AsyncTask):
 
     def CreateSUM(self):
         self.UpdateProgress(1,"Start Summary export")
-        TInit = time()
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         grp="to1.name"
         if self.param.sumsubtotal=="A":
@@ -278,37 +294,29 @@ class TaskExportTxt(AsyncTask):
         if self.param.samplelist!="":
             sql3+=" and s.orig_id= any(%(samplelist)s) "
             params['samplelist']=self.param.samplelist.split(",")
+        sql3+= sharedfilter.GetSQLFilter(self.param.filtres, params, self.task.owner_id)
         sql3+=" group by "+grp
         sql3+=" order by "+grp
         sql=sql1+" "+sql2+" "+sql3
-        logging.info("Execute SQL : %s"%(sql))
-        logging.info("Params : %s"%(params))
+        logging.info("Execute SQL : %s"%(sql,))
+        logging.info("Params : %s"%(params,))
         self.pgcur.execute(sql,params)
 
         self.param.OutFile= "export_summary_{0:d}_{1:s}.tsv".format(Prj.projid,
                                                              datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
-        logging.info("Creating file %s"%(fichier))
+        logging.info("Creating file %s"%(fichier,))
         with open(fichier,'w',encoding='latin_1') as csvfile:
             # lecture en mode dictionnaire basé sur la premiere ligne
             wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n' )
             colnames = [desc[0] for desc in self.pgcur.description]
-            coltypes=[desc[1] for desc in self.pgcur.description]
-            FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
             wtr.writerow(colnames)
             for r in self.pgcur:
-                # on supprime les CR des commentaires.
-                if self.param.commentsdata=='1' and r['complement_info']:
-                    r['complement_info']=' '.join(r['complement_info'].splitlines())
-                if self.param.usecomasepa=='1': # sur les decimaux on remplace . par ,
-                    for i,t in zip(range(1000),coltypes):
-                        if t==FloatType and r[i] is not None:
-                            r[i]=str(r[i]).replace('.',',')
                 wtr.writerow(r)
         logging.info("Extracted %d rows",self.pgcur.rowcount)
 
     def SPStep1(self):
-        logging.info("Input Param = %s"%(self.param.__dict__))
+        logging.info("Input Param = %s"%(self.param.__dict__,))
         if self.param.what=="TSV":
             self.CreateTSV()
         elif self.param.what=="XML":
@@ -328,18 +336,26 @@ class TaskExportTxt(AsyncTask):
 
 
     def QuestionProcess(self):
-        Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
+        Prj=database.Projects.query.filter_by(projid=gvg("projid")).first()
         txt="<a href='/prj/%d'>Back to project</a>"%Prj.projid
         if not Prj.CheckRight(1):
             return PrintInCharte("ACCESS DENIED for this project<br>"+txt)
         txt+="<h3>Text export Task creation</h3>"
         txt+="<h5>Exported Project : #%d - %s</h5>"%(Prj.projid,Prj.title)
         errors=[]
+        self.param.filtres = {}
+        for k in sharedfilter.FilterList:
+            if gvg(k, "") != "":
+                self.param.filtres[k] = gvg(k, "")
+        if len(self.param.filtres) > 0:
+            TxtFiltres = ",".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""])
+        else: TxtFiltres=""
+
         if self.task.taskstep==0:
             # Le projet de base est choisi second écran ou validation du second ecran
             if gvp('starttask')=="Y":
                 # validation du second ecran
-                self.param.ProjectId=gvg("p")
+                self.param.ProjectId=gvg("projid")
                 self.param.what=gvp("what")
                 self.param.samplelist=gvp("samplelist")
                 self.param.objectdata=gvp("objectdata")
@@ -351,6 +367,7 @@ class TaskExportTxt(AsyncTask):
                 self.param.usecomasepa=gvp("usecomasepa")
                 self.param.sumsubtotal=gvp("sumsubtotal")
                 self.param.internalids = gvp("internalids")
+                self.param.typeline = gvp("typeline")
                 self.param.splitcsvby = gvp("splitcsvby")
                 if self.param.splitcsvby=='sample': # si on splitte par sample, il faut les données du sample
                     self.param.sampledata='1'
@@ -368,8 +385,13 @@ class TaskExportTxt(AsyncTask):
             sql="""select sampleid,orig_id
                     from samples where projid =%(projid)s
                     order by orig_id"""
-            g.SampleList=GetAll(sql,{"projid":gvg("p")},cursor_factory=None)
-            return render_template('task/textexport_create.html',header=txt,data=self.param)
+            g.SampleList=GetAll(sql,{"projid":gvg("projid")},cursor_factory=None)
+            g.headcenter="<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title);
+            if TxtFiltres!="":
+                g.headcenter = "<h4>Project : <a href='/prj/{0}?{2}'>{1}</a></h4>".format(Prj.projid, Prj.title,
+                    "&".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""]))
+
+            return render_template('task/textexport_create.html',header=txt,data=self.param,TxtFiltres=TxtFiltres)
 
 
 

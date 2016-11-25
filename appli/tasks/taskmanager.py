@@ -1,4 +1,4 @@
-from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate
+from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate,database
 from flask.ext.login import current_user
 from flask import  render_template, g, flash,jsonify
 import json,os,sys,datetime,shutil,flask,logging
@@ -87,7 +87,11 @@ class AsyncTask:
         import _thread
         _thread.start_new_thread(os.system,(cmdfull,))
         flash("Taks %d subprocess Created "%(self.task.id,),"success")
-        return render_template('task/monitor.html',TaskID=self.task.id)
+        ProjectID = getattr(self.param, 'ProjectId', None)
+        if ProjectID:
+            Prj = database.Projects.query.filter_by(projid=ProjectID).first()
+            g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, Prj.title);
+        return render_template('task/monitor.html',TaskID=self.task.id,RedirectToMonitor=True)
 
     class Params:
         def __init__(self,InitStr=None):
@@ -200,6 +204,10 @@ def TaskShow(TaskID):
         decodedsteperrors=json.loads(task.task.inputparam).get("steperrors")
     except:
         decodedsteperrors=["Task Decoding Error"]
+    ProjectID = getattr(task.param, 'ProjectId', None)
+    if ProjectID:
+        Prj = database.Projects.query.filter_by(projid=ProjectID).first()
+        g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, Prj.title);
     return render_template('task/show.html',task=task.task,steperror=decodedsteperrors,CustomDetailsAvail=CustomDetailsAvail,extratext=txt)
 
 @app.route('/Task/GetFile/<int:TaskID>/<filename>', methods=['GET'])
@@ -307,3 +315,18 @@ def AutoClean():
     for t in TaskList:
         txt+=DoTaskClean(t['id'])
     return txt
+
+@app.route('/Task/Monitor/<int:TaskID>', methods=['GET'])
+def TaskMonitor(TaskID):
+    AddTaskSummaryForTemplate()
+    try:
+        task = LoadTask(TaskID)
+        ProjectID = getattr(task.param, 'ProjectId', None)
+        if ProjectID:
+            Prj = database.Projects.query.filter_by(projid=ProjectID).first()
+            g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, Prj.title);
+        return render_template('task/monitor.html',TaskID=task.task.id)
+    except:
+        return PrintInCharte("This task doesn't exists anymore, peraphs it was automaticaly purged")
+
+    txt = ""

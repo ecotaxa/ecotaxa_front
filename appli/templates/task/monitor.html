@@ -25,9 +25,13 @@ function StartMonitor(TaskID)
     var $progressbar = $("#progressbar");
     var $statusDiv = $("#statusDiv");
     var $StopTimer=false;
-// Set up a recurring timer to keep running this code every second
-        // We use intervalHandle later via clearInterval to turn off this timer
+  {#  Set up a recurring timer to keep running this code every second
+      We use intervalHandle later via clearInterval to turn off this timer  #}
         intervalHandle = setInterval(function () {
+          {% if RedirectToMonitor %} {# Permet passer de la page de création à la page de Monitor pour éviter les créations multiples. #}
+            window.location="/Task/Monitor/"+TaskID;
+            return;
+          {% endif %}
             // Go hit the web service to get the latest status
             $.ajax({
                 type: "GET",

@@ -11,6 +11,8 @@ def RefreshAllProjectsStat():
           from obj_head o
           group by projid )q
      where projects.projid=q.projid""")
+    ExecSQL("""delete from samples s
+              where not exists (select 1 from objects o where o.sampleid=s.sampleid )""")
 
 def RefreshTaxoStat():
     n=ExecSQL("UPDATE taxonomy SET  nbrobj=Null,nbrobjcum=null where nbrobj is NOT NULL or nbrobjcum is not null")

@@ -8,6 +8,7 @@ from flask_security.decorators import roles_accepted
 from appli.search.leftfilters import getcommonfilters
 import os,time,math,collections,appli,psycopg2.extras,urllib
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
+import appli.project.sharedfilter as sharedfilter
 
 ######################################################################################################################
 @app.route('/prj/')
@@ -135,7 +136,7 @@ def GetFieldList(Prj,champ='classiffieldlist'):
     for k,v in sorted(fieldlist2.items(), key=lambda t: t[1]):
         fieldlist[k]=v
     return fieldlist
-# Contient la liste des flitre & parametres de cet écrans avec les valeurs par degaut
+# Contient la liste des filtre & parametres de cet écrans avec les valeurs par degaut
 FilterList={"MapN":"","MapW":"","MapE":"","MapS":"","depthmin":"","depthmax":"","samples":"","fromdate":"","todate":""
                ,"inverttime":"","fromtime":"","totime":"","sortby":"","sortorder":"","dispfield":"","statusfilter":""
             ,'ipp':100,'zoom':100,'magenabled':1,'popupenabled':1,'instrum':'','month':'','daytime':''
@@ -148,7 +149,7 @@ def indexPrj(PrjId):
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
         data[k]=gvg(k,str(current_user.GetPref(k,v)))
-    print('%s',data)
+    # print('%s',data)
     if data["samples"]:
         data["sample_for_select"]=""
         for r in GetAll("select sampleid,orig_id from samples where projid=%d and sampleid in(%s)"%(PrjId,data["samples"])):
@@ -178,6 +179,7 @@ def indexPrj(PrjId):
                 ,Prj.title,Prj.projid,MainContact[0]['email'],MainContact[0]['name'])
         return PrintInCharte(msg+"<a href=/prj/>Select another project</a>")
     g.Projid=Prj.projid
+    # Ces 2 listes sont ajax mais si on passe le filtre dans l'URL il faut ajouter l'entrée en statique pour l'affichage
     data["filt_freenum_for_select"] = ""
     if data['freenum']!="":
         for r in PrjGetFieldList(Prj,'n',''):
@@ -224,7 +226,8 @@ def indexPrj(PrjId):
     if g.PrjAnnotate:
         g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
-        g.headmenu.append(("/Task/Create/TaskExportTxt?p=%d"%(PrjId,),"Export data as text"))
+        g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d"%(PrjId,),"Export data"))
+        g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')" , "Export data with active filter"))
     if g.PrjManager:
         g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
@@ -232,7 +235,9 @@ def indexPrj(PrjId):
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))
         g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit/erase annotations massively"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects / Delete project"))
+        g.headmenu.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Erase Objects with active filter"))
         g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract Subset"))
+        g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')"%(PrjId,), "Extract Subset with active filter"))
         g.headmenu.append(("/Task/Create/TaskImportUpdate?p=%d" % (PrjId,), "Re-import attribute"))
 
     appli.AddTaskSummaryForTemplate()
@@ -246,6 +251,10 @@ def indexPrj(PrjId):
 def LoadRightPane():
     # récupération des parametres d'affichage
     pageoffset=int(gvp("pageoffset","0"))
+    filtres={}
+    for k in sharedfilter.FilterList:
+        filtres[k]=gvp(k,"")
+
     PrjId=gvp("projid")
     Filt={}
     PrefToSave=0
@@ -285,93 +294,8 @@ left JOIN taxonomy t on o.classif_id=t.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
 """
-    if gvp("taxo")!="":
-        whereclause+=" and o.classif_id=%(taxo)s "
-        sqlparam['taxo']=gvp("taxo")
-    if gvp("statusfilter")!="":
-        whereclause+=" and classif_qual"
-        if gvp("statusfilter")=="NV":
-            whereclause+="!='V'"
-        elif gvp("statusfilter")=="NVM":
-            whereclause+="='V' and classif_who!="+str(current_user.id)
-        elif gvp("statusfilter")=="VM":
-            whereclause+="='V' and classif_who="+str(current_user.id)
-        elif gvp("statusfilter")=="U":
-            whereclause+=" is null "
-        else:
-            whereclause+="='"+gvp("statusfilter")+"'"
-
-    if gvp("MapN")!="" and gvp("MapW")!="" and gvp("MapE")!="" and gvp("MapS")!="":
-        whereclause+=" and o.latitude between %(MapS)s and %(MapN)s and o.longitude between %(MapW)s and %(MapE)s  "
-        sqlparam['MapN']=gvp("MapN")
-        sqlparam['MapW']=gvp("MapW")
-        sqlparam['MapE']=gvp("MapE")
-        sqlparam['MapS']=gvp("MapS")
-
-    if gvp("depthmin")!="" and gvp("depthmax")!="" :
-        whereclause+=" and o.depth_min between %(depthmin)s and %(depthmax)s and o.depth_max between %(depthmin)s and %(depthmax)s  "
-        sqlparam['depthmin']=gvp("depthmin")
-        sqlparam['depthmax']=gvp("depthmax")
-
-    if gvp("samples")!="":
-        whereclause+=" and o.sampleid= any (%(samples)s) "
-        sqlparam['samples']=[int(x) for x in gvp("samples").split(',')]
-
-    if gvp("instrum")!="":
-        whereclause += " and o.acquisid in (select acquisid  from acquisitions  where instrument ilike %(instrum)s and projid=%(projid)s )"
-        sqlparam['instrum']='%'+gvp("instrum")+'%'
-
-    if gvp("daytime")!="":
-        whereclause+=" and o.sunpos= any (%(daytime)s) "
-        sqlparam['daytime']=[x for x in gvp("daytime").split(',')]
-
-    if gvp("month")!="":
-        whereclause+=" and extract(month from o.objdate) = any (%(month)s) "
-        sqlparam['month']=[int(x) for x in gvp("month").split(',')]
-
-    if gvp("fromdate")!="":
-        whereclause+=" and objdate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
-        sqlparam['fromdate']=gvp("fromdate")
-    if gvp("todate")!="":
-        whereclause+=" and objdate<= to_date(%(todate)s,'YYYY-MM-DD') "
-        sqlparam['todate']=gvp("todate")
-
-    if gvp("inverttime")=="1":
-        if gvp("fromtime")!="" and gvp("totime")!="":
-            whereclause+=" and (objtime<= time %(fromtime)s or objtime>= time %(totime)s)"
-            sqlparam['fromtime']=gvp("fromtime")
-            sqlparam['totime']=gvp("totime")
-    else:
-        if gvp("fromtime")!="":
-            whereclause+=" and objtime>= time %(fromtime)s "
-            sqlparam['fromtime']=gvp("fromtime")
-        if gvp("totime")!="":
-            whereclause+=" and objtime<= time %(totime)s "
-            sqlparam['totime']=gvp("totime")
-
-    if gvp("freenum")!="" and  gvp("freenumst")!="" :
-        whereclause+=" and o.n"+("%02d"%int(gvp("freenum")[2:]))+" >=%(freenumst)s  "
-        sqlparam['freenumst']=gvp("freenumst")
-    if gvp("freenum")!="" and  gvp("freenumend")!="" :
-        whereclause+=" and o.n"+("%02d"%int(gvp("freenum")[2:]))+" <=%(freenumend)s  "
-        sqlparam['freenumend']=gvp("freenumend")
-    if gvp("freetxt")!="" and  gvp("freetxtval")!="" :
-        sqlparam['freetxtval']='%'+gvp("freetxtval")+'%'
-        if gvp("freetxt")[0]=='o':
-            whereclause += " and .t"+("%02d"%int(gvp("freetxt")[2:]))+" ilike %(freetxtval)s  "
-        elif gvp("freetxt")[0]=='a':
-            whereclause+=" and o.acquisid in (select acquisid  from acquisitions s where t" + ("%02d" % int(gvp("freetxt")[2:])) + "  ilike %(freetxtval)s  and projid=%(projid)s )"
-        elif gvp("freetxt")[0]=='s':
-            whereclause+=" and o.sampleid in (select sampleid  from samples s where t" + ("%02d" % int(gvp("freetxt")[2:])) + "  ilike %(freetxtval)s  and projid=%(projid)s )"
-        elif gvp("freetxt")[0]=='p':
-            whereclause+=" and o.processid in (select processid  from process s where t" + ("%02d" % int(gvp("freetxt")[2:])) + "  ilike %(freetxtval)s  and projid=%(projid)s )"
-    if gvp('filt_annot')!='':
-        whereclause+=" and (o.classif_who = any (%(filt_annot)s)  or exists (select classif_who from objectsclassifhisto oh where oh.objid=o.objid and classif_who = any (%(filt_annot)s) ) )"
-        sqlparam['filt_annot'] = [int(x) for x in gvp("filt_annot").split(',')]
-
-
+    whereclause += sharedfilter.GetSQLFilter(filtres,sqlparam,str(current_user.id))
     sql+=whereclause
-    #filt_fromdate,#filt_todate
 
     sqlcount="""select count(*)
         ,count(case when classif_qual='V' then 1 end) NbValidated
@@ -684,20 +608,32 @@ def prjPurge(PrjId):
     if not Prj.CheckRight(2): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot Purge this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
-    txt=""
+    txt=ObjListTxt=""
     g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+    txt += "<h3>ERASE OBJECTS TOOL </h3>";
     if gvp("objlist")=="":
+        sql="select objid FROM objects o where projid="+str(Prj.projid)
+        sqlparam={}
+        filtres = {}
+        for k in sharedfilter.FilterList:
+            if gvg(k):
+                filtres[k] = gvg(k, "")
+        if len(filtres):
+            sql+= sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
+            ObjList=GetAll(sql,sqlparam)
+            ObjListTxt="\n".join((str(r['objid']) for r in ObjList))
+            txt+="<span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters</span>"
+        else:
+            txt += """Enter the list of internal object id you want to delete. <br>Or type in ‘’DELETEALL’’ to remove all object from this project.<br>
+        You can retrieve object id from a TSV export file using export data from project action menu<br>""";
         txt+="""
-        <h3>ERASE OBJECTS TOOL </h3>
         <form action=? method=post>
-        Enter the list of internal object id you want to delete. <br>Or type in ‘’DELETEALL’’ to remove all object from this project.<br>
-        You can retrieve object id from a TSV export file using export data from project action menu<br>
-        <textarea name=objlist cols=15 rows=20 autocomplete=off></textarea><br>
+        <textarea name=objlist cols=15 rows=20 autocomplete=off>{1}</textarea><br>
         <input type=checkbox name=destroyproject value=Y> DELETE project after DELETEALL action.<br>
         <input type="submit" class="btn btn-danger" value='ERASE THESES OBJECTS !!! IRREVERSIBLE !!!!!'>
         <a href ="/prj/{0}" class="btn btn-success">Cancel, Back to project home</a>
         </form>
-        """.format(PrjId)
+        """.format(PrjId,ObjListTxt)
     else:
         if gvp("objlist")=="DELETEALL":
             sqlsi="select file_name,thumb_file_name from images i,objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
@@ -754,7 +690,7 @@ def PrjGetFieldList(Prj,typefield,term):
     MapPrefix = {'o': '', 's': 'sample ', 'a': 'acquis. ', 'p': 'process. '}
     for mapk, mapv in MapList.items():
         for k, v in sorted(DecodeEqualList(getattr(Prj, mapv, "")).items(), key=lambda t: t[1]):
-            if k[0] == typefield and v != "" and term in v:
+            if k[0] == typefield and v != "" and (term=='' or term in v):
                 fieldlist.append({'id': mapk + k, 'text': MapPrefix[mapk] + v})
     return fieldlist
 
