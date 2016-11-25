@@ -12,6 +12,10 @@
 Additionnal Selected projects : {{ g.dispextraprojects|safe }}
 <input type="hidden" name="extraprojects" value="{{ data.extraprojects }}">
 <table><tr><td>
+  {%   if filtertxt!='' %}
+    <span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters</span><br>
+    <b>Filters = {{filtertxt  }} </b><br><br>
+    {% else %}
   <table class="table table-bordered table-condensed " style="width: 400px">
     <tr>
         <td rowspan="2" style="vertical-align:middle;">OBJECT Selection parameter<br>(random per category) </td>
@@ -25,6 +29,7 @@ Additionnal Selected projects : {{ g.dispextraprojects|safe }}
       <td><input type="text" size=5 name="vvaleur" value="{{ prevpost.vvaleur }}">  objects </td>
     </tr>
 </table>
+  {% endif %}
 <b>Select object with status</b><br>
 &nbsp;{{ checkboxinputinlist("what_v","V",data.what) }} Validated<br>
 &nbsp;{{ checkboxinputinlist("what_d","D",data.what) }} Dubious<br>
@@ -75,7 +80,7 @@ Additionnal Selected projects : {{ g.dispextraprojects|safe }}
 <br>
 <table>
 <tr>
-{% if not data.extraprojects  %}
+{% if (not data.extraprojects) and (filtertxt=='')  %}
 
     <td valign="top">
 MANAGE SAMPLES TO BE INCLUDED IN THE SUBSET :<br>

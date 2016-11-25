@@ -35,7 +35,7 @@ PredefinedFields={
     'img_file_name':{'table':'image','field':'orig_file_name','type':'t'},
     'annotation_person_first_name':{'table':'obj_head','field':'tmp_todelete1','type':'t'},
     'sample_dataportal_descriptor':{'table':'sample','field':'dataportal_descriptor','type':'t'},
-    'acquis_instrument': {'table': 'acq', 'field': 'instrument', 'type': 't'},
+    'acq_instrument': {'table': 'acq', 'field': 'instrument', 'type': 't'},
 }
 # Purge les espace et converti le Nan en vide
 def CleanValue(v):
@@ -135,8 +135,8 @@ class TaskImportUpdate(AsyncTask):
                         # Fabrication du mapping
                         for champ in rdr.fieldnames:
                             ColName = champ.strip(" \t").lower()
-                            if ColName in self.param.Mapping:
-                                continue # Le champ à déjà été détecté
+                            if ColName in self.param.Mapping or ColName in ('object_annotation_parent_category','object_annotation_hierarchy'):
+                                continue # Le champ à déjà été détecté OU un des champs Bani de L'importation car fruit de l'export.
                             ColSplitted=ColName.split("_",1)
                             if len(ColSplitted)!=2:
                                 self.LogErrorForUser("Invalid Header '%s' in file %s. Format must be Table_Field. Field ignored"%(ColName,relname.as_posix()))
@@ -285,6 +285,7 @@ class TaskImportUpdate(AsyncTask):
             self.ExistingObject[rec[0]]=rec[1]
         #logging.info("Ids = %s",Ids)
         random.seed()
+        RealTableName = {"acq": 'acquisitions', "sample": 'samples', "process": 'process', "obj_head": "obj_head", "obj_field": "obj_field"}
         sd=Path(self.param.SourceDir)
         TotalRowCount=0
         for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv"):
@@ -299,8 +300,9 @@ class TaskImportUpdate(AsyncTask):
                     # Chargement du contenu du fichier
                     RowCount=0
                     for lig in rdr:
-                        Objs={"acq":database.Acquisitions(),"sample":database.Samples(),"process":database.Process()
+                        Objs={"acq":self.EmptyObject(),"sample":self.EmptyObject(),"process":self.EmptyObject()
                             ,"obj_head":self.EmptyObject(),"obj_field":self.EmptyObject()}
+                        ObjsNew={"acq":database.Acquisitions(),"sample":database.Samples(),"process":database.Process()}
                         RowCount+=1
                         TotalRowCount+=1
                         for champ in rdr.fieldnames:
@@ -332,11 +334,11 @@ class TaskImportUpdate(AsyncTask):
                                     FieldValue=database.ClassifQualRevert.get(v.lower())
                                 else: # c'est un champ texte sans rien de special
                                     FieldValue=v
-                                if FieldTable in ('image', 'sample'):
+                                # if FieldTable in ('image', 'sample'):
+                                if FieldTable in ('image',):
                                     pass  # les champs images sont ignorés lors d'un update
                                 elif FieldTable in Objs:
-                                    # if  hasattr(Objs[FieldTable],FieldName):
-                                    if FieldName in db.metadata.tables[FieldTable].columns:
+                                    if FieldName in db.metadata.tables[RealTableName[FieldTable]].columns:
                                         setattr(Objs[FieldTable],FieldName,FieldValue)
                                         # logging.info("setattr %s %s %s",FieldTable,FieldName,FieldValue)
                                     # else:
@@ -345,10 +347,27 @@ class TaskImportUpdate(AsyncTask):
                                     logging.info("skip T %s %s %s",FieldTable,FieldName,FieldValue)
                         # Affectation des ID Sample, Acq & Process et creation de ces dernier si necessaire
                         for t in Ids:
-                            if Objs[t].orig_id is not None:
-                                if Objs[t].orig_id in Ids[t]["ID"]:
+                            if  hasattr(Objs[t],'orig_id') and Objs[t].orig_id is not None: # si des colonnes sont definis sur les tables auxilaires
+                                if Objs[t].orig_id in Ids[t]["ID"]: # si on référence un auxiliaire existant
+                                    if t=='sample': # on ramene l'enregistrement
+                                        ObjAux = database.Samples.query.filter_by(orig_id=Objs[t].orig_id).first()
+                                    elif t=='acq':
+                                        ObjAux = database.Acquisitions.query.filter_by(orig_id=Objs[t].orig_id).first()
+                                    elif t=='process':
+                                        ObjAux = database.Process.query.filter_by(orig_id=Objs[t].orig_id).first()
+                                    else: ObjAux=None
+                                    if ObjAux is not None: # si on a bien trouvé l'enregistrement
+                                        for attr, value in Objs[t].__dict__.items(): # Pour les champs présents dans l'objet temporaire (dans le TSV donc)
+                                            if hasattr(ObjAux, attr) and getattr(ObjAux, attr)!=value : # si la valeur change
+                                                setattr(ObjAux, attr, value) # On met à jour l'enregistrement (qui sera commité avec l'objet plus bas)
+
                                     setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
                                 else:
+                                    # on copie les données de l'objet dans le nouvel enregistrement
+                                    for attr, value in Objs[t].__dict__.items():
+                                        if hasattr(ObjsNew[t], attr):
+                                            setattr(ObjsNew[t], attr, value);
+                                    Objs[t]=ObjsNew[t]
                                     Objs[t].projid=self.param.ProjectId
                                     db.session.add(Objs[t])
                                     db.session.commit()
@@ -357,12 +376,12 @@ class TaskImportUpdate(AsyncTask):
                                     logging.info("IDS %s %s",t,Ids[t])
                         # Recherche de l'objet si c'est une images complementaire
                         if Objs["obj_field"].orig_id in self.ExistingObject:
-                            # Objs["obj_head"].objid=self.ExistingObject[Objs["obj_field"].orig_id]
-                            # Todo Traiter header
+                            # Traitement des champs
                             ObjField=database.ObjectsFields.query.filter_by(objfid=self.ExistingObject[Objs["obj_field"].orig_id]).first()
                             for attr, value in Objs["obj_field"].__dict__.items():
                                 if hasattr(ObjField,attr):
                                     setattr(ObjField,attr,value);
+                            #traitement du header
                             ObjHead=database.Objects.query.filter_by(objid=self.ExistingObject[Objs["obj_field"].orig_id]).first()
                             for attr, value in Objs["obj_head"].__dict__.items():
                                 if hasattr(ObjHead,attr):

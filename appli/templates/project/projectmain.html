@@ -163,7 +163,7 @@
               <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;overflow-x: hidden;">
                   <div id="TabBInner" style="width: 240px;">
                     <a href=# onclick='ClearAllFilterCriteria();return false;' class="btn btn-info " style="width: 49%"><span class="glyphicon glyphicon-remove"></span> Clear filters</a>
-                     <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane(true);"><span class="glyphicon glyphicon-link"></span> Share page</button>
+                     <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane('mail');"><span class="glyphicon glyphicon-link"></span> Share page</button>
                   <br>
                   {{ leftb|safe }}
 {# ------- Annotator / Freefilter ------------#}
@@ -343,7 +343,7 @@ function LoadRightPane(NoAjax,SaveInProfile){
         PrevTxtFilter=TxtFilter;
     }
     req['pageoffset']=jqpageoffset.val();
-    if(NoAjax==true) {
+    if(NoAjax=='mail') {
         delete req["resultwidth"];
         delete req["windowheight"];
         var urlparam={};
@@ -354,6 +354,21 @@ function LoadRightPane(NoAjax,SaveInProfile){
         var url=window.location.protocol+"//"+window.location.host+window.location.pathname+"?"+$.param(urlparam);
         window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
         return;
+    }
+    if(typeof (NoAjax)=='string') { {# Une URL #}
+      delete req["resultwidth"];
+      delete req["windowheight"];
+      var urlparam={};
+      for	(var k in req)
+          if(req[k]!=="")
+              urlparam[k]=req[k];
+      var url=NoAjax;
+      if(url.indexOf('?')>0) url+="&";
+      else url+="?";
+      url+=$.param(urlparam);
+{#      alert(url);#}
+      window.location=url;
+      return;
     }
     if(SaveInProfile==true)
         req["saveinprofile"]='Y';
@@ -435,7 +450,7 @@ $(document).ready(function() {
     }); // Select2 Ajax
     $("#filt_freenum").select2({
         ajax: {
-            url: "/prj/GetFieldList/1/n",
+            url: "/prj/GetFieldList/{{ g.Projid }}/n",
             dataType: 'json',
             delay: 250,
             data: function (params) {  return { q: params.term, page: params.page };  },
@@ -444,7 +459,7 @@ $(document).ready(function() {
         },placeholder: "Num. field",dropdownCssClass:"width240"});
     $("#filt_freetxt").select2({
         ajax: {
-            url: "/prj/GetFieldList/1/t",
+            url: "/prj/GetFieldList/{{ g.Projid }}/t",
             dataType: 'json',
             delay: 250,
             data: function (params) {  return { q: params.term, page: params.page };  },
@@ -567,6 +582,11 @@ jQuery(window).bind('beforeunload', function(){
     if(Object.keys(PendingChanges).length>0)
       return "Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?"
 });
+
+function GotoWithFilter(Target){
+  LoadRightPane(Target);
+}
+
 
 </script>
         <div id="column-right" >

@@ -5,3 +5,6 @@ temptask/*
 MyAppli.log*
 *.pyc
 ecotaxapatch.zip
+*.zip
+__pycache__/
+*.py[cod]
