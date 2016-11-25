@@ -14,7 +14,7 @@ import appli.project.sharedfilter as sharedfilter
 @app.route('/prj/')
 @login_required
 def indexProjects():
-    txt = "<h3>Select your Project</h3>" #,pp.member
+    txt = "<h3>Select a project</h3>" #,pp.member
     sql="select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects p"
     if not current_user.has_role(database.AdministratorLabel):
         sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
@@ -50,7 +50,7 @@ def indexProjects():
         </tr>""".format(*r)
     txt+="</tbody></table>"
     txt+="""<div class="col-sm-6 col-sm-offset-3">
-			<a href="/prjothers/" class="btn  btn-block btn-primary">Show Others projects</a>
+			<a href="/prjothers/" class="btn  btn-block btn-primary">Show projectspriv in which you are not registered</a>
         </div>"""
     return PrintInCharte(txt)
 ######################################################################################################################
@@ -222,23 +222,23 @@ def indexPrj(PrjId):
     classiftab=GetClassifTab(Prj)
     g.ProjectTitle=Prj.title
     g.headmenu = []
-    g.headmenu.append(("/prjcm/%d"%(PrjId,),"Show Confusion Matrix"))
+    g.headmenu.append(("/prjcm/%d"%(PrjId,),"Show confusion matrix"))
     if g.PrjAnnotate:
         g.headmenu.append(("","SEP"))
-        g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Automatic classification"))
-        g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d"%(PrjId,),"Export data"))
-        g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')" , "Export data with active filter"))
+        g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Predict identifications"))
+        g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')" , "Export data with active filters"))
+        g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d"%(PrjId,),"Export all data"))
     if g.PrjManager:
         g.headmenu.append(("","SEP"))
-        g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import data"))
-        g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit Project settings"))
+        g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import images and metadata"))
+        g.headmenu.append(("/Task/Create/TaskImportUpdate?p=%d" % (PrjId,), "Re-import and update metadata"))
+        g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit project settings"))
+        g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract subset"))
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))
-        g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit/erase annotations massively"))
-        g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Erase Objects / Delete project"))
-        g.headmenu.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Erase Objects with active filter"))
-        g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract Subset"))
+        g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit or erase annotations massively"))
+        g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Delete objects and project"))
+        g.headmenu.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Erase objects with active filter"))
         g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')"%(PrjId,), "Extract Subset with active filter"))
-        g.headmenu.append(("/Task/Create/TaskImportUpdate?p=%d" % (PrjId,), "Re-import attribute"))
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)

@@ -5,14 +5,19 @@
 #TabB .select2-selection__rendered {font-size: 12px; }
 </style>
 
+{# ------- Instrument ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
+		<label class="title">Instrument</label>
+    <input class="form-control" type="text" id="filt_instrum" name="filt_instrum" value="{{ data.instrum }}" placeholder="Instrument">
+	</div>
+</div>
 {# ------- Sample ------------#}
 <div class="filter ">
 	<div class="form-group-sm">
-		<label class="title">Sample &amp; Instrument</label>
-		<span title="Available only when a project is selected" data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
+		<label class="title" title="Available only when a project is selected">Sample</label>
 		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearSamples();return false;'>Clear</a>
 		<select class="form-control" id="sampleid" name="sampleid" style="width: 100%" multiple autocomplete="off"> {{ data.sample_for_select|safe }}</select>
-    <input class="form-control" type="text" id="filt_instrum" name="filt_instrum" value="{{ data.instrum }}" placeholder="Instrument">
 	</div>
 </div>
 {# ------- Depth ------------#}
