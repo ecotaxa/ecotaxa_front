@@ -14,45 +14,30 @@ import appli.project.sharedfilter as sharedfilter
 @app.route('/prj/')
 @login_required
 def indexProjects():
-    txt = "<h3>Select a project</h3>" #,pp.member
+    params={}
     sql="select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects p"
     if not current_user.has_role(database.AdministratorLabel):
         sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
+    sql += " where 1=1 "
+    if gvg('filt_title','')!='':
+        sql +=" and (  title ilike '%%'||%(title)s ||'%%' or to_char(projid,'999999') like '%%'||%(title)s ) "
+        params['title']=gvg('filt_title')
+    if gvg('filt_instrum','')!='':
+        sql +=" and projid in (select distinct projid from acquisitions where instrument ilike '%%'||%(filt_instrum)s ||'%%' ) "
+        params['filt_instrum']=gvg('filt_instrum')
+    if gvg('filt_subset', '') != 'Y':
+        sql += " and not title ilike '%%subset%%'  "
     sql+=" order by lower(title)" #pp.member nulls last,
-    res = GetAll(sql) #,debug=True
-    txt+="""
-    <p>To create a new project and upload images in it, please contact the application manager(s): {0}</p>
-    """.format(appli.GetAppManagerMailto())
+    res = GetAll(sql,params) #,debug=True
+    CanCreate=False
+    if current_user.has_role(database.AdministratorLabel):
+        CanCreate=True
+    if database.GetAll("select count(*) nbr from projectspriv where privilege='Manage' and member=%(id)s",{'id':current_user.id})[0]['nbr']>0:
+        CanCreate = True
 
-    txt+="""
-    <table class='table table-hover table-verycondensed projectsList'>
-        <thead><tr>
-                <th></th>
-                <th>Title [ID]</th>
-                <th>Status</th>
-                <th>Nb objects</th>
-                <th>%&nbsp;validated</th>
-                <th>%&nbsp;classified</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
-    for r in res:
-        # if r[6] is None:
-        #     txt+="<tr><td><a class='btn btn-primary' href='/prj/{0}'>Request !</a> {0}</td>".format(*r)
-        # else:
-        txt+="<tr><td><a class='btn btn-primary' href='/prj/{0}'>Select</a></td>".format(*r)
-        txt+="""<td>{1} [{0}]</td>
-        <td>{2}</td>
-        <td>{3:0.0f}</td>
-        <td>{4:0.2f}</td>
-        <td>{5:0.2f}</td>
-        </tr>""".format(*r)
-    txt+="</tbody></table>"
-    txt+="""<div class="col-sm-6 col-sm-offset-3">
-			<a href="/prjothers/" class="btn  btn-block btn-primary">Show projectspriv in which you are not registered</a>
-        </div>"""
-    return PrintInCharte(txt)
+    return PrintInCharte(
+        render_template('project/list.html',PrjList=res,CanCreate=CanCreate,AppManagerMailto=appli.GetAppManagerMailto()
+                        , filt_title=gvg('filt_title'),filt_subset=gvg('filt_subset'),filt_instrum=gvg('filt_instrum')  ))
 ######################################################################################################################
 @app.route('/prjothers/')
 @login_required
@@ -206,6 +191,7 @@ def indexPrj(PrjId):
     data["statuslist"]["P"]="Predicted"
     data["statuslist"]["NV"]="Not Validated"
     data["statuslist"]["V"]="Validated"
+    data["statuslist"]["PV"]="Predicted or Validated"
     data["statuslist"]["NVM"]="Validated by others"
     data["statuslist"]["VM"]="Validated by me"
     data["statuslist"]["D"]="Dubious"
@@ -225,7 +211,8 @@ def indexPrj(PrjId):
     g.headmenu.append(("/prjcm/%d"%(PrjId,),"Show confusion matrix"))
     if g.PrjAnnotate:
         g.headmenu.append(("","SEP"))
-        g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Predict identifications"))
+        if Prj.status=="Annotate":
+            g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Predict identifications"))
         g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')" , "Export data with active filters"))
         g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d"%(PrjId,),"Export all data"))
     if g.PrjManager:
@@ -233,12 +220,12 @@ def indexPrj(PrjId):
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import images and metadata"))
         g.headmenu.append(("/Task/Create/TaskImportUpdate?p=%d" % (PrjId,), "Re-import and update metadata"))
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit project settings"))
-        g.headmenu.append(("/Task/Create/TaskSubset?p=%d"%(PrjId,),"Extract subset"))
+        g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')" % (PrjId,),
+                           "Extract Subset with active filter"))
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))
         g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit or erase annotations massively"))
-        g.headmenu.append(("/prjPurge/%d"%(PrjId,),"Delete objects and project"))
-        g.headmenu.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Erase objects with active filter"))
-        g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')"%(PrjId,), "Extract Subset with active filter"))
+        g.headmenu.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Erase objects with active filter or project"))
+
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
@@ -622,7 +609,7 @@ def prjPurge(PrjId):
             sql+= sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
             ObjList=GetAll(sql,sqlparam)
             ObjListTxt="\n".join((str(r['objid']) for r in ObjList))
-            txt+="<span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters</span>"
+            txt+="<span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters, {0} objects</span>".format(len(ObjList))
         else:
             txt += """Enter the list of internal object id you want to delete. <br>Or type in ‘’DELETEALL’’ to remove all object from this project.<br>
         You can retrieve object id from a TSV export file using export data from project action menu<br>""";
@@ -704,3 +691,19 @@ def PrjGetFieldListAjax(PrjId,typefield):
     fieldlist=PrjGetFieldList(Prj, typefield, term)
     return json.dumps(fieldlist)
 
+@app.route('/prj/simplecreate/', methods=['GET', 'POST'])
+@login_required
+def SimpleCreate():
+    Prj=database.Projects()
+    Prj.title=gvp("projtitle")
+    Prj.status="Annotate"
+    Prj.visible="Y"
+    db.session.add(Prj)
+    db.session.commit()
+    PrjPriv = database.ProjectsPriv()
+    PrjPriv.projid=Prj.projid
+    PrjPriv.member=current_user.id
+    PrjPriv.privilege="Manage"
+    db.session.add(PrjPriv)
+    db.session.commit()
+    return "<a href='/prj/{0}' class='btn btn-primary'>Project Created ! Open IT</a>".format(Prj.projid)

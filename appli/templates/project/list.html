@@ -1,0 +1,91 @@
+<table>
+  <tr>
+    <td>
+<span style="font-size: x-large;font-weight: bold;">Select a project </span> <a href="#create-project" data-toggle="collapse" class="help" style="font-size: small">How to create a project</a><br>
+<div id="create-project" class="collapse">
+				<p>To create your first project, you must contact the application manager: {{ AppManagerMailto|safe }}.</p>
+
+				<p>Then you will be allowed to create new projects.</p>
+			</div>
+{% if  CanCreate==True %}
+  <button class="btn btn-success" onclick="CreateProject();">Create a new project</button>
+{% else %}
+  <p>To create a new project and upload images in it, please contact the application manager(s): {{ AppManagerMailto|safe }}</p>
+{% endif %}
+</td>
+  <td style="padding-left: 50px;vertical-align: top;">
+    <form method="get">
+    Filter on title : <input type="text" style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}">
+    Include subset : <input type="checkbox" value="Y" name="filt_subset" {%  if filt_subset=='Y'  %}checked{%  endif  %}>
+    Instrument : <input type="text" style="width: 100px;" name="filt_instrum" id="filt_instrum" value="{{ filt_instrum }}">
+                <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});" style="cursor: pointer;"></span>
+    <br>
+     <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    </td>
+  </tr>
+</table>
+<table class='table table-hover table-verycondensed projectsList'>
+        <thead><tr>
+                <th></th>
+                <th>Title [ID]</th>
+                <th>Status</th>
+                <th>Nb objects</th>
+                <th>%&nbsp;validated</th>
+                <th>%&nbsp;classified</th>
+            </tr>
+        </thead>
+        <tbody>
+{%   for r in PrjList %}
+<tr><td><a class='btn btn-primary' href='/prj/{{ r[0] }}'>Select</a></td>
+  <td> {{ r[1] }} [{{ r[0] }}]</td>
+  <td>{{ r[2] }}</td>
+  <td>{{ '{0:0.0f}'.format(r[3]) }}</td>
+  <td>{{ '{0:0.2f}'.format(r[4]) }}</td>
+  <td>{{ '{0:0.2f}'.format(r[5]) }}</td>
+  </tr>
+{%  endfor %}
+
+</tbody></table>
+<div class="col-sm-6 col-sm-offset-3">
+  <a href="/prjothers/" class="btn  btn-block btn-primary">Show projectspriv in which you are not registered</a>
+</div>
+<script>
+  function DispInstrumList(projid){
+  $("#PopupDetails .modal-content").html("Loading...");
+  $('#PopupDetails .modal-lg').css('width',$(window).width()/2);
+  $('#PopupDetails').modal({});
+  var url="/search/instrumlist"
+  if(typeof (projid)!="undefined")
+    url+="?projid="+projid
+  $("#PopupDetails .modal-content").load(url);
+}
+function CreateProject() {
+  $('#PopupCreateProject').modal({});
+}
+function DoCreateProject() {
+  $('#resultcreate').load('/prj/simplecreate/',{projtitle:$('#newprojecttitle').val()});
+
+{#  alert("Not Yet implemted")#}
+}
+$('#filt_title').focus();
+
+</script>
+<div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      ...
+    </div>
+  </div>
+</div>
+
+<div id="PopupCreateProject" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="width: 600px; padding: 20px;">
+      <h3>Create a new project</h3>
+      Project Title : <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control" style="width: 400px;" autocomplete="off">
+      <br><br><button class="btn btn-success" onclick="DoCreateProject();">Create the project</button>
+      <div id="resultcreate"></div>
+    </div>
+  </div>
+</div>

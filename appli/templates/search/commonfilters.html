@@ -8,15 +8,23 @@
 {# ------- Instrument ------------#}
 <div class="filter ">
 	<div class="form-group-sm">
-		<label class="title">Instrument</label>
+		<label class="title">Instrument</label> <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});" style="cursor: pointer;"></span>
+    <a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearInstrum();return false;'>Clear</a>
     <input class="form-control" type="text" id="filt_instrum" name="filt_instrum" value="{{ data.instrum }}" placeholder="Instrument">
 	</div>
 </div>
 {# ------- Sample ------------#}
 <div class="filter ">
 	<div class="form-group-sm">
-		<label class="title" title="Available only when a project is selected">Sample</label>
+		<label class="title">Sample</label>
+    {% if data.inexplore==True %}
+		<span title="Available only when a project is selected" data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
+    {% endif %}
+
+
 		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearSamples();return false;'>Clear</a>
+		<a class="pull-right label label-info" style="padding: 1px 3px 3px 3px; margin-top: 5px;margin-right:5px;font-size: 90%;" href=# onclick='CopySamples();return false;'>Copy/Paste</a>
+
 		<select class="form-control" id="sampleid" name="sampleid" style="width: 100%" multiple autocomplete="off"> {{ data.sample_for_select|safe }}</select>
 	</div>
 </div>
@@ -112,10 +120,31 @@ function ClearTimes(){
   $("#filt_inverttime").prop("checked",false);
   $("#daytime").val(null).trigger("change");
 }
+function ClearInstrum(){
+  $("#filt_instrum" ).val("");
+}
 function ClearSamples(){
   $( "#sampleid" ).val(null).trigger("change");
-  $("#filt_instrum" ).val("");
-
+}
+function CopySamples(){
+  var lst="";
+  var sampleid=$('#sampleid');
+  lst=$.map(sampleid.find('option:selected'), function (element) { return $(element).text() }).join(', ');
+  var res=window.prompt("List of samples",lst);
+  if (res!=lst){  {# Si la réponse est différente c'est que l'utilisateur à collé une valeur #}
+    var cvl=res.split(","); {# découpe suivant les , #}
+    cvl.forEach(function (s,i){cvl[i]=s.replace(' ','');}); {# et supprimer les espace supplementaires autour des , #}
+    sampleid.html(""); {# Efface les valeurs existantes #}
+      $.getJSON("/search/samples",{q:'',projid:$('#projid').val()}, {# Récupère la liste des echantillons en format JSON #}
+        function(resajax) { {# avec le resultat, rempli les items qui sont dans la chaine collée #}
+          for (var i = 0; i < resajax.length; i++) {
+            if(cvl.indexOf(resajax[i].text)>=0) { {# Ajoute une option sélectionnée #}
+              sampleid.append("<option value='" + resajax[i].id + "' selected>" + resajax[i].text + "</option>");
+            }
+          }
+          sampleid.trigger("change"); {# Met à jour la liste #}
+      });
+  }
 }
 function UpdateTimeSliderColor(){
   if($("#filt_inverttime").prop("checked")) {
@@ -126,6 +155,16 @@ function UpdateTimeSliderColor(){
      $("#time-slider-range").css('background-color','#fff')
   }
 }
+function DispInstrumList(projid){
+  $("#PopupDetails .modal-content").html("Loading...");
+  $('#PopupDetails .modal-lg').css('width',$(window).width()/2);
+  $('#PopupDetails').modal({});
+  var url="/search/instrumlist"
+  if(typeof (projid)!="undefined")
+    url+="?projid="+projid
+  $("#PopupDetails .modal-content").load(url);
+}
+
 $(document).ready(function() {
   $("#sampleid").select2({
     ajax: {

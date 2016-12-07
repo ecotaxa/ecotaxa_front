@@ -134,7 +134,7 @@
       <div class="bodyleft" style="margin-left: 2px; width: 257px;">
         <script>
         $(document).ready(function () {
-          $('#myTabs a').click(function (e) {
+          $('#myTabs .nav-tabs a').click(function (e) {
             e.preventDefault()
             $(this).tab('show')
           });
@@ -569,6 +569,7 @@ function ClearAllFilterCriteria(){
     ClearDates();
     ClearTimes();
     ClearSamples();
+    ClearInstrum();
     ClearDepths();
     ClearAnnotFree();
     LoadRightPane();

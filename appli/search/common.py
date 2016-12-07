@@ -64,3 +64,25 @@ def ServerFolderSelectJSON():
             None # le parcours des fichier peu planter sur system volume information par exemple.
     res.sort(key=lambda val: str.upper(val['id']),reverse=False)
     return json.dumps(res)
+
+@app.route("/search/instrumlist")
+def searchinstrumlist():
+    sql="select DISTINCT lower(instrument) from acquisitions where instrument is not null and instrument!='' "
+    if gvg("projid")!="":
+        sql += " and projid="+str(int(gvg("projid")))
+    res = database.GetAll(sql+" order by 1")
+    txt="List of available Intruments : <hr><ul id=InstrumList>"
+    for r in res:
+        txt +="\n<li>{0}</li>".format(r[0])
+    txt += """</ul>
+    <hr>
+    &nbsp;<button type="button" class="btn btn-default btn-"  onclick="$('#PopupDetails').modal('hide');">Close</button>
+    <br><br>
+    <script>
+    $('#InstrumList li').click(function(){
+        $('#filt_instrum').val($(this).text());
+        $('#PopupDetails').modal('hide');
+    }).css('cursor','pointer');
+    </script>
+    """
+    return txt

@@ -127,9 +127,6 @@ class TaskSubset(AsyncTask):
             if self.param.what.find('N')>=0:
                 sqlwhere+=" or o.classif_qual is null "
             sqlwhere+=")"
-            if len(self.param.filtres)>0:
-                rankfunction = 'rank'
-                sqlparam['ranklimit']=100000000
             sqlwhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam, self.task.owner_id)
             logging.info("SQLParam=%s",sqlparam)
             sql="""select objid from (
@@ -203,7 +200,8 @@ class TaskSubset(AsyncTask):
         # self.UpdateProgress(10,"Test Error")
 
     def QuestionProcess(self):
-        Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
+        self.param.ProjectId = gvg("p")
+        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         if not Prj.CheckRight(1):
             return PrintInCharte("ACCESS DENIED for this project<br>"+Prj.title)
         txt=""
@@ -259,7 +257,6 @@ A SUBSET can have different usages:<br>
             # Le projet de base est choisi second écran ou validation du second ecran
             if gvp('starttask')=="Y":
                 # validation du second ecran
-                self.param.ProjectId=gvg("p")
                 self.param.extraprojects=gvp("extraprojects")
                 self.param.samplelist=gvp("samplelist")
                 self.param.withimg=gvp("withimg")
@@ -287,8 +284,7 @@ A SUBSET can have different usages:<br>
                 # Verifier la coherence des données
                 # errors.append("TEST ERROR")
                 if self.param.what=='' : errors.append("You must select at least one Flag")
-                if len(self.param.filtres)==0:
-                    if self.param.valtype=='' : errors.append("You must select % or values")
+                if self.param.valtype=='' : errors.append("You must select the object selection parameter '% of values' or '# of objects'")
                 if len(errors)>0:
                     for e in errors:
                         flash(e,"error")

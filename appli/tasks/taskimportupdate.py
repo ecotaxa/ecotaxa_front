@@ -111,6 +111,11 @@ class TaskImportUpdate(AsyncTask):
             self.param.TaxoFound={} # Reset à chaque Tentative
             self.param.UserFound={} # Reset à chaque Tentative
             self.param.steperrors=[] # Reset des erreurs
+            # La version 1.1 normalise le champ 'acq_instrument' donc s'il etait mappé sur un txx on le renome pour que la MAJ aille dans le champ instrument
+            if 'acq_instrument' in self.param.Mapping:
+                self.param.Mapping['acq_instrument_old']=self.param.Mapping['acq_instrument']
+                self.param.Mapping['acq_instrument_old']['title']='instrument_old'
+                del self.param.Mapping['acq_instrument']
             # recuperation de toutes les paire objet/Images du projet
             logging.info("SubTask1 : Analyze TSV Files")
             self.UpdateProgress(2,"Analyze TSV Files")
@@ -250,7 +255,7 @@ class TaskImportUpdate(AsyncTask):
             else:
                 self.task.taskstate="Question"
             if len(WarnMessages)>0:
-                self.UpdateProgress(20,"Taxo automatic resolution Done, Some Warning :\n-%s"%("\n-".join(WarnMessages)))
+                self.UpdateProgress(20,"Taxo automatic resolution Done, <span style='color:red;font-weight:bold;'>Some Warning :\n-%s </span>"%("\n-".join(WarnMessages)))
             else:
                 self.UpdateProgress(20,"Taxo automatic resolution Done"%())
             #sinon on pose une question

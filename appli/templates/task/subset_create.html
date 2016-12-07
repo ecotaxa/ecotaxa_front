@@ -9,13 +9,13 @@
 
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
-Additionnal Selected projects : {{ g.dispextraprojects|safe }}
+Additionnal Selected projects (<a href="/Task/Create/TaskSubset?p={{ data.ProjectId }}">select</a>) : {{ g.dispextraprojects|safe }}
 <input type="hidden" name="extraprojects" value="{{ data.extraprojects }}">
 <table><tr><td>
   {%   if filtertxt!='' %}
     <span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters</span><br>
     <b>Filters = {{filtertxt  }} </b><br><br>
-    {% else %}
+    {% endif %}
   <table class="table table-bordered table-condensed " style="width: 400px">
     <tr>
         <td rowspan="2" style="vertical-align:middle;">OBJECT Selection parameter<br>(random per category) </td>
@@ -29,7 +29,7 @@ Additionnal Selected projects : {{ g.dispextraprojects|safe }}
       <td><input type="text" size=5 name="vvaleur" value="{{ prevpost.vvaleur }}">  objects </td>
     </tr>
 </table>
-  {% endif %}
+
 <b>Select object with status</b><br>
 &nbsp;{{ checkboxinputinlist("what_v","V",data.what) }} Validated<br>
 &nbsp;{{ checkboxinputinlist("what_d","D",data.what) }} Dubious<br>
@@ -51,31 +51,26 @@ Additionnal Selected projects : {{ g.dispextraprojects|safe }}
 
 
 <script>
-
-    function ComputeSampleList() {
-        var cv="";
-        $('#TblVar input').each(function (){
-           if($(this).prop("checked")){
-               if(cv!="")
-                   cv+=",";
-               cv+=$(this).data("var");
-           }
-        });
-        $('#SampleList').val(cv);
-    }
-    function CheckBasedOnText() {
-        if($('#SampleList').length==0) return;
-        var cv=$('#SampleList').val();
-        var cvl=cv.split(",");
-        //console.log(cvl);
-        $('#TblVar input').each(function (){
-           if($(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)){
-               if(cv!="")
-                   cv+=",";
-               cv+=$(this).data("var");
-           }
-        });
-    }
+  function ComputeSampleList() {
+      var cv="";
+      $('#TblVar input').each(function (){
+         if($(this).prop("checked")){
+             if(cv!="")
+                 cv+=",";
+             cv+=$(this).data("var");
+         }
+      });
+      $('#SampleList').val(cv);
+  }
+  function CheckBasedOnText() {
+    if($('#SampleList').length==0) return;
+    var cv=$('#SampleList').val();
+    var cvl=cv.split(",");
+    //console.log(cvl);
+    $('#TblVar input').each(function (){
+       $(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)
+    });
+  }
 </script>
 <br>
 <table>
