@@ -28,7 +28,7 @@ function StartMonitor(TaskID)
   {#  Set up a recurring timer to keep running this code every second
       We use intervalHandle later via clearInterval to turn off this timer  #}
         intervalHandle = setInterval(function () {
-          {% if RedirectToMonitor %} {# Permet passer de la page de création à la page de Monitor pour éviter les créations multiples. #}
+          {% if RedirectToMonitor %} {# Permet passer de la page de création à la page de Monitor pour éviter les créations multiples en cas de refresh pas l'utilisateur. #}
             window.location="/Task/Monitor/"+TaskID;
             return;
           {% endif %}

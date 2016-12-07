@@ -29,7 +29,7 @@
     </td></tr>
 
 <tr><td>Status</td><td width="300px">
-        {{ selectinput('status', ("Annotate", "ExploreOnly"), value=data.status)  }}
+        {{ selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
   </td></tr>
 <tr><td>Project Description</td><td>
         <input type="text"  class="form-control" id="projtype" name="projtype"  value="{{ data.projtype|default('',true) }}">

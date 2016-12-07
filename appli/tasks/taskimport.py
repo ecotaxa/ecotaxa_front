@@ -240,8 +240,10 @@ class TaskImport(AsyncTask):
             # print(self.param.Mapping)
             logging.info("Taxo Found = %s",self.param.TaxoFound)
             logging.info("Users Found = %s",self.param.UserFound)
-            logging.info("For Information Not Seen Fields %s",
-                         [k for k in self.param.Mapping if k not in Seen])
+            NotSeenField=[k for k in self.param.Mapping if k not in Seen]
+            logging.info("For Information Not Seen Fields %s",NotSeenField)
+            if len(NotSeenField)>0:
+                WarnMessages.append("Some fields configured in the project are not seen in this import {0} ".format(", ".join(NotSeenField)))
             if len(self.param.steperrors)>0:
                 self.task.taskstate="Error"
                 self.task.progressmsg="Some errors founds during file parsing "
@@ -273,7 +275,7 @@ class TaskImport(AsyncTask):
             else:
                 self.task.taskstate="Question"
             if len(WarnMessages)>0:
-                self.UpdateProgress(20,"Taxo automatic resolution Done, Some Warning :\n-%s"%("\n-".join(WarnMessages)))
+                self.UpdateProgress(20,"Taxo automatic resolution Done, <span style='color:red;font-weight:bold;'>Some Warning :\n-%s </span>"%("\n-".join(WarnMessages)))
             else:
                 self.UpdateProgress(20,"Taxo automatic resolution Done"%())
             #sinon on pose une question
@@ -467,6 +469,9 @@ class TaskImport(AsyncTask):
             txt=""
             if Prj.CheckRight(2)==False:
                 return PrintInCharte("ACCESS DENIED for this project");
+            g.prjtitle=Prj.title
+            g.appmanagermailto=GetAppManagerMailto()
+
             if gvp('starttask')=="Y":
                 FileToSave=None
                 FileToSaveFileName=None

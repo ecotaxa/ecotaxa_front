@@ -17,6 +17,7 @@ def indexExplore():
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
         data[k]=gvg(k,v)
+    data['inexplore']=True
     data["projid"]=gvg("projid",0)
     data["taxochild"]=gvg("taxochild",0)
     data["sample_for_select"]=""
