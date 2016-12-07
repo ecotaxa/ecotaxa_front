@@ -1,0 +1,121 @@
+<style>
+  .helperselect {background-color: #faff6c}
+</style>
+<div style="padding: 5px;">
+<p>List of sample separated by comma
+<span class="pull-right" style="">
+  <button type="button" class="btn btn-success btn-sm"  onclick="ApplyPopupSampleFilter();">Apply</button>
+  <button type="button" class="btn btn-default btn-sm"  onclick="$('#PopupDetails').modal('hide');">Cancel</button>
+</span>
+</p>
+<div class="input-group">
+  <input type="text" class="form-control input-sm" style="width: 100%" id="txtlstsample">
+  <span class="input-group-btn">
+     <button class="btn btn-default btn-sm" type="button" onclick="SampleTxtToCB()">Update checkbox</button>
+  </span>
+    </div>
+<br>
+<div class="form-inline">
+  <div class="form-group" style="width: auto;">
+    <label for="exampleInputName2">Selection helper <a href="#helperhelp" data-toggle="collapse" class="help" > </a> : </label>
+<div class="input-group">
+  <input type="text" class="form-control input-sm" style="width: 150px" onkeyup="HelperFilterChanged(this);" name="HelperFilter">
+  <span class="input-group-btn">
+     <button class="btn btn-default btn-sm" type="button" onclick="ProcessSampleSelection(true)">Check</button>
+  </span>
+  <span class="input-group-btn">
+     <button class="btn btn-default btn-sm" type="button" onclick="ProcessSampleSelection(false)">Uncheck</button>
+  </span>
+
+</div>
+    <span id="helpernbr">-</span>
+</div>
+</div>
+<div id="helperhelp" class="collapse">
+  <p>Search sample by character parts, you can use a whitespace to separate parts.</p>
+  <p>You can also use regular expression (whitespace is converted to ".*") ex : "w [3-5]$" = contains w then finish by 3,4,5</p>
+</div>
+
+
+
+
+<table id="tblspl" class="table table-bordered table-condensed" style="margin-top: 10px;"><tr>
+ {% for s in samples %}
+   {% if loop.index0 is divisibleby 4 %}</tr><tr> {% endif %}
+    <td data-name="{{ s[1] }}"> <input type="checkbox" data-id="{{ s[0] }}" > {{ s[1] }}</td>
+
+  {% endfor %}
+</tr>
+</table>
+</div>
+<script>
+{#************************************************************#}
+function HelperFilterChanged(ed) {
+  var filter=$(ed).val().replace(' ','.*').replace(' ','.*'); {# Traite le remplacement de 2 espace par le regexp .* #}
+  var nbr=0;
+  if(filter==""){tblspl.find("td.helperselect").removeClass("helperselect"); return;}
+{#  debugger;#}
+  var patt = new RegExp(filter);
+  tblspl.find("td").each(function () {
+    var jobj=$(this);
+    if(patt.test(jobj.data('name'))) {
+      jobj.addClass("helperselect");
+      nbr++;
+    }
+    else
+      jobj.removeClass("helperselect");
+
+  });
+  $('#helpernbr').html(nbr+" items ");
+}
+{#************************************************************#}
+function SampleTxtToCB() {
+  var cvl=$("#txtlstsample").val().split(","); {# découpe suivant les , #}
+  cvl.forEach(function (s,i){cvl[i]=s.replace(' ','');}); {# et supprimer les espace supplementaires autour des , #}
+  tblspl.find("td").each(function () {
+    $(this).find('input').prop('checked',cvl.indexOf($(this).data("name"))>=0);
+  });
+}
+{#************************************************************#}
+function ComputeSampleList() {
+    var cv="";
+    tblspl.find('input').each(function (){
+       if($(this).prop("checked")){
+           if(cv!="")
+               cv+=",";
+           cv+=$(this).closest('td').data("name");
+       }
+    });
+    $('#txtlstsample').val(cv);
+}
+{#************************************************************#}
+function ProcessSampleSelection(checked) {
+  tblspl.find("td.helperselect").each(function () {
+    $(this).find('input').prop('checked',checked);
+  });
+  ComputeSampleList();
+}
+{#************************************************************#}
+function ApplyPopupSampleFilter(){
+  var sampleid=$('#sampleid');
+  var cvl=$("#txtlstsample").val().split(","); {# découpe suivant les , #}
+  cvl.forEach(function (s,i){cvl[i]=s.replace(' ','');}); {# et supprimer les espace supplementaires autour des , #}
+  sampleid.html(""); {# Efface les valeurs existantes #}
+  $.getJSON("/search/samples",{q:'',projid:$('#projid').val()}, {# Récupère la liste des echantillons en format JSON #}
+    function(resajax) { {# avec le resultat, rempli les items qui sont dans la chaine collée #}
+      for (var i = 0; i < resajax.length; i++) {
+        if(cvl.indexOf(resajax[i].text)>=0) { {# Ajoute une option sélectionnée #}
+          sampleid.append("<option value='" + resajax[i].id + "' selected>" + resajax[i].text + "</option>");
+        }
+      }
+      sampleid.trigger("change"); {# Met à jour la liste #}
+  });
+  $('#PopupDetails').modal('hide');
+}
+{#************************************************************#}
+$(document).ready(function() {
+  tblspl=$("#tblspl");
+  tblspl.find('input').click(ComputeSampleList);
+}); // Ready
+
+</script>

@@ -1,12 +1,125 @@
 <table>
   <tr>
-    <td>
-<span style="font-size: x-large;font-weight: bold;">Select a project </span> <a href="#create-project" data-toggle="collapse" class="help" style="font-size: small">How to create a project</a><br>
+    <td style="width: 600px;vertical-align: top;">
+<span style="font-size: x-large;font-weight: bold;">Select a project </span><p> <a href="#create-project" data-toggle="collapse" class="help" >How to create a project</a></p>
 <div id="create-project" class="collapse">
-				<p>To create your first project, you must contact the application manager: {{ AppManagerMailto|safe }}.</p>
+  <p>To create your first project, you must contact the application manager: {{ AppManagerMailto|safe }}.</p>
 
-				<p>Then you will be allowed to create new projects.</p>
-			</div>
+  <p>Then you will be allowed to create new projects.</p>
+</div>
+<p><a href="#prepare-data" data-toggle="collapse" class="help">How to prepare data</a></p>
+<div id="prepare-data" class="collapse">
+
+In a folder place:
+<dl style="margin-left: 40px;">
+
+  <dt>image files</dt>
+    <dd>
+      <p>Colour and 8-bits greyscale images are supported, in <code>jpg</code>, <code>png</code>,<code>gif</code> (possibly animated) formats.</p>
+    </dd>
+
+  <dt>a <code><a href="https://en.wikipedia.org/wiki/Tab-separated_values">tsv</a></code>  (TAB separated file) which can be .txt or .tsv extension. File name must start with ecotaxa (ecotaxa*.txt or ecotaxa*.tsv)</dt>
+    <dd>
+      <p>It contains the metadata for each image. This file can be created in a spreadsheet application (see formats and examples below).</p>
+      <ul>
+        <li>Line 1 contains column headers</li>
+        <li>Line 2 contains data format codes; [f] for floats, [t] for text</li>
+        <li>Line 3...n contain data for each image</li>
+      </ul>
+    </dd>
+</dl>
+
+<p>
+  The metadata and data for each image is organised in various levels (image, object, process, sample, etc.). All column names must be prefixed with the level name (<code>img_***</code>, <code>object_***</code>, etc.). Some common fields, used to filter data, must be named and sometimes formatted in a certain way (required format in blue), which is documented below. But, overall, the only two mandatory fields are <code  class="text-danger">img_file_name</code> and <code class="text-danger">object_id</code> (in red).
+
+  <ul>
+    <il>IMAGE</il>
+    <ul>
+      <li><code class="text-danger">img_file_name</code> [t]: name of the image file in the folder (including extension)</li>
+      <li><code>img_rank</code> [f] : rank of image to be displayed, in case of existence of multiples (&lt;10) images for one object. Starts at 1.</li>
+    </ul>
+
+    <il>OBJECT: one object to be classified, usually one organism. One object can be represented by several images. In this <code>tsv</code> file, there is one line per image which means the object data gets repeated on several lines.</il>
+    <ul>
+      <li><code class="text-danger">object_id</code> [t] : unique object name (will be displayed in Ecotaxa object page)</li>
+      <li><code>object_link</code> [f] : URL of an associated website</li>
+      <li><code>object_lat</code> [f] : latitude, <span class="text-info">decimal degrees</span></li>
+      <li><code>object_lon</code> [f] : longitude, <span class="text-info">decimal degrees</span></li>
+      <li><code>object_date</code> [f] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+      <li><code>object_time</code> [f] : ISO8601 <span class="text-info">HHMMSS</span> UTC</li>
+      <li><code>object_depth_min</code> [f] : minimum depth of object, <span class="text-info">meters</span></li>
+      <li><code>object_depth_max</code> [f] : maximum depth of object, <span class="text-info">meters</span></li>
+    </ul>
+    And, for already classified objects
+    <ul>
+      <li><code>object_annotation_date</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+      <li><code>object_annotation_time</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+      <li><code>object_annotation_category</code> [t] : class of the object</li>
+      <li><code>object_annotation_person_name</code> [t] : name of the person who identified the object</li>
+      <li><code>object_annotation_person_email</code> [t] : email of the person who identified the object</li>
+      <li><code>object_annotation_status</code> [t] : <span class="text-info">predicted</span>, <span class="text-info">dubious</span>, or <span="text-info">validated</span="text-info"></li>
+    </ul>
+    And additional object-related fields
+    <ul>
+      <li><code>object_***</code> [f] or</code> [t] : other fields relative to the object</li>
+    </ul>
+
+    <li>ACQUISITION: metadata relative to the image acquisition</li>
+    <ul>
+      <li><code>acq_id</code> [t] : unique identifier</li>
+      <li><code>acq_instrument</code> [t] : name of the instrument (UVP, ZOOSCAN, FLOWCAM, etc.)</li>
+      <li><code>acq_***</code> [f] or</code> [t] : other fields relative to the acquisition</li>
+    </ul>
+
+    <li>PROCESS: metadata relative to the processing of the raw images</li>
+    <ul>
+      <li><code>process_id</code> [t] : unique identifier</li>
+      <li><code>process_***</code> [f] or</code> [t] : other fields relative to the process</li>
+    </ul>
+
+    <li>SAMPLE: a collection event</li>
+    <ul>
+      <li><code>sample_id</code> [t] : unique identifier</li>
+      <li><code>sample_***</code> [f] or</code> [t] : other fields relative to the sample</li>
+    </ul>
+
+  </ul>
+</p>
+
+<p>You can download example tsv files
+<ul>
+  <li><a href="/static/examples/ecotaxa_table_minimum.tsv">Minimal example</a>, for fully manual entry</li>
+  <li><a href="/static/examples/ecotaxa_table_without_classification.tsv">Full featured example, with unknown</a> objects only</li>
+  <li><a href="/static/examples/ecotaxa_table_with_classification.tsv">Full featured example, with already classified</a> objects</li>
+</ul>
+</p>
+
+<p>Several such importation folders can be placed alongside each other in a main folder. Pointing at that main folder will import all subfolders recursively. EcoTaxa will read all <code>tsv</code> files and then import the images they point to. When "Skip <code>tsv</code> that have already been imported" is ticked, the names of <code>tsv</code> files are recorded and those already imported are not re-imported. For ongoing projects, this allows to simply put new data alongside the old import folders and have EcoTaxa only import the new ones.</p>
+
+So overall, the hierarchy can look like
+<ul style="list-style: none">
+  <li><span class="glyphicon glyphicon-folder-open"> import_folder</span></li>
+  <ul style="list-style: none">
+    <li><span class="glyphicon glyphicon-folder-open"> my_data_1</span></li>
+    <ul style="list-style: none">
+      <li><span class="glyphicon glyphicon-file"></span> img_1.jpg</li>
+      <li><span class="glyphicon glyphicon-file"></span> img_2.jpg</li>
+      <li><span class="glyphicon glyphicon-file"></span> img_3.jpg</li>
+      <li><span class="glyphicon glyphicon-file"></span> table.tsv</li>
+    </ul>
+    <li><span class="glyphicon glyphicon-folder-open"> my_data_2</span></li>
+    <ul style="list-style: none">
+      <li><span class="glyphicon glyphicon-file"></span> description.tsv</li>
+      <li><span class="glyphicon glyphicon-file"></span> DCN001.jpg</li>
+      <li><span class="glyphicon glyphicon-file"></span> IMG234.png</li>
+      <li><span class="glyphicon glyphicon-file"></span> anim.gif</li>
+    </ul>
+  </ul>
+</ul>
+
+
+</div>
+
 {% if  CanCreate==True %}
   <button class="btn btn-success" onclick="CreateProject();">Create a new project</button>
 {% else %}
@@ -14,14 +127,27 @@
 {% endif %}
 </td>
   <td style="padding-left: 50px;vertical-align: top;">
+  <div class="panel panel-default">
+  <div class="panel-body">
     <form method="get">
-    Filter on title : <input type="text" style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}">
-    Include subset : <input type="checkbox" value="Y" name="filt_subset" {%  if filt_subset=='Y'  %}checked{%  endif  %}>
-    Instrument : <input type="text" style="width: 100px;" name="filt_instrum" id="filt_instrum" value="{{ filt_instrum }}">
-                <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});" style="cursor: pointer;"></span>
-    <br>
-     <button type="submit" class="btn btn-primary">Search</button>
+      <table>
+        <tr>
+          <td>Filter on title :</td>
+          <td><input type="text"  style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}"></td>
+          <td rowspan="3" style="vertical-align: top"><button type="submit" class="btn btn-primary">Search</button></td>
+        </tr>
+        <tr>
+          <td style="padding-right: 10px;">List also subsets :</td>
+          <td><input type="checkbox" value="Y" name="filt_subset" {%  if filt_subset=='Y'  %}checked{%  endif  %}></td>
+        </tr>
+        <tr>
+          <td>Instrument : </td>
+          <td><input type="text" style="width: 100px;" name="filt_instrum" id="filt_instrum" value="{{ filt_instrum }}">
+                <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});" style="cursor: pointer;"></span></td>
+        </tr>
+      </table>
     </form>
+  </div></div>
     </td>
   </tr>
 </table>
@@ -38,7 +164,7 @@
         <tbody>
 {%   for r in PrjList %}
 <tr><td><a class='btn btn-primary' href='/prj/{{ r[0] }}'>Select</a></td>
-  <td> {{ r[1] }} [{{ r[0] }}]</td>
+  <td> {{ r[1] }} [{{ r[0] }}] {{ ("<a href='mailto:"+r[7]+"'>"+r[6]+"</a>") |safe if r[6] }}</td>
   <td>{{ r[2] }}</td>
   <td>{{ '{0:0.0f}'.format(r[3]) }}</td>
   <td>{{ '{0:0.2f}'.format(r[4]) }}</td>
@@ -48,7 +174,7 @@
 
 </tbody></table>
 <div class="col-sm-6 col-sm-offset-3">
-  <a href="/prjothers/" class="btn  btn-block btn-primary">Show projectspriv in which you are not registered</a>
+  <a href="/prjothers/" class="btn  btn-block btn-primary">Show projects in which you are not registered</a>
 </div>
 <script>
   function DispInstrumList(projid){
