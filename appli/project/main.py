@@ -15,7 +15,15 @@ import appli.project.sharedfilter as sharedfilter
 @login_required
 def indexProjects():
     params={}
-    sql="select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects p"
+    sql="""select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),qpp.name,qpp.email
+         from projects p
+         left join ( select * from (
+            select u.email,u.name,pp.projid,rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
+            from projectspriv pp join users u on pp.member=u.id
+            where pp.privilege='Manage' and u.active=true ) q where rang=1
+          ) qpp on qpp.projid=p.projid
+
+          """
     if not current_user.has_role(database.AdministratorLabel):
         sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
     sql += " where 1=1 "
@@ -78,7 +86,7 @@ def ProjectsOthers():
                                        ).replace('+','%20') # replace car urlencode mais des + pour les espaces qui sont mal traitrés par le navigateur
                 ,*r)
         txt+="<td>{1} [{0}]".format(*r)
-        if r['name']: txt+="<br>"+r['name']
+        if r['name']: txt+="<br><a href='mailto:"+r['email']+"'>"+r['name']+"</a>"
         txt+="""</td><td>{2}</td>
         <td>{3:0.0f}</td>
         <td>{4:0.2f}</td>
@@ -89,8 +97,6 @@ def ProjectsOthers():
 			<a href="/prj/" class="btn  btn-block btn-primary">Back to projects list</a>
         </div>"""
     return PrintInCharte(txt)
-
-
 
 ######################################################################################################################
 def UpdateProjectStat(PrjId):

@@ -9,7 +9,7 @@
 
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
-Additionnal Selected projects (<a href="/Task/Create/TaskSubset?p={{ data.ProjectId }}">select</a>) : {{ g.dispextraprojects|safe }}
+Additional selected projects (<a href="/Task/Create/TaskSubset?p={{ data.ProjectId }}">Select additional projects</a>) : {{ g.dispextraprojects|safe }}
 <input type="hidden" name="extraprojects" value="{{ data.extraprojects }}">
 <table><tr><td>
   {%   if filtertxt!='' %}
@@ -39,8 +39,8 @@ Additionnal Selected projects (<a href="/Task/Create/TaskSubset?p={{ data.Projec
 <div class='panel panel-default' style="width:600px;margin-left:10px;">
     <ul>
     <li>It is allowed to create a SUBSET containing 100% of images from the source project. In that case, the SUBSET will be a copy.
-    <li>A SUBSET created for Learning Set purpose should then be improved for better classification performances. It is noted that the classification & validation task is generally more efficient (less time consuming) when he Learning set contains more “homogeneous” and “limited” number of categories than in the final validated dataset
-    <li>The Project Manager of the source project will be also Project Manager of the SUBSET
+    <li>A SUBSET created for Learning Set purpose should then be improved for better classification performances. It is noted that the classification & validation task is generally more efficient (less time consuming) when the learning set contains more “homogeneous” and “limited” number of categories than in the final validated dataset.
+    <li>The Project Manager of the source project will also be Project Manager of the SUBSET.
     </ul>
 </div>
 </td></tr></table>

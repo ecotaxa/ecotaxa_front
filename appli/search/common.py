@@ -25,8 +25,10 @@ def searchsamples():
         projid=",".join([str(int(x)) for x in request.args.getlist("projid[]")])
     if projid=="":
         return "[]"
-    res = database.GetAll("SELECT sampleid, orig_id FROM samples WHERE  projid in ({0}) and orig_id like %s order by orig_id limit 2000".format(projid), (term,),debug=True)
-    return json.dumps([dict(id=r[0],text=r[1]) for r in res])
+    res = database.GetAll("SELECT sampleid, orig_id FROM samples WHERE  projid in ({0}) and orig_id like %s order by orig_id limit 2000".format(projid), (term,))
+    if gvg("format",'J')=='J': # version JSon par defaut
+        return json.dumps([dict(id=r[0],text=r[1]) for r in res])
+    return render_template('search/samples.html', samples=res)
 
 @app.route("/search/exploreproject")
 def searchexploreproject():

@@ -308,6 +308,7 @@ A SUBSET can have different usages:<br>
                     if p.mappingprocess!=Prj.mappingprocess:
                         flash("Process variables mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
             else:
+                g.dispextraprojects = "None"
                 #recupere les samples
                 sql="""select sampleid,orig_id
                         from samples where projid =%(projid)s

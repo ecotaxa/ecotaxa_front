@@ -1,0 +1,91 @@
+{% macro selectinput(name, values, value='') -%}
+    <select name="{{ name }}" id="{{ name }}" > {# class="form-control"  #}
+    {% for v in values %}
+        <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}
+{% macro selectinputdict(name, values, value='',emptyitem=false) -%}
+    <select name="{{ name }}" id="{{ name }}"  > {# class="form-control"  #}
+    {{  '<option/>'|safe if emptyitem }}
+    {% for k,v in values.items() %}
+        <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}
+
+
+{% extends "layout.html" %}
+
+{% block body %}
+<form class="form-horizontal" method="post" action="?" id="form1">
+    <h3>Edit privileges of project # {{ data.projid }} ({{ data.title }}) </h3>
+  <table class=table width="100%">
+
+
+  <tr><td>Privileges</td><td colspan="2">
+        <table class="table table-bordered table-verycondensed" style="width:500px;">
+          <tr>
+            <td >Name</td>
+            <td>Privilege</td>
+            <td>Delete</td>
+          </tr>
+      {% for pr in data.projmembers %}
+          <tr>
+            <td>{{ selectinputdict('priv_'~pr.id~'_member', g.users, pr.member) }}</td>
+            <td>{{ selectinput('priv_'~pr.id~'_privilege', ('View', 'Annotate','Manage'), pr.privilege) }}</td>
+            <td><input type="checkbox" name="priv_{{ pr.id }}_delete" value="Y"></td>
+          </tr>
+
+    {% endfor %}
+          <tr>
+            <td>New privilege :</td>
+          </tr>
+          <tr>
+            <td>{{ selectinputdict('priv_new_member', g.users, '',true) }}</td>
+            <td>{{ selectinput('priv_new_privilege', ('View', 'Annotate','Manage'), '') }}</td>
+            <td></td>
+          </tr>
+
+        </table>
+
+    </td><td>
+    </td></tr>
+
+</table>
+
+    <input type="hidden" name="save" value="Y">
+    <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-1">
+      <button type="button" onmousedown="SubmitForm();" class="btn btn-primary">Save</button>
+    </div>
+    <div class="col-sm-2">
+      <a href="/prj/{{ data.projid }}" class="btn btn-warning">Cancel, back to project</a>
+    </div>
+  </div>
+</form>
+
+
+ <script>
+$(document).ready(function() {
+    $(".userlb").select2({
+        ajax: {
+            url: "/search/users",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 2
+    }); // Select2 Ajax
+    }); // Ready
+
+function SubmitForm()
+{ {# On passe par cette fonction intermediare car quand on avait le focus sur un select2 dans certaines situations ca ne fesait pas le post #}
+    document.getElementById("form1").submit();
+}
+ </script>
+
+
+{% endblock %}

@@ -380,7 +380,12 @@ class TaskExportTxt(AsyncTask):
                 else: # Pas d'erreur, on lance la tache
                     return self.StartTask(self.param)
             else: # valeurs par default
-                pass
+                self.param.what ="TSV"
+                self.param.objectdata = "1"
+                self.param.processdata = "1"
+                self.param.acqdata = "1"
+                self.param.sampledata = "1"
+                self.param.splitcsvby="sample"
             #recupere les samples
             sql="""select sampleid,orig_id
                     from samples where projid =%(projid)s

@@ -111,9 +111,10 @@ $(document).ready(function() {{
              sqlclause['retrictq']+=":"+gvg('filt_min')
          sqlclause['retrictq']+=" ','YYYY-MM-DD HH24:MI')"
 
-    if OldAuthor is None and NewAuthor is None:
-        flash("This request doesn't make sense, you want replace the last classification of every one by the last classification",'error')
-        return PrintInCharte("Invalid Request")
+    # Protection désactivé en V1.1
+    # if OldAuthor is None and NewAuthor is None:
+    #     flash("This request doesn't make sense, you want replace the last classification of every one by the last classification",'error')
+    #     return PrintInCharte("Invalid Request")
 
 
     ################ 2nd Ecran, affichage liste des categories & estimations

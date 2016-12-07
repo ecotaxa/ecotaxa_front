@@ -26,9 +26,9 @@
 {{ checkboxinput("internalids","1",data.internalids) }} Internal IDs<br>
 {{ checkboxinput("typeline","1",data.typeline) }} 2nd line with types, usefull to reimport<br>
 Split in multiple files by <select name="splitcsvby" >
-        <option value=""></option>
-        <option value="sample">Sample</option>
-        <option value="taxo">Taxonomy (parent_child)</option>
+        <option value="" ></option>
+        <option value="sample" {{ 'selected' if data.splitcsvby=='sample' }} >Sample</option>
+        <option value="taxo" {{ 'selected' if data.splitcsvby=='taxo' }} >Taxonomy (parent_child)</option>
       </select><br>
       </td>
     </tr>
@@ -105,20 +105,12 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
 
 </td>
 </tr>
-
 </table>
-
-
-
 </form>
-
-   <script>
+<script>
 $(document).ready(function() {
         $('#TblVar input').click(ComputeSampleList);
         CheckBasedOnText();
-
     }); // Ready
- </script>
-
-
+</script>
 {% endblock %}
