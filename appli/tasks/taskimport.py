@@ -60,6 +60,7 @@ class TaskImport(AsyncTask):
                 self.InData='My In Data'
                 self.ProjectId=None
                 self.SkipAlreadyLoadedFile="N" # permet de dire si on
+                self.SkipObjectDuplicate="N"
                 # self.Mapping={x:{} for x in PredefinedTables}
                 self.Mapping={}
                 self.TaxoMap={}
@@ -114,11 +115,12 @@ class TaskImport(AsyncTask):
             self.param.UserFound={} # Reset à chaque Tentative
             self.param.steperrors=[] # Reset des erreurs
             # recuperation de toutes les paire objet/Images du projet
-            self.ExistingObject=set()
+            self.ExistingObjectAndImage = set()
             self.pgcur.execute(
-                "SELECT concat(o.orig_id,'*',i.orig_file_name) from images i join objects o on i.objid=o.objid where o.projid="+str(self.param.ProjectId))
+                "SELECT concat(o.orig_id,'*',i.orig_file_name) from images i join objects o on i.objid=o.objid where o.projid=" + str(
+                    self.param.ProjectId))
             for rec in self.pgcur:
-                self.ExistingObject.add(rec[0])
+                self.ExistingObjectAndImage.add(rec[0])
             logging.info("SubTask1 : Analyze TSV Files")
             self.UpdateProgress(2,"Analyze TSV Files")
             self.LastNum={x:{'n':0,'t':0} for x in PredefinedTables}
@@ -183,8 +185,8 @@ class TaskImport(AsyncTask):
                                 if m is None:
                                     continue # Le champ n'est pas considéré
                                 v=CleanValue(lig[champ])
+                                Seen.add(ColName) # V1.1 si la colonne est présente c'est considéré Seen, avant il fallait avoir vu une valeur.
                                 if v!="": # si pas de valeurs, pas de controle
-                                    Seen.add(ColName)
                                     if m['type']=='n':
                                         vf=ToFloat(v)
                                         if vf==None:
@@ -229,9 +231,9 @@ class TaskImport(AsyncTask):
                                 except:
                                     self.LogErrorForUser("Error while reading Image '%s' in file %s. %s"%(ImgFileName,relname.as_posix(),sys.exc_info()[0]))
                             CleExistObj=ObjectId+'*'+ImgFileName
-                            if CleExistObj in self.ExistingObject:
+                            if self.param.SkipObjectDuplicate!='Y' and CleExistObj in self.ExistingObjectAndImage:
                                 self.LogErrorForUser("Duplicate object %s Image '%s' in file %s. "%(ObjectId,ImgFileName,relname.as_posix()))
-                            self.ExistingObject.add(CleExistObj)
+                            self.ExistingObjectAndImage.add(CleExistObj)
                         logging.info("File %s : %d row analysed",relname.as_posix(),RowCount)
                         self.param.TotalRowCount+=RowCount
             if self.param.TotalRowCount==0:
@@ -303,10 +305,17 @@ class TaskImport(AsyncTask):
                 Ids[i]["ID"][r[0]]=int(r[1])
         # recuperation de les ID objet du projet
         self.ExistingObject={}
-        self.pgcur.execute(
-            "SELECT o.orig_id,o.objid from objects o where o.projid="+str(self.param.ProjectId))
+        self.pgcur.execute("SELECT o.orig_id,o.objid from objects o where o.projid="+str(self.param.ProjectId))
         for rec in self.pgcur:
             self.ExistingObject[rec[0]]=rec[1]
+        # recuperation de toutes les paire objet/Images du projet
+        self.ExistingObjectAndImage = set()
+        if self.param.SkipObjectDuplicate == 'Y': # cette liste n'est necessaire qui si on ignore les doublons
+            self.pgcur.execute(  # et doit être recahrgée depuis la base, car la phase 1 y a ajouté tous les objets pour le contrôle des doublons
+                "SELECT concat(o.orig_id,'*',i.orig_file_name) from images i join objects o on i.objid=o.objid where o.projid=" + str(
+                    self.param.ProjectId))
+            for rec in self.pgcur:
+                self.ExistingObjectAndImage.add(rec[0])
         #logging.info("Ids = %s",Ids)
         random.seed()
         sd=Path(self.param.SourceDir)
@@ -393,6 +402,9 @@ class TaskImport(AsyncTask):
                                     logging.info("IDS %s %s",t,Ids[t])
                         self.pgcur.execute("select nextval('seq_images')" )
                         Objs["image"].imgid=self.pgcur.fetchone()[0]
+                        CleExistObj = Objs["obj_field"].orig_id + '*' + Objs["image"].orig_file_name
+                        if self.param.SkipObjectDuplicate == 'Y' and CleExistObj in self.ExistingObjectAndImage:
+                            continue
                         # Recherche de l'objet si c'est une images complementaire
                         if Objs["obj_field"].orig_id in self.ExistingObject:
                             Objs["obj_head"].objid=self.ExistingObject[Objs["obj_field"].orig_id]
@@ -465,11 +477,11 @@ class TaskImport(AsyncTask):
             txt+="<h3>Task Creation</h3>"
             Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
             g.prjtitle=Prj.title
+            g.prjprojid = Prj.projid
             g.prjmanagermailto=Prj.GetFirstManagerMailto()
             txt=""
             if Prj.CheckRight(2)==False:
                 return PrintInCharte("ACCESS DENIED for this project");
-            g.prjtitle=Prj.title
             g.appmanagermailto=GetAppManagerMailto()
 
             if gvp('starttask')=="Y":
@@ -477,6 +489,7 @@ class TaskImport(AsyncTask):
                 FileToSaveFileName=None
                 self.param.ProjectId=gvg("p")
                 self.param.SkipAlreadyLoadedFile=gvp("skiploaded")
+                self.param.SkipObjectDuplicate = gvp("skipobjectduplicate")
                 TaxoMap={}
                 for l in gvp('TxtTaxoMap').splitlines():
                     ls=l.split('=',1)
@@ -511,6 +524,7 @@ class TaskImport(AsyncTask):
             PrjId=self.param.ProjectId
             Prj=database.Projects.query.filter_by(projid=PrjId).first()
             g.prjtitle=Prj.title
+            g.prjprojid = Prj.projid
             g.appmanagermailto=GetAppManagerMailto()
             # self.param.TaxoFound['agreia pratensis']=None #Pour TEST A EFFACER
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]

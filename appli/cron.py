@@ -4,6 +4,8 @@ from appli.database import ExecSQL
 
 
 def RefreshAllProjectsStat():
+    # Tout les objets validés sans classifications sont repassés en non validés
+    ExecSQL("update obj_head oh set classif_qual=NULL where classif_qual='V' and classif_id is null ")
     ExecSQL("UPDATE projects SET  objcount=Null,pctclassified=null,pctvalidated=NULL")
     ExecSQL("""UPDATE projects
      SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr

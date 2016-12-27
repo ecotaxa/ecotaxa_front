@@ -127,7 +127,7 @@ class TaskSubset(AsyncTask):
             if self.param.what.find('N')>=0:
                 sqlwhere+=" or o.classif_qual is null "
             sqlwhere+=")"
-            sqlwhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam, self.task.owner_id)
+            sqlwhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam, str(self.task.owner_id))
             logging.info("SQLParam=%s",sqlparam)
             sql="""select objid from (
                 SELECT """+rankfunction+"""() OVER (partition by classif_id order by random() )rang,o.objid
