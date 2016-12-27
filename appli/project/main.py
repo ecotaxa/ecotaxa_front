@@ -28,10 +28,10 @@ def indexProjects():
         sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
     sql += " where 1=1 "
     if gvg('filt_title','')!='':
-        sql +=" and (  title ilike '%%'||%(title)s ||'%%' or to_char(projid,'999999') like '%%'||%(title)s ) "
+        sql +=" and (  title ilike '%%'||%(title)s ||'%%' or to_char(p.projid,'999999') like '%%'||%(title)s ) "
         params['title']=gvg('filt_title')
     if gvg('filt_instrum','')!='':
-        sql +=" and projid in (select distinct projid from acquisitions where instrument ilike '%%'||%(filt_instrum)s ||'%%' ) "
+        sql +=" and p.projid in (select distinct projid from acquisitions where instrument ilike '%%'||%(filt_instrum)s ||'%%' ) "
         params['filt_instrum']=gvg('filt_instrum')
     if gvg('filt_subset', '') != 'Y':
         sql += " and not title ilike '%%subset%%'  "
@@ -459,7 +459,9 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
 </div>
         """)
     # Gestion de la navigation entre les pages
-    if pagecount>1 or pageoffset>0:
+    if ipp==0:
+        t.append("<p class='inliner'> Page management not available on Fit mode</p>" )
+    elif pagecount>1 or pageoffset>0:
         t.append("<p class='inliner'> Page %d / %d</p>"%(pageoffset+1,pagecount))
         t.append("<nav><ul class='pagination'>")
         if pageoffset>0:

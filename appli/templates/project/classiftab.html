@@ -6,7 +6,7 @@
             <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
         </span>
     <span class="input-group-btn">
-        <button class="btn btn-default btn-sm" type="button" title="Ctrl+E shortcut can also be utilized to assign category name to one or more vignettes" onclick="AssignTaxoLbToSelection();">
+        <button class="btn btn-default btn-sm" type="button" title="Ctrl+D shortcut can also be utilized to assign category name to one or more vignettes" onclick="AssignTaxoLbToSelection();">
             <span id=AssignTaxo class="glyphicon glyphicon-tags" aria-hidden="true"/></button>
         </span>
 
@@ -254,7 +254,7 @@ $(document).ready(function() {
           SelectAll(e);
           e.preventDefault();
       }
-       if((e.keyCode === 69)&& (e.ctrlKey||e.metaKey)) { {# CTRL+E #}
+       if((e.keyCode === 68)&& (e.ctrlKey||e.metaKey)) { {# CTRL+D #}
           AssignTaxoLbToSelection();
           e.preventDefault();
       }
