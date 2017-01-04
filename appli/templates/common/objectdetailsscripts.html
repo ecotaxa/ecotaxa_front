@@ -1,0 +1,165 @@
+<script>
+    $("#img1").elevateZoom({scrollZoom : true});
+    function SwapImg1(filename,width,height)    {
+        $('#img1').attr("width",width);
+        $('#img1').attr("height",height);
+        $('#img1').data('elevateZoom').swaptheimage('/vault/'+filename, '/vault/'+filename);
+    }
+
+{% if Prj.CheckRight(1) %}
+function Save1Object(classqual) {
+    var classid=$("#taxolbpop").val();
+    var objid='{{ objid }}';
+    if(classid=='') {
+        alert('Select a new category first');
+        return;
+    }
+    req={changes:{},qual:classqual}
+    req['changes'][objid]=classid;
+    $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>');
+    $("#PendingChangesPop").load("/prj/ManualClassif/{{ Prj.projid}}",req,function(){
+        if ($("#PendingChangesPop").html().indexOf("Successfull")>0) {
+            PendingChanges={}; // After successfull update no pending changes.
+            if(classqual=='V')
+                $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-validated');
+            else
+                $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-dubious');
+            if($("#taxolbpop").text().trim()!="")
+                $('#I'+objid).parents('td').find('.taxo').text($("#taxolbpop").text());
+            $('#PopupDetails').modal('hide');
+        }
+    });
+}
+$(document).ready(function() {
+    $("#taxolbpop").select2({
+        ajax: {
+            url: "/search/taxo",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 3
+    }); // Select2 Ajax
+});
+
+    function nl2br (str, is_xhtml) {
+        var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+        return (str + '').replace(/([^>\\r\\n]?)(\\r\\n|\\n\\r|\\r|\\n)/g, '$1' + breakTag + '$2');
+    }
+  function UpdateComment() {
+    req={comment:$('#compinfo').val()}
+    $("#ajaxresultcomment").html('<span class="label label-info">Server update in progress...</span>');
+    $("#ajaxresultcomment").load("/prj/UpdateComment/{{ objid }}",req,function(){
+        $('#spancomplinfo').html(nl2br($('#compinfo').val()));
+    })
+  }
+  function gotocommenttab() {
+    $("#linktabdaddcomments").click();
+    window.scrollTo(0,document.body.scrollHeight);
+  }
+
+{% endif %} {# if Prj.CheckRight(1) #}
+{# Gestion de la carte #}
+var map,vectorSource,SampleSource;
+
+function InitMap() {
+var mousePositionControl = new ol.control.MousePosition({
+  coordinateFormat: ol.coordinate.createStringXY(4),
+  projection: 'EPSG:4326',
+  undefinedHTML: '&nbsp;'
+});
+map = new ol.Map({
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM()
+    })
+  ],
+  controls: ol.control.defaults({
+    attributionOptions:  ({
+      collapsible: false
+    })
+  }).extend([mousePositionControl]),
+  target: 'map2',
+  view: new ol.View({
+    center: [0, 47],
+    zoom: 1
+  })
+});
+
+var infoBox = document.getElementById('info');
+
+// Create vector source and the feature to it.
+vectorSource = new ol.source.Vector();
+var vectorLayer= new ol.layer.Vector({
+  source: vectorSource
+});
+
+var RedIconStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+          anchor: [0.5, 0.5],
+          size: [52, 52],
+          offset: [52, 0],
+          opacity: 1,
+          scale: 0.25,
+          src: '/static/dots.png'
+        })
+      });
+
+SampleSource = new ol.source.Vector();
+var SampleLayer= new ol.layer.Vector({
+  source:SampleSource,style: RedIconStyle
+});
+// Add the vector layer to the map.
+map.addLayer(vectorLayer);
+map.addLayer(SampleLayer);
+
+} {#  End InitMap #}
+function ShowSample(p){
+  SampleSource.clear();
+  {% if (obj.longitude ) %}
+  var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform([{{  obj.longitude }},{{  obj.latitude }}], 'EPSG:4326','EPSG:3857')) });
+  SampleSource.addFeature(iconFeature);
+  {% endif %}
+} {# ShowSample #}
+  tabdmapfirstshow=true;
+  $('#atabdmap').on('shown.bs.tab', function (e) {
+    if(tabdmapfirstshow==true) {
+        tabdmapfirstshow=false;
+        $('body').append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.css" type="text/css">');
+
+       $.getScript("https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.js", function(){
+         $("#map2").html("");
+          InitMap();
+          ShowSample({ });
+         });
+        }
+    });
+
+{% if Prj.CheckRight(1) %}
+function EnableEdit(){
+  $("td[data-edit]").each(function(){
+    $(this).data('lbl',$(this).text()).prepend("<span class=' glyphicon glyphicon-pencil' style='cursor:pointer;' onclick='editattr(this);'></span> ");
+  });
+  $("#btenableedit").remove();
+}
+function editattr(o) {
+  var td=$(o).closest('td');
+  var tablename=$(o).closest('table').data("table");
+  var nexttd=td.next();
+  var ret=window.prompt("Enter a new value for "+td.data('lbl')+" ("+tablename+'.'+td.data("edit")+")",nexttd.text());
+  if (ret!==null) {
+    $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>');
+    $("#PendingChangesPop").load("/objectdetailsupdate/{{ objid}}",
+          {table: tablename,field: td.data("edit"),newval: ret } );
+  }
+}
+{% endif %}
+{#
+<style>
+  td[data-edit]::before {content: "<span class=' glyphicon glyphicon-pencil'></span>"}
+</style>
+
+#}
+</script>

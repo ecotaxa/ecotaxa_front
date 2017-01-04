@@ -274,7 +274,7 @@ class TaskClassifAuto(AsyncTask):
             for k,v in revobjmap.items():
                 if k in revobjmapbase:
                     sql+=",count({0}) {0}_nbr,count(distinct case classif_qual when 'V' then {0} end) {0}_nbrdist,count(case classif_qual when 'V' then null else {0} end) {0}_nbrnv".format(v)
-            sql+=" from objects where projid={0}".format(Prj.projid)
+            sql+=" from (select * from objects where projid={0} LIMIT 50000 ) objects ".format(Prj.projid)
             stat=GetAll(sql)[0]
             for k,v in revobjmap.items():
                 if k in revobjmapbase:
@@ -287,7 +287,7 @@ class TaskClassifAuto(AsyncTask):
                 for k,v in revobjmap.items():
                     if k in revobjmapbase:
                         sql+=",count({0}) {0}_nbr,0 {0}_nbrnv,count(distinct {0}) {0}_nbrdist".format(v)
-                sql+=" from objects where projid={0} and classif_qual='V'".format(PrjBase.projid)
+                sql+=" from (select * from objects where projid={0} and classif_qual='V' LIMIT 50000 ) objects ".format(PrjBase.projid)
                 stat=GetAll(sql)[0]
             if (stat["nbrtot"]-stat["nbrnotval"])>0:
                 for k,v in revobjmap.items():

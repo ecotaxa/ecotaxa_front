@@ -278,6 +278,9 @@ def TaskGetStatus(TaskID):
             rep={'d':{
                 'PercentComplete':Progress,
                 'WorkDescription': task.task.progressmsg}}
+            if len(task.param.steperrors):
+                rep['d']['WorkDescription'] += "".join("<br>\n-" + s for s in task.param.steperrors)
+
             if task.task.taskstate=="Done":
                 rep['d']['IsComplete']="Y"
                 rep['d']['ExtraAction']="<a href='/Task/Show/%d' class='btn btn-primary btn-sm ' role='button'>Show Task</a>"%TaskID
