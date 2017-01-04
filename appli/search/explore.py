@@ -19,7 +19,7 @@ def indexExplore():
         data[k]=gvg(k,v)
     data['inexplore']=True
     data["projid"]=gvg("projid",0)
-    data["taxochild"]=gvg("taxochild",0)
+    data["taxochild"]=gvg("taxochild",'1')
     data["sample_for_select"]=""
     if data["samples"]:
         for r in GetAll("select sampleid,orig_id from samples where sampleid in(%s)"%(data["samples"],)):
@@ -110,11 +110,12 @@ where o.classif_qual='V'
     if gvp("instrum")!="":
         whereclause += " and o.acquisid in (select acquisid  from acquisitions  where instrument ilike %(instrum)s "+("and projid= any (%(projid)s)" if gvp("projid")!="" else "")+" )"
         sqlparam['instrum']='%'+gvp("instrum")+'%'
-
+    PageTopProjectLink=MapForProject=None
     if gvp("projid")!="":
         whereclause+=" and o.projid= any (%(projid)s) "
         sqlparam['projid']=[int(x) for x in gvp("projid").split(',')]
-
+        if len(sqlparam['projid'])==1:
+            PageTopProjectLink = "You can explore this project in more details on its <a href='/prj/{0}'>dedicated page</a>".format(str(sqlparam['projid'][0]))
     if gvp("fromdate")!="":
         whereclause+=" and o.objdate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
         sqlparam['fromdate']=gvp("fromdate")
@@ -146,6 +147,7 @@ where o.classif_qual='V'
         randomproject=GetAll("select projid,title from projects where visible=true and pctvalidated>1 order by random() limit 1")
         if randomproject:
             randomproject=randomproject[0]
+            MapForProject = str(randomproject[0])
             sql+=" and o.projid= %s "%(randomproject[0])
             ExtraEndScript="""$('#headersubtitle').html('Randomly selected project : <a href="?projid={0}">{1}</a>');""".format(*randomproject)
     sql+="  order by random_value Limit %d"%(2*ipp,)
@@ -169,6 +171,10 @@ where o.projid in (select projid from projects where visible=true)"""
     res=GetAll(sql,sqlparam,debug=False)
     trcount=1
     LineStart=""
+    if(PageTopProjectLink):
+        t.append(PageTopProjectLink)
+    if MapForProject:
+        t.append(render_template("search/explore_inserted_popup.html",Projid=MapForProject))
     t.append("<table class=imgtab><tr id=tr1>"+LineStart)
     WidthOnRow=0
     #récuperation et ajustement des dimensions de la zone d'affichage
@@ -259,7 +265,9 @@ where o.projid in (select projid from projects where visible=true)"""
 
     t.append("</tr></table>")
     if len(res)==0:
-        t.append("No Result")
+        t.append("""<div class='alert alert-warning' role='alert' style='margin: 10px;font-size:larger;' >
+        <span class='glyphicon glyphicon-remove-sign' style='color:#DD2222;'></span>
+        Your selection does not return any object. <br>It may be too limited by the selected filters. <br>Try again releasing the selection criteria</div>""")
     t.append("""
     <script>
         PostAddImages();

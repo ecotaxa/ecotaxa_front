@@ -47,12 +47,7 @@
                    $('#SelectedID').html(id);
                    $('#SelectedName').html(valeur);
                    $('#{{ targetid }}').append($('<option>', {    value: id,    text: valeur}));
-//                   $("ul.select2-selection__rendered").children().last().prev().after('<li class="select2-selection__choice"><span role="presentation" class="select2-selection__choice__remove">×</span>'+valeur+'</li>');
-//<li class="select2-selection__choice"><span role="presentation" class="select2-selection__choice__remove">×</span>My option</li>
-                    var sel=$("#taxolb").val();
-                    if(sel==null) sel=[];
-                    sel.push(id);
-                    $('#{{ targetid }}').val(sel);
+                    $('#{{ targetid }}').val(id);
                     $('#{{ targetid }}').change();
                     $('#FileModal').modal("hide");
                 });

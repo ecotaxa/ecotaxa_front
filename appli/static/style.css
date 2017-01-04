@@ -247,3 +247,24 @@ code {
 
 .taxodrop_hover { background: #5cb85c; }
 .activeTaxo { background: #BCBCBC; }
+
+.btn-gris {
+  color: #ffffff;
+  background-color: #ADADAD;
+  border-color: #5E5E61;
+}
+.btn-gris:hover,.btn-gris:focus,.btn-gris:active,.btn-gris.active,.open .dropdown-toggle.btn-gris {
+  color: #ffffff;
+  background-color: #707070;
+  border-color: #5E5E61;
+}
+.btn-gris:active, .btn-gris.active,.open .dropdown-toggle.btn-gris {
+  background-image: none;
+}
+.btn-gris.disabled, .btn-gris[disabled],fieldset[disabled] .btn-gris,.btn-gris.disabled:hover,.btn-gris[disabled]:hover,
+fieldset[disabled] .btn-gris:hover, .btn-gris.disabled:focus,.btn-gris[disabled]:focus,fieldset[disabled] .btn-gris:focus,
+.btn-gris.disabled:active, .btn-gris[disabled]:active,fieldset[disabled] .btn-gris:active,.btn-gris.disabled.active,
+.btn-gris[disabled].active, fieldset[disabled] .btn-gris.active {
+  background-color: #89888A;
+  border-color: #5E5E61;
+}

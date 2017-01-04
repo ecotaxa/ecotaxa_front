@@ -68,7 +68,7 @@ $(document).ready(function() {
             {{ current_user.name }} (<a href="{{ url_for_security('logout') }}">log out</a>)
 {% if g.menu %}
     <br><div class="btn-group" style="width:100px;margin-right: 10px">
-    <button type="button" class="btn btn-default">Action</button>
+    <button type="button" class="btn btn-default"  data-toggle="dropdown">Action</button>
     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
         <span class="caret"></span>
         <span class="sr-only">Toggle Dropdown</span>

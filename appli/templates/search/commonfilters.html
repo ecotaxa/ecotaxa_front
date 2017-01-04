@@ -94,6 +94,7 @@
 </div>
 <script>
 function OpenMap(projid) {
+  $("#map").remove(); {# Efface l'eventuel objet map affiché dans  explore #}
   $("#PopupDetails .modal-content").html("Loading...");
   $('#PopupDetails .modal-lg').css('width',$(window).width()-40);
   $('#PopupDetails').modal({});

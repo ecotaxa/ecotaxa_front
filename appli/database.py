@@ -102,19 +102,23 @@ class Projects(db.Model):
     fileloaded  = db.Column(VARCHAR)
     def __str__(self):
         return "{0} ({1})".format(self.title,self.projid)
-    def CheckRight(self,Level,userid=None): # Level 0 = Read, 1 = Annotate, 2 = Admin . userid=None = current user
+    def CheckRight(self,Level,userid=None): # Level -1=Read public, 0 = Read, 1 = Annotate, 2 = Admin . userid=None = current user
         # pp=self.projmembers.filter(member=userid).first()
         if userid is None:
             u=current_user
             userid=getattr(u,'id',None)
             if userid is None: # correspond à anonymous
+                if Level<=-1 and self.visible: # V1.2 tout projet visible est visible par tous
+                    return True
                 return False
         else:
             u=users.query.filter_by(id=userid).first()
         if len([x for x in u.roles if x=='Application Administrator'])>0:
             return True # Admin à tous les droits
         pp=[x for x in self.projmembers if x.member==userid]
-        if len(pp)==0: # oas de privileges pour cet utilisateur
+        if len(pp)==0: # pas de privileges pour cet utilisateur
+            if Level <= -1 and self.visible:  # V1.2 tout projet visible est visible par tous
+                return True
             return False
         pp=pp[0] #on recupere la premiere ligne seulement.
         if pp.privilege=='Manage':
@@ -335,7 +339,7 @@ def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
         cur.close()
     return res
 
-
+# Les parametres doivent être passés au format (%s)
 def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
     cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:

@@ -135,28 +135,28 @@ FilterList={"MapN":"","MapW":"","MapE":"","MapS":"","depthmin":"","depthmax":"",
 FilterListAutoSave=("sortby","sortorder","dispfield","statusfilter",'ipp','zoom','magenabled','popupenabled')
 ######################################################################################################################
 @app.route('/prj/<int:PrjId>')
-@login_required
+# @login_required
 def indexPrj(PrjId):
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
-        data[k]=gvg(k,str(current_user.GetPref(k,v)))
+        data[k]=gvg(k,str(current_user.GetPref(k,v)) if current_user.is_authenticated() else "")
     # print('%s',data)
-    if data["samples"]:
+    if data.get("samples",None):
         data["sample_for_select"]=""
         for r in GetAll("select sampleid,orig_id from samples where projid=%d and sampleid in(%s)"%(PrjId,data["samples"])):
             data["sample_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
     data["month_for_select"] = ""
     # print("%s",data['month'])
     for (k,v) in enumerate(('January','February','March','April','May','June','July','August','September','October','November','December'),start=1):
-        data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['month'].split(',') else '',k,v)
+        data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data.get('month','').split(',') else '',k,v)
     data["daytime_for_select"] = ""
     for (k,v) in database.DayTimeList.items():
-        data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['daytime'].split(',') else '',k,v)
+        data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data.get('daytime','').split(',') else '',k,v)
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     if Prj is None:
         flash("Project doesn't exists",'error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
-    if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
+    if Prj.CheckRight(-1) ==False and Prj.CheckRight(0) ==False : # Level -1=Read Anonymous, 0 = Read, 1 = Annotate, 2 = Admin
         MainContact=GetAll("""select u.email,u.name
                         from projectspriv pp join users u on pp.member=u.id
                         where pp.privilege='Manage' and u.active=true and pp.projid=%s""",(PrjId,))
@@ -172,17 +172,17 @@ def indexPrj(PrjId):
     g.Projid=Prj.projid
     # Ces 2 listes sont ajax mais si on passe le filtre dans l'URL il faut ajouter l'entrée en statique pour l'affichage
     data["filt_freenum_for_select"] = ""
-    if data['freenum']!="":
+    if data.get('freenum','')!="":
         for r in PrjGetFieldList(Prj,'n',''):
             if r['id']==data['freenum']:
                 data["filt_freenum_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['text'])
     data["filt_freetxt_for_select"] = ""
-    if data['freetxt']!="":
+    if data.get('freetxt','')!="":
         for r in PrjGetFieldList(Prj,'t',''):
             if r['id']==data['freetxt']:
                 data["filt_freetxt_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['text'])
     data["filt_annot_for_select"] = ""
-    if data['filt_annot']!="":
+    if data.get('filt_annot','')!="":
         for r in GetAll("select id,name from users where id =any (%s)",([int(x) for x in data["filt_annot"].split(',')],)):
                 data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['name'])
     fieldlist=GetFieldList(Prj)
@@ -240,7 +240,7 @@ def indexPrj(PrjId):
 
 ######################################################################################################################
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def LoadRightPane():
     # récupération des parametres d'affichage
     pageoffset=int(gvp("pageoffset","0"))
@@ -253,7 +253,7 @@ def LoadRightPane():
     PrefToSave=0
     for k,v in FilterList.items():
         Filt[k]=gvp(k,v)
-        if k in FilterListAutoSave or gvp("saveinprofile")=="Y":
+        if ( k in FilterListAutoSave or gvp("saveinprofile")=="Y") and current_user.is_authenticated():
             PrefToSave+=current_user.SetPref(k,Filt[k])
 
     # on sauvegarde les parametres dans le profil utilisateur
@@ -268,6 +268,10 @@ def LoadRightPane():
     zoom=int(Filt["zoom"])
     popupenabled=Filt["popupenabled"]
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    if Prj is None:
+        return ("Invalid project")
+    if Prj.CheckRight(-1) == False:
+        return ("Access Denied")
     fieldlist=GetFieldList(Prj)
     fieldlist.pop('orig_id','')
     fieldlist.pop('objtime','')
@@ -287,7 +291,9 @@ left JOIN taxonomy t on o.classif_id=t.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
 """
-    whereclause += sharedfilter.GetSQLFilter(filtres,sqlparam,str(current_user.id))
+    whereclause += sharedfilter.GetSQLFilter(filtres,sqlparam,str(current_user.id if current_user.is_authenticated() else "999999"))
+    if Prj.CheckRight(0) ==False:  # Si c'est une lecture publique
+        whereclause+=" and o.classif_qual='V' " # Les anonymes ne peuvent voir que les objets validés
     sql+=whereclause
 
     sqlcount="""select count(*)
@@ -476,13 +482,21 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             t.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>"%(pageoffset+1))
         t.append("</ul></nav>")
     if nbrtotal>0:
-        pctvalid="<font color=#0A0>%0.1f %%</font>, <font color=#5bc0de>%0.1f %%</font>, <font color=#F0AD4E>%0.1f %%</font>"%(100*nbrvalid/nbrtotal,100*nbrpredict/nbrtotal,100*nbrdubious/nbrtotal)
-    else: pctvalid="-"
+        pctvalid=100*nbrvalid/nbrtotal
+        pctpredict=100*nbrpredict/nbrtotal
+        pctdubious=100*nbrdubious/nbrtotal
+        txtpctvalid="<font color=#0A0>%0.1f %%</font>, <font color=#5bc0de>%0.1f %%</font>, <font color=#F0AD4E>%0.1f %%</font>"%(pctvalid,pctpredict,pctdubious)
+    else:
+        txtpctvalid="-"
+        pctdubious=pctpredict=pctvalid=0
     t.append("""
     <script>
         PostAddImages();
-        $('#objcount').html('%s / %d ');
-    </script>"""%(pctvalid,nbrtotal))
+        $('#objcount').html('{0} / {1} ');
+        $('#progress-bar-validated').css('width','{2}%')
+        $('#progress-bar-predicted').css('width','{3}%')
+        $('#progress-bar-dubious').css('width','{4}%')
+    </script>""".format(txtpctvalid,nbrtotal,pctvalid,pctpredict,pctdubious))
     return "\n".join(t)
 
 ######################################################################################################################

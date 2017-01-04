@@ -132,6 +132,7 @@ class TaskImport(AsyncTask):
             sd=Path(self.param.SourceDir)
             self.param.TotalRowCount=0
             Seen=set() # Memorise les champs pour lesquels il y a des valeurs
+            NbrObjectWithoutGPS=0
             for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv"):
                 for CsvFile in sd.glob(filter):
                     relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
@@ -179,6 +180,7 @@ class TaskImport(AsyncTask):
                         RowCount=0
                         for lig in rdr:
                             RowCount+=1
+                            latitudeseen=False
                             for champ in rdr.fieldnames:
                                 ColName = champ.strip(" \t").lower()
                                 m=self.param.Mapping.get(ColName,None)
@@ -192,6 +194,7 @@ class TaskImport(AsyncTask):
                                         if vf==None:
                                             self.LogErrorForUser("Invalid float value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
                                         elif ColName=='object_lat':
+                                            latitudeseen=True
                                             if vf<-90 or vf>90:
                                                 self.LogErrorForUser("Invalid Lat. value '%s' for Field '%s' in file %s. Incorrect range -90/+90°."%(v,champ,relname.as_posix()))
                                         elif ColName=='object_long':
@@ -216,7 +219,8 @@ class TaskImport(AsyncTask):
                                     elif ColName=='object_annotation_status':
                                         if v!='noid' and v.lower() not in database.ClassifQualRevert:
                                             self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
-
+                            if latitudeseen==False:
+                                NbrObjectWithoutGPS+=1
                             #Analyse l'existance du fichier Image
                             ObjectId=CleanValue(lig.get('object_id',''))
                             if ObjectId=='':
@@ -237,7 +241,7 @@ class TaskImport(AsyncTask):
                         logging.info("File %s : %d row analysed",relname.as_posix(),RowCount)
                         self.param.TotalRowCount+=RowCount
             if self.param.TotalRowCount==0:
-                self.LogErrorForUser("No object found")
+                self.LogErrorForUser("No object to import. It maybe due to :<br>*	Empty TSV table<br>* TSV table already imported => 'SKIP TSV' option should be enabled")
             self.UpdateProgress(15,"TSV File Parsed"%())
             # print(self.param.Mapping)
             logging.info("Taxo Found = %s",self.param.TaxoFound)
@@ -246,6 +250,8 @@ class TaskImport(AsyncTask):
             logging.info("For Information Not Seen Fields %s",NotSeenField)
             if len(NotSeenField)>0:
                 WarnMessages.append("Some fields configured in the project are not seen in this import {0} ".format(", ".join(NotSeenField)))
+            if NbrObjectWithoutGPS>0:
+                WarnMessages.append("{0} objects doesn't have GPS information  ".format(NbrObjectWithoutGPS))
             if len(self.param.steperrors)>0:
                 self.task.taskstate="Error"
                 self.task.progressmsg="Some errors founds during file parsing "
