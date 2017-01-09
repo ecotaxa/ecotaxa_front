@@ -193,7 +193,7 @@ $(document).ready(function() {
         $("#jstree").jstree('open_node', data.node);
     });
     {# Quand on ouvre une branche de l'arbre on met à jours les background pour les nouveaux noeuds  #}
-    $("#jstreeexp").on('after_open.jstree', function(){ ('#taxolb').change(); });
+    $("#jstreeexp").on('after_open.jstree', function(){ $('#taxolb').change(); });
 
     $('#taxolb').change(function (){ {# Mise à jour des background dans l'arbre #}
       $(".taxo_tree_selected").removeClass("taxo_tree_selected");

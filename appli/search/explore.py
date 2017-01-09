@@ -115,7 +115,7 @@ where o.classif_qual='V'
         whereclause+=" and o.projid= any (%(projid)s) "
         sqlparam['projid']=[int(x) for x in gvp("projid").split(',')]
         if len(sqlparam['projid'])==1:
-            PageTopProjectLink = "You can explore this project in more details on its <a href='/prj/{0}'>dedicated page</a>".format(str(sqlparam['projid'][0]))
+            PageTopProjectLink = "<p class='bg-info'>You can explore this project in more details on its <a href='/prj/{0}'>dedicated page</a></p>".format(str(sqlparam['projid'][0]))
     if gvp("fromdate")!="":
         whereclause+=" and o.objdate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
         sqlparam['fromdate']=gvp("fromdate")

@@ -94,13 +94,25 @@
 </div>
 <script>
 function OpenMap(projid) {
-  $("#map").remove(); {# Efface l'eventuel objet map affiché dans  explore #}
+  $("#mappanel").remove(); {# Efface l'eventuel objet map affiché dans  explore #}
   $("#PopupDetails .modal-content").html("Loading...");
   $('#PopupDetails .modal-lg').css('width',$(window).width()-40);
   $('#PopupDetails').modal({});
-  var url="/search/mappopup/"
+  var url="/search/mappopup/?a=b";
   if(typeof (projid)!="undefined")
-    url+="?projid="+projid
+    url+="&projid="+projid;
+  jqProjid=$("#projid");
+  if((typeof (jqProjid.val())!="undefined")&&(jqProjid.val()!=null))
+    url+="&projid="+String(jqProjid.val());
+  jqTaxo=$("#taxolb"); {# dans explore #}
+  if((typeof (jqTaxo.val())!="undefined")&&(jqTaxo.val()!=null))
+    url+="&taxoid="+String(jqTaxo.val());
+  jqTaxo=$("#taxofilter"); {# dans classif manu #}
+  if((typeof (jqTaxo.val())!="undefined")&&(jqTaxo.val()!=null))
+    url+="&taxoid="+String(jqTaxo.val());
+
+  if($("#taxochild").prop("checked"))
+    url+="&taxochild=1";
   $("#PopupDetails .modal-content").load(url);
 }
 function ClearCoord() {
