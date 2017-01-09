@@ -1,0 +1,31 @@
+{{ header|safe }}
+<style>
+  #mytab td {padding: 5px;}
+</style>
+<form method=post>
+    <table id=mytab >
+    <tr><td>Field to update : </td>
+    <td>
+    <select name=field id=field><option></option>
+      {% for f in Lst %}
+        <option value='{{ f['id'] }}'>{{ f['text'] }}</option>
+      {% endfor %}
+    </select>
+    </td>
+    </tr>
+    <tr>
+      <td>New value : </td>
+      <td><input name="newvalue" class="form-control"></td>
+    </tr>
+      <tr>
+        <td colspan="2" style="text-align: center"><button type=submit class='btn btn-warning'>Apply MASS data modification</button></td>
+      </tr>
+    </table>
+
+    </form>
+<script>
+    $("#field").select2({
+        placeholder: "Select your field"
+        });
+
+</script>

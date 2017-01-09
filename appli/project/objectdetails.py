@@ -103,7 +103,7 @@ def objectdetails(objid):
     <li role="presentation" ><a href="#tabdacquis" aria-controls="tabdacquis" role="tab" data-toggle="tab"> Acquisition details</a></li>
     <li role="presentation" ><a href="#tabdprocessrel" aria-controls="tabdprocess" role="tab" data-toggle="tab"> Processing details</a></li>
     <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>
-    <li role="presentation" ><a href="#tabdmap" aria-controls="tabdmap" role="tab" data-toggle="tab" id=atabdmap>Map</a></li>
+    <li role="presentation" ><a href="#tabdmap" aria-controls="tabdmap" role="tab" data-toggle="tab" id=atabdmap style="background: #5CB85C;color:white;">Map</a></li>
     """)
     if Prj.CheckRight(1):
         t.append("""<li role="presentation" ><a id=linktabdaddcomments href="#tabdaddcomments" aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")

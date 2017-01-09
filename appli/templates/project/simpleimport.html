@@ -1,7 +1,7 @@
 <h3>Simple import</h3>
-<p>This procedure allows import a set of image with a fixed & reduced set of metadata.</p>
+<p>This procedure allows to import images in jpg, png, gif (possibly animated) formats. It will associate a fixed & reduced set of metadata.</p>
 
-<form class="form" method="post" enctype="multipart/form-data">
+<form class="form" method="post" enctype="multipart/form-data" onsubmit="return validform();">
 <input type="hidden" name="doimport" value="Y">
 	<div class="row" style="margin: 5px">
 		<div class="col-sm-5">
@@ -14,7 +14,7 @@
 					<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button>
                 </span>
 				</div>
-				<p class="help-block">Contact the project manager to know where and how to upload your data. Once the import is complete, all data folders/files can be safely erased on the server.
+				<p class="help-block">contact the Project manager to get the procedure to upload your data on the server via FTP. Once the import is complete, please manually remove these data from the server.
 				<br>Project manager : {{ g.prjmanagermailto |safe }}</p>
 			</div>
 		</div>
@@ -27,7 +27,7 @@
 <div class="form-group">
 				<label class="control-label">Upload folder(s) compressed as a zip file</label>
 				<input class="form-control" type="file" id="uploadfile" name="uploadfile" size="200">
-				<p class="help-block">Only for &lt;&nbsp;100MB zip files.</p>
+				<p class="help-block">zip all the images in an archive (<100Mb). Images of the same taxon must be grouped in a unique folder.</p>
 			</div>
 		</div>
 	</div>
@@ -39,24 +39,35 @@
   <table style="margin-left: 15px; width: auto" class="table table-condensed table-bordered" id="tbl1">
     <tr>
       <td>Image DATE (YYYYMMDD, UTC)</td>
-      <td><input type="text" name="imgdate" class="form-control" style="width:120px;" value="{{ preset.imgdate }}"> </td>
+      <td><input type="text" name="imgdate" class="form-control" style="width:120px;" value="{{ preset.imgdate|default('',true) }}"> </td>
       <td>Image TIME (HHMM, UTC)</td>
-      <td><input type="text" name="imgtime" class="form-control" style="width:70px;" value="{{ preset.imgtime }}"> </td>
+      <td><input type="text" name="imgtime" class="form-control" style="width:70px;" value="{{ preset.imgtime|default('',true) }}"> </td>
     </tr>
     <tr>
       <td>latitude (type in -12.06398 for 12°06.398 S)</td>
-      <td><input type="text" name="latitude" class="form-control" style="width:120px;" value="{{ preset.latitude }}"> </td>
+      <td><input type="text" name="latitude" class="form-control" style="width:120px;" value="{{ preset.latitude|default('',true) }}"> </td>
       <td>longitude (type in -135.05325 for 135°05.325 W)</td>
-      <td><input type="text" name="longitude" class="form-control" style="width:120px;" value="{{ preset.longitude }}"> </td>
+      <td><input type="text" name="longitude" class="form-control" style="width:120px;" value="{{ preset.longitude|default('',true) }}"> </td>
     </tr>
     <tr>
       <td>Object Depth min (m)</td>
-      <td><input type="text" name="depthmin" class="form-control" style="width:70px;" value="{{ preset.depthmin }}"> </td>
+      <td><input type="text" name="depthmin" class="form-control" style="width:70px;" value="{{ preset.depthmin|default('',true) }}"> </td>
       <td>Object Depth max (m)</td>
-      <td><input type="text" name="depthmax" class="form-control" style="width:70px;" value="{{ preset.depthmax }}"> </td>
+      <td><input type="text" name="depthmax" class="form-control" style="width:70px;" value="{{ preset.depthmax|default('',true) }}"> </td>
     </tr>
+{#     <tr>
+      <td>Instrument</td>
+      <td>
+        <select name="instrument">
+        <option></option>
+          {% for v in instrum %}
+            <option value="{{ v.instrument }}" {{ "selected" if preset.instrument==v.instrument }}>{{ v.instrument }}</option>
+          {% endfor %}
+        </select>
+      </td>
+    </tr>  #}
     <tr>
-      <td colspan="2">Annotation category for ALL images of the folder</td>
+      <td colspan="2">Optional annotation category for ALL images of the folder</td>
       <td colspan="2"><div class="input-group" style="width: 230px">
             <select id="taxolb" name="taxolb" style="width: 210px" class='taxolb' > </select>
             <span class="input-group-btn">
@@ -66,9 +77,9 @@
           </div>{# /input-group #}</td>
     </tr>
     <tr>
-      <td>Annotator</td>
+      <td>Optional annotator</td>
       <td><select id="userlb" name="userlb" style="width: 210px" class='userlb' ><option value="{{ preset.userlb }}" selected>{{ preset.annot_name }}</option> </select></td>
-      <td>Status </td>
+      <td>Optional status </td>
       <td><select name="status">
         <option></option>
         <option value="P" {{ "selected" if preset.status=="P" }}>predicted</option>
@@ -116,6 +127,18 @@ $(document).ready(function() {
         },
         minimumInputLength: 2
     }); // Select2 Ajax
+
+function validform() {
+  if(($('input[name=imgdate]').val()=='')
+   ||($('input[name=imgtime]').val()=='')
+   ||($('input[name=longitude]').val()=='')
+   ||($('input[name=latitude]').val()=='')
+  ){
+    var r = confirm("We encourage you to fill geographic(Lat/Long) and temporal (date/time) data !\n Do you really want to import ?");
+    return r;
+  }
+return true;
+}
 
 </script>
 

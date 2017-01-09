@@ -231,7 +231,7 @@ def indexPrj(PrjId):
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))
         g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit or erase annotations massively"))
         g.headmenu.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Erase objects with active filter or project"))
-
+        g.headmenu.append(("javascript:GotoWithFilter('/prj/editdatamass/%d')" % (PrjId,), "Edit objects data with active filter"))
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
@@ -699,7 +699,7 @@ def PrjGetFieldList(Prj,typefield,term):
     MapPrefix = {'o': '', 's': 'sample ', 'a': 'acquis. ', 'p': 'process. '}
     for mapk, mapv in MapList.items():
         for k, v in sorted(DecodeEqualList(getattr(Prj, mapv, "")).items(), key=lambda t: t[1]):
-            if k[0] == typefield and v != "" and (term=='' or term in v):
+            if (k[0] == typefield or typefield=='') and v != "" and (term=='' or term in v):
                 fieldlist.append({'id': mapk + k, 'text': MapPrefix[mapk] + v})
     return fieldlist
 

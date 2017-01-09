@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.css" type="text/css">
 
-<table width=100%><tr><td>Area Selection Map Popup
+<table width=100%><tr><td>Area Selection Map Popup <span style="margin-left: 50px; font-weight: bold;">{{ g.filtertxt }}</span>
         </td><td align='right'><button type="button" class="btn btn-default btn-sm"  onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
         </td></tr></table>
 
@@ -144,7 +144,7 @@ DrawSelectionRectangle([
   $("#MapOutE").val($("#filt_MapOutE").val());
   $("#MapOutS").val($("#filt_MapOutS").val());
   DrawInputOnMap();
-  ShowSample({ {% if g.Projid %} projid:{{g.Projid }} {%endif%} });
+  ShowSample({a:0 {% if g.Projid %} ,projid:"{{g.Projid }}" {%endif%}  {% if g.taxoid %} ,taxoid:"{{g.taxoid }}" {%endif%}  {% if g.taxochild %} ,taxochild:"{{g.taxochild }}" {%endif%}  });
  });
 
 function ReturnMapArea() {

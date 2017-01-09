@@ -95,6 +95,8 @@ def prj_simpleimport(PrjId):
             DbRes=GetAll("select name from users where id=(%s)", (preset['userlb'],))
             if DbRes:
                 preset["annot_name"]=DbRes[0][0]
+        # instrum=GetAll("select * from (SELECT DISTINCT  instrument  from acquisitions where instrument is not null) q order by upper(instrument)")
+        # ,instrum=instrum
         return PrintInCharte(render_template("project/simpleimport.html",preset=preset))
     if gvp("doimport", 'N') == 'Y':
         txt=""
