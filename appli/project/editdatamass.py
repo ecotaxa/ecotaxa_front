@@ -14,6 +14,13 @@ def GetFieldList(Prj):
     fieldlist = []
     MapList = (('f', 'mappingobj'), ('s', 'mappingsample'), ('a', 'mappingacq'), ('p', 'mappingprocess'))
     MapPrefix =  {'f': 'object.', 's': 'sample.', 'a': 'acquis.', 'p': 'process.'}
+    for k in db.metadata.tables['obj_head'].columns.keys():
+        if k not in ('objid','projid','img0id','imgcount'):
+            fieldlist.append({'id': 'h' + k, 'text': 'object.'+ k})
+    fieldlist.append({'id': 'forig_id', 'text': 'object.orig_id'})
+    fieldlist.append({'id': 'fobject_link', 'text': 'object.object_link'})
+    fieldlist.append({'id': 'sdataportal_descriptor', 'text': 'sample.dataportal_descriptor'})
+    fieldlist.append({'id': 'ainstrument', 'text': 'acquis.instrument (fixed)'})
     for mapk, mapv in MapList:
         for k, v in sorted(DecodeEqualList(getattr(Prj, mapv, "")).items(), key=lambda t: t[1]):
             fieldlist.append({'id': mapk + k, 'text': MapPrefix[mapk] + v})
@@ -35,12 +42,41 @@ def PrjEditDataMass(PrjId):
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
     txt = "<h3>Project Mass data edition </h3>"
-    sql = "select objid FROM objects o where projid=" + str(Prj.projid)
     sqlparam = {}
     filtres = {}
     for k in sharedfilter.FilterList:
         if gvg(k):
             filtres[k] = gvg(k, "")
+    field=gvp('field')
+    if field and gvp('newvalue') :
+        tables={'f': 'obj_field','h': 'obj_head', 's': 'samples', 'a': 'acquisitions', 'p': 'process'}
+        tablecode=field[0]
+        table=tables[tablecode] # on extrait la table à partir de la premiere lettre de field
+        field=field[1:] # on supprime la premiere lettre qui contenait le nom de la table
+        sql="update "+table+" set "+field+"=%(newvalue)s  "
+        if field == 'classif_id':
+            sql += " ,classif_when=current_timestamp,classif_who="+str(current_user.id)
+        sql += " where "
+        if tablecode == "h": sql+=" objid in ( select objid from objects o "
+        elif tablecode == "f": sql+=" objfid in ( select objid from objects o "
+        elif tablecode == "s" : sql+=" sampleid in ( select distinct sampleid from objects o "
+        elif tablecode == "a" : sql += " acquisid in ( select distinct acquisid from objects o "
+        elif tablecode == "p":  sql += " processid in ( select distinct processid from objects o "
+        sql += "  where projid=" + str(Prj.projid)
+        sqlparam['newvalue']=gvp('newvalue')
+        if len(filtres):
+            sql += " "+sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
+        sql += ")"
+        if field=='classif_id':  #TODO ICI
+            sqlhisto="""insert into objectsclassifhisto(objid,classif_date,classif_type,classif_id,classif_qual,classif_who)
+                          select objid,classif_when,'M', classif_id,classif_qual,classif_who
+                            from objects o
+                            where projid=""" + str(Prj.projid) +" and classif_when is not null "
+            sqlhisto+=sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
+            ExecSQL(sqlhisto, sqlparam)
+        ExecSQL(sql,sqlparam)
+        flash('Data updated', 'success')
+    sql = "select objid FROM objects o where projid=" + str(Prj.projid)
     if len(filtres):
         sql += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
         ObjList = GetAll(sql, sqlparam)

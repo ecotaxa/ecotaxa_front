@@ -49,7 +49,10 @@ def PrjEdit(PrjId):
     else:
         lst=[int(x) for x in Prj.initclassiflist.split(",") if x.isdigit()]
 
-    g.predeftaxo=GetAll("select id,name from taxonomy where id= any(%s) order by name ",(lst,))
+    g.predeftaxo=GetAll("""select t.id,concat(t.name,' (',t2.name,')') as name
+        from taxonomy t
+         left join taxonomy t2 on t.parent_id=t2.id
+        where t.id= any(%s) order by name """,(lst,))
     g.users=GetAssoc2Col("select id,name from users order by lower(name)",dicttype=collections.OrderedDict)
     g.maplist=['objtime','depth_min','depth_max']+sorted(DecodeEqualList(Prj.mappingobj).values())
     return render_template('project/editproject.html',data=Prj)

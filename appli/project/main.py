@@ -33,7 +33,7 @@ def indexProjects():
     if gvg('filt_instrum','')!='':
         sql +=" and p.projid in (select distinct projid from acquisitions where instrument ilike '%%'||%(filt_instrum)s ||'%%' ) "
         params['filt_instrum']=gvg('filt_instrum')
-    if gvg('filt_subset', '') != 'Y':
+    if gvg('filt_subset', '') == 'Y':
         sql += " and not title ilike '%%subset%%'  "
     sql+=" order by lower(title)" #pp.member nulls last,
     res = GetAll(sql,params) #,debug=True
@@ -278,7 +278,7 @@ def LoadRightPane():
     t=["<a name='toppage'/>"]
     whereclause=" where o.projid=%(projid)s "
     sqlparam={'projid':gvp("projid")}
-    sql="""select o.objid,t.name taxoname,o.classif_qual,u.name classifwhoname,i.file_name
+    sql="""select o.objid,t.name taxoname,t2.name taxoparent,o.classif_qual,u.name classifwhoname,i.file_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
   ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,to_char(o.objtime,'HH24:MI') objtime
   ,case when o.complement_info is not null and o.complement_info!='' then 1 else 0 end commentaires
@@ -288,6 +288,7 @@ def LoadRightPane():
     sql+=""" from objects o
 left Join images i on o.img0id=i.imgid
 left JOIN taxonomy t on o.classif_id=t.id
+left JOIN taxonomy t2 on t.parent_id=t2.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
 """
@@ -411,6 +412,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             #poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
             if r[3]!="":
                 poptxt+="<em>by</em> %s"%(r[3])
+            poptxt+="<br><em>parent</em> "+ntcv(r['taxoparent'])
             poptxt+="<br><em>in</em> "+ntcv(r['samplename'])
             for k,v in popoverfieldlist.items():
                 if k=='classif_auto_score' and r["classif_qual"]=='V':

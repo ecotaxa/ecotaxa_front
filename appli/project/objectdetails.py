@@ -5,7 +5,7 @@ from pathlib import Path
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask.ext.security import login_required
 from flask_security.decorators import roles_accepted
-import os,time,math,collections,html,urllib.parse
+import os,time,math,collections,html,urllib.parse,datetime
 from appli.database import GetAll,GetClassifQualClass,db
 
 
@@ -118,7 +118,7 @@ def objectdetails(objid):
     <table class='table table-bordered table-condensed' data-table='object'><tr>
     <td style=' background-color: #f2f2f2;' data-edit='longitude'><b>longitude</td><td>{0}</td>
     <td style=' background-color: #f2f2f2;' data-edit='latitude'><b>latitude</td><td>{1}</td>
-    <td style=' background-color: #f2f2f2;'><b>Date</td><td>{2}</td>
+    <td style=' background-color: #f2f2f2;' data-edit='objdate'><b>Date</td><td>{2}</td>
     <td style=' background-color: #f2f2f2;'><b>Time (daytime)</td><td>{3} ({10})</td>
     </tr><tr><td style=' background-color: #f2f2f2;' data-edit='depth_min'><b>Depth min</td><td>{4}</td>
     <td style=' background-color: #f2f2f2;' data-edit='depth_max'><b>Depth max</td><td>{5}</td>
@@ -237,6 +237,8 @@ def objectdetailsupdate(objid):
     newval=gvp("newval")
     try:
         dbval=newval
+        if field=="objdate":
+            dbval=datetime.date(int(newval[0:4]), int(newval[5:7]), int(newval[8:10]))
         if dbval=="": dbval=None
         setattr(target, field,dbval)
         db.session.commit()

@@ -12,6 +12,7 @@
 {% block body %}
 <style>
 .table-condensed tr td {padding-top: 0px  !important;padding-bottom: 0px  !important; } {# On condense encore plus #}
+#TblTaxo td:nth-child(1) {font-size: small;padding: 0}
 </style>
 <h3>AUTOMATIC CLASSIFICATION : SETTINGS </h3>
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
@@ -120,9 +121,9 @@ select Categories with more than <input type="text" id="selectlimit" value="5" s
 Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'checked', true )">ALL</a>
     / <a href="#tbltop" onclick="$('#TblTaxo input').prop( 'checked', false );">None</a>
 <table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
-    <tr><th >Select</th><th width="200" style="text-align: center;">Category</th><th style="text-align: center;">Nbr</th><th  style="text-align: center;">%</th></tr>
+    <tr><th colspan="2">(id) Select</th><th width="200" style="text-align: center;">Category</th><th style="text-align: center;">Nbr</th><th  style="text-align: center;">%</th></tr>
     {%   for r in g.TaxoList %}
-        <tr><td><input type="checkbox" value="Y" name="taxo{{ r[0] }}" data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" {{ r[4] }}>{{ r[0] }}</td><td>{{ r[1] }} </td><td class="rightfixedfont">{{ r[2] }}</td><td class="rightfixedfont">{{ r[3] }} %</td></tr>
+        <tr><td>({{ r[0] }})</td><td><input type="checkbox" value="Y" name="taxo{{ r[0] }}" data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" {{ r[4] }}></td><td>{{ r[1] }} </td><td class="rightfixedfont">{{ r[2] }}</td><td class="rightfixedfont">{{ r[3] }} %</td></tr>
     {% endfor %}
 </table>
 </td><td width="20"></td><td valign="top">

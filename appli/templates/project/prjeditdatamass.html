@@ -23,6 +23,16 @@
     </table>
 
     </form>
+
+<div class="panel panel-default" style="margin: 30px 10px">
+  <div class="panel-heading">Notes</div>
+  <div class="panel-body">
+    Date must be filled with this format YYYY-MM-DD<br>
+    Time must be filled with this format HH-MM-SS (HH=0-23)<br>
+    Most ID (except orig_id) are internals ID.<br>
+    Classif_id update will cause update of classif_who and classif_when and insert a line in historical.
+  </div>
+</div>
 <script>
     $("#field").select2({
         placeholder: "Select your field"

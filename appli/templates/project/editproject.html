@@ -21,14 +21,16 @@
 <form class="form-horizontal" method="post" action="?" id="form1">
     <h3>Edit project # {{ data.projid }} - <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;">Edit privileges only</a></h3>
   <table class=table width="100%">
-    <tr><td width="200px">Project Title </td><td colspan=2 width="500px">
+    <tr><td width="200px">Project Title </td><td colspan=2 >
         <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}" style="width: 500px" >
     </td></tr>
     <tr><td>Visible for all visitors<br>(only validated objects)</td><td>
            <input type="checkbox"  style="height:20px;" id="visible" name="visible"  value="Y" {{ 'checked' if data.visible else "" }}>
-    </td></tr>
+    </td>
+      <td width="600px"></td>
+    </tr>
 
-<tr><td>Status</td><td width="300px">
+<tr><td>Status</td><td >
         {{ selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
   </td></tr>
 <tr><td>Project Description</td><td>
@@ -37,7 +39,7 @@
 
   <tr><td>Definition of preset for manual sorting </td><td>
         <input type="text"  class="form-control" id="initclassiflist" name="initclassiflist"  value="{{ data.initclassiflist|default('',true) }}"><br>
-      <select name='inittaxo' id='inittaxo' class="taxolb" style="width: 280px;" multiple>
+      <select name='inittaxo' id='inittaxo' class="taxolb" style="width: 100%;" multiple>
     {% for r in g.predeftaxo %}
       <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
     {% endfor %}
