@@ -96,7 +96,7 @@ where projid =%d and classif_qual='V'"""%PrjId
       font-style: italic;
     }
   </style>
-  <h2>Confusion matrix  <a href='?astsv=Y' style='font-size:medium'> - TSV Export</a> </h2>
+  <h2>Confusion matrix - <a href='?astsv=Y' style='font-size:medium' class='btn btn-primary btn-xs'>TSV Export</a> </h2>
   <p>This matrix is refreshed every time you access it. For more information on confusion statistics, please see the <a href='https://en.wikipedia.org/wiki/Precision_and_recall'>very well written Wikipedia page</a>.</p>
   
     <table class='table table-bordered table-hover table-condensed' style='font-size:12px;'>

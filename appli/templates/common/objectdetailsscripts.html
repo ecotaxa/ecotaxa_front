@@ -152,7 +152,13 @@ function editattr(o) {
   if (ret!==null) {
     $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>');
     $("#PendingChangesPop").load("/objectdetailsupdate/{{ objid}}",
-          {table: tablename,field: td.data("edit"),newval: ret } );
+          {table: tablename,field: td.data("edit"),newval: ret }
+    ,function(response, status, xhr){
+      if(status!="error")
+        if(response.indexOf("label-success")>0)
+          nexttd.text(ret);  {# MAJ immediate du texte local en cas de success de MAJ #}
+    });
+
   }
 }
 {% endif %}

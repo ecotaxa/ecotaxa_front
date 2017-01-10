@@ -12,7 +12,7 @@ def GetSQLFilter(filtres,sqlparam,currentuserid):
         whereclause+=" and o.classif_qual"
         if filtres["statusfilter"]=="NV":
             whereclause+="!='V'"
-        if filtres["statusfilter"] == "PV":
+        elif filtres["statusfilter"] == "PV":
             whereclause += " in ('V','P')"
         elif filtres["statusfilter"]=="NVM":
             whereclause+="='V' and o.classif_who!="+currentuserid

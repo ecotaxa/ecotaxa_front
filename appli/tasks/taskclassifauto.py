@@ -103,7 +103,7 @@ class TaskClassifAuto(AsyncTask):
         logging.info('Model fit duration :  %0.3f s', time.time() - TStep)
         NbrItem=GetAll("select count(*) from obj_head where projid={0} {1} ".format(Prj.projid,PerimeterWhere))[0][0]
         if NbrItem==0:
-            raise Exception ("No object to classify, perhaps all object already classified or you should adjust the perimeter settings ")
+            raise Exception ("No object to classify, perhaps all object already classified or you should adjust the perimeter settings as it was probably set to 'Not Validated' ")
         sql="select objid"
         for c in ColsPrj:
             sql+=",coalesce({0},{1}) ".format(c,DefVal[MapColTargetToBase[c]])

@@ -3,7 +3,7 @@ from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqu
 from PIL import Image
 from flask import render_template,  flash,request,g
 import logging,os,csv,sys,time
-import datetime,shutil,random,zipfile
+import datetime,shutil,random,zipfile,re
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,LoadTask,DoTaskClean
 from appli.database import GetAll
@@ -212,7 +212,7 @@ class TaskImport(AsyncTask):
                                         except ValueError:
                                             self.LogErrorForUser("Invalid Time value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
                                     elif ColName=='object_annotation_category':
-                                        v=self.param.TaxoMap.get(v,v) # Applique le mapping
+                                        v=self.param.TaxoMap.get(v.lower(),v) # Applique le mapping
                                         self.param.TaxoFound[v.lower()]=None #creation d'une entrée dans le dictionnaire.
                                     elif ColName=='object_annotation_person_name':
                                         self.param.UserFound[v.lower()]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
@@ -275,6 +275,20 @@ class TaskImport(AsyncTask):
             for rec in self.pgcur:
                 self.param.TaxoFound[rec[1]]=rec[0]
             logging.info("Taxo Found = %s",self.param.TaxoFound)
+            # recheche des elements de la forme "Taxon (parent)
+            for InputTaxon,MappedTaxon in self.param.TaxoFound.items() :
+                if MappedTaxon is None:
+                    resfind = re.findall(R"([^(]+)\(([^\)]+)", InputTaxon)
+                    if len(resfind)==1 and len(resfind[0])==2: # trouve les 2 parties
+                        Taxon,Parent=resfind[0]
+                        ResSQL=GetAll("""select t.id,lower(t.name),lower(t2.name) from taxonomy t
+                                        join taxonomy t2 on t.parent_id=t2.id
+                                        where lower(t.name) = %s
+                                        and lower(t2.name)=%s"""
+                                      ,(Taxon.strip().lower(),Parent.strip().lower()))
+                        if len(ResSQL)>0:
+                            self.param.TaxoFound[InputTaxon]=ResSQL[0]['id']
+
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             if len(NotFoundTaxo)>0:
                 logging.info("Some Taxo Not Found = %s",NotFoundTaxo)
@@ -366,7 +380,7 @@ class TaskImport(AsyncTask):
                                     v2=CleanValue(lig.get('object_annotation_time','000000')).zfill(6)
                                     FieldValue=datetime.datetime(int(v[0:4]), int(v[4:6]), int(v[6:8]),int(v2[0:2]), int(v2[2:4]), int(v2[4:6]))
                                 elif FieldName=='classif_id':
-                                    v=self.param.TaxoMap.get(v,v) # Applique le mapping initial d'entrée
+                                    v=self.param.TaxoMap.get(v.lower(),v) # Applique le mapping initial d'entrée
                                     FieldValue=self.param.TaxoFound[ntcv(v).lower()]
                                 elif FieldName=='classif_who':
                                     FieldValue=self.param.UserFound[ntcv(v).lower()].get('id',None)
