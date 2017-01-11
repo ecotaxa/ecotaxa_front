@@ -113,6 +113,8 @@ function OpenMap(projid) {
 
   if($("#taxochild").prop("checked"))
     url+="&taxochild=1";
+  if($("#taxofilterchild").val()=="Y")
+    url+="&taxochild=1";
   $("#PopupDetails .modal-content").load(url);
 }
 function ClearCoord() {

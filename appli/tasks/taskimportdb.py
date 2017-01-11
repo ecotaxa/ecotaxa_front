@@ -441,7 +441,7 @@ class TaskImportDB(AsyncTask):
                                 u.email=self.param.UserFound[orig]["email"]
                                 u.name=self.param.UserFound[orig]["name"]
                                 u.password=self.param.UserFound[orig]["password"]
-                                u.organisation=ntcv(self.param.UserFound[orig]["organisation"])+" Imported on "+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                                u.organisation=ntcv(self.param.UserFound[orig]["organisation"]) #+" Imported on "+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                                 u.active=True
                                 db.session.add(u)
                                 db.session.commit()
