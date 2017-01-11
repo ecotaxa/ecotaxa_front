@@ -50,19 +50,26 @@
 
   </div>
 
-  <script>
-  function SetTaxoFilter(taxofiltervalue,taxofilterlabel){
-      //debugger;
-      if(taxofiltervalue==false){
-          $("#taxofilter").val("");
-          $('#taxoclearspan').html("");
-          $("#taxofilterlabel").val("");
-          if(taxofilterlabel==-1) LoadRightPane();
-          return;
-      }
-      $("#taxofilter").val(taxofiltervalue);
-      $("#taxofilterlabel").val(taxofilterlabel);
-      $('#taxoclearspan').html('<span class="label label-default" onclick="SetTaxoFilter(false,-1)">Clear '+taxofilterlabel+'</span>')
+<script>
+  function SetTaxoFilter(taxofiltervalue,taxofilterlabel,withchild){
+    //debugger;
+    var WithChild='N';
+    if(withchild==true){
+      taxofilterlabel+=" (with child)";
+      WithChild='Y';
+    }
+    if(taxofiltervalue==false){
+      $("#taxofilter").val("");
+      $('#taxoclearspan').html("");
+      $("#taxofilterlabel").val("");
+      if(taxofilterlabel==-1) LoadRightPane();
+      return;
+    }
+    $("#taxofilter").val(taxofiltervalue);
+    $("#taxofilterlabel").val(taxofilterlabel);
+    $("#taxofilterchild").val(WithChild);
+
+    $('#taxoclearspan').html('<span class="label label-default" onclick="SetTaxoFilter(false,-1)">Clear '+taxofilterlabel+'</span>')
   }
 function CategExpanderClick(e){
     e.stopPropagation();
@@ -98,6 +105,7 @@ function CategExpanderClick(e){
               //td.css('background-color', '#80FF80')
               //console.log(o, id ,droptaxoid,droptaxoname);
           }
+          UpdateSelectedCounter();
           NbrChanged=LstTd.length;
           // Ces resizes ralentissent mais permettent de recaller les zoom tracker suite au changement de taille des taille de taxo
           // sur table 1000 image à 10% ligne 42 ca Freeze 4s
@@ -298,45 +306,62 @@ $(window).mousemove(function (e) {
 var taxotree={{ taxotree|safe }};
 
 $(document).ready(function() {
-    {#  Initialisation Context Menu  #}
-    $.contextMenu({
-    // define which elements trigger this menu
-    selector: ".classiftab td",
-    // define the elements of the menu
-    build: function($trigger, e) {
-        res= {
-            callback: function (key, options) {
-                var taxoid=parseInt(key.substr(1));
-                var taxoname=taxotree[taxoid][1];
-                $('#taxolbanno').append($('<option>', { value: taxoid,text: taxoname}));
-                var sel=[];
-                sel.push(taxoid);
-                $('#taxolbanno').val(sel);
-                $('#taxolbanno').change();
-                AssignTaxoLbToSelection();
-            },
-            items: {}
-        };
-         var taxoid=$(e.currentTarget).attr('taxoid');
-         var taxoname=$(e.currentTarget).find(".taxodrop").text();
-        var Arr=[]
-         //res["items"]["o"+taxoid]={name:taxoname}
-        Arr.unshift({key:"o"+taxoid,name:taxoname})
-        for(var i=0;i<50;i++) {
-            taxoid=taxotree[taxoid][2]; // Go to parent
-            if (taxoid==null) break;
-            taxoname=taxotree[taxoid][1];
-            //res["items"]["o"+taxoid]={name:taxoname};
-            //res["items"].unshift("o"+taxoid])={name:taxoname};
-            Arr.unshift({key:"o"+taxoid,name:taxoname})
+  {#  Initialisation Context Menu  #}
+  $.contextMenu({
+  // define which elements trigger this menu
+  selector: ".classiftab td",
+  // define the elements of the menu
+  build: function($trigger, e) {
+    res= {
+      callback: function (key, options) {
+        var prefix=key.substr(0,1);
+        if(prefix=='X') return; {# Menu informatifs #}
+        var taxoid=parseInt(key.substr(1));
+        var taxoname=taxotree[taxoid][1];
+        if(prefix=='f') {
+{#          console.log("filter by ",taxoid,taxoname);#}
+          SetTaxoFilter(taxoid,taxoname,true);
+          LoadRightPane();
         }
-        for	(index = 0; index < Arr.length; index++)
-            res["items"][Arr[index]["key"]]={name:Arr[index]["name"]}
-
-        console.log(res["items"]);
-        return res;
+        if(prefix=='o') {
+          $('#taxolbanno').append($('<option>', {value: taxoid, text: taxoname}));
+          var sel = [];
+          sel.push(taxoid);
+          $('#taxolbanno').val(sel).change();
+          AssignTaxoLbToSelection();
+        }
+      },
+      items: {}
+    };
+    var taxoid=$(e.currentTarget).attr('taxoid');
+    var taxoname;
+    var Arr=[]
+{#     On insere d'abord en bas le filtrage #}
+    for(var i=0;i<50;i++) {
+        taxoid=taxotree[taxoid][2]; // Go to parent
+        if (taxoid==null) break;
+        taxoname=taxotree[taxoid][1];
+        Arr.unshift({key:"f"+taxoid,name:taxoname})
     }
-}); {#  Initialisation Context Menu  #}
+    Arr.unshift({key:"X2",name:"-- FILTER WITH CHILD -- "});
+    Arr.unshift({key:"X1",name:"_____________________"});
+
+    taxoid=$(e.currentTarget).attr('taxoid');
+    taxoname=$(e.currentTarget).find(".taxodrop").text();
+    Arr.unshift({key:"o"+taxoid,name:taxoname})
+    for(var i=0;i<50;i++) {
+        taxoid=taxotree[taxoid][2]; // Go to parent
+        if (taxoid==null) break;
+        taxoname=taxotree[taxoid][1];
+        Arr.unshift({key:"o"+taxoid,name:taxoname})
+    }
+    Arr.unshift({key:"X3",name:"-- CLASSIFY TO -- "});
+
+    for	(index = 0; index < Arr.length; index++)
+        res["items"][Arr[index]["key"]]={name:Arr[index]["name"]}
+    return res;
+    }
+  }); {#  Initialisation Context Menu  #}
 }); {#  Ready  #}
 
 function ToggleZeroCount(){

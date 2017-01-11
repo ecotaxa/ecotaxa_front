@@ -58,6 +58,7 @@
 <input type="hidden" id="projid" value="{{ g.Projid }}">
 <input type="hidden" id="taxofilter" value=""  autocomplete="off">
 <input type="hidden" id="taxofilterlabel" value=""  autocomplete="off">
+<input type="hidden" id="taxofilterchild" value=""  autocomplete="off">
 <input type="hidden" id="pageoffset" value="{{ data.pageoffset }}"  autocomplete="off">
 <table><tr><td>
     <button type="button" class="btn btn-xs btn-primary" onclick="LoadRightPane();" style="width: 260px;">
@@ -132,6 +133,7 @@
     <button type=button class="btn btn-primary btn-xs" onclick="LoadRightPane();">
       <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
     </button>
+    </td><td><span id="nbrselected" style="margin-left: 10px;"></span>&nbsp;
 </td>
 </tr>
 </table>
@@ -255,6 +257,7 @@ function LoadRightPane(NoAjax,SaveInProfile){
     $(".activeTaxo").removeClass("activeTaxo");
     if(jqtaxofilter.val()!="")
         $("#TabA").find("[taxoid="+jqtaxofilter.val()+"]").addClass("activeTaxo");
+    req['taxochild']=$("#taxofilterchild").val();
     req['ipp']=$("#ipp").val();
     req['zoom']=$("#zoom").val();
     req['sortby']=$("#sortby").val();
@@ -408,11 +411,11 @@ function RefreshClassifTab(KeepHiddens)
     $("#TabA").load("/prjGetClassifTab/"+$("#projid").val(),req,function() {
         $.each(HiddenItems, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
             $('.classiftab td[taxoid=' + v + ']').css('display', 'none');
-            console.log(v);
+{#            console.log(v);#}
         });
         $.each(HorizArrow, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
             $('.classiftab td[taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
-            console.log("R", v);
+{#            console.log("R", v);#}
         });
         $('#divclassiftab').scrollTop(PosScrollBar);
     });
@@ -442,7 +445,7 @@ $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip();
     $("#titlediv").width($("#titlediv").parent().width());
     {% if g.taxofilter %}
-    SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}");
+    SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild=='Y' }});
     {% endif %}
 
 
@@ -490,6 +493,12 @@ $(document).ready(function() {
         },placeholder: "Text field",dropdownCssClass:"width240"});
 
 });
+function UpdateSelectedCounter() {
+  var nbr=$("#column-right td.ui-selected").size();
+  if (nbr>0) nbr=nbr+" Selected";
+  else nbr="";
+  $('#nbrselected').text(nbr);
+}
 function PostAddImages(){
         $(document).scrollTop(0);
         // Required to  have Select2 component working on Bootstrap Popup
@@ -508,8 +517,9 @@ function PostAddImages(){
 {#        jQuery('.imgtab td img').draggable({revert:true,revertDuration:0});#}
         // Make the cell clickable for selection
         jQuery('.imgtab td').click(function(e){
-            if($(e.target).hasClass('linestart'))
-                if (e.shiftKey) { // Unselect line
+            if($(e.target).hasClass('linestart')) {
+                var nbrselectedinline=$(e.target).closest('tr').find('td.ui-selected').size();
+                if ((e.shiftKey)||(nbrselectedinline>0)) { // Unselect line
                     $(e.target).closest('tr').find('td').removeClass('ui-selected');
                     if (window.getSelection) {
                       if (window.getSelection().empty) {  // Chrome
@@ -520,20 +530,24 @@ function PostAddImages(){
                     } else if (document.selection) {  // IE?
                       document.selection.empty();
                     }
+                  UpdateSelectedCounter();
                   return;
-                }
+                } }
             if ((e.ctrlKey)||(e.metaKey)) {#  20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple #}
                 $('.ui-selected').removeClass('ui-selected');
             if($(e.target).hasClass('linestart')) // select line (except this first column)
-                $(e.target).closest('tr').find('td').addClass('ui-selected');
-            $(e.target).closest('td').toggleClass('ui-selected');
+                $(e.target).closest('tr').find('td:nth-child(1n+2)').addClass('ui-selected');
+            else
+              $(e.target).closest('td').toggleClass('ui-selected');
+            UpdateSelectedCounter()
             });
         // Make ZoomTracker Clickable for selection
         jQuery('body').delegate('.zoomtracker','click',function(e){
             {# if ((!e.ctrlKey)&&(!e.metaKey))   20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple#}
             if ((e.ctrlKey)||(e.metaKey))
                 $('.ui-selected').toggleClass('ui-selected');
-            $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected')
+            $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected');
+            UpdateSelectedCounter();
             });
         // setup zoomtracker creation tracking to make them draggable
         var target = $( "body" )[0];
@@ -580,11 +594,12 @@ jQuery('.SpanSelectAll').click(SelectAll);
 }  //PostAddImages
 
 function SelectAll(e){
-            if (!e.shiftKey)
-                jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
-            else
-                jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
-                }
+  if (!e.shiftKey)
+      jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
+  else
+      jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
+  UpdateSelectedCounter()
+}
 
 function ClearAllFilterCriteria(){
     ClearCoord();

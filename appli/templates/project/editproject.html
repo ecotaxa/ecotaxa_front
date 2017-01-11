@@ -19,7 +19,7 @@
 
 {% block body %}
 <form class="form-horizontal" method="post" action="?" id="form1">
-    <h3>Edit project # {{ data.projid }} - <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;">Edit privileges only</a></h3>
+    <h3>Edit project # {{ data.projid }} - <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;" class="btn btn-xs btn-primary">Edit privileges only</a></h3>
   <table class=table width="100%">
     <tr><td width="200px">Project Title </td><td colspan=2 >
         <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}" style="width: 500px" >

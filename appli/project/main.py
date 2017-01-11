@@ -206,10 +206,10 @@ def indexPrj(PrjId):
     right='dodefault'
     if gvg("taxo")!="":
         g.taxofilter=gvg("taxo")
+        g.taxochild = gvg("taxochild")
         g.taxofilterlabel= GetAll("select name from taxonomy where id=%s ",(gvg("taxo"),))[0][0]
     else:
-        g.taxofilter=""
-        g.taxofilterlabel=""
+        g.taxofilter=g.taxofilter = g.taxofilterlabel=""
 
     classiftab=GetClassifTab(Prj)
     g.ProjectTitle=Prj.title
