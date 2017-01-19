@@ -369,7 +369,7 @@ class Job(object):
 # create a Scheduler instance:
 
 default_scheduler = Scheduler()
-jobs = default_scheduler.jobs  # todo: should this be a copy, e.g. jobs()?
+jobs = default_scheduler.jobs  # should this be a copy, e.g. jobs()?
 
 
 def every(interval=1):
