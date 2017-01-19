@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
 from pathlib import Path
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask.ext.security import login_required
+from flask_security import Security, SQLAlchemyUserDatastore
+from flask_security import login_required
 from flask_security.decorators import roles_accepted
 from appli.search.leftfilters import getcommonfilters
 import os,time,math,collections,appli,appli.project.sharedfilter as sharedfilter
@@ -67,7 +67,7 @@ def PrjEditDataMass(PrjId):
         if len(filtres):
             sql += " "+sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
         sql += ")"
-        if field=='classif_id':  #TODO ICI
+        if field=='classif_id':
             sqlhisto="""insert into objectsclassifhisto(objid,classif_date,classif_type,classif_id,classif_qual,classif_who)
                           select objid,classif_when,'M', classif_id,classif_qual,classif_who
                             from objects o

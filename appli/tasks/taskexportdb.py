@@ -6,7 +6,7 @@ import zipfile,psycopg2.extras
 from time import time
 from pathlib import Path
 from zipfile import ZipFile
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll,ExecSQL,GetDBToolsDir
 

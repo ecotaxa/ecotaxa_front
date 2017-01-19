@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,gvg,db,gvp,database,ntcv
 from appli.database import GetAll
 from psycopg2.extensions import QuotedString
@@ -11,7 +11,7 @@ def searchtaxo():
     term=gvg("q")
     if len(term)<=2:
         # return "[]"
-        if not current_user.is_authenticated():
+        if not current_user.is_authenticated:
             return "[]"
         # current_user.id
         with app.MRUClassif_lock:

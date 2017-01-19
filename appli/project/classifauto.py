@@ -2,7 +2,7 @@
 from appli import db,app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
 from appli.database import GetAll,GetAssoc2Col
 from time import time
-from flask.ext.security import login_required
+from flask_security import login_required
 from flask import flash,g,Response
 import numpy as np
 import io,base64

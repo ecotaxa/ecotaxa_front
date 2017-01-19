@@ -2,8 +2,8 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from appli import db,app
-from flask.ext.security import  UserMixin, RoleMixin
-from flask.ext.login import current_user
+from flask_security import  UserMixin, RoleMixin
+from flask_login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence,func
 from sqlalchemy.exc import DBAPIError

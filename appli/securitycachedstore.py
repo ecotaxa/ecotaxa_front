@@ -1,6 +1,6 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from flask.ext.security import SQLAlchemyUserDatastore
+from flask_security import SQLAlchemyUserDatastore
 
 import werkzeug.contrib.cache
 import threading

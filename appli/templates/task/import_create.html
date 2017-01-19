@@ -72,7 +72,7 @@
 					<ul>
 						<li><code>object_annotation_date</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
 						<li><code>object_annotation_time</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
-						<li><code>object_annotation_category</code> [t] : class of the object</li>
+						<li><code>object_annotation_category</code> [t] : class of the object with optionnaly its direct parent between brackets "Cnidaria (Hydrozoa)"</li>
 						<li><code>object_annotation_person_name</code> [t] : name of the person who identified the object</li>
 						<li><code>object_annotation_person_email</code> [t] : email of the person who identified the object</li>
 						<li><code>object_annotation_status</code> [t] : <span class="text-info">predicted</span>, <span class="text-info">dubious</span>, or <span class="text-info">validated</span></li>
@@ -218,7 +218,7 @@
 					<label for="port" class="control-label">Optional taxonomy mapping</label>
 					<p class="help-block">This allows to change the name of the categories of previously classified objects to match the names in the UniEuk taxonomic framework included in the application.<br>Examples:<br>
 					crust_cop = Copepoda<br>
-					gelatinous medusae = Cnidaria</p>
+					gelatinous medusae = Cnidaria (Hydrozoa) <span style="margin-left: 20px;"></span></p>
 
           <table><tr><td>Imported name : <input type="text" id="oldname" class="form-control" style="width: 100px;display: inline-block;">
           UniEuk name :&nbsp; </td><td ><div class="input-group" >
@@ -238,7 +238,7 @@
 			</div>
 
     <input type="hidden" name="starttask" value="Y">
-			<button type="submit" class="btn btn-lg btn-block btn-primary">Start import</button>
+			<button type="submit" class="btn btn-lg btn-block btn-primary">Start import Images and TSV files</button>
     </div>
   </div>
 
@@ -251,9 +251,37 @@
     <h3 class="panel-title">Image Only import </h3>
   </div>
   <div class="panel-body">
-
-<a href="/prj/simpleimport/{{ g.prjprojid }}">If you have only image and no data file you can use the simple import here.</a>
+    If you have only image and no data file you can use the simple import here.
+<div class="col-sm-8 col-sm-offset-2">
+<a href="/prj/simpleimport/{{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start Images only</a>
+  </div>
     </div></div>
+
+
+  <div class="panel panel-default" style="margin: 20px 5px">
+  <div class="panel-heading">
+    <h3 class="panel-title">Re-import and Update Metadata</h3>
+  </div>
+  <div class="panel-body">
+If you have already loaded your images and you want update your metadata.
+    <div class="col-sm-8 col-sm-offset-2">
+<a href="/Task/Create/TaskImportUpdate?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start re-import TSV files to update metadata and data</a>
+      </div>
+    </div></div>
+
+
+  <div class="panel panel-default" style="margin: 20px 5px">
+  <div class="panel-heading">
+    <h3 class="panel-title">Import from another database</h3>
+  </div>
+  <div class="panel-body">
+To import from another Ecotaxa instance in an empty project.
+    <div class="col-sm-8 col-sm-offset-2">
+<a href="/Task/Create/TaskImportDB?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start import a project exported from another instance</a>
+      </div>
+    </div></div>
+
+
 <script>
 function TaxoHelperBtAdd(){
   var s=$('#oldname').val()+"="+$('#taxolb option:selected').text();

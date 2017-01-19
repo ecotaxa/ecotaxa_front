@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,ntcv,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,nonetoformat,CreateDirConcurrentlyIfNeeded
 from pathlib import Path,PurePath
-from PIL import Image
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask.ext.security import login_required
+from PIL import  Image
+from flask_security import Security, SQLAlchemyUserDatastore
+from flask_security import login_required
 from flask_security.decorators import roles_accepted
 import os,time,math,collections,html,urllib.parse,zipfile,shutil
 from appli.database import GetAll,GetClassifQualClass,db

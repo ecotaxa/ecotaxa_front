@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
-from flask.ext.login import current_user
+from flask_login import current_user
 from PIL import Image
 from flask import Blueprint, render_template, g, flash,request
 from io import StringIO

@@ -61,6 +61,7 @@ class TaskImportUpdate(AsyncTask):
                 self.ProjectId=None
                 self.Mapping={}
                 self.TaxoMap={}
+                self.updateclassif="N"
 
 
     def __init__(self,task=None):
@@ -79,8 +80,6 @@ class TaskImportUpdate(AsyncTask):
         logging.info("Input Param = %s"%(self.param.__dict__))
         logging.info("Start Step 1")
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        LoadedFiles=ntcv(Prj.fileloaded).splitlines()
-        logging.info("LoadedFiles = %s",LoadedFiles)
         WarnMessages=[]
         if getattr(self.param,'IntraStep',0)==0:
             #Sous tache 1 On dezippe ou on pointe sur le repertoire source.
@@ -202,13 +201,16 @@ class TaskImportUpdate(AsyncTask):
                                         except ValueError:
                                             self.LogErrorForUser("Invalid Time value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
                                     elif ColName=='object_annotation_category':
-                                        v=self.param.TaxoMap.get(v,v) # Applique le mapping
-                                        self.param.TaxoFound[v.lower()]=None #creation d'une entrée dans le dictionnaire.
+                                        if self.param.updateclassif=="Y":
+                                            v=self.param.TaxoMap.get(v,v) # Applique le mapping
+                                            self.param.TaxoFound[v.lower()]=None #creation d'une entrée dans le dictionnaire.
                                     elif ColName=='object_annotation_person_name':
-                                        self.param.UserFound[v.lower()]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
+                                        if self.param.updateclassif == "Y":
+                                            self.param.UserFound[v.lower()]={'email':CleanValue(lig.get('object_annotation_person_email',''))}
                                     elif ColName=='object_annotation_status':
-                                        if v!='noid' and v.lower() not in database.ClassifQualRevert:
-                                            self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
+                                        if self.param.updateclassif == "Y":
+                                            if v!='noid' and v.lower() not in database.ClassifQualRevert:
+                                                self.LogErrorForUser("Invalid Annotation Status '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
 
                             #Analyse l'existance du fichier Image
                             ObjectId=CleanValue(lig.get('object_id',''))
@@ -268,8 +270,6 @@ class TaskImportUpdate(AsyncTask):
         logging.info("Users Mapping = %s",self.param.UserFound)
         # Mise à jour du mapping en base
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        LoadedFiles=ntcv(Prj.fileloaded).splitlines()
-        logging.info("LoadedFiles = %s",LoadedFiles)
         Prj.mappingobj=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='obj_field' and v['field'][0]in ('t','n') and v.get('title')!=None})
         Prj.mappingsample=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='sample' and v['field'][0]in ('t','n') and v.get('title')!=None})
         Prj.mappingacq=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='acq' and v['field'][0]in ('t','n') and v.get('title')!=None})
@@ -328,14 +328,21 @@ class TaskImportUpdate(AsyncTask):
                                         v=v.zfill(6)
                                         FieldValue=datetime.time(int(v[0:2]), int(v[2:4]), int(v[4:6]))
                                 elif FieldName=='classif_when':
+                                    if self.param.updateclassif != "Y":
+                                        continue
                                     v2=CleanValue(lig.get('object_annotation_time','000000')).zfill(6)
                                     FieldValue=datetime.datetime(int(v[0:4]), int(v[4:6]), int(v[6:8]),int(v2[0:2]), int(v2[2:4]), int(v2[4:6]))
                                 elif FieldName=='classif_id':
-                                    v=self.param.TaxoMap.get(v,v) # Applique le mapping initial d'entrée
+                                    if self.param.updateclassif != "Y":
+                                        continue
                                     FieldValue=self.param.TaxoFound[ntcv(v).lower()]
                                 elif FieldName=='classif_who':
+                                    if self.param.updateclassif != "Y":
+                                        continue
                                     FieldValue=self.param.UserFound[ntcv(v).lower()].get('id',None)
                                 elif FieldName=='classif_qual':
+                                    if self.param.updateclassif != "Y":
+                                        continue
                                     FieldValue=database.ClassifQualRevert.get(v.lower())
                                 else: # c'est un champ texte sans rien de special
                                     FieldValue=v
@@ -355,11 +362,11 @@ class TaskImportUpdate(AsyncTask):
                             if  hasattr(Objs[t],'orig_id') and Objs[t].orig_id is not None: # si des colonnes sont definis sur les tables auxilaires
                                 if Objs[t].orig_id in Ids[t]["ID"]: # si on référence un auxiliaire existant
                                     if t=='sample': # on ramene l'enregistrement
-                                        ObjAux = database.Samples.query.filter_by(orig_id=Objs[t].orig_id).first()
+                                        ObjAux = database.Samples.query.filter_by(sampleid=Ids[t]["ID"][Objs[t].orig_id]).first()
                                     elif t=='acq':
-                                        ObjAux = database.Acquisitions.query.filter_by(orig_id=Objs[t].orig_id).first()
+                                        ObjAux = database.Acquisitions.query.filter_by(acquisid=Ids[t]["ID"][Objs[t].orig_id]).first()
                                     elif t=='process':
-                                        ObjAux = database.Process.query.filter_by(orig_id=Objs[t].orig_id).first()
+                                        ObjAux = database.Process.query.filter_by(processid=Ids[t]["ID"][Objs[t].orig_id]).first()
                                     else: ObjAux=None
                                     if ObjAux is not None: # si on a bien trouvé l'enregistrement
                                         for attr, value in Objs[t].__dict__.items(): # Pour les champs présents dans l'objet temporaire (dans le TSV donc)
@@ -408,8 +415,6 @@ class TaskImportUpdate(AsyncTask):
                         if (TotalRowCount%100)==0:
                             self.UpdateProgress(100*TotalRowCount/self.param.TotalRowCount,"Processing files %d/%d"%(TotalRowCount,self.param.TotalRowCount))
                     logging.info("File %s : %d row Processed",relname.as_posix(),RowCount)
-                    LoadedFiles.append(relname.as_posix())
-                    Prj.fileloaded="\n".join(LoadedFiles)
                     db.session.commit()
         self.pgcur.execute("""update obj_head o
                             set imgcount=(select count(*) from images where objid=o.objid)
@@ -434,6 +439,7 @@ class TaskImportUpdate(AsyncTask):
             txt+="<h3>Task Creation</h3>"
             Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
             g.prjtitle=Prj.title
+            g.prjprojid=Prj.projid
             g.prjmanagermailto=Prj.GetFirstManagerMailto()
             txt=""
             if Prj.CheckRight(2)==False:
@@ -442,7 +448,7 @@ class TaskImportUpdate(AsyncTask):
                 FileToSave=None
                 FileToSaveFileName=None
                 self.param.ProjectId=gvg("p")
-                self.param.SkipAlreadyLoadedFile=gvp("skiploaded")
+                self.param.updateclassif=gvp("updateclassif")
                 TaxoMap={}
                 for l in gvp('TxtTaxoMap').splitlines():
                     ls=l.split('=',1)

@@ -4,7 +4,7 @@ from flask import  render_template, g, flash,request
 import logging
 import time
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
-from appli.database import GetAll
+from appli.database import GetAll,ExecSQL
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
@@ -20,8 +20,12 @@ class TaskClassifAuto(AsyncTask):
                 self.BaseProject=None
                 self.CritVar=None
                 self.Taxo=""
+                self.TargetTaxo= ""
                 self.Perimeter=""
+                self.resetpredicted=""
                 self.keeplog="no"
+                self.learninglimit=""
+                self.CustSettings={}
 
     def __init__(self,task=None):
         super().__init__(task)
@@ -53,6 +57,8 @@ class TaskClassifAuto(AsyncTask):
         if 'posttaxomapping' in self.param.CustSettings:
             PostTaxoMapping = {int(el[0].strip()):int(el[1].strip()) for el in [el.split(':') for el in self.param.CustSettings['posttaxomapping'].split(',')]}
             logging.info("PostTaxoMapping = %s ", PostTaxoMapping )
+        if self.param.learninglimit:
+            self.param.learninglimit=int(self.param.learninglimit) # convert
         for c in CritVar:
             if c not in MapPrj:
                 logging.info("Variable %s not available in the classified project",c)
@@ -66,6 +72,12 @@ class TaskClassifAuto(AsyncTask):
         for c in ColsPrjBase:
             sql+=",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {0}".format(c)
         sql+=" from objects where projid={0} and classif_id is not null and classif_qual='V'".format(PrjBase.projid)
+        if self.param.learninglimit:
+            sql += """ and objid in ( select objid from (
+                        select objid,row_number() over(PARTITION BY classif_id order by random_value) rang
+                        from obj_head
+                        where projid={0} and classif_id is not null
+                        and classif_qual='V' ) q where rang <={1} ) """.format(PrjBase.projid,self.param.learninglimit)
         DefVal=GetAll(sql)[0]
         sql="select objid,classif_id"
         for c in ColsPrjBase:
@@ -73,8 +85,14 @@ class TaskClassifAuto(AsyncTask):
         sql+=""" from objects
                     where classif_id is not null and classif_qual='V'
                     and projid={0}
-                    and classif_id in ({1})
-                    order by objid""".format(PrjBase.projid,self.param.Taxo)
+                    and classif_id in ({1}) """.format(PrjBase.projid,self.param.Taxo,self.param.learninglimit)
+        if self.param.learninglimit:
+            sql += """ and objid in ( select objid from (
+                        select objid,row_number() over(PARTITION BY classif_id order by random_value) rang
+                        from obj_head
+                        where projid={0} and classif_id is not null
+                        and classif_qual='V' ) q where rang <={1} ) """.format(PrjBase.projid,self.param.learninglimit)
+        sql += " order by objid "
         DBRes=np.array(GetAll(sql))
         # Ids = DBRes[:,0] # Que l'objid
         learn_cat = DBRes[:,1] # Que la classif
@@ -86,12 +104,26 @@ class TaskClassifAuto(AsyncTask):
         if  self.param.Methode=='randomforest':
             Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=5, min_samples_split=10, n_jobs=1)
         elif  self.param.Methode=='svm':
-            Classifier = svm.SVC() # Todo parametres pour SVM
+            Classifier = svm.SVC()
         else:
             raise Exception ("Classifier '%s' not implemented "%self.param.Methode)
         if self.param.Perimeter!='all':
             PerimeterWhere=" and ( classif_qual='P' or classif_qual is null)  "
         else: PerimeterWhere=""
+        if self.param.TargetTaxo!="":
+            PerimeterWhere += " and classif_id in (%s) "%(self.param.TargetTaxo,)
+        if self.param.resetpredicted == "ResetToPredicted" and self.param.TargetTaxo!="":
+            sqlhisto="""insert into objectsclassifhisto(objid,classif_date,classif_type,classif_id,classif_qual,classif_who)
+                          select objid,classif_when,'M', classif_id,classif_qual,classif_who
+                            from obj_head o
+                            where projid={0} and classif_when is not null and classif_qual='V'
+                            and classif_id in ({1})""".format(Prj.projid,self.param.TargetTaxo)
+            ExecSQL(sqlhisto)
+            sqlhisto = """update obj_head set classif_qual=null
+                            where projid={0} and classif_when is not null and classif_qual='V'
+                            and classif_id in ({1}) """.format(Prj.projid,self.param.TargetTaxo)
+            ExecSQL(sqlhisto)
+
         # TStep = time.time()
         # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
         # toute la colonne et du coup la colonne est supprimé car on ne peut pas calculer la moyenne.
@@ -162,7 +194,7 @@ class TaskClassifAuto(AsyncTask):
     def QuestionProcess(self):
         Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
         if not Prj.CheckRight(1):
-            return PrintInCharte("ACCESS DENIED for this project<br>"+txt)
+            return PrintInCharte("ACCESS DENIED for this project<br>")
         g.prjtitle=Prj.title
         g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
         txt=""
@@ -186,7 +218,7 @@ class TaskClassifAuto(AsyncTask):
                     if len(BasePrj):
                         txt+="""<a class='btn btn-primary' href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>
                         USE previous Learning Set : #{1} - {2}</a><br><br>OR USE another project<br><br>""".format(Prj.projid,*BasePrj[0])
-                from flask.ext.login import current_user
+                from flask_login import current_user
                 sql="select projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects "
                 if not current_user.has_role(database.AdministratorLabel):
                     sql+=" where projid in (select projid from projectspriv where member=%d)"%current_user.id
@@ -212,8 +244,11 @@ class TaskClassifAuto(AsyncTask):
                 self.param.Methode=gvp("Methode")
                 self.param.CritVar=gvp("CritVar")
                 self.param.Perimeter=gvp("Perimeter")
+                self.param.learninglimit = gvp("learninglimit")
                 self.param.keeplog=gvp("keeplog")
+                self.param.resetpredicted = gvp("resetpredicted")
                 self.param.Taxo=",".join( (x[4:] for x in request.form if x[0:4]=="taxo") )
+                self.param.TargetTaxo = ",".join((x[10:] for x in request.form if x[0:10] == "targettaxo"))
                 self.param.CustSettings=DecodeEqualList(gvp("TxtCustSettings"))
                 g.TxtCustSettings=gvp("TxtCustSettings")
                 # Verifier la coherence des données
@@ -229,6 +264,7 @@ class TaskClassifAuto(AsyncTask):
                     d['critvar']=self.param.CritVar
                     d['methode']=self.param.Methode
                     d['perimeter']=self.param.Perimeter
+                    d['learninglimit'] = self.param.learninglimit
                     d['baseproject']=self.param.BaseProject
                     d['seltaxo']=self.param.Taxo
                     Prj.classifsettings=EncodeEqualList(d)
@@ -240,9 +276,11 @@ class TaskClassifAuto(AsyncTask):
                 self.param.Methode=d.get("methode","")
                 self.param.Taxo=d.get("seltaxo","")
                 self.param.Perimeter=d.get("perimeter","nmc")
+                self.param.learninglimit = d.get("learninglimit", "")
                 if "critvar" in d : del d["critvar"]
                 if "methode" in d : del d["methode"]
                 if "perimeter" in d : del d["perimeter"]
+                if "learninglimit" in d: del d["learninglimit"]
                 if "seltaxo" in d : del d["seltaxo"]
                 if "baseproject" in d : del d["baseproject"]
                 g.TxtCustSettings=EncodeEqualList(d)
@@ -265,6 +303,15 @@ class TaskClassifAuto(AsyncTask):
                 for i,r in zip(range(10000),g.TaxoList):
                     if r[0] not in TaxoSel:
                         g.TaxoList[i][4]=""
+            # Récupère la liste des taxo de la cible pour laisser l'option de ne faire de la prediction que sur un sous ensemble de la destination
+            sql="""select t.id,concat(t.name,'(',t2.name,')') as name from (
+                    select distinct classif_id
+                    from obj_head
+                    where projid=%(projid)s and classif_id is not null  ) q
+                join taxonomy t on q.classif_id=t.id
+                left join taxonomy t2 on t.parent_id=t2.id
+                order by name """
+            g.TargetTaxoList = GetAll(sql, {"projid": Prj.projid}, cursor_factory=None)
             # Determination des criteres/variables utilisées par l'algo de learning
             revobjmap = self.GetReverseObjMap(Prj)
             PrjBase=database.Projects.query.filter_by(projid=gvg("src")).first()
