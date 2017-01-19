@@ -3,17 +3,17 @@
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from appli import db,app, database,adminothers
 from appli.database import GetAll
-import flask.ext.admin
-from flask.ext.admin.contrib.sqla import ModelView,filters
+import flask_admin
+from flask_admin.contrib.sqla import ModelView,filters
 from wtforms  import TextAreaField
-from flask.ext.security.utils import encrypt_password
-from flask.ext.admin import base
+from flask_security.utils import encrypt_password
+from flask_admin import base
 from flask_admin.contrib.sqla.form import InlineModelConverter
 from flask_admin.contrib.sqla.fields import InlineModelFormList
 from flask_admin.model.form import InlineFormAdmin
 from wtforms.fields import SelectField,TextField,PasswordField
 from wtforms.validators import ValidationError
-from flask.ext.login import current_user
+from flask_login import current_user
 
 class UsersView(ModelView):
     # Disable model creation
@@ -180,7 +180,7 @@ class ObjectsFieldsView(ModelView):
         return current_user.has_role(database.AdministratorLabel)
 
 # Create admin
-adminApp = flask.ext.admin.Admin(app, name='Ecotaxa Administration')
+adminApp = flask_admin.Admin(app, name='Ecotaxa Administration')
 
 # Add views
 #admin.add_view(sqla.ModelView(database.users, db.session))

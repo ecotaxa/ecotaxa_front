@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,ntcv
 from pathlib import Path
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask.ext.security import login_required
+from flask_security import Security, SQLAlchemyUserDatastore
+from flask_security import login_required
 from flask_security.decorators import roles_accepted
 from appli.search.leftfilters import getcommonfilters
 import os,time,math,collections,appli,psycopg2.extras,urllib
@@ -139,7 +139,7 @@ FilterListAutoSave=("sortby","sortorder","dispfield","statusfilter",'ipp','zoom'
 def indexPrj(PrjId):
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
-        data[k]=gvg(k,str(current_user.GetPref(k,v)) if current_user.is_authenticated() else "")
+        data[k]=gvg(k,str(current_user.GetPref(k,v)) if current_user.is_authenticated else "")
     # print('%s',data)
     if data.get("samples",None):
         data["sample_for_select"]=""
@@ -224,7 +224,6 @@ def indexPrj(PrjId):
     if g.PrjManager:
         g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import images and metadata"))
-        g.headmenu.append(("/Task/Create/TaskImportUpdate?p=%d" % (PrjId,), "Re-import and update metadata"))
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit project settings"))
         g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')" % (PrjId,),
                            "Extract Subset with active filter"))
@@ -253,7 +252,7 @@ def LoadRightPane():
     PrefToSave=0
     for k,v in FilterList.items():
         Filt[k]=gvp(k,v)
-        if ( k in FilterListAutoSave or gvp("saveinprofile")=="Y") and current_user.is_authenticated():
+        if ( k in FilterListAutoSave or gvp("saveinprofile")=="Y") and current_user.is_authenticated:
             PrefToSave+=current_user.SetPref(k,Filt[k])
 
     # on sauvegarde les parametres dans le profil utilisateur
@@ -292,7 +291,7 @@ left JOIN taxonomy t2 on t.parent_id=t2.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
 """
-    whereclause += sharedfilter.GetSQLFilter(filtres,sqlparam,str(current_user.id if current_user.is_authenticated() else "999999"))
+    whereclause += sharedfilter.GetSQLFilter(filtres,sqlparam,str(current_user.id if current_user.is_authenticated else "999999"))
     if Prj.CheckRight(0) ==False:  # Si c'est une lecture publique
         whereclause+=" and o.classif_qual='V' " # Les anonymes ne peuvent voir que les objets validés
     sql+=whereclause

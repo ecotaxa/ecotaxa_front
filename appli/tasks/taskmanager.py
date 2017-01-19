@@ -1,8 +1,8 @@
 from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate,database
-from flask.ext.login import current_user
+from flask_login import current_user
 from flask import  render_template, g, flash,jsonify
 import json,os,sys,datetime,shutil,flask,logging
-from flask.ext.security import login_required
+from flask_security import login_required
 from appli.database import ExecSQL,GetAll
 
 class Task(db.Model):

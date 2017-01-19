@@ -1,25 +1,15 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp
-from flask.ext.security import Security, SQLAlchemyUserDatastore
+from flask import Blueprint, render_template, g, request,url_for
+from flask_login import current_user
+from appli import app,ObjectToStr,PrintInCharte,database
 from flask_security.decorators import roles_accepted
-from appli.database import db
 import os
 
-# Load default config and override config from an environment variable
-# app.config.update(dict(
-# DEBUG=True,
-# SECRET_KEY='development key',
-# USERNAME='admin',
-# PASSWORD='default'
-# ))
 # definition d'un second répertoire traité en statique en plus de static
 vaultBP = Blueprint('vault', __name__, static_url_path='/vault', static_folder='../vault')
 app.register_blueprint(vaultBP)
-
 
 @app.route('/')
 def index():
@@ -59,9 +49,7 @@ def index():
     with open(NomFichier, 'r',encoding='utf8') as f:
         txt+=f.read()
     txt+="""</div></div></div>"""
-
     return PrintInCharte(txt)
-    # return render_template('layout.html',bodycontent=txt)
 
 
 @app.route('/test1')
@@ -95,7 +83,7 @@ def before_request_security():
     if "/static" in request.url:
         return
     # print(request.form)
-    current_user.is_authenticated()
+    # current_user.is_authenticated
     g.menu = []
     g.menu.append((url_for("index"),"Home / Explore"))
     g.menu.append(("/prj/","Select Project"))
@@ -109,6 +97,7 @@ def before_request_security():
         g.menu.append(("/Task/Create/TaskTaxoImport","Import Taxonomy"))
         g.menu.append(("/Task/Create/TaskExportDb","Export Database"))
         g.menu.append(("/Task/Create/TaskImportDB","Import Database"))
+        g.menu.append(("/Task/listall","Task Manager"))
         g.appliadmin=True
 
     g.menu.append(("","SEP"))

@@ -23,8 +23,8 @@ if not os.path.exists(TempTaskDir):
     os.mkdir(TempTaskDir)
 
 from flask import Flask,render_template,request,g
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.security import Security #, SQLAlchemyUserDatastore
+from flask_sqlalchemy import SQLAlchemy
+from flask_security import Security
 import inspect,html,math,threading,time,traceback
 import appli.securitycachedstore
 
@@ -36,6 +36,7 @@ if 'PYTHONEXECUTABLE' in app.config:
 else:
     app.PythonExecutable="TBD"
 
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 db = SQLAlchemy(app,session_options={'expire_on_commit':True}) # expire_on_commit évite d'avoir des select quand on manipule les objets aprés un commit.
 
 import appli.database
@@ -61,7 +62,7 @@ def PrintInCharte(txt):
 
 
 def AddTaskSummaryForTemplate():
-    from flask.ext.login import current_user
+    from flask_login import current_user
     if getattr(current_user, 'id', -1) > 0:
         g.tasksummary = appli.database.GetAssoc2Col(
             "SELECT taskstate,count(*) from temp_tasks WHERE owner_id=%(owner_id)s group by taskstate"
