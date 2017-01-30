@@ -81,10 +81,10 @@ def PrjEditDataMass(PrjId):
         sql += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
         ObjList = GetAll(sql, sqlparam)
         ObjListTxt = "\n".join((str(r['objid']) for r in ObjList))
-        txt += "<span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters, {0} objects</span>".format(
+        txt += "<span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters, {0} objects</span>".format(
             len(ObjList))
     else:
-        txt += "<span style='color:red;weight:bold;font-size:large;'>Apply to ALL OBJETS OF THE PROJECT (NO Active Filters)</span>"
+        txt += "<span style='color:red;font-weight:bold;font-size:large;'>Apply to ALL OBJETS OF THE PROJECT (NO Active Filters)</span>"
     Lst=GetFieldList(Prj)
     # txt+="%s"%(Lst,)
 

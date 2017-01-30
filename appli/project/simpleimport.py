@@ -75,6 +75,12 @@ def CreateObject(Prj,Metadata,ImageName,ImageFile):
     db.session.add(Img)
     db.session.commit()
 
+def ConvDegTxtToDecimal(valdeg):
+    """Convertie une valeur '12°25.358' en  25.42263 """
+    splitted=valdeg.split("°")
+    if len(splitted)==1:
+        return splitted[0] # valeur passée en format numérique ou vide
+    return round(float(splitted[0])+(float(splitted[1])/60),8)
 
 @app.route('/prj/simpleimport/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
@@ -138,6 +144,10 @@ def prj_simpleimport(PrjId):
                 return PrintError("Invalid Time value '%s' for Field Image time ." % (Metadata["imgtime"],),DefBodyMsg)
         if Metadata["taxolb"]:
             Metadata["taxolb"]=int(Metadata["taxolb"])
+        if Metadata["latitude"]:
+            Metadata["latitude"]=ConvDegTxtToDecimal(Metadata["latitude"])
+        if Metadata["longitude"]:
+            Metadata["longitude"]=ConvDegTxtToDecimal(Metadata["longitude"])
         SimpleImportPreset[current_user.id]=Metadata
         ObjCount=0
         if z: # Parcour d'un fichier zip uploadé ou sur le serveur
