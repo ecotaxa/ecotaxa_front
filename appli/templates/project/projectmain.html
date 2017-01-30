@@ -92,7 +92,7 @@
 {% endfor %}
   </ul>
 </div>
-</td> {% if current_user.is_authenticated %}
+</td> {% if not g.PublicViewMode %}
   <td >
           <label for="statusfilter" data-toggle="tooltip" data-placement="bottom" data-html="true" class="rm5" style="margin-bottom: 0;"
         title="
@@ -112,7 +112,10 @@
 {% endfor %}
 </select></td>
   {% else %}
+  <td>
   <input type="hidden" name="statusfilter" id="statusfilter" value="">
+  Status : Validated Only&nbsp;
+  </td>
 {% endif %}
   <td style="padding-right: 5px;">
     <label for="ipp" style="margin-bottom: 0;"><span class="glyphicon glyphicon-th"></span></label>

@@ -8,7 +8,7 @@
 {% block body %}
 
   {% if TxtFiltres!="" %}
-    <span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters</span><BR>Filters :  {{ TxtFiltres }}
+    <span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters</span><BR>Filters :  {{ TxtFiltres }}
   {% endif %}
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
@@ -26,7 +26,7 @@
 {{ checkboxinput("internalids","1",data.internalids) }} Internal IDs<br>
 {{ checkboxinput("typeline","1",data.typeline) }} 2nd line with types, usefull to reimport<br>
 Split in multiple files by <select name="splitcsvby" >
-        <option value="" ></option>
+        <option value="" >NOT Active</option>
         <option value="sample" {{ 'selected' if data.splitcsvby=='sample' }} >Sample</option>
         <option value="taxo" {{ 'selected' if data.splitcsvby=='taxo' }} >Taxonomy (parent_child)</option>
       </select><br>
