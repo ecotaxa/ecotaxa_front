@@ -173,7 +173,7 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
 <a href="#TargetFilter" data-toggle="collapse" > <span class="glyphicon glyphicon-plus-sign"></span> Target Taxonomy Filter</a>
 <div id=TargetFilter class="panel panel-default collapse " style="margin-left: 0px;margin-top: 5px;width: 800px;padding: 5px;" >
 <div style="margin:5px;">
-Predict only on these category of target Set
+Predict only the objects of the selected categories from the list below
 <br>Select <a name="tbltargettop" href="#tbltargettop" onclick="$('#TblTargetTaxo input').prop( 'checked', true )">ALL</a>
     / <a href="#tbltargettop" onclick="$('#TblTargetTaxo input').prop( 'checked', false );">None</a>
 <table class="table table-bordered table-condensed" style="width: auto" id="TblTargetTaxo">
@@ -182,7 +182,7 @@ Predict only on these category of target Set
         <tr><td><input type="checkbox" value="Y" name="targettaxo{{ r[0] }}" ></td><td>{{ r[1] }} </td></tr>
     {% endfor %}
 </table>
-To force already validated items to be reset to predicted check them and type "ResetToPredicted" here :
+Type in "ResetToPredicted" to (re)predict also all validated objects from the selected categories :
   <input type="text" name="resetpredicted" value="" autocomplete="off" style="width: 150px;">
 </div></div>
 

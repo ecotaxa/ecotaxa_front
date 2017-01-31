@@ -1,8 +1,8 @@
 # manage.py
 
-from flask.ext.script import Manager
-from flask.ext.security.utils import encrypt_password
-from flask.ext.migrate import Migrate, MigrateCommand
+from flask_script import Manager
+from flask_security.utils import encrypt_password
+from flask_migrate import Migrate, MigrateCommand
 from appli import db,user_datastore,database
 from appli import app
 import shutil,os
