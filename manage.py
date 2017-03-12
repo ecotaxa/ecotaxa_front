@@ -4,7 +4,7 @@ from flask_script import Manager
 from flask_security.utils import encrypt_password
 from flask_migrate import Migrate, MigrateCommand
 from appli import db,user_datastore,database
-from appli import app
+from appli import app,g
 import shutil,os
 
 manager = Manager(app)
@@ -157,37 +157,39 @@ def UpdateSunPos(ProjId):
     """
     from appli import CalcAstralDayTime
     from astral import AstralError
-    param=[]
-    sql="""select distinct objdate,objtime,round(cast(latitude as NUMERIC),4) latitude,round(cast(longitude  as NUMERIC),4) longitude
-from obj_head
-where objdate is not null and objtime is not null  and longitude is not null and latitude is not null
- """
-    if ProjId!='*':
-        sql+=" and projid=%s "
-        param.append(ProjId)
-    Obj=database.GetAll(sql,param)
-    for o in Obj:
-        # l=Location()
-        # l.latitude=o['latitude']
-        # l.longitude = o['longitude']
-        # s=l.sun(date=o['objdate'],local=False)
-        # dt=datetime.datetime(o['objdate'].year,o['objdate'].month,o['objdate'].day,o['objtime'].hour,o['objtime'].minute,o['objtime'].second,tzinfo=pytz.UTC)
-        # if s['sunset'].time()>s['sunrise'].time() \
-        #         and dt.time()>=s['sunset'].time(): Result='N'
-        # elif dt>=s['dusk']: Result='U'
-        # elif dt>=s['sunrise']: Result='D'
-        app.logger.info("Process %s %s %s %s",o['objdate'],o['objtime'],o['latitude'],o['longitude'])
-        try:
-            Result=CalcAstralDayTime(o['objdate'],o['objtime'],o['latitude'],o['longitude'])
-            sql="update obj_head set sunpos=%s where objdate=%s and objtime=%s and round(cast(latitude as NUMERIC),4)=%s and round(cast(longitude  as NUMERIC),4)=%s "
-            param=[Result,o['objdate'],o['objtime'],o['latitude'],o['longitude']]
-            if ProjId != '*':
-                sql += " and projid=%s "
-                param.append(ProjId)
-            database.ExecSQL(sql,param)
-            app.logger.info(Result)
-        except AstralError as e:
-            app.logger.error("Astral error : %s",e)
+    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
+        g.db = None
+        param=[]
+        sql="""select distinct objdate,objtime,round(cast(latitude as NUMERIC),4) latitude,round(cast(longitude  as NUMERIC),4) longitude
+    from obj_head
+    where objdate is not null and objtime is not null  and longitude is not null and latitude is not null
+     """
+        if ProjId!='*':
+            sql+=" and projid=%s "
+            param.append(ProjId)
+        Obj=database.GetAll(sql,param)
+        for o in Obj:
+            # l=Location()
+            # l.latitude=o['latitude']
+            # l.longitude = o['longitude']
+            # s=l.sun(date=o['objdate'],local=False)
+            # dt=datetime.datetime(o['objdate'].year,o['objdate'].month,o['objdate'].day,o['objtime'].hour,o['objtime'].minute,o['objtime'].second,tzinfo=pytz.UTC)
+            # if s['sunset'].time()>s['sunrise'].time() \
+            #         and dt.time()>=s['sunset'].time(): Result='N'
+            # elif dt>=s['dusk']: Result='U'
+            # elif dt>=s['sunrise']: Result='D'
+            app.logger.info("Process %s %s %s %s",o['objdate'],o['objtime'],o['latitude'],o['longitude'])
+            try:
+                Result=CalcAstralDayTime(o['objdate'],o['objtime'],o['latitude'],o['longitude'])
+                sql="update obj_head set sunpos=%s where objdate=%s and objtime=%s and round(cast(latitude as NUMERIC),4)=%s and round(cast(longitude  as NUMERIC),4)=%s "
+                param=[Result,o['objdate'],o['objtime'],o['latitude'],o['longitude']]
+                if ProjId != '*':
+                    sql += " and projid=%s "
+                    param.append(ProjId)
+                database.ExecSQL(sql,param)
+                app.logger.info(Result)
+            except AstralError as e:
+                app.logger.error("Astral error : %s",e)
 
 
         # print(Result)
