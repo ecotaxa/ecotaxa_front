@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from appli import db,app
+from appli import db,app,g
 from flask_security import  UserMixin, RoleMixin
 from flask_login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
@@ -294,9 +294,12 @@ Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
 Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
 GlobalDebugSQL=False
-GlobalDebugSQL=True
+# GlobalDebugSQL=True
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,keyid=0):
-    cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
+    if g.db is None:
+        g.db=db.engine.raw_connection()
+    cur = g.db.cursor(cursor_factory=cursor_factory)
+    # cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
@@ -318,7 +321,10 @@ def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCurs
     return res
 
 def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
-    cur = db.engine.raw_connection().cursor()
+    if g.db is None:
+        g.db=db.engine.raw_connection()
+    cur = g.db.cursor()
+    # cur = db.engine.raw_connection().cursor()
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
@@ -341,7 +347,10 @@ def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
 
 # Les parametres doivent être passés au format (%s)
 def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
-    cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
+    if g.db is None:
+        g.db=db.engine.raw_connection()
+    cur = g.db.cursor(cursor_factory=cursor_factory)
+    # cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
@@ -361,7 +370,10 @@ def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor
     return res
 
 def ExecSQL(sql,params=None,debug=False):
-    cur = db.engine.raw_connection().cursor()
+    if g.db is None:
+        g.db=db.engine.raw_connection()
+    cur = g.db.cursor()
+    # cur = db.engine.raw_connection().cursor()
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)

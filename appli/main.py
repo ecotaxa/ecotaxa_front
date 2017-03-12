@@ -3,7 +3,7 @@
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from flask import Blueprint, render_template, g, request,url_for
 from flask_login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database
+from appli import app,ObjectToStr,PrintInCharte,database,db
 from flask_security.decorators import roles_accepted
 import os
 
@@ -80,6 +80,7 @@ def before_request_security():
     # time.sleep(0.1)
     # print("URL="+request.url)
     # app.logger.info("URL="+request.url)
+    g.db=None
     if "/static" in request.url:
         return
     # print(request.form)
@@ -103,3 +104,13 @@ def before_request_security():
     g.menu.append(("","SEP"))
     g.menu.append(("/change","Change Password"))
 
+@app.teardown_appcontext
+def before_teardown_commitdb(error):
+    try:
+        if g.db:
+            try:
+                g.db.commit()
+            except:
+                g.db.rollback()
+    except Exception as e: # si probleme d'accés à g.db ou d'operation sur la transaction on passe silencieusement
+        app.logger.error("before_teardown_commitdb : Unhandled exception : {0}".format(e))
