@@ -2,7 +2,7 @@
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv,GetAppManagerMailto,CreateDirConcurrentlyIfNeeded
 from PIL import Image
 from flask import render_template,  flash,request,g
-import logging,os,csv,sys,time
+import logging,os,csv,sys,time,re
 import datetime,shutil,random,zipfile
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,LoadTask,DoTaskClean
@@ -249,6 +249,20 @@ class TaskImportUpdate(AsyncTask):
             for rec in self.pgcur:
                 self.param.TaxoFound[rec[1]]=rec[0]
             logging.info("Taxo Found = %s",self.param.TaxoFound)
+            # recheche des elements de la forme "Taxon (parent)
+            for InputTaxon,MappedTaxon in self.param.TaxoFound.items() :
+                if MappedTaxon is None:
+                    resfind = re.findall(R"([^(]+)\(([^\)]+)", InputTaxon)
+                    if len(resfind)==1 and len(resfind[0])==2: # trouve les 2 parties
+                        Taxon,Parent=resfind[0]
+                        ResSQL=GetAll("""select t.id,lower(t.name),lower(t2.name) from taxonomy t
+                                        join taxonomy t2 on t.parent_id=t2.id
+                                        where lower(t.name) = %s
+                                        and lower(t2.name)=%s"""
+                                      ,(Taxon.strip().lower(),Parent.strip().lower()))
+                        if len(ResSQL)>0:
+                            self.param.TaxoFound[InputTaxon]=ResSQL[0]['id']
+
             NotFoundTaxo=[k for k,v in self.param.TaxoFound.items() if v==None]
             if len(NotFoundTaxo)>0:
                 logging.info("Some Taxo Not Found = %s",NotFoundTaxo)
@@ -378,7 +392,7 @@ class TaskImportUpdate(AsyncTask):
                                     # on copie les données de l'objet dans le nouvel enregistrement
                                     for attr, value in Objs[t].__dict__.items():
                                         if hasattr(ObjsNew[t], attr):
-                                            setattr(ObjsNew[t], attr, value);
+                                            setattr(ObjsNew[t], attr, value)
                                     Objs[t]=ObjsNew[t]
                                     Objs[t].projid=self.param.ProjectId
                                     db.session.add(Objs[t])
