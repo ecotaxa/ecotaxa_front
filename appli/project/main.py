@@ -413,7 +413,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             poptxt=""
             #poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
             if r[3]!="":
-                poptxt+="<em>by</em> %s"%(r[3])
+                poptxt+="<em>by</em> %s"%(r[4])
             poptxt+="<br><em>parent</em> "+ntcv(r['taxoparent'])
             poptxt+="<br><em>in</em> "+ntcv(r['samplename'])
             for k,v in popoverfieldlist.items():
