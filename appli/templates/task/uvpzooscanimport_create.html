@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block headcenter %}
+  <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
+{% endblock %}
+
+{% block body %}
+
+<h2>UVP ZooScan folder Importation Task</h2>
+
+<div class="help-block">
+	<div class="row">
+		<div class="col-sm-12">
+			<p><a href="#general-help" data-toggle="collapse" class="help">General help  TODO ????</a></p>
+			<div id="general-help" class="collapse">
+			<p> ?????????</p>
+			</div>
+		</div>
+	</div>
+</div>
+<p>Import folder : {{ data.DossierUVP }}</p>
+<form class="form" method="post" >
+<style>
+{#  On centre les coche de selection#}
+  #tblsample td:nth-child(1) {text-align: center}
+</style>
+<table id="tblsample" class="table table-bordered table-condensed" style="width: auto;">
+  <tr>
+    <th style="text-align: center;">Select<br>
+      <input type="checkbox" id="checkall" onclick="$('#tblsample td input').prop('checked',$(this).prop('checked'))" checked>
+    </th>
+    <th>profileid</th>
+    <th>filename</th>
+    <th>stationid</th>
+    <th>firstimage</th>
+    <th>endimg</th>
+    <th>comment</th>
+  </tr>
+{% for r in data.profilelistinheader %}
+  <tr>
+    <td><input type="checkbox" name="new_{{ loop.index }}" value="{{ r['profileid'] }}" checked></td>
+    <td>{{ r['profileid'] }}</td>
+    <td>{{ r['filename'] }}</td>
+    <td>{{ r['stationid'] }}</td>
+    <td>{{ r['firstimage'] }}</td>
+    <td>{{ r['endimg'] }}</td>
+    <td>{{ r['comment'] }}</td>
+  </tr>
+
+  {% endfor %}
+</table>
+
+
+    <input type="hidden" name="starttask" value="Y">
+			<button type="submit" class="btn btn-lg  btn-primary" style="width: 400px;margin: 5px 20px;">Start import</button>
+    </div>
+  </div>
+
+</form>
+
+<script>
+function TaxoHelperBtAdd(){
+  var s=$('#oldname').val()+"="+$('#taxolb option:selected').text();
+  var txt=$('#TxtTaxoMap');
+  txt.val( txt.val() +s+ "\n");
+}
+
+$(document).ready(function() {
+    $('#FileModal').on('show.bs.modal', function () {
+        $("#TaxoModalBody").html(""); {# Pour eviter les conflit sur le jstree suite à des ouverture successive car le jstree est dans la modal cachée #}
+         $("#FileModalBody").html("Loading...").load("/common/ServerFolderSelect");
+    });
+    $(".taxolb").select2({
+        ajax: {
+            url: "/search/taxo",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 3
+    }); // Select2 Ajax
+    $('#TaxoModal').on('show.bs.modal', function () {
+         $("#FileModalBody").html("");
+         $("#TaxoModalBody").html("Loading...").load("/search/taxotree?target=taxolb");
+    });
+  }); // Ready
+</script>
+
+<!-- Modal -->
+<div class="modal " id="FileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Select a folder or a zip file</h4>
+      </div>
+      <div class="modal-body">
+        <div id="FileModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal " id="TaxoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Taxonomy Tree</h4>
+      </div>
+      <div class="modal-body">
+        <div id="TaxoModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}

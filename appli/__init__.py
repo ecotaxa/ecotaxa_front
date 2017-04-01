@@ -60,6 +60,13 @@ def PrintInCharte(txt):
     AddTaskSummaryForTemplate()
     return render_template('layout.html',bodycontent=txt)
 
+def ErrorFormat(txt):
+    return """
+<div class='cell panel ' style='background-color: #f2dede; margin: 15px;'><div class='body' >
+				<table style='background-color: #f2dede'><tr><td width='50px' style='color: red;font-size: larger'> <span class='glyphicon glyphicon-exclamation-sign'></span></td>
+				<td style='color: red;font-size: larger;vertical-align: middle;'><B>%s</B></td>
+				</tr></table></div></div>
+    """%(txt)
 
 def AddTaskSummaryForTemplate():
     from flask_login import current_user
@@ -202,6 +209,7 @@ import appli.adminusers
 import appli.tasks.taskmanager
 import appli.search.view
 import appli.project.view
+import appli.uvp.view
 
 @app.errorhandler(404)
 def not_found(e):
