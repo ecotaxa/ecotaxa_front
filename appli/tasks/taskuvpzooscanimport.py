@@ -42,9 +42,13 @@ class TaskUVPZooscanImport(AsyncTask):
         Prj=uvpdatabase.uvp_projects.query.filter_by(uprojid=self.param.uprojid).first()
         for sample in self.param.profilelistinheader:
             ProcessType=self.param.profiletoprocess.get(sample['profileid'])
-            if ProcessType:
+            if ProcessType: #TODO si utile de transmettre new/ID ?
                 logging.info("Process profile %s : %s"%(sample['profileid'],ProcessType))
-                appli.uvp.sample_import.CreateOrUpdateSample(self.param.uprojid, sample)
+                usampleid=appli.uvp.sample_import.CreateOrUpdateSample(self.param.uprojid, sample)
+                logging.info("Sample %d processed"%(usampleid))
+                appli.uvp.sample_import.GenerateRawHistogram(usampleid) # TODO a réactiver, désactivé pour mise au point
+                appli.uvp.sample_import.GenerateParticleHistogram(usampleid)
+
 
         # self.task.taskstate="Done"
         # self.UpdateProgress(100,"Processing done")
@@ -79,10 +83,23 @@ class TaskUVPZooscanImport(AsyncTask):
             if not FichierHeader.exists():
                 return PrintInCharte(ErrorFormat("Le fichier header n'existe pas :" + FichierHeader.as_posix()))
             else:
+                dbsample=database.GetAssoc("""select profileid,usampleid,filename,stationid,firstimage,lastimg,lastimgused,comment,histobrutavailable
+                      ,(select count(*) from uvp_histopart_det where usampleid=s.usampleid) nbrlinedet
+                      ,(select count(*) from uvp_histopart_reduit where usampleid=s.usampleid) nbrlinereduit
+                      ,(select count(*) from uvp_histocat where usampleid=s.usampleid) nbrlinetaxo
+                      from uvp_samples s
+                      where uprojid=%s"""%(self.param.uprojid))
                 # print("ouverture de " + FichierHeader)
                 with open(FichierHeader.as_posix()) as FichierHeaderHandler:
                     F = csv.DictReader(FichierHeaderHandler, delimiter=';')
                     for r in F:
+                        r['usampleid']=None
+                        if r['profileid'] in dbsample:
+                            r['usampleid'] =dbsample[r['profileid']]['usampleid']
+                            r['histobrutavailable'] = dbsample[r['profileid']]['histobrutavailable']
+                            r['nbrlinedet'] = dbsample[r['profileid']]['nbrlinedet']
+                            r['nbrlinereduit'] = dbsample[r['profileid']]['nbrlinereduit']
+                            r['nbrlinetaxo'] = dbsample[r['profileid']]['nbrlinetaxo']
                         self.param.profilelistinheader.append(r)
                         # self.param.profilelistinheader[r['profileid']]=r
                     # Tri par 4eme colonne, profileid
