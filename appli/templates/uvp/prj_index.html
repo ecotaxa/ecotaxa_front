@@ -1,3 +1,57 @@
+<div style="margin: 3px;">
 Gestion du projets UVP {{ PrjId }} <br>
 
-<a href="/Task/Create/TaskUVPZooscanImport?p={{ PrjId }}">Import sample from disk</a>
+<a href="/Task/Create/TaskUVPZooscanImport?p={{ PrjId }}" class="btn btn-sm btn-primary">Import sample from disk</a>
+
+<h4>Project samples dashboard</h4>
+<form action="/uvp/prjcalc/{{ PrjId }}" method="post">
+<table id="tblsample2" class="table table-bordered table-condensed" style="width: auto;">
+  <tr>
+    <th style="text-align: center;">Select<br>
+      <input type="checkbox" id="checkall" onclick="$('#tblsample2 td input').prop('checked',$(this).prop('checked'))" >
+    </th>
+    <th>ID</th>
+    <th>profileid</th>
+    <th>filename</th>
+    <th>stationid</th>
+    <th>firstimage</th>
+    <th>lastimg</th>
+    <th>lastimgused</th>
+    <th>Raw Part. Histo</th>
+    <th>Det Part. Histo</th>
+    <th>Reduced Part. Histo</th>
+    <th>Ecotaxa Sample ID</th>
+    <th>Taxonomy Histo</th>
+    <th>Taxonomy Recalc Date</th>
+    <th>comment</th>
+  </tr>
+{% for r in dbsample %}
+  <tr>
+    <td><input type="checkbox" name="s_{{ r['usampleid'] }}" value="Y" ></td>
+    <td>{{ r['usampleid'] }}</td>
+    <td>{{ r['profileid'] }}</td>
+    <td>{{ r['filename'] }}</td>
+    <td>{{ r['stationid'] }}</td>
+    <td>{{ r['firstimage'] }}</td>
+    <td>{{ r['lastimg'] }}</td>
+    <td>{{ r['lastimgused'] }}</td>
+    <td>{{ r['histobrutavailable'] }}</td>
+    <td>{{ r['nbrlinedet'] }}</td>
+    <td>{{ r['nbrlinereduit'] }}</td>
+    <td>{{ r['sampleid'] or ''}}</td>
+    <td>{{ r['nbrlinetaxo'] }}</td>
+    <td>{{ r['daterecalculhistotaxo']|datetime }}</td>
+    <td>{{ r['comment'] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<p >
+  <b>Action : </b>
+<input type="checkbox" name="dohistodet" value="Y"> Compute detailled histogram
+- <input type="checkbox" name="dohistored" value="Y"> Compute reduced histogram
+- <input type="checkbox" name="domatchecotaxa" value="Y"> Match Ecotaxa sample
+- <input type="checkbox" name="dohistotaxo" value="Y"> Compute taxonomy histogram
+  <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-cog"></span> Start operation</button>
+</p>
+</form>
+</div>
