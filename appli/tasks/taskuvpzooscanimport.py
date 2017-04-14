@@ -21,6 +21,7 @@ class TaskUVPZooscanImport(AsyncTask):
                 self.uprojid=None
                 self.profilelistinheader=[]
                 self.profiletoprocess={}
+                self.ProcessOnlyMetadata=False
 
 
 
@@ -45,9 +46,10 @@ class TaskUVPZooscanImport(AsyncTask):
             if ProcessType: #TODO si utile de transmettre new/ID ?
                 logging.info("Process profile %s : %s"%(sample['profileid'],ProcessType))
                 usampleid=appli.uvp.sample_import.CreateOrUpdateSample(self.param.uprojid, sample)
-                logging.info("Sample %d processed"%(usampleid))
-                appli.uvp.sample_import.GenerateRawHistogram(usampleid) # TODO a réactiver, désactivé pour mise au point
-                appli.uvp.sample_import.GenerateParticleHistogram(usampleid)
+                logging.info("Sample %d Metadata processed"%(usampleid))
+                if not self.param.ProcessOnlyMetadata:
+                    appli.uvp.sample_import.GenerateRawHistogram(usampleid) # TODO a réactiver, désactivé pour mise au point
+                    appli.uvp.sample_import.GenerateParticleHistogram(usampleid)
 
 
         # self.task.taskstate="Done"
@@ -107,6 +109,7 @@ class TaskUVPZooscanImport(AsyncTask):
                                                             key=lambda r: r['profileid'])
 
         if gvp('starttask')=="Y":
+            self.param.ProcessOnlyMetadata=(gvp('onlymeta','N')=='Y')
             for f in request.form:
                 if f[0:3] == "new":
                     self.param.profiletoprocess[request.form.get(f)]="new"

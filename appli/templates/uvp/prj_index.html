@@ -1,7 +1,10 @@
 <div style="margin: 3px;">
-Gestion du projets UVP {{ PrjId }} <br>
+UVP Project {{ PrjId }} : {{ Prj.utitle }}<br>
 
-<a href="/Task/Create/TaskUVPZooscanImport?p={{ PrjId }}" class="btn btn-sm btn-primary">Import sample from disk</a>
+<a href="/Task/Create/TaskUVPZooscanImport?p={{ PrjId }}" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-import"></span> Import sample from disk</a>
+<a href="/uvp/prjedit/{{ PrjId }}" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit project metadata</a>
+<a href="/uvp/prj/" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-arrow-left"></span> Back to project list</a>
+
 
 <h4>Project samples dashboard</h4>
 <form action="/uvp/prjcalc/{{ PrjId }}" method="post">
@@ -23,12 +26,14 @@ Gestion du projets UVP {{ PrjId }} <br>
     <th>Ecotaxa Sample ID</th>
     <th>Taxonomy Histo</th>
     <th>Taxonomy Recalc Date</th>
+    <th>CTD Data</th>
+    <th>CTD Import Date</th>
     <th>comment</th>
   </tr>
 {% for r in dbsample %}
   <tr>
     <td><input type="checkbox" name="s_{{ r['usampleid'] }}" value="Y" ></td>
-    <td>{{ r['usampleid'] }}</td>
+    <td>{{ r['usampleid'] }} <a href="/uvp/sampleedit/{{ r['usampleid'] }}"><span class="glyphicon glyphicon-pencil"></span></a></td>
     <td>{{ r['profileid'] }}</td>
     <td>{{ r['filename'] }}</td>
     <td>{{ r['stationid'] }}</td>
@@ -41,6 +46,8 @@ Gestion du projets UVP {{ PrjId }} <br>
     <td>{{ r['sampleid'] or ''}}</td>
     <td>{{ r['nbrlinetaxo'] }}</td>
     <td>{{ r['daterecalculhistotaxo']|datetime }}</td>
+    <td>{{ r['nbrlinectd'] }}</td>
+    <td>{{ r['ctd_import_datetime']|datetime }}</td>
     <td>{{ r['comment'] }}</td>
   </tr>
   {% endfor %}
@@ -51,6 +58,7 @@ Gestion du projets UVP {{ PrjId }} <br>
 - <input type="checkbox" name="dohistored" value="Y"> Compute reduced histogram
 - <input type="checkbox" name="domatchecotaxa" value="Y"> Match Ecotaxa sample
 - <input type="checkbox" name="dohistotaxo" value="Y"> Compute taxonomy histogram
+- <input type="checkbox" name="doctdimport" value="Y"> CTD Import
   <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-cog"></span> Start operation</button>
 </p>
 </form>

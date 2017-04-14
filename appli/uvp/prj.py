@@ -4,6 +4,7 @@ from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 from flask_login import current_user
 from flask import render_template,  flash,request,g
 import appli,logging,appli.uvp.sample_import as sample_import
+import appli.uvp.database as uvpdatabase
 from flask_security import login_required
 
 @app.route('/uvp/prj/')
@@ -42,21 +43,25 @@ def UVP_prj():
 @app.route('/uvp/prj/<int:PrjId>')
 @login_required
 def UVP_prj_main(PrjId):
+    Prj = uvpdatabase.uvp_projects.query.filter_by(uprojid=PrjId).first()
+    g.headcenter="<h4>UVP Project %s : %s</h4><a href='/uvp/'>UVP Home</a>"%(Prj.projid,Prj.utitle)
     # TODO securité
     dbsample = database.GetAll("""select profileid,usampleid,filename,stationid,firstimage,lastimg,lastimgused,sampleid
-          ,histobrutavailable,comment,daterecalculhistotaxo
+          ,histobrutavailable,comment,daterecalculhistotaxo,ctd_import_datetime
           ,(select count(*) from uvp_histopart_det where usampleid=s.usampleid) nbrlinedet
           ,(select count(*) from uvp_histopart_reduit where usampleid=s.usampleid) nbrlinereduit
           ,(select count(*) from uvp_histocat where usampleid=s.usampleid) nbrlinetaxo
+          ,(select count(*) from uvp_ctd where usampleid=s.usampleid) nbrlinectd
           from uvp_samples s
           where uprojid=%s""" % (PrjId))
 
     return PrintInCharte(
-        render_template('uvp/prj_index.html',PrjId=PrjId,dbsample=dbsample ))
+        render_template('uvp/prj_index.html',PrjId=PrjId,dbsample=dbsample,Prj=Prj ))
 
 @app.route('/uvp/prjcalc/<int:PrjId>',methods=['post'])
 @login_required
 def UVP_prjcalc(PrjId):
+    Prj = uvpdatabase.uvp_projects.query.filter_by(uprojid=PrjId).first()
     # TODO securité
     txt=""
     CheckedSampleList=[]
@@ -66,8 +71,7 @@ def UVP_prjcalc(PrjId):
 
     app.logger.info("request.form=%s", request.form)
     app.logger.info("CheckedSampleList=%s", CheckedSampleList)
-    app.logger.info("dohistodet=%s", gvp('dohistodet'))
-    app.logger.info("dohistodet=%s", gvp('dohistodet'))
+    app.logger.info("dohistodet=%s,domatchecotaxa=%s,dohistotaxo=%s", gvp('dohistodet'), gvp('domatchecotaxa'), gvp('dohistotaxo'))
     dbsample = database.GetAll("""select profileid,usampleid,filename,sampleid,histobrutavailable
           ,(select count(*) from uvp_histopart_det where usampleid=s.usampleid) nbrlinedet
           from uvp_samples s
@@ -77,9 +81,36 @@ def UVP_prjcalc(PrjId):
         if gvp('dohistodet')=='Y':
             if S['histobrutavailable']:
                 sample_import.GenerateParticleHistogram(S['usampleid'])
-                txt+=prefix+" Detailled & reduced Histogram recomputed"
+                txt+=prefix+" Detailled & reduced Histogram computed"
             else:
                 txt += prefix + " <span style='color: red;'>Raw Histogram can't be computer without Raw histogram</span>"
+        if gvp('dohistored')=='Y':
+            if S['histobrutavailable']:
+                sample_import.GenerateReducedParticleHistogram(S['usampleid'])
+                txt+=prefix+" reduced Histogram computed"
+            else:
+                txt += prefix + " <span style='color: red;'>Raw Histogram can't be computer without Raw histogram</span>"
+        if gvp('domatchecotaxa') == 'Y':
+            if Prj.projid is not None:
+                ecosample=database.GetAll("""select sampleid from samples where projid=%s and orig_id=%s""",(int(Prj.projid),S['profileid']))
+                if len(ecosample)==1:
+                    database.ExecSQL("update uvp_samples set sampleid=%s where usampleid=%s",(ecosample[0]['sampleid'],S['usampleid']))
+                    txt += prefix + " Matched"
+                else:
+                    txt += prefix + " <span style='color: orange;'>No match found in Ecotaxa</span>"
+            else:
+                txt += prefix + " <span style='color: red;'>Ecotaxa sample matching impossible if UVP project not linked to an Ecotaxa project</span>"
+        if gvp('dohistotaxo') == 'Y':
+            if S['sampleid']:
+                sample_import.GenerateTaxonomyHistogram(S['usampleid'])
+                txt += prefix + " Taxonomy Histogram computed"
+            else:
+                txt += prefix + " <span style='color: red;'>Taxonomy Histogram can't be computer without link with Ecotaxa sample</span>"
+    if gvp('doctdimport') == 'Y':
+        if sample_import.ImportCTD(S['usampleid']):
+            txt += prefix + " CTD imported"
+        else:
+            txt += prefix + " <span style='color: red;'>CTD No file</span>"
     #
     # txt+="CheckedSampleList=%s"%(CheckedSampleList)
     # txt+="<br>dbsample = %s"%(dbsample)
