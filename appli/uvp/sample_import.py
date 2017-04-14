@@ -1,11 +1,16 @@
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,VaultRootDir,DecodeEqualList,ntcv,GetAppManagerMailto,CreateDirConcurrentlyIfNeeded
+from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,VaultRootDir,DecodeEqualList,ntcv,EncodeEqualList,CreateDirConcurrentlyIfNeeded
 from pathlib import Path
 import appli.uvp.database as uvpdatabase, logging,re,datetime,csv,math
 import numpy as np
 import matplotlib.pyplot as plt
+from appli import database
+from appli.uvp import PartDetClassLimit
+from flask_login import current_user
 
 # Purge les espace et converti le Nan en vide
 def CleanValue(v):
+    if type(v) != str:
+        return v
     v=v.strip()
     if v.lower()=='nan':
         v=''
@@ -66,12 +71,15 @@ def CreateOrUpdateSample(uprojid,headerdata):
     DossierUVPPath = ServerRoot / Prj.rawfolder
     uvp5_configuration_data =  DossierUVPPath / "config"/"uvp5_settings"/"uvp5_configuration_data.txt"
     if not uvp5_configuration_data.exists():
-        logging.warning("file %s is missing"%(uvp5_configuration_data.as_posix()))
+        logging.warning("file %s is missing, pixel data will miss (required for Taxo histogram esd/biovolume)"%(uvp5_configuration_data.as_posix()))
     else:
         with uvp5_configuration_data.open('r') as F:
-            Lines=F.readlines()
-            print("%s"%(Lines))
-            # TODO traiter ce fichier ou pas ?
+            Lines=F.read()
+            ConfigParam = DecodeEqualList(Lines)
+            if 'pixel' not in ConfigParam:
+                app.logger.warning("pixel parameter missing in file %s "%(uvp5_configuration_data.as_posix()))
+            else:
+                Sample.acq_pixel=float(ConfigParam['pixel'])
 
     HDRFolder =  DossierUVPPath / "raw"/("HDR"+Sample.filename)
     HDRFile = HDRFolder/("HDR"+Sample.filename+".hdr")
@@ -306,11 +314,7 @@ def GenerateParticleHistogram(usampleid):
     MetreParTranche=np.bincount((FirstLigByDepth[:, 0]  // 5).astype(int))  # Bin par tranche de tranche 5m partant de 0m
 
     (PartByClassAndTranche, bins, binsdept) = np.histogram2d(PartCalc[:,1], PartCalc[:,0], bins=(
-        [0.001000,0.001260,0.001590,0.002000,0.002520,0.003170,0.004000,0.005040,0.006350,0.008000
-        ,0.010100,0.012700,0.016000,0.020200,0.025400,0.032000,0.040300,0.050800,0.064000,0.080600
-        ,0.102000,0.128000,0.161000,0.203000,0.256000,0.323000,0.406000,0.512000,0.645000,0.813000
-        ,1.020000,1.290000,1.630000,2.050000,2.580000,3.250000,4.100000,5.160000,6.500000,8.190000
-        ,10.300000,13.000000,16.400000,20.600000,26.0, 10E7], np.arange(0, VolumeParTranche.shape[0]+1 ))
+        PartDetClassLimit, np.arange(0, VolumeParTranche.shape[0]+1 ))
             , weights=Part[:, 3])
 
 
@@ -404,13 +408,19 @@ def GenerateParticleHistogram(usampleid):
     sqlparam={'usampleid':usampleid}
     for i,r in enumerate(VolumeParTranche):
         sqlparam['lineno']=i
-        sqlparam['depth'] = -(i*5+2.5)
+        sqlparam['depth'] = (i*5+2.5)
         sqlparam['watervolume'] = VolumeParTranche[i]
         for k in range(0,45):
             sqlparam['class%02d'%(k+1)] = PartByClassAndTranche[k,i]
         database.ExecSQL(sql,sqlparam)
+    GenerateReducedParticleHistogram(usampleid)
 
-
+def GenerateReducedParticleHistogram(usampleid):
+    """
+    Génération de l'histogramme particulaire détaillé (45 classes) et réduit (15 classes) à partir de l'histogramme détaillé
+    :param usampleid:
+    :return:
+    """
     database.ExecSQL("delete from uvp_histopart_reduit where usampleid=" + str(usampleid))
     sql = """insert into uvp_histopart_reduit(usampleid, lineno, depth,datetime,  watervolume
     , class01, class02, class03, class04, class05, class06, class07, class08, class09, class10, class11, class12, class13, class14
@@ -423,6 +433,137 @@ def GenerateParticleHistogram(usampleid):
     from uvp_histopart_det where usampleid="""+str(usampleid)
     database.ExecSQL(sql)
 
+def GenerateTaxonomyHistogram(usampleid):
+    """
+    Génération de l'histogramme Taxonomique 
+    :param usampleid:
+    :return:
+    """
+    UvpSample= uvpdatabase.uvp_samples.query.filter_by(usampleid=usampleid).first()
+    if UvpSample is None:
+        raise Exception("GenerateTaxonomyHistogram: Sample %d missing"%usampleid)
+    Prj = uvpdatabase.uvp_projects.query.filter_by(uprojid=UvpSample.uprojid).first()
+    if UvpSample.sampleid is None:
+        raise Exception("GenerateTaxonomyHistogram: Ecotaxa sampleid required in Sample %d " % usampleid)
+    pixel=UvpSample.acq_pixel
+    EcoPrj = database.Projects.query.filter_by(projid=Prj.projid).first()
+    if EcoPrj is None:
+        raise Exception("GenerateTaxonomyHistogram: Ecotaxa project %d missing"%Prj.projid)
+    objmap = DecodeEqualList(EcoPrj.mappingobj)
+    areacol=None
+    for k,v in objmap.items():
+        if v.lower()=='area':
+            areacol=k
+            break
+    if areacol is None:
+        raise Exception("GenerateTaxonomyHistogram: esd attribute required in Ecotaxa project %d"%Prj.projid)
+    app.logger.info("Esd col is %s",areacol)
+    LstTaxo=database.GetAll("""select classif_id,floor(depth_min/5) tranche,avg({areacol}) as avgarea,count(*) nbr
+                from objects
+                WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL
+                group by classif_id,floor(depth_min/5)"""
+                            .format(sampleid=UvpSample.sampleid,areacol=areacol))
+    LstVol=database.GetAssoc("""select cast(round((depth-2.5)/5) as INT) tranche,watervolume from uvp_histopart_reduit where usampleid=%s"""%usampleid)
+    # 0 Taxoid, tranche
+    # TblTaxo=np.empty([len(LstTaxo),4])
+    database.ExecSQL("delete from uvp_histocat_lst where usampleid=%s"%usampleid)
+    database.ExecSQL("delete from uvp_histocat where usampleid=%s"%usampleid)
+    sql="""insert into uvp_histocat(usampleid, classif_id, lineno, depth, watervolume, nbr, avgesd, totalbiovolume)
+            values({usampleid},{classif_id},{lineno},{depth},{watervolume},{nbr},{avgesd},{totalbiovolume})"""
+    for r in LstTaxo:
+        watervolume=LstVol.get(r['tranche'])
+        esd=r['avgarea']*pixel*pixel  # todo finir
+        biovolume=r['nbr']*pow(esd/2,3)*4*math.pi/3
+        watervolume='NULL'
+        if r['tranche'] in LstVol:
+            watervolume =LstVol[r['tranche']]['watervolume']
+        database.ExecSQL(sql.format(
+        usampleid=usampleid, classif_id=r['classif_id'], lineno=r['tranche'], depth=r['tranche']*5+2.5, watervolume=watervolume
+            , nbr=r['nbr'], avgesd=esd, totalbiovolume=biovolume ))
+    database.ExecSQL("""insert into uvp_histocat_lst(usampleid, classif_id) 
+            select distinct usampleid,classif_id from uvp_histocat where usampleid=%s""" % usampleid)
 
+    database.ExecSQL("""update uvp_samples set daterecalculhistotaxo=current_timestamp  
+            where usampleid=%s""" % usampleid)
 
+        # TblTaxo[i,0:2]=r['avgarea'],r['nbr']
+    # TblTaxo[:,2]=
 
+def ImportCTD(usampleid):
+    """
+    Importe les données CTD 
+    :param usampleid:
+    :return:
+    """
+    FixedCol={
+        "chloro fluo [mg chl/m3]": "chloro_fluo",
+        "conductivity [ms/cm]": "conductivity",
+        "cpar [%]": "cpar",
+        "depth [salt water, m]": "fcdom_factory",
+        "fcdom factory [ppb qse]": "in_situ_density_anomaly",
+        "in situ density anomaly [kg/m3]": "neutral_density",
+        "neutral density [kg/m3]": "nitrate",
+        "nitrate [µmol/l]": "oxygen_mass",
+        "oxygen [µmol/kg]": "oxygen_vol",
+        "oxygen [ml/l]": "par",
+        "par [µmol m-2 s-1]": "part_backscattering_coef_470_nm",
+        "part backscattering coef 470 nm [m-1]": "pot_temperature",
+        "pot. temperature [degc] (any ref.)": "potential_density_anomaly",
+        "potential density anomaly [kg/m3]": "potential_temperature",
+        "potential temperature [degc]": "practical_salinity",
+        "practical salinity [psu]": "practical_salinity__from_conductivity",
+        "practical salinity from conductivity": "uvp_ctd_pkey",
+        "pressure in water column [db]": "pressure_in_water_column",
+        "qc flag": "qc_flag",
+        "sound speed c [m/s]": "sound_speed_c",
+        "spar [µmol m-2 s-1]": "spar",
+        "temperature [degc]": "temperature"
+    }
+    UvpSample= uvpdatabase.uvp_samples.query.filter_by(usampleid=usampleid).first()
+    if UvpSample is None:
+        raise Exception("ImportCTD: Sample %d missing"%usampleid)
+    Prj = uvpdatabase.uvp_projects.query.filter_by(uprojid=UvpSample.uprojid).first()
+    ServerRoot = Path(app.config['SERVERLOADAREA'])
+    DossierUVPPath = ServerRoot / Prj.rawfolder
+    CtdFile =  DossierUVPPath / "ctd_data_cnv"/(UvpSample.profileid+".ctd")
+    if not CtdFile.exists():
+        app.logger.info("CTD file %s missing", CtdFile.as_posix())
+        return False
+    app.logger.info("Import CTD file %s", CtdFile.as_posix())
+    with CtdFile.open('r') as tsvfile:
+        Rdr = csv.reader(tsvfile, delimiter='\t')
+        HeadRow=Rdr.__next__()
+        # Analyser la ligne de titre et assigner à chaque ID l'attribut
+        # Construire la table d'association des attributs complémentaires.
+        ExtramesID=0
+        Mapping=[]
+        ExtraMapping ={}
+        for ic,c in enumerate(HeadRow):
+            clow=c.lower().strip()
+            if clow in FixedCol:
+                Target=FixedCol[clow]
+            else:
+                ExtramesID += 1
+                Target ='extrames%02d'%ExtramesID
+                ExtraMapping['%02d'%ExtramesID]=c
+                if ExtramesID>20:
+                    raise Exception("ImportCTD: Too much CTD data, column %s skipped" % c)
+            Mapping.append(Target)
+        app.logger.info("Mapping = %s",Mapping)
+        database.ExecSQL("delete from uvp_ctd where usampleid=%s"%usampleid)
+        for i,r in enumerate(Rdr):
+            cl=uvpdatabase.uvp_ctd()
+            cl.usampleid=usampleid
+            cl.lineno=i
+            for i,c in enumerate(Mapping):
+                v=CleanValue(r[i])
+                if v!='':
+                    setattr(cl,c,v)
+            db.session.add(cl)
+            db.session.commit()
+        UvpSample.ctd_desc=EncodeEqualList(ExtraMapping)
+        UvpSample.ctd_import_datetime=datetime.datetime.now()
+        UvpSample.ctd_import_name=current_user.name
+        UvpSample.ctd_import_email = current_user.email
+        db.session.commit()
+        return True

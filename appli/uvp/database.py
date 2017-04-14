@@ -146,9 +146,9 @@ class uvp_histocat(db.Model):
     depth = db.Column(DOUBLE_PRECISION)
     datetime = db.Column(TIMESTAMP)
     watervolume = db.Column(DOUBLE_PRECISION)
-    concentration = db.Column(DOUBLE_PRECISION)
-    esdmoyen = db.Column(DOUBLE_PRECISION)
-    biovolume = db.Column(DOUBLE_PRECISION)
+    nbr = db.Column(DOUBLE_PRECISION)
+    avgesd = db.Column(DOUBLE_PRECISION)
+    totalbiovolume = db.Column(DOUBLE_PRECISION)
 
 class uvp_histocat_lst(db.Model):
     __tablename__ = 'uvp_histocat_lst'
