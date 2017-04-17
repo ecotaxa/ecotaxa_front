@@ -8,15 +8,7 @@ matplotlib.use('Agg')
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import numpy as np
-from appli.uvp import PartDetClassLimit,PartRedClassLimit
-
-
-def GetClassLimitTxt(LimitTab,Classe):
-    if LimitTab[Classe]<1:
-        txt = '%.4g-%.4g µm' % (LimitTab[Classe - 1]*1000, LimitTab[Classe]*1000)
-    else:
-        txt='%.4g-%.4g mm'%(LimitTab[Classe-1],LimitTab[Classe])
-    return txt
+from appli.uvp import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt
 
 
 @app.route('/uvp/drawchart')

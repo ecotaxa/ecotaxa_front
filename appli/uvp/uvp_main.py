@@ -1,18 +1,21 @@
-from flask import render_template, g, flash,json
+from flask import render_template, g, flash,json,request
 from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv
-from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,SelectField,TextAreaField
+from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,SelectField,TextAreaField,SelectMultipleField
 from flask_login import current_user
+# from appli.uvp import uvp_main, drawchart,PartRedClassLimit
+from appli.uvp import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt
 
 @app.route('/uvp/')
 def indexUVP():
     class FiltForm(Form):
-        # TODO passer en multiselect pour les projets
         # TODO ne pas afficher tous les projets en fonction des autorisations.
         # TODO gérer popup ajax sur les samples pour afficher quelques informations
-        filt_proj = SelectField(choices=[['','']]+database.GetAll(
-            "SELECT projid,concat(title,' (',cast(projid AS VARCHAR),')') FROM projects ORDER BY lower(title)"))
-        filt_uproj = SelectField(choices=[['','']]+database.GetAll(
+        filt_proj = SelectMultipleField(choices=[['','']]+database.GetAll(
+            "SELECT projid,concat(title,' (',cast(projid AS VARCHAR),')') FROM projects where projid in (select projid from uvp_projects) ORDER BY lower(title)"))
+        filt_uproj = SelectMultipleField(choices=[['','']]+database.GetAll(
             "SELECT uprojid,concat(utitle,' (',cast(uprojid AS VARCHAR),')') FROM uvp_projects ORDER BY lower(utitle)"))
+        gpr = SelectMultipleField(choices=[(i,"%02d : "%i+GetClassLimitTxt(PartRedClassLimit,i)) for i in range (1,16)])
+        gpd = SelectMultipleField(choices=[(i,"%02d : "%i+GetClassLimitTxt(PartDetClassLimit,i)) for i in range (1,46)])
 
     form=FiltForm()
     # data={}
@@ -53,11 +56,9 @@ def GetFilteredSamples(GetVisibleOnly=False):
         sql+=" and s.sampledate<= to_date(%(todate)s,'YYYY-MM-DD') "
         sqlparam['todate']=gvg("filt_todate")
     if gvg("filt_proj",'')!="":
-        sql+=" and p.projid=%(proj)s "
-        sqlparam['proj']=gvg("filt_proj")
+        sql+=" and p.projid in (%s) "%(','.join([str(int(x)) for x in request.args.getlist("filt_proj")]))
     if gvg("filt_uproj",'')!="":
-        sql+=" and up.uprojid=%(uproj)s "
-        sqlparam['uproj']=gvg("filt_uproj")
+        sql+=" and up.uprojid in (%s) "%(','.join([str(int(x)) for x in request.args.getlist("filt_uproj")]))
     if gvg("filt_instrum",'')!="":
         sql+=" and lower(up.instrumtype)=lower(%(instrum)s) "
         sqlparam['instrum']=gvg("filt_instrum")

@@ -36,7 +36,7 @@ def CreateOrUpdateSample(uprojid,headerdata):
     Prj = uvpdatabase.uvp_projects.query.filter_by(uprojid=uprojid).first()
     for k,v in headerdata.items():
         headerdata[k]=CleanValue(v)
-    Sample=uvpdatabase.uvp_samples.query.filter_by(profileid=headerdata['profileid']).first()
+    Sample=uvpdatabase.uvp_samples.query.filter_by(profileid=headerdata['profileid'],uprojid=uprojid).first()
     if Sample is None:
         logging.info("Create sample for %s %s"%(headerdata['profileid'],headerdata['filename']))
         Sample = uvpdatabase.uvp_samples()

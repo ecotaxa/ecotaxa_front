@@ -11,24 +11,23 @@ from flask_security import login_required
 def UVP_prj():
     params={}
     sql="""select uprojid,utitle,up.ownerid,u.name,u.email,rawfolder,instrumtype,ep.title
+            ,(select count(*) from uvp_samples where uprojid=up.uprojid) samplecount
             from uvp_projects up
             left JOIN projects ep on up.projid=ep.projid
             LEFT JOIN users u on ownerid=u.id
           """
     # if not current_user.has_role(database.AdministratorLabel):
     #     sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
-    # sql += " where 1=1 "
-    # if gvg('filt_title','')!='':
-    #     sql +=" and (  title ilike '%%'||%(title)s ||'%%' or to_char(p.projid,'999999') like '%%'||%(title)s ) "
-    #     params['title']=gvg('filt_title')
-    # if gvg('filt_instrum','')!='':
-    #     sql +=" and p.projid in (select distinct projid from acquisitions where instrument ilike '%%'||%(filt_instrum)s ||'%%' ) "
-    #     params['filt_instrum']=gvg('filt_instrum')
-    # if gvg('filt_subset', '') == 'Y':
-    #     sql += " and not title ilike '%%subset%%'  "
+    sql += " where 1=1 "
+    if gvg('filt_title','')!='':
+        sql +=" and (  up.utitle ilike '%%'||%(title)s ||'%%' or to_char(up.uprojid,'999999') like '%%'||%(title)s or ep.title ilike '%%'||%(title)s ||'%%' or to_char(ep.projid,'999999') like '%%'||%(title)s) "
+        params['title']=gvg('filt_title')
+    if gvg('filt_instrum','')!='':
+        sql +=" and up.instrumtype ilike '%%'||%(filt_instrum)s ||'%%'  "
+        params['filt_instrum']=gvg('filt_instrum')
     sql+=" order by lower(ep.title),lower(utitle)"
     res = GetAll(sql,params) #,debug=True
-    app.logger.info("res=",res)
+    app.logger.info("res=%s",res)
     CanCreate=False
     if current_user.has_role(database.AdministratorLabel):
         CanCreate=True
@@ -101,11 +100,13 @@ def UVP_prjcalc(PrjId):
             else:
                 txt += prefix + " <span style='color: red;'>Ecotaxa sample matching impossible if UVP project not linked to an Ecotaxa project</span>"
         if gvp('dohistotaxo') == 'Y':
-            if S['sampleid']:
+            # if S['sampleid']:
+            try:
                 sample_import.GenerateTaxonomyHistogram(S['usampleid'])
                 txt += prefix + " Taxonomy Histogram computed"
-            else:
-                txt += prefix + " <span style='color: red;'>Taxonomy Histogram can't be computer without link with Ecotaxa sample</span>"
+            # else:
+            except Exception as E:
+                txt += prefix + " <span style='color: red;'>Taxonomy Histogram can't be computed : %s </span>"%(E)
     if gvp('doctdimport') == 'Y':
         if sample_import.ImportCTD(S['usampleid']):
             txt += prefix + " CTD imported"

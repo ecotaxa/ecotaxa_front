@@ -41,19 +41,30 @@ class TaskUVPZooscanImport(AsyncTask):
         logging.info("Input Param = %s"%(self.param.__dict__))
         logging.info("Start Step 1")
         Prj=uvpdatabase.uvp_projects.query.filter_by(uprojid=self.param.uprojid).first()
+        Nbr=0
+        for sample in self.param.profilelistinheader:
+            ProcessType=self.param.profiletoprocess.get(sample['profileid'])
+            if ProcessType: #TODO si utile de transmettre new/ID ?
+                Nbr+=1
+        if Nbr==0: Nbr=1 # pour éviter les div / 0
+        NbrDone=0
         for sample in self.param.profilelistinheader:
             ProcessType=self.param.profiletoprocess.get(sample['profileid'])
             if ProcessType: #TODO si utile de transmettre new/ID ?
                 logging.info("Process profile %s : %s"%(sample['profileid'],ProcessType))
                 usampleid=appli.uvp.sample_import.CreateOrUpdateSample(self.param.uprojid, sample)
+                self.UpdateProgress(100*(NbrDone+0.1)/Nbr, "Metadata of profile %s : %s processed"%(sample['profileid'],ProcessType))
                 logging.info("Sample %d Metadata processed"%(usampleid))
                 if not self.param.ProcessOnlyMetadata:
                     appli.uvp.sample_import.GenerateRawHistogram(usampleid) # TODO a réactiver, désactivé pour mise au point
+                    self.UpdateProgress(100 * (NbrDone + 0.7) / Nbr,"Raw histogram of profile %s : %s processed" % (sample['profileid'], ProcessType))
                     appli.uvp.sample_import.GenerateParticleHistogram(usampleid)
+                    self.UpdateProgress(100 * (NbrDone + 0.95) / Nbr, "Raw histogram of profile %s : %s processed" % (sample['profileid'], ProcessType))
+                NbrDone+=1
 
 
-        # self.task.taskstate="Done"
-        # self.UpdateProgress(100,"Processing done")
+        self.task.taskstate="Done"
+        self.UpdateProgress(100,"Processing done")
 
     def QuestionProcess(self):
         ServerRoot=Path(app.config['SERVERLOADAREA'])
@@ -142,8 +153,7 @@ class TaskUVPZooscanImport(AsyncTask):
     def GetDoneExtraAction(self):
         # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
-        PrjId=self.param.ProjectId
+        PrjId=self.param.uprojid
         time.sleep(1)
         DoTaskClean(self.task.id)
-        return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
-        <a href='/Task/Create/TaskClassifAuto?p={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a> """.format(PrjId)
+        return """<a href='/uvp/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Project page</a> """.format(PrjId)
