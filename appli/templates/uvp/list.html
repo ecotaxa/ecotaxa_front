@@ -5,7 +5,7 @@
 
 
 {% if  CanCreate==True %}
-  <button class="btn btn-success" onclick="CreateProject();">Create a new UVP project</button>
+  <a href="/uvp/prjedit/0" class="btn btn-success" >Create a new UVP project</a>
 {% else %}
   <p>To create a new project and upload images in it, please contact the application manager(s): {{ AppManagerMailto|safe }}</p>
 {% endif %}
@@ -16,18 +16,14 @@
     <form method="get">
       <table>
         <tr>
-          <td>Filter on title :</td>
-          <td><input type="text"  style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}"></td>
+          <td style="padding-right: 5px;">Filter on title : </td>
+          <td><input type="text"  style="width: 100px;margin : 0 10px 3px 0;" name="filt_title" id="filt_title" value="{{ filt_title }}"></td>
           <td rowspan="3" style="vertical-align: top"><button type="submit" class="btn btn-primary">Search</button></td>
-        </tr>
-        <tr>
-          <td style="padding-right: 10px;">Exclude subsets :</td>
-          <td><input type="checkbox" value="Y" name="filt_subset" {%  if filt_subset=='Y'  %}checked{%  endif  %}></td>
         </tr>
         <tr>
           <td>Instrument : </td>
           <td><input type="text" style="width: 100px;" name="filt_instrum" id="filt_instrum" value="{{ filt_instrum }}">
-                <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});" style="cursor: pointer;"></span></td>
+                </td>
         </tr>
       </table>
     </form>
@@ -49,54 +45,17 @@
 {%   for r in PrjList %}
 <tr><td><a class='btn btn-primary' href='/uvp/prj/{{ r[0] }}'>Select</a></td>
   <td> {{ r[1] }} [{{ r[0] }}] {{ ("<a href='mailto:"+r['email']+"'>"+r['name']+"</a>") |safe if r['email'] }}</td>
-  <td>{{ r['instrumtype'] }}</td>
-  <td>{{ r['title'] }}</td>
-  <td>{{ r['rawfolder'] }}</td>
+  <td>{{ r['instrumtype'] or "" }}</td>
+  <td>{{ r['title'] or "" }}</td>
+  <td>{{ r['rawfolder'] or "" }}</td>
+  <td>{{ r['samplecount'] }}</td>
 
   </tr>
 {%  endfor %}
 
 </tbody></table>
-<div class="col-sm-6 col-sm-offset-3">
-  <a href="/prjothers/" class="btn  btn-block btn-primary">Show projects in which you are not registered</a>
-</div>
 <script>
-  function DispInstrumList(projid){
-  $("#PopupDetails .modal-content").html("Loading...");
-  $('#PopupDetails .modal-lg').css('width',$(window).width()/2);
-  $('#PopupDetails').modal({});
-  var url="/search/instrumlist"
-  if(typeof (projid)!="undefined")
-    url+="?projid="+projid
-  $("#PopupDetails .modal-content").load(url);
-}
-function CreateProject() {
-  $('#PopupCreateProject').modal({});
-}
-function DoCreateProject() {
-  $('#resultcreate').load('/prj/simplecreate/',{projtitle:$('#newprojecttitle').val()});
-
-{#  alert("Not Yet implemted")#}
-}
 $('#filt_title').focus();
-
 </script>
-<div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      ...
-    </div>
-  </div>
-</div>
 
-<div id="PopupCreateProject" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content" style="width: 600px; padding: 20px;">
-      <h3>Create a new project</h3>
-      Project Title : <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control" style="width: 400px;" autocomplete="off">
-      <br><br><button class="btn btn-success" onclick="DoCreateProject();">Create the project</button>
-      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-      <div id="resultcreate"></div>
-    </div>
-  </div>
-</div>
+

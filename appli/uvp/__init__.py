@@ -10,3 +10,12 @@ PartDetClassLimit=[0.001000,0.001260,0.001590,0.002000,0.002520,0.003170,0.00400
         ,1.020000,1.290000,1.630000,2.050000,2.580000,3.250000,4.100000,5.160000,6.500000,8.190000
         ,10.300000,13.000000,16.400000,20.600000,26.0, 10E7]
 PartRedClassLimit=[0.001000,0.002000,0.004000,0.008000,0.016000,0.032000,0.064000,0.128000,0.256000,0.512000,1.020000,2.050000,4.100000,8.190000,16.400000,10E7]
+
+def GetClassLimitTxt(LimitTab,Classe):
+    if Classe>=len(LimitTab)-1:
+        return '>%.4g mm'%LimitTab[Classe-1]
+    if LimitTab[Classe]<1:
+        txt = '%.4g-%.4g µm' % (LimitTab[Classe - 1]*1000, LimitTab[Classe]*1000)
+    else:
+        txt='%.4g-%.4g mm'%(LimitTab[Classe-1],LimitTab[Classe])
+    return txt

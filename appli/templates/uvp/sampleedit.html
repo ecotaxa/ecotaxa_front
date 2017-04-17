@@ -166,9 +166,21 @@
 {{ render_field(form.daterecalculhistotaxo,tr='') }}
 {{ render_checkbox_field(form.histobrutavailable,tr='c') }}
     <tr>
-        <td>
+        <td colspan="3">
 <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>
 <a href="/uvp/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
+{% if usampleid>0 %}
+    <button type="button" onclick="document.getElementById('confirm').showModal()" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove Sample</button>
+{% endif %}
+<dialog id="confirm">
+    <p style="font-weight: bold;font-size: larger">Are you sure you want remove this sample</p>
+    <form method="post" action="/uvp/sampleedit/{{ usampleid }}" style="display: inline-block">
+        <input type="hidden" name="delete" value="Y">
+    <button  class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove Sample</button>
+        </form>
+    <button  type="button" class="btn btn-warning" onclick="document.getElementById('confirm').close();"> Cancel</button>
+</dialog>
+
         </td>
     </tr>
 </table>

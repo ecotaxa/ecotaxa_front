@@ -81,17 +81,15 @@ class UvpSampleForm(Form):
 def UVP_sampleedit(usampleid):
     model = uvpdatabase.uvp_samples.query.filter_by(usampleid=usampleid).first()
     form=UvpSampleForm(request.form,model)
+    if gvp('delete')=='Y':
+        for t in ('uvp_histopart_reduit','uvp_histopart_det','uvp_histocat','uvp_histocat_lst','uvp_ctd'):
+            database.ExecSQL("delete from "+t+" where usampleid="+str(model.usampleid))
+        db.session.delete(model)
+        db.session.commit()
+        return redirect("/uvp/prj/" + str(model.uprojid))
     if request.method == 'POST' and form.validate():
         for k,v in form.data.items():
             setattr(model,k,v)
         db.session.commit()
         return redirect("/uvp/prj/"+str(model.uprojid))
-    # MyForm = model_form(model , base_class=Form)
-    # form = MyForm(request.form, model)
-    #
-    # if form.validate_on_submit():
-    #     form.populate_obj(model)
-    #     model.put()
-    #     flash("MyModel updated")
-    #     return redirect("/uvp/prj/1")
-    return PrintInCharte(render_template("uvp/sampleedit.html", form=form,prjid=model.uprojid))
+    return PrintInCharte(render_template("uvp/sampleedit.html", form=form,prjid=model.uprojid,usampleid=model.usampleid))

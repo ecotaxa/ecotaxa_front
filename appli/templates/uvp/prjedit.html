@@ -109,7 +109,17 @@
 <form method="POST" role="form" class="">
 <table id="edittab">
 {{ render_field(form.utitle,tr='o',style="width:500px;",colspan=3) }}
-{{ render_field(form.rawfolder,tr='c',style="width:500px;",colspan=3) }}
+<td > <label for="rawfolder" class="control-label">Raw folder</label></td><td colspan="3">
+  <div class="input-group" style="width: 600px;">
+    <input type="text" class="form-control" id="ServerPath" name="rawfolder" value="{{ form.rawfolder.data or "" }}" size="200">
+    <span class="input-group-btn">
+        <button class="btn btn-default" type="button"  data-toggle="modal" data-target="#FileModal">
+            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button>
+        <button class="btn btn-default" type="button" onclick="ReadMeta();">
+            Read Metadata</button>
+    </span>
+</div>
+</td></tr>
 {{ render_field(form.ownerid,tr='o',colspan=3) }}
 {{ render_field(form.projid,tr='c',colspan=3) }}
 {{ render_field(form.instrumtype,tr='o') }}
@@ -131,10 +141,54 @@
 {{ render_field(form.dataportal_desc,tr='c',colspan=3,style="width:500px;") }}
 
     <tr>
-        <td>
+        <td colspan="4">
 <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>
 <a href="/uvp/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
+{% if prjid>0 %}
+    <button type="button" onclick="document.getElementById('confirm').showModal()" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove project</button>
+{% endif %}
         </td>
     </tr>
 </table>
 </form>
+
+<dialog id="confirm">
+    <p style="font-weight: bold;font-size: larger">Are you sure you want remove this project</p>
+    <form method="post" action="/uvp/prjedit/{{ prjid }}" style="display: inline-block">
+        <input type="hidden" name="delete" value="Y">
+    <button  class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove project</button>
+        </form>
+    <button  type="button" class="btn btn-warning" onclick="document.getElementById('confirm').close();"> Cancel</button>
+</dialog>
+
+<div class="modal " id="FileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Select a folder or a zip file</h4>
+      </div>
+      <div class="modal-body">
+        <div id="FileModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#FileModal').on('show.bs.modal', function () {
+        $("#TaxoModalBody").html("");
+        {# Pour eviter les conflit sur le jstree suite à des ouverture successive car le jstree est dans la modal cachée #}
+        $("#FileModalBody").html("Loading...").load("/common/ServerFolderSelect");
+    });
+});
+function ReadMeta() {
+    $.getJSON( "/uvp/readprojectmeta",{path:$("#ServerPath").val()}, function( data ) {
+      $.each( data, function( key, val ) {
+          $('#'+key).val(val);
+      });
+    });
+}
+
+</script>
