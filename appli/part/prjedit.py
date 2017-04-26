@@ -10,7 +10,7 @@ from flask_security import login_required
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,SelectField,TextAreaField
 
 class UvpPrjForm(Form):
-    ptitle = StringField("UVP Project title")
+    ptitle = StringField("Particle Project title")
     rawfolder = StringField("rawfolder")
     ownerid = StringField("Project Owner")
     projid = StringField("Ecotaxa Project")
@@ -32,7 +32,7 @@ class UvpPrjForm(Form):
 @app.route('/part/prjedit/<int:pprojid>',methods=['get','post'])
 @login_required
 def part_prjedit(pprojid):
-    g.headcenter="<h3>UVP Project Metadata edition</h3>"
+    g.headcenter="<h3>Particle Project Metadata edition</h3>"
     if pprojid>0:
         model = partdatabase.part_projects.query.filter_by(pprojid=pprojid).first()
     else:

@@ -202,7 +202,7 @@ def GenerateRawHistogram(psampleid):
     DepthBinCount=np.bincount(np.floor(aFilteredImgDepth[:,1]).astype('int'))
     aFilteredImgDepth=None # version nparray plus necessaire.
     logging.info("Depth range= {0}->{1}".format(MinDepth,MaxDepth))
-    Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_depth_' + UvpSample.filename+'.png')).as_posix())
+    Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_depth_' + UvpSample.profileid+'.png')).as_posix())
 
     # chargement des données particulaires
     logging.info("Processing BRU Files:")
@@ -279,9 +279,10 @@ def GenerateParticleHistogram(psampleid):
     # 1 Ligne par mètre et area, ne contient les données entre fist et last
     MinDepth=Part[:,0].min()
     # ajout d'attributs calculés pour chaque ligne du fichier.
-    PartCalc=np.empty([Part.shape[0],2]) # col0 = tranche, Col1=ESD
+    PartCalc=np.empty([Part.shape[0],3]) # col0 = tranche, Col1=ESD, Col2=Biovolume en µl
     PartCalc[:,0]=Part[:,0]//5  #calcul de la tranche 0 pour [0m..5m[,1 pour [5m..10m[
     PartCalc[:,1]=2*np.sqrt((pow(Part[:,2],UvpSample.acq_exp)*UvpSample.acq_aa)/np.pi)
+    PartCalc[:, 2] = Part[:,3]*pow(PartCalc[:, 1] / 2, 3) * 4 * math.pi / 3
     LastTranche=PartCalc[:,0].max()
     # on récupere les 1ère ligne de chaque mètre afin de calculer le volume d'eau
     FirstLigByDepth = Part[np.unique(Part[:, 0], return_index=True)[1]]
@@ -292,6 +293,10 @@ def GenerateParticleHistogram(psampleid):
     (PartByClassAndTranche, bins, binsdept) = np.histogram2d(PartCalc[:,1], PartCalc[:,0], bins=(
         PartDetClassLimit, np.arange(0, VolumeParTranche.shape[0]+1 ))
             , weights=Part[:, 3])
+    (BioVolByClassAndTranche, bins, binsdept) = np.histogram2d(PartCalc[:,1], PartCalc[:,0], bins=(
+        PartDetClassLimit, np.arange(0, VolumeParTranche.shape[0]+1 ))
+            , weights=PartCalc[:, 2])
+    BioVolByClassAndTranche/=VolumeParTranche
 
 
     font = {'family' : 'arial',
@@ -341,6 +346,14 @@ def GenerateParticleHistogram(psampleid):
     ax.set_xlabel('Part 1.06-2.66 mm esd #/L')
     ax.set_ylabel('Depth(m)')
 
+    # Calcul Biovolume Particle >0.512-<=1.02 mm via histograme
+    n=np.sum(BioVolByClassAndTranche[28:30,:],axis=0)
+    ax = Fig.add_subplot(245)
+
+    ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
+    ax.set_xticks(GetTicks(n.max()))
+    ax.set_xlabel('Part >=0.512-<1.02 mm esd µl/l from det histo')
+    ax.set_ylabel('Depth(m)')
 
     # Calcul Particle <=0.512 mm via histograme
     n=np.sum(PartByClassAndTranche[0:28,:],axis=0)
@@ -369,18 +382,29 @@ def GenerateParticleHistogram(psampleid):
     ax.set_xlabel('Part >=1.02-<2.58 mm esd #/L from det histo')
     ax.set_ylabel('Depth(m)')
 
-    Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_particle_' + UvpSample.filename+'.png')).as_posix())
+    Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_particle_' + UvpSample.profileid+'.png')).as_posix())
 
     database.ExecSQL("delete from part_histopart_det where psampleid="+str(psampleid))
     sql="""insert into part_histopart_det(psampleid, lineno, depth,  watervolume
         , class01, class02, class03, class04, class05, class06, class07, class08, class09, class10, class11, class12, class13, class14
         , class15, class16, class17, class18, class19, class20, class21, class22, class23, class24, class25, class26, class27, class28, class29
-        , class30, class31, class32, class33, class34, class35, class36, class37, class38, class39, class40, class41, class42, class43, class44, class45)
-    values(%(psampleid)s,%(lineno)s,%(depth)s,%(watervolume)s,%(class01)s,%(class02)s,%(class03)s,%(class04)s,%(class05)s,%(class06)s
+        , class30, class31, class32, class33, class34, class35, class36, class37, class38, class39, class40, class41, class42, class43, class44, class45
+        , biovol01, biovol02, biovol03, biovol04, biovol05, biovol06, biovol07, biovol08, biovol09, biovol10, biovol11, biovol12, biovol13, biovol14
+        , biovol15, biovol16, biovol17, biovol18, biovol19, biovol20, biovol21, biovol22, biovol23, biovol24, biovol25, biovol26, biovol27, biovol28, biovol29
+        , biovol30, biovol31, biovol32, biovol33, biovol34, biovol35, biovol36, biovol37, biovol38, biovol39, biovol40, biovol41, biovol42, biovol43, biovol44, biovol45
+        )
+    values(%(psampleid)s,%(lineno)s,%(depth)s,%(watervolume)s
+    ,%(class01)s,%(class02)s,%(class03)s,%(class04)s,%(class05)s,%(class06)s
     ,%(class07)s,%(class08)s,%(class09)s,%(class10)s,%(class11)s,%(class12)s,%(class13)s,%(class14)s,%(class15)s,%(class16)s,%(class17)s
     ,%(class18)s,%(class19)s,%(class20)s,%(class21)s,%(class22)s,%(class23)s,%(class24)s,%(class25)s,%(class26)s,%(class27)s,%(class28)s
     ,%(class29)s,%(class30)s,%(class31)s,%(class32)s,%(class33)s,%(class34)s,%(class35)s,%(class36)s,%(class37)s,%(class38)s,%(class39)s
-    ,%(class40)s,%(class41)s,%(class42)s,%(class43)s,%(class44)s,%(class45)s)"""
+    ,%(class40)s,%(class41)s,%(class42)s,%(class43)s,%(class44)s,%(class45)s
+    ,%(biovol01)s,%(biovol02)s,%(biovol03)s,%(biovol04)s,%(biovol05)s,%(biovol06)s
+    ,%(biovol07)s,%(biovol08)s,%(biovol09)s,%(biovol10)s,%(biovol11)s,%(biovol12)s,%(biovol13)s,%(biovol14)s,%(biovol15)s,%(biovol16)s,%(biovol17)s
+    ,%(biovol18)s,%(biovol19)s,%(biovol20)s,%(biovol21)s,%(biovol22)s,%(biovol23)s,%(biovol24)s,%(biovol25)s,%(biovol26)s,%(biovol27)s,%(biovol28)s
+    ,%(biovol29)s,%(biovol30)s,%(biovol31)s,%(biovol32)s,%(biovol33)s,%(biovol34)s,%(biovol35)s,%(biovol36)s,%(biovol37)s,%(biovol38)s,%(biovol39)s
+    ,%(biovol40)s,%(biovol41)s,%(biovol42)s,%(biovol43)s,%(biovol44)s,%(biovol45)s
+    )"""
     sqlparam={'psampleid':psampleid}
     for i,r in enumerate(VolumeParTranche):
         sqlparam['lineno']=i
@@ -388,6 +412,8 @@ def GenerateParticleHistogram(psampleid):
         sqlparam['watervolume'] = VolumeParTranche[i]
         for k in range(0,45):
             sqlparam['class%02d'%(k+1)] = PartByClassAndTranche[k,i]
+        for k in range(0,45):
+            sqlparam['biovol%02d'%(k+1)] = BioVolByClassAndTranche[k,i]
         database.ExecSQL(sql,sqlparam)
 
     GenerateReducedParticleHistogram(psampleid)

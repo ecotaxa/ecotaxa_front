@@ -128,9 +128,9 @@ def TaskFactory(ClassName,task=None):
     from .taskimportupdate import TaskImportUpdate
     if ClassName=="TaskImportUpdate":
         return TaskImportUpdate(task)
-    from .taskuvpzooscanimport import TaskUVPZooscanImport
-    if ClassName=="TaskUVPZooscanImport":
-        return TaskUVPZooscanImport(task)
+    from .taskpartzooscanimport import TaskPartZooscanImport
+    if ClassName=="TaskPartZooscanImport":
+        return TaskPartZooscanImport(task)
 
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 
