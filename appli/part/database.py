@@ -10,13 +10,13 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import foreign,remote
 import json,psycopg2.extras,datetime,os
 
-class uvp_projects(db.Model):
-    __tablename__ = 'uvp_projects'
-    # uprojid  = db.Column(INTEGER,db.Sequence('seq_uvp_projects'), primary_key=True)
+class part_projects(db.Model):
+    __tablename__ = 'part_projects'
+    # pprojid  = db.Column(INTEGER,db.Sequence('seq_part_projects'), primary_key=True)
     # SQL Alchemy ne genere pas la sequence comme dans les autres tables précédentes, probablement un evolution
     # mais genere à la place un champ de type serial qui crée une sequence associée
-    uprojid  = db.Column(INTEGER,db.Sequence('uvp_projects_uprojid_seq'), primary_key=True)
-    utitle = db.Column(VARCHAR(250),nullable=False)
+    pprojid  = db.Column(INTEGER,db.Sequence('part_projects_pprojid_seq'), primary_key=True)
+    ptitle = db.Column(VARCHAR(250),nullable=False)
     rawfolder = db.Column(VARCHAR(250),nullable=False)
     ownerid = db.Column(db.Integer,db.ForeignKey('users.id'))
     owneridrel=db.relationship("users")
@@ -34,25 +34,21 @@ class uvp_projects(db.Model):
     cruise = db.Column(VARCHAR(100))
     ship = db.Column(VARCHAR(100))
     default_instrumsn = db.Column(VARCHAR(50))
-    default_aa = db.Column(DOUBLE_PRECISION)
-    default_exp = db.Column(DOUBLE_PRECISION)
-    default_volimage = db.Column(DOUBLE_PRECISION)
     default_depthoffset = db.Column(DOUBLE_PRECISION)
-    dataportal_desc = db.Column(VARCHAR(8000))
 
     def __str__(self):
-        return "{0} ({1})".format(self.utitle,self.uprojid)
-Index('is_uvp_projects_projid',uvp_projects.__table__.c.projid)
+        return "{0} ({1})".format(self.ptitle,self.pprojid)
+Index('is_part_projects_projid',part_projects.__table__.c.projid)
 
 
-class uvp_samples(db.Model):
-    __tablename__ = 'uvp_samples'
-    # usampleid  = db.Column(INTEGER,db.Sequence('seq_uvp_samples'), primary_key=True)
+class part_samples(db.Model):
+    __tablename__ = 'part_samples'
+    # psampleid  = db.Column(INTEGER,db.Sequence('seq_part_samples'), primary_key=True)
     # SQL Alchemy ne genere pas la sequence comme dans les autres tables précédentes, probablement un evolution
     # mais genere à la place un champ de type serial qui crée une sequence associée
-    usampleid  = db.Column(INTEGER,db.Sequence('uvp_samples_usampleid_seq'), primary_key=True)
-    uprojid = db.Column(INTEGER,db.ForeignKey('uvp_projects.uprojid'))
-    project=db.relationship("uvp_projects")
+    psampleid  = db.Column(INTEGER,db.Sequence('part_samples_psampleid_seq'), primary_key=True)
+    pprojid = db.Column(INTEGER,db.ForeignKey('part_projects.pprojid'))
+    project=db.relationship("part_projects")
     profileid = db.Column(VARCHAR(250),nullable=False)
     filename = db.Column(VARCHAR(250),nullable=False)
     sampleid = db.Column(INTEGER,db.ForeignKey('samples.sampleid'))
@@ -76,6 +72,8 @@ class uvp_samples(db.Model):
     bottomdepth = db.Column(INTEGER)
     yoyo = db.Column(db.Boolean())
     sampledate = db.Column(TIMESTAMP)
+    op_sample_name = db.Column(VARCHAR(100))
+    op_sample_email = db.Column(VARCHAR(100))
     ctd_desc = db.Column(VARCHAR(1000))
     ctd_origfilename = db.Column(VARCHAR(250))
     ctd_import_name = db.Column(VARCHAR(100))
@@ -108,39 +106,54 @@ class uvp_samples(db.Model):
     proc_datetime = db.Column(TIMESTAMP)
     proc_gamma = db.Column(DOUBLE_PRECISION)
     proc_soft = db.Column(VARCHAR(250))
-    op_sample_name = db.Column(VARCHAR(100))
-    op_sample_email = db.Column(VARCHAR(100))
+    lisst_zscat_filename = db.Column(VARCHAR(200))
+    lisst_kernel = db.Column(VARCHAR(200))
+    lisst_year = db.Column(INTEGER)
+    txt_data01 = db.Column(VARCHAR(200))
+    txt_data02 = db.Column(VARCHAR(200))
+    txt_data03 = db.Column(VARCHAR(200))
+    txt_data04 = db.Column(VARCHAR(200))
+    txt_data05 = db.Column(VARCHAR(200))
+    txt_data06 = db.Column(VARCHAR(200))
+    txt_data07 = db.Column(VARCHAR(200))
+    txt_data08 = db.Column(VARCHAR(200))
+    txt_data09 = db.Column(VARCHAR(200))
+    txt_data10 = db.Column(VARCHAR(200))
 
     def __str__(self):
-        return "{0} ({1})".format(self.profileid,self.usampleid)
-Index('is_uvp_samples_sampleid',uvp_samples.__table__.c.sampleid)
-Index('is_uvp_samples_prj',uvp_samples.__table__.c.uprojid)
+        return "{0} ({1})".format(self.profileid,self.psampleid)
+Index('is_part_samples_sampleid',part_samples.__table__.c.sampleid)
+Index('is_part_samples_prj',part_samples.__table__.c.pprojid)
 
-class uvp_histopart_reduit(db.Model):
-    __tablename__ = 'uvp_histopart_reduit'
-    usampleid  = db.Column(INTEGER,db.ForeignKey('uvp_samples.usampleid'), primary_key=True)
+class part_histopart_reduit(db.Model):
+    __tablename__ = 'part_histopart_reduit'
+    psampleid  = db.Column(INTEGER,db.ForeignKey('part_samples.psampleid'), primary_key=True)
     lineno  = db.Column(INTEGER, primary_key=True)
     depth = db.Column(DOUBLE_PRECISION)
     datetime = db.Column(TIMESTAMP)
     watervolume = db.Column(DOUBLE_PRECISION)
 # Ajout des colonnes classe entières
 for i in range(1, 16):
-    setattr(uvp_histopart_reduit, "class%02d" % i, db.Column(INTEGER))
+    setattr(part_histopart_reduit, "class%02d" % i, db.Column(INTEGER))
+for i in range(1, 16):
+    setattr(part_histopart_reduit, "biovol%02d" % i, db.Column(DOUBLE_PRECISION))
 
-class uvp_histopart_det(db.Model):
-    __tablename__ = 'uvp_histopart_det'
-    usampleid = db.Column(INTEGER,db.ForeignKey('uvp_samples.usampleid'), primary_key=True)
+class part_histopart_det(db.Model):
+    __tablename__ = 'part_histopart_det'
+    psampleid = db.Column(INTEGER,db.ForeignKey('part_samples.psampleid'), primary_key=True)
     lineno = db.Column(INTEGER, primary_key=True)
     depth = db.Column(DOUBLE_PRECISION)
     datetime = db.Column(TIMESTAMP)
     watervolume = db.Column(DOUBLE_PRECISION)
 # Ajout des colonnes classe entières
 for i in range(1, 46):
-    setattr(uvp_histopart_det, "class%02d" % i, db.Column(INTEGER))
+    setattr(part_histopart_det, "class%02d" % i, db.Column(INTEGER))
+for i in range(1, 46):
+    setattr(part_histopart_det, "biovol%02d" % i, db.Column(DOUBLE_PRECISION))
 
-class uvp_histocat(db.Model):
-    __tablename__ = 'uvp_histocat'
-    usampleid = db.Column(INTEGER,db.ForeignKey('uvp_samples.usampleid'), primary_key=True)
+class part_histocat(db.Model):
+    __tablename__ = 'part_histocat'
+    psampleid = db.Column(INTEGER,db.ForeignKey('part_samples.psampleid'), primary_key=True)
     classif_id = db.Column(INTEGER, primary_key=True)
     lineno = db.Column(INTEGER, primary_key=True)
     depth = db.Column(DOUBLE_PRECISION)
@@ -150,20 +163,21 @@ class uvp_histocat(db.Model):
     avgesd = db.Column(DOUBLE_PRECISION)
     totalbiovolume = db.Column(DOUBLE_PRECISION)
 
-class uvp_histocat_lst(db.Model):
-    __tablename__ = 'uvp_histocat_lst'
-    usampleid = db.Column(INTEGER,db.ForeignKey('uvp_samples.usampleid'), primary_key=True)
+class part_histocat_lst(db.Model):
+    __tablename__ = 'part_histocat_lst'
+    psampleid = db.Column(INTEGER,db.ForeignKey('part_samples.psampleid'), primary_key=True)
     classif_id = db.Column(INTEGER, primary_key=True)
 
-class uvp_ctd(db.Model):
-    __tablename__ = 'uvp_ctd'
-    usampleid = db.Column(INTEGER,db.ForeignKey('uvp_samples.usampleid'), primary_key=True)
+class part_ctd(db.Model):
+    __tablename__ = 'part_ctd'
+    psampleid = db.Column(INTEGER,db.ForeignKey('part_samples.psampleid'), primary_key=True)
     lineno = db.Column(INTEGER, primary_key=True)
     depth = db.Column(DOUBLE_PRECISION)
     datetime = db.Column(TIMESTAMP)
     chloro_fluo = db.Column(DOUBLE_PRECISION)
     conductivity = db.Column(DOUBLE_PRECISION)
     cpar = db.Column(DOUBLE_PRECISION)
+    depth_salt_water= db.Column(DOUBLE_PRECISION)
     fcdom_factory = db.Column(DOUBLE_PRECISION)
     in_situ_density_anomaly = db.Column(DOUBLE_PRECISION)
     neutral_density = db.Column(DOUBLE_PRECISION)
@@ -177,12 +191,11 @@ class uvp_ctd(db.Model):
     potential_temperature = db.Column(DOUBLE_PRECISION)
     practical_salinity = db.Column(DOUBLE_PRECISION)
     practical_salinity__from_conductivity= db.Column(DOUBLE_PRECISION)
-    pressure_in_water_column = db.Column(DOUBLE_PRECISION)
     qc_flag= db.Column(INTEGER)
     sound_speed_c = db.Column(DOUBLE_PRECISION)
     spar = db.Column(DOUBLE_PRECISION)
     temperature = db.Column(DOUBLE_PRECISION)
 # Ajout des colonnes de mesures supplémentaires
 for i in range(1, 21):
-    setattr(uvp_ctd, "extrames%02d" % i, db.Column(DOUBLE_PRECISION))
+    setattr(part_ctd, "extrames%02d" % i, db.Column(DOUBLE_PRECISION))
 

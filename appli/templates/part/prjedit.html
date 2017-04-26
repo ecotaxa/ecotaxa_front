@@ -108,10 +108,10 @@
 </style>
 <form method="POST" role="form" class="">
 <table id="edittab">
-{{ render_field(form.utitle,tr='o',style="width:500px;",colspan=3) }}
-<td > <label for="rawfolder" class="control-label">Raw folder</label></td><td colspan="3">
-  <div class="input-group" style="width: 600px;">
-    <input type="text" class="form-control" id="ServerPath" name="rawfolder" value="{{ form.rawfolder.data or "" }}" size="200">
+{{ render_field(form.ptitle,tr='oc',style="width:450px;",colspan=3) }}
+<tr><td > <label for="rawfolder" class="control-label">Raw folder</label></td><td colspan="3">
+  <div class="input-group" style="width: 700px;">
+    <input type="text" class="form-control" id="ServerPath" name="rawfolder" value="{{ form.rawfolder.data or "" }}" onchange="ServerPathChange()">
     <span class="input-group-btn">
         <button class="btn btn-default" type="button"  data-toggle="modal" data-target="#FileModal">
             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button>
@@ -120,46 +120,56 @@
     </span>
 </div>
 </td></tr>
-{{ render_field(form.ownerid,tr='o',colspan=3) }}
-{{ render_field(form.projid,tr='c',colspan=3) }}
+{{ render_field(form.ownerid,tr='oc',colspan=3) }}
+{{ render_field(form.projid,tr='oc',colspan=3) }}
 {{ render_field(form.instrumtype,tr='o') }}
 {{ render_field(form.default_instrumsn,tr='c') }}
 {{ render_field(form.op_name,tr='o') }}
-{{ render_field(form.op_email,tr='') }}
-{{ render_field(form.cs_name,tr='') }}
+{{ render_field(form.op_email,tr='c') }}
+{{ render_field(form.cs_name,tr='o') }}
 {{ render_field(form.cs_email,tr='c') }}
 {{ render_field(form.do_name,tr='o') }}
 {{ render_field(form.do_email,tr='c') }}
 {{ render_field(form.prj_acronym,tr='o') }}
-{{ render_field(form.cruise,tr='') }}
-{{ render_field(form.ship,tr='c') }}
-{{ render_field(form.default_aa,tr='o') }}
-{{ render_field(form.default_exp,tr='') }}
-{{ render_field(form.default_volimage,tr='') }}
 {{ render_field(form.default_depthoffset,tr='c') }}
-{{ render_field(form.prj_info,tr='o',colspan=3,style="width:500px;") }}
-{{ render_field(form.dataportal_desc,tr='c',colspan=3,style="width:500px;") }}
+{{ render_field(form.cruise,tr='o') }}
+{{ render_field(form.ship,tr='c') }}
+{{ render_field(form.prj_info,tr='oc',colspan=3,style="width:500px;") }}
+
 
     <tr>
         <td colspan="4">
 <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>
-<a href="/uvp/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
+<a href="/part/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
 {% if prjid>0 %}
-    <button type="button" onclick="document.getElementById('confirm').showModal()" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove project</button>
+    <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove project</button>
 {% endif %}
         </td>
     </tr>
 </table>
 </form>
 
-<dialog id="confirm">
-    <p style="font-weight: bold;font-size: larger">Are you sure you want remove this project</p>
-    <form method="post" action="/uvp/prjedit/{{ prjid }}" style="display: inline-block">
+
+
+<div class="modal " id="confirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Are you sure you want remove this project</h4>
+      </div>
+      <div class="modal-body">
+            <form method="post" action="/part/prjedit/{{ prjid }}" style="display: inline-block">
         <input type="hidden" name="delete" value="Y">
     <button  class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove project</button>
         </form>
-    <button  type="button" class="btn btn-warning" onclick="document.getElementById('confirm').close();"> Cancel</button>
-</dialog>
+    <button  type="button" class="btn btn-warning" onclick="$('#confirm').modal('hide')"> Cancel</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div class="modal " id="FileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -184,11 +194,14 @@ $(document).ready(function() {
     });
 });
 function ReadMeta() {
-    $.getJSON( "/uvp/readprojectmeta",{path:$("#ServerPath").val()}, function( data ) {
+    $.getJSON( "/part/readprojectmeta",{path:$("#ServerPath").val()}, function( data ) {
       $.each( data, function( key, val ) {
           $('#'+key).val(val);
       });
     });
+}
+function ServerPathChange(){
+  ReadMeta();
 }
 
 </script>

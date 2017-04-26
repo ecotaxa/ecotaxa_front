@@ -1,19 +1,28 @@
 {% extends "layout.html" %}
 {% block headcenter %}
-  <h4><a href="/uvp/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
+  <h4><a href="/part/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
 {% endblock %}
 
 {% block body %}
 <div style="margin: 3px;">
 
-<h2>UVP ZooScan folder Importation Task</h2>
+<h2>Particle ZooScan folder Importation Task</h2>
 
 <div class="help-block">
 	<div class="row">
 		<div class="col-sm-12">
-			<p><a href="#general-help" data-toggle="collapse" class="help">General help  TODO ????</a></p>
+			<p><a href="#general-help" data-toggle="collapse" class="help">General help</a></p>
 			<div id="general-help" class="collapse">
-			<p> ?????????</p>
+			<p> This task does the following operations :</p>
+        <ul>
+          <li>Parse the meta/xxxx_header_xxx.txt file to get the list of available sample and show list of availables and already imported ones</li>
+          <li>Create sample if not exists</li>
+          <li>Import metadata in the sample</li>
+          <li>Generate the Raw Particle histogram from BRU files</li>
+          <li>Generate the Detailled and reduced Particle histogram</li>
+          <li>Import CTD</li>
+        </ul>
+        <p>The purpose of "Load only metadata" checkbox is to just reload metadata of sample</p>
 			</div>
 		</div>
 	</div>
@@ -37,7 +46,7 @@
     <th>endimg</th>
     <th>comment</th>
   </tr>
-{% for r in data.profilelistinheader if r['usampleid'] == None %}
+{% for r in data.profilelistinheader if r['psampleid'] == None %}
   <tr>
     <td><input type="checkbox" name="new_{{ loop.index }}" value="{{ r['profileid'] }}" checked></td>
     <td>{{ r['profileid'] }}</td>
@@ -68,7 +77,7 @@
     <th>Taxonomy Histo</th>
     <th>comment</th>
   </tr>
-{% for r in data.profilelistinheader if r['usampleid'] != None %}
+{% for r in data.profilelistinheader if r['psampleid'] != None %}
   <tr>
     <td><input type="checkbox" name="new_{{ loop.index }}" value="{{ r['profileid'] }}" ></td>
     <td>{{ r['profileid'] }}</td>
@@ -76,7 +85,7 @@
     <td>{{ r['stationid'] }}</td>
     <td>{{ r['firstimage'] }}</td>
     <td>{{ r['endimg'] }}</td>
-    <td>{{ r['usampleid'] }}</td>
+    <td>{{ r['psampleid'] }}</td>
     <td>{{ r['histobrutavailable'] }}</td>
     <td>{{ r['nbrlinedet'] }}</td>
     <td>{{ r['nbrlinereduit'] }}</td>

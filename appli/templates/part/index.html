@@ -1,0 +1,460 @@
+<style>
+    .headinfo {margin-bottom: 5px;}
+    .select2-results__option {padding: 0px;}
+#filter1 td:nth-child(1) {width: 100px; }
+#filter1 td {padding-bottom: 2px;}
+#geofilter .form-control {width:100px;display: inline-block;}
+#map .popover-content {white-space: nowrap;}
+</style>
+<div style="margin: 2px;">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.1.0/ol.css" type="text/css">
+  <table style="width: 100%">
+    <tr>
+      <td style="width: 400px;vertical-align: top;">
+<form id="filt_form" class="form-group-sm">
+<b>Sample filters :</b>
+
+
+<table id="filter1" style="width: 95%">
+  <tr><td></td>
+    <td>
+<table style="width:100%;" id="geofilter">
+  <tr><td colspan="2" align="Center">North <input type="text" class="form-control" id="MapOutN"  name="MapN">
+  <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;" onClick="DrawInputOnMap();">Draw On Map</button>
+  </td></tr>
+  <tr >
+    <td style="padding: 2px;white-space: nowrap;">West <input type="text" class="form-control" id="MapOutW" name="MapW"></td>
+    <td>East <input type="text" class="form-control" id="MapOutE" name="MapE"></td></tr>
+  <tr><td colspan="2" align="Center">South <input type="text" class="form-control" id="MapOutS" name="MapS"></td></tr>
+</table>
+
+    </td>
+  </tr>
+  <tr><td>Date between</td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_fromdate" name="filt_fromdate"  autocomplete="off" placeholder="Begin">
+		and <input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_todate" name="filt_todate"  autocomplete="off" placeholder="End"></td></tr>
+  <tr><td>Instrument  </td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_instrum" name="filt_instrum"  autocomplete="off" ></td></tr>
+  <tr><td>Profile type </td><td>{{ form.filt_proftype(style="width:100px") }}</td></tr>
+  <tr><td>Ecotaxa Project </td><td>{{ form.filt_proj(style="width:100%") }}</td></tr>
+  <tr><td>Particle Project </td><td>{{ form.filt_uproj(style="width:100%") }}</td></tr>
+</table>
+
+      <br><button type="button" id="btfilt" class="btn btn-primary" onclick="DoSearch()"><span class="glyphicon glyphicon-search"></span> Search sample</button>
+
+
+</form>
+
+      </td>
+      <td>
+<div id="map" class="map" style="width: 100%; height: 450px;">
+Displaying Map requires Internet Access to load map from https://services.arcgisonline.com
+</div>
+
+      </td>
+    </tr>
+  </table>
+
+
+<div id="ajaxlog"></div>
+    <table style="width: 100%">
+        <tr>
+            <td style="width: 400px;vertical-align: top;padding-right: 10px">
+<div class="panel panel-default" id="graphconfig" >
+  <div class="panel-body" style="padding: 5px;">
+      <b>Graph configuration</b>
+          <button type="button" class="btn btn-sm btn-primary pull-right" onclick="ProcessDraw()"><span class="glyphicon glyphicon-ok"></span> Draw graph</button>
+
+    <br>
+
+      <form id="formgraphconfig">
+          Reduced particle histogram<br>
+          {{ form.gpr(style="width:100%") }}<br>
+          Detailled particle histogram<br>
+          {{ form.gpd(style="width:100%") }}<br>
+          CTD Data<br>
+          {{ form.ctd(style="width:100%") }}<br>
+{# ------- Depth ------------#}
+<div style="width:70%;display: inline-block">
+	<div class="form-group-sm">
+		<label class="title">Depth</label>
+		<span title="Positive values. Both values are required. Each object has a min and max depths. Both values must be in the selected range for the object to be displayed." data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
+		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearDepths();return false;'>Clear</a>
+
+		<div class="form-inline">
+			<div class="input-group" style="width: 49%" >
+				<div class="input-group-addon"><span class="glyphicon glyphicon-triangle-bottom"></span></div>
+				<input class="form-control" type="text" id="filt_depthmin" name="filt_depthmin" autocomplete="off" value="" placeholder="Min [m]">
+			</div>
+			<div class="input-group" style="width: 49%">
+				<div class="input-group-addon"><span class="glyphicon glyphicon-triangle-top"></span></div>
+				<input class="form-control"  type="text" id="filt_depthmax" name="filt_depthmax" autocomplete="off" value=""  placeholder="Max [m]">
+			</div>
+		</div>
+	</div>
+</div>
+<div style="width:28%;display: inline-block">
+  <label class="title">Log Scale on X</label><br>
+  <input type="checkbox" name="XLog" value="Y">
+</div>
+
+{# ------- Taxo Filter ------------#}
+<div >
+	<div class="form-group-sm">
+		<label class="title">Taxonomy Filter &nbsp;<span  data-toggle="popover" data-placement="top" data-container="body" data-html="true"
+    data-title="Taxonomy filter help" data-content="
+        <p style='text-align: left'><ul style='text-align: left'>
+        <li>Each lineage can have different length and the usual levels of taxonomic hierarchy are not considered.
+<li>The species is the lower level. However subspecies details can be mentioned. Only the species name encompasses two words: “Genus species”. The “sp.” is used whenever the species name is not available.
+<li>If a taxon is not yet named, we then merge the suffix 'X' with the parent Id:  'Parent_X'. Whenever several children are unknown, the suffix become “_X1”, “_X2” …
+<li>Some morphological categories (detritus, artefact, larvae, sex…) are also integrated.
+</ul>
+Tips for searching a category in the classification hierarchy:
+<ul>
+<li>Text entry “abc”  returns categories whose name starts with the string ‘abc’.
+<li>‘%’ can be used to search category names containing a given string. The text entry “%abc” returns categories whose name contains ‘abc’; and typing  “abc%ijk” returns categories whose name starts with ‘abc’ AND contains ‘ijk’.
+<li>‘*’ can be used for identifying a category having a specific parent in the classification hierarchy. The text entry “xyz*abc” returns categories whose name starts with ‘abc’ AND having a parent whose name starts with ‘xyz’. Several parents can be required in the same request without priority order (e.g. ‘parent1*parent2*abc’ = ‘parent2*parent1*abc’).
+<li>‘%’ and ‘*’ can be used simultaneously (e.g. ‘ijk*abc%xyz’ for searching a category whose name starts with ‘abc’ AND contains ‘xyz’ AND having a parent whose name start with ‘ijk’; or ‘%xyz*abc’ for searching a category whose name starts with ‘abc’ AND having a parent whose name contains ‘xyz’).
+</ul>
+</p>"
+        class="glyphicon glyphicon-question-sign"></span> </label>
+		<a class="pull-right clear" href='javascript:ClearTaxo();'></a>
+        <select id="taxolb" name="taxolb" multiple="multiple" style="width: 100%"  autocomplete="off">  </select>
+	</div>
+</div>
+<div >
+  <input type="checkbox" id="taxochild" name="taxochild" value="1" style='margin:0;'>
+Also display children
+</div>
+
+<div class="FilterToggle" style="display:none;cursor:pointer;">
+    <span onclick="$('.FilterToggle').toggle();"><span class="glyphicon glyphicon-triangle-right"></span>Show filters</span>
+</div>
+
+
+<link rel="stylesheet" href="/static/jstree/themes/default/style.min.css" />
+<script src="/static/jstree/jstree.min.js"></script>
+
+<style>
+    .tree li a {
+    padding-right:20px !important;
+    background:url(icons/Star-icon.png) top right no-repeat;
+}
+.tree li.clicked a {
+    padding-right:20px !important;
+    background:url(icons/Star-icon.png) top right no-repeat #BEEBFF;
+}
+.tree li a.hover,
+.tree li a:hover {
+    padding-right:20px !important;
+    background:url(icons/Star-icon.png) top right no-repeat #D8F0FA;
+}
+.taxo_tree_selected .v {background-color: #777777;}
+</style>
+
+
+  <div id="jstreeexp">
+      <ul>
+    <li>Root node 1</li>
+    <li>Root node 2</li>
+  </ul>
+  </div>
+
+<script>
+  $(function () {
+    var jstreeexp=$('#jstreeexp');
+    var taxolb=$('#taxolb');
+    jstreeexp.jstree({
+      'core': {
+        "animation" : 0,
+        "themes" : { "stripes" : false, "icons": false  },
+        'data': {
+            'dataType': 'JSON',
+            'url': '/search/taxotreejson',
+            'data': function (node) {
+                return {'id': node.id};
+            }
+        }
+      }
+    });
+
+      jstreeexp.delegate(".TaxoSel",'click',
+          function(o){
+            o.preventDefault();
+            var id= $(o.target).closest("li").attr("id");
+            var valeur= $(o.target).prev().html();
+            if($(o.target).hasClass("glyphicon"))
+                valeur= $(o.target).parent().prev().html();
+           $('#SelectedID').html(id);
+           $('#SelectedName').html(valeur);
+           taxolb.append($('<option>', {    value: id,    text: valeur}));
+            var sel=taxolb.val();
+            if(sel===null) sel=[];
+            sel.push(id);
+            taxolb.val(sel);
+            taxolb.change();
+          });
+
+    $("#jstree").bind("select_node.jstree", function (e, data) {
+        $("#jstree").jstree('open_node', data.node);
+    });
+    {# Quand on ouvre une branche de l'arbre on met à jours les background pour les nouveaux noeuds  #}
+    jstreeexp.on('after_open.jstree', function(){ $('#taxolb').change(); });
+
+    taxolb.change(function (){ {# Mise à jour des background dans l'arbre #}
+      $(".taxo_tree_selected").removeClass("taxo_tree_selected");
+      var taxofilterarray = [];
+      taxolb.find(':selected').each(function(i, selected){ taxofilterarray[i] = "#"+$(selected).val();    });
+      $(taxofilterarray.join(",")).addClass("taxo_tree_selected");
+    });
+
+  });
+</script>
+</form>
+</div>
+</div>
+</td>
+            <td style="vertical-align: top;">
+      <div id="graphdest" style="width: 100%;display: inline-block;"></div>
+        </td>
+        </tr>
+    </table>
+</div>
+
+<script>
+$( "#filt_fromdate,#filt_todate" ).datepicker({
+    showButtonPanel: true,changeMonth: true,changeYear: true,dateFormat:"yy-mm-dd"
+  });
+$('#filt_proj,#filt_uproj').select2();
+$('#filt_proftype').select2({ minimumResultsForSearch: -1});
+$('#gpr,#gpd,#ctd').select2( );
+
+
+function DoSearch(){
+{#    $('#ajaxlog').append("Start DoSearch");#}
+    var url="/part/searchsample?"+$('#filt_form').serialize();
+{#    $('#ajaxlog').append("<br>URL="+url);#}
+    $.getJSON( url, function( data ) {
+{#        $('#ajaxlog').append( "<br>" +data.length+" samples found");#}
+        SampleSource.clear();
+        $.each( data, function(key, val ) {
+            var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform([val['long'],val['lat']], 'EPSG:4326','EPSG:3857'))
+                      ,psampleid:val['id'] });
+            if(val['id']%2)
+            SampleSource.addFeature(iconFeature);
+            else
+            SampleSourceNotVisible.addFeature(iconFeature);
+{#            $('#ajaxlog').append( "<br>-" + val['id']+val['lat']  );#}
+          });
+    });
+}
+
+function ProcessDraw(){
+    var url="/part/drawchart?"+$('#filt_form').serialize()+"&"+$('#formgraphconfig').serialize()+"&r="+Math.random();
+    $('#graphdest').html("<img src='"+url+"' style='max-width: 100%;'>");
+}
+
+function ClearDepths(){
+  $( "#filt_depthmin,#filt_depthmax" ).val("");
+}
+
+$(document).ready(function() {
+  $("#taxolb").select2({
+    ajax: {
+      url: "/search/taxo",
+      dataType: 'json',
+      delay: 250,
+      data: function (params) {
+        return {q: params.term, page: params.page};
+      },
+      processResults: function (data, page) {
+        return {results: data};
+      },
+      cache: true
+    },
+    minimumInputLength: 3
+  }); // Select2 Ajax
+  $('[data-toggle="tooltip"]').tooltip();
+});
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.1.0/ol.js" type="text/javascript"></script>
+<script>
+
+var map,vectorSource,SampleSource,SampleSourceNotVisible,MapPopupContent;
+
+function InitMap() {
+  var attribution = new ol.Attribution({
+        html: 'Tiles © <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer">ArcGIS</a>'
+      });
+var mousePositionControl = new ol.control.MousePosition({
+  coordinateFormat: ol.coordinate.createStringXY(4),
+  projection: 'EPSG:4326',
+  undefinedHTML: '&nbsp;'
+});
+map = new ol.Map({
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.XYZ({
+              attributions: [attribution],
+              url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+            })
+    })
+  ],
+  controls: ol.control.defaults({
+    attributionOptions:  ({
+      collapsible: false
+    })
+  }).extend([mousePositionControl]),
+  target: 'map',
+  view: new ol.View({
+    center: [0, 47],
+    zoom: parseFloat($("#map").css('height'))/450 {# Mise à l'echelle, affiche toute la hauteur à l'echelle 1 sur une zone de 450px de haut #}
+  })
+});
+
+// a DragBox interaction used to select features by drawing boxes
+var dragBox = new ol.interaction.DragBox({
+  condition: ol.events.condition.altKeyOnly,
+  style: new ol.style.Style({
+    stroke: new ol.style.Stroke({color: [0, 0, 255, 1]})
+  })
+});
+
+map.addInteraction(dragBox);
+
+dragBox.on('boxend', function(e) {
+  // features that intersect the box are added to the collection of
+  // selected features, and their names are displayed in the "info"
+  // div
+
+  var extent = dragBox.getGeometry().getExtent();
+
+  // Calcule les tableau sous forme X/Longitude , Y/Lattitude
+  var bottomleft= ol.proj.transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326') ;
+  var topright= ol.proj.transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326') ;
+  if((bottomleft[0]<-180)||(bottomleft[0]>180))
+      bottomleft[0]=(bottomleft[0]+180+720)%360-180;
+  if((topright[0]<-180)||(topright[0]>180))
+      topright[0]=(topright[0]+180+720)%360-180;
+  if(topright[0]<-180) topright[0]+=360;
+  $("#MapOutN").val(topright[1].toFixed(4));
+  $("#MapOutW").val(bottomleft[0].toFixed(4));
+  $("#MapOutE").val(topright[0].toFixed(4));
+  $("#MapOutS").val(bottomleft[1].toFixed(4));
+  DrawInputOnMap();
+});
+
+// Create vector source and the feature to it.
+vectorSource = new ol.source.Vector();
+var vectorLayer= new ol.layer.Vector({
+  source: vectorSource
+});
+
+var RedIconStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+          anchor: [0.5, 0.5],
+          size: [40, 40],
+          offset: [52, 0],
+          opacity: 1,
+          scale: 0.19,
+          src: '/static/dots.png'
+        })
+      });
+
+var GreenIconStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+          anchor: [0.5, 0.5],
+          size: [40, 40],
+          offset: [0, 0],
+          opacity: 1,
+          scale: 0.19,
+          src: '/static/dots.png'
+        })
+      });
+
+SampleSource = new ol.source.Vector();
+SampleSourceNotVisible= new ol.source.Vector();
+var SampleLayer= new ol.layer.Vector({
+  source:SampleSource,style: GreenIconStyle
+});
+var SampleNotVisibleLayer= new ol.layer.Vector({
+  source:SampleSourceNotVisible,style: RedIconStyle
+});
+// Add the vector layer to the map.
+map.addLayer(vectorLayer);
+map.addLayer(SampleLayer);
+map.addLayer(SampleNotVisibleLayer);
+
+var MapPopupElt = document.getElementById('MapPopup');
+var popup = new ol.Overlay({
+  element: MapPopupElt,
+  positioning: 'bottom-center',
+  stopEvent: false,
+  offset: [3, 0]
+});
+map.addOverlay(popup);
+// display popup on click
+map.on('click', function(evt) {
+  var feature = map.forEachFeatureAtPixel(evt.pixel,
+      function(feature) {
+        return feature;
+      });
+
+  if (feature) {
+    var coordinates = feature.getGeometry().getCoordinates();
+    popup.setPosition(coordinates);
+    MapPopupContent='Get Data for sample '+feature.get('psampleid');
+    $(MapPopupElt).popover({
+      'placement': 'right',
+      'html': true,
+      'content': function (){return MapPopupContent;}
+    });
+    $(MapPopupElt).popover('show');
+    $.get('/part/getsamplepopover/'+feature.get('psampleid'),function(data){
+      MapPopupContent=data;
+      $(MapPopupElt).popover('show');
+    });
+  }
+  else
+    $(MapPopupElt).popover('destroy');
+});
+
+} //InitMap
+function GetMapPopupContent(){
+  return MapPopupContent;
+}
+
+
+function DrawSelectionRectangle(a){ {# X Y X Y  #}
+  var ring = [ [a[0], a[1]], [a[2], a[1]],  [a[2], a[3]], [a[0], a[3]] , [a[0], a[1]] ];
+  var polygon = new ol.geom.Polygon([ring]);
+  polygon.transform('EPSG:4326', 'EPSG:3857');
+  // Create feature with polygon.
+  var feature = new ol.Feature(polygon);
+  vectorSource.clear();
+  vectorSource.addFeature(feature);
+}
+
+function DrawInputOnMap()
+{
+var MapOutW=parseFloat($("#MapOutW").val());
+var MapOutN=parseFloat($("#MapOutN").val());
+var MapOutE=parseFloat($("#MapOutE").val());
+var MapOutS=parseFloat($("#MapOutS").val());
+if(MapOutW>MapOutE) {
+  DrawSelectionRectangle([MapOutW, MapOutN, MapOutE+360, MapOutS]);
+} else {
+  DrawSelectionRectangle([MapOutW, MapOutN, MapOutE, MapOutS]);
+}
+}
+ $(function(){
+ $("#map").html("");
+  InitMap();
+  $("#MapOutW").val($("#filt_MapOutW").val());
+  $("#MapOutN").val($("#filt_MapOutN").val());
+  $("#MapOutE").val($("#filt_MapOutE").val());
+  $("#MapOutS").val($("#filt_MapOutS").val());
+ });
+
+</script>
+<div id='MapPopup'></div>
