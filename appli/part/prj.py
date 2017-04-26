@@ -36,7 +36,7 @@ def part_prj():
     if getattr(current_user,'id',None) is not None: # correspond à anonymous
         if database.GetAll("select count(*) nbr from projectspriv where privilege='Manage' and member=%(id)s",{'id':current_user.id})[0]['nbr']>0:
             CanCreate = True
-    g.headcenter = "<h4>Particle Projects management</h4><a href='/part/'>UVP Home</a>"
+    g.headcenter = "<h4>Particle Projects management</h4><a href='/part/'>Particle Module Home</a>"
     return PrintInCharte(
         render_template('part/list.html', PrjList=res, CanCreate=CanCreate, AppManagerMailto=appli.GetAppManagerMailto()
                         , filt_title=gvg('filt_title'), filt_subset=gvg('filt_subset'), filt_instrum=gvg('filt_instrum')))
@@ -45,7 +45,7 @@ def part_prj():
 @login_required
 def part_prj_main(PrjId):
     Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
-    g.headcenter="<h4>UVP Project %s : %s</h4><a href='/part/'>UVP Home</a>"%(Prj.projid,Prj.ptitle)
+    g.headcenter="<h4>UVP Project %s : %s</h4><a href='/part/'>Particle Module Home</a>"%(Prj.projid,Prj.ptitle)
     # TODO securité
     dbsample = database.GetAll("""select profileid,psampleid,filename,stationid,firstimage,lastimg,lastimgused,sampleid
           ,histobrutavailable,comment,daterecalculhistotaxo,ctd_import_datetime
@@ -103,7 +103,7 @@ def part_prjcalc(PrjId):
                 else:
                     txt += prefix + " <span style='color: orange;'>No match found in Ecotaxa</span>"
             else:
-                txt += prefix + " <span style='color: red;'>Ecotaxa sample matching impossible if UVP project not linked to an Ecotaxa project</span>"
+                txt += prefix + " <span style='color: red;'>Ecotaxa sample matching impossible if Particle project not linked to an Ecotaxa project</span>"
         if gvp('dohistotaxo') == 'Y':
             # if S['sampleid']:
             try:

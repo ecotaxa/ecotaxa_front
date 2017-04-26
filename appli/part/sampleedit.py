@@ -11,7 +11,7 @@ from flask_security import login_required
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,TextAreaField
 
 class UvpSampleForm(Form):
-    pprojid = StringField("UVP Project ID",[validators.required()])
+    pprojid = StringField("Particle Project ID",[validators.required()])
     profileid = StringField("Profile ID",[validators.required()])
     filename = StringField("filename", [validators.required(),validators.Length(min=5)])
     sampleid = IntegerField("Ecotaxa SampleID",[validators.Optional(strip_whitespace=True)])

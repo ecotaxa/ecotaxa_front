@@ -6,7 +6,7 @@ from flask_login import current_user
 from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedCol
 
 @app.route('/part/')
-def indexUVP():
+def indexPart():
     class FiltForm(Form):
         # TODO ne pas afficher tous les projets en fonction des autorisations.
         # TODO gérer popup ajax sur les samples pour afficher quelques informations
@@ -84,7 +84,7 @@ def GetFilteredSamples(GetVisibleOnly=False,ForceVerticalIfNotSpecified=False):
     return database.GetAll(sql,sqlparam)
 
 @app.route('/part/searchsample')
-def UVPsearchsample():
+def Partsearchsample():
     # sql="""select s.psampleid,s.pprojid,s.latitude,s.longitude
     # from part_samples s
     # JOIN part_projects up on s.pprojid=up.pprojid
@@ -102,7 +102,7 @@ def UVPsearchsample():
 
 
 @app.route('/part/getsamplepopover/<int:psampleid>')
-def UVPgetsamplepopover(psampleid):
+def Partgetsamplepopover(psampleid):
     sql="""select s.psampleid,s.profileid,p.ptitle,ep.title,p.cruise,p.ship ,p.projid,p.pprojid
       from part_samples s
       LEFT JOIN part_projects p on s.pprojid=p.pprojid

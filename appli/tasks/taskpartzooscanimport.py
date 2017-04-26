@@ -13,7 +13,7 @@ import appli.part.database as partdatabase
 from appli.part import LstInstrumType
 import appli.part.uvp_sample_import,appli.part.common_sample_import,appli.part.lisst_sample_import
 
-class TaskUVPZooscanImport(AsyncTask):
+class TaskPartZooscanImport(AsyncTask):
     class Params (AsyncTask.Params):
         def __init__(self,InitStr=None):
             self.steperrors=[]
@@ -80,7 +80,7 @@ class TaskUVPZooscanImport(AsyncTask):
 
     def QuestionProcess(self):
         ServerRoot=Path(app.config['SERVERLOADAREA'])
-        txt="<h1>UVP ZooScan folder Importation Task</h1>"
+        txt="<h1>Particle ZooScan folder Importation Task</h1>"
         errors=[]
         txt+="<h3>Task Creation</h3>"
         Prj=partdatabase.part_projects.query.filter_by(pprojid=gvg("p")).first()
