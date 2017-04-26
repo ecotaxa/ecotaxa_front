@@ -209,7 +209,7 @@ import appli.adminusers
 import appli.tasks.taskmanager
 import appli.search.view
 import appli.project.view
-import appli.uvp.view
+import appli.part.view
 
 @app.errorhandler(404)
 def not_found(e):

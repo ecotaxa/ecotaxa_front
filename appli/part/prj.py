@@ -3,16 +3,18 @@ from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualL
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 from flask_login import current_user
 from flask import render_template,  flash,request,g
-import appli,logging,appli.uvp.sample_import as sample_import
-import appli.uvp.database as uvpdatabase
+import appli,logging,appli.part.uvp_sample_import as uvp_sample_import
+import appli.part.common_sample_import as common_import
+import appli.part.lisst_sample_import as lisst_sample_import
+import appli.part.database as partdatabase
 from flask_security import login_required
 
-@app.route('/uvp/prj/')
-def UVP_prj():
+@app.route('/part/prj/')
+def part_prj():
     params={}
-    sql="""select uprojid,utitle,up.ownerid,u.name,u.email,rawfolder,instrumtype,ep.title
-            ,(select count(*) from uvp_samples where uprojid=up.uprojid) samplecount
-            from uvp_projects up
+    sql="""select pprojid,ptitle,up.ownerid,u.name,u.email,rawfolder,instrumtype,ep.title
+            ,(select count(*) from part_samples where pprojid=up.pprojid) samplecount
+            from part_projects up
             left JOIN projects ep on up.projid=ep.projid
             LEFT JOIN users u on ownerid=u.id
           """
@@ -20,12 +22,12 @@ def UVP_prj():
     #     sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
     sql += " where 1=1 "
     if gvg('filt_title','')!='':
-        sql +=" and (  up.utitle ilike '%%'||%(title)s ||'%%' or to_char(up.uprojid,'999999') like '%%'||%(title)s or ep.title ilike '%%'||%(title)s ||'%%' or to_char(ep.projid,'999999') like '%%'||%(title)s) "
+        sql +=" and (  up.ptitle ilike '%%'||%(title)s ||'%%' or to_char(up.pprojid,'999999') like '%%'||%(title)s or ep.title ilike '%%'||%(title)s ||'%%' or to_char(ep.projid,'999999') like '%%'||%(title)s) "
         params['title']=gvg('filt_title')
     if gvg('filt_instrum','')!='':
         sql +=" and up.instrumtype ilike '%%'||%(filt_instrum)s ||'%%'  "
         params['filt_instrum']=gvg('filt_instrum')
-    sql+=" order by lower(ep.title),lower(utitle)"
+    sql+=" order by lower(ep.title),lower(ptitle)"
     res = GetAll(sql,params) #,debug=True
     app.logger.info("res=%s",res)
     CanCreate=False
@@ -34,33 +36,33 @@ def UVP_prj():
     if getattr(current_user,'id',None) is not None: # correspond à anonymous
         if database.GetAll("select count(*) nbr from projectspriv where privilege='Manage' and member=%(id)s",{'id':current_user.id})[0]['nbr']>0:
             CanCreate = True
-
+    g.headcenter = "<h4>Particle Projects management</h4><a href='/part/'>UVP Home</a>"
     return PrintInCharte(
-        render_template('uvp/list.html',PrjList=res,CanCreate=CanCreate,AppManagerMailto=appli.GetAppManagerMailto()
-                        , filt_title=gvg('filt_title'),filt_subset=gvg('filt_subset'),filt_instrum=gvg('filt_instrum')  ))
+        render_template('part/list.html', PrjList=res, CanCreate=CanCreate, AppManagerMailto=appli.GetAppManagerMailto()
+                        , filt_title=gvg('filt_title'), filt_subset=gvg('filt_subset'), filt_instrum=gvg('filt_instrum')))
 
-@app.route('/uvp/prj/<int:PrjId>')
+@app.route('/part/prj/<int:PrjId>')
 @login_required
-def UVP_prj_main(PrjId):
-    Prj = uvpdatabase.uvp_projects.query.filter_by(uprojid=PrjId).first()
-    g.headcenter="<h4>UVP Project %s : %s</h4><a href='/uvp/'>UVP Home</a>"%(Prj.projid,Prj.utitle)
+def part_prj_main(PrjId):
+    Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
+    g.headcenter="<h4>UVP Project %s : %s</h4><a href='/part/'>UVP Home</a>"%(Prj.projid,Prj.ptitle)
     # TODO securité
-    dbsample = database.GetAll("""select profileid,usampleid,filename,stationid,firstimage,lastimg,lastimgused,sampleid
+    dbsample = database.GetAll("""select profileid,psampleid,filename,stationid,firstimage,lastimg,lastimgused,sampleid
           ,histobrutavailable,comment,daterecalculhistotaxo,ctd_import_datetime
-          ,(select count(*) from uvp_histopart_det where usampleid=s.usampleid) nbrlinedet
-          ,(select count(*) from uvp_histopart_reduit where usampleid=s.usampleid) nbrlinereduit
-          ,(select count(*) from uvp_histocat where usampleid=s.usampleid) nbrlinetaxo
-          ,(select count(*) from uvp_ctd where usampleid=s.usampleid) nbrlinectd
-          from uvp_samples s
-          where uprojid=%s""" % (PrjId))
+          ,(select count(*) from part_histopart_det where psampleid=s.psampleid) nbrlinedet
+          ,(select count(*) from part_histopart_reduit where psampleid=s.psampleid) nbrlinereduit
+          ,(select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo
+          ,(select count(*) from part_ctd where psampleid=s.psampleid) nbrlinectd
+          from part_samples s
+          where pprojid=%s""" % (PrjId))
 
     return PrintInCharte(
-        render_template('uvp/prj_index.html',PrjId=PrjId,dbsample=dbsample,Prj=Prj ))
+        render_template('part/prj_index.html', PrjId=PrjId, dbsample=dbsample, Prj=Prj))
 
-@app.route('/uvp/prjcalc/<int:PrjId>',methods=['post'])
+@app.route('/part/prjcalc/<int:PrjId>',methods=['post'])
 @login_required
-def UVP_prjcalc(PrjId):
-    Prj = uvpdatabase.uvp_projects.query.filter_by(uprojid=PrjId).first()
+def part_prjcalc(PrjId):
+    Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
     # TODO securité
     txt=""
     CheckedSampleList=[]
@@ -71,21 +73,24 @@ def UVP_prjcalc(PrjId):
     app.logger.info("request.form=%s", request.form)
     app.logger.info("CheckedSampleList=%s", CheckedSampleList)
     app.logger.info("dohistodet=%s,domatchecotaxa=%s,dohistotaxo=%s", gvp('dohistodet'), gvp('domatchecotaxa'), gvp('dohistotaxo'))
-    dbsample = database.GetAll("""select profileid,usampleid,filename,sampleid,histobrutavailable
-          ,(select count(*) from uvp_histopart_det where usampleid=s.usampleid) nbrlinedet
-          from uvp_samples s
-          where uprojid=%s and usampleid = any (%s)""" , (PrjId,CheckedSampleList))
+    dbsample = database.GetAll("""select profileid,psampleid,filename,sampleid,histobrutavailable
+          ,(select count(*) from part_histopart_det where psampleid=s.psampleid) nbrlinedet
+          from part_samples s
+          where pprojid=%s and psampleid = any (%s)""" , (PrjId,CheckedSampleList))
     for S in dbsample:
         prefix="<br>{profileid} :".format(**S)
         if gvp('dohistodet')=='Y':
-            if S['histobrutavailable']:
-                sample_import.GenerateParticleHistogram(S['usampleid'])
+            if Prj.instrumtype=='uvp5' and S['histobrutavailable']:
+                uvp_sample_import.GenerateParticleHistogram(S['psampleid'])
                 txt+=prefix+" Detailled & reduced Histogram computed"
+            elif Prj.instrumtype == 'lisst':
+                lisst_sample_import.GenerateParticleHistogram(S['psampleid'])
+                txt += prefix + " Detailled & reduced Histogram computed"
             else:
                 txt += prefix + " <span style='color: red;'>Raw Histogram can't be computer without Raw histogram</span>"
         if gvp('dohistored')=='Y':
             if S['histobrutavailable']:
-                sample_import.GenerateReducedParticleHistogram(S['usampleid'])
+                uvp_sample_import.GenerateReducedParticleHistogram(S['psampleid'])
                 txt+=prefix+" reduced Histogram computed"
             else:
                 txt += prefix + " <span style='color: red;'>Raw Histogram can't be computer without Raw histogram</span>"
@@ -93,7 +98,7 @@ def UVP_prjcalc(PrjId):
             if Prj.projid is not None:
                 ecosample=database.GetAll("""select sampleid from samples where projid=%s and orig_id=%s""",(int(Prj.projid),S['profileid']))
                 if len(ecosample)==1:
-                    database.ExecSQL("update uvp_samples set sampleid=%s where usampleid=%s",(ecosample[0]['sampleid'],S['usampleid']))
+                    database.ExecSQL("update part_samples set sampleid=%s where psampleid=%s",(ecosample[0]['sampleid'],S['psampleid']))
                     txt += prefix + " Matched"
                 else:
                     txt += prefix + " <span style='color: orange;'>No match found in Ecotaxa</span>"
@@ -102,18 +107,18 @@ def UVP_prjcalc(PrjId):
         if gvp('dohistotaxo') == 'Y':
             # if S['sampleid']:
             try:
-                sample_import.GenerateTaxonomyHistogram(S['usampleid'])
+                uvp_sample_import.GenerateTaxonomyHistogram(S['psampleid'])
                 txt += prefix + " Taxonomy Histogram computed"
             # else:
             except Exception as E:
                 txt += prefix + " <span style='color: red;'>Taxonomy Histogram can't be computed : %s </span>"%(E)
-    if gvp('doctdimport') == 'Y':
-        if sample_import.ImportCTD(S['usampleid']):
-            txt += prefix + " CTD imported"
-        else:
-            txt += prefix + " <span style='color: red;'>CTD No file</span>"
+        if gvp('doctdimport') == 'Y':
+            if common_import.ImportCTD(S['psampleid'],current_user.name,current_user.email):
+                txt += prefix + " CTD imported"
+            else:
+                txt += prefix + " <span style='color: red;'>CTD No file</span>"
     #
     # txt+="CheckedSampleList=%s"%(CheckedSampleList)
     # txt+="<br>dbsample = %s"%(dbsample)
-    txt += "<br><br><a href=/uvp/prj/%s class='btn btn-primary'><span class='glyphicon glyphicon-arrow-left'></span> Back to project samples list</a>"%PrjId
+    txt += "<br><br><a href=/part/prj/%s class='btn btn-primary'><span class='glyphicon glyphicon-arrow-left'></span> Back to project samples list</a>"%PrjId
     return PrintInCharte(txt)

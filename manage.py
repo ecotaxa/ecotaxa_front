@@ -94,8 +94,8 @@ def ResetDBSequence(cur=None):
         cur.execute("SELECT setval('seq_temp_tasks', (SELECT max(id) FROM temp_tasks), true)")
         cur.execute("SELECT setval('seq_users', (SELECT max(id) FROM users), true)")
         cur.execute("SELECT setval('roles_id_seq', (SELECT max(id) FROM roles), true)")
-        cur.execute("SELECT setval('uvp_projects_uprojid_seq', (SELECT max(uprojid) FROM uvp_projects), true)")
-        cur.execute("SELECT setval('uvp_samples_usampleid_seq', (SELECT max(usampleid) FROM uvp_samples), true)")
+        cur.execute("SELECT setval('part_projects_pprojid_seq', (SELECT max(pprojid) FROM part_projects), true)")
+        cur.execute("SELECT setval('part_samples_psampleid_seq', (SELECT max(psampleid) FROM part_samples), true)")
         print("Sequence Reset Done")
 
 

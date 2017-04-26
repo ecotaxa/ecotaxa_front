@@ -1,13 +1,13 @@
 <div style="margin: 3px;">
-UVP Project {{ PrjId }} : {{ Prj.utitle }}<br>
+Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
 
 <a href="/Task/Create/TaskUVPZooscanImport?p={{ PrjId }}" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-import"></span> Import sample from disk</a>
-<a href="/uvp/prjedit/{{ PrjId }}" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit project metadata</a>
-<a href="/uvp/prj/" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-arrow-left"></span> Back to project list</a>
+<a href="/part/prjedit/{{ PrjId }}" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit project metadata</a>
+<a href="/part/prj/" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-arrow-left"></span> Back to project list</a>
 
 
 <h4>Project samples dashboard</h4>
-<form action="/uvp/prjcalc/{{ PrjId }}" method="post">
+<form action="/part/prjcalc/{{ PrjId }}" method="post">
 <table id="tblsample2" class="table table-bordered table-condensed" style="width: auto;">
   <tr>
     <th style="text-align: center;">Select<br>
@@ -32,8 +32,8 @@ UVP Project {{ PrjId }} : {{ Prj.utitle }}<br>
   </tr>
 {% for r in dbsample %}
   <tr>
-    <td><input type="checkbox" name="s_{{ r['usampleid'] }}" value="Y" ></td>
-    <td>{{ r['usampleid'] }} <a href="/uvp/sampleedit/{{ r['usampleid'] }}"><span class="glyphicon glyphicon-pencil"></span></a></td>
+    <td><input type="checkbox" name="s_{{ r['psampleid'] }}" value="Y" ></td>
+    <td>{{ r['psampleid'] }} <a href="/part/sampleedit/{{ r['psampleid'] }}"><span class="glyphicon glyphicon-pencil"></span></a></td>
     <td>{{ r['profileid'] }}</td>
     <td>{{ r['filename'] }}</td>
     <td>{{ r['stationid'] }}</td>

@@ -5,7 +5,7 @@
 
 
 {% if  CanCreate==True %}
-  <a href="/uvp/prjedit/0" class="btn btn-success" >Create a new UVP project</a>
+  <a href="/part/prjedit/0" class="btn btn-success" >Create a new UVP project</a>
 {% else %}
   <p>To create a new project and upload images in it, please contact the application manager(s): {{ AppManagerMailto|safe }}</p>
 {% endif %}
@@ -43,7 +43,7 @@
         </thead>
         <tbody>
 {%   for r in PrjList %}
-<tr><td><a class='btn btn-primary' href='/uvp/prj/{{ r[0] }}'>Select</a></td>
+<tr><td><a class='btn btn-primary' href='/part/prj/{{ r[0] }}'>Select</a></td>
   <td> {{ r[1] }} [{{ r[0] }}] {{ ("<a href='mailto:"+r['email']+"'>"+r['name']+"</a>") |safe if r['email'] }}</td>
   <td>{{ r['instrumtype'] or "" }}</td>
   <td>{{ r['title'] or "" }}</td>

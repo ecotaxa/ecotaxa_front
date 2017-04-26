@@ -108,7 +108,7 @@
 </style>
 <form method="POST" role="form" class="">
 <table id="edittab">
-{{ render_field(form.uprojid,style="width:50px;",tr='o') }}
+{{ render_field(form.pprojid,style="width:50px;",tr='o') }}
 {{ render_field(form.sampleid,tr='c') }}
 {{ render_field(form.profileid,tr='o') }}
 {{ render_field(form.filename,tr='') }}
@@ -168,20 +168,33 @@
     <tr>
         <td colspan="3">
 <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>
-<a href="/uvp/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
-{% if usampleid>0 %}
-    <button type="button" onclick="document.getElementById('confirm').showModal()" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove Sample</button>
+<a href="/part/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
+{% if psampleid>0 %}
+    <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove Sample</button>
 {% endif %}
-<dialog id="confirm">
-    <p style="font-weight: bold;font-size: larger">Are you sure you want remove this sample</p>
-    <form method="post" action="/uvp/sampleedit/{{ usampleid }}" style="display: inline-block">
-        <input type="hidden" name="delete" value="Y">
-    <button  class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove Sample</button>
-        </form>
-    <button  type="button" class="btn btn-warning" onclick="document.getElementById('confirm').close();"> Cancel</button>
-</dialog>
 
         </td>
     </tr>
 </table>
 </form>
+
+
+
+<div class="modal " id="confirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Are you sure you want remove this sample</h4>
+      </div>
+      <div class="modal-body">
+            <form method="post" action="/part/sampleedit/{{ psampleid }}" style="display: inline-block">
+        <input type="hidden" name="delete" value="Y">
+    <button  class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove sample</button>
+        </form>
+    <button  type="button" class="btn btn-warning" onclick="$('#confirm').modal('hide')"> Cancel</button>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -3,27 +3,20 @@ from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualL
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 from flask_login import current_user
 from flask import render_template,  flash,request,g
-import appli,logging,appli.uvp.sample_import as sample_import
-import appli.uvp.database as uvpdatabase
+import appli,logging,appli.part.uvp_sample_import as sample_import
+import appli.part.database as partdatabase
 from flask_security import login_required
 # from flask_wtf import Form
 # from wtforms.ext.sqlalchemy.orm import model_form
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,TextAreaField
 
-# class NullableDateTimeField(DateTimeField):
-#     def process_formdata(self, valuelist):
-#         if valuelist[0]:
-#             super().process_formdata(valuelist)
-#         else:
-#             self.data = None
 class UvpSampleForm(Form):
-    # usampleid  = StringField("usampleid")
-    uprojid = StringField("UVP Project ID",[validators.required()])
+    pprojid = StringField("UVP Project ID",[validators.required()])
     profileid = StringField("Profile ID",[validators.required()])
     filename = StringField("filename", [validators.required(),validators.Length(min=5)])
-    sampleid = StringField("Ecotaxa SampleID")
-    latitude = StringField("latitude")
-    longitude = StringField("longitude")
+    sampleid = IntegerField("Ecotaxa SampleID",[validators.Optional(strip_whitespace=True)])
+    latitude = FloatField("latitude",[validators.Optional(strip_whitespace=True)])
+    longitude = FloatField("longitude",[validators.Optional(strip_whitespace=True)])
     organizedbydeepth = BooleanField("organizedbydeepth")
     histobrutavailable = BooleanField("histobrutavailable")
     qualitytaxo = StringField("qualitytaxo")
@@ -39,7 +32,7 @@ class UvpSampleForm(Form):
     lastimg = IntegerField("lastimg",[validators.Optional(strip_whitespace=True)])
     lastimgused = IntegerField("lastimgused",[validators.Optional(strip_whitespace=True)])
     bottomdepth = IntegerField("bottomdepth",[validators.Optional(strip_whitespace=True)])
-    yoyo = StringField("yoyo")
+    yoyo = BooleanField("yoyo")
     sampledate = DateTimeField("sampledate",[validators.Optional(strip_whitespace=True)])
     ctd_desc = TextAreaField("ctd_desc")
     ctd_origfilename = StringField("ctd_origfilename")
@@ -76,20 +69,20 @@ class UvpSampleForm(Form):
     op_sample_name = StringField("op_sample_name")
     op_sample_email = StringField("op_sample_email")
 
-@app.route('/uvp/sampleedit/<int:usampleid>',methods=['get','post'])
+@app.route('/part/sampleedit/<int:psampleid>',methods=['get','post'])
 @login_required
-def UVP_sampleedit(usampleid):
-    model = uvpdatabase.uvp_samples.query.filter_by(usampleid=usampleid).first()
+def part_sampleedit(psampleid):
+    model = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     form=UvpSampleForm(request.form,model)
     if gvp('delete')=='Y':
-        for t in ('uvp_histopart_reduit','uvp_histopart_det','uvp_histocat','uvp_histocat_lst','uvp_ctd'):
-            database.ExecSQL("delete from "+t+" where usampleid="+str(model.usampleid))
+        for t in ('part_histopart_reduit','part_histopart_det','part_histocat','part_histocat_lst','part_ctd'):
+            database.ExecSQL("delete from "+t+" where psampleid="+str(model.psampleid))
         db.session.delete(model)
         db.session.commit()
-        return redirect("/uvp/prj/" + str(model.uprojid))
+        return redirect("/part/prj/" + str(model.pprojid))
     if request.method == 'POST' and form.validate():
         for k,v in form.data.items():
             setattr(model,k,v)
         db.session.commit()
-        return redirect("/uvp/prj/"+str(model.uprojid))
-    return PrintInCharte(render_template("uvp/sampleedit.html", form=form,prjid=model.uprojid,usampleid=model.usampleid))
+        return redirect("/part/prj/"+str(model.pprojid))
+    return PrintInCharte(render_template("part/sampleedit.html", form=form, prjid=model.pprojid, psampleid=model.psampleid))

@@ -4,13 +4,13 @@ from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 from flask_login import current_user
 from flask import render_template,  flash,request,g
 from pathlib import Path
-import appli,logging,appli.uvp.sample_import as sample_import
-import appli.uvp.database as uvpdatabase,collections,re,csv
+import appli,logging,appli.part.uvp_sample_import as sample_import
+import appli.part.database as partdatabase,collections,re,csv
 from flask_security import login_required
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,SelectField,TextAreaField
 
 class UvpPrjForm(Form):
-    utitle = StringField("UVP Project title")
+    ptitle = StringField("UVP Project title")
     rawfolder = StringField("rawfolder")
     ownerid = StringField("Project Owner")
     projid = StringField("Ecotaxa Project")
@@ -25,51 +25,61 @@ class UvpPrjForm(Form):
     cruise = StringField("cruise")
     ship = StringField("ship")
     default_instrumsn = StringField("default instrum SN")
-    default_aa = FloatField("default aa",[validators.Optional(strip_whitespace=True)])
-    default_exp = FloatField("default exp",[validators.Optional(strip_whitespace=True)])
-    default_volimage = FloatField("default volimage",[validators.Optional(strip_whitespace=True)])
     default_depthoffset = FloatField("default depthoffset",[validators.Optional(strip_whitespace=True)])
     prj_info = TextAreaField("prj_info")
-    dataportal_desc = TextAreaField("dataportal_desc")
 
 
-@app.route('/uvp/prjedit/<int:uprojid>',methods=['get','post'])
+@app.route('/part/prjedit/<int:pprojid>',methods=['get','post'])
 @login_required
-def UVP_prjedit(uprojid):
+def part_prjedit(pprojid):
     g.headcenter="<h3>UVP Project Metadata edition</h3>"
-    if uprojid>0:
-        model = uvpdatabase.uvp_projects.query.filter_by(uprojid=uprojid).first()
+    if pprojid>0:
+        model = partdatabase.part_projects.query.filter_by(pprojid=pprojid).first()
     else:
-        model=uvpdatabase.uvp_projects()
-        model.uprojid=0
+        model=partdatabase.part_projects()
+        model.pprojid=0
         model.ownerid=current_user.id
+        model.default_depthoffset=1.2
     UvpPrjForm.ownerid=SelectField('Project Owner',choices=database.GetAll("SELECT id,name FROM users ORDER BY trim(lower(name))"),coerce=int )
-    UvpPrjForm.projid=SelectField('Ecotaxa Project',choices=[(0,'')]+database.GetAll("SELECT projid,concat(title,' (',cast(projid as varchar),')') FROM projects ORDER BY lower(title)"),coerce=int )
+    UvpPrjForm.projid=SelectField('Ecotaxa Project',choices=[(0,''),(-1,'Create a new EcoTaxa project')]+database.GetAll("SELECT projid,concat(title,' (',cast(projid as varchar),')') FROM projects ORDER BY lower(title)"),coerce=int )
     form=UvpPrjForm(request.form,model)
     if gvp('delete')=='Y':
         try:
             db.session.delete(model)
             db.session.commit()
-            return redirect("/uvp/prj/")
+            return redirect("/part/prj/")
         except:
             flash("You can delete a project only if doesn't have any data (sample,...)",'error')
-            db.session.rollback();
-            return redirect("/uvp/prj/" + str(model.uprojid))
+            db.session.rollback()
+            return redirect("/part/prj/" + str(model.pprojid))
     if request.method == 'POST' and form.validate():
-        if uprojid==0:
-            model.uprojid = None
+        if pprojid==0:
+            model.pprojid = None
             db.session.add(model)
         for k,v in form.data.items():
             setattr(model,k,v)
-        if model.projid==0: model.projid=None
+        if model.projid==0: # 0 permet de dire aucun projet WTForm ne sait pas gére None avec coerce=int
+            model.projid=None
+        if model.projid == -1: # création d'un projet Ecotaxa
+            model.projid = None
+            EcotaxaProject=database.Projects()
+            EcotaxaProject.title=model.ptitle # Nommé comme le projet Particle
+            db.session.add(EcotaxaProject)
+            db.session.commit()
+            EcotaxaProjectMember=database.ProjectsPriv()
+            EcotaxaProjectMember.projid=EcotaxaProject.projid # L'utilisateur courant est Manager de ce projet
+            EcotaxaProjectMember.member=current_user.id
+            EcotaxaProjectMember.privilege='Manage'
+            db.session.add(EcotaxaProjectMember)
+            model.projid = EcotaxaProject.projid # On affecte le nouveau projet au projet Particle.
         db.session.commit()
-        return redirect("/uvp/prj/"+str(model.uprojid))
-    return PrintInCharte(render_template("uvp/prjedit.html", form=form,prjid=model.uprojid))
+        return redirect("/part/prj/"+str(model.pprojid))
+    return PrintInCharte(render_template("part/prjedit.html", form=form, prjid=model.pprojid))
 
 
-@app.route('/uvp/readprojectmeta',methods=['get','post'])
+@app.route('/part/readprojectmeta',methods=['get','post'])
 @login_required
-def UVP_readprojectmeta():
+def part_readprojectmeta():
     res={}
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     DossierUVPPath = ServerRoot / gvg('path')
@@ -80,8 +90,10 @@ def UVP_readprojectmeta():
         CruiseInfoData = appli.DecodeEqualList(CruiseFile.open('r').read())
         res['op_name']=CruiseInfoData.get('op_name')
         res['op_email'] = CruiseInfoData.get('op_email')
-        res['cs_name']=CruiseInfoData.get('cc_name')
-        res['cs_email'] = CruiseInfoData.get('cc_email')
+        res['cs_name']=CruiseInfoData.get('cs_name')
+        res['cs_email'] = CruiseInfoData.get('cs_email')
+        res['do_name']=CruiseInfoData.get('do_name')
+        res['do_email'] = CruiseInfoData.get('do_email')
         res['prj_info']=CruiseInfoData.get('gen_info')
         res['prj_acronym'] = CruiseInfoData.get('acron')
     # ConfigFile = DossierUVPPath / "config/uvp5_settings/uvp5_configuration_data.txt"
@@ -107,9 +119,6 @@ def UVP_readprojectmeta():
             if len(LstSamples) > 0:
                 res['cruise'] = LstSamples[0].get('cruise')
                 res['ship'] = LstSamples[0].get('ship')
-                res['default_volimage'] = LstSamples[0].get('volimage')
-                res['default_aa'] = LstSamples[0].get('aa')
-                res['default_exp'] = LstSamples[0].get('exp')
     res['default_depthoffset']=1.2
     return json.dumps(res)
 
