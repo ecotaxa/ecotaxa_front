@@ -7,6 +7,7 @@ import appli,logging,appli.part.uvp_sample_import as uvp_sample_import
 import appli.part.common_sample_import as common_import
 import appli.part.lisst_sample_import as lisst_sample_import
 import appli.part.database as partdatabase
+import appli.part.sampleedit as sampleedit
 from flask_security import login_required
 
 @app.route('/part/prj/')
@@ -45,7 +46,7 @@ def part_prj():
 @login_required
 def part_prj_main(PrjId):
     Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
-    g.headcenter="<h4>UVP Project %s : %s</h4><a href='/part/'>Particle Module Home</a>"%(Prj.projid,Prj.ptitle)
+    g.headcenter="<h4>Particle Project %s : %s</h4><a href='/part/'>Particle Module Home</a>"%(Prj.projid,Prj.ptitle)
     # TODO securité
     dbsample = database.GetAll("""select profileid,psampleid,filename,stationid,firstimage,lastimg,lastimgused,sampleid
           ,histobrutavailable,comment,daterecalculhistotaxo,ctd_import_datetime
@@ -79,6 +80,10 @@ def part_prjcalc(PrjId):
           where pprojid=%s and psampleid = any (%s)""" , (PrjId,CheckedSampleList))
     for S in dbsample:
         prefix="<br>{profileid} :".format(**S)
+        if gvp('delete') == 'Y':
+            sampleedit.delete_sample(S['psampleid'])
+            txt += prefix + " deleted"
+            continue
         if gvp('dohistodet')=='Y':
             if Prj.instrumtype=='uvp5' and S['histobrutavailable']:
                 uvp_sample_import.GenerateParticleHistogram(S['psampleid'])

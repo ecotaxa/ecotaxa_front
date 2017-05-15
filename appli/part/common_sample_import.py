@@ -27,6 +27,10 @@ def ToFloat(value):
 
 
 def GetTicks(MaxVal):
+    if np.isnan(MaxVal):
+        MaxVal=100 #Arbitraire si MaxVal n'est pas valide
+    if MaxVal<1:
+        MaxVal=1
     Step=math.pow(10,math.floor(math.log10(MaxVal)))
     if(MaxVal/Step)<3:
         Step=Step/2
@@ -124,7 +128,10 @@ def ImportCTD(psampleid,user_name,user_email):
             for i,c in enumerate(Mapping):
                 v=CleanValue(r[i])
                 if v!='':
-                    setattr(cl,c,v)
+                    if c=='qc_flag':
+                        setattr(cl, c, int(float(v)))
+                    else:
+                        setattr(cl,c,v)
             db.session.add(cl)
             db.session.commit()
         UvpSample.ctd_desc=EncodeEqualList(ExtraMapping)

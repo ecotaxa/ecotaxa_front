@@ -27,12 +27,14 @@ def indexPart():
     # data['filt_proj']=f()
     g.headcenter="<h1 style='text-align: center'><b>PARTICLE</b> module <span class='glyphicon glyphicon-info-sign'></span></h2>"
     return PrintInCharte(
-        render_template('part/index.html', form=form))
+        render_template('part/index.html', form=form,LocalGIS=app.config.get("LOCALGIS",False)))
 
 
-def GetFilteredSamples(GetVisibleOnly=False,ForceVerticalIfNotSpecified=False):
+def GetFilteredSamples(Filter=None,GetVisibleOnly=False,ForceVerticalIfNotSpecified=False):
     sqljoin=""
     sqlparam={}
+    if Filter is None: # si filtre non spécifié on utilise GET
+        Filter=request.args
     if current_user.has_role(database.AdministratorLabel):
         sqlvisible = "true"
     else:
@@ -49,32 +51,32 @@ def GetFilteredSamples(GetVisibleOnly=False,ForceVerticalIfNotSpecified=False):
     sql +=sqljoin
     sql += " where 1=1 "
 
-    if gvg("MapN",'')!="" and gvg("MapW",'')!="" and gvg("MapE",'')!="" and gvg("MapS",'')!="":
+    if Filter.get("MapN",'')!="" and Filter.get("MapW",'')!="" and Filter.get("MapE",'')!="" and Filter.get("MapS",'')!="":
         sql+=" and s.latitude between %(MapS)s and %(MapN)s   "
-        sqlparam['MapN']=gvg("MapN")
-        sqlparam['MapS']=gvg("MapS")
-        sqlparam['MapW']=float(gvg("MapW"))
-        sqlparam['MapE']=float(gvg("MapE"))
+        sqlparam['MapN']=Filter.get("MapN")
+        sqlparam['MapS']=Filter.get("MapS")
+        sqlparam['MapW']=float(Filter.get("MapW"))
+        sqlparam['MapE']=float(Filter.get("MapE"))
         if sqlparam['MapW']<sqlparam['MapE']:
             sql+=" and s.longitude between %(MapW)s and %(MapE)s  "
         else:
             sql += " and  (s.longitude between %(MapW)s and 180 or s.longitude between -180 and %(MapE)s   )"
 
-    if gvg("filt_fromdate",'')!="":
+    if Filter.get("filt_fromdate",'')!="":
         sql+=" and s.sampledate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
-        sqlparam['fromdate']=gvg("filt_fromdate")
-    if gvg("filt_todate",'')!="":
+        sqlparam['fromdate']=Filter.get("filt_fromdate")
+    if Filter.get("filt_todate",'')!="":
         sql+=" and s.sampledate<= to_date(%(todate)s,'YYYY-MM-DD') "
-        sqlparam['todate']=gvg("filt_todate")
-    if gvg("filt_proj",'')!="":
+        sqlparam['todate']=Filter.get("filt_todate")
+    if Filter.get("filt_proj",'')!="":
         sql+=" and p.projid in (%s) "%(','.join([str(int(x)) for x in request.args.getlist("filt_proj")]))
-    if gvg("filt_uproj",'')!="":
+    if Filter.get("filt_uproj",'')!="":
         sql+=" and up.pprojid in (%s) "%(','.join([str(int(x)) for x in request.args.getlist("filt_uproj")]))
-    if gvg("filt_instrum",'')!="":
+    if Filter.get("filt_instrum",'')!="":
         sql+=" and lower(up.instrumtype)=lower(%(instrum)s) "
-        sqlparam['instrum']=gvg("filt_instrum")
-    if gvg("filt_proftype", '') != "":
-        sql += " and organizedbydeepth = %s "%(True if gvg("filt_proftype", '' if ForceVerticalIfNotSpecified==False else 'V')=='V' else False)
+        sqlparam['instrum']=Filter.get("filt_instrum")
+    if Filter.get("filt_proftype", '') != "":
+        sql += " and organizedbydeepth = %s "%(True if Filter.get("filt_proftype", '' if ForceVerticalIfNotSpecified==False else 'V')=='V' else False)
 
 
 

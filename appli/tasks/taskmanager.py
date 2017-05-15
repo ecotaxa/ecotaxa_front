@@ -131,6 +131,9 @@ def TaskFactory(ClassName,task=None):
     from .taskpartzooscanimport import TaskPartZooscanImport
     if ClassName=="TaskPartZooscanImport":
         return TaskPartZooscanImport(task)
+    from .taskpartexport import TaskPartExport
+    if ClassName=="TaskPartExport":
+        return TaskPartExport(task)
 
     raise Exception("Invalid class name in TaskFactory : %s"%(ClassName,))
 

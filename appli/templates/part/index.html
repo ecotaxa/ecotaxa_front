@@ -6,9 +6,10 @@
 #geofilter .form-control {width:100px;display: inline-block;}
 #map .popover-content {white-space: nowrap;}
 </style>
+<script src="/static/common.js"></script>
 <div style="margin: 2px;">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.1.0/ol.css" type="text/css">
+<link rel="stylesheet" href="/static/openlayers/ol.css" type="text/css">
   <table style="width: 100%">
     <tr>
       <td style="width: 400px;vertical-align: top;">
@@ -20,27 +21,33 @@
   <tr><td></td>
     <td>
 <table style="width:100%;" id="geofilter">
-  <tr><td colspan="2" align="Center">North <input type="text" class="form-control" id="MapOutN"  name="MapN">
-  <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;" onClick="DrawInputOnMap();">Draw On Map</button>
+  <tr><td colspan="2" style="padding-left: 40px;">North <input type="text" class="form-control" id="MapOutN"  name="MapN">
+  <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="DrawInputOnMap();">Draw On Map</button>
   </td></tr>
   <tr >
     <td style="padding: 2px;white-space: nowrap;">West <input type="text" class="form-control" id="MapOutW" name="MapW"></td>
     <td>East <input type="text" class="form-control" id="MapOutE" name="MapE"></td></tr>
-  <tr><td colspan="2" align="Center">South <input type="text" class="form-control" id="MapOutS" name="MapS"></td></tr>
+  <tr><td colspan="2" style="padding-left: 40px;">South <input type="text" class="form-control" id="MapOutS" name="MapS">
+    <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="ClearGeoFilter();">Clear</button>
+  </td></tr>
 </table>
 
     </td>
   </tr>
   <tr><td>Date between</td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_fromdate" name="filt_fromdate"  autocomplete="off" placeholder="Begin">
-		and <input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_todate" name="filt_todate"  autocomplete="off" placeholder="End"></td></tr>
+		and <input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_todate" name="filt_todate"  autocomplete="off" placeholder="End">
+  <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="ClearDateFilter();">Clear</button>
+  </td></tr>
   <tr><td>Instrument  </td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_instrum" name="filt_instrum"  autocomplete="off" ></td></tr>
   <tr><td>Profile type </td><td>{{ form.filt_proftype(style="width:100px") }}</td></tr>
   <tr><td>Ecotaxa Project </td><td>{{ form.filt_proj(style="width:100%") }}</td></tr>
   <tr><td>Particle Project </td><td>{{ form.filt_uproj(style="width:100%") }}</td></tr>
 </table>
-
-      <br><button type="button" id="btfilt" class="btn btn-primary" onclick="DoSearch()"><span class="glyphicon glyphicon-search"></span> Search sample</button>
-
+<br>
+  <button type="button" id="btfilt" class="btn btn-primary" onclick="DoSearch()"><span class="glyphicon glyphicon-search"></span> Search samples</button>
+  <button type="button" id="btfilt" class="btn btn-primary" onclick="DisplayAll()"><span class="glyphicon glyphicon-erase"></span> Display all profile (Clear selection)</button>
+<br>
+  <button type="button" id="btfilt" class="btn btn-primary" onclick="DoExport()" style="margin-top: 5px;"><span class="glyphicon glyphicon-export"></span> Samples data export</button>
 
 </form>
 
@@ -123,7 +130,7 @@ Tips for searching a category in the classification hierarchy:
 </div>
 <div >
   <input type="checkbox" id="taxochild" name="taxochild" value="1" style='margin:0;'>
-Also display children
+Sum abundance of children categories
 </div>
 
 <div class="FilterToggle" style="display:none;cursor:pointer;">
@@ -133,6 +140,7 @@ Also display children
 
 <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css" />
 <script src="/static/jstree/jstree.min.js"></script>
+
 
 <style>
     .tree li a {
@@ -235,11 +243,11 @@ function DoSearch(){
 {#    $('#ajaxlog').append("<br>URL="+url);#}
     $.getJSON( url, function( data ) {
 {#        $('#ajaxlog').append( "<br>" +data.length+" samples found");#}
-        SampleSource.clear();
+        SampleSource.clear();SampleSourceNotVisible.clear();
         $.each( data, function(key, val ) {
             var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform([val['long'],val['lat']], 'EPSG:4326','EPSG:3857'))
                       ,psampleid:val['id'] });
-            if(val['id']%2)
+            if(val['visible'])
             SampleSource.addFeature(iconFeature);
             else
             SampleSourceNotVisible.addFeature(iconFeature);
@@ -247,11 +255,36 @@ function DoSearch(){
           });
     });
 }
+function DisplayAll()
+{
+  $('#filt_form')[0].reset(); {# Efface tous les champs simples #}
+  $("#filt_form select").each( function(){ $(this).val([]).change();}); {# Vide les select2 #}
+  DrawInputOnMap();
+  DoSearch();
+}
+
+function DoExport(){
+  var url="/Task/Create/TaskPartExport?"+$('#filt_form').serialize()+"&"+$('#formgraphconfig').serialize();
+  window.location=url;
+{#    var url="/Task/Create/TaskPartExport";#}
+{#    var champs=$('#filt_form').serializeArray();#}
+{#    var postdata={};#}
+{#    for(var i=0;i<champs.length;i++){#}
+{#      var c=champs[i];#}
+{#      postdata[c['name']]=c['value'];#}
+{#    }#}
+{#    PostDynForm(url,postdata);#}
+}
 
 function ProcessDraw(){
-    var url="/part/drawchart?"+$('#filt_form').serialize()+"&"+$('#formgraphconfig').serialize()+"&r="+Math.random();
-    $('#graphdest').html("<img src='"+url+"' style='max-width: 100%;'>");
+  var url="/part/drawchart?"+$('#filt_form').serialize()+"&"+$('#formgraphconfig').serialize()+"&r="+Math.random();
+  var img = $("<div id=waiter><img src='/static/spinningred.gif' >Processing your request, please wait....</div><img src='"+url+"' style='max-width: 100%;'>");
+  img.load(function() {
+    $('#waiter').hide();
+  });
+  $('#graphdest').text('').append(img);
 }
+
 
 function ClearDepths(){
   $( "#filt_depthmin,#filt_depthmax" ).val("");
@@ -274,10 +307,11 @@ $(document).ready(function() {
     minimumInputLength: 3
   }); // Select2 Ajax
   $('[data-toggle="tooltip"]').tooltip();
+  DoSearch();
 });
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.1.0/ol.js" type="text/javascript"></script>
+<script src="/static/openlayers/ol.js" type="text/javascript"></script>
 <script>
 
 var map,vectorSource,SampleSource,SampleSourceNotVisible,MapPopupContent;
@@ -296,7 +330,12 @@ map = new ol.Map({
     new ol.layer.Tile({
       source: new ol.source.XYZ({
               attributions: [attribution],
+    {% if LocalGIS %}
+        url: '/static/tiles/tile_{z}_{y}_{x}.jpg',maxZoom:6
+    {% else %}
               url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+    {% endif %}
+
             })
     })
   ],
@@ -446,6 +485,15 @@ if(MapOutW>MapOutE) {
 } else {
   DrawSelectionRectangle([MapOutW, MapOutN, MapOutE, MapOutS]);
 }
+}
+function ClearGeoFilter()
+{
+  $("#MapOutW,#MapOutN,#MapOutE,#MapOutS").val("");
+  DrawInputOnMap();
+}
+function ClearDateFilter()
+{
+  $("#filt_fromdate,#filt_todate").val("");
 }
  $(function(){
  $("#map").html("");

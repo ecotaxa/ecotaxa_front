@@ -36,7 +36,7 @@ def CreateOrUpdateSample(pprojid,headerdata):
     Sample.organizedbydeepth = True
     Sample.acq_descent_filter=True
     Sample.winddir = int(headerdata['winddir'])
-    Sample.winspeed = int(headerdata['windspeed'])
+    Sample.winspeed = int(round(ToFloat(headerdata['windspeed'])))
     Sample.seastate = int(headerdata['seastate'])
     Sample.nebuloussness = int(headerdata['nebuloussness'])
     Sample.comment = headerdata['comment']
@@ -74,7 +74,7 @@ def CreateOrUpdateSample(pprojid,headerdata):
             # print("Ligne2= '%s'" % (Ligne2))
             Sample.acq_filedescription = Ligne2
             m = re.search(R"\w+ (\w+)", Ligne2)
-            if m.lastindex == 1:
+            if m is not None and m.lastindex == 1:
                 Sample.instrumsn=m.group(1)
             Lines = F.read()
             HdrParam=DecodeEqualList(Lines)
@@ -107,7 +107,7 @@ def GenerateRawHistogram(psampleid):
     """
     Génération de l'histogramme particulaire brut stocké dans un fichier tsv bzippé stocké dans le vault.
     :param psampleid:
-    :return:
+    :return: None    
     """
     UvpSample= partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     if UvpSample is None:
@@ -124,10 +124,30 @@ def GenerateRawHistogram(psampleid):
     if DepthOffset is None:
         DepthOffset=1.20 # valeur par défaut, 1.20 m
     DescentFilter=UvpSample.acq_descent_filter
-
+    # Ecart format suivant l'endroit
+    # dans result on a comme dans work
+    #      1;	20160710164151_998;	00203;00181;00181;00009;02761;02683;00612;01051;00828;00396;00588;00692!;	542;	1;	4;	2;	5;
+    # dans work on a ;	00208;00175;00175;00019;02828;02055;00732;01049;00756;00712;00705;00682!;
+    #      1;	20160710164151_998;	00203;00181;00181;00009;02761;02683;00612;01051;00828;00396;00588;00692!;	542;	1;	4;	2;	5;
+    # 12 colonnes au lieu de 1
+    # alors que dans RAW on a ;	00208*00175*00175*00019*02828*02055*00732*01049*00756*00712*00705*00682!;
+    #      1;	20160628160507_071;	00203*00180*00180*00012*02611*02766*01125*00898*00655*00752*00786*00791!;	1289;	1;	7;	1;	10;
+    # Nom du fichier dans raw : HDR20160710164150/HDR20160710164150_000.dat
+    # Nom du fichier dans work ge_2016_202/HDR20160710164150.dat , un fichier unique
+    # Nom du fichier dans result ge_2016_202_datfile.txt, un fichier unique
+    # le changement de format n'as pas d'impact car seule les 3 premières colonnes sont utilisées et c'est le format de la 3eme qui change
+    # dans l'instrument on ne se sert que de la première valeurs donc le découpage suivant * et la prise de la première valeur donne le même résultat.
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     DossierUVPPath = ServerRoot / Prj.rawfolder
-    LstFichiers = list((DossierUVPPath / 'raw' / ('HDR' + UvpSample.filename)).glob('HDR' + UvpSample.filename + "*.dat"))
+    PathDat = DossierUVPPath / 'results' / ( UvpSample.profileid + "_datfile.txt")
+    if PathDat.exists():
+        LstFichiers = [PathDat]
+    else:
+        PathDat = DossierUVPPath / 'work' / UvpSample.profileid / ('HDR' + UvpSample.filename + ".dat")
+        if PathDat.exists():
+            LstFichiers = [PathDat]
+        else:
+            LstFichiers = list((DossierUVPPath / 'raw' / ('HDR' + UvpSample.filename)).glob('HDR' + UvpSample.filename + "*.dat"))
     # print(LstFichiers)
     RawImgDepth={} # version non filtrée utilisée pour générer le graphique
     ImgDepth={} # version filtrée
@@ -203,10 +223,29 @@ def GenerateRawHistogram(psampleid):
     aFilteredImgDepth=None # version nparray plus necessaire.
     logging.info("Depth range= {0}->{1}".format(MinDepth,MaxDepth))
     Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_depth_' + UvpSample.profileid+'.png')).as_posix())
-
+    Fig.clf()
+    # Ecart format suivant l'endroit
+    # Dans results nom = p1604_13.bru toujours au format bru1 malgré l'extension bru fichier unique
+    # dans work p1604_13/p1604_13.bru toujours au format bru1 malgré l'extension bru fichier unique
+    # dans raw HDR20160429180115/HDR20160429180115_000.bru ou bru1
     # chargement des données particulaires
     logging.info("Processing BRU Files:")
-    LstFichiers= list((DossierUVPPath / 'raw' / ('HDR'+UvpSample.filename)).glob('HDR'+UvpSample.filename+"*.bru"))+list((DossierUVPPath / 'raw' / ('HDR'+UvpSample.filename)).glob('HDR'+UvpSample.filename+"*.bru1"))
+    PathBru=DossierUVPPath / 'results' /(UvpSample.profileid+".bru")
+    if PathBru.exists():
+        BRUFormat="bru1"
+        LstFichiers = [PathBru ]
+    else:
+        PathBru=DossierUVPPath / 'work' /UvpSample.profileid/(UvpSample.profileid+".bru")
+        if PathBru.exists():
+            BRUFormat="bru1"
+            LstFichiers = [PathBru ]
+        else:
+            LstFichiers= list((DossierUVPPath / 'raw' / ('HDR'+UvpSample.filename)).glob('HDR'+UvpSample.filename+"*.bru"))
+            if len(LstFichiers)>0:
+                BRUFormat = "bru"
+            else:
+                LstFichiers = list((DossierUVPPath / 'raw' / ('HDR'+UvpSample.filename)).glob('HDR'+UvpSample.filename+"*.bru1"))
+                BRUFormat = "bru1"
     # logging.info(LstFichiers)
     SegmentedData={} # version filtrée
     for Fichier in LstFichiers:
@@ -217,10 +256,10 @@ def GenerateRawHistogram(psampleid):
             for row in Rdr:
                 idx = int(row[0].strip("\t "))
                 if idx not in ImgDepth : continue # c'est sur une image filtrée, on ignore
-                if Fichier.suffix=='.bru':
+                if BRUFormat=='bru':
                     area= int(row[3].strip("\t "))
                     grey= int(row[4].strip("\t "))
-                elif Fichier.suffix=='.bru1':
+                elif BRUFormat=='bru1':
                     area = int(row[2].strip("\t "))
                     grey = int(row[3].strip("\t "))
                 else: raise Exception("Invalid file extension")
@@ -383,6 +422,7 @@ def GenerateParticleHistogram(psampleid):
     ax.set_ylabel('Depth(m)')
 
     Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_particle_' + UvpSample.profileid+'.png')).as_posix())
+    Fig.clf()
 
     database.ExecSQL("delete from part_histopart_det where psampleid="+str(psampleid))
     sql="""insert into part_histopart_det(psampleid, lineno, depth,  watervolume
