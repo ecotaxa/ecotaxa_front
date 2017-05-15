@@ -294,7 +294,7 @@ Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
 Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
 GlobalDebugSQL=False
-GlobalDebugSQL=True
+# GlobalDebugSQL=True
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,keyid=0):
     if g.db is None:
         g.db=db.engine.raw_connection()

@@ -57,7 +57,7 @@ def part_drawchart():
         order by Y""".format(DepthFilter)
         graph=list(range(0,len(gpr)))
         for i, c in enumerate(gpr):
-            graph[i]=Fig.add_subplot(FigSizeY*100+FigSizeX*10+chartid+1)
+            graph[i] = Fig.add_subplot(FigSizeY  , FigSizeX , chartid + 1)
             if c[0:2] == "cl":
                 graph[i].set_xlabel('Particle red. class %s (%s) #/l'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:]))))
             if c[0:2] == "bv":
@@ -94,7 +94,7 @@ def part_drawchart():
         order by Y""".format(DepthFilter)
         graph=list(range(0,len(gpd)))
         for i, c in enumerate(gpd):
-            graph[i]=Fig.add_subplot(FigSizeY*100+FigSizeX*10+chartid+1)
+            graph[i]=Fig.add_subplot(FigSizeY,FigSizeX,chartid+1)
             if c[0:2] == "cl":
                 graph[i].set_xlabel('Particle det. class %s (%s) #/l'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:]))))
             if c[0:2] == "bv":
@@ -128,7 +128,7 @@ def part_drawchart():
         order by Y""".format(DepthFilter)
         graph=list(range(0,len(gctd)))
         for i, c in enumerate(gctd):
-            graph[i]=Fig.add_subplot(FigSizeY*100+FigSizeX*10+chartid+1)
+            graph[i]=Fig.add_subplot(FigSizeY,FigSizeX,chartid+1)
             graph[i].set_xlabel('CTD %s '%(CTDFixedColByKey.get(c)))
             chartid += 1
         for rs in samples:
@@ -159,8 +159,8 @@ def part_drawchart():
                   left JOIN taxonomy p on t.parent_id=p.id 
                   where t.id= %(taxoid)s""", {'taxoid': c})[0]['nom']
             if gvg('taxochild') == '1':
-                NomTaxo += " and childs"
-            graph[i]=Fig.add_subplot(FigSizeY*100+FigSizeX*10+chartid+1)
+                NomTaxo += " and children"
+            graph[i]=Fig.add_subplot(FigSizeY,FigSizeX,chartid+1)
             graph[i].set_xlabel('%s #/m3'%(NomTaxo))
             # graph[i].set_yscale('log')
             def format_fn(tick_val, tick_pos):

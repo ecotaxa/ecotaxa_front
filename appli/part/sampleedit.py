@@ -6,9 +6,8 @@ from flask import render_template,  flash,request,g
 import appli,logging,appli.part.uvp_sample_import as sample_import
 import appli.part.database as partdatabase
 from flask_security import login_required
-# from flask_wtf import Form
-# from wtforms.ext.sqlalchemy.orm import model_form
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,TextAreaField
+from pathlib import Path
 
 class UvpSampleForm(Form):
     pprojid = StringField("Particle Project ID",[validators.required()])
@@ -69,16 +68,24 @@ class UvpSampleForm(Form):
     op_sample_name = StringField("op_sample_name")
     op_sample_email = StringField("op_sample_email")
 
+def delete_sample(psampleid):
+    RawHistoFile=Path(sample_import.GetPathForRawHistoFile(psampleid))
+    if RawHistoFile.exists():
+        RawHistoFile.unlink()
+    model = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
+    for t in ('part_histopart_reduit', 'part_histopart_det', 'part_histocat', 'part_histocat_lst', 'part_ctd'):
+        database.ExecSQL("delete from " + t + " where psampleid=" + str(model.psampleid))
+    db.session.delete(model)
+    db.session.commit()
+
+
 @app.route('/part/sampleedit/<int:psampleid>',methods=['get','post'])
 @login_required
 def part_sampleedit(psampleid):
     model = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     form=UvpSampleForm(request.form,model)
     if gvp('delete')=='Y':
-        for t in ('part_histopart_reduit','part_histopart_det','part_histocat','part_histocat_lst','part_ctd'):
-            database.ExecSQL("delete from "+t+" where psampleid="+str(model.psampleid))
-        db.session.delete(model)
-        db.session.commit()
+        delete_sample(psampleid)
         return redirect("/part/prj/" + str(model.pprojid))
     if request.method == 'POST' and form.validate():
         for k,v in form.data.items():

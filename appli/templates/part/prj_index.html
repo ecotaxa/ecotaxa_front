@@ -7,7 +7,7 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
 
 
 <h4>Project samples dashboard</h4>
-<form action="/part/prjcalc/{{ PrjId }}" method="post">
+<form action="/part/prjcalc/{{ PrjId }}" method="post" id="FormSamples">
 <table id="tblsample2" class="table table-bordered table-condensed" style="width: auto;">
   <tr>
     <th style="text-align: center;">Select<br>
@@ -63,3 +63,37 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
 </p>
 </form>
 </div>
+<button type="button" onclick="$('#confirm').modal('show')" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove selected samples</button>
+
+
+<div class="modal " id="confirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Are you sure you want remove selected samples</h4>
+      </div>
+      <div class="modal-body">
+
+    <button type="button" onclick="ProcessDeleteSamples()" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove samples</button>
+
+    <button  type="button" class="btn btn-warning" onclick="$('#confirm').modal('hide')"> Cancel</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/common.js"></script>
+<script>
+  function ProcessDeleteSamples()
+  {
+    var postdata={'delete':'Y'};
+    var champs=$('#FormSamples').serializeArray();
+    for(i=0;i<champs.length;i++){
+      var c=champs[i];
+      postdata[c['name']]=c['value'];
+    }
+    PostDynForm("/part/prjcalc/{{ PrjId }}",postdata);
+  }
+
+</script>
