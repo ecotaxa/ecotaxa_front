@@ -77,6 +77,9 @@ class TaskPartZooscanImport(AsyncTask):
 
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Processing done")
+        # self.task.taskstate="Error"
+        # self.UpdateProgress(10,"Test Error")
+
 
     def QuestionProcess(self):
         ServerRoot=Path(app.config['SERVERLOADAREA'])

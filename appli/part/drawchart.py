@@ -47,7 +47,9 @@ def part_drawchart():
     # traitement des Graphes particulaire réduit
     if len(gpr)>0:
         sql="select depth y "
-        sql+=''.join([',case when watervolume>0 then class%02d/watervolume else 0 end as c%s'%(int(c[2:]),i)
+        # sql+=''.join([',case when watervolume>0 then class%02d/watervolume else 0 end as c%s'%(int(c[2:]),i)
+        #               for i,c in enumerate(gpr) if c[0:2]=="cl"])
+        sql+=''.join([',case when watervolume>0 then class%02d/watervolume else null end as c%s'%(int(c[2:]),i)
                       for i,c in enumerate(gpr) if c[0:2]=="cl"])
         sql+=''.join([',coalesce(biovol%02d) as c%s'%(int(c[2:]),i)
                       for i,c in enumerate(gpr) if c[0:2]=="bv"])
@@ -70,6 +72,9 @@ def part_drawchart():
                 xcolname="c%d"%i
                 for rnum,r in enumerate(DBData):
                     data[rnum]=(-r['y'],r[xcolname])
+                # data = data[~np.isnan(data[:,1]),:] # Supprime les lignes avec une valeur à Nan et fait donc de l'extrapolation linaire
+                # sans cette ligne les null des colonnes cl devient des nan et ne sont pas tracès (rupture de ligne)
+                # cependant l'autre option est de le traiter au niveau de l'import
                 graph[i].plot(data[:,1],data[:,0])
         # fait après les plot pour avoir un echelle X bien callé avec les données et evite les erreurs log si la premiere serie n'as pas de valeurs
         for i, c in enumerate(gpr):
@@ -81,7 +86,7 @@ def part_drawchart():
                     graph[i].set_xscale('linear')
             else:
                 graph[i].set_xlim(left=0)
-    # traitement des Graphes particulaire réduit
+    # traitement des Graphes particulaire détaillés
     if len(gpd)>0:
         sql="select depth y "
         sql+=''.join([',case when watervolume>0 then class%02d/watervolume else 0 end as c%s'%(int(c[2:]),i)

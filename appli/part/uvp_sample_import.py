@@ -8,6 +8,11 @@ from appli.part import PartDetClassLimit,CTDFixedCol
 from flask_login import current_user
 from appli.part.common_sample_import import CleanValue,ToFloat,GetTicks,GenerateReducedParticleHistogram
 
+def ConvDegreeMinuteFloatToDecimaldegre(v):
+    f,i=math.modf(v)
+    return i+(f/0.6)
+
+
 def CreateOrUpdateSample(pprojid,headerdata):
     """
     Crée ou met à jour le sample
@@ -31,8 +36,8 @@ def CreateOrUpdateSample(pprojid,headerdata):
     Sample.sampledate=datetime.datetime(int(headerdata['filename'][0:4]),int(headerdata['filename'][4:6]),int(headerdata['filename'][6:8])
                                        ,int(headerdata['filename'][8:10]), int(headerdata['filename'][10:12]), int(headerdata['filename'][12:14])
                                         )
-    Sample.latitude = ToFloat(headerdata['latitude'])
-    Sample.longitude = ToFloat(headerdata['longitude'])
+    Sample.latitude = ConvDegreeMinuteFloatToDecimaldegre(ToFloat(headerdata['latitude']))
+    Sample.longitude = ConvDegreeMinuteFloatToDecimaldegre(ToFloat(headerdata['longitude']))
     Sample.organizedbydeepth = True
     Sample.acq_descent_filter=True
     Sample.winddir = int(headerdata['winddir'])
@@ -66,30 +71,33 @@ def CreateOrUpdateSample(pprojid,headerdata):
     HDRFolder =  DossierUVPPath / "raw"/("HDR"+Sample.filename)
     HDRFile = HDRFolder/("HDR"+Sample.filename+".hdr")
     if not HDRFile.exists():
-        raise Exception("File %s is missing "%(HDRFile.as_posix()))
-    else:
-        with HDRFile.open('r') as F:
-            F.readline() # on saute la ligne 1
-            Ligne2=F.readline().strip('; \r\n')
-            # print("Ligne2= '%s'" % (Ligne2))
-            Sample.acq_filedescription = Ligne2
-            m = re.search(R"\w+ (\w+)", Ligne2)
-            if m is not None and m.lastindex == 1:
-                Sample.instrumsn=m.group(1)
-            Lines = F.read()
-            HdrParam=DecodeEqualList(Lines)
-            # print("%s" % (HdrParam))
-            Sample.acq_shutterspeed=ToFloat(HdrParam.get('shutterspeed',''))
-            Sample.acq_smzoo = int(HdrParam['smzoo'])
-            Sample.acq_smbase = int(HdrParam['smbase'])
-            Sample.acq_exposure = ToFloat(HdrParam.get('exposure',''))
-            Sample.acq_gain = ToFloat(HdrParam.get('gain', ''))
-            Sample.acq_eraseborder = ToFloat(HdrParam.get('eraseborderblobs', ''))
-            Sample.acq_tasktype = ToFloat(HdrParam.get('tasktype', ''))
-            Sample.acq_threshold = ToFloat(HdrParam.get('thresh', ''))
-            Sample.acq_choice = ToFloat(HdrParam.get('choice', ''))
-            Sample.acq_disktype = ToFloat(HdrParam.get('disktype', ''))
-            Sample.acq_ratio = ToFloat(HdrParam.get('ratio', ''))
+        HDRFolder = DossierUVPPath / "work" / Sample.profileid
+        HDRFile = HDRFolder / ("HDR" + Sample.filename + ".txt")
+        if not HDRFile.exists():
+            raise Exception("File %s is missing, and in raw folder too" % (HDRFile.as_posix()))
+
+    with HDRFile.open('r') as F:
+        F.readline() # on saute la ligne 1
+        Ligne2=F.readline().strip('; \r\n')
+        # print("Ligne2= '%s'" % (Ligne2))
+        Sample.acq_filedescription = Ligne2
+        m = re.search(R"\w+ (\w+)", Ligne2)
+        if m is not None and m.lastindex == 1:
+            Sample.instrumsn=m.group(1)
+        Lines = F.read()
+        HdrParam=DecodeEqualList(Lines)
+        # print("%s" % (HdrParam))
+        Sample.acq_shutterspeed=ToFloat(HdrParam.get('shutterspeed',''))
+        Sample.acq_smzoo = int(HdrParam['smzoo'])
+        Sample.acq_smbase = int(HdrParam['smbase'])
+        Sample.acq_exposure = ToFloat(HdrParam.get('exposure',''))
+        Sample.acq_gain = ToFloat(HdrParam.get('gain', ''))
+        Sample.acq_eraseborder = ToFloat(HdrParam.get('eraseborderblobs', ''))
+        Sample.acq_tasktype = ToFloat(HdrParam.get('tasktype', ''))
+        Sample.acq_threshold = ToFloat(HdrParam.get('thresh', ''))
+        Sample.acq_choice = ToFloat(HdrParam.get('choice', ''))
+        Sample.acq_disktype = ToFloat(HdrParam.get('disktype', ''))
+        Sample.acq_ratio = ToFloat(HdrParam.get('ratio', ''))
 
     # TODO pixel à prendre dans uvp5_configuration_data.txt s'il existe ?
     db.session.commit()
@@ -328,6 +336,9 @@ def GenerateParticleHistogram(psampleid):
     # on calcule le volume de chaque tranche (y compris celle qui n'existent pas en 0 et la profondeur maxi)
     VolumeParTranche=np.bincount((FirstLigByDepth[:, 0]  // 5).astype(int), FirstLigByDepth[:, 1])*UvpSample.acq_volimage  # Bin par tranche de tranche 5m partant de 0m
     MetreParTranche=np.bincount((FirstLigByDepth[:, 0]  // 5).astype(int))  # Bin par tranche de tranche 5m partant de 0m
+    # On supprime les tranches vides, mais ça fait planter les graphes suivants
+    # VolumeParTranche=VolumeParTranche[np.nonzero(VolumeParTranche)]
+    # MetreParTranche = MetreParTranche[np.nonzero(VolumeParTranche)]
 
     (PartByClassAndTranche, bins, binsdept) = np.histogram2d(PartCalc[:,1], PartCalc[:,0], bins=(
         PartDetClassLimit, np.arange(0, VolumeParTranche.shape[0]+1 ))
@@ -335,94 +346,95 @@ def GenerateParticleHistogram(psampleid):
     (BioVolByClassAndTranche, bins, binsdept) = np.histogram2d(PartCalc[:,1], PartCalc[:,0], bins=(
         PartDetClassLimit, np.arange(0, VolumeParTranche.shape[0]+1 ))
             , weights=PartCalc[:, 2])
-    BioVolByClassAndTranche/=VolumeParTranche
+    with np.errstate(divide='ignore', invalid='ignore'): # masque les warning provoquées par les divisions par 0 des tranches vides.
+        BioVolByClassAndTranche/=VolumeParTranche
 
 
-    font = {'family' : 'arial',
-            'weight' : 'normal',
-            'size'   : 10}
-    plt.rc('font', **font)
-    plt.rcParams['lines.linewidth'] = 0.5
+        font = {'family' : 'arial',
+                'weight' : 'normal',
+                'size'   : 10}
+        plt.rc('font', **font)
+        plt.rcParams['lines.linewidth'] = 0.5
 
-    Fig=plt.figure(figsize=(16,12), dpi=100)
-    # calcul volume par metre moyen de chaque tranche
-    ax = Fig.add_subplot(241)
-    # si une tranche n'as pas été entierement explorée la /5 est un calcul éronné
-    ax.plot(VolumeParTranche/MetreParTranche , np.arange(len(VolumeParTranche))*-5-2.5)
-    ax.set_xticks(GetTicks((VolumeParTranche/5).max()))
-    ax.set_xlabel('Volume/M')
-    ax.set_ylabel('Depth(m)')
+        Fig=plt.figure(figsize=(16,12), dpi=100)
+        # calcul volume par metre moyen de chaque tranche
+        ax = Fig.add_subplot(241)
+        # si une tranche n'as pas été entierement explorée la /5 est un calcul éronné
+        ax.plot(VolumeParTranche/MetreParTranche , np.arange(len(VolumeParTranche))*-5-2.5)
+        ax.set_xticks(GetTicks((VolumeParTranche/5).max()))
+        ax.set_xlabel('Volume/M')
+        ax.set_ylabel('Depth(m)')
 
-    # Calcul Particle <=0.53
-    Filtre=np.argwhere(PartCalc[:,1]<=0.53)
-    ax = Fig.add_subplot(242)
-    (n,bins)=np.histogram(PartCalc[Filtre,0],np.arange(len(VolumeParTranche)+1),weights=Part[Filtre,3])
-    n=n/VolumeParTranche
-    ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
-    ax.set_xticks(GetTicks(n.max()))
+        # Calcul Particle <=0.53
+        Filtre=np.argwhere(PartCalc[:,1]<=0.53)
+        ax = Fig.add_subplot(242)
+        (n,bins)=np.histogram(PartCalc[Filtre,0],np.arange(len(VolumeParTranche)+1),weights=Part[Filtre,3])
+        n=n/VolumeParTranche
+        ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
+        ax.set_xticks(GetTicks(n.max()))
 
-    ax.set_xlabel('Part 0.06-0.53 mm esd #/L')
-    ax.set_ylabel('Depth(m)')
+        ax.set_xlabel('Part 0.06-0.53 mm esd #/L')
+        ax.set_ylabel('Depth(m)')
 
 
-    # Calcul Particle 0.53->1.06
-    Filtre=np.argwhere((PartCalc[:,1]>=0.53)&(PartCalc[:,1]<=1.06))
-    ax = Fig.add_subplot(243)
-    (n,bins)=np.histogram(PartCalc[Filtre,0],np.arange(len(VolumeParTranche)+1),weights=Part[Filtre,3])
-    n=n/VolumeParTranche
-    ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
-    ax.set_xticks(GetTicks(n.max()))
-    ax.set_xlabel('Part 0.53-1.06 mm esd #/L')
-    ax.set_ylabel('Depth(m)')
+        # Calcul Particle 0.53->1.06
+        Filtre=np.argwhere((PartCalc[:,1]>=0.53)&(PartCalc[:,1]<=1.06))
+        ax = Fig.add_subplot(243)
+        (n,bins)=np.histogram(PartCalc[Filtre,0],np.arange(len(VolumeParTranche)+1),weights=Part[Filtre,3])
+        n=n/VolumeParTranche
+        ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
+        ax.set_xticks(GetTicks(n.max()))
+        ax.set_xlabel('Part 0.53-1.06 mm esd #/L')
+        ax.set_ylabel('Depth(m)')
 
-    # Calcul Particle 1.06->2.66
-    Filtre=np.argwhere((PartCalc[:,1]>=1.06)&(PartCalc[:,1]<=2.66))
-    ax = Fig.add_subplot(244)
-    (n,bins)=np.histogram(PartCalc[Filtre,0],np.arange(len(VolumeParTranche)+1),weights=Part[Filtre,3])
-    n=n/VolumeParTranche
-    ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
-    ax.set_xticks(GetTicks(n.max()))
-    ax.set_xlabel('Part 1.06-2.66 mm esd #/L')
-    ax.set_ylabel('Depth(m)')
+        # Calcul Particle 1.06->2.66
+        Filtre=np.argwhere((PartCalc[:,1]>=1.06)&(PartCalc[:,1]<=2.66))
+        ax = Fig.add_subplot(244)
+        (n,bins)=np.histogram(PartCalc[Filtre,0],np.arange(len(VolumeParTranche)+1),weights=Part[Filtre,3])
+        n=n/VolumeParTranche
+        ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
+        ax.set_xticks(GetTicks(n.max()))
+        ax.set_xlabel('Part 1.06-2.66 mm esd #/L')
+        ax.set_ylabel('Depth(m)')
 
-    # Calcul Biovolume Particle >0.512-<=1.02 mm via histograme
-    n=np.sum(BioVolByClassAndTranche[28:30,:],axis=0)
-    ax = Fig.add_subplot(245)
+        # Calcul Biovolume Particle >0.512-<=1.02 mm via histograme
+        n=np.sum(BioVolByClassAndTranche[28:30,:],axis=0)
+        ax = Fig.add_subplot(245)
 
-    ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
-    ax.set_xticks(GetTicks(n.max()))
-    ax.set_xlabel('Part >=0.512-<1.02 mm esd µl/l from det histo')
-    ax.set_ylabel('Depth(m)')
+        ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
+        ax.set_xticks(GetTicks(n.max()))
+        ax.set_xlabel('Part >=0.512-<1.02 mm esd µl/l from det histo')
+        ax.set_ylabel('Depth(m)')
 
-    # Calcul Particle <=0.512 mm via histograme
-    n=np.sum(PartByClassAndTranche[0:28,:],axis=0)
-    ax = Fig.add_subplot(246)
-    n=n/VolumeParTranche
-    ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
-    ax.set_xticks(GetTicks(n.max()))
-    ax.set_xlabel('Part <0.512 mm esd #/L from det histo')
-    ax.set_ylabel('Depth(m)')
+        # Calcul Particle <=0.512 mm via histograme
+        n=np.sum(PartByClassAndTranche[0:28,:],axis=0)
+        ax = Fig.add_subplot(246)
+        n=n/VolumeParTranche
+        ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
+        ax.set_xticks(GetTicks(n.max()))
+        ax.set_xlabel('Part <0.512 mm esd #/L from det histo')
+        ax.set_ylabel('Depth(m)')
 
-    # Calcul Particle >0.512-<=1.02 mm via histograme
-    n=np.sum(PartByClassAndTranche[28:30,:],axis=0)
-    ax = Fig.add_subplot(247)
-    n=n/VolumeParTranche
-    ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
-    ax.set_xticks(GetTicks(n.max()))
-    ax.set_xlabel('Part >=0.512-<1.02 mm esd #/L from det histo')
-    ax.set_ylabel('Depth(m)')
+        # Calcul Particle >0.512-<=1.02 mm via histograme
+        n=np.sum(PartByClassAndTranche[28:30,:],axis=0)
+        ax = Fig.add_subplot(247)
+        n=n/VolumeParTranche
+        ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
+        ax.set_xticks(GetTicks(n.max()))
+        ax.set_xlabel('Part >=0.512-<1.02 mm esd #/L from det histo')
+        ax.set_ylabel('Depth(m)')
 
-    # Calcul Particle >0.512-<=1.02 mm via histograme
-    n=np.sum(PartByClassAndTranche[30:34,:],axis=0)
-    ax = Fig.add_subplot(248)
-    n=n/VolumeParTranche
-    ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
-    ax.set_xticks(GetTicks(n.max()))
-    ax.set_xlabel('Part >=1.02-<2.58 mm esd #/L from det histo')
-    ax.set_ylabel('Depth(m)')
+        # Calcul Particle >0.512-<=1.02 mm via histograme
+        n=np.sum(PartByClassAndTranche[30:34,:],axis=0)
+        ax = Fig.add_subplot(248)
+        n=n/VolumeParTranche
+        ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
+        ax.set_xticks(GetTicks(n.max()))
+        ax.set_xlabel('Part >=1.02-<2.58 mm esd #/L from det histo')
+        ax.set_ylabel('Depth(m)')
 
-    Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_particle_' + UvpSample.profileid+'.png')).as_posix())
-    Fig.clf()
+        Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_particle_' + UvpSample.profileid+'.png')).as_posix())
+        Fig.clf()
 
     database.ExecSQL("delete from part_histopart_det where psampleid="+str(psampleid))
     sql="""insert into part_histopart_det(psampleid, lineno, depth,  watervolume
@@ -449,6 +461,8 @@ def GenerateParticleHistogram(psampleid):
     for i,r in enumerate(VolumeParTranche):
         sqlparam['lineno']=i
         sqlparam['depth'] = (i*5+2.5)
+        if VolumeParTranche[i]==0: # On ne charge pas les lignes sans volume d'eau car ça signifie qu'l n'y a pas eu d'échantillon
+            continue
         sqlparam['watervolume'] = VolumeParTranche[i]
         for k in range(0,45):
             sqlparam['class%02d'%(k+1)] = PartByClassAndTranche[k,i]
