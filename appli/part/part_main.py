@@ -87,20 +87,59 @@ def GetFilteredSamples(Filter=None,GetVisibleOnly=False,ForceVerticalIfNotSpecif
 
 @app.route('/part/searchsample')
 def Partsearchsample():
-    # sql="""select s.psampleid,s.pprojid,s.latitude,s.longitude
-    # from part_samples s
-    # JOIN part_projects up on s.pprojid=up.pprojid
-    # LEFT JOIN projects p on up.projid=p.projid
-    # order by s.sampleid
-    # """
-    # samples=database.GetAll(sql)
     samples =GetFilteredSamples()
     res=[]
     for s in samples:
-        r={'id':s['psampleid'],'lat':s['latitude'],'long':s['longitude'],'visible':True}
+        r={'id':s['psampleid'],'lat':s['latitude'],'long':s['longitude'],'visible':s['visible']}
         res.append(r)
     return json.dumps(res)
 
+@app.route('/part/statsample')
+def Partstatsample():
+    samples =GetFilteredSamples()
+    if len(samples )==0:
+        return "No Data selected"
+    sampleinclause=",".join([str(x[0]) for x in samples])
+    data={'nbrsample':len(samples),'nbrvisible':sum(1 for x in samples if x['visible'])}
+    data['nbrnotvisible']=data['nbrsample']-data['nbrvisible']
+    data['partprojcount']=database.GetAssoc2Col("""SELECT pp.ptitle,count(*) nbr
+        from part_samples ps
+        join part_projects pp on ps.pprojid=pp.pprojid
+        where ps.psampleid in ({0} )
+        group by pp.ptitle""".format(sampleinclause))
+    data['instrumcount']=database.GetAssoc2Col("""SELECT coalesce(pp.instrumtype,'not defined'),count(*) nbr
+        from part_samples ps
+        join part_projects pp on ps.pprojid=pp.pprojid
+        where ps.psampleid in ({0} )
+        group by pp.instrumtype""".format(sampleinclause))
+    data['taxoprojcount']=database.GetAssoc2Col("""SELECT coalesce(p.title,'not associated'),count(*) nbr
+        from part_samples ps
+        join part_projects pp on ps.pprojid=pp.pprojid
+        left join projects p on pp.projid=p.projid
+        where ps.psampleid in ({0} )
+        group by p.title""".format(sampleinclause))
+    data['taxostat']=database.GetAll("""select round(100*count(case when nbr=nbrval then 1 end)/count(*),1) pctval100pct
+          ,round(100*count(case when nbrval>0 and nbr=nbrval then 1 end)/count(*),1) pctpartval
+          ,round(100*sum(nbrval)/sum(nbr),1) as pctobjval
+        from (SELECT ps.sampleid,count(*) nbr,count(case when classif_qual='V' then 1 end) nbrval
+            from part_samples ps
+            join obj_head oh on oh.sampleid=ps.sampleid
+            where ps.psampleid in ({0})
+            group by ps.sampleid )q
+            having count(*)>0
+            """.format(sampleinclause))
+    if len(data['taxostat'])==0:
+        data['taxostat'] ={}
+    else:
+        data['taxostat']={k: float(v) for k, v in data['taxostat'][0].items()}
+    data['depthhisto']=database.GetAssoc2Col("""SELECT coalesce(case when bottomdepth<500 then '0-500' else trunc(bottomdepth,-3)||'-'||(trunc(bottomdepth,-3)+1000) end,'Not defined') slice
+        , count(*) nbr
+            from part_samples ps
+            where ps.psampleid in ({0})
+        group by slice""".format(sampleinclause))
+
+    return render_template('part/stats.html', data=data,raw=json.dumps(data))
+    # return json.dumps(data)
 
 
 @app.route('/part/getsamplepopover/<int:psampleid>')

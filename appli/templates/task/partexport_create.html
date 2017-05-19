@@ -1,0 +1,106 @@
+{% macro checkboxinput(name, checkedvalue, value='',extra='') -%}
+    <input type="checkbox" name="{{ name }}" id="{{ name }}" value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }} {{ extra|safe }}>
+{%- endmacro %}
+
+
+{% extends "layout.html" %}
+
+{% block body %}
+
+  
+<b>Samples filters :  </b>{{ TxtFiltres }}
+<br><b>Samples count :  </b> {{ SampleCount }}
+  
+
+<form class="form-horizontal" method="post" enctype=multipart/form-data>
+  <table class="table table-bordered table-condensed " style="width: 600px">
+    <tr>
+      <td><input type="radio" name="what" value="RED" {{'checked' if data.what=='RED'}} >Reduced data</td>
+      <td>
+File format <select name="fileformat" >
+        <option value="ODV" {{ 'selected' if data.fileformat=='ODV' }} >ODV</option>
+        <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
+      </select>
+        <br><b>Filters :</b>{{ RedFilter }}
+      </td>
+    </tr>
+    <tr>
+      <td><input type="radio" name="what" value="DET" {{'checked' if data.what=='DET'}} >Detailled data</td>
+      <td>
+File format <select name="fileformat" >
+        <option value="ODV" {{ 'selected' if data.fileformat=='ODV' }} >ODV</option>
+        <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
+      </select>
+      </td>
+    </tr>
+          <tr>
+      <td><input type="radio" name="what" value="RAW" {{ 'checked' if data.what=='RAW' }}>RAW</td>
+      <td>
+        Contains : <UL>
+        <LI>UVP : RAW compacted Histograms</LI>
+        <LI>LISST : Nothing</LI>
+        </UL>
+      </td>
+    </tr>
+    <tr>
+
+</table>
+<script>
+function ComputeSampleList() {
+    var cv="";
+    $('#TblVar input').each(function (){
+       if($(this).prop("checked")){
+           if(cv!="")
+               cv+=",";
+           cv+=$(this).data("var");
+       }
+    });
+    $('#SampleList').val(cv);
+}
+function CheckBasedOnText() {
+    var cv=$('#SampleList').val();
+    var cvl=cv.split(",");
+    //console.log(cvl);
+    $('#TblVar input').each(function (){
+       if($(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)){
+           if(cv!="")
+               cv+=",";
+           cv+=$(this).data("var");
+       }
+    });
+}
+</script>
+
+
+<table>
+<tr>
+{#{% if TxtFiltres=="" %}<td valign="top">#}
+{% if 1==0 %} {# Fonction désactivée #}
+Exported Samples :<br>
+<input type="text" name="samplelist" id="SampleList" value="{{ data.samplelist }}" style="width: 400px;"  autocomplete=off><br>
+
+Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', true );ComputeSampleList();">All</a>
+    / <a href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', false );ComputeSampleList();">None</a>
+    / <a href="#tbltop2" onclick="CheckBasedOnText();" title="Usefull to copy setting from a previous export" >Text field content</a>
+
+<table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
+    <tr><th >Select</th><th width="200">Sample</th></tr>
+    {%   for r in g.SampleList %}
+        <tr><td><input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[1] }}" ></td><td>{{ r[1] }}</td></tr>
+    {% endfor %}
+</table>
+</td>{% endif %}
+<td valign="top">
+  <br><br><br>
+    <input type="hidden" name="starttask" value="Y">
+    <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-2">
+      <button type="submit" class="btn btn-primary">Start Task</button>
+    </div>
+  </div>
+
+</td>
+</tr>
+</table>
+</form>
+{% endblock %}

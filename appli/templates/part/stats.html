@@ -1,0 +1,68 @@
+<style>
+  .TablePrefix {font-size: large;font-weight: bold;}
+  .rightspace {padding-right: 30px;}
+  .aligntop {vertical-align: top;}
+</style>
+<table>
+  <tr>
+    <td class="rightspace aligntop">
+      <p class="TablePrefix">Sample statistics</p>
+      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
+      <tr><td> Sample count</td>  <td>{{ data.nbrsample }}</td></tr>
+      <tr><td> Visible</td>  <td>{{ data.nbrvisible }}</td></tr>
+      <tr><td> Not Visible</td>  <td>{{ data.nbrnotvisible }}</td></tr>
+      <tr><td> Validated objects %</td>  <td>{{ data.taxostat.pctobjval }} %</td></tr>
+      <tr><td>Samples fully validated</td>  <td>{{ data.taxostat.pctval100pct }} %</td></tr>
+      <tr><td>Samples partially validated</td>  <td>{{ data.taxostat.pctpartval }} %</td></tr>
+      </table>
+    </td>
+    <td class="rightspace aligntop">
+      <p class="TablePrefix">Sample per Particle project</p>
+      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
+        <thead><tr><th>Project</th><th>Count</th></tr></thead>
+        <tbody>
+      {%   for k,v in data.partprojcount.items() %}
+      <tr>  <td> {{ k }}</td>  <td>{{ v }}</td>  </tr>
+      {%  endfor %}
+      </tbody></table>
+    </td>
+    <td class="aligntop">
+      <p class="TablePrefix">Sample per Taxonomy project</p>
+      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
+        <thead><tr><th>Project</th><th>Sample Count</th></tr></thead>
+        <tbody>
+      {%   for k,v in data.taxoprojcount.items() %}
+      <tr>  <td> {{ k }}</td>  <td>{{ v }}</td>  </tr>
+      {%  endfor %}
+      </tbody></table>
+
+    </td>
+  </tr>
+
+  <tr>
+    <td class="rightspace aligntop">
+      <p class="TablePrefix">Sample Max depth histogram</p>
+      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
+        <thead><tr><th>Depth slice</th><th>Count</th></tr></thead>
+        <tbody>
+      {%   for k,v in data.depthhisto.items() %}
+      <tr>  <td> {{ k }}</td>  <td>{{ v }}</td>  </tr>
+      {%  endfor %}
+      </tbody></table>
+    </td>
+    <td class="aligntop">
+      <p class="TablePrefix">Sample count per instrument</p>
+      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
+        <thead><tr><th>Instrument</th><th>Sample Count</th></tr></thead>
+        <tbody>
+      {%   for k,v in data.instrumcount.items() %}
+      <tr>  <td> {{ k }}</td>  <td>{{ v }}</td>  </tr>
+      {%  endfor %}
+      </tbody></table>
+
+    </td>
+  </tr>
+</table>
+
+
+{#  {{ raw }}#}
