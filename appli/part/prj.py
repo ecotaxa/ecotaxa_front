@@ -55,7 +55,9 @@ def part_prj_main(PrjId):
           ,(select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo
           ,(select count(*) from part_ctd where psampleid=s.psampleid) nbrlinectd
           from part_samples s
-          where pprojid=%s""" % (PrjId))
+          where pprojid=%s
+          ORDER BY filename desc
+          """ % (PrjId))
 
     return PrintInCharte(
         render_template('part/prj_index.html', PrjId=PrjId, dbsample=dbsample, Prj=Prj))

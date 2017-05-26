@@ -103,68 +103,105 @@
 
 
 <style>
- #edittab {margin: 10px;}
- #edittab td:nth-child(2n+1) {width: 200px;padding-right: 15px;padding-left:5px;}
+.edittab {margin: 3px;border: solid black 1px;width: 99%}
+.edittab td:nth-child(2n+1) {max-width: 200px;padding-right: 15px;padding-left:5px;}
+label {font-size: 12px; font-weight: normal;}
 </style>
 <form method="POST" role="form" class="">
-<table id="edittab">
+<table class="edittab">
+  <tr><td colspan="4"><b>PARTICLE module informations </b></td></tr>
 {{ render_field(form.pprojid,style="width:50px;",tr='o') }}
-{{ render_field(form.sampleid,tr='c') }}
-{{ render_field(form.profileid,tr='o') }}
-{{ render_field(form.filename,tr='') }}
-{{ render_field(form.instrumsn,tr='') }}
-{{ render_field(form.stationid,tr='c') }}
-{{ render_field(form.latitude,tr='o') }}
-{{ render_field(form.longitude,tr='') }}
-{{ render_field(form.qualitytaxo,tr='') }}
-{{ render_field(form.qualitypart,tr='c') }}
-{{ render_field(form.winddir,tr='o') }}
-{{ render_field(form.winspeed,tr='') }}
-{{ render_field(form.seastate,tr='') }}
-{{ render_field(form.nebuloussness,tr='c') }}
-{{ render_field(form.sampledate,tr='o') }}
-{{ render_field(form.comment,tr='c',style="width:700px;",colspan=7) }}
-{{ render_field(form.firstimage,tr='o') }}
-{{ render_field(form.lastimg,tr='') }}
-{{ render_field(form.lastimgused,tr='c') }}
-{{ render_field(form.bottomdepth,tr='o') }}
-{{ render_field(form.yoyo,tr='') }}
-{{ render_checkbox_field(form.organizedbydeepth,tr='c') }}
 {{ render_field(form.ctd_origfilename,tr='') }}
+{{ render_field(form.qualitytaxo,tr='') }}
+{{ render_field(form.daterecalculhistotaxo,tr='c') }}
+
+{{ render_field(form.profileid,tr='o') }}
 {{ render_field(form.ctd_import_name,tr='') }}
-{{ render_field(form.ctd_import_email,tr='c') }}
-{{ render_field(form.ctd_status,tr='o') }}
+{{ render_field(form.qualitypart,tr='') }}
+{{ render_checkbox_field(form.histobrutavailable,tr='c') }}
+
+{{ render_field(form.sampleid,tr='o') }}
+{{ render_field(form.ctd_import_email,tr='') }}
+{{ render_field(form.ctd_status,tr='c') }}
+
+{{ render_field(form.filename,tr='o') }}
 {{ render_field(form.ctd_import_datetime,tr='') }}
 {{ render_field(form.ctd_desc,tr='c',style="width:500px;",colspan=3) }}
-{{ render_field(form.acq_aa,tr='o') }}
-{{ render_field(form.acq_exp,tr='') }}
-{{ render_field(form.acq_pixel,tr='') }}
-{{ render_field(form.acq_volimage,tr='c') }}
-{{ render_field(form.acq_depthoffset,tr='o') }}
-{{ render_field(form.acq_shutterspeed,tr='') }}
-{{ render_field(form.acq_exposure,tr='') }}
-{{ render_field(form.acq_gain,tr='c') }}
-{{ render_field(form.acq_smzoo,tr='o') }}
-{{ render_field(form.acq_threshold,tr='') }}
-{{ render_field(form.acq_eraseborder,tr='') }}
-{{ render_field(form.acq_tasktype,tr='c') }}
-{{ render_field(form.acq_filedescription,tr='o') }}
-{{ render_field(form.acq_barcode,tr='c') }}
-{{ render_field(form.acq_choice,tr='o') }}
-{{ render_field(form.acq_disktype,tr='') }}
-{{ render_field(form.acq_smbase,tr='') }}
-{{ render_field(form.acq_ratio,tr='') }}
-{{ render_field(form.acq_descent_filter,tr='o') }}
-{{ render_field(form.acq_presure_gain,tr='') }}
-{{ render_field(form.acq_xsize,tr='') }}
-{{ render_field(form.acq_ysize,tr='c') }}
-{{ render_field(form.proc_datetime,tr='o') }}
-{{ render_field(form.proc_gamma,tr='') }}
-{{ render_field(form.proc_soft,tr='c') }}
+
+</table>
+<table class="edittab">
+  <tr><td colspan="4"><b>Profile METADATA</b></td></tr>
+{{ render_field(form.instrumsn,tr='o') }}
+{{ render_field(form.stationid,tr='') }}
+{{ render_field(form.acq_barcode,tr='') }}
+{{ render_field(form.winddir,tr='c') }}
+
+  {{ render_field(form.sampledate,tr='o') }}
+{{ render_field(form.latitude,tr='') }}
+{{ render_field(form.firstimage,tr='') }}
+{{ render_field(form.winspeed,tr='c') }}
+
+
 {{ render_field(form.op_sample_name,tr='o') }}
-{{ render_field(form.op_sample_email,tr='') }}
-{{ render_field(form.daterecalculhistotaxo,tr='') }}
-{{ render_checkbox_field(form.histobrutavailable,tr='c') }}
+{{ render_field(form.longitude,tr='') }}
+{{ render_field(form.lastimg,tr='') }}
+{{ render_field(form.seastate,tr='c') }}
+
+{{ render_field(form.op_sample_email,tr='o') }}
+{{ render_field(form.bottomdepth,tr='') }}
+{{ render_field(form.lastimgused,tr='') }}
+{{ render_field(form.nebuloussness,tr='c') }}
+
+{{ render_field(form.yoyo,tr='o') }}
+{{ render_checkbox_field(form.organizedbydeepth,tr='') }}
+{{ render_field(form.comment,tr='c',style="width:550px;",colspan=7) }}
+</table>
+<table class="edittab">
+<tr><td colspan="4"><b>UVP Settings</b></td></tr>
+{{ render_field(form.acq_aa,tr='o',style="width:80px;") }}
+<td></td><td></td>
+{{ render_field(form.acq_ratio,tr='',style="width:80px;") }}
+{{ render_field(form.proc_datetime,tr='c') }}
+
+{{ render_field(form.acq_exp,tr='o',style="width:80px;") }}
+{{ render_field(form.acq_shutterspeed,tr='',style="width:80px;") }}
+{{ render_field(form.acq_xsize,tr='',style="width:80px;") }}
+{{ render_field(form.proc_gamma,tr='c',style="width:80px;") }}
+
+{{ render_field(form.acq_volimage,tr='o',style="width:80px;") }}
+{{ render_field(form.acq_exposure,tr='',style="width:80px;") }}
+{{ render_field(form.acq_ysize,tr='',style="width:80px;") }}
+{{ render_field(form.proc_soft,tr='c') }}
+
+{{ render_field(form.acq_pixel,tr='o',style="width:80px;") }}
+{{ render_field(form.acq_gain,tr='',style="width:80px;") }}
+{{ render_field(form.acq_eraseborder,tr='',style="width:80px;") }}
+<td colspan="2">Process ratio ??</td></tr>
+
+
+{{ render_field(form.acq_depthoffset,tr='o',style="width:80px;") }}
+{{ render_field(form.acq_filedescription,tr='') }}
+{{ render_field(form.acq_threshold,tr='c',style="width:80px;") }}
+
+
+
+{{ render_field(form.acq_smbase,tr='o',style="width:80px;") }}
+{{ render_field(form.acq_tasktype,tr='') }}
+<td colspan="2"></td>
+
+
+{{ render_field(form.acq_smzoo,tr='o',style="width:80px;") }}
+{{ render_field(form.acq_choice,tr='c') }}
+
+  {{ render_field(form.acq_presure_gain,tr='o',style="width:80px;") }}
+{{ render_field(form.acq_disktype,tr='') }}
+{{ render_field(form.acq_descent_filter,tr='c') }}
+</table>
+<table class="edittab">
+  <tr><td colspan="4"><b>LISST Settings</b></td></tr>
+{{ render_field(form.lisst_zscat_filename,tr='o') }}
+{{ render_field(form.lisst_kernel,tr='c') }}
+</table><table>
     <tr>
         <td colspan="3">
 <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>

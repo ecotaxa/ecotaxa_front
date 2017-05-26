@@ -4,6 +4,7 @@ from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,I
 from flask_login import current_user
 # from appli.part import part_main, drawchart,PartRedClassLimit
 from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedCol
+import operator
 
 @app.route('/part/')
 def indexPart():
@@ -19,13 +20,11 @@ def indexPart():
         gpd = SelectMultipleField(choices=[("cl%d"%i,"#/l %02d : "%i+GetClassLimitTxt(PartDetClassLimit,i)) for i in range (1,46)]
                                           +[("bv%d"%i,"BV %02d : "%i+GetClassLimitTxt(PartDetClassLimit,i)) for i in range (1,46)])
         ctd = SelectMultipleField(
-            choices=[(k, v) for v,k in CTDFixedCol.items()])
+            choices=sorted([(k, v) for v,k in CTDFixedCol.items()], key=operator.itemgetter(1)))
         filt_proftype=SelectField(choices=[('','All'),('V','Vertical'),('H','Horizontal')])
 
     form=FiltForm()
-    # data={}
-    # data['filt_proj']=f()
-    g.headcenter="<h1 style='text-align: center'><b>PARTICLE</b> module <span class='glyphicon glyphicon-info-sign'></span></h2>"
+    g.headcenter="""<h1 style='text-align: center;cursor: pointer;' onclick="$('#particleinfodiv').toggle()"><b>PARTICLE</b> module <span class='glyphicon glyphicon-info-sign'></span></h2>"""
     return PrintInCharte(
         render_template('part/index.html', form=form,LocalGIS=app.config.get("LOCALGIS",False)))
 
@@ -44,7 +43,7 @@ def GetFilteredSamples(Filter=None,GetVisibleOnly=False,ForceVerticalIfNotSpecif
             sqljoin ="  left Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
         sqlvisible += " then true end "
 
-    sql="select s.psampleid,s.latitude,s.longitude,"+sqlvisible+""" as visible
+    sql="select s.psampleid,s.latitude,s.longitude,"+sqlvisible+""" as visible,s.pprojid,up.ptitle
     from part_samples s
     JOIN part_projects up on s.pprojid=up.pprojid
     LEFT JOIN projects p on up.projid=p.projid """
@@ -102,22 +101,25 @@ def Partstatsample():
     sampleinclause=",".join([str(x[0]) for x in samples])
     data={'nbrsample':len(samples),'nbrvisible':sum(1 for x in samples if x['visible'])}
     data['nbrnotvisible']=data['nbrsample']-data['nbrvisible']
-    data['partprojcount']=database.GetAssoc2Col("""SELECT pp.ptitle,count(*) nbr
+    data['partprojcount']=database.GetAll("""SELECT pp.ptitle,count(*) nbr,pp.do_email,do_name,cs_email,cs_name
         from part_samples ps
         join part_projects pp on ps.pprojid=pp.pprojid
         where ps.psampleid in ({0} )
-        group by pp.ptitle""".format(sampleinclause))
-    data['instrumcount']=database.GetAssoc2Col("""SELECT coalesce(pp.instrumtype,'not defined'),count(*) nbr
+        group by pp.ptitle,pp.do_email,do_name,cs_email,cs_name
+        order by pp.ptitle""".format(sampleinclause))
+    data['instrumcount']=database.GetAll("""SELECT coalesce(pp.instrumtype,'not defined') instrum,count(*) nbr
         from part_samples ps
         join part_projects pp on ps.pprojid=pp.pprojid
         where ps.psampleid in ({0} )
-        group by pp.instrumtype""".format(sampleinclause))
-    data['taxoprojcount']=database.GetAssoc2Col("""SELECT coalesce(p.title,'not associated'),count(*) nbr
+        group by pp.instrumtype
+        order by pp.instrumtype""".format(sampleinclause))
+    data['taxoprojcount']=database.GetAll("""SELECT coalesce(p.title,'not associated') title,count(*) nbr
         from part_samples ps
         join part_projects pp on ps.pprojid=pp.pprojid
         left join projects p on pp.projid=p.projid
         where ps.psampleid in ({0} )
-        group by p.title""".format(sampleinclause))
+        group by p.title
+        order by p.title""".format(sampleinclause))
     data['taxostat']=database.GetAll("""select round(100*count(case when nbr=nbrval then 1 end)/count(*),1) pctval100pct
           ,round(100*count(case when nbrval>0 and nbr=nbrval then 1 end)/count(*),1) pctpartval
           ,round(100*sum(nbrval)/sum(nbr),1) as pctobjval
@@ -132,11 +134,14 @@ def Partstatsample():
         data['taxostat'] ={}
     else:
         data['taxostat']={k: float(v) for k, v in data['taxostat'][0].items()}
-    data['depthhisto']=database.GetAssoc2Col("""SELECT coalesce(case when bottomdepth<500 then '0-500' else trunc(bottomdepth,-3)||'-'||(trunc(bottomdepth,-3)+1000) end,'Not defined') slice
-        , count(*) nbr
+    data['depthhisto']=database.GetAll("""SELECT coalesce(case when bottomdepth<500 then '0- 500' else trunc(bottomdepth,-3)||'-'||(trunc(bottomdepth,-3)+1000) end,'Not defined') slice
+      , count(*) nbr
+      from (select ps.psampleid,cast(coalesce(max(depth),ps.bottomdepth) as NUMERIC) bottomdepth
             from part_samples ps
+            left join part_histopart_reduit phr on ps.psampleid = phr.psampleid
             where ps.psampleid in ({0})
-        group by slice""".format(sampleinclause))
+            group by ps.psampleid) ps
+group by slice order by slice""".format(sampleinclause))
 
     return render_template('part/stats.html', data=data,raw=json.dumps(data))
     # return json.dumps(data)

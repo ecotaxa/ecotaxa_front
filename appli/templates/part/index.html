@@ -7,6 +7,14 @@
 #map .popover-content {white-space: nowrap;}
 </style>
 <script src="/static/common.js"></script>
+
+
+<div id="particleinfodiv" class="panel panel-default" style="margin-left: 200px;margin-right: 200px;display: none;">
+  <div class="panel-body">
+    Particle module informations
+  </div>
+</div>
+
 <div style="margin: 2px;">
 
 <link rel="stylesheet" href="/static/openlayers/ol.css" type="text/css">
@@ -56,7 +64,7 @@
 Displaying Map requires Internet Access to load map from https://services.arcgisonline.com
 </div></td></tr></table>
 <div id="ajaxlog"></div>
-<div id="samplecount" style="position: absolute;top:510px; left:410px;">-</div>
+<div id="samplecount" style="position: absolute;top:510px; left:410px;font-weight: bold;">-</div>
 {#----------- Debut formulaire Graphique -------------#}
 <table style="width: 100%">
 <tr><td style="width: 400px;vertical-align: top;padding-right: 10px">
@@ -70,7 +78,7 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
           {{ form.gpr(style="width:100%") }}<br>
           Detailled particle histogram - <span id=dethelpericon class="glyphicon glyphicon-check" style="cursor: pointer" data-html="true" data-placement="bottom" data-content=""></span> <br>
           {{ form.gpd(style="width:100%") }}<br>
-          CTD Data<br>
+          CTD Data - <span id=ctdhelpericon class="glyphicon glyphicon-check" style="cursor: pointer" data-html="true" data-placement="bottom" data-content=""></span> <br>
           {{ form.ctd(style="width:100%") }}<br>
 {# ------- Depth ------------#}
 <div style="width:70%;display: inline-block">
@@ -92,8 +100,10 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
 	</div>
 </div>
 <div >
-  <label class="title">Log Scale on X</label>
-  <input type="checkbox" name="XLog" value="Y">
+  <label class="title">Scale on X : </label>
+  <input type="radio" name="XScale" value="I" checked> Linear
+  - <input type="radio" name="XScale" value="O"> Log
+  - <input type="radio" name="XScale" value="S"> Symlog
 </div>
 
 {# ------- Taxo Filter ------------#}
@@ -230,7 +240,8 @@ function DoSearch(){
     $.getJSON( url, function( data ) {
 {#        $('#ajaxlog').append( "<br>" +data.length+" samples found");#}
         SampleSource.clear();SampleSourceNotVisible.clear();
-        $('#samplecount').text(data.length+" samples");
+        var d = new Date();
+        $('#samplecount').text(data.length+" samples - "+d.toUTCString());
         $.each( data, function(key, val ) {
             var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform([val['long'],val['lat']], 'EPSG:4326','EPSG:3857'))
                       ,psampleid:val['id'] });
@@ -505,6 +516,21 @@ $(function () {
   srcredhelpericon=$("#srcdethelpericon");
   $("#dethelpericon").data('content',srcredhelpericon.html()).popover();
   srcredhelpericon.remove();
+{#  Gestion du popup de selection rapide CTD #}
+  $('body').on("click","#ctdhelpertab td",function () {
+    var begin=parseInt($(this).data('begin'));
+    var i;
+    var gpr=$('#ctd');
+    if(begin===0)
+      gpr.find("option").prop('selected',false);
+    else
+        gpr.find("option").prop('selected',true);
+    $("#ctdhelpericon").popover('hide');
+    gpr.trigger('change');
+  });
+  srcredhelpericon=$("#srcctdhelpericon");
+  $("#ctdhelpericon").data('content',srcredhelpericon.html()).popover();
+  srcredhelpericon.remove();
 });
 </script>
 <div id='MapPopup'></div>
@@ -521,20 +547,20 @@ table.Grille td,table.Grille th{
    border-color:black;
    padding: 2px 3px 2px 3px;
 }
-#redhelpertab td,#dethelpertab td {cursor: pointer; text-decoration: underline;}
+#redhelpertab td,#dethelpertab td,#ctdhelpertab td {cursor: pointer; text-decoration: underline;}
 #formgraphconfig  .popover{  max-width: 100%;  }
 </style>
 <div id="srcredhelpericon">
   <table id="redhelpertab" class="Grille">
     <tr data-type="cl"><th>LPM</th>
       <td  data-begin="1" data-end="15">All</td>
-      <td data-begin="1" data-end="5">Class 1-5</td>
-      <td  data-begin="6" data-end="15">UVP class 6-15</td>
+      <td data-begin="1" data-end="6">Class 1-6</td>
+      <td  data-begin="7" data-end="12">UVP class 7-12</td>
       <td  data-begin="0" data-end="0">None</td></tr>
     <tr data-type="bv"><th>BV</th>
       <td  data-begin="1" data-end="15">All</td>
-      <td data-begin="1" data-end="5">Class 1-5</td>
-      <td  data-begin="6" data-end="15">UVP class 6-15</td>
+      <td data-begin="1" data-end="6">Class 1-6</td>
+      <td  data-begin="7" data-end="12">UVP class 7-12</td>
       <td  data-begin="0" data-end="0">None</td>
     </tr>
   </table>
@@ -552,5 +578,12 @@ table.Grille td,table.Grille th{
       <td  data-begin="18" data-end="45">UVP class 18-45</td>
       <td  data-begin="0" data-end="0">None</td>
     </tr>
+  </table>
+</div>
+<div id="srcctdhelpericon">
+  <table id="ctdhelpertab" class="Grille" style="width: 300px;">
+    <tr >
+      <td  data-begin="1" data-end="45">All</td>
+      <td  data-begin="0" data-end="0">None</td></tr>
   </table>
 </div>
