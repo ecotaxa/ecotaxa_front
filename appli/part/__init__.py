@@ -14,6 +14,8 @@ PartRedClassLimit=[0.001000,0.002000,0.004000,0.008000,0.016000,0.032000,0.06400
 def GetClassLimitTxt(LimitTab,Classe):
     if Classe>=len(LimitTab)-1:
         return '>%.4g mm'%LimitTab[Classe-1]
+    if Classe==0:
+        return '<=%.4g µm' % (LimitTab[0]*1000)
     if LimitTab[Classe]<1:
         txt = '%.4g-%.4g µm' % (LimitTab[Classe - 1]*1000, LimitTab[Classe]*1000)
     else:

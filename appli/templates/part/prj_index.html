@@ -9,9 +9,10 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
 <h4>Project samples dashboard</h4>
 <form action="/part/prjcalc/{{ PrjId }}" method="post" id="FormSamples">
 <table id="tblsample2" class="table table-bordered table-condensed" style="width: auto;">
+ <thead>
   <tr>
-    <th style="text-align: center;">Select<br>
-      <input type="checkbox" id="checkall" onclick="$('#tblsample2 td input').prop('checked',$(this).prop('checked'))" >
+    <th style="text-align: center;">Select
+    <br><input type="checkbox" id="checkall" onclick="$('#tblsample2 td input').prop('checked',$(this).prop('checked'))" >
     </th>
     <th>ID</th>
     <th>profileid</th>
@@ -30,6 +31,7 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
     <th>CTD Import Date</th>
     <th>comment</th>
   </tr>
+</thead><tbody>
 {% for r in dbsample %}
   <tr>
     <td><input type="checkbox" name="s_{{ r['psampleid'] }}" value="Y" ></td>
@@ -51,6 +53,7 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
     <td>{{ r['comment'] }}</td>
   </tr>
   {% endfor %}
+</tbody>
 </table>
 <p >
   <b>Action : </b>
@@ -84,6 +87,12 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
   </div>
 </div>
 <script src="/static/common.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/DataTables-1.10.15/css/dataTables.bootstrap.css"/>
+<style>
+#tblsample2_wrapper {margin-top: -40px;}
+</style>
+<script type="text/javascript" src="/static/DataTables-1.10.15/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="/static/DataTables-1.10.15/js/dataTables.bootstrap.js"></script>
 <script>
   function ProcessDeleteSamples()
   {
@@ -96,4 +105,12 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
     PostDynForm("/part/prjcalc/{{ PrjId }}",postdata);
   }
 
+$(document).ready(function(){
+    $('#tblsample2').DataTable({
+       "paging":   false
+      ,"order": [[ 3, "desc" ]]
+      ,"search": {"smart": true  }
+    });
+
+});
 </script>

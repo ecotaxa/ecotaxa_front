@@ -40,7 +40,8 @@ def CreateOrUpdateSample(pprojid,headerdata):
     Sample.longitude = ConvDegreeMinuteFloatToDecimaldegre(ToFloat(headerdata['longitude']))
     Sample.organizedbydeepth = True
     Sample.acq_descent_filter=True
-    Sample.winddir = int(headerdata['winddir'])
+    Sample.ctd_origfilename=headerdata['ctdrosettefilename']
+    Sample.winddir = int(round(ToFloat(headerdata['winddir'])))
     Sample.winspeed = int(round(ToFloat(headerdata['windspeed'])))
     Sample.seastate = int(headerdata['seastate'])
     Sample.nebuloussness = int(headerdata['nebuloussness'])

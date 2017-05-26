@@ -17,36 +17,12 @@
       </table>
     </td>
     <td class="rightspace aligntop">
-      <p class="TablePrefix">Sample per Particle project</p>
-      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
-        <thead><tr><th>Project</th><th>Count</th></tr></thead>
-        <tbody>
-      {%   for k,v in data.partprojcount.items() %}
-      <tr>  <td> {{ k }}</td>  <td>{{ v }}</td>  </tr>
-      {%  endfor %}
-      </tbody></table>
-    </td>
-    <td class="aligntop">
-      <p class="TablePrefix">Sample per Taxonomy project</p>
-      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
-        <thead><tr><th>Project</th><th>Sample Count</th></tr></thead>
-        <tbody>
-      {%   for k,v in data.taxoprojcount.items() %}
-      <tr>  <td> {{ k }}</td>  <td>{{ v }}</td>  </tr>
-      {%  endfor %}
-      </tbody></table>
-
-    </td>
-  </tr>
-
-  <tr>
-    <td class="rightspace aligntop">
       <p class="TablePrefix">Sample Max depth histogram</p>
       <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
         <thead><tr><th>Depth slice</th><th>Count</th></tr></thead>
         <tbody>
-      {%   for k,v in data.depthhisto.items() %}
-      <tr>  <td> {{ k }}</td>  <td>{{ v }}</td>  </tr>
+      {%   for v in data.depthhisto %}
+      <tr>  <td> {{ v['slice'] }}</td>  <td>{{ v['nbr'] }}</td>  </tr>
       {%  endfor %}
       </tbody></table>
     </td>
@@ -55,11 +31,38 @@
       <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
         <thead><tr><th>Instrument</th><th>Sample Count</th></tr></thead>
         <tbody>
-      {%   for k,v in data.instrumcount.items() %}
-      <tr>  <td> {{ k }}</td>  <td>{{ v }}</td>  </tr>
+      {%   for v in data.instrumcount %}
+      <tr>  <td> {{ v['instrum'] }}</td>  <td>{{ v['nbr'] }}</td>  </tr>
       {%  endfor %}
       </tbody></table>
 
+    </td>
+  </tr>
+
+  <tr>
+
+    <td class="rightspace aligntop" colspan="2">
+      <p class="TablePrefix">Sample per Particle project</p>
+      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
+        <thead><tr><th>Project</th><th>Count</th><th>Data Owner</th><th>Project Manager</th></tr></thead>
+        <tbody>
+      {%   for v in data.partprojcount %}
+      <tr>  <td> {{ v['ptitle'] }}</td>  <td>{{ v['nbr'] }}</td>
+      <td><a href="mailto:{{ v['do_email'] or ""}}">{{ v['do_name'] or "" }}</td>
+      <td><a href="mailto:{{ v['cs_email'] or ""}}">{{ v['cs_name'] or "" }}</td>
+      </tr>
+      {%  endfor %}
+      </tbody></table>
+    </td>
+    <td class="aligntop">
+      <p class="TablePrefix">Sample per Taxonomy project</p>
+      <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
+        <thead><tr><th>Project</th><th>Sample Count</th></tr></thead>
+        <tbody>
+      {%   for v in data.taxoprojcount %}
+      <tr>  <td> {{ v['title'] }}</td>  <td>{{ v['nbr'] }}</td>  </tr>
+      {%  endfor %}
+      </tbody></table>
     </td>
   </tr>
 </table>
