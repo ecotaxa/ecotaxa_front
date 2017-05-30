@@ -44,12 +44,13 @@
     <td class="rightspace aligntop" colspan="2">
       <p class="TablePrefix">Sample per Particle project</p>
       <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
-        <thead><tr><th>Project</th><th>Count</th><th>Data Owner</th><th>Project Manager</th></tr></thead>
+        <thead><tr><th>Project</th><th>Count</th><th>Data Owner</th><th>Project Manager</th><th>Download</th></tr></thead>
         <tbody>
       {%   for v in data.partprojcount %}
       <tr>  <td> {{ v['ptitle'] }}</td>  <td>{{ v['nbr'] }}</td>
       <td><a href="mailto:{{ v['do_email'] or ""}}">{{ v['do_name'] or "" }}</td>
-      <td><a href="mailto:{{ v['cs_email'] or ""}}">{{ v['cs_name'] or "" }}</td>
+      <td><a href="mailto:{{ v['email'] or ""}}">{{ v['name'] or "" }}</td>
+      <td>{{ 'Y' if v['visible'] else 'N' }}</td>
       </tr>
       {%  endfor %}
       </tbody></table>
@@ -60,12 +61,50 @@
         <thead><tr><th>Project</th><th>Sample Count</th></tr></thead>
         <tbody>
       {%   for v in data.taxoprojcount %}
-      <tr>  <td> {{ v['title'] }}</td>  <td>{{ v['nbr'] }}</td>  </tr>
+      <tr>  <td> <a href="/prj/{{ v['projid']}}" target="_blank">{{ v['title'] }}</a></td>  <td>{{ v['nbr'] }}</td>  </tr>
       {%  endfor %}
       </tbody></table>
     </td>
   </tr>
 </table>
 
+<style>
+#taxolist tbody td:nth-child(2),.linklike {cursor: pointer;text-decoration: underline;}
+</style>
+<table>
+  <tr>
+    <td class="rightspace aligntop">
+      <p class="TablePrefix">Classification statistics</p>
+      <table id="taxolist" class='table table-hover table-verycondensed table-bordered' style="width: auto">
+        <thead><tr><th>Classification
+          - <span class=linklike onclick="SelectTaxoList('');">Select All</span>
+          - <span class=linklike onclick="SelectTaxoList('living');">Select living</span>
+          - Check Taxonomy filter to complete the choice of categories
+        </th><th>Graph</th></tr></thead>
+        <tbody>
+      {%   for v in data.taxolist %}
+      <tr>  <td> {{ v['tree'] }}</td>  <td data-id="{{ v['classif_id'] }}" data-nom="{{v['nom'] }}" >select</td>  </tr>
+      {%  endfor %}
+      </tbody></table>
 
+    </td>
+  </tr>
+</table>
+<script>
+  $("#taxolist").on('click','tbody td:nth-child(2)',function () {
+    var id=$(this).data("id");
+    var nom=$(this).data("nom");
+    $("#taxolb").append($('<option>', {value:id, text: nom,selected:true}));
+    $("#taxolb").change();
+  });
+
+function SelectTaxoList(prefix)
+{
+  $("#taxolist tbody tr").each(function () {
+    var txt=$(this).find("td:nth-child(1)").text();
+    if((prefix=='')||(txt.trim().substr(0,prefix.length)==prefix))
+        $(this).find("td:nth-child(2)").click();
+  });
+}
+</script>
 {#  {{ raw }}#}

@@ -136,7 +136,6 @@ def ImportCTD(psampleid,user_name,user_email):
             db.session.commit()
         UvpSample.ctd_desc=EncodeEqualList(ExtraMapping)
         UvpSample.ctd_import_datetime=datetime.datetime.now()
-        # TODO faire le necessaire pour que ça marche dans une tache async sans current_user
         UvpSample.ctd_import_name=user_name
         UvpSample.ctd_import_email = user_email
         db.session.commit()

@@ -126,7 +126,8 @@ Tips for searching a category in the classification hierarchy:
 </ul>
 </p>"
         class="glyphicon glyphicon-question-sign"></span> </label>
-		<a class="pull-right clear" href='javascript:ClearTaxo();'></a>
+		<a class="pull-right clear label label-default" href='javascript:ClearTaxo();' style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" >Clear</a>
+
         <select id="taxolb" name="taxolb" multiple="multiple" style="width: 100%"  autocomplete="off">  </select>
 	</div>
 </div>
@@ -216,6 +217,9 @@ Sum abundance of children categories
     });
 
   });
+  function ClearTaxo(){
+  $( "#taxolb" ).val(null).trigger("change");
+}
 </script>
 </form>
 </div>
