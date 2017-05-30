@@ -34,7 +34,6 @@ File format <select name="fileformatd" >
         <option value="ODV" {{ 'selected' if data.fileformat=='ODV' }} >ODV</option>
         <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
       </select>
-        <br><input type="checkbox" name="excludenotliving" value="Y"> Exclude not living
       </td>
       <td>Particles on 45 class + CTD - Filtered on depth<br>
         Classification: all available + cumulative on their parents
@@ -43,13 +42,15 @@ File format <select name="fileformatd" >
     </tr>
           <tr>
       <td><input type="radio" name="what" value="RAW" {{ 'checked' if data.what=='RAW' }}>RAW</td>
-      <td></td>
+      <td>
+        <input type="checkbox" name="excludenotliving" value="Y"> Exclude not living
+      </td>
       <td>
         Particles: <UL>
         <LI>UVP : RAW compacted Histograms</LI>
         <LI>LISST : Nothing</LI>
         </UL>
-        List of particles<br>
+        List of ecotaxa objets<br>
         CTD files <br>
         Sample list details
 

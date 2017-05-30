@@ -11,7 +11,8 @@ import numpy as np
 from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedColByKey
 from matplotlib.ticker import FuncFormatter, MaxNLocator
 
-DepthTaxoHistoLimit=[0,25,50,75,100,150,200,250,500,750,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,20000,50000]
+DepthTaxoHistoLimit=[0,25,50,75,100,125,150,200,250,300,350,400,450,500,600,700,800,900,1000,1250,1500,1750,2000,2250,2500,2750
+    ,3000,3250,3500,3750,4000,4250,4500,4750,5000,5250,5500,5750,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,20000,50000]
 def GetTaxoHistoLimit(MaxDepth):
     Res=[]
     BreakOnNext=False
@@ -22,6 +23,15 @@ def GetTaxoHistoLimit(MaxDepth):
         if d>MaxDepth:
             BreakOnNext=True
     return Res
+
+def GetTaxoHistoWaterVolumeSQLExpr(field,retval='start'):
+    Res="case "
+    for i in range(1,len(DepthTaxoHistoLimit)):
+        Res +=" when {2}<{0} then {1}".format(DepthTaxoHistoLimit[i]
+                  ,DepthTaxoHistoLimit[i-1] if retval=='start' else (DepthTaxoHistoLimit[i-1]+DepthTaxoHistoLimit[i])/2
+                  ,field)
+    return Res+" end"
+
 
 @app.route('/part/drawchart')
 def part_drawchart():
@@ -177,16 +187,21 @@ def part_drawchart():
 
         # traitement des Graphes TAXO
         if len(gtaxo)>0:
-            sql="select depth y ,1000*nbr/watervolume as x from part_histocat h "
+            # sql = "select depth y ,1000*nbr/watervolume as x from part_histocat h "
+            sql="select depth y ,nbr as x from part_histocat h "
             if gvg('taxochild')=='1':
                 sql += " join taxonomy t0 on h.classif_id=t0.id "
                 for i in range(1,15) :
                     sql += " left join taxonomy t{0} on t{1}.parent_id=t{0}.id ".format(i,i-1)
-            sql += " where psampleid=%(psampleid)s  and ( classif_id = %(taxoid)s and watervolume>0"
+            # sql += " where psampleid=%(psampleid)s  and ( classif_id = %(taxoid)s and watervolume>0"
+            sql += " where psampleid=%(psampleid)s  and ( classif_id = %(taxoid)s "
             if gvg('taxochild') == '1':
                 for i in range(1, 15):
                     sql += " or t{}.id= %(taxoid)s".format(i)
             sql += " ){} order by Y""".format(DepthFilter)
+            sqlWV =""" select {0} tranche,sum(watervolume) from part_histopart_det 
+                    where psampleid=%(psampleid)s {1} group by tranche
+                    """.format(GetTaxoHistoWaterVolumeSQLExpr("depth"),DepthFilter )
             graph=list(range(0,len(gtaxo)))
             for i, c in enumerate(gtaxo):
                 NomTaxo = database.GetAll("""select concat(t.name,' (',p.name,')') nom 
@@ -212,6 +227,8 @@ def part_drawchart():
                 chartid += 1
                 for isample,rs in enumerate(samples):
                     DBData = database.GetAll(sql, {'psampleid': rs['psampleid'],'taxoid':c})
+                    WV=database.GetAssoc2Col(sqlWV, {'psampleid': rs['psampleid']})
+                    # print("{} =>{}".format(rs['psampleid'],WV))
                     if len(DBData)>0:
                         data = np.empty((len(DBData), 2))
                         for rnum,r in enumerate(DBData):
@@ -223,13 +240,31 @@ def part_drawchart():
                         bins=GetTaxoHistoLimit(data[:,0].max())
                         categ=-np.arange(len(bins)-1) #-isample*0.1
                         hist,edge=np.histogram(data[:,0],bins=bins,weights=data[:,1])
+                        # print(hist)
+                        for ih,h in enumerate(hist):
+                            if h>0:
+                                if WV.get(edge[ih],0)>0:
+                                    hist[ih]=1000*h/WV.get(edge[ih])
+                                else: hist[ih]=0
                         # print(hist,edge)
-                        Y=-(edge[:-1]+edge[1:])/2
+                        # Y=-(edge[:-1]+edge[1:])/2 calcul du milieu de l'espace
+                        Y = -edge[:-1]
                         # Y=categ
                         graph[i].step(hist,Y,color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
                         # bottom, top=graph[i].get_ylim()
                         # bottom=min(bottom,categ.min()-1)
                         # graph[i].set_ylim(bottom, top)
+                    bottom, top = graph[i].get_ylim()
+                    if gvg('filt_depthmin'):
+                        top=-float(gvg('filt_depthmin'))
+                    if gvg('filt_depthmax'):
+                        bottom=-float(gvg('filt_depthmax'))
+                    else:
+                        bottom =min(bottom,-max(WV.keys()))
+                    if top>0: top=0
+                    if bottom>=top:bottom=top-10
+                    graph[i].set_ylim(bottom, top)
+        # generation du graphique qui liste les projets
         if len(PrjColorMap) > 1:
             data = np.empty((len(PrjSampleCount), 2))
             PrjLabel=[]

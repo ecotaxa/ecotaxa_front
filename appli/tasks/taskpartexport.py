@@ -9,6 +9,9 @@ from appli.tasks.taskmanager import AsyncTask
 from appli.database import GetAll,GetAssoc
 from appli.part.part_main import GetFilteredSamples
 from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedColByKey
+import appli.part.uvp_sample_import as uvp_sample_import
+from appli.part.drawchart import GetTaxoHistoWaterVolumeSQLExpr
+import bz2,shutil
 
 class TaskPartExport(AsyncTask):
     class Params (AsyncTask.Params):
@@ -47,6 +50,7 @@ class TaskPartExport(AsyncTask):
                         from part_samples s
                         join part_projects p on s.pprojid = p.pprojid
                         where s.psampleid in (%s)
+                        order by s.profileid
                         """ % ((",".join([str(x[0]) for x in self.param.samples])),)
         samples=database.GetAll(sql)
         self.OwnerList = {S['dataowner'] for S in samples}
@@ -63,7 +67,8 @@ class TaskPartExport(AsyncTask):
         logging.info("CreateRED Input Param = %s"%(self.param.__dict__))
         AsODV=(self.param.fileformat=='ODV')
         samples=self.GetSamples()
-        BaseFileName="export_reduced_{0:s}".format(datetime.datetime.now().strftime("%Y%m%d_%H%M") )
+        DTNomFichier = datetime.datetime.now().strftime("%Y%m%d_%H_%M")
+        BaseFileName="export_reduced_{0:s}".format(DTNomFichier )
         self.param.OutFile= BaseFileName+".zip"
         zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
@@ -85,11 +90,13 @@ class TaskPartExport(AsyncTask):
                 left join ({0}) ctd on h.depth=ctd.tranche
                 where psampleid=(%s) {1}
                 order by h.datetime,h.depth """.format(ctdsql,DepthFilter)
+        sqlWV = " select {0} tranche,sum(watervolume) from part_histopart_det where psampleid=%(psampleid)s group by tranche".format(
+            GetTaxoHistoWaterVolumeSQLExpr("depth","middle"))
         logging.info("sql = %s" % sqlhisto)
         logging.info("samples = %s" % samples)
         # -------------------------- Fichier Particules --------------------------------
         if AsODV:
-            nomfichier = BaseFileName + "_part_odv.txt"
+            nomfichier = BaseFileName + "_PAR_odv.txt"
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
             with open(fichier,'w',encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
@@ -122,7 +129,7 @@ class TaskPartExport(AsyncTask):
             zfile.write(nomfichier)
         else:  # -------- Particule TSV --------------------------------
             for S in samples:
-                nomfichier = BaseFileName + "_part_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
+                nomfichier = BaseFileName + "_PAR_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
@@ -155,17 +162,49 @@ class TaskPartExport(AsyncTask):
         # if self.param.redfiltres.get('taxochild','')=='1' and len(TaxoList)>0:
         if len(TaxoList) > 0:
             # c'est la liste des taxo passées en paramètres
-            sqllstcat = """select t.id,concat(t.name,'(',p.name,')') nom, rank() over (order by p.name,t.name)-1 idx
+            sqllstcat = """select t.id,concat(t.name,'('||t1.name||')') nom
+        , rank() over (order by t14.name,t13.name,t12.name,t11.name,t10.name,t9.name,t8.name,t7.name,t6.name,t5.name,t4.name,t3.name,t2.name,t1.name,t.name)-1 idx
+,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
+     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t.name) tree
                         from taxonomy t 
-                        left JOIN taxonomy p on t.parent_id=p.id
+                        left join taxonomy t1 on t.parent_id=t1.id
+                        left join taxonomy t2 on t1.parent_id=t2.id
+                        left join taxonomy t3 on t2.parent_id=t3.id
+                        left join taxonomy t4 on t3.parent_id=t4.id
+                        left join taxonomy t5 on t4.parent_id=t5.id
+                        left join taxonomy t6 on t5.parent_id=t6.id
+                        left join taxonomy t7 on t6.parent_id=t7.id
+                        left join taxonomy t8 on t7.parent_id=t8.id
+                        left join taxonomy t9 on t8.parent_id=t9.id
+                        left join taxonomy t10 on t9.parent_id=t10.id
+                        left join taxonomy t11 on t10.parent_id=t11.id
+                        left join taxonomy t12 on t11.parent_id=t12.id
+                        left join taxonomy t13 on t12.parent_id=t13.id
+                        left join taxonomy t14 on t13.parent_id=t14.id
                         where t.id in ({0})
                         """.format(",".join([str(x) for x in TaxoList]))
             logging.info("sqllstcat = %s" % sqllstcat)
         else:
-            sqllstcat="""select t.id,concat(t.name,'(',p.name,')') nom, rank() over (order by p.name,t.name)-1 idx
+            sqllstcat="""select t.id,concat(t.name,'('||t1.name||')') nom
+            , rank() over (order by t14.name,t13.name,t12.name,t11.name,t10.name,t9.name,t8.name,t7.name,t6.name,t5.name,t4.name,t3.name,t2.name,t1.name,t.name)-1 idx
+,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
+     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t.name) tree
                     from (select distinct classif_id from part_histocat where psampleid in ( {0}) {1} ) cat
                     join taxonomy t on cat.classif_id=t.id
-                    left JOIN taxonomy p on t.parent_id=p.id
+                    left join taxonomy t1 on t.parent_id=t1.id
+                    left join taxonomy t2 on t1.parent_id=t2.id
+                    left join taxonomy t3 on t2.parent_id=t3.id
+                    left join taxonomy t4 on t3.parent_id=t4.id
+                    left join taxonomy t5 on t4.parent_id=t5.id
+                    left join taxonomy t6 on t5.parent_id=t6.id
+                    left join taxonomy t7 on t6.parent_id=t7.id
+                    left join taxonomy t8 on t7.parent_id=t8.id
+                    left join taxonomy t9 on t8.parent_id=t9.id
+                    left join taxonomy t10 on t9.parent_id=t10.id
+                    left join taxonomy t11 on t10.parent_id=t11.id
+                    left join taxonomy t12 on t11.parent_id=t12.id
+                    left join taxonomy t13 on t12.parent_id=t13.id
+                    left join taxonomy t14 on t13.parent_id=t14.id
                     """.format((",".join([str(x[0]) for x in self.param.samples])),DepthFilter)
         if self.param.redfiltres.get('taxochild', '') == '1' and len(TaxoList) > 0:
             sqlTaxoTreeFrom = " \njoin taxonomy t0 on h.classif_id=t0.id "
@@ -182,16 +221,18 @@ class TaskPartExport(AsyncTask):
                 sqlhisto+="""select {1} as classif_id, h.psampleid,h.depth,h.lineno,h.avgesd,h.nbr,h.totalbiovolume ,h.watervolume
                     from part_histocat h {2} 
                     where psampleid=%(psampleid)s {0} {3} """.format(DepthFilter,taxo,sqlTaxoTreeFrom,sqlTaxoTreeWhere)
-            sqlhisto = """select  classif_id,lineno,psampleid,depth,watervolume ,avg(avgesd) avgesd,sum(nbr) nbr,sum(totalbiovolume) totalbiovolume 
-                from ("""+sqlhisto+""" ) q
-                group by classif_id,lineno,psampleid,depth,watervolume
-                order by lineno """
+            sqlhisto = """select classif_id,{0} as tranche ,avg(avgesd) avgesd,sum(nbr) nbr,sum(totalbiovolume) totalbiovolume 
+                from ({1}) q
+                group by classif_id,tranche
+                order by tranche """.format(GetTaxoHistoWaterVolumeSQLExpr('depth','middle'),sqlhisto)
         else:
-            sqlhisto="""select h.* from part_histocat h where psampleid=%(psampleid)s {0}
-                order by lineno """.format(DepthFilter)
+            sqlhisto="""select classif_id,{1} as tranche ,avg(avgesd) avgesd,sum(nbr) nbr,sum(totalbiovolume) totalbiovolume 
+                from part_histocat h where psampleid=%(psampleid)s {0}
+                group by classif_id,tranche
+                order by tranche """.format(DepthFilter,GetTaxoHistoWaterVolumeSQLExpr('depth','middle'))
         lstcat=GetAssoc(sqllstcat)
-        if AsODV:
-            nomfichier = BaseFileName + "_cat_odv.txt"
+        if AsODV: # ------------ RED Categories AS ODV
+            nomfichier = BaseFileName + "_ZOO_odv.txt"
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
             with open(fichier, 'w', encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
@@ -203,7 +244,7 @@ class TaskPartExport(AsyncTask):
                     HeaderSuffix = "w/o children"
                 LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                 for v in LstHead:
-                    f.write(";%s %s[#/L]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s %s[#/m3]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
                     f.write(";%s biovolume %s[ppm]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
@@ -214,56 +255,63 @@ class TaskPartExport(AsyncTask):
                     t = [None for i in range(3 * len(lstcat))]
                     logging.info("sqlhisto = %s ; %s" % (sqlhisto,S["psampleid"]))
                     CatHisto=GetAll(sqlhisto, {'psampleid':S["psampleid"]})
+                    WV = database.GetAssoc2Col(sqlWV, {'psampleid': S["psampleid"]})
                     for i in range(len(CatHisto)):
                         h=CatHisto[i]
                         idx=lstcat[h['classif_id']]['idx']
-                        t[idx]=h['nbr']
+                        WaterVolumeTranche =WV.get(h['tranche'],0)
+                        if WaterVolumeTranche >0:
+                            t[idx] = 1000*h['nbr']/WaterVolumeTranche
+                        else: t[idx] =""
                         t[idx+len(lstcat)] = h['totalbiovolume']
                         t[idx + 2*len(lstcat)] = h['avgesd']
                         EOL=False
                         if (i+1)==len(CatHisto): # Derniere ligne du dataset
                             EOL = True
-                        elif CatHisto[i]['lineno']!=CatHisto[i+1]['lineno']: # on change de ligne
+                        elif CatHisto[i]['tranche']!=CatHisto[i+1]['tranche']: # on change de ligne
                             EOL = True
 
                         if EOL:
-                            L.extend([h['depth'],h['watervolume']])
+                            L.extend([h['tranche'],WaterVolumeTranche])
                             L.extend(t)
                             f.write(";".join((str(ntcv(x)) for x in L)))
                             f.write("\n")
                             t = [None for i in range(3 * len(lstcat))]
                             L=['','','','','','','','','','','']
             zfile.write(nomfichier)
-        else: # ------------ Categories AS TSV
+        else: # ------------ RED Categories AS TSV
             for S in samples:
-                nomfichier = BaseFileName + "_cat_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
+                CatHisto = GetAll(sqlhisto, {'psampleid':S["psampleid"]})
+                if len(CatHisto)==0: continue # on ne genere pas les fichiers vides.
+                nomfichier = BaseFileName + "_ZOO_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
                     LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                     for v in LstHead:
-                        f.write("\t%s[#/L]" % (v['nom']))
+                        f.write("\t%s[#]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s biovolume[ppm]" % (v['nom']))
+                        f.write("\t%s biovolume[ppm]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s avgesd[mm3]" % (v['nom']))
+                        f.write("\t%s avgesd[mm3]" % (v['tree']))
                     f.write("\n")
                     t = [None for i in range(3 * len(lstcat))]
-                    CatHisto = GetAll(sqlhisto, {'psampleid':S["psampleid"]})
+                    WV = database.GetAssoc2Col(sqlWV, {'psampleid': S["psampleid"]})
                     for i in range(len(CatHisto)):
                         h = CatHisto[i]
                         idx = lstcat[h['classif_id']]['idx']
+                        WaterVolumeTranche =WV.get(h['tranche'],0)
                         t[idx] = h['nbr']
                         t[idx + len(lstcat)] = h['totalbiovolume']
                         t[idx + 2 * len(lstcat)] = h['avgesd']
                         EOL = False
                         if (i + 1) == len(CatHisto):  # Derniere ligne du dataset
                             EOL = True
-                        elif CatHisto[i]['lineno'] != CatHisto[i + 1]['lineno']:  # on change de ligne
+                        elif CatHisto[i]['tranche'] != CatHisto[i + 1]['tranche']:  # on change de ligne
                             EOL = True
 
                         if EOL:
-                            L = [S['station'], S['rawfilename'],S['sampledate'],h['depth'], h['watervolume']]
+                            L = [S['station'], S['rawfilename'],S['sampledate'],h['tranche'], WaterVolumeTranche]
                             L.extend(t)
                             f.write("\t".join((str(ntcv(x)) for x in L)))
                             f.write("\n")
@@ -292,7 +340,8 @@ class TaskPartExport(AsyncTask):
         # Prj=partdatabase.part_projects.query.filter_by(pprojid=self.param.pprojid).first()
         logging.info("samples = %s" % (self.param.samples ))
         samples = self.GetSamples()
-        BaseFileName="export_detailled_{0:s}".format(datetime.datetime.now().strftime("%Y%m%d_%H%M") )
+        DTNomFichier = datetime.datetime.now().strftime("%Y%m%d_%H_%M")
+        BaseFileName="export_detailled_{0:s}".format(DTNomFichier)
         self.param.OutFile= BaseFileName+".zip"
         zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
@@ -318,7 +367,7 @@ class TaskPartExport(AsyncTask):
         logging.info("samples = %s" % samples)
         # -------------------------- Fichier Particules --------------------------------
         if AsODV:
-            nomfichier = BaseFileName + "_part_odv.txt"
+            nomfichier = BaseFileName + "_PAR_odv.txt"
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
             with open(fichier,'w',encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
@@ -351,7 +400,7 @@ class TaskPartExport(AsyncTask):
             zfile.write(nomfichier)
         else:  # -------- Particule TSV --------------------------------
             for S in samples:
-                nomfichier = BaseFileName + "_part_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
+                nomfichier = BaseFileName + "_PAR_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
@@ -384,22 +433,13 @@ class TaskPartExport(AsyncTask):
         # liste toutes les cat pour les samples et la depth
         sqllstcat = """select distinct classif_id from part_histocat hc where psampleid in ( {0}) {1} 
                             """.format((",".join([str(x[0]) for x in self.param.samples])), DepthFilter)
-        if len(TaxoList) > 0: # il faut restreindre à certains taxon
-            InTaxoList=",".join([str(x) for x in TaxoList])
-            if self.param.redfiltres.get('taxochild', '') == '1': # avec enfant
-                sqlTaxoTreeFrom = " \njoin taxonomy t0 on hc.classif_id=t0.id "
-                for i in range(1, 15):
-                    sqlTaxoTreeFrom += " \nleft join taxonomy t{0} on t{1}.parent_id=t{0}.id ".format(i, i - 1)
-                sqllstcat=sqllstcat.replace(" hc"," hc"+sqlTaxoTreeFrom)
-                sqllstcat += " and ( 0=1 "
-                for taxo in TaxoList:
-                    sqllstcat +=" or hc.classif_id = {}  ".format(taxo)
-                    for i in range(1, 15):
-                        sqllstcat += " or t{0}.id= {1}".format(i,taxo)
-                sqllstcat += ")"
-
-            else: # sans enfant
-                sqllstcat+=" classif_id in ({0})".format(InTaxoList)
+        if self.param.excludenotliving: # On ne prend que ceux qui ne sont pas desendant de not-living
+            sqlTaxoTreeFrom = " \njoin taxonomy t0 on hc.classif_id=t0.id "
+            for i in range(1, 15):
+                sqlTaxoTreeFrom += " \nleft join taxonomy t{0} on t{1}.parent_id=t{0}.id ".format(i, i - 1)
+            sqllstcat=sqllstcat.replace(" hc"," hc"+sqlTaxoTreeFrom)
+            for i in range(0, 15):
+                sqllstcat += " and (t{0}.id is null or t{0}.name!='not-living') ".format(i)
 
         logging.info("sqllstcat = %s" % sqllstcat)
         lstcatwhere = GetAll(sqllstcat)
@@ -414,11 +454,11 @@ select distinct tlink.parent_id
 from th join taxonomy tlink on tlink.id=th.id
 where tlink.parent_id is not null
 )
-select id,nom,rank() over (order by tree)-1 idx
+select id,nom,rank() over (order by tree)-1 idx,tree
 from (
 SELECT t0.id,concat(t0.name,'('||t1.name||')') nom
-,concat(t14.name||'/',t13.name||'/',t12.name||'/',t11.name||'/',t10.name||'/',t9.name||'/',t8.name||'/',t7.name||'/',
-     t6.name||'/',t5.name||'/',t4.name||'/',t3.name||'/',t2.name||'/',t1.name||'/',t0.name) tree
+,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
+     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) tree
 from
 (select distinct * from th) thd
 join taxonomy t0 on thd.id=t0.id
@@ -458,7 +498,7 @@ order by tree""".format(lstcatwhere)
         """.format(sqlhisto)
         sqlhisto+=" order by lineno"
         if AsODV:
-            nomfichier = BaseFileName + "_cat_odv.txt"
+            nomfichier = BaseFileName + "_ZOO_odv.txt"
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
             with open(fichier, 'w', encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
@@ -471,7 +511,7 @@ order by tree""".format(lstcatwhere)
                 HeaderSuffix = ""
                 LstHead=sorted(lstcat.values(),key=lambda cat:cat['idx'])
                 for v in LstHead:
-                    f.write(";%s %s[#/L]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s %s[#/m3]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
                     f.write(";%s biovolume %s[ppm]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
@@ -485,7 +525,9 @@ order by tree""".format(lstcatwhere)
                     for i in range(len(CatHisto)):
                         h=CatHisto[i]
                         idx=lstcat[h['classif_id']]['idx']
-                        t[idx]=h['nbr']
+                        if h['watervolume'] and h['watervolume']>0:
+                            t[idx] = h['nbr']*1000/h['watervolume']
+                        else: t[idx] =""
                         t[idx+len(lstcat)] = h['totalbiovolume']
                         t[idx + 2*len(lstcat)] = h['avgesd']
                         EOL=False
@@ -504,24 +546,24 @@ order by tree""".format(lstcatwhere)
             zfile.write(nomfichier)
         else: # ------------ Categories AS TSV
             for S in samples:
-                nomfichier = BaseFileName + "_cat_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
+                nomfichier = BaseFileName + "_ZOO_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
                     LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                     for v in LstHead:
-                        f.write("\t%s[#/L]" % (v['nom']))
+                        f.write("\t%s[#]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s biovolume[ppm]" % (v['nom']))
+                        f.write("\t%s biovolume[ppm]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s avgesd[mm3]" % (v['nom']))
+                        f.write("\t%s avgesd[mm3]" % (v['tree']))
                     f.write("\n")
                     t = [None for i in range(3 * len(lstcat))]
                     CatHisto = GetAll(sqlhisto, {'psampleid':S["psampleid"]})
                     for i in range(len(CatHisto)):
                         h = CatHisto[i]
                         idx = lstcat[h['classif_id']]['idx']
-                        t[idx] = h['nbr']
+                        t[idx]
                         t[idx + len(lstcat)] = h['totalbiovolume']
                         t[idx + 2 * len(lstcat)] = h['avgesd']
                         EOL = False
@@ -548,19 +590,142 @@ order by tree""".format(lstcatwhere)
                 for S in samples:
                     L = [S['station'],S['cruise'], S['site'],  S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude']
-                         ,BaseFileName + "_part_"+S['station']+".tsv"
-                        , BaseFileName + "_cat_" + S['station'] + ".tsv"]
+                         ,BaseFileName + "_PAR_"+S['station']+".tsv"
+                        , BaseFileName + "_ZOO_" + S['station'] + ".tsv"]
                     f.write("\t".join((str(ntcv(x)) for x in L)))
                     f.write("\n")
             zfile.write(nomfichier)
+    def CreateRAW(self):
+        logging.info("CreateRAW Input Param = %s"%(self.param.__dict__,))
+        logging.info("samples = %s" % (self.param.samples ))
+        DTNomFichier=datetime.datetime.now().strftime("%Y%m%d_%H_%M")
+        BaseFileName="export_raw_{0:s}".format(DTNomFichier)
+        self.param.OutFile= BaseFileName+".zip"
+        zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
+                                , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+        sql="""select s.*
+          ,pp.ptitle,pp.rawfolder,pp.ownerid,pp.projid,pp.instrumtype,pp.op_name,pp.op_email,pp.cs_name,pp.cs_email
+          ,pp.do_name,pp.do_email,pp.prj_info,pp.prj_acronym,pp.cruise,pp.ship,pp.default_instrumsn,pp.default_depthoffset
+          ,(select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo
+          ,(select count(*) from part_ctd where psampleid=s.psampleid) nbrlinectd
+          ,p.mappingobj
+        from part_samples s
+        join part_projects pp on s.pprojid=pp.pprojid
+        LEFT JOIN projects p on pp.projid=p.projid
+        where s.psampleid in (%s)
+        order by s.profileid
+        """ % ((",".join([str(x[0]) for x in self.param.samples])),)
+        samples=GetAll(sql)
+        cols=('psampleid','pprojid','profileid','filename','sampleid','latitude','longitude','organizedbydeepth','histobrutavailable',
+'qualitytaxo','qualitypart','daterecalculhistotaxo','winddir','winspeed','seastate','nebuloussness','comment','stationid','firstimage',
+'lastimg','lastimgused','bottomdepth','yoyo','sampledate','op_sample_name','op_sample_email','ctd_desc','ctd_origfilename','ctd_import_name',
+'ctd_import_email','ctd_import_datetime','ctd_status','instrumsn','acq_aa','acq_exp','acq_volimage','acq_depthoffset','acq_pixel','acq_shutterspeed',
+'acq_smzoo','acq_exposure','acq_gain','acq_filedescription','acq_eraseborder','acq_tasktype','acq_threshold','acq_choice','acq_disktype',
+'acq_smbase','acq_ratio','acq_descent_filter','acq_presure_gain','acq_xsize','acq_ysize','acq_barcode','proc_datetime','proc_gamma','proc_soft',
+'lisst_zscat_filename','lisst_kernel','txt_data01','txt_data02','txt_data03','txt_data04','txt_data05','txt_data06','txt_data07','txt_data08',
+'txt_data09','txt_data10','ptitle','rawfolder','ownerid','projid','instrumtype','op_name','op_email','cs_name','cs_email','do_name','do_email',
+'prj_info','prj_acronym','cruise','ship','default_instrumsn','default_depthoffset')
+        nomfichier = BaseFileName + "_sum.tsv"
+        fichier = os.path.join(self.GetWorkingDir(), nomfichier)
+        with open(fichier, 'w', encoding='latin-1') as f:
+            f.write("\t".join(cols)+"\tParticle filename\tCTD filename\tCategory filename\n")
+            for S in samples:
+                L=[S[c] for c in cols]
+                for i,v in enumerate(L):
+                    if isinstance(v,str):
+                        L[i]='"'+v.replace('\n','$')+'"'
+                # L = [str(S[c]).replace('\n','$') for c in cols]
+                L.extend(
+                    [
+                    "{0}_{1}_PAR_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier ) if S['histobrutavailable'] else None,
+                    "{0}_{1}_CTD_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier) if S['nbrlinectd'] else None,
+                    "{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier) if S['nbrlinetaxo'] else None
+                        ])
+                f.write("\t".join((str(ntcv(x)) for x in L)))
+                f.write("\n")
+        zfile.write(nomfichier)
+        for S in samples:
+            if S['histobrutavailable'] and S['instrumtype']=='uvp5':
+                nomfichier="{0}_{1}_PAR_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier )
+                fichier = os.path.join(self.GetWorkingDir(), nomfichier)
+                raworigfile= uvp_sample_import.GetPathForRawHistoFile(S['psampleid'])
+                with bz2.open(raworigfile,'rb') as rf,open(fichier,"wb") as rawtargetfile:
+                    shutil.copyfileobj(rf,rawtargetfile)
+                zfile.write(nomfichier)
+                os.unlink(nomfichier)
+        for S in samples:
+            if S['nbrlinectd'] > 0:
+                nomfichier="{0}_{1}_CTD_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier)
+                fichier = os.path.join(self.GetWorkingDir(), nomfichier)
+                with open(fichier,"wt") as f:
+                    res=GetAll("select * from part_ctd where psampleid=%s ORDER BY lineno",(S['psampleid'],))
+                    cols=sorted(CTDFixedColByKey.keys())
+                    colsname=["depth","datetime"]+[CTDFixedColByKey[x] for x in cols]
+                    cols=["depth","datetime"] +cols
+                    CtdCustomCols=DecodeEqualList(S['ctd_desc'])
+                    CtdCustomColsKeys=sorted(['extrames%s' % x for x in CtdCustomCols.keys()])
+                    cols.extend(CtdCustomColsKeys)
+                    colsname.extend([CtdCustomCols[x[-2:]] for x in CtdCustomColsKeys])
+
+                    f.write("\t".join(colsname) + "\n")
+                    for R in res:
+                        L = [R[c] for c in cols]
+                        f.write("\t".join((str(ntcv(x)) for x in L)))
+                        f.write("\n")
+                zfile.write(nomfichier)
+        for S in samples:
+            if S['nbrlinetaxo'] > 0:
+                TaxoReverseMapping ={v:k for k,v in DecodeEqualList(ntcv(S['mappingobj'])).items()}
+                nomfichier="{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier)
+                fichier = os.path.join(self.GetWorkingDir(), nomfichier)
+                with open(fichier,"wt") as f:
+                    res=GetAll("""select of.*
+                        ,concat(t0.name,'('||t1.name||')') as "name"                         
+                        ,(oh.depth_min+oh.depth_max)/2 as depth,objid
+                        ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
+     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) taxo_hirerarchy
+                      from part_samples ps
+                      join obj_head oh on ps.sampleid=oh.sampleid
+                      join obj_field of on of.objfid=oh.objid                      
+                        join taxonomy t0 on oh.classif_id=t0.id
+                        left join taxonomy t1 on t0.parent_id=t1.id
+                        left join taxonomy t2 on t1.parent_id=t2.id
+                        left join taxonomy t3 on t2.parent_id=t3.id
+                        left join taxonomy t4 on t3.parent_id=t4.id
+                        left join taxonomy t5 on t4.parent_id=t5.id
+                        left join taxonomy t6 on t5.parent_id=t6.id
+                        left join taxonomy t7 on t6.parent_id=t7.id
+                        left join taxonomy t8 on t7.parent_id=t8.id
+                        left join taxonomy t9 on t8.parent_id=t9.id
+                        left join taxonomy t10 on t9.parent_id=t10.id
+                        left join taxonomy t11 on t10.parent_id=t11.id
+                        left join taxonomy t12 on t11.parent_id=t12.id
+                        left join taxonomy t13 on t12.parent_id=t13.id
+                        left join taxonomy t14 on t13.parent_id=t14.id                                           
+                      where ps.psampleid=%s""",(S['psampleid'],))
+                    cols=['orig_id','objid','name','taxo_hirerarchy','depth']
+                    extracols=('area','minor','major','mean')
+                    colsname=cols[:]
+                    colsname.extend(['area [pixel]','minor [pixel]','major [pixel]','mean [8 bits]'])
+                    cols.extend([TaxoReverseMapping.get(x,None) for x in extracols])
+                    f.write("\t".join(colsname) + "\n")
+                    for R in res:
+                        L = [R[c] if c else '' for c in cols]
+                        f.write("\t".join((str(ntcv(x)) for x in L)))
+                        f.write("\n")
+                zfile.write(nomfichier)
+
+
 
 
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__,))
         if self.param.what=="RED":
             self.CreateRED()
-        elif self.param.what=="DET":
+        elif self.param.what == "DET":
             self.CreateDET()
+        elif self.param.what == "RAW":
+            self.CreateRAW()
         else:
             raise Exception("Unsupported exportation type : %s"%(self.param.what,))
 
