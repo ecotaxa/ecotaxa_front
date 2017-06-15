@@ -30,7 +30,7 @@ def part_prj():
         params['filt_instrum']=gvg('filt_instrum')
     sql+=" order by lower(ep.title),lower(ptitle)"
     res = GetAll(sql,params) #,debug=True
-    app.logger.info("res=%s",res)
+    # app.logger.info("res=%s",res)
     CanCreate=False
     if current_user.has_role(database.AdministratorLabel):
         CanCreate=True

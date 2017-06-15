@@ -6,7 +6,23 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
 <a href="/part/prj/" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-arrow-left"></span> Back to project list</a>
 
 
-<h4>Project samples dashboard</h4>
+<h4>Project samples dashboard <a href="#general-help" data-toggle="collapse" class="help"> </a></h4>
+<div id="general-help" class="collapse panel panel-default" style="width: 800px;margin-left: 50px;">
+  <div class="panel-body">
+INFORMATIONS :<br>
+This dashboard permits to : <br>
+* control the status of the imported samples<br>
+* to edit metadata from individual samples<br>
+* to reprocess histograms, match ecotaxa samples, re-compute taxonomy histogram or import CTD data after you<br>
+ - modify metadata<br>
+ - associate an Ecotaxa project<br>
+ - annotate vignettes in Ecotaxa<br>
+ - modify the CTD files<br>
+* to remove all or selected samples from the project<br>
+DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING OPERATIONS
+
+  </div>
+</div>
 <form action="/part/prjcalc/{{ PrjId }}" method="post" id="FormSamples">
 <table id="tblsample2" class="table table-bordered table-condensed" style="width: auto;">
  <thead>

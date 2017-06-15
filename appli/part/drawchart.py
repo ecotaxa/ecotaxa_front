@@ -46,7 +46,7 @@ def part_drawchart():
         gctd = request.args.getlist('ctd')
         gtaxo = request.args.getlist('taxolb')
         NbrChart=len(gpr)+len(gpd)+len(gctd)+len(gtaxo)
-        samples=umain.GetFilteredSamples(GetVisibleOnly=False)
+        samples=umain.GetFilteredSamples(GetVisibleOnly=True,RequiredPartVisibility='V')
         for S in samples:
             if S['pprojid'] not in PrjColorMap:
                 PrjColorMap[S['pprojid']]=Couleurs[len(PrjColorMap)%len(Couleurs)]
@@ -226,8 +226,11 @@ def part_drawchart():
                 ##graph[i].set_yticks(np.arange(0,-20,-1))
                 chartid += 1
                 for isample,rs in enumerate(samples):
-                    DBData = database.GetAll(sql, {'psampleid': rs['psampleid'],'taxoid':c})
-                    WV=database.GetAssoc2Col(sqlWV, {'psampleid': rs['psampleid']})
+                    if rs['visibility'][1]>='V': # Visible ou exportable
+                        DBData = database.GetAll(sql, {'psampleid': rs['psampleid'],'taxoid':c})
+                        WV=database.GetAssoc2Col(sqlWV, {'psampleid': rs['psampleid']})
+                    else: # si pas le droit, on fait comme s'il n'y avait pas de données.
+                        DBData=WV=[]
                     # print("{} =>{}".format(rs['psampleid'],WV))
                     if len(DBData)>0:
                         data = np.empty((len(DBData), 2))

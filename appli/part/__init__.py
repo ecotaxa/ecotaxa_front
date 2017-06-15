@@ -49,3 +49,14 @@ CTDFixedCol={
 CTDFixedColByKey={v:k for k,v in CTDFixedCol.items()}
 
 LstInstrumType=('uvp5','lisst')
+
+def GetPartClassLimitListText(LimitTab):
+    res=""
+    for i in range(len(LimitTab)-1):
+        if i==0:
+            res='%.4g µm' % (LimitTab[0]*1000)
+        elif LimitTab[i]<1:
+            res += ', %.4g µm' % (LimitTab[i]*1000)
+        else:
+            res +=', %.4g mm'%(LimitTab[i])
+    return res

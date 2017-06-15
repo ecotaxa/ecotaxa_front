@@ -12,7 +12,12 @@
     {{ "<tr>"|safe if 'o' in kwargs.get('tr','oc')  }}
     <td class="{% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}  ">
         {% if (field.type != 'HiddenField' and field.type !='CSRFTokenField') and label_visible %}
-            <label for="{{ field.id }}" class="control-label">{{ field.label }}  {% if field.flags.required %} <span style="font-weight: bold;color: red;">*</span> {% endif %} </label>
+            <label for="{{ field.id }}" class="control-label"
+                   {% if kwargs.get('help') %} data-toggle="popover" data-placement="right" data-content="{{ kwargs.get('help') }}" data-html="true"{% endif %}
+            >{{ field.label }}
+              {% if kwargs.get('help') %} <span class="glyphicon glyphicon-info-sign"></span> {% endif %}
+              {% if field.flags.required %} <span style="font-weight: bold;color: red;">*</span> {% endif %}
+            </label>
         {% endif %}
     </td><td {{ "colspan="+(kwargs.pop('colspan')|string) if kwargs.get('colspan') }} >
 {#        {{ field(class_='form-control', **kwargs) }}#}
@@ -106,10 +111,49 @@
  #edittab {margin: 10px;}
  #edittab td:nth-child(2n+1) {width: 200px;padding-right: 15px;padding-left:5px;}
 </style>
+
+
 <form method="POST" role="form" class="">
 <table id="edittab">
+  <tr>
+    <td colspan="4">
+<a href="#create-project" data-toggle="collapse"><b>DATA organization <span class="glyphicon glyphicon-info-sign"></span></a></p>
+<div id="create-project" class="collapse panel panel-default">
+  <div class="panel-body">
+    <p><b>Underwater Vision Profiler (UVP) :</b>
+      <ul>
+<li>PARTICLE and CTD data: the data must be organized in a « Zooprocess » architecture:
+<ul>
+<li>Instrument parameters : « uvp5_configuration_data.txt » in « :\uvp5_snXXX_cruise\config\UVP5_Settings\ »</li>
+<li>Cruise information and data ownership : « cruise_info.txt » in « :\uvp5_snXXX_cruise\config\</li>
+<li>Sample (profile) metadata : « uvp5_header_snXXX_cruise.txt » in « :\uvp5_snXXX_cruise\meta\ » : THIS FILE MUST ABSOLUTELY EXIST to IMPORT YOUR DATA.</li>
+<li>Particle UVP data files (*.bru, *.dat & *.hdr) will be accessed by the application in :
+  <ul>
+    <li>« :\uvp5_snXXX_cruise\raw\ »</li>
+    <li>« :\uvp5_snXXX_cruise\work\ » if processed by Zooprocess</li>
+    <li>« :\uvp5_snXXX_cruise\results\ » if processed by Zooprocess and not present in the previous folders</li>
+  </ul></li>
+<li>CTD data (optional) in « :\uvp5_snXXX_cruise\ctd_data_cnv\ » (see the import page about formating CTD data for importation)</li>
+  </ul>
+<li>Zooplancton and detritus images : the data must be organized in a « Zooprocess » architecture:
+Processed images and associated TSV files will be imported separately from the « :\uvp5_snXXX_cruise\work\ » folder into the ECOTAXA associated project (not in this Particle module)
+    </ul>
+<b>LISST :</b><ul>
+<li>PARTICLE and CTD data: the data must be organized in a « Zooprocess » architecture:
+  <ul>
+    <li>Cruise information and data ownership : « cruise_info.txt » in « :\lisst_snXXX_cruise\config\</li>
+    <li>Sample (profile) metadata : « lisst_header_snXXX_cruise.txt » in « :\lisst_snXXX_cruise\meta\ »</li>
+    <li>Particle UVP data (*.asc) will be accessed by the module in : « :\uvp5_snXXX_cruise\work\ »</li>
+  </ul>
+    <li>CTD data (optional) in « :\lisst_snXXX_cruise\ctd_data_cnv\ » (see the import page about formating CTD data for importation)</li>
+    </ul>
+</p>
+</div></div>
+
+    </td>
+  </tr>
 {{ render_field(form.ptitle,tr='oc',style="width:450px;",colspan=3) }}
-<tr><td > <label for="rawfolder" class="control-label">Raw folder</label></td><td colspan="3">
+<tr><td > <label for="rawfolder" class="control-label"><a href="#info2" data-toggle="collapse" style="color: black">Root folder <span class="glyphicon glyphicon-info-sign"></span></a></label></td><td colspan="3">
   <div class="input-group" style="width: 700px;">
     <input type="text" class="form-control" id="ServerPath" name="rawfolder" value="{{ form.rawfolder.data or "" }}" onchange="ServerPathChange()">
     <span class="input-group-btn">
@@ -119,30 +163,39 @@
             Read Metadata</button>
     </span>
 </div>
+  <div id="info2" class="collapse panel panel-default">
+  <div class="panel-body">
+    SELECT the UVP or LISST root folder from the drive (request FTP permission from the application manager to load your projects or load data from a local drive).
+<br> Press "Read Metadata" button to read the « cruise_info.txt » file again
+  </div></div>
+
 </td></tr>
-{{ render_field(form.ownerid,tr='oc',colspan=3) }}
-{{ render_field(form.projid,tr='oc',colspan=3) }}
-{{ render_field(form.instrumtype,tr='o') }}
-{{ render_field(form.default_instrumsn,tr='c') }}
-{{ render_field(form.op_name,tr='o') }}
+{{ render_field(form.ownerid,tr='oc',colspan=3,help="name of the unique manager of the project, to be selected in the ECOTAXA user list. The project owner will manage the permissions in relation to the permissions of the associated Ecotaxa project (if the project exists)") }}
+{{ render_field(form.projid,tr='oc',colspan=3,help="associated project where you will import the images from the « work » folders. <br>You can create a new associated project here.") }}
+{{ render_field(form.instrumtype,tr='o',help="selected from the root folder name<br><b>MUST BE :</b> uvp5 or lisst") }}
+{{ render_field(form.default_instrumsn,tr='c',help="selected from the root folder name") }}
+{{ render_field(form.op_name,tr='o',help="people who managed the acquisition of the data") }}
 {{ render_field(form.op_email,tr='c') }}
-{{ render_field(form.cs_name,tr='o') }}
+{{ render_field(form.cs_name,tr='o',help="people who conducted the cruise") }}
 {{ render_field(form.cs_email,tr='c') }}
-{{ render_field(form.do_name,tr='o') }}
+{{ render_field(form.do_name,tr='o',help="people who own the dataset, important for publication permissions") }}
 {{ render_field(form.do_email,tr='c') }}
-{{ render_field(form.prj_acronym,tr='o') }}
-{{ render_field(form.default_depthoffset,tr='c') }}
-{{ render_field(form.cruise,tr='o') }}
+{{ render_field(form.prj_acronym,tr='o',help="free field (e.g., as filled in the cruise_info.txt file)") }}
+{{ render_field(form.default_depthoffset,tr='c',help="vertical distance between the pressure sensor and the sampled/imaged zone of the instrument") }}
+{{ render_field(form.cruise,tr='o',help="selected from the root folder name") }}
 {{ render_field(form.ship,tr='c') }}
-{{ render_field(form.prj_info,tr='oc',colspan=3,style="width:500px;") }}
+{{ render_field(form.prj_info,tr='oc',colspan=3,style="width:500px;",help="read from the cruise_info.txt file") }}
 
 
     <tr>
         <td colspan="4">
 <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>
-<a href="/part/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
+
 {% if prjid>0 %}
+    <a href="/part/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
     <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove project</button>
+{% else %}
+  <a href="/part/prj/" class="btn btn-warning"> Cancel</a>
 {% endif %}
         </td>
     </tr>
@@ -192,6 +245,7 @@ $(document).ready(function() {
         {# Pour eviter les conflit sur le jstree suite à des ouverture successive car le jstree est dans la modal cachée #}
         $("#FileModalBody").html("Loading...").load("/common/ServerFolderSelect");
     });
+    $('[data-toggle="popover"]').popover();
 });
 function ReadMeta() {
     $.getJSON( "/part/readprojectmeta",{path:$("#ServerPath").val()}, function( data ) {

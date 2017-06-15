@@ -7,26 +7,55 @@
 <div style="margin: 3px;">
 
 <h2>Particle ZooScan folder Importation Task</h2>
+<p> This task does the following operations :</p>
+  <ul>
+    <li>Parse the meta/xxxx_header_xxx.txt file to get the list of available sample and show list of availables and already imported ones</li>
+    <li>Create sample if not exists</li>
+    <li>Import metadata in the sample</li>
+    <li>Generate the Raw Particle histogram from BRU files</li>
+    <li>Generate the Detailled and reduced Particle histogram</li>
+    <li><a href="#general-help" data-toggle="collapse" class="help">Import CTD</a></li>
+  </ul>
+  <p>The purpose of "Load only metadata" checkbox is to just reload metadata of sample</p>
 
-<div class="help-block">
-	<div class="row">
-		<div class="col-sm-12">
-			<p><a href="#general-help" data-toggle="collapse" class="help">General help</a></p>
-			<div id="general-help" class="collapse">
-			<p> This task does the following operations :</p>
-        <ul>
-          <li>Parse the meta/xxxx_header_xxx.txt file to get the list of available sample and show list of availables and already imported ones</li>
-          <li>Create sample if not exists</li>
-          <li>Import metadata in the sample</li>
-          <li>Generate the Raw Particle histogram from BRU files</li>
-          <li>Generate the Detailled and reduced Particle histogram</li>
-          <li>Import CTD</li>
-        </ul>
-        <p>The purpose of "Load only metadata" checkbox is to just reload metadata of sample</p>
-			</div>
-		</div>
-	</div>
+
+<div id="general-help" class="collapse panel panel-default" style="width: 800px;margin-left: 50px;">
+  <div class="panel-body">
+<b>IMPORTANT NOTE on the format  of CTD data files to be imported:</b><br>
+This Particle module is not an application designed to handle diverse CTD file formats. If you want to import CTD data along with particle/zooplankton data, you must format the files according to the following rules :<br>
+- One file per sample/profile<br>
+- File location : ctd_data_cnv folder of the « Zooprocess » project<br>
+- Filename : profileid.ctd (the same profileid as the one documented in the *_header_*.txt file)<br>
+- Separator : Tab<br>
+- Column titles : We have defined a list of standard column names. We DO RECOMMEND to respect this standard to allow displaying your data with the data from other projects. You may anyhow use other names for other parameters. The Pressure column is mandatory for vertical profiles. The list of pre-defined column names is :
+<p style=" white-space: pre; margin-left: 50px; ">Chloro Fluo [mg Chl/m3]
+Conductivity [mS/cm]
+Cpar [%]
+Depth [salt water, m]
+Fcdom factory [ppb QSE]
+In situ Density Anomaly [kg/m3]
+Neutral Density [kg/m3]
+Nitrate [µmol/l]
+Oxygen [µmol/kg]
+Oxygen [ml/l]
+PAR [µmol m-2 s-1]
+Part backscattering coef 470 nm [m-1]
+Pot. Temperature [degC] (any ref.)
+Potential Density Anomaly [kg/m3]
+Potential Temperature [degC]
+Practical Salinity [psu]
+Practical Salinity from Conductivity
+<b>Pressure in Water Column [db] => MANDATORY for DEPTH PROFILES</b>
+QC Flag
+Sound Speed c [m/s]
+SPAR [µmol m-2 s-1]
+Temperature [degC]
+<b>Time [yyyymmddhhmmssmmm] => MANDATORY FOR TIME DISPLAY</b>
+</p>
+  </div>
 </div>
+
+
 <p>Import folder : {{ data.DossierUVP }}</p>
 <form class="form" method="post" >
 <style>

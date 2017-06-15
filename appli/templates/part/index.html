@@ -11,7 +11,9 @@
 
 <div id="particleinfodiv" class="panel panel-default" style="margin-left: 200px;margin-right: 200px;display: none;">
   <div class="panel-body">
-    Particle module informations
+    Welcome to the "Particle module of Ecotaxa"
+    <br>Module description :
+    <br>Data use :
   </div>
 </div>
 
@@ -29,34 +31,47 @@
   <tr><td></td>
     <td>
 <table style="width:100%;" id="geofilter">
-  <tr><td colspan="2" style="padding-left: 40px;">North <input type="text" class="form-control" id="MapOutN"  name="MapN">
+  <tr><td colspan="2" style="padding-left: 40px;">North <input type="text" class="form-control" id="MapOutN"  name="MapN" value="{{ reqfields['MapN'] }}">
   <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="DrawInputOnMap();">Draw On Map</button>
   </td></tr>
   <tr >
-    <td style="padding: 2px;white-space: nowrap;">West <input type="text" class="form-control" id="MapOutW" name="MapW"></td>
-    <td>East <input type="text" class="form-control" id="MapOutE" name="MapE"></td></tr>
-  <tr><td colspan="2" style="padding-left: 40px;">South <input type="text" class="form-control" id="MapOutS" name="MapS">
+    <td style="padding: 2px;white-space: nowrap;">West <input type="text" class="form-control" id="MapOutW" name="MapW" value="{{ reqfields['MapW'] }}"></td>
+    <td>East <input type="text" class="form-control" id="MapOutE" name="MapE" value="{{ reqfields['MapE'] }}"></td></tr>
+  <tr><td colspan="2" style="padding-left: 40px;">South <input type="text" class="form-control" id="MapOutS" name="MapS" value="{{ reqfields['MapS'] }}">
     <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="ClearGeoFilter();">Clear</button>
   </td></tr>
 </table>
 
     </td>
   </tr>
-  <tr><td>Date between</td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_fromdate" name="filt_fromdate"  autocomplete="off" placeholder="Begin">
-		and <input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_todate" name="filt_todate"  autocomplete="off" placeholder="End">
+  <tr><td>Date between</td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_fromdate" name="filt_fromdate"  autocomplete="off" placeholder="Begin" value="{{ reqfields['filt_fromdate'] }}">
+		and <input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_todate" name="filt_todate"  autocomplete="off" placeholder="End" value="{{ reqfields['filt_todate'] }}">
   <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="ClearDateFilter();">Clear</button>
   </td></tr>
-  <tr><td>Instrument  </td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_instrum" name="filt_instrum"  autocomplete="off" ></td></tr>
+  <tr><td>Instrument  </td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_instrum" name="filt_instrum"  autocomplete="off" value="{{ reqfields['filt_instrum'] }}"></td></tr>
   <tr><td>Profile type </td><td>{{ form.filt_proftype(style="width:100px") }}</td></tr>
   <tr><td>Ecotaxa Project </td><td>{{ form.filt_proj(style="width:100%") }}</td></tr>
   <tr><td>Particle Project </td><td>{{ form.filt_uproj(style="width:100%") }}</td></tr>
 </table>
+<div style="margin-top: 5px">
+  <button type="button" id="btfilt" class="btn btn-primary" onclick="DoSearch()" style="width: 140px;"><span class="glyphicon glyphicon-search"></span> Apply filters</button>
+  <button type="button" id="btfilt" class="btn btn-primary" onclick="DisplayAll()" style="width: 200px;"><span class="glyphicon glyphicon-erase"></span> Display all </button>
 <br>
-  <button type="button" id="btfilt" class="btn btn-primary" onclick="DoSearch()"><span class="glyphicon glyphicon-search"></span> Search samples</button>
-  <button type="button" id="btfilt" class="btn btn-primary" onclick="DisplayAll()"><span class="glyphicon glyphicon-erase"></span> Display all profile (Clear selection)</button>
+  <button type="button" id="btfilt" class="btn btn-primary" onclick="DoExport()" style="margin-top: 5px;width: 140px;"><span class="glyphicon glyphicon-export"></span> Export selection</button>
+  <button type="button" id="btfilt" class="btn btn-primary" onclick="ShowStat()" style="margin-top: 5px;width: 200px;"><span class="glyphicon glyphicon-signal"></span> Display selection statistics</button>
 <br>
-  <button type="button" id="btfilt" class="btn btn-primary" onclick="DoExport()" style="margin-top: 5px;"><span class="glyphicon glyphicon-export"></span> Samples data export</button>
-  <button type="button" id="btfilt" class="btn btn-primary" onclick="ShowStat()" style="margin-top: 5px;"><span class="glyphicon glyphicon-signal"></span> Samples statistics</button>
+  Dot color legend <span class='glyphicon glyphicon-info-sign' onclick="$('#dotlegend').toggle()"></span> <br>
+  <div id="dotlegend" style="display: none">
+  <span style="color: black;"><b>Private</b> : Hidden data</span><br>
+  <span style="color: red;"><b>Visible</b> : Graphs are visible and limited CTD&amp;particle export </span><br>
+  <span style="color: orange;"><b>Exportable</b> : Full CTD&amp;particle export </span><br>
+  <span style="color: green;"><b>Exportable</b> : Full CTD&amp;particle+Zooplankton export </span><br>
+
+</div>
+
+
+</div>
+
 </form>
 </td>    {#----------- Fin formulaire filtrage -------------#}
 <td>
@@ -243,16 +258,20 @@ function DoSearch(){
 {#    $('#ajaxlog').append("<br>URL="+url);#}
     $.getJSON( url, function( data ) {
 {#        $('#ajaxlog').append( "<br>" +data.length+" samples found");#}
-        SampleSource.clear();SampleSourceNotVisible.clear();
+        SampleSource.clear();SampleSourceNotVisible.clear();SampleSourceVisible.clear();SampleSourceExportCTD.clear();
         var d = new Date();
         $('#samplecount').text(data.length+" samples - "+d.toUTCString());
         $.each( data, function(key, val ) {
             var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform([val['long'],val['lat']], 'EPSG:4326','EPSG:3857'))
                       ,psampleid:val['id'] });
-            if(val['visible'])
-            SampleSource.addFeature(iconFeature);
+            if(val['visibility'][1]=='Y')
+              SampleSource.addFeature(iconFeature);
+            else if(val['visibility'][0]=='Y')
+              SampleSourceExportCTD.addFeature(iconFeature);
+            else if(val['visibility'][0]=='V')
+              SampleSourceVisible.addFeature(iconFeature);
             else
-            SampleSourceNotVisible.addFeature(iconFeature);
+              SampleSourceNotVisible.addFeature(iconFeature);
 {#            $('#ajaxlog').append( "<br>-" + val['id']+val['lat']  );#}
           });
     });
@@ -384,7 +403,27 @@ var RedIconStyle = new ol.style.Style({
           offset: [52, 0],
           opacity: 1,
           scale: 0.19,
-          src: '/static/dots.png'
+          src: '/static/dots2.png'
+        })
+      });
+var OrangeIconStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+          anchor: [0.5, 0.5],
+          size: [40, 40],
+          offset: [208, 0],
+          opacity: 1,
+          scale: 0.19,
+          src: '/static/dots2.png'
+        })
+      });
+var BlackIconStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+          anchor: [0.5, 0.5],
+          size: [40, 40],
+          offset: [156, 0],
+          opacity: 1,
+          scale: 0.19,
+          src: '/static/dots2.png'
         })
       });
 
@@ -395,18 +434,24 @@ var GreenIconStyle = new ol.style.Style({
           offset: [0, 0],
           opacity: 1,
           scale: 0.19,
-          src: '/static/dots.png'
+          src: '/static/dots2.png'
         })
       });
 
 SampleSource = new ol.source.Vector();
 SampleSourceNotVisible= new ol.source.Vector();
+SampleSourceVisible= new ol.source.Vector();
+SampleSourceExportCTD= new ol.source.Vector();
 var SampleLayer= new ol.layer.Vector({   source:SampleSource,style: GreenIconStyle });
-var SampleNotVisibleLayer= new ol.layer.Vector({  source:SampleSourceNotVisible,style: RedIconStyle });
+var SampleNotVisibleLayer= new ol.layer.Vector({  source:SampleSourceNotVisible,style: BlackIconStyle });
+var SampleVisibleLayer= new ol.layer.Vector({  source:SampleSourceVisible,style: RedIconStyle });
+var SampleExportCTDLayer= new ol.layer.Vector({  source:SampleSourceExportCTD,style: OrangeIconStyle});
 // Add the vector layer to the map.
 map.addLayer(vectorLayer);
 map.addLayer(SampleLayer);
 map.addLayer(SampleNotVisibleLayer);
+map.addLayer(SampleVisibleLayer);
+map.addLayer(SampleExportCTDLayer);
 
 var MapPopupElt = document.getElementById('MapPopup');
 var popup = new ol.Overlay({
@@ -535,6 +580,7 @@ $(function () {
   srcredhelpericon=$("#srcctdhelpericon");
   $("#ctdhelpericon").data('content',srcredhelpericon.html()).popover();
   srcredhelpericon.remove();
+  DrawInputOnMap();
 });
 </script>
 <div id='MapPopup'></div>
