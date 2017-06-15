@@ -63,13 +63,15 @@ class TaskExportTxt(AsyncTask):
                 ,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
                 ,to_char(o.classif_when,'YYYYMMDD') object_annotation_date
                 ,to_char(o.classif_when,'HH24MISS') object_annotation_time
+                ,img.orig_file_name as img_file_name
                     """
         sql2=""" FROM objects o
                 LEFT JOIN taxonomy to1 on o.classif_id=to1.id
                 LEFT JOIN taxonomy to1p on to1.parent_id=to1p.id
                 LEFT JOIN users uo1 on o.classif_who=uo1.id
                 LEFT JOIN taxonomy to2 on o.classif_auto_id=to2.id
-                LEFT JOIN samples s on o.sampleid=s.sampleid """
+                LEFT JOIN samples s on o.sampleid=s.sampleid 
+                LEFT JOIN images img on o.img0id = img.imgid """
         sql3=" where o.projid=%(projid)s "
         params={'projid':int(self.param.ProjectId)}
         if self.param.samplelist!="":

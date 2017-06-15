@@ -1,13 +1,13 @@
 <table>
   <tr>
     <td style="width: 600px;vertical-align: top;">
-<span style="font-size: x-large;font-weight: bold;">Select an Particle project </span><p> <a href="#create-project" data-toggle="collapse" class="help" >How to create a project (TODO)</a></p>
+<p style="font-size: x-large;font-weight: bold;">Select a particle project </p>
 
 
 {% if  CanCreate==True %}
   <a href="/part/prjedit/0" class="btn btn-success" >Create a new Particle project</a>
 {% else %}
-  <p>To create a new project and upload images in it, please contact the application manager(s): {{ AppManagerMailto|safe }}</p>
+  <p>To create a new project and upload images in it, please contact the application manager(s):<br> {{ AppManagerMailto|safe }}</p>
 {% endif %}
 </td>
   <td style="padding-left: 50px;vertical-align: top;">

@@ -6,7 +6,18 @@
 {% extends "layout.html" %}
 
 {% block body %}
-
+<a href="#create-project" data-toggle="collapse" class="help" >DOWNLOAD OPTIONS<span class="glyphicon glyphicon-info"></span></a></p>
+<div id="create-project" class="collapse panel panel-default">
+  <div class="panel-body">
+    <ul>
+      <li>The data from the selected samples and depths will be prepared according to the selected file format and exported as a unique ZIP archive</li>
+      <li>The application will also export an additionnal summary file containing the metadata and status of the data from each project.</li>
+      <li>3 data formats are available and only authorized data for the selected format (reduced/detailed/raw) will be exported.
+        Contact data owners or project managers to request additionnat permissions (see permission explanation in the LANDING PAGE information of the Particle module).
+        The ODV data format permits loading the exported data directly into the <a href="https://odv.awi.de/" target="_blank">Ocean Data View application</a> </li>
+    </ul>
+  </div>
+</div>
   
 <b>Samples filters :  </b>{{ TxtFiltres }}
 <br><b>Samples count :  </b> {{ SampleCount }}
@@ -23,8 +34,11 @@ File format <select name="fileformat" >
       </select>
         <br><b>Filters :</b>{{ RedFilter }}
       </td>
-      <td>Particles on 15 class + CTD  - Filtered on depth<br>
-        Classification: all available or selected one <br>or sum of childrens for selected one on previous screen
+      <td>CTD + PARTICLES abundances and biovolumes sorted in 15 reduced classes at vertical steps of 5m<br>
+    ZOOPLANKTON selected categories at variable vertical steps<br>
+    Apply zooplankton and depth selections from graph<br>
+        - if you do not select any plankton category, the export will return all catégories<br>
+        - if you  enable "Sum abundance of children categories", the children counts will be added to the selected category
       </td>
     </tr>
     <tr>
@@ -35,9 +49,9 @@ File format <select name="fileformatd" >
         <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
       </select>
       </td>
-      <td>Particles on 45 class + CTD - Filtered on depth<br>
-        Classification: all available + cumulative on their parents
-        <br>Previous screen filter on classification ignored
+      <td>CTD + PARTICLES abundances and biovolumes sorted in 45 detailed classes at vertical steps of 5m<br>
+        ZOOPLANKTON from all categories and summed in parent categories at vertical steps of 5m <br>
+        Previous screen filter on classification ignored, detph used
       </td>
     </tr>
           <tr>
@@ -46,50 +60,22 @@ File format <select name="fileformatd" >
         <input type="checkbox" name="excludenotliving" value="Y"> Exclude not living
       </td>
       <td>
-        Particles: <UL>
-        <LI>UVP : RAW compacted Histograms</LI>
-        <LI>LISST : Nothing</LI>
-        </UL>
-        List of ecotaxa objets<br>
-        CTD files <br>
-        Sample list details
+        PARTICLES (UVP) : imported « BRU » data compressed and sorted in 1m bins<br>
+ZOOPLANKTON : annotation and main measurements (pixels) for individual items (possibly excluding not_living items)<br>
+CTD : as imported<br>
+SUMMARY file : metadata of exported sample (including pixel size for zooplankton)<br>
+
 
       </td>
     </tr>
     <tr>
 
 </table>
-<script>
-function ComputeSampleList() {
-    var cv="";
-    $('#TblVar input').each(function (){
-       if($(this).prop("checked")){
-           if(cv!="")
-               cv+=",";
-           cv+=$(this).data("var");
-       }
-    });
-    $('#SampleList').val(cv);
-}
-function CheckBasedOnText() {
-    var cv=$('#SampleList').val();
-    var cvl=cv.split(",");
-    //console.log(cvl);
-    $('#TblVar input').each(function (){
-       if($(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)){
-           if(cv!="")
-               cv+=",";
-           cv+=$(this).data("var");
-       }
-    });
-}
-</script>
 
-
+<b>45 Particles class limits</b> (Upper limit included + 1 extra class > last limit):  {{ GetPartDetClassLimitListTextResult }}
+<br><b>15 Particles class limits</b> :  {{ GetPartRedClassLimitListTextResult }}
 <table>
 <tr>
-
-
 <td valign="top">
   <br><br><br>
     <input type="hidden" name="starttask" value="Y">

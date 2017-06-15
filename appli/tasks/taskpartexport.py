@@ -8,7 +8,7 @@ from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask
 from appli.database import GetAll,GetAssoc
 from appli.part.part_main import GetFilteredSamples
-from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedColByKey
+from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedColByKey,GetPartClassLimitListText
 import appli.part.uvp_sample_import as uvp_sample_import
 from appli.part.drawchart import GetTaxoHistoWaterVolumeSQLExpr
 import bz2,shutil
@@ -26,6 +26,7 @@ class TaskPartExport(AsyncTask):
                 self.user_name = ""
                 self.user_email = ""
                 self.samples=[]
+                self.samplesdict = {}
                 self.excludenotliving=False
 
 
@@ -205,7 +206,8 @@ class TaskPartExport(AsyncTask):
                     left join taxonomy t12 on t11.parent_id=t12.id
                     left join taxonomy t13 on t12.parent_id=t13.id
                     left join taxonomy t14 on t13.parent_id=t14.id
-                    """.format((",".join([str(x[0]) for x in self.param.samples])),DepthFilter)
+                    """.format((",".join([str(x[0]) for x in self.param.samples if x[3][1]=='Y'])),DepthFilter)
+                            # x[3][1]==Y ==> Zoo exportable
         if self.param.redfiltres.get('taxochild', '') == '1' and len(TaxoList) > 0:
             sqlTaxoTreeFrom = " \njoin taxonomy t0 on h.classif_id=t0.id "
             for i in range(1,15) :
@@ -251,6 +253,8 @@ class TaskPartExport(AsyncTask):
                     f.write(";%s avgesd %s[mm3]" % (v['nom'],HeaderSuffix))
                 f.write("\n")
                 for S in samples:
+                    if self.samplesdict[S["psampleid"]][3][1] != 'Y': # 3 = visibility, 1 =Second char=Zoo visibility
+                        continue # pas les permission d'exporter le ZOO de ce sample le saute
                     L=[S['cruise'],S['site'],S['station'],S['dataowner'],S['rawfilename'],S['instrumtype'],S['instrumsn'],S['ctd_origfilename'],S['sampledate'],S['latitude'],S['longitude']]
                     t = [None for i in range(3 * len(lstcat))]
                     logging.info("sqlhisto = %s ; %s" % (sqlhisto,S["psampleid"]))
@@ -281,6 +285,8 @@ class TaskPartExport(AsyncTask):
             zfile.write(nomfichier)
         else: # ------------ RED Categories AS TSV
             for S in samples:
+                if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+                    continue  # pas les permission d'exporter le ZOO de ce sample le saute
                 CatHisto = GetAll(sqlhisto, {'psampleid':S["psampleid"]})
                 if len(CatHisto)==0: continue # on ne genere pas les fichiers vides.
                 nomfichier = BaseFileName + "_ZOO_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
@@ -326,10 +332,11 @@ class TaskPartExport(AsyncTask):
                 f.write("profile\tCruise\tSite\tDataOwner\tRawfilename\tInstrument\tCTDrosettefilename\tyyyy-mm-dd hh:mm\tLatitude \tLongitude\tParticle filename\tCategory filename\n")
 
                 for S in samples:
+                    visibility=self.samplesdict[S["psampleid"]][3]
                     L = [S['station'],S['cruise'], S['site'],  S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude']
-                         ,BaseFileName + "_part_"+S['station']+".tsv"
-                        , BaseFileName + "_cat_" + S['station'] + ".tsv"]
+                         ,BaseFileName + "_PAR_"+S['station']+".tsv"
+                        , BaseFileName + "_ZOO_" + S['station'] + ".tsv" if visibility[1]=='Y' else ""]
                     f.write("\t".join((str(ntcv(x)) for x in L)))
                     f.write("\n")
             zfile.write(nomfichier)
@@ -432,7 +439,8 @@ class TaskPartExport(AsyncTask):
         # On liste les categories pour fixer les colonnes de l'export
         # liste toutes les cat pour les samples et la depth
         sqllstcat = """select distinct classif_id from part_histocat hc where psampleid in ( {0}) {1} 
-                            """.format((",".join([str(x[0]) for x in self.param.samples])), DepthFilter)
+                            """.format((",".join([str(x[0]) for x in self.param.samples if x[3][1]=='Y'])), DepthFilter)
+                                                                        # x[3][1]==Y ==> Zoo exportable
         if self.param.excludenotliving: # On ne prend que ceux qui ne sont pas desendant de not-living
             sqlTaxoTreeFrom = " \njoin taxonomy t0 on hc.classif_id=t0.id "
             for i in range(1, 15):
@@ -518,6 +526,8 @@ order by tree""".format(lstcatwhere)
                     f.write(";%s avgesd %s[mm3]" % (v['nom'],HeaderSuffix))
                 f.write("\n")
                 for S in samples:
+                    if self.samplesdict[S["psampleid"]][3][1] != 'Y': # 3 = visibility, 1 =Second char=Zoo visibility
+                        continue # pas les permission d'exporter le ZOO de ce sample le saute
                     L=[S['cruise'],S['site'],S['station'],S['dataowner'],S['rawfilename'],S['instrumtype'],S['instrumsn'],S['ctd_origfilename'],S['sampledate'],S['latitude'],S['longitude']]
                     t = [None for i in range(3 * len(lstcat))]
                     logging.info("sqlhisto=%s"%sqlhisto)
@@ -546,6 +556,8 @@ order by tree""".format(lstcatwhere)
             zfile.write(nomfichier)
         else: # ------------ Categories AS TSV
             for S in samples:
+                if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+                    continue  # pas les permission d'exporter le ZOO de ce sample le saute
                 nomfichier = BaseFileName + "_ZOO_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
@@ -588,10 +600,11 @@ order by tree""".format(lstcatwhere)
                 f.write("profile\tCruise\tSite\tDataOwner\tRawfilename\tInstrument\tCTDrosettefilename\tyyyy-mm-dd hh:mm\tLatitude \tLongitude\tParticle filename\tCategory filename\n")
 
                 for S in samples:
+                    visibility = self.samplesdict[S["psampleid"]][3]
                     L = [S['station'],S['cruise'], S['site'],  S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude']
                          ,BaseFileName + "_PAR_"+S['station']+".tsv"
-                        , BaseFileName + "_ZOO_" + S['station'] + ".tsv"]
+                        , BaseFileName + "_ZOO_" + S['station'] + ".tsv" if visibility[1]=='Y' else ""]
                     f.write("\t".join((str(ntcv(x)) for x in L)))
                     f.write("\n")
             zfile.write(nomfichier)
@@ -630,6 +643,7 @@ order by tree""".format(lstcatwhere)
         with open(fichier, 'w', encoding='latin-1') as f:
             f.write("\t".join(cols)+"\tParticle filename\tCTD filename\tCategory filename\n")
             for S in samples:
+                visibility = self.samplesdict[S["psampleid"]][3]
                 L=[S[c] for c in cols]
                 for i,v in enumerate(L):
                     if isinstance(v,str):
@@ -639,7 +653,7 @@ order by tree""".format(lstcatwhere)
                     [
                     "{0}_{1}_PAR_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier ) if S['histobrutavailable'] else None,
                     "{0}_{1}_CTD_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier) if S['nbrlinectd'] else None,
-                    "{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier) if S['nbrlinetaxo'] else None
+                    "{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier) if S['nbrlinetaxo' and visibility[1]=='Y'] else None
                         ])
                 f.write("\t".join((str(ntcv(x)) for x in L)))
                 f.write("\n")
@@ -674,6 +688,8 @@ order by tree""".format(lstcatwhere)
                         f.write("\n")
                 zfile.write(nomfichier)
         for S in samples:
+            if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+                continue  # pas les permission d'exporter le ZOO de ce sample le saute
             if S['nbrlinetaxo'] > 0:
                 TaxoReverseMapping ={v:k for k,v in DecodeEqualList(ntcv(S['mappingobj'])).items()}
                 nomfichier="{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier)
@@ -715,11 +731,10 @@ order by tree""".format(lstcatwhere)
                         f.write("\n")
                 zfile.write(nomfichier)
 
-
-
-
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__,))
+        # dictionnaire par sample
+        self.samplesdict={int(x[0]):x for x in self.param.samples}
         if self.param.what=="RED":
             self.CreateRED()
         elif self.param.what == "DET":
@@ -736,7 +751,8 @@ order by tree""".format(lstcatwhere)
 
 
     def QuestionProcess(self):
-        txt="<a href='/part/'>Back to Particle Module Home page</a>"
+
+        txt="<a href='/part/?{0}'>Back to Particle Module Home page</a>".format(str(request.query_string,'utf-8'))
         txt+="<h3>Particle sample data export Task creation</h3>"
         errors=[]
         for k in request.args:
@@ -752,7 +768,10 @@ order by tree""".format(lstcatwhere)
             TxtFiltres = ",".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""])
         else: TxtFiltres=""
         # applique le filtre des sample et passe la liste à la tache car besoin de currentuser
-        self.param.samples=GetFilteredSamples(Filter=self.param.filtres,GetVisibleOnly=True)
+        self.param.samples=GetFilteredSamples(Filter=self.param.filtres,GetVisibleOnly=True
+                                  # Les exports Reduit Particule se contente de la visibité les autres requiert l'export
+                                  # Pour le Zoo c'est traité dans la routine d'export elle même
+                                  ,RequiredPartVisibility=('V' if self.param.what=='RED' else 'Y') )
 
         if self.task.taskstep==0:
             # Le projet de base est choisi second écran ou validation du second ecran
@@ -782,7 +801,10 @@ order by tree""".format(lstcatwhere)
             return render_template('task/partexport_create.html',header=txt,data=self.param
                                    ,SampleCount=len(self.param.samples)
                                    ,RedFilter=",".join(("%s=%s"%(k,v) for k,v in self.param.redfiltres.items()))
-                                   ,TxtFiltres=TxtFiltres)
+                                   ,TxtFiltres=TxtFiltres
+                                   ,GetPartDetClassLimitListTextResult=GetPartClassLimitListText(PartDetClassLimit)
+                                   ,GetPartRedClassLimitListTextResult=GetPartClassLimitListText(PartRedClassLimit)
+                                   )
 
 
 

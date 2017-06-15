@@ -74,6 +74,7 @@ def AddTaskSummaryForTemplate():
         g.tasksummary = appli.database.GetAssoc2Col(
             "SELECT taskstate,count(*) from temp_tasks WHERE owner_id=%(owner_id)s group by taskstate"
             , {'owner_id': current_user.id})
+    g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
 def gvg(varname,defvalue=''):
