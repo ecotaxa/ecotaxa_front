@@ -152,6 +152,10 @@ label {font-size: 12px; font-weight: normal;}
 {{ render_field(form.lastimgused,tr='') }}
 {{ render_field(form.nebuloussness,tr='c') }}
 
+  <tr><td></td><td></td><td></td><td></td>
+{{ render_field(form.imp_descent_filtered_row,tr='') }}
+{{ render_field(form.imp_removed_empty_slice,tr='c') }}
+
 {{ render_field(form.yoyo,tr='o') }}
 {{ render_checkbox_field(form.organizedbydeepth,tr='') }}
 {{ render_field(form.comment,tr='c',style="width:550px;",colspan=7) }}
@@ -176,7 +180,7 @@ label {font-size: 12px; font-weight: normal;}
 {{ render_field(form.acq_pixel,tr='o',style="width:80px;") }}
 {{ render_field(form.acq_gain,tr='',style="width:80px;") }}
 {{ render_field(form.acq_eraseborder,tr='',style="width:80px;") }}
-<td colspan="2">Process ratio ??</td></tr>
+{{ render_field(form.proc_process_ratio,tr='c',style="width:80px;") }}
 
 
 {{ render_field(form.acq_depthoffset,tr='o',style="width:80px;") }}

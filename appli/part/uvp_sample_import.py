@@ -54,6 +54,7 @@ def CreateOrUpdateSample(pprojid,headerdata):
     Sample.yoyo = headerdata['yoyo']=="Y"
     Sample.firstimage = int(headerdata['firstimage'])
     Sample.lastimg = int(headerdata['endimg'])
+    Sample.proc_soft="Zooprocess"
 
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     DossierUVPPath = ServerRoot / Prj.rawfolder
@@ -68,6 +69,10 @@ def CreateOrUpdateSample(pprojid,headerdata):
                 app.logger.warning("pixel parameter missing in file %s "%(uvp5_configuration_data.as_posix()))
             else:
                 Sample.acq_pixel=float(ConfigParam['pixel'])
+            if 'xsize' in ConfigParam:
+                Sample.acq_xsize = int(ConfigParam['xsize'])
+            if 'ysize' in ConfigParam:
+                Sample.acq_ysize = int(ConfigParam['ysize'])
 
     HDRFolder =  DossierUVPPath / "raw"/("HDR"+Sample.filename)
     HDRFile = HDRFolder/("HDR"+Sample.filename+".hdr")
@@ -100,7 +105,7 @@ def CreateOrUpdateSample(pprojid,headerdata):
         Sample.acq_disktype = ToFloat(HdrParam.get('disktype', ''))
         Sample.acq_ratio = ToFloat(HdrParam.get('ratio', ''))
 
-    # TODO pixel à prendre dans uvp5_configuration_data.txt s'il existe ?
+
     db.session.commit()
     return Sample.psampleid
 
@@ -188,6 +193,7 @@ def GenerateRawHistogram(psampleid):
     if len(RawImgDepth)==0:
         raise Exception("No data in dat file %s " % (Fichier.as_posix()))
     PrevDepth=0
+    DescentFilterRemovedCount=0
     # Application du filtre en descente
     for i in range(FirstImage,LastImage+1):
         if i not in RawImgDepth: continue
@@ -199,6 +205,8 @@ def GenerateRawHistogram(psampleid):
                 PrevDepth=RawImgDepth[i]
         if KeepLine:
             ImgDepth[i] = RawImgDepth[i]
+        else:
+            DescentFilterRemovedCount+=1
     logging.info("Raw image count = {0} , Filtered image count = {1} , LastIndex= {2},LastIndex-First+1= {4}, DescentFiltered images={3}"
           .format(len(RawImgDepth),len(ImgDepth),LastImage,LastImage-FirstImage-len(ImgDepth)+1,LastImage-FirstImage+1))
     if len(ImgDepth)==0:
@@ -299,6 +307,7 @@ def GenerateRawHistogram(psampleid):
                 )
     UvpSample.histobrutavailable=True
     UvpSample.lastimgused=LastImage
+    UvpSample.imp_descent_filtered_row=DescentFilterRemovedCount
     db.session.commit()
 
 def GenerateParticleHistogram(psampleid):
@@ -513,7 +522,7 @@ def GenerateTaxonomyHistogram(psampleid):
             values({psampleid},{classif_id},{lineno},{depth},{watervolume},{nbr},{avgesd},{totalbiovolume})"""
     for r in LstTaxo:
         watervolume=LstVol.get(r['tranche'])
-        esd=r['avgarea']*pixel*pixel  # todo finir
+        esd=r['avgarea']*pixel*pixel
         biovolume=r['nbr']*pow(esd/2,3)*4*math.pi/3
         watervolume='NULL'
         if r['tranche'] in LstVol:

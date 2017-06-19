@@ -1,5 +1,5 @@
 from flask import render_template, g, flash,json
-from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv
+from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv,ErrorFormat
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 from flask_login import current_user
 from flask import render_template,  flash,request,g
@@ -11,6 +11,7 @@ import appli.part.sampleedit as sampleedit
 from flask_security import login_required
 
 @app.route('/part/prj/')
+@login_required
 def part_prj():
     params={}
     sql="""select pprojid,ptitle,up.ownerid,u.name,u.email,rawfolder,instrumtype,ep.title
@@ -19,9 +20,9 @@ def part_prj():
             left JOIN projects ep on up.projid=ep.projid
             LEFT JOIN users u on ownerid=u.id
           """
-    # if not current_user.has_role(database.AdministratorLabel):
-    #     sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
     sql += " where 1=1 "
+    if not current_user.has_role(database.AdministratorLabel):
+        sql+="  and ownerid=%d"%(current_user.id,)
     if gvg('filt_title','')!='':
         sql +=" and (  up.ptitle ilike '%%'||%(title)s ||'%%' or to_char(up.pprojid,'999999') like '%%'||%(title)s or ep.title ilike '%%'||%(title)s ||'%%' or to_char(ep.projid,'999999') like '%%'||%(title)s) "
         params['title']=gvg('filt_title')
@@ -32,7 +33,7 @@ def part_prj():
     res = GetAll(sql,params) #,debug=True
     # app.logger.info("res=%s",res)
     CanCreate=False
-    if current_user.has_role(database.AdministratorLabel):
+    if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ParticleProjectCreatorLabel):
         CanCreate=True
     if getattr(current_user,'id',None) is not None: # correspond à anonymous
         if database.GetAll("select count(*) nbr from projectspriv where privilege='Manage' and member=%(id)s",{'id':current_user.id})[0]['nbr']>0:
@@ -45,11 +46,20 @@ def part_prj():
 @app.route('/part/prj/<int:PrjId>')
 @login_required
 def part_prj_main(PrjId):
-    Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
-    g.headcenter="<h4>Particle Project %s : %s</h4><a href='/part/'>Particle Module Home</a>"%(Prj.projid,Prj.ptitle)
-    # TODO securité
+    # Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
+    Prj=GetAll("""select pp.*
+                    ,oldestsampledate+make_interval(0,public_visibility_deferral_month) visibility_date  
+                    ,oldestsampledate+make_interval(0,public_partexport_deferral_month) partexport_date 
+                    ,oldestsampledate+make_interval(0,public_zooexport_deferral_month) zooexport_date 
+                    from part_projects pp where pprojid=%s""",(PrjId,))
+    if len(Prj)!=1:
+        return PrintInCharte(ErrorFormat("Project doesn't exists"))
+    Prj=Prj[0]
+    if Prj['ownerid']!=current_user.id and not current_user.has_role(database.AdministratorLabel):
+        return PrintInCharte(ErrorFormat("Access Denied"))
+    g.headcenter="<h4>Particle Project %s : %s</h4><a href='/part/'>Particle Module Home</a>"%(Prj['projid'],Prj['ptitle'])
     dbsample = database.GetAll("""select profileid,psampleid,filename,stationid,firstimage,lastimg,lastimgused,sampleid
-          ,histobrutavailable,comment,daterecalculhistotaxo,ctd_import_datetime
+          ,histobrutavailable,comment,daterecalculhistotaxo,ctd_import_datetime,sampledate,imp_descent_filtered_row,imp_removed_empty_slice
           ,(select count(*) from part_histopart_det where psampleid=s.psampleid) nbrlinedet
           ,(select count(*) from part_histopart_reduit where psampleid=s.psampleid) nbrlinereduit
           ,(select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo
@@ -58,15 +68,25 @@ def part_prj_main(PrjId):
           where pprojid=%s
           ORDER BY filename desc
           """ % (PrjId))
+    MinSampleDate=Prj['oldestsampledate']
+    VisibilityText=""
+    if MinSampleDate is not None :
+        VisibilityText +="""<br> Oldest sample date is {0:%Y-%m-%d}, Visibility date is {1}
+          , Particule export date is {2}, Zooplankton classification export date is {3} 
+          """.format(MinSampleDate
+                     , "Not Defined" if Prj['visibility_date'] is None else Prj['visibility_date'].strftime("%Y-%m-%d")
+                     , "Not Defined" if Prj['partexport_date'] is None else Prj['partexport_date'].strftime("%Y-%m-%d")
+                     , "Not Defined" if Prj['zooexport_date'] is None else Prj['zooexport_date'].strftime("%Y-%m-%d") )
 
     return PrintInCharte(
-        render_template('part/prj_index.html', PrjId=PrjId, dbsample=dbsample, Prj=Prj))
+        render_template('part/prj_index.html', PrjId=PrjId, dbsample=dbsample, Prj=Prj,VisibilityText=VisibilityText))
 
 @app.route('/part/prjcalc/<int:PrjId>',methods=['post'])
 @login_required
 def part_prjcalc(PrjId):
     Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
-    # TODO securité
+    if Prj.ownerid!=current_user.id and not current_user.has_role(database.AdministratorLabel):
+        return PrintInCharte(ErrorFormat("Access Denied"))
     txt=""
     CheckedSampleList=[]
     for f in request.form:

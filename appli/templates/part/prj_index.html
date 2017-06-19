@@ -5,7 +5,7 @@ Particle Project {{ PrjId }} : {{ Prj.ptitle }}<br>
 <a href="/part/prjedit/{{ PrjId }}" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit project metadata</a>
 <a href="/part/prj/" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-arrow-left"></span> Back to project list</a>
 
-
+{{ VisibilityText |safe }}
 <h4>Project samples dashboard <a href="#general-help" data-toggle="collapse" class="help"> </a></h4>
 <div id="general-help" class="collapse panel panel-default" style="width: 800px;margin-left: 50px;">
   <div class="panel-body">
@@ -33,10 +33,13 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
     <th>ID</th>
     <th>profileid</th>
     <th>filename</th>
-    <th>stationid</th>
-    <th>firstimage</th>
-    <th>lastimg</th>
-    <th>lastimgused</th>
+    <th>station ID</th>
+    <th>first image</th>
+    <th>last img</th>
+    <th>last img used</th>
+    <th>Descent Filtered Rows</th>
+    <th>Removed empty slice</th>
+    <th>Sample Date</th>
     <th>Raw Part. Histo</th>
     <th>Det Part. Histo</th>
     <th>Reduced Part. Histo</th>
@@ -55,9 +58,12 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
     <td>{{ r['profileid'] }}</td>
     <td>{{ r['filename'] }}</td>
     <td>{{ r['stationid'] }}</td>
-    <td>{{ r['firstimage'] }}</td>
-    <td>{{ r['lastimg'] }}</td>
-    <td>{{ r['lastimgused'] }}</td>
+    <td>{{ r['firstimage'] or ""}}</td>
+    <td>{{ r['lastimg'] or ""}}</td>
+    <td>{{ r['lastimgused'] or "" }}</td>
+    <td>{{ r['imp_descent_filtered_row'] or "" }}</td>
+    <td>{{ r['imp_removed_empty_slice'] or "" }}</td>
+    <td>{{ r['sampledate'].strftime('%Y-%m-%d') if r['sampledate'] is not none else "" }}</td>
     <td>{{ r['histobrutavailable'] }}</td>
     <td>{{ r['nbrlinedet'] }}</td>
     <td>{{ r['nbrlinereduit'] }}</td>

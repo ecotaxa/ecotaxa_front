@@ -12,6 +12,8 @@ import json,psycopg2.extras,datetime,os
 
 AdministratorLabel="Application Administrator"
 UserAdministratorLabel="Users Administrator"
+ParticleProjectCreatorLabel="Particle module project creator"
+
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
 DayTimeList={'A':'Dawn','D':'Day','U':'Dust','N':'Night'}
 ClassifQualRevert={}

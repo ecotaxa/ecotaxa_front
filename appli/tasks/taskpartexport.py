@@ -701,7 +701,7 @@ order by tree""".format(lstcatwhere)
                         ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
      t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) taxo_hirerarchy
                       from part_samples ps
-                      join obj_head oh on ps.sampleid=oh.sampleid
+                      join obj_head oh on ps.sampleid=oh.sampleid and oh.classif_qual='V'
                       join obj_field of on of.objfid=oh.objid                      
                         join taxonomy t0 on oh.classif_id=t0.id
                         left join taxonomy t1 on t0.parent_id=t1.id
@@ -751,8 +751,8 @@ order by tree""".format(lstcatwhere)
 
 
     def QuestionProcess(self):
-
-        txt="<a href='/part/?{0}'>Back to Particle Module Home page</a>".format(str(request.query_string,'utf-8'))
+        backurl="/part/?{0}".format(str(request.query_string,'utf-8'))
+        txt="<a href='{0}'>Back to Particle Module Home page</a>".format(backurl)
         txt+="<h3>Particle sample data export Task creation</h3>"
         errors=[]
         for k in request.args:
@@ -784,7 +784,8 @@ order by tree""".format(lstcatwhere)
                 if self.param.what == 'DET':
                     self.param.fileformat = gvp("fileformatd")
                     self.param.excludenotliving = (gvp("excludenotliving")=='Y')
-
+                self.param.CustomReturnLabel="Back to particle module"
+                self.param.CustomReturnURL=gvp("backurl")
 
                 if self.param.what=='' : errors.append("You must select What you want to export")
                 if len(errors)>0:
@@ -804,6 +805,7 @@ order by tree""".format(lstcatwhere)
                                    ,TxtFiltres=TxtFiltres
                                    ,GetPartDetClassLimitListTextResult=GetPartClassLimitListText(PartDetClassLimit)
                                    ,GetPartRedClassLimitListTextResult=GetPartClassLimitListText(PartRedClassLimit)
+                                   ,backurl=backurl
                                    )
 
 

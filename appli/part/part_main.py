@@ -9,8 +9,6 @@ import operator
 @app.route('/part/')
 def indexPart():
     class FiltForm(Form):
-        # TODO ne pas afficher tous les projets en fonction des autorisations.
-        # TODO gérer popup ajax sur les samples pour afficher quelques informations
         filt_proj = SelectMultipleField(choices=[['','']]+database.GetAll(
             "SELECT projid,concat(title,' (',cast(projid AS VARCHAR),')') FROM projects where projid in (select projid from part_projects) ORDER BY lower(title)"))
         filt_uproj = SelectMultipleField(choices=[['','']]+database.GetAll(
@@ -39,10 +37,20 @@ def GetSQLVisibility():
             sqlvisible += " when pp.ownerid=%d then 'YY' "%(current_user.id)
             sqlvisible += " when ppriv.privilege in('Manage','Annotate') then 'YY' "
             sqljoin ="  left Join projectspriv ppriv on p.projid = pp.projid and ppriv.member=%d"%(current_user.id,)
-        #TODO traiter les rendus public
+        sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
+                       and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date 
+                       and oldestsampledate+make_interval(0,public_zooexport_deferral_month)<=current_date 
+                       and p.visible then 'YY' """
         if current_user.is_authenticated:
-            sqlvisible += " when ppriv.member is not null then 'VV' "
-        sqlvisible += " when p.visible then 'VV'  "
+            sqlvisible += """ when ppriv.member is not null and oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date then 
+                                case when oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date
+                                then 'YV'
+                                else 'VV' end """
+        sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
+                       and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date  
+                       then case when p.visible then 'YV' else 'YN' end  """
+        sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date
+                       then case when p.visible then 'VV' else 'VN' end  """
         sqlvisible += " else 'NN' end "
     return (sqlvisible,sqljoin)
 # Retourne la liste des samples correspondant à un des filtres.

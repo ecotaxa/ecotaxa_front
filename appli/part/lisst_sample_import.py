@@ -196,7 +196,7 @@ def GenerateTaxonomyHistogram(psampleid):
             values({psampleid},{classif_id},{lineno},{depth},{watervolume},{nbr},{avgesd},{totalbiovolume})"""
     for r in LstTaxo:
         watervolume=LstVol.get(r['tranche'])
-        esd=r['avgarea']*pixel*pixel  # todo finir
+        esd=r['avgarea']*pixel*pixel
         biovolume=r['nbr']*pow(esd/2,3)*4*math.pi/3
         watervolume='NULL'
         if r['tranche'] in LstVol:
