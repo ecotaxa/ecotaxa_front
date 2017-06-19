@@ -1,5 +1,5 @@
 from flask import render_template, g, flash,json,redirect
-from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv
+from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv,ErrorFormat
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 from flask_login import current_user
 from flask import render_template,  flash,request,g
@@ -27,6 +27,9 @@ class UvpPrjForm(Form):
     default_instrumsn = StringField("default instrum SN")
     default_depthoffset = FloatField("Default depth offset",[validators.Optional(strip_whitespace=True)])
     prj_info = TextAreaField("Project information")
+    public_visibility_deferral_month = IntegerField("Privacy delay", [validators.Optional(strip_whitespace=True)])
+    public_partexport_deferral_month = IntegerField("General download delay", [validators.Optional(strip_whitespace=True)])
+    public_zooexport_deferral_month = IntegerField("Plankton annotation download delay", [validators.Optional(strip_whitespace=True)])
 
 
 @app.route('/part/prjedit/<int:pprojid>',methods=['get','post'])
@@ -35,7 +38,12 @@ def part_prjedit(pprojid):
     g.headcenter="<h3>Particle Project Metadata edition</h3>"
     if pprojid>0:
         model = partdatabase.part_projects.query.filter_by(pprojid=pprojid).first()
+        if model.ownerid!=current_user.id and not current_user.has_role(database.AdministratorLabel):
+            return PrintInCharte(ErrorFormat("Access Denied"))
     else:
+        if not (current_user.has_role(database.AdministratorLabel) or current_user.has_role(
+                database.ParticleProjectCreatorLabel)):
+            return PrintInCharte(ErrorFormat("Access Denied"))
         model=partdatabase.part_projects()
         model.pprojid=0
         model.ownerid=current_user.id

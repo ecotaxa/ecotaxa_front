@@ -74,7 +74,7 @@ class TaskPartZooscanImport(AsyncTask):
                         self.UpdateProgress(100 * (NbrDone + 0.95) / Nbr,"CTD of profile %s  processed" % (sample['profileid']))
                 NbrDone+=1
 
-
+        partdatabase.ComputeOldestSampleDateOnProject()
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Processing done")
         # self.task.taskstate="Error"

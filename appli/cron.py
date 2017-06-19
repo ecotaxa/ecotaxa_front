@@ -1,6 +1,7 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from appli.database import ExecSQL
+from appli.part.database import ComputeOldestSampleDateOnProject
 
 
 def RefreshAllProjectsStat():
@@ -15,6 +16,7 @@ def RefreshAllProjectsStat():
      where projects.projid=q.projid""")
     ExecSQL("""delete from samples s
               where not exists (select 1 from objects o where o.sampleid=s.sampleid )""")
+    ComputeOldestSampleDateOnProject()
 
 def RefreshTaxoStat():
     n=ExecSQL("UPDATE taxonomy SET  nbrobj=Null,nbrobjcum=null where nbrobj is NOT NULL or nbrobjcum is not null")

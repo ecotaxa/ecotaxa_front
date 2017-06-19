@@ -268,6 +268,10 @@ def DoTaskClean(TaskID):
         flash("Error While erasing " + str(sys.exc_info()), 'error')
     if ProjectID:
         Msg += "<a href='/prj/%s'>Back to project</a><br>"%ProjectID
+    CustomReturnURL = getattr(task.param, 'CustomReturnURL', None)
+    CustomReturnLabel = getattr(task.param, 'CustomReturnLabel', None)
+    if CustomReturnLabel and CustomReturnURL:
+        Msg += "<a href='{0}'>{1}</a><br>".format(CustomReturnURL,CustomReturnLabel)
     return Msg
 
 

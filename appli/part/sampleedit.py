@@ -24,7 +24,7 @@ class UvpSampleForm(Form):
     winddir = IntegerField("Wind direction [°] (0-360)",[validators.Optional(strip_whitespace=True)])
     winspeed = IntegerField("Wind speed [knots]",[validators.Optional(strip_whitespace=True)])
     seastate = IntegerField("Sea state (1-12)",[validators.Optional(strip_whitespace=True)])
-    nebuloussness = StringField("Nebuloussness (0-8)")
+    nebuloussness = IntegerField("Nebuloussness (0-8)",[validators.Optional(strip_whitespace=True)])
     comment = StringField("Comment")
     stationid = StringField("Station ID")
     firstimage = IntegerField("First image Ok",[validators.Optional(strip_whitespace=True)])
@@ -69,6 +69,9 @@ class UvpSampleForm(Form):
     op_sample_email = StringField("Operator email")
     lisst_zscat_filename = StringField("zscat filename")
     lisst_kernel = StringField("Kernel")
+    proc_process_ratio = IntegerField("Process ratio", [validators.Optional(strip_whitespace=True)])
+    imp_removed_empty_slice = IntegerField("Removed empty slice", [validators.Optional(strip_whitespace=True)])
+    imp_descent_filtered_row = IntegerField("Descent filtered row", [validators.Optional(strip_whitespace=True)])
 
 def delete_sample(psampleid):
     RawHistoFile=Path(sample_import.GetPathForRawHistoFile(psampleid))

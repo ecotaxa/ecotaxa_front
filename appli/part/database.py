@@ -2,13 +2,9 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from appli import db,app,g
-from flask_security import  UserMixin, RoleMixin
-from flask_login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
 from sqlalchemy import Index,Sequence,func
-from sqlalchemy.exc import DBAPIError
-from sqlalchemy.orm import foreign,remote
-import json,psycopg2.extras,datetime,os
+from appli.database import ExecSQL
 
 class part_projects(db.Model):
     __tablename__ = 'part_projects'
@@ -35,6 +31,10 @@ class part_projects(db.Model):
     ship = db.Column(VARCHAR(100))
     default_instrumsn = db.Column(VARCHAR(50))
     default_depthoffset = db.Column(DOUBLE_PRECISION)
+    public_visibility_deferral_month = db.Column(INTEGER)
+    public_partexport_deferral_month= db.Column(INTEGER)
+    public_zooexport_deferral_month= db.Column(INTEGER)
+    oldestsampledate = db.Column(TIMESTAMP)
 
     def __str__(self):
         return "{0} ({1})".format(self.ptitle,self.pprojid)
@@ -119,6 +119,9 @@ class part_samples(db.Model):
     txt_data08 = db.Column(VARCHAR(200))
     txt_data09 = db.Column(VARCHAR(200))
     txt_data10 = db.Column(VARCHAR(200))
+    proc_process_ratio = db.Column(INTEGER)
+    imp_descent_filtered_row = db.Column(INTEGER)
+    imp_removed_empty_slice = db.Column(INTEGER)
 
     def __str__(self):
         return "{0} ({1})".format(self.profileid,self.psampleid)
@@ -199,3 +202,6 @@ class part_ctd(db.Model):
 for i in range(1, 21):
     setattr(part_ctd, "extrames%02d" % i, db.Column(DOUBLE_PRECISION))
 
+
+def ComputeOldestSampleDateOnProject():
+    ExecSQL("update part_projects pp  set oldestsampledate=(select min(sampledate) from part_samples ps where ps.pprojid=pp.pprojid)")

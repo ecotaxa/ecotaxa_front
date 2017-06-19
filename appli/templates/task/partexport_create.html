@@ -13,7 +13,7 @@
       <li>The data from the selected samples and depths will be prepared according to the selected file format and exported as a unique ZIP archive</li>
       <li>The application will also export an additionnal summary file containing the metadata and status of the data from each project.</li>
       <li>3 data formats are available and only authorized data for the selected format (reduced/detailed/raw) will be exported.
-        Contact data owners or project managers to request additionnat permissions (see permission explanation in the LANDING PAGE information of the Particle module).
+        Contact data owners or project managers to request additionnal permissions (see permission explanation in the LANDING PAGE information of the Particle module).
         The ODV data format permits loading the exported data directly into the <a href="https://odv.awi.de/" target="_blank">Ocean Data View application</a> </li>
     </ul>
   </div>
@@ -24,6 +24,7 @@
   
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
+  <input type="hidden" name="backurl" value="{{ backurl }}">
   <table class="table table-bordered table-condensed " style="width: 800px">
     <tr>
       <td><input type="radio" name="what" value="RED" {{'checked' if data.what=='RED'}} >Reduced data</td>

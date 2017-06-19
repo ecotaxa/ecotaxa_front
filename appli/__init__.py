@@ -281,6 +281,9 @@ def scheduler_func():
     while 1:
         schedule.run_pending()
         time.sleep(1)
-scheduler_thread = threading.Thread(target=scheduler_func,name="Scheduler")
-scheduler_thread.daemon=True
-scheduler_thread.start()
+@app.before_first_request
+def app_before_first_request():
+    app.logger.info("Start Daily Task Thread")
+    scheduler_thread = threading.Thread(target=scheduler_func,name="Scheduler")
+    scheduler_thread.daemon=True
+    scheduler_thread.start()

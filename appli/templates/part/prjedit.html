@@ -14,7 +14,7 @@
         {% if (field.type != 'HiddenField' and field.type !='CSRFTokenField') and label_visible %}
             <label for="{{ field.id }}" class="control-label"
                    {% if kwargs.get('help') %} data-toggle="popover" data-placement="right" data-content="{{ kwargs.get('help') }}" data-html="true"{% endif %}
-            >{{ field.label }}
+            >{{ field.label.text }}
               {% if kwargs.get('help') %} <span class="glyphicon glyphicon-info-sign"></span> {% endif %}
               {% if field.flags.required %} <span style="font-weight: bold;color: red;">*</span> {% endif %}
             </label>
@@ -22,6 +22,7 @@
     </td><td {{ "colspan="+(kwargs.pop('colspan')|string) if kwargs.get('colspan') }} >
 {#        {{ field(class_='form-control', **kwargs) }}#}
     {{ field(**kwargs) }}
+    {% if kwargs.get('suffix') %} {{ kwargs.get('suffix') }}{% endif %}
         {% if field.errors %}
             {% for e in field.errors %}
                 <p class="help-block">{{ e }}</p>
@@ -109,7 +110,7 @@
 
 <style>
  #edittab {margin: 10px;}
- #edittab td:nth-child(2n+1) {width: 200px;padding-right: 15px;padding-left:5px;}
+ #edittab td:nth-child(2n+1) {width: 240px;padding-right: 15px;padding-left:5px;}
 </style>
 
 
@@ -185,6 +186,10 @@ Processed images and associated TSV files will be imported separately from the Â
 {{ render_field(form.cruise,tr='o',help="selected from the root folder name") }}
 {{ render_field(form.ship,tr='c') }}
 {{ render_field(form.prj_info,tr='oc',colspan=3,style="width:500px;",help="read from the cruise_info.txt file") }}
+{{ render_field(form.public_visibility_deferral_month,tr='o',style="width:50px;",suffix='Months',help="delay after which data will be displayed") }}
+  <td colspan="2">The delay starting date is the date of the older sample of the project. See the sample metadata page to visualize resulting display/download dates</td></tr>
+{{ render_field(form.public_partexport_deferral_month,tr='o',style="width:50px;",suffix='Months',help="delay to allow data downloading") }}
+{{ render_field(form.public_zooexport_deferral_month,tr='c',style="width:50px;",suffix='Months',help="note that the associated project must be VISIBLE") }}
 
 
     <tr>
@@ -201,8 +206,6 @@ Processed images and associated TSV files will be imported separately from the Â
     </tr>
 </table>
 </form>
-
-
 
 <div class="modal " id="confirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
