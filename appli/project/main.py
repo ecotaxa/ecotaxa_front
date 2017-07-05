@@ -413,9 +413,9 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             poptitletxt="%s"%(r['orig_id'],)
             poptxt=""
             #poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
-            if r[3]!="":
-                poptxt+="<em>by</em> %s"%(r[4])
-            poptxt+="<br><em>parent</em> "+ntcv(r['taxoparent'])
+            if ntcv(r['classifwhoname'])!="":
+                poptxt+="<em>by</em> %s<br>"%(r['classifwhoname'])
+            poptxt+="<em>parent</em> "+ntcv(r['taxoparent'])
             poptxt+="<br><em>in</em> "+ntcv(r['samplename'])
             for k,v in popoverfieldlist.items():
                 if k=='classif_auto_score' and r["classif_qual"]=='V':
