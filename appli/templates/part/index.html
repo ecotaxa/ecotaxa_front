@@ -9,11 +9,36 @@
 <script src="/static/common.js"></script>
 
 
-<div id="particleinfodiv" class="panel panel-default" style="margin-left: 200px;margin-right: 200px;display: none;">
+<div id="particleinfodiv" class="panel panel-default" style="margin-left: 50px;margin-right: 50px;display: none;
+position: absolute;z-index: 100;">
   <div class="panel-body">
-    Welcome to the "Particle module of Ecotaxa"
-    <br>Module description :
-    <br>Data use :
+    <h3>General introduction</h3>
+This PARTICLE module of ECOTAXA is designed to host data from the Underwater Vision Profiler (UVP) and the LIIST instruments. It permits to:
+<br>•	Load particle data and associate them with CTD data and zooplankton images loaded and annotated in Ecotaxa
+<br>•	Process size spectra from the particle data
+<br>•	Download the resulting particle spectra, the CTD and the zooplankton data according to defined permissions
+<br>•	Visualize data and permit their promotion thanks to the internet access
+<h3>Datasets status</h3>
+The datasets can have different status (PRIVATE, PARTIALLY or FULLY AVAILABLE). If the data you are interested to visualize or download are not accessible, you can contact the different project managers and data owners using the links provided in the STATISTICS display.
+<br>The data owners are always indicated in the datasets that you download. Please contact them to get additional information and discuss publications.
+<br>By default, all particle and CTD data can be displayed in the graph section and limited resolution data downloaded.
+<br>Unless the data owner changes the delays, the full particle and CTD data will be available after 24 months from acquisition.
+<br>Unless the data owner changes the delays and if the Ecotaxa associated project is annotated and visible, the validated zooplankton data will be available after 36 months from acquisition.
+<br>You can get full access to any dataset (project) by getting annotation or management permission to the associated Ecotaxa annotation project (for UVP projects only).
+<br>Warning about the zooplankton datasets: only validated (e.g. annotation visually checked by experts) are included in the displayed and downloaded datasets. Please check the validation ratio in the statistics page and in the data summary exported with the data. Do not hesitate to visit the Ecotaxa project to check the quality of the annotation.
+    <h3>Data provider information</h3>
+This application is designed to facilitate the processing and the display of the LISST and UVP datasets.
+    <br>A mobile instance will be available (contact <a href="mailto:marc.picheral@obs-vlfr.fr">marc.picheral@obs-vlfr.fr</a>) for field processing of your data but the importation of the projects will have to be done again on the server instance when back to shore.
+<br>We recommend keeping the default settings for the delays to release your datasets and make the associated Ecotaxa project visible. This will allow the access of the results and the visualization of the images.
+
+    <h3>Citation and disclaimer</h3>
+If you use EcoTaxa or Ecotaxa particle module in your work, we would appreciate that:
+<br>•	you cite it as: Picheral M, Colin S, Irisson J-O (2017). EcoTaxa, a tool for the taxonomic classification of images.
+    <a href="http://ecotaxa.obs-vlfr.fr">http://ecotaxa.obs-vlfr.fr</a>.
+<br>•	you consider setting aside some funds in your next grant to support its maintenance and development. Contact us to estimate what would be both reasonable and useful.
+<br>The Particle module of Ecotaxa was funded by SOERE MOOSE…..
+    <br>Contact: <a href="mailto:marc.picheral@obs-vlfr.fr">marc.picheral@obs-vlfr.fr</a> / Development by: <a href="http://www.altidev.com" target="_blank">Altidev</a>
+<br>Disclaimer: The managers of the EcoTaxa application are not responsible for the safekeeping of the images and associated data it hosts, even if they make their best to keep the application stable and secure.
   </div>
 </div>
 
@@ -37,6 +62,7 @@
   <tr >
     <td style="padding: 2px;white-space: nowrap;">West <input type="text" class="form-control" id="MapOutW" name="MapW" value="{{ reqfields['MapW'] }}"></td>
     <td>East <input type="text" class="form-control" id="MapOutE" name="MapE" value="{{ reqfields['MapE'] }}"></td></tr>
+    <td>East <input type="text" class="form-control" id="MapOutE" name="MapE" value="{{ reqfields['MapE'] }}"></td></tr>
   <tr><td colspan="2" style="padding-left: 40px;">South <input type="text" class="form-control" id="MapOutS" name="MapS" value="{{ reqfields['MapS'] }}">
     <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="ClearGeoFilter();">Clear</button>
   </td></tr>
@@ -57,15 +83,15 @@
   <button type="button" id="btfilt" class="btn btn-primary" onclick="DoSearch()" style="width: 140px;"><span class="glyphicon glyphicon-search"></span> Apply filters</button>
   <button type="button" id="btfilt" class="btn btn-primary" onclick="DisplayAll()" style="width: 200px;"><span class="glyphicon glyphicon-erase"></span> Display all </button>
 <br>
-  <button type="button" id="btfilt" class="btn btn-primary" onclick="DoExport()" style="margin-top: 5px;width: 140px;"><span class="glyphicon glyphicon-export"></span> Export selection</button>
+  <button type="button" id="btfilt" class="btn btn-primary" onclick="DoExport()" style="margin-top: 5px;width: 140px;" {% if not  current_user.is_authenticated %}disabled{% endif %} ><span class="glyphicon glyphicon-export"></span> Export selection</button>
   <button type="button" id="btfilt" class="btn btn-primary" onclick="ShowStat()" style="margin-top: 5px;width: 200px;"><span class="glyphicon glyphicon-signal"></span> Display selection statistics</button>
 <br>
   Dot color legend <span class='glyphicon glyphicon-info-sign' onclick="$('#dotlegend').toggle()"></span> <br>
   <div id="dotlegend" style="display: none">
   <span style="color: black;"><b>Private</b> : Hidden data</span><br>
-  <span style="color: red;"><b>Visible</b> : Graphs are visible and limited CTD&amp;particle export </span><br>
-  <span style="color: orange;"><b>Exportable</b> : Full CTD&amp;particle export </span><br>
-  <span style="color: green;"><b>Exportable</b> : Full CTD&amp;particle+Zooplankton export </span><br>
+  <span style="color: red;"><b>Visible</b> : Graphs are visible and limited CTD & particle export allowed </span><br>
+  <span style="color: orange;"><b>Exportable</b> : Full CTD & particle export allowed (plankton hidden or absent)</span><br>
+  <span style="color: green;"><b>Exportable</b> : Full CTD & particle & plankton export allowed </span><br>
 
 </div>
 
@@ -278,7 +304,9 @@ function DoSearch(){
 }
 function ShowStat() {
   var url="/part/statsample?"+$('#filt_form').serialize();
-  $('#graphdest').html("<div id=waiter><img src='/static/spinningred.gif' >Processing your request, please wait....</div>").load(url);
+  $('#graphdest').html("<div id=waiter><img src='/static/spinningred.gif' >Processing your request, please wait....</div>"
+      ).load(url, function( response, status, xhr ) {
+        if ( status == "error" ) { $( "#graphdest" ).html( xhr.status + " " + xhr.statusText );  } });
 }
 
 function DisplayAll()
@@ -470,7 +498,9 @@ map.on('click', function(evt) {
 
   if (feature) {
     var coordinates = feature.getGeometry().getCoordinates();
-    popup.setPosition(coordinates);
+{#    popup.setPosition(coordinates); Utilisation de l'evt plutot pour traiter le monde cyclique#}
+    popup.setPosition(evt.coordinate);
+    console.log(coordinates,evt.coordinate);
     MapPopupContent='Get Data for sample '+feature.get('psampleid');
     $(MapPopupElt).popover({
       'placement': 'right',

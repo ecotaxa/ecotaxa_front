@@ -125,18 +125,23 @@ def Partstatsample():
     sqlvisible, sqljoin = GetSQLVisibility()
     data['partprojcount']=database.GetAll("""SELECT pp.ptitle,count(*) nbr,pp.do_email,do_name,email,name,pp.instrumtype,pp.pprojid
         ,count(ps.sampleid ) nbrtaxo
-        ,p.visible,{1} as visibility
+        ,p.visible,visibility
         from part_samples ps
-        join part_projects pp on ps.pprojid=pp.pprojid        
+        --join part_projects pp on ps.pprojid=pp.pprojid        
+        join (select pp.*,cast ({1} as varchar(2) ) as visibility
+        from part_projects pp
+        LEFT JOIN projects p on pp.projid = p.projid
+        {2} 
+        ) pp on ps.pprojid=pp.pprojid
         left join ( select * from (
             select u.email,u.name,pp.projid,rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
             from projectspriv pp join users u on pp.member=u.id
             where pp.privilege='Manage' and u.active=true ) q where rang=1
           ) qpp on qpp.projid=pp.projid
         LEFT JOIN projects p on pp.projid = p.projid
-        {2}
+        
         where ps.psampleid in ({0} )
-        group by pp.ptitle,pp.do_email,do_name,email,name,p.visible,pp.instrumtype,pp.pprojid
+        group by pp.ptitle,pp.do_email,do_name,email,name,p.visible,pp.instrumtype,pp.pprojid,visibility
         order by pp.ptitle""".format(sampleinclause,sqlvisible, sqljoin ))
     data['instrumcount']=database.GetAll("""SELECT coalesce(pp.instrumtype,'not defined') instrum,count(*) nbr
         from part_samples ps

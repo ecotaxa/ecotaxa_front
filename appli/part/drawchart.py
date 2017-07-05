@@ -230,7 +230,8 @@ def part_drawchart():
                         DBData = database.GetAll(sql, {'psampleid': rs['psampleid'],'taxoid':c})
                         WV=database.GetAssoc2Col(sqlWV, {'psampleid': rs['psampleid']})
                     else: # si pas le droit, on fait comme s'il n'y avait pas de données.
-                        DBData=WV=[]
+                        DBData=[]
+                        WV = {}
                     # print("{} =>{}".format(rs['psampleid'],WV))
                     if len(DBData)>0:
                         data = np.empty((len(DBData), 2))
@@ -262,7 +263,7 @@ def part_drawchart():
                         top=-float(gvg('filt_depthmin'))
                     if gvg('filt_depthmax'):
                         bottom=-float(gvg('filt_depthmax'))
-                    else:
+                    elif len(WV)>0:
                         bottom =min(bottom,-max(WV.keys()))
                     if top>0: top=0
                     if bottom>=top:bottom=top-10
