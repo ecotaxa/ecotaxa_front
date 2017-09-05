@@ -161,7 +161,8 @@ def GenerateRawHistogram(psampleid):
         if PathDat.exists():
             LstFichiers = [PathDat]
         else:
-            LstFichiers = list((DossierUVPPath / 'raw' / ('HDR' + UvpSample.filename)).glob('HDR' + UvpSample.filename + "*.dat"))
+            # Le sorted n'as pas l'air necessaire d'après les essais sous windows, mais glob ne garanti pas l'ordre
+            LstFichiers = sorted(list((DossierUVPPath / 'raw' / ('HDR' + UvpSample.filename)).glob('HDR' + UvpSample.filename + "*.dat")))
     # print(LstFichiers)
     RawImgDepth={} # version non filtrée utilisée pour générer le graphique
     ImgDepth={} # version filtrée
@@ -220,7 +221,7 @@ def GenerateRawHistogram(psampleid):
     # ax = Fig.add_subplot(231)
     ax = plt.axes()
     aRawImgDepth=np.empty([len(RawImgDepth),2])
-    for i,(idx,dept) in enumerate(RawImgDepth.items()):
+    for i,(idx,dept) in enumerate(sorted(RawImgDepth.items(),key=lambda r:r[0])):
         aRawImgDepth[i]=idx,dept
     # Courbe bleu des données brutes
     ax.plot(aRawImgDepth[:,0] , -aRawImgDepth[:,1])
@@ -230,7 +231,7 @@ def GenerateRawHistogram(psampleid):
     aRawImgDepth=RawImgDepth=None # libère la mémoire des données brutes, elle ne sont plus utile une fois le graphe tracé
     # courbe rouge des données réduites à first==>Last et filtrées
     aFilteredImgDepth=np.empty([len(ImgDepth),2])
-    for i,(idx,dept) in enumerate(ImgDepth.items()):
+    for i,(idx,dept) in enumerate(sorted(ImgDepth.items(),key=lambda r:r[0])):
         aFilteredImgDepth[i]=idx,dept
     ax.plot(aFilteredImgDepth[:,0] , -aFilteredImgDepth[:,1],'r')
     MinDepth=aFilteredImgDepth[:,1].min()
