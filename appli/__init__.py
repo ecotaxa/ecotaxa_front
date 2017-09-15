@@ -263,11 +263,13 @@ from appli import schedule
 def scheduler_daily_task():
     app.logger.info("Start Daily Task")
     try:
-        import appli.cron
+        with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
+            g.db = None
+            import appli.cron
 
-        appli.cron.RefreshAllProjectsStat()
-        appli.cron.RefreshTaxoStat()
-        app.logger.info(appli.tasks.taskmanager.AutoClean())
+            appli.cron.RefreshAllProjectsStat()
+            appli.cron.RefreshTaxoStat()
+            app.logger.info(appli.tasks.taskmanager.AutoClean())
     except Exception as e:
         s=str(e)
         tb_list = traceback.format_tb(e.__traceback__)
