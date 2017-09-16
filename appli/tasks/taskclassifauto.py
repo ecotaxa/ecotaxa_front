@@ -102,7 +102,7 @@ class TaskClassifAuto(AsyncTask):
         logging.info("Variable shape %d Row, %d Col",*learn_var.shape)
         # Note : La multiplication des jobs n'est pas forcement plus performante, en tous cas sur un petit ensemble.
         if  self.param.Methode=='randomforest':
-            Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=5, min_samples_split=10, n_jobs=1)
+            Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1,class_weight = "balanced")
         elif  self.param.Methode=='svm':
             Classifier = svm.SVC()
         else:
