@@ -23,15 +23,29 @@
     <script src="/static/jquerycontextmenu/jquery.contextMenu.min.js" type="text/javascript"></script>
      <link href="/static/jquerycontextmenu/jquery.contextMenu.css" rel="stylesheet" type="text/css" />
 {% if g.headmenu %}
-    <table width="100%"><tr><td width="160px">
-    <br><div class="btn-group" style="width:150px;margin-right: 10px">
-    <button type="button" class="btn btn-default" data-toggle="dropdown" >Project Action</button>
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+    <table width="100%"><tr><td width="220px">
+    <br><div class="btn-group" style="width:90px;margin-right: 10px">
+    <button type="button" class="btn btn-default" data-toggle="dropdown" style="padding: 6px;">Project</button>
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"  style="padding: 6px;">
         <span class="caret"></span>
-        <span class="sr-only">Toggle Dropdown</span>
     </button>
-    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+    <ul class="dropdown-menu dropdown-menu-left" role="menu">
       {%   for m in g.headmenu %}
+          {% if m[1]=="SEP"%}
+            <li class="divider"></li>
+          {% else %}
+            <li><a href="{{ m[0] }}">{{ m[1] }}</a></li>
+          {% endif %}
+      {%  endfor %}
+  </ul>
+</div>
+    <div class="btn-group" style="width:90px;margin-right: 10px">
+    <button type="button" class="btn btn-default" data-toggle="dropdown"  style="padding: 6px;">Filtered</button>
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"  style="padding: 6px;">
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-left" role="menu">
+      {%   for m in g.headmenuF %}
           {% if m[1]=="SEP"%}
             <li class="divider"></li>
           {% else %}
@@ -227,7 +241,7 @@
 .ui-selected { background-color: #E9D6D7;}
 
 #column-right {margin-left: 260px;}
-#divheadinfo {position:fixed;top:0;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;}
+#divheadinfo {position:fixed;top:0;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;min-width: 1024px;}
 #topbar {position:fixed;top:80px;left: 1px;width:100%; height:40px;z-index:10; background-color: #fff;}
 body {margin-top: 125px;}
 {#Permet de fixer la largeur de la dropdown Taxo Annotation#}

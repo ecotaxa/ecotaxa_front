@@ -215,24 +215,36 @@ def indexPrj(PrjId):
 
     classiftab=GetClassifTab(Prj)
     g.ProjectTitle=Prj.title
-    g.headmenu = []
+    g.headmenu = [] # Menu project
+    g.headmenuF = []  # Menu Filtered
     g.headmenu.append(("/prjcm/%d"%(PrjId,),"Show confusion matrix"))
     if g.PrjAnnotate:
         g.headmenu.append(("","SEP"))
         if Prj.status=="Annotate":
-            g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Predict identifications"))
-        g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')" , "Export data with active filters"))
-        g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d"%(PrjId,),"Export all data"))
+            g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Train and Predict identifications"))
+            #TODO g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto')" , "Train and Predict identifications"))
+        if current_user.has_role(database.AdministratorLabel): # TODO pour Test Seulement
+            g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d" % (PrjId,), "Train and Predict identifications V2"))
+            g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2')" , "Train and Predict identifications V2"))
+            g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d&frommodel=Y" % (PrjId,), "Predict identifications from trained model"))
+            g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2?frommodel=Y')" , "Predict identifications from trained model"))
+
+        g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d"%PrjId , "Export"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')" , "Export"))
     if g.PrjManager:
         g.headmenu.append(("","SEP"))
+        g.headmenuF.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import images and metadata"))
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit project settings"))
-        g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')" % (PrjId,),
-                           "Extract Subset with active filter"))
+        g.headmenu.append(("/Task/Create/TaskSubset?p=%d&eps=y" % (PrjId,),"Extract Subset"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')" % (PrjId,),
+                           "Extract Subset"))
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))
         g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit or erase annotations massively"))
-        g.headmenu.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Erase objects with active filter or project"))
-        g.headmenu.append(("javascript:GotoWithFilter('/prj/editdatamass/%d')" % (PrjId,), "Edit objects data with active filter"))
+        g.headmenu.append(("/prj/editdatamass/%d" % (PrjId,), "Batch edit metadata"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/prj/editdatamass/%d')" % (PrjId,), "Batch edit metadata"))
+        g.headmenu.append(("/prjPurge/%d"%(PrjId,), "Delete objects or project"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Delete objects"))
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)

@@ -1,5 +1,5 @@
-from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate,database
-from flask_login import current_user
+from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate,database,gvp
+from flask_login import current_user,request
 from flask import  render_template, g, flash,jsonify
 import json,os,sys,datetime,shutil,flask,logging
 from flask_security import login_required
@@ -110,6 +110,9 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.taskclassifauto import TaskClassifAuto
     if ClassName=="TaskClassifAuto":
         return TaskClassifAuto(task)
+    from appli.tasks.taskclassifauto2 import TaskClassifAuto2
+    if ClassName=="TaskClassifAuto2":
+        return TaskClassifAuto2(task)
     from appli.tasks.tasktaxoimport import TaskTaxoImport
     if ClassName=="TaskTaxoImport":
         return TaskTaxoImport(task)
@@ -175,6 +178,7 @@ def ListTasks(owner=None):
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
 @login_required
 def TaskCreateRouter(ClassName):
+    gvp('dummy') # Protection bug flask connection reset si on fait post sans lire les champs
     AddTaskSummaryForTemplate()
     t=TaskFactory(ClassName)
     t.task.owner_id=current_user.get_id()

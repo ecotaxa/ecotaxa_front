@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+
+
+{% block body %}
+<h3>AUTOMATIC CLASSIFICATION V2: Selection of classification from Learning Set</h3>
+<p>Train on the following categories and, optionally, map them to others when predicting the identification of new objects.&nbsp;<span data-toggle="tooltip" data-placement="right" data-html="true" title="
+<p style='text-align: left'>The model will be trained with objects currently validated in the categories in the left column, within the projects selected at the previous step. It will therefore only be able to recognise those.
+Sometimes training on detailed, morphologically homogeneous, categories makes the model better but only a broader category is ecologically meaningful. In that case, all objects classified in the detailed categories can be regrouped in a broader one. This is done by mapping all detailed categories to the same broad category in the right column.
+</p>"
+class="glyphicon glyphicon-question-sign"></span></p>
+
+<script>
+    function Applyfilter(){
+        $('#TblTaxo input').prop( 'checked', false );
+        var Limit=parseInt($('#selectlimit').val());
+        var LimitType=$('#selecttype').val();
+        $('#TblTaxo input').each(function(){
+            if((LimitType=='N')&&($(this).data("nbr")>=Limit))
+                $(this).prop( 'checked', true );
+            if((LimitType=='P')&&($(this).data("pct")>=Limit))
+                $(this).prop( 'checked', true );
+        });
+    }
+
+</script>
+
+<form method="post">
+<input type="hidden" name="seltaxo" value="Y">
+{{ ExtraHeader |safe }}
+Use at most <input name="learninglimit" value="5000"> objects per category to train the model.
+<button type="submit" class="btn btn-primary">Continue to classifier option screen</button>
+<p style="margin-top: 5px;">
+  Get mapping from project: <select id="TaxoMappingFromPrj" style="width: 400px;margin-top: 5px">
+  <option value="{{ prj.projid }}" selected>{{ prj.title }}</option>
+</select>
+  <button type="button" class="btn btn-xs btn-primary" onclick="DoMapping()">Map</button>
+  <button type="button" class="btn btn-xs btn-default" onclick="ClearMapping()">Clear</button>
+
+</p>
+  <script>
+  $('#TaxoMappingFromPrj').select2({
+        ajax: {
+            url: "/search/exploreproject",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term   };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        dropdownCssClass:"width400"
+    }); // Select2 Ajax
+    function DoMapping() {
+      $.getJSON("/search/gettaxomapping",{projid:$('#TaxoMappingFromPrj').val()},function (data) {
+        $(".taxolb").html("").change();
+        for(var s in data.mapping) {
+          var liste=$("#taxolb"+s);
+          for (var tel in data.taxo) {
+            var newOption = new Option(data.taxo[tel], tel, false, false);
+            liste.append(newOption)
+          }
+          liste.val(data.mapping[s]).change();
+        }
+      });
+    }
+    function ClearMapping() {
+      $(".taxolb").val('').change();
+    }
+</script>
+select Categories with more than <input type="text" id="selectlimit" value="20" size="2">
+    <select id="selecttype">
+        <option value="N">Objects</option>
+        <option value="P">% of objects</option>
+    </select>
+<input type="button" class="btn" value="Select" onclick="Applyfilter()"><br>
+Select <a href="#" onclick="$('#TblTaxo input').prop( 'checked', true )">ALL</a>
+    / <a href="#" onclick="$('#TblTaxo input').prop( 'checked', false );">None</a>
+<table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
+    <tr><th colspan="2">(id) Select</th><th width="200" style="text-align: center;">Category</th><th style="text-align: center;">Nbr</th>
+      <th  style="text-align: center;">%</th><th  style="text-align: center;">Map to appear as</th></tr>
+    {%   for r in g.TaxoList %}
+        <tr><td>({{ r[0] }})</td><td><input type="checkbox" value="Y" name="taxo{{ r[0] }}" data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" {{ r[4] }}></td>
+          <td>{{ r[1] }} </td><td class="rightfixedfont">{{ r[2] }}</td><td class="rightfixedfont">{{ r[3] }} %</td>
+          <td><div class="input-group">
+       <select id="taxolb{{ r[0] }}" name="taxolb{{ r[0] }}" style="width: 210px" class='taxolb' > </select>
+            <span class="input-group-btn">
+                <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolb{{ r[0] }}">
+                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></button>
+                </span>
+    </div></td>
+        </tr>
+    {% endfor %}
+</table>
+</form>
+
+<script src='/static/common.js'></script>
+<script>
+$(function () {  $('[data-toggle="tooltip"]').tooltip()})
+
+function SubmitProjectSelection() {
+  var srclst=$(".selproj:checked").map(function(){return $(this).data('prjid');}).get().join(',');
+  PostDynForm("?{{ url }}",{src:srclst});
+}
+
+$(document).ready(function() {
+    $(".taxolb").select2({
+        ajax: {
+            url: "/search/taxo",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data, page) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 3
+    }); // Select2 Ajax
+    $('#TaxoModal').on('show.bs.modal', function (e) {
+        var button = $(e.relatedTarget); // Button that triggered the modal
+        var targetid = button.data('mytargetid');
+         $("#TaxoModalBody").html("Loading...");
+         $("#TaxoModalBody").load("/search/taxotree?target="+targetid);
+    });
+    }); // Ready
+</script>
+
+
+<!-- Modal -->
+<div class="modal " id="TaxoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <div id="TaxoModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
