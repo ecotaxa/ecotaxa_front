@@ -296,7 +296,7 @@ Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
 Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
 GlobalDebugSQL=False
-# GlobalDebugSQL=True
+GlobalDebugSQL=True
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,keyid=0):
     if g.db is None:
         g.db=db.engine.raw_connection()
@@ -402,3 +402,17 @@ def GetDBToolsDir():
             toolsdir=os.path.join( os.path.dirname(os.path.realpath(__file__)),"..",toolsdir)
             toolsdir=os.path.normpath(toolsdir)
     return toolsdir
+
+def CSVIntStringToInClause(InStr):
+    if InStr is None:
+        return ""
+    return ",".join([str(int(x)) for x in InStr.split(',')])
+
+
+def GetTaxoNameFromIdList(IdList):
+    sql = """SELECT tf.id, tf.name||case when p1.name is not null and tf.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+             FROM taxonomy tf
+            left join taxonomy p1 on tf.parent_id=p1.id
+            WHERE  tf.id = any (%s) 
+            order by tf.name """
+    return GetAll(sql,[IdList])

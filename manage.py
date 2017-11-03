@@ -205,6 +205,19 @@ def UpdateSunPos(ProjId):
 
 
         # print(Result)
+@manager.command
+def ExtractCategoriesFromRFModel(modeldir):
+    from sklearn.externals import joblib
+    import json
+    from pathlib import Path
+    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
+        g.db = None
+        ModelFolder = Path("RF_models") / modeldir
+        Meta = json.load((ModelFolder / "meta.json").open("r"))
+        Classifier = joblib.load(ModelFolder / 'random_forest.jbl')
+        # Meta['categories']=[int(x) for x in Classifier.classes_]
+        Meta['categories'] ={r[0]:r[1] for r in database.GetTaxoNameFromIdList([int(x) for x in Classifier.classes_])}
+        json.dump(Meta,(ModelFolder / "meta.json").open("w"),indent="\t")
 
 
 
