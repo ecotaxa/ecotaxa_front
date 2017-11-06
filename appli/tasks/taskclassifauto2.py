@@ -240,7 +240,7 @@ class TaskClassifAuto2(AsyncTask):
 
     def QuestionProcessScreenSelectSource(self,Prj):
         # Premier écran de configuration, choix du projet de base
-        PreviousTxt = ""
+        PreviousTxt = self.GetFilterText()
         d = DecodeEqualList(Prj.classifsettings)
         TargetFeatures = set(DecodeEqualList(Prj.mappingobj).values())
         PreviousLS=d.get("baseproject", "")
@@ -282,6 +282,7 @@ class TaskClassifAuto2(AsyncTask):
 
     def QuestionProcessScreenSelectSourceTaxo(self,Prj):
         # Second écran de configuration, choix des taxon utilisés dans la source
+
         # recupere les categories et le nombre d'occurence dans les projet de base/learning
         sql = """select n.classif_id,t.name||case when p1.name is not null and t.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
                 ,n.nbr
@@ -302,6 +303,7 @@ class TaskClassifAuto2(AsyncTask):
                       g.TaxoList]  # Ajout du % d'objet par categorie
 
         ExtraHeader="<input type='hidden' name='src' value='{}'>".format(gvp('src', gvg('src')))
+        ExtraHeader += self.GetFilterText()
 
         return render_template('task/classifauto2_create_lsttaxo.html'
                                ,url=request.query_string.decode('utf-8')
@@ -315,11 +317,18 @@ class TaskClassifAuto2(AsyncTask):
                 Models[dir.name]=json.load((dir/"meta.json").open("r"))
         return Models
 
+    def GetFilterText(self):
+        TxtFiltres=sharedfilter.GetTextFilter(self.param.filtres)
+        if TxtFiltres:
+            return "<p><span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters</span><BR>Filters : "+ TxtFiltres+"</p>"
+        else:
+            return ""
+
     def QuestionProcessScreenSelectModel(self, Prj):
         Models=self.ReadModels()
         # app.logger.info("Modèles = %s",Models)
         # Premier écran de configuration pour prédiction depuis un modèle, choix du projet du modèle
-        PreviousTxt = ""
+        PreviousTxt = self.GetFilterText()
         d = DecodeEqualList(Prj.classifsettings)
         g.posttaxomapping=d.get('posttaxomapping',"")
         TargetFeatures = set(DecodeEqualList(Prj.mappingobj).values())
@@ -350,6 +359,7 @@ class TaskClassifAuto2(AsyncTask):
 
     def QuestionProcessScreenSelectModelTaxo(self,Prj):
         # Second écran de configuration, mapping des taxon utilisés dans le modele
+        PreviousTxt = self.GetFilterText()
         g.modeldir=gvp('modeldir')
         ModelFolder = Path("RF_models") / g.modeldir
         Meta = json.load((ModelFolder / "meta.json").open("r"))
@@ -357,16 +367,17 @@ class TaskClassifAuto2(AsyncTask):
         g.TaxoList = database.GetTaxoNameFromIdList([int(x) for x in categories])
         return render_template('task/classifauto2_create_lsttaxo_frommodel.html'
                                ,url=request.query_string.decode('utf-8')
-                               ,prj=Prj)
+                               ,prj=Prj, PreviousTxt=PreviousTxt)
     def QuestionProcess(self):
         Prj=database.Projects.query.filter_by(projid=gvg("projid")).first()
         if not Prj.CheckRight(1):
             return PrintInCharte("ACCESS DENIED for this project<br>")
         g.prjtitle=Prj.title
+        for k in sharedfilter.FilterList:
+            self.param.filtres[k] = gvg(k, "")
         g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
         txt=""
         errors=[]
-
         # Le projet de base est choisi second écran ou validation du second ecran
         if gvp('starttask')=="Y":
             # validation du second ecran
@@ -390,8 +401,6 @@ class TaskClassifAuto2(AsyncTask):
             # self.param.Taxo=",".join( (x[4:] for x in request.form if x[0:4]=="taxo") )
             self.param.Taxo =gvp('Taxo')
             self.param.CustSettings=DecodeEqualList(gvp("TxtCustSettings"))
-            for k in sharedfilter.FilterList:
-                self.param.filtres[k] = gvg(k, "")
             g.TxtCustSettings=gvp("TxtCustSettings")
             # Verifier la coherence des données
             if self.param.usemodel_foldername=='':
@@ -498,7 +507,7 @@ class TaskClassifAuto2(AsyncTask):
         # app.logger.info(revobjmap)
         data = self.param
         data.src=PrjListInClause
-        return render_template('task/classifauto2_create_settings.html',header=txt,data=data)
+        return render_template('task/classifauto2_create_settings.html',header=txt,data=data,PreviousTxt = self.GetFilterText())
 
     def GetReverseObjMap(self, Prj):
         mappingobj=getattr(Prj,'mappingobj',None)   #Prj peut être un objet
