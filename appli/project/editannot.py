@@ -8,6 +8,7 @@ from flask_security.decorators import roles_accepted
 from collections import OrderedDict
 import os,time,math,collections,appli
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc2Col
+from appli.project.main import RecalcProjectTaxoStat
 
 def MakeHTMLSelect(selname,Values,SelValue="",ExtraTags="",AddEmptyLineFirst=False,SortByValues=False):
     txt="<select name={0} id={0} {1} >".format(selname,ExtraTags)
@@ -173,6 +174,7 @@ Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'check
 
         """.format(**sqlclause)
         RowCount=ExecSQL(sql,debug=True)
+        RecalcProjectTaxoStat(Prj.projid)
         txt+="<div class='alert alert-success' role='alert'>Annotation replacement Done successfully. Updated %d Row</div>"%RowCount
         txt+="<br><a class='btn btn-lg btn-primary' href='/prj/%s'>Back to target project</a>"%Prj.projid
         return PrintInCharte(txt)

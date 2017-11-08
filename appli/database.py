@@ -4,7 +4,7 @@
 from appli import db,app,g
 from flask_security import  UserMixin, RoleMixin
 from flask_login import current_user
-from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
+from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP,REAL
 from sqlalchemy import Index,Sequence,func
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import foreign,remote
@@ -102,6 +102,9 @@ class Projects(db.Model):
     comments  = db.Column(VARCHAR)
     projtype  = db.Column(VARCHAR(50))
     fileloaded  = db.Column(VARCHAR)
+    rf_models_used = db.Column(VARCHAR)
+    cnn_network_id=db.Column(VARCHAR(50))
+
     def __str__(self):
         return "{0} ({1})".format(self.title,self.projid)
     def CheckRight(self,Level,userid=None): # Level -1=Read public, 0 = Read, 1 = Annotate, 2 = Admin . userid=None = current user
@@ -155,6 +158,16 @@ class ProjectsPriv(db.Model):
     def __str__(self):
         return "{0} ({1})".format(self.member,self.privilege)
 Index('IS_ProjectsPriv',ProjectsPriv.__table__.c.projid,ProjectsPriv.__table__.c.member, unique=True)
+
+class ProjectsTaxoStat(db.Model):
+    __tablename__ = 'projects_taxo_stat'
+    projid = db.Column(INTEGER,db.ForeignKey('projects.projid',ondelete="CASCADE"), primary_key=True)
+    id  = db.Column(INTEGER, primary_key=True)
+    nbr  = db.Column(INTEGER)
+    nbr_v  = db.Column(INTEGER)
+    nbr_d  = db.Column(INTEGER)
+    nbr_p  = db.Column(INTEGER)
+
 
 class Samples(db.Model):
     __tablename__ = 'samples'
@@ -245,6 +258,16 @@ for i in range(1,501):
     setattr(ObjectsFields,"n%02d"%i,db.Column(FLOAT))
 for i in range(1,21):
     setattr(ObjectsFields,"t%02d"%i,db.Column(VARCHAR(250)))
+
+class Objects_cnn_features(db.Model):
+    __tablename__ = 'obj_cnn_features'
+    objcnnid = db.Column(BIGINT,db.ForeignKey('obj_head.objid',ondelete="CASCADE"), primary_key=True)
+    objhrel=db.relationship("Objects",foreign_keys="Objects.objid",primaryjoin="Objects_cnn_features.objcnnid==Objects.objid" ,uselist=False, backref="objcnnrel")
+
+# Ajout des colonnes numériques & textuelles libres
+for i in range(1,51):
+    setattr(Objects_cnn_features,"cnn%02d"%i,db.Column(REAL))
+
 
 # Index('IS_ObjectsProject',Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
 #utile pour home de  classif manu, car PG ne sait pas utiliser les Skip scan index.

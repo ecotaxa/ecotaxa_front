@@ -104,11 +104,23 @@ def UpdateProjectStat(PrjId):
          SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
          from projects p
          left join
-         (select projid, count(*) nbr,count(classif_id) nbrclassified,count(case when classif_qual='V' then 1 end) nbrvalidated
-              from objects o
+         (SELECT  projid,sum(nbr) nbr,sum(case when id>0 then nbr end) nbrclassified,sum(nbr_v) nbrvalidated
+              from projects_taxo_stat
               where projid=%(projid)s
               group by projid )q on p.projid=q.projid
          where projects.projid=%(projid)s and p.projid=%(projid)s""",{'projid':PrjId})
+######################################################################################################################
+def RecalcProjectTaxoStat(PrjId):
+    ExecSQL("""begin;
+        delete from projects_taxo_stat WHERE projid=%(projid)s;
+        insert into projects_taxo_stat(projid, id, nbr, nbr_v, nbr_d, nbr_p) 
+          select projid,coalesce(classif_id,-1) id,count(*) nbr,count(case when classif_qual='V' then 1 end) nbr_v
+          ,count(case when classif_qual='D' then 1 end) nbr_d,count(case when classif_qual='p' then 1 end) nbr_p
+          from obj_head
+          where projid=%(projid)s
+          GROUP BY projid,classif_id;
+          commit;""",{'projid':PrjId})
+
 ######################################################################################################################
 def GetFieldList(Prj,champ='classiffieldlist'):
     fieldlist=collections.OrderedDict()
@@ -318,8 +330,26 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         from objects o
         LEFT JOIN  acquisitions acq on o.acquisid=acq.acquisid
         """+whereclause
+    # Optimisation pour des cas simples et fréquents
+    if whereclause==' where o.projid=%(projid)s ':
+        sqlcount="""select sum(nbr),sum(nbr_v) NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
+                    from projects_taxo_stat 
+                    where projid=%(projid)s """
+    if whereclause==' where o.projid=%(projid)s  and o.classif_id=%(taxo)s ':
+        sqlcount = """select sum(nbr),sum(nbr_v) NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
+                from projects_taxo_stat 
+                where projid=%(projid)s and id=%(taxo)s"""
+    if whereclause==" where o.projid=%(projid)s  and o.classif_id=%(taxo)s  and o.classif_qual!='V'":
+        sqlcount = """select sum(nbr-nbr_v),0 NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
+                from projects_taxo_stat 
+                where projid=%(projid)s and id=%(taxo)s"""
+    # ' where o.projid=%(projid)s '
+    # ' where o.projid=%(projid)s  and o.classif_id=%(taxo)s '
     (nbrtotal,nbrvalid,nbrdubious,nbrpredict)=GetAll(sqlcount,sqlparam,debug=False)[0]
-    pagecount=math.ceil(nbrtotal/ippdb)
+    if nbrtotal is None: # si table vide
+        nbrtotal=nbrvalid=nbrdubious=nbrpredict=0
+        RecalcProjectTaxoStat(PrjId)
+    pagecount=math.ceil(int(nbrtotal)/ippdb)
     if sortby=="classifname":
         sql+=" order by t.name "+sortorder+" ,objid "+sortorder
     elif sortby!="":
@@ -526,19 +556,19 @@ def GetClassifTab(Prj):
             InitClassif=",".join(InitClassif)
         else:
             InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
-    ExtraFilter=""
+    ColForNbr="nbr"
     if g.PublicViewMode:
-        ExtraFilter = " and classif_qual='V' "
+        ColForNbr = " nbr_v "
     InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
     sql="""select t.id,t.name as taxoname,case when tp.name is not null and t.name not like '%% %%'  then ' ('||tp.name||')' else ' ' end as  taxoparent,nbr,nbrnotv
-    from (  SELECT    o.classif_id,   c.id,count(classif_id) Nbr,count(case when classif_qual='V' then NULL else o.classif_id end) NbrNotV
-        FROM (select * from objects where projid=%(projid)s {0}) o
+    from (  SELECT    o.classif_id,   c.id,coalesce(sum(nbr),0) Nbr,coalesce(sum(nbr-nbr_v),0) NbrNotV
+        FROM (select id classif_id,{0} nbr,nbr_v from projects_taxo_stat where id>0 and projid=%(projid)s ) o
         FULL JOIN (VALUES {1}) c(id) ON o.classif_id = c.id
         GROUP BY classif_id, c.id
       ) o
     JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
     left JOIN taxonomy tp ON t.parent_id = tp.id
-    order by t.name       """.format(ExtraFilter,InitClassif)
+    order by t.name       """.format(ColForNbr,InitClassif)
     param={'projid':Prj.projid}
     res=GetAll(sql,param,debug=False,cursor_factory=psycopg2.extras.RealDictCursor)
     ids=[x['id'] for x in res]
@@ -621,6 +651,8 @@ def prjGetClassifTab(PrjId):
         return "Project doesn't exists"
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
     g.PublicViewMode = not Prj.CheckRight(0)
+    if gvp('ForceRecalc')=='Y':
+        RecalcProjectTaxoStat(Prj.projid)
     UpdateProjectStat(Prj.projid)
     g.Projid=Prj.projid
     if gvp("taxo")!="":

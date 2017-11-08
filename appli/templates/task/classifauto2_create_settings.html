@@ -123,7 +123,12 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
 </table>
 </td><td style="width: 20px"></td><td valign="top">
   {% if g.SCN %}
-  Use Deep Learning features : <input type="checkbox" name="usescn" id="usescn">
+  Use Deep Learning features :
+    {% if g.SCNImpossible %}
+      <div class="bg-warning"><span class="glyphicon glyphicon-exclamation-sign"></span> Not Available : {{ g.SCNImpossible }}</div>
+      {% else %}
+    <input type="checkbox" name="usescn" id="usescn" value="Y">
+      {% endif %}
   <br>This functionnality require availaibility of SCN/Deep learning features
 <style>
 #TblScn td:nth-child(1) {max-width: 300px;}
@@ -134,7 +139,7 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
       <th>Project</th>
       <th># Obj </th>
       <th># Missing SCN Features</th>
-      <th>Model Name</th>
+      <th>SCN Network</th>
     </tr>
   {%   for r in g.SCN %}
     <tr><td>{{ r['projid'] }} - {{ r['title'] }}</td>
