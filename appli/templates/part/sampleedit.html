@@ -212,13 +212,18 @@ label {font-size: 12px; font-weight: normal;}
 <a href="/part/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
 {% if psampleid>0 %}
     <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove Sample</button>
+    <input type="checkbox" name="forcerecalc" id="forcerecalc" value="Y"> Force Histogram computation when saving
 {% endif %}
 
         </td>
     </tr>
 </table>
 </form>
-
+<script>
+  $('#acq_aa,#acq_exp,#acq_volimage,#acq_pixel,#profileid').change(function () {
+    $('#forcerecalc').prop('checked',true);
+  });
+</script>
 
 
 <div class="modal " id="confirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

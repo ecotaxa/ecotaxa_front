@@ -11,7 +11,7 @@ from appli.database import GetAll
 import appli.project.main
 import appli.part.database as partdatabase
 from appli.part import LstInstrumType
-import appli.part.uvp_sample_import,appli.part.common_sample_import,appli.part.lisst_sample_import
+import appli.part.uvp_sample_import,appli.part.common_sample_import,appli.part.lisst_sample_import,appli.part.prj
 
 class TaskPartZooscanImport(AsyncTask):
     class Params (AsyncTask.Params):
@@ -59,19 +59,25 @@ class TaskPartZooscanImport(AsyncTask):
 
                 if not self.param.ProcessOnlyMetadata:
                     if Prj.instrumtype == 'uvp5':
-                        logging.info("UVP Sample %d Metadata processed, Raw histogram in progress" % (psampleid))
+                        logging.info("UVP Sample %d Metadata processed, Raw histogram in progress" % (psampleid,))
                         appli.part.uvp_sample_import.GenerateRawHistogram(psampleid)
                         self.UpdateProgress(100 * (NbrDone + 0.6) / Nbr,"Raw histogram of profile %s  processed, Particle histogram in progress" % (sample['profileid']))
                         appli.part.uvp_sample_import.GenerateParticleHistogram(psampleid)
                         self.UpdateProgress(100 * (NbrDone + 0.7) / Nbr, "Particle histogram of profile %s  processed, CTD in progress" % (sample['profileid']))
                     if Prj.instrumtype == 'lisst':
-                        logging.info("LISST Sample %d Metadata processed, Particle histogram in progress" % (psampleid))
+                        logging.info("LISST Sample %d Metadata processed, Particle histogram in progress" % (psampleid,))
                         appli.part.lisst_sample_import.GenerateParticleHistogram(psampleid)
-                        self.UpdateProgress(100 * (NbrDone + 0.7) / Nbr,"Detailled histogram of profile %s  processed, CTD histogram in progress" % (sample['profileid']))
+                        self.UpdateProgress(100 * (NbrDone + 0.7) / Nbr,"Detailed histogram of profile %s  processed, CTD histogram in progress" % (sample['profileid']))
 
                     if Prj.instrumtype in ('uvp5','lisst'):
                         appli.part.common_sample_import.ImportCTD(psampleid,self.param.user_name,self.param.user_email)
                         self.UpdateProgress(100 * (NbrDone + 0.95) / Nbr,"CTD of profile %s  processed" % (sample['profileid']))
+
+                appli.part.prj.ComputeHistoDet(psampleid, Prj.instrumtype)
+                appli.part.prj.ComputeHistoRed(psampleid, Prj.instrumtype)
+                appli.part.prj.ComputeZooMatch(psampleid, Prj.projid)
+                appli.part.prj.ComputeZooHisto(psampleid)
+
                 NbrDone+=1
 
         partdatabase.ComputeOldestSampleDateOnProject()

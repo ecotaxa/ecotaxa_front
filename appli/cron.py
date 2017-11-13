@@ -3,6 +3,7 @@
 from appli.database import ExecSQL,GetAll
 from appli.part.database import ComputeOldestSampleDateOnProject
 from appli.project.main import RecalcProjectTaxoStat
+import appli.part.prj
 
 def RefreshAllProjectsStat():
     # Tout les objets validés sans classifications sont repassés en non validés
@@ -10,9 +11,9 @@ def RefreshAllProjectsStat():
     ExecSQL("UPDATE projects SET  objcount=Null,pctclassified=null,pctvalidated=NULL")
     ExecSQL("""UPDATE projects
      SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
-     from (select projid, count(*) nbr,count(classif_id) nbrclassified,count(case when classif_qual='V' then 1 end) nbrvalidated
-          from obj_head o
-          group by projid )q
+     from (SELECT  projid,sum(nbr) nbr,sum(case when id>0 then nbr end) nbrclassified,sum(nbr_v) nbrvalidated
+          from projects_taxo_stat
+          group by projid  )q
      where projects.projid=q.projid""")
     ExecSQL("""delete from samples s
               where not exists (select 1 from objects o where o.sampleid=s.sampleid )""")
@@ -53,7 +54,7 @@ def RefreshTaxoStat():
         print("RefreshTaxoStat updated %d level %d taxo"%(n,i))
         if n==0:
             break
-
+    appli.part.prj.GlobalTaxoCompute()
 
 if __name__ == "__main__":
     RefreshTaxoStat()

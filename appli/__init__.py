@@ -28,6 +28,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security
 import inspect,html,math,threading,time,traceback
 import appli.securitycachedstore
+import matplotlib
+matplotlib.use('Agg')
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')

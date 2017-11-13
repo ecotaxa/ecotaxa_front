@@ -79,7 +79,7 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
 </table>
 <p >
   <b>Action : </b>
-<input type="checkbox" name="dohistodet" value="Y"> Compute detailled histogram
+<input type="checkbox" name="dohistodet" value="Y"> Compute detailed histogram
 - <input type="checkbox" name="dohistored" value="Y"> Compute reduced histogram
 - <input type="checkbox" name="domatchecotaxa" value="Y"> Match Ecotaxa sample
 - <input type="checkbox" name="dohistotaxo" value="Y"> Compute taxonomy histogram
@@ -90,6 +90,9 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
 </div>
 <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove selected samples</button>
 
+{% if Prj.instrumtype=='uvp5' %}
+<br>Show importation result graph : {%   for i in range(0,dbsample|length,50) %} <a href="/part/prj_uvpgraph/{{Prj.pprojid}}/{{i}}">Page {{(i//50)+1}}</a>  {% endfor %}
+{% endif %}
 
 <div class="modal " id="confirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">

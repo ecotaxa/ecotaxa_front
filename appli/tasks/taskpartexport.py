@@ -28,6 +28,7 @@ class TaskPartExport(AsyncTask):
                 self.samples=[]
                 self.samplesdict = {}
                 self.excludenotliving=False
+                self.OutFile=None
 
 
     def __init__(self,task=None):
@@ -348,7 +349,7 @@ class TaskPartExport(AsyncTask):
         logging.info("samples = %s" % (self.param.samples ))
         samples = self.GetSamples()
         DTNomFichier = datetime.datetime.now().strftime("%Y%m%d_%H_%M")
-        BaseFileName="export_detailled_{0:s}".format(DTNomFichier)
+        BaseFileName="export_detailed_{0:s}".format(DTNomFichier)
         self.param.OutFile= BaseFileName+".zip"
         zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
@@ -672,10 +673,16 @@ order by tree""".format(lstcatwhere)
                 nomfichier="{0}_{1}_CTD_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier)
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier,"wt") as f:
-                    res=GetAll("select * from part_ctd where psampleid=%s ORDER BY lineno",(S['psampleid'],))
                     cols=sorted(CTDFixedColByKey.keys())
-                    colsname=["depth","datetime"]+[CTDFixedColByKey[x] for x in cols]
-                    cols=["depth","datetime"] +cols
+                    cols.remove('datetime')
+                    res=GetAll("""select to_char(datetime,'YYYYMMDDHH24MISSMS') as datetime,{},{} 
+                                      from part_ctd where psampleid=%s 
+                                      ORDER BY lineno""".format(
+                                    ",".join(cols),",".join(["extrames%02d" % (i + 1) for i in range(20)]))
+                               ,(S['psampleid'],))
+                    cols.remove('depth')
+                    cols = ["depth", "datetime"] + cols # passe dept et datetime en premieres colonnes
+                    colsname = [CTDFixedColByKey[x] for x in cols]
                     CtdCustomCols=DecodeEqualList(S['ctd_desc'])
                     CtdCustomColsKeys=sorted(['extrames%s' % x for x in CtdCustomCols.keys()])
                     cols.extend(CtdCustomColsKeys)
