@@ -309,6 +309,8 @@ def TaskGetStatus(TaskID):
                     f=task.GetResultFile()
                     if f is None:
                         rep['d']['ExtraAction']="Error, final file not available"
+                    elif f =='':
+                        None # Parfois l'export ne retourne pas de fichier car envoi sur FTP
                     else:
                         rep['d']['ExtraAction']="<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' role='button'>Get file %s</a>"%(TaskID,f,f)
                         if getattr(task.param,'ProjectId',None):

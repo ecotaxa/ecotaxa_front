@@ -32,6 +32,7 @@ class TaskExportTxt(AsyncTask):
                 self.sumsubtotal=''
                 self.internalids=''
                 self.typeline=''
+                self.putfileonftparea=''
 
 
     def __init__(self,task=None):
@@ -330,8 +331,21 @@ class TaskExportTxt(AsyncTask):
         else:
             raise Exception("Unsupported exportation type : %s"%(self.param.what,))
 
-        self.task.taskstate="Done"
-        self.UpdateProgress(100,"Export successfull")
+        if self.param.putfileonftparea=='Y':
+            fichier = Path(self.GetWorkingDir()) /  self.param.OutFile
+            fichierdest=Path(app.config['SERVERLOADAREA'])/"Exported_data"
+            if not fichierdest.exists():
+                fichierdest.mkdir()
+            NomFichier= "task_%d_%s"%(self.task.id,self.param.OutFile)
+            fichierdest = fichierdest / NomFichier
+            fichier.rename(fichierdest)
+            self.param.OutFile=''
+            self.task.taskstate = "Done"
+            self.UpdateProgress(100, "Export successfull : File '%s' is available on the 'Exported_data' FTP folder"%NomFichier)
+        else:
+            self.task.taskstate = "Done"
+            self.UpdateProgress(100, "Export successfull")
+
 
         # self.task.taskstate="Error"
         # self.UpdateProgress(10,"Test Error")
@@ -371,6 +385,7 @@ class TaskExportTxt(AsyncTask):
                 self.param.internalids = gvp("internalids")
                 self.param.typeline = gvp("typeline")
                 self.param.splitcsvby = gvp("splitcsvby")
+                self.param.putfileonftparea = gvp("putfileonftparea")
                 if self.param.splitcsvby=='sample': # si on splitte par sample, il faut les données du sample
                     self.param.sampledata='1'
                 # Verifier la coherence des données
