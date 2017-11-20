@@ -144,16 +144,17 @@ class TaskExportTxt(AsyncTask):
         splitcsv = (self.param.splitcsvby != "")
         self.param.OutFile= "export_{0:d}_{1:s}.{2}".format(Prj.projid
                                                             ,datetime.datetime.now().strftime("%Y%m%d_%H%M")
-                                                            ,"zip" if splitcsv else "tsv" )
-        if splitcsv  :
-            zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(),self.param.OutFile)
-                                    , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+                                                            ,"zip"  )
+
+        zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(),self.param.OutFile)
+                                , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+        if splitcsv:
             csvfilename='temp.tsv'
+            prevvalue = "NotAssigned"
         else:
-            csvfilename=self.param.OutFile
-            zfile=None
+            csvfilename =self.param.OutFile.replace('.zip','.tsv')
+            prevvalue = self.param.OutFile.replace('.zip', '')
         fichier=os.path.join(self.GetWorkingDir(),csvfilename)
-        prevvalue="NotAssigned"
         csvfile=None
         for r in self.pgcur:
             if (csvfile is None and (splitcsv == False)) or ((prevvalue!=r[splitfield]) and splitcsv ):
@@ -161,7 +162,8 @@ class TaskExportTxt(AsyncTask):
                     csvfile.close()
                     if zfile :
                         zfile.write(fichier,prevvalue+".tsv")
-                prevvalue = r[splitfield]
+                if splitcsv:
+                    prevvalue = r[splitfield]
                 logging.info("Creating file %s" % (fichier,))
                 csvfile=open(fichier,'w',encoding='latin_1')
                 wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_NONNUMERIC  )
