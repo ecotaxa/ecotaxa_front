@@ -8,6 +8,7 @@ from flask_security.decorators import roles_accepted
 from appli.search.leftfilters import getcommonfilters
 import os,time,math,collections,appli,appli.project.sharedfilter as sharedfilter
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc2Col
+import appli.project.main
 
 
 def GetFieldList(Prj):
@@ -89,3 +90,58 @@ def PrjEditDataMass(PrjId):
     # txt+="%s"%(Lst,)
 
     return PrintInCharte(render_template("project/prjeditdatamass.html",Lst=Lst,header=txt))
+
+######################################################################################################################
+@app.route('/prj/resettopredicted/<int:PrjId>', methods=['GET', 'POST'])
+@login_required
+def PrjResetToPredicted(PrjId):
+    request.form  # Force la lecture des données POST sinon il y a une erreur 504
+    Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    if Prj is None:
+        flash("Project doesn't exists",'error')
+        return PrintInCharte("<a href=/prj/>Select another project</a>")
+    if not Prj.CheckRight(2): # Level 0 = Read, 1 = Annotate, 2 = Admin
+        flash('You cannot edit settings for this project','error')
+        return PrintInCharte("<a href=/prj/>Select another project</a>")
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+    txt = "<h3>Reset status to predicted</h3>"
+    sqlparam = {}
+    filtres = {}
+    for k in sharedfilter.FilterList:
+        if gvg(k):
+            filtres[k] = gvg(k, "")
+    process=gvp('process')
+    if process=='Y':
+        sqlhisto="""insert into objectsclassifhisto(objid,classif_date,classif_type,classif_id,classif_qual,classif_who)
+                      select objid,classif_when,'M', classif_id,classif_qual,classif_who
+                        from objects o
+                        where projid=""" + str(Prj.projid) +""" and classif_when is not null and classif_qual in ('V','D')
+                         and not exists(select 1 from objectsclassifhisto och where och.objid=o.objid and och.classif_date=o.classif_when)
+                        """
+        sqlhisto+=sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
+        ExecSQL(sqlhisto, sqlparam)
+
+        sqlhisto = """update obj_head set classif_qual='P'
+                        where projid={0} and objid in (select objid from objects o   
+                                              where projid={0} and classif_qual in ('V','D') {1})
+                                              """.format(Prj.projid,sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id)))
+        ExecSQL(sqlhisto, sqlparam)
+
+        # flash('Data updated', 'success')
+        txt+="<a href='/prj/%s' class='btn btn-primary'>Back to project</a> "%(Prj.projid)
+        appli.project.main.RecalcProjectTaxoStat(Prj.projid)
+        appli.project.main.UpdateProjectStat(Prj.projid)
+        return PrintInCharte(txt)
+    sql = "select objid FROM objects o where projid=" + str(Prj.projid)
+    if len(filtres):
+        sql += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
+        ObjList = GetAll(sql, sqlparam)
+        ObjListTxt = "\n".join((str(r['objid']) for r in ObjList))
+        txt += "<span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters, {0} objects</span>".format(
+            len(ObjList))
+    else:
+        txt += "<span style='color:red;font-weight:bold;font-size:large;'>Apply to ALL OBJETS OF THE PROJECT (NO Active Filters)</span>"
+    Lst=GetFieldList(Prj)
+    # txt+="%s"%(Lst,)
+
+    return PrintInCharte(render_template("project/prjresettopredicted.html",Lst=Lst,header=txt))

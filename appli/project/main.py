@@ -151,7 +151,7 @@ FilterListAutoSave=("sortby","sortorder","dispfield","statusfilter",'ipp','zoom'
 def indexPrj(PrjId):
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
-        data[k]=gvg(k,str(current_user.GetPref(k,v)) if current_user.is_authenticated else "")
+        data[k]=gvg(k,str(current_user.GetPref(PrjId,k,v)) if current_user.is_authenticated else "")
     # print('%s',data)
     if data.get("samples",None):
         data["sample_for_select"]=""
@@ -255,6 +255,8 @@ def indexPrj(PrjId):
         g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit or erase annotations massively"))
         g.headmenu.append(("/prj/editdatamass/%d" % (PrjId,), "Batch edit metadata"))
         g.headmenuF.append(("javascript:GotoWithFilter('/prj/editdatamass/%d')" % (PrjId,), "Batch edit metadata"))
+        g.headmenu.append(("/prj/resettopredicted/%d" % (PrjId,), "Reset status to Predicted"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/prj/resettopredicted/%d')" % (PrjId,), "Reset status to Predicted"))
         g.headmenu.append(("/prjPurge/%d"%(PrjId,), "Delete objects or project"))
         g.headmenuF.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Delete objects"))
 
@@ -279,7 +281,7 @@ def LoadRightPane():
     for k,v in FilterList.items():
         Filt[k]=gvp(k,v)
         if ( k in FilterListAutoSave or gvp("saveinprofile")=="Y") and current_user.is_authenticated:
-            PrefToSave+=current_user.SetPref(k,Filt[k])
+            PrefToSave+=current_user.SetPref(PrjId,k,Filt[k])
 
     # on sauvegarde les parametres dans le profil utilisateur
     if PrefToSave>0 :
@@ -741,6 +743,7 @@ def prjPurge(PrjId):
             ExecSQL("delete from projects where projid={0}".format(PrjId))
             txt+="<br>Project and associated privileges, destroyed"
             return PrintInCharte(txt+ ("<br><br><a href ='/prj/'>Back to project list</a>"))
+        RecalcProjectTaxoStat(Prj.projid)
         UpdateProjectStat(Prj.projid)
     return PrintInCharte(txt+ ("<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId)))
 

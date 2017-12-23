@@ -15,6 +15,9 @@ Additional selected projects (<a href="/Task/Create/TaskSubset?p={{ data.Project
   {%   if filtertxt!='' %}
     <span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters</span><br>
     <b>Filters = {{filtertxt  }} </b><br><br>
+    <style>
+    #divselectstatus {display: none;}
+    </style>
     {% endif %}
   <table class="table table-bordered table-condensed " style="width: 400px">
     <tr>
@@ -29,12 +32,13 @@ Additional selected projects (<a href="/Task/Create/TaskSubset?p={{ data.Project
       <td><input type="text" size=5 name="vvaleur" value="{{ prevpost.vvaleur }}">  objects </td>
     </tr>
 </table>
-
+<div id="divselectstatus">
 <b>Select object with status</b><br>
 &nbsp;{{ checkboxinputinlist("what_v","V",data.what) }} Validated<br>
 &nbsp;{{ checkboxinputinlist("what_d","D",data.what) }} Dubious<br>
 &nbsp;{{ checkboxinputinlist("what_p","P",data.what) }} Predicted<br>
 &nbsp;{{ checkboxinputinlist("what_n","N",data.what) }} Unclassified <br>
+</div>
 </td><td>
 <div class='panel panel-default' style="width:600px;margin-left:10px;">
     <ul>

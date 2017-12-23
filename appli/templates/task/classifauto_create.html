@@ -17,34 +17,34 @@
 <h3>AUTOMATIC CLASSIFICATION : SETTINGS </h3>
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
 <div class="row">
-  <div class="col-md-4">
+  <div class="col-md-6">
   <div class="form-group">
-    <label class="col-sm-6 control-label" >Classification Method</label>
-    <div class="col-sm-6">
+    <label class="col-sm-4 control-label" >Classification Method</label>
+    <div class="col-sm-8">
 {#        {{ selectinputdict("Methode",{'':'','randomforest':"Random Forest",'svm':"SVM"},data.Methode) }}#}
         {{ selectinputdict("Methode",{'randomforest':"Random Forest"},data.Methode) }}
     </div>
   </div><!-- /form-group -->
 
   <div class="form-group">
-    <label class="col-sm-6 control-label" >OBJECTS to PREDICT</label>
-    <div class="col-sm-6">
-        {{ selectinputdict("Perimeter",{'nmc':"NOT Validated Objects",'all':"ALL Objects"},data.Perimeter) }}
+    <label class="col-sm-4 control-label" >OBJECTS to PREDICT</label>
+    <div class="col-sm-8">
+        {{ selectinputdict("Perimeter",{'nmc':"NOT Validated Objects (Unclassified or Predicted)",'all':"ALL Objects (for confusion matrix computation only)"},data.Perimeter) }}
     </div>
   </div><!-- /form-group -->
 <div class="form-group">
-    <label class="col-sm-6 control-label" >Keep log of previous automatic classification</label>
+    <label class="col-sm-4 control-label" >Keep log of previous automatic classification</label>
     <div class="col-sm-4">
         {{ selectinputdict("keeplog",{'no':"No",'yes':"Yes"},"no") }}
     </div> <!-- col-sm-4 -->
   </div><!-- /form-group -->
 <div class="form-group">
-    <label class="col-sm-6 control-label" >Limit number of objects by category from learning set </label>
+    <label class="col-sm-4 control-label" >Limit number of objects by category from learning set </label>
     <div class="col-sm-4">
         <input type="text" id="learninglimit" name="learninglimit" value="{{ data.learninglimit }}" size="2">
     </div> <!-- col-sm-4 -->
   </div><!-- /form-group -->
-</div>  <div class="col-md-8">
+</div>  <div class="col-md-6">
     <p style="padding-left: 100px;">
     <button type="submit" class="btn btn-primary">START Automatic PREDICTION of IDs</button>
         </p>
@@ -182,8 +182,6 @@ Predict only the objects of the selected categories from the list below
         <tr><td><input type="checkbox" value="Y" name="targettaxo{{ r[0] }}" ></td><td>{{ r[1] }} </td></tr>
     {% endfor %}
 </table>
-Type in "ResetToPredicted" to (re)predict also all validated objects from the selected categories :
-  <input type="text" name="resetpredicted" value="" autocomplete="off" style="width: 150px;">
 </div></div>
 
 <div class="form-group">

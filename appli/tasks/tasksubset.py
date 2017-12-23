@@ -191,6 +191,7 @@ class TaskSubset(AsyncTask):
                                 where projid="""+str(self.param.subsetproject))
             self.pgcur.connection.commit()
         import appli.project.main
+        appli.project.main.RecalcProjectTaxoStat(self.param.subsetproject)
         appli.project.main.UpdateProjectStat(self.param.subsetproject)
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Subset created successfully")
@@ -294,6 +295,9 @@ A SUBSET can have different usages:<br>
                 self.param.what="V"
                 self.param.subsetprojecttitle=(Prj.title+" - Subset created on "+(datetime.date.today().strftime('%Y-%m-%d')))[0:255]
                 self.param.extraprojects=",".join(request.form.getlist('extraprojects'))
+                if filtertxt != "": # s'il y a un filtre on coche toutes les cases et on masque la zone à l'affichage
+                    self.param.what = "V,D,P,N"
+
             txt="<h3>SUBSET SETTINGS Page (2/2)</h3>"
             if self.param.extraprojects:
                 ExtraPrj=database.Projects.query.filter(text("projid in (%s)"%self.param.extraprojects)).all()

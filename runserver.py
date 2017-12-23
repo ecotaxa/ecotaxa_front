@@ -11,6 +11,7 @@ import logging.handlers
 
 if __name__ == '__main__':
     app.debug = True
+
     handler = logging.handlers.RotatingFileHandler('MyAppli.log', maxBytes=10000, backupCount=1)
     #handler = logging.FileHandler('MyAppli.log')
     handler.setLevel(logging.INFO)
@@ -24,4 +25,4 @@ if __name__ == '__main__':
 
 
 
-    app.run()
+    app.run(host= '0.0.0.0')

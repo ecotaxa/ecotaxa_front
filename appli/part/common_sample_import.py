@@ -12,7 +12,7 @@ def CleanValue(v):
     if type(v) != str:
         return v
     v=v.strip()
-    if v.lower()=='nan':
+    if (v.lower()=='nan') or (v.lower()=='na') :
         v=''
     if v.lower().find('inf')>=0:
         v=''

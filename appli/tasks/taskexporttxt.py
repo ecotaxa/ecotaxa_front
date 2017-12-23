@@ -33,6 +33,7 @@ class TaskExportTxt(AsyncTask):
                 self.internalids=''
                 self.typeline=''
                 self.putfileonftparea=''
+                self.keep_original_image_name=''
 
 
     def __init__(self,task=None):
@@ -54,18 +55,22 @@ class TaskExportTxt(AsyncTask):
                 ,to_char(objdate,'YYYYMMDD') as object_date
                 ,to_char(objtime,'HH24MISS') as object_time
                 ,object_link,depth_min as object_depth_min,depth_max as object_depth_max
-                ,to1.name as object_annotation_category
-                ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubious' ELSE o.classif_qual end object_annotation_status
-                ,to1p.name as object_annotation_parent_category
-                ,(WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id,1 rang FROM taxonomy where id =o.classif_id
-                        union
-                        SELECT t.id,t.name,t.parent_id, rang+1 rang FROM rq JOIN taxonomy t ON t.id = rq.parent_id)
-                        select string_agg(name,'>') from (select name from rq order by rang desc)q) object_annotation_hierarchy
+                ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubious' ELSE o.classif_qual end object_annotation_status                
                 ,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
                 ,to_char(o.classif_when,'YYYYMMDD') object_annotation_date
                 ,to_char(o.classif_when,'HH24MISS') object_annotation_time
                 ,img.orig_file_name as img_file_name
                     """
+        if self.param.typeline == '1':
+            sql1 += """,concat(to1.name,' ('||to1p.name||')') as object_annotation_category """
+        else:
+            sql1 += """,to1.name as object_annotation_category
+                ,to1p.name as object_annotation_parent_category
+                ,(WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id,1 rang FROM taxonomy where id =o.classif_id
+                        union
+                        SELECT t.id,t.name,t.parent_id, rang+1 rang FROM rq JOIN taxonomy t ON t.id = rq.parent_id)
+                        select string_agg(name,'>') from (select name from rq order by rang desc)q) object_annotation_hierarchy """
+
         sql2=""" FROM objects o
                 LEFT JOIN taxonomy to1 on o.classif_id=to1.id
                 LEFT JOIN taxonomy to1p on to1.parent_id=to1p.id
@@ -161,7 +166,7 @@ class TaskExportTxt(AsyncTask):
                 if csvfile :
                     csvfile.close()
                     if zfile :
-                        zfile.write(fichier,prevvalue+".tsv")
+                        zfile.write(fichier,"ecotaxa_"+prevvalue+".tsv")
                 if splitcsv:
                     prevvalue = r[splitfield]
                 logging.info("Creating file %s" % (fichier,))
@@ -184,7 +189,7 @@ class TaskExportTxt(AsyncTask):
         if csvfile:
             csvfile.close()
             if zfile:
-                zfile.write(fichier, str(prevvalue) + ".tsv")
+                zfile.write(fichier, "ecotaxa_"+str(prevvalue) + ".tsv")
                 zfile.close()
         logging.info("Extracted %d rows", self.pgcur.rowcount)
 
@@ -279,7 +284,10 @@ class TaskExportTxt(AsyncTask):
         self.pgcur.execute(sql,params)
         vaultroot=Path("../../vault")
         for r in self.pgcur:
-            zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[4]))
+            if self.param.keep_original_image_name == '1': # r0=objod, r2=orig_file_name,r4 parent_taxo
+                zfile.write(vaultroot.joinpath(r[1]).as_posix(), arcname="{0}/{1}".format(r[4], r[2]))
+            else:
+                zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[4]))
 
     def CreateSUM(self):
         self.UpdateProgress(1,"Start Summary export")
@@ -335,7 +343,7 @@ class TaskExportTxt(AsyncTask):
 
         if self.param.putfileonftparea=='Y':
             fichier = Path(self.GetWorkingDir()) /  self.param.OutFile
-            fichierdest=Path(app.config['SERVERLOADAREA'])/"Exported_data"
+            fichierdest=Path(app.config['FTPEXPORTAREA'])
             if not fichierdest.exists():
                 fichierdest.mkdir()
             NomFichier= "task_%d_%s"%(self.task.id,self.param.OutFile)
@@ -385,6 +393,7 @@ class TaskExportTxt(AsyncTask):
                 self.param.usecomasepa=gvp("usecomasepa")
                 self.param.sumsubtotal=gvp("sumsubtotal")
                 self.param.internalids = gvp("internalids")
+                self.param.keep_original_image_name = gvp("keep_original_image_name")
                 self.param.typeline = gvp("typeline")
                 self.param.splitcsvby = gvp("splitcsvby")
                 self.param.putfileonftparea = gvp("putfileonftparea")

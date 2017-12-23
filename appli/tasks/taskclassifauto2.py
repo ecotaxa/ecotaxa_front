@@ -5,7 +5,7 @@ import logging,time,re,json,datetime,sys,os
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll,ExecSQL
 from appli.project import sharedfilter
-from appli.project.main import RecalcProjectTaxoStat
+from appli.project.main import RecalcProjectTaxoStat,UpdateProjectStat
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from pathlib import Path
@@ -25,7 +25,6 @@ class TaskClassifAuto2(AsyncTask):
                 self.CritVar=None
                 self.Taxo=""
                 self.Perimeter=""
-                self.resetpredicted=""
                 self.keeplog="no"
                 self.learninglimit=""
                 self.CustSettings={}
@@ -305,20 +304,6 @@ class TaskClassifAuto2(AsyncTask):
         if NbrItem==0:
             raise Exception ("No object to classify, perhaps all object already classified or you should adjust the perimeter settings as it was probably set to 'Not Validated' ")
 
-        if self.param.resetpredicted == "ResetToPredicted" :
-            sqlhisto="""insert into objectsclassifhisto(objid,classif_date,classif_type,classif_id,classif_qual,classif_who)
-                          select objid,classif_when,'M', classif_id,classif_qual,classif_who
-                            from objects o
-                            where projid={0} and classif_when is not null and classif_qual='V' {1}
-                            and not exists (select 1 from objectsclassifhisto oh where oh.objid=o.objid and oh.classif_date=o.classif_when)
-                            """.format(Prj.projid,PerimeterWhere)
-            ExecSQL(sqlhisto,sqlparam)
-            sqlhisto = """update obj_head set classif_qual=null
-                            where projid={0} and objid in (select objid from objects o   
-                                                  where projid={0} and classif_when is not null and classif_qual='V' {1} )
-                                                  """.format(Prj.projid,PerimeterWhere)
-            ExecSQL(sqlhisto,sqlparam)
-
         sql="select objid"
         for c in CommonKeys:
             sql += ",coalesce(case when {0} not in ('Infinity','-Infinity','NaN') then {0} end,{1}) as {0}".format(MapPrj[c], DefVal[MapPrj[c]])
@@ -369,6 +354,7 @@ class TaskClassifAuto2(AsyncTask):
                          , time.time() - TStep,TStep2 - TStep,TStep3 - TStep2,time.time() - TStep3)
 
         RecalcProjectTaxoStat(Prj.projid)
+        UpdateProjectStat(Prj.projid)
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Classified %d objects"%ProcessedRows)
         # self.task.taskstate="Error"
@@ -390,8 +376,6 @@ class TaskClassifAuto2(AsyncTask):
                     request.query_string.decode("utf-8"),PreviousLS, " + ".join(["#{0} - {1}".format(*r) for r in BasePrj]) )
         from flask_login import current_user
         sql = "select projid,title,round(coalesce(objcount,0)*coalesce(pctvalidated,0)/100),mappingobj,coalesce(cnn_network_id,'') from projects where 1=1 "
-        if not current_user.has_role(database.AdministratorLabel):
-            sql += " and projid in (select projid from projectspriv where member=%d)" % current_user.id
         sqlparam=[]
 
         if gvp('filt_title'):
@@ -539,7 +523,6 @@ class TaskClassifAuto2(AsyncTask):
                 self.param.PostTaxoMapping = gvp("PostTaxoMapping")
             self.param.learninglimit = gvp("learninglimit")
             self.param.keeplog=gvp("keeplog")
-            self.param.resetpredicted = gvp("resetpredicted")
             self.param.savemodel_foldername = gvp("savemodel_foldername")
             self.param.savemodel_title = gvp("savemodel_title")
             self.param.savemodel_comments = gvp("savemodel_comments")
@@ -550,7 +533,8 @@ class TaskClassifAuto2(AsyncTask):
             g.TxtCustSettings=gvp("TxtCustSettings")
             # Verifier la coherence des données
             if self.param.usemodel_foldername=='':
-                if self.param.CritVar=='' : errors.append("You must select some variable")
+                if self.param.CritVar=='' and self.param.usescn=="":
+                    errors.append("You must select some variable")
                 if self.param.Taxo=='' : errors.append("You must select some category")
             if len(errors)>0:
                 for e in errors:
@@ -569,7 +553,6 @@ class TaskClassifAuto2(AsyncTask):
                     if "critvar" in PrjCS: d["critvar"]=PrjCS["critvar"]
                     if "baseproject" in PrjCS: d["baseproject"]=PrjCS["baseproject"]
                     if "seltaxo" in PrjCS: d["seltaxo"] = PrjCS["seltaxo"]
-                d['perimeter']=self.param.Perimeter
                 d['posttaxomapping'] =self.param.PostTaxoMapping
                 Prj.classifsettings=EncodeEqualList(d)
                 return self.StartTask(self.param)
@@ -589,7 +572,7 @@ class TaskClassifAuto2(AsyncTask):
             # Certaines variable on leur propre zone d'edition, les autres sont dans la zone texte custom settings
             self.param.CritVar=d.get("critvar","")
             self.param.Taxo=d.get("seltaxo","")
-            self.param.Perimeter=d.get("perimeter","nmc")
+            self.param.Perimeter="nmc"
             self.param.learninglimit = int(gvp("learninglimit","5000"))
             if "critvar" in d : del d["critvar"]
             if "perimeter" in d : del d["perimeter"]

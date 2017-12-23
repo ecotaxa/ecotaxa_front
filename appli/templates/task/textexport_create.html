@@ -24,7 +24,7 @@
 {{ checkboxinput("commentsdata","1",data.commentsdata) }} Comments<br>
 {{ checkboxinput("usecomasepa","1",data.usecomasepa) }} Use comma as decimal separator<br>
 {{ checkboxinput("internalids","1",data.internalids) }} Internal IDs<br>
-{{ checkboxinput("typeline","1",data.typeline) }} 2nd line with types, usefull to reimport<br>
+{{ checkboxinput("typeline","1",data.typeline) }} 2nd line, Make exported file compatible for reimportation<br>
 Split in multiple files by <select name="splitcsvby" >
         <option value="" >NOT Active</option>
         <option value="sample" {{ 'selected' if data.splitcsvby=='sample' }} >Sample</option>
@@ -38,7 +38,9 @@ Split in multiple files by <select name="splitcsvby" >
     </tr>
       <tr>
       <td><input type="radio" name="what" value="IMG" {{'checked' if data.what=='IMG'}} >Images + TSV</td>
-      <td>Use TSV Section for TSV Options</td>
+      <td>Use TSV Section for TSV Options<br>
+      {{ checkboxinput("keep_original_image_name","1",data.keep_original_image_name) }} Keep original image file name<br>
+      </td>
     </tr>
     <tr>
       <td><input type="radio" name="what" value="SUM" {{'checked' if data.what=='SUM'}} >Summary</td>

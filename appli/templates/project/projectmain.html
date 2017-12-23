@@ -191,7 +191,7 @@
               {# Filters #}
               <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;overflow-x: hidden;">
                   <div id="TabBInner" style="width: 240px;">
-                     <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane('mail'); " title="Email a link to this page, including the current filters"><span class="glyphicon glyphicon-link"></span> Share page</button>
+                     <button class="btn btn-info" style="width: 49%" id=SharePageBtn title="Email a link to this page, including the current filters. Press CTRL to open it on another tab (usefull if you use GMail)"><span class="glyphicon glyphicon-link"></span> Share page</button>
                      <button onclick='ClearAllFilterCriteria();return false;' class="btn btn-info" style="width: 49%" title="Remove all selection criteria"><span class="glyphicon glyphicon-remove" ></span> Clear all filters</button>
                   <br>
                   {{ leftb|safe }}
@@ -261,6 +261,12 @@ DragInProgress=false;
 function InGreyButton(s,eraser) {
   return " <button type=button class='btn btn-gris btn-xs' onclick='"+eraser+";LoadRightPane();'>"+s+" <span class='glyphicon glyphicon-remove'></span></button>";
 }
+$('#SharePageBtn').click(function (e) {
+  if(e.ctrlKey)
+    LoadRightPane('mailN');
+  else
+    LoadRightPane('mail');
+});
 function LoadRightPane(NoAjax,SaveInProfile){
     if(Object.keys(PendingChanges).length>0)
       if(confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?")==false)
@@ -384,16 +390,20 @@ function LoadRightPane(NoAjax,SaveInProfile){
     }
     req['pageoffset']=jqpageoffset.val();
     var urlparam={},url,k;
-    if(NoAjax=='mail') {
+    if((NoAjax==='mail')||(NoAjax==='mailN')) {
         delete req["resultwidth"];
         delete req["windowheight"];
         for	(k in req)
             urlparam[k]=req[k];
         url=window.location.protocol+"//"+window.location.host+window.location.pathname+"?"+$.param(urlparam);
-        window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
+        url="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
+        if(NoAjax==='mail')
+          window.location=url;
+        else
+          window.open(url,'_blank');
         return;
     }
-    if(typeof (NoAjax)=='string') { {# Une URL #}
+    if(typeof (NoAjax)==='string') { {# Une URL #}
       delete req["resultwidth"];
       delete req["windowheight"];
       for	(k in req)

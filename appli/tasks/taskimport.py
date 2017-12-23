@@ -40,7 +40,7 @@ PredefinedFields={
 # Purge les espace et converti le Nan en vide
 def CleanValue(v):
     v=v.strip()
-    if v.lower()=='nan':
+    if (v.lower() == 'nan') or (v.lower() == 'na'):
         v=''
     return v;
 # retourne le flottant image de la chaine en faisant la conversion ou None
@@ -485,6 +485,7 @@ class TaskImport(AsyncTask):
               where projid=%(projid)s and o.latitude is not null and o.longitude is not null
               group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s and s.longitude is null""",{'projid':self.param.ProjectId})
         self.pgcur.connection.commit()
+        appli.project.main.RecalcProjectTaxoStat(Prj.projid)
         appli.project.main.UpdateProjectStat(Prj.projid)
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Processing done")

@@ -8,6 +8,7 @@ from flask_security.decorators import roles_accepted
 from appli.search.leftfilters import getcommonfilters
 import os,time,math,collections,appli
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc2Col
+import appli.project.main
 
 ######################################################################################################################
 @app.route('/prj/merge/<int:PrjId>', methods=['GET', 'POST'])
@@ -97,6 +98,9 @@ def PrjMerge(PrjId):
         # Efface ceux qui etait des 2 cotés
         ExecSQL("delete from projectspriv where projid={0}".format(PrjSrc.projid))
         ExecSQL("delete from projects where projid={0}".format(PrjSrc.projid))
+        appli.project.main.RecalcProjectTaxoStat(Prj.projid)
+        appli.project.main.UpdateProjectStat(Prj.projid)
+
         txt+="<div class='alert alert-success' role='alert'>Fusion Done successfully</div>"
         txt+="<br><a class='btn btn-lg btn-primary' href='/prj/%s'>Back to target project</a>"%Prj.projid
         return PrintInCharte(txt)
