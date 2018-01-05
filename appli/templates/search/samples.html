@@ -1,5 +1,6 @@
 <style>
   .helperselect {background-color: #faff6c}
+  #PopupDetails .modal-dialog {width: 95% !important;}
 </style>
 <div style="padding: 5px;">
 <p>List of sample separated by comma
@@ -19,7 +20,7 @@
   <div class="form-group" style="width: auto;">
     <label for="exampleInputName2">Selection helper <a href="#helperhelp" data-toggle="collapse" class="help" > </a> : </label>
 <div class="input-group">
-  <input type="text" class="form-control input-sm" style="width: 150px" onkeyup="HelperFilterChanged(this);" name="HelperFilter">
+  <input type="text" class="form-control input-sm" style="width: 150px" onkeyup="HelperFilterChanged(this);" id="HelperFilter">
   <span class="input-group-btn">
      <button class="btn btn-default btn-sm" type="button" onclick="ProcessSampleSelection(true)">Check</button>
   </span>
@@ -90,7 +91,11 @@ function ComputeSampleList() {
 }
 {#************************************************************#}
 function ProcessSampleSelection(checked) {
-  tblspl.find("td.helperselect").each(function () {
+  var filter="td";
+  if($('#HelperFilter').val()!=="") {
+    filter="td.helperselect";
+  }
+  tblspl.find(filter).each(function () {
     $(this).find('input').prop('checked',checked);
   });
   ComputeSampleList();

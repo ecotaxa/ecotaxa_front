@@ -25,7 +25,7 @@
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
   <input type="hidden" name="backurl" value="{{ backurl }}">
-  <table class="table table-bordered table-condensed " style="width: 800px">
+  <table class="table table-bordered table-condensed " style="width: 1000px">
     <tr>
       <td><input type="radio" name="what" value="RED" {{'checked' if data.what=='RED'}} >Reduced data</td>
       <td>
@@ -37,7 +37,7 @@ File format <select name="fileformat" >
       </td>
       <td>CTD + PARTICLES abundances and biovolumes sorted in 15 reduced classes at vertical steps of 5m<br>
     ZOOPLANKTON selected categories at variable vertical steps<br>
-        SUMMARY file : metadata of exported sample (including pixel size for zooplankton)<br>
+        SUMMARY file (TSV format only) : metadata of exported sample (including pixel size for zooplankton)<br>
     Apply zooplankton and depth selections from graph<br>
         - if you do not select any plankton category, the export will return all catégories<br>
         - if you  enable "Sum abundance of children categories", the children counts will be added to the selected category
@@ -53,7 +53,7 @@ File format <select name="fileformatd" >
       </td>
       <td>CTD + PARTICLES abundances and biovolumes sorted in 45 detailed classes at vertical steps of 5m<br>
         ZOOPLANKTON from all categories and summed in parent categories at vertical steps of 5m <br>
-        SUMMARY file : metadata of exported sample (including pixel size for zooplankton)<br>
+        SUMMARY file (TSV format only) : metadata of exported sample (including pixel size for zooplankton)<br>
         Previous screen filter on classification ignored, detph used
 
       </td>

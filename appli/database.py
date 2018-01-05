@@ -66,7 +66,7 @@ class users(db.Model, UserMixin):
             tmp=json.loads(self.preferences)
             if prjid not in tmp:
                 tmp[prjid] = {}
-            if tmp.get(name,-99999)==newval:
+            if tmp[prjid].get(name,-99999)==newval:
                 return 0# déjà la bonne valeur donc il n'y a rien à faire
         except:
             tmp={}

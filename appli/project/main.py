@@ -115,7 +115,7 @@ def RecalcProjectTaxoStat(PrjId):
         delete from projects_taxo_stat WHERE projid=%(projid)s;
         insert into projects_taxo_stat(projid, id, nbr, nbr_v, nbr_d, nbr_p) 
           select projid,coalesce(classif_id,-1) id,count(*) nbr,count(case when classif_qual='V' then 1 end) nbr_v
-          ,count(case when classif_qual='D' then 1 end) nbr_d,count(case when classif_qual='p' then 1 end) nbr_p
+          ,count(case when classif_qual='D' then 1 end) nbr_d,count(case when classif_qual='P' then 1 end) nbr_p
           from obj_head
           where projid=%(projid)s
           GROUP BY projid,classif_id;
@@ -533,8 +533,9 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     if nbrtotal>0:
         pctvalid=100*nbrvalid/nbrtotal
         pctpredict=100*nbrpredict/nbrtotal
-        pctdubious=100*nbrdubious/nbrtotal
-        txtpctvalid="<span style=\"color:#0A0\">%0.1f %%</span>, <span style=\"color:#5bc0de\">%0.1f %%</span>, <span style=\"color:#F0AD4E\">%0.1f %%</span>"%(pctvalid,pctpredict,pctdubious)
+        pctdubious=nbrdubious
+        pctothers = nbrtotal-nbrvalid-nbrpredict-nbrdubious
+        txtpctvalid="<span style=\"color:#0A0\">%0.1f %%</span>, <span style=\"color:#5bc0de\">%0.1f %%</span>, <span style=\"color:#F0AD4E\">%0d</span>, <span style=\"color:#888\">%0d </span>"%(pctvalid,pctpredict,pctdubious,pctothers)
     else:
         txtpctvalid="-"
         pctdubious=pctpredict=pctvalid=0

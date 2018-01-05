@@ -121,12 +121,12 @@ class TaskSubset(AsyncTask):
             if self.param.valtype=='V': rankfunction='rank'
             elif self.param.valtype=='P': rankfunction='100*percent_rank'
             else: rankfunction='FunctionError'
-            if self.param.samplelist:
-                sqlwhere+=" and s.orig_id in (%s) "%(",".join(["'%s'"%x for x in self.param.samplelist.split(",")]))
-            sqlwhere+=" and (o.classif_qual in (%s) "%(",".join(["'%s'"%x for x in self.param.what.split(",")]))
-            if self.param.what.find('N')>=0:
-                sqlwhere+=" or o.classif_qual is null "
-            sqlwhere+=")"
+            # if self.param.samplelist:
+            #     sqlwhere+=" and s.orig_id in (%s) "%(",".join(["'%s'"%x for x in self.param.samplelist.split(",")]))
+            # sqlwhere+=" and (o.classif_qual in (%s) "%(",".join(["'%s'"%x for x in self.param.what.split(",")]))
+            # if self.param.what.find('N')>=0:
+            #     sqlwhere+=" or o.classif_qual is null "
+            # sqlwhere+=")"
             sqlwhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam, str(self.task.owner_id))
             logging.info("SQLParam=%s",sqlparam)
             sql="""select objid from (
@@ -284,7 +284,7 @@ A SUBSET can have different usages:<br>
                 self.param.what=",".join(tmp)
                 # Verifier la coherence des données
                 # errors.append("TEST ERROR")
-                if self.param.what=='' : errors.append("You must select at least one Flag")
+                # if self.param.what=='' : errors.append("You must select at least one Flag")
                 if self.param.valtype=='' : errors.append("You must select the object selection parameter '% of values' or '# of objects'")
                 if len(errors)>0:
                     for e in errors:

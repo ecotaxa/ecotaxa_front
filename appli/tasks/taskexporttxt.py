@@ -33,7 +33,9 @@ class TaskExportTxt(AsyncTask):
                 self.internalids=''
                 self.typeline=''
                 self.putfileonftparea=''
-                self.keep_original_image_name=''
+                self.use_internal_image_name=''
+                self.exportimages = ''
+
 
 
     def __init__(self,task=None):
@@ -80,6 +82,7 @@ class TaskExportTxt(AsyncTask):
                 LEFT JOIN images img on o.img0id = img.imgid """
         sql3=" where o.projid=%(projid)s "
         params={'projid':int(self.param.ProjectId)}
+        OriginalColName={} # Nom de colonneSQL => Nom de colonne permet de traiter le cas de %area
         if self.param.samplelist!="":
             sql3+=" and s.orig_id= any(%(samplelist)s) "
             params['samplelist']=self.param.samplelist.split(",")
@@ -91,7 +94,9 @@ class TaskExportTxt(AsyncTask):
             sql1+="\n"
             Mapping=DecodeEqualList(Prj.mappingobj)
             for k,v in Mapping.items() :
-                sql1+=',o.%s as "object_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
+                AliasSQL='object_%s'%re.sub(R"[^a-zA-Z0-9\.\-]","_",v)
+                OriginalColName[AliasSQL]='object_%s'%v
+                sql1+=',o.%s as "%s" '%(k,AliasSQL)
         if self.param.sampledata=='1':
             sql1+="\n,s.orig_id sample_id,s.dataportal_descriptor as sample_dataportal_descriptor "
             Mapping=DecodeEqualList(Prj.mappingsample)
@@ -175,7 +180,7 @@ class TaskExportTxt(AsyncTask):
                 colnames = [desc[0] for desc in self.pgcur.description]
                 coltypes=[desc[1] for desc in self.pgcur.description]
                 FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
-                wtr.writerow(colnames)
+                wtr.writerow([OriginalColName.get(c,c) for c in colnames])
                 if self.param.typeline=='1':
                     wtr.writerow(['[f]' if x==FloatType else '[t]' for x in coltypes])
             # on supprime les CR des commentaires.
@@ -284,7 +289,7 @@ class TaskExportTxt(AsyncTask):
         self.pgcur.execute(sql,params)
         vaultroot=Path("../../vault")
         for r in self.pgcur:
-            if self.param.keep_original_image_name == '1': # r0=objod, r2=orig_file_name,r4 parent_taxo
+            if self.param.use_internal_image_name != '1': # r0=objod, r2=orig_file_name,r4 parent_taxo
                 zfile.write(vaultroot.joinpath(r[1]).as_posix(), arcname="{0}/{1}".format(r[4], r[2]))
             else:
                 zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[4]))
@@ -331,11 +336,12 @@ class TaskExportTxt(AsyncTask):
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__,))
         if self.param.what=="TSV":
-            self.CreateTSV()
+            if self.param.exportimages=='1':
+                self.CreateIMG()
+            else:
+                self.CreateTSV()
         elif self.param.what=="XML":
             self.CreateXML()
-        elif self.param.what=="IMG":
-            self.CreateIMG()
         elif self.param.what=="SUM":
             self.CreateSUM()
         else:
@@ -393,7 +399,8 @@ class TaskExportTxt(AsyncTask):
                 self.param.usecomasepa=gvp("usecomasepa")
                 self.param.sumsubtotal=gvp("sumsubtotal")
                 self.param.internalids = gvp("internalids")
-                self.param.keep_original_image_name = gvp("keep_original_image_name")
+                self.param.use_internal_image_name = gvp("use_internal_image_name")
+                self.param.exportimages = gvp("exportimages")
                 self.param.typeline = gvp("typeline")
                 self.param.splitcsvby = gvp("splitcsvby")
                 self.param.putfileonftparea = gvp("putfileonftparea")
@@ -423,7 +430,12 @@ class TaskExportTxt(AsyncTask):
             if TxtFiltres!="":
                 g.headcenter = "<h4>Project : <a href='/prj/{0}?{2}'>{1}</a></h4>".format(Prj.projid, Prj.title,
                     "&".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""]))
-
+            LstUsers = database.GetAll("""select distinct u.email,u.name,Lower(u.name)
+                        FROM users_roles ur join users u on ur.user_id=u.id
+                        where ur.role_id=2
+                        and u.active=TRUE and email like '%@%'
+                        order by Lower(u.name)""")
+            g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
             return render_template('task/textexport_create.html',header=txt,data=self.param,TxtFiltres=TxtFiltres)
 
 
