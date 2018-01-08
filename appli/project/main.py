@@ -234,8 +234,6 @@ def indexPrj(PrjId):
         g.headmenu.append(("","SEP"))
         if Prj.status=="Annotate":
             g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Train and Predict identifications"))
-            #TODO g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto')" , "Train and Predict identifications"))
-        if current_user.has_role(database.AdministratorLabel): # TODO pour Test Seulement
             g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d" % (PrjId,), "Train and Predict identifications V2"))
             g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2')" , "Train and Predict identifications V2"))
             g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d&frommodel=Y" % (PrjId,), "Predict identifications from trained model"))
@@ -533,9 +531,10 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     if nbrtotal>0:
         pctvalid=100*nbrvalid/nbrtotal
         pctpredict=100*nbrpredict/nbrtotal
-        pctdubious=nbrdubious
-        pctothers = nbrtotal-nbrvalid-nbrpredict-nbrdubious
-        txtpctvalid="<span style=\"color:#0A0\">%0.1f %%</span>, <span style=\"color:#5bc0de\">%0.1f %%</span>, <span style=\"color:#F0AD4E\">%0d</span>, <span style=\"color:#888\">%0d </span>"%(pctvalid,pctpredict,pctdubious,pctothers)
+        pctdubious=100*nbrdubious/nbrtotal
+        nbrothers = nbrtotal-nbrvalid-nbrpredict-nbrdubious
+        txtpctvalid="<span style=\"color:#0A0\">%0d </span>, <span style=\"color:#5bc0de\">%0d </span>, <span style=\"color:#F0AD4E\">%0d</span>, <span style=\"color:#888\">%0d </span>"%(
+            nbrvalid,nbrpredict,nbrdubious,nbrothers)
     else:
         txtpctvalid="-"
         pctdubious=pctpredict=pctvalid=0
