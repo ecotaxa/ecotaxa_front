@@ -36,7 +36,7 @@ def GetSQLVisibility():
         if current_user.is_authenticated:
             sqlvisible += " when pp.ownerid=%d then 'YY' "%(current_user.id)
             sqlvisible += " when ppriv.privilege in('Manage','Annotate') then 'YY' "
-            sqljoin ="  left Join projectspriv ppriv on p.projid = pp.projid and ppriv.member=%d"%(current_user.id,)
+            sqljoin ="  left Join projectspriv ppriv on pp.projid = ppriv.projid and ppriv.member=%d"%(current_user.id,)
         sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
                        and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date 
                        and oldestsampledate+make_interval(0,public_zooexport_deferral_month)<=current_date 
