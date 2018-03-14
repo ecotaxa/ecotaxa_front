@@ -39,10 +39,12 @@ PredefinedFields={
 }
 # Purge les espace et converti le Nan en vide
 def CleanValue(v):
+    if v is None:
+        return ''
     v=v.strip()
     if (v.lower() == 'nan') or (v.lower() == 'na'):
         v=''
-    return v;
+    return v
 # retourne le flottant image de la chaine en faisant la conversion ou None
 def ToFloat(value):
     if value=='': return None

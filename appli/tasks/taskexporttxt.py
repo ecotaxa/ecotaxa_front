@@ -2,7 +2,7 @@
 from appli import db,app, database ,PrintInCharte,gvp,gvg,DecodeEqualList
 from flask import render_template, g, flash
 import logging,os,csv,re,datetime
-import zipfile,psycopg2.extras
+import zipfile,psycopg2.extras,shutil
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask
 from appli.database import GetAll
@@ -354,7 +354,8 @@ class TaskExportTxt(AsyncTask):
                 fichierdest.mkdir()
             NomFichier= "task_%d_%s"%(self.task.id,self.param.OutFile)
             fichierdest = fichierdest / NomFichier
-            fichier.rename(fichierdest)
+            # fichier.rename(fichierdest) si ce sont des volumes sur des devices differents ça ne marche pas
+            shutil.copyfile(fichier.as_posix(), fichierdest.as_posix())
             self.param.OutFile=''
             self.task.taskstate = "Done"
             self.UpdateProgress(100, "Export successfull : File '%s' is available on the 'Exported_data' FTP folder"%NomFichier)

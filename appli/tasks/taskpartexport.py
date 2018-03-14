@@ -105,9 +105,9 @@ class TaskPartExport(AsyncTask):
             with open(fichier,'w',encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
                 f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
-                for i in range(len(PartRedClassLimit)):
+                for i in range(1,len(PartRedClassLimit)):
                     f.write(";LPM (%s)[#/L]"%(GetClassLimitTxt(PartRedClassLimit,i)))
-                for i in range(len(PartRedClassLimit)):
+                for i in range(1,len(PartRedClassLimit)):
                     f.write(";LPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                 for c in CTDFixedCols:
                     f.write(";%s" % (CTDFixedColByKey.get(c,c)))
@@ -123,8 +123,8 @@ class TaskPartExport(AsyncTask):
                         if not AsODV: # si TSV
                             L=[S['station'],S['rawfilename'],L[7]] # station + rawfilename + sampledate
                         L.extend([h['depth'],h['watervolume']])
-                        L.extend((h['class%02d'%i] for i in range(1,16)))
-                        L.extend((h['biovol%02d' % i] for i in range(1, 16)))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1,len(PartRedClassLimit))))
+                        L.extend((h['biovol%02d' % i] for i in range(1, len(PartRedClassLimit))))
                         f.write(";".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
                             f.write(";%s" % (ntcv(h["ctd_"+c])))
@@ -137,9 +137,9 @@ class TaskPartExport(AsyncTask):
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
-                    for i in range(len(PartRedClassLimit)):
+                    for i in range(1,len(PartRedClassLimit)):
                         f.write("\tLPM (%s)[#/L]" % (GetClassLimitTxt(PartRedClassLimit, i)))
-                    for i in range(len(PartRedClassLimit)):
+                    for i in range(1,len(PartRedClassLimit)):
                         f.write("\tLPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                     for c in CTDFixedCols:
                         f.write("\t%s" % (CTDFixedColByKey.get(c, c)))
@@ -152,8 +152,8 @@ class TaskPartExport(AsyncTask):
                         else:
                             L = [S['station'], S['rawfilename'], h['fdatetime'] ]
                         L.extend([h['depth'], h['watervolume']])
-                        L.extend((h['class%02d' % i] for i in range(1, 16)))
-                        L.extend((h['biovol%02d' % i] for i in range(1, 16)))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1, len(PartRedClassLimit))))
+                        L.extend((h['biovol%02d' % i] for i in range(1, len(PartRedClassLimit))))
                         f.write("\t".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
                             f.write("\t%s" % (ntcv(h["ctd_"+c])))
@@ -383,9 +383,9 @@ class TaskPartExport(AsyncTask):
             with open(fichier,'w',encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
                 f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
-                for i in range(len(PartDetClassLimit)):
+                for i in range(1,len(PartDetClassLimit)):
                     f.write(";LPM (%s)[#/L]"%(GetClassLimitTxt(PartDetClassLimit,i)))
-                for i in range(len(PartDetClassLimit)):
+                for i in range(1,len(PartDetClassLimit)):
                     f.write(";LPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                 for c in CTDFixedCols:
                     f.write(";%s" % (CTDFixedColByKey.get(c,c)))
@@ -401,8 +401,8 @@ class TaskPartExport(AsyncTask):
                         if not AsODV: # si TSV
                             L=[S['station'],S['rawfilename'],L[7]] # station + rawfilename + sampledate
                         L.extend([h['depth'],h['watervolume']])
-                        L.extend((h['class%02d'%i] for i in range(1,46)))
-                        L.extend((h['biovol%02d' % i] for i in range(1, 46)))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1,len(PartDetClassLimit))))
+                        L.extend((h['biovol%02d' % i] for i in range(1, len(PartDetClassLimit))))
                         f.write(";".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
                             f.write(";%s" % (ntcv(h["ctd_"+c])))
@@ -415,9 +415,9 @@ class TaskPartExport(AsyncTask):
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
-                    for i in range(len(PartDetClassLimit)):
+                    for i in range(1,len(PartDetClassLimit)):
                         f.write("\tLPM (%s)[#/L]" % (GetClassLimitTxt(PartDetClassLimit, i)))
-                    for i in range(len(PartDetClassLimit)):
+                    for i in range(1,len(PartDetClassLimit)):
                         f.write("\tLPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                     for c in CTDFixedCols:
                         f.write("\t%s" % (CTDFixedColByKey.get(c, c)))
@@ -430,8 +430,8 @@ class TaskPartExport(AsyncTask):
                         else:
                             L = [S['station'], S['rawfilename'], h['fdatetime'] ]
                         L.extend([h['depth'], h['watervolume']])
-                        L.extend((h['class%02d' % i] for i in range(1, 46)))
-                        L.extend((h['biovol%02d' % i] for i in range(1, 46)))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1, len(PartDetClassLimit))))
+                        L.extend((h['biovol%02d' % i] for i in range(1, len(PartDetClassLimit))))
                         f.write("\t".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
                             f.write("\t%s" % (ntcv(h["ctd_"+c])))
@@ -579,7 +579,7 @@ order by tree""".format(lstcatwhere)
                     for i in range(len(CatHisto)):
                         h = CatHisto[i]
                         idx = lstcat[h['classif_id']]['idx']
-                        t[idx]
+                        t[idx]= h['nbr']
                         t[idx + len(lstcat)] = h['totalbiovolume']
                         t[idx + 2 * len(lstcat)] = h['avgesd']
                         EOL = False
@@ -762,7 +762,8 @@ order by tree""".format(lstcatwhere)
                 fichierdest.mkdir()
             NomFichier= "task_%d_%s"%(self.task.id,self.param.OutFile)
             fichierdest = fichierdest / NomFichier
-            fichier.rename(fichierdest)
+            # fichier.rename(fichierdest) si ce sont des volumes sur des devices differents ça ne marche pas
+            shutil.copyfile(fichier.as_posix(), fichierdest.as_posix())
             self.param.OutFile=''
             self.task.taskstate = "Done"
             self.UpdateProgress(100, "Export successfull : File '%s' is available on the 'Exported_data' FTP folder"%NomFichier)
