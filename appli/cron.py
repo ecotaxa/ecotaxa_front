@@ -57,4 +57,25 @@ def RefreshTaxoStat():
     appli.part.prj.GlobalTaxoCompute()
 
 if __name__ == "__main__":
-    RefreshTaxoStat()
+    # RefreshTaxoStat()
+    from appli import app
+    from flask import g
+    import traceback,appli.tasks,logging
+
+    app.logger.setLevel(logging.DEBUG)
+    for h in app.logger.handlers:
+        h.setLevel(logging.DEBUG)
+    app.logger.info("Start Daily Task")
+    try:
+        with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
+            g.db = None
+            RefreshAllProjectsStat()
+            RefreshTaxoStat()
+            app.logger.info(appli.tasks.taskmanager.AutoClean())
+    except Exception as e:
+        s=str(e)
+        tb_list = traceback.format_tb(e.__traceback__)
+        for i in tb_list[::-1]:
+            s += "\n" + i
+        app.logger.error("Exception on Daily Task : %s"%s)
+    app.logger.info("End Daily Task")

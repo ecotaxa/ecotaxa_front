@@ -33,6 +33,7 @@ matplotlib.use('Agg')
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')
+app.logger.setLevel(10)
 
 if 'PYTHONEXECUTABLE' in app.config:
     app.PythonExecutable=app.config['PYTHONEXECUTABLE']
@@ -260,35 +261,3 @@ app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList)
 
-# Traitement du sheduler
-from appli import schedule
-
-def scheduler_daily_task():
-    app.logger.info("Start Daily Task")
-    try:
-        with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
-            g.db = None
-            import appli.cron
-
-            appli.cron.RefreshAllProjectsStat()
-            appli.cron.RefreshTaxoStat()
-            app.logger.info(appli.tasks.taskmanager.AutoClean())
-    except Exception as e:
-        s=str(e)
-        tb_list = traceback.format_tb(e.__traceback__)
-        for i in tb_list[::-1]:
-            s += "\n" + i
-        app.logger.error("Exception on Daily Task : %s"%s)
-    app.logger.info("End Daily Task")
-def scheduler_func():
-    # schedule.every(10).seconds.do(scheduler_daily_task)
-    schedule.every().day.at("01:15").do(scheduler_daily_task)
-    while 1:
-        schedule.run_pending()
-        time.sleep(1)
-@app.before_first_request
-def app_before_first_request():
-    app.logger.info("Start Daily Task Thread")
-    scheduler_thread = threading.Thread(target=scheduler_func,name="Scheduler")
-    scheduler_thread.daemon=True
-    scheduler_thread.start()
