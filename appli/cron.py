@@ -16,7 +16,8 @@ def RefreshAllProjectsStat():
           group by projid  )q
      where projects.projid=q.projid""")
     ExecSQL("""delete from samples s
-              where not exists (select 1 from objects o where o.sampleid=s.sampleid )""")
+              where not exists (select 1 from objects o where o.sampleid=s.sampleid )
+              and not exists (select 1 from part_samples o where o.sampleid=s.sampleid ) """)
     ComputeOldestSampleDateOnProject()
 
 def RefreshTaxoStat():
