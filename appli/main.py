@@ -38,16 +38,9 @@ def index():
 	<div class="row" id="homeSelectors" style="margin-top: 20px; margin-bottom: 20px;">
 		<div class="col-sm-6">
         <a href="/explore/" class="btn btn-primary btn-lg btn-block">Explore images</a>
-        
-    		<p>As a visitor, you have free access to the specimens that have been already identified by taxonomy experts.</p>
-
-    		<p>You can explore the database by navigating along the UniEuk taxonomic tree which aims at unifying taxonomic names and tree according to reliable and curated molecular phylogenies. It encompasses the whole Eukaryotic and Prokaryotic lineages (Viruses coming soon) that have been molecularly described. Then images can be filtered according to several criteria: geographic location, depth, date and time of sampling, imaging instrument, etc.</p>
-        
 		</div>
 		<div class="col-sm-6">
         <a href="/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
-        
-        <p>As a scientist, you can contribute to the richness of this image database and to the collaborative taxonomic annotation effort. Images are organised in projects which should be consistent in terms of sampling and imaging techniques. We provide tools to support the annotation of large image datasets by supervised machine learning prediction.</p>
 		</div>		
 	</div>
 """
