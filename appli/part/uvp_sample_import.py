@@ -62,7 +62,7 @@ def CreateOrUpdateSample(pprojid,headerdata):
     if not uvp5_configuration_data.exists():
         logging.warning("file %s is missing, pixel data will miss (required for Taxo histogram esd/biovolume)"%(uvp5_configuration_data.as_posix()))
     else:
-        with uvp5_configuration_data.open('r') as F:
+        with uvp5_configuration_data.open('r',encoding='latin_1') as F:
             Lines=F.read()
             ConfigParam = DecodeEqualList(Lines)
             if 'pixel' not in ConfigParam:
@@ -82,7 +82,7 @@ def CreateOrUpdateSample(pprojid,headerdata):
         if not HDRFile.exists():
             raise Exception("File %s is missing, and in raw folder too" % (HDRFile.as_posix()))
 
-    with HDRFile.open('r') as F:
+    with HDRFile.open('r',encoding='latin_1') as F:
         F.readline() # on saute la ligne 1
         Ligne2=F.readline().strip('; \r\n')
         # print("Ligne2= '%s'" % (Ligne2))
@@ -116,6 +116,24 @@ def GetPathForRawHistoFile(psampleid):
     CreateDirConcurrentlyIfNeeded(vaultroot / VaultFolder)
     return (vaultroot /VaultFolder/("%04d.tsv.bz2" %(psampleid % 10000))).as_posix()
 
+def GetPathForImportGraph(psampleid,suffix,RelativeToVault=False):
+    """
+    Retourne le chemin vers l'image associée en gérant l'éventuelle création du répertoire  
+    :param psampleid: 
+    :param suffix: suffixe mis à la fin du nom de l'image
+    :param RelativeToVault: 
+    :return: chemin posix de l'image 
+    """
+    VaultFolder = "pargraph%04d" % (psampleid // 10000)
+    vaultroot = Path(VaultRootDir)
+    # creation du repertoire contenant les graphe d'importation si necessaire
+    if not RelativeToVault : # Si Relatif c'est pour avoir l'url inutile de regarder si le repertoire existe.
+        CreateDirConcurrentlyIfNeeded(vaultroot / VaultFolder)
+    NomFichier="%06d_%s.png" %(psampleid % 10000,suffix)
+    if RelativeToVault:
+        return VaultFolder +"/" + NomFichier
+    else:
+        return (vaultroot /VaultFolder/NomFichier).as_posix()
 
 def GenerateRawHistogram(psampleid):
     """
@@ -170,7 +188,7 @@ def GenerateRawHistogram(psampleid):
     LastImageIdx=LastImageDepth=None
     for Fichier in LstFichiers:
         logging.info("Processing file "+Fichier.as_posix())
-        with Fichier.open() as csvfile:
+        with Fichier.open(encoding='latin_1') as csvfile:
             Rdr = csv.reader(csvfile, delimiter=';')
             next(Rdr) # au saute la ligne de titre
             for row in Rdr:
@@ -240,7 +258,13 @@ def GenerateRawHistogram(psampleid):
     DepthBinCount=np.bincount(np.floor(aFilteredImgDepth[:,1]).astype('int'))
     aFilteredImgDepth=None # version nparray plus necessaire.
     logging.info("Depth range= {0}->{1}".format(MinDepth,MaxDepth))
-    Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_depth_' + UvpSample.profileid+'.png')).as_posix())
+    # Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_depth_' + UvpSample.profileid+'.png')).as_posix())
+    Fig.text(0.05, 0.98,
+             "Project : %s , Profile %s , Filename : %s" % (Prj.ptitle, UvpSample.profileid, UvpSample.filename),
+             ha='left')
+    Fig.tight_layout(rect=(0, 0, 1, 0.98))  # permet de laisser un peu de blanc en haut pour le titre
+    Fig.savefig(GetPathForImportGraph(psampleid,'depth'))
+
     Fig.clf()
     # Ecart format suivant l'endroit
     # Dans results nom = p1604_13.bru toujours au format bru1 malgré l'extension bru fichier unique
@@ -268,7 +292,7 @@ def GenerateRawHistogram(psampleid):
     SegmentedData={} # version filtrée
     for Fichier in LstFichiers:
         logging.info("Processing file "+Fichier.as_posix())
-        with Fichier.open() as csvfile:
+        with Fichier.open(encoding='latin_1') as csvfile:
             Rdr = csv.reader(csvfile, delimiter=';')
             next(Rdr) # au saute la ligne de titre
             for row in Rdr:
@@ -319,7 +343,9 @@ def GenerateParticleHistogram(psampleid):
     """
     UvpSample= partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     if UvpSample is None:
-        raise Exception("GenerateRawHistogram: Sample %d missing"%psampleid)
+        raise Exception("GenerateParticleHistogram: Sample %d missing"%psampleid)
+    if not UvpSample.histobrutavailable:
+        raise Exception("GenerateParticleHistogram: Particle Histogram can't be computer without Raw histogram" % psampleid)
     Prj = partdatabase.part_projects.query.filter_by(pprojid=UvpSample.pprojid).first()
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     DossierUVPPath = ServerRoot / Prj.rawfolder
@@ -367,7 +393,7 @@ def GenerateParticleHistogram(psampleid):
         plt.rc('font', **font)
         plt.rcParams['lines.linewidth'] = 0.5
 
-        Fig=plt.figure(figsize=(16,12), dpi=100)
+        Fig=plt.figure(figsize=(16,12), dpi=100,)
         # calcul volume par metre moyen de chaque tranche
         ax = Fig.add_subplot(241)
         # si une tranche n'as pas été entierement explorée la /5 est un calcul éronné
@@ -444,7 +470,11 @@ def GenerateParticleHistogram(psampleid):
         ax.set_xlabel('Part >=1.02-<2.58 mm esd #/L from det histo')
         ax.set_ylabel('Depth(m)')
 
-        Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_particle_' + UvpSample.profileid+'.png')).as_posix())
+        # Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_particle_' + UvpSample.profileid+'.png')).as_posix())
+        Fig.text(0.05, 0.99, "Project : %s , Profile %s , Filename : %s"%(Prj.ptitle,UvpSample.profileid,UvpSample.filename), ha='left')
+        # Fig.suptitle("Project %s : Profile %s"%(Prj.ptitle,UvpSample.profileid), ha='center')
+        Fig.tight_layout(rect=(0,0,1,0.99)) # permet de laisser un peu de blanc en haut pour le titre
+        Fig.savefig(GetPathForImportGraph(psampleid,'particle'))
         Fig.clf()
 
     database.ExecSQL("delete from part_histopart_det where psampleid="+str(psampleid))

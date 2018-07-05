@@ -43,7 +43,7 @@ File format <select name="fileformat" >
       </td>
     </tr>
     <tr>
-      <td><input type="radio" name="what" value="DET" {{'checked' if data.what=='DET'}} >Detailled data</td>
+      <td><input type="radio" name="what" value="DET" {{'checked' if data.what=='DET'}} >Detailed data</td>
       <td>
 File format <select name="fileformatd" >
         <option value="ODV" {{ 'selected' if data.fileformat=='ODV' }} >ODV</option>
@@ -72,7 +72,12 @@ SUMMARY file : metadata of exported sample (including pixel size for zooplankton
     <tr>
 
 </table>
-
+<p>
+In order to ease the transfer of large exported datasets, you can chose to export your files to the Ecotaxa FTP that is utilized to import your data and images.
+<br>Do not forget to delete your exported files from the FTP as they will be visible and available for other users.
+<br>Ask Ecotaxa managers (link) if you do not have yet the permissions on this FTP
+<br> <input type="checkbox" name="putfileonftparea" value="Y"> Save export file on "Exported data" folder on the FTP Area
+</p>
 <b>45 Particles class limits</b> (Upper limit included + 1 extra class > last limit):  {{ GetPartDetClassLimitListTextResult }}
 <br><b>15 Particles class limits</b> :  {{ GetPartRedClassLimitListTextResult }}
 <table>

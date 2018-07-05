@@ -413,12 +413,13 @@ function LoadRightPane(NoAjax,SaveInProfile){
     $('#headersubtitle').html(TxtFilter);
 }
 
-function RefreshClassifTab(KeepHiddens)
+function RefreshClassifTab(ForceRecalc)
 {
     var HiddenItems=$('.classiftab td').filter(function() { return $(this).css('display') == 'none';}).map(function() { return $(this).attr('taxoid'); }).get();
     var HorizArrow=$('.classiftab td span.glyphicon-triangle-right').closest('td').map(function() { return $(this).attr('taxoid'); }).get();
     var PosScrollBar=$('#divclassiftab').scrollTop();
     var req={taxo:$("#taxofilter").val(),taxofilterlabel:$("#taxofilterlabel").val()};
+    if(ForceRecalc==='Y') req['ForceRecalc']='Y';
     $("#TabA").load("/prjGetClassifTab/"+$("#projid").val(),req,function() {
         $.each(HiddenItems, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
             $('.classiftab td[taxoid=' + v + ']').css('display', 'none');
@@ -502,6 +503,37 @@ $(document).ready(function() {
             processResults: function (data, page) { return { results: data};  },
             cache: true
         },placeholder: "Text field",dropdownCssClass:"width240"});
+
+{#     Ctrl + A affecte la valeur selectionnée#}
+{#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function(e) {#}
+    $(document).bind('keydown', 'Test1', function(e) {
+       if((e.keyCode === 65)&& (e.ctrlKey||e.metaKey)) { {# CTRL+A #}
+          SelectAll(e);
+          e.preventDefault();
+      }
+       if((e.keyCode === 68)&& (e.ctrlKey||e.metaKey)) { {# CTRL+D #}
+          AssignTaxoLbToSelection();
+          e.preventDefault();
+      }
+       if((e.keyCode === 83)&& (e.ctrlKey||e.metaKey)) { {# CTRL+S #}
+{#          console.log(e);#}
+          SavePendingChanges();
+          e.preventDefault();
+      }
+
+    });
+{#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvle la popup#}
+    $(document).bind('keydown', function(e) {
+      if((document.activeElement.nodeName=='BODY')||(document.activeElement.nodeName=='SPAN'))
+       if((e.keyCode >= 65)&&(e.keyCode <= 90)&& !e.ctrlKey&& !e.metaKey)
+         if($(".ui-selected").length>0)
+       {
+         $('#taxolbanno').select2("open");
+         $('.taxopopup .select2-search__field').val(String.fromCharCode(e.keyCode));
+          //console.log(e);
+          e.preventDefault();
+      }
+    });
 
 });
 function UpdateSelectedCounter() {

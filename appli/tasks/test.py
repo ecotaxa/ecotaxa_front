@@ -5,7 +5,6 @@ from io import StringIO
 import html,functools,logging,json,time
 from datetime import datetime
 from appli.tasks.taskmanager import AsyncTask,LoadTask
-from flask_wtf import Form
 from wtforms import StringField
 from wtforms.validators import DataRequired
 

@@ -82,6 +82,16 @@ Available fields :
     {% for x in  g.maplist %}{{ x }}, {% endfor %}
 
    </td></tr>
+  <tr><td>SCN Network</td><td>
+        <select  class="form-control" id="cnn_network_id" name="cnn_network_id" >
+        <option value=""></option>
+        {% for k,v in g.scn.items() %}
+          <option value="{{ k }}" {{ 'selected' if data.cnn_network_id==k }}>{{ v.name }}</option>
+        {% endfor %}
+        </select>
+    </td><td>SCN Network used for prediction, if you change it, existing features computed with this network will be erased.
+    <br>New features will be recomputed during the next automatic classification.
+    </td></tr>
   <tr><td>Comments</td><td>
         <textarea  class="form-control" id="comments" name="comments"  rows="4">{{ data.comments|default('',true) }}</textarea>
     </td><td>

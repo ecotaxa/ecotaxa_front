@@ -11,7 +11,7 @@ from sklearn import svm
 from collections import Counter
 from sklearn import metrics
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 

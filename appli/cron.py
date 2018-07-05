@@ -1,8 +1,9 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from appli.database import ExecSQL
+from appli.database import ExecSQL,GetAll
 from appli.part.database import ComputeOldestSampleDateOnProject
-
+from appli.project.main import RecalcProjectTaxoStat
+import appli.part.prj
 
 def RefreshAllProjectsStat():
     # Tout les objets validés sans classifications sont repassés en non validés
@@ -10,9 +11,9 @@ def RefreshAllProjectsStat():
     ExecSQL("UPDATE projects SET  objcount=Null,pctclassified=null,pctvalidated=NULL")
     ExecSQL("""UPDATE projects
      SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
-     from (select projid, count(*) nbr,count(classif_id) nbrclassified,count(case when classif_qual='V' then 1 end) nbrvalidated
-          from obj_head o
-          group by projid )q
+     from (SELECT  projid,sum(nbr) nbr,sum(case when id>0 then nbr end) nbrclassified,sum(nbr_v) nbrvalidated
+          from projects_taxo_stat
+          group by projid  )q
      where projects.projid=q.projid""")
     ExecSQL("""delete from samples s
               where not exists (select 1 from objects o where o.sampleid=s.sampleid )""")
@@ -22,11 +23,16 @@ def RefreshTaxoStat():
     n=ExecSQL("UPDATE taxonomy SET  nbrobj=Null,nbrobjcum=null where nbrobj is NOT NULL or nbrobjcum is not null")
     print("RefreshTaxoStat cleaned %d taxo"%n)
 
+    print("Refresh projects_taxo_stat")
+    for r in GetAll('select projid from projects'):
+        RecalcProjectTaxoStat(r['projid'])
+
     n=ExecSQL("""UPDATE taxonomy
                 SET  nbrobj=q.nbr
-                from (select classif_id, count(*) nbr from obj_head o
-                        join projects p on o.projid=p.projid and p.visible=true
-                        where classif_qual='V' group by classif_id )q
+                from (select id classif_id, sum(nbr_v) nbr 
+                from projects_taxo_stat pts
+                        join projects p on pts.projid=p.projid and p.visible=true
+                        where nbr_v>0 group by id )q
                 where taxonomy.id=q.classif_id""")
     print("RefreshTaxoStat updated %d 1st level taxo"%(n))
 
@@ -47,8 +53,8 @@ def RefreshTaxoStat():
                     and coalesce(taxonomy.nbrobjcum,0)<>q.nbr""")
         print("RefreshTaxoStat updated %d level %d taxo"%(n,i))
         if n==0:
-            break;
-
+            break
+    appli.part.prj.GlobalTaxoCompute()
 
 if __name__ == "__main__":
     RefreshTaxoStat()

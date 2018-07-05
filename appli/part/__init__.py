@@ -44,7 +44,8 @@ CTDFixedCol={
         "qc flag": "qc_flag",
         "sound speed c [m/s]": "sound_speed_c",
         "spar [µmol m-2 s-1]": "spar",
-        "temperature [degc]": "temperature"
+        "temperature [degc]": "temperature",
+        "time [yyyymmddhhmmssmmm]": "datetime"
     }
 CTDFixedColByKey={v:k for k,v in CTDFixedCol.items()}
 

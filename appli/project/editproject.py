@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask_login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,TempTaskDir
 from pathlib import Path
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security import login_required
@@ -23,9 +23,13 @@ def PrjEdit(PrjId):
         return PrintInCharte("<a href=/prj/>Select another project</a>")
 
     if gvp('save')=="Y":
+        PreviousCNN=Prj.cnn_network_id
         for f in request.form:
             if f in dir(Prj):
                 setattr(Prj,f,gvp(f))
+        if PreviousCNN!=Prj.cnn_network_id:
+            database.ExecSQL("delete from obj_cnn_features where objcnnid in (select objid from obj_head where projid=%s)",[PrjId])
+            flash("SCN features erased", "success")
         Prj.visible=gvp('visible',False)
         # print(request.form)
         for m in Prj.projmembers:
@@ -55,7 +59,18 @@ def PrjEdit(PrjId):
         where t.id= any(%s) order by name """,(lst,))
     g.users=GetAssoc2Col("select id,name from users order by lower(name)",dicttype=collections.OrderedDict)
     g.maplist=['objtime','depth_min','depth_max']+sorted(DecodeEqualList(Prj.mappingobj).values())
+    g.scn=GetSCNNetworks()
     return render_template('project/editproject.html',data=Prj)
+######################################################################################################################
+def GetSCNNetworks():
+    ModelFolder = (Path(TempTaskDir) / "../SCN_networks").resolve()
+    Models = {}
+    for dir in ModelFolder.glob("*"):
+        if dir.is_dir() and (dir / "meta.json").is_file():
+            Models[dir.name] = json.load((dir / "meta.json").open("r"))
+            # Models[dir.name] = json.load((dir / "meta.json").open("r")).get('name',dir.name)
+    return Models
+
 
 ######################################################################################################################
 @app.route('/prj/editpriv/<int:PrjId>', methods=['GET', 'POST'])

@@ -4,7 +4,7 @@ from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,I
 from flask_login import current_user
 import appli.part.part_main as umain
 import matplotlib,io,math,traceback
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import numpy as np

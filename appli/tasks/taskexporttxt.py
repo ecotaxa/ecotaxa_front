@@ -32,6 +32,7 @@ class TaskExportTxt(AsyncTask):
                 self.sumsubtotal=''
                 self.internalids=''
                 self.typeline=''
+                self.putfileonftparea=''
 
 
     def __init__(self,task=None):
@@ -143,16 +144,17 @@ class TaskExportTxt(AsyncTask):
         splitcsv = (self.param.splitcsvby != "")
         self.param.OutFile= "export_{0:d}_{1:s}.{2}".format(Prj.projid
                                                             ,datetime.datetime.now().strftime("%Y%m%d_%H%M")
-                                                            ,"zip" if splitcsv else "tsv" )
-        if splitcsv  :
-            zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(),self.param.OutFile)
-                                    , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+                                                            ,"zip"  )
+
+        zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(),self.param.OutFile)
+                                , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+        if splitcsv:
             csvfilename='temp.tsv'
+            prevvalue = "NotAssigned"
         else:
-            csvfilename=self.param.OutFile
-            zfile=None
+            csvfilename =self.param.OutFile.replace('.zip','.tsv')
+            prevvalue = self.param.OutFile.replace('.zip', '')
         fichier=os.path.join(self.GetWorkingDir(),csvfilename)
-        prevvalue="NotAssigned"
         csvfile=None
         for r in self.pgcur:
             if (csvfile is None and (splitcsv == False)) or ((prevvalue!=r[splitfield]) and splitcsv ):
@@ -160,7 +162,8 @@ class TaskExportTxt(AsyncTask):
                     csvfile.close()
                     if zfile :
                         zfile.write(fichier,prevvalue+".tsv")
-                prevvalue = r[splitfield]
+                if splitcsv:
+                    prevvalue = r[splitfield]
                 logging.info("Creating file %s" % (fichier,))
                 csvfile=open(fichier,'w',encoding='latin_1')
                 wtr = csv.writer(csvfile, delimiter='\t', quotechar='"',lineterminator='\n',quoting=csv.QUOTE_NONNUMERIC  )
@@ -330,8 +333,21 @@ class TaskExportTxt(AsyncTask):
         else:
             raise Exception("Unsupported exportation type : %s"%(self.param.what,))
 
-        self.task.taskstate="Done"
-        self.UpdateProgress(100,"Export successfull")
+        if self.param.putfileonftparea=='Y':
+            fichier = Path(self.GetWorkingDir()) /  self.param.OutFile
+            fichierdest=Path(app.config['SERVERLOADAREA'])/"Exported_data"
+            if not fichierdest.exists():
+                fichierdest.mkdir()
+            NomFichier= "task_%d_%s"%(self.task.id,self.param.OutFile)
+            fichierdest = fichierdest / NomFichier
+            fichier.rename(fichierdest)
+            self.param.OutFile=''
+            self.task.taskstate = "Done"
+            self.UpdateProgress(100, "Export successfull : File '%s' is available on the 'Exported_data' FTP folder"%NomFichier)
+        else:
+            self.task.taskstate = "Done"
+            self.UpdateProgress(100, "Export successfull")
+
 
         # self.task.taskstate="Error"
         # self.UpdateProgress(10,"Test Error")
@@ -371,6 +387,7 @@ class TaskExportTxt(AsyncTask):
                 self.param.internalids = gvp("internalids")
                 self.param.typeline = gvp("typeline")
                 self.param.splitcsvby = gvp("splitcsvby")
+                self.param.putfileonftparea = gvp("putfileonftparea")
                 if self.param.splitcsvby=='sample': # si on splitte par sample, il faut les données du sample
                     self.param.sampledata='1'
                 # Verifier la coherence des données

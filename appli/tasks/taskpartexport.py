@@ -28,6 +28,8 @@ class TaskPartExport(AsyncTask):
                 self.samples=[]
                 self.samplesdict = {}
                 self.excludenotliving=False
+                self.OutFile=None
+                self.putfileonftparea = ''
 
 
     def __init__(self,task=None):
@@ -74,6 +76,7 @@ class TaskPartExport(AsyncTask):
         zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
         CTDFixedCols=list(CTDFixedColByKey.keys())
+        CTDFixedCols.remove('datetime')
         CTDFixedCols.extend(["extrames%02d" % (i + 1) for i in range(20)])
         ctdsql=",".join(["avg({0}) as ctd_{0} ".format(c) for c in CTDFixedCols])
         ctdsql="""select floor(depth/5)*5+2.5 tranche ,{0}
@@ -348,11 +351,12 @@ class TaskPartExport(AsyncTask):
         logging.info("samples = %s" % (self.param.samples ))
         samples = self.GetSamples()
         DTNomFichier = datetime.datetime.now().strftime("%Y%m%d_%H_%M")
-        BaseFileName="export_detailled_{0:s}".format(DTNomFichier)
+        BaseFileName="export_detailed_{0:s}".format(DTNomFichier)
         self.param.OutFile= BaseFileName+".zip"
         zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
         CTDFixedCols=list(CTDFixedColByKey.keys())
+        CTDFixedCols.remove('datetime')
         CTDFixedCols.extend(["extrames%02d" % (i + 1) for i in range(20)])
         ctdsql=",".join(["avg({0}) as ctd_{0} ".format(c) for c in CTDFixedCols])
         ctdsql="""select floor(depth/5)*5+2.5 tranche ,{0}
@@ -672,10 +676,16 @@ order by tree""".format(lstcatwhere)
                 nomfichier="{0}_{1}_CTD_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier)
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier,"wt") as f:
-                    res=GetAll("select * from part_ctd where psampleid=%s ORDER BY lineno",(S['psampleid'],))
                     cols=sorted(CTDFixedColByKey.keys())
-                    colsname=["depth","datetime"]+[CTDFixedColByKey[x] for x in cols]
-                    cols=["depth","datetime"] +cols
+                    cols.remove('datetime')
+                    res=GetAll("""select to_char(datetime,'YYYYMMDDHH24MISSMS') as datetime,{},{} 
+                                      from part_ctd where psampleid=%s 
+                                      ORDER BY lineno""".format(
+                                    ",".join(cols),",".join(["extrames%02d" % (i + 1) for i in range(20)]))
+                               ,(S['psampleid'],))
+                    cols.remove('depth')
+                    cols = ["depth", "datetime"] + cols # passe dept et datetime en premieres colonnes
+                    colsname = [CTDFixedColByKey[x] for x in cols]
                     CtdCustomCols=DecodeEqualList(S['ctd_desc'])
                     CtdCustomColsKeys=sorted(['extrames%s' % x for x in CtdCustomCols.keys()])
                     cols.extend(CtdCustomColsKeys)
@@ -744,8 +754,20 @@ order by tree""".format(lstcatwhere)
         else:
             raise Exception("Unsupported exportation type : %s"%(self.param.what,))
 
-        self.task.taskstate="Done"
-        self.UpdateProgress(100,"Export successfull")
+        if self.param.putfileonftparea=='Y':
+            fichier = Path(self.GetWorkingDir()) /  self.param.OutFile
+            fichierdest=Path(app.config['SERVERLOADAREA'])/"Exported_data"
+            if not fichierdest.exists():
+                fichierdest.mkdir()
+            NomFichier= "task_%d_%s"%(self.task.id,self.param.OutFile)
+            fichierdest = fichierdest / NomFichier
+            fichier.rename(fichierdest)
+            self.param.OutFile=''
+            self.task.taskstate = "Done"
+            self.UpdateProgress(100, "Export successfull : File '%s' is available on the 'Exported_data' FTP folder"%NomFichier)
+        else:
+            self.task.taskstate = "Done"
+            self.UpdateProgress(100, "Export successfull")
         # self.task.taskstate="Error"
         # self.UpdateProgress(10,"Test Error")
 
@@ -781,6 +803,7 @@ order by tree""".format(lstcatwhere)
                 self.param.user_name = current_user.name
                 self.param.user_email = current_user.email
                 self.param.fileformat=gvp("fileformat")
+                self.param.putfileonftparea = gvp("putfileonftparea")
                 if self.param.what == 'DET':
                     self.param.fileformat = gvp("fileformatd")
                     self.param.excludenotliving = (gvp("excludenotliving")=='Y')

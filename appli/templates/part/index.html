@@ -4,7 +4,7 @@
 #filter1 td:nth-child(1) {width: 100px; }
 #filter1 td {padding-bottom: 2px;}
 #geofilter .form-control {width:100px;display: inline-block;}
-#map .popover-content {white-space: nowrap;}
+#map .popover{max-width: 380px; }
 </style>
 <script src="/static/common.js"></script>
 
@@ -62,7 +62,6 @@ If you use EcoTaxa or Ecotaxa particle module in your work, we would appreciate 
   <tr >
     <td style="padding: 2px;white-space: nowrap;">West <input type="text" class="form-control" id="MapOutW" name="MapW" value="{{ reqfields['MapW'] }}"></td>
     <td>East <input type="text" class="form-control" id="MapOutE" name="MapE" value="{{ reqfields['MapE'] }}"></td></tr>
-    <td>East <input type="text" class="form-control" id="MapOutE" name="MapE" value="{{ reqfields['MapE'] }}"></td></tr>
   <tr><td colspan="2" style="padding-left: 40px;">South <input type="text" class="form-control" id="MapOutS" name="MapS" value="{{ reqfields['MapS'] }}">
     <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="ClearGeoFilter();">Clear</button>
   </td></tr>
@@ -117,7 +116,7 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
       <form id="formgraphconfig">
           Reduced particle histogram - <span id=redhelpericon class="glyphicon glyphicon-check" style="cursor: pointer" data-html="true" data-placement="bottom" data-content=""></span> <br>
           {{ form.gpr(style="width:100%") }}<br>
-          Detailled particle histogram - <span id=dethelpericon class="glyphicon glyphicon-check" style="cursor: pointer" data-html="true" data-placement="bottom" data-content=""></span> <br>
+          Detailed particle histogram - <span id=dethelpericon class="glyphicon glyphicon-check" style="cursor: pointer" data-html="true" data-placement="bottom" data-content=""></span> <br>
           {{ form.gpd(style="width:100%") }}<br>
           CTD Data - <span id=ctdhelpericon class="glyphicon glyphicon-check" style="cursor: pointer" data-html="true" data-placement="bottom" data-content=""></span> <br>
           {{ form.ctd(style="width:100%") }}<br>
@@ -286,7 +285,7 @@ function DoSearch(){
 {#        $('#ajaxlog').append( "<br>" +data.length+" samples found");#}
         SampleSource.clear();SampleSourceNotVisible.clear();SampleSourceVisible.clear();SampleSourceExportCTD.clear();
         var d = new Date();
-        $('#samplecount').text(data.length+" samples - "+d.toUTCString());
+        $('#samplecount').html(data.length+" samples - "+d.toUTCString()+"<span style='font-weight:normal'> - Use Shift+drag for Rectangle Zooming, Use Alt+drag for Rectangle Selection</span>");
         $.each( data, function(key, val ) {
             var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform([val['long'],val['lat']], 'EPSG:4326','EPSG:3857'))
                       ,psampleid:val['id'] });

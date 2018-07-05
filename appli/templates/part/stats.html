@@ -44,12 +44,13 @@
       <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
         <thead><tr><th>Project</th><th>Instrument</th><th width="70px">Sample<br>Particle</th><th width="90px">Sample&nbsp;ZOO<br>associated</th>
           <th>% Validated<br>zooplankton</th>
-          <th>Data Owner</th><th>Particle<br>Project Manager</th><th>Particle<br>data status</th><th>Zooplankton<br>data status</th></tr></thead>
+          <th>Data Owner</th><th>Particle<br>Project Manager</th><th>Ecotaxa (zoo)<br>Project Manager </th><th>Particle<br>data status</th><th>Zooplankton<br>data status</th></tr></thead>
         <tbody>
       {%   for v in data.partprojcount %}
       <tr>  <td> {{ v['ptitle'] }}</td>  <td>{{ v['instrumtype'] }}</td><td>{{ v['nbr'] }}</td><td>{{ v['nbrtaxo'] }}</td>
         <td>{{ data.taxostatbyproj[v['pprojid']] }}</td>
       <td><a href="mailto:{{ v['do_email'] or ""}}">{{ v['do_name'] or "" }}</td>
+      <td><a href="mailto:{{ v['uppowner_email'] or ""}}">{{ v['uppowner_name'] or "" }}</td>
       <td><a href="mailto:{{ v['email'] or ""}}">{{ v['name'] or "" }}</td>
       <td>{{ {'Y':'Full export','V':'Limited export','N':'Private'}[v['visibility'][0]] }} </td>
       <td>{{ {'Y':'Full export','V':'Visible','N':'Private'}[v['visibility'][1]] }} </td>

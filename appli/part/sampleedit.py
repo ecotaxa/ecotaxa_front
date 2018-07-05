@@ -5,6 +5,8 @@ from flask_login import current_user
 from flask import render_template,  flash,request,g
 import appli,logging,appli.part.uvp_sample_import as sample_import
 import appli.part.database as partdatabase
+import appli.part.prj
+# from . import prj as PartPrj
 from flask_security import login_required
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,TextAreaField
 from pathlib import Path
@@ -96,5 +98,10 @@ def part_sampleedit(psampleid):
         for k,v in form.data.items():
             setattr(model,k,v)
         db.session.commit()
+        if gvp('forcerecalc')=='Y':
+            appli.part.prj.ComputeHistoDet(model.psampleid,model.project.instrumtype)
+            appli.part.prj.ComputeHistoRed(model.psampleid,model.project.instrumtype)
+            appli.part.prj.ComputeZooMatch(model.psampleid,model.project.projid)
+            flash("Histograms have been recomputed","success")
         return redirect("/part/prj/"+str(model.pprojid))
     return PrintInCharte(render_template("part/sampleedit.html", form=form, prjid=model.pprojid, psampleid=model.psampleid))

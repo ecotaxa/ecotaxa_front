@@ -98,6 +98,21 @@ def GetSQLFilter(filtres,sqlparam,currentuserid):
     if filtres.get('filt_annot','')!='':
         whereclause+=" and (o.classif_who = any (%(filt_annot)s)  or exists (select classif_who from objectsclassifhisto oh where oh.objid=o.objid and classif_who = any (%(filt_annot)s) ) )"
         sqlparam['filt_annot'] = [int(x) for x in filtres["filt_annot"].split(',')]
-
-
     return whereclause
+
+
+def GetTextFilter(filtres):
+    """
+    Retourne le texte décrivant un filtre
+    :param filtres: Dictionnaires des filtres
+    :return:  chaine du filtre ou chaine vide si pas de filtres
+    """
+    filtresremplis={}
+    for k in FilterList:
+        if filtres.get(k, "") != "":
+            filtresremplis[k] = filtres[k]
+    if len(filtresremplis) > 0:
+        TxtFiltres = ",".join([k + "=" + v for k, v in filtresremplis.items() if v != ""])
+    else:
+        TxtFiltres = ""
+    return TxtFiltres

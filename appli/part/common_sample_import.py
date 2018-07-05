@@ -42,6 +42,8 @@ def GenerateReducedParticleHistogram(psampleid):
     :param psampleid:
     :return:
     """
+    if database.GetAll("select count(*) from part_histopart_det where psampleid="+str(psampleid))[0][0]<=0:
+        return "<span style='color: red;'>Reduced Histogram can't be computer without Detailed histogram</span>"
     database.ExecSQL("delete from part_histopart_reduit where psampleid=" + str(psampleid))
     sql = """insert into part_histopart_reduit(psampleid, lineno, depth,datetime,  watervolume
     , class01, class02, class03, class04, class05, class06, class07, class08, class09, class10, class11, class12, class13, class14, class15
@@ -80,6 +82,7 @@ def GenerateReducedParticleHistogram(psampleid):
       coalesce(biovol43,0)+coalesce(biovol44,0)+coalesce(biovol45,0) as bv15
     from part_histopart_det where psampleid="""+str(psampleid)
     database.ExecSQL(sql)
+    return " reduced Histogram computed"
 
 
 def ImportCTD(psampleid,user_name,user_email):
@@ -100,7 +103,7 @@ def ImportCTD(psampleid,user_name,user_email):
         app.logger.info("CTD file %s missing", CtdFile.as_posix())
         return False
     app.logger.info("Import CTD file %s", CtdFile.as_posix())
-    with CtdFile.open('r') as tsvfile:
+    with CtdFile.open('r',encoding='latin_1') as tsvfile:
         Rdr = csv.reader(tsvfile, delimiter='\t')
         HeadRow=Rdr.__next__()
         # Analyser la ligne de titre et assigner à chaque ID l'attribut
@@ -130,6 +133,8 @@ def ImportCTD(psampleid,user_name,user_email):
                 if v!='':
                     if c=='qc_flag':
                         setattr(cl, c, int(float(v)))
+                    elif c=='datetime':
+                        setattr(cl, c, datetime.datetime(int(v[0:4]),int(v[4:6]),int(v[6:8]),int(v[8:10]),int(v[10:12]),int(v[12:14]),int(v[14:17])*1000))
                     else:
                         setattr(cl,c,v)
             db.session.add(cl)

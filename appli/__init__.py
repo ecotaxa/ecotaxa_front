@@ -8,11 +8,12 @@ if sys.platform.startswith('win32'):
     virtualprefix = sys.base_prefix
     if hasattr(sys, 'real_prefix'):
         sys.base_prefix = sys.real_prefix
-    from tkinter import _fix
-    if "TCL_LIBRARY" not in os.environ:
-        # reload module, so that sys.real_prefix be used
-        from imp import reload
-        reload(_fix)
+    if float(sys.winver) < 3.5:
+        from tkinter import _fix
+        if "TCL_LIBRARY" not in os.environ:
+            # reload module, so that sys.real_prefix be used
+            from imp import reload
+            reload(_fix)
     sys.base_prefix = virtualprefix
 
 VaultRootDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), "..","vault")
@@ -27,6 +28,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security
 import inspect,html,math,threading,time,traceback
 import appli.securitycachedstore
+import matplotlib
+matplotlib.use('Agg')
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')

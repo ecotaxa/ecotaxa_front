@@ -123,9 +123,9 @@ def Partstatsample():
     data={'nbrsample':len(samples),'nbrvisible':sum(1 for x in samples if x['visible'])}
     data['nbrnotvisible']=data['nbrsample']-data['nbrvisible']
     sqlvisible, sqljoin = GetSQLVisibility()
-    data['partprojcount']=database.GetAll("""SELECT pp.ptitle,count(*) nbr,pp.do_email,do_name,email,name,pp.instrumtype,pp.pprojid
+    data['partprojcount']=database.GetAll("""SELECT pp.ptitle,count(*) nbr,pp.do_email,do_name,qpp.email,qpp.name,pp.instrumtype,pp.pprojid
         ,count(ps.sampleid ) nbrtaxo
-        ,p.visible,visibility
+        ,p.visible,visibility,uppowner.name uppowner_name,uppowner.email uppowner_email
         from part_samples ps
         --join part_projects pp on ps.pprojid=pp.pprojid        
         join (select pp.*,cast ({1} as varchar(2) ) as visibility
@@ -139,9 +139,10 @@ def Partstatsample():
             where pp.privilege='Manage' and u.active=true ) q where rang=1
           ) qpp on qpp.projid=pp.projid
         LEFT JOIN projects p on pp.projid = p.projid
+        LEFT JOIN users uppowner on pp.ownerid=uppowner.id 
         
         where ps.psampleid in ({0} )
-        group by pp.ptitle,pp.do_email,do_name,email,name,p.visible,pp.instrumtype,pp.pprojid,visibility
+        group by pp.ptitle,pp.do_email,do_name,qpp.email,qpp.name,p.visible,pp.instrumtype,pp.pprojid,visibility,uppowner.name,uppowner.email
         order by pp.ptitle""".format(sampleinclause,sqlvisible, sqljoin ))
     data['instrumcount']=database.GetAll("""SELECT coalesce(pp.instrumtype,'not defined') instrum,count(*) nbr
         from part_samples ps
@@ -238,6 +239,7 @@ group by slice order by slice""".format(sampleinclause))
 @app.route('/part/getsamplepopover/<int:psampleid>')
 def Partgetsamplepopover(psampleid):
     sql="""select s.psampleid,s.profileid,p.ptitle,ep.title,p.cruise,p.ship ,p.projid,p.pprojid
+      ,round(cast(s.latitude as NUMERIC),4) latitude,round(cast(s.longitude as NUMERIC),4) longitude
       from part_samples s
       LEFT JOIN part_projects p on s.pprojid=p.pprojid
       left join projects ep on p.projid = ep.projid
@@ -249,6 +251,7 @@ def Partgetsamplepopover(psampleid):
     Project : {ptitle} ({pprojid})<br>
     Ship : {ship}<br>
     Cruise : {cruise}<br>
-    Ecotaxa Project : {title} ({projid})
+    Ecotaxa Project : {title} ({projid})<br>
+    Lat/Lon : {latitude}/{longitude}
     """.format(**data)
     return txt
