@@ -11,10 +11,16 @@
 	<div class="row">
 		<div class="col-sm-12">
 
-			<p><a href="#general-help" data-toggle="collapse" class="help">General help</a></p>
-			<div id="general-help" class="collapse">
-			
-			<p>Use this page to import images and associated metadata into the current project.</p>
+			<p><a href="#create-project" data-toggle="collapse" class="help">How to create a project</a></p>
+			<div id="create-project" class="collapse">
+				<p>To create your first project, you must contact the application manager: {{ g.appmanagermailto|safe }}.</p>
+				
+				<p>Then you will be allowed to create new projects.</p>
+			</div>
+			</p>
+
+			<p><a href="#prepare-data" data-toggle="collapse" class="help">How to prepare data</a></p>
+			<div id="prepare-data" class="collapse">
 			
 			In a folder place:
 			<dl style="margin-left: 40px;">
@@ -126,7 +132,7 @@
 			
 			</div>
 			
-			<p><a href="#zooprocess-help" data-toggle="collapse" class="help">Zooprocess user help</a></p>
+			<p><a href="#zooprocess-help" data-toggle="collapse" class="help">How to import data from zooprocess</a></p>
 			<div id="zooprocess-help" class="collapse">
 				<p>Use version > 7.21.</p>
 				<p><h5>Importation of previously validated samples <small>(vignettes sorted in "sorted_vignettes” folder and identification loaded in dat1.tsv files)</small></h5>
@@ -178,7 +184,7 @@
 
 		<div class="col-sm-5">
 <div class="form-group">
-				<label class="control-label">Upload a local zip file</label>
+				<label class="control-label">Upload folder(s) compressed as a zip file</label>
 				<input class="form-control" type="file" id="uploadfile" name="uploadfile" size="200">
 				<p class="help-block">Only for &lt;&nbsp;100MB zip files.</p>
 			</div>
@@ -192,6 +198,13 @@
 				<div class="checkbox">
 					<label>
 						<input type="checkbox" id="skiploaded" name="skiploaded" value="Y">Skip <code>tsv</code> files that have already been imported
+					</label>
+    </div>
+  </div>
+  <div class="form-group">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" id="skipobjectduplicate" name="skipobjectduplicate" value="Y">Skip objects that have already been imported
 					</label>
     </div>
   </div>

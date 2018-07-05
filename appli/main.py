@@ -24,6 +24,18 @@ app.register_blueprint(vaultBP)
 @app.route('/')
 def index():
     txt="""<div style='margin:5px;'><div id="homeText"'>"""
+    #lecture du message de l'application manager
+    NomFichier='appli/static/home/appmanagermsg.html'
+    if os.path.exists(NomFichier):
+        with open(NomFichier, 'r',encoding='utf8') as f:
+            message=f.read()
+            if len(message)>5:
+                txt+="""<div class="panel panel-default">
+                <div class="panel-body">
+                    <div style='color:red;font-size:large;'>Message from application manager</div>
+                    <div class="alert alert-warning" role="alert" style="margin:0;">{0}</div></div>
+                </div>""".format(message)
+    # Lecture de la partie Haute
     NomFichier='appli/static/home/home.html'
     if not os.path.exists(NomFichier):
         NomFichier='appli/static/home/home-model.html'

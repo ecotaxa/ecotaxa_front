@@ -7,6 +7,9 @@
 
 {% block body %}
 
+  {% if TxtFiltres!="" %}
+    <span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters</span><BR>Filters :  {{ TxtFiltres }}
+  {% endif %}
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
   <table class="table table-bordered table-condensed " style="width: 600px">
@@ -20,7 +23,13 @@
 {{ checkboxinput("histodata","1",data.histodata) }} Historical Data <br>
 {{ checkboxinput("commentsdata","1",data.commentsdata) }} Comments<br>
 {{ checkboxinput("usecomasepa","1",data.usecomasepa) }} Use comma as decimal separator<br>
-
+{{ checkboxinput("internalids","1",data.internalids) }} Internal IDs<br>
+{{ checkboxinput("typeline","1",data.typeline) }} 2nd line with types, usefull to reimport<br>
+Split in multiple files by <select name="splitcsvby" >
+        <option value="" ></option>
+        <option value="sample" {{ 'selected' if data.splitcsvby=='sample' }} >Sample</option>
+        <option value="taxo" {{ 'selected' if data.splitcsvby=='taxo' }} >Taxonomy (parent_child)</option>
+      </select><br>
       </td>
     </tr>
     <tr>
@@ -40,36 +49,37 @@
       </select></td>
     </tr>
 </table>
-
 <script>
-
-    function ComputeSampleList() {
-        var cv="";
-        $('#TblVar input').each(function (){
-           if($(this).prop("checked")){
-               if(cv!="")
-                   cv+=",";
-               cv+=$(this).data("var");
-           }
-        });
-        $('#SampleList').val(cv);
-    }
-    function CheckBasedOnText() {
-        var cv=$('#SampleList').val();
-        var cvl=cv.split(",");
-        //console.log(cvl);
-        $('#TblVar input').each(function (){
-           if($(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)){
-               if(cv!="")
-                   cv+=",";
-               cv+=$(this).data("var");
-           }
-        });
-    }
+function ComputeSampleList() {
+    var cv="";
+    $('#TblVar input').each(function (){
+       if($(this).prop("checked")){
+           if(cv!="")
+               cv+=",";
+           cv+=$(this).data("var");
+       }
+    });
+    $('#SampleList').val(cv);
+}
+function CheckBasedOnText() {
+    var cv=$('#SampleList').val();
+    var cvl=cv.split(",");
+    //console.log(cvl);
+    $('#TblVar input').each(function (){
+       if($(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)){
+           if(cv!="")
+               cv+=",";
+           cv+=$(this).data("var");
+       }
+    });
+}
 </script>
 
+
 <table>
-<tr><td valign="top">
+<tr>
+{#{% if TxtFiltres=="" %}<td valign="top">#}
+{% if 1==0 %} {# Fonction désactivée #}
 Exported Samples :<br>
 <input type="text" name="samplelist" id="SampleList" value="{{ data.samplelist }}" style="width: 400px;"  autocomplete=off><br>
 
@@ -83,7 +93,7 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
         <tr><td><input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[1] }}" ></td><td>{{ r[1] }}</td></tr>
     {% endfor %}
 </table>
-</td>
+</td>{% endif %}
 <td valign="top">
   <br><br><br>
     <input type="hidden" name="starttask" value="Y">
@@ -95,20 +105,12 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
 
 </td>
 </tr>
-
 </table>
-
-
-
 </form>
-
-   <script>
+<script>
 $(document).ready(function() {
         $('#TblVar input').click(ComputeSampleList);
         CheckBasedOnText();
-
     }); // Ready
- </script>
-
-
+</script>
 {% endblock %}

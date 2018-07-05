@@ -9,9 +9,13 @@
 
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
-Additionnal Selected projects : {{ g.dispextraprojects|safe }}
+Additional selected projects (<a href="/Task/Create/TaskSubset?p={{ data.ProjectId }}">Select additional projects</a>) : {{ g.dispextraprojects|safe }}
 <input type="hidden" name="extraprojects" value="{{ data.extraprojects }}">
 <table><tr><td>
+  {%   if filtertxt!='' %}
+    <span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters</span><br>
+    <b>Filters = {{filtertxt  }} </b><br><br>
+    {% endif %}
   <table class="table table-bordered table-condensed " style="width: 400px">
     <tr>
         <td rowspan="2" style="vertical-align:middle;">OBJECT Selection parameter<br>(random per category) </td>
@@ -25,6 +29,7 @@ Additionnal Selected projects : {{ g.dispextraprojects|safe }}
       <td><input type="text" size=5 name="vvaleur" value="{{ prevpost.vvaleur }}">  objects </td>
     </tr>
 </table>
+
 <b>Select object with status</b><br>
 &nbsp;{{ checkboxinputinlist("what_v","V",data.what) }} Validated<br>
 &nbsp;{{ checkboxinputinlist("what_d","D",data.what) }} Dubious<br>
@@ -34,8 +39,8 @@ Additionnal Selected projects : {{ g.dispextraprojects|safe }}
 <div class='panel panel-default' style="width:600px;margin-left:10px;">
     <ul>
     <li>It is allowed to create a SUBSET containing 100% of images from the source project. In that case, the SUBSET will be a copy.
-    <li>A SUBSET created for Learning Set purpose should then be improved for better classification performances. It is noted that the classification & validation task is generally more efficient (less time consuming) when he Learning set contains more “homogeneous” and “limited” number of categories than in the final validated dataset
-    <li>The Project Manager of the source project will be also Project Manager of the SUBSET
+    <li>A SUBSET created for Learning Set purpose should then be improved for better classification performances. It is noted that the classification & validation task is generally more efficient (less time consuming) when the learning set contains more “homogeneous” and “limited” number of categories than in the final validated dataset.
+    <li>The Project Manager of the source project will also be Project Manager of the SUBSET.
     </ul>
 </div>
 </td></tr></table>
@@ -46,36 +51,31 @@ Additionnal Selected projects : {{ g.dispextraprojects|safe }}
 
 
 <script>
-
-    function ComputeSampleList() {
-        var cv="";
-        $('#TblVar input').each(function (){
-           if($(this).prop("checked")){
-               if(cv!="")
-                   cv+=",";
-               cv+=$(this).data("var");
-           }
-        });
-        $('#SampleList').val(cv);
-    }
-    function CheckBasedOnText() {
-        if($('#SampleList').length==0) return;
-        var cv=$('#SampleList').val();
-        var cvl=cv.split(",");
-        //console.log(cvl);
-        $('#TblVar input').each(function (){
-           if($(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)){
-               if(cv!="")
-                   cv+=",";
-               cv+=$(this).data("var");
-           }
-        });
-    }
+  function ComputeSampleList() {
+      var cv="";
+      $('#TblVar input').each(function (){
+         if($(this).prop("checked")){
+             if(cv!="")
+                 cv+=",";
+             cv+=$(this).data("var");
+         }
+      });
+      $('#SampleList').val(cv);
+  }
+  function CheckBasedOnText() {
+    if($('#SampleList').length==0) return;
+    var cv=$('#SampleList').val();
+    var cvl=cv.split(",");
+    //console.log(cvl);
+    $('#TblVar input').each(function (){
+       $(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)
+    });
+  }
 </script>
 <br>
 <table>
 <tr>
-{% if not data.extraprojects  %}
+{% if (not data.extraprojects) and (filtertxt=='')  %}
 
     <td valign="top">
 MANAGE SAMPLES TO BE INCLUDED IN THE SUBSET :<br>

@@ -7,7 +7,7 @@ from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll
 from sqlalchemy.orm.session import make_transient
 from sqlalchemy import text
-
+import appli.project.sharedfilter as sharedfilter
 
 class TaskSubset(AsyncTask):
     class Params (AsyncTask.Params):
@@ -23,6 +23,7 @@ class TaskSubset(AsyncTask):
                 self.subsetproject=None #N° du projet destination
                 self.subsetprojecttitle=""
                 self.withimg="Y"
+                self.filtres = {}
 
     def __init__(self,task=None):
         super().__init__(task)
@@ -112,30 +113,31 @@ class TaskSubset(AsyncTask):
 
         if self.param.IntraStep==1:
             vaultroot=Path("../../vault")
-            sqlparam={'projid':self.param.ProjectId,'sqlwhere':""}
+            sqlparam={'projid':self.param.ProjectId}
+            sqlwhere=""
             if self.param.extraprojects:
                 sqlparam['projid']+=","+self.param.extraprojects
             sqlparam['ranklimit']=self.param.valeur
-            if self.param.valtype=='V': sqlparam['rankfunction']='rank'
-            elif self.param.valtype=='P': sqlparam['rankfunction']='100*percent_rank'
-            else: sqlparam['rankfunction']='FunctionError'
+            if self.param.valtype=='V': rankfunction='rank'
+            elif self.param.valtype=='P': rankfunction='100*percent_rank'
+            else: rankfunction='FunctionError'
             if self.param.samplelist:
-                sqlparam['sqlwhere']+=" and s.orig_id in (%s) "%(",".join(["'%s'"%x for x in self.param.samplelist.split(",")]))
-            sqlparam['sqlwhere']+=" and (o.classif_qual in (%s) "%(",".join(["'%s'"%x for x in self.param.what.split(",")]))
+                sqlwhere+=" and s.orig_id in (%s) "%(",".join(["'%s'"%x for x in self.param.samplelist.split(",")]))
+            sqlwhere+=" and (o.classif_qual in (%s) "%(",".join(["'%s'"%x for x in self.param.what.split(",")]))
             if self.param.what.find('N')>=0:
-                sqlparam['sqlwhere']+=" or o.classif_qual is null "
-            sqlparam['sqlwhere']+=")"
-
-
+                sqlwhere+=" or o.classif_qual is null "
+            sqlwhere+=")"
+            sqlwhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam, str(self.task.owner_id))
             logging.info("SQLParam=%s",sqlparam)
             sql="""select objid from (
-                SELECT {rankfunction}() OVER (partition by classif_id order by random() )rang,o.objid
+                SELECT """+rankfunction+"""() OVER (partition by classif_id order by random() )rang,o.objid
                       from objects o left join samples s on o.sampleid=s.sampleid
-                      where o.projid in ( {projid} ) {sqlwhere} ) sr
-                where rang<={ranklimit} """.format(**sqlparam)
-            logging.info("SQL=%s",sql)
+                      where o.projid in ( %(projid)s ) """+sqlwhere+""" ) sr
+                where rang<=%(ranklimit)s """
+            logging.info("SQL=%s %s",sql,sqlparam)
             # for obj in db.session.query(database.Objects).from_statement( text(sql) ).all():
-            LstObjects=GetAll(sql)
+            LstObjects=GetAll(sql,sqlparam)
+            logging.info("matched %s objects", len(LstObjects))
             if len(LstObjects)==0:
                 self.task.taskstate="Error"
                 self.UpdateProgress(10,"No object to include in the subset project")
@@ -188,14 +190,18 @@ class TaskSubset(AsyncTask):
                                 ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
                                 where projid="""+str(self.param.subsetproject))
             self.pgcur.connection.commit()
-
+        import appli.project.main
+        appli.project.main.UpdateProjectStat(self.param.subsetproject)
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Subset created successfully")
+
+
         # self.task.taskstate="Error"
         # self.UpdateProgress(10,"Test Error")
 
     def QuestionProcess(self):
-        Prj=database.Projects.query.filter_by(projid=gvg("p")).first()
+        self.param.ProjectId = gvg("p")
+        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         if not Prj.CheckRight(1):
             return PrintInCharte("ACCESS DENIED for this project<br>"+Prj.title)
         txt=""
@@ -238,10 +244,19 @@ A SUBSET can have different usages:<br>
                 """
                 return PrintInCharte(txt)
 
+            self.param.filtres = {}
+            for k in sharedfilter.FilterList:
+                if gvg(k, "") != "":
+                    self.param.filtres[k] = gvg(k, "")
+            filtertxt=""
+            if len(self.param.filtres) > 0:
+                filtertxt += ",".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""])
+                g.headcenter = "<h4><a href='/prj/{0}?{2}'>{1}</a></h4>".format(Prj.projid, Prj.title,
+                "&".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""]) )
+
             # Le projet de base est choisi second écran ou validation du second ecran
             if gvp('starttask')=="Y":
                 # validation du second ecran
-                self.param.ProjectId=gvg("p")
                 self.param.extraprojects=gvp("extraprojects")
                 self.param.samplelist=gvp("samplelist")
                 self.param.withimg=gvp("withimg")
@@ -269,7 +284,7 @@ A SUBSET can have different usages:<br>
                 # Verifier la coherence des données
                 # errors.append("TEST ERROR")
                 if self.param.what=='' : errors.append("You must select at least one Flag")
-                if self.param.valtype=='' : errors.append("You must select % or values")
+                if self.param.valtype=='' : errors.append("You must select the object selection parameter '% of values' or '# of objects'")
                 if len(errors)>0:
                     for e in errors:
                         flash(e,"error")
@@ -277,7 +292,7 @@ A SUBSET can have different usages:<br>
                     return self.StartTask(self.param)
             else: # valeurs par default
                 self.param.what="V"
-                self.param.subsetprojecttitle=("Subset of "+Prj.title+" created on "+(datetime.date.today().strftime('%Y-%m-%d')))[0:255]
+                self.param.subsetprojecttitle=(Prj.title+" - Subset created on "+(datetime.date.today().strftime('%Y-%m-%d')))[0:255]
                 self.param.extraprojects=",".join(request.form.getlist('extraprojects'))
             txt="<h3>SUBSET SETTINGS Page (2/2)</h3>"
             if self.param.extraprojects:
@@ -293,12 +308,13 @@ A SUBSET can have different usages:<br>
                     if p.mappingprocess!=Prj.mappingprocess:
                         flash("Process variables mapping differ on project %d (%s)"%(p.projid,p.title),"warning")
             else:
+                g.dispextraprojects = "None"
                 #recupere les samples
                 sql="""select sampleid,orig_id
                         from samples where projid =%(projid)s
                         order by orig_id"""
                 g.SampleList=GetAll(sql,{"projid":gvg("p")},cursor_factory=None)
-            return render_template('task/subset_create.html',header=txt,data=self.param,prevpost=request.form)
+            return render_template('task/subset_create.html',header=txt,data=self.param,prevpost=request.form,filtertxt=filtertxt)
 
 
     def GetDoneExtraAction(self):

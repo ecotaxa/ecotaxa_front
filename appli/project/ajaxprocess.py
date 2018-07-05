@@ -41,6 +41,25 @@ def PrjManualClassif(PrjId):
                     ExecSQL(sqli,params,True)
             except:
                 app.logger.warning("Unable to add historical information, non-blocking %s"%(prev,))
+            if prev[ki]['classif_id']!=int(v): # il y a eu un changement de classif on maintient la liste des classifs MRU
+                with app.MRUClassif_lock:
+                    tbl=app.MRUClassif.get(current_user.id,[])
+                    for i,t in enumerate(tbl):
+                        if t["id"]==int(v):
+                            if i>0: # on met cet item au début pour gérer un MRU
+                                tbl=[t]+tbl[0:i]+tbl[i+1:]
+                            break
+                    else: # si pas trouvé dans la liste des MRU on l'ajoute au début si on trouve bien son nom dans la taxo
+                        Taxon=GetAll("""select tf.name||case when p1.name is not null and tf.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+                            from taxonomy tf
+                             left join taxonomy p1 on tf.parent_id=p1.id
+                            where tf.id=%(id)s """,{"id":v})
+                        if len(Taxon)==1:
+                            Taxon=Taxon[0].get('name', "")
+                            tbl.insert(0,{"id": int(v), "pr": 0, "text": Taxon})
+                            if len(tbl)>10:
+                                tbl=tbl[0:10]
+                    app.MRUClassif[current_user.id]=tbl
 
     return '<span class="label label-success">Database update Successfull</span>'
 

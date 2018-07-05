@@ -1,8 +1,9 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-  <p>Ecotaxa Version : 2016.06.10</p>
+  <p>Ecotaxa Version : 1.1 2016.12.07</p>
 {# Log :
+2016.12.07 : V 1.1 Several changes on annotation page, filters, see release note.
 2016.06.10 : Removed X before Object name
              if file home.html or homebottom.html is missing use home-model.html and homebottom-model.html
              Theses file are read as UTF-8 Format instead of target platform settings.
@@ -26,6 +27,7 @@
             <tr >
                 <td width="200"><a href="/Task/Create/TaskImportDB" class="btn">Database Import</a></td>
                 <td width="200"><a href="/Task/Create/TaskExportDb" class="btn">Database Export</a></td>
+                <td width="200"><a href="/adminothers/edithomemessage" class="btn">Edit Home Page Message</a></td>
 
             </tr>
         </table>

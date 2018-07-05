@@ -5,12 +5,23 @@
 #TabB .select2-selection__rendered {font-size: 12px; }
 </style>
 
+{# ------- Instrument ------------#}
+<div class="filter ">
+	<div class="form-group-sm">
+		<label class="title">Instrument</label> <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});" style="cursor: pointer;"></span>
+    <a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearInstrum();return false;'>Clear</a>
+    <input class="form-control" type="text" id="filt_instrum" name="filt_instrum" value="{{ data.instrum }}" placeholder="Instrument">
+	</div>
+</div>
 {# ------- Sample ------------#}
 <div class="filter ">
 	<div class="form-group-sm">
 		<label class="title">Sample</label>
+    {% if data.inexplore==True %}
 		<span title="Available only when a project is selected" data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
-		<a class="pull-right clear" href='javascript:ClearSamples();'></a>
+    {% endif %}
+		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearSamples();return false;'>Clear</a>
+		<a class="pull-right label label-info" style="padding: 1px 3px 3px 3px; margin-top: 5px;margin-right:5px;font-size: 90%;" href=# onclick='AdvancedSamples();return false;'>Advanced</a>
 		<select class="form-control" id="sampleid" name="sampleid" style="width: 100%" multiple autocomplete="off"> {{ data.sample_for_select|safe }}</select>
 	</div>
 </div>
@@ -19,7 +30,7 @@
 	<div class="form-group-sm">
 		<label class="title">Depth</label>
 		<span title="Positive values. Both values are required. Each object has a min and max depths. Both values must be in the selected range for the object to be displayed." data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
-		<a class="pull-right clear" href='javascript:ClearDepths();'></a>
+		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearDepths();return false;'>Clear</a>
 
 		<div class="form-inline">
 			<div class="input-group" style="width: 49%" >
@@ -37,7 +48,7 @@
 <div class="filter ">
 	<div class="form-group-sm">
 		<label class="title">Location</label>
-		<a class="pull-right clear" href='javascript:ClearCoords();'></a>
+		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearCoord();return false;'>Clear</a>
 
 		<table>
 			<tr>
@@ -56,9 +67,12 @@
 <div class="filter ">
 	<div class="form-group-sm">
 		<label class="title">Date</label>
-		<a class="pull-right clear" href='javascript:ClearDates();'></a>
+		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick="ClearDates();return false;">Clear</a>
 		<input class="form-control" type="text" style="width: 100%" id="filt_fromdate" name="filt_fromdate" value="{{ data.fromdate }}" autocomplete="off" placeholder="Begin">
 		<input class="form-control" type="text" style="width: 100%" id="filt_todate" name="filt_todate" value="{{ data.todate }}" autocomplete="off" placeholder="End">
+        <select class="form-control" id="month" name="month" style="width: 100%" multiple autocomplete="off">
+            {{ data.month_for_select|safe }}
+        </select>
 	</div>
 </div>
 {# ------- Times ------------#}
@@ -67,31 +81,33 @@
 
 		<label class="title">Time</label>
 		<input type="checkbox" value="Y" id="filt_inverttime" name="filt_inverttime" autocomplete="off" {{ "checked" if data.inverttime=='1' }}> <label for="filt_inverttime">invert</label>
-		<a class="pull-right clear" href='javascript:ClearTimes();'></a>
+		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearTimes();return false;'>Clear</a>
 		<form class="form-inline">
 			<input class="form-control" type="text" style="width: 49%" id="filt_fromtime" name="filt_fromtime" autocomplete="off" value="{{ data.fromtime }}" placeholder="Begin">
 			<input class="form-control" type="text" style="width: 49%" id="filt_totime" name="filt_totime" autocomplete="off" value="{{ data.totime }}" placeholder="End">
 		</form>
-
 		<div style="margin: 7px" id="time-slider-range"></div>
+        <select class="form-control" id="daytime" name="daytime" style="width: 100%" multiple autocomplete="off">
+            {{ data.daytime_for_select|safe }}
+        </select>
 	</div>
 </div>
-
 <script>
 function OpenMap(projid) {
-    $("#PopupDetails .modal-content").html("Loading...");
-    $('#PopupDetails .modal-lg').css('width',$(window).width()-40);
-    $('#PopupDetails').modal({});
-    var url="/search/mappopup/"
-    if(typeof (projid)!="undefined")
-      url+="?projid="+projid
-    $("#PopupDetails .modal-content").load(url);
+  $("#PopupDetails .modal-content").html("Loading...");
+  $('#PopupDetails .modal-lg').css('width',$(window).width()-40);
+  $('#PopupDetails').modal({});
+  var url="/search/mappopup/"
+  if(typeof (projid)!="undefined")
+    url+="?projid="+projid
+  $("#PopupDetails .modal-content").load(url);
 }
 function ClearCoord() {
   $("#filt_MapOutN,#filt_MapOutW,#filt_MapOutE,#filt_MapOutS").val("");
 }
 function ClearDates(){
   $( "#filt_fromdate,#filt_todate" ).val("");
+  $( "#month" ).val(null).trigger("change");
 }
 function ClearDepths(){
   $( "#filt_depthmin,#filt_depthmax" ).val("");
@@ -99,56 +115,87 @@ function ClearDepths(){
 function ClearTimes(){
   $("#filt_fromtime,#filt_totime" ).val("");
   $("#filt_inverttime").prop("checked",false);
+  $("#daytime").val(null).trigger("change");
+}
+function ClearInstrum(){
+  $("#filt_instrum" ).val("");
 }
 function ClearSamples(){
   $( "#sampleid" ).val(null).trigger("change");
 }
+
+function AdvancedSamples() {
+  if($('#projid').val()==null) return;
+  $("#PopupDetails .modal-content").html("Loading...");
+  $('#PopupDetails .modal-lg').css('width',800);
+  $('#PopupDetails').modal({});
+
+  var url="/search/samples?format=P&q=&projid="+$('#projid').val();
+  $("#PopupDetails .modal-content").load(url,function () {
+    var lst="";
+    var sampleid=$('#sampleid');
+    lst=$.map(sampleid.find('option:selected'), function (element) { return $(element).text() }).join(', ');
+    $('#txtlstsample').val(lst);
+    SampleTxtToCB();
+
+  });
+
+}
 function UpdateTimeSliderColor(){
-    if($("#filt_inverttime").prop("checked")) {
-       $("#time-slider-range .ui-slider-range").css('background-color','#fff')
-       $("#time-slider-range").css('background-color','#555')
-    } else    {
-       $("#time-slider-range .ui-slider-range").css('background-color','#555')
-       $("#time-slider-range").css('background-color','#fff')
-    }
+  if($("#filt_inverttime").prop("checked")) {
+     $("#time-slider-range .ui-slider-range").css('background-color','#fff')
+     $("#time-slider-range").css('background-color','#555')
+  } else    {
+     $("#time-slider-range .ui-slider-range").css('background-color','#555')
+     $("#time-slider-range").css('background-color','#fff')
+  }
+}
+function DispInstrumList(projid){
+  $("#PopupDetails .modal-content").html("Loading...");
+  $('#PopupDetails .modal-lg').css('width',$(window).width()/2);
+  $('#PopupDetails').modal({});
+  var url="/search/instrumlist"
+  if(typeof (projid)!="undefined")
+    url+="?projid="+projid
+  $("#PopupDetails .modal-content").load(url);
 }
 
 $(document).ready(function() {
-  
+  $("#sampleid").select2({
+    ajax: {
+      url: "/search/samples",
+      dataType: 'json',
+      delay: 250,
+      data: function (params) {  return { q: params.term  ,projid:$('#projid').val() };  },
+      processResults: function (data, page) { return { results: data};  },
+      cache: true
+    },
+    dropdownCssClass:"width400"
+    ,placeholder: "Sample"
+  }); // Select2 Ajax
+  $('#month').select2({placeholder: "Month"});
+  $('#daytime').select2({placeholder: "Day time"});
+  $( "#filt_fromdate,#filt_todate" ).datepicker({
+    showButtonPanel: true,changeMonth: true,changeYear: true,dateFormat:"yy-mm-dd",
+  });
 
-    $("#sampleid").select2({
-        ajax: {
-            url: "/search/samples",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {  return { q: params.term  ,projid:$('#projid').val() };  },
-            processResults: function (data, page) { return { results: data};  },
-            cache: true
-        },
-        dropdownCssClass:"width400"
-    }); // Select2 Ajax
-
-      $( "#filt_fromdate,#filt_todate" ).datepicker({
-      showButtonPanel: true,changeMonth: true,changeYear: true,dateFormat:"yy-mm-dd",
-    });
-
-    $( "#time-slider-range" ).slider({
-      range: true,
-      min: 0,
-      max: 1439,
-      values: [ 0, 1439 ],
-      slide: function( event, ui ) {
-        v=ui.values[ 0 ];
-        v=Math.floor(v/60)+":"+(("00"+(v% 60)).substr(-2));
-        $( "#filt_fromtime" ).val(  v);
-        v=ui.values[1];
-        v=Math.floor(v/60)+":"+(("00"+(v% 60)).substr(-2));
-        $( "#filt_totime" ).val( v );
-      }
-    });
-    $("#filt_inverttime").change(function(){
-			UpdateTimeSliderColor();
-		});
+  $( "#time-slider-range" ).slider({
+    range: true,
+    min: 0,
+    max: 1439,
+    values: [ 0, 1439 ],
+    slide: function( event, ui ) {
+      v=ui.values[ 0 ];
+      v=Math.floor(v/60)+":"+(("00"+(v% 60)).substr(-2));
+      $( "#filt_fromtime" ).val(  v);
+      v=ui.values[1];
+      v=Math.floor(v/60)+":"+(("00"+(v% 60)).substr(-2));
+      $( "#filt_totime" ).val( v );
+    }
+  });
+  $("#filt_inverttime").change(function(){
     UpdateTimeSliderColor();
+  });
+  UpdateTimeSliderColor();
 });
 </script>

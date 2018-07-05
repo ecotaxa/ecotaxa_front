@@ -4,6 +4,8 @@ from appli.database import ExecSQL
 
 
 def RefreshAllProjectsStat():
+    # Tout les objets validés sans classifications sont repassés en non validés
+    ExecSQL("update obj_head oh set classif_qual=NULL where classif_qual='V' and classif_id is null ")
     ExecSQL("UPDATE projects SET  objcount=Null,pctclassified=null,pctvalidated=NULL")
     ExecSQL("""UPDATE projects
      SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
@@ -11,6 +13,8 @@ def RefreshAllProjectsStat():
           from obj_head o
           group by projid )q
      where projects.projid=q.projid""")
+    ExecSQL("""delete from samples s
+              where not exists (select 1 from objects o where o.sampleid=s.sampleid )""")
 
 def RefreshTaxoStat():
     n=ExecSQL("UPDATE taxonomy SET  nbrobj=Null,nbrobjcum=null where nbrobj is NOT NULL or nbrobjcum is not null")

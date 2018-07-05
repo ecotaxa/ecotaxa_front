@@ -17,6 +17,7 @@ def indexExplore():
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
         data[k]=gvg(k,v)
+    data['inexplore']=True
     data["projid"]=gvg("projid",0)
     data["taxochild"]=gvg("taxochild",0)
     data["sample_for_select"]=""
@@ -32,7 +33,12 @@ def indexExplore():
         print(gvg("taxo[]"))
         for r in GetAll("SELECT id, name FROM taxonomy WHERE  id in(%s) order by name"%(",".join((str(int(x)) for x in request.args.getlist("taxo[]"))),),debug=False):
             data["taxo_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
-            print(data["taxo_for_select"])
+    data["month_for_select"] = ""
+    for (k,v) in enumerate(('January','February','March','April','May','June','July','August','September','October','November','December'),start=1):
+        data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['month'].split(',') else '',k,v)
+    data["daytime_for_select"] = ""
+    for (k,v) in database.DayTimeList.items():
+        data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['daytime'].split(',') else '',k,v)
 
     right='dodefault'
     classiftab=""
@@ -101,6 +107,10 @@ where o.classif_qual='V'
         whereclause+=" and o.sampleid= any (%(samples)s) "
         sqlparam['samples']=[int(x) for x in gvp("samples").split(',')]
 
+    if gvp("instrum")!="":
+        whereclause += " and o.acquisid in (select acquisid  from acquisitions  where instrument ilike %(instrum)s "+("and projid= any (%(projid)s)" if gvp("projid")!="" else "")+" )"
+        sqlparam['instrum']='%'+gvp("instrum")+'%'
+
     if gvp("projid")!="":
         whereclause+=" and o.projid= any (%(projid)s) "
         sqlparam['projid']=[int(x) for x in gvp("projid").split(',')]
@@ -111,6 +121,12 @@ where o.classif_qual='V'
     if gvp("todate")!="":
         whereclause+=" and o.objdate<= to_date(%(todate)s,'YYYY-MM-DD') "
         sqlparam['todate']=gvp("todate")
+    if gvp("month")!="":
+        whereclause+=" and extract(month from o.objdate) = any (%(month)s) "
+        sqlparam['month']=[int(x) for x in gvp("month").split(',')]
+    if gvp("daytime")!="":
+        whereclause+=" and o.sunpos= any (%(daytime)s) "
+        sqlparam['daytime']=[x for x in gvp("daytime").split(',')]
 
     if gvp("inverttime")=="1":
         if gvp("fromtime")!="" and gvp("totime")!="":

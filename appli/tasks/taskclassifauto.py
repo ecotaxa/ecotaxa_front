@@ -49,6 +49,10 @@ class TaskClassifAuto(AsyncTask):
         ColsPrj=[]  # contient les colonnes communes au deux projets dans le même ordre
         ColsPrjBase=[]
         MapColTargetToBase={}
+        PostTaxoMapping={}
+        if 'posttaxomapping' in self.param.CustSettings:
+            PostTaxoMapping = {int(el[0].strip()):int(el[1].strip()) for el in [el.split(':') for el in self.param.CustSettings['posttaxomapping'].split(',')]}
+            logging.info("PostTaxoMapping = %s ", PostTaxoMapping )
         for c in CritVar:
             if c not in MapPrj:
                 logging.info("Variable %s not available in the classified project",c)
@@ -126,6 +130,9 @@ class TaskClassifAuto(AsyncTask):
             ResultMaxCol=np.argmax(Result,axis=1)
             # Typage important pour les perf postgresql
             SqlParam=[{'cat':int(Classifier.classes_[mc]),'p':r[mc],'id':int(i)} for i,mc,r in zip(Tget_Ids,ResultMaxCol,Result)]
+            for i, v in enumerate(SqlParam):
+                if v['cat'] in PostTaxoMapping:
+                    SqlParam[i]['cat']=PostTaxoMapping[v['cat']]
             TStep3 = time.time()
             # MAJ dans la base, Si pas de classif devient predicted , Si vide ou predicted, MAJ de la classif
             if self.param.keeplog:
@@ -241,11 +248,13 @@ class TaskClassifAuto(AsyncTask):
                 g.TxtCustSettings=EncodeEqualList(d)
             # Le projet de base est choisi second écran
             #recupere les categories et le nombre d'occurence dans le projet de base/learning
-            sql="""select n.classif_id,t.name,n.nbr
+            sql="""select n.classif_id,t.name||case when p1.name is not null and t.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+                    ,n.nbr
                     from (select o.classif_id,count(*) nbr
                           from obj_head o where projid =%(projid)s and classif_qual='V'
                           group by classif_id) n
                     JOIN taxonomy t on n.classif_id=t.id
+                    left join taxonomy p1 on t.parent_id=p1.id
                     order by nbr desc,name"""
             g.TaxoList=GetAll(sql,{"projid":gvg("src")},cursor_factory=None)
             s=sum([r[2] for r in g.TaxoList])  # Nbr total d'objet par categorie

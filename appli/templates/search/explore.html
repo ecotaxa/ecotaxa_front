@@ -257,6 +257,16 @@ function LoadRightPane(NoAjax){
     else req['samples']="";
     if(req['samples']!="")
         TxtFilter+=" Samples="+$.map( $('#sampleid  option:selected'), function (element) { return $(element).text() }).join(', ');
+    req['instrum']=$("#filt_instrum").val();
+    if(req['instrum']!="")
+        TxtFilter+=" Instrument ="+req['instrum'];
+    var jqmonth=$('#month');
+    if(jqmonth.val()!=null) {
+      req['month'] = String(jqmonth.val());
+      TxtFilter += " Month=" + $.map(jqmonth.find('option:selected'), function (element) {
+            return $(element).text()
+          }).join(', ');
+    }
 
     if($('#projid').val()!=null)
       req['projid']=String($('#projid').val())
@@ -288,6 +298,11 @@ function LoadRightPane(NoAjax){
     if(req['inverttime']=="1")
         TxtFilter+=" Time Invert ";
     else delete req['inverttime'];
+    var jqdaytime=$('#daytime');
+    if(jqdaytime.val()!=null) {
+      req['daytime'] = String(jqdaytime.val());
+      TxtFilter+=" DayTime="+$.map(jqdaytime.find('option:selected'), function (element) { return $(element).text() }).join(', ');
+    }
 
 
     $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
@@ -332,7 +347,6 @@ $(document).ready(function() {
         dropdownCssClass:"width400"
     }); // Select2 Ajax
 
-
 });
 function ClearProjects(){
   $( "#projid" ).val(null).trigger("change");
@@ -340,7 +354,6 @@ function ClearProjects(){
 function ClearTaxo(){
   $( "#taxolb" ).val(null).trigger("change");
 }
-
 
 function PostAddImages(){
         $(document).scrollTop(0);
@@ -376,11 +389,10 @@ function ClearAllFilterCriteria(){
     ClearDates();
     ClearTimes();
     ClearSamples();
+    ClearInstrum();
     ClearDepths();
     LoadRightPane();
 }
-
-
 </script>
         <div id="column-right" >
             RIGHT
@@ -396,8 +408,6 @@ function ClearAllFilterCriteria(){
             {% endif %}
 		</div>
     </div> {# Container #}
-
-
 
 <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
   <div class="modal-dialog modal-lg">
