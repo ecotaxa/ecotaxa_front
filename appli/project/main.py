@@ -309,9 +309,9 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     (nbrtotal,nbrvalid,nbrdubious,nbrpredict)=GetAll(sqlcount,sqlparam,debug=False)[0]
     pagecount=math.ceil(nbrtotal/ippdb)
     if sortby=="classifname":
-        sql+=" order by t.name "+sortorder
+        sql+=" order by t.name "+sortorder+" ,objid "+sortorder
     elif sortby!="":
-        sql+=" order by o."+sortby+" "+sortorder
+        sql+=" order by o."+sortby+" "+sortorder+" ,objid "+sortorder
     # else:  # pas de tri par defaut pour améliorer les performances sur les gros projets
     #     sql+=" order by o.orig_id"
     # app.logger.info("pageoffset/pagecount %s / %s",pageoffset,pagecount)
@@ -321,6 +321,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             pageoffset=0
     sql+=" Limit %d offset %d "%(ippdb,pageoffset*ippdb)
     res=GetAll(sql,sqlparam,False)
+    # print("%s\n%s\n%s"%(sql,sqlparam,res))
     trcount=1
     fitlastclosedtr=0 # index de t de la derniere création de ligne qu'il faudrat effacer quand la page sera pleine
     fitheight=100 # hauteur déjà occupé dans la page plus les header footer (hors premier header)
@@ -412,9 +413,9 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             poptitletxt="%s"%(r['orig_id'],)
             poptxt=""
             #poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
-            if r[3]!="":
-                poptxt+="<em>by</em> %s"%(r[4])
-            poptxt+="<br><em>parent</em> "+ntcv(r['taxoparent'])
+            if ntcv(r['classifwhoname'])!="":
+                poptxt+="<em>by</em> %s<br>"%(r['classifwhoname'])
+            poptxt+="<em>parent</em> "+ntcv(r['taxoparent'])
             poptxt+="<br><em>in</em> "+ntcv(r['samplename'])
             for k,v in popoverfieldlist.items():
                 if k=='classif_auto_score' and r["classif_qual"]=='V':

@@ -60,6 +60,13 @@ def PrintInCharte(txt):
     AddTaskSummaryForTemplate()
     return render_template('layout.html',bodycontent=txt)
 
+def ErrorFormat(txt):
+    return """
+<div class='cell panel ' style='background-color: #f2dede; margin: 15px;'><div class='body' >
+				<table style='background-color: #f2dede'><tr><td width='50px' style='color: red;font-size: larger'> <span class='glyphicon glyphicon-exclamation-sign'></span></td>
+				<td style='color: red;font-size: larger;vertical-align: middle;'><B>%s</B></td>
+				</tr></table></div></div>
+    """%(txt)
 
 def AddTaskSummaryForTemplate():
     from flask_login import current_user
@@ -67,6 +74,7 @@ def AddTaskSummaryForTemplate():
         g.tasksummary = appli.database.GetAssoc2Col(
             "SELECT taskstate,count(*) from temp_tasks WHERE owner_id=%(owner_id)s group by taskstate"
             , {'owner_id': current_user.id})
+    g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
 def gvg(varname,defvalue=''):
@@ -202,6 +210,7 @@ import appli.adminusers
 import appli.tasks.taskmanager
 import appli.search.view
 import appli.project.view
+import appli.part.view
 
 @app.errorhandler(404)
 def not_found(e):
@@ -254,11 +263,13 @@ from appli import schedule
 def scheduler_daily_task():
     app.logger.info("Start Daily Task")
     try:
-        import appli.cron
+        with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
+            g.db = None
+            import appli.cron
 
-        appli.cron.RefreshAllProjectsStat()
-        appli.cron.RefreshTaxoStat()
-        app.logger.info(appli.tasks.taskmanager.AutoClean())
+            appli.cron.RefreshAllProjectsStat()
+            appli.cron.RefreshTaxoStat()
+            app.logger.info(appli.tasks.taskmanager.AutoClean())
     except Exception as e:
         s=str(e)
         tb_list = traceback.format_tb(e.__traceback__)
@@ -272,6 +283,9 @@ def scheduler_func():
     while 1:
         schedule.run_pending()
         time.sleep(1)
-scheduler_thread = threading.Thread(target=scheduler_func,name="Scheduler")
-scheduler_thread.daemon=True
-scheduler_thread.start()
+@app.before_first_request
+def app_before_first_request():
+    app.logger.info("Start Daily Task Thread")
+    scheduler_thread = threading.Thread(target=scheduler_func,name="Scheduler")
+    scheduler_thread.daemon=True
+    scheduler_thread.start()

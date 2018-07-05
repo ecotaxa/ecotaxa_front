@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, g, request,url_for
 from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,db
 from flask_security.decorators import roles_accepted
+import appli.part
 import os
 
 # definition d'un second répertoire traité en statique en plus de static
@@ -95,6 +96,9 @@ def before_request_security():
     g.menu = []
     g.menu.append((url_for("index"),"Home / Explore"))
     g.menu.append(("/prj/","Select Project"))
+    g.menu.append(("/part/","Particle Module"))
+    if current_user.is_authenticated:
+        g.menu.append(("/part/prj/","Particle projects management"))
     g.useradmin=False
     g.appliadmin=False
     if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.UserAdministratorLabel) :
@@ -120,4 +124,4 @@ def before_teardown_commitdb(error):
             except:
                 g.db.rollback()
     except Exception as e: # si probleme d'accés à g.db ou d'operation sur la transaction on passe silencieusement
-        app.logger.error("before_teardown_commitdb : Unhandled exception : {0}".format(e))
+        app.logger.error("before_teardown_commitdb : Unhandled exception (can be safely ignored) : {0} ".format(e))
