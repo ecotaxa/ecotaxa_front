@@ -12,7 +12,7 @@
   {% endif %}
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
-  <table class="table table-bordered table-condensed " style="width: 600px">
+  <table class="table table-bordered table-condensed " style="width: 700px">
     <tr>
       <td><input type="radio" name="what" value="TSV" {{ 'checked' if data.what=='TSV' }}>TSV</td>
       <td>
@@ -24,21 +24,20 @@
 {{ checkboxinput("commentsdata","1",data.commentsdata) }} Comments<br>
 {{ checkboxinput("usecomasepa","1",data.usecomasepa) }} Use comma as decimal separator<br>
 {{ checkboxinput("internalids","1",data.internalids) }} Internal IDs<br>
-{{ checkboxinput("typeline","1",data.typeline) }} 2nd line with types, usefull to reimport<br>
+{{ checkboxinput("typeline","1",data.typeline) }} 2nd line, Make exported file compatible for reimportation<br>
 Split in multiple files by <select name="splitcsvby" >
         <option value="" >NOT Active</option>
         <option value="sample" {{ 'selected' if data.splitcsvby=='sample' }} >Sample</option>
         <option value="taxo" {{ 'selected' if data.splitcsvby=='taxo' }} >Taxonomy (parent_child)</option>
       </select><br>
+{{ checkboxinput("exportimages","1",data.exportimages) }} Export all image files<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ checkboxinput("use_internal_image_name","1",data.keep_original_image_name) }} Use internal ids to name image files (usefull if duplicated imported image files)
+
       </td>
     </tr>
     <tr>
       <td><input type="radio" name="what" value="XML" {{'checked' if data.what=='XML'}} >XML</td>
       <td></td>
-    </tr>
-      <tr>
-      <td><input type="radio" name="what" value="IMG" {{'checked' if data.what=='IMG'}} >Images + TSV</td>
-      <td>Use TSV Section for TSV Options</td>
     </tr>
     <tr>
       <td><input type="radio" name="what" value="SUM" {{'checked' if data.what=='SUM'}} >Summary</td>
@@ -52,7 +51,7 @@ Split in multiple files by <select name="splitcsvby" >
 <p>
 In order to ease the transfer of large exported datasets, you can chose to export your files to the Ecotaxa FTP that is utilized to import your data and images.
 <br>Do not forget to delete your exported files from the FTP as they will be visible and available for other users.
-<br>Ask Ecotaxa managers (link) if you do not have yet the permissions on this FTP
+<br>Ask Ecotaxa managers ({{ g.LstUser|safe }}) if you do not have yet the permissions on this FTP
 <br> <input type="checkbox" name="putfileonftparea" value="Y"> Save export file on "Exported data" folder on the FTP Area
 </p>
 <script>

@@ -23,8 +23,8 @@
     <script src="/static/jquerycontextmenu/jquery.contextMenu.min.js" type="text/javascript"></script>
      <link href="/static/jquerycontextmenu/jquery.contextMenu.css" rel="stylesheet" type="text/css" />
 {% if g.headmenu %}
-    <table width="100%"><tr><td width="220px">
-    <br><div class="btn-group" style="width:90px;margin-right: 10px">
+    <table width="100%"><tr><td style="white-space: nowrap;width: 170px;">
+    <div class="btn-group" style="margin-right: 5px">
     <button type="button" class="btn btn-default" data-toggle="dropdown" style="padding: 6px;">Project</button>
     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"  style="padding: 6px;">
         <span class="caret"></span>
@@ -39,7 +39,7 @@
       {%  endfor %}
   </ul>
 </div>
-    <div class="btn-group" style="width:90px;margin-right: 10px">
+    <div class="btn-group" style="margin-right: 5px">
     <button type="button" class="btn btn-default" data-toggle="dropdown"  style="padding: 6px;">Filtered</button>
     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"  style="padding: 6px;">
         <span class="caret"></span>
@@ -54,8 +54,10 @@
       {%  endfor %}
   </ul>
 </div>
-     <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
-    </td><td><div id="titlediv" style="width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><span style="font-size: 12px;"> (<span id=objcount></span>)</span></div>
+     <div id="taxoclearspan" style="margin-top: 3px;cursor: pointer">{{ g.taxoclearspan|safe }}</div>
+    </td><td><div id="titlediv">
+      <div id=titledivtitle style="font-size: 18px;max-width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden; vertical-align: bottom;display: inline-block;">{{ g.ProjectTitle }}</div>
+      <div style="font-size: 12px;vertical-align: bottom;display: inline-block;"> (<span id=objcount></span>)</div></div>
     <div id="projectProgress" class="progress" style="    height: 6px;    margin-bottom: 0;    margin-top: 1px;">
 				  <div id="progress-bar-validated" class="progress-bar" style="width: 0;background-color: #5CB85C;"></div>
 				  <div id="progress-bar-predicted" class="progress-bar" style="width: 0;background-color: #5bc0de;"></div>
@@ -191,7 +193,7 @@
               {# Filters #}
               <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;overflow-x: hidden;">
                   <div id="TabBInner" style="width: 240px;">
-                     <button class="btn btn-info" style="width: 49%" onclick="LoadRightPane('mail'); " title="Email a link to this page, including the current filters"><span class="glyphicon glyphicon-link"></span> Share page</button>
+                     <button class="btn btn-info" style="width: 49%" id=SharePageBtn title="Email a link to this page, including the current filters. Press CTRL to open it on another tab (usefull if you use GMail)"><span class="glyphicon glyphicon-link"></span> Share page</button>
                      <button onclick='ClearAllFilterCriteria();return false;' class="btn btn-info" style="width: 49%" title="Remove all selection criteria"><span class="glyphicon glyphicon-remove" ></span> Clear all filters</button>
                   <br>
                   {{ leftb|safe }}
@@ -252,6 +254,7 @@ body {margin-top: 125px;}
 #select2-taxolbanno-results li {font-size: 12px; padding: 3px;}
 .popover {max-width: 500px;}
 #headersubtitle .btn-gris {padding-top: 0;padding-bottom: 0;border:0;}
+#headersubtitle .btn-gris div:nth-child(1){max-width:500px;text-overflow: ellipsis; overflow: hidden;display: inline-block;vertical-align: bottom;}
 </style>
 <script>
 var PendingChanges={};
@@ -259,8 +262,14 @@ var PendingChangesTaxoName={};
 var PrevTxtFilter="INITIAL";
 DragInProgress=false;
 function InGreyButton(s,eraser) {
-  return " <button type=button class='btn btn-gris btn-xs' onclick='"+eraser+";LoadRightPane();'>"+s+" <span class='glyphicon glyphicon-remove'></span></button>";
+  return " <button type=button class='btn btn-gris btn-xs' onclick='"+eraser+";LoadRightPane();'><div>"+s+"</div> <span class='glyphicon glyphicon-remove'></span></button>";
 }
+$('#SharePageBtn').click(function (e) {
+  if(e.ctrlKey)
+    LoadRightPane('mailN');
+  else
+    LoadRightPane('mail');
+});
 function LoadRightPane(NoAjax,SaveInProfile){
     if(Object.keys(PendingChanges).length>0)
       if(confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?")==false)
@@ -384,16 +393,20 @@ function LoadRightPane(NoAjax,SaveInProfile){
     }
     req['pageoffset']=jqpageoffset.val();
     var urlparam={},url,k;
-    if(NoAjax=='mail') {
+    if((NoAjax==='mail')||(NoAjax==='mailN')) {
         delete req["resultwidth"];
         delete req["windowheight"];
         for	(k in req)
             urlparam[k]=req[k];
         url=window.location.protocol+"//"+window.location.host+window.location.pathname+"?"+$.param(urlparam);
-        window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
+        url="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
+        if(NoAjax==='mail')
+          window.location=url;
+        else
+          window.open(url,'_blank');
         return;
     }
-    if(typeof (NoAjax)=='string') { {# Une URL #}
+    if(typeof (NoAjax)==='string') { {# Une URL #}
       delete req["resultwidth"];
       delete req["windowheight"];
       for	(k in req)
@@ -455,7 +468,7 @@ $(document).ready(function() {
     if ("{{data.sortorder}}"=="desc")
         SortToggle();
     $('[data-toggle="tooltip"]').tooltip();
-    $("#titlediv").width($("#titlediv").parent().width());
+    $("#titledivtitle").css("max-width",$("#titlediv").parent().width()-150);
     {% if g.taxofilter %}
     SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild=='Y' }});
     {% endif %}

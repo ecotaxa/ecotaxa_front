@@ -29,12 +29,6 @@ Additional selected projects (<a href="/Task/Create/TaskSubset?p={{ data.Project
       <td><input type="text" size=5 name="vvaleur" value="{{ prevpost.vvaleur }}">  objects </td>
     </tr>
 </table>
-
-<b>Select object with status</b><br>
-&nbsp;{{ checkboxinputinlist("what_v","V",data.what) }} Validated<br>
-&nbsp;{{ checkboxinputinlist("what_d","D",data.what) }} Dubious<br>
-&nbsp;{{ checkboxinputinlist("what_p","P",data.what) }} Predicted<br>
-&nbsp;{{ checkboxinputinlist("what_n","N",data.what) }} Unclassified <br>
 </td><td>
 <div class='panel panel-default' style="width:600px;margin-left:10px;">
     <ul>
@@ -75,24 +69,7 @@ Additional selected projects (<a href="/Task/Create/TaskSubset?p={{ data.Project
 <br>
 <table>
 <tr>
-{% if (not data.extraprojects) and (filtertxt=='')  %}
 
-    <td valign="top">
-MANAGE SAMPLES TO BE INCLUDED IN THE SUBSET :<br>
-<input type="text" name="samplelist" id="SampleList" value="{{ data.samplelist }}" style="width: 400px;"><br>
-
-Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', true );ComputeSampleList();">All</a>
-    / <a href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', false );ComputeSampleList();">None</a>
-    / <a href="#tbltop2" onclick="CheckBasedOnText();" title="Usefull to copy setting from a previous export" >Text field content</a>
-
-<table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
-    <tr><th >Select</th><th width="200">Sample</th></tr>
-    {%   for r in g.SampleList %}
-        <tr><td><input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[1] }}" ></td><td>{{ r[1] }}</td></tr>
-    {% endfor %}
-</table>
-</td>
-{% endif %}
 <td valign="top">
   <br><br><br>
     <input type="hidden" name="starttask" value="Y">

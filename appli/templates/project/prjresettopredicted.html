@@ -1,0 +1,28 @@
+{{ header|safe }}
+<style>
+  #mytab td {padding: 5px;}
+</style>
+<form method=post>
+  <input type="hidden" name="process" value="Y">
+    <table id=mytab >
+      <tr>
+
+        <td colspan="2" style="text-align: center"><button type=submit class='btn btn-warning' >Apply Reset to Predicted</button></td>
+      </tr>
+    </table>
+
+    </form>
+
+<div class="panel panel-default" style="margin: 30px 10px">
+  <div class="panel-heading">What will append</div>
+  <div class="panel-body">
+    This operation will change status of all validated and dubious objects matching the filter to Predicted<br>
+    The previous classification will be append to the "classification change log" of the object if it was dated (imported object without classification date are not logged)
+  </div>
+</div>
+<script>
+    $("#field").select2({
+        placeholder: "Select your field"
+        });
+
+</script>

@@ -149,23 +149,7 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
 {# ------- Taxo Filter ------------#}
 <div >
 	<div class="form-group-sm">
-		<label class="title">Taxonomy Filter &nbsp;<span  data-toggle="popover" data-placement="top" data-container="body" data-html="true"
-    data-title="Taxonomy filter help" data-content="
-        <p style='text-align: left'><ul style='text-align: left'>
-        <li>Each lineage can have different length and the usual levels of taxonomic hierarchy are not considered.
-<li>The species is the lower level. However subspecies details can be mentioned. Only the species name encompasses two words: “Genus species”. The “sp.” is used whenever the species name is not available.
-<li>If a taxon is not yet named, we then merge the suffix 'X' with the parent Id:  'Parent_X'. Whenever several children are unknown, the suffix become “_X1”, “_X2” …
-<li>Some morphological categories (detritus, artefact, larvae, sex…) are also integrated.
-</ul>
-Tips for searching a category in the classification hierarchy:
-<ul>
-<li>Text entry “abc”  returns categories whose name starts with the string ‘abc’.
-<li>‘%’ can be used to search category names containing a given string. The text entry “%abc” returns categories whose name contains ‘abc’; and typing  “abc%ijk” returns categories whose name starts with ‘abc’ AND contains ‘ijk’.
-<li>‘*’ can be used for identifying a category having a specific parent in the classification hierarchy. The text entry “xyz*abc” returns categories whose name starts with ‘abc’ AND having a parent whose name starts with ‘xyz’. Several parents can be required in the same request without priority order (e.g. ‘parent1*parent2*abc’ = ‘parent2*parent1*abc’).
-<li>‘%’ and ‘*’ can be used simultaneously (e.g. ‘ijk*abc%xyz’ for searching a category whose name starts with ‘abc’ AND contains ‘xyz’ AND having a parent whose name start with ‘ijk’; or ‘%xyz*abc’ for searching a category whose name starts with ‘abc’ AND having a parent whose name contains ‘xyz’).
-</ul>
-</p>"
-        class="glyphicon glyphicon-question-sign"></span> </label>
+    <label class="title">Validated Plankton filter </label>
 		<a class="pull-right clear label label-default" href='javascript:ClearTaxo();' style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" >Clear</a>
 
         <select id="taxolb" name="taxolb" multiple="multiple" style="width: 100%"  autocomplete="off">  </select>

@@ -155,13 +155,11 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
 <span class="glyphicon glyphicon-plus-sign"></span> Advanced settings</a>
 <div id=TargetFilter class="panel panel-default collapse " style="margin-left: 0px;margin-top: 5px;width: 800px;padding: 5px;" >
 
-  OBJECTS to PREDICT {{ selectinputdict("Perimeter",{'nmc':"NOT Validated Objects",'all':"ALL Objects"},data.Perimeter) }}
+  OBJECTS to PREDICT {{ selectinputdict("Perimeter",{'nmc':"NOT Validated Objects (Unclassified or Predicted)",'all':"ALL Objects (for confusion matrix computation only)"},data.Perimeter) }}
 
-  <br>Type in "ResetToPredicted" to (re)predict also all validated objects from the selected categories :
-  <input type="text" name="resetpredicted" value="" autocomplete="off" style="width: 150px;">
 <br>
-{%  if g.LsSize >500 %}
-  <b>Save model : TODO Ajuster condition de taille 500 à 150 000 </b><br>
+{%  if g.LsSize >150000 %}
+  <b>Save model :  </b><br>
   Model folder name <input type="text" name="savemodel_foldername" value="" autocomplete="off" style="width: 150px;">
   <br>Model Title <input type="text" name="savemodel_title" value="" autocomplete="off" style="width: 350px;">
   <br>Comments <textarea name="savemodel_comments" rows="2" cols="80"></textarea>

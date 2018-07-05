@@ -17,9 +17,9 @@ def GetSQLFilter(filtres,sqlparam,currentuserid):
             whereclause+=" and o.classif_id=%(taxo)s "
             sqlparam['taxo']=filtres["taxo"]
     if filtres.get("statusfilter","")!="":
-        whereclause+=" and o.classif_qual"
+        whereclause+=" and (o.classif_qual"
         if filtres["statusfilter"]=="NV":
-            whereclause+="!='V'"
+            whereclause+="!='V' or o.classif_qual is null"
         elif filtres["statusfilter"] == "PV":
             whereclause += " in ('V','P')"
         elif filtres["statusfilter"]=="NVM":
@@ -30,7 +30,7 @@ def GetSQLFilter(filtres,sqlparam,currentuserid):
             whereclause+=" is null "
         else:
             whereclause+="='"+filtres["statusfilter"]+"'"
-
+        whereclause += ")"
     if filtres.get("MapN",'')!="" and filtres.get("MapW",'')!="" and filtres.get("MapE",'')!="" and filtres.get("MapS",'')!="":
         whereclause+=" and o.latitude between %(MapS)s and %(MapN)s and o.longitude between %(MapW)s and %(MapE)s  "
         sqlparam['MapN']=filtres["MapN"]

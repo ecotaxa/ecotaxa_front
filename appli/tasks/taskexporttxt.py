@@ -2,7 +2,7 @@
 from appli import db,app, database ,PrintInCharte,gvp,gvg,DecodeEqualList
 from flask import render_template, g, flash
 import logging,os,csv,re,datetime
-import zipfile,psycopg2.extras
+import zipfile,psycopg2.extras,shutil
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask
 from appli.database import GetAll
@@ -33,6 +33,9 @@ class TaskExportTxt(AsyncTask):
                 self.internalids=''
                 self.typeline=''
                 self.putfileonftparea=''
+                self.use_internal_image_name=''
+                self.exportimages = ''
+
 
 
     def __init__(self,task=None):
@@ -54,18 +57,22 @@ class TaskExportTxt(AsyncTask):
                 ,to_char(objdate,'YYYYMMDD') as object_date
                 ,to_char(objtime,'HH24MISS') as object_time
                 ,object_link,depth_min as object_depth_min,depth_max as object_depth_max
-                ,to1.name as object_annotation_category
-                ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubious' ELSE o.classif_qual end object_annotation_status
-                ,to1p.name as object_annotation_parent_category
-                ,(WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id,1 rang FROM taxonomy where id =o.classif_id
-                        union
-                        SELECT t.id,t.name,t.parent_id, rang+1 rang FROM rq JOIN taxonomy t ON t.id = rq.parent_id)
-                        select string_agg(name,'>') from (select name from rq order by rang desc)q) object_annotation_hierarchy
+                ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubious' ELSE o.classif_qual end object_annotation_status                
                 ,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
                 ,to_char(o.classif_when,'YYYYMMDD') object_annotation_date
                 ,to_char(o.classif_when,'HH24MISS') object_annotation_time
                 ,img.orig_file_name as img_file_name
                     """
+        if self.param.typeline == '1':
+            sql1 += """,concat(to1.name,' ('||to1p.name||')') as object_annotation_category """
+        else:
+            sql1 += """,to1.name as object_annotation_category
+                ,to1p.name as object_annotation_parent_category
+                ,(WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id,1 rang FROM taxonomy where id =o.classif_id
+                        union
+                        SELECT t.id,t.name,t.parent_id, rang+1 rang FROM rq JOIN taxonomy t ON t.id = rq.parent_id)
+                        select string_agg(name,'>') from (select name from rq order by rang desc)q) object_annotation_hierarchy """
+
         sql2=""" FROM objects o
                 LEFT JOIN taxonomy to1 on o.classif_id=to1.id
                 LEFT JOIN taxonomy to1p on to1.parent_id=to1p.id
@@ -75,6 +82,7 @@ class TaskExportTxt(AsyncTask):
                 LEFT JOIN images img on o.img0id = img.imgid """
         sql3=" where o.projid=%(projid)s "
         params={'projid':int(self.param.ProjectId)}
+        OriginalColName={} # Nom de colonneSQL => Nom de colonne permet de traiter le cas de %area
         if self.param.samplelist!="":
             sql3+=" and s.orig_id= any(%(samplelist)s) "
             params['samplelist']=self.param.samplelist.split(",")
@@ -86,7 +94,9 @@ class TaskExportTxt(AsyncTask):
             sql1+="\n"
             Mapping=DecodeEqualList(Prj.mappingobj)
             for k,v in Mapping.items() :
-                sql1+=',o.%s as "object_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
+                AliasSQL='object_%s'%re.sub(R"[^a-zA-Z0-9\.\-]","_",v)
+                OriginalColName[AliasSQL]='object_%s'%v
+                sql1+=',o.%s as "%s" '%(k,AliasSQL)
         if self.param.sampledata=='1':
             sql1+="\n,s.orig_id sample_id,s.dataportal_descriptor as sample_dataportal_descriptor "
             Mapping=DecodeEqualList(Prj.mappingsample)
@@ -161,7 +171,7 @@ class TaskExportTxt(AsyncTask):
                 if csvfile :
                     csvfile.close()
                     if zfile :
-                        zfile.write(fichier,prevvalue+".tsv")
+                        zfile.write(fichier,"ecotaxa_"+prevvalue+".tsv")
                 if splitcsv:
                     prevvalue = r[splitfield]
                 logging.info("Creating file %s" % (fichier,))
@@ -170,7 +180,7 @@ class TaskExportTxt(AsyncTask):
                 colnames = [desc[0] for desc in self.pgcur.description]
                 coltypes=[desc[1] for desc in self.pgcur.description]
                 FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
-                wtr.writerow(colnames)
+                wtr.writerow([OriginalColName.get(c,c) for c in colnames])
                 if self.param.typeline=='1':
                     wtr.writerow(['[f]' if x==FloatType else '[t]' for x in coltypes])
             # on supprime les CR des commentaires.
@@ -184,7 +194,7 @@ class TaskExportTxt(AsyncTask):
         if csvfile:
             csvfile.close()
             if zfile:
-                zfile.write(fichier, str(prevvalue) + ".tsv")
+                zfile.write(fichier, "ecotaxa_"+str(prevvalue) + ".tsv")
                 zfile.close()
         logging.info("Extracted %d rows", self.pgcur.rowcount)
 
@@ -279,7 +289,10 @@ class TaskExportTxt(AsyncTask):
         self.pgcur.execute(sql,params)
         vaultroot=Path("../../vault")
         for r in self.pgcur:
-            zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[4]))
+            if self.param.use_internal_image_name != '1': # r0=objod, r2=orig_file_name,r4 parent_taxo
+                zfile.write(vaultroot.joinpath(r[1]).as_posix(), arcname="{0}/{1}".format(r[4], r[2]))
+            else:
+                zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[4]))
 
     def CreateSUM(self):
         self.UpdateProgress(1,"Start Summary export")
@@ -323,11 +336,12 @@ class TaskExportTxt(AsyncTask):
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__,))
         if self.param.what=="TSV":
-            self.CreateTSV()
+            if self.param.exportimages=='1':
+                self.CreateIMG()
+            else:
+                self.CreateTSV()
         elif self.param.what=="XML":
             self.CreateXML()
-        elif self.param.what=="IMG":
-            self.CreateIMG()
         elif self.param.what=="SUM":
             self.CreateSUM()
         else:
@@ -335,12 +349,13 @@ class TaskExportTxt(AsyncTask):
 
         if self.param.putfileonftparea=='Y':
             fichier = Path(self.GetWorkingDir()) /  self.param.OutFile
-            fichierdest=Path(app.config['SERVERLOADAREA'])/"Exported_data"
+            fichierdest=Path(app.config['FTPEXPORTAREA'])
             if not fichierdest.exists():
                 fichierdest.mkdir()
             NomFichier= "task_%d_%s"%(self.task.id,self.param.OutFile)
             fichierdest = fichierdest / NomFichier
-            fichier.rename(fichierdest)
+            # fichier.rename(fichierdest) si ce sont des volumes sur des devices differents ça ne marche pas
+            shutil.copyfile(fichier.as_posix(), fichierdest.as_posix())
             self.param.OutFile=''
             self.task.taskstate = "Done"
             self.UpdateProgress(100, "Export successfull : File '%s' is available on the 'Exported_data' FTP folder"%NomFichier)
@@ -385,6 +400,8 @@ class TaskExportTxt(AsyncTask):
                 self.param.usecomasepa=gvp("usecomasepa")
                 self.param.sumsubtotal=gvp("sumsubtotal")
                 self.param.internalids = gvp("internalids")
+                self.param.use_internal_image_name = gvp("use_internal_image_name")
+                self.param.exportimages = gvp("exportimages")
                 self.param.typeline = gvp("typeline")
                 self.param.splitcsvby = gvp("splitcsvby")
                 self.param.putfileonftparea = gvp("putfileonftparea")
@@ -414,7 +431,12 @@ class TaskExportTxt(AsyncTask):
             if TxtFiltres!="":
                 g.headcenter = "<h4>Project : <a href='/prj/{0}?{2}'>{1}</a></h4>".format(Prj.projid, Prj.title,
                     "&".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""]))
-
+            LstUsers = database.GetAll("""select distinct u.email,u.name,Lower(u.name)
+                        FROM users_roles ur join users u on ur.user_id=u.id
+                        where ur.role_id=2
+                        and u.active=TRUE and email like '%@%'
+                        order by Lower(u.name)""")
+            g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
             return render_template('task/textexport_create.html',header=txt,data=self.param,TxtFiltres=TxtFiltres)
 
 

@@ -49,7 +49,7 @@ class TaskPartExport(AsyncTask):
         sql = """SELECT  p.cruise,s.stationid site,s.profileid station,'HDR'||s.filename rawfilename
                         ,p.instrumtype ,s.instrumsn,coalesce(ctd_origfilename,'') ctd_origfilename
                         ,to_char(s.sampledate,'YYYY-MM-DD HH24:MI:SS') sampledate,concat(p.do_name,'(',do_email,')') dataowner
-                        ,s.latitude,s.longitude,s.psampleid
+                        ,s.latitude,s.longitude,s.psampleid,s.acq_pixel,acq_aa,acq_exp
                         from part_samples s
                         join part_projects p on s.pprojid = p.pprojid
                         where s.psampleid in (%s)
@@ -105,9 +105,9 @@ class TaskPartExport(AsyncTask):
             with open(fichier,'w',encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
                 f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
-                for i in range(len(PartRedClassLimit)):
+                for i in range(1,len(PartRedClassLimit)):
                     f.write(";LPM (%s)[#/L]"%(GetClassLimitTxt(PartRedClassLimit,i)))
-                for i in range(len(PartRedClassLimit)):
+                for i in range(1,len(PartRedClassLimit)):
                     f.write(";LPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                 for c in CTDFixedCols:
                     f.write(";%s" % (CTDFixedColByKey.get(c,c)))
@@ -123,8 +123,8 @@ class TaskPartExport(AsyncTask):
                         if not AsODV: # si TSV
                             L=[S['station'],S['rawfilename'],L[7]] # station + rawfilename + sampledate
                         L.extend([h['depth'],h['watervolume']])
-                        L.extend((h['class%02d'%i] for i in range(1,16)))
-                        L.extend((h['biovol%02d' % i] for i in range(1, 16)))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1,len(PartRedClassLimit))))
+                        L.extend((h['biovol%02d' % i] for i in range(1, len(PartRedClassLimit))))
                         f.write(";".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
                             f.write(";%s" % (ntcv(h["ctd_"+c])))
@@ -137,9 +137,9 @@ class TaskPartExport(AsyncTask):
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
-                    for i in range(len(PartRedClassLimit)):
+                    for i in range(1,len(PartRedClassLimit)):
                         f.write("\tLPM (%s)[#/L]" % (GetClassLimitTxt(PartRedClassLimit, i)))
-                    for i in range(len(PartRedClassLimit)):
+                    for i in range(1,len(PartRedClassLimit)):
                         f.write("\tLPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                     for c in CTDFixedCols:
                         f.write("\t%s" % (CTDFixedColByKey.get(c, c)))
@@ -152,8 +152,8 @@ class TaskPartExport(AsyncTask):
                         else:
                             L = [S['station'], S['rawfilename'], h['fdatetime'] ]
                         L.extend([h['depth'], h['watervolume']])
-                        L.extend((h['class%02d' % i] for i in range(1, 16)))
-                        L.extend((h['biovol%02d' % i] for i in range(1, 16)))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1, len(PartRedClassLimit))))
+                        L.extend((h['biovol%02d' % i] for i in range(1, len(PartRedClassLimit))))
                         f.write("\t".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
                             f.write("\t%s" % (ntcv(h["ctd_"+c])))
@@ -329,15 +329,15 @@ class TaskPartExport(AsyncTask):
 
     # -------------------------- Fichier Synthèse TSV only --------------------------------
         if not AsODV:
-            nomfichier = BaseFileName + "_sum.tsv"
+            nomfichier = BaseFileName + "_Export_metadata_summary.tsv"
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
             with open(fichier,'w',encoding='latin-1') as f:
-                f.write("profile\tCruise\tSite\tDataOwner\tRawfilename\tInstrument\tCTDrosettefilename\tyyyy-mm-dd hh:mm\tLatitude \tLongitude\tParticle filename\tCategory filename\n")
+                f.write("profile\tCruise\tSite\tDataOwner\tRawfilename\tInstrument\tCTDrosettefilename\tyyyy-mm-dd hh:mm\tLatitude \tLongitude\taa\texp\tPixel size\tParticle filename\tPlankton filename\n")
 
                 for S in samples:
                     visibility=self.samplesdict[S["psampleid"]][3]
                     L = [S['station'],S['cruise'], S['site'],  S['dataowner'], S['rawfilename'], S['instrumtype'],
-                         S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude']
+                         S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude'],S['acq_aa'],S['acq_exp'],S['acq_pixel']
                          ,BaseFileName + "_PAR_"+S['station']+".tsv"
                         , BaseFileName + "_ZOO_" + S['station'] + ".tsv" if visibility[1]=='Y' else ""]
                     f.write("\t".join((str(ntcv(x)) for x in L)))
@@ -383,9 +383,9 @@ class TaskPartExport(AsyncTask):
             with open(fichier,'w',encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
                 f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
-                for i in range(len(PartDetClassLimit)):
+                for i in range(1,len(PartDetClassLimit)):
                     f.write(";LPM (%s)[#/L]"%(GetClassLimitTxt(PartDetClassLimit,i)))
-                for i in range(len(PartDetClassLimit)):
+                for i in range(1,len(PartDetClassLimit)):
                     f.write(";LPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                 for c in CTDFixedCols:
                     f.write(";%s" % (CTDFixedColByKey.get(c,c)))
@@ -401,8 +401,8 @@ class TaskPartExport(AsyncTask):
                         if not AsODV: # si TSV
                             L=[S['station'],S['rawfilename'],L[7]] # station + rawfilename + sampledate
                         L.extend([h['depth'],h['watervolume']])
-                        L.extend((h['class%02d'%i] for i in range(1,46)))
-                        L.extend((h['biovol%02d' % i] for i in range(1, 46)))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1,len(PartDetClassLimit))))
+                        L.extend((h['biovol%02d' % i] for i in range(1, len(PartDetClassLimit))))
                         f.write(";".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
                             f.write(";%s" % (ntcv(h["ctd_"+c])))
@@ -415,9 +415,9 @@ class TaskPartExport(AsyncTask):
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
-                    for i in range(len(PartDetClassLimit)):
+                    for i in range(1,len(PartDetClassLimit)):
                         f.write("\tLPM (%s)[#/L]" % (GetClassLimitTxt(PartDetClassLimit, i)))
-                    for i in range(len(PartDetClassLimit)):
+                    for i in range(1,len(PartDetClassLimit)):
                         f.write("\tLPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                     for c in CTDFixedCols:
                         f.write("\t%s" % (CTDFixedColByKey.get(c, c)))
@@ -430,8 +430,8 @@ class TaskPartExport(AsyncTask):
                         else:
                             L = [S['station'], S['rawfilename'], h['fdatetime'] ]
                         L.extend([h['depth'], h['watervolume']])
-                        L.extend((h['class%02d' % i] for i in range(1, 46)))
-                        L.extend((h['biovol%02d' % i] for i in range(1, 46)))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1, len(PartDetClassLimit))))
+                        L.extend((h['biovol%02d' % i] for i in range(1, len(PartDetClassLimit))))
                         f.write("\t".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
                             f.write("\t%s" % (ntcv(h["ctd_"+c])))
@@ -579,7 +579,7 @@ order by tree""".format(lstcatwhere)
                     for i in range(len(CatHisto)):
                         h = CatHisto[i]
                         idx = lstcat[h['classif_id']]['idx']
-                        t[idx]
+                        t[idx]= h['nbr']
                         t[idx + len(lstcat)] = h['totalbiovolume']
                         t[idx + 2 * len(lstcat)] = h['avgesd']
                         EOL = False
@@ -598,15 +598,15 @@ order by tree""".format(lstcatwhere)
 
     # -------------------------- Fichier Synthèse TSV only --------------------------------
         if not AsODV:
-            nomfichier = BaseFileName + "_sum.tsv"
+            nomfichier = BaseFileName + "_Export_metadata_summary.tsv"
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
             with open(fichier,'w',encoding='latin-1') as f:
-                f.write("profile\tCruise\tSite\tDataOwner\tRawfilename\tInstrument\tCTDrosettefilename\tyyyy-mm-dd hh:mm\tLatitude \tLongitude\tParticle filename\tCategory filename\n")
+                f.write("profile\tCruise\tSite\tDataOwner\tRawfilename\tInstrument\tCTDrosettefilename\tyyyy-mm-dd hh:mm\tLatitude \tLongitude\taa\texp\tPixel size\tParticle filename\tPlankton filename\n")
 
                 for S in samples:
                     visibility = self.samplesdict[S["psampleid"]][3]
                     L = [S['station'],S['cruise'], S['site'],  S['dataowner'], S['rawfilename'], S['instrumtype'],
-                         S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude']
+                         S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude'],S['acq_aa'],S['acq_exp'],S['acq_pixel']
                          ,BaseFileName + "_PAR_"+S['station']+".tsv"
                         , BaseFileName + "_ZOO_" + S['station'] + ".tsv" if visibility[1]=='Y' else ""]
                     f.write("\t".join((str(ntcv(x)) for x in L)))
@@ -621,7 +621,7 @@ order by tree""".format(lstcatwhere)
         zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
         sql="""select s.*
-          ,pp.ptitle,pp.rawfolder,pp.ownerid,pp.projid,pp.instrumtype,pp.op_name,pp.op_email,pp.cs_name,pp.cs_email
+          ,pp.ptitle,pp.rawfolder,concat(u.name,' ('||u.email||')') ownerid,pp.projid,pp.instrumtype,pp.op_name,pp.op_email,pp.cs_name,pp.cs_email
           ,pp.do_name,pp.do_email,pp.prj_info,pp.prj_acronym,pp.cruise,pp.ship,pp.default_instrumsn,pp.default_depthoffset
           ,(select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo
           ,(select count(*) from part_ctd where psampleid=s.psampleid) nbrlinectd
@@ -629,6 +629,7 @@ order by tree""".format(lstcatwhere)
         from part_samples s
         join part_projects pp on s.pprojid=pp.pprojid
         LEFT JOIN projects p on pp.projid=p.projid
+        LEFT JOIN users u on pp.ownerid=u.id
         where s.psampleid in (%s)
         order by s.profileid
         """ % ((",".join([str(x[0]) for x in self.param.samples])),)
@@ -642,10 +643,10 @@ order by tree""".format(lstcatwhere)
 'lisst_zscat_filename','lisst_kernel','txt_data01','txt_data02','txt_data03','txt_data04','txt_data05','txt_data06','txt_data07','txt_data08',
 'txt_data09','txt_data10','ptitle','rawfolder','ownerid','projid','instrumtype','op_name','op_email','cs_name','cs_email','do_name','do_email',
 'prj_info','prj_acronym','cruise','ship','default_instrumsn','default_depthoffset')
-        nomfichier = BaseFileName + "_sum.tsv"
+        nomfichier = BaseFileName + "_Export_metadata_summary.tsv"
         fichier = os.path.join(self.GetWorkingDir(), nomfichier)
         with open(fichier, 'w', encoding='latin-1') as f:
-            f.write("\t".join(cols)+"\tParticle filename\tCTD filename\tCategory filename\n")
+            f.write("\t".join(cols)+"\tParticle filename\tCTD filename\tPlankton filename\n")
             for S in samples:
                 visibility = self.samplesdict[S["psampleid"]][3]
                 L=[S[c] for c in cols]
@@ -756,12 +757,13 @@ order by tree""".format(lstcatwhere)
 
         if self.param.putfileonftparea=='Y':
             fichier = Path(self.GetWorkingDir()) /  self.param.OutFile
-            fichierdest=Path(app.config['SERVERLOADAREA'])/"Exported_data"
+            fichierdest=Path(app.config['FTPEXPORTAREA'])
             if not fichierdest.exists():
                 fichierdest.mkdir()
             NomFichier= "task_%d_%s"%(self.task.id,self.param.OutFile)
             fichierdest = fichierdest / NomFichier
-            fichier.rename(fichierdest)
+            # fichier.rename(fichierdest) si ce sont des volumes sur des devices differents ça ne marche pas
+            shutil.copyfile(fichier.as_posix(), fichierdest.as_posix())
             self.param.OutFile=''
             self.task.taskstate = "Done"
             self.UpdateProgress(100, "Export successfull : File '%s' is available on the 'Exported_data' FTP folder"%NomFichier)
@@ -820,7 +822,12 @@ order by tree""".format(lstcatwhere)
                 self.param.what ="RED"
                 self.param.fileformat = "ODV"
 
-
+            LstUsers = database.GetAll("""select distinct u.email,u.name,Lower(u.name)
+            FROM users_roles ur join users u on ur.user_id=u.id
+            where ur.role_id=2
+            and u.active=TRUE and email like '%@%'
+            order by Lower(u.name)""")
+            g.LstUser=",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
 
             return render_template('task/partexport_create.html',header=txt,data=self.param
                                    ,SampleCount=len(self.param.samples)

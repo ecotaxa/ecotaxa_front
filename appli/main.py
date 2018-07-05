@@ -21,11 +21,12 @@ def index():
         with open(NomFichier, 'r',encoding='utf8') as f:
             message=f.read()
             if len(message)>5:
-                txt+="""<div class="panel panel-default">
-                <div class="panel-body">
-                    <div style='color:red;font-size:large;'>Message from application manager</div>
-                    <div class="alert alert-warning" role="alert" style="margin:0;">{0}</div></div>
-                </div>""".format(message)
+                txt+="""
+                    <div class="alert alert-warning alert-dismissable" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <p><strong>Message from the application manager</strong></p>{0}
+                    </div>
+                """.format(message)
     # Lecture de la partie Haute
     NomFichier='appli/static/home/home.html'
     if not os.path.exists(NomFichier):

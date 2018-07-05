@@ -29,6 +29,10 @@
 var map,vectorSource,SampleSource;
 
 function InitMap() {
+var attribution = new ol.Attribution({
+        html: 'Tiles © <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer">ArcGIS</a>'
+      });
+
 var mousePositionControl = new ol.control.MousePosition({
   coordinateFormat: ol.coordinate.createStringXY(4),
   projection: 'EPSG:4326',
@@ -38,7 +42,10 @@ $("#map").css('height',$(window).height()-250).html(""); {# Optimise la surface 
 map = new ol.Map({
   layers: [
     new ol.layer.Tile({
-      source: new ol.source.OSM()
+      source: new ol.source.XYZ({
+              attributions: [attribution],
+              url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+            })
     })
   ],
   controls: ol.control.defaults({

@@ -168,8 +168,9 @@ def objectdetails(objid):
 
     # Affichage de l'historique des classification
     t.append("""<div role="tabpanel" class="tab-pane" id="tabdclassiflog">
+Current Classification : Quality={} , date={}    
     <table class='table table-bordered table-condensed'><tr>
-    <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""")
+    <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""".format(obj.classif_qual,obj.classif_when))
     Histo=GetAll("""SELECT to_char(classif_date,'YYYY-MM-DD HH24:MI:SS') datetxt,classif_type ,t.name,u.name username,classif_qual
   from objectsclassifhisto h
   left join taxonomy t on h.classif_id=t.id
