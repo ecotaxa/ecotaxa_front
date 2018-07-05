@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% macro selectinputdict(name, values, value='') -%}
+    <select name="{{ name }}" id="{{ name }}">
+    {% for k,v in values.items() %}
+        <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}
+
+
+{% block body %}
+  <div style="margin-left:10px;">
+<h3>AUTOMATIC CLASSIFICATION V2: Selection Random Forest Model</h3>
+
+{{ PreviousTxt |safe }}
+
+<table><tr><td>
+<div class="panel panel-default" style='display: inline-block; width: 400px;margin-bottom: 0;'>
+  <div class="panel-body">
+    <form method="post">
+      <table >
+        <tbody><tr>
+          <td >Common features &ge;  </td>
+          <td><input style="width: 100px;" name="filt_featurenbr" id="filt_featurenbr" value="{{ request.form.get('filt_featurenbr','10') }}" type="text"></td>
+
+        </tr><tr>
+          <td>Filter on title :</td>
+          <td><input style="width: 100px;" name="filt_title" id="filt_title" value="{{ request.form.get('filt_title','') }}" type="text"></td>
+          <td rowspan="3" style="vertical-align: top"><button type="submit" class="btn btn-primary">Search</button></td>
+        </tr>
+      </tbody></table>
+    </form>
+  </div></div></td></tr></table>
+        <table class='table table-bordered table-verycondensed table-hover' style='width: 95%'>
+                <tr><th style='width:20px'></th>
+                <th># - Title</th><th style='width:100px'># valid.</th><th style='width:100px'># Matching features</th>
+                <th style='width:100px'>CNN Network</th></tr>
+  {{ TblBody|safe }}
+</table>
+
+{# ----------- Partie Gestion des Taxon destination --------------------- #}
+<p><a href="#TargetFilter" data-toggle="collapse" >
+<span class="glyphicon glyphicon-plus-sign"></span> Advanced settings</a></p>
+<div id=TargetFilter class="panel panel-default collapse " style="margin-left: 0;margin-top: 5px;width: 800px;padding: 5px;" >
+
+  OBJECTS to PREDICT {{ selectinputdict("Perimeter",{'nmc':"NOT Validated Objects",'all':"ALL Objects"},'nmc') }}
+
+  <br>Type in "ResetToPredicted" to (re)predict also all validated objects from the selected categories :
+  <input type="text" id="resetpredicted" value="" autocomplete="off" style="width: 150px;">
+  <br>Display screen to map categories <input type="checkbox" id="displaytaxomap" value="Y">
+  <br>else use <input style="width: 600px" id="PostTaxoMapping" value="{{ g.posttaxomapping }}">
+</div>
+<button type="button" class="btn btn-primary" onclick="StartPrediction()">Start Prediction</button>
+<script src='/static/common.js'></script>
+<script>
+function StartPrediction() {
+  var modeldir=$('.selmodel:checked').data('modeldir');
+  if(modeldir===undefined) {
+    alert("You must select a model first"); return;}
+  var param={modeldir:modeldir,starttask:'Y'
+    ,Perimeter:$('#Perimeter').val(),resetpredicted:$('#resetpredicted').val(),PostTaxoMapping:$('#PostTaxoMapping').val()};
+    if($('#displaytaxomap').prop("checked")) {
+      param.starttask = '';
+      param.displaytaxomap='Y';
+    }
+  PostDynForm("?{{ url|safe }}",param);
+}
+</script>
+<div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      ...
+    </div>
+  </div>
+</div>
+
+  </div>
+{% endblock %}

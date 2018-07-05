@@ -2,7 +2,7 @@
 from appli import db, database , PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList
 from flask import  render_template, g, flash,request
 import logging
-import time
+import time,re
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll,ExecSQL
 import numpy as np
@@ -214,7 +214,9 @@ class TaskClassifAuto(AsyncTask):
                 """
                 d=DecodeEqualList(Prj.classifsettings)
                 if d.get("baseproject","")!="":
-                    BasePrj=GetAll("select projid,title from projects where projid=%s",(d.get("baseproject"),))
+                    BasePrj=GetAll("select projid,title from projects where projid=%s"
+                           # ,(d.get("baseproject"),))
+                           , (re.findall(r'\d+',d.get("baseproject"))[0],))  #permet de gérer le fait que la V2 peut avoir un LS de plusieurs projets
                     if len(BasePrj):
                         txt+="""<a class='btn btn-primary' href='/Task/Create/TaskClassifAuto?p={0}&src={1}'>
                         USE previous Learning Set : #{1} - {2}</a><br><br>OR USE another project<br><br>""".format(Prj.projid,*BasePrj[0])
