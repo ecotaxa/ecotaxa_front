@@ -14,7 +14,10 @@
 {%- endmacro %}
 
 {% block body %}
-
+  <a class='btn btn-default'  href=?cleandone=Y{{ seeall }}>Clean All Done</a>
+  <a class='btn btn-default' href=?cleanerror=Y{{ seeall }}>Clean All Error</a>
+  <a class='btn btn-default' href=?cleanall=Y{{ seeall }}>Clean All (warning !!!)</a>  Task count : {{  len_tasks }}
+  <a class='btn btn-default' href=?seeall=Y>See All users tasks </a>
 <table class="table">
     <tr><th>ID</th><th>Task type</th><th>Owner</th>
     <th>State</th><th>Step</th><th width="60px">%</th><th>Message</th><th>Creation date</th><th>Last update</th></tr>

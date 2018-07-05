@@ -5,3 +5,5 @@ import appli.project.classifauto
 import appli.project.editproject
 import appli.project.merge
 import appli.project.editannot
+import appli.project.simpleimport
+import appli.project.editdatamass

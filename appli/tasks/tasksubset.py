@@ -215,7 +215,7 @@ class TaskSubset(AsyncTask):
                 <form action="?p={0}&eps=y" method=post>
                 """.format(Prj.projid)
 
-                from flask.ext.login import current_user
+                from flask_login import current_user
                 sql="select projid,title from projects "
                 if not current_user.has_role(database.AdministratorLabel):
                     sql+=" where projid in (select projid from projectspriv where member=%d and privilege='Manage')"%current_user.id

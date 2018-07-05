@@ -1,29 +1,28 @@
-<link rel="stylesheet" href="http://openlayers.org/en/v3.8.2/css/ol.css" type="text/css">
-{#<script src="http://openlayers.org/en/v3.8.2/build/ol.js"></script>#}
-<table width=100%><tr><td>Area Selection Map Popup
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.css" type="text/css">
+
+<table width=100%><tr><td>Area Selection Map Popup <span style="margin-left: 50px; font-weight: bold;">{{ g.filtertxt }}</span>
         </td><td align='right'><button type="button" class="btn btn-default btn-sm"  onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
         </td></tr></table>
 
-<div id="map" class="map" style="width: 100%; height: 500px;"></div>
+<div id="map" class="map" style="width: 100%; height: 500px;">
+  Displaying Map requires Internet Access to load map from https://www.openstreetmap.org
+</div>
 <p> Use mouse drag to Pan, Shift+drag for Rectangle Zooming, Use Alt+drag for Rectangle Selection</p>
 
 <table><tr>
   <td>
-<table class="table" style="width:300px;">
+<table class="table table-condensed" style="width:300px;">
   <tr><td colspan="2" align="Center">North <input type="text" size="7" id="MapOutN"></td></tr>
   <tr>
     <td>West <input type="text" size="7" id="MapOutW"></td>
     <td>East <input type="text" size="7" id="MapOutE"></td></tr>
   <tr><td colspan="2" align="Center">South <input type="text" size="7" id="MapOutS"></td></tr>
 </table>
-    </td><td>
+    </td><td style="vertical-align: middle">
 <button type="button" class="btn btn-primary" onClick="DrawInputOnMap();">Draw On Map</button> <br><br>
 <button type="button" class="btn btn-success" onClick="ReturnMapArea();">Return this Area</button>
   </td>
 
-<td>
-  <button type="button" class="btn btn-primary" onClick="ShowSample({ {% if g.Projid %} projid:{{g.Projid }} {%endif%} });">Show Samples Position</button> <br><br>
-  </td>
 </tr></table>
 <script>
 
@@ -35,7 +34,7 @@ var mousePositionControl = new ol.control.MousePosition({
   projection: 'EPSG:4326',
   undefinedHTML: '&nbsp;'
 });
-
+$("#map").css('height',$(window).height()-250).html(""); {# Optimise la surface de la carte en fonction de la hauteur de l'écran #}
 map = new ol.Map({
   layers: [
     new ol.layer.Tile({
@@ -50,7 +49,7 @@ map = new ol.Map({
   target: 'map',
   view: new ol.View({
     center: [0, 47],
-    zoom: 2
+    zoom: parseFloat($("#map").css('height'))/450 {# Mise à l'echelle, affiche toute la hauteur à l'echelle 1 sur une zone de 450px de haut #}
   })
 });
 
@@ -101,10 +100,10 @@ var vectorLayer= new ol.layer.Vector({
 var RedIconStyle = new ol.style.Style({
         image: new ol.style.Icon({
           anchor: [0.5, 0.5],
-          size: [52, 52],
+          size: [40, 40],
           offset: [52, 0],
           opacity: 1,
-          scale: 0.25,
+          scale: 0.19,
           src: '/static/dots.png'
         })
       });
@@ -138,13 +137,14 @@ DrawSelectionRectangle([
     parseFloat($("#MapOutS").val()) ]);
 }
 
- $.getScript("http://openlayers.org/en/v3.8.2/build/ol.js", function(){
+ $.getScript("https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.js", function(){
   InitMap();
   $("#MapOutW").val($("#filt_MapOutW").val());
   $("#MapOutN").val($("#filt_MapOutN").val());
   $("#MapOutE").val($("#filt_MapOutE").val());
   $("#MapOutS").val($("#filt_MapOutS").val());
   DrawInputOnMap();
+  ShowSample({a:0 {% if g.Projid %} ,projid:"{{g.Projid }}" {%endif%}  {% if g.taxoid %} ,taxoid:"{{g.taxoid }}" {%endif%}  {% if g.taxochild %} ,taxochild:"{{g.taxochild }}" {%endif%}  });
  });
 
 function ReturnMapArea() {

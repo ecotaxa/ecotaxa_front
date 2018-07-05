@@ -1,18 +1,26 @@
+from appli.database import GetAll
 
 FilterList=("MapN","MapW","MapE","MapS","depthmin","depthmax","samples","fromdate","todate"
             ,"inverttime","fromtime","totime","statusfilter",'instrum','month','daytime'
-            ,'freenum','freenumst','freenumend','freetxt','freetxtval','filt_annot','taxo')
+            ,'freenum','freenumst','freenumend','freetxt','freetxtval','filt_annot','taxo','taxochild')
 
 def GetSQLFilter(filtres,sqlparam,currentuserid):
     whereclause=""
     if filtres.get("taxo","")!="":
-        whereclause+=" and o.classif_id=%(taxo)s "
-        sqlparam['taxo']=filtres["taxo"]
+        if filtres.get("taxochild", "") == "Y":
+            sqlparam['taxo'] =[int(x[0]) for x in GetAll("""WITH RECURSIVE rq(id) as ( select id FROM taxonomy where id in(%s)
+                                    union
+                                    SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id and (t.nbrobjcum>0 or t.nbrobj>0)
+                                    ) select id from rq """%(filtres["taxo"],))]
+            whereclause+=" and o.classif_id= any (%(taxo)s) "
+        else:
+            whereclause+=" and o.classif_id=%(taxo)s "
+            sqlparam['taxo']=filtres["taxo"]
     if filtres.get("statusfilter","")!="":
         whereclause+=" and o.classif_qual"
         if filtres["statusfilter"]=="NV":
             whereclause+="!='V'"
-        if filtres["statusfilter"] == "PV":
+        elif filtres["statusfilter"] == "PV":
             whereclause += " in ('V','P')"
         elif filtres["statusfilter"]=="NVM":
             whereclause+="='V' and o.classif_who!="+currentuserid

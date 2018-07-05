@@ -57,7 +57,7 @@ $(document).ready(function() {
     <td width="200px"><h1><a href="/"><img height="30" src="/static/logo_ecotaxa.png"></a></h1></td>
     <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
     <td align="right" width="300px">
-        {% if not  current_user.is_authenticated() %}
+        {% if not  current_user.is_authenticated %}
             Not logged ( <a href="{{ url_for_security('login') }}">log in</a> )
         {% else %}
             {%  if g.tasksummary %} <a href="/Task/listall">
@@ -68,7 +68,7 @@ $(document).ready(function() {
             {{ current_user.name }} (<a href="{{ url_for_security('logout') }}">log out</a>)
 {% if g.menu %}
     <br><div class="btn-group" style="width:100px;margin-right: 10px">
-    <button type="button" class="btn btn-default">Action</button>
+    <button type="button" class="btn btn-default"  data-toggle="dropdown">Action</button>
     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
         <span class="caret"></span>
         <span class="sr-only">Toggle Dropdown</span>

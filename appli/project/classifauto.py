@@ -2,8 +2,8 @@
 from appli import db,app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
 from appli.database import GetAll,GetAssoc2Col
 from time import time
-from flask.ext.security import login_required
-from flask import flash,g
+from flask_security import login_required
+from flask import flash,g,Response
 import numpy as np
 import io,base64
 from sklearn.ensemble import RandomForestClassifier
@@ -45,6 +45,28 @@ where projid =%d and classif_qual='V'"""%PrjId
     TotalObj=CatPred.shape[0]
     D=np.diag(cm)
 
+    if gvg("astsv"):
+        t=[""] #case haut gauche vide
+        for c in CatAll:
+            t.append("\t%s" % c)
+        t.append("\tNb. true\t% true\tRecall")
+        for c, cml, s, recall in zip(CatAll, cm, SommeH, 100 * D / SommeHNoZero):
+            t.append("\n%s" % c)
+            for v in cml:
+                t.append("\t%s" % v)
+            t.append("\t%s\t%0.1f\t%0.1f" % (s, 100 * s / TotalObj, recall))  # Ajoute le total & Pct de la ligne
+        t.append("\nNb. predicted")
+        for s in SommeV:
+            t.append("\t%s" % (s))  # Ajoute le total de la Colonne
+        t.append("\n% of predicted")
+        for s in SommeV:
+            t.append("\t%0.1f" % (100 * s / TotalObj))  # Ajoute le % de la Colonne
+        t.append("\nPrecision")
+        for s in 100 * D / SommeVNoZero:
+            t.append("\t%0.1f" % (s))  # Ajoute la precision
+        t.append("\n")
+        return Response( "".join(t) ,mimetype="text/tsv",headers={"Content-Disposition" : "attachment; filename=confusionmatrix_%s.tsv"%Prj.projid})
+
     t=["""<style>
     th {
       vertical-align: bottom !important;
@@ -74,7 +96,7 @@ where projid =%d and classif_qual='V'"""%PrjId
       font-style: italic;
     }
   </style>
-  <h2>Confusion matrix</h2>
+  <h2>Confusion matrix - <a href='?astsv=Y' style='font-size:medium' class='btn btn-primary btn-xs'>TSV Export</a> </h2>
   <p>This matrix is refreshed every time you access it. For more information on confusion statistics, please see the <a href='https://en.wikipedia.org/wiki/Precision_and_recall'>very well written Wikipedia page</a>.</p>
   
     <table class='table table-bordered table-hover table-condensed' style='font-size:12px;'>

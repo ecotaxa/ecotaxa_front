@@ -1,12 +1,10 @@
-from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,ntcv
+from flask import render_template, g, flash,json
+from flask_login import current_user
+from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv
 from pathlib import Path
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask.ext.security import login_required
-from flask_security.decorators import roles_accepted
+from flask_security import login_required
 from appli.search.leftfilters import getcommonfilters
-import os,time,math,collections,appli,psycopg2.extras,urllib
+import os,math,collections,appli,psycopg2.extras,urllib.parse
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 import appli.project.sharedfilter as sharedfilter
 
@@ -33,7 +31,7 @@ def indexProjects():
     if gvg('filt_instrum','')!='':
         sql +=" and p.projid in (select distinct projid from acquisitions where instrument ilike '%%'||%(filt_instrum)s ||'%%' ) "
         params['filt_instrum']=gvg('filt_instrum')
-    if gvg('filt_subset', '') != 'Y':
+    if gvg('filt_subset', '') == 'Y':
         sql += " and not title ilike '%%subset%%'  "
     sql+=" order by lower(title)" #pp.member nulls last,
     res = GetAll(sql,params) #,debug=True
@@ -51,7 +49,7 @@ def indexProjects():
 @login_required
 def ProjectsOthers():
     txt = "<h3>Other projects</h3>" #,pp.member
-    sql="""select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),qpp.email,qpp.name
+    sql="""select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),qpp.email,qpp.name,visible
            from projects p
            left Join projectspriv pp on p.projid = pp.projid and pp.member=%d
            left join ( select * from (
@@ -77,15 +75,17 @@ def ProjectsOthers():
         <tbody>
     """
     for r in res:
-        if r[6] is None:
-            txt+="<tr><td> </td>"
-        else:
-            txt+="<tr><td><a class='btn btn-primary' href='mailto:{7}?{0}'>REQUEST ACCESS</a></td>".format(
+        txt += "<tr><td>"
+        if r[6] is not None:
+            txt+="<a class='btn btn-primary' href='mailto:{7}?{0}'>REQUEST ACCESS</a> ".format(
                 urllib.parse.urlencode({'body':"Please provide me privileges to project : "+ntcv(r[1])
                                            ,'subject':'Project access request'}
                                        ).replace('+','%20') # replace car urlencode mais des + pour les espaces qui sont mal traitrés par le navigateur
                 ,*r)
-        txt+="<td>{1} [{0}]".format(*r)
+        if r[8] ==True or current_user.has_role(database.AdministratorLabel) :
+            txt+="<a class='btn btn-primary' href='/prj/{0}'>View</a>".format(*r)
+
+        txt+="</td><td>{1} [{0}]".format(*r)
         if r['name']: txt+="<br><a href='mailto:"+r['email']+"'>"+r['name']+"</a>"
         txt+="""</td><td>{2}</td>
         <td>{3:0.0f}</td>
@@ -135,28 +135,28 @@ FilterList={"MapN":"","MapW":"","MapE":"","MapS":"","depthmin":"","depthmax":"",
 FilterListAutoSave=("sortby","sortorder","dispfield","statusfilter",'ipp','zoom','magenabled','popupenabled')
 ######################################################################################################################
 @app.route('/prj/<int:PrjId>')
-@login_required
+# @login_required
 def indexPrj(PrjId):
     data={'pageoffset':gvg("pageoffset","0")}
     for k,v in FilterList.items():
-        data[k]=gvg(k,str(current_user.GetPref(k,v)))
+        data[k]=gvg(k,str(current_user.GetPref(k,v)) if current_user.is_authenticated else "")
     # print('%s',data)
-    if data["samples"]:
+    if data.get("samples",None):
         data["sample_for_select"]=""
         for r in GetAll("select sampleid,orig_id from samples where projid=%d and sampleid in(%s)"%(PrjId,data["samples"])):
             data["sample_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
     data["month_for_select"] = ""
     # print("%s",data['month'])
     for (k,v) in enumerate(('January','February','March','April','May','June','July','August','September','October','November','December'),start=1):
-        data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['month'].split(',') else '',k,v)
+        data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data.get('month','').split(',') else '',k,v)
     data["daytime_for_select"] = ""
     for (k,v) in database.DayTimeList.items():
-        data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['daytime'].split(',') else '',k,v)
+        data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data.get('daytime','').split(',') else '',k,v)
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     if Prj is None:
         flash("Project doesn't exists",'error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
-    if not Prj.CheckRight(0): # Level 0 = Read, 1 = Annotate, 2 = Admin
+    if Prj.CheckRight(-1) ==False and Prj.CheckRight(0) ==False : # Level -1=Read Anonymous, 0 = Read, 1 = Annotate, 2 = Admin
         MainContact=GetAll("""select u.email,u.name
                         from projectspriv pp join users u on pp.member=u.id
                         where pp.privilege='Manage' and u.active=true and pp.projid=%s""",(PrjId,))
@@ -172,17 +172,17 @@ def indexPrj(PrjId):
     g.Projid=Prj.projid
     # Ces 2 listes sont ajax mais si on passe le filtre dans l'URL il faut ajouter l'entrée en statique pour l'affichage
     data["filt_freenum_for_select"] = ""
-    if data['freenum']!="":
-        for r in PrjGetFieldList(Prj,'n',''):
+    if data.get('freenum','')!="":
+        for r in PrjGetFieldList(Prj,'n',''): # type: dict
             if r['id']==data['freenum']:
                 data["filt_freenum_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['text'])
     data["filt_freetxt_for_select"] = ""
-    if data['freetxt']!="":
-        for r in PrjGetFieldList(Prj,'t',''):
+    if data.get('freetxt','')!="":
+        for r in PrjGetFieldList(Prj,'t',''):# type: dict
             if r['id']==data['freetxt']:
                 data["filt_freetxt_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['text'])
     data["filt_annot_for_select"] = ""
-    if data['filt_annot']!="":
+    if data.get('filt_annot','')!="":
         for r in GetAll("select id,name from users where id =any (%s)",([int(x) for x in data["filt_annot"].split(',')],)):
                 data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['name'])
     fieldlist=GetFieldList(Prj)
@@ -202,14 +202,16 @@ def indexPrj(PrjId):
     data["statuslist"]["VM"]="Validated by me"
     data["statuslist"]["D"]="Dubious"
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
-    if not g.PrjManager: g.PrjAnnotate=Prj.CheckRight(1)
+    if not g.PrjManager:
+        g.PrjAnnotate=Prj.CheckRight(1)
+    g.PublicViewMode = not Prj.CheckRight(0)
     right='dodefault'
     if gvg("taxo")!="":
         g.taxofilter=gvg("taxo")
+        g.taxochild = gvg("taxochild")
         g.taxofilterlabel= GetAll("select name from taxonomy where id=%s ",(gvg("taxo"),))[0][0]
     else:
-        g.taxofilter=""
-        g.taxofilterlabel=""
+        g.taxofilter=g.taxofilter = g.taxofilterlabel=""
 
     classiftab=GetClassifTab(Prj)
     g.ProjectTitle=Prj.title
@@ -224,14 +226,13 @@ def indexPrj(PrjId):
     if g.PrjManager:
         g.headmenu.append(("","SEP"))
         g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import images and metadata"))
-        g.headmenu.append(("/Task/Create/TaskImportUpdate?p=%d" % (PrjId,), "Re-import and update metadata"))
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit project settings"))
         g.headmenu.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')" % (PrjId,),
                            "Extract Subset with active filter"))
         g.headmenu.append(("/prj/merge/%d"%(PrjId,),"Merge another project in this project"))
         g.headmenu.append(("/prj/EditAnnot/%d"%(PrjId,),"Edit or erase annotations massively"))
         g.headmenu.append(("javascript:GotoWithFilter('/prjPurge/%d')"%(PrjId,), "Erase objects with active filter or project"))
-
+        g.headmenu.append(("javascript:GotoWithFilter('/prj/editdatamass/%d')" % (PrjId,), "Edit objects data with active filter"))
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
@@ -240,7 +241,7 @@ def indexPrj(PrjId):
 
 ######################################################################################################################
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def LoadRightPane():
     # récupération des parametres d'affichage
     pageoffset=int(gvp("pageoffset","0"))
@@ -253,7 +254,7 @@ def LoadRightPane():
     PrefToSave=0
     for k,v in FilterList.items():
         Filt[k]=gvp(k,v)
-        if k in FilterListAutoSave or gvp("saveinprofile")=="Y":
+        if ( k in FilterListAutoSave or gvp("saveinprofile")=="Y") and current_user.is_authenticated:
             PrefToSave+=current_user.SetPref(k,Filt[k])
 
     # on sauvegarde les parametres dans le profil utilisateur
@@ -268,13 +269,18 @@ def LoadRightPane():
     zoom=int(Filt["zoom"])
     popupenabled=Filt["popupenabled"]
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
+    if Prj is None:
+        return "Invalid project"
+    if Prj.CheckRight(-1) == False:
+        return "Access Denied"
+    g.PublicViewMode = not Prj.CheckRight(0)
     fieldlist=GetFieldList(Prj)
     fieldlist.pop('orig_id','')
     fieldlist.pop('objtime','')
     t=["<a name='toppage'/>"]
     whereclause=" where o.projid=%(projid)s "
     sqlparam={'projid':gvp("projid")}
-    sql="""select o.objid,t.name taxoname,o.classif_qual,u.name classifwhoname,i.file_name
+    sql="""select o.objid,t.name taxoname,t2.name taxoparent,o.classif_qual,u.name classifwhoname,i.file_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
   ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,to_char(o.objtime,'HH24:MI') objtime
   ,case when o.complement_info is not null and o.complement_info!='' then 1 else 0 end commentaires
@@ -284,10 +290,13 @@ def LoadRightPane():
     sql+=""" from objects o
 left Join images i on o.img0id=i.imgid
 left JOIN taxonomy t on o.classif_id=t.id
+left JOIN taxonomy t2 on t.parent_id=t2.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid
 """
-    whereclause += sharedfilter.GetSQLFilter(filtres,sqlparam,str(current_user.id))
+    whereclause += sharedfilter.GetSQLFilter(filtres,sqlparam,str(current_user.id if current_user.is_authenticated else "999999"))
+    if g.PublicViewMode:  # Si c'est une lecture publique
+        whereclause+=" and o.classif_qual='V' " # Les anonymes ne peuvent voir que les objets validés
     sql+=whereclause
 
     sqlcount="""select count(*)
@@ -374,7 +383,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             if(ipp==0) and (fitheight>WindowHeight): # en mode fit quand la page est pleine
                 if fitlastclosedtr>0 : #dans tous les cas on laisse une ligne
                     del t[fitlastclosedtr:]
-                break;
+                break
             fitlastclosedtr=len(t)
             fitcurrentlinemaxheight=0
             t.append("</tr></table><table class=imgtab><tr id=tr%d>%s"%(trcount,LineStart))
@@ -404,7 +413,8 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             poptxt=""
             #poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
             if r[3]!="":
-                poptxt+="<em>by</em> %s"%(r[3])
+                poptxt+="<em>by</em> %s"%(r[4])
+            poptxt+="<br><em>parent</em> "+ntcv(r['taxoparent'])
             poptxt+="<br><em>in</em> "+ntcv(r['samplename'])
             for k,v in popoverfieldlist.items():
                 if k=='classif_auto_score' and r["classif_qual"]=='V':
@@ -452,7 +462,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         <!--<button class='btn btn-success' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>-->
         <button class='btn btn-success' onclick='ValidateSelection();'><span class='glyphicon glyphicon-ok' />  Validate Selection</button>
         <button class='btn btn-default' onclick="$('#bottomhelp').toggle()" ><span class='glyphicon glyphicon-question-sign' /> Undo</button>
-        <div id="bottomhelp" class="panel panel-default" style="margin:10px 0px 0px 40px;width:500px;display:none;">To correct validation mistakes (no UNDO button in Ecotaxa):
+        <div id="bottomhelp" class="panel panel-default" style="margin:10px 0 0 40px;width:500px;display:none;">To correct validation mistakes (no UNDO button in Ecotaxa):
 <br>1.	Select Validated Status
 <br>2.	Sort by : Validation date
 <br>3.	Move the most recent (erroneous) validated objects into the suitable category
@@ -476,13 +486,21 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             t.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>"%(pageoffset+1))
         t.append("</ul></nav>")
     if nbrtotal>0:
-        pctvalid="<font color=#0A0>%0.1f %%</font>, <font color=#5bc0de>%0.1f %%</font>, <font color=#F0AD4E>%0.1f %%</font>"%(100*nbrvalid/nbrtotal,100*nbrpredict/nbrtotal,100*nbrdubious/nbrtotal)
-    else: pctvalid="-"
+        pctvalid=100*nbrvalid/nbrtotal
+        pctpredict=100*nbrpredict/nbrtotal
+        pctdubious=100*nbrdubious/nbrtotal
+        txtpctvalid="<span style=\"color:#0A0\">%0.1f %%</span>, <span style=\"color:#5bc0de\">%0.1f %%</span>, <span style=\"color:#F0AD4E\">%0.1f %%</span>"%(pctvalid,pctpredict,pctdubious)
+    else:
+        txtpctvalid="-"
+        pctdubious=pctpredict=pctvalid=0
     t.append("""
     <script>
         PostAddImages();
-        $('#objcount').html('%s / %d ');
-    </script>"""%(pctvalid,nbrtotal))
+        $('#objcount').html('{0} / {1} ');
+        $('#progress-bar-validated').css('width','{2}%');
+        $('#progress-bar-predicted').css('width','{3}%');
+        $('#progress-bar-dubious').css('width','{4}%');
+    </script>""".format(txtpctvalid,nbrtotal,pctvalid,pctpredict,pctdubious))
     return "\n".join(t)
 
 ######################################################################################################################
@@ -495,17 +513,19 @@ def GetClassifTab(Prj):
             InitClassif=",".join(InitClassif)
         else:
             InitClassif="0" # pour être sur qu'il y a toujours au moins une valeur
-
+    ExtraFilter=""
+    if g.PublicViewMode:
+        ExtraFilter = " and classif_qual='V' "
     InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
     sql="""select t.id,t.name as taxoname,case when tp.name is not null and t.name not like '%% %%'  then ' ('||tp.name||')' else ' ' end as  taxoparent,nbr,nbrnotv
     from (  SELECT    o.classif_id,   c.id,count(classif_id) Nbr,count(case when classif_qual='V' then NULL else o.classif_id end) NbrNotV
-        FROM (select * from objects where projid=%(projid)s) o
-        FULL JOIN (VALUES """+InitClassif+""") c(id) ON o.classif_id = c.id
+        FROM (select * from objects where projid=%(projid)s {0}) o
+        FULL JOIN (VALUES {1}) c(id) ON o.classif_id = c.id
         GROUP BY classif_id, c.id
       ) o
     JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
     left JOIN taxonomy tp ON t.parent_id = tp.id
-    order by t.name       """
+    order by t.name       """.format(ExtraFilter,InitClassif)
     param={'projid':Prj.projid}
     res=GetAll(sql,param,debug=False,cursor_factory=psycopg2.extras.RealDictCursor)
     ids=[x['id'] for x in res]
@@ -522,31 +542,31 @@ def GetClassifTab(Prj):
     for k,v in enumerate(res):
         res[k]['cp']=None  #cp = Closest parent
         res[k]['cpdist']=0
-        id=v["id"]
+        taxoid=v["id"]
         for i in range(50): # 50 pour arreter en cas de boucle
-            if id in taxotree:
-                id=taxotree[id]['parent_id']
+            if taxoid in taxotree:
+                taxoid=taxotree[taxoid]['parent_id']
             else:
-                id=None
-            if id is None:
+                taxoid=None
+            if taxoid is None:
                 break
-            if id in ids:
-                res[k]['cp']=id
+            if taxoid in ids:
+                res[k]['cp']=taxoid
                 res[k]['cpdist']=i+1
                 break
-    restree=[]
+    restree=[] # type: list[dict]
     def AddChild(Src,Parent,Res,Deep,ParentClasses):
-        for r in Src:
-            if r['cp'] ==Parent:
+        for rec in Src:
+            if rec['cp'] ==Parent:
                 # r['dist']=Deep+r['cpdist']
-                r['dist']=Deep
-                r['parentclasses']=ParentClasses
-                r["haschild"]=False
+                rec['dist']=Deep
+                rec['parentclasses']=ParentClasses
+                rec["haschild"]=False
                 for p,i in zip(Res,range(10000)):
                     if p['id']==Parent:
                         Res[i]["haschild"]=True
-                Res.append(r)
-                AddChild(Src,r['id'],Res,r['dist']+1,ParentClasses+(" visib%s"%(r['id'],)))
+                Res.append(rec)
+                AddChild(Src,rec['id'],Res,rec['dist']+1,ParentClasses+(" visib%s"%(rec['id'],)))
     AddChild(res,None,restree,0,"")
     # Cette section de code à pour but de trier le niveau final (qui n'as pas d'enfant) par parent s'il un parent apparait plus d'une fois sinon par enfant
     # on isole d'abord les branche
@@ -587,6 +607,7 @@ def prjGetClassifTab(PrjId):
     if Prj is None:
         return "Project doesn't exists"
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
+    g.PublicViewMode = not Prj.CheckRight(0)
     UpdateProjectStat(Prj.projid)
     g.Projid=Prj.projid
     if gvp("taxo")!="":
@@ -605,7 +626,7 @@ def prjPurge(PrjId):
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     txt=ObjListTxt=""
     g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
-    txt += "<h3>ERASE OBJECTS TOOL </h3>";
+    txt += "<h3>ERASE OBJECTS TOOL </h3>"
     if gvp("objlist")=="":
         sql="select objid FROM objects o where projid="+str(Prj.projid)
         sqlparam={}
@@ -617,10 +638,10 @@ def prjPurge(PrjId):
             sql+= sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
             ObjList=GetAll(sql,sqlparam)
             ObjListTxt="\n".join((str(r['objid']) for r in ObjList))
-            txt+="<span style='color:red;weight:bold;font-size:large;'>USING Active Project Filters, {0} objects</span>".format(len(ObjList))
+            txt+="<span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters, {0} objects</span>".format(len(ObjList))
         else:
             txt += """Enter the list of internal object id you want to delete. <br>Or type in ‘’DELETEALL’’ to remove all object from this project.<br>
-        You can retrieve object id from a TSV export file using export data from project action menu<br>""";
+        You can retrieve object id from a TSV export file using export data from project action menu<br>"""
         txt+="""
         <form action=? method=post>
         <textarea name=objlist cols=15 rows=20 autocomplete=off>{1}</textarea><br>
@@ -635,7 +656,6 @@ def prjPurge(PrjId):
             sqldi="delete from images i using objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
             sqldoh="delete from objectsclassifhisto i using objects o where o.objid=i.objid and o.projid={0}".format(PrjId)
             sqldo="delete from obj_head where projid={0}".format(PrjId)
-            objs=()
             SqlParam={}
         else:
             sqlsi="select file_name,thumb_file_name from images i,objects o where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
@@ -685,7 +705,7 @@ def PrjGetFieldList(Prj,typefield,term):
     MapPrefix = {'o': '', 's': 'sample ', 'a': 'acquis. ', 'p': 'process. '}
     for mapk, mapv in MapList.items():
         for k, v in sorted(DecodeEqualList(getattr(Prj, mapv, "")).items(), key=lambda t: t[1]):
-            if k[0] == typefield and v != "" and (term=='' or term in v):
+            if (k[0] == typefield or typefield=='') and v != "" and (term=='' or term in v):
                 fieldlist.append({'id': mapk + k, 'text': MapPrefix[mapk] + v})
     return fieldlist
 

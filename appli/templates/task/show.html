@@ -19,6 +19,8 @@
 </tr><tr>
     <th width="150px">Class</th><td>{{ task.taskclass }}</td>
 </tr><tr>
+    <th width="150px">Owner</th><td>{{ task.owner_rel }}</td>
+</tr><tr>
     <th>State</th><td>{{ task.taskstate }}
     {% if task.taskstate=="Question" %}
         <a href="/Task/Question/{{ task.id }}"><span class="label label-warning">Go</span></a>

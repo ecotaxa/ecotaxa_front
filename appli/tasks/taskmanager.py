@@ -1,8 +1,8 @@
 from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate,database
-from flask.ext.login import current_user
+from flask_login import current_user
 from flask import  render_template, g, flash,jsonify
 import json,os,sys,datetime,shutil,flask,logging
-from flask.ext.security import login_required
+from flask_security import login_required
 from appli.database import ExecSQL,GetAll
 
 class Task(db.Model):
@@ -146,19 +146,24 @@ def LoadTask(taskid):
 @app.route('/Task/listall')
 @login_required
 def ListTasks(owner=None):
-     g.headcenter="<H3>Task Monitor</h3>"
-     AddTaskSummaryForTemplate()
-     tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
-     txt=""
-     if gvg("cleandone")=='Y' or gvg("cleanerror")=='Y' or gvg("cleanall")=='Y':
+    g.headcenter="<H3>Task Monitor</h3>"
+    AddTaskSummaryForTemplate()
+    seeall=""
+    if current_user.has_role(database.AdministratorLabel) and gvg("seeall")=='Y':
+        tasks=Task.query.filter_by().order_by("id").all()
+        seeall='&seeall=Y'
+    else:
+        tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
+    txt=""
+    if gvg("cleandone")=='Y' or gvg("cleanerror")=='Y' or gvg("cleanall")=='Y':
         txt="Cleanning process result :<br>"
         for t in tasks:
             if (gvg("cleandone")=='Y' and t.taskstate=='Done') or (gvg("cleanall")=='Y') \
             or (gvg("cleanerror")=='Y' and t.taskstate=='Error') :
                 txt+=DoTaskClean(t.id)
         tasks=Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
-     txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default' href=?cleanerror=Y>Clean All Error</a>   <a class='btn btn-default' href=?cleanall=Y>Clean All (warning !!!)</a>  Task count : "+str(len(tasks))
-     return render_template('task/listall.html',tasks=tasks,header=txt)
+    # txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default' href=?cleanerror=Y>Clean All Error</a>   <a class='btn btn-default' href=?cleanall=Y>Clean All (warning !!!)</a>  Task count : "+str(len(tasks))
+    return render_template('task/listall.html',tasks=tasks,header=txt,len_tasks=len(tasks),seeall=seeall,IsAdmin=current_user.has_role(database.AdministratorLabel))
 
 
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
@@ -278,6 +283,9 @@ def TaskGetStatus(TaskID):
             rep={'d':{
                 'PercentComplete':Progress,
                 'WorkDescription': task.task.progressmsg}}
+            if len(task.param.steperrors):
+                rep['d']['WorkDescription'] += "".join("<br>\n-" + s for s in task.param.steperrors)
+
             if task.task.taskstate=="Done":
                 rep['d']['IsComplete']="Y"
                 rep['d']['ExtraAction']="<a href='/Task/Show/%d' class='btn btn-primary btn-sm ' role='button'>Show Task</a>"%TaskID
@@ -310,7 +318,9 @@ def AutoClean():
     TaskList=GetAll("""SELECT id, owner_id, taskclass, taskstate, taskstep, progresspct, progressmsg,
        inputparam, creationdate, lastupdate, questiondata, answerdata
   FROM temp_tasks
-  where lastupdate<current_timestamp - interval '7 days' or ( creationdate<current_timestamp - interval '1 days' and lastupdate is null)""")
+  where lastupdate<current_timestamp - interval '30 days'
+      or ( lastupdate<current_timestamp - interval '7 days' and taskstate='Done' )
+      or ( creationdate<current_timestamp - interval '1 days' and lastupdate is null)""")
     txt="Cleanning process result :<br>"
     for t in TaskList:
         txt+=DoTaskClean(t['id'])

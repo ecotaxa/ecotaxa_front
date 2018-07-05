@@ -8,12 +8,12 @@
 
 <div class="panel panel-default " style="margin-left: 20px;margin-top: 40px;width: 800px">
 <div style="margin:5px;">
-<span class=" glyphicon glyphicon-info-sign"></span> This process is launched in an asynchronous manner it means you can either:
-<ul><li>Continue to work in another tab a take a look on this page
-<li>Go in another page from this tab and keep progress using Task status button in upper right corner of the application
+<span class=" glyphicon glyphicon-info-sign"></span> WARNING : this is an asynchronous process.<br>
+ You can either:
+<ul><li>Open another tab or window to continue working in Ecotaxa (and monitor the progress of the task switching to this page from time to time)
+<li>Leave this page to continue working in Ecotaxa (and clic on the "Run" or "Done" buttons on the upper right of the Ecotaxa topper to monitor the progress of the task or check its completion)
 </ul>
-Asynchronous task, are used for process that can be long. They can create temporary data (like export file) that can be removed safely at the end of the process.
-<br>We suggest you to clean your finished task to easily track new ones.
+Asynchronous task are utilized for process that can be long. They can create temporary data (like export file) that can be manually removed at the end of the process even if Ecotaxa will do it for you on a regular schedule. Remaining tasks can be checked using the "Done" or "Error" top right buttons.
 
 </div>
 </div>
@@ -66,7 +66,9 @@ et du coup une seconde requete ajax est emise par le client et retourne le fait 
                         }
                         if (response.d.IsError) {
                             $StopTimer=true;
-                            $statusDiv.html('<div class="alert alert-danger" role="alert">'+response.d.WorkDescription+'<a href="/Task/Show/{{ TaskID }}" class="btn btn-primary btn-sm " role="button">Show Task</a></div>');
+                            $statusDiv.html('<div class="alert alert-danger" role="alert">' +
+                                '<div style="display: inline-block;margin-right: 30px;max-height:500px;overflow:auto;">'
+                                +response.d.WorkDescription+'</div><a href="/Task/Show/{{ TaskID }}" class="btn btn-primary btn-sm " role="button">Show Task</a></div>');
                             $ajaxImage.hide();
                             $progressbar.hide();
                             clearInterval(intervalHandle);

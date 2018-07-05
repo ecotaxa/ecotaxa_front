@@ -4,13 +4,13 @@ from flask import render_template,  flash,request
 import logging,datetime,sys,shutil,os
 from pathlib import Path
 from zipfile import ZipFile
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
 from appli.database import GetAll,ExecSQL,GetDBToolsDir,GetAssoc,GetAssoc2Col
 from appli.tasks.taskexportdb import table_list
 from psycopg2.extras import  RealDictCursor
 import psycopg2
-from flask.ext.security.utils import encrypt_password
+from flask_security.utils import encrypt_password
 
 def GetColsForTable(schema:str,table:str):
     ColList=GetAll("""select a.attname from pg_namespace ns
@@ -80,7 +80,7 @@ class TaskImportDB(AsyncTask):
                 ExecSQL('alter table {0}.{1} drop CONSTRAINT {2}'.format(newschema,*r),debug=False)
             logging.info("Drop Index") # for faster insert and not needed for DB Merge
             for t in ("is_objectssample","is_objectslatlong","is_objectsdepth","is_objectsdate","is_objectstime","is_objectfieldsorigid","is_objectsprojrandom","IS_TaxonomySource"):
-                ExecSQL('drop index {0}."{1}" '.format(newschema,t),debug=False)
+                ExecSQL('drop index IF EXISTS {0}."{1}" '.format(newschema,t),debug=False)
 
             logging.info("Restore data")
             for t in table_list:
@@ -254,7 +254,9 @@ class TaskImportDB(AsyncTask):
     # ******************************************************************************************************
     def QuestionProcess(self):
         if not current_user.has_role(database.AdministratorLabel):
-            return PrintInCharte("ACCESS DENIED for this feature, Admin Required")
+            res=GetAll("select count(*) nbr from projectspriv where member=%s and privilege='Manage'",(current_user.id,))
+            if res[0]['nbr']==0:
+                return PrintInCharte("ACCESS DENIED for this feature, Admin Required")
         ServerRoot=Path(app.config['SERVERLOADAREA'])
         txt="<h1>Database Importation Task</h1>"
         errors=[]
@@ -300,7 +302,14 @@ class TaskImportDB(AsyncTask):
                 txt+="""</table>""";
                 return PrintInCharte(txt);
             if gvg("dest")=="" : # il faut choisir le projet destination
-                PrjList=GetAll("select projid,title,status from projects order by lower(title)",cursor_factory=None)
+                if current_user.has_role(database.AdministratorLabel):
+                    PrjList=GetAll("select projid,title,status from projects order by lower(title)",cursor_factory=None)
+                else:
+                    PrjList = GetAll("""select p.projid,title,status
+                                          from projects p
+                                          join projectspriv pp on p.projid = pp.projid
+                                          where member=%s and privilege='Manage'
+                                          order by lower(title)""",[current_user.id],cursor_factory=None)
                 txt+="<h3>Select project destination project</h3> or <a class='btn btn-primary' href='?src={0}&dest=new'>New project</a>".format(gvg("src"))
                 txt+="""<table class='table table-condensed table-bordered' style='width:600px;'>"""
                 for r in PrjList:
@@ -315,6 +324,13 @@ class TaskImportDB(AsyncTask):
                     Prj=database.Projects()
                     Prj.title="IMPORT "+SrcPrj[0]['title']
                     db.session.add(Prj)
+                    db.session.commit()
+                    PrjPriv=database.ProjectsPriv()
+                    PrjPriv.projid=Prj.projid
+                    PrjPriv.member=current_user.id
+                    PrjPriv.privilege="Manage"
+                    db.session.add(PrjPriv)
+
                 else: # MAJ du projet
                     Prj=database.Projects.query.filter_by(projid=int(gvg("dest"))).first()
                     NbrObj=GetAll("select count(*) from obj_head WHERE projid="+gvg("dest"))[0][0]
@@ -441,7 +457,7 @@ class TaskImportDB(AsyncTask):
                                 u.email=self.param.UserFound[orig]["email"]
                                 u.name=self.param.UserFound[orig]["name"]
                                 u.password=self.param.UserFound[orig]["password"]
-                                u.organisation=ntcv(self.param.UserFound[orig]["organisation"])+" Imported on "+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                                u.organisation=ntcv(self.param.UserFound[orig]["organisation"]) #+" Imported on "+datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                                 u.active=True
                                 db.session.add(u)
                                 db.session.commit()

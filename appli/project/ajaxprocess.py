@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv
 from pathlib import Path
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask.ext.security import login_required
+from flask_security import Security, SQLAlchemyUserDatastore
+from flask_security import login_required
 from flask_security.decorators import roles_accepted
 import os,time,math,collections,psycopg2.extras
 from appli.database import GetAll,GetClassifQualClass,db,ExecSQL
@@ -11,9 +11,10 @@ from appli.database import GetAll,GetClassifQualClass,db,ExecSQL
 @app.route('/prj/ManualClassif/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def PrjManualClassif(PrjId):
+    request.form  # Force la lecture des données POST sinon il y a une erreur 504
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
     if not Prj.CheckRight(1): # Level 0 = Read, 1 = Annotate, 2 = Admin
-        return "You cannot Annotate this project"
+        return '<span class="label label-danger">You cannot Annotate this project</span>'
 
     changes={k[8:-1]:v for k,v in request.form.items() if k[0:7]=="changes"}
     if len(changes)==0:

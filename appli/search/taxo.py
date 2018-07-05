@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,gvg,db,gvp,database,ntcv
 from appli.database import GetAll
 from psycopg2.extensions import QuotedString
@@ -11,7 +11,7 @@ def searchtaxo():
     term=gvg("q")
     if len(term)<=2:
         # return "[]"
-        if not current_user.is_authenticated():
+        if not current_user.is_authenticated:
             return "[]"
         # current_user.id
         with app.MRUClassif_lock:
@@ -19,7 +19,7 @@ def searchtaxo():
          # {"id": 12488, "pr": 0, "text": "Teranympha mirabilis "},
          # {"id": 76677, "pr": 0, "text": "Terasakiella (Methylocystaceae)"},
          # {"id": 82969, "pr": 0, "text": "Terasakiella pusilla "}]
-            return json.dumps(app.MRUClassif.get(current_user.id,[])) # TODO gérer les MRU en utilisant les classif
+            return json.dumps(app.MRUClassif.get(current_user.id,[])) # gère les MRU en utilisant les classif
     terms=[x.strip().lower()+R"%" for x in term.split('*')]
     # psycopg2.extensions.QuotedString("""c'est ok "ici" à  """).getquoted()
     param={'term':terms[-1]} # le dernier term est toujours dans la requete

@@ -1,0 +1,96 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.css" type="text/css">
+<div class="panel panel-default" id="mappanel">
+    <div class="panel-heading">
+    <h3 class="panel-title">Global map of all objects of the application. <span style="font-size: small"> (To see filtered for a project or a taxon use 'Open map')</span></h3>
+  </div>
+  <div class="panel-body">
+    <div id="map" class="map" style="width: 100%; height: 300px;">
+    Displaying Map requires Internet Access to load map from https://www.openstreetmap.org
+    </div>
+  </div>
+</div>
+<script>
+var map,vectorSource,SampleSource;
+
+function InitMap() {
+var mousePositionControl = new ol.control.MousePosition({
+  coordinateFormat: ol.coordinate.createStringXY(4),
+  projection: 'EPSG:4326',
+  undefinedHTML: '&nbsp;'
+});
+map = new ol.Map({
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM()
+    })
+  ],
+  controls: ol.control.defaults({
+    attributionOptions:  ({
+      collapsible: false
+    })
+  }).extend([mousePositionControl]),
+  target: 'map',
+  view: new ol.View({
+    center: [0, 47],
+    zoom: parseFloat($("#map").css('height'))/450 {# Mise à l'echelle, affiche toute la hauteur à l'echelle 1 sur une zone de 450px de haut #}
+  })
+});
+
+var infoBox = document.getElementById('info');
+
+// Create vector source and the feature to it.
+vectorSource = new ol.source.Vector();
+var vectorLayer= new ol.layer.Vector({
+  source: vectorSource
+});
+
+var RedIconStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+          anchor: [0.5, 0.5],
+          size: [40, 40],
+          offset: [52, 0],
+          opacity: 1,
+          scale: 0.19,
+          src: '/static/dots.png'
+        })
+      });
+
+SampleSource = new ol.source.Vector();
+var SampleLayer= new ol.layer.Vector({
+  source:SampleSource,style: RedIconStyle
+});
+// Add the vector layer to the map.
+map.addLayer(vectorLayer);
+map.addLayer(SampleLayer);
+
+} //InitMap
+
+
+ $.getScript("https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.js", function(){
+ $("#map").html("");
+  InitMap();
+  $("#MapOutW").val($("#filt_MapOutW").val());
+  $("#MapOutN").val($("#filt_MapOutN").val());
+  $("#MapOutE").val($("#filt_MapOutE").val());
+  $("#MapOutS").val($("#filt_MapOutS").val());
+
+{#  ShowSample({ {% if Projid %} projid:{{Projid }} {%endif%} });#}
+  ShowSample({ });
+ });
+
+
+function ShowSample(p){
+{#  console.log(p);#}
+$.getJSON( "/search/mappopup/samples/",p, function( data ) {
+  SampleSource.clear();
+  $.each( data, function( key, val ) {
+{#    console.log(key,val);#}
+    var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform(val, 'EPSG:4326','EPSG:3857')) });
+    SampleSource.addFeature(iconFeature);
+
+  });
+
+});
+}
+
+</script>

@@ -137,7 +137,7 @@ So overall, the hierarchy can look like
           <td rowspan="3" style="vertical-align: top"><button type="submit" class="btn btn-primary">Search</button></td>
         </tr>
         <tr>
-          <td style="padding-right: 10px;">List also subsets :</td>
+          <td style="padding-right: 10px;">Exclude subsets :</td>
           <td><input type="checkbox" value="Y" name="filt_subset" {%  if filt_subset=='Y'  %}checked{%  endif  %}></td>
         </tr>
         <tr>
@@ -211,6 +211,7 @@ $('#filt_title').focus();
       <h3>Create a new project</h3>
       Project Title : <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control" style="width: 400px;" autocomplete="off">
       <br><br><button class="btn btn-success" onclick="DoCreateProject();">Create the project</button>
+      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
       <div id="resultcreate"></div>
     </div>
   </div>

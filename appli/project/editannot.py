@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
+from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
 from pathlib import Path
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask.ext.security import login_required
+from flask_security import Security, SQLAlchemyUserDatastore
+from flask_security import login_required
 from flask_security.decorators import roles_accepted
 from collections import OrderedDict
 import os,time,math,collections,appli
@@ -122,15 +122,16 @@ $(document).ready(function() {{
         txt+="""<form method=post action=?OldAuthor={0}&NewAuthor={1}&filt_date={2}&filt_hour={3}&filt_min={4}&Process=Y>
         """.format(gvg('OldAuthor'),gvg('NewAuthor'),gvg('filt_date'),gvg('filt_hour'),gvg('filt_min'))
         sql="""
-        select t.id,t.name, count(*) Nbr
+        select t.id,concat(t.name,' (',t2.name,')') as name, count(*) Nbr
         from obj_head o
         {jointype} join (select rank() over(PARTITION BY och.objid order by och.classif_date desc) ochrank,och.*
               from objectsclassifhisto och
               join obj_head ooch on ooch.objid=och.objid and ooch.projid={projid}
         where och.classif_type='M' {retrictsq}) newclassif on newclassif.objid=o.objid and newclassif.ochrank=1
         join taxonomy t on o.classif_id=t.id
+        left join taxonomy t2 on t.parent_id=t2.id
         where o.projid={projid} {retrictq}
-        GROUP BY t.id,t.name
+        GROUP BY t.id,concat(t.name,' (',t2.name,')')
         order BY t.name
         """.format(**sqlclause)
         data=GetAll(sql,debug=False)

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,ntcv
-from flask.ext.security import login_required
+from flask_security import login_required
 from flask_security.decorators import roles_accepted
 import os,io
 

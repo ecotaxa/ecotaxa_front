@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask.ext.login import current_user
+from flask import Blueprint, render_template, g, flash,request,url_for,json,Response
+from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,ntcv,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,nonetoformat
 from pathlib import Path
-from flask.ext.security import Security, SQLAlchemyUserDatastore
-from flask.ext.security import login_required
+from flask_security import Security, SQLAlchemyUserDatastore
+from flask_security import login_required
 from flask_security.decorators import roles_accepted
-import os,time,math,collections,html
+import os,time,math,collections,html,urllib.parse,datetime
 from appli.database import GetAll,GetClassifQualClass,db
 
 
@@ -31,9 +31,14 @@ def objectdetails(objid):
         flash('You cannot view this project','error')
         return PrintInCharte("<a href=/>Back to home</a>")
     g.Projid=Prj.projid
-    t.append("<p>Project: <b>%s</b> (managed by : %s)</p>"%(Prj.title
-                     ,",".join(("<a href ='mailto:%s'>%s</a>"%(m.memberrel.email,m.memberrel.name) for m in Prj.projmembers  if m.privilege=='Manage'))))
-    t.append("<p>Classification :")
+    PrjManager=[(m.memberrel.email,m.memberrel.name) for m in Prj.projmembers  if m.privilege=='Manage']
+    t.append("<p>Project: <b><a href='/prj/%d'>%s</a></b> (managed by : %s)"%(Prj.projid,Prj.title
+                     ,",".join(("<a href ='mailto:%s'>%s</a>"%m for m in PrjManager))))
+    if len(PrjManager)>0:
+        t.append("<br>To report a mistake, contact <a href ='mailto:{0}?subject=Ecotaxa%20mistake%20notification&body={2}'>{1}</a>".format(
+            PrjManager[0][0],PrjManager[0][1],urllib.parse.quote("Hello,\n\nI have discovered a mistake on this page "+request.base_url+"\n")))
+# //window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
+    t.append("</p><p>Classification :")
     if obj.classif:
         t.append("<br>&emsp;<b>%s</b>"%obj.classif.name)
         TaxoHierarchie=(r[0] for r in GetAll("""WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id FROM taxonomy where id =%(taxoid)s
@@ -70,55 +75,9 @@ def objectdetails(objid):
     (width,height)=ComputeLimitForImage(obj.images[0].width,obj.images[0].height,PageWidth,WindowHeight)
     t.append("</p><p><img id=img1 src=/vault/{1} data-zoom-image=/vault/{1} width={2} height={0}></p>"
              .format(height,obj.images[0].file_name,width))
-    t.append("""<script>
-    $("#img1").elevateZoom({scrollZoom : true});
-    function SwapImg1(filename,width,height)    {
-        $('#img1').attr("width",width);
-        $('#img1').attr("height",height);
-        $('#img1').data('elevateZoom').swaptheimage('/vault/'+filename, '/vault/'+filename);
-    }
-    </script>
-    """)
     # Affichage de l'onglet de classification
     if Prj.CheckRight(1):
-        t.append("""<script>
-function Save1Object(classqual) {
-    var classid=$("#taxolbpop").val();
-    var objid='"""+str(objid)+"""';
-    if(classid=='') {
-        alert('Select a new category first');
-        return;
-    }
-    req={changes:{},qual:classqual}
-    req['changes'][objid]=classid;
-    $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>');
-    $("#PendingChangesPop").load("/prj/ManualClassif/"""+str(Prj.projid)+"""",req,function(){
-        if ($("#PendingChangesPop").html().indexOf("Successfull")>0) {
-            PendingChanges={}; // After successfull update no pending changes.
-            if(classqual=='V')
-                $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-validated');
-            else
-                $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-dubious');
-            if($("#taxolbpop").text().trim()!="")
-                $('#I'+objid).parents('td').find('.taxo').text($("#taxolbpop").text());
-            $('#PopupDetails').modal('hide');
-        }
-    });
-}
-$(document).ready(function() {
-    $("#taxolbpop").select2({
-        ajax: {
-            url: "/search/taxo",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {  return { q: params.term, page: params.page };  },
-            processResults: function (data, page) { return { results: data};  },
-            cache: true
-        },
-        minimumInputLength: 3
-    }); // Select2 Ajax
-});
- </script>
+        t.append("""
 <table><tr><td>Set a new classification :</td>
  <td style="width: 230px;">
      <div class="input-group">
@@ -133,6 +92,7 @@ $(document).ready(function() {
  <span id=PendingChangesPop></span></td><td width=30px></td><td valign=top>
     <button type="button" class="btn btn-success btn-xs" onclick="Save1Object('V');">Save as Validated</button>
     <button type="button" class="btn btn-warning btn-xs" onclick="Save1Object('D');">Save as dubious</button>
+    <button id=btenableedit type="button" class="btn btn-gris btn-xs" onclick="EnableEdit();">Enable Editing</button>
     <button type="button" class="btn btn-default btn-xs"  onclick="$('#PopupDetails').modal('hide');">Close</button>
     </td></tr></table>
     """)
@@ -142,7 +102,9 @@ $(document).ready(function() {
     <li role="presentation" ><a href="#tabdsample" aria-controls="tabdsample" role="tab" data-toggle="tab"> Sample details</a></li>
     <li role="presentation" ><a href="#tabdacquis" aria-controls="tabdacquis" role="tab" data-toggle="tab"> Acquisition details</a></li>
     <li role="presentation" ><a href="#tabdprocessrel" aria-controls="tabdprocess" role="tab" data-toggle="tab"> Processing details</a></li>
-    <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>""")
+    <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab">Classification change log</a></li>
+    <li role="presentation" ><a href="#tabdmap" aria-controls="tabdmap" role="tab" data-toggle="tab" id=atabdmap style="background: #5CB85C;color:white;">Map</a></li>
+    """)
     if Prj.CheckRight(1):
         t.append("""<li role="presentation" ><a id=linktabdaddcomments href="#tabdaddcomments" aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")
     if obj.classif_auto:
@@ -153,11 +115,16 @@ $(document).ready(function() {
     t.append("""</ul>
     <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
-    <table class='table table-bordered table-condensed'><tr>
-    <td style=' background-color: #f2f2f2;'><b>longitude</td><td>{0}</td><td style=' background-color: #f2f2f2;'><b>latitude</td><td>{1}</td>
-      <td style=' background-color: #f2f2f2;'><b>Date</td><td>{2}</td><td style=' background-color: #f2f2f2;'><b>Time (daytime)</td><td>{3} ({10})</td>
-    </tr><tr><td style=' background-color: #f2f2f2;'><b>Depth min</td><td>{4}</td><td style=' background-color: #f2f2f2;'><b>Depth max</td><td>{5}</td><td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
-    </tr><tr><td><b>Object #</td><td>{8}</td><td><b>Original Object ID</td><td colspan=5>{9}</td></tr><tr>""".format(nonetoformat(obj.longitude,'.5f'),nonetoformat(obj.latitude,'.5f'),obj.objdate,obj.objtime
+    <table class='table table-bordered table-condensed' data-table='object'><tr>
+    <td style=' background-color: #f2f2f2;' data-edit='longitude'><b>longitude</td><td>{0}</td>
+    <td style=' background-color: #f2f2f2;' data-edit='latitude'><b>latitude</td><td>{1}</td>
+    <td style=' background-color: #f2f2f2;' data-edit='objdate'><b>Date</td><td>{2}</td>
+    <td style=' background-color: #f2f2f2;'><b>Time (daytime)</td><td>{3} ({10})</td>
+    </tr><tr><td style=' background-color: #f2f2f2;' data-edit='depth_min'><b>Depth min</td><td>{4}</td>
+    <td style=' background-color: #f2f2f2;' data-edit='depth_max'><b>Depth max</td><td>{5}</td>
+    <td><b>Classif auto</td><td>{6}</td><td><b>Classif auto when</td><td>{7}</td>
+    </tr><tr><td><b>Object #</td><td>{8}</td>
+    <td data-edit='orig_id'><b>Original Object ID</td><td colspan=5>{9}</td></tr><tr>""".format(nonetoformat(obj.longitude,'.5f'),nonetoformat(obj.latitude,'.5f'),obj.objdate,obj.objtime
                         ,obj.depth_min,obj.depth_max
                         ,classif_auto_name,obj.classif_auto_when,objid,obj.objfrel.orig_id,database.DayTimeList.get(obj.sunpos,'?') ))
     cpt=0
@@ -166,32 +133,32 @@ $(document).ready(function() {
         if cpt>0 and cpt%4==0:
             t.append("</tr><tr>")
         cpt+=1
-        t.append("<td><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(obj.objfrel,k,"???"))))
+        t.append("<td data-edit='{2}'><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(obj.objfrel,k,"???")),k))
     t.append("</tr></table></div>")
     # insertion des champs Sample, Acquisition & Processing dans leurs onglets respectifs
     for r in (("Sample","mappingsample","sample") ,("Acquisition","mappingacq","acquis"),("Processing","mappingprocess","processrel") ):
-        t.append('<div role="tabpanel" class="tab-pane" id="tabd'+r[2]+'">'+r[0]+" details :<table class='table table-bordered table-condensed'><tr>")
+        t.append('<div role="tabpanel" class="tab-pane" id="tabd'+r[2]+'">'+r[0]+" details :<table class='table table-bordered table-condensed'  data-table='"+r[2]+"'><tr>")
         cpt=0
         if getattr(obj,r[2]):
             if r[2]=="sample":
-                t.append("<td><b>{0}</td><td colspan=3>{1}</td><td><b>{2}</td><td>{3}</td><td><b>{4}</td><td>{5}</td></tr><tr>"
+                t.append("<td data-edit='orig_id'><b>{0}</td><td colspan=3>{1}</td><td data-edit='longitude'><b>{2}</td><td>{3}</td><td data-edit='latitude'><b>{4}</td><td>{5}</td></tr><tr>"
                          .format("Original ID",ScaleForDisplay(obj.sample.orig_id),
                                  "longitude",ScaleForDisplay(obj.sample.longitude),
                                  "latitude",ScaleForDisplay(obj.sample.latitude),))
             elif r[2] == "acquis":
                 t.append(
-                    "<td><b>{0}</td><td colspan=3>{1}</td><td><b>{2}</td><td>{3}</td></tr><tr>"
+                    "<td data-edit='orig_id'><b>{0}</td><td colspan=3>{1}</td><td data-edit='instrument'><b>{2}</td><td>{3}</td></tr><tr>"
                     .format("Original ID", ScaleForDisplay(obj.acquis.orig_id),
                             "Instrument", ScaleForDisplay(obj.acquis.instrument),
                              ))
             else:
-                t.append("<td><b>{0}</td><td>{1}</td></tr><tr>"
+                t.append("<td data-edit='orig_id'><b>{0}</td><td>{1}</td></tr><tr>"
                          .format("Original ID.",ScaleForDisplay(getattr(getattr(obj,r[2]),"orig_id","???"))))
             for k,v in  collections.OrderedDict(sorted(DecodeEqualList(getattr(Prj,r[1])).items())).items():
                 if cpt>0 and cpt%4==0:
                     t.append("</tr><tr>")
                 cpt+=1
-                t.append("<td><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(getattr(obj,r[2]),k,"???"))))
+                t.append("<td data-edit='{2}'><b>{0}</td><td>{1}</td>".format(v,ScaleForDisplay(getattr(getattr(obj,r[2]),k,"???")),k))
             if r[2]=="sample":
                 t.append("</tr><tr><td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
                          .format("Dataportal Desc.",ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
@@ -214,28 +181,22 @@ order by classif_date desc""",{"objid":objid})
     t.append("</table></div>")
     if Prj.CheckRight(1):
         t.append("""<div role="tabpanel" class="tab-pane" id="tabdaddcomments">
-        <script>
-            function nl2br (str, is_xhtml) {
-                var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
-                return (str + '').replace(/([^>\\r\\n]?)(\\r\\n|\\n\\r|\\r|\\n)/g, '$1' + breakTag + '$2');
-            }
-          function UpdateComment() {
-            req={comment:$('#compinfo').val()}
-            $("#ajaxresultcomment").html('<span class="label label-info">Server update in progress...</span>');
-            $("#ajaxresultcomment").load("/prj/UpdateComment/%s",req,function(){
-                $('#spancomplinfo').html(nl2br($('#compinfo').val()));
-            })
-          }
-          function gotocommenttab() {
-            $("#linktabdaddcomments").click();
-            window.scrollTo(0,document.body.scrollHeight);
-          }
-        </script>
         <textarea id=compinfo rows=5 cols=120 autocomplete=off>%s</textarea><br>
         <button type="button" class='btn btn-primary' onclick="UpdateComment();">Save additional comment</button>
         <span id=ajaxresultcomment></span>
-        """%(obj.objid,ntcv( obj.complement_info)))
+        """%(ntcv( obj.complement_info),))
         t.append("</div>")
+    # Affichage de la carte
+    t.append("""
+    <div role="tabpanel" class="tab-pane" id="tabdmap">
+<div id="map2" class="map2" style="width: 100%; height: 450px;">
+  Displaying Map requires Internet Access to load map from https://www.openstreetmap.org
+</div>""");
+
+    t.append("</table></div>")
+    t.append(render_template("common/objectdetailsscripts.html", Prj=Prj,
+                             objid=objid,obj=obj))
+
     # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenete isolée
     # Sinon affichage sans lien dans la charte.
     if gvg("ajax","0")=="1":
@@ -243,3 +204,45 @@ order by classif_date desc""",{"objid":objid})
         </td><td align='right'><button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
         </td></tr></table>""".format(objid,gvg("w"),gvg("h"))+"\n".join(t)
     return PrintInCharte("<div style='margin-left:10px;'>"+"\n".join(t)+render_template('common/taxopopup.html'))
+
+@app.route('/objectdetailsupdate/<int:objid>',  methods=['GET', 'POST'])
+@login_required
+def objectdetailsupdate(objid):
+    request.form  # Force la lecture des données POST sinon il y a une erreur 504
+    obj=database.Objects.query.filter_by(objid=objid).first()
+    Prj=obj.project
+    if not Prj.CheckRight(2): # Level 0 = Read, 1 = Annotate, 2 = Admin
+        return '<span class="label label-danger">You cannot edit data on this project</span>'
+
+    table=gvp("table")
+    field= gvp("field")
+    if table=="object":
+        if hasattr(obj,field):
+            target=obj
+        elif hasattr(obj.objfrel, field):
+            target = obj.objfrel
+        else:
+            return '<span class="label label-danger">Invalid field %s.%s</span>'%(table,field)
+    elif table=="sample":
+        target=obj.sample
+    elif table=="acquis":
+        target=obj.acquis
+    elif table=="processrel":
+        target=obj.processrel
+
+    else:
+        return '<span class="label label-danger">Invalid table %s</span>' % (table, )
+
+    oldval=getattr(target, field)
+    newval=gvp("newval")
+    try:
+        dbval=newval
+        if field=="objdate":
+            dbval=datetime.date(int(newval[0:4]), int(newval[5:7]), int(newval[8:10]))
+        if dbval=="": dbval=None
+        setattr(target, field,dbval)
+        db.session.commit()
+    except Exception as E:
+        return '<span class="label label-danger">Data update error %s</span>' % (str(E)[0:100],)
+
+    return "<span class='label label-success'>changed value '%s' by '%s'"%(oldval,newval)

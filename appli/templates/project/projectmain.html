@@ -25,7 +25,7 @@
 {% if g.headmenu %}
     <table width="100%"><tr><td width="160px">
     <br><div class="btn-group" style="width:150px;margin-right: 10px">
-    <button type="button" class="btn btn-default">Project Action</button>
+    <button type="button" class="btn btn-default" data-toggle="dropdown" >Project Action</button>
     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
         <span class="caret"></span>
         <span class="sr-only">Toggle Dropdown</span>
@@ -42,7 +42,12 @@
 </div>
      <span id="taxoclearspan">{{ g.taxoclearspan|safe }}</span>
     </td><td><div id="titlediv" style="width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"><span style="font-size: 18px;">{{ g.ProjectTitle }}</span><span style="font-size: 12px;"> (<span id=objcount></span>)</span></div>
-    <div id="headersubtitle" style="color:#FF6600;overflow-y: auto;height: 40px;"> </div>
+    <div id="projectProgress" class="progress" style="    height: 6px;    margin-bottom: 0;    margin-top: 1px;">
+				  <div id="progress-bar-validated" class="progress-bar" style="width: 0;background-color: #5CB85C;"></div>
+				  <div id="progress-bar-predicted" class="progress-bar" style="width: 0;background-color: #5bc0de;"></div>
+				  <div id="progress-bar-dubious" class="progress-bar" style="width: 0;background-color: #F0AD4E;"></div>
+		</div>
+    <div id="headersubtitle" style="color:#FF6600;overflow-y: auto;height: 42px;"> </div>
 
     </td></tr></table>
 {% endif %} {# If headmenu #}
@@ -53,6 +58,7 @@
 <input type="hidden" id="projid" value="{{ g.Projid }}">
 <input type="hidden" id="taxofilter" value=""  autocomplete="off">
 <input type="hidden" id="taxofilterlabel" value=""  autocomplete="off">
+<input type="hidden" id="taxofilterchild" value=""  autocomplete="off">
 <input type="hidden" id="pageoffset" value="{{ data.pageoffset }}"  autocomplete="off">
 <table><tr><td>
     <button type="button" class="btn btn-xs btn-primary" onclick="LoadRightPane();" style="width: 260px;">
@@ -86,8 +92,9 @@
 {% endfor %}
   </ul>
 </div>
-</td><td >
-          <label for="statusfilter" data-toggle="tooltip" data-placement="bottom" data-html="true" class="rm5" style="margin-bottom: 0px;"
+</td> {% if not g.PublicViewMode %}
+  <td >
+          <label for="statusfilter" data-toggle="tooltip" data-placement="bottom" data-html="true" class="rm5" style="margin-bottom: 0;"
         title="
         <p style='text-align: left'>
         <b>All</b>: all images</br>
@@ -99,22 +106,29 @@
         <b>Valid. by me</b>: identification done by me</br>
         <b>Dubious</b>: dubious identification</div>">
       Status </label></td><td style="padding-right: 5px;" class="rm5">
-      </label><select name="statusfilter" id="statusfilter"  class="form-control" data-original-title="" title="" style="width: 100px">
+      <select name="statusfilter" id="statusfilter"  class="form-control" data-original-title="" title="" style="width: 100px">
 {% for key, value in data.statuslist.items() %}
     <option value="{{ key|e }}" {{ 'selected' if key==data.statusfilter }}> {{ value|e }}</option>
 {% endfor %}
-</select></td><td style="padding-right: 5px;">
-    <label for="ipp" style="margin-bottom: 0px;"><span class="glyphicon glyphicon-th"></span></label>
+</select></td>
+  {% else %}
+  <td>
+  <input type="hidden" name="statusfilter" id="statusfilter" value="">
+  Status : Validated Only&nbsp;
+  </td>
+{% endif %}
+  <td style="padding-right: 5px;">
+    <label for="ipp" style="margin-bottom: 0;"><span class="glyphicon glyphicon-th"></span></label>
     </td><td style="padding-right: 5px;">{{ selectinputtuple("ipp",[('0','Fit'),('1','1'),('5','5'),('10','10'),('20','20'),('50','50'),('100','100'),('200','200'),('500','500'),('1000','1000')],data.ipp) }}
-    </td><td style="padding-right: 5px;">    <label for="zoom" style="margin-bottom: 0px;"><span class="glyphicon glyphicon-zoom-in"></span>%</label>
+    </td><td style="padding-right: 5px;">    <label for="zoom" style="margin-bottom: 0;"><span class="glyphicon glyphicon-zoom-in"></span>%</label>
     </td><td style="padding-right: 5px;">{{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100','200'],data.zoom) }}</td><td>
 </td><td>
-      <label for="magenabled" style="margin-bottom: 0px;">
+      <label for="magenabled" style="margin-bottom: 0;">
       	<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
       </label>
       {{ checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
     </td><td>
-      <label for="popupenabled" style="margin-bottom: 0px;padding-left: 8px;">
+      <label for="popupenabled" style="margin-bottom: 0;padding-left: 8px;">
         <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
       </label>
       {{ checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
@@ -122,6 +136,7 @@
     <button type=button class="btn btn-primary btn-xs" onclick="LoadRightPane();">
       <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
     </button>
+    </td><td><span id="nbrselected" style="margin-left: 10px;"></span>&nbsp;
 </td>
 </tr>
 </table>
@@ -129,14 +144,14 @@
 {% include "common/taxopopup.html" %}
 
 	<div id="bodycontainer">
-		<div id="column-left"  class="panelzzz " style="position: fixed;	top: 120px;	bottom: 0px;	width: 260px;
-	                overflow-y: hidden; overflow-x: hidden;  margin-bottom: 0px; " >
+		<div id="column-left"  class="panelzzz " style="position: fixed;	top: 120px;	bottom: 0;	width: 260px;
+	                overflow-y: hidden; overflow-x: hidden;margin-bottom: 0;" >
       <div class="bodyleft" style="margin-left: 2px; width: 257px;">
         <script>
         $(document).ready(function () {
           $('#myTabs .nav-tabs a').click(function (e) {
-            e.preventDefault()
-            $(this).tab('show')
+            e.preventDefault();
+            $(this).tab('show');
           });
 
           $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -203,18 +218,16 @@
 		</div>
 {#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
 <style>
-.lazy {margin: 15px 5px 0px 5px; cursor: -webkit-grab; cursor:grab;}
+.lazy {margin: 15px 5px 0 5px; cursor: -webkit-grab; cursor:grab;}
 .ddet {text-align:left;  font-size: 10px; margin-top: -3px;margin-bottom: -1px;  text-decoration: underline; color:#00c;}
 .ddets {cursor:pointer;}
 .categexpander {cursor:pointer;}
 .taxo {cursor: -webkit-grab; cursor:grab;}
-#dispfieldlist li a {    padding-top:0px;}
+#dispfieldlist li a {    padding-top:0;}
 .ui-selected { background-color: #E9D6D7;}
-.ra3 {float:right; margin-right: 3px;} {#TODO voir necessite de conserver#}
-
 
 #column-right {margin-left: 260px;}
-#divheadinfo {position:fixed;top:0px;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;}
+#divheadinfo {position:fixed;top:0;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;}
 #topbar {position:fixed;top:80px;left: 1px;width:100%; height:40px;z-index:10; background-color: #fff;}
 body {margin-top: 125px;}
 {#Permet de fixer la largeur de la dropdown Taxo Annotation#}
@@ -224,12 +237,16 @@ body {margin-top: 125px;}
 {#Permet de reduire la taille et l'espace du texte du dropdown Taxo Annotation#}
 #select2-taxolbanno-results li {font-size: 12px; padding: 3px;}
 .popover {max-width: 500px;}
+#headersubtitle .btn-gris {padding-top: 0;padding-bottom: 0;border:0;}
 </style>
 <script>
 var PendingChanges={};
 var PendingChangesTaxoName={};
 var PrevTxtFilter="INITIAL";
 DragInProgress=false;
+function InGreyButton(s,eraser) {
+  return " <button type=button class='btn btn-gris btn-xs' onclick='"+eraser+";LoadRightPane();'>"+s+" <span class='glyphicon glyphicon-remove'></span></button>";
+}
 function LoadRightPane(NoAjax,SaveInProfile){
     if(Object.keys(PendingChanges).length>0)
       if(confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?")==false)
@@ -237,10 +254,11 @@ function LoadRightPane(NoAjax,SaveInProfile){
     var TxtFilter="",jqtaxofilter=$("#taxofilter"),jqtaxofilterlbl=$("#taxofilterlabel"),jqcolumnright=$("#column-right");
     var req={taxo:jqtaxofilter.val(),resultwidth:jqcolumnright.width(),windowheight:$(window).height()};
     if(jqtaxofilterlbl.val()!="")
-        TxtFilter+=" Taxo="+jqtaxofilterlbl.val();
+        TxtFilter+=InGreyButton("Taxo="+jqtaxofilterlbl.val(),"SetTaxoFilter(false)");
     $(".activeTaxo").removeClass("activeTaxo");
     if(jqtaxofilter.val()!="")
         $("#TabA").find("[taxoid="+jqtaxofilter.val()+"]").addClass("activeTaxo");
+    req['taxochild']=$("#taxofilterchild").val();
     req['ipp']=$("#ipp").val();
     req['zoom']=$("#zoom").val();
     req['sortby']=$("#sortby").val();
@@ -249,32 +267,34 @@ function LoadRightPane(NoAjax,SaveInProfile){
     var jqstatusfilter=$("#statusfilter");
     req['statusfilter']=jqstatusfilter.val();
     if(jqstatusfilter.val()!="")
-        TxtFilter+=" Status="+jqstatusfilter.find("option:selected").text();
+        TxtFilter+=InGreyButton("Status="+jqstatusfilter.find("option:selected").text(),"$(\"#statusfilter\").val(null)");
     req['MapN']=$("#filt_MapOutN").val();
     req['MapW']=$("#filt_MapOutW").val();
     req['MapE']=$("#filt_MapOutE").val();
     req['MapS']=$("#filt_MapOutS").val();
     if((req['MapN']!="")&&(req['MapW']!="")&&(req['MapE']!="")&&(req['MapS']!=""))
-        TxtFilter+=" Position=("+req['MapN']+","+req['MapW']+","+req['MapE']+","+req['MapS']+")";
+        TxtFilter+=InGreyButton(" Position=("+req['MapN']+","+req['MapW']+","+req['MapE']+","+req['MapS']+")","ClearCoord()");
     else {delete req['MapN']; delete req['MapW'];delete req['MapE']; delete req['MapS']; }
 
     req['depthmin']=$("#filt_depthmin").val();
     req['depthmax']=$("#filt_depthmax").val();
     if((req['depthmin']!="")&&(req['depthmax']!=""))
-        TxtFilter+=" Depth in("+req['depthmin']+"-"+req['depthmax']+")";
+        TxtFilter+=InGreyButton(" Depth in("+req['depthmin']+"-"+req['depthmax']+")","ClearDepths()");
     else {delete req['depthmin']; delete req['depthmax']; }
-    jqfreenum=$("#filt_freenum")
+    var jqfreenum=$("#filt_freenum");
     req['freenum']=jqfreenum.val();
     req['freenumst']=$("#filt_freenumst").val();
     req['freenumend']=$("#filt_freenumend").val();
     if((req['freenum']!="")&&((req['freenumst']!="")||(req['freenumend']!="")))
-        TxtFilter+=jqfreenum.find("option:selected").text()+" in("+req['freenumst']+"-"+req['freenumend']+")";
+        TxtFilter+=InGreyButton(jqfreenum.find("option:selected").text()+" in("+req['freenumst']+"-"+req['freenumend']+")"
+                       ,"$(\"#filt_freenum,#filt_freenumst,#filt_freenumend\").val(null).trigger(\"change\")");
     else {delete req['freenum']; delete req['freenumst'];delete req['freenumend']; }
-    jqfreetxt=$("#filt_freetxt")
+    var jqfreetxt=$("#filt_freetxt");
     req['freetxt']=jqfreetxt.val();
     req['freetxtval']=$("#filt_freetxtval").val();
     if((req['freetxt']!="")&&(req['freetxtval']!=""))
-        TxtFilter+=jqfreetxt.find("option:selected").text()+" contains "+req['freetxtval'];
+        TxtFilter+=InGreyButton(jqfreetxt.find("option:selected").text()+" contains "+req['freetxtval']
+                      ,"$(\"#filt_freetxt,#filt_freetxtval\").val(null).trigger(\"change\")");
     else {delete req['freetxt']; delete req['freetxtval']; }
 
     var sampleid=$('#sampleid');
@@ -282,49 +302,53 @@ function LoadRightPane(NoAjax,SaveInProfile){
       req['samples']=String(sampleid.val());
     else req['samples']="";
     if(req['samples']!="")
-        TxtFilter+=" Samples="+$.map(sampleid.find('option:selected'), function (element) { return $(element).text() }).join(', ');
+        TxtFilter+=InGreyButton("Samples="+$.map(sampleid.find('option:selected'), function (element) { return $(element).text() }).join(', '),"ClearSamples()");
     req['instrum']=$("#filt_instrum").val();
     if(req['instrum']!="")
-        TxtFilter+=" Instrument ="+req['instrum'];
+        TxtFilter+=InGreyButton("Instrument ="+req['instrum'],"ClearInstrum()");
     var jqmonth=$('#month');
     if(jqmonth.val()!=null) {
       req['month'] = String(jqmonth.val());
-      TxtFilter += " Month=" + $.map(jqmonth.find('option:selected'), function (element) {
+      TxtFilter += InGreyButton("Month=" + $.map(jqmonth.find('option:selected'), function (element) {
             return $(element).text()
-          }).join(', ');
+          }).join(', '),"ClearDates()");
     }
     var jqannot=$('#filt_annot');
     if(jqannot.val()!=null) {
       req['filt_annot'] = String(jqannot.val());
-      TxtFilter += " Annotateur=" + $.map(jqannot.find('option:selected'), function (element) {
+      TxtFilter += InGreyButton("Annotateur=" + $.map(jqannot.find('option:selected'), function (element) {
             return $(element).text()
-          }).join(', ');
+          }).join(', '),"$(\"#filt_annot\").val(null).trigger(\"change\")");
     }
     req['fromdate']=$("#filt_fromdate").val();
     if(req['fromdate']!="")
-        TxtFilter+=" Date >= "+req['fromdate'];
+        TxtFilter+=InGreyButton("Date &ge; "+req['fromdate'],"ClearDates()");
     else delete req['fromdate'];
     req['todate']=$("#filt_todate").val();
     if(req['todate']!="")
-        TxtFilter+=" Date <= "+req['todate'];
+        TxtFilter+=InGreyButton("Date &le; "+req['todate'],"ClearDates()");
     else delete req['todate'];
 
     req['fromtime']=$("#filt_fromtime").val();
-    if(req['fromtime']!="")
-        TxtFilter+=" Time >= "+req['fromtime'];
-    else delete req['fromtime'];
     req['totime']=$("#filt_totime").val();
-    if(req['totime']!="")
-        TxtFilter+=" Time <= "+req['totime'];
-    else delete req['totime'];
+    if((req['fromtime']!="")&&(req['totime']!=""))
+      TxtFilter+=InGreyButton("Time &ge; "+req['fromtime']+",&le;"+req['totime'],"ClearTimes()");
+  else {
+      if (req['fromtime'] != "")
+        TxtFilter += InGreyButton("Time &ge; " + req['fromtime'], "ClearTimes()");
+      else delete req['fromtime'];
+      if (req['totime'] != "")
+        TxtFilter += InGreyButton("Time &le; " + req['totime'], "ClearTimes()");
+      else delete req['totime'];
+    }
     req['inverttime']=$("#filt_inverttime").prop("checked")?"1":"";
     if(req['inverttime']=="1")
-        TxtFilter+=" Time Invert ";
+        TxtFilter+=InGreyButton("Time Invert","$(\"#filt_inverttime\").prop(\"checked\",false)");
     else delete req['inverttime'];
     var jqdaytime=$('#daytime');
     if(jqdaytime.val()!=null) {
       req['daytime'] = String(jqdaytime.val());
-      TxtFilter+=" DayTime="+$.map(jqdaytime.find('option:selected'), function (element) { return $(element).text() }).join(', ');
+      TxtFilter+=InGreyButton("DayTime="+$.map(jqdaytime.find('option:selected'), function (element) { return $(element).text() }).join(', '), "ClearTimes()");
     }
 
     req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
@@ -345,30 +369,26 @@ function LoadRightPane(NoAjax,SaveInProfile){
         PrevTxtFilter=TxtFilter;
     }
     req['pageoffset']=jqpageoffset.val();
+    var urlparam={},url,k;
     if(NoAjax=='mail') {
         delete req["resultwidth"];
         delete req["windowheight"];
-        var urlparam={};
-        for	(var k in req)
-{#            if(req[k]!=="") // Il faut tous les laisser pour pouvoir forcer leur effacement par rapport aux users settings  #}
-                urlparam[k]=req[k];
-{#        window.location="?"+$.param(urlparam);#}
-        var url=window.location.protocol+"//"+window.location.host+window.location.pathname+"?"+$.param(urlparam);
+        for	(k in req)
+            urlparam[k]=req[k];
+        url=window.location.protocol+"//"+window.location.host+window.location.pathname+"?"+$.param(urlparam);
         window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
         return;
     }
     if(typeof (NoAjax)=='string') { {# Une URL #}
       delete req["resultwidth"];
       delete req["windowheight"];
-      var urlparam={};
-      for	(var k in req)
+      for	(k in req)
           if(req[k]!=="")
               urlparam[k]=req[k];
-      var url=NoAjax;
+      url=NoAjax;
       if(url.indexOf('?')>0) url+="&";
       else url+="?";
       url+=$.param(urlparam);
-{#      alert(url);#}
       window.location=url;
       return;
     }
@@ -384,15 +404,15 @@ function RefreshClassifTab(KeepHiddens)
     var HiddenItems=$('.classiftab td').filter(function() { return $(this).css('display') == 'none';}).map(function() { return $(this).attr('taxoid'); }).get();
     var HorizArrow=$('.classiftab td span.glyphicon-triangle-right').closest('td').map(function() { return $(this).attr('taxoid'); }).get();
     var PosScrollBar=$('#divclassiftab').scrollTop();
-    req={taxo:$("#taxofilter").val(),taxofilterlabel:$("#taxofilterlabel").val()};
+    var req={taxo:$("#taxofilter").val(),taxofilterlabel:$("#taxofilterlabel").val()};
     $("#TabA").load("/prjGetClassifTab/"+$("#projid").val(),req,function() {
         $.each(HiddenItems, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
             $('.classiftab td[taxoid=' + v + ']').css('display', 'none');
-            console.log(v);
+{#            console.log(v);#}
         });
         $.each(HorizArrow, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
             $('.classiftab td[taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
-            console.log("R", v);
+{#            console.log("R", v);#}
         });
         $('#divclassiftab').scrollTop(PosScrollBar);
     });
@@ -422,7 +442,7 @@ $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip();
     $("#titlediv").width($("#titlediv").parent().width());
     {% if g.taxofilter %}
-    SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}");
+    SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild=='Y' }});
     {% endif %}
 
 
@@ -470,6 +490,12 @@ $(document).ready(function() {
         },placeholder: "Text field",dropdownCssClass:"width240"});
 
 });
+function UpdateSelectedCounter() {
+  var nbr=$("#column-right td.ui-selected").size();
+  if (nbr>0) nbr=nbr+" Selected";
+  else nbr="";
+  $('#nbrselected').text(nbr);
+}
 function PostAddImages(){
         $(document).scrollTop(0);
         // Required to  have Select2 component working on Bootstrap Popup
@@ -488,8 +514,9 @@ function PostAddImages(){
 {#        jQuery('.imgtab td img').draggable({revert:true,revertDuration:0});#}
         // Make the cell clickable for selection
         jQuery('.imgtab td').click(function(e){
-            if($(e.target).hasClass('linestart'))
-                if (e.shiftKey) { // Unselect line
+            if($(e.target).hasClass('linestart')) {
+                var nbrselectedinline=$(e.target).closest('tr').find('td.ui-selected').size();
+                if ((e.shiftKey)||(nbrselectedinline>0)) { // Unselect line
                     $(e.target).closest('tr').find('td').removeClass('ui-selected');
                     if (window.getSelection) {
                       if (window.getSelection().empty) {  // Chrome
@@ -500,20 +527,24 @@ function PostAddImages(){
                     } else if (document.selection) {  // IE?
                       document.selection.empty();
                     }
+                  UpdateSelectedCounter();
                   return;
-                }
+                } }
             if ((e.ctrlKey)||(e.metaKey)) {#  20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple #}
                 $('.ui-selected').removeClass('ui-selected');
             if($(e.target).hasClass('linestart')) // select line (except this first column)
-                $(e.target).closest('tr').find('td').addClass('ui-selected');
-            $(e.target).closest('td').toggleClass('ui-selected');
+                $(e.target).closest('tr').find('td:nth-child(1n+2)').addClass('ui-selected');
+            else
+              $(e.target).closest('td').toggleClass('ui-selected');
+            UpdateSelectedCounter()
             });
         // Make ZoomTracker Clickable for selection
         jQuery('body').delegate('.zoomtracker','click',function(e){
             {# if ((!e.ctrlKey)&&(!e.metaKey))   20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple#}
             if ((e.ctrlKey)||(e.metaKey))
                 $('.ui-selected').toggleClass('ui-selected');
-            $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected')
+            $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected');
+            UpdateSelectedCounter();
             });
         // setup zoomtracker creation tracking to make them draggable
         var target = $( "body" )[0];
@@ -544,7 +575,7 @@ function PostAddImages(){
 //            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
 //            var win = window.open(url, '_blank');
             var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1)+"?w="+($(window).width()-400)+"&h="+($(window).height()-40)+"&ajax=1";
-            var options={}
+            var options={};
             $("#PopupDetails .modal-content").html("Loading...");
 
             $('#PopupDetails .modal-lg').css('width',$(window).width()-40);
@@ -554,17 +585,18 @@ function PostAddImages(){
 $('#PopupDetails').on('hidden.bs.modal', function (e) {
     $("#PopupDetails .modal-content").html("CLEAN");
     $(".zoomContainer").remove();
-})
+});
 
 jQuery('.SpanSelectAll').click(SelectAll);
 }  //PostAddImages
 
 function SelectAll(e){
-            if (!e.shiftKey)
-                jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
-            else
-                jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
-                }
+  if (!e.shiftKey)
+      jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
+  else
+      jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
+  UpdateSelectedCounter();
+}
 
 function ClearAllFilterCriteria(){
     ClearCoord();

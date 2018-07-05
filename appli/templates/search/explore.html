@@ -70,6 +70,7 @@ $(document).ready(function() {
          $("#TaxoModalBody").load("/search/taxotree");
     });
     $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="popover"]').popover();
     }); // Ready
  </script>
 <style> {# On agrandi la taile de la drop down de la popup #}
@@ -106,12 +107,20 @@ $(document).ready(function() {
 {# ------- Taxo Filter ------------#}
 <div >
 	<div class="form-group-sm">
-		<label class="title">Taxonomy Filter &nbsp;<span data-toggle="tooltip" data-placement="top" data-html="true" title="
+		<label class="title">Taxonomy Filter &nbsp;<span  data-toggle="popover" data-placement="top" data-container="body" data-html="true"
+    data-title="Taxonomy filter help" data-content="
         <p style='text-align: left'><ul style='text-align: left'>
         <li>Each lineage can have different length and the usual levels of taxonomic hierarchy are not considered.
 <li>The species is the lower level. However subspecies details can be mentioned. Only the species name encompasses two words: “Genus species”. The “sp.” is used whenever the species name is not available.
 <li>If a taxon is not yet named, we then merge the suffix 'X' with the parent Id:  'Parent_X'. Whenever several children are unknown, the suffix become “_X1”, “_X2” …
 <li>Some morphological categories (detritus, artefact, larvae, sex…) are also integrated.
+</ul>
+Tips for searching a category in the classification hierarchy:
+<ul>
+<li>Text entry “abc”  returns categories whose name starts with the string ‘abc’.
+<li>‘%’ can be used to search category names containing a given string. The text entry “%abc” returns categories whose name contains ‘abc’; and typing  “abc%ijk” returns categories whose name starts with ‘abc’ AND contains ‘ijk’.
+<li>‘*’ can be used for identifying a category having a specific parent in the classification hierarchy. The text entry “xyz*abc” returns categories whose name starts with ‘abc’ AND having a parent whose name starts with ‘xyz’. Several parents can be required in the same request without priority order (e.g. ‘parent1*parent2*abc’ = ‘parent2*parent1*abc’).
+<li>‘%’ and ‘*’ can be used simultaneously (e.g. ‘ijk*abc%xyz’ for searching a category whose name starts with ‘abc’ AND contains ‘xyz’ AND having a parent whose name start with ‘ijk’; or ‘%xyz*abc’ for searching a category whose name starts with ‘abc’ AND having a parent whose name contains ‘xyz’).
 </ul>
 </p>"
         class="glyphicon glyphicon-question-sign"></span> </label>
@@ -145,6 +154,7 @@ $(document).ready(function() {
     padding-right:20px !important;
     background:url(icons/Star-icon.png) top right no-repeat #D8F0FA;
 }
+.taxo_tree_selected .v {background-color: #777777;}
 </style>
 
 
@@ -156,44 +166,52 @@ $(document).ready(function() {
   </div>
 
 <script>
-
-    $(function () {
-        $('#jstreeexp').jstree({
-            'core': {
-                "animation" : 0,
-                "themes" : { "stripes" : false, "icons": false  },
-                'data': {
-                    'dataType': 'JSON',
-                    'url': '/search/taxotreejson',
-                    'data': function (node) {
-                        return {'id': node.id};
-                    }
-                }
+  $(function () {
+    $('#jstreeexp').jstree({
+      'core': {
+        "animation" : 0,
+        "themes" : { "stripes" : false, "icons": false  },
+        'data': {
+            'dataType': 'JSON',
+            'url': '/search/taxotreejson',
+            'data': function (node) {
+                return {'id': node.id};
             }
-        });
-
-        $("#jstreeexp").delegate(".TaxoSel",'click',
-                function(o){
-                    o.preventDefault();
-                    var id= $(o.target).closest("li").attr("id");
-                    var valeur= $(o.target).prev().html();
-                    if($(o.target).hasClass("glyphicon"))
-                        valeur= $(o.target).parent().prev().html();
-                   $('#SelectedID').html(id);
-                   $('#SelectedName').html(valeur);
-                   $('#taxolb').append($('<option>', {    value: id,    text: valeur}));
-                    var sel=$("#taxolb").val();
-                    if(sel==null) sel=[];
-                    sel.push(id);
-                    $('#taxolb').val(sel);
-                    $('#taxolb').change();
-                });
-
-        $("#jstree").bind("select_node.jstree", function (e, data) {
-            $("#jstree").jstree('open_node', data.node);
-        })
-
+        }
+      }
     });
+
+      $("#jstreeexp").delegate(".TaxoSel",'click',
+          function(o){
+            o.preventDefault();
+            var id= $(o.target).closest("li").attr("id");
+            var valeur= $(o.target).prev().html();
+            if($(o.target).hasClass("glyphicon"))
+                valeur= $(o.target).parent().prev().html();
+           $('#SelectedID').html(id);
+           $('#SelectedName').html(valeur);
+           $('#taxolb').append($('<option>', {    value: id,    text: valeur}));
+            var sel=$("#taxolb").val();
+            if(sel==null) sel=[];
+            sel.push(id);
+            $('#taxolb').val(sel);
+            $('#taxolb').change();
+          });
+
+    $("#jstree").bind("select_node.jstree", function (e, data) {
+        $("#jstree").jstree('open_node', data.node);
+    });
+    {# Quand on ouvre une branche de l'arbre on met à jours les background pour les nouveaux noeuds  #}
+    $("#jstreeexp").on('after_open.jstree', function(){ $('#taxolb').change(); });
+
+    $('#taxolb').change(function (){ {# Mise à jour des background dans l'arbre #}
+      $(".taxo_tree_selected").removeClass("taxo_tree_selected");
+      var taxofilterarray = [];
+      $('#taxolb :selected').each(function(i, selected){ taxofilterarray[i] = "#"+$(selected).val();    });
+      $(taxofilterarray.join(",")).addClass("taxo_tree_selected");
+    });
+
+  });
 </script>
 
 
@@ -209,7 +227,7 @@ $(document).ready(function() {
 .tooltip-inner { max-width: 500px; }
 
 
-#column-right {margin-left: 260px;}
+#column-right {margin-left: 265px;}
 #divheadinfo {position:fixed;top:0px;left: 1px;width:100%; height:80px;z-index:12; background-color: #fff;}
 #topbar {position:fixed;top:80px;left: 1px;width:100%; height:40px;z-index:10; background-color: #fff;}
 body {margin-top: 125px;}
@@ -272,7 +290,7 @@ function LoadRightPane(NoAjax){
       req['projid']=String($('#projid').val())
     else req['projid']="";
     if(req['projid']!="")
-        TxtFilter+=" Project="+$.map( $('#projid  option:selected'), function (element) { return $(element).text() }).join(', ');
+        TxtFilter+=" Project="+$.map( $('#projid  option:selected'), function (element) { return "<a href='/prj/"+$(element).val()+"'>"+$(element).text()+"</a>" }).join(', ');
 
     req['fromdate']=$("#filt_fromdate").val();
     if(req['fromdate']!="")

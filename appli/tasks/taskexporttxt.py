@@ -179,7 +179,7 @@ class TaskExportTxt(AsyncTask):
         if csvfile:
             csvfile.close()
             if zfile:
-                zfile.write(fichier, prevvalue + ".tsv")
+                zfile.write(fichier, str(prevvalue) + ".tsv")
                 zfile.close()
         logging.info("Extracted %d rows", self.pgcur.rowcount)
 

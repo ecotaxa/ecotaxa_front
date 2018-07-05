@@ -75,7 +75,19 @@
 					<label for="port" class="control-label">Optional taxonomy mapping</label>
 					<p class="help-block">This allows to change the name of the categories of previously classified objects to match the names in the UniEuk taxonomic framework included in the application.<br>Examples:<br>
 					crust_cop = Copepoda<br>
-					gelatinous medusae = Cnidaria</p>
+					gelatinous medusae = Cnidaria (Hydrozoa)</p>
+ <table><tr><td>Imported name : <input type="text" id="oldname" class="form-control" style="width: 100px;display: inline-block;">
+          UniEuk name :&nbsp; </td><td ><div class="input-group" >
+            <select id="taxolb" name="taxolb" style="width: 210px" class='taxolb' > </select>
+            <span class="input-group-btn">
+                <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolb">
+                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></span></button>
+                </span>
+          </div><!-- /input-group -->
+          </td><td>
+            <button class="btn btn-primary " type="button" onclick="TaxoHelperBtAdd();">Add to list</button>
+          </td>
+          </tr></table>
 					<textarea class="form-control" id="TxtTaxoMap" name="TxtTaxoMap" rows="4" placeholder="oldname = UniEuk name"></textarea>
 				</div>
 			</div>
@@ -87,14 +99,35 @@
 
 </form>
 
-   <script>
+<script>
+function TaxoHelperBtAdd(){
+  var s=$('#oldname').val()+"="+$('#taxolb option:selected').text();
+  var txt=$('#TxtTaxoMap');
+  txt.val( txt.val() +s+ "\n");
+}
+
 $(document).ready(function() {
-    $('#FileModal').on('show.bs.modal', function (e) {
-         $("#FileModalBody").html("Loading...");
-         $("#FileModalBody").load("/common/ServerFolderSelect");
+    $('#FileModal').on('show.bs.modal', function () {
+        $("#TaxoModalBody").html(""); {# Pour eviter les conflit sur le jstree suite à des ouverture successive car le jstree est dans la modal cachée #}
+         $("#FileModalBody").html("Loading...").load("/common/ServerFolderSelect");
     });
-    }); // Ready
- </script>
+    $(".taxolb").select2({
+        ajax: {
+            url: "/search/taxo",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {  return { q: params.term, page: params.page };  },
+            processResults: function (data) { return { results: data};  },
+            cache: true
+        },
+        minimumInputLength: 3
+    }); // Select2 Ajax
+    $('#TaxoModal').on('show.bs.modal', function () {
+         $("#FileModalBody").html("");
+         $("#TaxoModalBody").html("Loading...").load("/search/taxotree?target=taxolb");
+    });
+  }); // Ready
+</script>
 
 <!-- Modal -->
 <div class="modal " id="FileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -110,5 +143,23 @@ $(document).ready(function() {
     </div>
   </div>
 </div>
+
+
+<!-- Modal -->
+<div class="modal " id="TaxoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Taxonomy Tree</h4>
+      </div>
+      <div class="modal-body">
+        <div id="TaxoModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 {% endblock %}

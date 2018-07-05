@@ -8,10 +8,69 @@
 
 {% from "security/_custommacros.html" import render_field_with_errors, render_field,display_field_errors %}
 
+  <p>Ecotaxa Version : 1.2.3 2017.03.28</p>
+{# Log :
+2017.03.28 : V 1.2.3
+              Bugfix in display annotator on image Popup
+              Bugfix is Manage.py where using global db routine.
+2017.03.22 : V 1.2.2
+              Added composite taxon Taxon(parent) in metadata update screen
+2017.03.12 : V 1.2.1
+              Improved database transaction management to avoid long transaction
+2017.01.30 : V 1.2
+              Explore : Improved no result, improved taxo filter
+              Explore : Public user can go on manual classification of any visible project
+              Explore : Map on home of explore
+              Map : Filter by project and Taxo
+              Details page : MailTo to notify classif error, display on map,
+              Details page : edit data by manager
+              Import : Wizard to premapping, added taxo (parent) format allowed at import
+              Import : Image import only with form to fill metadata
+              Export BD at project level.
+              Prediction : Limit count for statistics, predict only filtered taxon on target set
+              Conf Matrix : Export TSV
+              Topper : Progress bar, improved button clic, improved clear filter
+              Contribute : Display selection count, change line selection behavior
+              Contribute : Show taxo children
+              Task : New menu for app admin + can see all task of all users
+
+
+2016.12.07 : V 1.1 Several changes on annotation page, filters
+              Select project : filter on name, instrument, subset
+              Select project : display email
+              Manual Classif : Several minor changes
+              Manual Classif : Propose last 5 classification
+              New Filters : Instrument, Annotator, Free Field, Month, Day period
+              Import : New feature to update matadata from file
+              Import : Bugfix on uppercase column name
+              Project : New status to block prediction
+              Filter on feature : Purge, subset, Export
+              TSV Export : split in multiple file, predefined check, separate internalID, add 2nd line for reimport
+              AutoClean empty sample
+              Zoom : 200%
+              Admin : All manager can create a project
+              Home Page : Custom message by App manager
+              Prediction : added PostClassifMapping
+2016.06.10 : Removed X before Object name
+             if file home.html or homebottom.html is missing use home-model.html and homebottom-model.html
+             Theses file are read as UTF-8 Format instead of target platform settings.
+             Integration of licenses files as md format before integration to GitHub
+2016.03.15 : Added CreateDirConcurrentlyIfNeeded to avoid conflinct in creation of images directory by concurrent task
+2016.01.17 : Added parameter PYTHONEXECUTABLE in Config.cfg
+             Added objects view creation in Manage CreateDB
+             Added a Matplotlib uses to execute correctly on GraphicLess server.
+             Added Cascade delete on DB Definition to create them during CreateDB (obj_field & Histo)
+             During ImportDb compare Taxon Name and Parent Taxon Name to process correctly Name duplicate
+2015.12.14 : Bugfix in import task, use only ecotaxa prefixed files
+2015.12.11 : Improved CSV export to include Direct Taxonomy parent name and Taxonomy hierarchy
+             Included license.txt File
+
+#}
+
+
 				<h3>Registration</h3>
 
 				<p>To register, please send an email to one the following persons</p>
-				<!-- TODO generate list of user manager emails, obfuscated -->
 				<ul>
                     {{ GetManagerList()|safe }}
 				</ul>
