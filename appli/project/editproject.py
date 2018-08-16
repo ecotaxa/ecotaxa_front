@@ -63,12 +63,14 @@ def PrjEdit(PrjId):
     return render_template('project/editproject.html',data=Prj)
 ######################################################################################################################
 def GetSCNNetworks():
-    ModelFolder = (Path(TempTaskDir) / "../SCN_networks").resolve()
     Models = {}
-    for dir in ModelFolder.glob("*"):
-        if dir.is_dir() and (dir / "meta.json").is_file():
-            Models[dir.name] = json.load((dir / "meta.json").open("r"))
-            # Models[dir.name] = json.load((dir / "meta.json").open("r")).get('name',dir.name)
+    ModelFolder = (Path(TempTaskDir) / "../SCN_networks")
+    if ModelFolder.exists():
+        ModelFolder=ModelFolder.resolve()
+        for dir in ModelFolder.glob("*"):
+            if dir.is_dir() and (dir / "meta.json").is_file():
+                Models[dir.name] = json.load((dir / "meta.json").open("r"))
+                # Models[dir.name] = json.load((dir / "meta.json").open("r")).get('name',dir.name)
     return Models
 
 

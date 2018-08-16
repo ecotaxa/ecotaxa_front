@@ -67,8 +67,9 @@ class TaskImportDB(AsyncTask):
 
 
             toolsdir=GetDBToolsDir()
+            os.environ["PGPASSWORD"] = app.config['DB_PASSWORD']
             cmd=os.path.join( toolsdir,"psql")
-            cmd+=" -h "+app.config['DB_HOST']+" -U "+app.config['DB_USER']+" -w --file=schemapatched.sql "+app.config['DB_DATABASE']+" >createschemaout.txt"
+            cmd+=" -h "+app.config['DB_HOST']+" -U "+app.config['DB_USER']+" -p "+app.config.get('DB_PORT','5432')+" --file=schemapatched.sql "+app.config['DB_DATABASE']+" >createschemaout.txt"
             logging.info("Import Schema : %s",cmd)
             os.system(cmd)
 
@@ -543,8 +544,9 @@ def RestoreDBFull():
     cur.execute(sql)
 
     toolsdir=GetDBToolsDir()
+    os.environ["PGPASSWORD"] = app.config['DB_PASSWORD']
     cmd=os.path.join( toolsdir,"psql")
-    cmd+=" -h "+app.config['DB_HOST']+" -U "+app.config['DB_USER']+" -w --file=schema.sql "+app.config['DB_DATABASE']+" >createschemaout.txt"
+    cmd+=" -h "+app.config['DB_HOST']+" -U "+app.config['DB_USER']+" -p "+app.config.get('DB_PORT','5432')+" --file=schema.sql "+app.config['DB_DATABASE']+" >createschemaout.txt"
     print("Import Schema : %s",cmd)
     os.system(cmd)
 

@@ -19,13 +19,13 @@ class TaskExportDb(AsyncTask):
         def __init__(self,InitStr=None):
             self.steperrors=[]
             super().__init__(InitStr)
-            if InitStr==None: # Valeurs par defaut ou vide pour init
+            if InitStr is None: # Valeurs par defaut ou vide pour init
                 self.ProjectIds=()
 
 
     def __init__(self,task=None):
         super().__init__(task)
-        if task==None:
+        if task is None:
             self.param=self.Params()
         else:
             self.param=self.Params(task.inputparam)
@@ -47,11 +47,11 @@ class TaskExportDb(AsyncTask):
 
         # table_list=("users",) # pour test permet d'exporter moins de données
         toolsdir=GetDBToolsDir()
+        os.environ["PGPASSWORD"] = app.config['DB_PASSWORD']
         cmd=os.path.join( toolsdir,"pg_dump")
-
-        cmd+=" -h "+app.config['DB_HOST']+" -U "+app.config['DB_USER']+" -w "   #+" -W "+app.config['DB_PASSWORD']
+        cmd+=" -h "+app.config['DB_HOST']+" -U "+app.config['DB_USER']+" -p "+app.config.get('DB_PORT','5432')
         # -s = le schema , -F le format -f le fichier
-        cmd+="  --schema-only --format=p  -f schema.sql -E LATIN1 -n public --no-owner  --no-privileges --no-security-labels --no-tablespaces  "+app.config['DB_DATABASE']+"  >dumpschemaout.txt"
+        cmd+="  --schema-only --format=p  -f schema.sql -E LATIN1 -n public --no-owner  --no-privileges --no-security-labels --no-tablespaces  "+app.config['DB_DATABASE']+"  >dumpschemaout.txt 2>&1"
         logging.info("Export Schema : %s",cmd)
         os.system(cmd)
         zfile=ZipFile('ecotaxadb.zip', 'w',allowZip64 = True,compression= zipfile.ZIP_DEFLATED)
@@ -155,10 +155,8 @@ Help on common usage of this feature :
 
 </div>
 </div>
-            """;
-            return PrintInCharte(txt);
-
-
+            """
+            return PrintInCharte(txt)
 
     def GetResultFile(self):
         return 'ecotaxadb.zip'

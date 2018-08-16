@@ -5,3 +5,13 @@
     PROJECT EDITION FORM
     {{ super() }}
 {% endblock %}
+
+{% block tail %}
+    {{ super() }}
+<script>
+    $(function () {
+        $('.select2-container').css('width','400px');
+    });
+</script>
+
+{% endblock %}

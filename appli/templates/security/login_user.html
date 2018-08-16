@@ -8,8 +8,20 @@
 
 {% from "security/_custommacros.html" import render_field_with_errors, render_field,display_field_errors %}
 
-  <p>Ecotaxa Version : 1.5.1 2018.01.16</p>
+  <p>Ecotaxa Version : 1.5.2 2018.08.16</p>
 {# Log :
+2018.08.16 : V 1.5.2
+                Added hability to work on database without trust connection configured on pg_hba
+                Added CSRF Token on AdminForms most sensibles screens
+                Added CSRF protection on console screen
+                Added CSP policies to reduce impact of XSS attack
+                Fixed several SQL Inject vulnerabilities
+                Fixed no more errors if folder SCN_networks is missing
+                Removed dead code
+2018.03.14 : V 1.5.1b
+               Moved Daily task in external launch using cron.py
+               fixed computation on particle
+               modified handling of ftp export copy due to issue on LOV FTP is on NFS volume
 2018.01.16 : V 1.5.1
               Bugfix on privilèges on part module causing performance issues
 2017.12.23 : V 1.5

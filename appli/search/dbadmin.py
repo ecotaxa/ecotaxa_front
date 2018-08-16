@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, g, flash,request,url_for,json
+from flask import Blueprint, render_template, g, flash,request,url_for,json,escape
 from flask_login import current_user
 from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,ntcv
 from pathlib import Path
@@ -171,17 +171,20 @@ def dbadmin_merge2taxon():
 @login_required
 @roles_accepted(database.AdministratorLabel)
 def dbadmin_console():
+    sql=gvp("sql")
+    if len(request.form)>0 and request.referrer!=request.url: # si post doit venir de cette page
+        return PrintInCharte("Invalid referer")
     g.headcenter="<font color=red style='font-size:18px;'>Warning : This screen must be used only by experts</font><br><a href=/admin>Back to admin home</a>"
-    txt="<form method=post>SQL : <textarea name=sql rows=15 cols=100>%s</textarea><br>"%gvp("sql")
+    txt="<form method=post>SQL : <textarea name=sql rows=15 cols=100>%s</textarea><br>"%escape(sql)
     txt+="""<input type=submit class='btn btn-primary' name=doselect value='Execute Select'>
     <input type=submit class='btn btn-primary' name=dodml value='Execute DML'>
-    Note : For DML ; can be used, but only the result of the last query dis displayed
+    Note : For DML ; can be used, but only the result of the last query displayed
     </form>"""
     if gvp("doselect"):
         txt+="<br>Select Result :"
         cur = db.engine.raw_connection().cursor()
         try:
-            cur.execute(gvp("sql"))
+            cur.execute(sql)
             txt+="<table class='table table-condensed table-bordered'>"
             for c in cur.description:
                 txt+="<td>%s</td>"%c[0]
@@ -201,7 +204,7 @@ def dbadmin_console():
         txt+="<br>DML Result :"
         cur = db.engine.raw_connection().cursor()
         try:
-            cur.execute(gvp("sql"))
+            cur.execute(sql)
             txt+="%s rows impacted"%cur.rowcount
             cur.connection.commit()
         except Exception as e :

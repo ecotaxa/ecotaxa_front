@@ -191,7 +191,7 @@ order by classif_date desc""",{"objid":objid})
     t.append("""
     <div role="tabpanel" class="tab-pane" id="tabdmap">
 <div id="map2" class="map2" style="width: 100%; height: 450px;">
-  Displaying Map requires Internet Access to load map from https://www.openstreetmap.org
+  Displaying Map requires Internet Access to load map from https://server.arcgisonline.com
 </div>""");
 
     t.append("</table></div>")

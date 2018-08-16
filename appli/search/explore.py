@@ -22,16 +22,16 @@ def indexExplore():
     data["taxochild"]=gvg("taxochild",'1')
     data["sample_for_select"]=""
     if data["samples"]:
-        for r in GetAll("select sampleid,orig_id from samples where sampleid in(%s)"%(data["samples"],)):
+        for r in GetAll("select sampleid,orig_id from samples where sampleid =any(%s)" , ([int(x) for x in data["samples"].split(',')],)):
             data["sample_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
     data["projects_for_select"]=""
     if data["projid"]:
-        for r in GetAll("select projid,title from projects where projid in(%s) and visible=true"%(data["projid"],)):
+        for r in GetAll("select projid,title from projects where projid =any(%s) and visible=true" , ([int(x) for x in data["projid"].split(',')],)):
             data["projects_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
     data["taxo_for_select"]=""
     if gvg("taxo[]"):
         print(gvg("taxo[]"))
-        for r in GetAll("SELECT id, name FROM taxonomy WHERE  id in(%s) order by name"%(",".join((str(int(x)) for x in request.args.getlist("taxo[]"))),),debug=False):
+        for r in GetAll("SELECT id, name FROM taxonomy WHERE  id =any(%s) order by name",([int(x) for x in request.args.getlist("taxo[]")],),debug=False):
             data["taxo_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
     data["month_for_select"] = ""
     for (k,v) in enumerate(('January','February','March','April','May','June','July','August','September','October','November','December'),start=1):

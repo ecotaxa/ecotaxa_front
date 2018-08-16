@@ -14,10 +14,13 @@ from flask_admin.model.form import InlineFormAdmin
 from wtforms.fields import SelectField,TextField,PasswordField
 from wtforms.validators import ValidationError
 from flask_login import current_user
+from flask_admin.form import SecureForm
 
 class UsersView(ModelView):
     # Disable model creation
     can_create = True
+    # Enable CSRF check
+    form_base_class = SecureForm
 
     # Override displayed fields
     column_list = ('email', 'name','organisation','active', 'roles')
@@ -60,6 +63,9 @@ class UsersView(ModelView):
     create_template = 'admin/users_create.html'
 
 class UsersViewRestricted(UsersView):
+    # Enable CSRF check
+    form_base_class = SecureForm
+
     form_columns = ('email', 'name','organisation', 'active',  'password')
     def __init__(self, session, **kwargs):
         # You can pass name and other parameters if you want to
@@ -81,10 +87,14 @@ class ProjectsViewPrivInlineModelForm(InlineFormAdmin):
         privilege=dict(
             choices=[('View', 'View'), ('Annotate', 'Annotate'), ('Manage', 'Manage')]
         ))
+
     def __init__(self):
-        return super(ProjectsViewPrivInlineModelForm, self).__init__(database.ProjectsPriv)
+        super(ProjectsViewPrivInlineModelForm, self).__init__(database.ProjectsPriv)
 
 class ProjectsView(ModelView):
+    # Enable CSRF check
+    form_base_class = SecureForm
+
     column_list = ('projid', 'title','visible','status','objcount','pctvalidated','pctclassified')
     column_searchable_list = ('title',)
     column_default_sort = 'projid'
@@ -94,6 +104,9 @@ class ProjectsView(ModelView):
     form_excluded_columns=('objcount','pctvalidated','pctclassified')
     edit_template = 'admin/projects_edit.html'
     create_template = 'admin/projects_create.html'
+    form_widget_args = {
+        'title': {  'style':'width: 400px;'}
+    }
 
     def __init__(self, session, **kwargs):
         super(ProjectsView, self).__init__(database.Projects, session, **kwargs)

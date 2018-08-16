@@ -119,3 +119,9 @@ def before_teardown_commitdb(error):
                 g.db.rollback()
     except Exception as e: # si probleme d'accés à g.db ou d'operation sur la transaction on passe silencieusement
         app.logger.error("before_teardown_commitdb : Unhandled exception (can be safely ignored) : {0} ".format(e))
+
+@app.after_request
+def after_request(response):
+    response.headers[
+        'Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: cdnjs.cloudflare.com server.arcgisonline.com;frame-ancestors 'self';form-action 'self';"
+    return response
