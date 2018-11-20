@@ -17,7 +17,7 @@ def searchusers():
 
 @app.route("/search/samples")
 def searchsamples():
-    term="%"+gvg("q")+"%"
+    term=("%"+gvg("q")+"%").lower().replace('*','%')
     projid=""
     if gvg("projid")!="":
         projid=str(int(gvg("projid")))
@@ -25,7 +25,9 @@ def searchsamples():
         projid=",".join([str(int(x)) for x in request.args.getlist("projid[]")])
     if projid=="":
         return "[]"
-    res = database.GetAll("SELECT sampleid, orig_id FROM samples WHERE  projid in ({0}) and orig_id like %s order by orig_id limit 2000".format(projid), (term,))
+    res = database.GetAll("""SELECT sampleid, orig_id 
+                      FROM samples 
+                      WHERE  projid in ({0}) and orig_id like %s order by orig_id limit 2000""".format(projid), (term,))
     if gvg("format",'J')=='J': # version JSon par defaut
         return json.dumps([dict(id=r[0],text=r[1]) for r in res])
     return render_template('search/samples.html', samples=res)
@@ -106,3 +108,14 @@ def searchgettaxomapping():
         res['taxo'] = {x[0]:x[1] for x in database.GetAll(sql,([int(x) for x in res['mapping'].values()],))}
 
     return json.dumps(res)
+
+@app.route("/search/annot/<int:PrjId>")
+def searchannot(PrjId):
+    projid = str(int(PrjId))
+    res = database.GetAll("""Select id,name 
+          from users
+          where id in ( SELECT distinct classif_who FROM obj_head WHERE  projid ={0} ) order by name""".format(projid))
+    # if gvg("format",'J')=='J': # version JSon par defaut
+    #     return json.dumps([dict(id=r[0],text=r[1]) for r in res])
+    return render_template('search/annot.html', samples=res)
+

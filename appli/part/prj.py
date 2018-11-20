@@ -33,11 +33,8 @@ def part_prj():
     res = GetAll(sql,params) #,debug=True
     # app.logger.info("res=%s",res)
     CanCreate=False
-    if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ParticleProjectCreatorLabel):
+    if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel):
         CanCreate=True
-    if getattr(current_user,'id',None) is not None: # correspond à anonymous
-        if database.GetAll("select count(*) nbr from projectspriv where privilege='Manage' and member=%(id)s",{'id':current_user.id})[0]['nbr']>0:
-            CanCreate = True
     g.headcenter = "<h4>Particle Projects management</h4><a href='/part/'>Particle Module Home</a>"
     return PrintInCharte(
         render_template('part/list.html', PrjList=res, CanCreate=CanCreate, AppManagerMailto=appli.GetAppManagerMailto()

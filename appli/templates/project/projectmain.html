@@ -22,6 +22,9 @@
     <script src="/static/jquerycontextmenu/jquery.ui.position.min.js" type="text/javascript"></script>
     <script src="/static/jquerycontextmenu/jquery.contextMenu.min.js" type="text/javascript"></script>
      <link href="/static/jquerycontextmenu/jquery.contextMenu.css" rel="stylesheet" type="text/css" />
+    <script src="/static/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+     <link href="/static/jquery.datetimepicker.min.css" rel="stylesheet" type="text/css" />
+
 {% if g.headmenu %}
     <table width="100%"><tr><td style="white-space: nowrap;width: 170px;">
     <div class="btn-group" style="margin-right: 5px">
@@ -54,7 +57,7 @@
       {%  endfor %}
   </ul>
 </div>
-     <div id="taxoclearspan" style="margin-top: 3px;cursor: pointer">{{ g.taxoclearspan|safe }}</div>
+
     </td><td><div id="titlediv">
       <div id=titledivtitle style="font-size: 18px;max-width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden; vertical-align: bottom;display: inline-block;">{{ g.ProjectTitle }}</div>
       <div style="font-size: 12px;vertical-align: bottom;display: inline-block;"> (<span id=objcount></span>)</div></div>
@@ -152,6 +155,7 @@
     <button type=button class="btn btn-primary btn-xs" onclick="LoadRightPane();">
       <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
     </button>
+    <span id='PendingChanges2' class='text-danger'></span>
     </td><td><span id="nbrselected" style="margin-left: 10px;"></span>&nbsp;
 </td>
 </tr>
@@ -175,11 +179,20 @@
                 $("#TabB").outerHeight( $("#column-left").innerHeight()-$("#TabB").position().top);
             });
         }); {# ready #}
+function DispClassificationHelp(projid){
+  $("#PopupDetails .modal-content").load("/static/taxofilterhelp.html");
+  $('#PopupDetails').modal({});
+}
+
+
         </script>
           <div id="myTabs">  <!-- Nav tabs -->
             <ul class="nav nav-tabs nav-justified" role="tablist">
               <li role="presentation" class="active">
-                  <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Taxonomy filter</a>
+                  <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Taxonomy filter
+                  <span title="Taxo filter help" class="glyphicon glyphicon-info-sign" style="color: black" onclick="DispClassificationHelp()"></span>
+                  </a>
+
               </li>
               <li role="presentation">
                   <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Other filters</a>
@@ -202,8 +215,13 @@
 	<div class="form-group-sm">
 		<label class="title">Annotator / Free filters</label>
 		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearAnnotFree();return false;'>Clear</a>
+		<a class="pull-right label label-info" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;margin-right: 5px;" href=# onclick='AdvancedAnnot();return false;'>Advanced</a>
     <select class="form-control" id="filt_annot" name="filt_annot" style="width: 100%" multiple autocomplete="off">{{ data.filt_annot_for_select|safe }}</select>
 	</div>
+</div>
+<div>
+<input class="form-control" type="text" style="width: 100%" id="filt_validfromdate" name="filt_validfromdate" value="" autocomplete="off" placeholder="Validation date begin">
+<input class="form-control" type="text" style="width: 100%" id="filt_validtodate" name="filt_validtodate" value="" autocomplete="off" placeholder="Validation date end">
 </div>
 <form class="form-inline">
   <select class="form-control" id="filt_freenum" name="filt_freenum" style="width: 49%" autocomplete="off">
@@ -260,6 +278,7 @@ body {margin-top: 125px;}
 var PendingChanges={};
 var PendingChangesTaxoName={};
 var PrevTxtFilter="INITIAL";
+var RightPanelScrollPosAfterLoad=0;
 DragInProgress=false;
 function InGreyButton(s,eraser) {
   return " <button type=button class='btn btn-gris btn-xs' onclick='"+eraser+";LoadRightPane();'><div>"+s+"</div> <span class='glyphicon glyphicon-remove'></span></button>";
@@ -374,6 +393,16 @@ function LoadRightPane(NoAjax,SaveInProfile){
       TxtFilter+=InGreyButton("DayTime="+$.map(jqdaytime.find('option:selected'), function (element) { return $(element).text() }).join(', '), "ClearTimes()");
     }
 
+    req['validfromdate']=$("#filt_validfromdate").val();
+    if(req['validfromdate']!="")
+        TxtFilter+=InGreyButton("Valid date &ge; "+req['validfromdate'],'$(\"#filt_validfromdate\").val(\"\")');
+    else delete req['validfromdate'];
+    req['validtodate']=$("#filt_validtodate").val();
+    if(req['validtodate']!="")
+        TxtFilter+=InGreyButton("Valid date &le; "+req['validtodate'],'$(\"#filt_validtodate\").val(\"\")');
+    else delete req['validtodate'];
+
+
     req['sortorder']=$('#sortorder').hasClass("glyphicon-sort-by-attributes-alt")?"desc":'asc';
     req['dispfield']="";
     $("#dispfieldlist").find(".glyphicon-ok").closest("li").each(function () {
@@ -447,15 +476,19 @@ function RefreshClassifTab(ForceRecalc)
 
 }
 
-    function SortToggle() {
-        if($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
-             $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title","Current Sort : Descending");
-        else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title","Current Sort : Ascending");
-        $("#pageoffset").val(0); {# Force le retour à la premiere page #}
-    }
+function SortToggle() {
+  if($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
+       $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title","Current Sort : Descending");
+  else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title","Current Sort : Ascending");
+  $("#pageoffset").val(0); {# Force le retour à la premiere page #}
+  LoadRightPane();{# 20181024 Autorefresh #}
+}
 
 function ToggleDispField(caller){
     $('#'+caller).find('span').toggleClass("glyphicon-ok");
+    $('#'+caller).find('span').removeClass("ManualAdd");
+    $('#'+caller).find('span.glyphicon-ok').addClass("ManualAdd");
+    LoadRightPane();{# 20181024 Autorefresh #}
     //return false;
 }
 function gotopage(nopage)
@@ -473,13 +506,16 @@ $(document).ready(function() {
     SetTaxoFilter({{ g.taxofilter }},"{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild=='Y' }});
     {% endif %}
 
-
+    var PreviousSort=$('#sortby').val();
 {#Si on choisi un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields#}
     $('#sortby').change(function(){
-        $("#dispfield_"+$(this).val()+"  .glyphicon").addClass('glyphicon-ok');
+        $("#dispfield_"+PreviousSort+"  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
+        $("#dispfield_"+$(this).val()+" .glyphicon").addClass('glyphicon-ok');
+        PreviousSort=$(this).val();
         $("#pageoffset").val(0); {# Changement d'ordre on revient à la première page #}
+        LoadRightPane();{# 20181024 Autorefresh #}
     });
-
+    $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () {LoadRightPane();}); {# 20181024 Autorefresh #}
     {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
     $('#sortby').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
     $('#ipp').select2({minimumResultsForSearch: Infinity,dropdownAutoWidth : true});
@@ -528,6 +564,10 @@ $(document).ready(function() {
           AssignTaxoLbToSelection();
           e.preventDefault();
       }
+       if((e.keyCode === 76)&& (e.ctrlKey||e.metaKey)) { {# CTRL+L #}
+          ValidateSelection('V');
+          e.preventDefault();
+      }
        if((e.keyCode === 83)&& (e.ctrlKey||e.metaKey)) { {# CTRL+S #}
 {#          console.log(e);#}
           SavePendingChanges();
@@ -547,7 +587,7 @@ $(document).ready(function() {
           e.preventDefault();
       }
     });
-
+  $('#filt_validfromdate,#filt_validtodate').datetimepicker({format:'Y-m-d H:i'});
 });
 function UpdateSelectedCounter() {
   var nbr=$("#column-right td.ui-selected").size();
@@ -647,6 +687,8 @@ $('#PopupDetails').on('hidden.bs.modal', function (e) {
 });
 
 jQuery('.SpanSelectAll').click(SelectAll);
+$(document).scrollTop(RightPanelScrollPosAfterLoad);
+RightPanelScrollPosAfterLoad=0;
 }  //PostAddImages
 
 function SelectAll(e){
@@ -680,7 +722,23 @@ jQuery(window).bind('beforeunload', function(){
 function GotoWithFilter(Target){
   LoadRightPane(Target);
 }
+function AdvancedAnnot(){
+  if($('#projid').val()==null) return;
+  $("#PopupDetails .modal-content").html("Loading...");
+  $('#PopupDetails .modal-lg').css('width',800);
+  $('#PopupDetails').modal({});
 
+  var url="/search/annot/"+$('#projid').val();
+  $("#PopupDetails .modal-content").load(url,function () {
+    var lst="";
+    var sampleid=$('#filt_annot');
+    lst=$.map(sampleid.find('option:selected'), function (element) { return $(element).val() }).join(', ');
+    $('#txtlstsample').val(lst);
+    SampleTxtToCB();
+
+  });
+
+}
 
 </script>
         <div id="column-right" >

@@ -77,6 +77,13 @@ def PrjEditDataMass(PrjId):
             ExecSQL(sqlhisto, sqlparam)
         ExecSQL(sql,sqlparam)
         flash('Data updated', 'success')
+    if field=='latitude' or field=='longitude' or gvp('recompute')=='Y':
+        ExecSQL("""update samples s set latitude=sll.latitude,longitude=sll.longitude
+              from (select o.sampleid,min(o.latitude) latitude,min(o.longitude) longitude
+              from obj_head o
+              where projid=%(projid)s and o.latitude is not null and o.longitude is not null
+              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s """,{'projid':Prj.projid})
+        flash('sample latitude and longitude updated', 'success')
     sql = "select objid FROM objects o where projid=" + str(Prj.projid)
     if len(filtres):
         sql += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))

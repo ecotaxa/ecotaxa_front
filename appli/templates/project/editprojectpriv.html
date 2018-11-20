@@ -68,7 +68,7 @@
 
  <script>
 $(document).ready(function() {
-    $(".userlb").select2({
+    $("select[name$=member]").select2({
         ajax: {
             url: "/search/users",
             dataType: 'json',

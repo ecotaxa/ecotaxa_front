@@ -154,6 +154,8 @@ def prj_simpleimport(PrjId):
             Lst=z.infolist()
             for fichier in Lst:
                 nomfichier=fichier.filename
+                if nomfichier[0:8]=="__MACOSX":
+                    continue
                 nomfichierseul=os.path.basename(nomfichier)
                 filename, file_extension = os.path.splitext(nomfichier)
                 if file_extension.lower() in ('.jpg','.png','.gif'):

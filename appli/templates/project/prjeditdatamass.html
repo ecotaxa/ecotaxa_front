@@ -2,6 +2,7 @@
 <style>
   #mytab td {padding: 5px;}
 </style>
+<div style="margin: 10px">
 <form method=post>
     <table id=mytab >
     <tr><td>Field to update : </td>
@@ -32,6 +33,10 @@
     Most ID (except orig_id) are internals ID.They can be found in the Object details page<br>
     Classif_id update will cause update of classif_who and classif_when and insert a line in historical.
   </div>
+</div>
+<form method=post>
+  <button name="recompute" value="Y" type=submit class='btn btn-default'>Recompute sample latitude and longitude </button>
+</form>
 </div>
 <script>
     $("#field").select2({

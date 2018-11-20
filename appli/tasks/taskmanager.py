@@ -317,6 +317,7 @@ def TaskGetStatus(TaskID):
                             rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d?thengotoproject=Y' class='btn btn-primary btn-sm ' role='button'>FORCE Delete of %s and back to project (no danger for the original database) </a>"%(TaskID,f)
                         else:
                             rep['d']['ExtraAction']+=" <a href='/Task/Clean/%d' class='btn btn-primary btn-sm ' role='button'>FORCE Delete of %s (no danger for the original database) </a>"%(TaskID,f)
+                        rep['d']['ExtraAction'] += "<br>Local users can also retrieve the file on the Ecotaxa folder temptask/task%06d (usefull for huge files)"%(int(task.task.id))
 
 
             if task.task.taskstate=="Error":

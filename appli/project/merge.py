@@ -84,6 +84,7 @@ def PrjMerge(PrjId):
         ExecSQL("update process set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
         ExecSQL("update samples set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
         ExecSQL("update obj_head set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
+        ExecSQL("update part_projects set projid={0} where projid={1}".format(Prj.projid,PrjSrc.projid))
         # garde le privilege le plus elevé des 2 projets
         ExecSQL("""UPDATE projectspriv ppdst
                   set privilege=case when 'Manage' in (ppsrc.privilege,ppdst.privilege) then 'Manage'

@@ -2,7 +2,7 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 
-import os,sys,pathlib
+import os,sys,pathlib,urllib.parse
 # Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL
 if sys.platform.startswith('win32'):
     virtualprefix = sys.base_prefix
@@ -33,6 +33,7 @@ matplotlib.use('Agg')
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')
+app.config['SECURITY_MSG_DISABLED_ACCOUNT']=('Your account is disabled. Email to the User manager (list on the left) to re-activate.','error')
 app.logger.setLevel(10)
 
 if 'PYTHONEXECUTABLE' in app.config:
@@ -55,14 +56,22 @@ def ObjectToStr(o):
 #    return str([(n, v) for n, v in inspect.getmembers(o) if((not inspect.ismethod(v))and  (not inspect.isfunction(v))and  (n!='__module__')and  (n!='__doc__') and  (n!='__dict__') and  (n!='__dir__')and  (n!='__delattr__')and  (n!='__dir__')and  (n!='__dir__') )])
     return str([(n, v) for n, v in inspect.getmembers(o) if(('method' not in str(v))and  (not inspect.isfunction(v))and  (n!='__module__')and  (n!='__doc__') and  (n!='__dict__') and  (n!='__dir__') and  (n!='__weakref__') )])
 
-def PrintInCharte(txt):
+def PrintInCharte(txt,title=None):
     """
     Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
     :param txt: Texte à affiche
     :return: Texte rendu
     """
     AddTaskSummaryForTemplate()
-    return render_template('layout.html',bodycontent=txt)
+    module='' # Par defaut c'est Ecotaxa
+    if request.path.find('/part')>=0:
+        module = 'part'
+    if not title:
+        if module == 'part':
+            title='EcoPart'
+        else:
+            title = 'EcoTaxa'
+    return render_template('layout.html',bodycontent=txt,module=module,title=title)
 
 def ErrorFormat(txt):
     return """
@@ -215,6 +224,7 @@ import appli.tasks.taskmanager
 import appli.search.view
 import appli.project.view
 import appli.part.view
+import appli.usermgmnt
 
 @app.errorhandler(404)
 def not_found(e):
@@ -249,13 +259,15 @@ def JinjaFormatDateTime(d,format='%Y-%m-%d %H:%M:%S'):
 def JinjaNl2BR(t):
     return t.replace('\n', '<br>\n');
 
-def JinjaGetManagerList():
+def JinjaGetManagerList(sujet=""):
     LstUsers=database.GetAll("""select distinct u.email,u.name,Lower(u.name)
 FROM users_roles ur join users u on ur.user_id=u.id
 where ur.role_id=2
 and u.active=TRUE and email like '%@%'
 order by Lower(u.name)""")
-    return " ".join(["<li><a href='mailto:{0}'>{1} ({0})</a></li> ".format(*r) for r in LstUsers ])
+    if sujet:
+        sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
+    return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR

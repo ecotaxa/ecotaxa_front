@@ -1,6 +1,10 @@
 <table>
   <tr>
     <td style="width: 600px;vertical-align: top;">
+{%  if Others %}
+  <h3>Other projects</h3>
+  <p>To have acces to theses projects, request access to the project manager.</p>
+{% else %}
 <span style="font-size: x-large;font-weight: bold;">Select a project </span><p> <a href="#create-project" data-toggle="collapse" class="help" >How to create a project</a></p>
 <div id="create-project" class="collapse">
   <p>To create your first project, you must contact the application manager: {{ AppManagerMailto|safe }}.</p>
@@ -123,8 +127,9 @@ So overall, the hierarchy can look like
 {% if  CanCreate==True %}
   <button class="btn btn-success" onclick="CreateProject();">Create a new project</button>
 {% else %}
-  <p>To create a new project and upload images in it, please contact the application manager(s): {{ AppManagerMailto|safe }}</p>
+  <p style="margin-bottom: 0">To create a new project and upload images in it, please contact the user manager(s): </p><ul>{{ GetManagerList('Ecotaxa : Please provide me the Project creation rights')|safe }}</ul>
 {% endif %}
+{% endif %} {# If Others #}
 </td>
   <td style="padding-left: 50px;vertical-align: top;">
   <div class="panel panel-default">
@@ -134,16 +139,17 @@ So overall, the hierarchy can look like
         <tr>
           <td>Filter on title :</td>
           <td><input type="text"  style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}"></td>
-          <td rowspan="3" style="vertical-align: top"><button type="submit" class="btn btn-primary">Search</button></td>
+          <td rowspan="2" style="vertical-align: top"><button type="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search"></span> Search</button></td>
         </tr>
         <tr>
           <td style="padding-right: 10px;">Exclude subsets :</td>
-          <td><input type="checkbox" value="Y" name="filt_subset" {%  if filt_subset=='Y'  %}checked{%  endif  %}></td>
+          <td><input type="checkbox" value="Y" name="filt_subset"  {%  if filt_subset=='Y'  %}checked{%  endif  %}></td>
         </tr>
         <tr>
           <td>Instrument : </td>
-          <td><input type="text" style="width: 100px;" name="filt_instrum" id="filt_instrum" value="{{ filt_instrum }}">
+          <td style="padding-right: 10px;"><input type="text" style="width: 100px;" name="filt_instrum" id="filt_instrum" value="{{ filt_instrum }}">
                 <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});" style="cursor: pointer;"></span></td>
+          <td  style="vertical-align: top"><a href="?filt_title=&filt_instrum=" class="btn btn-sm btn-default btn-block"><span class="glyphicon glyphicon-remove"></span> Clear</a></td>
         </tr>
       </table>
     </form>
@@ -163,7 +169,17 @@ So overall, the hierarchy can look like
         </thead>
         <tbody>
 {%   for r in PrjList %}
-<tr><td><a class='btn btn-primary' href='/prj/{{ r[0] }}'>Select</a></td>
+<tr><td>
+{%  if Others %}
+  <a class='btn btn-primary' href='mailto:{{r[6]}}?body={{ "Please provide me privileges to project : "+r[1]|urlencode }}&subject={{"Project access request"|urlencode }}'>REQUEST ACCESS</a>
+  {% if r[8] ==True or isadmin  %}
+    <a class='btn btn-primary' href='/prj/{{ r[0] }}'>View</a>
+    {% endif %}
+{% else %}
+  <a class='btn btn-primary' href='/prj/{{r[0]}}'>Select</a>
+{% endif %}
+
+  </td>
   <td> {{ r[1] }} [{{ r[0] }}] {{ ("<a href='mailto:"+r[7]+"'>"+r[6]+"</a>") |safe if r[6] }}</td>
   <td>{{ r[2] }}</td>
   <td>{{ '{0:0.0f}'.format(r[3]) }}</td>
@@ -174,7 +190,11 @@ So overall, the hierarchy can look like
 
 </tbody></table>
 <div class="col-sm-6 col-sm-offset-3">
+{%  if Others %}
+  <a href="/prj/" class="btn  btn-block btn-primary">Back to projects list</a>
+{% else %}
   <a href="/prjothers/" class="btn  btn-block btn-primary">Show projects in which you are not registered</a>
+{% endif %}
 </div>
 <script>
   function DispInstrumList(projid){

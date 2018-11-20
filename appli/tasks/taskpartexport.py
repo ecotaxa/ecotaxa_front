@@ -28,6 +28,7 @@ class TaskPartExport(AsyncTask):
                 self.samples=[]
                 self.samplesdict = {}
                 self.excludenotliving=False
+                self.includenotvalidated=False
                 self.OutFile=None
                 self.putfileonftparea = ''
 
@@ -455,7 +456,10 @@ class TaskPartExport(AsyncTask):
 
         logging.info("sqllstcat = %s" % sqllstcat)
         lstcatwhere = GetAll(sqllstcat)
-        lstcatwhere=",".join((str(x[0]) for x in lstcatwhere)) # extraction de la 1ère colonne seulement et mise en format in
+        if lstcatwhere:
+            lstcatwhere=",".join((str(x[0]) for x in lstcatwhere)) # extraction de la 1ère colonne seulement et mise en format in
+        else :
+            lstcatwhere = "-1"
         logging.info("lstcatwhere = %s" % lstcatwhere)
         sqllstcat="""with RECURSIVE th(id ) AS (
     SELECT t.id
@@ -699,6 +703,12 @@ order by tree""".format(lstcatwhere)
                         f.write("\n")
                 zfile.write(nomfichier)
         for S in samples:
+            DepthOffset = S['acq_depthoffset']
+            if DepthOffset is None:
+                DepthOffset = S['default_depthoffset']
+            if DepthOffset is None:
+                DepthOffset = 0
+
             if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
                 continue  # pas les permission d'exporter le ZOO de ce sample le saute
             if S['nbrlinetaxo'] > 0:
@@ -706,13 +716,14 @@ order by tree""".format(lstcatwhere)
                 nomfichier="{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier)
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier,"wt") as f:
-                    res=GetAll("""select of.*
-                        ,concat(t0.name,'('||t1.name||')') as "name"                         
-                        ,(oh.depth_min+oh.depth_max)/2 as depth,objid
+                    # excludenotliving
+                    sql="""select of.*
+                        ,concat(t0.name,'('||t1.name||')') as "name", classif_qual                         
+                        ,((oh.depth_min+oh.depth_max)/2)+{DepthOffset} as depth,objid
                         ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
      t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) taxo_hirerarchy
                       from part_samples ps
-                      join obj_head oh on ps.sampleid=oh.sampleid and oh.classif_qual='V'
+                      join obj_head oh on ps.sampleid=oh.sampleid 
                       join obj_field of on of.objfid=oh.objid                      
                         join taxonomy t0 on oh.classif_id=t0.id
                         left join taxonomy t1 on t0.parent_id=t1.id
@@ -729,8 +740,13 @@ order by tree""".format(lstcatwhere)
                         left join taxonomy t12 on t11.parent_id=t12.id
                         left join taxonomy t13 on t12.parent_id=t13.id
                         left join taxonomy t14 on t13.parent_id=t14.id                                           
-                      where ps.psampleid=%s""",(S['psampleid'],))
-                    cols=['orig_id','objid','name','taxo_hirerarchy','depth']
+                      where ps.psampleid=%s """.format(DepthOffset=DepthOffset)
+                    if self.param.excludenotliving:
+                        sql+=" and coalesce(t14.name,t13.name,t12.name,t11.name,t10.name,t9.name,t8.name,t7.name,t6.name,t5.name,t4.name,t3.name,t2.name,t1.name,t0.name)!='not-living' "
+                    if self.param.includenotvalidated==False:
+                        sql += " and oh.classif_qual='V' "
+                    res = GetAll(sql,(S['psampleid'],))
+                    cols=['orig_id','objid','name','taxo_hirerarchy','classif_qual','depth']
                     extracols=('area','minor','major','mean')
                     colsname=cols[:]
                     colsname.extend(['area [pixel]','minor [pixel]','major [pixel]','mean [8 bits]'])
@@ -777,7 +793,7 @@ order by tree""".format(lstcatwhere)
     def QuestionProcess(self):
         backurl="/part/?{0}".format(str(request.query_string,'utf-8'))
         txt="<a href='{0}'>Back to Particle Module Home page</a>".format(backurl)
-        txt+="<h3>Particle sample data export Task creation</h3>"
+        txt+="<h3>Particle sample data export</h3>"
         errors=[]
         for k in request.args:
             if k in ('gpr','gpd','ctd'):
@@ -808,7 +824,10 @@ order by tree""".format(lstcatwhere)
                 self.param.putfileonftparea = gvp("putfileonftparea")
                 if self.param.what == 'DET':
                     self.param.fileformat = gvp("fileformatd")
-                    self.param.excludenotliving = (gvp("excludenotliving")=='Y')
+                    self.param.excludenotliving = (gvp("excludenotlivingd")=='Y')
+                if self.param.what == 'RAW':
+                    self.param.excludenotliving = (gvp("excludenotlivingr") == 'Y')
+                    self.param.includenotvalidated=(gvp("includenotvalidatedr") == 'Y')
                 self.param.CustomReturnLabel="Back to particle module"
                 self.param.CustomReturnURL=gvp("backurl")
 

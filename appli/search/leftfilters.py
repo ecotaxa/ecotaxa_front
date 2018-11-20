@@ -31,7 +31,7 @@ def search_mappopup_samples():
     app.logger.info(request.args)
     if gvg('projid') or gvg('taxoid'):
         sqlparam={}
-        sql="SELECT distinct longitude,latitude from samples where latitude is not NULL and longitude is not NULL "
+        sql="SELECT distinct sampleid, longitude,latitude from samples where latitude is not NULL and longitude is not NULL "
         if gvg('projid'):
             sql+=" and projid=any (%(projid)s) "
             sqlparam['projid'] = [int(x) for x in gvg("projid").split(',')];
@@ -49,13 +49,36 @@ def search_mappopup_samples():
 
         res=GetAll(sql,sqlparam);
     else:
-        res=GetAll("""SELECT distinct cast(round(CAST (s.longitude AS numeric),1) as double PRECISION)
-                      ,cast(round(cast(s.latitude AS numeric) ,1)as double PRECISION)
+        res=GetAll("""SELECT latitude,longitude,max(sampleid) sampleid from (
+                SELECT sampleid, cast(round(CAST (s.longitude AS numeric),1) as double PRECISION) longitude
+                      ,cast(round(cast(s.latitude AS numeric) ,1)as double PRECISION) latitude
                       from samples s
                        join projects p on s.projid=p.projid and p.visible=true
-                      where s.latitude is not NULL and s.longitude is not NULL  """)
-    return json.dumps(res)
+                      where s.latitude is not NULL and s.longitude is not NULL  
+                ) q
+                group by latitude,longitude """)
+    ores=[]
+    for s in res:
+        r={'id':s['sampleid'],'lat':s['latitude'],'long':s['longitude']}
+        ores.append(r)
+    return json.dumps(ores)
 
+
+@app.route('/search/mappopup/getsamplepopover/<int:sampleid>')
+def search_mappopup_samplepopover(sampleid):
+    sql="""select s.sampleid,s.orig_id,ep.title,ep.projid
+      ,round(cast(s.latitude as NUMERIC),4) latitude,round(cast(s.longitude as NUMERIC),4) longitude
+      from samples s
+      join projects ep on ep.projid = s.projid
+      where s.sampleid=%(sampleid)s
+      """
+    data=database.GetAll(sql,{'sampleid':sampleid})[0]
+    txt="""ID : {sampleid}<br>
+    Original ID : {orig_id}<br>
+    Project : {title} ({projid})<br>
+    Lat/Lon : {latitude}/{longitude}
+    """.format(**data)
+    return txt
 
 def getcommonfilters(data):
     return render_template('search/commonfilters.html',data=data)

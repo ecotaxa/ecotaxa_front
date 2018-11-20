@@ -15,6 +15,7 @@ from wtforms.fields import SelectField,TextField,PasswordField
 from wtforms.validators import ValidationError
 from flask_login import current_user
 from flask_admin.form import SecureForm
+from flask_admin.helpers import get_form_data
 
 class UsersView(ModelView):
     # Disable model creation
@@ -23,12 +24,14 @@ class UsersView(ModelView):
     form_base_class = SecureForm
 
     # Override displayed fields
-    column_list = ('email', 'name','organisation','active', 'roles')
-    form_columns = ('email', 'name','organisation', 'active', 'roles', 'password')
+    column_list = ('email', 'name','organisation','active', 'roles','country')
+    form_columns = ('email', 'name','organisation', 'active', 'roles', 'password','country','usercreationreason')
     column_searchable_list = ('email', 'name')
     form_overrides = {
         'email': TextField,
         'password': PasswordField,
+        'usercreationreason':TextAreaField,
+        'country':SelectField
     }
 
     def __init__(self, session, **kwargs):
@@ -49,6 +52,14 @@ class UsersView(ModelView):
     def checkpasswordequal(form, field):
         if field.data !=form._fields['password_confirm'].data:
             raise ValidationError("Password Confirmation doesn't match")
+
+    def edit_form(self,obj=None):
+        form = self._edit_form_class(get_form_data(), obj=obj)
+        form.country .choices=[('','')]+GetAll("""select countryname k,countryname v from countrylist order by 1""")
+        return form
+
+    def create_form(self,obj=None):
+        return self.edit_form(obj)
 
     def scaffold_form(self):
         form_class = super(UsersView, self).scaffold_form()

@@ -12,7 +12,7 @@ import json,psycopg2.extras,datetime,os,time
 
 AdministratorLabel="Application Administrator"
 UserAdministratorLabel="Users Administrator"
-ParticleProjectCreatorLabel="Particle module project creator"
+ProjectCreatorLabel= "Project creator"
 
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
 DayTimeList={'A':'Dawn','D':'Day','U':'Dust','N':'Night'}
@@ -45,6 +45,9 @@ class users(db.Model, UserMixin):
     roles = db.relationship('roles', secondary=users_roles,
                             backref=db.backref('users', lazy='dynamic')) #
     preferences= db.Column(db.String(40000))
+    country = db.Column(db.String(50))
+    usercreationdate = db.Column(TIMESTAMP, default=func.now())
+    usercreationreason= db.Column(db.String(1000))
     def __str__(self):
         return "{0} ({1})".format(self.name,self.email)
     def GetPref(self,prjid,name,defval):
@@ -83,6 +86,10 @@ class users(db.Model, UserMixin):
                 tmp[id]=newpref[id]
         self.preferences=json.dumps(tmp)
         return 1
+
+class countrylist(db.Model, UserMixin):
+    __tablename__ = 'countrylist'
+    countryname = db.Column(db.String(50), primary_key=True,nullable=False)
 
 class Taxonomy(db.Model):
     __tablename__ = 'taxonomy'

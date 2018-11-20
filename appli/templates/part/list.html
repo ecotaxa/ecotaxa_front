@@ -7,7 +7,7 @@
 {% if  CanCreate==True %}
   <a href="/part/prjedit/0" class="btn btn-success" >Create a new Particle project</a>
 {% else %}
-  <p>To create a new project and upload images in it, please contact the application manager(s):<br> {{ AppManagerMailto|safe }}</p>
+  <p style="margin-bottom: 0">To create a new project and upload data in it, please contact the user manager(s): </p><ul>{{ GetManagerList('Ecotaxa : Please provide me the Project creation rights')|safe }}</ul>
 {% endif %}
 </td>
   <td style="padding-left: 50px;vertical-align: top;">

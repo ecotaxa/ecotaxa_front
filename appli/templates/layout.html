@@ -13,13 +13,17 @@
 <head lang="en">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui/jquery-ui.min.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style20181025.css') }}">
+  {%if g.get('useselect4') %}
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2_405/css/select2.css') }}">
+  {%else %}
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2/css/select2.css') }}">
+  {% endif %}
 
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>EcoTaxa</title>
+    <title>{{ title }}</title>
 </head>
 <body>
 
@@ -27,11 +31,15 @@
 <script src="{{ url_for('static', filename='jquery-ui/jquery-ui.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 {# <script src="{{ url_for('static', filename='select2/js/select2.full.min.js') }}"></script> #}
+  {%if g.get('useselect4') %}
+<script src="{{ url_for('static', filename='select2_405/js/select2.full.js') }}"></script>
+  {%else %}
 <script src="{{ url_for('static', filename='select2/js/select2.full.js') }}"></script>
+{% endif %}
 <script src="{{ url_for('static', filename='jquery.lazy.min.js') }}"></script>
-{# <script src="{{ url_for('static', filename='jquery.elevatezoom.js') }}"></script>  #}
 <link rel="stylesheet" href="/static/multizoom.css" type="text/css" />
 <script type="text/javascript" src="/static/multizoom.js"></script>
+<link rel="stylesheet" href="/static/ecotaxa.css" type="text/css" />
 
 <script>
 function AddZoom(element)
@@ -54,7 +62,12 @@ $(document).ready(function() {
 <div id="divheadinfo" class="headinfo">
 <div class="headinfo panel panel-default">  <div class="panel-body" style="padding: 1px 5px 1px 5px;">
 <table width="100%"><tr>
-    <td width="140px"><h1><a href="/"><img height="30" src="/static/logo_ecotaxa.png"></a></h1></td>
+{%  if module=='part' %}
+    <td width="145px"><a href="/part/"><img src="/static/logo_ecopart.png"></a></td>
+{% else %}
+    <td width="140px"><a href="/"><img height="30" src="/static/logo_ecotaxa.png" style="margin: 10px 0"></a></td>
+{% endif %}
+
     <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
     <td align="right" width="300px">
         {% if not  current_user.is_authenticated %}
@@ -96,24 +109,41 @@ $(document).ready(function() {
 <!-- Main body -->
 {% block body %}{% endblock %}
     {{ bodycontent|safe }}
-{% if g.google_analytics_id %}
+{% if g.google_analytics_id and g.cookieGAOK=='Y' %}
   <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
   ga('create', '{{  g.google_analytics_id }} ', 'auto');
+  ga('set', 'anonymizeIp', true);
   ga('send', 'pageview');
 </script>
 {% endif %}
-<div style="position: fixed;top:0;left: 0px;z-index: 100;color:red;display: none;" id="ZoomWarning">Ecotaxa is designed to use 100% browser zoom</div>
-<script>
-function CheckBrowserZoom() {
-  if ((window.devicePixelRatio > 0) && (window.devicePixelRatio !== 1))
-    $('#ZoomWarning').show();
-}
-CheckBrowserZoom();
-window.resize =CheckBrowserZoom;
-</script>
+{#<div style="position: fixed;top:0;left: 0px;z-index: 100;color:red;display: none;" id="ZoomWarning">Ecotaxa is designed to use 100% browser zoom</div>#}
+{#<script>#}
+{#function CheckBrowserZoom() {#}
+{#  if ((window.devicePixelRatio > 0) && (window.devicePixelRatio !== 1))#}
+{#    $('#ZoomWarning').show();#}
+{#}#}
+{#CheckBrowserZoom();#}
+{#window.resize =CheckBrowserZoom;#}
+{#</script>#}
+{% if g.cookieGAOK=='' and g.google_analytics_id  %}
+  <div style="position: fixed;bottom: 0;height: 100px;left: 0;;right:0;background-color: rgba(0,0,0,0.90);color: white;z-index: 10000;" id="DivGAAccept">
+  <div style="display: flex;align-items: center; width: 1000px;margin-right: auto;margin-left: auto;margin-top: 20px;">
+  <div style="flex: 1;min-width: 81%;">We use cookies on this site to analyze traffic, remember your preferences,
+    and optimize your experience. Click “Accept” to consent to the continued use of cookies or visit our <a href="/privacy">Privacy Policy</a> to see how you can make changes to your cookie settings.</div>
+  <div style="flex: 1;"> <button type="button" class="btn btn-warning" id="BtGAAccept">Accept</button></div>
+  </div>
+  </div>
+  <script>
+  $('#BtGAAccept').click(function () {
+    $.get('/setprivacy/Y',function () {
+        $('#DivGAAccept').hide();
+      });
+  });
+  </script>
+{% endif %}
 </body>
 </html>

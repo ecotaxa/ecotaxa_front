@@ -265,7 +265,7 @@ class TaskClassifAuto2(AsyncTask):
             logging.info('DB Conversion to NP : %0.3f s', time.time() - TInit)
             logging.info("Variable shape %d Row, %d Col",*learn_var.shape)
             # Note : La multiplication des jobs n'est pas forcement plus performante, en tous cas sur un petit ensemble.
-            Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, class_weight="balanced")
+            Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, class_weight="auto")
 
             # TStep = time.time()
             # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
@@ -476,11 +476,12 @@ class TaskClassifAuto2(AsyncTask):
             if len(ModelFeatures)!=MatchingFeatures:
                 MatchingFeatures='Missing'
                 Radio = ""
+            TaxoDetails=" <span class='showcat'>Show categories</span><span style='display: none'><br>"+', '.join(sorted(r.get('categories',{}).values(),key=lambda v: v.upper()))+"</span>"
             TblBody += """<tr><td> {6}</td>
-                        <td>{0} - {1}{5}</td><td>{2:0.0f}</td><td>{3}</td><td>{4}</td>
+                        <td>{0} - {1}{7}{5}</td><td>{2:0.0f}</td><td>{3}</td><td>{4}</td>
                         </tr>""".format(modeldir, r['name'],r['n_objects'],MatchingFeatures, r['scn_model']
                                         ,"<br>Comments : "+JinjaNl2BR(r.get('comments')) if r.get('comments') else ""
-                                        ,Radio)
+                                        ,Radio,TaxoDetails)
 
         return render_template('task/classifauto2_create_selectmodel.html'
                                , url=request.query_string.decode('utf-8')

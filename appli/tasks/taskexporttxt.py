@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database ,PrintInCharte,gvp,gvg,DecodeEqualList
+from appli import db,app, database ,PrintInCharte,gvp,gvg,DecodeEqualList,ntcv
 from flask import render_template, g, flash
 import logging,os,csv,re,datetime
 import zipfile,psycopg2.extras,shutil
@@ -8,6 +8,18 @@ from appli.tasks.taskmanager import AsyncTask
 from appli.database import GetAll
 import xml.etree.ElementTree as ET
 import appli.project.sharedfilter as sharedfilter
+
+
+def NormalizeFileName(FileName):
+    return re.sub(R"[^a-zA-Z0-9 \.\-\(\)]", "_", str(FileName))
+
+def GetDOIImgFileName(objid, imgrank, taxofolder, originalfilename):
+    if not taxofolder:
+        taxofolder="NoCategory"
+    FileName = "images/{0}/{1}_{2}{3}".format(NormalizeFileName(taxofolder), objid, imgrank,
+                                              Path(originalfilename).suffix.lower())
+    return FileName
+
 
 class TaskExportTxt(AsyncTask):
     class Params (AsyncTask.Params):
@@ -34,7 +46,8 @@ class TaskExportTxt(AsyncTask):
                 self.typeline=''
                 self.putfileonftparea=''
                 self.use_internal_image_name=''
-                self.exportimages = ''
+                self.exportimagesbak = ''
+                self.exportimagesdoi = ''
 
 
 
@@ -50,9 +63,18 @@ class TaskExportTxt(AsyncTask):
         logging.info("Execute SPCommon for Txt Export")
         self.pgcur=db.engine.raw_connection().cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    def CreateTSV(self):
+    def CreateTSV(self,ExportMode):
         self.UpdateProgress(1,"Start TSV export")
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
+        ImageExport=''
+        if ExportMode in ('BAK', 'DOI'):
+            self.param.sampledata=self.param.objectdata=self.param.processdata=self.param.acqdata='1'
+            self.param.commentsdata=self.param.histodata=self.param.internalids=''
+        if ExportMode=='BAK':
+            ImageExport =self.param.exportimagesbak
+        if ExportMode=='DOI':
+            ImageExport =self.param.exportimagesdoi
+
         sql1="""SELECT o.orig_id as object_id,o.latitude as object_lat,o.longitude as object_lon
                 ,to_char(objdate,'YYYYMMDD') as object_date
                 ,to_char(objtime,'HH24MISS') as object_time
@@ -60,30 +82,33 @@ class TaskExportTxt(AsyncTask):
                 ,case o.classif_qual when 'V' then 'validated' when 'P' then 'predicted' when 'D' then 'dubious' ELSE o.classif_qual end object_annotation_status                
                 ,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
                 ,to_char(o.classif_when,'YYYYMMDD') object_annotation_date
-                ,to_char(o.classif_when,'HH24MISS') object_annotation_time
-                ,img.orig_file_name as img_file_name
+                ,to_char(o.classif_when,'HH24MISS') object_annotation_time                
+                ,concat(to1.name,' ('||to1p.name||')') as object_annotation_category 
                     """
-        if self.param.typeline == '1':
-            sql1 += """,concat(to1.name,' ('||to1p.name||')') as object_annotation_category """
-        else:
-            sql1 += """,to1.name as object_annotation_category
-                ,to1p.name as object_annotation_parent_category
+
+        if ExportMode!='BAK':
+            sql1 += """
                 ,(WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id,1 rang FROM taxonomy where id =o.classif_id
                         union
                         SELECT t.id,t.name,t.parent_id, rang+1 rang FROM rq JOIN taxonomy t ON t.id = rq.parent_id)
                         select string_agg(name,'>') from (select name from rq order by rang desc)q) object_annotation_hierarchy """
-
         sql2=""" FROM objects o
                 LEFT JOIN taxonomy to1 on o.classif_id=to1.id
                 LEFT JOIN taxonomy to1p on to1.parent_id=to1p.id
                 LEFT JOIN users uo1 on o.classif_who=uo1.id
                 LEFT JOIN taxonomy to2 on o.classif_auto_id=to2.id
-                LEFT JOIN samples s on o.sampleid=s.sampleid 
-                LEFT JOIN images img on o.img0id = img.imgid """
+                LEFT JOIN samples s on o.sampleid=s.sampleid """
         sql3=" where o.projid=%(projid)s "
         params={'projid':int(self.param.ProjectId)}
         OriginalColName={} # Nom de colonneSQL => Nom de colonne permet de traiter le cas de %area
-        if self.param.samplelist!="":
+        if ImageExport=='1':
+            sql1 += "\n,img.orig_file_name as img_file_name,img.imgrank img_rank"
+            sql2 += "\nLEFT JOIN images img on o.img0id = img.imgid "
+        if ImageExport=='A': # Toutes les images
+            sql1 += "\n,img.orig_file_name as img_file_name,img.imgrank img_rank"
+            sql2 += "\nLEFT JOIN images img on o.objid = img.objid "
+
+        if self.param.samplelist!="" :
             sql3+=" and s.orig_id= any(%(samplelist)s) "
             params['samplelist']=self.param.samplelist.split(",")
 
@@ -94,30 +119,32 @@ class TaskExportTxt(AsyncTask):
             sql1+="\n"
             Mapping=DecodeEqualList(Prj.mappingobj)
             for k,v in Mapping.items() :
-                AliasSQL='object_%s'%re.sub(R"[^a-zA-Z0-9\.\-]","_",v)
+                AliasSQL='object_%s'%re.sub(R"[^a-zA-Z0-9\.\-µ]","_",v)
                 OriginalColName[AliasSQL]='object_%s'%v
                 sql1+=',o.%s as "%s" '%(k,AliasSQL)
         if self.param.sampledata=='1':
             sql1+="\n,s.orig_id sample_id,s.dataportal_descriptor as sample_dataportal_descriptor "
             Mapping=DecodeEqualList(Prj.mappingsample)
             for k,v in Mapping.items() :
-                sql1+=',s.%s as "sample_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
+                sql1+=',s.%s as "sample_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-µ]","_",v))
         if self.param.processdata=='1':
             sql1+="\n,p.orig_id process_id"
             Mapping=DecodeEqualList(Prj.mappingprocess)
             for k,v in Mapping.items() :
-                sql1+=',p.%s as "process_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
+                sql1+=',p.%s as "process_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-µ]","_",v))
             sql2+=" left join process p on o.processid=p.processid "
         if self.param.acqdata=='1':
             sql1+="\n,a.orig_id acq_id,a.instrument as acq_instrument"
             Mapping=DecodeEqualList(Prj.mappingacq)
             for k,v in Mapping.items() :
-                sql1+=',a.%s as "acq_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-]","_",v))
+                sql1+=',a.%s as "acq_%s" '%(k,re.sub(R"[^a-zA-Z0-9\.\-µ]","_",v))
             sql2+=" left join acquisitions a on o.acquisid=a.acquisid "
+        if ExportMode =='DOI':
+            sql1 += "\n,o.objid"
         if self.param.internalids == '1':
             sql1 += """\n,o.objid,o.acquisid as acq_id_internal,o.processid as processid_internal,o.sampleid as sample_id_internal,o.classif_id,o.classif_who
-                        ,o.classif_auto_id,to2.name classif_auto_name,classif_auto_score,classif_auto_when
-                        ,o.random_value object_random_value,o.sunpos object_sunpos """
+                    ,o.classif_auto_id,to2.name classif_auto_name,classif_auto_score,classif_auto_when
+                    ,o.random_value object_random_value,o.sunpos object_sunpos """
             if self.param.sampledata == '1':
                 sql1 += "\n,s.latitude sample_lat,s.longitude sample_long "
 
@@ -139,14 +166,21 @@ class TaskExportTxt(AsyncTask):
 
         sql3+=sharedfilter.GetSQLFilter(self.param.filtres,params,self.task.owner_id)
         splitfield="object_id" # cette valeur permet d'éviter des erreurs plus loins dans r[splitfield]
+        if ExportMode=='BAK':
+            self.param.splitcsvby = "sample"
+        elif ExportMode=='DOI':
+            self.param.splitcsvby = ""
         if self.param.splitcsvby=="sample":
             sql3+=" order by s.orig_id, o.objid "
             splitfield = "sample_id"
-        if self.param.splitcsvby=="taxo":
+        elif self.param.splitcsvby=="taxo":
             sql1 += "\n,concat(to1p.name,'_',to1.name) taxo_parent_child "
             sql3+=" order by taxo_parent_child, o.objid "
             splitfield = "taxo_parent_child"
-
+        else:
+            sql3 += " order by s.orig_id, o.objid " #tri par defaut
+        if ImageExport!='':
+            sql3+=",img_rank"
         sql=sql1+" "+sql2+" "+sql3
         logging.info("Execute SQL : %s"%(sql,))
         logging.info("Params : %s"%(params,))
@@ -171,7 +205,10 @@ class TaskExportTxt(AsyncTask):
                 if csvfile :
                     csvfile.close()
                     if zfile :
-                        zfile.write(fichier,"ecotaxa_"+prevvalue+".tsv")
+                        if ExportMode == 'BAK':
+                            zfile.write(fichier, os.path.join(str(prevvalue),"ecotaxa_" + str(prevvalue) + ".tsv"))
+                        else:
+                            zfile.write(fichier,"ecotaxa_"+str(prevvalue)+".tsv")
                 if splitcsv:
                     prevvalue = r[splitfield]
                 logging.info("Creating file %s" % (fichier,))
@@ -181,9 +218,11 @@ class TaskExportTxt(AsyncTask):
                 coltypes=[desc[1] for desc in self.pgcur.description]
                 FloatType=coltypes[2] # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
                 wtr.writerow([OriginalColName.get(c,c) for c in colnames])
-                if self.param.typeline=='1':
+                if ExportMode == 'BAK':
                     wtr.writerow(['[f]' if x==FloatType else '[t]' for x in coltypes])
             # on supprime les CR des commentaires.
+            if r.get('img_file_name','') and ExportMode == 'DOI': # les images sont dans des dossiers par taxo
+                r['img_file_name']=GetDOIImgFileName(r['objid'],r['img_rank'],r['object_annotation_category'],r['img_file_name'])
             if self.param.commentsdata == '1' and r['complement_info']:
                 r['complement_info'] = ' '.join(r['complement_info'].splitlines())
             if self.param.usecomasepa == '1':  # sur les decimaux on remplace . par ,
@@ -194,9 +233,49 @@ class TaskExportTxt(AsyncTask):
         if csvfile:
             csvfile.close()
             if zfile:
-                zfile.write(fichier, "ecotaxa_"+str(prevvalue) + ".tsv")
+                if ExportMode == 'BAK': #Split par sample et le fTSV est avec le sample.
+                    zfile.write(fichier, os.path.join(str(prevvalue) , "ecotaxa_" + str(prevvalue) + ".tsv"))
+                else:
+                    zfile.write(fichier, "ecotaxa_"+str(prevvalue) + ".tsv")
                 zfile.close()
         logging.info("Extracted %d rows", self.pgcur.rowcount)
+
+    def CreateIMG(self,SplitImageBy):
+        # tsvfile=self.param.OutFile
+        self.UpdateProgress(1,"Start Image export")
+        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
+        # self.param.OutFile= "exportimg_{0:d}_{1:s}.zip".format(Prj.projid,
+        #                                                      datetime.datetime.now().strftime("%Y%m%d_%H%M"))
+        # fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
+        logging.info("Opening for appending file %s"%(self.param.OutFile,))
+        # zfile=zipfile.ZipFile(fichier, 'w',allowZip64 = True,compression= zipfile.ZIP_DEFLATED)
+        # zfile.write(tsvfile)
+        zfile = zipfile.ZipFile(self.param.OutFile, 'a', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+
+        sql="""SELECT i.objid,i.file_name,i.orig_file_name,t.name,concat(t.name,' ('||to1p.name||')') taxo_parent_child,imgrank
+                  ,s.orig_id sample_orig_id
+                 From objects o 
+                 left join samples s on o.sampleid=s.sampleid
+                 join images i on o.objid=i.objid
+                 left join taxonomy t on o.classif_id=t.id
+                 LEFT JOIN taxonomy to1p on t.parent_id=to1p.id
+                   where o.projid=%(projid)s """
+        params={'projid':int(self.param.ProjectId)}
+        if self.param.samplelist!="":
+            sql+=" and s.orig_id= any(%(samplelist)s) "
+            params['samplelist']=self.param.samplelist.split(",")
+
+        sql+=sharedfilter.GetSQLFilter(self.param.filtres,params,self.task.owner_id)
+
+        logging.info("Execute SQL : %s"%(sql,))
+        logging.info("Params : %s"%(params,))
+        self.pgcur.execute(sql,params)
+        vaultroot=Path("../../vault")
+        for r in self.pgcur: # r0=objid, r2=orig_file_name,r4 parent_taxo,r5=imgrank,r6=samplename
+            if SplitImageBy=='taxo':
+                zfile.write(vaultroot.joinpath(r[1]).as_posix(), arcname=GetDOIImgFileName(r['objid'],r['imgrank'],r['taxo_parent_child'],r['file_name']))
+            else:
+                zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{0}/{1}".format(r['sample_orig_id'],r['orig_file_name']))
 
     def CreateXML(self):
         self.UpdateProgress(1,"Start XML export")
@@ -228,7 +307,7 @@ class TaskExportTxt(AsyncTask):
 
         sql1="""SELECT s.sampleid,s.orig_id,s.dataportal_descriptor
                  From samples s
-                   where projid=%(projid)s """
+                   where projid=%(projid)s and dataportal_descriptor is not null """
         sql3=" "
         params={'projid':int(self.param.ProjectId)}
         if self.param.samplelist!="":
@@ -249,7 +328,7 @@ class TaskExportTxt(AsyncTask):
 
             sql= """SELECT distinct to1.name
                 FROM objects o
-                LEFT JOIN taxonomy to1 on o.classif_id=to1.id
+                JOIN taxonomy to1 on o.classif_id=to1.id
                 where o.sampleid={0:d}
                 """.format(r['sampleid'], )
             taxo=GetAll(sql)
@@ -258,41 +337,6 @@ class TaskExportTxt(AsyncTask):
                 ET.SubElement(taxoel, 'taxonomicassignment',taxon=r[0])
 
         ET.ElementTree(root).write(fichier,encoding="UTF-8", xml_declaration=True)
-
-    def CreateIMG(self):
-        self.CreateTSV()
-        tsvfile=self.param.OutFile
-        self.UpdateProgress(1,"Start Image export")
-        Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        self.param.OutFile= "exportimg_{0:d}_{1:s}.zip".format(Prj.projid,
-                                                             datetime.datetime.now().strftime("%Y%m%d_%H%M"))
-        fichier=os.path.join(self.GetWorkingDir(),self.param.OutFile)
-        logging.info("Creating file %s"%(fichier,))
-        zfile=zipfile.ZipFile(fichier, 'w',allowZip64 = True,compression= zipfile.ZIP_DEFLATED)
-        zfile.write(tsvfile)
-
-        sql="""SELECT i.objid,i.file_name,i.orig_file_name,t.name,concat(to1p.name,'_',t.name) taxo_parent_child
-                 From objects o left join samples s on o.sampleid=s.sampleid
-                 join images i on o.objid=i.objid
-                 left join taxonomy t on o.classif_id=t.id
-                 LEFT JOIN taxonomy to1p on t.parent_id=to1p.id
-                   where o.projid=%(projid)s """
-        params={'projid':int(self.param.ProjectId)}
-        if self.param.samplelist!="":
-            sql+=" and s.orig_id= any(%(samplelist)s) "
-            params['samplelist']=self.param.samplelist.split(",")
-
-        sql+=sharedfilter.GetSQLFilter(self.param.filtres,params,self.task.owner_id)
-
-        logging.info("Execute SQL : %s"%(sql,))
-        logging.info("Params : %s"%(params,))
-        self.pgcur.execute(sql,params)
-        vaultroot=Path("../../vault")
-        for r in self.pgcur:
-            if self.param.use_internal_image_name != '1': # r0=objod, r2=orig_file_name,r4 parent_taxo
-                zfile.write(vaultroot.joinpath(r[1]).as_posix(), arcname="{0}/{1}".format(r[4], r[2]))
-            else:
-                zfile.write(vaultroot.joinpath(r[1]).as_posix(),arcname="{2}/{0}_{1}".format(r[0],r[2],r[4]))
 
     def CreateSUM(self):
         self.UpdateProgress(1,"Start Summary export")
@@ -336,10 +380,15 @@ class TaskExportTxt(AsyncTask):
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__,))
         if self.param.what=="TSV":
-            if self.param.exportimages=='1':
-                self.CreateIMG()
-            else:
-                self.CreateTSV()
+            self.CreateTSV(self.param.what)
+        elif self.param.what == "BAK":
+            self.CreateTSV(self.param.what)
+            if self.param.exportimagesbak != '':
+                self.CreateIMG('sample')
+        elif self.param.what == "DOI":
+            self.CreateTSV(self.param.what)
+            if self.param.exportimagesdoi != '':
+                self.CreateIMG('taxo')
         elif self.param.what=="XML":
             self.CreateXML()
         elif self.param.what=="SUM":
@@ -401,7 +450,8 @@ class TaskExportTxt(AsyncTask):
                 self.param.sumsubtotal=gvp("sumsubtotal")
                 self.param.internalids = gvp("internalids")
                 self.param.use_internal_image_name = gvp("use_internal_image_name")
-                self.param.exportimages = gvp("exportimages")
+                self.param.exportimagesbak = gvp("exportimagesbak")
+                self.param.exportimagesdoi = gvp("exportimagesdoi")
                 self.param.typeline = gvp("typeline")
                 self.param.splitcsvby = gvp("splitcsvby")
                 self.param.putfileonftparea = gvp("putfileonftparea")
@@ -421,7 +471,7 @@ class TaskExportTxt(AsyncTask):
                 self.param.processdata = "1"
                 self.param.acqdata = "1"
                 self.param.sampledata = "1"
-                self.param.splitcsvby="sample"
+                self.param.splitcsvby=""
             #recupere les samples
             sql="""select sampleid,orig_id
                     from samples where projid =%(projid)s

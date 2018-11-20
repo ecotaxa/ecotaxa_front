@@ -409,6 +409,8 @@ class TaskImport(AsyncTask):
                                 AstralCache['r'] = appli.CalcAstralDayTime(AstralCache['date'], AstralCache['time'], AstralCache['lat'], AstralCache['long'])
                             except AstralError as e: # dans certains endoit du globe il n'y a jamais de changement nuit/jour certains jours, ca provoque une erreur
                                 app.logger.error("Astral error : %s for %s", e,AstralCache)
+                            except Exception as e:   # autre erreurs par exemple si l'heure n'est pas valide;
+                                app.logger.error("Astral error : %s for %s", e, AstralCache)
                         Objs["obj_head"].sunpos = AstralCache['r']
                         # Affectation des ID Sample, Acq & Process et creation de ces dernier si necessaire
                         for t in Ids:
@@ -485,7 +487,7 @@ class TaskImport(AsyncTask):
               from (select o.sampleid,min(o.latitude) latitude,min(o.longitude) longitude
               from obj_head o
               where projid=%(projid)s and o.latitude is not null and o.longitude is not null
-              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s and s.longitude is null""",{'projid':self.param.ProjectId})
+              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s """,{'projid':self.param.ProjectId})
         self.pgcur.connection.commit()
         appli.project.main.RecalcProjectTaxoStat(Prj.projid)
         appli.project.main.UpdateProjectStat(Prj.projid)
@@ -503,7 +505,7 @@ class TaskImport(AsyncTask):
             g.prjprojid = Prj.projid
             g.prjmanagermailto=Prj.GetFirstManagerMailto()
             txt=""
-            if Prj.CheckRight(2)==False:
+            if Prj.CheckRight(1)==False:
                 return PrintInCharte("ACCESS DENIED for this project");
             g.appmanagermailto=GetAppManagerMailto()
 

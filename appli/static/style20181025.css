@@ -183,9 +183,13 @@ code {
 .classiftab .activeTaxo .taxoparent {
 	color: white;
 }
-.classiftab .counter {
+.classiftab .counternotv {
+	margin-left: 2px;
+}
+.classiftab .counterarea {
 	float:right;
 }
+
 .nav-tabs > li > a {
     /* adjust padding for height*/
     padding-top: 2px; 

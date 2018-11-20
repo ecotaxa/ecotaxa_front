@@ -58,7 +58,7 @@ def PrjEdit(PrjId):
          left join taxonomy t2 on t.parent_id=t2.id
         where t.id= any(%s) order by name """,(lst,))
     g.users=GetAssoc2Col("select id,name from users order by lower(name)",dicttype=collections.OrderedDict)
-    g.maplist=['objtime','depth_min','depth_max']+sorted(DecodeEqualList(Prj.mappingobj).values())
+    g.maplist=['objtime','objdate','latitude','longitude','depth_min','depth_max']+sorted(DecodeEqualList(Prj.mappingobj).values())
     g.scn=GetSCNNetworks()
     return render_template('project/editproject.html',data=Prj)
 ######################################################################################################################

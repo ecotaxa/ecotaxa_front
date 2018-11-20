@@ -5,8 +5,10 @@
 #filter1 td {padding-bottom: 2px;}
 #geofilter .form-control {width:100px;display: inline-block;}
 #map .popover{max-width: 380px; }
+.select2-selection { overflow: hidden !important; }
+.select2-selection__rendered { white-space: normal !important; word-break: break-all !important; }
 </style>
-<script src="/static/common.js"></script>
+<script src="/static/common_20181107.js"></script>
 
 
 <div id="particleinfodiv" class="panel panel-default" style="margin-left: 50px;margin-right: 50px;display: none;
@@ -73,7 +75,7 @@ If you use EcoTaxa or Ecotaxa particle module in your work, we would appreciate 
 		and <input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_todate" name="filt_todate"  autocomplete="off" placeholder="End" value="{{ reqfields['filt_todate'] }}">
   <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="ClearDateFilter();">Clear</button>
   </td></tr>
-  <tr><td>Instrument  </td><td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_instrum" name="filt_instrum"  autocomplete="off" value="{{ reqfields['filt_instrum'] }}"></td></tr>
+  <tr><td>Instrument  </td><td><input class="form-control" type="text" style="width: 100px;display: inline-block;" id="filt_instrum" name="filt_instrum"  autocomplete="off" value="{{ reqfields['filt_instrum'] }}"></td></tr>
   <tr><td>Profile type </td><td>{{ form.filt_proftype(style="width:100px") }}</td></tr>
   <tr><td>Ecotaxa Project </td><td>{{ form.filt_proj(style="width:100%") }}</td></tr>
   <tr><td>Particle Project </td><td>{{ form.filt_uproj(style="width:100%") }}</td></tr>
@@ -99,12 +101,14 @@ If you use EcoTaxa or Ecotaxa particle module in your work, we would appreciate 
 
 </form>
 </td>    {#----------- Fin formulaire filtrage -------------#}
-<td>
+<td style="vertical-align: top;position: relative;">
 <div id="map" class="map" style="width: 100%; height: 450px;">
 Displaying Map requires Internet Access to load map from https://services.arcgisonline.com
-</div></td></tr></table>
+</div>
+  <div id="samplecount" style="position: absolute;top: 430px; left:10px;font-weight: bold;">-</div>
+</td></tr></table>
 <div id="ajaxlog"></div>
-<div id="samplecount" style="position: absolute;top:510px; left:410px;font-weight: bold;">-</div>
+
 {#----------- Debut formulaire Graphique -------------#}
 <table style="width: 100%">
 <tr><td style="width: 400px;vertical-align: top;padding-right: 10px">
@@ -257,7 +261,7 @@ Sum abundance of children categories
 $( "#filt_fromdate,#filt_todate" ).datepicker({
     showButtonPanel: true,changeMonth: true,changeYear: true,dateFormat:"yy-mm-dd"
   });
-$('#filt_proj,#filt_uproj').select2();
+$('#filt_proj,#filt_uproj').select2({closeOnSelect:false});
 $('#filt_proftype').select2({ minimumResultsForSearch: -1});
 $('#gpr,#gpd,#ctd').select2( );
 
@@ -483,7 +487,7 @@ map.on('click', function(evt) {
     var coordinates = feature.getGeometry().getCoordinates();
 {#    popup.setPosition(coordinates); Utilisation de l'evt plutot pour traiter le monde cyclique#}
     popup.setPosition(evt.coordinate);
-    console.log(coordinates,evt.coordinate);
+{#    console.log(coordinates,evt.coordinate);#}
     MapPopupContent='Get Data for sample '+feature.get('psampleid');
     $(MapPopupElt).popover({
       'placement': 'right',

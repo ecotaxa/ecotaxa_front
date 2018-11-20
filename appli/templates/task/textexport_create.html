@@ -6,15 +6,21 @@
 {% extends "layout.html" %}
 
 {% block body %}
-
+<style>
+#divheadinfo,form {margin-left: 5px;}
+.DisabledCell {background-color: #BBB;}
+#tbl td:nth-child(1) input+b {cursor: pointer;}
+</style>
   {% if TxtFiltres!="" %}
     <span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters</span><BR>Filters :  {{ TxtFiltres }}
   {% endif %}
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
-  <table class="table table-bordered table-condensed " style="width: 700px">
+  <table class="table table-bordered table-condensed " style="width: 900px;margin-left: 10px" id="tbl">
+    <thead><tr><th>Export format</th><th>Options</th></tr></thead>
+    <tbody>
     <tr>
-      <td><input type="radio" name="what" value="TSV" {{ 'checked' if data.what=='TSV' }}>TSV</td>
+      <td><input type="radio" name="what" value="TSV" {{ 'checked' if data.what=='TSV' }}> <b>General export</b><br>(configurable export for general purposes)</td>
       <td>
 {{ checkboxinput("objectdata","1",data.objectdata) }} Object Data (median,mean, x, y, ...)<br>
 {{ checkboxinput("processdata","1",data.processdata) }} Process Data (software,version, ...)<br>
@@ -23,30 +29,48 @@
 {{ checkboxinput("histodata","1",data.histodata) }} Historical Data <br>
 {{ checkboxinput("commentsdata","1",data.commentsdata) }} Comments<br>
 {{ checkboxinput("usecomasepa","1",data.usecomasepa) }} Use comma as decimal separator<br>
-{{ checkboxinput("internalids","1",data.internalids) }} Internal IDs<br>
-{{ checkboxinput("typeline","1",data.typeline) }} 2nd line, Make exported file compatible for reimportation<br>
+{{ checkboxinput("internalids","1",data.internalids) }} Internal Ids (including taxonomic source Id)<br>
 Split in multiple files by <select name="splitcsvby" >
         <option value="" >NOT Active</option>
         <option value="sample" {{ 'selected' if data.splitcsvby=='sample' }} >Sample</option>
         <option value="taxo" {{ 'selected' if data.splitcsvby=='taxo' }} >Taxonomy (parent_child)</option>
       </select><br>
-{{ checkboxinput("exportimages","1",data.exportimages) }} Export all image files<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ checkboxinput("use_internal_image_name","1",data.keep_original_image_name) }} Use internal ids to name image files (usefull if duplicated imported image files)
+      </td>
+    </tr>
+    <tr>
+      <td><input type="radio" name="what" value="BAK" {{ 'checked' if data.what=='BAK' }}> <b>Backup export</b><br>(ready to re-import datasets, possibly including images)</td>
+      <td>
+        {{ checkboxinput("exportimagesbak","A",data.exportimagesbak) }} Export all image files
 
       </td>
     </tr>
     <tr>
-      <td><input type="radio" name="what" value="XML" {{'checked' if data.what=='XML'}} >XML</td>
+      <td><input type="radio" name="what" value="DOI" {{ 'checked' if data.what=='DOI' }}> <b>D.O.I. export</b><br>(ready to publish datasets)</td>
+      <td>
+        Export image files :
+        <select name="exportimagesdoi" >
+        <option value="" >NO Images</option>
+        <option value="1" {{ 'selected' if data.exportimagesdoi=='1' }} >Only Rank 0 Image</option>
+        <option value="A" {{ 'selected' if data.exportimagesdoi=='A' }} >All images of each objects</option>
+      </select><br>
+        To archive a dataset in a public repository for future scientific exploitation (and possibly attach a DOI to it), use this option.
+        <br>It will export all classifications in an easily readable, non-ambiguous format as well as all the metadata associated with each object.
+        <br>If you choose to export images, they will be sorted taxonomically in subfolders. Beware, however, that many online repositories may not accept to host the images because of their size.
+      </td>
+    </tr>
+    <tr>
+      <td><input type="radio" name="what" value="XML" {{'checked' if data.what=='XML'}} > <b>XML</b></td>
       <td></td>
     </tr>
     <tr>
-      <td><input type="radio" name="what" value="SUM" {{'checked' if data.what=='SUM'}} >Summary</td>
+      <td><input type="radio" name="what" value="SUM" {{'checked' if data.what=='SUM'}} > <b>Summary</b></td>
       <td>Count per category and <select name="sumsubtotal">
           <option value="W">Whole Project</option>
           <option value="S">Sample</option>
           <option value="A">Acquisition</option>
       </select></td>
     </tr>
+  </table>
 </table>
 <p>
 In order to ease the transfer of large exported datasets, you can chose to export your files to the Ecotaxa FTP that is utilized to import your data and images.
@@ -54,53 +78,13 @@ In order to ease the transfer of large exported datasets, you can chose to expor
 <br>Ask Ecotaxa managers ({{ g.LstUser|safe }}) if you do not have yet the permissions on this FTP
 <br> <input type="checkbox" name="putfileonftparea" value="Y"> Save export file on "Exported data" folder on the FTP Area
 </p>
-<script>
-function ComputeSampleList() {
-    var cv="";
-    $('#TblVar input').each(function (){
-       if($(this).prop("checked")){
-           if(cv!="")
-               cv+=",";
-           cv+=$(this).data("var");
-       }
-    });
-    $('#SampleList').val(cv);
-}
-function CheckBasedOnText() {
-    var cv=$('#SampleList').val();
-    var cvl=cv.split(",");
-    //console.log(cvl);
-    $('#TblVar input').each(function (){
-       if($(this).prop("checked",cvl.indexOf($(this).data("var"))>=0)){
-           if(cv!="")
-               cv+=",";
-           cv+=$(this).data("var");
-       }
-    });
-}
-</script>
-
 
 <table>
 <tr>
 {#{% if TxtFiltres=="" %}<td valign="top">#}
-{% if 1==0 %} {# Fonction désactivée #}
-Exported Samples :<br>
-<input type="text" name="samplelist" id="SampleList" value="{{ data.samplelist }}" style="width: 400px;"  autocomplete=off><br>
 
-Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', true );ComputeSampleList();">All</a>
-    / <a href="#tbltop2" onclick="$('#TblVar input').prop( 'checked', false );ComputeSampleList();">None</a>
-    / <a href="#tbltop2" onclick="CheckBasedOnText();" title="Usefull to copy setting from a previous export" >Text field content</a>
-
-<table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
-    <tr><th >Select</th><th width="200">Sample</th></tr>
-    {%   for r in g.SampleList %}
-        <tr><td><input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[1] }}" ></td><td>{{ r[1] }}</td></tr>
-    {% endfor %}
-</table>
-</td>{% endif %}
 <td valign="top">
-  <br><br><br>
+  <br>
     <input type="hidden" name="starttask" value="Y">
     <div class="form-group">
     <div class="col-sm-offset-2 col-sm-2">
@@ -114,8 +98,30 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
 </form>
 <script>
 $(document).ready(function() {
-        $('#TblVar input').click(ComputeSampleList);
-        CheckBasedOnText();
-    }); // Ready
+  UpdateTblBG();
+}); // Ready
+$('#tbl input[type=radio]').click(UpdateTblBG);
+$('#tbl').on('click','.DisabledCell,input:disabled',function (e) {
+  e.preventDefault();
+  alert("Select the right Export format on the left column first");
+
+});
+
+function UpdateTblBG(){
+  $('#tbl tbody tr').each(function () {
+    var IsActive=($(this).find('input[type=radio]:checked').length>0);
+    if(IsActive){
+      $(this).find('td:nth-child(2),select').removeClass('DisabledCell');
+    }else{
+      $(this).find('td:nth-child(2),select').addClass('DisabledCell');
+    }
+{#    $(this).find('td:nth-child(2) input,td:nth-child(2) select').attr('disabled',!IsActive)#}
+  });
+}
+
+$('#tbl td:nth-child(1) input+b').click(function () {
+  $(this).prev('input').prop('checked',true).click();
+})
+
 </script>
 {% endblock %}

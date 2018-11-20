@@ -9,7 +9,7 @@
 
 
 <form class="form-horizontal" method="post" enctype=multipart/form-data>
-Additional selected projects (<a href="/Task/Create/TaskSubset?p={{ data.ProjectId }}">Select additional projects</a>) : {{ g.dispextraprojects|safe }}
+{#Additional selected projects (<a href="/Task/Create/TaskSubset?p={{ data.ProjectId }}">Select additional projects</a>) : {{ g.dispextraprojects|safe }}#}
 <input type="hidden" name="extraprojects" value="{{ data.extraprojects }}">
 <table><tr><td>
   {%   if filtertxt!='' %}

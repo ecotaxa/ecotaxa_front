@@ -6,6 +6,15 @@
 {% extends "layout.html" %}
 
 {% block body %}
+<style>
+#divheadinfo,form {margin-left: 5px;}
+.DisabledCell {background-color: #BBB;}
+#tbl td:nth-child(1) label { vertical-align: top;margin-left: 3px }
+#tbl td:nth-child(1) { white-space: nowrap; }
+</style>
+
+<form class="form-horizontal" method="post" enctype=multipart/form-data>
+
 <a href="#create-project" data-toggle="collapse" class="help" >DOWNLOAD OPTIONS<span class="glyphicon glyphicon-info"></span></a></p>
 <div id="create-project" class="collapse panel panel-default">
   <div class="panel-body">
@@ -23,11 +32,13 @@
 <br><b>Samples count :  </b> {{ SampleCount }}
   
 
-<form class="form-horizontal" method="post" enctype=multipart/form-data>
   <input type="hidden" name="backurl" value="{{ backurl }}">
-  <table class="table table-bordered table-condensed " style="width: 1000px">
+  <table id=tbl class="table table-bordered table-condensed " style="width: 1000px">
+    <thead><tr><th>Export format</th><th>Options</th><th>Description</th></tr></thead>
+    <tbody>
     <tr>
-      <td><input type="radio" name="what" value="RED" {{'checked' if data.what=='RED'}} >Reduced data</td>
+      <td>
+        <input type="radio" name="what" value="RED" {{'checked' if data.what=='RED'}} id="cbred" ><label for="cbred"> Reduced data</label></td>
       <td>
 File format <select name="fileformat" >
         <option value="ODV" {{ 'selected' if data.fileformat=='ODV' }} >ODV</option>
@@ -44,12 +55,15 @@ File format <select name="fileformat" >
       </td>
     </tr>
     <tr>
-      <td><input type="radio" name="what" value="DET" {{'checked' if data.what=='DET'}} >Detailed data</td>
+      <td>
+        <input type="radio" name="what" value="DET" {{'checked' if data.what=='DET'}} id="cbdet" ><label for="cbdet"> Detailed data</label></td>
       <td>
 File format <select name="fileformatd" >
         <option value="ODV" {{ 'selected' if data.fileformat=='ODV' }} >ODV</option>
         <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
       </select>
+        <br><input type="checkbox" name="excludenotlivingd" value="Y"> Exclude not living
+
       </td>
       <td>CTD + PARTICLES abundances and biovolumes sorted in 45 detailed classes at vertical steps of 5m<br>
         ZOOPLANKTON from all categories and summed in parent categories at vertical steps of 5m <br>
@@ -59,9 +73,10 @@ File format <select name="fileformatd" >
       </td>
     </tr>
           <tr>
-      <td><input type="radio" name="what" value="RAW" {{ 'checked' if data.what=='RAW' }}>RAW</td>
+      <td><input type="radio" name="what" value="RAW" {{ 'checked' if data.what=='RAW' }} id="cbraw" ><label for="cbraw"> RAW</td>
       <td>
-        <input type="checkbox" name="excludenotliving" value="Y"> Exclude not living
+        <input type="checkbox" name="excludenotlivingr" value="Y"> Exclude not living
+        <br><input type="checkbox" name="includenotvalidatedr" value="Y"> Include not validated objects
       </td>
       <td>
         PARTICLES (UVP) : imported « BRU » data compressed and sorted in 1m bins<br>
@@ -96,6 +111,31 @@ In order to ease the transfer of large exported datasets, you can chose to expor
 
 </td>
 </tr>
+  </tbody>
 </table>
 </form>
+<script>
+$(document).ready(function() {
+  UpdateTblBG();
+}); // Ready
+$('#tbl input[type=radio]').click(UpdateTblBG);
+$('#tbl').on('click','.DisabledCell,input:disabled',function (e) {
+  e.preventDefault();
+  alert("Select the right Export format on the left column first");
+
+});
+
+function UpdateTblBG(){
+  $('#tbl tbody tr').each(function () {
+    var IsActive=($(this).find('input[type=radio]:checked').length>0);
+    if(IsActive){
+      $(this).find('td:nth-child(1n+2),select').removeClass('DisabledCell');
+    }else{
+      $(this).find('td:nth-child(1n+2),select').addClass('DisabledCell');
+    }
+  });
+}
+
+</script>
+
 {% endblock %}

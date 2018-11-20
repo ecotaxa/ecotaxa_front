@@ -254,10 +254,8 @@ class TaskImportDB(AsyncTask):
 
     # ******************************************************************************************************
     def QuestionProcess(self):
-        if not current_user.has_role(database.AdministratorLabel):
-            res=GetAll("select count(*) nbr from projectspriv where member=%s and privilege='Manage'",(current_user.id,))
-            if res[0]['nbr']==0:
-                return PrintInCharte("ACCESS DENIED for this feature, Admin Required")
+        if not (current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel) ):
+            return PrintInCharte("ACCESS DENIED for this feature, Admin or privilege creation Required")
         ServerRoot=Path(app.config['SERVERLOADAREA'])
         txt="<h1>Database Importation Task</h1>"
         errors=[]
@@ -300,8 +298,8 @@ class TaskImportDB(AsyncTask):
                 txt+="""<table class='table table-condensed table-bordered' style='width:600px;'>"""
                 for r in PrjList:
                     txt+="<tr><td><a class='btn btn-primary' href='?src={0}'>Select {0}</a></td><td>{1}</td><td>{2}</td></tr>".format(*r)
-                txt+="""</table>""";
-                return PrintInCharte(txt);
+                txt+="""</table>"""
+                return PrintInCharte(txt)
             if gvg("dest")=="" : # il faut choisir le projet destination
                 if current_user.has_role(database.AdministratorLabel):
                     PrjList=GetAll("select projid,title,status from projects order by lower(title)",cursor_factory=None)
@@ -315,8 +313,8 @@ class TaskImportDB(AsyncTask):
                 txt+="""<table class='table table-condensed table-bordered' style='width:600px;'>"""
                 for r in PrjList:
                     txt+="<tr><td><a class='btn btn-primary' href='?src={0}&dest={1}'>Select {1}</a></td><td>{2}</td><td>{3}</td></tr>".format(gvg("src"),*r)
-                txt+="""</table>""";
-                return PrintInCharte(txt);
+                txt+="""</table>"""
+                return PrintInCharte(txt)
 
 
             if gvg("prjok")=="" : # Creation du projet destination ou MAJ des attributs & detection des Taxo&Users Founds

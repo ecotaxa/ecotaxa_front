@@ -154,7 +154,7 @@ def GenerateRawHistogram(psampleid):
     if DepthOffset is None:
         DepthOffset = Prj.default_depthoffset
     if DepthOffset is None:
-        DepthOffset=1.20 # valeur par défaut, 1.20 m
+        DepthOffset=0
     DescentFilter=UvpSample.acq_descent_filter
     # Ecart format suivant l'endroit
     # dans result on a comme dans work
@@ -539,11 +539,17 @@ def GenerateTaxonomyHistogram(psampleid):
     if areacol is None:
         raise Exception("GenerateTaxonomyHistogram: esd attribute required in Ecotaxa project %d"%Prj.projid)
     app.logger.info("Esd col is %s",areacol)
-    LstTaxo=database.GetAll("""select classif_id,floor(depth_min/5) tranche,avg({areacol}) as avgarea,count(*) nbr
+    DepthOffset=UvpSample.acq_depthoffset
+    if DepthOffset is None:
+        DepthOffset = Prj.default_depthoffset
+    if DepthOffset is None:
+        DepthOffset=0
+
+    LstTaxo=database.GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,avg({areacol}) as avgarea,count(*) nbr
                 from objects
-                WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL
-                group by classif_id,floor(depth_min/5)"""
-                            .format(sampleid=UvpSample.sampleid,areacol=areacol))
+                WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL and classif_qual='V'
+                group by classif_id,floor((depth_min+{DepthOffset})/5)"""
+                            .format(sampleid=UvpSample.sampleid,areacol=areacol,DepthOffset=DepthOffset))
     LstVol=database.GetAssoc("""select cast(round((depth-2.5)/5) as INT) tranche,watervolume from part_histopart_reduit where psampleid=%s"""%psampleid)
     # 0 Taxoid, tranche
     # TblTaxo=np.empty([len(LstTaxo),4])

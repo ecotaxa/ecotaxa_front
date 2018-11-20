@@ -1,4 +1,4 @@
-from flask import render_template, g, flash,json
+from flask import render_template, g, flash,json,session,request
 from flask_login import current_user
 from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv
 from pathlib import Path
@@ -11,92 +11,68 @@ import appli.project.sharedfilter as sharedfilter
 ######################################################################################################################
 @app.route('/prj/')
 @login_required
-def indexProjects():
+def indexProjects(Others=False):
     params={}
-    sql="""select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),qpp.name,qpp.email
+    if Others:
+        sql = """select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),qpp.email,qpp.name,visible
+               from projects p
+               left Join projectspriv pp on p.projid = pp.projid and pp.member=%d
+               left join ( select * from (
+                            select u.email,u.name,pp.projid,rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
+                            from projectspriv pp join users u on pp.member=u.id
+                            where pp.privilege='Manage' and u.active=true ) q where rang=1
+                          ) qpp on qpp.projid=p.projid
+               where pp.member is null 
+               """ % (current_user.id,)
+    else:
+        sql="""select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),qpp.name,qpp.email
          from projects p
          left join ( select * from (
             select u.email,u.name,pp.projid,rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
             from projectspriv pp join users u on pp.member=u.id
             where pp.privilege='Manage' and u.active=true ) q where rang=1
           ) qpp on qpp.projid=p.projid
-
           """
-    if not current_user.has_role(database.AdministratorLabel):
-        sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
-    sql += " where 1=1 "
-    if gvg('filt_title','')!='':
+        if not current_user.has_role(database.AdministratorLabel):
+            sql+="  Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
+        sql += " where 1=1 "
+    filt_title=gvg('filt_title',session.get('prjfilt_title',''))
+    session['prjfilt_title'] = filt_title
+    if filt_title !='':
         sql +=" and (  title ilike '%%'||%(title)s ||'%%' or to_char(p.projid,'999999') like '%%'||%(title)s ) "
-        params['title']=gvg('filt_title')
-    if gvg('filt_instrum','')!='':
+        params['title']=filt_title
+
+    filt_instrum=gvg('filt_instrum',session.get('prjfilt_instrum',''))
+    session['prjfilt_instrum'] = filt_instrum
+    if filt_instrum!='':
         sql +=" and p.projid in (select distinct projid from acquisitions where instrument ilike '%%'||%(filt_instrum)s ||'%%' ) "
-        params['filt_instrum']=gvg('filt_instrum')
-    if gvg('filt_subset', '') == 'Y':
+        params['filt_instrum']=filt_instrum
+
+    # Les checkbox ne sont pas transmises si elle ne sont pas coché,
+    if 'filt_title' in request.args: # donc si le filtre du titre est transmis on utilise le get
+        filt_subset=gvg('filt_subset',"")
+        session['prjfilt_subset'] = filt_subset
+    else: # Sinon on prend la valeur de la session.
+        filt_subset =session.get('prjfilt_subset', '')
+    if filt_subset == 'Y':
         sql += " and not title ilike '%%subset%%'  "
+
     sql+=" order by lower(title)" #pp.member nulls last,
     res = GetAll(sql,params) #,debug=True
     CanCreate=False
-    if current_user.has_role(database.AdministratorLabel):
-        CanCreate=True
-    if database.GetAll("select count(*) nbr from projectspriv where privilege='Manage' and member=%(id)s",{'id':current_user.id})[0]['nbr']>0:
-        CanCreate = True
+    if not Others:
+        if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel):
+            CanCreate=True
 
     return PrintInCharte(
         render_template('project/list.html',PrjList=res,CanCreate=CanCreate,AppManagerMailto=appli.GetAppManagerMailto()
-                        , filt_title=gvg('filt_title'),filt_subset=gvg('filt_subset'),filt_instrum=gvg('filt_instrum')  ))
+                        , filt_title=filt_title,filt_subset=filt_subset,filt_instrum=filt_instrum,Others=Others
+                        , isadmin=current_user.has_role(database.AdministratorLabel)))
 ######################################################################################################################
 @app.route('/prjothers/')
 @login_required
 def ProjectsOthers():
-    txt = "<h3>Other projects</h3>" #,pp.member
-    sql="""select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),qpp.email,qpp.name,visible
-           from projects p
-           left Join projectspriv pp on p.projid = pp.projid and pp.member=%d
-           left join ( select * from (
-                        select u.email,u.name,pp.projid,rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
-                        from projectspriv pp join users u on pp.member=u.id
-                        where pp.privilege='Manage' and u.active=true ) q where rang=1
-                      ) qpp on qpp.projid=p.projid
-           where pp.member is null
-           order by lower(title)"""%(current_user.id,)
-    res = GetAll(sql) #,debug=True
-    txt+="""
-    <p>To have acces to theses projects, request access to the project manager.</p>
-    <table class='table table-hover table-verycondensed projectsList'>
-        <thead><tr>
-                <th></th>
-                <th>Title [ID]</th>
-                <th>Status</th>
-                <th>Nb objects</th>
-                <th>%&nbsp;validated</th>
-                <th>%&nbsp;classified</th>
-            </tr>
-        </thead>
-        <tbody>
-    """
-    for r in res:
-        txt += "<tr><td>"
-        if r[6] is not None:
-            txt+="<a class='btn btn-primary' href='mailto:{7}?{0}'>REQUEST ACCESS</a> ".format(
-                urllib.parse.urlencode({'body':"Please provide me privileges to project : "+ntcv(r[1])
-                                           ,'subject':'Project access request'}
-                                       ).replace('+','%20') # replace car urlencode mais des + pour les espaces qui sont mal traitrés par le navigateur
-                ,*r)
-        if r[8] ==True or current_user.has_role(database.AdministratorLabel) :
-            txt+="<a class='btn btn-primary' href='/prj/{0}'>View</a>".format(*r)
-
-        txt+="</td><td>{1} [{0}]".format(*r)
-        if r['name']: txt+="<br><a href='mailto:"+r['email']+"'>"+r['name']+"</a>"
-        txt+="""</td><td>{2}</td>
-        <td>{3:0.0f}</td>
-        <td>{4:0.2f}</td>
-        <td>{5:0.2f}</td>
-        </tr>""".format(*r)
-    txt+="</tbody></table>"
-    txt+="""<div class="col-sm-6 col-sm-offset-3">
-			<a href="/prj/" class="btn  btn-block btn-primary">Back to projects list</a>
-        </div>"""
-    return PrintInCharte(txt)
+    return indexProjects(Others=True)
 
 ######################################################################################################################
 def UpdateProjectStat(PrjId):
@@ -127,7 +103,7 @@ def GetFieldList(Prj,champ='classiffieldlist'):
     fieldlist["orig_id"]="Image Name"
     fieldlist["classif_auto_score"]="Score"
     objmap=DecodeEqualList(Prj.mappingobj)
-    for v in ('objtime','depth_min','depth_max'):
+    for v in ('objtime','objdate','latitude','longitude','depth_min','depth_max'):
         objmap[v]=v
     #fieldlist fait le mapping entre le nom fonctionnel et le nom à affiche
     # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe.
@@ -139,10 +115,10 @@ def GetFieldList(Prj,champ='classiffieldlist'):
     for k,v in sorted(fieldlist2.items(), key=lambda t: t[1]):
         fieldlist[k]=v
     return fieldlist
-# Contient la liste des filtre & parametres de cet écrans avec les valeurs par degaut
+# Contient la liste des filtre & parametres de cet écrans avec les valeurs par defaut
 FilterList={"MapN":"","MapW":"","MapE":"","MapS":"","depthmin":"","depthmax":"","samples":"","fromdate":"","todate":""
                ,"inverttime":"","fromtime":"","totime":"","sortby":"","sortorder":"","dispfield":"","statusfilter":""
-            ,'ipp':100,'zoom':100,'magenabled':1,'popupenabled':1,'instrum':'','month':'','daytime':''
+            ,'ipp':100,'zoom':100,'magenabled':0,'popupenabled':0,'instrum':'','month':'','daytime':''
             ,'freenum':'','freenumst':'','freenumend':'','freetxt':'','freetxtval':'','filt_annot':''}
 FilterListAutoSave=("sortby","sortorder","dispfield","statusfilter",'ipp','zoom','magenabled','popupenabled')
 ######################################################################################################################
@@ -198,6 +174,7 @@ def indexPrj(PrjId):
         for r in GetAll("select id,name from users where id =any (%s)",([int(x) for x in data["filt_annot"].split(',')],)):
                 data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(r['id'],r['name'])
     fieldlist=GetFieldList(Prj)
+    fieldlist["classif_when"]="Validation date"
     data["fieldlist"]=fieldlist
     data["sortlist"]=collections.OrderedDict({"":""})
     data["sortlist"]["classifname"]="Category Name"
@@ -233,18 +210,17 @@ def indexPrj(PrjId):
     if g.PrjAnnotate:
         g.headmenu.append(("","SEP"))
         if Prj.status=="Annotate":
-            g.headmenu.append(("/Task/Create/TaskClassifAuto?p=%d"%(PrjId,),"Train and Predict identifications"))
             g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d" % (PrjId,), "Train and Predict identifications V2"))
             g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2')" , "Train and Predict identifications V2"))
             g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d&frommodel=Y" % (PrjId,), "Predict identifications from trained model"))
             g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2?frommodel=Y')" , "Predict identifications from trained model"))
+            g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import images and metadata"))
 
         g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d"%PrjId , "Export"))
         g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')" , "Export"))
     if g.PrjManager:
         g.headmenu.append(("","SEP"))
         g.headmenuF.append(("","SEP"))
-        g.headmenu.append(("/Task/Create/TaskImport?p=%d"%(PrjId,),"Import images and metadata"))
         g.headmenu.append(("/prj/edit/%d"%(PrjId,),"Edit project settings"))
         g.headmenu.append(("/Task/Create/TaskSubset?p=%d&eps=y" % (PrjId,),"Extract Subset"))
         g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')" % (PrjId,),
@@ -261,7 +237,7 @@ def indexPrj(PrjId):
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
     return render_template('project/projectmain.html',top="",lefta=classiftab,leftb=filtertab
-                           ,right=right,data=data)
+                           ,right=right,data=data,title='EcoTaxa '+ntcv(Prj.title))
 
 ######################################################################################################################
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
@@ -306,7 +282,7 @@ def LoadRightPane():
     sqlparam={'projid':gvp("projid")}
     sql="""select o.objid,t.name taxoname,t2.name taxoparent,o.classif_qual,u.name classifwhoname,i.file_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
-  ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,to_char(o.objtime,'HH24:MI') objtime
+  ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,to_char(o.objtime,'HH24:MI') objtime,to_char(classif_when,'YYYY-MM-DD HH24:MI') classif_when
   ,case when o.complement_info is not null and o.complement_info!='' then 1 else 0 end commentaires
   ,o.latitude,o.orig_id,o.imgcount"""
     for k in fieldlist.keys():
@@ -464,12 +440,16 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
                     poptxt+="<br>%s : %s"%(v,"-")
                 else:
                     poptxt+="<br>%s : %s"%(v,ScaleForDisplay(r["extra_"+k]))
+            if r['classif_when']:
+                poptxt += "<br>Validation date : %s" % (ntcv(r['classif_when']),)
             popattribute="data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'".format(poptitletxt,poptxt,'left' if WidthOnRow>500 else 'right')
         else: popattribute=""
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher
         bottomtxt=""
         if 'objtime' in dispfield:
             bottomtxt+="<br>Time %s"%(r['objtime'],)
+        if 'classif_when' in dispfield and r['classif_when']:
+            bottomtxt+="<br>Validation date : %s"%(r['classif_when'],)
         for k,v in fieldlist.items():
             if k in dispfield:
                 if k=='classif_auto_score' and r["classif_qual"]=='V':
@@ -503,13 +483,14 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         <button class='btn btn-primary' onclick='SavePendingChanges();' title='CTRL+S' id=BtnSave disabled><span class='glyphicon glyphicon-save' /> Save pending changes [CTRL+S]</button>
         <button class='btn btn-success' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> <span class='glyphicon glyphicon-arrow-right' /> <span id=TxtBtnValidateAll>Validate all and move to next page</span></button>
         <!--<button class='btn btn-success' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>-->
-        <button class='btn btn-success' onclick='ValidateSelection();'><span class='glyphicon glyphicon-ok' />  Validate Selection</button>
+        <button class='btn btn-success' onclick="ValidateSelection('V');"><span class='glyphicon glyphicon-ok' />  Validate Selection [CTRL+L]</button>
+        <button class='btn btn-warning' onclick="ValidateSelection('D');">Set Selection Dubious</button>
         <button class='btn btn-default' onclick="$('#bottomhelp').toggle()" ><span class='glyphicon glyphicon-question-sign' /> Undo</button>
         <div id="bottomhelp" class="panel panel-default" style="margin:10px 0 0 40px;width:500px;display:none;">To correct validation mistakes (no UNDO button in Ecotaxa):
 <br>1.	Select Validated Status
 <br>2.	Sort by : Validation date
 <br>3.	Move the most recent (erroneous) validated objects into the suitable category
-</div>
+</div><script>$("#PendingChanges2").html('');</script>
         """)
     # Gestion de la navigation entre les pages
     if ipp==0:
@@ -562,9 +543,11 @@ def GetClassifTab(Prj):
     if g.PublicViewMode:
         ColForNbr = " nbr_v "
     InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
-    sql="""select t.id,t.name as taxoname,case when tp.name is not null and t.name not like '%% %%'  then ' ('||tp.name||')' else ' ' end as  taxoparent,nbr,nbrnotv
-    from (  SELECT    o.classif_id,   c.id,coalesce(sum(nbr),0) Nbr,coalesce(sum(nbr-nbr_v),0) NbrNotV
-        FROM (select id classif_id,{0} nbr,nbr_v from projects_taxo_stat where id>0 and projid=%(projid)s ) o
+    sql="""select t.id,t.name as taxoname,case when tp.name is not null and t.name not like '%% %%'  then ' ('||tp.name||')' else ' ' end as  taxoparent,nbr,nbr_p,nbr_d,nbr_v,nbrothers
+    from (  SELECT    o.classif_id,   c.id,coalesce(sum(nbr),0) Nbr,coalesce(sum(nbr_d),0) nbr_d,coalesce(sum(nbr_p),0) nbr_p,coalesce(sum(nbr-nbr_v-nbr_p-nbr_d),0) NbrOthers,coalesce(sum(nbr_v),0) nbr_v
+        FROM (select id classif_id,{0} nbr,nbr_v,nbr_d,nbr_p 
+              from projects_taxo_stat where 
+              id>0 and projid=%(projid)s ) o
         FULL JOIN (VALUES {1}) c(id) ON o.classif_id = c.id
         GROUP BY classif_id, c.id
       ) o
@@ -657,8 +640,6 @@ def prjGetClassifTab(PrjId):
         RecalcProjectTaxoStat(Prj.projid)
     UpdateProjectStat(Prj.projid)
     g.Projid=Prj.projid
-    if gvp("taxo")!="":
-        g.taxoclearspan="<span class='label label-default' onclick='SetTaxoFilter(false,-1)'>Clear "+gvp("taxofilterlabel")+"</span>"
     return GetClassifTab(Prj)
 
 ######################################################################################################################
@@ -673,7 +654,7 @@ def prjPurge(PrjId):
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     txt=ObjListTxt=""
     g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
-    txt += "<h3>ERASE OBJECTS TOOL </h3>"
+    txt += "<div style='margin-left: 5px;'><h3>ERASE OBJECTS TOOL </h3>"
     if gvp("objlist")=="":
         sql="select objid FROM objects o where projid="+str(Prj.projid)
         sqlparam={}
@@ -687,15 +668,17 @@ def prjPurge(PrjId):
             ObjListTxt="\n".join((str(r['objid']) for r in ObjList))
             txt+="<span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters, {0} objects</span>".format(len(ObjList))
         else:
-            txt += """Enter the list of internal object id you want to delete. <br>Or type in ‘’DELETEALL’’ to remove all object from this project.<br>
-        You can retrieve object id from a TSV export file using export data from project action menu<br>"""
+            txt += """Enter the list of internal object id you want to delete. 
+            <br>Or type in <span style='cursor:pointer;color:#337ab7;' onclick="$('#objlist').val('DELETEALL')">"DELETEALL"</span> to remove all object from this project.
+            <br>(<b>On big project it can be long, a NGinx Error may append, but erase process is still working on background, statistics are not updated during erase project. </b>)
+            <br>You can retrieve object id from a TSV export file using export data from project action menu<br>"""
         txt+="""
         <form action=? method=post>
-        <textarea name=objlist cols=15 rows=20 autocomplete=off>{1}</textarea><br>
+        <textarea name=objlist id=objlist cols=15 rows=20 autocomplete=off>{1}</textarea><br>
         <input type=checkbox name=destroyproject value=Y> DELETE project after DELETEALL action.<br>
         <input type="submit" class="btn btn-danger" value='ERASE THESES OBJECTS !!! IRREVERSIBLE !!!!!'>
         <a href ="/prj/{0}" class="btn btn-success">Cancel, Back to project home</a>
-        </form>
+        </form></div>
         """.format(PrjId,ObjListTxt)
     else:
         if gvp("objlist")=="DELETEALL":
@@ -734,11 +717,19 @@ def prjPurge(PrjId):
         noh=ExecSQL(sqldoh,SqlParam)
         no=ExecSQL(sqldo,SqlParam)
         if gvp("objlist")=="DELETEALL":
+            ExecSQL("""delete from part_histocat_lst 
+                    where psampleid in (select psampleid from  part_samples
+                        where sampleid in(select sampleid from samples where projid={0}))""".format(PrjId))
+            ExecSQL("""delete from part_histocat 
+                    where psampleid in (select psampleid from  part_samples
+                        where sampleid in(select sampleid from samples where projid={0}))""".format(PrjId))
+            ExecSQL("update part_samples set sampleid=null where sampleid in(select sampleid from samples where projid={0})".format(PrjId))
             ExecSQL("delete from samples where projid={0}".format(PrjId))
             ExecSQL("delete from acquisitions where projid={0}".format(PrjId))
             ExecSQL("delete from process where projid={0}".format(PrjId))
         txt+="Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files"%(no,noh,ni,nbrfile)
         if gvp("objlist")=="DELETEALL" and gvp("destroyproject")=="Y" :
+            ExecSQL("update part_projects set projid=null where projid={0}".format(PrjId))
             ExecSQL("delete from projectspriv where projid={0}".format(PrjId))
             ExecSQL("delete from projects where projid={0}".format(PrjId))
             txt+="<br>Project and associated privileges, destroyed"
@@ -782,4 +773,5 @@ def SimpleCreate():
     PrjPriv.privilege="Manage"
     db.session.add(PrjPriv)
     db.session.commit()
-    return "<a href='/prj/{0}' class='btn btn-primary'>Project Created ! Open IT</a>".format(Prj.projid)
+    # return "<a href='/prj/{0}' class='btn btn-primary'>Project Created ! Open IT</a>".format(Prj.projid)
+    return "<script>window.location='/prj/{0}';</script>".format(Prj.projid)

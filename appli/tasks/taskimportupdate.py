@@ -282,6 +282,7 @@ class TaskImportUpdate(AsyncTask):
         logging.info("Start Step 2 : Effective data import")
         logging.info("Taxo Mapping = %s",self.param.TaxoFound)
         logging.info("Users Mapping = %s",self.param.UserFound)
+        AstralCache={'date':None,'time':None,'long':None,'lat':None,'r':''}
         # Mise à jour du mapping en base
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         Prj.mappingobj=EncodeEqualList({v['field']:v.get('title') for k,v in self.param.Mapping.items() if v['table']=='obj_field' and v['field'][0]in ('t','n') and v.get('title')!=None})
@@ -371,6 +372,21 @@ class TaskImportUpdate(AsyncTask):
                                         # logging.info("skip F %s %s %s",FieldTable,FieldName,FieldValue)
                                 else:
                                     logging.info("skip T %s %s %s",FieldTable,FieldName,FieldValue)
+                        # Calcul de la position du soleil
+                        if (hasattr(Objs["obj_head"],'objdate') and hasattr(Objs["obj_head"],'objtime') and
+                            hasattr(Objs["obj_head"],'longitude') and hasattr(Objs["obj_head"],'latitude')):
+                            if not (AstralCache['date']==Objs["obj_head"].objdate and AstralCache['time']==Objs["obj_head"].objtime \
+                                and AstralCache['long']==Objs["obj_head"].longitude and AstralCache['lat']==Objs["obj_head"].latitude) :
+                                AstralCache = {'date': Objs["obj_head"].objdate, 'time': Objs["obj_head"].objtime
+                                    , 'long': Objs["obj_head"].longitude, 'lat': Objs["obj_head"].latitude, 'r': ''}
+                                from astral import AstralError
+                                try:
+                                    AstralCache['r'] = appli.CalcAstralDayTime(AstralCache['date'], AstralCache['time'], AstralCache['lat'], AstralCache['long'])
+                                except AstralError as e: # dans certains endoit du globe il n'y a jamais de changement nuit/jour certains jours, ca provoque une erreur
+                                    app.logger.error("Astral error : %s for %s", e,AstralCache)
+                                except Exception as e:   # autre erreurs par exemple si l'heure n'est pas valide;
+                                    app.logger.error("Astral error : %s for %s", e, AstralCache)
+                            Objs["obj_head"].sunpos = AstralCache['r']
                         # Affectation des ID Sample, Acq & Process et creation de ces dernier si necessaire
                         for t in Ids:
                             if  hasattr(Objs[t],'orig_id') and Objs[t].orig_id is not None: # si des colonnes sont definis sur les tables auxilaires
@@ -439,7 +455,7 @@ class TaskImportUpdate(AsyncTask):
               from (select o.sampleid,min(o.latitude) latitude,min(o.longitude) longitude
               from obj_head o
               where projid=%(projid)s and o.latitude is not null and o.longitude is not null
-              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s and s.longitude is null""",{'projid':self.param.ProjectId})
+              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s """,{'projid':self.param.ProjectId})
         self.pgcur.connection.commit()
         appli.project.main.RecalcProjectTaxoStat(Prj.projid)
         appli.project.main.UpdateProjectStat(Prj.projid)

@@ -36,11 +36,14 @@ def index():
     txt+="""
 	</div>
 	<div class="row" id="homeSelectors" style="margin-top: 20px; margin-bottom: 20px;">
-		<div class="col-sm-6">
+		<div class="col-sm-4">
         <a href="/explore/" class="btn btn-primary btn-lg btn-block">Explore images</a>
 		</div>
-		<div class="col-sm-6">
+		<div class="col-sm-4">
         <a href="/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
+		</div>		
+		<div class="col-sm-4">
+        <a href="/part/" class="btn btn-primary btn-lg  btn-block">Particle module</a>
 		</div>		
 	</div>
 """
@@ -50,7 +53,7 @@ def index():
     txt+="""<div class="row" id="homeLegal"><div class="col-sm-12">"""
     with open(NomFichier, 'r',encoding='utf8') as f:
         txt+=f.read()
-    txt+="""</div></div></div>"""
+    txt+="""<br><a href='/privacy'>Privacy</a></div></div></div>"""
     return PrintInCharte(txt)
 
 
@@ -87,6 +90,7 @@ def before_request_security():
         return
     # print(request.form)
     # current_user.is_authenticated
+    g.cookieGAOK = request.cookies.get('GAOK', '')
     g.menu = []
     g.menu.append((url_for("index"),"Home / Explore"))
     g.menu.append(("/prj/","Select Project"))
@@ -123,5 +127,5 @@ def before_teardown_commitdb(error):
 @app.after_request
 def after_request(response):
     response.headers[
-        'Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: cdnjs.cloudflare.com server.arcgisonline.com;frame-ancestors 'self';form-action 'self';"
+        'Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: cdnjs.cloudflare.com server.arcgisonline.com www.google.com www.gstatic.com www.google-analytics.com;frame-ancestors 'self';form-action 'self';"
     return response

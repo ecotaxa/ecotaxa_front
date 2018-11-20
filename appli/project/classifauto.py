@@ -18,11 +18,14 @@ import matplotlib.pyplot as plt
 @app.route('/prjcm/<int:PrjId>')
 @login_required
 def PrjConfusionMatrix(PrjId):
-    sql="""select lower(tr.name) ClassifReel,lower(tp.name) ClassifPredict
+    sql="""select lower(case when tr.name like '% %' then tr.name else concat(tr.name,'(',trp.name,')') end ) ClassifReel
+          ,lower(case when tp.name like '% %' then tp.name else concat(tp.name,'(',tpp.name,')') end)  ClassifPredict
 from objects o
 join taxonomy tp on tp.id=o.classif_auto_id
 join taxonomy tr on tr.id=o.classif_id
-where projid =%d and classif_qual='V'"""%PrjId
+left join taxonomy tpp on tp.parent_id=tpp.id 
+left join taxonomy trp on tr.parent_id=trp.id
+where projid ={} and classif_qual='V'""".format(PrjId)
     DBRes=np.array(GetAll(sql))
     txtbacktoproject="<a href='/prj/%d'>Back to project</a>"%PrjId
     Prj=database.Projects.query.filter_by(projid=PrjId).first()

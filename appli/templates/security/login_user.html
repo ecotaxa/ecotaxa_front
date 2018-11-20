@@ -1,27 +1,48 @@
 {% extends "layout.html" %}
 {% block body %}
+<link rel="stylesheet" href="/static/fontawesome-free-5.5.0-web/css/all.min.css">
 	<div class="row" id="content">
-		<div class="col-sm-6">
+		<div class="col-sm-6" style="margin-left: 5px">
 
 
 
 
 {% from "security/_custommacros.html" import render_field_with_errors, render_field,display_field_errors %}
 
-  <p>Ecotaxa Version : 1.5.2 2018.08.16</p>
+  <p>Ecotaxa Version : 1.6 2018-11-14</p>
 {# Log :
+2018.11.14 : V 1.6
+    RandomForestClassifier modified from balanced to auto
+    Export redesigned
+    Import #224,#243,#248: Robustified issues with Sun Position computation, lat/lon of sample always recomputed
+    ReImport : Added sun position computation, lat/lon of sample always recomputed
+    Subset #255 : Added duplication of CNN features
+    Admin Project : Enhanced user management
+    Manual classif #169,#164 : Refresh counter at each save, use separated badges
+    Manual classif #163,#162,#260 : autoremove autoadded by sort displayed fields, Validation,ObjDate,Lat,Long date available on list and added on popup
+    Manual classif #161,#159,#158 : autorefresh on top filter value change, added Ctrl+L for Validate selection, Keep vertical position on save
+    Manual classif #211,#210,#209,#207,#205,#183 : Help for TaxoFilter,Improved validator filter, Added filter on validation date, added save dubious
+    Manual classif #212,#217: duplicated saving status, Annotator can import
+    Maps : #208 added informations on the sample
+    EcoPart Fix : computation of Plankton abondance include only Validated Now (then Reduced & Détailled export too)
+    EcoPart Fix #201 : Export of raw now handle not-living exclusion
+    EcoPart Fix #196: computation of Plankton abondance use the Deepth offset now, also substracted
+    EcoPart Fix #184 : When ecotaxa project are merged, associated PartProject are now associated to the target project
+    Also #214,#220,#186,#179,#178,#176,#175,#152,#107
+    User Management : Handle Self creation and Country
+    Privacy : Added privacy page and Google Analytics Opt-out
 2018.08.16 : V 1.5.2
-                Added hability to work on database without trust connection configured on pg_hba
-                Added CSRF Token on AdminForms most sensibles screens
-                Added CSRF protection on console screen
-                Added CSP policies to reduce impact of XSS attack
-                Fixed several SQL Inject vulnerabilities
-                Fixed no more errors if folder SCN_networks is missing
-                Removed dead code
+              Added hability to work on database without trust connection configured on pg_hba
+              Added CSRF Token on AdminForms most sensibles screens
+              Added CSRF protection on console screen
+              Added CSP policies to reduce impact of XSS attack
+              Fixed several SQL Inject vulnerabilities
+              Fixed no more errors if folder SCN_networks is missing
+              Removed dead code
 2018.03.14 : V 1.5.1b
-               Moved Daily task in external launch using cron.py
-               fixed computation on particle
-               modified handling of ftp export copy due to issue on LOV FTP is on NFS volume
+              Moved Daily task in external launch using cron.py
+              fixed computation on particle
+              modified handling of ftp export copy due to issue on LOV FTP is on NFS volume
 2018.01.16 : V 1.5.1
               Bugfix on privilèges on part module causing performance issues
 2017.12.23 : V 1.5
@@ -103,13 +124,13 @@
 
 
 				<h3>Registration</h3>
+      <a href='/register' class="btn btn-success"><span class="fas fa-user-plus"></span> Create your EcoTaxa account</a>
 
-				<p>To register, please send an email to one the following persons</p>
-				<ul>
-                    {{ GetManagerList()|safe }}
-				</ul>
+				<p>In case of registration problem or if you want to avoid Google reCaptcha on Account creation page for privacy reasons
+          , please send an email to one the following persons in order to proceed to a manual account creation</p>
+				<ul>{{ GetManagerList('Ecotaxa : Account issue')|safe }}</ul>
 				
-
+    <a href="/privacy">Our privacy statement</a>
 		</div>
 
 		<div class="col-sm-5">
@@ -137,8 +158,8 @@
           </label>
         </div>
 					
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-  {{ render_field(login_user_form.next) }}
+        <button class="btn btn-lg btn-primary btn-block" type="submit"><span class="fas fa-check"></span>&nbsp;&nbsp; Log in</button>
+{#  {{ render_field(login_user_form.next) }}#}
 
 </form>
 {% include "security/_menu.html" %}

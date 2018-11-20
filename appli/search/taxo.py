@@ -57,7 +57,7 @@ def searchtaxo():
             left join taxonomy p1 on tf.parent_id=p1.id
             """+ExtraFrom+"""
               WHERE  lower(tf.name) LIKE %(term)s """+ExtraWhere+"""
-            order by inpreset desc,tf.name limit 200 """
+            order by inpreset desc,name limit 200 """
     res = GetAll(sql, param,debug=False)
     return json.dumps([dict(id=r[0],text=r[1],pr=r[2]) for r in res])
 

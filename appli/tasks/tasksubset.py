@@ -145,6 +145,7 @@ class TaskSubset(AsyncTask):
             for objid in LstObjects:
                 obj=db.session.query(database.Objects).filter_by(objid=objid[0] ).first()
                 objf=db.session.query(database.ObjectsFields).filter_by(objfid=objid[0] ).first()
+                objcnn=db.session.query(database.Objects_cnn_features).filter_by(objcnnid=objid[0] ).first()
                 NbrObjects+=1
                 oldobjid=obj.objid
                 if self.param.withimg=='Y':
@@ -180,6 +181,12 @@ class TaskSubset(AsyncTask):
                 make_transient(objf)
                 objf.objfid=obj.objid
                 db.session.add(objf)
+                if objcnn:
+                    dummy = objcnn.cnn01 #permet de forcer l'etat de objcnn sinon perd ses données sur les instruction suivantes.
+                    db.session.expunge(objcnn)
+                    make_transient(objcnn)
+                    objcnn.objcnnid=obj.objid
+                    db.session.add(objcnn)
                 db.session.commit()
                 if NbrObjects %20 ==0:
                     self.UpdateProgress(5+95*NbrObjects/len(LstObjects),"Subset creation in progress")

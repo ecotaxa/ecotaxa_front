@@ -13,7 +13,6 @@
 <h3>AUTOMATIC CLASSIFICATION V2: Selection Random Forest Model</h3>
 
 {{ PreviousTxt |safe }}
-
 <table><tr><td>
 <div class="panel panel-default" style='display: inline-block; width: 400px;margin-bottom: 0;'>
   <div class="panel-body">
@@ -50,8 +49,12 @@
   <br>Display screen to map categories <input type="checkbox" id="displaytaxomap" value="Y">
   <br>else use <input style="width: 600px" id="PostTaxoMapping" value="{{ g.posttaxomapping }}">
 </div>
+<style>
+.showcat {cursor: pointer;color: #0a6aa1;float: right;font-size: small;text-decoration: underline;}
+</style>
+
 <button type="button" class="btn btn-primary" onclick="StartPrediction()">Start Prediction</button>
-<script src='/static/common.js'></script>
+<script src='/static/common_20181107.js'></script>
 <script>
 function StartPrediction() {
   var modeldir=$('.selmodel:checked').data('modeldir');
@@ -65,6 +68,10 @@ function StartPrediction() {
     }
   PostDynForm("?{{ url|safe }}",param);
 }
+$('.showcat').click(function () {
+  $(this).next().toggle();
+
+});
 </script>
 <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
   <div class="modal-dialog modal-lg">

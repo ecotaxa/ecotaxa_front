@@ -27,6 +27,8 @@ function Save1Object(classqual) {
             if($("#taxolbpop").text().trim()!="")
                 $('#I'+objid).parents('td').find('.taxo').text($("#taxolbpop").text());
             $('#PopupDetails').modal('hide');
+            if(typeof(RefreshClassifTab)!=="undefined")
+              RefreshClassifTab();
         }
     });
 }

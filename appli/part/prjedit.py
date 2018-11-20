@@ -41,8 +41,7 @@ def part_prjedit(pprojid):
         if model.ownerid!=current_user.id and not current_user.has_role(database.AdministratorLabel):
             return PrintInCharte(ErrorFormat("Access Denied"))
     else:
-        if not (current_user.has_role(database.AdministratorLabel) or current_user.has_role(
-                database.ParticleProjectCreatorLabel)):
+        if not (current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel)):
             return PrintInCharte(ErrorFormat("Access Denied"))
         model=partdatabase.part_projects()
         model.pprojid=0

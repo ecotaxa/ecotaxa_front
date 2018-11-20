@@ -1,7 +1,7 @@
 from appli.database import GetAll
 
 FilterList=("MapN","MapW","MapE","MapS","depthmin","depthmax","samples","fromdate","todate"
-            ,"inverttime","fromtime","totime","statusfilter",'instrum','month','daytime'
+            ,"inverttime","fromtime","totime","statusfilter",'instrum','month','daytime','validfromdate','validtodate'
             ,'freenum','freenumst','freenumend','freetxt','freetxtval','filt_annot','taxo','taxochild')
 
 def GetSQLFilter(filtres,sqlparam,currentuserid):
@@ -78,6 +78,14 @@ def GetSQLFilter(filtres,sqlparam,currentuserid):
         if filtres.get("totime",'')!="":
             whereclause+=" and objtime<= time %(totime)s "
             sqlparam['totime']=filtres["totime"]
+
+    if filtres.get("validfromdate",'')!="":
+        whereclause+=" and classif_when>= to_timestamp(%(validfromdate)s,'YYYY-MM-DD HH24:MI') "
+        sqlparam['validfromdate']=filtres["validfromdate"]
+    if filtres.get("validtodate",'')!="":
+        whereclause+=" and classif_when<= to_timestamp(%(validtodate)s,'YYYY-MM-DD HH24:MI') "
+        sqlparam['validtodate']=filtres["validtodate"]
+
 
     if filtres.get("freenum",'')!="" and  filtres.get("freenumst",'')!="" :
         whereclause+=" and o.n"+("%02d"%int(filtres["freenum"][2:]))+" >=%(freenumst)s  "

@@ -24,9 +24,13 @@
   </td>
 
 </tr></table>
+<div id='MapPopup'></div>
+<style>
+  #map .popover{max-width: 380px; }
+</style>
 <script>
 
-var map,vectorSource,SampleSource;
+var map,vectorSource,SampleSource,MapPopupContent;
 
 function InitMap() {
 var attribution = new ol.Attribution({
@@ -123,6 +127,42 @@ var SampleLayer= new ol.layer.Vector({
 map.addLayer(vectorLayer);
 map.addLayer(SampleLayer);
 
+var MapPopupElt = document.getElementById('MapPopup');
+var popup = new ol.Overlay({
+  element: MapPopupElt,
+  positioning: 'bottom-center',
+  stopEvent: false,
+  offset: [3, 0]
+});
+map.addOverlay(popup);
+// display popup on click
+map.on('click', function(evt) {
+  var feature = map.forEachFeatureAtPixel(evt.pixel,
+      function(feature) {
+        return feature;
+      });
+
+  if (feature) {
+    var coordinates = feature.getGeometry().getCoordinates();
+{#    popup.setPosition(coordinates); Utilisation de l'evt plutot pour traiter le monde cyclique#}
+    popup.setPosition(evt.coordinate);
+{#    console.log(coordinates,evt.coordinate);#}
+    MapPopupContent='Get Data for sample '+feature.get('sampleid');
+    $(MapPopupElt).popover({
+      'placement': 'right',
+      'html': true,
+      'content': function (){return MapPopupContent;}
+    });
+    $(MapPopupElt).popover('show');
+    $.get('/search/mappopup/getsamplepopover/'+feature.get('sampleid'),function(data){
+      MapPopupContent=data;
+      $(MapPopupElt).popover('show');
+    });
+  }
+  else
+    $(MapPopupElt).popover('destroy');
+});
+
 } //InitMap
 
 function DrawSelectionRectangle(a){ {# X Y X Y  #}
@@ -168,12 +208,14 @@ $.getJSON( "/search/mappopup/samples/",p, function( data ) {
   SampleSource.clear();
   $.each( data, function( key, val ) {
 {#    console.log(key,val);#}
-    var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform(val, 'EPSG:4326','EPSG:3857')) });
+    var iconFeature = new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform([val['long'],val['lat']], 'EPSG:4326','EPSG:3857'))
+        ,sampleid:val['id'] });
     SampleSource.addFeature(iconFeature);
 
   });
 
 });
 }
+
 
 </script>
