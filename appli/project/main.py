@@ -481,7 +481,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
 		<div id='PendingChanges' class='PendingChangesClass text-danger'></div>
 		<button class='btn btn-default' onclick="$(window).scrollTop(0);"><span class='glyphicon glyphicon-arrow-up ' ></span></button>
         <button class='btn btn-primary' onclick='SavePendingChanges();' title='CTRL+S' id=BtnSave disabled><span class='glyphicon glyphicon-save' /> Save pending changes [CTRL+S]</button>
-        <button class='btn btn-success' onclick='ValidateAll();'><span class='glyphicon glyphicon-ok' /> <span class='glyphicon glyphicon-arrow-right' /> <span id=TxtBtnValidateAll>Validate all and move to next page</span></button>
+        <button class='btn btn-success' onclick='ValidateAll(0);'><span class='glyphicon glyphicon-ok' /> <span class='glyphicon glyphicon-arrow-right' /> <span id=TxtBtnValidateAll>Validate all and move to next page</span></button>
         <!--<button class='btn btn-success' onclick='ValidateAll(1);' title="Save changed annotations , Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> Save, Validate all &amp; Go to Next Page</button>-->
         <button class='btn btn-success' onclick="ValidateSelection('V');"><span class='glyphicon glyphicon-ok' />  Validate Selection [CTRL+L]</button>
         <button class='btn btn-warning' onclick="ValidateSelection('D');">Set Selection Dubious</button>

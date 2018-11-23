@@ -290,6 +290,7 @@ $('#SharePageBtn').click(function (e) {
     LoadRightPane('mail');
 });
 function LoadRightPane(NoAjax,SaveInProfile){
+    document.activeElement.blur();
     if(Object.keys(PendingChanges).length>0)
       if(confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?")==false)
         return;
@@ -457,6 +458,7 @@ function LoadRightPane(NoAjax,SaveInProfile){
 
 function RefreshClassifTab(ForceRecalc)
 {
+    Restoretaxolb=$('#taxolbanno option').detach();
     var HiddenItems=$('.classiftab td').filter(function() { return $(this).css('display') == 'none';}).map(function() { return $(this).attr('taxoid'); }).get();
     var HorizArrow=$('.classiftab td span.glyphicon-triangle-right').closest('td').map(function() { return $(this).attr('taxoid'); }).get();
     var PosScrollBar=$('#divclassiftab').scrollTop();

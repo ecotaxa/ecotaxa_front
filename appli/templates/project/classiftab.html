@@ -148,7 +148,9 @@ function SavePendingChanges(NextPage,forcedqual) {
             if(NextPage==1)
                $("#pageoffset").val(parseInt($("#pageoffset").val())+1);
             else {# Si on ne change pas de page on garde l'offset de la scrollbar vertical à sa position courante #}
-              RightPanelScrollPosAfterLoad=$(document).scrollTop();
+                if(NextPage===0) {} {# Distinction entre save et save go to next page qui en fait reste sur la page. #}
+                else
+                  RightPanelScrollPosAfterLoad=$(document).scrollTop();
             LoadRightPane();
             RefreshClassifTab();
         }

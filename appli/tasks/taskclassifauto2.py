@@ -265,7 +265,7 @@ class TaskClassifAuto2(AsyncTask):
             logging.info('DB Conversion to NP : %0.3f s', time.time() - TInit)
             logging.info("Variable shape %d Row, %d Col",*learn_var.shape)
             # Note : La multiplication des jobs n'est pas forcement plus performante, en tous cas sur un petit ensemble.
-            Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, class_weight="auto")
+            Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, class_weight="balanced")
 
             # TStep = time.time()
             # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
