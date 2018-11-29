@@ -635,6 +635,8 @@ def prjGetClassifTab(PrjId):
     if Prj is None:
         return "Project doesn't exists"
     g.PrjAnnotate=g.PrjManager=Prj.CheckRight(2)
+    if not g.PrjManager:
+        g.PrjAnnotate=Prj.CheckRight(1)
     g.PublicViewMode = not Prj.CheckRight(0)
     if gvp('ForceRecalc')=='Y':
         RecalcProjectTaxoStat(Prj.projid)
