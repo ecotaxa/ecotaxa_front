@@ -1,0 +1,25 @@
+{% macro selectinputdict(name, values, value='', addemptyrow=false ,extrataginfo='') -%}
+    <select name="{{ name }}" id="{{ name }}" {{ extrataginfo }}>
+    {% if addemptyrow %}
+      <option></option>
+    {% endif %}
+    {% for k,v in values.items() %}
+        <option value="{{ k or '' }}"  {{ 'selected' if value==k }}>{{ v }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}
+
+{% macro InputText (name,value='',extrataginfo='') -%}
+  <input type="text" name="{{ name }}" id="{{ name }}" value="{{ value  or '' }}"{{ extrataginfo }}>
+{%- endmacro %}
+
+{% macro TextArea (name,rows,value='',extrataginfo='') -%}
+  <textarea type="text" name="{{ name }}" id="{{ name }}" rows={{ rows }} {{ extrataginfo }}>{{ value  or ''}}</textarea>
+{%- endmacro %}
+
+
+{% macro NL2BR (text) -%}
+  {% for line in (text or '').splitlines() %}
+    {{line}}<br>
+  {% endfor %}
+{%- endmacro %}

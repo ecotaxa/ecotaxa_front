@@ -99,6 +99,9 @@ def before_request_security():
         g.menu.append(("/part/prj/","Particle projects management"))
     g.useradmin=False
     g.appliadmin=False
+    if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel) :
+        g.menu.append(("","SEP"))
+        g.menu.append(("/taxo/browse/","Manage Taxonomy"))
     if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.UserAdministratorLabel) :
         g.menu.append(("","SEP"))
         g.menu.append(("/admin","Admin Screen"))

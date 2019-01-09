@@ -236,6 +236,7 @@ def indexPrj(PrjId):
 
     appli.AddTaskSummaryForTemplate()
     filtertab=getcommonfilters(data)
+    g.useselect4 = True
     return render_template('project/projectmain.html',top="",lefta=classiftab,leftb=filtertab
                            ,right=right,data=data,title='EcoTaxa '+ntcv(Prj.title))
 
@@ -280,7 +281,7 @@ def LoadRightPane():
     t=["<a name='toppage'/>"]
     whereclause=" where o.projid=%(projid)s "
     sqlparam={'projid':gvp("projid")}
-    sql="""select o.objid,t.name taxoname,t2.name taxoparent,o.classif_qual,u.name classifwhoname,i.file_name
+    sql="""select o.objid,t.name taxoname,t2.name taxoparent,o.classif_qual,u.name classifwhoname,i.file_name,t.display_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
   ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,to_char(o.objtime,'HH24:MI') objtime,to_char(classif_when,'YYYY-MM-DD HH24:MI') classif_when
   ,case when o.complement_info is not null and o.complement_info!='' then 1 else 0 end commentaires
@@ -464,7 +465,8 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
 <div class='taxo'>{0}</div>
 <div class='displayedFields'>{3}</div></div>
 <div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div>"""\
-            .format(r['taxoname'],GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
+            .format(ntcv(r['display_name']).replace('>',' > ') #.replace('>','&nbsp;&#x276D&nbsp;')  #r['taxoname']
+                     ,GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else ""
                     ,"<b>!</b> "if r['commentaires'] >0 else "" )
         txt+="</td>"

@@ -168,7 +168,9 @@ def GlobalTaxoCompute():
                 where ps.sampleid is not null
                 and (
                       exists (select 1 from obj_head where obj_head.sampleid=ps.sampleid and obj_head.classif_when>ps.daterecalculhistotaxo)
-                or ps.daterecalculhistotaxo is null ) """)
+                or ps.daterecalculhistotaxo is null 
+                or exists (select 1 from part_histocat_lst hc where hc.psampleid=ps.psampleid and classif_id not in (select id from taxonomy)) 
+                )""")
     for S in Samples:
         ComputeZooHisto(S['psampleid'])
 

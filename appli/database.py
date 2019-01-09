@@ -13,7 +13,8 @@ import json,psycopg2.extras,datetime,os,time
 AdministratorLabel="Application Administrator"
 UserAdministratorLabel="Users Administrator"
 ProjectCreatorLabel= "Project creator"
-
+TaxoType={'P':'Phylo','M':'Morpho'}
+TaxoStatus={'A' : 'Active', 'D' : 'Deprecated' , 'N' : 'Not reviewed'}
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
 DayTimeList={'A':'Dawn','D':'Day','U':'Dust','N':'Night'}
 ClassifQualRevert={}
@@ -97,6 +98,16 @@ class Taxonomy(db.Model):
     parent_id  = db.Column(INTEGER)
     name   = db.Column(VARCHAR(100),nullable=False)
     id_source  = db.Column(VARCHAR(20))
+    taxotype   = db.Column(CHAR(1),nullable=False,server_default='P') # P = Phylo , M = Morpho
+    display_name = db.Column(VARCHAR(200))
+    lastupdate_datetime = db.Column(TIMESTAMP(precision=0))
+    id_instance=db.Column(INTEGER)
+    taxostatus = db.Column(CHAR(1),nullable=False,server_default='A')
+    rename_to=db.Column(INTEGER)
+    source_url = db.Column(VARCHAR(200))
+    source_desc = db.Column(VARCHAR(1000))
+    creator_email = db.Column(VARCHAR(255))
+    creation_datetime = db.Column(TIMESTAMP(precision=0))
     nbrobj  = db.Column(INTEGER)
     nbrobjcum  = db.Column(INTEGER)
     def __str__(self):

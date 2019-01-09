@@ -31,3 +31,28 @@ textarea.parsley-error {
 .parsley-errors-list.filled {
   opacity: 1;
 }
+
+/****  Gestion Popup  ******/
+.At2PopupMask {
+  position:absolute; top : 0; left: 0; width: 100%; height: 100%;
+    background-color:#000; opacity: 0.7;
+    display:none;
+}
+.At2PopupWindowContainer {
+    position:absolute; top : 0; left: 0; width: 100%; height: 100%;
+    display:none;
+}
+.At2PopupWindow {
+  position:relative;
+  background-color:white;  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 3px 9px rgba(0,0,0,.5);
+    box-shadow: 0 3px 9px rgba(0,0,0,.5);
+  margin: 20px auto; min-width: 300px; width: 700px;
+}
+.At2PopupHeader {border-top-left-radius: 6px;border-top-right-radius: 6px; padding:6px 10px ;
+    font-weight: bold;
+    border-bottom: 1px #eee solid;}
+.At2PopupContent {  padding:10px; }
+.ui-datepicker { z-index: 10000 !important; } /*Requis pour fonctionnement dans une popup*/
+.ui-front { z-index: 10000 !important; } /*Requis pour fonctionnement dans une popup de autocomplete*/

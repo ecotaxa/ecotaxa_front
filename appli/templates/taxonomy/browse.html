@@ -1,0 +1,95 @@
+
+{#<link rel="stylesheet" type="text/css" href="/static/DataTables1.10.18/Bootstrap-3.3.7/css/bootstrap.min.css"/>#}
+<link rel="stylesheet" type="text/css" href="/static/DataTables1.10.18/DataTables-1.10.18/css/dataTables.bootstrap.min.css"/>
+
+{#<script type="text/javascript" src="/static/DataTables1.10.18/Bootstrap-3.3.7/js/bootstrap.min.js"></script>#}
+<script type="text/javascript" src="/static/DataTables1.10.18/DataTables-1.10.18/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/DataTables1.10.18/DataTables-1.10.18/js/dataTables.bootstrap.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/static/DataTables1.10.18/Buttons-1.5.4/css/buttons.dataTables.css">
+<link rel="stylesheet" type="text/css" href="/static/DataTables1.10.18/Buttons-1.5.4/css/buttons.bootstrap.css">
+<script src="/static/DataTables1.10.18/Buttons-1.5.4/js/dataTables.buttons.min.js"></script>
+<script src="/static/DataTables1.10.18/Buttons-1.5.4/js/buttons.bootstrap.js"></script>
+<script src="/static/DataTables1.10.18/JSZip-2.5.0/jszip.min.js"></script>
+<script src="/static/DataTables1.10.18/Buttons-1.5.4/js/buttons.html5.min.js"></script>
+
+<style>
+.dataTable td {padding: 2px !important;}
+table.dataTable thead tr:nth-child(1) td {padding-right: 30px !important;}
+table.dataTable thead .sorting:after, table.dataTable thead .sorting_asc:after, table.dataTable thead .sorting_desc:after, table.dataTable thead .sorting_asc_disabled:after, table.dataTable thead .sorting_desc_disabled:after
+{ bottom: 2px;}
+#tbl tbody td:nth-child(3){cursor: pointer;}
+#tbl tbody td:nth-child(9){word-break: break-all;}
+#tbl_wrapper .btn-group {margin-left: 10px}
+</style>
+
+<div style="margin: 10px;">
+<div class="panel panel-default " style="padding: 5px;">
+  This screen list all taxon you can update. You can update only not-validated taxon created on this server.<br>
+  Theses taxa are not visible on other Ecotaxa instance until they are validated on EcoTaxoServer.<br>
+  It's recommended to synchronize prior making changes.
+</div>
+
+<button type="button" onclick="DoSync()" class="btn btn-primary"><span class="glyphicon glyphicon-refresh"></span> Synchronize with EcotaxoServer</button>
+<button type="button" onclick="NewTaxon()" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> Create taxon</button>
+<a href="{{ g.taxoserver_url }}" class="btn btn-primary"><span class="glyphicon glyphicon-link"></span> Browse entire taxonomy on EcotaxoServer</a>
+</div>
+
+<table id="tbl" style="width:100%" class="table table-striped table-bordered" >
+<thead>
+  <tr><td>ID</td><td>Parent ID</td><td>Display name</td><td>Type</td><td>Status</td>
+  <td>Creator</td><td>Source ID</td><td>Creation Date</td><td>Last update</td><td>Lineage</td>
+  </tr>
+</thead>
+<tbody>
+{% for l in lst %}
+  <tr><td>{{l.id}}</td><td>{{l.parent_id}}</td><td>{{l.name}}</td><td>{{l.taxotype}}</td><td>{{l.taxostatus}}</td>
+  <td>{{l.creator_email or ''}}</td><td>{{l.id_source or ''}}</td><td>{{l.creation_datetime or ''}}</td><td>{{l.lastupdate_datetime}}</td><td>{{l.tree}}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+
+<script>
+function DoSync() {
+  At2PopupWaitOpenLoad(1,"/taxo/dosync","EcotaxoServer Synchronisation");
+}
+function NewTaxon() {
+  At2PopupWaitOpenLoad(0,"/taxo/edit/0","Create new taxon");
+}
+
+$(document).ready(function() {
+
+    var table=$('#tbl').DataTable( {
+        scrollY:        '70vh',
+        scrollCollapse: true,
+        paging: false,
+        orderCellsTop: true,
+        buttons: ['copy', 'csv', 'excel'],
+        dom: 'Bfrtip',
+        orderMulti: false,
+        columnDefs: [
+           { width:'40px', targets: 0 }
+          ,{ width:'60px', targets: 1 }
+          ,{ width:'30px', targets: 3 }
+          ,{ width:'30px', targets: 4 }
+        ]
+
+    });
+
+
+    $('#tbl tbody').on('click','td:nth-child(3)',function () {
+      var taxoid=$(this).closest('tr').find('td:nth-child(1)').text();
+      At2PopupWaitOpenLoad(0,"/taxo/edit/"+taxoid,"Edit taxon "+taxoid);
+    });
+    $('#tbl tbody').on('click','td:nth-child(1),td:nth-child(2)',function () {
+      var taxoid=$(this).text();
+      if(taxoid=='') taxoid='0';
+      $('.dataTables_scrollHead thead tr:eq(1) td:nth-child(1) input').val('').change();
+      $('.dataTables_scrollHead thead tr:eq(1) td:nth-child(2) input').val(taxoid).change();
+    });
+} );
+
+
+</script>

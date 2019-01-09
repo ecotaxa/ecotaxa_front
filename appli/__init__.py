@@ -155,6 +155,38 @@ def ScaleForDisplay(v):
         return ""
     else:
         return v
+def XSSEscape(txt):
+    return html.escape(txt)
+
+def XSSUnEscape(txt):
+    return html.unescape(txt)
+
+def FormatError(Msg,*args,DoNotEscape=False,**kwargs):
+    caller_frameinfo=inspect.getframeinfo(sys._getframe(1))
+    txt = Msg.format(*args, **kwargs)
+    app.logger.error("FormatError from {} : {}".format(caller_frameinfo.function,txt))
+    if not DoNotEscape:
+        Msg=Msg.replace('\n','__BR__')
+    txt=Msg.format(*args,**kwargs)
+    if not DoNotEscape:
+        txt=XSSEscape(txt)
+    txt=txt.replace('__BR__','<br>')
+    return "<div class='alert alert-danger' role='alert'>{}</div>".format(txt)
+
+def FAIcon(classname,styleclass='fas'):
+    return "<span class='{} fa-{}'></span> ".format(styleclass,classname)
+
+def FormatSuccess(Msg,*args,DoNotEscape=False,**kwargs):
+    txt=Msg.format(*args,**kwargs)
+    if not DoNotEscape:
+        txt=XSSEscape(txt)
+    if not DoNotEscape:
+        Msg=Msg.replace('\n','__BR__')
+    txt=Msg.format(*args,**kwargs)
+    if not DoNotEscape:
+        txt=XSSEscape(txt)
+    txt=txt.replace('__BR__','<br>')
+    return "<div class='alert alert-success' role='alert'>{}</div>".format(txt)
 
 def CreateDirConcurrentlyIfNeeded(DirPath:pathlib.Path):
     """
@@ -224,6 +256,7 @@ import appli.tasks.taskmanager
 import appli.search.view
 import appli.project.view
 import appli.part.view
+import appli.taxonomy.taxomain
 import appli.usermgmnt
 
 @app.errorhandler(404)

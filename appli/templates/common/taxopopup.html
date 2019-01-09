@@ -22,6 +22,11 @@ function EnableSelect2Taxolb() {
         templateResult: FormatTaxoItem,
 {#        minimumInputLength: 3,#}
         dropdownCssClass:"width240 taxopopup"
+        ,"language": {
+           "noResults": function(){
+               return $("<span>No Results Found. <a href='/taxo/browse/?fromprj={{ g.Projid }}' >Create new category</a></span>");
+           }
+       }
     }); // Select2 Ajax
 }
 $(document).ready(function() {
