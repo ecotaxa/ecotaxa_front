@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database ,PrintInCharte,gvp,gvg,DecodeEqualList,ntcv
+from appli import db,app, database ,PrintInCharte,gvp,gvg,DecodeEqualList,ntcv,XSSEscape
 from flask import render_template, g, flash
 import logging,os,csv,re,datetime
 import zipfile,psycopg2.extras,shutil
@@ -83,8 +83,10 @@ class TaskExportTxt(AsyncTask):
                 ,uo1.name object_annotation_person_name,uo1.email object_annotation_person_email
                 ,to_char(o.classif_when,'YYYYMMDD') object_annotation_date
                 ,to_char(o.classif_when,'HH24MISS') object_annotation_time                
-                ,concat(to1.name,' ('||to1p.name||')') as object_annotation_category 
+                ,to1.display_name as object_annotation_category 
                     """
+        if ExportMode=='BAK':
+            sql1 += ",to1.id as object_annotation_category_id"
 
         if ExportMode!='BAK':
             sql1 += """
@@ -477,7 +479,7 @@ class TaskExportTxt(AsyncTask):
                     from samples where projid =%(projid)s
                     order by orig_id"""
             g.SampleList=GetAll(sql,{"projid":gvg("projid")},cursor_factory=None)
-            g.headcenter="<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title);
+            g.headcenter="<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,XSSEscape(Prj.title));
             if TxtFiltres!="":
                 g.headcenter = "<h4>Project : <a href='/prj/{0}?{2}'>{1}</a></h4>".format(Prj.projid, Prj.title,
                     "&".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""]))

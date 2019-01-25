@@ -22,17 +22,17 @@ def indexExplore():
     data["taxochild"]=gvg("taxochild",'1')
     data["sample_for_select"]=""
     if data["samples"]:
-        for r in GetAll("select sampleid,orig_id from samples where sampleid =any(%s)" , ([int(x) for x in data["samples"].split(',')],)):
-            data["sample_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
+        for r in GetAll("select sampleid,orig_id from samples where sampleid =any(%s)" , ([int(x) for x in data["samples"].split(',')],),doXSSEscape=True):
+            data["sample_for_select"]+="\n<option value='{sampleid}' selected>{orig_id}</option> ".format(**r)
     data["projects_for_select"]=""
     if data["projid"]:
-        for r in GetAll("select projid,title from projects where projid =any(%s) and visible=true" , ([int(x) for x in data["projid"].split(',')],)):
-            data["projects_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
+        for r in GetAll("select projid,title from projects where projid =any(%s) and visible=true" , ([int(x) for x in data["projid"].split(',')],),doXSSEscape=True):
+            data["projects_for_select"]+="\n<option value='{projid}' selected>{title}</option> ".format(**r)
     data["taxo_for_select"]=""
     if gvg("taxo[]"):
         print(gvg("taxo[]"))
-        for r in GetAll("SELECT id, name FROM taxonomy WHERE  id =any(%s) order by name",([int(x) for x in request.args.getlist("taxo[]")],),debug=False):
-            data["taxo_for_select"]+="\n<option value='{0}' selected>{1}</option> ".format(*r)
+        for r in GetAll("SELECT id, display_name FROM taxonomy WHERE  id =any(%s) order by name",([int(x) for x in request.args.getlist("taxo[]")],),debug=False):
+            data["taxo_for_select"]+="\n<option value='{id}' selected>{display_name}</option> ".format(**r)
     data["month_for_select"] = ""
     for (k,v) in enumerate(('January','February','March','April','May','June','July','August','September','October','November','December'),start=1):
         data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['month'].split(',') else '',k,v)
@@ -85,9 +85,9 @@ where o.classif_qual='V'
             # Sur les petits nombres de ref le in est plus performant que la sous requete
             taxoids=",".join((str(int(x[0])) for x in GetAll("""WITH RECURSIVE rq(id) as ( select id FROM taxonomy where id in(%s)
                                     union
-                                    SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id and (t.nbrobjcum>0 or t.nbrobj>0)
+                                    SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id 
                                     ) select id from rq """%(taxoids,))))
-            whereclause+=" and o.classif_id in ("+taxoids+")"
+            whereclause+=" and o.classif_id in ("+taxoids+")" # optimisation qui provoque de faux résultats : and (t.nbrobjcum>0 or t.nbrobj>0)
         else:
             whereclause+=" and o.classif_id in ("+taxoids+")"
 
@@ -155,7 +155,7 @@ where o.classif_qual='V'
     # sql+="  Limit %d"%(20*ipp,) # desactivé suite à split table objects mais pourrait devoir revenir.
 
     #filt_fromdate,#filt_todate
-    sql="""select o.*,t.name taxoname,u.name classifwhoname,i.file_name,s.orig_id samplename
+    sql="""select o.*,t.display_name taxoname,u.name classifwhoname,i.file_name,s.orig_id samplename
                   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width,ofi.orig_id
                   from ("""+sql+""")o
 left Join images i on o.img0id=i.imgid
@@ -168,7 +168,7 @@ where o.projid in (select projid from projects where visible=true)"""
     sql+=" order by random_value  "
     # sql+=" order by random()  "
     sql+=" Limit %d  "%(ipp,)
-    res=GetAll(sql,sqlparam,debug=False)
+    res=GetAll(sql,sqlparam,debug=False,doXSSEscape=True)
     trcount=1
     LineStart=""
     if(PageTopProjectLink):
@@ -247,8 +247,8 @@ where o.projid in (select projid from projects where visible=true)"""
         poptitletxt="%s"%(r['orig_id'],)
         # poptxt="%s"%(r['taxoname'],)
         poptxt=""
-        if r[12]!="":
-            poptxt+="<em>by</em> %s"%(r[12])
+        if r['classifwhoname']!="":
+            poptxt+="<em>by</em> %s"%(r['classifwhoname'])
         poptxt+="<br><em>in</em> "+ntcv(r['samplename'])
         popattribute="data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'".format(poptitletxt, poptxt, 'left' if WidthOnRow > 500 else 'right')
 

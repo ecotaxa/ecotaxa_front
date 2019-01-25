@@ -8,7 +8,7 @@ import os,io
 @login_required
 @roles_accepted(database.AdministratorLabel)
 def admin_edithomemessage():
-    g.headcenter="Edit home page message<br><a href=/admin>Back to admin home</a>"
+    g.headcenter="Edit home page message<br><a href='/admin/'>Back to admin home</a>"
     txt="<script src='//cdn.ckeditor.com/4.6.0/full/ckeditor.js'></script>"
     message=""
     NomFichier='appli/static/home/appmanagermsg.html'

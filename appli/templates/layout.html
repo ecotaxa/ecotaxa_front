@@ -40,7 +40,7 @@
 <link rel="stylesheet" href="/static/multizoom.css" type="text/css" />
 <script type="text/javascript" src="/static/multizoom.js"></script>
 <link rel="stylesheet" href="/static/ecotaxa.css" type="text/css" />
-<script src="/static/common_20181107.js"></script>
+<script src="{{ url_for('static', filename='common_20190123.js')}}"></script>
 <link rel="stylesheet" href="/static/fontawesome-free-5.5.0-web/css/all.min.css">
 
 <script>
@@ -67,7 +67,7 @@ $(document).ready(function() {
 {%  if module=='part' %}
     <td width="145px"><a href="/part/"><img src="/static/logo_ecopart.png"></a></td>
 {% else %}
-    <td width="140px"><a href="/"><img height="30" src="/static/logo_ecotaxa.png" style="margin: 10px 0"></a></td>
+    <td width="140px"><a href="/"><img height="30" src="/static/logo_ecotaxa_20.png" style="margin: 10px 0"></a></td>
 {% endif %}
 
     <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>

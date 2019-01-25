@@ -37,22 +37,21 @@
         <input type="text"  class="form-control" id="projtype" name="projtype"  value="{{ data.projtype|default('',true) }}">
       </td></tr>
 
-  <tr><td>Definition of preset for manual sorting </td><td>
-        <input type="text"  class="form-control" id="initclassiflist" name="initclassiflist"  value="{{ data.initclassiflist|default('',true) }}"><br>
+  <tr><td>Definition of preset for manual sorting
+  <br><button class="btn btn-default" type="button" onclick="PickPresetFromOthersProject();"><i class="fas fa-clone"></i> Pick from others projects</button>
+  </td><td>
+        <input type="hidden"  class="form-control" id="initclassiflist" name="initclassiflist"  value="{{ data.initclassiflist|default('',true) }}">
       <select name='inittaxo' id='inittaxo' class="taxolb" style="width: 100%;" multiple>
     {% for r in g.predeftaxo %}
       <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
     {% endfor %}
   </select>
     </td><td>
-      First line contains IDs separated by coma (1,2,3) and can be easily copied between projects.
-      <br><br>Second line is an helper with auto-completion by name, in normal case you should use this area.
-      <br><div class="panel panel-default" style="margin-top: 5px;margin-bottom:5px;">
 The PRESET tool permits to create a pre-defined list of categories for the sorting of the images from the project
-<ul><li>The list can be directly copied from another project (Copy / Paste)
+<ul><li>The list can be directly copied from another project (use Pick from others projects)
     <li>New categories can be added using the auto completion function
 </ul>
-  </div></td></tr>
+  </td></tr>
 
   <tr><td>Fields available for<br>sorting & Display<br>In the manual classification page</td><td>
         <textarea  class="form-control" id="classiffieldlist" name="classiffieldlist"  rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
@@ -182,6 +181,9 @@ $(document).ready(function() {
 function SubmitForm()
 { {# On passe par cette fonction intermediare car quand on avait le focus sur un select2 dans certaines situations ca ne fesait pas le post #}
     document.getElementById("form1").submit();
+}
+function PickPresetFromOthersProject() {
+  At2PopupWaitOpenLoad(2,'/prj/popupeditpreset/{{ data.projid }}','Pick preset from others projects',{});
 }
  </script>
 

@@ -29,29 +29,39 @@ SQLTreeJoin="""left join taxonomy t1 on t.parent_id=t1.id
       left join taxonomy t14 on t13.parent_id=t14.id"""
 
 
-@app.route('/taxo/browse/')
-# @login_required
-# @roles_accepted(database.AdministratorLabel,database.ProjectCreatorLabel)
+@app.route('/taxo/browse/',methods=['GET','POST'])
 def routetaxobrowse():
+    BackProjectBtn=''
+    if gvp('updatestat')=='Y':
+        # DoSyncStatUpdate()
+        DoFullSync()
+    if gvg('fromprj'):
+        BackProjectBtn="<a href='/prj/{}' class='btn btn-default btn-primary'>{} Back to project</a> ".format(int(gvg('fromprj')),FAIcon('arrow-left'))
+    if gvg('fromtask'):
+        BackProjectBtn = "<a href='/Task/Question/{}' class='btn btn-default btn-primary'>{} Back to importation task</a> ".format(int(gvg('fromtask')), FAIcon('arrow-left'))
+
+
     if not (current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel) ) :
         # /prj/653
         txt= "You cannot create tanonomy category, you must request to your project manager (check project page)"
         if gvg('fromprj'):
-            txt +="<br><a href='/prj/{}' class='btn btn-default'>{} Back to project</a> ".format(int(gvg('fromprj')),FAIcon('arrow-left'))
+            txt +="<br>"+BackProjectBtn
 
         return PrintInCharte(FormatError(txt,DoNotEscape=True))
-
-
     g.taxoserver_url=app.config.get('TAXOSERVER_URL')
 
-    lst=GetAll("""select t.id,t.parent_id,t.display_name as name,t.taxotype,t.taxostatus,t.creator_email,t.id_source
+    if current_user.has_role(database.AdministratorLabel):
+        ExtraWehereClause=""
+    else :
+        ExtraWehereClause="and t.creator_email='{}'".format(current_user.email)
+    lst=GetAll("""select t.id,t.parent_id,t.display_name as name,case t.taxotype when 'M' then 'Morpho' when 'P' then 'Phylo' else t.taxotype end taxotype,t.taxostatus,t.creator_email,t.id_source
       ,to_char(t.creation_datetime,'yyyy-mm-dd hh24:mi') creation_datetime,to_char(t.lastupdate_datetime,'yyyy-mm-dd hh24:mi') lastupdate_datetime,{}
     from taxonomy t
     {}
-    where t.id_instance ={} and t.taxostatus='N'
-    order by t.id
-    LIMIT 200
-    """.format(SQLTreeSelect,SQLTreeJoin,app.config.get('TAXOSERVER_INSTANCE_ID')))
+    where t.id_instance ={} {}
+    order by case t.taxostatus when 'N' then 1 else 2 end,t.id
+    LIMIT 400
+    """.format(SQLTreeSelect,SQLTreeJoin,app.config.get('TAXOSERVER_INSTANCE_ID'),ExtraWehereClause))
     for lstitem in lst:
         # lstitem['tree']=PackTreeTxt(lstitem['tree']) #evite les problèmes de safe
         if lstitem['parent_id'] is None:
@@ -60,21 +70,38 @@ def routetaxobrowse():
     # nbrtaxon=GetAll("select count(*) from taxonomy")[0][0]
     # return render_template('browsetaxo.html',lst=lst,nbrtaxon=nbrtaxon)
 
-    return PrintInCharte(render_template('taxonomy/browse.html',lst=lst))
+    return PrintInCharte(render_template('taxonomy/browse.html',lst=lst,BackProjectBtn=BackProjectBtn))
 
 
 def request_withinstanceinfo(urlend,params,id_instance=1):
     params['id_instance']=app.config.get('TAXOSERVER_INSTANCE_ID')
     params['sharedsecret']=app.config.get('TAXOSERVER_SHARED_SECRET')
+    params['ecotaxa_version']=appli.ecotaxa_version
+
     r=requests.post(app.config.get('TAXOSERVER_URL')+urlend,params)
     return r.json()
 
 
+def DoSyncStatUpdate():
+    Stats=database.GetAssoc2Col("""select id,sum(nbr) nbr from projects_taxo_stat group by id""")
+    j = request_withinstanceinfo("/setstat/", {'data': json.dumps(Stats)})
+    if j.get('msgversion','ok')!='ok':
+        flash(j['msgversion'],'warning')
+    if 'msg' in j:
+        PDT = database.PersistantDataTable.query.first()
+        PDT.lastserverversioncheck_datetime = datetime.datetime.now()
+        db.session.commit()
+        return j['msg']
+    return 'DoSyncStatUpdate : NetWork Error'
 
-@app.route('/taxo/dosync')
+
+@app.route('/taxo/dosync',methods=['POST'])
 @login_required
 @roles_accepted(database.AdministratorLabel,database.ProjectCreatorLabel)
 def routetaxodosync():
+    return DoFullSync()
+
+def DoFullSync():
     txt = ""
     try:
         UpdatableCols = ['parent_id', 'name', 'taxotype', 'taxostatus', 'id_source', 'id_instance', 'rename_to',
@@ -85,7 +112,6 @@ def routetaxodosync():
         j = request_withinstanceinfo("/gettaxon/", {'filtertype': 'since', 'startdate': MaxUpdateDate})
         if 'msg' in j:
             return appli.ErrorFormat("Sync Error :"+j['msg'])
-
         NbrRow=len(j)
         NbrUpdate=NbrInsert=0
         txt+="Received {} rows<br>".format(NbrRow)
@@ -142,7 +168,12 @@ def routetaxodosync():
             appli.part.prj.GlobalTaxoCompute()
 
         flash("Received {} rows,Insertion : {} Update :{}".format(NbrRow,NbrInsert,NbrUpdate),"success")
-        txt="<script>location.reload(true);</script>"
+        if gvp('updatestat')=='Y':
+            msg=DoSyncStatUpdate()
+            flash("Taxon statistics update : "+msg,"success" if msg=='ok' else 'error')
+
+        # txt="<script>location.reload(true);</script>" # non car ça reprovoque le post de l'arrivée initiale
+        txt="<script>window.location=window.location;</script>"
     except:
         msg="Error while syncing {}".format(sys.exc_info())
         app.logger.error(msg)
@@ -164,10 +195,11 @@ def routetaxoedit(taxoid):
     if taxoid>0:
         taxon= GetAll(sql,{'id':taxoid})[0]
     else:
-        taxon={'id':0,'creator_email':current_user.email
+        taxon={'id':0,'creator_email':current_user.email,'tree':''
             ,'creationdatetimefmt':datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
                }
     g.TaxoType=database.TaxoType
+    g.taxoserver_url = app.config.get('TAXOSERVER_URL')
     return render_template('taxonomy/edit.html', taxon=taxon)
 
 @app.route('/taxo/save/',methods=['POST'])

@@ -1,5 +1,5 @@
-from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate,database,gvp
-from flask_login import current_user,request
+from appli import db,app,PrintInCharte,gvg,AddTaskSummaryForTemplate,database,gvp,XSSEscape
+from flask_login import current_user
 from flask import  render_template, g, flash,jsonify
 import json,os,sys,datetime,shutil,flask,logging
 from flask_security import login_required
@@ -90,7 +90,7 @@ class AsyncTask:
         ProjectID = getattr(self.param, 'ProjectId', None)
         if ProjectID:
             Prj = database.Projects.query.filter_by(projid=ProjectID).first()
-            g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, Prj.title);
+            g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
         return render_template('task/monitor.html',TaskID=self.task.id,RedirectToMonitor=True)
 
     class Params:
@@ -113,9 +113,9 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.taskclassifauto2 import TaskClassifAuto2
     if ClassName=="TaskClassifAuto2":
         return TaskClassifAuto2(task)
-    from appli.tasks.tasktaxoimport import TaskTaxoImport
-    if ClassName=="TaskTaxoImport":
-        return TaskTaxoImport(task)
+    # from appli.tasks.tasktaxoimport import TaskTaxoImport
+    # if ClassName=="TaskTaxoImport":
+    #     return TaskTaxoImport(task)
     from appli.tasks.taskexporttxt import TaskExportTxt
     if ClassName=="TaskExportTxt":
         return TaskExportTxt(task)
@@ -222,7 +222,7 @@ def TaskShow(TaskID):
     ProjectID = getattr(task.param, 'ProjectId', None)
     if ProjectID:
         Prj = database.Projects.query.filter_by(projid=ProjectID).first()
-        g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, Prj.title);
+        g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
     return render_template('task/show.html',task=task.task,steperror=decodedsteperrors,CustomDetailsAvail=CustomDetailsAvail,extratext=txt)
 
 @app.route('/Task/GetFile/<int:TaskID>/<filename>', methods=['GET'])
@@ -351,9 +351,7 @@ def TaskMonitor(TaskID):
         ProjectID = getattr(task.param, 'ProjectId', None)
         if ProjectID:
             Prj = database.Projects.query.filter_by(projid=ProjectID).first()
-            g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, Prj.title);
+            g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
         return render_template('task/monitor.html',TaskID=task.task.id)
     except:
         return PrintInCharte("This task doesn't exists anymore, peraphs it was automaticaly purged")
-
-    txt = ""

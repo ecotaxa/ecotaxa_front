@@ -10,9 +10,9 @@ def GetSQLFilter(filtres,sqlparam,currentuserid):
         if filtres.get("taxochild", "") == "Y":
             sqlparam['taxo'] =[int(x[0]) for x in GetAll("""WITH RECURSIVE rq(id) as ( select id FROM taxonomy where id in(%s)
                                     union
-                                    SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id and (t.nbrobjcum>0 or t.nbrobj>0)
+                                    SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id 
                                     ) select id from rq """%(filtres["taxo"],))]
-            whereclause+=" and o.classif_id= any (%(taxo)s) "
+            whereclause+=" and o.classif_id= any (%(taxo)s) " # optimisation qui provoque de faux résultats : and (t.nbrobjcum>0 or t.nbrobj>0)
         else:
             whereclause+=" and o.classif_id=%(taxo)s "
             sqlparam['taxo']=filtres["taxo"]

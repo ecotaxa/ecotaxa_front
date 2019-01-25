@@ -101,13 +101,14 @@ def before_request_security():
     g.appliadmin=False
     if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel) :
         g.menu.append(("","SEP"))
-        g.menu.append(("/taxo/browse/","Manage Taxonomy"))
+        # g.menu.append(("/taxo/browse/","Manage Taxonomy"))
+        g.menu.append(("javascript:PostDynForm('/taxo/browse/',{updatestat:'Y'});", "Manage Taxonomy"))
     if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.UserAdministratorLabel) :
         g.menu.append(("","SEP"))
-        g.menu.append(("/admin","Admin Screen"))
+        g.menu.append(("/admin/","Admin Screen"))
         g.useradmin=True
     if current_user.has_role(database.AdministratorLabel) :
-        g.menu.append(("/Task/Create/TaskTaxoImport","Import Taxonomy"))
+        # g.menu.append(("/Task/Create/TaskTaxoImport","Import Taxonomy"))
         g.menu.append(("/Task/Create/TaskExportDb","Export Database"))
         g.menu.append(("/Task/Create/TaskImportDB","Import Database"))
         g.menu.append(("/Task/listall","Task Manager"))

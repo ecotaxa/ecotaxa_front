@@ -1,26 +1,26 @@
 <script>
     $("#img1").elevateZoom({scrollZoom : true});
     function SwapImg1(filename,width,height)    {
-        $('#img1').attr("width",width);
-        $('#img1').attr("height",height);
-        $('#img1').data('elevateZoom').swaptheimage('/vault/'+filename, '/vault/'+filename);
+        $('#img1').attr("width",width)
+                  .attr("height",height)
+                  .data('elevateZoom').swaptheimage('/vault/'+filename, '/vault/'+filename);
     }
 
 {% if Prj.CheckRight(1) %}
 function Save1Object(classqual) {
     var classid=$("#taxolbpop").val();
     var objid='{{ objid }}';
-    if(classid=='') {
+    if(classid==='') {
         alert('Select a new category first');
         return;
     }
-    req={changes:{},qual:classqual}
+    req={changes:{},qual:classqual};
     req['changes'][objid]=classid;
-    $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>');
-    $("#PendingChangesPop").load("/prj/ManualClassif/{{ Prj.projid}}",req,function(){
+    $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>')
+        .load("/prj/ManualClassif/{{ Prj.projid}}",req,function(){
         if ($("#PendingChangesPop").html().indexOf("Successfull")>0) {
             PendingChanges={}; // After successfull update no pending changes.
-            if(classqual=='V')
+            if(classqual==='V')
                 $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-validated');
             else
                 $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-dubious');
@@ -51,11 +51,11 @@ $(document).ready(function() {
         return (str + '').replace(/([^>\\r\\n]?)(\\r\\n|\\n\\r|\\r|\\n)/g, '$1' + breakTag + '$2');
     }
   function UpdateComment() {
-    req={comment:$('#compinfo').val()}
-    $("#ajaxresultcomment").html('<span class="label label-info">Server update in progress...</span>');
-    $("#ajaxresultcomment").load("/prj/UpdateComment/{{ objid }}",req,function(){
+    var req={comment:$('#compinfo').val()};
+    $("#ajaxresultcomment").html('<span class="label label-info">Server update in progress...</span>')
+        .load("/prj/UpdateComment/{{ objid }}",req,function(){
         $('#spancomplinfo').html(nl2br($('#compinfo').val()));
-    })
+    });
   }
   function gotocommenttab() {
     $("#linktabdaddcomments").click();
@@ -170,10 +170,5 @@ function editattr(o) {
   }
 }
 {% endif %}
-{#
-<style>
-  td[data-edit]::before {content: "<span class=' glyphicon glyphicon-pencil'></span>"}
-</style>
 
-#}
 </script>

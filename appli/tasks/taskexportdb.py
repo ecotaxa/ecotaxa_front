@@ -94,7 +94,7 @@ class TaskExportDb(AsyncTask):
     def QuestionProcess(self):
         if not current_user.has_role(database.AdministratorLabel):
             return PrintInCharte("ACCESS DENIED for this feature, Admin Required")
-        g.headcenter="<h3>DATABASE EXPORT TOOL</h3><a href=/admin>Back to admin home</a>"
+        g.headcenter="<h3>DATABASE EXPORT TOOL</h3><a href='/admin/'>Back to admin home</a>"
         txt=""
         errors=[]
         if self.task.taskstep==0:

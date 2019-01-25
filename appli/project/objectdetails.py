@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json,Response
 from flask_login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,ntcv,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,nonetoformat
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,ntcv,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,nonetoformat,XSSEscape
 from pathlib import Path
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security import login_required
@@ -19,8 +19,8 @@ def objectdetails(objid):
         WindowHeight=int(gvg("h"))-40 # on laisse un peu de marge en haut
         if WindowHeight<200 : WindowHeight=20000
     except:
-        PageWidth=20000;
-        WindowHeight=20000;
+        PageWidth=20000
+        WindowHeight=20000
 
     obj=database.Objects.query.filter_by(objid=objid).first()
     t=list()
@@ -32,7 +32,7 @@ def objectdetails(objid):
         return PrintInCharte("<a href=/>Back to home</a>")
     g.Projid=Prj.projid
     PrjManager=[(m.memberrel.email,m.memberrel.name) for m in Prj.projmembers  if m.privilege=='Manage']
-    t.append("<p>Project: <b><a href='/prj/%d'>%s</a></b> (managed by : %s)"%(Prj.projid,Prj.title
+    t.append("<p>Project: <b><a href='/prj/%d'>%s</a></b> (managed by : %s)"%(Prj.projid,XSSEscape(Prj.title)
                      ,",".join(("<a href ='mailto:%s'>%s</a>"%m for m in PrjManager))))
     if len(PrjManager)>0:
         t.append("<br>To report a mistake, contact <a href ='mailto:{0}?subject=Ecotaxa%20mistake%20notification&body={2}'>{1}</a>".format(
@@ -40,7 +40,7 @@ def objectdetails(objid):
 # //window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
     t.append("</p><p>Classification :")
     if obj.classif:
-        t.append("<br>&emsp;<b>%s</b>"%obj.classif.name)
+        t.append("<br>&emsp;<b>%s</b>"%XSSEscape(obj.classif.display_name))
         TaxoHierarchie=(r[0] for r in GetAll("""WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id FROM taxonomy where id =%(taxoid)s
                         union
                         SELECT t.id,t.name,t.parent_id FROM rq JOIN taxonomy t ON t.id = rq.parent_id )
@@ -171,14 +171,14 @@ def objectdetails(objid):
 Current Classification : Quality={} , date={}    
     <table class='table table-bordered table-condensed'><tr>
     <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""".format(obj.classif_qual,obj.classif_when))
-    Histo=GetAll("""SELECT to_char(classif_date,'YYYY-MM-DD HH24:MI:SS') datetxt,classif_type ,t.name,u.name username,classif_qual
+    Histo=GetAll("""SELECT to_char(classif_date,'YYYY-MM-DD HH24:MI:SS') datetxt,classif_type ,t.display_name as name,u.name username,classif_qual
   from objectsclassifhisto h
   left join taxonomy t on h.classif_id=t.id
   LEFT JOIN users u on u.id = h.classif_who
 WHERE objid=%(objid)s
-order by classif_date desc""",{"objid":objid})
+order by classif_date desc""",{"objid":objid},doXSSEscape=True)
     for r in Histo:
-        t.append("<tr><td>"+("</td><td>".join([str(x) if x else "-" for x in r])) +"</td></tr>")
+        t.append("<tr><td>"+("</td><td>".join([str(r[x]) if r[x] else "-" for x in ("datetxt","classif_type","name","username","classif_qual")])) +"</td></tr>")
     t.append("</table></div>")
     if Prj.CheckRight(1):
         t.append("""<div role="tabpanel" class="tab-pane" id="tabdaddcomments">
@@ -192,7 +192,7 @@ order by classif_date desc""",{"objid":objid})
     <div role="tabpanel" class="tab-pane" id="tabdmap">
 <div id="map2" class="map2" style="width: 100%; height: 450px;">
   Displaying Map requires Internet Access to load map from https://server.arcgisonline.com
-</div>""");
+</div>""")
 
     t.append("</table></div>")
     t.append(render_template("common/objectdetailsscripts.html", Prj=Prj,
@@ -201,9 +201,9 @@ order by classif_date desc""",{"objid":objid})
     # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenete isolée
     # Sinon affichage sans lien dans la charte.
     if gvg("ajax","0")=="1":
-        return """<table width=100%><tr><td><a href='/objectdetails/{0}?w={1}&h={2}' target=_blank><b>Open in a separate window</b> (right click to copy link)</a>
+        return """<table width=100% style='margin: 3px'><tr><td><a href='/objectdetails/{0}?w={1}&h={2}' target=_blank><b>Open in a separate window</b> (right click to copy link)</a>
         </td><td align='right'><button type="button" class="btn btn-default"  onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
-        </td></tr></table>""".format(objid,gvg("w"),gvg("h"))+"\n".join(t)
+        </td></tr></table><div style='margin: 0 5px;'>""".format(objid,gvg("w"),gvg("h"))+"\n".join(t)
     return PrintInCharte("<div style='margin-left:10px;'>"+"\n".join(t)+render_template('common/taxopopup.html'))
 
 @app.route('/objectdetailsupdate/<int:objid>',  methods=['GET', 'POST'])

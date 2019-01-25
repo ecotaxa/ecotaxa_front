@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from appli import db,app,g
+from appli import db,app,g,XSSEscape
 from flask_security import  UserMixin, RoleMixin
 from flask_login import current_user
 from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP,REAL
@@ -115,6 +115,7 @@ class Taxonomy(db.Model):
 Index('IS_TaxonomyParent',Taxonomy.__table__.c.parent_id)
 Index('IS_TaxonomySource',Taxonomy.__table__.c.id_source)
 Index('IS_TaxonomyNameLow',func.lower(Taxonomy.__table__.c.name))
+Index('IS_TaxonomyDispNameLow',func.lower(Taxonomy.__table__.c.display_name)) # create index IS_TaxonomyDispNameLow on taxonomy(lower(display_name));
 
 class Projects(db.Model):
     __tablename__ = 'projects'
@@ -352,6 +353,12 @@ class TempTaxo(db.Model):
 Index('IS_TempTaxoParent',TempTaxo.__table__.c.idparent)
 Index('IS_TempTaxoIdFinal',TempTaxo.__table__.c.idfinal)
 
+class PersistantDataTable(db.Model):
+    __tablename__ = 'persistantdatatable'
+    id = db.Column(INTEGER, primary_key=True)
+    lastserverversioncheck_datetime = db.Column(TIMESTAMP(precision=0))
+
+
 GlobalDebugSQL=False
 GlobalDebugSQL=True
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,keyid=0):
@@ -405,15 +412,22 @@ def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
     return res
 
 # Les parametres doivent être passés au format (%s)
-def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor):
+def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,doXSSEscape=False):
     if g.db is None:
         g.db=db.engine.raw_connection()
+    if doXSSEscape:
+        cursor_factory=psycopg2.extras.RealDictCursor
     cur = g.db.cursor(cursor_factory=cursor_factory)
     # cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
         res = cur.fetchall()
+        if doXSSEscape:
+            for rid,row in enumerate(res):
+                for k,v in row.items():
+                    if isinstance(v,str):
+                        res[rid][k]=XSSEscape(v)
     except psycopg2.InterfaceError:
         app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
         db.engine.connect()
@@ -467,7 +481,8 @@ def CSVIntStringToInClause(InStr):
 
 
 def GetTaxoNameFromIdList(IdList):
-    sql = """SELECT tf.id, tf.name||case when p1.name is not null and tf.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+    #     sql = """SELECT tf.id, tf.name||case when p1.name is not null and tf.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+    sql = """SELECT tf.id, tf.display_name as name
              FROM taxonomy tf
             left join taxonomy p1 on tf.parent_id=p1.id
             WHERE  tf.id = any (%s) 

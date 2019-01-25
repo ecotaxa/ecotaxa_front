@@ -220,7 +220,7 @@ adminApp.add_view(ProcessView(db.session,category='Objects'))
 adminApp.add_view(AcquisitionsView(db.session,category='Objects'))
 adminApp.add_view(TaxonomyView(db.session,category='Taxonomy',name="Edit Taxonomy"))
 
-adminApp.add_link(base.MenuLink('Import Taxonomy (admin only)', category='Taxonomy', url='/Task/Create/TaskTaxoImport'))
+# adminApp.add_link(base.MenuLink('Import Taxonomy (admin only)', category='Taxonomy', url='/Task/Create/TaskTaxoImport'))
 adminApp.add_link(base.MenuLink('Merge 2 categories (admin only)', category='Taxonomy', url='/dbadmin/merge2taxon'))
 adminApp.add_link(base.MenuLink('Taxonomy errors (admin only)', category='Taxonomy', url='/dbadmin/viewtaxoerror'))
 adminApp.add_link(base.MenuLink('Ecotaxa Home', url='/'))

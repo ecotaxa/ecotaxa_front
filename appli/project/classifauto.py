@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from appli import db,app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
-from appli.database import GetAll,GetAssoc2Col
+from appli.database import GetAll,GetAssoc2Col,XSSEscape
 from time import time
 from flask_security import login_required
 from flask import flash,g,Response
@@ -29,7 +29,7 @@ where projid ={} and classif_qual='V'""".format(PrjId)
     DBRes=np.array(GetAll(sql))
     txtbacktoproject="<a href='/prj/%d'>Back to project</a>"%PrjId
     Prj=database.Projects.query.filter_by(projid=PrjId).first()
-    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,XSSEscape(Prj.title))
     if len(DBRes)==0:
         flash("No validated objects with prediction",'error')
         return PrintInCharte(txtbacktoproject)

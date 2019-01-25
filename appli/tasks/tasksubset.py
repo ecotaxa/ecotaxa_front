@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,CreateDirConcurrentlyIfNeeded
+from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,XSSEscape,CreateDirConcurrentlyIfNeeded
 from flask import  render_template, g, flash,request
 import logging,copy,psycopg2.extras,shutil,datetime,time
 from pathlib import Path
@@ -213,7 +213,7 @@ class TaskSubset(AsyncTask):
         if not Prj.CheckRight(1):
             return PrintInCharte("ACCESS DENIED for this project<br>"+Prj.title)
         txt=""
-        g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+        g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,XSSEscape(Prj.title))
         errors=[]
         if self.task.taskstep==0:
             if gvg('eps')=="": # eps = Extra Project selected
@@ -259,7 +259,7 @@ A SUBSET can have different usages:<br>
             filtertxt=""
             if len(self.param.filtres) > 0:
                 filtertxt += ",".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""])
-                g.headcenter = "<h4><a href='/prj/{0}?{2}'>{1}</a></h4>".format(Prj.projid, Prj.title,
+                g.headcenter = "<h4><a href='/prj/{0}?{2}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title),
                 "&".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""]) )
 
             # Le projet de base est choisi second écran ou validation du second ecran

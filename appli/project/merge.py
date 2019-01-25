@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, g, flash,request,url_for,json
+from flask import Blueprint, render_template, g, flash
 from flask_login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,XSSEscape,FormatError
 from pathlib import Path
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security import login_required
@@ -21,7 +21,7 @@ def PrjMerge(PrjId):
     if not Prj.CheckRight(2): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot edit settings for this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
-    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,XSSEscape(Prj.title))
     txt = "<h3>Project Merge / Fusion </h3>"
 
     if not gvg('src'):
@@ -33,22 +33,22 @@ def PrjMerge(PrjId):
 </ul><li>Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.
 </ul>
                 """
-        sql="select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0) from projects p"
+        sql="select p.projid,title,status,coalesce(objcount,0) objcount,coalesce(pctvalidated,0) pctvalidated,coalesce(pctclassified,0) pctclassified from projects p"
         if not current_user.has_role(database.AdministratorLabel):
             sql+=" Join projectspriv pp on p.projid = pp.projid and pp.member=%d"%(current_user.id,)
         sql+=" where p.projid!=%d order by title"%Prj.projid
-        res = GetAll(sql) #,debug=True
+        res = GetAll(sql,doXSSEscape=True) #,debug=True
         txt+="""<table class='table table-bordered table-hover table-verycondensed'>
                 <tr><th width=120>ID</td><th>Title</td><th width=100>Status</th><th width=100>Nbr Obj</th>
             <th width=100>% Validated</th><th width=100>% Classified</th></tr>"""
         for r in res:
-            txt+="""<tr><td><a class="btn btn-primary" href='/prj/merge/{0}?src={1}'>Select</a> {1}</td>
-            <td>{2}</td>
-            <td>{3}</td>
-            <td>{4:0.0f}</td>
-            <td>{5:0.2f}</td>
-            <td>{6:0.2f}</td>
-            </tr>""".format(Prj.projid,*r)
+            txt+="""<tr><td><a class="btn btn-primary" href='/prj/merge/{activeproject}?src={projid}'>Select</a> {projid}</td>
+            <td>{title}</td>
+            <td>{status}</td>
+            <td>{objcount:0.0f}</td>
+            <td>{pctvalidated:0.2f}</td>
+            <td>{pctclassified:0.2f}</td>
+            </tr>""".format(activeproject=Prj.projid,**r)
         txt+="</table>"
         return PrintInCharte(txt)
 
@@ -60,7 +60,7 @@ def PrjMerge(PrjId):
         flash('You cannot merge for this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     txt += """<h4>Source Project : {0} - {1} (This project will be destroyed)</h4>
-            """.format(PrjSrc.projid,PrjSrc.title)
+            """.format(PrjSrc.projid,XSSEscape(PrjSrc.title))
     if not gvg('merge'): # Ici la src à été choisie et vérifiée
         if PrjSrc.mappingobj!=Prj.mappingobj:
             flash("Object mapping differ With source project ","warning")
@@ -70,13 +70,12 @@ def PrjMerge(PrjId):
             flash("Acquisition mapping differ With source project ","warning")
         if PrjSrc.mappingprocess!=Prj.mappingprocess:
             flash("Process mapping differ With source project ","warning")
-        txt+="""<p style='font-size: 18px;color:red;'><span class='glyphicon glyphicon-warning-sign'></span>
+        txt += FormatError(""" <span class='glyphicon glyphicon-warning-sign'></span>
         Warning project {1} - {2}<br>
         Will be destroyed, its content will be transfered in the target project.<br>
         This operation is irreversible</p>
-
-        <br><a class='btn btn-lg btn-warning' href='/prj/merge/{0}?src={1}&merge=Y'>Start Project Fusion</a>
-        """.format(Prj.projid,PrjSrc.projid,PrjSrc.title)
+        <br><a class='btn btn-lg btn-warning' href='/prj/merge/{0}?src={1}&merge=Y'>Start Project Fusion</a>        
+        """,Prj.projid,PrjSrc.projid,XSSEscape(PrjSrc.title),DoNotEscape=True)
         return PrintInCharte(txt)
 
     if gvg('merge')=='Y':

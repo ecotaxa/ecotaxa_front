@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from appli import db, database , PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,app,TempTaskDir,JinjaNl2BR
+from appli import db, database , PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,app,TempTaskDir,JinjaNl2BR,XSSEscape,TaxoNameAddSpaces
 from flask import  render_template, g, flash,request
 import logging,time,re,json,datetime,sys,os
 from appli.tasks.taskmanager import AsyncTask,DoTaskClean
@@ -375,27 +375,26 @@ class TaskClassifAuto2(AsyncTask):
                             USE previous Learning Set :  {2}</a><br><br>OR USE another project<br><br>""".format(
                     request.query_string.decode("utf-8"),PreviousLS, " + ".join(["#{0} - {1}".format(*r) for r in BasePrj]) )
         from flask_login import current_user
-        sql = "select projid,title,round(coalesce(objcount,0)*coalesce(pctvalidated,0)/100),mappingobj,coalesce(cnn_network_id,'') from projects where 1=1 "
+        sql = """select projid,title,round(coalesce(objcount,0)*coalesce(pctvalidated,0)/100) objvalid
+                ,mappingobj,coalesce(cnn_network_id,'') cnn_network_id 
+                from projects where 1=1 """
         sqlparam=[]
-
         if gvp('filt_title'):
             sql += " and title ilike (%s) "
             sqlparam.append(("%"+gvp('filt_title')+"%"))
         if gvp('filt_instrum', '') != '':
             sql += " and projid in (select distinct projid from acquisitions where instrument ilike '%%'||(%s) ||'%%' ) "
             sqlparam.append(gvp('filt_instrum'))
-
         sql += " order by title"
-        ProjList = database.GetAll(sql,sqlparam)
-
+        ProjList = database.GetAll(sql,sqlparam,doXSSEscape=True)
         TblBody=""
         for r in ProjList:
             MatchingFeatures = len(set(DecodeEqualList(r['mappingobj']).values()) & TargetFeatures)
             if MatchingFeatures<int(gvp("filt_featurenbr") if gvp("filt_featurenbr") else 10):
                 continue
-            TblBody += """<tr><td><input type='checkbox' class='selproj' data-prjid='{2}'></td>
-                        <td>#{2} - {3}</td><td>{4:0.0f}</td><td>{1}</td><td>{6}</td>
-                        </tr>""".format(Prj.projid,MatchingFeatures, *r)
+            TblBody += """<tr><td><input type='checkbox' class='selproj' data-prjid='{projid}'></td>
+                        <td>#{projid} - {title}</td><td>{objvalid:0.0f}</td><td>{MatchingFeatures}</td><td>{cnn_network_id}</td>
+                        </tr>""".format(MatchingFeatures=MatchingFeatures, **r)
 
         return render_template('task/classifauto2_create_lstproj.html'
                                ,url=request.query_string.decode('utf-8')
@@ -406,7 +405,8 @@ class TaskClassifAuto2(AsyncTask):
         # Second écran de configuration, choix des taxon utilisés dans la source
 
         # recupere les categories et le nombre d'occurence dans les projet de base/learning
-        sql = """select n.classif_id,t.name||case when p1.name is not null and t.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+        #         sql = """select n.classif_id,t.name||case when p1.name is not null and t.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+        sql = """select n.classif_id,t.display_name as name
                 ,n.nbr
                 from (select o.classif_id,count(*) nbr
                       from obj_head o where projid in ({0}) and classif_qual='V'
@@ -476,7 +476,8 @@ class TaskClassifAuto2(AsyncTask):
             if len(ModelFeatures)!=MatchingFeatures:
                 MatchingFeatures='Missing'
                 Radio = ""
-            TaxoDetails=" <span class='showcat'>Show categories</span><span style='display: none'><br>"+', '.join(sorted(r.get('categories',{}).values(),key=lambda v: v.upper()))+"</span>"
+            TaxoDetails=" <span class='showcat'>Show categories</span><span style='display: none'><br>"\
+                        +TaxoNameAddSpaces(', '.join(sorted(r.get('categories',{}).values(),key=lambda v: v.upper())))+"</span>"
             TblBody += """<tr><td> {6}</td>
                         <td>{0} - {1}{7}{5}</td><td>{2:0.0f}</td><td>{3}</td><td>{4}</td>
                         </tr>""".format(modeldir, r['name'],r['n_objects'],MatchingFeatures, r['scn_model']
@@ -506,7 +507,7 @@ class TaskClassifAuto2(AsyncTask):
         g.prjtitle=Prj.title
         for k in sharedfilter.FilterList:
             self.param.filtres[k] = gvg(k, "")
-        g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+        g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,XSSEscape(Prj.title))
         txt=""
         errors=[]
         # Le projet de base est choisi second écran ou validation du second ecran

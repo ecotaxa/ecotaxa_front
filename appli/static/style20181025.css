@@ -136,6 +136,10 @@ code {
 #column-right .taxo {
 	font-weight: bold;
 }
+.cat_ancestor {
+	font-weight: normal;
+	color: #888;
+}
 #column-right .subimg .displayedFields {
 	text-align: left;
 	font-size: 80%;

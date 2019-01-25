@@ -41,11 +41,11 @@ def search_mappopup_samples():
             if gvg("taxochild") == "1":
                 sqlparam['taxoid'] = [int(x[0]) for x in GetAll("""WITH RECURSIVE rq(id) as ( select id FROM taxonomy where id =any (%(taxoid)s)
                                         union
-                                        SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id and (t.nbrobjcum>0 or t.nbrobj>0)
+                                        SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id 
                                         ) select id from rq """ ,{"taxoid":sqlparam['taxoid']})]
 
             if gvg('projid'): sql+=" and projid=any (%(projid)s) "
-            sql += " ) ";
+            sql += " ) " # optimisation qui provoque de faux résultats : and (t.nbrobjcum>0 or t.nbrobj>0)
 
         res=GetAll(sql,sqlparam);
     else:

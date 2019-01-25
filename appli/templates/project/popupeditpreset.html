@@ -1,0 +1,137 @@
+<style>
+  .At2PopupWindow {margin: 20px 50px; width: auto;}
+  #TblProj {max-height: 750px; overflow-y: scroll;display: block;}
+  #TblProj td:nth-child(1) {min-width: 180px;}
+  #TblProj td:nth-child(1n+2) {font-size: small;}
+  #TblProj th {font-weight: bold;text-align: center;}
+  #TblProj .selvaleurs {margin-bottom: 3px;}
+  mark {background-color: yellow;}
+  .smallnowrap {width: 50px;white-space: nowrap;}
+</style>
+{{ txt }}
+<form id="formfilter">
+  <table style="margin-bottom: 10px;">
+    <tr>
+      <td class="smallnowrap"><b>Filter on categories</b> :&nbsp;</td>
+      <td class="smallnowrap"><input id="filtercateg" class="form-control" style="width: 150px;display: inline-block;">&nbsp;</td>
+      <td class="smallnowrap"><button id="btfilter" class="btn btn-primary"><i class="fas fa-search"></i> Filter</button></td>
+      <td class="smallnowrap" style="padding-left: 1em;"><i>(to search multiple categories,<br>separate parts by whitespace)</i></td>
+      <td style="padding-left:3em "><b>Preset IDs</b> :&nbsp;</td>
+      <td>
+        <div class="input-group">
+          <input id="idlist" class="form-control" style="width: 150px;display: inline-block;">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" onclick="$('#idlist').val('')" title="Clear Preset IDs field"><i class="fas fa-eraser"></i></button>
+          </span>
+        </div></td>
+      <td>&nbsp;<button id="btsetids" class="btn btn-success"><i class="fas fa-check"></i> Set IDs &amp; Close</button></td>
+    </tr>
+  </table>
+</form>
+<table id="TblProj" class="table table-bordered table-condensed">
+<thead>
+<tr><th>Project</th><th>Preset categories</th><th>Extra categories used</th></tr>
+</thead><tbody>
+{% for P in Prj %} {# Pour améliorer les performances, on affiche que les 50 premieres lignes #}
+  <tr {{ "style='display:none'"|safe if loop.index>50 }} data-presetids="{{ P.presetids }}" data-objtaxonids="{{ P.objtaxonids }}">
+    <td>{{ P.title }} ({{P.projid}})<br>
+      <button class="btn btn-xs btn-primary selvaleurs" data-what="preset" title="Add Preset categories content to the current preset">Add Preset</button>
+      <button class="btn btn-xs btn-primary selvaleurs" data-what="objtaxon" title="Add Extra categories content to the current preset">Add Extra</button>
+    </td>
+    <td>{{ P.preset }}</td><td>{{ P.objtaxonnotinpreset }}</td></tr>
+{% endfor %}
+</tbody>
+<tfoot>
+<tr {{ "style='display:none'"|safe if Prj|length()<50 }}><td colspan="3">More projects avaialable but hidden to avoid a too big list, you should add filter</td></tr>
+</tfoot>
+</table>
+<script>
+function Filter(search) {
+  var DisplayedRows=0;
+  search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape string
+  var searchlist=search.split(' ');
+  var searchlistclean=[];
+  for(var i in searchlist)
+    if(searchlist[i]!=='')
+      searchlistclean.push(searchlist[i]);
+  $('#TblProj tbody tr ').each(function () {
+      var tr=$(this);
+      {# pour améliorer les performances on mémorise les text() #}
+      var tds={1:{td:tr.find('td:nth-child(2)')},2:{td:tr.find('td:nth-child(3)')}};
+      tds[1].text=tds[1].td.html().replace(/<\/?mark>/gi,'');
+      tds[2].text=tds[2].td.html().replace(/<\/?mark>/gi,'');
+      var OneNotFound=false; {# Tous les mots trouvés sur la lignes ? permettra de décider si on affiche la ligne#}
+      for(i in searchlistclean) {
+        var retest = new RegExp(searchlistclean[i], 'i');
+        if(retest.test(tds[1].text)===false) {
+          if(retest.test(tds[2].text)===false) {
+            OneNotFound=true;
+            break;
+          }
+        }
+      }
+      for (var tdid=1;tdid<=2;tdid++) {
+        var td=tds[tdid].td;
+        var tdtext=tds[tdid].text;
+        if((search!=='')&&(OneNotFound===false)){
+          for(i in searchlistclean) {
+            var re = new RegExp('(' + searchlistclean[i] + ')', 'gi');
+            tdtext=tdtext.replace(re,"<mark>$1</mark>")
+          }
+          td.html(tdtext).addClass('hasMark');
+        }
+        else if((td.hasClass('hasMark'))&&(!OneNotFound)) {#  Si pas de mark dans la cellule et qu'il faut montrer ce td on efface les mark  #}
+          td.html(tdtext).removeClass('hasMark');
+      }
+      if((DisplayedRows<50)&&(OneNotFound===false)) {# si un seul pas trouvé on masque la ligne, si on cherche rien on montre car on ne cherche pas #}
+      {   {# Limite à 50 pour avoir une meilleure reactivité de l'affichage #}
+        DisplayedRows++;
+        tr.show();
+      }
+      else
+        tr.hide();
+  });
+  $('#TblProj tfoot').toggle(DisplayedRows>=50);
+}
+$('#formfilter').submit(function (e) {
+  e.preventDefault();
+  Filter($('#filtercateg').val());
+  $('#filtercateg').focus();
+});
+{#Filter('t001 t002');#}
+var jidlist=$('#idlist');
+{# Handle Select buttons #}
+$('#TblProj').on('click','.selvaleurs',function () {
+  var what=$(this).data('what')+'ids';
+  var ids=$(this).closest('tr').data(what);
+  ids=ids.toString().split(',');
+  ids=ids.concat(jidlist.val().toString().split(','));
+  var uniqueIds = []; {# supprime doublons #}
+  $.each(ids, function(i, el){
+    if(($.inArray(el, uniqueIds) === -1)&&(el!==''))
+      uniqueIds.push(el);
+  });
+{#  uniqueIds.sort(); {# tri juste pour aider les tests #}
+  jidlist.val(uniqueIds.join(','));
+});
+
+{# Initialize IDs field from the Select of Edit Screen #}
+var LstIds=[];
+var jSelectInitaxo=$('#inittaxo');
+jSelectInitaxo.find('option:selected').each(function () {
+  LstIds.push($(this).val());
+});
+jidlist.val(LstIds.join(','));
+
+$("#btsetids").click(function () {
+  $.post("/search/taxoresolve",{idlist:jidlist.val()},function (data) {
+    jSelectInitaxo.html(""); {# Efface les options existantes #}
+    for(var k in data) {
+      jSelectInitaxo.append(new Option(data[k], k, true, true));
+    }
+    jSelectInitaxo.trigger('change');
+    At2PopupClose(2);
+  });
+});
+$('#filtercateg').focus();
+</script>

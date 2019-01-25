@@ -44,6 +44,9 @@ else:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 db = SQLAlchemy(app,session_options={'expire_on_commit':True}) # expire_on_commit évite d'avoir des select quand on manipule les objets aprés un commit.
 
+def XSSEscape(txt):
+    return html.escape(txt)
+
 import appli.database
 # Setup Flask-Security
 user_datastore = appli.securitycachedstore.SQLAlchemyUserDatastoreCACHED(db, database.users, database.roles)
@@ -155,11 +158,13 @@ def ScaleForDisplay(v):
         return ""
     else:
         return v
-def XSSEscape(txt):
-    return html.escape(txt)
 
 def XSSUnEscape(txt):
     return html.unescape(txt)
+
+def TaxoNameAddSpaces(name):
+    Parts=[XSSEscape(x) for x in ntcv(name).split('<')]
+    return ' &lt;&nbsp;'.join(Parts) # premier espace secable, second non
 
 def FormatError(Msg,*args,DoNotEscape=False,**kwargs):
     caller_frameinfo=inspect.getframeinfo(sys._getframe(1))
@@ -302,7 +307,130 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
+ecotaxa_version="2.0.0"
+def JinjaGetEcotaxaVersionText():
+    return ecotaxa_version+" 2019-01-25"
+
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
-app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList)
+app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
+
+"""Changelog
+2019.01.25 : V 2.0.0
+    Integration with EcotaxoServer
+    Handling new display_name child<parent #87,#172
+    Python Packages upgrade (flask, numpy, scikit, .... ), Bootstrap Upgrade
+    fix/improve #216,#274,#284,#280 
+2018.11.22 : V 1.6.1
+    Minor fix
+2018.11.14 : V 1.6
+    RandomForestClassifier modified from balanced to auto
+    Export redesigned
+    Import #224,#243,#248: Robustified issues with Sun Position computation, lat/lon of sample always recomputed
+    ReImport : Added sun position computation, lat/lon of sample always recomputed
+    Subset #255 : Added duplication of CNN features
+    Admin Project : Enhanced user management
+    Manual classif #169,#164 : Refresh counter at each save, use separated badges
+    Manual classif #163,#162,#260 : autoremove autoadded by sort displayed fields, Validation,ObjDate,Lat,Long date available on list and added on popup
+    Manual classif #161,#159,#158 : autorefresh on top filter value change, added Ctrl+L for Validate selection, Keep vertical position on save
+    Manual classif #211,#210,#209,#207,#205,#183 : Help for TaxoFilter,Improved validator filter, Added filter on validation date, added save dubious
+    Manual classif #212,#217: duplicated saving status, Annotator can import
+    Maps : #208 added informations on the sample
+    EcoPart Fix : computation of Plankton abondance include only Validated Now (then Reduced & Détailled export too)
+    EcoPart Fix #201 : Export of raw now handle not-living exclusion
+    EcoPart Fix #196: computation of Plankton abondance use the Deepth offset now, also substracted
+    EcoPart Fix #184 : When ecotaxa project are merged, associated PartProject are now associated to the target project
+    Also #214,#220,#186,#179,#178,#176,#175,#152,#107
+    User Management : Handle Self creation and Country
+    Privacy : Added privacy page and Google Analytics Opt-out
+2018.08.16 : V 1.5.2
+              Added hability to work on database without trust connection configured on pg_hba
+              Added CSRF Token on AdminForms most sensibles screens
+              Added CSRF protection on console screen
+              Added CSP policies to reduce impact of XSS attack
+              Fixed several SQL Inject vulnerabilities
+              Fixed no more errors if folder SCN_networks is missing
+              Removed dead code
+2018.03.14 : V 1.5.1b
+              Moved Daily task in external launch using cron.py
+              fixed computation on particle
+              modified handling of ftp export copy due to issue on LOV FTP is on NFS volume
+2018.01.16 : V 1.5.1
+              Bugfix on privilèges on part module causing performance issues
+2017.12.23 : V 1.5
+              Minor adjustements
+2017.11.08 : V 1.4
+              Deep machine learning Integration
+              Optimization of classification update query
+              Added a table for Statistics by taxo/project to optimize displays on classification
+              Bugfix on Particle module
+2017.11.03 : V 1.3.2
+              On manual classification splitted menu on 2 menu : Project wide and filtered
+              Implementing Automatic classification V2
+              - Filtered prediction
+              - Can save/and predict from model
+              - New Screen for PostPredictionMapping
+              - Multiple project for Learning Set
+              - Handling Nan,+/- Inf as empty value
+2017.09.16 : V 1.3.1
+              Evolution of Confusion matrix for sklearn,numpy,matplotlib upgrade
+              Evolution of RandomForest parameters
+2017.07.05 : V 1.3.0
+              Introduction of Particle module
+2017.03.28 : V 1.2.3
+              Bugfix in display annotator on image Popup
+              Bugfix is Manage.py where using global db routine.
+2017.03.22 : V 1.2.2
+              Added composite taxon Taxon(parent) in metadata update screen
+2017.03.12 : V 1.2.1
+              Improved database transaction management to avoid long transaction
+2017.01.30 : V 1.2
+              Explore : Improved no result, improved taxo filter
+              Explore : Public user can go on manual classification of any visible project
+              Explore : Map on home of explore
+              Map : Filter by project and Taxo
+              Details page : MailTo to notify classif error, display on map,
+              Details page : edit data by manager
+              Import : Wizard to premapping, added taxo (parent) format allowed at import
+              Import : Image import only with form to fill metadata
+              Export BD at project level.
+              Prediction : Limit count for statistics, predict only filtered taxon on target set
+              Conf Matrix : Export TSV
+              Topper : Progress bar, improved button clic, improved clear filter
+              Contribute : Display selection count, change line selection behavior
+              Contribute : Show taxo children
+              Task : New menu for app admin + can see all task of all users
+
+
+2016.12.07 : V 1.1 Several changes on annotation page, filters
+              Select project : filter on name, instrument, subset
+              Select project : display email
+              Manual Classif : Several minor changes
+              Manual Classif : Propose last 5 classification
+              New Filters : Instrument, Annotator, Free Field, Month, Day period
+              Import : New feature to update matadata from file
+              Import : Bugfix on uppercase column name
+              Project : New status to block prediction
+              Filter on feature : Purge, subset, Export
+              TSV Export : split in multiple file, predefined check, separate internalID, add 2nd line for reimport
+              AutoClean empty sample
+              Zoom : 200%
+              Admin : All manager can create a project
+              Home Page : Custom message by App manager
+              Prediction : added PostClassifMapping
+2016.06.10 : Removed X before Object name
+             if file home.html or homebottom.html is missing use home-model.html and homebottom-model.html
+             Theses file are read as UTF-8 Format instead of target platform settings.
+             Integration of licenses files as md format before integration to GitHub
+2016.03.15 : Added CreateDirConcurrentlyIfNeeded to avoid conflinct in creation of images directory by concurrent task
+2016.01.17 : Added parameter PYTHONEXECUTABLE in Config.cfg
+             Added objects view creation in Manage CreateDB
+             Added a Matplotlib uses to execute correctly on GraphicLess server.
+             Added Cascade delete on DB Definition to create them during CreateDB (obj_field & Histo)
+             During ImportDb compare Taxon Name and Parent Taxon Name to process correctly Name duplicate
+2015.12.14 : Bugfix in import task, use only ecotaxa prefixed files
+2015.12.11 : Improved CSV export to include Direct Taxonomy parent name and Taxonomy hierarchy
+             Included license.txt File
+
+"""

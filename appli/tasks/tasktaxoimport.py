@@ -138,7 +138,7 @@ class TaskTaxoImport(AsyncTask):
         # self.UpdateProgress(10,"Test Error")
 
     def QuestionProcess(self):
-        g.headcenter="<h3>TAXONOMY IMPORTATION</h3><a href=/admin>Back to admin home</a>"
+        g.headcenter="<h3>TAXONOMY IMPORTATION</h3><a href='/admin'/>Back to admin home</a>"
         txt="<h1>Taxonomy Text File Importation Task</h1>"
         errors=[]
         if self.task.taskstep==0:

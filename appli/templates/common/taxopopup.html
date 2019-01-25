@@ -2,7 +2,7 @@
 <script>
 function FormatTaxoItem(t) {
   if (t.pr==1)
-    return $("<u>"+ t.text+"</u>")
+    return $("<u>"+ XSSStrEscape(t.text)+"</u>")
   else return t.text;
 }
 function EnableSelect2Taxolb() {
@@ -24,7 +24,8 @@ function EnableSelect2Taxolb() {
         dropdownCssClass:"width240 taxopopup"
         ,"language": {
            "noResults": function(){
-               return $("<span>No Results Found. <a href='/taxo/browse/?fromprj={{ g.Projid }}' >Create new category</a></span>");
+{#               return $("<span>No Results Found. <a href='/taxo/browse/?fromprj={{ g.Projid }}' >Create new category</a></span>");#}
+               return $("<span>No Results Found. <a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}',{updatestat:'Y'})\" >Create new category</a></span>");
            }
        }
     }); // Select2 Ajax

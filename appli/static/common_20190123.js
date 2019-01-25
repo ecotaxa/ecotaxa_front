@@ -142,3 +142,9 @@ function At2Confirm(titre,content,parameter){
   $('#At2PopupWindow80 .At2PopupHeader').css('background-color',headerColor).css('border-color',headerColor);
 }
 
+function XSSStrEscape(str) {
+  if (str)
+    return str.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&apos;")
+  else
+    return '';
+}

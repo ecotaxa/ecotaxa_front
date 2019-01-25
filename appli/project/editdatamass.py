@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask_login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,XSSEscape
 from pathlib import Path
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security import login_required
@@ -41,7 +41,7 @@ def PrjEditDataMass(PrjId):
     if not Prj.CheckRight(2): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot edit settings for this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
-    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,XSSEscape(Prj.title))
     txt = "<h3>Project Mass data edition </h3>"
     sqlparam = {}
     filtres = {}
@@ -110,7 +110,7 @@ def PrjResetToPredicted(PrjId):
     if not Prj.CheckRight(2): # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot edit settings for this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
-    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,XSSEscape(Prj.title))
     txt = "<h3>Reset status to predicted</h3>"
     sqlparam = {}
     filtres = {}

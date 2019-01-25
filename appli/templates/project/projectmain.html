@@ -300,7 +300,7 @@ function LoadRightPane(NoAjax,SaveInProfile){
         TxtFilter+=InGreyButton("Taxo="+jqtaxofilterlbl.val(),"SetTaxoFilter(false)");
     $(".activeTaxo").removeClass("activeTaxo");
     if(jqtaxofilter.val()!="")
-        $("#TabA").find("[taxoid="+jqtaxofilter.val()+"]").addClass("activeTaxo");
+        $("#TabA").find("[data-taxoid="+jqtaxofilter.val()+"]").addClass("activeTaxo");
     req['taxochild']=$("#taxofilterchild").val();
     req['ipp']=$("#ipp").val();
     req['zoom']=$("#zoom").val();
@@ -459,6 +459,7 @@ function LoadRightPane(NoAjax,SaveInProfile){
 function RefreshClassifTab(ForceRecalc)
 {
     Restoretaxolb=$('#taxolbanno option').detach();
+    RestoreHighLigthID=$('.ui-droppable.ui-state-highlight').data('taxoid');
     var HiddenItems=$('.classiftab td').filter(function() { return $(this).css('display') == 'none';}).map(function() { return $(this).attr('taxoid'); }).get();
     var HorizArrow=$('.classiftab td span.glyphicon-triangle-right').closest('td').map(function() { return $(this).attr('taxoid'); }).get();
     var PosScrollBar=$('#divclassiftab').scrollTop();
@@ -466,24 +467,24 @@ function RefreshClassifTab(ForceRecalc)
     if(ForceRecalc==='Y') req['ForceRecalc']='Y';
     $("#TabA").load("/prjGetClassifTab/"+$("#projid").val(),req,function() {
         $.each(HiddenItems, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
-            $('.classiftab td[taxoid=' + v + ']').css('display', 'none');
-{#            console.log(v);#}
+            $('.classiftab td[data-taxoid=' + v + ']').css('display', 'none');
         });
         $.each(HorizArrow, function (k, v) { {# Masque ceux qui etaient déjà cachés #}
-            $('.classiftab td[taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
-{#            console.log("R", v);#}
+            $('.classiftab td[data-taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
         });
         $('#divclassiftab').scrollTop(PosScrollBar);
     });
 
 }
 
-function SortToggle() {
+function SortToggle(NoRefresh) {
   if($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
        $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title","Current Sort : Descending");
   else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title","Current Sort : Ascending");
-  $("#pageoffset").val(0); {# Force le retour à la premiere page #}
-  LoadRightPane();{# 20181024 Autorefresh #}
+  if(NoRefresh!=='NoRefresh') {
+    $("#pageoffset").val(0);    {# Force le retour à la premiere page #}
+    LoadRightPane();    {# 20181024 Autorefresh #}
+  }
 }
 
 function ToggleDispField(caller){
@@ -500,8 +501,8 @@ function gotopage(nopage)
 }
 
 $(document).ready(function() {
-    if ("{{data.sortorder}}"=="desc")
-        SortToggle();
+    if ("{{data.sortorder}}"=="desc")    //TOCHECK LN
+        SortToggle('NoRefresh');
     $('[data-toggle="tooltip"]').tooltip();
     $("#titledivtitle").css("max-width",$("#titlediv").parent().width()-150);
     {% if g.taxofilter %}

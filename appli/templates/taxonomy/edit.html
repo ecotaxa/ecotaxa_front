@@ -3,54 +3,70 @@
 <style>
   #tblviewtaxon {width: 100%}
   #tblviewtaxon th {width: 100px;font-weight: normal;background-color: #EEE;}
-  #tblviewtaxon td {word-break: break-all; padding: 3px 5px}
+  #tblviewtaxon td {word-break: break-word; padding: 3px 5px;}
   #At2PopupWindow0 .At2PopupWindow {width: 1000px;}
 </style>
 <form id="formedittaxon" method="post" action="?">
+<input type="hidden" name="id" value="{{ taxon.id }}">
 <table class=" " id="tblviewtaxon">
+  <tr>  <th>Name</th><td colspan="3">{{ M.InputText('name',taxon.name,"class=form-control required maxlength=100") }}</td>
+    <th>Type</th><td style="width: 200px">{{ M.selectinputdict('taxotype', g.TaxoType, taxon.taxotype,addemptyrow=True,extrataginfo="class=form-control required")  }}</td>
+  </tr>
+  <tr>  <th>Display Name</th><td colspan="5">{{ taxon.display_name }}</td></tr>
   <tr>
-    <th>ID</th><td><input type="hidden" name="id" value="{{ taxon.id }}">{{ taxon.id }}</td>
-    <th>Parent ID</th><td>
+    <th>Parent</th><td colspan="5">
       <select id="parent_id" name="parent_id" class="taxolbpop" required>
         {% if taxon.parent_id %}
         <option value="{{ taxon.parent_id }}">{{ taxon.parentname }}</option>
         {% endif %}
       </select>
      </td>
-    <th>Type</th><td>{{ M.selectinputdict('taxotype', g.TaxoType, taxon.taxotype,addemptyrow=True,extrataginfo="class=form-control required")  }}</td>
   </tr>
-  <tr>  <th>Name</th><td colspan="5">{{ M.InputText('name',taxon.name,"class=form-control required maxlength=100") }}</td></tr>
-  <tr>  <th>Display Name</th><td colspan="5">{{ taxon.display_name }}</td></tr>
-  <tr>  <th>Tree</th><td colspan="5">{{ taxon.tree }}</td></tr>
+  <tr>  <th>Lineage</th><td colspan="5">{{ taxon.tree.replace('>',' > ') }}</td></tr>
 
   <tr>
 {#    <th>Source ID</th><td>{{ M.InputText('id_source', taxon.id_source ,extrataginfo="class=form-control maxlength=20 style='width:100px'"|safe)  }} </td>#}
-    <th>Source URL</th><td colspan="5">
+    <th>Source URL
+      <i class="fas fa-info-circle" data-content="If the new category is described on the WEB, please provide the link to help the Ecotaxoserver managers to review and populate this new category for all users."></i>
+    </th><td colspan="5">
         {{ M.InputText('source_url', taxon.source_url,extrataginfo="class=form-control maxlength=200 data-parsley-type=url")  }}    </td></tr>
-  <tr><th>Source Desc</th><td colspan="5">
+  <tr><th>Source Desc
+      <i class="fas fa-info-circle" data-content="If the new category is NOT described on the WEB, please provide a description of the catégory to help other users to use it."></i>
+  </th><td colspan="5">
     {{ M.TextArea('source_desc',4, taxon.source_desc,extrataginfo="class=form-control maxlength=1000 ")  }}
     </td></tr>
   <tr>
+    <th>By (email)
+      <i class="fas fa-info-circle" data-content="If you change the email, you will not be anymore able to manage this taxon."></i>
+    </th><td colspan="3">
+    {{ M.InputText('creator_email', taxon.creator_email ,extrataginfo=("class=form-control maxlength=250 data-parsley-type=email "+("READONLY" if taxon.creator_email.find('@')>0 else ""))|safe)  }}
+    </td>
     <th>Creation date</th><td>
-        {{ M.InputText('creation_datetime', taxon.creationdatetimefmt ,extrataginfo="class=form-control maxlength=200 pattern='\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}' style='width:150px'"|safe)  }} </td>
-    <th>By (email)</th><td colspan="3">
-    {{ M.InputText('creator_email', taxon.creator_email ,extrataginfo="class=form-control maxlength=250 data-parsley-type=email "|safe)  }}
-    </td></tr>
+        {{ M.InputText('creation_datetime', taxon.creationdatetimefmt ,extrataginfo="class=form-control maxlength=200 pattern='\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}' style='width:150px' READONLY"|safe)  }} </td>
+</tr>
 
 
 </table>
 <table style="width: 100%;margin-top: 10px;">
   <tr><td><button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Taxon</button>
   {% if taxon.id>0 %}
-    <button type="button" onclick="DeleteTaxon({{ taxon.id }})" class="btn btn-danger"><i class="fa fa-delete"></i> Delete Taxon</button>
+    <button type="button" onclick="DeleteTaxon({{ taxon.id }})" class="btn btn-danger"><i class="fa fa-eraser"></i> Delete Taxon</button>
   {% endif %}
   </td>
     <td style="text-align: right"><button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close</button></td></tr>
 </table>
 </form>
 <div id="formedittaxon_PostResult" style="margin-top: 10px"></div>
+<div class="panel panel-default " style="padding: 5px;">
+  Naming rules to create Taxon :<br>
+  - Phylo type : Must be unique, contains only letters and -+' and not more than 1 whitespace, Start with a Uppercase <br>
+  - Morpho type : Must be unique for the parent, contains only letters and -+' and not more than 1 whitespace, be lowercase only.<br>
+{#  In case of repeated creation error ask help to users listed on <a href="{{ g.taxoserver_url }}/browsetaxo/" target="_blank">this page</a>#}
+  In case of repeated creation error ask help to the administrators of your Ecotaxa instance <ul>{{ GetManagerList('Ecotaxa : Account issue')|safe }}</ul>
+</div>
+
 <style>
-  .taxolbpop {width: 300px;}
+  .taxolbpop {width: 400px;}
 </style>
 <script>
   $(".taxolbpop").select2({
@@ -83,6 +99,6 @@
       AtdSetWaitAndLoad("#formedittaxon_PostResult",'/taxo/del/',{id:id});
     });
   }
-
+  $('#tblviewtaxon .fa-info-circle').popover({trigger:'hover',container:"body",placement:"top"})
 
 </script>

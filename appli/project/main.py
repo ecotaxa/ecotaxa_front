@@ -1,10 +1,10 @@
-from flask import render_template, g, flash,json,session,request
+from flask import render_template, g, flash,json,session,request,Markup
 from flask_login import current_user
-from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv
+from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ntcv,XSSEscape
 from pathlib import Path
 from flask_security import login_required
 from appli.search.leftfilters import getcommonfilters
-import os,math,collections,appli,psycopg2.extras,urllib.parse
+import os,math,collections,appli,psycopg2.extras,urllib.parse,datetime
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
 import appli.project.sharedfilter as sharedfilter
 
@@ -63,7 +63,11 @@ def indexProjects(Others=False):
     if not Others:
         if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel):
             CanCreate=True
-
+    PDT=database.PersistantDataTable.query.first()
+    if (datetime.datetime.now()-PDT.lastserverversioncheck_datetime).days>7 :
+        fashtxt="Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days, Ask application administrator to do it." #+str(PDT.lastserverversioncheck_datetime)
+        fashtxt+="  <a href='/taxo/browse/' class='btn btn-primary btn-xs'>Synchronize to check Ecotaxa version</a>"
+        flash(Markup(fashtxt),'warning')
     return PrintInCharte(
         render_template('project/list.html',PrjList=res,CanCreate=CanCreate,AppManagerMailto=appli.GetAppManagerMailto()
                         , filt_title=filt_title,filt_subset=filt_subset,filt_instrum=filt_instrum,Others=Others
@@ -461,11 +465,19 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             bottomtxt=bottomtxt[4::] #[4::] supprime le premier <BR>
         if 'orig_id' in dispfield:
             bottomtxt="<div style='word-break: break-all;'>%s</div>"%(r['orig_id'],)+bottomtxt
+        def FormatNameForVignetteDisplay(CategName):
+            Parts=ntcv(CategName).split('<')
+            restxt = "<span class='cat_name'>{}</span>".format(Parts[0])
+            if len(Parts)>1:
+                restxt+="<span class='cat_ancestor'> &lt;&nbsp;{}</span>".format(" &lt;&nbsp;".join(Parts[1:]))
+            else:
+                restxt+=""
+            return restxt
         txt+="""<div class='subimg {1}' {2}>
 <div class='taxo'>{0}</div>
 <div class='displayedFields'>{3}</div></div>
 <div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div>"""\
-            .format(ntcv(r['display_name']).replace('>',' > ') #.replace('>','&nbsp;&#x276D&nbsp;')  #r['taxoname']
+            .format(FormatNameForVignetteDisplay(r['display_name'])
                      ,GetClassifQualClass(r['classif_qual']),popattribute,bottomtxt
                     ,"(%d)"%(r['imgcount'],) if r['imgcount'] is not None and r['imgcount']>1 else ""
                     ,"<b>!</b> "if r['commentaires'] >0 else "" )
@@ -545,7 +557,10 @@ def GetClassifTab(Prj):
     if g.PublicViewMode:
         ColForNbr = " nbr_v "
     InitClassif=", ".join(["("+x.strip()+")" for x in InitClassif.split(",") if x.strip()!=""])
-    sql="""select t.id,t.name as taxoname,case when tp.name is not null and t.name not like '%% %%'  then ' ('||tp.name||')' else ' ' end as  taxoparent,nbr,nbr_p,nbr_d,nbr_v,nbrothers
+    sql="""select t.id,coalesce(t.display_name,'') display_name
+        ,t.name as taxoname
+        ,case when tp.name is not null and t.name not like '%% %%' and t.display_name not like '%%<%%'  then ' ('||tp.name||')' else ' ' end as  taxoparent
+        ,nbr,nbr_p,nbr_d,nbr_v,nbrothers
     from (  SELECT    o.classif_id,   c.id,coalesce(sum(nbr),0) Nbr,coalesce(sum(nbr_d),0) nbr_d,coalesce(sum(nbr_p),0) nbr_p,coalesce(sum(nbr-nbr_v-nbr_p-nbr_d),0) NbrOthers,coalesce(sum(nbr_v),0) nbr_v
         FROM (select id classif_id,{0} nbr,nbr_v,nbr_d,nbr_p 
               from projects_taxo_stat where 
@@ -627,6 +642,15 @@ def GetClassifTab(Prj):
                 subset[i]['sortclause']=r['taxoname']
         # on tri le subset et on le remet dans le tableau original.
         restree[d:f+1]=sorted(subset,key=lambda t:t['sortclause'])
+    for k,v in enumerate(restree):
+        if v['display_name'].find('<')>0:
+            parts=v['display_name'].split('<')
+            restree[k]['htmldisplayname']=parts[0]
+            restree[k]['taxoparent'] = ''.join((' &lt;&nbsp;'+XSSEscape(x) for x in parts[1:]))
+        else:
+            restree[k]['htmldisplayname']=v['display_name']
+            restree[k]['taxoparent']=XSSEscape(v['taxoparent'])
+            restree[k]['taxoparent'] =""
     return render_template('project/classiftab.html',res=restree,taxotree=json.dumps(taxotree))
 
 ######################################################################################################################
@@ -657,7 +681,7 @@ def prjPurge(PrjId):
         flash('You cannot Purge this project','error')
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     txt=ObjListTxt=""
-    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,Prj.title)
+    g.headcenter="<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid,XSSEscape(Prj.title))
     txt += "<div style='margin-left: 5px;'><h3>ERASE OBJECTS TOOL </h3>"
     if gvp("objlist")=="":
         sql="select objid FROM objects o where projid="+str(Prj.projid)
@@ -768,7 +792,7 @@ def SimpleCreate():
     Prj=database.Projects()
     Prj.title=gvp("projtitle")
     Prj.status="Annotate"
-    Prj.visible="Y"
+    Prj.visible=True
     db.session.add(Prj)
     db.session.commit()
     PrjPriv = database.ProjectsPriv()

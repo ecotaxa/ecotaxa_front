@@ -108,7 +108,7 @@ function ApplyPopupSampleFilter(){
   tblspl.find('input:checked').each(function (){
     var id=$(this).data('id').toString();
     var name=$(this).closest('td').text().trim();
-    console.log(id,name);
+{#    console.log(id,name);#}
     filt_annot.append("<option value='" + id + "' selected>" + name + "</option>");
   });
   filt_annot.trigger("change"); {# Met à jour la liste #}
