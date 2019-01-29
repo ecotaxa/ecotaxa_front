@@ -360,12 +360,11 @@ class PersistantDataTable(db.Model):
 
 
 GlobalDebugSQL=False
-GlobalDebugSQL=True
+# GlobalDebugSQL=True
 def GetAssoc(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor,keyid=0):
     if g.db is None:
         g.db=db.engine.raw_connection()
     cur = g.db.cursor(cursor_factory=cursor_factory)
-    # cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
@@ -390,7 +389,6 @@ def GetAssoc2Col(sql,params=None,debug=False,dicttype=dict):
     if g.db is None:
         g.db=db.engine.raw_connection()
     cur = g.db.cursor()
-    # cur = db.engine.raw_connection().cursor()
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
@@ -418,7 +416,6 @@ def GetAll(sql,params=None,debug=False,cursor_factory=psycopg2.extras.DictCursor
     if doXSSEscape:
         cursor_factory=psycopg2.extras.RealDictCursor
     cur = g.db.cursor(cursor_factory=cursor_factory)
-    # cur = db.engine.raw_connection().cursor(cursor_factory=cursor_factory)
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)
@@ -446,7 +443,6 @@ def ExecSQL(sql,params=None,debug=False):
     if g.db is None:
         g.db=db.engine.raw_connection()
     cur = g.db.cursor()
-    # cur = db.engine.raw_connection().cursor()
     try:
         starttime=datetime.datetime.now()
         cur.execute(sql,params)

@@ -44,8 +44,8 @@ def objectdetails(objid):
         TaxoHierarchie=(r[0] for r in GetAll("""WITH RECURSIVE rq(id,name,parent_id) as ( select id,name,parent_id FROM taxonomy where id =%(taxoid)s
                         union
                         SELECT t.id,t.name,t.parent_id FROM rq JOIN taxonomy t ON t.id = rq.parent_id )
-                        select name from rq""",{"taxoid":obj.classif.id})[::-1])
-        t.append("<br>&emsp;"+ (" &gt; ".join(TaxoHierarchie))+" (id=%s)"%obj.classif_id )
+                        select name from rq""",{"taxoid":obj.classif.id}))
+        t.append("<br>&emsp;"+ (" &lt; ".join(TaxoHierarchie))+" (id=%s)"%obj.classif_id )
     else:
         t.append("<br>&emsp;<b>Unknown</b>")
     if obj.classiffier is not None:

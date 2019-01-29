@@ -256,6 +256,11 @@ $(document).ready(function() {
       $('td[data-taxoid='+RestoreHighLigthID+']').addClass('ui-state-highlight');
       RestoreHighLigthID=undefined;
     }
+{#    Restore le surlignage Gris dans l'arbre/activeTaxo pour filtrage #}
+    if(typeof(RestoreActiveTaxoID)!=='undefined'){
+      $('td[data-taxoid='+RestoreActiveTaxoID+']').addClass('activeTaxo');
+      RestoreActiveTaxoID=undefined;
+    }
 {#    Le fait de choisir un item fait l'assignation/CTRL+A#}
     $('#taxolbanno').on("select2:select", function (e) {
         AssignTaxoLbToSelection();

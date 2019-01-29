@@ -52,10 +52,8 @@ def dbcreate():
     with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
         g.db = None
         db.create_all()
-        from flask.ext.migrate import _get_config
-        config = _get_config(None)
-        from alembic import command
-        command.stamp(config, 'head')
+        from flask_migrate import stamp
+        stamp(revision='head')
         database.ExecSQL("""create view objects as select oh.*,ofi.*
         from obj_head oh left join obj_field ofi on oh.objid=ofi.objfid""")
 

@@ -343,13 +343,16 @@ class TaskExportTxt(AsyncTask):
     def CreateSUM(self):
         self.UpdateProgress(1,"Start Summary export")
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        grp="to1.name"
+        grp="to1.display_name"
         if self.param.sumsubtotal=="A":
             grp="a.orig_id,"+grp
         if self.param.sumsubtotal=="S":
-            grp="s.orig_id,"+grp
-        sql1="SELECT "+grp+" ,count(*) Nbr "
-        sql2=""" FROM objects o
+            grp="s.orig_id,s.latitude,s.longitude,"+grp
+        sql1="SELECT "+grp
+        if self.param.sumsubtotal=="S": # Il est demandé d'avoir la colonne agrégé date au milieu du groupe, donc réécriture de la requete.
+            sql1 ="SELECT  s.orig_id,s.latitude,s.longitude,max(objdate) as date,to1.display_name"
+        sql1 += ",count(*) Nbr"
+        sql2=""" FROM obj_head o
                 LEFT JOIN taxonomy to1 on o.classif_id=to1.id
                 LEFT JOIN samples s on o.sampleid=s.sampleid
                 LEFT JOIN acquisitions a on o.acquisid=a.acquisid """
@@ -425,7 +428,7 @@ class TaskExportTxt(AsyncTask):
         if not Prj.CheckRight(1):
             return PrintInCharte("ACCESS DENIED for this project<br>"+txt)
         txt+="<h3>Text export Task creation</h3>"
-        txt+="<h5>Exported Project : #%d - %s</h5>"%(Prj.projid,Prj.title)
+        txt+="<h5>Exported Project : #%d - %s</h5>"%(Prj.projid,XSSEscape(Prj.title))
         errors=[]
         self.param.filtres = {}
         for k in sharedfilter.FilterList:

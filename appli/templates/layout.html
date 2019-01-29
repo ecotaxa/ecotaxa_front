@@ -73,7 +73,7 @@ $(document).ready(function() {
     <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
     <td align="right" width="300px">
         {% if not  current_user.is_authenticated %}
-            Not logged ( <a href="{{ url_for_security('login') }}">log in</a> )
+            Not logged ( <a href="{{ url_for_security('login') }}">log in / register</a> )
         {% else %}
             {%  if g.tasksummary %} <a href="/Task/listall">
             {%  if g.tasksummary.Question  %}<span class="label label-warning">Question : {{g.tasksummary['Question']}}</span>{% endif %}

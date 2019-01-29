@@ -6,6 +6,24 @@ from appli.database import GetAll,GetAssoc2Col
 from psycopg2.extensions import QuotedString
 import psycopg2,psycopg2.extras
 
+SQLTreeExp="""concat(tf.name,'<'||t1.name,'<'||t2.name,'<'||t3.name,'<'||t4.name,'<'||t5.name,'<'||t6.name,'<'||t7.name
+            ,'<'||t8.name,'<'||t9.name,'<'||t10.name,'<'||t11.name,'<'||t12.name,'<'||t13.name,'<'||t14.name)"""
+SQLTreeJoin="""left join taxonomy t1 on tf.parent_id=t1.id
+      left join taxonomy t2 on t1.parent_id=t2.id
+      left join taxonomy t3 on t2.parent_id=t3.id
+      left join taxonomy t4 on t3.parent_id=t4.id
+      left join taxonomy t5 on t4.parent_id=t5.id
+      left join taxonomy t6 on t5.parent_id=t6.id
+      left join taxonomy t7 on t6.parent_id=t7.id
+      left join taxonomy t8 on t7.parent_id=t8.id
+      left join taxonomy t9 on t8.parent_id=t9.id
+      left join taxonomy t10 on t9.parent_id=t10.id
+      left join taxonomy t11 on t10.parent_id=t11.id
+      left join taxonomy t12 on t11.parent_id=t12.id
+      left join taxonomy t13 on t12.parent_id=t13.id
+      left join taxonomy t14 on t13.parent_id=t14.id"""
+
+
 @app.route('/search/taxo')
 def searchtaxo():
     term=gvg("q")
@@ -20,20 +38,20 @@ def searchtaxo():
          # {"id": 76677, "pr": 0, "text": "Terasakiella (Methylocystaceae)"},
          # {"id": 82969, "pr": 0, "text": "Terasakiella pusilla "}]
             return json.dumps(app.MRUClassif.get(current_user.id,[])) # gère les MRU en utilisant les classif
-    terms=[x.strip().lower()+R"%" for x in term.split('*')]
-    param={'term':terms[-1].replace('<','%<')} # le dernier term est toujours dans la requete
-      # replace permet de spécifier un parent affiché dans le dispanme sans finir le mot
-    terms=[QuotedString(x).getquoted().decode('iso-8859-15','strict').replace("%","%%") for x in terms[0:-1]]
+    ltfound=term.find('<')>0
+    SQLWith="""
+    """
+    # * et espace comme %
+    terms=[x.lower().replace("*","%").replace(" ","%")+R"%" for x in term.split('<')]
+    param={'term':terms[0]} # le premier term est toujours appliqué sur le display name
     ExtraWhere=ExtraFrom=""
-    if terms:
-        for t in terms:
-            ExtraWhere +="\n and ("
-            # SQLI insensible, protégé par quotedstring
-            ExtraWhere +=' or '.join(("lower(p{0}.name) like {1}".format(i,t) for i in range(1,6)))+")"
-        ExtraFrom="\n".join(["left join taxonomy p{0} on p{1}.parent_id=p{0}.id".format(i,i-1) for i in range(2,6)])
+    if len(terms)>1:
+        ExtraFrom = SQLTreeJoin
+        terms = ['%%<'+x.replace("%","%%").replace("*","%%").replace(" ","%%")  for x in terms[1:]]
+        termsSQL=QuotedString("".join(terms)).getquoted().decode('iso-8859-15','strict')
+        ExtraWhere= ' and '+SQLTreeExp+" ilike "+termsSQL
     sql="""SELECT tf.id, tf.display_name as name
           ,0 FROM taxonomy tf
-          left join taxonomy p1 on tf.parent_id=p1.id
           {0}
           WHERE  lower(tf.display_name) LIKE %(term)s  {1}
           order by lower(tf.display_name) limit 200""".format(ExtraFrom,ExtraWhere)
@@ -53,9 +71,8 @@ def searchtaxo():
             , case when id2 is null then 0 else 1 end inpreset FROM taxonomy tf
             join (select t.id id1,c.id id2 FROM taxonomy t
             full JOIN (VALUES """+InitClassif+""") c(id) ON t.id = c.id
-                 WHERE  lower(display_name) LIKE %(term)s) t2
+                 WHERE  lower(display_name) LIKE %(term)s) tl2
             on tf.id=coalesce(id1,id2)
-            left join taxonomy p1 on tf.parent_id=p1.id
             """+ExtraFrom+"""
               WHERE  lower(tf.display_name) LIKE %(term)s """+ExtraWhere+"""
             order by inpreset desc,lower(tf.display_name),name limit 200 """

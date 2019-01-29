@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask_login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,ntcv
+from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,XSSEscape,ntcv
 from pathlib import Path
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security import login_required
@@ -149,7 +149,7 @@ where o.classif_qual='V'
             randomproject=randomproject[0]
             MapForProject = str(randomproject[0])
             sql+=" and o.projid= %s "%(randomproject[0])
-            ExtraEndScript="""$('#headersubtitle').html('Randomly selected project : <a href="?projid={0}">{1}</a>');""".format(*randomproject)
+            ExtraEndScript="""$('#headersubtitle').html('Randomly selected project : <a href="?projid={0}">{1}</a>');""".format(randomproject['projid'],XSSEscape(randomproject['title']))
     sql+="  order by random_value Limit %d"%(2*ipp,)
     # pour de meilleure perf plus de random ici et du coup on prend 20xipp pour créer un peu d'aléa
     # sql+="  Limit %d"%(20*ipp,) # desactivé suite à split table objects mais pourrait devoir revenir.
