@@ -458,10 +458,13 @@ function LoadRightPane(NoAjax,SaveInProfile){
 
 function RefreshClassifTab(ForceRecalc)
 {
-    Restoretaxolb=$('#taxolbanno option').detach();
-    RestoreHighLigthID=$('.ui-droppable.ui-state-highlight').data('taxoid');
-    RestoreActiveTaxoID=$('.ui-droppable.activeTaxo').data('taxoid');
-    var HiddenItems=$('.classiftab td').filter(function() { return $(this).css('display') == 'none';}).map(function() { return $(this).data('taxoid'); }).get();
+  var jOptionSelected=$('#taxolbanno option:selected');
+  Restoretaxolbid=jOptionSelected.val();
+  Restoretaxolbtxt=jOptionSelected.text();
+  Restoretaxolb=$('#taxolbanno option').detach();
+  RestoreHighLigthID=$('.ui-droppable.ui-state-highlight').data('taxoid');
+  RestoreActiveTaxoID=$('.ui-droppable.activeTaxo').data('taxoid');
+  var HiddenItems=$('.classiftab td').filter(function() { return $(this).css('display') == 'none';}).map(function() { return $(this).data('taxoid'); }).get();
     var HorizArrow=$('.classiftab td span.glyphicon-triangle-right').closest('td').map(function() { return $(this).data('taxoid'); }).get();
     var PosScrollBar=$('#divclassiftab').scrollTop();
     var req={taxo:$("#taxofilter").val(),taxofilterlabel:$("#taxofilterlabel").val()};

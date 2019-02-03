@@ -29,11 +29,11 @@
     <th>Source URL
       <i class="fas fa-info-circle" data-content="If the new category is described on the WEB, please provide the link to help the Ecotaxoserver managers to review and populate this new category for all users."></i>
     </th><td colspan="5">
-        {{ M.InputText('source_url', taxon.source_url,extrataginfo="class=form-control maxlength=200 data-parsley-type=url")  }}    </td></tr>
+        {{ M.InputText('source_url', taxon.source_url,extrataginfo="class=form-control maxlength=200 data-parsley-sourceurl=1 data-parsley-validate-if-empty=1")  }}    </td></tr>
   <tr><th>Source Desc
       <i class="fas fa-info-circle" data-content="If the new category is NOT described on the WEB, please provide a description of the catégory to help other users to use it."></i>
   </th><td colspan="5">
-    {{ M.TextArea('source_desc',4, taxon.source_desc,extrataginfo="class=form-control maxlength=1000 ")  }}
+    {{ M.TextArea('source_desc',4, taxon.source_desc,extrataginfo="class=form-control maxlength=1000 data-parsley-sourcedesc=1 data-parsley-validate-if-empty=1 ")  }}
     </td></tr>
   <tr>
     <th>By (email)
@@ -81,6 +81,52 @@
         minimumInputLength: 3
         /*,allowClear:true know bug on it #5394*/
     }); // Select2 Ajax
+  window.Parsley.addValidator('sourcedesc', {
+  validateString: function(value) {
+    if($('#taxotype').val()!='M') return true;
+    return value !== '' ;
+  },  messages: { en: 'You must enter a source description for Morpho type' }
+});
+  window.Parsley.addValidator('sourceurl', {
+  validateString: function(value) {
+    if($('#taxotype').val()!='P') return true;
+    var re=new RegExp(
+      "^" +
+        // protocol identifier
+        "(?:(?:https?)://)?" + // ** mod: make scheme optional
+        // user:pass authentication
+        "(?:\\S+(?::\\S*)?@)?" +
+        "(?:" +
+          // IP address exclusion
+          // private & local networks
+          // "(?!(?:10|127)(?:\\.\\d{1,3}){3})" +   // ** mod: allow local networks
+          // "(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})" +  // ** mod: allow local networks
+          // "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})" +  // ** mod: allow local networks
+          // IP address dotted notation octets
+          // excludes loopback network 0.0.0.0
+          // excludes reserved space >= 224.0.0.0
+          // excludes network & broacast addresses
+          // (first & last IP address of each class)
+          "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" +
+          "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" +
+          "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" +
+        "|" +
+          // host name
+          "(?:(?:[a-zA-Z\\u00a1-\\uffff0-9]-*)*[a-zA-Z\\u00a1-\\uffff0-9]+)" +
+          // domain name
+          "(?:\\.(?:[a-zA-Z\\u00a1-\\uffff0-9]-*)*[a-zA-Z\\u00a1-\\uffff0-9]+)*" +
+          // TLD identifier
+          "(?:\\.(?:[a-zA-Z\\u00a1-\\uffff]{2,}))" +
+        ")" +
+        // port number
+        "(?::\\d{2,5})?" +
+        // resource path
+        "(?:/\\S*)?" +
+      "$"
+    );
+    return re.test(value)!==false;
+  },  messages: { en: 'You must enter a valid source URL for Phylo type' }
+});
   $('#formedittaxon').parsley();
 
 

@@ -12,7 +12,7 @@
 <form id="formfilter">
   <table style="margin-bottom: 10px;">
     <tr>
-      <td class="smallnowrap"><b>Filter on categories</b> :&nbsp;</td>
+      <td class="smallnowrap"><b>Filter on projects and categories</b> :&nbsp;</td>
       <td class="smallnowrap"><input id="filtercateg" class="form-control" style="width: 150px;display: inline-block;">&nbsp;</td>
       <td class="smallnowrap"><button id="btfilter" class="btn btn-primary"><i class="fas fa-search"></i> Filter</button></td>
       <td class="smallnowrap" style="padding-left: 1em;"><i>(to search multiple categories,<br>separate parts by whitespace)</i></td>
@@ -57,20 +57,23 @@ function Filter(search) {
   $('#TblProj tbody tr ').each(function () {
       var tr=$(this);
       {# pour améliorer les performances on mémorise les text() #}
-      var tds={1:{td:tr.find('td:nth-child(2)')},2:{td:tr.find('td:nth-child(3)')}};
+      var tds={0:{td:tr.find('td:nth-child(1)')},1:{td:tr.find('td:nth-child(2)')},2:{td:tr.find('td:nth-child(3)')}};
+      tds[0].text=tds[0].td.html().replace(/<\/?mark>/gi,'');
       tds[1].text=tds[1].td.html().replace(/<\/?mark>/gi,'');
       tds[2].text=tds[2].td.html().replace(/<\/?mark>/gi,'');
       var OneNotFound=false; {# Tous les mots trouvés sur la lignes ? permettra de décider si on affiche la ligne#}
       for(i in searchlistclean) {
         var retest = new RegExp(searchlistclean[i], 'i');
-        if(retest.test(tds[1].text)===false) {
-          if(retest.test(tds[2].text)===false) {
-            OneNotFound=true;
-            break;
+        if(retest.test(tds[0].text)===false) {
+          if (retest.test(tds[1].text) === false) {
+            if (retest.test(tds[2].text) === false) {
+              OneNotFound = true;
+              break;
+            }
           }
         }
       }
-      for (var tdid=1;tdid<=2;tdid++) {
+      for (var tdid=0;tdid<=2;tdid++) {
         var td=tds[tdid].td;
         var tdtext=tds[tdid].text;
         if((search!=='')&&(OneNotFound===false)){

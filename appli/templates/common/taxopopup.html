@@ -6,9 +6,10 @@ function FormatTaxoItem(t) {
   else return t.text;
 }
 function EnableSelect2Taxolb() {
-  if(typeof(Restoretaxolb)!=='undefined'){
-    Restoretaxolb.appendTo('#taxolbanno');
-    Restoretaxolb=undefined;
+  if((typeof(Restoretaxolbid)!=='undefined')&&(typeof(Restoretaxolbid)!=='')){
+    var NewOption=$('<option></option').val(Restoretaxolbid).text(Restoretaxolbtxt);
+    NewOption.appendTo('#taxolbanno');
+    Restoretaxolbid=undefined;
   }
     $(".taxolb").select2({
         ajax: {
@@ -41,7 +42,6 @@ $(document).ready(function() {
       });
     }); // Ready
  </script>
-
 
 <!-- Modal -->
 <div class="modal " id="TaxoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

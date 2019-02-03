@@ -8,7 +8,7 @@ if sys.platform.startswith('win32'):
     virtualprefix = sys.base_prefix
     if hasattr(sys, 'real_prefix'):
         sys.base_prefix = sys.real_prefix
-    if float(sys.winver) < 3.5:
+    if float(sys.winver.replace('-32','')) < 3.5:
         from tkinter import _fix
         if "TCL_LIBRARY" not in os.environ:
             # reload module, so that sys.real_prefix be used
@@ -307,7 +307,7 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.0.0"
+ecotaxa_version="2.0.1"
 def JinjaGetEcotaxaVersionText():
     return ecotaxa_version+" 2019-01-25"
 
@@ -317,6 +317,8 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2019.02.01 : V 2.0.1
+    Fix implementation minor bug
 2019.01.25 : V 2.0.0
     Integration with EcotaxoServer
     Handling new display_name child<parent #87,#172

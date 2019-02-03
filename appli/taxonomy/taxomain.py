@@ -89,6 +89,10 @@ def DoSyncStatUpdate():
         flash(j['msgversion'],'warning')
     if 'msg' in j:
         PDT = database.PersistantDataTable.query.first()
+        if PDT is None: # si record manquant
+            PDT = database.PersistantDataTable()
+            PDT.id=1
+            db.session.add(PDT)
         PDT.lastserverversioncheck_datetime = datetime.datetime.now()
         db.session.commit()
         return j['msg']

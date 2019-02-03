@@ -68,7 +68,7 @@ def PrjManualClassif(PrjId):
                                 tbl=[t]+tbl[0:i]+tbl[i+1:]
                             break
                     else: # si pas trouvé dans la liste des MRU on l'ajoute au début si on trouve bien son nom dans la taxo
-                        Taxon=GetAll("""select tf.name||case when p1.name is not null and tf.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+                        Taxon=GetAll("""select tf.display_name as name
                             from taxonomy tf
                              left join taxonomy p1 on tf.parent_id=p1.id
                             where tf.id=%(id)s """,{"id":v})

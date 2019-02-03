@@ -13,7 +13,7 @@
 <head lang="en">
 <link rel="stylesheet" type="text/css" href="/static/DataTables1.10.18/Bootstrap-3.3.7/css/bootstrap.min.css"/>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui/jquery-ui.min.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style20181025.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style20190201.css') }}">
   {%if g.get('useselect4') %}
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2_405/css/select2.css') }}">
   {%else %}
@@ -30,16 +30,14 @@
 <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='jquery-ui/jquery-ui.min.js') }}"></script>
 <script type="text/javascript" src="/static/DataTables1.10.18/Bootstrap-3.3.7/js/bootstrap.min.js"></script>
-{# <script src="{{ url_for('static', filename='select2/js/select2.full.min.js') }}"></script> #}
-  {%if g.get('useselect4') %}
+{%if g.get('useselect4') %}
 <script src="{{ url_for('static', filename='select2_405/js/select2.full.js') }}"></script>
-  {%else %}
+{%else %}
 <script src="{{ url_for('static', filename='select2/js/select2.full.js') }}"></script>
 {% endif %}
 <script src="{{ url_for('static', filename='jquery.lazy.min.js') }}"></script>
 <link rel="stylesheet" href="/static/multizoom.css" type="text/css" />
 <script type="text/javascript" src="/static/multizoom.js"></script>
-<link rel="stylesheet" href="/static/ecotaxa.css" type="text/css" />
 <script src="{{ url_for('static', filename='common_20190123.js')}}"></script>
 <link rel="stylesheet" href="/static/fontawesome-free-5.5.0-web/css/all.min.css">
 

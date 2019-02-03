@@ -7,16 +7,16 @@ from pathlib import Path
 # Passe dans le repertoire parent qui est la racine du repertoire portable
 os.chdir("..")
 print("Current directory is %s"%(os.getcwd(),))
-os.environ['PATH']=os.getcwd()+"\\Python34;"+os.environ['PATH']
-os.environ['PGDATA']=os.getcwd()+"\\PG94\\Data\\Data"
+os.environ['PGDATA']=os.getcwd()+"\\PG10\\Data\\Data"
 os.environ['PGDATABASE']="postgres"
-os.environ['PGLOCALEDIR']=os.getcwd()+"\\PG94\\App\\PgSQL\Share"
-os.environ['PGSQL']=os.getcwd()+"\\PG94\\App\\PgSQL"
-os.environ['PGLOG']=os.getcwd()+"\\PG94\\Data\\log.txt"
+os.environ['PGLOCALEDIR']=os.getcwd()+"\\PG10\\App\\PgSQL\Share"
+os.environ['PGSQL']=os.getcwd()+"\\PG10\\App\\PgSQL"
+os.environ['PGLOG']=os.getcwd()+"\\PG10\\Data\\log.txt"
 os.environ['PGPORT']="5432"
 os.environ['PGUSER']="postgres"
-os.environ['PYTHONHOME']=os.getcwd()+"\\Python34"
-os.environ['PYTHONPATH']=os.getcwd()+"\\Python34\\DLLs;"+os.getcwd()+"\\Python34\\Lib;"+os.getcwd()+"\\Python34\\Lib\\site-packages;"
+# Ces 2 lignes sont requises pour faire marcher depuis apache
+os.environ['PYTHONHOME']=os.getcwd()+"\\Python37"
+os.environ['PYTHONPATH']=os.getcwd()+"\\Python37\\DLLs;"+os.getcwd()+"\\Python37\\Lib;"+os.getcwd()+"\\Python37\\Lib\\site-packages;"
 
 # Decommenter ici pour ouvrir un shell avec les bonne variables d'environnement
 RunAppli=True
@@ -68,7 +68,7 @@ Close "ECOTAXA Web Server" Windows to stop the Database""")
     os.chdir("ecotaxa")
     thread = Thread(target = WebBrowserOpener,args=(5,"http://127.0.0.1:5000",))
     thread.start()
-    os.system('start "ECOTAXA Web Server" /Wait   ..\\Python34\\python.exe runserver.py')
+    os.system('start "ECOTAXA Web Server" /Wait  python.exe runserver.py')
 if RunShell:    
     print("""
 type 'exit' to stop the database""")

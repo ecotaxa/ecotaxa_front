@@ -30,6 +30,6 @@ if application.PythonExecutable=="TBD":
         # version Virtual Env
         # application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Scripts\python.exe"))
         if not Path(application.PythonExecutable).exists(): # version Ecotaxa portable
-            application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python34\python.exe"))
+            application.PythonExecutable= "python.exe" # sous apache il n'as pas le nom de l'exe, grace à venv il est dans le path
     else:
         application.PythonExecutable='/usr/local/bin/python3'

@@ -90,15 +90,24 @@ function CategExpanderClick(e){
 {% if g.PrjAnnotate %}
     {# Traitement de la Liste des objets TD à traiter. #}
     function ProcessList(LstTd,droptaxoid,droptaxoname) {
-        var TrSet = new Set();
+        var TrSet = new Set(),i;
         PendingChangesTaxoName[droptaxoid]=droptaxoname;
+        var taxopart=droptaxoname.split('<');
+        var HtmlTaxo="<span class='cat_name'>"+taxopart[0]+"</span>";
+        if(taxopart.length>1){
+          HtmlTaxo+="<span class='cat_ancestor'>";
+          for(i= 1; i < taxopart.length; i++)
+            HtmlTaxo+=" &lt;&nbsp;"+taxopart[i];
+          HtmlTaxo+="</span>";
+        }
+
         // Traitement des cellules
-          for(var i= 0; i < LstTd.length; i++) {
+          for(i= 0; i < LstTd.length; i++) {
               var td=LstTd[i];
               td.removeClass("ui-selected");
-              td.addClass("ToBeSaved")
+              td.addClass("ToBeSaved");
               var id = td.find('img').attr('id');
-              td.find('.taxo').text(droptaxoname);
+              td.find('.taxo').html(HtmlTaxo);
               td.find('.subimg').css("height",'').css("width",'').css("left",'').css("top",'').css("right",'').css("bottom",'');
               td.find('.subimg').attr('class','subimg status-validated');
               TrSet.add(td.closest('tr').attr('id'));
@@ -113,14 +122,14 @@ function CategExpanderClick(e){
           // sur table 200 images à 10% ca Freeze 1s
           // Sur 50&100 ca ne se voit pas
           //for ( trid of TrSet) Marche pas sous IE
-          TRArray=Array.from(TrSet)
-          for(var i= 0; i < TRArray.length; i++)
+          TRArray=Array.from(TrSet);
+          for(i= 0; i < TRArray.length; i++)
           {
               var trid=TRArray[i];
               $('#' + trid).find('td img').resize();
               //console.log("resize #"+trid);
           }
-        var calctotaux={}
+        var calctotaux={};
         for (var k in PendingChanges) {
             v=0;
             if (PendingChanges[k] in calctotaux) v=calctotaux[PendingChanges[k]];
@@ -128,7 +137,7 @@ function CategExpanderClick(e){
         }
         var Msg="Pending Changes : ";
         PendingChangesTaxoName[-1]="Unchanged";
-        for (var k in calctotaux)
+        for (k in calctotaux)
             Msg=Msg+calctotaux[k]+" "+PendingChangesTaxoName[k]+", ";
         $('.PendingChangesClass').text(Msg);
         document.getElementById("BtnSave").disabled = false;

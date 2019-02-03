@@ -64,7 +64,7 @@ def indexProjects(Others=False):
         if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel):
             CanCreate=True
     PDT=database.PersistantDataTable.query.first()
-    if (datetime.datetime.now()-PDT.lastserverversioncheck_datetime).days>7 :
+    if PDT is None or PDT.lastserverversioncheck_datetime is None or (datetime.datetime.now()-PDT.lastserverversioncheck_datetime).days>7 :
         fashtxt="Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days, Ask application administrator to do it." #+str(PDT.lastserverversioncheck_datetime)
         fashtxt+="  <a href='/taxo/browse/' class='btn btn-primary btn-xs'>Synchronize to check Ecotaxa version</a>"
         flash(Markup(fashtxt),'warning')
