@@ -508,7 +508,7 @@ class TaskImportDB(AsyncTask):
 
 # #############################################################################################################
 # Restore une base complete, à vocation à être appellé depuis depuis manage
-def RestoreDBFull():
+def RestoreDBFull(UseExistingDatabase=False):
     print("Configuration is Database:",app.config['DB_DATABASE'])
     print("Login: ",app.config['DB_USER'],"/",app.config['DB_PASSWORD'])
     print("Host: ",app.config['DB_HOST'])
@@ -518,8 +518,11 @@ def RestoreDBFull():
         print("File ecotaxadb.zip must be in the current directory")
         return
     print("Connect Database")
-    # On se loggue en postgres pour dropper/creer les bases qui doit être déclaré trust dans hba_conf
-    conn=psycopg2.connect(user='postgres',host=app.config['DB_HOST'])
+    if UseExistingDatabase:
+        conn=psycopg2.connect(user=app.config['DB_USER'],password=app.config['DB_PASSWORD'],host=app.config['DB_HOST'],database=app.config['DB_DATABASE'])
+    else:
+        # On se loggue en postgres pour dropper/creer les bases qui doit être déclaré trust dans hba_conf
+        conn=psycopg2.connect(user='postgres',host=app.config['DB_HOST'])
     cur=conn.cursor()
 
     print("Open ZipFile")
@@ -533,13 +536,20 @@ def RestoreDBFull():
     zfile.extract('schema.sql')
 
     conn.set_session(autocommit=True)
-    print("Drop the existing database")
-    sql="DROP DATABASE IF EXISTS "+app.config['DB_DATABASE']
-    cur.execute(sql)
-
-    print("Create the new database")
-    sql="create DATABASE "+app.config['DB_DATABASE']+" WITH ENCODING='LATIN1'  OWNER="+app.config['DB_USER']+" TEMPLATE=template0 LC_CTYPE='C' LC_COLLATE='C' CONNECTION LIMIT=-1 "
-    cur.execute(sql)
+    if UseExistingDatabase:
+        print("Drop the existing public schema")
+        sql = "DROP SCHEMA public cascade"
+        cur.execute(sql)
+        # print("Create the public schema")  # inutile fait par l'import du schema, ça evite une erreur dans le log
+        # sql = "create schema public AUTHORIZATION " + app.config['DB_USER']
+        # cur.execute(sql)
+    else:
+        print("Drop the existing database")
+        sql="DROP DATABASE IF EXISTS "+app.config['DB_DATABASE']
+        cur.execute(sql)
+        print("Create the new database")
+        sql="create DATABASE "+app.config['DB_DATABASE']+" WITH ENCODING='LATIN1'  OWNER="+app.config['DB_USER']+" TEMPLATE=template0 LC_CTYPE='C' LC_COLLATE='C' CONNECTION LIMIT=-1 "
+        cur.execute(sql)
 
     toolsdir=GetDBToolsDir()
     os.environ["PGPASSWORD"] = app.config['DB_PASSWORD']
