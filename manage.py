@@ -233,6 +233,44 @@ def ExtractCategoriesFromRFModel(modeldir):
         Meta['categories'] ={r[0]:r[1] for r in database.GetTaxoNameFromIdList([int(x) for x in Classifier.classes_])}
         json.dump(Meta,(ModelFolder / "meta.json").open("w"),indent="\t")
 
+@manager.option('-p', '--projectid', dest='ProjectID',type=int, default=None,required=True,help="Particle project ID")
+@manager.option('-w', '--what', dest='What', default=None,required=True,help="""What should be recomputed, a set of letter i.e : DRMTC
+D : Compute detailed histogram 
+R : Compute Reduced histogram
+M : Match Ecotaxa sample
+T : Compute taxonomy histogram
+C : CTD import""")
+@manager.option('-u', '--user', dest='User', default=None,help="User Name for CTD Import")
+@manager.option('-e', '--email', dest='Email', default=None,help="Email for CTD Import")
+def RecomputePart(ProjectID,What,User,Email):
+    if 'C' in What:
+        if User is None or Email is None:
+            print("-u and -e options are required for CTD import")
+            quit(-1)
+    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
+        g.db = None
+        import appli.part.database as partdatabase
+        import appli.part.prj as prj
+        import appli.part.common_sample_import as common_import
+        Prj = partdatabase.part_projects.query.filter_by(pprojid=ProjectID).first()
+        Samples=database.GetAll("select psampleid,profileid from part_samples where pprojid=(%s)",[ProjectID])
+        for S in Samples:
+            print("Processing particle sample %s:%s"%(S['psampleid'],S['profileid']))
+            if 'D' in What:
+                print("Det=",prj.ComputeHistoDet(S['psampleid'], Prj.instrumtype))
+            if 'R' in What:
+                print("Red=",prj.ComputeHistoRed(S['psampleid'], Prj.instrumtype))
+            if 'M' in What:
+                print("Match=",prj.ComputeZooMatch(S['psampleid'], Prj.projid))
+            if 'C' in What:
+                print("CTD=","Imported" if common_import.ImportCTD(S['psampleid'], User, Email) else 'CTD No file' )
+        Samples = database.GetAll("select psampleid,profileid,sampleid from part_samples where pprojid=(%s)", [ProjectID])
+        for S in Samples:
+            if 'T' in What and S['sampleid']:
+                print("Zoo for particle sample %s:%s="%(S['psampleid'],S['profileid']),prj.ComputeZooHisto(S['psampleid']))
+
+
+
 
 
 if __name__ == "__main__":

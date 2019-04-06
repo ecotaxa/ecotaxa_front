@@ -13,9 +13,9 @@ def indexPart():
             "SELECT projid,concat(title,' (',cast(projid AS VARCHAR),')') FROM projects where projid in (select projid from part_projects) ORDER BY lower(title)"))
         filt_uproj = SelectMultipleField(choices=[['','']]+database.GetAll(
             "SELECT pprojid,concat(ptitle,' (',cast(pprojid AS VARCHAR),')') FROM part_projects ORDER BY lower(ptitle)"))
-        gpr = SelectMultipleField(choices=[("cl%d"%i,"#/l %02d : "%i+GetClassLimitTxt(PartRedClassLimit,i)) for i in range (1,16)]
+        gpr = SelectMultipleField(choices=[("cl%d"%i,"# l-1 %02d : "%i+GetClassLimitTxt(PartRedClassLimit,i)) for i in range (1,16)]
                                           +[("bv%d"%i,"BV %02d : "%i+GetClassLimitTxt(PartRedClassLimit,i)) for i in range (1,16)])
-        gpd = SelectMultipleField(choices=[("cl%d"%i,"#/l %02d : "%i+GetClassLimitTxt(PartDetClassLimit,i)) for i in range (1,46)]
+        gpd = SelectMultipleField(choices=[("cl%d"%i,"# l-1 %02d : "%i+GetClassLimitTxt(PartDetClassLimit,i)) for i in range (1,46)]
                                           +[("bv%d"%i,"BV %02d : "%i+GetClassLimitTxt(PartDetClassLimit,i)) for i in range (1,46)])
         ctd = SelectMultipleField(
             choices=sorted([(k, v) for v,k in CTDFixedCol.items()], key=operator.itemgetter(1)))
@@ -88,7 +88,7 @@ def GetFilteredSamples(Filter=None,GetVisibleOnly=False,ForceVerticalIfNotSpecif
         sql+=" and s.sampledate>= to_date(%(fromdate)s,'YYYY-MM-DD') "
         sqlparam['fromdate']=Filter.get("filt_fromdate")
     if Filter.get("filt_todate",'')!="":
-        sql+=" and s.sampledate<= to_date(%(todate)s,'YYYY-MM-DD') "
+        sql+=" and s.sampledate< to_date(%(todate)s,'YYYY-MM-DD')+1 "
         sqlparam['todate']=Filter.get("filt_todate")
     if Filter.get("filt_proj",'')!="":
         sql+=" and p.projid in (%s) "%(','.join([str(int(x)) for x in request.args.getlist("filt_proj")]))

@@ -83,9 +83,9 @@ def part_drawchart():
             for i, c in enumerate(gpr):
                 graph[i] = Fig.add_subplot(FigSizeY  , FigSizeX , chartid + 1)
                 if c[0:2] == "cl":
-                    graph[i].set_xlabel('Particle red. class %s (%s) #/l'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:]))))
+                    graph[i].set_xlabel('Particle red. class %s (%s) # l-1'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:]))))
                 if c[0:2] == "bv":
-                    graph[i].set_xlabel('Biovolume red. class %s (%s) µl/l'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:]))))
+                    graph[i].set_xlabel('Biovolume red. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:]))))
                 chartid += 1
             for rs in samples:
                 DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})
@@ -130,9 +130,9 @@ def part_drawchart():
             for i, c in enumerate(gpd):
                 graph[i]=Fig.add_subplot(FigSizeY,FigSizeX,chartid+1)
                 if c[0:2] == "cl":
-                    graph[i].set_xlabel('Particle det. class %s (%s) #/l'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:]))))
+                    graph[i].set_xlabel('Particle det. class %s (%s) # l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:]))))
                 if c[0:2] == "bv":
-                    graph[i].set_xlabel('Biovolume det. class %s (%s) µl/l'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:]))))
+                    graph[i].set_xlabel('Biovolume det. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:]))))
                 chartid += 1
             for rs in samples:
                 DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})

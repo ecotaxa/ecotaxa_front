@@ -12,7 +12,10 @@
     <li>Parse the meta/xxxx_header_xxx.txt file to get the list of available sample and show list of availables and already imported ones</li>
     <li>Create sample if not exists</li>
     <li>Import metadata in the sample</li>
-    <li>Generate the Raw Particle histogram from BRU files</li>
+    <li>Generate the Raw Particle histogram from BRU files searched in this order :
+            <br>DAT : results/xxx_datfile.txt,work/xxx/HDRxx.dat
+            <br>BRU : results/xxx.bru, work/xxx/xxx.bru, raw/xxx/xxx.bru ,raw/xxx/xxx.bru1
+    </li>
     <li>Generate the Detailed and reduced Particle histogram</li>
     <li><a href="#general-help" data-toggle="collapse" class="help">Import CTD</a></li>
   </ul>
@@ -28,32 +31,28 @@ This Particle module is not an application designed to handle diverse CTD file f
 - Filename : profileid.ctd (the same profileid as the one documented in the *_header_*.txt file)<br>
 - Separator : Tab<br>
 - File encoding : Latin1<br>
-- Column titles : We have defined a list of standard column names. We DO RECOMMEND to respect this standard to allow displaying your data with the data from other projects. You may anyhow use other names for other parameters. The Pressure column is mandatory for vertical profiles. The list of pre-defined column names is :
-<p style=" white-space: pre; margin-left: 50px; ">Chloro Fluo [mg Chl/m3]
-Conductivity [mS/cm]
-Cpar [%]
-Depth [salt water, m]
-Fcdom factory [ppb QSE]
-In situ Density Anomaly [kg/m3]
-Neutral Density [kg/m3]
-Nitrate [µmol/l]
-Oxygen [µmol/kg]
-Oxygen [ml/l]
-PAR [µmol m-2 s-1]
-Part backscattering coef 470 nm [m-1]
-Pot. Temperature [degC] (any ref.)
-Potential Density Anomaly [kg/m3]
-Potential Temperature [degC]
-Practical Salinity [psu]
-Practical Salinity from Conductivity
-<b>Pressure in Water Column [db] => MANDATORY for DEPTH PROFILES</b>
-QC Flag
-Sound Speed c [m/s]
-SPAR [µmol m-2 s-1]
-Temperature [degC]
-<b>Time [yyyymmddhhmmssmmm] => MANDATORY FOR TIME DISPLAY</b>
+- Column titles : We have defined a list of standard column names. We DO RECOMMEND to respect this standard to allow displaying your data with the data from other projects. You may anyhow use other names for other parameters. The <code>pressure</code> column is mandatory for vertical profiles, the <code>time</code> column is mandatory of time series. Names are insensitive to capitalisation. The list of pre-defined column names is :
+<p style=" white-space: pre; margin-left: 50px; ">
+chloro fluo [mg chl m-3]
+conductivity [ms cm-1]
+cpar [%]
+depth [m]
+fcdom [ppb qse]
+in situ density anomaly [kg m-3]
+nitrate [umol l-1]
+oxygen [umol kg-1]
+oxygen [ml l-1]
+par [umol m-2 s-1]
+potential density anomaly [kg m-3]
+potential temperature [degc]
+practical salinity [psu]
+<b>pressure [db] => MANDATORY for DEPTH PROFILES</b>
+qc flag
+spar [umol m-2 s-1]
+temperature [degc]
+<b>time [yyyymmddhhmmssmmm] => MANDATORY FOR TIME SERIES</b>
 </p>
-  </div>
+</div>
 </div>
 
 

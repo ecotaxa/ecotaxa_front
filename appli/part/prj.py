@@ -152,6 +152,7 @@ def ComputeZooHisto(psampleid):
         uvp_sample_import.GenerateTaxonomyHistogram(psampleid)
         return " Taxonomy Histogram computed"
     except Exception as E:
+        logging.exception("Taxonomy Histogram can't be computed ")
         return " <span style='color: red;'>Taxonomy Histogram can't be computed : %s </span>" % (E)
 
 def GlobalTaxoCompute():

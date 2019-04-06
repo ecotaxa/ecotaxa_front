@@ -107,9 +107,9 @@ class TaskPartExport(AsyncTask):
                 self.WriteODVCommentArea(f)
                 f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
                 for i in range(1,len(PartRedClassLimit)):
-                    f.write(";LPM (%s)[#/L]"%(GetClassLimitTxt(PartRedClassLimit,i)))
+                    f.write(";LPM (%s)[# l-1]"%(GetClassLimitTxt(PartRedClassLimit,i)))
                 for i in range(1,len(PartRedClassLimit)):
-                    f.write(";LPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartRedClassLimit, i)))
+                    f.write(";LPM biovolume (%s)[mm3 l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                 for c in CTDFixedCols:
                     f.write(";%s" % (CTDFixedColByKey.get(c,c)))
 
@@ -139,9 +139,9 @@ class TaskPartExport(AsyncTask):
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
                     for i in range(1,len(PartRedClassLimit)):
-                        f.write("\tLPM (%s)[#/L]" % (GetClassLimitTxt(PartRedClassLimit, i)))
+                        f.write("\tLPM (%s)[# l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                     for i in range(1,len(PartRedClassLimit)):
-                        f.write("\tLPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartRedClassLimit, i)))
+                        f.write("\tLPM biovolume (%s)[mm3 l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                     for c in CTDFixedCols:
                         f.write("\t%s" % (CTDFixedColByKey.get(c, c)))
 
@@ -250,11 +250,11 @@ class TaskPartExport(AsyncTask):
                     HeaderSuffix = "w/o children"
                 LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                 for v in LstHead:
-                    f.write(";%s %s[#/m3]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s %s[# m-3]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
-                    f.write(";%s biovolume %s[ppm]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s biovolume %s[mm3 l-1]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
-                    f.write(";%s avgesd %s[mm3]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s avgesd %s[mm]" % (v['nom'],HeaderSuffix))
                 f.write("\n")
                 for S in samples:
                     if self.samplesdict[S["psampleid"]][3][1] != 'Y': # 3 = visibility, 1 =Second char=Zoo visibility
@@ -271,7 +271,10 @@ class TaskPartExport(AsyncTask):
                         if WaterVolumeTranche >0:
                             t[idx] = 1000*h['nbr']/WaterVolumeTranche
                         else: t[idx] =""
-                        t[idx+len(lstcat)] = h['totalbiovolume']
+                        biovolume=""
+                        if h['totalbiovolume'] and WaterVolumeTranche>0:
+                            biovolume=h['totalbiovolume']/WaterVolumeTranche
+                        t[idx+len(lstcat)] = biovolume
                         t[idx + 2*len(lstcat)] = h['avgesd']
                         EOL=False
                         if (i+1)==len(CatHisto): # Derniere ligne du dataset
@@ -288,22 +291,24 @@ class TaskPartExport(AsyncTask):
                             L=['','','','','','','','','','','']
             zfile.write(nomfichier)
         else: # ------------ RED Categories AS TSV
+            ZooFileParStation={}
             for S in samples:
                 if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
                     continue  # pas les permission d'exporter le ZOO de ce sample le saute
                 CatHisto = GetAll(sqlhisto, {'psampleid':S["psampleid"]})
                 if len(CatHisto)==0: continue # on ne genere pas les fichiers vides.
                 nomfichier = BaseFileName + "_ZOO_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
+                ZooFileParStation[S['station']]=nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
                     LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                     for v in LstHead:
-                        f.write("\t%s[#]" % (v['tree']))
+                        f.write("\t%s[# m-3]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s biovolume[ppm]" % (v['tree']))
+                        f.write("\t%s biovolume[mm3 l-1]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s avgesd[mm3]" % (v['tree']))
+                        f.write("\t%s avgesd[mm]" % (v['tree']))
                     f.write("\n")
                     t = [None for i in range(3 * len(lstcat))]
                     WV = database.GetAssoc2Col(sqlWV, {'psampleid': S["psampleid"]})
@@ -311,7 +316,9 @@ class TaskPartExport(AsyncTask):
                         h = CatHisto[i]
                         idx = lstcat[h['classif_id']]['idx']
                         WaterVolumeTranche =WV.get(h['tranche'],0)
-                        t[idx] = h['nbr']
+                        if WaterVolumeTranche >0:
+                            t[idx] = 1000*h['nbr']/WaterVolumeTranche
+                        else: t[idx] =""
                         t[idx + len(lstcat)] = h['totalbiovolume']
                         t[idx + 2 * len(lstcat)] = h['avgesd']
                         EOL = False
@@ -338,9 +345,9 @@ class TaskPartExport(AsyncTask):
                 for S in samples:
                     visibility=self.samplesdict[S["psampleid"]][3]
                     L = [S['station'],S['cruise'], S['site'],  S['dataowner'], S['rawfilename'], S['instrumtype'],
-                         S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude'],S['acq_aa'],S['acq_exp'],S['acq_pixel']
-                         ,BaseFileName + "_PAR_"+S['station']+".tsv"
-                        , BaseFileName + "_ZOO_" + S['station'] + ".tsv" if visibility[1]=='Y' else ""]
+                         S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude'],S['acq_aa'],S['acq_exp'],S['acq_pixel']]
+                    L.append(BaseFileName + "_PAR_"+S['station']+".tsv")
+                    L.append(ZooFileParStation[S['station']] if S['station'] in ZooFileParStation else "no data available")
                     f.write("\t".join((str(ntcv(x)) for x in L)))
                     f.write("\n")
             zfile.write(nomfichier)
@@ -385,9 +392,9 @@ class TaskPartExport(AsyncTask):
                 self.WriteODVCommentArea(f)
                 f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
                 for i in range(1,len(PartDetClassLimit)):
-                    f.write(";LPM (%s)[#/L]"%(GetClassLimitTxt(PartDetClassLimit,i)))
+                    f.write(";LPM (%s)[# l-1]"%(GetClassLimitTxt(PartDetClassLimit,i)))
                 for i in range(1,len(PartDetClassLimit)):
-                    f.write(";LPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartDetClassLimit, i)))
+                    f.write(";LPM biovolume (%s)[mm3 l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                 for c in CTDFixedCols:
                     f.write(";%s" % (CTDFixedColByKey.get(c,c)))
 
@@ -417,9 +424,9 @@ class TaskPartExport(AsyncTask):
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
                     for i in range(1,len(PartDetClassLimit)):
-                        f.write("\tLPM (%s)[#/L]" % (GetClassLimitTxt(PartDetClassLimit, i)))
+                        f.write("\tLPM (%s)[# l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                     for i in range(1,len(PartDetClassLimit)):
-                        f.write("\tLPM biovolume (%s)[ppm]" % (GetClassLimitTxt(PartDetClassLimit, i)))
+                        f.write("\tLPM biovolume (%s)[mm3 l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                     for c in CTDFixedCols:
                         f.write("\t%s" % (CTDFixedColByKey.get(c, c)))
 
@@ -527,11 +534,11 @@ order by tree""".format(lstcatwhere)
                 HeaderSuffix = ""
                 LstHead=sorted(lstcat.values(),key=lambda cat:cat['idx'])
                 for v in LstHead:
-                    f.write(";%s %s[#/m3]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s %s[# m-3]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
-                    f.write(";%s biovolume %s[ppm]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s biovolume %s[mm3 l-1]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
-                    f.write(";%s avgesd %s[mm3]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s avgesd %s[mm]" % (v['nom'],HeaderSuffix))
                 f.write("\n")
                 for S in samples:
                     if self.samplesdict[S["psampleid"]][3][1] != 'Y': # 3 = visibility, 1 =Second char=Zoo visibility
@@ -546,7 +553,10 @@ order by tree""".format(lstcatwhere)
                         if h['watervolume'] and h['watervolume']>0:
                             t[idx] = h['nbr']*1000/h['watervolume']
                         else: t[idx] =""
-                        t[idx+len(lstcat)] = h['totalbiovolume']
+                        biovolume=""
+                        if h['totalbiovolume'] and h['watervolume']:
+                            biovolume=h['totalbiovolume']/h['watervolume']
+                        t[idx+len(lstcat)] = biovolume
                         t[idx + 2*len(lstcat)] = h['avgesd']
                         EOL=False
                         if (i+1)==len(CatHisto): # Derniere ligne du dataset
@@ -563,28 +573,36 @@ order by tree""".format(lstcatwhere)
                             L=['','','','','','','','','','','']
             zfile.write(nomfichier)
         else: # ------------ Categories AS TSV
+            ZooFileParStation = {}
             for S in samples:
                 if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
                     continue  # pas les permission d'exporter le ZOO de ce sample le saute
+                CatHisto = GetAll(sqlhisto, {'psampleid': S["psampleid"]})
+                if len(CatHisto)==0: continue # on ne genere pas les fichiers vides.
                 nomfichier = BaseFileName + "_ZOO_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
+                ZooFileParStation[S['station']] = nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
                     LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                     for v in LstHead:
-                        f.write("\t%s[#]" % (v['tree']))
+                        f.write("\t%s[# m-3]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s biovolume[ppm]" % (v['tree']))
+                        f.write("\t%s biovolume[mm3 l-1]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s avgesd[mm3]" % (v['tree']))
+                        f.write("\t%s avgesd[mm]" % (v['tree']))
                     f.write("\n")
                     t = [None for i in range(3 * len(lstcat))]
-                    CatHisto = GetAll(sqlhisto, {'psampleid':S["psampleid"]})
                     for i in range(len(CatHisto)):
                         h = CatHisto[i]
                         idx = lstcat[h['classif_id']]['idx']
-                        t[idx]= h['nbr']
-                        t[idx + len(lstcat)] = h['totalbiovolume']
+                        if h['watervolume'] :
+                            t[idx] = 1000*h['nbr']/h['watervolume']
+                        else: t[idx] =""
+                        biovolume=""
+                        if h['totalbiovolume'] and h['watervolume']:
+                            biovolume=h['totalbiovolume']/h['watervolume']
+                        t[idx + len(lstcat)] = biovolume
                         t[idx + 2 * len(lstcat)] = h['avgesd']
                         EOL = False
                         if (i + 1) == len(CatHisto):  # Derniere ligne du dataset
@@ -611,8 +629,9 @@ order by tree""".format(lstcatwhere)
                     visibility = self.samplesdict[S["psampleid"]][3]
                     L = [S['station'],S['cruise'], S['site'],  S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude'],S['acq_aa'],S['acq_exp'],S['acq_pixel']
-                         ,BaseFileName + "_PAR_"+S['station']+".tsv"
-                        , BaseFileName + "_ZOO_" + S['station'] + ".tsv" if visibility[1]=='Y' else ""]
+                         ,BaseFileName + "_PAR_"+S['station']+".tsv"]
+                    L.append(ZooFileParStation[S['station']] if S['station'] in ZooFileParStation else "no data available")
+
                     f.write("\t".join((str(ntcv(x)) for x in L)))
                     f.write("\n")
             zfile.write(nomfichier)
@@ -638,35 +657,7 @@ order by tree""".format(lstcatwhere)
         order by s.profileid
         """ % ((",".join([str(x[0]) for x in self.param.samples])),)
         samples=GetAll(sql)
-        cols=('psampleid','pprojid','profileid','filename','sampleid','latitude','longitude','organizedbydeepth','histobrutavailable',
-'qualitytaxo','qualitypart','daterecalculhistotaxo','winddir','winspeed','seastate','nebuloussness','comment','stationid','firstimage',
-'lastimg','lastimgused','bottomdepth','yoyo','sampledate','op_sample_name','op_sample_email','ctd_desc','ctd_origfilename','ctd_import_name',
-'ctd_import_email','ctd_import_datetime','ctd_status','instrumsn','acq_aa','acq_exp','acq_volimage','acq_depthoffset','acq_pixel','acq_shutterspeed',
-'acq_smzoo','acq_exposure','acq_gain','acq_filedescription','acq_eraseborder','acq_tasktype','acq_threshold','acq_choice','acq_disktype',
-'acq_smbase','acq_ratio','acq_descent_filter','acq_presure_gain','acq_xsize','acq_ysize','acq_barcode','proc_datetime','proc_gamma','proc_soft',
-'lisst_zscat_filename','lisst_kernel','txt_data01','txt_data02','txt_data03','txt_data04','txt_data05','txt_data06','txt_data07','txt_data08',
-'txt_data09','txt_data10','ptitle','rawfolder','ownerid','projid','instrumtype','op_name','op_email','cs_name','cs_email','do_name','do_email',
-'prj_info','prj_acronym','cruise','ship','default_instrumsn','default_depthoffset')
-        nomfichier = BaseFileName + "_Export_metadata_summary.tsv"
-        fichier = os.path.join(self.GetWorkingDir(), nomfichier)
-        with open(fichier, 'w', encoding='latin-1') as f:
-            f.write("\t".join(cols)+"\tParticle filename\tCTD filename\tPlankton filename\n")
-            for S in samples:
-                visibility = self.samplesdict[S["psampleid"]][3]
-                L=[S[c] for c in cols]
-                for i,v in enumerate(L):
-                    if isinstance(v,str):
-                        L[i]='"'+v.replace('\n','$')+'"'
-                # L = [str(S[c]).replace('\n','$') for c in cols]
-                L.extend(
-                    [
-                    "{0}_{1}_PAR_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier ) if S['histobrutavailable'] else None,
-                    "{0}_{1}_CTD_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier) if S['nbrlinectd'] else None,
-                    "{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier) if S['nbrlinetaxo' and visibility[1]=='Y'] else None
-                        ])
-                f.write("\t".join((str(ntcv(x)) for x in L)))
-                f.write("\n")
-        zfile.write(nomfichier)
+        # Fichiers particule
         for S in samples:
             if S['histobrutavailable'] and S['instrumtype']=='uvp5':
                 nomfichier="{0}_{1}_PAR_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier )
@@ -676,9 +667,12 @@ order by tree""".format(lstcatwhere)
                     shutil.copyfileobj(rf,rawtargetfile)
                 zfile.write(nomfichier)
                 os.unlink(nomfichier)
+        # fichiers CTD
+        CTDFileParPSampleID = {}
         for S in samples:
             if S['nbrlinectd'] > 0:
                 nomfichier="{0}_{1}_CTD_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier)
+                CTDFileParPSampleID[S["psampleid"]] = nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier,"wt") as f:
                     cols=sorted(CTDFixedColByKey.keys())
@@ -702,6 +696,8 @@ order by tree""".format(lstcatwhere)
                         f.write("\t".join((str(ntcv(x)) for x in L)))
                         f.write("\n")
                 zfile.write(nomfichier)
+        # Fichiers ZOO
+        ZooFileParPSampleID = {}
         for S in samples:
             DepthOffset = S['acq_depthoffset']
             if DepthOffset is None:
@@ -714,14 +710,15 @@ order by tree""".format(lstcatwhere)
             if S['nbrlinetaxo'] > 0:
                 TaxoReverseMapping ={v:k for k,v in DecodeEqualList(ntcv(S['mappingobj'])).items()}
                 nomfichier="{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier)
+                ZooFileParPSampleID[S["psampleid"]]=nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier,"wt") as f:
                     # excludenotliving
                     sql="""select of.*
-                        ,concat(t0.name,'('||t1.name||')') as "name", classif_qual                         
-                        ,((oh.depth_min+oh.depth_max)/2)+{DepthOffset} as depth,objid
+                        ,t0.display_name as "name", classif_qual ,ps.psampleid                        
+                        ,((oh.depth_min+oh.depth_max)/2)+{DepthOffset} as depth_including_offset,objid
                         ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
-     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) taxo_hirerarchy
+                                t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) taxo_hierarchy
                       from part_samples ps
                       join obj_head oh on ps.sampleid=oh.sampleid 
                       join obj_field of on of.objfid=oh.objid                      
@@ -746,17 +743,58 @@ order by tree""".format(lstcatwhere)
                     if self.param.includenotvalidated==False:
                         sql += " and oh.classif_qual='V' "
                     res = GetAll(sql,(S['psampleid'],))
-                    cols=['orig_id','objid','name','taxo_hirerarchy','classif_qual','depth']
-                    extracols=('area','minor','major','mean')
+                    cols=['orig_id','objid','name','taxo_hierarchy','classif_qual','depth_including_offset','psampleid']
+                    extracols=list(TaxoReverseMapping.keys())
+                    extracols.sort()
                     colsname=cols[:]
-                    colsname.extend(['area [pixel]','minor [pixel]','major [pixel]','mean [8 bits]'])
-                    cols.extend([TaxoReverseMapping.get(x,None) for x in extracols])
+                    if extracols:
+                        colsname.extend(extracols)
+                        cols.extend([TaxoReverseMapping.get(x,None) for x in extracols])
                     f.write("\t".join(colsname) + "\n")
                     for R in res:
                         L = [R[c] if c else '' for c in cols]
                         f.write("\t".join((str(ntcv(x)) for x in L)))
                         f.write("\n")
                 zfile.write(nomfichier)
+        # Summary File
+        cols = (
+        'psampleid', 'pprojid', 'profileid', 'filename', 'sampleid', 'latitude', 'longitude', 'organizedbydeepth',
+        'histobrutavailable',
+        'qualitytaxo', 'qualitypart', 'daterecalculhistotaxo', 'winddir', 'winspeed', 'seastate', 'nebuloussness',
+        'comment', 'stationid', 'firstimage',
+        'lastimg', 'lastimgused', 'bottomdepth', 'yoyo', 'sampledate', 'op_sample_name', 'op_sample_email',
+        'ctd_desc', 'ctd_origfilename', 'ctd_import_name',
+        'ctd_import_email', 'ctd_import_datetime', 'ctd_status', 'instrumsn', 'acq_aa', 'acq_exp', 'acq_volimage',
+        'acq_depthoffset', 'acq_pixel', 'acq_shutterspeed',
+        'acq_smzoo', 'acq_exposure', 'acq_gain', 'acq_filedescription', 'acq_eraseborder', 'acq_tasktype',
+        'acq_threshold', 'acq_choice', 'acq_disktype',
+        'acq_smbase', 'acq_ratio', 'acq_descent_filter', 'acq_presure_gain', 'acq_xsize', 'acq_ysize',
+        'acq_barcode', 'proc_datetime', 'proc_gamma', 'proc_soft',
+        'lisst_zscat_filename', 'lisst_kernel', 'txt_data01', 'txt_data02', 'txt_data03', 'txt_data04',
+        'txt_data05', 'txt_data06', 'txt_data07', 'txt_data08',
+        'txt_data09', 'txt_data10', 'ptitle', 'rawfolder', 'ownerid', 'projid', 'instrumtype', 'op_name',
+        'op_email', 'cs_name', 'cs_email', 'do_name', 'do_email',
+        'prj_info', 'prj_acronym', 'cruise', 'ship', 'default_instrumsn', 'default_depthoffset')
+        nomfichier = BaseFileName + "_Export_metadata_summary.tsv"
+        fichier = os.path.join(self.GetWorkingDir(), nomfichier)
+        with open(fichier, 'w', encoding='latin-1') as f:
+            f.write("\t".join(cols) + "\tParticle filename\tCTD filename\tPlankton filename\n")
+            for S in samples:
+                L = [S[c] for c in cols]
+                for i, v in enumerate(L):
+                    if isinstance(v, str):
+                        L[i] = '"' + v.replace('\n', '$') + '"'
+                # L = [str(S[c]).replace('\n','$') for c in cols]
+                L.extend(
+                    [
+                        "{0}_{1}_PAR_raw_{2}.tsv".format(S['filename'], S['profileid'], DTNomFichier) if S[
+                            'histobrutavailable'] else None,
+                        CTDFileParPSampleID[S["psampleid"]] if S["psampleid"] in CTDFileParPSampleID else "no data available",
+                        ZooFileParPSampleID[S["psampleid"]] if S["psampleid"] in ZooFileParPSampleID else "no data available"
+                    ])
+                f.write("\t".join((str(ntcv(x)) for x in L)))
+                f.write("\n")
+        zfile.write(nomfichier)
 
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__,))

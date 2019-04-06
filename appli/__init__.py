@@ -307,9 +307,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.0.1"
+ecotaxa_version="2.1.0"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2019-01-25"
+    return ecotaxa_version+" 2019-04-03"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -317,6 +317,8 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2019-04-03 : V 2.1.0
+    Fix #111,#277,#304,#305,#306,#307,#311,#312,#314
 2019.02.01 : V 2.0.1
     Fix implementation minor bug
 2019.01.25 : V 2.0.0

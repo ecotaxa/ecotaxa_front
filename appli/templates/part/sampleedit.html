@@ -40,7 +40,8 @@
             {{ field.label }}
         </td>
         <td>
-            {{ field(type='checkbox', **kwargs) }}
+        {# field(type='checkbox', **kwargs) #}
+           <input type="checkbox" name="{{ field.id }}" id="{{ field.id }}" value="y" {{ 'checked' if field.object_data  }}>{{ label }}
         </td>
     {{ "</tr>"|safe if 'c' in kwargs.get('tr','oc') }}
 {%- endmacro %}
@@ -156,7 +157,7 @@ label {font-size: 12px; font-weight: normal;}
 {{ render_field(form.imp_descent_filtered_row,tr='') }}
 {{ render_field(form.imp_removed_empty_slice,tr='c') }}
 
-{{ render_field(form.yoyo,tr='o') }}
+{{ render_checkbox_field(form.yoyo,tr='o') }}
 {{ render_checkbox_field(form.organizedbydeepth,tr='') }}
 {{ render_field(form.comment,tr='c',style="width:550px;",colspan=7) }}
 </table>

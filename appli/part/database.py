@@ -139,7 +139,7 @@ class part_histopart_reduit(db.Model):
 for i in range(1, 16):
     setattr(part_histopart_reduit, "class%02d" % i, db.Column(INTEGER))
 for i in range(1, 16):
-    setattr(part_histopart_reduit, "biovol%02d" % i, db.Column(DOUBLE_PRECISION))
+    setattr(part_histopart_reduit, "biovol%02d" % i, db.Column(DOUBLE_PRECISION)) # en mm3/l
 
 class part_histopart_det(db.Model):
     __tablename__ = 'part_histopart_det'
@@ -152,7 +152,7 @@ class part_histopart_det(db.Model):
 for i in range(1, 46):
     setattr(part_histopart_det, "class%02d" % i, db.Column(INTEGER))
 for i in range(1, 46):
-    setattr(part_histopart_det, "biovol%02d" % i, db.Column(DOUBLE_PRECISION))
+    setattr(part_histopart_det, "biovol%02d" % i, db.Column(DOUBLE_PRECISION))  # en mm3/l
 
 class part_histocat(db.Model):
     __tablename__ = 'part_histocat'
@@ -164,7 +164,7 @@ class part_histocat(db.Model):
     watervolume = db.Column(DOUBLE_PRECISION)
     nbr = db.Column(DOUBLE_PRECISION)
     avgesd = db.Column(DOUBLE_PRECISION)
-    totalbiovolume = db.Column(DOUBLE_PRECISION)
+    totalbiovolume = db.Column(DOUBLE_PRECISION) # en mm3
 
 class part_histocat_lst(db.Model):
     __tablename__ = 'part_histocat_lst'

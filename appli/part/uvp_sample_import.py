@@ -345,7 +345,7 @@ def GenerateParticleHistogram(psampleid):
     if UvpSample is None:
         raise Exception("GenerateParticleHistogram: Sample %d missing"%psampleid)
     if not UvpSample.histobrutavailable:
-        raise Exception("GenerateParticleHistogram: Particle Histogram can't be computer without Raw histogram" % psampleid)
+        raise Exception("GenerateParticleHistogram: Sample %d Particle Histogram can't be computed without Raw histogram" % psampleid)
     Prj = partdatabase.part_projects.query.filter_by(pprojid=UvpSample.pprojid).first()
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     DossierUVPPath = ServerRoot / Prj.rawfolder
@@ -363,7 +363,7 @@ def GenerateParticleHistogram(psampleid):
     # 1 Ligne par mètre et area, ne contient les données entre fist et last
     MinDepth=Part[:,0].min()
     # ajout d'attributs calculés pour chaque ligne du fichier.
-    PartCalc=np.empty([Part.shape[0],3]) # col0 = tranche, Col1=ESD, Col2=Biovolume en µl
+    PartCalc=np.empty([Part.shape[0],3]) # col0 = tranche, Col1=ESD, Col2=Biovolume en µl=mm3
     PartCalc[:,0]=Part[:,0]//5  #calcul de la tranche 0 pour [0m..5m[,1 pour [5m..10m[
     PartCalc[:,1]=2*np.sqrt((pow(Part[:,2],UvpSample.acq_exp)*UvpSample.acq_aa)/np.pi)
     PartCalc[:, 2] = Part[:,3]*pow(PartCalc[:, 1] / 2, 3) * 4 * math.pi / 3
@@ -410,7 +410,7 @@ def GenerateParticleHistogram(psampleid):
         ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
         ax.set_xticks(GetTicks(n.max()))
 
-        ax.set_xlabel('Part 0.06-0.53 mm esd #/L')
+        ax.set_xlabel('Part 0.06-0.53 mm esd # l-1')
         ax.set_ylabel('Depth(m)')
 
 
@@ -421,7 +421,7 @@ def GenerateParticleHistogram(psampleid):
         n=n/VolumeParTranche
         ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
         ax.set_xticks(GetTicks(n.max()))
-        ax.set_xlabel('Part 0.53-1.06 mm esd #/L')
+        ax.set_xlabel('Part 0.53-1.06 mm esd # l-1')
         ax.set_ylabel('Depth(m)')
 
         # Calcul Particle 1.06->2.66
@@ -431,7 +431,7 @@ def GenerateParticleHistogram(psampleid):
         n=n/VolumeParTranche
         ax.plot(n , bins[:-1]*-5-MinDepth-2.5)
         ax.set_xticks(GetTicks(n.max()))
-        ax.set_xlabel('Part 1.06-2.66 mm esd #/L')
+        ax.set_xlabel('Part 1.06-2.66 mm esd # l-1')
         ax.set_ylabel('Depth(m)')
 
         # Calcul Biovolume Particle >0.512-<=1.02 mm via histograme
@@ -440,7 +440,7 @@ def GenerateParticleHistogram(psampleid):
 
         ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
         ax.set_xticks(GetTicks(n.max()))
-        ax.set_xlabel('Part >=0.512-<1.02 mm esd µl/l from det histo')
+        ax.set_xlabel('Part >=0.512-<1.02 mm esd mm3 l-1 from det histo')
         ax.set_ylabel('Depth(m)')
 
         # Calcul Particle <=0.512 mm via histograme
@@ -449,7 +449,7 @@ def GenerateParticleHistogram(psampleid):
         n=n/VolumeParTranche
         ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
         ax.set_xticks(GetTicks(n.max()))
-        ax.set_xlabel('Part <0.512 mm esd #/L from det histo')
+        ax.set_xlabel('Part <0.512 mm esd # l-1 from det histo')
         ax.set_ylabel('Depth(m)')
 
         # Calcul Particle >0.512-<=1.02 mm via histograme
@@ -458,7 +458,7 @@ def GenerateParticleHistogram(psampleid):
         n=n/VolumeParTranche
         ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
         ax.set_xticks(GetTicks(n.max()))
-        ax.set_xlabel('Part >=0.512-<1.02 mm esd #/L from det histo')
+        ax.set_xlabel('Part >=0.512-<1.02 mm esd # l-1 from det histo')
         ax.set_ylabel('Depth(m)')
 
         # Calcul Particle >0.512-<=1.02 mm via histograme
@@ -467,7 +467,7 @@ def GenerateParticleHistogram(psampleid):
         n=n/VolumeParTranche
         ax.plot(n , np.arange(0, LastTranche+1 )*-5 -2.5)
         ax.set_xticks(GetTicks(n.max()))
-        ax.set_xlabel('Part >=1.02-<2.58 mm esd #/L from det histo')
+        ax.set_xlabel('Part >=1.02-<2.58 mm esd # l-1 from det histo')
         ax.set_ylabel('Depth(m)')
 
         # Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_particle_' + UvpSample.profileid+'.png')).as_posix())
@@ -538,18 +538,34 @@ def GenerateTaxonomyHistogram(psampleid):
             break
     if areacol is None:
         raise Exception("GenerateTaxonomyHistogram: esd attribute required in Ecotaxa project %d"%Prj.projid)
-    app.logger.info("Esd col is %s",areacol)
+    # app.logger.info("Esd col is %s",areacol)
     DepthOffset=UvpSample.acq_depthoffset
     if DepthOffset is None:
         DepthOffset = Prj.default_depthoffset
     if DepthOffset is None:
         DepthOffset=0
 
-    LstTaxo=database.GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,avg({areacol}) as avgarea,count(*) nbr
+    # LstTaxo=database.GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,avg({areacol}) as avgarea,count(*) nbr
+    #             from objects
+    #             WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL and classif_qual='V'
+    #             group by classif_id,floor((depth_min+{DepthOffset})/5)"""
+    #                         .format(sampleid=UvpSample.sampleid,areacol=areacol,DepthOffset=DepthOffset))
+    LstTaxoDet=database.GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,{areacol} areacol
                 from objects
                 WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL and classif_qual='V'
-                group by classif_id,floor((depth_min+{DepthOffset})/5)"""
+                """
                             .format(sampleid=UvpSample.sampleid,areacol=areacol,DepthOffset=DepthOffset))
+    LstTaxo = {}
+    for r in LstTaxoDet:
+        cle="{}/{}".format(r['classif_id'],r['tranche'])
+        if cle not in LstTaxo:
+            LstTaxo[cle]={'nbr':0,'esdsum':0,'bvsum':0,'classif_id':r['classif_id'],'tranche':r['tranche']}
+        LstTaxo[cle]['nbr']+=1
+        esd=2*math.sqrt(r['areacol']*(pixel**2)/math.pi)
+        LstTaxo[cle]['esdsum']+=esd
+        biovolume =pow(esd/2,3)*4*math.pi/3
+        LstTaxo[cle]['bvsum']+=biovolume
+
     LstVol=database.GetAssoc("""select cast(round((depth-2.5)/5) as INT) tranche,watervolume from part_histopart_reduit where psampleid=%s"""%psampleid)
     # 0 Taxoid, tranche
     # TblTaxo=np.empty([len(LstTaxo),4])
@@ -557,16 +573,15 @@ def GenerateTaxonomyHistogram(psampleid):
     database.ExecSQL("delete from part_histocat where psampleid=%s"%psampleid)
     sql="""insert into part_histocat(psampleid, classif_id, lineno, depth, watervolume, nbr, avgesd, totalbiovolume)
             values({psampleid},{classif_id},{lineno},{depth},{watervolume},{nbr},{avgesd},{totalbiovolume})"""
-    for r in LstTaxo:
-        watervolume=LstVol.get(r['tranche'])
-        esd=r['avgarea']*pixel*pixel
-        biovolume=r['nbr']*pow(esd/2,3)*4*math.pi/3
+    for r in LstTaxo.values():
+        avgesd=r['esdsum']/r['nbr']
+        biovolume=r['bvsum']
         watervolume='NULL'
         if r['tranche'] in LstVol:
             watervolume =LstVol[r['tranche']]['watervolume']
         database.ExecSQL(sql.format(
         psampleid=psampleid, classif_id=r['classif_id'], lineno=r['tranche'], depth=r['tranche']*5+2.5, watervolume=watervolume
-            , nbr=r['nbr'], avgesd=esd, totalbiovolume=biovolume ))
+            , nbr=r['nbr'], avgesd=avgesd, totalbiovolume=biovolume ))
     database.ExecSQL("""insert into part_histocat_lst(psampleid, classif_id) 
             select distinct psampleid,classif_id from part_histocat where psampleid=%s""" % psampleid)
 

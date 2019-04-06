@@ -113,9 +113,22 @@ def ImportCTD(psampleid,user_name,user_email):
         ExtraMapping ={}
         for ic,c in enumerate(HeadRow):
             clow=c.lower().strip()
+            if clow=="chloro fluo [mg chl/m3]":clow="chloro fluo [mg chl m-3]"
+            if clow == "conductivity [ms/cm]": clow = "conductivity [ms cm-1]"
+            if clow == "depth [salt water, m]": clow = "depth [m]"
+            if clow == "fcdom factory [ppb qse]": clow = "fcdom [ppb qse]"
+            if clow == "in situ density anomaly [kg/m3]": clow = "in situ density anomaly [kg m-3]"
+            if clow == "nitrate [µmol/l]": clow = "nitrate [umol l-1]"
+            if clow == "oxygen [µmol/kg]": clow = "oxygen [umol kg-1]"
+            if clow == "oxygen [ml/l]": clow = "oxygen [ml l-1]"
+            if clow == "par [µmol m-2 s-1]": clow = "par [umol m-2 s-1]"
+            if clow == "potential density anomaly [kg/m3]": clow = "potential density anomaly [kg m-3]"
+            if clow == "pressure in water column [db]": clow = "pressure [db]"
+            if clow == "spar [µmol m-2 s-1]": clow = "spar [umol m-2 s-1]"
             if clow in CTDFixedCol:
                 Target=CTDFixedCol[clow]
             else:
+                # print (clow)
                 ExtramesID += 1
                 Target ='extrames%02d'%ExtramesID
                 ExtraMapping['%02d'%ExtramesID]=c
