@@ -309,7 +309,7 @@ order by Lower(u.name)""")
 
 ecotaxa_version="2.1.0"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2019-04-03"
+    return ecotaxa_version+" 2019-04-18"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -317,6 +317,8 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2019-04-18 : V 2.1.0
+    Fix #304,#316,#317
 2019-04-03 : V 2.1.0
     Fix #111,#277,#304,#305,#306,#307,#311,#312,#314
 2019.02.01 : V 2.0.1

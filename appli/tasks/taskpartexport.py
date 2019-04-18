@@ -319,7 +319,10 @@ class TaskPartExport(AsyncTask):
                         if WaterVolumeTranche >0:
                             t[idx] = 1000*h['nbr']/WaterVolumeTranche
                         else: t[idx] =""
-                        t[idx + len(lstcat)] = h['totalbiovolume']
+                        biovolume = ""
+                        if h['totalbiovolume'] and WaterVolumeTranche:
+                            biovolume = h['totalbiovolume'] / WaterVolumeTranche
+                        t[idx + len(lstcat)] = biovolume
                         t[idx + 2 * len(lstcat)] = h['avgesd']
                         EOL = False
                         if (i + 1) == len(CatHisto):  # Derniere ligne du dataset

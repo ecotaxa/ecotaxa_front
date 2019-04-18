@@ -254,7 +254,7 @@ class TaskExportTxt(AsyncTask):
         # zfile.write(tsvfile)
         zfile = zipfile.ZipFile(self.param.OutFile, 'a', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
 
-        sql="""SELECT i.objid,i.file_name,i.orig_file_name,t.name,concat(t.name,' ('||to1p.name||')') taxo_parent_child,imgrank
+        sql="""SELECT i.objid,i.file_name,i.orig_file_name,t.name,replace(t.display_name,'<','_') taxo_parent_child,imgrank
                   ,s.orig_id sample_orig_id
                  From objects o 
                  left join samples s on o.sampleid=s.sampleid

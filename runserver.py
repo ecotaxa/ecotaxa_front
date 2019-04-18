@@ -11,8 +11,8 @@ import logging.handlers
 
 if __name__ == '__main__':
     app.debug = True
-
-    handler = logging.handlers.RotatingFileHandler('MyAppli.log', maxBytes=1000000, backupCount=1)
+    handler = logging.StreamHandler()
+    # handler = logging.handlers.RotatingFileHandler('MyAppli.log', maxBytes=1000000, backupCount=1)
     #handler = logging.FileHandler('MyAppli.log')
     handler.setLevel(logging.INFO)
     LoggingFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

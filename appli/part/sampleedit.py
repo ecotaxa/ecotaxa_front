@@ -46,7 +46,7 @@ class UvpSampleForm(Form):
     acq_exp = FloatField("Exp",[validators.Optional(strip_whitespace=True)])
     acq_volimage = FloatField("Image Volume [L]",[validators.Optional(strip_whitespace=True)])
     acq_depthoffset = FloatField("Depth Offset [M]",[validators.Optional(strip_whitespace=True)])
-    acq_pixel = FloatField("Pixel size [µM]",[validators.Optional(strip_whitespace=True)])
+    acq_pixel = FloatField("Pixel size [mm]",[validators.Optional(strip_whitespace=True)])
     acq_shutterspeed = IntegerField("Acq Shutter speed",[validators.Optional(strip_whitespace=True)])
     acq_smzoo = IntegerField("Vignettes minimum size [Pixels]",[validators.Optional(strip_whitespace=True)])
     acq_exposure = IntegerField("Acq Exposure",[validators.Optional(strip_whitespace=True)])
