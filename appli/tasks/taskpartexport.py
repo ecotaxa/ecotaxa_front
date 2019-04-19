@@ -105,11 +105,11 @@ class TaskPartExport(AsyncTask):
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
             with open(fichier,'w',encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
-                f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
+                f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume [L]")
                 for i in range(1,len(PartRedClassLimit)):
-                    f.write(";LPM (%s)[# l-1]"%(GetClassLimitTxt(PartRedClassLimit,i)))
+                    f.write(";LPM (%s) [# l-1]"%(GetClassLimitTxt(PartRedClassLimit,i)))
                 for i in range(1,len(PartRedClassLimit)):
-                    f.write(";LPM biovolume (%s)[mm3 l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
+                    f.write(";LPM biovolume (%s) [mm3 l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                 for c in CTDFixedCols:
                     f.write(";%s" % (CTDFixedColByKey.get(c,c)))
 
@@ -137,11 +137,11 @@ class TaskPartExport(AsyncTask):
                 nomfichier = BaseFileName + "_PAR_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
-                    f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
+                    f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume [L]")
                     for i in range(1,len(PartRedClassLimit)):
-                        f.write("\tLPM (%s)[# l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
+                        f.write("\tLPM (%s) [# l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                     for i in range(1,len(PartRedClassLimit)):
-                        f.write("\tLPM biovolume (%s)[mm3 l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
+                        f.write("\tLPM biovolume (%s) [mm3 l-1]" % (GetClassLimitTxt(PartRedClassLimit, i)))
                     for c in CTDFixedCols:
                         f.write("\t%s" % (CTDFixedColByKey.get(c, c)))
 
@@ -243,18 +243,18 @@ class TaskPartExport(AsyncTask):
             with open(fichier, 'w', encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
                 f.write(
-                    "Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
+                    "Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume [L]")
                 if self.param.redfiltres.get('taxochild', '') == '1':
                     HeaderSuffix="w/ children"
                 else:
                     HeaderSuffix = "w/o children"
                 LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                 for v in LstHead:
-                    f.write(";%s %s[# m-3]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s %s [# m-3]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
-                    f.write(";%s biovolume %s[mm3 l-1]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s biovolume %s [mm3 l-1]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
-                    f.write(";%s avgesd %s[mm]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s avgesd %s [mm]" % (v['nom'],HeaderSuffix))
                 f.write("\n")
                 for S in samples:
                     if self.samplesdict[S["psampleid"]][3][1] != 'Y': # 3 = visibility, 1 =Second char=Zoo visibility
@@ -301,14 +301,14 @@ class TaskPartExport(AsyncTask):
                 ZooFileParStation[S['station']]=nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
-                    f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
+                    f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume [L]")
                     LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                     for v in LstHead:
-                        f.write("\t%s[# m-3]" % (v['tree']))
+                        f.write("\t%s [# m-3]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s biovolume[mm3 l-1]" % (v['tree']))
+                        f.write("\t%s biovolume [mm3 l-1]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s avgesd[mm]" % (v['tree']))
+                        f.write("\t%s avgesd [mm]" % (v['tree']))
                     f.write("\n")
                     t = [None for i in range(3 * len(lstcat))]
                     WV = database.GetAssoc2Col(sqlWV, {'psampleid': S["psampleid"]})
@@ -393,11 +393,11 @@ class TaskPartExport(AsyncTask):
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
             with open(fichier,'w',encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
-                f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
+                f.write("Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume [L]")
                 for i in range(1,len(PartDetClassLimit)):
-                    f.write(";LPM (%s)[# l-1]"%(GetClassLimitTxt(PartDetClassLimit,i)))
+                    f.write(";LPM (%s) [# l-1]"%(GetClassLimitTxt(PartDetClassLimit,i)))
                 for i in range(1,len(PartDetClassLimit)):
-                    f.write(";LPM biovolume (%s)[mm3 l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
+                    f.write(";LPM biovolume (%s) [mm3 l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                 for c in CTDFixedCols:
                     f.write(";%s" % (CTDFixedColByKey.get(c,c)))
 
@@ -425,11 +425,11 @@ class TaskPartExport(AsyncTask):
                 nomfichier = BaseFileName + "_PAR_"+S['station']+".tsv" # nommé par le profileid qui est dans le champ station
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
-                    f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
+                    f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume [L]")
                     for i in range(1,len(PartDetClassLimit)):
-                        f.write("\tLPM (%s)[# l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
+                        f.write("\tLPM (%s) [# l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                     for i in range(1,len(PartDetClassLimit)):
-                        f.write("\tLPM biovolume (%s)[mm3 l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
+                        f.write("\tLPM biovolume (%s) [mm3 l-1]" % (GetClassLimitTxt(PartDetClassLimit, i)))
                     for c in CTDFixedCols:
                         f.write("\t%s" % (CTDFixedColByKey.get(c, c)))
 
@@ -529,7 +529,7 @@ order by tree""".format(lstcatwhere)
             with open(fichier, 'w', encoding='latin-1') as f:
                 self.WriteODVCommentArea(f)
                 f.write(
-                    "Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume[L]")
+                    "Cruise:METAVAR:TEXT:40;Site:METAVAR:TEXT:20;Station:METAVAR:TEXT:20;DataOwner:METAVAR:TEXT:20;Rawfilename:METAVAR:TEXT:20;Instrument:METAVAR:TEXT:10;SN:METAVAR:TEXT:10;CTDrosettefilename:METAVAR:TEXT:40;yyyy-mm-dd hh:mm:METAVAR:TEXT:40;Latitude [degrees_north]:METAVAR:DOUBLE;Longitude [degrees_east]:METAVAR:DOUBLE;Depth [m]:PRIMARYVAR:DOUBLE;Sampled volume [L]")
                 # if self.param.redfiltres.get('taxochild', '') == '1':
                 #     HeaderSuffix="w/ children"
                 # else:
@@ -537,11 +537,11 @@ order by tree""".format(lstcatwhere)
                 HeaderSuffix = ""
                 LstHead=sorted(lstcat.values(),key=lambda cat:cat['idx'])
                 for v in LstHead:
-                    f.write(";%s %s[# m-3]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s %s [# m-3]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
-                    f.write(";%s biovolume %s[mm3 l-1]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s biovolume %s [mm3 l-1]" % (v['nom'],HeaderSuffix))
                 for v in LstHead:
-                    f.write(";%s avgesd %s[mm]" % (v['nom'],HeaderSuffix))
+                    f.write(";%s avgesd %s [mm]" % (v['nom'],HeaderSuffix))
                 f.write("\n")
                 for S in samples:
                     if self.samplesdict[S["psampleid"]][3][1] != 'Y': # 3 = visibility, 1 =Second char=Zoo visibility
@@ -586,14 +586,14 @@ order by tree""".format(lstcatwhere)
                 ZooFileParStation[S['station']] = nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, 'w', encoding='latin-1') as f:
-                    f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume[L]")
+                    f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume [L]")
                     LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                     for v in LstHead:
-                        f.write("\t%s[# m-3]" % (v['tree']))
+                        f.write("\t%s [# m-3]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s biovolume[mm3 l-1]" % (v['tree']))
+                        f.write("\t%s biovolume [mm3 l-1]" % (v['tree']))
                     for v in LstHead:
-                        f.write("\t%s avgesd[mm]" % (v['tree']))
+                        f.write("\t%s avgesd [mm]" % (v['tree']))
                     f.write("\n")
                     t = [None for i in range(3 * len(lstcat))]
                     for i in range(len(CatHisto)):
