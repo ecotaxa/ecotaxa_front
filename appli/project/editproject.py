@@ -66,7 +66,7 @@ def PrjEdit(PrjId):
 @app.route('/prj/popupeditpreset/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def Prjpopupeditpreset(PrjId):
-    sql="""select projid,title,initclassiflist
+    sql="""select p.projid,title,initclassiflist
                   ,(select string_agg(pts.id::varchar,',') objtaxon from projects_taxo_stat pts where pts.projid=p.projid)
             from projects p
             """
