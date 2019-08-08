@@ -196,7 +196,7 @@ def ExplodeGreyLevel(Nbr,Avg,ET):
         res.append([round(Nbr/(2*ET+1)),i])
     return res
 
-def GenerateRawHistogramUVPAPP(UvpSample,Prj,FirstImage,LastImage,DepthOffset,DescentFilter,EcodataPartFile):
+def GenerateRawHistogramUVPAPP(UvpSample,Prj,DepthOffset,DescentFilter,EcodataPartFile):
     """
     Génération de l'histogramme particulaire à partir d'un fichier généré par UVPApp
     """
@@ -204,11 +204,8 @@ def GenerateRawHistogramUVPAPP(UvpSample,Prj,FirstImage,LastImage,DepthOffset,De
     ImgDepth={} # version filtrée
     ImgTime={} # heure des images
     SegmentedData={} # version filtrée
-    LastImageIdx=LastImageDepth=None
     PrevDepth = 0
     DescentFilterRemovedCount = 0
-    if LastImage is not None:
-        LastImageIdx =LastImage
     z = zipfile.ZipFile(EcodataPartFile.as_posix())
     with z.open("particules.csv", "r") as csvfile:
         logging.info("Processing file "+EcodataPartFile.as_posix()+"/particules.csv")
@@ -223,31 +220,21 @@ def GenerateRawHistogramUVPAPP(UvpSample,Prj,FirstImage,LastImage,DepthOffset,De
             idx+=1
             header=rowpart[0].split(",")
             dateheuretxt=header[0]
-            depth=float(header[1])
+            depth=float(header[1])+DepthOffset
             RawImgDepth[idx] = depth
             ImgTime[idx]=dateheuretxt
             flash=header[3]
-            if idx < FirstImage:
-                continue
-            if LastImage is None: # On détermine la dernière image si elle n'est pas determinée
-                if DescentFilter==False and (LastImageIdx is None or idx>LastImageIdx): # si le filtre de descente n'est pas actif on considère toujour la derniere image
-                    LastImageIdx = idx
-                elif LastImageDepth is None or depth>LastImageDepth:
-                    LastImageDepth=depth
-                    LastImageIdx=idx
-            # On applique le filtre
-            if idx<=LastImageIdx:
-                # Application du filtre en descente
-                KeepLine = True
-                if DescentFilter:
-                    if depth < PrevDepth:
-                        KeepLine = False
-                    else:
-                        PrevDepth = depth
-                if KeepLine:
-                    ImgDepth[idx] = depth
+            # Application du filtre en descente
+            KeepLine = True
+            if DescentFilter:
+                if depth < PrevDepth:
+                    KeepLine = False
                 else:
-                    DescentFilterRemovedCount += 1
+                    PrevDepth = depth
+            if KeepLine:
+                ImgDepth[idx] = depth
+            else:
+                DescentFilterRemovedCount += 1
 
             data=[p.split(',') for p in rowpart[1].split(";") if len(p.split(','))==4]
             if data[0][0]=="OVER_EXPOSED":
@@ -271,16 +258,13 @@ def GenerateRawHistogramUVPAPP(UvpSample,Prj,FirstImage,LastImage,DepthOffset,De
             # logging.info("rowpart={}",rowpart)
 
 
-        if LastImage is None:
-            LastImage=LastImageIdx
         if len(RawImgDepth)==0:
             raise Exception("No data in particlefile for sample %s " % [UvpSample.profileid])
 
 
         logging.info(
-            "Raw image count = {0} , Filtered image count = {1} , LastIndex= {2},LastIndex-First+1= {4}, DescentFiltered images={3}"
-                .format(len(RawImgDepth), len(ImgDepth), LastImage, LastImage - FirstImage - len(ImgDepth) + 1,
-                        LastImage - FirstImage + 1))
+            "Raw image count = {0} , Filtered image count = {1} ,  DescentFiltered images={2}"
+                .format(len(RawImgDepth), len(ImgDepth), len(RawImgDepth) - len(ImgDepth) + 1))
         if len(ImgDepth) == 0:
             raise Exception("No remaining filtered data in dat file")
 
@@ -296,7 +280,6 @@ def GenerateRawHistogramUVPAPP(UvpSample,Prj,FirstImage,LastImage,DepthOffset,De
                     cf.writerow([SegmentedData[Partition]['depth'], SegmentedData[Partition]['imgcount'], area, histo.sum(),limits[1],limits[2],limits[3]])
 
         UvpSample.histobrutavailable = True
-        UvpSample.lastimgused = LastImage
         UvpSample.imp_descent_filtered_row = DescentFilterRemovedCount
         db.session.commit()
 
@@ -340,7 +323,7 @@ def GenerateRawHistogram(psampleid):
     PathDat = DossierUVPPath / 'results' / ( UvpSample.profileid + "_datfile.txt")
     EcodataPartFile = DossierUVPPath / "ecodata" / UvpSample.profileid / (UvpSample.profileid + "Particule.zip")
     if EcodataPartFile.exists():
-        GenerateRawHistogramUVPAPP(UvpSample, Prj, FirstImage, LastImage, DepthOffset, DescentFilter, EcodataPartFile)
+        GenerateRawHistogramUVPAPP(UvpSample, Prj, DepthOffset, DescentFilter, EcodataPartFile)
         return
 
     if PathDat.exists():
