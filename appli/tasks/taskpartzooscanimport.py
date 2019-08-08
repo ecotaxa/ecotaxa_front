@@ -51,14 +51,14 @@ class TaskPartZooscanImport(AsyncTask):
 
             if self.param.profiletoprocess.get(sample['profileid']):
                 logging.info("Process profile %s "%(sample['profileid']))
-                if Prj.instrumtype=='uvp5':
+                if Prj.instrumtype in ('uvp5','uvp6'):
                     psampleid=appli.part.uvp_sample_import.CreateOrUpdateSample(self.param.pprojid, sample)
                 if Prj.instrumtype=='lisst':
                     psampleid=appli.part.lisst_sample_import.CreateOrUpdateSample(self.param.pprojid, sample)
                 self.UpdateProgress(100*(NbrDone+0.1)/Nbr, "Metadata of profile %s  processed"%(sample['profileid']))
 
                 if not self.param.ProcessOnlyMetadata:
-                    if Prj.instrumtype == 'uvp5':
+                    if Prj.instrumtype in ('uvp5','uvp6'):
                         logging.info("UVP Sample %d Metadata processed, Raw histogram in progress" % (psampleid,))
                         appli.part.uvp_sample_import.GenerateRawHistogram(psampleid)
                         self.UpdateProgress(100 * (NbrDone + 0.6) / Nbr,"Raw histogram of profile %s  processed, Particle histogram in progress" % (sample['profileid']))

@@ -1,7 +1,7 @@
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,VaultRootDir,DecodeEqualList,ntcv,EncodeEqualList,CreateDirConcurrentlyIfNeeded
 from pathlib import Path
 import appli.part.database as partdatabase, logging,re,datetime,csv,math
-import numpy as np
+import numpy as np,zipfile,configparser,io,bz2
 import matplotlib.pyplot as plt
 from appli import database
 from appli.part import PartDetClassLimit,CTDFixedCol
@@ -9,8 +9,16 @@ from flask_login import current_user
 from appli.part.common_sample_import import CleanValue,ToFloat,GetTicks,GenerateReducedParticleHistogram
 
 def ConvDegreeMinuteFloatToDecimaldegre(v):
-    f,i=math.modf(v)
-    return i+(f/0.6)
+    m=re.search("(-?\d+)°(\d+).(\d+)",v)
+    if m: # donnée au format DDD°MM.SSS
+        parties=[float(x) for x in m.group(1, 2, 3)]
+        parties[1]+=parties[2]/60 # on ajoute les secondes en fraction des minutes
+        parties[0]+=parties[1]/60# on ajoute les minutes en fraction des degrés
+        return parties[0]
+    else: # format historique la partie decimale etait exprime en minutes
+        v=ToFloat(v)
+        f,i=math.modf(v)
+        return i+(f/0.6)
 
 
 def CreateOrUpdateSample(pprojid,headerdata):
@@ -33,18 +41,25 @@ def CreateOrUpdateSample(pprojid,headerdata):
     else:
         logging.info("Update UVP sample %s for %s %s" % (Sample.psampleid,headerdata['profileid'], headerdata['filename']))
     Sample.filename=headerdata['filename']
-    Sample.sampledate=datetime.datetime(int(headerdata['filename'][0:4]),int(headerdata['filename'][4:6]),int(headerdata['filename'][6:8])
-                                       ,int(headerdata['filename'][8:10]), int(headerdata['filename'][10:12]), int(headerdata['filename'][12:14])
-                                        )
-    Sample.latitude = ConvDegreeMinuteFloatToDecimaldegre(ToFloat(headerdata['latitude']))
-    Sample.longitude = ConvDegreeMinuteFloatToDecimaldegre(ToFloat(headerdata['longitude']))
-    Sample.organizedbydeepth = True
+    if 'sampledatetime' in headerdata and headerdata['sampledatetime']:
+        sampledatetxt=headerdata['sampledatetime'] #format uvpapp
+    else:
+        sampledatetxt=headerdata['filename'] #format historique uvp5
+    m = re.search("(\d{4})(\d{2})(\d{2})-?(\d{2})(\d{2})(\d{2})?", sampledatetxt) #YYYYMMDD-HHMMSS avec tiret central et secondes optionnelles
+    Sample.sampledate=datetime.datetime(*[int(x) if x else 0 for x in m.group(1,2,3,4,5,6)])
+    Sample.latitude = ConvDegreeMinuteFloatToDecimaldegre(headerdata['latitude'])
+    Sample.longitude = ConvDegreeMinuteFloatToDecimaldegre(headerdata['longitude'])
+    Sample.organizedbydeepth = headerdata.get('sampletype','P')=='P' # Nouvelle colonne optionnel, par défaut organisé par (P)ression
     Sample.acq_descent_filter=True
     Sample.ctd_origfilename=headerdata['ctdrosettefilename']
-    Sample.winddir = int(round(ToFloat(headerdata['winddir'])))
-    Sample.winspeed = int(round(ToFloat(headerdata['windspeed'])))
-    Sample.seastate = int(headerdata['seastate'])
-    Sample.nebuloussness = int(headerdata['nebuloussness'])
+    if headerdata['winddir']:
+        Sample.winddir = int(round(ToFloat(headerdata['winddir'])))
+    if headerdata['windspeed']:
+        Sample.winspeed = int(round(ToFloat(headerdata['windspeed'])))
+    if headerdata['seastate']:
+        Sample.seastate = int(headerdata['seastate'])
+    if headerdata['nebuloussness']:
+        Sample.nebuloussness = int(headerdata['nebuloussness'])
     Sample.comment = headerdata['comment']
     Sample.stationid = headerdata['stationid']
     Sample.acq_volimage = ToFloat(headerdata['volimage'])
@@ -55,12 +70,16 @@ def CreateOrUpdateSample(pprojid,headerdata):
     Sample.firstimage = int(headerdata['firstimage'])
     Sample.lastimg = int(headerdata['endimg'])
     Sample.proc_soft="Zooprocess"
+    if headerdata.get("pixelsize"):
+        Sample.acq_pixel = float(headerdata['pixelsize'])
+
 
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     DossierUVPPath = ServerRoot / Prj.rawfolder
     uvp5_configuration_data =  DossierUVPPath / "config"/"uvp5_settings"/"uvp5_configuration_data.txt"
     if not uvp5_configuration_data.exists():
-        logging.warning("file %s is missing, pixel data will miss (required for Taxo histogram esd/biovolume)"%(uvp5_configuration_data.as_posix()))
+        if Sample.acq_pixel is None: # warning sauf si déjà rempli grace à la colonne ajoutée au fichier header version uvpapp
+            logging.warning("file %s is missing, pixel data will miss (required for Taxo histogram esd/biovolume)"%(uvp5_configuration_data.as_posix()))
     else:
         with uvp5_configuration_data.open('r',encoding='latin_1') as F:
             Lines=F.read()
@@ -80,32 +99,53 @@ def CreateOrUpdateSample(pprojid,headerdata):
         HDRFolder = DossierUVPPath / "work" / Sample.profileid
         HDRFile = HDRFolder / ("HDR" + Sample.filename + ".txt")
         if not HDRFile.exists():
-            raise Exception("File %s is missing, and in raw folder too" % (HDRFile.as_posix()))
-
-    with HDRFile.open('r',encoding='latin_1') as F:
-        F.readline() # on saute la ligne 1
-        Ligne2=F.readline().strip('; \r\n')
-        # print("Ligne2= '%s'" % (Ligne2))
-        Sample.acq_filedescription = Ligne2
-        m = re.search(R"\w+ (\w+)", Ligne2)
-        if m is not None and m.lastindex == 1:
-            Sample.instrumsn=m.group(1)
-        Lines = F.read()
-        HdrParam=DecodeEqualList(Lines)
-        # print("%s" % (HdrParam))
-        Sample.acq_shutterspeed=ToFloat(HdrParam.get('shutterspeed',''))
-        Sample.acq_smzoo = int(HdrParam['smzoo'])
-        Sample.acq_smbase = int(HdrParam['smbase'])
-        Sample.acq_exposure = ToFloat(HdrParam.get('exposure',''))
-        Sample.acq_gain = ToFloat(HdrParam.get('gain', ''))
-        Sample.acq_eraseborder = ToFloat(HdrParam.get('eraseborderblobs', ''))
-        Sample.acq_tasktype = ToFloat(HdrParam.get('tasktype', ''))
-        Sample.acq_threshold = ToFloat(HdrParam.get('thresh', ''))
-        Sample.acq_choice = ToFloat(HdrParam.get('choice', ''))
-        Sample.acq_disktype = ToFloat(HdrParam.get('disktype', ''))
-        Sample.acq_ratio = ToFloat(HdrParam.get('ratio', ''))
-
-
+            EcodataPartFile = DossierUVPPath / "ecodata" / Sample.profileid/(Sample.profileid + "Particule.zip")
+            if EcodataPartFile.exists():
+                HDRFile=None # pas un fichier HDR donc on lira le fichier zip
+            else:
+                raise Exception("File %s or %s are  missing, and in raw folder too" % (HDRFile.as_posix(),EcodataPartFile.as_posix()))
+    if HDRFile:
+        with HDRFile.open('r',encoding='latin_1') as F:
+            F.readline() # on saute la ligne 1
+            Ligne2=F.readline().strip('; \r\n')
+            # print("Ligne2= '%s'" % (Ligne2))
+            Sample.acq_filedescription = Ligne2
+            m = re.search(R"\w+ (\w+)", Ligne2)
+            if m is not None and m.lastindex == 1:
+                Sample.instrumsn=m.group(1)
+            Lines = F.read()
+            HdrParam=DecodeEqualList(Lines)
+            # print("%s" % (HdrParam))
+            Sample.acq_shutterspeed=ToFloat(HdrParam.get('shutterspeed',''))
+            Sample.acq_smzoo = int(HdrParam['smzoo'])
+            Sample.acq_smbase = int(HdrParam['smbase'])
+            Sample.acq_exposure = ToFloat(HdrParam.get('exposure',''))
+            Sample.acq_gain = ToFloat(HdrParam.get('gain', ''))
+            Sample.acq_eraseborder = ToFloat(HdrParam.get('eraseborderblobs', ''))
+            Sample.acq_tasktype = ToFloat(HdrParam.get('tasktype', ''))
+            Sample.acq_threshold = ToFloat(HdrParam.get('thresh', ''))
+            Sample.acq_choice = ToFloat(HdrParam.get('choice', ''))
+            Sample.acq_disktype = ToFloat(HdrParam.get('disktype', ''))
+            Sample.acq_ratio = ToFloat(HdrParam.get('ratio', ''))
+    else:
+        z = zipfile.ZipFile(EcodataPartFile.as_posix())
+        with z.open("metadata.ini","r") as metadata_ini_raw:
+            metadata_ini=io.TextIOWrapper(io.BytesIO(metadata_ini_raw.read()))
+            # with open(metadata_ini_raw, encoding='latin_1') as metadata_ini:
+            ini=configparser.ConfigParser()
+            ini.read_file(metadata_ini)
+            hw_conf=ini['HW_CONF']
+            Sample.acq_shutterspeed=ToFloat(hw_conf.get('Shutter',''))
+            Sample.acq_gain = ToFloat(hw_conf.get('Gain', ''))
+            Sample.acq_threshold = ToFloat(hw_conf.get('Threshold', ''))
+            # Sample.acq_smzoo = int(HdrParam['smzoo'])
+            # Sample.acq_smbase = int(HdrParam['smbase'])
+            # Sample.acq_exposure = ToFloat(HdrParam.get('exposure',''))
+            # Sample.acq_eraseborder = ToFloat(HdrParam.get('eraseborderblobs', ''))
+            # Sample.acq_tasktype = ToFloat(HdrParam.get('tasktype', ''))
+            # Sample.acq_choice = ToFloat(HdrParam.get('choice', ''))
+            # Sample.acq_disktype = ToFloat(HdrParam.get('disktype', ''))
+            # Sample.acq_ratio = ToFloat(HdrParam.get('ratio', ''))
     db.session.commit()
     return Sample.psampleid
 
@@ -134,6 +174,132 @@ def GetPathForImportGraph(psampleid,suffix,RelativeToVault=False):
         return VaultFolder +"/" + NomFichier
     else:
         return (vaultroot /VaultFolder/NomFichier).as_posix()
+
+def ExplodeGreyLevel(Nbr,Avg,ET):
+    """
+    ventile les particule de façon lineaire sur +/- l'ecart type
+    :param Nbr: # de particule
+    :param Avg: # Gris moyen
+    :param ET:  # ecart type
+    :return: Liste de paire Nbr, Niveau de gris
+    """
+    if ET<1 or Nbr<ET:
+        return [[Nbr,Avg]]
+    mini=Avg-ET
+    if mini<1:
+        mini=1
+    maxi=Avg+ET
+    if maxi>255:
+        maxi=255
+    res=[]
+    for i in range(mini,maxi+1):
+        res.append([round(Nbr/(2*ET+1)),i])
+    return res
+
+def GenerateRawHistogramUVPAPP(UvpSample,Prj,FirstImage,LastImage,DepthOffset,DescentFilter,EcodataPartFile):
+    """
+    Génération de l'histogramme particulaire à partir d'un fichier généré par UVPApp
+    """
+    RawImgDepth={} # version non filtrée utilisée pour générer le graphique
+    ImgDepth={} # version filtrée
+    ImgTime={} # heure des images
+    SegmentedData={} # version filtrée
+    LastImageIdx=LastImageDepth=None
+    PrevDepth = 0
+    DescentFilterRemovedCount = 0
+    if LastImage is not None:
+        LastImageIdx =LastImage
+    z = zipfile.ZipFile(EcodataPartFile.as_posix())
+    with z.open("particules.csv", "r") as csvfile:
+        logging.info("Processing file "+EcodataPartFile.as_posix()+"/particules.csv")
+        idx=-1 # Les index d'image sont en base 0
+        for row in csvfile:
+            row=row.decode('latin-1')
+            rowpart=row.split(":")
+            if len(rowpart)!=2: # Pas une ligne data
+                continue
+            if rowpart[0][0:2]!="20":
+                continue # les lignes de données commencent toutes par la date 2019-MM-DD ...
+            idx+=1
+            header=rowpart[0].split(",")
+            dateheuretxt=header[0]
+            depth=float(header[1])
+            RawImgDepth[idx] = depth
+            ImgTime[idx]=dateheuretxt
+            flash=header[3]
+            if idx < FirstImage:
+                continue
+            if LastImage is None: # On détermine la dernière image si elle n'est pas determinée
+                if DescentFilter==False and (LastImageIdx is None or idx>LastImageIdx): # si le filtre de descente n'est pas actif on considère toujour la derniere image
+                    LastImageIdx = idx
+                elif LastImageDepth is None or depth>LastImageDepth:
+                    LastImageDepth=depth
+                    LastImageIdx=idx
+            # On applique le filtre
+            if idx<=LastImageIdx:
+                # Application du filtre en descente
+                KeepLine = True
+                if DescentFilter:
+                    if depth < PrevDepth:
+                        KeepLine = False
+                    else:
+                        PrevDepth = depth
+                if KeepLine:
+                    ImgDepth[idx] = depth
+                else:
+                    DescentFilterRemovedCount += 1
+
+            data=[p.split(',') for p in rowpart[1].split(";") if len(p.split(','))==4]
+            if data[0][0]=="OVER_EXPOSED":
+                None
+            elif data[0][0] == "EMPTY_IMAGE":
+                None
+            elif int(data[0][0]) == 0: # taille de particule non valide
+                None
+            else: # Données normale
+                Partition =math.floor(depth)
+                if flash=='1':
+                    if Partition not in SegmentedData: # TODO il faut peut être transformer un peu le format de dateheuretxt pour être compatible avec l'existant
+                        SegmentedData[Partition]={'depth':Partition,'time':dateheuretxt,'imgcount':0,'area':{}}
+                    SegmentedData[Partition]['imgcount']+=1
+                    for data1taille in data:
+                        area=int(data1taille[0])
+                        if area not in SegmentedData[Partition]['area']:
+                            SegmentedData[Partition]['area'][area] = [] # tableau=liste des niveaux de gris
+                        SegmentedData[Partition]['area'][area].extend(ExplodeGreyLevel(int(data1taille[1]),round(float(data1taille[2])),round(float(data1taille[3])))) #nbr, moyenne,ecarttype
+
+            # logging.info("rowpart={}",rowpart)
+
+
+        if LastImage is None:
+            LastImage=LastImageIdx
+        if len(RawImgDepth)==0:
+            raise Exception("No data in particlefile for sample %s " % [UvpSample.profileid])
+
+
+        logging.info(
+            "Raw image count = {0} , Filtered image count = {1} , LastIndex= {2},LastIndex-First+1= {4}, DescentFiltered images={3}"
+                .format(len(RawImgDepth), len(ImgDepth), LastImage, LastImage - FirstImage - len(ImgDepth) + 1,
+                        LastImage - FirstImage + 1))
+        if len(ImgDepth) == 0:
+            raise Exception("No remaining filtered data in dat file")
+
+        DepthBinCount = GenerateDepthChart(Prj, UvpSample, RawImgDepth, ImgDepth)
+        DetHistoFile = GetPathForRawHistoFile(UvpSample.psampleid)
+        with bz2.open(DetHistoFile, 'wt', newline='') as f:
+            cf = csv.writer(f, delimiter='\t')
+            cf.writerow(["depth", "imgcount", "area", "nbr", "greylimit1", "greylimit2", "greylimit3"])
+            for Partition in SegmentedData:
+                for area in SegmentedData[Partition]['area']:
+                    a = np.array(SegmentedData[Partition]['area'][area])
+                    (histo, limits) = np.histogram(a[:, 1], bins=4, weights=a[:, 0])
+                    cf.writerow([SegmentedData[Partition]['depth'], SegmentedData[Partition]['imgcount'], area, histo.sum(),limits[1],limits[2],limits[3]])
+
+        UvpSample.histobrutavailable = True
+        UvpSample.lastimgused = LastImage
+        UvpSample.imp_descent_filtered_row = DescentFilterRemovedCount
+        db.session.commit()
+
 
 def GenerateRawHistogram(psampleid):
     """
@@ -172,6 +338,11 @@ def GenerateRawHistogram(psampleid):
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     DossierUVPPath = ServerRoot / Prj.rawfolder
     PathDat = DossierUVPPath / 'results' / ( UvpSample.profileid + "_datfile.txt")
+    EcodataPartFile = DossierUVPPath / "ecodata" / UvpSample.profileid / (UvpSample.profileid + "Particule.zip")
+    if EcodataPartFile.exists():
+        GenerateRawHistogramUVPAPP(UvpSample, Prj, FirstImage, LastImage, DepthOffset, DescentFilter, EcodataPartFile)
+        return
+
     if PathDat.exists():
         LstFichiers = [PathDat]
     else:
@@ -231,41 +402,7 @@ def GenerateRawHistogram(psampleid):
     if len(ImgDepth)==0:
         raise Exception("No remaining filtered data in dat file")
 
-    font = {'family' : 'arial','weight' : 'normal','size'   : 10}
-    plt.rc('font', **font)
-    plt.rcParams['lines.linewidth'] = 0.5
-    Fig=plt.figure(figsize=(8,10), dpi=100)
-    # 2 lignes, 3 colonnes, graphique en haut à gauche trace de la courbe de descente
-    # ax = Fig.add_subplot(231)
-    ax = plt.axes()
-    aRawImgDepth=np.empty([len(RawImgDepth),2])
-    for i,(idx,dept) in enumerate(sorted(RawImgDepth.items(),key=lambda r:r[0])):
-        aRawImgDepth[i]=idx,dept
-    # Courbe bleu des données brutes
-    ax.plot(aRawImgDepth[:,0] , -aRawImgDepth[:,1])
-    ax.set_xlabel('Image nb')
-    ax.set_ylabel('Depth(m)')
-    ax.set_xticks(np.arange(0,aRawImgDepth[:,0].max(),5000))
-    aRawImgDepth=RawImgDepth=None # libère la mémoire des données brutes, elle ne sont plus utile une fois le graphe tracé
-    # courbe rouge des données réduites à first==>Last et filtrées
-    aFilteredImgDepth=np.empty([len(ImgDepth),2])
-    for i,(idx,dept) in enumerate(sorted(ImgDepth.items(),key=lambda r:r[0])):
-        aFilteredImgDepth[i]=idx,dept
-    ax.plot(aFilteredImgDepth[:,0] , -aFilteredImgDepth[:,1],'r')
-    MinDepth=aFilteredImgDepth[:,1].min()
-    MaxDepth=aFilteredImgDepth[:,1].max()
-    # Calcule le nombre d'image par mettre à partir de 0m
-    DepthBinCount=np.bincount(np.floor(aFilteredImgDepth[:,1]).astype('int'))
-    aFilteredImgDepth=None # version nparray plus necessaire.
-    logging.info("Depth range= {0}->{1}".format(MinDepth,MaxDepth))
-    # Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_depth_' + UvpSample.profileid+'.png')).as_posix())
-    Fig.text(0.05, 0.98,
-             "Project : %s , Profile %s , Filename : %s" % (Prj.ptitle, UvpSample.profileid, UvpSample.filename),
-             ha='left')
-    Fig.tight_layout(rect=(0, 0, 1, 0.98))  # permet de laisser un peu de blanc en haut pour le titre
-    Fig.savefig(GetPathForImportGraph(psampleid,'depth'))
-
-    Fig.clf()
+    DepthBinCount = GenerateDepthChart(Prj, RawImgDepth, UvpSample, psampleid, ImgDepth)
     # Ecart format suivant l'endroit
     # Dans results nom = p1604_13.bru toujours au format bru1 malgré l'extension bru fichier unique
     # dans work p1604_13/p1604_13.bru toujours au format bru1 malgré l'extension bru fichier unique
@@ -334,6 +471,45 @@ def GenerateRawHistogram(psampleid):
     UvpSample.lastimgused=LastImage
     UvpSample.imp_descent_filtered_row=DescentFilterRemovedCount
     db.session.commit()
+
+
+def GenerateDepthChart(Prj, UvpSample, RawImgDepth, ImgDepth):
+    font = {'family': 'arial', 'weight': 'normal', 'size': 10}
+    plt.rc('font', **font)
+    plt.rcParams['lines.linewidth'] = 0.5
+    Fig = plt.figure(figsize=(8, 10), dpi=100)
+    # 2 lignes, 3 colonnes, graphique en haut à gauche trace de la courbe de descente
+    # ax = Fig.add_subplot(231)
+    ax = plt.axes()
+    aRawImgDepth = np.empty([len(RawImgDepth), 2])
+    for i, (idx, dept) in enumerate(sorted(RawImgDepth.items(), key=lambda r: r[0])):
+        aRawImgDepth[i] = idx, dept
+    # Courbe bleu des données brutes
+    ax.plot(aRawImgDepth[:, 0], -aRawImgDepth[:, 1])
+    ax.set_xlabel('Image nb')
+    ax.set_ylabel('Depth(m)')
+    ax.set_xticks(np.arange(0, aRawImgDepth[:, 0].max(), 5000))
+    aRawImgDepth = RawImgDepth = None  # libère la mémoire des données brutes, elle ne sont plus utile une fois le graphe tracé
+    # courbe rouge des données réduites à first==>Last et filtrées
+    aFilteredImgDepth = np.empty([len(ImgDepth), 2])
+    for i, (idx, dept) in enumerate(sorted(ImgDepth.items(), key=lambda r: r[0])):
+        aFilteredImgDepth[i] = idx, dept
+    ax.plot(aFilteredImgDepth[:, 0], -aFilteredImgDepth[:, 1], 'r')
+    MinDepth = aFilteredImgDepth[:, 1].min()
+    MaxDepth = aFilteredImgDepth[:, 1].max()
+    # Calcule le nombre d'image par mettre à partir de 0m
+    DepthBinCount = np.bincount(np.floor(aFilteredImgDepth[:, 1]).astype('int'))
+    aFilteredImgDepth = None  # version nparray plus necessaire.
+    logging.info("Depth range= {0}->{1}".format(MinDepth, MaxDepth))
+    # Fig.savefig((DossierUVPPath / 'results' / ('ecotaxa_depth_' + UvpSample.profileid+'.png')).as_posix())
+    Fig.text(0.05, 0.98,
+             "Project : %s , Profile %s , Filename : %s" % (Prj.ptitle, UvpSample.profileid, UvpSample.filename),
+             ha='left')
+    Fig.tight_layout(rect=(0, 0, 1, 0.98))  # permet de laisser un peu de blanc en haut pour le titre
+    Fig.savefig(GetPathForImportGraph(UvpSample.psampleid, 'depth'))
+    Fig.clf()
+    return DepthBinCount
+
 
 def GenerateParticleHistogram(psampleid):
     """
