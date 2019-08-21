@@ -74,7 +74,14 @@ If you use EcoTaxa or Ecotaxa particle module in your work, we would appreciate 
   <button type="button" class="btn btn-xs btn-primary pull-right" style="margin-right: 5px;margin-top: 3px;" onClick="ClearDateFilter();">Clear</button>
   </td></tr>
   <tr><td>Instrument  </td><td><input class="form-control" type="text" style="width: 100px;display: inline-block;" id="filt_instrum" name="filt_instrum"  autocomplete="off" value="{{ reqfields['filt_instrum'] }}"></td></tr>
-  <tr><td>Profile type </td><td>{{ form.filt_proftype(style="width:100px") }}</td></tr>
+  <tr><td>Profile type </td><td>{{ form.filt_proftype(style="width:100px") }}
+  <span class='glyphicon glyphicon-info-sign' onclick="$('#dotlegend2').toggle()"></span> <br>
+  <div id="dotlegend2" style="display: none">
+  <span style="color: black;">Oblique casts (from gliders) are displayed as depth casts
+
+</div>
+
+  </td></tr>
   <tr><td>Ecotaxa Project </td><td>{{ form.filt_proj(style="width:100%") }}</td></tr>
   <tr><td>Particle Project </td><td>{{ form.filt_uproj(style="width:100%") }}</td></tr>
 </table>
@@ -142,7 +149,7 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
 	</div>
 </div>
 <div >
-  <label class="title">Scale on X : </label>
+  <label class="title">DATA Scale : </label>
   <input type="radio" name="XScale" value="I" checked> Linear
   - <input type="radio" name="XScale" value="O"> Log
   - <input type="radio" name="XScale" value="S"> Symlog

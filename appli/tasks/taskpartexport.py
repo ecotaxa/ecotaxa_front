@@ -662,14 +662,16 @@ order by tree""".format(lstcatwhere)
         samples=GetAll(sql)
         # Fichiers particule
         for S in samples:
-            if S['histobrutavailable'] and S['instrumtype']=='uvp5':
-                nomfichier="{0}_{1}_PAR_raw_{2}.tsv".format(S['filename'],S['profileid'],DTNomFichier )
-                fichier = os.path.join(self.GetWorkingDir(), nomfichier)
-                raworigfile= uvp_sample_import.GetPathForRawHistoFile(S['psampleid'])
-                with bz2.open(raworigfile,'rb') as rf,open(fichier,"wb") as rawtargetfile:
-                    shutil.copyfileobj(rf,rawtargetfile)
-                zfile.write(nomfichier)
-                os.unlink(nomfichier)
+            if S['histobrutavailable'] and S['instrumtype'] in ('uvp5','uvp6'):
+                for flash in ('0', '1'):
+                    nomfichier="{0}_{1}_PAR_raw_{2}{3}.tsv".format(S['filename'],S['profileid'],DTNomFichier,'_black' if flash=='0' else '' )
+                    fichier = os.path.join(self.GetWorkingDir(), nomfichier)
+                    raworigfile= uvp_sample_import.GetPathForRawHistoFile(S['psampleid'],flash)
+                    if os.path.isfile(raworigfile):
+                        with bz2.open(raworigfile,'rb') as rf,open(fichier,"wb") as rawtargetfile:
+                            shutil.copyfileobj(rf,rawtargetfile)
+                        zfile.write(nomfichier)
+                        os.unlink(nomfichier)
         # fichiers CTD
         CTDFileParPSampleID = {}
         for S in samples:

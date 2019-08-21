@@ -97,7 +97,7 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
 </div>
 <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove selected samples</button>
 
-{% if Prj.instrumtype=='uvp5' %}
+{% if Prj.instrumtype=='uvp5' or Prj.instrumtype=='uvp6' %}
 <br>SHOW IMPORTATION RESULT GRAPH : {%   for i in range(0,dbsample|length,50) %} <a href="/part/prj_uvpgraph/{{Prj.pprojid}}/{{i}}" class="btn btn-primary btn-xs">Page {{(i//50)+1}}</a>  {% endfor %}
 {% endif %}
 

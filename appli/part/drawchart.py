@@ -46,7 +46,13 @@ def part_drawchart():
         gctd = request.args.getlist('ctd')
         gtaxo = request.args.getlist('taxolb')
         NbrChart=len(gpr)+len(gpd)+len(gctd)+len(gtaxo)
-        samples=umain.GetFilteredSamples(GetVisibleOnly=True,RequiredPartVisibility='V')
+        Filter = {k:v for k,v in request.args.items()}
+        ProfTypeVerticalForced=False
+        if Filter.get('filt_proftype','')=='':
+            Filter['filt_proftype']='V' # Si pas de filtre sur le type de profil ou tous, alors on met Vertical pour ne pas melanger les 2 ce qui donne des graphes incoherents
+            ProfTypeVerticalForced=True # pourrais être utile pour affiche un message, mais risque d'être un message parasite.
+        ProfilVertical=Filter.get('filt_proftype', '') == 'V'
+        samples=umain.GetFilteredSamples(Filter=Filter,GetVisibleOnly=True,RequiredPartVisibility='V')
         for S in samples:
             if S['pprojid'] not in PrjColorMap:
                 PrjColorMap[S['pprojid']]=Couleurs[len(PrjColorMap)%len(Couleurs)]
@@ -54,12 +60,18 @@ def part_drawchart():
             PrjSampleCount[S['pprojid']]=PrjSampleCount.get(S['pprojid'],0)+1
         if len(PrjColorMap) > 1: NbrChart+=1
         FigSizeX=NbrChart
-        if NbrChart>4: FigSizeX = 4
+        if ProfilVertical:
+            if NbrChart>4: FigSizeX = 4
+        else:
+            if NbrChart > 2: FigSizeX = 2
         FigSizeY=math.ceil(NbrChart/FigSizeX)
         font = {'family' : 'arial','weight' : 'normal','size'   : 10}
         plt.rc('font', **font)
         plt.rcParams['lines.linewidth'] = 0.5
-        Fig = plt.figure(figsize=(FigSizeX*4, FigSizeY*5), dpi=100)
+        if ProfilVertical:
+            Fig = plt.figure(figsize=(FigSizeX*4, FigSizeY*5), dpi=100)
+        else:
+            Fig = plt.figure(figsize=(FigSizeX * 8, FigSizeY * 3), dpi=100)
         chartid=0
         DepthFilter=""
         if gvg('filt_depthmin'):
@@ -68,7 +80,10 @@ def part_drawchart():
             DepthFilter += " and depth<=%d"%int(gvg('filt_depthmax'))
         # traitement des Graphes particulaire réduit
         if len(gpr)>0:
-            sql="select depth y "
+            if ProfilVertical:
+                sql="select depth y "
+            else:
+                sql = "select -lineno y "
             # sql+=''.join([',case when watervolume>0 then class%02d/watervolume else 0 end as c%s'%(int(c[2:]),i)
             #               for i,c in enumerate(gpr) if c[0:2]=="cl"])
             sql+=''.join([',case when watervolume>0 then class%02d/watervolume else null end as c%s'%(int(c[2:]),i)
@@ -82,10 +97,14 @@ def part_drawchart():
             graph=list(range(0,len(gpr)))
             for i, c in enumerate(gpr):
                 graph[i] = Fig.add_subplot(FigSizeY  , FigSizeX , chartid + 1)
+                XLabel=""
                 if c[0:2] == "cl":
-                    graph[i].set_xlabel('Particle red. class %s (%s) # l-1'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:]))))
+                    XLabel='Particle red. class %s (%s) # l-1'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:])))
                 if c[0:2] == "bv":
-                    graph[i].set_xlabel('Biovolume red. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:]))))
+                    XLabel='Biovolume red. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:])))
+                if not ProfilVertical:
+                    XLabel="X : time (hour), Y : "+XLabel
+                graph[i].set_xlabel(XLabel)
                 chartid += 1
             for rs in samples:
                 DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})
@@ -101,23 +120,32 @@ def part_drawchart():
                     # data = data[~np.isnan(data[:,1]),:] # Supprime les lignes avec une valeur à Nan et fait donc de l'extrapolation linaire
                     # sans cette ligne les null des colonnes cl devient des nan et ne sont pas tracès (rupture de ligne)
                     # cependant l'autre option est de le traiter au niveau de l'import
-                    graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
+                    if ProfilVertical:
+                        graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
+                    else:
+                        graph[i].plot(data[:valcount, 0], data[:valcount, 1], color=PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else None)
             # fait après les plot pour avoir un echelle X bien callé avec les données et evite les erreurs log si la premiere serie n'as pas de valeurs
             for i, c in enumerate(gpr):
                 if gvg('XScale') != 'I':
                     try:
                         if gvg('XScale') == 'O':
-                            graph[i].set_xscale('log')
+                            if ProfilVertical: graph[i].set_xscale('log')
+                            else: graph[i].set_yscale('log');
                         if gvg('XScale') == 'S':
-                            graph[i].set_xscale('symlog')
+                            if ProfilVertical: graph[i].set_xscale('symlog')
+                            else: graph[i].set_yscale('symlog')
                     except Exception as e:
                         # parfois s'il n'y a pas de données pas possible de passer en echelle log, on force alors linear sinon ça plante plus loin
-                        graph[i].set_xscale('linear')
+                        if ProfilVertical: graph[i].set_xscale('linear')
+                        else: graph[i].set_yscale('linear')
                 else:
                     graph[i].set_xlim(left=0)
         # traitement des Graphes particulaire détaillés
         if len(gpd)>0:
-            sql="select depth y "
+            if ProfilVertical:
+                sql="select depth y "
+            else:
+                sql = "select -lineno y "
             sql+=''.join([',case when watervolume>0 then class%02d/watervolume else 0 end as c%s'%(int(c[2:]),i)
                           for i,c in enumerate(gpd) if c[0:2]=="cl"])
             sql+=''.join([',coalesce(biovol%02d) as c%s'%(int(c[2:]),i)
@@ -129,10 +157,14 @@ def part_drawchart():
             graph=list(range(0,len(gpd)))
             for i, c in enumerate(gpd):
                 graph[i]=Fig.add_subplot(FigSizeY,FigSizeX,chartid+1)
+                XLabel=""
                 if c[0:2] == "cl":
-                    graph[i].set_xlabel('Particle det. class %s (%s) # l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:]))))
+                    XLabel='Particle det. class %s (%s) # l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:])))
                 if c[0:2] == "bv":
-                    graph[i].set_xlabel('Biovolume det. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:]))))
+                    XLabel='Biovolume det. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:])))
+                if not ProfilVertical:
+                    XLabel="X : time (hour), Y : "+XLabel
+                graph[i].set_xlabel(XLabel)
                 chartid += 1
             for rs in samples:
                 DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})
@@ -145,24 +177,34 @@ def part_drawchart():
                             continue
                         data[valcount]=(-r['y'],r[xcolname])
                         valcount +=1
-                    graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
+                    if ProfilVertical:
+                        graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
+                    else:
+                        graph[i].plot(data[:valcount, 0], data[:valcount, 1], color=PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else None)
             # fait après les plot pour avoir un echelle X bien callé avec les données et evite les erreurs log si la premiere serie n'as pas de valeurs
             for i, c in enumerate(gpd):
                 if gvg('XScale') != 'I':
                     try:
                         if gvg('XScale') == 'O':
-                            graph[i].set_xscale('log')
+                            if ProfilVertical: graph[i].set_xscale('log')
+                            else: graph[i].set_yscale('log');
                         if gvg('XScale') == 'S':
-                            graph[i].set_xscale('symlog')
+                            if ProfilVertical: graph[i].set_xscale('symlog')
+                            else: graph[i].set_yscale('symlog')
                     except Exception as e:
                         # parfois s'il n'y a pas de données pas possible de passer en echelle log, on force alors linear sinon ça plante plus loin
-                        graph[i].set_xscale('linear')
+                        if ProfilVertical: graph[i].set_xscale('linear')
+                        else: graph[i].set_yscale('linear')
                 else:
                     graph[i].set_xlim(left=0)
 
         # traitement des Graphes CTD
         if len(gctd)>0:
-            sql="select depth y ,"+','.join(['%s as c%d'%(c,i) for i,c in enumerate(gctd)])
+            if ProfilVertical:
+                sql="select depth y "
+            else:
+                sql = "select -round(cast(EXTRACT(EPOCH FROM datetime-(select min(datetime) from part_histopart_reduit where psampleid=6))/3600 as numeric),2) y "
+            sql+=''.join([',%s as c%d'%(c,i) for i,c in enumerate(gctd)])
             sql += """ from part_ctd
              where psampleid=%(psampleid)s
              {}
@@ -170,7 +212,11 @@ def part_drawchart():
             graph=list(range(0,len(gctd)))
             for i, c in enumerate(gctd):
                 graph[i]=Fig.add_subplot(FigSizeY,FigSizeX,chartid+1)
-                graph[i].set_xlabel('CTD %s '%(CTDFixedColByKey.get(c)))
+                XLabel ='CTD %s '%(CTDFixedColByKey.get(c))
+                if not ProfilVertical:
+                    XLabel="X : time (hour), Y : "+XLabel
+                graph[i].set_xlabel(XLabel)
+
                 chartid += 1
             for rs in samples:
                 DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})
@@ -183,7 +229,10 @@ def part_drawchart():
                             continue
                         data[valcount]=(-r['y'],r[xcolname])
                         valcount +=1
-                    graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
+                    if ProfilVertical:
+                        graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
+                    else:
+                        graph[i].plot(data[:valcount, 0], data[:valcount, 1], color=PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else None)
 
         # traitement des Graphes TAXO
         if len(gtaxo)>0:

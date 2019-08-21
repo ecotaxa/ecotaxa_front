@@ -50,7 +50,7 @@ def part_prj_vpgraph(PrjId,offset):
     if Prj['ownerid']!=current_user.id and not current_user.has_role(database.AdministratorLabel):
         return PrintInCharte(ErrorFormat("Access Denied"))
     g.headcenter="<h4>Particle Project %s : %s</h4><a href='/part/prj/%s'>Project home</a>"%(Prj['projid'],Prj['ptitle'],Prj['pprojid'],)
-    dbsample = database.GetAll("""select psampleid,filename from part_samples s where pprojid=%s
+    dbsample = database.GetAll("""select psampleid,filename,profileid from part_samples s where pprojid=%s
           ORDER BY filename desc limit 50 OFFSET %s 
           """ % (PrjId,offset))
     txt="""<style>
@@ -67,9 +67,9 @@ def part_prj_vpgraph(PrjId,offset):
 </script>
     """
     for s in dbsample:
-        txt+="""<p class='ghead'>Graph for {psampleid} - {filename} - </p>
+        txt+="""<p class='ghead'>Graph for {psampleid} - {filename} - {profileid} - </p>
           <img src='/vault/{idepth}' class='idepth'> <img src='/vault/{ipart}' class='ipart'>
-          """.format(psampleid=s['psampleid'],filename=s['filename']
+          """.format(psampleid=s['psampleid'],filename=s['filename'],profileid=s['profileid']
                      ,idepth=uvp_sample_import.GetPathForImportGraph(s['psampleid'],'depth',True)
                      ,ipart =uvp_sample_import.GetPathForImportGraph(s['psampleid'],'particle',True))
     return PrintInCharte(txt)
@@ -115,7 +115,7 @@ def part_prj_main(PrjId):
 
 def ComputeHistoDet(psampleid,instrumtype):
     try:
-        if instrumtype == 'uvp5':
+        if instrumtype in ('uvp5','uvp6'):
             uvp_sample_import.GenerateParticleHistogram(psampleid)
             return  " Detailed & reduced Histogram computed"
         elif instrumtype == 'lisst':

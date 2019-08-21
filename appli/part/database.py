@@ -122,6 +122,7 @@ class part_samples(db.Model):
     proc_process_ratio = db.Column(INTEGER)
     imp_descent_filtered_row = db.Column(INTEGER)
     imp_removed_empty_slice = db.Column(INTEGER)
+    integrationtime = db.Column(INTEGER)
 
     def __str__(self):
         return "{0} ({1})".format(self.profileid,self.psampleid)
