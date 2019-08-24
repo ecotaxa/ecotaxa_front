@@ -1,6 +1,6 @@
 from appli import ntcv
 from appli.database import GetAll
-import re,logging
+import re,logging,math
 
 # object_annotation_category_id
 PredefinedTables=['obj_field','sample','process','acq']
@@ -83,3 +83,37 @@ def ResolveTaxoFound(TaxoFound,o_NotFoundTaxo):
     for FoundK, FoundV in TaxoFound.items():
         TaxoFound[FoundK]=FoundV['id'] # in fine on ne garde que l'id, les autres champs etaient temporaires.
 
+
+def ConvDegreeMinuteFloatToDecimaldegre(v):
+    m=re.search("(-?\d+)°(\d+).(\d+)",v)
+    if m: # donnée au format DDD°MM.SSS
+        parties=[float(x) for x in m.group(1, 2, 3)]
+        parties[1]+=parties[2]/60 # on ajoute les secondes en fraction des minutes
+        parties[0]+=parties[1]/60# on ajoute les minutes en fraction des degrés
+        return parties[0]
+    else: # format historique la partie decimale etait exprime en minutes
+        v=ToFloat(v)
+        f,i=math.modf(v)
+        return i+(f/0.6)
+
+def calcesdFrom_aa_exp(nbr,aa,exp):
+    """
+    Calcule l'ESD en utilisant aa & exp
+    :param nbr: surface en pixel
+    :param aa: en pseudo mm²/px unité UVP5 ou UVP6*1E-6
+    :param exp:
+    :return: ESD en mm
+    """
+    return 2*math.sqrt((math.pow(nbr,exp)*aa)/math.pi)
+#     PartCalc[:,1]=2*np.sqrt((pow(Part[:,2],UvpSample.acq_exp)*UvpSample.acq_aa)/np.pi)
+
+def calcpixelfromesd_aa_exp(esd,aa,exp):
+    """
+    Calcule une surface à partir d'un ESD
+    :param esd: en mm
+    :param aa: en pseudo mm²/px unité UVP5 ou UVP6*1E-6
+    :param exp:
+    :return: Nbr pixel
+    """
+    pxfloat= pow((math.pi/(aa))*((esd/2)**2),1/exp)
+    return math.floor(round(pxfloat,3))

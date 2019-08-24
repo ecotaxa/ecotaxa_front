@@ -146,7 +146,7 @@ class TaskImportUpdate(AsyncTask):
                                         elif ColName=='object_lat':
                                             if vf<-90 or vf>90:
                                                 self.LogErrorForUser("Invalid Lat. value '%s' for Field '%s' in file %s. Incorrect range -90/+90°."%(v,champ,relname.as_posix()))
-                                        elif ColName=='object_long':
+                                        elif ColName=='object_lon':
                                             if vf<-180 or vf>180:
                                                 self.LogErrorForUser("Invalid Long. value '%s' for Field '%s' in file %s. Incorrect range -180/+180°."%(v,champ,relname.as_posix()))
                                         elif ColName=='object_annotation_category_id':

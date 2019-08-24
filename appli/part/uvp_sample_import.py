@@ -7,19 +7,7 @@ from appli import database
 from appli.part import PartDetClassLimit,CTDFixedCol
 from flask_login import current_user
 from appli.part.common_sample_import import CleanValue,ToFloat,GetTicks,GenerateReducedParticleHistogram
-
-def ConvDegreeMinuteFloatToDecimaldegre(v):
-    m=re.search("(-?\d+)°(\d+).(\d+)",v)
-    if m: # donnée au format DDD°MM.SSS
-        parties=[float(x) for x in m.group(1, 2, 3)]
-        parties[1]+=parties[2]/60 # on ajoute les secondes en fraction des minutes
-        parties[0]+=parties[1]/60# on ajoute les minutes en fraction des degrés
-        return parties[0]
-    else: # format historique la partie decimale etait exprime en minutes
-        v=ToFloat(v)
-        f,i=math.modf(v)
-        return i+(f/0.6)
-
+from appli.tasks.importcommon import ConvDegreeMinuteFloatToDecimaldegre,calcesdFrom_aa_exp,calcpixelfromesd_aa_exp
 
 def CreateOrUpdateSample(pprojid,headerdata):
     """
@@ -137,10 +125,12 @@ def CreateOrUpdateSample(pprojid,headerdata):
             ini=configparser.ConfigParser()
             ini.read_file(metadata_ini)
             hw_conf=ini['HW_CONF']
+            acq_conf = ini['ACQ_CONF']
             Sample.acq_shutterspeed=ToFloat(hw_conf.get('Shutter',''))
             Sample.acq_gain = ToFloat(hw_conf.get('Gain', ''))
             Sample.acq_threshold = ToFloat(hw_conf.get('Threshold', ''))
-            # Sample.acq_smzoo = int(HdrParam['smzoo'])
+            Sample.acq_smzoo = calcpixelfromesd_aa_exp( ToFloat(acq_conf.get('Vignetting_lower_limit_size', ''))/1000.0,Sample.acq_aa,Sample.acq_exp )
+            Sample.acq_smbase = calcpixelfromesd_aa_exp( ToFloat(acq_conf.get('Limit_lpm_detection_size', ''))/1000.0,Sample.acq_aa,Sample.acq_exp )
             # Sample.acq_smbase = int(HdrParam['smbase'])
             # Sample.acq_exposure = ToFloat(HdrParam.get('exposure',''))
             # Sample.acq_eraseborder = ToFloat(HdrParam.get('eraseborderblobs', ''))
