@@ -10,7 +10,8 @@ def MakeVignette(InFilestr:str,OutFilestr:str,cfg:configparser):
     fontheight_px=int(section['fontheight_px'])
     scalebarsize_mm=float(section['scalebarsize_mm'])
     pixel_size=float(section['Pixel_Size'])
-    scalebarsize_px = int(round(scalebarsize_mm * 1000 / pixel_size, 0))
+    scalebarsize_px = int(round(scalebarsize_mm * 1000 / pixel_size, 0)*scale)
+    minimgwidth=scalebarsize_px+10
     fontcolor=section['fontcolor']
     bgcolor="black" if fontcolor=="white" else 254 # 254 comme blanc mais facile à détecter par algo
     if gamma!=1:
@@ -23,11 +24,11 @@ def MakeVignette(InFilestr:str,OutFilestr:str,cfg:configparser):
         imgpil=imgpil.resize((int(imgpil.size[0]*scale),int(imgpil.size[1]*scale)),Image.BICUBIC)
     # generation du bandeau d'echelle en bas de l'image
     oldimg=imgpil
-    imgpil=Image.new(oldimg.mode,(imgpil.size[0],imgpil.size[1]+int(section['footerheight_px'])),bgcolor  ) # Nouvelle image plus grande
+    imgpil=Image.new(oldimg.mode,(max([imgpil.size[0],minimgwidth]),imgpil.size[1]+int(section['footerheight_px'])),bgcolor  ) # Nouvelle image plus grande
     imgpil.paste(oldimg) # on y colle l'image en haut
     H=imgpil.size[1]
     draw = ImageDraw.Draw(imgpil)
-    LinePoints=[(9, H-4),(9+int(round(scalebarsize_px*scale)), H-4)]
+    LinePoints=[(9, H-4),(9+int(round(scalebarsize_px)), H-4)]
     LinePoints.insert(0,(LinePoints[0][0],LinePoints[0][1]+2))
     LinePoints.append( (LinePoints[2][0], LinePoints[2][1] + 2))
     # print(LinePoints)
@@ -45,15 +46,11 @@ def MakeVignette(InFilestr:str,OutFilestr:str,cfg:configparser):
 
 
 
-
-
-
-
-
 if __name__ == "__main__":
     ConfigFile = "compute_vignette.txt"
     dir = R'D:\dev\_client\Lov\UVPApp\TestData\uvp6_sn008_20190430_nke_float_up\ecodata\TestSample1'
     imgname = '20190430-142010_2_biggest.png'
+    # imgname = '20190430-150649_1_small.png'
     # imgname='20190430-141541_2_biggest2.png'
     origimg = dir + '\\' + imgname
     ini = configparser.ConfigParser()
