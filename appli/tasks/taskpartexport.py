@@ -672,6 +672,8 @@ order by tree""".format(lstcatwhere)
                             shutil.copyfileobj(rf,rawtargetfile)
                         zfile.write(nomfichier)
                         os.unlink(nomfichier)
+            if S['histobrutavailable'] and S['instrumtype'] in ('uvp6remote'):
+                zfile.write(uvp_sample_import.GetPathForRawHistoFile(S['psampleid']),arcname="{0}_rawfiles.zip".format(S['profileid']))
         # fichiers CTD
         CTDFileParPSampleID = {}
         for S in samples:

@@ -89,7 +89,7 @@ def CreateOrUpdateSample(pprojid,headerdata):
         HDRFolder = DossierUVPPath / "work" / Sample.profileid
         HDRFile = HDRFolder / ("HDR" + Sample.filename + ".txt")
         if not HDRFile.exists():
-            EcodataPartFile = DossierUVPPath / "ecodata" / Sample.profileid/(Sample.profileid + "Particule.zip")
+            EcodataPartFile = DossierUVPPath / "ecodata" / Sample.profileid/(Sample.profileid + "_Particule.zip")
             if EcodataPartFile.exists():
                 HDRFile=None # pas un fichier HDR donc on lira le fichier zip
             else:
@@ -237,12 +237,12 @@ def GenerateRawHistogramUVPAPP(UvpSample, Prj, DepthOffset, organizedbydepth, De
                 DescentFilterRemovedCount += 1
 
             data=[p.split(',') for p in rowpart[1].split(";") if len(p.split(','))==4]
-            if data[0][0]=="OVER_EXPOSED":
-                None
-            elif data[0][0] == "EMPTY_IMAGE":
-                None
+            if rowpart[1].find("OVER_EXPOSED")>=0:
+                pass
+            elif rowpart[1].find("EMPTY_IMAGE")>=0:
+                pass
             elif int(data[0][0]) == 0: # taille de particule non valide
-                None
+                pass
             else: # Données normale
 
                 if organizedbydepth:
@@ -347,7 +347,7 @@ def GenerateRawHistogram(psampleid):
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     DossierUVPPath = ServerRoot / Prj.rawfolder
     PathDat = DossierUVPPath / 'results' / ( UvpSample.profileid + "_datfile.txt")
-    EcodataPartFile = DossierUVPPath / "ecodata" / UvpSample.profileid / (UvpSample.profileid + "Particule.zip")
+    EcodataPartFile = DossierUVPPath / "ecodata" / UvpSample.profileid / (UvpSample.profileid + "_Particule.zip")
     if EcodataPartFile.exists():
         GenerateRawHistogramUVPAPP(UvpSample, Prj, DepthOffset,UvpSample.organizedbydeepth, DescentFilter, EcodataPartFile)
         return

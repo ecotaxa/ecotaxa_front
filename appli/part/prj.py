@@ -6,6 +6,7 @@ from flask import render_template,  flash,request,g
 import appli,logging,appli.part.uvp_sample_import as uvp_sample_import
 import appli.part.common_sample_import as common_import
 import appli.part.lisst_sample_import as lisst_sample_import
+import appli.part.uvp6remote_sample_import as uvp6remote_sample_import
 import appli.part.database as partdatabase
 import appli.part.sampleedit as sampleedit
 from flask_security import login_required
@@ -121,6 +122,9 @@ def ComputeHistoDet(psampleid,instrumtype):
         elif instrumtype == 'lisst':
             lisst_sample_import.GenerateParticleHistogram(psampleid)
             return " Detailed & reduced Histogram computed"
+        elif instrumtype == 'uvp6remote':
+            uvp6remote_sample_import.GenerateParticleHistogram(psampleid)
+            return " Detailed & reduced Histogram computed"
         else:
             Msg='Invalid instrument'
     except Exception as E:
@@ -147,9 +151,12 @@ def ComputeZooMatch(psampleid, projid):
     else:
         return " <span style='color: red;'>Ecotaxa sample matching impossible if Particle project not linked to an Ecotaxa project</span>"
 
-def ComputeZooHisto(psampleid):
+def ComputeZooHisto(psampleid,instrumtype):
     try:
-        uvp_sample_import.GenerateTaxonomyHistogram(psampleid)
+        if instrumtype == 'uvp6remote':
+            uvp6remote_sample_import.GenerateTaxonomyHistogram(psampleid)
+        else:
+            uvp_sample_import.GenerateTaxonomyHistogram(psampleid)
         return " Taxonomy Histogram computed"
     except Exception as E:
         logging.exception("Taxonomy Histogram can't be computed ")
@@ -157,7 +164,7 @@ def ComputeZooHisto(psampleid):
 
 def GlobalTaxoCompute():
     # Sample Particule sans liens etabli avec Zoo qui sont liables
-    Samples=database.GetAll("""select ps.psampleid,pp.projid from samples
+    Samples=database.GetAll("""select ps.psampleid,pp.projid,pp.instrumtype from samples
             join part_samples ps on samples.orig_id=ps.profileid
             join part_projects pp on ps.pprojid = pp.pprojid and samples.projid=pp.projid
             where ps.sampleid is null""")
@@ -173,7 +180,7 @@ def GlobalTaxoCompute():
                 or exists (select 1 from part_histocat_lst hc where hc.psampleid=ps.psampleid and classif_id not in (select id from taxonomy)) 
                 )""")
     for S in Samples:
-        ComputeZooHisto(S['psampleid'])
+        ComputeZooHisto(S['psampleid'],S['instrumtype'])
 
 @app.route('/part/prjcalc/<int:PrjId>',methods=['post'])
 @login_required
@@ -207,7 +214,7 @@ def part_prjcalc(PrjId):
         if gvp('domatchecotaxa') == 'Y':
             txt += prefix +ComputeZooMatch(S['psampleid'],Prj.projid)
         if gvp('dohistotaxo') == 'Y':
-            txt += prefix + ComputeZooHisto(S['psampleid'])
+            txt += prefix + ComputeZooHisto(S['psampleid'], Prj.instrumtype)
             # try:
             #     uvp_sample_import.GenerateTaxonomyHistogram(S['psampleid'])
             #     txt += prefix + " Taxonomy Histogram computed"

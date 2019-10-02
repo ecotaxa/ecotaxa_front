@@ -173,7 +173,7 @@ Processed images and associated TSV files will be imported separately from the �
 </td></tr>
 {{ render_field(form.ownerid,tr='oc',colspan=3,help="name of the unique manager of the project, to be selected in the ECOTAXA user list. The project owner will manage the permissions in relation to the permissions of the associated Ecotaxa project (if the project exists)") }}
 {{ render_field(form.projid,tr='oc',colspan=3,help="associated project where you will import the images from the « work » folders. <br>You can create a new associated project here.") }}
-{{ render_field(form.instrumtype,tr='o',help="selected from the root folder name<br><b>MUST BE :</b> uvp5 or lisst") }}
+{{ render_field(form.instrumtype,tr='o',help="selected from the root folder name<br><b>MUST BE :</b> uvp5,uvp6,lisst or uvp6remote") }}
 {{ render_field(form.default_instrumsn,tr='c',help="selected from the root folder name") }}
 {{ render_field(form.op_name,tr='o',help="people who managed the acquisition of the data") }}
 {{ render_field(form.op_email,tr='c') }}
@@ -190,10 +190,16 @@ Processed images and associated TSV files will be imported separately from the �
   <td colspan="2">The delay starting date is the date of the older sample of the project. See the sample metadata page to visualize resulting display/download dates</td></tr>
 {{ render_field(form.public_partexport_deferral_month,tr='o',style="width:50px;",suffix='Months',help="delay to allow data downloading") }}
 {{ render_field(form.public_zooexport_deferral_month,tr='c',style="width:50px;",suffix='Months',help="note that the associated project must be VISIBLE") }}
-
-
+  <tr><td colspan="4" style="border-bottom: 1px #555 solid;">Connexion to data server</td></tr>
+  <tr><td colspan="4" style="height: 5px;"> </td></tr>
+{{ render_field(form.remote_type,tr='oc',style="width:100px;") }}
+{{ render_field(form.remote_url,tr='o',style="width:300px;",help="Hostname/IP @ of remote server") }}
+{{ render_field(form.remote_directory,tr='c',style="width:300px;",help="directory on remote server with / as separator") }}
+{{ render_field(form.remote_user,tr='o',style="width:100px;") }}
+{{ render_field(form.remote_password,tr='c',style="width:100px;") }}
+{{ render_field(form.remote_vectorref,tr='c',style="width:300px;",help="This reference can help searching in associated databases. It can be the serial number of the glider, the IMO number of the ARGO float") }}
     <tr>
-        <td colspan="4">
+        <td colspan="4" style="padding-top: 10px">
 <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>
 
 {% if prjid>0 %}

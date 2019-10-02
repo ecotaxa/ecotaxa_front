@@ -30,6 +30,11 @@ class UvpPrjForm(Form):
     public_visibility_deferral_month = IntegerField("Privacy delay", [validators.Optional(strip_whitespace=True)])
     public_partexport_deferral_month = IntegerField("General download delay", [validators.Optional(strip_whitespace=True)])
     public_zooexport_deferral_month = IntegerField("Plankton annotation download delay", [validators.Optional(strip_whitespace=True)])
+    remote_url = StringField("Host")
+    remote_user= StringField("User")
+    remote_password = StringField("Password")
+    remote_directory = StringField("Directory on server")
+    remote_vectorref = StringField("Additionnal reference of the vector")
 
 
 @app.route('/part/prjedit/<int:pprojid>',methods=['get','post'])
@@ -52,7 +57,9 @@ def part_prjedit(pprojid):
         model.public_zooexport_deferral_month = app.config.get('PART_DEFAULT_PLANKTON_EXPORT_DELAY', '')
 
     UvpPrjForm.ownerid=SelectField('Project Owner',choices=database.GetAll("SELECT id,name FROM users ORDER BY trim(lower(name))"),coerce=int )
+    UvpPrjForm.instrumtype=SelectField('Instrument type',choices=[(x,x) for x in ("","uvp5","uvp6","lisst","uvp6remote")])
     UvpPrjForm.projid=SelectField('Ecotaxa Project',choices=[(0,''),(-1,'Create a new EcoTaxa project')]+database.GetAll("SELECT projid,concat(title,' (',cast(projid as varchar),')') FROM projects ORDER BY lower(title)"),coerce=int )
+    UvpPrjForm.remote_type=SelectField('Remote type',choices=[(x,x) for x in ("","ARGO","TSV LOV")])
     form=UvpPrjForm(request.form,model)
     if gvp('delete')=='Y':
         try:

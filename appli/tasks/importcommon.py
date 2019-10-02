@@ -85,8 +85,8 @@ def ResolveTaxoFound(TaxoFound,o_NotFoundTaxo):
 
 
 def ConvDegreeMinuteFloatToDecimaldegre(v):
-    m=re.search("(-?\d+)°(\d+).(\d+)",v)
-    if m: # donnée au format DDD°MM.SSS
+    m=re.search("(-?\d+)°(\d+) (\d+)",v)
+    if m: # donnée au format DDD°MM SSS
         parties=[float(x) for x in m.group(1, 2, 3)]
         parties[1]+=parties[2]/60 # on ajoute les secondes en fraction des minutes
         parties[0]+=parties[1]/60# on ajoute les minutes en fraction des degrés

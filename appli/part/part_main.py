@@ -20,6 +20,7 @@ def indexPart():
         ctd = SelectMultipleField(
             choices=sorted([(k, v) for v,k in CTDFixedCol.items()], key=operator.itemgetter(1)))
         filt_proftype=SelectField(choices=[['','All'],['V','DEPTH casts'],['H','TIME series']])
+        filt_instrum = SelectField(choices=[['', 'All'],('lisst','lisst'),('uvp5','uvp5'),('uvp6','uvp6'),('uvp6remote','uvp6remote')])
 
     filt_data =request.args
     form=FiltForm(filt_data)

@@ -1,11 +1,12 @@
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,VaultRootDir,DecodeEqualList,ntcv,EncodeEqualList,CreateDirConcurrentlyIfNeeded
 from pathlib import Path
-import appli.part.database as partdatabase, logging,re,datetime,csv,math
+import appli.part.database as partdatabase, logging,re,datetime,csv,math,zipfile,io
 import numpy as np
 import matplotlib.pyplot as plt
 from appli import database
 from appli.part import PartDetClassLimit,CTDFixedCol
 from flask_login import current_user
+
 
 # Purge les espace et converti le Nan en vide
 def CleanValue(v):
@@ -96,65 +97,76 @@ def ImportCTD(psampleid,user_name,user_email):
     if UvpSample is None:
         raise Exception("ImportCTD: Sample %d missing"%psampleid)
     Prj = partdatabase.part_projects.query.filter_by(pprojid=UvpSample.pprojid).first()
-    ServerRoot = Path(app.config['SERVERLOADAREA'])
-    DossierUVPPath = ServerRoot / Prj.rawfolder
-    CtdFile =  DossierUVPPath / "ctd_data_cnv"/(UvpSample.profileid+".ctd")
-    if not CtdFile.exists():
-        app.logger.info("CTD file %s missing", CtdFile.as_posix())
-        return False
-    app.logger.info("Import CTD file %s", CtdFile.as_posix())
-    with CtdFile.open('r',encoding='latin_1') as tsvfile:
-        Rdr = csv.reader(tsvfile, delimiter='\t')
-        HeadRow=Rdr.__next__()
-        # Analyser la ligne de titre et assigner à chaque ID l'attribut
-        # Construire la table d'association des attributs complémentaires.
-        ExtramesID=0
-        Mapping=[]
-        ExtraMapping ={}
-        for ic,c in enumerate(HeadRow):
-            clow=c.lower().strip()
-            if clow=="chloro fluo [mg chl/m3]":clow="chloro fluo [mg chl m-3]"
-            if clow == "conductivity [ms/cm]": clow = "conductivity [ms cm-1]"
-            if clow == "depth [salt water, m]": clow = "depth [m]"
-            if clow == "fcdom factory [ppb qse]": clow = "fcdom [ppb qse]"
-            if clow == "in situ density anomaly [kg/m3]": clow = "in situ density anomaly [kg m-3]"
-            if clow == "nitrate [µmol/l]": clow = "nitrate [umol l-1]"
-            if clow == "oxygen [µmol/kg]": clow = "oxygen [umol kg-1]"
-            if clow == "oxygen [ml/l]": clow = "oxygen [ml l-1]"
-            if clow == "par [µmol m-2 s-1]": clow = "par [umol m-2 s-1]"
-            if clow == "potential density anomaly [kg/m3]": clow = "potential density anomaly [kg m-3]"
-            if clow == "pressure in water column [db]": clow = "pressure [db]"
-            if clow == "spar [µmol m-2 s-1]": clow = "spar [umol m-2 s-1]"
-            if clow in CTDFixedCol:
-                Target=CTDFixedCol[clow]
-            else:
-                # print (clow)
-                ExtramesID += 1
-                Target ='extrames%02d'%ExtramesID
-                ExtraMapping['%02d'%ExtramesID]=c
-                if ExtramesID>20:
-                    raise Exception("ImportCTD: Too much CTD data, column %s skipped" % c)
-            Mapping.append(Target)
-        app.logger.info("Mapping = %s",Mapping)
-        database.ExecSQL("delete from part_ctd where psampleid=%s"%psampleid)
-        for i,r in enumerate(Rdr):
-            cl=partdatabase.part_ctd()
-            cl.psampleid=psampleid
-            cl.lineno=i
-            for i,c in enumerate(Mapping):
-                v=CleanValue(r[i])
-                if v!='':
-                    if c=='qc_flag':
-                        setattr(cl, c, int(float(v)))
-                    elif c=='datetime':
-                        setattr(cl, c, datetime.datetime(int(v[0:4]),int(v[4:6]),int(v[6:8]),int(v[8:10]),int(v[10:12]),int(v[12:14]),int(v[14:17])*1000))
-                    else:
-                        setattr(cl,c,v)
-            db.session.add(cl)
-            db.session.commit()
-        UvpSample.ctd_desc=EncodeEqualList(ExtraMapping)
-        UvpSample.ctd_import_datetime=datetime.datetime.now()
-        UvpSample.ctd_import_name=user_name
-        UvpSample.ctd_import_email = user_email
+    if Prj.instrumtype == 'uvp6remote':
+        import appli.part.uvp_sample_import as uvp_sample_import
+        rawfileinvault = uvp_sample_import.GetPathForRawHistoFile(UvpSample.psampleid)
+        zf=zipfile.ZipFile(rawfileinvault, "r")
+        if 'CTD.txt' not in zf.namelist() :
+            app.logger.info("CTD.txt file missing")
+            return False
+        fctb=zf.open('CTD.txt', 'r')
+        tsvfile = io.TextIOWrapper(fctb)
+    else:  # process normal par traitement du repertoire des données
+        ServerRoot = Path(app.config['SERVERLOADAREA'])
+        DossierUVPPath = ServerRoot / Prj.rawfolder
+        CtdFile =  DossierUVPPath / "ctd_data_cnv"/(UvpSample.profileid+".ctd")
+        if not CtdFile.exists():
+            app.logger.info("CTD file %s missing", CtdFile.as_posix())
+            return False
+        app.logger.info("Import CTD file %s", CtdFile.as_posix())
+        tsvfile=CtdFile.open('r',encoding='latin_1')
+
+    Rdr = csv.reader(tsvfile, delimiter='\t')
+    HeadRow=Rdr.__next__()
+    # Analyser la ligne de titre et assigner à chaque ID l'attribut
+    # Construire la table d'association des attributs complémentaires.
+    ExtramesID=0
+    Mapping=[]
+    ExtraMapping ={}
+    for ic,c in enumerate(HeadRow):
+        clow=c.lower().strip()
+        if clow=="chloro fluo [mg chl/m3]":clow="chloro fluo [mg chl m-3]"
+        if clow == "conductivity [ms/cm]": clow = "conductivity [ms cm-1]"
+        if clow == "depth [salt water, m]": clow = "depth [m]"
+        if clow == "fcdom factory [ppb qse]": clow = "fcdom [ppb qse]"
+        if clow == "in situ density anomaly [kg/m3]": clow = "in situ density anomaly [kg m-3]"
+        if clow == "nitrate [µmol/l]": clow = "nitrate [umol l-1]"
+        if clow == "oxygen [µmol/kg]": clow = "oxygen [umol kg-1]"
+        if clow == "oxygen [ml/l]": clow = "oxygen [ml l-1]"
+        if clow == "par [µmol m-2 s-1]": clow = "par [umol m-2 s-1]"
+        if clow == "potential density anomaly [kg/m3]": clow = "potential density anomaly [kg m-3]"
+        if clow == "pressure in water column [db]": clow = "pressure [db]"
+        if clow == "spar [µmol m-2 s-1]": clow = "spar [umol m-2 s-1]"
+        if clow in CTDFixedCol:
+            Target=CTDFixedCol[clow]
+        else:
+            # print (clow)
+            ExtramesID += 1
+            Target ='extrames%02d'%ExtramesID
+            ExtraMapping['%02d'%ExtramesID]=c
+            if ExtramesID>20:
+                raise Exception("ImportCTD: Too much CTD data, column %s skipped" % c)
+        Mapping.append(Target)
+    app.logger.info("Mapping = %s",Mapping)
+    database.ExecSQL("delete from part_ctd where psampleid=%s"%psampleid)
+    for i,r in enumerate(Rdr):
+        cl=partdatabase.part_ctd()
+        cl.psampleid=psampleid
+        cl.lineno=i
+        for i,c in enumerate(Mapping):
+            v=CleanValue(r[i])
+            if v!='':
+                if c=='qc_flag':
+                    setattr(cl, c, int(float(v)))
+                elif c=='datetime':
+                    setattr(cl, c, datetime.datetime(int(v[0:4]),int(v[4:6]),int(v[6:8]),int(v[8:10]),int(v[10:12]),int(v[12:14]),int(v[14:17])*1000))
+                else:
+                    setattr(cl,c,v)
+        db.session.add(cl)
         db.session.commit()
-        return True
+    UvpSample.ctd_desc=EncodeEqualList(ExtraMapping)
+    UvpSample.ctd_import_datetime=datetime.datetime.now()
+    UvpSample.ctd_import_name=user_name
+    UvpSample.ctd_import_email = user_email
+    db.session.commit()
+    return True
