@@ -583,8 +583,8 @@ def GenerateParticleHistogram(psampleid):
         FirstLigIDByImage = np.unique(Part[:, 7], return_index=True)[1]
         #MaxTrancheId=np.max(PartCalc[:, 0])
         # on calcule le volume de chaque tranche (y compris celle qui n'existent (bincount génère touts les pas entre 0 et la MaxTrancheId
-        VolumeParTranche=np.bincount((PartCalc[FirstLigIDByImage, 0]).astype(np.uint32), Part[FirstLigIDByImage, 1])*UvpSample.acq_volimage  # Bin par tranche de 1h
-        DepthParTranche = np.bincount((PartCalc[FirstLigIDByImage, 0]).astype(np.uint32), Part[FirstLigIDByImage, 0])/np.bincount((PartCalc[FirstLigIDByImage, 0]).astype(np.uint32))
+        VolumeParTranche=np.bincount((PartCalc[FirstLigIDByImage, 0]).astype(np.int32), Part[FirstLigIDByImage, 1])*UvpSample.acq_volimage  # Bin par tranche de 1h
+        DepthParTranche = np.bincount((PartCalc[FirstLigIDByImage, 0]).astype(np.int32), Part[FirstLigIDByImage, 0])/np.bincount((PartCalc[FirstLigIDByImage, 0]).astype(np.int32))
     # les calculs de concentration sont commun au 2 types de profils
     (PartByClassAndTranche, bins, binsdept) = np.histogram2d(PartCalc[:,1], PartCalc[:,0], bins=(
         PartDetClassLimit, np.arange(0, VolumeParTranche.shape[0]+1 ))

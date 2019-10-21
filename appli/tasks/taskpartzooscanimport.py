@@ -90,8 +90,9 @@ class TaskPartZooscanImport(AsyncTask):
 
                     appli.part.prj.ComputeHistoDet(psampleid, Prj.instrumtype)
                     appli.part.prj.ComputeHistoRed(psampleid, Prj.instrumtype)
-                    appli.part.prj.ComputeZooMatch(psampleid, Prj.projid)
-                    appli.part.prj.ComputeZooHisto(psampleid, Prj.instrumtype)
+                    if Prj.projid is not None : # on essaye de matcher que si on a un projet Ecotaxa
+                        appli.part.prj.ComputeZooMatch(psampleid, Prj.projid)
+                        appli.part.prj.ComputeZooHisto(psampleid, Prj.instrumtype)
 
                     NbrDone+=1
 
