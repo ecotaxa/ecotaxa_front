@@ -189,7 +189,7 @@ class TaskImport(AsyncTask):
                             if ObjectId=='':
                                 self.LogErrorForUser("Missing object_id on line '%s' in file %s. "%(RowCount,relname.as_posix()))
                             ImgFileName=CleanValue(lig.get('img_file_name','MissingField img_file_name'))
-                            ImgFilePath=CsvFile.with_name(ImgFileName)
+                            ImgFilePath=CsvFile.parent.joinpath(ImgFileName)
                             if not ImgFilePath.exists():
                                 self.LogErrorForUser("Missing Image '%s' in file %s. "%(ImgFileName,relname.as_posix()))
                             else:
@@ -403,7 +403,7 @@ class TaskImport(AsyncTask):
                             self.ExistingObject[Objs["obj_field"].orig_id]=Objs["obj_head"].objid # Provoque un select object sauf si 'expire_on_commit':False
                         #Gestion de l'image, creation DB et fichier dans Vault
                         Objs["image"].objid=Objs["obj_head"].objid
-                        ImgFilePath=CsvFile.with_name(Objs["image"].orig_file_name)
+                        ImgFilePath=CsvFile.parent.joinpath(Objs["image"].orig_file_name)
                         VaultFolder="%04d"%(Objs["image"].imgid//10000)
                         vaultroot=Path("../../vault")
                         #creation du repertoire contenant les images si necessaire
