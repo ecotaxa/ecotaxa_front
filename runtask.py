@@ -22,9 +22,9 @@ if __name__ == '__main__':
         os.chdir(workingdir)
         # On active le logger
         LoggingFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        logging.basicConfig(filename='TaskLog.txt',level=logging.DEBUG,format=LoggingFormat)
+        logging.basicConfig(filename='TaskLog.txt',level=logging.INFO,format=LoggingFormat)
         logging_console = logging.StreamHandler()
-        logging_console.setLevel(logging.DEBUG)
+        logging_console.setLevel(logging.INFO)
         logging_console.setFormatter(logging.Formatter(LoggingFormat))
         logging.getLogger('').addHandler(logging_console)
         with app.app_context(): # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
