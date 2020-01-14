@@ -181,19 +181,13 @@ def GenerateParticleHistogram(psampleid):
                 # GreyParClasse = {}
                 NbrImg=float(L['IMAGE_NUMBER_PARTICLES'])
                 for classe in range(18):
-                    NbrParClasse[classe]=ToFloat(L['NB_SIZE_SPECTRA_PARTICLES_class_%s'%(classe+1,)])
-                    # GreyParClasse[classe] =NbrParClasse[classe]*ToFloat(L['GREY_SIZE_SPECTRA_PARTICLES_class_%s'%(classe+1,)])*NbrImg
+                    NbrParClasse[classe]= round(ToFloat(L['NB_SIZE_SPECTRA_PARTICLES_class_%s'%(classe+1,)])*NbrImg)
                 if Tranche not in HistoByTranche:
                     HistoByTranche[Tranche]={'NbrImg':NbrImg,'NbrParClasse':NbrParClasse,'DepthTranche':DepthTranche}#,'GreyParClasse':GreyParClasse
                 else:
                     HistoByTranche[Tranche]['NbrImg']+= NbrImg
                     for classe in range(18):
                         HistoByTranche[Tranche]['NbrParClasse'][classe] += NbrParClasse[classe]
-                        # HistoByTranche[Tranche]['GreyParClasse'][classe] += GreyParClasse[classe]
-            # for Tranche in HistoByTranche: # fin calcul du niveau de gris moyen pas tranche/classe
-            #     for classe in range(18):
-            #         if HistoByTranche[Tranche]['NbrImg']>0:
-            #             HistoByTranche[Tranche]['GreyParClasse'][classe] /= HistoByTranche[Tranche]['NbrImg']
             logging.info("Line count %d" % NbrLine)
 
         

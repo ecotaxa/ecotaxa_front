@@ -3,7 +3,7 @@ from appli import app,PrintInCharte,database,gvg,gvp,user_datastore,DecodeEqualL
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,SelectField,TextAreaField
 from flask_login import current_user
 import appli.part.part_main as umain
-import matplotlib,io,math,traceback
+import matplotlib,io,math,traceback,matplotlib.dates,matplotlib.ticker
 # matplotlib.use('Agg')
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
@@ -32,14 +32,22 @@ def GetTaxoHistoWaterVolumeSQLExpr(field,retval='start'):
                   ,field)
     return Res+" end"
 
+# variante de matplotlib.dates.DateFormatter mais qui ne plante pas en cas de zero, ce qui arrive si les graphes sont vides
+class dateFormaterYMD(matplotlib.ticker.Formatter):
+    def __call__(self, x, pos=0):
+        if x<=0:
+            return "-"
+        return matplotlib.dates.num2date(x).strftime("%Y-%m-%d")
 
 @app.route('/part/drawchart')
 def part_drawchart():
     Couleurs=("#FF0000","#4385FF","#00BE00","#AA6E28","#FF9900","#FFD8B1","#808000","#FFEA00","#FFFAC8","#BEFF00",
         "#AAFFC3","#008080","#64FFFF","#000080","#800000","#820096","#E6BEFF","#FF00FF","#808080","#FFC9DE","#000000" )
-    PrjColorMap={}
+    PrjColorMap={} # chaque projet à une couleur
     PrjSampleCount={}
     PrjTitle={}
+    SampleColorMap={} # chaque sample à une couleur s'il n'y a qu'un seul projet
+    SampleTitle={}
     try:
         gpr=request.args.getlist('gpr')
         gpd=request.args.getlist('gpd')
@@ -57,9 +65,15 @@ def part_drawchart():
             if S['pprojid'] not in PrjColorMap:
                 PrjColorMap[S['pprojid']]=Couleurs[len(PrjColorMap)%len(Couleurs)]
                 PrjTitle[S['pprojid']]=S['ptitle']
+            if S['psampleid'] not in SampleColorMap:
+                SampleColorMap[S['psampleid']]=Couleurs[len(SampleColorMap)%len(Couleurs)]
+                SampleTitle[S['psampleid']]=S['profileid']
             PrjSampleCount[S['pprojid']]=PrjSampleCount.get(S['pprojid'],0)+1
-        if len(PrjColorMap) > 1: NbrChart+=1
+        NbrChart += 1 # toujours un graphe en plus à la fin pour la legende ou le message disant pourquoi pas de legende
         FigSizeX=NbrChart
+        TimeAbsolute = False
+        if not ProfilVertical and gvg('TimeScale') == 'A':
+            TimeAbsolute=True
         if ProfilVertical:
             if NbrChart>4: FigSizeX = 4
         else:
@@ -83,7 +97,10 @@ def part_drawchart():
             if ProfilVertical:
                 sql="select depth y "
             else:
-                sql = "select -lineno y "
+                if TimeAbsolute:
+                    sql = "select datetime y "
+                else:
+                    sql = "select -lineno y "
             # sql+=''.join([',case when watervolume>0 then class%02d/watervolume else 0 end as c%s'%(int(c[2:]),i)
             #               for i,c in enumerate(gpr) if c[0:2]=="cl"])
             sql+=''.join([',case when watervolume>0 then class%02d/watervolume else null end as c%s'%(int(c[2:]),i)
@@ -103,7 +120,11 @@ def part_drawchart():
                 if c[0:2] == "bv":
                     XLabel='Biovolume red. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartRedClassLimit,int(c[2:])))
                 if not ProfilVertical:
-                    XLabel="X : time (hour), Y : "+XLabel
+                    if TimeAbsolute:
+                        graph[i].xaxis.set_major_formatter(dateFormaterYMD())
+                        XLabel="X : date, Y : "+XLabel
+                    else:
+                        XLabel="X : time (hour), Y : "+XLabel
                 graph[i].set_xlabel(XLabel)
                 chartid += 1
             for rs in samples:
@@ -113,17 +134,22 @@ def part_drawchart():
                     xcolname="c%d"%i
                     valcount=0
                     for rnum,r in enumerate(DBData):
-                        if r[xcolname] is None:
+                        if r[xcolname] is None or r['y'] is None:
                             continue
-                        data[valcount]=(-r['y'],r[xcolname])
+                        if ProfilVertical:
+                            data[valcount] = (-r['y'], r[xcolname])
+                        else:
+                            if TimeAbsolute:
+                                data[valcount]=(r[xcolname],matplotlib.dates.date2num(r['y']))
+                            else:
+                                data[valcount] = (r[xcolname],-r['y'])
                         valcount +=1
                     # data = data[~np.isnan(data[:,1]),:] # Supprime les lignes avec une valeur à Nan et fait donc de l'extrapolation linaire
                     # sans cette ligne les null des colonnes cl devient des nan et ne sont pas tracès (rupture de ligne)
                     # cependant l'autre option est de le traiter au niveau de l'import
-                    if ProfilVertical:
-                        graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
-                    else:
-                        graph[i].plot(data[:valcount, 0], data[:valcount, 1], color=PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else None)
+                    color = PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else \
+                        (SampleColorMap[rs['psampleid']] if len(SampleColorMap) <25 else None)
+                    graph[i].plot(data[:valcount, 1], data[:valcount, 0], color=color)
             # fait après les plot pour avoir un echelle X bien callé avec les données et evite les erreurs log si la premiere serie n'as pas de valeurs
             for i, c in enumerate(gpr):
                 if gvg('XScale') != 'I':
@@ -139,13 +165,17 @@ def part_drawchart():
                         if ProfilVertical: graph[i].set_xscale('linear')
                         else: graph[i].set_yscale('linear')
                 else:
-                    graph[i].set_xlim(left=0)
+                    if not TimeAbsolute:
+                        graph[i].set_xlim(left=0)
         # traitement des Graphes particulaire détaillés
         if len(gpd)>0:
             if ProfilVertical:
                 sql="select depth y "
             else:
-                sql = "select -lineno y "
+                if TimeAbsolute:
+                    sql = "select datetime y "
+                else:
+                    sql = "select -lineno y "
             sql+=''.join([',case when watervolume>0 then class%02d/watervolume else 0 end as c%s'%(int(c[2:]),i)
                           for i,c in enumerate(gpd) if c[0:2]=="cl"])
             sql+=''.join([',coalesce(biovol%02d) as c%s'%(int(c[2:]),i)
@@ -163,7 +193,11 @@ def part_drawchart():
                 if c[0:2] == "bv":
                     XLabel='Biovolume det. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:])))
                 if not ProfilVertical:
-                    XLabel="X : time (hour), Y : "+XLabel
+                    if TimeAbsolute:
+                        graph[i].xaxis.set_major_formatter(dateFormaterYMD())
+                        XLabel="X : date, Y : "+XLabel
+                    else:
+                        XLabel="X : time (hour), Y : "+XLabel
                 graph[i].set_xlabel(XLabel)
                 chartid += 1
             for rs in samples:
@@ -173,14 +207,20 @@ def part_drawchart():
                     xcolname="c%d"%i
                     valcount = 0
                     for rnum,r in enumerate(DBData):
-                        if r[xcolname] is None:
+                        if r[xcolname] is None or r['y'] is None:
                             continue
-                        data[valcount]=(-r['y'],r[xcolname])
+                        if ProfilVertical:
+                            data[valcount] = (-r['y'], r[xcolname])
+                        else:
+                            if TimeAbsolute:
+                                y=matplotlib.dates.date2num(r['y'])
+                                data[valcount]=(r[xcolname],y)
+                            else:
+                                data[valcount] = (r[xcolname],-r['y'])
                         valcount +=1
-                    if ProfilVertical:
-                        graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
-                    else:
-                        graph[i].plot(data[:valcount, 0], data[:valcount, 1], color=PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else None)
+                    color = PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else \
+                        (SampleColorMap[rs['psampleid']] if len(SampleColorMap) <25 else None)
+                    graph[i].plot(data[:valcount,1],data[:valcount,0],color=color)
             # fait après les plot pour avoir un echelle X bien callé avec les données et evite les erreurs log si la premiere serie n'as pas de valeurs
             for i, c in enumerate(gpd):
                 if gvg('XScale') != 'I':
@@ -196,28 +236,37 @@ def part_drawchart():
                         if ProfilVertical: graph[i].set_xscale('linear')
                         else: graph[i].set_yscale('linear')
                 else:
-                    graph[i].set_xlim(left=0)
+                    if not TimeAbsolute:
+                        graph[i].set_xlim(left=0)
 
         # traitement des Graphes CTD
         if len(gctd)>0:
             if ProfilVertical:
                 sql="select depth y "
             else:
-                sql = "select -round(cast(EXTRACT(EPOCH FROM datetime-(select min(datetime) from part_histopart_reduit where psampleid=6))/3600 as numeric),2) y "
+                if TimeAbsolute:
+                    sql = "select datetime y "
+                else:
+                    sql = "select -round(cast(EXTRACT(EPOCH FROM datetime-(select min(datetime) from part_ctd where psampleid=%(psampleid)s))/3600 as numeric),2) y "
             sql+=''.join([',%s as c%d'%(c,i) for i,c in enumerate(gctd)])
             sql += """ from part_ctd
              where psampleid=%(psampleid)s
              {}
             order by lineno""".format(DepthFilter)
             graph=list(range(0,len(gctd)))
+            totvalcount = [0]*len(gctd)
             for i, c in enumerate(gctd):
                 graph[i]=Fig.add_subplot(FigSizeY,FigSizeX,chartid+1)
                 XLabel ='CTD %s '%(CTDFixedColByKey.get(c))
                 if not ProfilVertical:
-                    XLabel="X : time (hour), Y : "+XLabel
+                    if TimeAbsolute:
+                        graph[i].xaxis.set_major_formatter(dateFormaterYMD())
+                        XLabel = "X : date, Y : " + XLabel
+                    else:
+                        XLabel="X : time (hour), Y : "+XLabel
                 graph[i].set_xlabel(XLabel)
-
                 chartid += 1
+
             for rs in samples:
                 DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})
                 data = np.empty((len(DBData), 2))
@@ -225,14 +274,25 @@ def part_drawchart():
                     xcolname="c%d"%i
                     valcount = 0
                     for rnum,r in enumerate(DBData):
-                        if r[xcolname] is None:
+                        if r[xcolname] is None or r['y'] is None:
                             continue
-                        data[valcount]=(-r['y'],r[xcolname])
+                        if ProfilVertical:
+                            data[valcount] = (-r['y'], r[xcolname])
+                        else:
+                            if TimeAbsolute:
+                                y=matplotlib.dates.date2num(r['y'])
+                                data[valcount]=(r[xcolname],y)
+                            else:
+                                data[valcount] = (r[xcolname],-r['y'])
                         valcount +=1
-                    if ProfilVertical:
-                        graph[i].plot(data[:valcount,1],data[:valcount,0],color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
-                    else:
-                        graph[i].plot(data[:valcount, 0], data[:valcount, 1], color=PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else None)
+                    color = PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else \
+                        (SampleColorMap[rs['psampleid']] if len(SampleColorMap) <25 else None)
+                    graph[i].plot(data[:valcount,1],data[:valcount,0],color=color)
+                    totvalcount[i]+=len(data[:valcount,1])
+            for i in range(len(gctd)): # permet de gérer l'affichage correct s'il n'y a pas de données en time absolu
+                if totvalcount[i]==0:
+                    graph[i].set_xscale('linear')
+                    graph[i].set_yscale('linear')
 
         # traitement des Graphes TAXO
         if len(gtaxo)>0:
@@ -303,7 +363,9 @@ def part_drawchart():
                         # Y=-(edge[:-1]+edge[1:])/2 calcul du milieu de l'espace
                         Y = -edge[:-1]
                         # Y=categ
-                        graph[i].step(hist,Y,color=PrjColorMap[rs['pprojid']] if len(PrjColorMap)>1 else None)
+                        color = PrjColorMap[rs['pprojid']] if len(PrjColorMap) > 1 else \
+                            (SampleColorMap[rs['psampleid']] if len(SampleColorMap) < 25 else None)
+                        graph[i].step(hist,Y,color=color)
                         # bottom, top=graph[i].get_ylim()
                         # bottom=min(bottom,categ.min()-1)
                         # graph[i].set_ylim(bottom, top)
@@ -331,6 +393,25 @@ def part_drawchart():
             graph.set_yticks(np.arange(len(PrjLabel))+0.4)
             graph.set_yticklabels(PrjLabel)
             graph.set_xlabel("Sample count per project + Legend")
+        elif 0<len(SampleColorMap)<=25 :
+            data = np.empty((len(samples), 2))
+            SampleLabel=[]
+            GColor=[]
+            for i,S in enumerate(samples):
+                data[i]=i,1
+                SampleLabel.append(S['profileid'])
+                GColor.append(SampleColorMap[S['psampleid']])
+            graph = Fig.add_subplot(FigSizeY, FigSizeX, chartid + 1)
+            graph.barh(data[:,0],data[:,1],color=GColor)
+            graph.set_yticks(np.arange(len(SampleLabel))+0.4)
+            graph.set_yticklabels(SampleLabel)
+            graph.set_xlabel("Sample Legend")
+        elif len(SampleColorMap)==0:
+            graph = Fig.add_subplot(FigSizeY, FigSizeX, chartid + 1)
+            graph.text(0.05, 0.5, "No Data\nor set 'profile type' to 'time series'\nif you handle this kind of data ",fontsize=15, clip_on=True)
+        else:
+            graph = Fig.add_subplot(FigSizeY, FigSizeX, chartid + 1)
+            graph.text(0.05, 0.5, "Too many samples,\nLegend not available \nfor too numerous selections\n(N>25)", fontsize=15, clip_on=True)
 
         Fig.tight_layout()
     except Exception as e:

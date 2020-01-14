@@ -91,7 +91,7 @@ def part_prj_main(PrjId):
     if Prj['ownerid']!=current_user.id and not current_user.has_role(database.AdministratorLabel):
         return PrintInCharte(ErrorFormat("Access Denied"))
     g.headcenter="<h4>Particle Project %s : %s</h4><a href='/part/'>Particle Module Home</a>"%(Prj['projid'],Prj['ptitle'])
-    dbsample = database.GetAll("""select profileid,psampleid,filename,stationid,firstimage,lastimg,lastimgused,sampleid
+    dbsample = database.GetAll("""select profileid,psampleid,organizedbydeepth,filename,stationid,firstimage,lastimg,lastimgused,sampleid
           ,histobrutavailable,comment,daterecalculhistotaxo,ctd_import_datetime,sampledate,imp_descent_filtered_row,imp_removed_empty_slice
           ,(select count(*) from part_histopart_det where psampleid=s.psampleid) nbrlinedet
           ,(select count(*) from part_histopart_reduit where psampleid=s.psampleid) nbrlinereduit

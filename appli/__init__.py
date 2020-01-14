@@ -307,9 +307,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.2.0"
+ecotaxa_version="2.2.1"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2019-08-18"
+    return ecotaxa_version+" 2020-01-14"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -317,6 +317,17 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-01-14 : V 2.2.1
+    Generation vignette : Largeur minimale pour voir au moins l'echelle
+    Gestion UVP6 Remote : Format LOV TSV
+    Fix python 3.7
+    Améliorations performances import
+    Part : Gestion graphique temporel temps absolu
+    Part : Gestion graphique 1 couleur par sample + legende si un seul projet
+    Part export : gestion aggregation des TSV sur détaillé et réduit + nom projet dans les summary
+    Part import : ajustement format LOV TSV
+    Part import : ignore les samples sans depth si profil vertical sinon si depth invalide mise à 0
+      
 2019-08-18 : V 2.2.0
     Intégration of UVPApp Data Format
 2019-04-18 : V 2.1.0

@@ -67,7 +67,7 @@ def GetFilteredSamples(Filter=None,GetVisibleOnly=False,ForceVerticalIfNotSpecif
     if Filter is None: # si filtre non spécifié on utilise GET
         Filter=request.args
     sqlvisible, sqljoin=GetSQLVisibility()
-    sql="select s.psampleid,s.latitude,s.longitude,cast ("+sqlvisible+""" as varchar(2) ) as visibility,s.pprojid,pp.ptitle
+    sql="select s.psampleid,s.latitude,s.longitude,cast ("+sqlvisible+""" as varchar(2) ) as visibility,s.profileid,s.pprojid,pp.ptitle
     from part_samples s
     JOIN part_projects pp on s.pprojid=pp.pprojid
     LEFT JOIN projects p on pp.projid=p.projid """

@@ -1,7 +1,7 @@
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,VaultRootDir,DecodeEqualList,ntcv,EncodeEqualList,CreateDirConcurrentlyIfNeeded
 from pathlib import Path
 import appli.part.database as partdatabase, logging,re,datetime,csv,math
-import numpy as np,zipfile,configparser,io,bz2
+import numpy as np,zipfile,configparser,io,bz2,sys
 import matplotlib.pyplot as plt
 from appli import database
 from appli.part import PartDetClassLimit,CTDFixedCol
@@ -55,7 +55,8 @@ def CreateOrUpdateSample(pprojid,headerdata):
     Sample.acq_volimage = ToFloat(headerdata['volimage'])
     Sample.acq_aa = ToFloat(headerdata['aa'])
     Sample.acq_exp = ToFloat(headerdata['exp'])
-    Sample.bottomdepth = int(headerdata['bottomdepth'])//10
+    if headerdata.get('bottomdepth'):
+        Sample.bottomdepth = int(headerdata['bottomdepth'])//10
     Sample.yoyo = headerdata['yoyo']=="Y"
     Sample.firstimage = int(headerdata['firstimage'])
     Sample.lastimg = int(headerdata['endimg'])
@@ -210,7 +211,7 @@ def GenerateRawHistogramUVPAPP(UvpSample, Prj, DepthOffset, organizedbydepth, De
     with z.open("particules.csv", "r") as csvfile:
         logging.info("Processing file "+EcodataPartFile.as_posix()+"/particules.csv")
         idx=-1 # Les index d'image sont en base 0
-        for row in csvfile:
+        for rownum,row in enumerate(csvfile):
             row=row.decode('latin-1')
             rowpart=row.split(":")
             if len(rowpart)!=2: # Pas une ligne data
@@ -221,6 +222,11 @@ def GenerateRawHistogramUVPAPP(UvpSample, Prj, DepthOffset, organizedbydepth, De
             header=rowpart[0].split(",")
             dateheuretxt=header[0]
             depth=float(header[1])+DepthOffset
+            if math.isnan(depth):
+                if organizedbydepth:
+                    continue #si on a pas de profondeur on ne peut pas traiter la donnée
+                else:
+                    depth=float(0)
             RawImgDepth[idx] = depth
             ImgTime[idx]=dateheuretxt
             flash=header[3]
@@ -268,7 +274,10 @@ def GenerateRawHistogramUVPAPP(UvpSample, Prj, DepthOffset, organizedbydepth, De
                         area=int(data1taille[0])
                         if area not in SegmentedData[flash][Partition]['area']:
                             SegmentedData[flash][Partition]['area'][area] = [] # tableau=liste des niveaux de gris
-                        SegmentedData[flash][Partition]['area'][area].extend(ExplodeGreyLevel(int(data1taille[1]),round(float(data1taille[2])),round(float(data1taille[3])))) #nbr, moyenne,ecarttype
+                        try:
+                            SegmentedData[flash][Partition]['area'][area].extend(ExplodeGreyLevel(int(data1taille[1]),round(float(data1taille[2])),round(float(data1taille[3])))) #nbr, moyenne,ecarttype
+                        except:
+                            raise Exception("{} at row {} data=[{},{},{},{}]".format(sys.exc_info(),rownum,data1taille[0],data1taille[1],data1taille[2],data1taille[3]))
 
             # logging.info("rowpart={}",rowpart)
 

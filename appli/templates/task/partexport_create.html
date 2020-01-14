@@ -45,6 +45,7 @@ File format <select name="fileformat" >
         <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
       </select>
         <br><b>Filters :</b>{{ RedFilter }}
+        <br><input type="checkbox" name="aggregatefilesr" value="Y"> Aggregate files in a single file (TSV Only)
       </td>
       <td>CTD + PARTICLES abundances and biovolumes sorted in 15 reduced classes at vertical steps of 5m<br>
     ZOOPLANKTON selected categories at variable vertical steps<br>
@@ -63,6 +64,7 @@ File format <select name="fileformatd" >
         <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
       </select>
         <br><input type="checkbox" name="excludenotlivingd" value="Y"> Exclude not living
+        <br><input type="checkbox" name="aggregatefilesd" value="Y"> Aggregate files in a single file (TSV Only)
 
       </td>
       <td>CTD + PARTICLES abundances and biovolumes sorted in 45 detailed classes at vertical steps of 5m<br>
@@ -101,7 +103,7 @@ In order to ease the transfer of large exported datasets, you can chose to expor
 <table>
 <tr>
 <td valign="top">
-  <br><br><br>
+  <br><br>
     <input type="hidden" name="starttask" value="Y">
     <div class="form-group">
     <div class="col-sm-offset-2 col-sm-2">
