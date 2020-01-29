@@ -155,9 +155,9 @@ def GenerateParticleHistogram(psampleid):
         raise Exception("GenerateRawHistogram: Sample %d missing"%psampleid)
     Prj = partdatabase.part_projects.query.filter_by(pprojid=PartSample.pprojid).first()
     rawfileinvault = uvp_sample_import.GetPathForRawHistoFile(PartSample.psampleid)
-    DepthOffset=PartSample.acq_depthoffset
+    DepthOffset = Prj.default_depthoffset
     if DepthOffset is None:
-        DepthOffset = Prj.default_depthoffset
+        DepthOffset=PartSample.acq_depthoffset
     if DepthOffset is None:
         DepthOffset=0
 
@@ -190,7 +190,7 @@ def GenerateParticleHistogram(psampleid):
                         HistoByTranche[Tranche]['NbrParClasse'][classe] += NbrParClasse[classe]
             logging.info("Line count %d" % NbrLine)
 
-        
+
             database.ExecSQL("delete from part_histopart_det where psampleid="+str(psampleid))
             sql="""insert into part_histopart_det(psampleid, lineno, depth,  watervolume
                 , class17, class18, class19, class20, class21, class22, class23, class24, class25, class26, class27, class28, class29
@@ -220,9 +220,9 @@ def GenerateTaxonomyHistogram(psampleid):
         raise Exception("GenerateTaxonomyHistogram: Sample %d missing"%psampleid)
     Prj = partdatabase.part_projects.query.filter_by(pprojid=PartSample.pprojid).first()
     rawfileinvault = uvp_sample_import.GetPathForRawHistoFile(PartSample.psampleid)
-    DepthOffset=PartSample.acq_depthoffset
+    DepthOffset = Prj.default_depthoffset
     if DepthOffset is None:
-        DepthOffset = Prj.default_depthoffset
+        DepthOffset=PartSample.acq_depthoffset
     if DepthOffset is None:
         DepthOffset=0
     with zipfile.ZipFile(rawfileinvault,"r") as zf:
@@ -271,7 +271,7 @@ def GenerateTaxonomyHistogram(psampleid):
                     SizeParClasse[classe] =NbrParClasse[classe]*SizeParClasse[classe] if SizeParClasse[classe] else 0
                 if Tranche not in HistoByTranche:
                     HistoByTranche[Tranche]={'NbrImg':NbrImg,'NbrParClasse':NbrParClasse,'DepthTranche':DepthTranche
-                    ,'SizeParClasse':SizeParClasse }
+                        ,'SizeParClasse':SizeParClasse }
                 else:
                     HistoByTranche[Tranche]['NbrImg']+= NbrImg
                     for classe in range(40):

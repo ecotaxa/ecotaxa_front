@@ -307,9 +307,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.2.1"
+ecotaxa_version="2.2.2"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-01-14"
+    return ecotaxa_version+" 2020-01-29"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -317,6 +317,11 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-01-29 : V 2.2.2
+    Part : Modification comportement default_depthoffset now override
+    Part import : uvp6 sample use Pressure_offset
+    Part export : Divers bugfix 
+    Part view : Ajustement groupe de classes 
 2020-01-14 : V 2.2.1
     Generation vignette : Largeur minimale pour voir au moins l'echelle
     Gestion UVP6 Remote : Format LOV TSV

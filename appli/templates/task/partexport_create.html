@@ -13,7 +13,7 @@
 #tbl td:nth-child(1) { white-space: nowrap; }
 </style>
 
-<form class="form-horizontal" method="post" enctype=multipart/form-data>
+<form class="form-horizontal" method="post" enctype=multipart/form-data id="formtask">
 
 <a href="#create-project" data-toggle="collapse" class="help" >DOWNLOAD OPTIONS<span class="glyphicon glyphicon-info"></span></a></p>
 <div id="create-project" class="collapse panel panel-default">
@@ -45,7 +45,7 @@ File format <select name="fileformat" >
         <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
       </select>
         <br><b>Filters :</b>{{ RedFilter }}
-        <br><input type="checkbox" name="aggregatefilesr" value="Y"> Aggregate files in a single file (TSV Only)
+        <br><input type="checkbox" name="aggregatefilesr" id="aggregatefilesr" value="Y"> Aggregate files in a single file (TSV Only)
       </td>
       <td>CTD + PARTICLES abundances and biovolumes sorted in 15 reduced classes at vertical steps of 5m<br>
     ZOOPLANKTON selected categories at variable vertical steps<br>
@@ -64,7 +64,7 @@ File format <select name="fileformatd" >
         <option value="TSV" {{ 'selected' if data.fileformat=='TSV' }} >TSV</option>
       </select>
         <br><input type="checkbox" name="excludenotlivingd" value="Y"> Exclude not living
-        <br><input type="checkbox" name="aggregatefilesd" value="Y"> Aggregate files in a single file (TSV Only)
+        <br><input type="checkbox" name="aggregatefilesd" id="aggregatefilesd" value="Y"> Aggregate files in a single file (TSV Only)
 
       </td>
       <td>CTD + PARTICLES abundances and biovolumes sorted in 45 detailed classes at vertical steps of 5m<br>
@@ -137,6 +137,20 @@ function UpdateTblBG(){
     }
   });
 }
+
+$('#formtask').submit(function (e) {
+  if($('#cbred:checked,#aggregatefilesr:checked').length===2)
+    if($('[name=fileformat]').val()!=='TSV') {
+      alert('Aggregate files in a single file is available only for TSV file format ');
+      e.preventDefault();
+    }
+if($('#cbdet:checked,#aggregatefilesd:checked').length===2)
+    if($('[name=fileformatd]').val()!=='TSV') {
+      alert('Aggregate files in a single file is available only for TSV file format ');
+      e.preventDefault();
+    }
+
+});
 
 </script>
 

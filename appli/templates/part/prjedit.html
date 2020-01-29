@@ -182,7 +182,10 @@ Processed images and associated TSV files will be imported separately from the Â
 {{ render_field(form.do_name,tr='o',help="people who own the dataset, important for publication permissions") }}
 {{ render_field(form.do_email,tr='c') }}
 {{ render_field(form.prj_acronym,tr='o',help="free field (e.g., as filled in the cruise_info.txt file)") }}
-{{ render_field(form.default_depthoffset,tr='c',help="vertical distance between the pressure sensor and the sampled/imaged zone of the instrument") }}
+{{ render_field(form.default_depthoffset,tr='c',help="""The depth offset is the vertical distance between the pressure sensor and the imaged zone (positive if pressure sensor above imaged area). This information can be filled in the <b>project</b> metadata page for the entire project or at <b>sample</b> level.<br><br>
+In case the <b>project</b> depth offset is documented, it will override the <b>sample</b> depth offsets for the process of the project.<br><br>
+The <b>project</b> depth offset is automatically set to 1.2 if your instrument is UVP5 during read project metadata operation as the <b>sample</b> depth offsets are not documented in the instrument metadata.<br><br>
+The <b>sample</b> depth offsets are set in the instrument metadata for the UVP6 instrument and automatically documented in EcoPart for each sample.""") }}
 {{ render_field(form.cruise,tr='o',help="selected from the root folder name") }}
 {{ render_field(form.ship,tr='c') }}
 {{ render_field(form.prj_info,tr='oc',colspan=3,style="width:500px;",help="read from the cruise_info.txt file") }}

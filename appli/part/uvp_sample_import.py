@@ -132,6 +132,9 @@ def CreateOrUpdateSample(pprojid,headerdata):
             Sample.acq_threshold = ToFloat(hw_conf.get('Threshold', ''))
             Sample.acq_smzoo = calcpixelfromesd_aa_exp( ToFloat(acq_conf.get('Vignetting_lower_limit_size', ''))/1000.0,Sample.acq_aa,Sample.acq_exp )
             Sample.acq_smbase = calcpixelfromesd_aa_exp( ToFloat(acq_conf.get('Limit_lpm_detection_size', ''))/1000.0,Sample.acq_aa,Sample.acq_exp )
+            if(hw_conf.get('Pressure_offset','')!=''):
+                if 0<=ToFloat(hw_conf.get('Pressure_offset', ''))<100:
+                    Sample.acq_depthoffset = ToFloat(hw_conf.get('Pressure_offset', ''))
             # Sample.acq_smbase = int(HdrParam['smbase'])
             # Sample.acq_exposure = ToFloat(HdrParam.get('exposure',''))
             # Sample.acq_eraseborder = ToFloat(HdrParam.get('eraseborderblobs', ''))
@@ -334,9 +337,9 @@ def GenerateRawHistogram(psampleid):
     LastImage = int(UvpSample.lastimg)
     if LastImage>=999999:
         LastImage=None
-    DepthOffset=UvpSample.acq_depthoffset
+    DepthOffset = Prj.default_depthoffset
     if DepthOffset is None:
-        DepthOffset = Prj.default_depthoffset
+        DepthOffset=UvpSample.acq_depthoffset
     if DepthOffset is None:
         DepthOffset=0
     DescentFilter=UvpSample.acq_descent_filter
@@ -416,7 +419,7 @@ def GenerateRawHistogram(psampleid):
         else:
             DescentFilterRemovedCount+=1
     logging.info("Raw image count = {0} , Filtered image count = {1} , LastIndex= {2},LastIndex-First+1= {4}, DescentFiltered images={3}"
-          .format(len(RawImgDepth),len(ImgDepth),LastImage,LastImage-FirstImage-len(ImgDepth)+1,LastImage-FirstImage+1))
+                 .format(len(RawImgDepth),len(ImgDepth),LastImage,LastImage-FirstImage-len(ImgDepth)+1,LastImage-FirstImage+1))
     if len(ImgDepth)==0:
         raise Exception("No remaining filtered data in dat file")
 
@@ -481,10 +484,10 @@ def GenerateRawHistogram(psampleid):
                 agreydata=np.asarray(greydata)
                 # ça ne gère pas l'organisation temporelle des données
                 cf.writerow([PartitionContent['depth'],PartitionContent['imgcount'],area,len(agreydata)
-                    ,np.percentile(agreydata,25,interpolation='lower')
-                    , np.percentile(agreydata, 50, interpolation='lower')
-                    , np.percentile(agreydata, 75, interpolation='higher')]
-                )
+                                ,np.percentile(agreydata,25,interpolation='lower')
+                                , np.percentile(agreydata, 50, interpolation='lower')
+                                , np.percentile(agreydata, 75, interpolation='higher')]
+                            )
     UvpSample.histobrutavailable=True
     UvpSample.lastimgused=LastImage
     UvpSample.imp_descent_filtered_row=DescentFilterRemovedCount
@@ -805,9 +808,9 @@ def GenerateTaxonomyHistogram(psampleid):
     if areacol is None:
         raise Exception("GenerateTaxonomyHistogram: esd attribute required in Ecotaxa project %d"%Prj.projid)
     # app.logger.info("Esd col is %s",areacol)
-    DepthOffset=UvpSample.acq_depthoffset
+    DepthOffset = Prj.default_depthoffset
     if DepthOffset is None:
-        DepthOffset = Prj.default_depthoffset
+        DepthOffset=UvpSample.acq_depthoffset
     if DepthOffset is None:
         DepthOffset=0
 
@@ -820,7 +823,7 @@ def GenerateTaxonomyHistogram(psampleid):
                 from objects
                 WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL and classif_qual='V'
                 """
-                            .format(sampleid=UvpSample.sampleid,areacol=areacol,DepthOffset=DepthOffset))
+                               .format(sampleid=UvpSample.sampleid,areacol=areacol,DepthOffset=DepthOffset))
     LstTaxo = {}
     for r in LstTaxoDet:
         cle="{}/{}".format(r['classif_id'],r['tranche'])
@@ -846,7 +849,7 @@ def GenerateTaxonomyHistogram(psampleid):
         if r['tranche'] in LstVol:
             watervolume =LstVol[r['tranche']]['watervolume']
         database.ExecSQL(sql.format(
-        psampleid=psampleid, classif_id=r['classif_id'], lineno=r['tranche'], depth=r['tranche']*5+2.5, watervolume=watervolume
+            psampleid=psampleid, classif_id=r['classif_id'], lineno=r['tranche'], depth=r['tranche']*5+2.5, watervolume=watervolume
             , nbr=r['nbr'], avgesd=avgesd, totalbiovolume=biovolume ))
     database.ExecSQL("""insert into part_histocat_lst(psampleid, classif_id) 
             select distinct psampleid,classif_id from part_histocat where psampleid=%s""" % psampleid)
@@ -854,6 +857,6 @@ def GenerateTaxonomyHistogram(psampleid):
     database.ExecSQL("""update part_samples set daterecalculhistotaxo=current_timestamp  
             where psampleid=%s""" % psampleid)
 
-        # TblTaxo[i,0:2]=r['avgarea'],r['nbr']
+    # TblTaxo[i,0:2]=r['avgarea'],r['nbr']
     # TblTaxo[:,2]=
 

@@ -179,6 +179,7 @@ class TaskPartExport(AsyncTask):
             zfile.write(nomfichier)
 
         # --------------- Traitement fichier par categorie -------------------------------
+        f=None
         TaxoList=self.param.redfiltres.get('taxo',[])
         # On liste les categories pour fixer les colonnes de l'export
         # if self.param.redfiltres.get('taxochild','')=='1' and len(TaxoList)>0:
@@ -367,7 +368,7 @@ class TaskPartExport(AsyncTask):
                 if not self.param.aggregatefiles:
                     f.close()
                     zfile.write(nomfichier)
-            if self.param.aggregatefiles:
+            if self.param.aggregatefiles and f:
                 f.close()
                 zfile.write(nomfichier)
 
@@ -446,7 +447,7 @@ class TaskPartExport(AsyncTask):
                         if not AsODV: # si TSV
                             L=[S['station'],S['rawfilename'],L[7]] # station + rawfilename + sampledate
                         L.extend([h['depth'],h['watervolume']])
-                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['watervolume'] else '') for i in range(1,len(PartDetClassLimit))))
+                        L.extend((((h['class%02d' % i]/h['watervolume'])if h['class%02d' % i] and h['watervolume'] else '') for i in range(1,len(PartDetClassLimit))))
                         L.extend((h['biovol%02d' % i] for i in range(1, len(PartDetClassLimit))))
                         f.write(";".join((str(ntcv(x)) for x in L)))
                         for c in CTDFixedCols:
@@ -500,6 +501,7 @@ class TaskPartExport(AsyncTask):
                 zfile.write(nomfichier)
 
         # --------------- Traitement fichier par categorie -------------------------------
+        f=None
         TaxoList=self.param.redfiltres.get('taxo',[])
         # On liste les categories pour fixer les colonnes de l'export
         # liste toutes les cat pour les samples et la depth
@@ -683,7 +685,7 @@ order by tree""".format(lstcatwhere)
                 if not self.param.aggregatefiles:
                     f.close()
                     zfile.write(nomfichier)
-            if self.param.aggregatefiles:
+            if self.param.aggregatefiles and f:
                 f.close()
                 zfile.write(nomfichier)
 
@@ -772,9 +774,9 @@ order by tree""".format(lstcatwhere)
         # Fichiers ZOO
         ZooFileParPSampleID = {}
         for S in samples:
-            DepthOffset = S['acq_depthoffset']
+            DepthOffset = S['default_depthoffset']
             if DepthOffset is None:
-                DepthOffset = S['default_depthoffset']
+                DepthOffset = S['acq_depthoffset']
             if DepthOffset is None:
                 DepthOffset = 0
 
