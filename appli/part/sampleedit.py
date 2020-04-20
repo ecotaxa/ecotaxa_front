@@ -12,9 +12,9 @@ from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,I
 from pathlib import Path
 
 class UvpSampleForm(Form):
-    pprojid = StringField("Part. project ID",[validators.required()])
-    profileid = StringField("Profile ID",[validators.required()])
-    filename = StringField("Filename", [validators.required(),validators.Length(min=5)])
+    pprojid = StringField("Part. project ID",[validators.DataRequired()])
+    profileid = StringField("Profile ID",[validators.DataRequired()])
+    filename = StringField("Filename", [validators.DataRequired(),validators.Length(min=5)])
     sampleid = IntegerField("Ecotaxa SampleID",[validators.Optional(strip_whitespace=True)])
     latitude = FloatField("Latitude [DD.DDDD] (- for South)",[validators.Optional(strip_whitespace=True)])
     longitude = FloatField("Longitude [DDD.DDDD] (- for West)",[validators.Optional(strip_whitespace=True)])

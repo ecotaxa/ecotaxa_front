@@ -83,18 +83,30 @@ def ResolveTaxoFound(TaxoFound,o_NotFoundTaxo):
     for FoundK, FoundV in TaxoFound.items():
         TaxoFound[FoundK]=FoundV['id'] # in fine on ne garde que l'id, les autres champs etaient temporaires.
 
-
-def ConvDegreeMinuteFloatToDecimaldegre(v):
+def ConvTextDegreeToDecimalDegree(v, FloatAsDecimalDegree=True):
+    """
+    Converti une lattitude ou longitude texte en version floattante degrés decimaux.
+    Format possibles :
+    DD°MM SS
+    DD.MMMMM : MMMMM = Minutes /100 donc compris entre 0.0 et 0.6 format historique UVP
+    DD.FFFFF : FFFFF = Fractions de dégrés
+    :param v: Input text
+    :param FloatAsDecimalDegree: Si False notation historique, si True degrés décimaux
+    :return:
+    """
     m=re.search("(-?\d+)°(\d+) (\d+)",v)
     if m: # donnée au format DDD°MM SSS
         parties=[float(x) for x in m.group(1, 2, 3)]
         parties[1]+=parties[2]/60 # on ajoute les secondes en fraction des minutes
-        parties[0]+=parties[1]/60# on ajoute les minutes en fraction des degrés
-        return parties[0]
-    else: # format historique la partie decimale etait exprime en minutes
+        parties[0]+=math.copysign(parties[1]/60,parties[0])# on ajoute les minutes en fraction des degrés avec le même signe que la partie dégrés
+        return round(parties[0],5)
+    else:
         v=ToFloat(v)
-        f,i=math.modf(v)
-        return i+(f/0.6)
+        if FloatAsDecimalDegree: # format degrée decimal, il faut juste convertir le texte en float.
+            return v
+        else: # format historique la partie decimale etait exprimée en minutes
+            f,i=math.modf(v)
+            return round(i+(f/0.6),5)
 
 def calcesdFrom_aa_exp(nbr,aa,exp):
     """

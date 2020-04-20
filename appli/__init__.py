@@ -317,6 +317,10 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-04-20 : V 2.2.4
+    Bugfix/Regression #340 les imports d'objets sont en notation degrée decimaux et non pas degree.minutes
+    Réduction du nombre de décimales lors des conversions des latitudes et longitudes exprimées en minutes
+    Suppression de warning de dépraciation sur WTForm validators.required 
 2020-02-07 : V 2.2.3
     Ajout de normpath sur certaines resolution de chemin suite à problème avec des lien sympboliques
 2020-01-29 : V 2.2.2

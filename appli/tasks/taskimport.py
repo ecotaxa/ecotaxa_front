@@ -177,12 +177,12 @@ class TaskImport(AsyncTask):
                                 if v!="": # si pas de valeurs, pas de controle
                                     if ColName == 'object_lat':
                                         latitudeseen = True
-                                        vf=ConvDegreeMinuteFloatToDecimaldegre(v)
+                                        vf=ConvTextDegreeToDecimalDegree(v)
                                         if vf < -90 or vf > 90:
                                             self.LogErrorForUser(
                                                 "Invalid Lat. value '%s' for Field '%s' in file %s. Incorrect range -90/+90°." % (v, champ, relname.as_posix()))
                                     elif ColName == 'object_lon':
-                                        vf = ConvDegreeMinuteFloatToDecimaldegre(v)
+                                        vf = ConvTextDegreeToDecimalDegree(v)
                                         if vf < -180 or vf > 180:
                                             self.LogErrorForUser("Invalid Long. value '%s' for Field '%s' in file %s. Incorrect range -180/+180°." % (
                                             v, champ, relname.as_posix()))
@@ -376,9 +376,9 @@ class TaskImport(AsyncTask):
                             v=CleanValue(lig.get(champ))
                             if v!="": # si pas de valeurs, on laisse le champ null
                                 if champ == 'object_lat': # c'est des type N mais depuis AVPApp ils peuvent contenir une notation avec des ddd°MM.SS
-                                    FieldValue = ConvDegreeMinuteFloatToDecimaldegre(v)
+                                    FieldValue = ConvTextDegreeToDecimalDegree(v)
                                 elif champ == 'object_lon':
-                                    FieldValue = ConvDegreeMinuteFloatToDecimaldegre(v)
+                                    FieldValue = ConvTextDegreeToDecimalDegree(v)
                                 elif m['type']=='n':
                                     FieldValue=ToFloat(v)
                                 elif champ=='object_date':

@@ -7,7 +7,7 @@ from appli import database
 from appli.part import PartDetClassLimit,CTDFixedCol
 from flask_login import current_user
 from appli.part.common_sample_import import CleanValue,ToFloat,GetTicks,GenerateReducedParticleHistogram
-from appli.tasks.importcommon import ConvDegreeMinuteFloatToDecimaldegre,calcesdFrom_aa_exp,calcpixelfromesd_aa_exp
+from appli.tasks.importcommon import ConvTextDegreeToDecimalDegree,calcesdFrom_aa_exp,calcpixelfromesd_aa_exp
 
 def CreateOrUpdateSample(pprojid,headerdata):
     """
@@ -35,8 +35,8 @@ def CreateOrUpdateSample(pprojid,headerdata):
         sampledatetxt=headerdata['filename'] #format historique uvp5
     m = re.search("(\d{4})(\d{2})(\d{2})-?(\d{2})(\d{2})(\d{2})?", sampledatetxt) #YYYYMMDD-HHMMSS avec tiret central et secondes optionnelles
     Sample.sampledate=datetime.datetime(*[int(x) if x else 0 for x in m.group(1,2,3,4,5,6)])
-    Sample.latitude = ConvDegreeMinuteFloatToDecimaldegre(headerdata['latitude'])
-    Sample.longitude = ConvDegreeMinuteFloatToDecimaldegre(headerdata['longitude'])
+    Sample.latitude = ConvTextDegreeToDecimalDegree(headerdata['latitude'], False) # false car dans les fichiers UVP historique c'est la notation degree.minute
+    Sample.longitude = ConvTextDegreeToDecimalDegree(headerdata['longitude'], False)
     Sample.organizedbydeepth = headerdata.get('sampletype','P')=='P' # Nouvelle colonne optionnel, par défaut organisé par (P)ression
     Sample.acq_descent_filter=Sample.organizedbydeepth # Si sample vertical alors filtrage en descente activé par défaut.
     Sample.ctd_origfilename=headerdata['ctdrosettefilename']
