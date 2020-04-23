@@ -307,9 +307,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.2.3"
+ecotaxa_version="2.2.5"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-01-29"
+    return ecotaxa_version+" 2020-04-23"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -317,6 +317,8 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-04-20 : V 2.2.5
+    Amélioration du texte d'information sur le serveur FTP lors des exports.
 2020-04-20 : V 2.2.4
     Bugfix/Regression #340 les imports d'objets sont en notation degrée decimaux et non pas degree.minutes
     Réduction du nombre de décimales lors des conversions des latitudes et longitudes exprimées en minutes
