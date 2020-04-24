@@ -44,7 +44,7 @@ CTDFixedCol={
     }
 CTDFixedColByKey={v:k for k,v in CTDFixedCol.items()}
 
-LstInstrumType=('uvp5','lisst')
+LstInstrumType=('uvp5','uvp6','lisst','uvp6remote')
 
 def GetPartClassLimitListText(LimitTab):
     res=""

@@ -35,6 +35,12 @@ class part_projects(db.Model):
     public_partexport_deferral_month= db.Column(INTEGER)
     public_zooexport_deferral_month= db.Column(INTEGER)
     oldestsampledate = db.Column(TIMESTAMP)
+    remote_type= db.Column(VARCHAR(20))
+    remote_url = db.Column(VARCHAR(200))
+    remote_user= db.Column(VARCHAR(100))
+    remote_password= db.Column(VARCHAR(100))
+    remote_directory= db.Column(VARCHAR(200))
+    remote_vectorref= db.Column(VARCHAR(200))
 
     def __str__(self):
         return "{0} ({1})".format(self.ptitle,self.pprojid)
@@ -122,6 +128,7 @@ class part_samples(db.Model):
     proc_process_ratio = db.Column(INTEGER)
     imp_descent_filtered_row = db.Column(INTEGER)
     imp_removed_empty_slice = db.Column(INTEGER)
+    integrationtime = db.Column(INTEGER)
 
     def __str__(self):
         return "{0} ({1})".format(self.profileid,self.psampleid)

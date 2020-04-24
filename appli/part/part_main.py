@@ -19,7 +19,8 @@ def indexPart():
                                           +[("bv%d"%i,"BV %02d : "%i+GetClassLimitTxt(PartDetClassLimit,i)) for i in range (1,46)])
         ctd = SelectMultipleField(
             choices=sorted([(k, v) for v,k in CTDFixedCol.items()], key=operator.itemgetter(1)))
-        filt_proftype=SelectField(choices=[['','All'],['V','Vertical'],['H','Horizontal']])
+        filt_proftype=SelectField(choices=[['','All'],['V','DEPTH casts'],['H','TIME series']])
+        filt_instrum = SelectField(choices=[['', 'All'],('lisst','lisst'),('uvp5','uvp5'),('uvp6','uvp6'),('uvp6remote','uvp6remote')])
 
     filt_data =request.args
     form=FiltForm(filt_data)
@@ -66,7 +67,7 @@ def GetFilteredSamples(Filter=None,GetVisibleOnly=False,ForceVerticalIfNotSpecif
     if Filter is None: # si filtre non spécifié on utilise GET
         Filter=request.args
     sqlvisible, sqljoin=GetSQLVisibility()
-    sql="select s.psampleid,s.latitude,s.longitude,cast ("+sqlvisible+""" as varchar(2) ) as visibility,s.pprojid,pp.ptitle
+    sql="select s.psampleid,s.latitude,s.longitude,cast ("+sqlvisible+""" as varchar(2) ) as visibility,s.profileid,s.pprojid,pp.ptitle
     from part_samples s
     JOIN part_projects pp on s.pprojid=pp.pprojid
     LEFT JOIN projects p on pp.projid=p.projid """
@@ -126,7 +127,10 @@ def Partstatsample():
     data={'nbrsample':len(samples),'nbrvisible':sum(1 for x in samples if x['visible'])}
     data['nbrnotvisible']=data['nbrsample']-data['nbrvisible']
     sqlvisible, sqljoin = GetSQLVisibility()
-    data['partprojcount']=database.GetAll("""SELECT pp.ptitle,count(*) nbr,pp.do_email,do_name,qpp.email,qpp.name,pp.instrumtype,pp.pprojid
+    data['partprojcount']=database.GetAll("""SELECT pp.ptitle,count(*) nbr
+          ,count(case when organizedbydeepth then 1 end) nbrdepth
+          ,count(case when not organizedbydeepth then 1 end) nbrtime
+          ,pp.do_email,do_name,qpp.email,qpp.name,pp.instrumtype,pp.pprojid
         ,count(ps.sampleid ) nbrtaxo
         ,p.visible,visibility,uppowner.name uppowner_name,uppowner.email uppowner_email
         from part_samples ps

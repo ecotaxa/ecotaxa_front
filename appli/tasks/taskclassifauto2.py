@@ -68,7 +68,7 @@ class TaskClassifAuto2(AsyncTask):
         output_dir = WorkDir / "scn_output"
         if not output_dir.exists(): output_dir.mkdir()
         vaultdir= (Path(TempTaskDir) / "../vault/").resolve().as_posix()+"/"
-        model_dir= (Path(TempTaskDir) / "../SCN_networks"/Prj.cnn_network_id).resolve()
+        model_dir = Path(os.path.normpath((Path(TempTaskDir) / "../SCN_networks" / Prj.cnn_network_id).as_posix())).resolve()
         meta=json.load((model_dir/"meta.json").open('r'))
         TStep = time.time()
         NbrLig=0

@@ -2,13 +2,14 @@
 from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv,GetAppManagerMailto,CreateDirConcurrentlyIfNeeded
 from PIL import Image
 from flask import render_template,  flash,request,g
-import logging,os,csv,sys,time
+import logging,os,csv,sys,time,configparser
 import datetime,shutil,random,zipfile,re
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask,LoadTask,DoTaskClean
 from appli.database import GetAll
 import appli.project.main
 from appli.tasks.importcommon import *
+from appli.tasks.vignettemaker import MakeVignette
 
 class TaskImport(AsyncTask):
     class Params (AsyncTask.Params):
@@ -31,6 +32,18 @@ class TaskImport(AsyncTask):
             self.param=self.Params()
         else:
             self.param=self.Params(task.inputparam)
+        self.seqcache={}
+
+    def GetSequenceCached(self,SequenceName):
+        if SequenceName not in self.seqcache:
+            self.seqcache[SequenceName]={'tbl':[],'next':0}
+        if self.seqcache[SequenceName]['next']>=len(self.seqcache[SequenceName]['tbl']):
+            self.pgcur.execute("select nextval('%s') FROM generate_series(1,100)"%SequenceName)
+            self.seqcache[SequenceName]['tbl']=[x[0] for x in self.pgcur.fetchall()]
+            self.seqcache[SequenceName]['next']=0
+        ret=self.seqcache[SequenceName]['tbl'][self.seqcache[SequenceName]['next']]
+        self.seqcache[SequenceName]['next']+=1
+        return ret
 
     def SPCommon(self):
         logging.info("Execute SPCommon")
@@ -93,13 +106,26 @@ class TaskImport(AsyncTask):
             Seen=set() # Memorise les champs pour lesquels il y a des valeurs
             ClassifIDSeen = set()
             NbrObjectWithoutGPS=0
-            for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv"):
+            for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv","**/*Images.zip"):
                 for CsvFile in sd.glob(filter):
                     relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
                     if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
                         logging.info("File %s skipped, already loaded"%(relname.as_posix()))
                         continue
                     logging.info("Analyzing file %s"%(relname.as_posix()))
+                    if relname.name.endswith("Images.zip"): # c'est un format compressé par UVPAPP, chaque sample est dans un.zip
+                        SampleDir=Path(self.GetWorkingDir()) / relname.stem
+                        SampleCSV=SampleDir/("ecotaxa_"+relname.stem[:-7]+".tsv")
+                        if SampleDir.exists():
+                            if not SampleCSV.exists(): # dezipage incorrect
+                                # SampleDir.rmdir() # on détruit le repertoire et on redezippe
+                                shutil.rmtree(SampleDir.as_posix())
+                        if not SampleDir.exists():
+                            SampleDir.mkdir()
+                            with zipfile.ZipFile(CsvFile.as_posix(), 'r') as z:
+                                z.extractall(SampleDir.as_posix())
+                        CsvFile=SampleCSV
+
                     with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
                         # lecture en mode dictionnaire basé sur la premiere ligne
                         rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
@@ -149,17 +175,23 @@ class TaskImport(AsyncTask):
                                 v=CleanValue(lig[champ])
                                 Seen.add(ColName) # V1.1 si la colonne est présente c'est considéré Seen, avant il fallait avoir vu une valeur.
                                 if v!="": # si pas de valeurs, pas de controle
-                                    if m['type']=='n':
+                                    if ColName == 'object_lat':
+                                        latitudeseen = True
+                                        vf=ConvTextDegreeToDecimalDegree(v)
+                                        if vf < -90 or vf > 90:
+                                            self.LogErrorForUser(
+                                                "Invalid Lat. value '%s' for Field '%s' in file %s. Incorrect range -90/+90°." % (v, champ, relname.as_posix()))
+                                    elif ColName == 'object_lon':
+                                        vf = ConvTextDegreeToDecimalDegree(v)
+                                        if vf < -180 or vf > 180:
+                                            self.LogErrorForUser("Invalid Long. value '%s' for Field '%s' in file %s. Incorrect range -180/+180°." % (
+                                            v, champ, relname.as_posix()))
+
+                                    elif m['type']=='n':
                                         vf=ToFloat(v)
                                         if vf is None:
                                             self.LogErrorForUser("Invalid float value '%s' for Field '%s' in file %s."%(v,champ,relname.as_posix()))
-                                        elif ColName=='object_lat':
-                                            latitudeseen=True
-                                            if vf<-90 or vf>90:
-                                                self.LogErrorForUser("Invalid Lat. value '%s' for Field '%s' in file %s. Incorrect range -90/+90°."%(v,champ,relname.as_posix()))
-                                        elif ColName=='object_long':
-                                            if vf<-180 or vf>180:
-                                                self.LogErrorForUser("Invalid Long. value '%s' for Field '%s' in file %s. Incorrect range -180/+180°."%(v,champ,relname.as_posix()))
+
                                         elif ColName=='object_annotation_category_id':
                                             ClassifIDSeen.add(int(v))
                                     elif ColName=='object_date':
@@ -189,7 +221,7 @@ class TaskImport(AsyncTask):
                             if ObjectId=='':
                                 self.LogErrorForUser("Missing object_id on line '%s' in file %s. "%(RowCount,relname.as_posix()))
                             ImgFileName=CleanValue(lig.get('img_file_name','MissingField img_file_name'))
-                            ImgFilePath=CsvFile.with_name(ImgFileName)
+                            ImgFilePath=CsvFile.parent/ImgFileName
                             if not ImgFilePath.exists():
                                 self.LogErrorForUser("Missing Image '%s' in file %s. "%(ImgFileName,relname.as_posix()))
                             else:
@@ -227,6 +259,7 @@ class TaskImport(AsyncTask):
             if len(self.param.steperrors)>0:
                 self.task.taskstate="Error"
                 self.task.progressmsg="Some errors founds during file parsing "
+                logging.error(self.task.progressmsg)
                 db.session.commit()
                 return
             self.param.IntraStep=2
@@ -264,6 +297,7 @@ class TaskImport(AsyncTask):
         logging.info("Taxo Mapping = %s",self.param.TaxoFound)
         logging.info("Users Mapping = %s",self.param.UserFound)
         AstralCache={'date':None,'time':None,'long':None,'lat':None,'r':''}
+        WorkingDirCache=self.GetWorkingDir() # sans ça, ça rafraichi l'objet Task par une requete à chaque fois
         # Mise à jour du mapping en base
         Prj=database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         LoadedFiles=ntcv(Prj.fileloaded).splitlines()
@@ -297,13 +331,24 @@ class TaskImport(AsyncTask):
         random.seed()
         sd=Path(self.param.SourceDir)
         TotalRowCount=0
-        for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv"):
+        for filter in ("**/ecotaxa*.txt","**/ecotaxa*.tsv","**/*Images.zip"):
             for CsvFile in sd.glob(filter):
                 relname=CsvFile.relative_to(sd) # Nom relatif à des fins d'affichage uniquement
                 if relname.as_posix() in LoadedFiles and self.param.SkipAlreadyLoadedFile=='Y':
                     logging.info("File %s skipped, already loaded"%(relname.as_posix()))
                     continue
                 logging.info("Analyzing file %s"%(relname.as_posix()))
+                if relname.name.endswith("Images.zip"):  # c'est un format compressé par UVPAPP, chaque sample est dans un.zip, qui à été décompressé si necessaire lors de l'analyse
+                    CsvFile = Path(WorkingDirCache) / relname.stem / ("ecotaxa_" + relname.stem[:-7] + ".tsv")
+
+                VignetteMakerCfg = None
+                VignetteMakerCfgkeeporiginal = False
+                # if (sd / "config" / "compute_vignette.txt").exists(): # Celui qui est dans config ne contient pas le pixel size
+                if (CsvFile.parent / "compute_vignette.txt").exists(): # on prend plutot celui qui est dans chaque sample en plus ça permettrai de marcher en envoyant un ensemble de zip
+                    VignetteMakerCfg = configparser.ConfigParser()
+                    VignetteMakerCfg.read((CsvFile.parent / "compute_vignette.txt").as_posix())
+                    VignetteMakerCfgkeeporiginal = VignetteMakerCfg['vignette'].get('keeporiginal', 'n').lower() == 'y'
+
                 with open(CsvFile.as_posix(),encoding='latin_1') as csvfile:
                     # lecture en mode dictionnaire basé sur la premiere ligne
                     rdr = csv.DictReader(csvfile, delimiter='\t', quotechar='"')
@@ -330,7 +375,11 @@ class TaskImport(AsyncTask):
                             FieldValue=None
                             v=CleanValue(lig.get(champ))
                             if v!="": # si pas de valeurs, on laisse le champ null
-                                if m['type']=='n':
+                                if champ == 'object_lat': # c'est des type N mais depuis AVPApp ils peuvent contenir une notation avec des ddd°MM.SS
+                                    FieldValue = ConvTextDegreeToDecimalDegree(v)
+                                elif champ == 'object_lon':
+                                    FieldValue = ConvTextDegreeToDecimalDegree(v)
+                                elif m['type']=='n':
                                     FieldValue=ToFloat(v)
                                 elif champ=='object_date':
                                     FieldValue=datetime.date(int(v[0:4]), int(v[4:6]), int(v[6:8]))
@@ -383,8 +432,9 @@ class TaskImport(AsyncTask):
                                     Ids[t]["ID"][Objs[t].orig_id]=getattr(Objs[t],Ids[t]["pk"])
                                     setattr(Objs["obj_head"],Ids[t]["pk"],Ids[t]["ID"][Objs[t].orig_id])
                                     logging.info("IDS %s %s",t,Ids[t])
-                        self.pgcur.execute("select nextval('seq_images')" )
-                        Objs["image"].imgid=self.pgcur.fetchone()[0]
+                        # self.pgcur.execute("select nextval('seq_images')" )
+                        # Objs["image"].imgid=self.pgcur.fetchone()[0]
+                        Objs["image"].imgid=self.GetSequenceCached('seq_images')
                         CleExistObj = Objs["obj_field"].orig_id + '*' + Objs["image"].orig_file_name
                         if self.param.SkipObjectDuplicate == 'Y' and CleExistObj in self.ExistingObjectAndImage:
                             continue
@@ -399,11 +449,15 @@ class TaskImport(AsyncTask):
                             db.session.commit()
                             Objs["obj_field"].objfid=Objs["obj_head"].objid
                             db.session.add(Objs["obj_field"])
-                            db.session.commit()
+                            # db.session.commit() ce commit intermediaire n'est pas necessaire
                             self.ExistingObject[Objs["obj_field"].orig_id]=Objs["obj_head"].objid # Provoque un select object sauf si 'expire_on_commit':False
                         #Gestion de l'image, creation DB et fichier dans Vault
                         Objs["image"].objid=Objs["obj_head"].objid
-                        ImgFilePath=CsvFile.with_name(Objs["image"].orig_file_name)
+                        ImgFilePath = OriginalImgFilePath = CsvFile.parent / Objs["image"].orig_file_name
+                        if VignetteMakerCfg:
+                            ImgFilePath = Path(WorkingDirCache) / "tempvignette.png"
+                            MakeVignette(OriginalImgFilePath.as_posix(),ImgFilePath.as_posix(),VignetteMakerCfg)
+
                         VaultFolder="%04d"%(Objs["image"].imgid//10000)
                         vaultroot=Path("../../vault")
                         #creation du repertoire contenant les images si necessaire
@@ -426,10 +480,25 @@ class TaskImport(AsyncTask):
                                 Objs["image"].thumb_file_name=vaultfilenameThumb
                                 Objs["image"].thumb_width=im.size[0]
                                 Objs["image"].thumb_height=im.size[1]
+                        del im
                         #ajoute de l'image en DB
                         if Objs["image"].imgrank is None:
                             Objs["image"].imgrank =0 # valeur par defaut
                         db.session.add(Objs["image"])
+                        if VignetteMakerCfgkeeporiginal: # si creation de vignette et qu'on garde l'original on va créer une seconde image pour l'y mettre
+                            Objs["image2"]=database.Images()
+                            # self.pgcur.execute("select nextval('seq_images')")
+                            # Objs["image2"].imgid = self.pgcur.fetchone()[0]
+                            Objs["image2"].imgid = self.GetSequenceCached('seq_images')
+                            Objs["image2"].imgrank=100
+                            Objs["image2"].objid = Objs["obj_head"].objid
+                            vaultfilename = "%s/%04d%s" % (VaultFolder, Objs["image2"].imgid % 10000, OriginalImgFilePath.suffix)
+                            Objs["image2"].file_name=vaultfilename
+                            shutil.copyfile(OriginalImgFilePath.as_posix(),vaultroot.joinpath(vaultfilename).as_posix())
+                            im=Image.open(vaultroot.joinpath(vaultfilename).as_posix())
+                            Objs["image2"].width,Objs["image2"].height=im.size
+                            del im
+                            db.session.add(Objs["image2"])
                         db.session.commit()
                         if (TotalRowCount%100)==0:
                             self.UpdateProgress(100*TotalRowCount/self.param.TotalRowCount,"Processing files %d/%d"%(TotalRowCount,self.param.TotalRowCount))
@@ -437,6 +506,12 @@ class TaskImport(AsyncTask):
                     LoadedFiles.append(relname.as_posix())
                     Prj.fileloaded="\n".join(LoadedFiles)
                     db.session.commit()
+        # Delete all temporary subfolder of  WorkingDirCache
+        for d in [os.path.join(WorkingDirCache, o) for o in os.listdir(WorkingDirCache) if os.path.isdir(os.path.join(WorkingDirCache, o))]:
+            try:
+                shutil.rmtree(d)
+            except: # c'est un menage préalable pas grave s'il y a une erreur
+                pass
         self.pgcur.execute("""update obj_head o
                             set imgcount=(select count(*) from images where objid=o.objid)
                             ,img0id=(select imgid from images where objid=o.objid order by imgrank asc limit 1 )
@@ -450,6 +525,7 @@ class TaskImport(AsyncTask):
         self.pgcur.connection.commit()
         appli.project.main.RecalcProjectTaxoStat(Prj.projid)
         appli.project.main.UpdateProjectStat(Prj.projid)
+
         self.task.taskstate="Done"
         self.UpdateProgress(100,"Processing done")
 

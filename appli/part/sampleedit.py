@@ -12,13 +12,14 @@ from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,I
 from pathlib import Path
 
 class UvpSampleForm(Form):
-    pprojid = StringField("Part. project ID",[validators.required()])
-    profileid = StringField("Profile ID",[validators.required()])
-    filename = StringField("Filename", [validators.required(),validators.Length(min=5)])
+    pprojid = StringField("Part. project ID",[validators.DataRequired()])
+    profileid = StringField("Profile ID",[validators.DataRequired()])
+    filename = StringField("Filename", [validators.DataRequired(),validators.Length(min=5)])
     sampleid = IntegerField("Ecotaxa SampleID",[validators.Optional(strip_whitespace=True)])
     latitude = FloatField("Latitude [DD.DDDD] (- for South)",[validators.Optional(strip_whitespace=True)])
     longitude = FloatField("Longitude [DDD.DDDD] (- for West)",[validators.Optional(strip_whitespace=True)])
     organizedbydeepth = BooleanField("Profile Type Depth")
+    integrationtime=IntegerField("Integration time (Time profile) [s]",[validators.Optional(strip_whitespace=True)])
     histobrutavailable = BooleanField("Raw histogram available ")
     qualitytaxo = StringField("Taxonomy QC")
     qualitypart = StringField("Particles QC")
@@ -42,7 +43,7 @@ class UvpSampleForm(Form):
     ctd_import_datetime = DateTimeField("CTD date & time (import)",[validators.Optional(strip_whitespace=True)])
     ctd_status = StringField("CTD status")
     instrumsn = StringField("Instrument SN")
-    acq_aa = FloatField("Aa",[validators.Optional(strip_whitespace=True)])
+    acq_aa = FloatField("Aa (for UVP6, value is divided by 10<sup>6</sup>)",[validators.Optional(strip_whitespace=True)])
     acq_exp = FloatField("Exp",[validators.Optional(strip_whitespace=True)])
     acq_volimage = FloatField("Image Volume [L]",[validators.Optional(strip_whitespace=True)])
     acq_depthoffset = FloatField("Depth Offset [M]",[validators.Optional(strip_whitespace=True)])

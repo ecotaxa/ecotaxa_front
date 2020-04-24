@@ -33,6 +33,7 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
     <th>ID</th>
     <th>profileid</th>
     <th>filename</th>
+    <th>Type</th>
     <th>station ID</th>
     <th>first image</th>
     <th>last img</th>
@@ -57,6 +58,7 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
     <td>{{ r['psampleid'] }} <a href="/part/sampleedit/{{ r['psampleid'] }}"><span class="glyphicon glyphicon-pencil"></span></a></td>
     <td>{{ r['profileid'] }}</td>
     <td>{{ r['filename'] }}</td>
+    <td> {{ 'Depth' if r['organizedbydeepth'] else 'Time' }}</td>
     <td>{{ r['stationid'] }}</td>
     <td>{{ r['firstimage'] or ""}}</td>
     <td>{{ r['lastimg'] or ""}}</td>
@@ -97,7 +99,7 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
 </div>
 <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-xs btn-danger"><span class="glyphicon glyphicon-erase"></span> Remove selected samples</button>
 
-{% if Prj.instrumtype=='uvp5' %}
+{% if Prj.instrumtype=='uvp5' or Prj.instrumtype=='uvp6' %}
 <br>SHOW IMPORTATION RESULT GRAPH : {%   for i in range(0,dbsample|length,50) %} <a href="/part/prj_uvpgraph/{{Prj.pprojid}}/{{i}}" class="btn btn-primary btn-xs">Page {{(i//50)+1}}</a>  {% endfor %}
 {% endif %}
 
@@ -124,6 +126,7 @@ DO NOT FORGET TO SELECT THE SAMPLES THAT YOU WANT TO REPROCESS BEFORE STARTING O
 <script type="text/javascript" src="/static/DataTables1.10.18/DataTables-1.10.18/js/dataTables.bootstrap.min.js"></script>
 <style>
 #tblsample2_wrapper {margin-top: -40px;}
+#tblsample2 tbody td:nth-child(2) {white-space: nowrap}
 </style>
 <script>
   function ProcessDeleteSamples()

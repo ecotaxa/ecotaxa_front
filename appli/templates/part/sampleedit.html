@@ -12,7 +12,10 @@
     {{ "<tr>"|safe if 'o' in kwargs.get('tr','oc')  }}
     <td class="{% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}  ">
         {% if (field.type != 'HiddenField' and field.type !='CSRFTokenField') and label_visible %}
-            <label for="{{ field.id }}" class="control-label">{{ field.label }}  {% if field.flags.required %} <span style="font-weight: bold;color: red;">*</span> {% endif %} </label>
+            <label for="{{ field.id }}" class="control-label" {% if kwargs.get('help') %} data-toggle="popover" data-placement="right" data-content="{{ kwargs.get('help') }}" data-html="true"{% endif %}>{{ field.label }}  {% if field.flags.required %} <span style="font-weight: bold;color: red;">*</span> {% endif %}
+            {% if kwargs.get('help') %} <span class="glyphicon glyphicon-info-sign"></span> {% endif %}
+
+            </label>
         {% endif %}
     </td><td {{ "colspan="+(kwargs.pop('colspan')|string) if kwargs.get('colspan') }} >
 {#        {{ field(class_='form-control', **kwargs) }}#}
@@ -110,7 +113,7 @@ label {font-size: 12px; font-weight: normal;}
 </style>
 <form method="POST" role="form" class="">
 <table class="edittab">
-  <tr><td colspan="4"><b>PARTICLE module informations </b></td></tr>
+  <tr><td colspan="8"><b>PARTICLE module informations </b></td></tr>
 {{ render_field(form.pprojid,style="width:50px;",tr='o') }}
 {{ render_field(form.ctd_origfilename,tr='') }}
 {{ render_field(form.qualitytaxo,tr='') }}
@@ -123,7 +126,7 @@ label {font-size: 12px; font-weight: normal;}
 
 {{ render_field(form.sampleid,tr='o') }}
 {{ render_field(form.ctd_import_email,tr='') }}
-{{ render_field(form.ctd_status,tr='c') }}
+{{ render_field(form.ctd_status,tr='c',colspan=3) }}
 
 {{ render_field(form.filename,tr='o') }}
 {{ render_field(form.ctd_import_datetime,tr='') }}
@@ -131,7 +134,7 @@ label {font-size: 12px; font-weight: normal;}
 
 </table>
 <table class="edittab">
-  <tr><td colspan="4"><b>Profile METADATA</b></td></tr>
+  <tr><td colspan="8"><b>Profile METADATA</b></td></tr>
 {{ render_field(form.instrumsn,tr='o') }}
 {{ render_field(form.stationid,tr='') }}
 {{ render_field(form.acq_barcode,tr='') }}
@@ -153,16 +156,17 @@ label {font-size: 12px; font-weight: normal;}
 {{ render_field(form.lastimgused,tr='') }}
 {{ render_field(form.nebuloussness,tr='c') }}
 
-  <tr><td></td><td></td><td></td><td></td>
+  <tr><td></td><td></td>
+{{ render_checkbox_field(form.organizedbydeepth,tr='') }}
 {{ render_field(form.imp_descent_filtered_row,tr='') }}
 {{ render_field(form.imp_removed_empty_slice,tr='c') }}
 
 {{ render_checkbox_field(form.yoyo,tr='o') }}
-{{ render_checkbox_field(form.organizedbydeepth,tr='') }}
-{{ render_field(form.comment,tr='c',style="width:550px;",colspan=7) }}
+{{ render_field(form.integrationtime,tr='') }}
+{{ render_field(form.comment,tr='c',style="width:500px;",colspan=3) }}
 </table>
 <table class="edittab">
-<tr><td colspan="4"><b>UVP Settings</b></td></tr>
+<tr><td colspan="8"><b>UVP Settings</b></td></tr>
 {{ render_field(form.acq_aa,tr='o',style="width:80px;") }}
 <td></td><td></td>
 {{ render_field(form.acq_ratio,tr='',style="width:80px;") }}
@@ -184,23 +188,26 @@ label {font-size: 12px; font-weight: normal;}
 {{ render_field(form.proc_process_ratio,tr='c',style="width:80px;") }}
 
 
-{{ render_field(form.acq_depthoffset,tr='o',style="width:80px;") }}
+{{ render_field(form.acq_depthoffset,tr='o',style="width:80px;",help="""The depth offset is the vertical distance between the pressure sensor and the imaged zone (positive if pressure sensor above imaged area). This information can be filled in the <b>project</b> metadata page for the entire project or at <b>sample</b> level.<br><br>
+In case the <b>project</b> depth offset is documented, it will override the <b>sample</b> depth offsets for the process of the project.<br><br>
+The <b>project</b> depth offset is automatically set to 1.2 if your instrument is UVP5 during read project metadata operation as the <b>sample</b> depth offsets are not documented in the instrument metadata.<br><br>
+The <b>sample</b> depth offsets are set in the instrument metadata for the UVP6 instrument and automatically documented in EcoPart for each sample.""") }}
 {{ render_field(form.acq_filedescription,tr='') }}
-{{ render_field(form.acq_threshold,tr='c',style="width:80px;") }}
+{{ render_field(form.acq_threshold,tr='c',style="width:80px;",colspan=3) }}
 
 
 
 {{ render_field(form.acq_smbase,tr='o',style="width:80px;") }}
-{{ render_field(form.acq_tasktype,tr='') }}
-<td colspan="2"></td>
+{{ render_field(form.acq_tasktype,tr='c',colspan=5) }}
+
 
 
 {{ render_field(form.acq_smzoo,tr='o',style="width:80px;") }}
-{{ render_field(form.acq_choice,tr='c') }}
+{{ render_field(form.acq_choice,tr='c',colspan=5) }}
 
   {{ render_field(form.acq_presure_gain,tr='o',style="width:80px;") }}
 {{ render_field(form.acq_disktype,tr='') }}
-{{ render_field(form.acq_descent_filter,tr='c') }}
+{{ render_field(form.acq_descent_filter,tr='c',colspan=3) }}
 </table>
 <table class="edittab">
   <tr><td colspan="4"><b>LISST Settings</b></td></tr>
@@ -224,6 +231,7 @@ label {font-size: 12px; font-weight: normal;}
   $('#acq_aa,#acq_exp,#acq_volimage,#acq_pixel,#profileid').change(function () {
     $('#forcerecalc').prop('checked',true);
   });
+  $('[data-toggle="popover"]').popover();
 </script>
 
 

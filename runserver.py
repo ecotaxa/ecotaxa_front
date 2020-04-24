@@ -10,7 +10,7 @@ import logging.handlers
 
 
 if __name__ == '__main__':
-    app.debug = True
+    # app.debug = True
     handler = logging.StreamHandler()
     # handler = logging.handlers.RotatingFileHandler('MyAppli.log', maxBytes=1000000, backupCount=1)
     #handler = logging.FileHandler('MyAppli.log')

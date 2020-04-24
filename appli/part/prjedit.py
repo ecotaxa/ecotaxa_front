@@ -25,11 +25,16 @@ class UvpPrjForm(Form):
     cruise = StringField("Cruise")
     ship = StringField("Ship")
     default_instrumsn = StringField("default instrum SN")
-    default_depthoffset = FloatField("Default depth offset",[validators.Optional(strip_whitespace=True)])
+    default_depthoffset = FloatField("Override depth offset",[validators.Optional(strip_whitespace=True)])
     prj_info = TextAreaField("Project information")
     public_visibility_deferral_month = IntegerField("Privacy delay", [validators.Optional(strip_whitespace=True)])
     public_partexport_deferral_month = IntegerField("General download delay", [validators.Optional(strip_whitespace=True)])
     public_zooexport_deferral_month = IntegerField("Plankton annotation download delay", [validators.Optional(strip_whitespace=True)])
+    remote_url = StringField("Host")
+    remote_user= StringField("User")
+    remote_password = StringField("Password")
+    remote_directory = StringField("Directory on server")
+    remote_vectorref = StringField("Additionnal reference of the vector")
 
 
 @app.route('/part/prjedit/<int:pprojid>',methods=['get','post'])
@@ -46,13 +51,15 @@ def part_prjedit(pprojid):
         model=partdatabase.part_projects()
         model.pprojid=0
         model.ownerid=current_user.id
-        model.default_depthoffset=1.2
+        # model.default_depthoffset=1.2
         model.public_visibility_deferral_month= app.config.get('PART_DEFAULT_VISIBLE_DELAY', '')
         model.public_partexport_deferral_month=app.config.get('PART_DEFAULT_GENERAL_EXPORT_DELAY', '')
         model.public_zooexport_deferral_month = app.config.get('PART_DEFAULT_PLANKTON_EXPORT_DELAY', '')
 
     UvpPrjForm.ownerid=SelectField('Project Owner',choices=database.GetAll("SELECT id,name FROM users ORDER BY trim(lower(name))"),coerce=int )
+    UvpPrjForm.instrumtype=SelectField('Instrument type',choices=[(x,x) for x in ("","uvp5","uvp6","lisst","uvp6remote")])
     UvpPrjForm.projid=SelectField('Ecotaxa Project',choices=[(0,''),(-1,'Create a new EcoTaxa project')]+database.GetAll("SELECT projid,concat(title,' (',cast(projid as varchar),')') FROM projects ORDER BY lower(title)"),coerce=int )
+    UvpPrjForm.remote_type=SelectField('Remote type',choices=[(x,x) for x in ("","ARGO","TSV LOV")])
     form=UvpPrjForm(request.form,model)
     if gvp('delete')=='Y':
         try:
@@ -130,6 +137,7 @@ def part_readprojectmeta():
             if len(LstSamples) > 0:
                 res['cruise'] = LstSamples[0].get('cruise')
                 res['ship'] = LstSamples[0].get('ship')
-    res['default_depthoffset']=1.2
+        if res['instrumtype']=='uvp5':
+            res['default_depthoffset']=1.2
     return json.dumps(res)
 
