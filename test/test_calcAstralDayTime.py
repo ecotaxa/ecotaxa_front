@@ -21,3 +21,23 @@ class TestCalcAstralDayTime(TestCase):
         self.assertEqual(CalcAstralDayTime(Date, time( 2, 0, 0), Latitude, -180), 'D')  #  2h 180 Day
         self.assertEqual(CalcAstralDayTime(Date, time( 6, 0, 0), Latitude, -180), 'U')  #  6h 180 dusk
         self.assertEqual(CalcAstralDayTime(Date, time( 7, 0, 0), Latitude, -180), 'N')  #  7h 180 Nigth
+
+    def test_LectureDegrees(self):
+        from appli.tasks.importcommon import ConvTextDegreeToDecimalDegree
+        # Test du format decimal historique/Degrée minute utilisée dans les fichiers header de la partie ecopart
+        self.assertEqual(ConvTextDegreeToDecimalDegree("1.3", False), 1.5)
+        self.assertEqual(ConvTextDegreeToDecimalDegree("-1.3", False), -1.5)
+        # Test de la limitation à 5 décimales car les division par 60 on tendance à créer des rationnels.
+        self.assertEqual(ConvTextDegreeToDecimalDegree("10.4583", False), 10.76383)
+        # Test du format degrée décimal utilisé dans les objets depuis toujours
+        self.assertEqual(ConvTextDegreeToDecimalDegree("1.5"), 1.5)
+        self.assertEqual(ConvTextDegreeToDecimalDegree("-1.5"), -1.5)
+        # Test du format  DD°MM SS utilisé par UVP App
+        self.assertEqual(ConvTextDegreeToDecimalDegree("1°30 00"), 1.5)
+        self.assertEqual(ConvTextDegreeToDecimalDegree("-1°30 00"), -1.5)
+        # Test de la limitation à 5 décimales
+        self.assertEqual(ConvTextDegreeToDecimalDegree("1°30 1"), 1.50028)
+        self.assertEqual(ConvTextDegreeToDecimalDegree("-1°30 1"), -1.50028)
+
+
+

@@ -111,6 +111,7 @@ def Prjpopupeditpreset(PrjId):
 def GetSCNNetworks():
     Models = {}
     ModelFolder = (Path(TempTaskDir) / "../SCN_networks")
+    ModelFolder = Path(os.path.normpath(ModelFolder.as_posix()))
     if ModelFolder.exists():
         ModelFolder=ModelFolder.resolve()
         for dir in ModelFolder.glob("*"):

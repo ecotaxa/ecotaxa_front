@@ -1,5 +1,4 @@
 # manage.py
-
 from flask_script import Manager
 from flask_security.utils import encrypt_password
 from flask_migrate import Migrate, MigrateCommand
@@ -267,10 +266,24 @@ def RecomputePart(ProjectID,What,User,Email):
         Samples = database.GetAll("select psampleid,profileid,sampleid from part_samples where pprojid=(%s)", [ProjectID])
         for S in Samples:
             if 'T' in What and S['sampleid']:
-                print("Zoo for particle sample %s:%s="%(S['psampleid'],S['profileid']),prj.ComputeZooHisto(S['psampleid']))
+                print("Zoo for particle sample %s:%s="%(S['psampleid'],S['profileid']),prj.ComputeZooHisto(S['psampleid'], Prj.instrumtype))
 
-
-
+@manager.command
+def partpoolserver():
+    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
+        g.db = None
+        import appli.part.uvp6remote_sample_import as uvp6remote_sample_import
+        import appli.part.common_sample_import as common_import
+        Lst=database.GetAll("""select pprojid,ptitle from part_projects where remote_type is not null and remote_url is not null""")
+        for P in Lst:
+            print("pollserver for project {pprojid} : {ptitle}".format(**P))
+            RSF=uvp6remote_sample_import.RemoteServerFetcher(P['pprojid'])
+            LstSampleID =RSF.FetchServerDataForProject([])
+            for psampleid in LstSampleID:
+                print("uvp6remote Sample %d Metadata processed, Détailled histogram in progress" % (psampleid,))
+                uvp6remote_sample_import.GenerateParticleHistogram(psampleid)
+                print("Try to import CTD")
+                print(common_import.ImportCTD(psampleid, "Automatic", ""))
 
 
 if __name__ == "__main__":

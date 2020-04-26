@@ -307,9 +307,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.1.0"
+ecotaxa_version="2.2.5"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2019-04-18"
+    return ecotaxa_version+" 2020-04-23"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -317,6 +317,32 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-04-20 : V 2.2.5
+    Amélioration du texte d'information sur le serveur FTP lors des exports.
+2020-04-20 : V 2.2.4
+    Bugfix/Regression #340 les imports d'objets sont en notation degrée decimaux et non pas degree.minutes
+    Réduction du nombre de décimales lors des conversions des latitudes et longitudes exprimées en minutes
+    Suppression de warning de dépraciation sur WTForm validators.required 
+2020-02-07 : V 2.2.3
+    Ajout de normpath sur certaines resolution de chemin suite à problème avec des lien sympboliques
+2020-01-29 : V 2.2.2
+    Part : Modification comportement default_depthoffset now override
+    Part import : uvp6 sample use Pressure_offset
+    Part export : Divers bugfix 
+    Part view : Ajustement groupe de classes 
+2020-01-14 : V 2.2.1
+    Generation vignette : Largeur minimale pour voir au moins l'echelle
+    Gestion UVP6 Remote : Format LOV TSV
+    Fix python 3.7
+    Améliorations performances import
+    Part : Gestion graphique temporel temps absolu
+    Part : Gestion graphique 1 couleur par sample + legende si un seul projet
+    Part export : gestion aggregation des TSV sur détaillé et réduit + nom projet dans les summary
+    Part import : ajustement format LOV TSV
+    Part import : ignore les samples sans depth si profil vertical sinon si depth invalide mise à 0
+      
+2019-08-18 : V 2.2.0
+    Intégration of UVPApp Data Format
 2019-04-18 : V 2.1.0
     Fix #304,#316,#317
 2019-04-03 : V 2.1.0

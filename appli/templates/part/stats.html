@@ -42,12 +42,12 @@
     <td class="rightspace aligntop" colspan="2">
       <p class="TablePrefix">TABLE of PROJECT STATS, STATUS and DATA OWNERS</p>
       <table class='table table-hover table-verycondensed table-bordered' style="width: auto">
-        <thead><tr><th>Project</th><th>Instrument</th><th width="70px">Sample<br>Particle</th><th width="90px">Sample&nbsp;ZOO<br>associated</th>
+        <thead><tr><th>Project</th><th>Instrument</th><th width="70px">Nbr<br>depth&nbsp;cast</th><th width="70px">Nbr<br>time&nbsp;serie</th><th width="90px">Sample&nbsp;ZOO<br>associated</th>
           <th>% Validated<br>zooplankton</th>
           <th>Data Owner</th><th>Particle<br>Project Manager</th><th>Ecotaxa (zoo)<br>Project Manager </th><th>Particle<br>data status</th><th>Zooplankton<br>data status</th></tr></thead>
         <tbody>
       {%   for v in data.partprojcount %}
-      <tr>  <td> {{ v['ptitle'] }}</td>  <td>{{ v['instrumtype'] }}</td><td>{{ v['nbr'] }}</td><td>{{ v['nbrtaxo'] }}</td>
+      <tr>  <td> {{ v['ptitle'] }}</td>  <td>{{ v['instrumtype'] }}</td><td>{{ v['nbrdepth'] }}</td><td>{{ v['nbrtime'] }}</td><td>{{ v['nbrtaxo'] }}</td>
         <td>{{ data.taxostatbyproj[v['pprojid']] }}</td>
       <td><a href="mailto:{{ v['do_email'] or ""}}">{{ v['do_name'] or "" }}</td>
       <td><a href="mailto:{{ v['uppowner_email'] or ""}}">{{ v['uppowner_name'] or "" }}</td>
