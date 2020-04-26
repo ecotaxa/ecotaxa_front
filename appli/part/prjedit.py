@@ -122,7 +122,7 @@ def part_readprojectmeta():
         res['default_instrumsn'] = m.group(1)
         if FichierHeader.exists():
             LstSamples=[]
-            with FichierHeader.open() as FichierHeaderHandler:
+            with FichierHeader.open(encoding="latin_1") as FichierHeaderHandler:
                 F = csv.DictReader(FichierHeaderHandler, delimiter=';')
                 for r in F:
                     LstSamples.append(r)
