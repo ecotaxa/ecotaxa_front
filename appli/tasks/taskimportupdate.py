@@ -119,7 +119,8 @@ class TaskImportUpdate(AsyncTask):
                                     SelType='t'
                                 else:
                                     if LType[ColName] not in PredefinedTypes:
-                                        self.LogErrorForUser("Invalid Type '%s' for Field '%s' in file %s. Incorrect Type. Field ignored"%(LType[champ],ColName,relname.as_posix()))
+                                        self.LogErrorForUser("Invalid Type '%s' for Field '%s' in file %s. Incorrect Type. Field ignored"
+                                                             %(LType[ColName],ColName,relname.as_posix()))
                                         continue
                                     SelType=PredefinedTypes[LType[ColName]]
                                 self.LastNum[Table][SelType]+=1
