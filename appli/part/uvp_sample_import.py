@@ -121,7 +121,7 @@ def CreateOrUpdateSample(pprojid,headerdata):
     else:
         z = zipfile.ZipFile(EcodataPartFile.as_posix())
         with z.open("metadata.ini","r") as metadata_ini_raw:
-            metadata_ini=io.TextIOWrapper(io.BytesIO(metadata_ini_raw.read()))
+            metadata_ini=io.TextIOWrapper(io.BytesIO(metadata_ini_raw.read()), encoding="latin_1")
             # with open(metadata_ini_raw, encoding='latin_1') as metadata_ini:
             ini=configparser.ConfigParser()
             ini.read_file(metadata_ini)

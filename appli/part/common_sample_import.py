@@ -105,7 +105,7 @@ def ImportCTD(psampleid,user_name,user_email):
             app.logger.info("CTD.txt file missing")
             return False
         fctb=zf.open('CTD.txt', 'r')
-        tsvfile = io.TextIOWrapper(fctb)
+        tsvfile = io.TextIOWrapper(fctb,encoding='latin_1')
     else:  # process normal par traitement du repertoire des données
         ServerRoot = Path(app.config['SERVERLOADAREA'])
         DossierUVPPath = ServerRoot / Prj.rawfolder

@@ -158,7 +158,7 @@ class TaskPartZooscanImport(AsyncTask):
                 return PrintInCharte(ErrorFormat("Le fichier header n'existe pas :" + FichierHeader.as_posix()))
             else:
                 # print("ouverture de " + FichierHeader)
-                with open(FichierHeader.as_posix()) as FichierHeaderHandler:
+                with open(FichierHeader.as_posix(), encoding="latin_1") as FichierHeaderHandler:
                     F = csv.DictReader(FichierHeaderHandler, delimiter=';')
                     for r in F:
                         r['psampleid']=None

@@ -163,7 +163,7 @@ def GenerateParticleHistogram(psampleid):
 
     with zipfile.ZipFile(rawfileinvault,"r") as zf:
         with zf.open('LPM.txt','r') as flpmb:
-            flpm=io.TextIOWrapper(flpmb)
+            flpm=io.TextIOWrapper(flpmb,encoding='latin_1')
             csvfile=csv.DictReader(flpm, delimiter='\t')
             NbrLine = 0
             HistoByTranche={}
@@ -227,7 +227,7 @@ def GenerateTaxonomyHistogram(psampleid):
         DepthOffset=0
     with zipfile.ZipFile(rawfileinvault,"r") as zf:
         with zf.open("META.txt", 'r') as MetaFb:
-            MetaF = io.TextIOWrapper(MetaFb)
+            MetaF = io.TextIOWrapper(MetaFb,encoding='latin_1')
             MetaData = ParseMetadataFile(MetaF)
             TaxoIds=list(range(40))
             for i in range(40):
@@ -246,7 +246,7 @@ def GenerateTaxonomyHistogram(psampleid):
 
 
         with zf.open('TAXO2.txt','r') as ftaxob:
-            ftaxo=io.TextIOWrapper(ftaxob)
+            ftaxo=io.TextIOWrapper(ftaxob,encoding='latin_1')
             csvfile=csv.DictReader(ftaxo, delimiter='\t')
             NbrLine = 0
             HistoByTranche={}
