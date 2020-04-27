@@ -307,9 +307,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.2.5"
+ecotaxa_version="2.2.6"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-04-23"
+    return ecotaxa_version+" 2020-04-27"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -317,7 +317,10 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
-2020-04-20 : V 2.2.5
+2020-04-27 : V 2.2.6
+    Bugfix #364 #366: Import de fichiers encodés latin_1 sous Linux.
+    Bugfix #351: Exception python lors de l'import si la 2eme ligne du TSV n'est pas conforme.
+2020-04-23 : V 2.2.5
     Amélioration du texte d'information sur le serveur FTP lors des exports.
 2020-04-20 : V 2.2.4
     Bugfix/Regression #340 les imports d'objets sont en notation degrée decimaux et non pas degree.minutes
