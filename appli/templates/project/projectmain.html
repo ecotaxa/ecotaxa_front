@@ -452,9 +452,36 @@ function LoadRightPane(NoAjax,SaveInProfile){
     if(SaveInProfile==true)
         req["saveinprofile"]='Y';
     jqcolumnright.html("<img src='/static/spinningred.gif'> Loading");
-    jqcolumnright.load("/prj/LoadRightPane",req);
+    AsyncSingleLoadRightPane(jqcolumnright, req)
     $('#headersubtitle').html(TxtFilter);
 }
+
+var theOnlyRightPaneXHR = null;
+function AsyncSingleLoadRightPane(elem, req)
+{
+  // Load right pane, but cancel a previous load if in progress. github #281.
+  // Below is a copy/paste/simplify of JQuery load(), as this primitive does
+  // not return the generated XHR object.
+  if(theOnlyRightPaneXHR && theOnlyRightPaneXHR.readyState != 4){
+    // abort request in progress, we want new request results and only them
+    theOnlyRightPaneXHR.abort();
+  }
+  theOnlyRightPaneXHR = jQuery.ajax({
+    url: "/prj/LoadRightPane",
+    type: "POST",
+    dataType: "html",
+    data: req
+  }).done(function( responseText ) {
+    elem.html( responseText );
+  }).error(function( jqXHR, opts, error ) {
+    if (error!=="abort") {
+      msg = "Request problem "+JSON.stringify(jqXHR);
+      msg += "<br>Refreshing the page could cure this problem.";
+      elem.html( msg );
+    }
+  });
+}
+
 
 function RefreshClassifTab(ForceRecalc)
 {
