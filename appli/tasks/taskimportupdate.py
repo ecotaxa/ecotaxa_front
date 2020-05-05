@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv,GetAppManagerMailto,CreateDirConcurrentlyIfNeeded
+from appli import db, app, database, ObjectToStr, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, ntcv, \
+    GetAppManagerMailto, CreateDirConcurrentlyIfNeeded, UtfDiag
 from PIL import Image
 from flask import render_template,  flash,request,g
 import logging,os,csv,sys,time
@@ -464,6 +465,7 @@ class TaskImportUpdate(AsyncTask):
                     sp=ServerRoot.joinpath(Path(gvp("ServerPath")))
                     if not sp.exists(): #verifie que le repertoire existe
                         errors.append("Input Folder/File Invalid")
+                        UtfDiag(errors, str(sp))
                     else:
                         self.param.InData=sp.as_posix()
                 if len(errors)>0:
