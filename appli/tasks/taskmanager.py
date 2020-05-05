@@ -107,9 +107,6 @@ def TaskFactory(ClassName,task=None):
     from appli.tasks.taskimport import TaskImport
     if ClassName=="TaskImport":
         return TaskImport(task)
-    from appli.tasks.taskclassifauto import TaskClassifAuto
-    if ClassName=="TaskClassifAuto":
-        return TaskClassifAuto(task)
     from appli.tasks.taskclassifauto2 import TaskClassifAuto2
     if ClassName=="TaskClassifAuto2":
         return TaskClassifAuto2(task)
