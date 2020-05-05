@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, g, flash,request,url_for,json
 from flask_login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp,ntcv,DecodeEqualList,ScaleForDisplay,ComputeLimitForImage,nonetoformat,CreateDirConcurrentlyIfNeeded
+from appli import app, ObjectToStr, PrintInCharte, database, gvg, gvp, ntcv, DecodeEqualList, ScaleForDisplay, \
+    ComputeLimitForImage, nonetoformat, CreateDirConcurrentlyIfNeeded, UtfDiag3
 from pathlib import Path,PurePath
 from PIL import  Image
 from flask_security import Security, SQLAlchemyUserDatastore
@@ -117,7 +118,9 @@ def prj_simpleimport(PrjId):
             ServerRoot = Path(app.config['SERVERLOADAREA'])
             sp = ServerRoot.joinpath(Path(gvp("ServerPath")))
             if not sp.exists():  # verifie que le repertoire existe
-                return PrintError("Input Folder/File Invalid", DefBodyMsg)
+                err = "Input Folder/File Invalid"
+                err += UtfDiag3(str(sp))
+                return PrintError(err, DefBodyMsg)
             else:
                 ServerPath = sp.as_posix()
                 if ServerPath.lower().endswith("zip"):

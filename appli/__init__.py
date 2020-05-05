@@ -4,6 +4,8 @@
 
 import os,sys,pathlib,urllib.parse
 # Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL
+import unicodedata
+
 if sys.platform.startswith('win32'):
     virtualprefix = sys.base_prefix
     if hasattr(sys, 'real_prefix'):
@@ -253,6 +255,36 @@ def CalcAstralDayTime(Date,Time,Latitude,Longitude):
         elif s[I['d']].time() > s[I['f']].time() and (Time >= s[I['d']].time() or Time <= s[I['f']].time()):
             Result = I['r'] # Changement de jour entre les 2 parties de l'intervalle
     return Result
+
+_utf_warn = "HINT: Did you use utf-8 while transferring?"
+
+def _suspicious_str(path: str):
+    if not isinstance(path, str):
+        return False
+    try:
+        t = repr(path)
+        for c in path:
+            # Below throws an exception and that's all we need
+            unicodedata.name(c)
+            if 0xFFF0 <= ord(c) <= 0xFFFF:
+                # Replacement chars
+                return True
+        return False
+    except ValueError:
+        return True
+
+def UtfDiag(errors, path: str):
+    if _suspicious_str(path):
+        errors.append(_utf_warn)
+
+def UtfDiag2(fn, path1:str, path2: str):
+    if _suspicious_str(path1) or _suspicious_str(path2):
+        fn(_utf_warn)
+
+def UtfDiag3(path: str):
+    if _suspicious_str(path):
+        return ". "+_utf_warn
+    return ""
 
 # Ici les imports des modules qui definissent des routes
 import appli.main

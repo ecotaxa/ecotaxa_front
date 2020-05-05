@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,EncodeEqualList,DecodeEqualList,ntcv,GetAppManagerMailto,CreateDirConcurrentlyIfNeeded
+from appli import db, app, database, ObjectToStr, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, ntcv, \
+    GetAppManagerMailto, CreateDirConcurrentlyIfNeeded, UtfDiag2, UtfDiag
 from PIL import Image
 from flask import render_template,  flash,request,g
 import logging,os,csv,sys,time,configparser
@@ -225,6 +226,7 @@ class TaskImport(AsyncTask):
                             ImgFilePath=CsvFile.parent/ImgFileName
                             if not ImgFilePath.exists():
                                 self.LogErrorForUser("Missing Image '%s' in file %s. "%(ImgFileName,relname.as_posix()))
+                                UtfDiag2(self.LogErrorForUser, ImgFileName, relname.as_posix())
                             else:
                                 try:
                                     im=Image.open(ImgFilePath.as_posix())
@@ -570,6 +572,7 @@ class TaskImport(AsyncTask):
                     sp=ServerRoot.joinpath(Path(gvp("ServerPath")))
                     if not sp.exists(): #verifie que le repertoire existe
                         errors.append("Input Folder/File Invalid")
+                        UtfDiag(errors, str(sp))
                     else:
                         self.param.InData=sp.as_posix()
                 if len(errors)>0:
