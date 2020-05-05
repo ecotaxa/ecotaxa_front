@@ -307,9 +307,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.2.6"
+ecotaxa_version="2.2.7"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-04-27"
+    return ecotaxa_version+" 2020-05-05"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -317,6 +317,10 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-05-05 : V 2.2.7
+    Bugfix #334: L'utilisateur reçoit un indice en cas de nom de fichier problématique lors de l'import.
+    Bugfix #281: Correction des rechargements aléatoires pendant la classification manuelle.
+    Début de nettoyage du code #381.
 2020-04-27 : V 2.2.6
     Bugfix #364 #366: Import de fichiers encodés latin_1 sous Linux.
     Bugfix #351: Exception python lors de l'import si la 2eme ligne du TSV n'est pas conforme.
