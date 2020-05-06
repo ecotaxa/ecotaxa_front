@@ -502,7 +502,7 @@ class TaskImportDB(AsyncTask):
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
         PrjId=self.param.ProjectId
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
-        <a href='/Task/Create/TaskClassifAuto?p={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a>
+        <a href='/Task/Create/TaskClassifAuto2?projid={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a>
         <a href='/Task/Question/{1}?restart=Y' class='btn btn-primary btn-sm'  role=button>Import Another project from the same database</a>
         <a href='/Task/Clean/{1}' class='btn btn-primary btn-sm'  role=button>Clean temporary data</a>
 

@@ -534,4 +534,4 @@ class TaskImportUpdate(AsyncTask):
         time.sleep(1)
         DoTaskClean(self.task.id)
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
-        <a href='/Task/Create/TaskClassifAuto?p={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a> """.format(PrjId)
+        <a href='/Task/Create/TaskClassifAuto2?projid={0}' class='btn btn-primary btn-sm'  role=button>Go to Automatic Classification Screen</a> """.format(PrjId)
