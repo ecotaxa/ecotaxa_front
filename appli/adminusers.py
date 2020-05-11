@@ -204,7 +204,7 @@ class ObjectsFieldsView(ModelView):
         return current_user.has_role(database.AdministratorLabel)
 
 # Create admin
-adminApp = flask_admin.Admin(app, name='Ecotaxa Administration')
+adminApp = flask_admin.Admin(app, name='Ecotaxa Administration', url='/admin/')
 
 # Add views
 #admin.add_view(sqla.ModelView(database.users, db.session))
