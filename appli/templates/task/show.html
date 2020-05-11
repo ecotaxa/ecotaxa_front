@@ -7,7 +7,7 @@
 	<a href="/Task/listall"><button class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span> Back to tasks list</button></a>
 </p>
 
-{% if task.taskstate=="Error" or task.taskstate=="Running" %}
+{% if task.taskstate=="Error"  %}
 <div class="alert alert-danger" >
 	<p>This taks has errors. Check the error messages below, fix these errors, go back to your project and restart your task.</p>
 </div>
