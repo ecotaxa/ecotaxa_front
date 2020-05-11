@@ -208,6 +208,9 @@ class TaskPartExport(AsyncTask):
                         """.format(",".join([str(x) for x in TaxoList]))
             logging.info("sqllstcat = %s" % sqllstcat)
         else:
+            SampleIdsForTaxoExport=[str(x[0]) for x in self.param.samples if x[3][1]=='Y']
+            if len(SampleIdsForTaxoExport)==0:
+                SampleIdsForTaxoExport=['-1']
             sqllstcat="""select t.id,concat(t.name,'('||t1.name||')') nom
             , rank() over (order by t14.name,t13.name,t12.name,t11.name,t10.name,t9.name,t8.name,t7.name,t6.name,t5.name,t4.name,t3.name,t2.name,t1.name,t.name)-1 idx
 ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
@@ -228,7 +231,7 @@ class TaskPartExport(AsyncTask):
                     left join taxonomy t12 on t11.parent_id=t12.id
                     left join taxonomy t13 on t12.parent_id=t13.id
                     left join taxonomy t14 on t13.parent_id=t14.id
-                    """.format((",".join([str(x[0]) for x in self.param.samples if x[3][1]=='Y'])),DepthFilter)
+                    """.format((",".join(SampleIdsForTaxoExport)),DepthFilter)
                             # x[3][1]==Y ==> Zoo exportable
         if self.param.redfiltres.get('taxochild', '') == '1' and len(TaxoList) > 0:
             sqlTaxoTreeFrom = " \njoin taxonomy t0 on h.classif_id=t0.id "
@@ -505,8 +508,12 @@ class TaskPartExport(AsyncTask):
         TaxoList=self.param.redfiltres.get('taxo',[])
         # On liste les categories pour fixer les colonnes de l'export
         # liste toutes les cat pour les samples et la depth
-        sqllstcat = """select distinct classif_id from part_histocat hc where psampleid in ( {0}) {1} 
-                            """.format((",".join([str(x[0]) for x in self.param.samples if x[3][1]=='Y'])), DepthFilter)
+        SampleIdsForTaxoExport = [str(x[0]) for x in self.param.samples if x[3][1] == 'Y']
+        if len(SampleIdsForTaxoExport) == 0:
+            SampleIdsForTaxoExport = ['-1']
+
+        sqllstcat = """select distinct classif_id from part_histocat hc where psampleid in ({0}) {1} 
+                            """.format((",".join(SampleIdsForTaxoExport)), DepthFilter)
                                                                         # x[3][1]==Y ==> Zoo exportable
         if self.param.excludenotliving: # On ne prend que ceux qui ne sont pas desendant de not-living
             sqlTaxoTreeFrom = " \njoin taxonomy t0 on hc.classif_id=t0.id "

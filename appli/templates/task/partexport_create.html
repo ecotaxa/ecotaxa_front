@@ -103,6 +103,7 @@ In order to ease the transfer of large exported datasets, you can chose to expor
 <table>
 <tr>
 <td valign="top">
+  {% if SampleCount>0 %}
   <br><br>
     <input type="hidden" name="starttask" value="Y">
     <div class="form-group">
@@ -110,6 +111,9 @@ In order to ease the transfer of large exported datasets, you can chose to expor
       <button type="submit" class="btn btn-primary">Start Task</button>
     </div>
   </div>
+    {% else %}
+    <span style="color: red;font-weight: bold;font-size: x-large">No data to export, change your criteria</span>
+  {% endif %}
 
 </td>
 </tr>
