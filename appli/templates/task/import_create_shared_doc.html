@@ -1,113 +1,156 @@
-
 <p><a href="#prepare-data" data-toggle="collapse" class="help">How to prepare data</a></p>
 <div id="prepare-data" class="collapse">
 
-In a folder place:
-<dl style="margin-left: 40px;">
+    In a folder place:
+    <dl style="margin-left: 40px;">
 
-  <dt>image files</dt>
-    <dd>
-      <p>Colour and 8-bits greyscale images are supported, in <code>jpg</code>, <code>png</code>,<code>gif</code> (possibly animated) formats.</p>
-    </dd>
+        <dt>image files</dt>
+        <dd>
+            <p>Colour and 8-bits greyscale images are supported, in <code>jpg</code>, <code>png</code>,<code>gif</code>
+                (possibly animated) formats.</p>
+        </dd>
 
-  <dt>a <code><a href="https://en.wikipedia.org/wiki/Tab-separated_values">tsv</a></code>  (TAB separated file) which can be .txt or .tsv extension. File name must start with ecotaxa (ecotaxa*.txt or ecotaxa*.tsv)</dt>
-    <dd>
-      <p>It contains the metadata for each image. This file can be created in a spreadsheet application (see formats and examples below).</p>
-      <ul>
-        <li>Line 1 contains column headers</li>
-        <li>Line 2 contains data format codes; [f] for floats, [t] for text</li>
-        <li>Line 3...n contain data for each image</li>
-      </ul>
-    </dd>
-</dl>
+        <dt>a <code><a href="https://en.wikipedia.org/wiki/Tab-separated_values">tsv</a></code> (TAB separated file)
+            which can be .txt or .tsv extension. File name must start with ecotaxa (ecotaxa*.txt or ecotaxa*.tsv)
+        </dt>
+        <dd>
+            <p>It contains the metadata for each image. This file can be created in a spreadsheet application (see
+                formats and examples below).</p>
+            <ul>
+                <li>Line 1 contains column headers</li>
+                <li>Line 2 contains data format codes; [f] for floats, [t] for text</li>
+                <li>Line 3...n contain data for each image</li>
+            </ul>
+        </dd>
+    </dl>
 
-<p>
-  The metadata and data for each image is organised in various levels (image, object, process, sample, etc.). All column names must be prefixed with the level name (<code>img_***</code>, <code>object_***</code>, etc.). Some common fields, used to filter data, must be named and sometimes formatted in a certain way (required format in blue), which is documented below. But, overall, the only two mandatory fields are <code  class="text-danger">img_file_name</code> and <code class="text-danger">object_id</code> (in red).
-</p>
-  <ul>
-    <li>IMAGE
+    <p>
+        The metadata and data for each image is organised in various levels (image, object, process, sample, etc.). All
+        column names must be prefixed with the level name (<code>img_***</code>, <code>object_***</code>, etc.). Some
+        common fields, used to filter data, must be named and sometimes formatted in a certain way (required format in
+        blue), which is documented below. But, overall, the only two mandatory fields are
+        <code class="text-danger">img_file_name</code> and <code class="text-danger">object_id</code> (in red).
+    </p>
     <ul>
-      <li><code class="text-danger">img_file_name</code> [t]: name of the image file in the folder (including extension)</li>
-      <li><code>img_rank</code> [f] : rank of image to be displayed, in case of existence of multiples (&lt;10) images for one object. Starts at 1.</li>
-    </ul></li>
+        <li>IMAGE
+            <ul>
+                <li><code class="text-danger">img_file_name</code> [t]: name of the image file in the folder (including
+                    extension)
+                </li>
+                <li><code>img_rank</code> [f] : rank of image to be displayed, in case of existence of multiple (&lt;10)
+                    images for one object. Starts at 1.
+                </li>
+            </ul>
+        </li>
 
-    <li>OBJECT: one object to be classified, usually one organism. One object can be represented by several images. In this <code>tsv</code> file, there is one line per image which means the object data gets repeated on several lines.
-    <ul>
-      <li><code class="text-danger">object_id</code> [t] : unique object name (will be displayed in Ecotaxa object page)</li>
-      <li><code>object_link</code> [f] : URL of an associated website</li>
-      <li><code>object_lat</code> [f] : latitude, <span class="text-info">decimal degrees</span></li>
-      <li><code>object_lon</code> [f] : longitude, <span class="text-info">decimal degrees</span></li>
-      <li><code>object_date</code> [f] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
-      <li><code>object_time</code> [f] : ISO8601 <span class="text-info">HHMMSS</span> UTC</li>
-      <li><code>object_depth_min</code> [f] : minimum depth of object, <span class="text-info">meters</span></li>
-      <li><code>object_depth_max</code> [f] : maximum depth of object, <span class="text-info">meters</span></li>
+        <li>OBJECT: one object to be classified, usually one organism. One object can be represented by several images.
+            In this <code>tsv</code> file, there is one line per image which means the object data gets repeated on
+            several lines.
+            <ul>
+                <li><code class="text-danger">object_id</code> [t] : unique object name (will be displayed in Ecotaxa
+                    object page)
+                </li>
+                <li><code>object_link</code> [f] : URL of an associated website</li>
+                <li><code>object_lat</code> [f] : latitude, <span class="text-info">decimal degrees</span></li>
+                <li><code>object_lon</code> [f] : longitude, <span class="text-info">decimal degrees</span></li>
+                <li><code>object_date</code> [f] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+                <li><code>object_time</code> [f] : ISO8601 <span class="text-info">HHMMSS</span> UTC</li>
+                <li><code>object_depth_min</code> [f] : minimum depth of object, <span class="text-info">meters</span>
+                </li>
+                <li><code>object_depth_max</code> [f] : maximum depth of object, <span class="text-info">meters</span>
+                </li>
+            </ul>
+            And, for already classified objects
+            <ul>
+                <li><code>object_annotation_date</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+                <li><code>object_annotation_time</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
+                <li><code>object_annotation_category</code> [t] : class of the object with optionally its direct parent
+                    following separated by left angle bracket without whitespace "Cnidaria&lt;Hydrozoa" or old style
+                    between brackets "Cnidaria (Hydrozoa)"
+                </li>
+                <li><code>object_annotation_category_id</code> [f] : Ecotaxa ID of the class of the object, generally
+                    from an Ecotaxa export
+                </li>
+                <li><code>object_annotation_person_name</code> [t] : name of the person who identified the object</li>
+                <li><code>object_annotation_person_email</code> [t] : email of the person who identified the object</li>
+                <li><code>object_annotation_status</code> [t] : <span class="text-info">predicted</span>, <span
+                        class="text-info">dubious</span>, or <span class="text-info">validated</span></li>
+            </ul>
+            And additional object-related fields
+            <ul>
+                <li><code>object_***</code> [f] or [t] : other fields relative to the object. Up to 500 [f] fields and
+                    20 [t] ones.
+                </li>
+            </ul>
+        </li>
+
+        <li>ACQUISITION: metadata relative to the image acquisition
+            <ul>
+                <li><code>acq_id</code> [t] : unique identifier. If your acquisition differ for each sample you must
+                    have different identifier.
+                </li>
+                <li><code>acq_instrument</code> [t] : name of the instrument (UVP, ZOOSCAN, FLOWCAM, etc.)</li>
+                <li><code>acq_***</code> [t] : other fields relative to the acquisition. Up to 30 of them.</li>
+            </ul>
+        </li>
+
+        <li>PROCESS: metadata relative to the processing of the raw images
+            <ul>
+                <li><code>process_id</code> [t] : unique identifier. If your processing differ for each sample you must
+                    have different identifier.
+                </li>
+                <li><code>process_***</code> [t] : other fields relative to the process. Up to 30 of them.</li>
+            </ul>
+        </li>
+        <li>SAMPLE: a collection event
+            <ul>
+                <li><code>sample_id</code> [t] : unique identifier</li>
+                <li><code>sample_***</code> [t] : other fields relative to the sample. Up to 30 of them.</li>
+            </ul>
+        </li>
     </ul>
-    And, for already classified objects
+
+
+    <p>You can download example tsv files</p>
     <ul>
-      <li><code>object_annotation_date</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
-      <li><code>object_annotation_time</code> [t] : ISO8601 <span class="text-info">YYYYMMJJ</span> UTC</li>
-      <li><code>object_annotation_category</code> [t] : class of the object with optionnaly its direct parent following separated by left angle bracket without whitespace "Cnidaria&lt;Hydrozoa" or old style between brackets "Cnidaria (Hydrozoa)"</li>
-      <li><code>object_annotation_category_id</code> [f] : Ecotaxa ID of the class of the object, generaly from an Ecotaxa export</li>
-      <li><code>object_annotation_person_name</code> [t] : name of the person who identified the object</li>
-      <li><code>object_annotation_person_email</code> [t] : email of the person who identified the object</li>
-      <li><code>object_annotation_status</code> [t] : <span class="text-info">predicted</span>, <span class="text-info">dubious</span>, or <span class="text-info">validated</span></li>
+        <li><a href="/static/examples/ecotaxa_table_minimum.tsv">Minimal example</a>, for fully manual entry</li>
+        <li><a href="/static/examples/ecotaxa_table_without_classification.tsv">Full featured example, with unknown</a>
+            objects only
+        </li>
+        <li><a href="/static/examples/ecotaxa_table_with_classification.tsv">Full featured example, with already
+            classified</a> objects
+        </li>
     </ul>
-    And additional object-related fields
-    <ul>
-      <li><code>object_***</code> [f] or [t] : other fields relative to the object</li>
-    </ul></li>
 
-    <li>ACQUISITION: metadata relative to the image acquisition
-    <ul>
-      <li><code>acq_id</code> [t] : unique identifier. If your acquisition differ for each sample you must have different identifier.</li>
-      <li><code>acq_instrument</code> [t] : name of the instrument (UVP, ZOOSCAN, FLOWCAM, etc.)</li>
-      <li><code>acq_***</code> [f] or [t] : other fields relative to the acquisition</li>
-    </ul></li>
+    <p>Several such importation folders can be placed alongside each other in a main folder. Pointing at that main
+        folder will import all subfolders recursively. EcoTaxa will read all <code>tsv</code> files and then import the
+        images they point to. When "Skip <code>tsv</code> that have already been imported" is ticked, the names of
+        <code>tsv</code> files are recorded and those already imported are not re-imported. For ongoing projects, this
+        allows to simply put new data alongside the old import folders and have EcoTaxa only import the new ones.</p>
 
-    <li>PROCESS: metadata relative to the processing of the raw images
-    <ul>
-      <li><code>process_id</code> [t] : unique identifier. If your processing differ for each sample you must have different identifier.</li>
-      <li><code>process_***</code> [f] or [t] : other fields relative to the process</li>
-    </ul>
-    </li>
-    <li>SAMPLE: a collection event
-    <ul>
-      <li><code>sample_id</code> [t] : unique identifier</li>
-      <li><code>sample_***</code> [f] or [t] : other fields relative to the sample</li>
-    </ul>
-  </li>
-  </ul>
-
-
-<p>You can download example tsv files</p>
-<ul>
-  <li><a href="/static/examples/ecotaxa_table_minimum.tsv">Minimal example</a>, for fully manual entry</li>
-  <li><a href="/static/examples/ecotaxa_table_without_classification.tsv">Full featured example, with unknown</a> objects only</li>
-  <li><a href="/static/examples/ecotaxa_table_with_classification.tsv">Full featured example, with already classified</a> objects</li>
-</ul>
-
-<p>Several such importation folders can be placed alongside each other in a main folder. Pointing at that main folder will import all subfolders recursively. EcoTaxa will read all <code>tsv</code> files and then import the images they point to. When "Skip <code>tsv</code> that have already been imported" is ticked, the names of <code>tsv</code> files are recorded and those already imported are not re-imported. For ongoing projects, this allows to simply put new data alongside the old import folders and have EcoTaxa only import the new ones.</p>
-
-So overall, the hierarchy can look like
-<ul style="list-style: none">
-  <li><span class="glyphicon glyphicon-folder-open"> import_folder</span>
-  <ul style="list-style: none">
-    <li><span class="glyphicon glyphicon-folder-open"> my_data_1</span>
+    So overall, the hierarchy can look like
     <ul style="list-style: none">
-      <li><span class="glyphicon glyphicon-file"></span> img_1.jpg</li>
-      <li><span class="glyphicon glyphicon-file"></span> img_2.jpg</li>
-      <li><span class="glyphicon glyphicon-file"></span> img_3.jpg</li>
-      <li><span class="glyphicon glyphicon-file"></span> table.tsv</li>
-    </ul></li>
-    <li><span class="glyphicon glyphicon-folder-open"> my_data_2</span>
-    <ul style="list-style: none">
-      <li><span class="glyphicon glyphicon-file"></span> description.tsv</li>
-      <li><span class="glyphicon glyphicon-file"></span> DCN001.jpg</li>
-      <li><span class="glyphicon glyphicon-file"></span> IMG234.png</li>
-      <li><span class="glyphicon glyphicon-file"></span> anim.gif</li>
-    </ul></li>
-  </ul></li>
-</ul>
+        <li><span class="glyphicon glyphicon-folder-open"> import_folder</span>
+            <ul style="list-style: none">
+                <li><span class="glyphicon glyphicon-folder-open"> my_data_1</span>
+                    <ul style="list-style: none">
+                        <li><span class="glyphicon glyphicon-file"></span> img_1.jpg</li>
+                        <li><span class="glyphicon glyphicon-file"></span> img_2.jpg</li>
+                        <li><span class="glyphicon glyphicon-file"></span> img_3.jpg</li>
+                        <li><span class="glyphicon glyphicon-file"></span> table.tsv</li>
+                    </ul>
+                </li>
+                <li><span class="glyphicon glyphicon-folder-open"> my_data_2</span>
+                    <ul style="list-style: none">
+                        <li><span class="glyphicon glyphicon-file"></span> description.tsv</li>
+                        <li><span class="glyphicon glyphicon-file"></span> DCN001.jpg</li>
+                        <li><span class="glyphicon glyphicon-file"></span> IMG234.png</li>
+                        <li><span class="glyphicon glyphicon-file"></span> anim.gif</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
 
 
 </div>
