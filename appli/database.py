@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
+from typing import Dict
+
 from appli import db,app,g,XSSEscape
 from flask_security import  UserMixin, RoleMixin
 from flask_login import current_user
@@ -78,15 +80,24 @@ class users(db.Model, UserMixin):
             tmp[prjid]={}
         tmp[prjid][name]=newval
         tmp[prjid]['ts']=time.time()
-        if len(tmp)>75: # si des settings pour plus de 50 projets on ne garde que les 25 plus recents
-            newpref={k:v for k,v in tmp.items() if isinstance(v,dict) and 'ts' in v}
-            ChronoSorted=[[k,v['ts']] for k,v in newpref.items()]
-            sorted(ChronoSorted,key=lambda r:r[1],reverse=True)
-            tmp={}
-            for id,ts in ChronoSorted[0:50]:
-                tmp[id]=newpref[id]
-        self.preferences=json.dumps(tmp)
+        self.preferences=self.keep_last_if_too_much(tmp, 40000)
         return 1
+
+    @staticmethod
+    def keep_last_if_too_large(prefs : Dict[str, dict], max_size: int):
+        ret = json.dumps(prefs)
+        if len(ret) > max_size:
+            # Sort project settings, new first old last
+            prefs_with_ts = [[prj, pref['ts']] for prj, pref in prefs.items()
+                                if isinstance(pref, dict) and 'ts' in pref]
+            chrono_prefs = sorted(prefs_with_ts, key=lambda r: r[1], reverse=True)
+            while len(ret) > max_size and chrono_prefs:
+                # Remove older entries until it fits
+                old_prj, old_ts = chrono_prefs.pop()
+                del prefs[old_prj]
+                ret = json.dumps(prefs)
+        return ret
+
 
 class countrylist(db.Model, UserMixin):
     __tablename__ = 'countrylist'
