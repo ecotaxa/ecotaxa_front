@@ -18,7 +18,7 @@ ProjectCreatorLabel= "Project creator"
 TaxoType={'P':'Phylo','M':'Morpho'}
 TaxoStatus={'A' : 'Active', 'D' : 'Deprecated' , 'N' : 'Not reviewed'}
 ClassifQual={'P':'predicted','D':'dubious','V':'validated'}
-DayTimeList={'A':'Dawn','D':'Day','U':'Dust','N':'Night'}
+DayTimeList={'A':'Dawn','D':'Day','U':'Dusk','N':'Night'}
 ClassifQualRevert={}
 for(k,v) in ClassifQual.items():
     ClassifQualRevert[v]=k
@@ -80,7 +80,7 @@ class users(db.Model, UserMixin):
             tmp[prjid]={}
         tmp[prjid][name]=newval
         tmp[prjid]['ts']=time.time()
-        self.preferences=self.keep_last_if_too_much(tmp, 40000)
+        self.preferences=self.keep_last_if_too_large(tmp, 40000)
         return 1
 
     @staticmethod
