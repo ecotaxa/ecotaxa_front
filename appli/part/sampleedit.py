@@ -60,7 +60,7 @@ class UvpSampleForm(Form):
     acq_disktype = IntegerField("Acq Disk type",[validators.Optional(strip_whitespace=True)])
     acq_smbase = IntegerField("Particle minimum size [pixels]",[validators.Optional(strip_whitespace=True)])
     acq_ratio = IntegerField("Acq Ratio",[validators.Optional(strip_whitespace=True)])
-    acq_descent_filter = BooleanField("acq_descent_filter",[validators.Optional(strip_whitespace=True)])
+    acq_descent_filter = BooleanField("acq_descent_filter")
     acq_presure_gain = FloatField("Presure gain",[validators.Optional(strip_whitespace=True)])
     acq_xsize = IntegerField("Acq Xsize",[validators.Optional(strip_whitespace=True)])
     acq_ysize = IntegerField("Acq Ysize",[validators.Optional(strip_whitespace=True)])
@@ -105,4 +105,5 @@ def part_sampleedit(psampleid):
             appli.part.prj.ComputeZooMatch(model.psampleid,model.project.projid)
             flash("Histograms have been recomputed","success")
         return redirect("/part/prj/"+str(model.pprojid))
-    return PrintInCharte(render_template("part/sampleedit.html", form=form, prjid=model.pprojid, psampleid=model.psampleid))
+    return PrintInCharte(render_template("part/sampleedit.html", form=form, prjid=model.pprojid
+                                         , psampleid=model.psampleid, acq_descent_filter=model.acq_descent_filter))

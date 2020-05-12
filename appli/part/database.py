@@ -41,6 +41,7 @@ class part_projects(db.Model):
     remote_password= db.Column(VARCHAR(100))
     remote_directory= db.Column(VARCHAR(200))
     remote_vectorref= db.Column(VARCHAR(200))
+    enable_descent_filter = db.Column(CHAR(1)) # Y/N/Empty
 
     def __str__(self):
         return "{0} ({1})".format(self.ptitle,self.pprojid)

@@ -38,7 +38,8 @@ def CreateOrUpdateSample(pprojid,headerdata):
     Sample.latitude = ConvTextDegreeToDecimalDegree(headerdata['latitude'], False) # false car dans les fichiers UVP historique c'est la notation degree.minute
     Sample.longitude = ConvTextDegreeToDecimalDegree(headerdata['longitude'], False)
     Sample.organizedbydeepth = headerdata.get('sampletype','P')=='P' # Nouvelle colonne optionnel, par défaut organisé par (P)ression
-    Sample.acq_descent_filter=Sample.organizedbydeepth # Si sample vertical alors filtrage en descente activé par défaut.
+    # 2020-05-01 : ce champ est à present actualisé lors du traitement du sample
+    #Sample.acq_descent_filter=Sample.organizedbydeepth # Si sample vertical alors filtrage en descente activé par défaut.
     Sample.ctd_origfilename=headerdata['ctdrosettefilename']
     if headerdata['winddir']:
         Sample.winddir = int(round(ToFloat(headerdata['winddir'])))
@@ -135,13 +136,6 @@ def CreateOrUpdateSample(pprojid,headerdata):
             if(hw_conf.get('Pressure_offset','')!=''):
                 if 0<=ToFloat(hw_conf.get('Pressure_offset', ''))<100:
                     Sample.acq_depthoffset = ToFloat(hw_conf.get('Pressure_offset', ''))
-            # Sample.acq_smbase = int(HdrParam['smbase'])
-            # Sample.acq_exposure = ToFloat(HdrParam.get('exposure',''))
-            # Sample.acq_eraseborder = ToFloat(HdrParam.get('eraseborderblobs', ''))
-            # Sample.acq_tasktype = ToFloat(HdrParam.get('tasktype', ''))
-            # Sample.acq_choice = ToFloat(HdrParam.get('choice', ''))
-            # Sample.acq_disktype = ToFloat(HdrParam.get('disktype', ''))
-            # Sample.acq_ratio = ToFloat(HdrParam.get('ratio', ''))
     db.session.commit()
     return Sample.psampleid
 
@@ -230,6 +224,9 @@ def GenerateRawHistogramUVPAPP(UvpSample, Prj, DepthOffset, organizedbydepth, De
                     continue #si on a pas de profondeur on ne peut pas traiter la donnée
                 else:
                     depth=float(0)
+            else:
+                if depth<0:
+                    depth=0 # les profondeur négatives sont forcées à 0
             RawImgDepth[idx] = depth
             ImgTime[idx]=dateheuretxt
             flash=header[3]
@@ -244,6 +241,8 @@ def GenerateRawHistogramUVPAPP(UvpSample, Prj, DepthOffset, organizedbydepth, De
                 ImgDepth[idx] = depth
             else:
                 DescentFilterRemovedCount += 1
+            if KeepLine==False:
+                continue
 
             data=[p.split(',') for p in rowpart[1].split(";") if len(p.split(','))==4]
             if rowpart[1].find("OVER_EXPOSED")>=0:
@@ -342,6 +341,18 @@ def GenerateRawHistogram(psampleid):
         DepthOffset=UvpSample.acq_depthoffset
     if DepthOffset is None:
         DepthOffset=0
+    if UvpSample.organizedbydeepth:
+        if Prj.enable_descent_filter=='Y':
+            UvpSample.acq_descent_filter = True
+        elif Prj.enable_descent_filter == 'N':
+            UvpSample.acq_descent_filter = False
+        else: # si pas explicitement positionné au niveau du projet, on utilise des valeurs par defaut en fonction de l'instrument.
+            if Prj.instrumtype=='uvp5':
+                UvpSample.acq_descent_filter = True
+            else:
+                UvpSample.acq_descent_filter = False
+    else: # si pas organisé par temps, pas de filtre de descente.
+        UvpSample.acq_descent_filter = False
     DescentFilter=UvpSample.acq_descent_filter
     # Ecart format suivant l'endroit
     # dans result on a comme dans work
@@ -390,6 +401,8 @@ def GenerateRawHistogram(psampleid):
                 idx = int(idx)
                 instrumdata = instrumdata.split('*')
                 depth = float(instrumdata[0])*0.1+DepthOffset
+                if (not math.isnan(depth)) and (depth<0):
+                    depth=0 # les profondeur négatives sont forcées à 0
                 RawImgDepth[idx] = depth
                 if idx<FirstImage : continue
                 ImgTime[idx]=row[1][0:14]

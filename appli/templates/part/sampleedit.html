@@ -207,7 +207,9 @@ The <b>sample</b> depth offsets are set in the instrument metadata for the UVP6 
 
   {{ render_field(form.acq_presure_gain,tr='o',style="width:80px;") }}
 {{ render_field(form.acq_disktype,tr='') }}
-{{ render_field(form.acq_descent_filter,tr='c',colspan=3) }}
+<td>
+  <label for="acq_presure_gain" class="control-label">Acq descent filter</label>
+  </td><td>{{"yes" if acq_descent_filter else "no" }}</td><td></td><td></td></tr>
 </table>
 <table class="edittab">
   <tr><td colspan="4"><b>LISST Settings</b></td></tr>

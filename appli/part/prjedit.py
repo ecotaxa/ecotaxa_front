@@ -35,6 +35,7 @@ class UvpPrjForm(Form):
     remote_password = StringField("Password")
     remote_directory = StringField("Directory on server")
     remote_vectorref = StringField("Additionnal reference of the vector")
+    enable_descent_filter = StringField("Enable descent filter")
 
 
 @app.route('/part/prjedit/<int:pprojid>',methods=['get','post'])
@@ -60,6 +61,7 @@ def part_prjedit(pprojid):
     UvpPrjForm.instrumtype=SelectField('Instrument type',choices=[(x,x) for x in ("","uvp5","uvp6","lisst","uvp6remote")])
     UvpPrjForm.projid=SelectField('Ecotaxa Project',choices=[(0,''),(-1,'Create a new EcoTaxa project')]+database.GetAll("SELECT projid,concat(title,' (',cast(projid as varchar),')') FROM projects ORDER BY lower(title)"),coerce=int )
     UvpPrjForm.remote_type=SelectField('Remote type',choices=[(x,x) for x in ("","ARGO","TSV LOV")])
+    UvpPrjForm.enable_descent_filter=SelectField('Enable descent filter',choices=[("",""),("Y","Yes"),("N","No")])
     form=UvpPrjForm(request.form,model)
     if gvp('delete')=='Y':
         try:

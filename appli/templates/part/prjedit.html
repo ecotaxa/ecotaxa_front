@@ -121,7 +121,7 @@
 <a href="#create-project" data-toggle="collapse"><b>DATA organization <span class="glyphicon glyphicon-info-sign"></span></a></p>
 <div id="create-project" class="collapse panel panel-default">
   <div class="panel-body">
-    <p><b>Underwater Vision Profiler (UVP) :</b>
+    <p><b>Underwater Vision Profiler (UVP) 5 :</b>
       <ul>
 <li>PARTICLE and CTD data: the data must be organized in a « Zooprocess » architecture:
 <ul>
@@ -139,6 +139,16 @@
 <li>Zooplancton and detritus images : the data must be organized in a « Zooprocess » architecture:
 Processed images and associated TSV files will be imported separately from the « :\uvp5_snXXX_cruise\work\ » folder into the ECOTAXA associated project (not in this Particle module)
     </ul>
+
+<b>Underwater Vision Profiler (UVP) 6 through UVPAPP :</b>
+<ul>
+<li>PARTICLE and CTD data: the data must be organized in a « Zooprocess » architecture:
+<ul>
+<li>Sample (profile) metadata : « uvp6_header_snXXX_cruise.txt » in « :\uvp6_snXXX_cruise\meta\ » : THIS FILE MUST ABSOLUTELY EXIST to IMPORT YOUR DATA.</li>
+<li>Particle UVP data files (SampleName_Particule.zip) in « :\uvp6_snXXX_cruise\ecodata\ »
+<li>CTD data (optional) in « :\uvp2_snXXX_cruise\ctd_data_cnv\ » (see the import page about formating CTD data for importation)</li>
+</ul>
+</ul>
 <b>LISST :</b><ul>
 <li>PARTICLE and CTD data: the data must be organized in a « Zooprocess » architecture:
   <ul>
@@ -188,6 +198,12 @@ The <b>project</b> depth offset is automatically set to 1.2 if your instrument i
 The <b>sample</b> depth offsets are set in the instrument metadata for the UVP6 instrument and automatically documented in EcoPart for each sample.""") }}
 {{ render_field(form.cruise,tr='o',help="selected from the root folder name") }}
 {{ render_field(form.ship,tr='c') }}
+{{ render_field(form.enable_descent_filter,tr='oc',help="""The Descent filter operates <b>during the import</b> of the samples. It checks the pressure and removes images acquired when UVP is ascending. The filter applies only on UVP data (LISST and UVP6remote excluded).
+
+<br>NO : no filtering in any case
+<br>YES : applied on 'depth' samples of the project
+<br>EMPTY : automatically applies the 'YES' rule for UVP5 and the 'NO' rule for UVP6
+""")}}
 {{ render_field(form.prj_info,tr='oc',colspan=3,style="width:500px;",help="read from the cruise_info.txt file") }}
 {{ render_field(form.public_visibility_deferral_month,tr='o',style="width:50px;",suffix='Months',help="delay after which data will be displayed") }}
   <td colspan="2">The delay starting date is the date of the older sample of the project. See the sample metadata page to visualize resulting display/download dates</td></tr>
