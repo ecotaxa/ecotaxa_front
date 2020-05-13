@@ -339,9 +339,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.2.7"
+ecotaxa_version="2.3"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-05-05"
+    return ecotaxa_version+" 2020-05-13"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -349,6 +349,18 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-05-13 : V 2.3
+    Architecture #400: Move some code to back-end, potentially in a container.
+    Bugfix #349: Time format wrongly hinted in Mass Update page.
+    Bugfix #320: "Dust" instead of "Dusk" in parts of day display.
+    Bugfix #322: Document limit of custom fields for each table in import page.
+    Bugfix #395: Ensure preferences do not overflow the DB column.
+    Feature #379: EcoPart: Allow negative values in particle import.
+    Feature #380: EcoPart: Remove descent filter for UVP6 datasets.
+    Bugfix #300: EcoPart: User cannot export restricted project when not annotator.
+    Bugfix #363: In details page, tasks are always flagged as "with error" while running.
+    Bugfix #361: "Ecotaxa Administration" is a dead link in admin home.
+    Bugfix #328: No country in a freshly created DB.
 2020-05-05 : V 2.2.7
     Bugfix #334: L'utilisateur reçoit un indice en cas de nom de fichier problématique lors de l'import.
     Bugfix #281: Correction des rechargements aléatoires pendant la classification manuelle.
