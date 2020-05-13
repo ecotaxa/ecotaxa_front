@@ -3,9 +3,8 @@
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 
 import os,sys,pathlib,urllib.parse
-# Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL
-import unicodedata
 
+# Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL
 if sys.platform.startswith('win32'):
     virtualprefix = sys.base_prefix
     if hasattr(sys, 'real_prefix'):
@@ -258,6 +257,7 @@ def CalcAstralDayTime(Date,Time,Latitude,Longitude):
 
 _utf_warn = "HINT: Did you use utf-8 while transferring?"
 
+import unicodedata
 def _suspicious_str(path: str):
     if not isinstance(path, str):
         return False

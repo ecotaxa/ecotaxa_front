@@ -8,3 +8,8 @@ ecotaxapatch.zip
 *.zip
 __pycache__/
 *.py[cod]
+/to_back/ecotaxa_cli_py/test/
+/to_back/ecotaxa_cli_py/docs/
+/to_back/.openapi-generator/
+/to_back/ecotaxa_cli_py_README.md
+/to_back/.openapi-generator-ignore
