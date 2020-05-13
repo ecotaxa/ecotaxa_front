@@ -24,7 +24,7 @@ import six
 from six.moves.urllib.parse import urlencode
 import urllib3
 
-from ecotaxa_cli_py.exceptions import ApiException, ApiValueError
+from to_back.ecotaxa_cli_py.exceptions import ApiException, ApiValueError
 
 
 logger = logging.getLogger(__name__)

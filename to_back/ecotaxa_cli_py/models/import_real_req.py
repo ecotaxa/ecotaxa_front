@@ -15,7 +15,7 @@ import re  # noqa: F401
 
 import six
 
-from ecotaxa_cli_py.configuration import Configuration
+from to_back.ecotaxa_cli_py.configuration import Configuration
 
 
 class ImportRealReq(object):

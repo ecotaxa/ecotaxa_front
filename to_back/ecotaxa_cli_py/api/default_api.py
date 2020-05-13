@@ -17,8 +17,8 @@ import re  # noqa: F401
 # python 2 and python 3 compatibility library
 import six
 
-from ecotaxa_cli_py.api_client import ApiClient
-from ecotaxa_cli_py.exceptions import (  # noqa: F401
+from to_back.ecotaxa_cli_py.api_client import ApiClient
+from to_back.ecotaxa_cli_py.exceptions import (  # noqa: F401
     ApiTypeError,
     ApiValueError
 )

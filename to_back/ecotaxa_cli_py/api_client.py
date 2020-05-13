@@ -24,10 +24,10 @@ import tempfile
 import six
 from six.moves.urllib.parse import quote
 
-from ecotaxa_cli_py.configuration import Configuration
-import ecotaxa_cli_py.models
-from ecotaxa_cli_py import rest
-from ecotaxa_cli_py.exceptions import ApiValueError, ApiException
+from to_back.ecotaxa_cli_py.configuration import Configuration
+import to_back.ecotaxa_cli_py.models
+from to_back.ecotaxa_cli_py import rest
+from to_back.ecotaxa_cli_py.exceptions import ApiValueError, ApiException
 
 
 class ApiClient(object):
@@ -305,7 +305,7 @@ class ApiClient(object):
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
             else:
-                klass = getattr(ecotaxa_cli_py.models, klass)
+                klass = getattr(to_back.ecotaxa_cli_py.models, klass)
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)

@@ -14,8 +14,8 @@
 from __future__ import absolute_import
 
 # import models into model package
-from ecotaxa_cli_py.models.http_validation_error import HTTPValidationError
-from ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
-from ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
-from ecotaxa_cli_py.models.import_real_req import ImportRealReq
-from ecotaxa_cli_py.models.validation_error import ValidationError
+from to_back.ecotaxa_cli_py.models.http_validation_error import HTTPValidationError
+from to_back.ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
+from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
+from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
+from to_back.ecotaxa_cli_py.models.validation_error import ValidationError

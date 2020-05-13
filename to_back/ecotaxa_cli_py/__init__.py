@@ -17,20 +17,21 @@ from __future__ import absolute_import
 __version__ = "1.0.0"
 
 # import apis into sdk package
-from ecotaxa_cli_py.api.default_api import DefaultApi
+from to_back.ecotaxa_cli_py.api.default_api import DefaultApi
 
 # import ApiClient
-from ecotaxa_cli_py.api_client import ApiClient
-from ecotaxa_cli_py.configuration import Configuration
-from ecotaxa_cli_py.exceptions import OpenApiException
-from ecotaxa_cli_py.exceptions import ApiTypeError
-from ecotaxa_cli_py.exceptions import ApiValueError
-from ecotaxa_cli_py.exceptions import ApiKeyError
-from ecotaxa_cli_py.exceptions import ApiException
+from to_back.ecotaxa_cli_py.api_client import ApiClient
+from to_back.ecotaxa_cli_py.configuration import Configuration
+from to_back.ecotaxa_cli_py.exceptions import OpenApiException
+from to_back.ecotaxa_cli_py.exceptions import ApiTypeError
+from to_back.ecotaxa_cli_py.exceptions import ApiValueError
+from to_back.ecotaxa_cli_py.exceptions import ApiKeyError
+from to_back.ecotaxa_cli_py.exceptions import ApiAttributeError
+from to_back.ecotaxa_cli_py.exceptions import ApiException
 # import models into sdk package
-from ecotaxa_cli_py.models.http_validation_error import HTTPValidationError
-from ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
-from ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
-from ecotaxa_cli_py.models.import_real_req import ImportRealReq
-from ecotaxa_cli_py.models.validation_error import ValidationError
+from to_back.ecotaxa_cli_py.models.http_validation_error import HTTPValidationError
+from to_back.ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
+from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
+from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
+from to_back.ecotaxa_cli_py.models.validation_error import ValidationError
 
