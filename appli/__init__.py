@@ -339,9 +339,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.3"
+ecotaxa_version="2.3.1"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-05-13"
+    return ecotaxa_version+" 2020-05-18"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -349,6 +349,8 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-05-18 : V 2.3.1
+    Bugfix #402: Under server load or for big page sizes, vignettes could appear after a delay.
 2020-05-13 : V 2.3
     Architecture #400: Move some code to back-end, potentially in a container.
     Bugfix #349: Time format wrongly hinted in Mass Update page.
