@@ -293,12 +293,8 @@ def indexPrj(PrjId):
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
 # @login_required
 def LoadRightPane():
-    # récupération des parametres d'affichage
-    pageoffset = int(gvp("pageoffset", "0"))
-    filtres = {}
-    for k in sharedfilter.FilterList:
-        filtres[k] = gvp(k, "")
 
+    # Fetch project are check rights
     PrjId = gvp("projid")
     Prj = database.Projects.query.filter_by(projid=PrjId).first()
     if Prj is None:
@@ -306,18 +302,28 @@ def LoadRightPane():
     if not Prj.CheckRight(-1):
         return "Access Denied"
 
+    # copie des valeurs de filtres connues
     Filt = {}
-    PrefToSave = 0
     for k, v in FilterList.items():
         Filt[k] = gvp(k, v)
-        if (k in FilterListAutoSave or gvp("saveinprofile") == "Y") and current_user.is_authenticated:
-            PrefToSave += current_user.SetPref(PrjId, k, Filt[k])
 
     # on sauvegarde les parametres dans le profil utilisateur
-    if PrefToSave > 0:
-        database.ExecSQL("update users set preferences=%s where id=%s", (current_user.preferences, current_user.id),
-                         True)
-        user_datastore.ClearCache()
+    if current_user.is_authenticated:
+        PrefToSave = 0
+        save_all = gvp("saveinprofile") == "Y"
+        for k, v in Filt.items():
+            if save_all or (k in FilterListAutoSave):
+                PrefToSave += current_user.SetPref(Prj.projid, k, v)
+        if PrefToSave > 0:
+            database.ExecSQL("update users set preferences=%s where id=%s", (current_user.preferences, current_user.id),
+                             True)
+            user_datastore.ClearCache()
+
+    # récupération des parametres d'affichage
+    filtres = {}
+    for k in sharedfilter.FilterList:
+        filtres[k] = gvp(k, "")
+    pageoffset = int(gvp("pageoffset", "0"))
     sortby = Filt["sortby"]
     sortorder = Filt["sortorder"]
     dispfield = Filt["dispfield"]
@@ -330,9 +336,8 @@ def LoadRightPane():
     fieldlist = GetFieldList(Prj)
     fieldlist.pop('orig_id', '')
     fieldlist.pop('objtime', '')
-    t = ["<a name='toppage'/>"]
     whereclause = " where o.projid=%(projid)s "
-    sqlparam = {'projid': gvp("projid")}
+    sqlparam = {'projid': Prj.projid}
     sql = """select o.objid,t.name taxoname,t2.name taxoparent,o.classif_qual,
     u.name classifwhoname,i.file_name,t.display_name
   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
@@ -380,7 +385,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     (nbrtotal, nbrvalid, nbrdubious, nbrpredict) = GetAll(sqlcount, sqlparam, debug=False)[0]
     if nbrtotal is None:  # si table vide
         nbrtotal = nbrvalid = nbrdubious = nbrpredict = 0
-        RecalcProjectTaxoStat(PrjId)
+        RecalcProjectTaxoStat(Prj.projid)
     pagecount = math.ceil(int(nbrtotal) / ippdb)
     if sortby == "classifname":
         sql += " order by t.name " + sortorder + " ,objid " + sortorder
@@ -396,7 +401,9 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     sql += " Limit %d offset %d " % (ippdb, pageoffset * ippdb)
     res = GetAll(sql, sqlparam, False)
 
+    # Produce page lines using request output
     # print("%s\n%s\n%s"%(sql,sqlparam,res))
+    html = ["<a name='toppage'/>"]
     trcount = 1
     fitlastclosedtr = 0  # index de t de la derniere création de ligne qu'il faudrat effacer quand la page sera pleine
     fitheight = 100  # hauteur déjà occupé dans la page plus les header footer (hors premier header)
@@ -404,7 +411,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     LineStart = ""
     if Prj.CheckRight(1):  # si annotateur on peut sauver les changements.
         LineStart = "<td class='linestart'></td>"
-    t.append("<table class=imgtab><tr id=tr1>" + LineStart)
+    html.append("<table class=imgtab><tr id=tr1>" + LineStart)
     WidthOnRow = 0
     # récuperation et ajustement des dimensions de la zone d'affichage
     # noinspection PyBroadException
@@ -466,11 +473,11 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
             fitheight += fitcurrentlinemaxheight
             if (ipp == 0) and (fitheight > WindowHeight):  # en mode fit quand la page est pleine
                 if fitlastclosedtr > 0:  # dans tous les cas on laisse une ligne
-                    del t[fitlastclosedtr:]
+                    del html[fitlastclosedtr:]
                 break
-            fitlastclosedtr = len(t)
+            fitlastclosedtr = len(html)
             fitcurrentlinemaxheight = 0
-            t.append("</tr></table><table class=imgtab><tr id=tr%d>%s" % (trcount, LineStart))
+            html.append("</tr></table><table class=imgtab><tr id=tr%d>%s" % (trcount, LineStart))
             WidthOnRow = 0
         cellwidth = width + 22
         fitcurrentlinemaxheight = max(fitcurrentlinemaxheight, height + 45 + 14 * len(
@@ -555,13 +562,13 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
         WidthOnRow += cellwidth + 5  # 5 = border-spacing = espace inter image
-        t.append(txt)
+        html.append(txt)
 
-    t.append("</tr></table>")
+    html.append("</tr></table>")
     if len(res) == 0:
-        t.append("<b>No Result</b><br>")
+        html.append("<b>No Result</b><br>")
     if Prj.CheckRight(1):  # si annotateur on peut sauver les changements.
-        t.append("""
+        html.append("""
         <div id='PendingChanges' class='PendingChangesClass text-danger'></div>
         <button class='btn btn-default' onclick="$(window).scrollTop(0);">
             <span class='glyphicon glyphicon-arrow-up ' ></span></button>
@@ -587,21 +594,21 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         """)
     # Gestion de la navigation entre les pages
     if ipp == 0:
-        t.append("<p class='inliner'> Page management not available on Fit mode</p>")
+        html.append("<p class='inliner'> Page management not available on Fit mode</p>")
     elif pagecount > 1 or pageoffset > 0:
-        t.append("<p class='inliner'> Page %d / %d</p>" % (pageoffset + 1, pagecount))
-        t.append("<nav><ul class='pagination'>")
+        html.append("<p class='inliner'> Page %d / %d</p>" % (pageoffset + 1, pagecount))
+        html.append("<nav><ul class='pagination'>")
         if pageoffset > 0:
-            t.append("<li><a href='javascript:gotopage(%d);' >&laquo;</a></li>" % (pageoffset - 1))
+            html.append("<li><a href='javascript:gotopage(%d);' >&laquo;</a></li>" % (pageoffset - 1))
         for i in range(0, pagecount - 1, math.ceil(pagecount / 20)):
             if i == pageoffset:
-                t.append("<li class='active'><a href='javascript:gotopage(%d);'>%d</a></li>" % (i, i + 1))
+                html.append("<li class='active'><a href='javascript:gotopage(%d);'>%d</a></li>" % (i, i + 1))
             else:
-                t.append("<li><a href='javascript:gotopage(%d);'>%d</a></li>" % (i, i + 1))
-        t.append("<li><a href='javascript:gotopage(%d);'>%d</a></li>" % (pagecount - 1, pagecount))
+                html.append("<li><a href='javascript:gotopage(%d);'>%d</a></li>" % (i, i + 1))
+        html.append("<li><a href='javascript:gotopage(%d);'>%d</a></li>" % (pagecount - 1, pagecount))
         if pageoffset < pagecount - 1:
-            t.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>" % (pageoffset + 1))
-        t.append("</ul></nav>")
+            html.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>" % (pageoffset + 1))
+        html.append("</ul></nav>")
     if nbrtotal > 0:
         pctvalid = 100 * nbrvalid / nbrtotal
         pctpredict = 100 * nbrpredict / nbrtotal
@@ -614,7 +621,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
     else:
         txtpctvalid = "-"
         pctdubious = pctpredict = pctvalid = 0
-    t.append("""
+    html.append("""
     <script>
         PostAddImages();
         $('#objcount').html('{0} / {1} ');
@@ -622,7 +629,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         $('#progress-bar-predicted').css('width','{3}%');
         $('#progress-bar-dubious').css('width','{4}%');
     </script>""".format(txtpctvalid, nbrtotal, pctvalid, pctpredict, pctdubious))
-    return "\n".join(t)
+    return "\n".join(html)
 
 
 ######################################################################################################################

@@ -89,7 +89,8 @@
 
 {% endblock %}
 
-{% block body %}<div id="topbar">
+{% block body %}
+<div id="topbar">
     <input type="hidden" id="projid" value="{{ g.Projid }}">
     <input type="hidden" id="taxofilter" value="" autocomplete="off">
     <input type="hidden" id="taxofilterlabel" value="" autocomplete="off">
@@ -400,28 +401,28 @@
         }
 
             {# Permet de reduire la taille et l'espace du texte du dropdown Taxo Annotation #}
-#select2-taxolbanno-results li {
-                font-size: 12px;
-                padding: 3px;
-            }
+        #select2-taxolbanno-results li {
+            font-size: 12px;
+            padding: 3px;
+        }
 
-            .popover {
-                max-width: 500px;
-            }
+        .popover {
+            max-width: 500px;
+        }
 
-            #headersubtitle .btn-gris {
-                padding-top: 0;
-                padding-bottom: 0;
-                border: 0;
-            }
+        #headersubtitle .btn-gris {
+            padding-top: 0;
+            padding-bottom: 0;
+            border: 0;
+        }
 
-            #headersubtitle .btn-gris div:nth-child(1) {
-                max-width: 500px;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                display: inline-block;
-                vertical-align: bottom;
-            }
+        #headersubtitle .btn-gris div:nth-child(1) {
+            max-width: 500px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: bottom;
+        }
     </style>
     <script>
         var PendingChanges = {};
@@ -561,390 +562,403 @@
             req['projid'] = $("#projid").val();
             $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
             PendingChanges = {}; {# After load there's no pending changes #}
-                PendingChangesTaxoName = {};
-                if (TxtFilter != "")
-                    TxtFilter = "Filter: " + TxtFilter;
-                var jqpageoffset = $("#pageoffset");
-                if (TxtFilter != PrevTxtFilter) {
-                    {# Si une condition change on revient page 1 #}
-                    if (PrevTxtFilter != "INITIAL") // Mais pas sur le premier load de page qui peut être avec une URL qui met un filtre
-                        jqpageoffset.val(0);
-                    PrevTxtFilter = TxtFilter;
-                }
-                req['pageoffset'] = jqpageoffset.val();
-                var urlparam = {}, url, k;
-                if ((NoAjax === 'mail') || (NoAjax === 'mailN')) {
-                    delete req["resultwidth"];
-                    delete req["windowheight"];
-                    for (k in req)
-                        urlparam[k] = req[k];
-                    url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + $.param(urlparam);
-                    url = "mailto:?subject=Ecotaxa%20page%20share&body=" + encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n" + url);
-                    if (NoAjax === 'mail')
-                        window.location = url;
-                    else
-                        window.open(url, '_blank');
-                    return;
-                }
-                if (typeof (NoAjax) === 'string') {
-                    {# Une URL #}
-                    delete req["resultwidth"];
-                    delete req["windowheight"];
-                    for (k in req)
-                        if (req[k] !== "")
-                            urlparam[k] = req[k];
-                    url = NoAjax;
-                    if (url.indexOf('?') > 0) url += "&";
-                    else url += "?";
-                    url += $.param(urlparam);
+            PendingChangesTaxoName = {};
+            if (TxtFilter != "")
+                TxtFilter = "Filter: " + TxtFilter;
+            var jqpageoffset = $("#pageoffset");
+            if (TxtFilter != PrevTxtFilter) {
+                {# Si une condition change on revient page 1 #}
+                if (PrevTxtFilter != "INITIAL") // Mais pas sur le premier load de page qui peut être avec une URL qui met un filtre
+                    jqpageoffset.val(0);
+                PrevTxtFilter = TxtFilter;
+            }
+            req['pageoffset'] = jqpageoffset.val();
+            var urlparam = {}, url, k;
+            if ((NoAjax === 'mail') || (NoAjax === 'mailN')) {
+                delete req["resultwidth"];
+                delete req["windowheight"];
+                for (k in req)
+                    urlparam[k] = req[k];
+                url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + $.param(urlparam);
+                url = "mailto:?subject=Ecotaxa%20page%20share&body=" + encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n" + url);
+                if (NoAjax === 'mail')
                     window.location = url;
-                    return;
-                }
-                if (SaveInProfile == true)
-                    req["saveinprofile"] = 'Y';
-                jqcolumnright.html("<img src='/static/spinningred.gif'> Loading");
-                AsyncSingleLoadRightPane(jqcolumnright, req)
-                $('#headersubtitle').html(TxtFilter);
+                else
+                    window.open(url, '_blank');
+                return;
             }
+            if (typeof (NoAjax) === 'string') {
+                {# Une URL #}
+                delete req["resultwidth"];
+                delete req["windowheight"];
+                for (k in req)
+                    if (req[k] !== "")
+                        urlparam[k] = req[k];
+                url = NoAjax;
+                if (url.indexOf('?') > 0) url += "&";
+                else url += "?";
+                url += $.param(urlparam);
+                window.location = url;
+                return;
+            }
+            if (SaveInProfile == true)
+                req["saveinprofile"] = 'Y';
+            jqcolumnright.html("<img src='/static/spinningred.gif'> Loading");
+            AsyncSingleLoadRightPane(jqcolumnright, req)
+            $('#headersubtitle').html(TxtFilter);
+        }
 
-            var theOnlyRightPaneXHR = null;
-            function AsyncSingleLoadRightPane(elem, req) {
-                // Load right pane, but cancel a previous load if in progress. github #281.
-                // Below is a copy/paste/simplify of JQuery load(), as this primitive does
-                // not return the generated XHR object.
-                if (theOnlyRightPaneXHR && theOnlyRightPaneXHR.readyState != 4) {
-                    // abort request in progress, we want new request results and only them
-                    theOnlyRightPaneXHR.abort();
+        var theOnlyLazyLoader = null;
+
+        var theOnlyRightPaneXHR = null;
+        function AsyncSingleLoadRightPane(elem, req) {
+            // Load right pane, but cancel a previous load if in progress. github #281.
+            // Below is a copy/paste/simplify of JQuery load(), as this primitive does
+            // not return the generated XHR object.
+            if (theOnlyRightPaneXHR && theOnlyRightPaneXHR.readyState != 4) {
+                // abort request in progress, we want new request results and only them
+                theOnlyRightPaneXHR.abort();
+            }
+            if (theOnlyLazyLoader !== null) {
+                // Lazy loader does the loading for detached DOM elements as well -> Gh #402 for big page size
+                theOnlyLazyLoader.destroy();
+                theOnlyLazyLoader = null;
+            }
+            theOnlyRightPaneXHR = jQuery.ajax({
+                url: "/prj/LoadRightPane",
+                type: "POST",
+                dataType: "html",
+                data: req
+            }).done(function (responseText) {
+                // Detach present DOM and inject the new one
+                elem.html(responseText);
+            }).error(function (jqXHR, opts, error) {
+                if (error !== "abort") {
+                    msg = "Request problem " + JSON.stringify(jqXHR);
+                    msg += "<br>Refreshing the page could cure this problem.";
+                    elem.html(msg);
                 }
-                theOnlyRightPaneXHR = jQuery.ajax({
-                    url: "/prj/LoadRightPane",
-                    type: "POST",
-                    dataType: "html",
-                    data: req
-                }).done(function (responseText) {
-                    elem.html(responseText);
-                }).error(function (jqXHR, opts, error) {
-                    if (error !== "abort") {
-                        msg = "Request problem " + JSON.stringify(jqXHR);
-                        msg += "<br>Refreshing the page could cure this problem.";
-                        elem.html(msg);
-                    }
+            });
+        }
+
+
+        function RefreshClassifTab(ForceRecalc) {
+            var jOptionSelected = $('#taxolbanno option:selected');
+            Restoretaxolbid = jOptionSelected.val();
+            Restoretaxolbtxt = jOptionSelected.text();
+            Restoretaxolb = $('#taxolbanno option').detach();
+            RestoreHighLigthID = $('.ui-droppable.ui-state-highlight').data('taxoid');
+            RestoreActiveTaxoID = $('.ui-droppable.activeTaxo').data('taxoid');
+            var HiddenItems = $('.classiftab td').filter(function () { return $(this).css('display') == 'none'; }).map(function () { return $(this).data('taxoid'); }).get();
+            var HorizArrow = $('.classiftab td span.glyphicon-triangle-right').closest('td').map(function () { return $(this).data('taxoid'); }).get();
+            var PosScrollBar = $('#divclassiftab').scrollTop();
+            var req = { taxo: $("#taxofilter").val(), taxofilterlabel: $("#taxofilterlabel").val() };
+            if (ForceRecalc === 'Y') req['ForceRecalc'] = 'Y';
+            $("#TabA").load("/prjGetClassifTab/" + $("#projid").val(), req, function () {
+                $.each(HiddenItems, function (k, v) {
+                    {# Masque ceux qui etaient déjà cachés #}
+                    $('.classiftab td[data-taxoid=' + v + ']').css('display', 'none');
                 });
-            }
-
-
-            function RefreshClassifTab(ForceRecalc) {
-                var jOptionSelected = $('#taxolbanno option:selected');
-                Restoretaxolbid = jOptionSelected.val();
-                Restoretaxolbtxt = jOptionSelected.text();
-                Restoretaxolb = $('#taxolbanno option').detach();
-                RestoreHighLigthID = $('.ui-droppable.ui-state-highlight').data('taxoid');
-                RestoreActiveTaxoID = $('.ui-droppable.activeTaxo').data('taxoid');
-                var HiddenItems = $('.classiftab td').filter(function () { return $(this).css('display') == 'none'; }).map(function () { return $(this).data('taxoid'); }).get();
-                var HorizArrow = $('.classiftab td span.glyphicon-triangle-right').closest('td').map(function () { return $(this).data('taxoid'); }).get();
-                var PosScrollBar = $('#divclassiftab').scrollTop();
-                var req = { taxo: $("#taxofilter").val(), taxofilterlabel: $("#taxofilterlabel").val() };
-                if (ForceRecalc === 'Y') req['ForceRecalc'] = 'Y';
-                $("#TabA").load("/prjGetClassifTab/" + $("#projid").val(), req, function () {
-                    $.each(HiddenItems, function (k, v) {
-                        {# Masque ceux qui etaient déjà cachés #}
-                        $('.classiftab td[data-taxoid=' + v + ']').css('display', 'none');
-                    });
-                    $.each(HorizArrow, function (k, v) {
-                        {# Masque ceux qui etaient déjà cachés #}
-                        $('.classiftab td[data-taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
-                    });
-                    $('#divclassiftab').scrollTop(PosScrollBar);
+                $.each(HorizArrow, function (k, v) {
+                    {# Masque ceux qui etaient déjà cachés #}
+                    $('.classiftab td[data-taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
                 });
+                $('#divclassiftab').scrollTop(PosScrollBar);
+            });
 
-            }
+        }
 
-            function SortToggle(NoRefresh) {
-                if ($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
-                    $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title", "Current Sort : Descending");
-                else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title", "Current Sort : Ascending");
-                if (NoRefresh !== 'NoRefresh') {
-                    $("#pageoffset").val(0); {# Force le retour à la premiere page #}
-                    LoadRightPane(); {# 20181024 Autorefresh #}
-                }
-            }
-
-            function ToggleDispField(caller) {
-                $('#' + caller).find('span').toggleClass("glyphicon-ok");
-                $('#' + caller).find('span').removeClass("ManualAdd");
-                $('#' + caller).find('span.glyphicon-ok').addClass("ManualAdd");
+        function SortToggle(NoRefresh) {
+            if ($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
+                $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title", "Current Sort : Descending");
+            else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title", "Current Sort : Ascending");
+            if (NoRefresh !== 'NoRefresh') {
+                $("#pageoffset").val(0); {# Force le retour à la premiere page #}
                 LoadRightPane(); {# 20181024 Autorefresh #}
-                //return false;
             }
-            function gotopage(nopage) {
-                $("#pageoffset").val(nopage);
-                LoadRightPane();
-            }
+        }
 
-            $(document).ready(function () {
-                if ("{{data.sortorder}}" == "desc")    //TOCHECK LN
-                    SortToggle('NoRefresh');
-                $('[data-toggle="tooltip"]').tooltip();
-                $("#titledivtitle").css("max-width", $("#titlediv").parent().width() - 150);
-                {% if g.taxofilter %}
-                SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }});
+        function ToggleDispField(caller) {
+            $('#' + caller).find('span').toggleClass("glyphicon-ok");
+            $('#' + caller).find('span').removeClass("ManualAdd");
+            $('#' + caller).find('span.glyphicon-ok').addClass("ManualAdd");
+            LoadRightPane(); {# 20181024 Autorefresh #}
+            //return false;
+        }
+        function gotopage(nopage) {
+            $("#pageoffset").val(nopage);
+            LoadRightPane();
+        }
+
+        $(document).ready(function () {
+            if ("{{data.sortorder}}" == "desc")    //TOCHECK LN
+                SortToggle('NoRefresh');
+            $('[data-toggle="tooltip"]').tooltip();
+            $("#titledivtitle").css("max-width", $("#titlediv").parent().width() - 150);
+            {% if g.taxofilter %}
+            SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }}
+        );
+
         {% endif %}
 
         var PreviousSort = $('#sortby').val();
         {# Si on choisit un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields #}
-            $('#sortby').change(function () {
-                $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
-                $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
-                PreviousSort = $(this).val();
-                $("#pageoffset").val(0); {# Changement d'ordre on revient à la première page #}
-                    LoadRightPane(); {# 20181024 Autorefresh #}
-                });
-            $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () { LoadRightPane(); }); {# 20181024 Autorefresh #}
-            {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
-                $('#sortby').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-                $('#ipp').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-                $('#zoom').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-            #}
+        $('#sortby').change(function () {
+            $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
+            $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
+            PreviousSort = $(this).val();
+            $("#pageoffset").val(0); {# Changement d'ordre on revient à la première page #}
+                LoadRightPane(); {# 20181024 Autorefresh #}
+            });
+        $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () { LoadRightPane(); }); {# 20181024 Autorefresh #}
+        {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
+            $('#sortby').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
+            $('#ipp').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
+            $('#zoom').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
+        #}
 
-            $("#filt_annot").select2({
-                ajax: {
-                    url: "/search/users",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) { return { q: params.term, page: params.page }; },
-                    processResults: function (data, page) { return { results: data }; },
-                    cache: true
+        $("#filt_annot").select2({
+            ajax: {
+                url: "/search/users",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term, page: params.page }; },
+                processResults: function (data, page) { return { results: data }; },
+                cache: true
+            },
+            minimumInputLength: 2
+            , placeholder: "Annotator"
+        }); // Select2 Ajax
+        $("#filt_freenum").select2({
+            ajax: {
+                url: "/prj/GetFieldList/{{ g.Projid }}/n",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term, page: params.page }; },
+                processResults: function (data, page) { return { results: data }; },
+                cache: true
+            }, placeholder: "Num. field", dropdownCssClass: "width240"
+        });
+        $("#filt_freetxt").select2({
+            ajax: {
+                url: "/prj/GetFieldList/{{ g.Projid }}/t",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term, page: params.page }; },
+                processResults: function (data, page) { return { results: data }; },
+                cache: true
+            }, placeholder: "Text field", dropdownCssClass: "width240"
+        });
+
+        {#     Ctrl + A affecte la valeur selectionnée #}
+        {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function (e) { #}
+        $(document).bind('keydown', 'Test1', function (e) {
+            if ((e.keyCode === 65) && (e.ctrlKey || e.metaKey)) {
+                {# CTRL + A #}
+                SelectAll(e);
+                e.preventDefault();
+            }
+            if ((e.keyCode === 68) && (e.ctrlKey || e.metaKey)) {
+                {# CTRL + D #}
+                AssignTaxoLbToSelection();
+                e.preventDefault();
+            }
+            if ((e.keyCode === 76) && (e.ctrlKey || e.metaKey)) {
+                {# CTRL + L #}
+                ValidateSelection('V');
+                e.preventDefault();
+            }
+            if ((e.keyCode === 83) && (e.ctrlKey || e.metaKey)) {
+                {# CTRL + S #}
+                {#          console.log(e);#}
+                SavePendingChanges();
+                e.preventDefault();
+            }
+
+        });
+        {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvre la popup #}
+            $(document).bind('keydown', function (e) {
+                if ((document.activeElement.nodeName == 'BODY') || (document.activeElement.nodeName == 'SPAN'))
+                    if ((e.keyCode >= 65) && (e.keyCode <= 90) && !e.ctrlKey && !e.metaKey)
+                        if ($(".ui-selected").length > 0) {
+                            $('#taxolbanno').select2("open");
+                            $('.taxopopup .select2-search__field').val(String.fromCharCode(e.keyCode));
+                            //console.log(e);
+                            e.preventDefault();
+                        }
+            });
+            $('#filt_validfromdate,#filt_validtodate').datetimepicker({ format: 'Y-m-d H:i' });
+        });
+        function UpdateSelectedCounter() {
+            var nbr = $("#column-right td.ui-selected").size();
+            if (nbr > 0) nbr = nbr + " Selected";
+            else nbr = "";
+            $('#nbrselected').text(nbr);
+        }
+        function PostAddImages() {
+            $(document).scrollTop(0);
+            // Required to  have Select2 component working on Bootstrap Popup
+            $.fn.modal.Constructor.prototype.enforceFocus = function () { };
+            // Add Zoom & lazy loading of images
+            theOnlyLazyLoader = jQuery('div#column-right img.lazy').Lazy({
+                bind: 'event', 
+                afterLoad: function (element) {
+                    if ($('#magenabled').prop("checked") == false)
+                        return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
+                    AddZoom(element);
                 },
-                minimumInputLength: 2
-                , placeholder: "Annotator"
-            }); // Select2 Ajax
-            $("#filt_freenum").select2({
-                ajax: {
-                    url: "/prj/GetFieldList/{{ g.Projid }}/n",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) { return { q: params.term, page: params.page }; },
-                    processResults: function (data, page) { return { results: data }; },
-                    cache: true
-                }, placeholder: "Num. field", dropdownCssClass: "width240"
+                chainable: false // return the instance i.e. loader itself
             });
-            $("#filt_freetxt").select2({
-                ajax: {
-                    url: "/prj/GetFieldList/{{ g.Projid }}/t",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) { return { q: params.term, page: params.page }; },
-                    processResults: function (data, page) { return { results: data }; },
-                    cache: true
-                }, placeholder: "Text field", dropdownCssClass: "width240"
+            // Make sub image draggable
+            jQuery('.imgtab td').draggable({
+                revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
+                cursorAt: { top: 0, left: 0 },
+                start: function (event, ui) { DragInProgress = true; },
+                stop: function (event, ui) { DragInProgress = false; },
+                helper: function (ev) { return $("<img src='/static/drag_cursor.png'>"); }
             });
-
-            {#     Ctrl + A affecte la valeur selectionnée#}
-            {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function (e) {#}
-    $(document).bind('keydown', 'Test1', function (e) {
-                if ((e.keyCode === 65) && (e.ctrlKey || e.metaKey)) {
-                    {# CTRL + A #}
-                    SelectAll(e);
-                    e.preventDefault();
-                }
-                if ((e.keyCode === 68) && (e.ctrlKey || e.metaKey)) {
-                    {# CTRL + D #}
-                    AssignTaxoLbToSelection();
-                    e.preventDefault();
-                }
-                if ((e.keyCode === 76) && (e.ctrlKey || e.metaKey)) {
-                    {# CTRL + L #}
-                    ValidateSelection('V');
-                    e.preventDefault();
-                }
-                if ((e.keyCode === 83) && (e.ctrlKey || e.metaKey)) {
-                    {# CTRL + S #}
-                    {#          console.log(e);#}
-                    SavePendingChanges();
-                    e.preventDefault();
-                }
-
-            });
-                {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvle la popup#}
-                    $(document).bind('keydown', function (e) {
-                        if ((document.activeElement.nodeName == 'BODY') || (document.activeElement.nodeName == 'SPAN'))
-                            if ((e.keyCode >= 65) && (e.keyCode <= 90) && !e.ctrlKey && !e.metaKey)
-                                if ($(".ui-selected").length > 0) {
-                                    $('#taxolbanno').select2("open");
-                                    $('.taxopopup .select2-search__field').val(String.fromCharCode(e.keyCode));
-                                    //console.log(e);
-                                    e.preventDefault();
-                                }
-                    });
-                    $('#filt_validfromdate,#filt_validtodate').datetimepicker({ format: 'Y-m-d H:i' });
-                });
-                function UpdateSelectedCounter() {
-                    var nbr = $("#column-right td.ui-selected").size();
-                    if (nbr > 0) nbr = nbr + " Selected";
-                    else nbr = "";
-                    $('#nbrselected').text(nbr);
-                }
-                function PostAddImages() {
-                    $(document).scrollTop(0);
-                    // Required to  have Select2 component working on Bootstrap Popup
-                    $.fn.modal.Constructor.prototype.enforceFocus = function () { };
-                    // Add Zoom
-                    jQuery('div#column-right img.lazy').Lazy({
-                        bind: 'event', afterLoad: function (element) {
-                            if ($('#magenabled').prop("checked") == false)
-                                return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
-                            AddZoom(element);
-                        }
-                    });
-                    // Make sub image draggable
-                    jQuery('.imgtab td').draggable({
-                        revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
-                        cursorAt: { top: 0, left: 0 },
-                        start: function (event, ui) { DragInProgress = true; },
-                        stop: function (event, ui) { DragInProgress = false; },
-                        helper: function (ev) { return $("<img src='/static/drag_cursor.png'>"); }
-                    });
-                    {#        jQuery('.imgtab td img').draggable({ revert: true, revertDuration: 0 });#}
-                    // Make the cell clickable for selection
-                    jQuery('.imgtab td').click(function (e) {
-                        if ($(e.target).hasClass('linestart')) {
-                            var nbrselectedinline = $(e.target).closest('tr').find('td.ui-selected').size();
-                            if ((e.shiftKey) || (nbrselectedinline > 0)) { // Unselect line
-                                $(e.target).closest('tr').find('td').removeClass('ui-selected');
-                                if (window.getSelection) {
-                                    if (window.getSelection().empty) {  // Chrome
-                                        window.getSelection().empty();
-                                    } else if (window.getSelection().removeAllRanges) {  // Firefox
-                                        window.getSelection().removeAllRanges();
-                                    }
-                                } else if (document.selection) {  // IE?
-                                    document.selection.empty();
-                                }
-                                UpdateSelectedCounter();
-                                return;
+            {#        jQuery('.imgtab td img').draggable({ revert: true, revertDuration: 0 });#}
+            // Make the cell clickable for selection
+            jQuery('.imgtab td').click(function (e) {
+                if ($(e.target).hasClass('linestart')) {
+                    var nbrselectedinline = $(e.target).closest('tr').find('td.ui-selected').size();
+                    if ((e.shiftKey) || (nbrselectedinline > 0)) { // Unselect line
+                        $(e.target).closest('tr').find('td').removeClass('ui-selected');
+                        if (window.getSelection) {
+                            if (window.getSelection().empty) {  // Chrome
+                                window.getSelection().empty();
+                            } else if (window.getSelection().removeAllRanges) {  // Firefox
+                                window.getSelection().removeAllRanges();
                             }
+                        } else if (document.selection) {  // IE?
+                            document.selection.empty();
                         }
-                        if ((e.ctrlKey) || (e.metaKey)) {#  20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple #}
-                        $('.ui-selected').removeClass('ui-selected');
-                        if ($(e.target).hasClass('linestart')) // select line (except this first column)
-                            $(e.target).closest('tr').find('td:nth-child(1n+2)').addClass('ui-selected');
-                        else
-                            $(e.target).closest('td').toggleClass('ui-selected');
-                        UpdateSelectedCounter()
-                    });
-                    // Make ZoomTracker Clickable for selection
-                    jQuery('body').delegate('.zoomtracker', 'click', function (e) {
-                        {# if ((!e.ctrlKey) && (!e.metaKey)) 20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple#}
-                        if ((e.ctrlKey) || (e.metaKey))
-                            $('.ui-selected').toggleClass('ui-selected');
-                        $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected');
                         UpdateSelectedCounter();
-                    });
-                    // setup zoomtracker creation tracking to make them draggable
-                    var target = $("body")[0];
-                    var observer = new MutationObserver(function (mutations) {
-                        mutations.forEach(function (mutation) {
-                            var newNodes = mutation.addedNodes; // DOM NodeList
-                            if (newNodes !== null) { // If there are new nodes added
-                                var $nodes = $(newNodes); // jQuery set
-                                $nodes.each(function () {
-                                    var $node = $(this);
-                                    if ($node.hasClass("zoomtracker")) {
-                                        //console.log("zoomtracker");
-                                        jQuery($node).draggable({
-                                            revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
-                                            cursorAt: { top: 0, left: 0 },
-                                            helper: function (ev) { return $("<img src='/static/drag_cursor.png'>"); }
-                                        });
-                                    }
+                        return;
+                    }
+                }
+                if ((e.ctrlKey) || (e.metaKey)) 
+                    {#  20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple #}
+                    $('.ui-selected').removeClass('ui-selected');
+                if ($(e.target).hasClass('linestart')) // select line (except this first column)
+                    $(e.target).closest('tr').find('td:nth-child(1n+2)').addClass('ui-selected');
+                else
+                    $(e.target).closest('td').toggleClass('ui-selected');
+                UpdateSelectedCounter()
+            });
+            // Make ZoomTracker Clickable for selection
+            jQuery('body').delegate('.zoomtracker', 'click', function (e) {
+                {# if ((!e.ctrlKey) && (!e.metaKey)) 20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple#}
+                if ((e.ctrlKey) || (e.metaKey))
+                    $('.ui-selected').toggleClass('ui-selected');
+                $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected');
+                UpdateSelectedCounter();
+            });
+            // setup zoomtracker creation tracking to make them draggable
+            var target = $("body")[0];
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    var newNodes = mutation.addedNodes; // DOM NodeList
+                    if (newNodes !== null) { // If there are new nodes added
+                        var $nodes = $(newNodes); // jQuery set
+                        $nodes.each(function () {
+                            var $node = $(this);
+                            if ($node.hasClass("zoomtracker")) {
+                                //console.log("zoomtracker");
+                                jQuery($node).draggable({
+                                    revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
+                                    cursorAt: { top: 0, left: 0 },
+                                    helper: function (ev) { return $("<img src='/static/drag_cursor.png'>"); }
                                 });
                             }
                         });
-                    });
-                    var config = { attributes: true, childList: true, characterData: true };
-                    observer.observe(target, config);
-                    // Enable the popover
-                    var option = { 'trigger': 'hover', 'html': true };
-                    $('div.subimg').popover(option);
-                    $('.ddets').click(function (e) {
-                        e.stopPropagation();
-                        //            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
-                        //            var win = window.open(url, '_blank');
-                        var url = "/objectdetails/" + $(e.target).closest('td').find('img').prop('id').substr(1) + "?w=" + ($(window).width() - 400) + "&h=" + ($(window).height() - 40) + "&ajax=1";
-                        var options = {};
-                        $("#PopupDetails .modal-content").html("Loading...");
-
-                        $('#PopupDetails .modal-lg').css('width', $(window).width() - 40);
-                        $('#PopupDetails').modal(options);
-                        $("#PopupDetails .modal-content").load(url);
-                    });
-                    $('#PopupDetails').on('hidden.bs.modal', function (e) {
-                        $("#PopupDetails .modal-content").html("CLEAN");
-                        $(".zoomContainer").remove();
-                    });
-
-                    jQuery('.SpanSelectAll').click(SelectAll);
-                    $(document).scrollTop(RightPanelScrollPosAfterLoad);
-                    RightPanelScrollPosAfterLoad = 0;
-                }  //PostAddImages
-
-                function SelectAll(e) {
-                    if (!e.shiftKey)
-                        jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
-                    else
-                        jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
-                    UpdateSelectedCounter();
-                }
-
-                function ClearAllFilterCriteria() {
-                    ClearCoord();
-                    ClearDates();
-                    ClearTimes();
-                    ClearSamples();
-                    ClearInstrum();
-                    ClearDepths();
-                    ClearAnnotFree();
-                    LoadRightPane();
-                }
-                function ClearAnnotFree() {
-                    $("#filt_freenumst,#filt_freenumend,#filt_freetxtval").val("");
-                    $("#filt_annot,#filt_freenum,#filt_freetxt").val(null).trigger("change");
-                }
-
-                jQuery(window).bind('beforeunload', function () {
-                    if (Object.keys(PendingChanges).length > 0)
-                        return "Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?"
+                    }
                 });
+            });
+            var config = { attributes: true, childList: true, characterData: true };
+            observer.observe(target, config);
+            // Enable the popover
+            var option = { 'trigger': 'hover', 'html': true };
+            $('div.subimg').popover(option);
+            $('.ddets').click(function (e) {
+                e.stopPropagation();
+                //            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
+                //            var win = window.open(url, '_blank');
+                var url = "/objectdetails/" + $(e.target).closest('td').find('img').prop('id').substr(1) + "?w=" + ($(window).width() - 400) + "&h=" + ($(window).height() - 40) + "&ajax=1";
+                var options = {};
+                $("#PopupDetails .modal-content").html("Loading...");
 
-                function GotoWithFilter(Target) {
-                    LoadRightPane(Target);
-                }
-                function AdvancedAnnot() {
-                    if ($('#projid').val() == null) return;
-                    $("#PopupDetails .modal-content").html("Loading...");
-                    $('#PopupDetails .modal-lg').css('width', 800);
-                    $('#PopupDetails').modal({});
+                $('#PopupDetails .modal-lg').css('width', $(window).width() - 40);
+                $('#PopupDetails').modal(options);
+                $("#PopupDetails .modal-content").load(url);
+            });
+            $('#PopupDetails').on('hidden.bs.modal', function (e) {
+                $("#PopupDetails .modal-content").html("CLEAN");
+                $(".zoomContainer").remove();
+            });
 
-                    var url = "/search/annot/" + $('#projid').val();
-                    $("#PopupDetails .modal-content").load(url, function () {
-                        var lst = "";
-                        var sampleid = $('#filt_annot');
-                        lst = $.map(sampleid.find('option:selected'), function (element) { return $(element).val() }).join(', ');
-                        $('#txtlstsample').val(lst);
-                        SampleTxtToCB();
+            jQuery('.SpanSelectAll').click(SelectAll);
+            $(document).scrollTop(RightPanelScrollPosAfterLoad);
+            RightPanelScrollPosAfterLoad = 0;
+        }  //PostAddImages
 
-                    });
+        function SelectAll(e) {
+            if (!e.shiftKey)
+                jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
+            else
+                jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
+            UpdateSelectedCounter();
+        }
 
-                }
+        function ClearAllFilterCriteria() {
+            ClearCoord();
+            ClearDates();
+            ClearTimes();
+            ClearSamples();
+            ClearInstrum();
+            ClearDepths();
+            ClearAnnotFree();
+            LoadRightPane();
+        }
+        function ClearAnnotFree() {
+            $("#filt_freenumst,#filt_freenumend,#filt_freetxtval").val("");
+            $("#filt_annot,#filt_freenum,#filt_freetxt").val(null).trigger("change");
+        }
+
+        jQuery(window).bind('beforeunload', function () {
+            if (Object.keys(PendingChanges).length > 0)
+                return "Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?"
+        });
+
+        function GotoWithFilter(Target) {
+            LoadRightPane(Target);
+        }
+        function AdvancedAnnot() {
+            if ($('#projid').val() == null) return;
+            $("#PopupDetails .modal-content").html("Loading...");
+            $('#PopupDetails .modal-lg').css('width', 800);
+            $('#PopupDetails').modal({});
+
+            var url = "/search/annot/" + $('#projid').val();
+            $("#PopupDetails .modal-content").load(url, function () {
+                var lst = "";
+                var sampleid = $('#filt_annot');
+                lst = $.map(sampleid.find('option:selected'), function (element) { return $(element).val() }).join(', ');
+                $('#txtlstsample').val(lst);
+                SampleTxtToCB();
+
+            });
+
+        }
 
     </script>
     <div id="column-right">
         RIGHT
         {% if right=='dodefault' %}
         <script>
-                    $(document).ready(function () {
-                        LoadRightPane();
-                    }); // Ready
+            $(document).ready(function () {
+                LoadRightPane();
+            }); // Ready
         </script>
         Loading ....
         {% else %}
