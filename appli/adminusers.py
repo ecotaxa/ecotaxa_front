@@ -16,7 +16,9 @@ from wtforms import TextAreaField
 from wtforms.fields import SelectField, TextField, PasswordField
 from wtforms.validators import ValidationError
 
-from appli import db, app, database
+from appli import db
+# We need the @route there
+from appli.adminothers import *
 from appli.database import GetAll
 
 
