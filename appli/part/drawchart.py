@@ -69,7 +69,7 @@ def part_drawchart():
                 SampleColorMap[S['psampleid']]=Couleurs[len(SampleColorMap)%len(Couleurs)]
                 SampleTitle[S['psampleid']]=S['profileid']
             PrjSampleCount[S['pprojid']]=PrjSampleCount.get(S['pprojid'],0)+1
-        NbrChart += 1 # toujours un graphe en plus à la fin pour la legende ou le message disant pourquoi pas de legende
+        # NbrChart += 1 # toujours un graphe en plus à la fin pour la legende ou le message disant pourquoi pas de legende
         FigSizeX=NbrChart
         TimeAbsolute = False
         if not ProfilVertical and gvg('TimeScale') == 'A':
@@ -79,6 +79,9 @@ def part_drawchart():
         else:
             if NbrChart > 2: FigSizeX = 2
         FigSizeY=math.ceil(NbrChart/FigSizeX)
+        FigSizeY+= 1 # toujours un graphe en plus à la fin pour la legende ou le message disant pourquoi pas de legende
+        if FigSizeX<2:
+            FigSizeX=2 # le graphe de legende fait 2 de largeur même s'il n'y a qu'un graphe
         font = {'family' : 'arial','weight' : 'normal','size'   : 10}
         plt.rc('font', **font)
         plt.rcParams['lines.linewidth'] = 0.5
@@ -379,6 +382,8 @@ def part_drawchart():
                     if top>0: top=0
                     if bottom>=top:bottom=top-10
                     graph[i].set_ylim(bottom, top)
+        # on ajuste la disposition avant de placer le dernier qui est en placement forcé et perturbe le tight_layout
+        Fig.tight_layout()
         # generation du graphique qui liste les projets
         if len(PrjColorMap) > 1:
             data = np.empty((len(PrjSampleCount), 2))
@@ -388,7 +393,20 @@ def part_drawchart():
                 data[i]=i,v
                 PrjLabel.append(PrjTitle[k])
                 GColor.append(PrjColorMap[k])
-            graph = Fig.add_subplot(FigSizeY, FigSizeX, chartid + 1)
+            if ProfilVertical: # chaque ligne fait 500px , la legende basse 55px
+                graph = Fig.add_subplot(FigSizeY, FigSizeX, (FigSizeY-1)*FigSizeX+1 # 1ère image de la dernière ligne
+                                        ,position=[0.4 # Left
+                                        ,55/(500*FigSizeY) #Bottom
+                                        ,0.25 #with
+                                        ,(500-85)/(500*FigSizeY) # height
+                                                   ])
+            else: # chaque ligne fait 300px
+                graph = Fig.add_subplot(FigSizeY, FigSizeX, (FigSizeY-1)*FigSizeX+1 # 1ère image de la dernière ligne
+                                        ,position=[0.4 # Left
+                                        ,55/(300*FigSizeY) #Bottom
+                                        ,0.25 #with
+                                        ,(300-85)/(300*FigSizeY) # height
+                                                   ])
             graph.barh(data[:,0],data[:,1],color=GColor)
             graph.set_yticks(np.arange(len(PrjLabel))+0.4)
             graph.set_yticklabels(PrjLabel)
@@ -413,7 +431,6 @@ def part_drawchart():
             graph = Fig.add_subplot(FigSizeY, FigSizeX, chartid + 1)
             graph.text(0.05, 0.5, "Too many samples,\nLegend not available \nfor too numerous selections\n(N>25)", fontsize=15, clip_on=True)
 
-        Fig.tight_layout()
     except Exception as e:
         Fig = plt.figure(figsize=(8,6), dpi=100)
         tb_list = traceback.format_tb(e.__traceback__)
