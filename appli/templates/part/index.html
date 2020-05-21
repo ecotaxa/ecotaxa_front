@@ -53,7 +53,12 @@ If you use EcoTaxa or Ecotaxa particle module in your work, we would appreciate 
 
 {#----------- Début formulaire filtrage -------------#}
 <table id="filter1" style="width: 95%">
-  <tr><td></td>
+  <tr><td style="vertical-align: top">
+<button class="btn btn-primary btn-xs" style="width: 100%" id=SharePageBtn type="button"
+title="Email a link to this page, including the current filters. Press CTRL to open it on another tab (usefull if you use GMail)">
+  <span class="glyphicon glyphicon-link"></span> Share page</button>
+
+  </td>
     <td>
 <table style="width:100%;" id="geofilter">
   <tr><td colspan="2" style="padding-left: 40px;">North <input type="text" class="form-control" id="MapOutN"  name="MapN" value="{{ reqfields['MapN'] }}">
@@ -139,25 +144,25 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
 		<div class="form-inline">
 			<div class="input-group" style="width: 49%" >
 				<div class="input-group-addon"><span class="glyphicon glyphicon-triangle-bottom"></span></div>
-				<input class="form-control" type="text" id="filt_depthmin" name="filt_depthmin" autocomplete="off" value="" placeholder="Min [m]">
+				<input class="form-control" type="text" id="filt_depthmin" name="filt_depthmin" value="{{ reqfields['filt_depthmin'] }}" autocomplete="off" value="" placeholder="Min [m]">
 			</div>
 			<div class="input-group" style="width: 49%">
 				<div class="input-group-addon"><span class="glyphicon glyphicon-triangle-top"></span></div>
-				<input class="form-control"  type="text" id="filt_depthmax" name="filt_depthmax" autocomplete="off" value=""  placeholder="Max [m]">
+				<input class="form-control"  type="text" id="filt_depthmax" name="filt_depthmax" value="{{ reqfields['filt_depthmax'] }}"autocomplete="off" value=""  placeholder="Max [m]">
 			</div>
 		</div>
 	</div>
 </div>
 <div >
   <label class="title">DATA Scale : </label>
-  <input type="radio" name="XScale" value="I" checked> Linear
-  - <input type="radio" name="XScale" value="O"> Log
-  - <input type="radio" name="XScale" value="S"> Symlog
+  <input type="radio" name="XScale" value="I" {{ 'checked' if reqfields['XScale']not in ('O','S') }}> Linear
+  - <input type="radio" name="XScale" value="O" {{ 'checked' if reqfields['XScale']=='O' }}> Log
+  - <input type="radio" name="XScale" value="S" {{ 'checked' if reqfields['XScale']=='S' }}> Symlog
 </div>
 <div >
   <label class="title">TIME Scale : </label>
-  <input type="radio" name="TimeScale" value="R" checked> Relative
-  - <input type="radio" name="TimeScale" value="A"> Absolute
+  <input type="radio" name="TimeScale" value="R" {{ 'checked' if reqfields['TimeScale']not in ('A') }}> Relative
+  - <input type="radio" name="TimeScale" value="A"{{ 'checked' if reqfields['TimeScale']=='A' }}> Absolute
 </div>
 
 {# ------- Taxo Filter ------------#}
@@ -165,12 +170,12 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
 	<div class="form-group-sm">
     <label class="title">Validated Plankton filter </label>
 		<a class="pull-right clear label label-default" href='javascript:ClearTaxo();' style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" >Clear</a>
-
-        <select id="taxolb" name="taxolb" multiple="multiple" style="width: 100%"  autocomplete="off">  </select>
+      {{ form.taxolb(style="width:100%") }}
+{#        <select id="taxolb" name="taxolb" multiple="multiple" style="width: 100%"  autocomplete="off">  </select>#}
 	</div>
 </div>
 <div >
-  <input type="checkbox" id="taxochild" name="taxochild" value="1" style='margin:0;'>
+  <input type="checkbox" id="taxochild" name="taxochild" value="1" style='margin:0;' {{ 'checked' if reqfields['taxochild']=='1' }}>
 Sum abundance of children categories
 </div>
 
@@ -327,6 +332,16 @@ function ProcessDraw(){
   });
   $('#graphdest').text('').append(img);
 }
+
+
+$('#SharePageBtn').click(function (e) {
+  var url=window.location.protocol + "//" + window.location.host + "/part/?"+$('#filt_form').serialize()+"&"+$('#formgraphconfig').serialize();
+  url = "mailto:?subject=EcoPart%20page%20share&body=" + encodeURIComponent("Hello,\n\nAn EcoPart user want share this page with you \n" + url);
+  if (e.ctrlKey)
+      window.open(url, '_blank');
+  else
+      window.location = url;
+});
 
 function ClearDepths(){
   $( "#filt_depthmin,#filt_depthmax" ).val("");
