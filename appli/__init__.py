@@ -513,7 +513,7 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
              Added objects view creation in Manage CreateDB
              Added a Matplotlib uses to execute correctly on GraphicLess server.
              Added Cascade delete on DB Definition to create them during CreateDB (obj_field & Histo)
-             During ImportDb compare Taxon Name and Parent Taxon Name to process correctly Name duplicate
+             During ImportDb compare Taxon Name and Parent Taxon Name to detect correctly Name duplicate
 2015.12.14 : Bugfix in import task, use only ecotaxa prefixed files
 2015.12.11 : Improved CSV export to include Direct Taxonomy parent name and Taxonomy hierarchy
              Included license.txt File
