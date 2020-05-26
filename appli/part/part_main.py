@@ -21,11 +21,13 @@ def indexPart():
             choices=sorted([(k, v) for v,k in CTDFixedCol.items()], key=operator.itemgetter(1)))
         filt_proftype=SelectField(choices=[['','All'],['V','DEPTH casts'],['H','TIME series']])
         filt_instrum = SelectField(choices=[['', 'All'],('lisst','lisst'),('uvp5','uvp5'),('uvp6','uvp6'),('uvp6remote','uvp6remote')])
-        taxolb=SelectMultipleField(choices=[['', ''],['4','444']])
+        taxolb=SelectMultipleField(choices=[['', '']])
 
     filt_data =request.args
     form=FiltForm(filt_data)
-    form.taxolb.choices=[['', '']] + database.GetAll(
+    form.taxolb.choices=[['', '']]
+    if(len(request.args.getlist('taxolb'))):
+        form.taxolb.choices+=database.GetAll(
              "SELECT id,display_name FROM taxonomy where id in (%s) ORDER BY id,lower(display_name) "%(
                  ",".join((str(int(x)) for x in request.args.getlist('taxolb')))))
     g.headcenter="""<h1 style='text-align: center;cursor: pointer;' >

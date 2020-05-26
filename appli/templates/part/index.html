@@ -161,7 +161,7 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
 </div>
 <div >
   <label class="title">TIME Scale : </label>
-  <input type="radio" name="TimeScale" value="R" {{ 'checked' if reqfields['TimeScale']not in ('A') }}> Relative
+  <input type="radio" name="TimeScale" value="R" {{ 'checked' if not reqfields['TimeScale'] or reqfields['TimeScale']not in ('A') }}> Relative
   - <input type="radio" name="TimeScale" value="A"{{ 'checked' if reqfields['TimeScale']=='A' }}> Absolute
 </div>
 
