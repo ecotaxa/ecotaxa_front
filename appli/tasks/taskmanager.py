@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 import os
+import re
 import shutil
 import sys
 from typing import Optional
@@ -31,6 +32,15 @@ class Task(db.Model):
 
     def __str__(self):
         return self.name
+
+    # e.g. "ProjectId": "2990"
+    PROJ_ID_RE = r"\"ProjectId\": \"(\d*)\""
+
+    def project_id(self) -> Optional[str]:
+        match = re.search(self.PROJ_ID_RE, self.inputparam)
+        if match:
+            return match.group(1)
+        return None
 
 
 setattr(Task, "questiondata", db.Column(db.String()))

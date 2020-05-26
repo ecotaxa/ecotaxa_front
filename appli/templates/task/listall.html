@@ -36,7 +36,12 @@
         <td><a href="/Task/Show/{{ t.id }}"> {{ t.id }}
             <button class="btn btn-xs btn-primary">View</button>
         </a></td>
-        <td>{{ t.taskclass }}</td>
+        <td>{{ t.taskclass }}
+            {% set prj_id = t.project_id() %}
+            {% if prj_id %}
+            <br/>in <a href="/prj/{{ prj_id }} ">{{ prj_id }}</a>
+            {% endif %}
+        </td>
         <td><a href="mailto:{{t.owner_rel.email}}">{{ t.owner_rel.name }}</a></td>
         <td>{{ PutInLabel(t.taskstate,t.taskstate,t.id) }}</td>
         <td>{{ t.taskstep }}</td>
