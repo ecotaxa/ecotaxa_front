@@ -154,6 +154,9 @@ def TaskFactory(ClassName, task=None):
     from .taskimportupdate import TaskImportUpdate
     if ClassName == "TaskImportUpdate":
         return TaskImportUpdate(task)
+    from .taskimportupdate2back import TaskImportUpdateToBack
+    if ClassName == "TaskImportUpdateToBack":
+        return TaskImportUpdateToBack(task)
     from .taskpartzooscanimport import TaskPartZooscanImport
     if ClassName == "TaskPartZooscanImport":
         return TaskPartZooscanImport(task)
@@ -203,7 +206,8 @@ def ListTasks():
 
 
 # Mappings to new task classes, conservatively keeping old code just in case
-_new_tasks = {"TaskImport": "TaskImportToBack"}
+_new_tasks = {"TaskImport": "TaskImportToBack",
+              "TaskImportUpdate": "TaskImportUpdateToBack"}
 
 
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])

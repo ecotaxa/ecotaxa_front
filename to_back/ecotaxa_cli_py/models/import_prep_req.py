@@ -35,9 +35,10 @@ class ImportPrepReq(object):
     openapi_types = {
         'task_id': 'int',
         'source_path': 'str',
-        'taxo_mappings': 'dict(str, int)',
+        'taxo_mappings': 'dict(str, str)',
         'skip_loaded_files': 'bool',
-        'skip_existing_objects': 'bool'
+        'skip_existing_objects': 'bool',
+        'update_mode': 'str'
     }
 
     attribute_map = {
@@ -45,10 +46,11 @@ class ImportPrepReq(object):
         'source_path': 'source_path',
         'taxo_mappings': 'taxo_mappings',
         'skip_loaded_files': 'skip_loaded_files',
-        'skip_existing_objects': 'skip_existing_objects'
+        'skip_existing_objects': 'skip_existing_objects',
+        'update_mode': 'update_mode'
     }
 
-    def __init__(self, task_id=None, source_path=None, taxo_mappings=None, skip_loaded_files=False, skip_existing_objects=False, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, task_id=None, source_path=None, taxo_mappings=None, skip_loaded_files=False, skip_existing_objects=False, update_mode='', local_vars_configuration=None):  # noqa: E501
         """ImportPrepReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -59,6 +61,7 @@ class ImportPrepReq(object):
         self._taxo_mappings = None
         self._skip_loaded_files = None
         self._skip_existing_objects = None
+        self._update_mode = None
         self.discriminator = None
 
         self.task_id = task_id
@@ -69,6 +72,8 @@ class ImportPrepReq(object):
             self.skip_loaded_files = skip_loaded_files
         if skip_existing_objects is not None:
             self.skip_existing_objects = skip_existing_objects
+        if update_mode is not None:
+            self.update_mode = update_mode
 
     @property
     def task_id(self):
@@ -122,7 +127,7 @@ class ImportPrepReq(object):
 
 
         :return: The taxo_mappings of this ImportPrepReq.  # noqa: E501
-        :rtype: dict(str, int)
+        :rtype: dict(str, str)
         """
         return self._taxo_mappings
 
@@ -132,7 +137,7 @@ class ImportPrepReq(object):
 
 
         :param taxo_mappings: The taxo_mappings of this ImportPrepReq.  # noqa: E501
-        :type: dict(str, int)
+        :type: dict(str, str)
         """
 
         self._taxo_mappings = taxo_mappings
@@ -178,6 +183,27 @@ class ImportPrepReq(object):
         """
 
         self._skip_existing_objects = skip_existing_objects
+
+    @property
+    def update_mode(self):
+        """Gets the update_mode of this ImportPrepReq.  # noqa: E501
+
+
+        :return: The update_mode of this ImportPrepReq.  # noqa: E501
+        :rtype: str
+        """
+        return self._update_mode
+
+    @update_mode.setter
+    def update_mode(self, update_mode):
+        """Sets the update_mode of this ImportPrepReq.
+
+
+        :param update_mode: The update_mode of this ImportPrepReq.  # noqa: E501
+        :type: str
+        """
+
+        self._update_mode = update_mode
 
     def to_dict(self):
         """Returns the model properties as a dict"""

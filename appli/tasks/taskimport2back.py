@@ -7,14 +7,16 @@ from flask import render_template, flash, request, g
 from appli import app, database, PrintInCharte, gvp, gvg, GetAppManagerMailto, \
     UtfDiag, db
 from appli.tasks.importcommon import *
-from appli.tasks.taskmanager import AsyncTask, DoTaskClean
+from appli.tasks.taskmanager import AsyncTask
 from to_back.ecotaxa_cli_py import DefaultApi, ImportPrepReq, ImportPrepRsp, ApiClient, ImportRealReq
 
 
 class TaskImportToBack(AsyncTask):
     """
         Import, just GUI here, bulk of job subcontracted to back-end.
+        Also serves as a base class for import update as pages are very similar.
     """
+    STEP0_TEMPLATE = "task/import_create.html"
 
     class Params(AsyncTask.Params):
         def __init__(self, InitStr=None):
@@ -25,6 +27,8 @@ class TaskImportToBack(AsyncTask):
                 self.ProjectId = None
                 self.SkipAlreadyLoadedFile = "N"  # permet de dire si on
                 self.SkipObjectDuplicate = "N"
+                # For import update
+                self.UpdateClassif = "N"
                 # mapping, stored at project level
                 self.Mapping = {}
                 self.TaxoMap = {}
@@ -72,6 +76,8 @@ class TaskImportToBack(AsyncTask):
             self.param.ProjectId = gvg("p")
             self.param.SkipAlreadyLoadedFile = gvp("skiploaded")
             self.param.SkipObjectDuplicate = gvp("skipobjectduplicate")
+            # Import update parameter
+            self.param.UpdateClassif = gvp("updateclassif")
             TaxoMap = {}
             for lig in gvp('TxtTaxoMap').splitlines():
                 ls = lig.split('=', 1)
@@ -104,7 +110,7 @@ class TaskImportToBack(AsyncTask):
                 return self.StartTask(self.param, step=1, FileToSave=FileToSave, FileToSaveFileName=FileToSaveFileName)
         else:  # valeurs par default
             self.param.ProjectId = gvg("p")
-        return render_template('task/import_create.html', header=txt, data=self.param, ServerPath=gvp("ServerPath"),
+        return render_template(self.STEP0_TEMPLATE, header=txt, data=self.param, ServerPath=gvp("ServerPath"),
                                TxtTaxoMap=gvp("TxtTaxoMap"))
 
     def SPStep1(self):
@@ -116,7 +122,8 @@ class TaskImportToBack(AsyncTask):
                             source_path=self.param.InData,
                             taxo_mappings=self.param.TaxoMap,
                             skip_loaded_files=(self.param.SkipAlreadyLoadedFile == "Y"),
-                            skip_existing_objects=(self.param.SkipObjectDuplicate == "Y"))
+                            skip_existing_objects=self._must_skip_existing_objects(),
+                            update_mode=self._update_mode())
         rsp: ImportPrepRsp = self.api.api_import_import_prep_project_id_post(self.param.ProjectId, req)
         # Copy back into params the eventually amended fields in response
         self.param.InData = rsp.source_path
@@ -188,6 +195,12 @@ class TaskImportToBack(AsyncTask):
         return render_template('task/import_question1.html', header=txt, taxo=NotFoundTaxo, users=NotFoundUsers,
                                task=self.task)
 
+    def _must_skip_existing_objects(self) -> bool:
+        return self.param.SkipObjectDuplicate == "Y"
+
+    def _update_mode(self) -> str:
+        return "" # No update for plain import
+
     def SPStep2(self):
         """ In subprocess, task.taskstep = 2 """
         self.UpdateProgress(0, "Waiting for backend")
@@ -195,8 +208,9 @@ class TaskImportToBack(AsyncTask):
         logging.info("Start Step 2 : Effective data import")
         req = ImportRealReq(task_id=self.task.id,
                             taxo_mappings=self.param.TaxoMap,
+                            update_mode=self._update_mode(),  # from class
                             skip_loaded_files=(self.param.SkipAlreadyLoadedFile == "Y"),
-                            skip_existing_objects=(self.param.SkipObjectDuplicate == "Y"),
+                            skip_existing_objects=self._must_skip_existing_objects(),
                             source_path=self.param.InData,  # from prep
                             mappings=self.param.Mapping,  # from prep
                             rowcount=self.param.TotalRowCount,  # from prep
@@ -230,7 +244,8 @@ class TaskImportToBack(AsyncTask):
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle ou auto
         PrjId = self.param.ProjectId
         time.sleep(1)
-        DoTaskClean(self.task.id)
+        # TODO: Remove, but for now we have trace information inside
+        # DoTaskClean(self.task.id)
         return "<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>" \
                "<a href='/Task/Create/TaskClassifAuto2?projid={0}' class='btn btn-primary btn-sm'" \
                "role=button>Go to Automatic Classification Screen</a> ".format(PrjId)

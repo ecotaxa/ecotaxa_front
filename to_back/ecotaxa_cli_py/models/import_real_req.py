@@ -35,9 +35,10 @@ class ImportRealReq(object):
     openapi_types = {
         'task_id': 'int',
         'source_path': 'str',
-        'taxo_mappings': 'dict(str, int)',
+        'taxo_mappings': 'dict(str, str)',
         'skip_loaded_files': 'bool',
         'skip_existing_objects': 'bool',
+        'update_mode': 'str',
         'mappings': 'dict(str, dict(str, str))',
         'found_users': 'dict(str, object)',
         'found_taxa': 'dict(str, int)',
@@ -50,13 +51,14 @@ class ImportRealReq(object):
         'taxo_mappings': 'taxo_mappings',
         'skip_loaded_files': 'skip_loaded_files',
         'skip_existing_objects': 'skip_existing_objects',
+        'update_mode': 'update_mode',
         'mappings': 'mappings',
         'found_users': 'found_users',
         'found_taxa': 'found_taxa',
         'rowcount': 'rowcount'
     }
 
-    def __init__(self, task_id=None, source_path=None, taxo_mappings=None, skip_loaded_files=False, skip_existing_objects=False, mappings=None, found_users=None, found_taxa=None, rowcount=0, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, task_id=None, source_path=None, taxo_mappings=None, skip_loaded_files=False, skip_existing_objects=False, update_mode='', mappings=None, found_users=None, found_taxa=None, rowcount=0, local_vars_configuration=None):  # noqa: E501
         """ImportRealReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -67,6 +69,7 @@ class ImportRealReq(object):
         self._taxo_mappings = None
         self._skip_loaded_files = None
         self._skip_existing_objects = None
+        self._update_mode = None
         self._mappings = None
         self._found_users = None
         self._found_taxa = None
@@ -81,6 +84,8 @@ class ImportRealReq(object):
             self.skip_loaded_files = skip_loaded_files
         if skip_existing_objects is not None:
             self.skip_existing_objects = skip_existing_objects
+        if update_mode is not None:
+            self.update_mode = update_mode
         if mappings is not None:
             self.mappings = mappings
         if found_users is not None:
@@ -142,7 +147,7 @@ class ImportRealReq(object):
 
 
         :return: The taxo_mappings of this ImportRealReq.  # noqa: E501
-        :rtype: dict(str, int)
+        :rtype: dict(str, str)
         """
         return self._taxo_mappings
 
@@ -152,7 +157,7 @@ class ImportRealReq(object):
 
 
         :param taxo_mappings: The taxo_mappings of this ImportRealReq.  # noqa: E501
-        :type: dict(str, int)
+        :type: dict(str, str)
         """
 
         self._taxo_mappings = taxo_mappings
@@ -198,6 +203,27 @@ class ImportRealReq(object):
         """
 
         self._skip_existing_objects = skip_existing_objects
+
+    @property
+    def update_mode(self):
+        """Gets the update_mode of this ImportRealReq.  # noqa: E501
+
+
+        :return: The update_mode of this ImportRealReq.  # noqa: E501
+        :rtype: str
+        """
+        return self._update_mode
+
+    @update_mode.setter
+    def update_mode(self, update_mode):
+        """Sets the update_mode of this ImportRealReq.
+
+
+        :param update_mode: The update_mode of this ImportRealReq.  # noqa: E501
+        :type: str
+        """
+
+        self._update_mode = update_mode
 
     @property
     def mappings(self):
