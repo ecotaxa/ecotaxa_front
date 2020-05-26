@@ -164,15 +164,16 @@ def ComputeZooHisto(psampleid,instrumtype):
 
 def GlobalTaxoCompute():
     # Sample Particule sans liens etabli avec Zoo qui sont liables
-    Samples=database.GetAll("""select ps.psampleid,pp.projid,pp.instrumtype from samples
+    Samples=database.GetAll("""select ps.psampleid,pp.projid from samples
             join part_samples ps on samples.orig_id=ps.profileid
             join part_projects pp on ps.pprojid = pp.pprojid and samples.projid=pp.projid
             where ps.sampleid is null""")
     for S in Samples:
         logging.info("Matching %s %s",S['psampleid'],ComputeZooMatch(S['psampleid'],S['projid']))
     # sample ayant un objet qui à été classifié depuis le dernier calcul de l'histogramme
-    Samples=database.GetAll("""select psampleid, daterecalculhistotaxo
+    Samples=database.GetAll("""select psampleid, daterecalculhistotaxo,pp.instrumtype
                 from part_samples ps
+                join part_projects pp on ps.pprojid = pp.pprojid 
                 where ps.sampleid is not null
                 and (
                       exists (select 1 from obj_head where obj_head.sampleid=ps.sampleid and obj_head.classif_when>ps.daterecalculhistotaxo)

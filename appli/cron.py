@@ -57,8 +57,7 @@ def RefreshTaxoStat():
         print("RefreshTaxoStat updated %d level %d taxo" % (n, level))
         if n == 0:
             break
-    # TODO: Commented out due to #413
-    #  appli.part.prj.GlobalTaxoCompute()
+    appli.part.prj.GlobalTaxoCompute()
 
 
 if __name__ == "__main__":
