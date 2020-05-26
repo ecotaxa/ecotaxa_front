@@ -19,20 +19,34 @@
   <a class='btn btn-default' href=?cleanall=Y{{ seeall }}>Clean All (warning !!!)</a>  Task count : {{  len_tasks }}
   <a class='btn btn-default' href=?seeall=Y>See All users tasks </a>
 <table class="table">
-    <tr><th>ID</th><th>Task type</th><th>Owner</th>
-    <th>State</th><th>Step</th><th width="60px">%</th><th>Message</th><th>Creation date</th><th>Last update</th></tr>
- {% for t in tasks %}
+    <tr>
+        <th>ID</th>
+        <th>Task type</th>
+        <th>Owner</th>
+        <th>State</th>
+        <th>Step</th>
+        <th width="60px">%</th>
+        <th>Message</th>
+        <th>Creation date</th>
+        <th>Last update</th>
+    </tr>
+    {% for t in tasks %}
 
-    <tr><td><a href="/Task/Show/{{ t.id }}"> {{ t.id }} <button class="btn btn-xs btn-primary">View</button></a></td>
-    <td>{{ t.taskclass }}</td>
-    <td>{{ t.owner_rel.name }}</td>
-    <td>{{ PutInLabel(t.taskstate,t.taskstate,t.id) }}</td><td>{{ t.taskstep }}</td>
+    <tr>
+        <td><a href="/Task/Show/{{ t.id }}"> {{ t.id }}
+            <button class="btn btn-xs btn-primary">View</button>
+        </a></td>
+        <td>{{ t.taskclass }}</td>
+        <td><a href="mailto:{{t.owner_rel.email}}">{{ t.owner_rel.name }}</a></td>
+        <td>{{ PutInLabel(t.taskstate,t.taskstate,t.id) }}</td>
+        <td>{{ t.taskstep }}</td>
         <td>{{ t.progresspct }} %</td>
         <td>{{ t.progressmsg }}</td>
         <td>{{ t.creationdate|datetime }}</td>
         <td>{{ t.lastupdate|datetime }}</td>
+    </tr>
 
-  {% endfor %}
+    {% endfor %}
 </table>
 
 {% endblock %}
