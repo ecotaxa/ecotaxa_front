@@ -339,9 +339,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.3.1"
+ecotaxa_version="2.3.2"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-05-18"
+    return ecotaxa_version+" 2020-05-27"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -349,6 +349,14 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-05-27 : V 2.3.2
+    Bugfix #357: Outdated logos.
+    Feature #401: Add a mailto: link to owner for each task in task list.
+    Feature #222: Add a link to project for each task in task list.
+    Bugfix #413: Daily Task (cron) fails.
+    Feature #406: EcoPart: Share current filters by mail.
+    Feature #400: Move import update to back-end.
+    Bugfix #403: EcoPart: Last graph in series is damaged.
 2020-05-18 : V 2.3.1
     Bugfix #402: Under server load or for big page sizes, vignettes could appear after a delay.
 2020-05-13 : V 2.3
