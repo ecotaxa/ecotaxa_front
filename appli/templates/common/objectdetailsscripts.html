@@ -18,7 +18,7 @@ function Save1Object(classqual) {
     req['changes'][objid]=classid;
     $("#PendingChangesPop").html('<span class="label label-info">Server update in progress...</span>')
         .load("/prj/ManualClassif/{{ Prj.projid}}",req,function(){
-        if ($("#PendingChangesPop").html().indexOf("Successfull")>0) {
+        if ($("#PendingChangesPop").html().indexOf("Successful")>0) {
             PendingChanges={}; // After successfull update no pending changes.
             if(classqual==='V')
                 $('#I'+objid).parents('td').find('.subimg').attr('class','subimg status-validated');

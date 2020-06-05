@@ -150,8 +150,8 @@ function SavePendingChanges(NextPage,forcedqual) {
     $("#PendingChanges2").html($("#PendingChanges").html());
     $("#PendingChanges").load("/prj/ManualClassif/"+$("#projid").val(),req,function(){
         $("#PendingChanges2").html($("#PendingChanges").html());
-        if ($("#PendingChanges").html().indexOf("Successfull")>0) {
-            PendingChanges={}; // After successfull update no pending changes.
+        if ($("#PendingChanges").html().indexOf("Successful")>0) {
+            PendingChanges={}; // After successful update no pending changes.
             if(NextPage==1)
                $("#pageoffset").val(parseInt($("#pageoffset").val())+1);
             else {# Si on ne change pas de page on garde l'offset de la scrollbar vertical à sa position courante #}
