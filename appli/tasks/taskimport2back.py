@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import time
-from pathlib import Path
 
-from flask import render_template, flash, request, g
+from flask import render_template, flash, g
 
-from appli import app, database, PrintInCharte, gvp, gvg, GetAppManagerMailto, \
-    UtfDiag, db
+from appli import database, PrintInCharte, gvg, GetAppManagerMailto, \
+    db
 from appli.tasks.importcommon import *
 from appli.tasks.taskmanager import AsyncTask
-from to_back.ecotaxa_cli_py import DefaultApi, ImportPrepReq, ImportPrepRsp, ApiClient, ImportRealReq
+from appli.utils import get_api_client
+from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq
 
 
 class TaskImportToBack(AsyncTask):
@@ -45,11 +45,6 @@ class TaskImportToBack(AsyncTask):
             self.param = self.Params()
         else:
             self.param = self.Params(task.inputparam)
-        # TODO: Can be a singleton/higher in classes
-        api_client = ApiClient()
-        # No trailing /
-        api_client.configuration.host = "http://localhost:8000"
-        self.api = DefaultApi(api_client)
 
     # noinspection PyMethodMayBeStatic
     def SPCommon(self):
@@ -58,7 +53,6 @@ class TaskImportToBack(AsyncTask):
 
     def _CreateDialogStep0(self):
         """ In UI/flask, task.taskstep = 0 AKA initial dialog """
-        ServerRoot = Path(app.config['SERVERLOADAREA'])
         Prj = database.Projects.query.filter_by(projid=gvg("p")).first()
         g.prjtitle = Prj.title
         g.prjprojid = Prj.projid
@@ -71,8 +65,6 @@ class TaskImportToBack(AsyncTask):
         if gvp('starttask') == "Y":
             # Form Submit -> check and store values to use
             errors = []
-            FileToSave = None
-            FileToSaveFileName = None
             self.param.ProjectId = gvg("p")
             self.param.SkipAlreadyLoadedFile = gvp("skiploaded")
             self.param.SkipObjectDuplicate = gvp("skipobjectduplicate")
@@ -85,22 +77,9 @@ class TaskImportToBack(AsyncTask):
                     errors.append("Taxonomy Mapping : Invalid format for line %s" % lig)
                 else:
                     TaxoMap[ls[0].strip().lower()] = ls[1].strip().lower()
-            # Verifier la coherence des données
-            uploadfile = request.files.get("uploadfile")
-            if uploadfile is not None and uploadfile.filename != '':  # import d'un fichier par HTTP
-                FileToSave = uploadfile  # La copie est faite plus tard, car à ce moment là, le repertoire
-                # de la tache n'est pas encore créé
-                FileToSaveFileName = "uploaded.zip"
-                self.param.InData = "uploaded.zip"
-            elif len(gvp("ServerPath")) < 2:
-                errors.append("Input Folder/File Too Short")
-            else:
-                sp = ServerRoot.joinpath(Path(gvp("ServerPath")))
-                if not sp.exists():  # verifie que le repertoire existe
-                    errors.append("Input Folder/File Invalid")
-                    UtfDiag(errors, str(sp))
-                else:
-                    self.param.InData = sp.as_posix()
+            # Import file parameter
+            FileToSave, FileToSaveFileName = get_file_from_form(self, errors)
+
             if len(errors) > 0:
                 for e in errors:
                     flash(e, "error")
@@ -124,7 +103,8 @@ class TaskImportToBack(AsyncTask):
                             skip_loaded_files=(self.param.SkipAlreadyLoadedFile == "Y"),
                             skip_existing_objects=self._must_skip_existing_objects(),
                             update_mode=self._update_mode())
-        rsp: ImportPrepRsp = self.api.api_import_import_prep_project_id_post(self.param.ProjectId, req)
+        with get_api_client() as api:
+            rsp: ImportPrepRsp = api.api_import_import_prep_project_id_post(self.param.ProjectId, req)
         # Copy back into params the eventually amended fields in response
         self.param.InData = rsp.source_path
         self.param.TaxoFound = rsp.found_taxa
@@ -199,7 +179,7 @@ class TaskImportToBack(AsyncTask):
         return self.param.SkipObjectDuplicate == "Y"
 
     def _update_mode(self) -> str:
-        return "" # No update for plain import
+        return ""  # No update for plain import
 
     def SPStep2(self):
         """ In subprocess, task.taskstep = 2 """
@@ -217,7 +197,8 @@ class TaskImportToBack(AsyncTask):
                             found_users=self.param.UserFound,  # from prep & UI
                             found_taxa=self.param.TaxoFound  # from prep & UI
                             )
-        self.api.api_import_import_real_project_id_post(self.param.ProjectId, req)
+        with get_api_client() as api:
+            api.api_import_import_real_project_id_post(self.param.ProjectId, req)
         self.task.taskstate = "Done"
         self.UpdateProgress(100, "Processing done")
 

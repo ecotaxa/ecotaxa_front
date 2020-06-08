@@ -37,6 +37,8 @@ class Task(db.Model):
     PROJ_ID_RE = r"\"ProjectId\": \"(\d*)\""
 
     def project_id(self) -> Optional[str]:
+        if self.inputparam is None:
+            return None
         match = re.search(self.PROJ_ID_RE, self.inputparam)
         if match:
             return match.group(1)
@@ -143,6 +145,9 @@ def TaskFactory(ClassName, task=None):
     from .taskimport2back import TaskImportToBack
     if ClassName == "TaskImportToBack":
         return TaskImportToBack(task)
+    from .tasksimpleimport import TaskSimpleImport
+    if ClassName == "TaskSimpleImport":
+        return TaskSimpleImport(task)
     from appli.tasks.taskclassifauto2 import TaskClassifAuto2
     if ClassName == "TaskClassifAuto2":
         return TaskClassifAuto2(task)
