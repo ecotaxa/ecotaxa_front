@@ -339,9 +339,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.3.2"
+ecotaxa_version="2.3.3"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-05-27"
+    return ecotaxa_version+" 2020-06-10"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -349,6 +349,9 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-06-10 : V 2.3.3
+    Bugfix #391, #418, #420: Rewrite of manual classification entry point for safer multi-session access.
+    Feature #400: Move simple import to back-end.
 2020-05-27 : V 2.3.2
     Bugfix #357: Outdated logos.
     Feature #401: Add a mailto: link to owner for each task in task list.

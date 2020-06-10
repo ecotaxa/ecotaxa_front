@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% macro selectinputdict(name, values, value='') -%}
+    <!--suppress ALL -->
     <select name="{{ name }}" id="{{ name }}">
     {% for k,v in values.items() %}
         <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
