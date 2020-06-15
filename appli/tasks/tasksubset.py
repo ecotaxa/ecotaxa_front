@@ -24,10 +24,8 @@ class TaskSubset(AsyncTask):
             super().__init__(InitStr)
             if InitStr is None:  # Valeurs par defaut ou vide pour init
                 self.ProjectId = None  # Projet de reference
-                self.what = None  # V,D,P,N (N=No flag)
                 self.valtype = None  # P,V = Pourcentage ou Valeur Absolue
                 self.valeur = None
-                self.extraprojects = None  # projets complementaires
                 self.subsetproject = None  # N° du projet destination
                 self.subsetprojecttitle = ""
                 self.withimg = "Y"
@@ -44,7 +42,7 @@ class TaskSubset(AsyncTask):
         self.acquisitions_by_id = {}
 
     def SPCommon(self):
-        logging.info("Execute SPCommon for Txt Export")
+        logging.info("Execute SPCommon for Extract Subset")
         self.pgcur = db.engine.raw_connection().cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     def GetSampleID(self, oldid):
@@ -124,8 +122,6 @@ class TaskSubset(AsyncTask):
             vaultroot = Path("../../vault")
             sqlparam = {'projid': self.param.ProjectId}
             sqlwhere = ""
-            if self.param.extraprojects:
-                sqlparam['projid'] += "," + self.param.extraprojects
             sqlparam['ranklimit'] = self.param.valeur
             if self.param.valtype == 'V':
                 rankfunction = 'rank'
@@ -133,12 +129,6 @@ class TaskSubset(AsyncTask):
                 rankfunction = '100*percent_rank'
             else:
                 rankfunction = 'FunctionError'
-            # if self.param.samplelist:
-            #     sqlwhere+=" and s.orig_id in (%s) "%(",".join(["'%s'"%x for x in self.param.samplelist.split(",")]))
-            # sqlwhere+=" and (o.classif_qual in (%s) "%(",".join(["'%s'"%x for x in self.param.what.split(",")]))
-            # if self.param.what.find('N')>=0:
-            #     sqlwhere+=" or o.classif_qual is null "
-            # sqlwhere+=")"
             sqlwhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam, str(self.task.owner_id))
             logging.info("SQLParam=%s", sqlparam)
             sql = """select objid from (
@@ -232,42 +222,6 @@ class TaskSubset(AsyncTask):
         g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
         errors = []
         if self.task.taskstep == 0:
-            if gvg('eps') == "":  # eps = Extra Project selected
-                # Premier écran de configuration, choix du projet de base
-                html = "<h3>SUBSET PROJECT SELECTION Page (1/2)</h3>"
-                html += """<h4>SELECT ADDITIONAL PROJECT TO INCLUDE IN THE SUBSET</h4>
-                <form action="?p={0}&eps=y" method=post>
-                """.format(Prj.projid)
-
-                from flask_login import current_user
-                sql = "select projid,title from projects "
-                if not current_user.has_role(database.AdministratorLabel):
-                    sql += " where projid in (select projid from projectspriv where member=%d and privilege='Manage')" % current_user.id
-                sql += " order by title"
-                ProjList = database.GetAll(sql)
-                html += """<select name=extraprojects id= extraprojects multiple>"""
-                for r in ProjList:
-                    html += "<option value='{0}'>{1} ({0})</option>".format(*r)
-                html += """</select><br><br>
-                <input class="btn btn-primary" type=submit value="Go to the next page">
-                <script>
-                $(document).ready(function() {
-                        $("#extraprojects").select2();
-                        });
-                </script>
-                </form>
-                <br><br>
-                <div class='panel panel-default' style="width:600px;margin-left:10px;">
-A SUBSET is a selection of images (objects) randomly copied from one or more source projects<br>
-A SUBSET can have different usages:<br>
-<ul>
-<li>It can be utilized as a Learning Set for the automatic classification
-<li>It can be utilized as a Test Set to evaluate the quality of the prediction or the validation
-</ul>
-                </div>
-                """
-                return PrintInCharte(html)
-
             self.param.filtres = {}
             for k in sharedfilter.FilterList:
                 if gvg(k, "") != "":
@@ -280,14 +234,19 @@ A SUBSET can have different usages:<br>
                                                                                           self.param.filtres.items() if
                                                                                           v != ""]))
 
+            prevpost = {}
+            if gvp("vvaleur"):
+                prevpost["vvaleur"]=gvp("vvaleur")
+            if gvp("pvaleur"):
+                prevpost["pvaleur"]=gvp("pvaleur")
             # Le projet de base est choisi second écran ou validation du second ecran
             if gvp('starttask') == "Y":
                 # validation du second ecran
-                self.param.extraprojects = gvp("extraprojects")
-                self.param.samplelist = gvp("samplelist")
                 self.param.withimg = gvp("withimg")
                 self.param.subsetprojecttitle = gvp("subsetprojecttitle")
                 self.param.valtype = gvp("valtype")
+                if len(self.param.subsetprojecttitle)<5:
+                    errors.append("Project name too short")
                 if self.param.valtype == 'V':
                     try:
                         self.param.valeur = int(gvp("vvaleur"))
@@ -303,19 +262,9 @@ A SUBSET can have different usages:<br>
                     except:
                         errors.append("Invalid % value")
 
-                tmp = []
-                if gvp('what_v'):
-                    tmp.append('V')
-                if gvp('what_d'):
-                    tmp.append('D')
-                if gvp('what_p'):
-                    tmp.append('P')
-                if gvp('what_n'):
-                    tmp.append('N')
-                self.param.what = ",".join(tmp)
+
                 # Verifier la coherence des données
                 # errors.append("TEST ERROR")
-                # if self.param.what=='' : errors.append("You must select at least one Flag")
                 if self.param.valtype == '':
                     errors.append("You must select the object selection parameter '% of values' or '# of objects'")
                 if len(errors) > 0:
@@ -324,39 +273,13 @@ A SUBSET can have different usages:<br>
                 else:  # Pas d'erreur, on lance la tache
                     return self.StartTask(self.param)
             else:  # valeurs par default
-                self.param.what = "V"
                 self.param.subsetprojecttitle = (Prj.title + " - Subset created on " + (
                     datetime.date.today().strftime('%Y-%m-%d')))[0:255]
-                self.param.extraprojects = ",".join(request.form.getlist('extraprojects'))
-                if filtertxt != "":  # s'il y a un filtre on coche toutes les cases et on masque la zone à l'affichage
-                    self.param.what = "V,D,P,N"
+                self.param.valtype='V'
+                prevpost['vvaleur']=200
 
-            html = "<h3>SUBSET SETTINGS Page (2/2)</h3>"
-            if self.param.extraprojects:
-                ExtraPrj = database.Projects.query.filter(text("projid in (%s)" % self.param.extraprojects)).all()
-                g.dispextraprojects = " ".join(["<br>- {1} ({0}) ".format(r.projid, r.title) for r in ExtraPrj])
-                for p in ExtraPrj:
-                    if p.mappingobj != Prj.mappingobj:
-                        flash(
-                            "Object variables and metadata differ on project %d (%s). "
-                            "The subset should not be utilized as a Learning Set"
-                            % (p.projid, p.title), "warning")
-                    if p.mappingsample != Prj.mappingsample:
-                        flash("Sample variables mapping differ on project %d (%s)."
-                        % (p.projid, p.title), "warning")
-                    if p.mappingacq != Prj.mappingacq:
-                        flash("Acquisition variables mapping differ on project %d (%s)" % (p.projid, p.title),
-                              "warning")
-                    if p.mappingprocess != Prj.mappingprocess:
-                        flash("Process variables mapping differ on project %d (%s)" % (p.projid, p.title), "warning")
-            else:
-                g.dispextraprojects = "None"
-                # recupere les samples
-                sql = """select sampleid,orig_id
-                        from samples where projid =%(projid)s
-                        order by orig_id"""
-                g.SampleList = GetAll(sql, {"projid": gvg("p")}, cursor_factory=None)
-            return render_template('task/subset_create.html', header=html, data=self.param, prevpost=request.form,
+            html = "<h3>Extract subset</h3>"
+            return render_template('task/subset_create.html', header=html, data=self.param, prevpost=prevpost,
                                    filtertxt=filtertxt)
 
     def GetDoneExtraAction(self):
