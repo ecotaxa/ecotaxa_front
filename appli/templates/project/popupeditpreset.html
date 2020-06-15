@@ -5,7 +5,7 @@
   #TblProj td:nth-child(1n+2) {font-size: small;}
   #TblProj th {font-weight: bold;text-align: center;}
   #TblProj .selvaleurs {margin-bottom: 3px;}
-  mark {background-color: yellow;}
+  mark {background-color: yellow;padding: 0;}
   .smallnowrap {width: 50px;white-space: nowrap;}
 </style>
 {{ txt }}
@@ -34,7 +34,7 @@
 </thead><tbody>
 {% for P in Prj %} {# Pour améliorer les performances, on affiche que les 50 premieres lignes #}
   <tr {{ "style='display:none'"|safe if loop.index>50 }} data-presetids="{{ P.presetids }}" data-objtaxonids="{{ P.objtaxonids }}">
-    <td>{{ P.title }} ({{P.projid}})<br>
+    <td><div class="content">{{ P.title }} ({{P.projid}})</div><br>
       <button class="btn btn-xs btn-primary selvaleurs" data-what="preset" title="Add Preset categories content to the current preset">Add Preset</button>
       <button class="btn btn-xs btn-primary selvaleurs" data-what="objtaxon" title="Add Extra categories content to the current preset">Add Extra</button>
     </td>
@@ -52,12 +52,12 @@ function Filter(search) {
   var searchlist=search.split(' ');
   var searchlistclean=[];
   for(var i in searchlist)
-    if(searchlist[i]!=='')
+    if((searchlist[i]!=='')&&(searchlist[i].length>1))
       searchlistclean.push(searchlist[i]);
   $('#TblProj tbody tr ').each(function () {
       var tr=$(this);
       {# pour améliorer les performances on mémorise les text() #}
-      var tds={0:{td:tr.find('td:nth-child(1)')},1:{td:tr.find('td:nth-child(2)')},2:{td:tr.find('td:nth-child(3)')}};
+      var tds={0:{td:tr.find('td:nth-child(1) .content')},1:{td:tr.find('td:nth-child(2)')},2:{td:tr.find('td:nth-child(3)')}};
       tds[0].text=tds[0].td.html().replace(/<\/?mark>/gi,'');
       tds[1].text=tds[1].td.html().replace(/<\/?mark>/gi,'');
       tds[2].text=tds[2].td.html().replace(/<\/?mark>/gi,'');
