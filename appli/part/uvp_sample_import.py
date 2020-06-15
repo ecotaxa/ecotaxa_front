@@ -59,8 +59,8 @@ def CreateOrUpdateSample(pprojid,headerdata):
     if headerdata.get('bottomdepth'):
         Sample.bottomdepth = int(headerdata['bottomdepth'])//10
     Sample.yoyo = headerdata['yoyo']=="Y"
-    Sample.firstimage = int(headerdata['firstimage'])
-    Sample.lastimg = int(headerdata['endimg'])
+    Sample.firstimage = int(float(headerdata['firstimage']))
+    Sample.lastimg = int(float(headerdata['endimg']))
     Sample.proc_soft="Zooprocess"
     if headerdata.get("pixelsize"):
         Sample.acq_pixel = float(headerdata['pixelsize'])
