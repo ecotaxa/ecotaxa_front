@@ -268,8 +268,8 @@ def indexPrj(PrjId):
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
         g.headmenu.append(("/prj/edit/%d" % (PrjId,), "Edit project settings"))
-        g.headmenu.append(("/Task/Create/TaskSubset?p=%d&eps=y" % (PrjId,), "Extract Subset"))
-        g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d&eps=y')" % (PrjId,),
+        g.headmenu.append(("/Task/Create/TaskSubset?p=%d" % (PrjId,), "Extract Subset"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d')" % (PrjId,),
                             "Extract Subset"))
         g.headmenu.append(("/prj/merge/%d" % (PrjId,), "Merge another project in this project"))
         g.headmenu.append(("/prj/EditAnnot/%d" % (PrjId,), "Edit or erase annotations massively"))
