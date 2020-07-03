@@ -339,9 +339,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.3.3"
+ecotaxa_version="2.3.4"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-06-10"
+    return ecotaxa_version+" 2020-07-02"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -349,6 +349,10 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-07-02 : V 2.3.4
+    Bugfix #419: Add preset/add extra unusable due to HTML escape.
+    Feature #282: Subset extraction page improvement.
+    Feature: Ecopart #423: Allow a special value for last image.
 2020-06-10 : V 2.3.3
     Bugfix #391, #418, #420: Rewrite of manual classification entry point for safer multi-session access.
     Feature #400: Move simple import to back-end.
