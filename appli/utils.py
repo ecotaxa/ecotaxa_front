@@ -17,8 +17,9 @@ class APIClientWrapper(DefaultApi):
         pass
 
 
-def get_api_client() -> DefaultApi:
+def get_api_client(token: str) -> DefaultApi:
     api_client = ApiClient()
+    api_client.configuration.access_token = token
     # Note: No trailing / in URL
     api_client.configuration.host = "http://localhost:8000"
     ret = APIClientWrapper(api_client)

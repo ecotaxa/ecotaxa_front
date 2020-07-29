@@ -103,7 +103,7 @@ class TaskImportToBack(AsyncTask):
                             skip_loaded_files=(self.param.SkipAlreadyLoadedFile == "Y"),
                             skip_existing_objects=self._must_skip_existing_objects(),
                             update_mode=self._update_mode())
-        with get_api_client() as api:
+        with get_api_client(self.cookie) as api:
             rsp: ImportPrepRsp = api.api_import_import_prep_project_id_post(self.param.ProjectId, req)
         # Copy back into params the eventually amended fields in response
         self.param.InData = rsp.source_path
@@ -197,7 +197,7 @@ class TaskImportToBack(AsyncTask):
                             found_users=self.param.UserFound,  # from prep & UI
                             found_taxa=self.param.TaxoFound  # from prep & UI
                             )
-        with get_api_client() as api:
+        with get_api_client(self.cookie) as api:
             api.api_import_import_real_project_id_post(self.param.ProjectId, req)
         self.task.taskstate = "Done"
         self.UpdateProgress(100, "Processing done")

@@ -61,7 +61,7 @@ if __name__ == '__main__':
             # logging.warning("Test Warning")
             # raise Exception("TEST")
             # On crée la tache à partir de la base
-            task = LoadTask(taskid)
+            task = LoadTask(taskid, cookie_from_env=True)
             task.task.taskstate = "Running"
             # on execute SPCommon s'il existe
             fct = getattr(task, "SPCommon", None)

@@ -36,6 +36,124 @@ class DefaultApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
+    def api_export_emodnet_export_emodnet_post(self, emod_net_export_req, **kwargs):  # noqa: E501
+        """Api Export Emodnet  # noqa: E501
+
+        Export in EMODnet format, @see https://www.emodnet-ingestion.eu/ Produces a DwC-A archive into a temporary directory, ready for download. https://python-dwca-reader.readthedocs.io/en/latest/index.html  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.api_export_emodnet_export_emodnet_post(emod_net_export_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param EMODNetExportReq emod_net_export_req: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: EMODNetExportRsp
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.api_export_emodnet_export_emodnet_post_with_http_info(emod_net_export_req, **kwargs)  # noqa: E501
+
+    def api_export_emodnet_export_emodnet_post_with_http_info(self, emod_net_export_req, **kwargs):  # noqa: E501
+        """Api Export Emodnet  # noqa: E501
+
+        Export in EMODnet format, @see https://www.emodnet-ingestion.eu/ Produces a DwC-A archive into a temporary directory, ready for download. https://python-dwca-reader.readthedocs.io/en/latest/index.html  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.api_export_emodnet_export_emodnet_post_with_http_info(emod_net_export_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param EMODNetExportReq emod_net_export_req: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(EMODNetExportRsp, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'emod_net_export_req'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method api_export_emodnet_export_emodnet_post" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'emod_net_export_req' is set
+        if self.api_client.client_side_validation and ('emod_net_export_req' not in local_var_params or  # noqa: E501
+                                                        local_var_params['emod_net_export_req'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `emod_net_export_req` when calling `api_export_emodnet_export_emodnet_post`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'emod_net_export_req' in local_var_params:
+            body_params = local_var_params['emod_net_export_req']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['HTTPBearer']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/export/emodnet', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='EMODNetExportRsp',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def api_import_import_prep_project_id_post(self, project_id, import_prep_req, **kwargs):  # noqa: E501
         """Api Import  # noqa: E501
 
@@ -145,7 +263,7 @@ class DefaultApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = []  # noqa: E501
+        auth_settings = ['HTTPBearer']  # noqa: E501
 
         return self.api_client.call_api(
             '/import_prep/{project_id}', 'POST',
@@ -272,7 +390,7 @@ class DefaultApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = []  # noqa: E501
+        auth_settings = ['HTTPBearer']  # noqa: E501
 
         return self.api_client.call_api(
             '/import_real/{project_id}', 'POST',
@@ -293,7 +411,7 @@ class DefaultApi(object):
     def api_import_simple_import_project_id_post(self, project_id, simple_import_req, **kwargs):  # noqa: E501
         """Api Import  # noqa: E501
 
-        Import an EcoTaxa archive or directory.  # noqa: E501
+        Import images only, with same metadata for all.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.api_import_simple_import_project_id_post(project_id, simple_import_req, async_req=True)
@@ -319,7 +437,7 @@ class DefaultApi(object):
     def api_import_simple_import_project_id_post_with_http_info(self, project_id, simple_import_req, **kwargs):  # noqa: E501
         """Api Import  # noqa: E501
 
-        Import an EcoTaxa archive or directory.  # noqa: E501
+        Import images only, with same metadata for all.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.api_import_simple_import_project_id_post_with_http_info(project_id, simple_import_req, async_req=True)
@@ -399,7 +517,7 @@ class DefaultApi(object):
             ['application/json'])  # noqa: E501
 
         # Authentication setting
-        auth_settings = []  # noqa: E501
+        auth_settings = ['HTTPBearer']  # noqa: E501
 
         return self.api_client.call_api(
             '/simple_import/{project_id}', 'POST',
@@ -539,7 +657,7 @@ class DefaultApi(object):
     def api_status_status_get(self, **kwargs):  # noqa: E501
         """Api Status  # noqa: E501
 
-        Import an EcoTaxa archive or directory.  # noqa: E501
+        Report the status, mainly used for verifying that the server is up.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.api_status_status_get(async_req=True)
@@ -563,7 +681,7 @@ class DefaultApi(object):
     def api_status_status_get_with_http_info(self, **kwargs):  # noqa: E501
         """Api Status  # noqa: E501
 
-        Import an EcoTaxa archive or directory.  # noqa: E501
+        Report the status, mainly used for verifying that the server is up.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.api_status_status_get_with_http_info(async_req=True)

@@ -50,6 +50,7 @@ class Configuration(object):
       additional properties map. In that case, there are undeclared properties, and
       nothing to discard.
 
+    :Example:
     """
 
     _default = None
@@ -88,6 +89,9 @@ class Configuration(object):
         """Password for HTTP basic authentication
         """
         self.discard_unknown_keys = discard_unknown_keys
+        self.access_token = None
+        """access token for OAuth/Bearer
+        """
         self.logger = {}
         """Logging Settings
         """
@@ -314,6 +318,13 @@ class Configuration(object):
         :return: The Auth Settings information dict.
         """
         auth = {}
+        if self.access_token is not None:
+            auth['HTTPBearer'] = {
+                'type': 'bearer',
+                'in': 'header',
+                'key': 'Authorization',
+                'value': 'Bearer ' + self.access_token
+            }
         return auth
 
     def to_debug_report(self):

@@ -8,13 +8,15 @@ import sys
 from typing import Optional
 
 import flask
-from flask import render_template, g, flash, jsonify
+from flask import render_template, g, flash, jsonify, request
 from flask_login import current_user
 from flask_security import login_required
 
 from appli import db, app, PrintInCharte, gvg, AddTaskSummaryForTemplate, database, gvp, XSSEscape
 from appli.database import ExecSQL, GetAll
 
+# Environment variable for transmitting cookie, i.e. web session, to subprocess
+ECOTAXA_COOKIE = "ECOTAXA_COOKIE"
 
 class Task(db.Model):
     __tablename__ = 'temp_tasks'
@@ -64,6 +66,7 @@ class AsyncTask:
             self.task.creationdate = datetime.datetime.now()
         else:
             self.task = task
+        self.cookie = None
 
     def Process(self):
         pass
@@ -99,6 +102,7 @@ class AsyncTask:
 
     # Permet de lancer le sous process
     def StartTask(self, param=None, step=1, FileToSave=None, FileToSaveFileName=None):
+        # Create/update DB task
         if param is not None:
             self.task.inputparam = json.dumps(param.__dict__)
         self.task.taskstep = step
@@ -106,6 +110,10 @@ class AsyncTask:
         if self.task.id is None:
             db.session.add(self.task)
         db.session.commit()
+        # Get request cookie for session transmission
+        cookie = request.cookies.get('session')
+        if cookie is not None:
+            os.environ[ECOTAXA_COOKIE] = cookie
         workingdir = self.GetWorkingDir()
         if not os.path.exists(workingdir):
             os.mkdir(workingdir)
@@ -182,7 +190,7 @@ def TaskFactory(ClassName, task=None):
     raise Exception("Invalid class name in TaskFactory : %s" % (ClassName,))
 
 
-def LoadTask(taskid):
+def LoadTask(taskid, cookie_from_env=False):
     """
     Permet de charger une tâche à partir de la base de données
     :param taskid:
@@ -191,7 +199,15 @@ def LoadTask(taskid):
     task = Task.query.filter_by(id=taskid).first()
     if task is None:
         raise Exception("Task %d not exists in database" % (taskid,))
-    return TaskFactory(task.taskclass, task)
+    ret = TaskFactory(task.taskclass, task)
+    # Amend the task with Web session cookie
+    if cookie_from_env:
+        # Find the cookie in environment variable
+        ret.cookie = os.environ.get(ECOTAXA_COOKIE)
+    else:
+        # Get the cookie from HTTP client
+        ret.cookie = request.cookies.get('session')
+    return ret
 
 
 @app.route('/Task/listall')
@@ -232,6 +248,8 @@ def TaskCreateRouter(ClassName):
     AddTaskSummaryForTemplate()
     ClassName = _new_tasks.get(ClassName, ClassName)
     task = TaskFactory(ClassName)
+    # Get the cookie from HTTP client
+    task.cookie = request.cookies.get('session')
     task.task.owner_id = current_user.get_id()
     return task.QuestionProcess()
 

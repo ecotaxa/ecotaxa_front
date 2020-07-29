@@ -27,7 +27,7 @@ class RawConnection(object):
         return ret
 
     def execute(self, sql: str, params: Any) -> int:
-        """ Execute an insert/delete/update, return the updated rows """
+        """ Execute an insert/delete/update, return the number of updated rows """
         with self.cnx.cursor() as cur:
             cur.execute(sql, params)
             ret = cur.rowcount

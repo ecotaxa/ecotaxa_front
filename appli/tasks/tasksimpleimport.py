@@ -68,7 +68,7 @@ class TaskSimpleImport(AsyncTask):
                 if values[fld] == "":
                     values[fld] = None
                 preset[fld] = values[fld]
-            with get_api_client() as api:
+            with get_api_client(self.cookie) as api:
                 rsp: SimpleImportRsp = api.api_import_simple_import_project_id_post(self.param.ProjectId, req)
             errors.extend(rsp.errors)
             # Check for errors. If any, stay in current state.
@@ -98,7 +98,7 @@ class TaskSimpleImport(AsyncTask):
         req = SimpleImportReq(task_id=self.task.id,
                               source_path=self.param.InData,
                               values=self.param.values)
-        with get_api_client() as api:
+        with get_api_client(self.cookie) as api:
             rsp: SimpleImportRsp = api.api_import_simple_import_project_id_post(self.param.ProjectId, req)
         if len(rsp.errors) != 0:
             msg = "Some errors were found during import"
