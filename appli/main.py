@@ -135,5 +135,5 @@ def before_teardown_commitdb(error):
 @app.after_request
 def after_request(response):
     response.headers[
-        'Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: cdnjs.cloudflare.com server.arcgisonline.com www.google.com www.gstatic.com www.google-analytics.com cdn.ckeditor.com;frame-ancestors 'self';form-action 'self';"
+        'Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: cdnjs.cloudflare.com server.arcgisonline.com www.google.com www.gstatic.com www.google-analytics.com cdn.ckeditor.com cdn.jsdelivr.net;frame-ancestors 'self';form-action 'self';"
     return response

@@ -295,6 +295,7 @@ import appli.project.view
 import appli.part.view
 import appli.taxonomy.taxomain
 import appli.usermgmnt
+import appli.api_proxy
 
 @app.errorhandler(404)
 def not_found(e):
