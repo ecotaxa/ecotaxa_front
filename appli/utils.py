@@ -1,20 +1,19 @@
 #
 # Utility defs not depending on the Flask app.
 #
+from contextlib import AbstractContextManager
+
 from to_back.ecotaxa_cli_py import ApiClient, DefaultApi
 from appli.api_proxy import BACKEND_URL
 
 
-class APIClientWrapper(DefaultApi):
+class APIClientWrapper(DefaultApi, AbstractContextManager):
     """ A client with guaranteed resource released """
 
     def __init__(self, api_client: ApiClient):
         super().__init__(api_client)
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         pass
 
 

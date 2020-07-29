@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import time
 
-from flask import render_template, flash, g
+from flask import render_template, g
 
 from appli import database, PrintInCharte, gvg, GetAppManagerMailto, \
     db
 from appli.tasks.importcommon import *
 from appli.tasks.taskmanager import AsyncTask
 from appli.utils import get_api_client
-from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq
+from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, DefaultApi
 
 
 class TaskImportToBack(AsyncTask):
@@ -103,8 +103,9 @@ class TaskImportToBack(AsyncTask):
                             skip_loaded_files=(self.param.SkipAlreadyLoadedFile == "Y"),
                             skip_existing_objects=self._must_skip_existing_objects(),
                             update_mode=self._update_mode())
+        api: DefaultApi
         with get_api_client(self.cookie) as api:
-            rsp: ImportPrepRsp = api.api_import_import_prep_project_id_post(self.param.ProjectId, req)
+            rsp: ImportPrepRsp = api.import_preparation_import_prep_project_id_post(self.param.ProjectId, req)
         # Copy back into params the eventually amended fields in response
         self.param.InData = rsp.source_path
         self.param.TaxoFound = rsp.found_taxa
@@ -197,8 +198,9 @@ class TaskImportToBack(AsyncTask):
                             found_users=self.param.UserFound,  # from prep & UI
                             found_taxa=self.param.TaxoFound  # from prep & UI
                             )
+        api: DefaultApi
         with get_api_client(self.cookie) as api:
-            api.api_import_import_real_project_id_post(self.param.ProjectId, req)
+            api.real_import_import_real_project_id_post(self.param.ProjectId, req)
         self.task.taskstate = "Done"
         self.UpdateProgress(100, "Processing done")
 

@@ -9,7 +9,7 @@ from appli import database, PrintInCharte, gvg
 from appli.tasks.importcommon import *
 from appli.tasks.taskmanager import AsyncTask, DoTaskClean
 from appli.utils import get_api_client
-from to_back.ecotaxa_cli_py import SimpleImportReq, SimpleImportRsp
+from to_back.ecotaxa_cli_py import SimpleImportReq, SimpleImportRsp, DefaultApi
 
 
 class TaskSimpleImport(AsyncTask):
@@ -68,8 +68,9 @@ class TaskSimpleImport(AsyncTask):
                 if values[fld] == "":
                     values[fld] = None
                 preset[fld] = values[fld]
+            api: DefaultApi
             with get_api_client(self.cookie) as api:
-                rsp: SimpleImportRsp = api.api_import_simple_import_project_id_post(self.param.ProjectId, req)
+                rsp: SimpleImportRsp = api.simple_import_simple_import_project_id_post(self.param.ProjectId, req)
             errors.extend(rsp.errors)
             # Check for errors. If any, stay in current state.
             if not flash_any_error(errors):
@@ -98,8 +99,9 @@ class TaskSimpleImport(AsyncTask):
         req = SimpleImportReq(task_id=self.task.id,
                               source_path=self.param.InData,
                               values=self.param.values)
+        api: DefaultApi
         with get_api_client(self.cookie) as api:
-            rsp: SimpleImportRsp = api.api_import_simple_import_project_id_post(self.param.ProjectId, req)
+            rsp: SimpleImportRsp = api.simple_import_simple_import_project_id_post(self.param.ProjectId, req)
         if len(rsp.errors) != 0:
             msg = "Some errors were found during import"
             logging.error(msg + ":")
