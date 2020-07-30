@@ -91,7 +91,7 @@ class ImportPrepReq(object):
 
 
         :param task_id: The task_id of this ImportPrepReq.  # noqa: E501
-        :type: int
+        :type task_id: int
         """
         if self.local_vars_configuration.client_side_validation and task_id is None:  # noqa: E501
             raise ValueError("Invalid value for `task_id`, must not be `None`")  # noqa: E501
@@ -114,7 +114,7 @@ class ImportPrepReq(object):
 
 
         :param source_path: The source_path of this ImportPrepReq.  # noqa: E501
-        :type: str
+        :type source_path: str
         """
         if self.local_vars_configuration.client_side_validation and source_path is None:  # noqa: E501
             raise ValueError("Invalid value for `source_path`, must not be `None`")  # noqa: E501
@@ -137,7 +137,7 @@ class ImportPrepReq(object):
 
 
         :param taxo_mappings: The taxo_mappings of this ImportPrepReq.  # noqa: E501
-        :type: dict(str, str)
+        :type taxo_mappings: dict(str, str)
         """
 
         self._taxo_mappings = taxo_mappings
@@ -158,7 +158,7 @@ class ImportPrepReq(object):
 
 
         :param skip_loaded_files: The skip_loaded_files of this ImportPrepReq.  # noqa: E501
-        :type: bool
+        :type skip_loaded_files: bool
         """
 
         self._skip_loaded_files = skip_loaded_files
@@ -179,7 +179,7 @@ class ImportPrepReq(object):
 
 
         :param skip_existing_objects: The skip_existing_objects of this ImportPrepReq.  # noqa: E501
-        :type: bool
+        :type skip_existing_objects: bool
         """
 
         self._skip_existing_objects = skip_existing_objects
@@ -200,7 +200,7 @@ class ImportPrepReq(object):
 
 
         :param update_mode: The update_mode of this ImportPrepReq.  # noqa: E501
-        :type: str
+        :type update_mode: str
         """
 
         self._update_mode = update_mode

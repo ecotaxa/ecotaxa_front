@@ -22,7 +22,13 @@ def proxy_post(path):
         if path == "openapi.json":
             resp = get(f'{BACKEND_URL}/api/{path}')
         else:
-            resp = get(f'{BACKEND_URL}/{path}')
+            # If there is a session cookie then transform it into a security bearer, to authenticate GETs from browsers
+            # also connected to main site.
+            session_cookie = request.cookies.get('session')
+            headers = {}
+            if session_cookie is not None:
+                headers["Authorization"] = "Bearer "+session_cookie
+            resp = get(f'{BACKEND_URL}/{path}', headers=headers)
     # noinspection PyUnboundLocalVariable
     headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
     response = Response(resp.content, resp.status_code, headers)

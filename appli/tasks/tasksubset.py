@@ -287,7 +287,7 @@ class TaskSubset(AsyncTask):
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
         PrjId = self.param.ProjectId
         time.sleep(1)
-        DoTaskClean(self.task.id)
+        #DoTaskClean(self.task.id)
         return ("""<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Original project</a>
         <a href='/prj/{1}' class='btn btn-primary btn-sm'  role=button>Go to Subset Project</a> """
                 .format(PrjId, self.param.subsetproject))

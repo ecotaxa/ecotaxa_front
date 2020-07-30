@@ -75,7 +75,7 @@ class ValidationError(object):
 
 
         :param loc: The loc of this ValidationError.  # noqa: E501
-        :type: list[str]
+        :type loc: list[str]
         """
         if self.local_vars_configuration.client_side_validation and loc is None:  # noqa: E501
             raise ValueError("Invalid value for `loc`, must not be `None`")  # noqa: E501
@@ -98,7 +98,7 @@ class ValidationError(object):
 
 
         :param msg: The msg of this ValidationError.  # noqa: E501
-        :type: str
+        :type msg: str
         """
         if self.local_vars_configuration.client_side_validation and msg is None:  # noqa: E501
             raise ValueError("Invalid value for `msg`, must not be `None`")  # noqa: E501
@@ -121,7 +121,7 @@ class ValidationError(object):
 
 
         :param type: The type of this ValidationError.  # noqa: E501
-        :type: str
+        :type type: str
         """
         if self.local_vars_configuration.client_side_validation and type is None:  # noqa: E501
             raise ValueError("Invalid value for `type`, must not be `None`")  # noqa: E501
