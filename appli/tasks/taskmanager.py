@@ -147,21 +147,20 @@ def TaskFactory(ClassName, task=None):
     from appli.tasks.test import TaskTest
     if ClassName == "TaskTest":
         return TaskTest(task)
-    from appli.tasks.taskimport import TaskImport
-    if ClassName == "TaskImport":
-        return TaskImport(task)
+    # Tasks using back-end and API
     from .taskimport2back import TaskImportToBack
     if ClassName == "TaskImportToBack":
         return TaskImportToBack(task)
+    from .taskimportupdate2back import TaskImportUpdateToBack
+    if ClassName == "TaskImportUpdateToBack":
+        return TaskImportUpdateToBack(task)
     from .tasksimpleimport import TaskSimpleImport
     if ClassName == "TaskSimpleImport":
         return TaskSimpleImport(task)
+    # Tasks running in present component
     from appli.tasks.taskclassifauto2 import TaskClassifAuto2
     if ClassName == "TaskClassifAuto2":
         return TaskClassifAuto2(task)
-    # from appli.tasks.tasktaxoimport import TaskTaxoImport
-    # if ClassName=="TaskTaxoImport":
-    #     return TaskTaxoImport(task)
     from appli.tasks.taskexporttxt import TaskExportTxt
     if ClassName == "TaskExportTxt":
         return TaskExportTxt(task)
@@ -174,12 +173,7 @@ def TaskFactory(ClassName, task=None):
     from appli.tasks.taskimportdb import TaskImportDB
     if ClassName == "TaskImportDB":
         return TaskImportDB(task)
-    from .taskimportupdate import TaskImportUpdate
-    if ClassName == "TaskImportUpdate":
-        return TaskImportUpdate(task)
-    from .taskimportupdate2back import TaskImportUpdateToBack
-    if ClassName == "TaskImportUpdateToBack":
-        return TaskImportUpdateToBack(task)
+    # Particle module tasks
     from .taskpartzooscanimport import TaskPartZooscanImport
     if ClassName == "TaskPartZooscanImport":
         return TaskPartZooscanImport(task)
