@@ -35,18 +35,16 @@ class SimpleImportReq(object):
     openapi_types = {
         'task_id': 'int',
         'source_path': 'str',
-        'values': 'dict(str, str)',
-        'possible_values': 'list[object]'
+        'values': 'dict(str, str)'
     }
 
     attribute_map = {
         'task_id': 'task_id',
         'source_path': 'source_path',
-        'values': 'values',
-        'possible_values': 'possible_values'
+        'values': 'values'
     }
 
-    def __init__(self, task_id=None, source_path=None, values=None, possible_values=["imgdate","imgtime","latitude","longitude","depthmin","depthmax","taxolb","userlb","status"], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, task_id=None, source_path=None, values=None, local_vars_configuration=None):  # noqa: E501
         """SimpleImportReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -55,14 +53,11 @@ class SimpleImportReq(object):
         self._task_id = None
         self._source_path = None
         self._values = None
-        self._possible_values = None
         self.discriminator = None
 
         self.task_id = task_id
         self.source_path = source_path
         self.values = values
-        if possible_values is not None:
-            self.possible_values = possible_values
 
     @property
     def task_id(self):
@@ -80,7 +75,7 @@ class SimpleImportReq(object):
 
 
         :param task_id: The task_id of this SimpleImportReq.  # noqa: E501
-        :type task_id: int
+        :type: int
         """
         if self.local_vars_configuration.client_side_validation and task_id is None:  # noqa: E501
             raise ValueError("Invalid value for `task_id`, must not be `None`")  # noqa: E501
@@ -103,7 +98,7 @@ class SimpleImportReq(object):
 
 
         :param source_path: The source_path of this SimpleImportReq.  # noqa: E501
-        :type source_path: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and source_path is None:  # noqa: E501
             raise ValueError("Invalid value for `source_path`, must not be `None`")  # noqa: E501
@@ -114,6 +109,7 @@ class SimpleImportReq(object):
     def values(self):
         """Gets the values of this SimpleImportReq.  # noqa: E501
 
+        Possible field values:imgdate, imgtime, latitude, longitude, depthmin, depthmax, taxolb, userlb, status  # noqa: E501
 
         :return: The values of this SimpleImportReq.  # noqa: E501
         :rtype: dict(str, str)
@@ -124,35 +120,15 @@ class SimpleImportReq(object):
     def values(self, values):
         """Sets the values of this SimpleImportReq.
 
+        Possible field values:imgdate, imgtime, latitude, longitude, depthmin, depthmax, taxolb, userlb, status  # noqa: E501
 
         :param values: The values of this SimpleImportReq.  # noqa: E501
-        :type values: dict(str, str)
+        :type: dict(str, str)
         """
         if self.local_vars_configuration.client_side_validation and values is None:  # noqa: E501
             raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
 
         self._values = values
-
-    @property
-    def possible_values(self):
-        """Gets the possible_values of this SimpleImportReq.  # noqa: E501
-
-
-        :return: The possible_values of this SimpleImportReq.  # noqa: E501
-        :rtype: list[object]
-        """
-        return self._possible_values
-
-    @possible_values.setter
-    def possible_values(self, possible_values):
-        """Sets the possible_values of this SimpleImportReq.
-
-
-        :param possible_values: The possible_values of this SimpleImportReq.  # noqa: E501
-        :type possible_values: list[object]
-        """
-
-        self._possible_values = possible_values
 
     def to_dict(self):
         """Returns the model properties as a dict"""

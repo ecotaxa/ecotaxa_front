@@ -1,0 +1,22 @@
+{% macro select2_user(placeholder) -%}
+     select2({
+        ajax: {
+            url: "/api/users/search",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { by_name: '%'+params.term+'%', page: params.page };
+            },
+            processResults: function (data, page) {
+                return { results: data.map(function(rec) {
+                    return {'id':rec.id, 'text':rec.name};
+                    })
+                };
+            },
+            cache: true,
+        },
+        placeholder: 'search user...',
+        allowClear: true,
+        minimumInputLength: 2
+    })
+{%- endmacro %}

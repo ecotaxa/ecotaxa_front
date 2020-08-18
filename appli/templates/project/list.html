@@ -55,20 +55,20 @@
 {%   for r in PrjList %}
 <tr><td>
 {%  if Others %}
-  <a class='btn btn-primary' href='mailto:{{r[6]}}?body={{ "Please provide me privileges to project : "+r[1]|urlencode }}&subject={{"Project access request"|urlencode }}'>REQUEST ACCESS</a>
-  {% if r[8] ==True or isadmin  %}
-    <a class='btn btn-primary' href='/prj/{{ r[0] }}'>View</a>
+  <a class='btn btn-primary' href='mailto:{{r.email}}?body={{ "Please provide me privileges to project : "+r.title|urlencode }}&subject={{"Project access request"|urlencode }}'>REQUEST ACCESS</a>
+  {% if r.visible==True or isadmin  %}
+    <a class='btn btn-primary' href='/prj/{{ r.projid }}'>View</a>
     {% endif %}
 {% else %}
-  <a class='btn btn-primary' href='/prj/{{r[0]}}'>Select</a>
+  <a class='btn btn-primary' href='/prj/{{r.projid}}'>Select</a>
 {% endif %}
 
   </td>
-  <td> {{ r[1] }} [{{ r[0] }}] {{ ("<a href='mailto:"+r[7]+"'>"+r[6]+"</a>") |safe if r[6] }}</td>
-  <td>{{ r[2] }}</td>
-  <td>{{ '{0:0.0f}'.format(r[3]) }}</td>
-  <td>{{ '{0:0.2f}'.format(r[4]) }}</td>
-  <td>{{ '{0:0.2f}'.format(r[5]) }}</td>
+  <td> {{ r.title }} [{{ r.projid }}] {{ ("<a href='mailto:"+r.email+"'>"+r.name+"</a>") |safe if r.email }}</td>
+  <td>{{ r.status }}</td>
+  <td>{{ '{0:0.0f}'.format(r.objcount) }}</td>
+  <td>{{ '{0:0.2f}'.format(r.pctvalidated) }}</td>
+  <td>{{ '{0:0.2f}'.format(r.pctclassified) }}</td>
   </tr>
 {%  endfor %}
 

@@ -14,6 +14,7 @@
 from __future__ import absolute_import
 
 # import models into model package
+from to_back.ecotaxa_cli_py.models.create_project_req import CreateProjectReq
 from to_back.ecotaxa_cli_py.models.eml_additional_meta import EMLAdditionalMeta
 from to_back.ecotaxa_cli_py.models.eml_associated_person import EMLAssociatedPerson
 from to_back.ecotaxa_cli_py.models.eml_geo_coverage import EMLGeoCoverage
@@ -31,6 +32,8 @@ from to_back.ecotaxa_cli_py.models.http_validation_error import HTTPValidationEr
 from to_back.ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
 from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
 from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
+from to_back.ecotaxa_cli_py.models.project_search_result import ProjectSearchResult
 from to_back.ecotaxa_cli_py.models.simple_import_req import SimpleImportReq
 from to_back.ecotaxa_cli_py.models.simple_import_rsp import SimpleImportRsp
+from to_back.ecotaxa_cli_py.models.user import User
 from to_back.ecotaxa_cli_py.models.validation_error import ValidationError

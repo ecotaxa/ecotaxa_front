@@ -143,7 +143,9 @@ def PrjEditPriv(PrjId):
                 m.member=int(gvp('priv_%s_member'%m.id))
                 m.privilege=gvp('priv_%s_privilege'%m.id)
         if gvp('priv_new_member')!='':
-            new=database.ProjectsPriv(member=int(gvp('priv_new_member')),privilege=gvp('priv_new_privilege'),projid=PrjId)
+            new=database.ProjectsPriv(member=int(gvp('priv_new_member')),
+                                      privilege=gvp('priv_new_privilege'),
+                                      projid=PrjId)
             db.session.add(new)
         try:
             db.session.commit()

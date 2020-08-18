@@ -17,49 +17,19 @@ from appli import app, PrintInCharte, database, gvg, gvp, user_datastore, Decode
 from appli.database import GetAll, GetClassifQualClass, ExecSQL, db, GetAssoc
 from appli.search.leftfilters import getcommonfilters
 
-
 ######################################################################################################################
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi, UsersApi
+
+
 @app.route('/prj/')
 @login_required
 def indexProjects(Others=False):
-    params = {}
-    if Others:
-        sql = """select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),
-                        coalesce(pctclassified,0),qpp.email,qpp.name,visible
-               from projects p
-               left Join projectspriv pp on p.projid = pp.projid and pp.member=%d
-               left join ( select * from (
-                            select u.email,u.name,pp.projid,rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
-                            from projectspriv pp join users u on pp.member=u.id
-                            where pp.privilege='Manage' and u.active=true ) q where rang=1
-                          ) qpp on qpp.projid=p.projid
-               where pp.member is null 
-               """ % (current_user.id,)
-    else:
-        sql = """select p.projid,title,status,coalesce(objcount,0),coalesce(pctvalidated,0),coalesce(pctclassified,0),
-                        qpp.name,qpp.email
-         from projects p
-         left join ( select * from (
-            select u.email,u.name,pp.projid,rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
-            from projectspriv pp join users u on pp.member=u.id
-            where pp.privilege='Manage' and u.active=true ) q where rang=1
-          ) qpp on qpp.projid=p.projid
-          """
-        if not current_user.has_role(database.AdministratorLabel):
-            sql += "  Join projectspriv pp on p.projid = pp.projid and pp.member=%d" % (current_user.id,)
-        sql += " where 1=1 "
     filt_title = gvg('filt_title', session.get('prjfilt_title', ''))
     session['prjfilt_title'] = filt_title
-    if filt_title != '':
-        sql += " and (  title ilike '%%'||%(title)s ||'%%' or to_char(p.projid,'999999') like '%%'||%(title)s ) "
-        params['title'] = filt_title
 
     filt_instrum = gvg('filt_instrum', session.get('prjfilt_instrum', ''))
     session['prjfilt_instrum'] = filt_instrum
-    if filt_instrum != '':
-        sql += " and p.projid in (select distinct projid from acquisitions " \
-               "                   where instrument ilike '%%'||%(filt_instrum)s ||'%%' ) "
-        params['filt_instrum'] = filt_instrum
 
     # Les checkbox ne sont pas transmises si elle ne sont pas coché,
     if 'filt_title' in request.args:  # donc si le filtre du titre est transmis on utilise le get
@@ -67,15 +37,18 @@ def indexProjects(Others=False):
         session['prjfilt_subset'] = filt_subset
     else:  # Sinon on prend la valeur de la session.
         filt_subset = session.get('prjfilt_subset', '')
-    if filt_subset == 'Y':
-        sql += " and not title ilike '%%subset%%'  "
 
-    sql += " order by lower(title)"  # pp.member nulls last,
-    res = GetAll(sql, params)  # ,debug=True
+    with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
+        rsp: ProjectSearchResult = api.search_projects_projects_search_get(also_others=Others,
+                                                                           title_filter=filt_title,
+                                                                           instrument_filter=filt_instrum,
+                                                                           filter_subset=(filt_subset == 'Y'))
+
     CanCreate = False
     if not Others:
         if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel):
             CanCreate = True
+
     PDT = database.PersistantDataTable.query.first()
     if PDT is None or PDT.lastserverversioncheck_datetime is None or (
             datetime.datetime.now() - PDT.lastserverversioncheck_datetime).days > 7:
@@ -83,8 +56,9 @@ def indexProjects(Others=False):
                   "Ask application administrator to do it."  # +str(PDT.lastserverversioncheck_datetime)
         fashtxt += "  <a href='/taxo/browse/' class='btn btn-primary btn-xs'>Synchronize to check Ecotaxa version</a>"
         flash(Markup(fashtxt), 'warning')
+
     return PrintInCharte(
-        render_template('project/list.html', PrjList=res, CanCreate=CanCreate,
+        render_template('project/list.html', PrjList=rsp, CanCreate=CanCreate,
                         AppManagerMailto=appli.GetAppManagerMailto(),
                         filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum, Others=Others,
                         isadmin=current_user.has_role(database.AdministratorLabel)))
@@ -293,7 +267,6 @@ def indexPrj(PrjId):
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
 # @login_required
 def LoadRightPane():
-
     # Fetch project are check rights
     PrjId = gvp("projid")
     Prj = database.Projects.query.filter_by(projid=PrjId).first()
@@ -903,17 +876,10 @@ def PrjGetFieldListAjax(PrjId, typefield):
 @app.route('/prj/simplecreate/', methods=['GET', 'POST'])
 @login_required
 def SimpleCreate():
-    Prj = database.Projects()
-    Prj.title = gvp("projtitle")
-    Prj.status = "Annotate"
-    Prj.visible = True
-    db.session.add(Prj)
-    db.session.commit()
-    PrjPriv = database.ProjectsPriv()
-    PrjPriv.projid = Prj.projid
-    PrjPriv.member = current_user.id
-    PrjPriv.privilege = "Manage"
-    db.session.add(PrjPriv)
-    db.session.commit()
+
+    with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
+        req = CreateProjectReq(title=gvp("projtitle"))
+        rsp: int = api.create_project_projects_create_post(req)
+
     # return "<a href='/prj/{0}' class='btn btn-primary'>Project Created ! Open IT</a>".format(Prj.projid)
-    return "<script>window.location='/prj/{0}';</script>".format(Prj.projid)
+    return "<script>window.location='/prj/{0}';</script>".format(rsp)

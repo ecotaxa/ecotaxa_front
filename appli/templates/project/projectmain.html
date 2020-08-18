@@ -19,6 +19,8 @@
 {%- endmacro %}
 
 {% extends "layout.html" %}
+{% import "js_macros.html" as js %}
+
 {% block headcenter %}
 <script src="/static/jquerycontextmenu/jquery.ui.position.min.js" type="text/javascript"></script>
 <script src="/static/jquerycontextmenu/jquery.contextMenu.min.js" type="text/javascript"></script>
@@ -717,18 +719,7 @@
             $('#zoom').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
         #}
 
-        $("#filt_annot").select2({
-            ajax: {
-                url: "/search/users",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) { return { q: params.term, page: params.page }; },
-                processResults: function (data, page) { return { results: data }; },
-                cache: true
-            },
-            minimumInputLength: 2
-            , placeholder: "Annotator"
-        }); // Select2 Ajax
+        $("#filt_annot").{{ js.select2_user() }}; // Select2 Ajax
         $("#filt_freenum").select2({
             ajax: {
                 url: "/prj/GetFieldList/{{ g.Projid }}/n",

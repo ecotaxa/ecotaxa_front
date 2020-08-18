@@ -1,0 +1,15 @@
+{% macro selectinput(name, values, value='') -%}
+    <select name="{{ name }}" id="{{ name }}" > {# class="form-control"  #}
+    {% for v in values %}
+        <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}
+{% macro selectinputdict(name, values, value='', emptyitem=false) -%}
+    <select name="{{ name }}" id="{{ name }}"  > {# class="form-control"  #}
+    {{ '<option/>'|safe if emptyitem }}
+    {% for k,v in values.items() %}
+        <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}

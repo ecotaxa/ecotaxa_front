@@ -1,3 +1,5 @@
+{% import "js_macros.html" as js %}
+
 <h3>Simple import</h3>
 <p>This procedure allows to import images in jpg, png, gif (possibly animated) formats. It will associate a fixed &
     reduced set of metadata.</p>
@@ -151,23 +153,7 @@
             $("#FileModalBody").html("");
             $("#TaxoModalBody").html("Loading...").load("/search/taxotree?target=taxolb");
         });
-        $(".userlb").select2({
-            ajax: {
-                url: "/search/users",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {q: params.term, page: params.page};
-                },
-                processResults: function (data, page) {
-                    return {results: data};
-                },
-                cache: true
-            },
-            placeholder: 'search user...',
-            allowClear: true,
-            minimumInputLength: 2
-        }); // Select2 Ajax
+        $(".userlb").{{ js.select2_user() }}; // Select2 Ajax
     }); // Ready
 
     function validform() {

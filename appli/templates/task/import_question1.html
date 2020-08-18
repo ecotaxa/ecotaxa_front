@@ -81,17 +81,7 @@ $(document).ready(function() {
         },
         minimumInputLength: 3
     }); // Select2 Ajax
-    $(".userlb").select2({
-        ajax: {
-            url: "/search/users",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {  return { q: params.term, page: params.page };  },
-            processResults: function (data, page) { return { results: data};  },
-            cache: true
-        },
-        minimumInputLength: 2
-    }); // Select2 Ajax
+    $(".userlb").{{ select2_user() }}; // Select2 Ajax
     $('#TaxoModal').on('show.bs.modal', function (e) {
         var button = $(e.relatedTarget); // Button that triggered the modal
         var targetid = button.data('mytargetid');

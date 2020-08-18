@@ -1,13 +1,5 @@
 {% extends "layout.html" %}
-{% macro selectinputdict(name, values, value='') -%}
-    <!--suppress ALL -->
-    <select name="{{ name }}" id="{{ name }}">
-    {% for k,v in values.items() %}
-        <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
-    {% endfor %}
-    </select>
-{%- endmacro %}
-
+{% import "ht_macros.html" as ht %}
 
 {% block body %}
   <div style="margin-left:10px;">
@@ -43,7 +35,7 @@
 <span class="glyphicon glyphicon-plus-sign"></span> Advanced settings</a></p>
 <div id=TargetFilter class="panel panel-default collapse " style="margin-left: 0;margin-top: 5px;width: 800px;padding: 5px;" >
 
-  OBJECTS to PREDICT {{ selectinputdict("Perimeter",{'nmc':"NOT Validated Objects",'all':"ALL Objects"},'nmc') }}
+  OBJECTS to PREDICT {{ ht.selectinputdict("Perimeter",{'nmc':"NOT Validated Objects",'all':"ALL Objects"},'nmc') }}
 
   <br>Type in "ResetToPredicted" to (re)predict also all validated objects from the selected categories :
   <input type="text" id="resetpredicted" value="" autocomplete="off" style="width: 150px;">

@@ -1,21 +1,7 @@
-{% macro selectinput(name, values, value='') -%}
-    <select name="{{ name }}" id="{{ name }}" > {# class="form-control"  #}
-    {% for v in values %}
-        <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
-    {% endfor %}
-    </select>
-{%- endmacro %}
-{% macro selectinputdict(name, values, value='',emptyitem=false) -%}
-    <select name="{{ name }}" id="{{ name }}"  > {# class="form-control"  #}
-    {{  '<option/>'|safe if emptyitem }}
-    {% for k,v in values.items() %}
-        <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
-    {% endfor %}
-    </select>
-{%- endmacro %}
-
 
 {% extends "layout.html" %}
+{% import "js_macros.html" as js %}
+{% import "ht_macros.html" as ht %}
 
 {% block body %}
 <form class="form-horizontal" method="post" action="?" id="form1">
@@ -31,7 +17,7 @@
     </tr>
 
 <tr><td>Status</td><td >
-        {{ selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
+        {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
   </td></tr>
 <tr><td>Project Description</td><td>
         <input type="text"  class="form-control" id="projtype" name="projtype"  value="{{ data.projtype|default('',true) }}">
@@ -105,8 +91,8 @@ Available fields :
           </tr>
       {% for pr in data.projmembers %}
           <tr>
-            <td>{{ selectinputdict('priv_'~pr.id~'_member', g.users, pr.member) }}</td>
-            <td>{{ selectinput('priv_'~pr.id~'_privilege', ('View', 'Annotate','Manage'), pr.privilege) }}</td>
+            <td>{{ ht.selectinputdict('priv_'~pr.id~'_member', g.users, pr.member) }}</td>
+            <td>{{ ht.selectinput('priv_'~pr.id~'_privilege', ('View', 'Annotate','Manage'), pr.privilege) }}</td>
             <td><input type="checkbox" name="priv_{{ pr.id }}_delete" value="Y"></td>
           </tr>
 
@@ -115,8 +101,8 @@ Available fields :
             <td>New privilege :</td>
           </tr>
           <tr>
-            <td>{{ selectinputdict('priv_new_member', g.users, '',true) }}</td>
-            <td>{{ selectinput('priv_new_privilege', ('View', 'Annotate','Manage'), '') }}</td>
+            <td>{{ ht.selectinputdict('priv_new_member', g.users, '',true) }}</td>
+            <td>{{ ht.selectinput('priv_new_privilege', ('View', 'Annotate','Manage'), '') }}</td>
             <td></td>
           </tr>
 
@@ -152,17 +138,7 @@ $(document).ready(function() {
         },
         minimumInputLength: 3
     }); // Select2 Ajax
-    $("select[name$=member]").select2({
-        ajax: {
-            url: "/search/users",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {  return { q: params.term, page: params.page };  },
-            processResults: function (data, page) { return { results: data};  },
-            cache: true
-        },
-        minimumInputLength: 2
-    }); // Select2 Ajax
+    $("select[name$=member]").{{ js.select2_user() }}; // Select2 Ajax
     $('#TaxoModal').on('show.bs.modal', function (e) {
         var button = $(e.relatedTarget); // Button that triggered the modal
         var targetid = button.data('mytargetid');

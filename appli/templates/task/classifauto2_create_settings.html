@@ -1,12 +1,6 @@
-{% macro selectinputdict(name, values, value='') -%}
-    <select name="{{ name }}" id="{{ name }}">
-    {% for k,v in values.items() %}
-        <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
-    {% endfor %}
-    </select>
-{%- endmacro %}
-
 {% extends "layout.html" %}
+{% import "ht_macros.html" as ht %}
+
 
 
 {% block body %}
@@ -28,7 +22,7 @@
 <div class="form-group">
     <label class="col-sm-6 control-label" >Keep log of previous automatic classification</label>
     <div class="col-sm-4">
-        {{ selectinputdict("keeplog",{'no':"No",'yes':"Yes"},"no") }}
+        {{ ht.selectinputdict("keeplog",{'no':"No",'yes':"Yes"},"no") }}
     </div> <!-- col-sm-4 -->
   </div><!-- /form-group -->
 
@@ -155,7 +149,7 @@ Select <a name="tbltop2" href="#tbltop2" onclick="$('#TblVar input').prop( 'chec
 <span class="glyphicon glyphicon-plus-sign"></span> Advanced settings</a>
 <div id=TargetFilter class="panel panel-default collapse " style="margin-left: 0px;margin-top: 5px;width: 800px;padding: 5px;" >
 
-  OBJECTS to PREDICT {{ selectinputdict("Perimeter",{'nmc':"NOT Validated Objects (Unclassified or Predicted)",'all':"ALL Objects (for confusion matrix computation only)"},data.Perimeter) }}
+  OBJECTS to PREDICT {{ ht.selectinputdict("Perimeter",{'nmc':"NOT Validated Objects (Unclassified or Predicted)",'all':"ALL Objects (for confusion matrix computation only)"},data.Perimeter) }}
 
 <br>
 {%  if g.LsSize >150000 %}
