@@ -77,7 +77,7 @@ if __name__ == '__main__':
         db.session.rollback()
         db.engine.begin()
         if task is not None:
-            task = LoadTask(taskid)
+            task = LoadTask(taskid, cookie_from_env=True)
             task.task.taskstate = "Error"
             task.task.progresspct = -1
             task.task.progressmsg = "Unhandled SubProcess Exception : " + str(sys.exc_info())
