@@ -19,7 +19,6 @@ __version__ = "1.0.0"
 # import apis into sdk package
 from to_back.ecotaxa_cli_py.api.wip_api import WIPApi
 from to_back.ecotaxa_cli_py.api.authentification_api import AuthentificationApi
-from to_back.ecotaxa_cli_py.api.other_api import OtherApi
 from to_back.ecotaxa_cli_py.api.projects_api import ProjectsApi
 from to_back.ecotaxa_cli_py.api.users_api import UsersApi
 
@@ -51,9 +50,12 @@ from to_back.ecotaxa_cli_py.models.http_validation_error import HTTPValidationEr
 from to_back.ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
 from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
 from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
+from to_back.ecotaxa_cli_py.models.merge_rsp import MergeRsp
 from to_back.ecotaxa_cli_py.models.project_search_result import ProjectSearchResult
 from to_back.ecotaxa_cli_py.models.simple_import_req import SimpleImportReq
 from to_back.ecotaxa_cli_py.models.simple_import_rsp import SimpleImportRsp
+from to_back.ecotaxa_cli_py.models.subset_req import SubsetReq
+from to_back.ecotaxa_cli_py.models.subset_rsp import SubsetRsp
 from to_back.ecotaxa_cli_py.models.user import User
 from to_back.ecotaxa_cli_py.models.validation_error import ValidationError
 

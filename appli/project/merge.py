@@ -59,6 +59,7 @@ def PrjMerge(PrjId):
         return PrintInCharte("<a href=/prj/>Select another project</a>")
     txt += """<h4>Source Project : {0} - {1} (This project will be destroyed)</h4>
             """.format(PrjSrc.projid, XSSEscape(PrjSrc.title))
+
     if not gvg('merge'):  # Ici la src à été choisie et vérifiée
         if PrjSrc.mappingobj != Prj.mappingobj:
             flash("Object mapping differ With source project ", "warning")

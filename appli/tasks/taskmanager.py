@@ -157,6 +157,9 @@ def TaskFactory(ClassName, task=None):
     from .tasksimpleimport import TaskSimpleImport
     if ClassName == "TaskSimpleImport":
         return TaskSimpleImport(task)
+    from appli.tasks.tasksubset2back import TaskSubsetToBack
+    if ClassName in ("TaskSubset", "TaskSubsetToBack"):
+        return TaskSubsetToBack(task)
     # Tasks running in present component
     from appli.tasks.taskclassifauto2 import TaskClassifAuto2
     if ClassName == "TaskClassifAuto2":
@@ -164,9 +167,6 @@ def TaskFactory(ClassName, task=None):
     from appli.tasks.taskexporttxt import TaskExportTxt
     if ClassName == "TaskExportTxt":
         return TaskExportTxt(task)
-    from appli.tasks.tasksubset import TaskSubset
-    if ClassName == "TaskSubset":
-        return TaskSubset(task)
     from appli.tasks.taskexportdb import TaskExportDb
     if ClassName == "TaskExportDb":
         return TaskExportDb(task)
@@ -232,7 +232,8 @@ def ListTasks():
 
 # Mappings to new task classes, conservatively keeping old code just in case
 _new_tasks = {"TaskImport": "TaskImportToBack",
-              "TaskImportUpdate": "TaskImportUpdateToBack"}
+              "TaskImportUpdate": "TaskImportUpdateToBack",
+              "TaskSubset": "TaskSubsetToBack",}
 
 
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])

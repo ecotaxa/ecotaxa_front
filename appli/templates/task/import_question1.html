@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% import "js_macros.html" as js %}
 
 {% block headcenter %}
   <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
@@ -81,7 +82,7 @@ $(document).ready(function() {
         },
         minimumInputLength: 3
     }); // Select2 Ajax
-    $(".userlb").{{ select2_user() }}; // Select2 Ajax
+    $(".userlb").{{ js.select2_user() }}; // Select2 Ajax
     $('#TaxoModal').on('show.bs.modal', function (e) {
         var button = $(e.relatedTarget); // Button that triggered the modal
         var targetid = button.data('mytargetid');

@@ -32,8 +32,11 @@ from to_back.ecotaxa_cli_py.models.http_validation_error import HTTPValidationEr
 from to_back.ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
 from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
 from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
+from to_back.ecotaxa_cli_py.models.merge_rsp import MergeRsp
 from to_back.ecotaxa_cli_py.models.project_search_result import ProjectSearchResult
 from to_back.ecotaxa_cli_py.models.simple_import_req import SimpleImportReq
 from to_back.ecotaxa_cli_py.models.simple_import_rsp import SimpleImportRsp
+from to_back.ecotaxa_cli_py.models.subset_req import SubsetReq
+from to_back.ecotaxa_cli_py.models.subset_rsp import SubsetRsp
 from to_back.ecotaxa_cli_py.models.user import User
 from to_back.ecotaxa_cli_py.models.validation_error import ValidationError

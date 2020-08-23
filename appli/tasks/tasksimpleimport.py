@@ -7,9 +7,9 @@ from flask_login import current_user
 
 from appli import database, PrintInCharte, gvg
 from appli.tasks.importcommon import *
-from appli.tasks.taskmanager import AsyncTask, DoTaskClean
+from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import SimpleImportReq, SimpleImportRsp, DefaultApi, ProjectsApi
+from to_back.ecotaxa_cli_py import SimpleImportReq, SimpleImportRsp, ProjectsApi
 
 
 class TaskSimpleImport(AsyncTask):
@@ -81,7 +81,6 @@ class TaskSimpleImport(AsyncTask):
         #                    "latitude": "-12.06398", "longitude": "-135.05325","depthmin": "50",
         #                    "depthmax": "70","userlb":8, "status":'V', "taxolb":25827}
         if 'userlb' in preset and preset['userlb'] is not None:
-            print(type(preset['userlb']))
             usr = database.users.query.filter_by(id=preset['userlb']).first()
             if usr:
                 preset["annot_name"] = usr.name
@@ -91,14 +90,15 @@ class TaskSimpleImport(AsyncTask):
                 preset["taxo_name"] = taxo.name
         return PrintInCharte(render_template("project/simpleimport.html", preset=preset))
 
+    # noinspection PyPep8Naming
     def SPStep1(self):
         """ In subprocess, task.taskstep = 1 """
         self.UpdateProgress(0, "Waiting for backend")
         logging.info("Input Param = %s" % self.param.__dict__)
+        # Back-end call
         req = SimpleImportReq(task_id=self.task.id,
                               source_path=self.param.InData,
                               values=self.param.values)
-        # Back-end call
         with ApiClient(ProjectsApi, self.cookie) as api:
             rsp: SimpleImportRsp = api.simple_import_simple_import_project_id_post(self.param.ProjectId, req)
 
@@ -117,6 +117,7 @@ class TaskSimpleImport(AsyncTask):
             self.task.taskstate = "Done"
             self.UpdateProgress(100, "Import done")
 
+    # noinspection PyPep8Naming
     def QuestionProcess(self):
         """ Called from tasking framework """
         txt = "<h1>Simple Import Task</h1>"
@@ -124,11 +125,12 @@ class TaskSimpleImport(AsyncTask):
             return self._CreateDialogStep0()
         return PrintInCharte(txt)
 
+    # noinspection PyPep8Naming
     def GetDoneExtraAction(self):
         """ Called when done """
         prj_id = self.param.ProjectId
         obj_count = self.param.ObjectCount
         time.sleep(1)
-        #DoTaskClean(self.task.id)
+        # DoTaskClean(self.task.id)
         return "Imported %s images successfully<br><a href='/prj/%s' class='btn btn-primary'>Go to project</a>" \
                % (obj_count, prj_id)

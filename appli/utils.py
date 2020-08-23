@@ -4,11 +4,11 @@
 from contextlib import AbstractContextManager
 from typing import Type, TypeVar, Generic
 
-from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, DefaultApi, ProjectsApi, UsersApi
+from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectsApi, UsersApi
 from appli.api_proxy import BACKEND_URL
 
 # Lol, generics in python
-A = TypeVar('A', DefaultApi, ProjectsApi, UsersApi)
+A = TypeVar('A', ProjectsApi, UsersApi)
 
 
 class ApiClient(Generic[A]):

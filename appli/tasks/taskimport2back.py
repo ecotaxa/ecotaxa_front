@@ -8,7 +8,7 @@ from appli import database, PrintInCharte, gvg, GetAppManagerMailto, \
 from appli.tasks.importcommon import *
 from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, DefaultApi, ProjectsApi
+from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, ProjectsApi
 
 
 class TaskImportToBack(AsyncTask):
