@@ -76,7 +76,7 @@ class EMLTaxonomicClassification(object):
 
 
         :param taxon_rank_name: The taxon_rank_name of this EMLTaxonomicClassification.  # noqa: E501
-        :type: str
+        :type taxon_rank_name: str
         """
         if self.local_vars_configuration.client_side_validation and taxon_rank_name is None:  # noqa: E501
             raise ValueError("Invalid value for `taxon_rank_name`, must not be `None`")  # noqa: E501
@@ -99,7 +99,7 @@ class EMLTaxonomicClassification(object):
 
 
         :param taxon_rank_value: The taxon_rank_value of this EMLTaxonomicClassification.  # noqa: E501
-        :type: str
+        :type taxon_rank_value: str
         """
         if self.local_vars_configuration.client_side_validation and taxon_rank_value is None:  # noqa: E501
             raise ValueError("Invalid value for `taxon_rank_value`, must not be `None`")  # noqa: E501
@@ -122,7 +122,7 @@ class EMLTaxonomicClassification(object):
 
 
         :param common_name: The common_name of this EMLTaxonomicClassification.  # noqa: E501
-        :type: str
+        :type common_name: str
         """
 
         self._common_name = common_name

@@ -71,7 +71,7 @@ class EMODNetExportReq(object):
 
 
         :param meta: The meta of this EMODNetExportReq.  # noqa: E501
-        :type: EMLMeta
+        :type meta: EMLMeta
         """
         if self.local_vars_configuration.client_side_validation and meta is None:  # noqa: E501
             raise ValueError("Invalid value for `meta`, must not be `None`")  # noqa: E501
@@ -94,7 +94,7 @@ class EMODNetExportReq(object):
 
 
         :param project_ids: The project_ids of this EMODNetExportReq.  # noqa: E501
-        :type: list[int]
+        :type project_ids: list[int]
         """
         if self.local_vars_configuration.client_side_validation and project_ids is None:  # noqa: E501
             raise ValueError("Invalid value for `project_ids`, must not be `None`")  # noqa: E501

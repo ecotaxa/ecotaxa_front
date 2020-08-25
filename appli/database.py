@@ -313,6 +313,11 @@ class Objects(db.Model):
     classif_id = db.Column(INTEGER)
     classif = db.relationship("Taxonomy", primaryjoin="Taxonomy.id==Objects.classif_id", foreign_keys="Taxonomy.id",
                               uselist=False, )
+    # Can be NULL meaning nothing happened to the object from classification point of view
+    # Other values:
+    # 'P' = Predicted (by automatic classification)
+    # 'V' = Validated (by operator)
+    # 'D' = Dubious (by operator)
     classif_qual = db.Column(CHAR(1))
     classif_who = db.Column(db.Integer, db.ForeignKey('users.id'))
     classiffier = db.relationship("users", primaryjoin="users.id==Objects.classif_who", foreign_keys="users.id",

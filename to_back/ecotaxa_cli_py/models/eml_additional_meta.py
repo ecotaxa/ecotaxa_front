@@ -112,7 +112,7 @@ class EMLAdditionalMeta(object):
 
 
         :param date_stamp: The date_stamp of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type date_stamp: str
         """
         if self.local_vars_configuration.client_side_validation and date_stamp is None:  # noqa: E501
             raise ValueError("Invalid value for `date_stamp`, must not be `None`")  # noqa: E501
@@ -135,7 +135,7 @@ class EMLAdditionalMeta(object):
 
 
         :param metadata_language: The metadata_language of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type metadata_language: str
         """
 
         self._metadata_language = metadata_language
@@ -156,7 +156,7 @@ class EMLAdditionalMeta(object):
 
 
         :param citation: The citation of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type citation: str
         """
 
         self._citation = citation
@@ -177,7 +177,7 @@ class EMLAdditionalMeta(object):
 
 
         :param bibliography: The bibliography of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type bibliography: str
         """
 
         self._bibliography = bibliography
@@ -198,7 +198,7 @@ class EMLAdditionalMeta(object):
 
 
         :param resource_logo_url: The resource_logo_url of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type resource_logo_url: str
         """
 
         self._resource_logo_url = resource_logo_url
@@ -219,7 +219,7 @@ class EMLAdditionalMeta(object):
 
 
         :param parent_collection_identifier: The parent_collection_identifier of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type parent_collection_identifier: str
         """
 
         self._parent_collection_identifier = parent_collection_identifier
@@ -240,7 +240,7 @@ class EMLAdditionalMeta(object):
 
 
         :param collection_identifier: The collection_identifier of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type collection_identifier: str
         """
 
         self._collection_identifier = collection_identifier
@@ -261,7 +261,7 @@ class EMLAdditionalMeta(object):
 
 
         :param formation_period: The formation_period of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type formation_period: str
         """
 
         self._formation_period = formation_period
@@ -282,7 +282,7 @@ class EMLAdditionalMeta(object):
 
 
         :param living_time_period: The living_time_period of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type living_time_period: str
         """
 
         self._living_time_period = living_time_period
@@ -303,7 +303,7 @@ class EMLAdditionalMeta(object):
 
 
         :param specimen_preservation_method: The specimen_preservation_method of this EMLAdditionalMeta.  # noqa: E501
-        :type: str
+        :type specimen_preservation_method: str
         """
 
         self._specimen_preservation_method = specimen_preservation_method

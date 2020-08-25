@@ -4,6 +4,7 @@ import math
 import os
 import urllib.parse
 from pathlib import Path
+from typing import List
 
 import psycopg2.extras
 from flask import render_template, g, flash, json, session, request, Markup
@@ -16,10 +17,9 @@ from appli import app, PrintInCharte, database, gvg, gvp, user_datastore, Decode
     XSSEscape
 from appli.database import GetAll, GetClassifQualClass, ExecSQL, db, GetAssoc
 from appli.search.leftfilters import getcommonfilters
-
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi, UsersApi
+from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi
 
 
 @app.route('/prj/')
@@ -39,10 +39,10 @@ def indexProjects(Others=False):
         filt_subset = session.get('prjfilt_subset', '')
 
     with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-        rsp: ProjectSearchResult = api.search_projects_projects_search_get(also_others=Others,
-                                                                           title_filter=filt_title,
-                                                                           instrument_filter=filt_instrum,
-                                                                           filter_subset=(filt_subset == 'Y'))
+        rsp: List[ProjectSearchResult] = api.search_projects_projects_search_get(also_others=Others,
+                                                                                 title_filter=filt_title,
+                                                                                 instrument_filter=filt_instrum,
+                                                                                 filter_subset=(filt_subset == 'Y'))
 
     CanCreate = False
     if not Others:
@@ -876,7 +876,6 @@ def PrjGetFieldListAjax(PrjId, typefield):
 @app.route('/prj/simplecreate/', methods=['GET', 'POST'])
 @login_required
 def SimpleCreate():
-
     with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
         req = CreateProjectReq(title=gvp("projtitle"))
         rsp: int = api.create_project_projects_create_post(req)

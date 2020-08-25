@@ -155,7 +155,7 @@ class EMLMeta(object):
 
 
         :param titles: The titles of this EMLMeta.  # noqa: E501
-        :type: list[EMLTitle]
+        :type titles: list[EMLTitle]
         """
         if self.local_vars_configuration.client_side_validation and titles is None:  # noqa: E501
             raise ValueError("Invalid value for `titles`, must not be `None`")  # noqa: E501
@@ -178,7 +178,7 @@ class EMLMeta(object):
 
 
         :param creators: The creators of this EMLMeta.  # noqa: E501
-        :type: list[EMLPerson]
+        :type creators: list[EMLPerson]
         """
         if self.local_vars_configuration.client_side_validation and creators is None:  # noqa: E501
             raise ValueError("Invalid value for `creators`, must not be `None`")  # noqa: E501
@@ -201,7 +201,7 @@ class EMLMeta(object):
 
 
         :param metadata_providers: The metadata_providers of this EMLMeta.  # noqa: E501
-        :type: list[EMLPerson]
+        :type metadata_providers: list[EMLPerson]
         """
         if self.local_vars_configuration.client_side_validation and metadata_providers is None:  # noqa: E501
             raise ValueError("Invalid value for `metadata_providers`, must not be `None`")  # noqa: E501
@@ -224,7 +224,7 @@ class EMLMeta(object):
 
 
         :param associated_parties: The associated_parties of this EMLMeta.  # noqa: E501
-        :type: list[EMLAssociatedPerson]
+        :type associated_parties: list[EMLAssociatedPerson]
         """
         if self.local_vars_configuration.client_side_validation and associated_parties is None:  # noqa: E501
             raise ValueError("Invalid value for `associated_parties`, must not be `None`")  # noqa: E501
@@ -247,7 +247,7 @@ class EMLMeta(object):
 
 
         :param contacts: The contacts of this EMLMeta.  # noqa: E501
-        :type: list[EMLPerson]
+        :type contacts: list[EMLPerson]
         """
         if self.local_vars_configuration.client_side_validation and contacts is None:  # noqa: E501
             raise ValueError("Invalid value for `contacts`, must not be `None`")  # noqa: E501
@@ -270,7 +270,7 @@ class EMLMeta(object):
 
 
         :param pub_date: The pub_date of this EMLMeta.  # noqa: E501
-        :type: str
+        :type pub_date: str
         """
         if self.local_vars_configuration.client_side_validation and pub_date is None:  # noqa: E501
             raise ValueError("Invalid value for `pub_date`, must not be `None`")  # noqa: E501
@@ -293,7 +293,7 @@ class EMLMeta(object):
 
 
         :param language: The language of this EMLMeta.  # noqa: E501
-        :type: str
+        :type language: str
         """
 
         self._language = language
@@ -314,7 +314,7 @@ class EMLMeta(object):
 
 
         :param abstract: The abstract of this EMLMeta.  # noqa: E501
-        :type: list[str]
+        :type abstract: list[str]
         """
         if self.local_vars_configuration.client_side_validation and abstract is None:  # noqa: E501
             raise ValueError("Invalid value for `abstract`, must not be `None`")  # noqa: E501
@@ -337,7 +337,7 @@ class EMLMeta(object):
 
 
         :param keyword_set: The keyword_set of this EMLMeta.  # noqa: E501
-        :type: EMLKeywordSet
+        :type keyword_set: EMLKeywordSet
         """
         if self.local_vars_configuration.client_side_validation and keyword_set is None:  # noqa: E501
             raise ValueError("Invalid value for `keyword_set`, must not be `None`")  # noqa: E501
@@ -360,7 +360,7 @@ class EMLMeta(object):
 
 
         :param additional_info: The additional_info of this EMLMeta.  # noqa: E501
-        :type: str
+        :type additional_info: str
         """
 
         self._additional_info = additional_info
@@ -381,7 +381,7 @@ class EMLMeta(object):
 
 
         :param geographic_coverage: The geographic_coverage of this EMLMeta.  # noqa: E501
-        :type: EMLGeoCoverage
+        :type geographic_coverage: EMLGeoCoverage
         """
         if self.local_vars_configuration.client_side_validation and geographic_coverage is None:  # noqa: E501
             raise ValueError("Invalid value for `geographic_coverage`, must not be `None`")  # noqa: E501
@@ -404,7 +404,7 @@ class EMLMeta(object):
 
 
         :param temporal_coverage: The temporal_coverage of this EMLMeta.  # noqa: E501
-        :type: EMLTemporalCoverage
+        :type temporal_coverage: EMLTemporalCoverage
         """
         if self.local_vars_configuration.client_side_validation and temporal_coverage is None:  # noqa: E501
             raise ValueError("Invalid value for `temporal_coverage`, must not be `None`")  # noqa: E501
@@ -427,7 +427,7 @@ class EMLMeta(object):
 
 
         :param general_taxonomic_coverage: The general_taxonomic_coverage of this EMLMeta.  # noqa: E501
-        :type: str
+        :type general_taxonomic_coverage: str
         """
 
         self._general_taxonomic_coverage = general_taxonomic_coverage
@@ -448,7 +448,7 @@ class EMLMeta(object):
 
 
         :param taxonomic_coverage: The taxonomic_coverage of this EMLMeta.  # noqa: E501
-        :type: list[EMLTaxonomicClassification]
+        :type taxonomic_coverage: list[EMLTaxonomicClassification]
         """
         if self.local_vars_configuration.client_side_validation and taxonomic_coverage is None:  # noqa: E501
             raise ValueError("Invalid value for `taxonomic_coverage`, must not be `None`")  # noqa: E501
@@ -471,7 +471,7 @@ class EMLMeta(object):
 
 
         :param intellectual_rights: The intellectual_rights of this EMLMeta.  # noqa: E501
-        :type: str
+        :type intellectual_rights: str
         """
         if self.local_vars_configuration.client_side_validation and intellectual_rights is None:  # noqa: E501
             raise ValueError("Invalid value for `intellectual_rights`, must not be `None`")  # noqa: E501
@@ -494,7 +494,7 @@ class EMLMeta(object):
 
 
         :param purpose: The purpose of this EMLMeta.  # noqa: E501
-        :type: str
+        :type purpose: str
         """
 
         self._purpose = purpose
@@ -515,7 +515,7 @@ class EMLMeta(object):
 
 
         :param methods: The methods of this EMLMeta.  # noqa: E501
-        :type: EMLMethod
+        :type methods: EMLMethod
         """
 
         self._methods = methods
@@ -536,7 +536,7 @@ class EMLMeta(object):
 
 
         :param project: The project of this EMLMeta.  # noqa: E501
-        :type: EMLProject
+        :type project: EMLProject
         """
 
         self._project = project
@@ -557,7 +557,7 @@ class EMLMeta(object):
 
 
         :param maintenance_update_frequency: The maintenance_update_frequency of this EMLMeta.  # noqa: E501
-        :type: str
+        :type maintenance_update_frequency: str
         """
 
         self._maintenance_update_frequency = maintenance_update_frequency
@@ -578,7 +578,7 @@ class EMLMeta(object):
 
 
         :param maintenance: The maintenance of this EMLMeta.  # noqa: E501
-        :type: str
+        :type maintenance: str
         """
 
         self._maintenance = maintenance
@@ -599,7 +599,7 @@ class EMLMeta(object):
 
 
         :param additional_metadata: The additional_metadata of this EMLMeta.  # noqa: E501
-        :type: EMLAdditionalMeta
+        :type additional_metadata: EMLAdditionalMeta
         """
         if self.local_vars_configuration.client_side_validation and additional_metadata is None:  # noqa: E501
             raise ValueError("Invalid value for `additional_metadata`, must not be `None`")  # noqa: E501

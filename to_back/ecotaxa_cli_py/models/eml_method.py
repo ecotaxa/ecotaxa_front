@@ -79,7 +79,7 @@ class EMLMethod(object):
 
 
         :param method_step: The method_step of this EMLMethod.  # noqa: E501
-        :type: str
+        :type method_step: str
         """
         if self.local_vars_configuration.client_side_validation and method_step is None:  # noqa: E501
             raise ValueError("Invalid value for `method_step`, must not be `None`")  # noqa: E501
@@ -102,7 +102,7 @@ class EMLMethod(object):
 
 
         :param sampling: The sampling of this EMLMethod.  # noqa: E501
-        :type: str
+        :type sampling: str
         """
         if self.local_vars_configuration.client_side_validation and sampling is None:  # noqa: E501
             raise ValueError("Invalid value for `sampling`, must not be `None`")  # noqa: E501
@@ -125,7 +125,7 @@ class EMLMethod(object):
 
 
         :param study_extent: The study_extent of this EMLMethod.  # noqa: E501
-        :type: str
+        :type study_extent: str
         """
         if self.local_vars_configuration.client_side_validation and study_extent is None:  # noqa: E501
             raise ValueError("Invalid value for `study_extent`, must not be `None`")  # noqa: E501
@@ -148,7 +148,7 @@ class EMLMethod(object):
 
 
         :param sampling_description: The sampling_description of this EMLMethod.  # noqa: E501
-        :type: str
+        :type sampling_description: str
         """
         if self.local_vars_configuration.client_side_validation and sampling_description is None:  # noqa: E501
             raise ValueError("Invalid value for `sampling_description`, must not be `None`")  # noqa: E501

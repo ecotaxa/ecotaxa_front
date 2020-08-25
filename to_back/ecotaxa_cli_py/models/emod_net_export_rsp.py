@@ -67,7 +67,7 @@ class EMODNetExportRsp(object):
 
 
         :param task_id: The task_id of this EMODNetExportRsp.  # noqa: E501
-        :type: int
+        :type task_id: int
         """
         if self.local_vars_configuration.client_side_validation and task_id is None:  # noqa: E501
             raise ValueError("Invalid value for `task_id`, must not be `None`")  # noqa: E501

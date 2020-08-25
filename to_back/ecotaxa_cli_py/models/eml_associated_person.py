@@ -130,7 +130,7 @@ class EMLAssociatedPerson(object):
 
 
         :param given_name: The given_name of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type given_name: str
         """
 
         self._given_name = given_name
@@ -151,7 +151,7 @@ class EMLAssociatedPerson(object):
 
 
         :param sur_name: The sur_name of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type sur_name: str
         """
 
         self._sur_name = sur_name
@@ -172,7 +172,7 @@ class EMLAssociatedPerson(object):
 
 
         :param organization_name: The organization_name of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type organization_name: str
         """
         if self.local_vars_configuration.client_side_validation and organization_name is None:  # noqa: E501
             raise ValueError("Invalid value for `organization_name`, must not be `None`")  # noqa: E501
@@ -195,7 +195,7 @@ class EMLAssociatedPerson(object):
 
 
         :param position_name: The position_name of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type position_name: str
         """
         if self.local_vars_configuration.client_side_validation and position_name is None:  # noqa: E501
             raise ValueError("Invalid value for `position_name`, must not be `None`")  # noqa: E501
@@ -218,7 +218,7 @@ class EMLAssociatedPerson(object):
 
 
         :param delivery_point: The delivery_point of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type delivery_point: str
         """
 
         self._delivery_point = delivery_point
@@ -239,7 +239,7 @@ class EMLAssociatedPerson(object):
 
 
         :param city: The city of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type city: str
         """
 
         self._city = city
@@ -260,7 +260,7 @@ class EMLAssociatedPerson(object):
 
 
         :param administrative_area: The administrative_area of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type administrative_area: str
         """
 
         self._administrative_area = administrative_area
@@ -281,7 +281,7 @@ class EMLAssociatedPerson(object):
 
 
         :param postal_code: The postal_code of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type postal_code: str
         """
 
         self._postal_code = postal_code
@@ -302,7 +302,7 @@ class EMLAssociatedPerson(object):
 
 
         :param country: The country of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type country: str
         """
         if self.local_vars_configuration.client_side_validation and country is None:  # noqa: E501
             raise ValueError("Invalid value for `country`, must not be `None`")  # noqa: E501
@@ -325,7 +325,7 @@ class EMLAssociatedPerson(object):
 
 
         :param phone: The phone of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type phone: str
         """
 
         self._phone = phone
@@ -346,7 +346,7 @@ class EMLAssociatedPerson(object):
 
 
         :param electronic_mail_address: The electronic_mail_address of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type electronic_mail_address: str
         """
 
         self._electronic_mail_address = electronic_mail_address
@@ -367,7 +367,7 @@ class EMLAssociatedPerson(object):
 
 
         :param online_url: The online_url of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type online_url: str
         """
 
         self._online_url = online_url
@@ -388,7 +388,7 @@ class EMLAssociatedPerson(object):
 
 
         :param user_id: The user_id of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type user_id: str
         """
 
         self._user_id = user_id
@@ -409,7 +409,7 @@ class EMLAssociatedPerson(object):
 
 
         :param role: The role of this EMLAssociatedPerson.  # noqa: E501
-        :type: str
+        :type role: str
         """
 
         self._role = role

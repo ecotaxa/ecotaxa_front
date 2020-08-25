@@ -78,7 +78,7 @@ class EMLTemporalCoverage(object):
 
 
         :param single_date_time: The single_date_time of this EMLTemporalCoverage.  # noqa: E501
-        :type: str
+        :type single_date_time: str
         """
 
         self._single_date_time = single_date_time
@@ -99,7 +99,7 @@ class EMLTemporalCoverage(object):
 
 
         :param begin_date: The begin_date of this EMLTemporalCoverage.  # noqa: E501
-        :type: str
+        :type begin_date: str
         """
 
         self._begin_date = begin_date
@@ -120,7 +120,7 @@ class EMLTemporalCoverage(object):
 
 
         :param end_date: The end_date of this EMLTemporalCoverage.  # noqa: E501
-        :type: str
+        :type end_date: str
         """
 
         self._end_date = end_date

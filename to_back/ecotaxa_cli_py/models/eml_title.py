@@ -72,7 +72,7 @@ class EMLTitle(object):
 
 
         :param title: The title of this EMLTitle.  # noqa: E501
-        :type: str
+        :type title: str
         """
         if self.local_vars_configuration.client_side_validation and title is None:  # noqa: E501
             raise ValueError("Invalid value for `title`, must not be `None`")  # noqa: E501
@@ -95,7 +95,7 @@ class EMLTitle(object):
 
 
         :param lang: The lang of this EMLTitle.  # noqa: E501
-        :type: str
+        :type lang: str
         """
 
         self._lang = lang

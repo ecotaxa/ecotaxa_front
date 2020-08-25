@@ -88,7 +88,7 @@ class SubsetReq(object):
 
 
         :param task_id: The task_id of this SubsetReq.  # noqa: E501
-        :type: int
+        :type task_id: int
         """
         if self.local_vars_configuration.client_side_validation and task_id is None:  # noqa: E501
             raise ValueError("Invalid value for `task_id`, must not be `None`")  # noqa: E501
@@ -111,7 +111,7 @@ class SubsetReq(object):
 
 
         :param filters: The filters of this SubsetReq.  # noqa: E501
-        :type: dict(str, str)
+        :type filters: dict(str, str)
         """
 
         self._filters = filters
@@ -132,7 +132,7 @@ class SubsetReq(object):
 
 
         :param dest_prj_id: The dest_prj_id of this SubsetReq.  # noqa: E501
-        :type: int
+        :type dest_prj_id: int
         """
         if self.local_vars_configuration.client_side_validation and dest_prj_id is None:  # noqa: E501
             raise ValueError("Invalid value for `dest_prj_id`, must not be `None`")  # noqa: E501
@@ -155,7 +155,7 @@ class SubsetReq(object):
 
 
         :param limit_type: The limit_type of this SubsetReq.  # noqa: E501
-        :type: str
+        :type limit_type: str
         """
         if self.local_vars_configuration.client_side_validation and limit_type is None:  # noqa: E501
             raise ValueError("Invalid value for `limit_type`, must not be `None`")  # noqa: E501
@@ -184,7 +184,7 @@ class SubsetReq(object):
 
 
         :param limit_value: The limit_value of this SubsetReq.  # noqa: E501
-        :type: float
+        :type limit_value: float
         """
         if self.local_vars_configuration.client_side_validation and limit_value is None:  # noqa: E501
             raise ValueError("Invalid value for `limit_value`, must not be `None`")  # noqa: E501
@@ -207,7 +207,7 @@ class SubsetReq(object):
 
 
         :param do_images: The do_images of this SubsetReq.  # noqa: E501
-        :type: bool
+        :type do_images: bool
         """
         if self.local_vars_configuration.client_side_validation and do_images is None:  # noqa: E501
             raise ValueError("Invalid value for `do_images`, must not be `None`")  # noqa: E501

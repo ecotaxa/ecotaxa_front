@@ -71,7 +71,7 @@ class EMLKeywordSet(object):
 
 
         :param keywords: The keywords of this EMLKeywordSet.  # noqa: E501
-        :type: list[str]
+        :type keywords: list[str]
         """
         if self.local_vars_configuration.client_side_validation and keywords is None:  # noqa: E501
             raise ValueError("Invalid value for `keywords`, must not be `None`")  # noqa: E501
@@ -94,7 +94,7 @@ class EMLKeywordSet(object):
 
 
         :param keyword_thesaurus: The keyword_thesaurus of this EMLKeywordSet.  # noqa: E501
-        :type: str
+        :type keyword_thesaurus: str
         """
         if self.local_vars_configuration.client_side_validation and keyword_thesaurus is None:  # noqa: E501
             raise ValueError("Invalid value for `keyword_thesaurus`, must not be `None`")  # noqa: E501

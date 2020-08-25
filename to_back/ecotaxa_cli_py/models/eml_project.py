@@ -101,7 +101,7 @@ class EMLProject(object):
 
 
         :param title: The title of this EMLProject.  # noqa: E501
-        :type: str
+        :type title: str
         """
         if self.local_vars_configuration.client_side_validation and title is None:  # noqa: E501
             raise ValueError("Invalid value for `title`, must not be `None`")  # noqa: E501
@@ -124,7 +124,7 @@ class EMLProject(object):
 
 
         :param identifier: The identifier of this EMLProject.  # noqa: E501
-        :type: str
+        :type identifier: str
         """
 
         self._identifier = identifier
@@ -145,7 +145,7 @@ class EMLProject(object):
 
 
         :param personnel: The personnel of this EMLProject.  # noqa: E501
-        :type: list[EMLAssociatedPerson]
+        :type personnel: list[EMLAssociatedPerson]
         """
         if self.local_vars_configuration.client_side_validation and personnel is None:  # noqa: E501
             raise ValueError("Invalid value for `personnel`, must not be `None`")  # noqa: E501
@@ -168,7 +168,7 @@ class EMLProject(object):
 
 
         :param description: The description of this EMLProject.  # noqa: E501
-        :type: str
+        :type description: str
         """
 
         self._description = description
@@ -189,7 +189,7 @@ class EMLProject(object):
 
 
         :param funding: The funding of this EMLProject.  # noqa: E501
-        :type: str
+        :type funding: str
         """
 
         self._funding = funding
@@ -210,7 +210,7 @@ class EMLProject(object):
 
 
         :param study_area_description: The study_area_description of this EMLProject.  # noqa: E501
-        :type: str
+        :type study_area_description: str
         """
 
         self._study_area_description = study_area_description
@@ -231,7 +231,7 @@ class EMLProject(object):
 
 
         :param design_description: The design_description of this EMLProject.  # noqa: E501
-        :type: str
+        :type design_description: str
         """
 
         self._design_description = design_description
@@ -252,7 +252,7 @@ class EMLProject(object):
 
 
         :param quality_control: The quality_control of this EMLProject.  # noqa: E501
-        :type: str
+        :type quality_control: str
         """
 
         self._quality_control = quality_control

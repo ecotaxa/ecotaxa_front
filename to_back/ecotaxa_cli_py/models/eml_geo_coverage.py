@@ -83,7 +83,7 @@ class EMLGeoCoverage(object):
 
 
         :param geographic_description: The geographic_description of this EMLGeoCoverage.  # noqa: E501
-        :type: str
+        :type geographic_description: str
         """
         if self.local_vars_configuration.client_side_validation and geographic_description is None:  # noqa: E501
             raise ValueError("Invalid value for `geographic_description`, must not be `None`")  # noqa: E501
@@ -106,7 +106,7 @@ class EMLGeoCoverage(object):
 
 
         :param west_bounding_coordinate: The west_bounding_coordinate of this EMLGeoCoverage.  # noqa: E501
-        :type: str
+        :type west_bounding_coordinate: str
         """
         if self.local_vars_configuration.client_side_validation and west_bounding_coordinate is None:  # noqa: E501
             raise ValueError("Invalid value for `west_bounding_coordinate`, must not be `None`")  # noqa: E501
@@ -129,7 +129,7 @@ class EMLGeoCoverage(object):
 
 
         :param east_bounding_coordinate: The east_bounding_coordinate of this EMLGeoCoverage.  # noqa: E501
-        :type: str
+        :type east_bounding_coordinate: str
         """
         if self.local_vars_configuration.client_side_validation and east_bounding_coordinate is None:  # noqa: E501
             raise ValueError("Invalid value for `east_bounding_coordinate`, must not be `None`")  # noqa: E501
@@ -152,7 +152,7 @@ class EMLGeoCoverage(object):
 
 
         :param north_bounding_coordinate: The north_bounding_coordinate of this EMLGeoCoverage.  # noqa: E501
-        :type: str
+        :type north_bounding_coordinate: str
         """
         if self.local_vars_configuration.client_side_validation and north_bounding_coordinate is None:  # noqa: E501
             raise ValueError("Invalid value for `north_bounding_coordinate`, must not be `None`")  # noqa: E501
@@ -175,7 +175,7 @@ class EMLGeoCoverage(object):
 
 
         :param south_bounding_coordinate: The south_bounding_coordinate of this EMLGeoCoverage.  # noqa: E501
-        :type: str
+        :type south_bounding_coordinate: str
         """
         if self.local_vars_configuration.client_side_validation and south_bounding_coordinate is None:  # noqa: E501
             raise ValueError("Invalid value for `south_bounding_coordinate`, must not be `None`")  # noqa: E501
