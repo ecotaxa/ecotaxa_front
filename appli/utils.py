@@ -1,11 +1,10 @@
 #
 # Utility defs not depending on the Flask app.
 #
-from contextlib import AbstractContextManager
 from typing import Type, TypeVar, Generic
 
-from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectsApi, UsersApi
 from appli.api_proxy import BACKEND_URL
+from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectsApi, UsersApi
 
 # Lol, generics in python
 A = TypeVar('A', ProjectsApi, UsersApi)
