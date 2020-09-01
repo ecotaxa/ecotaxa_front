@@ -77,7 +77,7 @@ class CreateProjectReq(object):
 
 
         :param clone_of_id: The clone_of_id of this CreateProjectReq.  # noqa: E501
-        :type clone_of_id: int
+        :type: int
         """
 
         self._clone_of_id = clone_of_id
@@ -98,7 +98,7 @@ class CreateProjectReq(object):
 
 
         :param title: The title of this CreateProjectReq.  # noqa: E501
-        :type title: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and title is None:  # noqa: E501
             raise ValueError("Invalid value for `title`, must not be `None`")  # noqa: E501
@@ -121,7 +121,7 @@ class CreateProjectReq(object):
 
 
         :param visible: The visible of this CreateProjectReq.  # noqa: E501
-        :type visible: bool
+        :type: bool
         """
 
         self._visible = visible

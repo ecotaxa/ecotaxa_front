@@ -68,7 +68,7 @@ class MergeRsp(object):
 
 
         :param errors: The errors of this MergeRsp.  # noqa: E501
-        :type errors: list[str]
+        :type: list[str]
         """
 
         self._errors = errors
