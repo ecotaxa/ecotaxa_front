@@ -340,7 +340,7 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.4"
+ecotaxa_version="2.4.1"
 def JinjaGetEcotaxaVersionText():
     return ecotaxa_version+" 2020-09-02"
 
@@ -350,7 +350,7 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
-2020-09-02 : V 2.4
+2020-09-02 : V 2.4.1
     Feature #245: More API primitives implemented on back-end.
     Bugfix #350: Object mappings are now re-ordered during merge.
     Bugfix #352: Merge is now impossible when it would mean data loss.
