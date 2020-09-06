@@ -19,7 +19,7 @@ from appli.database import GetAll, GetClassifQualClass, ExecSQL, db, GetAssoc
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi
+from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi, Project, ApiException, ObjectsApi
 
 
 @app.route('/prj/')
@@ -747,28 +747,35 @@ def prjGetClassifTab(PrjId):
 @app.route('/prjPurge/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def prjPurge(PrjId):
-    Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if Prj is None:
-        return "Project doesn't exists"
-    if not Prj.CheckRight(2):  # Level 0 = Read, 1 = Annotate, 2 = Admin
-        flash('You cannot Purge this project', 'error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            target_proj: Project = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+        except ApiException as ae:
+            if ae.status == 404:
+                return "Project doesn't exists"
+            elif ae.status == 403:
+                flash('You cannot Purge this project', 'error')
+                return PrintInCharte("<a href=/prj/>Select another project</a>")
+
     txt = ObjListTxt = ""
-    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
+    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_proj.projid, XSSEscape(target_proj.title))
     txt += "<div style='margin-left: 5px;'><h3>ERASE OBJECTS TOOL </h3>"
+
     if gvp("objlist") == "":
-        sql = "select objid FROM objects o where projid=" + str(Prj.projid)
-        sqlparam = {}
+
+        # Extract filter values
         filtres = {}
         for k in sharedfilter.FilterList:
             if gvg(k):
                 filtres[k] = gvg(k, "")
         if len(filtres):
-            sql += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
-            ObjList = GetAll(sql, sqlparam)
-            ObjListTxt = "\n".join((str(r['objid']) for r in ObjList))
+            # QUERY objects in project
+            with ApiClient(ObjectsApi, request) as api:
+                object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
+            ObjListTxt = "\n".join((str(r) for r in object_ids))
+
             txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
-                   "USING Active Project Filters, {0} objects</span>".format(len(ObjList))
+                   "USING Active Project Filters, {0} objects</span>".format(len(object_ids))
         else:
             txt += """Enter the list of internal object id you want to delete. 
             <br>Or type in <span style='cursor:pointer;color:#337ab7;' onclick="$('#objlist').val('DELETEALL')">
@@ -780,12 +787,13 @@ def prjPurge(PrjId):
         <form action=? method=post>
         <textarea name=objlist id=objlist cols=15 rows=20 autocomplete=off>{1}</textarea><br>
         <input type=checkbox name=destroyproject value=Y> DELETE project after DELETEALL action.<br>
-        <input type="submit" class="btn btn-danger" value='ERASE THESES OBJECTS !!! IRREVERSIBLE !!!!!'>
+        <input type="submit" class="btn btn-danger" value='ERASE THESE OBJECTS !!! IRREVERSIBLE !!!!!'>
         <a href ="/prj/{0}" class="btn btn-success">Cancel, Back to project home</a>
         </form></div>
         """.format(PrjId, ObjListTxt)
     else:
         if gvp("objlist") == "DELETEALL":
+            # DELETE all objects
             sqlsi = "select file_name,thumb_file_name from images i,objects o " \
                     "where o.objid=i.objid and o.projid={0}".format(PrjId)
             sqldi = "delete from images i using objects o " \
@@ -794,39 +802,27 @@ def prjPurge(PrjId):
                      "where o.objid=i.objid and o.projid={0}".format(PrjId)
             sqldo = "delete from obj_head where projid={0}".format(PrjId)
             SqlParam = {}
-        else:
-            sqlsi = "select file_name,thumb_file_name from images i,objects o " \
-                    "where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
-            sqldi = "delete from images i using objects o " \
-                    "where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
-            sqldoh = "delete from objectsclassifhisto i using objects o " \
-                     "where o.objid=i.objid and o.projid={0} and o.objid = any(%(objs)s)".format(PrjId)
-            sqldo = "delete from obj_head where projid={0} and objid = any(%(objs)s)".format(PrjId)
-            objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]
-            if len(objs) == 0:
-                raise Exception("No Objects ID specified")
-            SqlParam = {"objs": objs}
-            app.logger.info("Erase %s" % (objs,))
-        cur = db.engine.raw_connection().cursor()
-        try:
-            app.logger.info("Erase SQL=%s" % (sqlsi,))
-            cur.execute(sqlsi, SqlParam)
-            vaultroot = Path("./vault")
-            nbrfile = 0
-            for r in cur:  # chaque enregistrement
-                for f in r:  # chacun des 2 champs
-                    if f:  # si pas null
-                        img = vaultroot.joinpath(f)
-                        if img.exists():
-                            os.remove(img.as_posix())
-                            nbrfile += 1
-        finally:
-            cur.close()
 
-        ni = ExecSQL(sqldi, SqlParam)
-        noh = ExecSQL(sqldoh, SqlParam)
-        no = ExecSQL(sqldo, SqlParam)
-        if gvp("objlist") == "DELETEALL":
+            cur = db.engine.raw_connection().cursor()
+            try:
+                app.logger.info("Erase SQL=%s" % (sqlsi,))
+                cur.execute(sqlsi, SqlParam)
+                vaultroot = Path("./vault")
+                nbrfile = 0
+                for r in cur:  # chaque enregistrement
+                    for f in r:  # chacun des 2 champs
+                        if f:  # si pas null
+                            img = vaultroot.joinpath(f)
+                            if img.exists():
+                                os.remove(img.as_posix())
+                                nbrfile += 1
+            finally:
+                cur.close()
+
+            ni = ExecSQL(sqldi, SqlParam)
+            noh = ExecSQL(sqldoh, SqlParam)
+            no = ExecSQL(sqldo, SqlParam)
+
             ExecSQL("""delete from part_histocat_lst 
                     where psampleid in (select psampleid from  part_samples
                         where sampleid in(select sampleid from samples where projid={0}))""".format(PrjId))
@@ -836,18 +832,29 @@ def prjPurge(PrjId):
             ExecSQL(
                 "update part_samples set sampleid=null "
                 " where sampleid in(select sampleid from samples where projid={0})".format(PrjId))
+
             ExecSQL("delete from samples where projid={0}".format(PrjId))
             ExecSQL("delete from acquisitions where projid={0}".format(PrjId))
             ExecSQL("delete from process where projid={0}".format(PrjId))
+
+        else:
+            # DELETE some objects in project
+            objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]
+            with ApiClient(ObjectsApi, request) as api:
+                (no, noh, ni, nbrfile) = api.erase_object_list_object_set_delete(objs)
+
         txt += "Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files" % (no, noh, ni, nbrfile)
+
         if gvp("objlist") == "DELETEALL" and gvp("destroyproject") == "Y":
+
             ExecSQL("update part_projects set projid=null where projid={0}".format(PrjId))
             ExecSQL("delete from projectspriv where projid={0}".format(PrjId))
             ExecSQL("delete from projects where projid={0}".format(PrjId))
             txt += "<br>Project and associated privileges, destroyed"
             return PrintInCharte(txt + "<br><br><a href ='/prj/'>Back to project list</a>")
-        RecalcProjectTaxoStat(Prj.projid)
-        UpdateProjectStat(Prj.projid)
+
+        RecalcProjectTaxoStat(target_proj.projid)
+        UpdateProjectStat(target_proj.projid)
     return PrintInCharte(txt + "<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId))
 
 
