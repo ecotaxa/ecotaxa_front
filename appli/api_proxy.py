@@ -24,7 +24,7 @@ def proxy_post(path):
             # Proxy the login which is here and not in backend yet
             # TODO
             pass
-        resp = post(f'{BACKEND_URL}/{path}', json=request.get_json(), headers=req_headers)
+        resp = post(f'{BACKEND_URL}/{path}', json=request.get_json(), headers=req_headers, stream=True)
     elif request.method == 'GET':
         # From URL
         req_args = request.args
@@ -42,10 +42,10 @@ def proxy_post(path):
                 req_headers = {name: value for (name, value) in req_headers.items()}
                 req_headers["Authorization"] = "Bearer " + session_cookie
             #resp = get(f'{BACKEND_URL}/{path}', headers=req_headers)
-            resp = session.get(f'{BACKEND_URL}/{path}', params=req_args, headers=req_headers)
+            resp = session.get(f'{BACKEND_URL}/{path}', params=req_args, headers=req_headers, stream=True)
             app.logger.info("API call duration: %0.2f"%((time.time()-start)*1000))
     excluded_headers = []  # ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
     rsp_headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
-    response = Response(resp.content, resp.status_code, rsp_headers)
+    response = Response(resp.iter_content(chunk_size=10*1024), resp.status_code, rsp_headers)
     app.logger.info("API relay duration: %0.2f"%((time.time()-start)*1000))
     return response
