@@ -796,7 +796,7 @@ def prjPurge(PrjId):
             with ApiClient(ProjectsApi, request) as api:
                 no, noh, ni, nbrfile = api.erase_project_projects_project_id_delete(project_id=PrjId,
                                                                                     only_objects=
-                                                                                    gvp("destroyproject") == "Y")
+                                                                                    gvp("destroyproject") != "Y")
         else:
             # DELETE some objects in project
             objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]

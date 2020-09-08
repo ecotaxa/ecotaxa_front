@@ -386,6 +386,9 @@ Index('is_objectsdate', Objects.__table__.c.objdate, Objects.__table__.c.projid)
 Index('is_objectsprojrandom', Objects.__table__.c.projid, Objects.__table__.c.random_value,
       Objects.__table__.c.classif_qual)
 Index('is_objectfieldsorigid', ObjectsFields.__table__.c.orig_id)
+# For FK checks during deletion
+Index('is_objectsacquisition', Objects.__table__.c.acquisid)
+Index('is_objectsprocess', Objects.__table__.c.processid)
 
 
 class ObjectsClassifHisto(db.Model):

@@ -20,6 +20,8 @@ from to_back.ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
 from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
 from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
 from to_back.ecotaxa_cli_py.models.merge_rsp import MergeRsp
+from to_back.ecotaxa_cli_py.models.project import Project
+from to_back.ecotaxa_cli_py.models.project_filters import ProjectFilters
 from to_back.ecotaxa_cli_py.models.project_search_result import ProjectSearchResult
 from to_back.ecotaxa_cli_py.models.simple_import_req import SimpleImportReq
 from to_back.ecotaxa_cli_py.models.simple_import_rsp import SimpleImportRsp
