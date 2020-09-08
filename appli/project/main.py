@@ -1,9 +1,7 @@
 import collections
 import datetime
 import math
-import os
 import urllib.parse
-from pathlib import Path
 from typing import List
 
 import psycopg2.extras
@@ -15,7 +13,7 @@ import appli
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, database, gvg, gvp, user_datastore, DecodeEqualList, ScaleForDisplay, ntcv, \
     XSSEscape
-from appli.database import GetAll, GetClassifQualClass, ExecSQL, db, GetAssoc
+from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient
@@ -771,6 +769,7 @@ def prjPurge(PrjId):
         if len(filtres):
             # QUERY objects in project
             with ApiClient(ObjectsApi, request) as api:
+                # noinspection PyTypeChecker
                 object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
             ObjListTxt = "\n".join((str(r) for r in object_ids))
 
@@ -794,67 +793,22 @@ def prjPurge(PrjId):
     else:
         if gvp("objlist") == "DELETEALL":
             # DELETE all objects
-            sqlsi = "select file_name,thumb_file_name from images i,objects o " \
-                    "where o.objid=i.objid and o.projid={0}".format(PrjId)
-            sqldi = "delete from images i using objects o " \
-                    "where o.objid=i.objid and o.projid={0}".format(PrjId)
-            sqldoh = "delete from objectsclassifhisto i using objects o " \
-                     "where o.objid=i.objid and o.projid={0}".format(PrjId)
-            sqldo = "delete from obj_head where projid={0}".format(PrjId)
-            SqlParam = {}
-
-            cur = db.engine.raw_connection().cursor()
-            try:
-                app.logger.info("Erase SQL=%s" % (sqlsi,))
-                cur.execute(sqlsi, SqlParam)
-                vaultroot = Path("./vault")
-                nbrfile = 0
-                for r in cur:  # chaque enregistrement
-                    for f in r:  # chacun des 2 champs
-                        if f:  # si pas null
-                            img = vaultroot.joinpath(f)
-                            if img.exists():
-                                os.remove(img.as_posix())
-                                nbrfile += 1
-            finally:
-                cur.close()
-
-            ni = ExecSQL(sqldi, SqlParam)
-            noh = ExecSQL(sqldoh, SqlParam)
-            no = ExecSQL(sqldo, SqlParam)
-
-            ExecSQL("""delete from part_histocat_lst 
-                    where psampleid in (select psampleid from  part_samples
-                        where sampleid in(select sampleid from samples where projid={0}))""".format(PrjId))
-            ExecSQL("""delete from part_histocat 
-                    where psampleid in (select psampleid from  part_samples
-                        where sampleid in(select sampleid from samples where projid={0}))""".format(PrjId))
-            ExecSQL(
-                "update part_samples set sampleid=null "
-                " where sampleid in(select sampleid from samples where projid={0})".format(PrjId))
-
-            ExecSQL("delete from samples where projid={0}".format(PrjId))
-            ExecSQL("delete from acquisitions where projid={0}".format(PrjId))
-            ExecSQL("delete from process where projid={0}".format(PrjId))
-
+            with ApiClient(ProjectsApi, request) as api:
+                no, noh, ni, nbrfile = api.erase_project_projects_project_id_delete(project_id=PrjId,
+                                                                                    only_objects=
+                                                                                    gvp("destroyproject") == "Y")
         else:
             # DELETE some objects in project
             objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]
             with ApiClient(ObjectsApi, request) as api:
-                (no, noh, ni, nbrfile) = api.erase_object_list_object_set_delete(objs)
+                no, noh, ni, nbrfile = api.erase_object_list_object_set_delete(objs)
 
         txt += "Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files" % (no, noh, ni, nbrfile)
 
         if gvp("objlist") == "DELETEALL" and gvp("destroyproject") == "Y":
-
-            ExecSQL("update part_projects set projid=null where projid={0}".format(PrjId))
-            ExecSQL("delete from projectspriv where projid={0}".format(PrjId))
-            ExecSQL("delete from projects where projid={0}".format(PrjId))
             txt += "<br>Project and associated privileges, destroyed"
             return PrintInCharte(txt + "<br><br><a href ='/prj/'>Back to project list</a>")
 
-        RecalcProjectTaxoStat(target_proj.projid)
-        UpdateProjectStat(target_proj.projid)
     return PrintInCharte(txt + "<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId))
 
 
