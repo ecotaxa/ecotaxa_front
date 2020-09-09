@@ -779,8 +779,9 @@ def prjPurge(PrjId):
             txt += """Enter the list of internal object id you want to delete. 
             <br>Or type in <span style='cursor:pointer;color:#337ab7;' onclick="$('#objlist').val('DELETEALL')">
             "DELETEALL"</span> to remove all object from this project.
-            <br>(<b>On big project it can be long, a NGinx Error may happen, but erase process is still working 
-            in background, statistics are not updated during erase project. </b>)
+            <br>(<b>Around 10000 objects are deleted per second, so on a big project it can be long, 
+            a NGinx Error may happen, but erase process is still working in background. 
+            <br/>Statistics are not updated during erase project. </b>)
             <br>You can retrieve object id from a TSV export file using export data from project action menu<br>"""
         txt += """
         <form action=? method=post>
@@ -801,7 +802,7 @@ def prjPurge(PrjId):
             # DELETE some objects in project
             objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]
             with ApiClient(ObjectsApi, request) as api:
-                no, noh, ni, nbrfile = api.erase_object_list_object_set_delete(objs)
+                no, noh, ni, nbrfile = api.erase_object_set_object_set_delete(objs)
 
         txt += "Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files" % (no, noh, ni, nbrfile)
 

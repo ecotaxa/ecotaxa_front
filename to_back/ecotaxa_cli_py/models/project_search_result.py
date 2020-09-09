@@ -101,7 +101,7 @@ class ProjectSearchResult(object):
 
 
         :param projid: The projid of this ProjectSearchResult.  # noqa: E501
-        :type: int
+        :type projid: int
         """
         if self.local_vars_configuration.client_side_validation and projid is None:  # noqa: E501
             raise ValueError("Invalid value for `projid`, must not be `None`")  # noqa: E501
@@ -124,7 +124,7 @@ class ProjectSearchResult(object):
 
 
         :param title: The title of this ProjectSearchResult.  # noqa: E501
-        :type: str
+        :type title: str
         """
         if self.local_vars_configuration.client_side_validation and title is None:  # noqa: E501
             raise ValueError("Invalid value for `title`, must not be `None`")  # noqa: E501
@@ -147,7 +147,7 @@ class ProjectSearchResult(object):
 
 
         :param status: The status of this ProjectSearchResult.  # noqa: E501
-        :type: str
+        :type status: str
         """
         if self.local_vars_configuration.client_side_validation and status is None:  # noqa: E501
             raise ValueError("Invalid value for `status`, must not be `None`")  # noqa: E501
@@ -170,7 +170,7 @@ class ProjectSearchResult(object):
 
 
         :param objcount: The objcount of this ProjectSearchResult.  # noqa: E501
-        :type: int
+        :type objcount: int
         """
         if self.local_vars_configuration.client_side_validation and objcount is None:  # noqa: E501
             raise ValueError("Invalid value for `objcount`, must not be `None`")  # noqa: E501
@@ -193,7 +193,7 @@ class ProjectSearchResult(object):
 
 
         :param pctvalidated: The pctvalidated of this ProjectSearchResult.  # noqa: E501
-        :type: float
+        :type pctvalidated: float
         """
         if self.local_vars_configuration.client_side_validation and pctvalidated is None:  # noqa: E501
             raise ValueError("Invalid value for `pctvalidated`, must not be `None`")  # noqa: E501
@@ -216,7 +216,7 @@ class ProjectSearchResult(object):
 
 
         :param pctclassified: The pctclassified of this ProjectSearchResult.  # noqa: E501
-        :type: float
+        :type pctclassified: float
         """
         if self.local_vars_configuration.client_side_validation and pctclassified is None:  # noqa: E501
             raise ValueError("Invalid value for `pctclassified`, must not be `None`")  # noqa: E501
@@ -239,7 +239,7 @@ class ProjectSearchResult(object):
 
 
         :param email: The email of this ProjectSearchResult.  # noqa: E501
-        :type: str
+        :type email: str
         """
 
         self._email = email
@@ -260,7 +260,7 @@ class ProjectSearchResult(object):
 
 
         :param name: The name of this ProjectSearchResult.  # noqa: E501
-        :type: str
+        :type name: str
         """
 
         self._name = name
@@ -281,7 +281,7 @@ class ProjectSearchResult(object):
 
 
         :param visible: The visible of this ProjectSearchResult.  # noqa: E501
-        :type: bool
+        :type visible: bool
         """
         if self.local_vars_configuration.client_side_validation and visible is None:  # noqa: E501
             raise ValueError("Invalid value for `visible`, must not be `None`")  # noqa: E501

@@ -68,7 +68,7 @@ class HTTPValidationError(object):
 
 
         :param detail: The detail of this HTTPValidationError.  # noqa: E501
-        :type: list[ValidationError]
+        :type detail: list[ValidationError]
         """
 
         self._detail = detail
