@@ -109,7 +109,7 @@ def GetSQLFilter(filtres, sqlparam, currentuserid):
     if filtres.get("freetxt", '') != "" and filtres.get("freetxtval", "") != "":
         sqlparam['freetxtval'] = '%' + filtres["freetxtval"] + '%'
         if filtres.get("freetxt", '')[0] == 'o':
-            whereclause += " and .t" + ("%02d" % int(filtres["freetxt"][2:])) + " ilike %(freetxtval)s  "
+            whereclause += " and o.t" + ("%02d" % int(filtres["freetxt"][2:])) + " ilike %(freetxtval)s  "
         elif filtres.get("freetxt", '')[0] == 'a':
             whereclause += " and o.acquisid in (select acquisid from acquisitions s where t" + (
                     "%02d" % int(filtres["freetxt"][2:])) + " ilike %(freetxtval)s and projid=%(projid)s )"
