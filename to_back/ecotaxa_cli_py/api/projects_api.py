@@ -42,26 +42,21 @@ class ProjectsApi(object):
         Create an empty project with only a title, and return its number. The project will be managed by current user. The user has to be app administrator or project creator.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.create_project_projects_create_post(create_project_req, async_req=True)
         >>> result = thread.get()
 
-        :param create_project_req: (required)
-        :type create_project_req: CreateProjectReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param CreateProjectReq create_project_req: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: int
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: int
         """
         kwargs['_return_http_data_only'] = True
         return self.create_project_projects_create_post_with_http_info(create_project_req, **kwargs)  # noqa: E501
@@ -72,33 +67,23 @@ class ProjectsApi(object):
         Create an empty project with only a title, and return its number. The project will be managed by current user. The user has to be app administrator or project creator.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.create_project_projects_create_post_with_http_info(create_project_req, async_req=True)
         >>> result = thread.get()
 
-        :param create_project_req: (required)
-        :type create_project_req: CreateProjectReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param CreateProjectReq create_project_req: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(int, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(int, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -111,8 +96,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -168,8 +152,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def erase_project_projects_project_id_delete(self, project_id, **kwargs):  # noqa: E501
         """Erase Project  # noqa: E501
@@ -177,28 +160,22 @@ class ProjectsApi(object):
         Delete the project.     Optionally, if \"only_objects\" is set, the project structure is kept,         but emptied from any object/sample/acquisition/process     Otherwise, no trace of the project will remain in the database.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.erase_project_projects_project_id_delete(project_id, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param only_objects:
-        :type only_objects: bool
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param bool only_objects:
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: object
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: object
         """
         kwargs['_return_http_data_only'] = True
         return self.erase_project_projects_project_id_delete_with_http_info(project_id, **kwargs)  # noqa: E501
@@ -209,35 +186,24 @@ class ProjectsApi(object):
         Delete the project.     Optionally, if \"only_objects\" is set, the project structure is kept,         but emptied from any object/sample/acquisition/process     Otherwise, no trace of the project will remain in the database.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.erase_project_projects_project_id_delete_with_http_info(project_id, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param only_objects:
-        :type only_objects: bool
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param bool only_objects:
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(object, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -251,8 +217,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -306,8 +271,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def import_preparation_import_prep_project_id_post(self, project_id, import_prep_req, **kwargs):  # noqa: E501
         """Import Preparation  # noqa: E501
@@ -315,28 +279,22 @@ class ProjectsApi(object):
         Prepare/validate the import of an EcoTaxa archive or directory.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.import_preparation_import_prep_project_id_post(project_id, import_prep_req, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param import_prep_req: (required)
-        :type import_prep_req: ImportPrepReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param ImportPrepReq import_prep_req: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: ImportPrepRsp
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: ImportPrepRsp
         """
         kwargs['_return_http_data_only'] = True
         return self.import_preparation_import_prep_project_id_post_with_http_info(project_id, import_prep_req, **kwargs)  # noqa: E501
@@ -347,35 +305,24 @@ class ProjectsApi(object):
         Prepare/validate the import of an EcoTaxa archive or directory.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.import_preparation_import_prep_project_id_post_with_http_info(project_id, import_prep_req, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param import_prep_req: (required)
-        :type import_prep_req: ImportPrepReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param ImportPrepReq import_prep_req: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(ImportPrepRsp, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(ImportPrepRsp, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -389,8 +336,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -452,8 +398,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def project_check_projects_project_id_check_get(self, project_id, **kwargs):  # noqa: E501
         """Project Check  # noqa: E501
@@ -461,26 +406,21 @@ class ProjectsApi(object):
         Check consistency of a project.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.project_check_projects_project_id_check_get(project_id, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: object
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: object
         """
         kwargs['_return_http_data_only'] = True
         return self.project_check_projects_project_id_check_get_with_http_info(project_id, **kwargs)  # noqa: E501
@@ -491,33 +431,23 @@ class ProjectsApi(object):
         Check consistency of a project.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.project_check_projects_project_id_check_get_with_http_info(project_id, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(object, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -530,8 +460,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -583,8 +512,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def project_merge_projects_project_id_merge_post(self, project_id, source_project_id, dry_run, **kwargs):  # noqa: E501
         """Project Merge  # noqa: E501
@@ -592,30 +520,23 @@ class ProjectsApi(object):
         Merge another project into this one. It's more a phagocytosis than a merge, as the source will see all its objects gone and will be erased. - param `dry_run`: If set, then only a diagnostic of doability will be done.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.project_merge_projects_project_id_merge_post(project_id, source_project_id, dry_run, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param source_project_id: (required)
-        :type source_project_id: int
-        :param dry_run: (required)
-        :type dry_run: bool
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param int source_project_id: (required)
+        :param bool dry_run: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: MergeRsp
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: MergeRsp
         """
         kwargs['_return_http_data_only'] = True
         return self.project_merge_projects_project_id_merge_post_with_http_info(project_id, source_project_id, dry_run, **kwargs)  # noqa: E501
@@ -626,37 +547,25 @@ class ProjectsApi(object):
         Merge another project into this one. It's more a phagocytosis than a merge, as the source will see all its objects gone and will be erased. - param `dry_run`: If set, then only a diagnostic of doability will be done.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.project_merge_projects_project_id_merge_post_with_http_info(project_id, source_project_id, dry_run, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param source_project_id: (required)
-        :type source_project_id: int
-        :param dry_run: (required)
-        :type dry_run: bool
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param int source_project_id: (required)
+        :param bool dry_run: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(MergeRsp, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(MergeRsp, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -671,8 +580,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -736,8 +644,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def project_query_projects_project_id_query_get(self, project_id, **kwargs):  # noqa: E501
         """Project Query  # noqa: E501
@@ -745,28 +652,22 @@ class ProjectsApi(object):
         See if project exists for current user, eventually for managing it.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.project_query_projects_project_id_query_get(project_id, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param for_managing:
-        :type for_managing: bool
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param bool for_managing:
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: Project
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: Project
         """
         kwargs['_return_http_data_only'] = True
         return self.project_query_projects_project_id_query_get_with_http_info(project_id, **kwargs)  # noqa: E501
@@ -777,35 +678,24 @@ class ProjectsApi(object):
         See if project exists for current user, eventually for managing it.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.project_query_projects_project_id_query_get_with_http_info(project_id, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param for_managing:
-        :type for_managing: bool
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param bool for_managing:
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(Project, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(Project, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -819,8 +709,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -874,8 +763,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def project_subset_projects_project_id_subset_post(self, project_id, subset_req, **kwargs):  # noqa: E501
         """Project Subset  # noqa: E501
@@ -883,28 +771,22 @@ class ProjectsApi(object):
         Subset a project into another one.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.project_subset_projects_project_id_subset_post(project_id, subset_req, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param subset_req: (required)
-        :type subset_req: SubsetReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param SubsetReq subset_req: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: SubsetRsp
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: SubsetRsp
         """
         kwargs['_return_http_data_only'] = True
         return self.project_subset_projects_project_id_subset_post_with_http_info(project_id, subset_req, **kwargs)  # noqa: E501
@@ -915,35 +797,24 @@ class ProjectsApi(object):
         Subset a project into another one.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.project_subset_projects_project_id_subset_post_with_http_info(project_id, subset_req, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param subset_req: (required)
-        :type subset_req: SubsetReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param SubsetReq subset_req: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(SubsetRsp, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(SubsetRsp, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -957,8 +828,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -1020,8 +890,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def real_import_import_real_project_id_post(self, project_id, import_real_req, **kwargs):  # noqa: E501
         """Real Import  # noqa: E501
@@ -1029,28 +898,22 @@ class ProjectsApi(object):
         Import an EcoTaxa archive or directory.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.real_import_import_real_project_id_post(project_id, import_real_req, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param import_real_req: (required)
-        :type import_real_req: ImportRealReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param ImportRealReq import_real_req: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: object
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: object
         """
         kwargs['_return_http_data_only'] = True
         return self.real_import_import_real_project_id_post_with_http_info(project_id, import_real_req, **kwargs)  # noqa: E501
@@ -1061,35 +924,24 @@ class ProjectsApi(object):
         Import an EcoTaxa archive or directory.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.real_import_import_real_project_id_post_with_http_info(project_id, import_real_req, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param import_real_req: (required)
-        :type import_real_req: ImportRealReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param ImportRealReq import_real_req: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(object, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -1103,8 +955,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -1166,8 +1017,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def search_projects_projects_search_get(self, **kwargs):  # noqa: E501
         """Search Projects  # noqa: E501
@@ -1175,34 +1025,25 @@ class ProjectsApi(object):
         Return projects summary for current user. - @param also_others: Allows to return projects for which given user has no right - @param for_managing: Allows to return project that can be written to (including erased) by the given user - @param title_filter: Use this pattern for matching returned projects names - @param instrument_filter: Only return projects where this instrument was used - @param filter_subset: Only return projects having 'subset' in their names  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.search_projects_projects_search_get(async_req=True)
         >>> result = thread.get()
 
-        :param also_others:
-        :type also_others: bool
-        :param for_managing:
-        :type for_managing: bool
-        :param title_filter:
-        :type title_filter: str
-        :param instrument_filter:
-        :type instrument_filter: str
-        :param filter_subset:
-        :type filter_subset: bool
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param bool also_others:
+        :param bool for_managing:
+        :param str title_filter:
+        :param str instrument_filter:
+        :param bool filter_subset:
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: list[ProjectSearchResult]
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: list[ProjectSearchResult]
         """
         kwargs['_return_http_data_only'] = True
         return self.search_projects_projects_search_get_with_http_info(**kwargs)  # noqa: E501
@@ -1213,41 +1054,27 @@ class ProjectsApi(object):
         Return projects summary for current user. - @param also_others: Allows to return projects for which given user has no right - @param for_managing: Allows to return project that can be written to (including erased) by the given user - @param title_filter: Use this pattern for matching returned projects names - @param instrument_filter: Only return projects where this instrument was used - @param filter_subset: Only return projects having 'subset' in their names  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.search_projects_projects_search_get_with_http_info(async_req=True)
         >>> result = thread.get()
 
-        :param also_others:
-        :type also_others: bool
-        :param for_managing:
-        :type for_managing: bool
-        :param title_filter:
-        :type title_filter: str
-        :param instrument_filter:
-        :type instrument_filter: str
-        :param filter_subset:
-        :type filter_subset: bool
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param bool also_others:
+        :param bool for_managing:
+        :param str title_filter:
+        :param str instrument_filter:
+        :param bool filter_subset:
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(list[ProjectSearchResult], status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(list[ProjectSearchResult], status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -1264,8 +1091,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -1321,8 +1147,7 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)
 
     def simple_import_simple_import_project_id_post(self, project_id, simple_import_req, **kwargs):  # noqa: E501
         """Simple Import  # noqa: E501
@@ -1330,28 +1155,22 @@ class ProjectsApi(object):
         Import images only, with same metadata for all.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.simple_import_simple_import_project_id_post(project_id, simple_import_req, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param simple_import_req: (required)
-        :type simple_import_req: SimpleImportReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param SimpleImportReq simple_import_req: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: Returns the result object.
+        :return: SimpleImportRsp
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: SimpleImportRsp
         """
         kwargs['_return_http_data_only'] = True
         return self.simple_import_simple_import_project_id_post_with_http_info(project_id, simple_import_req, **kwargs)  # noqa: E501
@@ -1362,35 +1181,24 @@ class ProjectsApi(object):
         Import images only, with same metadata for all.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-
         >>> thread = api.simple_import_simple_import_project_id_post_with_http_info(project_id, simple_import_req, async_req=True)
         >>> result = thread.get()
 
-        :param project_id: (required)
-        :type project_id: int
-        :param simple_import_req: (required)
-        :type simple_import_req: SimpleImportReq
-        :param async_req: Whether to execute the request asynchronously.
-        :type async_req: bool, optional
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param SimpleImportReq simple_import_req: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
-        :type _return_http_data_only: bool, optional
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
-        :type _preload_content: bool, optional
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the authentication
-                              in the spec for a single request.
-        :type _request_auth: dict, optional
-        :return: Returns the result object.
+        :return: tuple(SimpleImportRsp, status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
-        :rtype: tuple(SimpleImportRsp, status_code(int), headers(HTTPHeaderDict))
         """
 
         local_var_params = locals()
@@ -1404,8 +1212,7 @@ class ProjectsApi(object):
                 'async_req',
                 '_return_http_data_only',
                 '_preload_content',
-                '_request_timeout',
-                '_request_auth'
+                '_request_timeout'
             ]
         )
 
@@ -1467,5 +1274,4 @@ class ProjectsApi(object):
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
             _preload_content=local_var_params.get('_preload_content', True),
             _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats,
-            _request_auth=local_var_params.get('_request_auth'))
+            collection_formats=collection_formats)

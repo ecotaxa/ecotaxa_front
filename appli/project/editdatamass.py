@@ -1,3 +1,5 @@
+from typing import List
+
 from flask import render_template, g, flash, request
 from flask_login import current_user
 from flask_security import login_required
@@ -7,6 +9,8 @@ import appli.project.main
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, database, gvg, gvp, DecodeEqualList, XSSEscape
 from appli.database import GetAll, ExecSQL, db
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import ProjectsApi, Project, ApiException, ObjectsApi
 
 
 def GetFieldList(Prj):
@@ -111,61 +115,51 @@ def PrjEditDataMass(PrjId):
 def PrjResetToPredicted(PrjId):
     # noinspection PyStatementEffect
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
-    Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if Prj is None:
-        flash("Project doesn't exists", 'error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
-    if not Prj.CheckRight(2):  # Level 0 = Read, 1 = Annotate, 2 = Admin
-        flash('You cannot edit settings for this project', 'error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
-    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
+
+    # Security & sanity checks
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            target_proj: Project = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+        except ApiException as ae:
+            if ae.status == 404:
+                return "Project doesn't exists"
+            elif ae.status == 403:
+                flash('You cannot do reset to predicted on this project', 'error')
+                return PrintInCharte("<a href=/prj/>Select another project</a>")
+
+    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_proj.projid, XSSEscape(target_proj.title))
     txt = "<h3>Reset status to predicted</h3>"
-    sqlparam = {}
+
     filtres = {}
     for k in sharedfilter.FilterList:
         if gvg(k):
             filtres[k] = gvg(k, "")
+
     proceed = gvp('process')
     if proceed == 'Y':
-        sqlhisto = """insert into objectsclassifhisto(objid, classif_date, classif_type, classif_id,
-                                                      classif_qual, classif_who)
-                      select objid, classif_when,'M', classif_id,
-                             classif_qual,classif_who
-                        from objects o
-                       where projid=""" + str(Prj.projid) + """ 
-                         and classif_when is not null 
-                         and classif_qual in ('V','D')
-                         and not exists(select 1 from objectsclassifhisto och 
-                                         where och.objid=o.objid 
-                                           and och.classif_date=o.classif_when)
-                        """
-        sqlhisto += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
-        ExecSQL(sqlhisto, sqlparam)
-
-        sqlhisto = """update obj_head set classif_qual='P'
-                        where projid={0} 
-                          and objid in (select objid from objects o   
-                                         where projid={0} 
-                                           and classif_qual in ('V','D') {1})
-                   """.format(Prj.projid, sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id)))
-        ExecSQL(sqlhisto, sqlparam)
+        # Do the job on back-end
+        with ApiClient(ObjectsApi, request) as api:
+            api.reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post(PrjId, filtres)
 
         # flash('Data updated', 'success')
-        txt += "<a href='/prj/%s' class='btn btn-primary'>Back to project</a> " % Prj.projid
-        appli.project.main.RecalcProjectTaxoStat(Prj.projid)
-        appli.project.main.UpdateProjectStat(Prj.projid)
+        txt += "<a href='/prj/%s' class='btn btn-primary'>Back to project</a> " % target_proj.projid
+        # TODO: Move to back-end
+        appli.project.main.RecalcProjectTaxoStat(target_proj.projid)
+        appli.project.main.UpdateProjectStat(target_proj.projid)
         return PrintInCharte(txt)
-    sql = "select objid FROM objects o where projid=" + str(Prj.projid)
+
     if len(filtres):
-        sql += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
-        ObjList = GetAll(sql, sqlparam)
+        # Query the filtered list in project
+        with ApiClient(ObjectsApi, request) as api:
+            object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
+        # Warn the user
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
                "USING Active Project Filters, {0} objects</span>" \
-            .format(len(ObjList))
+            .format(len(object_ids))
     else:
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
                "Apply to ALL OBJECTS OF THE PROJECT (NO Active Filters)</span>"
-    Lst = GetFieldList(Prj)
-    # txt+="%s"%(Lst,)
 
-    return PrintInCharte(render_template("project/prjresettopredicted.html", Lst=Lst, header=txt))
+    # The eventual filter is in the URL (GET), so when POST-ed again after validation, the filter is preserved
+    return PrintInCharte(render_template("project/prjresettopredicted.html",
+                                         header=txt))

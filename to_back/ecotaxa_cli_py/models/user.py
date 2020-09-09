@@ -111,7 +111,7 @@ class User(object):
 
 
         :param id: The id of this User.  # noqa: E501
-        :type id: int
+        :type: int
         """
 
         self._id = id
@@ -132,7 +132,7 @@ class User(object):
 
 
         :param email: The email of this User.  # noqa: E501
-        :type email: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and email is None:  # noqa: E501
             raise ValueError("Invalid value for `email`, must not be `None`")  # noqa: E501
@@ -155,7 +155,7 @@ class User(object):
 
 
         :param password: The password of this User.  # noqa: E501
-        :type password: str
+        :type: str
         """
 
         self._password = password
@@ -176,7 +176,7 @@ class User(object):
 
 
         :param name: The name of this User.  # noqa: E501
-        :type name: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and name is None:  # noqa: E501
             raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
@@ -199,7 +199,7 @@ class User(object):
 
 
         :param organisation: The organisation of this User.  # noqa: E501
-        :type organisation: str
+        :type: str
         """
 
         self._organisation = organisation
@@ -220,7 +220,7 @@ class User(object):
 
 
         :param active: The active of this User.  # noqa: E501
-        :type active: bool
+        :type: bool
         """
 
         self._active = active
@@ -241,7 +241,7 @@ class User(object):
 
 
         :param preferences: The preferences of this User.  # noqa: E501
-        :type preferences: str
+        :type: str
         """
 
         self._preferences = preferences
@@ -262,7 +262,7 @@ class User(object):
 
 
         :param country: The country of this User.  # noqa: E501
-        :type country: str
+        :type: str
         """
 
         self._country = country
@@ -283,7 +283,7 @@ class User(object):
 
 
         :param usercreationdate: The usercreationdate of this User.  # noqa: E501
-        :type usercreationdate: datetime
+        :type: datetime
         """
 
         self._usercreationdate = usercreationdate
@@ -304,7 +304,7 @@ class User(object):
 
 
         :param usercreationreason: The usercreationreason of this User.  # noqa: E501
-        :type usercreationreason: str
+        :type: str
         """
 
         self._usercreationreason = usercreationreason

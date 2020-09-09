@@ -80,7 +80,7 @@ class SimpleImportReq(object):
 
 
         :param task_id: The task_id of this SimpleImportReq.  # noqa: E501
-        :type task_id: int
+        :type: int
         """
         if self.local_vars_configuration.client_side_validation and task_id is None:  # noqa: E501
             raise ValueError("Invalid value for `task_id`, must not be `None`")  # noqa: E501
@@ -103,7 +103,7 @@ class SimpleImportReq(object):
 
 
         :param source_path: The source_path of this SimpleImportReq.  # noqa: E501
-        :type source_path: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and source_path is None:  # noqa: E501
             raise ValueError("Invalid value for `source_path`, must not be `None`")  # noqa: E501
@@ -128,7 +128,7 @@ class SimpleImportReq(object):
         :imgdate, imgtime, latitude, longitude, depthmin, depthmax, taxolb, userlb, status  # noqa: E501
 
         :param values: The values of this SimpleImportReq.  # noqa: E501
-        :type values: dict(str, str)
+        :type: dict(str, str)
         """
         if self.local_vars_configuration.client_side_validation and values is None:  # noqa: E501
             raise ValueError("Invalid value for `values`, must not be `None`")  # noqa: E501
@@ -151,7 +151,7 @@ class SimpleImportReq(object):
 
 
         :param possible_values: The possible_values of this SimpleImportReq.  # noqa: E501
-        :type possible_values: list[str]
+        :type: list[str]
         """
 
         self._possible_values = possible_values

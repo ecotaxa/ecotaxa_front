@@ -754,6 +754,7 @@ def prjGetClassifTab(PrjId):
 @app.route('/prjPurge/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def prjPurge(PrjId):
+    # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
             target_proj: Project = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
@@ -776,9 +777,8 @@ def prjPurge(PrjId):
             if gvg(k):
                 filtres[k] = gvg(k, "")
         if len(filtres):
-            # QUERY objects in project
+            # Query objects, using filters, in project
             with ApiClient(ObjectsApi, request) as api:
-                # noinspection PyTypeChecker
                 object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
             ObjListTxt = "\n".join((str(r) for r in object_ids))
 

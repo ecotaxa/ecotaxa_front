@@ -162,7 +162,7 @@ class Project(object):
 
 
         :param projid: The projid of this Project.  # noqa: E501
-        :type projid: int
+        :type: int
         """
 
         self._projid = projid
@@ -183,7 +183,7 @@ class Project(object):
 
 
         :param title: The title of this Project.  # noqa: E501
-        :type title: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and title is None:  # noqa: E501
             raise ValueError("Invalid value for `title`, must not be `None`")  # noqa: E501
@@ -206,7 +206,7 @@ class Project(object):
 
 
         :param visible: The visible of this Project.  # noqa: E501
-        :type visible: bool
+        :type: bool
         """
 
         self._visible = visible
@@ -227,7 +227,7 @@ class Project(object):
 
 
         :param status: The status of this Project.  # noqa: E501
-        :type status: str
+        :type: str
         """
 
         self._status = status
@@ -248,7 +248,7 @@ class Project(object):
 
 
         :param mappingobj: The mappingobj of this Project.  # noqa: E501
-        :type mappingobj: str
+        :type: str
         """
 
         self._mappingobj = mappingobj
@@ -269,7 +269,7 @@ class Project(object):
 
 
         :param mappingsample: The mappingsample of this Project.  # noqa: E501
-        :type mappingsample: str
+        :type: str
         """
 
         self._mappingsample = mappingsample
@@ -290,7 +290,7 @@ class Project(object):
 
 
         :param mappingacq: The mappingacq of this Project.  # noqa: E501
-        :type mappingacq: str
+        :type: str
         """
 
         self._mappingacq = mappingacq
@@ -311,7 +311,7 @@ class Project(object):
 
 
         :param mappingprocess: The mappingprocess of this Project.  # noqa: E501
-        :type mappingprocess: str
+        :type: str
         """
 
         self._mappingprocess = mappingprocess
@@ -332,7 +332,7 @@ class Project(object):
 
 
         :param objcount: The objcount of this Project.  # noqa: E501
-        :type objcount: float
+        :type: float
         """
 
         self._objcount = objcount
@@ -353,7 +353,7 @@ class Project(object):
 
 
         :param pctvalidated: The pctvalidated of this Project.  # noqa: E501
-        :type pctvalidated: float
+        :type: float
         """
 
         self._pctvalidated = pctvalidated
@@ -374,7 +374,7 @@ class Project(object):
 
 
         :param pctclassified: The pctclassified of this Project.  # noqa: E501
-        :type pctclassified: float
+        :type: float
         """
 
         self._pctclassified = pctclassified
@@ -395,7 +395,7 @@ class Project(object):
 
 
         :param classifsettings: The classifsettings of this Project.  # noqa: E501
-        :type classifsettings: str
+        :type: str
         """
 
         self._classifsettings = classifsettings
@@ -416,7 +416,7 @@ class Project(object):
 
 
         :param initclassiflist: The initclassiflist of this Project.  # noqa: E501
-        :type initclassiflist: str
+        :type: str
         """
 
         self._initclassiflist = initclassiflist
@@ -437,7 +437,7 @@ class Project(object):
 
 
         :param classiffieldlist: The classiffieldlist of this Project.  # noqa: E501
-        :type classiffieldlist: str
+        :type: str
         """
 
         self._classiffieldlist = classiffieldlist
@@ -458,7 +458,7 @@ class Project(object):
 
 
         :param popoverfieldlist: The popoverfieldlist of this Project.  # noqa: E501
-        :type popoverfieldlist: str
+        :type: str
         """
 
         self._popoverfieldlist = popoverfieldlist
@@ -479,7 +479,7 @@ class Project(object):
 
 
         :param comments: The comments of this Project.  # noqa: E501
-        :type comments: str
+        :type: str
         """
 
         self._comments = comments
@@ -500,7 +500,7 @@ class Project(object):
 
 
         :param projtype: The projtype of this Project.  # noqa: E501
-        :type projtype: str
+        :type: str
         """
 
         self._projtype = projtype
@@ -521,7 +521,7 @@ class Project(object):
 
 
         :param fileloaded: The fileloaded of this Project.  # noqa: E501
-        :type fileloaded: str
+        :type: str
         """
 
         self._fileloaded = fileloaded
@@ -542,7 +542,7 @@ class Project(object):
 
 
         :param rf_models_used: The rf_models_used of this Project.  # noqa: E501
-        :type rf_models_used: str
+        :type: str
         """
 
         self._rf_models_used = rf_models_used
@@ -563,7 +563,7 @@ class Project(object):
 
 
         :param cnn_network_id: The cnn_network_id of this Project.  # noqa: E501
-        :type cnn_network_id: str
+        :type: str
         """
 
         self._cnn_network_id = cnn_network_id
