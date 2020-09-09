@@ -1,11 +1,12 @@
 import collections
 import datetime
+import html
 import math
 import urllib.parse
 from typing import List
 
 import psycopg2.extras
-from flask import render_template, g, flash, json, session, request, Markup
+from flask import render_template, g, flash, json, session, request, Markup, url_for
 from flask_login import current_user
 from flask_security import login_required
 
@@ -59,7 +60,8 @@ def indexProjects(Others=False):
         render_template('project/list.html', PrjList=rsp, CanCreate=CanCreate,
                         AppManagerMailto=appli.GetAppManagerMailto(),
                         filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum, Others=Others,
-                        isadmin=current_user.has_role(database.AdministratorLabel)))
+                        isadmin=current_user.has_role(database.AdministratorLabel),
+                        _manager_mail=_manager_mail))
 
 
 ######################################################################################################################
@@ -158,14 +160,11 @@ def indexPrj(PrjId):
                         from projectspriv pp join users u on pp.member=u.id
                         where pp.privilege='Manage' and u.active=true and pp.projid=%s""", (PrjId,))
         # flash("",'error')
+        html_mail_body = _manager_mail(ntcv(Prj.title), Prj.projid)
         msg = """
         <div class="alert alert-danger alert-dismissible" role="alert"> You cannot view this project : {1} [{2}] 
         <a class='btn btn-primary' href='mailto:{3}?{0}' style='margin-left:15px;'>REQUEST ACCESS to {4}</a>
-        </div>""".format(
-            urllib.parse.urlencode({'body': "Please provide me privileges to project : " + ntcv(Prj.title),
-                                    'subject': 'Project access request'}).replace('+', '%20'),
-            # replace car urlencode mais des + pour les espaces qui sont mal traitrés par le navigateur
-            Prj.title, Prj.projid, MainContact[0]['email'], MainContact[0]['name'])
+        </div>""".format(html_mail_body, Prj.title, Prj.projid, MainContact[0]['email'], MainContact[0]['name'])
         return PrintInCharte(msg + "<a href=/prj/>Select another project</a>")
     g.Projid = Prj.projid
     # Ces 2 listes sont ajax mais si on passe le filtre dans l'URL il faut ajouter l'entrée en statique pour l'affichage
@@ -258,6 +257,16 @@ def indexPrj(PrjId):
     g.useselect4 = True
     return render_template('project/projectmain.html', top="", lefta=classiftab, leftb=filtertab,
                            right=right, data=data, title='EcoTaxa ' + ntcv(Prj.title))
+
+
+def _manager_mail(prj_title, prj_id):
+    base_url = request.host_url[:-1]
+    mail_body = "Please provide me privileges to project : '%s' at this address : %s " % (
+        prj_title, base_url+url_for('indexPrj', PrjId=int(prj_id)))
+    mail_link = urllib.parse.urlencode({'body': mail_body,
+                                        'subject': 'EcoTaxa project access request'},
+                                       quote_via=urllib.parse.quote)
+    return mail_link
 
 
 ######################################################################################################################

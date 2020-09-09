@@ -55,7 +55,7 @@
 {%   for r in PrjList %}
 <tr><td>
 {%  if Others %}
-  <a class='btn btn-primary' href='mailto:{{r.email}}?body={{ "Please provide me privileges to project : "+r.title|urlencode }}&subject={{"Project access request"|urlencode }}'>REQUEST ACCESS</a>
+  <a class='btn btn-primary' href='mailto:{{r.email}}?{{_manager_mail(r.title, r.projid)|safe}}'>REQUEST ACCESS</a>
   {% if r.visible==True or isadmin  %}
     <a class='btn btn-primary' href='/prj/{{ r.projid }}'>View</a>
     {% endif %}
