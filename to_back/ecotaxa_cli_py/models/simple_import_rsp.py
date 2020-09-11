@@ -71,7 +71,7 @@ class SimpleImportRsp(object):
 
 
         :param errors: The errors of this SimpleImportRsp.  # noqa: E501
-        :type: list[str]
+        :type errors: list[str]
         """
         if self.local_vars_configuration.client_side_validation and errors is None:  # noqa: E501
             raise ValueError("Invalid value for `errors`, must not be `None`")  # noqa: E501
@@ -94,7 +94,7 @@ class SimpleImportRsp(object):
 
 
         :param nb_images: The nb_images of this SimpleImportRsp.  # noqa: E501
-        :type: int
+        :type nb_images: int
         """
         if self.local_vars_configuration.client_side_validation and nb_images is None:  # noqa: E501
             raise ValueError("Invalid value for `nb_images`, must not be `None`")  # noqa: E501

@@ -56,6 +56,19 @@
             $("#jstree").jstree('open_node', data.node);
         })
 
+        var target_val = $('#{{targetid}}').val().split('/');
+        var current_val = [];
+        $("#jstree").bind('loaded.jstree', function(e, data) {
+            // invoked after the root of jstree has loaded
+            function after_open() {
+                // try to reach the target path
+                if (target_val.length == 0) return;
+                current_val.push(target_val.shift());
+                $('#jstree').jstree('open_node', current_val.join('/'), after_open, false);
+            }
+            after_open();
+        })
+
     });
 </script>
 

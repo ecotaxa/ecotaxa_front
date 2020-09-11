@@ -4,10 +4,10 @@
 import datetime
 import json
 import os
-import psycopg2.extras
 import time
 from typing import Dict
 
+import psycopg2.extras
 from flask_login import current_user
 from flask_security import UserMixin, RoleMixin
 from sqlalchemy import Index, func
@@ -37,6 +37,16 @@ def GetClassifQualClass(q):
 users_roles = db.Table('users_roles',
                        db.Column('user_id', db.Integer(), db.ForeignKey('users.id'), primary_key=True),
                        db.Column('role_id', db.Integer(), db.ForeignKey('roles.id'), primary_key=True))
+
+
+class UserPreferences(db.Model):
+    """
+        User preferences per project.
+            In this project, just for the upgrade script generation. The table is managed on back-end side.
+    """
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+    project_id = db.Column(db.Integer(), db.ForeignKey('projects.projid', ondelete="CASCADE"), primary_key=True)
+    json_prefs = db.Column(db.String(4096), nullable=False)
 
 
 # noinspection PyPep8Naming
@@ -78,7 +88,7 @@ class users(db.Model, UserMixin):
             if isinstance(defval, float):
                 return float(tmp[prjid].get(name, defval))
             return tmp[prjid].get(name, defval)
-        except: # noqa
+        except:  # noqa
             return defval
 
     def SetPref(self, prjid, name, newval):
@@ -89,7 +99,7 @@ class users(db.Model, UserMixin):
                 tmp[prjid] = {}
             if tmp[prjid].get(name, -99999) == newval:
                 return 0  # déjà la bonne valeur donc il n'y a rien à faire
-        except: # noqa
+        except:  # noqa
             tmp = {}
         if prjid not in tmp:
             tmp[prjid] = {}
@@ -459,7 +469,7 @@ def GetAssoc(sql, params=None, debug=False, cursor_factory=psycopg2.extras.DictC
         app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
         db.engine.connect()
         raise
-    except: # noqa
+    except:  # noqa
         app.logger.debug("GetAssoc Exception SQL = %s %s", sql, params)
         cur.connection.rollback()
         raise
@@ -485,7 +495,7 @@ def GetAssoc2Col(sql, params=None, debug=False, dicttype=dict):
         app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
         db.engine.connect()
         raise
-    except: # noqa
+    except:  # noqa
         app.logger.debug("GetAssoc2Col  Exception SQL = %s %s", sql, params)
         cur.connection.rollback()
         raise
@@ -517,7 +527,7 @@ def GetAll(sql, params=None, debug=False, cursor_factory=psycopg2.extras.DictCur
         app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
         db.engine.connect()
         raise
-    except: # noqa
+    except:  # noqa
         app.logger.debug("GetAll Exception SQL = %s %s", sql, params)
         cur.connection.rollback()
         raise
@@ -542,7 +552,7 @@ def ExecSQL(sql, params=None, debug=False):
         app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
         db.engine.connect()
         raise
-    except: # noqa
+    except:  # noqa
         app.logger.debug("ExecSQL Exception SQL = %s %s", sql, params)
         cur.connection.rollback()
         raise

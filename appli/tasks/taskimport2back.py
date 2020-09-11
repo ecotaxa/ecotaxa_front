@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import json
 import time
+from typing import Dict
 
 from flask import render_template, g
 
@@ -8,7 +10,7 @@ from appli import database, PrintInCharte, gvg, GetAppManagerMailto, \
 from appli.tasks.importcommon import *
 from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, ProjectsApi
+from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, ProjectsApi, UsersApi
 
 
 class TaskImportToBack(AsyncTask):
@@ -62,6 +64,7 @@ class TaskImportToBack(AsyncTask):
             return PrintInCharte("ACCESS DENIED for this project")
         g.appmanagermailto = GetAppManagerMailto()
 
+        server_path = gvp("ServerPath")
         if gvp('starttask') == "Y":
             # Form Submit -> check and store values to use
             errors = []
@@ -79,6 +82,13 @@ class TaskImportToBack(AsyncTask):
                     TaxoMap[ls[0].strip().lower()] = ls[1].strip().lower()
             # Import file parameter
             FileToSave, FileToSaveFileName = get_file_from_form(self, errors)
+            # Save preferences
+            if server_path != "":
+                with ApiClient(UsersApi, request) as api:
+                    # Compute directory to open next time, we pick the parent to avoid double import of the same
+                    # directory or zip.
+                    cwd = str(Path(server_path).parent)
+                    api.set_current_user_prefs_users_my_preferences_project_id_put(self.param.ProjectId, "cwd", cwd)
 
             if len(errors) > 0:
                 for e in errors:
@@ -89,7 +99,10 @@ class TaskImportToBack(AsyncTask):
                 return self.StartTask(self.param, step=1, FileToSave=FileToSave, FileToSaveFileName=FileToSaveFileName)
         else:  # valeurs par default
             self.param.ProjectId = gvg("p")
-        return render_template(self.STEP0_TEMPLATE, header=txt, data=self.param, ServerPath=gvp("ServerPath"),
+        if server_path == "":
+            with ApiClient(UsersApi, request) as api:
+                server_path = api.get_current_user_prefs_users_my_preferences_project_id_get(self.param.ProjectId, "cwd")
+        return render_template(self.STEP0_TEMPLATE, header=txt, data=self.param, ServerPath=server_path,
                                TxtTaxoMap=gvp("TxtTaxoMap"))
 
     def SPStep1(self):

@@ -97,7 +97,7 @@ class ImportPrepRsp(object):
 
 
         :param source_path: The source_path of this ImportPrepRsp.  # noqa: E501
-        :type: str
+        :type source_path: str
         """
         if self.local_vars_configuration.client_side_validation and source_path is None:  # noqa: E501
             raise ValueError("Invalid value for `source_path`, must not be `None`")  # noqa: E501
@@ -120,7 +120,7 @@ class ImportPrepRsp(object):
 
 
         :param mappings: The mappings of this ImportPrepRsp.  # noqa: E501
-        :type: dict(str, dict(str, str))
+        :type mappings: dict(str, dict(str, str))
         """
 
         self._mappings = mappings
@@ -143,7 +143,7 @@ class ImportPrepRsp(object):
         key = user name; value = dict with (key = 'id' if resolved, else 'email')  # noqa: E501
 
         :param found_users: The found_users of this ImportPrepRsp.  # noqa: E501
-        :type: dict(str, object)
+        :type found_users: dict(str, object)
         """
 
         self._found_users = found_users
@@ -166,7 +166,7 @@ class ImportPrepRsp(object):
         key = taxon NAME; value = taxon ID if resolved, else None  # noqa: E501
 
         :param found_taxa: The found_taxa of this ImportPrepRsp.  # noqa: E501
-        :type: dict(str, int)
+        :type found_taxa: dict(str, int)
         """
 
         self._found_taxa = found_taxa
@@ -187,7 +187,7 @@ class ImportPrepRsp(object):
 
 
         :param warnings: The warnings of this ImportPrepRsp.  # noqa: E501
-        :type: list[str]
+        :type warnings: list[str]
         """
 
         self._warnings = warnings
@@ -210,7 +210,7 @@ class ImportPrepRsp(object):
         Do NOT proceed to real import if not empty.  # noqa: E501
 
         :param errors: The errors of this ImportPrepRsp.  # noqa: E501
-        :type: list[str]
+        :type errors: list[str]
         """
 
         self._errors = errors
@@ -231,7 +231,7 @@ class ImportPrepRsp(object):
 
 
         :param rowcount: The rowcount of this ImportPrepRsp.  # noqa: E501
-        :type: int
+        :type rowcount: int
         """
 
         self._rowcount = rowcount
