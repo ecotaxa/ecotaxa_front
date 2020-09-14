@@ -21,12 +21,10 @@ function EnableSelect2Taxolb() {
             cache: true
         },
         templateResult: FormatTaxoItem,
-{#        minimumInputLength: 3,#}
-        dropdownCssClass:"width240 taxopopup"
-        ,"language": {
-           "noResults": function(){
-{#               return $("<span>No Results Found. <a href='/taxo/browse/?fromprj={{ g.Projid }}' >Create new category</a></span>");#}
-               return $("<span>No Results Found. <a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}',{updatestat:'Y'})\" >Create new category</a></span>");
+        dropdownCssClass: "width240 taxopopup",
+        language: {
+           noResults: function(){
+               return $("<span>No recent/result found. <a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}',{updatestat:'Y'})\" >Create category</a></span>");
            }
        }
     }); // Select2 Ajax

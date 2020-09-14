@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import re
+from typing import List, Dict
+
 from flask import render_template, json, jsonify
 from flask_login import current_user
 from psycopg2.extensions import QuotedString
@@ -6,8 +9,9 @@ from psycopg2.extensions import QuotedString
 from appli import app, gvg, gvp, database, ntcv
 from appli.database import GetAll, GetAssoc2Col
 
-SQLTreeExp = """concat(tf.name,'<'||t1.name,'<'||t2.name,'<'||t3.name,'<'||t4.name,'<'||t5.name,'<'||t6.name,'<'||t7.name
-            ,'<'||t8.name,'<'||t9.name,'<'||t10.name,'<'||t11.name,'<'||t12.name,'<'||t13.name,'<'||t14.name)"""
+sql_tree_exp = """concat(tf.name,'<'||t1.name,'<'||t2.name,'<'||t3.name,'<'||t4.name,'<'||t5.name,'<'||t6.name,
+            '<'||t7.name,'<'||t8.name,'<'||t9.name,'<'||t10.name,'<'||t11.name,'<'||t12.name,
+            '<'||t13.name,'<'||t14.name)"""
 SQLTreeJoin = """left join taxonomy t1 on tf.parent_id=t1.id
       left join taxonomy t2 on t1.parent_id=t2.id
       left join taxonomy t3 on t2.parent_id=t3.id
@@ -24,6 +28,26 @@ SQLTreeJoin = """left join taxonomy t1 on tf.parent_id=t1.id
       left join taxonomy t14 on t13.parent_id=t14.id"""
 
 
+def _filter_mru(raw_mru: List[Dict], query: str) -> List[Dict]:
+    """
+        Apply filtering to the MRU so that it complies with the query.
+    """
+    query = query.lower()
+    # OK we have only 2 letters so below is a bit of overkill
+    if not ("*" in query or " " in query or "%" in query):
+        # Simple search
+        filter_func = lambda txt: txt.lower().startswith(query)
+    else:
+        # Regexp match
+        query = query.replace(" ", "*").replace("%", "*").replace("*", ".*")
+        filter_func = lambda txt: re.match(query, txt.lower())
+    try:
+        return [itm for itm in raw_mru if filter_func(itm["text"])]
+    except (KeyError, ValueError):
+        # Better nothing than a faulty value
+        return []
+
+
 @app.route('/search/taxo')
 def searchtaxo():
     term = gvg("q")
@@ -33,49 +57,55 @@ def searchtaxo():
             return "[]"
         # current_user.id
         with app.MRUClassif_lock:
-            # app.MRUClassif[current_user.id]=[{"id": 2904, "pr": 0, "text": "Teranympha (Eucomonymphidae-Teranymphidae)"},
+            # app.MRUClassif[current_user.id]=[{"id": 2904, "pr": 0, "text": "Teranympha (Eucomonymphidae
+            #  -Teranymphidae)"},
             # {"id": 12488, "pr": 0, "text": "Teranympha mirabilis "},
             # {"id": 76677, "pr": 0, "text": "Terasakiella (Methylocystaceae)"},
             # {"id": 82969, "pr": 0, "text": "Terasakiella pusilla "}]
-            return json.dumps(app.MRUClassif.get(current_user.id, []))  # gère les MRU en utilisant les classif
-    ltfound = term.find('<') > 0
-    SQLWith = """
-    """
+            mru = app.MRUClassif.get(current_user.id, [])
+            # filter inside the MRU list
+            mru = _filter_mru(mru, term)
+            return json.dumps(mru)
+    # Proceed to 3+ letters
     # * et espace comme %
     terms = [x.lower().replace("*", "%").replace(" ", "%") + R"%" for x in term.split('<')]
     param = {'term': terms[0]}  # le premier term est toujours appliqué sur le display name
-    ExtraWhere = ExtraFrom = ""
+    extra_where = extra_from = ""
+
     if len(terms) > 1:
-        ExtraFrom = SQLTreeJoin
+        extra_from = SQLTreeJoin
         terms = ['%%<' + x.replace("%", "%%").replace("*", "%%").replace(" ", "%%") for x in terms[1:]]
-        termsSQL = QuotedString("".join(terms)).getquoted().decode('iso-8859-15', 'strict')
-        ExtraWhere = ' and ' + SQLTreeExp + " ilike " + termsSQL
-    sql = """SELECT tf.id, tf.display_name as name
-          ,0 FROM taxonomy tf
-          {0}
-          WHERE  lower(tf.display_name) LIKE %(term)s  {1}
-          order by lower(tf.display_name) limit 200""".format(ExtraFrom, ExtraWhere)
+        terms_sql = QuotedString("".join(terms)).getquoted().decode('iso-8859-15', 'strict')
+        extra_where = ' and ' + sql_tree_exp + " ilike " + terms_sql
 
-    PrjId = gvg("projid")
-    if PrjId != "":
-        PrjId = int(PrjId)
-        Prj = database.Projects.query.filter_by(projid=PrjId).first()
-        if ntcv(Prj.initclassiflist) != "":
-            InitClassif = Prj.initclassiflist
-            InitClassif = ", ".join(["(" + x.strip() + ")" for x in InitClassif.split(",") if x.strip() != ""])
-            #             ,tf.name||case when p1.name is not null and tf.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
+    # By default, simple select from taxonomy and return alphabetical matches
+    sql = """SELECT tf.id, tf.display_name as name, 0 
+               FROM taxonomy tf
+                 {0}
+              WHERE LOWER(tf.display_name) LIKE %(term)s  {1}
+           ORDER BY LOWER(tf.display_name) LIMIT 200""".format(extra_from, extra_where)
 
+    prj_id = gvg("projid")
+    if prj_id != "":
+        prj_id = int(prj_id)
+        prj = database.Projects.query.filter_by(projid=prj_id).first()
+        if ntcv(prj.initclassiflist) != "":
+            # e.g. 14532,16789,165778
+            db_init_classif = prj.initclassiflist
+            # => (14532),(16789),(165778)
+            init_classif = ", ".join(["(" + x.strip() + ")" for x in db_init_classif.split(",") if x.strip() != ""])
+            # We're inside a project, with presets, so favor the presets in the search output order
             sql = """
-            SELECT tf.id
-            ,tf.display_name as name
-            , case when id2 is null then 0 else 1 end inpreset FROM taxonomy tf
-            join (select t.id id1,c.id id2 FROM taxonomy t
-            full JOIN (VALUES """ + InitClassif + """) c(id) ON t.id = c.id
-                 WHERE  lower(display_name) LIKE %(term)s) tl2
-            on tf.id=coalesce(id1,id2)
-            """ + ExtraFrom + """
-              WHERE  lower(tf.display_name) LIKE %(term)s """ + ExtraWhere + """
-            order by inpreset desc,lower(tf.display_name),name limit 200 """
+            SELECT tf.id, tf.display_name as name, case when id2 is null then 0 else 1 end inpreset 
+              FROM taxonomy tf
+              JOIN (SELECT t.id id1, c.id id2 
+                      FROM taxonomy t
+                      FULL JOIN (VALUES """ + init_classif + """) c(id) ON t.id = c.id
+                     WHERE LOWER(display_name) LIKE %(term)s ) tl2 ON tf.id = COALESCE(id1, id2)
+            """ + extra_from + """
+             WHERE LOWER(tf.display_name) LIKE %(term)s """ + extra_where + """
+          ORDER BY inpreset DESC, LOWER(tf.display_name), name LIMIT 200 """
+
     res = GetAll(sql, param, debug=False)
     return json.dumps([dict(id=r[0], text=r[1], pr=r[2]) for r in res])
 
