@@ -18,7 +18,7 @@ from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi, Project, ApiException, ObjectsApi
+from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi, ProjectModel, ApiException, ObjectsApi
 
 
 @app.route('/prj/')
@@ -757,7 +757,7 @@ def prjPurge(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: Project = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"

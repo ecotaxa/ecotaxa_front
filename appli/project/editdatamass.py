@@ -1,32 +1,44 @@
-from typing import List
+from typing import List, Dict
 
 from flask import render_template, g, flash, request
 from flask_login import current_user
 from flask_security import login_required
 
-import appli
-import appli.project.main
 import appli.project.sharedfilter as sharedfilter
-from appli import app, PrintInCharte, database, gvg, gvp, DecodeEqualList, XSSEscape
-from appli.database import GetAll, ExecSQL, db
+from appli import app, PrintInCharte, gvg, gvp, XSSEscape
+from appli.database import ExecSQL
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, Project, ApiException, ObjectsApi
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ObjectHeaderModel, ApiException, ObjectsApi
 
 
-def GetFieldList(Prj):
+def GetFieldList(prj_model: ProjectModel):
     fieldlist = []
-    MapList = (('f', 'mappingobj'), ('s', 'mappingsample'), ('a', 'mappingacq'), ('p', 'mappingprocess'))
-    MapPrefix = {'f': 'object.', 's': 'sample.', 'a': 'acquis.', 'p': 'process.'}
-    for k in db.metadata.tables['obj_head'].columns.keys():
+
+    excluded = set()
+    for k in ObjectHeaderModel.openapi_types.keys():
+        # TODO: Hardcoded, not rename-friendly
         if k not in ('objid', 'projid', 'img0id', 'imgcount'):
             fieldlist.append({'id': 'h' + k, 'text': 'object.' + k})
-    fieldlist.append({'id': 'forig_id', 'text': 'object.orig_id'})
-    fieldlist.append({'id': 'fobject_link', 'text': 'object.object_link'})
-    fieldlist.append({'id': 'sdataportal_descriptor', 'text': 'sample.dataportal_descriptor'})
-    fieldlist.append({'id': 'ainstrument', 'text': 'acquis.instrument (fixed)'})
+        else:
+            excluded.add(k)
+    assert excluded == {'objid', 'projid', 'img0id', 'imgcount'}, "Attempt to exclude a non-existing column"
+
+    # TODO: Hardcoded, not completely rename-friendly
+    # 2 fields in object_fields
+    fieldlist.append({'id': 'f''orig_id', 'text': 'object.''orig_id'})
+    fieldlist.append({'id': 'f''object_link', 'text': 'object.''object_link'})
+    # 1 field in sample
+    fieldlist.append({'id': 's''dataportal_descriptor', 'text': 'sample.''dataportal_descriptor'})
+    # 1 field in acquisition
+    fieldlist.append({'id': 'a''instrument', 'text': 'acquis.''instrument'' (fixed)'})
+
+    MapList = (('f', prj_model.obj_free_cols), ('s', prj_model.sample_free_cols),
+               ('a', prj_model.acquisition_free_cols), ('p', prj_model.process_free_cols))
+    MapPrefix = {'f': 'object.', 's': 'sample.', 'a': 'acquis.', 'p': 'process.'}
+    mapv: Dict[str, str]
     for mapk, mapv in MapList:
-        for k, v in sorted(DecodeEqualList(getattr(Prj, mapv, "")).items(), key=lambda t: t[1]):
-            fieldlist.append({'id': mapk + k, 'text': MapPrefix[mapk] + v})
+        for k in sorted(mapv.keys()):
+            fieldlist.append({'id': mapk + mapv[k], 'text': MapPrefix[mapk] + k})
     return fieldlist
 
 
@@ -36,23 +48,33 @@ def GetFieldList(Prj):
 def PrjEditDataMass(PrjId):
     # noinspection PyStatementEffect
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
-    Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if Prj is None:
-        flash("Project doesn't exists", 'error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
-    if not Prj.CheckRight(2):  # Level 0 = Read, 1 = Annotate, 2 = Admin
-        flash('You cannot edit settings for this project', 'error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
-    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
+
+    # Security & sanity checks
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+        except ApiException as ae:
+            if ae.status == 404:
+                return "Project doesn't exists"
+            elif ae.status == 403:
+                flash('You cannot do mass data edition on this project', 'error')
+                return PrintInCharte("<a href=/prj/>Select another project</a>")
+
+    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_proj.projid, XSSEscape(target_proj.title))
     txt = "<h3>Project Mass data edition </h3>"
+
     sqlparam = {}
+
     filtres = {}
     for k in sharedfilter.FilterList:
         if gvg(k):
             filtres[k] = gvg(k, "")
+
+    # Get the field name from user input
     field = gvp('field')
     if field and gvp('newvalue'):
-        tables = {'f': 'obj_field', 'h': 'obj_head', 's': 'samples', 'a': 'acquisitions', 'p': 'process'}
+        tables = {'f': 'obj_field', 'h': 'obj_head',
+                  's': 'samples', 'a': 'acquisitions', 'p': 'process'}
         tablecode = field[0]
         table = tables[tablecode]  # on extrait la table à partir de la premiere lettre de field
         field = field[1:]  # on supprime la premiere lettre qui contenait le nom de la table
@@ -70,7 +92,7 @@ def PrjEditDataMass(PrjId):
             sql += " acquisid in ( select distinct acquisid from objects o "
         elif tablecode == "p":
             sql += " processid in ( select distinct processid from objects o "
-        sql += "  where projid=" + str(Prj.projid)
+        sql += "  where projid=" + str(target_proj.projid)
         sqlparam['newvalue'] = gvp('newvalue')
         if len(filtres):
             sql += " " + sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
@@ -81,32 +103,37 @@ def PrjEditDataMass(PrjId):
                           select objid, classif_when, 'M', classif_id,
                                  classif_qual,classif_who
                             from objects o
-                           where projid=""" + str(Prj.projid) + " and classif_when is not null "
+                           where projid=""" + str(target_proj.projid) + " and classif_when is not null "
             sqlhisto += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
             ExecSQL(sqlhisto, sqlparam)
         ExecSQL(sql, sqlparam)
         flash('Data updated', 'success')
+
     if field == 'latitude' or field == 'longitude' or gvp('recompute') == 'Y':
         ExecSQL("""update samples s set latitude=sll.latitude,longitude=sll.longitude
               from (select o.sampleid,min(o.latitude) latitude,min(o.longitude) longitude
               from obj_head o
               where projid=%(projid)s and o.latitude is not null and o.longitude is not null
-              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s """, {'projid': Prj.projid})
+              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s """,
+                {'projid': target_proj.projid})
         flash('sample latitude and longitude updated', 'success')
-    sql = "select objid FROM objects o where projid=" + str(Prj.projid)
+
     if len(filtres):
-        sql += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
-        ObjList = GetAll(sql, sqlparam)
+        # Query the filtered list in project
+        with ApiClient(ObjectsApi, request) as api:
+            object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
+        # Warn the user
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
                "USING Active Project Filters, {0} objects</span>". \
-            format(len(ObjList))
+            format(len(object_ids))
     else:
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
                "Apply to ALL OBJECTS OF THE PROJECT (NO Active Filters)</span>"
-    Lst = GetFieldList(Prj)
-    # txt+="%s"%(Lst,)
 
-    return PrintInCharte(render_template("project/prjeditdatamass.html", Lst=Lst, header=txt))
+    Lst = GetFieldList(target_proj)
+
+    return PrintInCharte(render_template("project/prjeditdatamass.html",
+                                         Lst=Lst, header=txt))
 
 
 ######################################################################################################################
@@ -119,7 +146,7 @@ def PrjResetToPredicted(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: Project = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
@@ -143,9 +170,7 @@ def PrjResetToPredicted(PrjId):
 
         # flash('Data updated', 'success')
         txt += "<a href='/prj/%s' class='btn btn-primary'>Back to project</a> " % target_proj.projid
-        # TODO: Move to back-end
-        appli.project.main.RecalcProjectTaxoStat(target_proj.projid)
-        appli.project.main.UpdateProjectStat(target_proj.projid)
+
         return PrintInCharte(txt)
 
     if len(filtres):
