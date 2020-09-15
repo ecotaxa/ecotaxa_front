@@ -18,7 +18,8 @@ from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi, ProjectModel, ApiException, ObjectsApi
+from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi, ProjectModel, \
+    ApiException, ObjectsApi
 
 
 @app.route('/prj/')
@@ -673,7 +674,7 @@ def GetClassifTab(Prj):
                 res[k]['cpdist'] = i + 1
                 break
     # noinspection PyUnresolvedReferences
-    restree = []  # type:list[dict]
+    restree = []  # type:List[Dict]
 
     def AddChild(Src, Parent, Res, Deep, ParentClasses):
         for rec in Src:
@@ -779,7 +780,7 @@ def prjPurge(PrjId):
         if len(filtres):
             # Query objects, using filters, in project
             with ApiClient(ObjectsApi, request) as api:
-                object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
+                object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres).object_ids
             ObjListTxt = "\n".join((str(r) for r in object_ids))
 
             txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \

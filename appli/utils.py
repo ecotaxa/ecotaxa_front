@@ -7,10 +7,11 @@ from flask import Request
 from werkzeug.local import LocalProxy
 
 from appli.api_proxy import BACKEND_URL
-from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectsApi, UsersApi, ObjectsApi
+from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
+    AcquisitionsApi, ProcessesApi
 
 # Lol, generics in python
-A = TypeVar('A', ProjectsApi, UsersApi, ObjectsApi)
+A = TypeVar('A', ProjectsApi, UsersApi, ObjectsApi, SamplesApi, AcquisitionsApi, ProcessesApi)
 
 
 class ApiClient(Generic[A]):

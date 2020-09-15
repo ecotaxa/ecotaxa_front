@@ -6,9 +6,9 @@ from flask_security import login_required
 
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, gvg, gvp, XSSEscape
-from appli.database import ExecSQL
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ObjectHeaderModel, ApiException, ObjectsApi
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ObjectHeaderModel, ApiException, ObjectsApi, SamplesApi, \
+    BulkUpdateReq, ProcessesApi, AcquisitionsApi
 
 
 def GetFieldList(prj_model: ProjectModel):
@@ -63,8 +63,6 @@ def PrjEditDataMass(PrjId):
     g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_proj.projid, XSSEscape(target_proj.title))
     txt = "<h3>Project Mass data edition </h3>"
 
-    sqlparam = {}
-
     filtres = {}
     for k in sharedfilter.FilterList:
         if gvg(k):
@@ -73,67 +71,65 @@ def PrjEditDataMass(PrjId):
     # Get the field name from user input
     field = gvp('field')
     if field and gvp('newvalue'):
-        tables = {'f': 'obj_field', 'h': 'obj_head',
-                  's': 'samples', 'a': 'acquisitions', 'p': 'process'}
+        # First field lettre gives the entity to update
         tablecode = field[0]
-        table = tables[tablecode]  # on extrait la table à partir de la premiere lettre de field
-        field = field[1:]  # on supprime la premiere lettre qui contenait le nom de la table
-        sql = "update " + table + " set " + field + "=%(newvalue)s  "
-        if field == 'classif_id':
-            sql += " ,classif_when=current_timestamp,classif_who=" + str(current_user.id)
-        sql += " where "
-        if tablecode == "h":
-            sql += " objid in ( select objid from objects o "
-        elif tablecode == "f":
-            sql += " objfid in ( select objid from objects o "
-        elif tablecode == "s":
-            sql += " sampleid in ( select distinct sampleid from objects o "
-        elif tablecode == "a":
-            sql += " acquisid in ( select distinct acquisid from objects o "
+        # What's left is field name
+        field = field[1:]
+        new_value = gvp('newvalue')
+        # Query the filtered list in project, if no filter then it's the whole project
+        with ApiClient(ObjectsApi, request) as api:
+            res = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
+        # Call the back-end service, depending on the field to update
+        updates = [{"ucol": field, "uval": new_value}]
+        if tablecode in ("h", "f"):
+            # Object update
+            if field == 'classif_id':
+                updates.append({"ucol": "classif_when", "uval": "current_timestamp"})
+                updates.append({"ucol": "classif_who", "uval": str(current_user.id)})
+            with ApiClient(ObjectsApi, request) as api:
+                nb_rows = api.update_object_set_object_set_update_post(BulkUpdateReq(target_ids=res.object_ids,
+                                                                                     updates=updates))
         elif tablecode == "p":
-            sql += " processid in ( select distinct processid from objects o "
-        sql += "  where projid=" + str(target_proj.projid)
-        sqlparam['newvalue'] = gvp('newvalue')
-        if len(filtres):
-            sql += " " + sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
-        sql += ")"
-        if field == 'classif_id':
-            sqlhisto = """insert into objectsclassifhisto(objid, classif_date, classif_type, classif_id, 
-                                                          classif_qual, classif_who)
-                          select objid, classif_when, 'M', classif_id,
-                                 classif_qual,classif_who
-                            from objects o
-                           where projid=""" + str(target_proj.projid) + " and classif_when is not null "
-            sqlhisto += sharedfilter.GetSQLFilter(filtres, sqlparam, str(current_user.id))
-            ExecSQL(sqlhisto, sqlparam)
-        ExecSQL(sql, sqlparam)
-        flash('Data updated', 'success')
+            # Process update, i.e. parents
+            processes = [a_parent for a_parent in set(res.process_ids) if a_parent]
+            with ApiClient(ProcessesApi, request) as api:
+                nb_rows = api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=processes,
+                                                                                     updates=updates))
+        elif tablecode == "a":
+            # Acquisition update
+            acquisitions = [a_parent for a_parent in set(res.acquisition_ids) if a_parent]
+            with ApiClient(AcquisitionsApi, request) as api:
+                nb_rows = api.update_acquisitions_acquisition_set_update_post(BulkUpdateReq(target_ids=acquisitions,
+                                                                                            updates=updates))
+        elif tablecode == "s":
+            # Sample update
+            samples = [a_parent for a_parent in set(res.sample_ids) if a_parent]
+            with ApiClient(SamplesApi, request) as api:
+                nb_rows = api.update_samples_sample_set_update_post(BulkUpdateReq(target_ids=samples,
+                                                                                  updates=updates))
+        flash('%s data rows updated' % nb_rows, 'success')
 
     if field == 'latitude' or field == 'longitude' or gvp('recompute') == 'Y':
-        ExecSQL("""update samples s set latitude=sll.latitude,longitude=sll.longitude
-              from (select o.sampleid,min(o.latitude) latitude,min(o.longitude) longitude
-              from obj_head o
-              where projid=%(projid)s and o.latitude is not null and o.longitude is not null
-              group by o.sampleid) sll where s.sampleid=sll.sampleid and projid=%(projid)s """,
-                {'projid': target_proj.projid})
-        flash('sample latitude and longitude updated', 'success')
+        with ApiClient(ProjectsApi, request) as api:
+            api.project_recompute_geography_projects_project_id_recompute_geo_post(PrjId)
+        flash('All samples latitude and longitude updated', 'success')
 
     if len(filtres):
         # Query the filtered list in project
         with ApiClient(ObjectsApi, request) as api:
-            object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
+            object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres).object_ids
         # Warn the user
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
                "USING Active Project Filters, {0} objects</span>". \
             format(len(object_ids))
     else:
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
-               "Apply to ALL OBJECTS OF THE PROJECT (NO Active Filters)</span>"
+               "Apply to ALL ENTITIES OF THE PROJECT (NO Active Filters)</span>"
 
-    Lst = GetFieldList(target_proj)
+    field_list = GetFieldList(target_proj)
 
     return PrintInCharte(render_template("project/prjeditdatamass.html",
-                                         Lst=Lst, header=txt))
+                                         Lst=field_list, header=txt))
 
 
 ######################################################################################################################
@@ -176,7 +172,7 @@ def PrjResetToPredicted(PrjId):
     if len(filtres):
         # Query the filtered list in project
         with ApiClient(ObjectsApi, request) as api:
-            object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
+            object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres).object_ids
         # Warn the user
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
                "USING Active Project Filters, {0} objects</span>" \
