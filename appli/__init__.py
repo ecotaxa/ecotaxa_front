@@ -340,9 +340,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.4.1"
+ecotaxa_version="2.4.2"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-09-02"
+    return ecotaxa_version+" 2020-09-16"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -350,6 +350,11 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-09-16 : V 2.4.2
+    Feature #245: More API primitives implemented on back-end, namely mass update and reset to predicted.
+    Bugfix #465: Right-click menu in category is cropped and moves with right pane.
+    Feature #445: Remember, per project, the directory used during last import operation..
+    Bugfix #463: Recent categories were not filtered as they should have.
 2020-09-02 : V 2.4.1
     Feature #245: More API primitives implemented on back-end.
     Bugfix #350: Object mappings are now re-ordered during merge.
