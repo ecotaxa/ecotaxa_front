@@ -299,6 +299,18 @@ $(document).ready(function() {
   $.contextMenu({
   // define which elements trigger this menu
   selector: ".classiftab td",
+  appendTo: "#empty_fixed",
+  position: function(opt, x, y){
+    win_scroll = $(window).scrollTop();
+    win_height = $(window).height();
+    menu_height = opt.$menu[0].clientHeight;
+    new_y = y-win_scroll;
+    if (new_y+menu_height > win_height) {
+        new_y -= (new_y+menu_height)-win_height;
+    }
+    // console.log(opt, x, y, win_scroll, menu_height);
+    opt.$menu.css({left: x, top: new_y});
+  },
   // define the elements of the menu
   build: function($trigger, e) {
     res= {
