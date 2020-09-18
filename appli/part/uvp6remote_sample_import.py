@@ -4,6 +4,28 @@ from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,VaultRoot
 import appli.part.uvp_sample_import as uvp_sample_import
 from appli.part.common_sample_import import CleanValue,ToFloat,GenerateReducedParticleHistogram
 import numpy as np,io
+from html.parser import HTMLParser
+import urllib.request,ssl,os
+
+class ATagParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.FoundA=[]
+
+    def handle_starttag(self, tag, attrs):
+        if tag!='a':
+            return
+        attr_dict=dict(attrs)
+        if 'href' not in attr_dict:
+             return
+        href=attr_dict['href']
+        if ':' in href:
+            return # on ignore les url qui respécifient un protocole
+        if not href.endswith('.txt'):
+            return # on ne garde que les .txt
+        fichier=os.path.basename(href)
+        self.FoundA.append(fichier)
+
 
 def ParseMetadataFile(MetaF):
     MetaData = {}
@@ -24,7 +46,27 @@ class RemoteServerFetcher:
         if ntcv(self.Prj.remote_directory)!="":
             self.ftp.cwd(self.Prj.remote_directory)
 
+    def IsHttp(self):
+        return self.Prj.remote_url.startswith('http:') or  self.Prj.remote_url.startswith('https:')
 
+    def GetHTTPUrl(self,Filename=''):
+        url=self.Prj.remote_url
+        if (not url.endswith('/')) and (not self.Prj.remote_directory.startswith('/')):
+            url+='/'
+        url +=self.Prj.remote_directory
+        if not url.endswith('/'):
+            url+='/'
+        url += Filename
+        return url
+
+    def RetrieveFile(self,FileName,TempFile):
+        if self.IsHttp():
+            ContexteSSLSansControle = ssl.SSLContext()
+            with urllib.request.urlopen(self.GetHTTPUrl(FileName), context=ContexteSSLSansControle) as response:
+                html = response.read()
+                TempFile.write(html)
+        else:
+            self.ftp.retrbinary('RETR %s' % FileName, TempFile.write)
 
     def GetServerFiles(self):
         """Retourne la liste des fichiers sous forme d'un dictionnaire
@@ -38,9 +80,10 @@ class RemoteServerFetcher:
                     , 'LPM': 'SG003A_000002LP_DEPTH_LPM.txt', 'TAXO1': 'SG003A_000002LP_DEPTH_TAXO1.txt'
                     , 'BLACK': 'SG003A_000002LP_DEPTH_BLACK.txt'} }}
 """
-        if self.ftp is None:
-            self.Connect()
-        lst = self.ftp.nlst()
+        if self.IsHttp():
+            lst=self.GetServerFilelistHTTP()
+        else:
+            lst=self.GetServerFilelistFTP()
         Samples={}
         for entry in lst:
             if entry[-4:] != '.txt':  # premier filtrage basique et silencieux
@@ -55,6 +98,23 @@ class RemoteServerFetcher:
             Samples[SampleName]['files'][m.group(4)]=entry
             # print(entry, m.group(1), m.group(2), m.group(3), m.group(4))
         return Samples
+
+
+    def GetServerFilelistHTTP(self):
+        ContexteSSLSansControle = ssl.SSLContext()
+        url=self.GetHTTPUrl()
+        Req = urllib.request.Request(url)
+        with urllib.request.urlopen(Req, context=ContexteSSLSansControle) as response:
+            html = response.read().decode('latin-1')
+            parser = ATagParser()
+            parser.feed(html)
+            return parser.FoundA
+
+
+    def GetServerFilelistFTP(self):
+        if self.ftp is None:
+            self.Connect()
+        return list(self.ftp.nlst())
 
 
     def FetchServerDataForProject(self,ForcedSample:list):
@@ -96,7 +156,7 @@ class RemoteServerFetcher:
             with zipfile.ZipFile(TmpDir+'/raw.zip', 'w',compression=zipfile.ZIP_DEFLATED) as zf:
                 for filetype in ServerSamples[SampleName]['files']:
                     with open(TmpDir+"/"+filetype,"wb") as TmpF:
-                        self.ftp.retrbinary('RETR %s' % ServerSamples[SampleName]['files'][filetype], TmpF.write)
+                        self.RetrieveFile(ServerSamples[SampleName]['files'][filetype], TmpF)
                     zf.write(TmpF.name, arcname=filetype+'.txt')
             with open(TmpDir+"/META", 'r') as MetaF:
                 MetaData=ParseMetadataFile(MetaF)
