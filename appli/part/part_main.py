@@ -253,6 +253,7 @@ group by slice order by slice""".format(sampleinclause))
 def Partgetsamplepopover(psampleid):
     sql="""select s.psampleid,s.profileid,p.ptitle,ep.title,p.cruise,p.ship ,p.projid,p.pprojid
       ,round(cast(s.latitude as NUMERIC),4) latitude,round(cast(s.longitude as NUMERIC),4) longitude
+      ,to_char(s.sampledate,'YYYY-MM-DD HH24:MI') sampledate
       from part_samples s
       LEFT JOIN part_projects p on s.pprojid=p.pprojid
       left join projects ep on p.projid = ep.projid
@@ -265,6 +266,7 @@ def Partgetsamplepopover(psampleid):
     Ship : {ship}<br>
     Cruise : {cruise}<br>
     Ecotaxa Project : {title} ({projid})<br>
-    Lat/Lon : {latitude}/{longitude}
+    Lat/Lon : {latitude}/{longitude}<br>
+    Date/Time : {sampledate}
     """.format(**data)
     return txt
