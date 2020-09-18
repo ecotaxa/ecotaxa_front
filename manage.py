@@ -1,6 +1,5 @@
 # manage.py
-import os
-import shutil
+import os,sys,shutil
 
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
@@ -349,17 +348,21 @@ def partpoolserver():
         import appli.part.uvp6remote_sample_import as uvp6remote_sample_import
         import appli.part.common_sample_import as common_import
         Lst = database.GetAll(
-            """select pprojid,ptitle from part_projects where remote_type is not null and remote_url is not null""")
+            """select pprojid,ptitle from part_projects where coalesce(remote_type,'')!='' and coalesce(remote_url,'')!='' """)
         for P in Lst:
             print("pollserver for project {pprojid} : {ptitle}".format(**P))
-            RSF = uvp6remote_sample_import.RemoteServerFetcher(P['pprojid'])
-            LstSampleID = RSF.FetchServerDataForProject([])
-            for psampleid in LstSampleID:
-                print("uvp6remote Sample %d Metadata processed, Détailled histogram in progress" % (psampleid,))
-                uvp6remote_sample_import.GenerateParticleHistogram(psampleid)
-                print("Try to import CTD")
-                print(common_import.ImportCTD(psampleid, "Automatic", ""))
-
+            try:
+                RSF = uvp6remote_sample_import.RemoteServerFetcher(P['pprojid'])
+                LstSampleID = RSF.FetchServerDataForProject([])
+                if not LstSampleID:
+                    continue
+                for psampleid in LstSampleID:
+                    print("uvp6remote Sample %d Metadata processed, Détailled histogram in progress" % (psampleid,))
+                    uvp6remote_sample_import.GenerateParticleHistogram(psampleid)
+                    print("Try to import CTD")
+                    print(common_import.ImportCTD(psampleid, "Automatic", ""))
+            except:
+                print('Error : '+str(sys.exc_info()))
 
 if __name__ == "__main__":
     manager.run()
