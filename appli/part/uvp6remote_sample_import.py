@@ -126,6 +126,8 @@ class RemoteServerFetcher:
                                       ,usecols=['DATE_TIME','LATITUDE_decimal_degree','LONGITUDE_decimal_degree']
                                       #,usecols=[0,2,3]
                                       , dtype=[ ('DATE_TIME', 'S15'),('LATITUDE_decimal_degree','<f4'),('LONGITUDE_decimal_degree','<f4')])
+            if len(SamplesData.shape) == 0: # s'il n'y a qu'une seul ligne genfromtxt ne retourne pas un tableau à 2 dimensions, donc ou transforme celui ci
+                SamplesData = np.array([SamplesData])
             Sample.latitude= round(np.average(SamplesData['LATITUDE_decimal_degree'] + 360) - 360, 3)
             Sample.longitude =round(np.average(SamplesData['LONGITUDE_decimal_degree'] + 360) - 360, 3)
             FirstDate=datetime.datetime.strptime(SamplesData['DATE_TIME'][0].decode(), '%Y%m%dT%H%M%S')
