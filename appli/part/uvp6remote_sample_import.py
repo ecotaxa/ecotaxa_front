@@ -175,7 +175,7 @@ def GenerateParticleHistogram(psampleid):
                     Tranche=(Depth//5)*5
                     DepthTranche=Tranche+2.5
                 else:
-                    Tranche=Time[:-4] # On enlève Heure et minute
+                    Tranche=Time[:-4] # On enlève minute et secondes
                     DepthTranche =Depth # on prend la premiere profondeur
                 NbrParClasse={}
                 # GreyParClasse = {}
@@ -192,18 +192,24 @@ def GenerateParticleHistogram(psampleid):
 
 
             database.ExecSQL("delete from part_histopart_det where psampleid="+str(psampleid))
-            sql="""insert into part_histopart_det(psampleid, lineno, depth,  watervolume
+            sql="""insert into part_histopart_det(psampleid, lineno, depth,  watervolume,datetime
                 , class17, class18, class19, class20, class21, class22, class23, class24, class25, class26, class27, class28, class29
                 , class30, class31, class32, class33, class34)
-            values(%(psampleid)s,%(lineno)s,%(depth)s,%(watervolume)s,%(class17)s,%(class18)s,%(class19)s,%(class20)s,%(class21)s,%(class22)s
+            values(%(psampleid)s,%(lineno)s,%(depth)s,%(watervolume)s,%(datetime)s,%(class17)s,%(class18)s,%(class19)s,%(class20)s,%(class21)s,%(class22)s
             ,%(class23)s,%(class24)s,%(class25)s,%(class26)s,%(class27)s,%(class28)s
             ,%(class29)s,%(class30)s,%(class31)s,%(class32)s,%(class33)s,%(class34)s)"""
             sqlparam={'psampleid':psampleid}
             Tranches=sorted(HistoByTranche.keys())
             for i,Tranche in enumerate(Tranches):
                 sqlparam['lineno']=i
-                sqlparam['depth'] = HistoByTranche[Tranche]['DepthTranche']
+                sqlparam['depth'] = round(HistoByTranche[Tranche]['DepthTranche'],2)
                 sqlparam['watervolume'] =round(HistoByTranche[Tranche]['NbrImg']*PartSample.acq_volimage,3)
+                if PartSample.organizedbydeepth:
+                    sqlparam['datetime']=None
+                else:
+                    sqlparam['datetime'] = datetime.datetime.strptime(Tranche+'3000', "%Y%m%dT%H%M%S") # on insère avec l'heure à 30minutes
+
+
                 for classe in range(18):
                     sqlparam['class%02d'%(17+classe)] = HistoByTranche[Tranche]['NbrParClasse'][classe]
                 database.ExecSQL(sql,sqlparam)
