@@ -14,3 +14,5 @@ __pycache__/
 /to_back/ecotaxa_cli_py_README.md
 /to_back/.openapi-generator-ignore
 /venv/
+/vault.local/
+/vault/
