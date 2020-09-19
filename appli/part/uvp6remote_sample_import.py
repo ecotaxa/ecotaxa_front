@@ -4,6 +4,28 @@ from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,VaultRoot
 import appli.part.uvp_sample_import as uvp_sample_import
 from appli.part.common_sample_import import CleanValue,ToFloat,GenerateReducedParticleHistogram
 import numpy as np,io
+from html.parser import HTMLParser
+import urllib.request,ssl,os
+
+class ATagParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.FoundA=[]
+
+    def handle_starttag(self, tag, attrs):
+        if tag!='a':
+            return
+        attr_dict=dict(attrs)
+        if 'href' not in attr_dict:
+             return
+        href=attr_dict['href']
+        if ':' in href:
+            return # on ignore les url qui respécifient un protocole
+        if not href.endswith('.txt'):
+            return # on ne garde que les .txt
+        fichier=os.path.basename(href)
+        self.FoundA.append(fichier)
+
 
 def ParseMetadataFile(MetaF):
     MetaData = {}
@@ -24,7 +46,27 @@ class RemoteServerFetcher:
         if ntcv(self.Prj.remote_directory)!="":
             self.ftp.cwd(self.Prj.remote_directory)
 
+    def IsHttp(self):
+        return self.Prj.remote_url.startswith('http:') or  self.Prj.remote_url.startswith('https:')
 
+    def GetHTTPUrl(self,Filename=''):
+        url=self.Prj.remote_url
+        if (not url.endswith('/')) and (not self.Prj.remote_directory.startswith('/')):
+            url+='/'
+        url +=self.Prj.remote_directory
+        if not url.endswith('/'):
+            url+='/'
+        url += Filename
+        return url
+
+    def RetrieveFile(self,FileName,TempFile):
+        if self.IsHttp():
+            ContexteSSLSansControle = ssl.SSLContext()
+            with urllib.request.urlopen(self.GetHTTPUrl(FileName), context=ContexteSSLSansControle) as response:
+                html = response.read()
+                TempFile.write(html)
+        else:
+            self.ftp.retrbinary('RETR %s' % FileName, TempFile.write)
 
     def GetServerFiles(self):
         """Retourne la liste des fichiers sous forme d'un dictionnaire
@@ -38,9 +80,10 @@ class RemoteServerFetcher:
                     , 'LPM': 'SG003A_000002LP_DEPTH_LPM.txt', 'TAXO1': 'SG003A_000002LP_DEPTH_TAXO1.txt'
                     , 'BLACK': 'SG003A_000002LP_DEPTH_BLACK.txt'} }}
 """
-        if self.ftp is None:
-            self.Connect()
-        lst = self.ftp.nlst()
+        if self.IsHttp():
+            lst=self.GetServerFilelistHTTP()
+        else:
+            lst=self.GetServerFilelistFTP()
         Samples={}
         for entry in lst:
             if entry[-4:] != '.txt':  # premier filtrage basique et silencieux
@@ -55,6 +98,23 @@ class RemoteServerFetcher:
             Samples[SampleName]['files'][m.group(4)]=entry
             # print(entry, m.group(1), m.group(2), m.group(3), m.group(4))
         return Samples
+
+
+    def GetServerFilelistHTTP(self):
+        ContexteSSLSansControle = ssl.SSLContext()
+        url=self.GetHTTPUrl()
+        Req = urllib.request.Request(url)
+        with urllib.request.urlopen(Req, context=ContexteSSLSansControle) as response:
+            html = response.read().decode('latin-1')
+            parser = ATagParser()
+            parser.feed(html)
+            return parser.FoundA
+
+
+    def GetServerFilelistFTP(self):
+        if self.ftp is None:
+            self.Connect()
+        return list(self.ftp.nlst())
 
 
     def FetchServerDataForProject(self,ForcedSample:list):
@@ -96,7 +156,7 @@ class RemoteServerFetcher:
             with zipfile.ZipFile(TmpDir+'/raw.zip', 'w',compression=zipfile.ZIP_DEFLATED) as zf:
                 for filetype in ServerSamples[SampleName]['files']:
                     with open(TmpDir+"/"+filetype,"wb") as TmpF:
-                        self.ftp.retrbinary('RETR %s' % ServerSamples[SampleName]['files'][filetype], TmpF.write)
+                        self.RetrieveFile(ServerSamples[SampleName]['files'][filetype], TmpF)
                     zf.write(TmpF.name, arcname=filetype+'.txt')
             with open(TmpDir+"/META", 'r') as MetaF:
                 MetaData=ParseMetadataFile(MetaF)
@@ -126,6 +186,8 @@ class RemoteServerFetcher:
                                       ,usecols=['DATE_TIME','LATITUDE_decimal_degree','LONGITUDE_decimal_degree']
                                       #,usecols=[0,2,3]
                                       , dtype=[ ('DATE_TIME', 'S15'),('LATITUDE_decimal_degree','<f4'),('LONGITUDE_decimal_degree','<f4')])
+            if len(SamplesData.shape) == 0: # s'il n'y a qu'une seul ligne genfromtxt ne retourne pas un tableau à 2 dimensions, donc ou transforme celui ci
+                SamplesData = np.array([SamplesData])
             Sample.latitude= round(np.average(SamplesData['LATITUDE_decimal_degree'] + 360) - 360, 3)
             Sample.longitude =round(np.average(SamplesData['LONGITUDE_decimal_degree'] + 360) - 360, 3)
             FirstDate=datetime.datetime.strptime(SamplesData['DATE_TIME'][0].decode(), '%Y%m%dT%H%M%S')
@@ -175,7 +237,7 @@ def GenerateParticleHistogram(psampleid):
                     Tranche=(Depth//5)*5
                     DepthTranche=Tranche+2.5
                 else:
-                    Tranche=Time[:-4] # On enlève Heure et minute
+                    Tranche=Time[:-4] # On enlève minute et secondes
                     DepthTranche =Depth # on prend la premiere profondeur
                 NbrParClasse={}
                 # GreyParClasse = {}
@@ -192,18 +254,24 @@ def GenerateParticleHistogram(psampleid):
 
 
             database.ExecSQL("delete from part_histopart_det where psampleid="+str(psampleid))
-            sql="""insert into part_histopart_det(psampleid, lineno, depth,  watervolume
+            sql="""insert into part_histopart_det(psampleid, lineno, depth,  watervolume,datetime
                 , class17, class18, class19, class20, class21, class22, class23, class24, class25, class26, class27, class28, class29
                 , class30, class31, class32, class33, class34)
-            values(%(psampleid)s,%(lineno)s,%(depth)s,%(watervolume)s,%(class17)s,%(class18)s,%(class19)s,%(class20)s,%(class21)s,%(class22)s
+            values(%(psampleid)s,%(lineno)s,%(depth)s,%(watervolume)s,%(datetime)s,%(class17)s,%(class18)s,%(class19)s,%(class20)s,%(class21)s,%(class22)s
             ,%(class23)s,%(class24)s,%(class25)s,%(class26)s,%(class27)s,%(class28)s
             ,%(class29)s,%(class30)s,%(class31)s,%(class32)s,%(class33)s,%(class34)s)"""
             sqlparam={'psampleid':psampleid}
             Tranches=sorted(HistoByTranche.keys())
             for i,Tranche in enumerate(Tranches):
                 sqlparam['lineno']=i
-                sqlparam['depth'] = HistoByTranche[Tranche]['DepthTranche']
+                sqlparam['depth'] = round(HistoByTranche[Tranche]['DepthTranche'],2)
                 sqlparam['watervolume'] =round(HistoByTranche[Tranche]['NbrImg']*PartSample.acq_volimage,3)
+                if PartSample.organizedbydeepth:
+                    sqlparam['datetime']=None
+                else:
+                    sqlparam['datetime'] = datetime.datetime.strptime(Tranche+'3000', "%Y%m%dT%H%M%S") # on insère avec l'heure à 30minutes
+
+
                 for classe in range(18):
                     sqlparam['class%02d'%(17+classe)] = HistoByTranche[Tranche]['NbrParClasse'][classe]
                 database.ExecSQL(sql,sqlparam)

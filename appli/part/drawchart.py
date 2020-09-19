@@ -53,13 +53,14 @@ def part_drawchart():
         gpd=request.args.getlist('gpd')
         gctd = request.args.getlist('ctd')
         gtaxo = request.args.getlist('taxolb')
-        NbrChart=len(gpr)+len(gpd)+len(gctd)+len(gtaxo)
         Filter = {k:v for k,v in request.args.items()}
         ProfTypeVerticalForced=False
         if Filter.get('filt_proftype','')=='':
             Filter['filt_proftype']='V' # Si pas de filtre sur le type de profil ou tous, alors on met Vertical pour ne pas melanger les 2 ce qui donne des graphes incoherents
             ProfTypeVerticalForced=True # pourrais être utile pour affiche un message, mais risque d'être un message parasite.
         ProfilVertical=Filter.get('filt_proftype', '') == 'V'
+        if not ProfilVertical :
+            gpd.append('depth') # si ce sont des profils temporels, on ajoute une trace pour les profondeurs
         samples=umain.GetFilteredSamples(Filter=Filter,GetVisibleOnly=True,RequiredPartVisibility='V')
         for S in samples:
             if S['pprojid'] not in PrjColorMap:
@@ -70,6 +71,7 @@ def part_drawchart():
                 SampleTitle[S['psampleid']]=S['profileid']
             PrjSampleCount[S['pprojid']]=PrjSampleCount.get(S['pprojid'],0)+1
         # NbrChart += 1 # toujours un graphe en plus à la fin pour la legende ou le message disant pourquoi pas de legende
+        NbrChart=len(gpr)+len(gpd)+len(gctd)+len(gtaxo)
         FigSizeX=NbrChart
         TimeAbsolute = False
         if not ProfilVertical and gvg('TimeScale') == 'A':
@@ -183,6 +185,8 @@ def part_drawchart():
                           for i,c in enumerate(gpd) if c[0:2]=="cl"])
             sql+=''.join([',coalesce(biovol%02d) as c%s'%(int(c[2:]),i)
                           for i,c in enumerate(gpd) if c[0:2]=="bv"])
+            sql+=''.join([',-coalesce(depth) as c%s'%(i)
+                          for i,c in enumerate(gpd) if c=="depth"])
             sql += """ from part_histopart_det
              where psampleid=%(psampleid)s
              {}
@@ -195,6 +199,8 @@ def part_drawchart():
                     XLabel='Particle det. class %s (%s) # l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:])))
                 if c[0:2] == "bv":
                     XLabel='Biovolume det. class %s (%s) mm3 l-1'%(c,GetClassLimitTxt(PartDetClassLimit,int(c[2:])))
+                if c == "depth":
+                    XLabel='pressure [db]'
                 if not ProfilVertical:
                     if TimeAbsolute:
                         graph[i].xaxis.set_major_formatter(dateFormaterYMD())
@@ -419,7 +425,20 @@ def part_drawchart():
                 data[i]=i,1
                 SampleLabel.append(S['profileid'])
                 GColor.append(SampleColorMap[S['psampleid']])
-            graph = Fig.add_subplot(FigSizeY, FigSizeX, chartid + 1)
+            if ProfilVertical: # chaque ligne fait 500px , la legende basse 55px
+                graph = Fig.add_subplot(FigSizeY, FigSizeX, (FigSizeY-1)*FigSizeX+1 # 1ère image de la dernière ligne
+                                        ,position=[0.4 # Left
+                                        ,55/(500*FigSizeY) #Bottom
+                                        ,0.25 #with
+                                        ,(500-85)/(500*FigSizeY) # height
+                                                   ])
+            else: # chaque ligne fait 300px
+                graph = Fig.add_subplot(FigSizeY, FigSizeX, (FigSizeY-1)*FigSizeX+1 # 1ère image de la dernière ligne
+                                        ,position=[0.4 # Left
+                                        ,55/(300*FigSizeY) #Bottom
+                                        ,0.25 #with
+                                        ,(300-85)/(300*FigSizeY) # height
+                                                   ])
             graph.barh(data[:,0],data[:,1],color=GColor)
             graph.set_yticks(np.arange(len(SampleLabel))+0.4)
             graph.set_yticklabels(SampleLabel)
