@@ -92,6 +92,8 @@ def _piggyback_response(response: HTTPResponse, is_chunked: bool):
 def _my_read(self, amt):
     """ Add into stream the chunk markers when needed """
     ret = self.orig_read(amt)
+    if len(ret) == 0:
+        return ret
     if self.is_chunked:
         # Re-chunk the chunked response
         chunk = hex(len(ret))[2:] + "\r\n"
