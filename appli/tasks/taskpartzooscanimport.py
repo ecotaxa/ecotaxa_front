@@ -193,7 +193,7 @@ class TaskPartZooscanImport(AsyncTask):
 
             if len(self.param.profilelistinheader) == 0:
                 return PrintInCharte(ErrorFormat("No sample available in file %s"%(FichierHeader.as_posix())))
-            print("%s"%(self.param.profilelistinheader))
+            # print("%s"%(self.param.profilelistinheader))
         return render_template('task/uvpzooscanimport_create.html',header=txt,data=self.param,ServerPath=gvp("ServerPath"),TxtTaxoMap=gvp("TxtTaxoMap"))
 
     def GetDoneExtraAction(self):

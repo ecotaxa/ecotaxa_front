@@ -6,13 +6,30 @@
 {% block body %}
 <div style="margin: 3px;">
 
-<h2>Particle ZooScan folder Importation Task</h2>
+<h2>ECOPART IMPORTATION TASK</h2>
 <p> This task does the following operations :</p>
   <ul>
-    <li>Parse the meta/xxxx_header_xxx.txt file to get the list of available sample and show list of availables and already imported ones</li>
-    <li>Create sample if not exists</li>
-    <li>Import metadata in the sample</li>
-    <li>Generate the Raw Particle histogram from BRU files searched in this order :
+    <li>Parses the *_header_*.txt file from the meta folder to get the list of  the samples and displays it in two sections (New samples to import / Already imported samples to Update)
+      <a href="#details-metadata" data-toggle="collapse" class="help">Details</a>
+      <div id="details-metadata" class="collapse panel panel-default" style="width: 800px;margin-left: 50px;">
+  <div class="panel-body">The UVP5/6 : sample metadata are read in the *_header_*.txt file except
+    <ul>
+      <li>UVP5 *.hdr file for <ul><li>
+      shutterspeed, smzoo, smbase, exposure, gain, eraseborderblobs, tasktype, thresh, choice, disktype, ratio
+      </li></ul>
+      </li>
+      <li>UVP6 *_Particule.zip containing the metadata.ini file for :
+        <ul><li>Shutter, Gain, Threshold, Pressure_offset</li>
+        <li>Vignetting_lower_limit_size, Aa, Exp (to compute smzoo)</li>
+        <li>Limit_lpm_detection_size, Aa, Exp (to compute smbase)</li>
+        </ul>
+
+      </li></ul>
+  </div></div>
+    </li>
+    <li>Creates samples if not exists</li>
+    <li>Imports metadata in the sample</li>
+    <li>Generates the Raw Particle histogram from BRU files searched in this order :
             <br>DAT : results/xxx_datfile.txt,work/xxx/HDRxx.dat
             <br>BRU : results/xxx.bru, work/xxx/xxx.bru, raw/xxx/xxx.bru ,raw/xxx/xxx.bru1
     </li>
