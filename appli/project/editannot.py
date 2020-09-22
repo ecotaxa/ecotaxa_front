@@ -1,22 +1,15 @@
 from collections import OrderedDict
+from typing import List
 
-from flask import g, flash, request
+from flask import g, flash, request, render_template
 from flask_security import login_required
 
 from appli import app, PrintInCharte, database, gvg
-from appli.database import GetAll, ExecSQL, GetAssoc2Col
+from appli.database import GetAll, ExecSQL
 from appli.project.main import RecalcProjectTaxoStat
 
-
-# noinspection PyPep8Naming,SpellCheckingInspection
-def _MakeHTMLSelect(selname, Values, ExtraTags="", AddEmptyLineFirst=False):
-    txt = "<select name={0} id={0} {1} >".format(selname, ExtraTags)
-    if AddEmptyLineFirst:
-        txt += "<option/>"
-    for k, v in Values.items():
-        txt += "<option value={0} {1}>{2}</option>".format(k, "selected" if k == v else "", v)
-    txt += "</select>"
-    return txt
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UsersApi, UserModel
 
 
 ######################################################################################################################
@@ -24,106 +17,84 @@ def _MakeHTMLSelect(selname, Values, ExtraTags="", AddEmptyLineFirst=False):
 @app.route('/prj/EditAnnot/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def PrjEditAnnot(PrjId):
+    # Security & sanity checks
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+        except ApiException as ae:
+            if ae.status == 404:
+                return "Project doesn't exists"
+            elif ae.status == 403:
+                flash('You cannot do mass annotation edition on this project', 'error')
+                return PrintInCharte("<a href=/prj/>Select another project</a>")
 
-    Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if Prj is None:
-        flash("Project doesn't exists", 'error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
-    if not Prj.CheckRight(2):  # Level 0 = Read, 1 = Annotate, 2 = Admin
-        flash('You cannot edit settings for this project', 'error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
-    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, Prj.title)
+    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_proj.projid, target_proj.title)
 
-    txt = "<h3>Project Edit / Erase annotation massively </h3>"
+    header = "<h3>Project Edit / Erase annotation massively </h3>"
 
+    # Store posted variables
+    old_author = gvg('OldAuthor')  # Note: is an id or one of the special choices below
+    new_author = gvg('NewAuthor')
+    date_filter = gvg('filt_date')
+    time_filter_hour = gvg('filt_hour')
+    time_filter_minutes = gvg('filt_min')
     # ############### 1er Ecran
-    if not gvg('NewAuthor') or not gvg('OldAuthor'):
-        LstUser = GetAssoc2Col("select id,name from users order by lower(name)")
+    if not new_author or not old_author:
+        # Selection lists, special choices, in first
         LstUserOld = OrderedDict({'anyuser': "Any User"})
-        for k, v in LstUser.items():
-            LstUserOld[k] = v
         LstUserNew = OrderedDict({'lastannot': "Previous Annotation available, or prediction, or Nothing"})
-        for k, v in LstUser.items():
-            LstUserNew[k] = v
-        LBOld = _MakeHTMLSelect("OldAuthor", LstUserOld, AddEmptyLineFirst=True)
-        LBNew = _MakeHTMLSelect("NewAuthor", LstUserNew, AddEmptyLineFirst=True)
-        txt += """<form method=get>
-                  <table>
-                  <tr><td>Replace the identification done by : </td><td>{0}</td></tr>
-                  <tr><td>By the identification done by : </td><td>{1}</td></tr>
-                  <tr><td>Since the (optional) :</td><td> <input type="text" style="width: 80px" id="filt_date" 
-                  name="filt_date" autocomplete="off">
-                                    at <input type="text" style="width: 25px" id="filt_hour" 
-                                    name="filt_hour" autocomplete="off"> h
-                                    <input type="text" style="width: 25px" id="filt_min" name="filt_min" 
-                                    autocomplete="off"> m
-                            </td></tr>
-                  </table>
-                    <br>
-                  <input type=submit class='btn btn-primary' value="Compute an estimation of the impact"><br>
-                    On the next screen you will be able to apply the change only on some categories
-                  <form>
-<br><br>
-<div class='panel panel-default' style="width:1000px;margin-left:10px;">
-This correction tool permits to erase the validation jobs for selected categories, selected Annotators and period of 
-time and replace it by the one of a selected Annotator<br>
-EXAMPLES of possibilities :<br>
-<ul>
-<li>Replace validation done by Mr X for all Copepoda by the validation done by Mrs. Y whos is well known specialist 
-of this group
-<li>Replace validation done by Mr W before 2015 November, 15th (which is the date of his taxonomy training course) by 
-prediction or validation by anyone else
-</ul>
-</div>
+        # TODO: It would be nice to offer only relevant users as a choice
+        with ApiClient(UsersApi, request) as api:
+            all_users: List[UserModel] = api.get_users_users_get()
+        # No guaranteed order from API, so sort now, see #475 for the strip()
+        all_users.sort(key=lambda user: user.name.strip())
+        # Complete selection lists
+        for usr in all_users:
+            LstUserOld[usr.id] = usr.name
+            LstUserNew[usr.id] = usr.name
+        return PrintInCharte(render_template("project/MassAnnotationEdition.html",
+                                             old_authors=LstUserOld, new_authors=LstUserNew,
+                                             header=header))
 
-<script>
-$(document).ready(function() {{
-      $( "#filt_fromdate,#filt_date" ).datepicker({{
-      showButtonPanel: true,changeMonth: true,changeYear: true,dateFormat:"yy-mm-dd",
-    }});
-}});
-</script>
-                """.format(LBOld, LBNew)
-        return PrintInCharte(txt)
-
-    sqlclause = {"projid": Prj.projid, 'retrictsq': "", 'retrictq': "", 'jointype': ""}
-    if gvg('OldAuthor') == "anyuser":
-        txt += "Replace all classification<br>"
+    # Prepare data for the 2 other possibilities:
+    #   - Estimate of the impacted data
+    #   - Real execution of the update
+    sqlclause = {"projid": target_proj.projid, 'retrictsq': "", 'retrictq': "", 'jointype': ""}
+    if old_author == "anyuser":
+        from_txt = "Replace all classification"
     else:
-        OldAuthor = database.users.query.filter_by(id=int(gvg('OldAuthor'))).first()
+        OldAuthor = database.users.query.filter_by(id=int(old_author)).first()
         if OldAuthor is None:
             flash("Invalid new author", 'error')
             return PrintInCharte("URL Hacking ?")
-        sqlclause['retrictsq'] += " and och.classif_who!=%s " % gvg('OldAuthor')
-        sqlclause['retrictq'] += " and o.classif_who=%s " % gvg('OldAuthor')
-        txt += "Replace classification done by <b>%s</b><br>" % OldAuthor.name
-    if gvg('NewAuthor') == "lastannot":
-        txt += "By the last classification of any other author<br>"
+        sqlclause['retrictsq'] += " and och.classif_who!=%s " % old_author
+        sqlclause['retrictq'] += " and o.classif_who=%s " % old_author
+        from_txt = "Replace classification done by <b>%s</b>" % OldAuthor.name
+
+    if new_author == "lastannot":
+        to_txt = "By the last classification of any other author"
         sqlclause['jointype'] = 'left'
     else:
-        NewAuthor = database.users.query.filter_by(id=int(gvg('NewAuthor'))).first()
+        NewAuthor = database.users.query.filter_by(id=int(new_author)).first()
         if NewAuthor is None:
             flash("Invalid new author", 'error')
             return PrintInCharte("URL Hacking ?")
-        sqlclause['retrictsq'] += " and och.classif_who=%s " % gvg('NewAuthor')
-        sqlclause['retrictq'] += " and o.classif_who!=%s " % gvg('NewAuthor')
-        txt += "By classification done by <b>%s</b><br>" % NewAuthor.name
+        sqlclause['retrictsq'] += " and och.classif_who=%s " % new_author
+        sqlclause['retrictq'] += " and o.classif_who!=%s " % new_author
+        to_txt = "By classification done by <b>%s</b>" % NewAuthor.name
 
-    if gvg('filt_date'):
-        sqlclause['retrictq'] += " and o.classif_when>=to_date('" + gvg('filt_date')
-        if gvg('filt_hour'):
-            sqlclause['retrictq'] += " " + gvg('filt_hour')
-        if gvg('filt_min'):
-            sqlclause['retrictq'] += ":" + gvg('filt_min')
+    if date_filter:
+        sqlclause['retrictq'] += " and o.classif_when>=to_date('" + date_filter
+        if time_filter_hour:
+            sqlclause['retrictq'] += " " + time_filter_hour
+        if time_filter_minutes:
+            sqlclause['retrictq'] += ":" + time_filter_minutes
         sqlclause['retrictq'] += " ','YYYY-MM-DD HH24:MI')"
 
     # ############### 2nd Ecran, affichage liste des categories & estimations
     if not gvg('Process'):
-        txt += """<form method=post action=?OldAuthor={0}&NewAuthor={1}&filt_date={2}
-        &filt_hour={3}&filt_min={4}&Process=Y>""".format(gvg('OldAuthor'), gvg('NewAuthor'),
-                                                         gvg('filt_date'), gvg('filt_hour'), gvg('filt_min'))
         sql = """
-        select t.id,concat(t.name,' (',t2.name,')') as name, count(*) Nbr
+        select t.id,concat(t.name,' (',t2.name,')') as name, count(*) nbr
         from obj_head o
         {jointype} join (select rank() over(PARTITION BY och.objid order by och.classif_date desc) ochrank,och.*
               from objectsclassifhisto och
@@ -136,21 +107,13 @@ $(document).ready(function() {{
         order BY t.name
         """.format(**sqlclause)
         data = GetAll(sql, debug=False)
-        txt += """
-        <input type=submit class='btn btn-warning' value="Process the replacement. WARNING : It's irreversible !!!!">
-        <br>
-        Below the estimation of each impacted category, select categories you want replace on these 
-source categories list<br>
-Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'checked', true )">All</a>
-    / <a href="#tbltop" onclick="$('#TblTaxo input').prop( 'checked', false );">None</a>
-<table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
-    <tr><th >Select</th><th width="200">Name</th><th >Nbr</th></tr>
-        """
-        for r in data:
-            txt += "<tr><td><input type='checkbox' value='Y' name='taxo{0}' ></td><td>{1}</td>" \
-                   "<td class='rightfixedfont'>{2}</td></tr>".format(*r)
-        txt += "</table>"
-        return PrintInCharte(txt)
+        return PrintInCharte(render_template("project/MassAnnotationEdition.html",
+                                             header=header, from_txt=from_txt, to_txt=to_txt,
+                                             old_author=old_author, new_author=new_author,
+                                             date_filter=date_filter, time_filter_hour=time_filter_hour,
+                                             time_filter_minutes=time_filter_minutes,
+                                             taxo_impact=data
+                                             ))
 
     # ############### 3eme Ecran Execution Requetes
     if gvg('Process') == 'Y':
@@ -177,8 +140,7 @@ Select <a name="tbltop" href="#tbltop" onclick="$('#TblTaxo input').prop( 'check
 
         """.format(**sqlclause)
         RowCount = ExecSQL(sql, debug=True)
-        RecalcProjectTaxoStat(Prj.projid)
-        txt += "<div class='alert alert-success' role='alert'>Annotation replacement Done successfully. " \
-               "Updated %d Row</div>" % RowCount
-        txt += "<br><a class='btn btn-lg btn-primary' href='/prj/%s'>Back to target project</a>" % Prj.projid
-        return PrintInCharte(txt)
+        RecalcProjectTaxoStat(target_proj.projid)
+        return PrintInCharte(render_template("project/MassAnnotationEdition.html",
+                                             header=header,
+                                             nb_rows=RowCount, projid=target_proj.projid))
