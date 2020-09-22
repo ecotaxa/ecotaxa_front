@@ -666,6 +666,5 @@ class TaskClassifAuto2(AsyncTask):
         PrjId=self.param.ProjectId
         time.sleep(1)
         DoTaskClean(self.task.id)
-        return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>
-        <a href='/prjcm/{0}' class='btn btn-primary btn-sm'  role=button>Go to Confusion Matrix</a> """.format(PrjId)
+        return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a> """.format(PrjId)
 

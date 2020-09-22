@@ -220,9 +220,7 @@ def indexPrj(PrjId):
     g.ProjectTitle = Prj.title
     g.headmenu = []  # Menu project
     g.headmenuF = []  # Menu Filtered
-    g.headmenu.append(("/prjcm/%d" % (PrjId,), "Show confusion matrix"))
     if g.PrjAnnotate:
-        g.headmenu.append(("", "SEP"))
         if Prj.status == "Annotate":
             g.headmenu.append(
                 ("/Task/Create/TaskClassifAuto2?projid=%d" % (PrjId,), "Train and Predict identifications V2"))
