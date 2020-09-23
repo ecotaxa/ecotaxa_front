@@ -10,7 +10,7 @@ if test -f "openapi.json"; then
   # A bit disturbing, but it's the same file, openapi.json in current directory is in /client as seen from docker
   SRC="/client/to_back/openapi.json"
 fi
-docker run --rm --network="host" -v ${PWD}/..:/client openapitools/openapi-generator-cli generate \
+docker run --rm --network="host" -v ${PWD}/..:/client openapitools/openapi-generator-cli:v4.3.1 generate \
  -i ${SRC} -g python \
  --minimal-update \
  --additional-properties=generateSourceCodeOnly=true,packageName=to_back.ecotaxa_cli_py \
