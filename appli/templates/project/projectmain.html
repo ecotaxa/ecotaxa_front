@@ -432,6 +432,7 @@
         var PrevTxtFilter = "INITIAL";
         var RightPanelScrollPosAfterLoad = 0;
         DragInProgress = false;
+        drag_start_time = null;
         function InGreyButton(s, eraser) {
             return " <button type=button class='btn btn-gris btn-xs' onclick='" + eraser + ";LoadRightPane();'><div>" + s + "</div> <span class='glyphicon glyphicon-remove'></span></button>";
         }
@@ -781,10 +782,14 @@
             $('#filt_validfromdate,#filt_validtodate').datetimepicker({ format: 'Y-m-d H:i' });
         });
         function UpdateSelectedCounter() {
-            var nbr = $("#column-right td.ui-selected").size();
-            if (nbr > 0) nbr = nbr + " Selected";
-            else nbr = "";
-            $('#nbrselected').text(nbr);
+            // Asynchronously update the selected counter, as it takes some time for jQuery to find selected nodes
+            // especially on 1000 images setting
+            setTimeout(function() {
+                var nbr = $("#column-right").find("td.ui-selected").size();
+                if (nbr > 0) nbr = nbr + " Selected";
+                else nbr = "";
+                $('#nbrselected').text(nbr);
+            }, 0);
         }
         function PostAddImages() {
             $(document).scrollTop(0);
@@ -804,8 +809,18 @@
             jQuery('.imgtab td').draggable({
                 revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
                 cursorAt: { top: 0, left: 0 },
-                start: function (event, ui) { DragInProgress = true; },
-                stop: function (event, ui) { DragInProgress = false; },
+                start: function (event, ui) {
+                    DragInProgress = true;
+                    drag_start_time = event.timeStamp;
+                },
+                stop: function (event, ui) {
+                    DragInProgress = false;
+                    if (event.timeStamp-drag_start_time < 150) {
+                        // Less than 150ms, so not at drag, rather a click while moving mouse
+                        event.target.click();
+                    }
+                    drag_start_time = null;
+                },
                 helper: function (ev) { return $("<img src='/static/drag_cursor.png'>"); }
             });
             {#        jQuery('.imgtab td img').draggable({ revert: true, revertDuration: 0 });#}
