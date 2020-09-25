@@ -137,18 +137,18 @@ Displaying Map requires Internet Access to load map from https://services.arcgis
 {# ------- Depth ------------#}
 <div style="width:70%;display: inline-block">
 	<div class="form-group-sm">
-		<label class="title">Depth</label>
-		<span title="Positive values. Both values are required. Each object has a min and max depths. Both values must be in the selected range for the object to be displayed." data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
+		<label class="title">Pressure [db]</label>
+		<span title="Positive values. Both values are required. Each object has a min and max pressure. Both values must be in the selected range for the object to be displayed." data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
 		<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=# onclick='ClearDepths();return false;'>Clear</a>
 
 		<div class="form-inline">
 			<div class="input-group" style="width: 49%" >
 				<div class="input-group-addon"><span class="glyphicon glyphicon-triangle-bottom"></span></div>
-				<input class="form-control" type="text" id="filt_depthmin" name="filt_depthmin" value="{{ reqfields['filt_depthmin'] }}" autocomplete="off" value="" placeholder="Min [m]">
+				<input class="form-control" type="text" id="filt_depthmin" name="filt_depthmin" value="{{ reqfields['filt_depthmin'] }}" autocomplete="off" value="" placeholder="Min [db]">
 			</div>
 			<div class="input-group" style="width: 49%">
 				<div class="input-group-addon"><span class="glyphicon glyphicon-triangle-top"></span></div>
-				<input class="form-control"  type="text" id="filt_depthmax" name="filt_depthmax" value="{{ reqfields['filt_depthmax'] }}"autocomplete="off" value=""  placeholder="Max [m]">
+				<input class="form-control"  type="text" id="filt_depthmax" name="filt_depthmax" value="{{ reqfields['filt_depthmax'] }}"autocomplete="off" value=""  placeholder="Max [db]">
 			</div>
 		</div>
 	</div>
