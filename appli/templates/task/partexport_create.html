@@ -27,10 +27,28 @@
     </ul>
   </div>
 </div>
-  
-<b>Samples filters :  </b>{{ TxtFiltres }}
+<table><tr><td style="vertical-align: top">
+  <b>Samples filters :  </b>{{ TxtFiltres }}
 <br><b>Samples count :  </b> {{ SampleCount }}
-  
+
+</td>{% if statdata!=False %}
+  <td style="padding-left: 20px;padding-right: 10px;vertical-align: top;">Sample statistics : </td><td>
+      <table class='table table-hover table-verycondensed table-bordered' style="width: auto;margin-bottom: 3px;">
+      <tr><td> Sample count</td>  <td>{{ statdata.nbrsample }}</td>
+        <td> Validated objects %</td>  <td>{{ statdata.taxostat.pctobjval }} %</td>
+      </tr>
+      <tr>
+        <td> Visible</td>  <td>{{ statdata.nbrvisible }}</td>
+        <td>Samples fully validated</td>  <td>{{ statdata.taxostat.pctval100pct }} %</td>
+      </tr>
+      <tr>
+        <td> Not Visible</td>  <td>{{ statdata.nbrnotvisible }}</td>
+        <td>Samples partially validated</td>  <td>{{ statdata.taxostat.pctpartval }} %</td>
+      </tr>
+      </table>
+{% endif %}
+</tr></table>
+
 
   <input type="hidden" name="backurl" value="{{ backurl }}">
   <table id=tbl class="table table-bordered table-condensed " style="width: 1000px">
@@ -50,7 +68,7 @@ File format <select name="fileformat" >
       <td>CTD + PARTICLES abundances and biovolumes sorted in 15 reduced classes at vertical steps of 5m<br>
     ZOOPLANKTON selected categories at variable vertical steps<br>
         SUMMARY file (TSV format only) : metadata of exported sample (including pixel size for zooplankton)<br>
-    Apply zooplankton and depth selections from graph<br>
+    Apply zooplankton and pressure selections from graph<br>
         - if you do not select any plankton category, the export will return all catégories<br>
         - if you  enable "Sum abundance of children categories", the children counts will be added to the selected category
       </td>
@@ -70,7 +88,7 @@ File format <select name="fileformatd" >
       <td>CTD + PARTICLES abundances and biovolumes sorted in 45 detailed classes at vertical steps of 5m<br>
         ZOOPLANKTON from all categories and summed in parent categories at vertical steps of 5m<br>
         SUMMARY file (TSV format only) : metadata of exported sample (including pixel size for zooplankton)<br>
-        Previous screen filter on classification ignored, depth used
+        Previous screen filter on classification ignored, pressure used
 
       </td>
     </tr>
@@ -82,7 +100,7 @@ File format <select name="fileformatd" >
       </td>
       <td>
         PARTICLES (UVP) : imported « BRU » data compressed and sorted in 1m bins<br>
-ZOOPLANKTON : annotation and main measurements (pixels) for individual items (possibly excluding not_living items)<br>
+ZOOPLANKTON : The main measurements (Area, Area excluded, Major, Minor and Mean grey) will be exported with the annotation for each object (possibly excluding not_living items)<br>
 CTD : as imported<br>
 SUMMARY file : metadata of exported sample (including pixel size for zooplankton)<br>
 
@@ -114,7 +132,6 @@ In order to ease the transfer of large exported datasets, you can chose to expor
     {% else %}
     <span style="color: red;font-weight: bold;font-size: x-large">No data to export, change your criteria</span>
   {% endif %}
-
 </td>
 </tr>
   </tbody>

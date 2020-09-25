@@ -2,12 +2,12 @@
 from appli import db,app, database ,PrintInCharte,gvp,gvg,DecodeEqualList,ntcv
 from flask import render_template, g, flash,request
 import logging,os,csv,re,datetime
-import zipfile,psycopg2.extras
+import zipfile,psycopg2.extras,json
 from flask_login import current_user
 from pathlib import Path
 from appli.tasks.taskmanager import AsyncTask
 from appli.database import GetAll,GetAssoc
-from appli.part.part_main import GetFilteredSamples
+from appli.part.part_main import GetFilteredSamples,PartstatsampleGetData
 from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedColByKey,GetPartClassLimitListText
 import appli.part.uvp_sample_import as uvp_sample_import
 from appli.part.drawchart import GetTaxoHistoWaterVolumeSQLExpr
@@ -971,14 +971,20 @@ order by tree""".format(lstcatwhere)
             order by Lower(u.name)""")
             g.LstUser=",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
 
-            return render_template('task/partexport_create.html',header=txt,data=self.param
+            statdata = PartstatsampleGetData()
+            if isinstance(statdata, str):
+                statdata=False
+            html=render_template('task/partexport_create.html',header=txt,data=self.param
                                    ,SampleCount=len(self.param.samples)
                                    ,RedFilter=",".join(("%s=%s"%(k,v) for k,v in self.param.redfiltres.items()))
                                    ,TxtFiltres=TxtFiltres
                                    ,GetPartDetClassLimitListTextResult=GetPartClassLimitListText(PartDetClassLimit)
                                    ,GetPartRedClassLimitListTextResult=GetPartClassLimitListText(PartRedClassLimit)
+                                   ,statdata=statdata
                                    ,backurl=backurl
                                    )
+
+            return html
 
 
 
