@@ -124,8 +124,8 @@ def Partsearchsample():
         res.append(r)
     return json.dumps(res)
 
-@app.route('/part/statsample')
-def Partstatsample():
+# @app.route('/part/statsample')
+def PartstatsampleGetData():
     samples =GetFilteredSamples()
     if len(samples )==0:
         return "No Data selected"
@@ -244,7 +244,13 @@ group by slice order by slice""".format(sampleinclause))
         left join taxonomy t13 on t12.parent_id=t13.id
         left join taxonomy t14 on t13.parent_id=t14.id                
         order by tree""".format(sampleinclause))
+    return data
 
+@app.route('/part/statsample')
+def Partstatsample():
+    data=PartstatsampleGetData()
+    if isinstance(data,str):
+        return data
     return render_template('part/stats.html', data=data,raw=json.dumps(data))
     # return json.dumps(data)
 
