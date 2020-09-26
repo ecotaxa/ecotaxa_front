@@ -63,14 +63,20 @@
         <table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
             <tr>
                 <th>Select</th>
-                <th width="200">Name</th>
+                <th width="200">Category</th>
                 <th>Nbr</th>
+                <th>Changes</th>
             </tr>
             {% for a_rec in taxo_impact %}
             <tr>
                 <td><input type='checkbox' value='Y' name='taxo{{a_rec.id}}'></td>
                 <td>{{a_rec.name}}</td>
                 <td class='rightfixedfont'>{{a_rec.nbr}}</td>
+                <td>
+                {% for a_chg, a_chg_nbr in a_rec.dest.items() %}
+                    &xrarr;{{a_chg}}:<span class='rightfixedfont'>{{a_chg_nbr}}</span>
+                {% endfor %}
+                </td>
             </tr>
             {% endfor %}
         </table>

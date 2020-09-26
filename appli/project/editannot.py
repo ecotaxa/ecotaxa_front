@@ -1,15 +1,14 @@
 from collections import OrderedDict
-from typing import List
+from typing import List, Dict
 
 from flask import g, flash, request, render_template
 from flask_security import login_required
 
-from appli import app, PrintInCharte, database, gvg
-from appli.database import GetAll, ExecSQL
-from appli.project.main import RecalcProjectTaxoStat
+from appli import app, PrintInCharte, gvg
 
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UsersApi, UserModel
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UsersApi, UserModel, ObjectsApi, \
+    ObjectSetRevertToHistoryRsp, HistoricalClassif
 
 
 ######################################################################################################################
@@ -23,7 +22,7 @@ def PrjEditAnnot(PrjId):
             target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
-                return "Project doesn't exists"
+                return "Project doesn't exist"
             elif ae.status == 403:
                 flash('You cannot do mass annotation edition on this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
@@ -33,13 +32,13 @@ def PrjEditAnnot(PrjId):
     header = "<h3>Project Edit / Erase annotation massively </h3>"
 
     # Store posted variables
-    old_author = gvg('OldAuthor')  # Note: is an id or one of the special choices below
-    new_author = gvg('NewAuthor')
+    old_author_id = gvg('OldAuthor')  # Note: is an id or one of the special choices below
+    new_author_id = gvg('NewAuthor')
     date_filter = gvg('filt_date')
     time_filter_hour = gvg('filt_hour')
     time_filter_minutes = gvg('filt_min')
     # ############### 1er Ecran
-    if not new_author or not old_author:
+    if not (old_author_id and new_author_id):
         # Selection lists, special choices, in first
         LstUserOld = OrderedDict({'anyuser': "Any User"})
         LstUserNew = OrderedDict({'lastannot': "Previous Annotation available, or prediction, or Nothing"})
@@ -53,63 +52,56 @@ def PrjEditAnnot(PrjId):
             LstUserOld[usr.id] = usr.name
             LstUserNew[usr.id] = usr.name
         return PrintInCharte(render_template("project/MassAnnotationEdition.html",
-                                             old_authors=LstUserOld, new_authors=LstUserNew,
-                                             header=header))
+                                             header=header,
+                                             old_authors=LstUserOld, new_authors=LstUserNew))
 
-    # Prepare data for the 2 other possibilities:
-    #   - Estimate of the impacted data
-    #   - Real execution of the update
-    sqlclause = {"projid": target_proj.projid, 'retrictsq': "", 'retrictq': "", 'jointype': ""}
-    if old_author == "anyuser":
-        from_txt = "Replace all classification"
+    # Use filtering on target
+    filters: Dict[str, str] = {}
+
+    # Define the to-be-modified set of objects
+    if old_author_id == "anyuser":
+        from_txt = "Replace any classification"
     else:
-        OldAuthor = database.users.query.filter_by(id=int(old_author)).first()
-        if OldAuthor is None:
-            flash("Invalid new author", 'error')
-            return PrintInCharte("URL Hacking ?")
-        sqlclause['retrictsq'] += " and och.classif_who!=%s " % old_author
-        sqlclause['retrictq'] += " and o.classif_who=%s " % old_author
-        from_txt = "Replace classification done by <b>%s</b>" % OldAuthor.name
-
-    if new_author == "lastannot":
-        to_txt = "By the last classification of any other author"
-        sqlclause['jointype'] = 'left'
-    else:
-        NewAuthor = database.users.query.filter_by(id=int(new_author)).first()
-        if NewAuthor is None:
-            flash("Invalid new author", 'error')
-            return PrintInCharte("URL Hacking ?")
-        sqlclause['retrictsq'] += " and och.classif_who=%s " % new_author
-        sqlclause['retrictq'] += " and o.classif_who!=%s " % new_author
-        to_txt = "By classification done by <b>%s</b>" % NewAuthor.name
-
+        with ApiClient(UsersApi, request) as api:
+            # Let the eventual 404 propagate
+            old_author: UserModel = api.get_user_users_user_id_get(user_id=int(old_author_id))
+        # Only return objects classified by the requested user, and exclude him/her from history picking
+        filters["filt_last_annot"] = old_author_id
+        from_txt = "Replace current classification, when done by <b>%s</b>" % old_author.name
     if date_filter:
-        sqlclause['retrictq'] += " and o.classif_when>=to_date('" + date_filter
-        if time_filter_hour:
-            sqlclause['retrictq'] += " " + time_filter_hour
-        if time_filter_minutes:
-            sqlclause['retrictq'] += ":" + time_filter_minutes
-        sqlclause['retrictq'] += " ','YYYY-MM-DD HH24:MI')"
+        filters["validfromdate"] = (date_filter + " " +
+                                    (time_filter_hour if time_filter_hour else "00") + ":" +
+                                    (time_filter_minutes if time_filter_minutes else "00"))
+
+    # Define how to modify them
+    if new_author_id == "lastannot":
+        target_for_api = None
+        to_txt = "With previous classification "
+        if old_author_id != "anyuser":
+            to_txt += "of any other author, prediction if no other author, NOTHING as a fallback "
+    else:
+        with ApiClient(UsersApi, request) as api:
+            # Let the eventual 404 propagate
+            new_author: UserModel = api.get_user_users_user_id_get(user_id=int(new_author_id))
+        target_for_api = new_author_id
+        to_txt = "With previous classification done by <b>%s</b>, except if already the case" % new_author.name
 
     # ############### 2nd Ecran, affichage liste des categories & estimations
     if not gvg('Process'):
-        sql = """
-        select t.id,concat(t.name,' (',t2.name,')') as name, count(*) nbr
-        from obj_head o
-        {jointype} join (select rank() over(PARTITION BY och.objid order by och.classif_date desc) ochrank,och.*
-              from objectsclassifhisto och
-              join obj_head ooch on ooch.objid=och.objid and ooch.projid={projid}
-        where och.classif_type='M' {retrictsq}) newclassif on newclassif.objid=o.objid and newclassif.ochrank=1
-        join taxonomy t on o.classif_id=t.id
-        left join taxonomy t2 on t.parent_id=t2.id
-        where o.projid={projid} {retrictq}
-        GROUP BY t.id,concat(t.name,' (',t2.name,')')
-        order BY t.name
-        """.format(**sqlclause)
-        data = GetAll(sql, debug=False)
+        # Query the filtered list in project, if no filter then it's the whole project
+        with ApiClient(ObjectsApi, request) as api:
+            # TODO: It's getting long these primitive names...
+            call = api.revert_object_set_to_history_object_set_project_id_revert_to_history_post
+            res: ObjectSetRevertToHistoryRsp = call(project_id=PrjId,
+                                                    project_filters=filters,
+                                                    target=target_for_api,
+                                                    dry_run=True)
+        # Summarize/group changes
+        data = _digest_changes(res)
+        # Display categories choice
         return PrintInCharte(render_template("project/MassAnnotationEdition.html",
                                              header=header, from_txt=from_txt, to_txt=to_txt,
-                                             old_author=old_author, new_author=new_author,
+                                             old_author=old_author_id, new_author=new_author_id,
                                              date_filter=date_filter, time_filter_hour=time_filter_hour,
                                              time_filter_minutes=time_filter_minutes,
                                              taxo_impact=data
@@ -117,30 +109,57 @@ def PrjEditAnnot(PrjId):
 
     # ############### 3eme Ecran Execution Requetes
     if gvg('Process') == 'Y':
-        sqlclause['taxoin'] = ",".join((x[4:] for x in request.form if x[0:4] == "taxo"))
-        if sqlclause['taxoin'] == "":
-            flash("You must select at least one categorie to do the replacement", 'error')
+        selected_taxa = ",".join((x[4:] for x in request.form if x[0:4] == "taxo"))
+        if selected_taxa == "":
+            flash("You must select at least one category to do the replacement", 'error')
             return PrintInCharte("<a href='#' onclick='history.back();'>Back</a>")
-        sql = """
-        update obj_head as ou
-            set classif_who=newclassif.classif_who,
-            classif_when=coalesce(newclassif.classif_date,ou.classif_auto_when),
-            classif_id=coalesce(newclassif.classif_id,ou.classif_auto_id),
-            classif_qual=case when newclassif.classif_qual is not null then newclassif.classif_qual
-                                 when ou.classif_auto_id is not null then 'P'
-                                 else null end
-        from obj_head o {jointype} join
-        (select rank() over(PARTITION BY och.objid order by och.classif_date desc) ochrank,och.*
-              from objectsclassifhisto och
-              join obj_head ooch on ooch.objid=och.objid and ooch.projid={projid}
-        where och.classif_type='M' {retrictsq}) newclassif on newclassif.objid=o.objid and newclassif.ochrank=1
-        join taxonomy t on o.classif_id=t.id
-        where  o.projid={projid} {retrictq} and o.classif_id in ({taxoin})
-        and o.objid=ou.objid
-
-        """.format(**sqlclause)
-        RowCount = ExecSQL(sql, debug=True)
-        RecalcProjectTaxoStat(target_proj.projid)
+        filters["taxo"] = selected_taxa
+        with ApiClient(ObjectsApi, request) as api:
+            call = api.revert_object_set_to_history_object_set_project_id_revert_to_history_post
+            res: ObjectSetRevertToHistoryRsp = call(project_id=PrjId,
+                                                    project_filters=filters,
+                                                    target=target_for_api,
+                                                    dry_run=False)
+        # Display change outcome
         return PrintInCharte(render_template("project/MassAnnotationEdition.html",
                                              header=header,
-                                             nb_rows=RowCount, projid=target_proj.projid))
+                                             nb_rows=len(res.last_entries),
+                                             projid=target_proj.projid))
+
+
+def _digest_changes(api_result):
+    """
+        From provided changes (full list!), do a summary of what will happen.
+    """
+    ret = []
+    # noinspection PyUnresolvedReferences
+    for classif_id, names in api_result.classif_info.items():
+        classif_id = int(classif_id)  # No 'int' in dict keys for openapi?
+        for_disp = {"id": classif_id,
+                    "name": names[0] + " (" + names[1] + ")",
+                    "nbr": 0,
+                    "dest": {}}
+        ret.append(for_disp)
+    ret.append({"id": None,
+                "name": "Nothing",
+                "nbr": 0,
+                "dest": {}})
+    data_by_id = {dat["id"]: dat for dat in ret}
+    an_entry: HistoricalClassif
+    for an_entry in api_result.last_entries:
+        print(an_entry.classif_id)
+        summary = data_by_id[an_entry.classif_id]
+        summary["nbr"] += 1
+        # Determine the future classification ID & name
+        future = summary["dest"]
+        if an_entry.histo_classif_id is None:
+            future_name = "Nothing"
+        else:
+            future_name = data_by_id[an_entry.histo_classif_id]["name"]
+        if future_name in future:
+            future[future_name] += 1
+        else:
+            future[future_name] = 1
+    ret = [rec for rec in ret if rec["nbr"] > 0]
+    ret.sort(key=lambda rec: rec["name"])
+    return ret
