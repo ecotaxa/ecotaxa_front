@@ -22,12 +22,29 @@ from appli.adminothers import *
 from appli.database import GetAll
 
 
+class SecureStrippingBaseForm(SecureForm):
+    """
+        A form metaclass stripping values
+    """
+    class Meta:
+        def bind_field(self, form, unbound_field, options):
+            filters = unbound_field.kwargs.get('filters', [])
+            filters.append(_strip_filter)
+            return unbound_field.bind(form=form, filters=filters, **options)
+
+
+def _strip_filter(value):
+    # strip field if possible
+    if value is not None and hasattr(value, 'strip'):
+        return value.strip()
+    return value
+
 # noinspection PyProtectedMember
 class UsersView(ModelView):
     # Disable model creation
     can_create = True
     # Enable CSRF check
-    form_base_class = SecureForm
+    form_base_class = SecureStrippingBaseForm
 
     # Override displayed fields
     column_list = ('email', 'name', 'organisation', 'active', 'roles', 'country')
@@ -90,7 +107,7 @@ class UsersView(ModelView):
 
 class UsersViewRestricted(UsersView):
     # Enable CSRF check
-    form_base_class = SecureForm
+    form_base_class = SecureStrippingBaseForm
 
     form_columns = ('email', 'name', 'organisation', 'active', 'password')
 
@@ -125,7 +142,7 @@ class ProjectsViewPrivInlineModelForm(InlineFormAdmin):
 
 class ProjectsView(ModelView):
     # Enable CSRF check
-    form_base_class = SecureForm
+    form_base_class = SecureStrippingBaseForm
 
     column_list = ('projid', 'title', 'visible', 'status', 'objcount', 'pctvalidated', 'pctclassified')
     column_searchable_list = ('title',)
