@@ -363,6 +363,14 @@ class TaskClassifAuto2(AsyncTask):
         #sinon on pose une question
 
     def QuestionProcessScreenSelectSource(self,Prj):
+
+        try:
+            if gvp("filt_featurenbr"):
+                _valid = int(gvp("filt_featurenbr"))
+        except ValueError:
+            flash("Common features must be an integer", category="error")
+            return PrintInCharte("<a href='#' onclick='history.back();'>Back</a>")
+
         # Premier écran de configuration, choix du projet de base
         PreviousTxt = self.GetFilterText()
         d = DecodeEqualList(Prj.classifsettings)
