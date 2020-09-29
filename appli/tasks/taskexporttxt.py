@@ -396,7 +396,7 @@ class TaskExportTxt(AsyncTask):
             # Il est demandé d'avoir la colonne agrégé date au milieu du groupe, donc réécriture de la requete.
             sql1 = "SELECT  s.orig_id, s.latitude, s.longitude, max(objdate) as date, to1.display_name"
         sql1 += ",count(*) Nbr"
-        sql2 = """ FROM obj_head o
+        sql2 = """ FROM objects o
                 left join taxonomy to1 on o.classif_id=to1.id
                 left join samples s on o.sampleid=s.sampleid
                 left join acquisitions a on o.acquisid=a.acquisid """
