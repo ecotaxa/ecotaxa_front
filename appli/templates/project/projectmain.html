@@ -657,6 +657,8 @@
             var PosScrollBar = $('#divclassiftab').scrollTop();
             var req = { taxo: $("#taxofilter").val(), taxofilterlabel: $("#taxofilterlabel").val() };
             if (ForceRecalc === 'Y') req['ForceRecalc'] = 'Y';
+            // This container is "forgotten" during DOM replacement below, which is natural as it's not inside
+            $('.select2-container').remove();
             $("#TabA").load("/prjGetClassifTab/" + $("#projid").val(), req, function () {
                 $.each(HiddenItems, function (k, v) {
                     {# Masque ceux qui etaient déjà cachés #}
