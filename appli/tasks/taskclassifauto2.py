@@ -49,6 +49,11 @@ class TaskClassifAuto2(AsyncTask):
 
     def ComputeSCNFeatures(self,Prj):
         logging.info("Start SCN features Computation ")
+        # Minimal sanity check
+        if Prj.cnn_network_id is None or len(Prj.cnn_network_id) == 0:
+            logging.error("No SCN Network set for this project. See settings.")
+            self.task.taskstate = "Error"
+            return False
         if self.param.BaseProject!='':
             PrjListInClause = database.CSVIntStringToInClause(self.param.BaseProject+','+str(self.param.ProjectId))
         else:
@@ -82,7 +87,7 @@ class TaskClassifAuto2(AsyncTask):
                 finput.writelines(("%s,%s%s\n"%(r[0],vaultdir,r[1]) for r in DBRes ))
         if NbrLig==0:
             logging.info("No Missing SCN Features")
-            return
+            return True
         TStep = time.time()
         env = {
             "MODEL_DIR": model_dir.as_posix(),
@@ -163,6 +168,7 @@ class TaskClassifAuto2(AsyncTask):
                     ProcessLig()
         if len(LigData)>0:
             ProcessLig()
+        return True
 
     def SPStep1(self):
         logging.info("Input Param = %s"%(self.param.__dict__,))
@@ -187,7 +193,8 @@ class TaskClassifAuto2(AsyncTask):
 
         CNNCols = ""
         if self.param.usescn=='Y':
-            self.ComputeSCNFeatures(Prj)
+            if not self.ComputeSCNFeatures(Prj):
+                return
             CNNCols="".join([",cnn%02d"%(i+1) for i in range(50)])
 
         if self.param.usemodel_foldername!='': # Utilisation d'un modèle existant
