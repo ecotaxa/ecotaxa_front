@@ -766,15 +766,23 @@
                 SavePendingChanges();
                 e.preventDefault();
             }
-
         });
         {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvre la popup #}
             $(document).bind('keydown', function (e) {
                 if ((document.activeElement.nodeName == 'BODY') || (document.activeElement.nodeName == 'SPAN'))
                     if ((e.keyCode >= 65) && (e.keyCode <= 90) && !e.ctrlKey && !e.metaKey)
                         if ($(".ui-selected").length > 0) {
-                            $('#taxolbanno').select2("open");
-                            $('.taxopopup .select2-search__field').val(String.fromCharCode(e.keyCode));
+                            var typedKey = String.fromCharCode(e.keyCode)
+                            var sel2 = $('#taxolbanno');
+                            // Signal the query code that a first something was typed
+                            sel2.data('first_key', typedKey);
+                            // open, it will trigger the amended query
+                            sel2.select2("open");
+                            // visibility of the beginning filter
+                            $('.taxopopup .select2-search__field').val(typedKey);
+                            // no previous value, so always a change, so selecting several times the same value
+                            // will end up in several times the same annotation
+                            sel2.val("").trigger('change');
                             //console.log(e);
                             e.preventDefault();
                         }

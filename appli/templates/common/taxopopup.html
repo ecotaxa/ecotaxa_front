@@ -16,8 +16,21 @@ function EnableSelect2Taxolb() {
             url: "/search/taxo",
             dataType: 'json',
             delay: 250,
-            data: function (params) {  return { q: params.term {% if g.Projid %} ,projid:{{ g.Projid }} {% endif %} };  },
-            processResults: function (data, page) { return { results: data};  },
+            data: function (params) {
+                 // If first letter was typed, use it for filtering
+                 first = $(this).data('first_key');
+                 if (first) {
+                     params.term = first;
+                     $(this).data('first_key', null);
+                 }
+                 return { q: params.term
+                         {% if g.Projid %}
+                         ,projid:{{ g.Projid }}
+                         {% endif %} };
+            },
+            processResults: function (data, page) {
+                 return { results: data};
+            },
             cache: true
         },
         templateResult: FormatTaxoItem,
