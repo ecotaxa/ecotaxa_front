@@ -68,7 +68,7 @@ class SubsetRsp(object):
 
 
         :param errors: The errors of this SubsetRsp.  # noqa: E501
-        :type errors: list[str]
+        :type: list[str]
         """
 
         self._errors = errors

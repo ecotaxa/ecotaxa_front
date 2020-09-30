@@ -35,7 +35,6 @@ class UserModel(object):
     openapi_types = {
         'id': 'int',
         'email': 'str',
-        'password': 'str',
         'name': 'str',
         'organisation': 'str',
         'active': 'bool',
@@ -48,7 +47,6 @@ class UserModel(object):
     attribute_map = {
         'id': 'id',
         'email': 'email',
-        'password': 'password',
         'name': 'name',
         'organisation': 'organisation',
         'active': 'active',
@@ -58,7 +56,7 @@ class UserModel(object):
         'usercreationreason': 'usercreationreason'
     }
 
-    def __init__(self, id=None, email=None, password=None, name=None, organisation=None, active=None, preferences=None, country=None, usercreationdate=None, usercreationreason=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, email=None, name=None, organisation=None, active=None, preferences=None, country=None, usercreationdate=None, usercreationreason=None, local_vars_configuration=None):  # noqa: E501
         """UserModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -66,7 +64,6 @@ class UserModel(object):
 
         self._id = None
         self._email = None
-        self._password = None
         self._name = None
         self._organisation = None
         self._active = None
@@ -79,8 +76,6 @@ class UserModel(object):
         if id is not None:
             self.id = id
         self.email = email
-        if password is not None:
-            self.password = password
         self.name = name
         if organisation is not None:
             self.organisation = organisation
@@ -111,7 +106,7 @@ class UserModel(object):
 
 
         :param id: The id of this UserModel.  # noqa: E501
-        :type id: int
+        :type: int
         """
 
         self._id = id
@@ -132,33 +127,12 @@ class UserModel(object):
 
 
         :param email: The email of this UserModel.  # noqa: E501
-        :type email: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and email is None:  # noqa: E501
             raise ValueError("Invalid value for `email`, must not be `None`")  # noqa: E501
 
         self._email = email
-
-    @property
-    def password(self):
-        """Gets the password of this UserModel.  # noqa: E501
-
-
-        :return: The password of this UserModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._password
-
-    @password.setter
-    def password(self, password):
-        """Sets the password of this UserModel.
-
-
-        :param password: The password of this UserModel.  # noqa: E501
-        :type password: str
-        """
-
-        self._password = password
 
     @property
     def name(self):
@@ -176,7 +150,7 @@ class UserModel(object):
 
 
         :param name: The name of this UserModel.  # noqa: E501
-        :type name: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and name is None:  # noqa: E501
             raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
@@ -199,7 +173,7 @@ class UserModel(object):
 
 
         :param organisation: The organisation of this UserModel.  # noqa: E501
-        :type organisation: str
+        :type: str
         """
 
         self._organisation = organisation
@@ -220,7 +194,7 @@ class UserModel(object):
 
 
         :param active: The active of this UserModel.  # noqa: E501
-        :type active: bool
+        :type: bool
         """
 
         self._active = active
@@ -241,7 +215,7 @@ class UserModel(object):
 
 
         :param preferences: The preferences of this UserModel.  # noqa: E501
-        :type preferences: str
+        :type: str
         """
 
         self._preferences = preferences
@@ -262,7 +236,7 @@ class UserModel(object):
 
 
         :param country: The country of this UserModel.  # noqa: E501
-        :type country: str
+        :type: str
         """
 
         self._country = country
@@ -283,7 +257,7 @@ class UserModel(object):
 
 
         :param usercreationdate: The usercreationdate of this UserModel.  # noqa: E501
-        :type usercreationdate: datetime
+        :type: datetime
         """
 
         self._usercreationdate = usercreationdate
@@ -304,7 +278,7 @@ class UserModel(object):
 
 
         :param usercreationreason: The usercreationreason of this UserModel.  # noqa: E501
-        :type usercreationreason: str
+        :type: str
         """
 
         self._usercreationreason = usercreationreason

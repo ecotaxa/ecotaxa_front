@@ -187,7 +187,7 @@ class ObjectHeaderModel(object):
 
 
         :param objid: The objid of this ObjectHeaderModel.  # noqa: E501
-        :type objid: int
+        :type: int
         """
 
         self._objid = objid
@@ -208,7 +208,7 @@ class ObjectHeaderModel(object):
 
 
         :param projid: The projid of this ObjectHeaderModel.  # noqa: E501
-        :type projid: int
+        :type: int
         """
         if self.local_vars_configuration.client_side_validation and projid is None:  # noqa: E501
             raise ValueError("Invalid value for `projid`, must not be `None`")  # noqa: E501
@@ -231,7 +231,7 @@ class ObjectHeaderModel(object):
 
 
         :param objdate: The objdate of this ObjectHeaderModel.  # noqa: E501
-        :type objdate: date
+        :type: date
         """
 
         self._objdate = objdate
@@ -252,7 +252,7 @@ class ObjectHeaderModel(object):
 
 
         :param objtime: The objtime of this ObjectHeaderModel.  # noqa: E501
-        :type objtime: str
+        :type: str
         """
 
         self._objtime = objtime
@@ -273,7 +273,7 @@ class ObjectHeaderModel(object):
 
 
         :param latitude: The latitude of this ObjectHeaderModel.  # noqa: E501
-        :type latitude: float
+        :type: float
         """
 
         self._latitude = latitude
@@ -294,7 +294,7 @@ class ObjectHeaderModel(object):
 
 
         :param longitude: The longitude of this ObjectHeaderModel.  # noqa: E501
-        :type longitude: float
+        :type: float
         """
 
         self._longitude = longitude
@@ -315,7 +315,7 @@ class ObjectHeaderModel(object):
 
 
         :param depth_min: The depth_min of this ObjectHeaderModel.  # noqa: E501
-        :type depth_min: float
+        :type: float
         """
 
         self._depth_min = depth_min
@@ -336,7 +336,7 @@ class ObjectHeaderModel(object):
 
 
         :param depth_max: The depth_max of this ObjectHeaderModel.  # noqa: E501
-        :type depth_max: float
+        :type: float
         """
 
         self._depth_max = depth_max
@@ -357,7 +357,7 @@ class ObjectHeaderModel(object):
 
 
         :param sunpos: The sunpos of this ObjectHeaderModel.  # noqa: E501
-        :type sunpos: str
+        :type: str
         """
 
         self._sunpos = sunpos
@@ -378,7 +378,7 @@ class ObjectHeaderModel(object):
 
 
         :param classif_id: The classif_id of this ObjectHeaderModel.  # noqa: E501
-        :type classif_id: int
+        :type: int
         """
 
         self._classif_id = classif_id
@@ -399,7 +399,7 @@ class ObjectHeaderModel(object):
 
 
         :param classif_qual: The classif_qual of this ObjectHeaderModel.  # noqa: E501
-        :type classif_qual: str
+        :type: str
         """
 
         self._classif_qual = classif_qual
@@ -420,7 +420,7 @@ class ObjectHeaderModel(object):
 
 
         :param classif_who: The classif_who of this ObjectHeaderModel.  # noqa: E501
-        :type classif_who: int
+        :type: int
         """
 
         self._classif_who = classif_who
@@ -441,7 +441,7 @@ class ObjectHeaderModel(object):
 
 
         :param classif_when: The classif_when of this ObjectHeaderModel.  # noqa: E501
-        :type classif_when: datetime
+        :type: datetime
         """
 
         self._classif_when = classif_when
@@ -462,7 +462,7 @@ class ObjectHeaderModel(object):
 
 
         :param classif_auto_id: The classif_auto_id of this ObjectHeaderModel.  # noqa: E501
-        :type classif_auto_id: int
+        :type: int
         """
 
         self._classif_auto_id = classif_auto_id
@@ -483,7 +483,7 @@ class ObjectHeaderModel(object):
 
 
         :param classif_auto_score: The classif_auto_score of this ObjectHeaderModel.  # noqa: E501
-        :type classif_auto_score: float
+        :type: float
         """
 
         self._classif_auto_score = classif_auto_score
@@ -504,7 +504,7 @@ class ObjectHeaderModel(object):
 
 
         :param classif_auto_when: The classif_auto_when of this ObjectHeaderModel.  # noqa: E501
-        :type classif_auto_when: datetime
+        :type: datetime
         """
 
         self._classif_auto_when = classif_auto_when
@@ -525,7 +525,7 @@ class ObjectHeaderModel(object):
 
 
         :param classif_crossvalidation_id: The classif_crossvalidation_id of this ObjectHeaderModel.  # noqa: E501
-        :type classif_crossvalidation_id: int
+        :type: int
         """
 
         self._classif_crossvalidation_id = classif_crossvalidation_id
@@ -546,7 +546,7 @@ class ObjectHeaderModel(object):
 
 
         :param img0id: The img0id of this ObjectHeaderModel.  # noqa: E501
-        :type img0id: int
+        :type: int
         """
 
         self._img0id = img0id
@@ -567,7 +567,7 @@ class ObjectHeaderModel(object):
 
 
         :param imgcount: The imgcount of this ObjectHeaderModel.  # noqa: E501
-        :type imgcount: int
+        :type: int
         """
 
         self._imgcount = imgcount
@@ -588,7 +588,7 @@ class ObjectHeaderModel(object):
 
 
         :param complement_info: The complement_info of this ObjectHeaderModel.  # noqa: E501
-        :type complement_info: str
+        :type: str
         """
 
         self._complement_info = complement_info
@@ -609,7 +609,7 @@ class ObjectHeaderModel(object):
 
 
         :param similarity: The similarity of this ObjectHeaderModel.  # noqa: E501
-        :type similarity: float
+        :type: float
         """
 
         self._similarity = similarity
@@ -630,7 +630,7 @@ class ObjectHeaderModel(object):
 
 
         :param random_value: The random_value of this ObjectHeaderModel.  # noqa: E501
-        :type random_value: int
+        :type: int
         """
 
         self._random_value = random_value
@@ -651,7 +651,7 @@ class ObjectHeaderModel(object):
 
 
         :param sampleid: The sampleid of this ObjectHeaderModel.  # noqa: E501
-        :type sampleid: int
+        :type: int
         """
 
         self._sampleid = sampleid
@@ -672,7 +672,7 @@ class ObjectHeaderModel(object):
 
 
         :param acquisid: The acquisid of this ObjectHeaderModel.  # noqa: E501
-        :type acquisid: int
+        :type: int
         """
 
         self._acquisid = acquisid
@@ -693,7 +693,7 @@ class ObjectHeaderModel(object):
 
 
         :param processid: The processid of this ObjectHeaderModel.  # noqa: E501
-        :type processid: int
+        :type: int
         """
 
         self._processid = processid

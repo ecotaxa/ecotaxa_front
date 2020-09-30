@@ -83,7 +83,7 @@ class ObjectSetQueryRsp(object):
 
 
         :param object_ids: The object_ids of this ObjectSetQueryRsp.  # noqa: E501
-        :type object_ids: list[int]
+        :type: list[int]
         """
 
         self._object_ids = object_ids
@@ -104,7 +104,7 @@ class ObjectSetQueryRsp(object):
 
 
         :param process_ids: The process_ids of this ObjectSetQueryRsp.  # noqa: E501
-        :type process_ids: list[int]
+        :type: list[int]
         """
 
         self._process_ids = process_ids
@@ -125,7 +125,7 @@ class ObjectSetQueryRsp(object):
 
 
         :param acquisition_ids: The acquisition_ids of this ObjectSetQueryRsp.  # noqa: E501
-        :type acquisition_ids: list[int]
+        :type: list[int]
         """
 
         self._acquisition_ids = acquisition_ids
@@ -146,7 +146,7 @@ class ObjectSetQueryRsp(object):
 
 
         :param sample_ids: The sample_ids of this ObjectSetQueryRsp.  # noqa: E501
-        :type sample_ids: list[int]
+        :type: list[int]
         """
 
         self._sample_ids = sample_ids

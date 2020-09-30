@@ -182,7 +182,7 @@ class ProjectModel(object):
 
 
         :param obj_free_cols: The obj_free_cols of this ProjectModel.  # noqa: E501
-        :type obj_free_cols: dict(str, str)
+        :type: dict(str, str)
         """
 
         self._obj_free_cols = obj_free_cols
@@ -203,7 +203,7 @@ class ProjectModel(object):
 
 
         :param sample_free_cols: The sample_free_cols of this ProjectModel.  # noqa: E501
-        :type sample_free_cols: dict(str, str)
+        :type: dict(str, str)
         """
 
         self._sample_free_cols = sample_free_cols
@@ -224,7 +224,7 @@ class ProjectModel(object):
 
 
         :param acquisition_free_cols: The acquisition_free_cols of this ProjectModel.  # noqa: E501
-        :type acquisition_free_cols: dict(str, str)
+        :type: dict(str, str)
         """
 
         self._acquisition_free_cols = acquisition_free_cols
@@ -245,7 +245,7 @@ class ProjectModel(object):
 
 
         :param process_free_cols: The process_free_cols of this ProjectModel.  # noqa: E501
-        :type process_free_cols: dict(str, str)
+        :type: dict(str, str)
         """
 
         self._process_free_cols = process_free_cols
@@ -266,7 +266,7 @@ class ProjectModel(object):
 
 
         :param projid: The projid of this ProjectModel.  # noqa: E501
-        :type projid: int
+        :type: int
         """
 
         self._projid = projid
@@ -287,7 +287,7 @@ class ProjectModel(object):
 
 
         :param title: The title of this ProjectModel.  # noqa: E501
-        :type title: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and title is None:  # noqa: E501
             raise ValueError("Invalid value for `title`, must not be `None`")  # noqa: E501
@@ -310,7 +310,7 @@ class ProjectModel(object):
 
 
         :param visible: The visible of this ProjectModel.  # noqa: E501
-        :type visible: bool
+        :type: bool
         """
 
         self._visible = visible
@@ -331,7 +331,7 @@ class ProjectModel(object):
 
 
         :param status: The status of this ProjectModel.  # noqa: E501
-        :type status: str
+        :type: str
         """
 
         self._status = status
@@ -352,7 +352,7 @@ class ProjectModel(object):
 
 
         :param mappingobj: The mappingobj of this ProjectModel.  # noqa: E501
-        :type mappingobj: str
+        :type: str
         """
 
         self._mappingobj = mappingobj
@@ -373,7 +373,7 @@ class ProjectModel(object):
 
 
         :param mappingsample: The mappingsample of this ProjectModel.  # noqa: E501
-        :type mappingsample: str
+        :type: str
         """
 
         self._mappingsample = mappingsample
@@ -394,7 +394,7 @@ class ProjectModel(object):
 
 
         :param mappingacq: The mappingacq of this ProjectModel.  # noqa: E501
-        :type mappingacq: str
+        :type: str
         """
 
         self._mappingacq = mappingacq
@@ -415,7 +415,7 @@ class ProjectModel(object):
 
 
         :param mappingprocess: The mappingprocess of this ProjectModel.  # noqa: E501
-        :type mappingprocess: str
+        :type: str
         """
 
         self._mappingprocess = mappingprocess
@@ -436,7 +436,7 @@ class ProjectModel(object):
 
 
         :param objcount: The objcount of this ProjectModel.  # noqa: E501
-        :type objcount: float
+        :type: float
         """
 
         self._objcount = objcount
@@ -457,7 +457,7 @@ class ProjectModel(object):
 
 
         :param pctvalidated: The pctvalidated of this ProjectModel.  # noqa: E501
-        :type pctvalidated: float
+        :type: float
         """
 
         self._pctvalidated = pctvalidated
@@ -478,7 +478,7 @@ class ProjectModel(object):
 
 
         :param pctclassified: The pctclassified of this ProjectModel.  # noqa: E501
-        :type pctclassified: float
+        :type: float
         """
 
         self._pctclassified = pctclassified
@@ -499,7 +499,7 @@ class ProjectModel(object):
 
 
         :param classifsettings: The classifsettings of this ProjectModel.  # noqa: E501
-        :type classifsettings: str
+        :type: str
         """
 
         self._classifsettings = classifsettings
@@ -520,7 +520,7 @@ class ProjectModel(object):
 
 
         :param initclassiflist: The initclassiflist of this ProjectModel.  # noqa: E501
-        :type initclassiflist: str
+        :type: str
         """
 
         self._initclassiflist = initclassiflist
@@ -541,7 +541,7 @@ class ProjectModel(object):
 
 
         :param classiffieldlist: The classiffieldlist of this ProjectModel.  # noqa: E501
-        :type classiffieldlist: str
+        :type: str
         """
 
         self._classiffieldlist = classiffieldlist
@@ -562,7 +562,7 @@ class ProjectModel(object):
 
 
         :param popoverfieldlist: The popoverfieldlist of this ProjectModel.  # noqa: E501
-        :type popoverfieldlist: str
+        :type: str
         """
 
         self._popoverfieldlist = popoverfieldlist
@@ -583,7 +583,7 @@ class ProjectModel(object):
 
 
         :param comments: The comments of this ProjectModel.  # noqa: E501
-        :type comments: str
+        :type: str
         """
 
         self._comments = comments
@@ -604,7 +604,7 @@ class ProjectModel(object):
 
 
         :param projtype: The projtype of this ProjectModel.  # noqa: E501
-        :type projtype: str
+        :type: str
         """
 
         self._projtype = projtype
@@ -625,7 +625,7 @@ class ProjectModel(object):
 
 
         :param fileloaded: The fileloaded of this ProjectModel.  # noqa: E501
-        :type fileloaded: str
+        :type: str
         """
 
         self._fileloaded = fileloaded
@@ -646,7 +646,7 @@ class ProjectModel(object):
 
 
         :param rf_models_used: The rf_models_used of this ProjectModel.  # noqa: E501
-        :type rf_models_used: str
+        :type: str
         """
 
         self._rf_models_used = rf_models_used
@@ -667,7 +667,7 @@ class ProjectModel(object):
 
 
         :param cnn_network_id: The cnn_network_id of this ProjectModel.  # noqa: E501
-        :type cnn_network_id: str
+        :type: str
         """
 
         self._cnn_network_id = cnn_network_id

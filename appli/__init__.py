@@ -340,9 +340,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.4.2"
+ecotaxa_version="2.4.3"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-09-16"
+    return ecotaxa_version+" 2020-09-30"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -350,10 +350,34 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-09-30 : V 2.4.3
+    Bug: Ecopart #451: Too long project title makes layout of EcoPart prjedit page ugly.
+    Bug: Ecopart #437: Stack trace when displaying TIME.
+    Bug: Ecopart #433: Single-line TIME_LPM files cannot be imported.
+    Feature: Ecopart #288: Add date+time in map popup.
+    Feature: Ecopart #438: View pressure in TIME mode.
+    Feature: Ecopart #432: Improve UVP6 remote import (http* support).
+    Documentation: Ecopart #442: Indicate polling frequency for UVP remote files.
+    Documentation: Ecopart #378: Indicate data origin in import task.
+    Feature #452: No more confusion matrix page.
+    Feature #435: Edit / Erase annotation massively is now implemented on back-end.
+    Feature #383: Mouse move + click in manual classification page sometimes fails to select.
+    Feature: Ecopart #202: Choice between Zoo and LPM formats during export.
+    Documentation: Ecopart #356: Indicate units in export page.
+    Bug #475: Some user fields could start/end with blanks.
+    Bug #477: Category assignment using ENTER did not work with same category.
+    Bug #463: Re-fix. Behavior was different when typing into the input and outside, e.g. in vignettes pane.
+    Bug #459: _One_ of the tens of missing user input controls is now implemented.
+    Bug #458: SCN Network presence is checked before using it during prediction.
+    Bug #344: Export summary crashed when current filter was on an object feature.
+    Bug #368: Saving with opened autocompletion left an unused window in the page upper left corner.
+    Bug #483: Cryptic error during import with too large image files.
+    Bug #484: Right checking was wrong for READ action.
+    Bug #466: Make optional a previously mandatory column during import update.    
 2020-09-16 : V 2.4.2
     Feature #245: More API primitives implemented on back-end, namely mass update and reset to predicted.
     Bugfix #465: Right-click menu in category is cropped and moves with right pane.
-    Feature #445: Remember, per project, the directory used during last import operation..
+    Feature #445: Remember, per project, the directory used during last import operation.
     Bugfix #463: Recent categories were not filtered as they should have.
 2020-09-02 : V 2.4.1
     Feature #245: More API primitives implemented on back-end.

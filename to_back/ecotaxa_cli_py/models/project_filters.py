@@ -58,7 +58,8 @@ class ProjectFilters(object):
         'freenumend': 'str',
         'freetxt': 'str',
         'freetxtval': 'str',
-        'filt_annot': 'str'
+        'filt_annot': 'str',
+        'filt_last_annot': 'str'
     }
 
     attribute_map = {
@@ -87,10 +88,11 @@ class ProjectFilters(object):
         'freenumend': 'freenumend',
         'freetxt': 'freetxt',
         'freetxtval': 'freetxtval',
-        'filt_annot': 'filt_annot'
+        'filt_annot': 'filt_annot',
+        'filt_last_annot': 'filt_last_annot'
     }
 
-    def __init__(self, taxo=None, taxochild=None, statusfilter=None, map_n=None, map_w=None, map_e=None, map_s=None, depthmin=None, depthmax=None, samples=None, instrum=None, daytime=None, month=None, fromdate=None, todate=None, fromtime=None, totime=None, inverttime=None, validfromdate=None, validtodate=None, freenum=None, freenumst=None, freenumend=None, freetxt=None, freetxtval=None, filt_annot=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, taxo=None, taxochild=None, statusfilter=None, map_n=None, map_w=None, map_e=None, map_s=None, depthmin=None, depthmax=None, samples=None, instrum=None, daytime=None, month=None, fromdate=None, todate=None, fromtime=None, totime=None, inverttime=None, validfromdate=None, validtodate=None, freenum=None, freenumst=None, freenumend=None, freetxt=None, freetxtval=None, filt_annot=None, filt_last_annot=None, local_vars_configuration=None):  # noqa: E501
         """ProjectFilters - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -122,6 +124,7 @@ class ProjectFilters(object):
         self._freetxt = None
         self._freetxtval = None
         self._filt_annot = None
+        self._filt_last_annot = None
         self.discriminator = None
 
         if taxo is not None:
@@ -176,6 +179,8 @@ class ProjectFilters(object):
             self.freetxtval = freetxtval
         if filt_annot is not None:
             self.filt_annot = filt_annot
+        if filt_last_annot is not None:
+            self.filt_last_annot = filt_last_annot
 
     @property
     def taxo(self):
@@ -193,7 +198,7 @@ class ProjectFilters(object):
 
 
         :param taxo: The taxo of this ProjectFilters.  # noqa: E501
-        :type taxo: str
+        :type: str
         """
 
         self._taxo = taxo
@@ -214,7 +219,7 @@ class ProjectFilters(object):
 
 
         :param taxochild: The taxochild of this ProjectFilters.  # noqa: E501
-        :type taxochild: str
+        :type: str
         """
 
         self._taxochild = taxochild
@@ -235,7 +240,7 @@ class ProjectFilters(object):
 
 
         :param statusfilter: The statusfilter of this ProjectFilters.  # noqa: E501
-        :type statusfilter: str
+        :type: str
         """
 
         self._statusfilter = statusfilter
@@ -256,7 +261,7 @@ class ProjectFilters(object):
 
 
         :param map_n: The map_n of this ProjectFilters.  # noqa: E501
-        :type map_n: str
+        :type: str
         """
 
         self._map_n = map_n
@@ -277,7 +282,7 @@ class ProjectFilters(object):
 
 
         :param map_w: The map_w of this ProjectFilters.  # noqa: E501
-        :type map_w: str
+        :type: str
         """
 
         self._map_w = map_w
@@ -298,7 +303,7 @@ class ProjectFilters(object):
 
 
         :param map_e: The map_e of this ProjectFilters.  # noqa: E501
-        :type map_e: str
+        :type: str
         """
 
         self._map_e = map_e
@@ -319,7 +324,7 @@ class ProjectFilters(object):
 
 
         :param map_s: The map_s of this ProjectFilters.  # noqa: E501
-        :type map_s: str
+        :type: str
         """
 
         self._map_s = map_s
@@ -340,7 +345,7 @@ class ProjectFilters(object):
 
 
         :param depthmin: The depthmin of this ProjectFilters.  # noqa: E501
-        :type depthmin: str
+        :type: str
         """
 
         self._depthmin = depthmin
@@ -361,7 +366,7 @@ class ProjectFilters(object):
 
 
         :param depthmax: The depthmax of this ProjectFilters.  # noqa: E501
-        :type depthmax: str
+        :type: str
         """
 
         self._depthmax = depthmax
@@ -382,7 +387,7 @@ class ProjectFilters(object):
 
 
         :param samples: The samples of this ProjectFilters.  # noqa: E501
-        :type samples: str
+        :type: str
         """
 
         self._samples = samples
@@ -403,7 +408,7 @@ class ProjectFilters(object):
 
 
         :param instrum: The instrum of this ProjectFilters.  # noqa: E501
-        :type instrum: str
+        :type: str
         """
 
         self._instrum = instrum
@@ -424,7 +429,7 @@ class ProjectFilters(object):
 
 
         :param daytime: The daytime of this ProjectFilters.  # noqa: E501
-        :type daytime: str
+        :type: str
         """
 
         self._daytime = daytime
@@ -445,7 +450,7 @@ class ProjectFilters(object):
 
 
         :param month: The month of this ProjectFilters.  # noqa: E501
-        :type month: str
+        :type: str
         """
 
         self._month = month
@@ -466,7 +471,7 @@ class ProjectFilters(object):
 
 
         :param fromdate: The fromdate of this ProjectFilters.  # noqa: E501
-        :type fromdate: str
+        :type: str
         """
 
         self._fromdate = fromdate
@@ -487,7 +492,7 @@ class ProjectFilters(object):
 
 
         :param todate: The todate of this ProjectFilters.  # noqa: E501
-        :type todate: str
+        :type: str
         """
 
         self._todate = todate
@@ -508,7 +513,7 @@ class ProjectFilters(object):
 
 
         :param fromtime: The fromtime of this ProjectFilters.  # noqa: E501
-        :type fromtime: str
+        :type: str
         """
 
         self._fromtime = fromtime
@@ -529,7 +534,7 @@ class ProjectFilters(object):
 
 
         :param totime: The totime of this ProjectFilters.  # noqa: E501
-        :type totime: str
+        :type: str
         """
 
         self._totime = totime
@@ -550,7 +555,7 @@ class ProjectFilters(object):
 
 
         :param inverttime: The inverttime of this ProjectFilters.  # noqa: E501
-        :type inverttime: str
+        :type: str
         """
 
         self._inverttime = inverttime
@@ -571,7 +576,7 @@ class ProjectFilters(object):
 
 
         :param validfromdate: The validfromdate of this ProjectFilters.  # noqa: E501
-        :type validfromdate: str
+        :type: str
         """
 
         self._validfromdate = validfromdate
@@ -592,7 +597,7 @@ class ProjectFilters(object):
 
 
         :param validtodate: The validtodate of this ProjectFilters.  # noqa: E501
-        :type validtodate: str
+        :type: str
         """
 
         self._validtodate = validtodate
@@ -613,7 +618,7 @@ class ProjectFilters(object):
 
 
         :param freenum: The freenum of this ProjectFilters.  # noqa: E501
-        :type freenum: str
+        :type: str
         """
 
         self._freenum = freenum
@@ -634,7 +639,7 @@ class ProjectFilters(object):
 
 
         :param freenumst: The freenumst of this ProjectFilters.  # noqa: E501
-        :type freenumst: str
+        :type: str
         """
 
         self._freenumst = freenumst
@@ -655,7 +660,7 @@ class ProjectFilters(object):
 
 
         :param freenumend: The freenumend of this ProjectFilters.  # noqa: E501
-        :type freenumend: str
+        :type: str
         """
 
         self._freenumend = freenumend
@@ -676,7 +681,7 @@ class ProjectFilters(object):
 
 
         :param freetxt: The freetxt of this ProjectFilters.  # noqa: E501
-        :type freetxt: str
+        :type: str
         """
 
         self._freetxt = freetxt
@@ -697,7 +702,7 @@ class ProjectFilters(object):
 
 
         :param freetxtval: The freetxtval of this ProjectFilters.  # noqa: E501
-        :type freetxtval: str
+        :type: str
         """
 
         self._freetxtval = freetxtval
@@ -718,10 +723,31 @@ class ProjectFilters(object):
 
 
         :param filt_annot: The filt_annot of this ProjectFilters.  # noqa: E501
-        :type filt_annot: str
+        :type: str
         """
 
         self._filt_annot = filt_annot
+
+    @property
+    def filt_last_annot(self):
+        """Gets the filt_last_annot of this ProjectFilters.  # noqa: E501
+
+
+        :return: The filt_last_annot of this ProjectFilters.  # noqa: E501
+        :rtype: str
+        """
+        return self._filt_last_annot
+
+    @filt_last_annot.setter
+    def filt_last_annot(self, filt_last_annot):
+        """Sets the filt_last_annot of this ProjectFilters.
+
+
+        :param filt_last_annot: The filt_last_annot of this ProjectFilters.  # noqa: E501
+        :type: str
+        """
+
+        self._filt_last_annot = filt_last_annot
 
     def to_dict(self):
         """Returns the model properties as a dict"""

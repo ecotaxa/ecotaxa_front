@@ -111,7 +111,7 @@ class ImportRealReq(object):
 
 
         :param task_id: The task_id of this ImportRealReq.  # noqa: E501
-        :type task_id: int
+        :type: int
         """
         if self.local_vars_configuration.client_side_validation and task_id is None:  # noqa: E501
             raise ValueError("Invalid value for `task_id`, must not be `None`")  # noqa: E501
@@ -134,7 +134,7 @@ class ImportRealReq(object):
 
 
         :param source_path: The source_path of this ImportRealReq.  # noqa: E501
-        :type source_path: str
+        :type: str
         """
         if self.local_vars_configuration.client_side_validation and source_path is None:  # noqa: E501
             raise ValueError("Invalid value for `source_path`, must not be `None`")  # noqa: E501
@@ -157,7 +157,7 @@ class ImportRealReq(object):
 
 
         :param taxo_mappings: The taxo_mappings of this ImportRealReq.  # noqa: E501
-        :type taxo_mappings: dict(str, str)
+        :type: dict(str, str)
         """
 
         self._taxo_mappings = taxo_mappings
@@ -178,7 +178,7 @@ class ImportRealReq(object):
 
 
         :param skip_loaded_files: The skip_loaded_files of this ImportRealReq.  # noqa: E501
-        :type skip_loaded_files: bool
+        :type: bool
         """
 
         self._skip_loaded_files = skip_loaded_files
@@ -199,7 +199,7 @@ class ImportRealReq(object):
 
 
         :param skip_existing_objects: The skip_existing_objects of this ImportRealReq.  # noqa: E501
-        :type skip_existing_objects: bool
+        :type: bool
         """
 
         self._skip_existing_objects = skip_existing_objects
@@ -220,7 +220,7 @@ class ImportRealReq(object):
 
 
         :param update_mode: The update_mode of this ImportRealReq.  # noqa: E501
-        :type update_mode: str
+        :type: str
         """
 
         self._update_mode = update_mode
@@ -241,7 +241,7 @@ class ImportRealReq(object):
 
 
         :param mappings: The mappings of this ImportRealReq.  # noqa: E501
-        :type mappings: dict(str, dict(str, str))
+        :type: dict(str, dict(str, str))
         """
 
         self._mappings = mappings
@@ -264,7 +264,7 @@ class ImportRealReq(object):
         key = user name; value = dict with (key = 'id' if resolved, else 'email')  # noqa: E501
 
         :param found_users: The found_users of this ImportRealReq.  # noqa: E501
-        :type found_users: dict(str, object)
+        :type: dict(str, object)
         """
 
         self._found_users = found_users
@@ -287,7 +287,7 @@ class ImportRealReq(object):
         key = taxon NAME; value = taxon ID if resolved, else None  # noqa: E501
 
         :param found_taxa: The found_taxa of this ImportRealReq.  # noqa: E501
-        :type found_taxa: dict(str, int)
+        :type: dict(str, int)
         """
 
         self._found_taxa = found_taxa
@@ -308,7 +308,7 @@ class ImportRealReq(object):
 
 
         :param rowcount: The rowcount of this ImportRealReq.  # noqa: E501
-        :type rowcount: int
+        :type: int
         """
 
         self._rowcount = rowcount

@@ -71,7 +71,7 @@ class BulkUpdateReq(object):
 
 
         :param target_ids: The target_ids of this BulkUpdateReq.  # noqa: E501
-        :type target_ids: list[int]
+        :type: list[int]
         """
         if self.local_vars_configuration.client_side_validation and target_ids is None:  # noqa: E501
             raise ValueError("Invalid value for `target_ids`, must not be `None`")  # noqa: E501
@@ -94,7 +94,7 @@ class BulkUpdateReq(object):
 
 
         :param updates: The updates of this BulkUpdateReq.  # noqa: E501
-        :type updates: list[object]
+        :type: list[object]
         """
         if self.local_vars_configuration.client_side_validation and updates is None:  # noqa: E501
             raise ValueError("Invalid value for `updates`, must not be `None`")  # noqa: E501

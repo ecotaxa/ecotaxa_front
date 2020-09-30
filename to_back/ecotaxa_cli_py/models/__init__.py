@@ -17,12 +17,14 @@ from __future__ import absolute_import
 from to_back.ecotaxa_cli_py.models.bulk_update_req import BulkUpdateReq
 from to_back.ecotaxa_cli_py.models.create_project_req import CreateProjectReq
 from to_back.ecotaxa_cli_py.models.http_validation_error import HTTPValidationError
+from to_back.ecotaxa_cli_py.models.historical_classif import HistoricalClassif
 from to_back.ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
 from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
 from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
 from to_back.ecotaxa_cli_py.models.merge_rsp import MergeRsp
 from to_back.ecotaxa_cli_py.models.object_header_model import ObjectHeaderModel
 from to_back.ecotaxa_cli_py.models.object_set_query_rsp import ObjectSetQueryRsp
+from to_back.ecotaxa_cli_py.models.object_set_revert_to_history_rsp import ObjectSetRevertToHistoryRsp
 from to_back.ecotaxa_cli_py.models.project_filters import ProjectFilters
 from to_back.ecotaxa_cli_py.models.project_model import ProjectModel
 from to_back.ecotaxa_cli_py.models.project_search_result import ProjectSearchResult
