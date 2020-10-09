@@ -87,15 +87,13 @@ def UpdateProjectStat(PrjId):
 
 ######################################################################################################################
 def RecalcProjectTaxoStat(PrjId):
-    ExecSQL("""begin;
-        delete from projects_taxo_stat WHERE projid=%(projid)s;
+    ExecSQL("""delete from projects_taxo_stat WHERE projid=%(projid)s;
         insert into projects_taxo_stat(projid, id, nbr, nbr_v, nbr_d, nbr_p) 
           select projid,coalesce(classif_id,-1) id,count(*) nbr,count(case when classif_qual='V' then 1 end) nbr_v
           ,count(case when classif_qual='D' then 1 end) nbr_d,count(case when classif_qual='P' then 1 end) nbr_p
           from obj_head
           where projid=%(projid)s
-          GROUP BY projid,classif_id;
-          commit;""", {'projid': PrjId})
+          GROUP BY projid,classif_id;""", {'projid': PrjId})
 
 
 ######################################################################################################################
