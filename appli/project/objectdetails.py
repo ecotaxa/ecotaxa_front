@@ -38,6 +38,12 @@ def objectdetails(objid):
         t.append("<br>To report a mistake, contact <a href ='mailto:{0}?subject=Ecotaxa%20mistake%20notification&body={2}'>{1}</a>".format(
             PrjManager[0][0],PrjManager[0][1],urllib.parse.quote("Hello,\n\nI have discovered a mistake on this page "+request.base_url+"\n")))
 # //window.location="mailto:?subject=Ecotaxa%20page%20share&body="+encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
+    # Injected data for taxo select
+    g.PrjAnnotate = g.PrjManager = Prj.CheckRight(2)
+    if not g.PrjManager:
+        g.PrjAnnotate = Prj.CheckRight(1)
+    g.manager_mail = Prj.GetFirstManager()[1] if Prj.GetFirstManager() else ""
+    #
     t.append("</p><p>Classification :")
     if obj.classif:
         t.append("<br>&emsp;<b>%s</b>"%XSSEscape(obj.classif.display_name))
@@ -83,6 +89,7 @@ def objectdetails(objid):
      <div class="input-group">
        <select id="taxolbpop" name="taxolbpop" style="width: 200px" class='taxolb' > </select>""")
         if gvg("ajax","0")=="0":
+            # Avoid a second modal on the first modal
             t.append("""<span class="input-group-btn">
                     <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbpop" title="Search on Taxonomy Tree">
                         <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>

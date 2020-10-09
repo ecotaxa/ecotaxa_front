@@ -208,6 +208,7 @@ def indexPrj(PrjId):
     if not g.PrjManager:
         g.PrjAnnotate = Prj.CheckRight(1)
     g.PublicViewMode = not Prj.CheckRight(0)
+    g.manager_mail = Prj.GetFirstManager()[1] if Prj.GetFirstManager() else ""
     right = 'dodefault'
     if gvg("taxo") != "":
         g.taxofilter = gvg("taxo")

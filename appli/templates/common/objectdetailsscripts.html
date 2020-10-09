@@ -33,16 +33,38 @@ function Save1Object(classqual) {
     });
 }
 $(document).ready(function() {
+function FormatTaxoItem(t) {
+  if (t.pr==1)
+    return $("<u>"+ XSSStrEscape(t.text)+"</u>")
+  else return t.text;
+}
     $("#taxolbpop").select2({
         ajax: {
             url: "/search/taxo",
             dataType: 'json',
             delay: 250,
-            data: function (params) {  return { q: params.term, page: params.page };  },
-            processResults: function (data, page) { return { results: data};  },
+            data: function (params) {
+                 return { q: params.term
+                         {% if g.Projid %}
+                         ,projid:{{ g.Projid }}
+                         {% endif %} }; },
+            processResults: function (data, page) {
+                 return { results: data};
+            },
             cache: true
         },
-        minimumInputLength: 3
+        templateResult: FormatTaxoItem,
+        dropdownCssClass: "width240 taxopopup",
+        language: {
+           noResults: function(){
+{% if g.PrjManager %}
+               var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}',{updatestat:'Y'})\" >Create category</a>";
+{% else %}
+               var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
+{% endif %}
+               return $("<span>No recent/result found. "+msg+"</span>");
+           }
+       }
     }); // Select2 Ajax
 });
 
