@@ -27,13 +27,14 @@ def objectdetails(objid):
         window_height = 20000
 
     obj = database.Objects.query.filter_by(objid=objid).first()
-    page = list()
-    # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
-    page.append("<script src='/static/jquery.elevatezoom.js'></script>")
     prj = obj.project
     if not prj.visible and not prj.CheckRight(0):  # Level 0 = Read, 1 = Annotate, 2 = Admin
         flash('You cannot view this project', 'error')
         return PrintInCharte("<a href=/>Back to home</a>")
+
+    page = list()
+    # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
+    page.append("<script src='/static/jquery.elevatezoom.js'></script>")
     g.Projid = prj.projid
     prj_managers = [(m.memberrel.email, m.memberrel.name) for m in prj.projmembers if m.privilege == 'Manage']
     page.append("<p>Project: <b><a href='/prj/%d'>%s</a></b> (managed by : %s)"
@@ -47,12 +48,14 @@ def objectdetails(objid):
                                   "Hello,\n\nI have discovered a mistake on this page " + request.base_url + "\n")))
     # //window.location="mailto:?subject=Ecotaxa%20page%20share&body="+
     # encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
+
     # Injected data for taxo select
     g.PrjAnnotate = g.PrjManager = prj.CheckRight(2)
     if not g.PrjManager:
         g.PrjAnnotate = prj.CheckRight(1)
     g.manager_mail = prj.GetFirstManager()[1] if prj.GetFirstManager() else ""
     #
+
     page.append("</p><p>Classification :")
     if obj.classif:
         page.append("<br>&emsp;<b>%s</b>" % XSSEscape(obj.classif.display_name))
@@ -64,12 +67,14 @@ def objectdetails(objid):
         page.append("<br>&emsp;" + (" &lt; ".join(taxo_hierarchy)) + " (id=%s)" % obj.classif_id)
     else:
         page.append("<br>&emsp;<b>Unknown</b>")
+
     if obj.classiffier is not None:
         page.append("<br>&emsp;%s " % (database.ClassifQual.get(obj.classif_qual, "To be classified")))
         page.append(" by %s (%s) " % (obj.classiffier.name, obj.classiffier.email))
         if obj.classif_when is not None:
             page.append(" on %s " % (obj.classif_when.strftime("%Y-%m-%d %H:%M")))
     page.append("</p>")
+
     if obj.objfrel.object_link is not None:
         page.append("<p>External link :<a href='{0}' target=_blank> {0}</a></p>".format(obj.objfrel.object_link))
     page.append("<table><tr>"
@@ -77,6 +82,7 @@ def objectdetails(objid):
                 "> ( edit )</a>: </td>"
                 "<td> <span id=spancomplinfo> {0}</span></td></tr></table>"
                 .format(ntcv(obj.complement_info).replace('\n', '<br>\n')))
+
     # On affiche la liste des images, en selectionnant une image on changera le contenu de l'image Img1 + Redim
     # l'approche avec des onglets de marchait pas car les images sont superposées
     obj.images.sort(key=lambda x: x.imgrank)
@@ -96,7 +102,8 @@ def objectdetails(objid):
     (width, height) = ComputeLimitForImage(obj.images[0].width, obj.images[0].height, page_width, window_height)
     page.append("</p><p><img id=img1 src=/vault/{1} data-zoom-image=/vault/{1} width={2} height={0}></p>"
                 .format(height, obj.images[0].file_name, width))
-    # Affichage de l'onglet de classification
+
+    # Affichage de la ligne de classification
     if prj.CheckRight(1):
         page.append("""
 <table><tr><td>Set a new classification :</td>
@@ -120,6 +127,7 @@ def objectdetails(objid):
     <button type="button" class="btn btn-default btn-xs"  onclick="$('#PopupDetails').modal('hide');">Close</button>
     </td></tr></table>
     """)
+
     # Ajout des Onglets sous l'image
     page.append("""<br><div><ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#tabdobj" aria-controls="tabdobj" role="tab" data-toggle="tab"
@@ -139,12 +147,14 @@ def objectdetails(objid):
         page.append(
             """<li role="presentation" ><a id=linktabdaddcomments href="#tabdaddcomments" 
             aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")
+
     if obj.classif_auto:
         classif_auto_name = obj.classif_auto.name
         if obj.classif_auto_score:
             classif_auto_name += " (%0.3f)" % (obj.classif_auto_score,)
     else:
         classif_auto_name = ''
+
     page.append("""</ul>
     <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="tabdobj">
@@ -163,6 +173,7 @@ def objectdetails(objid):
                        obj.depth_min, obj.depth_max,
                        classif_auto_name, obj.classif_auto_when, objid, obj.objfrel.orig_id,
                        database.DayTimeList.get(obj.sunpos, '?')))
+
     cpt = 0
     # Insertion des champs object
     for k, v in collections.OrderedDict(sorted(DecodeEqualList(prj.mappingobj).items())).items():
@@ -173,43 +184,46 @@ def objectdetails(objid):
                     format(v, ScaleForDisplay(getattr(obj.objfrel, k, "???")), k))
     page.append("</tr></table></div>")
     # insertion des champs Sample, Acquisition & Processing dans leurs onglets respectifs
-    for r in (("Sample", "mappingsample", "sample"), ("Acquisition", "mappingacq", "acquis"),
-              ("Processing", "mappingprocess", "processrel")):
-        page.append('<div role="tabpanel" class="tab-pane" id="tabd' + r[2] + '">' + r[
-            0] + " details :<table class='table table-bordered table-condensed'  data-table='" + r[2] + "'><tr>")
+    for entity_desc in (("Sample", "mappingsample", "sample"),
+                        ("Acquisition", "mappingacq", "acquis"),
+                        ("Processing", "mappingprocess", "processrel")):
+        page.append('<div role="tabpanel" class="tab-pane" id="tabd' + entity_desc[2] + '">' + entity_desc[
+            0] + " details :<table class='table table-bordered table-condensed'  data-table='" + entity_desc[
+                        2] + "'><tr>")
         cpt = 0
-        if getattr(obj, r[2]):
-            if r[2] == "sample":
+        if getattr(obj, entity_desc[2]):
+            if entity_desc[2] == "sample":
                 page.append("""<td data-edit='orig_id'><b>{0}</td><td colspan=3>{1}</td>
                     <td data-edit='longitude'><b>{2}</td><td>{3}</td>
                     <td data-edit='latitude'><b>{4}</td><td>{5}</td></tr><tr>"""
                             .format("Original ID", ScaleForDisplay(obj.sample.orig_id),
                                     "longitude", ScaleForDisplay(obj.sample.longitude),
                                     "latitude", ScaleForDisplay(obj.sample.latitude)))
-            elif r[2] == "acquis":
+            elif entity_desc[2] == "acquis":
                 page.append("""<td data-edit='orig_id'><b>{0}</td><td colspan=3>{1}</td>
                     <td data-edit='instrument'><b>{2}</td><td>{3}</td></tr><tr>"""
                             .format("Original ID", ScaleForDisplay(obj.acquis.orig_id),
                                     "Instrument", ScaleForDisplay(obj.acquis.instrument)))
             else:
                 page.append("<td data-edit='orig_id'><b>{0}</td><td>{1}</td></tr><tr>"
-                            .format("Original ID.", ScaleForDisplay(getattr(getattr(obj, r[2]), "orig_id", "???"))))
+                            .format("Original ID.",
+                                    ScaleForDisplay(getattr(getattr(obj, entity_desc[2]), "orig_id", "???"))))
             # Display free columns
-            for k, v in collections.OrderedDict(sorted(DecodeEqualList(getattr(prj, r[1])).items())).items():
+            for k, v in collections.OrderedDict(sorted(DecodeEqualList(getattr(prj, entity_desc[1])).items())).items():
                 if cpt > 0 and cpt % 4 == 0:
                     page.append("</tr><tr>")
                 cpt += 1
                 page.append("<td data-edit='{2}'><b>{0}</td><td>{1}</td>".format(v, ScaleForDisplay(
-                    getattr(getattr(obj, r[2]), k, "???")), k))
-            if r[2] == "sample":
+                    getattr(getattr(obj, entity_desc[2]), k, "???")), k))
+            if entity_desc[2] == "sample":
                 page.append("</tr><tr><td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
                             .format("Dataportal Desc.",
                                     ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
         else:
-            page.append("<td>No {0}</td>".format(r[0]))
+            page.append("<td>No {0}</td>".format(entity_desc[0]))
         page.append("</tr></table></div>")
 
-    # Affichage de l'historique des classification
+    # Affichage de l'historique des classifications
     page.append("""<div role="tabpanel" class="tab-pane" id="tabdclassiflog">
 Current Classification : Quality={} , date={}    
     <table class='table table-bordered table-condensed'><tr>
@@ -222,10 +236,12 @@ Current Classification : Quality={} , date={}
   LEFT JOIN users u on u.id = h.classif_who
 WHERE objid=%(objid)s
 order by classif_date desc""", {"objid": objid}, doXSSEscape=True)
-    for r in classif_histo:
-        page.append("<tr><td>" + ("</td><td>".join([str(r[x]) if r[x] else "-" for x in (
+    for entity_desc in classif_histo:
+        page.append("<tr><td>" + ("</td><td>".join([str(entity_desc[x]) if entity_desc[x] else "-" for x in (
             "datetxt", "classif_type", "name", "username", "classif_qual")])) + "</td></tr>")
     page.append("</table></div>")
+
+    # Complementary information tab
     if prj.CheckRight(1):
         page.append("""<div role="tabpanel" class="tab-pane" id="tabdaddcomments">
         <textarea id=compinfo rows=5 cols=120 autocomplete=off>%s</textarea><br>
@@ -242,18 +258,22 @@ order by classif_date desc""", {"objid": objid}, doXSSEscape=True)
 </div>""")
 
     page.append("</table></div>")
-    page.append(render_template("common/objectdetailsscripts.html", Prj=prj,
-                                objid=objid, obj=obj))
+    page.append(render_template("common/objectdetailsscripts.html",
+                                Prj=prj, objid=objid, obj=obj))
 
-    # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenete isolée
+    # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenetre isolée
     # Sinon affichage sans lien dans la charte.
+    html_page = "\n".join(page)
     if gvg("ajax", "0") == "1":
         return """<table width=100% style='margin: 3px'><tr><td><a href='/objectdetails/{0}?w={1}&h={2}' target=_blank>
         <b>Open in a separate window</b> (right click to copy link)</a>
         </td><td align='right'><button type="button" class="btn btn-default"  
         onclick="$('#PopupDetails').modal('hide');">Close</button>&nbsp;&nbsp;
-        </td></tr></table><div style='margin: 0 5px;'>""".format(objid, gvg("w"), gvg("h")) + "\n".join(page)
-    return PrintInCharte("<div style='margin-left:10px;'>" + "\n".join(page) + render_template('common/taxopopup.html'))
+        </td></tr></table><div style='margin: 0 5px;'>""".format(objid, gvg("w"), gvg("h")) \
+               + html_page
+    return PrintInCharte("<div style='margin-left:10px;'>"
+                         + html_page
+                         + render_template('common/taxopopup.html'))
 
 
 @app.route('/objectdetailsupdate/<int:objid>', methods=['GET', 'POST'])
