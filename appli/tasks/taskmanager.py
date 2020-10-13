@@ -211,18 +211,18 @@ def ListTasks():
     AddTaskSummaryForTemplate()
     seeall = ""
     if current_user.has_role(database.AdministratorLabel) and gvg("seeall") == 'Y':
-        tasks = Task.query.filter_by().order_by("id").all()
+        tasks = Task.query.filter_by().order_by(Task.id.desc()).all()
         seeall = '&seeall=Y'
     else:
-        tasks = Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
+        tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
     txt = ""
     if gvg("cleandone") == 'Y' or gvg("cleanerror") == 'Y' or gvg("cleanall") == 'Y':
-        txt = "Cleanning process result :<br>"
+        txt = "Cleaning process result :<br>"
         for t in tasks:
             if (gvg("cleandone") == 'Y' and t.taskstate == 'Done') or (gvg("cleanall") == 'Y') \
                     or (gvg("cleanerror") == 'Y' and t.taskstate == 'Error'):
                 txt += DoTaskClean(t.id)
-        tasks = Task.query.filter_by(owner_id=current_user.id).order_by("id").all()
+        tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
     # txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default'
     # href=?cleanerror=Y>Clean All Error</a>   <a class='btn btn-default' href=?cleanall=Y>Clean All
     # (warning !!!)</a>  Task count : "+str(len(tasks))
