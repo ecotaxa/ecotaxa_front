@@ -341,9 +341,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.4.3"
+ecotaxa_version="2.4.4"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-09-30"
+    return ecotaxa_version+" 2020-10-14"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -351,6 +351,17 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-10-14 : V 2.4.4
+    Bug #500: Base view for queries should be simpler and faster.
+    Feature #497: Sort tasks by more recents first.
+    Feature #435: Object details is now implemented on back-end.
+    Bug #414: Useless commit appears as a warning in PG logs.
+    Feature #321: Proper message when a user who cannot create a taxon needs one.
+    Bug #342: Taxon select box has no MRU or create link in object details window. 
+    Bug #422: Update sun position when related metadata changes.
+    Bug #341: Filter "NaN" and "NA" even in text columns.
+    Feature #435: Move classification/validation to back-end.
+    Bug #464: Last used taxa should not be random.
 2020-09-30 : V 2.4.3
     Bug: Ecopart #451: Too long project title makes layout of EcoPart prjedit page ugly.
     Bug: Ecopart #437: Stack trace when displaying TIME.
