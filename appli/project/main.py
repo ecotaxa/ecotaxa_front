@@ -1,6 +1,5 @@
 import collections
 import datetime
-import html
 import math
 import urllib.parse
 from typing import List
@@ -22,6 +21,7 @@ from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, Projec
     ApiException, ObjectsApi
 
 
+# noinspection PyPep8Naming
 @app.route('/prj/')
 @login_required
 def indexProjects(Others=False):
@@ -127,6 +127,7 @@ FilterListAutoSave = ("sortby", "sortorder", "dispfield", "statusfilter", 'ipp',
 
 
 ######################################################################################################################
+# noinspection PyPep8Naming
 @app.route('/prj/<int:PrjId>')
 # @login_required
 def indexPrj(PrjId):
@@ -260,7 +261,7 @@ def indexPrj(PrjId):
 def _manager_mail(prj_title, prj_id):
     base_url = request.host_url[:-1]
     mail_body = "Please provide me privileges to project : '%s' at this address : %s " % (
-        prj_title, base_url+url_for('indexPrj', PrjId=int(prj_id)))
+        prj_title, base_url + url_for('indexPrj', PrjId=int(prj_id)))
     mail_link = urllib.parse.urlencode({'body': mail_body,
                                         'subject': 'EcoTaxa project access request'},
                                        quote_via=urllib.parse.quote)
@@ -268,7 +269,7 @@ def _manager_mail(prj_title, prj_id):
 
 
 ######################################################################################################################
-# noinspection SpellCheckingInspection
+# noinspection SpellCheckingInspection,PyPep8Naming
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
 # @login_required
 def LoadRightPane():
@@ -519,6 +520,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         if 'orig_id' in dispfield:
             bottomtxt = "<div style='word-break: break-all;'>%s</div>" % (r['orig_id'],) + bottomtxt
 
+        # noinspection PyPep8Naming
         def FormatNameForVignetteDisplay(CategName):
             Parts = ntcv(CategName).split('<')
             restxt = "<span class='cat_name'>{}</span>".format(Parts[0])
@@ -611,6 +613,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
 
 
 ######################################################################################################################
+# noinspection PyPep8Naming
 def GetClassifTab(Prj):
     if Prj.initclassiflist is None:
         InitClassif = "0"  # pour être sur qu'il y a toujours au moins une valeur
@@ -731,6 +734,7 @@ def GetClassifTab(Prj):
 
 
 ######################################################################################################################
+# noinspection PyPep8Naming
 @app.route('/prjGetClassifTab/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def prjGetClassifTab(PrjId):
@@ -749,13 +753,14 @@ def prjGetClassifTab(PrjId):
 
 
 ######################################################################################################################
+# noinspection PyPep8Naming
 @app.route('/prjPurge/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def prjPurge(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
@@ -803,8 +808,8 @@ def prjPurge(PrjId):
             # DELETE all objects
             with ApiClient(ProjectsApi, request) as api:
                 no, noh, ni, nbrfile = api.erase_project_projects_project_id_delete(project_id=PrjId,
-                                                                                    only_objects=
-                                                                                    gvp("destroyproject") != "Y")
+                                                                                    only_objects=gvp(
+                                                                                        "destroyproject") != "Y")
         else:
             # DELETE some objects in project
             objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]
@@ -820,6 +825,7 @@ def prjPurge(PrjId):
     return PrintInCharte(txt + "<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId))
 
 
+# noinspection PyPep8Naming
 def PrjGetFieldList(Prj, typefield, term):
     fieldlist = []
     MapList = {'o': 'mappingobj', 's': 'mappingsample', 'a': 'mappingacq', 'p': 'mappingprocess'}
@@ -831,6 +837,7 @@ def PrjGetFieldList(Prj, typefield, term):
     return fieldlist
 
 
+# noinspection PyPep8Naming
 @app.route('/prj/GetFieldList/<int:PrjId>/<string:typefield>')
 @login_required
 def PrjGetFieldListAjax(PrjId, typefield):

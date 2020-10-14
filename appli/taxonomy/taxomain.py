@@ -43,7 +43,7 @@ def routetaxobrowse():
 
     if not (current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel) ) :
         # /prj/653
-        txt= "You cannot create tanonomy category, you must request to your project manager (check project page)"
+        txt= "You cannot create tanonomy category, you must request your project manager (check project page)"
         if gvg('fromprj'):
             txt +="<br>"+BackProjectBtn
 

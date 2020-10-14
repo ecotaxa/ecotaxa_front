@@ -52,7 +52,7 @@ def PrjEditDataMass(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
@@ -142,7 +142,7 @@ def PrjResetToPredicted(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"

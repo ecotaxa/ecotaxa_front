@@ -3,10 +3,7 @@ from typing import List
 from flask import g, flash, request
 from flask_security import login_required
 
-import appli
-import appli.project.main
 from appli import app, PrintInCharte, database, gvg, XSSEscape, FormatError
-from appli.database import ExecSQL
 ######################################################################################################################
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ProjectsApi, ProjectSearchResult, MergeRsp

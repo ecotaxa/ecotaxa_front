@@ -6,7 +6,7 @@
                   .data('elevateZoom').swaptheimage('/vault/'+filename, '/vault/'+filename);
     }
 
-{% if Prj.CheckRight(1) %}
+{% if g.PrjAnnotate or g.PrjManager %}
 function Save1Object(classqual) {
     var classid=$("#taxolbpop").val();
     var objid='{{ objid }}';
@@ -84,7 +84,7 @@ function FormatTaxoItem(t) {
     window.scrollTo(0,document.body.scrollHeight);
   }
 
-{% endif %} {# if Prj.CheckRight(1) #}
+{% endif %} {# if g.PrjAnnotate or g.PrjManager #}
 {# Gestion de la carte #}
 var map,vectorSource,SampleSource;
 
@@ -167,7 +167,7 @@ function ShowSample(p){
         }
     });
 
-{% if Prj.CheckRight(1) %}
+{% if g.PrjAnnotate or g.PrjManager %}
 function EnableEdit(){
   $("td[data-edit]").each(function(){
     $(this).data('lbl',$(this).text()).prepend("<span class=' glyphicon glyphicon-pencil' style='cursor:pointer;' onclick='editattr(this);'></span> ");

@@ -1,17 +1,21 @@
-import collections
 import datetime
 import html
 import urllib.parse
 
 from flask import render_template, g, flash, request
+from flask_login import current_user
 from flask_security import login_required
 
-from appli import app, PrintInCharte, database, gvg, gvp, ntcv, DecodeEqualList, ScaleForDisplay, \
+from appli import app, PrintInCharte, database, gvg, gvp, ntcv, ScaleForDisplay, \
     ComputeLimitForImage, nonetoformat, XSSEscape
-from appli.database import GetAll, db
-
-
+from appli.database import db
 # noinspection SpellCheckingInspection
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import ObjectApi, ObjectModel, ApiException, ProjectsApi, ProjectModel, TaxonomyTreeApi, \
+    TaxonModel, UsersApi, UserModel, SamplesApi, ProcessesApi, AcquisitionsApi, SampleModel, AcquisitionModel, \
+    ProcessModel, HistoricalClassification, ObjectHistoryRsp
+
+
 @app.route('/objectdetails/<int:objid>')
 def objectdetails(objid):
     # récuperation et ajustement des dimensions de la zone d'affichage
@@ -26,19 +30,28 @@ def objectdetails(objid):
         page_width = 20000
         window_height = 20000
 
-    obj = database.Objects.query.filter_by(objid=objid).first()
-    prj = obj.project
-    if not prj.visible and not prj.CheckRight(0):  # Level 0 = Read, 1 = Annotate, 2 = Admin
-        flash('You cannot view this project', 'error')
-        return PrintInCharte("<a href=/>Back to home</a>")
+    # Security & sanity checks
+    with ApiClient(ObjectApi, request) as api:
+        try:
+            obj: ObjectModel = api.object_query_object_object_id_get(objid)
+        except ApiException as ae:
+            if ae.status == 404:
+                return "Object doesn't exists"
+            elif ae.status == 403:
+                flash('You cannot read this object', 'error')
+                return PrintInCharte("<a href=/>Back to home</a>")
+
+    with ApiClient(ProjectsApi, request) as api:
+        obj_proj: ProjectModel = api.project_query_projects_project_id_get(obj.projid, for_managing=False)
 
     page = list()
     # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
     page.append("<script src='/static/jquery.elevatezoom.js'></script>")
-    g.Projid = prj.projid
-    prj_managers = [(m.memberrel.email, m.memberrel.name) for m in prj.projmembers if m.privilege == 'Manage']
+    g.Projid = obj_proj.projid
+    g.manager_mail = ""
+    prj_managers = [(m.email, m.name) for m in obj_proj.managers]
     page.append("<p>Project: <b><a href='/prj/%d'>%s</a></b> (managed by : %s)"
-                % (prj.projid, XSSEscape(prj.title), ",".
+                % (obj_proj.projid, XSSEscape(obj_proj.title), ",".
                    join(("<a href ='mailto:%s'>%s</a>" % m for m in prj_managers))))
     if len(prj_managers) > 0:
         page.append(
@@ -46,37 +59,38 @@ def objectdetails(objid):
             ">{1}</a>".format(prj_managers[0][0], prj_managers[0][1],
                               urllib.parse.quote(
                                   "Hello,\n\nI have discovered a mistake on this page " + request.base_url + "\n")))
+        mgr_email, mgr_name = prj_managers[0]
+        g.manager_mail = f"<a href='mailto:{mgr_email}'>{mgr_name} ({mgr_email})</a>"
     # //window.location="mailto:?subject=Ecotaxa%20page%20share&body="+
     # encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
 
     # Injected data for taxo select
-    g.PrjAnnotate = g.PrjManager = prj.CheckRight(2)
+    g.PrjManager = obj_proj.can_administrate or current_user.id in [u.id for u in obj_proj.managers]
+    g.PrjAnnotate = False
     if not g.PrjManager:
-        g.PrjAnnotate = prj.CheckRight(1)
-    g.manager_mail = prj.GetFirstManager()[1] if prj.GetFirstManager() else ""
-    #
+        g.PrjAnnotate = current_user.id in [u.id for u in obj_proj.annotators]
 
     page.append("</p><p>Classification :")
-    if obj.classif:
-        page.append("<br>&emsp;<b>%s</b>" % XSSEscape(obj.classif.display_name))
-        taxo_hierarchy = (r[0] for r in GetAll("""WITH RECURSIVE rq(id,name,parent_id) 
-        as ( select id,name,parent_id FROM taxonomy where id =%(taxoid)s
-                        union
-                        SELECT t.id,t.name,t.parent_id FROM rq JOIN taxonomy t ON t.id = rq.parent_id )
-                        select name from rq""", {"taxoid": obj.classif.id}))
-        page.append("<br>&emsp;" + (" &lt; ".join(taxo_hierarchy)) + " (id=%s)" % obj.classif_id)
+    if obj.classif_id:
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            taxon: TaxonModel = api.query_taxa_taxa_taxon_id_get(taxon_id=obj.classif_id)
+        page.append("<br>&emsp;<b>%s</b>" % XSSEscape(taxon.display_name))
+        page.append("<br>&emsp;" + (" &lt; ".join(taxon.lineage)) + " (id=%s)" % obj.classif_id)
     else:
         page.append("<br>&emsp;<b>Unknown</b>")
 
-    if obj.classiffier is not None:
+    if obj.classif_who is not None:
+        with ApiClient(UsersApi, request) as api:
+            user: UserModel = api.get_user_users_user_id_get(user_id=obj.classif_who)
         page.append("<br>&emsp;%s " % (database.ClassifQual.get(obj.classif_qual, "To be classified")))
-        page.append(" by %s (%s) " % (obj.classiffier.name, obj.classiffier.email))
+        page.append(" by %s (%s) " % (user.name, user.email))
         if obj.classif_when is not None:
-            page.append(" on %s " % (obj.classif_when.strftime("%Y-%m-%d %H:%M")))
+            page.append(" on %s " % obj.classif_when)
     page.append("</p>")
 
-    if obj.objfrel.object_link is not None:
-        page.append("<p>External link :<a href='{0}' target=_blank> {0}</a></p>".format(obj.objfrel.object_link))
+    if obj.object_link is not None:
+        page.append("<p>External link :<a href='{0}' target=_blank> {0}</a></p>".format(obj.object_link))
+
     page.append("<table><tr>"
                 "<td valign=top>Complementary information <a href='javascript:gotocommenttab();' "
                 "> ( edit )</a>: </td>"
@@ -104,7 +118,7 @@ def objectdetails(objid):
                 .format(height, obj.images[0].file_name, width))
 
     # Affichage de la ligne de classification
-    if prj.CheckRight(1):
+    if g.PrjAnnotate or g.PrjManager:
         page.append("""
 <table><tr><td>Set a new classification :</td>
  <td style="width: 230px;">
@@ -143,13 +157,15 @@ def objectdetails(objid):
     <li role="presentation" ><a href="#tabdmap" aria-controls="tabdmap" role="tab" data-toggle="tab" id=atabdmap 
     style="background: #5CB85C;color:white;">Map</a></li>
     """)
-    if prj.CheckRight(1):
+    if g.PrjAnnotate or g.PrjManager:
         page.append(
             """<li role="presentation" ><a id=linktabdaddcomments href="#tabdaddcomments" 
             aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")
 
-    if obj.classif_auto:
-        classif_auto_name = obj.classif_auto.name
+    if obj.classif_auto_id:
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            taxon: TaxonModel = api.query_taxa_taxa_taxon_id_get(taxon_id=obj.classif_auto_id)
+        classif_auto_name = taxon.lineage[0]
         if obj.classif_auto_score:
             classif_auto_name += " (%0.3f)" % (obj.classif_auto_score,)
     else:
@@ -171,78 +187,88 @@ def objectdetails(objid):
                 format(nonetoformat(obj.longitude, '.5f'), nonetoformat(obj.latitude, '.5f'),
                        obj.objdate, obj.objtime,
                        obj.depth_min, obj.depth_max,
-                       classif_auto_name, obj.classif_auto_when, objid, obj.objfrel.orig_id,
+                       classif_auto_name, obj.classif_auto_when, objid, obj.orig_id,
                        database.DayTimeList.get(obj.sunpos, '?')))
 
     cpt = 0
     # Insertion des champs object
-    for k, v in collections.OrderedDict(sorted(DecodeEqualList(prj.mappingobj).items())).items():
+    for k, v in obj_proj.obj_free_cols.items():
         if cpt > 0 and cpt % 4 == 0:
             page.append("</tr><tr>")
         cpt += 1
+        # noinspection PyUnresolvedReferences
         page.append("<td data-edit='{2}'><b>{0}</td><td>{1}</td>".
-                    format(v, ScaleForDisplay(getattr(obj.objfrel, k, "???")), k))
+                    format(k, ScaleForDisplay(obj.free_columns.get(k, "???")), v))
     page.append("</tr></table></div>")
+
     # insertion des champs Sample, Acquisition & Processing dans leurs onglets respectifs
-    for entity_desc in (("Sample", "mappingsample", "sample"),
-                        ("Acquisition", "mappingacq", "acquis"),
-                        ("Processing", "mappingprocess", "processrel")):
+    with ApiClient(SamplesApi, request) as api:
+        sample: SampleModel = api.sample_query_sample_sample_id_get(sample_id=obj.sampleid)
+    with ApiClient(AcquisitionsApi, request) as api:
+        acquisition: AcquisitionModel = api.acquisition_query_acquisition_acquisition_id_get(
+            acquisition_id=obj.acquisid)
+    with ApiClient(ProcessesApi, request) as api:
+        process: ProcessModel = api.process_query_process_process_id_get(process_id=obj.processid)
+
+    for entity_desc in (("Sample", sample, "sample", obj_proj.sample_free_cols),
+                        ("Acquisition", acquisition, "acquis", obj_proj.acquisition_free_cols),
+                        ("Processing", process, "processrel", obj_proj.process_free_cols)):
         page.append('<div role="tabpanel" class="tab-pane" id="tabd' + entity_desc[2] + '">' + entity_desc[
             0] + " details :<table class='table table-bordered table-condensed'  data-table='" + entity_desc[
                         2] + "'><tr>")
         cpt = 0
-        if getattr(obj, entity_desc[2]):
+        if entity_desc[1]:
             if entity_desc[2] == "sample":
                 page.append("""<td data-edit='orig_id'><b>{0}</td><td colspan=3>{1}</td>
                     <td data-edit='longitude'><b>{2}</td><td>{3}</td>
                     <td data-edit='latitude'><b>{4}</td><td>{5}</td></tr><tr>"""
-                            .format("Original ID", ScaleForDisplay(obj.sample.orig_id),
-                                    "longitude", ScaleForDisplay(obj.sample.longitude),
-                                    "latitude", ScaleForDisplay(obj.sample.latitude)))
+                            .format("Original ID", ScaleForDisplay(sample.orig_id),
+                                    "longitude", ScaleForDisplay(sample.longitude),
+                                    "latitude", ScaleForDisplay(sample.latitude)))
             elif entity_desc[2] == "acquis":
                 page.append("""<td data-edit='orig_id'><b>{0}</td><td colspan=3>{1}</td>
                     <td data-edit='instrument'><b>{2}</td><td>{3}</td></tr><tr>"""
-                            .format("Original ID", ScaleForDisplay(obj.acquis.orig_id),
-                                    "Instrument", ScaleForDisplay(obj.acquis.instrument)))
+                            .format("Original ID", ScaleForDisplay(acquisition.orig_id),
+                                    "Instrument", ScaleForDisplay(acquisition.instrument)))
             else:
                 page.append("<td data-edit='orig_id'><b>{0}</td><td>{1}</td></tr><tr>"
-                            .format("Original ID.",
-                                    ScaleForDisplay(getattr(getattr(obj, entity_desc[2]), "orig_id", "???"))))
+                            .format("Original ID.", ScaleForDisplay(getattr(entity_desc[1], "orig_id", "???"))))
             # Display free columns
-            for k, v in collections.OrderedDict(sorted(DecodeEqualList(getattr(prj, entity_desc[1])).items())).items():
+            for k, v in entity_desc[3].items():
                 if cpt > 0 and cpt % 4 == 0:
                     page.append("</tr><tr>")
                 cpt += 1
-                page.append("<td data-edit='{2}'><b>{0}</td><td>{1}</td>".format(v, ScaleForDisplay(
-                    getattr(getattr(obj, entity_desc[2]), k, "???")), k))
+                # noinspection PyUnresolvedReferences
+                page.append("<td data-edit='{2}'><b>{0}</td><td>{1}</td>".format(k, ScaleForDisplay(
+                    entity_desc[1].free_columns.get(k, "???")), v))
             if entity_desc[2] == "sample":
                 page.append("</tr><tr><td><b>{0}</td><td colspan=7>{1}</td></tr><tr>"
                             .format("Dataportal Desc.",
-                                    ScaleForDisplay(html.escape(ntcv(obj.sample.dataportal_descriptor)))))
+                                    ScaleForDisplay(html.escape(ntcv(sample.dataportal_descriptor)))))
         else:
             page.append("<td>No {0}</td>".format(entity_desc[0]))
         page.append("</tr></table></div>")
 
     # Affichage de l'historique des classifications
+    with ApiClient(ObjectApi, request) as api:
+        history: ObjectHistoryRsp = api.object_query_history_object_object_id_history_get(objid)
+
     page.append("""<div role="tabpanel" class="tab-pane" id="tabdclassiflog">
-Current Classification : Quality={} , date={}    
+Current Classification : Quality={} , date={}
     <table class='table table-bordered table-condensed'><tr>
     <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""".format(obj.classif_qual,
                                                                                           obj.classif_when))
-    classif_histo = GetAll("""SELECT to_char(classif_date,'YYYY-MM-DD HH24:MI:SS') datetxt,classif_type ,
-    t.display_name as name,u.name username,classif_qual
-  from objectsclassifhisto h
-  left join taxonomy t on h.classif_id=t.id
-  LEFT JOIN users u on u.id = h.classif_who
-WHERE objid=%(objid)s
-order by classif_date desc""", {"objid": objid}, doXSSEscape=True)
-    for entity_desc in classif_histo:
-        page.append("<tr><td>" + ("</td><td>".join([str(entity_desc[x]) if entity_desc[x] else "-" for x in (
-            "datetxt", "classif_type", "name", "username", "classif_qual")])) + "</td></tr>")
+    classif_desc: HistoricalClassification
+    for classif_desc in history.classif:
+        vals = [getattr(classif_desc, fld)
+                for fld in ('classif_date', 'classif_type', 'taxon_name', 'user_name', 'classif_qual')]
+        vals = [str(a_val) if a_val is not None else "-"
+                for a_val in vals]
+        page.append("<tr><td>" + ("</td><td>".join(vals)) + "</td></tr>")
     page.append("</table></div>")
 
     # Complementary information tab
-    if prj.CheckRight(1):
+    if g.PrjAnnotate or g.PrjManager:
         page.append("""<div role="tabpanel" class="tab-pane" id="tabdaddcomments">
         <textarea id=compinfo rows=5 cols=120 autocomplete=off>%s</textarea><br>
         <button type="button" class='btn btn-primary' onclick="UpdateComment();">Save additional comment</button>
@@ -259,7 +285,7 @@ order by classif_date desc""", {"objid": objid}, doXSSEscape=True)
 
     page.append("</table></div>")
     page.append(render_template("common/objectdetailsscripts.html",
-                                Prj=prj, objid=objid, obj=obj))
+                                Prj=obj_proj, objid=objid, obj=obj))
 
     # En mode popup ajout en haut de l'écran d'un hyperlien pour ouvrir en fenetre isolée
     # Sinon affichage sans lien dans la charte.

@@ -328,7 +328,8 @@ def JinjaFormatDateTime(d,format='%Y-%m-%d %H:%M:%S'):
     return d.strftime(format)
 
 def JinjaNl2BR(t):
-    return t.replace('\n', '<br>\n');
+    return t.replace('\n', '<br>\n')
+
 
 def JinjaGetManagerList(sujet=""):
     LstUsers=database.GetAll("""select distinct u.email,u.name,Lower(u.name)

@@ -3,15 +3,15 @@
 #
 from typing import Type, TypeVar, Generic, Union
 
-from flask import Request
 from werkzeug.local import LocalProxy
 
 from appli.api_proxy import BACKEND_URL
 from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
-    AcquisitionsApi, ProcessesApi
+    AcquisitionsApi, ProcessesApi, ObjectApi, TaxonomyTreeApi
 
 # Lol, generics in python
-A = TypeVar('A', ProjectsApi, UsersApi, ObjectsApi, SamplesApi, AcquisitionsApi, ProcessesApi)
+A = TypeVar('A', ProjectsApi, UsersApi, ObjectsApi, ObjectApi,
+            SamplesApi, AcquisitionsApi, ProcessesApi, TaxonomyTreeApi)
 
 
 class ApiClient(Generic[A]):

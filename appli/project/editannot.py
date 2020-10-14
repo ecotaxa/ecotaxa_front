@@ -8,7 +8,7 @@ from appli import app, PrintInCharte, gvg
 
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UsersApi, UserModel, ObjectsApi, \
-    ObjectSetRevertToHistoryRsp, HistoricalClassif
+    ObjectSetRevertToHistoryRsp, HistoricalLastClassif
 
 
 ######################################################################################################################
@@ -19,7 +19,7 @@ def PrjEditAnnot(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_query_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exist"
@@ -136,7 +136,7 @@ def _digest_changes(api_result):
     for classif_id, names in api_result.classif_info.items():
         classif_id = int(classif_id)  # No 'int' in dict keys for openapi?
         for_disp = {"id": classif_id,
-                    "name": names[0] + " (" + names[1] + ")",
+                    "name": names[0] + " (" + str(names[1]) + ")",
                     "nbr": 0,
                     "dest": {}}
         ret.append(for_disp)
@@ -145,9 +145,8 @@ def _digest_changes(api_result):
                 "nbr": 0,
                 "dest": {}})
     data_by_id = {dat["id"]: dat for dat in ret}
-    an_entry: HistoricalClassif
+    an_entry: HistoricalLastClassif
     for an_entry in api_result.last_entries:
-        print(an_entry.classif_id)
         summary = data_by_id[an_entry.classif_id]
         summary["nbr"] += 1
         # Determine the future classification ID & name
