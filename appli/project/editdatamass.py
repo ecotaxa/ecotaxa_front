@@ -32,13 +32,13 @@ def GetFieldList(prj_model: ProjectModel):
     # 1 field in acquisition
     fieldlist.append({'id': 'a''instrument', 'text': 'acquis.''instrument'' (fixed)'})
 
-    MapList = (('f', prj_model.obj_free_cols), ('s', prj_model.sample_free_cols),
-               ('a', prj_model.acquisition_free_cols), ('p', prj_model.process_free_cols))
-    MapPrefix = {'f': 'object.', 's': 'sample.', 'a': 'acquis.', 'p': 'process.'}
+    map_list = (('f', prj_model.obj_free_cols), ('s', prj_model.sample_free_cols),
+                ('a', prj_model.acquisition_free_cols), ('p', prj_model.process_free_cols))
+    map_prefix = {'f': 'object.', 's': 'sample.', 'a': 'acquis.', 'p': 'process.'}
     mapv: Dict[str, str]
-    for mapk, mapv in MapList:
+    for mapk, mapv in map_list:
         for k in sorted(mapv.keys()):
-            fieldlist.append({'id': mapk + mapv[k], 'text': MapPrefix[mapk] + k})
+            fieldlist.append({'id': mapk + mapv[k], 'text': map_prefix[mapk] + k})
     return fieldlist
 
 
