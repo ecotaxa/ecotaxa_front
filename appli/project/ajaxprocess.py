@@ -1,10 +1,9 @@
 from flask import request
 from flask_security import login_required
 
-from appli import app, database, gvp
-from appli.database import db
+from appli import app, gvp
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ObjectsApi, ClassifyReq, ApiException
+from to_back.ecotaxa_cli_py import ObjectsApi, ClassifyReq, ApiException, BulkUpdateReq
 
 
 @app.route('/prj/ManualClassif/<int:_PrjId>', methods=['GET', 'POST'])
@@ -61,14 +60,19 @@ def PrjManualClassif(_PrjId):
 @app.route('/prj/UpdateComment/<int:ObjId>', methods=['GET', 'POST'])
 @login_required
 def PrjUpdateComment(ObjId):
-    Obj = database.Objects.query.filter_by(objid=ObjId).first()
-    if Obj is None:
-        return "Object doesnt exists"
-    Prj = database.Projects.query.filter_by(projid=Obj.projid).first()
-    if not Prj.CheckRight(1):  # Level 0 = Read, 1 = Annotate, 2 = Admin
-        return "You cannot Annotate this project"
+    # Update single field of object
+    updates = [{"ucol": "complement_info", "uval": gvp('comment')}]
+    with ApiClient(ObjectsApi, request) as api:
+        try:
+            nb_rows = api.update_object_set_object_set_update_post(BulkUpdateReq(target_ids=[ObjId],
+                                                                                 updates=updates))
+        except ApiException as ae:
+            if ae.status == 404:
+                return "Object doesn't exists"
+            elif ae.status == 403:
+                return "You cannot write data in this project"
 
-    Obj.complement_info = gvp('comment')
-    db.session.commit()
-
-    return '<span class="label label-success">Database update Successful</span>'
+    if nb_rows == 1:
+        return '<span class="label label-success">Database update Successful</span>'
+    else:
+        return '<span class="label label-warning">Database update failed</span>'
