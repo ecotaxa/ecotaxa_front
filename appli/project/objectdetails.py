@@ -1,6 +1,7 @@
 import datetime
 import html
 import urllib.parse
+from typing import List
 
 from flask import render_template, g, flash, request
 from flask_login import current_user
@@ -13,7 +14,7 @@ from appli.database import db
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ObjectApi, ObjectModel, ApiException, ProjectsApi, ProjectModel, TaxonomyTreeApi, \
     TaxonModel, UsersApi, UserModel, SamplesApi, ProcessesApi, AcquisitionsApi, SampleModel, AcquisitionModel, \
-    ProcessModel, HistoricalClassification, ObjectHistoryRsp
+    ProcessModel, HistoricalClassification
 
 
 @app.route('/objectdetails/<int:objid>')
@@ -251,15 +252,14 @@ def objectdetails(objid):
 
     # Affichage de l'historique des classifications
     with ApiClient(ObjectApi, request) as api:
-        history: ObjectHistoryRsp = api.object_query_history_object_object_id_history_get(objid)
+        history: List[HistoricalClassification] = api.object_query_history_object_object_id_history_get(objid)
 
     page.append("""<div role="tabpanel" class="tab-pane" id="tabdclassiflog">
 Current Classification : Quality={} , date={}
     <table class='table table-bordered table-condensed'><tr>
     <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""".format(obj.classif_qual,
                                                                                           obj.classif_when))
-    classif_desc: HistoricalClassification
-    for classif_desc in history.classif:
+    for classif_desc in history:
         vals = [getattr(classif_desc, fld)
                 for fld in ('classif_date', 'classif_type', 'taxon_name', 'user_name', 'classif_qual')]
         vals = [str(a_val) if a_val is not None else "-"

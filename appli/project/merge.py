@@ -6,7 +6,7 @@ from flask_security import login_required
 from appli import app, PrintInCharte, database, gvg, XSSEscape, FormatError
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectSearchResult, MergeRsp
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, MergeRsp
 
 
 @app.route('/prj/merge/<int:PrjId>', methods=['GET', 'POST'])
@@ -34,7 +34,7 @@ def PrjMerge(PrjId):
                 """
         # Fetch the potential merge sources
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-            rsp: List[ProjectSearchResult] = api.search_projects_projects_search_get(for_managing=True)
+            rsp: List[ProjectModel] = api.search_projects_projects_search_get(for_managing=True)
 
         # TODO: XSSEscape??
         # Display them
@@ -69,8 +69,8 @@ def PrjMerge(PrjId):
         # Validate the merge
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
             rsp: MergeRsp = api.project_merge_projects_project_id_merge_post(project_id=Prj.projid,
-                                                                              source_project_id=PrjSrc.projid,
-                                                                              dry_run=True)
+                                                                             source_project_id=PrjSrc.projid,
+                                                                             dry_run=True)
 
         for an_error in rsp.errors:
             flash(an_error, "error")
@@ -87,12 +87,11 @@ def PrjMerge(PrjId):
             return PrintInCharte("Hit \"Back\" on the navigator to pick another source project.")
 
     if gvg('merge') == 'Y':
-
         # Do the real merge
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
             rsp: MergeRsp = api.project_merge_projects_project_id_merge_post(project_id=Prj.projid,
-                                                                              source_project_id=PrjSrc.projid,
-                                                                              dry_run=False)
+                                                                             source_project_id=PrjSrc.projid,
+                                                                             dry_run=False)
 
         txt += "<div class='alert alert-success' role='alert'>Fusion Done successfully</div>"
         txt += "<br><a class='btn btn-lg btn-primary' href='/prj/%s'>Back to target project</a>" % Prj.projid

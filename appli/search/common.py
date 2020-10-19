@@ -28,6 +28,7 @@ def searchsamples():
 
 @app.route("/search/exploreproject")
 def searchexploreproject():
+    # Public page
     term = ("%" + gvg("q") + "%").lower()
     res = database.GetAll(
         "SELECT projid, title FROM projects WHERE  lower(title) like %s and visible=true order by lower(title) ",
@@ -70,7 +71,7 @@ def ServerFolderSelectJSON():
                                 text="<span class=v>" + "%s (%.1f Mb : %s)" % fmt + "</span> <span class='TaxoSel label label-default'>Select</span>",
                                 parent=parent, children=False))
         except:
-            None  # le parcours des fichier peu planter sur system volume information par exemple.
+            None  # le parcours des fichiers peut planter sur system volume information par exemple.
     res.sort(key=lambda val: str.upper(val['id']), reverse=False)
     return json.dumps(res)
 

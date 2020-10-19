@@ -37,8 +37,10 @@ class ProjectModel(object):
         'sample_free_cols': 'dict(str, str)',
         'acquisition_free_cols': 'dict(str, str)',
         'process_free_cols': 'dict(str, str)',
+        'init_classif_list': 'list[int]',
         'managers': 'list[UserModel]',
         'annotators': 'list[UserModel]',
+        'viewers': 'list[UserModel]',
         'can_administrate': 'bool',
         'projid': 'int',
         'title': 'str',
@@ -48,12 +50,10 @@ class ProjectModel(object):
         'pctvalidated': 'float',
         'pctclassified': 'float',
         'classifsettings': 'str',
-        'initclassiflist': 'str',
         'classiffieldlist': 'str',
         'popoverfieldlist': 'str',
         'comments': 'str',
         'projtype': 'str',
-        'fileloaded': 'str',
         'rf_models_used': 'str',
         'cnn_network_id': 'str'
     }
@@ -63,8 +63,10 @@ class ProjectModel(object):
         'sample_free_cols': 'sample_free_cols',
         'acquisition_free_cols': 'acquisition_free_cols',
         'process_free_cols': 'process_free_cols',
+        'init_classif_list': 'init_classif_list',
         'managers': 'managers',
         'annotators': 'annotators',
+        'viewers': 'viewers',
         'can_administrate': 'can_administrate',
         'projid': 'projid',
         'title': 'title',
@@ -74,17 +76,15 @@ class ProjectModel(object):
         'pctvalidated': 'pctvalidated',
         'pctclassified': 'pctclassified',
         'classifsettings': 'classifsettings',
-        'initclassiflist': 'initclassiflist',
         'classiffieldlist': 'classiffieldlist',
         'popoverfieldlist': 'popoverfieldlist',
         'comments': 'comments',
         'projtype': 'projtype',
-        'fileloaded': 'fileloaded',
         'rf_models_used': 'rf_models_used',
         'cnn_network_id': 'cnn_network_id'
     }
 
-    def __init__(self, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, managers=[], annotators=[], can_administrate=False, projid=None, title=None, visible=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, initclassiflist=None, classiffieldlist=None, popoverfieldlist=None, comments=None, projtype=None, fileloaded=None, rf_models_used=None, cnn_network_id=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, init_classif_list=[], managers=[], annotators=[], viewers=[], can_administrate=False, projid=None, title=None, visible=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, projtype=None, rf_models_used=None, cnn_network_id=None, local_vars_configuration=None):  # noqa: E501
         """ProjectModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -94,8 +94,10 @@ class ProjectModel(object):
         self._sample_free_cols = None
         self._acquisition_free_cols = None
         self._process_free_cols = None
+        self._init_classif_list = None
         self._managers = None
         self._annotators = None
+        self._viewers = None
         self._can_administrate = None
         self._projid = None
         self._title = None
@@ -105,12 +107,10 @@ class ProjectModel(object):
         self._pctvalidated = None
         self._pctclassified = None
         self._classifsettings = None
-        self._initclassiflist = None
         self._classiffieldlist = None
         self._popoverfieldlist = None
         self._comments = None
         self._projtype = None
-        self._fileloaded = None
         self._rf_models_used = None
         self._cnn_network_id = None
         self.discriminator = None
@@ -123,10 +123,14 @@ class ProjectModel(object):
             self.acquisition_free_cols = acquisition_free_cols
         if process_free_cols is not None:
             self.process_free_cols = process_free_cols
+        if init_classif_list is not None:
+            self.init_classif_list = init_classif_list
         if managers is not None:
             self.managers = managers
         if annotators is not None:
             self.annotators = annotators
+        if viewers is not None:
+            self.viewers = viewers
         if can_administrate is not None:
             self.can_administrate = can_administrate
         if projid is not None:
@@ -144,8 +148,6 @@ class ProjectModel(object):
             self.pctclassified = pctclassified
         if classifsettings is not None:
             self.classifsettings = classifsettings
-        if initclassiflist is not None:
-            self.initclassiflist = initclassiflist
         if classiffieldlist is not None:
             self.classiffieldlist = classiffieldlist
         if popoverfieldlist is not None:
@@ -154,8 +156,6 @@ class ProjectModel(object):
             self.comments = comments
         if projtype is not None:
             self.projtype = projtype
-        if fileloaded is not None:
-            self.fileloaded = fileloaded
         if rf_models_used is not None:
             self.rf_models_used = rf_models_used
         if cnn_network_id is not None:
@@ -246,6 +246,27 @@ class ProjectModel(object):
         self._process_free_cols = process_free_cols
 
     @property
+    def init_classif_list(self):
+        """Gets the init_classif_list of this ProjectModel.  # noqa: E501
+
+
+        :return: The init_classif_list of this ProjectModel.  # noqa: E501
+        :rtype: list[int]
+        """
+        return self._init_classif_list
+
+    @init_classif_list.setter
+    def init_classif_list(self, init_classif_list):
+        """Sets the init_classif_list of this ProjectModel.
+
+
+        :param init_classif_list: The init_classif_list of this ProjectModel.  # noqa: E501
+        :type: list[int]
+        """
+
+        self._init_classif_list = init_classif_list
+
+    @property
     def managers(self):
         """Gets the managers of this ProjectModel.  # noqa: E501
 
@@ -286,6 +307,27 @@ class ProjectModel(object):
         """
 
         self._annotators = annotators
+
+    @property
+    def viewers(self):
+        """Gets the viewers of this ProjectModel.  # noqa: E501
+
+
+        :return: The viewers of this ProjectModel.  # noqa: E501
+        :rtype: list[UserModel]
+        """
+        return self._viewers
+
+    @viewers.setter
+    def viewers(self, viewers):
+        """Sets the viewers of this ProjectModel.
+
+
+        :param viewers: The viewers of this ProjectModel.  # noqa: E501
+        :type: list[UserModel]
+        """
+
+        self._viewers = viewers
 
     @property
     def can_administrate(self):
@@ -479,27 +521,6 @@ class ProjectModel(object):
         self._classifsettings = classifsettings
 
     @property
-    def initclassiflist(self):
-        """Gets the initclassiflist of this ProjectModel.  # noqa: E501
-
-
-        :return: The initclassiflist of this ProjectModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._initclassiflist
-
-    @initclassiflist.setter
-    def initclassiflist(self, initclassiflist):
-        """Sets the initclassiflist of this ProjectModel.
-
-
-        :param initclassiflist: The initclassiflist of this ProjectModel.  # noqa: E501
-        :type: str
-        """
-
-        self._initclassiflist = initclassiflist
-
-    @property
     def classiffieldlist(self):
         """Gets the classiffieldlist of this ProjectModel.  # noqa: E501
 
@@ -582,27 +603,6 @@ class ProjectModel(object):
         """
 
         self._projtype = projtype
-
-    @property
-    def fileloaded(self):
-        """Gets the fileloaded of this ProjectModel.  # noqa: E501
-
-
-        :return: The fileloaded of this ProjectModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._fileloaded
-
-    @fileloaded.setter
-    def fileloaded(self, fileloaded):
-        """Sets the fileloaded of this ProjectModel.
-
-
-        :param fileloaded: The fileloaded of this ProjectModel.  # noqa: E501
-        :type: str
-        """
-
-        self._fileloaded = fileloaded
 
     @property
     def rf_models_used(self):

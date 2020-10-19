@@ -55,7 +55,7 @@
 {%   for r in PrjList %}
 <tr><td>
 {%  if Others %}
-  <a class='btn btn-primary' href='mailto:{{r.email}}?{{_manager_mail(r.title, r.projid)|safe}}'>REQUEST ACCESS</a>
+  <a class='btn btn-primary' href='mailto:{{r.managers[0].email|safe if r.managers}}?{{_manager_mail(r.title, r.projid)|safe if r.managers}}'>REQUEST ACCESS</a>
   {% if r.visible==True or isadmin  %}
     <a class='btn btn-primary' href='/prj/{{ r.projid }}'>View</a>
     {% endif %}
@@ -64,11 +64,11 @@
 {% endif %}
 
   </td>
-  <td> {{ r.title }} [{{ r.projid }}] {{ ("<a href='mailto:"+r.email+"'>"+r.name+"</a>") |safe if r.email }}</td>
+  <td> {{ r.title }} [{{ r.projid }}] {{ ("<a href='mailto:"+r.managers[0].email+"'>"+r.managers[0].name+"</a>") |safe if r.managers }}</td>
   <td>{{ r.status }}</td>
-  <td>{{ '{0:0.0f}'.format(r.objcount) }}</td>
-  <td>{{ '{0:0.2f}'.format(r.pctvalidated) }}</td>
-  <td>{{ '{0:0.2f}'.format(r.pctclassified) }}</td>
+  <td>{{ '{0:0.0f}'.format(r.objcount) if r.objcount else 0.0 }}</td>
+  <td>{{ '{0:0.2f}'.format(r.pctvalidated) if r.pctvalidated else 0.0 }}</td>
+  <td>{{ '{0:0.2f}'.format(r.pctclassified) if r.pctclassified else 0.0 }}</td>
   </tr>
 {%  endfor %}
 

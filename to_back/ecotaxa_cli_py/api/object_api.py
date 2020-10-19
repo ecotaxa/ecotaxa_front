@@ -54,7 +54,7 @@ class ObjectApi(object):
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: ObjectHistoryRsp
+        :return: list[HistoricalClassification]
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -81,7 +81,7 @@ class ObjectApi(object):
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: tuple(ObjectHistoryRsp, status_code(int), headers(HTTPHeaderDict))
+        :return: tuple(list[HistoricalClassification], status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -142,7 +142,7 @@ class ObjectApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='ObjectHistoryRsp',  # noqa: E501
+            response_type='list[HistoricalClassification]',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501

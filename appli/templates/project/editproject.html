@@ -5,13 +5,23 @@
 
 {% block body %}
 <form class="form-horizontal" method="post" action="?" id="form1">
-    <h3>Edit project # {{ data.projid }} - <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;" class="btn btn-xs btn-primary">Edit privileges only</a></h3>
+{% if g.privs_only %}
+    <h3>Edit project # {{ data.projid }} - privileges&nbsp;
+        <a href="/prj/edit/{{ data.projid }}" style="font-size: medium;"
+           class="btn btn-xs btn-primary">Edit all</a></h3>
+{% else %}
+    <h3>Edit project # {{ data.projid }} -
+        <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;"
+           class="btn btn-xs btn-primary">Edit privileges only</a></h3>
+{% endif %}
   <table class=table width="100%">
+{% if not g.privs_only %}
     <tr><td width="200px">Project Title </td><td colspan=2 >
         <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}" style="width: 500px" >
     </td></tr>
     <tr><td>Visible for all visitors<br>(only validated objects)</td><td>
-           <input type="checkbox"  style="height:20px;" id="visible" name="visible"  value="Y" {{ 'checked' if data.visible else "" }}>
+           <input type="checkbox"  style="height:20px;" id="visible" name="visible"
+                  value="Y" {{ 'checked' if data.visible else "" }}>
     </td>
       <td width="600px"></td>
     </tr>
@@ -20,27 +30,31 @@
         {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
   </td></tr>
 <tr><td>Project Description</td><td>
-        <input type="text"  class="form-control" id="projtype" name="projtype"  value="{{ data.projtype|default('',true) }}">
+        <input type="text" maxlength="50" class="form-control" id="projtype" name="projtype"
+               value="{{ data.projtype|default('',true) }}">
       </td></tr>
 
   <tr><td>Definition of preset for manual sorting
-  <br><button class="btn btn-default" type="button" onclick="PickPresetFromOthersProject();"><i class="fas fa-clone"></i> Pick from others projects</button>
+  <br><button class="btn btn-default" type="button" onclick="PickPresetFromOthersProject();">
+          <i class="fas fa-clone"></i> Pick from others projects</button>
   </td><td>
-        <input type="hidden"  class="form-control" id="initclassiflist" name="initclassiflist"  value="{{ data.initclassiflist|default('',true) }}">
-      <select name='inittaxo' id='inittaxo' class="taxolb" style="width: 100%;" multiple>
+        <input type="hidden"  class="form-control" id="initclassiflist" name="initclassiflist"
+               value="{{ data.initclassiflist|default('',true) }}">
+      <select id='inittaxo' class="taxolb" style="width: 100%;" multiple>
     {% for r in g.predeftaxo %}
       <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
     {% endfor %}
   </select>
     </td><td>
 The PRESET tool permits to create a pre-defined list of categories for the sorting of the images from the project
-<ul><li>The list can be directly copied from another project (use Pick from others projects)
+<ul><li>The list can be directly copied from another project (use Pick from other projects)
     <li>New categories can be added using the auto completion function
 </ul>
   </td></tr>
 
   <tr><td>Fields available for<br>sorting & Display<br>In the manual classification page</td><td>
-        <textarea  class="form-control" id="classiffieldlist" name="classiffieldlist"  rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
+        <textarea  class="form-control" id="classiffieldlist" name="classiffieldlist"
+                   rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
     </td><td>
     Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
 <br>Example : depth_min=minimum depth [m] where
@@ -54,7 +68,8 @@ Available fields :
 
    </td></tr>
   <tr><td>Fields displayed in image popover<br>in the manual classification page</td><td>
-        <textarea  class="form-control" id="popoverfieldlist" name="popoverfieldlist"  rows="8">{{ data.popoverfieldlist|default('',true) }}</textarea>
+        <textarea  class="form-control" id="popoverfieldlist" name="popoverfieldlist"
+                   rows="8">{{ data.popoverfieldlist|default('',true) }}</textarea>
     </td><td>
         Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
 <br>Example : depth_min=minimum depth [m] where
@@ -74,29 +89,30 @@ Available fields :
           <option value="{{ k }}" {{ 'selected' if data.cnn_network_id==k }}>{{ v.name }}</option>
         {% endfor %}
         </select>
-    </td><td>SCN Network used for prediction, if you change it, existing features computed with this network will be erased.
+    </td>
+      <td>SCN Network used for prediction, if you change it, existing features computed with this network will be erased.
     <br>New features will be recomputed during the next automatic classification.
     </td></tr>
   <tr><td>Comments</td><td>
-        <textarea  class="form-control" id="comments" name="comments"  rows="4">{{ data.comments|default('',true) }}</textarea>
+        <textarea  class="form-control" id="comments" name="comments"
+                   rows="4">{{ data.comments|default('',true) }}</textarea>
     </td><td>
     </td></tr>
-
+{% endif %}
   <tr><td>Privileges</td><td colspan="2">
         <table class="table table-bordered table-verycondensed" style="width:500px;">
           <tr>
-            <td >Name</td>
+            <td>Name</td>
             <td>Privilege</td>
             <td>Delete</td>
           </tr>
-      {% for pr in data.projmembers %}
+          {% for pr in g.members %}
           <tr>
-            <td>{{ ht.selectinputdict('priv_'~pr.id~'_member', g.users, pr.member) }}</td>
-            <td>{{ ht.selectinput('priv_'~pr.id~'_privilege', ('View', 'Annotate','Manage'), pr.privilege) }}</td>
-            <td><input type="checkbox" name="priv_{{ pr.id }}_delete" value="Y"></td>
+            <td>{{ ht.selectinputdict('priv_'~pr.member_id~'_member', g.users, pr.member_id) }}</td>
+            <td>{{ ht.selectinput('priv_'~pr.member_id~'_privilege', ('View', 'Annotate','Manage'), pr.privilege) }}</td>
+            <td><input type="checkbox" name="priv_{{ pr.member_id }}_delete" value="Y"></td>
           </tr>
-
-    {% endfor %}
+          {% endfor %}
           <tr>
             <td>New privilege :</td>
           </tr>
@@ -145,21 +161,24 @@ $(document).ready(function() {
          $("#TaxoModalBody").html("Loading...");
          $("#TaxoModalBody").load("/search/taxotree?target="+targetid);
     });
-    }); // Ready
+}); // Ready
 
- $('#inittaxo').on("change", function (e) {
-  var selected=[];
+$('#inittaxo').on("change", function (e) {
+   var selected=[];
    $('#inittaxo :selected').each(function(){
      selected.push($(this).val())
       });
    $("#initclassiflist").val(selected.join())
- });
+});
+
 function SubmitForm()
-{ {# On passe par cette fonction intermediare car quand on avait le focus sur un select2 dans certaines situations ca ne fesait pas le post #}
+{ {# On passe par cette fonction intermediaire car quand on avait le focus sur un select2 dans certaines
+     situations ca ne faisait pas le post #}
     document.getElementById("form1").submit();
 }
+
 function PickPresetFromOthersProject() {
-  At2PopupWaitOpenLoad(2,'/prj/popupeditpreset/{{ data.projid }}','Pick preset from others projects',{});
+  At2PopupWaitOpenLoad(2,'/prj/popupeditpreset/{{ data.projid }}','Pick preset from other projects',{});
 }
  </script>
 
@@ -169,7 +188,8 @@ function PickPresetFromOthersProject() {
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="ModalLabel">Modal title</h4>
       </div>
       <div class="modal-body">

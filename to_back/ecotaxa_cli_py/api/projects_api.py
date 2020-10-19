@@ -649,7 +649,7 @@ class ProjectsApi(object):
     def project_query_projects_project_id_get(self, project_id, **kwargs):  # noqa: E501
         """Project Query  # noqa: E501
 
-        See if project exists for current user, eventually for managing it.  # noqa: E501
+        Read project if it exists for current user, eventually for managing it.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.project_query_projects_project_id_get(project_id, async_req=True)
@@ -675,7 +675,7 @@ class ProjectsApi(object):
     def project_query_projects_project_id_get_with_http_info(self, project_id, **kwargs):  # noqa: E501
         """Project Query  # noqa: E501
 
-        See if project exists for current user, eventually for managing it.  # noqa: E501
+        Read project if it exists for current user, eventually for managing it.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.project_query_projects_project_id_get_with_http_info(project_id, async_req=True)
@@ -872,6 +872,120 @@ class ProjectsApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='object',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def project_stats_project_set_stats_get(self, ids, **kwargs):  # noqa: E501
+        """Project Stats  # noqa: E501
+
+        Read projects statistics, i.e. used taxa and classification states.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.project_stats_project_set_stats_get(ids, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str ids: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: list[ProjectStatsModel]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.project_stats_project_set_stats_get_with_http_info(ids, **kwargs)  # noqa: E501
+
+    def project_stats_project_set_stats_get_with_http_info(self, ids, **kwargs):  # noqa: E501
+        """Project Stats  # noqa: E501
+
+        Read projects statistics, i.e. used taxa and classification states.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.project_stats_project_set_stats_get_with_http_info(ids, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str ids: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(list[ProjectStatsModel], status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'ids'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method project_stats_project_set_stats_get" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'ids' is set
+        if self.api_client.client_side_validation and ('ids' not in local_var_params or  # noqa: E501
+                                                        local_var_params['ids'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `ids` when calling `project_stats_project_set_stats_get`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'ids' in local_var_params and local_var_params['ids'] is not None:  # noqa: E501
+            query_params.append(('ids', local_var_params['ids']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['HTTPBearer']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/project_set/stats', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='list[ProjectStatsModel]',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
@@ -1136,7 +1250,7 @@ class ProjectsApi(object):
     def search_projects_projects_search_get(self, **kwargs):  # noqa: E501
         """Search Projects  # noqa: E501
 
-        Return projects summary for current user. - @param also_others: Allows to return projects for which given user has no right - @param for_managing: Allows to return project that can be written to (including erased) by the given user - @param title_filter: Use this pattern for matching returned projects names - @param instrument_filter: Only return projects where this instrument was used - @param filter_subset: Only return projects having 'subset' in their names  # noqa: E501
+        Return projects for current user. - `param` also_others: Allows to return projects for which given user has no right - `param` for_managing: Allows to return project that can be written to (including erased) by the given user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having 'subset' in their names  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.search_projects_projects_search_get(async_req=True)
@@ -1155,7 +1269,7 @@ class ProjectsApi(object):
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: list[ProjectSearchResult]
+        :return: list[ProjectModel]
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -1165,7 +1279,7 @@ class ProjectsApi(object):
     def search_projects_projects_search_get_with_http_info(self, **kwargs):  # noqa: E501
         """Search Projects  # noqa: E501
 
-        Return projects summary for current user. - @param also_others: Allows to return projects for which given user has no right - @param for_managing: Allows to return project that can be written to (including erased) by the given user - @param title_filter: Use this pattern for matching returned projects names - @param instrument_filter: Only return projects where this instrument was used - @param filter_subset: Only return projects having 'subset' in their names  # noqa: E501
+        Return projects for current user. - `param` also_others: Allows to return projects for which given user has no right - `param` for_managing: Allows to return project that can be written to (including erased) by the given user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having 'subset' in their names  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.search_projects_projects_search_get_with_http_info(async_req=True)
@@ -1186,7 +1300,7 @@ class ProjectsApi(object):
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: tuple(list[ProjectSearchResult], status_code(int), headers(HTTPHeaderDict))
+        :return: tuple(list[ProjectModel], status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -1255,7 +1369,7 @@ class ProjectsApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[ProjectSearchResult]',  # noqa: E501
+            response_type='list[ProjectModel]',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
@@ -1383,6 +1497,133 @@ class ProjectsApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='SimpleImportRsp',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def update_project_projects_project_id_put(self, project_id, project_model, **kwargs):  # noqa: E501
+        """Update Project  # noqa: E501
+
+        Update the project. Note that some fields will NOT be updated and simply ignored, e.g. *free_cols.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.update_project_projects_project_id_put(project_id, project_model, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param ProjectModel project_model: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: object
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.update_project_projects_project_id_put_with_http_info(project_id, project_model, **kwargs)  # noqa: E501
+
+    def update_project_projects_project_id_put_with_http_info(self, project_id, project_model, **kwargs):  # noqa: E501
+        """Update Project  # noqa: E501
+
+        Update the project. Note that some fields will NOT be updated and simply ignored, e.g. *free_cols.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.update_project_projects_project_id_put_with_http_info(project_id, project_model, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param int project_id: (required)
+        :param ProjectModel project_model: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'project_id',
+            'project_model'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method update_project_projects_project_id_put" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'project_id' is set
+        if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
+                                                        local_var_params['project_id'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `update_project_projects_project_id_put`")  # noqa: E501
+        # verify the required parameter 'project_model' is set
+        if self.api_client.client_side_validation and ('project_model' not in local_var_params or  # noqa: E501
+                                                        local_var_params['project_model'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_model` when calling `update_project_projects_project_id_put`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'project_id' in local_var_params:
+            path_params['project_id'] = local_var_params['project_id']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'project_model' in local_var_params:
+            body_params = local_var_params['project_model']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['HTTPBearer']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/projects/{project_id}', 'PUT',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='object',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501

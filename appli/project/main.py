@@ -17,7 +17,7 @@ from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectSearchResult, CreateProjectReq, ProjectsApi, ProjectModel, \
+from to_back.ecotaxa_cli_py import CreateProjectReq, ProjectsApi, ProjectModel, \
     ApiException, ObjectsApi
 
 
@@ -38,11 +38,13 @@ def indexProjects(Others=False):
     else:  # Sinon on prend la valeur de la session.
         filt_subset = session.get('prjfilt_subset', '')
 
-    with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-        rsp: List[ProjectSearchResult] = api.search_projects_projects_search_get(also_others=Others,
-                                                                                 title_filter=filt_title,
-                                                                                 instrument_filter=filt_instrum,
-                                                                                 filter_subset=(filt_subset == 'Y'))
+    with ApiClient(ProjectsApi, request) as api:
+        prjs: List[ProjectModel] = api.search_projects_projects_search_get(also_others=Others,
+                                                                           title_filter=filt_title,
+                                                                           instrument_filter=filt_instrum,
+                                                                           filter_subset=(filt_subset == 'Y'))
+    # Sort for consistency
+    prjs.sort(key=lambda prj: prj.title.strip().lower())
 
     CanCreate = False
     if not Others:
@@ -58,7 +60,7 @@ def indexProjects(Others=False):
         flash(Markup(fashtxt), 'warning')
 
     return PrintInCharte(
-        render_template('project/list.html', PrjList=rsp, CanCreate=CanCreate,
+        render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
                         AppManagerMailto=appli.GetAppManagerMailto(),
                         filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum, Others=Others,
                         isadmin=current_user.has_role(database.AdministratorLabel),
