@@ -165,6 +165,7 @@ class Projects(db.Model):
     projid = db.Column(INTEGER, db.Sequence('seq_projects'), primary_key=True)
     title = db.Column(VARCHAR(255), nullable=False)
     visible = db.Column(db.Boolean(), default=True)
+    license = db.Column(VARCHAR(16), default="C", nullable=False)
     status = db.Column(VARCHAR(40), default="Annotate")  # Annotate, ExploreOnly, Annotate No Prediction
     mappingobj = db.Column(VARCHAR)
     mappingsample = db.Column(VARCHAR)

@@ -19,11 +19,20 @@
     <tr><td width="200px">Project Title </td><td colspan=2 >
         <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}" style="width: 500px" >
     </td></tr>
-    <tr><td>Visible for all visitors<br>(only validated objects)</td><td>
+    <tr>
+        <td>Visible for all visitors<br>(only validated objects)</td><td>
            <input type="checkbox"  style="height:20px;" id="visible" name="visible"
                   value="Y" {{ 'checked' if data.visible else "" }}>
-    </td>
-      <td width="600px"></td>
+       </td>
+        <td>License
+            <select name="license" id="license" onchange=""  > {# class="form-control"  #}
+            {% for k,v in possible_licenses.items() %}
+                <option value="{{ k }}"  {{ 'selected' if data.license==k }}>{{ k }}</option>
+            {% endfor %}
+            </select>
+            <br><span id="license_explain">help</span>
+       </td>
+        <td width="600px"></td>
     </tr>
 
 <tr><td>Status</td><td >
@@ -161,6 +170,22 @@ $(document).ready(function() {
          $("#TaxoModalBody").html("Loading...");
          $("#TaxoModalBody").load("/search/taxotree?target="+targetid);
     });
+    // A Dict[str,str] in python loads fine in JS var
+    var choice_to_help = {{ possible_licenses | safe }}
+    var show_license_help = function(sel) {
+        var help = choice_to_help[sel];
+        if (help.startsWith("http")) {
+            // If a link, show it clickable
+            help = "<a target='_new' href='"+help+"'>"+help+"</a>";
+        }
+        $("#license_explain").html(help);
+    };
+    // on change handler
+    $('#license').change(function(event) {
+        show_license_help($(this)[0].value);
+    });
+    // initial value
+    show_license_help('{{ data.license }}');
 }); // Ready
 
 $('#inittaxo').on("change", function (e) {

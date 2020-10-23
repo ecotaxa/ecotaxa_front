@@ -10,7 +10,7 @@ from appli import app, PrintInCharte, gvp, XSSEscape, TempTaskDir
 ######################################################################################################################
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UserModel, UsersApi, \
-    TaxonomyTreeApi, TaxonModel, ProjectStatsModel
+    TaxonomyTreeApi, TaxonModel, ProjectStatsModel, MiscApi
 
 
 @app.route('/prj/edit/<int:PrjId>', methods=['GET', 'POST'])
@@ -105,7 +105,12 @@ def PrjEdit(PrjId, privs_only=False):
     # TODO: move to back-end
     g.scn = _GetSCNNetworks()
 
-    return render_template('project/editproject.html', data=target_proj)
+    # TODO: Cache of course, it's constants!
+    with ApiClient(MiscApi, request) as api:
+        possible_licenses = api.used_constants_constants_get().license_texts
+
+    return render_template('project/editproject.html', data=target_proj,
+                           possible_licenses=possible_licenses)
 
 
 ######################################################################################################################
