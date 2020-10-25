@@ -30,18 +30,25 @@
                 <option value="{{ k }}"  {{ 'selected' if data.license==k }}>{{ k }}</option>
             {% endfor %}
             </select>
-            <br><span id="license_explain">help</span>
+            <br><span id="license_explain">license text</span>
        </td>
         <td width="600px"></td>
     </tr>
 
-<tr><td>Status</td><td >
+    <tr>
+        <td>Status</td>
+        <td >
         {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
-  </td></tr>
+        </td>
+        <td>Owner&nbsp;{{ ht.selectinputdict('owner_id', g.managers_by_id, data.owner.id) }}
+        </td>
+    </tr>
+      
 <tr><td>Project Description</td><td>
         <input type="text" maxlength="50" class="form-control" id="projtype" name="projtype"
                value="{{ data.projtype|default('',true) }}">
-      </td></tr>
+      </td>
+</tr>
 
   <tr><td>Definition of preset for manual sorting
   <br><button class="btn btn-default" type="button" onclick="PickPresetFromOthersProject();">
@@ -164,6 +171,7 @@ $(document).ready(function() {
         minimumInputLength: 3
     }); // Select2 Ajax
     $("select[name$=member]").{{ js.select2_user() }}; // Select2 Ajax
+    $("select[name=owner_id]").select2(); // Select2 Ajax
     $('#TaxoModal').on('show.bs.modal', function (e) {
         var button = $(e.relatedTarget); // Button that triggered the modal
         var targetid = button.data('mytargetid');
