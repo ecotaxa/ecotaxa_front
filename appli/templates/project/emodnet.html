@@ -1,0 +1,17 @@
+<div>
+
+    {% for an_error in data.errors %}
+    <span class="label-danger">{{ an_error }}</span>
+    <br/>
+    {% endfor %}
+
+    {% for a_warning in data.warnings %}
+    <span class="label-warning">{{ a_warning }}</span>
+    <br/>
+    {% endfor %}
+
+    {% if data.task_id != 0 %}
+    <a href='/Task/GetFile/{{data.task_id}}/dwca.zip' class='btn btn-primary btn-sm ' role='button'>Get file</a>
+    {% endif %}
+
+</div>

@@ -296,6 +296,7 @@ import appli.part.view
 import appli.taxonomy.taxomain
 import appli.usermgmnt
 import appli.api_proxy
+import appli.project.emodnet
 
 @app.errorhandler(404)
 def not_found(e):
