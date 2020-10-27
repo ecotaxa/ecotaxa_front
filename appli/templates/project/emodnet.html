@@ -5,6 +5,11 @@
     <br/>
     {% endfor %}
 
+    {% if data.errors %}
+    <a href="/prj/edit/{{prj.projid}}">Project Settings</a>
+    <br/>
+    {% endif %}
+
     {% for a_warning in data.warnings %}
     <span class="label-warning">{{ a_warning }}</span>
     <br/>

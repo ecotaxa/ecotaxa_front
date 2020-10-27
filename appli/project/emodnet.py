@@ -36,5 +36,5 @@ def EMODnet_export(prj_id):
     else:
         # Self-post
         pass
-    page = render_template("project/emodnet.html", data=export_rsp)
+    page = render_template("project/emodnet.html", data=export_rsp, prj=source_proj)
     return PrintInCharte(page)
