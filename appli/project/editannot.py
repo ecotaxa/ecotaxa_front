@@ -44,7 +44,7 @@ def PrjEditAnnot(PrjId):
         LstUserNew = OrderedDict({'lastannot': "Previous Annotation available, or prediction, or Nothing"})
         # TODO: It would be nice to offer only relevant users as a choice
         with ApiClient(UsersApi, request) as api:
-            all_users: List[UserModel] = api.get_users_users_get()
+            all_users: List[UserModel] = api.search_user_users_search_get(by_name="%%")
         # No guaranteed order from API, so sort now, see #475 for the strip()
         all_users.sort(key=lambda user: user.name.strip())
         # Complete selection lists
