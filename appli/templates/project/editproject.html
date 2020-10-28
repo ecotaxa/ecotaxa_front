@@ -40,8 +40,6 @@
         <td >
         {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
         </td>
-        <td>Owner&nbsp;{{ ht.selectinputdict('owner_id', g.managers_by_id, data.owner.id) }}
-        </td>
     </tr>
       
 <tr><td>Project Description</td><td>
@@ -171,7 +169,6 @@ $(document).ready(function() {
         minimumInputLength: 3
     }); // Select2 Ajax
     $("select[name$=member]").{{ js.select2_user() }}; // Select2 Ajax
-    $("select[name=owner_id]").select2(); // Select2 Ajax
     $('#TaxoModal').on('show.bs.modal', function (e) {
         var button = $(e.relatedTarget); // Button that triggered the modal
         var targetid = button.data('mytargetid');

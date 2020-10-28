@@ -83,14 +83,14 @@ def PrjEdit(PrjId, privs_only=False):
         if len(target_proj.managers) == 0:
             flash("At least one manager is needed", "error")
 
-        # Point owner to the right manager
-        owner_id = int(gvp('owner_id','0'))
-        for a_member in target_proj.managers:
-            if a_member.id == owner_id:
-                target_proj.owner = a_member
-                break
-        else:
-            flash("Owner has to be a Manager", "error")
+        # # Point owner to the right manager
+        # owner_id = int(gvp('owner_id','0'))
+        # for a_member in target_proj.managers:
+        #     if a_member.id == owner_id:
+        #         target_proj.owner = a_member
+        #         break
+        # else:
+        #     flash("Owner has to be a Manager", "error")
 
         # Update on back-end
         with ApiClient(ProjectsApi, request) as api:
@@ -106,7 +106,7 @@ def PrjEdit(PrjId, privs_only=False):
         for a_user in members_for_priv:
             g.members.append({"member_id": str(a_user.id), "privilege": a_priv})
 
-    g.managers_by_id = {mgr.id:mgr.name for mgr in target_proj.managers}
+    # g.managers_by_id = {mgr.id:mgr.name for mgr in target_proj.managers}
 
     lst = [str(tid) for tid in target_proj.init_classif_list]
     with ApiClient(TaxonomyTreeApi, request) as api:
