@@ -17,7 +17,10 @@ from __future__ import absolute_import
 from to_back.ecotaxa_cli_py.models.acquisition_model import AcquisitionModel
 from to_back.ecotaxa_cli_py.models.bulk_update_req import BulkUpdateReq
 from to_back.ecotaxa_cli_py.models.classify_req import ClassifyReq
+from to_back.ecotaxa_cli_py.models.constants import Constants
 from to_back.ecotaxa_cli_py.models.create_project_req import CreateProjectReq
+from to_back.ecotaxa_cli_py.models.emo_dnet_export_req import EMODnetExportReq
+from to_back.ecotaxa_cli_py.models.emo_dnet_export_rsp import EMODnetExportRsp
 from to_back.ecotaxa_cli_py.models.http_validation_error import HTTPValidationError
 from to_back.ecotaxa_cli_py.models.historical_classification import HistoricalClassification
 from to_back.ecotaxa_cli_py.models.historical_last_classif import HistoricalLastClassif
@@ -25,6 +28,7 @@ from to_back.ecotaxa_cli_py.models.image_model import ImageModel
 from to_back.ecotaxa_cli_py.models.import_prep_req import ImportPrepReq
 from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
 from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
+from to_back.ecotaxa_cli_py.models.login_req import LoginReq
 from to_back.ecotaxa_cli_py.models.merge_rsp import MergeRsp
 from to_back.ecotaxa_cli_py.models.object_header_model import ObjectHeaderModel
 from to_back.ecotaxa_cli_py.models.object_model import ObjectModel

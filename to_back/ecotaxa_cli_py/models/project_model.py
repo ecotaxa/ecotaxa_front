@@ -42,6 +42,7 @@ class ProjectModel(object):
         'annotators': 'list[UserModel]',
         'viewers': 'list[UserModel]',
         'can_administrate': 'bool',
+        'license': 'str',
         'projid': 'int',
         'title': 'str',
         'visible': 'bool',
@@ -68,6 +69,7 @@ class ProjectModel(object):
         'annotators': 'annotators',
         'viewers': 'viewers',
         'can_administrate': 'can_administrate',
+        'license': 'license',
         'projid': 'projid',
         'title': 'title',
         'visible': 'visible',
@@ -84,7 +86,7 @@ class ProjectModel(object):
         'cnn_network_id': 'cnn_network_id'
     }
 
-    def __init__(self, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, init_classif_list=[], managers=[], annotators=[], viewers=[], can_administrate=False, projid=None, title=None, visible=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, projtype=None, rf_models_used=None, cnn_network_id=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, init_classif_list=[], managers=[], annotators=[], viewers=[], can_administrate=False, license=None, projid=None, title=None, visible=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, projtype=None, rf_models_used=None, cnn_network_id=None, local_vars_configuration=None):  # noqa: E501
         """ProjectModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -99,6 +101,7 @@ class ProjectModel(object):
         self._annotators = None
         self._viewers = None
         self._can_administrate = None
+        self._license = None
         self._projid = None
         self._title = None
         self._visible = None
@@ -133,6 +136,8 @@ class ProjectModel(object):
             self.viewers = viewers
         if can_administrate is not None:
             self.can_administrate = can_administrate
+        if license is not None:
+            self.license = license
         if projid is not None:
             self.projid = projid
         self.title = title
@@ -349,6 +354,27 @@ class ProjectModel(object):
         """
 
         self._can_administrate = can_administrate
+
+    @property
+    def license(self):
+        """Gets the license of this ProjectModel.  # noqa: E501
+
+
+        :return: The license of this ProjectModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._license
+
+    @license.setter
+    def license(self, license):
+        """Sets the license of this ProjectModel.
+
+
+        :param license: The license of this ProjectModel.  # noqa: E501
+        :type: str
+        """
+
+        self._license = license
 
     @property
     def projid(self):

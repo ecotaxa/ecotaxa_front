@@ -342,9 +342,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.4.4"
+ecotaxa_version="2.4.5"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-10-14"
+    return ecotaxa_version+" 2020-10-29"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -352,6 +352,11 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-10-29 : V 2.4.5
+    Bug #516: No title for project in anonymous view mode.
+    Feature #426: Minimal UI to export a project in DwC format. Menu is hidden.
+    Feature #244: Add a license field for projects.
+    Feature #435: Project edit now on back-end (excluding CNN list).
 2020-10-14 : V 2.4.4
     Bug #500: Base view for queries should be simpler and faster.
     Feature #497: Sort tasks by more recents first.

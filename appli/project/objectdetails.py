@@ -65,11 +65,16 @@ def objectdetails(objid):
     # //window.location="mailto:?subject=Ecotaxa%20page%20share&body="+
     # encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
 
+    try:
+        current_user_id = current_user.id
+    except AttributeError:
+        current_user_id = -1 # Anonymous
+
     # Injected data for taxo select
-    g.PrjManager = obj_proj.can_administrate or current_user.id in [u.id for u in obj_proj.managers]
+    g.PrjManager = obj_proj.can_administrate or current_user_id in [u.id for u in obj_proj.managers]
     g.PrjAnnotate = False
     if not g.PrjManager:
-        g.PrjAnnotate = current_user.id in [u.id for u in obj_proj.annotators]
+        g.PrjAnnotate = current_user_id in [u.id for u in obj_proj.annotators]
 
     page.append("</p><p>Classification :")
     if obj.classif_id:
@@ -81,10 +86,12 @@ def objectdetails(objid):
         page.append("<br>&emsp;<b>Unknown</b>")
 
     if obj.classif_who is not None:
-        with ApiClient(UsersApi, request) as api:
-            user: UserModel = api.get_user_users_user_id_get(user_id=obj.classif_who)
         page.append("<br>&emsp;%s " % (database.ClassifQual.get(obj.classif_qual, "To be classified")))
-        page.append(" by %s (%s) " % (user.name, user.email))
+        if current_user_id != -1:
+            # No name for anonymous
+            with ApiClient(UsersApi, request) as api:
+                user: UserModel = api.get_user_users_user_id_get(user_id=obj.classif_who)
+            page.append(" by %s (%s) " % (user.name, user.email))
         if obj.classif_when is not None:
             page.append(" on %s " % obj.classif_when)
     page.append("</p>")

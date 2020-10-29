@@ -253,8 +253,8 @@ def indexPrj(PrjId):
         g.headmenu.append(("/prjPurge/%d" % (PrjId,), "Delete objects or project"))
         g.headmenuF.append(("javascript:GotoWithFilter('/prjPurge/%d')" % (PrjId,), "Delete objects"))
         # EMODNet Audit & Export
-        g.headmenu.append(("", "SEP"))
-        g.headmenu.append(("/prj/emodnet/%d" % (PrjId,), "EMODnet export"))
+        # g.headmenu.append(("", "SEP"))
+        # g.headmenu.append(("/prj/emodnet/%d" % (PrjId,), "EMODnet export"))
 
     appli.AddTaskSummaryForTemplate()
     filtertab = getcommonfilters(data)
