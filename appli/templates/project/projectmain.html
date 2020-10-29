@@ -87,6 +87,20 @@
         </td>
     </tr>
 </table>
+{% else %}
+<table width="100%">
+    <tr>
+        <td width="14%"></td>
+        <td>
+            <div id="titlediv">
+                <div id=titledivtitle
+                    style="font-size: 18px;max-width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden; vertical-align: bottom;display: inline-block;">
+                    {{ g.ProjectTitle }}
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
 {% endif %} {# If headmenu #}
 
 {% endblock %}
