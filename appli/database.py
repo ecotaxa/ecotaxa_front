@@ -260,7 +260,7 @@ class ProjectsTaxoStat(db.Model):
 
 class Samples(db.Model):
     __tablename__ = 'samples'
-    sampleid = db.Column(BIGINT, db.Sequence('seq_samples'), primary_key=True)
+    sampleid = db.Column(INTEGER, db.Sequence('seq_samples'), primary_key=True)
     projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
     project = db.relationship("Projects")
     orig_id = db.Column(VARCHAR(255))
@@ -279,7 +279,7 @@ Index('IS_SamplesProject', Samples.__table__.c.projid)
 
 class Acquisitions(db.Model):
     __tablename__ = 'acquisitions'
-    acquisid = db.Column(BIGINT, db.Sequence('seq_acquisitions'), primary_key=True)
+    acquisid = db.Column(INTEGER, db.Sequence('seq_acquisitions'), primary_key=True)
     projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
     project = db.relationship("Projects")
     orig_id = db.Column(VARCHAR(255))
@@ -296,7 +296,7 @@ Index('IS_AcquisitionsProject', Acquisitions.__table__.c.projid)
 
 class Process(db.Model):
     __tablename__ = 'process'
-    processid = db.Column(BIGINT, db.Sequence('seq_process'), primary_key=True)
+    processid = db.Column(INTEGER, db.Sequence('seq_process'), primary_key=True)
     projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
     project = db.relationship("Projects")
     orig_id = db.Column(VARCHAR(255))
