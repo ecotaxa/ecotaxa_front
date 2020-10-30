@@ -553,6 +553,20 @@ class TaskClassifAuto2(AsyncTask):
                 if self.param.CritVar=='' and self.param.usescn=="":
                     errors.append("You must select some variable")
                 if self.param.Taxo=='' : errors.append("You must select some category")
+
+            # Sanity check before launching the task
+            if self.param.Perimeter != 'all':
+                PerimeterWhere = " and ( classif_qual='P' or classif_qual is null)  "
+            else:
+                PerimeterWhere = ""
+            sqlparam = {}
+            PerimeterWhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam, -99999)
+            NbrItem = \
+            GetAll("select count(*) from objects o where projid={0} {1} ".format(Prj.projid, PerimeterWhere), sqlparam)[
+                0][0]
+            if NbrItem == 0:
+                errors.append("No object to classify, perhaps all object already classified or you should adjust the perimeter settings as it was probably set to 'Not Validated' ")
+
             if len(errors)>0:
                 for e in errors:
                     flash(e,"error")
