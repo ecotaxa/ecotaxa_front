@@ -1,174 +1,197 @@
 {% extends "layout.html" %}
 {% block headcenter %}
-  <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
+<h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
 {% endblock %}
 
 {% block body %}
 
 
 <div class="panel panel-default" style="margin: 0px 5px">
-  <div class="panel-heading">
-    <h3 class="panel-title">Images and TSV file import (Step 1)</h3>
-  </div>
-  <div class="panel-body">
+    <div class="panel-heading">
+        <h3 class="panel-title">Images and TSV file import (Step 1)</h3>
+    </div>
+    <div class="panel-body">
 
 
-<div class="help-block">
-	<div class="row">
-		<div class="col-sm-12">
+        <div class="help-block">
+            <div class="row">
+                <div class="col-sm-12">
 
-<p><a href="#create-project" data-toggle="collapse" class="help">How to create a project</a></p>
-<div id="create-project" class="collapse">
-  <p>To create your first project, you must contact the application manager: {{ g.appmanagermailto|safe }}.</p>
+                    <p><a href="#create-project" data-toggle="collapse" class="help">How to create a project</a></p>
+                    <div id="create-project" class="collapse">
+                        <p>To create your first project, you must contact the application manager: {{
+                            g.appmanagermailto|safe }}.</p>
 
-  <p>Then you will be allowed to create new projects.</p>
-</div>
+                        <p>Then you will be allowed to create new projects.</p>
+                    </div>
 
- {% include "task/import_create_shared_doc.html" %}
+                    {% include "task/import_create_shared_doc.html" %}
 
-			<p><a href="#zooprocess-help" data-toggle="collapse" class="help">How to import data from zooprocess</a></p>
-			<div id="zooprocess-help" class="collapse">
-				<p>Use version > 7.21.</p>
-				<h5>Importation of previously validated samples <small>(vignettes sorted in "sorted_vignettes” folder and identification loaded in dat1.tsv files)</small></h5>
-				<ul>
-					<li>Check that ALL metadata are correct</li>
-					<li>Select project</li>
-					<li>Switch to Advanced mode</li>
-					<li>Run "Create tables for Ecotaxa” (from "Other tools” menu for Zooscan users) and run option "ALL sorted vignettes…” to create the Ecotaxa folder in the root of your project. This Ecotaxa folder will contain and TSV tables sorted by samples</li>
-					<li>Load the "ecotaxa” folder on the server</li>
-				</ul>
+                    <p><a href="#zooprocess-help" data-toggle="collapse" class="help">How to import data from
+                        zooprocess</a></p>
+                    <div id="zooprocess-help" class="collapse">
+                        <p>Use version > 7.21.</p>
+                        <h5>Importation of previously validated samples <small>(vignettes sorted in "sorted_vignettes”
+                            folder and identification loaded in dat1.tsv files)</small></h5>
+                        <ul>
+                            <li>Check that ALL metadata are correct</li>
+                            <li>Select project</li>
+                            <li>Switch to Advanced mode</li>
+                            <li>Run "Create tables for Ecotaxa” (from "Other tools” menu for Zooscan users) and run
+                                option "ALL sorted vignettes…” to create the Ecotaxa folder in the root of your project.
+                                This Ecotaxa folder will contain and TSV tables sorted by samples
+                            </li>
+                            <li>Load the "ecotaxa” folder on the server</li>
+                        </ul>
 
-			<h5>Importation from unvalidated samples <small>(on-going projects)</small></h5>
-				<ul>
-					<li>Check that ALL metadata are correct</li>
-					<li>Zooscan : TSV tables are automatically created along with PID files in each sample folder during the process of the images</li>
-					<li>All instruments: Run "Create tables for Ecotaxa” (from "Other tools” menu for Zooscan users) and run option "ALL unpredicted/validated…” to create the TSV tables in the sample folders along with PID files</li>
-					<li>Load the "_work” folder on the server</li>
-					<li>When importing, tick the "Skip <code>tsv</code> files" option</li>
-				</ul>
-			</div>
-		
-		</div>
-	</div>
-</div>
+                        <h5>Importation from unvalidated samples <small>(on-going projects)</small></h5>
+                        <ul>
+                            <li>Check that ALL metadata are correct</li>
+                            <li>Zooscan : TSV tables are automatically created along with PID files in each sample
+                                folder during the process of the images
+                            </li>
+                            <li>All instruments: Run "Create tables for Ecotaxa” (from "Other tools” menu for Zooscan
+                                users) and run option "ALL unpredicted/validated…” to create the TSV tables in the
+                                sample folders along with PID files
+                            </li>
+                            <li>Load the "_work” folder on the server</li>
+                            <li>When importing, tick the "Skip <code>tsv</code> files" option</li>
+                        </ul>
+                    </div>
 
-<form class="form" method="post" enctype="multipart/form-data">
+                </div>
+            </div>
+        </div>
 
-	<div class="row" style="margin: 5px">
-		<div class="col-sm-5">
-  <div class="form-group">
-				<label class="control-label">Choose a folder or zip file on the server</label>
-      <div class="input-group">
-					<input type="text" class="form-control" id="ServerPath" name="ServerPath" value="{{ServerPath}}" size="200">
-            <span class="input-group-btn">
-                <button class="btn btn-default" type="button"  data-toggle="modal" data-target="#FileModal">
+        <form class="form" method="post" enctype="multipart/form-data">
+
+            <div class="row" style="margin: 5px">
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <label class="control-label">Choose a folder or zip file on the server</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="ServerPath" name="ServerPath"
+                                   value="{{ServerPath}}" size="200">
+                            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" data-toggle="modal" data-target="#FileModal">
 					<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button>
                 </span>
-				</div>
-				<p class="help-block">Contact the project manager to know where and how to upload your data. Once the import is complete, all data folders/files can be safely erased on the server.
-				<br>Project manager : {{ g.prjmanagermailto |safe }}</p>
-			</div>
-		</div>
+                        </div>
+                        <p class="help-block">Contact the project manager to know where and how to upload your data.
+                            Once the import is complete, all data folders/files can be safely erased on the server.
+                            <br>Project manager : {{ g.prjmanagermailto |safe }}</p>
+                    </div>
+                </div>
 
-		<div class="col-sm-2" style="text-align: center">
-			<label class="control-label">OR</label>
-		</div>
+                <div class="col-sm-2" style="text-align: center">
+                    <label class="control-label">OR</label>
+                </div>
 
-		<div class="col-sm-5">
-<div class="form-group">
-				<label class="control-label">Upload folder(s) compressed as a zip file</label>
-				<input class="form-control" type="file" id="uploadfile" name="uploadfile" size="200">
-				<p class="help-block">Only for &lt;&nbsp;100MB zip files.</p>
-			</div>
-		</div>
-	</div>
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <label class="control-label">Upload folder(s) compressed as a zip file</label>
+                        <input class="form-control" type="file" id="uploadfile" name="uploadfile" size="200">
+                        <p class="help-block">Only for &lt;&nbsp;100MB zip files.</p>
+                    </div>
+                </div>
+            </div>
 
-	<div class="row">
-		<div class="col-sm-8 col-sm-offset-2">
+            <div class="row">
+                <div class="col-sm-8 col-sm-offset-2">
 
-  <div class="form-group">
-				<div class="checkbox">
-					<label>
-						<input type="checkbox" id="skiploaded" name="skiploaded" value="Y">Skip <code>tsv</code> files that have already been imported
-					</label>
-    </div>
-  </div>
-  <div class="form-group">
-				<div class="checkbox">
-					<label>
-						<input type="checkbox" id="skipobjectduplicate" name="skipobjectduplicate" value="Y">Skip objects that have already been imported
-					</label>
-    </div>
-  </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" id="skiploaded" name="skiploaded" value="Y">Skip <code>tsv</code>
+                                files that have already been imported
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" id="skipobjectduplicate" name="skipobjectduplicate" value="Y">Skip
+                                objects that have already been imported
+                            </label>
+                        </div>
+                    </div>
 
-			<p><a href="#advanced" data-toggle="collapse" class="help">Advanced options</a></p>
-			<div id="advanced" class="collapse">
-				<div class="form-group">
-					<label for="port" class="control-label">Optional taxonomy mapping</label>
-					<p class="help-block">This allows to change the name of the categories of previously classified objects to match the names in the UniEuk taxonomic framework included in the application.<br>Examples:<br>
-					crust_cop = Copepoda<br>
-					gelatinous medusae = Cnidaria (Hydrozoa) <span style="margin-left: 20px;"></span></p>
+                    <p><a href="#advanced" data-toggle="collapse" class="help">Advanced options</a></p>
+                    <div id="advanced" class="collapse">
+                        <div class="form-group">
+                            <label for="port" class="control-label">Optional taxonomy mapping</label>
+                            <p class="help-block">This allows to change the name of the categories of previously
+                                classified objects to match the names in the UniEuk taxonomic framework included in the
+                                application.<br>Examples:<br>
+                                crust_cop = Copepoda<br>
+                                gelatinous medusae = Cnidaria (Hydrozoa) <span style="margin-left: 20px;"></span></p>
 
-          <table><tr><td>Imported name : <input type="text" id="oldname" class="form-control" style="width: 100px;display: inline-block;">
-          UniEuk name :&nbsp; </td><td ><div class="input-group" >
-            <select id="taxolb" name="taxolb" style="width: 210px" class='taxolb' > </select>
-            <span class="input-group-btn">
-                <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolb">
+                            <table>
+                                <tr>
+                                    <td>Imported name : <input type="text" id="oldname" class="form-control"
+                                                               style="width: 100px;display: inline-block;">
+                                        UniEuk name :&nbsp;
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <select id="taxolb" name="taxolb" style="width: 210px"
+                                                    class='taxolb'> </select>
+                                            <span class="input-group-btn">
+                <button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#TaxoModal"
+                        data-mytargetid="taxolb">
                     <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></span></button>
                 </span>
-          </div><!-- /input-group -->
-          </td><td>
-            <button class="btn btn-primary " type="button" onclick="TaxoHelperBtAdd();">Add to list</button>
-          </td>
-          </tr></table>
+                                        </div><!-- /input-group -->
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary " type="button" onclick="TaxoHelperBtAdd();">Add
+                                            to list
+                                        </button>
+                                    </td>
+                                </tr>
+                            </table>
 
-					<textarea class="form-control" id="TxtTaxoMap" name="TxtTaxoMap" rows="4" placeholder="oldname = UniEuk name"></textarea>
-				</div>
-			</div>
+                            <textarea class="form-control" id="TxtTaxoMap" name="TxtTaxoMap" rows="4"
+                                      placeholder="oldname = UniEuk name"></textarea>
+                        </div>
+                    </div>
 
-    <input type="hidden" name="starttask" value="Y">
-			<button type="submit" class="btn btn-lg btn-block btn-primary">Start import Images and TSV files</button>
+                    <input type="hidden" name="starttask" value="Y">
+                    <button type="submit" class="btn btn-lg btn-block btn-primary">Start import Images and TSV files
+                    </button>
+                </div>
+            </div>
+
+        </form>
     </div>
-  </div>
-
-</form>
-  </div>
 </div>
 
-  <div class="panel panel-default" style="margin: 20px 5px">
-  <div class="panel-heading">
-    <h3 class="panel-title">Image Only import </h3>
-  </div>
-  <div class="panel-body">
-    If you have only image and no data file you can use the simple import here.
-<div class="col-sm-8 col-sm-offset-2">
-<a href="/Task/Create/TaskSimpleImport?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start Images only</a>
-  </div>
-    </div></div>
+<div class="panel panel-default" style="margin: 20px 5px">
+    <div class="panel-heading">
+        <h3 class="panel-title">Image Only import </h3>
+    </div>
+    <div class="panel-body">
+        If you have only image and no data file you can use the simple import here.
+        <div class="col-sm-8 col-sm-offset-2">
+            <a href="/Task/Create/TaskSimpleImport?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start
+                Images only</a>
+        </div>
+    </div>
+</div>
 
 
-  <div class="panel panel-default" style="margin: 20px 5px">
-  <div class="panel-heading">
-    <h3 class="panel-title">Re-import and Update Metadata</h3>
-  </div>
-  <div class="panel-body">
-If you have already loaded your images and you want update your metadata.
-    <div class="col-sm-8 col-sm-offset-2">
-<a href="/Task/Create/TaskImportUpdate?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start re-import TSV files to update metadata and data</a>
-      </div>
-    </div></div>
-
-
-  <div class="panel panel-default" style="margin: 20px 5px">
-  <div class="panel-heading">
-    <h3 class="panel-title">Import from another database</h3>
-  </div>
-  <div class="panel-body">
-To import from another Ecotaxa instance in an empty project.
-    <div class="col-sm-8 col-sm-offset-2">
-<a href="/Task/Create/TaskImportDB?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start import a project exported from another instance</a>
-      </div>
-    </div></div>
+<div class="panel panel-default" style="margin: 20px 5px">
+    <div class="panel-heading">
+        <h3 class="panel-title">Re-import and Update Metadata</h3>
+    </div>
+    <div class="panel-body">
+        If you have already loaded your images and you want update your metadata.
+        <div class="col-sm-8 col-sm-offset-2">
+            <a href="/Task/Create/TaskImportUpdate?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start
+                re-import TSV files to update metadata and data</a>
+        </div>
+    </div>
+</div>
 
 
 <script>
@@ -199,52 +222,59 @@ $(document).ready(function() {
          $("#TaxoModalBody").html("Loading...").load("/search/taxotree?target=taxolb");
     });
   }); // Ready
+
 </script>
 
 <!-- Modal -->
 <div class="modal " id="FileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="ModalLabel">Select a folder or a zip file</h4>
-      </div>
-      <div class="modal-body">
-        <div id="FileModalBody">...</div>
-      </div>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="ModalLabel">Select a folder or a zip file</h4>
+            </div>
+            <div class="modal-body">
+                <div id="FileModalBody">...</div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 
 <!-- Modal -->
 <div class="modal " id="TaxoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="ModalLabel">Taxonomy Tree</h4>
-      </div>
-      <div class="modal-body">
-        <div id="TaxoModalBody">...</div>
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="ModalLabel">Taxonomy Tree</h4>
+            </div>
+            <div class="modal-body">
+                <div id="TaxoModalBody">...</div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 
-
-    <div id="ImportantNote" class="panel panel-danger" style="float: right;position: absolute; top:80px;right: 20px;width: 600px;">
-  <div class="panel-heading">
-    <h3 class="panel-title">IMPORTANT NOTE
-    <button type="button" class="close" aria-label="Close" onclick="$('#ImportantNote').hide();"><span aria-hidden="true">&times;</span></button>
-    </h3>
-  </div>
-  <div class="panel-body">
-The maintenance and improvement of EcoTaxa is not free. We would appreciate that you set aside some funds in your next grant to support it.
-    <br><a href="mailto:picheral@obs-vlfr.fr" title="Press CTRL to open it on another tab (usefull if you use GMail)">Contact us</a> to estimate what would be both reasonable and useful.
-    </div></div>
-
+<div id="ImportantNote" class="panel panel-danger"
+     style="float: right;position: absolute; top:80px;right: 20px;width: 600px;">
+    <div class="panel-heading">
+        <h3 class="panel-title">IMPORTANT NOTE
+            <button type="button" class="close" aria-label="Close" onclick="$('#ImportantNote').hide();"><span
+                    aria-hidden="true">&times;</span></button>
+        </h3>
+    </div>
+    <div class="panel-body">
+        The maintenance and improvement of EcoTaxa is not free. We would appreciate that you set aside some funds in
+        your next grant to support it.
+        <br><a href="mailto:picheral@obs-vlfr.fr"
+               title="Press CTRL to open it on another tab (usefull if you use GMail)">Contact us</a> to estimate what
+        would be both reasonable and useful.
+    </div>
+</div>
 
 
 {% endblock %}
