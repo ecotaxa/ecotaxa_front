@@ -18,7 +18,7 @@ from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import CreateProjectReq, ProjectsApi, ProjectModel, \
-    ApiException, ObjectsApi
+    ApiException, ObjectsApi, ObjectSetQueryRsp
 
 
 # noinspection PyPep8Naming
@@ -818,6 +818,26 @@ def prjPurge(PrjId):
         else:
             # DELETE some objects in project
             objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]
+            err = None
+            with ApiClient(ObjectsApi, request) as api:
+                try:
+                    res: ObjectSetQueryRsp = api.query_object_set_parents_object_set_parents_post(objs)
+                except ApiException as ae:
+                    if ae.status == 403:
+                        err = 'At least one object does not belong to you'
+                    else:
+                        raise
+            if err is None:
+                nb_not_in_project = 0
+                for a_prjid in res.project_ids:
+                    if a_prjid != PrjId:
+                        nb_not_in_project += 1
+                if nb_not_in_project > 0:
+                    err = '%d object(s) are not in current project.' % nb_not_in_project
+            if err is not None:
+                flash(err, 'error')
+                return PrintInCharte(txt + "<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId))
+
             with ApiClient(ObjectsApi, request) as api:
                 no, noh, ni, nbrfile = api.erase_object_set_object_set_delete(objs)
 
