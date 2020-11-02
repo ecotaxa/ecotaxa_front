@@ -2,7 +2,7 @@
 
 <h3>Simple import</h3>
 <p>This procedure allows to import images in jpg, png, gif (possibly animated) formats. It will associate a fixed &
-    reduced set of metadata.</p>
+    reduced set of metadata, that you can enter below.</p>
 
 <form class="form" method="post" enctype="multipart/form-data" onsubmit="return validform();">
     <input type="hidden" name="starttask" value="Y">
@@ -18,7 +18,7 @@
                 </span>
                 </div>
                 <p class="help-block">contact the Project manager to get the procedure to upload your data on the server
-                    via FTP. Once the import is complete, please manually remove these data from the server.
+                    via FTP. Once the import is complete, please manually remove this data from the server.
                     <br>Project manager : {{ g.prjmanagermailto |safe }}</p>
             </div>
         </div>
@@ -31,8 +31,7 @@
             <div class="form-group">
                 <label class="control-label">Upload folder(s) compressed as a zip file</label>
                 <input class="form-control" type="file" id="uploadfile" name="uploadfile" size="200">
-                <p class="help-block">zip all the images in an archive (<100Mb). Images of the same taxon must be
-                    grouped in a unique folder.</p>
+                <p class="help-block">zip all the images in an archive (<100Mb).</p>
             </div>
         </div>
     </div>
