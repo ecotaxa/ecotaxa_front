@@ -20,7 +20,7 @@ BACKEND_PORT = 8000
 BACKEND_URL = "http://%s:%d" % (BACKEND_HOST, BACKEND_PORT)
 
 
-@app.route('/api/<path:path>', methods=['GET', 'POST'])
+@app.route('/api/<path:path>', methods=['GET', 'POST', 'DELETE', 'PUT'])
 def proxy_request(path):
     start = time.time()
     # Prepare request data
@@ -40,6 +40,10 @@ def proxy_request(path):
         if path == "openapi.json":
             # Plain page but the URL is wrong on FastApi side
             url = f'/api/{path}'
+    elif method == 'DELETE':
+        pass
+    elif method == 'PUT':
+        pass
     else:
         return "Not implemented"
     # Do the call itself
