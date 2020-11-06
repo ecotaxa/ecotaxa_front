@@ -24,7 +24,7 @@
            <input type="checkbox"  style="height:20px;" id="visible" name="visible"
                   value="Y" {{ 'checked' if data.visible else "" }}>
        </td>
-        <td>License
+        <td width="600px">License
             <select name="license" id="license" onchange=""  > {# class="form-control"  #}
             {% for k,v in possible_licenses.items() %}
                 <option value="{{ k }}"  {{ 'selected' if data.license==k }}>{{ k }}</option>
@@ -32,7 +32,6 @@
             </select>
             <br><span id="license_explain">license text</span>
        </td>
-        <td width="600px"></td>
     </tr>
 
     <tr>
@@ -41,7 +40,7 @@
         {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
         </td>
     </tr>
-      
+
 <tr><td>Project Description</td><td>
         <input type="text" maxlength="50" class="form-control" id="projtype" name="projtype"
                value="{{ data.projtype|default('',true) }}">
