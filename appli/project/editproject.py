@@ -55,7 +55,14 @@ def PrjEdit(PrjId, privs_only=False):
         if previous_cnn != target_proj.cnn_network_id:
             flash("SCN features erased", "success")
         target_proj.visible = True if gvp('visible') == 'Y' else False
-        target_proj.init_classif_list = [int(cl_id) for cl_id in gvp('initclassiflist').split(",")
+        posted_classif_list = gvp('initclassiflist')
+        # The original list is displayed using str(list), so there is a bit of formatting inside
+        posted_classif_list = posted_classif_list.replace(" ", "")
+        if posted_classif_list and posted_classif_list[0] == "[":
+            posted_classif_list = posted_classif_list[1:]
+        if posted_classif_list and posted_classif_list[-1] == "]":
+            posted_classif_list = posted_classif_list[:-1]
+        target_proj.init_classif_list = [int(cl_id) for cl_id in posted_classif_list.split(",")
                                          if cl_id.isdigit()]
         # Update lists by right
         for a_priv, members_for_priv in members_by_right.items():
@@ -163,19 +170,19 @@ def Prjpopupeditpreset(PrjId):
     for a_prj in prjs:
         # Inject taxon lists for display
         result = []
-        initclassiflist = set(a_prj.init_classif_list)
+        prj_initclassif_list = set(a_prj.init_classif_list)
         try:
             objtaxon = set(stats_per_project[a_prj.projid])
         except KeyError:
             # No stats
             objtaxon = set()
         # 'Extra' are the taxa used, but not in the classification preset
-        objtaxon.difference_update(initclassiflist)
-        for t in initclassiflist:
+        objtaxon.difference_update(prj_initclassif_list)
+        for t in prj_initclassif_list:
             resolved = taxo_map.get(t, None)
             if resolved:
                 result.append(resolved)
-        a_prj.presetids = ",".join([str(x) for x in initclassiflist])
+        a_prj.presetids = ",".join([str(x) for x in prj_initclassif_list])
         a_prj.preset = ", ".join(sorted(result))
 
         result = []

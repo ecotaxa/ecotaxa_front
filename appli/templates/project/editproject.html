@@ -52,7 +52,7 @@
           <i class="fas fa-clone"></i> Pick from others projects</button>
   </td><td>
         <input type="hidden"  class="form-control" id="initclassiflist" name="initclassiflist"
-               value="{{ data.initclassiflist|default('',true) }}">
+               value="{{ data.init_classif_list|default('',true) }}">
       <select id='inittaxo' class="taxolb" style="width: 100%;" multiple>
     {% for r in g.predeftaxo %}
       <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
