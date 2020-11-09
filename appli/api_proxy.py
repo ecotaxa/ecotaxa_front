@@ -96,13 +96,16 @@ def _piggyback_response(response: HTTPResponse, is_chunked: bool):
 def _my_read(self, amt):
     """ Add into stream the chunk markers when needed """
     ret = self.orig_read(amt)
-    if len(ret) == 0:
-        return ret
+    at_eof = len(ret) == 0
     if self.is_chunked:
         # Re-chunk the chunked response
         chunk = hex(len(ret))[2:] + "\r\n"
         # OK we add a few bytes but anyway the call only gives an indication of size
         ret = bytes(chunk, "utf-8") + ret + b"\r\n"
+    if at_eof:
+        # At EOF stop sending chunks, i.e. blocks of size 3, otherwise it loops forever on reader side
+        # if it's not chunks-aware.
+        self.is_chunked = False
     self.nb_bytes += len(ret)
     app.logger.info("%d response bytes read", self.nb_bytes)
     return ret
