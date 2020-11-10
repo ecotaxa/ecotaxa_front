@@ -10,7 +10,7 @@ from typing import Dict
 import psycopg2.extras
 from flask_login import current_user
 from flask_security import UserMixin, RoleMixin
-from sqlalchemy import Index, func
+from sqlalchemy import Index, func, Integer, String, SmallInteger, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import BIGINT, FLOAT, VARCHAR, DATE, TIME, DOUBLE_PRECISION, INTEGER, CHAR, \
     TIMESTAMP, REAL
 
@@ -589,3 +589,135 @@ def GetTaxoNameFromIdList(IdList):
             WHERE  tf.id = any (%s) 
             order by tf.name """
     return GetAll(sql, [IdList])
+
+
+# Small hack to be able to copy/paste from back-end DB definition code
+_Model = db.Model
+
+
+######### WoRMS ###########
+# Absolutely unused, but this repo is the reference for DB upgrade so it's needed here
+class WoRMS(_Model):
+    __tablename__ = 'worms'
+    # WoRMS record @see http://www.marinespecies.org/rest/
+    aphia_id = db.Column(Integer, primary_key=True)
+    """ Unique and persistent identifier within WoRMS. Primary key in the database -- """
+    url = db.Column(String(255))
+    """ HTTP URL to the AphiaRecord """
+    scientificname = db.Column(String(128))
+    """ the full scientific name without authorship """
+    authority = db.Column(String(384))
+    """ the authorship information for the scientificname formatted according to the conventions 
+        of the applicable nomenclaturalCode """
+    status = db.Column(String(24))
+    """ the status of the use of the scientificname (usually a taxonomic opinion). 
+        Additional technical statuses are (1) quarantined: hidden from public interface after decision from an editor 
+        and (2) deleted: AphiaID should NOT be used anymore, please replace it by the valid_AphiaID
+        Also seen: 'alternate representation' """
+    unacceptreason = db.Column(String(768))
+    """ the reason why a scientificname is unaccepted """
+    taxon_rank_id = db.Column(SmallInteger)
+    """ the taxonomic rank identifier of the most specific name in the scientificname """
+    rank = db.Column(String(24))
+    """ the taxonomic rank of the most specific name in the scientificname """
+    valid_aphia_id = db.Column(Integer)
+    """ the AphiaID (for the scientificname) of the currently accepted taxon. NULL if 
+        there is no currently accepted taxon."""
+    valid_name = db.Column(String(128))
+    """ the scientificname of the currently accepted taxon """
+    valid_authority = db.Column(String(385))
+    """ the authorship information for the scientificname of the currently accepted taxon """
+    parent_name_usage_id = db.Column(Integer)
+    """ the AphiaID (for the scientificname) of the direct, most proximate higher-rank 
+        parent taxon (in a classification) """
+    kingdom = db.Column(String(128))
+    """ the full scientific name of the kingdom in which the taxon is classified """
+    phylum = db.Column(String(129))
+    """ the full scientific name of the phylum or division in which the taxon is classified """
+    class_ = db.Column(String(130))
+    """ the full scientific name of the class in which the taxon is classified """
+    order = db.Column(String(131))
+    """ the full scientific name of the order in which the taxon is classified """
+    family = db.Column(String(132))
+    """ the full scientific name of the family in which the taxon is classified """
+    genus = db.Column(String(133))
+    """ the full scientific name of the genus in which the taxon is classified """
+    citation = db.Column(String(1024))
+    """ a bibliographic reference for the resource as a statement indicating how this record should 
+        be cited (attributed) when used """
+    lsid = db.Column(String(257))
+    """ LifeScience Identifier. Persistent GUID for an AphiaID """
+    is_marine = db.Column(Boolean)
+    """ a boolean flag indicating whether the taxon is a marine organism, i.e. can be found in/above sea water. 
+        Possible values: 0/1/NULL """
+    is_brackish = db.Column(Boolean)
+    """ a boolean flag indicating whether the taxon occurrs in brackish habitats. 
+        Possible values: 0/1/NULL """
+    is_freshwater = db.Column(Boolean)
+    """ a boolean flag indicating whether the taxon occurrs in freshwater habitats, i.e. can be 
+        found in/above rivers or lakes. Possible values: 0/1/NULL"""
+    is_terrestrial = db.Column(Boolean)
+    """ a boolean flag indicating the taxon is a terrestial organism, i.e. occurrs on land as opposed to the sea. 
+        Possible values: 0/1/NULL"""
+    is_extinct = db.Column(Boolean)
+    """ a flag indicating an extinct organism. Possible values: 0/1/NULL """
+    # In REST response
+    match_type = db.Column(String(16), nullable=False)
+    """ Type of match. Possible values: exact/like/phonetic/near_1/near_2"""
+    modified = db.Column(DateTime)
+    """ The most recent date-time in GMT on which the resource was changed """
+    # Our management of taxon
+    all_fetched = db.Column(Boolean)
+
+
+######### Collections #########
+
+
+class Collection(_Model):
+    """ A set of project see #82, #335, #519 """
+    __tablename__ = 'collection'
+    id = db.Column(INTEGER, db.Sequence('collection_id_seq'), primary_key=True)
+    provider_user_id = db.Column(INTEGER, db.ForeignKey('users.id'))
+    title = db.Column(VARCHAR, nullable=False)
+    contact_user_id = db.Column(INTEGER, db.ForeignKey('users.id'))
+    citation = db.Column(VARCHAR)
+    license = db.Column(VARCHAR(16))
+    abstract = db.Column(VARCHAR)
+    description = db.Column(VARCHAR)
+
+    def __str__(self):
+        return "{0} ({1})".format(self.id, self.title)
+
+
+Index('CollectionTitle', Collection.__table__.c.title, unique=True)
+
+
+class CollectionProject(_Model):
+    """ n<->n plain relationship b/w collection and projects """
+    collection_id = db.Column(INTEGER, db.ForeignKey('collection.id'), primary_key=True)
+    project_id = db.Column(INTEGER, db.ForeignKey('projects.projid'), primary_key=True)
+
+    def __str__(self):
+        return "{0},{1}".format(self.collection_id, self.project_id)
+
+
+class CollectionUserRole(_Model):
+    """ n<->n valued relationship b/w collection and users """
+    collection_id = db.Column(INTEGER, db.ForeignKey('collection.id'), primary_key=True)
+    user_id = db.Column(INTEGER, db.ForeignKey('users.id'), primary_key=True)
+    role = db.Column(VARCHAR(1),  # 'C' for data Creator, 'A' for Associated person
+                     nullable=False, primary_key=True)
+
+    def __str__(self):
+        return "{0},{1}:{2}".format(self.collection_id, self.user_id, self.role)
+
+
+class CollectionOrgaRole(_Model):
+    """ n<->n valued relationship b/w collection and organisations """
+    collection_id = db.Column(INTEGER, db.ForeignKey('collection.id'), primary_key=True)
+    organisation = db.Column(db.String(255), primary_key=True)
+    role = db.Column(VARCHAR(1),  # 'C' for data Creator, 'A' for Associated 'person'
+                     nullable=False, primary_key=True)
+
+    def __str__(self):
+        return "{0},{1}:{2}".format(self.collection_id, self.organisation, self.role)
