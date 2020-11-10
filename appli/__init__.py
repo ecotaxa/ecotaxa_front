@@ -342,9 +342,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.4.5"
+ecotaxa_version="2.4.6"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-10-29"
+    return ecotaxa_version+" 2020-11-10"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -352,6 +352,13 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-11-10 : V 2.4.6
+    Bug #503: Inconsistency in database schema on samples, acquisitions and process tables.
+    Bug #523, #524: Project settings page layout is damaged and predefined taxonomy not saved.
+    Bug #501: It was possible to delete objects outside current project.
+    Bug #499: Last imported path was not recorded for 'import update'.
+    Bug #68: Inconsistency in 'Import Database' UI.
+    Bug #345: Users were told late that nothing has to be done during automatic classification.    
 2020-10-29 : V 2.4.5
     Bug #516: No title for project in anonymous view mode.
     Feature #426: Minimal UI to export a project in DwC format. Menu is hidden.

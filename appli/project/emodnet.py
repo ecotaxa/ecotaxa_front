@@ -1,11 +1,9 @@
-from flask import request, flash, render_template
-
-from appli import app, PrintInCharte
+from flask import request, flash
 from flask_login import login_required
 
+from appli import app, PrintInCharte
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ExportsApi, EMODnetExportReq, \
-    EMODnetExportRsp
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException
 
 
 @app.route('/prj/emodnet/<int:prj_id>', methods=['GET', 'POST'])
@@ -26,15 +24,15 @@ def EMODnet_export(prj_id):
                 flash('You cannot export this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 
-    if request.method == 'GET':
-        # Initial loading
-        with ApiClient(ExportsApi, request) as api:
-            req: EMODnetExportReq = EMODnetExportReq(project_ids=[prj_id])
-            export_rsp: EMODnetExportRsp = api.emodnet_format_export_export_emodnet_post(emo_dnet_export_req=req,
-                                                                                         dry_run=True)
-
-    else:
-        # Self-post
-        pass
-    page = render_template("project/emodnet.html", data=export_rsp, prj=source_proj)
-    return PrintInCharte(page)
+    # if request.method == 'GET':
+    #     # Initial loading
+    #     with ApiClient(ExportsApi, request) as api:
+    #         req: EMODnetExportReq = EMODnetExportReq(project_ids=[prj_id])
+    #         export_rsp: EMODnetExportRsp = api.emodnet_format_export_export_emodnet_post(emo_dnet_export_req=req,
+    #                                                                                      dry_run=True)
+    #
+    # else:
+    #     # Self-post
+    #     pass
+    # page = render_template("project/emodnet.html", data=export_rsp, prj=source_proj)
+    return PrintInCharte("Not found")
