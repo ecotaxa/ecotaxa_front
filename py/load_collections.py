@@ -116,7 +116,7 @@ def de_chunk_if_needed(blob: bytes):
 0000020  66  6a  51  38  6d  b7  a5  14  0b  00  00  ce  50  00  00  07
           f   j   Q   8   m 267 245 024  \v  \0  \0 316   P  \0  \0  \a
     """
-    if blob[0:1] == [0x50, 0x4b]:
+    if blob[0:2] == b"PK":
         return blob
     fd = io.BytesIO(blob)
     ret = b""
@@ -166,9 +166,10 @@ def create_collection(client: EcoTaxaApiClient, coll_in: CollectionDescription):
     coll_reread = client.query_collection(coll_id)
     logging.info("After update: %s", coll_reread)
     export_out = client.export_collection(coll_id, True)
-    if len(export_out.warnings) > 0:
-        for a_warn in export_out.warnings:
-            logging.warning("(BACK):%s", a_warn)
+    for a_msg in export_out.warnings:
+        logging.warning("(BACK):%s", a_msg)
+    for a_msg in export_out.errors:
+        logging.error("(BACK):%s", a_msg)
     if export_out.task_id == 0:
         logging.error("Export failed:" + "\n".join(export_out.errors))
     else:
@@ -218,7 +219,7 @@ def create_all(client: EcoTaxaApiClient, collections: List[CollectionDescription
 
 def main():
     try:
-        username, password = open("creds.txt").read().split()
+        username, password = open("creds.txt").read().split()[:2]
     except FileNotFoundError:
         print("Need a creds.txt, first line username, second line password.")
         return
