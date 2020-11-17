@@ -13,6 +13,7 @@ import appli
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, database, gvg, gvp, user_datastore, DecodeEqualList, ScaleForDisplay, ntcv, \
     XSSEscape
+from appli.constants import DayTimeList
 from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
@@ -149,7 +150,7 @@ def indexPrj(PrjId):
         data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
             'selected' if str(k) in data.get('month', '').split(',') else '', k, v)
     data["daytime_for_select"] = ""
-    for (k, v) in database.DayTimeList.items():
+    for (k, v) in DayTimeList.items():
         data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
             'selected' if str(k) in data.get('daytime', '').split(',') else '', k, v)
     Prj = database.Projects.query.filter_by(projid=PrjId).first()

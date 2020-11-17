@@ -21,17 +21,10 @@ UserAdministratorLabel = "Users Administrator"
 ProjectCreatorLabel = "Project creator"
 TaxoType = {'P': 'Phylo', 'M': 'Morpho'}
 TaxoStatus = {'A': 'Active', 'D': 'Deprecated', 'N': 'Not reviewed'}
-ClassifQual = {'P': 'predicted', 'D': 'dubious', 'V': 'validated'}
-DayTimeList = {'A': 'Dawn', 'D': 'Day', 'U': 'Dusk', 'N': 'Night'}
-ClassifQualRevert = {}
-for (c_k, c_v) in ClassifQual.items():
-    ClassifQualRevert[c_v] = c_k
 
-
-def GetClassifQualClass(q):
-    if q in ClassifQual:
-        return 'status-' + ClassifQual[q]
-    return 'status-unknown'
+# Just for re-exporting and compatibility with EcoPart source
+# noinspection PyUnresolvedReferences
+from .constants import GetClassifQualClass
 
 
 users_roles = db.Table('users_roles',

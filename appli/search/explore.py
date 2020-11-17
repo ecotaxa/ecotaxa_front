@@ -5,6 +5,8 @@ from pathlib import Path
 from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security import login_required
 from flask_security.decorators import roles_accepted
+
+from appli.constants import DayTimeList
 from appli.search.leftfilters import getcommonfilters
 import os,time,math,collections,appli,psycopg2.extras
 from appli.database import GetAll,GetClassifQualClass,ExecSQL,db,GetAssoc
@@ -37,7 +39,7 @@ def indexExplore():
     for (k,v) in enumerate(('January','February','March','April','May','June','July','August','September','October','November','December'),start=1):
         data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['month'].split(',') else '',k,v)
     data["daytime_for_select"] = ""
-    for (k,v) in database.DayTimeList.items():
+    for (k,v) in DayTimeList.items():
         data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format('selected' if str(k) in data['daytime'].split(',') else '',k,v)
 
     right='dodefault'

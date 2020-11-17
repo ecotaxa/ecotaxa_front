@@ -12,6 +12,7 @@ from appli import app, PrintInCharte, database, gvg, gvp, ntcv, ScaleForDisplay,
 from appli.database import db
 # noinspection SpellCheckingInspection
 from appli.utils import ApiClient
+from appli.constants import ClassifQual, DayTimeList
 from to_back.ecotaxa_cli_py import ObjectApi, ObjectModel, ApiException, ProjectsApi, ProjectModel, TaxonomyTreeApi, \
     TaxonModel, UsersApi, UserModel, SamplesApi, ProcessesApi, AcquisitionsApi, SampleModel, AcquisitionModel, \
     ProcessModel, HistoricalClassification
@@ -86,7 +87,7 @@ def objectdetails(objid):
         page.append("<br>&emsp;<b>Unknown</b>")
 
     if obj.classif_who is not None:
-        page.append("<br>&emsp;%s " % (database.ClassifQual.get(obj.classif_qual, "To be classified")))
+        page.append("<br>&emsp;%s " % (ClassifQual.get(obj.classif_qual, "To be classified")))
         if current_user_id != -1:
             # No name for anonymous
             with ApiClient(UsersApi, request) as api:
@@ -196,7 +197,7 @@ def objectdetails(objid):
                        obj.objdate, obj.objtime,
                        obj.depth_min, obj.depth_max,
                        classif_auto_name, obj.classif_auto_when, objid, obj.orig_id,
-                       database.DayTimeList.get(obj.sunpos, '?')))
+                       DayTimeList.get(obj.sunpos, '?')))
 
     cpt = 0
     # Insertion des champs object
