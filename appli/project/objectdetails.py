@@ -7,15 +7,14 @@ from flask import render_template, g, flash, request
 from flask_login import current_user
 from flask_security import login_required
 
-from appli import app, PrintInCharte, database, gvg, gvp, ntcv, ScaleForDisplay, \
+from appli import app, PrintInCharte, gvg, gvp, ntcv, ScaleForDisplay, \
     ComputeLimitForImage, nonetoformat, XSSEscape
-from appli.database import db
+from appli.constants import ClassifQual, DayTimeList
 # noinspection SpellCheckingInspection
 from appli.utils import ApiClient
-from appli.constants import ClassifQual, DayTimeList
 from to_back.ecotaxa_cli_py import ObjectApi, ObjectModel, ApiException, ProjectsApi, ProjectModel, TaxonomyTreeApi, \
     TaxonModel, UsersApi, UserModel, SamplesApi, ProcessesApi, AcquisitionsApi, SampleModel, AcquisitionModel, \
-    ProcessModel, HistoricalClassification
+    ProcessModel, HistoricalClassification, ObjectsApi, BulkUpdateReq
 
 
 @app.route('/objectdetails/<int:objid>')
@@ -69,7 +68,7 @@ def objectdetails(objid):
     try:
         current_user_id = current_user.id
     except AttributeError:
-        current_user_id = -1 # Anonymous
+        current_user_id = -1  # Anonymous
 
     # Injected data for taxo select
     g.PrjManager = obj_proj.can_administrate or current_user_id in [u.id for u in obj_proj.managers]
@@ -315,41 +314,44 @@ Current Classification : Quality={} , date={}
 def objectdetailsupdate(objid):
     # noinspection PyStatementEffect
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
-    obj = database.Objects.query.filter_by(objid=objid).first()
-    prj = obj.project
-    if not prj.CheckRight(2):  # Level 0 = Read, 1 = Annotate, 2 = Admin
-        return '<span class="label label-danger">You cannot edit data on this project</span>'
+
+    with ApiClient(ObjectApi, request) as api:
+        obj: ObjectModel = api.object_query_object_object_id_get(objid)
 
     table = gvp("table")
     field = gvp("field")
-    if table == "object":
-        if hasattr(obj, field):
-            target = obj
-        elif hasattr(obj.objfrel, field):
-            target = obj.objfrel
-        else:
-            return '<span class="label label-danger">Invalid field %s.%s</span>' % (table, field)
-    elif table == "sample":
-        target = obj.sample
-    elif table == "acquis":
-        target = obj.acquis
-    elif table == "processrel":
-        target = obj.processrel
-
-    else:
-        return '<span class="label label-danger">Invalid table %s</span>' % (table,)
-
-    oldval = getattr(target, field)
-    newval = gvp("newval")
+    new_value = gvp("newval")
+    if field == "objdate":
+        try:
+            new_value = datetime.date(int(new_value[0:4]), int(new_value[5:7]), int(new_value[8:10]))
+        except ValueError:
+            return '<span class="label label-danger">Wrong date</span>'
+    if new_value == "":
+        new_value = None
+    updates = [{"ucol": field, "uval": new_value}]
     try:
-        dbval = newval
-        if field == "objdate":
-            dbval = datetime.date(int(newval[0:4]), int(newval[5:7]), int(newval[8:10]))
-        if dbval == "":
-            dbval = None
-        setattr(target, field, dbval)
-        db.session.commit()
+        if table == "object":
+            with ApiClient(ObjectsApi, request) as api:
+                api.update_object_set_object_set_update_post(BulkUpdateReq(target_ids=[objid],
+                                                                           updates=updates))
+        elif table == "processrel":
+            with ApiClient(ProcessesApi, request) as api:
+                api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=[obj.processid],
+                                                                           updates=updates))
+        elif table == "acquis":
+            with ApiClient(AcquisitionsApi, request) as api:
+                api.update_acquisitions_acquisition_set_update_post(BulkUpdateReq(target_ids=[obj.acquisid],
+                                                                                  updates=updates))
+        elif table == "sample":
+            with ApiClient(SamplesApi, request) as api:
+                api.update_samples_sample_set_update_post(BulkUpdateReq(target_ids=[obj.sampleid],
+                                                                        updates=updates))
     except Exception as E:
-        return '<span class="label label-danger">Data update error %s</span>' % (str(E)[0:100],)
+        exc = str(E)
+        for exc_line in exc.split("\n"):
+            if exc_line.startswith("Exception"):
+                exc = exc_line
+                break
+        return '<span class="label label-danger">Update error %s</span>' % exc[0:100]
 
-    return "<span class='label label-success'>changed value '%s' by '%s'" % (oldval, newval)
+    return "<span class='label label-success'>changed value to '%s'" % new_value
