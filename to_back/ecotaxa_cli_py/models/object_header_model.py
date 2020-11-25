@@ -164,12 +164,9 @@ class ObjectHeaderModel(object):
             self.similarity = similarity
         if random_value is not None:
             self.random_value = random_value
-        if sampleid is not None:
-            self.sampleid = sampleid
-        if acquisid is not None:
-            self.acquisid = acquisid
-        if processid is not None:
-            self.processid = processid
+        self.sampleid = sampleid
+        self.acquisid = acquisid
+        self.processid = processid
 
     @property
     def objid(self):
@@ -653,6 +650,8 @@ class ObjectHeaderModel(object):
         :param sampleid: The sampleid of this ObjectHeaderModel.  # noqa: E501
         :type: int
         """
+        if self.local_vars_configuration.client_side_validation and sampleid is None:  # noqa: E501
+            raise ValueError("Invalid value for `sampleid`, must not be `None`")  # noqa: E501
 
         self._sampleid = sampleid
 
@@ -674,6 +673,8 @@ class ObjectHeaderModel(object):
         :param acquisid: The acquisid of this ObjectHeaderModel.  # noqa: E501
         :type: int
         """
+        if self.local_vars_configuration.client_side_validation and acquisid is None:  # noqa: E501
+            raise ValueError("Invalid value for `acquisid`, must not be `None`")  # noqa: E501
 
         self._acquisid = acquisid
 
@@ -695,6 +696,8 @@ class ObjectHeaderModel(object):
         :param processid: The processid of this ObjectHeaderModel.  # noqa: E501
         :type: int
         """
+        if self.local_vars_configuration.client_side_validation and processid is None:  # noqa: E501
+            raise ValueError("Invalid value for `processid`, must not be `None`")  # noqa: E501
 
         self._processid = processid
 

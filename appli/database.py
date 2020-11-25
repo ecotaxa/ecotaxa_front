@@ -261,7 +261,7 @@ class Samples(db.Model):
     dataportal_descriptor = db.Column(VARCHAR(8000))
 
     def __str__(self):
-        return "{0} ({1})".format(self.orig_id, self.processid)
+        return "{0} ({1})".format(self.orig_id, self.sampleid)
 
 
 for i in range(1, 31):
@@ -278,7 +278,7 @@ class Acquisitions(db.Model):
     instrument = db.Column(VARCHAR(255))
 
     def __str__(self):
-        return "{0} ({1})".format(self.orig_id, self.processid)
+        return "{0} ({1})".format(self.orig_id, self.acquisid)
 
 
 for i in range(1, 31):
@@ -340,11 +340,11 @@ class Objects(db.Model):
     similarity = db.Column(DOUBLE_PRECISION)
     sunpos = db.Column(CHAR(1))  # position du soleil
     random_value = db.Column(INTEGER)
-    sampleid = db.Column(INTEGER, db.ForeignKey('samples.sampleid'))
+    sampleid = db.Column(INTEGER, db.ForeignKey('samples.sampleid'), nullable=False)
     sample = db.relationship("Samples")
-    acquisid = db.Column(INTEGER, db.ForeignKey('acquisitions.acquisid'))
+    acquisid = db.Column(INTEGER, db.ForeignKey('acquisitions.acquisid'), nullable=False)
     acquis = db.relationship("Acquisitions")
-    processid = db.Column(INTEGER, db.ForeignKey('process.processid'))
+    processid = db.Column(INTEGER, db.ForeignKey('process.processid'), nullable=False)
     processrel = db.relationship("Process")
 
 
