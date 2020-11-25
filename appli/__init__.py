@@ -342,7 +342,7 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.4.6"
+ecotaxa_version="2.4.7"
 def JinjaGetEcotaxaVersionText():
     return ecotaxa_version+" 2020-11-10"
 
@@ -352,6 +352,9 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-11-25 : V 2.4.7
+    Feature #389: Force presence of sample/acquisition/process for each object.
+    Features #435, #523: More functions go thru API from flask app.
 2020-11-10 : V 2.4.6
     Bug #503: Inconsistency in database schema on samples, acquisitions and process tables.
     Bug #523, #524: Project settings page layout is damaged and predefined taxonomy not saved.
