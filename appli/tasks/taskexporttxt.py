@@ -20,21 +20,24 @@ from appli.tasks.taskmanager import AsyncTask
 
 
 # noinspection RegExpRedundantEscape
-def NormalizeFileName(FileName):
-    return re.sub(R"[^a-zA-Z0-9 \.\-\(\)]", "_", str(FileName))
+def normalize_filename(filename):
+    return re.sub(R"[^a-zA-Z0-9 \.\-\(\)]", "_", str(filename))
 
 
-def GetDOIImgFileName(objid, imgrank, taxofolder, originalfilename):
+# noinspection PyPep8Naming
+def get_DOI_imgfile_name(objid, imgrank, taxofolder, originalfilename):
     if not taxofolder:
         taxofolder = "NoCategory"
-    FileName = "images/{0}/{1}_{2}{3}".format(NormalizeFileName(taxofolder), objid, imgrank,
+    FileName = "images/{0}/{1}_{2}{3}".format(normalize_filename(taxofolder), objid, imgrank,
                                               Path(originalfilename).suffix.lower())
     return FileName
 
 
-# noinspection RegExpRedundantEscape
+# noinspection RegExpRedundantEscape,PyPep8Naming
 class TaskExportTxt(AsyncTask):
+    # noinspection SpellCheckingInspection
     class Params(AsyncTask.Params):
+        # noinspection PyPep8Naming
         def __init__(self, InitStr=None):
             self.steperrors = []
             super().__init__(InitStr)
@@ -76,14 +79,14 @@ class TaskExportTxt(AsyncTask):
     def CreateTSV(self, ExportMode):
         self.UpdateProgress(1, "Start TSV export")
         Prj = database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        ImageExport = ''
+        image_export = ''
         if ExportMode in ('BAK', 'DOI'):
             self.param.sampledata = self.param.objectdata = self.param.processdata = self.param.acqdata = '1'
             self.param.commentsdata = self.param.histodata = self.param.internalids = ''
         if ExportMode == 'BAK':
-            ImageExport = self.param.exportimagesbak
+            image_export = self.param.exportimagesbak
         if ExportMode == 'DOI':
-            ImageExport = self.param.exportimagesdoi
+            image_export = self.param.exportimagesdoi
 
         sql1 = """select o.orig_id as object_id, o.latitude as object_lat, o.longitude as object_lon,
                          to_char(objdate,'YYYYMMDD') as object_date,
@@ -125,11 +128,11 @@ class TaskExportTxt(AsyncTask):
                 left join samples s on o.sampleid = s.sampleid """
         sql3 = " where o.projid=%(projid)s "
         params = {'projid': int(self.param.ProjectId)}
-        OriginalColName = {}  # Nom de colonneSQL => Nom de colonne permet de traiter le cas de %area
-        if ImageExport == '1':
+        original_col_name = {}  # Nom de colonneSQL => Nom de colonne permet de traiter le cas de %area
+        if image_export == '1':
             sql1 += "\n,img.orig_file_name as img_file_name,img.imgrank img_rank"
             sql2 += "\nleft join images img on o.img0id = img.imgid "
-        if ImageExport == 'A':  # Toutes les images
+        if image_export == 'A':  # Toutes les images
             sql1 += "\n,img.orig_file_name as img_file_name,img.imgrank img_rank"
             sql2 += "\nleft join images img on o.objid = img.objid "
 
@@ -141,26 +144,26 @@ class TaskExportTxt(AsyncTask):
             sql1 += "\n,complement_info"
         if self.param.objectdata == '1':
             sql1 += "\n"
-            Mapping = DecodeEqualList(Prj.mappingobj)
-            for k, v in Mapping.items():
-                AliasSQL = 'object_%s' % re.sub(R"[^a-zA-Z0-9\.\-µ]", "_", v)
-                OriginalColName[AliasSQL] = 'object_%s' % v
-                sql1 += ',o.%s as "%s" ' % (k, AliasSQL)
+            mapping = DecodeEqualList(Prj.mappingobj)
+            for k, v in mapping.items():
+                alias_sql = 'object_%s' % re.sub(R"[^a-zA-Z0-9\.\-µ]", "_", v)
+                original_col_name[alias_sql] = 'object_%s' % v
+                sql1 += ',o.%s as "%s" ' % (k, alias_sql)
         if self.param.sampledata == '1':
             sql1 += "\n,s.orig_id sample_id,s.dataportal_descriptor as sample_dataportal_descriptor "
-            Mapping = DecodeEqualList(Prj.mappingsample)
-            for k, v in Mapping.items():
+            mapping = DecodeEqualList(Prj.mappingsample)
+            for k, v in mapping.items():
                 sql1 += ',s.%s as "sample_%s" ' % (k, re.sub(R"[^a-zA-Z0-9\.\-µ]", "_", v))
         if self.param.processdata == '1':
             sql1 += "\n,p.orig_id process_id"
-            Mapping = DecodeEqualList(Prj.mappingprocess)
-            for k, v in Mapping.items():
+            mapping = DecodeEqualList(Prj.mappingprocess)
+            for k, v in mapping.items():
                 sql1 += ',p.%s as "process_%s" ' % (k, re.sub(R"[^a-zA-Z0-9\.\-µ]", "_", v))
             sql2 += " left join process p on o.processid=p.processid "
         if self.param.acqdata == '1':
             sql1 += "\n,a.orig_id acq_id,a.instrument as acq_instrument"
-            Mapping = DecodeEqualList(Prj.mappingacq)
-            for k, v in Mapping.items():
+            mapping = DecodeEqualList(Prj.mappingacq)
+            for k, v in mapping.items():
                 sql1 += ',a.%s as "acq_%s" ' % (k, re.sub(R"[^a-zA-Z0-9\.\-µ]", "_", v))
             sql2 += " left join acquisitions a on o.acquisid = a.acquisid "
         if ExportMode == 'DOI':
@@ -209,7 +212,7 @@ class TaskExportTxt(AsyncTask):
             splitfield = "taxo_parent_child"
         else:
             sql3 += " order by s.orig_id, o.objid "  # tri par defaut
-        if ImageExport != '':
+        if image_export != '':
             sql3 += ",img_rank"
         sql = sql1 + " " + sql2 + " " + sql3
         logging.info("Execute SQL : %s" % (sql,))
@@ -229,7 +232,7 @@ class TaskExportTxt(AsyncTask):
             prevvalue = self.param.OutFile.replace('.zip', '')
         fichier = os.path.join(self.GetWorkingDir(), csvfilename)
         csvfile = None
-        wtr = coltypes = FloatType = None  # assigned inside the loop
+        wtr = coltypes = db_float_type = None  # assigned inside the loop
         for r in self.pgcur:
             if (csvfile is None and (not splitcsv)) or ((prevvalue != r[splitfield]) and splitcsv):
                 if csvfile:
@@ -248,19 +251,19 @@ class TaskExportTxt(AsyncTask):
                 colnames = [desc[0] for desc in self.pgcur.description]
                 coltypes = [desc[1] for desc in self.pgcur.description]
                 # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
-                FloatType = coltypes[2]
-                wtr.writerow([OriginalColName.get(c, c) for c in colnames])
+                db_float_type = coltypes[2]
+                wtr.writerow([original_col_name.get(c, c) for c in colnames])
                 if ExportMode == 'BAK':
-                    wtr.writerow(['[f]' if x == FloatType else '[t]' for x in coltypes])
+                    wtr.writerow(['[f]' if x == db_float_type else '[t]' for x in coltypes])
             # on supprime les CR des commentaires.
             if r.get('img_file_name', '') and ExportMode == 'DOI':  # les images sont dans des dossiers par taxo
-                r['img_file_name'] = GetDOIImgFileName(r['objid'], r['img_rank'], r['object_annotation_category'],
-                                                       r['img_file_name'])
+                r['img_file_name'] = get_DOI_imgfile_name(r['objid'], r['img_rank'], r['object_annotation_category'],
+                                                          r['img_file_name'])
             if self.param.commentsdata == '1' and r['complement_info']:
                 r['complement_info'] = ' '.join(r['complement_info'].splitlines())
             if self.param.usecomasepa == '1':  # sur les decimaux on remplace . par ,
                 for i, t in zip(range(1000), coltypes):
-                    if t == FloatType and r[i] is not None:
+                    if t == db_float_type and r[i] is not None:
                         r[i] = str(r[i]).replace('.', ',')
             wtr.writerow(r)
         if csvfile:
@@ -308,7 +311,8 @@ class TaskExportTxt(AsyncTask):
         for r in self.pgcur:  # r0=objid, r2=orig_file_name,r4 parent_taxo,r5=imgrank,r6=samplename
             if SplitImageBy == 'taxo':
                 zfile.write(vaultroot.joinpath(r[1]).as_posix(),
-                            arcname=GetDOIImgFileName(r['objid'], r['imgrank'], r['taxo_parent_child'], r['file_name']))
+                            arcname=get_DOI_imgfile_name(r['objid'], r['imgrank'], r['taxo_parent_child'],
+                                                         r['file_name']))
             else:
                 zfile.write(vaultroot.joinpath(r[1]).as_posix(),
                             arcname="{0}/{1}".format(r['sample_orig_id'], r['orig_file_name']))
@@ -317,7 +321,7 @@ class TaskExportTxt(AsyncTask):
     XMLNS = "http://typo.oceanomics.abims.sbr.fr/ecotaxa-export"
     XSI_LOC = "platform:/resource/typo-shared/src/main/resources/ecotaxa-export-1.1.xsd"
 
-    def CreateXML(self):
+    def create_XML(self):
         self.UpdateProgress(1, "Start XML export")
         Prj = database.Projects.query.filter_by(projid=self.param.ProjectId).first()
 
@@ -330,8 +334,8 @@ class TaskExportTxt(AsyncTask):
                                        "xsi:schemaLocation": self.XMLNS + " " + self.XSI_LOC
                                        })
 
-        Project = ET.SubElement(root, 'project', {'id': "ecotaxa:%d" % Prj.projid})
-        projectdescription = ET.SubElement(Project, 'projectdescription')
+        project_elem = ET.SubElement(root, 'project', {'id': "ecotaxa:%d" % Prj.projid})
+        projectdescription = ET.SubElement(project_elem, 'projectdescription')
         projectdescriptionname = ET.SubElement(projectdescription, 'name')
         projectdescriptionname.text = Prj.title
         ET.SubElement(projectdescription, 'link', {"url": "%sprj/%d" % (app.config['SERVERURL'], Prj.projid)})
@@ -362,7 +366,7 @@ class TaskExportTxt(AsyncTask):
         logging.info("Params : %s" % (params,))
         self.pgcur.execute(sql, params)
 
-        samples = ET.SubElement(Project, 'samples')
+        samples = ET.SubElement(project_elem, 'samples')
         for r in self.pgcur:
             sel = ET.SubElement(samples, 'sample')
             dtpdesc = ET.fromstring(r['dataportal_descriptor'])
@@ -383,7 +387,7 @@ class TaskExportTxt(AsyncTask):
 
         ET.ElementTree(root).write(fichier, encoding="UTF-8", xml_declaration=True)
 
-    def CreateSUM(self):
+    def create_sum(self):
         self.UpdateProgress(1, "Start Summary export")
         Prj = database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         grp = "to1.display_name"
@@ -439,9 +443,9 @@ class TaskExportTxt(AsyncTask):
             if self.param.exportimagesdoi != '':
                 self.CreateIMG('taxo')
         elif self.param.what == "XML":
-            self.CreateXML()
+            self.create_XML()
         elif self.param.what == "SUM":
-            self.CreateSUM()
+            self.create_sum()
         else:
             raise Exception("Unsupported exportation type : %s" % (self.param.what,))
 
@@ -533,15 +537,16 @@ class TaskExportTxt(AsyncTask):
                 g.headcenter = "<h4>Project : <a href='/prj/{0}?{2}'>{1}</a></h4>". \
                     format(Prj.projid, Prj.title, "&".join([k + "=" + v for k, v in self.param.filtres.items()
                                                             if v != ""]))
-            LstUsers = database.GetAll(
+            lst_users = database.GetAll(
                 """select distinct u.email,u.name,Lower(u.name)
                      from users_roles ur join users u on ur.user_id=u.id
                     where ur.role_id=2
                       and u.active = TRUE 
                       and email like '%@%'
                     order by Lower(u.name)""")
-            g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
+            g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in lst_users])
             return render_template('task/textexport_create.html', header=txt, data=self.param, TxtFiltres=TxtFiltres)
 
+    # noinspection PyPep8Naming
     def GetResultFile(self):
         return self.param.OutFile
