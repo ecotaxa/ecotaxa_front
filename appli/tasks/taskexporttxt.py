@@ -73,11 +73,13 @@ class TaskExportTxt(AsyncTask):
             self.param = self.Params(task.inputparam)
 
     def SPCommon(self):
+        """ Executed before each step, i.e. in subprocess """
         logging.info("Execute SPCommon for Txt Export")
         self.pgcur = db.engine.raw_connection().cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    def CreateTSV(self, ExportMode):
-        self.UpdateProgress(1, "Start TSV export")
+    def CreateTSV(self, ExportMode, start_progress, end_progress):
+        self.UpdateProgress(start_progress, "Start TSV export")
+        progress_range = end_progress - start_progress
         Prj = database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         image_export = ''
         if ExportMode in ('BAK', 'DOI'):
@@ -87,6 +89,11 @@ class TaskExportTxt(AsyncTask):
             image_export = self.param.exportimagesbak
         if ExportMode == 'DOI':
             image_export = self.param.exportimagesdoi
+
+        # Get a fast count of the maximum of what to do
+        sql_count = "select sum(nbr) as cnt from projects_taxo_stat where projid=%(projid)s"
+        self.pgcur.execute(sql_count, {'projid': int(self.param.ProjectId)})
+        obj_count = next(self.pgcur)[0]
 
         sql1 = """select o.orig_id as object_id, o.latitude as object_lat, o.longitude as object_lon,
                          to_char(objdate,'YYYYMMDD') as object_date,
@@ -232,26 +239,21 @@ class TaskExportTxt(AsyncTask):
             prevvalue = self.param.OutFile.replace('.zip', '')
         fichier = os.path.join(self.GetWorkingDir(), csvfilename)
         csvfile = None
-        wtr = coltypes = db_float_type = None  # assigned inside the loop
+        wtr = None
+        colnames = [desc[0] for desc in self.pgcur.description]
+        coltypes = [desc[1] for desc in self.pgcur.description]
+        # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
+        db_float_type = coltypes[2]
+        nb_rows = 0
         for r in self.pgcur:
             if (csvfile is None and (not splitcsv)) or ((prevvalue != r[splitfield]) and splitcsv):
-                if csvfile:
-                    csvfile.close()
-                    if zfile:
-                        if ExportMode == 'BAK':
-                            zfile.write(fichier, os.path.join(str(prevvalue), "ecotaxa_" + str(prevvalue) + ".tsv"))
-                        else:
-                            zfile.write(fichier, "ecotaxa_" + str(prevvalue) + ".tsv")
+                self.close_csv_if_needed(csvfile, fichier, zfile, prevvalue, ExportMode)
                 if splitcsv:
                     prevvalue = r[splitfield]
                 logging.info("Creating file %s" % (fichier,))
                 csvfile = open(fichier, 'w', encoding='latin_1')
                 wtr = csv.writer(csvfile, delimiter='\t', quotechar='"', lineterminator='\n',
                                  quoting=csv.QUOTE_NONNUMERIC)
-                colnames = [desc[0] for desc in self.pgcur.description]
-                coltypes = [desc[1] for desc in self.pgcur.description]
-                # on lit le type de la colonne 2 alias latitude pour determiner le code du type double
-                db_float_type = coltypes[2]
                 wtr.writerow([original_col_name.get(c, c) for c in colnames])
                 if ExportMode == 'BAK':
                     wtr.writerow(['[f]' if x == db_float_type else '[t]' for x in coltypes])
@@ -266,19 +268,28 @@ class TaskExportTxt(AsyncTask):
                     if t == db_float_type and r[i] is not None:
                         r[i] = str(r[i]).replace('.', ',')
             wtr.writerow(r)
+            nb_rows += 1
+            if nb_rows % 10000 == 0:
+                msg = "Row %d of max %d" % (nb_rows, obj_count)
+                logging.info(msg)
+                self.UpdateProgress(start_progress + progress_range / obj_count * nb_rows, msg)
+        self.close_csv_if_needed(csvfile, fichier, zfile, prevvalue, ExportMode)
+        logging.info("Extracted %d rows", self.pgcur.rowcount)
+
+    @staticmethod
+    def close_csv_if_needed(csvfile, fichier, zfile, prevvalue, ExportMode):
         if csvfile:
             csvfile.close()
             if zfile:
-                if ExportMode == 'BAK':  # Split par sample et le fTSV est avec le sample.
+                if ExportMode == 'BAK':
                     zfile.write(fichier, os.path.join(str(prevvalue), "ecotaxa_" + str(prevvalue) + ".tsv"))
                 else:
                     zfile.write(fichier, "ecotaxa_" + str(prevvalue) + ".tsv")
-                zfile.close()
-        logging.info("Extracted %d rows", self.pgcur.rowcount)
 
-    def CreateIMG(self, SplitImageBy):
+    def CreateIMG(self, SplitImageBy, start_progress, end_progress):
         # tsvfile=self.param.OutFile
-        self.UpdateProgress(1, "Start Image export")
+        self.UpdateProgress(start_progress, "Start Image export")
+        progress_range = end_progress - start_progress
         _Prj = database.Projects.query.filter_by(projid=self.param.ProjectId).first()
         # self.param.OutFile= "exportimg_{0:d}_{1:s}.zip".format(Prj.projid,
         #                                                      datetime.datetime.now().strftime("%Y%m%d_%H%M"))
@@ -307,15 +318,27 @@ class TaskExportTxt(AsyncTask):
         logging.info("Execute SQL : %s" % (sql,))
         logging.info("Params : %s" % (params,))
         self.pgcur.execute(sql, params)
+        temp_img_file = os.path.join(self.GetWorkingDir(), "images.csv")
+        # Write the resultset to a file in order to free cursor data #542
+        nb_files_to_add = self.write_cursor_to_csv(temp_img_file)
+        nb_files_added = 0
         vaultroot = Path("../../vault")
-        for r in self.pgcur:  # r0=objid, r2=orig_file_name,r4 parent_taxo,r5=imgrank,r6=samplename
-            if SplitImageBy == 'taxo':
-                zfile.write(vaultroot.joinpath(r[1]).as_posix(),
-                            arcname=get_DOI_imgfile_name(r['objid'], r['imgrank'], r['taxo_parent_child'],
-                                                         r['file_name']))
-            else:
-                zfile.write(vaultroot.joinpath(r[1]).as_posix(),
-                            arcname="{0}/{1}".format(r['sample_orig_id'], r['orig_file_name']))
+        with open(temp_img_file, "r") as temp_images_csv_fd:
+            for r in csv.DictReader(temp_images_csv_fd, delimiter='\t', quotechar='"', lineterminator='\n'):
+                img_file_path = vaultroot.joinpath(r["file_name"]).as_posix()
+                if SplitImageBy == 'taxo':
+                    path_in_zip = get_DOI_imgfile_name(r['objid'], r['imgrank'], r['taxo_parent_child'], r['file_name'])
+                else:
+                    path_in_zip = "{0}/{1}".format(r['sample_orig_id'], r['orig_file_name'])
+                try:
+                    zfile.write(img_file_path, arcname=path_in_zip)
+                except FileNotFoundError:
+                    pass
+                nb_files_added += 1
+                if nb_files_added % 1000 == 0:
+                    msg = "Added %d files" % nb_files_added
+                    logging.info(msg)
+                    self.UpdateProgress(start_progress + progress_range / nb_files_to_add * nb_files_added, msg)
 
     # TODO: Invalid URL
     XMLNS = "http://typo.oceanomics.abims.sbr.fr/ecotaxa-export"
@@ -420,51 +443,68 @@ class TaskExportTxt(AsyncTask):
         self.param.OutFile = "export_summary_{0:d}_{1:s}.tsv".format(Prj.projid,
                                                                      datetime.datetime.now().strftime("%Y%m%d_%H%M"))
         fichier = os.path.join(self.GetWorkingDir(), self.param.OutFile)
-        logging.info("Creating file %s" % (fichier,))
+        msg = "Creating file %s" % fichier
+        logging.info(msg)
+        self.UpdateProgress(50, msg)
+        nb_lines = self.write_cursor_to_csv(fichier)
+        msg = "Extracted %d rows" % nb_lines
+        logging.info(msg)
+        self.UpdateProgress(90, msg)
+
+    def write_cursor_to_csv(self, fichier):
+        nb_lines = 0
         with open(fichier, 'w', encoding='latin_1') as csvfile:
-            # lecture en mode dictionnaire basé sur la premiere ligne
             wtr = csv.writer(csvfile, delimiter='\t', quotechar='"', lineterminator='\n')
             colnames = [desc[0] for desc in self.pgcur.description]
             wtr.writerow(colnames)
             for r in self.pgcur:
                 wtr.writerow(r)
-        logging.info("Extracted %d rows", self.pgcur.rowcount)
+                nb_lines += 1
+        return nb_lines
 
     def SPStep1(self):
+        """ In subprocess, task.taskstep = 1 """
         logging.info("Input Param = %s" % (self.param.__dict__,))
-        if self.param.what == "TSV":
-            self.CreateTSV(self.param.what)
-        elif self.param.what == "BAK":
-            self.CreateTSV(self.param.what)
-            if self.param.exportimagesbak != '':
-                self.CreateIMG('sample')
-        elif self.param.what == "DOI":
-            self.CreateTSV(self.param.what)
-            if self.param.exportimagesdoi != '':
-                self.CreateIMG('taxo')
-        elif self.param.what == "XML":
+        # A bit of forward-thinking...
+        progress_before_copy = 100
+        if self.param.putfileonftparea == 'Y':
+            progress_before_copy = 95
+        # Bulk of the job
+        params = self.param
+        if params.what == "TSV":
+            self.CreateTSV(params.what, 1, progress_before_copy)
+        elif params.what == "BAK":
+            self.CreateTSV(params.what, 1, 10 if params.exportimagesbak != '' else progress_before_copy)
+            if params.exportimagesbak != '':
+                self.CreateIMG('sample', 10, progress_before_copy)
+        elif params.what == "DOI":
+            self.CreateTSV(params.what, 1, 10 if params.exportimagesdoi != '' else progress_before_copy)
+            if params.exportimagesdoi != '':
+                self.CreateIMG('taxo', 10, progress_before_copy)
+        elif params.what == "XML":
             self.create_XML()
-        elif self.param.what == "SUM":
+        elif params.what == "SUM":
             self.create_sum()
         else:
-            raise Exception("Unsupported exportation type : %s" % (self.param.what,))
-
-        if self.param.putfileonftparea == 'Y':
-            fichier = Path(self.GetWorkingDir()) / self.param.OutFile
+            raise Exception("Unsupported exportation type : %s" % (params.what,))
+        # Final copy
+        if params.putfileonftparea == 'Y':
+            self.UpdateProgress(progress_before_copy, "Copying file to FTP")
+            fichier = Path(self.GetWorkingDir()) / params.OutFile
             fichierdest = Path(app.config['FTPEXPORTAREA'])
             if not fichierdest.exists():
                 fichierdest.mkdir()
-            NomFichier = "task_%d_%s" % (self.task.id, self.param.OutFile)
+            NomFichier = "task_%d_%s" % (self.task.id, params.OutFile)
             fichierdest = fichierdest / NomFichier
             # fichier.rename(fichierdest) si ce sont des volumes sur des devices differents ça ne marche pas
             shutil.copyfile(fichier.as_posix(), fichierdest.as_posix())
-            self.param.OutFile = ''
-            self.task.taskstate = "Done"
-            self.UpdateProgress(100, "Export successful : File '%s' is available on the 'Exported_data' FTP folder"
-                                % NomFichier)
+            params.OutFile = ''
+            final_message = "Export successful : File '%s' is available on the 'Exported_data' FTP folder" % NomFichier
         else:
-            self.task.taskstate = "Done"
-            self.UpdateProgress(100, "Export successfull")
+            final_message = "Export successful"
+
+        self.task.taskstate = "Done"
+        self.UpdateProgress(100, final_message)
 
         # self.task.taskstate="Error"
         # self.UpdateProgress(10,"Test Error")
