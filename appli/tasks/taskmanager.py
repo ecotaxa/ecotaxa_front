@@ -200,7 +200,10 @@ def LoadTask(taskid, cookie_from_env=False):
         ret.cookie = os.environ.get(ECOTAXA_COOKIE)
     else:
         # Get the cookie from HTTP client
-        ret.cookie = request.cookies.get('session')
+        try:
+            ret.cookie = request.cookies.get('session')
+        except RuntimeError:
+            ret.cookie = os.environ.get(ECOTAXA_COOKIE)
     return ret
 
 

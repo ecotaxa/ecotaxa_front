@@ -1,11 +1,10 @@
 import collections
-import datetime
 import math
 import urllib.parse
 from typing import List
 
 import psycopg2.extras
-from flask import render_template, g, flash, json, session, request, Markup, url_for
+from flask import render_template, g, flash, json, request, url_for
 from flask_login import current_user
 from flask_security import login_required
 
@@ -16,63 +15,9 @@ from appli import app, PrintInCharte, database, gvg, gvp, user_datastore, Decode
 from appli.constants import DayTimeList
 from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.search.leftfilters import getcommonfilters
-######################################################################################################################
-from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import CreateProjectReq, ProjectsApi, ProjectModel, \
-    ApiException, ObjectsApi, ObjectSetQueryRsp
-
-
-# noinspection PyPep8Naming
-@app.route('/prj/')
-@login_required
-def indexProjects(Others=False):
-    filt_title = gvg('filt_title', session.get('prjfilt_title', ''))
-    session['prjfilt_title'] = filt_title
-
-    filt_instrum = gvg('filt_instrum', session.get('prjfilt_instrum', ''))
-    session['prjfilt_instrum'] = filt_instrum
-
-    # Les checkbox ne sont pas transmises si elle ne sont pas coché,
-    if 'filt_title' in request.args:  # donc si le filtre du titre est transmis on utilise le get
-        filt_subset = gvg('filt_subset', "")
-        session['prjfilt_subset'] = filt_subset
-    else:  # Sinon on prend la valeur de la session.
-        filt_subset = session.get('prjfilt_subset', '')
-
-    with ApiClient(ProjectsApi, request) as api:
-        prjs: List[ProjectModel] = api.search_projects_projects_search_get(also_others=Others,
-                                                                           title_filter=filt_title,
-                                                                           instrument_filter=filt_instrum,
-                                                                           filter_subset=(filt_subset == 'Y'))
-    # Sort for consistency
-    prjs.sort(key=lambda prj: prj.title.strip().lower())
-
-    CanCreate = False
-    if not Others:
-        if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel):
-            CanCreate = True
-
-    PDT = database.PersistantDataTable.query.first()
-    if PDT is None or PDT.lastserverversioncheck_datetime is None or (
-            datetime.datetime.now() - PDT.lastserverversioncheck_datetime).days > 7:
-        fashtxt = "Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days, " \
-                  "Ask application administrator to do it."  # +str(PDT.lastserverversioncheck_datetime)
-        fashtxt += "  <a href='/taxo/browse/' class='btn btn-primary btn-xs'>Synchronize to check Ecotaxa version</a>"
-        flash(Markup(fashtxt), 'warning')
-
-    return PrintInCharte(
-        render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
-                        AppManagerMailto=appli.GetAppManagerMailto(),
-                        filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum, Others=Others,
-                        isadmin=current_user.has_role(database.AdministratorLabel),
-                        _manager_mail=_manager_mail))
 
 
 ######################################################################################################################
-@app.route('/prjothers/')
-@login_required
-def ProjectsOthers():
-    return indexProjects(Others=True)
 
 
 ######################################################################################################################
@@ -759,97 +704,6 @@ def prjGetClassifTab(PrjId):
 
 
 ######################################################################################################################
-# noinspection PyPep8Naming
-@app.route('/prjPurge/<int:PrjId>', methods=['GET', 'POST'])
-@login_required
-def prjPurge(PrjId):
-    # Security & sanity checks
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
-        except ApiException as ae:
-            if ae.status == 404:
-                return "Project doesn't exists"
-            elif ae.status == 403:
-                flash('You cannot Purge this project', 'error')
-                return PrintInCharte("<a href=/prj/>Select another project</a>")
-
-    txt = ObjListTxt = ""
-    g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_proj.projid, XSSEscape(target_proj.title))
-    txt += "<div style='margin-left: 5px;'><h3>ERASE OBJECTS TOOL </h3>"
-
-    if gvp("objlist") == "":
-
-        # Extract filter values
-        filtres = {}
-        for k in sharedfilter.FilterList:
-            if gvg(k):
-                filtres[k] = gvg(k, "")
-        if len(filtres):
-            # Query objects, using filters, in project
-            with ApiClient(ObjectsApi, request) as api:
-                object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres).object_ids
-            ObjListTxt = "\n".join((str(r) for r in object_ids))
-
-            txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
-                   "USING Active Project Filters, {0} objects</span>".format(len(object_ids))
-        else:
-            txt += """Enter the list of internal object id you want to delete. 
-            <br>Or type in <span style='cursor:pointer;color:#337ab7;' onclick="$('#objlist').val('DELETEALL')">
-            "DELETEALL"</span> to remove all object from this project.
-            <br>(<b>Around 10000 objects are deleted per second, so on a big project it can be long, 
-            a NGinx Error may happen, but erase process is still working in background. 
-            <br/>Statistics are not updated during erase project. </b>)
-            <br>You can retrieve object id from a TSV export file using export data from project action menu<br>"""
-        txt += """
-        <form action=? method=post>
-        <textarea name=objlist id=objlist cols=15 rows=20 autocomplete=off>{1}</textarea><br>
-        <input type=checkbox name=destroyproject value=Y> DELETE project after DELETEALL action.<br>
-        <input type="submit" class="btn btn-danger" value='ERASE THESE OBJECTS !!! IRREVERSIBLE !!!!!'>
-        <a href ="/prj/{0}" class="btn btn-success">Cancel, Back to project home</a>
-        </form></div>
-        """.format(PrjId, ObjListTxt)
-    else:
-        if gvp("objlist") == "DELETEALL":
-            # DELETE all objects
-            with ApiClient(ProjectsApi, request) as api:
-                no, noh, ni, nbrfile = api.erase_project_projects_project_id_delete(project_id=PrjId,
-                                                                                    only_objects=gvp(
-                                                                                        "destroyproject") != "Y")
-        else:
-            # DELETE some objects in project
-            objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]
-            err = None
-            with ApiClient(ObjectsApi, request) as api:
-                try:
-                    res: ObjectSetQueryRsp = api.query_object_set_parents_object_set_parents_post(objs)
-                except ApiException as ae:
-                    if ae.status == 403:
-                        err = 'At least one object does not belong to you'
-                    else:
-                        raise
-            if err is None:
-                nb_not_in_project = 0
-                for a_prjid in res.project_ids:
-                    if a_prjid != PrjId:
-                        nb_not_in_project += 1
-                if nb_not_in_project > 0:
-                    err = '%d object(s) are not in current project.' % nb_not_in_project
-            if err is not None:
-                flash(err, 'error')
-                return PrintInCharte(txt + "<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId))
-
-            with ApiClient(ObjectsApi, request) as api:
-                no, noh, ni, nbrfile = api.erase_object_set_object_set_delete(objs)
-
-        txt += "Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files" % (no, noh, ni, nbrfile)
-
-        if gvp("objlist") == "DELETEALL" and gvp("destroyproject") == "Y":
-            txt += "<br>Project and associated privileges, destroyed"
-            return PrintInCharte(txt + "<br><br><a href ='/prj/'>Back to project list</a>")
-
-    return PrintInCharte(txt + "<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId))
-
 
 # noinspection PyPep8Naming
 def PrjGetFieldList(Prj, typefield, term):
@@ -873,14 +727,3 @@ def PrjGetFieldListAjax(PrjId, typefield):
     term = gvg("q")
     fieldlist = PrjGetFieldList(Prj, typefield, term)
     return json.dumps(fieldlist)
-
-
-@app.route('/prj/simplecreate/', methods=['GET', 'POST'])
-@login_required
-def SimpleCreate():
-    with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-        req = CreateProjectReq(title=gvp("projtitle"))
-        rsp: int = api.create_project_projects_create_post(req)
-
-    # return "<a href='/prj/{0}' class='btn btn-primary'>Project Created ! Open IT</a>".format(Prj.projid)
-    return "<script>window.location='/prj/{0}';</script>".format(rsp)
