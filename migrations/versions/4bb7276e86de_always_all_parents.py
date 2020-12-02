@@ -1,4 +1,4 @@
-"""object relations
+"""always all parents
 
 Revision ID: 4bb7276e86de
 Revises: 36bb704b9fc5
@@ -13,7 +13,7 @@ down_revision = '36bb704b9fc5'
 from alembic import op
 import sqlalchemy as sa
 
-"""
+cleanup_script = """
 begin;
 insert into samples (sampleid, orig_id, projid)
 select nextval('seq_samples'), '__DUMMY_ID__'||oh.projid||'__', oh.projid

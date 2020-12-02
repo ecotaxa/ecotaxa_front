@@ -255,7 +255,7 @@ class Samples(db.Model):
     sampleid = db.Column(INTEGER, db.Sequence('seq_samples'), primary_key=True)
     projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
     project = db.relationship("Projects")
-    orig_id = db.Column(VARCHAR(255))
+    orig_id = db.Column(VARCHAR(255), nullable=False)
     latitude = db.Column(DOUBLE_PRECISION)
     longitude = db.Column(DOUBLE_PRECISION)
     dataportal_descriptor = db.Column(VARCHAR(8000))
@@ -274,7 +274,7 @@ class Acquisitions(db.Model):
     acquisid = db.Column(INTEGER, db.Sequence('seq_acquisitions'), primary_key=True)
     projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
     project = db.relationship("Projects")
-    orig_id = db.Column(VARCHAR(255))
+    orig_id = db.Column(VARCHAR(255), nullable=False)
     instrument = db.Column(VARCHAR(255))
 
     def __str__(self):
@@ -291,7 +291,7 @@ class Process(db.Model):
     processid = db.Column(INTEGER, db.Sequence('seq_process'), primary_key=True)
     projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
     project = db.relationship("Projects")
-    orig_id = db.Column(VARCHAR(255))
+    orig_id = db.Column(VARCHAR(255), nullable=False)
 
     def __str__(self):
         return "{0} ({1})".format(self.orig_id, self.processid)
@@ -353,7 +353,7 @@ class ObjectsFields(db.Model):
     objfid = db.Column(BIGINT, db.ForeignKey('obj_head.objid', ondelete="CASCADE"), primary_key=True)
     objhrel = db.relationship("Objects", foreign_keys="Objects.objid",
                               primaryjoin="ObjectsFields.objfid==Objects.objid", uselist=False, backref="objfrel")
-    orig_id = db.Column(VARCHAR(255))
+    orig_id = db.Column(VARCHAR(255), nullable=False)
     object_link = db.Column(VARCHAR(255))
 
 
