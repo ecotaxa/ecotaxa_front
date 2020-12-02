@@ -26,7 +26,6 @@ TaxoStatus = {'A': 'Active', 'D': 'Deprecated', 'N': 'Not reviewed'}
 # noinspection PyUnresolvedReferences
 from .constants import GetClassifQualClass
 
-
 users_roles = db.Table('users_roles',
                        db.Column('user_id', db.Integer(), db.ForeignKey('users.id'), primary_key=True),
                        db.Column('role_id', db.Integer(), db.ForeignKey('roles.id'), primary_key=True))
@@ -266,7 +265,7 @@ class Samples(db.Model):
 
 for i in range(1, 31):
     setattr(Samples, "t%02d" % i, db.Column(VARCHAR(250)))
-Index('IS_SamplesProject', Samples.__table__.c.projid)
+Index('IS_SamplesProjectOrigId', Samples.__table__.c.projid, Samples.__table__.c.orig_id, unique=True)
 
 
 class Acquisitions(db.Model):
@@ -283,7 +282,7 @@ class Acquisitions(db.Model):
 
 for i in range(1, 31):
     setattr(Acquisitions, "t%02d" % i, db.Column(VARCHAR(250)))
-Index('IS_AcquisitionsProject', Acquisitions.__table__.c.projid)
+Index('IS_AcquisitionsProjectOrigId', Acquisitions.__table__.c.projid, Acquisitions.__table__.c.orig_id, unique=True)
 
 
 class Process(db.Model):
