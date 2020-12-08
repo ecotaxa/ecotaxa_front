@@ -95,7 +95,6 @@ def ResetDBSequence(cur=None):
         cur.execute("SELECT setval('seq_acquisitions', (SELECT max(acquisid) FROM acquisitions), true)")
         cur.execute("SELECT setval('seq_images', (SELECT max(imgid) FROM images), true)")
         cur.execute("SELECT setval('seq_objects', (SELECT max(objid) FROM obj_head), true)")
-        cur.execute("SELECT setval('seq_process', (SELECT max(processid) FROM process), true)")
         cur.execute("SELECT setval('seq_projects', (SELECT max(projid) FROM projects), true)")
         cur.execute("SELECT setval('seq_projectspriv', (SELECT max(id) FROM projectspriv), true)")
         cur.execute("SELECT setval('seq_samples', (SELECT max(sampleid) FROM samples), true)")
