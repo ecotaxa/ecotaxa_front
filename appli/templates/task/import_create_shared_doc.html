@@ -47,8 +47,8 @@
             In this <code>tsv</code> file, there is one line per image which means the object data gets repeated on
             several lines.
             <ul>
-                <li><code class="text-danger">object_id</code> [t] : unique object name (will be displayed in Ecotaxa
-                    object page)
+                <li><code class="text-danger">object_id</code> [t] : identifier of the object, must be unique in the
+                    project. It will be displayed in the object page
                 </li>
                 <li><code>object_link</code> [f] : URL of an associated website</li>
                 <li><code>object_lat</code> [f] : latitude, <span class="text-info">decimal degrees</span></li>
@@ -84,27 +84,30 @@
             </ul>
         </li>
 
+        <li>PROCESS: metadata relative to the processing of the raw images
+            <ul>
+                <li><code>process_id</code> [t] : identifier. The processing information is associated with the
+                    acquisition on the same line. If missing, a dummy processing identifier will be created.
+                </li>
+                <li><code>process_***</code> [t] : other fields relative to the process. Up to 30 of them.</li>
+            </ul>
+        </li>
+
         <li>ACQUISITION: metadata relative to the image acquisition
             <ul>
-                <li><code>acq_id</code> [t] : unique identifier. If your acquisition differ for each sample you must
-                    have different identifier.
+                <li><code>acq_id</code> [t] : identifier of the image acquisition, must be unique in the project. If
+                    missing, a dummy acquisition identifier will be created.
                 </li>
                 <li><code>acq_instrument</code> [t] : name of the instrument (UVP, ZOOSCAN, FLOWCAM, etc.)</li>
                 <li><code>acq_***</code> [t] : other fields relative to the acquisition. Up to 30 of them.</li>
             </ul>
         </li>
 
-        <li>PROCESS: metadata relative to the processing of the raw images
-            <ul>
-                <li><code>process_id</code> [t] : unique identifier. If your processing differ for each sample you must
-                    have different identifier.
-                </li>
-                <li><code>process_***</code> [t] : other fields relative to the process. Up to 30 of them.</li>
-            </ul>
-        </li>
         <li>SAMPLE: a collection event
             <ul>
-                <li><code>sample_id</code> [t] : unique identifier</li>
+                <li><code>sample_id</code> [t] : identifier of the sample, must be unique in the project. If missing, a
+                    dummy sample identifier will be created.
+                </li>
                 <li><code>sample_***</code> [t] : other fields relative to the sample. Up to 30 of them.</li>
             </ul>
         </li>

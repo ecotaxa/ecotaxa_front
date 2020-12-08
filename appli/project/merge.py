@@ -31,8 +31,10 @@ def PrjMerge(PrjId):
         txt += """<ul><li>You are allowed to merge projects that you are allowed to manage
 <li>User privileges from both projects will be added
 <li>This tool allows to merge two projects in a single projet (called Current project). The added project will then be automatically deleted. If object data are not consistent between both projects :
-<ul><li>New data fields are added to the Current project
+<ul><li>New data fields are added to the Current project.
     <li>The resulting project will thus contain partially documented datafields.
+<li>Samples with same sample_id on both sides will <b>not</b> be updated from added project.
+<li>Acquisitions with same acq_id on both sides will <b>not</b> be updated from added project.
 </ul><li>Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.
 </ul>
                 """
