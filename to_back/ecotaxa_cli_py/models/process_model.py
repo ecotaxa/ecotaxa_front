@@ -58,12 +58,10 @@ class ProcessModel(object):
         self._free_columns = None
         self.discriminator = None
 
-        if processid is not None:
-            self.processid = processid
+        self.processid = processid
         if projid is not None:
             self.projid = projid
-        if orig_id is not None:
-            self.orig_id = orig_id
+        self.orig_id = orig_id
         if free_columns is not None:
             self.free_columns = free_columns
 
@@ -85,6 +83,8 @@ class ProcessModel(object):
         :param processid: The processid of this ProcessModel.  # noqa: E501
         :type: int
         """
+        if self.local_vars_configuration.client_side_validation and processid is None:  # noqa: E501
+            raise ValueError("Invalid value for `processid`, must not be `None`")  # noqa: E501
 
         self._processid = processid
 
@@ -127,6 +127,8 @@ class ProcessModel(object):
         :param orig_id: The orig_id of this ProcessModel.  # noqa: E501
         :type: str
         """
+        if self.local_vars_configuration.client_side_validation and orig_id is None:  # noqa: E501
+            raise ValueError("Invalid value for `orig_id`, must not be `None`")  # noqa: E501
 
         self._orig_id = orig_id
 

@@ -342,9 +342,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.4.7"
+ecotaxa_version="2.5.0"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-11-10"
+    return ecotaxa_version+" 2020-12-08"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -352,6 +352,13 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2020-12-08 : V 2.5.0
+    Bug #542: During export with images, arrange that resultsets from DB are flushed to disk instead of remaining opened.
+    Bug #537: There is now a decent progress bar during export.
+    Bug #540: It's not possible anymore to have a NULL orig_id in Samples and Acquisitions.
+    Bug #546 (partial fix): orig_id is now unique for Samples and Acquisitions. Process is not relevant anymore. Object remains.
+    Feature #144: Check the hierarchy in data identifiers at import time.
+    Feature #367: Merge acquisition and process into a single entity.
 2020-11-25 : V 2.4.7
     Feature #389: Force presence of sample/acquisition/process for each object.
     Features #435, #523: More functions go thru API from flask app.

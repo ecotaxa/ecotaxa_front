@@ -71,8 +71,7 @@ class SampleModel(object):
             self.sampleid = sampleid
         if projid is not None:
             self.projid = projid
-        if orig_id is not None:
-            self.orig_id = orig_id
+        self.orig_id = orig_id
         if latitude is not None:
             self.latitude = latitude
         if longitude is not None:
@@ -142,6 +141,8 @@ class SampleModel(object):
         :param orig_id: The orig_id of this SampleModel.  # noqa: E501
         :type: str
         """
+        if self.local_vars_configuration.client_side_validation and orig_id is None:  # noqa: E501
+            raise ValueError("Invalid value for `orig_id`, must not be `None`")  # noqa: E501
 
         self._orig_id = orig_id
 

@@ -59,7 +59,6 @@ class ObjectModel(object):
         'random_value': 'int',
         'sampleid': 'int',
         'acquisid': 'int',
-        'processid': 'int',
         'images': 'list[ImageModel]',
         'free_columns': 'object'
     }
@@ -91,12 +90,11 @@ class ObjectModel(object):
         'random_value': 'random_value',
         'sampleid': 'sampleid',
         'acquisid': 'acquisid',
-        'processid': 'processid',
         'images': 'images',
         'free_columns': 'free_columns'
     }
 
-    def __init__(self, orig_id=None, object_link=None, objid=None, projid=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, img0id=None, imgcount=None, complement_info=None, similarity=None, random_value=None, sampleid=None, acquisid=None, processid=None, images=[], free_columns=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, orig_id=None, object_link=None, objid=None, projid=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, img0id=None, imgcount=None, complement_info=None, similarity=None, random_value=None, sampleid=None, acquisid=None, images=[], free_columns=None, local_vars_configuration=None):  # noqa: E501
         """ObjectModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -128,7 +126,6 @@ class ObjectModel(object):
         self._random_value = None
         self._sampleid = None
         self._acquisid = None
-        self._processid = None
         self._images = None
         self._free_columns = None
         self.discriminator = None
@@ -181,7 +178,6 @@ class ObjectModel(object):
             self.random_value = random_value
         self.sampleid = sampleid
         self.acquisid = acquisid
-        self.processid = processid
         if images is not None:
             self.images = images
         if free_columns is not None:
@@ -740,29 +736,6 @@ class ObjectModel(object):
             raise ValueError("Invalid value for `acquisid`, must not be `None`")  # noqa: E501
 
         self._acquisid = acquisid
-
-    @property
-    def processid(self):
-        """Gets the processid of this ObjectModel.  # noqa: E501
-
-
-        :return: The processid of this ObjectModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._processid
-
-    @processid.setter
-    def processid(self, processid):
-        """Sets the processid of this ObjectModel.
-
-
-        :param processid: The processid of this ObjectModel.  # noqa: E501
-        :type: int
-        """
-        if self.local_vars_configuration.client_side_validation and processid is None:  # noqa: E501
-            raise ValueError("Invalid value for `processid`, must not be `None`")  # noqa: E501
-
-        self._processid = processid
 
     @property
     def images(self):

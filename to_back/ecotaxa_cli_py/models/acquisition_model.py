@@ -65,8 +65,7 @@ class AcquisitionModel(object):
             self.acquisid = acquisid
         if projid is not None:
             self.projid = projid
-        if orig_id is not None:
-            self.orig_id = orig_id
+        self.orig_id = orig_id
         if instrument is not None:
             self.instrument = instrument
         if free_columns is not None:
@@ -132,6 +131,8 @@ class AcquisitionModel(object):
         :param orig_id: The orig_id of this AcquisitionModel.  # noqa: E501
         :type: str
         """
+        if self.local_vars_configuration.client_side_validation and orig_id is None:  # noqa: E501
+            raise ValueError("Invalid value for `orig_id`, must not be `None`")  # noqa: E501
 
         self._orig_id = orig_id
 
