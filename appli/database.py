@@ -287,7 +287,8 @@ Index('IS_AcquisitionsProjectOrigId', Acquisitions.__table__.c.projid, Acquisiti
 
 class Process(db.Model):
     __tablename__ = 'process'
-    processid = db.Column(INTEGER, db.Sequence('seq_process'), primary_key=True)
+    # Now a common key with Acquisitions
+    processid = db.Column(INTEGER, primary_key=True)
     projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
     project = db.relationship("Projects")
     orig_id = db.Column(VARCHAR(255), nullable=False)
@@ -343,9 +344,7 @@ class Objects(db.Model):
     sample = db.relationship("Samples")
     acquisid = db.Column(INTEGER, db.ForeignKey('acquisitions.acquisid'), nullable=False)
     acquis = db.relationship("Acquisitions")
-    processid = db.Column(INTEGER, db.ForeignKey('process.processid'), nullable=False)
-    processrel = db.relationship("Process")
-
+    processrel = db.relationship("Process", primaryjoin="Process.processid==foreign(Objects.acquisid)")
 
 class ObjectsFields(db.Model):
     __tablename__ = 'obj_field'
@@ -391,7 +390,6 @@ Index('is_objectsprojrandom', Objects.__table__.c.projid, Objects.__table__.c.ra
 Index('is_objectfieldsorigid', ObjectsFields.__table__.c.orig_id)
 # For FK checks during deletion
 Index('is_objectsacquisition', Objects.__table__.c.acquisid)
-Index('is_objectsprocess', Objects.__table__.c.processid)
 
 
 class ObjectsClassifHisto(db.Model):

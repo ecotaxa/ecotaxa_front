@@ -117,7 +117,7 @@ def GetSQLFilter(filtres, sqlparam, currentuserid):
             whereclause += " and o.sampleid in (select sampleid from samples s where t" + (
                     "%02d" % int(filtres["freetxt"][2:])) + " ilike %(freetxtval)s and projid=%(projid)s )"
         elif filtres.get("freetxt", '')[0] == 'p':
-            whereclause += " and o.processid in (select processid from process s where t" + (
+            whereclause += " and o.acquisid in (select processid from process s where t" + (
                     "%02d" % int(filtres["freetxt"][2:])) + " ilike %(freetxtval)s and projid=%(projid)s )"
     if filtres.get('filt_annot', '') != '':
         whereclause += " and (o.classif_who = any (%(filt_annot)s) " \

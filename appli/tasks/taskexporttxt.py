@@ -132,7 +132,7 @@ class TaskExportTxt(AsyncTask):
                 left join taxonomy to1p on to1.parent_id = to1p.id
                 left join users uo1 on o.classif_who = uo1.id
                 left join taxonomy to2 on o.classif_auto_id = to2.id
-                left join samples s on o.sampleid = s.sampleid """
+                     join samples s on o.sampleid = s.sampleid """
         sql3 = " where o.projid=%(projid)s "
         params = {'projid': int(self.param.ProjectId)}
         original_col_name = {}  # Nom de colonneSQL => Nom de colonne permet de traiter le cas de %area
@@ -166,17 +166,17 @@ class TaskExportTxt(AsyncTask):
             mapping = DecodeEqualList(Prj.mappingprocess)
             for k, v in mapping.items():
                 sql1 += ',p.%s as "process_%s" ' % (k, re.sub(R"[^a-zA-Z0-9\.\-µ]", "_", v))
-            sql2 += " left join process p on o.processid=p.processid "
+            sql2 += "      join process p on o.acquisid = p.processid "
         if self.param.acqdata == '1':
             sql1 += "\n,a.orig_id acq_id,a.instrument as acq_instrument"
             mapping = DecodeEqualList(Prj.mappingacq)
             for k, v in mapping.items():
                 sql1 += ',a.%s as "acq_%s" ' % (k, re.sub(R"[^a-zA-Z0-9\.\-µ]", "_", v))
-            sql2 += " left join acquisitions a on o.acquisid = a.acquisid "
+            sql2 += " join acquisitions a on o.acquisid = a.acquisid "
         if ExportMode == 'DOI':
             sql1 += "\n,o.objid"
         if self.param.internalids == '1':
-            sql1 += """\n,o.objid, o.acquisid as acq_id_internal, o.processid as processid_internal, 
+            sql1 += """\n,o.objid, o.acquisid as acq_id_internal, o.acquisid as processid_internal, 
                     o.sampleid as sample_id_internal, o.classif_id, o.classif_who,
                     o.classif_auto_id, to2.name classif_auto_name, classif_auto_score, classif_auto_when,
                     o.random_value object_random_value, o.sunpos object_sunpos """
@@ -303,7 +303,7 @@ class TaskExportTxt(AsyncTask):
                         replace(t.display_name,'<','_') taxo_parent_child, imgrank,
                         s.orig_id sample_orig_id
                    from objects o 
-                   left join samples s on o.sampleid = s.sampleid
+                        join samples s on o.sampleid = s.sampleid
                    join images i on o.objid = i.objid
                    left join taxonomy t on o.classif_id = t.id
                    left join taxonomy to1p on t.parent_id = to1p.id
@@ -424,9 +424,9 @@ class TaskExportTxt(AsyncTask):
             sql1 = "SELECT  s.orig_id, s.latitude, s.longitude, max(objdate) as date, to1.display_name"
         sql1 += ",count(*) Nbr"
         sql2 = """ FROM objects o
-                left join taxonomy to1 on o.classif_id=to1.id
-                left join samples s on o.sampleid=s.sampleid
-                left join acquisitions a on o.acquisid=a.acquisid """
+                left join taxonomy to1 on o.classif_id = to1.id
+                     join samples s on o.sampleid = s.sampleid
+                     join acquisitions a on o.acquisid = a.acquisid """
         sql3 = " where o.projid=%(projid)s "
         params = {'projid': int(self.param.ProjectId)}
         if self.param.samplelist != "":

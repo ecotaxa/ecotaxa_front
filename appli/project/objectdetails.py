@@ -216,7 +216,7 @@ def objectdetails(objid):
         acquisition: AcquisitionModel = api.acquisition_query_acquisition_acquisition_id_get(
             acquisition_id=obj.acquisid)
     with ApiClient(ProcessesApi, request) as api:
-        process: ProcessModel = api.process_query_process_process_id_get(process_id=obj.processid)
+        process: ProcessModel = api.process_query_process_process_id_get(process_id=obj.acquisid)
 
     for entity_desc in (("Sample", sample, "sample", obj_proj.sample_free_cols),
                         ("Acquisition", acquisition, "acquis", obj_proj.acquisition_free_cols),
@@ -336,7 +336,7 @@ def objectdetailsupdate(objid):
                                                                            updates=updates))
         elif table == "processrel":
             with ApiClient(ProcessesApi, request) as api:
-                api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=[obj.processid],
+                api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=[obj.acquisid],
                                                                            updates=updates))
         elif table == "acquis":
             with ApiClient(AcquisitionsApi, request) as api:

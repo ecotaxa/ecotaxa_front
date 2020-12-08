@@ -282,7 +282,7 @@ left Join images i on o.img0id=i.imgid
 left JOIN taxonomy t on o.classif_id=t.id
 left JOIN taxonomy t2 on t.parent_id=t2.id
 LEFT JOIN users u on o.classif_who=u.id
-LEFT JOIN  samples s on o.sampleid=s.sampleid
+     JOIN samples s on o.sampleid=s.sampleid
 """
     whereclause += sharedfilter.GetSQLFilter(filtres, sqlparam,
                                              str(current_user.id if current_user.is_authenticated else "999999"))
@@ -295,7 +295,7 @@ LEFT JOIN  samples s on o.sampleid=s.sampleid
         ,count(case when classif_qual='D' then 1 end) NbDubious
         ,count(case when classif_qual='P' then 1 end) NbPredicted
         from objects o
-        LEFT JOIN  acquisitions acq on o.acquisid=acq.acquisid
+             JOIN acquisitions acq on o.acquisid=acq.acquisid
         """ + whereclause
     # Optimisation pour des cas simples et fréquents
     if whereclause == ' where o.projid=%(projid)s ':
