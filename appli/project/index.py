@@ -2,15 +2,15 @@ import datetime
 from typing import List
 
 from flask import render_template, flash, session, request, Markup
-from flask_login import current_user
 from flask_security import login_required
 
 import appli
-from appli import app, PrintInCharte, database, gvg
+from appli import app, PrintInCharte, gvg
 ######################################################################################################################
 from appli.project.main import _manager_mail
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, UsersApi, UserModelWithRights, TaxonomyTreeApi, \
+    TaxonomyTreeStatus
 
 
 # noinspection PyPep8Naming
@@ -38,14 +38,21 @@ def indexProjects(Others=False):
     # Sort for consistency
     prjs.sort(key=lambda prj: prj.title.strip().lower())
 
-    CanCreate = False
-    if not Others:
-        if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel):
-            CanCreate = True
+    with ApiClient(UsersApi, request) as api:
+        user: UserModelWithRights = api.show_current_user_users_me_get()
 
-    PDT = database.PersistantDataTable.query.first()
-    if PDT is None or PDT.lastserverversioncheck_datetime is None or (
-            datetime.datetime.now() - PDT.lastserverversioncheck_datetime).days > 7:
+    if Others:
+        CanCreate = False
+    else:
+        CanCreate = 1 in user.can_do
+
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        status: TaxonomyTreeStatus = api.taxa_tree_status_taxa_status_get()
+        try:
+            last_refresh = datetime.datetime.strptime(status.last_refresh, '%Y-%m-%dT%H:%M:%S')
+        except ValueError:
+            last_refresh = None
+    if last_refresh is None or (datetime.datetime.now() - last_refresh).days > 7:
         fashtxt = "Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days, " \
                   "Ask application administrator to do it."  # +str(PDT.lastserverversioncheck_datetime)
         fashtxt += "  <a href='/taxo/browse/' class='btn btn-primary btn-xs'>Synchronize to check Ecotaxa version</a>"
@@ -54,8 +61,8 @@ def indexProjects(Others=False):
     return PrintInCharte(
         render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
                         AppManagerMailto=appli.GetAppManagerMailto(),
-                        filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum, Others=Others,
-                        isadmin=current_user.has_role(database.AdministratorLabel),
+                        filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
+                        Others=Others, isadmin=2 in user.can_do,
                         _manager_mail=_manager_mail))
 
 
