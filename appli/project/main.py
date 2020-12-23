@@ -14,6 +14,7 @@ from appli import app, PrintInCharte, database, gvg, gvp, user_datastore, Decode
     XSSEscape
 from appli.constants import DayTimeList
 from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
+from appli.project.widgets import ClassificationPageStats
 from appli.search.leftfilters import getcommonfilters
 
 
@@ -80,24 +81,30 @@ FilterListAutoSave = ("sortby", "sortorder", "dispfield", "statusfilter", 'ipp',
 # @login_required
 def indexPrj(PrjId):
     data = {'pageoffset': gvg("pageoffset", "0")}
+
+    # Read user preferences related to this project
     for k, v in FilterList.items():
         data[k] = gvg(k, str(current_user.GetPref(PrjId, k, v)) if current_user.is_authenticated else "")
+
     # print('%s',data)
     if data.get("samples", None):
         data["sample_for_select"] = ""
         for r in GetAll(
                 "select sampleid,orig_id from samples where projid=%d and sampleid in(%s)" % (PrjId, data["samples"])):
             data["sample_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(*r)
+
     data["month_for_select"] = ""
     # print("%s",data['month'])
     for (k, v) in enumerate(('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
                              'October', 'November', 'December'), start=1):
         data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
             'selected' if str(k) in data.get('month', '').split(',') else '', k, v)
+
     data["daytime_for_select"] = ""
     for (k, v) in DayTimeList.items():
         data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
             'selected' if str(k) in data.get('daytime', '').split(',') else '', k, v)
+
     Prj = database.Projects.query.filter_by(projid=PrjId).first()
     if Prj is None:
         flash("Project doesn't exists", 'error')
@@ -114,6 +121,7 @@ def indexPrj(PrjId):
         <a class='btn btn-primary' href='mailto:{3}?{0}' style='margin-left:15px;'>REQUEST ACCESS to {4}</a>
         </div>""".format(html_mail_body, Prj.title, Prj.projid, MainContact[0]['email'], MainContact[0]['name'])
         return PrintInCharte(msg + "<a href=/prj/>Select another project</a>")
+
     g.Projid = Prj.projid
     # Ces 2 listes sont ajax mais si on passe le filtre dans l'URL il faut ajouter l'entrée en statique pour l'affichage
     data["filt_freenum_for_select"] = ""
@@ -122,17 +130,20 @@ def indexPrj(PrjId):
             if r['id'] == data['freenum']:
                 data["filt_freenum_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],
                                                                                                         r['text'])
+
     data["filt_freetxt_for_select"] = ""
     if data.get('freetxt', '') != "":
         for r in PrjGetFieldList(Prj, 't', ''):  # type: dict
             if r['id'] == data['freetxt']:
                 data["filt_freetxt_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],
                                                                                                         r['text'])
+
     data["filt_annot_for_select"] = ""
     if data.get('filt_annot', '') != "":
         for r in GetAll("select id,name from users where id =any (%s)",
                         ([int(x) for x in data["filt_annot"].split(',')],)):
             data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(r['id'], r['name'])
+
     fieldlist = GetFieldList(Prj)
     fieldlist["classif_when"] = "Validation date"
     data["fieldlist"] = fieldlist
@@ -142,6 +153,7 @@ def indexPrj(PrjId):
     data["sortlist"]["classif_when"] = "Validation date"
     for k, v in fieldlist.items():
         data["sortlist"][k] = v
+
     data["statuslist"] = collections.OrderedDict({"": "All"})
     data["statuslist"]["U"] = "Unclassified"
     data["statuslist"]["P"] = "Predicted"
@@ -151,6 +163,7 @@ def indexPrj(PrjId):
     data["statuslist"]["NVM"] = "Validated by others"
     data["statuslist"]["VM"] = "Validated by me"
     data["statuslist"]["D"] = "Dubious"
+
     g.PrjAnnotate = g.PrjManager = Prj.CheckRight(2)
     if not g.PrjManager:
         g.PrjAnnotate = Prj.CheckRight(1)
@@ -165,6 +178,7 @@ def indexPrj(PrjId):
         g.taxofilter = g.taxofilter = g.taxofilterlabel = ""
 
     classiftab = GetClassifTab(Prj)
+
     g.ProjectTitle = Prj.title
     g.headmenu = []  # Menu project
     g.headmenuF = []  # Menu Filtered
@@ -263,9 +277,11 @@ def LoadRightPane():
     zoom = int(Filt["zoom"])
     popupenabled = Filt["popupenabled"]
     g.PublicViewMode = not Prj.CheckRight(0)
+
     fieldlist = GetFieldList(Prj)
     fieldlist.pop('orig_id', '')
     fieldlist.pop('objtime', '')
+
     whereclause = " where o.projid=%(projid)s "
     sqlparam = {'projid': Prj.projid}
     sql = """select o.objid,t.name taxoname,t2.name taxoparent,o.classif_qual,
@@ -290,33 +306,11 @@ LEFT JOIN users u on o.classif_who=u.id
         whereclause += " and o.classif_qual='V' "  # Les anonymes ne peuvent voir que les objets validés
     sql += whereclause
 
-    sqlcount = """select count(*)
-        ,count(case when classif_qual='V' then 1 end) NbValidated
-        ,count(case when classif_qual='D' then 1 end) NbDubious
-        ,count(case when classif_qual='P' then 1 end) NbPredicted
-        from objects o
-             JOIN acquisitions acq on o.acquisid=acq.acquisid
-        """ + whereclause
-    # Optimisation pour des cas simples et fréquents
-    if whereclause == ' where o.projid=%(projid)s ':
-        sqlcount = """select sum(nbr),sum(nbr_v) NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
-                    from projects_taxo_stat 
-                    where projid=%(projid)s """
-    if whereclause == ' where o.projid=%(projid)s  and o.classif_id=%(taxo)s ':
-        sqlcount = """select sum(nbr),sum(nbr_v) NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
-                from projects_taxo_stat 
-                where projid=%(projid)s and id=%(taxo)s"""
-    if whereclause == " where o.projid=%(projid)s  and o.classif_id=%(taxo)s  and o.classif_qual!='V'":
-        sqlcount = """select sum(nbr-nbr_v),0 NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
-                from projects_taxo_stat 
-                where projid=%(projid)s and id=%(taxo)s"""
-    # ' where o.projid=%(projid)s '
-    # ' where o.projid=%(projid)s  and o.classif_id=%(taxo)s '
-    (nbrtotal, nbrvalid, nbrdubious, nbrpredict) = GetAll(sqlcount, sqlparam, debug=False)[0]
-    if nbrtotal is None:  # si table vide
-        nbrtotal = nbrvalid = nbrdubious = nbrpredict = 0
+    stats = ClassificationPageStats(whereclause, sqlparam)
+    if not stats.are_valid:
         RecalcProjectTaxoStat(Prj.projid)
-    pagecount = math.ceil(int(nbrtotal) / ippdb)
+
+    pagecount = math.ceil(int(stats.nbrtotal) / ippdb)
     if sortby == "classifname":
         sql += " order by t.name " + sortorder + " ,objid " + sortorder
     elif sortby != "":
@@ -540,26 +534,12 @@ LEFT JOIN users u on o.classif_who=u.id
         if pageoffset < pagecount - 1:
             html.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>" % (pageoffset + 1))
         html.append("</ul></nav>")
-    if nbrtotal > 0:
-        pctvalid = 100 * nbrvalid / nbrtotal
-        pctpredict = 100 * nbrpredict / nbrtotal
-        pctdubious = 100 * nbrdubious / nbrtotal
-        nbrothers = nbrtotal - nbrvalid - nbrpredict - nbrdubious
-        txtpctvalid = "<span style=\"color:#0A0\">%0d </span>, " \
-                      "<span style=\"color:#5bc0de\">%0d </span>, " \
-                      "<span style=\"color:#F0AD4E\">%0d</span>, " \
-                      "<span style=\"color:#888\">%0d </span>" % (nbrvalid, nbrpredict, nbrdubious, nbrothers)
-    else:
-        txtpctvalid = "-"
-        pctdubious = pctpredict = pctvalid = 0
     html.append("""
     <script>
         PostAddImages();
-        $('#objcount').html('{0} / {1} ');
-        $('#progress-bar-validated').css('width','{2}%');
-        $('#progress-bar-predicted').css('width','{3}%');
-        $('#progress-bar-dubious').css('width','{4}%');
-    </script>""".format(txtpctvalid, nbrtotal, pctvalid, pctpredict, pctdubious))
+    </script>""")
+    # Add stats-rendering HTML
+    html.append(stats.render())
     return "\n".join(html)
 
 
