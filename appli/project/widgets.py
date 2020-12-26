@@ -12,7 +12,7 @@ class ClassificationPageStats(object):
         Top animated bar with statistics about current project + current filters.
     """
 
-    def __init__(self, where_clause: str, sql_param: dict):
+    def __init__(self, where_clause: str, sql_params: dict):
         sqlcount = """select count(*)
             ,count(case when classif_qual='V' then 1 end) NbValidated
             ,count(case when classif_qual='D' then 1 end) NbDubious
@@ -34,7 +34,7 @@ class ClassificationPageStats(object):
                     from projects_taxo_stat 
                     where projid=%(projid)s and id=%(taxo)s"""
 
-        (self.nbrtotal, self.nbrvalid, self.nbrdubious, self.nbrpredict) = GetAll(sqlcount, sql_param, debug=False)[0]
+        (self.nbrtotal, self.nbrvalid, self.nbrdubious, self.nbrpredict) = GetAll(sqlcount, sql_params, debug=False)[0]
         if self.nbrtotal is None:
             # Empty table
             self.nbrtotal = self.nbrvalid = self.nbrdubious = self.nbrpredict = 0

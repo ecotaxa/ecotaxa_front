@@ -17,11 +17,14 @@ from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.project.widgets import ClassificationPageStats
 from appli.search.leftfilters import getcommonfilters
 
-
 ######################################################################################################################
 
 
 ######################################################################################################################
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException
+
+
 def UpdateProjectStat(PrjId):
     ExecSQL("""UPDATE projects
          SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
@@ -50,9 +53,11 @@ def GetFieldList(Prj, champ='classiffieldlist'):
     fieldlist = collections.OrderedDict()
     fieldlist["orig_id"] = "Image Name"
     fieldlist["classif_auto_score"] = "Score"
+
     objmap = DecodeEqualList(Prj.mappingobj)
     for v in ('objtime', 'objdate', 'latitude', 'longitude', 'depth_min', 'depth_max'):
         objmap[v] = v
+
     # fieldlist fait le mapping entre le nom fonctionnel et le nom à affiche
     # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe.
     fieldlist2 = {}
@@ -63,6 +68,38 @@ def GetFieldList(Prj, champ='classiffieldlist'):
     for k, v in sorted(fieldlist2.items(), key=lambda t: t[1]):
         fieldlist[k] = v
     return fieldlist
+
+
+def GetFieldListFromModel(proj_model, presentation_field='classiffieldlist'):
+    """
+        Same as above, but for the Model object returned by API call.
+        @return: A dict with key = column names (in 'objects' DB view)
+                             value = column label as seen in UI
+    """
+    # Hard-coded default first values, not 'free' columns
+    ret = collections.OrderedDict()
+    ret["orig_id"] = "Image Name"
+    ret["classif_auto_score"] = "Score"
+
+    # Get free object columns, dict with key=free column name, value=db column like n04
+    objmap = proj_model.obj_free_cols
+    # Add fixed object columns which are not mapped
+    for v in ('objtime', 'objdate', 'latitude', 'longitude', 'depth_min', 'depth_max'):
+        objmap[v] = v
+
+    # fieldlist fait le mapping entre le nom fonctionnel et le nom à affiche
+    # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe).
+    # e.g. objtime=time\r\nequiv_diameter=diameter [px]
+    presentation = DecodeEqualList(getattr(proj_model, presentation_field))
+    fieldlist2 = {}
+    for field, dispname in presentation.items():
+        if field in objmap:
+            fieldlist2[objmap[field]] = dispname
+    # Overwrite or add in returned dict
+    for k, v in sorted(fieldlist2.items(), key=lambda t: t[1]):
+        ret[k] = v
+
+    return ret
 
 
 # Contient la liste des filtres & parametres de cet écran avec les valeurs par défaut
@@ -238,13 +275,16 @@ def _manager_mail(prj_title, prj_id):
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
 # @login_required
 def LoadRightPane():
-    # Fetch project are check rights
+    # Security & sanity checks
     PrjId = gvp("projid")
-    Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if Prj is None:
-        return "Invalid project"
-    if not Prj.CheckRight(-1):
-        return "Access Denied"
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            Prj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+        except ApiException as ae:
+            if ae.status == 404:
+                return "Invalid project"
+            elif ae.status == 403:
+                return "Access Denied"
 
     # copie des valeurs de filtres connues
     Filt = {}
@@ -276,9 +316,12 @@ def LoadRightPane():
     ippdb = ipp if ipp > 0 else 200
     zoom = int(Filt["zoom"])
     popupenabled = Filt["popupenabled"]
-    g.PublicViewMode = not Prj.CheckRight(0)
 
-    fieldlist = GetFieldList(Prj)
+    # Public view is when the project is visible, but the current user has no right on it.
+    g.PublicViewMode = Prj.highest_right == ""
+    user_can_modify = Prj.highest_right in ("Administrate", "Annotate")
+
+    fieldlist = GetFieldListFromModel(Prj)
     fieldlist.pop('orig_id', '')
     fieldlist.pop('objtime', '')
 
@@ -333,7 +376,7 @@ LEFT JOIN users u on o.classif_who=u.id
     fitheight = 100  # hauteur déjà occupé dans la page plus les header footer (hors premier header)
     fitcurrentlinemaxheight = 0
     LineStart = ""
-    if Prj.CheckRight(1):  # si annotateur on peut sauver les changements.
+    if user_can_modify:
         LineStart = "<td class='linestart'></td>"
     html.append("<table class=imgtab><tr id=tr1>" + LineStart)
     WidthOnRow = 0
@@ -427,7 +470,7 @@ LEFT JOIN users u on o.classif_who=u.id
             txt += "No Image"
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
         if popupenabled == "1":
-            popoverfieldlist = GetFieldList(Prj, champ='popoverfieldlist')
+            popoverfieldlist = GetFieldListFromModel(Prj, presentation_field='popoverfieldlist')
             popoverfieldlist.pop('orig_id', '')
             popoverfieldlist.pop('objtime', '')
             poptitletxt = "%s" % (r['orig_id'],)
@@ -492,7 +535,7 @@ LEFT JOIN users u on o.classif_who=u.id
     html.append("</tr></table>")
     if len(res) == 0:
         html.append("<b>No Result</b><br>")
-    if Prj.CheckRight(1):  # si annotateur on peut sauver les changements.
+    if user_can_modify:
         html.append("""
         <div id='PendingChanges' class='PendingChangesClass text-danger'></div>
         <button class='btn btn-default' onclick="$(window).scrollTop(0);">

@@ -71,10 +71,10 @@ def objectdetails(objid):
         current_user_id = -1  # Anonymous
 
     # Injected data for taxo select
-    g.PrjManager = obj_proj.can_administrate or current_user_id in [u.id for u in obj_proj.managers]
+    g.PrjManager = obj_proj.highest_right == "Administrate"
     g.PrjAnnotate = False
     if not g.PrjManager:
-        g.PrjAnnotate = current_user_id in [u.id for u in obj_proj.annotators]
+        g.PrjAnnotate = obj_proj.highest_right == "Annotate"
 
     page.append("</p><p>Classification :")
     if obj.classif_id:
