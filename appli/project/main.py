@@ -14,7 +14,7 @@ from appli import app, PrintInCharte, database, gvg, gvp, user_datastore, Decode
     XSSEscape
 from appli.constants import DayTimeList
 from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
-from appli.project.widgets import ClassificationPageStats
+from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 
 ######################################################################################################################
@@ -74,7 +74,7 @@ def GetFieldListFromModel(proj_model, presentation_field='classiffieldlist'):
     """
         Same as above, but for the Model object returned by API call.
         @return: A dict with key = column names (in 'objects' DB view)
-                             value = column label as seen in UI
+                             value = label for this column, as seen in UI
     """
     # Hard-coded default first values, not 'free' columns
     ret = collections.OrderedDict()
@@ -270,6 +270,16 @@ def _manager_mail(prj_title, prj_id):
     return mail_link
 
 
+# noinspection PyPep8Naming
+def FormatNameForVignetteDisplay(category_name):
+    # If the name is composed, use different styles for parts
+    parts = ntcv(category_name).split('<')
+    restxt = "<span class='cat_name'>{}</span>".format(parts[0])
+    if len(parts) > 1:
+        restxt += "<span class='cat_ancestor'> &lt;&nbsp;{}</span>".format(" &lt;&nbsp;".join(parts[1:]))
+    return restxt
+
+
 ######################################################################################################################
 # noinspection SpellCheckingInspection,PyPep8Naming
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
@@ -311,9 +321,9 @@ def LoadRightPane():
     sortby = Filt["sortby"]
     sortorder = Filt["sortorder"]
     dispfield = Filt["dispfield"]
-    ipp = int(Filt["ipp"])
+    images_per_page = int(Filt["ipp"])
     # Fit to page envoi un ipp de 0 donc on se comporte comme du 200 d'un point de vue DB
-    ippdb = ipp if ipp > 0 else 200
+    ippdb = images_per_page if images_per_page > 0 else 200
     zoom = int(Filt["zoom"])
     popupenabled = Filt["popupenabled"]
 
@@ -396,6 +406,9 @@ LEFT JOIN users u on o.classif_who=u.id
     except Exception:
         WindowHeight = 200
     # print("PageWidth=%s, WindowHeight=%s"%(PageWidth,WindowHeight))
+    popover_fields = GetFieldListFromModel(Prj, presentation_field='popoverfieldlist')
+    popover_fields.pop('orig_id', '')
+    popover_fields.pop('objtime', '')
     # Calcul des dimmensions et affichage des images
     for r in res:
         filename = r['file_name']
@@ -427,18 +440,18 @@ LEFT JOIN users u on o.classif_who=u.id
         # On limite les images pour qu'elles tiennent toujours dans l'écran
         if width > PageWidth:
             width = PageWidth
-            height = math.trunc(r['height'] * width / r['width'])
+            height = math.trunc(origheight * width / origwidth)
             if height == 0:
                 height = 1
         if height > WindowHeight:
             height = WindowHeight
-            width = math.trunc(r['width'] * height / r['height'])
+            width = math.trunc(origwidth * height / origheight)
             if width == 0:
                 width = 1
         if WidthOnRow != 0 and (WidthOnRow + width) > PageWidth:
             trcount += 1
             fitheight += fitcurrentlinemaxheight
-            if (ipp == 0) and (fitheight > WindowHeight):  # en mode fit quand la page est pleine
+            if (images_per_page == 0) and (fitheight > WindowHeight):  # en mode fit quand la page est pleine
                 if fitlastclosedtr > 0:  # dans tous les cas on laisse une ligne
                     del html[fitlastclosedtr:]
                 break
@@ -470,25 +483,7 @@ LEFT JOIN users u on o.classif_who=u.id
             txt += "No Image"
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
         if popupenabled == "1":
-            popoverfieldlist = GetFieldListFromModel(Prj, presentation_field='popoverfieldlist')
-            popoverfieldlist.pop('orig_id', '')
-            popoverfieldlist.pop('objtime', '')
-            poptitletxt = "%s" % (r['orig_id'],)
-            poptxt = ""
-            # poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
-            if ntcv(r['classifwhoname']) != "":
-                poptxt += "<em>by</em> %s<br>" % (r['classifwhoname'])
-            poptxt += "<em>parent</em> " + ntcv(r['taxoparent'])
-            poptxt += "<br><em>in</em> " + ntcv(r['samplename'])
-            for k, v in popoverfieldlist.items():
-                if k == 'classif_auto_score' and r["classif_qual"] == 'V':
-                    poptxt += "<br>%s : %s" % (v, "-")
-                else:
-                    poptxt += "<br>%s : %s" % (v, ScaleForDisplay(r["extra_" + k]))
-            if r['classif_when']:
-                poptxt += "<br>Validation date : %s" % (ntcv(r['classif_when']),)
-            popattribute = "data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'". \
-                format(poptitletxt, poptxt, 'left' if WidthOnRow > 500 else 'right')
+            popattribute = PopoverPane(popover_fields, r).render(WidthOnRow)
         else:
             popattribute = ""
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher
@@ -507,16 +502,6 @@ LEFT JOIN users u on o.classif_who=u.id
             bottomtxt = bottomtxt[4::]  # [4::] supprime le premier <BR>
         if 'orig_id' in dispfield:
             bottomtxt = "<div style='word-break: break-all;'>%s</div>" % (r['orig_id'],) + bottomtxt
-
-        # noinspection PyPep8Naming
-        def FormatNameForVignetteDisplay(CategName):
-            Parts = ntcv(CategName).split('<')
-            restxt = "<span class='cat_name'>{}</span>".format(Parts[0])
-            if len(Parts) > 1:
-                restxt += "<span class='cat_ancestor'> &lt;&nbsp;{}</span>".format(" &lt;&nbsp;".join(Parts[1:]))
-            else:
-                restxt += ""
-            return restxt
 
         txt += """<div class='subimg {1}' {2}>
 <div class='taxo'>{0}</div>
@@ -561,7 +546,7 @@ LEFT JOIN users u on o.classif_who=u.id
 </div><script>$("#PendingChanges2").html('');</script>
         """)
     # Gestion de la navigation entre les pages
-    if ipp == 0:
+    if images_per_page == 0:
         html.append("<p class='inliner'> Page management not available on Fit mode</p>")
     elif pagecount > 1 or pageoffset > 0:
         html.append("<p class='inliner'> Page %d / %d</p>" % (pageoffset + 1, pagecount))
