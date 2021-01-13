@@ -104,7 +104,7 @@ function ProcessSampleSelection(checked) {
 function ApplyPopupSampleFilter(){
   var sampleid=$('#sampleid');
   var cvl=$("#txtlstsample").val().split(","); {# découpe suivant les , #}
-  cvl.forEach(function (s,i){cvl[i]=s.replace(' ','');}); {# et supprimer les espace supplementaires autour des , #}
+  cvl = cvl.map(function (s) {return s.replace(/(^\s+)|(\s+$)/g,'');}); {# et supprimer les espace supplementaires autour des , #}
   sampleid.html(""); {# Efface les valeurs existantes #}
   $.getJSON("/search/samples",{q:'',projid:$('#projid').val()}, {# Récupère la liste des echantillons en format JSON #}
     function(resajax) { {# avec le resultat, rempli les items qui sont dans la chaine collée #}
