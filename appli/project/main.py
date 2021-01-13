@@ -22,7 +22,8 @@ from appli.search.leftfilters import getcommonfilters
 
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ObjectsApi, ObjectSetSummaryRsp, \
+    ObjectSetQueryRsp
 
 
 def UpdateProjectStat(PrjId):
@@ -104,12 +105,24 @@ def GetFieldListFromModel(proj_model, presentation_field='classiffieldlist'):
 
 # Contient la liste des filtres & parametres de cet écran avec les valeurs par défaut
 # noinspection SpellCheckingInspection
-FilterList = {"MapN": "", "MapW": "", "MapE": "", "MapS": "", "depthmin": "", "depthmax": "", "samples": "",
-              "fromdate": "", "todate": "", "inverttime": "", "fromtime": "", "totime": "", "sortby": "",
-              "sortorder": "", "dispfield": "", "statusfilter": "", 'ipp': 100, 'zoom': 100, 'magenabled': 0,
-              'popupenabled': 0, 'instrum': '', 'month': '', 'daytime': '', 'freenum': '', 'freenumst': '',
-              'freenumend': '', 'freetxt': '', 'freetxtval': '', 'filt_annot': ''}
-FilterListAutoSave = ("sortby", "sortorder", "dispfield", "statusfilter", 'ipp', 'zoom', 'magenabled', 'popupenabled')
+FilterList = {"MapN": "", "MapW": "", "MapE": "", "MapS": "",
+              "depthmin": "", "depthmax": "",
+              "samples": "",
+              "fromdate": "", "todate": "", "inverttime": "",
+              "fromtime": "", "totime": "",
+              'instrum': '', 'month': '', 'daytime': '',
+              'freetxt': '', 'freetxtval': '', 'filt_annot': '',
+              'freenum': '', 'freenumst': '', 'freenumend': '',
+              "statusfilter": "",
+              # Display parameters, not filters
+              "sortby": "", "sortorder": "", "dispfield": "",
+              'ipp': 100, 'zoom': 100, 'magenabled': 0,
+              'popupenabled': 0,
+              }
+FilterListAutoSave = ("statusfilter",
+                      "sortby", "sortorder", "dispfield",
+                      'ipp', 'zoom', 'magenabled',
+                      'popupenabled')
 
 
 ######################################################################################################################
@@ -313,74 +326,117 @@ def LoadRightPane():
                              True)
             user_datastore.ClearCache()
 
+    # Public view is when the project is visible, but the current user has no right on it.
+    g.PublicViewMode = Prj.highest_right == ""
+    user_can_modify = Prj.highest_right in ("Manage", "Annotate")
+
     # récupération des parametres d'affichage
     filtres = {}
     for k in sharedfilter.FilterList:
         filtres[k] = gvp(k, "")
+    if g.PublicViewMode:  # Si c'est une lecture publique
+        filtres["statusfilter"] = "V"  # Les anonymes ne peuvent voir que les objets validés
+
     pageoffset = int(gvp("pageoffset", "0"))
     sortby = Filt["sortby"]
     sortorder = Filt["sortorder"]
-    dispfield = Filt["dispfield"]
+    display_fields = Filt["dispfield"]
     images_per_page = int(Filt["ipp"])
-    # Fit to page envoi un ipp de 0 donc on se comporte comme du 200 d'un point de vue DB
-    ippdb = images_per_page if images_per_page > 0 else 200
     zoom = int(Filt["zoom"])
-    popupenabled = Filt["popupenabled"]
+    popup_enabled = Filt["popupenabled"] == "1"
 
-    # Public view is when the project is visible, but the current user has no right on it.
-    g.PublicViewMode = Prj.highest_right == ""
-    user_can_modify = Prj.highest_right in ("Administrate", "Annotate")
+    # Fit to page envoie un ipp de 0 donc on se comporte comme du 200 d'un point de vue DB
+    ippdb = images_per_page if images_per_page > 0 else 200
+
+    if popup_enabled:
+        popover_fields = GetFieldListFromModel(Prj, presentation_field='popoverfieldlist')
+        popover_fields.pop('orig_id', '')
+        popover_fields.pop('objtime', '')
+    else:
+        popover_fields = {}
 
     fieldlist = GetFieldListFromModel(Prj)
     fieldlist.pop('orig_id', '')
     fieldlist.pop('objtime', '')
 
-    whereclause = " where o.projid=%(projid)s "
-    sqlparam = {'projid': Prj.projid}
-    sql = """select o.objid,t.name taxoname,t2.name taxoparent,o.classif_qual,
-    u.name classifwhoname,i.file_name,t.display_name
-  ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
-  ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate
-  ,to_char(o.objtime,'HH24:MI') objtime,to_char(classif_when,'YYYY-MM-DD HH24:MI') classif_when
-  ,case when o.complement_info is not null and o.complement_info!='' then 1 else 0 end commentaires
-  ,o.latitude,o.orig_id,o.imgcount"""
+    sql_selects = ["o.objid, o.classif_qual, o.imgcount, o.complement_info",
+                   "i.height, i.width, i.thumb_file_name, i.thumb_height, i.thumb_width, i.file_name",
+                   "t.name taxoname, t.display_name"]
+
+    sql_from = """
+       FROM objects o
+  LEFT JOIN images i ON o.img0id=i.imgid
+  LEFT JOIN taxonomy t ON o.classif_id=t.id """
+
+    # Add needed columns from project
+    extra_cols = []
     for k in fieldlist.keys():
-        sql += ",o." + k + " as extra_" + k
-    sql += """ from objects o
-left Join images i on o.img0id=i.imgid
-left JOIN taxonomy t on o.classif_id=t.id
-left JOIN taxonomy t2 on t.parent_id=t2.id
-LEFT JOIN users u on o.classif_who=u.id
-     JOIN samples s on o.sampleid=s.sampleid
-"""
-    whereclause += sharedfilter.GetSQLFilter(filtres, sqlparam,
-                                             str(current_user.id if current_user.is_authenticated else "999999"))
-    if g.PublicViewMode:  # Si c'est une lecture publique
-        whereclause += " and o.classif_qual='V' "  # Les anonymes ne peuvent voir que les objets validés
-    sql += whereclause
+        # But exclude the ones we don't display
+        if k in display_fields or k in popover_fields:
+            extra_cols.append("o." + k + " as extra_" + k)
+    if extra_cols:
+        sql_selects.append(", ".join(extra_cols))
 
-    stats = ClassificationPageStats(whereclause, sqlparam)
-    if not stats.are_valid:
-        RecalcProjectTaxoStat(Prj.projid)
+    # Optional columns that we have to select if they are used
+    if 'orig_id' in display_fields or popup_enabled:
+        sql_selects.append("o.orig_id")
+    if 'objtime' in display_fields:
+        sql_selects.append("TO_CHAR(o.objtime,'HH24:MI') objtime")
+    if 'classif_when' in display_fields or 'classif_when' in popover_fields or popup_enabled:
+        sql_selects.append("TO_CHAR(o.classif_when,'YYYY-MM-DD HH24:MI') classif_when")
+    if popup_enabled:
+        sql_selects.extend(["u.name classifwhoname",
+                            "t2.name taxoparent",
+                            "s.orig_id samplename"])
+        sql_from += """
+   LEFT JOIN users u ON o.classif_who=u.id
+   LEFT JOIN taxonomy t2 ON t.parent_id=t2.id
+        JOIN samples s ON o.sampleid=s.sampleid
+        """
 
-    pagecount = math.ceil(int(stats.nbrtotal) / ippdb)
-    if sortby == "classifname":
-        sql += " order by t.name " + sortorder + " ,objid " + sortorder
-    elif sortby != "":
-        sql += " order by o." + sortby + " " + sortorder + " ,objid " + sortorder
+    sqlparam = {"projid": PrjId}
+
+    sql_order = ""
+    if sortby != "":
+        sql_order = "\n ORDER BY "
+        if sortby == "classifname":
+            sql_order += "t.name " + sortorder + ", o.objid " + sortorder
+        else:
+            sql_order += "o." + sortby + " " + sortorder + ", o.objid " + sortorder
     # else:  # pas de tri par defaut pour améliorer les performances sur les gros projets
-    #     sql+=" order by o.orig_id"
+    #     obj_sel_cte += " ORDER BY o.orig_id"
     # app.logger.info("pageoffset/pagecount %s / %s",pageoffset,pagecount)
-    if pageoffset >= pagecount:
-        pageoffset = pagecount - 1
-        if pageoffset < 0:
-            pageoffset = 0
-    sql += " Limit %d offset %d " % (ippdb, pageoffset * ippdb)
-    res = GetAll(sql, sqlparam, False)
+
+    # if pageoffset >= pagecount:
+    #     pageoffset = pagecount - 1
+    #     if pageoffset < 0:
+    #         pageoffset = 0
+
+    # Query objects, using filters and page size, in project
+    with ApiClient(ObjectsApi, request) as api:
+        sort_col_signed = None
+        if sortby != "":
+            sort_col_signed = ("-" if sortorder.lower() == "desc" else "") + sortby
+        objs: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(project_id=PrjId,
+                                                                                      project_filters=filtres,
+                                                                                      order_field=sort_col_signed,
+                                                                                      window_size=ippdb,
+                                                                                      window_start=pageoffset * ippdb)
+        object_ids = objs.object_ids
+        pagecount = math.ceil(objs.total_ids / ippdb)
+
+    sql_where = "WHERE o.objid = ANY(%(objids)s) "
+    sqlparam["objids"] = object_ids
+
+    sql_stmt = "SELECT " + ",\n       ".join(sql_selects) + sql_from + sql_where + sql_order
+    res = GetAll(sql_stmt, sqlparam, False)
 
     # Produce page lines using request output
     # print("%s\n%s\n%s"%(sql,sqlparam,res))
     html = ["<a name='toppage'/>"]
+    # DEBUG SPAN
+    html.append(
+        "<span>%d vs %d, %s %s</span>" % (objs.total_ids, len(object_ids), Prj.highest_right, display_fields))
     trcount = 1
     fitlastclosedtr = 0  # index de t de la derniere création de ligne qu'il faudrat effacer quand la page sera pleine
     fitheight = 100  # hauteur déjà occupé dans la page plus les header footer (hors premier header)
@@ -406,10 +462,7 @@ LEFT JOIN users u on o.classif_who=u.id
     except Exception:
         WindowHeight = 200
     # print("PageWidth=%s, WindowHeight=%s"%(PageWidth,WindowHeight))
-    popover_fields = GetFieldListFromModel(Prj, presentation_field='popoverfieldlist')
-    popover_fields.pop('orig_id', '')
-    popover_fields.pop('objtime', '')
-    # Calcul des dimmensions et affichage des images
+    # Calcul des dimensions et affichage des images
     for r in res:
         filename = r['file_name']
         origwidth = r['width']
@@ -461,7 +514,7 @@ LEFT JOIN users u on o.classif_who=u.id
             WidthOnRow = 0
         cellwidth = width + 22
         fitcurrentlinemaxheight = max(fitcurrentlinemaxheight, height + 45 + 14 * len(
-            dispfield.split()))  # 45 espace sur le dessus et le dessous de l'image + 14px par info affichée
+            display_fields.split()))  # 45 espace sur le dessus et le dessous de l'image + 14px par info affichée
         if cellwidth < 80:
             cellwidth = 80  # on considère au moins 80 car avec les label c'est rarement moins
         # Met la fenetre de zoon la ou il y a plus de place, sachant qu'elle fait 400px
@@ -482,35 +535,36 @@ LEFT JOIN users u on o.classif_who=u.id
         else:
             txt += "No Image"
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
-        if popupenabled == "1":
+        if popup_enabled:
             popattribute = PopoverPane(popover_fields, r).render(WidthOnRow)
         else:
             popattribute = ""
         # Génération du texte sous l'image qui contient la taxo + les champs à afficher
         bottomtxt = ""
-        if 'objtime' in dispfield:
+        if 'objtime' in display_fields:
             bottomtxt += "<br>Time %s" % (r['objtime'],)
-        if 'classif_when' in dispfield and r['classif_when']:
+        if 'classif_when' in display_fields and r['classif_when']:
             bottomtxt += "<br>Validation date : %s" % (r['classif_when'],)
         for k, v in fieldlist.items():
-            if k in dispfield:
+            if k in display_fields:
                 if k == 'classif_auto_score' and r["classif_qual"] == 'V':
                     bottomtxt += "<br>%s : -" % v
                 else:
                     bottomtxt += "<br>%s : %s" % (v, ScaleForDisplay(r["extra_" + k]))
         if bottomtxt != "":
             bottomtxt = bottomtxt[4::]  # [4::] supprime le premier <BR>
-        if 'orig_id' in dispfield:
+        if 'orig_id' in display_fields:
             bottomtxt = "<div style='word-break: break-all;'>%s</div>" % (r['orig_id'],) + bottomtxt
+
+        imgcount = "(%d)" % (r['imgcount'],) if r['imgcount'] is not None and r['imgcount'] > 1 else ""
+        comment_present = "<b>!</b> " if r['complement_info'] is not None and r['complement_info'] != '' else ""
 
         txt += """<div class='subimg {1}' {2}>
 <div class='taxo'>{0}</div>
 <div class='displayedFields'>{3}</div></div>
 <div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div>""" \
             .format(FormatNameForVignetteDisplay(r['display_name']), GetClassifQualClass(r['classif_qual']),
-                    popattribute, bottomtxt,
-                    "(%d)" % (r['imgcount'],) if r['imgcount'] is not None and r['imgcount'] > 1 else "",
-                    "<b>!</b> " if r['commentaires'] > 0 else "")
+                    popattribute, bottomtxt, imgcount, comment_present)
         txt += "</td>"
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
@@ -553,6 +607,7 @@ LEFT JOIN users u on o.classif_who=u.id
         html.append("<nav><ul class='pagination'>")
         if pageoffset > 0:
             html.append("<li><a href='javascript:gotopage(%d);' >&laquo;</a></li>" % (pageoffset - 1))
+        # ValueError: range() arg 3 must not be zero
         for i in range(0, pagecount - 1, math.ceil(pagecount / 20)):
             if i == pageoffset:
                 html.append("<li class='active'><a href='javascript:gotopage(%d);'>%d</a></li>" % (i, i + 1))
@@ -567,7 +622,7 @@ LEFT JOIN users u on o.classif_who=u.id
         PostAddImages();
     </script>""")
     # Add stats-rendering HTML
-    html.append(stats.render())
+    html.append(ClassificationPageStats.render(filtres, PrjId))
     return "\n".join(html)
 
 

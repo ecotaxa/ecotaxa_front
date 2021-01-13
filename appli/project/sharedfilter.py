@@ -1,8 +1,15 @@
 from appli.database import GetAll
 
-FilterList = ("MapN", "MapW", "MapE", "MapS", "depthmin", "depthmax", "samples", "fromdate", "todate",
-              "inverttime", "fromtime", "totime", "statusfilter", 'instrum', 'month', 'daytime', 'validfromdate',
-              'validtodate', 'freenum', 'freenumst', 'freenumend', 'freetxt', 'freetxtval', 'filt_annot',
+FilterList = ("MapN", "MapW", "MapE", "MapS",
+              "depthmin", "depthmax",
+              "samples",
+              "fromdate", "todate", "inverttime",
+              "fromtime", "totime",
+              'instrum', 'month', 'daytime',
+              'validfromdate', 'validtodate',
+              'freetxt', 'freetxtval', 'filt_annot',
+              'freenum', 'freenumst', 'freenumend',
+              "statusfilter",
               'taxo', 'taxochild')
 
 
@@ -24,7 +31,7 @@ def GetSQLFilter(filtres, sqlparam, currentuserid):
             # optimisation qui provoque de faux résultats : and (t.nbrobjcum>0 or t.nbrobj>0)
         else:
             whereclause += " and o.classif_id=%(taxo)s "
-            sqlparam['taxo'] = filtres["taxo"]
+            sqlparam['taxo'] = int(filtres["taxo"])
     if filtres.get("statusfilter", "") != "":
         whereclause += " and (o.classif_qual"
         if filtres["statusfilter"] == "NV":
