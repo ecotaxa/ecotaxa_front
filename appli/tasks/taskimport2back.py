@@ -10,7 +10,7 @@ from appli import database, PrintInCharte, gvg, GetAppManagerMailto, \
 from appli.tasks.importcommon import *
 from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, ProjectsApi, UsersApi
+from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, ProjectsApi, UsersApi, ApiException
 
 
 class TaskImportToBack(AsyncTask):
@@ -117,7 +117,16 @@ class TaskImportToBack(AsyncTask):
                             skip_existing_objects=self._must_skip_existing_objects(),
                             update_mode=self._update_mode())
         with ApiClient(ProjectsApi, self.cookie) as api:
-            rsp: ImportPrepRsp = api.import_preparation_import_prep_project_id_post(self.param.ProjectId, req)
+            try:
+                rsp: ImportPrepRsp = api.import_preparation_import_prep_project_id_post(self.param.ProjectId, req)
+            except ApiException as ae:
+                if ae.status == 403:
+                    self.task.taskstate = "Error"
+                    self.task.progressmsg = "You don't have enough permission on this project"
+                    self.UpdateParam()
+                    return
+                else:
+                    raise
         # Copy back into params the eventually amended fields in response
         self.param.InData = rsp.source_path
         self.param.TaxoFound = rsp.found_taxa
