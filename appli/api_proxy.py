@@ -30,6 +30,7 @@ def proxy_request(path):
     headers = _copy_headers_and_session(request.headers)
     params = {}
     if method == 'POST':
+        params = request.args  # re-encode URL params if any
         if path == "login":
             # Proxy the login which is here and not in backend yet
             # TODO
@@ -41,9 +42,9 @@ def proxy_request(path):
             # Plain page but the URL is wrong on FastApi side
             url = f'/api/{path}'
     elif method == 'DELETE':
-        pass
+        params = request.args
     elif method == 'PUT':
-        pass
+        params = request.args
     else:
         return "Not implemented"
     # Do the call itself
