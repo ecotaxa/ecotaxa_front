@@ -49,22 +49,29 @@ def PrjEdit(PrjId, privs_only=False):
     if gvp('save') == "Y":
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
-        for f in request.form:
-            if f in dir(target_proj):
-                setattr(target_proj, f, gvp(f))
+
+        for a_var in request.form:
+            # Update the project (from API call) with posted variables
+            if a_var in dir(target_proj):
+                # TODO: Big assumption here, variables need to have same name as Model fields
+                setattr(target_proj, a_var, gvp(a_var))
+            if a_var == 'visible':
+                target_proj.visible = gvp('visible') == 'Y'
+            if a_var == 'initclassiflist':
+                posted_classif_list = gvp('initclassiflist')
+                # The original list is displayed using str(list), so there is a bit of formatting inside
+                posted_classif_list = posted_classif_list.replace(" ", "")
+                if posted_classif_list and posted_classif_list[0] == "[":
+                    posted_classif_list = posted_classif_list[1:]
+                if posted_classif_list and posted_classif_list[-1] == "]":
+                    posted_classif_list = posted_classif_list[:-1]
+                target_proj.init_classif_list = [int(cl_id) for cl_id in posted_classif_list.split(",")
+                                                 if cl_id.isdigit()]
+
         if previous_cnn != target_proj.cnn_network_id:
             flash("SCN features erased", "success")
-        target_proj.visible = True if gvp('visible') == 'Y' else False
-        posted_classif_list = gvp('initclassiflist')
-        # The original list is displayed using str(list), so there is a bit of formatting inside
-        posted_classif_list = posted_classif_list.replace(" ", "")
-        if posted_classif_list and posted_classif_list[0] == "[":
-            posted_classif_list = posted_classif_list[1:]
-        if posted_classif_list and posted_classif_list[-1] == "]":
-            posted_classif_list = posted_classif_list[:-1]
-        target_proj.init_classif_list = [int(cl_id) for cl_id in posted_classif_list.split(",")
-                                         if cl_id.isdigit()]
-        # Update lists by right
+
+        # Update (in place) lists by right for permission update
         for a_priv, members_for_priv in members_by_right.items():
             for a_member in members_for_priv.copy():
                 a_member_id = a_member.id
