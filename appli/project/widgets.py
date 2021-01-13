@@ -4,66 +4,59 @@
 #
 # Some classes around displayed parts in page
 #
+import json
+
 from appli import ScaleForDisplay, ntcv
-from appli.database import GetAll
 
 
 class ClassificationPageStats(object):
     """
         Top animated bar with statistics about current project + current filters.
     """
-
-    def __init__(self, where_clause: str, sql_params: dict):
-        sqlcount = """select count(*)
-            ,count(case when classif_qual='V' then 1 end) NbValidated
-            ,count(case when classif_qual='D' then 1 end) NbDubious
-            ,count(case when classif_qual='P' then 1 end) NbPredicted
-            from objects o
-                 JOIN acquisitions acq on o.acquisid=acq.acquisid
-            """ + where_clause
-        # Optimisation pour des cas simples et fréquents
-        if where_clause == ' where o.projid=%(projid)s ':
-            sqlcount = """select sum(nbr),sum(nbr_v) NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
-                        from projects_taxo_stat 
-                        where projid=%(projid)s """
-        if where_clause == ' where o.projid=%(projid)s  and o.classif_id=%(taxo)s ':
-            sqlcount = """select sum(nbr),sum(nbr_v) NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
-                    from projects_taxo_stat 
-                    where projid=%(projid)s and id=%(taxo)s"""
-        if where_clause == " where o.projid=%(projid)s  and o.classif_id=%(taxo)s  and o.classif_qual!='V'":
-            sqlcount = """select sum(nbr-nbr_v),0 NbValidated,sum(nbr_d) NbDubious,sum(nbr_p) NbPredicted 
-                    from projects_taxo_stat 
-                    where projid=%(projid)s and id=%(taxo)s"""
-
-        (self.nbrtotal, self.nbrvalid, self.nbrdubious, self.nbrpredict) = GetAll(sqlcount, sql_params, debug=False)[0]
-        if self.nbrtotal is None:
-            # Empty table
-            self.nbrtotal = self.nbrvalid = self.nbrdubious = self.nbrpredict = 0
-            self.are_valid = False
-        else:
-            self.are_valid = True
-
-    def render(self):
-        if self.nbrtotal > 0:
-            pctvalid = 100 * self.nbrvalid / self.nbrtotal
-            pctpredict = 100 * self.nbrpredict / self.nbrtotal
-            pctdubious = 100 * self.nbrdubious / self.nbrtotal
-            nbrothers = self.nbrtotal - self.nbrvalid - self.nbrpredict - self.nbrdubious
-            txtpctvalid = "<span style=\"color:#0A0\">%0d </span>, " \
-                          "<span style=\"color:#5bc0de\">%0d </span>, " \
-                          "<span style=\"color:#F0AD4E\">%0d</span>, " \
-                          "<span style=\"color:#888\">%0d </span>" % (
-                              self.nbrvalid, self.nbrpredict, self.nbrdubious, nbrothers)
-        else:
-            txtpctvalid = "-"
-            pctdubious = pctpredict = pctvalid = 0
-        return """
+    @staticmethod
+    def render(filters, projid):
+        # Make API call params from filters
+        form_json = json.dumps(filters)
+        ajax_call = """
         <script>
-            $('#objcount').html('{0} / {1} ');
-            $('#progress-bar-validated').css('width','{2}%');
-            $('#progress-bar-predicted').css('width','{3}%');
-            $('#progress-bar-dubious').css('width','{4}%');
-        </script>""".format(txtpctvalid, self.nbrtotal, pctvalid, pctpredict, pctdubious)
+            $.ajax({
+              type: "POST",
+              url: "/api/object_set/%s/summary?only_total=False",
+              data: JSON.stringify(%s),""" % (projid, form_json)
+        ajax_call += """  
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              success: function(rsp) {
+                nbr = rsp['total_objects'];
+                if (nbr == 0) {
+                  txt_valid = "-";
+                  pct_valid = 0;
+                  pct_predict = 0;
+                  pct_dubious = 0;
+                } else {
+                  nbr_v = rsp['validated_objects'];
+                  nbr_d = rsp['dubious_objects'];
+                  nbr_p = rsp['predicted_objects'];
+                  nbr_o = nbr - nbr_v - nbr_d - nbr_p;
+                  txt_valid = '<span style="color:#0A0">'+nbr_v+' </span>,'+ 
+                              '<span style="color:#5bc0de"> '+nbr_p+' </span>,'+ 
+                              '<span style="color:#F0AD4E"> '+nbr_d+' </span>,'+
+                              '<span style="color:#888"> '+nbr_o+' </span> / '+nbr;
+                  pct_valid = Math.round(100 * nbr_v / nbr);
+                  pct_predict = Math.round(100 * nbr_p / nbr);
+                  pct_dubious = Math.round(100 * nbr_d / nbr);
+                }
+                $('#objcount').html(txt_valid);
+                $('#progress-bar-validated').css('width',pct_valid+'%');
+                $('#progress-bar-predicted').css('width',pct_predict+'%');
+                $('#progress-bar-dubious').css('width',pct_dubious+'%');
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                $('#objcount').html('<span>'+textStatus+errorThrown+'</span>');
+              }
+            });
+        </script>"""
+        return ajax_call
 
 
 class PopoverPane(object):
@@ -72,7 +65,7 @@ class PopoverPane(object):
     """
 
     def __init__(self, field_list, row):
-        self.fielf_list = field_list
+        self.field_list = field_list
         self.row = row
 
     def render(self, width_on_row):
@@ -84,7 +77,7 @@ class PopoverPane(object):
             poptxt += "<em>by</em> %s<br>" % (row['classifwhoname'])
         poptxt += "<em>parent</em> " + ntcv(row['taxoparent'])
         poptxt += "<br><em>in</em> " + ntcv(row['samplename'])
-        for k, v in self.fielf_list.items():
+        for k, v in self.field_list.items():
             if k == 'classif_auto_score' and row["classif_qual"] == 'V':
                 poptxt += "<br>%s : %s" % (v, "-")
             else:

@@ -620,9 +620,65 @@
             }
             if (SaveInProfile == true)
                 req["saveinprofile"] = 'Y';
-            jqcolumnright.html("<img src='/static/spinningred.gif'> Loading");
-            AsyncSingleLoadRightPane(jqcolumnright, req)
+            // Show spinning wheel
+            jqcolumnright.html("<img src='/static/spinningred.gif'> Loading <span id='load_progress'></span>");
+            // Launch progress indicator
+            UpdateRightPaneProgress(req);
+            // Launch real load
+            AsyncSingleLoadRightPane(jqcolumnright, req);
             $('#headersubtitle').html(TxtFilter);
+        }
+
+        function UpdateRightPaneProgress(req) {
+            // Show a series of dots while the user is waiting for query to return
+            var proj_id = req['projid'];
+            var req_clone = $.extend({}, req); // A shallow copy is good enough
+            $.ajax({
+              type: "GET",
+              url: "/api/samples/search?project_id="+proj_id,
+              success: function(rsp) {
+                if (rsp.length == 0) {
+                  return;
+                }
+                var first_sample_id = rsp[0].sampleid;
+                var nb_samples = rsp.length;
+                req_clone['samples'] = first_sample_id;
+                var req_start = new Date();
+                $.ajax({
+                  type: "POST",
+                  // Don't bother replicating the full query, anyway it's just for heating up caches
+                  url: "/api/object_set/"+proj_id+"/query?window_size=10000",
+                  data: JSON.stringify(req_clone),
+                  contentType: "application/json; charset=utf-8",
+                  dataType: "json",
+                  success: function(rsp) {
+                    var req_end = new Date();
+                    // We now have an estimate of time for the first sample
+                    var elapsed = req_end.getTime() - req_start.getTime();
+                    // Let's say 32 dots...
+                    elapsed = elapsed * nb_samples / 32;
+                    if (elapsed < 500) { elapsed = 500; } // Useless to show too quick animation
+                    var dots = "🔎";
+                    $('#load_progress').html(dots);
+                    var interv = setInterval(function() {
+                      dots = dots + "🔎";
+                      if ($('#load_progress').length) {
+                        $('#load_progress').html(dots);
+                      } else {
+                        clearInterval(interv);
+                      }
+                    }, elapsed);
+                  },
+                  error: function(jqXHR, textStatus, errorThrown) {
+                    $('#load_progress').html(textStatus+":"+errorThrown);
+                  }
+                });
+                $('#load_progress').html("⌚");
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                $('#load_progress').html(textStatus+":"+errorThrown);
+              }
+            });
         }
 
         var theOnlyLazyLoader = null;
