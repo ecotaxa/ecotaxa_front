@@ -147,7 +147,7 @@ def Prjpopupeditpreset(PrjId):
     # And their statistics
     prj_ids = " ".join([str(a_prj.projid) for a_prj in prjs])
     with ApiClient(ProjectsApi, request) as api:
-        stats: List[ProjectStatsModel] = api.project_stats_project_set_stats_get(ids=prj_ids)
+        stats: List[ProjectStatsModel] = api.project_set_get_stats_project_set_stats_get(ids=prj_ids)
 
     # Sort for consistency
     prjs.sort(key=lambda prj: prj.title.strip().lower())

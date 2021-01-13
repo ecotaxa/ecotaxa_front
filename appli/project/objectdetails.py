@@ -71,7 +71,7 @@ def objectdetails(objid):
         current_user_id = -1  # Anonymous
 
     # Injected data for taxo select
-    g.PrjManager = obj_proj.highest_right == "Administrate"
+    g.PrjManager = obj_proj.highest_right == "Manage"
     g.PrjAnnotate = False
     if not g.PrjManager:
         g.PrjAnnotate = obj_proj.highest_right == "Annotate"
@@ -230,17 +230,18 @@ def objectdetails(objid):
                 page.append("""<td data-edit='orig_id'><b>{0}</td><td colspan=3>{1}</td>
                     <td data-edit='longitude'><b>{2}</td><td>{3}</td>
                     <td data-edit='latitude'><b>{4}</td><td>{5}</td></tr><tr>"""
-                            .format("Original ID", ScaleForDisplay(sample.orig_id),
+                            .format("Original ID", html.escape(sample.orig_id),
                                     "longitude", ScaleForDisplay(sample.longitude),
                                     "latitude", ScaleForDisplay(sample.latitude)))
             elif entity_desc[2] == "acquis":
                 page.append("""<td data-edit='orig_id'><b>{0}</td><td colspan=3>{1}</td>
                     <td data-edit='instrument'><b>{2}</td><td>{3}</td></tr><tr>"""
-                            .format("Original ID", ScaleForDisplay(acquisition.orig_id),
+                            .format("Original ID", html.escape(acquisition.orig_id),
                                     "Instrument", ScaleForDisplay(acquisition.instrument)))
             else:
+                orig_id = html.escape(process.orig_id)
                 page.append("<td data-edit='orig_id'><b>{0}</td><td>{1}</td></tr><tr>"
-                            .format("Original ID.", ScaleForDisplay(getattr(entity_desc[1], "orig_id", "???"))))
+                            .format("Original ID.", orig_id))
             # Display free columns
             for k, v in entity_desc[3].items():
                 if cpt > 0 and cpt % 4 == 0:

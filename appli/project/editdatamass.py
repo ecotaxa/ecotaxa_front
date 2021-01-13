@@ -90,8 +90,8 @@ def PrjEditDataMass(PrjId):
                 nb_rows = api.update_object_set_object_set_update_post(BulkUpdateReq(target_ids=res.object_ids,
                                                                                      updates=updates))
         elif tablecode == "p":
-            # Process update, i.e. parents
-            processes = [a_parent for a_parent in set(res.process_ids) if a_parent]
+            # Process update, same key as acquisitions
+            processes = [a_parent for a_parent in set(res.acquisition_ids) if a_parent]
             with ApiClient(ProcessesApi, request) as api:
                 nb_rows = api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=processes,
                                                                                      updates=updates))
