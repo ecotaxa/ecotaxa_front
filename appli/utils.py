@@ -3,6 +3,7 @@
 #
 from typing import Type, TypeVar, Generic, Union
 
+from flask import Request
 from werkzeug.local import LocalProxy
 
 from appli.api_proxy import BACKEND_URL
@@ -18,7 +19,7 @@ A = TypeVar('A', ProjectsApi, UsersApi, ObjectsApi, ObjectApi,
 class ApiClient(Generic[A]):
     """ A client with guaranteed resource released """
 
-    def __init__(self, api_class: Type[A], token: Union[str, LocalProxy]):
+    def __init__(self, api_class: Type[A], token: Union[str, LocalProxy, Request]):
         api_client = _ApiClient()
         if isinstance(token, LocalProxy):
             token = token.cookies.get('session')

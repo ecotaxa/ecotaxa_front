@@ -342,9 +342,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.5.0"
+ecotaxa_version="2.5.1"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2020-12-08"
+    return ecotaxa_version+" 2021-01-14"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -352,6 +352,12 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2021-01-14 : V 2.5.1
+    Feature #529: Show a progress bar while loading in the manual classification window.
+    Bug #549: Cryptic error when import update fails due to rights problem.
+    Bug #556: Fields are not updated in object_set/update when mixing plain and free columns.
+    Bug #538: Space in sample names made them unselectable in "Pick from other projects" child window.
+    Regression due to #523 fix: Preset were erased from project after editing rights only. 
 2020-12-08 : V 2.5.0
     Bug #542: During export with images, arrange that resultsets from DB are flushed to disk instead of remaining opened.
     Bug #537: There is now a decent progress bar during export.
