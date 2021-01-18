@@ -112,9 +112,6 @@ def before_request_security():
         g.menu.append(("/admin/","Admin Screen"))
         g.useradmin=True
     if current_user.has_role(database.AdministratorLabel) :
-        # g.menu.append(("/Task/Create/TaskTaxoImport","Import Taxonomy"))
-        g.menu.append(("/Task/Create/TaskExportDb","Export Database"))
-        g.menu.append(("/Task/Create/TaskImportDB","Import Database"))
         g.menu.append(("/Task/listall","Task Manager"))
         g.appliadmin=True
 
