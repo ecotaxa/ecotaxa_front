@@ -197,8 +197,8 @@ class SamplesView(ModelView):
 
 
 class ProcessView(ModelView):
-    column_list = ('processid', 'projid', 'orig_id', 't01', 't02', 't03')
-    column_filters = ('processid', 'projid', 'orig_id')
+    column_list = ('processid', 'orig_id', 't01', 't02', 't03')
+    column_filters = ('processid', 'orig_id')
     column_searchable_list = ('orig_id',)
 
     def __init__(self, session, **kwargs):
@@ -209,8 +209,8 @@ class ProcessView(ModelView):
 
 
 class AcquisitionsView(ModelView):
-    column_list = ('acquisid', 'projid', 'orig_id', 't01', 't02', 't03')
-    column_filters = ('acquisid', 'projid', 'orig_id')
+    column_list = ('acquisid', 'acq_sample_id', 'orig_id', 't01', 't02', 't03')
+    column_filters = ('acquisid', 'acq_sample_id', 'orig_id')
     column_searchable_list = ('orig_id',)
 
     def __init__(self, session, **kwargs):

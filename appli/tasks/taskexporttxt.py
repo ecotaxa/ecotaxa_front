@@ -18,8 +18,11 @@ from appli import db, app, database, PrintInCharte, gvp, gvg, DecodeEqualList, X
 from appli.database import GetAll
 from appli.tasks.taskmanager import AsyncTask
 
-
 # noinspection RegExpRedundantEscape
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp
+
+
 def normalize_filename(filename):
     return re.sub(R"[^a-zA-Z0-9 \.\-\(\)]", "_", str(filename))
 
@@ -204,7 +207,15 @@ class TaskExportTxt(AsyncTask):
                         left join users uo3 on oh.classif_who=uo3.id
                     """.format(samplefilter)
 
-        sql3 += sharedfilter.GetSQLFilter(self.param.filtres, params, self.task.owner_id)
+        # sql3 += sharedfilter.GetSQLFilter(self.param.filtres, params, self.task.owner_id)
+
+        # Use the API entry point for filtering
+        with ApiClient(ObjectsApi, self.cookie) as api:
+            res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(self.param.ProjectId,
+                                                                                         self.param.filtres)
+            sql3 += "and o.objid = any (%(objids)s) "
+            params["objids"] = sorted(res.object_ids)
+
         splitfield = "object_id"  # cette valeur permet d'éviter des erreurs plus loin dans r[splitfield]
         if ExportMode == 'BAK':
             self.param.splitcsvby = "sample"
@@ -313,7 +324,14 @@ class TaskExportTxt(AsyncTask):
             sql += " and s.orig_id= any(%(samplelist)s) "
             params['samplelist'] = self.param.samplelist.split(",")
 
-        sql += sharedfilter.GetSQLFilter(self.param.filtres, params, self.task.owner_id)
+        # sql += sharedfilter.GetSQLFilter(self.param.filtres, params, self.task.owner_id)
+
+        # Use the API entry point for filtering
+        with ApiClient(ObjectsApi, self.cookie) as api:
+            res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(self.param.ProjectId,
+                                                                                         self.param.filtres)
+            sql += "and o.objid = any (%(objids)s) "
+            params["objids"] = sorted(res.object_ids)
 
         logging.info("Execute SQL : %s" % (sql,))
         logging.info("Params : %s" % (params,))
@@ -432,7 +450,16 @@ class TaskExportTxt(AsyncTask):
         if self.param.samplelist != "":
             sql3 += " and s.orig_id= any(%(samplelist)s) "
             params['samplelist'] = self.param.samplelist.split(",")
-        sql3 += sharedfilter.GetSQLFilter(self.param.filtres, params, self.task.owner_id)
+
+        # sql3 += sharedfilter.GetSQLFilter(self.param.filtres, params, self.task.owner_id)
+
+        # Use the API entry point for filtering
+        with ApiClient(ObjectsApi, self.cookie) as api:
+            res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(self.param.ProjectId,
+                                                                                         self.param.filtres)
+            sql3 += "and o.objid = any (%(objids)s) "
+            params["objids"] = sorted(res.object_ids)
+
         sql3 += " group by " + grp
         sql3 += " order by " + grp
         sql = sql1 + " " + sql2 + " " + sql3

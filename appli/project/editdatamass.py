@@ -91,21 +91,21 @@ def PrjEditDataMass(PrjId):
                                                                                      updates=updates))
         elif tablecode == "p":
             # Process update, same key as acquisitions
-            processes = [a_parent for a_parent in set(res.acquisition_ids) if a_parent]
+            tgt_processes = [a_parent for a_parent in set(res.acquisition_ids) if a_parent]
             with ApiClient(ProcessesApi, request) as api:
-                nb_rows = api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=processes,
+                nb_rows = api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=tgt_processes,
                                                                                      updates=updates))
         elif tablecode == "a":
             # Acquisition update
-            acquisitions = [a_parent for a_parent in set(res.acquisition_ids) if a_parent]
+            tgt_acquisitions = [a_parent for a_parent in set(res.acquisition_ids) if a_parent]
             with ApiClient(AcquisitionsApi, request) as api:
-                nb_rows = api.update_acquisitions_acquisition_set_update_post(BulkUpdateReq(target_ids=acquisitions,
+                nb_rows = api.update_acquisitions_acquisition_set_update_post(BulkUpdateReq(target_ids=tgt_acquisitions,
                                                                                             updates=updates))
         elif tablecode == "s":
             # Sample update
-            samples = [a_parent for a_parent in set(res.sample_ids) if a_parent]
+            tgt_samples = [a_parent for a_parent in set(res.sample_ids) if a_parent]
             with ApiClient(SamplesApi, request) as api:
-                nb_rows = api.update_samples_sample_set_update_post(BulkUpdateReq(target_ids=samples,
+                nb_rows = api.update_samples_sample_set_update_post(BulkUpdateReq(target_ids=tgt_samples,
                                                                                   updates=updates))
         flash('%s data rows updated' % nb_rows, 'success')
 

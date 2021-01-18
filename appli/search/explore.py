@@ -110,7 +110,9 @@ where o.classif_qual='V'
         sqlparam['samples']=[int(x) for x in gvp("samples").split(',')]
 
     if gvp("instrum")!="":
-        whereclause += " and o.acquisid in (select acquisid  from acquisitions  where instrument ilike %(instrum)s "+("and projid= any (%(projid)s)" if gvp("projid")!="" else "")+" )"
+        whereclause += " and o.acquisid in (select acq.acquisid from acquisitions acq, samples sam where acq.acq_sample_id = sam.sampleid and acq.instrument ilike %(instrum)s "+\
+                       ("and sam.projid= any (%(projid)s)" if gvp("projid")!="" else "")+\
+                       " )"
         sqlparam['instrum']='%'+gvp("instrum")+'%'
     PageTopProjectLink=MapForProject=None
     if gvp("projid")!="":

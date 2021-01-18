@@ -271,8 +271,7 @@ Index('IS_SamplesProjectOrigId', Samples.__table__.c.projid, Samples.__table__.c
 class Acquisitions(db.Model):
     __tablename__ = 'acquisitions'
     acquisid = db.Column(INTEGER, db.Sequence('seq_acquisitions'), primary_key=True)
-    projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
-    project = db.relationship("Projects")
+    acq_sample_id = db.Column(INTEGER, db.ForeignKey('samples.sampleid'), nullable=False)
     orig_id = db.Column(VARCHAR(255), nullable=False)
     instrument = db.Column(VARCHAR(255))
 
@@ -288,9 +287,8 @@ Index('IS_AcquisitionsProjectOrigId', Acquisitions.__table__.c.projid, Acquisiti
 class Process(db.Model):
     __tablename__ = 'process'
     # Now a common key with Acquisitions
-    processid = db.Column(INTEGER, primary_key=True)
-    projid = db.Column(INTEGER, db.ForeignKey('projects.projid'))
-    project = db.relationship("Projects")
+    processid = db.Column(INTEGER, db.ForeignKey('acquisitions.acquisid', onupdate="CASCADE", ondelete="CASCADE"),
+                          primary_key=True)
     orig_id = db.Column(VARCHAR(255), nullable=False)
 
     def __str__(self):
@@ -299,7 +297,6 @@ class Process(db.Model):
 
 for i in range(1, 31):
     setattr(Process, "t%02d" % i, db.Column(VARCHAR(250)))
-Index('IS_ProcessProject', Process.__table__.c.projid)
 
 
 class Objects(db.Model):
