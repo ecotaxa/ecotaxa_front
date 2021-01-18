@@ -167,12 +167,6 @@ def TaskFactory(ClassName, task=None):
     from appli.tasks.taskexporttxt import TaskExportTxt
     if ClassName == "TaskExportTxt":
         return TaskExportTxt(task)
-    from appli.tasks.taskexportdb import TaskExportDb
-    if ClassName == "TaskExportDb":
-        return TaskExportDb(task)
-    from appli.tasks.taskimportdb import TaskImportDB
-    if ClassName == "TaskImportDB":
-        return TaskImportDB(task)
     # Particle module tasks
     from .taskpartzooscanimport import TaskPartZooscanImport
     if ClassName == "TaskPartZooscanImport":
