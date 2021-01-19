@@ -20,18 +20,26 @@
         <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}" style="width: 500px" >
     </td></tr>
     <tr>
-        <td>Visible for all visitors<br>(only validated objects)</td><td>
-           <input type="checkbox"  style="height:20px;" id="visible" name="visible"
-                  value="Y" {{ 'checked' if data.visible else "" }}>
-       </td>
-        <td width="600px">License
+        <td>License</td>
+        <td>
             <select name="license" id="license" onchange=""  > {# class="form-control"  #}
             {% for k,v in possible_licenses.items() %}
                 <option value="{{ k }}"  {{ 'selected' if data.license==k }}>{{ k }}</option>
             {% endfor %}
             </select>
-            <br><span id="license_explain">license text</span>
-       </td>
+        </td>
+        <td>
+            Pick a data sharing license for your project.
+            <br/>Current choice is&nbsp;:&nbsp;<span id="license_explain">license text</span>
+        </td>
+    </tr>
+    <tr>
+        <td>Visible for all visitors<br>(only validated objects)</td>
+        <td>
+           <input type="checkbox"  style="height:20px;" id="visible" name="visible"
+                  value="Y" {{ 'checked' if data.visible else "" }}>
+        </td>
+        <td></td>
     </tr>
 
     <tr>
