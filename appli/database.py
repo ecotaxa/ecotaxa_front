@@ -69,52 +69,6 @@ class users(db.Model, UserMixin):
     def __str__(self):
         return "{0} ({1})".format(self.name, self.email)
 
-    def GetPref(self, prjid, name, defval):
-        try:
-            prjid = str(prjid)
-            tmp = json.loads(self.preferences)
-            if prjid not in tmp:
-                return defval
-            if isinstance(defval, int):
-                return int(tmp[prjid].get(name, defval))
-            if isinstance(defval, float):
-                return float(tmp[prjid].get(name, defval))
-            return tmp[prjid].get(name, defval)
-        except:  # noqa
-            return defval
-
-    def SetPref(self, prjid, name, newval):
-        try:
-            prjid = str(prjid)
-            tmp = json.loads(self.preferences)
-            if prjid not in tmp:
-                tmp[prjid] = {}
-            if tmp[prjid].get(name, -99999) == newval:
-                return 0  # déjà la bonne valeur donc il n'y a rien à faire
-        except:  # noqa
-            tmp = {}
-        if prjid not in tmp:
-            tmp[prjid] = {}
-        tmp[prjid][name] = newval
-        tmp[prjid]['ts'] = time.time()
-        self.preferences = self.keep_last_if_too_large(tmp, 40000)
-        return 1
-
-    @staticmethod
-    def keep_last_if_too_large(prefs: Dict[str, dict], max_size: int):
-        ret = json.dumps(prefs)
-        if len(ret) > max_size:
-            # Sort project settings, new first old last
-            prefs_with_ts = [[prj, pref['ts']] for prj, pref in prefs.items()
-                             if isinstance(pref, dict) and 'ts' in pref]
-            chrono_prefs = sorted(prefs_with_ts, key=lambda r: r[1], reverse=True)
-            while len(ret) > max_size and chrono_prefs:
-                # Remove older entries until it fits
-                old_prj, old_ts = chrono_prefs.pop()
-                del prefs[old_prj]
-                ret = json.dumps(prefs)
-        return ret
-
 
 # noinspection PyPep8Naming
 class countrylist(db.Model, UserMixin):

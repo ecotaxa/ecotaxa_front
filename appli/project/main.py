@@ -1,29 +1,27 @@
 import collections
 import math
 import urllib.parse
+from json import JSONDecodeError
 from typing import List
 
 import psycopg2.extras
 from flask import render_template, g, flash, json, request, url_for
-from flask_login import current_user
 from flask_security import login_required
 
 import appli
 import appli.project.sharedfilter as sharedfilter
-from appli import app, PrintInCharte, database, gvg, gvp, user_datastore, DecodeEqualList, ScaleForDisplay, ntcv, \
+from appli import app, PrintInCharte, database, gvg, gvp, DecodeEqualList, ScaleForDisplay, ntcv, \
     XSSEscape
 from appli.constants import DayTimeList
 from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
-
-######################################################################################################################
-
-
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ObjectsApi, ObjectSetSummaryRsp, \
-    ObjectSetQueryRsp
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ObjectsApi, ObjectSetQueryRsp, UsersApi
+
+
+######################################################################################################################
 
 
 def UpdateProjectStat(PrjId):
@@ -105,24 +103,91 @@ def GetFieldListFromModel(proj_model, presentation_field='classiffieldlist'):
 
 # Contient la liste des filtres & parametres de cet écran avec les valeurs par défaut
 # noinspection SpellCheckingInspection
-FilterList = {"MapN": "", "MapW": "", "MapE": "", "MapS": "",
-              "depthmin": "", "depthmax": "",
-              "samples": "",
-              "fromdate": "", "todate": "", "inverttime": "",
-              "fromtime": "", "totime": "",
-              'instrum': '', 'month': '', 'daytime': '',
-              'freetxt': '', 'freetxtval': '', 'filt_annot': '',
-              'freenum': '', 'freenumst': '', 'freenumend': '',
-              "statusfilter": "",
+FilterList = {"MapN": '', "MapW": '', "MapE": '', "MapS": '',
+              "depthmin": '', "depthmax": '',
+              "samples": '',
+              "fromdate": '', "todate": '', "inverttime": '',
+              "fromtime": '', "totime": '',
+              "instrum": '', "month": '', "daytime": '',
+              "freetxt": '', "freetxtval": '', "filt_annot": '',
+              "freenum": '', "freenumst": '', "freenumend": '',
+              "statusfilter": '',
               # Display parameters, not filters
               "sortby": "", "sortorder": "", "dispfield": "",
-              'ipp': 100, 'zoom': 100, 'magenabled': 0,
-              'popupenabled': 0,
+              "ipp": 100, "zoom": 100, "magenabled": 0,
+              "popupenabled": 0,
               }
 FilterListAutoSave = ("statusfilter",
                       "sortby", "sortorder", "dispfield",
                       'ipp', 'zoom', 'magenabled',
                       'popupenabled')
+
+# What is used for storing preferences on back-end
+_FILTERS_KEY = "filters"
+
+
+def _set_filters_from_prefs_and_get(page_vars, prj_id, request):
+    """
+        Set page variables, essentially INPUT settings, from user preferences
+    """
+    # Inject default vals
+    page_vars.update(FilterList)
+    # Override with posted vals
+    posted_vals = {a_val: request.args[a_val]
+                   for a_val in FilterList.keys() & request.args.keys()}
+    page_vars.update(posted_vals)
+    # Read user preferences related to this project
+    # for a_filter, default in FilterList.items():
+    #     data[a_filter] = gvg(a_filter, str(current_user.GetPref(PrjId, a_filter, default))
+    #     if current_user.is_authenticated else "")
+    with ApiClient(UsersApi, request) as api:
+        try:
+            prefs: str = api.get_current_user_prefs_users_my_preferences_project_id_get(project_id=prj_id,
+                                                                                        key=_FILTERS_KEY)
+            user_vals = json.loads(prefs)
+            page_vars.update(user_vals)
+        except ApiException as ae:
+            if ae.status == 403:
+                # Not logged in
+                pass
+        except JSONDecodeError:
+            pass
+        except ValueError:
+            pass
+
+
+def _set_prefs_from_filters(filters, prj_id):
+    """
+        Save user preferences from POSTed variables
+    """
+    # Read present values
+    with ApiClient(UsersApi, request) as api:
+        try:
+            prefs: str = api.get_current_user_prefs_users_my_preferences_project_id_get(project_id=prj_id,
+                                                                                        key=_FILTERS_KEY)
+            user_vals = json.loads(prefs)
+            if not isinstance(user_vals, dict):
+                user_vals = {}
+        except ApiException as ae:
+            if ae.status == 403:
+                # Not logged in
+                return
+        except JSONDecodeError:
+            user_vals = {}
+    # See what needs update
+    prefs_update = {}
+    save_all = gvp("saveinprofile") == "Y"
+    for a_filter, val in filters.items():
+        if save_all or (a_filter in FilterListAutoSave):
+            if user_vals.get(a_filter) != val:
+                prefs_update[a_filter] = val
+    if len(prefs_update) > 0:
+        user_vals.update(prefs_update)
+        with ApiClient(UsersApi, request) as api:
+            val_to_write = json.dumps(user_vals)
+            api.set_current_user_prefs_users_my_preferences_project_id_put(project_id=prj_id,
+                                                                           key=_FILTERS_KEY,
+                                                                           value=val_to_write)
 
 
 ######################################################################################################################
@@ -132,9 +197,7 @@ FilterListAutoSave = ("statusfilter",
 def indexPrj(PrjId):
     data = {'pageoffset': gvg("pageoffset", "0")}
 
-    # Read user preferences related to this project
-    for k, v in FilterList.items():
-        data[k] = gvg(k, str(current_user.GetPref(PrjId, k, v)) if current_user.is_authenticated else "")
+    _set_filters_from_prefs_and_get(data, PrjId, request)
 
     # print('%s',data)
     if data.get("samples", None):
@@ -145,15 +208,16 @@ def indexPrj(PrjId):
 
     data["month_for_select"] = ""
     # print("%s",data['month'])
-    for (k, v) in enumerate(('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-                             'October', 'November', 'December'), start=1):
+    for (a_filter, default) in enumerate(
+            ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+             'October', 'November', 'December'), start=1):
         data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
-            'selected' if str(k) in data.get('month', '').split(',') else '', k, v)
+            'selected' if str(a_filter) in data.get('month', '').split(',') else '', a_filter, default)
 
     data["daytime_for_select"] = ""
-    for (k, v) in DayTimeList.items():
+    for (a_filter, default) in DayTimeList.items():
         data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
-            'selected' if str(k) in data.get('daytime', '').split(',') else '', k, v)
+            'selected' if str(a_filter) in data.get('daytime', '').split(',') else '', a_filter, default)
 
     Prj = database.Projects.query.filter_by(projid=PrjId).first()
     if Prj is None:
@@ -309,22 +373,12 @@ def LoadRightPane():
             elif ae.status == 403:
                 return "Access Denied"
 
-    # copie des valeurs de filtres connues
+    # get filter values from POST
     Filt = {}
     for k, v in FilterList.items():
         Filt[k] = gvp(k, v)
 
-    # on sauvegarde les parametres dans le profil utilisateur
-    if current_user.is_authenticated:
-        PrefToSave = 0
-        save_all = gvp("saveinprofile") == "Y"
-        for k, v in Filt.items():
-            if save_all or (k in FilterListAutoSave):
-                PrefToSave += current_user.SetPref(Prj.projid, k, v)
-        if PrefToSave > 0:
-            database.ExecSQL("update users set preferences=%s where id=%s", (current_user.preferences, current_user.id),
-                             True)
-            user_datastore.ClearCache()
+    _set_prefs_from_filters(Filt, PrjId)
 
     # Public view is when the project is visible, but the current user has no right on it.
     g.PublicViewMode = Prj.highest_right == ""
