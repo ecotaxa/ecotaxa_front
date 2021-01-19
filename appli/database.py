@@ -281,7 +281,10 @@ class Acquisitions(db.Model):
 
 for i in range(1, 31):
     setattr(Acquisitions, "t%02d" % i, db.Column(VARCHAR(250)))
-Index('IS_AcquisitionsProjectOrigId', Acquisitions.__table__.c.projid, Acquisitions.__table__.c.orig_id, unique=True)
+
+
+# TODO: Enforce another way
+#    Index('IS_AcquisitionsProjectOrigId', Acquisitions.__table__.c.projid, Acquisitions.__table__.c.orig_id, unique=True)
 
 
 class Process(db.Model):

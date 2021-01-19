@@ -1,4 +1,4 @@
-"""Fillfactor
+"""redundant columns
 
 Revision ID: 6f57c8aa715d
 Revises: d3309bb7012e

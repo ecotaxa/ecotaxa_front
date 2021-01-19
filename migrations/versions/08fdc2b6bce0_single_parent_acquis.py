@@ -1,4 +1,4 @@
-"""empty message
+"""single parent acquisition
 
 Revision ID: 08fdc2b6bce0
 Revises: d3309bb7012e
@@ -60,9 +60,6 @@ update rels2fork r2f
  where r2f.sampleid != (select min(sampleid) 
                           from rels2fork r2fs 
                          where r2fs.acquisid=r2f.acquisid);
-   
-select * from rels2fork order by acquisid, sampleid;
-commit;
 
 -- Duplicate acquisitions as many times as needed
 insert into acquisitions (acquisid, projid, 
@@ -82,11 +79,11 @@ select r2f.acquisid_to, acq.projid,
   join samples sam on sam.sampleid = r2f.sampleid;  
 
 -- Mark the original as well
-update acquisitions
-   set orig_id = orig_id || '@' || sam.orig_id
-  from acquisitions acq
-  join rels2fork r2f on r2f.acquisid = acq.acquisid and r2f.acquisid_to is null
-  join samples sam on sam.sampleid = r2f.sampleid;  
+update acquisitions acq
+   set orig_id = acq.orig_id || '@' || sam.orig_id
+  from rels2fork r2f 
+  join samples sam on sam.sampleid = r2f.sampleid  
+ where r2f.acquisid = acq.acquisid and r2f.acquisid_to is null;
   
 -- Duplicate processes as there is a 1<->1 relationship b/w acquisitions and process
 insert into process (processid, projid, orig_id, 
@@ -103,11 +100,11 @@ select r2f.acquisid_to, prc.projid,
   join samples sam on sam.sampleid = r2f.sampleid;
 
 -- Mark original process as well
-update process
-   set orig_id = orig_id || '@' || sam.orig_id
-  from process prc
-  join rels2fork r2f on r2f.acquisid = prc.processid and r2f.acquisid_to is null
-  join samples sam on sam.sampleid = r2f.sampleid;  
+update process prc
+   set orig_id = prc.orig_id || '@' || sam.orig_id
+  from rels2fork r2f 
+  join samples sam on sam.sampleid = r2f.sampleid  
+ where r2f.acquisid = prc.processid and r2f.acquisid_to is null;
 
 -- Speed up update by removing checks during update
 DROP INDEX is_objectsacquisition;
@@ -171,7 +168,7 @@ ALTER TABLE acquisitions
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
     
-commit;
+COMMIT;
 """
 
 
