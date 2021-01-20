@@ -12,8 +12,13 @@
 {% else %}
     <h3>Edit project # {{ data.projid }} -
         <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;"
-           class="btn btn-xs btn-primary">Edit privileges only</a></h3>
+           class="btn btn-xs btn-primary">Edit privileges only</a>
+      <button type="button" style="position:absolute; right:5%"
+              onmousedown="SubmitForm();" class="btn btn-primary">Save</button>
+    </h3>
 {% endif %}
+
+
   <table class=table width="100%">
 {% if not g.privs_only %}
     <tr><td width="200px">Project Title </td><td colspan=2 >
@@ -150,8 +155,8 @@ Available fields :
 
 </table>
 
-    <input type="hidden" name="save" value="Y">
-    <div class="form-group">
+  <input type="hidden" name="save" value="Y">
+  <div class="form-group">
     <div class="col-sm-offset-2 col-sm-1">
       <button type="button" onmousedown="SubmitForm();" class="btn btn-primary">Save</button>
     </div>
@@ -159,6 +164,7 @@ Available fields :
       <a href="/prj/{{ data.projid }}" class="btn btn-warning">Cancel, back to project</a>
     </div>
   </div>
+
 </form>
 
 
