@@ -79,7 +79,7 @@ def objectdetails(objid):
     page.append("</p><p>Classification :")
     if obj.classif_id:
         with ApiClient(TaxonomyTreeApi, request) as api:
-            taxon: TaxonModel = api.query_taxa_taxa_taxon_id_get(taxon_id=obj.classif_id)
+            taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=obj.classif_id)
         page.append("<br>&emsp;<b>%s</b>" % XSSEscape(taxon.display_name))
         page.append("<br>&emsp;" + (" &lt; ".join(taxon.lineage)) + " (id=%s)" % obj.classif_id)
     else:
@@ -172,7 +172,7 @@ def objectdetails(objid):
 
     if obj.classif_auto_id:
         with ApiClient(TaxonomyTreeApi, request) as api:
-            taxon: TaxonModel = api.query_taxa_taxa_taxon_id_get(taxon_id=obj.classif_auto_id)
+            taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=obj.classif_auto_id)
         classif_auto_name = taxon.lineage[0]
         if obj.classif_auto_score:
             classif_auto_name += " (%0.3f)" % (obj.classif_auto_score,)

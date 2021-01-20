@@ -489,8 +489,8 @@ def LoadRightPane():
     # print("%s\n%s\n%s"%(sql,sqlparam,res))
     html = ["<a name='toppage'/>"]
     # DEBUG SPAN
-    html.append(
-        "<span>%d vs %d, %s %s</span>" % (objs.total_ids, len(object_ids), Prj.highest_right, display_fields))
+    # html.append(
+    #     "<span>%d vs %d, %s %s</span>" % (objs.total_ids, len(object_ids), Prj.highest_right, display_fields))
     trcount = 1
     fitlastclosedtr = 0  # index de t de la derniere création de ligne qu'il faudrat effacer quand la page sera pleine
     fitheight = 100  # hauteur déjà occupé dans la page plus les header footer (hors premier header)

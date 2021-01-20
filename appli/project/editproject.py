@@ -124,7 +124,7 @@ def PrjEdit(PrjId, privs_only=False):
 
     lst = [str(tid) for tid in target_proj.init_classif_list]
     with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxonModel] = api.query_taxa_set_taxa_set_query_get(ids=" ".join(lst))
+        res: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=" ".join(lst))
     g.predeftaxo = [(r.id, r.display_name) for r in res]
 
     # TODO: Get from metadata
@@ -170,7 +170,7 @@ def Prjpopupeditpreset(PrjId):
     # Collect name for each existing id
     lst = [str(tid) for tid in taxa_ids_for_all if tid != -1]
     with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxonModel] = api.query_taxa_set_taxa_set_query_get(ids=" ".join(lst))
+        res: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=" ".join(lst))
     taxo_map = {taxon_rec.id: taxon_rec.display_name for taxon_rec in res}
 
     txt = ""

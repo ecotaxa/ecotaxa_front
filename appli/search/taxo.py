@@ -27,8 +27,8 @@ def searchtaxo():
 
     # Relay to back-end
     with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxaSearchRsp] = api.search_taxa_taxa_search_get(query=term,
-                                                                   project_id=prj_id)
+        res: List[TaxaSearchRsp] = api.search_taxa_taxon_set_search_get(query=term,
+                                                                        project_id=prj_id)
 
     # TODO: temporary until the HTML goes to /api directly
     return json.dumps(res, cls=BackEndJSONEncoder)
