@@ -43,6 +43,46 @@
 <script src="{{ url_for('static', filename='common_20201020.js')}}"></script>
 <link rel="stylesheet" href="/static/fontawesome-free-5.5.0-web/css/all.min.css">
 
+<style>
+.dropdown-submenu {
+    position:relative;
+}
+.dropdown-submenu>.dropdown-menu {
+    top:-50%;
+    left:-180%;
+    width: 200%;
+    max-width: 200%;
+    float: left;
+    margin-top:-6px;
+    margin-left:-1px;
+    -webkit-border-radius:6px 6px 6px 6px;
+    -moz-border-radius:6px 6px 6px 6px;
+    border-radius:6px 6px 6px 6px;
+}
+.dropdown-submenu .dropdown-item {
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+    display:block;
+}
+.dropdown-submenu>a:before {
+    display:inline-block;
+    content:" ";
+    width:0;
+    height:0;
+    border-color:transparent;
+    border-style:solid;
+    border-width:5px 5px 5px 0px;
+    border-right-color:#cccccc;
+    margin-top:5px;
+    margin-right:5px;
+}
+.dropdown-submenu:hover>a:after {
+    border-left-color:#ffffff;
+}
+</style>
+
 <script>
 function AddZoom(element)
 {
@@ -90,11 +130,18 @@ $(document).ready(function() {
         <span class="sr-only">Toggle Dropdown</span>
     </button>
     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-      {%   for m in g.menu %}
+      {% for m in g.menu %}
           {% if m[1]=="SEP"%}
             <li class="divider"></li>
+          {% elif m[2]=="SUB"%}
+            <li class="dropdown-submenu">
+                <a href="{{ m[0] }}">{{ m[1] }}</a>
+		  	 <ul class="dropdown-menu">
+          {% elif m[1]=="NOSUB"%}
+			 </ul>
+            </li>
           {% else %}
-            <li><a href="{{ m[0] }}">{{ m[1] }}</a></li>
+            <li><a class="dropdown-item" href="{{ m[0] }}">{{ m[1] }}</a></li>
           {% endif %}
       {%  endfor %}
   </ul>
