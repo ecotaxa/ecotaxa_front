@@ -49,12 +49,15 @@ def PrjEdit(PrjId, privs_only=False):
     if gvp('save') == "Y":
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
+        posted_contact_id = None
 
         for a_var in request.form:
             # Update the project (from API call) with posted variables
             if a_var in dir(target_proj):
                 # TODO: Big assumption here, variables need to have same name as Model fields
                 setattr(target_proj, a_var, gvp(a_var))
+            if a_var == 'contact_user_id':
+                posted_contact_id = gvp(a_var)
             if a_var == 'visible':
                 target_proj.visible = gvp('visible') == 'Y'
             if a_var == 'initclassiflist':
@@ -93,24 +96,30 @@ def PrjEdit(PrjId, privs_only=False):
             priv_for_new_member = gvp('priv_new_privilege')
             members_by_right[priv_for_new_member].append(users_by_id[int(new_member)])
 
-        # Sanity check
+        do_update = True
+        # Pick the contact from managers
+        contact_user = None
+        for a_user in members_by_right['Manage']:
+            if str(a_user.id) == posted_contact_id:
+                contact_user = a_user
+                break
+        else:
+            flash("A manager need to be contact person", "error")
+            do_update = False
+        # OK we have someone
+        target_proj.contact = contact_user
+
+        # Managers sanity check
         if len(target_proj.managers) == 0:
             flash("At least one manager is needed", "error")
-
-        # # Point owner to the right manager
-        # owner_id = int(gvp('owner_id','0'))
-        # for a_member in target_proj.managers:
-        #     if a_member.id == owner_id:
-        #         target_proj.owner = a_member
-        #         break
-        # else:
-        #     flash("Owner has to be a Manager", "error")
+            do_update = False
 
         # Update on back-end
         with ApiClient(ProjectsApi, request) as api:
             try:
-                api.update_project_projects_project_id_put(project_id=target_proj.projid,
-                                                           project_model=target_proj)
+                if do_update:
+                    api.update_project_projects_project_id_put(project_id=target_proj.projid,
+                                                               project_model=target_proj)
             except ApiException as ae:
                 flash("Update problem: %s" % ae, "error")
 
@@ -120,7 +129,7 @@ def PrjEdit(PrjId, privs_only=False):
         for a_user in members_for_priv:
             g.members.append({"member_id": str(a_user.id), "privilege": a_priv})
 
-    # g.managers_by_id = {mgr.id:mgr.name for mgr in target_proj.managers}
+    g.contact_user_id = str(target_proj.contact.id) if target_proj.contact else None
 
     lst = [str(tid) for tid in target_proj.init_classif_list]
     with ApiClient(TaxonomyTreeApi, request) as api:

@@ -125,33 +125,49 @@ Available fields :
     </td><td>
     </td></tr>
 {% endif %}
-  <tr><td>Privileges</td><td colspan="2">
+  <tr><td>Privileges</td><td colspan="1">
         <table class="table table-bordered table-verycondensed" style="width:500px;">
           <tr>
             <td>Name</td>
             <td>Privilege</td>
+            <td>Contact</td>
             <td>Delete</td>
           </tr>
           {% for pr in g.members %}
           <tr>
             <td>{{ ht.selectinputdict('priv_'~pr.member_id~'_member', g.users, pr.member_id) }}</td>
             <td>{{ ht.selectinput('priv_'~pr.member_id~'_privilege', ('View', 'Annotate','Manage'), pr.privilege) }}</td>
+            <td><input type="radio" name="contact_user_id"
+                       value="{{ pr.member_id }}"
+                    {{ 'disabled' if pr.privilege != 'Manage' }}
+                    {{ 'checked' if pr.member_id == g.contact_user_id }}>
+            </td>
             <td><input type="checkbox" name="priv_{{ pr.member_id }}_delete" value="Y"></td>
           </tr>
           {% endfor %}
           <tr>
             <td>New privilege :</td>
+            <td colspan="3"></td>
           </tr>
           <tr>
             <td>{{ ht.selectinputdict('priv_new_member', g.users, '',true) }}</td>
             <td>{{ ht.selectinput('priv_new_privilege', ('View', 'Annotate','Manage'), '') }}</td>
             <td></td>
+            <td></td>
           </tr>
 
         </table>
 
-    </td><td>
-    </td></tr>
+    </td>
+      <td>
+          The roles in short:
+<ul>
+    <li>Viewers can view the project even when it is private; the project is listed in their project list.</li>
+    <li>Annotators can classify objects.</li>
+    <li>Managers can import and delete data, as well as change project settings.</li>
+    <li>The contact person is a Manager, displayed in the project table and serving as the contact point for other users and EcoTaxa's managers.</li>
+</ul>
+      </td></tr>
 
 </table>
 

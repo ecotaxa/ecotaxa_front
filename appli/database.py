@@ -182,6 +182,7 @@ class ProjectsPriv(db.Model):
     projid = db.Column(INTEGER, db.ForeignKey('projects.projid', ondelete="CASCADE"), nullable=False)
     member = db.Column(db.Integer, db.ForeignKey('users.id'))
     privilege = db.Column(VARCHAR(255), nullable=False)
+    extra = db.Column(VARCHAR(1), nullable=True)
     memberrel = db.relationship("users")
     refproject = db.relationship('Projects', backref=db.backref('projmembers', cascade="all, delete-orphan",
                                                                 single_parent=True))  # ,cascade='delete'
