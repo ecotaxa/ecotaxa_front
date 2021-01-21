@@ -34,33 +34,28 @@ class ProcessModel(object):
     """
     openapi_types = {
         'processid': 'int',
-        'projid': 'int',
         'orig_id': 'str',
         'free_columns': 'object'
     }
 
     attribute_map = {
         'processid': 'processid',
-        'projid': 'projid',
         'orig_id': 'orig_id',
         'free_columns': 'free_columns'
     }
 
-    def __init__(self, processid=None, projid=None, orig_id=None, free_columns=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, processid=None, orig_id=None, free_columns=None, local_vars_configuration=None):  # noqa: E501
         """ProcessModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._processid = None
-        self._projid = None
         self._orig_id = None
         self._free_columns = None
         self.discriminator = None
 
         self.processid = processid
-        if projid is not None:
-            self.projid = projid
         self.orig_id = orig_id
         if free_columns is not None:
             self.free_columns = free_columns
@@ -87,27 +82,6 @@ class ProcessModel(object):
             raise ValueError("Invalid value for `processid`, must not be `None`")  # noqa: E501
 
         self._processid = processid
-
-    @property
-    def projid(self):
-        """Gets the projid of this ProcessModel.  # noqa: E501
-
-
-        :return: The projid of this ProcessModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._projid
-
-    @projid.setter
-    def projid(self, projid):
-        """Sets the projid of this ProcessModel.
-
-
-        :param projid: The projid of this ProcessModel.  # noqa: E501
-        :type: int
-        """
-
-        self._projid = projid
 
     @property
     def orig_id(self):

@@ -36,13 +36,13 @@ class TaxonomyTreeApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def query_taxa_set_taxa_set_query_get(self, ids, **kwargs):  # noqa: E501
+    def query_taxa_set_taxon_set_query_get(self, ids, **kwargs):  # noqa: E501
         """Query Taxa Set  # noqa: E501
 
         Information about several taxa, including their lineage. The separator between numbers is arbitrary non-digit, e.g. \":\", \"|\" or \",\"  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.query_taxa_set_taxa_set_query_get(ids, async_req=True)
+        >>> thread = api.query_taxa_set_taxon_set_query_get(ids, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class TaxonomyTreeApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.query_taxa_set_taxa_set_query_get_with_http_info(ids, **kwargs)  # noqa: E501
+        return self.query_taxa_set_taxon_set_query_get_with_http_info(ids, **kwargs)  # noqa: E501
 
-    def query_taxa_set_taxa_set_query_get_with_http_info(self, ids, **kwargs):  # noqa: E501
+    def query_taxa_set_taxon_set_query_get_with_http_info(self, ids, **kwargs):  # noqa: E501
         """Query Taxa Set  # noqa: E501
 
         Information about several taxa, including their lineage. The separator between numbers is arbitrary non-digit, e.g. \":\", \"|\" or \",\"  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.query_taxa_set_taxa_set_query_get_with_http_info(ids, async_req=True)
+        >>> thread = api.query_taxa_set_taxon_set_query_get_with_http_info(ids, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class TaxonomyTreeApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method query_taxa_set_taxa_set_query_get" % key
+                    " to method query_taxa_set_taxon_set_query_get" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'ids' is set
         if self.api_client.client_side_validation and ('ids' not in local_var_params or  # noqa: E501
                                                         local_var_params['ids'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `ids` when calling `query_taxa_set_taxa_set_query_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `ids` when calling `query_taxa_set_taxon_set_query_get`")  # noqa: E501
 
         collection_formats = {}
 
@@ -135,7 +135,7 @@ class TaxonomyTreeApi(object):
         auth_settings = ['HTTPBearer']  # noqa: E501
 
         return self.api_client.call_api(
-            '/taxa_set/query', 'GET',
+            '/taxon_set/query', 'GET',
             path_params,
             query_params,
             header_params,
@@ -150,13 +150,13 @@ class TaxonomyTreeApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def query_taxa_taxa_taxon_id_get(self, taxon_id, **kwargs):  # noqa: E501
+    def query_taxa_taxon_taxon_id_get(self, taxon_id, **kwargs):  # noqa: E501
         """Query Taxa  # noqa: E501
 
         Information about a single taxon, including its lineage.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.query_taxa_taxa_taxon_id_get(taxon_id, async_req=True)
+        >>> thread = api.query_taxa_taxon_taxon_id_get(taxon_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -173,15 +173,15 @@ class TaxonomyTreeApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.query_taxa_taxa_taxon_id_get_with_http_info(taxon_id, **kwargs)  # noqa: E501
+        return self.query_taxa_taxon_taxon_id_get_with_http_info(taxon_id, **kwargs)  # noqa: E501
 
-    def query_taxa_taxa_taxon_id_get_with_http_info(self, taxon_id, **kwargs):  # noqa: E501
+    def query_taxa_taxon_taxon_id_get_with_http_info(self, taxon_id, **kwargs):  # noqa: E501
         """Query Taxa  # noqa: E501
 
         Information about a single taxon, including its lineage.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.query_taxa_taxa_taxon_id_get_with_http_info(taxon_id, async_req=True)
+        >>> thread = api.query_taxa_taxon_taxon_id_get_with_http_info(taxon_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -218,14 +218,14 @@ class TaxonomyTreeApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method query_taxa_taxa_taxon_id_get" % key
+                    " to method query_taxa_taxon_taxon_id_get" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'taxon_id' is set
         if self.api_client.client_side_validation and ('taxon_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['taxon_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `taxon_id` when calling `query_taxa_taxa_taxon_id_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `taxon_id` when calling `query_taxa_taxon_taxon_id_get`")  # noqa: E501
 
         collection_formats = {}
 
@@ -249,7 +249,7 @@ class TaxonomyTreeApi(object):
         auth_settings = ['HTTPBearer']  # noqa: E501
 
         return self.api_client.call_api(
-            '/taxa/{taxon_id}', 'GET',
+            '/taxon/{taxon_id}', 'GET',
             path_params,
             query_params,
             header_params,
@@ -264,13 +264,13 @@ class TaxonomyTreeApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def search_taxa_taxa_search_get(self, query, project_id, **kwargs):  # noqa: E501
+    def search_taxa_taxon_set_search_get(self, query, project_id, **kwargs):  # noqa: E501
         """Search Taxa  # noqa: E501
 
         Search for taxa by name.  Queries can be 'small', i.e. of length < 3 and even zero-length. For a public, unauthenticated call: - zero-length and small queries always return nothing. - otherwise, a full search is done and results are returned in alphabetical order.  Behavior for an authenticated call: - zero-length queries: return the MRU list in full. - small queries: the MRU list is searched, so that taxa in the recent list are returned, if matching. - otherwise, a full search is done. Results are ordered so that taxa in the project list are in first,     and are signalled as such in the response.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.search_taxa_taxa_search_get(query, project_id, async_req=True)
+        >>> thread = api.search_taxa_taxon_set_search_get(query, project_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -288,15 +288,15 @@ class TaxonomyTreeApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.search_taxa_taxa_search_get_with_http_info(query, project_id, **kwargs)  # noqa: E501
+        return self.search_taxa_taxon_set_search_get_with_http_info(query, project_id, **kwargs)  # noqa: E501
 
-    def search_taxa_taxa_search_get_with_http_info(self, query, project_id, **kwargs):  # noqa: E501
+    def search_taxa_taxon_set_search_get_with_http_info(self, query, project_id, **kwargs):  # noqa: E501
         """Search Taxa  # noqa: E501
 
         Search for taxa by name.  Queries can be 'small', i.e. of length < 3 and even zero-length. For a public, unauthenticated call: - zero-length and small queries always return nothing. - otherwise, a full search is done and results are returned in alphabetical order.  Behavior for an authenticated call: - zero-length queries: return the MRU list in full. - small queries: the MRU list is searched, so that taxa in the recent list are returned, if matching. - otherwise, a full search is done. Results are ordered so that taxa in the project list are in first,     and are signalled as such in the response.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.search_taxa_taxa_search_get_with_http_info(query, project_id, async_req=True)
+        >>> thread = api.search_taxa_taxon_set_search_get_with_http_info(query, project_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -335,18 +335,18 @@ class TaxonomyTreeApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method search_taxa_taxa_search_get" % key
+                    " to method search_taxa_taxon_set_search_get" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'query' is set
         if self.api_client.client_side_validation and ('query' not in local_var_params or  # noqa: E501
                                                         local_var_params['query'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `query` when calling `search_taxa_taxa_search_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `query` when calling `search_taxa_taxon_set_search_get`")  # noqa: E501
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `search_taxa_taxa_search_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `search_taxa_taxon_set_search_get`")  # noqa: E501
 
         collection_formats = {}
 
@@ -372,7 +372,7 @@ class TaxonomyTreeApi(object):
         auth_settings = ['HTTPBearer']  # noqa: E501
 
         return self.api_client.call_api(
-            '/taxa/search', 'GET',
+            '/taxon_set/search', 'GET',
             path_params,
             query_params,
             header_params,

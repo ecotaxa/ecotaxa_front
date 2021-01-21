@@ -342,9 +342,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.5.1"
+ecotaxa_version="2.5.2"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2021-01-14"
+    return ecotaxa_version+" 2021-01-21"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -352,6 +352,14 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2021-01-21 : V 2.5.2
+    Feature #557: Rename some API endpoints for naming consistency
+    Feature #511: Add a legal license per project.
+    Feature #564: Add a second "Save" button in Project Settings page
+    Feature #565: Add a Contact Person per project
+    Feature #4: Add a "Recent projects" list (with last accesses projects)
+    Bug #541: Ensure that the objects hierarchy is consistent
+    Bug #567: Under some conditions, FastAPI framework leaks request resource (DB session) 
 2021-01-14 : V 2.5.1
     Feature #529: Show a progress bar while loading in the manual classification window.
     Bug #549: Cryptic error when import update fails due to rights problem.

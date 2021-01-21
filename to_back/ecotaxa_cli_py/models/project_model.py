@@ -41,6 +41,7 @@ class ProjectModel(object):
         'managers': 'list[UserModel]',
         'annotators': 'list[UserModel]',
         'viewers': 'list[UserModel]',
+        'contact': 'UserModel',
         'highest_right': 'str',
         'license': 'str',
         'projid': 'int',
@@ -68,6 +69,7 @@ class ProjectModel(object):
         'managers': 'managers',
         'annotators': 'annotators',
         'viewers': 'viewers',
+        'contact': 'contact',
         'highest_right': 'highest_right',
         'license': 'license',
         'projid': 'projid',
@@ -86,7 +88,7 @@ class ProjectModel(object):
         'cnn_network_id': 'cnn_network_id'
     }
 
-    def __init__(self, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, init_classif_list=[], managers=[], annotators=[], viewers=[], highest_right='', license=None, projid=None, title=None, visible=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, projtype=None, rf_models_used=None, cnn_network_id=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, init_classif_list=[], managers=[], annotators=[], viewers=[], contact=None, highest_right='', license=None, projid=None, title=None, visible=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, projtype=None, rf_models_used=None, cnn_network_id=None, local_vars_configuration=None):  # noqa: E501
         """ProjectModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -100,6 +102,7 @@ class ProjectModel(object):
         self._managers = None
         self._annotators = None
         self._viewers = None
+        self._contact = None
         self._highest_right = None
         self._license = None
         self._projid = None
@@ -134,6 +137,8 @@ class ProjectModel(object):
             self.annotators = annotators
         if viewers is not None:
             self.viewers = viewers
+        if contact is not None:
+            self.contact = contact
         if highest_right is not None:
             self.highest_right = highest_right
         if license is not None:
@@ -333,6 +338,27 @@ class ProjectModel(object):
         """
 
         self._viewers = viewers
+
+    @property
+    def contact(self):
+        """Gets the contact of this ProjectModel.  # noqa: E501
+
+
+        :return: The contact of this ProjectModel.  # noqa: E501
+        :rtype: UserModel
+        """
+        return self._contact
+
+    @contact.setter
+    def contact(self, contact):
+        """Sets the contact of this ProjectModel.
+
+
+        :param contact: The contact of this ProjectModel.  # noqa: E501
+        :type: UserModel
+        """
+
+        self._contact = contact
 
     @property
     def highest_right(self):

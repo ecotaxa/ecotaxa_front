@@ -66,6 +66,7 @@ from to_back.ecotaxa_cli_py.models.process_model import ProcessModel
 from to_back.ecotaxa_cli_py.models.project_filters import ProjectFilters
 from to_back.ecotaxa_cli_py.models.project_model import ProjectModel
 from to_back.ecotaxa_cli_py.models.project_stats_model import ProjectStatsModel
+from to_back.ecotaxa_cli_py.models.project_summary_model import ProjectSummaryModel
 from to_back.ecotaxa_cli_py.models.sample_model import SampleModel
 from to_back.ecotaxa_cli_py.models.simple_import_req import SimpleImportReq
 from to_back.ecotaxa_cli_py.models.simple_import_rsp import SimpleImportRsp

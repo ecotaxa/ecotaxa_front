@@ -34,7 +34,7 @@ class AcquisitionModel(object):
     """
     openapi_types = {
         'acquisid': 'int',
-        'projid': 'int',
+        'acq_sample_id': 'int',
         'orig_id': 'str',
         'instrument': 'str',
         'free_columns': 'object'
@@ -42,20 +42,20 @@ class AcquisitionModel(object):
 
     attribute_map = {
         'acquisid': 'acquisid',
-        'projid': 'projid',
+        'acq_sample_id': 'acq_sample_id',
         'orig_id': 'orig_id',
         'instrument': 'instrument',
         'free_columns': 'free_columns'
     }
 
-    def __init__(self, acquisid=None, projid=None, orig_id=None, instrument=None, free_columns=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, acquisid=None, acq_sample_id=None, orig_id=None, instrument=None, free_columns=None, local_vars_configuration=None):  # noqa: E501
         """AcquisitionModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._acquisid = None
-        self._projid = None
+        self._acq_sample_id = None
         self._orig_id = None
         self._instrument = None
         self._free_columns = None
@@ -63,8 +63,7 @@ class AcquisitionModel(object):
 
         if acquisid is not None:
             self.acquisid = acquisid
-        if projid is not None:
-            self.projid = projid
+        self.acq_sample_id = acq_sample_id
         self.orig_id = orig_id
         if instrument is not None:
             self.instrument = instrument
@@ -93,25 +92,27 @@ class AcquisitionModel(object):
         self._acquisid = acquisid
 
     @property
-    def projid(self):
-        """Gets the projid of this AcquisitionModel.  # noqa: E501
+    def acq_sample_id(self):
+        """Gets the acq_sample_id of this AcquisitionModel.  # noqa: E501
 
 
-        :return: The projid of this AcquisitionModel.  # noqa: E501
+        :return: The acq_sample_id of this AcquisitionModel.  # noqa: E501
         :rtype: int
         """
-        return self._projid
+        return self._acq_sample_id
 
-    @projid.setter
-    def projid(self, projid):
-        """Sets the projid of this AcquisitionModel.
+    @acq_sample_id.setter
+    def acq_sample_id(self, acq_sample_id):
+        """Sets the acq_sample_id of this AcquisitionModel.
 
 
-        :param projid: The projid of this AcquisitionModel.  # noqa: E501
+        :param acq_sample_id: The acq_sample_id of this AcquisitionModel.  # noqa: E501
         :type: int
         """
+        if self.local_vars_configuration.client_side_validation and acq_sample_id is None:  # noqa: E501
+            raise ValueError("Invalid value for `acq_sample_id`, must not be `None`")  # noqa: E501
 
-        self._projid = projid
+        self._acq_sample_id = acq_sample_id
 
     @property
     def orig_id(self):

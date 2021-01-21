@@ -491,7 +491,7 @@ class UsersApi(object):
     def set_current_user_prefs_users_my_preferences_project_id_put(self, project_id, key, value, **kwargs):  # noqa: E501
         """Set Current User Prefs  # noqa: E501
 
-        Set one preference, for project and currently authenticated user.  -`key`: The preference key  # noqa: E501
+        Set one preference, for project and currently authenticated user. -`key`: The preference key -`value`: The value to set this preference to  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.set_current_user_prefs_users_my_preferences_project_id_put(project_id, key, value, async_req=True)
@@ -518,7 +518,7 @@ class UsersApi(object):
     def set_current_user_prefs_users_my_preferences_project_id_put_with_http_info(self, project_id, key, value, **kwargs):  # noqa: E501
         """Set Current User Prefs  # noqa: E501
 
-        Set one preference, for project and currently authenticated user.  -`key`: The preference key  # noqa: E501
+        Set one preference, for project and currently authenticated user. -`key`: The preference key -`value`: The value to set this preference to  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.set_current_user_prefs_users_my_preferences_project_id_put_with_http_info(project_id, key, value, async_req=True)

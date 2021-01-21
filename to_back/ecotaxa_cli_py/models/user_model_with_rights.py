@@ -41,7 +41,8 @@ class UserModelWithRights(object):
         'country': 'str',
         'usercreationdate': 'datetime',
         'usercreationreason': 'str',
-        'can_do': 'list[int]'
+        'can_do': 'list[int]',
+        'last_used_projects': 'list[ProjectSummaryModel]'
     }
 
     attribute_map = {
@@ -53,10 +54,11 @@ class UserModelWithRights(object):
         'country': 'country',
         'usercreationdate': 'usercreationdate',
         'usercreationreason': 'usercreationreason',
-        'can_do': 'can_do'
+        'can_do': 'can_do',
+        'last_used_projects': 'last_used_projects'
     }
 
-    def __init__(self, id=None, email=None, name=None, organisation=None, active=None, country=None, usercreationdate=None, usercreationreason=None, can_do=[], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, email=None, name=None, organisation=None, active=None, country=None, usercreationdate=None, usercreationreason=None, can_do=[], last_used_projects=[], local_vars_configuration=None):  # noqa: E501
         """UserModelWithRights - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -71,6 +73,7 @@ class UserModelWithRights(object):
         self._usercreationdate = None
         self._usercreationreason = None
         self._can_do = None
+        self._last_used_projects = None
         self.discriminator = None
 
         if id is not None:
@@ -89,6 +92,8 @@ class UserModelWithRights(object):
             self.usercreationreason = usercreationreason
         if can_do is not None:
             self.can_do = can_do
+        if last_used_projects is not None:
+            self.last_used_projects = last_used_projects
 
     @property
     def id(self):
@@ -282,6 +287,27 @@ class UserModelWithRights(object):
         """
 
         self._can_do = can_do
+
+    @property
+    def last_used_projects(self):
+        """Gets the last_used_projects of this UserModelWithRights.  # noqa: E501
+
+
+        :return: The last_used_projects of this UserModelWithRights.  # noqa: E501
+        :rtype: list[ProjectSummaryModel]
+        """
+        return self._last_used_projects
+
+    @last_used_projects.setter
+    def last_used_projects(self, last_used_projects):
+        """Sets the last_used_projects of this UserModelWithRights.
+
+
+        :param last_used_projects: The last_used_projects of this UserModelWithRights.  # noqa: E501
+        :type: list[ProjectSummaryModel]
+        """
+
+        self._last_used_projects = last_used_projects
 
     def to_dict(self):
         """Returns the model properties as a dict"""
