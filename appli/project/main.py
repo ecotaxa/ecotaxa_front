@@ -1,5 +1,6 @@
 import collections
 import math
+import os
 import urllib.parse
 from json import JSONDecodeError
 from typing import List
@@ -7,6 +8,7 @@ from typing import List
 import psycopg2.extras
 from flask import render_template, g, flash, json, request, url_for
 from flask_security import login_required
+from hyphenator import Hyphenator
 
 import appli
 import appli.project.sharedfilter as sharedfilter
@@ -347,11 +349,44 @@ def _manager_mail(prj_title, prj_id):
     return mail_link
 
 
+class LatinHyphenator(object):
+    """
+        For too long latin word, insert optional hyphens.
+    """
+
+    def __init__(self):
+        self.nator = Hyphenator(filename=os.path.dirname(__file__) + os.sep + ".." + os.sep + "hyphen_la.dic")
+        self.cache = {}
+
+    def hyphenize(self, word):
+        ret = self.cache.get(word)
+        if ret is not None:
+            return ret
+        if '-' in word:
+            ret = '&ndash;'.join([self.hyphenize(a_word) for a_word in word.split('-')])
+        elif ' ' in word:
+            # The browser will do the job
+            ret = word
+        else:
+            try:
+                ret = self.nator.inserted(word, "&shy;")
+            except Exception:
+                ret = word
+        self.cache[word] = ret
+        return ret
+
+
+MAX_LEN_BEFORE_HYPHEN = 12
+
+
 # noinspection PyPep8Naming
-def FormatNameForVignetteDisplay(category_name):
+def FormatNameForVignetteDisplay(category_name, hyphenator):
     # If the name is composed, use different styles for parts
     parts = ntcv(category_name).split('<')
-    restxt = "<span class='cat_name'>{}</span>".format(parts[0])
+    part0 = parts[0]
+    if len(part0) >= MAX_LEN_BEFORE_HYPHEN:
+        part0 = hyphenator.hyphenize(part0)
+    restxt = "<span class='cat_name'>{}</span>".format(part0)
     if len(parts) > 1:
         restxt += "<span class='cat_ancestor'> &lt;&nbsp;{}</span>".format(" &lt;&nbsp;".join(parts[1:]))
     return restxt
@@ -516,6 +551,7 @@ def LoadRightPane():
     except Exception:
         WindowHeight = 200
     # print("PageWidth=%s, WindowHeight=%s"%(PageWidth,WindowHeight))
+    hyphenator = LatinHyphenator()
     # Calcul des dimensions et affichage des images
     for r in res:
         filename = r['file_name']
@@ -523,6 +559,7 @@ def LoadRightPane():
         origheight = r['height']
         thumbfilename = r['thumb_file_name']
         thumbwidth = r['thumb_width']
+        display_name = r['display_name']
         if origwidth is None:  # pas d'image associé, pas trés normal mais arrive pour les subset sans images
             width = 80
             height = 40
@@ -617,7 +654,7 @@ def LoadRightPane():
 <div class='taxo'>{0}</div>
 <div class='displayedFields'>{3}</div></div>
 <div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div>""" \
-            .format(FormatNameForVignetteDisplay(r['display_name']), GetClassifQualClass(r['classif_qual']),
+            .format(FormatNameForVignetteDisplay(display_name, hyphenator), GetClassifQualClass(r['classif_qual']),
                     popattribute, bottomtxt, imgcount, comment_present)
         txt += "</td>"
 
