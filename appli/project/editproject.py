@@ -104,7 +104,9 @@ def PrjEdit(PrjId, privs_only=False):
                 contact_user = a_user
                 break
         else:
-            flash("A manager need to be contact person", "error")
+            flash('A contact person needs to be designated among the current project managers. '
+                  'Use the "Edit privileges only" button or scroll down to bottom of the page.',
+                  "error")
             do_update = False
         # OK we have someone
         target_proj.contact = contact_user
