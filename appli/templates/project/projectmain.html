@@ -1,14 +1,14 @@
 {% macro selectinput(name, values, value='') -%}
 <select class="form-control" name="{{ name }}" id="{{ name }}">
     {% for v in values %}
-    <option value="{{ v }}" {{ 'selected' if value==v }}>{{ v }}</option>
+    <option value="{{ v }}" {{ 'selected' if value | string == v | string }}>{{ v }}</option>
     {% endfor %}
 </select>
 {%- endmacro %}
 {% macro selectinputtuple(name, values, value='') -%}
 <select class="form-control" name="{{ name }}" id="{{ name }}">
     {% for v in values %}
-    <option value="{{ v[0] }}" {{ 'selected' if value==v[0] }}>{{ v[1] }}</option>
+    <option value="{{ v[0] }}" {{ 'selected' if value | string == v[0] | string }}>{{ v[1] }}</option>
     {% endfor %}
 </select>
 {%- endmacro %}
@@ -27,6 +27,7 @@
 <link href="/static/jquerycontextmenu/jquery.contextMenu.css" rel="stylesheet" type="text/css" />
 <script src="/static/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
 <link href="/static/jquery.datetimepicker.min.css" rel="stylesheet" type="text/css" />
+<script src="/static/jquery.nearest.min.js" type="text/javascript"></script>
 
 {% if g.headmenu %}
 <table width="100%">
@@ -817,26 +818,60 @@
         {#     Ctrl + A affecte la valeur selectionnée #}
         {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function (e) { #}
         $(document).bind('keydown', 'Test1', function (e) {
-            if ((e.keyCode === 65) && (e.ctrlKey || e.metaKey)) {
-                {# CTRL + A #}
-                SelectAll(e);
-                e.preventDefault();
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+                // CTRL but no SHIFT
+                switch (e.keyCode) {
+                    case 65:
+                        {# CTRL + A #}
+                        SelectAll(e);
+                        e.preventDefault();
+                    break;
+                    case 68:
+                        {# CTRL + D #}
+                        AssignTaxoLbToSelection();
+                        e.preventDefault();
+                    break;
+                    case 76:
+                        {# CTRL + L #}
+                        ValidateSelection('V');
+                        e.preventDefault();
+                    break;
+                    case 83:
+                        {# CTRL + S #}
+                        SavePendingChanges();
+                        e.preventDefault();
+                    break;
+                    case 37:
+                        KeyboardMoveSelection("LEFT");
+                        e.preventDefault();
+                    break;
+                    case 38:
+                        KeyboardMoveSelection("UP");
+                        e.preventDefault();
+                    break;
+                    case 39:
+                        KeyboardMoveSelection("RIGHT");
+                        e.preventDefault();
+                    break;
+                    case 40:
+                        KeyboardMoveSelection("DOWN");
+                        e.preventDefault();
+                    break;
+                }
             }
-            if ((e.keyCode === 68) && (e.ctrlKey || e.metaKey)) {
-                {# CTRL + D #}
-                AssignTaxoLbToSelection();
-                e.preventDefault();
-            }
-            if ((e.keyCode === 76) && (e.ctrlKey || e.metaKey)) {
-                {# CTRL + L #}
-                ValidateSelection('V');
-                e.preventDefault();
-            }
-            if ((e.keyCode === 83) && (e.ctrlKey || e.metaKey)) {
-                {# CTRL + S #}
-                {#          console.log(e);#}
-                SavePendingChanges();
-                e.preventDefault();
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                switch (e.keyCode) {
+                    case 37:
+                        var curr_page = +$("#pageoffset").val();
+                        if (curr_page>0) gotopage(curr_page-1);
+                        e.preventDefault();
+                    break;
+                    case 39:
+                        var curr_page = +$("#pageoffset").val();
+                        gotopage(curr_page+1);
+                        e.preventDefault();
+                    break;
+                }
             }
         });
         {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvre la popup #}

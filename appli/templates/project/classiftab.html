@@ -88,6 +88,7 @@ function CategExpanderClick(e){
 }
 
 {% if g.PrjAnnotate %}
+    var last_deselected = null;
     {# Traitement de la Liste des objets TD à traiter. #}
     function ProcessList(LstTd,droptaxoid,droptaxoname) {
         var TrSet = new Set(),i;
@@ -104,6 +105,7 @@ function CategExpanderClick(e){
         // Traitement des cellules
           for(i= 0; i < LstTd.length; i++) {
               var td=LstTd[i];
+              last_deselected = td
               td.removeClass("ui-selected");
               td.addClass("ToBeSaved");
               var id = td.find('img').attr('id');
@@ -180,7 +182,80 @@ function ValidateSelection(qual) {
     });
     SavePendingChanges(0,qual);
 }
+    // Magic 125 is height of #divheadinfo + height of #topbar + a margin somewhere...
+    var y_offset_before_objects=125;
+function CheckIfInView(elem){
+    const win_scroll_top = $(window).scrollTop();
+    const win_height = $(window).innerHeight();
+    const elem_top = elem.offset().top;
+    const elem_bottom = elem.offset().top + elem.height() + 5;
+    let warp = null;
+    // Both sides must be visible
+    if (elem_bottom > win_scroll_top + win_height) {
+        warp = elem_bottom - win_height;
+    } else if (elem_top < win_scroll_top + y_offset_before_objects) {
+        warp = elem_top - y_offset_before_objects;
+    } else {
+        return;
+    }
+    $('html,body').animate({scrollTop:warp}, 100);
+}
 
+function NearestY(from, where) {
+    // Get nearest TD from 'from' in elem tree 'where'
+    let from_pos = from.offset();
+    var from_width = from.width();
+    var from_height = from.height()
+    let ret = $.nearest({x: from_pos.left + from_width / 2, y: from_pos.top + from_height / 2},
+        'td', {container: where, sort: true});
+    // Sometimes it's deuce, the middle of current row falls right in the middle of 2 others
+    if (ret.length > 1) ret = ret.slice(0,1);
+    return ret;
+}
+function KeyboardMoveSelection(way) {
+    // Get current selected cell
+    let col_right = $("#column-right");
+    let present_sel = col_right.find(".ui-selected").first();
+    if (!present_sel[0]) {
+        // If no selection, fallback to last de_deselected, e.g. when 'CTRL-D' was used
+        present_sel = last_deselected;
+    }
+    let next_sel;
+    if (present_sel) {
+        let parent;
+        switch (way) {
+            case 'UP':
+                parent = present_sel.parent().parent().parent();
+                const line_above = parent.prev();
+                if (!line_above.hasClass('imgtab')) return; // Not a line
+                next_sel = NearestY(present_sel, line_above);
+                break;
+            case 'DOWN':
+                parent = present_sel.parent().parent().parent();
+                const line_below = parent.next();
+                if (!line_below.hasClass('imgtab')) return; // Not a line
+                next_sel = NearestY(present_sel, line_below);
+                break;
+            case 'LEFT':
+                next_sel = present_sel.prev();
+                if (!next_sel[0] || next_sel.hasClass("linestart")) return;  // Previous is beginning of line
+                break;
+            case 'RIGHT':
+                next_sel = present_sel.next();
+                if (!next_sel[0]) return;  // No element on the right, i.e. end of line
+                break;
+        }
+        present_sel.removeClass('ui-selected');
+    } else {
+        // Upper-left object of the visible section
+        next_sel = $.nearest({x: 0, y:$(window).scrollTop()+y_offset_before_objects},
+                '.ui-draggable', {container: col_right, sort: true});
+        // solve deuce and skip column header
+        next_sel = next_sel.slice(0,1).next();
+    }
+    next_sel.addClass('ui-selected');
+    setTimeout(CheckIfInView, 5, next_sel);
+}
 {% endif %}
   $(function() {
     $( ".classiftab td"
