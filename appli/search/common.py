@@ -78,9 +78,10 @@ def ServerFolderSelectJSON():
 
 @app.route("/search/instrumlist")
 def searchinstrumlist():
-    sql = "select DISTINCT lower(instrument) from acquisitions where instrument is not null and instrument!='' "
+    sql = "select DISTINCT lower(instrument) from acquisitions acq where acq.instrument is not null and acq.instrument!='' "
     if gvg("projid") != "":
-        sql += " and projid=" + str(int(gvg("projid")))
+        sql += " and acq.acq_sample_id in (select sampleid from samples where projid=" + str(
+            int(gvg("projid"))) + ")"
     res = database.GetAll(sql + " order by 1")
     txt = "List of available Intruments : <hr><ul id=InstrumList>"
     for r in res:
