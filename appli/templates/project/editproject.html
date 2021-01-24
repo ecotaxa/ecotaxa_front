@@ -8,7 +8,8 @@
 {% if g.privs_only %}
     <h3>Edit project # {{ data.projid }} - privileges&nbsp;
         <a href="/prj/edit/{{ data.projid }}" style="font-size: medium;"
-           class="btn btn-xs btn-primary">Edit all</a></h3>
+           class="btn btn-xs btn-primary">Edit all</a>
+    </h3>
 {% else %}
     <h3>Edit project # {{ data.projid }} -
         <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;"
@@ -17,7 +18,9 @@
               onmousedown="SubmitForm();" class="btn btn-primary">Save</button>
     </h3>
 {% endif %}
-
+{% if not g.contact_user_id %}
+    <span class="alert-danger">IMPORTANT : A contact person needs to be designated among the current project managers. Use the "Edit privileges only" button or scroll down to bottom of the page.</span>
+{% endif %}
 
   <table class=table width="100%">
 {% if not g.privs_only %}
@@ -25,17 +28,16 @@
         <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}" style="width: 500px" >
     </td></tr>
     <tr>
-        <td>License</td>
+        <td>Data sharing license</td>
         <td>
-            <select name="license" id="license" onchange=""  > {# class="form-control"  #}
             {% for k,v in possible_licenses.items() %}
-                <option value="{{ k }}"  {{ 'selected' if data.license==k }}>{{ k }}</option>
+                <input type="radio" name="license"
+                       value="{{ k }}"
+                    {{ 'checked' if data.license==k }}>
+                {{ v | safe }}<br>
             {% endfor %}
-            </select>
         </td>
         <td>
-            Pick a data sharing license for your project.
-            <br/>Current choice is&nbsp;:&nbsp;<span id="license_explain">license text</span>
         </td>
     </tr>
     <tr>
