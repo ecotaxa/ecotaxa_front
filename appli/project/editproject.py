@@ -91,6 +91,20 @@ def PrjEdit(PrjId, privs_only=False):
                 else:
                     # Small cross in user select -> no more user name
                     members_for_priv.remove(a_member)
+        # Add new member(s) which were added in the list by a previous failed Save
+        for a_var, a_val in request.form.items():
+            if a_var.startswith("priv_") and a_var.endswith("_member"):
+                if a_var == 'priv_new_member':
+                    continue
+                a_member_id = int(a_var[5:-7])
+                priv_posted = gvp('priv_%s_privilege' % a_member_id)
+                for a_user_there in members_by_right[priv_posted]:
+                    if a_user_there.id == a_member_id:
+                        a_member_id = None
+                        break
+                if a_member_id:
+                    new_member = users_by_id[int(a_member_id)]
+                    members_by_right[priv_posted].append(new_member)
         new_member = gvp('priv_new_member')
         if new_member != '':
             priv_for_new_member = gvp('priv_new_privilege')
