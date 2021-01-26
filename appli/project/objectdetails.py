@@ -43,7 +43,7 @@ def objectdetails(objid):
                 return PrintInCharte("<a href=/>Back to home</a>")
 
     with ApiClient(ProjectsApi, request) as api:
-        obj_proj: ProjectModel = api.project_query_projects_project_id_get(obj.projid, for_managing=False)
+        obj_proj: ProjectModel = api.project_query_projects_project_id_get(obj.project_id, for_managing=False)
 
     page = list()
     # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
@@ -158,7 +158,7 @@ def objectdetails(objid):
     > Sample details</a></li>
     <li role="presentation" ><a href="#tabdacquis" aria-controls="tabdacquis" role="tab" data-toggle="tab"
     > Acquisition details</a></li>
-    <li role="presentation" ><a href="#tabdprocessrel" aria-controls="tabdprocess" role="tab" data-toggle="tab"
+    <li role="presentation" ><a href="#tabdprocess" aria-controls="tabdprocess" role="tab" data-toggle="tab"
     > Processing details</a></li>
     <li role="presentation" ><a href="#tabdclassiflog" aria-controls="tabdclassiflog" role="tab" data-toggle="tab"
     >Classification change log</a></li>
@@ -211,7 +211,7 @@ def objectdetails(objid):
 
     # insertion des champs Sample, Acquisition & Processing dans leurs onglets respectifs
     with ApiClient(SamplesApi, request) as api:
-        sample: SampleModel = api.sample_query_sample_sample_id_get(sample_id=obj.sampleid)
+        sample: SampleModel = api.sample_query_sample_sample_id_get(sample_id=obj.sample_id)
     with ApiClient(AcquisitionsApi, request) as api:
         acquisition: AcquisitionModel = api.acquisition_query_acquisition_acquisition_id_get(
             acquisition_id=obj.acquisid)
@@ -220,7 +220,7 @@ def objectdetails(objid):
 
     for entity_desc in (("Sample", sample, "sample", obj_proj.sample_free_cols),
                         ("Acquisition", acquisition, "acquis", obj_proj.acquisition_free_cols),
-                        ("Processing", process, "processrel", obj_proj.process_free_cols)):
+                        ("Processing", process, "process", obj_proj.process_free_cols)):
         page.append('<div role="tabpanel" class="tab-pane" id="tabd' + entity_desc[2] + '">' + entity_desc[
             0] + " details :<table class='table table-bordered table-condensed'  data-table='" + entity_desc[
                         2] + "'><tr>")
@@ -335,7 +335,7 @@ def objectdetailsupdate(objid):
             with ApiClient(ObjectsApi, request) as api:
                 api.update_object_set_object_set_update_post(BulkUpdateReq(target_ids=[objid],
                                                                            updates=updates))
-        elif table == "processrel":
+        elif table == "process":
             with ApiClient(ProcessesApi, request) as api:
                 api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=[obj.acquisid],
                                                                            updates=updates))
