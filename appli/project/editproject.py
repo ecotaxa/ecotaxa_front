@@ -97,6 +97,8 @@ def PrjEdit(PrjId, privs_only=False):
                 if a_var == 'priv_new_member':
                     continue
                 a_member_id = int(a_var[5:-7])
+                if gvp('priv_%s_delete' % a_member_id) == 'Y':
+                    continue
                 priv_posted = gvp('priv_%s_privilege' % a_member_id)
                 for a_user_there in members_by_right[priv_posted]:
                     if a_user_there.id == a_member_id:
