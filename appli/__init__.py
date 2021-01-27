@@ -313,7 +313,7 @@ def internal_server_error(e):
 
 @app.errorhandler(Exception)
 def unhandled_exception(e):
-    # Ceci est imperatif si on veux pouvoir avoir des messages d'erreurs à l'écran sous apache
+    # Ceci est imperatif si on veut pouvoir avoir des messages d'erreurs à l'écran sous apache
     app.logger.exception(e)
     # Ajout des informations d'exception dans le template custom
     tb_list = traceback.format_tb(e.__traceback__)
@@ -342,9 +342,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.5.2"
+ecotaxa_version="2.5.3"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2021-01-21"
+    return ecotaxa_version+" 2021-01-28"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -352,6 +352,14 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2021-01-28 : V 2.5.3
+    Feature #430: Move selection using CTRL-key + arrows in manual classification page
+    Bug #371: Manual classification layout is broken (scrolls) with too long taxa names.
+    Regression #574: Instrument list does not show in Other Filters when clicking ?
+    Regression #576: When last page in manual classification does not match filtering criterion, it appears
+        empty after a save. Used to jump automatically back to previous one.
+    Feature #399: CTRL-SHIFT+left/right arrow to move b/w pages in manual classification page.
+    Data consistency bug #544: It was possible to have several paths to reach an object.
 2021-01-21 : V 2.5.2
     Feature #557: Rename some API endpoints for naming consistency
     Feature #511: Add a legal license per project.
