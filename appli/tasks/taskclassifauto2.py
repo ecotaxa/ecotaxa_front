@@ -64,11 +64,11 @@ class TaskClassifAuto2(AsyncTask):
         else:
             PrjListInClause = str(self.param.ProjectId)
         sql = """select objid,file_name from (
-                select oh.objid,  images.file_name,rank() over(partition by oh.objid order by images.imgid) rang
-                    from obj_head oh
-                    join images on images.objid=oh.objid
-                    left join obj_cnn_features cnn on oh.objid=cnn.objcnnid                    
-                    where projid in({0}) and cnn.objcnnid is NULL
+                select obj.objid,  images.file_name,rank() over(partition by obj.objid order by images.imgid) rang
+                    from objects obj
+                    join images on images.objid=obj.objid
+                    left join obj_cnn_features cnn on obj.objid=cnn.objcnnid                    
+                    where obj.projid in({0}) and cnn.objcnnid is NULL
                     ) Q 
                     where rang=1
                     """.format(PrjListInClause)
@@ -247,9 +247,9 @@ class TaskClassifAuto2(AsyncTask):
                 sql += " where projid={0} and classif_id is not null and classif_qual='V'".format(bprojid)
             if self.param.learninglimit:
                 LimitHead = """ with objlist as ( select objid from (
-                            select objid,row_number() over(PARTITION BY classif_id order by random_value) rang
-                            from obj_head
-                            where projid in ({0}) and classif_id is not null
+                            select obj.objid,row_number() over(PARTITION BY classif_id order by random_value) rang
+                            from objects obj
+                            where obj.projid in ({0}) and obj.classif_id is not null
                             and classif_qual='V' ) q where rang <={1} ) """.format(PrjListInClause,
                                                                                    self.param.learninglimit)
                 LimitFoot = """ and objid in ( select objid from objlist ) """
@@ -453,8 +453,8 @@ class TaskClassifAuto2(AsyncTask):
         #         sql = """select n.classif_id,t.name||case when p1.name is not null and t.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
         sql = """select n.classif_id,t.display_name as name
                 ,n.nbr
-                from (select o.classif_id,count(*) nbr
-                      from obj_head o where projid in ({0}) and classif_qual='V'
+                from (select obj.classif_id,count(*) nbr
+                      from objects obj where obj.projid in ({0}) and obj.classif_qual='V'
                       group by classif_id) n
                 JOIN taxonomy t on n.classif_id=t.id
                 left join taxonomy p1 on t.parent_id=p1.id
@@ -715,10 +715,10 @@ class TaskClassifAuto2(AsyncTask):
             sql = """
               select p.projid,p.title,n.nbr,n.nbr-nbrscn miss_scn,cnn_network_id scnmodel
               from projects p
-              join (select projid,count(*) nbr,count(cnn.objcnnid) nbrscn  
-                    from obj_head oh
-                    left join obj_cnn_features cnn on oh.objid=cnn.objcnnid  
-                    where projid in({0}) group by projid) N on n.projid=p.projid
+              join (select obj.projid,count(*) nbr,count(cnn.objcnnid) nbrscn  
+                    from objects obj
+                    left join obj_cnn_features cnn on obj.objid=cnn.objcnnid  
+                    where obj.projid in({0}) group by projid) N on n.projid=p.projid
               order by p.projid
               """.format(PrjListInClause + (",%d" % Prj.projid))
             g.SCN = GetAll(sql)

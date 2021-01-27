@@ -124,7 +124,7 @@ def searchannot(PrjId):
     projid = str(int(PrjId))
     res = database.GetAll("""Select id,name 
           from users
-          where id in ( SELECT distinct classif_who FROM obj_head WHERE  projid ={0} ) order by name""".format(projid))
+          where id in ( SELECT distinct classif_who FROM objects WHERE projid ={0} ) order by name""".format(projid))
     # if gvg("format",'J')=='J': # version JSon par defaut
     #     return json.dumps([dict(id=r[0],text=r[1]) for r in res])
     return render_template('search/annot.html', samples=res)

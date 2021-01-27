@@ -64,8 +64,13 @@ def dbcreate():
         db.create_all()
         from flask_migrate import stamp
         stamp(revision='head')
-        database.ExecSQL("""create view objects as select oh.*,ofi.*
-        from obj_head oh join obj_field ofi on oh.objid=ofi.objfid""")
+        database.ExecSQL("""create view objects as 
+                  select sam.projid, sam.sampleid, obh.*, obh.acquisid as processid, ofi.*
+                    from obj_head obh
+                    join acquisitions acq on obh.acquisid = acq.acquisid
+                    join samples sam on acq.acq_sample_id = sam.sampleid 
+                    left join obj_field ofi on obh.objid = ofi.objfid -- allow elimination by planner
+                    """)
 
 
 @manager.command

@@ -802,7 +802,9 @@ order by tree""".format(lstcatwhere)
                         ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
                                 t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) taxo_hierarchy
                       from part_samples ps
-                      join obj_head oh on ps.sampleid=oh.sampleid 
+                      join samples sam on ps.sampleid = sam.sampleid
+                      join acquisitions acq on sam.sampleid = acq.acq_sample_id
+                      join obj_head oh on acq.acquisid = oh.acquisid
                       join obj_field of on of.objfid=oh.objid                      
                         join taxonomy t0 on oh.classif_id=t0.id
                         left join taxonomy t1 on t0.parent_id=t1.id

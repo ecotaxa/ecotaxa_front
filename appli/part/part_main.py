@@ -175,7 +175,7 @@ def PartstatsampleGetData():
     #       ,round(100*sum(nbrval)/sum(nbr),1) as pctobjval
     #     from (SELECT ps.sampleid,count(*) nbr,count(case when classif_qual='V' then 1 end) nbrval
     #         from part_samples ps
-    #         join obj_head oh on oh.sampleid=ps.sampleid
+    #         join objects oh on oh.sampleid=ps.sampleid
     #         where ps.psampleid in ({0})
     #         group by ps.sampleid )q
     #         having count(*)>0
@@ -186,7 +186,7 @@ def PartstatsampleGetData():
     #     data['taxostat']={k: float(v) for k, v in data['taxostat'][0].items()}
     TaxoStat=database.GetAll("""SELECT ps.sampleid,count(*) nbr,count(case when classif_qual='V' then 1 end) nbrval,ps.pprojid
             from part_samples ps
-            join obj_head oh on oh.sampleid=ps.sampleid
+            join objects oh on oh.sampleid=ps.sampleid
             where ps.psampleid in ({0})
             group by ps.sampleid,ps.pprojid  """.format(sampleinclause))
     ResultTaxoStat = {'nbrobj':0,'nbrobjval':0,'pctval100pct':0,'pctpartval':0,'pctobjval':0}

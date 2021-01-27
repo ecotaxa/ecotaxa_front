@@ -236,10 +236,10 @@ class TaxonomyView(ModelView):
 
 
 class ObjectsView(ModelView):
-    column_list = ('objid', 'projid', 'sampleid', 'classif_qual', 'objdate', 'acquisid')
-    column_filters = ('objid', 'projid', 'sampleid', 'classif_qual', 'acquisid')
+    column_list = ('objid', 'acquisid', 'classif_qual', 'objdate', )
+    column_filters = ('objid', 'acquisid', 'classif_qual')
     form_overrides = dict(complement_info=TextAreaField)
-    form_excluded_columns = ('classif_id', 'classif_auto', 'processrel', 'acquis', 'img0',
+    form_excluded_columns = ('classif_id', 'classif_auto', 'acquis', 'img0',
                              'images', 'sample', 'classiffier', 'objfrel')
     form_ajax_refs = {'classif': {'fields': ('name',)}}
 

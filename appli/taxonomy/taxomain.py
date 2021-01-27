@@ -144,16 +144,16 @@ def DoFullSync():
             db.session.commit()
         # Manage rename_to
         sqlbase="with taxorename as (select id,rename_to from taxonomy where rename_to is not null) "
-        sql=sqlbase+"""select distinct projid from obj_head o join taxorename tr  on o.classif_id=tr.id """
+        sql=sqlbase+"""select distinct obj.projid from objects obj join taxorename tr on obj.classif_id=tr.id """
         ProjetsToRecalc=database.GetAll(sql)
-        sql=sqlbase+"""update obj_head o set classif_id=tr.rename_to 
-              from taxorename tr  where o.classif_id=tr.id """
+        sql=sqlbase+"""update obj_head obh set classif_id=tr.rename_to 
+              from taxorename tr  where obh.classif_id=tr.id """
         NbrRenamedObjects=ExecSQL(sql)
-        sql=sqlbase+"""update obj_head o set classif_auto_id=tr.rename_to 
-              from taxorename tr  where o.classif_auto_id=tr.id """
+        sql=sqlbase+"""update obj_head obh set classif_auto_id=tr.rename_to 
+              from taxorename tr  where obh.classif_auto_id=tr.id """
         ExecSQL(sql)
-        sql=sqlbase+"""update objectsclassifhisto o set classif_id=tr.rename_to 
-              from taxorename tr  where o.classif_id=tr.id """
+        sql=sqlbase+"""update objectsclassifhisto och set classif_id=tr.rename_to 
+              from taxorename tr  where och.classif_id=tr.id """
         ExecSQL(sql)
         # on efface les taxon qui doivent être renomé car ils l'ont normalement été
         sql="""delete from taxonomy where rename_to is not null """
@@ -208,6 +208,9 @@ def routetaxoedit(taxoid):
 
 @app.route('/taxo/save/',methods=['POST'])
 @login_required
+#
+# POUR TOUS LES PROJECT MANAGER
+#
 @roles_accepted(database.AdministratorLabel,database.ProjectCreatorLabel)
 def routetaxosave():
     txt=""

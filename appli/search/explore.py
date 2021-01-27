@@ -74,7 +74,7 @@ def ExploreLoadRightPane():
     whereclause=""
     sql="""select o.objid,o.classif_qual  ,o.objdate,to_char(o.objtime,'HH24:MI') objtime
   ,o.imgcount,o.img0id,o.classif_id,o.classif_who,o.sampleid,random_value,o.projid
-   from obj_head o
+   from objects o
 where o.classif_qual='V'
 """
     if gvp("taxo[]"):

@@ -260,15 +260,17 @@ for i in range(1, 31):
 class Objects(db.Model):
     __tablename__ = 'obj_head'
     objid = db.Column(BIGINT, db.Sequence('seq_objects'), primary_key=True)
-    projid = db.Column(INTEGER, db.ForeignKey('projects.projid'), nullable=False)
-    project = db.relationship("Projects")
+    # Parent
+    acquisid = db.Column(INTEGER, db.ForeignKey('acquisitions.acquisid'), nullable=False)
+    acquis = db.relationship("Acquisitions")
+
     latitude = db.Column(DOUBLE_PRECISION)
     longitude = db.Column(DOUBLE_PRECISION)
     objdate = db.Column(DATE)
     objtime = db.Column(TIME)
     depth_min = db.Column(FLOAT)
     depth_max = db.Column(FLOAT)
-    images = db.relationship("Images")
+
     classif_id = db.Column(INTEGER)
     classif = db.relationship("Taxonomy", primaryjoin="Taxonomy.id==Objects.classif_id", foreign_keys="Taxonomy.id",
                               uselist=False, )
@@ -288,18 +290,18 @@ class Objects(db.Model):
     classif_auto = db.relationship("Taxonomy", primaryjoin="Taxonomy.id==foreign(Objects.classif_auto_id)",
                                    uselist=False, )
     classif_crossvalidation_id = db.Column(INTEGER)
+
     img0id = db.Column(BIGINT)
     img0 = db.relationship("Images", foreign_keys="Images.objid")
+    images = db.relationship("Images")
     imgcount = db.Column(INTEGER)
+
     complement_info = db.Column(VARCHAR)
     similarity = db.Column(DOUBLE_PRECISION)
     sunpos = db.Column(CHAR(1))  # position du soleil
     random_value = db.Column(INTEGER)
-    sampleid = db.Column(INTEGER, db.ForeignKey('samples.sampleid'), nullable=False)
-    sample = db.relationship("Samples")
-    acquisid = db.Column(INTEGER, db.ForeignKey('acquisitions.acquisid'), nullable=False)
-    acquis = db.relationship("Acquisitions")
-    processrel = db.relationship("Process", primaryjoin="Process.processid==foreign(Objects.acquisid)")
+
+
 
 class ObjectsFields(db.Model):
     __tablename__ = 'obj_field'
@@ -330,18 +332,14 @@ class Objects_cnn_features(db.Model):
 for i in range(1, 51):
     setattr(Objects_cnn_features, "cnn%02d" % i, db.Column(REAL))
 
-# Index('IS_ObjectsProject',Objects.__table__.c.projid,Objects.__table__.c.classif_qual)
-# utile pour home de  classif manu, car PG ne sait pas utiliser les Skip scan index.
-Index('is_objectsprojectonly', Objects.__table__.c.projid)
-Index('is_objectsprojclassifqual', Objects.__table__.c.projid, Objects.__table__.c.classif_id,
+Index('is_objectsacqclassifqual', Objects.__table__.c.acquisid, Objects.__table__.c.classif_id,
       Objects.__table__.c.classif_qual)
+Index('is_objectsacqrandom', Objects.__table__.c.acquisid, Objects.__table__.c.random_value,
+      Objects.__table__.c.classif_qual)
+Index('is_objectsdepth', Objects.__table__.c.depth_max, Objects.__table__.c.depth_min, Objects.__table__.c.acquisid)
 Index('is_objectslatlong', Objects.__table__.c.latitude, Objects.__table__.c.longitude)
-Index('is_objectssample', Objects.__table__.c.sampleid)
-Index('is_objectsdepth', Objects.__table__.c.depth_max, Objects.__table__.c.depth_min, Objects.__table__.c.projid)
-Index('is_objectstime', Objects.__table__.c.objtime, Objects.__table__.c.projid)
-Index('is_objectsdate', Objects.__table__.c.objdate, Objects.__table__.c.projid)
-Index('is_objectsprojrandom', Objects.__table__.c.projid, Objects.__table__.c.random_value,
-      Objects.__table__.c.classif_qual)
+Index('is_objectstime', Objects.__table__.c.objtime, Objects.__table__.c.acquisid)
+Index('is_objectsdate', Objects.__table__.c.objdate, Objects.__table__.c.acquisid)
 Index('is_objectfieldsorigid', ObjectsFields.__table__.c.orig_id)
 # For FK checks during deletion
 Index('is_objectsacquisition', Objects.__table__.c.acquisid)

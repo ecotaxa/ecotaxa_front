@@ -36,7 +36,7 @@ def search_mappopup_samples():
             sql+=" and projid=any (%(projid)s) "
             sqlparam['projid'] = [int(x) for x in gvg("projid").split(',')];
         if gvg('taxoid'):
-            sql+=" and sampleid in (select sampleid from obj_head where classif_id=any (%(taxoid)s) "
+            sql+=" and sampleid in (select sampleid from objects where classif_id=any (%(taxoid)s) "
             sqlparam['taxoid'] = [int(x) for x in gvg("taxoid").split(',')];
             if gvg("taxochild") == "1":
                 sqlparam['taxoid'] = [int(x[0]) for x in GetAll("""WITH RECURSIVE rq(id) as ( select id FROM taxonomy where id =any (%(taxoid)s)
