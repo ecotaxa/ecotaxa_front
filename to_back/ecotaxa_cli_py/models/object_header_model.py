@@ -34,7 +34,7 @@ class ObjectHeaderModel(object):
     """
     openapi_types = {
         'objid': 'int',
-        'projid': 'int',
+        'acquisid': 'int',
         'objdate': 'date',
         'objtime': 'str',
         'latitude': 'float',
@@ -50,18 +50,14 @@ class ObjectHeaderModel(object):
         'classif_auto_score': 'float',
         'classif_auto_when': 'datetime',
         'classif_crossvalidation_id': 'int',
-        'img0id': 'int',
-        'imgcount': 'int',
         'complement_info': 'str',
         'similarity': 'float',
-        'random_value': 'int',
-        'sampleid': 'int',
-        'acquisid': 'int'
+        'random_value': 'int'
     }
 
     attribute_map = {
         'objid': 'objid',
-        'projid': 'projid',
+        'acquisid': 'acquisid',
         'objdate': 'objdate',
         'objtime': 'objtime',
         'latitude': 'latitude',
@@ -77,23 +73,19 @@ class ObjectHeaderModel(object):
         'classif_auto_score': 'classif_auto_score',
         'classif_auto_when': 'classif_auto_when',
         'classif_crossvalidation_id': 'classif_crossvalidation_id',
-        'img0id': 'img0id',
-        'imgcount': 'imgcount',
         'complement_info': 'complement_info',
         'similarity': 'similarity',
-        'random_value': 'random_value',
-        'sampleid': 'sampleid',
-        'acquisid': 'acquisid'
+        'random_value': 'random_value'
     }
 
-    def __init__(self, objid=None, projid=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, img0id=None, imgcount=None, complement_info=None, similarity=None, random_value=None, sampleid=None, acquisid=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, objid=None, acquisid=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, complement_info=None, similarity=None, random_value=None, local_vars_configuration=None):  # noqa: E501
         """ObjectHeaderModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._objid = None
-        self._projid = None
+        self._acquisid = None
         self._objdate = None
         self._objtime = None
         self._latitude = None
@@ -109,18 +101,14 @@ class ObjectHeaderModel(object):
         self._classif_auto_score = None
         self._classif_auto_when = None
         self._classif_crossvalidation_id = None
-        self._img0id = None
-        self._imgcount = None
         self._complement_info = None
         self._similarity = None
         self._random_value = None
-        self._sampleid = None
-        self._acquisid = None
         self.discriminator = None
 
         if objid is not None:
             self.objid = objid
-        self.projid = projid
+        self.acquisid = acquisid
         if objdate is not None:
             self.objdate = objdate
         if objtime is not None:
@@ -151,18 +139,12 @@ class ObjectHeaderModel(object):
             self.classif_auto_when = classif_auto_when
         if classif_crossvalidation_id is not None:
             self.classif_crossvalidation_id = classif_crossvalidation_id
-        if img0id is not None:
-            self.img0id = img0id
-        if imgcount is not None:
-            self.imgcount = imgcount
         if complement_info is not None:
             self.complement_info = complement_info
         if similarity is not None:
             self.similarity = similarity
         if random_value is not None:
             self.random_value = random_value
-        self.sampleid = sampleid
-        self.acquisid = acquisid
 
     @property
     def objid(self):
@@ -186,27 +168,27 @@ class ObjectHeaderModel(object):
         self._objid = objid
 
     @property
-    def projid(self):
-        """Gets the projid of this ObjectHeaderModel.  # noqa: E501
+    def acquisid(self):
+        """Gets the acquisid of this ObjectHeaderModel.  # noqa: E501
 
 
-        :return: The projid of this ObjectHeaderModel.  # noqa: E501
+        :return: The acquisid of this ObjectHeaderModel.  # noqa: E501
         :rtype: int
         """
-        return self._projid
+        return self._acquisid
 
-    @projid.setter
-    def projid(self, projid):
-        """Sets the projid of this ObjectHeaderModel.
+    @acquisid.setter
+    def acquisid(self, acquisid):
+        """Sets the acquisid of this ObjectHeaderModel.
 
 
-        :param projid: The projid of this ObjectHeaderModel.  # noqa: E501
+        :param acquisid: The acquisid of this ObjectHeaderModel.  # noqa: E501
         :type: int
         """
-        if self.local_vars_configuration.client_side_validation and projid is None:  # noqa: E501
-            raise ValueError("Invalid value for `projid`, must not be `None`")  # noqa: E501
+        if self.local_vars_configuration.client_side_validation and acquisid is None:  # noqa: E501
+            raise ValueError("Invalid value for `acquisid`, must not be `None`")  # noqa: E501
 
-        self._projid = projid
+        self._acquisid = acquisid
 
     @property
     def objdate(self):
@@ -524,48 +506,6 @@ class ObjectHeaderModel(object):
         self._classif_crossvalidation_id = classif_crossvalidation_id
 
     @property
-    def img0id(self):
-        """Gets the img0id of this ObjectHeaderModel.  # noqa: E501
-
-
-        :return: The img0id of this ObjectHeaderModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._img0id
-
-    @img0id.setter
-    def img0id(self, img0id):
-        """Sets the img0id of this ObjectHeaderModel.
-
-
-        :param img0id: The img0id of this ObjectHeaderModel.  # noqa: E501
-        :type: int
-        """
-
-        self._img0id = img0id
-
-    @property
-    def imgcount(self):
-        """Gets the imgcount of this ObjectHeaderModel.  # noqa: E501
-
-
-        :return: The imgcount of this ObjectHeaderModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._imgcount
-
-    @imgcount.setter
-    def imgcount(self, imgcount):
-        """Sets the imgcount of this ObjectHeaderModel.
-
-
-        :param imgcount: The imgcount of this ObjectHeaderModel.  # noqa: E501
-        :type: int
-        """
-
-        self._imgcount = imgcount
-
-    @property
     def complement_info(self):
         """Gets the complement_info of this ObjectHeaderModel.  # noqa: E501
 
@@ -627,52 +567,6 @@ class ObjectHeaderModel(object):
         """
 
         self._random_value = random_value
-
-    @property
-    def sampleid(self):
-        """Gets the sampleid of this ObjectHeaderModel.  # noqa: E501
-
-
-        :return: The sampleid of this ObjectHeaderModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._sampleid
-
-    @sampleid.setter
-    def sampleid(self, sampleid):
-        """Sets the sampleid of this ObjectHeaderModel.
-
-
-        :param sampleid: The sampleid of this ObjectHeaderModel.  # noqa: E501
-        :type: int
-        """
-        if self.local_vars_configuration.client_side_validation and sampleid is None:  # noqa: E501
-            raise ValueError("Invalid value for `sampleid`, must not be `None`")  # noqa: E501
-
-        self._sampleid = sampleid
-
-    @property
-    def acquisid(self):
-        """Gets the acquisid of this ObjectHeaderModel.  # noqa: E501
-
-
-        :return: The acquisid of this ObjectHeaderModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._acquisid
-
-    @acquisid.setter
-    def acquisid(self, acquisid):
-        """Sets the acquisid of this ObjectHeaderModel.
-
-
-        :param acquisid: The acquisid of this ObjectHeaderModel.  # noqa: E501
-        :type: int
-        """
-        if self.local_vars_configuration.client_side_validation and acquisid is None:  # noqa: E501
-            raise ValueError("Invalid value for `acquisid`, must not be `None`")  # noqa: E501
-
-        self._acquisid = acquisid
 
     def to_dict(self):
         """Returns the model properties as a dict"""

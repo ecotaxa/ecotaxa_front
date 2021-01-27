@@ -141,7 +141,9 @@ class TaskExportTxt(AsyncTask):
         original_col_name = {}  # Nom de colonneSQL => Nom de colonne permet de traiter le cas de %area
         if image_export == '1':
             sql1 += "\n,img.orig_file_name as img_file_name,img.imgrank img_rank"
-            sql2 += "\nleft join images img on o.img0id = img.imgid "
+            sql2 += "\nleft join images img on o.objid = img.objid " \
+                    "                      and img.imgrank = (SELECT MIN(img2.imgrank) " \
+                    "                                           FROM images img2 WHERE img2.objid = o.objid) "
         if image_export == 'A':  # Toutes les images
             sql1 += "\n,img.orig_file_name as img_file_name,img.imgrank img_rank"
             sql2 += "\nleft join images img on o.objid = img.objid "

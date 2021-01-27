@@ -448,13 +448,15 @@ def LoadRightPane():
     fieldlist.pop('orig_id', '')
     fieldlist.pop('objtime', '')
 
-    sql_selects = ["obj.objid, obj.classif_qual, obj.imgcount, obj.complement_info",
+    sql_selects = ["obj.objid, obj.classif_qual, "
+                   "(SELECT COUNT(img.imgrank) FROM images img WHERE img.objid = obj.objid) AS imgcount, "
+                   "obj.complement_info",
                    "i.height, i.width, i.thumb_file_name, i.thumb_height, i.thumb_width, i.file_name",
                    "t.name taxoname, t.display_name"]
-
     sql_from = """
        FROM objects obj JOIN obj_cte ON obj.objid = obj_cte.objid
-  LEFT JOIN images i ON obj.img0id=i.imgid
+  LEFT JOIN images i ON obj.objid=i.objid AND i.imgrank = (SELECT MIN(img.imgrank) 
+                                                             FROM images img WHERE img.objid = obj.objid)
   LEFT JOIN taxonomy t ON obj.classif_id=t.id """
 
     # Add needed columns from project
@@ -558,6 +560,7 @@ def LoadRightPane():
         thumbfilename = r['thumb_file_name']
         thumbwidth = r['thumb_width']
         display_name = r['display_name']
+        imgcount = r['imgcount']
         if origwidth is None:  # pas d'image associé, pas trés normal mais arrive pour les subset sans images
             width = 80
             height = 40
@@ -645,7 +648,7 @@ def LoadRightPane():
         if 'orig_id' in display_fields:
             bottomtxt = "<div style='word-break: break-all;'>%s</div>" % (r['orig_id'],) + bottomtxt
 
-        imgcount = "(%d)" % (r['imgcount'],) if r['imgcount'] is not None and r['imgcount'] > 1 else ""
+        imgcount_lbl = "(%d)" % (imgcount,) if imgcount is not None and imgcount > 1 else ""
         comment_present = "<b>!</b> " if r['complement_info'] is not None and r['complement_info'] != '' else ""
 
         txt += """<div class='subimg {1}' {2}>
@@ -653,7 +656,7 @@ def LoadRightPane():
 <div class='displayedFields'>{3}</div></div>
 <div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div>""" \
             .format(FormatNameForVignetteDisplay(display_name, hyphenator), GetClassifQualClass(r['classif_qual']),
-                    popattribute, bottomtxt, imgcount, comment_present)
+                    popattribute, bottomtxt, imgcount_lbl, comment_present)
         txt += "</td>"
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins

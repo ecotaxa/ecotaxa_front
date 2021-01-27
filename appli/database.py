@@ -291,10 +291,7 @@ class Objects(db.Model):
                                    uselist=False, )
     classif_crossvalidation_id = db.Column(INTEGER)
 
-    img0id = db.Column(BIGINT)
-    img0 = db.relationship("Images", foreign_keys="Images.objid")
     images = db.relationship("Images")
-    imgcount = db.Column(INTEGER)
 
     complement_info = db.Column(VARCHAR)
     similarity = db.Column(DOUBLE_PRECISION)
@@ -369,8 +366,8 @@ class Images(db.Model):
     thumb_width = db.Column(INTEGER)
     thumb_height = db.Column(INTEGER)
 
-
-Index('IS_ImagesObjects', Images.__table__.c.objid)
+# Covering index with rank
+Index('is_imageobjrank', Images.__table__.c.objid, Images.__table__.c.imgrank, unique=True)
 
 
 # Sequence("seq_images",1,1)

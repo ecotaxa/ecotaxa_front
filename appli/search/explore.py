@@ -60,20 +60,10 @@ def ExploreLoadRightPane():
     zoom=int(Filt["zoom"])
     t=["<a name='toppage'/>"]
     sqlparam={'projid':gvp("projid")}
-#     sql="""select o.objid,t.name taxoname,o.classif_qual,u.name classifwhoname,i.file_name
-#   ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width
-#   ,o.depth_min,o.depth_max,s.orig_id samplename,o.objdate,to_char(o.objtime,'HH24:MI') objtime
-#   ,o.latitude,o.orig_id,o.imgcount
-#    from objects o
-# left Join images i on o.img0id=i.imgid
-# left JOIN taxonomy t on o.classif_id=t.id
-# LEFT JOIN users u on o.classif_who=u.id
-# LEFT JOIN  samples s on o.sampleid=s.sampleid
-# where o.classif_qual='V'
-# """
+
     whereclause=""
     sql="""select o.objid,o.classif_qual  ,o.objdate,to_char(o.objtime,'HH24:MI') objtime
-  ,o.imgcount,o.img0id,o.classif_id,o.classif_who,o.sampleid,random_value,o.projid
+    ,o.classif_id,o.classif_who,o.sampleid,random_value,o.projid
    from objects o
 where o.classif_qual='V'
 """
@@ -160,9 +150,10 @@ where o.classif_qual='V'
 
     #filt_fromdate,#filt_todate
     sql="""select o.*,t.display_name taxoname,u.name classifwhoname,i.file_name,s.orig_id samplename
-                  ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width,ofi.orig_id
+                  ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width,ofi.orig_id,
+                  (SELECT COUNT(img.imgrank) FROM images img WHERE img.objid = o.objid) AS imgcount
                   from ("""+sql+""")o
-left Join images i on o.img0id=i.imgid
+left Join images i on o.objid=i.objid and i.imgrank = (select min(imgrank) from images img where img.objid = o.objid)
 left JOIN taxonomy t on o.classif_id=t.id
 LEFT JOIN users u on o.classif_who=u.id
 LEFT JOIN  samples s on o.sampleid=s.sampleid

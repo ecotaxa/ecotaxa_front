@@ -17,11 +17,11 @@ def GetFieldList(prj_model: ProjectModel):
     excluded = set()
     for k in ObjectHeaderModel.openapi_types.keys():
         # TODO: Hardcoded, not rename-friendly
-        if k not in ('objid', 'projid', 'img0id', 'imgcount'):
+        if k not in ('objid'):
             fieldlist.append({'id': 'h' + k, 'text': 'object.' + k})
         else:
             excluded.add(k)
-    assert excluded == {'objid', 'projid', 'img0id', 'imgcount'}, "Attempt to exclude a non-existing column"
+    assert excluded == {'objid'}, "Attempt to exclude a non-existing column"
 
     # TODO: Hardcoded, not completely rename-friendly
     # 2 fields in object_fields
