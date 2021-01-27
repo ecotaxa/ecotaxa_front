@@ -448,76 +448,74 @@ def LoadRightPane():
     fieldlist.pop('orig_id', '')
     fieldlist.pop('objtime', '')
 
-    sql_selects = ["o.objid, o.classif_qual, o.imgcount, o.complement_info",
+    sql_selects = ["obj.objid, obj.classif_qual, obj.imgcount, obj.complement_info",
                    "i.height, i.width, i.thumb_file_name, i.thumb_height, i.thumb_width, i.file_name",
                    "t.name taxoname, t.display_name"]
 
     sql_from = """
-       FROM objects o
-  LEFT JOIN images i ON o.img0id=i.imgid
-  LEFT JOIN taxonomy t ON o.classif_id=t.id """
+       FROM objects obj JOIN obj_cte ON obj.objid = obj_cte.objid
+  LEFT JOIN images i ON obj.img0id=i.imgid
+  LEFT JOIN taxonomy t ON obj.classif_id=t.id """
 
     # Add needed columns from project
     extra_cols = []
     for k in fieldlist.keys():
         # But exclude the ones we don't display
         if k in display_fields or k in popover_fields:
-            extra_cols.append("o." + k + " as extra_" + k)
+            extra_cols.append("obj." + k + " as extra_" + k)
     if extra_cols:
         sql_selects.append(", ".join(extra_cols))
 
     # Optional columns that we have to select if they are used
     if 'orig_id' in display_fields or popup_enabled:
-        sql_selects.append("o.orig_id")
+        sql_selects.append("obj.orig_id")
     if 'objtime' in display_fields:
-        sql_selects.append("TO_CHAR(o.objtime,'HH24:MI') objtime")
+        sql_selects.append("TO_CHAR(obj.objtime,'HH24:MI') objtime")
     if 'classif_when' in display_fields or 'classif_when' in popover_fields or popup_enabled:
-        sql_selects.append("TO_CHAR(o.classif_when,'YYYY-MM-DD HH24:MI') classif_when")
+        sql_selects.append("TO_CHAR(obj.classif_when,'YYYY-MM-DD HH24:MI') classif_when")
     if popup_enabled:
         sql_selects.extend(["u.name classifwhoname",
                             "t2.name taxoparent",
                             "s.orig_id samplename"])
         sql_from += """
-   LEFT JOIN users u ON o.classif_who=u.id
+   LEFT JOIN users u ON obj.classif_who=u.id
    LEFT JOIN taxonomy t2 ON t.parent_id=t2.id
-        JOIN samples s ON o.sampleid=s.sampleid
+        JOIN samples s ON obj.sampleid=s.sampleid
         """
 
     sqlparam = {"projid": PrjId}
-
-    sql_order = ""
-    if sortby != "":
-        sql_order = "\n ORDER BY "
-        if sortby == "classifname":
-            sql_order += "t.name " + sortorder + ", o.objid " + sortorder
-        else:
-            sql_order += "o." + sortby + " " + sortorder + ", o.objid " + sortorder
-    # else:  # pas de tri par defaut pour améliorer les performances sur les gros projets
-    #     obj_sel_cte += " ORDER BY o.orig_id"
-    # app.logger.info("pageoffset/pagecount %s / %s",pageoffset,pagecount)
-
-    # if pageoffset >= pagecount:
-    #     pageoffset = pagecount - 1
-    #     if pageoffset < 0:
-    #         pageoffset = 0
 
     # Query objects, using filters and page size, in project
     with ApiClient(ObjectsApi, request) as api:
         sort_col_signed = None
         if sortby != "":
             sort_col_signed = ("-" if sortorder.lower() == "desc" else "") + sortby
-        objs: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(project_id=PrjId,
-                                                                                      project_filters=filtres,
-                                                                                      order_field=sort_col_signed,
-                                                                                      window_size=ippdb,
-                                                                                      window_start=pageoffset * ippdb)
-        object_ids = objs.object_ids
-        pagecount = math.ceil(objs.total_ids / ippdb)
+        while True:
+            objs: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(project_id=PrjId,
+                                                                                          project_filters=filtres,
+                                                                                          order_field=sort_col_signed,
+                                                                                          window_size=ippdb,
+                                                                                          window_start=pageoffset * ippdb)
+            object_ids = objs.object_ids
+            pagecount = math.ceil(objs.total_ids / ippdb)
+            if pageoffset < pagecount:
+                # There are objects to view, we're done
+                break
+            # Case when the filter removed the last page, AKA no object returned
+            pageoffset = pagecount - 1
+            if pageoffset < 0:
+                pageoffset = 0
+                break
 
-    sql_where = "WHERE o.objid = ANY(%(objids)s) "
-    sqlparam["objids"] = object_ids
+    if len(object_ids) == 0:
+        object_ids.append(-1)  # Non existing objid as VALUES() cannot be empty
 
-    sql_stmt = "SELECT " + ",\n       ".join(sql_selects) + sql_from + sql_where + sql_order
+    sql_vals = ",".join(["(%d,%d)" % (objid, rnk) for rnk, objid in enumerate(object_ids)])
+    sql_cte = "WITH obj_cte (objid, ordr) AS (VALUES" + sql_vals + ")\n"
+
+    sql_order = " ORDER BY ordr"
+
+    sql_stmt = sql_cte + "SELECT " + ",\n       ".join(sql_selects) + sql_from + sql_order
     res = GetAll(sql_stmt, sqlparam, False)
 
     # Produce page lines using request output
