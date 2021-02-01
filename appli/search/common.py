@@ -8,7 +8,7 @@ from flask import render_template, request, json
 
 from appli import app, gvg, database, DecodeEqualList
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import SamplesApi, SampleModel
+from to_back.ecotaxa_cli_py import SamplesApi, SampleModel, ProjectsApi, ProjectModel
 
 
 @app.route("/search/samples")
@@ -38,11 +38,10 @@ def searchsamples():
 @app.route("/search/exploreproject")
 def searchexploreproject():
     # Public page
-    term = ("%" + gvg("q") + "%").lower()
-    res = database.GetAll(
-        "SELECT projid, title FROM projects WHERE  lower(title) like %s and visible=true order by lower(title) ",
-        (term,), debug=True)
-    return json.dumps([dict(id=r[0], text=r[1]) for r in res])
+    with ApiClient(ProjectsApi, request) as api:
+        prjs: List[ProjectModel] = api.search_projects_projects_search_get(title_filter=gvg("q"))
+    for_disp = [dict(id=p.projid, text=p.title) for p in prjs]
+    return json.dumps(for_disp)
 
 
 @app.route('/common/ServerFolderSelect')
