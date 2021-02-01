@@ -90,6 +90,8 @@ def before_request_security():
     g.db = None
     if "/static" in request.url:
         return
+    if "/vault/" in request.url:
+        return
     # print(request.form)
     user_is_logged = False
     user_can_create = False

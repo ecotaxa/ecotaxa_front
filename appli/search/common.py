@@ -2,28 +2,37 @@
 import os
 import time
 from pathlib import Path
+from typing import List
 
 from flask import render_template, request, json
 
 from appli import app, gvg, database, DecodeEqualList
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import SamplesApi, SampleModel
 
 
 @app.route("/search/samples")
 def searchsamples():
-    term = ("%" + gvg("q") + "%").lower().replace('*', '%')
-    projid = ""
+    # Entry point for searching in samples for one or several project
+    # Get request params
     if gvg("projid") != "":
-        projid = str(int(gvg("projid")))
-    if gvg("projid[]") != "":
-        projid = ",".join([str(int(x)) for x in request.args.getlist("projid[]")])
-    if projid == "":
-        return "[]"
-    res = database.GetAll("""SELECT sampleid, orig_id 
-                      FROM samples 
-                      WHERE  projid in ({0}) and orig_id like %s order by orig_id limit 2000""".format(projid), (term,))
+        project_ids = [int(gvg("projid"))]
+    elif gvg("projid[]") != "":
+        project_ids = [int(x) for x in request.args.getlist("projid[]")]
+    else:
+        project_ids = []
+    project_ids = "+".join([str(p) for p in project_ids])
+    pattern = gvg("q")
+    # Do back-end call
+    with ApiClient(SamplesApi, request) as api:
+        samples: List[SampleModel] = api.samples_search_samples_search_get(project_ids=project_ids,
+                                                                           id_pattern=gvg("q"))
     if gvg("format", 'J') == 'J':  # version JSon par defaut
-        return json.dumps([dict(id=r[0], text=r[1]) for r in res])
-    return render_template('search/samples.html', samples=res)
+        return json.dumps([dict(id=s.sampleid, text=s.orig_id) for s in samples])
+    else:
+        # Render HTML
+        for_disp = [(s.sampleid, s.orig_id) for s in samples]
+        return render_template('search/samples.html', samples=for_disp)
 
 
 @app.route("/search/exploreproject")

@@ -636,7 +636,7 @@
             var req_clone = $.extend({}, req); // A shallow copy is good enough
             $.ajax({
               type: "GET",
-              url: "/api/samples/search?project_id="+proj_id,
+              url: "/api/samples/search?project_ids="+proj_id+"&id_pattern=",
               success: function(rsp) {
                 if (rsp.length == 0) {
                   return;
