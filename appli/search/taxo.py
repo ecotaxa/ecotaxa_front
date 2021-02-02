@@ -7,7 +7,7 @@ from flask import render_template, json, jsonify, request
 from appli import app, gvg, gvp
 from appli.database import GetAll, GetAssoc2Col
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import TaxonomyTreeApi, TaxaSearchRsp
+from to_back.ecotaxa_cli_py import TaxonomyTreeApi, TaxaSearchRsp, TaxonModel
 
 
 # Specialize an encoder for serializing directly the back-end response
@@ -24,20 +24,21 @@ def searchtaxo():
     prj_id = gvg("projid")
     if not prj_id:
         prj_id = -1
-
     # Relay to back-end
     with ApiClient(TaxonomyTreeApi, request) as api:
         res: List[TaxaSearchRsp] = api.search_taxa_taxon_set_search_get(query=term,
                                                                         project_id=prj_id)
-
     # TODO: temporary until the HTML goes to /api directly
     return json.dumps(res, cls=BackEndJSONEncoder)
 
 
 @app.route('/search/taxotree')
 def searchtaxotree():
-    res = GetAll("SELECT id, name FROM taxonomy WHERE  parent_id is null order by name ")
-    # print(res)
+    # Return root of the taxonomy tree, i.e. taxa with no parent
+    # There will be a call to below /search/taxotreejson right away
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        res: List[TaxonModel] = api.query_root_taxa_taxa_get()
+    res.sort(key=lambda r: r.name)
     return render_template('search/taxopopup.html', root_elements=res, targetid=gvg("target", "taxolb"))
 
 
