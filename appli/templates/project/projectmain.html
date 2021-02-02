@@ -1060,7 +1060,7 @@
             $('#PopupDetails .modal-lg').css('width', 800);
             $('#PopupDetails').modal({});
 
-            var url = "/search/annot/" + $('#projid').val();
+            var url = "/search/annotators/" + $('#projid').val();
             $("#PopupDetails .modal-content").load(url, function () {
                 var lst = "";
                 var sampleid = $('#filt_annot');

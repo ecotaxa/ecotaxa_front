@@ -345,7 +345,7 @@ def objectdetailsupdate(objid):
                                                                                   updates=updates))
         elif table == "sample":
             with ApiClient(SamplesApi, request) as api:
-                api.update_samples_sample_set_update_post(BulkUpdateReq(target_ids=[obj.sampleid],
+                api.update_samples_sample_set_update_post(BulkUpdateReq(target_ids=[obj.sample_id],
                                                                         updates=updates))
     except Exception as E:
         exc = str(E)

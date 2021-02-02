@@ -128,21 +128,21 @@ FilterListAutoSave = ("statusfilter",
 _FILTERS_KEY = "filters"
 
 
-def _set_filters_from_prefs_and_get(page_vars, prj_id, request):
+def _set_filters_from_prefs_and_get(page_vars, prj_id, a_request):
     """
-        Set page variables, essentially INPUT settings, from user preferences
+        Set page variables, essentially INPUT settings, from user preferences.
     """
     # Inject default vals
     page_vars.update(FilterList)
     # Override with posted vals
-    posted_vals = {a_val: request.args[a_val]
-                   for a_val in FilterList.keys() & request.args.keys()}
+    posted_vals = {a_val: a_request.args[a_val]
+                   for a_val in FilterList.keys() & a_request.args.keys()}
     page_vars.update(posted_vals)
     # Read user preferences related to this project
     # for a_filter, default in FilterList.items():
     #     data[a_filter] = gvg(a_filter, str(current_user.GetPref(PrjId, a_filter, default))
     #     if current_user.is_authenticated else "")
-    with ApiClient(UsersApi, request) as api:
+    with ApiClient(UsersApi, a_request) as api:
         try:
             prefs: str = api.get_current_user_prefs_users_my_preferences_project_id_get(project_id=prj_id,
                                                                                         key=_FILTERS_KEY)
@@ -493,11 +493,12 @@ def LoadRightPane():
         if sortby != "":
             sort_col_signed = ("-" if sortorder.lower() == "desc" else "") + sortby
         while True:
-            objs: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(project_id=PrjId,
-                                                                                          project_filters=filtres,
-                                                                                          order_field=sort_col_signed,
-                                                                                          window_size=ippdb,
-                                                                                          window_start=pageoffset * ippdb)
+            objs: ObjectSetQueryRsp = \
+                api.get_object_set_object_set_project_id_query_post(project_id=PrjId,
+                                                                    project_filters=filtres,
+                                                                    order_field=sort_col_signed,
+                                                                    window_size=ippdb,
+                                                                    window_start=pageoffset * ippdb)
             object_ids = objs.object_ids
             pagecount = math.ceil(objs.total_ids / ippdb)
             if pageoffset < pagecount:

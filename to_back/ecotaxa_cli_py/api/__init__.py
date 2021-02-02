@@ -8,6 +8,7 @@ from to_back.ecotaxa_cli_py.api.wip_api import WIPApi
 from to_back.ecotaxa_cli_py.api.acquisitions_api import AcquisitionsApi
 from to_back.ecotaxa_cli_py.api.authentification_api import AuthentificationApi
 from to_back.ecotaxa_cli_py.api.collections_api import CollectionsApi
+from to_back.ecotaxa_cli_py.api.instrument_api import InstrumentApi
 from to_back.ecotaxa_cli_py.api.misc_api import MiscApi
 from to_back.ecotaxa_cli_py.api.object_api import ObjectApi
 from to_back.ecotaxa_cli_py.api.objects_api import ObjectsApi

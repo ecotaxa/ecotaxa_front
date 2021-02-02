@@ -17,7 +17,7 @@ def GetFieldList(prj_model: ProjectModel):
     excluded = set()
     for k in ObjectHeaderModel.openapi_types.keys():
         # TODO: Hardcoded, not rename-friendly
-        if k not in ('objid'):
+        if k not in ('objid',):
             fieldlist.append({'id': 'h' + k, 'text': 'object.' + k})
         else:
             excluded.add(k)

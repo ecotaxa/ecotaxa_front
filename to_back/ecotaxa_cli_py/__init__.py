@@ -22,6 +22,7 @@ from to_back.ecotaxa_cli_py.api.wip_api import WIPApi
 from to_back.ecotaxa_cli_py.api.acquisitions_api import AcquisitionsApi
 from to_back.ecotaxa_cli_py.api.authentification_api import AuthentificationApi
 from to_back.ecotaxa_cli_py.api.collections_api import CollectionsApi
+from to_back.ecotaxa_cli_py.api.instrument_api import InstrumentApi
 from to_back.ecotaxa_cli_py.api.misc_api import MiscApi
 from to_back.ecotaxa_cli_py.api.object_api import ObjectApi
 from to_back.ecotaxa_cli_py.api.objects_api import ObjectsApi
@@ -57,6 +58,7 @@ from to_back.ecotaxa_cli_py.models.import_prep_rsp import ImportPrepRsp
 from to_back.ecotaxa_cli_py.models.import_real_req import ImportRealReq
 from to_back.ecotaxa_cli_py.models.login_req import LoginReq
 from to_back.ecotaxa_cli_py.models.merge_rsp import MergeRsp
+from to_back.ecotaxa_cli_py.models.minimal_user_bo import MinimalUserBO
 from to_back.ecotaxa_cli_py.models.object_header_model import ObjectHeaderModel
 from to_back.ecotaxa_cli_py.models.object_model import ObjectModel
 from to_back.ecotaxa_cli_py.models.object_set_query_rsp import ObjectSetQueryRsp
@@ -65,8 +67,9 @@ from to_back.ecotaxa_cli_py.models.object_set_summary_rsp import ObjectSetSummar
 from to_back.ecotaxa_cli_py.models.process_model import ProcessModel
 from to_back.ecotaxa_cli_py.models.project_filters import ProjectFilters
 from to_back.ecotaxa_cli_py.models.project_model import ProjectModel
-from to_back.ecotaxa_cli_py.models.project_stats_model import ProjectStatsModel
 from to_back.ecotaxa_cli_py.models.project_summary_model import ProjectSummaryModel
+from to_back.ecotaxa_cli_py.models.project_taxo_stats_model import ProjectTaxoStatsModel
+from to_back.ecotaxa_cli_py.models.project_user_stats_model import ProjectUserStatsModel
 from to_back.ecotaxa_cli_py.models.sample_model import SampleModel
 from to_back.ecotaxa_cli_py.models.simple_import_req import SimpleImportReq
 from to_back.ecotaxa_cli_py.models.simple_import_rsp import SimpleImportRsp

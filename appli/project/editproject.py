@@ -10,7 +10,7 @@ from appli import app, PrintInCharte, gvp, XSSEscape, TempTaskDir
 ######################################################################################################################
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UserModel, UsersApi, \
-    TaxonomyTreeApi, TaxonModel, ProjectStatsModel, MiscApi
+    TaxonomyTreeApi, TaxonModel, ProjectTaxoStatsModel, MiscApi
 
 
 @app.route('/prj/edit/<int:PrjId>', methods=['GET', 'POST'])
@@ -181,7 +181,7 @@ def Prjpopupeditpreset(PrjId):
     # And their statistics
     prj_ids = " ".join([str(a_prj.projid) for a_prj in prjs])
     with ApiClient(ProjectsApi, request) as api:
-        stats: List[ProjectStatsModel] = api.project_set_get_stats_project_set_stats_get(ids=prj_ids)
+        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats_project_set_taxo_stats_get(ids=prj_ids)
 
     # Sort for consistency
     prjs.sort(key=lambda prj: prj.title.strip().lower())

@@ -150,17 +150,18 @@ class SamplesApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def samples_search_samples_search_get(self, project_id, **kwargs):  # noqa: E501
+    def samples_search_samples_search_get(self, project_ids, id_pattern, **kwargs):  # noqa: E501
         """Samples Search  # noqa: E501
 
-        Read all samples for a project.  # noqa: E501
+        Read samples for a set of projects.  - project_ids: any(non number)-separated list of project numbers - id_pattern: sample id textual pattern. Use * for 'any matches'. Match is case-insensitive.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.samples_search_samples_search_get(project_id, async_req=True)
+        >>> thread = api.samples_search_samples_search_get(project_ids, id_pattern, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param int project_id: (required)
+        :param str project_ids: (required)
+        :param str id_pattern: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -173,19 +174,20 @@ class SamplesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.samples_search_samples_search_get_with_http_info(project_id, **kwargs)  # noqa: E501
+        return self.samples_search_samples_search_get_with_http_info(project_ids, id_pattern, **kwargs)  # noqa: E501
 
-    def samples_search_samples_search_get_with_http_info(self, project_id, **kwargs):  # noqa: E501
+    def samples_search_samples_search_get_with_http_info(self, project_ids, id_pattern, **kwargs):  # noqa: E501
         """Samples Search  # noqa: E501
 
-        Read all samples for a project.  # noqa: E501
+        Read samples for a set of projects.  - project_ids: any(non number)-separated list of project numbers - id_pattern: sample id textual pattern. Use * for 'any matches'. Match is case-insensitive.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.samples_search_samples_search_get_with_http_info(project_id, async_req=True)
+        >>> thread = api.samples_search_samples_search_get_with_http_info(project_ids, id_pattern, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param int project_id: (required)
+        :param str project_ids: (required)
+        :param str id_pattern: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -203,7 +205,8 @@ class SamplesApi(object):
         local_var_params = locals()
 
         all_params = [
-            'project_id'
+            'project_ids',
+            'id_pattern'
         ]
         all_params.extend(
             [
@@ -222,18 +225,24 @@ class SamplesApi(object):
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
-        # verify the required parameter 'project_id' is set
-        if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
-                                                        local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `samples_search_samples_search_get`")  # noqa: E501
+        # verify the required parameter 'project_ids' is set
+        if self.api_client.client_side_validation and ('project_ids' not in local_var_params or  # noqa: E501
+                                                        local_var_params['project_ids'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_ids` when calling `samples_search_samples_search_get`")  # noqa: E501
+        # verify the required parameter 'id_pattern' is set
+        if self.api_client.client_side_validation and ('id_pattern' not in local_var_params or  # noqa: E501
+                                                        local_var_params['id_pattern'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `id_pattern` when calling `samples_search_samples_search_get`")  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
 
         query_params = []
-        if 'project_id' in local_var_params and local_var_params['project_id'] is not None:  # noqa: E501
-            query_params.append(('project_id', local_var_params['project_id']))  # noqa: E501
+        if 'project_ids' in local_var_params and local_var_params['project_ids'] is not None:  # noqa: E501
+            query_params.append(('project_ids', local_var_params['project_ids']))  # noqa: E501
+        if 'id_pattern' in local_var_params and local_var_params['id_pattern'] is not None:  # noqa: E501
+            query_params.append(('id_pattern', local_var_params['id_pattern']))  # noqa: E501
 
         header_params = {}
 
