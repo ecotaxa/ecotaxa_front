@@ -38,7 +38,7 @@ def upgrade():
     op.create_index('is_objectstime', 'obj_head', ['objtime', 'acquisid'], unique=False)
     op.create_index('is_objectsacqclassifqual', 'obj_head', ['acquisid', 'classif_id', 'classif_qual'], unique=False)
     op.create_index('is_objectsacqrandom', 'obj_head', ['acquisid', 'random_value', 'classif_qual'], unique=False)
-    op.create_index('is_objectfieldsorigid', 'obj_field', ['orig_id'], unique=False)
+    #op.create_index('is_objectfieldsorigid', 'obj_field', ['orig_id'], unique=False)
 
     op.drop_constraint('obj_head_sampleid_fkey', 'obj_head', type_='foreignkey')
     op.drop_constraint('obj_head_projid_fkey', 'obj_head', type_='foreignkey')
