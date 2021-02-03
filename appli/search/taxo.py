@@ -5,7 +5,6 @@ from typing import List
 from flask import render_template, json, jsonify, request
 
 from appli import app, gvg, gvp
-from appli.database import GetAll, GetAssoc2Col
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import TaxonomyTreeApi, TaxaSearchRsp, TaxonModel
 
@@ -34,37 +33,52 @@ def searchtaxo():
 
 @app.route('/search/taxotree')
 def searchtaxotree():
-    # Return root of the taxonomy tree, i.e. taxa with no parent
-    # There will be a call to below /search/taxotreejson right away
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxonModel] = api.query_root_taxa_taxa_get()
-    res.sort(key=lambda r: r.name)
-    return render_template('search/taxopopup.html', root_elements=res, targetid=gvg("target", "taxolb"))
+    # Return an initial template with root of the taxonomy tree
+    # Does nothing except rendering the template with targetid
+    return render_template('search/taxopopup.html', targetid=gvg("target", "taxolb"))
 
 
 @app.route('/search/taxotreejson')
 def taxotreerootjson():
     parent = gvg("id")
-    sql = """SELECT id, name,parent_id,coalesce(nbrobj,0)+coalesce(nbrobjcum,0)
-          ,exists(select 1 from taxonomy te where te.parent_id=taxonomy.id)
-          FROM taxonomy
-          WHERE """
     if parent == '#':
-        sql += "parent_id is null"
+        # Root nodes
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            roots: List[TaxonModel] = api.query_root_taxa_taxa_get()
+        res = [(r.id, r.name, None, r.nb_objects + r.nb_children_objects, len(r.children) > 0) for r in roots]
     else:
-        sql += "parent_id =%d" % (int(parent))
-    sql += " order by name "
-    res = GetAll(sql)
-    # print(res)
-    return json.dumps([dict(id=str(r[0]), text="<span class=v>" + r[1] + "</span> (" + str(
-        r[3]) + ") <span class='TaxoSel label label-default'><span class='glyphicon glyphicon-ok'></span></span>",
-                            parent=r[2] or "#", children=r[4]) for r in res])
+        # Children of the requested parent_id, when opening the tree
+        # Fetch the parent for getting its children
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            parents: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=str(parent))
+        children_ids = "+".join([str(child_id) for child_id in parents[0].children])
+        # Fetch children, for their names and to know if they have children
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            children: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=children_ids)
+        res = [(r.id, r.name, parent, r.nb_objects + r.nb_children_objects, len(r.children) > 0) for r in children]
+    res.sort(key=lambda r: r[1])
+
+    def span_for_node(rec):
+        return "<span class=v>" + rec[1] + "</span> (" + str(rec[3]) + ") " + \
+               "<span class='TaxoSel label label-default'><span class='glyphicon glyphicon-ok'></span></span>"
+
+    return json.dumps([dict(id=str(r[0]),
+                            text=span_for_node(r),
+                            parent=r[2] or "#",
+                            children=r[4]) for r in res])
 
 
 @app.route('/search/taxoresolve', methods=['POST'])
 def taxoresolve():
+    # Called from modal "Pick preset from other projects" when Close is clicked.
+    # As it's possible to enter numerical taxa IDs, and the buttons to get settings from projects
+    # put numerical IDs there, the lookup will be done for setting the destination select with taxa display names.
     idlist = gvp('idlist', '')
     lst = [int(x) for x in idlist.split(",") if x.isdigit()]
-    taxomap = GetAssoc2Col("""select id,display_name from taxonomy where id = any(%s) order by lower(display_name)""",
-                           [lst])
+    node_ids = "+".join([str(x) for x in lst])
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        nodes: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=node_ids)
+    # The sort below is a bit useless as the control (select2) has its own order
+    nodes.sort(key=lambda r: r.display_name.lower())
+    taxomap = {a_node.id: a_node.display_name for a_node in nodes}
     return jsonify(taxomap)
