@@ -153,6 +153,7 @@ def PrjEdit(PrjId, privs_only=False):
     with ApiClient(TaxonomyTreeApi, request) as api:
         res: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=" ".join(lst))
     g.predeftaxo = [(r.id, r.display_name) for r in res]
+    g.predeftaxo.sort(key=lambda r: r[1].lower())
 
     # TODO: Get from metadata
     g.maplist = ['objtime', 'objdate', 'latitude', 'longitude', 'depth_min', 'depth_max']
