@@ -236,8 +236,8 @@ class TaxonomyView(ModelView):
 
 
 class ObjectsView(ModelView):
-    column_list = ('objid', 'acquisid', 'classif_qual', 'objdate', )
-    column_filters = ('objid', 'acquisid', 'classif_qual')
+    column_list = ('objid', 'orig_id', 'acquisid', 'classif_qual', 'objdate', )
+    column_filters = ('objid', 'orig_id', 'acquisid', 'classif_qual')
     form_overrides = dict(complement_info=TextAreaField)
     form_excluded_columns = ('classif_id', 'classif_auto', 'acquis',
                              'images', 'sample', 'classiffier', 'objfrel')
@@ -251,9 +251,9 @@ class ObjectsView(ModelView):
 
 
 class ObjectsFieldsView(ModelView):
-    column_list = ('objfid', 'orig_id')
-    column_filters = ('objfid', 'orig_id')
-    column_searchable_list = ('orig_id',)
+    column_list = ('objfid', )
+    column_filters = ('objfid', )
+    column_searchable_list = ()
     form_excluded_columns = ('objhrel',)
 
     def __init__(self, session, **kwargs):

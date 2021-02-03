@@ -263,6 +263,9 @@ class Objects(db.Model):
     # Parent
     acquisid = db.Column(INTEGER, db.ForeignKey('acquisitions.acquisid'), nullable=False)
     acquis = db.relationship("Acquisitions")
+    # User-provided identifier
+    orig_id = db.Column(VARCHAR(255), nullable=False)
+    object_link = db.Column(VARCHAR(255))
 
     latitude = db.Column(DOUBLE_PRECISION)
     longitude = db.Column(DOUBLE_PRECISION)
@@ -305,8 +308,6 @@ class ObjectsFields(db.Model):
     objfid = db.Column(BIGINT, db.ForeignKey('obj_head.objid', ondelete="CASCADE"), primary_key=True)
     objhrel = db.relationship("Objects", foreign_keys="Objects.objid",
                               primaryjoin="ObjectsFields.objfid==Objects.objid", uselist=False, backref="objfrel")
-    orig_id = db.Column(VARCHAR(255), nullable=False)
-    object_link = db.Column(VARCHAR(255))
 
 
 # Ajout des colonnes numériques & textuelles libres
@@ -337,7 +338,6 @@ Index('is_objectsdepth', Objects.__table__.c.depth_max, Objects.__table__.c.dept
 Index('is_objectslatlong', Objects.__table__.c.latitude, Objects.__table__.c.longitude)
 Index('is_objectstime', Objects.__table__.c.objtime, Objects.__table__.c.acquisid)
 Index('is_objectsdate', Objects.__table__.c.objdate, Objects.__table__.c.acquisid)
-Index('is_objectfieldsorigid', ObjectsFields.__table__.c.orig_id)
 # For FK checks during deletion
 Index('is_objectsacquisition', Objects.__table__.c.acquisid)
 
