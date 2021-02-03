@@ -4,7 +4,6 @@ from typing import List
 from flask import render_template, flash, session, request, Markup
 from flask_security import login_required
 
-import appli
 from appli import app, PrintInCharte, gvg
 ######################################################################################################################
 from appli.project.main import _manager_mail
@@ -60,7 +59,6 @@ def indexProjects(Others=False):
 
     return PrintInCharte(
         render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
-                        AppManagerMailto=appli.GetAppManagerMailto(),
                         filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
                         Others=Others, isadmin=2 in user.can_do,
                         _manager_mail=_manager_mail))

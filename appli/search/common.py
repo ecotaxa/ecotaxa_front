@@ -24,7 +24,7 @@ def searchsamples():
     # Do back-end call
     with ApiClient(SamplesApi, request) as api:
         samples: List[SampleModel] = api.samples_search_samples_search_get(project_ids=project_ids,
-                                                                           id_pattern=gvg("q"))
+                                                                           id_pattern=pattern)
     if gvg("format", 'J') == 'J':  # version JSon par defaut
         return json.dumps([dict(id=s.sampleid, text=s.orig_id) for s in samples])
     else:
@@ -80,11 +80,11 @@ def searchgettaxomapping():
     #     seltaxo=25828,84963,85061,85076,85044,11514,85116,85123,12908,51958,11518,81935,12838,45036,85078,12846,30815,45052,45054,56693,11512
     #     usemodel_foldername=testln1
     classifsettings = DecodeEqualList(proj.classifsettings)
-    PostTaxoMapping = classifsettings.get("posttaxomapping", "")
+    post_taxo_mapping = classifsettings.get("posttaxomapping", "")
     res = {'mapping': {}, 'taxo': {}}
-    if PostTaxoMapping != '':
+    if post_taxo_mapping != '':
         res['mapping'] = {el[0].strip(): el[1].strip() for el in
-                          [el.split(':') for el in PostTaxoMapping.split(',') if el != '']}
+                          [el.split(':') for el in post_taxo_mapping.split(',') if el != '']}
         # Collect name for each needed id
         lst = "+".join(res['mapping'].values())
         with ApiClient(TaxonomyTreeApi, request) as api:

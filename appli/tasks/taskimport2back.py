@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-import json
 import time
-from typing import Dict
+from typing import List
 
 from flask import render_template, g
 
-from appli import database, PrintInCharte, gvg, GetAppManagerMailto, \
-    db
+from appli import PrintInCharte, gvg, db
+from appli.constants import get_app_manager_mail
 from appli.tasks.importcommon import *
 from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, ProjectsApi, UsersApi, ApiException
+from to_back.ecotaxa_cli_py import ImportPrepReq, ImportPrepRsp, ImportRealReq, ProjectsApi, UsersApi, ApiException, \
+    TaxonomyTreeApi, TaxonModel, ProjectModel, UserModel
 
 
+# noinspection DuplicatedCode
 class TaskImportToBack(AsyncTask):
     """
         Import, just GUI here, bulk of job subcontracted to back-end.
@@ -55,14 +56,18 @@ class TaskImportToBack(AsyncTask):
 
     def _CreateDialogStep0(self):
         """ In UI/flask, task.taskstep = 0 AKA initial dialog """
-        Prj = database.Projects.query.filter_by(projid=gvg("p")).first()
-        g.prjtitle = Prj.title
-        g.prjprojid = Prj.projid
-        g.prjmanagermailto = Prj.GetFirstManagerMailto()
+        prj_id = int(gvg("p"))
+        with ApiClient(ProjectsApi, request) as api:
+            try:
+                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+            except ApiException as ae:
+                if ae.status == 403:
+                    return PrintInCharte("ACCESS DENIED for this project")
+        g.prjtitle = target_prj.title
+        g.prjprojid = target_prj.projid
+        g.prjmanagermailto = target_prj.managers[0].email
         txt = ""
-        if not Prj.CheckRight(1):
-            return PrintInCharte("ACCESS DENIED for this project")
-        g.appmanagermailto = GetAppManagerMailto()
+        g.appmanagermailto = get_app_manager_mail(request)
 
         server_path = gvp("ServerPath")
         if gvp('starttask') == "Y":
@@ -73,15 +78,15 @@ class TaskImportToBack(AsyncTask):
             self.param.SkipObjectDuplicate = gvp("skipobjectduplicate")
             # Import update parameter
             self.param.UpdateClassif = gvp("updateclassif")
-            TaxoMap = {}
+            taxo_map = {}
             for lig in gvp('TxtTaxoMap').splitlines():
                 ls = lig.split('=', 1)
                 if len(ls) != 2:
                     errors.append("Taxonomy Mapping : Invalid format for line %s" % lig)
                 else:
-                    TaxoMap[ls[0].strip().lower()] = ls[1].strip().lower()
+                    taxo_map[ls[0].strip().lower()] = ls[1].strip().lower()
             # Import file parameter
-            FileToSave, FileToSaveFileName = get_file_from_form(self, errors)
+            file_to_save, file_to_save_file_name = get_file_from_form(self, errors)
             # Save preferences
             if server_path != "":
                 with ApiClient(UsersApi, request) as api:
@@ -94,14 +99,16 @@ class TaskImportToBack(AsyncTask):
                 for e in errors:
                     flash(e, "error")
             else:
-                self.param.TaxoMap = TaxoMap  # on stocke le dictionnaire et pas la chaine
+                self.param.TaxoMap = taxo_map  # on stocke le dictionnaire et pas la chaine
                 # start Step1, in a subprocess as we're in UI process, reusing log files
-                return self.StartTask(self.param, step=1, FileToSave=FileToSave, FileToSaveFileName=FileToSaveFileName)
+                return self.StartTask(self.param, step=1, FileToSave=file_to_save,
+                                      FileToSaveFileName=file_to_save_file_name)
         else:  # valeurs par default
             self.param.ProjectId = gvg("p")
         if server_path == "":
             with ApiClient(UsersApi, request) as api:
-                server_path = api.get_current_user_prefs_users_my_preferences_project_id_get(self.param.ProjectId, "cwd")
+                server_path = api.get_current_user_prefs_users_my_preferences_project_id_get(self.param.ProjectId,
+                                                                                             "cwd")
         return render_template(self.STEP0_TEMPLATE, header=txt, data=self.param, ServerPath=server_path,
                                TxtTaxoMap=gvp("TxtTaxoMap"))
 
@@ -154,34 +161,38 @@ class TaskImportToBack(AsyncTask):
         """ In UI/flask, task.taskstep = 1 AKA mapping of not found entities """
         txt = "<h1>Text File Importation Task</h1>"
         errors = []
-        PrjId = self.param.ProjectId
-        Prj = database.Projects.query.filter_by(projid=PrjId).first()
-        g.prjtitle = Prj.title
-        g.prjprojid = Prj.projid
-        g.appmanagermailto = GetAppManagerMailto()
-        NotFoundTaxo = self._notFoundTaxoInParam()
-        NotFoundUsers = self._notFoundUsersInParam()
-        app.logger.info("Pending Taxo Not Found = %s", NotFoundTaxo)
-        app.logger.info("Pending Users Not Found = %s", NotFoundUsers)
+        prj_id = self.param.ProjectId
+        with ApiClient(ProjectsApi, request) as api:
+            target_project: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+        g.prjtitle = target_project.title
+        g.prjprojid = target_project.projid
+        not_found_taxo = self._notFoundTaxoInParam()
+        not_found_users = self._notFoundUsersInParam()
+        app.logger.info("Pending Taxo Not Found = %s", not_found_taxo)
+        app.logger.info("Pending Users Not Found = %s", not_found_users)
         if gvp('starttask') == "Y":
             # Submit -> check and store values to use
             app.logger.info("Form Data = %s", request.form)
-            for i in range(1, 1 + len(NotFoundTaxo)):
+            for i in range(1, 1 + len(not_found_taxo)):
                 orig = gvp("orig%d" % i)  # Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
                 newvalue = gvp("taxolb%d" % i)
-                if orig in NotFoundTaxo and newvalue != "":
-                    t = database.Taxonomy.query.filter(database.Taxonomy.id == int(newvalue)).first()
-                    app.logger.info(orig + " associated to " + t.name)
-                    self.param.TaxoFound[orig] = t.id
+                if orig in not_found_taxo and newvalue != "":
+                    # OK it could be a bit more efficient by grouping calls
+                    with ApiClient(TaxonomyTreeApi, request) as api:
+                        nodes: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=newvalue)
+                    taxon = nodes[0]
+                    app.logger.info(orig + " associated to " + taxon.name)
+                    self.param.TaxoFound[orig] = taxon.id
                 else:
                     errors.append("Taxonomy Manual Mapping : Invalid value '%s' for '%s'" % (newvalue, orig))
-            for i in range(1, 1 + len(NotFoundUsers)):
+            for i in range(1, 1 + len(not_found_users)):
                 orig = gvp("origuser%d" % i)  # Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
                 newvalue = gvp("userlb%d" % i)
-                if orig in NotFoundUsers and newvalue != "":
-                    t = database.users.query.filter(database.users.id == int(newvalue)).first()
-                    app.logger.info("User " + orig + " associated to " + t.name)
-                    self.param.UserFound[orig]['id'] = t.id
+                if orig in not_found_users and newvalue != "":
+                    with ApiClient(UsersApi, request) as api:
+                        user: UserModel = api.get_user_users_user_id_get(user_id=int(newvalue))
+                    app.logger.info("User " + orig + " associated to " + user.name)
+                    self.param.UserFound[orig]['id'] = user.id
                 else:
                     errors.append("User Manual Mapping : Invalid value '%s' for '%s'" % (newvalue, orig))
             app.logger.info("Final Taxofound = %s", self.param.TaxoFound)
@@ -192,9 +203,9 @@ class TaskImportToBack(AsyncTask):
                 return self.StartTask(self.param, step=2)
             for e in errors:
                 flash(e, "error")
-            NotFoundTaxo = [k for k, v in self.param.TaxoFound.items() if v is None]
-            NotFoundUsers = [k for k, v in self.param.UserFound.items() if v.get('id') is None]
-        return render_template('task/import_question1.html', header=txt, taxo=NotFoundTaxo, users=NotFoundUsers,
+            not_found_taxo = [k for k, v in self.param.TaxoFound.items() if v is None]
+            not_found_users = [k for k, v in self.param.UserFound.items() if v.get('id') is None]
+        return render_template('task/import_question1.html', header=txt, taxo=not_found_taxo, users=not_found_users,
                                task=self.task)
 
     def _must_skip_existing_objects(self) -> bool:
@@ -234,24 +245,29 @@ class TaskImportToBack(AsyncTask):
         return PrintInCharte(txt)
 
     def ShowCustomDetails(self):
+        # e.g. http://localhost:5001/Task/Show/40202?CustomDetails=Y
+        # param.TaxoFound is rsp.found_taxa, so key=taxon name (seen in TSV), value=resolved ID
+        node_ids = "+".join([str(x) for x in set(self.param.TaxoFound.values())])
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            nodes: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=node_ids)
+        nodes_dict = {a_node.id: a_node.name for a_node in nodes}
+        # issue a line per resolved name
         txt = "<p><u>Used mapping, usable for next import</u></p>"
-        taxo = database.GetAssoc2Col("select id,name from taxonomy where id = any(%s)",
-                                     (list(set(self.param.TaxoFound.values())),))
-        for k, v in self.param.TaxoFound.items():
-            if v in taxo:
-                txt += "{0}={1}<br>".format(k, taxo[v])
+        for seen_name, resolved_id in self.param.TaxoFound.items():
+            if resolved_id in nodes_dict:
+                txt += "{0}={1}<br>".format(seen_name, nodes_dict[resolved_id])
         return PrintInCharte(txt)
 
     def GetDoneExtraAction(self):
         # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle ou auto
-        PrjId = self.param.ProjectId
+        prj_id = self.param.ProjectId
         time.sleep(1)
-        # TODO: Remove, but for now we have trace information inside
+        # TODO: Remove the commented, but for now we have trace information inside
         # DoTaskClean(self.task.id)
         return "<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>" \
                "<a href='/Task/Create/TaskClassifAuto2?projid={0}' class='btn btn-primary btn-sm'" \
-               "role=button>Go to Automatic Classification Screen</a> ".format(PrjId)
+               "role=button>Go to Automatic Classification Screen</a> ".format(prj_id)
 
     def _notFoundTaxoInParam(self):
         return [k for k, v in self.param.TaxoFound.items() if v is None]
