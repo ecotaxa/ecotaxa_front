@@ -35,18 +35,24 @@ class TaxonModel(object):
     openapi_types = {
         'id': 'int',
         'name': 'str',
+        'nb_objects': 'int',
+        'nb_children_objects': 'int',
         'display_name': 'str',
-        'lineage': 'list[str]'
+        'lineage': 'list[str]',
+        'children': 'list[int]'
     }
 
     attribute_map = {
         'id': 'id',
         'name': 'name',
+        'nb_objects': 'nb_objects',
+        'nb_children_objects': 'nb_children_objects',
         'display_name': 'display_name',
-        'lineage': 'lineage'
+        'lineage': 'lineage',
+        'children': 'children'
     }
 
-    def __init__(self, id=None, name=None, display_name=None, lineage=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, name=None, nb_objects=None, nb_children_objects=None, display_name=None, lineage=None, children=None, local_vars_configuration=None):  # noqa: E501
         """TaxonModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -54,14 +60,20 @@ class TaxonModel(object):
 
         self._id = None
         self._name = None
+        self._nb_objects = None
+        self._nb_children_objects = None
         self._display_name = None
         self._lineage = None
+        self._children = None
         self.discriminator = None
 
         self.id = id
         self.name = name
+        self.nb_objects = nb_objects
+        self.nb_children_objects = nb_children_objects
         self.display_name = display_name
         self.lineage = lineage
+        self.children = children
 
     @property
     def id(self):
@@ -110,6 +122,52 @@ class TaxonModel(object):
         self._name = name
 
     @property
+    def nb_objects(self):
+        """Gets the nb_objects of this TaxonModel.  # noqa: E501
+
+
+        :return: The nb_objects of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._nb_objects
+
+    @nb_objects.setter
+    def nb_objects(self, nb_objects):
+        """Sets the nb_objects of this TaxonModel.
+
+
+        :param nb_objects: The nb_objects of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+        if self.local_vars_configuration.client_side_validation and nb_objects is None:  # noqa: E501
+            raise ValueError("Invalid value for `nb_objects`, must not be `None`")  # noqa: E501
+
+        self._nb_objects = nb_objects
+
+    @property
+    def nb_children_objects(self):
+        """Gets the nb_children_objects of this TaxonModel.  # noqa: E501
+
+
+        :return: The nb_children_objects of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._nb_children_objects
+
+    @nb_children_objects.setter
+    def nb_children_objects(self, nb_children_objects):
+        """Sets the nb_children_objects of this TaxonModel.
+
+
+        :param nb_children_objects: The nb_children_objects of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+        if self.local_vars_configuration.client_side_validation and nb_children_objects is None:  # noqa: E501
+            raise ValueError("Invalid value for `nb_children_objects`, must not be `None`")  # noqa: E501
+
+        self._nb_children_objects = nb_children_objects
+
+    @property
     def display_name(self):
         """Gets the display_name of this TaxonModel.  # noqa: E501
 
@@ -154,6 +212,29 @@ class TaxonModel(object):
             raise ValueError("Invalid value for `lineage`, must not be `None`")  # noqa: E501
 
         self._lineage = lineage
+
+    @property
+    def children(self):
+        """Gets the children of this TaxonModel.  # noqa: E501
+
+
+        :return: The children of this TaxonModel.  # noqa: E501
+        :rtype: list[int]
+        """
+        return self._children
+
+    @children.setter
+    def children(self, children):
+        """Sets the children of this TaxonModel.
+
+
+        :param children: The children of this TaxonModel.  # noqa: E501
+        :type: list[int]
+        """
+        if self.local_vars_configuration.client_side_validation and children is None:  # noqa: E501
+            raise ValueError("Invalid value for `children`, must not be `None`")  # noqa: E501
+
+        self._children = children
 
     def to_dict(self):
         """Returns the model properties as a dict"""

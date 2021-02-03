@@ -33,24 +33,29 @@ class Constants(object):
                             and the value is json key in definition.
     """
     openapi_types = {
-        'license_texts': 'dict(str, str)'
+        'license_texts': 'dict(str, str)',
+        'app_manager': 'list[str]'
     }
 
     attribute_map = {
-        'license_texts': 'license_texts'
+        'license_texts': 'license_texts',
+        'app_manager': 'app_manager'
     }
 
-    def __init__(self, license_texts=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, license_texts=None, app_manager=["",""], local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._license_texts = None
+        self._app_manager = None
         self.discriminator = None
 
         if license_texts is not None:
             self.license_texts = license_texts
+        if app_manager is not None:
+            self.app_manager = app_manager
 
     @property
     def license_texts(self):
@@ -72,6 +77,27 @@ class Constants(object):
         """
 
         self._license_texts = license_texts
+
+    @property
+    def app_manager(self):
+        """Gets the app_manager of this Constants.  # noqa: E501
+
+
+        :return: The app_manager of this Constants.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._app_manager
+
+    @app_manager.setter
+    def app_manager(self, app_manager):
+        """Sets the app_manager of this Constants.
+
+
+        :param app_manager: The app_manager of this Constants.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._app_manager = app_manager
 
     def to_dict(self):
         """Returns the model properties as a dict"""

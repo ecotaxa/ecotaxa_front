@@ -35,6 +35,7 @@ class ObjectHeaderModel(object):
     openapi_types = {
         'objid': 'int',
         'acquisid': 'int',
+        'orig_id': 'str',
         'objdate': 'date',
         'objtime': 'str',
         'latitude': 'float',
@@ -52,12 +53,14 @@ class ObjectHeaderModel(object):
         'classif_crossvalidation_id': 'int',
         'complement_info': 'str',
         'similarity': 'float',
-        'random_value': 'int'
+        'random_value': 'int',
+        'object_link': 'str'
     }
 
     attribute_map = {
         'objid': 'objid',
         'acquisid': 'acquisid',
+        'orig_id': 'orig_id',
         'objdate': 'objdate',
         'objtime': 'objtime',
         'latitude': 'latitude',
@@ -75,10 +78,11 @@ class ObjectHeaderModel(object):
         'classif_crossvalidation_id': 'classif_crossvalidation_id',
         'complement_info': 'complement_info',
         'similarity': 'similarity',
-        'random_value': 'random_value'
+        'random_value': 'random_value',
+        'object_link': 'object_link'
     }
 
-    def __init__(self, objid=None, acquisid=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, complement_info=None, similarity=None, random_value=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, objid=None, acquisid=None, orig_id=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, complement_info=None, similarity=None, random_value=None, object_link=None, local_vars_configuration=None):  # noqa: E501
         """ObjectHeaderModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -86,6 +90,7 @@ class ObjectHeaderModel(object):
 
         self._objid = None
         self._acquisid = None
+        self._orig_id = None
         self._objdate = None
         self._objtime = None
         self._latitude = None
@@ -104,11 +109,13 @@ class ObjectHeaderModel(object):
         self._complement_info = None
         self._similarity = None
         self._random_value = None
+        self._object_link = None
         self.discriminator = None
 
         if objid is not None:
             self.objid = objid
         self.acquisid = acquisid
+        self.orig_id = orig_id
         if objdate is not None:
             self.objdate = objdate
         if objtime is not None:
@@ -145,6 +152,8 @@ class ObjectHeaderModel(object):
             self.similarity = similarity
         if random_value is not None:
             self.random_value = random_value
+        if object_link is not None:
+            self.object_link = object_link
 
     @property
     def objid(self):
@@ -189,6 +198,29 @@ class ObjectHeaderModel(object):
             raise ValueError("Invalid value for `acquisid`, must not be `None`")  # noqa: E501
 
         self._acquisid = acquisid
+
+    @property
+    def orig_id(self):
+        """Gets the orig_id of this ObjectHeaderModel.  # noqa: E501
+
+
+        :return: The orig_id of this ObjectHeaderModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._orig_id
+
+    @orig_id.setter
+    def orig_id(self, orig_id):
+        """Sets the orig_id of this ObjectHeaderModel.
+
+
+        :param orig_id: The orig_id of this ObjectHeaderModel.  # noqa: E501
+        :type: str
+        """
+        if self.local_vars_configuration.client_side_validation and orig_id is None:  # noqa: E501
+            raise ValueError("Invalid value for `orig_id`, must not be `None`")  # noqa: E501
+
+        self._orig_id = orig_id
 
     @property
     def objdate(self):
@@ -567,6 +599,27 @@ class ObjectHeaderModel(object):
         """
 
         self._random_value = random_value
+
+    @property
+    def object_link(self):
+        """Gets the object_link of this ObjectHeaderModel.  # noqa: E501
+
+
+        :return: The object_link of this ObjectHeaderModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._object_link
+
+    @object_link.setter
+    def object_link(self, object_link):
+        """Sets the object_link of this ObjectHeaderModel.
+
+
+        :param object_link: The object_link of this ObjectHeaderModel.  # noqa: E501
+        :type: str
+        """
+
+        self._object_link = object_link
 
     def to_dict(self):
         """Returns the model properties as a dict"""

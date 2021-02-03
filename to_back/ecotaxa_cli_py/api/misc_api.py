@@ -249,7 +249,7 @@ class MiscApi(object):
     def used_constants_constants_get(self, **kwargs):  # noqa: E501
         """Used Constants  # noqa: E501
 
-        This entry point will return useful strings for user dialog.  # noqa: E501
+        This entry point will return useful strings for user dialog. Now also used for values extracted from Config.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.used_constants_constants_get(async_req=True)
@@ -273,7 +273,7 @@ class MiscApi(object):
     def used_constants_constants_get_with_http_info(self, **kwargs):  # noqa: E501
         """Used Constants  # noqa: E501
 
-        This entry point will return useful strings for user dialog.  # noqa: E501
+        This entry point will return useful strings for user dialog. Now also used for values extracted from Config.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.used_constants_constants_get_with_http_info(async_req=True)

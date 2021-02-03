@@ -343,9 +343,9 @@ order by Lower(u.name)""")
         sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
 
-ecotaxa_version="2.5.3"
+ecotaxa_version="2.5.4"
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2021-01-28"
+    return ecotaxa_version+" 2021-02-03"
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
@@ -353,6 +353,11 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
 
 
 """Changelog
+2021-02-03 : V 2.5.4
+    Bug #548 (starting): Move object orig_id from obj_field DB table to obj_head. 
+    Bug #523: Cosmetic fix (order of categories in project settings page).
+    Feature #436 (continues): Use more entry points from backend, around Samples and Taxonomy. 
+    Feature #411: Remove DB export and import. App. export is better even if slower.
 2021-01-28 : V 2.5.3
     Feature #430: Move selection using CTRL-key + arrows in manual classification page
     Bug #371: Manual classification layout is broken (scrolls) with too long taxa names.

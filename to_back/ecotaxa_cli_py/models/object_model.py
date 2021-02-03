@@ -33,10 +33,9 @@ class ObjectModel(object):
                             and the value is json key in definition.
     """
     openapi_types = {
-        'orig_id': 'str',
-        'object_link': 'str',
         'objid': 'int',
         'acquisid': 'int',
+        'orig_id': 'str',
         'objdate': 'date',
         'objtime': 'str',
         'latitude': 'float',
@@ -55,6 +54,7 @@ class ObjectModel(object):
         'complement_info': 'str',
         'similarity': 'float',
         'random_value': 'int',
+        'object_link': 'str',
         'sample_id': 'int',
         'project_id': 'int',
         'images': 'list[ImageModel]',
@@ -62,10 +62,9 @@ class ObjectModel(object):
     }
 
     attribute_map = {
-        'orig_id': 'orig_id',
-        'object_link': 'object_link',
         'objid': 'objid',
         'acquisid': 'acquisid',
+        'orig_id': 'orig_id',
         'objdate': 'objdate',
         'objtime': 'objtime',
         'latitude': 'latitude',
@@ -84,22 +83,22 @@ class ObjectModel(object):
         'complement_info': 'complement_info',
         'similarity': 'similarity',
         'random_value': 'random_value',
+        'object_link': 'object_link',
         'sample_id': 'sample_id',
         'project_id': 'project_id',
         'images': 'images',
         'free_columns': 'free_columns'
     }
 
-    def __init__(self, orig_id=None, object_link=None, objid=None, acquisid=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, complement_info=None, similarity=None, random_value=None, sample_id=None, project_id=None, images=[], free_columns=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, objid=None, acquisid=None, orig_id=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, complement_info=None, similarity=None, random_value=None, object_link=None, sample_id=None, project_id=None, images=[], free_columns=None, local_vars_configuration=None):  # noqa: E501
         """ObjectModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
-        self._orig_id = None
-        self._object_link = None
         self._objid = None
         self._acquisid = None
+        self._orig_id = None
         self._objdate = None
         self._objtime = None
         self._latitude = None
@@ -118,18 +117,17 @@ class ObjectModel(object):
         self._complement_info = None
         self._similarity = None
         self._random_value = None
+        self._object_link = None
         self._sample_id = None
         self._project_id = None
         self._images = None
         self._free_columns = None
         self.discriminator = None
 
-        self.orig_id = orig_id
-        if object_link is not None:
-            self.object_link = object_link
         if objid is not None:
             self.objid = objid
         self.acquisid = acquisid
+        self.orig_id = orig_id
         if objdate is not None:
             self.objdate = objdate
         if objtime is not None:
@@ -166,56 +164,14 @@ class ObjectModel(object):
             self.similarity = similarity
         if random_value is not None:
             self.random_value = random_value
+        if object_link is not None:
+            self.object_link = object_link
         self.sample_id = sample_id
         self.project_id = project_id
         if images is not None:
             self.images = images
         if free_columns is not None:
             self.free_columns = free_columns
-
-    @property
-    def orig_id(self):
-        """Gets the orig_id of this ObjectModel.  # noqa: E501
-
-
-        :return: The orig_id of this ObjectModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._orig_id
-
-    @orig_id.setter
-    def orig_id(self, orig_id):
-        """Sets the orig_id of this ObjectModel.
-
-
-        :param orig_id: The orig_id of this ObjectModel.  # noqa: E501
-        :type: str
-        """
-        if self.local_vars_configuration.client_side_validation and orig_id is None:  # noqa: E501
-            raise ValueError("Invalid value for `orig_id`, must not be `None`")  # noqa: E501
-
-        self._orig_id = orig_id
-
-    @property
-    def object_link(self):
-        """Gets the object_link of this ObjectModel.  # noqa: E501
-
-
-        :return: The object_link of this ObjectModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._object_link
-
-    @object_link.setter
-    def object_link(self, object_link):
-        """Sets the object_link of this ObjectModel.
-
-
-        :param object_link: The object_link of this ObjectModel.  # noqa: E501
-        :type: str
-        """
-
-        self._object_link = object_link
 
     @property
     def objid(self):
@@ -260,6 +216,29 @@ class ObjectModel(object):
             raise ValueError("Invalid value for `acquisid`, must not be `None`")  # noqa: E501
 
         self._acquisid = acquisid
+
+    @property
+    def orig_id(self):
+        """Gets the orig_id of this ObjectModel.  # noqa: E501
+
+
+        :return: The orig_id of this ObjectModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._orig_id
+
+    @orig_id.setter
+    def orig_id(self, orig_id):
+        """Sets the orig_id of this ObjectModel.
+
+
+        :param orig_id: The orig_id of this ObjectModel.  # noqa: E501
+        :type: str
+        """
+        if self.local_vars_configuration.client_side_validation and orig_id is None:  # noqa: E501
+            raise ValueError("Invalid value for `orig_id`, must not be `None`")  # noqa: E501
+
+        self._orig_id = orig_id
 
     @property
     def objdate(self):
@@ -638,6 +617,27 @@ class ObjectModel(object):
         """
 
         self._random_value = random_value
+
+    @property
+    def object_link(self):
+        """Gets the object_link of this ObjectModel.  # noqa: E501
+
+
+        :return: The object_link of this ObjectModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._object_link
+
+    @object_link.setter
+    def object_link(self, object_link):
+        """Sets the object_link of this ObjectModel.
+
+
+        :param object_link: The object_link of this ObjectModel.  # noqa: E501
+        :type: str
+        """
+
+        self._object_link = object_link
 
     @property
     def sample_id(self):
