@@ -63,7 +63,7 @@ def ExploreLoadRightPane():
 
     whereclause=""
     sql="""select o.objid,o.classif_qual  ,o.objdate,to_char(o.objtime,'HH24:MI') objtime
-    ,o.classif_id,o.classif_who,o.sampleid,random_value,o.projid
+    ,o.classif_id,o.classif_who,o.sampleid,random_value,o.projid,o.orig_id
    from objects o
 where o.classif_qual='V'
 """
@@ -150,7 +150,7 @@ where o.classif_qual='V'
 
     #filt_fromdate,#filt_todate
     sql="""select o.*,t.display_name taxoname,u.name classifwhoname,i.file_name,s.orig_id samplename
-                  ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width,ofi.orig_id,
+                  ,i.height,i.width,i.thumb_file_name,i.thumb_height,i.thumb_width,o.orig_id,
                   (SELECT COUNT(img.imgrank) FROM images img WHERE img.objid = o.objid) AS imgcount
                   from ("""+sql+""")o
 left Join images i on o.objid=i.objid and i.imgrank = (select min(imgrank) from images img where img.objid = o.objid)

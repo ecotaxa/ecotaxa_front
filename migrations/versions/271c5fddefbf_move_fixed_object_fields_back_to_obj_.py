@@ -30,13 +30,15 @@ DECLARE
   cnt integer = 0;
   row_count integer;
 BEGIN
-FOR acq_rec IN SELECT acquisid FROM acquisitions ORDER BY acquisid
+create temp table origs as select objfid, orig_id, object_link from obj_field ;
+create unique index origs_id on origs(objfid);
+FOR acq_rec IN SELECT acquisid FROM acquisitions ORDER BY acquisid DESC
 LOOP
     update obj_head obh
-       set orig_id = obf.orig_id,
-           object_link = obf.object_link
-      from obj_field obf
-     where obf.objfid = obh.objid 
+       set orig_id = org.orig_id,
+           object_link = org.object_link
+      from origs org
+     where org.objfid = obh.objid
        and obh.objid  IN (SELECT objid FROM obj_head WHERE acquisid = acq_rec.acquisid)
        and obh.orig_id is null;
   GET DIAGNOSTICS row_count = ROW_COUNT;
