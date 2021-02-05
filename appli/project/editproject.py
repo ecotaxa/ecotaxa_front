@@ -58,8 +58,6 @@ def PrjEdit(PrjId, privs_only=False):
                 setattr(target_proj, a_var, gvp(a_var))
             if a_var == 'contact_user_id':
                 posted_contact_id = gvp(a_var)
-            if a_var == 'visible':
-                target_proj.visible = gvp('visible') == 'Y'
             if a_var == 'initclassiflist':
                 posted_classif_list = gvp('initclassiflist')
                 # The original list is displayed using str(list), so there is a bit of formatting inside
@@ -70,6 +68,9 @@ def PrjEdit(PrjId, privs_only=False):
                     posted_classif_list = posted_classif_list[:-1]
                 target_proj.init_classif_list = [int(cl_id) for cl_id in posted_classif_list.split(",")
                                                  if cl_id.isdigit()]
+
+        # Absent means "not checked"
+        target_proj.visible = gvp('visible') == 'Y'
 
         if previous_cnn != target_proj.cnn_network_id:
             flash("SCN features erased", "success")
