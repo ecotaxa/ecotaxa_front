@@ -48,7 +48,7 @@ class TaskSimpleImport(AsyncTask):
             try:
                 _target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
             except ApiException as ae:
-                if ae.status == 403:
+                if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
         self.param.ProjectId = prj_id
         preset = self.SimpleImportPreset.setdefault(current_user.id, {})

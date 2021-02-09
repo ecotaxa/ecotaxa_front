@@ -38,7 +38,7 @@ def objectdetails(objid):
         except ApiException as ae:
             if ae.status == 404:
                 return "Object doesn't exists"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 flash('You cannot read this object', 'error')
                 return PrintInCharte("<a href=/>Back to home</a>")
 

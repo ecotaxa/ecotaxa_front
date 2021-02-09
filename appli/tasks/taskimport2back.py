@@ -61,7 +61,7 @@ class TaskImportToBack(AsyncTask):
             try:
                 target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
             except ApiException as ae:
-                if ae.status == 403:
+                if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
         g.prjtitle = target_prj.title
         g.prjprojid = target_prj.projid
@@ -127,7 +127,7 @@ class TaskImportToBack(AsyncTask):
             try:
                 rsp: ImportPrepRsp = api.import_preparation_import_prep_project_id_post(self.param.ProjectId, req)
             except ApiException as ae:
-                if ae.status == 403:
+                if ae.status in (401, 403):
                     self.task.taskstate = "Error"
                     self.task.progressmsg = "You don't have enough permission on this project"
                     self.UpdateParam()

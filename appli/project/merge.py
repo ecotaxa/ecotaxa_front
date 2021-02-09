@@ -19,7 +19,7 @@ def PrjMerge(PrjId):
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exist"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 flash('You cannot merge this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 
@@ -74,7 +74,7 @@ def PrjMerge(PrjId):
         except ApiException as ae:
             if ae.status == 404:
                 return "Source project doesn't exist"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 flash('You cannot merge from this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 

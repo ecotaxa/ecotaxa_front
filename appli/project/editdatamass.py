@@ -56,7 +56,7 @@ def PrjEditDataMass(PrjId):
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 flash('You cannot do mass data edition on this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 
@@ -146,7 +146,7 @@ def PrjResetToPredicted(PrjId):
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 flash('You cannot do reset to predicted on this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 

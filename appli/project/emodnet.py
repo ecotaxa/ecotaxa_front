@@ -20,7 +20,7 @@ def EMODnet_export(prj_id):
             if ae.status == 404:
                 flash("Project doesn't exist", 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 flash('You cannot export this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 

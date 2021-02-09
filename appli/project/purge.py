@@ -19,7 +19,7 @@ def prjPurge(PrjId):
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 flash('You cannot Purge this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 
@@ -73,7 +73,7 @@ def prjPurge(PrjId):
                 try:
                     res: ObjectSetQueryRsp = api.query_object_set_parents_object_set_parents_post(objs)
                 except ApiException as ae:
-                    if ae.status == 403:
+                    if ae.status in (401, 403):
                         err = 'At least one object does not belong to you'
                     else:
                         raise

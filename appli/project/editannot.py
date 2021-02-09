@@ -23,7 +23,7 @@ def PrjEditAnnot(PrjId):
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exist"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 flash('You cannot do mass annotation edition on this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 

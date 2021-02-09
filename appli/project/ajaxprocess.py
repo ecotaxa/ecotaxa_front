@@ -46,7 +46,7 @@ def PrjManualClassif(_PrjId):
         else:
             ret = '<span class="label label-success">Database update Successful</span>'
     except ApiException as ae:
-        if ae.status == 403:
+        if ae.status in (401, 403):
             ret = '<span class="label label-danger">You cannot Annotate this project</span>'
         else:
             app.logger.exception(ae)
@@ -69,7 +69,7 @@ def PrjUpdateComment(ObjId):
         except ApiException as ae:
             if ae.status == 404:
                 return "Object doesn't exists"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 return "You cannot write data in this project"
 
     if nb_rows == 1:

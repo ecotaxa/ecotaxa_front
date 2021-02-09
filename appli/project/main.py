@@ -149,7 +149,7 @@ def _set_filters_from_prefs_and_get(page_vars, prj_id, a_request):
             user_vals = json.loads(prefs)
             page_vars.update(user_vals)
         except ApiException as ae:
-            if ae.status == 403:
+            if ae.status in (401, 403):
                 # Not logged in
                 pass
         except JSONDecodeError:
@@ -171,7 +171,7 @@ def _set_prefs_from_filters(filters, prj_id):
             if not isinstance(user_vals, dict):
                 user_vals = {}
         except ApiException as ae:
-            if ae.status == 403:
+            if ae.status in (401, 403):
                 # Not logged in
                 return
         except JSONDecodeError:
@@ -404,7 +404,7 @@ def LoadRightPane():
         except ApiException as ae:
             if ae.status == 404:
                 return "Invalid project"
-            elif ae.status == 403:
+            elif ae.status in (401, 403):
                 return "Access Denied"
 
     # get filter values from POST

@@ -107,7 +107,7 @@ def before_request_security():
             user_can_administrate_users = 3 in user.can_do
             mru_projects = user.last_used_projects
         except ApiException as ae:
-            if ae.status == 403:
+            if ae.status in (401, 403):
                 pass
     # current_user.is_authenticated
     g.cookieGAOK = request.cookies.get('GAOK', '')
