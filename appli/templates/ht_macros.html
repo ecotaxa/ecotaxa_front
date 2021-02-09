@@ -1,9 +1,17 @@
+{# HTML-producing jinja2 macros #}
 {% macro selectinput(name, values, value='') -%}
     <select name="{{ name }}" id="{{ name }}" > {# class="form-control"  #}
     {% for v in values %}
         <option value="{{ v }}"  {{ 'selected' if value==v }}>{{ v }}</option>
     {% endfor %}
     </select>
+{%- endmacro %}
+{% macro selectinput_form_control(name, values, value='') -%}
+<select class="form-control" name="{{ name }}" id="{{ name }}">
+    {% for v in values %}
+    <option value="{{ v }}" {{ 'selected' if value | string == v | string }}>{{ v }}</option>
+    {% endfor %}
+</select>
 {%- endmacro %}
 {% macro selectinputdict(name, values, value='', emptyitem=false) -%}
     <select name="{{ name }}" id="{{ name }}"  > {# class="form-control"  #}
@@ -12,4 +20,34 @@
         <option value="{{ k }}"  {{ 'selected' if value==k }}>{{ v }}</option>
     {% endfor %}
     </select>
+{%- endmacro %}
+{% macro selectinputtuple(name, values, value='') -%}
+<select class="form-control" name="{{ name }}" id="{{ name }}">
+    {% for v in values %}
+    <option value="{{ v[0] }}" {{ 'selected' if value | string == v[0] | string }}>{{ v[1] }}</option>
+    {% endfor %}
+</select>
+{%- endmacro %}
+{% macro selectinputdict_enriched(name, values, value='', addemptyrow=false ,extrataginfo='') -%}
+    <select name="{{ name }}" id="{{ name }}" {{ extrataginfo }}>
+    {% if addemptyrow %}
+      <option></option>
+    {% endif %}
+    {% for k,v in values.items() %}
+        <option value="{{ k or '' }}"  {{ 'selected' if value==k }}>{{ v }}</option>
+    {% endfor %}
+    </select>
+{%- endmacro %}
+
+{% macro checkboxinput(name, checkedvalue, value='',extra='') -%}
+<input type="checkbox" name="{{ name }}" id="{{ name }}" value="{{ checkedvalue }}"
+    {{ 'checked' if value==checkedvalue }} {{ extra|safe }}>
+{%- endmacro %}
+
+{% macro InputText (name,value='',extrataginfo='') -%}
+  <input type="text" name="{{ name }}" id="{{ name }}" value="{{ value  or '' }}"{{ extrataginfo }}>
+{%- endmacro %}
+
+{% macro TextArea (name,rows,value='',extrataginfo='') -%}
+  <textarea type="text" name="{{ name }}" id="{{ name }}" rows={{ rows }} {{ extrataginfo }}>{{ value  or ''}}</textarea>
 {%- endmacro %}

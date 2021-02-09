@@ -28,7 +28,6 @@ def PrjEdit(PrjId, privs_only=False):
                 flash('You cannot edit settings for this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
 
-    g.useselect4 = True
     g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_proj.projid, XSSEscape(target_proj.title))
     g.privs_only = privs_only
 

@@ -2,80 +2,93 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 
-import os,sys,pathlib,urllib.parse
+import os, sys, pathlib, urllib.parse
 
 # Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL
 if sys.platform.startswith('win32'):
     virtualprefix = sys.base_prefix
     if hasattr(sys, 'real_prefix'):
         sys.base_prefix = sys.real_prefix
-    if float(sys.winver.replace('-32','')) < 3.5:
+    if float(sys.winver.replace('-32', '')) < 3.5:
         from tkinter import _fix
+
         if "TCL_LIBRARY" not in os.environ:
             # reload module, so that sys.real_prefix be used
             from imp import reload
+
             reload(_fix)
     sys.base_prefix = virtualprefix
 
-VaultRootDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), "..","vault")
+VaultRootDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "vault")
 if not os.path.exists(VaultRootDir):
     os.mkdir(VaultRootDir)
-TempTaskDir=os.path.join(os.path.dirname(os.path.realpath(__file__)), "..","temptask")
+TempTaskDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "temptask")
 if not os.path.exists(TempTaskDir):
     os.mkdir(TempTaskDir)
 
-from flask import Flask,render_template,request,g
+from flask import Flask, render_template, request, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security
-import inspect,html,math,threading,time,traceback
+import inspect, html, math, threading, traceback
 import appli.securitycachedstore
 import matplotlib
+
 matplotlib.use('Agg')
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')
-app.config['SECURITY_MSG_DISABLED_ACCOUNT']=('Your account is disabled. Email to the User manager (list on the left) to re-activate.','error')
+app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = (
+    'Your account is disabled. Email to the User manager (list on the left) to re-activate.', 'error')
 app.logger.setLevel(10)
 
 if 'PYTHONEXECUTABLE' in app.config:
-    app.PythonExecutable=app.config['PYTHONEXECUTABLE']
+    app.PythonExecutable = app.config['PYTHONEXECUTABLE']
 else:
-    app.PythonExecutable="TBD"
+    app.PythonExecutable = "TBD"
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
-db = SQLAlchemy(app,session_options={'expire_on_commit':True}) # expire_on_commit évite d'avoir des select quand on manipule les objets aprés un commit.
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app, session_options={
+    'expire_on_commit': True})  # expire_on_commit évite d'avoir des select quand on manipule les objets aprés un commit.
+
 
 def XSSEscape(txt):
     return html.escape(txt)
 
+
 import appli.database
+
 # Setup Flask-Security
 user_datastore = appli.securitycachedstore.SQLAlchemyUserDatastoreCACHED(db, database.users, database.roles)
 security = Security(app, user_datastore)
 
-app.MRUClassif = {} # Dictionnaire des valeurs recement utilisé par les classifications
+app.MRUClassif = {}  # Dictionnaire des valeurs recement utilisé par les classifications
 app.MRUClassif_lock = threading.Lock()
 
-def ObjectToStr(o):
-#    return str([(n, v) for n, v in inspect.getmembers(o) if((not inspect.ismethod(v))and  (not inspect.isfunction(v))and  (n!='__module__')and  (n!='__doc__') and  (n!='__dict__') and  (n!='__dir__')and  (n!='__delattr__')and  (n!='__dir__')and  (n!='__dir__') )])
-    return str([(n, v) for n, v in inspect.getmembers(o) if(('method' not in str(v))and  (not inspect.isfunction(v))and  (n!='__module__')and  (n!='__doc__') and  (n!='__dict__') and  (n!='__dir__') and  (n!='__weakref__') )])
 
-def PrintInCharte(txt,title=None):
+def ObjectToStr(o):
+    #    return str([(n, v) for n, v in inspect.getmembers(o) if((not inspect.ismethod(v))and  (not inspect.isfunction(v))and  (n!='__module__')and  (n!='__doc__') and  (n!='__dict__') and  (n!='__dir__')and  (n!='__delattr__')and  (n!='__dir__')and  (n!='__dir__') )])
+    return str([(n, v) for n, v in inspect.getmembers(o) if (
+            ('method' not in str(v)) and (not inspect.isfunction(v)) and (n != '__module__') and (
+            n != '__doc__') and (n != '__dict__') and (n != '__dir__') and (n != '__weakref__'))])
+
+
+def PrintInCharte(txt, title=None):
     """
     Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
     :param txt: Texte à affiche
     :return: Texte rendu
     """
     AddTaskSummaryForTemplate()
-    module='' # Par defaut c'est Ecotaxa
-    if request.path.find('/part')>=0:
+    module = ''  # Par defaut c'est Ecotaxa
+    if request.path.find('/part') >= 0:
         module = 'part'
     if not title:
         if module == 'part':
-            title='EcoPart'
+            title = 'EcoPart'
         else:
             title = 'EcoTaxa'
-    return render_template('layout.html',bodycontent=txt,module=module,title=title)
+    return render_template('layout.html', bodycontent=txt, module=module, title=title)
+
 
 def ErrorFormat(txt):
     return """
@@ -83,7 +96,8 @@ def ErrorFormat(txt):
 				<table style='background-color: #f2dede'><tr><td width='50px' style='color: red;font-size: larger'> <span class='glyphicon glyphicon-exclamation-sign'></span></td>
 				<td style='color: red;font-size: larger;vertical-align: middle;'><B>%s</B></td>
 				</tr></table></div></div>
-    """%(txt)
+    """ % (txt)
+
 
 def AddTaskSummaryForTemplate():
     from flask_login import current_user
@@ -94,7 +108,7 @@ def AddTaskSummaryForTemplate():
     g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
-def gvg(varname,defvalue=''):
+def gvg(varname, defvalue=''):
     """
     Permet de récuperer une variable dans la Chaine GET ou de retourner une valeur par defaut
     :param varname: Variable à récuperer
@@ -103,7 +117,8 @@ def gvg(varname,defvalue=''):
     """
     return request.args.get(varname, defvalue)
 
-def gvp(varname,defvalue=''):
+
+def gvp(varname, defvalue=''):
     """
     Permet de récuperer une variable dans la Chaine POST ou de retourner une valeur par defaut
     :param varname: Variable à récuperer
@@ -111,6 +126,7 @@ def gvp(varname,defvalue=''):
     :return: Chaine de la variable ou valeur par default si elle n'existe pas
     """
     return request.form.get(varname, defvalue)
+
 
 def ntcv(v):
     """
@@ -122,7 +138,8 @@ def ntcv(v):
         return ""
     return v
 
-def nonetoformat(v,fmt :str):
+
+def nonetoformat(v, fmt: str):
     """
     Permet de faire un formatage qui n'aura lieu que si la donnée n'est pas nulle et permet récuperer une chaine que la source soit une données ou un None issue d'une DB
     :param v: Chaine potentiellement None
@@ -131,19 +148,23 @@ def nonetoformat(v,fmt :str):
     """
     if v is None:
         return ""
-    return ("{0:"+fmt+"}").format(v)
+    return ("{0:" + fmt + "}").format(v)
+
 
 def DecodeEqualList(txt):
-    res={}
+    res = {}
     for l in str(txt).splitlines():
-        ls=l.split('=',1)
-        if len(ls)==2:
-            res[ls[0].strip().lower()]=ls[1].strip().lower()
+        ls = l.split('=', 1)
+        if len(ls) == 2:
+            res[ls[0].strip().lower()] = ls[1].strip().lower()
     return res
+
+
 def EncodeEqualList(map):
-    l=["%s=%s"%(k,v) for k,v in map.items()]
+    l = ["%s=%s" % (k, v) for k, v in map.items()]
     l.sort()
     return "\n".join(l)
+
 
 def ScaleForDisplay(v):
     """
@@ -152,49 +173,56 @@ def ScaleForDisplay(v):
     :return: Texte formaté
     """
     if isinstance(v, (float)):
-        if(abs(v)<100):
-            return "%0.2f"%(v)
-        else: return "%0.f"%(v)
+        if (abs(v) < 100):
+            return "%0.2f" % (v)
+        else:
+            return "%0.f" % (v)
     elif v is None:
         return ""
     else:
         return v
 
+
 def XSSUnEscape(txt):
     return html.unescape(txt)
 
-def TaxoNameAddSpaces(name):
-    Parts=[XSSEscape(x) for x in ntcv(name).split('<')]
-    return ' &lt;&nbsp;'.join(Parts) # premier espace secable, second non
 
-def FormatError(Msg,*args,DoNotEscape=False,**kwargs):
-    caller_frameinfo=inspect.getframeinfo(sys._getframe(1))
+def TaxoNameAddSpaces(name):
+    Parts = [XSSEscape(x) for x in ntcv(name).split('<')]
+    return ' &lt;&nbsp;'.join(Parts)  # premier espace secable, second non
+
+
+def FormatError(Msg, *args, DoNotEscape=False, **kwargs):
+    caller_frameinfo = inspect.getframeinfo(sys._getframe(1))
     txt = Msg.format(*args, **kwargs)
-    app.logger.error("FormatError from {} : {}".format(caller_frameinfo.function,txt))
+    app.logger.error("FormatError from {} : {}".format(caller_frameinfo.function, txt))
     if not DoNotEscape:
-        Msg=Msg.replace('\n','__BR__')
-    txt=Msg.format(*args,**kwargs)
+        Msg = Msg.replace('\n', '__BR__')
+    txt = Msg.format(*args, **kwargs)
     if not DoNotEscape:
-        txt=XSSEscape(txt)
-    txt=txt.replace('__BR__','<br>')
+        txt = XSSEscape(txt)
+    txt = txt.replace('__BR__', '<br>')
     return "<div class='alert alert-danger' role='alert'>{}</div>".format(txt)
 
-def FAIcon(classname,styleclass='fas'):
-    return "<span class='{} fa-{}'></span> ".format(styleclass,classname)
 
-def FormatSuccess(Msg,*args,DoNotEscape=False,**kwargs):
-    txt=Msg.format(*args,**kwargs)
+def FAIcon(classname, styleclass='fas'):
+    return "<span class='{} fa-{}'></span> ".format(styleclass, classname)
+
+
+def FormatSuccess(Msg, *args, DoNotEscape=False, **kwargs):
+    txt = Msg.format(*args, **kwargs)
     if not DoNotEscape:
-        txt=XSSEscape(txt)
+        txt = XSSEscape(txt)
     if not DoNotEscape:
-        Msg=Msg.replace('\n','__BR__')
-    txt=Msg.format(*args,**kwargs)
+        Msg = Msg.replace('\n', '__BR__')
+    txt = Msg.format(*args, **kwargs)
     if not DoNotEscape:
-        txt=XSSEscape(txt)
-    txt=txt.replace('__BR__','<br>')
+        txt = XSSEscape(txt)
+    txt = txt.replace('__BR__', '<br>')
     return "<div class='alert alert-success' role='alert'>{}</div>".format(txt)
 
-def CreateDirConcurrentlyIfNeeded(DirPath:pathlib.Path):
+
+def CreateDirConcurrentlyIfNeeded(DirPath: pathlib.Path):
     """
     Permets de créer le répertoire passé en paramètre s'il n'existe pas et le crée si nécessaire.
     Si la création échoue, il teste s'il n'a pas été créé par un autre processus, et dans ce cas ne remonte pas d'erreur.
@@ -208,18 +236,19 @@ def CreateDirConcurrentlyIfNeeded(DirPath:pathlib.Path):
             raise e
 
 
-def ComputeLimitForImage(imgwidth,imgheight,LimitWidth,LimitHeight):
-    width=imgwidth
-    height=imgheight
-    if width>LimitWidth:
-        width=LimitWidth
-        height=math.trunc(imgheight*width/imgwidth)
-        if height==0: height=1
-    if height>LimitHeight:
-        height=LimitHeight
-        width=math.trunc(imgwidth*height/imgheight)
-        if width==0: width=1
-    return width,height
+def ComputeLimitForImage(imgwidth, imgheight, LimitWidth, LimitHeight):
+    width = imgwidth
+    height = imgheight
+    if width > LimitWidth:
+        width = LimitWidth
+        height = math.trunc(imgheight * width / imgwidth)
+        if height == 0: height = 1
+    if height > LimitHeight:
+        height = LimitHeight
+        width = math.trunc(imgwidth * height / imgheight)
+        if width == 0: width = 1
+    return width, height
+
 
 def GetAppManagerMailto():
     # Left here for EcoPart
@@ -227,7 +256,8 @@ def GetAppManagerMailto():
         return "<a href='mailto:{APPMANAGER_EMAIL}'>{APPMANAGER_NAME} ({APPMANAGER_EMAIL})</a>".format(**app.config)
     return ""
 
-def CalcAstralDayTime(Date,Time,Latitude,Longitude):
+
+def CalcAstralDayTime(Date, Time, Latitude, Longitude):
     """
     Calcule la position du soleil pour l'heure donnée.
     :param Date: Date UTC
@@ -238,27 +268,30 @@ def CalcAstralDayTime(Date,Time,Latitude,Longitude):
     """
     from astral import Location
     l = Location()
-    l.solar_depression= 'nautical'
+    l.solar_depression = 'nautical'
     l.latitude = Latitude
     l.longitude = Longitude
     s = l.sun(date=Date, local=False)
     # print(Date,Time,Latitude,Longitude,s,)
     Result = '?'
-    Inter=( {'d': 'sunrise', 'f': 'sunset' , 'r': 'D'}
-          , {'d': 'sunset' , 'f': 'dusk'   , 'r': 'U'}
-          , {'d': 'dusk'   , 'f': 'dawn'   , 'r': 'N'}
-          , {'d': 'dawn'   , 'f': 'sunrise', 'r': 'A'}
-           )
+    Inter = ({'d': 'sunrise', 'f': 'sunset', 'r': 'D'}
+             , {'d': 'sunset', 'f': 'dusk', 'r': 'U'}
+             , {'d': 'dusk', 'f': 'dawn', 'r': 'N'}
+             , {'d': 'dawn', 'f': 'sunrise', 'r': 'A'}
+             )
     for I in Inter:
-        if s[I['d']].time()<s[I['f']].time() and (Time>=s[I['d']].time() and Time<=s[I['f']].time() ) :
-            Result=I['r']
+        if s[I['d']].time() < s[I['f']].time() and (Time >= s[I['d']].time() and Time <= s[I['f']].time()):
+            Result = I['r']
         elif s[I['d']].time() > s[I['f']].time() and (Time >= s[I['d']].time() or Time <= s[I['f']].time()):
-            Result = I['r'] # Changement de jour entre les 2 parties de l'intervalle
+            Result = I['r']  # Changement de jour entre les 2 parties de l'intervalle
     return Result
+
 
 _utf_warn = "HINT: Did you use utf-8 while transferring?"
 
 import unicodedata
+
+
 def _suspicious_str(path: str):
     if not isinstance(path, str):
         return False
@@ -274,22 +307,25 @@ def _suspicious_str(path: str):
     except ValueError:
         return True
 
+
 def UtfDiag(errors, path: str):
     if _suspicious_str(path):
         errors.append(_utf_warn)
 
-def UtfDiag2(fn, path1:str, path2: str):
+
+def UtfDiag2(fn, path1: str, path2: str):
     if _suspicious_str(path1) or _suspicious_str(path2):
         fn(_utf_warn)
 
+
 def UtfDiag3(path: str):
     if _suspicious_str(path):
-        return ". "+_utf_warn
+        return ". " + _utf_warn
     return ""
+
 
 # Ici les imports des modules qui definissent des routes
 import appli.main
-import appli.adminusers
 import appli.tasks.taskmanager
 import appli.search.view
 import appli.project.view
@@ -299,18 +335,22 @@ import appli.usermgmnt
 import appli.api_proxy
 import appli.project.emodnet
 
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template("errors/404.html"), 404
+
 
 @app.errorhandler(403)
 def forbidden(e):
     return render_template("errors/403.html"), 403
 
+
 @app.errorhandler(500)
 def internal_server_error(e):
     app.logger.exception(e)
     return render_template("errors/500.html"), 500
+
 
 @app.errorhandler(Exception)
 def unhandled_exception(e):
@@ -318,39 +358,45 @@ def unhandled_exception(e):
     app.logger.exception(e)
     # Ajout des informations d'exception dans le template custom
     tb_list = traceback.format_tb(e.__traceback__)
-    s = "<b>Error:</b> %s <br><b>Description: </b>%s \n<b>Traceback:</b>" % (html.escape(str(e.__class__)), html.escape(str(e)))
+    s = "<b>Error:</b> %s <br><b>Description: </b>%s \n<b>Traceback:</b>" % (
+        html.escape(str(e.__class__)), html.escape(str(e)))
     for i in tb_list[::-1]:
         s += "\n" + html.escape(i)
     db.session.rollback()
-    return render_template('errors/500.html' ,trace=s), 500
+    return render_template('errors/500.html', trace=s), 500
 
-def JinjaFormatDateTime(d,format='%Y-%m-%d %H:%M:%S'):
+
+def JinjaFormatDateTime(d, format='%Y-%m-%d %H:%M:%S'):
     if d is None:
         return ""
     return d.strftime(format)
+
 
 def JinjaNl2BR(t):
     return t.replace('\n', '<br>\n')
 
 
 def JinjaGetManagerList(sujet=""):
-    LstUsers=database.GetAll("""select distinct u.email,u.name,Lower(u.name)
+    LstUsers = database.GetAll("""select distinct u.email,u.name,Lower(u.name)
 FROM users_roles ur join users u on ur.user_id=u.id
 where ur.role_id=2
 and u.active=TRUE and email like '%@%'
 order by Lower(u.name)""")
     if sujet:
-        sujet="?"+urllib.parse.urlencode({"subject":sujet}).replace('+','%20')
-    return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet,*r) for r in LstUsers ])
+        sujet = "?" + urllib.parse.urlencode({"subject": sujet}).replace('+', '%20')
+    return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
-ecotaxa_version="2.5.4"
+
+ecotaxa_version = "2.5.4"
+
+
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version+" 2021-02-03"
+    return ecotaxa_version + " 2021-02-03"
+
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
-app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
-
+app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
 2021-02-03 : V 2.5.4
@@ -633,3 +679,15 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList,GetEcotaxaVersio
              Included license.txt File
 
 """
+
+
+def load_admin():
+    # Import a sub-application for admin
+    # IMPORTANT: The admin blueprint needs to be loaded before flaskAdmin below,
+    # as it registers routes/templates in /admin, and flask-admin does it as well.
+    from .admin.admin_blueprint import adminBlueprint
+    app.register_blueprint(adminBlueprint)
+    # noinspection PyUnresolvedReferences
+    from .admin.admin_from_flask import flaskAdmin
+
+load_admin()

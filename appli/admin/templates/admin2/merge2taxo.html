@@ -1,0 +1,78 @@
+{% extends 'admin/master.html' %}
+
+{% block head %}
+  {{ super() }}
+  {# Import the bare minimum for this page #}
+  <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='select2_405/js/select2.full.js') }}"></script>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2_405/css/select2.css') }}">
+  <script src="{{ admin_static.url(filename='bootstrap/bootstrap3/js/bootstrap.min.js', v='3.3.5') }}" type="text/javascript"></script>
+{% endblock %}
+
+{% block tail_js %}
+  {#  Prevent load of old select2 which is in flask-admin templates and conflicts with "our" select2
+      by overriding the block. #}
+{% endblock %}
+
+<h4>MERGE 2 CATEGORIES</h4><a href=/admin>Back to admin home</a>
+
+
+{% block body %}
+
+  <script>
+      $(document).ready(function () {
+          $("#src,#dest").select2({
+              ajax: {
+                  url: "/search/taxo",
+                  dataType: 'json',
+                  delay: 250,
+                  data: function (params) {
+                      return {q: params.term, page: params.page};
+                  },
+                  processResults: function (data, page) {
+                      return {results: data};
+                  },
+                  cache: true
+              },
+              minimumInputLength: 3
+          }); // Select2 Ajax
+      }); // Ready
+  </script>
+  <style> {# On agrandi la taile de la drop down de la popup #}
+  UL#select2-taxolb-results {
+      max-height: 500px;
+  }
+  </style>
+
+  {# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
+  <form method="get" action="?">
+    <h4>
+      This tool permits
+      <ul>
+        <li>To transfer all objects from a category into another category
+        <li>Remove the emptied category from Ecotaxa
+      </ul>
+    </h4>
+
+    <table>
+      <tr>
+        <td>Select source Category (will be deleted after merge) :</td>
+        <td>
+          <select id="src" name="src" style="width: 210px"> </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Select Target Category :</td>
+        <td>
+          <select id="dest" name="dest" style="width: 210px"> </select>
+        </td>
+      </tr>
+    </table>
+
+    <input type=submit class="btn btn-primary" value="GO">
+    <p style='font-size: 18px;color:red;'><span class='glyphicon glyphicon-warning-sign'></span>
+      Warning This operation is irreversible !!!</p>
+  </form>
+  <p>If you want to merge two categories having the same name, edit and rename the category that you will delete and
+    then merge it with the correct one.</p>
+{% endblock %}

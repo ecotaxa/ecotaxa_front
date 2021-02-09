@@ -1,0 +1,19 @@
+{% extends 'admin/model/create.html' %}
+
+{% block body %}
+{% include 'admin2/users_header.html' %}
+    {{ super() }}
+{% endblock %}
+{% block tail %}
+    {{ super() }}
+<script src="/static/jquery-ui/jquery-ui.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/jquery-ui/jquery-ui.min.css">
+<script>
+  $( function() {
+    $( "#organisation" ).autocomplete({
+      source: '/ajaxorganisationlist'
+      ,minLength: 0
+    });
+  } );
+</script>
+{% endblock %}

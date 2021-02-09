@@ -10,7 +10,6 @@ from appli import gvg
 def logincreate():
     # update users set organisation=trim(organisation) where organisation is not null;
     txt=""
-    g.useselect4=True
     g.reCaptchaID=app.config.get('RECAPTCHAID')
     return render_template('security/logincreate.html', txt=txt,title="EcoTaxa: Create an account")
 

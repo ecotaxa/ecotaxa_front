@@ -1,0 +1,40 @@
+/*
+    bootstrap disables submenu from 4.something. These styles re-enable them.
+ */
+.dropdown-submenu {
+    position:relative;
+}
+.dropdown-submenu>.dropdown-menu {
+    top:-50%;
+    left:-180%;
+    width: 200%;
+    max-width: 200%;
+    float: left;
+    margin-top:-6px;
+    margin-left:-1px;
+    -webkit-border-radius:6px 6px 6px 6px;
+    -moz-border-radius:6px 6px 6px 6px;
+    border-radius:6px 6px 6px 6px;
+}
+.dropdown-submenu .dropdown-item {
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+    display:block;
+}
+.dropdown-submenu>a:before {
+    display:inline-block;
+    content:" ";
+    width:0;
+    height:0;
+    border-color:transparent;
+    border-style:solid;
+    border-width:5px 5px 5px 0;
+    border-right-color:#cccccc;
+    margin-top:5px;
+    margin-right:5px;
+}
+.dropdown-submenu:hover>a:after {
+    border-left-color:#ffffff;
+}

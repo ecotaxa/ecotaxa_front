@@ -1,25 +1,7 @@
-{% macro selectinput(name, values, value='') -%}
-<select class="form-control" name="{{ name }}" id="{{ name }}">
-    {% for v in values %}
-    <option value="{{ v }}" {{ 'selected' if value | string == v | string }}>{{ v }}</option>
-    {% endfor %}
-</select>
-{%- endmacro %}
-{% macro selectinputtuple(name, values, value='') -%}
-<select class="form-control" name="{{ name }}" id="{{ name }}">
-    {% for v in values %}
-    <option value="{{ v[0] }}" {{ 'selected' if value | string == v[0] | string }}>{{ v[1] }}</option>
-    {% endfor %}
-</select>
-{%- endmacro %}
-
-{% macro checkboxinput(name, checkedvalue, value='',extra='') -%}
-<input type="checkbox" name="{{ name }}" id="{{ name }}" value="{{ checkedvalue }}"
-    {{ 'checked' if value==checkedvalue }} {{ extra|safe }}>
-{%- endmacro %}
 
 {% extends "layout.html" %}
 {% import "js_macros.html" as js %}
+{% import "ht_macros.html" as ht %}
 
 {% block headcenter %}
 <script src="/static/jquerycontextmenu/jquery.ui.position.min.js" type="text/javascript"></script>
@@ -187,26 +169,26 @@
                 <label for="ipp" style="margin-bottom: 0;"><span class="glyphicon glyphicon-th"></span></label>
             </td>
             <td style="padding-right: 5px;">
-                {{ selectinputtuple("ipp",[('0','Fit'),('1','1'),('5','5'),('10','10'),('20','20'),('50','50'),('100','100'),('200','200'),('500','500'),('1000','1000')],data.ipp) }}
+                {{ ht.selectinputtuple("ipp",[('0','Fit'),('1','1'),('5','5'),('10','10'),('20','20'),('50','50'),('100','100'),('200','200'),('500','500'),('1000','1000')],data.ipp) }}
             </td>
             <td style="padding-right: 5px;"> <label for="zoom" style="margin-bottom: 0;"><span
                         class="glyphicon glyphicon-zoom-in"></span>%</label>
             </td>
             <td style="padding-right: 5px;">
-                {{ selectinput("zoom",['10','20','30','40','50','60','70','80','90','100','200'],data.zoom) }}</td>
+                {{ ht.selectinput_form_control("zoom",['10','20','30','40','50','60','70','80','90','100','200'],data.zoom) }}</td>
             <td>
             </td>
             <td>
                 <label for="magenabled" style="margin-bottom: 0;">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 </label>
-                {{ checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
+                {{ ht.checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
             </td>
             <td>
                 <label for="popupenabled" style="margin-bottom: 0;padding-left: 8px;">
                     <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
                 </label>
-                {{ checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
+                {{ ht.checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
             </td>
             <td>&nbsp;
                 <button type=button class="btn btn-primary btn-xs" onclick="LoadRightPane();">

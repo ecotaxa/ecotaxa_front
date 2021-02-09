@@ -16,11 +16,7 @@
 <link rel="stylesheet" type="text/css" href="/static/DataTables1.10.18/Bootstrap-3.3.7/css/bootstrap.min.css"/>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui/jquery-ui.min.css') }}">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style20190201.css') }}">
-  {%if g.get('useselect4') %}
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2_405/css/select2.css') }}">
-  {%else %}
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2/css/select2.css') }}">
-  {% endif %}
 
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -32,56 +28,13 @@
 <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='jquery-ui/jquery-ui.min.js') }}"></script>
 <script type="text/javascript" src="/static/DataTables1.10.18/Bootstrap-3.3.7/js/bootstrap.min.js"></script>
-{%if g.get('useselect4') %}
 <script src="{{ url_for('static', filename='select2_405/js/select2.full.js') }}"></script>
-{%else %}
-<script src="{{ url_for('static', filename='select2/js/select2.full.js') }}"></script>
-{% endif %}
 <script src="{{ url_for('static', filename='jquery.lazy.1.7.10.min.js') }}"></script>
 <link rel="stylesheet" href="/static/multizoom.css" type="text/css" />
 <script type="text/javascript" src="/static/multizoom.js"></script>
 <script src="{{ url_for('static', filename='common_20201020.js')}}"></script>
 <link rel="stylesheet" href="/static/fontawesome-free-5.5.0-web/css/all.min.css">
-
-<style>
-.dropdown-submenu {
-    position:relative;
-}
-.dropdown-submenu>.dropdown-menu {
-    top:-50%;
-    left:-180%;
-    width: 200%;
-    max-width: 200%;
-    float: left;
-    margin-top:-6px;
-    margin-left:-1px;
-    -webkit-border-radius:6px 6px 6px 6px;
-    -moz-border-radius:6px 6px 6px 6px;
-    border-radius:6px 6px 6px 6px;
-}
-.dropdown-submenu .dropdown-item {
-    overflow: hidden;
-    text-overflow:ellipsis;
-}
-.dropdown-submenu:hover>.dropdown-menu {
-    display:block;
-}
-.dropdown-submenu>a:before {
-    display:inline-block;
-    content:" ";
-    width:0;
-    height:0;
-    border-color:transparent;
-    border-style:solid;
-    border-width:5px 5px 5px 0px;
-    border-right-color:#cccccc;
-    margin-top:5px;
-    margin-right:5px;
-}
-.dropdown-submenu:hover>a:after {
-    border-left-color:#ffffff;
-}
-</style>
+<link rel="stylesheet" href="/static/bootstrap.dropdown.submenu.css">
 
 <script>
 function AddZoom(element)
@@ -157,7 +110,7 @@ $(document).ready(function() {
     {{ header|safe }}
 </div>{# headinfo #}
 <!-- Main body -->
-<div id="bodydiv" {% if g.bodydivmargin %} style="margin:{{ g.bodydivmargin }};" {% endif %}>
+<div id="bodydiv">
 {% block body %}{% endblock %}
     {{ bodycontent|safe }}
 </div>

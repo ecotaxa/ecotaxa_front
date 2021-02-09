@@ -334,7 +334,6 @@ def indexPrj(PrjId):
 
     appli.AddTaskSummaryForTemplate()
     filtertab = getcommonfilters(data)
-    g.useselect4 = True
     return render_template('project/projectmain.html', top="", lefta=classiftab, leftb=filtertab,
                            right=right, data=data, title='EcoTaxa ' + ntcv(Prj.title))
 
