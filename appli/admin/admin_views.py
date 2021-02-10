@@ -50,8 +50,8 @@ class UsersView(ModelView):
     form_base_class = SecureStrippingBaseForm
 
     # Override displayed fields
-    column_list = ('email', 'name', 'organisation', 'active', 'roles', 'country')
-    form_columns = ('email', 'name', 'organisation', 'active', 'roles', 'password',
+    column_list = ('email', 'mail_status', 'name', 'organisation', 'active', 'roles', 'country')
+    form_columns = ('email', 'mail_status', 'mail_status_date', 'name', 'organisation', 'active', 'roles', 'password',
                     'country', 'usercreationreason')
     column_searchable_list = ('email', 'name')
     form_overrides = {

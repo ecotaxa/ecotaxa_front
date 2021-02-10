@@ -2,17 +2,15 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import datetime
-import json
 import os
-import time
-from typing import Dict
 
 import psycopg2.extras
 from flask_login import current_user
 from flask_security import UserMixin, RoleMixin
-from sqlalchemy import Index, func, Integer, String, SmallInteger, Boolean, DateTime
+from sqlalchemy import Index, func, Integer, String, SmallInteger, Boolean, DateTime, event, DDL
 from sqlalchemy.dialects.postgresql import BIGINT, FLOAT, VARCHAR, DATE, TIME, DOUBLE_PRECISION, INTEGER, CHAR, \
     TIMESTAMP, REAL
+from sqlalchemy.dialects.postgresql.base import BYTEA
 
 from appli import db, app, g, XSSEscape
 
@@ -63,8 +61,13 @@ class users(db.Model, UserMixin):
                             backref=db.backref('users', lazy='dynamic'))  #
     preferences = db.Column(db.String(40000))
     country = db.Column(db.String(50))
+    # TODO: naming of below columns
     usercreationdate = db.Column(TIMESTAMP, default=func.now())
     usercreationreason = db.Column(db.String(1000))
+    # Mail status: 'V' for verified, 'W' for wrong
+    mail_status = db.Column(CHAR, server_default=' ')
+    # Date the mail status was set
+    mail_status_date = db.Column(TIMESTAMP)
 
     def __str__(self):
         return "{0} ({1})".format(self.name, self.email)
@@ -259,6 +262,7 @@ for i in range(1, 31):
 
 class Objects(db.Model):
     __tablename__ = 'obj_head'
+    # Self
     objid = db.Column(BIGINT, db.Sequence('seq_objects'), primary_key=True)
     # Parent
     acquisid = db.Column(INTEGER, db.ForeignKey('acquisitions.acquisid'), nullable=False)
@@ -302,6 +306,13 @@ class Objects(db.Model):
     random_value = db.Column(INTEGER)
 
 
+event.listen(
+    Objects.__table__,
+    "after_create",
+    DDL("ALTER TABLE users SET (fillfactor = 90, statistics_target = 10000)"
+        ).execute_if(dialect='postgresql')
+)
+
 
 class ObjectsFields(db.Model):
     __tablename__ = 'obj_field'
@@ -316,6 +327,12 @@ for i in range(1, 501):
 for i in range(1, 21):
     setattr(ObjectsFields, "t%02d" % i, db.Column(VARCHAR(250)))
 
+event.listen(
+    ObjectsFields.__table__,
+    "after_create",
+    DDL("ALTER TABLE obj_field SET (fillfactor = 90, statistics_target = 10000)"
+        ).execute_if(dialect='postgresql')
+)
 
 # noinspection PyPep8Naming
 class Objects_cnn_features(db.Model):
@@ -366,8 +383,27 @@ class Images(db.Model):
     thumb_width = db.Column(INTEGER)
     thumb_height = db.Column(INTEGER)
 
+
 # Covering index with rank
 Index('is_imageobjrank', Images.__table__.c.objid, Images.__table__.c.imgrank, unique=True)
+# To track corresponding files
+Index('is_image_file', Images.__table__.c.file_name)
+
+
+class ImageFile(db.Model):
+    # An image on disk. Can be referenced (or not...) from the application
+    __tablename__ = 'image_file'
+    # Path inside the Vault
+    path = db.Column(VARCHAR, primary_key=True)
+    # State w/r to the application
+    state = db.Column(CHAR, default="?", server_default="?", nullable=False)
+    # What can be found in digest column
+    digest_type = db.Column(CHAR, default="?", server_default="?", nullable=False)
+    # A digital signature
+    digest = db.Column(BYTEA, nullable=True)
+
+
+Index('is_phy_image_file', ImageFile.__table__.c.digest_type, ImageFile.__table__.c.digest)
 
 
 # Sequence("seq_images",1,1)
