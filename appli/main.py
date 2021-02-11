@@ -92,6 +92,8 @@ def before_request_security():
         return
     if "/vault/" in request.url:
         return
+    if "/api/" in request.url:
+        return
     # print(request.form)
     user_is_logged = False
     user_can_create = False

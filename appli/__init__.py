@@ -387,11 +387,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.4"
+ecotaxa_version = "2.5.5"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-02-03"
+    return ecotaxa_version + " 2021-02-11"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -399,6 +399,14 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-02-03 : V 2.5.5
+    Feature #603: Export abundances / concentrations of 0 in DwCA export
+    Bug #583 (starting): Set-up database storage of information about images on disk. Add an API
+        entry point to store MD5 of present files. 
+    Feature #579: Amend database to store users email validity information.
+    Bug #602 (Api): PUT projects/{project_id} i.e. project update fails silently on some errors
+    Feature #612: Relocate admin app in a dedicated sub-app. 
+    Bug #587: "Visible for all visitors" checkbox cannot be changed in project settings". 
 2021-02-03 : V 2.5.4
     Bug #548 (starting): Move object orig_id from obj_field DB table to obj_head. 
     Bug #523: Cosmetic fix (order of categories in project settings page).

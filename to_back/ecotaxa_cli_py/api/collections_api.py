@@ -154,18 +154,19 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def emodnet_format_export_collections_collection_id_export_emodnet_get(self, collection_id, dry_run, **kwargs):  # noqa: E501
+    def emodnet_format_export_collections_collection_id_export_emodnet_get(self, collection_id, dry_run, with_zeroes, **kwargs):  # noqa: E501
         """Emodnet Format Export  # noqa: E501
 
-        Export the collection in EMODnet format, @see https://www.emodnet-ingestion.eu/ Produces a DwC-A archive into a temporary directory, ready for download. - param `dry_run`: If set, then only a diagnostic of doability will be done. Maybe useful, a reader in Python: https://python-dwca-reader.readthedocs.io/en/latest/index.html  *Currently only for admins*  # noqa: E501
+        Export the collection in EMODnet format, @see https://www.emodnet-ingestion.eu/ Produces a DwC-A archive into a temporary directory, ready for download. - param `dry_run`: If set, then only a diagnostic of doability will be done. - param `with_zeroes`: If set, then *absent* records will be generated, in the relevant samples,  for categories present in other samples.  Maybe useful, a reader in Python: https://python-dwca-reader.readthedocs.io/en/latest/index.html  *Currently only for admins*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.emodnet_format_export_collections_collection_id_export_emodnet_get(collection_id, dry_run, async_req=True)
+        >>> thread = api.emodnet_format_export_collections_collection_id_export_emodnet_get(collection_id, dry_run, with_zeroes, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param int collection_id: (required)
         :param bool dry_run: (required)
+        :param bool with_zeroes: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -178,20 +179,21 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(collection_id, dry_run, **kwargs)  # noqa: E501
+        return self.emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(collection_id, dry_run, with_zeroes, **kwargs)  # noqa: E501
 
-    def emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(self, collection_id, dry_run, **kwargs):  # noqa: E501
+    def emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(self, collection_id, dry_run, with_zeroes, **kwargs):  # noqa: E501
         """Emodnet Format Export  # noqa: E501
 
-        Export the collection in EMODnet format, @see https://www.emodnet-ingestion.eu/ Produces a DwC-A archive into a temporary directory, ready for download. - param `dry_run`: If set, then only a diagnostic of doability will be done. Maybe useful, a reader in Python: https://python-dwca-reader.readthedocs.io/en/latest/index.html  *Currently only for admins*  # noqa: E501
+        Export the collection in EMODnet format, @see https://www.emodnet-ingestion.eu/ Produces a DwC-A archive into a temporary directory, ready for download. - param `dry_run`: If set, then only a diagnostic of doability will be done. - param `with_zeroes`: If set, then *absent* records will be generated, in the relevant samples,  for categories present in other samples.  Maybe useful, a reader in Python: https://python-dwca-reader.readthedocs.io/en/latest/index.html  *Currently only for admins*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(collection_id, dry_run, async_req=True)
+        >>> thread = api.emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(collection_id, dry_run, with_zeroes, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param int collection_id: (required)
         :param bool dry_run: (required)
+        :param bool with_zeroes: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -210,7 +212,8 @@ class CollectionsApi(object):
 
         all_params = [
             'collection_id',
-            'dry_run'
+            'dry_run',
+            'with_zeroes'
         ]
         all_params.extend(
             [
@@ -237,6 +240,10 @@ class CollectionsApi(object):
         if self.api_client.client_side_validation and ('dry_run' not in local_var_params or  # noqa: E501
                                                         local_var_params['dry_run'] is None):  # noqa: E501
             raise ApiValueError("Missing the required parameter `dry_run` when calling `emodnet_format_export_collections_collection_id_export_emodnet_get`")  # noqa: E501
+        # verify the required parameter 'with_zeroes' is set
+        if self.api_client.client_side_validation and ('with_zeroes' not in local_var_params or  # noqa: E501
+                                                        local_var_params['with_zeroes'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `with_zeroes` when calling `emodnet_format_export_collections_collection_id_export_emodnet_get`")  # noqa: E501
 
         collection_formats = {}
 
@@ -247,6 +254,8 @@ class CollectionsApi(object):
         query_params = []
         if 'dry_run' in local_var_params and local_var_params['dry_run'] is not None:  # noqa: E501
             query_params.append(('dry_run', local_var_params['dry_run']))  # noqa: E501
+        if 'with_zeroes' in local_var_params and local_var_params['with_zeroes'] is not None:  # noqa: E501
+            query_params.append(('with_zeroes', local_var_params['with_zeroes']))  # noqa: E501
 
         header_params = {}
 
