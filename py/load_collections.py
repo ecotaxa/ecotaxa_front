@@ -5,20 +5,15 @@
 # LOV collections creation via API.
 #
 import io
+import logging
 import zipfile
 from typing import Union, IO
 
 from urllib3.exceptions import HTTPWarning
 
-from datasets import CollectionDescription, tara_bongo, moose1, tara_multinet
+from datasets import CollectionDescription
 from ecotaxa_model import *
 from simple_client import SimpleClient
-import logging
-
-BASE_URL = "http://localhost:5001"
-
-# production
-BASE_URL = "https://ecotaxa.obs-vlfr.fr"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -83,8 +78,9 @@ class EcoTaxaApiClient(SimpleClient):
         rsp = self.delete("/collections/%d" % coll_id)
         return rsp
 
-    def export_collection(self, coll_id: int, dry_run: bool) -> EMODnetExportRsp:
-        rsp = self.get(EMODnetExportRsp, "/collections/%d/export/emodnet?dry_run=%s" % (coll_id, dry_run))
+    def export_collection(self, coll_id: int, dry_run: bool, with_zeroes: bool) -> EMODnetExportRsp:
+        rsp = self.get(EMODnetExportRsp, "/collections/%d/export/emodnet?dry_run=%s&with_zeroes=%s"
+                       % (coll_id, dry_run, with_zeroes))
         return rsp
 
     def get_task_file(self, task_id: int):
@@ -165,7 +161,7 @@ def create_collection(client: EcoTaxaApiClient, coll_in: CollectionDescription):
     # Check after update
     coll_reread = client.query_collection(coll_id)
     logging.info("After update: %s", coll_reread)
-    export_out = client.export_collection(coll_id, True)
+    export_out = client.export_collection(coll_id, True, True)
     for a_msg in export_out.warnings:
         logging.warning("(BACK):%s", a_msg)
     for a_msg in export_out.errors:
@@ -192,7 +188,7 @@ def lookup_users(client: EcoTaxaApiClient, list_label: str, present: List[UserMo
     """
     ret = []
     present_ids = set([a_present_user.id for a_present_user in present])
-    for a_line in names_list.splitlines():
+    for a_line in names_list.strip().splitlines():
         words = a_line.split()
         nb_words = len(words)
         if nb_words > 4 or "Consortium" in words:
@@ -217,23 +213,4 @@ def create_all(client: EcoTaxaApiClient, collections: List[CollectionDescription
         create_collection(client, a_coll)
 
 
-def main():
-    try:
-        username, password = open("creds.txt").read().split()[:2]
-    except FileNotFoundError:
-        print("Need a creds.txt, first line username, second line password.")
-        return
-    # /!\ Don't hardcode credentials in source code, especially if it goes to GH /!\
-    client = EcoTaxaApiClient(url=BASE_URL,
-                              email=username,
-                              password=password)
-    client.open()
-    client.whoami()
-    create_all(client,
-               [  # moose1,  "Net type 'triple_net' in sample triple_35_200_20170907 is not mapped to BODC vocabulary"
-                   tara_bongo,
-                   tara_multinet])
 
-
-if __name__ == '__main__':
-    main()
