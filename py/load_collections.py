@@ -156,6 +156,9 @@ def create_collection(client: EcoTaxaApiClient, coll_in: CollectionDescription):
     coll.citation = coll_in.citation
     coll.abstract = coll_in.abstract
     coll.description = coll_in.description
+    # TODO: temp
+    coll.external_id = coll_in.title
+    coll.external_id_system = "local"
     client.update_collection(coll)
     # TODO: License
     # Check after update
