@@ -1,4 +1,3 @@
-
 {% extends "layout.html" %}
 {% import "js_macros.html" as js %}
 {% import "ht_macros.html" as ht %}
@@ -430,15 +429,18 @@
         var RightPanelScrollPosAfterLoad = 0;
         DragInProgress = false;
         drag_start_time = null;
+
         function InGreyButton(s, eraser) {
             return " <button type=button class='btn btn-gris btn-xs' onclick='" + eraser + ";LoadRightPane();'><div>" + s + "</div> <span class='glyphicon glyphicon-remove'></span></button>";
         }
+
         $('#SharePageBtn').click(function (e) {
             if (e.ctrlKey)
                 LoadRightPane('mailN');
             else
                 LoadRightPane('mail');
         });
+
         function LoadRightPane(NoAjax, SaveInProfile) {
             document.activeElement.blur();
             if (Object.keys(PendingChanges).length > 0)
@@ -667,6 +669,7 @@
         var theOnlyLazyLoader = null;
 
         var theOnlyRightPaneXHR = null;
+
         function AsyncSingleLoadRightPane(elem, req) {
             // Load right pane, but cancel a previous load if in progress. github #281.
             // Below is a copy/paste/simplify of JQuery load(), as this primitive does
@@ -743,158 +746,166 @@
             LoadRightPane(); {# 20181024 Autorefresh #}
             //return false;
         }
+
         function gotopage(nopage) {
             $("#pageoffset").val(nopage);
             LoadRightPane();
         }
 
         $(document).ready(function () {
-            if ("{{data.sortorder}}" == "desc")    //TOCHECK LN
+            if ("{{data.sortorder}}" == "desc") {   //TOCHECK LN
                 SortToggle('NoRefresh');
+            }
             $('[data-toggle="tooltip"]').tooltip();
             $("#titledivtitle").css("max-width", $("#titlediv").parent().width() - 150);
             {% if g.taxofilter %}
-            SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }}
-        );
+            SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }});
+            {% endif %}
 
-        {% endif %}
+            var PreviousSort = $('#sortby').val();
+            {# Si on choisit un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields #}
+            $('#sortby').change(function () {
+                $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
+                $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
+                PreviousSort = $(this).val();
+                $("#pageoffset").val(0); {# Changement d'ordre on revient à la première page #}
+                    LoadRightPane(); {# 20181024 Autorefresh #}
+                });
+            $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () { LoadRightPane(); }); {# 20181024 Autorefresh #}
+            {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
+                $('#sortby').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
+                $('#ipp').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
+                $('#zoom').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
+            #}
 
-        var PreviousSort = $('#sortby').val();
-        {# Si on choisit un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields #}
-        $('#sortby').change(function () {
-            $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
-            $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
-            PreviousSort = $(this).val();
-            $("#pageoffset").val(0); {# Changement d'ordre on revient à la première page #}
-                LoadRightPane(); {# 20181024 Autorefresh #}
+            $("#filt_annot").{{ js.select2_user() }}; // Select2 Ajax
+            $("#filt_freenum").select2({
+                ajax: {
+                    url: "/prj/GetFieldList/{{ g.Projid }}/n",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) { return { q: params.term, page: params.page }; },
+                    processResults: function (data, page) { return { results: data }; },
+                    cache: true
+                }, placeholder: "Num. field", dropdownCssClass: "width240"
             });
-        $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () { LoadRightPane(); }); {# 20181024 Autorefresh #}
-        {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
-            $('#sortby').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-            $('#ipp').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-            $('#zoom').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-        #}
+            $("#filt_freetxt").select2({
+                ajax: {
+                    url: "/prj/GetFieldList/{{ g.Projid }}/t",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) { return { q: params.term, page: params.page }; },
+                    processResults: function (data, page) { return { results: data }; },
+                    cache: true
+                }, placeholder: "Text field", dropdownCssClass: "width240"
+            });
 
-        $("#filt_annot").{{ js.select2_user() }}; // Select2 Ajax
-        $("#filt_freenum").select2({
-            ajax: {
-                url: "/prj/GetFieldList/{{ g.Projid }}/n",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) { return { q: params.term, page: params.page }; },
-                processResults: function (data, page) { return { results: data }; },
-                cache: true
-            }, placeholder: "Num. field", dropdownCssClass: "width240"
-        });
-        $("#filt_freetxt").select2({
-            ajax: {
-                url: "/prj/GetFieldList/{{ g.Projid }}/t",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) { return { q: params.term, page: params.page }; },
-                processResults: function (data, page) { return { results: data }; },
-                cache: true
-            }, placeholder: "Text field", dropdownCssClass: "width240"
-        });
+            {#     Ctrl + A affecte la valeur selectionnée #}
+            {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function (e) { #}
+            $(document).bind('keydown', 'Test1', function (e) {
+                if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+                    // CTRL but no SHIFT
+                    switch (e.keyCode) {
+                        case 65:
+                            {# CTRL + A #}
+                            SelectAll(e);
+                            e.preventDefault();
+                        break;
+                        case 68:
+                            {# CTRL + D #}
+                            AssignTaxoLbToSelection();
+                            e.preventDefault();
+                        break;
+                        case 76:
+                            {# CTRL + L #}
+                            ValidateSelection('V');
+                            e.preventDefault();
+                        break;
+                        case 83:
+                            {# CTRL + S #}
+                            SavePendingChanges();
+                            e.preventDefault();
+                        break;
+                        case 37:
+                            KeyboardMoveSelection("LEFT");
+                            e.preventDefault();
+                        break;
+                        case 38:
+                            KeyboardMoveSelection("UP");
+                            e.preventDefault();
+                        break;
+                        case 39:
+                            KeyboardMoveSelection("RIGHT");
+                            e.preventDefault();
+                        break;
+                        case 40:
+                            KeyboardMoveSelection("DOWN");
+                            e.preventDefault();
+                        break;
+                    }
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                    switch (e.keyCode) {
+                        case 37:
+                            var curr_page = +$("#pageoffset").val();
+                            if (curr_page>0) gotopage(curr_page-1);
+                            e.preventDefault();
+                        break;
+                        case 39:
+                            var curr_page = +$("#pageoffset").val();
+                            gotopage(curr_page+1);
+                            e.preventDefault();
+                        break;
+                    }
+                }
+            });
 
-        {#     Ctrl + A affecte la valeur selectionnée #}
-        {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function (e) { #}
-        $(document).bind('keydown', 'Test1', function (e) {
-            if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
-                // CTRL but no SHIFT
-                switch (e.keyCode) {
-                    case 65:
-                        {# CTRL + A #}
-                        SelectAll(e);
-                        e.preventDefault();
-                    break;
-                    case 68:
-                        {# CTRL + D #}
-                        AssignTaxoLbToSelection();
-                        e.preventDefault();
-                    break;
-                    case 76:
-                        {# CTRL + L #}
-                        ValidateSelection('V');
-                        e.preventDefault();
-                    break;
-                    case 83:
-                        {# CTRL + S #}
-                        SavePendingChanges();
-                        e.preventDefault();
-                    break;
-                    case 37:
-                        KeyboardMoveSelection("LEFT");
-                        e.preventDefault();
-                    break;
-                    case 38:
-                        KeyboardMoveSelection("UP");
-                        e.preventDefault();
-                    break;
-                    case 39:
-                        KeyboardMoveSelection("RIGHT");
-                        e.preventDefault();
-                    break;
-                    case 40:
-                        KeyboardMoveSelection("DOWN");
-                        e.preventDefault();
-                    break;
-                }
-            }
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-                switch (e.keyCode) {
-                    case 37:
-                        var curr_page = +$("#pageoffset").val();
-                        if (curr_page>0) gotopage(curr_page-1);
-                        e.preventDefault();
-                    break;
-                    case 39:
-                        var curr_page = +$("#pageoffset").val();
-                        gotopage(curr_page+1);
-                        e.preventDefault();
-                    break;
-                }
-            }
-        });
-        {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvre la popup #}
+            {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvre la popup #}
             $(document).bind('keydown', function (e) {
                 if ((document.activeElement.nodeName == 'BODY') || (document.activeElement.nodeName == 'SPAN'))
                     if ((e.keyCode >= 65) && (e.keyCode <= 90) && !e.ctrlKey && !e.metaKey)
                         if ($(".ui-selected").length > 0) {
-                            var typedKey = String.fromCharCode(e.keyCode)
-                            var sel2 = $('#taxolbanno');
-                            // Signal the query code that a first something was typed
-                            sel2.data('first_key', typedKey);
-                            // open, it will trigger the amended query
+                            const typedKey = String.fromCharCode(e.keyCode).toLocaleLowerCase();
+                            const sel2 = $('#taxolbanno');
+                            // When the select2 "open" executes, it will trigger a query to the server
+                            // with what's inside, i.e. nothing. The line below will add present key
+                            // into the query params. Search for 'first_keys' magic value in code.
+                            sel2.data('first_keys', sel2.data('first_keys') && '' + typedKey);
+                            // Open the select2, it will trigger the amended query...
                             sel2.select2("open");
-                            // visibility of the beginning filter
-                            $('.taxopopup .select2-search__field').val(typedKey);
-                            // no previous value, so always a change, so selecting several times the same value
-                            // will end up in several times the same annotation
+                            // ...and switch on the visibility of the beginning filter.
+                            const search = $('.taxopopup .select2-search__field');
+                            // Add current key into search as well
+                            search.val(search.val() + typedKey);
+                            // Clear previous value, so there will always be a change,
+                            // so selecting several times the same value will end up in
+                            // several times the same annotation.
                             sel2.val("").trigger('change');
                             //console.log(e);
                             e.preventDefault();
                         }
             });
-            $('#filt_validfromdate,#filt_validtodate').datetimepicker({ format: 'Y-m-d H:i' });
-        });
+            $('#filt_validfromdate,#filt_validtodate').datetimepicker({format: 'Y-m-d H:i'});
+        }); // document.ready
+
         function UpdateSelectedCounter() {
             // Asynchronously update the selected counter, as it takes some time for jQuery to find selected nodes
             // especially on 1000 images setting
-            setTimeout(function() {
+            setTimeout(function () {
                 var nbr = $("#column-right").find("td.ui-selected").size();
                 if (nbr > 0) nbr = nbr + " Selected";
                 else nbr = "";
                 $('#nbrselected').text(nbr);
             }, 0);
         }
+
         function PostAddImages() {
             $(document).scrollTop(0);
             // Required to  have Select2 component working on Bootstrap Popup
             $.fn.modal.Constructor.prototype.enforceFocus = function () { };
             // Add Zoom & lazy loading of images
             theOnlyLazyLoader = jQuery('div#column-right img.lazy').Lazy({
-                bind: 'event', 
+                bind: 'event',
                 afterLoad: function (element) {
                     if ($('#magenabled').prop("checked") == false)
                         return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
@@ -905,20 +916,22 @@
             // Make sub image draggable
             jQuery('.imgtab td').draggable({
                 revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
-                cursorAt: { top: 0, left: 0 },
+                cursorAt: {top: 0, left: 0},
                 start: function (event, ui) {
                     DragInProgress = true;
                     drag_start_time = event.timeStamp;
                 },
                 stop: function (event, ui) {
                     DragInProgress = false;
-                    if (event.timeStamp-drag_start_time < 150) {
+                    if (event.timeStamp - drag_start_time < 150) {
                         // Less than 150ms, so not at drag, rather a click while moving mouse
                         event.target.click();
                     }
                     drag_start_time = null;
                 },
-                helper: function (ev) { return $("<img src='/static/drag_cursor.png'>"); }
+                helper: function (ev) {
+                    return $("<img src='/static/drag_cursor.png'>");
+                }
             });
             {#        jQuery('.imgtab td img').draggable({ revert: true, revertDuration: 0 });#}
             // Make the cell clickable for selection
@@ -940,7 +953,7 @@
                         return;
                     }
                 }
-                if ((e.ctrlKey) || (e.metaKey)) 
+                if ((e.ctrlKey) || (e.metaKey))
                     {#  20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple #}
                     $('.ui-selected').removeClass('ui-selected');
                 if ($(e.target).hasClass('linestart')) // select line (except this first column)
@@ -970,8 +983,10 @@
                                 //console.log("zoomtracker");
                                 jQuery($node).draggable({
                                     revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
-                                    cursorAt: { top: 0, left: 0 },
-                                    helper: function (ev) { return $("<img src='/static/drag_cursor.png'>"); }
+                                    cursorAt: {top: 0, left: 0},
+                                    helper: function (ev) {
+                                        return $("<img src='/static/drag_cursor.png'>");
+                                    }
                                 });
                             }
                         });
@@ -1023,6 +1038,7 @@
             ClearAnnotFree();
             LoadRightPane();
         }
+
         function ClearAnnotFree() {
             $("#filt_freenumst,#filt_freenumend,#filt_freetxtval").val("");
             $("#filt_annot,#filt_freenum,#filt_freetxt").val(null).trigger("change");
@@ -1036,6 +1052,7 @@
         function GotoWithFilter(Target) {
             LoadRightPane(Target);
         }
+
         function AdvancedAnnot() {
             if ($('#projid').val() == null) return;
             $("#PopupDetails .modal-content").html("Loading...");
@@ -1046,7 +1063,9 @@
             $("#PopupDetails .modal-content").load(url, function () {
                 var lst = "";
                 var sampleid = $('#filt_annot');
-                lst = $.map(sampleid.find('option:selected'), function (element) { return $(element).val() }).join(', ');
+                lst = $.map(sampleid.find('option:selected'), function (element) {
+                    return $(element).val()
+                }).join(', ');
                 $('#txtlstsample').val(lst);
                 SampleTxtToCB();
 

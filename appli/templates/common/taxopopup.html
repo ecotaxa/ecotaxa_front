@@ -16,14 +16,15 @@ function EnableSelect2Taxolb() {
             url: "/search/taxo",
             dataType: 'json',
             delay: 250,
-            data: function (params) {
-                 // If first letter was typed, use it for filtering
-                 first = $(this).data('first_key');
+            data: function (query) {
+                 // Cook the query params for above url, from control's content
+                 const first = $(this).data('first_keys');
                  if (first) {
-                     params.term = first;
-                     $(this).data('first_key', null);
+                     // If first letter(s) typed, use for filtering
+                     query.term = first;
+                     $(this).data('first_keys', null);
                  }
-                 return { q: params.term
+                 return { q: query.term
                          {% if g.Projid %}
                          ,projid:{{ g.Projid }}
                          {% endif %} };
