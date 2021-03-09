@@ -107,6 +107,7 @@ Index('IS_TaxonomySource', Taxonomy.__table__.c.id_source)
 Index('IS_TaxonomyNameLow', func.lower(Taxonomy.__table__.c.name))
 Index('IS_TaxonomyDispNameLow', func.lower(
     Taxonomy.__table__.c.display_name))  # create index IS_TaxonomyDispNameLow on taxonomy(lower(display_name));
+Index('is_taxo_parent_name', Taxonomy.__table__.c.parent_id, Taxonomy.__table__.c.name, unique=True)
 
 
 class Projects(db.Model):
@@ -653,6 +654,10 @@ class Collection(_Model):
     """ A set of project see #82, #335, #519 """
     __tablename__ = 'collection'
     id = db.Column(INTEGER, db.Sequence('collection_id_seq'), primary_key=True)
+    """ Internal identifier """
+    external_id = db.Column(VARCHAR, nullable=False)
+    """ External identifier, e.g. doi:10.xxxx/eml.1.1 """
+    external_id_system = db.Column(VARCHAR, nullable=False)
     provider_user_id = db.Column(INTEGER, db.ForeignKey('users.id'))
     title = db.Column(VARCHAR, nullable=False)
     contact_user_id = db.Column(INTEGER, db.ForeignKey('users.id'))
