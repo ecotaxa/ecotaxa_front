@@ -12,7 +12,7 @@ Flask-Security==3.0.0
 Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
 itsdangerous==1.1.0
-Jinja2==2.10
+Jinja2==2.11.3
 joblib==0.13.0
 kiwisolver==1.0.1
 Mako==1.0.7
