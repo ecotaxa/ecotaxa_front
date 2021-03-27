@@ -6,6 +6,7 @@
 #
 import io
 import logging
+import time
 import zipfile
 from typing import Union, IO
 
@@ -78,9 +79,9 @@ class EcoTaxaApiClient(SimpleClient):
         rsp = self.delete("/collections/%d" % coll_id)
         return rsp
 
-    def export_collection(self, coll_id: int, dry_run: bool, with_zeroes: bool) -> EMODnetExportRsp:
-        rsp = self.get(EMODnetExportRsp, "/collections/%d/export/emodnet?dry_run=%s&with_zeroes=%s"
-                       % (coll_id, dry_run, with_zeroes))
+    def export_collection(self, coll_id: int, dry_run: bool, with_zeroes: bool, auto_morpho: bool) -> EMODnetExportRsp:
+        rsp = self.get(EMODnetExportRsp, "/collections/%d/export/emodnet?dry_run=%s&with_zeroes=%s&auto_morpho=%s"
+                       % (coll_id, dry_run, with_zeroes, auto_morpho))
         return rsp
 
     def get_task_file(self, task_id: int):
@@ -164,7 +165,7 @@ def create_collection(client: EcoTaxaApiClient, coll_in: CollectionDescription):
     # Check after update
     coll_reread = client.query_collection(coll_id)
     logging.info("After update: %s", coll_reread)
-    export_out = client.export_collection(coll_id, True, True)
+    export_out = client.export_collection(coll_id, True, True, False)
     for a_msg in export_out.warnings:
         logging.warning("(BACK):%s", a_msg)
     for a_msg in export_out.errors:
@@ -214,6 +215,3 @@ def lookup_users(client: EcoTaxaApiClient, list_label: str, present: List[UserMo
 def create_all(client: EcoTaxaApiClient, collections: List[CollectionDescription]):
     for a_coll in collections:
         create_collection(client, a_coll)
-
-
-
