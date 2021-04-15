@@ -5,6 +5,8 @@
 # Some classes around displayed parts in page
 #
 import json
+from collections import OrderedDict
+from typing import Dict
 
 from appli import ScaleForDisplay, ntcv
 
@@ -13,6 +15,7 @@ class ClassificationPageStats(object):
     """
         Top animated bar with statistics about current project + current filters.
     """
+
     @staticmethod
     def render(filters, projid):
         # Make API call params from filters
@@ -64,25 +67,37 @@ class PopoverPane(object):
         A small hint-style window giving a set of information about the image.
     """
 
+    # The fields displayed by default, whatever the setup in the project
+    always_there = OrderedDict([("usr.name", "by"),
+                                ("txp.name", "parent"),
+                                ("sam.orig_id", "in"),
+                                ("obj.orig_id", "Image Name"),
+                                ("obj.classif_auto_score", "Score"),
+                                ("obj.classif_when", "Validation date")])
+
     def __init__(self, field_list, row):
-        self.field_list = field_list
-        self.row = row
+        """
+        """
+        self.field_list: OrderedDict = field_list
+        self.row: Dict = row
 
     def render(self, width_on_row):
         row = self.row
-        poptitletxt = "%s" % (row['orig_id'],)
-        poptxt = ""
-        # poptxt="<p style='white-space: nowrap;color:black;'>cat. %s"%(r['taxoname'],)
-        if ntcv(row['classifwhoname']) != "":
-            poptxt += "<em>by</em> %s<br>" % (row['classifwhoname'])
-        poptxt += "<em>parent</em> " + ntcv(row['taxoparent'])
-        poptxt += "<br><em>in</em> " + ntcv(row['samplename'])
-        for k, v in self.field_list.items():
-            if k == 'classif_auto_score' and row["classif_qual"] == 'V':
-                poptxt += "<br>%s : %s" % (v, "-")
+        lines = []
+        poptitletxt = self.row['obj.orig_id']
+        for fld, disp in self.field_list.items():
+            if fld == 'obj.orig_id':
+                continue
+            elif fld == 'usr.name':
+                if ntcv(row['usr.name']) != "":
+                    lines.append("<em>%s</em> %s" % (disp, row[fld]))
+            elif fld == 'txp.name':
+                lines.append("<em>%s</em> %s" % (disp, ntcv(row[fld])))
+            elif fld == 'sam.orig_id':
+                lines.append("<em>%s</em> %s" % (disp, ntcv(row[fld])))
+            elif fld == 'obj.classif_auto_score' and row["obj.classif_qual"] == 'V':
+                lines.append("%s : %s" % (disp, "-"))
             else:
-                poptxt += "<br>%s : %s" % (v, ScaleForDisplay(row["extra_" + k]))
-        if row['classif_when']:
-            poptxt += "<br>Validation date : %s" % (ntcv(row['classif_when']),)
+                lines.append("%s : %s" % (disp, ScaleForDisplay(row[fld])))
         return "data-title=\"{0}\" data-content=\"{1}\" data-placement='{2}'". \
-            format(poptitletxt, poptxt, 'left' if width_on_row > 500 else 'right')
+            format(poptitletxt, '<br>'.join(lines), 'left' if width_on_row > 500 else 'right')

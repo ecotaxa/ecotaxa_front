@@ -2,8 +2,9 @@ import collections
 import math
 import os
 import urllib.parse
+from collections import OrderedDict
 from json import JSONDecodeError
-from typing import List
+from typing import List, Dict, Any
 
 import psycopg2.extras
 from flask import render_template, g, flash, json, request, url_for
@@ -14,7 +15,7 @@ import appli
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, database, gvg, gvp, DecodeEqualList, ScaleForDisplay, ntcv, \
     XSSEscape
-from appli.constants import DayTimeList
+from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields
 from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
@@ -54,6 +55,8 @@ def GetFieldList(Prj, champ='classiffieldlist'):
     fieldlist = collections.OrderedDict()
     fieldlist["orig_id"] = "Image Name"
     fieldlist["classif_auto_score"] = "Score"
+    fieldlist["classif_when"] = "Validation date"
+    fieldlist["random_value"] = "Random"
 
     objmap = DecodeEqualList(Prj.mappingobj)
     for v in ('objtime', 'objdate', 'latitude', 'longitude', 'depth_min', 'depth_max'):
@@ -71,32 +74,34 @@ def GetFieldList(Prj, champ='classiffieldlist'):
     return fieldlist
 
 
-def GetFieldListFromModel(proj_model, presentation_field='classiffieldlist'):
+def GetFieldListFromModel(proj_model, presentation_field):
     """
-        Same as above, but for the Model object returned by API call.
+        For a given presentation field, return an ordered dict of correspondence
+        between the DB column name and what the user will see for this value.
         @return: A dict with key = column names (in 'objects' DB view)
                              value = label for this column, as seen in UI
     """
-    # Hard-coded default first values, not 'free' columns
-    ret = collections.OrderedDict()
-    ret["orig_id"] = "Image Name"
-    ret["classif_auto_score"] = "Score"
+    assert presentation_field in ('popoverfieldlist', 'classiffieldlist')
 
-    # Get free object columns, dict with key=free column name, value=db column like n04
+    # Get free object columns, dict with key=free column name, value=db column, like n04 for example
+    # This is just for checking that each presentation field is OK
     objmap = proj_model.obj_free_cols
-    # Add fixed object columns which are not mapped
-    for v in ('objtime', 'objdate', 'latitude', 'longitude', 'depth_min', 'depth_max'):
-        objmap[v] = v
 
-    # fieldlist fait le mapping entre le nom fonctionnel et le nom à affiche
+    # fieldlist fait le mapping entre le nom fonctionnel et le nom à afficher
     # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe).
     # e.g. objtime=time\r\nequiv_diameter=diameter [px]
     presentation = DecodeEqualList(getattr(proj_model, presentation_field))
-    fieldlist2 = {}
+    fieldlist2 = {}  # key: db column, value: displayed label
     for field, dispname in presentation.items():
         if field in objmap:
+            # 99% of display fields are from 'free columns'...
             fieldlist2[objmap[field]] = dispname
-    # Overwrite or add in returned dict
+        elif field in MappableObjectColumnsSet:
+            # ... but sometimes not, e.g. mapping objtime to 'Sampling Time'
+            fieldlist2[field] = dispname
+
+    ret = collections.OrderedDict()
+    # Return in alphabetical order of the visible label, e.g. 'plla546.min'
     for k, v in sorted(fieldlist2.items(), key=lambda t: t[1]):
         ret[k] = v
 
@@ -261,24 +266,26 @@ def indexPrj(PrjId):
             data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(r['id'], r['name'])
 
     fieldlist = GetFieldList(Prj)
-    fieldlist["classif_when"] = "Validation date"
     data["fieldlist"] = fieldlist
-    data["sortlist"] = collections.OrderedDict({"": ""})
-    data["sortlist"]["classifname"] = "Category Name"
-    data["sortlist"]["random_value"] = "Random"
-    data["sortlist"]["classif_when"] = "Validation date"
-    for k, v in fieldlist.items():
-        data["sortlist"][k] = v
 
-    data["statuslist"] = collections.OrderedDict({"": "All"})
-    data["statuslist"]["U"] = "Unclassified"
-    data["statuslist"]["P"] = "Predicted"
-    data["statuslist"]["NV"] = "Not Validated"
-    data["statuslist"]["V"] = "Validated"
-    data["statuslist"]["PV"] = "Predicted or Validated"
-    data["statuslist"]["NVM"] = "Validated by others"
-    data["statuslist"]["VM"] = "Validated by me"
-    data["statuslist"]["D"] = "Dubious"
+    sortlist = collections.OrderedDict({"": ""})
+    data["sortlist"] = sortlist
+    sortlist["classifname"] = "Category Name"  # Historical, == txo.name
+    sortlist.update(SortableObjectFields)
+    # All displayable fields are sortable
+    for k, v in fieldlist.items():
+        sortlist[k] = v
+
+    statuslist = collections.OrderedDict({"": "All"})
+    data["statuslist"] = statuslist
+    statuslist["U"] = "Unclassified"
+    statuslist["P"] = "Predicted"
+    statuslist["NV"] = "Not Validated"
+    statuslist["V"] = "Validated"
+    statuslist["PV"] = "Predicted or Validated"
+    statuslist["NVM"] = "Validated by others"
+    statuslist["VM"] = "Validated by me"
+    statuslist["D"] = "Dubious"
 
     g.PrjAnnotate = g.PrjManager = Prj.CheckRight(2)
     if not g.PrjManager:
@@ -301,36 +308,36 @@ def indexPrj(PrjId):
     if g.PrjAnnotate:
         if Prj.status == "Annotate":
             g.headmenu.append(
-                ("/Task/Create/TaskClassifAuto2?projid=%d" % (PrjId,), "Train and Predict identifications V2"))
+                ("/Task/Create/TaskClassifAuto2?projid=%d" % PrjId, "Train and Predict identifications V2"))
             g.headmenuF.append(
                 ("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2')", "Train and Predict identifications V2"))
-            g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d&frommodel=Y" % (PrjId,),
+            g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d&frommodel=Y" % PrjId,
                                "Predict identifications from trained model"))
             g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2?frommodel=Y')",
                                 "Predict identifications from trained model"))
-            g.headmenu.append(("/Task/Create/TaskImport?p=%d" % (PrjId,), "Import images and metadata"))
+            g.headmenu.append(("/Task/Create/TaskImport?p=%d" % PrjId, "Import images and metadata"))
 
         g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
         g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')", "Export"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
-        g.headmenu.append(("/prj/edit/%d" % (PrjId,), "Edit project settings"))
-        g.headmenu.append(("/Task/Create/TaskSubset?p=%d" % (PrjId,), "Extract Subset"))
-        g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d')" % (PrjId,),
+        g.headmenu.append(("/prj/edit/%d" % PrjId, "Edit project settings"))
+        g.headmenu.append(("/Task/Create/TaskSubset?p=%d" % PrjId, "Extract Subset"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d')" % PrjId,
                             "Extract Subset"))
-        g.headmenu.append(("/prj/merge/%d" % (PrjId,), "Merge another project in this project"))
-        g.headmenu.append(("/prj/EditAnnot/%d" % (PrjId,), "Edit or erase annotations massively"))
-        g.headmenu.append(("/prj/editdatamass/%d" % (PrjId,), "Batch edit metadata"))
-        g.headmenuF.append(("javascript:GotoWithFilter('/prj/editdatamass/%d')" % (PrjId,), "Batch edit metadata"))
-        g.headmenu.append(("/prj/resettopredicted/%d" % (PrjId,), "Reset status to Predicted"))
+        g.headmenu.append(("/prj/merge/%d" % PrjId, "Merge another project in this project"))
+        g.headmenu.append(("/prj/EditAnnot/%d" % PrjId, "Edit or erase annotations massively"))
+        g.headmenu.append(("/prj/editdatamass/%d" % PrjId, "Batch edit metadata"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/prj/editdatamass/%d')" % PrjId, "Batch edit metadata"))
+        g.headmenu.append(("/prj/resettopredicted/%d" % PrjId, "Reset status to Predicted"))
         g.headmenuF.append(
-            ("javascript:GotoWithFilter('/prj/resettopredicted/%d')" % (PrjId,), "Reset status to Predicted"))
-        g.headmenu.append(("/prjPurge/%d" % (PrjId,), "Delete objects or project"))
-        g.headmenuF.append(("javascript:GotoWithFilter('/prjPurge/%d')" % (PrjId,), "Delete objects"))
+            ("javascript:GotoWithFilter('/prj/resettopredicted/%d')" % PrjId, "Reset status to Predicted"))
+        g.headmenu.append(("/prjPurge/%d" % PrjId, "Delete objects or project"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/prjPurge/%d')" % PrjId, "Delete objects"))
         # EMODNet Audit & Export
         # g.headmenu.append(("", "SEP"))
-        # g.headmenu.append(("/prj/emodnet/%d" % (PrjId,), "EMODnet export"))
+        # g.headmenu.append(("/prj/emodnet/%d" % PrjId, "EMODnet export"))
 
     appli.AddTaskSummaryForTemplate()
     filtertab = getcommonfilters(data)
@@ -409,8 +416,8 @@ def LoadRightPane():
 
     # get filter values from POST
     Filt = {}
-    for k, v in FilterList.items():
-        Filt[k] = gvp(k, v)
+    for col, v in FilterList.items():
+        Filt[col] = gvp(col, v)
 
     _set_prefs_from_filters(Filt, PrjId)
 
@@ -420,15 +427,18 @@ def LoadRightPane():
 
     # récupération des parametres d'affichage
     filtres = {}
-    for k in sharedfilter.FilterList:
-        filtres[k] = gvp(k, "")
+    for col in sharedfilter.FilterList:
+        filtres[col] = gvp(col, "")
     if g.PublicViewMode:  # Si c'est une lecture publique
         filtres["statusfilter"] = "V"  # Les anonymes ne peuvent voir que les objets validés
 
     pageoffset = int(gvp("pageoffset", "0"))
     sortby = Filt["sortby"]
     sortorder = Filt["sortorder"]
-    display_fields = Filt["dispfield"]
+    # The fields AKA DB columns needed under each image, a space-separated list of
+    # DB column names, with dispfield_ prefix, e.g. ' dispfield_orig_id dispfield_classif_auto_score dispfield_n33'
+    # @see building of <ul id="dispfieldlist"> for why
+    posted_columns_to_display = Filt["dispfield"]
     images_per_page = int(Filt["ipp"])
     zoom = int(Filt["zoom"])
     popup_enabled = Filt["popupenabled"] == "1"
@@ -437,68 +447,83 @@ def LoadRightPane():
     ippdb = images_per_page if images_per_page > 0 else 200
 
     if popup_enabled:
-        popover_fields = GetFieldListFromModel(Prj, presentation_field='popoverfieldlist')
-        popover_fields.pop('orig_id', '')
-        popover_fields.pop('objtime', '')
+        popover_columns = GetFieldListFromModel(Prj, presentation_field='popoverfieldlist')
     else:
-        popover_fields = {}
+        popover_columns = {}
 
-    fieldlist = GetFieldListFromModel(Prj)
-    fieldlist.pop('orig_id', '')
-    fieldlist.pop('objtime', '')
+    possible_proj_fields = GetFieldListFromModel(Prj, presentation_field='classiffieldlist')
 
-    sql_selects = ["obj.objid, obj.classif_qual, "
-                   "(SELECT COUNT(img.imgrank) FROM images img WHERE img.objid = obj.objid) AS imgcount, "
-                   "obj.complement_info",
-                   "i.height, i.width, i.thumb_file_name, i.thumb_height, i.thumb_width, i.file_name",
-                   "t.name taxoname, t.display_name"]
-    sql_from = """
-       FROM objects obj JOIN obj_cte ON obj.objid = obj_cte.objid
-  LEFT JOIN images i ON obj.objid=i.objid AND i.imgrank = (SELECT MIN(img.imgrank) 
-                                                             FROM images img WHERE img.objid = obj.objid)
-  LEFT JOIN taxonomy t ON obj.classif_id=t.id """
+    # Sanitize fields to display
+    post_prfx_len = len("dispfield_")
+    posted_columns_list = [a_col[post_prfx_len:]
+                           for a_col in posted_columns_to_display.strip().split()
+                           if len(a_col) > post_prfx_len]
 
-    # Add needed columns from project
-    extra_cols = []
-    for k in fieldlist.keys():
-        # But exclude the ones we don't display
-        if k in display_fields or k in popover_fields:
-            extra_cols.append("obj." + k + " as extra_" + k)
-    if extra_cols:
-        sql_selects.append(", ".join(extra_cols))
+    # The mandatory columns, _always_ needed as they are referenced
+    api_cols = ["obj.objid", "obj.classif_qual", "obj.imgcount", "obj.complement_info",
+                "img.height", "img.width", "img.thumb_file_name", "img.thumb_height", "img.thumb_width",
+                "img.file_name",
+                "txo.name", "txo.display_name"]
+    api_cols_to_display = OrderedDict()
 
-    # Optional columns that we have to select if they are used
-    if 'orig_id' in display_fields or popup_enabled:
-        sql_selects.append("obj.orig_id")
-    if 'objtime' in display_fields:
-        sql_selects.append("TO_CHAR(obj.objtime,'HH24:MI') objtime")
-    if 'classif_when' in display_fields or 'classif_when' in popover_fields or popup_enabled:
-        sql_selects.append("TO_CHAR(obj.classif_when,'YYYY-MM-DD HH24:MI') classif_when")
+    # Add to query the needed columns, from project settings and current query
+    col_2_free = {v: k for k, v in Prj.obj_free_cols.items()}
+
+    def prefix_db_col(a_col):
+        # Return a column with a prefix in API convention, depending on its origin
+        if a_col in MappableObjectColumnsSet or a_col in SortableObjectFields:
+            return "obj." + a_col
+        elif a_col in col_2_free:
+            return "fre." + col_2_free[a_col]
+        elif a_col == "classifname":
+            # Historical, kept for old URLs which might have been transmitted to third-parties
+            return "txo.name"
+        return None
+
+    # Compute optional columns needed under the image
+    for col in posted_columns_list:
+        # Determine the label for displaying
+        if col in possible_proj_fields:
+            col_label = possible_proj_fields[col]
+        elif col in SortableObjectFields:
+            col_label = SortableObjectFields[col]
+        elif col in MappableObjectColumnsSet:
+            col_label = col
+        else:
+            continue
+        # Tranform into an API-naming column name
+        prfx_col = prefix_db_col(col)
+        if prfx_col is not None:
+            api_cols.append(prfx_col)
+            api_cols_to_display[prfx_col] = col_label
+    # We also need from back-end all the columns for populating popover,
+    # namely the stadard columns + the customized ones (per project)
     if popup_enabled:
-        sql_selects.extend(["u.name classifwhoname",
-                            "t2.name taxoparent",
-                            "s.orig_id samplename"])
-        sql_from += """
-   LEFT JOIN users u ON obj.classif_who=u.id
-   LEFT JOIN taxonomy t2 ON t.parent_id=t2.id
-        JOIN samples s ON obj.sampleid=s.sampleid
-        """
-
-    sqlparam = {"projid": PrjId}
+        popover_prfxed_cols = PopoverPane.always_there.copy()
+        api_cols.extend([a_col for a_col in PopoverPane.always_there.keys()
+                         if a_col not in api_cols])
+        # Change setup columns to API notation
+        popover_prfxed_cols.update(OrderedDict([(prefix_db_col(k), v)
+                                                for k, v in popover_columns.items()]))
+        api_cols.extend([a_col for a_col in popover_prfxed_cols.keys()
+                         if a_col is not None and a_col not in api_cols])
+    else:
+        popover_prfxed_cols = {}
 
     # Query objects, using filters and page size, in project
     with ApiClient(ObjectsApi, request) as api:
         sort_col_signed = None
         if sortby != "":
-            sort_col_signed = ("-" if sortorder.lower() == "desc" else "") + sortby
+            sort_col_signed = ("-" if sortorder.lower() == "desc" else "") + prefix_db_col(sortby)
+        needed_fields = ",".join(api_cols)
         while True:
             objs: ObjectSetQueryRsp = \
                 api.get_object_set_object_set_project_id_query_post(project_id=PrjId,
                                                                     project_filters=filtres,
+                                                                    fields=needed_fields,
                                                                     order_field=sort_col_signed,
                                                                     window_size=ippdb,
                                                                     window_start=pageoffset * ippdb)
-            object_ids = objs.object_ids
             pagecount = math.ceil(objs.total_ids / ippdb)
             if pageoffset < pagecount:
                 # There are objects to view, we're done
@@ -509,23 +534,12 @@ def LoadRightPane():
                 pageoffset = 0
                 break
 
-    if len(object_ids) == 0:
-        object_ids.append(-1)  # Non existing objid as VALUES() cannot be empty
-
-    sql_vals = ",".join(["(%d,%d)" % (objid, rnk) for rnk, objid in enumerate(object_ids)])
-    sql_cte = "WITH obj_cte (objid, ordr) AS (VALUES" + sql_vals + ")\n"
-
-    sql_order = " ORDER BY ordr"
-
-    sql_stmt = sql_cte + "SELECT " + ",\n       ".join(sql_selects) + sql_from + sql_order
-    res = GetAll(sql_stmt, sqlparam, False)
-
-    # Produce page lines using request output
-    # print("%s\n%s\n%s"%(sql,sqlparam,res))
+    # Produce page lines using API call output
     html = ["<a name='toppage'/>"]
     # DEBUG SPAN
     # html.append(
-    #     "<span>%d vs %d, %s %s</span>" % (objs.total_ids, len(object_ids), Prj.highest_right, display_fields))
+    #     "<span>%d vs %d vs %d, %s %s</span>" % (
+    #         objs.total_ids, len(object_ids), len(objs.details), Prj.highest_right, api_cols_to_display))
     trcount = 1
     fitlastclosedtr = 0  # index de t de la derniere création de ligne qu'il faudrat effacer quand la page sera pleine
     fitheight = 100  # hauteur déjà occupé dans la page plus les header footer (hors premier header)
@@ -553,14 +567,16 @@ def LoadRightPane():
     # print("PageWidth=%s, WindowHeight=%s"%(PageWidth,WindowHeight))
     hyphenator = LatinHyphenator()
     # Calcul des dimensions et affichage des images
-    for r in res:
-        filename = r['file_name']
-        origwidth = r['width']
-        origheight = r['height']
-        thumbfilename = r['thumb_file_name']
-        thumbwidth = r['thumb_width']
-        display_name = r['display_name']
-        imgcount = r['imgcount']
+    for dtl in objs.details:
+        # Access API result by name for readability
+        dtl: Dict[str, Any] = dict(zip(api_cols, dtl))
+        filename = dtl['img.file_name']
+        origwidth: int = dtl['img.width']
+        origheight: int = dtl['img.height']
+        thumbfilename = dtl['img.thumb_file_name']
+        thumbwidth = dtl['img.thumb_width']
+        display_name = dtl['txo.display_name']
+        imgcount = dtl['obj.imgcount']
         if origwidth is None:  # pas d'image associé, pas trés normal mais arrive pour les subset sans images
             width = 80
             height = 40
@@ -605,8 +621,9 @@ def LoadRightPane():
             html.append("</tr></table><table class=imgtab><tr id=tr%d>%s" % (trcount, LineStart))
             WidthOnRow = 0
         cellwidth = width + 22
-        fitcurrentlinemaxheight = max(fitcurrentlinemaxheight, height + 45 + 14 * len(
-            display_fields.split()))  # 45 espace sur le dessus et le dessous de l'image + 14px par info affichée
+        fitcurrentlinemaxheight = max(fitcurrentlinemaxheight,
+                                      # 45 espace sur le dessus et le dessous de l'image + 14px par info affichée
+                                      height + 45 + 14 * len(api_cols_to_display))
         if cellwidth < 80:
             cellwidth = 80  # on considère au moins 80 car avec les label c'est rarement moins
         # Met la fenetre de zoon la ou il y a plus de place, sachant qu'elle fait 400px
@@ -623,39 +640,41 @@ def LoadRightPane():
         if filename:
             txt += "<img class='lazy' id=I{3} data-src='/vault/{5}' " \
                    "data-zoom-image='{0}' width={1} height={2} pos={4}>" \
-                .format(filename, width, height, r['objid'], pos, thumbfilename)
+                .format(filename, width, height, dtl['obj.objid'], pos, thumbfilename)
         else:
             txt += "No Image"
         # Génération de la popover qui apparait pour donner quelques détails sur l'image
         if popup_enabled:
-            popattribute = PopoverPane(popover_fields, r).render(WidthOnRow)
+            popattribute = PopoverPane(popover_prfxed_cols, dtl).render(WidthOnRow)
         else:
             popattribute = ""
-        # Génération du texte sous l'image qui contient la taxo + les champs à afficher
-        bottomtxt = ""
-        if 'objtime' in display_fields:
-            bottomtxt += "<br>Time %s" % (r['objtime'],)
-        if 'classif_when' in display_fields and r['classif_when']:
-            bottomtxt += "<br>Validation date : %s" % (r['classif_when'],)
-        for k, v in fieldlist.items():
-            if k in display_fields:
-                if k == 'classif_auto_score' and r["classif_qual"] == 'V':
-                    bottomtxt += "<br>%s : -" % v
-                else:
-                    bottomtxt += "<br>%s : %s" % (v, ScaleForDisplay(r["extra_" + k]))
-        if bottomtxt != "":
-            bottomtxt = bottomtxt[4::]  # [4::] supprime le premier <BR>
-        if 'orig_id' in display_fields:
-            bottomtxt = "<div style='word-break: break-all;'>%s</div>" % (r['orig_id'],) + bottomtxt
 
-        imgcount_lbl = "(%d)" % (imgcount,) if imgcount is not None and imgcount > 1 else ""
-        comment_present = "<b>!</b> " if r['complement_info'] is not None and r['complement_info'] != '' else ""
+        # Generate text box under the image
+        bottom_txts = []
+        before_brs = ""
+        for fld, disp in api_cols_to_display.items():
+            if fld == 'obj.classif_auto_score' and dtl["obj.classif_qual"] == 'V':
+                bottom_txts.append("%s : -" % disp)
+            elif fld == 'obj.objtime':
+                bottom_txts.append("Time %s" % dtl['obj.objtime'])
+            elif fld == 'obj.classif_when':
+                if dtl['obj.classif_when']:
+                    bottom_txts.append("Validation date : %s" % dtl['obj.classif_when'])
+            elif fld == 'obj.orig_id':
+                before_brs = "<div style='word-break: break-all;'>%s</div>" % dtl['obj.orig_id']
+            else:
+                bottom_txts.append("%s : %s" % (disp, ScaleForDisplay(dtl[fld])))
+        bottomtxt = before_brs + "<br>".join(bottom_txts)
+
+        imgcount_lbl = "(%d)" % imgcount if imgcount is not None and imgcount > 1 else ""
+        comment_present = "<b>!</b> " if dtl['obj.complement_info'] not in (None, "") else ""
 
         txt += """<div class='subimg {1}' {2}>
 <div class='taxo'>{0}</div>
 <div class='displayedFields'>{3}</div></div>
 <div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div>""" \
-            .format(FormatNameForVignetteDisplay(display_name, hyphenator), GetClassifQualClass(r['classif_qual']),
+            .format(FormatNameForVignetteDisplay(display_name, hyphenator),
+                    GetClassifQualClass(dtl['obj.classif_qual']),
                     popattribute, bottomtxt, imgcount_lbl, comment_present)
         txt += "</td>"
 
@@ -664,7 +683,7 @@ def LoadRightPane():
         html.append(txt)
 
     html.append("</tr></table>")
-    if len(res) == 0:
+    if len(objs.details) == 0:
         html.append("<b>No Result</b><br>")
     if user_can_modify:
         html.append("""
@@ -785,7 +804,6 @@ def GetClassifTab(Prj):
     def AddChild(Src, Parent, Res, Deep, ParentClasses):
         for rec in Src:
             if rec['cp'] == Parent:
-                # r['dist']=Deep+r['cpdist']
                 rec['dist'] = Deep
                 rec['parentclasses'] = ParentClasses
                 rec["haschild"] = False
@@ -803,28 +821,28 @@ def GetClassifTab(Prj):
     # on ne garde que les branches sans enfants
     parentsnochild = parents.copy()
     for p in parents:
-        for r in restree:
-            if r['parentclasses'] == p and r['haschild']:
+        for rec in restree:
+            if rec['parentclasses'] == p and rec['haschild']:
                 parentsnochild.discard(p)
     for p in parentsnochild:
         # on recherche dans le tableau à plats les bornes de chaques branche et on met la branche dans subset
         d = f = 0
-        for (r, i) in zip(restree, range(0, 1000)):
-            if r['parentclasses'] == p:
+        for (rec, i) in zip(restree, range(0, 1000)):
+            if rec['parentclasses'] == p:
                 f = i
                 if d == 0:
                     d = i
         subset = restree[d:f + 1]
         # on cherche les parents presents plus d'une fois
         NbrParent = {x['taxoparent']: 0 for x in subset}
-        for r in subset:
-            NbrParent[r['taxoparent']] += 1
+        for rec in subset:
+            NbrParent[rec['taxoparent']] += 1
         # on calcule une clause de tri en fonction du fait que le parent est present plusieurs fois ou pas
-        for (r, i) in zip(subset, range(0, 1000)):
-            if NbrParent[r['taxoparent']] > 1:
-                subset[i]['sortclause'] = r['taxoparent'][1:99] + r['taxoname']
+        for (rec, i) in zip(subset, range(0, 1000)):
+            if NbrParent[rec['taxoparent']] > 1:
+                subset[i]['sortclause'] = rec['taxoparent'][1:99] + rec['taxoname']
             else:
-                subset[i]['sortclause'] = r['taxoname']
+                subset[i]['sortclause'] = rec['taxoname']
         # on tri le subset et on le remet dans le tableau original.
         restree[d:f + 1] = sorted(subset, key=lambda t: t['sortclause'])
     for k, v in enumerate(restree):

@@ -9,6 +9,7 @@ from flask_security import login_required
 from appli import app, PrintInCharte, gvp, XSSEscape, TempTaskDir
 ######################################################################################################################
 from appli.utils import ApiClient
+from constants import MappableObjectColumns
 from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UserModel, UsersApi, \
     TaxonomyTreeApi, TaxonModel, ProjectTaxoStatsModel, MiscApi
 
@@ -156,7 +157,7 @@ def PrjEdit(PrjId, privs_only=False):
     g.predeftaxo.sort(key=lambda r: r[1].lower())
 
     # TODO: Get from metadata
-    g.maplist = ['objtime', 'objdate', 'latitude', 'longitude', 'depth_min', 'depth_max']
+    g.maplist = list(MappableObjectColumns)
     g.maplist.extend(target_proj.obj_free_cols.keys())
 
     # TODO: move to back-end
