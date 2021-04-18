@@ -20,8 +20,9 @@ from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
-from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ObjectsApi, ObjectSetQueryRsp, UsersApi
+from appli.utils import ApiClient, format_date_time
+from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ObjectsApi, ObjectSetQueryRsp, UsersApi, \
+    SamplesApi, SampleModel, UserModel, TaxonomyTreeApi, TaxonModel
 
 
 ######################################################################################################################
@@ -51,30 +52,8 @@ def RecalcProjectTaxoStat(PrjId):
 
 
 ######################################################################################################################
-def GetFieldList(Prj, champ='classiffieldlist'):
-    fieldlist = collections.OrderedDict()
-    fieldlist["orig_id"] = "Image Name"
-    fieldlist["classif_auto_score"] = "Score"
-    fieldlist["classif_when"] = "Validation date"
-    fieldlist["random_value"] = "Random"
 
-    objmap = DecodeEqualList(Prj.mappingobj)
-    for v in ('objtime', 'objdate', 'latitude', 'longitude', 'depth_min', 'depth_max'):
-        objmap[v] = v
-
-    # fieldlist fait le mapping entre le nom fonctionnel et le nom à affiche
-    # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe.
-    fieldlist2 = {}
-    for field, dispname in DecodeEqualList(getattr(Prj, champ)).items():
-        for ok, on in objmap.items():
-            if field == on:
-                fieldlist2[ok] = dispname
-    for k, v in sorted(fieldlist2.items(), key=lambda t: t[1]):
-        fieldlist[k] = v
-    return fieldlist
-
-
-def GetFieldListFromModel(proj_model, presentation_field):
+def GetFieldListFromModel(proj_model: ProjectModel, presentation_field):
     """
         For a given presentation field, return an ordered dict of correspondence
         between the DB column name and what the user will see for this value.
@@ -137,16 +116,13 @@ def _set_filters_from_prefs_and_get(page_vars, prj_id, a_request):
     """
         Set page variables, essentially INPUT settings, from user preferences.
     """
-    # Inject default vals
+    # Inject default values
     page_vars.update(FilterList)
-    # Override with posted vals
+    # Override with posted values
     posted_vals = {a_val: a_request.args[a_val]
                    for a_val in FilterList.keys() & a_request.args.keys()}
     page_vars.update(posted_vals)
     # Read user preferences related to this project
-    # for a_filter, default in FilterList.items():
-    #     data[a_filter] = gvg(a_filter, str(current_user.GetPref(PrjId, a_filter, default))
-    #     if current_user.is_authenticated else "")
     with ApiClient(UsersApi, a_request) as api:
         try:
             prefs: str = api.get_current_user_prefs_users_my_preferences_project_id_get(project_id=prj_id,
@@ -198,38 +174,31 @@ def _set_prefs_from_filters(filters, prj_id):
 
 
 ######################################################################################################################
+MONTH_LABELS = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+                'October', 'November', 'December')
+
+STATUSES = OrderedDict([("U", "Unclassified"),
+                        ("P", "Predicted"),
+                        ("NV", "Not Validated"),
+                        ("V", "Validated"),
+                        ("PV", "Predicted or Validated"),
+                        ("NVM", "Validated by others"),
+                        ("VM", "Validated by me"),
+                        ("D", "Dubious")]
+                       )
+
+
 # noinspection PyPep8Naming
 @app.route('/prj/<int:PrjId>')
-# @login_required
 def indexPrj(PrjId):
+    """
+        Generate the main project page. Can be used by an unauthenticated user.
+    """
     data = {'pageoffset': gvg("pageoffset", "0")}
 
     _set_filters_from_prefs_and_get(data, PrjId, request)
 
-    # print('%s',data)
-    if data.get("samples", None):
-        data["sample_for_select"] = ""
-        for r in GetAll(
-                "select sampleid,orig_id from samples where projid=%d and sampleid in(%s)" % (PrjId, data["samples"])):
-            data["sample_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(*r)
-
-    data["month_for_select"] = ""
-    # print("%s",data['month'])
-    for (a_filter, default) in enumerate(
-            ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-             'October', 'November', 'December'), start=1):
-        data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
-            'selected' if str(a_filter) in data.get('month', '').split(',') else '', a_filter, default)
-
-    data["daytime_for_select"] = ""
-    for (a_filter, default) in DayTimeList.items():
-        data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
-            'selected' if str(a_filter) in data.get('daytime', '').split(',') else '', a_filter, default)
-
     Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if Prj is None:
-        flash("Project doesn't exists", 'error')
-        return PrintInCharte("<a href=/prj/>Select another project</a>")
     if not Prj.CheckRight(-1) and not Prj.CheckRight(0):
         # Level -1=Read Anonymous, 0 = Read, 1 = Annotate, 2 = Admin
         MainContact = GetAll("""select u.email,u.name
@@ -238,75 +207,124 @@ def indexPrj(PrjId):
         # flash("",'error')
         html_mail_body = _manager_mail(ntcv(Prj.title), Prj.projid)
         msg = """
-        <div class="alert alert-danger alert-dismissible" role="alert"> You cannot view this project : {1} [{2}] 
+        <div class="alert alert-danger alert-dismissible" role="alert"> You cannot view this project : {1} [{2}]
         <a class='btn btn-primary' href='mailto:{3}?{0}' style='margin-left:15px;'>REQUEST ACCESS to {4}</a>
         </div>""".format(html_mail_body, Prj.title, Prj.projid, MainContact[0]['email'], MainContact[0]['name'])
         return PrintInCharte(msg + "<a href=/prj/>Select another project</a>")
 
-    g.Projid = Prj.projid
-    # Ces 2 listes sont ajax mais si on passe le filtre dans l'URL il faut ajouter l'entrée en statique pour l'affichage
+    # Security & sanity checks
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            target_prj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+        except ApiException as ae:
+            if ae.status == 404:
+                flash("Project doesn't exists", 'error')
+            elif ae.status in (401, 403):
+                # Original code leaked the manager mail for requesting access, as the URL is unauthentified
+                # it's enough for scrapping mail lists.
+                flash('You cannot view this project', 'error')
+            return PrintInCharte("<a href=/prj/>Select another project</a>")
+
+    # print('%s',data)
+    data["sample_for_select"] = ""
+    if data.get("samples"):
+        # Sample filter was posted, select the corresponding items.
+        with ApiClient(SamplesApi, request) as api:
+            samples: List[SampleModel] = api.samples_search_samples_search_get(project_ids=str(PrjId),
+                                                                               id_pattern="")
+        sample_ids = set(data['samples'].split(","))
+        for a_sample in samples:
+            # TODO: Could be filtered server-side
+            if str(a_sample.sampleid) in sample_ids:
+                data["sample_for_select"] += "\n<option value='%s' selected>%s</option> " % (
+                    a_sample.sampleid, a_sample.orig_id)
+
+    data["month_for_select"] = ""
+    # print("%s",data['month'])
+    for (a_filter, default) in enumerate(MONTH_LABELS, start=1):
+        data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
+            'selected' if str(a_filter) in data.get('month', '').split(',') else '', a_filter, default)
+
+    data["daytime_for_select"] = ""
+    for (a_filter, default) in DayTimeList.items():
+        data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
+            'selected' if str(a_filter) in data.get('daytime', '').split(',') else '', a_filter, default)
+
+    g.Projid = target_prj.projid
+
+    # Generate the selection if the parameter is set in the URL - free numeric column
     data["filt_freenum_for_select"] = ""
     if data.get('freenum', '') != "":
-        for r in PrjGetFieldList(Prj, 'n', ''):  # type: dict
+        for r in PrjGetFieldListFromModel(target_prj, 'n', ''):  # type: dict
             if r['id'] == data['freenum']:
                 data["filt_freenum_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],
                                                                                                         r['text'])
 
+    # Generate the selection if the parameter is set in the URL - free textual column
     data["filt_freetxt_for_select"] = ""
     if data.get('freetxt', '') != "":
-        for r in PrjGetFieldList(Prj, 't', ''):  # type: dict
+        for r in PrjGetFieldListFromModel(target_prj, 't', ''):  # type: dict
             if r['id'] == data['freetxt']:
                 data["filt_freetxt_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],
                                                                                                         r['text'])
 
+    # Generate the selection if the parameter is set in the URL - annotators filter
     data["filt_annot_for_select"] = ""
     if data.get('filt_annot', '') != "":
-        for r in GetAll("select id,name from users where id =any (%s)",
-                        ([int(x) for x in data["filt_annot"].split(',')],)):
-            data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(r['id'], r['name'])
+        user_ids = [int(x) for x in data["filt_annot"].split(',') if x.isdigit()]
+        for an_id in user_ids:
+            with ApiClient(UsersApi, request) as api:
+                try:
+                    user: UserModel = api.get_user_users_user_id_get(user_id=an_id)
+                except ApiException as _ae:
+                    # Ignore this one
+                    continue
+            data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(user.id, user.name)
 
-    fieldlist = GetFieldList(Prj)
-    data["fieldlist"] = fieldlist
+    # We can display what we can sort
+    displayable_fields = SortableObjectFields.copy()
+    data["fieldlist"] = displayable_fields
+    displayable_fields.update(GetFieldListFromModel(target_prj, "classiffieldlist"))
 
     sortlist = collections.OrderedDict({"": ""})
     data["sortlist"] = sortlist
     sortlist["classifname"] = "Category Name"  # Historical, == txo.name
     sortlist.update(SortableObjectFields)
     # All displayable fields are sortable
-    for k, v in fieldlist.items():
+    for k, v in displayable_fields.items():
         sortlist[k] = v
 
-    statuslist = collections.OrderedDict({"": "All"})
-    data["statuslist"] = statuslist
-    statuslist["U"] = "Unclassified"
-    statuslist["P"] = "Predicted"
-    statuslist["NV"] = "Not Validated"
-    statuslist["V"] = "Validated"
-    statuslist["PV"] = "Predicted or Validated"
-    statuslist["NVM"] = "Validated by others"
-    statuslist["VM"] = "Validated by me"
-    statuslist["D"] = "Dubious"
+    data["statuslist"] = collections.OrderedDict({"": "All"})
+    data["statuslist"].update(STATUSES)
 
-    g.PrjAnnotate = g.PrjManager = Prj.CheckRight(2)
+    g.PrjManager = target_prj.highest_right == "Manage"
+    g.PrjAnnotate = False
     if not g.PrjManager:
-        g.PrjAnnotate = Prj.CheckRight(1)
-    g.PublicViewMode = not Prj.CheckRight(0)
-    g.manager_mail = Prj.GetFirstManager()[1] if Prj.GetFirstManager() else ""
-    right = 'dodefault'
+        g.PrjAnnotate = target_prj.highest_right == "Annotate"
+    # Public view is when the project is visible, but the current user has no right on it.
+    g.PublicViewMode = target_prj.highest_right == ""
+    g.manager_mail = g.prjmanagermailto = target_prj.managers[0].email
+
     if gvg("taxo") != "":
         g.taxofilter = gvg("taxo")
         g.taxochild = gvg("taxochild")
-        g.taxofilterlabel = GetAll("select name from taxonomy where id=%s ", (gvg("taxo"),))[0][0]
+        try:
+            taxon_id = int(gvg("taxo"))
+            with ApiClient(TaxonomyTreeApi, request) as api:
+                taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=taxon_id)
+            g.taxofilterlabel = taxon.name
+        except (ValueError, ApiException):
+            pass
     else:
         g.taxofilter = g.taxofilter = g.taxofilterlabel = ""
 
     classiftab = GetClassifTab(Prj)
 
-    g.ProjectTitle = Prj.title
+    g.ProjectTitle = target_prj.title
     g.headmenu = []  # Menu project
     g.headmenuF = []  # Menu Filtered
-    if g.PrjAnnotate:
-        if Prj.status == "Annotate":
+    if g.PrjAnnotate or g.PrjManager:
+        if target_prj.status == "Annotate":
             g.headmenu.append(
                 ("/Task/Create/TaskClassifAuto2?projid=%d" % PrjId, "Train and Predict identifications V2"))
             g.headmenuF.append(
@@ -342,7 +360,7 @@ def indexPrj(PrjId):
     appli.AddTaskSummaryForTemplate()
     filtertab = getcommonfilters(data)
     return render_template('project/projectmain.html', top="", lefta=classiftab, leftb=filtertab,
-                           right=right, data=data, title='EcoTaxa ' + ntcv(Prj.title))
+                           right='dodefault', data=data, title='EcoTaxa ' + ntcv(target_prj.title))
 
 
 def _manager_mail(prj_title, prj_id):
@@ -407,7 +425,7 @@ def LoadRightPane():
     PrjId = gvp("projid")
     with ApiClient(ProjectsApi, request) as api:
         try:
-            Prj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+            proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
         except ApiException as ae:
             if ae.status == 404:
                 return "Invalid project"
@@ -422,8 +440,8 @@ def LoadRightPane():
     _set_prefs_from_filters(Filt, PrjId)
 
     # Public view is when the project is visible, but the current user has no right on it.
-    g.PublicViewMode = Prj.highest_right == ""
-    user_can_modify = Prj.highest_right in ("Manage", "Annotate")
+    g.PublicViewMode = proj.highest_right == ""
+    user_can_modify = proj.highest_right in ("Manage", "Annotate")
 
     # récupération des parametres d'affichage
     filtres = {}
@@ -447,11 +465,11 @@ def LoadRightPane():
     ippdb = images_per_page if images_per_page > 0 else 200
 
     if popup_enabled:
-        popover_columns = GetFieldListFromModel(Prj, presentation_field='popoverfieldlist')
+        popover_columns = GetFieldListFromModel(proj, presentation_field='popoverfieldlist')
     else:
         popover_columns = {}
 
-    possible_proj_fields = GetFieldListFromModel(Prj, presentation_field='classiffieldlist')
+    possible_proj_fields = GetFieldListFromModel(proj, presentation_field='classiffieldlist')
 
     # Sanitize fields to display
     post_prfx_len = len("dispfield_")
@@ -467,7 +485,7 @@ def LoadRightPane():
     api_cols_to_display = OrderedDict()
 
     # Add to query the needed columns, from project settings and current query
-    col_2_free = {v: k for k, v in Prj.obj_free_cols.items()}
+    col_2_free = {v: k for k, v in proj.obj_free_cols.items()}
 
     def prefix_db_col(a_col):
         # Return a column with a prefix in API convention, depending on its origin
@@ -539,7 +557,7 @@ def LoadRightPane():
     # DEBUG SPAN
     # html.append(
     #     "<span>%d vs %d vs %d, %s %s</span>" % (
-    #         objs.total_ids, len(object_ids), len(objs.details), Prj.highest_right, api_cols_to_display))
+    #         objs.total_ids, len(object_ids), len(objs.details), proj.highest_right, api_cols_to_display))
     trcount = 1
     fitlastclosedtr = 0  # index de t de la derniere création de ligne qu'il faudrat effacer quand la page sera pleine
     fitheight = 100  # hauteur déjà occupé dans la page plus les header footer (hors premier header)
@@ -570,6 +588,7 @@ def LoadRightPane():
     for dtl in objs.details:
         # Access API result by name for readability
         dtl: Dict[str, Any] = dict(zip(api_cols, dtl))
+        format_date_time(dtl, {"obj.classif_when"}, {"obj.objtime"})
         filename = dtl['img.file_name']
         origwidth: int = dtl['img.width']
         origheight: int = dtl['img.height']
@@ -878,25 +897,32 @@ def prjGetClassifTab(PrjId):
 
 ######################################################################################################################
 
-# noinspection PyPep8Naming
-def PrjGetFieldList(Prj, typefield, term):
-    fieldlist = []
-    MapList = {'o': 'mappingobj', 's': 'mappingsample', 'a': 'mappingacq', 'p': 'mappingprocess'}
-    MapPrefix = {'o': '', 's': 'sample ', 'a': 'acquis. ', 'p': 'process. '}
-    for mapk, mapv in MapList.items():
-        for k, v in sorted(DecodeEqualList(getattr(Prj, mapv, "")).items(), key=lambda t: t[1]):
-            if (k[0] == typefield or typefield == '') and v != "" and (term == '' or term in v):
-                fieldlist.append({'id': mapk + k, 'text': MapPrefix[mapk] + v})
-    return fieldlist
+def PrjGetFieldListFromModel(proj: ProjectModel, field_type, term):
+    """
+        Return the list of free columns for the project, for any entity,
+         with given type ('' matches all) and matching with term ('' matches all).
+    """
+    ret = []
+    free_cols_per_entity = {'o': proj.obj_free_cols,
+                            's': proj.sample_free_cols,
+                            'a': proj.acquisition_free_cols,
+                            'p': proj.process_free_cols}
+    out_text_prefix = {'o': '', 's': 'sample ', 'a': 'acquis. ', 'p': 'process. '}
+    field_types = "nt" if field_type == '' else field_type
+    for prfx, free_cols in free_cols_per_entity.items():
+        for tsv_col, db_col in free_cols.items():
+            if db_col[0] in field_types and (term == '' or term in tsv_col):
+                ret.append({'id': prfx + db_col, 'text': out_text_prefix[prfx] + tsv_col})
+    return ret
 
 
 # noinspection PyPep8Naming
 @app.route('/prj/GetFieldList/<int:PrjId>/<string:typefield>')
 @login_required
 def PrjGetFieldListAjax(PrjId, typefield):
-    Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if Prj is None:
-        return "Project doesn't exists"
+    with ApiClient(ProjectsApi, request) as api:
+        proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+        # A direct Ajax call with wrong context -> let the HTTP error throw
     term = gvg("q")
-    fieldlist = PrjGetFieldList(Prj, typefield, term)
+    fieldlist = PrjGetFieldListFromModel(proj, typefield, term)
     return json.dumps(fieldlist)

@@ -1,7 +1,7 @@
 #
 # Utility defs not depending on the Flask app.
 #
-from typing import Type, TypeVar, Generic, Union
+from typing import Type, TypeVar, Generic, Union, Dict
 
 from flask import Request
 from werkzeug.local import LocalProxy
@@ -35,3 +35,26 @@ class ApiClient(Generic[A]):
     def __exit__(self, exc_type, exc_value, traceback):
         # TODO: pool management
         pass
+
+
+def format_date_time(rec: Dict, date_cols=(), time_cols=()):
+    """
+        Format known date & time columns from their JSON representation.
+        Minimal sanity check of the input.
+    """
+    for a_col in date_cols:
+        val = rec.get(a_col)
+        if val is None:
+            continue
+        if len(val) < 17 or val[10] != "T":
+            continue
+        # 2020-09-17T13:15:37.441179 -> 2020-09-17 13:15
+        rec[a_col] = val[:10] + " " + val[11:16]
+    for a_col in time_cols:
+        val = rec.get(a_col)
+        if val is None:
+            continue
+        if len(val) < 6 or val[2] != ":":
+            continue
+        # 13:15:37 -> 13:15
+        rec[a_col] = val[:5]
