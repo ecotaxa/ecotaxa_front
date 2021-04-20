@@ -6,49 +6,21 @@ from collections import OrderedDict
 from json import JSONDecodeError
 from typing import List, Dict, Any
 
-import psycopg2.extras
 from flask import render_template, g, flash, json, request, url_for
 from flask_security import login_required
 from hyphenator import Hyphenator
 
 import appli
 import appli.project.sharedfilter as sharedfilter
-from appli import app, PrintInCharte, database, gvg, gvp, DecodeEqualList, ScaleForDisplay, ntcv, \
-    XSSEscape
+from appli import app, PrintInCharte, gvg, gvp, DecodeEqualList, ScaleForDisplay, ntcv, XSSEscape
 from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields
-from appli.database import GetAll, GetClassifQualClass, ExecSQL, GetAssoc
+from appli.database import GetClassifQualClass
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient, format_date_time
 from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ObjectsApi, ObjectSetQueryRsp, UsersApi, \
-    SamplesApi, SampleModel, UserModel, TaxonomyTreeApi, TaxonModel
-
-
-######################################################################################################################
-
-
-def UpdateProjectStat(PrjId):
-    ExecSQL("""UPDATE projects
-         SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
-         from projects p
-         left join
-         (SELECT  projid,sum(nbr) nbr,sum(case when id>0 then nbr end) nbrclassified,sum(nbr_v) nbrvalidated
-              from projects_taxo_stat
-              where projid=%(projid)s
-              group by projid )q on p.projid=q.projid
-         where projects.projid=%(projid)s and p.projid=%(projid)s""", {'projid': PrjId})
-
-
-######################################################################################################################
-def RecalcProjectTaxoStat(PrjId):
-    ExecSQL("""delete from projects_taxo_stat WHERE projid=%(projid)s;
-        insert into projects_taxo_stat(projid, id, nbr, nbr_v, nbr_d, nbr_p) 
-          select projid,coalesce(classif_id,-1) id,count(*) nbr,count(case when classif_qual='V' then 1 end) nbr_v
-          ,count(case when classif_qual='D' then 1 end) nbr_d,count(case when classif_qual='P' then 1 end) nbr_p
-          from objects
-          where projid = %(projid)s
-          GROUP BY projid,classif_id;""", {'projid': PrjId})
+    SamplesApi, SampleModel, UserModel, TaxonomyTreeApi, TaxonModel, ProjectTaxoStatsModel
 
 
 ######################################################################################################################
@@ -62,7 +34,7 @@ def GetFieldListFromModel(proj_model: ProjectModel, presentation_field):
     """
     assert presentation_field in ('popoverfieldlist', 'classiffieldlist')
 
-    # Get free object columns, dict with key=free column name, value=db column, like n04 for example
+    # Get free object columns, dict with key=free column name, value=db column, like area=n04 for example
     # This is just for checking that each presentation field is OK
     objmap = proj_model.obj_free_cols
 
@@ -110,6 +82,19 @@ FilterListAutoSave = ("statusfilter",
 
 # What is used for storing preferences on back-end
 _FILTERS_KEY = "filters"
+
+MONTH_LABELS = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+                'October', 'November', 'December')
+
+STATUSES = OrderedDict([("U", "Unclassified"),
+                        ("P", "Predicted"),
+                        ("NV", "Not Validated"),
+                        ("V", "Validated"),
+                        ("PV", "Predicted or Validated"),
+                        ("NVM", "Validated by others"),
+                        ("VM", "Validated by me"),
+                        ("D", "Dubious")]
+                       )
 
 
 def _set_filters_from_prefs_and_get(page_vars, prj_id, a_request):
@@ -174,19 +159,6 @@ def _set_prefs_from_filters(filters, prj_id):
 
 
 ######################################################################################################################
-MONTH_LABELS = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-                'October', 'November', 'December')
-
-STATUSES = OrderedDict([("U", "Unclassified"),
-                        ("P", "Predicted"),
-                        ("NV", "Not Validated"),
-                        ("V", "Validated"),
-                        ("PV", "Predicted or Validated"),
-                        ("NVM", "Validated by others"),
-                        ("VM", "Validated by me"),
-                        ("D", "Dubious")]
-                       )
-
 
 # noinspection PyPep8Naming
 @app.route('/prj/<int:PrjId>')
@@ -198,30 +170,23 @@ def indexPrj(PrjId):
 
     _set_filters_from_prefs_and_get(data, PrjId, request)
 
-    Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if not Prj.CheckRight(-1) and not Prj.CheckRight(0):
-        # Level -1=Read Anonymous, 0 = Read, 1 = Annotate, 2 = Admin
-        MainContact = GetAll("""select u.email,u.name
-                        from projectspriv pp join users u on pp.member=u.id
-                        where pp.privilege='Manage' and u.active=true and pp.projid=%s""", (PrjId,))
-        # flash("",'error')
-        html_mail_body = _manager_mail(ntcv(Prj.title), Prj.projid)
-        msg = """
-        <div class="alert alert-danger alert-dismissible" role="alert"> You cannot view this project : {1} [{2}]
-        <a class='btn btn-primary' href='mailto:{3}?{0}' style='margin-left:15px;'>REQUEST ACCESS to {4}</a>
-        </div>""".format(html_mail_body, Prj.title, Prj.projid, MainContact[0]['email'], MainContact[0]['name'])
-        return PrintInCharte(msg + "<a href=/prj/>Select another project</a>")
-
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_prj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+            proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
         except ApiException as ae:
             if ae.status == 404:
                 flash("Project doesn't exists", 'error')
             elif ae.status in (401, 403):
-                # Original code leaked the manager mail for requesting access, as the URL is unauthentified
+                # Original code leaked the manager mail for requesting access, but as the URL is unauthentified
                 # it's enough for scrapping mail lists.
+                # html_mail_body = _manager_mail(ntcv(Prj.title), Prj.projid)
+                # msg = """
+                # <div class="alert alert-danger alert-dismissible" role="alert"> You cannot view this project :
+                # {1} [{2}]
+                # <a class='btn btn-primary' href='mailto:{3}?{0}' style='margin-left:15px;'>REQUEST ACCESS to {4}</a>
+                # </div>""".format(html_mail_body, Prj.title, Prj.projid, MainContact[0]['email'],
+                # MainContact[0]['name'])
                 flash('You cannot view this project', 'error')
             return PrintInCharte("<a href=/prj/>Select another project</a>")
 
@@ -250,12 +215,10 @@ def indexPrj(PrjId):
         data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
             'selected' if str(a_filter) in data.get('daytime', '').split(',') else '', a_filter, default)
 
-    g.Projid = target_prj.projid
-
     # Generate the selection if the parameter is set in the URL - free numeric column
     data["filt_freenum_for_select"] = ""
     if data.get('freenum', '') != "":
-        for r in PrjGetFieldListFromModel(target_prj, 'n', ''):  # type: dict
+        for r in PrjGetFieldListFromModel(proj, 'n', ''):  # type: dict
             if r['id'] == data['freenum']:
                 data["filt_freenum_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],
                                                                                                         r['text'])
@@ -263,7 +226,7 @@ def indexPrj(PrjId):
     # Generate the selection if the parameter is set in the URL - free textual column
     data["filt_freetxt_for_select"] = ""
     if data.get('freetxt', '') != "":
-        for r in PrjGetFieldListFromModel(target_prj, 't', ''):  # type: dict
+        for r in PrjGetFieldListFromModel(proj, 't', ''):  # type: dict
             if r['id'] == data['freetxt']:
                 data["filt_freetxt_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],
                                                                                                         r['text'])
@@ -284,7 +247,7 @@ def indexPrj(PrjId):
     # We can display what we can sort
     displayable_fields = SortableObjectFields.copy()
     data["fieldlist"] = displayable_fields
-    displayable_fields.update(GetFieldListFromModel(target_prj, "classiffieldlist"))
+    displayable_fields.update(GetFieldListFromModel(proj, "classiffieldlist"))
 
     sortlist = collections.OrderedDict({"": ""})
     data["sortlist"] = sortlist
@@ -297,13 +260,12 @@ def indexPrj(PrjId):
     data["statuslist"] = collections.OrderedDict({"": "All"})
     data["statuslist"].update(STATUSES)
 
-    g.PrjManager = target_prj.highest_right == "Manage"
-    g.PrjAnnotate = False
-    if not g.PrjManager:
-        g.PrjAnnotate = target_prj.highest_right == "Annotate"
+    g.Projid = proj.projid
+    g.PrjManager = proj.highest_right == "Manage"
+    g.PrjAnnotate = proj.highest_right == "Annotate"
     # Public view is when the project is visible, but the current user has no right on it.
-    g.PublicViewMode = target_prj.highest_right == ""
-    g.manager_mail = g.prjmanagermailto = target_prj.managers[0].email
+    g.PublicViewMode = proj.highest_right == ""
+    g.manager_mail = g.prjmanagermailto = proj.managers[0].email
 
     if gvg("taxo") != "":
         g.taxofilter = gvg("taxo")
@@ -318,13 +280,13 @@ def indexPrj(PrjId):
     else:
         g.taxofilter = g.taxofilter = g.taxofilterlabel = ""
 
-    classiftab = GetClassifTab(Prj)
+    classiftab = GetClassifTabFromModel(proj)
 
-    g.ProjectTitle = target_prj.title
+    g.ProjectTitle = proj.title
     g.headmenu = []  # Menu project
     g.headmenuF = []  # Menu Filtered
     if g.PrjAnnotate or g.PrjManager:
-        if target_prj.status == "Annotate":
+        if proj.status == "Annotate":
             g.headmenu.append(
                 ("/Task/Create/TaskClassifAuto2?projid=%d" % PrjId, "Train and Predict identifications V2"))
             g.headmenuF.append(
@@ -360,7 +322,7 @@ def indexPrj(PrjId):
     appli.AddTaskSummaryForTemplate()
     filtertab = getcommonfilters(data)
     return render_template('project/projectmain.html', top="", lefta=classiftab, leftb=filtertab,
-                           right='dodefault', data=data, title='EcoTaxa ' + ntcv(target_prj.title))
+                           right='dodefault', data=data, title='EcoTaxa ' + ntcv(proj.title))
 
 
 def _manager_mail(prj_title, prj_id):
@@ -419,7 +381,6 @@ def FormatNameForVignetteDisplay(category_name, hyphenator):
 ######################################################################################################################
 # noinspection SpellCheckingInspection,PyPep8Naming
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
-# @login_required
 def LoadRightPane():
     # Security & sanity checks
     PrjId = gvp("projid")
@@ -515,7 +476,7 @@ def LoadRightPane():
             api_cols.append(prfx_col)
             api_cols_to_display[prfx_col] = col_label
     # We also need from back-end all the columns for populating popover,
-    # namely the stadard columns + the customized ones (per project)
+    # namely the standard columns + the customized ones (per project)
     if popup_enabled:
         popover_prfxed_cols = PopoverPane.always_there.copy()
         api_cols.extend([a_col for a_col in PopoverPane.always_there.keys()
@@ -596,7 +557,7 @@ def LoadRightPane():
         thumbwidth = dtl['img.thumb_width']
         display_name = dtl['txo.display_name']
         imgcount = dtl['obj.imgcount']
-        if origwidth is None:  # pas d'image associé, pas trés normal mais arrive pour les subset sans images
+        if origwidth is None:  # pas d'image associée, pas trés normal mais arrive pour les subset sans images
             width = 80
             height = 40
         else:
@@ -757,122 +718,110 @@ def LoadRightPane():
 
 
 ######################################################################################################################
-# noinspection PyPep8Naming
-def GetClassifTab(Prj):
-    if Prj.initclassiflist is None:
-        InitClassif = "0"  # pour être sur qu'il y a toujours au moins une valeur
-    else:
-        InitClassif = [x for x in Prj.initclassiflist.split(",") if x.isdigit()]
-        if len(InitClassif):
-            InitClassif = ",".join(InitClassif)
-        else:
-            InitClassif = "0"  # pour être sur qu'il y a toujours au moins une valeur
-    ColForNbr = "nbr"
-    if g.PublicViewMode:
-        ColForNbr = " nbr_v "
-    InitClassif = ", ".join(["(" + x.strip() + ")" for x in InitClassif.split(",") if x.strip() != ""])
-    sql = """select t.id,coalesce(t.display_name,'') display_name
-        ,t.name as taxoname
-        ,case when tp.name is not null and t.name not like '%% %%' and t.display_name not like '%%<%%'  
-         then ' ('||tp.name||')' 
-         else ' ' end as  taxoparent
-        ,nbr,nbr_p,nbr_d,nbr_v,nbrothers
-    from (SELECT o.classif_id, c.id,coalesce(sum(nbr),0) Nbr,
-                 coalesce(sum(nbr_d),0) nbr_d,coalesce(sum(nbr_p),0) nbr_p,
-                 coalesce(sum(nbr-nbr_v-nbr_p-nbr_d),0) NbrOthers,
-                 coalesce(sum(nbr_v),0) nbr_v
-            FROM (select id classif_id,{0} nbr,nbr_v,nbr_d,nbr_p 
-                  from projects_taxo_stat where 
-                  id>0 and projid=%(projid)s ) o
-       FULL JOIN (VALUES {1}) c(id) ON o.classif_id = c.id
-                   GROUP BY classif_id, c.id) o
-    JOIN taxonomy t on coalesce(o.classif_id,o.id)=t.id
-    left JOIN taxonomy tp ON t.parent_id = tp.id
-    order by t.name       """.format(ColForNbr, InitClassif)
-    param = {'projid': Prj.projid}
-    res = GetAll(sql, param, debug=False, cursor_factory=psycopg2.extras.RealDictCursor)
-    ids = [x['id'] for x in res]
-    # print(ids)
-    sql = """WITH RECURSIVE rq as (
-                SELECT DISTINCT t.id,t.name,t.parent_id
-                FROM taxonomy t where t.id = any (%s)
-              union
-                SELECT t.id,t.name,t.parent_id
-                FROM rq JOIN taxonomy t ON rq.parent_id = t.id
-            )
-            select * from rq  """
-    taxotree = GetAssoc(sql, (ids,))
-    for k, v in enumerate(res):
-        res[k]['cp'] = None  # cp = Closest parent
-        res[k]['cpdist'] = 0
-        taxoid = v["id"]
-        for i in range(50):  # 50 pour arreter en cas de boucle
-            if taxoid in taxotree:
-                taxoid = taxotree[taxoid]['parent_id']
-            else:
-                taxoid = None
-            if taxoid is None:
-                break
-            if taxoid in ids:
-                res[k]['cp'] = taxoid
-                res[k]['cpdist'] = i + 1
-                break
-    # noinspection PyUnresolvedReferences
-    restree = []  # type:List[Dict]
 
-    def AddChild(Src, Parent, Res, Deep, ParentClasses):
-        for rec in Src:
-            if rec['cp'] == Parent:
-                rec['dist'] = Deep
-                rec['parentclasses'] = ParentClasses
-                rec["haschild"] = False
-                for prnt, ndx in zip(Res, range(10000)):
-                    if prnt['id'] == Parent:
-                        Res[ndx]["haschild"] = True
-                Res.append(rec)
-                AddChild(Src, rec['id'], Res, rec['dist'] + 1, ParentClasses + (" visib%s" % (rec['id'],)))
+def GetClassifTabFromModel(proj: ProjectModel):
+    """
+        Classification tab contains:
+            - All taxa from project's init list, populated or not.
+            - All taxa having a count in the project.
+    """
+    # Get used taxa inside the project
+    with ApiClient(ProjectsApi, request) as api:
+        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats_project_set_taxo_stats_get(ids=str(proj.projid),
+                                                                                                  taxa_ids="all")
+    populated_taxa = {stat.used_taxa[0]: stat
+                      for stat in stats
+                      if stat.used_taxa[0] != -1}  # filter unclassified
 
-    AddChild(res, None, restree, 0, "")
-    # Cette section de code à pour but de trier le niveau final (qui n'as pas d'enfant) par parent
-    # s'il un parent apparait plus d'une fois sinon par enfant
-    # on isole d'abord les branches
-    parents = set([x['parentclasses'] for x in restree])
-    # on ne garde que les branches sans enfants
-    parentsnochild = parents.copy()
-    for p in parents:
-        for rec in restree:
-            if rec['parentclasses'] == p and rec['haschild']:
-                parentsnochild.discard(p)
-    for p in parentsnochild:
-        # on recherche dans le tableau à plats les bornes de chaques branche et on met la branche dans subset
-        d = f = 0
-        for (rec, i) in zip(restree, range(0, 1000)):
-            if rec['parentclasses'] == p:
-                f = i
-                if d == 0:
-                    d = i
-        subset = restree[d:f + 1]
-        # on cherche les parents presents plus d'une fois
-        NbrParent = {x['taxoparent']: 0 for x in subset}
-        for rec in subset:
-            NbrParent[rec['taxoparent']] += 1
-        # on calcule une clause de tri en fonction du fait que le parent est present plusieurs fois ou pas
-        for (rec, i) in zip(subset, range(0, 1000)):
-            if NbrParent[rec['taxoparent']] > 1:
-                subset[i]['sortclause'] = rec['taxoparent'][1:99] + rec['taxoname']
-            else:
-                subset[i]['sortclause'] = rec['taxoname']
-        # on tri le subset et on le remet dans le tableau original.
-        restree[d:f + 1] = sorted(subset, key=lambda t: t['sortclause'])
-    for k, v in enumerate(restree):
-        if v['display_name'].find('<') > 0:
-            parts = v['display_name'].split('<')
-            restree[k]['htmldisplayname'] = parts[0]
-            restree[k]['taxoparent'] = ''.join((' &lt;&nbsp;' + XSSEscape(x) for x in parts[1:]))
+    # Get info on them + the ones from project configuration
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        taxa_ids = "+".join([str(x) for x in set(proj.init_classif_list).union(populated_taxa.keys())])
+        taxa: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=taxa_ids)
+    taxa.sort(key=lambda r: r.name)
+    present_ids = {taxon.id for taxon in taxa}
+
+    # Build full tree on present taxa, for right-click menu.
+    # The values are accessed in order in the JS code, so a list is enough.
+    # We have straight away the parent (first in lineage) for queried taxa...
+    taxotree = {taxon.id: [taxon.id, taxon.name, (taxon.id_lineage[1] if len(taxon.id_lineage) > 1 else None)]
+                for taxon in taxa}
+    # ...but not necessarily all the parents
+    for a_taxon in taxa:
+        prev_id = None
+        for taxon_id, taxon_name in zip(reversed(a_taxon.id_lineage), reversed(a_taxon.lineage)):
+            if taxon_id not in taxotree:
+                taxotree[taxon_id] = [taxon_id, taxon_name, prev_id]
+            prev_id = taxon_id
+
+    res_by_id: Dict = {}
+    children_by_id: Dict = {}
+    for taxon in taxa:
+        # Find the parent (if any) in the subtree being displayed.
+        for a_parent_id in taxon.id_lineage[1:]:
+            if a_parent_id in present_ids:
+                parent_id_here = a_parent_id
+                break
         else:
-            restree[k]['htmldisplayname'] = v['display_name']
-            restree[k]['taxoparent'] = XSSEscape(v['taxoparent'])
-            restree[k]['taxoparent'] = ""
+            parent_id_here = None
+        # Add a record for the taxon
+        for_taxon = {"id": taxon.id,
+                     "dist": 0,  # the distance to root, in # of branches. Used for indenting sub-nodes
+                     "parentclasses": "",  # the CSS classes, allowing pseudo-collapse
+                     "haschild": False,  # If the node has a child
+                     "name": taxon.name,
+                     "display_name": taxon.display_name}
+        stats_for_taxon = populated_taxa.get(taxon.id)
+        if stats_for_taxon is not None:
+            for_taxon["nbr_p"] = stats_for_taxon.nb_predicted
+            for_taxon["nbr_v"] = stats_for_taxon.nb_validated
+            for_taxon["nbr_d"] = stats_for_taxon.nb_dubious
+        else:
+            for_taxon["nbr_p"] = for_taxon["nbr_v"] = for_taxon["nbr_d"] = 0
+        # To toggle 'zero count' in the GUI
+        for_taxon["nbr"] = for_taxon["nbr_p"] + for_taxon["nbr_v"] + for_taxon["nbr_d"]
+        # Store
+        children_by_id.setdefault(parent_id_here, []).append(taxon.id)
+        res_by_id[taxon.id] = for_taxon
+
+    # Go down the tree, in sets, one for each level
+    nodes_to_mark = set(children_by_id[None])
+    depth = 0
+    while len(nodes_to_mark) > 0:
+        next_to_mark = set()
+        for an_id in nodes_to_mark:
+            to_mark = res_by_id[an_id]
+            to_mark["dist"] = depth
+            children = children_by_id.get(an_id)
+            if children is not None:
+                to_mark["haschild"] = True
+                for a_child_in in children:
+                    child_to_mark = res_by_id[a_child_in]
+                    child_to_mark["parentclasses"] = to_mark["parentclasses"] + " visib%d" % an_id
+                next_to_mark.update(children)
+        nodes_to_mark = next_to_mark
+        depth += 1
+
+    # Flatten the list, in order
+    restree = []
+
+    def add_lines_in_order(taxo_id):
+        for a_child in children_by_id.get(taxo_id, ()):
+            restree.append(res_by_id[a_child])
+            add_lines_in_order(a_child)
+
+    add_lines_in_order(None)
+
+    for line in restree:
+        # Special case, when display_name has a "<" inside then visually separate the parts
+        disp_name = line['display_name']
+        if '<' in disp_name:
+            parts = disp_name.split('<')
+            line['htmldisplayname'] = parts[0]
+            line['taxoparent'] = ''.join((' &lt;&nbsp;' + XSSEscape(x) for x in parts[1:]))
+        else:
+            line['htmldisplayname'] = disp_name
+            line['taxoparent'] = ""
+
     return render_template('project/classiftab.html', res=restree, taxotree=json.dumps(taxotree))
 
 
@@ -881,18 +830,20 @@ def GetClassifTab(Prj):
 @app.route('/prjGetClassifTab/<int:PrjId>', methods=['GET', 'POST'])
 @login_required
 def prjGetClassifTab(PrjId):
-    Prj = database.Projects.query.filter_by(projid=PrjId).first()
-    if Prj is None:
-        return "Project doesn't exists"
-    g.PrjAnnotate = g.PrjManager = Prj.CheckRight(2)
-    if not g.PrjManager:
-        g.PrjAnnotate = Prj.CheckRight(1)
-    g.PublicViewMode = not Prj.CheckRight(0)
-    if gvp('ForceRecalc') == 'Y':
-        RecalcProjectTaxoStat(Prj.projid)
-    UpdateProjectStat(Prj.projid)
-    g.Projid = Prj.projid
-    return GetClassifTab(Prj)
+    # Security & sanity checks
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+        except ApiException as _ae:
+            return "Project doesn't exists"
+
+    g.Projid = proj.projid
+    g.PrjManager = proj.highest_right == "Manage"
+    g.PrjAnnotate = proj.highest_right == "Annotate"
+    # Public view is when the project is visible, but the current user has no right on it.
+    g.PublicViewMode = proj.highest_right == ""
+
+    return GetClassifTabFromModel(proj)
 
 
 ######################################################################################################################
@@ -922,7 +873,7 @@ def PrjGetFieldListFromModel(proj: ProjectModel, field_type, term):
 def PrjGetFieldListAjax(PrjId, typefield):
     with ApiClient(ProjectsApi, request) as api:
         proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
-        # A direct Ajax call with wrong context -> let the HTTP error throw
+        # A direct Ajax call with wrong context -> let the eventual HTTP error throw
     term = gvg("q")
     fieldlist = PrjGetFieldListFromModel(proj, typefield, term)
     return json.dumps(fieldlist)

@@ -72,9 +72,7 @@ def objectdetails(objid):
 
     # Injected data for taxo select
     g.PrjManager = obj_proj.highest_right == "Manage"
-    g.PrjAnnotate = False
-    if not g.PrjManager:
-        g.PrjAnnotate = obj_proj.highest_right == "Annotate"
+    g.PrjAnnotate = obj_proj.highest_right == "Annotate"
 
     page.append("</p><p>Classification :")
     if obj.classif_id:

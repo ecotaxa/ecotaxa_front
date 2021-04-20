@@ -3,7 +3,7 @@
 import appli.part.prj
 from appli.database import ExecSQL, GetAll
 from appli.part.database import ComputeOldestSampleDateOnProject
-from appli.project.main import RecalcProjectTaxoStat
+from appli.project.stats import RecalcProjectTaxoStat
 
 
 def RefreshAllProjectsStat():

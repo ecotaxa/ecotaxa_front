@@ -6,7 +6,7 @@ import logging, time, re, json, datetime, sys, os
 from appli.tasks.taskmanager import AsyncTask, DoTaskClean
 from appli.database import GetAll, ExecSQL
 from appli.project import sharedfilter
-from appli.project.main import RecalcProjectTaxoStat, UpdateProjectStat
+from appli.project.stats import UpdateProjectStat, RecalcProjectTaxoStat
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from pathlib import Path
