@@ -13,8 +13,7 @@ from hyphenator import Hyphenator
 import appli
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, gvg, gvp, DecodeEqualList, ScaleForDisplay, ntcv, XSSEscape
-from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields
-from appli.database import GetClassifQualClass
+from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields, GetClassifQualClass
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################

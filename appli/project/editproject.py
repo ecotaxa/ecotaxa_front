@@ -9,7 +9,7 @@ from flask_security import login_required
 from appli import app, PrintInCharte, gvp, XSSEscape, TempTaskDir
 ######################################################################################################################
 from appli.utils import ApiClient
-from constants import MappableObjectColumns
+from appli.constants import MappableObjectColumns
 from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UserModel, UsersApi, \
     TaxonomyTreeApi, TaxonModel, ProjectTaxoStatsModel, MiscApi
 

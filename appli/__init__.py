@@ -100,6 +100,10 @@ def ErrorFormat(txt):
 
 
 def AddTaskSummaryForTemplate():
+    """
+        Set in global 'g' a structure to show what is currently ongoing on task side.
+        @see appli/templates/layout.html
+    """
     from flask_login import current_user
     if getattr(current_user, 'id', -1) > 0:
         g.tasksummary = appli.database.GetAssoc2Col(
