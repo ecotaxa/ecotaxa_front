@@ -796,7 +796,7 @@ order by tree""".format(lstcatwhere)
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier,"wt") as f:
                     # excludenotliving
-                    sql="""select of.*
+                    sql="""select of.*, oh.orig_id
                         ,t0.display_name as "name", classif_qual ,ps.psampleid                        
                         ,((oh.depth_min+oh.depth_max)/2)+{DepthOffset} as depth_including_offset,objid
                         ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
