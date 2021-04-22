@@ -391,11 +391,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.5"
+ecotaxa_version = "2.5.6"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-02-11"
+    return ecotaxa_version + " 2021-04-22"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -403,7 +403,12 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
-2021-02-03 : V 2.5.5
+2021-04-22 : V 2.5.6
+    Feature #607: Ensure that any information visible in the main classification page can be queried via the API.
+    Features #624, #631, #625: Export in Darwin Core Archive format a collection. API only.
+    Bug #640: Taxo tree could be logically inconsistent.
+    Bug #583: Re-import of the same file ended up with multiple identical images for each object.
+2021-02-11 : V 2.5.5
     Feature #603: Export abundances / concentrations of 0 in DwCA export
     Bug #583 (starting): Set-up database storage of information about images on disk. Add an API
         entry point to store MD5 of present files. 
