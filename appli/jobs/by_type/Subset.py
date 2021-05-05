@@ -9,7 +9,8 @@ from appli.project import sharedfilter
 from appli.tasks.importcommon import *
 from appli.utils import ApiClient
 from appli.jobs.Job import Job
-from to_back.ecotaxa_cli_py import ProjectsApi, CreateProjectReq, SubsetReq, SubsetRsp, ProjectModel, ApiException
+from to_back.ecotaxa_cli_py import ProjectsApi, CreateProjectReq, SubsetReq, SubsetRsp, ProjectModel, ApiException, \
+    JobModel
 
 
 class SubsetJob(Job):
@@ -133,12 +134,15 @@ class SubsetJob(Job):
                                                                                     subset_req=req)
             return redirect("/Job/Monitor/%d" % rsp.job_id)
 
-    def GetDoneExtraAction(self):
+    # noinspection PyUnresolvedReferences
+    @classmethod
+    def final_action(cls, job: JobModel):
         # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
-        PrjId = self.param.ProjectId
+        prj_id = job.params["prj_id"]
+        subset_prj_id = job.params["req"]["dest_prj_id"]
         time.sleep(1)
         # DoTaskClean(self.task.id)
         return ("""<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Original project</a>
         <a href='/prj/{1}' class='btn btn-primary btn-sm'  role=button>Go to Subset Project</a> """
-                .format(PrjId, self.param.subsetproject))
+                .format(prj_id, subset_prj_id))

@@ -202,10 +202,12 @@ class ImportJob(Job):
                 txt += "{0}={1}<br>".format(seen_name, nodes_dict[resolved_id])
         return PrintInCharte(txt)
 
-    def GetDoneExtraAction(self):
+    # noinspection PyUnresolvedReferences
+    @classmethod
+    def final_action(cls, job: JobModel):
         # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle ou auto
-        prj_id = self.param.ProjectId
+        prj_id = job.params["prj_id"]
         time.sleep(1)
         # TODO: Remove the commented, but for now we have trace information inside
         # DoTaskClean(self.task.id)
