@@ -395,11 +395,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.6"
+ecotaxa_version = "2.5.7"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-04-22"
+    return ecotaxa_version + " 2021-05-05"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -407,6 +407,12 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-05-05 : V 2.5.7
+    Feature #660: Add a column to Collection and expose a search API entry point using it.
+    Bug #659: In a mirrored DB setup, project creation is sometime not visible immediately.
+    Bug #656: Subset (and other GET-based launched tasks) fails when behind a uWSGI server (NOT A CODE FIX).
+    Bug #652: Some actions in object details window make the selection behind silently empty.
+    Feature #608: In parallel with tasks, create back-end job entities and mix the two kinds for users.
 2021-04-22 : V 2.5.6
     Feature #607: Ensure that any information visible in the main classification page can be queried via the API.
     Features #624, #631, #625: Export in Darwin Core Archive format a collection. API only.
