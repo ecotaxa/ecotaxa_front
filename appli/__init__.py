@@ -109,6 +109,9 @@ def AddTaskSummaryForTemplate():
         g.tasksummary = appli.database.GetAssoc2Col(
             "SELECT taskstate,count(*) from temp_tasks WHERE owner_id=%(owner_id)s group by taskstate"
             , {'owner_id': current_user.id})
+    # Add jobs from back-end
+    from appli.jobs.emul import _add_jobs_to_tasks_summary
+    _add_jobs_to_tasks_summary(g.tasksummary)
     g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
@@ -338,6 +341,7 @@ import appli.taxonomy.taxomain
 import appli.usermgmnt
 import appli.api_proxy
 import appli.project.emodnet
+import appli.jobs.views
 
 
 @app.errorhandler(404)
@@ -706,5 +710,6 @@ def load_admin():
     app.register_blueprint(adminBlueprint)
     # noinspection PyUnresolvedReferences
     from .admin.admin_from_flask import flaskAdmin
+
 
 load_admin()

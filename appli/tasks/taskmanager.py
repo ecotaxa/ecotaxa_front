@@ -18,6 +18,7 @@ from appli.database import ExecSQL, GetAll
 # Environment variable for transmitting cookie, i.e. web session, to subprocess
 ECOTAXA_COOKIE = "ECOTAXA_COOKIE"
 
+
 class Task(db.Model):
     __tablename__ = 'temp_tasks'
     id = db.Column(db.Integer(), db.Sequence('seq_temp_tasks'), primary_key=True)
@@ -110,6 +111,7 @@ class AsyncTask:
         if self.task.id is None:
             db.session.add(self.task)
         db.session.commit()
+
         # Get request cookie for session transmission
         cookie = request.cookies.get('session')
         if cookie is not None:
@@ -147,19 +149,6 @@ def TaskFactory(ClassName, task=None):
     from appli.tasks.test import TaskTest
     if ClassName == "TaskTest":
         return TaskTest(task)
-    # Tasks using back-end and API
-    from .taskimport2back import TaskImportToBack
-    if ClassName == "TaskImportToBack":
-        return TaskImportToBack(task)
-    from .taskimportupdate2back import TaskImportUpdateToBack
-    if ClassName == "TaskImportUpdateToBack":
-        return TaskImportUpdateToBack(task)
-    from .tasksimpleimport import TaskSimpleImport
-    if ClassName == "TaskSimpleImport":
-        return TaskSimpleImport(task)
-    from appli.tasks.tasksubset2back import TaskSubsetToBack
-    if ClassName in ("TaskSubset", "TaskSubsetToBack"):
-        return TaskSubsetToBack(task)
     # Tasks running in present component
     from appli.tasks.taskclassifauto2 import TaskClassifAuto2
     if ClassName == "TaskClassifAuto2":
@@ -204,33 +193,38 @@ def LoadTask(taskid, cookie_from_env=False):
 @app.route('/Task/listall')
 @login_required
 def ListTasks():
+    from appli.jobs.emul import _add_jobs_to_task_list, _clean_jobs
     g.headcenter = "<H3>Task Monitor</h3>"
     AddTaskSummaryForTemplate()
+
     seeall = ""
-    if current_user.has_role(database.AdministratorLabel) and gvg("seeall") == 'Y':
+    is_admin = current_user.has_role(database.AdministratorLabel)
+    wants_admin = gvg("seeall") == 'Y'
+    if is_admin and wants_admin:
         tasks = Task.query.filter_by().order_by(Task.id.desc()).all()
         seeall = '&seeall=Y'
     else:
         tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
+
     txt = ""
     if gvg("cleandone") == 'Y' or gvg("cleanerror") == 'Y' or gvg("cleanall") == 'Y':
         txt = "Cleaning process result :<br>"
+        clean_all = gvg("cleanall") == 'Y'
+        clean_done = gvg("cleandone") == 'Y'
+        clean_error = gvg("cleanerror") == 'Y'
         for t in tasks:
-            if (gvg("cleandone") == 'Y' and t.taskstate == 'Done') or (gvg("cleanall") == 'Y') \
-                    or (gvg("cleanerror") == 'Y' and t.taskstate == 'Error'):
+            if clean_all or (clean_done and t.taskstate == 'Done') or (clean_error and t.taskstate == 'Error'):
                 txt += DoTaskClean(t.id)
-        tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
+        txt += _clean_jobs(clean_all, clean_done, clean_error, wants_admin)
+
+    tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
     # txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default'
     # href=?cleanerror=Y>Clean All Error</a>   <a class='btn btn-default' href=?cleanall=Y>Clean All
     # (warning !!!)</a>  Task count : "+str(len(tasks))
-    return render_template('task/listall.html', tasks=tasks, header=txt, len_tasks=len(tasks), seeall=seeall,
-                           IsAdmin=current_user.has_role(database.AdministratorLabel))
-
-
-# Mappings to new task classes, conservatively keeping old code just in case
-_new_tasks = {"TaskImport": "TaskImportToBack",
-              "TaskImportUpdate": "TaskImportUpdateToBack",
-              "TaskSubset": "TaskSubsetToBack",}
+    _add_jobs_to_task_list(tasks, wants_admin)
+    return render_template('task/listall.html', tasks=tasks, header=txt,
+                           len_tasks=len(tasks), seeall=seeall,
+                           IsAdmin=is_admin)
 
 
 @app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
@@ -238,7 +232,6 @@ _new_tasks = {"TaskImport": "TaskImportToBack",
 def TaskCreateRouter(ClassName):
     gvp('dummy')  # Protection bug flask connection reset si on fait post sans lire les champs
     AddTaskSummaryForTemplate()
-    ClassName = _new_tasks.get(ClassName, ClassName)
     task = TaskFactory(ClassName)
     # Get the cookie from HTTP client
     task.cookie = request.cookies.get('session')
@@ -423,6 +416,7 @@ def AutoCleanManual():
 
 
 def AutoClean():
+    """ Called from cron.py """
     TaskList = GetAll("""SELECT id, owner_id, taskclass, taskstate, taskstep, progresspct, progressmsg,
        inputparam, creationdate, lastupdate, questiondata, answerdata
   FROM temp_tasks
@@ -447,4 +441,4 @@ def TaskMonitor(TaskID):
             g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
         return render_template('task/monitor.html', TaskID=task.task.id)
     except Exception:
-        return PrintInCharte("This task doesn't exists anymore, peraphs it was automaticaly purged")
+        return PrintInCharte("This task doesn't exist anymore, perhaps it was automaticaly purged")

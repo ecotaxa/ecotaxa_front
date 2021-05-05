@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% set state2label = dict({'P': 'Pending',
+'E': 'Error',
+'R': 'Running',
+'A': 'Question',
+'F': 'Finished'}) %}
+{% block body %}
+
+  <p>
+    <a href="/Job/Clean/{{ job.id }}">
+      <button class="btn btn-danger">Clean task data</button>
+    </a>
+    <a href="/Task/listall">
+      <button class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span> Back to tasks list</button>
+    </a>
+  </p>
+
+  {% if job.taskstate=="Error" %}
+    <div class="alert alert-danger">
+      <p>This task has errors. Check the error messages below, fix these errors, go back to your project and restart
+        your job.</p>
+    </div>
+  {% endif %}
+
+  <table class="table table-condensed">
+    <tr>
+      <th>Task ID</th>
+      <td>{{ job.id }}</td>
+    </tr>
+    <tr>
+      <th width="150px">Class</th>
+      <td>Task{{ job.type }}</td>
+    </tr>
+    <tr>
+      <th width="150px">Owner</th>
+      <td><a href="mailto:{{ owner.email }}">{{ owner.name }}</a></td>
+    </tr>
+    <tr>
+      <th>State</th>
+      <td>{{ state2label[job.state]|safe }}
+        {% if job.state=="Q" %}
+          <a href="/Job/Question/{{ job.id }}"><span class="label label-warning">Go</span></a>
+        {% elif job.state in ("E", "R") %}
+          <a href="/Job/ForceRestart/{{ job.id }}">
+            <button class="btn btn-danger btn-sm">Force restart</button>
+          </a>
+        {% endif %}
+
+      </td>
+    </tr>
+    <tr>
+      <th>Step</th>
+      <td>{{ job.taskstep }}</td>
+    </tr>
+    <tr>
+      <th>Progress</th>
+      <td>{{ job.progress_pct }}%</td>
+    </tr>
+    <tr>
+      <th>Message</th>
+      <td>{{ job.progress_msg }}
+        <ul>
+          {% for e in job.errors %}
+            <li>{{ e }}</li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr>
+    <tr class="collapse">
+      <th>Input Parameters</th>
+      <td>{{ job.params|string }}</td>
+    </tr>
+    <tr class="collapse">
+      <th>Question Data</th>
+      <td>{{ job.questiondata|string }}</td>
+    </tr>
+    <tr class="collapse">
+      <th>Answer Data</th>
+      <td>{{ job.answerdata|string }}</td>
+    </tr>
+  </table>
+
+  <p><a class="btn" data-toggle="collapse" data-target=".collapse">View internal details &raquo;</a></p>
+
+  <p><a class="btn" href="?log=Y">View log file &raquo;</a></p>
+
+  {% if CustomDetailsAvail %}<p><a class="btn" href="?CustomDetails=Y">View custom details &raquo;</a></p>{% endif %}
+
+  <p>{{ extratext|safe }}</p>
+
+{% endblock %}
+

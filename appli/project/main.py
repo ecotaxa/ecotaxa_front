@@ -294,7 +294,7 @@ def indexPrj(PrjId):
                                "Predict identifications from trained model"))
             g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2?frommodel=Y')",
                                 "Predict identifications from trained model"))
-            g.headmenu.append(("/Task/Create/TaskImport?p=%d" % PrjId, "Import images and metadata"))
+            g.headmenu.append(("/Job/Create/FileImport?p=%d" % PrjId, "Import images and metadata"))
 
         g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
         g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')", "Export"))
@@ -302,8 +302,8 @@ def indexPrj(PrjId):
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
         g.headmenu.append(("/prj/edit/%d" % PrjId, "Edit project settings"))
-        g.headmenu.append(("/Task/Create/TaskSubset?p=%d" % PrjId, "Extract Subset"))
-        g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskSubset?p=%d')" % PrjId,
+        g.headmenu.append(("/Job/Create/Subset?p=%d" % PrjId, "Extract Subset"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/Job/Create/Subset?p=%d')" % PrjId,
                             "Extract Subset"))
         g.headmenu.append(("/prj/merge/%d" % PrjId, "Merge another project in this project"))
         g.headmenu.append(("/prj/EditAnnot/%d" % PrjId, "Edit or erase annotations massively"))
@@ -783,7 +783,10 @@ def GetClassifTabFromModel(proj: ProjectModel):
         res_by_id[taxon.id] = for_taxon
 
     # Go down the tree, in sets, one for each level
-    nodes_to_mark = set(children_by_id[None])
+    try:
+        nodes_to_mark = set(children_by_id[None])
+    except KeyError:
+        nodes_to_mark = set()
     depth = 0
     while len(nodes_to_mark) > 0:
         next_to_mark = set()

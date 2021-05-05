@@ -70,6 +70,7 @@ $(document).ready(function() {
             Not logged ( <a href="{{ url_for_security('login') }}">log in / register</a> )
         {% else %}
             {%  if g.tasksummary %} <a href="/Task/listall">
+            {%  if g.tasksummary.Pending  %}<span class="label label-default">Pending : {{g.tasksummary['Pending']}}</span>{% endif %}
             {%  if g.tasksummary.Question  %}<span class="label label-warning">Question : {{g.tasksummary['Question']}}</span>{% endif %}
             {%  if g.tasksummary.Running  %}<span class="label label-info">Run : {{g.tasksummary['Running']}}</span>{% endif %}
             {%  if g.tasksummary.Error  %}<span class="label label-danger">Error :{{g.tasksummary['Error']}}</span>{% endif %}

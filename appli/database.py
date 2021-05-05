@@ -335,6 +335,7 @@ event.listen(
         ).execute_if(dialect='postgresql')
 )
 
+
 # noinspection PyPep8Naming
 class Objects_cnn_features(db.Model):
     __tablename__ = 'obj_cnn_features'
@@ -702,3 +703,44 @@ class CollectionOrgaRole(_Model):
 
     def __str__(self):
         return "{0},{1}:{2}".format(self.collection_id, self.organisation, self.role)
+
+
+########## Jobs aka Tasks but server-side ###########
+
+Column = db.Column
+Model = _Model
+Sequence = db.Sequence
+ForeignKey = db.ForeignKey
+relationship = db.relationship
+
+
+class Job(Model):
+    """
+        Description of long-running processing operations, server-side.
+        The jobs might need to communicate with the UI for getting input.
+    """
+    __tablename__ = 'job'
+    id = Column(INTEGER, Sequence('seq_temp_tasks'), primary_key=True)
+    """ Unique identifier, from a sequence """
+    owner_id = Column(INTEGER, ForeignKey('users.id'), nullable=False)
+    """ The user who created and thus owns the job """
+    type = Column(VARCHAR(80), nullable=False)
+    """ The job type, e.g. import, export... """
+    state = Column(VARCHAR(80))
+    """ What the job is doing """
+    step = Column(INTEGER)
+    """ Where in the workflow the job is """
+    progress_pct = Column(INTEGER)
+    """ The progress percentage for UI """
+    progress_msg = Column(VARCHAR())
+    """ The message for UI """
+    params = Column(VARCHAR())
+    """ JSON-encoded parameters """
+    creation_date = Column(TIMESTAMP, nullable=False)
+    updated_on = Column(TIMESTAMP, nullable=False)
+    """ Last time that anything changed in present line """
+
+    owner: relationship
+
+    def __str__(self):
+        return "{0} ({1})".format(self.id, self.type)
