@@ -659,8 +659,11 @@ class Collection(_Model):
     external_id = db.Column(VARCHAR, nullable=False)
     """ External identifier, e.g. doi:10.xxxx/eml.1.1 """
     external_id_system = db.Column(VARCHAR, nullable=False)
+    """ External identifier system, e.g. https://doi.org """
     provider_user_id = db.Column(INTEGER, db.ForeignKey('users.id'))
     title = db.Column(VARCHAR, nullable=False)
+    short_title = db.Column(VARCHAR(64))
+    """ A shorter and constrained title for the collection """
     contact_user_id = db.Column(INTEGER, db.ForeignKey('users.id'))
     citation = db.Column(VARCHAR)
     license = db.Column(VARCHAR(16))
@@ -672,6 +675,7 @@ class Collection(_Model):
 
 
 Index('CollectionTitle', Collection.__table__.c.title, unique=True)
+Index('CollectionShortTitle', Collection.__table__.c.short_title, unique=True)
 
 
 class CollectionProject(_Model):
@@ -726,16 +730,26 @@ class Job(Model):
     """ The user who created and thus owns the job """
     type = Column(VARCHAR(80), nullable=False)
     """ The job type, e.g. import, export... """
-    state = Column(VARCHAR(80))
+    params = Column(VARCHAR())
+    """ JSON-encoded startup parameters """
+    state = Column(VARCHAR(1))
     """ What the job is doing """
     step = Column(INTEGER)
     """ Where in the workflow the job is """
     progress_pct = Column(INTEGER)
     """ The progress percentage for UI """
     progress_msg = Column(VARCHAR())
-    """ The message for UI """
-    params = Column(VARCHAR())
-    """ JSON-encoded parameters """
+    """ The message for UI, short version """
+    messages = Column(VARCHAR())
+    """ The messages for UI, long version """
+    inside = Column(VARCHAR())
+    """ JSON-encoded internal state, to use b/w steps """
+    question = Column(VARCHAR())
+    """ JSON-encoded last question data """
+    reply = Column(VARCHAR())
+    """ JSON-encoded reply to last question """
+    result = Column(VARCHAR())
+    """ JSON-encoded execution result """
     creation_date = Column(TIMESTAMP, nullable=False)
     updated_on = Column(TIMESTAMP, nullable=False)
     """ Last time that anything changed in present line """

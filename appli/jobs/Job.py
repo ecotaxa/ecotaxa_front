@@ -5,7 +5,7 @@ import requests
 from werkzeug.datastructures import FileStorage
 
 from to_back.ecotaxa_cli_py import FilesApi, JobModel
-from utils import ApiClient
+from appli.utils import ApiClient
 
 
 class Job(object):

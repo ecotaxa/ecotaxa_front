@@ -6,7 +6,7 @@ from appli.jobs.Job import Job
 # noinspection PyUnresolvedReferences
 from appli.jobs.by_type import *  # Import all for job searching in class hierarchy
 from to_back.ecotaxa_cli_py import JobsApi, JobModel, ApiException, UsersApi, ProjectsApi, ProjectModel
-from utils import ApiClient
+from appli.utils import ApiClient
 
 
 @app.route('/Job/Create/<job_type>', methods=['GET', 'POST'])
