@@ -8,7 +8,7 @@ from typing import Dict, List
 from flask import request
 
 from to_back.ecotaxa_cli_py import JobModel, UserModel, UsersApi, JobsApi, ApiException
-from utils import ApiClient
+from appli.utils import ApiClient
 
 JOB_STATE_TO_TASK_STATE = {'P': 'Pending',
                            'R': 'Running',
@@ -68,7 +68,7 @@ def _clean_jobs(clean_all: bool, clean_done: bool, clean_error: bool, wants_admi
 
 
 def _add_jobs_to_tasks_summary(summary):
-    from utils import ApiClient
+    from appli.utils import ApiClient
     with ApiClient(JobsApi, request) as api:
         try:
             api_jobs: List[JobModel] = api.list_jobs_jobs_get(for_admin=False)

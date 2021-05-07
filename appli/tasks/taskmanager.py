@@ -217,7 +217,7 @@ def ListTasks():
                 txt += DoTaskClean(t.id)
         txt += _clean_jobs(clean_all, clean_done, clean_error, wants_admin)
 
-    tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
+        tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
     # txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default'
     # href=?cleanerror=Y>Clean All Error</a>   <a class='btn btn-default' href=?cleanall=Y>Clean All
     # (warning !!!)</a>  Task count : "+str(len(tasks))

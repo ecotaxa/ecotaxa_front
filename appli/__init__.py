@@ -109,9 +109,9 @@ def AddTaskSummaryForTemplate():
         g.tasksummary = appli.database.GetAssoc2Col(
             "SELECT taskstate,count(*) from temp_tasks WHERE owner_id=%(owner_id)s group by taskstate"
             , {'owner_id': current_user.id})
-    # Add jobs from back-end
-    from appli.jobs.emul import _add_jobs_to_tasks_summary
-    _add_jobs_to_tasks_summary(g.tasksummary)
+        # Add jobs from back-end
+        from appli.jobs.emul import _add_jobs_to_tasks_summary
+        _add_jobs_to_tasks_summary(g.tasksummary)
     g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
