@@ -1,0 +1,19 @@
+Some sample IDs for project 185
+
+15713
+15711
+15749
+15733
+15707
+15762
+15718
+15757
+15712
+15760
+
+Potential status
+================
+nb_unclassified
+nb_validated
+nb_dubious
+nb_predicted	
