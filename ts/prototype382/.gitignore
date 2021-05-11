@@ -1,0 +1,5 @@
+# generated during TypeScript compilation
+*.d.ts
+
+# javascript files should be generated from typescript files !
+*.js

@@ -13,7 +13,7 @@ Some sample IDs for project 185
 
 Potential status
 ================
-nb_unclassified
+nb_unclassified : N.B. The taxon gets and ID when it is no more unclassified
 nb_validated
 nb_dubious
 nb_predicted	
