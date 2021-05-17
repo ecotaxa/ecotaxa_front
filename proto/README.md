@@ -24,9 +24,11 @@ $ pushd ../tools
 
 $ ./generate.sh
 
+This will generate messages (in verbose mode for the moment)
+
 $ popd
 
-This will generate the Typescript API entry points in proto/gen.
+This will generate the Typescript API entry points in proto/ecotaxa-cli/gen.
 
 ###### Setting up the environment:
 
