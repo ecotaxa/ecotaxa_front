@@ -1,6 +1,6 @@
 import { InjectionKey } from "vue";
 import { createStore, Store, useStore } from "vuex";
-import { AuthentificationApi } from "../../gen/api";
+import { AuthentificationApi } from "../../gen";
 
 // define the typings for the store state
 export interface State {
@@ -23,7 +23,7 @@ export const store = createStore<State>({
   },
   actions: {
     try_login(context, creds) {
-      var api = new AuthentificationApi();
+      const api = new AuthentificationApi();
       const req = { username: creds.username, password: creds.password };
       api
         .loginLoginPost(req)

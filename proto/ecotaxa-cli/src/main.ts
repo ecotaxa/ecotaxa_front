@@ -2,7 +2,7 @@
 // Main app creation
 //
 import { createApp } from "vue";
-import App from "./components/App.vue";
+import App from "./App.vue";
 import { store, key } from "./store/store";
 
 const app = createApp(App);
