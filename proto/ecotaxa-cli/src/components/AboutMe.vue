@@ -5,7 +5,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { UsersApi } from "../../gen";
-import { Configuration } from "../../gen";
+//import { Configuration } from "../../gen";
 
 export default defineComponent({
   // type inference enabled
@@ -17,14 +17,15 @@ export default defineComponent({
   },
   created() {
     // eslint-disable-next-line no-unused-vars
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === "settoken" && this.$store.state.token !== null) {
+    //this.$store.subscribe((mutation, state) => {
+    //  if (mutation.type === "settoken" && this.$store.state.token !== null) {
         // logged successfully
-        const conf = new Configuration({
-          accessToken: this.$store.state.token ?? "",
-        });
+//        const conf = new Configuration({
+//          accessToken: this.$store.state.token ?? "",
+//        });
 
-        const api = new UsersApi(conf);
+//        const api = new UsersApi(conf);
+    const api = new UsersApi();
         api
           .showCurrentUserUsersMeGet()
           .then((data) => {
@@ -37,8 +38,8 @@ export default defineComponent({
           .catch(() => {
             this.to_show = "api pb";
           });
-      }
-    });
+  //    }
+    //});
   },
 });
 </script>
