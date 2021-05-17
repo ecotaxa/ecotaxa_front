@@ -8,7 +8,6 @@
 </template>
 
 <script lang="ts">
-//import { defineComponent } from "vue";
 import HelloWorld from "./components/HelloWorld.vue";
 import Login from "./components/Login.vue";
 import Banner from "./components/Banner.vue";
