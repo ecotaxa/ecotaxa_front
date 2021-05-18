@@ -166,6 +166,7 @@
         View List
       </button>
       <div class="dropdown-menu">
+        user-select: all;        
         <a class="dropdown-item" href="mailto:amanda.elineau@obs-vlfr.fr"
           >Amanda Elineau</a
         >

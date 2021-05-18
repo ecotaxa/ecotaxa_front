@@ -15,13 +15,13 @@
 </template>
 
 <script lang="ts">
-import HelloWorld from "./components/HelloWorld.vue";
-/*import Login from "./components/Login.vue";
+/*import HelloWorld from "./components/HelloWorld.vue";
+import Login from "./components/Login.vue";
 import Banner from "./components/Banner.vue";
 import AboutMe from "./components/AboutMe.vue";
 import Login from "./components/Login.vue";*/
 import { Options, Vue } from "vue-class-component";
-import ProjectAbout from "./components/ProjectAbout.vue";
+// import ProjectAbout from "./components/ProjectAbout.vue";
 
 @Options({
   components: {

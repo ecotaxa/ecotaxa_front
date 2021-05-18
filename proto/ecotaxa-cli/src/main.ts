@@ -4,7 +4,7 @@
 // Bootstrap for vue3 (see e.g. https://www.techiediaries.com/vue-bootstrap/)
 
 import Vue from "vue";
-// Vue.use(BootstrapVue); DOES NOT WORK
+// Vue.use(BootstrapVue); // DOES NOT WORK
 
 import { createApp } from "vue";
 import BootstrapVue from "bootstrap-vue";
@@ -13,16 +13,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 import App from "./App.vue";
 // add the store to all components in the app
-// app.use(BootstrapVue); DOES NOT WORK
 import my_router from "./router";
 
-const app = createApp(App)
+const app = createApp(App);
 
 // use router, see routing rules there
 app.use(my_router);
+// app.use(BootstrapVue); DOES NOT WORK
 
 // add the store to all components in the app
 // TODO: Typing for $store
 app.use(store, key);
 app.mount("#app");
-
