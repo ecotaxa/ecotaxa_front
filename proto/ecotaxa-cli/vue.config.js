@@ -5,8 +5,10 @@
  */
 module.exports = {
   // options...
-  publicPath: process.env.NODE_ENV === 'production' ? '/front/' : '',
+  publicPath: process.env.NODE_ENV === "production" ? "/front/" : "/",
   devServer: {
+    // https://webpack.js.org/configuration/dev-server/#devserverhistoryapifallback
+    historyApiFallback: true,
     proxy: {
       "/api": {
         target: "https://ecotaxa.obs-vlfr.fr/",
