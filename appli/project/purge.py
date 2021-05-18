@@ -6,7 +6,9 @@ from flask_security import login_required
 from appli import app, PrintInCharte, gvp, gvg, XSSEscape
 from appli.project import sharedfilter
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ObjectsApi, ObjectSetQueryRsp
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
+from to_back.ecotaxa_cli_py.models import ProjectModel, ObjectSetQueryRsp
 
 
 @app.route('/prjPurge/<int:PrjId>', methods=['GET', 'POST'])

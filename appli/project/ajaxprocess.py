@@ -3,7 +3,9 @@ from flask_security import login_required
 
 from appli import app, gvp
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ObjectsApi, ClassifyReq, ApiException, BulkUpdateReq
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ObjectsApi
+from to_back.ecotaxa_cli_py.models import ClassifyReq, BulkUpdateReq
 
 
 @app.route('/prj/ManualClassif/<int:_PrjId>', methods=['GET', 'POST'])

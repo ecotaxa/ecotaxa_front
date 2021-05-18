@@ -7,8 +7,9 @@ from flask_security import login_required
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, gvg, gvp, XSSEscape
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ObjectHeaderModel, ApiException, ObjectsApi, SamplesApi, \
-    BulkUpdateReq, ProcessesApi, AcquisitionsApi
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, SamplesApi, ProcessesApi, AcquisitionsApi
+from to_back.ecotaxa_cli_py.models import ProjectModel, ObjectHeaderModel, BulkUpdateReq
 
 
 def GetFieldList(prj_model: ProjectModel):

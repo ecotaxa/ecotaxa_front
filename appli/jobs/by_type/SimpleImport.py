@@ -9,8 +9,10 @@ from appli import PrintInCharte, gvg
 from appli.jobs.Job import Job, load_from_json
 from appli.tasks.importcommon import *
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import SimpleImportReq, SimpleImportRsp, ProjectsApi, ProjectModel, ApiException, \
-    UsersApi, UserModel, TaxonomyTreeApi, TaxonModel, JobModel
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.models import SimpleImportReq, SimpleImportRsp, ProjectModel, UserModel, TaxonModel, \
+    JobModel
 
 
 class SimpleImportJob(Job):

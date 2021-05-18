@@ -7,7 +7,8 @@ from flask import Request
 from werkzeug.local import LocalProxy
 
 from appli.api_proxy import BACKEND_URL
-from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
+from to_back.ecotaxa_cli_py import ApiClient as _ApiClient
+from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
     AcquisitionsApi, ProcessesApi, ObjectApi, TaxonomyTreeApi, MiscApi, InstrumentApi, FilesApi, JobsApi
 
 # Lol, generics in python

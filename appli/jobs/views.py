@@ -5,7 +5,9 @@ from appli import app, gvp, PrintInCharte, gvg, XSSEscape, AddTaskSummaryForTemp
 from appli.jobs.Job import Job
 # noinspection PyUnresolvedReferences
 from appli.jobs.by_type import *  # Import all for job searching in class hierarchy
-from to_back.ecotaxa_cli_py import JobsApi, JobModel, ApiException, UsersApi, ProjectsApi, ProjectModel
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import JobsApi, UsersApi, ProjectsApi
+from to_back.ecotaxa_cli_py.models import JobModel, ProjectModel
 from appli.utils import ApiClient
 
 

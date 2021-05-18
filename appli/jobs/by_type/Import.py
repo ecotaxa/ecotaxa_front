@@ -9,8 +9,9 @@ from appli.constants import get_app_manager_mail
 from appli.jobs.Job import Job
 from appli.tasks.importcommon import *
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ImportReq, ImportRsp, ProjectsApi, UsersApi, ApiException, \
-    TaxonomyTreeApi, TaxonModel, ProjectModel, JobModel, JobsApi
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi, JobsApi
+from to_back.ecotaxa_cli_py.models import ImportReq, ImportRsp, TaxonModel, ProjectModel, JobModel
 
 
 class ImportJob(Job):

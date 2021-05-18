@@ -3,7 +3,8 @@ from flask_security import login_required
 
 from appli import app, gvp
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, CreateProjectReq
+from to_back.ecotaxa_cli_py.api import ProjectsApi
+from to_back.ecotaxa_cli_py.models import CreateProjectReq
 
 
 @app.route('/prj/simplecreate/', methods=['GET', 'POST'])

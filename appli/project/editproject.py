@@ -10,8 +10,9 @@ from appli import app, PrintInCharte, gvp, XSSEscape, TempTaskDir
 ######################################################################################################################
 from appli.utils import ApiClient
 from appli.constants import MappableObjectColumns
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UserModel, UsersApi, \
-    TaxonomyTreeApi, TaxonModel, ProjectTaxoStatsModel, MiscApi
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import (ProjectsApi, UsersApi, TaxonomyTreeApi, MiscApi)
+from to_back.ecotaxa_cli_py.models import (ProjectModel, UserModel, TaxonModel, ProjectTaxoStatsModel)
 
 
 @app.route('/prj/edit/<int:PrjId>', methods=['GET', 'POST'])

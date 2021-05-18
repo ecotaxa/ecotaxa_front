@@ -9,8 +9,9 @@ from appli.project import sharedfilter
 from appli.tasks.importcommon import *
 from appli.utils import ApiClient
 from appli.jobs.Job import Job
-from to_back.ecotaxa_cli_py import ProjectsApi, CreateProjectReq, SubsetReq, SubsetRsp, ProjectModel, ApiException, \
-    JobModel
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi
+from to_back.ecotaxa_cli_py.models import CreateProjectReq, SubsetReq, SubsetRsp, ProjectModel, JobModel
 
 
 class SubsetJob(Job):

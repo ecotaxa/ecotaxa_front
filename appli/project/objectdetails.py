@@ -12,9 +12,12 @@ from appli import app, PrintInCharte, gvg, gvp, ntcv, ScaleForDisplay, \
 from appli.constants import ClassifQual, DayTimeList
 # noinspection SpellCheckingInspection
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ObjectApi, ObjectModel, ApiException, ProjectsApi, ProjectModel, TaxonomyTreeApi, \
-    TaxonModel, UsersApi, UserModel, SamplesApi, ProcessesApi, AcquisitionsApi, SampleModel, AcquisitionModel, \
-    ProcessModel, HistoricalClassification, ObjectsApi, BulkUpdateReq
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import (ObjectApi, ProjectsApi, TaxonomyTreeApi,
+                                         UsersApi, SamplesApi, ProcessesApi, AcquisitionsApi,
+                                         ObjectsApi)
+from to_back.ecotaxa_cli_py.models import (ObjectModel, ProjectModel, SampleModel, AcquisitionModel,
+                                           TaxonModel, UserModel, ProcessModel, HistoricalClassification, BulkUpdateReq)
 
 
 @app.route('/objectdetails/<int:objid>')

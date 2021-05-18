@@ -1,7 +1,8 @@
 from collections import OrderedDict
 
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import MiscApi, Constants
+from to_back.ecotaxa_cli_py.api import MiscApi
+from to_back.ecotaxa_cli_py.models import Constants
 
 ClassifQual = {'P': 'predicted', 'D': 'dubious', 'V': 'validated'}
 

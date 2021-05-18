@@ -3,7 +3,9 @@ from flask_login import login_required
 
 from appli import app, PrintInCharte
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi
+from to_back.ecotaxa_cli_py.models import ProjectModel
 
 
 @app.route('/prj/emodnet/<int:prj_id>', methods=['GET', 'POST'])

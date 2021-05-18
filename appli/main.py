@@ -10,7 +10,9 @@ import os
 
 # definition d'un second répertoire traité en statique en plus de static
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import UsersApi, UserModelWithRights, ApiException
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import UsersApi
+from to_back.ecotaxa_cli_py.models import UserModelWithRights
 
 vaultBP = Blueprint('vault', __name__, static_url_path='/vault', static_folder='../vault')
 app.register_blueprint(vaultBP)

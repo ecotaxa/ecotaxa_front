@@ -10,10 +10,16 @@ if test -f "openapi.json"; then
   # A bit disturbing, but it's the same file, openapi.json in current directory is in /client as seen from docker
   SRC="/client/to_back/openapi.json"
 fi
-docker run --rm --network="host" -v ${PWD}/..:/client openapitools/openapi-generator-cli:v4.3.1 generate \
+# openapi generator removed any python typings or just auto-completion hints in 5.1.1,
+# so the main point of generators is a bit lost to me.
+docker run --rm --network="host" -v ${PWD}/..:/client -u $(id -u ${USER}):$(id -g ${USER}) \
+ openapitools/openapi-generator-cli:v4.3.1 generate \
  -i ${SRC} -g python \
  --minimal-update \
  --additional-properties=generateSourceCodeOnly=true,packageName=to_back.ecotaxa_cli_py \
  -o /client
- # Linux: Generated files belong to root, fix it.
- sudo chown -R $(id -u):$(id -g) ${PWD}
+# Remove the _api_ in defs which come from leading /api in URLs
+#for f in ecotaxa_cli_py/api/*.py
+#do
+#  sed -i 's/_api_/_/g' $f
+#done

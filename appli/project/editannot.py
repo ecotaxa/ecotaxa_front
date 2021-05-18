@@ -7,8 +7,9 @@ from flask_security import login_required
 from appli import app, PrintInCharte, gvg
 
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, UsersApi, UserModel, ObjectsApi, \
-    ObjectSetRevertToHistoryRsp, HistoricalLastClassif
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi
+from to_back.ecotaxa_cli_py.models import ProjectModel, UserModel, ObjectSetRevertToHistoryRsp, HistoricalLastClassif
 
 
 ######################################################################################################################

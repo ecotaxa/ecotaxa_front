@@ -8,8 +8,8 @@ from appli import app, PrintInCharte, gvg
 ######################################################################################################################
 from appli.project.main import _manager_mail
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, UsersApi, UserModelWithRights, TaxonomyTreeApi, \
-    TaxonomyTreeStatus
+from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.models import ProjectModel, UserModelWithRights, TaxonomyTreeStatus
 
 
 # noinspection PyPep8Naming

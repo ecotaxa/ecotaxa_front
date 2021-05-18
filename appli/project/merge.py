@@ -6,7 +6,9 @@ from flask_security import login_required
 from appli import app, PrintInCharte, gvg, XSSEscape, FormatError
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, MergeRsp, ApiException
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi
+from to_back.ecotaxa_cli_py.models import ProjectModel, MergeRsp
 
 
 @app.route('/prj/merge/<int:PrjId>', methods=['GET', 'POST'])

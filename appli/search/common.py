@@ -5,8 +5,8 @@ from flask import render_template, request, json
 
 from appli import app, gvg, DecodeEqualList
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import SamplesApi, SampleModel, ProjectsApi, ProjectModel, InstrumentApi, TaxonomyTreeApi, \
-    TaxonModel, ProjectUserStatsModel
+from to_back.ecotaxa_cli_py.api import SamplesApi, InstrumentApi, TaxonomyTreeApi, ProjectsApi
+from to_back.ecotaxa_cli_py.models import ProjectModel, SampleModel, TaxonModel, ProjectUserStatsModel
 
 
 @app.route("/search/samples")

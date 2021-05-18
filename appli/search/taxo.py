@@ -6,7 +6,8 @@ from flask import render_template, json, jsonify, request
 
 from appli import app, gvg, gvp
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import TaxonomyTreeApi, TaxaSearchRsp, TaxonModel
+from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel
+from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
 
 
 # Specialize an encoder for serializing directly the back-end response

@@ -4,7 +4,8 @@ from json import JSONDecodeError
 import requests
 from werkzeug.datastructures import FileStorage
 
-from to_back.ecotaxa_cli_py import FilesApi, JobModel
+from to_back.ecotaxa_cli_py.api import FilesApi
+from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
 
 

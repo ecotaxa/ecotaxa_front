@@ -18,8 +18,10 @@ from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient, format_date_time
-from to_back.ecotaxa_cli_py import ProjectsApi, ProjectModel, ApiException, ObjectsApi, ObjectSetQueryRsp, UsersApi, \
-    SamplesApi, SampleModel, UserModel, TaxonomyTreeApi, TaxonModel, ProjectTaxoStatsModel
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi, SamplesApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.models import (ProjectModel, SampleModel, UserModel, ObjectSetQueryRsp, TaxonModel,
+                                           ProjectTaxoStatsModel)
 
 
 ######################################################################################################################
