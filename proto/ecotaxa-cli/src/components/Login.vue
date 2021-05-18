@@ -1,6 +1,7 @@
 <template>
   <div id="login">
     Status: {{ status }} Is logged: {{ is_logged }}
+    <br>
     <form @submit.prevent="login">
       <input v-model="username" placeholder="username" />
       <input v-model="password" placeholder="password" type="password" />
@@ -17,9 +18,9 @@ export default defineComponent({
   name: "Login",
   data() {
     return {
-      status: "",
-      username: "",
-      password: "",
+      status: String(""),
+      username: String(""),
+      password: String(""),
     };
   },
   methods: {

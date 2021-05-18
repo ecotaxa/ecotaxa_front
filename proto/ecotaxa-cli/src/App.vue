@@ -1,25 +1,31 @@
 <template>
-  <Banner />
+  <!--Banner />
   <img alt="Vue logo" src="./assets/logo.png" />
   <span> {{ a }} </span>
-  <login />
   <about-me />
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" /-->
+  <login />
+  <br>
+  <Issue382 projectID=186 />
 </template>
 
 <script lang="ts">
-import HelloWorld from "./components/HelloWorld.vue";
+/* import HelloWorld from "./components/HelloWorld.vue";
 import Login from "./components/Login.vue";
 import Banner from "./components/Banner.vue";
-import AboutMe from "./components/AboutMe.vue";
+import AboutMe from "./components/AboutMe.vue";*/
+import Login from "./components/Login.vue";
 import { Options, Vue } from "vue-class-component";
+import Issue382 from "./components/Issue382.vue";
 
 @Options({
   components: {
-    HelloWorld,
+    Issue382,
+    Login,    
+    /*HelloWorld,
     Login,
     Banner,
-    AboutMe,
+    AboutMe,*/
   },
 })
 export default class App extends Vue {}
