@@ -1,18 +1,11 @@
 <template>
+  <div>This is About Project for {{ to_show }}</div>
   <div id="ecotaxa" class="jumbotron text-left">
     <h1>Basic Information about project {{ projectID }}</h1>
     <br />
-    <!--h1>{{ urlLink }}</h1-->
-
     <p>
       <a v-bind:href="urlLink"> Details about Project {{ projectID }} </a>
     </p>
-
-    <!--p>
-      <a href="https://ecotaxa.obs-vlfr.fr/prj/185"
-        >Details about Project {{ projectID }}</a
-      >      
-    </p-->
   </div>
 
   <div class="container">
@@ -404,6 +397,7 @@
 </template>
 
 <script lang="ts">
+// import { Prop } from "vue-property-decorator";
 import { Options, Vue } from "vue-class-component";
 
 @Options({
@@ -412,14 +406,30 @@ import { Options, Vue } from "vue-class-component";
   },
   data: function () {
     return {
-      //urlLink: String("coucou"),
-      urlLink: String(window.location.pathname + "prj/" + this.projectID)
+      // urlLink: String("")
+      // urlLink: String("") /* (window.location.pathname + "prj/" + this.projectID) */
     };
   },
+  computed: {
+    urlLink: function () {
+      let findDoubleSlash: number = window.location.pathname.indexOf("//");
+      let findSlash: number = window.location.pathname.indexOf(
+        "/",
+        findDoubleSlash + 1
+      );
+      let mySub: string = "";
+      if (findSlash != -1)
+        mySub = window.location.pathname.substring(0, findSlash);
+      else mySub = window.location.pathname;
+      mySub += "prj/" + this.projectID;
+      return mySub;
+    },
+  },
 })
-export default class Issue382 extends Vue {
+export default class ProjectAbout extends Vue {
   projectID!: string;
   urlLink!: string;
+  to_show = this.projectID;
 }
 </script>
 
