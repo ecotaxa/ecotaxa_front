@@ -425,9 +425,8 @@ import { Options, Vue } from "vue-class-component";
       if (findSlash != -1)
         mySub = window.location.pathname.substring(0, findSlash);
       else mySub = window.location.pathname;
-      mySub += "prj/" + this.projectID;
+      mySub += "/prj/" + this.projectID;
       return mySub;
-      // return "prj/" + this.projectID;
     },
   },
 })
