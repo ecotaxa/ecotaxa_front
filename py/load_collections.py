@@ -79,13 +79,25 @@ class EcoTaxaApiClient(SimpleClient):
         rsp = self.delete("/collections/%d" % coll_id)
         return rsp
 
-    def export_collection(self, coll_id: int, dry_run: bool, with_zeroes: bool, auto_morpho: bool) -> EMODnetExportRsp:
-        rsp = self.get(EMODnetExportRsp, "/collections/%d/export/emodnet?dry_run=%s&with_zeroes=%s&auto_morpho=%s"
-                       % (coll_id, dry_run, with_zeroes, auto_morpho))
+    def export_collection(self, coll_id: int, dry_run: bool,
+                          with_zeroes: bool, with_computations: bool, auto_morpho: bool) -> EMODnetExportRsp:
+        rsp: EMODnetExportRsp = self.get(EMODnetExportRsp,
+                                         "/collections/%d/export/emodnet?dry_run=%s&with_zeroes=%s&auto_morpho=%s&with_computations=%s"
+                                         % (coll_id, dry_run, with_zeroes, auto_morpho, with_computations))
+        self.wait_for_job_done(rsp.job_id)
         return rsp
 
-    def get_task_file(self, task_id: int):
-        rsp = self.get(IO, "/tasks/%d/file" % task_id, stream=False)
+    def wait_for_job_done(self, job_id: int):
+        logging.info("Waiting for job #%d", job_id)
+        while True:
+            rsp: JobModel = self.get(JobModel, "/jobs/%d/" % job_id)
+            if rsp.state in ('E', 'F'):
+                break
+            logging.info(rsp)
+            time.sleep(1)
+
+    def get_task_file(self, job_id: int):
+        rsp = self.get(IO, "/jobs/%d/file" % job_id, stream=False)
         return rsp
 
 
@@ -137,6 +149,7 @@ def create_collection(client: EcoTaxaApiClient, coll_in: CollectionDescription):
     coll_id = client.create_collection(coll_in.title, coll_in.projects)
     logging.info("New collection id:%d from %s", coll_id, coll_in.projects)
     # Get the collection, a few fields should be aggregated from projects e.g. license
+    time.sleep(2)
     coll = client.query_collection(coll_id)
     if coll.license not in OK_LICENSES:
         logging.error("Collection license '%s' does not make it exportable", coll.license)
@@ -158,22 +171,22 @@ def create_collection(client: EcoTaxaApiClient, coll_in: CollectionDescription):
     coll.abstract = coll_in.abstract
     coll.description = coll_in.description
     # TODO: temp
-    coll.external_id = coll_in.title
-    coll.external_id_system = "local"
+    coll.external_id = "?"
+    coll.external_id_system = "?"
     client.update_collection(coll)
-    # TODO: License
+    time.sleep(2)
     # Check after update
     coll_reread = client.query_collection(coll_id)
     logging.info("After update: %s", coll_reread)
-    export_out = client.export_collection(coll_id, True, True, False)
+    export_out = client.export_collection(coll_id, True, False, False, True)
     for a_msg in export_out.warnings:
         logging.warning("(BACK):%s", a_msg)
     for a_msg in export_out.errors:
         logging.error("(BACK):%s", a_msg)
-    if export_out.task_id == 0:
+    if export_out.job_id == 0:
         logging.error("Export failed:" + "\n".join(export_out.errors))
     else:
-        zipped_blob = client.get_task_file(export_out.task_id)
+        zipped_blob = client.get_task_file(export_out.job_id)
         # For some reason, thru the proxy we get an http 1.1 chunked content
         zipped_blob = de_chunk_if_needed(zipped_blob)
         dasid = coll_in.ref.split("=")[-1]
