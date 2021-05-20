@@ -7,10 +7,12 @@ import Vue from "vue";
 // Vue.use(BootstrapVue); // DOES NOT WORK
 
 import { createApp } from "vue";
-import BootstrapVue from "bootstrap-vue";
+import 'bootstrap';
+//import BootstrapVue from "bootstrap-vue";
 import { store, key } from "./store/store";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-vue/dist/bootstrap-vue.css";
+import '@/assets/custom.scss';
+//import "bootstrap/dist/css/bootstrap.min.css";
+//import "bootstrap-vue/dist/bootstrap-vue.css";
 import App from "./App.vue";
 // add the store to all components in the app
 import my_router from "./router";

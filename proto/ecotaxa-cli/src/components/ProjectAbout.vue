@@ -157,6 +157,24 @@
   <div class="container">
     <h2>Project Managers</h2>
 
+    <h2>Dropdowns</h2>
+    <div class="btn-group">
+      <button
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        id="dropdownMenuButton1"
+        data-toggle="dropdown"
+        aria-expanded="false"
+      >
+        Dropdown button
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <a class="dropdown-item" href="#">Action</a>
+        <a class="dropdown-item" href="#">Another action</a>
+        <a class="dropdown-item" href="#">Something else here</a>
+      </div>
+    </div>
+
     <div class="dropdown">
       <button
         type="button"
@@ -399,11 +417,52 @@
 <script lang="ts">
 // import { Prop } from "vue-property-decorator";
 import { Options, Vue } from "vue-class-component";
+import { onMounted, ref } from "vue";
+// import 'bootstrap';
+import { Popover, Modal } from "bootstrap";
 
 @Options({
+  name: "ProjectAbout",
   props: {
     projectID: String,
   },
+  setup() {
+    alert("Laurent1");
+    // will be assigned when component is attached to DOM
+    // don't forget to "export" these variables
+    // (see the final return statement below)
+    // or they will remain null ...
+    const popoverRef = ref(null);
+    const modalRef = ref(null);
+
+    const showModal = () => {
+      const dialog = new Modal(modalRef.value, { backdrop: true });
+      dialog.show();
+    };
+
+    const showPopover = () => {
+      const popover = new Popover(popoverRef.value, {
+        content: "Hello world!",
+        placement: "top",
+      });
+      popover.show();
+    };
+
+    onMounted(() => {
+      alert("Laurent2");
+      /*
+      // vanilla style, also working :)
+      const el = document.getElementById('pop-pop-pop');
+      const popover = new Popover(el, { content: 'Hello world!', placement: 'top' });
+      el.addEventListener('click', () => {
+        popover.show();
+      }, false);
+      */
+    });
+
+    return { modalRef, popoverRef, showModal, showPopover };
+  },
+
   data: function () {
     return {
       // urlLink: String("")
@@ -412,6 +471,7 @@ import { Options, Vue } from "vue-class-component";
   },
   computed: {
     urlLink: function () {
+      alert("Laurent3");      
       let findDoubleSlash: number = window.location.pathname.indexOf("//");
       let findSlash: number = 0;
       if (findDoubleSlash == -1) {
@@ -428,14 +488,17 @@ import { Options, Vue } from "vue-class-component";
       mySub += "/prj/" + this.projectID;
       return mySub;
     },
-  },
+  }
 })
+
 export default class ProjectAbout extends Vue {
   projectID!: string;
   urlLink!: string;
   to_show = this.projectID;
 }
+
 </script>
+
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <!--style scoped>
