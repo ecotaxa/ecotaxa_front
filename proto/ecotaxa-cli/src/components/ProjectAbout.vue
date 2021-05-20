@@ -166,7 +166,6 @@
         View List
       </button>
       <div class="dropdown-menu">
-        user-select: all;        
         <a class="dropdown-item" href="mailto:amanda.elineau@obs-vlfr.fr"
           >Amanda Elineau</a
         >
@@ -414,15 +413,19 @@ import { Options, Vue } from "vue-class-component";
   computed: {
     urlLink: function () {
       let findDoubleSlash: number = window.location.pathname.indexOf("//");
-      let findSlash: number = window.location.pathname.indexOf(
-        "/",
-        findDoubleSlash + 1
-      );
+      let findSlash: number = 0;
+      if (findDoubleSlash == -1) {
+        // not found
+        findSlash = window.location.pathname.indexOf("/");
+      } else {
+        findSlash = window.location.pathname.indexOf("/", findDoubleSlash + 2);
+      }
+
       let mySub: string = "";
       if (findSlash != -1)
         mySub = window.location.pathname.substring(0, findSlash);
       else mySub = window.location.pathname;
-      mySub += "prj/" + this.projectID;
+      mySub += "/prj/" + this.projectID;
       return mySub;
     },
   },
