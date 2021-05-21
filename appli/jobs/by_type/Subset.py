@@ -37,9 +37,10 @@ class SubsetJob(Job):
 
         formdata = {'subsetprojecttitle': (target_prj.title + " - Subset created on " +
                                            (datetime.date.today().strftime('%Y-%m-%d')))[0:255],
-                    'valtype': 'V',
-                    'vvaleur': 200,
-                    'pvaleur': "",
+                    'grptype': 'C',
+                    'valtype': 'P',
+                    'vvaleur': "",
+                    'pvaleur': "10",
                     'withimg': False}
 
         html = "<h3>Extract subset</h3>"
@@ -128,6 +129,7 @@ class SubsetJob(Job):
             with ApiClient(ProjectsApi, request) as api:
                 req = SubsetReq(filters=filters,
                                 dest_prj_id=new_prj_id,
+                                group_type='S',
                                 limit_type=valtype,
                                 limit_value=valeur,
                                 do_images=(withimg == 'Y'))
