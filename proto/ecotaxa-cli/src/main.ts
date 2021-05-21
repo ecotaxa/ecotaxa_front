@@ -7,10 +7,10 @@ import Vue from "vue";
 // Vue.use(BootstrapVue); // DOES NOT WORK
 
 import { createApp } from "vue";
-import 'bootstrap';
+import "bootstrap";
 //import BootstrapVue from "bootstrap-vue";
 import { store, key } from "./store/store";
-import '@/assets/custom.scss';
+import "@/assets/custom.scss";
 //import "bootstrap/dist/css/bootstrap.min.css";
 //import "bootstrap-vue/dist/bootstrap-vue.css";
 import App from "./App.vue";
