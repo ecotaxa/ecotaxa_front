@@ -3,7 +3,7 @@
 //
 // Bootstrap for vue3 (see e.g. https://www.techiediaries.com/vue-bootstrap/)
 
-import Vue from "vue";
+// import Vue from "vue";
 // Vue.use(BootstrapVue); // DOES NOT WORK
 
 import { createApp } from "vue";

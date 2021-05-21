@@ -435,7 +435,7 @@ import { Dropdown } from "bootstrap";
     // Add a custom event
     dd_ref.addEventListener("hidden.bs.dropdown", function (event: Event) {
       console.log(event);
-      alert("parti!");
+      alert(event.type);
     });
   },
   // setup() {

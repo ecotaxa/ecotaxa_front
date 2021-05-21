@@ -15,7 +15,8 @@
 </template>
 
 <script lang="ts">
-/*import HelloWorld from "./components/HelloWorld.vue";
+/* import Banner from "./components/Banner.vue";
+import HelloWorld from "./components/HelloWorld.vue";
 import Login from "./components/Login.vue";
 import Banner from "./components/Banner.vue";
 import AboutMe from "./components/AboutMe.vue";
