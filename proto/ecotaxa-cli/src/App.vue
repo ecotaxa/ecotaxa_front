@@ -1,4 +1,7 @@
 <template>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
   <div id="nav">
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link> |
@@ -33,7 +36,11 @@ import { Options, Vue } from "vue-class-component";
     AboutMe,*/
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  mounted() {
+    this.$forceUpdate(); // keep it while in dev. phase, to avoid using cache
+  }
+}
 </script>
 
 <style>

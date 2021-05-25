@@ -160,7 +160,9 @@
   <div class="container">
     <br />
     <h3>Samples with objects and status</h3>
-    <button type="button" class="btn btn-primary">Export in .tsv format</button>
+    <button type="button" @click="exportSamples" class="btn btn-primary">
+      Export in .tsv format
+    </button>
     <p></p>
     <table class="table table-bordered table-striped col-sm-6">
       <tr>
@@ -377,6 +379,14 @@ import { ProjectsApi } from "../../gen";
     this.displayAcquisitionAndProcessingFields(this.projectID);
   },
   methods: {
+    exportSamples() {
+      // 3 possible solutions to export Samples with objects and status
+      // https://stackoverflow.com/questions/48611671/vue-js-write-json-object-to-local-file
+      // We will use the "blob" solution, with a plugging already written, see :
+      // https://www.iamrohit.in/vuejs-component-export-json-data-csv-file/
+      alert("exportSamples");
+    },
+
     displayProjectTitle(pID: string): void {
       const api: ProjectsApi = new ProjectsApi();
       api
