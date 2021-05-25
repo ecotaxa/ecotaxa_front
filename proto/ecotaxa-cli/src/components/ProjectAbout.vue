@@ -20,29 +20,21 @@
       </div>
       <div class="col-sm-4">
         <h3>Comments</h3>
-        <p>
-          No comment. But the comment could be much longer and fill in several
-          lines automatically indented as you should see here (otherwise resize
-          the window to make it smaller and see the result)
-        </p>
+        <p>{{ projectComment }}</p>
       </div>
       <div class="col-sm-4">
         <h3>License</h3>
-        <p>CC BY-NC 4.0</p>
+        <p>{{ projectLicense }}</p>
       </div>
       <div class="col-sm-4">
         <h3>SCN Network</h3>
-        <p>SCN_zooscan_group1</p>
+        <p>{{ projectSCNnetwork }}</p>
       </div>
       <div class="col-sm-4">
         <h3>Contact</h3>
         <p>
-          <a href="mailto:ecotaxa.api.user@gmail.com">Jon Doe</a>
+          <a :href="contactMail">{{ contactName }}</a>
         </p>
-      </div>
-      <div class="col-sm-4">
-        <h3>Other fields to come...</h3>
-        <p>Other field value, the arrays and lists would come at the end</p>
       </div>
     </div>
   </div>
@@ -72,11 +64,23 @@
       </tbody>
     </table>
   </div>
+  <div class="container">
+    <h3>Object fields</h3>
+    <br />
+    <table class="table table-bordered table-striped col-sm-6">
+      <tbody>
+        <tr v-for="myfields in objectArrayArray" :key="myfields.index">
+          <td v-for="myobjectfield in myfields" :key="myobjectfield.index">
+            {{ myobjectfield }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <br />
   <div class="container">
     <h2>Project Managers</h2>
-
-    <h2>Dropdowns</h2>
     <div class="btn-group">
       <button
         ref="vanillaDD"
@@ -254,8 +258,8 @@
   <br />
   <div class="container">
     <h3>
-      Taxas
-      <button type="button" class="btn btn-primary">
+      Taxa
+      <button type="button" @click="exportTaxa" class="btn btn-primary">
         Export in .tsv format
       </button>
     </h3>
@@ -359,8 +363,14 @@ import { ProjectsApi } from "../../gen";
       vanilla: null,
       projectTitle: String(""),
       projectDescription: String(""),
+      projectComment: String(""),
+      projectLicense: String(""),
+      projectSCNnetwork: String(""),
+      contactMail: String(""),
+      contactName: String(""),
       sampleArrayArray: Array<Array<string>>(),
       acquAndProcArrayArray: Array<Array<string>>(),
+      objectArrayArray: Array<Array<string>>(),
     };
   },
   mounted() {
@@ -373,10 +383,17 @@ import { ProjectsApi } from "../../gen";
       alert(event.type);
     });
 
-    this.displayProjectTitle(this.projectID);
-    this.displayProjectDescription(this.projectID);
-    this.displayProjectSampleFields(this.projectID);
-    this.displayAcquisitionAndProcessingFields(this.projectID);
+    // this.sampleArrayArray = ProcessProjectSampleFields(this|this.projectID); ==> .ts apart
+
+    this.processProjectTitle();
+    this.processProjectDescription(this.projectID);
+    this.processProjectComment(this.projectID);
+    this.processProjectLicense(this.projectID);
+    this.processProjectSCNnetwork(this.projectID);
+    this.processNameAndContact(this.projectID);
+    this.processProjectSampleFields(this.projectID);
+    this.processAcquisitionAndProcessingFields(this.projectID);
+    this.processObjectFields(this.projectID);
   },
   methods: {
     exportSamples() {
@@ -384,13 +401,16 @@ import { ProjectsApi } from "../../gen";
       // https://stackoverflow.com/questions/48611671/vue-js-write-json-object-to-local-file
       // We will use the "blob" solution, with a plugging already written, see :
       // https://www.iamrohit.in/vuejs-component-export-json-data-csv-file/
-      alert("exportSamples");
+      alert("Not yet implemented !");
+    },
+    exportTaxa() {
+      alert("Not yet implemented !");
     },
 
-    displayProjectTitle(pID: string): void {
+    processProjectTitle(): void {
       const api: ProjectsApi = new ProjectsApi();
       api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .projectQueryProjectsProjectIdGet(parseInt(this.projectID))
         .then((data) => {
           this.projectTitle = data.data.title;
         })
@@ -399,7 +419,7 @@ import { ProjectsApi } from "../../gen";
           this.projectTitle = "Invalid Project ID"; // TODO : global error treatment
         });
     },
-    displayProjectDescription(pID: string): void {
+    processProjectDescription(pID: string): void {
       const api: ProjectsApi = new ProjectsApi();
       api
         .projectQueryProjectsProjectIdGet(parseInt(pID))
@@ -411,7 +431,57 @@ import { ProjectsApi } from "../../gen";
           this.projectDescription = "Invalid Project ID"; // TODO : global error treatment
         });
     },
-    displayProjectSampleFields(pID: string): void {
+    processProjectComment(pID: string): void {
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          this.projectComment = data.data.comments;
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.projectComment = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
+    processProjectLicense(pID: string): void {
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          this.projectLicense = data.data.license;
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.projectLicense = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
+    processProjectSCNnetwork(pID: string): void {
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          this.projectSCNnetwork = data.data.cnn_network_id;
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.projectSCNnetwork = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
+    processNameAndContact(pID: string): void {
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          this.contactMail = "mailto:" + data.data.contact?.email;
+          this.contactName = data.data.contact?.name;
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.contactMail = "";
+          this.contactName = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
+    processProjectSampleFields(pID: string): void {
       /* For information : data.data.sample_free_cols will look like
       let sample_free_cols: { [key: string]: string } = {
         scan_operator: "t01",
@@ -453,7 +523,7 @@ import { ProjectsApi } from "../../gen";
           this.sampleArrayArray = "Invalid Project ID"; // TODO : global error treatment
         });
     },
-    displayAcquisitionAndProcessingFields(pID: string): void {
+    processAcquisitionAndProcessingFields(pID: string): void {
       const api: ProjectsApi = new ProjectsApi();
       api
         .projectQueryProjectsProjectIdGet(parseInt(pID))
@@ -483,6 +553,41 @@ import { ProjectsApi } from "../../gen";
               row++;
             }
             this.acquAndProcArrayArray = myArrayArrayString;
+            //console.log(nbRows);
+            //console.log(myArrayArrayString);
+          }
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.acquAndProcArrayArray = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
+    processObjectFields(pID: string): void {
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          // Join acquisition_free_cols and process_free_cols
+          let myFlatArray: Array<string> = new Array<string>();
+          if (data.data.obj_free_cols !== undefined)
+            myFlatArray = Object.keys(data.data.obj_free_cols);
+          if (myFlatArray.length) {
+            let nbItems: number = myFlatArray.length;
+            let myArrayString: Array<string>;
+            let myArrayArrayString = new Array<Array<string>>();
+            //let nbRows: number = Math.round(nbItems / _NUMCOL);
+            let row: number = 0;
+            let col: number = 0;
+            while (col + row * _NUMCOL < nbItems) {
+              myArrayString = new Array<string>();
+              for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
+                myArrayString.push(myFlatArray[col + row * _NUMCOL]);
+              }
+              myArrayArrayString.push(myArrayString);
+              col = 0;
+              row++;
+            }
+            this.objectArrayArray = myArrayArrayString;
             //console.log(nbRows);
             //console.log(myArrayArrayString);
           }
