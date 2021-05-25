@@ -12,11 +12,11 @@
     <div class="row">
       <div class="col-sm-4">
         <h3>Title</h3>
-        <p>Demo Zooscan for API tests (point B WP2 200)</p>
+        <p>{{ projectTitle }}</p>
       </div>
       <div class="col-sm-4">
         <h3>Description</h3>
-        <p>Données PtB Zooscan filet WP2, semaine ET mardi.</p>
+        <p>{{ projectDescription }}</p>
       </div>
       <div class="col-sm-4">
         <h3>Comments</h3>
@@ -49,108 +49,27 @@
   <div class="container">
     <h3>Sample fields</h3>
     <br />
-    <table class="table table-bordered table-striped col-sm-12">
-      <!-- hard coded just to see the result-->
-      <!-- find a proper generic solution with Vuejs/TypeScript -->
-      <tr>
-        <td>scan_operator</td>
-        <td>ship</td>
-        <td>program</td>
-        <td>stationid</td>
-        <td>bottomdepth</td>
-        <td>ctdrosettefilename</td>
-        <td>other_ref</td>
-        <td>tow_nb</td>
-      </tr>
-      <tr>
-        <td>tow_type</td>
-        <td>net_type</td>
-        <td>net_mesh</td>
-        <td>net_surf</td>
-        <td>zmax</td>
-        <td>zmin</td>
-        <td>tot_vol</td>
-        <td>comment</td>
-      </tr>
-      <tr>
-        <td>tot_vol_qc</td>
-        <td>depth_qc</td>
-        <td>sample_qc</td>
-        <td>barcode</td>
-        <td>duration</td>
-        <td>ship_speed</td>
-        <td>cable_length</td>
-        <td>cable_angle</td>
-      </tr>
-      <tr>
-        <td>cable_speed</td>
-        <td>nb_jar</td>
-        <td>open</td>
-      </tr>
+    <table class="table table-bordered table-striped">
+      <tbody>
+        <tr v-for="samples in sampleArrayArray" :key="samples.index">
+          <td v-for="sample in samples" :key="sample.index">
+            {{ sample }}
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
   <div class="container">
     <h3>Acquisition and Processing fields</h3>
     <br />
     <table class="table table-bordered table-striped col-sm-6">
-      <!-- hard coded to see the merge between acquisition and processing-->
-      <!-- find a proper generic solution with Vuejs/TypeScript -->
-      <tr>
-        <td>min_mesh</td>
-        <td>max_mesh</td>
-        <td>sub_part</td>
-        <td>sub_method</td>
-        <td>hardware</td>
-        <td>software</td>
-      </tr>
-      <tr>
-        <td>author</td>
-        <td>imgtype</td>
-        <td>scan_date</td>
-        <td>scan_time</td>
-        <td>quality</td>
-        <td>bitpixel</td>
-      </tr>
-      <tr>
-        <td>greyfrom</td>
-        <td>scan_resolution</td>
-        <td>rotation</td>
-        <td>miror</td>
-        <td>xsize</td>
-        <td>ysize</td>
-      </tr>
-      <tr>
-        <td>xoffset</td>
-        <td>yoffset</td>
-        <td>lut_color_balance</td>
-        <td>lut_filter</td>
-        <td>lut_min</td>
-        <td>lut_max</td>
-      </tr>
-      <tr>
-        <td>lut_odrange</td>
-        <td>lut_ratio</td>
-        <td>lut_16b_median</td>
-        <td>instrument</td>
-        <td>date</td>
-        <td>time</td>
-      </tr>
-      <tr>
-        <td>img_software_version</td>
-        <td>img_resolution</td>
-        <td>img_od_grey</td>
-        <td>img_od_std</td>
-        <td>img_background_img</td>
-        <td>particle_version</td>
-      </tr>
-      <tr>
-        <td>particle_threshold</td>
-        <td>particle_pixel_size_mm</td>
-        <td>particle_min_size_mm</td>
-        <td>particle_max_size_mm</td>
-        <td>particle_sep_mask</td>
-        <td>particle_bw_ratio</td>
-      </tr>
+      <tbody>
+        <tr v-for="myfields in acquAndProcArrayArray" :key="myfields.index">
+          <td v-for="myAcquOrProc in myfields" :key="myAcquOrProc.index">
+            {{ myAcquOrProc }}
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
   <br />
@@ -175,7 +94,6 @@
         <a class="dropdown-item" href="#">Something else here</a>
       </div>
     </div>
-
     <div class="dropdown">
       <button
         type="button"
@@ -417,16 +335,31 @@
 </template>
 
 <script lang="ts">
+const _NUMCOL: number = 7; // number of Columns we want to display for the tables in this component
 // import { Prop } from "vue-property-decorator";
 import { Options, Vue } from "vue-class-component";
 //import { onMounted, ref } from "vue";
 // import 'bootst rap';
 import { Dropdown } from "bootstrap";
+import { ProjectsApi } from "../../gen";
 
+//export default defineComponent({
 @Options({
   name: "ProjectAbout",
   props: {
-    projectID: String,
+    projectID: {
+      type: String,
+      default: "",
+    },
+  },
+  data: function () {
+    return {
+      vanilla: null,
+      projectTitle: String(""),
+      projectDescription: String(""),
+      sampleArrayArray: Array<Array<string>>(),
+      acquAndProcArrayArray: Array<Array<string>>(),
+    };
   },
   mounted() {
     const dd_ref = this.$refs.vanillaDD;
@@ -437,52 +370,121 @@ import { Dropdown } from "bootstrap";
       console.log(event);
       alert(event.type);
     });
-  },
-  // setup() {
-  //   alert("Laurent1");
-  //   // will be assigned when component is attached to DOM
-  //   // don't forget to "export" these variables
-  //   // (see the final return statement below)
-  //   // or they will remain null ...
-  //   const popoverRef = ref(null);
-  //   const modalRef = ref(null);
-  //
-  //   const showModal = () => {
-  //     const dialog = new Modal(modalRef.value, { backdrop: true });
-  //     dialog.show();
-  //   };
-  //
-  //   const showPopover = () => {
-  //     const popover = new Popover(popoverRef.value, {
-  //       content: "Hello world!",
-  //       placement: "top",
-  //     });
-  //     popover.show();
-  //   };
-  //
-  //   onMounted(() => {
-  //     /*
-  //     // vanilla style, also working :)
-  //     const el = document.getElementById('pop-pop-pop');
-  //     const popover = new Popover(el, { content: 'Hello world!', placement: 'top' });
-  //     el.addEventListener('click', () => {
-  //       popover.show();
-  //     }, false);
-  //     */
-  //   });
-  //
-  //   return { modalRef, popoverRef, showModal, showPopover };
-  // },
 
-  data: function () {
-    return {
-      // urlLink: String("")
-      // urlLink: String("") /* (window.location.pathname + "prj/" + this.projectID) */
-      vanilla: null,
-    };
+    this.displayProjectTitle(this.projectID);
+    this.displayProjectDescription(this.projectID);
+    this.displayProjectSampleFields(this.projectID);
+    this.displayAcquisitionAndProcessingFields(this.projectID);
+  },
+  methods: {
+    displayProjectTitle(pID: string): void {
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          this.projectTitle = data.data.title;
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.projectTitle = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
+    displayProjectDescription(pID: string): void {
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          this.projectDescription = data.data.projtype;
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.projectDescription = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
+    displayProjectSampleFields(pID: string): void {
+      /* For information : data.data.sample_free_cols will look like
+      let sample_free_cols: { [key: string]: string } = {
+        scan_operator: "t01",
+        ship: "t02",
+        program: "t03",
+        // ...
+      };
+      console.log(sample_free_cols["ship"]);
+      console.log(Object.keys(sample_free_cols)[1]); */
+
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          if (data.data.sample_free_cols !== undefined) {
+            let sampleFlatArray = Object.keys(data.data.sample_free_cols);
+            let nbItems: number = sampleFlatArray.length;
+            let myArrayString: Array<string>;
+            let myArrayArrayString = new Array<Array<string>>();
+            //let nbRows: number = Math.round(nbItems / _NUMCOL);
+            let row: number = 0;
+            let col: number = 0;
+            while (col + row * _NUMCOL < nbItems) {
+              myArrayString = new Array<string>();
+              for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
+                myArrayString.push(sampleFlatArray[col + row * _NUMCOL]);
+              }
+              myArrayArrayString.push(myArrayString);
+              col = 0;
+              row++;
+            }
+            this.sampleArrayArray = myArrayArrayString;
+            //console.log(nbRows);
+            //console.log(myArrayArrayString);
+          }
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.sampleArrayArray = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
+    displayAcquisitionAndProcessingFields(pID: string): void {
+      const api: ProjectsApi = new ProjectsApi();
+      api
+        .projectQueryProjectsProjectIdGet(parseInt(pID))
+        .then((data) => {
+          // Join acquisition_free_cols and process_free_cols
+          let myFlatArray: Array<string> = new Array<string>();
+          if (data.data.acquisition_free_cols !== undefined)
+            myFlatArray = Object.keys(data.data.acquisition_free_cols);
+          if (data.data.process_free_cols !== undefined)
+            myFlatArray = myFlatArray.concat(
+              Object.keys(data.data.process_free_cols)
+            );
+          if (myFlatArray.length) {
+            let nbItems: number = myFlatArray.length;
+            let myArrayString: Array<string>;
+            let myArrayArrayString = new Array<Array<string>>();
+            //let nbRows: number = Math.round(nbItems / _NUMCOL);
+            let row: number = 0;
+            let col: number = 0;
+            while (col + row * _NUMCOL < nbItems) {
+              myArrayString = new Array<string>();
+              for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
+                myArrayString.push(myFlatArray[col + row * _NUMCOL]);
+              }
+              myArrayArrayString.push(myArrayString);
+              col = 0;
+              row++;
+            }
+            this.acquAndProcArrayArray = myArrayArrayString;
+            //console.log(nbRows);
+            //console.log(myArrayArrayString);
+          }
+        })
+        .catch((reason) => {
+          console.log(reason);
+          this.acquAndProcArrayArray = "Invalid Project ID"; // TODO : global error treatment
+        });
+    },
   },
   computed: {
-    urlLink: function () {
+    urlLink: function (): string {
       let findDoubleSlash: number = window.location.pathname.indexOf("//");
       let findSlash: number = 0;
       if (findDoubleSlash == -1) {
@@ -507,9 +509,8 @@ export default class ProjectAbout extends Vue {
   to_show = this.projectID;
 }
 </script>
-
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<!--style scoped>
+<style scoped>
 h3 {
   margin: 40px 0 0;
 }
@@ -524,4 +525,4 @@ li {
 a {
   color: #42b983;
 }
-</style-->
+</style>

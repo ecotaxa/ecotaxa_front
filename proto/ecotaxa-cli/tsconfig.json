@@ -3,6 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "strict": true,
+    "downlevelIteration": false,
 // beginning of special (LaurentR) flags    
     "declaration":true,
     "forceConsistentCasingInFileNames": true,
