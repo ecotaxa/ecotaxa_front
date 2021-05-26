@@ -120,7 +120,7 @@ export function processProjectSampleFields(myObject: any): void {
     })
     .catch((reason) => {
       console.log(reason);
-      myObject.sampleArrayArray = "Invalid Project ID"; // TODO : global error treatment
+      myObject.sampleArrayArray = ""; // TODO : global error treatment
     });
 }
 ////////////////////////////////////////////////////////////////////
@@ -159,7 +159,7 @@ export function processAcquisitionAndProcessingFields(myObject: any): void {
     })
     .catch((reason) => {
       console.log(reason);
-      myObject.acquAndProcArrayArray = "Invalid Project ID"; // TODO : global error treatment
+      myObject.acquAndProcArrayArray = ""; // TODO : global error treatment
     });
 }
 ////////////////////////////////////////////////////////////////////
@@ -193,7 +193,7 @@ export function processObjectFields(myObject: any): void {
     })
     .catch((reason) => {
       console.log(reason);
-      myObject.acquAndProcArrayArray = "Invalid Project ID"; // TODO : global error treatment
+      myObject.objectArrayArray = ""; // TODO : global error treatment
     });
 }
 ////////////////////////////////////////////////////////////////////
