@@ -395,11 +395,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.7"
+ecotaxa_version = "2.5.8"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-05-05"
+    return ecotaxa_version + " 2021-05-26"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -407,6 +407,14 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-05-26 : V 2.5.8
+    Feature #360: Allow to subset by sampling various entities, not only categories.
+    Bug #595: Project managers should be able to clone their own projects, even if they are not Project Creator.
+    Bug #543: A corrupted PNG could make an import operation fail with a cryptic error.
+    Feature #590: Move file navigation to back-end.
+    Features #673, #672: Add/adapt API entry points for new front-end. @See #382
+    Bug #614: Api could not be used interactively from /api/docs generated page.
+    Bug #657: A TIFF file could crash the import. 
 2021-05-05 : V 2.5.7
     Feature #660: Add a column to Collection and expose a search API entry point using it.
     Bug #659: In a mirrored DB setup, project creation is sometime not visible immediately.
