@@ -17,6 +17,7 @@ from appli import app
 
 BACKEND_HOST = "localhost"
 BACKEND_PORT = 8000
+# noinspection HttpUrlsUsage
 BACKEND_URL = "http://%s:%d" % (BACKEND_HOST, BACKEND_PORT)
 
 
@@ -25,10 +26,9 @@ def proxy_request(path):
     start = time.time()
     # Prepare request data
     method = request.method
-    url = f'/{path}'  # By default, request root in back-end
+    url = f'/api/{path}'
     body = request.get_data()  # Copy body, e.g. json params
     headers = _copy_headers_and_session(request.headers)
-    params = {}
     if method == 'POST':
         params = request.args  # re-encode URL params if any
         if path == "login":
@@ -38,9 +38,6 @@ def proxy_request(path):
     elif method == 'GET':
         # From URL
         params = request.values  # join of request.args and request.form
-        if path == "openapi.json":
-            # Plain page but the URL is wrong on FastApi side
-            url = f'/api/{path}'
     elif method == 'DELETE':
         params = request.args
     elif method == 'PUT':
@@ -53,16 +50,16 @@ def proxy_request(path):
         url += "?" + urlencode(params)
     req.request(method=method, url=url, body=body, headers=headers)
     rsp: HTTPResponse = req.getresponse()
-    app.logger.info("API call duration: %0.2fms" % ((time.time() - start) * 1000))
+    app.logger.debug("API call duration: %0.2fms", ((time.time() - start) * 1000))
     # Reply to caller
     rsp_headers = _copy_back_headers(rsp)
     # For chunked content we need http 1.1. Firefox cares when Chrome doesn't (surprise!)
     is_chunked = ("transfer-encoding", "chunked") in rsp_headers
-    app.logger.info("Chunked: %s", is_chunked)
+    app.logger.debug("Chunked: %s", is_chunked)
     _piggyback_response(rsp, is_chunked)
     # Sort of stream the response
     response = Response(wrap_file({}, rsp, 1024), rsp.status, rsp_headers, direct_passthrough=True)
-    app.logger.info("API relay duration: %0.2fms" % ((time.time() - start) * 1000))
+    app.logger.debug("API relay duration: %0.2fms", ((time.time() - start) * 1000))
     return response
 
 
@@ -108,5 +105,5 @@ def _my_read(self, amt):
         # if it's not chunks-aware.
         self.is_chunked = False
     self.nb_bytes += len(ret)
-    app.logger.info("%d response bytes read", self.nb_bytes)
+    app.logger.debug("%d response bytes read", self.nb_bytes)
     return ret
