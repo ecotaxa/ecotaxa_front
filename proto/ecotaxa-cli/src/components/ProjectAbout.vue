@@ -125,15 +125,24 @@
   <div class="container">
     <br />
     <h2>Project Users</h2>
-    <ul class="list-group" v-for="myUser in projectUsers" :key="myUser.index">
+    <ul
+      class="list-group"
+      v-for="myUser in projectUsersTRY"
+      :key="myUser.index"
+    >
       <li class="list-group-item">
         <a :href="myUser.email">
           <span>
-          {{ myUser.name }}
+            {{ myUser.name }}
           </span>
-          </a>
-          &emsp;&emsp;
-          <span class="badge">10</span>
+        </a>
+        &emsp;&emsp;
+        <span class="badge">10</span>
+        <!--
+        <span class="badge">{{ myUser.actions }}</span>
+        &emsp;&emsp;
+        <span class="date">{{ myUser.annot }}</span>
+        -->
       </li>
 
       <!-- tabs are here OF COURSE temporary, just to see visual effect
@@ -368,7 +377,8 @@ import * as utils from "../utils/utils";
       acquAndProcArrayArray: Array<Array<string>>(),
       objectArrayArray: Array<Array<string>>(),
       projectManagers: Array<utils.projectUserType>(), // a manager is a user
-      projectUsers: Array<utils.projectUserType>(),
+      //projectUsers: Array<utils.projectUserType>(),
+      projectUsersTRY: Array<utils.projUser>(),
     };
   },
   mounted() {
@@ -391,7 +401,8 @@ import * as utils from "../utils/utils";
     utils.processAcquisitionAndProcessingFields(this);
     utils.processObjectFields(this);
     utils.processProjectManagers(this);
-    utils.processProjectUsers(this);
+    //utils.processProjectUsers(this);
+    utils.TRYprocessProjectUsers(this);
   },
   methods: {
     exportSamples() {

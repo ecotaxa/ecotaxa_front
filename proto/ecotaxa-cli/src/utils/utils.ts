@@ -1,5 +1,5 @@
 import { ProjectsApi } from "../../gen";
-const _NUMCOL: number = 2; // number of Columns we want to display for the tables in this component
+const _NUMCOL: number = 7; // number of Columns we want to display for the tables in this component
 
 ////////////////////////////////////////////////////////////////////
 export function processProjectTitle(myObject: any): void {
@@ -259,5 +259,91 @@ export function processProjectUsers(myObject: any): void {
       myObject.projectUsers = [
         { email: "Invalid Project ID", name: "Invalid Project ID" },
       ]; // TODO : global error treatment
+    });
+}
+////////////////////////////////////////////////////////////////////
+// From a single project ID and a user ID, fetch his number of actions (annotations),
+// and hist last active date on the project.
+// Here take first item of Array, as we pass a single project ID
+// if (data.data[0].activities[i].id === userID) {
+//  activities[i].nb_actions
+////////////////////////////////////////////////////////////////////
+class projUser {
+  name: string;
+  email: string;
+  id: number | undefined; // TODO : fix : undefined needed because of a strange compilation error
+  actions: number | undefined; // TODO : fix : undefined needed because of a strange compilation error
+  annot: string | undefined; // It's a date. TODO : fix : undefined needed because of a strange compilation error
+  constructor() {
+    this.name = "";
+    this.email = "";
+    this.id = undefined;
+    this.actions = 0;
+    this.annot = "";
+  }
+}
+export { projUser };
+
+export function TRYprocessProjectUsers(myProject: any): void {
+  const api: ProjectsApi = new ProjectsApi();
+  api
+    .projectQueryProjectsProjectIdGet(parseInt(myProject.projectID))
+    .then((data) => {
+      const oneArray: Array<projUser> = new Array<projUser>();
+      if (data.data.annotators !== undefined) {
+        for (let i: number = 0; i < data.data.annotators.length; i++) {
+          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+          const oneUser: projUser = new projUser();
+          oneUser.email = "mailto:" + data.data.annotators[i].email;
+          oneUser.name = data.data.annotators[i].name;
+          oneUser.id = data.data.annotators[i].id; // will be used in the second .then to identify the user
+          oneArray.push(oneUser);
+        }
+      }
+      // Also add the managers in oneArray, because they are also users
+      if (data.data.managers !== undefined) {
+        for (let i: number = 0; i < data.data.managers.length; i++) {
+          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+          const oneManager: projUser = new projUser();
+          oneManager.email = "mailto:" + data.data.managers[i].email;
+          oneManager.name = data.data.managers[i].name;
+          oneManager.id = data.data.managers[i].id; // will be used in the second .then to identify the user
+          oneArray.push(oneManager);
+        }
+      }
+      return oneArray;
+    })
+    .then((arr) => {
+      // arr is my array partially built with email + name + id
+      // Now we're going to add actions and annotations
+      alert(arr.length);      
+      const api2: ProjectsApi = new ProjectsApi();
+      api2
+        .projectSetGetUserStatsProjectSetUserStatsGet("185") // myProject.projectID)
+        .then((data) => {
+          alert("oui1");
+          // We are working on a single project here, so take data[0]
+          if (data.data[0].activities !== undefined) {
+            for (let i: number = 0; i < arr.length; i++) {
+              for (let j: number = 0; j < data.data[0].activities.length; j++) {
+                if (arr[i].id === data.data[0].activities[j].id) {  // find corresponding IDs between Projects and ProjectsStats
+                  arr[i].actions = data.data[0].activities[j].nb_actions;
+                  arr[i].annot = data.data[0].activities[j].last_annot;
+                }
+              }
+            }
+            myProject.projectUsersTRY = arr;
+          }
+        })
+        .catch((reason) => {
+          console.log(reason);
+          alert(reason);
+          myProject.projectUsersTRY = []; // TODO : global error treatment
+        });
+    })
+    .catch((reason) => {
+      console.log(reason);
+      alert(reason);
+      myProject.projectUsersTRY = []; // TODO : global error treatment
     });
 }
