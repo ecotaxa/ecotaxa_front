@@ -4,7 +4,7 @@ from flask import render_template, json, request
 
 from appli import app, gvg
 from to_back.ecotaxa_cli_py import FilesApi, DirectoryModel, DirectoryEntryModel
-from utils import ApiClient
+from appli.utils import ApiClient
 
 
 @app.route('/common/ServerFolderSelect')
