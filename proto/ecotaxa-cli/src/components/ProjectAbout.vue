@@ -78,10 +78,9 @@
     </table>
   </div>
 
-  <br />
-  <div class="container">
-    <h2>Project Managers</h2>
-    <div class="btn-group" style="visibility: hidden">
+  <div class="container" style="visibility: hidden">
+    <!-- I want to keep this important example here and hidden -->
+    <div class="btn-group">
       <button
         ref="vanillaDD"
         class="btn btn-secondary dropdown-toggle"
@@ -98,6 +97,9 @@
         <a class="dropdown-item" href="#">Something else here</a>
       </div>
     </div>
+  </div>
+  <div class="container">
+    <h2>Project Managers</h2>
     <div class="dropdown">
       <button
         type="button"
@@ -119,12 +121,22 @@
       </div>
     </div>
   </div>
-  <br />
+
   <div class="container">
     <br />
     <h2>Project Users</h2>
-    <ul class="list-group">
-      <!-- tabs are here OF COURSE temporary, just to see visual effect-->
+    <ul class="list-group" v-for="myUser in projectUsers" :key="myUser.index">
+      <li class="list-group-item">
+        <a :href="myUser.email">
+          <span>
+          {{ myUser.name }}
+          </span>
+          </a>
+          &emsp;&emsp;
+          <span class="badge">10</span>
+      </li>
+
+      <!-- tabs are here OF COURSE temporary, just to see visual effect
       <li class="list-group-item">
         <a href="mailto:javier.gilabert@upct.es">Javier Gilabert</a>
         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
@@ -134,7 +146,6 @@
         <span class="month">June</span>
         <span class="year">2011</span>
       </li>
-      <!-- tabs are here OF COURSE temporary, just to see visual effect-->
       <li class="list-group-item">
         <a href="mailto:nur.garcia.herrera@awi.de">Nur Garcia Herrera</a>
         &emsp;&emsp;&emsp;&emsp;
@@ -143,9 +154,10 @@
         <span class="day">4</span>
         <span class="month">July</span>
         <span class="year">2015</span>
-      </li>
+      </li-->
     </ul>
   </div>
+
   <div class="container">
     <br />
     <h3>Samples with objects and status</h3>
@@ -326,7 +338,6 @@
 </template>
 
 <script lang="ts">
-
 // import { Prop } from "vue-property-decorator";
 import { Options, Vue } from "vue-class-component";
 //import { onMounted, ref } from "vue";
@@ -356,7 +367,8 @@ import * as utils from "../utils/utils";
       sampleArrayArray: Array<Array<string>>(),
       acquAndProcArrayArray: Array<Array<string>>(),
       objectArrayArray: Array<Array<string>>(),
-      projectManagers: Array<utils.projectManagerType>(),
+      projectManagers: Array<utils.projectUserType>(), // a manager is a user
+      projectUsers: Array<utils.projectUserType>(),
     };
   },
   mounted() {
@@ -379,6 +391,7 @@ import * as utils from "../utils/utils";
     utils.processAcquisitionAndProcessingFields(this);
     utils.processObjectFields(this);
     utils.processProjectManagers(this);
+    utils.processProjectUsers(this);
   },
   methods: {
     exportSamples() {
@@ -419,7 +432,15 @@ export default class ProjectAbout extends Vue {
 }
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
+.badge {
+  min-width: 28px;
+  border-radius: 10px;
+  background-color: grey;
+  color: white;
+}
+
 h3 {
   margin: 40px 0 0;
 }

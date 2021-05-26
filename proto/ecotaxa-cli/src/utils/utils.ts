@@ -1,5 +1,5 @@
 import { ProjectsApi } from "../../gen";
-const _NUMCOL: number = 7; // number of Columns we want to display for the tables in this component
+const _NUMCOL: number = 2; // number of Columns we want to display for the tables in this component
 
 ////////////////////////////////////////////////////////////////////
 export function processProjectTitle(myObject: any): void {
@@ -197,7 +197,7 @@ export function processObjectFields(myObject: any): void {
     });
 }
 ////////////////////////////////////////////////////////////////////
-class projectManagerType {
+class projectUserType {
   name: string;
   email: string;
   constructor(myname: string, myemail: string) {
@@ -205,7 +205,7 @@ class projectManagerType {
     this.email = myemail;
   }
 }
-export { projectManagerType };
+export { projectUserType };
 
 export function processProjectManagers(myObject: any): void {
   const api: ProjectsApi = new ProjectsApi();
@@ -214,8 +214,8 @@ export function processProjectManagers(myObject: any): void {
     .then((data) => {
       if (data.data.managers !== undefined)
         for (let i: number = 0; i < data.data.managers.length; i++) {
-          // The new below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const oneManager: projectManagerType = new projectManagerType("", "");
+          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+          const oneManager: projectUserType = new projectUserType("", "");
           oneManager.email = "mailto:" + data.data.managers[i].email;
           oneManager.name = data.data.managers[i].name;
           myObject.projectManagers.push(oneManager);
@@ -229,3 +229,35 @@ export function processProjectManagers(myObject: any): void {
     });
 }
 ////////////////////////////////////////////////////////////////////
+export function processProjectUsers(myObject: any): void {
+  const api: ProjectsApi = new ProjectsApi();
+  api
+    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
+    .then((data) => {
+      if (data.data.annotators !== undefined) {
+        for (let i: number = 0; i < data.data.annotators.length; i++) {
+          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+          const oneUser: projectUserType = new projectUserType("", "");
+          oneUser.email = "mailto:" + data.data.annotators[i].email;
+          oneUser.name = data.data.annotators[i].name;
+          myObject.projectUsers.push(oneUser);
+        }
+      }
+      // Also add the managers, who are also users
+      if (data.data.managers !== undefined) {
+        for (let i: number = 0; i < data.data.managers.length; i++) {
+          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+          const oneManager: projectUserType = new projectUserType("", "");
+          oneManager.email = "mailto:" + data.data.managers[i].email;
+          oneManager.name = data.data.managers[i].name;
+          myObject.projectUsers.push(oneManager);
+        }
+      }
+    })
+    .catch((reason) => {
+      console.log(reason);
+      myObject.projectUsers = [
+        { email: "Invalid Project ID", name: "Invalid Project ID" },
+      ]; // TODO : global error treatment
+    });
+}
