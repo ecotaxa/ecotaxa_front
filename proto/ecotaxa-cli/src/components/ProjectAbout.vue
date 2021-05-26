@@ -81,7 +81,7 @@
   <br />
   <div class="container">
     <h2>Project Managers</h2>
-    <div class="btn-group">
+    <div class="btn-group" style="visibility: hidden">
       <button
         ref="vanillaDD"
         class="btn btn-secondary dropdown-toggle"
@@ -108,28 +108,13 @@
         View List
       </button>
       <div class="dropdown-menu" id="people">
-        <a class="dropdown-item" href="mailto:amanda.elineau@obs-vlfr.fr"
-          >Amanda Elineau</a
+        <a
+          class="dropdown-item"
+          v-for="myProjectManager in projectManagers"
+          :key="myProjectManager.name"
+          :href="myProjectManager.email"
         >
-        <a class="dropdown-item" href="mailto:lombard@obs-vlfr.fr"
-          >Fabien Lombard</a
-        >
-        <a class="dropdown-item" href="mailto:hirata@ime.usp.br"
-          >Roberto Hirata</a
-        >
-        <a class="dropdown-item" href="mailto:stace@whoi.edu">Stace Beaulieu</a>
-        <a class="dropdown-item" href="mailto:jp.li@siat.ac.cn">Jianping Li</a>
-        <a class="dropdown-item" href="mailto:annotateur@obs-vlfr.fr"
-          >Annotateur OBS</a
-        >
-        <a class="dropdown-item" href="mailto:ecotaxa.api.user@gmail.com"
-          >Test API user</a
-        >
-        <a class="dropdown-item" href="mailto:irisson@obs-vlfr.fr"
-          >Jean-Olivier Irisson</a
-        >
-        <a class="dropdown-item" href="mailto:laurent.reese@gmail.com"
-          >Laurent Reese</a
+          {{ myProjectManager.name }}</a
         >
       </div>
     </div>
@@ -341,13 +326,13 @@
 </template>
 
 <script lang="ts">
-const _NUMCOL: number = 7; // number of Columns we want to display for the tables in this component
+
 // import { Prop } from "vue-property-decorator";
 import { Options, Vue } from "vue-class-component";
 //import { onMounted, ref } from "vue";
 // import 'bootst rap';
 import { Dropdown } from "bootstrap";
-import { ProjectsApi } from "../../gen";
+import * as utils from "../utils/utils";
 
 //export default defineComponent({
 @Options({
@@ -371,6 +356,7 @@ import { ProjectsApi } from "../../gen";
       sampleArrayArray: Array<Array<string>>(),
       acquAndProcArrayArray: Array<Array<string>>(),
       objectArrayArray: Array<Array<string>>(),
+      projectManagers: Array<utils.projectManagerType>(),
     };
   },
   mounted() {
@@ -383,17 +369,16 @@ import { ProjectsApi } from "../../gen";
       alert(event.type);
     });
 
-    // this.sampleArrayArray = ProcessProjectSampleFields(this|this.projectID); ==> .ts apart
-
-    this.processProjectTitle();
-    this.processProjectDescription(this.projectID);
-    this.processProjectComment(this.projectID);
-    this.processProjectLicense(this.projectID);
-    this.processProjectSCNnetwork(this.projectID);
-    this.processNameAndContact(this.projectID);
-    this.processProjectSampleFields(this.projectID);
-    this.processAcquisitionAndProcessingFields(this.projectID);
-    this.processObjectFields(this.projectID);
+    utils.processProjectTitle(this);
+    utils.processProjectDescription(this);
+    utils.processProjectComment(this);
+    utils.processProjectLicense(this);
+    utils.processProjectSCNnetwork(this);
+    utils.processNameAndContact(this);
+    utils.processProjectSampleFields(this);
+    utils.processAcquisitionAndProcessingFields(this);
+    utils.processObjectFields(this);
+    utils.processProjectManagers(this);
   },
   methods: {
     exportSamples() {
@@ -405,197 +390,6 @@ import { ProjectsApi } from "../../gen";
     },
     exportTaxa() {
       alert("Not yet implemented !");
-    },
-
-    processProjectTitle(): void {
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(this.projectID))
-        .then((data) => {
-          this.projectTitle = data.data.title;
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.projectTitle = "Invalid Project ID"; // TODO : global error treatment
-        });
-    },
-    processProjectDescription(pID: string): void {
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
-        .then((data) => {
-          this.projectDescription = data.data.projtype;
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.projectDescription = "Invalid Project ID"; // TODO : global error treatment
-        });
-    },
-    processProjectComment(pID: string): void {
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
-        .then((data) => {
-          this.projectComment = data.data.comments;
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.projectComment = "Invalid Project ID"; // TODO : global error treatment
-        });
-    },
-    processProjectLicense(pID: string): void {
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
-        .then((data) => {
-          this.projectLicense = data.data.license;
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.projectLicense = "Invalid Project ID"; // TODO : global error treatment
-        });
-    },
-    processProjectSCNnetwork(pID: string): void {
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
-        .then((data) => {
-          this.projectSCNnetwork = data.data.cnn_network_id;
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.projectSCNnetwork = "Invalid Project ID"; // TODO : global error treatment
-        });
-    },
-    processNameAndContact(pID: string): void {
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
-        .then((data) => {
-          this.contactMail = "mailto:" + data.data.contact?.email;
-          this.contactName = data.data.contact?.name;
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.contactMail = "";
-          this.contactName = "Invalid Project ID"; // TODO : global error treatment
-        });
-    },
-    processProjectSampleFields(pID: string): void {
-      /* For information : data.data.sample_free_cols will look like
-      let sample_free_cols: { [key: string]: string } = {
-        scan_operator: "t01",
-        ship: "t02",
-        program: "t03",
-        // ...
-      };
-      console.log(sample_free_cols["ship"]);
-      console.log(Object.keys(sample_free_cols)[1]); */
-
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
-        .then((data) => {
-          if (data.data.sample_free_cols !== undefined) {
-            let sampleFlatArray = Object.keys(data.data.sample_free_cols);
-            let nbItems: number = sampleFlatArray.length;
-            let myArrayString: Array<string>;
-            let myArrayArrayString = new Array<Array<string>>();
-            //let nbRows: number = Math.round(nbItems / _NUMCOL);
-            let row: number = 0;
-            let col: number = 0;
-            while (col + row * _NUMCOL < nbItems) {
-              myArrayString = new Array<string>();
-              for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
-                myArrayString.push(sampleFlatArray[col + row * _NUMCOL]);
-              }
-              myArrayArrayString.push(myArrayString);
-              col = 0;
-              row++;
-            }
-            this.sampleArrayArray = myArrayArrayString;
-            //console.log(nbRows);
-            //console.log(myArrayArrayString);
-          }
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.sampleArrayArray = "Invalid Project ID"; // TODO : global error treatment
-        });
-    },
-    processAcquisitionAndProcessingFields(pID: string): void {
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
-        .then((data) => {
-          // Join acquisition_free_cols and process_free_cols
-          let myFlatArray: Array<string> = new Array<string>();
-          if (data.data.acquisition_free_cols !== undefined)
-            myFlatArray = Object.keys(data.data.acquisition_free_cols);
-          if (data.data.process_free_cols !== undefined)
-            myFlatArray = myFlatArray.concat(
-              Object.keys(data.data.process_free_cols)
-            );
-          if (myFlatArray.length) {
-            let nbItems: number = myFlatArray.length;
-            let myArrayString: Array<string>;
-            let myArrayArrayString = new Array<Array<string>>();
-            //let nbRows: number = Math.round(nbItems / _NUMCOL);
-            let row: number = 0;
-            let col: number = 0;
-            while (col + row * _NUMCOL < nbItems) {
-              myArrayString = new Array<string>();
-              for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
-                myArrayString.push(myFlatArray[col + row * _NUMCOL]);
-              }
-              myArrayArrayString.push(myArrayString);
-              col = 0;
-              row++;
-            }
-            this.acquAndProcArrayArray = myArrayArrayString;
-            //console.log(nbRows);
-            //console.log(myArrayArrayString);
-          }
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.acquAndProcArrayArray = "Invalid Project ID"; // TODO : global error treatment
-        });
-    },
-    processObjectFields(pID: string): void {
-      const api: ProjectsApi = new ProjectsApi();
-      api
-        .projectQueryProjectsProjectIdGet(parseInt(pID))
-        .then((data) => {
-          // Join acquisition_free_cols and process_free_cols
-          let myFlatArray: Array<string> = new Array<string>();
-          if (data.data.obj_free_cols !== undefined)
-            myFlatArray = Object.keys(data.data.obj_free_cols);
-          if (myFlatArray.length) {
-            let nbItems: number = myFlatArray.length;
-            let myArrayString: Array<string>;
-            let myArrayArrayString = new Array<Array<string>>();
-            //let nbRows: number = Math.round(nbItems / _NUMCOL);
-            let row: number = 0;
-            let col: number = 0;
-            while (col + row * _NUMCOL < nbItems) {
-              myArrayString = new Array<string>();
-              for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
-                myArrayString.push(myFlatArray[col + row * _NUMCOL]);
-              }
-              myArrayArrayString.push(myArrayString);
-              col = 0;
-              row++;
-            }
-            this.objectArrayArray = myArrayArrayString;
-            //console.log(nbRows);
-            //console.log(myArrayArrayString);
-          }
-        })
-        .catch((reason) => {
-          console.log(reason);
-          this.acquAndProcArrayArray = "Invalid Project ID"; // TODO : global error treatment
-        });
     },
   },
   computed: {
