@@ -81,6 +81,7 @@ class SubsetJob(Job):
         vvaleur = gvp("vvaleur")
         pvaleur = gvp("pvaleur")
         withimg = gvp("withimg")
+        grptype = gvp("grptype")
 
         errors = []
         # Check data validity
@@ -129,7 +130,7 @@ class SubsetJob(Job):
             with ApiClient(ProjectsApi, request) as api:
                 req = SubsetReq(filters=filters,
                                 dest_prj_id=new_prj_id,
-                                group_type='S',
+                                group_type=grptype,
                                 limit_type=valtype,
                                 limit_value=valeur,
                                 do_images=(withimg == 'Y'))
