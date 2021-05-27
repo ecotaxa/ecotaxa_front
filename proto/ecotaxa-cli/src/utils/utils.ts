@@ -1,4 +1,5 @@
 import { ProjectsApi } from "../../gen";
+import { SamplesApi } from "../../gen";
 const _NUMCOL: number = 7; // number of Columns we want to display for the tables in this component
 
 ////////////////////////////////////////////////////////////////////
@@ -174,39 +175,6 @@ export function processProjectManagers(myObject: any): void {
     });
 }
 ////////////////////////////////////////////////////////////////////
-export function processProjectUsers(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      if (data.data.annotators !== undefined) {
-        for (let i: number = 0; i < data.data.annotators.length; i++) {
-          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const oneUser: projectUserType = new projectUserType("", "");
-          oneUser.email = "mailto:" + data.data.annotators[i].email;
-          oneUser.name = data.data.annotators[i].name;
-          myObject.projectUsers.push(oneUser);
-        }
-      }
-      // Also add the managers, who are also users
-      if (data.data.managers !== undefined) {
-        for (let i: number = 0; i < data.data.managers.length; i++) {
-          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const oneManager: projectUserType = new projectUserType("", "");
-          oneManager.email = "mailto:" + data.data.managers[i].email;
-          oneManager.name = data.data.managers[i].name;
-          myObject.projectUsers.push(oneManager);
-        }
-      }
-    })
-    .catch((reason) => {
-      console.log(reason);
-      myObject.projectUsers = [
-        { email: "Invalid Project ID", name: "Invalid Project ID" },
-      ]; // TODO : global error treatment
-    });
-}
-////////////////////////////////////////////////////////////////////
 // From a single project ID and a user ID, fetch his number of actions (annotations),
 // and hist last active date on the project.
 // Here take first item of Array, as we pass a single project ID
@@ -229,7 +197,7 @@ class projUser {
 }
 export { projUser };
 
-export function TRYprocessProjectUsers(myProject: any): void {
+export function processProjectUsers(myProject: any): void {
   const api: ProjectsApi = new ProjectsApi();
   api
     .projectQueryProjectsProjectIdGet(parseInt(myProject.projectID))
@@ -278,19 +246,177 @@ export function TRYprocessProjectUsers(myProject: any): void {
                 }
               }
             }
-            myProject.projectUsersTRY = arr;
+            myProject.projectUsers = arr;
           }
         })
         .catch((reason) => {
           console.log(reason);
           // Think about your session cookie whenever you fall down here !
           // alert(reason);
-          myProject.projectUsersTRY = []; // TODO : global error treatment
+          myProject.projectUsers = []; // TODO : global error treatment
         });
     })
     .catch((reason) => {
       console.log(reason);
       alert(reason);
-      myProject.projectUsersTRY = []; // TODO : global error treatment
+      myProject.projectUsers = []; // TODO : global error treatment
+    });
+}
+////////////////////////////////////////////////////////////////////
+// "Samples with objects and status"
+// 1) Use samplesSearchSamplesSearchGet to get a list of samples from a project ID
+// 2) Then sampleSetGetStatsSampleSetTaxoStatsGet : from a list of sample IDs
+// 3) From JO : "Pour les samples et taxa, il faudrait afficher le nom (orig_id et name) plutôt que l'identifiant numérique"
+// ==> sampleQuerySampleSampleIdGet : donne l'orig_id === le name
+class sampleWithObjectsAndStatus {
+  sampleid: number | undefined;
+  orig_id: string;
+  nb_unclassified: number | undefined;
+  nb_validated: number | undefined;
+  nb_dubious: number | undefined;
+  nb_predicted: number | undefined;
+  constructor() {
+    this.sampleid = 0;
+    this.orig_id = "";
+    this.nb_unclassified = 0;
+    this.nb_validated = 0;
+    this.nb_dubious = 0;
+    this.nb_predicted = 0;
+  }
+}
+export { sampleWithObjectsAndStatus };
+
+export function processSamplesWithObjectsAndStatus(myProject: any): void {
+  const api: SamplesApi = new SamplesApi();
+  api
+    .samplesSearchSamplesSearchGet(myProject.projectID, "*")
+    .then((data) => {
+      const oneArray: Array<sampleWithObjectsAndStatus> = new Array<sampleWithObjectsAndStatus>();
+      const myData = data.data;
+      for (let i: number = 0; i < myData.length; i++) {
+        // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+        const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus();
+        oneSample.sampleid = myData[i].sampleid;
+        oneSample.orig_id = myData[i].orig_id;
+        oneArray.push(oneSample);
+      }
+      return oneArray;
+    })
+    .then((arr) => {
+      // arr is my array partially built with sampleid and orig_id fields
+      // Now I'm going to add nb_Unclassified, nb_Validated, nb_Dubious, nb_Predicted
+      // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
+      let sampleIDlist: string = ""; // build list of sample IDs
+      arr.forEach((sample) => {
+        sampleIDlist += sample.sampleid + " ";
+      });
+      const api2: SamplesApi = new SamplesApi(); // create another API as the first one is currently used
+      api2
+        .sampleSetGetStatsSampleSetTaxoStatsGet(sampleIDlist)
+        .then((data) => {
+          // analyze the answer by going through the array items
+          for (let i: number = 0; i < data.data.length; i++) {
+            const myDataI = data.data[i];
+            // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
+            for (let j: number = 0; j < arr.length; j++) {
+              if (myDataI.sample_id === arr[j].sampleid) {
+                arr[j].nb_unclassified = myDataI.nb_unclassified;
+                arr[j].nb_validated = myDataI.nb_validated;
+                arr[j].nb_dubious = myDataI.nb_dubious;
+                arr[j].nb_predicted = myDataI.nb_predicted;
+              }
+            }
+          }
+          myProject.samplesWithObjectsAndStatus = arr;
+        })
+        .catch((reason) => {
+          console.log(reason);
+          alert(reason);
+          myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
+        });
+    })
+    .catch((reason) => {
+      console.log(reason);
+      alert(reason);
+      myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
+    });
+}
+
+/////////////////////////////////////////////////////////////////////
+class taxon {
+  id: number;
+  name: string;
+  nb_unclassified: number | undefined;
+  nb_validated: number | undefined;
+  nb_dubious: number | undefined;
+  nb_predicted: number | undefined;
+  constructor(mytaxon: number) {
+    this.id = mytaxon;
+    this.name = "";
+    this.nb_unclassified = 0;
+    this.nb_validated = 0;
+    this.nb_dubious = 0;
+    this.nb_predicted = 0;
+  }
+}
+export { taxon };
+export function processTaxa(myProject: any): void {
+  // use projectSetGetStatsProjectSetTaxoStatsGet: async (ids: string, taxaIds?: string)
+  // 1) call with just projectID to get all the taxon IDs
+  // 2) call with projectID and list of taxon IDs, in order to get all information about all taxa
+  // 3) use API: /taxon_set/query to get the taxon name from a taxon ID
+  const api: ProjectsApi = new ProjectsApi();
+  api
+    .projectSetGetStatsProjectSetTaxoStatsGet(myProject.projectID)
+    .then((data) => {
+      const oneArray: Array<taxon> = new Array<taxon>();
+      const myData = data.data[0]; // 0 because we work on a precise single project
+      if (myData !== undefined && myData.used_taxa !== undefined) {
+        for (let i: number = 0; i < myData.used_taxa.length; i++) {
+          const oneTaxon: taxon = new taxon(myData.used_taxa[i]);
+          oneArray.push(oneTaxon);
+        }
+      }
+      return oneArray;
+    })
+    .then((arr) => {
+      // arr is my array partially built with taxon id
+      // Now I'm going to add nb_unclassified, nb_validated, nb_dubious, nb_predicted
+      // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
+      let taxonIDlist: string = ""; // build list of sample IDs
+      arr.forEach((taxon) => {
+        taxonIDlist += taxon.id + " ";
+      });
+      const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
+      api2
+        .projectSetGetStatsProjectSetTaxoStatsGet(myProject.projectID, taxonIDlist)
+        .then((data) => {
+          // analyze the answer by going through the array items
+          for (let i: number = 0; i < data.data.length; i++) {
+            const dataI = data.data[i];
+            // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)            
+            for (let j: number = 0; j < arr.length; j++) {
+              if (dataI !== undefined && dataI.used_taxa) {
+                if (dataI.used_taxa[0] == arr[j].id) {
+                  arr[j].nb_unclassified = dataI.nb_unclassified; // TODO : probably useless field
+                  arr[j].nb_validated = dataI.nb_validated;
+                  arr[j].nb_dubious = dataI.nb_dubious;
+                  arr[j].nb_predicted = dataI.nb_predicted;
+                }
+              }
+            }
+          }
+          myProject.projectTaxa = arr;
+        })
+        .catch((reason) => {
+          console.log(reason);
+          alert(reason);
+          myProject.projectTaxa = []; // TODO : global error treatment
+        });
+    })
+    .catch((reason) => {
+      console.log(reason);
+      alert(reason);
+      myProject.projectTaxa = []; // TODO : global error treatment
     });
 }

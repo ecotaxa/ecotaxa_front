@@ -127,7 +127,7 @@
     <h2>Project Users</h2>
     <ul
       class="list-group"
-      v-for="myUser in projectUsersTRY"
+      v-for="myUser in projectUsers"
       :key="myUser.index"
     >
       <li class="list-group-item">
@@ -141,26 +141,6 @@
         &emsp;&emsp;
         <span class="date">{{ myUser.annot }}</span>
       </li>
-
-      <!-- tabs are here OF COURSE temporary, just to see visual effect
-      <li class="list-group-item">
-        <a href="mailto:javier.gilabert@upct.es">Javier Gilabert</a>
-        &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-        <span class="badge">10</span>
-        &emsp;
-        <span class="day">8</span>
-        <span class="month">June</span>
-        <span class="year">2011</span>
-      </li>
-      <li class="list-group-item">
-        <a href="mailto:nur.garcia.herrera@awi.de">Nur Garcia Herrera</a>
-        &emsp;&emsp;&emsp;&emsp;
-        <span class="badge">9</span>
-        &emsp;
-        <span class="day">4</span>
-        <span class="month">July</span>
-        <span class="year">2015</span>
-      </li-->
     </ul>
   </div>
 
@@ -173,88 +153,21 @@
     <p></p>
     <table class="table table-bordered table-striped col-sm-6">
       <tr>
-        <th>Sample ID</th>
+        <th>Sample name (ID)</th>
         <th>Unclassified</th>
         <th>Validated</th>
         <th>Dubious</th>
         <th>Predicted</th>
       </tr>
-      <tr>
-        <td>15713</td>
-        <td>34</td>
-        <td>567</td>
-        <td>12</td>
-        <td>956</td>
-      </tr>
-      <tr>
-        <td>15711</td>
-        <td>3254</td>
-        <td>45</td>
-        <td>0</td>
-        <td>34</td>
-      </tr>
-      <tr>
-        <td>15749</td>
-        <td>76</td>
-        <td>9175</td>
-        <td>29</td>
-        <td>18</td>
-      </tr>
-      <tr>
-        <td>15733</td>
-        <td>895</td>
-        <td>923</td>
-        <td>9</td>
-        <td>1</td>
-      </tr>
-      <tr>
-        <td>15707</td>
-        <td>34</td>
-        <td>567</td>
-        <td>12</td>
-        <td>956</td>
-      </tr>
-      <tr>
-        <td>15762</td>
-        <td>435</td>
-        <td>899</td>
-        <td>1723</td>
-        <td>52</td>
-      </tr>
-      <tr>
-        <td>15718</td>
-        <td>895</td>
-        <td>923</td>
-        <td>9</td>
-        <td>1</td>
-      </tr>
-      <tr>
-        <td>15757</td>
-        <td>76</td>
-        <td>9175</td>
-        <td>29</td>
-        <td>18</td>
-      </tr>
-      <tr>
-        <td>15712</td>
-        <td>3254</td>
-        <td>45</td>
-        <td>0</td>
-        <td>34</td>
-      </tr>
-      <tr>
-        <td>15760</td>
-        <td>34</td>
-        <td>567</td>
-        <td>12</td>
-        <td>956</td>
-      </tr>
-      <tr>
-        <td>...</td>
-        <td>...</td>
-        <td>...</td>
-        <td>...</td>
-        <td>...</td>
+      <tr
+        v-for="mySample in samplesWithObjectsAndStatus"
+        :key="mySample.sampleid"
+      >
+        <td>{{ mySample.orig_id }}&emsp;({{ mySample.sampleid }})</td>
+        <td>{{ mySample.nb_unclassified }}</td>
+        <td>{{ mySample.nb_validated }}</td>
+        <td>{{ mySample.nb_dubious }}</td>
+        <td>{{ mySample.nb_predicted }}</td>
       </tr>
     </table>
   </div>
@@ -273,71 +186,11 @@
         <th>Dubious</th>
         <th>Predicted</th>
       </tr>
-      <tr>
-        <td>11498</td>
-        <td>67</td>
-        <td>2</td>
-        <td>56</td>
-      </tr>
-      <tr>
-        <td>11509</td>
-        <td>5</td>
-        <td>3</td>
-        <td>4</td>
-      </tr>
-      <tr>
-        <td>11512</td>
-        <td>175</td>
-        <td>9</td>
-        <td>8</td>
-      </tr>
-      <tr>
-        <td>11514</td>
-        <td>23</td>
-        <td>9</td>
-        <td>1</td>
-      </tr>
-      <tr>
-        <td>11518</td>
-        <td>67</td>
-        <td>2</td>
-        <td>56</td>
-      </tr>
-      <tr>
-        <td>12846</td>
-        <td>99</td>
-        <td>723</td>
-        <td>2</td>
-      </tr>
-      <tr>
-        <td>12908</td>
-        <td>23</td>
-        <td>9</td>
-        <td>1</td>
-      </tr>
-      <tr>
-        <td>18758</td>
-        <td>175</td>
-        <td>9</td>
-        <td>8</td>
-      </tr>
-      <tr>
-        <td>25631</td>
-        <td>5</td>
-        <td>0</td>
-        <td>4</td>
-      </tr>
-      <tr>
-        <td>25828</td>
-        <td>67</td>
-        <td>2</td>
-        <td>56</td>
-      </tr>
-      <tr>
-        <td>...</td>
-        <td>...</td>
-        <td>...</td>
-        <td>...</td>
+      <tr v-for="myTaxon in projectTaxa" :key="myTaxon.id">
+        <td>{{ myTaxon.id }}</td>
+        <td>{{ myTaxon.nb_validated }}</td>
+        <td>{{ myTaxon.nb_dubious }}</td>
+        <td>{{ myTaxon.nb_predicted }}</td>
       </tr>
     </table>
   </div>
@@ -374,8 +227,9 @@ import * as utils from "../utils/utils";
       acquAndProcArrayArray: Array<Array<string>>(),
       objectArrayArray: Array<Array<string>>(),
       projectManagers: Array<utils.projectUserType>(), // a manager is a user
-      //projectUsers: Array<utils.projectUserType>(),
-      projectUsersTRY: Array<utils.projUser>(),
+      projectUsers: Array<utils.projUser>(),
+      samplesWithObjectsAndStatus: Array<utils.sampleWithObjectsAndStatus>(),
+      projectTaxa: Array<utils.taxon>(),
     };
   },
   mounted() {
@@ -393,8 +247,9 @@ import * as utils from "../utils/utils";
     utils.processAcquisitionAndProcessingFields(this);
     utils.processObjectFields(this);
     utils.processProjectManagers(this);
-    //utils.processProjectUsers(this);
-    utils.TRYprocessProjectUsers(this);
+    utils.processProjectUsers(this);
+    utils.processSamplesWithObjectsAndStatus(this);
+    utils.processTaxa(this);
   },
   methods: {
     exportSamples() {
