@@ -274,7 +274,7 @@ export function TRYprocessProjectUsers(myProject: any): void {
                 if (arr[i].id === data0activities[j].id) {
                   // find corresponding IDs between Projects and ProjectsStats
                   arr[i].actions = data0activities[j].nb_actions;
-                  arr[i].annot = data0activities[j].last_annot;
+                  arr[i].annot = data0activities[j].last_annot; // TODO : convert
                 }
               }
             }
@@ -283,7 +283,8 @@ export function TRYprocessProjectUsers(myProject: any): void {
         })
         .catch((reason) => {
           console.log(reason);
-          alert(reason);
+          // Think about your session cookie whenever you fall down here !
+          // alert(reason);
           myProject.projectUsersTRY = []; // TODO : global error treatment
         });
     })

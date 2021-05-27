@@ -137,12 +137,9 @@
           </span>
         </a>
         &emsp;&emsp;
-        <span class="badge">10</span>
-        <!--
         <span class="badge">{{ myUser.actions }}</span>
         &emsp;&emsp;
         <span class="date">{{ myUser.annot }}</span>
-        -->
       </li>
 
       <!-- tabs are here OF COURSE temporary, just to see visual effect
