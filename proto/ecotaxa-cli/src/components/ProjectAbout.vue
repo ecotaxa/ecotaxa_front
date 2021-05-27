@@ -391,12 +391,7 @@ import * as utils from "../utils/utils";
       alert(event.type);
     });
 
-    utils.processProjectTitle(this);
-    utils.processProjectDescription(this);
-    utils.processProjectComment(this);
-    utils.processProjectLicense(this);
-    utils.processProjectSCNnetwork(this);
-    utils.processNameAndContact(this);
+    utils.processProjectSimpleFields(this);
     utils.processProjectSampleFields(this);
     utils.processAcquisitionAndProcessingFields(this);
     utils.processObjectFields(this);

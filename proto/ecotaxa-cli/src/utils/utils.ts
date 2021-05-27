@@ -2,81 +2,27 @@ import { ProjectsApi } from "../../gen";
 const _NUMCOL: number = 7; // number of Columns we want to display for the tables in this component
 
 ////////////////////////////////////////////////////////////////////
-export function processProjectTitle(myObject: any): void {
+export function processProjectSimpleFields(myObject: any): void {
   const api: ProjectsApi = new ProjectsApi();
   api
     .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
     .then((data) => {
       myObject.projectTitle = data.data.title;
+      myObject.projectDescription = data.data.projtype;
+      myObject.projectComment = data.data.comments;
+      myObject.projectLicense = data.data.license;
+      myObject.projectSCNnetwork = data.data.cnn_network_id;
+      myObject.contactMail = "mailto:" + data.data.contact?.email;
+      myObject.contactName = data.data.contact?.name;
+
     })
     .catch((reason) => {
       console.log(reason);
       myObject.projectTitle = "Invalid Project ID"; // TODO : global error treatment
-    });
-}
-////////////////////////////////////////////////////////////////////
-export function processProjectDescription(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      myObject.projectDescription = data.data.projtype;
-    })
-    .catch((reason) => {
-      console.log(reason);
       myObject.projectDescription = "Invalid Project ID"; // TODO : global error treatment
-    });
-}
-////////////////////////////////////////////////////////////////////
-export function processProjectComment(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      myObject.projectComment = data.data.comments;
-    })
-    .catch((reason) => {
-      console.log(reason);
       myObject.projectComment = "Invalid Project ID"; // TODO : global error treatment
-    });
-}
-////////////////////////////////////////////////////////////////////
-export function processProjectLicense(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      myObject.projectLicense = data.data.license;
-    })
-    .catch((reason) => {
-      console.log(reason);
-      myObject.projectLicense = "Invalid Project ID"; // TODO : global error treatment
-    });
-}
-////////////////////////////////////////////////////////////////////
-export function processProjectSCNnetwork(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      myObject.projectSCNnetwork = data.data.cnn_network_id;
-    })
-    .catch((reason) => {
-      console.log(reason);
-      myObject.projectSCNnetwork = "Invalid Project ID"; // TODO : global error treatment
-    });
-}
-////////////////////////////////////////////////////////////////////
-export function processNameAndContact(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      myObject.contactMail = "mailto:" + data.data.contact?.email;
-      myObject.contactName = data.data.contact?.name;
-    })
-    .catch((reason) => {
-      console.log(reason);
+      myObject.projectLicense = "Invalid Project ID"; // TODO : global error treatment      
+      myObject.projectSCNnetwork = "Invalid Project ID"; // TODO : global error treatment      
       myObject.contactMail = "";
       myObject.contactName = "Invalid Project ID"; // TODO : global error treatment
     });
@@ -316,13 +262,14 @@ export function TRYprocessProjectUsers(myProject: any): void {
     .then((arr) => {
       // arr is my array partially built with email + name + id
       // Now we're going to add actions and annotations
-      alert(arr.length);      
-      const api2: ProjectsApi = new ProjectsApi();
-      api2
-        .projectSetGetUserStatsProjectSetUserStatsGet("185") // myProject.projectID)
+      alert("<" + myProject.projectID + ">");
+      //const api2: ProjectsApi = new ProjectsApi();
+      api
+        .projectSetGetUserStatsProjectSetUserStatsGet(myProject.projectID)
         .then((data) => {
           alert("oui1");
           // We are working on a single project here, so take data[0]
+          // TODO here : create and use temp vars named data0 and data0actvities to factorize
           if (data.data[0].activities !== undefined) {
             for (let i: number = 0; i < arr.length; i++) {
               for (let j: number = 0; j < data.data[0].activities.length; j++) {
