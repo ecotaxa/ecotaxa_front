@@ -14,15 +14,14 @@ export function processProjectSimpleFields(myObject: any): void {
       myObject.projectSCNnetwork = data.data.cnn_network_id;
       myObject.contactMail = "mailto:" + data.data.contact?.email;
       myObject.contactName = data.data.contact?.name;
-
     })
     .catch((reason) => {
       console.log(reason);
       myObject.projectTitle = "Invalid Project ID"; // TODO : global error treatment
       myObject.projectDescription = "Invalid Project ID"; // TODO : global error treatment
       myObject.projectComment = "Invalid Project ID"; // TODO : global error treatment
-      myObject.projectLicense = "Invalid Project ID"; // TODO : global error treatment      
-      myObject.projectSCNnetwork = "Invalid Project ID"; // TODO : global error treatment      
+      myObject.projectLicense = "Invalid Project ID"; // TODO : global error treatment
+      myObject.projectSCNnetwork = "Invalid Project ID"; // TODO : global error treatment
       myObject.contactMail = "";
       myObject.contactName = "Invalid Project ID"; // TODO : global error treatment
     });
@@ -262,20 +261,20 @@ export function TRYprocessProjectUsers(myProject: any): void {
     .then((arr) => {
       // arr is my array partially built with email + name + id
       // Now we're going to add actions and annotations
-      alert("<" + myProject.projectID + ">");
-      //const api2: ProjectsApi = new ProjectsApi();
-      api
+      const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
+      api2
         .projectSetGetUserStatsProjectSetUserStatsGet(myProject.projectID)
         .then((data) => {
-          alert("oui1");
           // We are working on a single project here, so take data[0]
           // TODO here : create and use temp vars named data0 and data0actvities to factorize
-          if (data.data[0].activities !== undefined) {
+          const data0activities = data.data[0].activities;
+          if (data0activities !== undefined) {
             for (let i: number = 0; i < arr.length; i++) {
-              for (let j: number = 0; j < data.data[0].activities.length; j++) {
-                if (arr[i].id === data.data[0].activities[j].id) {  // find corresponding IDs between Projects and ProjectsStats
-                  arr[i].actions = data.data[0].activities[j].nb_actions;
-                  arr[i].annot = data.data[0].activities[j].last_annot;
+              for (let j: number = 0; j < data0activities.length; j++) {
+                if (arr[i].id === data0activities[j].id) {
+                  // find corresponding IDs between Projects and ProjectsStats
+                  arr[i].actions = data0activities[j].nb_actions;
+                  arr[i].annot = data0activities[j].last_annot;
                 }
               }
             }
