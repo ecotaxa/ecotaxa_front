@@ -342,7 +342,6 @@ export function processTaxa(myProject: any): void {
       const myData = data.data[0]; // 0 because we work on a precise single project
       if (myData !== undefined && myData.used_taxa !== undefined) {
         for (let i: number = 0; i < myData.used_taxa.length; i++) {
-          // TODO ! : remove the if below when bug about taxon === -1 is fixed
           if (myData.used_taxa[i] !== -1) {
             const oneTaxon: taxon = new taxon(myData.used_taxa[i]);
             oneArray.push(oneTaxon);

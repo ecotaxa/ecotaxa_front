@@ -1,6 +1,10 @@
 <template>
-  <div>This is About Project for {{ to_show }}</div>
+  <a href="/">
+    <img height="30" src="../assets/logo_ecotaxa_25.png" style="margin: 10px 0"
+  /></a>
+  <div><br />This is About Project for {{ to_show }}</div>
   <div id="ecotaxa" class="jumbotron text-left">
+    <br />
     <h1>Basic Information about project {{ projectID }}</h1>
     <br />
     <p>
@@ -37,8 +41,6 @@
         </p>
       </div>
     </div>
-  </div>
-  <div class="container">
     <h3>Sample fields</h3>
     <br />
     <table class="table table-bordered table-striped">
@@ -50,8 +52,6 @@
         </tr>
       </tbody>
     </table>
-  </div>
-  <div class="container">
     <h3>Acquisition and Processing fields</h3>
     <br />
     <table class="table table-bordered table-striped col-sm-6">
@@ -76,11 +76,8 @@
         </tr>
       </tbody>
     </table>
-  </div>
-
-  <div class="container" style="visibility: hidden">
     <!-- I want to keep this important example here and hidden -->
-    <div class="btn-group">
+    <div class="btn-group" style="visibility: hidden">
       <button
         ref="vanillaDD"
         class="btn btn-secondary dropdown-toggle"
@@ -97,8 +94,6 @@
         <a class="dropdown-item" href="#">Something else here</a>
       </div>
     </div>
-  </div>
-  <div class="container">
     <h2>Project Managers</h2>
     <div class="dropdown">
       <button
@@ -120,9 +115,6 @@
         >
       </div>
     </div>
-  </div>
-
-  <div class="container">
     <br />
     <h2>Project Users</h2>
     <ul class="list-group" v-for="myUser in projectUsers" :key="myUser.index">
@@ -138,9 +130,6 @@
         <span class="date">{{ myUser.annot }}</span>
       </li>
     </ul>
-  </div>
-
-  <div class="container">
     <br />
     <h3>Samples with objects and status</h3>
     <button type="button" @click="exportSamples" class="btn btn-primary">
@@ -166,9 +155,6 @@
         <td>{{ mySample.nb_predicted }}</td>
       </tr>
     </table>
-  </div>
-  <br />
-  <div class="container">
     <h3>
       Taxa
       <button type="button" @click="exportTaxa" class="btn btn-primary">
@@ -234,7 +220,6 @@ import * as utils from "../utils/utils";
     this.vanilla = new Dropdown(dd_ref);
     // Add a custom event
     dd_ref.addEventListener("hidden.bs.dropdown", function (event: Event) {
-      console.log(event);
       alert(event.type);
     });
 
