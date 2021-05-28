@@ -1,5 +1,6 @@
 import { ProjectsApi } from "../../gen";
 import { SamplesApi } from "../../gen";
+import { TaxonomyTreeApi } from "../../gen";
 const _NUMCOL: number = 7; // number of Columns we want to display for the tables in this component
 
 ////////////////////////////////////////////////////////////////////
@@ -143,38 +144,6 @@ export function processObjectFields(myObject: any): void {
     });
 }
 ////////////////////////////////////////////////////////////////////
-class projectUserType {
-  name: string;
-  email: string;
-  constructor(myname: string, myemail: string) {
-    this.name = myname;
-    this.email = myemail;
-  }
-}
-export { projectUserType };
-
-export function processProjectManagers(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      if (data.data.managers !== undefined)
-        for (let i: number = 0; i < data.data.managers.length; i++) {
-          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const oneManager: projectUserType = new projectUserType("", "");
-          oneManager.email = "mailto:" + data.data.managers[i].email;
-          oneManager.name = data.data.managers[i].name;
-          myObject.projectManagers.push(oneManager);
-        }
-    })
-    .catch((reason) => {
-      console.log(reason);
-      myObject.projectManagers = [
-        { email: "Invalid Project ID", name: "Invalid Project ID" },
-      ]; // TODO : global error treatment
-    });
-}
-////////////////////////////////////////////////////////////////////
 // From a single project ID and a user ID, fetch his number of actions (annotations),
 // and hist last active date on the project.
 // Here take first item of Array, as we pass a single project ID
@@ -202,17 +171,7 @@ export function processProjectUsers(myProject: any): void {
   api
     .projectQueryProjectsProjectIdGet(parseInt(myProject.projectID))
     .then((data) => {
-      const oneArray: Array<projUser> = new Array<projUser>();
-      if (data.data.annotators !== undefined) {
-        for (let i: number = 0; i < data.data.annotators.length; i++) {
-          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const oneUser: projUser = new projUser();
-          oneUser.email = "mailto:" + data.data.annotators[i].email;
-          oneUser.name = data.data.annotators[i].name;
-          oneUser.id = data.data.annotators[i].id; // will be used in the second .then to identify the user
-          oneArray.push(oneUser);
-        }
-      }
+      let oneArray: Array<projUser> = new Array<projUser>();
       // Also add the managers in oneArray, because they are also users
       if (data.data.managers !== undefined) {
         for (let i: number = 0; i < data.data.managers.length; i++) {
@@ -221,7 +180,18 @@ export function processProjectUsers(myProject: any): void {
           oneManager.email = "mailto:" + data.data.managers[i].email;
           oneManager.name = data.data.managers[i].name;
           oneManager.id = data.data.managers[i].id; // will be used in the second .then to identify the user
-          oneArray.push(oneManager);
+          myProject.projectManagers.push(oneManager);
+        }
+      }
+      oneArray = oneArray.concat(myProject.projectManagers);
+      if (data.data.annotators !== undefined) {
+        for (let i: number = 0; i < data.data.annotators.length; i++) {
+          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+          const oneUser: projUser = new projUser();
+          oneUser.email = "mailto:" + data.data.annotators[i].email;
+          oneUser.name = data.data.annotators[i].name;
+          oneUser.id = data.data.annotators[i].id; // will be used in the second .then to identify the user
+          oneArray.push(oneUser);
         }
       }
       return oneArray;
@@ -341,7 +311,6 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
       myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
     });
 }
-
 /////////////////////////////////////////////////////////////////////
 class taxon {
   id: number;
@@ -373,8 +342,11 @@ export function processTaxa(myProject: any): void {
       const myData = data.data[0]; // 0 because we work on a precise single project
       if (myData !== undefined && myData.used_taxa !== undefined) {
         for (let i: number = 0; i < myData.used_taxa.length; i++) {
-          const oneTaxon: taxon = new taxon(myData.used_taxa[i]);
-          oneArray.push(oneTaxon);
+          // TODO ! : remove the if below when bug about taxon === -1 is fixed
+          if (myData.used_taxa[i] !== -1) {
+            const oneTaxon: taxon = new taxon(myData.used_taxa[i]);
+            oneArray.push(oneTaxon);
+          }
         }
       }
       return oneArray;
@@ -396,8 +368,8 @@ export function processTaxa(myProject: any): void {
             const dataI = data.data[i];
             // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)            
             for (let j: number = 0; j < arr.length; j++) {
-              if (dataI !== undefined && dataI.used_taxa) {
-                if (dataI.used_taxa[0] == arr[j].id) {
+              if (dataI !== undefined && dataI.used_taxa !== undefined) {
+                if (dataI.used_taxa[0] === arr[j].id) {
                   arr[j].nb_unclassified = dataI.nb_unclassified; // TODO : probably useless field
                   arr[j].nb_validated = dataI.nb_validated;
                   arr[j].nb_dubious = dataI.nb_dubious;
@@ -406,13 +378,42 @@ export function processTaxa(myProject: any): void {
               }
             }
           }
-          myProject.projectTaxa = arr;
+          // return arr; not necessary ! arr is known in the following .then scope
+        })
+        .then(() => {
+          // arr is known here !
+          // Now I'm going to add the taxon name
+          const api3: TaxonomyTreeApi = new TaxonomyTreeApi();
+          api3
+            .queryTaxaSetTaxonSetQueryGet(taxonIDlist)
+            .then((data) => {
+              // analyze the answer by going through the array items
+              for (let i: number = 0; i < data.data.length; i++) {
+                const dataI = data.data[i];
+                for (let j: number = 0; j < arr.length; j++) {
+                  if (dataI.id === arr[j].id) {
+                    arr[j].name = dataI.name;
+                  }
+                }
+              }
+              myProject.projectTaxa = arr;
+            })
+            .catch((reason) => {
+              console.log(reason);
+              alert(reason);
+              myProject.projectTaxa = []; // TODO : global error treatment
+            });
         })
         .catch((reason) => {
           console.log(reason);
           alert(reason);
           myProject.projectTaxa = []; // TODO : global error treatment
         });
+    })
+    .catch((reason) => {
+      console.log(reason);
+      alert(reason);
+      myProject.projectTaxa = []; // TODO : global error treatment
     })
     .catch((reason) => {
       console.log(reason);

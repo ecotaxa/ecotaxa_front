@@ -125,11 +125,7 @@
   <div class="container">
     <br />
     <h2>Project Users</h2>
-    <ul
-      class="list-group"
-      v-for="myUser in projectUsers"
-      :key="myUser.index"
-    >
+    <ul class="list-group" v-for="myUser in projectUsers" :key="myUser.index">
       <li class="list-group-item">
         <a :href="myUser.email">
           <span>
@@ -181,13 +177,13 @@
     </h3>
     <table class="table table-bordered table-striped col-sm-6">
       <tr>
-        <th>Taxon ID</th>
+        <th>Taxon (ID)</th>
         <th>Validated</th>
         <th>Dubious</th>
         <th>Predicted</th>
       </tr>
       <tr v-for="myTaxon in projectTaxa" :key="myTaxon.id">
-        <td>{{ myTaxon.id }}</td>
+        <td>{{ myTaxon.name }}&emsp;({{ myTaxon.id }})</td>
         <td>{{ myTaxon.nb_validated }}</td>
         <td>{{ myTaxon.nb_dubious }}</td>
         <td>{{ myTaxon.nb_predicted }}</td>
@@ -226,7 +222,7 @@ import * as utils from "../utils/utils";
       sampleArrayArray: Array<Array<string>>(),
       acquAndProcArrayArray: Array<Array<string>>(),
       objectArrayArray: Array<Array<string>>(),
-      projectManagers: Array<utils.projectUserType>(), // a manager is a user
+      projectManagers: Array<utils.projUser>(), // a manager is a user
       projectUsers: Array<utils.projUser>(),
       samplesWithObjectsAndStatus: Array<utils.sampleWithObjectsAndStatus>(),
       projectTaxa: Array<utils.taxon>(),
@@ -246,7 +242,6 @@ import * as utils from "../utils/utils";
     utils.processProjectSampleFields(this);
     utils.processAcquisitionAndProcessingFields(this);
     utils.processObjectFields(this);
-    utils.processProjectManagers(this);
     utils.processProjectUsers(this);
     utils.processSamplesWithObjectsAndStatus(this);
     utils.processTaxa(this);
