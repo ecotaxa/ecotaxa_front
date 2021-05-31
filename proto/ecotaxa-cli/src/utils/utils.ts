@@ -174,9 +174,9 @@ export function processProjectUsers(myProject: any): void {
                   }
                 }
               }
-              myProject.projectUsers = arr;
             }
           }
+          myProject.projectUsers = arr;          
         })
         .catch((reason) => {
           //console.trace();
