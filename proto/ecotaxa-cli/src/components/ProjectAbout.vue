@@ -43,39 +43,37 @@
     </div>
     <h3>Sample fields</h3>
     <br />
-    <table class="table table-bordered table-striped">
-      <tbody>
-        <tr v-for="samples in sampleArrayArray" :key="samples.index">
-          <td v-for="sample in samples" :key="sample.index">
-            {{ sample }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <ul class="list-group list-group-horizontal">
+      <li
+        class="list-group-item"
+        v-for="sample in sampleArray"
+        :key="sample.index"
+      >
+        {{ sample }}
+      </li>
+    </ul>
     <h3>Acquisition and Processing fields</h3>
     <br />
-    <table class="table table-bordered table-striped col-sm-6">
-      <tbody>
-        <tr v-for="myfields in acquAndProcArrayArray" :key="myfields.index">
-          <td v-for="myAcquOrProc in myfields" :key="myAcquOrProc.index">
-            {{ myAcquOrProc }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="container">
+    <ul class="list-group list-group-horizontal">
+      <li
+        class="list-group-item"
+        v-for="myAcquOrProc in acquAndProcArray"
+        :key="myAcquOrProc.index"
+      >
+        {{ myAcquOrProc }}
+      </li>
+    </ul>
     <h3>Object fields</h3>
     <br />
-    <table class="table table-bordered table-striped col-sm-6">
-      <tbody>
-        <tr v-for="myfields in objectArrayArray" :key="myfields.index">
-          <td v-for="myobjectfield in myfields" :key="myobjectfield.index">
-            {{ myobjectfield }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <ul class="list-group list-group-horizontal">
+      <li
+        class="list-group-item"
+        v-for="myObjectField in objectArray"
+        :key="myObjectField.index"
+      >
+        {{ myObjectField }}
+      </li>
+    </ul>
     <!-- I want to keep this important example here and hidden -->
     <div class="btn-group" style="visibility: hidden">
       <button
@@ -205,9 +203,9 @@ import * as utils from "../utils/utils";
       projectSCNnetwork: String(""),
       contactMail: String(""),
       contactName: String(""),
-      sampleArrayArray: Array<Array<string>>(),
-      acquAndProcArrayArray: Array<Array<string>>(),
-      objectArrayArray: Array<Array<string>>(),
+      sampleArray: Array<string>(),
+      acquAndProcArray: Array<string>(),
+      objectArray: Array<string>(),
       projectManagers: Array<utils.projUser>(), // a manager is a user
       projectUsers: Array<utils.projUser>(),
       samplesWithObjectsAndStatus: Array<utils.sampleWithObjectsAndStatus>(),
@@ -224,9 +222,7 @@ import * as utils from "../utils/utils";
     });
 
     utils.processProjectSimpleFields(this);
-    utils.processProjectSampleFields(this);
-    utils.processAcquisitionAndProcessingFields(this);
-    utils.processObjectFields(this);
+    utils.processProjectSampleAcquisitionProcessingObjectFields(this);
     utils.processProjectUsers(this);
     utils.processSamplesWithObjectsAndStatus(this);
     utils.processTaxa(this);
@@ -268,10 +264,24 @@ export default class ProjectAbout extends Vue {
   urlLink!: string;
   to_show = this.projectID;
 }
+/*
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 10000px;
+*/
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 
 <style scoped>
+.list-group {
+  flex-wrap: wrap;
+}
+
+.list-group-item {
+  min-width: 200px;
+}
+
 .badge {
   min-width: 28px;
   border-radius: 10px;

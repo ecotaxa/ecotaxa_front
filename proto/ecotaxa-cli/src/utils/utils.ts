@@ -1,7 +1,6 @@
 import { ProjectsApi } from "../../gen";
 import { SamplesApi } from "../../gen";
 import { TaxonomyTreeApi } from "../../gen";
-const _NUMCOL: number = 7; // number of Columns we want to display for the tables in this component
 
 ////////////////////////////////////////////////////////////////////
 export function processProjectSimpleFields(myObject: any): void {
@@ -18,7 +17,9 @@ export function processProjectSimpleFields(myObject: any): void {
       myObject.contactName = data.data.contact?.name;
     })
     .catch((reason) => {
+      //console.trace();
       console.log(reason);
+      alert(reason);
       myObject.projectTitle = "Invalid Project ID"; // TODO : global error treatment
       myObject.projectDescription = "Invalid Project ID"; // TODO : global error treatment
       myObject.projectComment = "Invalid Project ID"; // TODO : global error treatment
@@ -29,7 +30,7 @@ export function processProjectSimpleFields(myObject: any): void {
     });
 }
 ////////////////////////////////////////////////////////////////////
-export function processProjectSampleFields(myObject: any): void {
+export function processProjectSampleAcquisitionProcessingObjectFields(myObject: any): void {
   /* For information : data.data.sample_free_cols will look like
   let sample_free_cols: { [key: string]: string } = {
     scan_operator: "t01",
@@ -44,105 +45,29 @@ export function processProjectSampleFields(myObject: any): void {
     .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
     .then((data) => {
       if (data.data.sample_free_cols !== undefined) {
-        const sampleFlatArray = Object.keys(data.data.sample_free_cols);
-        const nbItems: number = sampleFlatArray.length;
-        //let myArrayString: Array<string>;
-        const myArrayArrayString = new Array<Array<string>>();
-        //let nbRows: number = Math.round(nbItems / _NUMCOL);
-        let row: number = 0;
-        let col: number = 0;
-        while (col + row * _NUMCOL < nbItems) {
-          const myArrayString = new Array<string>();
-          for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
-            myArrayString.push(sampleFlatArray[col + row * _NUMCOL]);
-          }
-          myArrayArrayString.push(myArrayString);
-          col = 0;
-          row++;
-        }
-        myObject.sampleArrayArray = myArrayArrayString;
-        //console.log(nbRows);
-        //console.log(myArrayArrayString);
+        myObject.sampleArray = Object.keys(data.data.sample_free_cols);
+      }
+      if (data.data.acquisition_free_cols !== undefined) {
+        myObject.acquAndProcArray = Object.keys(data.data.acquisition_free_cols);
+      }
+      if (data.data.process_free_cols !== undefined) {
+        myObject.acquAndProcArray = myObject.acquAndProcArray.concat(Object.keys(data.data.process_free_cols));
+      }
+
+      if (data.data.obj_free_cols !== undefined) {
+        myObject.objectArray = Object.keys(data.data.obj_free_cols);
       }
     })
     .catch((reason) => {
+      //console.trace();
       console.log(reason);
-      myObject.sampleArrayArray = ""; // TODO : global error treatment
+      alert(reason);
+      myObject.sampleArray = []; // TODO : global error treatment
+      myObject.acquAndProcArray = [];
+      myObject.objectArray = [];
     });
 }
-////////////////////////////////////////////////////////////////////
-export function processAcquisitionAndProcessingFields(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      // Join acquisition_free_cols and process_free_cols
-      let myFlatArray: Array<string> = new Array<string>();
-      if (data.data.acquisition_free_cols !== undefined)
-        myFlatArray = Object.keys(data.data.acquisition_free_cols);
-      if (data.data.process_free_cols !== undefined)
-        myFlatArray = myFlatArray.concat(
-          Object.keys(data.data.process_free_cols)
-        );
-      if (myFlatArray.length) {
-        const nbItems: number = myFlatArray.length;
-        const myArrayArrayString = new Array<Array<string>>();
-        //let nbRows: number = Math.round(nbItems / _NUMCOL);
-        let row: number = 0;
-        let col: number = 0;
-        while (col + row * _NUMCOL < nbItems) {
-          const myArrayString = new Array<string>();
-          for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
-            myArrayString.push(myFlatArray[col + row * _NUMCOL]);
-          }
-          myArrayArrayString.push(myArrayString);
-          col = 0;
-          row++;
-        }
-        myObject.acquAndProcArrayArray = myArrayArrayString;
-        //console.log(nbRows);
-        //console.log(myArrayArrayString);
-      }
-    })
-    .catch((reason) => {
-      console.log(reason);
-      myObject.acquAndProcArrayArray = ""; // TODO : global error treatment
-    });
-}
-////////////////////////////////////////////////////////////////////
-export function processObjectFields(myObject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      let myFlatArray: Array<string> = new Array<string>();
-      if (data.data.obj_free_cols !== undefined)
-        myFlatArray = Object.keys(data.data.obj_free_cols);
-      if (myFlatArray.length) {
-        const nbItems: number = myFlatArray.length;
-        const myArrayArrayString = new Array<Array<string>>();
-        //let nbRows: number = Math.round(nbItems / _NUMCOL);
-        let row: number = 0;
-        let col: number = 0;
-        while (col + row * _NUMCOL < nbItems) {
-          const myArrayString = new Array<string>();
-          for (; col < _NUMCOL && col + row * _NUMCOL < nbItems; col++) {
-            myArrayString.push(myFlatArray[col + row * _NUMCOL]);
-          }
-          myArrayArrayString.push(myArrayString);
-          col = 0;
-          row++;
-        }
-        myObject.objectArrayArray = myArrayArrayString;
-        //console.log(nbRows);
-        //console.log(myArrayArrayString);
-      }
-    })
-    .catch((reason) => {
-      console.log(reason);
-      myObject.objectArrayArray = ""; // TODO : global error treatment
-    });
-}
+
 ////////////////////////////////////////////////////////////////////
 // From a single project ID and a user ID, fetch his number of actions (annotations),
 // and hist last active date on the project.
@@ -220,13 +145,16 @@ export function processProjectUsers(myProject: any): void {
           }
         })
         .catch((reason) => {
+          //console.trace();
           console.log(reason);
+          alert(reason);
           // Think about your session cookie whenever you fall down here !
           // alert(reason);
           myProject.projectUsers = []; // TODO : global error treatment
         });
     })
     .catch((reason) => {
+      console.trace();
       console.log(reason);
       alert(reason);
       myProject.projectUsers = []; // TODO : global error treatment
@@ -245,9 +173,9 @@ class sampleWithObjectsAndStatus {
   nb_validated: number | undefined;
   nb_dubious: number | undefined;
   nb_predicted: number | undefined;
-  constructor() {
-    this.sampleid = 0;
-    this.orig_id = "";
+  constructor(mysampleid: number | undefined, myorigid: string) {
+    this.sampleid = mysampleid;
+    this.orig_id = myorigid;
     this.nb_unclassified = 0;
     this.nb_validated = 0;
     this.nb_dubious = 0;
@@ -265,9 +193,7 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
       const myData = data.data;
       for (let i: number = 0; i < myData.length; i++) {
         // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-        const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus();
-        oneSample.sampleid = myData[i].sampleid;
-        oneSample.orig_id = myData[i].orig_id;
+        const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus(myData[i].sampleid, myData[i].orig_id);
         oneArray.push(oneSample);
       }
       return oneArray;
@@ -300,12 +226,14 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
           myProject.samplesWithObjectsAndStatus = arr;
         })
         .catch((reason) => {
+          //console.trace();
           console.log(reason);
           alert(reason);
           myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
         });
     })
     .catch((reason) => {
+      console.trace();
       console.log(reason);
       alert(reason);
       myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
@@ -398,23 +326,27 @@ export function processTaxa(myProject: any): void {
               myProject.projectTaxa = arr;
             })
             .catch((reason) => {
+              //console.trace();
               console.log(reason);
               alert(reason);
               myProject.projectTaxa = []; // TODO : global error treatment
             });
         })
         .catch((reason) => {
+          //console.trace();
           console.log(reason);
           alert(reason);
           myProject.projectTaxa = []; // TODO : global error treatment
         });
     })
     .catch((reason) => {
+      //console.trace();
       console.log(reason);
       alert(reason);
       myProject.projectTaxa = []; // TODO : global error treatment
     })
     .catch((reason) => {
+      console.trace();
       console.log(reason);
       alert(reason);
       myProject.projectTaxa = []; // TODO : global error treatment
