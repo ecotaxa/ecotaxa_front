@@ -74,45 +74,6 @@
         {{ myObjectField }}
       </li>
     </ul>
-    <!-- I want to keep this important example here and hidden -->
-    <div class="btn-group" style="visibility: hidden">
-      <button
-        ref="vanillaDD"
-        class="btn btn-secondary dropdown-toggle"
-        type="button"
-        id="dropdownMenuButton1"
-        data-toggle="dropdown"
-        aria-expanded="false"
-      >
-        Dropdown button
-      </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-        <a class="dropdown-item" href="#">Action</a>
-        <a class="dropdown-item" href="#">Another action</a>
-        <a class="dropdown-item" href="#">Something else here</a>
-      </div>
-    </div>
-    <h2>Project Managers</h2>
-    <div class="dropdown">
-      <button
-        type="button"
-        class="btn btn-primary dropdown-toggle"
-        data-bs-target="#people"
-        data-bs-toggle="dropdown"
-      >
-        View List
-      </button>
-      <div class="dropdown-menu" id="people">
-        <a
-          class="dropdown-item"
-          v-for="myProjectManager in projectManagers"
-          :key="myProjectManager.name"
-          :href="myProjectManager.email"
-        >
-          {{ myProjectManager.name }}</a
-        >
-      </div>
-    </div>
     <br />
     <h2>Project Users</h2>
     <ul class="list-group" v-for="myUser in projectUsers" :key="myUser.index">
@@ -173,6 +134,45 @@
         <td>{{ myTaxon.nb_predicted }}</td>
       </tr>
     </table>
+    <!-- I want to keep this important example here and hidden -->
+    <div class="btn-group" style="visibility: hidden">
+      <button
+        ref="vanillaDD"
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        id="dropdownMenuButton1"
+        data-toggle="dropdown"
+        aria-expanded="false"
+      >
+        Dropdown button
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <a class="dropdown-item" href="#">Action</a>
+        <a class="dropdown-item" href="#">Another action</a>
+        <a class="dropdown-item" href="#">Something else here</a>
+      </div>
+    </div>
+    <!-- I want to keep this important example here and hidden -->
+    <div class="dropdown" style="visibility: hidden">
+      <button
+        type="button"
+        class="btn btn-primary dropdown-toggle"
+        data-bs-target="#people"
+        data-bs-toggle="dropdown"
+      >
+        View List
+      </button>
+      <div class="dropdown-menu" id="people">
+        <a
+          class="dropdown-item"
+          v-for="myProjectManager in projectManagers"
+          :key="myProjectManager.name"
+          :href="myProjectManager.email"
+        >
+          {{ myProjectManager.name }}</a
+        >
+      </div>
+    </div>
   </div>
 </template>
 

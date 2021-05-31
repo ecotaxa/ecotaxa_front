@@ -129,19 +129,20 @@ export function processProjectUsers(myProject: any): void {
         .projectSetGetUserStatsProjectSetUserStatsGet(myProject.projectID)
         .then((data) => {
           // We are working on a single project here, so take data[0]
-          // TODO here : create and use temp vars named data0 and data0actvities to factorize
-          const data0activities = data.data[0].activities;
-          if (data0activities !== undefined) {
-            for (let i: number = 0; i < arr.length; i++) {
-              for (let j: number = 0; j < data0activities.length; j++) {
-                if (arr[i].id === data0activities[j].id) {
-                  // find corresponding IDs between Projects and ProjectsStats
-                  arr[i].actions = data0activities[j].nb_actions;
-                  arr[i].annot = data0activities[j].last_annot; // TODO : convert
+          if (data.data !== undefined && data.data[0] !== undefined) {
+            const data0activities = data.data[0].activities;
+            if (data0activities !== undefined) {
+              for (let i: number = 0; i < arr.length; i++) {
+                for (let j: number = 0; j < data0activities.length; j++) {
+                  if (arr[i].id === data0activities[j].id) {
+                    // find corresponding IDs between Projects and ProjectsStats
+                    arr[i].actions = data0activities[j].nb_actions;
+                    arr[i].annot = data0activities[j].last_annot; // TODO : convert
+                  }
                 }
               }
+              myProject.projectUsers = arr;
             }
-            myProject.projectUsers = arr;
           }
         })
         .catch((reason) => {
