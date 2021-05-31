@@ -242,9 +242,7 @@ import * as utils from "../utils/utils";
       alert(event.type);
     });
 
-    utils.processProjectSimpleFields(this);
-    utils.processProjectSampleAcquisitionProcessingObjectFields(this);
-    utils.processProjectUsers(this);
+    utils.processProject(this);
     utils.processSamplesWithObjectsAndStatus(this);
     utils.processTaxa(this);
   },

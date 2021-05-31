@@ -1,36 +1,49 @@
 import { ProjectsApi } from "../../gen";
 import { SamplesApi } from "../../gen";
 import { TaxonomyTreeApi } from "../../gen";
+import { AxiosResponse } from "axios";
+import { ProjectModel } from "gen/api";
 
 ////////////////////////////////////////////////////////////////////
-export function processProjectSimpleFields(myObject: any): void {
+export function processProject(myProject: any): void {
   const api: ProjectsApi = new ProjectsApi();
   api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
+    .projectQueryProjectsProjectIdGet(parseInt(myProject.projectID))
     .then((data) => {
-      myObject.projectTitle = data.data.title;
-      myObject.projectDescription = data.data.projtype;
-      myObject.projectComment = data.data.comments;
-      myObject.projectLicense = data.data.license;
-      myObject.projectSCNnetwork = data.data.cnn_network_id;
-      myObject.contactMail = "mailto:" + data.data.contact?.email;
-      myObject.contactName = data.data.contact?.name;
+      simpleFieldsOK(myProject, data);
+      sampleAcquisitionProcessingObjectFieldsOK(myProject, data);
+      projectUsersOK(myProject, data);
     })
     .catch((reason) => {
-      //console.trace();
-      console.log(reason);
-      alert(reason);
-      myObject.projectTitle = "Invalid Project ID"; // TODO : global error treatment
-      myObject.projectDescription = "Invalid Project ID"; // TODO : global error treatment
-      myObject.projectComment = "Invalid Project ID"; // TODO : global error treatment
-      myObject.projectLicense = "Invalid Project ID"; // TODO : global error treatment
-      myObject.projectSCNnetwork = "Invalid Project ID"; // TODO : global error treatment
-      myObject.contactMail = "";
-      myObject.contactName = "Invalid Project ID"; // TODO : global error treatment
+      simpleFieldsKO(myProject, reason);
+      sampleAcquisitionProcessingObjectFieldsKO(myProject, reason);
+      projectUsersKO(myProject, reason);
     });
 }
 ////////////////////////////////////////////////////////////////////
-export function processProjectSampleAcquisitionProcessingObjectFields(myObject: any): void {
+function simpleFieldsOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
+  myProject.projectTitle = data.data.title;
+  myProject.projectDescription = data.data.projtype;
+  myProject.projectComment = data.data.comments;
+  myProject.projectLicense = data.data.license;
+  myProject.projectSCNnetwork = data.data.cnn_network_id;
+  myProject.contactMail = "mailto:" + data.data.contact?.email;
+  myProject.contactName = data.data.contact?.name;
+}
+function simpleFieldsKO(myProject: any, reason: any): void {
+  //console.trace();
+  console.log(reason);
+  alert(reason);
+  myProject.projectTitle = "Invalid Project ID"; // TODO : global error treatment
+  myProject.projectDescription = "Invalid Project ID"; // TODO : global error treatment
+  myProject.projectComment = "Invalid Project ID"; // TODO : global error treatment
+  myProject.projectLicense = "Invalid Project ID"; // TODO : global error treatment
+  myProject.projectSCNnetwork = "Invalid Project ID"; // TODO : global error treatment
+  myProject.contactMail = "";
+  myProject.contactName = "Invalid Project ID"; // TODO : global error treatment
+}
+////////////////////////////////////////////////////////////////////
+function sampleAcquisitionProcessingObjectFieldsOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
   /* For information : data.data.sample_free_cols will look like
   let sample_free_cols: { [key: string]: string } = {
     scan_operator: "t01",
@@ -40,34 +53,28 @@ export function processProjectSampleAcquisitionProcessingObjectFields(myObject: 
   };
   console.log(sample_free_cols["ship"]);
   console.log(Object.keys(sample_free_cols)[1]); */
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myObject.projectID))
-    .then((data) => {
-      if (data.data.sample_free_cols !== undefined) {
-        myObject.sampleArray = Object.keys(data.data.sample_free_cols);
-      }
-      if (data.data.acquisition_free_cols !== undefined) {
-        myObject.acquAndProcArray = Object.keys(data.data.acquisition_free_cols);
-      }
-      if (data.data.process_free_cols !== undefined) {
-        myObject.acquAndProcArray = myObject.acquAndProcArray.concat(Object.keys(data.data.process_free_cols));
-      }
+  if (data.data.sample_free_cols !== undefined) {
+    myProject.sampleArray = Object.keys(data.data.sample_free_cols);
+  }
 
-      if (data.data.obj_free_cols !== undefined) {
-        myObject.objectArray = Object.keys(data.data.obj_free_cols);
-      }
-    })
-    .catch((reason) => {
-      //console.trace();
-      console.log(reason);
-      alert(reason);
-      myObject.sampleArray = []; // TODO : global error treatment
-      myObject.acquAndProcArray = [];
-      myObject.objectArray = [];
-    });
+  if (data.data.acquisition_free_cols !== undefined) {
+    myProject.acquAndProcArray = Object.keys(data.data.acquisition_free_cols);
+  }
+  if (data.data.process_free_cols !== undefined) {
+    myProject.acquAndProcArray = myProject.acquAndProcArray.concat(Object.keys(data.data.process_free_cols));
+  }
+
+  if (data.data.obj_free_cols !== undefined) {
+    myProject.objectArray = Object.keys(data.data.obj_free_cols);
+  }
 }
-
+function sampleAcquisitionProcessingObjectFieldsKO(myProject: any, reason: any): void {
+  console.log(reason);
+  alert(reason);
+  myProject.sampleArray = []; // TODO : global error treatment
+  myProject.acquAndProcArray = [];
+  myProject.objectArray = [];
+}
 ////////////////////////////////////////////////////////////////////
 // From a single project ID and a user ID, fetch his number of actions (annotations),
 // and hist last active date on the project.
@@ -76,7 +83,6 @@ export function processProjectSampleAcquisitionProcessingObjectFields(myObject: 
 //  activities[i].nb_actions
 ////////////////////////////////////////////////////////////////////
 /*Il y a 4 statuts d'utilisateurs dans un projet:
-
     visitor = non loggé ou n'ayant pas de statut particulier dans ce projet
     viewer = enregistré sur le projet mais n'a pas le droit de faire quoi que ce soit
     annotator = enregistré et a le droit de bouger des images
@@ -111,88 +117,75 @@ class projUser {
 }
 export { projUser };
 
-export function processProjectUsers(myProject: any): void {
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .projectQueryProjectsProjectIdGet(parseInt(myProject.projectID))
+export function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
+  const oneArray: Array<projUser> = new Array<projUser>();
+  // Also add the managers in oneArray, because they are also users
+  if (data.data.managers !== undefined) {
+    for (let i: number = 0; i < data.data.managers.length; i++) {
+      // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+      const managerI = data.data.managers[i];
+      const oneUser: projUser = new projUser(managerI.id, userStatus._MANAGER);
+      oneUser.email = "mailto:" + managerI.email;
+      oneUser.name = managerI.name;
+      oneUser.active = managerI.active;
+      oneArray.push(oneUser);
+    }
+  }
+  if (data.data.annotators !== undefined) {
+    for (let i: number = 0; i < data.data.annotators.length; i++) {
+      // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+      const annotatorI = data.data.annotators[i];
+      const oneUser: projUser = new projUser(annotatorI.id, userStatus._ANNOTATOR);
+      oneUser.email = "mailto:" + annotatorI.email;
+      oneUser.name = annotatorI.name;
+      oneUser.active = annotatorI.active;
+      oneArray.push(oneUser);
+    }
+  }
+  if (data.data.viewers !== undefined) {
+    for (let i: number = 0; i < data.data.viewers.length; i++) {
+      // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+      const viewerI = data.data.viewers[i];
+      const oneUser: projUser = new projUser(viewerI.id, userStatus._VIEWER);
+      oneUser.email = "mailto:" + viewerI.email;
+      oneUser.name = viewerI.name;
+      oneUser.active = viewerI.active;
+      oneArray.push(oneUser);
+    }
+  }
+  // arr is my array partially built with email + name + id + status
+  // Now we're going to add actions and annotations
+  const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
+  api2
+    .projectSetGetUserStatsProjectSetUserStatsGet(myProject.projectID)
     .then((data) => {
-      const oneArray: Array<projUser> = new Array<projUser>();
-      // Also add the managers in oneArray, because they are also users
-      if (data.data.managers !== undefined) {
-        for (let i: number = 0; i < data.data.managers.length; i++) {
-          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const managerI = data.data.managers[i];
-          const oneUser: projUser = new projUser(managerI.id, userStatus._MANAGER);
-          oneUser.email = "mailto:" + managerI.email;
-          oneUser.name = managerI.name;
-          oneUser.active = managerI.active;
-          oneArray.push(oneUser);
-        }
-      }
-      if (data.data.annotators !== undefined) {
-        for (let i: number = 0; i < data.data.annotators.length; i++) {
-          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const annotatorI = data.data.annotators[i];
-          const oneUser: projUser = new projUser(annotatorI.id, userStatus._ANNOTATOR);
-          oneUser.email = "mailto:" + annotatorI.email;
-          oneUser.name = annotatorI.name;
-          oneUser.active = annotatorI.active;
-          oneArray.push(oneUser);
-        }
-      }
-      if (data.data.viewers !== undefined) {
-        for (let i: number = 0; i < data.data.viewers.length; i++) {
-          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const viewerI = data.data.viewers[i];
-          const oneUser: projUser = new projUser(viewerI.id, userStatus._VIEWER);
-          oneUser.email = "mailto:" + viewerI.email;
-          oneUser.name = viewerI.name;
-          oneUser.active = viewerI.active;
-          oneArray.push(oneUser);
-        }
-      }
-      return oneArray;
-      // id will be used in the second .then to identify the user      
-    })
-    .then((arr) => {
-      // arr is my array partially built with email + name + id + status
-      // Now we're going to add actions and annotations
-      const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
-      api2
-        .projectSetGetUserStatsProjectSetUserStatsGet(myProject.projectID)
-        .then((data) => {
-          // We are working on a single project here, so take data[0]
-          if (data.data !== undefined && data.data[0] !== undefined) {
-            const data0activities = data.data[0].activities;
-            if (data0activities !== undefined) {
-              for (let i: number = 0; i < arr.length; i++) {
-                for (let j: number = 0; j < data0activities.length; j++) {
-                  if (arr[i].id === data0activities[j].id) {
-                    // find corresponding IDs between Projects and ProjectsStats
-                    arr[i].actions = data0activities[j].nb_actions;
-                    arr[i].annot = data0activities[j].last_annot?.replace("T", " ");
-                  }
-                }
+      // We are working on a single project here, so take data[0]
+      if (data.data !== undefined && data.data[0] !== undefined) {
+        const data0activities = data.data[0].activities;
+        if (data0activities !== undefined) {
+          for (let i: number = 0; i < oneArray.length; i++) {
+            for (let j: number = 0; j < data0activities.length; j++) {
+              if (oneArray[i].id === data0activities[j].id) {
+                // find corresponding IDs between Projects and ProjectsStats
+                oneArray[i].actions = data0activities[j].nb_actions;
+                oneArray[i].annot = data0activities[j].last_annot?.replace("T", " ");
               }
             }
           }
-          myProject.projectUsers = arr;          
-        })
-        .catch((reason) => {
-          //console.trace();
-          console.log(reason);
-          alert(reason);
-          // Think about your session cookie whenever you fall down here !
-          // alert(reason);
-          myProject.projectUsers = []; // TODO : global error treatment
-        });
+        }
+      }
+      myProject.projectUsers = oneArray;
     })
     .catch((reason) => {
-      //console.trace();
-      console.log(reason);
-      alert(reason);
-      myProject.projectUsers = []; // TODO : global error treatment
+      projectUsersKO(myProject, reason);
     });
+}
+
+function projectUsersKO(myProject: any, reason: any): void {
+  //console.trace();
+  console.log(reason);
+  alert(reason);
+  myProject.projectUsers = []; // TODO : global error treatment
 }
 ////////////////////////////////////////////////////////////////////
 // "Samples with objects and status"
