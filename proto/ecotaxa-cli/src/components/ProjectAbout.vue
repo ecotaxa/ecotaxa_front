@@ -75,20 +75,42 @@
       </li>
     </ul>
     <br />
+    <br />
     <h2>Project Users</h2>
-    <ul class="list-group" v-for="myUser in projectUsers" :key="myUser.index">
-      <li class="list-group-item">
-        <a :href="myUser.email">
-          <span>
-            {{ myUser.name }}
-          </span>
-        </a>
-        &emsp;&emsp;
-        <span class="badge">{{ myUser.actions }}</span>
-        &emsp;&emsp;
-        <span class="date">{{ myUser.annot }}</span>
-      </li>
-    </ul>
+    <table class="table table-bordered table-striped col-sm-6">
+      <tr>
+        <th>Name</th>
+        <th>Number of annotations</th>
+        <th>Last annotation date</th>
+        <th>User Status</th>
+      </tr>
+      <tr v-for="myUser in projectUsers" :key="myUser.id">
+        <template v-if="myUser.active === true">
+          <td>
+            <a :href="myUser.email">{{ myUser.name }}</a>
+          </td>
+          <td>{{ myUser.actions }}</td>
+          <td>{{ myUser.annot }}</td>
+          <td>{{ myUser.status }}</td>
+        </template>
+        <template v-else>
+          <td>
+            <strike
+              ><a :href="myUser.email">{{ myUser.name }}</a></strike
+            >
+          </td>
+          <td>
+            <strike>{{ myUser.actions }} </strike>
+          </td>
+          <td>
+            <strike>{{ myUser.annot }} </strike>
+          </td>
+          <td>
+            <strike>{{ myUser.status }} </strike>
+          </td>
+        </template>
+      </tr>
+    </table>
     <br />
     <h3>Samples with objects and status</h3>
     <button type="button" @click="exportSamples" class="btn btn-primary">
@@ -206,7 +228,6 @@ import * as utils from "../utils/utils";
       sampleArray: Array<string>(),
       acquAndProcArray: Array<string>(),
       objectArray: Array<string>(),
-      projectManagers: Array<utils.projUser>(), // a manager is a user
       projectUsers: Array<utils.projUser>(),
       samplesWithObjectsAndStatus: Array<utils.sampleWithObjectsAndStatus>(),
       projectTaxa: Array<utils.taxon>(),

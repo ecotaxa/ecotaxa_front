@@ -75,18 +75,38 @@ export function processProjectSampleAcquisitionProcessingObjectFields(myObject: 
 // if (data.data[0].activities[i].id === userID) {
 //  activities[i].nb_actions
 ////////////////////////////////////////////////////////////////////
+/*Il y a 4 statuts d'utilisateurs dans un projet:
+
+    visitor = non loggé ou n'ayant pas de statut particulier dans ce projet
+    viewer = enregistré sur le projet mais n'a pas le droit de faire quoi que ce soit
+    annotator = enregistré et a le droit de bouger des images
+    manager = a tous les droits
+Donc un manager est un "utilisateur" mais avec des droits spéciaux.
+Et les managers peuvent changer au cours de la vie du projet
+Donc il faut vraiment le voir comme un flag à un temps t.
+*/
+
+enum userStatus { // from lower to higher "rights"
+  _VIEWER = "Viewer",
+  _ANNOTATOR = "Annotator",
+  _MANAGER = "Manager"
+};
+
 class projUser {
+  status: userStatus;
   name: string;
   email: string;
   id: number | undefined; // TODO : fix : undefined needed because of a strange compilation error
   actions: number | undefined; // TODO : fix : undefined needed because of a strange compilation error
   annot: string | undefined; // It's a date. TODO : fix : undefined needed because of a strange compilation error
-  constructor() {
+  active: boolean | undefined;
+  constructor(myID: number | undefined, myStatus: userStatus) {
+    this.id = myID;
+    this.status = myStatus;
     this.name = "";
     this.email = "";
-    this.id = undefined;
     this.actions = 0;
-    this.annot = "";
+    this.annot = "N/A";
   }
 }
 export { projUser };
@@ -96,33 +116,46 @@ export function processProjectUsers(myProject: any): void {
   api
     .projectQueryProjectsProjectIdGet(parseInt(myProject.projectID))
     .then((data) => {
-      let oneArray: Array<projUser> = new Array<projUser>();
+      const oneArray: Array<projUser> = new Array<projUser>();
       // Also add the managers in oneArray, because they are also users
       if (data.data.managers !== undefined) {
         for (let i: number = 0; i < data.data.managers.length; i++) {
           // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const oneManager: projUser = new projUser();
-          oneManager.email = "mailto:" + data.data.managers[i].email;
-          oneManager.name = data.data.managers[i].name;
-          oneManager.id = data.data.managers[i].id; // will be used in the second .then to identify the user
-          myProject.projectManagers.push(oneManager);
+          const managerI = data.data.managers[i];
+          const oneUser: projUser = new projUser(managerI.id, userStatus._MANAGER);
+          oneUser.email = "mailto:" + managerI.email;
+          oneUser.name = managerI.name;
+          oneUser.active = managerI.active;
+          oneArray.push(oneUser);
         }
       }
-      oneArray = oneArray.concat(myProject.projectManagers);
       if (data.data.annotators !== undefined) {
         for (let i: number = 0; i < data.data.annotators.length; i++) {
           // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-          const oneUser: projUser = new projUser();
-          oneUser.email = "mailto:" + data.data.annotators[i].email;
-          oneUser.name = data.data.annotators[i].name;
-          oneUser.id = data.data.annotators[i].id; // will be used in the second .then to identify the user
+          const annotatorI = data.data.annotators[i];
+          const oneUser: projUser = new projUser(annotatorI.id, userStatus._ANNOTATOR);
+          oneUser.email = "mailto:" + annotatorI.email;
+          oneUser.name = annotatorI.name;
+          oneUser.active = annotatorI.active;
+          oneArray.push(oneUser);
+        }
+      }
+      if (data.data.viewers !== undefined) {
+        for (let i: number = 0; i < data.data.viewers.length; i++) {
+          // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
+          const viewerI = data.data.viewers[i];
+          const oneUser: projUser = new projUser(viewerI.id, userStatus._VIEWER);
+          oneUser.email = "mailto:" + viewerI.email;
+          oneUser.name = viewerI.name;
+          oneUser.active = viewerI.active;
           oneArray.push(oneUser);
         }
       }
       return oneArray;
+      // id will be used in the second .then to identify the user      
     })
     .then((arr) => {
-      // arr is my array partially built with email + name + id
+      // arr is my array partially built with email + name + id + status
       // Now we're going to add actions and annotations
       const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
       api2
@@ -137,7 +170,7 @@ export function processProjectUsers(myProject: any): void {
                   if (arr[i].id === data0activities[j].id) {
                     // find corresponding IDs between Projects and ProjectsStats
                     arr[i].actions = data0activities[j].nb_actions;
-                    arr[i].annot = data0activities[j].last_annot; // TODO : convert
+                    arr[i].annot = data0activities[j].last_annot?.replace("T", " ");
                   }
                 }
               }
@@ -155,7 +188,7 @@ export function processProjectUsers(myProject: any): void {
         });
     })
     .catch((reason) => {
-      console.trace();
+      //console.trace();
       console.log(reason);
       alert(reason);
       myProject.projectUsers = []; // TODO : global error treatment
@@ -234,7 +267,7 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
         });
     })
     .catch((reason) => {
-      console.trace();
+      //console.trace();
       console.log(reason);
       alert(reason);
       myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
@@ -347,7 +380,7 @@ export function processTaxa(myProject: any): void {
       myProject.projectTaxa = []; // TODO : global error treatment
     })
     .catch((reason) => {
-      console.trace();
+      //console.trace();
       console.log(reason);
       alert(reason);
       myProject.projectTaxa = []; // TODO : global error treatment
