@@ -117,7 +117,7 @@ class projUser {
 }
 export { projUser };
 
-export function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
+function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
   const oneArray: Array<projUser> = new Array<projUser>();
   // Also add the managers in oneArray, because they are also users
   if (data.data.managers !== undefined) {
@@ -253,19 +253,21 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
           myProject.samplesWithObjectsAndStatus = arr;
         })
         .catch((reason) => {
-          //console.trace();
-          console.log(reason);
-          alert(reason);
-          myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
+          processSamplesWithObjectsAndStatusKO(myProject, reason);
         });
     })
     .catch((reason) => {
-      //console.trace();
-      console.log(reason);
-      alert(reason);
-      myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
+      processSamplesWithObjectsAndStatusKO(myProject, reason);
     });
 }
+
+function processSamplesWithObjectsAndStatusKO(myProject: any, reason: any): void {
+  //console.trace();
+  console.log(reason);
+  alert(reason);
+  myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
+}
+
 /////////////////////////////////////////////////////////////////////
 class taxon {
   id: number;
@@ -353,29 +355,24 @@ export function processTaxa(myProject: any): void {
               myProject.projectTaxa = arr;
             })
             .catch((reason) => {
-              //console.trace();
-              console.log(reason);
-              alert(reason);
-              myProject.projectTaxa = []; // TODO : global error treatment
+              processTaxaKO(myProject, reason);
             });
         })
         .catch((reason) => {
-          //console.trace();
-          console.log(reason);
-          alert(reason);
-          myProject.projectTaxa = []; // TODO : global error treatment
+          processTaxaKO(myProject, reason);
         });
     })
     .catch((reason) => {
-      //console.trace();
-      console.log(reason);
-      alert(reason);
-      myProject.projectTaxa = []; // TODO : global error treatment
+      processTaxaKO(myProject, reason);
     })
     .catch((reason) => {
-      //console.trace();
-      console.log(reason);
-      alert(reason);
-      myProject.projectTaxa = []; // TODO : global error treatment
+      processTaxaKO(myProject, reason);
     });
+}
+
+function processTaxaKO(myProject: any, reason: any): void {
+  //console.trace();
+  console.log(reason);
+  alert(reason);
+  myProject.projectTaxa = []; // TODO : global error treatment
 }
