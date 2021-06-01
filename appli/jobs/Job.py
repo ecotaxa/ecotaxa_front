@@ -2,8 +2,11 @@ import json
 from json import JSONDecodeError
 
 import requests
+from flask import g
 from werkzeug.datastructures import FileStorage
 
+from appli import gvg, XSSEscape
+from appli.project import sharedfilter
 from to_back.ecotaxa_cli_py.api import FilesApi
 from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
@@ -46,6 +49,30 @@ class Job(object):
         return ""
 
     @classmethod
+    def final_download_action(cls, job_id, prj_id, out_file):
+        if out_file is None:
+            return "Error, final file not available"
+
+        ret = "<a href='/api/jobs/%d/file' class='btn btn-primary btn-sm ' " \
+              "role='button'>Get file %s</a>" \
+              % (job_id, out_file)
+        if prj_id is not None:
+            ret += " <a href='/Job/Clean/%d?thengotoproject=Y' " \
+                   "class='btn btn-primary btn-sm ' " \
+                   "role='button'>FORCE Delete of %s and back to project " \
+                   "(no danger for the original database) </a>" \
+                   % (job_id, out_file)
+        else:
+            ret += " <a href='/Job/Clean/%d' class='btn btn-primary btn-sm ' " \
+                   "role='button'>FORCE Delete of %s (no danger for the " \
+                   "original database) </a>" \
+                   % (job_id, out_file)
+        ret += "<br>Local users can also retrieve the file in the " \
+               "EcoTaxa folder temptask/task%06d (useful for huge files)" \
+               % job_id
+        return ret
+
+    @classmethod
     def get_file_from_form(cls, request):
         """
             Common treatment of "file" fields in several tasks.
@@ -72,6 +99,23 @@ class Job(object):
                 return file_rsp.json(), None
         else:
             return request.form.get("ServerPath", ""), None
+
+    @classmethod
+    def _extract_filters_from_url(cls, filters, target_prj):
+        # Extract filter values, they are in the URL (get)
+        for k in sharedfilter.FilterList:
+            if gvg(k, "") != "":
+                filters[k] = gvg(k, "")
+        # If subset was required on a filtered view, remind it in the page
+        filtertxt = ""
+        if len(filters) > 0:
+            filtertxt += ",".join([k + "=" + v for k, v in filters.items() if v != ""])
+            g.headcenter = "<h4><a href='/prj/{0}?{2}'>{1}</a></h4>".format(target_prj.projid,
+                                                                            XSSEscape(target_prj.title),
+                                                                            "&".join([k + "=" + v for k, v in
+                                                                                      filters.items() if
+                                                                                      v != ""]))
+        return filtertxt
 
 
 def load_from_json(str, clazz):

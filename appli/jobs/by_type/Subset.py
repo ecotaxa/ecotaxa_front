@@ -4,11 +4,11 @@ import time
 
 from flask import render_template, g, redirect
 
-from appli import database, PrintInCharte, gvg, XSSEscape
+from appli import PrintInCharte, gvg, XSSEscape
+from appli.jobs.Job import Job
 from appli.project import sharedfilter
 from appli.tasks.importcommon import *
 from appli.utils import ApiClient
-from appli.jobs.Job import Job
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py.models import CreateProjectReq, SubsetReq, SubsetRsp, ProjectModel, JobModel
@@ -46,23 +46,6 @@ class SubsetJob(Job):
         html = "<h3>Extract subset</h3>"
         return render_template('jobs/subset_create.html', header=html,
                                form=formdata, filtertxt=filtertxt)
-
-    @classmethod
-    def _extract_filters_from_url(cls, filters, target_prj):
-        # Extract filter values, they are in the URL (get)
-        for k in sharedfilter.FilterList:
-            if gvg(k, "") != "":
-                filters[k] = gvg(k, "")
-        # If subset was required on a filtered view, remind it in the page
-        filtertxt = ""
-        if len(filters) > 0:
-            filtertxt += ",".join([k + "=" + v for k, v in filters.items() if v != ""])
-            g.headcenter = "<h4><a href='/prj/{0}?{2}'>{1}</a></h4>".format(target_prj.projid,
-                                                                            XSSEscape(target_prj.title),
-                                                                            "&".join([k + "=" + v for k, v in
-                                                                                      filters.items() if
-                                                                                      v != ""]))
-        return filtertxt
 
     @classmethod
     def create_or_update(cls):

@@ -86,7 +86,7 @@ class Taxonomy(db.Model):
     name = db.Column(VARCHAR(100), nullable=False)
     id_source = db.Column(VARCHAR(20))
     taxotype = db.Column(CHAR(1), nullable=False, server_default='P')  # P = Phylo , M = Morpho
-    display_name = db.Column(VARCHAR(200))
+    display_name = db.Column(VARCHAR(200))  # Unique name @see ecotaxoserver
     lastupdate_datetime = db.Column(TIMESTAMP(precision=0))
     id_instance = db.Column(INTEGER)
     taxostatus = db.Column(CHAR(1), nullable=False, server_default='A')

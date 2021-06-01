@@ -1,0 +1,148 @@
+{% macro checkboxinput(name, checkedvalue, value='',extra='') -%}
+  <input type="checkbox" name="{{ name }}" id="{{ name }}"
+         value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }} {{ extra|safe }}>
+{%- endmacro %}
+
+
+{% extends "layout.html" %}
+
+{% block body %}
+  <style>
+      #divheadinfo, form {
+          margin-left: 5px;
+      }
+
+      .DisabledCell {
+          background-color: #BBB;
+      }
+
+      #tbl td:nth-child(1) input + b {
+          cursor: pointer;
+      }
+  </style>
+  {% if filtertxt!="" %}
+    <span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters</span><BR>Filters :
+    {{ filtertxt }}
+  {% endif %}
+
+  <form class="form-horizontal" method="post" enctype=multipart/form-data>
+    <table class="table table-bordered table-condensed " style="width: 900px;margin-left: 10px" id="tbl">
+      <thead>
+      <tr>
+        <th>Export format</th>
+        <th>Options</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><input type="radio" name="what" value="TSV" {{ 'checked' if form.what=='TSV' }}> <b>General export</b><br>(configurable
+          export for general purposes)
+        </td>
+        <td>
+          {{ checkboxinput("objectdata","1",form.objectdata) }} Object Data (median,mean, x, y, ...)<br>
+          {{ checkboxinput("processdata","1",form.processdata) }} Process Data (software,version, ...)<br>
+          {{ checkboxinput("acqdata","1",form.acqdata) }} Acquisition Data (Resolution, ...)<br>
+          {{ checkboxinput("sampledata","1",form.sampledata) }} Sample Data (lat,long, date, ...)<br>
+          {{ checkboxinput("histodata","1",form.histodata) }} Historical Data <br>
+          {{ checkboxinput("commentsdata","1",form.commentsdata) }} Comments<br>
+          {{ checkboxinput("usecomasepa","1",form.usecomasepa) }} Use coma as decimal separator&nbsp;&nbsp;
+          {{ checkboxinput("formatdates","1",form.formatdates) }} Format dates and times using - and :<br>
+          {{ checkboxinput("internalids","1",form.internalids) }} Internal Ids (including taxonomic source Id)<br>
+          Split in multiple files by <select name="splitcsvby">
+          <option value="">NOT Active</option>
+          <option value="sample" {{ 'selected' if form.splitcsvby=='sample' }} >Sample</option>
+          <option value="taxo" {{ 'selected' if form.splitcsvby=='taxo' }} >Taxonomy (parent_child)</option>
+        </select><br>
+        </td>
+      </tr>
+      <tr>
+        <td><input type="radio" name="what" value="BAK" {{ 'checked' if form.what=='BAK' }}> <b>Backup export</b><br>(ready
+          to re-import datasets, possibly including images)
+        </td>
+        <td>
+          {{ checkboxinput("exportimages","A",form.exportimages) }} Export all image files
+        </td>
+      </tr>
+      <tr>
+        <td><input type="radio" name="what" value="DOI" {{ 'checked' if form.what=='DOI' }}> <b>D.O.I. export</b><br>(ready
+          to publish datasets)
+        </td>
+        <td>
+          Export image files :
+          <select name="exportimages">
+            <option value="">NO Images</option>
+            <option value="1" {{ 'selected' if form.exportimages=='1' }} >Only Rank 0 Image</option>
+            <option value="A" {{ 'selected' if form.exportimages=='A' }} >All images of each objects</option>
+          </select><br>
+          To archive a dataset in a public repository for future scientific exploitation (and possibly attach a DOI to
+          it), use this option.
+          <br>It will export all classifications in an easily readable, non-ambiguous format as well as all the metadata
+          associated with each object.
+          <br>If you choose to export images, they will be sorted taxonomically in subfolders. Beware, however, that
+          many online repositories may not accept to host the images because of their size.
+        </td>
+      </tr>
+      <tr>
+        <td><input type="radio" name="what" value="SUM" {{ 'checked' if form.what=='SUM' }} > <b>Summary</b></td>
+        <td>Count per category and <select name="sumsubtotal">
+          <option value="">Whole Project</option>
+          <option value="S">Sample</option>
+          <option value="A">Acquisition</option>
+        </select></td>
+      </tr>
+    </table>
+    </table>
+    <p>
+      In order to ease the transfer of large exported datasets, you can choose to export your files to the Ecotaxa FTP
+      that is utilized to import your data and images.
+      <br>Your exported files on FTP will be visible and available for other users, but automatically deleted after 1
+      month.
+      <br>Ask Ecotaxa managers ({{ g.LstUser|safe }}) if you do not have yet the permissions on this FTP.
+      <br> <input type="checkbox" name="putfileonftparea" value="Y"> Save export file on "Exported data" folder on the
+      FTP Area
+    </p>
+
+    <table>
+      <tr>
+
+        <td valign="top">
+          <br>
+          <input type="hidden" name="starttask" value="Y">
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-2">
+              <button type="submit" class="btn btn-primary">Start Task</button>
+            </div>
+          </div>
+
+        </td>
+      </tr>
+    </table>
+  </form>
+  <script>
+      $(document).ready(function () {
+          UpdateTblBG();
+      }); // Ready
+      $('#tbl input[type=radio]').click(UpdateTblBG);
+      $('#tbl').on('click', '.DisabledCell,input:disabled', function (e) {
+          e.preventDefault();
+          alert("Select the right Export format on the left column first");
+
+      });
+
+      function UpdateTblBG() {
+          $('#tbl tbody tr').each(function () {
+              var IsActive = ($(this).find('input[type=radio]:checked').length > 0);
+              if (IsActive) {
+                  $(this).find('td:nth-child(2),select').removeClass('DisabledCell');
+              } else {
+                  $(this).find('td:nth-child(2),select').addClass('DisabledCell');
+              }
+          });
+      }
+
+      $('#tbl td:nth-child(1) input+b').click(function () {
+          $(this).prev('input').prop('checked', true).click();
+      })
+
+  </script>
+{% endblock %}

@@ -154,31 +154,6 @@ def jobGetStatus(job_id: int):
                 extra_action = job_cls.final_action(job)
                 if extra_action:
                     rep['d']['ExtraAction'] = extra_action
-                # if "GetResultFile" in dir(task):
-                #     f = task.GetResultFile()
-                #     if f is None:
-                #         rep['d']['ExtraAction'] = "Error, final file not available"
-                #     elif f == '':
-                #         pass  # Parfois l'export ne retourne pas de fichier car envoi sur FTP
-                #     else:
-                #         rep['d']['ExtraAction'] = "<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' " \
-                #                                   "role='button'>Get file %s</a>" \
-                #                                   % (job_id, f, f)
-                #         if getattr(task.param, 'ProjectId', None):
-                #             rep['d']['ExtraAction'] += " <a href='/Task/Clean/%d?thengotoproject=Y' " \
-                #                                        "class='btn btn-primary btn-sm ' " \
-                #                                        "role='button'>FORCE Delete of %s and back to project " \
-                #                                        "(no danger for the original database) </a>" \
-                #                                        % (job_id, f)
-                #         else:
-                #             rep['d']['ExtraAction'] += " <a href='/Task/Clean/%d' class='btn btn-primary btn-sm ' " \
-                #                                        "role='button'>FORCE Delete of %s (no danger for the " \
-                #                                        "original database) </a>" \
-                #                                        % (job_id, f)
-                #         rep['d']['ExtraAction'] += "<br>Local users can also retrieve the file in the " \
-                #                                    "EcoTaxa folder temptask/task%06d (useful for huge files)" \
-                #                                    % (int(job.id))
-
             elif job.state == "E":
                 rep['d']['IsError'] = "Y"
             elif job.state == "P":
@@ -202,8 +177,17 @@ def jobForceRestart(job_id: int):
 def jobCleanup(job_id: int):
     AddTaskSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
-        job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
-        proj_id = job.params.get("prj_id")
+        try:
+            job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
+            proj_id = job.params.get("prj_id")
+            if proj_id is None and job.params.get("req") is not None:
+                proj_id = job.params["req"].get("project_id")
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                # Not logged in
+                return ""
+            elif ae.status == 404:
+                return PrintInCharte("This job doesn't exist anymore, perhaps it was automatically purged")
     with ApiClient(JobsApi, request) as api:
         api.erase_job_jobs_job_id_delete(job_id=job_id)
 
