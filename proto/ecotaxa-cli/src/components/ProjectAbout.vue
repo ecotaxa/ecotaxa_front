@@ -95,8 +95,8 @@
         </template>
         <template v-else>
           <td>
-            <strike
-              ><a :href="myUser.email">{{ myUser.name }}</a></strike
+            <a :href="myUser.email"
+              ><strike>{{ myUser.name }}</strike></a
             >
           </td>
           <td>

@@ -4,6 +4,9 @@ import { TaxonomyTreeApi } from "../../gen";
 import { AxiosResponse } from "axios";
 import { ProjectModel } from "gen/api";
 
+const _MAX_REQUEST_LENGTH: number = 2000; // in bytes
+const _SEPARATOR: string = " ";
+
 ////////////////////////////////////////////////////////////////////
 export function processProject(myProject: any): void {
   const api: ProjectsApi = new ProjectsApi();
@@ -231,38 +234,68 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
       let sampleIDlist: string = ""; // build list of sample IDs
       arr.forEach((sample) => {
-        sampleIDlist += sample.sampleid + " ";
+        sampleIDlist += sample.sampleid + _SEPARATOR;
       });
-      const api2: SamplesApi = new SamplesApi(); // create another API as the first one is currently used
-      api2
-        .sampleSetGetStatsSampleSetTaxoStatsGet(sampleIDlist)
-        .then((data) => {
-          // analyze the answer by going through the array items
-          for (let i: number = 0; i < data.data.length; i++) {
-            const myDataI = data.data[i];
-            // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
-            for (let j: number = 0; j < arr.length; j++) {
-              if (myDataI.sample_id === arr[j].sampleid) {
-                arr[j].nb_unclassified = myDataI.nb_unclassified;
-                arr[j].nb_validated = myDataI.nb_validated;
-                arr[j].nb_dubious = myDataI.nb_dubious;
-                arr[j].nb_predicted = myDataI.nb_predicted;
-              }
-            }
-          }
-          myProject.samplesWithObjectsAndStatus = arr;
-        })
-        .catch((reason) => {
-          processSamplesWithObjectsAndStatusKO(myProject, reason);
-        });
+      // Special case : if sampleIDlist is too long : for project 4421 or 1409 the problem exists
+      if (sampleIDlist.length > _MAX_REQUEST_LENGTH) {
+        processSamplesLongRequest(myProject, sampleIDlist, arr);
+      }
+      else {
+        processThroughSampleList(myProject, sampleIDlist, arr);
+      }
     })
     .catch((reason) => {
       processSamplesWithObjectsAndStatusKO(myProject, reason);
     });
 }
 
+function processThroughSampleList(myProject: any, samplelist: string, arr: sampleWithObjectsAndStatus[]) {
+  if (samplelist != "") {
+    const api2: SamplesApi = new SamplesApi(); // create another API as the first one is currently used
+    api2
+      .sampleSetGetStatsSampleSetTaxoStatsGet(samplelist)
+      .then((data) => {
+        // analyze the answer by going through the array items
+        for (let i: number = 0; i < data.data.length; i++) {
+          const myDataI = data.data[i];
+          // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
+          for (let j: number = 0; j < arr.length; j++) {
+            if (myDataI.sample_id === arr[j].sampleid) {
+              arr[j].nb_unclassified = myDataI.nb_unclassified;
+              arr[j].nb_validated = myDataI.nb_validated;
+              arr[j].nb_dubious = myDataI.nb_dubious;
+              arr[j].nb_predicted = myDataI.nb_predicted;
+            }
+          }
+        }
+        myProject.samplesWithObjectsAndStatus = arr;
+      })
+      .catch((reason) => {
+        processSamplesWithObjectsAndStatusKO(myProject, reason);
+      });
+  }
+}
+
+function processSamplesLongRequest(myProject: any, sampleIDlist: string, arr: sampleWithObjectsAndStatus[]) {
+  const nbPackets: number = Math.floor(sampleIDlist.length / _MAX_REQUEST_LENGTH) + 1;
+  let oldSmallStep: number = 0;
+  let smallStep: number = _MAX_REQUEST_LENGTH;
+  for (let curPacket: number = 0; curPacket < nbPackets; curPacket++) {
+    for (; smallStep < sampleIDlist.length; smallStep++)
+      if (sampleIDlist[smallStep] == _SEPARATOR)
+        break; // found the separator, in order to get a full sampleID
+
+    const subSampleIDlist: string = sampleIDlist.substring(oldSmallStep, smallStep);
+
+    processThroughSampleList(myProject, subSampleIDlist, arr);
+
+    oldSmallStep = smallStep + 1; // + 1 to swallow the separator
+    smallStep += _MAX_REQUEST_LENGTH;
+    if (smallStep > sampleIDlist.length) smallStep = sampleIDlist.length;
+  }
+}
+
 function processSamplesWithObjectsAndStatusKO(myProject: any, reason: any): void {
-  //console.trace();
   console.log(reason);
   alert(reason);
   myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
@@ -313,7 +346,7 @@ export function processTaxa(myProject: any): void {
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
       let taxonIDlist: string = ""; // build list of sample IDs
       arr.forEach((taxon) => {
-        taxonIDlist += taxon.id + " ";
+        taxonIDlist += taxon.id + _SEPARATOR;
       });
       const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
       api2
