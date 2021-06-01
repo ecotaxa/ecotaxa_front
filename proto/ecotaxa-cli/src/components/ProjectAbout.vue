@@ -89,7 +89,9 @@
           <td>
             <a :href="myUser.email">{{ myUser.name }}</a>
           </td>
-          <td>{{ myUser.actions }}</td>
+          <td>
+            <span class="badge">{{ myUser.actions }}</span>
+          </td>
           <td>{{ myUser.annot }}</td>
           <td>{{ myUser.status }}</td>
         </template>
@@ -100,7 +102,9 @@
             >
           </td>
           <td>
-            <strike>{{ myUser.actions }} </strike>
+            <span class="badge"
+              ><strike>{{ myUser.actions }}</strike></span
+            >
           </td>
           <td>
             <strike>{{ myUser.annot }} </strike>
@@ -116,7 +120,6 @@
     <button type="button" @click="exportSamples" class="btn btn-primary">
       Export in .tsv format
     </button>
-    <p></p>
     <table class="table table-bordered table-striped col-sm-6">
       <tr>
         <th>Sample name (ID)</th>
@@ -136,21 +139,20 @@
         <td>{{ mySample.nb_predicted }}</td>
       </tr>
     </table>
-    <h3>
-      Taxa
-      <button type="button" @click="exportTaxa" class="btn btn-primary">
-        Export in .tsv format
-      </button>
-    </h3>
+    <h3>Taxa</h3>
+    <button type="button" @click="exportTaxa" class="btn btn-primary">
+      Export in .tsv format
+    </button>
     <table class="table table-bordered table-striped col-sm-6">
       <tr>
-        <th>Unique Name (ID)</th>
+        <th>Unique Name</th>
         <th>Validated</th>
         <th>Dubious</th>
         <th>Predicted</th>
       </tr>
       <tr v-for="myTaxon in projectTaxa" :key="myTaxon.id">
-        <td>{{ myTaxon.display_name }}&emsp;({{ myTaxon.id }})</td>
+        <!--td>{{ myTaxon.display_name }}&emsp;({{ myTaxon.id }})</td-->
+        <td>{{ myTaxon.display_name }}</td>
         <td>{{ myTaxon.nb_validated }}</td>
         <td>{{ myTaxon.nb_dubious }}</td>
         <td>{{ myTaxon.nb_predicted }}</td>

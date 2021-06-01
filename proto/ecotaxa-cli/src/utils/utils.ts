@@ -250,7 +250,7 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
 }
 
 function processThroughSampleList(myProject: any, samplelist: string, arr: sampleWithObjectsAndStatus[]) {
-  if (samplelist != "") {
+  if (samplelist !== "") {
     const api2: SamplesApi = new SamplesApi(); // create another API as the first one is currently used
     api2
       .sampleSetGetStatsSampleSetTaxoStatsGet(samplelist)
@@ -282,7 +282,7 @@ function processSamplesLongRequest(myProject: any, sampleIDlist: string, arr: sa
   let smallStep: number = _MAX_REQUEST_LENGTH;
   for (let curPacket: number = 0; curPacket < nbPackets; curPacket++) {
     for (; smallStep < sampleIDlist.length; smallStep++)
-      if (sampleIDlist[smallStep] == _SEPARATOR)
+      if (sampleIDlist[smallStep] === _SEPARATOR)
         break; // found the separator, in order to get a full sampleID
 
     const subSampleIDlist: string = sampleIDlist.substring(oldSmallStep, smallStep);
