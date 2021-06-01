@@ -144,13 +144,13 @@
     </h3>
     <table class="table table-bordered table-striped col-sm-6">
       <tr>
-        <th>Taxon (ID)</th>
+        <th>Unique Name (ID)</th>
         <th>Validated</th>
         <th>Dubious</th>
         <th>Predicted</th>
       </tr>
       <tr v-for="myTaxon in projectTaxa" :key="myTaxon.id">
-        <td>{{ myTaxon.name }}&emsp;({{ myTaxon.id }})</td>
+        <td>{{ myTaxon.display_name }}&emsp;({{ myTaxon.id }})</td>
         <td>{{ myTaxon.nb_validated }}</td>
         <td>{{ myTaxon.nb_dubious }}</td>
         <td>{{ myTaxon.nb_predicted }}</td>

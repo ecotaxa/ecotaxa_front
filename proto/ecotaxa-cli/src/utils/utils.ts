@@ -271,14 +271,14 @@ function processSamplesWithObjectsAndStatusKO(myProject: any, reason: any): void
 /////////////////////////////////////////////////////////////////////
 class taxon {
   id: number;
-  name: string;
+  display_name: string;
   nb_unclassified: number | undefined;
   nb_validated: number | undefined;
   nb_dubious: number | undefined;
   nb_predicted: number | undefined;
   constructor(mytaxon: number) {
     this.id = mytaxon;
-    this.name = "";
+    this.display_name = "";
     this.nb_unclassified = 0;
     this.nb_validated = 0;
     this.nb_dubious = 0;
@@ -347,8 +347,8 @@ export function processTaxa(myProject: any): void {
               for (let i: number = 0; i < data.data.length; i++) {
                 const dataI = data.data[i];
                 for (let j: number = 0; j < arr.length; j++) {
-                  if (dataI.id === arr[j].id) {
-                    arr[j].name = dataI.name;
+                  if (dataI.id === arr[j].id) { // found !
+                    arr[j].display_name = dataI.display_name;
                   }
                 }
               }
