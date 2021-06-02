@@ -219,30 +219,33 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
   api
     .samplesSearchSamplesSearchGet(myProject.projectID, "*")
     .then((data) => {
-      const oneArray: Array<sampleWithObjectsAndStatus> = new Array<sampleWithObjectsAndStatus>();
+      myProject.samplesWithObjectsAndStatus = new Array<sampleWithObjectsAndStatus>();
+      // const oneArray: Array<sampleWithObjectsAndStatus> = new Array<sampleWithObjectsAndStatus>();
       const myData = data.data;
       for (let i: number = 0; i < myData.length; i++) {
         // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
         const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus(myData[i].sampleid, myData[i].orig_id);
-        oneArray.push(oneSample);
+        myProject.samplesWithObjectsAndStatus.push(oneSample);
       }
-      myProject.samplesWithObjectsAndStatus = oneArray;
-      return oneArray;
+      // myProject.samplesWithObjectsAndStatus = oneArray;
+      // return oneArray;
     })
-    .then((arr) => {
+    .then(() => {
       // arr is my array partially built with sampleid and orig_id fields
       // Now I'm going to add nb_Unclassified, nb_Validated, nb_Dubious, nb_Predicted
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
       let sampleIDlist: string = ""; // build list of sample IDs
-      arr.forEach((sample) => {
+      for (let i: number = 0; i < myProject.samplesWithObjectsAndStatus.length; i++)
+      {
+        const sample: sampleWithObjectsAndStatus = myProject.samplesWithObjectsAndStatus[i];
         sampleIDlist += sample.sampleid + _SEPARATOR;
-      });
+      }
       // Special case : if sampleIDlist is too long : for project 4421 or 1409 the problem exists
       if (sampleIDlist.length > _MAX_REQUEST_LENGTH) {
-        processSamplesLongRequest(myProject, sampleIDlist, arr);
+        processSamplesLongRequest(myProject, sampleIDlist);
       }
       else {
-        processThroughSampleList(myProject, sampleIDlist, arr);
+        processThroughSampleList(myProject, sampleIDlist);
       }
     })
     .catch((reason) => {
@@ -250,7 +253,7 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
     });
 }
 
-function processThroughSampleList(myProject: any, samplelist: string, arr: sampleWithObjectsAndStatus[]) {
+function processThroughSampleList(myProject: any, samplelist: string) {
   if (samplelist !== "") {
     const api2: SamplesApi = new SamplesApi(); // create another API as the first one is currently used
     api2
@@ -260,16 +263,15 @@ function processThroughSampleList(myProject: any, samplelist: string, arr: sampl
         for (let i: number = 0; i < data.data.length; i++) {
           const myDataI = data.data[i];
           // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
-          for (let j: number = 0; j < arr.length; j++) {
-            if (myDataI.sample_id === arr[j].sampleid) {
-              arr[j].nb_unclassified = myDataI.nb_unclassified;
-              arr[j].nb_validated = myDataI.nb_validated;
-              arr[j].nb_dubious = myDataI.nb_dubious;
-              arr[j].nb_predicted = myDataI.nb_predicted;
+          for (let j: number = 0; j < myProject.samplesWithObjectsAndStatus.length; j++) {
+            if (myDataI.sample_id === myProject.samplesWithObjectsAndStatus[j].sampleid) {
+              myProject.samplesWithObjectsAndStatus[j].nb_unclassified = myDataI.nb_unclassified;
+              myProject.samplesWithObjectsAndStatus[j].nb_validated = myDataI.nb_validated;
+              myProject.samplesWithObjectsAndStatus[j].nb_dubious = myDataI.nb_dubious;
+              myProject.samplesWithObjectsAndStatus[j].nb_predicted = myDataI.nb_predicted;
             }
           }
         }
-       
       })
       .catch((reason) => {
         processSamplesWithObjectsAndStatusKO(myProject, reason);
@@ -277,7 +279,7 @@ function processThroughSampleList(myProject: any, samplelist: string, arr: sampl
   }
 }
 
-function processSamplesLongRequest(myProject: any, sampleIDlist: string, arr: sampleWithObjectsAndStatus[]) {
+function processSamplesLongRequest(myProject: any, sampleIDlist: string) {
   const nbPackets: number = Math.floor(sampleIDlist.length / _MAX_REQUEST_LENGTH) + 1;
   let oldSmallStep: number = 0;
   let smallStep: number = _MAX_REQUEST_LENGTH;
@@ -288,7 +290,7 @@ function processSamplesLongRequest(myProject: any, sampleIDlist: string, arr: sa
 
     const subSampleIDlist: string = sampleIDlist.substring(oldSmallStep, smallStep);
 
-    processThroughSampleList(myProject, subSampleIDlist, arr);
+    processThroughSampleList(myProject, subSampleIDlist);
 
     oldSmallStep = smallStep + 1; // + 1 to swallow the separator
     smallStep += _MAX_REQUEST_LENGTH;
