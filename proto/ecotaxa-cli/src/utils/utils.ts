@@ -226,6 +226,7 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
         const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus(myData[i].sampleid, myData[i].orig_id);
         oneArray.push(oneSample);
       }
+      myProject.samplesWithObjectsAndStatus = oneArray;
       return oneArray;
     })
     .then((arr) => {
@@ -268,7 +269,7 @@ function processThroughSampleList(myProject: any, samplelist: string, arr: sampl
             }
           }
         }
-        myProject.samplesWithObjectsAndStatus = arr;
+       
       })
       .catch((reason) => {
         processSamplesWithObjectsAndStatusKO(myProject, reason);
