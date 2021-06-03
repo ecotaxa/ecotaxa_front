@@ -98,8 +98,8 @@ Donc il faut vraiment le voir comme un flag à un temps t.
 enum userStatus { // from lower to higher "rights"
   _VIEWER = "Viewer",
   _ANNOTATOR = "Annotator",
-  _MANAGER = "Manager"
-};
+  _MANAGER = "Manager",
+}
 
 class projUser {
   status: userStatus;
@@ -197,8 +197,8 @@ function projectUsersKO(myProject: any, reason: any): void {
 // 3) From JO : "Pour les samples et taxa, il faudrait afficher le nom (orig_id et name) plutôt que l'identifiant numérique"
 // ==> sampleQuerySampleSampleIdGet : donne l'orig_id === le name
 class sampleWithObjectsAndStatus {
-  sampleid: number | undefined;
   orig_id: string;
+  sampleid: number | undefined;
   nb_unclassified: number | undefined;
   nb_validated: number | undefined;
   nb_dubious: number | undefined;
@@ -243,8 +243,7 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
       // Special case : if sampleIDlist is too long : for project 4421 or 1409 the problem exists
       if (sampleIDlist.length > _MAX_REQUEST_LENGTH) {
         processSamplesLongRequest(myProject, sampleIDlist);
-      }
-      else {
+      } else {
         processThroughSampleList(myProject, sampleIDlist);
       }
     })
@@ -307,15 +306,15 @@ function processSamplesWithObjectsAndStatusKO(myProject: any, reason: any): void
 /////////////////////////////////////////////////////////////////////
 class taxon {
   id: number;
-  display_name: string;
-  nb_unclassified: number | undefined;
+  display_name: string;  
+//  nb_unclassified: number | undefined;
   nb_validated: number | undefined;
   nb_dubious: number | undefined;
   nb_predicted: number | undefined;
   constructor(mytaxon: number) {
     this.id = mytaxon;
     this.display_name = "";
-    this.nb_unclassified = 0;
+    //this.nb_unclassified = 0;
     this.nb_validated = 0;
     this.nb_dubious = 0;
     this.nb_predicted = 0;
@@ -358,11 +357,11 @@ export function processTaxa(myProject: any): void {
           // analyze the answer by going through the array items
           for (let i: number = 0; i < data.data.length; i++) {
             const dataI = data.data[i];
-            // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)            
+            // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
             for (let j: number = 0; j < arr.length; j++) {
               if (dataI !== undefined && dataI.used_taxa !== undefined) {
                 if (dataI.used_taxa[0] === arr[j].id) {
-                  arr[j].nb_unclassified = dataI.nb_unclassified; // TODO : probably useless field
+                  //arr[j].nb_unclassified = dataI.nb_unclassified; // TODO : probably useless field
                   arr[j].nb_validated = dataI.nb_validated;
                   arr[j].nb_dubious = dataI.nb_dubious;
                   arr[j].nb_predicted = dataI.nb_predicted;

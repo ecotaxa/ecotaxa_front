@@ -117,7 +117,8 @@
     </table>
     <br />
     <h3>Samples with objects and status</h3>
-    <button type="button" @click="exportSamples" class="btn btn-primary">
+    <button
+      type="button" @click="exportSamplesToTSVFile" class="btn btn-primary">
       Export in .tsv format
     </button>
     <table class="table table-bordered table-striped col-sm-6">
@@ -140,7 +141,7 @@
       </tr>
     </table>
     <h3>Taxa</h3>
-    <button type="button" @click="exportTaxa" class="btn btn-primary">
+    <button type="button" @click="exportTaxaToTSVFile" class="btn btn-primary">
       Export in .tsv format
     </button>
     <table class="table table-bordered table-striped col-sm-6">
@@ -207,6 +208,7 @@ import { Options, Vue } from "vue-class-component";
 // import 'bootst rap';
 import { Dropdown } from "bootstrap";
 import * as utils from "../utils/utils";
+import {exportDataToTSVFile} from "../utils/exportDataToTSVFile";
 
 //export default defineComponent({
 @Options({
@@ -249,15 +251,11 @@ import * as utils from "../utils/utils";
     utils.processTaxa(this);
   },
   methods: {
-    exportSamples() {
-      // 3 possible solutions to export Samples with objects and status
-      // https://stackoverflow.com/questions/48611671/vue-js-write-json-object-to-local-file
-      // We will use the "blob" solution, with a plugging already written, see :
-      // https://www.iamrohit.in/vuejs-component-export-json-data-csv-file/
-      alert("Not yet implemented !");
+    exportTaxaToTSVFile() : void {
+      exportDataToTSVFile(this.projectTaxa, "Taxa", this.projectID);
     },
-    exportTaxa() {
-      alert("Not yet implemented !");
+    exportSamplesToTSVFile(): void {    
+      exportDataToTSVFile(this.samplesWithObjectsAndStatus, "Samples", this.projectID);
     },
   },
   computed: {
@@ -270,7 +268,6 @@ import * as utils from "../utils/utils";
       } else {
         findSlash = window.location.pathname.indexOf("/", findDoubleSlash + 2);
       }
-
       let mySub: string = "";
       if (findSlash != -1)
         mySub = window.location.pathname.substring(0, findSlash);
@@ -280,6 +277,7 @@ import * as utils from "../utils/utils";
     },
   },
 })
+
 export default class ProjectAbout extends Vue {
   projectID!: string;
   urlLink!: string;
