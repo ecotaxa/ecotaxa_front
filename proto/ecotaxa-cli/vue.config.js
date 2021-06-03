@@ -16,14 +16,11 @@ module.exports = {
         changeOrigin: true,
         onProxyReq: (proxyReq, req) => {
           // Remove session cookies which are the session b/w client and dev web server
-          //if ("cookie" in req.headers) {
+          if ("cookie" in req.headers) {
             proxyReq.removeHeader("cookie");
-            const session_cookie =
-              "eyJfZnJlc2giOmZhbHNlLCJ1c2VyX2lkIjoiMTE2NSJ9.YK9o1w.7chqkCsts-HRDBv87g-jLmp0uA8";
-            proxyReq.setHeader("Authorization", "Bearer " + session_cookie);
-          //}
-        }
+          }
+        },
       },
     },
   },
-}
+};
