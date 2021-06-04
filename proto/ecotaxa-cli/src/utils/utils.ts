@@ -220,18 +220,14 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
     .samplesSearchSamplesSearchGet(myProject.projectID, "*")
     .then((data) => {
       myProject.samplesWithObjectsAndStatus = new Array<sampleWithObjectsAndStatus>();
-      // const oneArray: Array<sampleWithObjectsAndStatus> = new Array<sampleWithObjectsAndStatus>();
       const myData = data.data;
       for (let i: number = 0; i < myData.length; i++) {
         // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
         const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus(myData[i].sampleid, myData[i].orig_id);
         myProject.samplesWithObjectsAndStatus.push(oneSample);
       }
-      // myProject.samplesWithObjectsAndStatus = oneArray;
-      // return oneArray;
     })
     .then(() => {
-      // arr is my array partially built with sampleid and orig_id fields
       // Now I'm going to add nb_Unclassified, nb_Validated, nb_Dubious, nb_Predicted
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
       let sampleIDlist: string = ""; // build list of sample IDs

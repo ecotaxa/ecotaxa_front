@@ -28,7 +28,7 @@ function ConvertToTSV(objArray: any): string {
   for (let i:number = 0; i < objArray.length; i++) {
     let line:string = "";
     for (const index in objArray[i]) {
-      if (line != "") line += "\t"; // would be a "," instead of tabulation for a .csv
+      if (line !== "") line += "\t"; // would be a "," instead of tabulation for a .csv
       line += objArray[i][index];
     }
     str += line + "\r\n";
