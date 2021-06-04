@@ -225,7 +225,7 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
         // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
         const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus(myData[i].sampleid, myData[i].orig_id);
         myProject.samplesWithObjectsAndStatus.push(oneSample);
-      }
+      } 
     })
     .then(() => {
       // Now I'm going to add nb_Unclassified, nb_Validated, nb_Dubious, nb_Predicted

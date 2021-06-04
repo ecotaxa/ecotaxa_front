@@ -1,0 +1,84 @@
+// Useful 
+// https://sass-lang.com/guide
+// http://ipssidm.com/raisons-dabandonner-css-classique-sass/
+
+#app {
+  font-family: sans-serif, Avenir, Helvetica, Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
+}
+
+h3 {
+    margin: 40px 0 0;
+  }
+ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  li {
+    display: inline-block;
+    margin: 0 10px;
+  }
+  a {
+    color: #42b983;
+  }
+
+.badge {
+    min-width: 28px;
+    border-radius: 10px;
+    background-color: grey;
+    color: white;
+    }
+
+
+$free_cols_cell-width: 200px;
+
+.list-group {
+      flex-wrap: wrap;
+}
+
+@mixin free-cols($my-back-color : lightgrey) {
+  background-color: $my-back-color;
+  min-width: $free_cols_cell-width;
+}
+
+.sampleFields
+{
+  @include free-cols;
+}
+
+.acquAndProcFields
+{
+  @include free-cols($my-back-color: lightblue);
+}
+
+.objectFields {
+  @include free-cols($my-back-color: rgb(180, 233, 180));  
+}
+
+/*  
+
+$free_cols_cell-width: 200px;
+$free-cols-background-color : lightgrey;
+    
+.list-group-item {
+    background-color: $free-cols-background-color;
+    min-width: $free_cols_cell-width;
+  }
+
+*/  

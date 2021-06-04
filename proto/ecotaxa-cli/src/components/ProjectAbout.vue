@@ -1,204 +1,216 @@
 <template>
-  <a href="/">
-    <img height="30" src="../assets/logo_ecotaxa_25.png" style="margin: 10px 0"
-  /></a>
-  <div><br />This is About Project for {{ to_show }}</div>
-  <div id="ecotaxa" class="jumbotron text-left">
-    <br />
-    <h1>Basic Information about project {{ projectID }}</h1>
-    <br />
-    <p>
-      <a v-bind:href="urlLink"> Details about Project {{ projectID }} </a>
-    </p>
-  </div>
+  <body class="body">
+    <a href="/">
+      <img
+        height="30"
+        src="../assets/logo_ecotaxa_25.png"
+        style="margin: 10px 0"
+    /></a>
+    <div><br />This is About Project for {{ to_show }}</div>
+    <div class="jumbotron text-left">
+      <br />
+      <h1>Basic Information about project {{ projectID }}</h1>
+      <br />
+      <p>
+        <a v-bind:href="urlLink"> Details about Project {{ projectID }} </a>
+      </p>
+    </div>
 
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-4">
-        <h3>Title</h3>
-        <p>{{ projectTitle }}</p>
+    <div id="#app" class="container">
+      <div class="row">
+        <div class="col-sm-4">
+          <h3>Title</h3>
+          <p>{{ projectTitle }}</p>
+        </div>
+        <div class="col-sm-4">
+          <h3>Description</h3>
+          <p>{{ projectDescription }}</p>
+        </div>
+        <div class="col-sm-4">
+          <h3>Comments</h3>
+          <p>{{ projectComment }}</p>
+        </div>
+        <div class="col-sm-4">
+          <h3>License</h3>
+          <p>{{ projectLicense }}</p>
+        </div>
+        <div class="col-sm-4">
+          <h3>SCN Network</h3>
+          <p>{{ projectSCNnetwork }}</p>
+        </div>
+        <div class="col-sm-4">
+          <h3>Contact</h3>
+          <p>
+            <a :href="contactMail">{{ contactName }}</a>
+          </p>
+        </div>
       </div>
-      <div class="col-sm-4">
-        <h3>Description</h3>
-        <p>{{ projectDescription }}</p>
-      </div>
-      <div class="col-sm-4">
-        <h3>Comments</h3>
-        <p>{{ projectComment }}</p>
-      </div>
-      <div class="col-sm-4">
-        <h3>License</h3>
-        <p>{{ projectLicense }}</p>
-      </div>
-      <div class="col-sm-4">
-        <h3>SCN Network</h3>
-        <p>{{ projectSCNnetwork }}</p>
-      </div>
-      <div class="col-sm-4">
-        <h3>Contact</h3>
-        <p>
-          <a :href="contactMail">{{ contactName }}</a>
-        </p>
-      </div>
-    </div>
-    <h3>Sample fields</h3>
-    <br />
-    <ul class="list-group list-group-horizontal">
-      <li
-        class="list-group-item"
-        v-for="sample in sampleArray"
-        :key="sample.index"
-      >
-        {{ sample }}
-      </li>
-    </ul>
-    <h3>Acquisition and Processing fields</h3>
-    <br />
-    <ul class="list-group list-group-horizontal">
-      <li
-        class="list-group-item"
-        v-for="myAcquOrProc in acquAndProcArray"
-        :key="myAcquOrProc.index"
-      >
-        {{ myAcquOrProc }}
-      </li>
-    </ul>
-    <h3>Object fields</h3>
-    <br />
-    <ul class="list-group list-group-horizontal">
-      <li
-        class="list-group-item"
-        v-for="myObjectField in objectArray"
-        :key="myObjectField.index"
-      >
-        {{ myObjectField }}
-      </li>
-    </ul>
-    <br />
-    <br />
-    <h2>Project Users</h2>
-    <table class="table table-bordered table-striped col-sm-6">
-      <tr>
-        <th>Name</th>
-        <th>Number of annotations</th>
-        <th>Last annotation date</th>
-        <th>User Status</th>
-      </tr>
-      <tr v-for="myUser in projectUsers" :key="myUser.id">
-        <template v-if="myUser.active === true">
-          <td>
-            <a :href="myUser.email">{{ myUser.name }}</a>
-          </td>
-          <td>
-            <span class="badge">{{ myUser.actions }}</span>
-          </td>
-          <td>{{ myUser.annot }}</td>
-          <td>{{ myUser.status }}</td>
-        </template>
-        <template v-else>
-          <td>
-            <a :href="myUser.email"
-              ><strike>{{ myUser.name }}</strike></a
-            >
-          </td>
-          <td>
-            <span class="badge"
-              ><strike>{{ myUser.actions }}</strike></span
-            >
-          </td>
-          <td>
-            <strike>{{ myUser.annot }} </strike>
-          </td>
-          <td>
-            <strike>{{ myUser.status }} </strike>
-          </td>
-        </template>
-      </tr>
-    </table>
-    <br />
-    <h3>Samples with objects and status</h3>
-    <button
-      type="button" @click="exportSamplesToTSVFile" class="btn btn-primary">
-      Export in .tsv format
-    </button>
-    <table class="table table-bordered table-striped col-sm-6">
-      <tr>
-        <th>Sample name (ID)</th>
-        <th>Unclassified</th>
-        <th>Validated</th>
-        <th>Dubious</th>
-        <th>Predicted</th>
-      </tr>
-      <tr
-        v-for="mySample in samplesWithObjectsAndStatus"
-        :key="mySample.sampleid"
-      >
-        <td>{{ mySample.orig_id }}&emsp;({{ mySample.sampleid }})</td>
-        <td>{{ mySample.nb_unclassified }}</td>
-        <td>{{ mySample.nb_validated }}</td>
-        <td>{{ mySample.nb_dubious }}</td>
-        <td>{{ mySample.nb_predicted }}</td>
-      </tr>
-    </table>
-    <h3>Taxa</h3>
-    <button type="button" @click="exportTaxaToTSVFile" class="btn btn-primary">
-      Export in .tsv format
-    </button>
-    <table class="table table-bordered table-striped col-sm-6">
-      <tr>
-        <th>Unique Name</th>
-        <th>Validated</th>
-        <th>Dubious</th>
-        <th>Predicted</th>
-      </tr>
-      <tr v-for="myTaxon in projectTaxa" :key="myTaxon.id">
-        <!--td>{{ myTaxon.display_name }}&emsp;({{ myTaxon.id }})</td-->
-        <td>{{ myTaxon.display_name }}</td>
-        <td>{{ myTaxon.nb_validated }}</td>
-        <td>{{ myTaxon.nb_dubious }}</td>
-        <td>{{ myTaxon.nb_predicted }}</td>
-      </tr>
-    </table>
-    <!-- I want to keep this important example here and hidden -->
-    <div class="btn-group" style="visibility: hidden">
-      <button
-        ref="vanillaDD"
-        class="btn btn-secondary dropdown-toggle"
-        type="button"
-        id="dropdownMenuButton1"
-        data-toggle="dropdown"
-        aria-expanded="false"
-      >
-        Dropdown button
-      </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-        <a class="dropdown-item" href="#">Action</a>
-        <a class="dropdown-item" href="#">Another action</a>
-        <a class="dropdown-item" href="#">Something else here</a>
-      </div>
-    </div>
-    <!-- I want to keep this important example here and hidden -->
-    <div class="dropdown" style="visibility: hidden">
+      <h3>Sample fields</h3>
+      <br />
+      <ul class="list-group list-group-horizontal">
+        <li
+          class="sampleFields list-group-item"
+          v-for="sample in sampleArray"
+          :key="sample.index"
+        >
+          {{ sample }}
+        </li>
+      </ul>
+      <h3>Acquisition and Processing fields</h3>
+      <br />
+      <ul class="list-group list-group-horizontal">
+        <li
+          class="acquAndProcFields list-group-item"
+          v-for="myAcquOrProc in acquAndProcArray"
+          :key="myAcquOrProc.index"
+        >
+          {{ myAcquOrProc }}
+        </li>
+      </ul>
+      <h3>Object fields</h3>
+      <br />
+      <ul class="list-group list-group-horizontal">
+        <li
+          class="objectFields list-group-item"
+          v-for="myObjectField in objectArray"
+          :key="myObjectField.index"
+        >
+          {{ myObjectField }}
+        </li>
+      </ul>
+      <br />
+      <br />
+      <h2>Project Users</h2>
+      <table class="table table-bordered table-striped col-sm-6">
+        <tr>
+          <th>Name</th>
+          <th>Number of annotations</th>
+          <th>Last annotation date</th>
+          <th>User Status</th>
+        </tr>
+        <tr v-for="myUser in projectUsers" :key="myUser.id">
+          <template v-if="myUser.active === true">
+            <td>
+              <a :href="myUser.email">{{ myUser.name }}</a>
+            </td>
+            <td>
+              <span class="badge">{{ myUser.actions }}</span>
+            </td>
+            <td>{{ myUser.annot }}</td>
+            <td>{{ myUser.status }}</td>
+          </template>
+          <template v-else>
+            <td>
+              <a :href="myUser.email"
+                ><strike>{{ myUser.name }}</strike></a
+              >
+            </td>
+            <td>
+              <span class="badge"
+                ><strike>{{ myUser.actions }}</strike></span
+              >
+            </td>
+            <td>
+              <strike>{{ myUser.annot }} </strike>
+            </td>
+            <td>
+              <strike>{{ myUser.status }} </strike>
+            </td>
+          </template>
+        </tr>
+      </table>
+      <br />
+      <h3>Samples with objects and status</h3>
       <button
         type="button"
-        class="btn btn-primary dropdown-toggle"
-        data-bs-target="#people"
-        data-bs-toggle="dropdown"
+        @click="exportSamplesToTSVFile"
+        class="btn btn-primary"
       >
-        View List
+        Export in .tsv format
       </button>
-      <div class="dropdown-menu" id="people">
-        <a
-          class="dropdown-item"
-          v-for="myProjectManager in projectManagers"
-          :key="myProjectManager.name"
-          :href="myProjectManager.email"
+      <table class="table table-bordered table-striped col-sm-6">
+        <tr>
+          <th>Sample name (ID)</th>
+          <th>Unclassified</th>
+          <th>Validated</th>
+          <th>Dubious</th>
+          <th>Predicted</th>
+        </tr>
+        <tr
+          v-for="mySample in samplesWithObjectsAndStatus"
+          :key="mySample.sampleid"
         >
-          {{ myProjectManager.name }}</a
+          <td>{{ mySample.orig_id }}&emsp;({{ mySample.sampleid }})</td>
+          <td>{{ mySample.nb_unclassified }}</td>
+          <td>{{ mySample.nb_validated }}</td>
+          <td>{{ mySample.nb_dubious }}</td>
+          <td>{{ mySample.nb_predicted }}</td>
+        </tr>
+      </table>
+      <h3>Taxa</h3>
+      <button
+        type="button"
+        @click="exportTaxaToTSVFile"
+        class="btn btn-primary"
+      >
+        Export in .tsv format
+      </button>
+      <table class="table table-bordered table-striped col-sm-6">
+        <tr>
+          <th>Unique Name</th>
+          <th>Validated</th>
+          <th>Dubious</th>
+          <th>Predicted</th>
+        </tr>
+        <tr v-for="myTaxon in projectTaxa" :key="myTaxon.id">
+          <!--td>{{ myTaxon.display_name }}&emsp;({{ myTaxon.id }})</td-->
+          <td>{{ myTaxon.display_name }}</td>
+          <td>{{ myTaxon.nb_validated }}</td>
+          <td>{{ myTaxon.nb_dubious }}</td>
+          <td>{{ myTaxon.nb_predicted }}</td>
+        </tr>
+      </table>
+      <!-- I want to keep this important example here and hidden -->
+      <div class="btn-group" style="visibility: hidden">
+        <button
+          ref="vanillaDD"
+          class="btn btn-secondary dropdown-toggle"
+          type="button"
+          id="dropdownMenuButton1"
+          data-toggle="dropdown"
+          aria-expanded="false"
         >
+          Dropdown button
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+          <a class="dropdown-item" href="#">Action</a>
+          <a class="dropdown-item" href="#">Another action</a>
+          <a class="dropdown-item" href="#">Something else here</a>
+        </div>
+      </div>
+      <!-- I want to keep this important example here and hidden -->
+      <div class="dropdown" style="visibility: hidden">
+        <button
+          type="button"
+          class="btn btn-primary dropdown-toggle"
+          data-bs-target="#people"
+          data-bs-toggle="dropdown"
+        >
+          View List
+        </button>
+        <div class="dropdown-menu" id="people">
+          <a
+            class="dropdown-item"
+            v-for="myProjectManager in projectManagers"
+            :key="myProjectManager.name"
+            :href="myProjectManager.email"
+          >
+            {{ myProjectManager.name }}</a
+          >
+        </div>
       </div>
     </div>
-  </div>
+  </body>
 </template>
 
 <script lang="ts">
@@ -208,7 +220,7 @@ import { Options, Vue } from "vue-class-component";
 // import 'bootst rap';
 import { Dropdown } from "bootstrap";
 import * as utils from "../utils/utils";
-import {exportDataToTSVFile} from "../utils/exportDataToTSVFile";
+import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
 
 //export default defineComponent({
 @Options({
@@ -251,11 +263,15 @@ import {exportDataToTSVFile} from "../utils/exportDataToTSVFile";
     utils.processTaxa(this);
   },
   methods: {
-    exportTaxaToTSVFile() : void {
+    exportTaxaToTSVFile(): void {
       exportDataToTSVFile(this.projectTaxa, "Taxa", this.projectID);
     },
-    exportSamplesToTSVFile(): void {    
-      exportDataToTSVFile(this.samplesWithObjectsAndStatus, "Samples", this.projectID);
+    exportSamplesToTSVFile(): void {
+      exportDataToTSVFile(
+        this.samplesWithObjectsAndStatus,
+        "Samples",
+        this.projectID
+      );
     },
   },
   computed: {
@@ -277,49 +293,23 @@ import {exportDataToTSVFile} from "../utils/exportDataToTSVFile";
     },
   },
 })
-
 export default class ProjectAbout extends Vue {
   projectID!: string;
   urlLink!: string;
   to_show = this.projectID;
 }
-/*
-  display:flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  max-width: 10000px;
-*/
 </script>
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 
+<!-- TODO : I need this style scoped here, otherwise my badges are strange-->
 <style scoped>
-.list-group {
-  flex-wrap: wrap;
-}
-
-.list-group-item {
-  min-width: 200px;
-}
-
-.badge {
-  min-width: 28px;
-  border-radius: 10px;
-  background-color: grey;
-  color: white;
-}
-
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+  .badge {
+    min-width: 28px;
+    border-radius: 10px;
+    background-color: grey;
+    color: white;
+  }
 </style>
+
+
+
+
