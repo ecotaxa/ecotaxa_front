@@ -6,9 +6,7 @@
         src="../assets/logo_ecotaxa_25.png"
         style="margin: 10px 0"
     /></a>
-    <div><br />This is About Project for {{ to_show }}</div>
-    <div class="jumbotron text-left">
-      <br />
+    <div class="EcoTaxaFocusIntro">
       <h1>Basic Information about project {{ projectID }}</h1>
       <br />
       <p>
@@ -48,9 +46,9 @@
       <h3>Sample fields</h3>
       <h6 v-if="sampleArray.length == 0">(none)</h6>
       <br />
-      <ul class="list-group list-group-horizontal">
+      <ul class="EcoTaxaListGroupHorizontal">
         <li
-          class="sampleFields list-group-item"
+          class="EcoTaxaSampleFields"
           v-for="sample in sampleArray"
           :key="sample.index"
         >
@@ -60,9 +58,9 @@
       <h3>Acquisition and Processing fields</h3>
       <h6 v-if="acquAndProcArray.length == 0">(none)</h6>      
       <br />
-      <ul class="list-group list-group-horizontal">
+      <ul class="EcoTaxaListGroupHorizontal">
         <li
-          class="acquAndProcFields list-group-item"
+          class="EcoTaxaAcquAndProcFields"
           v-for="myAcquOrProc in acquAndProcArray"
           :key="myAcquOrProc.index"
         >
@@ -72,9 +70,9 @@
       <h3>Object fields</h3>
       <h6 v-if="objectArray.length == 0">(none)</h6>            
       <br />
-      <ul class="list-group list-group-horizontal">
+      <ul class="EcoTaxaListGroupHorizontal">
         <li
-          class="objectFields list-group-item"
+          class="EcoTaxaObjectFields"
           v-for="myObjectField in objectArray"
           :key="myObjectField.index"
         >
@@ -84,7 +82,7 @@
       <br />
       <br />
       <h2>Project Users</h2>
-      <table class="table table-bordered table-striped col-sm-6">
+      <table class="EcoTaxaTable">
         <tr>
           <th>Name</th>
           <th>Number of annotations</th>
@@ -127,11 +125,11 @@
       <button
         type="button"
         @click="exportSamplesToTSVFile"
-        class="btn btn-primary"
+        class="EcoTaxaExportButtonToTSV"
       >
         Export in .tsv format
       </button>
-      <table class="table table-bordered table-striped col-sm-6">
+      <table class="EcoTaxaTable">
         <tr>
           <th>Sample name (ID)</th>
           <th>Unclassified</th>
@@ -154,11 +152,11 @@
       <button
         type="button"
         @click="exportTaxaToTSVFile"
-        class="btn btn-primary"
+        class="EcoTaxaExportButtonToTSV"
       >
         Export in .tsv format
       </button>
-      <table class="table table-bordered table-striped col-sm-6">
+      <table class="EcoTaxaTable">
         <tr>
           <th>Unique Name</th>
           <th>Validated</th>
@@ -304,6 +302,7 @@ export default class ProjectAbout extends Vue {
 </script>
 
 <!-- TODO : I need this style scoped here, otherwise my badges are strange-->
+<!-- Why? -->
 <style scoped>
 .badge {
   min-width: 28px;

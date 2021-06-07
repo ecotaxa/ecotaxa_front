@@ -5,7 +5,8 @@
 // https://www.w3schools.com/sass/
 
 #app {
-  font-family: sans-serif, Avenir, Helvetica, Arial;
+  //@extend .EcoTaxaFocusIntro;  
+  //font-family: sans-serif, Avenir, Helvetica, Arial;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -26,61 +27,76 @@
 }
 
 h3 {
-    margin: 40px 0 0;
-  }
+  margin: 40px 0 0;
+}
+
 ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  li {
-    display: inline-block;
-    margin: 0 10px;
-  }
-  a {
-    color: #42b983;
-  }
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+a {
+  color: #42b983;
+}
 
 .badge {
-    min-width: 28px;
-    border-radius: 10px;
-    background-color: grey;
-    color: white;
-    }
+  min-width: 28px;
+  border-radius: 10px;
+  background-color: grey;
+  color: white;
+}
 
 
 $free_cols_cell-width: 200px;
 
 .list-group {
-      flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
 @mixin free-cols($my-back-color : lightgrey) {
   background-color: $my-back-color;
   min-width: $free_cols_cell-width;
+  @extend .list-group-item;
 }
 
-.sampleFields
-{
-  @include free-cols;
+.EcoTaxaSampleFields {
+  @include free-cols($my-back-color:rgb(255, 218, 223));
 }
 
-.acquAndProcFields
-{
+.EcoTaxaAcquAndProcFields {
   @include free-cols($my-back-color: lightblue);
 }
 
-.objectFields {
-  @include free-cols($my-back-color: rgb(180, 233, 180));  
+.EcoTaxaObjectFields {
+  @include free-cols($my-back-color: rgb(180, 233, 180));
 }
 
-/*  
+.EcoTaxaExportButtonToTSV {
+  @extend .btn;
+  @extend .btn-primary;
+}
 
-$free_cols_cell-width: 200px;
-$free-cols-background-color : lightgrey;
-    
-.list-group-item {
-    background-color: $free-cols-background-color;
-    min-width: $free_cols_cell-width;
-  }
+.EcoTaxaTable {
+  @extend .table;
+  @extend .table-bordered;
+  @extend .table-striped;
+  @extend .col-sm-6;
+}
 
-*/  
+.EcoTaxaListGroupHorizontal {
+  @extend .list-group;
+  @extend .list-group-horizontal;
+}
+
+.EcoTaxaFocusIntro {
+  @extend .bg-light;
+  @extend .p-5;
+  @extend .rounded-lg !optional;
+  @extend .m-3;
+  @extend .text-left !optional;
+}
