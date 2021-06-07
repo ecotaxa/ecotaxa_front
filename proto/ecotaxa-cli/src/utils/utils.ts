@@ -121,7 +121,6 @@ class projUser {
 export { projUser };
 
 function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
-  //const oneArray: Array<projUser> = new Array<projUser>();
   myProject.projectUsers = new Array<projUser>();
   // Also add the managers in oneArray, because they are also users
   if (data.data.managers !== undefined) {
@@ -327,41 +326,43 @@ export function processTaxa(myProject: any): void {
   api
     .projectSetGetStatsProjectSetTaxoStatsGet(myProject.projectID)
     .then((data) => {
-      const oneArray: Array<taxon> = new Array<taxon>();
+      //const oneArray: Array<taxon> = new Array<taxon>();
+      myProject.projectTaxa = new Array<taxon>();
       const myData = data.data[0]; // 0 because we work on a precise single project
       if (myData !== undefined && myData.used_taxa !== undefined) {
         for (let i: number = 0; i < myData.used_taxa.length; i++) {
           if (myData.used_taxa[i] !== -1) {
             const oneTaxon: taxon = new taxon(myData.used_taxa[i]);
-            oneArray.push(oneTaxon);
+            myProject.projectTaxa.push(oneTaxon);
           }
         }
       }
-      return oneArray;
     })
-    .then((arr) => {
-      // arr is my array partially built with taxon id
+    .then(() => {
+      // myProject.projectTaxa array partially built with taxon id.
       // Now I'm going to add nb_unclassified, nb_validated, nb_dubious, nb_predicted
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
-      let taxonIDlist: string = ""; // build list of sample IDs
-      arr.forEach((taxon) => {
-        taxonIDlist += taxon.id + _SEPARATOR;
-      });
-      const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
-      api2
+      let taxonIDlist: string = ""; // build list of taxon IDs
+      for (let i: number = 0; i < myProject.projectTaxa.length; i++)
+      {
+        const oneTaxon: taxon = myProject.projectTaxa[i];
+        taxonIDlist += oneTaxon.id + _SEPARATOR;
+      }
+      //const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
+      api
         .projectSetGetStatsProjectSetTaxoStatsGet(myProject.projectID, taxonIDlist)
         .then((data) => {
           // analyze the answer by going through the array items
           for (let i: number = 0; i < data.data.length; i++) {
             const dataI = data.data[i];
             // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
-            for (let j: number = 0; j < arr.length; j++) {
+            for (let j: number = 0; j < myProject.projectTaxa.length; j++) {
               if (dataI !== undefined && dataI.used_taxa !== undefined) {
-                if (dataI.used_taxa[0] === arr[j].id) {
+                if (dataI.used_taxa[0] === myProject.projectTaxa[j].id) {
                   //arr[j].nb_unclassified = dataI.nb_unclassified; // TODO : probably useless field
-                  arr[j].nb_validated = dataI.nb_validated;
-                  arr[j].nb_dubious = dataI.nb_dubious;
-                  arr[j].nb_predicted = dataI.nb_predicted;
+                  myProject.projectTaxa[j].nb_validated = dataI.nb_validated;
+                  myProject.projectTaxa[j].nb_dubious = dataI.nb_dubious;
+                  myProject.projectTaxa[j].nb_predicted = dataI.nb_predicted;
                 }
               }
             }
@@ -378,13 +379,13 @@ export function processTaxa(myProject: any): void {
               // analyze the answer by going through the array items
               for (let i: number = 0; i < data.data.length; i++) {
                 const dataI = data.data[i];
-                for (let j: number = 0; j < arr.length; j++) {
-                  if (dataI.id === arr[j].id) { // found !
-                    arr[j].display_name = dataI.display_name;
+                for (let j: number = 0; j < myProject.projectTaxa.length; j++) {
+                  if (dataI.id === myProject.projectTaxa[j].id) { // found !
+                    myProject.projectTaxa[j].display_name = dataI.display_name;
                   }
                 }
               }
-              myProject.projectTaxa = arr;
+              // myProject.projectTaxa = arr;
             })
             .catch((reason) => {
               processTaxaKO(myProject, reason);
