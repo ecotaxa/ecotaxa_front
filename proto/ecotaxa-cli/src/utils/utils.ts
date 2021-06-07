@@ -121,7 +121,8 @@ class projUser {
 export { projUser };
 
 function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
-  const oneArray: Array<projUser> = new Array<projUser>();
+  //const oneArray: Array<projUser> = new Array<projUser>();
+  myProject.projectUsers = new Array<projUser>();
   // Also add the managers in oneArray, because they are also users
   if (data.data.managers !== undefined) {
     for (let i: number = 0; i < data.data.managers.length; i++) {
@@ -131,7 +132,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       oneUser.email = "mailto:" + managerI.email;
       oneUser.name = managerI.name;
       oneUser.active = managerI.active;
-      oneArray.push(oneUser);
+      myProject.projectUsers.push(oneUser);
     }
   }
   if (data.data.annotators !== undefined) {
@@ -142,7 +143,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       oneUser.email = "mailto:" + annotatorI.email;
       oneUser.name = annotatorI.name;
       oneUser.active = annotatorI.active;
-      oneArray.push(oneUser);
+      myProject.projectUsers.push(oneUser);
     }
   }
   if (data.data.viewers !== undefined) {
@@ -153,7 +154,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       oneUser.email = "mailto:" + viewerI.email;
       oneUser.name = viewerI.name;
       oneUser.active = viewerI.active;
-      oneArray.push(oneUser);
+      myProject.projectUsers.push(oneUser);
     }
   }
   // arr is my array partially built with email + name + id + status
@@ -166,18 +167,18 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       if (data.data !== undefined && data.data[0] !== undefined) {
         const data0activities = data.data[0].activities;
         if (data0activities !== undefined) {
-          for (let i: number = 0; i < oneArray.length; i++) {
+          for (let i: number = 0; i < myProject.projectUsers.length; i++) {
             for (let j: number = 0; j < data0activities.length; j++) {
-              if (oneArray[i].id === data0activities[j].id) {
+              if (myProject.projectUsers[i].id === data0activities[j].id) {
                 // find corresponding IDs between Projects and ProjectsStats
-                oneArray[i].actions = data0activities[j].nb_actions;
-                oneArray[i].annot = data0activities[j].last_annot?.replace("T", " ");
+                myProject.projectUsers[i].actions = data0activities[j].nb_actions;
+                myProject.projectUsers[i].annot = data0activities[j].last_annot?.replace("T", " ");
               }
             }
           }
         }
       }
-      myProject.projectUsers = oneArray;
+      // myProject.projectUsers = oneArray;
     })
     .catch((reason) => {
       projectUsersKO(myProject, reason);
