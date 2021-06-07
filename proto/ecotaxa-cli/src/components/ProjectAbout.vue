@@ -46,6 +46,7 @@
         </div>
       </div>
       <h3>Sample fields</h3>
+      <h6 v-if="sampleArray.length == 0">(none)</h6>
       <br />
       <ul class="list-group list-group-horizontal">
         <li
@@ -57,6 +58,7 @@
         </li>
       </ul>
       <h3>Acquisition and Processing fields</h3>
+      <h6 v-if="acquAndProcArray.length == 0">(none)</h6>      
       <br />
       <ul class="list-group list-group-horizontal">
         <li
@@ -68,6 +70,7 @@
         </li>
       </ul>
       <h3>Object fields</h3>
+      <h6 v-if="objectArray.length == 0">(none)</h6>            
       <br />
       <ul class="list-group list-group-horizontal">
         <li
@@ -302,12 +305,12 @@ export default class ProjectAbout extends Vue {
 
 <!-- TODO : I need this style scoped here, otherwise my badges are strange-->
 <style scoped>
-  .badge {
-    min-width: 28px;
-    border-radius: 10px;
-    background-color: grey;
-    color: white;
-  }
+.badge {
+  min-width: 28px;
+  border-radius: 10px;
+  background-color: grey;
+  color: white;
+}
 </style>
 
 
