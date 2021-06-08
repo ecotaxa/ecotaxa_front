@@ -95,7 +95,7 @@
               <a :href="myUser.email">{{ myUser.name }}</a>
             </td>
             <td>
-              <span class="badge">{{ myUser.actions }}</span>
+              <span class="EcoTaxaBadge">{{ myUser.actions }}</span>
             </td>
             <td>{{ myUser.annot }}</td>
             <td>{{ myUser.status }}</td>
@@ -107,7 +107,7 @@
               >
             </td>
             <td>
-              <span class="badge"
+              <span class="EcoTaxaBadge"
                 ><strike>{{ myUser.actions }}</strike></span
               >
             </td>
@@ -300,18 +300,3 @@ export default class ProjectAbout extends Vue {
   to_show = this.projectID;
 }
 </script>
-
-<!-- TODO : I need this style scoped here, otherwise my badges are strange-->
-<!-- Why? -->
-<style scoped>
-.badge {
-  min-width: 28px;
-  border-radius: 10px;
-  background-color: grey;
-  color: white;
-}
-</style>
-
-
-
-

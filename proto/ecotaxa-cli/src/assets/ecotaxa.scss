@@ -44,14 +44,6 @@ a {
   color: #42b983;
 }
 
-.badge {
-  min-width: 28px;
-  border-radius: 10px;
-  background-color: grey;
-  color: white;
-}
-
-
 $free_cols_cell-width: 200px;
 
 .list-group {
@@ -82,6 +74,7 @@ $free_cols_cell-width: 200px;
 }
 
 .EcoTaxaTable {
+  background-color: lightgrey;  
   @extend .table;
   @extend .table-bordered;
   @extend .table-striped;
@@ -100,3 +93,27 @@ $free_cols_cell-width: 200px;
   @extend .m-3;
   @extend .text-left !optional;
 }
+
+$EcoTaxaBadgeInsideColor:white;
+$EcoTaxaBadgeBackgroundColor:grey;
+
+.EcoTaxaBadge {
+@extend .badge;
+@extend .badge-important;
+@extend .badge-primary !optional;
+}
+
+// ! known problem about badges
+// https://answers.themler.io/questions/90184/problem-with-bootstrap-badges
+.badge
+{
+  min-width: 28px;
+  border-radius: 10px;
+  color:EcoTaxaBadgeInsideColor;
+  background-color:#999999!important;
+}
+.badge-important
+{
+background-color:$EcoTaxaBadgeBackgroundColor!important;
+}
+

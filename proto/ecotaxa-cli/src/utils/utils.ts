@@ -370,7 +370,6 @@ export function processTaxa(myProject: any): void {
           // return arr; not necessary ! arr is known in the following .then scope
         })
         .then(() => {
-          // arr is known here !
           // Now I'm going to add the taxon name
           const api3: TaxonomyTreeApi = new TaxonomyTreeApi();
           api3
@@ -385,7 +384,6 @@ export function processTaxa(myProject: any): void {
                   }
                 }
               }
-              // myProject.projectTaxa = arr;
             })
             .catch((reason) => {
               processTaxaKO(myProject, reason);
