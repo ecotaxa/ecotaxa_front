@@ -57,14 +57,22 @@ $free_cols_cell-width: 200px;
   flex-wrap: wrap;
 }
 
+// START HERE TO CUSTOMIZE the Eco properties
+
+$EcoTaxaBadgeInsideColor:white;
+$EcoTaxaBadgeBackgroundColor:grey;
+$EcoTaxaLightPinkColor: rgb(255, 218, 223);
+$EcoTaxaLightBlueColor: lightblue;
+$EcoTaxaLightGreenColor: rgb(180, 233, 180);
+$EcoTaxaLightYellowColor:lightyellow;
+
 @mixin free-cols($my-back-color : lightgrey) {
   background-color: $my-back-color;
   min-width: $free_cols_cell-width;
   @extend .list-group-item;
 }
 
-.EcoTaxaBasicInformation
-{
+.EcoTaxaBasicInformation {
   @extend .col-sm-4;
   text-align: center;
   //display: flex;
@@ -73,15 +81,15 @@ $free_cols_cell-width: 200px;
 }
 
 .EcoTaxaSampleFields {
-  @include free-cols($my-back-color:rgb(255, 218, 223));
+  @include free-cols($EcoTaxaLightPinkColor); // customize here
 }
 
 .EcoTaxaAcquAndProcFields {
-  @include free-cols($my-back-color: lightblue);
+  @include free-cols($EcoTaxaLightBlueColor); // customize here
 }
 
 .EcoTaxaObjectFields {
-  @include free-cols($my-back-color: rgb(180, 233, 180));
+  @include free-cols($EcoTaxaLightGreenColor); // customize here
 }
 
 .EcoTaxaExportButtonToTSV {
@@ -89,12 +97,37 @@ $free_cols_cell-width: 200px;
   @extend .btn-primary;
 }
 
+@mixin EcoTaxaTableColors($color1 : $EcoTaxaLightPinkColor, // default color for column1
+                          $color2 : $EcoTaxaLightBlueColor, // default color for column2
+                          $color3 : $EcoTaxaLightGreenColor, // default color for column3
+                          $color4 : $EcoTaxaLightYellowColor) // default color for column4
+{
+  // td:nth-of-type(1) is the title column which stays grey
+  td:nth-of-type(2) {
+    background: $color1;
+  }
+
+  td:nth-of-type(3) {
+    background: $color2;
+  }
+
+  td:nth-of-type(4) {
+    background: $color3;
+  }
+
+  td:nth-of-type(5) {
+    background: $color4;
+  }}
+
 .EcoTaxaTable {
   background-color: lightgrey;
   @extend .table;
   @extend .table-bordered;
   @extend .table-striped;
   @extend .col-sm-6;
+  @include EcoTaxaTableColors;
+  // change the default behavior by passing your own colors,
+  // like @include(red,black, blue,orange); if you wish
 }
 
 .EcoTaxaListGroupHorizontal {
@@ -110,16 +143,13 @@ $free_cols_cell-width: 200px;
   @extend .text-left !optional;
 }
 
-$EcoTaxaBadgeInsideColor:white;
-$EcoTaxaBadgeBackgroundColor:grey;
-
 .EcoTaxaBadge {
   @extend .badge;
   @extend .badge-important;
   @extend .badge-primary !optional;
 }
 
-// ! known problem about badges
+// ! known problem about badges : DO NOT TOUCH
 // https://answers.themler.io/questions/90184/problem-with-bootstrap-badges
 .badge {
   min-width: 28px;
@@ -127,14 +157,11 @@ $EcoTaxaBadgeBackgroundColor:grey;
   color: EcoTaxaBadgeInsideColor;
   background-color: #999999 !important;
 }
-
 .badge-important {
-  background-color: $EcoTaxaBadgeBackgroundColor !important;
+  background-color: EcoTaxaBadgeBackgroundColor !important;
 }
 
-
-
-/*
+/* cannot make it work (for the moment) with the "nested mechanism"
 div {
   @extend .app;
   @extend .container;

@@ -42,8 +42,8 @@
           </p>
         </div>
       </div>
-      <br>
-      <br />      
+      <br />
+      <br />
       <h2>Sample fields</h2>
       <h6 v-if="sampleArray.length == 0">(none)</h6>
       <br />
@@ -56,7 +56,7 @@
           {{ sample }}
         </li>
       </ul>
-      <br>      
+      <br />
       <h2>Acquisition and Processing fields</h2>
       <h6 v-if="acquAndProcArray.length == 0">(none)</h6>
       <br />
@@ -69,7 +69,7 @@
           {{ myAcquOrProc }}
         </li>
       </ul>
-      <br>            
+      <br />
       <h2>Object fields</h2>
       <h6 v-if="objectArray.length == 0">(none)</h6>
       <br />
@@ -85,42 +85,46 @@
       <br />
       <h2>Project Users</h2>
       <table class="EcoTaxaTable">
-        <tr>
-          <th>Name</th>
-          <th>Number of annotations</th>
-          <th>Last annotation date</th>
-          <th>User Status</th>
-        </tr>
-        <tr v-for="myUser in projectUsers" :key="myUser.id">
-          <template v-if="myUser.active === true">
-            <td>
-              <a :href="myUser.email">{{ myUser.name }}</a>
-            </td>
-            <td>
-              <span class="EcoTaxaBadge">{{ myUser.actions }}</span>
-            </td>
-            <td>{{ myUser.annot }}</td>
-            <td>{{ myUser.status }}</td>
-          </template>
-          <template v-else>
-            <td>
-              <a :href="myUser.email"
-                ><strike>{{ myUser.name }}</strike></a
-              >
-            </td>
-            <td>
-              <span class="EcoTaxaBadge"
-                ><strike>{{ myUser.actions }}</strike></span
-              >
-            </td>
-            <td>
-              <strike>{{ myUser.annot }} </strike>
-            </td>
-            <td>
-              <strike>{{ myUser.status }} </strike>
-            </td>
-          </template>
-        </tr>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Number of annotations</th>
+            <th>Last annotation date</th>
+            <th>User Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="myUser in projectUsers" :key="myUser.id">
+            <template v-if="myUser.active === true">
+              <td>
+                <a :href="myUser.email">{{ myUser.name }}</a>
+              </td>
+              <td>
+                <span class="EcoTaxaBadge">{{ myUser.actions }}</span>
+              </td>
+              <td>{{ myUser.annot }}</td>
+              <td>{{ myUser.status }}</td>
+            </template>
+            <template v-else>
+              <td>
+                <a :href="myUser.email"
+                  ><strike>{{ myUser.name }}</strike></a
+                >
+              </td>
+              <td>
+                <span class="EcoTaxaBadge"
+                  ><strike>{{ myUser.actions }}</strike></span
+                >
+              </td>
+              <td>
+                <strike>{{ myUser.annot }} </strike>
+              </td>
+              <td>
+                <strike>{{ myUser.status }} </strike>
+              </td>
+            </template>
+          </tr>
+        </tbody>
       </table>
       <br />
       <h2>Samples with objects and status</h2>
@@ -132,25 +136,29 @@
         Export in .tsv format
       </button>
       <table class="EcoTaxaTable">
-        <tr>
-          <th>Sample name (ID)</th>
-          <th>Unclassified</th>
-          <th>Validated</th>
-          <th>Dubious</th>
-          <th>Predicted</th>
-        </tr>
-        <tr
-          v-for="mySample in samplesWithObjectsAndStatus"
-          :key="mySample.sampleid"
-        >
-          <td>{{ mySample.orig_id }}&emsp;({{ mySample.sampleid }})</td>
-          <td>{{ mySample.nb_unclassified }}</td>
-          <td>{{ mySample.nb_validated }}</td>
-          <td>{{ mySample.nb_dubious }}</td>
-          <td>{{ mySample.nb_predicted }}</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Sample name (ID)</th>
+            <th>Unclassified</th>
+            <th>Validated</th>
+            <th>Dubious</th>
+            <th>Predicted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="mySample in samplesWithObjectsAndStatus"
+            :key="mySample.sampleid"
+          >
+            <td>{{ mySample.orig_id }}&emsp;({{ mySample.sampleid }})</td>
+            <td>{{ mySample.nb_unclassified }}</td>
+            <td>{{ mySample.nb_validated }}</td>
+            <td>{{ mySample.nb_dubious }}</td>
+            <td>{{ mySample.nb_predicted }}</td>
+          </tr>
+        </tbody>
       </table>
-      <br />      
+      <br />
       <h2>Taxa</h2>
       <button
         type="button"
@@ -160,19 +168,23 @@
         Export in .tsv format
       </button>
       <table class="EcoTaxaTable">
-        <tr>
-          <th>Unique Name</th>
-          <th>Validated</th>
-          <th>Dubious</th>
-          <th>Predicted</th>
-        </tr>
-        <tr v-for="myTaxon in projectTaxa" :key="myTaxon.id">
-          <!--td>{{ myTaxon.display_name }}&emsp;({{ myTaxon.id }})</td-->
-          <td>{{ myTaxon.display_name }}</td>
-          <td>{{ myTaxon.nb_validated }}</td>
-          <td>{{ myTaxon.nb_dubious }}</td>
-          <td>{{ myTaxon.nb_predicted }}</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Unique Name</th>
+            <th>Validated</th>
+            <th>Dubious</th>
+            <th>Predicted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="myTaxon in projectTaxa" :key="myTaxon.id">
+            <!--td>{{ myTaxon.display_name }}&emsp;({{ myTaxon.id }})</td-->
+            <td>{{ myTaxon.display_name }}</td>
+            <td>{{ myTaxon.nb_validated }}</td>
+            <td>{{ myTaxon.nb_dubious }}</td>
+            <td>{{ myTaxon.nb_predicted }}</td>
+          </tr>
+        </tbody>
       </table>
       <!-- I want to keep this important example here and hidden -->
       <div class="btn-group" style="visibility: hidden">
