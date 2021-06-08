@@ -13,37 +13,38 @@
         <a v-bind:href="urlLink"> Details about Project {{ projectID }} </a>
       </p>
     </div>
-
     <div id="#app" class="container">
       <div class="row">
-        <div class="col-sm-4">
+        <div class="EcoTaxaBasicInformation">
           <h3>Title</h3>
           <p>{{ projectTitle }}</p>
         </div>
-        <div class="col-sm-4">
+        <div class="EcoTaxaBasicInformation">
           <h3>Description</h3>
           <p>{{ projectDescription }}</p>
         </div>
-        <div class="col-sm-4">
+        <div class="EcoTaxaBasicInformation">
           <h3>Comments</h3>
           <p>{{ projectComment }}</p>
         </div>
-        <div class="col-sm-4">
+        <div class="EcoTaxaBasicInformation">
           <h3>License</h3>
           <p>{{ projectLicense }}</p>
         </div>
-        <div class="col-sm-4">
+        <div class="EcoTaxaBasicInformation">
           <h3>SCN Network</h3>
           <p>{{ projectSCNnetwork }}</p>
         </div>
-        <div class="col-sm-4">
+        <div class="EcoTaxaBasicInformation">
           <h3>Contact</h3>
           <p>
             <a :href="contactMail">{{ contactName }}</a>
           </p>
         </div>
       </div>
-      <h3>Sample fields</h3>
+      <br>
+      <br />      
+      <h2>Sample fields</h2>
       <h6 v-if="sampleArray.length == 0">(none)</h6>
       <br />
       <ul class="EcoTaxaListGroupHorizontal">
@@ -55,8 +56,9 @@
           {{ sample }}
         </li>
       </ul>
-      <h3>Acquisition and Processing fields</h3>
-      <h6 v-if="acquAndProcArray.length == 0">(none)</h6>      
+      <br>      
+      <h2>Acquisition and Processing fields</h2>
+      <h6 v-if="acquAndProcArray.length == 0">(none)</h6>
       <br />
       <ul class="EcoTaxaListGroupHorizontal">
         <li
@@ -67,8 +69,9 @@
           {{ myAcquOrProc }}
         </li>
       </ul>
-      <h3>Object fields</h3>
-      <h6 v-if="objectArray.length == 0">(none)</h6>            
+      <br>            
+      <h2>Object fields</h2>
+      <h6 v-if="objectArray.length == 0">(none)</h6>
       <br />
       <ul class="EcoTaxaListGroupHorizontal">
         <li
@@ -79,7 +82,6 @@
           {{ myObjectField }}
         </li>
       </ul>
-      <br />
       <br />
       <h2>Project Users</h2>
       <table class="EcoTaxaTable">
@@ -121,7 +123,7 @@
         </tr>
       </table>
       <br />
-      <h3>Samples with objects and status</h3>
+      <h2>Samples with objects and status</h2>
       <button
         type="button"
         @click="exportSamplesToTSVFile"
@@ -148,7 +150,8 @@
           <td>{{ mySample.nb_predicted }}</td>
         </tr>
       </table>
-      <h3>Taxa</h3>
+      <br />      
+      <h2>Taxa</h2>
       <button
         type="button"
         @click="exportTaxaToTSVFile"

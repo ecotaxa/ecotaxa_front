@@ -13,6 +13,13 @@
   color: #2c3e50;
 }
 
+.app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
 #nav {
   padding: 30px;
 }
@@ -56,6 +63,15 @@ $free_cols_cell-width: 200px;
   @extend .list-group-item;
 }
 
+.EcoTaxaBasicInformation
+{
+  @extend .col-sm-4;
+  text-align: center;
+  //display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .EcoTaxaSampleFields {
   @include free-cols($my-back-color:rgb(255, 218, 223));
 }
@@ -74,7 +90,7 @@ $free_cols_cell-width: 200px;
 }
 
 .EcoTaxaTable {
-  background-color: lightgrey;  
+  background-color: lightgrey;
   @extend .table;
   @extend .table-bordered;
   @extend .table-striped;
@@ -98,22 +114,41 @@ $EcoTaxaBadgeInsideColor:white;
 $EcoTaxaBadgeBackgroundColor:grey;
 
 .EcoTaxaBadge {
-@extend .badge;
-@extend .badge-important;
-@extend .badge-primary !optional;
+  @extend .badge;
+  @extend .badge-important;
+  @extend .badge-primary !optional;
 }
 
 // ! known problem about badges
 // https://answers.themler.io/questions/90184/problem-with-bootstrap-badges
-.badge
-{
+.badge {
   min-width: 28px;
   border-radius: 10px;
-  color:EcoTaxaBadgeInsideColor;
-  background-color:#999999!important;
-}
-.badge-important
-{
-background-color:$EcoTaxaBadgeBackgroundColor!important;
+  color: EcoTaxaBadgeInsideColor;
+  background-color: #999999 !important;
 }
 
+.badge-important {
+  background-color: $EcoTaxaBadgeBackgroundColor !important;
+}
+
+
+
+/*
+div {
+  @extend .app;
+  @extend .container;
+  div {
+    @extend .row;
+
+    div {
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    
+      @extend .col-sm-6;
+    }
+  }
+}
+*/
