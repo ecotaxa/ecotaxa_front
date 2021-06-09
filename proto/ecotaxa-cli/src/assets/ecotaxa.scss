@@ -4,9 +4,13 @@
 // https://www.ionos.fr/digitalguide/sites-internet/developpement-web/sass-tutoriel/
 // https://www.w3schools.com/sass/
 
+@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600";
+
+body {
+  font-family: 'Source Sans Pro', sans-serif, Helvetica, Arial;
+}
+
 #app {
-  //@extend .EcoTaxaFocusIntro;  
-  //font-family: sans-serif, Avenir, Helvetica, Arial;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
