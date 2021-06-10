@@ -29,30 +29,8 @@
           {{ projectLicense }}
           {{ copyright }}
           -->
-          <!-- TODO !! find a way to use the copyright variable ! But it's hell because it's badly interpreted -->
-          <span v-if="copyright == 'CC-BY-NC-ND'">
-            <img src="../assets/CC-BY-NC-ND.png" height="60"/>
-          </span>
-          <span v-else-if="copyright == 'CC-BY-NC-SA'">
-            <img src="../assets/CC-BY-NC-SA.png"  height="60"/>
-          </span>
-          <span v-else-if="copyright == 'CC-BY-NC'">
-            <img src="../assets/CC-BY-NC.png" height="60"/>
-          </span>
-          <span v-else-if="copyright == 'CC-BY-ND'">
-            <img src="../assets/CC-BY-ND.png" height="60" />
-          </span>
-          <span v-else-if="copyright == 'CC-BY-SA'">
-            <img src="../assets/CC-BY-SA.png" height="60" />
-          </span>
-          <span v-else-if="copyright == 'CC-BY'">
-            <img src="../assets/CC-BY.png" height="60" />
-          </span>
-          <span v-else-if="copyright == 'Copyright'">
-            <img src="../assets/Copyright.png" height="60"/>
-          </span>
-          <span v-else>
-            <img src="../assets/CC-0.png" height="60"/>
+          <span>
+            <img v-bind:src="copyright" height="60" />
           </span>
         </div>
         <div class="EcoTaxaBasicInformation">
@@ -261,6 +239,7 @@ import { Options, Vue } from "vue-class-component";
 import { Dropdown } from "bootstrap";
 import * as utils from "../utils/utils";
 import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
+import { computeLicense } from "../utils/manageLicenses";
 
 //export default defineComponent({
 @Options({
@@ -332,60 +311,8 @@ import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
       mySub += "/prj/" + this.projectID;
       return mySub;
     },
-
     copyright: function (): string {
-      // TODO in the html part !! find a way to use the variable value, but it's hell because it's badly interpreted
-      // Then put in a separate "utils.ts" file ?
-      // Important : 8 cases, compute from more complex to simplest one
-      // CC-BY-NC-ND
-      if (
-        this.projectLicense.indexOf("CC") !== -1 &&
-        this.projectLicense.indexOf("BY") !== -1 &&
-        this.projectLicense.indexOf("NC") !== -1 &&
-        this.projectLicense.indexOf("ND") !== -1
-      )
-        return "CC-BY-NC-ND";
-      // CC-BY-NC-SA
-      if (
-        this.projectLicense.indexOf("CC") !== -1 &&
-        this.projectLicense.indexOf("BY") !== -1 &&
-        this.projectLicense.indexOf("NC") !== -1 &&
-        this.projectLicense.indexOf("SA") !== -1
-      )
-        return "CC-BY-NC-SA";
-      // CC-BY-NC
-      if (
-        this.projectLicense.indexOf("CC") !== -1 &&
-        this.projectLicense.indexOf("BY") !== -1 &&
-        this.projectLicense.indexOf("NC") !== -1
-      )
-        return "CC-BY-NC";
-      // CC-BY-ND
-      if (
-        this.projectLicense.indexOf("CC") !== -1 &&
-        this.projectLicense.indexOf("BY") !== -1 &&
-        this.projectLicense.indexOf("ND") !== -1
-      )
-        return "CC-BY-ND";
-      // CC-BY-SA
-      if (
-        this.projectLicense.indexOf("CC") !== -1 &&
-        this.projectLicense.indexOf("BY") !== -1 &&
-        this.projectLicense.indexOf("SA") !== -1
-      )
-        return "CC-BY-SA";
-      // CC-BY
-      if (
-        this.projectLicense.indexOf("CC") !== -1 &&
-        this.projectLicense.indexOf("BY") !== -1
-      )
-        return "CC-BY";
-      // Copyright
-      if (this.projectLicense.indexOf("Copyright") !== -1) {
-        return "Copyright";
-      }
-      // Default if not specified
-      return "CC-0";
+      return computeLicense(this.projectLicense);
     },
   },
 })
