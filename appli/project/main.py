@@ -297,10 +297,10 @@ def indexPrj(PrjId):
             g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2?frommodel=Y')",
                                 "Predict identifications from trained model"))
             g.headmenu.append(("/Job/Create/FileImport?p=%d" % PrjId, "Import images and metadata"))
-        g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
-        g.headmenu.append(("/Job/Create/GenExport?projid=%d" % PrjId, "Export(New!)"))
-        g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')", "Export"))
-        g.headmenuF.append(("javascript:GotoWithFilter('/Job/Create/GenExport')", "Export(New!)"))
+        #g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
+        g.headmenu.append(("/Job/Create/GenExport?projid=%d" % PrjId, "Export"))
+        #g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')", "Export"))
+        g.headmenuF.append(("javascript:GotoWithFilter('/Job/Create/GenExport')", "Export"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
