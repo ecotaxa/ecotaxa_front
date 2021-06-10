@@ -395,11 +395,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.8"
+ecotaxa_version = "2.5.9"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-05-26"
+    return ecotaxa_version + " 2021-06-10"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -407,6 +407,15 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-06-10 : V 2.5.9
+    Feature #600: Move export function(s) to back-end
+    Feature #603: Add image references to exported data, even if without images themselves
+    Feature #678: Remove XML export which is in a specific unused format
+    Bug #679: Duplicates pathes inside exported zip files
+    Bug #676: Hard-coded relative pathes in export code
+    Feature #539: Include export log files in produced zip. Should be useful for non-fatal problems.
+    Feature #682: Avoid historical trouble with leading 0s in times by enabling a formatted time
+    Bug #683: Images without file name (in historically imported UVP6 projects)
 2021-05-26 : V 2.5.8
     Feature #360: Allow to subset by sampling various entities, not only categories.
     Bug #595: Project managers should be able to clone their own projects, even if they are not Project Creator.
