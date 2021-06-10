@@ -7,7 +7,7 @@
         style="margin: 10px 0"
     /></a>
     <div class="EcoTaxaFocusIntro">
-      <h1>Basic Information about project {{ projectID }}</h1>
+      <h1>Project {{ projectID }} : {{ projectTitle }}</h1>
       <br />
       <p>
         <a v-bind:href="urlLink"> Details about Project {{ projectID }} </a>
@@ -15,10 +15,6 @@
     </div>
     <div id="#app" class="container">
       <div class="row">
-        <div class="EcoTaxaBasicInformation">
-          <h3>Title</h3>
-          <p>{{ projectTitle }}</p>
-        </div>
         <div class="EcoTaxaBasicInformation">
           <h3>Description</h3>
           <p>{{ projectDescription }}</p>
@@ -29,7 +25,35 @@
         </div>
         <div class="EcoTaxaBasicInformation">
           <h3>License</h3>
-          <p>{{ projectLicense }}</p>
+          <!--
+          {{ projectLicense }}
+          {{ copyright }}
+          -->
+          <!-- TODO !! find a way to use the copyright variable ! But it's hell because it's badly interpreted -->
+          <span v-if="copyright == 'CC-BY-NC-ND'">
+            <img src="../assets/CC-BY-NC-ND.png" height="60"/>
+          </span>
+          <span v-else-if="copyright == 'CC-BY-NC-SA'">
+            <img src="../assets/CC-BY-NC-SA.png"  height="60"/>
+          </span>
+          <span v-else-if="copyright == 'CC-BY-NC'">
+            <img src="../assets/CC-BY-NC.png" height="60"/>
+          </span>
+          <span v-else-if="copyright == 'CC-BY-ND'">
+            <img src="../assets/CC-BY-ND.png" height="60" />
+          </span>
+          <span v-else-if="copyright == 'CC-BY-SA'">
+            <img src="../assets/CC-BY-SA.png" height="60" />
+          </span>
+          <span v-else-if="copyright == 'CC-BY'">
+            <img src="../assets/CC-BY.png" height="60" />
+          </span>
+          <span v-else-if="copyright == 'Copyright'">
+            <img src="../assets/Copyright.png" height="60"/>
+          </span>
+          <span v-else>
+            <img src="../assets/CC-0.png" height="60"/>
+          </span>
         </div>
         <div class="EcoTaxaBasicInformation">
           <h3>SCN Network</h3>
@@ -253,7 +277,7 @@ import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
       projectTitle: String(""),
       projectDescription: String(""),
       projectComment: String(""),
-      projectLicense: String(""),
+      projectLicense: String(""), // see https://www.systemed.fr/normes-droit-regles/licences-creative-commons,5113.html
       projectSCNnetwork: String(""),
       contactMail: String(""),
       contactName: String(""),
@@ -292,6 +316,7 @@ import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
   },
   computed: {
     urlLink: function (): string {
+      // TODO : will be used elsewhere so put in a separate "utils.ts" file
       let findDoubleSlash: number = window.location.pathname.indexOf("//");
       let findSlash: number = 0;
       if (findDoubleSlash == -1) {
@@ -307,11 +332,67 @@ import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
       mySub += "/prj/" + this.projectID;
       return mySub;
     },
+
+    copyright: function (): string {
+      // TODO in the html part !! find a way to use the variable value, but it's hell because it's badly interpreted
+      // Then put in a separate "utils.ts" file ?
+      // Important : 8 cases, compute from more complex to simplest one
+      // CC-BY-NC-ND
+      if (
+        this.projectLicense.indexOf("CC") !== -1 &&
+        this.projectLicense.indexOf("BY") !== -1 &&
+        this.projectLicense.indexOf("NC") !== -1 &&
+        this.projectLicense.indexOf("ND") !== -1
+      )
+        return "CC-BY-NC-ND";
+      // CC-BY-NC-SA
+      if (
+        this.projectLicense.indexOf("CC") !== -1 &&
+        this.projectLicense.indexOf("BY") !== -1 &&
+        this.projectLicense.indexOf("NC") !== -1 &&
+        this.projectLicense.indexOf("SA") !== -1
+      )
+        return "CC-BY-NC-SA";
+      // CC-BY-NC
+      if (
+        this.projectLicense.indexOf("CC") !== -1 &&
+        this.projectLicense.indexOf("BY") !== -1 &&
+        this.projectLicense.indexOf("NC") !== -1
+      )
+        return "CC-BY-NC";
+      // CC-BY-ND
+      if (
+        this.projectLicense.indexOf("CC") !== -1 &&
+        this.projectLicense.indexOf("BY") !== -1 &&
+        this.projectLicense.indexOf("ND") !== -1
+      )
+        return "CC-BY-ND";
+      // CC-BY-SA
+      if (
+        this.projectLicense.indexOf("CC") !== -1 &&
+        this.projectLicense.indexOf("BY") !== -1 &&
+        this.projectLicense.indexOf("SA") !== -1
+      )
+        return "CC-BY-SA";
+      // CC-BY
+      if (
+        this.projectLicense.indexOf("CC") !== -1 &&
+        this.projectLicense.indexOf("BY") !== -1
+      )
+        return "CC-BY";
+      // Copyright
+      if (this.projectLicense.indexOf("Copyright") !== -1) {
+        return "Copyright";
+      }
+      // Default if not specified
+      return "CC-0";
+    },
   },
 })
 export default class ProjectAbout extends Vue {
   projectID!: string;
   urlLink!: string;
+  copyright!: string;
   to_show = this.projectID;
 }
 </script>
