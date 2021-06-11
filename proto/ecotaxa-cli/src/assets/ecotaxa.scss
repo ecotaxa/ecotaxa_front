@@ -57,11 +57,15 @@ a {
 
 $free_cols_cell-width: 200px;
 
+
 .list-group {
   flex-wrap: wrap;
+  display:flex;
 }
 
 // START HERE TO CUSTOMIZE the Eco properties
+$EcoTaxaBorderColor : rgb(170,170,170); // border of cells
+
 $EcoTaxaLightPinkColor : rgb(255, 218, 223);
 $EcoTaxaLightBlueColor : lightblue;
 $EcoTaxaLightGreenColor : rgb(180, 233, 180);
@@ -79,9 +83,10 @@ $EcoTaxaBadgeInsideColor:white;
 $EcoTaxaBadgeBackgroundColor:grey;
 
 @mixin free-cols($my-back-color : lightgrey) {
+  border: 1px solid;
+  border-color: $EcoTaxaBorderColor;
   background-color: $my-back-color;
   min-width: $free_cols_cell-width;
-  @extend .list-group-item;
 }
 
 .EcoTaxaBasicInformation {
@@ -114,6 +119,8 @@ $EcoTaxaBadgeBackgroundColor:grey;
   $dubious : $EcoTaxaDubiousColor, // default color for Dubious
   $predicted : $EcoTaxaPredictedColor) // default color for Predicted
 {
+  border: 1px solid;
+  border-color: $EcoTaxaBorderColor;
   background-color: lightgrey;
   @extend .table;
   @extend .table-bordered;
@@ -151,8 +158,8 @@ $EcoTaxaBadgeBackgroundColor:grey;
 }
 
 .EcoTaxaListGroupHorizontal {
+  @extend .list-group-horizontal;  
   @extend .list-group;
-  @extend .list-group-horizontal;
 }
 
 .EcoTaxaFocusIntro {
