@@ -86,7 +86,7 @@
       </ul>
       <br />
       <h2>Project Users</h2>
-      <table class="EcoTaxaTable">
+      <table class="EcoTaxaProjectUsersTable">
         <thead>
           <tr>
             <th>Name</th>
@@ -137,7 +137,7 @@
       >
         Export in .tsv format
       </button>
-      <table class="EcoTaxaTable">
+      <table class="EcoTaxaSamplesTable">
         <thead>
           <tr>
             <th>Sample name (ID)</th>
@@ -169,7 +169,7 @@
       >
         Export in .tsv format
       </button>
-      <table class="EcoTaxaTable">
+      <table class="EcoTaxaTaxaTable">
         <thead>
           <tr>
             <th>Unique Name</th>

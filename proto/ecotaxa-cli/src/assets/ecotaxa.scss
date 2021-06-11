@@ -62,13 +62,21 @@ $free_cols_cell-width: 200px;
 }
 
 // START HERE TO CUSTOMIZE the Eco properties
+$EcoTaxaLightPinkColor : rgb(255, 218, 223);
+$EcoTaxaLightBlueColor : lightblue;
+$EcoTaxaLightGreenColor : rgb(180, 233, 180);
+
+$EcoTaxaUnclassifiedColor: lightgrey;
+$EcoTaxaValidatedColor: #5cb85c; // RGBA(92,184,92,255)
+$EcoTaxaDubiousColor: #f0ad4e; // rgba(240,173,78,255)
+$EcoTaxaPredictedColor:#5bc0de; // rgba(91,192,222,255)
+
+$EcoTaxaSampleColor: $EcoTaxaLightPinkColor;
+$EcoTaxaAcquAndProcColor: $EcoTaxaLightBlueColor;
+$EcoTaxaObjectColor: $EcoTaxaLightGreenColor;
 
 $EcoTaxaBadgeInsideColor:white;
 $EcoTaxaBadgeBackgroundColor:grey;
-$EcoTaxaLightPinkColor: rgb(255, 218, 223);
-$EcoTaxaLightBlueColor: lightblue;
-$EcoTaxaLightGreenColor: rgb(180, 233, 180);
-$EcoTaxaLightYellowColor:lightyellow;
 
 @mixin free-cols($my-back-color : lightgrey) {
   background-color: $my-back-color;
@@ -85,15 +93,15 @@ $EcoTaxaLightYellowColor:lightyellow;
 }
 
 .EcoTaxaSampleFields {
-  @include free-cols($EcoTaxaLightPinkColor); // customize here
+  @include free-cols($EcoTaxaSampleColor);
 }
 
 .EcoTaxaAcquAndProcFields {
-  @include free-cols($EcoTaxaLightBlueColor); // customize here
+  @include free-cols($EcoTaxaAcquAndProcColor);
 }
 
 .EcoTaxaObjectFields {
-  @include free-cols($EcoTaxaLightGreenColor); // customize here
+  @include free-cols($EcoTaxaObjectColor);
 }
 
 .EcoTaxaExportButtonToTSV {
@@ -101,37 +109,45 @@ $EcoTaxaLightYellowColor:lightyellow;
   @extend .btn-primary;
 }
 
-@mixin EcoTaxaTableColors($color1 : $EcoTaxaLightPinkColor, // default color for column1
-                          $color2 : $EcoTaxaLightBlueColor, // default color for column2
-                          $color3 : $EcoTaxaLightGreenColor, // default color for column3
-                          $color4 : $EcoTaxaLightYellowColor) // default color for column4
+@mixin EcoTaxaTableColors($unclassified : $EcoTaxaUnclassifiedColor, // default color for Unclassified
+  $validated : $EcoTaxaValidatedColor, // default color for Validated
+  $dubious : $EcoTaxaDubiousColor, // default color for Dubious
+  $predicted : $EcoTaxaPredictedColor) // default color for Predicted
 {
-  // td:nth-of-type(1) is the title column which stays grey
-  td:nth-of-type(2) {
-    background: $color1;
-  }
-
-  td:nth-of-type(3) {
-    background: $color2;
-  }
-
-  td:nth-of-type(4) {
-    background: $color3;
-  }
-
-  td:nth-of-type(5) {
-    background: $color4;
-  }}
-
-.EcoTaxaTable {
   background-color: lightgrey;
   @extend .table;
   @extend .table-bordered;
   @extend .table-striped;
   @extend .col-sm-6;
-  @include EcoTaxaTableColors;
-  // change the default behavior by passing your own colors,
-  // like @include(red,black, blue,orange); if you wish
+
+  // td:nth-of-type(1) is the title column which stays grey
+  td:nth-of-type(2) {
+    background: $unclassified;
+  }
+
+  td:nth-of-type(3) {
+    background: $validated;
+  }
+
+  td:nth-of-type(4) {
+    background: $dubious;
+  }
+
+  td:nth-of-type(5) {
+    background: $predicted;
+  }
+}
+
+.EcoTaxaProjectUsersTable {
+  @include EcoTaxaTableColors($EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaLightGreenColor);
+}
+
+.EcoTaxaSamplesTable {
+  @include EcoTaxaTableColors; // will take default values
+}
+
+.EcoTaxaTaxaTable {
+  @include EcoTaxaTableColors($EcoTaxaValidatedColor, $EcoTaxaDubiousColor, $EcoTaxaPredictedColor);
 }
 
 .EcoTaxaListGroupHorizontal {
@@ -161,6 +177,7 @@ $EcoTaxaLightYellowColor:lightyellow;
   color: EcoTaxaBadgeInsideColor;
   background-color: #999999 !important;
 }
+
 .badge-important {
   background-color: EcoTaxaBadgeBackgroundColor !important;
 }
