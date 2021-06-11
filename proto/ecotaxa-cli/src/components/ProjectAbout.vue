@@ -10,7 +10,7 @@
       <h1>Project {{ projectID }} : {{ projectTitle }}</h1>
       <br />
       <p>
-        <a v-bind:href="urlLink"> Details about Project {{ projectID }} </a>
+        <a v-bind:href="urlLink"> Go to Project {{ projectID }} </a>
       </p>
     </div>
     <div id="#app" class="container">
