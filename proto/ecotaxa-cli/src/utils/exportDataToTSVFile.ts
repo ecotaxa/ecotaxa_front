@@ -1,8 +1,15 @@
-export function exportDataToTSVFile(results:any, title:string, projectID:string): void {
+
+export function exportDataToTSVFile(results: any, title: string, projectID: string, ...headerTitles: Array<string>): void {
+  let header: string = "";
+  for (let i = 0; i <  headerTitles.length; i++) {
+    header += headerTitles[i];
+    if (i < headerTitles.length - 1) header += "\t";
+  }
+  header += "\r\n";
   // *USEFUL COMMENTS*
   // https://stackoverflow.com/questions/48611671/vue-js-write-json-object-to-local-file
   // https://stackoverflow.com/questions/8847766/how-to-convert-json-to-csv-format-and-store-in-a-variable
-  const data: string = ConvertToTSV(results);
+  const data: string = header + ConvertToTSV(results);
   const blob:Blob = new Blob([data], { type: "text/plain" });
   const e:MouseEvent = document.createEvent("MouseEvents");
   const a:HTMLAnchorElement = document.createElement("a");

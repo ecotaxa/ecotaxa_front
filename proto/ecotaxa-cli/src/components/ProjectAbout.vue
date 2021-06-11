@@ -283,14 +283,12 @@ import { computeLicense } from "../utils/manageLicenses";
   },
   methods: {
     exportTaxaToTSVFile(): void {
-      exportDataToTSVFile(this.projectTaxa, "Taxa", this.projectID);
+      exportDataToTSVFile(this.projectTaxa, "Taxa", this.projectID,
+      "id","display_name","nb_validated","nb_dubious","nb_predicted");
     },
     exportSamplesToTSVFile(): void {
-      exportDataToTSVFile(
-        this.samplesWithObjectsAndStatus,
-        "Samples",
-        this.projectID
-      );
+      exportDataToTSVFile(this.samplesWithObjectsAndStatus, "Samples", this.projectID,
+      "orig_id","sampleid","nb_unclassified","nb_validated","nb_dubious","nb_predicted");
     },
   },
   computed: {
