@@ -1,15 +1,9 @@
 <template>
   <body>
     <div class="EcoTaxaFocusIntro">
-      <img
-        height="30"
-        src="../assets/logo_ecotaxa_25.png"
-        style="margin: 10px 0"
-      />
-      <br />
       <h1>Project {{ projectID }} : {{ projectTitle }}</h1>
       <!--p-->
-        <a v-bind:href="urlLink"> Go to Project {{ projectID }} </a>
+      <a v-bind:href="urlLink"> Go to Project {{ projectID }} </a>
       <!--/p-->
     </div>
     <div id="#app" class="container">

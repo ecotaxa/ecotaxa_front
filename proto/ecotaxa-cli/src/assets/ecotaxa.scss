@@ -24,18 +24,21 @@ body {
   color: #2c3e50;
 }
 
+/*
 #nav {
-  padding: 30px;
+  display:flex;
+  //padding: 30px;
+  justify-content:space-between;
+  //text-align: left;  
 }
-
 #nav a {
-  font-weight: bold;
-  color: #2c3e50;
+//  font-weight: bold;
+  font-size: 2em;  
 }
-
 #nav a.router-link-exact-active {
   color: #42b983;
-}
+}*/
+
 
 h3 {
   margin: 40px 0 0;
@@ -82,11 +85,26 @@ $EcoTaxaObjectColor: $EcoTaxaLightGreenColor;
 $EcoTaxaBadgeInsideColor:white;
 $EcoTaxaBadgeBackgroundColor:grey;
 
-@mixin free-cols($my-back-color : lightgrey) {
-  border: 1px solid;
-  border-color: $EcoTaxaBorderColor;
-  background-color: $my-back-color;
-  min-width: $free_cols_cell-width;
+.EcoTaxaIconPlusRouting {
+  padding: 10px;  
+  display:flex; // will distribute the items "equally" on the line
+  img {
+    height:30px;
+  }
+  justify-content:space-between;
+  span {
+  font-size: 1.5em;  
+  color: #42b983;
+  }
+}
+
+.EcoTaxaFocusIntro {
+  text-align: left;  
+  @extend .bg-light;
+  @extend .p-5;
+  @extend .rounded-lg !optional;
+  @extend .m-3;
+  @extend .text-left !optional;
 }
 
 .EcoTaxaBasicInformation {
@@ -95,6 +113,13 @@ $EcoTaxaBadgeBackgroundColor:grey;
   //display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@mixin free-cols($my-back-color : lightgrey) {
+  border: 1px solid;
+  border-color: $EcoTaxaBorderColor;
+  background-color: $my-back-color;
+  min-width: $free_cols_cell-width;
 }
 
 .EcoTaxaSampleFields {
@@ -163,15 +188,6 @@ $EcoTaxaBadgeBackgroundColor:grey;
   @extend .list-group;
 }
 
-.EcoTaxaFocusIntro {
-  text-align: left;  
-  @extend .bg-light;
-  @extend .p-5;
-  @extend .rounded-lg !optional;
-  @extend .m-3;
-  @extend .text-left !optional;
-}
-
 .EcoTaxaBadge {
   @extend .badge;
   @extend .badge-important;
@@ -190,22 +206,3 @@ $EcoTaxaBadgeBackgroundColor:grey;
 .badge-important {
   background-color: EcoTaxaBadgeBackgroundColor !important;
 }
-
-/* cannot make it work (for the moment) with the "nested mechanism"
-div {
-  @extend .app;
-  @extend .container;
-  div {
-    @extend .row;
-
-    div {
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    
-      @extend .col-sm-6;
-    }
-  }
-}
-*/
