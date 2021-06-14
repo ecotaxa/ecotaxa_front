@@ -1,17 +1,16 @@
 <template>
-  <body class="body">
-    <a href="/">
+  <body>
+    <div class="EcoTaxaFocusIntro">
       <img
         height="30"
         src="../assets/logo_ecotaxa_25.png"
         style="margin: 10px 0"
-    /></a>
-    <div class="EcoTaxaFocusIntro">
-      <h1>Project {{ projectID }} : {{ projectTitle }}</h1>
+      />
       <br />
-      <p>
+      <h1>Project {{ projectID }} : {{ projectTitle }}</h1>
+      <!--p-->
         <a v-bind:href="urlLink"> Go to Project {{ projectID }} </a>
-      </p>
+      <!--/p-->
     </div>
     <div id="#app" class="container">
       <div class="row">
@@ -283,12 +282,29 @@ import { computeLicense } from "../utils/manageLicenses";
   },
   methods: {
     exportTaxaToTSVFile(): void {
-      exportDataToTSVFile(this.projectTaxa, "Taxa", this.projectID,
-      "id","display_name","nb_validated","nb_dubious","nb_predicted");
+      exportDataToTSVFile(
+        this.projectTaxa,
+        "Taxa",
+        this.projectID,
+        "id",
+        "display_name",
+        "nb_validated",
+        "nb_dubious",
+        "nb_predicted"
+      );
     },
     exportSamplesToTSVFile(): void {
-      exportDataToTSVFile(this.samplesWithObjectsAndStatus, "Samples", this.projectID,
-      "orig_id","sampleid","nb_unclassified","nb_validated","nb_dubious","nb_predicted");
+      exportDataToTSVFile(
+        this.samplesWithObjectsAndStatus,
+        "Samples",
+        this.projectID,
+        "orig_id",
+        "sampleid",
+        "nb_unclassified",
+        "nb_validated",
+        "nb_dubious",
+        "nb_predicted"
+      );
     },
   },
   computed: {

@@ -112,6 +112,7 @@ $EcoTaxaBadgeBackgroundColor:grey;
 .EcoTaxaExportButtonToTSV {
   @extend .btn;
   @extend .btn-primary;
+  //background-color: yellow;  
 }
 
 @mixin EcoTaxaTableColors($unclassified : $EcoTaxaUnclassifiedColor, // default color for Unclassified
@@ -163,6 +164,7 @@ $EcoTaxaBadgeBackgroundColor:grey;
 }
 
 .EcoTaxaFocusIntro {
+  text-align: left;  
   @extend .bg-light;
   @extend .p-5;
   @extend .rounded-lg !optional;

@@ -7,9 +7,10 @@ $body-bg : #ECECEC;
 
 $theme-colors: (
 	//"primary":  #F24438,
-	"primary":  #5438f2,	
-	//"secondary":#7C4E40,
-	"secondary":#dff70b,	
+	"primary":#337ab7, // color taken from historic EcoTaxa
+	//"primary":  #8f7ef0,	
+	"secondary":#7C4E40,
+	//"secondary":#dff70b,	
 	// don't forget other colors below
 	// or they won't be available anymore
 	"success":    $success,
