@@ -15,7 +15,7 @@ from sklearn.decomposition import PCA
 from subprocess import Popen, TimeoutExpired, DEVNULL, PIPE
 
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp
+from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ClassifyAutoReq
 
 
 class TaskClassifAuto2(AsyncTask):
@@ -348,7 +348,6 @@ class TaskClassifAuto2(AsyncTask):
                     order by objid""".format(Prj.projid, PerimeterWhere)
         self.pgcur.execute(sql, sqlparam)
         # logging.info("SQL=%s",sql)
-        upcur = db.engine.raw_connection().cursor()
         ProcessedRows = 0
         while True:
             self.UpdateProgress(15 + 85 * (ProcessedRows / NbrItem), "Processed %d/%d" % (ProcessedRows, NbrItem))
@@ -372,18 +371,13 @@ class TaskClassifAuto2(AsyncTask):
                 if v['cat'] in PostTaxoMapping:
                     SqlParam[i]['cat'] = PostTaxoMapping[v['cat']]
             TStep3 = time.time()
-            # MAJ dans la base, Si pas de classif devient predicted , Si vide ou predicted, MAJ de la classif
-            if self.param.keeplog:
-                upcur.executemany("""insert into objectsclassifhisto(objid,classif_date,classif_type,classif_id,classif_qual,classif_score)
-                                      select objid,classif_auto_when,'A', classif_auto_id,classif_qual,classif_auto_score
-                                        from obj_head
-                                        where objid=%(id)s and classif_auto_id!=%(cat)s and classif_auto_id is not null
-                                        and classif_auto_when is not null """, SqlParam)
-            upcur.executemany("""update obj_head set classif_auto_id=%(cat)s,classif_auto_score=%(p)s,classif_auto_when=now()
-                                    ,classif_qual=case when classif_qual in ('D','V') then  classif_qual else 'P'  END
-                                    ,classif_id=case when classif_qual in ('D','V') then classif_id  else %(cat)s end
-                                    where objid=%(id)s""", SqlParam)
-            upcur.connection.commit()
+            # Call auto classification storage primitive on back-end
+            with ApiClient(ObjectsApi, self.cookie) as api:
+                req = ClassifyAutoReq(target_ids=[a_classif['id'] for a_classif in SqlParam],
+                                      classifications=[a_classif['cat'] for a_classif in SqlParam],
+                                      scores=[a_classif['p'] for a_classif in SqlParam],
+                                      keep_log=self.param.keeplog == 'Yes')
+                api.classify_auto_object_set_object_set_classify_auto_post(classify_auto_req=req)
             logging.info('Chunk Db Extract %d/%d, Classification and Db Save :  %0.3f s %0.3f+%0.3f+%0.3f'
                          , ProcessedRows, NbrItem
                          , time.time() - TStep, TStep2 - TStep, TStep3 - TStep2, time.time() - TStep3)
@@ -751,6 +745,6 @@ class TaskClassifAuto2(AsyncTask):
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
         PrjId = self.param.ProjectId
         time.sleep(1)
-        DoTaskClean(self.task.id)
+        #DoTaskClean(self.task.id)
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a> """.format(
             PrjId)
