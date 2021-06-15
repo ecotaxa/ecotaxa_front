@@ -395,11 +395,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.9"
+ecotaxa_version = "2.5.10"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-06-10"
+    return ecotaxa_version + " 2021-06-16"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -407,6 +407,11 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-06-16 : V 2.5.10
+    Bug #686: Ensure that project link is present for new export jobs.
+    Feature #605 (start): Automatic classification result can now be stored by calling an API endpoint.
+    Bug #687: When an import job goes wild, it can generate an un-displayable number of errors.
+    Bug #688: Seldom but confusing python error when a job starts.    
 2021-06-10 : V 2.5.9
     Feature #600: Move export function(s) to back-end
     Feature #603: Add image references to exported data, even if without images themselves
