@@ -30,6 +30,9 @@ def _pseudo_task(user_cache: Dict, a_job: JobModel):
     if "prj_id" in a_job.params:
         # noinspection PyUnresolvedReferences
         a_job.params["ProjectId"] = str(a_job.params["prj_id"])
+    if "req" in a_job.params and "project_id" in a_job.params["req"]:
+        # noinspection PyUnresolvedReferences
+        a_job.params["ProjectId"] = str(a_job.params["req"]["project_id"])
     ret.inputparam = json.dumps(a_job.params)
     ret.creationdate = a_job.creation_date
     ret.lastupdate = a_job.updated_on
