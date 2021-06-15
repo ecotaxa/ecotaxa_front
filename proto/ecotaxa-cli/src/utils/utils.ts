@@ -3,6 +3,7 @@ import { SamplesApi } from "../../gen";
 import { TaxonomyTreeApi } from "../../gen";
 import { AxiosResponse } from "axios";
 import { ProjectModel } from "gen/api";
+import { UsersApi } from "../../gen";
 
 const _MAX_REQUEST_LENGTH: number = 2000; // in bytes
 const _SEPARATOR: string = " ";
@@ -225,14 +226,13 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
         // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
         const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus(myData[i].sampleid, myData[i].orig_id);
         myProject.samplesWithObjectsAndStatus.push(oneSample);
-      } 
+      }
     })
     .then(() => {
       // Now I'm going to add nb_Unclassified, nb_Validated, nb_Dubious, nb_Predicted
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
       let sampleIDlist: string = ""; // build list of sample IDs
-      for (let i: number = 0; i < myProject.samplesWithObjectsAndStatus.length; i++)
-      {
+      for (let i: number = 0; i < myProject.samplesWithObjectsAndStatus.length; i++) {
         const sample: sampleWithObjectsAndStatus = myProject.samplesWithObjectsAndStatus[i];
         sampleIDlist += sample.sampleid + _SEPARATOR;
       }
@@ -302,8 +302,8 @@ function processSamplesWithObjectsAndStatusKO(myProject: any, reason: any): void
 /////////////////////////////////////////////////////////////////////
 class taxon {
   id: number;
-  display_name: string;  
-//  nb_unclassified: number | undefined;
+  display_name: string;
+  //  nb_unclassified: number | undefined;
   nb_validated: number | undefined;
   nb_dubious: number | undefined;
   nb_predicted: number | undefined;
@@ -343,8 +343,7 @@ export function processTaxa(myProject: any): void {
       // Now I'm going to add nb_unclassified, nb_validated, nb_dubious, nb_predicted
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
       let taxonIDlist: string = ""; // build list of taxon IDs
-      for (let i: number = 0; i < myProject.projectTaxa.length; i++)
-      {
+      for (let i: number = 0; i < myProject.projectTaxa.length; i++) {
         const oneTaxon: taxon = myProject.projectTaxa[i];
         taxonIDlist += oneTaxon.id + _SEPARATOR;
       }
@@ -406,4 +405,75 @@ function processTaxaKO(myProject: any, reason: any): void {
   console.log(reason);
   alert(reason);
   myProject.projectTaxa = []; // TODO : global error treatment
+}
+
+////////////////////////////////////////////////////////////////////
+// TODO ? maybe a separate .ts for each page ?
+////////////////////////////////////////////////////////////////////
+class project {
+  title: string | undefined;
+  projid: number | undefined;
+  status: string | undefined;
+  objcount: number;
+  pctvalidated: number;
+  pctclassified: number;
+  constructor(myTitle: string | undefined, myID: number | undefined) {
+    this.title = myTitle;
+    this.projid = myID;
+    this.status = "";
+    this.objcount = 0;
+    this.pctvalidated = 0;
+    this.pctclassified = 0;
+  }
+}
+export { project };
+
+export function processUserName(myProjects: any): void {
+  const api: UsersApi = new UsersApi();
+  api
+    .showCurrentUserUsersMeGet()
+    .then((data) => {
+      myProjects.userName = data.data.name;
+      myProjects.userMail = "mailto:" + data.data.email;
+    })
+    .catch((reason) => {
+      // TODO : global error treatment      
+      console.log(reason);
+      alert(reason);
+      myProjects.userName = "<< User probably not logged in >>";
+      myProjects.userMail = "";
+    });
+}
+
+////////////////////////////////////////////////////////////////////
+export function processProjects(myProjects: any): void {
+  const api: ProjectsApi = new ProjectsApi();
+  api
+    .searchProjectsProjectsSearchGet()
+    .then((data) => {
+      if (data.data !== undefined && data.data.length > 0) {
+        myProjects.projects = new Array<project>();
+        for (let i: number = 0; i < data.data.length; i++) {
+          const dataI: ProjectModel = data.data[i];
+          if (dataI !== undefined) {
+            // DO A *new*
+            const oneProject: project = new project(dataI.title, dataI.projid);
+            if (dataI.objcount !== undefined && dataI.objcount !== null)
+              oneProject.objcount = dataI.objcount;
+            if (dataI.pctclassified !== undefined && dataI.pctclassified !== null)
+              oneProject.pctclassified = Math.round(dataI.pctclassified * 100) / 100;
+            if (dataI.pctvalidated !== undefined && dataI.pctvalidated !== null)
+              oneProject.pctvalidated = Math.round(dataI.pctvalidated * 100) / 100;
+            oneProject.status = dataI.status;
+            myProjects.projects.push(oneProject);
+          }
+        }
+      }
+    })
+    .catch((reason) => {
+      // TODO : global error treatment      
+      console.log(reason);
+      alert(reason);
+      myProjects = [];
+    });
 }

@@ -72,6 +72,7 @@ $EcoTaxaBorderColor : rgb(170,170,170); // border of cells
 $EcoTaxaLightPinkColor : rgb(255, 218, 223);
 $EcoTaxaLightBlueColor : lightblue;
 $EcoTaxaLightGreenColor : rgb(180, 233, 180);
+$EcoTaxaLightYellowColor : lightyellow;
 
 $EcoTaxaUnclassifiedColor: lightgrey;
 $EcoTaxaValidatedColor: #5cb85c; // RGBA(92,184,92,255)
@@ -172,7 +173,7 @@ $EcoTaxaBadgeBackgroundColor:grey;
 }
 
 .EcoTaxaProjectUsersTable {
-  @include EcoTaxaTableColors($EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaLightGreenColor);
+  @include EcoTaxaTableColors($EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaLightGreenColor, $EcoTaxaLightYellowColor);
 }
 
 .EcoTaxaSamplesTable {

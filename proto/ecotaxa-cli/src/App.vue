@@ -7,7 +7,7 @@
     <img src="./assets/logo_ecotaxa_25.png" />
     <span>
       <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link> |
+      <router-link to="/projects">Projects</router-link> |
       <router-link to="/prj_about/185">Project 185</router-link>
     </span>
     <span />  <!-- this empty item is *mandatory* -->

@@ -1,10 +1,9 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo_ecotaxa_25.png" />
-    <br>
-    <br>
-    <h1>"Welcome to EcoTaxa"</h1>
-  </div>
+  <body>
+    <div class="EcoTaxaFocusIntro">
+      <h1>Welcome to EcoTaxa</h1>
+    </div>
+  </body>
 </template>
 
 <script>
