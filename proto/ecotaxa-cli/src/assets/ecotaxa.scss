@@ -1,0 +1,209 @@
+// Useful 
+// https://sass-lang.com/guide
+// http://ipssidm.com/raisons-dabandonner-css-classique-sass/
+// https://www.ionos.fr/digitalguide/sites-internet/developpement-web/sass-tutoriel/
+// https://www.w3schools.com/sass/
+
+@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600";
+
+body {
+  font-family: 'Source Sans Pro', sans-serif, Helvetica, Arial;
+}
+
+#app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+/*
+#nav {
+  display:flex;
+  //padding: 30px;
+  justify-content:space-between;
+  //text-align: left;  
+}
+#nav a {
+//  font-weight: bold;
+  font-size: 2em;  
+}
+#nav a.router-link-exact-active {
+  color: #42b983;
+}*/
+
+
+h3 {
+  margin: 40px 0 0;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+a {
+  color: #42b983;
+}
+
+$free_cols_cell-width: 200px;
+
+
+.list-group {
+  flex-wrap: wrap;
+  display:flex;
+}
+
+// START HERE TO CUSTOMIZE the Eco properties
+$EcoTaxaBorderColor : rgb(170,170,170); // border of cells
+
+$EcoTaxaLightPinkColor : rgb(255, 218, 223);
+$EcoTaxaLightBlueColor : lightblue;
+$EcoTaxaLightGreenColor : rgb(180, 233, 180);
+$EcoTaxaLightYellowColor : lightyellow;
+
+$EcoTaxaUnclassifiedColor: lightgrey;
+$EcoTaxaValidatedColor: #5cb85c; // RGBA(92,184,92,255)
+$EcoTaxaDubiousColor: #f0ad4e; // rgba(240,173,78,255)
+$EcoTaxaPredictedColor:#5bc0de; // rgba(91,192,222,255)
+
+$EcoTaxaSampleColor: $EcoTaxaLightPinkColor;
+$EcoTaxaAcquAndProcColor: $EcoTaxaLightBlueColor;
+$EcoTaxaObjectColor: $EcoTaxaLightGreenColor;
+
+$EcoTaxaBadgeInsideColor:white;
+$EcoTaxaBadgeBackgroundColor:grey;
+
+.EcoTaxaIconPlusRouting {
+  padding: 10px;  
+  display:flex; // will distribute the items "equally" on the line
+  img {
+    height:30px;
+  }
+  justify-content:space-between;
+  span {
+  font-size: 1.5em;  
+  color: #42b983;
+  }
+}
+
+.EcoTaxaFocusIntro {
+  text-align: left;  
+  @extend .bg-light;
+  @extend .p-5;
+  @extend .rounded-lg !optional;
+  @extend .m-3;
+  @extend .text-left !optional;
+}
+
+.EcoTaxaBasicInformation {
+  @extend .col-sm-4;
+  text-align: center;
+  //display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin free-cols($my-back-color : lightgrey) {
+  border: 1px solid;
+  border-color: $EcoTaxaBorderColor;
+  background-color: $my-back-color;
+  min-width: $free_cols_cell-width;
+}
+
+.EcoTaxaSampleFields {
+  @include free-cols($EcoTaxaSampleColor);
+}
+
+.EcoTaxaAcquAndProcFields {
+  @include free-cols($EcoTaxaAcquAndProcColor);
+}
+
+.EcoTaxaObjectFields {
+  @include free-cols($EcoTaxaObjectColor);
+}
+
+.EcoTaxaExportButtonToTSV {
+  @extend .btn;
+  @extend .btn-primary;
+  //background-color: yellow;  
+}
+
+@mixin EcoTaxaTableColors($unclassified : $EcoTaxaUnclassifiedColor, // default color for Unclassified
+  $validated : $EcoTaxaValidatedColor, // default color for Validated
+  $dubious : $EcoTaxaDubiousColor, // default color for Dubious
+  $predicted : $EcoTaxaPredictedColor) // default color for Predicted
+{
+  border: 1px solid;
+  border-color: $EcoTaxaBorderColor;
+  background-color: lightgrey;
+  @extend .table;
+  @extend .table-bordered;
+  @extend .table-striped;
+  @extend .col-sm-6;
+
+  // td:nth-of-type(1) is the title column which stays grey
+  td:nth-of-type(2) {
+    background: $unclassified;
+  }
+
+  td:nth-of-type(3) {
+    background: $validated;
+  }
+
+  td:nth-of-type(4) {
+    background: $dubious;
+  }
+
+  td:nth-of-type(5) {
+    background: $predicted;
+  }
+}
+
+.EcoTaxaProjectUsersTable {
+  @include EcoTaxaTableColors($EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaLightGreenColor, $EcoTaxaLightYellowColor);
+}
+
+.EcoTaxaSamplesTable {
+  @include EcoTaxaTableColors; // will take default values
+}
+
+.EcoTaxaTaxaTable {
+  @include EcoTaxaTableColors($EcoTaxaValidatedColor, $EcoTaxaDubiousColor, $EcoTaxaPredictedColor);
+}
+
+.EcoTaxaListGroupHorizontal {
+  @extend .list-group-horizontal;  
+  @extend .list-group;
+}
+
+.EcoTaxaBadge {
+  @extend .badge;
+  @extend .badge-important;
+  @extend .badge-primary !optional;
+}
+
+// ! known problem about badges : DO NOT TOUCH
+// https://answers.themler.io/questions/90184/problem-with-bootstrap-badges
+.badge {
+  min-width: 28px;
+  border-radius: 10px;
+  color: EcoTaxaBadgeInsideColor;
+  background-color: #999999 !important;
+}
+
+.badge-important {
+  background-color: EcoTaxaBadgeBackgroundColor !important;
+}

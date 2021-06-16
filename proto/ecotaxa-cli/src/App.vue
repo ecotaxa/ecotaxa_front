@@ -2,12 +2,33 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
-  <div id="nav">
+
+  <div class="EcoTaxaIconPlusRouting">
+    <img src="./assets/logo_ecotaxa_25.png" />
+    <span>
+      <router-link to="/">Home</router-link> |
+      <router-link to="/projects">Projects</router-link> |
+      <router-link to="/prj_about/185">Project 185</router-link>
+    </span>
+    <span />  <!-- this empty item is *mandatory* -->
+  </div>
+  <router-view />
+
+  <!--div id="nav" >
+    <img class="alignleft"
+      height="30"
+      src="./assets/logo_ecotaxa_25.png"
+      style="margin: 10px 0"
+    />
+    <span class="aligncenter">
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link> |
     <router-link to="/prj_about/185">Project 185</router-link>
+    </span>
+    <span/>
   </div>
-  <router-view />
+  <router-view /-->
+
   <!--Banner />
   <img alt="Vue logo" src="./assets/logo.png" />  
   <Login />
@@ -42,26 +63,3 @@ export default class App extends Vue {
   }
 }
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>

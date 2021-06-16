@@ -3,6 +3,7 @@ import { SamplesApi } from "../../gen";
 import { TaxonomyTreeApi } from "../../gen";
 import { AxiosResponse } from "axios";
 import { ProjectModel } from "gen/api";
+import { UsersApi } from "../../gen";
 
 const _MAX_REQUEST_LENGTH: number = 2000; // in bytes
 const _SEPARATOR: string = " ";
@@ -98,8 +99,8 @@ Donc il faut vraiment le voir comme un flag à un temps t.
 enum userStatus { // from lower to higher "rights"
   _VIEWER = "Viewer",
   _ANNOTATOR = "Annotator",
-  _MANAGER = "Manager"
-};
+  _MANAGER = "Manager",
+}
 
 class projUser {
   status: userStatus;
@@ -121,7 +122,7 @@ class projUser {
 export { projUser };
 
 function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
-  const oneArray: Array<projUser> = new Array<projUser>();
+  myProject.projectUsers = new Array<projUser>();
   // Also add the managers in oneArray, because they are also users
   if (data.data.managers !== undefined) {
     for (let i: number = 0; i < data.data.managers.length; i++) {
@@ -131,7 +132,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       oneUser.email = "mailto:" + managerI.email;
       oneUser.name = managerI.name;
       oneUser.active = managerI.active;
-      oneArray.push(oneUser);
+      myProject.projectUsers.push(oneUser);
     }
   }
   if (data.data.annotators !== undefined) {
@@ -142,7 +143,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       oneUser.email = "mailto:" + annotatorI.email;
       oneUser.name = annotatorI.name;
       oneUser.active = annotatorI.active;
-      oneArray.push(oneUser);
+      myProject.projectUsers.push(oneUser);
     }
   }
   if (data.data.viewers !== undefined) {
@@ -153,7 +154,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       oneUser.email = "mailto:" + viewerI.email;
       oneUser.name = viewerI.name;
       oneUser.active = viewerI.active;
-      oneArray.push(oneUser);
+      myProject.projectUsers.push(oneUser);
     }
   }
   // arr is my array partially built with email + name + id + status
@@ -166,18 +167,18 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       if (data.data !== undefined && data.data[0] !== undefined) {
         const data0activities = data.data[0].activities;
         if (data0activities !== undefined) {
-          for (let i: number = 0; i < oneArray.length; i++) {
+          for (let i: number = 0; i < myProject.projectUsers.length; i++) {
             for (let j: number = 0; j < data0activities.length; j++) {
-              if (oneArray[i].id === data0activities[j].id) {
+              if (myProject.projectUsers[i].id === data0activities[j].id) {
                 // find corresponding IDs between Projects and ProjectsStats
-                oneArray[i].actions = data0activities[j].nb_actions;
-                oneArray[i].annot = data0activities[j].last_annot?.replace("T", " ");
+                myProject.projectUsers[i].actions = data0activities[j].nb_actions;
+                myProject.projectUsers[i].annot = data0activities[j].last_annot?.replace("T", " ");
               }
             }
           }
         }
       }
-      myProject.projectUsers = oneArray;
+      // myProject.projectUsers = oneArray;
     })
     .catch((reason) => {
       projectUsersKO(myProject, reason);
@@ -197,8 +198,8 @@ function projectUsersKO(myProject: any, reason: any): void {
 // 3) From JO : "Pour les samples et taxa, il faudrait afficher le nom (orig_id et name) plutôt que l'identifiant numérique"
 // ==> sampleQuerySampleSampleIdGet : donne l'orig_id === le name
 class sampleWithObjectsAndStatus {
-  sampleid: number | undefined;
   orig_id: string;
+  sampleid: number | undefined;
   nb_unclassified: number | undefined;
   nb_validated: number | undefined;
   nb_dubious: number | undefined;
@@ -219,29 +220,27 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
   api
     .samplesSearchSamplesSearchGet(myProject.projectID, "*")
     .then((data) => {
-      const oneArray: Array<sampleWithObjectsAndStatus> = new Array<sampleWithObjectsAndStatus>();
+      myProject.samplesWithObjectsAndStatus = new Array<sampleWithObjectsAndStatus>();
       const myData = data.data;
       for (let i: number = 0; i < myData.length; i++) {
         // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
         const oneSample: sampleWithObjectsAndStatus = new sampleWithObjectsAndStatus(myData[i].sampleid, myData[i].orig_id);
-        oneArray.push(oneSample);
+        myProject.samplesWithObjectsAndStatus.push(oneSample);
       }
-      return oneArray;
     })
-    .then((arr) => {
-      // arr is my array partially built with sampleid and orig_id fields
+    .then(() => {
       // Now I'm going to add nb_Unclassified, nb_Validated, nb_Dubious, nb_Predicted
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
       let sampleIDlist: string = ""; // build list of sample IDs
-      arr.forEach((sample) => {
+      for (let i: number = 0; i < myProject.samplesWithObjectsAndStatus.length; i++) {
+        const sample: sampleWithObjectsAndStatus = myProject.samplesWithObjectsAndStatus[i];
         sampleIDlist += sample.sampleid + _SEPARATOR;
-      });
+      }
       // Special case : if sampleIDlist is too long : for project 4421 or 1409 the problem exists
       if (sampleIDlist.length > _MAX_REQUEST_LENGTH) {
-        processSamplesLongRequest(myProject, sampleIDlist, arr);
-      }
-      else {
-        processThroughSampleList(myProject, sampleIDlist, arr);
+        processSamplesLongRequest(myProject, sampleIDlist);
+      } else {
+        processThroughSampleList(myProject, sampleIDlist);
       }
     })
     .catch((reason) => {
@@ -249,8 +248,8 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
     });
 }
 
-function processThroughSampleList(myProject: any, samplelist: string, arr: sampleWithObjectsAndStatus[]) {
-  if (samplelist != "") {
+function processThroughSampleList(myProject: any, samplelist: string) {
+  if (samplelist !== "") {
     const api2: SamplesApi = new SamplesApi(); // create another API as the first one is currently used
     api2
       .sampleSetGetStatsSampleSetTaxoStatsGet(samplelist)
@@ -259,16 +258,15 @@ function processThroughSampleList(myProject: any, samplelist: string, arr: sampl
         for (let i: number = 0; i < data.data.length; i++) {
           const myDataI = data.data[i];
           // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
-          for (let j: number = 0; j < arr.length; j++) {
-            if (myDataI.sample_id === arr[j].sampleid) {
-              arr[j].nb_unclassified = myDataI.nb_unclassified;
-              arr[j].nb_validated = myDataI.nb_validated;
-              arr[j].nb_dubious = myDataI.nb_dubious;
-              arr[j].nb_predicted = myDataI.nb_predicted;
+          for (let j: number = 0; j < myProject.samplesWithObjectsAndStatus.length; j++) {
+            if (myDataI.sample_id === myProject.samplesWithObjectsAndStatus[j].sampleid) {
+              myProject.samplesWithObjectsAndStatus[j].nb_unclassified = myDataI.nb_unclassified;
+              myProject.samplesWithObjectsAndStatus[j].nb_validated = myDataI.nb_validated;
+              myProject.samplesWithObjectsAndStatus[j].nb_dubious = myDataI.nb_dubious;
+              myProject.samplesWithObjectsAndStatus[j].nb_predicted = myDataI.nb_predicted;
             }
           }
         }
-        myProject.samplesWithObjectsAndStatus = arr;
       })
       .catch((reason) => {
         processSamplesWithObjectsAndStatusKO(myProject, reason);
@@ -276,18 +274,18 @@ function processThroughSampleList(myProject: any, samplelist: string, arr: sampl
   }
 }
 
-function processSamplesLongRequest(myProject: any, sampleIDlist: string, arr: sampleWithObjectsAndStatus[]) {
+function processSamplesLongRequest(myProject: any, sampleIDlist: string) {
   const nbPackets: number = Math.floor(sampleIDlist.length / _MAX_REQUEST_LENGTH) + 1;
   let oldSmallStep: number = 0;
   let smallStep: number = _MAX_REQUEST_LENGTH;
   for (let curPacket: number = 0; curPacket < nbPackets; curPacket++) {
     for (; smallStep < sampleIDlist.length; smallStep++)
-      if (sampleIDlist[smallStep] == _SEPARATOR)
+      if (sampleIDlist[smallStep] === _SEPARATOR)
         break; // found the separator, in order to get a full sampleID
 
     const subSampleIDlist: string = sampleIDlist.substring(oldSmallStep, smallStep);
 
-    processThroughSampleList(myProject, subSampleIDlist, arr);
+    processThroughSampleList(myProject, subSampleIDlist);
 
     oldSmallStep = smallStep + 1; // + 1 to swallow the separator
     smallStep += _MAX_REQUEST_LENGTH;
@@ -305,14 +303,14 @@ function processSamplesWithObjectsAndStatusKO(myProject: any, reason: any): void
 class taxon {
   id: number;
   display_name: string;
-  nb_unclassified: number | undefined;
+  //  nb_unclassified: number | undefined;
   nb_validated: number | undefined;
   nb_dubious: number | undefined;
   nb_predicted: number | undefined;
   constructor(mytaxon: number) {
     this.id = mytaxon;
     this.display_name = "";
-    this.nb_unclassified = 0;
+    //this.nb_unclassified = 0;
     this.nb_validated = 0;
     this.nb_dubious = 0;
     this.nb_predicted = 0;
@@ -328,41 +326,42 @@ export function processTaxa(myProject: any): void {
   api
     .projectSetGetStatsProjectSetTaxoStatsGet(myProject.projectID)
     .then((data) => {
-      const oneArray: Array<taxon> = new Array<taxon>();
+      //const oneArray: Array<taxon> = new Array<taxon>();
+      myProject.projectTaxa = new Array<taxon>();
       const myData = data.data[0]; // 0 because we work on a precise single project
       if (myData !== undefined && myData.used_taxa !== undefined) {
         for (let i: number = 0; i < myData.used_taxa.length; i++) {
           if (myData.used_taxa[i] !== -1) {
             const oneTaxon: taxon = new taxon(myData.used_taxa[i]);
-            oneArray.push(oneTaxon);
+            myProject.projectTaxa.push(oneTaxon);
           }
         }
       }
-      return oneArray;
     })
-    .then((arr) => {
-      // arr is my array partially built with taxon id
+    .then(() => {
+      // myProject.projectTaxa array partially built with taxon id.
       // Now I'm going to add nb_unclassified, nb_validated, nb_dubious, nb_predicted
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
-      let taxonIDlist: string = ""; // build list of sample IDs
-      arr.forEach((taxon) => {
-        taxonIDlist += taxon.id + _SEPARATOR;
-      });
-      const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
-      api2
+      let taxonIDlist: string = ""; // build list of taxon IDs
+      for (let i: number = 0; i < myProject.projectTaxa.length; i++) {
+        const oneTaxon: taxon = myProject.projectTaxa[i];
+        taxonIDlist += oneTaxon.id + _SEPARATOR;
+      }
+      //const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
+      api
         .projectSetGetStatsProjectSetTaxoStatsGet(myProject.projectID, taxonIDlist)
         .then((data) => {
           // analyze the answer by going through the array items
           for (let i: number = 0; i < data.data.length; i++) {
             const dataI = data.data[i];
-            // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)            
-            for (let j: number = 0; j < arr.length; j++) {
+            // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
+            for (let j: number = 0; j < myProject.projectTaxa.length; j++) {
               if (dataI !== undefined && dataI.used_taxa !== undefined) {
-                if (dataI.used_taxa[0] === arr[j].id) {
-                  arr[j].nb_unclassified = dataI.nb_unclassified; // TODO : probably useless field
-                  arr[j].nb_validated = dataI.nb_validated;
-                  arr[j].nb_dubious = dataI.nb_dubious;
-                  arr[j].nb_predicted = dataI.nb_predicted;
+                if (dataI.used_taxa[0] === myProject.projectTaxa[j].id) {
+                  //arr[j].nb_unclassified = dataI.nb_unclassified; // TODO : probably useless field
+                  myProject.projectTaxa[j].nb_validated = dataI.nb_validated;
+                  myProject.projectTaxa[j].nb_dubious = dataI.nb_dubious;
+                  myProject.projectTaxa[j].nb_predicted = dataI.nb_predicted;
                 }
               }
             }
@@ -370,7 +369,6 @@ export function processTaxa(myProject: any): void {
           // return arr; not necessary ! arr is known in the following .then scope
         })
         .then(() => {
-          // arr is known here !
           // Now I'm going to add the taxon name
           const api3: TaxonomyTreeApi = new TaxonomyTreeApi();
           api3
@@ -379,13 +377,12 @@ export function processTaxa(myProject: any): void {
               // analyze the answer by going through the array items
               for (let i: number = 0; i < data.data.length; i++) {
                 const dataI = data.data[i];
-                for (let j: number = 0; j < arr.length; j++) {
-                  if (dataI.id === arr[j].id) { // found !
-                    arr[j].display_name = dataI.display_name;
+                for (let j: number = 0; j < myProject.projectTaxa.length; j++) {
+                  if (dataI.id === myProject.projectTaxa[j].id) { // found !
+                    myProject.projectTaxa[j].display_name = dataI.display_name;
                   }
                 }
               }
-              myProject.projectTaxa = arr;
             })
             .catch((reason) => {
               processTaxaKO(myProject, reason);
@@ -408,4 +405,75 @@ function processTaxaKO(myProject: any, reason: any): void {
   console.log(reason);
   alert(reason);
   myProject.projectTaxa = []; // TODO : global error treatment
+}
+
+////////////////////////////////////////////////////////////////////
+// TODO ? maybe a separate .ts for each page ?
+////////////////////////////////////////////////////////////////////
+class project {
+  title: string | undefined;
+  projid: number | undefined;
+  status: string | undefined;
+  objcount: number;
+  pctvalidated: number;
+  pctclassified: number;
+  constructor(myTitle: string | undefined, myID: number | undefined) {
+    this.title = myTitle;
+    this.projid = myID;
+    this.status = "";
+    this.objcount = 0;
+    this.pctvalidated = 0;
+    this.pctclassified = 0;
+  }
+}
+export { project };
+
+export function processUserName(myProjects: any): void {
+  const api: UsersApi = new UsersApi();
+  api
+    .showCurrentUserUsersMeGet()
+    .then((data) => {
+      myProjects.userName = data.data.name;
+      myProjects.userMail = "mailto:" + data.data.email;
+    })
+    .catch((reason) => {
+      // TODO : global error treatment      
+      console.log(reason);
+      alert(reason);
+      myProjects.userName = "<< User probably not logged in >>";
+      myProjects.userMail = "";
+    });
+}
+
+////////////////////////////////////////////////////////////////////
+export function processProjects(myProjects: any): void {
+  const api: ProjectsApi = new ProjectsApi();
+  api
+    .searchProjectsProjectsSearchGet()
+    .then((data) => {
+      if (data.data !== undefined && data.data.length > 0) {
+        myProjects.projects = new Array<project>();
+        for (let i: number = 0; i < data.data.length; i++) {
+          const dataI: ProjectModel = data.data[i];
+          if (dataI !== undefined) {
+            // DO A *new*
+            const oneProject: project = new project(dataI.title, dataI.projid);
+            if (dataI.objcount !== undefined && dataI.objcount !== null)
+              oneProject.objcount = dataI.objcount;
+            if (dataI.pctclassified !== undefined && dataI.pctclassified !== null)
+              oneProject.pctclassified = Math.round(dataI.pctclassified * 100) / 100;
+            if (dataI.pctvalidated !== undefined && dataI.pctvalidated !== null)
+              oneProject.pctvalidated = Math.round(dataI.pctvalidated * 100) / 100;
+            oneProject.status = dataI.status;
+            myProjects.projects.push(oneProject);
+          }
+        }
+      }
+    })
+    .catch((reason) => {
+      // TODO : global error treatment      
+      console.log(reason);
+      alert(reason);
+      myProjects = [];
+    });
 }

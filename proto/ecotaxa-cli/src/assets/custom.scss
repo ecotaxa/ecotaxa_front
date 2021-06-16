@@ -1,4 +1,3 @@
-
 @import "../../node_modules/bootstrap/scss/functions";
 @import "../../node_modules/bootstrap/scss/variables";
 @import "../../node_modules/bootstrap/scss/mixins";
@@ -7,8 +6,11 @@
 $body-bg : #ECECEC;
 
 $theme-colors: (
-	"primary":  #F24438,
+	//"primary":  #F24438,
+	"primary":#337ab7, // color taken from historic EcoTaxa
+	//"primary":  #8f7ef0,	
 	"secondary":#7C4E40,
+	//"secondary":#dff70b,	
 	// don't forget other colors below
 	// or they won't be available anymore
 	"success":    $success,
@@ -53,3 +55,6 @@ $theme-colors: (
 
 // Utilities
 @import "../../node_modules/bootstrap/scss/utilities/api";
+
+// EcoTaxa at the very end, in order to overrule the rest if we wish
+@import "ecotaxa";
