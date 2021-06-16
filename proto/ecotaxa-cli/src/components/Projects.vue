@@ -3,6 +3,8 @@
     <div class="EcoTaxaFocusIntro">
       <h1>
         Projects available for <a :href="userMail">{{ userName }}</a>
+        <br>
+        {{waiting}}
       </h1>
     </div>
     <div id="#app" class="container">
@@ -42,6 +44,7 @@ import * as utils from "../utils/utils";
       userName: String(""), // user currently logged in
       userMail: String(""),
       projects: Array<utils.project>(),
+      waiting: String("Wait please...")
     };
   },
   mounted() {
@@ -52,6 +55,7 @@ import * as utils from "../utils/utils";
 export default class Projects extends Vue {
   userName!: string;
   userMail!: string;
+  waiting!: string;
 }
 </script>
 

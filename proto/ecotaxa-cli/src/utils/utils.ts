@@ -475,5 +475,7 @@ export function processProjects(myProjects: any): void {
       console.log(reason);
       alert(reason);
       myProjects = [];
-    });
+    })
+    .finally(() => { myProjects.waiting = ""; }
+    );
 }
