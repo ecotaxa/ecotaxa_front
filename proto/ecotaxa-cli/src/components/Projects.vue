@@ -4,7 +4,7 @@
       <h1>
         Projects available for <a :href="userMail">{{ userName }}</a>
         <br>
-        {{waiting}}
+        {{waiting }}
       </h1>
     </div>
     <div id="#app" class="container">
