@@ -3,8 +3,9 @@
     <div class="EcoTaxaFocusIntro">
       <h1>
         Projects available for <a :href="userMail">{{ userName }}</a>
-        <br>
+        <h4>
         {{waiting }}
+        </h4>
       </h1>
     </div>
     <div id="#app" class="container">
@@ -44,7 +45,7 @@ import * as utils from "../utils/utils";
       userName: String(""), // user currently logged in
       userMail: String(""),
       projects: Array<utils.project>(),
-      waiting: String("Wait please...")
+      waiting: String("Please wait for server answer...")
     };
   },
   mounted() {
