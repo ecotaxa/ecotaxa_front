@@ -6,7 +6,7 @@
       </h1>
     </div>
     <div id="#app" class="container">
-      <table class="EcoTaxaProjectUsersTable">
+      <table class="EcoTaxaProjectsTable">
         <thead>
           <tr>
             <th>Title (ID)</th>

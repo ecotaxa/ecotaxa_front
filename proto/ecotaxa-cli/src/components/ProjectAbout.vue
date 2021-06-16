@@ -79,7 +79,7 @@
       </ul>
       <br />
       <h2>Project Users</h2>
-      <table class="EcoTaxaProjectUsersTable">
+      <table class="EcoTaxaUsersTable">
         <thead>
           <tr>
             <th>Name</th>

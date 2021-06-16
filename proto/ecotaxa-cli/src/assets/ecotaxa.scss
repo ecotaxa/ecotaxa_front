@@ -6,6 +6,12 @@
 
 @import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600";
 
+.container {
+  /* not working one */
+  cursor: "download.jpeg", auto;
+}
+
+
 body {
   font-family: 'Source Sans Pro', sans-serif, Helvetica, Arial;
 }
@@ -141,11 +147,12 @@ $EcoTaxaBadgeBackgroundColor:grey;
   //background-color: yellow;  
 }
 
-@mixin EcoTaxaTableColors($unclassified : $EcoTaxaUnclassifiedColor, // default color for Unclassified
-  $validated : $EcoTaxaValidatedColor, // default color for Validated
-  $dubious : $EcoTaxaDubiousColor, // default color for Dubious
-  $predicted : $EcoTaxaPredictedColor) // default color for Predicted
+@mixin EcoTaxaTableColors($column1 : $EcoTaxaUnclassifiedColor, // default color for Unclassified
+  $column2 : $EcoTaxaValidatedColor, // default color for Validated
+  $column3 : $EcoTaxaDubiousColor, // default color for Dubious
+  $column4 : $EcoTaxaPredictedColor) // default color for Predicted
 {
+  // column 0 stays grey
   border: 1px solid;
   border-color: $EcoTaxaBorderColor;
   background-color: lightgrey;
@@ -156,24 +163,28 @@ $EcoTaxaBadgeBackgroundColor:grey;
 
   // td:nth-of-type(1) is the title column which stays grey
   td:nth-of-type(2) {
-    background: $unclassified;
+    background: $column1;
   }
 
   td:nth-of-type(3) {
-    background: $validated;
+    background: $column2;
   }
 
   td:nth-of-type(4) {
-    background: $dubious;
+    background: $column3;
   }
 
   td:nth-of-type(5) {
-    background: $predicted;
+    background: $column4;
   }
 }
 
-.EcoTaxaProjectUsersTable {
+.EcoTaxaUsersTable {
   @include EcoTaxaTableColors($EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaLightGreenColor, $EcoTaxaLightYellowColor);
+}
+
+.EcoTaxaProjectsTable {
+  @include EcoTaxaTableColors($EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaValidatedColor, $EcoTaxaUnclassifiedColor);
 }
 
 .EcoTaxaSamplesTable {

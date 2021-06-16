@@ -449,7 +449,7 @@ export function processUserName(myProjects: any): void {
 export function processProjects(myProjects: any): void {
   const api: ProjectsApi = new ProjectsApi();
   api
-    .searchProjectsProjectsSearchGet()
+    .searchProjectsProjectsSearchGet(true) // true is temp for the moment
     .then((data) => {
       if (data.data !== undefined && data.data.length > 0) {
         myProjects.projects = new Array<project>();
