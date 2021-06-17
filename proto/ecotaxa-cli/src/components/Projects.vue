@@ -9,11 +9,23 @@
       </h1>
     </div>
     <div id="#app" class="container">
-      <!--input type="checkbox" id="checkbox" v-model="yourProjects" true-value="true" false-value="false"/>
-      <label for="checkbox">&emsp;Your projects</label-->
-
-      <input type="checkbox" @click="yourProjectsToggle" v-model="yourProjects" />&emsp;Your projects
-
+      <input type="checkbox" v-model="yourProjects" />Projects I'm in&emsp;
+      <input type="checkbox" v-model="forManaging" />For managing&emsp;
+      <input type="checkbox" v-model="filterSubset" />Filter subsets&emsp;
+      <br />
+      Title filter&emsp;<input type="text" v-model="titleFilter" />&emsp;&emsp;
+      Instrument Filter&emsp;<input type="text" v-model="instrumentFilter" />
+      <br />
+       <br />
+      <button
+        type="button"
+        @click="runProjectsQuery"
+        class="EcoTaxaExportButtonToTSV"
+      >
+        Run Query
+      </button>
+      <br />
+       <br />
       <table class="EcoTaxaProjectsTable">
         <thead>
           <tr>
@@ -56,17 +68,19 @@ import * as utils from "../utils/utils";
       projects: Array<utils.project>(),
       waiting: String(""),
       // TODO : yourProjects + yP is temporary code
-      yourProjects: Boolean(true), // just to set the checkbox to true by default
-      yP : Boolean(true), // to really handle the value
+      yourProjects: Boolean(true), // this checkbox set to true by default
+      forManaging : Boolean(false),
+      filterSubset:Boolean(false),
+      titleFilter:String(""),
+      instrumentFilter:String("")
     };
   },
   mounted() {
     utils.processUserName(this);
-    utils.processProjects(this);
+    // utils.processProjects(this);
   },
   methods: {
-    yourProjectsToggle: function () {
-      this.yP = !this.yP;
+    runProjectsQuery: function () {
       utils.processProjects(this);
     },
   },

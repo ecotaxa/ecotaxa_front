@@ -452,10 +452,15 @@ export function processUserName(myProjects: any): void {
 ////////////////////////////////////////////////////////////////////
 export function processProjects(theProjects: any): void {
   theProjects.waiting = "Please wait for server answer...";
-  // alert(theProjects.yourProjects);
+  theProjects.projects = [];
   const api: ProjectsApi = new ProjectsApi();
   api
-    .searchProjectsProjectsSearchGet(!theProjects.yP, !theProjects.yP) // !theProjects.yourProjects) // apply filters
+    .searchProjectsProjectsSearchGet(!theProjects.yourProjects, !theProjects.yourProjects,
+      theProjects.forManaging,
+      theProjects.titleFilter,
+      theProjects.instrumentFilter,
+      theProjects.filterSubset
+    )
     .then((data) => {
       if (data.data !== undefined && data.data.length > 0) {
         theProjects.projects = new Array<project>();
@@ -484,7 +489,7 @@ export function processProjects(theProjects: any): void {
       // TODO : global error treatment      
       console.log(reason);
       alert(reason);
-      theProjects = [];
+      theProjects.projects = [];
     })
     .finally(() => { theProjects.waiting = ""; }
     );

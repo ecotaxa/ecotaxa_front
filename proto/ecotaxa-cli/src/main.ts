@@ -2,6 +2,7 @@
 // Main app creation
 //
 // Bootstrap for vue3 (see e.g. https://www.techiediaries.com/vue-bootstrap/)
+// typescript with vuejs : https://blog.logrocket.com/vue-typescript-tutorial-examples/
 
 // import Vue from "vue";
 // Vue.use(BootstrapVue); // DOES NOT WORK
