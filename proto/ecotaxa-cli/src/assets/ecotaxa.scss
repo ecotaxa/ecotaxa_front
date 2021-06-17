@@ -144,9 +144,11 @@ $EcoTaxaBadgeBackgroundColor:grey;
 @mixin EcoTaxaTableColors($column1 : $EcoTaxaUnclassifiedColor, // default color for Unclassified
   $column2 : $EcoTaxaValidatedColor, // default color for Validated
   $column3 : $EcoTaxaDubiousColor, // default color for Dubious
-  $column4 : $EcoTaxaPredictedColor) // default color for Predicted
+  $column4 : $EcoTaxaPredictedColor, // default color for Predicted
+  $column5 : $EcoTaxaLightYellowColor) // default color for column 5
 {
   // column 0 stays grey
+  // NOT A PROBLEM is some columns are not used
   border: 1px solid;
   border-color: $EcoTaxaBorderColor;
   background-color: lightgrey;
@@ -156,6 +158,10 @@ $EcoTaxaBadgeBackgroundColor:grey;
   @extend .col-sm-6;
 
   // td:nth-of-type(1) is the title column which stays grey
+  td:nth-of-type(1) {
+    text-align:left;
+  }
+
   td:nth-of-type(2) {
     background: $column1;
   }
@@ -171,6 +177,10 @@ $EcoTaxaBadgeBackgroundColor:grey;
   td:nth-of-type(5) {
     background: $column4;
   }
+
+  td:nth-of-type(6) {
+    background: $column5;
+  }  
 }
 
 .EcoTaxaUsersTable {
@@ -178,7 +188,7 @@ $EcoTaxaBadgeBackgroundColor:grey;
 }
 
 .EcoTaxaProjectsTable {
-  @include EcoTaxaTableColors($EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaValidatedColor, $EcoTaxaUnclassifiedColor);
+  @include EcoTaxaTableColors($EcoTaxaLightYellowColor, $EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaValidatedColor, $EcoTaxaUnclassifiedColor);
 }
 
 .EcoTaxaSamplesTable {

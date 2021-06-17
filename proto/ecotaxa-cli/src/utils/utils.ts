@@ -413,6 +413,8 @@ function processTaxaKO(myProject: any, reason: any): void {
 class project {
   title: string | undefined;
   projid: number | undefined;
+  name: string;
+  email: string;
   status: string | undefined;
   objcount: number;
   pctvalidated: number;
@@ -420,6 +422,8 @@ class project {
   constructor(myTitle: string | undefined, myID: number | undefined) {
     this.title = myTitle;
     this.projid = myID;
+    this.name = "";
+    this.email = "";    
     this.status = "";
     this.objcount = 0;
     this.pctvalidated = 0;
@@ -446,13 +450,15 @@ export function processUserName(myProjects: any): void {
 }
 
 ////////////////////////////////////////////////////////////////////
-export function processProjects(myProjects: any): void {
+export function processProjects(theProjects: any): void {
+  theProjects.waiting = "Please wait for server answer...";
+  // alert(theProjects.yourProjects);
   const api: ProjectsApi = new ProjectsApi();
   api
-    .searchProjectsProjectsSearchGet(true) // true is temp for the moment
+    .searchProjectsProjectsSearchGet(!theProjects.yP, !theProjects.yP) // !theProjects.yourProjects) // apply filters
     .then((data) => {
       if (data.data !== undefined && data.data.length > 0) {
-        myProjects.projects = new Array<project>();
+        theProjects.projects = new Array<project>();
         for (let i: number = 0; i < data.data.length; i++) {
           const dataI: ProjectModel = data.data[i];
           if (dataI !== undefined) {
@@ -464,8 +470,12 @@ export function processProjects(myProjects: any): void {
               oneProject.pctclassified = Math.round(dataI.pctclassified * 100) / 100;
             if (dataI.pctvalidated !== undefined && dataI.pctvalidated !== null)
               oneProject.pctvalidated = Math.round(dataI.pctvalidated * 100) / 100;
+            if (dataI.contact !== null && dataI.contact !== undefined) {
+              oneProject.email = "mailto:" + dataI.contact.email;
+              oneProject.name = dataI.contact.name;
+            }
             oneProject.status = dataI.status;
-            myProjects.projects.push(oneProject);
+            theProjects.projects.push(oneProject);
           }
         }
       }
@@ -474,8 +484,8 @@ export function processProjects(myProjects: any): void {
       // TODO : global error treatment      
       console.log(reason);
       alert(reason);
-      myProjects = [];
+      theProjects = [];
     })
-    .finally(() => {  myProjects.waiting = ""; }
+    .finally(() => { theProjects.waiting = ""; }
     );
 }
