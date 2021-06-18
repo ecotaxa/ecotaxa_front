@@ -153,9 +153,6 @@ def TaskFactory(ClassName, task=None):
     from appli.tasks.taskclassifauto2 import TaskClassifAuto2
     if ClassName == "TaskClassifAuto2":
         return TaskClassifAuto2(task)
-    from appli.tasks.taskexporttxt import TaskExportTxt
-    if ClassName == "TaskExportTxt":
-        return TaskExportTxt(task)
     # Particle module tasks
     from .taskpartzooscanimport import TaskPartZooscanImport
     if ClassName == "TaskPartZooscanImport":

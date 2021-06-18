@@ -43,7 +43,7 @@ class ExportJob(Job):
                     "splitcsvby": ""
                     }
 
-        html = "<h3>Extract subset</h3>"
+        html = "<h3>Data Export</h3>"
         return render_template('jobs/export_create.html', header=html,
                                form=formdata, filtertxt=filtertxt)
 
