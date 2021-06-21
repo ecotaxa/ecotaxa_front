@@ -77,7 +77,7 @@ import * as utils from "../utils/utilsProjects";
   },
   mounted() {
     utils.processUserName(this);
-    utils.processProjects(this); // ==> Run query button when reaching this page
+    // utils.processProjects(this); // ==> Run query button when reaching this page
   },
   computed: {
     waiting: function (): string {

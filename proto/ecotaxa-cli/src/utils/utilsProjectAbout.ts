@@ -5,7 +5,6 @@ import { AxiosResponse } from "axios";
 import { ProjectModel } from "gen/api";
 import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
-
 ////////////////////////////////////////////////////////////////////
 export function processProject(myProject: any): void {
   const api: ProjectsApi = new ProjectsApi();
