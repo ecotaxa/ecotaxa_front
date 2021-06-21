@@ -126,7 +126,7 @@
       <button
         type="button"
         @click="exportSamplesToTSVFile"
-        class="EcoTaxaExportButtonToTSV"
+        class="EcoTaxaButton"
       >
         Export in .tsv format
       </button>
@@ -158,7 +158,7 @@
       <button
         type="button"
         @click="exportTaxaToTSVFile"
-        class="EcoTaxaExportButtonToTSV"
+        class="EcoTaxaButton"
       >
         Export in .tsv format
       </button>
@@ -230,7 +230,7 @@ import { Options, Vue } from "vue-class-component";
 //import { onMounted, ref } from "vue";
 // import 'bootst rap';
 import { Dropdown } from "bootstrap";
-import * as utils from "../utils/utils";
+import * as utils from "../utils/utilsProjectAbout";
 import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
 import { computeLicense } from "../utils/manageLicenses";
 

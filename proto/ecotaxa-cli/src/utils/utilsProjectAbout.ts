@@ -3,10 +3,8 @@ import { SamplesApi } from "../../gen";
 import { TaxonomyTreeApi } from "../../gen";
 import { AxiosResponse } from "axios";
 import { ProjectModel } from "gen/api";
-import { UsersApi } from "../../gen";
-
-const _MAX_REQUEST_LENGTH: number = 2000; // in bytes
-const _SEPARATOR: string = " ";
+import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
+import { _SEPARATOR } from "./utilsConsts";
 
 ////////////////////////////////////////////////////////////////////
 export function processProject(myProject: any): void {
@@ -405,92 +403,4 @@ function processTaxaKO(myProject: any, reason: any): void {
   console.log(reason);
   alert(reason);
   myProject.projectTaxa = []; // TODO : global error treatment
-}
-
-////////////////////////////////////////////////////////////////////
-// TODO ? maybe a separate .ts for each page ?
-////////////////////////////////////////////////////////////////////
-class project {
-  title: string | undefined;
-  projid: number | undefined;
-  name: string;
-  email: string;
-  status: string | undefined;
-  objcount: number;
-  pctvalidated: number;
-  pctclassified: number;
-  constructor(myTitle: string | undefined, myID: number | undefined) {
-    this.title = myTitle;
-    this.projid = myID;
-    this.name = "";
-    this.email = "";    
-    this.status = "";
-    this.objcount = 0;
-    this.pctvalidated = 0;
-    this.pctclassified = 0;
-  }
-}
-export { project };
-
-export function processUserName(myProjects: any): void {
-  const api: UsersApi = new UsersApi();
-  api
-    .showCurrentUserUsersMeGet()
-    .then((data) => {
-      myProjects.userName = data.data.name;
-      myProjects.userMail = "mailto:" + data.data.email;
-    })
-    .catch((reason) => {
-      // TODO : global error treatment      
-      console.log(reason);
-      alert(reason);
-      myProjects.userName = "<< User probably not logged in >>";
-      myProjects.userMail = "";
-    });
-}
-
-////////////////////////////////////////////////////////////////////
-export function processProjects(theProjects: any): void {
-  theProjects.waiting = "Please wait for server answer...";
-  theProjects.projects = [];
-  const api: ProjectsApi = new ProjectsApi();
-  api
-    .searchProjectsProjectsSearchGet(!theProjects.yourProjects, !theProjects.yourProjects,
-      theProjects.forManaging,
-      theProjects.titleFilter,
-      theProjects.instrumentFilter,
-      theProjects.filterSubset
-    )
-    .then((data) => {
-      if (data.data !== undefined && data.data.length > 0) {
-        theProjects.projects = new Array<project>();
-        for (let i: number = 0; i < data.data.length; i++) {
-          const dataI: ProjectModel = data.data[i];
-          if (dataI !== undefined) {
-            // DO A *new*
-            const oneProject: project = new project(dataI.title, dataI.projid);
-            if (dataI.objcount !== undefined && dataI.objcount !== null)
-              oneProject.objcount = dataI.objcount;
-            if (dataI.pctclassified !== undefined && dataI.pctclassified !== null)
-              oneProject.pctclassified = Math.round(dataI.pctclassified * 100) / 100;
-            if (dataI.pctvalidated !== undefined && dataI.pctvalidated !== null)
-              oneProject.pctvalidated = Math.round(dataI.pctvalidated * 100) / 100;
-            if (dataI.contact !== null && dataI.contact !== undefined) {
-              oneProject.email = "mailto:" + dataI.contact.email;
-              oneProject.name = dataI.contact.name;
-            }
-            oneProject.status = dataI.status;
-            theProjects.projects.push(oneProject);
-          }
-        }
-      }
-    })
-    .catch((reason) => {
-      // TODO : global error treatment      
-      console.log(reason);
-      alert(reason);
-      theProjects.projects = [];
-    })
-    .finally(() => { theProjects.waiting = ""; }
-    );
 }

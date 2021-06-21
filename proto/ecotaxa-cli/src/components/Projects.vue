@@ -20,7 +20,7 @@
       <button
         type="button"
         @click="runProjectsQuery"
-        class="EcoTaxaExportButtonToTSV"
+        class="EcoTaxaButton"
       >
         Run Query
       </button>
@@ -34,7 +34,7 @@
             <th>Status</th>
             <th>Nb objects</th>
             <th>% validated</th>
-            <th>% classified</th>
+            <th>Nb taxa</th>
           </tr>
         </thead>
         <tbody>
@@ -46,7 +46,7 @@
             <td>{{ myProject.status }}</td>
             <td>{{ myProject.objcount }}</td>
             <td>{{ myProject.pctvalidated }}</td>
-            <td>{{ myProject.pctclassified }}</td>
+            <td>{{ nb_taxa.get(myProject.projid) }}</td>
           </tr>
         </tbody>
       </table>
@@ -57,7 +57,7 @@
 <script lang="ts">
 // import { Prop } from "vue-property-decorator";
 import { Options, Vue } from "vue-class-component";
-import * as utils from "../utils/utils";
+import * as utils from "../utils/utilsProjects";
 
 @Options({
   name: "Projects",
@@ -66,21 +66,28 @@ import * as utils from "../utils/utils";
       userName: String(""), // user currently logged in
       userMail: String(""),
       projects: Array<utils.project>(),
-      waiting: String(""),
-      // TODO : yourProjects + yP is temporary code
       yourProjects: Boolean(true), // this checkbox set to true by default
-      forManaging : Boolean(false),
-      filterSubset:Boolean(false),
-      titleFilter:String(""),
-      instrumentFilter:String("")
+      forManaging: Boolean(false),
+      filterSubset: Boolean(false),
+      titleFilter: String(""),
+      instrumentFilter: String(""),
+      nb_taxa: new Map<number, number>(),
+      nbRequests: Number(0),
     };
   },
   mounted() {
     utils.processUserName(this);
-    // utils.processProjects(this);
+    utils.processProjects(this); // ==> Run query button when reaching this page
+  },
+  computed: {
+    waiting: function (): string {
+      if (this.nbRequests === 0) return "";
+      return "Please wait for server answer...";
+    },
   },
   methods: {
     runProjectsQuery: function () {
+      this.nbRequests == 0; // should not be necessary
       utils.processProjects(this);
     },
   },
@@ -91,6 +98,3 @@ export default class Projects extends Vue {
   waiting!: string;
 }
 </script>
-
-
-

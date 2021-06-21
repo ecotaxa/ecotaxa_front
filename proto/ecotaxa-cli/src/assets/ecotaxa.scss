@@ -135,7 +135,7 @@ $EcoTaxaBadgeBackgroundColor:grey;
   @include free-cols($EcoTaxaObjectColor);
 }
 
-.EcoTaxaExportButtonToTSV {
+.EcoTaxaButton {
   @extend .btn;
   @extend .btn-primary;
   //background-color: yellow;  
