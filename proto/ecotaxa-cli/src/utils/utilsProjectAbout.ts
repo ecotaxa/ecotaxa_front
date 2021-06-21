@@ -2,7 +2,7 @@ import { ProjectsApi } from "../../gen";
 import { SamplesApi } from "../../gen";
 import { TaxonomyTreeApi } from "../../gen";
 import { AxiosResponse } from "axios";
-import { ProjectModel } from "gen/api";
+import { ProjectModel, UserModel } from "gen/api";
 import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
 ////////////////////////////////////////////////////////////////////
@@ -99,23 +99,26 @@ enum userStatus { // from lower to higher "rights"
   _MANAGER = "Manager",
 }
 
-class projUser {
+class projUser implements UserModel {
+  id;  
+  email;
+  name;
+  active?;
+  nb_actions: number;
+  last_annot: string;
   status: userStatus;
-  name: string;
-  email: string;
-  id: number | undefined; // TODO : fix : undefined needed because of a strange compilation error
-  actions: number | undefined; // TODO : fix : undefined needed because of a strange compilation error
-  annot: string | undefined; // It's a date. TODO : fix : undefined needed because of a strange compilation error
-  active: boolean | undefined;
+  
   constructor(myID: number | undefined, myStatus: userStatus) {
     this.id = myID;
-    this.status = myStatus;
-    this.name = "";
     this.email = "";
-    this.actions = 0;
-    this.annot = "N/A";
-  }
+    this.name = "";
+    this.active = false;
+    this.nb_actions = 0;
+    this.last_annot = "N/A";    
+    this.status = myStatus;
+    }
 }
+
 export { projUser };
 
 function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
@@ -127,8 +130,8 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       const managerI = data.data.managers[i];
       const oneUser: projUser = new projUser(managerI.id, userStatus._MANAGER);
       oneUser.email = "mailto:" + managerI.email;
+      oneUser.active = managerI.active;      
       oneUser.name = managerI.name;
-      oneUser.active = managerI.active;
       myProject.projectUsers.push(oneUser);
     }
   }
@@ -150,7 +153,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       const oneUser: projUser = new projUser(viewerI.id, userStatus._VIEWER);
       oneUser.email = "mailto:" + viewerI.email;
       oneUser.name = viewerI.name;
-      oneUser.active = viewerI.active;
+      oneUser.active = viewerI.active;      
       myProject.projectUsers.push(oneUser);
     }
   }
@@ -168,8 +171,8 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
             for (let j: number = 0; j < data0activities.length; j++) {
               if (myProject.projectUsers[i].id === data0activities[j].id) {
                 // find corresponding IDs between Projects and ProjectsStats
-                myProject.projectUsers[i].actions = data0activities[j].nb_actions;
-                myProject.projectUsers[i].annot = data0activities[j].last_annot?.replace("T", " ");
+                myProject.projectUsers[i].nb_actions = data0activities[j].nb_actions;
+                myProject.projectUsers[i].last_annot = data0activities[j].last_annot?.replace("T", " ");
               }
             }
           }
@@ -313,6 +316,7 @@ class taxon {
     this.nb_predicted = 0;
   }
 }
+
 export { taxon };
 export function processTaxa(myProject: any): void {
   // use projectSetGetStatsProjectSetTaxoStatsGet: async (ids: string, taxaIds?: string)

@@ -1,57 +1,54 @@
 <template>
-  <body>
-    <div class="EcoTaxaFocusIntro">
-      <h1>
-        Projects available for <a :href="userMail">{{ userName }}</a>
-        <h4>
-          {{ waiting }}
-        </h4>
-      </h1>
-    </div>
-    <div id="#app" class="container">
-      <input type="checkbox" v-model="yourProjects" />Projects I'm in&emsp;
-      <input type="checkbox" v-model="forManaging" />For managing&emsp;
-      <input type="checkbox" v-model="filterSubset" />Filter subsets&emsp;
+  <div class="EcoTaxaFocusIntro">
+    <h1>
+      Projects available for <a :href="userMail">{{ userName }}</a>
       <br />
-      Title filter&emsp;<input type="text" v-model="titleFilter" />&emsp;&emsp;
-      Instrument Filter&emsp;<input type="text" v-model="instrumentFilter" />
-      <br />
-       <br />
-      <button
-        type="button"
-        @click="runProjectsQuery"
-        class="EcoTaxaButton"
-      >
-        Run Query
-      </button>
-      <br />
-       <br />
-      <table class="EcoTaxaProjectsTable">
-        <thead>
-          <tr>
-            <th>Title (ID)</th>
-            <th>Contact</th>
-            <th>Status</th>
-            <th>Nb objects</th>
-            <th>% validated</th>
-            <th>Nb taxa</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="myProject in projects" :key="myProject.index">
-            <td>{{ myProject.title }}&emsp;({{ myProject.projid }})</td>
-            <td>
-              <a :href="myProject.email">{{ myProject.name }}</a>
-            </td>
-            <td>{{ myProject.status }}</td>
-            <td>{{ myProject.objcount }}</td>
-            <td>{{ myProject.pctvalidated }}</td>
-            <td>{{ nb_taxa.get(myProject.projid) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </body>
+      <span v-if="nbRequests">
+        <img src="../assets/wait.png" height="40" />
+      </span>
+    </h1>
+  </div>
+  <div id="#app" class="container">
+    <input type="checkbox" v-model="yourProjects" />Projects I'm in&emsp;
+    <input type="checkbox" v-model="forManaging" />For managing&emsp;
+    <input type="checkbox" v-model="filterSubset" />Filter subsets&emsp;
+    <br />
+    Title filter&emsp;<input type="text" v-model="titleFilter" />&emsp;&emsp;
+    Instrument Filter&emsp;<input type="text" v-model="instrumentFilter" />
+    <br />
+    <br />
+    <button type="button" @click="runProjectsQuery" class="EcoTaxaButton">
+      Run Query
+    </button>
+    <br />
+    <br />
+    <table class="EcoTaxaProjectsTable">
+      <thead>
+        <tr>
+          <th>Title (ID)</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Nb objects</th>
+          <th>% validated</th>
+          <th>Nb taxa</th>
+          <th>Nb Instruments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="myProject in projects" :key="myProject.index">
+          <td>{{ myProject.title }}&emsp;({{ myProject.projid }})</td>
+          <td>
+            <a :href="myProject.email">{{ myProject.name }}</a>
+          </td>
+          <td>{{ myProject.status }}</td>
+          <td>{{ myProject.objcount }}</td>
+          <td>{{ myProject.pctvalidated }}</td>
+          <td>{{ nb_taxa.get(myProject.projid) }}</td>
+          <td>TODOLaurentS</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script lang="ts">
@@ -78,12 +75,6 @@ import * as utils from "../utils/utilsProjects";
   mounted() {
     utils.processUserName(this);
     // utils.processProjects(this); // ==> Run query button when reaching this page
-  },
-  computed: {
-    waiting: function (): string {
-      if (this.nbRequests === 0) return "";
-      return "Please wait for server answer...";
-    },
   },
   methods: {
     runProjectsQuery: function () {

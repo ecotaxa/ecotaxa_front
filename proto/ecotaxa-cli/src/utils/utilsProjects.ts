@@ -5,17 +5,18 @@ import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
 
 ////////////////////////////////////////////////////////////////////
-class project {
-  title: string | undefined;
-  projid: number | undefined;
-  name: string;
-  email: string;
-  status: string | undefined;
-  objcount: number;
-  pctvalidated: number;
-  pctclassified: number;
 
-  constructor(myTitle: string | undefined, myID: number | undefined) {
+// class project implements ProjectModel {
+class project implements ProjectModel {
+  title;
+  projid;
+  objcount;
+  pctvalidated;
+  status:string;
+  name:string;
+  email:string;
+
+  constructor(myTitle: string, myID: number) {
     this.title = myTitle;
     this.projid = myID;
     this.name = "";
@@ -23,8 +24,7 @@ class project {
     this.status = "";
     this.objcount = 0;
     this.pctvalidated = 0;
-    this.pctclassified = 0;
-  }
+  }  
 }
 
 export { project };
@@ -64,20 +64,20 @@ export function processProjects(theProjects: any): void {
         theProjects.projects = new Array<project>();
         for (let i: number = 0; i < data.data.length; i++) {
           const dataI: ProjectModel = data.data[i];
-          if (dataI !== undefined) {
+          if (dataI !== undefined && dataI.projid != undefined) {
             // DO A *new*
             const oneProject: project = new project(dataI.title, dataI.projid);
             if (dataI.objcount !== undefined && dataI.objcount !== null)
               oneProject.objcount = dataI.objcount;
-            if (dataI.pctclassified !== undefined && dataI.pctclassified !== null)
-              oneProject.pctclassified = Math.round(dataI.pctclassified * 100) / 100;
             if (dataI.pctvalidated !== undefined && dataI.pctvalidated !== null)
               oneProject.pctvalidated = Math.round(dataI.pctvalidated * 100) / 100;
             if (dataI.contact !== null && dataI.contact !== undefined) {
               oneProject.email = "mailto:" + dataI.contact.email;
               oneProject.name = dataI.contact.name;
             }
-            oneProject.status = dataI.status;
+            if (dataI.status !== undefined)
+              oneProject.status = dataI.status;
+            // NB INSTRUMENTS to come            
             theProjects.projects.push(oneProject);
           }
         }

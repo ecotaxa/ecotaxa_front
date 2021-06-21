@@ -1,5 +1,4 @@
 <template>
-  <body>
     <div class="EcoTaxaFocusIntro">
       <h1>Project {{ projectID }} : {{ projectTitle }}</h1>
       <!--p-->
@@ -95,9 +94,9 @@
                 <a :href="myUser.email">{{ myUser.name }}</a>
               </td>
               <td>
-                <span class="EcoTaxaBadge">{{ myUser.actions }}</span>
+                <span class="EcoTaxaBadge">{{ myUser.nb_actions }}</span>
               </td>
-              <td>{{ myUser.annot }}</td>
+              <td>{{ myUser.last_annot }}</td>
               <td>{{ myUser.status }}</td>
             </template>
             <template v-else>
@@ -108,11 +107,11 @@
               </td>
               <td>
                 <span class="EcoTaxaBadge"
-                  ><strike>{{ myUser.actions }}</strike></span
+                  ><strike>{{ myUser.nb_actions }}</strike></span
                 >
               </td>
               <td>
-                <strike>{{ myUser.annot }} </strike>
+                <strike>{{ myUser.last_annot }} </strike>
               </td>
               <td>
                 <strike>{{ myUser.status }} </strike>
@@ -221,7 +220,6 @@
         </div>
       </div>
     </div>
-  </body>
 </template>
 
 <script lang="ts">

@@ -3,18 +3,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
 
-  <div class="EcoTaxaIconPlusRouting">
-    <img src="./assets/logo_ecotaxa_25.png" />
-    <span>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/projects">Projects</router-link> |
-      <router-link to="/prj_about/185">Project 185</router-link>
-    </span>
-    <span />  <!-- this empty item is *mandatory* -->
-  </div>
-  <router-view />
+    <div class="EcoTaxaIconPlusRouting">
+      <img src="./assets/logo_ecotaxa_25.png" />
+      <span>
+        <router-link to="/">Home</router-link> |
+        <router-link to="/projects">Projects</router-link> |
+        <router-link to="/prj_about/185">Project 185</router-link>
+      </span>
+      <span />
+      <!-- this empty item is *mandatory* -->
+    </div>
+    <router-view />
 
-  <!--div id="nav" >
+    <!--div id="nav" >
     <img class="alignleft"
       height="30"
       src="./assets/logo_ecotaxa_25.png"
@@ -29,7 +30,7 @@
   </div>
   <router-view /-->
 
-  <!--Banner />
+    <!--Banner />
   <img alt="Vue logo" src="./assets/logo.png" />  
   <Login />
   <AboutMe />
