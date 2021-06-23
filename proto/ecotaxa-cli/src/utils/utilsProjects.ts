@@ -12,9 +12,9 @@ class project implements ProjectModel {
   projid;
   objcount;
   pctvalidated;
-  status:string;
-  name:string;
-  email:string;
+  status: string;
+  name: string;
+  email: string;
 
   constructor(myTitle: string, myID: number) {
     this.title = myTitle;
@@ -24,7 +24,7 @@ class project implements ProjectModel {
     this.status = "";
     this.objcount = 0;
     this.pctvalidated = 0;
-  }  
+  }
 }
 
 export { project };

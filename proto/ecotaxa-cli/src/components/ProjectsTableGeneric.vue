@@ -1,5 +1,8 @@
 <template>
   <div class="ProjectsTableGeneric">
+    <span v-if="nbRequests">
+      <img src="../assets/wait.png" height="50" />
+    </span>
     <table class="EcoTaxaProjectsTable">
       <thead>
         <tr>
@@ -35,7 +38,7 @@ import { Options, Vue } from "vue-class-component";
 import * as utils from "../utils/utilsProjects";
 
 @Options({
-// export default {
+  // export default {
   name: "ProjectsTableGeneric",
   data: function () {
     return {
@@ -47,8 +50,8 @@ import * as utils from "../utils/utilsProjects";
   props: {
     // several data of Projects.vue become properties here
     // I keep the same names for convenience only
-    yourProjects: Boolean,    
-    forManaging: Boolean,    
+    yourProjects: Boolean,
+    forManaging: Boolean,
     filterSubset: Boolean,
     titleFilter: String,
     instrumentFilter: String,
@@ -56,13 +59,11 @@ import * as utils from "../utils/utilsProjects";
   mounted() {
     utils.processProjects(this); // ==> Run query immediately when reaching this page
   },
-  methods: {
-  },
+  methods: {},
 })
-
 export default class ProjectsTableGeneric extends Vue {
-  yourProjects!: boolean;  
-  forManaging!: boolean;   
+  yourProjects!: boolean;
+  forManaging!: boolean;
   filterSubset!: boolean;
   titleFilter!: string;
   instrumentFilter!: string;

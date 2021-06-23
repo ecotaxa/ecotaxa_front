@@ -3,11 +3,6 @@
     <h1>
       Projects available for <a :href="userMail">{{ userName }}</a>
       <br />
-      <!--
-      <span v-if="nbRequests">
-        <img src="../assets/wait.png" height="40" />
-      </span>
-      -->
     </h1>
   </div>
   <div id="#app" class="container">
