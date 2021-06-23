@@ -13,6 +13,7 @@
           <th>% validated</th>
           <th>Nb taxa</th>
           <th>Instrument</th>
+          <th v-if="display_cnn_network_id">CNN Network</th>
         </tr>
       </thead>
       <tbody>
@@ -26,6 +27,9 @@
           <td>{{ myProject.pctvalidated }}</td>
           <td>{{ nb_taxa.get(myProject.projid) }}</td>
           <td>TODOLaurentS</td>
+          <td v-if="display_cnn_network_id">
+            {{ myProject.cnn_network_id }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -55,6 +59,7 @@ import * as utils from "../utils/utilsProjects";
     filterSubset: Boolean,
     titleFilter: String,
     instrumentFilter: String,
+    display_cnn_network_id: Boolean,
   },
   mounted() {
     utils.processProjects(this); // ==> Run query immediately when reaching this page

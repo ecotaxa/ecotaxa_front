@@ -12,9 +12,11 @@
       @click="reinitQuery"
     />Projects I'm in&emsp;
     <input type="checkbox" v-model="forManaging" @click="reinitQuery" />For
-    managing&emsp;
-    <input type="checkbox" v-model="filterSubset" @click="reinitQuery" />Filter
+    managing&emsp; <input type="checkbox" v-model="filterSubset" />Filter
     subsets&emsp;
+    <!-- @click="reinitQuery" is NOT necessary in the following checkbox, as there is a condition about display_cnn_network_id inside ProjectsTableGeneric -->
+    <input type="checkbox" v-model="display_cnn_network_id" />Display CNN
+    Network ID&emsp;
     <br />
     Title filter&emsp;<input
       type="text"
@@ -42,6 +44,7 @@
         v-bind:filterSubset="filterSubset"
         v-bind:titleFilter="titleFilter"
         v-bind:instrumentFilter="instrumentFilter"
+        v-bind:display_cnn_network_id="display_cnn_network_id"
         ref="ProjectsTableGeneric"
       />
     </span>
@@ -70,6 +73,7 @@ import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
       titleFilter: String(""),
       instrumentFilter: String(""),
       runQuery: Boolean(false),
+      display_cnn_network_id: Boolean(true),
     };
   },
   mounted() {
