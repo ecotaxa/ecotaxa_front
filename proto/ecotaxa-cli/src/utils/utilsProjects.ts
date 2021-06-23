@@ -57,7 +57,7 @@ export function processProjects(theProjects: any): void {
       theProjects.forManaging,
       theProjects.titleFilter,
       theProjects.instrumentFilter,
-      theProjects.filterSubset
+      theProjects.filterSubset,
     )
     .then((data) => {
       if (data.data !== undefined && data.data.length > 0) {

@@ -157,7 +157,6 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       myProject.projectUsers.push(oneUser);
     }
   }
-  // arr is my array partially built with email + name + id + status
   // Now we're going to add actions and annotations
   const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
   api2
@@ -178,7 +177,6 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
           }
         }
       }
-      // myProject.projectUsers = oneArray;
     })
     .catch((reason) => {
       projectUsersKO(myProject, reason);
@@ -257,7 +255,7 @@ function processThroughSampleList(myProject: any, samplelist: string) {
         // analyze the answer by going through the array items
         for (let i: number = 0; i < data.data.length; i++) {
           const myDataI = data.data[i];
-          // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
+          // ! the 2 arrays (i.e. "request" and "answer") are not in the same order
           for (let j: number = 0; j < myProject.samplesWithObjectsAndStatus.length; j++) {
             if (myDataI.sample_id === myProject.samplesWithObjectsAndStatus[j].sampleid) {
               myProject.samplesWithObjectsAndStatus[j].nb_unclassified = myDataI.nb_unclassified;
@@ -303,14 +301,12 @@ function processSamplesWithObjectsAndStatusKO(myProject: any, reason: any): void
 class taxon {
   id: number;
   display_name: string;
-  //  nb_unclassified: number | undefined;
   nb_validated: number | undefined;
   nb_dubious: number | undefined;
   nb_predicted: number | undefined;
   constructor(mytaxon: number) {
     this.id = mytaxon;
     this.display_name = "";
-    //this.nb_unclassified = 0;
     this.nb_validated = 0;
     this.nb_dubious = 0;
     this.nb_predicted = 0;
@@ -327,7 +323,6 @@ export function processTaxa(myProject: any): void {
   api
     .projectSetGetStatsProjectSetTaxoStatsGet(myProject.projectID)
     .then((data) => {
-      //const oneArray: Array<taxon> = new Array<taxon>();
       myProject.projectTaxa = new Array<taxon>();
       const myData = data.data[0]; // 0 because we work on a precise single project
       if (myData !== undefined && myData.used_taxa !== undefined) {
@@ -348,18 +343,16 @@ export function processTaxa(myProject: any): void {
         const oneTaxon: taxon = myProject.projectTaxa[i];
         taxonIDlist += oneTaxon.id + _SEPARATOR;
       }
-      //const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
       api
         .projectSetGetStatsProjectSetTaxoStatsGet(myProject.projectID, taxonIDlist)
         .then((data) => {
           // analyze the answer by going through the array items
           for (let i: number = 0; i < data.data.length; i++) {
             const dataI = data.data[i];
-            // ! the 2 arrays (i.e. "request" and "answer" are not in the same order)
+            // ! the 2 arrays (i.e. "request" and "answer") are not in the same order
             for (let j: number = 0; j < myProject.projectTaxa.length; j++) {
               if (dataI !== undefined && dataI.used_taxa !== undefined) {
                 if (dataI.used_taxa[0] === myProject.projectTaxa[j].id) {
-                  //arr[j].nb_unclassified = dataI.nb_unclassified; // TODO : probably useless field
                   myProject.projectTaxa[j].nb_validated = dataI.nb_validated;
                   myProject.projectTaxa[j].nb_dubious = dataI.nb_dubious;
                   myProject.projectTaxa[j].nb_predicted = dataI.nb_predicted;
@@ -386,6 +379,7 @@ export function processTaxa(myProject: any): void {
               }
             })
             .catch((reason) => {
+              // TODO : can I throw it to upper level, as it's the same treatment
               processTaxaKO(myProject, reason);
             });
         })
