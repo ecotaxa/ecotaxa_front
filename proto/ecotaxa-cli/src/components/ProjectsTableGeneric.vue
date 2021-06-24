@@ -72,6 +72,7 @@ export default class ProjectsTableGeneric extends Vue {
   filterSubset!: boolean;
   titleFilter!: string;
   instrumentFilter!: string;
+  display_cnn_network_id!: boolean;
 }
 
 // export default ProjectsTableGeneric;
