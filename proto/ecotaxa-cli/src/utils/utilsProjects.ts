@@ -85,7 +85,8 @@ export function processProjects(theProjects: any): void {
               oneProject.status = dataI.status;
             if (dataI.cnn_network_id !== undefined)
               oneProject.cnn_network_id = dataI.cnn_network_id;
-            oneProject.instrument = dataI.instrument;
+            if (dataI.instrument !== undefined)            
+              oneProject.instrument = dataI.instrument;
             if (dataI.cnn_network_id !== undefined)
               oneProject.cnn_network_id = dataI.cnn_network_id;
 

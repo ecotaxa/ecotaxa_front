@@ -1566,7 +1566,7 @@ export interface ProjectModel {
      * @type {string}
      * @memberof ProjectModel
      */
-    instrument: string;
+    instrument?: string;
     /**
      * 
      * @type {UserModel}
