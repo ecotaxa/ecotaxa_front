@@ -12,21 +12,30 @@
       @click="reinitQuery"
     />Projects I'm in&emsp;
     <input type="checkbox" v-model="forManaging" @click="reinitQuery" />For
-    managing&emsp; <input type="checkbox" v-model="filterSubset" />Filter
+    managing&emsp;
+    <input type="checkbox" v-model="filterSubset" @click="reinitQuery" />Filter
     subsets&emsp;
     <!-- @click="reinitQuery" is NOT necessary in the following checkbox, as there is a condition about display_cnn_network_id inside ProjectsTableGeneric -->
     <input type="checkbox" v-model="display_cnn_network_id" />Display CNN
     Network ID&emsp;
     <br />
-    Title filter&emsp;<input
+    <input type="checkbox" v-model="display_nbMatchingFeatures" />Display Match.
+    features :&emsp;
+    <input
       type="text"
-      v-model="titleFilter"
-      @click="reinitQuery"
-    />&emsp;&emsp; Instrument Filter&emsp;<input
-      type="text"
-      v-model="instrumentFilter"
+      v-model="stringsMatching"
+      :disabled="!display_nbMatchingFeatures"
       @click="reinitQuery"
     />
+    <span style="visibility: hidden">
+      TODO remove this string
+    </span>
+    <br />
+    <br />
+    Title filter&emsp;
+    <input type="text" v-model="titleFilter" @click="reinitQuery" />&emsp;&emsp;
+    Instrument Filter&emsp;
+    <input type="text" v-model="instrumentFilter" @click="reinitQuery" />
     <br />
     <br />
     <button type="button" @click="runProjectsQuery" class="EcoTaxaButton">
@@ -45,6 +54,8 @@
         v-bind:titleFilter="titleFilter"
         v-bind:instrumentFilter="instrumentFilter"
         v-bind:display_cnn_network_id="display_cnn_network_id"
+        v-bind:display_nbMatchingFeatures="display_nbMatchingFeatures"
+        v-bind:stringsMatching="stringsMatching"
         ref="ProjectsTableGeneric"
       />
     </span>
@@ -74,6 +85,8 @@ import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
       instrumentFilter: String(""),
       runQuery: Boolean(false),
       display_cnn_network_id: Boolean(true),
+      display_nbMatchingFeatures: Boolean(false),
+      stringsMatching: String(""),
     };
   },
   mounted() {

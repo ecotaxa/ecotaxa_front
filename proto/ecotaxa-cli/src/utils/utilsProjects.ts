@@ -17,6 +17,7 @@ class project implements ProjectModel {
   email: string;
   cnn_network_id: string;
   instrument: string;
+  nbMatchingFeatures: number;
 
   constructor(myTitle: string, myID: number) {
     this.title = myTitle;
@@ -28,6 +29,7 @@ class project implements ProjectModel {
     this.pctvalidated = 0;
     this.cnn_network_id = "";
     this.instrument = "";
+    this.nbMatchingFeatures = 0;
   }
 }
 
@@ -86,10 +88,27 @@ export function processProjects(theProjects: any): void {
             oneProject.instrument = dataI.instrument;
             if (dataI.cnn_network_id !== undefined)
               oneProject.cnn_network_id = dataI.cnn_network_id;
-            theProjects.projects.push(oneProject);
-          }
+
+            if (dataI.obj_free_cols !== undefined) {
+              // TODO : think of factorizinz that if used elsewhere
+              if (theProjects.stringsMatching !== undefined && theProjects.stringsMatching !== "") {
+                const stringsMatching: string = theProjects.stringsMatching;
+                const stringsMatchingArray: Array<string> = stringsMatching.split(" ");
+                if (stringsMatchingArray.length) {
+                  const freecolsArray: Array<string> = Object.keys(dataI.obj_free_cols);
+                  stringsMatchingArray.forEach(element => {
+                    if (element !== undefined) {
+                      if (freecolsArray.indexOf(element) !== -1)
+                        oneProject.nbMatchingFeatures++;
+                    }
+                  })
+                }
+              }
+            }
+          theProjects.projects.push(oneProject);
         }
       }
+    }
     })
     .then(() => {
       // TODO EVERYWHERE : give a type to "this", instead of "any", otherwise we lose all the TS useful checking.
@@ -110,16 +129,16 @@ export function processProjects(theProjects: any): void {
         setProjectsCategories(api, projectIDlist, theProjects);
       }
     })
-    .catch((reason) => {
-      // TODO : global error treatment      
-      console.log(reason);
-      alert(reason);
-      theProjects.projects = [];
-    })
-    .finally(() => {
-      theProjects.nbRequests--;
-    }
-    );
+  .catch((reason) => {
+    // TODO : global error treatment      
+    console.log(reason);
+    alert(reason);
+    theProjects.projects = [];
+  })
+  .finally(() => {
+    theProjects.nbRequests--;
+  }
+  );
 }
 
 function setProjectsAllCategories(api: ProjectsApi, projectIDlist: string, theProjects: any): void {

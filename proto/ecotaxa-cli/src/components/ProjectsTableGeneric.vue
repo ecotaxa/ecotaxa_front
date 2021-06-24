@@ -14,6 +14,7 @@
           <th>Nb taxa</th>
           <th>Instrument</th>
           <th v-if="display_cnn_network_id">CNN Network</th>
+          <th v-if="display_nbMatchingFeatures">Nb Match. Features</th>          
         </tr>
       </thead>
       <tbody>
@@ -30,6 +31,9 @@
           <td v-if="display_cnn_network_id">
             {{ myProject.cnn_network_id }}
           </td>
+          <td v-if="display_nbMatchingFeatures">
+            {{ myProject.nbMatchingFeatures }}
+          </td>          
         </tr>
       </tbody>
     </table>
@@ -60,9 +64,12 @@ import * as utils from "../utils/utilsProjects";
     titleFilter: String,
     instrumentFilter: String,
     display_cnn_network_id: Boolean,
+    display_nbMatchingFeatures: Boolean,    
+    stringsMatching: String,
   },
   mounted() {
     utils.processProjects(this); // ==> Run query immediately when reaching this page
+
   },
   methods: {},
 })

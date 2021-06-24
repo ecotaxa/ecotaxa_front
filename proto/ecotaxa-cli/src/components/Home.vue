@@ -9,6 +9,8 @@
         :filterSubset=myFilterSubset
         :display_cnn_network_id=false
         :titleFilter="myTitleFilter"
+        :display_nbMatchingFeatures=false
+        stringsMatching=""
       />
     </div>
   </body>
