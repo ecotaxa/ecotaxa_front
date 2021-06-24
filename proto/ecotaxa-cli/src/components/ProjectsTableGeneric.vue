@@ -26,7 +26,7 @@
           <td>{{ myProject.objcount }}</td>
           <td>{{ myProject.pctvalidated }}</td>
           <td>{{ nb_taxa.get(myProject.projid) }}</td>
-          <td>TODOLaurentS</td>
+          <td>{{ myProject.instrument}}</td>
           <td v-if="display_cnn_network_id">
             {{ myProject.cnn_network_id }}
           </td>

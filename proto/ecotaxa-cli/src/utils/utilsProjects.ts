@@ -16,6 +16,7 @@ class project implements ProjectModel {
   name: string;
   email: string;
   cnn_network_id: string;
+  instrument: string;
 
   constructor(myTitle: string, myID: number) {
     this.title = myTitle;
@@ -25,7 +26,8 @@ class project implements ProjectModel {
     this.status = "";
     this.objcount = 0;
     this.pctvalidated = 0;
-    this.cnn_network_id = "";    
+    this.cnn_network_id = "";
+    this.instrument = "";
   }
 }
 
@@ -79,7 +81,9 @@ export function processProjects(theProjects: any): void {
             }
             if (dataI.status !== undefined)
               oneProject.status = dataI.status;
-            // NB INSTRUMENTS to come
+            if (dataI.cnn_network_id !== undefined)
+              oneProject.cnn_network_id = dataI.cnn_network_id;
+            oneProject.instrument = dataI.instrument;
             if (dataI.cnn_network_id !== undefined)
               oneProject.cnn_network_id = dataI.cnn_network_id;
             theProjects.projects.push(oneProject);

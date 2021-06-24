@@ -1563,6 +1563,12 @@ export interface ProjectModel {
     viewers?: Array<UserModel>;
     /**
      * 
+     * @type {string}
+     * @memberof ProjectModel
+     */
+    instrument: string;
+    /**
+     * 
      * @type {UserModel}
      * @memberof ProjectModel
      */
@@ -5993,7 +5999,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Return projects which the current user has explicit permission to access, with search options - `param` not_granted: Return projects on which the current user has _no permission_, but visible to him/her - `param` for_managing: Return projects that can be written to (including erased) by the current user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having \'subset\' in their names
+         * Return projects which the current user has explicit permission to access, with search options. - `param` not_granted: Return projects on which the current user has _no permission_, but visible to him/her - `param` for_managing: Return projects that can be written to (including erased) by the current user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having \'subset\' in their names - `params` order_field, window_start, window_size: See accompanying description.
          * @summary Search Projects
          * @param {boolean} [alsoOthers] 
          * @param {boolean} [notGranted] 
@@ -6001,10 +6007,13 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
          * @param {string} [titleFilter] 
          * @param {string} [instrumentFilter] 
          * @param {boolean} [filterSubset] 
+         * @param {string} [orderField] One of [\&#39;instrument\&#39;, \&#39;highest_right\&#39;, \&#39;license\&#39;, \&#39;projid\&#39;, \&#39;title\&#39;, \&#39;visible\&#39;, \&#39;status\&#39;, \&#39;objcount\&#39;, \&#39;pctvalidated\&#39;, \&#39;pctclassified\&#39;, \&#39;classifsettings\&#39;, \&#39;classiffieldlist\&#39;, \&#39;popoverfieldlist\&#39;, \&#39;comments\&#39;, \&#39;projtype\&#39;, \&#39;rf_models_used\&#39;, \&#39;cnn_network_id\&#39;]
+         * @param {number} [windowStart] Skip &#x60;window_start&#x60; before returning data
+         * @param {number} [windowSize] Return only &#x60;window_size&#x60; lines
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchProjectsProjectsSearchGet: async (alsoOthers?: boolean, notGranted?: boolean, forManaging?: boolean, titleFilter?: string, instrumentFilter?: string, filterSubset?: boolean, options: any = {}): Promise<RequestArgs> => {
+        searchProjectsProjectsSearchGet: async (alsoOthers?: boolean, notGranted?: boolean, forManaging?: boolean, titleFilter?: string, instrumentFilter?: string, filterSubset?: boolean, orderField?: string, windowStart?: number, windowSize?: number, options: any = {}): Promise<RequestArgs> => {
             const localVarPath = `/projects/search`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6043,6 +6052,18 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
 
             if (filterSubset !== undefined) {
                 localVarQueryParameter['filter_subset'] = filterSubset;
+            }
+
+            if (orderField !== undefined) {
+                localVarQueryParameter['order_field'] = orderField;
+            }
+
+            if (windowStart !== undefined) {
+                localVarQueryParameter['window_start'] = windowStart;
+            }
+
+            if (windowSize !== undefined) {
+                localVarQueryParameter['window_size'] = windowSize;
             }
 
 
@@ -6290,7 +6311,7 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Return projects which the current user has explicit permission to access, with search options - `param` not_granted: Return projects on which the current user has _no permission_, but visible to him/her - `param` for_managing: Return projects that can be written to (including erased) by the current user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having \'subset\' in their names
+         * Return projects which the current user has explicit permission to access, with search options. - `param` not_granted: Return projects on which the current user has _no permission_, but visible to him/her - `param` for_managing: Return projects that can be written to (including erased) by the current user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having \'subset\' in their names - `params` order_field, window_start, window_size: See accompanying description.
          * @summary Search Projects
          * @param {boolean} [alsoOthers] 
          * @param {boolean} [notGranted] 
@@ -6298,11 +6319,14 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
          * @param {string} [titleFilter] 
          * @param {string} [instrumentFilter] 
          * @param {boolean} [filterSubset] 
+         * @param {string} [orderField] One of [\&#39;instrument\&#39;, \&#39;highest_right\&#39;, \&#39;license\&#39;, \&#39;projid\&#39;, \&#39;title\&#39;, \&#39;visible\&#39;, \&#39;status\&#39;, \&#39;objcount\&#39;, \&#39;pctvalidated\&#39;, \&#39;pctclassified\&#39;, \&#39;classifsettings\&#39;, \&#39;classiffieldlist\&#39;, \&#39;popoverfieldlist\&#39;, \&#39;comments\&#39;, \&#39;projtype\&#39;, \&#39;rf_models_used\&#39;, \&#39;cnn_network_id\&#39;]
+         * @param {number} [windowStart] Skip &#x60;window_start&#x60; before returning data
+         * @param {number} [windowSize] Return only &#x60;window_size&#x60; lines
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async searchProjectsProjectsSearchGet(alsoOthers?: boolean, notGranted?: boolean, forManaging?: boolean, titleFilter?: string, instrumentFilter?: string, filterSubset?: boolean, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ProjectModel>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.searchProjectsProjectsSearchGet(alsoOthers, notGranted, forManaging, titleFilter, instrumentFilter, filterSubset, options);
+        async searchProjectsProjectsSearchGet(alsoOthers?: boolean, notGranted?: boolean, forManaging?: boolean, titleFilter?: string, instrumentFilter?: string, filterSubset?: boolean, orderField?: string, windowStart?: number, windowSize?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ProjectModel>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchProjectsProjectsSearchGet(alsoOthers, notGranted, forManaging, titleFilter, instrumentFilter, filterSubset, orderField, windowStart, windowSize, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -6458,7 +6482,7 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.projectSubsetProjectsProjectIdSubsetPost(projectId, subsetReq, options).then((request) => request(axios, basePath));
         },
         /**
-         * Return projects which the current user has explicit permission to access, with search options - `param` not_granted: Return projects on which the current user has _no permission_, but visible to him/her - `param` for_managing: Return projects that can be written to (including erased) by the current user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having \'subset\' in their names
+         * Return projects which the current user has explicit permission to access, with search options. - `param` not_granted: Return projects on which the current user has _no permission_, but visible to him/her - `param` for_managing: Return projects that can be written to (including erased) by the current user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having \'subset\' in their names - `params` order_field, window_start, window_size: See accompanying description.
          * @summary Search Projects
          * @param {boolean} [alsoOthers] 
          * @param {boolean} [notGranted] 
@@ -6466,11 +6490,14 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
          * @param {string} [titleFilter] 
          * @param {string} [instrumentFilter] 
          * @param {boolean} [filterSubset] 
+         * @param {string} [orderField] One of [\&#39;instrument\&#39;, \&#39;highest_right\&#39;, \&#39;license\&#39;, \&#39;projid\&#39;, \&#39;title\&#39;, \&#39;visible\&#39;, \&#39;status\&#39;, \&#39;objcount\&#39;, \&#39;pctvalidated\&#39;, \&#39;pctclassified\&#39;, \&#39;classifsettings\&#39;, \&#39;classiffieldlist\&#39;, \&#39;popoverfieldlist\&#39;, \&#39;comments\&#39;, \&#39;projtype\&#39;, \&#39;rf_models_used\&#39;, \&#39;cnn_network_id\&#39;]
+         * @param {number} [windowStart] Skip &#x60;window_start&#x60; before returning data
+         * @param {number} [windowSize] Return only &#x60;window_size&#x60; lines
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchProjectsProjectsSearchGet(alsoOthers?: boolean, notGranted?: boolean, forManaging?: boolean, titleFilter?: string, instrumentFilter?: string, filterSubset?: boolean, options?: any): AxiosPromise<Array<ProjectModel>> {
-            return localVarFp.searchProjectsProjectsSearchGet(alsoOthers, notGranted, forManaging, titleFilter, instrumentFilter, filterSubset, options).then((request) => request(axios, basePath));
+        searchProjectsProjectsSearchGet(alsoOthers?: boolean, notGranted?: boolean, forManaging?: boolean, titleFilter?: string, instrumentFilter?: string, filterSubset?: boolean, orderField?: string, windowStart?: number, windowSize?: number, options?: any): AxiosPromise<Array<ProjectModel>> {
+            return localVarFp.searchProjectsProjectsSearchGet(alsoOthers, notGranted, forManaging, titleFilter, instrumentFilter, filterSubset, orderField, windowStart, windowSize, options).then((request) => request(axios, basePath));
         },
         /**
          * Import images only, with same metadata for all. - param `dry_run`: If set, then _only_ a diagnostic of do-ability will be done.     In this case, plain value check. If no dry_run, this call will create a background job.
@@ -6645,7 +6672,7 @@ export class ProjectsApi extends BaseAPI {
     }
 
     /**
-     * Return projects which the current user has explicit permission to access, with search options - `param` not_granted: Return projects on which the current user has _no permission_, but visible to him/her - `param` for_managing: Return projects that can be written to (including erased) by the current user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having \'subset\' in their names
+     * Return projects which the current user has explicit permission to access, with search options. - `param` not_granted: Return projects on which the current user has _no permission_, but visible to him/her - `param` for_managing: Return projects that can be written to (including erased) by the current user - `param` title_filter: Use this pattern for matching returned projects names - `param` instrument_filter: Only return projects where this instrument was used - `param` filter_subset: Only return projects having \'subset\' in their names - `params` order_field, window_start, window_size: See accompanying description.
      * @summary Search Projects
      * @param {boolean} [alsoOthers] 
      * @param {boolean} [notGranted] 
@@ -6653,12 +6680,15 @@ export class ProjectsApi extends BaseAPI {
      * @param {string} [titleFilter] 
      * @param {string} [instrumentFilter] 
      * @param {boolean} [filterSubset] 
+     * @param {string} [orderField] One of [\&#39;instrument\&#39;, \&#39;highest_right\&#39;, \&#39;license\&#39;, \&#39;projid\&#39;, \&#39;title\&#39;, \&#39;visible\&#39;, \&#39;status\&#39;, \&#39;objcount\&#39;, \&#39;pctvalidated\&#39;, \&#39;pctclassified\&#39;, \&#39;classifsettings\&#39;, \&#39;classiffieldlist\&#39;, \&#39;popoverfieldlist\&#39;, \&#39;comments\&#39;, \&#39;projtype\&#39;, \&#39;rf_models_used\&#39;, \&#39;cnn_network_id\&#39;]
+     * @param {number} [windowStart] Skip &#x60;window_start&#x60; before returning data
+     * @param {number} [windowSize] Return only &#x60;window_size&#x60; lines
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProjectsApi
      */
-    public searchProjectsProjectsSearchGet(alsoOthers?: boolean, notGranted?: boolean, forManaging?: boolean, titleFilter?: string, instrumentFilter?: string, filterSubset?: boolean, options?: any) {
-        return ProjectsApiFp(this.configuration).searchProjectsProjectsSearchGet(alsoOthers, notGranted, forManaging, titleFilter, instrumentFilter, filterSubset, options).then((request) => request(this.axios, this.basePath));
+    public searchProjectsProjectsSearchGet(alsoOthers?: boolean, notGranted?: boolean, forManaging?: boolean, titleFilter?: string, instrumentFilter?: string, filterSubset?: boolean, orderField?: string, windowStart?: number, windowSize?: number, options?: any) {
+        return ProjectsApiFp(this.configuration).searchProjectsProjectsSearchGet(alsoOthers, notGranted, forManaging, titleFilter, instrumentFilter, filterSubset, orderField, windowStart, windowSize, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
