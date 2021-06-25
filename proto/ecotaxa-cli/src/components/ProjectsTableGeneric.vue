@@ -3,6 +3,15 @@
     <span v-if="nbRequests">
       <img src="../assets/wait.png" height="50" />
     </span>
+    <span v-if="projects.length && !nbRequests">
+      <button
+        type="button"
+        @click="exportProjectsToTSVFile"
+        class="EcoTaxaButton"
+      >
+        Export in .tsv format
+      </button>
+    </span>
     <table class="EcoTaxaProjectsTable">
       <thead>
         <tr>
@@ -14,7 +23,7 @@
           <th>Nb taxa</th>
           <th>Instrument</th>
           <th v-if="display_cnn_network_id">CNN Network</th>
-          <th v-if="display_nbMatchingFeatures">Nb Match. Features</th>          
+          <th v-if="display_nbMatchingFeatures">Nb Match. Features</th>
         </tr>
       </thead>
       <tbody>
@@ -27,13 +36,13 @@
           <td>{{ myProject.objcount }}</td>
           <td>{{ myProject.pctvalidated }}</td>
           <td>{{ nb_taxa.get(myProject.projid) }}</td>
-          <td>{{ myProject.instrument}}</td>
+          <td>{{ myProject.instrument }}</td>
           <td v-if="display_cnn_network_id">
             {{ myProject.cnn_network_id }}
           </td>
           <td v-if="display_nbMatchingFeatures">
             {{ myProject.nbMatchingFeatures }}
-          </td>          
+          </td>
         </tr>
       </tbody>
     </table>
@@ -44,6 +53,7 @@
 // import { Prop } from "vue-property-decorator";
 import { Options, Vue } from "vue-class-component";
 import * as utils from "../utils/utilsProjects";
+import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
 
 @Options({
   // export default {
@@ -64,14 +74,49 @@ import * as utils from "../utils/utilsProjects";
     titleFilter: String,
     instrumentFilter: String,
     display_cnn_network_id: Boolean,
-    display_nbMatchingFeatures: Boolean,    
+    display_nbMatchingFeatures: Boolean,
     stringsMatching: String,
   },
   mounted() {
     utils.processProjects(this); // ==> Run query immediately when reaching this page
-
   },
-  methods: {},
+  methods: {
+    exportProjectsToTSVFile(): void {
+      // Build a temp. special projects array to perform the export.
+      // Dispatch the nb_taxa map into this special projects array.
+      class projectExport extends utils.project {
+        nb_taxa: number;
+        constructor() {
+          super("", 0);
+          this.nb_taxa = 0;
+        }
+      }
+
+      let myProjects:Array<projectExport> = new Array<projectExport>();
+      for (let i = 0; i < this.projects.length; i++) {
+        let oneProjectExport: projectExport = this.projects[i];
+        oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
+        myProjects.push(oneProjectExport);
+      }
+      // TODO : review columns orders, I'm sure JO will have a precise idea
+      exportDataToTSVFile(
+        myProjects,
+        "Projects",
+        "EcoTaxa",
+        "title",
+        "projid",
+        "objcount",
+        "pctvalidated",
+        "status",
+        "name",
+        "email",
+        "cnn_network_id",
+        "instrument",
+        "nbMatchingFeatures",
+        "nb_taxa"
+      );
+    },
+  },
 })
 export default class ProjectsTableGeneric extends Vue {
   yourProjects!: boolean;
