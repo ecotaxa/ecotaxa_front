@@ -1,0 +1,378 @@
+<!--suppress ALL -->
+<html>
+<head>
+  <link>
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,viewport-fit=cover">
+  <title>CPICS download prototype</title>
+  <script src="https://unpkg.com/vue@3.1.2/dist/vue.global.js"></script>
+
+  <link
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600"
+      rel="stylesheet">
+
+  <link href="https://unpkg.com/primevue@3.5.1/resources/primevue.min.css" rel="stylesheet">
+  <!-- browse here https://unpkg.com/browse/primevue@3.5.1/resources/themes/ -->
+  <link href="https://unpkg.com/primevue@3.5.1/resources/themes/nova-accent/theme.css" rel="stylesheet">
+  <link href="https://unpkg.com/primeicons@4.1.0/primeicons.css" rel="stylesheet">
+  <link href="https://unpkg.com/primeflex@2.0.0/primeflex.min.css" rel=stylesheet type=text/css>
+
+  <script src="https://unpkg.com/primevue@3.5.1/utils/utils.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/api/api.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/config/config.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/ripple/ripple.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/paginator/paginator.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/inputtext/inputtext.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/button/button.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/inputnumber/inputnumber.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/selectbutton/selectbutton.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/overlayeventbus/overlayeventbus.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/dropdown/dropdown.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/progressbar/progressbar.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/message/message.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/tooltip/tooltip.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/fieldset/fieldset.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/progressbar/progressbar.min.js"></script>
+  <script src="https://unpkg.com/primevue@3.5.1/badge/badge.min.js"></script>
+  <!--
+    <script src="https://unpkg.com/primevue@3.5.1/fileupload/fileupload.js"></script>
+    -->
+
+  <script src="https://unpkg.com/vue-upload-component@3.0.47"></script>
+
+  <script src="https://unpkg.com/axios@0.21.1/dist/axios.min.js"></script>
+
+</head>
+<style>
+    html {
+        font-size: 14px
+    }
+
+    body {
+        margin: 0;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        background-color: var(--surface-a);
+        /* font-family:var(--font-family); */
+        font-family: 'Source Sans Pro', sans-serif, Helvetica, Arial;
+        font-weight: 400;
+        color: var(--text-color);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale
+    }
+
+    .p-component, .p-inputtext {
+        font-family: inherit;
+    }
+
+    .p-fieldset .p-fieldset-legend {
+        font-weight: 600;
+    }
+
+    .p-fieldset.p-fieldset-toggleable .p-fieldset-legend a {
+        padding: 0.4rem 1rem;
+    }
+
+    .file-uploads {
+        display: inherit;
+    }
+</style>
+<body>
+<div id="app">
+  <div class="p-d-flex p-jc-between">
+    <div>
+      <a href="/">
+        <img height="30" src="/static/logo_ecotaxa_25.png" style="margin: 10px 0">
+      </a>
+    </div>
+    <div>
+      <h1 class="p-text-center ">CPICS import</h1>
+    </div>
+    <div>
+      <span>{{ user_name }}</span>
+    </div>
+  </div>
+  <div class="card p-shadow-3 p-px-3" style="max-width: 768px; margin: auto">
+    <div class="p-fluid p-formgrid p-grid">
+      <div class="p-field p-offset-1 p-col-10">
+        <label for="dest_prj">Project to import into</label>
+        <p-dropdown id="dest_prj" v-model="dest_prj"
+                    :options="projects" option-label="name" :filter="true"
+                    :placeholder="projects_loading?'Loading...':'Pick a destination project'"/>
+      </div>
+      <div class="p-field p-col-1">
+        <a target="_blank" v-if="dest_prj" :href="'/prj/'+dest_prj.code">check</a>
+      </div>
+      <div class="p-field p-col-2">
+        <!-- in case full TZs here: https://github.com/dmfilipenko/timezones.json/blob/master/timezones.json -->
+        <label for="tz_offset">Time Offset to UTC</label>
+        <p-inputnumber id="tz_offset" v-model="tz_offset" show-buttons
+                       :min="-12" :max="13"
+                       v-tooltip="'If time in data is not UTC'"/>
+      </div>
+      <div class="p-field p-col-2">
+        <label for="latitude">Latitude</label>
+        <p-inputnumber id="latitude" v-model="latitude"
+                       :min="-90" :max="90" :min-fraction-digits="6" :max-fraction-digits="6"
+                       placeholder="Acquisition latitude"/>
+      </div>
+      <div class="p-field p-col-2">
+        <label for="longitude">Longitude</label>
+        <p-inputnumber id="longitude" v-model="longitude"
+                       :min="-180" :max="180" :min-fraction-digits="6" :max-fraction-digits="6"
+                       placeholder="Acquisition longitude"/>
+      </div>
+      <div class="p-field p-col-2">
+        <label for="ctd_dist">Distance to CTD</label>
+        <p-inputnumber id="ctd_dist" v-model="ctd_dist"
+                       :min="0" :max="100"
+                       v-tooltip="'Offset b/w CTD and camera'"/>
+      </div>
+      <div class="p-field p-col-12">
+        <p-fieldset legend="Profile" :toggleable="true"
+                    @toggle="switch_profile_import_type"
+                    v-model:collapsed="is_time_series">
+          <div class="p-field p-col-6">
+            <label for="sample_id">Sample ID</label>
+            <p-inputtext id="sample_id" type="text"
+                         v-tooltip="'Usually station id'"/>
+          </div>
+        </p-fieldset>
+      </div>
+      <div class="p-field p-col-12">
+        <p-fieldset legend="Time Series" :toggleable="true"
+                    @toggle="switch_time_series_import_type"
+                    v-model:collapsed="is_profile">
+          <div class="p-field p-col-6">
+            <label for="deployment_id">Deployment ID</label>
+            <p-inputtext id="deployment_id" type="text"
+                         v-tooltip="'Sample and subsamples will use this as base name'"/>
+          </div>
+        </p-fieldset>
+      </div>
+      <div class="p-col-3">
+        <div id="dropzone" class="p-field p-col-12">
+          <file-upload
+              ref="upload"
+              v-model="files"
+              post-action="/api/my_files"
+              :multiple="true"
+              :drop="'#dropzone'"
+              :directory="true"
+              :drop-directory="true"
+              @input-filter="inputFilter"
+              @input-file="trackFiles"
+          >
+            <p-button class="p-field p-mt-md-3 p-mb-md-2" label="Choose directory" icon="pi pi-plus"/>
+          </file-upload>
+          <div>
+            <small>Or drop here</small>
+          </div>
+        </div>
+        <div class="p-field p-col-10 p-mb-md-0 ">
+          <p-button class="p-field" label="Start Upload" icon="pi pi-upload" iconPos="left"
+                    :disabled="!files.length"
+                    @click.prevent="$refs.upload.active = true"/>
+        </div>
+        <div class="p-field p-col-10">
+          <p-button class="p-field" label="Stop Upload" icon="pi pi-times" iconPos="left"
+                    :disabled="! $refs.upload || $refs.upload.active == false"
+                    @click.prevent="$refs.upload.active = false"/>
+        </div>
+      </div>
+      <div class="p-col-9">
+        <ul v-if="files.length">
+          {{ files.length }} accepted files (.png and .txt) for a total of {{ data_volume }} bytes.
+        </ul>
+        <ul v-if="ignored_files.length">
+          {{ ignored_files.length }} ignored files.
+        </ul>
+        <p-progressbar v-if="nb_trsf" :value="Math.round(nb_trsf*100/nb_files)"></p-progressbar>
+        <p-badge v-if="nb_trsf_err" severity="danger" :value="nb_trsf_err+' errors'"></p-badge>
+      </div>
+    </div>
+    <div class="p-flex-md-row">
+      <div class="p-field p-offset-5 p-col-2">
+        <p-button label="Submit"/>
+      </div>
+
+    </div>
+  </div>
+  <h6>{{ tz_offset }}</h6>
+</div>
+
+<script>
+    const {createApp, ref} = Vue;
+    const PrimeVue = primevue.config.default;
+
+    const App = {
+            setup() {
+                const dest_prj = ref(null);
+                const projects = []
+                const files = ref([]);
+                const ignored_files = ref([]);
+                const ctd_dist = ref(null);
+                const is_profile = ref(false);
+                const is_time_series = ref(true);
+
+                return {
+                    latitude: null,
+                    longitude: ref(null),
+                    tz_offset: ref(0),
+                    data_volume: ref(0),
+                    nb_files: 0, nb_trsf: 0, nb_trsf_ok: 0, nb_trsf_err: 0,
+                    projects, dest_prj, files,
+                    ctd_dist, is_profile, is_time_series, ignored_files,
+                    user_name: 'Loading...',
+                    projects_loading: ref(true)
+                };
+            },
+            components: {
+                'p-inputtext': primevue.inputtext,
+                'p-inputnumber': primevue.inputnumber,
+                'p-selectbutton': primevue.selectbutton,
+                'p-button': primevue.button,
+                'p-dropdown': primevue.dropdown,
+                'file-upload': VueUploadComponent,
+                'p-fieldset': primevue.fieldset,
+                'p-progressbar': primevue.progressbar,
+                'p-badge': primevue.badge,
+            },
+            created() {
+                const self = this;
+                axios.get('/api/users/me')
+                    .then(function (rsp) {
+                        // handle success
+                        self.user_name = rsp.data.name;
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        self.user_name = "NOT LOGGED";
+                    });
+                axios.get('/api/projects/search?for_managing=true')
+                    .then(function (rsp) {
+                        // handle success
+                        for (const a_prj of rsp.data) {
+                            self.projects.push({name: a_prj.title, code: a_prj.projid})
+                        }
+                    })
+                    .catch(function (error) {
+                        // handle error
+                    })
+                    .then(function () {
+                        self.projects_loading = false;
+                    });
+            },
+            methods: {
+                switch_profile_import_type(event) {
+                    this.is_profile = !(event.value);
+                },
+                switch_time_series_import_type(event) {
+                    this.is_time_series = !(event.value);
+                },
+                /**
+                 * Has changed
+                 * @param  Object|undefined   newFile   Read only
+                 * @param  Object|undefined   oldFile   Read only
+                 * @return undefined
+                 * Full super-useful examples here:
+                 * https://lian-yue.github.io/vue-upload-component/#/en/documents#options-events-input-filter
+                 */
+                trackFiles: function (newFile, oldFile) {
+                    if (newFile && !oldFile) {
+                        // Add file, filtered by above.
+                        this.nb_files++;
+                    }
+
+                    if (newFile && oldFile) {
+                        // Update file
+
+                        // Start upload
+                        if (newFile.active !== oldFile.active) {
+                            console.log('Start upload', newFile.active, newFile)
+
+                            // min size
+                            /* if (newFile.size >= 0 && newFile.size < 100 * 1024) {
+                                newFile = this.$refs.upload.update(newFile, {error: 'size'})
+                            } */
+                        }
+
+                        // Upload progress
+                        if (newFile.progress !== oldFile.progress) {
+                            //console.log('progress', newFile.progress, newFile)
+                        }
+
+                        // Upload error
+                        if (newFile.error !== oldFile.error) {
+                            this.nb_trsf += 1;
+                            this.nb_trsf_err += 1;
+                            //console.log('error', newFile.error, newFile)
+                        }
+
+                        // Uploaded successfully
+                        if (newFile.success !== oldFile.success) {
+                            this.nb_trsf += 1;
+                            this.nb_trsf_ok += 1;
+                            //console.log('success', newFile.success, newFile)
+                        }
+                    }
+
+                    if (!newFile && oldFile) {
+                        // Remove file
+
+                        // Automatically delete files on the server
+                        if (oldFile.success && oldFile.response.id) {
+                            // $.ajax({
+                            //   type: 'DELETE',
+                            //   url: '/file/delete?id=' + oldFile.response.id,
+                            // });
+                        }
+                    }
+
+                    // Automatic upload
+                    /* if (Boolean(newFile) !== Boolean(oldFile) || oldFile.error !== newFile.error) {
+                        if (!this.$refs.upload.active) {
+                            this.$refs.upload.active = true
+                        }
+                    } */
+                },
+                /**
+                 * Pretreatment
+                 * @param  Object|undefined   newFile   Read and write
+                 * @param  Object|undefined   oldFile   Read only
+                 * @param  Function           prevent   Prevent changing
+                 * @return undefined
+                 * https://lian-yue.github.io/vue-upload-component/#/en/documents#instance-file-id
+                 */
+                inputFilter: function (newFile, oldFile, prevent) {
+                    if (newFile && !oldFile) {
+                        // Take .txt (for ROI) and .png (original files)
+                        if (!/\.(txt|png)$/i.test(newFile.name)) {
+                            this.ignored_files.push(newFile.name);
+                            return prevent()
+                        }
+                        // Full path for back-end checks
+                        newFile.data = {path: newFile.name};
+                        // stats
+                        this.data_volume += newFile.size;
+                    }
+                }
+            }
+        }
+    ;
+
+    const app = createApp(App);
+    app.use(PrimeVue);
+    app.directive('ripple', primevue.ripple);
+    app.directive('tooltip', primevue.tooltip);
+    app.mount("#app");
+</script>
+<style>
+    #dropzone {
+        background-color: var(--cyan-200)
+    }
+</style>
+</body>
+</html>
