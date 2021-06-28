@@ -48,6 +48,7 @@
     <span v-if="runQuery">
       <!-- keeping same names like filterSubset="filterSubset" is not mandatory, here it's done for convenience only -->
       <ProjectsTableGeneric
+        v-bind:loggedUserId="loggedUserId"      
         v-bind:yourProjects="yourProjects"
         v-bind:forManaging="forManaging"
         v-bind:filterSubset="filterSubset"
@@ -78,6 +79,7 @@ import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
     return {
       userName: String(""), // user currently logged in
       userMail: String(""),
+      loggedUserId : Number(0),
       yourProjects: Boolean(true), // this checkbox set to true by default
       forManaging: Boolean(false),
       filterSubset: Boolean(false),

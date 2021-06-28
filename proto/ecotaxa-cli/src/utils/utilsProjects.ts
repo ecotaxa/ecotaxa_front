@@ -3,20 +3,23 @@ import { ProjectModel } from "gen/api";
 import { UsersApi } from "../../gen";
 import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
+import { userStatus } from "./utilsConsts";
 
 ////////////////////////////////////////////////////////////////////
 
 // class project implements ProjectModel {
 class project implements ProjectModel {
+  // TODO write the copy constructor to build a project object from a ProjectModel object 
   title;
   projid;
-  objcount;
-  pctvalidated;
-  status: string;
   name: string;
   email: string;
-  cnn_network_id: string;
-  instrument: string;
+  user_Status : userStatus;
+  status: string;    
+  objcount;
+  pctvalidated;
+  instrument: string;  
+  cnn_network_id : string;
   nbMatchingFeatures: number;
 
   constructor(myTitle: string, myID: number) {
@@ -24,11 +27,12 @@ class project implements ProjectModel {
     this.projid = myID;
     this.name = "";
     this.email = "";
-    this.status = "";
-    this.objcount = 0;
+    this.user_Status = userStatus._NONE;
+    this.status = "";    
+    this.objcount = 0;    
     this.pctvalidated = 0;
+    this.instrument = "";    
     this.cnn_network_id = "";
-    this.instrument = "";
     this.nbMatchingFeatures = 0;
   }
 }
@@ -41,6 +45,7 @@ export function processUserName(myProjects: any): void {
     .showCurrentUserUsersMeGet()
     .then((data) => {
       myProjects.userName = data.data.name;
+      myProjects.loggedUserId = data.data.id;
       myProjects.userMail = "mailto:" + data.data.email;
     })
     .catch((reason) => {
@@ -48,6 +53,7 @@ export function processUserName(myProjects: any): void {
       console.log(reason);
       alert(reason);
       myProjects.userName = "<< User probably not logged in >>";
+      myProjects.loggedUserId = 0;
       myProjects.userMail = "";
     });
 }
@@ -72,6 +78,8 @@ export function processProjects(theProjects: any): void {
           const dataI: ProjectModel = data.data[i];
           if (dataI !== undefined && dataI.projid != undefined) {
             // DO A *new*
+            // TODO use the copy constructor to build a project object from a ProjectModel object
+            // instead of doing = through several fields, like objcount or status, or projid
             const oneProject: project = new project(dataI.title, dataI.projid);
             if (dataI.objcount !== undefined && dataI.objcount !== null)
               oneProject.objcount = dataI.objcount;
@@ -85,7 +93,7 @@ export function processProjects(theProjects: any): void {
               oneProject.status = dataI.status;
             if (dataI.cnn_network_id !== undefined)
               oneProject.cnn_network_id = dataI.cnn_network_id;
-            if (dataI.instrument !== undefined)            
+            if (dataI.instrument !== undefined)
               oneProject.instrument = dataI.instrument;
             if (dataI.cnn_network_id !== undefined)
               oneProject.cnn_network_id = dataI.cnn_network_id;
@@ -106,10 +114,12 @@ export function processProjects(theProjects: any): void {
                 }
               }
             }
-          theProjects.projects.push(oneProject);
+            // Here work on the user status on each project (different from project status)
+            oneProject.user_Status = findUserStatus(dataI, theProjects.loggedUserId);
+            theProjects.projects.push(oneProject);
+          }
         }
       }
-    }
     })
     .then(() => {
       // TODO EVERYWHERE : give a type to "this", instead of "any", otherwise we lose all the TS useful checking.
@@ -130,16 +140,41 @@ export function processProjects(theProjects: any): void {
         setProjectsCategories(api, projectIDlist, theProjects);
       }
     })
-  .catch((reason) => {
-    // TODO : global error treatment      
-    console.log(reason);
-    alert(reason);
-    theProjects.projects = [];
-  })
-  .finally(() => {
-    theProjects.nbRequests--;
+    .catch((reason) => {
+      // TODO : global error treatment      
+      console.log(reason);
+      alert(reason);
+      theProjects.projects = [];
+    })
+    .finally(() => {
+      theProjects.nbRequests--;
+    }
+    );
+}
+
+function findUserStatus(dataI: ProjectModel, userId: number): userStatus {
+  let theUsers = dataI.annotators;
+  if (theUsers !== undefined) {
+    for (const element of theUsers) {
+      if (element.id === userId)
+        return userStatus._ANNOTATOR;
+    }
   }
-  );
+  theUsers = dataI.managers;
+  if (theUsers !== undefined) {
+    for (const element of theUsers) {
+      if (element.id === userId)
+        return userStatus._MANAGER;
+    }
+  }
+  theUsers = dataI.viewers;
+  if (theUsers !== undefined) {
+    for (const element of theUsers) {
+      if (element.id === userId)
+        return userStatus._VIEWER;
+    }
+  }
+  return userStatus._NONE;
 }
 
 function setProjectsAllCategories(api: ProjectsApi, projectIDlist: string, theProjects: any): void {
@@ -152,7 +187,6 @@ function setProjectsAllCategories(api: ProjectsApi, projectIDlist: string, thePr
         break; // found the separator, in order to get a full projectID
 
     const subProjectIDlist: string = projectIDlist.substring(oldSmallStep, smallStep);
-
     setProjectsCategories(api, subProjectIDlist, theProjects);
 
     oldSmallStep = smallStep + 1; // + 1 to swallow the separator

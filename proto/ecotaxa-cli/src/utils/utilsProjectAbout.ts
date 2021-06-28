@@ -5,6 +5,8 @@ import { AxiosResponse } from "axios";
 import { ProjectModel, UserModel } from "gen/api";
 import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
+import { userStatus } from "./utilsConsts";
+
 ////////////////////////////////////////////////////////////////////
 export function processProject(myProject: any): void {
   const api: ProjectsApi = new ProjectsApi();
@@ -92,12 +94,6 @@ Donc un manager est un "utilisateur" mais avec des droits spéciaux.
 Et les managers peuvent changer au cours de la vie du projet
 Donc il faut vraiment le voir comme un flag à un temps t.
 */
-
-enum userStatus { // from lower to higher "rights"
-  _VIEWER = "Viewer",
-  _ANNOTATOR = "Annotator",
-  _MANAGER = "Manager",
-}
 
 class projUser implements UserModel {
   id;  

@@ -17,6 +17,7 @@
         <tr>
           <th>Title (ID)</th>
           <th>Contact</th>
+          <th>User status</th>          
           <th>Status</th>
           <th>Nb objects</th>
           <th>% validated</th>
@@ -32,6 +33,7 @@
           <td>
             <a :href="myProject.email">{{ myProject.name }}</a>
           </td>
+          <td>{{ myProject.user_Status }}</td>          
           <td>{{ myProject.status }}</td>
           <td>{{ myProject.objcount }}</td>
           <td>{{ myProject.pctvalidated }}</td>
@@ -68,6 +70,7 @@ import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
   props: {
     // several data of Projects.vue become properties here
     // I keep the same names for convenience only
+    loggedUserId:Number,
     yourProjects: Boolean,
     forManaging: Boolean,
     filterSubset: Boolean,
@@ -105,15 +108,16 @@ import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
         "EcoTaxa",
         "title",
         "projid",
-        "objcount",
-        "pctvalidated",
-        "status",
         "name",
         "email",
+        "user_Status",
+        "status",
+        "objcount",
+        "pctvalidated",
+        "instrument",        
         "cnn_network_id",
-        "instrument",
         "nbMatchingFeatures",
-        "nb_taxa"
+        "nb_taxa",        
       );
     },
   },

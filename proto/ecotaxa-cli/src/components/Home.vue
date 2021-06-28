@@ -4,6 +4,7 @@
       <h1>Welcome to EcoTaxa</h1>
       Hereunder temp. table to test generic component (on projects table)
       <ProjectsTableGeneric
+        loggedUserId=""      
         :yourProjects=false
         :forManaging=false
         :filterSubset=myFilterSubset
