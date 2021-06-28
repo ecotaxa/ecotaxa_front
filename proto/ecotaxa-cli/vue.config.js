@@ -24,6 +24,13 @@ module.exports = {
           if ("cookie" in req.headers && proxyReq.host !== "localhost") {
             proxyReq.removeHeader("cookie");
           }
+          // On Chrome, get your EcoTaxa session cookie, by :
+          // 1) Use EcoTaxa
+          // 2) On up-right corner, click vertical ...
+          // 3) Go to More tools/Developer tools/Application/Storage/Cookies/<EcoTaxa site>/session
+          // To make it work with a "session cookie", uncomment the 2 following lines :
+          // const session_cookie = "PUT HERE THE SESSION COOKIE... LONG STRING";
+          // proxyReq.setHeader("Authorization", "Bearer " + session_cookie);          
         },
       },
     },
