@@ -54,7 +54,7 @@
         height: 100%;
         overflow-x: hidden;
         overflow-y: auto;
-        background-color: #f4fbfd;
+        background-color: #c6dcef;
         /* font-family:var(--font-family); */
         font-family: 'Source Sans Pro', sans-serif, Helvetica, Arial;
         font-weight: 400;
@@ -78,23 +78,28 @@
     .file-uploads {
         display: inherit;
     }
+    .p-fieldset-content {
+        display: flex;
+    }
+
 </style>
 <body>
 <div id="app">
   <div class="p-d-flex p-jc-between">
     <div>
       <a href="/">
-        <img height="30" src="/static/logo_ecotaxa_25.png" style="margin: 10px 0">
+        <img height="30" src="/static/logo_ecotaxa_25.png" style="margin: 10px 10px">
       </a>
     </div>
     <div>
       <h1 class="p-text-center ">CPICS import</h1>
     </div>
     <div>
-      <span>{{ user_name }}</span>
+      <span><br>{{ user_name }}&nbsp;&nbsp;</span>
     </div>
   </div>
-  <div class="card p-shadow-3 p-px-3" style="max-width: 768px; margin: auto">
+  <div class="card p-shadow-3 p-px-3"
+       style="max-width: 768px; margin: auto;background-color: #f3f8fc;">
     <div class="p-fluid p-formgrid p-grid">
       <div class="p-field p-offset-1 p-col-10">
         <label for="dest_prj">Project to import into</label>
@@ -128,30 +133,33 @@
         <label for="ctd_dist">Distance to CTD</label>
         <p-inputnumber id="ctd_dist" v-model="ctd_dist"
                        :min="0" :max="100"
-                       v-tooltip="'Offset b/w CTD and camera'"/>
+                       v-tooltip="'Offset b/w CTD and camera (cm)'"/>
       </div>
-      <div class="p-field p-col-12">
-        <p-fieldset legend="Profile" :toggleable="true"
-                    @toggle="switch_profile_import_type"
-                    v-model:collapsed="is_time_series">
-          <div class="p-field p-col-6">
-            <label for="sample_id">Sample ID</label>
-            <p-inputtext id="sample_id" type="text"
-                         v-tooltip="'Usually station id'"/>
-          </div>
-        </p-fieldset>
-      </div>
-      <div class="p-field p-col-12">
-        <p-fieldset legend="Time Series" :toggleable="true"
-                    @toggle="switch_time_series_import_type"
-                    v-model:collapsed="is_profile">
-          <div class="p-field p-col-6">
-            <label for="deployment_id">Deployment ID</label>
-            <p-inputtext id="deployment_id" type="text"
-                         v-tooltip="'Sample and subsamples will use this as base name'"/>
-          </div>
-        </p-fieldset>
-      </div>
+      <p-fieldset class="p-field p-col-12" legend="Profile" :toggleable="true"
+                  @toggle="switch_profile_import_type"
+                  v-model:collapsed="is_time_series">
+        <div class="p-field p-col-6">
+          <label for="sample_id">Sample ID</label>
+          <p-inputtext id="sample_id" v-model="sample_id" type="text"
+                       v-tooltip="'Usually station id'"/>
+        </div>
+        <div class="p-field p-col-2">
+          <label for="split_m">Bin size</label>
+          <p-inputnumber id="split_m" v-model="split_m"
+                         :min="1" :max="100"
+                         v-tooltip="'Subsample split interval (m)'"/>
+
+        </div>
+      </p-fieldset>
+      <p-fieldset class="p-field p-col-12" legend="Time Series" :toggleable="true"
+                  @toggle="switch_time_series_import_type"
+                  v-model:collapsed="is_profile">
+        <div class="p-field p-col-6">
+          <label for="deployment_id">Deployment ID</label>
+          <p-inputtext id="deployment_id" v-model="deployment_id" type="text"
+                       v-tooltip="'Sample and subsamples will use this as base name'"/>
+        </div>
+      </p-fieldset>
       <div class="p-col-3">
         <div id="dropzone" class="p-field p-col-12">
           <file-upload
@@ -200,7 +208,7 @@
 
     </div>
   </div>
-  <h6>{{ tz_offset }}</h6>
+  <h6> {{ dest_prj }} {{ tz_offset }} {{ latitude }} {{ longitude }} {{ ctd_dist }} {{ is_profile }} {{ deployment_id }}</h6>
 </div>
 
 <script>
@@ -209,24 +217,17 @@
 
     const App = {
             setup() {
-                const dest_prj = ref(null);
-                const projects = []
-                const files = ref([]);
-                const ignored_files = ref([]);
-                const ctd_dist = ref(null);
-                const is_profile = ref(false);
-                const is_time_series = ref(true);
-
                 return {
-                    latitude: null,
-                    longitude: ref(null),
-                    tz_offset: ref(0),
+                    user_name: ref('Loading...'),
+                    projects: ref([]), dest_prj: ref(null), projects_loading: ref(true),
+                    tz_offset: ref(0), latitude: ref(null), longitude: ref(null), ctd_dist: ref(null),
+                    is_profile: ref(false),
+                    deployment_id: ref(null), split_m: ref(5),
+                    is_time_series: ref(true),
+                    sample_id: ref(null),
                     data_volume: ref(0),
-                    nb_files: 0, nb_trsf: 0, nb_trsf_ok: 0, nb_trsf_err: 0,
-                    projects, dest_prj, files,
-                    ctd_dist, is_profile, is_time_series, ignored_files,
-                    user_name: 'Loading...',
-                    projects_loading: ref(true)
+                    ignored_files: ref([]), nb_files: 0, nb_trsf: 0, nb_trsf_ok: 0, nb_trsf_err: 0,
+                    files: ref([]),
                 };
             },
             components: {
@@ -291,7 +292,7 @@
 
                         // Start upload
                         if (newFile.active !== oldFile.active) {
-                            console.log('Start upload', newFile.active, newFile)
+                            //console.log('Start upload', newFile.active, newFile)
 
                             // min size
                             /* if (newFile.size >= 0 && newFile.size < 100 * 1024) {
@@ -354,7 +355,7 @@
                             return prevent()
                         }
                         // Full path for back-end checks
-                        newFile.data = {path: newFile.name};
+                        newFile.data = {path: newFile.name, tag: 'cpics_imp'};
                         // stats
                         this.data_volume += newFile.size;
                     }
