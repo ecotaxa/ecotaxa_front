@@ -5,6 +5,7 @@ import { AxiosResponse } from "axios";
 import { ProjectModel, UserModel } from "gen/api";
 import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
+import { _MAILTO } from "./utilsConsts";
 import { userStatus } from "./utilsConsts";
 
 ////////////////////////////////////////////////////////////////////
@@ -30,7 +31,7 @@ function simpleFieldsOK(myProject: any, data: AxiosResponse<ProjectModel>): void
   myProject.projectComment = data.data.comments;
   myProject.projectLicense = data.data.license;
   myProject.projectSCNnetwork = data.data.cnn_network_id;
-  myProject.contactMail = "mailto:" + data.data.contact?.email;
+  myProject.contactMail = _MAILTO + data.data.contact?.email;
   myProject.contactName = data.data.contact?.name;
 }
 function simpleFieldsKO(myProject: any, reason: any): void {
@@ -125,7 +126,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
       const managerI = data.data.managers[i];
       const oneUser: projUser = new projUser(managerI.id, userStatus._MANAGER);
-      oneUser.email = "mailto:" + managerI.email;
+      oneUser.email = _MAILTO + managerI.email;
       oneUser.active = managerI.active;      
       oneUser.name = managerI.name;
       myProject.projectUsers.push(oneUser);
@@ -136,7 +137,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
       const annotatorI = data.data.annotators[i];
       const oneUser: projUser = new projUser(annotatorI.id, userStatus._ANNOTATOR);
-      oneUser.email = "mailto:" + annotatorI.email;
+      oneUser.email = _MAILTO + annotatorI.email;
       oneUser.name = annotatorI.name;
       oneUser.active = annotatorI.active;
       myProject.projectUsers.push(oneUser);
@@ -147,7 +148,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
       const viewerI = data.data.viewers[i];
       const oneUser: projUser = new projUser(viewerI.id, userStatus._VIEWER);
-      oneUser.email = "mailto:" + viewerI.email;
+      oneUser.email = _MAILTO + viewerI.email;
       oneUser.name = viewerI.name;
       oneUser.active = viewerI.active;      
       myProject.projectUsers.push(oneUser);

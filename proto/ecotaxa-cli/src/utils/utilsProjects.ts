@@ -3,25 +3,46 @@ import { ProjectModel } from "gen/api";
 import { UsersApi } from "../../gen";
 import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
+import { _MAILTO } from "./utilsConsts";
 import { userStatus } from "./utilsConsts";
 
 ////////////////////////////////////////////////////////////////////
 
 // class project implements ProjectModel {
 class project implements ProjectModel {
-  // TODO write the copy constructor to build a project object from a ProjectModel object 
   title;
   projid;
   name: string;
   email: string;
   user_Status : userStatus;
-  status: string;    
+  status;
   objcount;
   pctvalidated;
-  instrument: string;  
-  cnn_network_id : string;
+  instrument;
+  cnn_network_id;
   nbMatchingFeatures: number;
+  // Use the copy constructor to build a project object from a ProjectModel object
+  constructor(father: ProjectModel) {
+    this.title = father.title;
+    this.projid = father.projid;
+    if (father.contact !== undefined && father.contact !== null)
+      this.name = father.contact.name;
+    else
+      this.name = "";
+    if (father.contact !== undefined && father.contact !== null)
+      this.email = _MAILTO + father.contact.email;
+    else
+      this.email = "";
+    this.user_Status = userStatus._NONE;
+    this.status = father.status;
+    this.objcount = father.objcount;
+    this.pctvalidated = father.pctvalidated;
+    this.instrument = father.instrument;
+    this.cnn_network_id = father.cnn_network_id;
+    this.nbMatchingFeatures = 0;
+  }
 
+  /*
   constructor(myTitle: string, myID: number) {
     this.title = myTitle;
     this.projid = myID;
@@ -34,7 +55,7 @@ class project implements ProjectModel {
     this.instrument = "";    
     this.cnn_network_id = "";
     this.nbMatchingFeatures = 0;
-  }
+  }*/
 }
 
 export { project };
@@ -46,7 +67,7 @@ export function processUserName(myProjects: any): void {
     .then((data) => {
       myProjects.userName = data.data.name;
       myProjects.loggedUserId = data.data.id;
-      myProjects.userMail = "mailto:" + data.data.email;
+      myProjects.userMail = _MAILTO + data.data.email;
     })
     .catch((reason) => {
       // TODO : global error treatment      
@@ -76,28 +97,11 @@ export function processProjects(theProjects: any): void {
         theProjects.projects = new Array<project>();
         for (let i: number = 0; i < data.data.length; i++) {
           const dataI: ProjectModel = data.data[i];
-          if (dataI !== undefined && dataI.projid != undefined) {
+          if (dataI !== undefined) {
             // DO A *new*
-            // TODO use the copy constructor to build a project object from a ProjectModel object
+            // Better to use the copy constructor to build a project object from a ProjectModel object
             // instead of doing = through several fields, like objcount or status, or projid
-            const oneProject: project = new project(dataI.title, dataI.projid);
-            if (dataI.objcount !== undefined && dataI.objcount !== null)
-              oneProject.objcount = dataI.objcount;
-            if (dataI.pctvalidated !== undefined && dataI.pctvalidated !== null)
-              oneProject.pctvalidated = Math.round(dataI.pctvalidated * 100) / 100;
-            if (dataI.contact !== null && dataI.contact !== undefined) {
-              oneProject.email = "mailto:" + dataI.contact.email;
-              oneProject.name = dataI.contact.name;
-            }
-            if (dataI.status !== undefined)
-              oneProject.status = dataI.status;
-            if (dataI.cnn_network_id !== undefined)
-              oneProject.cnn_network_id = dataI.cnn_network_id;
-            if (dataI.instrument !== undefined)
-              oneProject.instrument = dataI.instrument;
-            if (dataI.cnn_network_id !== undefined)
-              oneProject.cnn_network_id = dataI.cnn_network_id;
-
+             const oneProject: project = new project(dataI);
             if (dataI.obj_free_cols !== undefined) {
               // TODO : think of factorizinz that if used elsewhere
               if (theProjects.stringsMatching !== undefined && theProjects.stringsMatching !== "") {

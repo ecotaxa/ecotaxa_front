@@ -56,6 +56,7 @@
 import { Options, Vue } from "vue-class-component";
 import * as utils from "../utils/utilsProjects";
 import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
+import {_MAILTO} from "../utils/utilsConsts";
 
 @Options({
   // export default {
@@ -89,19 +90,30 @@ import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
       // Dispatch the nb_taxa map into this special projects array.
       class projectExport extends utils.project {
         nb_taxa: number;
-        constructor() {
-          super("", 0);
+        constructor(father:utils.project) {
+          super(father);
           this.nb_taxa = 0;
         }
       }
 
-      let myProjects:Array<projectExport> = new Array<projectExport>();
+      const myProjects:Array<projectExport> = new Array<projectExport>();
+      for (const oneProjectExport of this.projects) {
+        oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
+        oneProjectExport.email = oneProjectExport.email.replace(_MAILTO,"");
+        myProjects.push(oneProjectExport);       
+      }
+
+/*
+      // KEEP it: at one moment I got strange problems with fields of subclass
+      const myProjects:Array<projectExport> = new Array<projectExport>();
       for (let i = 0; i < this.projects.length; i++) {
         let oneProjectExport: projectExport = this.projects[i];
         oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
         myProjects.push(oneProjectExport);
       }
-      // TODO : review columns orders, I'm sure JO will have a precise idea
+*/
+
+      // TODO : review columns orders, JO may have a precise idea
       exportDataToTSVFile(
         myProjects,
         "Projects",
