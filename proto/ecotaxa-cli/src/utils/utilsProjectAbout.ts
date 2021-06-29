@@ -122,37 +122,34 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
   myProject.projectUsers = new Array<projUser>();
   // Also add the managers in oneArray, because they are also users
   if (data.data.managers !== undefined) {
-    for (let i: number = 0; i < data.data.managers.length; i++) {
+    data.data.managers.forEach(managerI => {
       // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-      const managerI = data.data.managers[i];
       const oneUser: projUser = new projUser(managerI.id, userStatus._MANAGER);
       oneUser.email = _MAILTO + managerI.email;
       oneUser.active = managerI.active;      
       oneUser.name = managerI.name;
       myProject.projectUsers.push(oneUser);
-    }
+    });
   }
   if (data.data.annotators !== undefined) {
-    for (let i: number = 0; i < data.data.annotators.length; i++) {
+    data.data.annotators.forEach(annotatorI => {
       // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-      const annotatorI = data.data.annotators[i];
       const oneUser: projUser = new projUser(annotatorI.id, userStatus._ANNOTATOR);
       oneUser.email = _MAILTO + annotatorI.email;
       oneUser.name = annotatorI.name;
       oneUser.active = annotatorI.active;
       myProject.projectUsers.push(oneUser);
-    }
+    });
   }
   if (data.data.viewers !== undefined) {
-    for (let i: number = 0; i < data.data.viewers.length; i++) {
+    data.data.viewers.forEach(viewerI => {
       // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
-      const viewerI = data.data.viewers[i];
       const oneUser: projUser = new projUser(viewerI.id, userStatus._VIEWER);
       oneUser.email = _MAILTO + viewerI.email;
       oneUser.name = viewerI.name;
-      oneUser.active = viewerI.active;      
+      oneUser.active = viewerI.active;
       myProject.projectUsers.push(oneUser);
-    }
+    });
   }
   // Now we're going to add actions and annotations
   const api2: ProjectsApi = new ProjectsApi(); // create another API as the first one is currently used
@@ -323,12 +320,12 @@ export function processTaxa(myProject: any): void {
       myProject.projectTaxa = new Array<taxon>();
       const myData = data.data[0]; // 0 because we work on a precise single project
       if (myData !== undefined && myData.used_taxa !== undefined) {
-        for (let i: number = 0; i < myData.used_taxa.length; i++) {
-          if (myData.used_taxa[i] !== -1) {
-            const oneTaxon: taxon = new taxon(myData.used_taxa[i]);
+        myData.used_taxa.forEach(element => {
+          if (element !== -1) {
+            const oneTaxon: taxon = new taxon(element);
             myProject.projectTaxa.push(oneTaxon);
-          }
-        }
+          }          
+        });
       }
     })
     .then(() => {
@@ -336,6 +333,7 @@ export function processTaxa(myProject: any): void {
       // Now I'm going to add nb_unclassified, nb_validated, nb_dubious, nb_predicted
       // TODO : verify if we can (with no mem leaks) reuse api instead declaring api2
       let taxonIDlist: string = ""; // build list of taxon IDs
+
       for (let i: number = 0; i < myProject.projectTaxa.length; i++) {
         const oneTaxon: taxon = myProject.projectTaxa[i];
         taxonIDlist += oneTaxon.id + _SEPARATOR;

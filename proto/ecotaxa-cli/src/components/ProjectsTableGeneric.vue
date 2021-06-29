@@ -104,7 +104,8 @@ import {_MAILTO} from "../utils/utilsConsts";
       }
 
 /*
-      // KEEP it: at one moment I got strange problems with fields of subclass
+      // KEEP it: at one moment I got strange problems with fields of subclass.
+      // There is a copy constructor (from mother class) called here.
       const myProjects:Array<projectExport> = new Array<projectExport>();
       for (let i = 0; i < this.projects.length; i++) {
         let oneProjectExport: projectExport = this.projects[i];

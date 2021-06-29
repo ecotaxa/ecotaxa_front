@@ -36,26 +36,14 @@ class project implements ProjectModel {
     this.user_Status = userStatus._NONE;
     this.status = father.status;
     this.objcount = father.objcount;
-    this.pctvalidated = father.pctvalidated;
+    if (father.pctvalidated !== undefined && father.pctvalidated !== null)
+      this.pctvalidated = Math.round(father.pctvalidated * 100) / 100;
+    else
+      this.pctvalidated = 0;
     this.instrument = father.instrument;
     this.cnn_network_id = father.cnn_network_id;
     this.nbMatchingFeatures = 0;
   }
-
-  /*
-  constructor(myTitle: string, myID: number) {
-    this.title = myTitle;
-    this.projid = myID;
-    this.name = "";
-    this.email = "";
-    this.user_Status = userStatus._NONE;
-    this.status = "";    
-    this.objcount = 0;    
-    this.pctvalidated = 0;
-    this.instrument = "";    
-    this.cnn_network_id = "";
-    this.nbMatchingFeatures = 0;
-  }*/
 }
 
 export { project };
@@ -95,13 +83,12 @@ export function processProjects(theProjects: any): void {
     .then((data) => {
       if (data.data !== undefined && data.data.length > 0) {
         theProjects.projects = new Array<project>();
-        for (let i: number = 0; i < data.data.length; i++) {
-          const dataI: ProjectModel = data.data[i];
+        data.data.forEach(dataI => {
           if (dataI !== undefined) {
             // DO A *new*
             // Better to use the copy constructor to build a project object from a ProjectModel object
             // instead of doing = through several fields, like objcount or status, or projid
-             const oneProject: project = new project(dataI);
+            const oneProject: project = new project(dataI);
             if (dataI.obj_free_cols !== undefined) {
               // TODO : think of factorizinz that if used elsewhere
               if (theProjects.stringsMatching !== undefined && theProjects.stringsMatching !== "") {
@@ -122,21 +109,21 @@ export function processProjects(theProjects: any): void {
             oneProject.user_Status = findUserStatus(dataI, theProjects.loggedUserId);
             theProjects.projects.push(oneProject);
           }
-        }
+        });
       }
     })
     .then(() => {
       // TODO EVERYWHERE : give a type to "this", instead of "any", otherwise we lose all the TS useful checking.
       // Build the projectID list and initialize the nb_taxa map
       let projectIDlist: string = ""; // build list of project IDs
-      for (let i: number = 0; i < theProjects.projects.length; i++) {
-        const oneProject: project = theProjects.projects[i];
-        const pid: number | undefined = oneProject.projid;
+      const projs:project[] = theProjects.projects;
+      projs.forEach(oneProject => {
+        const pid: number|undefined = oneProject.projid;
         if (pid !== undefined) {
           projectIDlist += pid.toString() + _SEPARATOR;
           theProjects.nb_taxa.set(pid, 0);
-        }
-      }
+        }        
+      });
       if (projectIDlist.length > _MAX_REQUEST_LENGTH) {
         setProjectsAllCategories(api, projectIDlist, theProjects);
       }
@@ -206,10 +193,10 @@ function setProjectsCategories(api: ProjectsApi, projectIDlist: string, theProje
       .projectSetGetStatsProjectSetTaxoStatsGet(projectIDlist, "all")
       .then((data) => {
         // analyze the answer by going through the array items, and work with the map
-        for (let i: number = 0; i < data.data.length; i++) {
-          const pid: number = data.data[i].projid;
-          theProjects.nb_taxa.set(pid, theProjects.nb_taxa.get(pid) + 1);
-        }
+        data.data.forEach(element => {
+          const pid: number = element.projid;
+          theProjects.nb_taxa.set(pid, theProjects.nb_taxa.get(pid) + 1);                    
+        });
       })
       .catch((reason) => {
         // TODO : global error treatment      

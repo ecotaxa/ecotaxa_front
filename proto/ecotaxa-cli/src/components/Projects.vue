@@ -25,7 +25,7 @@
       type="text"
       v-model="stringsMatching"
       :disabled="!display_nbMatchingFeatures"
-      @click="reinitQuery"
+      @click="reinitQuery" @change="reinitQuery"
     />
     <span style="visibility: hidden">
       TODO remove this string
@@ -33,9 +33,9 @@
     <br />
     <br />
     Title filter&emsp;
-    <input type="text" v-model="titleFilter" @click="reinitQuery" />&emsp;&emsp;
+    <input type="text" v-model="titleFilter" @click="reinitQuery" @change="reinitQuery" />&emsp;&emsp;
     Instrument Filter&emsp;
-    <input type="text" v-model="instrumentFilter" @click="reinitQuery" />
+    <input type="text" v-model="instrumentFilter" @click="reinitQuery" @change="reinitQuery" />
     <br />
     <br />
     <button type="button" @click="runProjectsQuery" class="EcoTaxaButton">
