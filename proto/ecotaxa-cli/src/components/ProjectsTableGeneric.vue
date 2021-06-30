@@ -17,7 +17,7 @@
         <tr>
           <th>Title (ID)</th>
           <th>Contact</th>
-          <th>User status</th>          
+          <th>User status</th>
           <th>Status</th>
           <th>Nb objects</th>
           <th>% validated</th>
@@ -33,7 +33,7 @@
           <td>
             <a :href="myProject.email">{{ myProject.name }}</a>
           </td>
-          <td>{{ myProject.user_Status }}</td>          
+          <td>{{ myProject.user_Status }}</td>
           <td>{{ myProject.status }}</td>
           <td>{{ myProject.objcount }}</td>
           <td>{{ myProject.pctvalidated }}</td>
@@ -53,12 +53,14 @@
 
 <script lang="ts">
 // import { Prop } from "vue-property-decorator";
-import { Options, Vue } from "vue-class-component";
+// import { Options, Vue } from "vue-class-component";
 import * as utils from "../utils/utilsProjects";
 import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
-import {_MAILTO} from "../utils/utilsConsts";
+import { _MAILTO } from "../utils/utilsConsts";
+import { defineComponent } from "@vue/runtime-core";
 
-@Options({
+//@Options({
+export default defineComponent({
   // export default {
   name: "ProjectsTableGeneric",
   data: function () {
@@ -71,7 +73,7 @@ import {_MAILTO} from "../utils/utilsConsts";
   props: {
     // several data of Projects.vue become properties here
     // I keep the same names for convenience only
-    loggedUserId:Number,
+    loggedUserId: Number,
     yourProjects: Boolean,
     forManaging: Boolean,
     filterSubset: Boolean,
@@ -89,30 +91,36 @@ import {_MAILTO} from "../utils/utilsConsts";
       // Build a temp. special projects array to perform the export.
       // Dispatch the nb_taxa map into this special projects array.
       class projectExport extends utils.project {
-        nb_taxa: number;
-        constructor(father:utils.project) {
+        nb_taxa: number | undefined;
+        constructor(father: utils.project) {
           super(father);
           this.nb_taxa = 0;
         }
       }
 
-      const myProjects:Array<projectExport> = new Array<projectExport>();
-      for (const oneProjectExport of this.projects) {
-        oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
-        oneProjectExport.email = oneProjectExport.email.replace(_MAILTO,"");
-        myProjects.push(oneProjectExport);       
+      const myProjects: Array<projectExport> = new Array<projectExport>();
+      for (const oneProject of this.projects) {
+        const oneProjectExport: projectExport = new projectExport(oneProject);
+        if (oneProjectExport.projid !== undefined)        
+          oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
+        oneProjectExport.email = oneProjectExport.email.replace(_MAILTO, "");
+        myProjects.push(oneProjectExport);
       }
 
-/*
+      /*
       // KEEP it: at one moment I got strange problems with fields of subclass.
       // There is a copy constructor (from mother class) called here.
       const myProjects:Array<projectExport> = new Array<projectExport>();
       for (let i = 0; i < this.projects.length; i++) {
-        let oneProjectExport: projectExport = this.projects[i];
-        oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
+        const oneProjectExport: projectExport = new projectExport(this.projects[i]);
+        if (oneProjectExport.projid !== undefined)
+          oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
+        else
+          oneProjectExport.nb_taxa = 0;
+        oneProjectExport.email = oneProjectExport.email.replace(_MAILTO,"");          
         myProjects.push(oneProjectExport);
       }
-*/
+      */
 
       // TODO : review columns orders, JO may have a precise idea
       exportDataToTSVFile(
@@ -127,14 +135,16 @@ import {_MAILTO} from "../utils/utilsConsts";
         "status",
         "objcount",
         "pctvalidated",
-        "instrument",        
+        "instrument",
         "cnn_network_id",
         "nbMatchingFeatures",
-        "nb_taxa",        
+        "nb_taxa"
       );
     },
   },
-})
+});
+
+/*
 export default class ProjectsTableGeneric extends Vue {
   yourProjects!: boolean;
   forManaging!: boolean;
@@ -143,6 +153,7 @@ export default class ProjectsTableGeneric extends Vue {
   instrumentFilter!: string;
   display_cnn_network_id!: boolean;
 }
+*/
 
 // export default ProjectsTableGeneric;
 </script>

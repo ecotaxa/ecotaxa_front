@@ -65,12 +65,14 @@
 
 <script lang="ts">
 // import { Prop } from "vue-property-decorator";
-//import my_router from "@/router";
-import { Options, Vue } from "vue-class-component";
+// import my_router from "@/router";
+// import { Options, Vue } from "vue-class-component";
 import * as utils from "../utils/utilsProjects";
 import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
+import { defineComponent } from "@vue/runtime-core";
 
-@Options({
+// @Options({
+export default defineComponent ({  
   name: "Projects",
   components: {
     ProjectsTableGeneric: ProjectsTableGeneric,
@@ -103,9 +105,12 @@ import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
       this.runQuery = false;
     },
   },
-})
+});
+
+/*
 export default class Projects extends Vue {
   userName!: string;
   userMail!: string;
 }
+*/
 </script>

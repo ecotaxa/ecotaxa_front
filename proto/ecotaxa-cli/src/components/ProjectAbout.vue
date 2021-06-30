@@ -224,16 +224,17 @@
 
 <script lang="ts">
 // import { Prop } from "vue-property-decorator";
-import { Options, Vue } from "vue-class-component";
+//import { Options, Vue } from "vue-class-component";
 //import { onMounted, ref } from "vue";
 // import 'bootst rap';
 import { Dropdown } from "bootstrap";
 import * as utils from "../utils/utilsProjectAbout";
 import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
 import { computeLicense } from "../utils/manageLicenses";
+import { defineComponent } from "@vue/runtime-core";
 
-//export default defineComponent({
-@Options({
+export default defineComponent({
+//@Options({
   name: "ProjectAbout",
   props: {
     projectID: {
@@ -260,7 +261,7 @@ import { computeLicense } from "../utils/manageLicenses";
     };
   },
   mounted() {
-    const dd_ref = this.$refs.vanillaDD;
+    const dd_ref:any = this.$refs.vanillaDD;
     // Add the DD handler code - not working without line below
     this.vanilla = new Dropdown(dd_ref);
     // Add a custom event
@@ -321,11 +322,13 @@ import { computeLicense } from "../utils/manageLicenses";
       return computeLicense(this.projectLicense);
     },
   },
-})
+});
+
+/*
 export default class ProjectAbout extends Vue {
   projectID!: string;
   urlLink!: string;
   copyright!: string;
   to_show = this.projectID;
-}
+}*/
 </script>

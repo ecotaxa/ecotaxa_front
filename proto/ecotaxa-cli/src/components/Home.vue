@@ -23,12 +23,14 @@
 // import HelloWorld from "@/components/HelloWorld.vue";
 
 import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
+import { defineComponent } from "@vue/runtime-core";
 
-export default {
+export default defineComponent({
+// export default {
   name: "Home",
   components: {
     // HelloWorld
-    /*ProjectsTableGeneric:*/ ProjectsTableGeneric,
+    ProjectsTableGeneric: ProjectsTableGeneric,
   },
   data: function () {
     return {
@@ -37,5 +39,6 @@ export default {
       // N.B. myTitleFilter and myFilterSubset can be referenced in the html part, with or without ""
     }
   }
-};
+});
+
 </script>
