@@ -1,8 +1,10 @@
 <template>
-  <body>
+
     <div class="EcoTaxaFocusIntro">
       <h1>Welcome to EcoTaxa</h1>
       Hereunder temp. table to test generic component (on projects table)
+    </div>
+    <div id="#app" class="container">        
       <ProjectsTableGeneric
         loggedUserId=""      
         :yourProjects=false
@@ -13,8 +15,7 @@
         :display_nbMatchingFeatures=false
         stringsMatching=""
       />
-    </div>
-  </body>
+    </div>      
 </template>
 
 <script lang="ts">
