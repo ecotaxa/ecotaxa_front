@@ -97,23 +97,23 @@ Donc il faut vraiment le voir comme un flag à un temps t.
 */
 
 class projUser implements UserModel {
-  id;  
+  id;
   email;
   name;
   active?;
   nb_actions: number;
   last_annot: string;
   status: userStatus;
-  
+
   constructor(myID: number | undefined, myStatus: userStatus) {
     this.id = myID;
     this.email = "";
     this.name = "";
     this.active = false;
     this.nb_actions = 0;
-    this.last_annot = "N/A";    
+    this.last_annot = "N/A";
     this.status = myStatus;
-    }
+  }
 }
 
 export { projUser };
@@ -126,7 +126,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
       // The new keyword below is *absolutely* necessary, do NOT reuse the same variable to change only the field values
       const oneUser: projUser = new projUser(managerI.id, userStatus._MANAGER);
       oneUser.email = _MAILTO + managerI.email;
-      oneUser.active = managerI.active;      
+      oneUser.active = managerI.active;
       oneUser.name = managerI.name;
       myProject.projectUsers.push(oneUser);
     });
@@ -324,7 +324,7 @@ export function processTaxa(myProject: any): void {
           if (element !== -1) {
             const oneTaxon: taxon = new taxon(element);
             myProject.projectTaxa.push(oneTaxon);
-          }          
+          }
         });
       }
     })

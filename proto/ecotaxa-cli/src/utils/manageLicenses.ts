@@ -14,8 +14,8 @@ enum licenseType {
 };
 
 const licenseURLs: Array<string> =
-// DO NOT change the order    
-[
+  // DO NOT change the order    
+  [
   /* CC_BY_NC_ND */ "https://upload.wikimedia.org/wikipedia/commons/f/f1/Cc-by-nc-nd_icon.svg",
   /* CC-BY-NC-SA */ "https://upload.wikimedia.org/wikipedia/commons/1/12/Cc-by-nc-sa_icon.svg",
   /* CC_BY_NC    */ "https://upload.wikimedia.org/wikipedia/commons/9/99/Cc-by-nc_icon.svg",
@@ -25,7 +25,7 @@ const licenseURLs: Array<string> =
   /* Copyright   */ "https://upload.wikimedia.org/wikipedia/commons/b/bc/Somerights2.png",
   /* CC_0        */ "https://upload.wikimedia.org/wikipedia/commons/6/69/CC0_button.svg",
   /* None        */ "https://upload.wikimedia.org/wikipedia/commons/8/84/Public_Domain_Mark_button.svg"
-];
+  ];
 
 export function computeLicense(projLicense: string): string {
   // DO NOT change the order  

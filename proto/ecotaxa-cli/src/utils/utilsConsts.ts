@@ -4,7 +4,7 @@ export const _SEPARATOR: string = " ";
 export const _MAILTO: string = "mailto:";
 
 export enum userStatus { // from lower to higher "rights"
-  _NONE = "None",  
+  _NONE = "None",
   _VIEWER = "Viewer",
   _ANNOTATOR = "Annotator",
   _MANAGER = "Manager"

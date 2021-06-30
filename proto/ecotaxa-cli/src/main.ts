@@ -18,8 +18,16 @@ import App from "./App.vue";
 // add the store to all components in the app
 import my_router from "./router";
 
-const app = createApp(App);
+import PrimeVue from "primevue/config";
+import InputText from "primevue/inputtext";
+import 'primevue/resources/primevue.min.css'
+import 'primevue/resources/themes/bootstrap4-light-blue/theme.css'
+import 'primeicons/primeicons.css'
 
+
+const app = createApp(App);
+app.use(PrimeVue);
+app.component("InputText", InputText);
 // use router, see routing rules there
 app.use(my_router);
 // app.use(BootstrapVue); DOES NOT WORK

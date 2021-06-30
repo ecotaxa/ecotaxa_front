@@ -101,7 +101,7 @@ export default defineComponent({
       const myProjects: Array<projectExport> = new Array<projectExport>();
       for (const oneProject of this.projects) {
         const oneProjectExport: projectExport = new projectExport(oneProject);
-        if (oneProjectExport.projid !== undefined)        
+        if (oneProjectExport.projid !== undefined)
           oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
         oneProjectExport.email = oneProjectExport.email.replace(_MAILTO, "");
         myProjects.push(oneProjectExport);

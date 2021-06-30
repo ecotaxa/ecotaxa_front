@@ -15,7 +15,7 @@ class project implements ProjectModel {
   projid;
   name: string;
   email: string;
-  user_Status : userStatus;
+  user_Status: userStatus;
   status;
   objcount;
   pctvalidated;
@@ -71,7 +71,7 @@ export function processUserName(myProjects: any): void {
 ////////////////////////////////////////////////////////////////////
 export function processProjects(theProjects: any): void {
   theProjects.nbRequests++; // this function makes a request  
-  theProjects.projects = [];  
+  theProjects.projects = [];
   theProjects.nb_taxa = new Map<number, number>();
   const api: ProjectsApi = new ProjectsApi();
   api
@@ -117,13 +117,13 @@ export function processProjects(theProjects: any): void {
       // TODO EVERYWHERE : give a type to "this", instead of "any", otherwise we lose all the TS useful checking.
       // Build the projectID list and initialize the nb_taxa map
       let projectIDlist: string = ""; // build list of project IDs
-      const projs:project[] = theProjects.projects;
+      const projs: project[] = theProjects.projects;
       projs.forEach(oneProject => {
-        const pid: number|undefined = oneProject.projid;
+        const pid: number | undefined = oneProject.projid;
         if (pid !== undefined) {
           projectIDlist += pid.toString() + _SEPARATOR;
           theProjects.nb_taxa.set(pid, 0);
-        }        
+        }
       });
       if (projectIDlist.length > _MAX_REQUEST_LENGTH) {
         setProjectsAllCategories(api, projectIDlist, theProjects);
@@ -196,7 +196,7 @@ function setProjectsCategories(api: ProjectsApi, projectIDlist: string, theProje
         // analyze the answer by going through the array items, and work with the map
         data.data.forEach(element => {
           const pid: number = element.projid;
-          theProjects.nb_taxa.set(pid, theProjects.nb_taxa.get(pid) + 1);                    
+          theProjects.nb_taxa.set(pid, theProjects.nb_taxa.get(pid) + 1);
         });
       })
       .catch((reason) => {
