@@ -5,7 +5,7 @@ import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
 import { _MAILTO } from "./utilsConsts";
 import { userStatus } from "./utilsConsts";
-// import ProjectsTableGeneric from "@/components/ProjectsTableGeneric.vue";
+import {projectsTableGenericT} from "@/components/ProjectsTableGeneric.vue";
 
 ////////////////////////////////////////////////////////////////////
 
@@ -69,8 +69,8 @@ export function processUserName(myProjects: any): void {
 }
 
 ////////////////////////////////////////////////////////////////////
-export function processProjects(theProjects: any): void {
-  theProjects.nbRequests++; // this function makes a request  
+export function processProjects(theProjects: projectsTableGenericT): void {
+  theProjects.nbRequests++; // this function makes a request
   theProjects.projects = [];
   theProjects.nb_taxa = new Map<number, number>();
   const api: ProjectsApi = new ProjectsApi();

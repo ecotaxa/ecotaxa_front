@@ -52,23 +52,38 @@
 </template>
 
 <script lang="ts">
-// import { Prop } from "vue-property-decorator";
-// import { Options, Vue } from "vue-class-component";
 import * as utils from "../utils/utilsProjects";
-import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
-import { _MAILTO } from "../utils/utilsConsts";
-import { defineComponent } from "@vue/runtime-core";
+import { exportDataToTSVFile } from "@/utils/exportDataToTSVFile";
+import { _MAILTO } from "@/utils/utilsConsts";
+import { defineComponent } from "vue";
+
+const myProps = {
+  // several data of Projects.vue become properties here
+  // I keep the same names for convenience only
+  loggedUserId: 0 as number,
+  yourProjects: false as boolean,
+  forManaging: false as boolean,
+  filterSubset: false as boolean,
+  titleFilter: "" as string,
+  instrumentFilter: "" as string,
+  display_cnn_network_id: false as boolean,
+  display_nbMatchingFeatures: false as boolean,
+  stringsMatching: "" as string,
+};
+const myData = {
+  projects: Array<utils.project>(),
+  nb_taxa: new Map<number, number>(),
+  nbRequests: Number(0),
+};
+type projectsTableGenericT = Readonly<typeof myProps> & typeof myData;
+export type { projectsTableGenericT };
 
 //@Options({
-export default defineComponent({
+const myComp = defineComponent({
   // export default {
   name: "ProjectsTableGeneric",
   data: function () {
-    return {
-      projects: Array<utils.project>(),
-      nb_taxa: new Map<number, number>(),
-      nbRequests: Number(0),
-    };
+    return myData;
   },
   props: {
     // several data of Projects.vue become properties here
@@ -84,14 +99,16 @@ export default defineComponent({
     stringsMatching: String,
   },
   mounted() {
-    utils.processProjects(this); // ==> Run query immediately when reaching this page
+    // TODO: Can remove the "as" maybe and avoid duplication of props. See ExtractPropTypes
+    utils.processProjects(this as projectsTableGenericT); // ==> Run query immediately when reaching this page
   },
   methods: {
     exportProjectsToTSVFile(): void {
       // Build a temp. special projects array to perform the export.
       // Dispatch the nb_taxa map into this special projects array.
       class projectExport extends utils.project {
-        nb_taxa: number | undefined;
+        nb_taxa: number;
+
         constructor(father: utils.project) {
           super(father);
           this.nb_taxa = 0;
@@ -102,24 +119,20 @@ export default defineComponent({
       for (const oneProject of this.projects) {
         const oneProjectExport: projectExport = new projectExport(oneProject);
         if (oneProjectExport.projid !== undefined)
-          oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
+          oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid)!;
         oneProjectExport.email = oneProjectExport.email.replace(_MAILTO, "");
         myProjects.push(oneProjectExport);
       }
 
       /*
-      // KEEP it: at one moment I got strange problems with fields of subclass.
-      // There is a copy constructor (from mother class) called here.
-      const myProjects:Array<projectExport> = new Array<projectExport>();
-      for (let i = 0; i < this.projects.length; i++) {
-        const oneProjectExport: projectExport = new projectExport(this.projects[i]);
-        if (oneProjectExport.projid !== undefined)
-          oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
-        else
-          oneProjectExport.nb_taxa = 0;
-        oneProjectExport.email = oneProjectExport.email.replace(_MAILTO,"");          
-        myProjects.push(oneProjectExport);
-      }
+            // KEEP it: at one moment I got strange problems with fields of subclass.
+            // There is a copy constructor (from mother class) called here.
+            const myProjects:Array<projectExport> = new Array<projectExport>();
+            for (let i = 0; i < this.projects.length; i++) {
+              let oneProjectExport: projectExport = this.projects[i];
+              oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
+              myProjects.push(oneProjectExport);
+            }
       */
 
       // TODO : review columns orders, JO may have a precise idea
@@ -143,17 +156,7 @@ export default defineComponent({
     },
   },
 });
+//myComp.methods.toto = function() {};
 
-/*
-export default class ProjectsTableGeneric extends Vue {
-  yourProjects!: boolean;
-  forManaging!: boolean;
-  filterSubset!: boolean;
-  titleFilter!: string;
-  instrumentFilter!: string;
-  display_cnn_network_id!: boolean;
-}
-*/
-
-// export default ProjectsTableGeneric;
+export default myComp;
 </script>
