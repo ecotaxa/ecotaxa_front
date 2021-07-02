@@ -12,6 +12,22 @@
         Export in .tsv format
       </button>
     </span>
+    <div class="card">
+      <DataTable :value="projects" class="EcoTaxaProjectsTable" sortMode="multiple" v-model:selection="selectedProjects" selectionMode="multiple" dataKey="projid">
+      <!--DataTable :value="projects" class="EcoTaxaProjectsTable"-->      
+        <Column field="title" header="Title" :sortable="true" ></Column>
+        <Column field="projid" header="ID" :sortable="true" ></Column>
+        <Column field="name" header="Name" :sortable="true" ></Column>
+        <Column field="email" header="Mail" :sortable="true" ></Column>
+        <Column field="user_Status" header="User status" :sortable="true" ></Column>
+        <Column field="status" header="Status" :sortable="true" ></Column>
+        <Column field="objcount" header="Nb objects" :sortable="true" ></Column>
+        <Column field="pctvalidated" header="% validated" :sortable="true" ></Column>
+        <Column field="instrument" header="Instrument" :sortable="true" ></Column>
+        <Column field="cnn_network_id" header="CNN Network" :sortable="true" ></Column>
+        <Column field="nbMatchingFeatures" header="Nb Match. Features" :sortable="true" ></Column>
+      </DataTable>
+    </div>
     <table class="EcoTaxaProjectsTable">
       <thead>
         <tr>
@@ -56,6 +72,8 @@ import * as utils from "../utils/utilsProjects";
 import { exportDataToTSVFile } from "@/utils/exportDataToTSVFile";
 import { _MAILTO } from "@/utils/utilsConsts";
 import { defineComponent } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
 
 const myProps = {
   // several data of Projects.vue become properties here
@@ -74,6 +92,7 @@ const myData = {
   projects: Array<utils.project>(),
   nb_taxa: new Map<number, number>(),
   nbRequests: Number(0),
+  selectedProjects:Array<Number>(),
 };
 type projectsTableGenericT = Readonly<typeof myProps> & typeof myData;
 export type { projectsTableGenericT };
@@ -84,6 +103,10 @@ const myComp = defineComponent({
   name: "ProjectsTableGeneric",
   data: function () {
     return myData;
+  },
+  components: {
+    DataTable: DataTable,
+    Column: Column,
   },
   props: {
     // several data of Projects.vue become properties here
@@ -103,6 +126,10 @@ const myComp = defineComponent({
     utils.processProjects(this as projectsTableGenericT); // ==> Run query immediately when reaching this page
   },
   methods: {
+    exportCSV(event:any)
+    {
+      alert(event);
+    },
     exportProjectsToTSVFile(): void {
       // Build a temp. special projects array to perform the export.
       // Dispatch the nb_taxa map into this special projects array.

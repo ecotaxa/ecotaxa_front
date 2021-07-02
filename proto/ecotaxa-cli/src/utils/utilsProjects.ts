@@ -5,7 +5,7 @@ import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
 import { _MAILTO } from "./utilsConsts";
 import { userStatus } from "./utilsConsts";
-import {projectsTableGenericT} from "@/components/ProjectsTableGeneric.vue";
+import { projectsTableGenericT } from "@/components/ProjectsTableGeneric.vue";
 
 ////////////////////////////////////////////////////////////////////
 
