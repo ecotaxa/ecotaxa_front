@@ -1,0 +1,86 @@
+A REVOIR ET CORRIGER au fur et à mesure
+
+
+1)===== dernières versions ?
+git pull de ecotaxa_dev
+
+2)===== POSTGRESL fonctionnel ?
+psql
+=> voir si g sql
+
+3)===== POSTGRESQL suite
+==> params de connexion, création d'une table simple (drop_create.sh est dans mon ~/SAUV) pour verif
+==> changer -p 5434 en -p 5432
+cd SAUV
+. ./drop_create.sh
+
+++ CONN='-U postgres -h localhost -p 5432'
+++ cat
+++ psql -U postgres -h localhost -p 5432
+DROP DATABASE
+++ cat
+++ psql -U postgres -h localhost -p 5432
+CREATE DATABASE
+ERROR:  role "zoo" already exists
+++ set +x
+
+3)===== POSTGRESQL démon à lancer
+==> lancement du service de base de données postgresql
+sudo bash
+cd /etc/postgresql/12/main
+cp pg_hba.conf ~/SAUV
+cp postgresql.conf ~/SAUV
+service --help
+service --status-all
+service postgresql restart
+ps ax | grep post
+psql -h newecotaxa.obs-vlfr.fr -U zoo -d ecotaxa
+ecotaxa=> select * from
+
+4) ===== Récup de la BD
+==> ssh pour essayer d'envoyer le .zip d la DATABASE
+ssh newecotaxa.obs-vlfr.fr -l reese 'cat /backups/postgres/20210630-ecotaxa.dump.gz' | gunzip | pv | psql -U postgres -h localhost -d ecotaxa3
+==> puis, suite à pb de transfert, on simplifie
+ssh newecotaxa.obs-vlfr.fr -l reese 'cat /backups/postgres/20210627-ecotaxa.dump.gz' > db.dump.gz
+
+5) ===== Spagetti Python
+==> env pour python 
+~/ecotaxa/ecotaxa_dev$ git pull
+~/ecotaxa/ecotaxa_dev$ python3 -m venv venv
+laurentr@laurentr-Latitude-7420:~/ecotaxa/ecotaxa_dev$ cd venv/
+==> python, pour le spagetti python
+environnement venv pour le python
+~/ecotaxa/ecotaxa_dev$ python3 runserver.py
+~/ecotaxa/ecotaxa_dev/venv$ source bin/activate
+(venv) laurentr@laurentr-Latitude-7420:
+(venv) laurentr@laurentr-Latitude-7420:~/ecotaxa/ecotaxa_dev$ pip3 install -r requirements.txt
+(venv) laurentr@laurentr-Latitude-7420:~/ecotaxa/ecotaxa_dev$ python3 runserver.py
+==> si nécessaire, installation de composants manquants
+pip3 list
+pip3 install psycopg2
+pip3 install psycopg2-binary
+pip3 install urllib3
+pip3 install certifi
+pip3 install hyphenator
+pip3 install matplotlib
+pip3 install requests
+et on refait le python3 runserver.py
+
+6) ===== docker du backend
+cp run_docker.sh ~/SAUV
+docker images
+docker pull grololo06/ecotaxaback
+docker run 4b39ceee4905
+~/ecotaxa/ecotaxa_dev/vault
+~/ecotaxa/ecotaxa_dev/plankton_rw
+cd ~/ecotaxa/ecotaxa_dev
+. ./run_docker.sh
+
+fichier personnalisés :
+drop_create.sh
+run_docker.sh
+__init__.py
+(cp config-model.cfg config.cfg)
+config.cfg
+pg_hba.conf  postgresql.conf (/etc/postgresql/12/main#)
+
