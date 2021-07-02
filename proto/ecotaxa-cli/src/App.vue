@@ -46,12 +46,13 @@ import Login from "./components/Login.vue";
 import Banner from "./components/Banner.vue";
 import AboutMe from "./components/AboutMe.vue";
 import Login from "./components/Login.vue";*/
-import { Options, Vue } from "vue-class-component";
+//import { Options, Vue } from "vue-class-component";
+import { defineComponent } from "@vue/runtime-core";
 // import ProjectAbout from "./components/ProjectAbout.vue";
 
-@Options({
+export default defineComponent({
+//@Options({
   components: {
-    //"p-inputnumber": primevue.inputnumber,
     /*Issue382,
     Login,    
     HelloWorld,
@@ -63,10 +64,18 @@ import { Options, Vue } from "vue-class-component";
       text: "",
     };
   },
-})
+  mounted() {
+    this.$forceUpdate(); // keep it while in dev. phase, to avoid using cache
+  },  
+});
+
+/*
 export default class App extends Vue {
   mounted() {
     this.$forceUpdate(); // keep it while in dev. phase, to avoid using cache
   }
 }
+*/
 </script>
+
+

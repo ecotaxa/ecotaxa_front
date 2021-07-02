@@ -1,14 +1,22 @@
 <template>
-
   <div class="EcoTaxaFocusIntro">
     <h1>Welcome to EcoTaxa</h1>
     Hereunder temp. table to test generic component (on projects table)
   </div>
   <div id="#app" class="container">
     <div>
-    <InputText type="text" v-model="text" />
-    <p>{{text}}</p>
-  </div>
+      <InputText type="text" v-model="text" />
+      <p>{{ text }}</p>
+      <InputNumber
+        id="latitude"
+        v-model="latitude"
+        :min="-90"
+        :max="90"
+        :min-fraction-digits="6"
+        :max-fraction-digits="6"
+        placeholder="Acquisition latitude"
+      />
+    </div>
     <ProjectsTableGeneric
       loggedUserId=""
       :yourProjects="false"
@@ -28,6 +36,8 @@
 
 import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
 import { defineComponent } from "@vue/runtime-core";
+import InputText from "primevue/inputtext";
+import InputNumber from "primevue/inputnumber";
 
 export default defineComponent({
   // export default {
@@ -35,6 +45,8 @@ export default defineComponent({
   components: {
     // HelloWorld
     ProjectsTableGeneric: ProjectsTableGeneric,
+    InputText : InputText,
+    InputNumber : InputNumber,    
   },
   data: function () {
     return {
