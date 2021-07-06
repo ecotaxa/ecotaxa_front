@@ -42,7 +42,7 @@ docker rm ecotaxaback
 ```
 ./run_docker.sh
 ```
-### hereunder an example of run_docker.sh, adapt it with you ecotaxa_dev directory
+### hereunder an example of run_docker.sh, to adapt according to your ecotaxa_dev directory
 ```
 #!/bin/bash
 # 33:33 is www-data
