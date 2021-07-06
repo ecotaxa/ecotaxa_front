@@ -221,22 +221,14 @@
 // import 'bootst rap';
 import { Dropdown } from "bootstrap";
 import * as utils from "../utils/utilsProjectAbout";
-import { exportDataToTSVFile } from "../utils/exportDataToTSVFile";
+import { exportDataToTSVFile } from "@/utils/exportDataToTSVFile";
 import { computeLicense } from "../utils/manageLicenses";
-import { defineComponent } from "@vue/runtime-core";
+import { defineComponent } from "vue";
 
-export default defineComponent({
-  //@Options({
-  name: "ProjectAbout",
-  props: {
-    projectID: {
-      type: String,
-      default: "",
-    },
-  },
-  data: function () {
-    return {
-      vanilla: null,
+const myProps = {
+    projectID: "" as string,
+    };
+const myData = {
       projectTitle: String(""),
       projectDescription: String(""),
       projectComment: String(""),
@@ -250,10 +242,20 @@ export default defineComponent({
       projectUsers: Array<utils.projUser>(),
       samplesWithObjectsAndStatus: Array<utils.sampleWithObjectsAndStatus>(),
       projectTaxa: Array<utils.taxon>(),
-    };
+      vanilla: null, 
+};     
+
+type projectAboutT = Readonly<typeof myProps> & typeof myData;
+export type {projectAboutT};
+
+const myComp = defineComponent({
+  name: "ProjectAbout",
+  data: function () {
+    return myData;
   },
+  props: {projectID: {type: String, default: "",},},
   mounted() {
-    const dd_ref: any = this.$refs.vanillaDD;
+    const dd_ref:any = this.$refs.vanillaDD;
     // Add the DD handler code - not working without line below
     this.vanilla = new Dropdown(dd_ref);
     // Add a custom event
@@ -261,9 +263,9 @@ export default defineComponent({
       alert(event.type);
     });
 
-    utils.processProject(this);
-    utils.processSamplesWithObjectsAndStatus(this);
-    utils.processTaxa(this);
+    utils.processProject(this as projectAboutT);
+    utils.processSamplesWithObjectsAndStatus(this as projectAboutT);
+    utils.processTaxa(this as projectAboutT);
   },
   methods: {
     exportTaxaToTSVFile(): void {
@@ -316,11 +318,5 @@ export default defineComponent({
   },
 });
 
-/*
-export default class ProjectAbout extends Vue {
-  projectID!: string;
-  urlLink!: string;
-  copyright!: string;
-  to_show = this.projectID;
-}*/
+export default myComp;
 </script>

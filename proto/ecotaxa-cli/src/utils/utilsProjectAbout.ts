@@ -7,9 +7,9 @@ import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
 import { _MAILTO } from "./utilsConsts";
 import { userStatus } from "./utilsConsts";
-
+import { projectAboutT } from "@/components/ProjectAbout.vue";
 ////////////////////////////////////////////////////////////////////
-export function processProject(myProject: any): void {
+export function processProject(myProject: projectAboutT): void {
   const api: ProjectsApi = new ProjectsApi();
   api
     .projectQueryProjectsProjectIdGet(parseInt(myProject.projectID))
@@ -25,16 +25,22 @@ export function processProject(myProject: any): void {
     });
 }
 ////////////////////////////////////////////////////////////////////
-function simpleFieldsOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
+function simpleFieldsOK(myProject: projectAboutT, data: AxiosResponse<ProjectModel>): void {
   myProject.projectTitle = data.data.title;
-  myProject.projectDescription = data.data.projtype;
-  myProject.projectComment = data.data.comments;
-  myProject.projectLicense = data.data.license;
-  myProject.projectSCNnetwork = data.data.cnn_network_id;
-  myProject.contactMail = _MAILTO + data.data.contact?.email;
-  myProject.contactName = data.data.contact?.name;
+  if (data.data.projtype !== undefined)
+    myProject.projectDescription = data.data.projtype;
+  if (data.data.comments !== undefined)
+    myProject.projectComment = data.data.comments;
+  if (data.data.license !== undefined)
+    myProject.projectLicense = data.data.license;
+  if (data.data.cnn_network_id !== undefined)
+    myProject.projectSCNnetwork = data.data.cnn_network_id;
+  if (data.data.contact !== undefined) {
+    myProject.contactMail = _MAILTO + data.data.contact.email;
+    myProject.contactName = data.data.contact.name;
+  }
 }
-function simpleFieldsKO(myProject: any, reason: any): void {
+function simpleFieldsKO(myProject: projectAboutT, reason: any): void {
   //console.trace();
   console.log(reason);
   alert(reason);
@@ -47,7 +53,7 @@ function simpleFieldsKO(myProject: any, reason: any): void {
   myProject.contactName = "Invalid Project ID"; // TODO : global error treatment
 }
 ////////////////////////////////////////////////////////////////////
-function sampleAcquisitionProcessingObjectFieldsOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
+function sampleAcquisitionProcessingObjectFieldsOK(myProject: projectAboutT, data: AxiosResponse<ProjectModel>): void {
   /* For information : data.data.sample_free_cols will look like
   let sample_free_cols: { [key: string]: string } = {
     scan_operator: "t01",
@@ -72,7 +78,7 @@ function sampleAcquisitionProcessingObjectFieldsOK(myProject: any, data: AxiosRe
     myProject.objectArray = Object.keys(data.data.obj_free_cols);
   }
 }
-function sampleAcquisitionProcessingObjectFieldsKO(myProject: any, reason: any): void {
+function sampleAcquisitionProcessingObjectFieldsKO(myProject: projectAboutT, reason: any): void {
   console.log(reason);
   alert(reason);
   myProject.sampleArray = []; // TODO : global error treatment
@@ -101,8 +107,8 @@ class projUser implements UserModel {
   email;
   name;
   active?;
-  nb_actions: number;
-  last_annot: string;
+  nb_actions: number | undefined;
+  last_annot: string | undefined;
   status: userStatus;
 
   constructor(myID: number | undefined, myStatus: userStatus) {
@@ -118,7 +124,7 @@ class projUser implements UserModel {
 
 export { projUser };
 
-function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void {
+function projectUsersOK(myProject: projectAboutT, data: AxiosResponse<ProjectModel>): void {
   myProject.projectUsers = new Array<projUser>();
   // Also add the managers in oneArray, because they are also users
   if (data.data.managers !== undefined) {
@@ -164,8 +170,10 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
             for (let j: number = 0; j < data0activities.length; j++) {
               if (myProject.projectUsers[i].id === data0activities[j].id) {
                 // find corresponding IDs between Projects and ProjectsStats
-                myProject.projectUsers[i].nb_actions = data0activities[j].nb_actions;
-                myProject.projectUsers[i].last_annot = data0activities[j].last_annot?.replace("T", " ");
+                if (data0activities[j].nb_actions !== undefined)
+                  myProject.projectUsers[i].nb_actions = data0activities[j].nb_actions;
+                if (data0activities[j].last_annot !== undefined)                
+                  myProject.projectUsers[i].last_annot = data0activities[j].last_annot!.replace("T", " ");
               }
             }
           }
@@ -177,7 +185,7 @@ function projectUsersOK(myProject: any, data: AxiosResponse<ProjectModel>): void
     });
 }
 
-function projectUsersKO(myProject: any, reason: any): void {
+function projectUsersKO(myProject: projectAboutT, reason: any): void {
   //console.trace();
   console.log(reason);
   alert(reason);
@@ -207,7 +215,7 @@ class sampleWithObjectsAndStatus {
 }
 export { sampleWithObjectsAndStatus };
 
-export function processSamplesWithObjectsAndStatus(myProject: any): void {
+export function processSamplesWithObjectsAndStatus(myProject: projectAboutT): void {
   const api: SamplesApi = new SamplesApi();
   api
     .samplesSearchSamplesSearchGet(myProject.projectID, "*")
@@ -240,7 +248,7 @@ export function processSamplesWithObjectsAndStatus(myProject: any): void {
     });
 }
 
-function processThroughSampleList(myProject: any, samplelist: string) {
+function processThroughSampleList(myProject: projectAboutT, samplelist: string) {
   if (samplelist !== "") {
     const api2: SamplesApi = new SamplesApi(); // create another API as the first one is currently used
     api2
@@ -266,7 +274,7 @@ function processThroughSampleList(myProject: any, samplelist: string) {
   }
 }
 
-function processSamplesLongRequest(myProject: any, sampleIDlist: string) {
+function processSamplesLongRequest(myProject: projectAboutT, sampleIDlist: string) {
   const nbPackets: number = Math.floor(sampleIDlist.length / _MAX_REQUEST_LENGTH) + 1;
   let oldSmallStep: number = 0;
   let smallStep: number = _MAX_REQUEST_LENGTH;
@@ -285,7 +293,7 @@ function processSamplesLongRequest(myProject: any, sampleIDlist: string) {
   }
 }
 
-function processSamplesWithObjectsAndStatusKO(myProject: any, reason: any): void {
+function processSamplesWithObjectsAndStatusKO(myProject: projectAboutT, reason: any): void {
   console.log(reason);
   alert(reason);
   myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
@@ -308,7 +316,7 @@ class taxon {
 }
 
 export { taxon };
-export function processTaxa(myProject: any): void {
+export function processTaxa(myProject: projectAboutT): void {
   // use projectSetGetStatsProjectSetTaxoStatsGet: async (ids: string, taxaIds?: string)
   // 1) call with just projectID to get all the taxon IDs
   // 2) call with projectID and list of taxon IDs, in order to get all information about all taxa
@@ -390,7 +398,7 @@ export function processTaxa(myProject: any): void {
     });
 }
 
-function processTaxaKO(myProject: any, reason: any): void {
+function processTaxaKO(myProject: projectAboutT, reason: any): void {
   //console.trace();
   console.log(reason);
   alert(reason);

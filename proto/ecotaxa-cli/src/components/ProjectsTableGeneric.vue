@@ -126,10 +126,6 @@ const myComp = defineComponent({
     utils.processProjects(this as projectsTableGenericT); // ==> Run query immediately when reaching this page
   },
   methods: {
-    exportCSV(event:any)
-    {
-      alert(event);
-    },
     exportProjectsToTSVFile(): void {
       // Build a temp. special projects array to perform the export.
       // Dispatch the nb_taxa map into this special projects array.
@@ -150,17 +146,6 @@ const myComp = defineComponent({
         oneProjectExport.email = oneProjectExport.email.replace(_MAILTO, "");
         myProjects.push(oneProjectExport);
       }
-
-      /*
-            // KEEP it: at one moment I got strange problems with fields of subclass.
-            // There is a copy constructor (from mother class) called here.
-            const myProjects:Array<projectExport> = new Array<projectExport>();
-            for (let i = 0; i < this.projects.length; i++) {
-              let oneProjectExport: projectExport = this.projects[i];
-              oneProjectExport.nb_taxa = this.nb_taxa.get(oneProjectExport.projid);
-              myProjects.push(oneProjectExport);
-            }
-      */
 
       // TODO : review columns orders, JO may have a precise idea
       exportDataToTSVFile(
@@ -183,7 +168,6 @@ const myComp = defineComponent({
     },
   },
 });
-//myComp.methods.toto = function() {};
 
 export default myComp;
 </script>

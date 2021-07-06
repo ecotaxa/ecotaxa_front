@@ -77,16 +77,9 @@
 // import { Options, Vue } from "vue-class-component";
 import * as utils from "../utils/utilsProjects";
 import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
-import { defineComponent } from "@vue/runtime-core";
+import { defineComponent } from "vue";
 
-// @Options({
-export default defineComponent({
-  name: "Projects",
-  components: {
-    ProjectsTableGeneric: ProjectsTableGeneric,
-  },
-  data: function () {
-    return {
+const myData = {
       userName: String(""), // user currently logged in
       userMail: String(""),
       loggedUserId: Number(0),
@@ -98,11 +91,25 @@ export default defineComponent({
       runQuery: Boolean(false),
       display_cnn_network_id: Boolean(true),
       display_nbMatchingFeatures: Boolean(false),
-      stringsMatching: String(""),
-    };
+      stringsMatching: String(""),  
+};
+
+type projectsT = typeof myData;
+export type { projectsT };
+
+// @Options({
+// export default defineComponent({
+const myComp = defineComponent({
+  name: "Projects",
+  components: {
+    ProjectsTableGeneric: ProjectsTableGeneric,
+  },
+  
+  data: function () {
+    return myData;
   },
   mounted() {
-    utils.processUserName(this);
+    utils.processUserName(this as projectsT);
   },
 
   methods: {
@@ -115,10 +122,6 @@ export default defineComponent({
   },
 });
 
-/*
-export default class Projects extends Vue {
-  userName!: string;
-  userMail!: string;
-}
-*/
+export default myComp;
+
 </script>

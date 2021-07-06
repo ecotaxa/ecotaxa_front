@@ -5,6 +5,7 @@ import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
 import { _MAILTO } from "./utilsConsts";
 import { userStatus } from "./utilsConsts";
+import { projectsT } from "@/components/Projects.vue";
 import { projectsTableGenericT } from "@/components/ProjectsTableGeneric.vue";
 
 ////////////////////////////////////////////////////////////////////
@@ -49,13 +50,14 @@ class project implements ProjectModel {
 
 export { project };
 
-export function processUserName(myProjects: any): void {
+export function processUserName(myProjects: projectsT): void {
   const api: UsersApi = new UsersApi();
   api
     .showCurrentUserUsersMeGet()
     .then((data) => {
       myProjects.userName = data.data.name;
-      myProjects.loggedUserId = data.data.id;
+      if (data.data.id !== undefined)
+        myProjects.loggedUserId = data.data.id;
       myProjects.userMail = _MAILTO + data.data.email;
     })
     .catch((reason) => {
@@ -114,7 +116,6 @@ export function processProjects(theProjects: projectsTableGenericT): void {
       }
     })
     .then(() => {
-      // TODO EVERYWHERE : give a type to "this", instead of "any", otherwise we lose all the TS useful checking.
       // Build the projectID list and initialize the nb_taxa map
       let projectIDlist: string = ""; // build list of project IDs
       const projs: project[] = theProjects.projects;
@@ -169,7 +170,7 @@ function findUserStatus(dataI: ProjectModel, userId: number): userStatus {
   return userStatus._NONE;
 }
 
-function setProjectsAllCategories(api: ProjectsApi, projectIDlist: string, theProjects: any): void {
+function setProjectsAllCategories(api: ProjectsApi, projectIDlist: string, theProjects: projectsTableGenericT): void {
   const nbPackets: number = Math.floor(projectIDlist.length / _MAX_REQUEST_LENGTH) + 1;
   let oldSmallStep: number = 0;
   let smallStep: number = _MAX_REQUEST_LENGTH;
@@ -187,7 +188,7 @@ function setProjectsAllCategories(api: ProjectsApi, projectIDlist: string, thePr
   }
 }
 
-function setProjectsCategories(api: ProjectsApi, projectIDlist: string, theProjects: any): void {
+function setProjectsCategories(api: ProjectsApi, projectIDlist: string, theProjects: projectsTableGenericT): void {
   if (projectIDlist !== "") {
     theProjects.nbRequests++;
     api
@@ -196,7 +197,9 @@ function setProjectsCategories(api: ProjectsApi, projectIDlist: string, theProje
         // analyze the answer by going through the array items, and work with the map
         data.data.forEach(element => {
           const pid: number = element.projid;
-          theProjects.nb_taxa.set(pid, theProjects.nb_taxa.get(pid) + 1);
+          const val: number | undefined = theProjects.nb_taxa.get(pid);
+          if (val !== undefined)
+            theProjects.nb_taxa.set(pid, val + 1);
         });
       })
       .catch((reason) => {
