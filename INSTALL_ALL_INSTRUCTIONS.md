@@ -42,7 +42,20 @@ docker rm ecotaxaback
 ```
 ./run_docker.sh
 ```
-###
+### hereunder an example of run_docker.sh, adapt it with you ecotaxa_dev directory
+```
+#!/bin/bash
+# 33:33 is www-data
+# Add -i for having a console:
+#docker run -it --rm \
+docker run \
+-u 1001:33 -p 8000:8000 --name ecotaxaback  \
+-e "WEB_CONCURRENCY=4" -e "LEGACY_APP=/ecotaxa_master" \
+--mount type=bind,source=/home/laurentr/ecotaxa/ecotaxa_dev,target=/ecotaxa_master  \
+--mount type=bind,source=/var/run/postgresql,target=/var/run/postgresql  \
+--mount type=bind,source=/home/laurentr/ecotaxa/ecotaxa_dev/plankton_rw,target=/plankton_rw \
+grololo06/ecotaxaback:2.5
+```
 ## 5) Activate the python environment by running, in the ~/ecotaxa/ecotaxa_dev directory
 ```
 source venv/bin/activate
