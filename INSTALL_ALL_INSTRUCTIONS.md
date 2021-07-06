@@ -54,7 +54,7 @@ source venv/bin/activate
 python3 runserver.py
 ```
 ###
-## 7) Run frontend locally: 0.0.0.0:5001 () or 0.0.0.0:8080
+## 7) Run frontend locally: 0.0.0.0:5001 (or something like 0.0.0.0:8080 if you have a another local frontend)
 
 
 ## FROM HERE, NOT FINISHED
