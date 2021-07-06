@@ -1,60 +1,65 @@
-A REVOIR ET CORRIGER au fur et à mesure
+# INSTALL ECOTAXA SYSTEM LOCALLY ON A PC (Ubuntu)
+# Please fix this doc if you use it and find improvements
+#
+# 1) Get the last versions, inside ...ecotaxa_dev folder, run
+git pull
 
+2) See if postgresql is installed and running
+"apt list --installed | grep postgresql" ==> to see if it is installed
+"psql" ==> see if the command is understood, even if an error (e.g. about the role) is returned
+"sudo systemctl status postgresql" : get info about the postgresql process
 
-1)===== dernières versions ?
-git pull de ecotaxa_dev
+3) Postgresql Startup + its configuration changes : n.b. this is done for version 13 of Postgresql
+"sudo bash"
+"cd /etc/postgresql/13/main" : this is the directory for configuring, while /var/lib/postgresql is for data
+Make a change inside pg_hba.conf (hba means host base authentification) : if not existing, add a line 'host all postgres 127.0.0.1/32 trust'
+Make a change inside pg_hba.conf (hba means host base authentification) : if not existing, add a line 'host all postgres 172.17.0.1/24 trust'
+Make a change inside postgresql.conf (global postgresql config) : listen_addresses to fill in : 'localhost,172.17.0.1' + maybe port to set to 5432 instead of 5434
+"service --status-all" to see all the running services (postgresql should be present)
+"service postgresql restart" in order to restart the postgresql service
+"ps ax | grep postgresql" to see the postgresql daemon
+"psql -h newecotaxa.obs-vlfr.fr -U zoo -d ecotaxa" to enter inside the Database management
+ecotaxa=> "select * from <tab>" to see the available tables
+"\q" to quit
 
-2)===== POSTGRESL fonctionnel ?
-psql
-=> voir si g sql
-
-3)===== POSTGRESQL suite
+3')===== POSTGRESQL suite
 ==> params de connexion, création d'une table simple (drop_create.sh est dans mon ~/SAUV) pour verif
 ==> changer -p 5434 en -p 5432
 cd SAUV
 . ./drop_create.sh
-
 ++ CONN='-U postgres -h localhost -p 5432'
 ++ cat
 ++ psql -U postgres -h localhost -p 5432
 DROP DATABASE
 ++ cat
 ++ psql -U postgres -h localhost -p 5432
-CREATE DATABASE
+CREATE DATABASE'il t
 ERROR:  role "zoo" already exists
 ++ set +x
 
-3)===== POSTGRESQL démon à lancer
-==> lancement du service de base de données postgresql
-sudo bash
-cd /etc/postgresql/12/main
-cp pg_hba.conf ~/SAUV
-cp postgresql.conf ~/SAUV
-service --help
-service --status-all
-service postgresql restart
-ps ax | grep post
-psql -h newecotaxa.obs-vlfr.fr -U zoo -d ecotaxa
-ecotaxa=> select * from
+
 
 4) ===== Récup de la BD
 ==> ssh pour essayer d'envoyer le .zip d la DATABASE
 ssh newecotaxa.obs-vlfr.fr -l reese 'cat /backups/postgres/20210630-ecotaxa.dump.gz' | gunzip | pv | psql -U postgres -h localhost -d ecotaxa3
 ==> puis, suite à pb de transfert, on simplifie
 ssh newecotaxa.obs-vlfr.fr -l reese 'cat /backups/postgres/20210627-ecotaxa.dump.gz' > db.dump.gz
+ou : zcat 20210630-ecotaxa.dump.gz | psql -U postgres -h localhost -d ecotaxa3
 
-5) ===== Spagetti Python
-==> env pour python 
+
+5) ===== Spaghetti Python : il ne supporte pas un restart de la BD
+==> env pour python : for local execution
 ~/ecotaxa/ecotaxa_dev$ git pull
-~/ecotaxa/ecotaxa_dev$ python3 -m venv venv
+~/ecotaxa/ecotaxa_dev$ python3 -m venv venv  construire env, fait 1 seule fois
 laurentr@laurentr-Latitude-7420:~/ecotaxa/ecotaxa_dev$ cd venv/
 ==> python, pour le spagetti python
 environnement venv pour le python
-~/ecotaxa/ecotaxa_dev$ python3 runserver.py
-~/ecotaxa/ecotaxa_dev/venv$ source bin/activate
-(venv) laurentr@laurentr-Latitude-7420:
-(venv) laurentr@laurentr-Latitude-7420:~/ecotaxa/ecotaxa_dev$ pip3 install -r requirements.txt
-(venv) laurentr@laurentr-Latitude-7420:~/ecotaxa/ecotaxa_dev$ python3 runserver.py
+~/ecotaxa/ecotaxa_dev/venv$ source bin/activate lance l'environement venv, fait à chaque run: important
+When you see the "(venv)" prompt, you know that you got the python environment necessary for the spaghetti
+like : (venv) laurentr@laurentr-Latitude-7420:
+(venv) laurentr@laurentr-Latitude-7420:~/ecotaxa/ecotaxa_dev$ pip3 install -r requirements.txt (fait une seule fois)
+Puis faire pour lancer le spageti :
+(venv) laurentr@laurentr-Latitude-7420:~/ecotaxa/ecotaxa_dev$ python3 runserver.py à chaque fois
 ==> si nécessaire, installation de composants manquants
 pip3 list
 pip3 install psycopg2
@@ -67,20 +72,58 @@ pip3 install requests
 et on refait le python3 runserver.py
 
 6) ===== docker du backend
+docker stop ecotaxaback  si nécessaire avant le run_docker.sh
+docker rm ecotaxaback si nécessaire avant le run_docker.sh
 cp run_docker.sh ~/SAUV
-docker images
+docker images ==> je dois voir ecotaxa
 docker pull grololo06/ecotaxaback
-docker run 4b39ceee4905
+or
+you may have to pull a specific version like :
+"docker pull grololo06/ecotaxaback:2.5"
+"docker rmi 4b39ceee4905 --force" if necessary (when you cannot remove an image because already running in a container)
+"docker images purge" and/or "docker images prune"
 ~/ecotaxa/ecotaxa_dev/vault
 ~/ecotaxa/ecotaxa_dev/plankton_rw
 cd ~/ecotaxa/ecotaxa_dev
-. ./run_docker.sh
+~/ecotaxa/ecotaxa_dev$> . ./run_docker.sh  g changé le premier 33 en 1001
+docker ps pour savoir les containers dockers qui tournent
 
-fichier personnalisés :
+Fichiers personnalisés :
+========================
 drop_create.sh
 run_docker.sh
-__init__.py
+~/ecotaxa/ecotaxa_dev/appli/__init__.py  ==> on avait commenté import matplotlib et matplotlib.use('Agg')
+~/ecotaxa/ecotaxa_dev/requirements.txt ==> on avait commenté matplotlib==3.0.2
 (cp config-model.cfg config.cfg)
 config.cfg
-pg_hba.conf  postgresql.conf (/etc/postgresql/12/main#)
+pg_hba.conf  postgresql.conf (/etc/postgresql/13/main#)
 
+
+
+Notes diverses :
+================
+NB : port 5001 pour le frontend python avec backend docker sur le port 8000
+
+3 types d'erreur possibles, bien regarder les messages obtenus qui diffèrent.
+Erreurs sur la base de données (ne tourne pas par exemple).
+Errors on the python spageti (stopped).
+Errors on the backend program ==>  Max retries exceeded with url: /users/me
+http://localhost:5001 is the historic ecotaxa frontend running locally on my machine
+
+!!! N.B : démarrer docker(le backend), (re)démarrer postgres sinon PB, puis spaghetti, puis le front (historic ou nouveau)
+après un boot:
+démarrer le back-end
+voir que ça se gaufre
+redémarrer postgres
+démarrer le back-end
+voir que c'est bon
+spaghetti, front
+** postgresql n'aime pas que le backend s'arrête (mais il supporte le backend non démarré), si ça se produit il a besoin de redémarrer
+** le docker backend veut que postgresql soit dans un bon état quand il (re)démarre
+** le spaghetti n'aime pas que postgresql redémarre, si ça se produit il a besoin de redémarrer
+
+sinon g retrouvé des modifs qu'on avait faites :
+~/ecotaxa/ecotaxa_dev/appli/__init__.py  ==> on avait commenté avec un # import matplotlib et matplotlib.use('Agg')
+~/ecotaxa/ecotaxa_dev/requirements.txt ==> on avait commenté avec un # matplotlib==3.0.2
+Je sais pas si on tomberait sur le même problème
+if you comment out, EcoPart will not work
