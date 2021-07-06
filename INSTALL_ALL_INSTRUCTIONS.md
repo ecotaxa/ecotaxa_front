@@ -47,20 +47,20 @@ docker rm ecotaxaback
 ```
 source venv/bin/activate
 ```
-## When you see the "(venv)" prompt, you know that you got the python environment necessary for the spaghetti
-## like : (venv) laurentr@laurentr-Latitude-7420:~$
-## 5) Launch the spaghetti **from the venv environment**, in the ~/ecotaxa/ecotaxa_dev directory
+### When you see the "(venv)" prompt, you know that you got the python environment necessary for the spaghetti
+### like : (venv) laurentr@laurentr-Latitude-7420:~$
+## 6) Launch the spaghetti **from the venv environment**, in the ~/ecotaxa/ecotaxa_dev directory
 ```
 python3 runserver.py
 ```
 ###
-## 6) Run frontend locally: 0.0.0.0:5001 () or 0.0.0.0:8080
+## 7) Run frontend locally: 0.0.0.0:5001 () or 0.0.0.0:8080
 
 
-FROM HERE, NOT FINISHED
-FROM HERE, NOT FINISHED
-FROM HERE, NOT FINISHED
-FROM HERE, NOT FINISHED
+## FROM HERE, NOT FINISHED
+## FROM HERE, NOT FINISHED
+## FROM HERE, NOT FINISHED
+## FROM HERE, NOT FINISHED
 
 
 # II) Prerequisites
