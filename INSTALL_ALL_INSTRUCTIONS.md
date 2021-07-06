@@ -38,7 +38,7 @@ service postgresql restart
 docker stop ecotaxaback
 docker rm ecotaxaback
 ```
-### Then launch the backend docker, in ecotaxa_dev folder
+### Then launch the backend docker
 ```
 ./run_docker.sh
 ```
