@@ -1,7 +1,7 @@
 <template>
   <div class="EcoTaxaFocusIntro">
     <h1>
-      Projects available for <a :href="userMail">{{ userName }}</a>
+      Projects available for <a :href="myID.userMail">{{ myID.userName }}</a>
       <br />
     </h1>
   </div>
@@ -56,7 +56,7 @@
     <span v-if="runQuery">
       <!-- keeping same names like filterSubset="filterSubset" is not mandatory, here it's done for convenience only -->
       <ProjectsTableGeneric
-        v-bind:loggedUserId="loggedUserId"
+        v-bind:loggedUserId="myID.loggedUserId"
         v-bind:yourProjects="yourProjects"
         v-bind:forManaging="forManaging"
         v-bind:filterSubset="filterSubset"
@@ -80,9 +80,7 @@ import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
 import { defineComponent } from "vue";
 
 const myData = {
-      userName: String(""), // user currently logged in
-      userMail: String(""),
-      loggedUserId: Number(0),
+      myID : new utils.identification,
       yourProjects: Boolean(true), // this checkbox set to true by default
       forManaging: Boolean(false),
       filterSubset: Boolean(false),
@@ -109,7 +107,7 @@ const myComp = defineComponent({
     return myData;
   },
   mounted() {
-    utils.processUserName(this as projectsT);
+    utils.pUserName(this.myID); 
   },
 
   methods: {

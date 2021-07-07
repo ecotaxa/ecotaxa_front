@@ -1,6 +1,6 @@
 <template>
   <div class="EcoTaxaFocusIntro">
-    <h1>Welcome to EcoTaxa</h1>
+    <h1>Welcome to EcoTaxa {{myID.userName}} </h1>
     Hereunder temp. table to test generic component (on projects table)
   </div>
   <div id="#app" class="container">
@@ -32,18 +32,16 @@
 
 <script lang="ts">
 // @ is an alias to /src
-// import HelloWorld from "@/components/HelloWorld.vue";
-
 import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
 import { defineComponent } from "@vue/runtime-core";
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
+import * as utils from "../utils/utilsProjects";
 
 export default defineComponent({
   // export default {
   name: "Home",
   components: {
-    // HelloWorld
     ProjectsTableGeneric: ProjectsTableGeneric,
     InputText : InputText,
     InputNumber : InputNumber,    
@@ -52,8 +50,12 @@ export default defineComponent({
     return {
       myTitleFilter: "learning",
       myFilterSubset: true,
+      myID: new utils.identification,
       // N.B. myTitleFilter and myFilterSubset can be referenced in the html part, with or without ""
     };
   },
+  mounted() {
+    utils.pUserName(this.myID);
+  },  
 });
 </script>

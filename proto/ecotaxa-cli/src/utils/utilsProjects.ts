@@ -5,7 +5,7 @@ import { _MAX_REQUEST_LENGTH } from "./utilsConsts";
 import { _SEPARATOR } from "./utilsConsts";
 import { _MAILTO } from "./utilsConsts";
 import { userStatus } from "./utilsConsts";
-import { projectsT } from "@/components/Projects.vue";
+// import { projectsT } from "@/components/Projects.vue";
 import { projectsTableGenericT } from "@/components/ProjectsTableGeneric.vue";
 
 ////////////////////////////////////////////////////////////////////
@@ -47,26 +47,38 @@ class project implements ProjectModel {
     this.nbMatchingFeatures = 0;
   }
 }
-
+ 
 export { project };
 
-export function processUserName(myProjects: projectsT): void {
+class identification {
+  userName: string;
+  loggedUserId: number;
+  userMail: string;
+  constructor() {
+    this.userName = "";
+    this.loggedUserId = 0;
+    this.userMail = "";
+  }
+}
+
+export { identification };
+
+export function pUserName(id:identification): void {
   const api: UsersApi = new UsersApi();
   api
     .showCurrentUserUsersMeGet()
     .then((data) => {
-      myProjects.userName = data.data.name;
+      id.userName = data.data.name;
       if (data.data.id !== undefined)
-        myProjects.loggedUserId = data.data.id;
-      myProjects.userMail = _MAILTO + data.data.email;
+        id.loggedUserId = data.data.id;
+      id.userMail = _MAILTO + data.data.email;
     })
     .catch((reason) => {
-      // TODO : global error treatment      
       console.log(reason);
       alert(reason);
-      myProjects.userName = "<< User probably not logged in >>";
-      myProjects.loggedUserId = 0;
-      myProjects.userMail = "";
+      id.userName = "<< User probably not logged in >>";
+      id.loggedUserId = 0;
+      id.userMail = "";
     });
 }
 
