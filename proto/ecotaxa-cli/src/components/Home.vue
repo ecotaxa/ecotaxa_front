@@ -1,6 +1,7 @@
 <template>
   <div class="EcoTaxaFocusIntro">
     <h1>Welcome to EcoTaxa {{myID.userName}} </h1>
+    <EcoTaxaBannerGeneric/>
     Hereunder temp. table to test generic component (on projects table)
   </div>
   <div id="#app" class="container">
@@ -32,6 +33,7 @@
 
 <script lang="ts">
 // @ is an alias to /src
+//import EcoTaxaBannerGeneric from "./EcoTaxaBannerGeneric.vue";
 import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
 import { defineComponent } from "@vue/runtime-core";
 import InputText from "primevue/inputtext";
@@ -43,6 +45,7 @@ export default defineComponent({
   name: "Home",
   components: {
     ProjectsTableGeneric: ProjectsTableGeneric,
+    //EcoTaxaBannerGeneric: EcoTaxaBannerGeneric,    
     InputText : InputText,
     InputNumber : InputNumber,    
   },

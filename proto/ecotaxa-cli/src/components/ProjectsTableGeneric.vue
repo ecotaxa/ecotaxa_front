@@ -13,7 +13,7 @@
       </button>
     </span>
     <div class="card">
-      <DataTable :value="projects" class="EcoTaxaProjectsTable" sortMode="multiple" v-model:selection="selectedProjects" selectionMode="multiple" dataKey="projid">
+      <DataTable :value="projects" class="EcoTaxaProjectsTable" sortMode="single" selectionMode="single" dataKey="projid">
       <!--DataTable :value="projects" class="EcoTaxaProjectsTable"-->      
         <Column field="title" header="Title" :sortable="true" ></Column>
         <Column field="projid" header="ID" :sortable="true" ></Column>
@@ -92,7 +92,6 @@ const myData = {
   projects: Array<utils.project>(),
   nb_taxa: new Map<number, number>(),
   nbRequests: Number(0),
-  selectedProjects:Array<Number>(),
 };
 type projectsTableGenericT = Readonly<typeof myProps> & typeof myData;
 export type { projectsTableGenericT };
