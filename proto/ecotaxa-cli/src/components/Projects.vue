@@ -80,16 +80,16 @@ import ProjectsTableGeneric from "./ProjectsTableGeneric.vue";
 import { defineComponent } from "vue";
 
 const myData = {
-      myID : new utils.identification,
-      yourProjects: Boolean(true), // this checkbox set to true by default
-      forManaging: Boolean(false),
-      filterSubset: Boolean(false),
-      titleFilter: String(""),
-      instrumentFilter: String(""),
-      runQuery: Boolean(false),
-      display_cnn_network_id: Boolean(true),
-      display_nbMatchingFeatures: Boolean(false),
-      stringsMatching: String(""),  
+  myID: new utils.identification(),
+  yourProjects: Boolean(true), // this checkbox set to true by default
+  forManaging: Boolean(false),
+  filterSubset: Boolean(false),
+  titleFilter: String(""),
+  instrumentFilter: String(""),
+  runQuery: Boolean(false),
+  display_cnn_network_id: Boolean(true),
+  display_nbMatchingFeatures: Boolean(false),
+  stringsMatching: String(""),
 };
 
 type projectsT = typeof myData;
@@ -102,12 +102,12 @@ const myComp = defineComponent({
   components: {
     ProjectsTableGeneric: ProjectsTableGeneric,
   },
-  
+
   data: function () {
     return myData;
   },
   mounted() {
-    utils.pUserName(this.myID); 
+    utils.pUserName(this.myID);
   },
 
   methods: {
@@ -121,5 +121,4 @@ const myComp = defineComponent({
 });
 
 export default myComp;
-
 </script>

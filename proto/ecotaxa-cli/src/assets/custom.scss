@@ -56,5 +56,52 @@ $theme-colors: (
 // Utilities
 @import "../../node_modules/bootstrap/scss/utilities/api";
 
+// PrimeVue
+// install : SEE https://javascript.plainenglish.io/getting-started-with-vue-3-development-with-the-primevue-framework-a74f60c64fad
+// doc : https://www.primefaces.org/primevue/showcase/#/datatable/sort
+// https://www.primefaces.org/primevue/showcase/#/datatable
+// in node_modules : primeflex/  primeicons/ primevue/
+@import "../../node_modules/primevue/resources/themes/bootstrap4-light-blue/theme";
+@import "../../node_modules/primeflex/primeflex";
+@import "../../node_modules/primeflex/primeflex.min";
+/*
+@import "../../node_modules/primeicons/primeicons";
+@import "../../node_modules/primevue/resources/primevue";
+@import "../../node_modules/primevue/resources/primevue.min";
+@import "../../node_modules/primevue/resources/themes/md-light-indigo/theme";
+@import "../../node_modules/primevue/resources/themes/mdc-dark-indigo/theme";
+@import "../../node_modules/primevue/resources/themes/md-dark-indigo/theme";
+@import "../../node_modules/primevue/resources/themes/md-light-deeppurple/theme";
+@import "../../node_modules/primevue/resources/themes/mdc-light-indigo/theme";
+@import "../../node_modules/primevue/resources/themes/mdc-dark-deeppurple/theme";
+@import "../../node_modules/primevue/resources/themes/md-dark-deeppurple/theme";
+@import "../../node_modules/primevue/resources/themes/mdc-light-deeppurple/theme";
+*/
+@import "../../node_modules/primevue/resources/themes/vela-green/theme";
+@import "../../node_modules/primevue/resources/themes/fluent-light/theme";
+@import "../../node_modules/primevue/resources/themes/arya-green/theme";
+@import "../../node_modules/primevue/resources/themes/nova-accent/theme";
+@import "../../node_modules/primevue/resources/themes/nova/theme";
+@import "../../node_modules/primevue/resources/themes/nova-alt/theme";
+@import "../../node_modules/primevue/resources/themes/luna-blue/theme";
+@import "../../node_modules/primevue/resources/themes/arya-purple/theme";
+@import "../../node_modules/primevue/resources/themes/vela-blue/theme";
+@import "../../node_modules/primevue/resources/themes/luna-green/theme";
+@import "../../node_modules/primevue/resources/themes/vela-purple/theme";
+@import "../../node_modules/primevue/resources/themes/arya-blue/theme";
+@import "../../node_modules/primevue/resources/themes/bootstrap4-light-purple/theme";
+@import "../../node_modules/primevue/resources/themes/vela-orange/theme";
+@import "../../node_modules/primevue/resources/themes/saga-purple/theme";
+@import "../../node_modules/primevue/resources/themes/arya-orange/theme";
+@import "../../node_modules/primevue/resources/themes/nova-vue/theme";
+@import "../../node_modules/primevue/resources/themes/luna-amber/theme";
+@import "../../node_modules/primevue/resources/themes/luna-pink/theme";
+@import "../../node_modules/primevue/resources/themes/saga-orange/theme";
+@import "../../node_modules/primevue/resources/themes/bootstrap4-dark-purple/theme";
+@import "../../node_modules/primevue/resources/themes/bootstrap4-light-blue/theme";
+@import "../../node_modules/primevue/resources/themes/bootstrap4-dark-blue/theme";
+@import "../../node_modules/primevue/resources/themes/saga-blue/theme";
+@import "../../node_modules/primevue/resources/themes/rhea/theme";
+
 // EcoTaxa at the very end, in order to overrule the rest if we wish
 @import "ecotaxa";

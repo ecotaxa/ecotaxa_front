@@ -22,10 +22,6 @@ import PrimeVue from "primevue/config";
 // install : SEE https://javascript.plainenglish.io/getting-started-with-vue-3-development-with-the-primevue-framework-a74f60c64fad
 // doc : https://www.primefaces.org/primevue/showcase/#/datatable/sort
 // https://www.primefaces.org/primevue/showcase/#/datatable
-import 'primevue/resources/primevue.min.css'
-import 'primevue/resources/themes/bootstrap4-light-blue/theme.css'
-import 'primeicons/primeicons.css'
-import 'primeflex/primeflex.min.css'
 
 const app = createApp(App);
 app.use(PrimeVue);

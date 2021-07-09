@@ -63,11 +63,11 @@ $free_cols_cell-width: 200px;
 
 .list-group {
   flex-wrap: wrap;
-  display:flex;
+  display: flex;
 }
 
 // START HERE TO CUSTOMIZE the Eco properties
-$EcoTaxaBorderColor : rgb(170,170,170); // border of cells
+$EcoTaxaBorderColor : rgb(170, 170, 170); // border of cells
 
 $EcoTaxaLightPinkColor : rgb(255, 218, 223);
 $EcoTaxaLightBlueColor : lightblue;
@@ -87,21 +87,33 @@ $EcoTaxaObjectColor: $EcoTaxaLightGreenColor;
 $EcoTaxaBadgeInsideColor:white;
 $EcoTaxaBadgeBackgroundColor:grey;
 
-.EcoTaxaIconPlusRouting {
-  padding: 10px;  
-  display:flex; // will distribute the items "equally" on the line
+
+.EcoTaxaBannerGeneric {
+  @extend .p-d-flex;
+  @extend .p-jc-between;
+
   img {
-    height:30px;
+    height: 30px;
+    margin: 10px 10px;
   }
+  h1 {
+    @extend .p-text-center;
+  }
+}
+
+.EcoTaxaRouting {
+  padding: 10px;
+  display: center; // will distribute the items "equally" on the line
   justify-content:space-between;
   span {
-  font-size: 1.5em;  
-  color: #42b983;
+    // TODO : no font size hard coded... but this routing should disappear anyway
+    font-size: 1.5em;
+    color: #42b983;
   }
 }
 
 .EcoTaxaFocusIntro {
-  text-align: left;  
+  text-align: left;
   @extend .bg-light;
   @extend .p-5;
   @extend .rounded-lg !optional;
@@ -148,7 +160,8 @@ $EcoTaxaBadgeBackgroundColor:grey;
   $column4 : $EcoTaxaPredictedColor, // default color for Predicted
   $column5 : $EcoTaxaLightYellowColor, // default color for column 5
   $column6 : $EcoTaxaLightOrangeColor) // default color for column 6  
-{
+
+  {
   // column 0 stays grey
   // NOT A PROBLEM if some columns are not used
   border: 1px solid;
@@ -161,7 +174,7 @@ $EcoTaxaBadgeBackgroundColor:grey;
 
   // td:nth-of-type(1) is the title column which stays grey
   td:nth-of-type(1) {
-    text-align:left;
+    text-align: left;
   }
 
   td:nth-of-type(2) {
@@ -182,11 +195,11 @@ $EcoTaxaBadgeBackgroundColor:grey;
 
   td:nth-of-type(6) {
     background: $column5;
-  }  
+  }
 
   td:nth-of-type(7) {
     background: $column6;
-  }  
+  }
 
 }
 
@@ -195,7 +208,7 @@ $EcoTaxaBadgeBackgroundColor:grey;
 }
 
 .EcoTaxaProjectsTable {
-  @include EcoTaxaTableColors($EcoTaxaLightYellowColor, $EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor,$EcoTaxaLightOrangeColor, $EcoTaxaValidatedColor, $EcoTaxaUnclassifiedColor);
+  @include EcoTaxaTableColors($EcoTaxaLightYellowColor, $EcoTaxaLightPinkColor, $EcoTaxaLightBlueColor, $EcoTaxaLightOrangeColor, $EcoTaxaValidatedColor, $EcoTaxaUnclassifiedColor);
 }
 
 .EcoTaxaSamplesTable {
@@ -207,7 +220,7 @@ $EcoTaxaBadgeBackgroundColor:grey;
 }
 
 .EcoTaxaListGroupHorizontal {
-  @extend .list-group-horizontal;  
+  @extend .list-group-horizontal;
   @extend .list-group;
 }
 

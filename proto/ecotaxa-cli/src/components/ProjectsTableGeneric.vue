@@ -13,19 +13,45 @@
       </button>
     </span>
     <div class="card">
-      <DataTable :value="projects" class="EcoTaxaProjectsTable" sortMode="single" selectionMode="single" dataKey="projid">
-      <!--DataTable :value="projects" class="EcoTaxaProjectsTable"-->      
-        <Column field="title" header="Title" :sortable="true" ></Column>
-        <Column field="projid" header="ID" :sortable="true" ></Column>
-        <Column field="name" header="Name" :sortable="true" ></Column>
-        <Column field="email" header="Mail" :sortable="true" ></Column>
-        <Column field="user_Status" header="User status" :sortable="true" ></Column>
-        <Column field="status" header="Status" :sortable="true" ></Column>
-        <Column field="objcount" header="Nb objects" :sortable="true" ></Column>
-        <Column field="pctvalidated" header="% validated" :sortable="true" ></Column>
-        <Column field="instrument" header="Instrument" :sortable="true" ></Column>
-        <Column field="cnn_network_id" header="CNN Network" :sortable="true" ></Column>
-        <Column field="nbMatchingFeatures" header="Nb Match. Features" :sortable="true" ></Column>
+      <DataTable
+        :value="projects"
+        class="EcoTaxaProjectsTable"
+        sortMode="single"
+        selectionMode="single"
+        dataKey="projid"
+      >
+        <!--DataTable :value="projects" class="EcoTaxaProjectsTable"-->
+        <Column field="title" header="Title" :sortable="true"></Column>
+        <Column field="projid" header="ID" :sortable="true"></Column>
+        <Column field="name" header="Name" :sortable="true"></Column>
+        <Column field="email" header="Mail" :sortable="true"></Column>
+        <Column
+          field="user_Status"
+          header="User status"
+          :sortable="true"
+        ></Column>
+        <Column field="status" header="Status" :sortable="true"></Column>
+        <Column field="objcount" header="Nb objects" :sortable="true"></Column>
+        <Column
+          field="pctvalidated"
+          header="% validated"
+          :sortable="true"
+        ></Column>
+        <Column
+          field="instrument"
+          header="Instrument"
+          :sortable="true"
+        ></Column>
+        <Column
+          field="cnn_network_id"
+          header="CNN Network"
+          :sortable="true"
+        ></Column>
+        <Column
+          field="nbMatchingFeatures"
+          header="Nb Match. Features"
+          :sortable="true"
+        ></Column>
       </DataTable>
     </div>
     <table class="EcoTaxaProjectsTable">
