@@ -33,6 +33,7 @@ export default defineComponent({
     return {
       myID: new utils.identification(),
       items: [
+        // OTHERS TO COME as dev progresses        
         {
           label: "Home / Explore",
           url: 'https://ecotaxa.obs-vlfr.fr'
@@ -46,6 +47,7 @@ export default defineComponent({
         */
         {
           label: "Particle Module",
+          // to : "/projects", was just a trial
           url: 'https://ecotaxa.obs-vlfr.fr/part/'
         },
         {
@@ -75,7 +77,6 @@ export default defineComponent({
           url: 'https://ecotaxa.obs-vlfr.fr/login'          
         },
         */
-        // OTHERS TO COME when dev progresses
       ],
     };
   },
