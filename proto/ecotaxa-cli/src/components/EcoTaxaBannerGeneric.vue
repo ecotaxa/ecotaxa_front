@@ -35,34 +35,47 @@ export default defineComponent({
       items: [
         {
           label: "Home / Explore",
+          url: 'https://ecotaxa.obs-vlfr.fr'
         },
+        /*
         {
           label: "Create new project",
           visible: () => this.isLogged(),
+          url: 'not plugged'          
         },
+        */
         {
           label: "Particle Module",
+          url: 'https://ecotaxa.obs-vlfr.fr/part/'
         },
         {
           label: "Particle projects management",
           visible: () => this.isLogged(),
+          url: 'https://ecotaxa.obs-vlfr.fr/part/prj/'          
         },
         {
           label: "Change Password",
           visible: () => this.isLogged(),
+          url: 'https://ecotaxa.obs-vlfr.fr/change'
         },
+        /*
         {
           label: "Create your EcoTaxa account",
           visible: () => !this.isLogged(),
+          url: 'https://ecotaxa.obs-vlfr.fr/register'          
         },
         {
           label: "Log out",
           visible: () => this.isLogged(),
+          url: 'https://ecotaxa.obs-vlfr.fr/logout'                 
         },
         {
           label: "Log in",
           visible: () => !this.isLogged(),
+          url: 'https://ecotaxa.obs-vlfr.fr/login'          
         },
+        */
+        // OTHERS TO COME when dev progresses
       ],
     };
   },

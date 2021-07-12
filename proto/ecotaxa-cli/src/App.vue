@@ -8,7 +8,7 @@
   <div class="EcoTaxaRouting">
     <span>
       <router-link to="/">Home</router-link> |
-      <router-link to="/projects">Projects</router-link> |
+      <router-link to="/projects/">Projects</router-link> |
       <router-link to="/prj_about/185">Project 185</router-link>
     </span>
   </div>
