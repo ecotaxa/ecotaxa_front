@@ -59,6 +59,9 @@ class identification {
     this.loggedUserId = 0;
     this.userMail = "";
   }
+  logged(): boolean{
+    return (this.loggedUserId !== 0);
+  }
 }
 
 export { identification };
@@ -76,7 +79,7 @@ export function pUserName(id:identification): void {
     .catch((reason) => {
       console.log(reason);
       alert(reason);
-      id.userName = "<< User probably not logged in >>";
+      id.userName = "";
       id.loggedUserId = 0;
       id.userMail = "";
     });
