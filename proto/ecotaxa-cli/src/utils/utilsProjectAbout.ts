@@ -43,7 +43,8 @@ function simpleFieldsOK(myProject: projectAboutT, data: AxiosResponse<ProjectMod
 function simpleFieldsKO(myProject: projectAboutT, reason: any): void {
   //console.trace();
   console.log(reason);
-  alert(reason);
+  // You don't have enough rights to get info, but this is not a serious error
+  // alert(reason);
   myProject.projectTitle = "Invalid Project ID"; // TODO : global error treatment
   myProject.projectDescription = "Invalid Project ID"; // TODO : global error treatment
   myProject.projectComment = "Invalid Project ID"; // TODO : global error treatment
@@ -80,7 +81,8 @@ function sampleAcquisitionProcessingObjectFieldsOK(myProject: projectAboutT, dat
 }
 function sampleAcquisitionProcessingObjectFieldsKO(myProject: projectAboutT, reason: any): void {
   console.log(reason);
-  alert(reason);
+  // You don't have enough rights to get info, but this is not a serious error
+  // alert(reason);
   myProject.sampleArray = []; // TODO : global error treatment
   myProject.acquAndProcArray = [];
   myProject.objectArray = [];
@@ -188,7 +190,8 @@ function projectUsersOK(myProject: projectAboutT, data: AxiosResponse<ProjectMod
 function projectUsersKO(myProject: projectAboutT, reason: any): void {
   //console.trace();
   console.log(reason);
-  alert(reason);
+  // You don't have enough rights to get info about users, but this is not a serious error
+  // alert(reason);
   myProject.projectUsers = []; // TODO : global error treatment
 }
 ////////////////////////////////////////////////////////////////////
@@ -295,7 +298,8 @@ function processSamplesLongRequest(myProject: projectAboutT, sampleIDlist: strin
 
 function processSamplesWithObjectsAndStatusKO(myProject: projectAboutT, reason: any): void {
   console.log(reason);
-  alert(reason);
+  // You don't have enough rights to get info about samples, but this is not a serious error  
+  // alert(reason);
   myProject.samplesWithObjectsAndStatus = []; // TODO : global error treatment
 }
 

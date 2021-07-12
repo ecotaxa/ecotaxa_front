@@ -78,7 +78,8 @@ export function pUserName(id:identification): void {
     })
     .catch((reason) => {
       console.log(reason);
-      alert(reason);
+      // This is not really an error : you can do several things while not logged in
+      // alert(reason); 
       id.userName = "";
       id.loggedUserId = 0;
       id.userMail = "";
