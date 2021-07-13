@@ -12,7 +12,7 @@
       <span
         ><br />{{ myID.userName }}&nbsp;&nbsp;<br />
         <Button type="button" label="Toggle" @click="toggle">Action</Button>
-        <TieredMenu ref="menu" :model="items" :popup="true" />
+        <TieredMenu class="EcoTaxaProjectMenu" ref="menu" :model="items" popup="true"/>
       </span>
     </div>
   </div>

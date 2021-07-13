@@ -112,6 +112,19 @@ $EcoTaxaBadgeBackgroundColor:grey;
   }
 }
 
+.EcoTaxaProjectMenu {
+  //overflow:scroll;
+}
+
+// Hard coded values are not welcome...
+// But it almost works except that the white background stayed detached from the rest of the menu items
+/*
+.EcoTaxaProjectMenuItem {
+    left: -500px;
+    width:345px;
+    //overflow:scroll;
+}*/
+
 .EcoTaxaFocusIntro {
   text-align: left;
   @extend .bg-light;
