@@ -12,13 +12,14 @@
       <span
         ><br />{{ myID.userName }}&nbsp;&nbsp;<br />
         <Button type="button" label="Toggle" @click="toggle">Action</Button>
-        <TieredMenu ref="menu" :model="items" :popup="true" :dropdown="true" />
+        <TieredMenu ref="menu" :model="items" :popup="true" />
       </span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import * as banner from "../utils/utilsBanner";
 import * as utils from "../utils/utilsProjects";
 import { defineComponent } from "vue";
 import TieredMenu from "primevue/tieredmenu";
@@ -33,10 +34,15 @@ export default defineComponent({
     return {
       myID: new utils.identification(),
       items: [
-        // OTHERS TO COME as dev progresses        
+        // Others entries to come as dev progresses
         {
           label: "Home / Explore",
-          url: 'https://ecotaxa.obs-vlfr.fr'
+          url: "https://ecotaxa.obs-vlfr.fr",
+        },
+        {
+          visible: () => this.isLogged(),
+          label: "Select Project",
+          items: [],
         },
         /*
         {
@@ -48,17 +54,17 @@ export default defineComponent({
         {
           label: "Particle Module",
           // to : "/projects", was just a trial
-          url: 'https://ecotaxa.obs-vlfr.fr/part/'
+          url: "https://ecotaxa.obs-vlfr.fr/part/",
         },
         {
           label: "Particle projects management",
           visible: () => this.isLogged(),
-          url: 'https://ecotaxa.obs-vlfr.fr/part/prj/'          
+          url: "https://ecotaxa.obs-vlfr.fr/part/prj/",
         },
         {
           label: "Change Password",
           visible: () => this.isLogged(),
-          url: 'https://ecotaxa.obs-vlfr.fr/change'
+          url: "https://ecotaxa.obs-vlfr.fr/change",
         },
         /*
         {
@@ -85,6 +91,7 @@ export default defineComponent({
   },
   mounted() {
     utils.pUserName(this.myID);
+    banner.fillMenuWithUserProjects(this.items);
   },
   methods: {
     toggle: function (event: any) {
@@ -94,7 +101,7 @@ export default defineComponent({
     isLogged: function (): boolean {
       return this.myID.logged();
     },
-  },
+  }
 });
 
 // export default myComp;
