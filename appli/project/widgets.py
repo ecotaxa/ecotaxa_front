@@ -67,7 +67,7 @@ class PopoverPane(object):
         A small hint-style window giving a set of information about the image.
     """
 
-    # The fields displayed by default, whatever the setup in the project
+    # The fields displayable by default, whatever the setup in the project
     always_there = OrderedDict([("usr.name", "by"),
                                 ("txp.name", "parent"),
                                 ("sam.orig_id", "in"),

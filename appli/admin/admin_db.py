@@ -133,6 +133,7 @@ def dbadmin_viewbloat():
 @login_required
 @roles_accepted(database.AdministratorLabel)
 def dbadmin_recomputestat():
+    # TODO: API call
     appli.cron.RefreshTaxoStat()
     appli.cron.RefreshAllProjectsStat()
     return render_in_admin_blueprint("admin2/admin_page.html", body="Statistics recompute done")

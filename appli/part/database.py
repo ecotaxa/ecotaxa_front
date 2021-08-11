@@ -212,4 +212,7 @@ for i in range(1, 21):
 
 
 def ComputeOldestSampleDateOnProject():
-    ExecSQL("update part_projects pp  set oldestsampledate=(select min(sampledate) from part_samples ps where ps.pprojid=pp.pprojid)")
+    ExecSQL("update part_projects pp  "
+            "   set oldestsampledate=(select min(sampledate) "
+            "                          from part_samples ps "
+            "                         where ps.pprojid=pp.pprojid)")

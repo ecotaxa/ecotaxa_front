@@ -105,5 +105,5 @@ def _my_read(self, amt):
         # if it's not chunks-aware.
         self.is_chunked = False
     self.nb_bytes += len(ret)
-    app.logger.debug("%d response bytes read", self.nb_bytes)
+    # app.logger.debug("%d response bytes read", self.nb_bytes)
     return ret
