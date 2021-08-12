@@ -1,63 +1,10 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import appli.part.prj
-from appli.database import ExecSQL, GetAll
 from appli.part.database import ComputeOldestSampleDateOnProject
-from appli.project.stats import RecalcProjectTaxoStat
 
 
-def RefreshAllProjectsStat():
-    # Tout les objets validés sans classifications sont repassés en non validés
-    ExecSQL("update obj_head oh set classif_qual=NULL where classif_qual='V' and classif_id is null ")
-    ExecSQL("UPDATE projects SET  objcount=Null,pctclassified=null,pctvalidated=NULL")
-    ExecSQL("""UPDATE projects
-     SET  objcount=q.nbr,pctclassified=100.0*nbrclassified/q.nbr,pctvalidated=100.0*nbrvalidated/q.nbr
-     from (SELECT  projid,sum(nbr) nbr,sum(case when id>0 then nbr end) nbrclassified,sum(nbr_v) nbrvalidated
-          from projects_taxo_stat
-          group by projid  )q
-     where projects.projid=q.projid""")
-    ExecSQL("""delete from samples s
-              where not exists (select 1 from objects o where o.sampleid=s.sampleid )
-              and not exists (select 1 from part_samples o where o.sampleid=s.sampleid ) """)
-    ComputeOldestSampleDateOnProject()
 
-
-def RefreshTaxoStat():
-    n = ExecSQL("UPDATE taxonomy SET  nbrobj=Null,nbrobjcum=null where nbrobj is NOT NULL or nbrobjcum is not null")
-    print("RefreshTaxoStat cleaned %d taxo" % n)
-
-    print("Refresh projects_taxo_stat")
-    for r in GetAll('select projid from projects'):
-        RecalcProjectTaxoStat(r['projid'])
-
-    n = ExecSQL("""UPDATE taxonomy
-                SET  nbrobj=q.nbr
-                from (select id classif_id, sum(nbr_v) nbr 
-                from projects_taxo_stat pts
-                        join projects p on pts.projid=p.projid and p.visible=true
-                        where nbr_v>0 group by id )q
-                where taxonomy.id=q.classif_id""")
-    print("RefreshTaxoStat updated %d 1st level taxo" % n)
-
-    n = ExecSQL("""UPDATE taxonomy
-                SET  nbrobjcum=q.nbr
-                from (select parent_id,sum(nbrobj) nbr from taxonomy
-                      where nbrobj is NOT NULL
-                      group by parent_id ) q
-                where taxonomy.id=q.parent_id""")
-    print("RefreshTaxoStat updated %d 2st level taxo" % n)
-    for level in range(50):
-        n = ExecSQL("""UPDATE taxonomy
-                    SET  nbrobjcum=q.nbr
-                    from (select parent_id,sum(nbrobjcum+coalesce(nbrobj,0)) nbr from taxonomy
-                          where nbrobjcum is NOT NULL
-                          group by parent_id  ) q
-                    where taxonomy.id=q.parent_id
-                    and coalesce(taxonomy.nbrobjcum,0)<>q.nbr""")
-        print("RefreshTaxoStat updated %d level %d taxo" % (n, level))
-        if n == 0:
-            break
-    appli.part.prj.GlobalTaxoCompute()
 
 
 if __name__ == "__main__":
@@ -75,8 +22,11 @@ if __name__ == "__main__":
     try:
         with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
             g.db = None
-            RefreshAllProjectsStat()
-            RefreshTaxoStat()
+            app.logger.info("EcoPart...")
+            ComputeOldestSampleDateOnProject()
+            appli.part.prj.GlobalTaxoCompute()
+            app.logger.info("EcoPart tasks+EcoTaxa one...")
+            # Keep EcoPart auto clean
             app.logger.info(AutoClean())
     except Exception as e:
         s = str(e)

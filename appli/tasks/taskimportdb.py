@@ -68,7 +68,7 @@ def RestoreDBFull(UseExistingDatabase=False):
         sql = "DROP DATABASE IF EXISTS " + app.config['DB_DATABASE']
         cur.execute(sql)
         print("Create the new database")
-        sql = "create DATABASE " + app.config['DB_DATABASE'] + " WITH ENCODING='LATIN1'  OWNER=" + app.config[
+        sql = "create DATABASE " + app.config['DB_DATABASE'] + " WITH ENCODING='UTF8'  OWNER=" + app.config[
             'DB_USER'] + " TEMPLATE=template0 LC_CTYPE='C' LC_COLLATE='C' CONNECTION LIMIT=-1 "
         cur.execute(sql)
 

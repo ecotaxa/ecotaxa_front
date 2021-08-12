@@ -1,5 +1,5 @@
 # manage.py
-import os,sys,shutil
+import os, sys, shutil
 
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
@@ -131,18 +131,6 @@ def FullDBRestore(UseExistingDatabase=False):
 
 
 @manager.command
-def RecomputeStats():
-    """
-    Recompute stats related on Taxonomy and Projects
-    """
-    import appli.cron
-    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
-        g.db = None
-        appli.cron.RefreshAllProjectsStat()
-        appli.cron.RefreshTaxoStat()
-
-
-@manager.command
 def CreateDB(UseExistingDatabase=False):
     with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
         g.db = None
@@ -188,7 +176,7 @@ def CreateDB(UseExistingDatabase=False):
             sql = "create schema public AUTHORIZATION " + app.config['DB_USER']
         else:
             print("Create the new database")
-            sql = "create DATABASE " + app.config['DB_DATABASE'] + " WITH ENCODING='LATIN1'  OWNER=" + app.config[
+            sql = "create DATABASE " + app.config['DB_DATABASE'] + " WITH ENCODING='UTF8'  OWNER=" + app.config[
                 'DB_USER'] + " TEMPLATE=template0 LC_CTYPE='C' LC_COLLATE='C' CONNECTION LIMIT=-1 "
         cur.execute(sql)
 
@@ -366,7 +354,8 @@ def partpoolserver():
                     print("Try to import CTD")
                     print(common_import.ImportCTD(psampleid, "Automatic", ""))
             except:
-                print('Error : '+str(sys.exc_info()))
+                print('Error : ' + str(sys.exc_info()))
+
 
 if __name__ == "__main__":
     manager.run()
