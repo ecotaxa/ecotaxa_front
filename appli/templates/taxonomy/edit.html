@@ -85,11 +85,6 @@
     <tr>
       <td>
         <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Taxon</button>
-        {% if taxon.id>0 %}
-          <button type="button" onclick="DeleteTaxon({{ taxon.id }})" class="btn btn-danger"><i
-              class="fa fa-eraser"></i> Delete Taxon
-          </button>
-        {% endif %}
       </td>
       <td style="text-align: right">
         <button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
@@ -193,12 +188,6 @@
         var formobj = objectifyForm('formedittaxon');
         AtdSetWaitAndLoad("#formedittaxon_PostResult", '/taxo/save/', formobj);
     });
-
-    function DeleteTaxon(id) {
-        At2Confirm("Taxon removal", "Are you sure you want remove this taxon", function () {
-            AtdSetWaitAndLoad("#formedittaxon_PostResult", '/taxo/del/', {id: id});
-        });
-    }
 
     $('#tblviewtaxon .fa-info-circle').popover({trigger: 'hover', container: "body", placement: "top"})
 

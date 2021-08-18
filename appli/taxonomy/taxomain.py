@@ -1,3 +1,7 @@
+import datetime
+import sys
+
+import requests
 from flask import render_template, g, flash, json
 from flask_login import current_user
 from flask_security import login_required, roles_accepted
@@ -5,16 +9,15 @@ from flask_security import login_required, roles_accepted
 import appli
 import appli.part.prj
 import appli.project.main
-import datetime
-import requests
-import sys
 from appli import app, PrintInCharte, database, gvg, gvp, ntcv, FormatError, FAIcon
 from appli.database import GetAll, ExecSQL, db
 ######################################################################################################################
 from appli.project.stats import RecalcProjectTaxoStat
 
+# Select chunk for getting full name with parent
 SQLTreeSelect = """concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
      t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t.name) tree"""
+# And the needed joins
 SQLTreeJoin = """left join taxonomy t1 on t.parent_id=t1.id
       left join taxonomy t2 on t1.parent_id=t2.id
       left join taxonomy t3 on t2.parent_id=t3.id
@@ -31,8 +34,16 @@ SQLTreeJoin = """left join taxonomy t1 on t.parent_id=t1.id
       left join taxonomy t14 on t13.parent_id=t14.id"""
 
 
+def get_taxoserver_url():
+    return app.config.get('TAXOSERVER_URL')
+
+
 @app.route('/taxo/browse/', methods=['GET', 'POST'])
 def routetaxobrowse():
+    """
+        Browse, i.e. display local taxa.
+
+    """
     BackProjectBtn = ''
     if gvp('updatestat') == 'Y':
         # DoSyncStatUpdate()
@@ -51,14 +62,22 @@ def routetaxobrowse():
             txt += "<br>" + BackProjectBtn
 
         return PrintInCharte(FormatError(txt, DoNotEscape=True))
-    g.taxoserver_url = app.config.get('TAXOSERVER_URL')
+
+    g.taxoserver_url = get_taxoserver_url()
 
     if current_user.has_role(database.AdministratorLabel):
+        # Admin can see all taxa
         ExtraWehereClause = ""
     else:
+        # Ordinary user can see own ones, but only if they belong to current instance
         ExtraWehereClause = "and t.creator_email='{}'".format(current_user.email)
-    lst = GetAll("""select t.id,t.parent_id,t.display_name as name,case t.taxotype when 'M' then 'Morpho' when 'P' then 'Phylo' else t.taxotype end taxotype,t.taxostatus,t.creator_email,t.id_source
-      ,to_char(t.creation_datetime,'yyyy-mm-dd hh24:mi') creation_datetime,to_char(t.lastupdate_datetime,'yyyy-mm-dd hh24:mi') lastupdate_datetime,{}
+
+    # Select what's needed, but only the first 400 ones
+    lst = GetAll("""select t.id, t.parent_id, t.display_name as name,
+                           case t.taxotype when 'M' then 'Morpho' when 'P' then 'Phylo' else t.taxotype end taxotype,
+                           t.taxostatus, t.creator_email, t.id_source, to_char(t.creation_datetime,'yyyy-mm-dd hh24:mi') creation_datetime,
+                           to_char(t.lastupdate_datetime,'yyyy-mm-dd hh24:mi') lastupdate_datetime
+      ,{}
     from taxonomy t
     {}
     where t.id_instance ={} {}
@@ -73,19 +92,26 @@ def routetaxobrowse():
     # nbrtaxon=GetAll("select count(*) from taxonomy")[0][0]
     # return render_template('browsetaxo.html',lst=lst,nbrtaxon=nbrtaxon)
 
-    return PrintInCharte(render_template('taxonomy/browse.html', lst=lst, BackProjectBtn=BackProjectBtn))
+    return PrintInCharte(render_template('taxonomy/browse.html', lst=lst,
+                                         BackProjectBtn=BackProjectBtn))
 
 
 def request_withinstanceinfo(urlend, params, id_instance=1):
+    """
+        Issue a REST query on EcoTaxoServer
+    """
     params['id_instance'] = app.config.get('TAXOSERVER_INSTANCE_ID')
     params['sharedsecret'] = app.config.get('TAXOSERVER_SHARED_SECRET')
     params['ecotaxa_version'] = appli.ecotaxa_version
 
-    r = requests.post(app.config.get('TAXOSERVER_URL') + urlend, params)
+    r = requests.post(get_taxoserver_url() + urlend, params)
     return r.json()
 
 
 def DoSyncStatUpdate():
+    """
+        Update EcoTaxoServer with statistics about current node usage.
+    """
     Stats = database.GetAssoc2Col("""select id,sum(nbr) nbr from projects_taxo_stat group by id""")
     j = request_withinstanceinfo("/setstat/", {'data': json.dumps(Stats)})
     if j.get('msgversion', 'ok') != 'ok':
@@ -93,9 +119,11 @@ def DoSyncStatUpdate():
     if 'msg' in j:
         PDT = database.PersistantDataTable.query.first()
         if PDT is None:  # si record manquant
+            # Create the unique line in this table
             PDT = database.PersistantDataTable()
             PDT.id = 1
             db.session.add(PDT)
+        # Update the always-existing record
         PDT.lastserverversioncheck_datetime = datetime.datetime.now()
         db.session.commit()
         return j['msg']
@@ -195,6 +223,10 @@ def DoFullSync():
 @login_required
 @roles_accepted(database.AdministratorLabel, database.ProjectCreatorLabel)
 def routetaxoedit(taxoid):
+    """
+        Modification of the centralized taxon.
+        Step 1: Read from local (!) DB and display it.
+    """
     sql = """select t.*
             ,p.display_name parentname,to_char(t.creation_datetime,'YYYY-MM-DD HH24:MI:SS') creationdatetimefmt,{}
         from taxonomy t 
@@ -209,7 +241,7 @@ def routetaxoedit(taxoid):
             , 'creationdatetimefmt': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
                  }
     g.TaxoType = database.TaxoType
-    g.taxoserver_url = app.config.get('TAXOSERVER_URL')
+    g.taxoserver_url = get_taxoserver_url()
     return render_template('taxonomy/edit.html', taxon=taxon)
 
 
@@ -220,10 +252,18 @@ def routetaxoedit(taxoid):
 #
 @roles_accepted(database.AdministratorLabel, database.ProjectCreatorLabel)
 def routetaxosave():
+    """
+        Modification of the centralized taxon.
+        Step 2: Collect data from the form and send to centralized server.
+
+        Also used for creating new taxa.
+    """
     txt = ""
     try:
         params = {}
-        for c in ['parent_id', 'name', 'taxotype', 'source_desc', 'source_url', 'creation_datetime', 'creator_email']:
+        for c in ['parent_id', 'name', 'taxotype',
+                  'source_desc', 'source_url',
+                  'creation_datetime', 'creator_email']:
             params[c] = gvp(c)
         if int(gvp('id')) > 0:
             params['id'] = int(gvp('id'))
@@ -231,34 +271,6 @@ def routetaxosave():
         j = request_withinstanceinfo("/settaxon/", params)
         if j['msg'] != 'ok':
             return appli.ErrorFormat("settaxon Error :" + j['msg'])
-        txt = """<script> DoSync(); At2PopupClose(0); </script>"""
-        return txt
-    except Exception as e:
-        import traceback
-        tb_list = traceback.format_tb(e.__traceback__)
-        return appli.FormatError("Saving Error : {}\n{}", e, "__BR__".join(tb_list[::-1]))
-
-
-@app.route('/taxo/del/', methods=['POST'])
-@login_required
-@roles_accepted(database.AdministratorLabel, database.ProjectCreatorLabel)
-def routetaxodel():
-    txt = ""
-    try:
-        taxoid = int(gvp('id'))
-        params = dict(id=taxoid)
-        UsedTaxon = database.GetAll("""select 1 from taxonomy t where id=(%s)
-          and (
-              exists(select 1 from taxonomy p where p.parent_id=t.id)
-          or  exists(select 1 from obj_head where classif_id=t.id) )
-        """, [taxoid])
-        if len(UsedTaxon) > 0:
-            return appli.ErrorFormat("This Taxon is used locally, you cannot remove it")
-        database.ExecSQL("delete from taxonomy t where id=%s", [taxoid])
-
-        j = request_withinstanceinfo("/deltaxon/", params)
-        if j['msg'] != 'ok':
-            return appli.ErrorFormat("deltaxon Error :" + j['msg'])
         txt = """<script> DoSync(); At2PopupClose(0); </script>"""
         return txt
     except Exception as e:
