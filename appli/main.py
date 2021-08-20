@@ -128,15 +128,12 @@ def before_request_security():
     g.menu.append(("/part/", "Particle Module"))
     if user_is_logged:
         g.menu.append(("/part/prj/", "Particle projects management"))
-    if user_can_create or user_can_administrate:
-        g.menu.append(("", "SEP"))
-        # g.menu.append(("/taxo/browse/","Manage Taxonomy"))
-        if request.endpoint == 'indexPrj':
-            g.menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%d',{updatestat:'Y'});" % (
-                request.view_args.get('PrjId'),), "Manage Taxonomy"))
-        else:
-            g.menu.append(("javascript:PostDynForm('/taxo/browse/',{updatestat:'Y'});", "Manage Taxonomy"))
-    #     ?fromprj={{ g.Projid }}
+    g.menu.append(("", "SEP"))
+    if request.endpoint == 'indexPrj':
+        g.menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%d',{updatestat:'Y'});" % (
+            request.view_args.get('PrjId'),), "Browse Taxonomy"))
+    else:
+        g.menu.append(("javascript:PostDynForm('/taxo/browse/',{updatestat:'Y'});", "Browse Taxonomy"))
     if user_can_administrate or user_can_administrate_users:
         g.menu.append(("", "SEP"))
         g.menu.append(("/admin/", "Admin Screen"))

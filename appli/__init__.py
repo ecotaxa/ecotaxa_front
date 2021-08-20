@@ -31,6 +31,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security
 import inspect, html, math, threading, traceback
 import appli.securitycachedstore
+# TODO: This is not useful anymore for EcoTaxa.
 import matplotlib
 
 matplotlib.use('Agg')

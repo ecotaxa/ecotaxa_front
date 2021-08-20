@@ -1,52 +1,47 @@
 import datetime
 import sys
+from typing import Optional
 
 import requests
-from flask import render_template, g, flash, json
-from flask_login import current_user
-from flask_security import login_required, roles_accepted
+from flask import render_template, g, flash, json, request
 
 import appli
 import appli.part.prj
 import appli.project.main
-from appli import app, PrintInCharte, database, gvg, gvp, ntcv, FormatError, FAIcon
-from appli.database import GetAll, ExecSQL, db
+from appli import app, PrintInCharte, database, gvg, gvp, ntcv, FAIcon
+from appli.database import ExecSQL, db
 ######################################################################################################################
 from appli.project.stats import RecalcProjectTaxoStat
-
-# Select chunk for getting full name with parent
-SQLTreeSelect = """concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
-     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t.name) tree"""
-# And the needed joins
-SQLTreeJoin = """left join taxonomy t1 on t.parent_id=t1.id
-      left join taxonomy t2 on t1.parent_id=t2.id
-      left join taxonomy t3 on t2.parent_id=t3.id
-      left join taxonomy t4 on t3.parent_id=t4.id
-      left join taxonomy t5 on t4.parent_id=t5.id
-      left join taxonomy t6 on t5.parent_id=t6.id
-      left join taxonomy t7 on t6.parent_id=t7.id
-      left join taxonomy t8 on t7.parent_id=t8.id
-      left join taxonomy t9 on t8.parent_id=t9.id
-      left join taxonomy t10 on t9.parent_id=t10.id
-      left join taxonomy t11 on t10.parent_id=t11.id
-      left join taxonomy t12 on t11.parent_id=t12.id
-      left join taxonomy t13 on t12.parent_id=t13.id
-      left join taxonomy t14 on t13.parent_id=t14.id"""
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import UsersApi, UserModelWithRights, ApiException, TaxonomyTreeApi, TaxonModel
 
 
 def get_taxoserver_url():
     return app.config.get('TAXOSERVER_URL')
 
 
+def get_login() -> Optional[UserModelWithRights]:
+    with ApiClient(UsersApi, request) as api:
+        try:
+            return api.show_current_user_users_me_get()
+        except ApiException as ae:
+            return None
+
+
+def is_admin_or_project_creator(user: UserModelWithRights) -> bool:
+    return (1 in user.can_do) or (2 in user.can_do)
+
+
 @app.route('/taxo/browse/', methods=['GET', 'POST'])
 def routetaxobrowse():
     """
-        Browse, i.e. display local taxa.
-
+        Browse, i.e. display local taxa. This is a dynamic API-based table.
     """
+    user = get_login()
+    if user is None:
+        return PrintInCharte("Please login to access this page")
     BackProjectBtn = ''
     if gvp('updatestat') == 'Y':
-        # DoSyncStatUpdate()
         DoFullSync()
     if gvg('fromprj'):
         BackProjectBtn = "<a href='/prj/{}' class='btn btn-default btn-primary'>{} Back to project</a> ".format(
@@ -55,48 +50,14 @@ def routetaxobrowse():
         BackProjectBtn = "<a href='/Task/Question/{}' class='btn btn-default btn-primary'>{} Back to importation task</a> ".format(
             int(gvg('fromtask')), FAIcon('arrow-left'))
 
-    if not (current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel)):
-        # /prj/653
-        txt = "You cannot create tanonomy category, you must request your project manager (check project page)"
-        if gvg('fromprj'):
-            txt += "<br>" + BackProjectBtn
-
-        return PrintInCharte(FormatError(txt, DoNotEscape=True))
-
     g.taxoserver_url = get_taxoserver_url()
 
-    if current_user.has_role(database.AdministratorLabel):
-        # Admin can see all taxa
-        ExtraWehereClause = ""
-    else:
-        # Ordinary user can see own ones, but only if they belong to current instance
-        ExtraWehereClause = "and t.creator_email='{}'".format(current_user.email)
-
-    # Select what's needed, but only the first 400 ones
-    lst = GetAll("""select t.id, t.parent_id, t.display_name as name,
-                           case t.taxotype when 'M' then 'Morpho' when 'P' then 'Phylo' else t.taxotype end taxotype,
-                           t.taxostatus, t.creator_email, t.id_source, to_char(t.creation_datetime,'yyyy-mm-dd hh24:mi') creation_datetime,
-                           to_char(t.lastupdate_datetime,'yyyy-mm-dd hh24:mi') lastupdate_datetime
-      ,{}
-    from taxonomy t
-    {}
-    where t.id_instance ={} {}
-    order by case t.taxostatus when 'N' then 1 else 2 end,t.id
-    LIMIT 400
-    """.format(SQLTreeSelect, SQLTreeJoin, app.config.get('TAXOSERVER_INSTANCE_ID'), ExtraWehereClause))
-    for lstitem in lst:
-        # lstitem['tree']=PackTreeTxt(lstitem['tree']) #evite les problèmes de safe
-        if lstitem['parent_id'] is None:
-            lstitem['parent_id'] = ""
-
-    # nbrtaxon=GetAll("select count(*) from taxonomy")[0][0]
-    # return render_template('browsetaxo.html',lst=lst,nbrtaxon=nbrtaxon)
-
-    return PrintInCharte(render_template('taxonomy/browse.html', lst=lst,
-                                         BackProjectBtn=BackProjectBtn))
+    return PrintInCharte(render_template('taxonomy/browse.html',
+                                         BackProjectBtn=BackProjectBtn,
+                                         create_ok=is_admin_or_project_creator(user)))
 
 
-def request_withinstanceinfo(urlend, params, id_instance=1):
+def request_withinstanceinfo(urlend, params):
     """
         Issue a REST query on EcoTaxoServer
     """
@@ -131,9 +92,12 @@ def DoSyncStatUpdate():
 
 
 @app.route('/taxo/dosync', methods=['POST'])
-@login_required
-@roles_accepted(database.AdministratorLabel, database.ProjectCreatorLabel)
 def routetaxodosync():
+    user = get_login()
+    if user is None:
+        return PrintInCharte("Please login to access this page")
+    if not is_admin_or_project_creator(user):
+        return PrintInCharte("Insufficient rights")
     return DoFullSync()
 
 
@@ -188,7 +152,7 @@ def DoFullSync():
         sql = sqlbase + """update objectsclassifhisto och set classif_id=tr.rename_to 
               from taxorename tr  where och.classif_id=tr.id """
         ExecSQL(sql)
-        # on efface les taxon qui doivent être renomé car ils l'ont normalement été
+        # on efface les taxon qui doivent être renommés car ils l'ont normalement été
         sql = """delete from taxonomy where rename_to is not null """
         ExecSQL(sql)
         sql = """delete from taxonomy t where taxostatus='D' 
@@ -218,59 +182,64 @@ def DoFullSync():
 
     return txt
 
+# Below fields are not provided via back-end API call, because they are useless in most contexts
+FIELDS_IN_CENTRAL_ONLY = ["source_url", "source_desc", "creator_email", "creation_datetime"]
 
-@app.route('/taxo/edit/<int:taxoid>')
-@login_required
-@roles_accepted(database.AdministratorLabel, database.ProjectCreatorLabel)
-def routetaxoedit(taxoid):
+
+@app.route('/taxo/view/<int:taxoid>')
+def route_view_taxon(taxoid):
     """
-        Modification of the centralized taxon.
-        Step 1: Read from local (!) DB and display it.
+        View the local taxon.
     """
-    sql = """select t.*
-            ,p.display_name parentname,to_char(t.creation_datetime,'YYYY-MM-DD HH24:MI:SS') creationdatetimefmt,{}
-        from taxonomy t 
-        {}
-        left join taxonomy p on t.parent_id=p.id
-        where t.id = %(id)s
-        """.format(SQLTreeSelect, SQLTreeJoin)
-    if taxoid > 0:
-        taxon = GetAll(sql, {'id': taxoid})[0]
-    else:
-        taxon = {'id': 0, 'creator_email': current_user.email, 'tree': ''
-            , 'creationdatetimefmt': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-                 }
+    user = get_login()
+    if user is None:
+        return PrintInCharte("Please login to access this page")
+    # Get local data
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=taxoid)
+    # Complete with centralized info
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        on_central = api.taxon_in_central_taxon_central_taxon_id_get(taxon_id=taxoid)
+    for a_field in FIELDS_IN_CENTRAL_ONLY:
+        setattr(taxon, a_field, on_central[0][a_field])
+    g.TaxoType = database.TaxoType
+    g.taxoserver_url = get_taxoserver_url()
+    return render_template('taxonomy/edit.html', taxon=taxon)
+
+
+@app.route('/taxo/new')
+def route_add_taxon():
+    """
+        Creation of a new taxon, step 0 initial form.
+    """
+    # Security barrier...
+    # We don't write anything so we could display the form and wait for the "save" to fail.
+    user = get_login()
+    if user is None:
+        return PrintInCharte("Please login to access this page")
+    if not is_admin_or_project_creator(user):
+        return PrintInCharte("Insufficient rights")
+    # Create a blank taxon
+    taxon = {'id': 0, 'creator_email': user.email, 'tree': '', 'creation_datetime': ''}
     g.TaxoType = database.TaxoType
     g.taxoserver_url = get_taxoserver_url()
     return render_template('taxonomy/edit.html', taxon=taxon)
 
 
 @app.route('/taxo/save/', methods=['POST'])
-@login_required
-#
-# POUR TOUS LES PROJECT MANAGER
-#
-@roles_accepted(database.AdministratorLabel, database.ProjectCreatorLabel)
-def routetaxosave():
+def route_save_taxon():
     """
-        Modification of the centralized taxon.
-        Step 2: Collect data from the form and send to centralized server.
-
-        Also used for creating new taxa.
+        Saving of the centralized taxon.
+        Collect data from the form and send to back-end, which will relay to centralized server.
     """
-    txt = ""
     try:
         params = {}
-        for c in ['parent_id', 'name', 'taxotype',
-                  'source_desc', 'source_url',
-                  'creation_datetime', 'creator_email']:
+        for c in ['parent_id', 'name', 'taxotype', 'source_desc', 'source_url', 'creator_email']:
             params[c] = gvp(c)
-        if int(gvp('id')) > 0:
-            params['id'] = int(gvp('id'))
-        params['taxostatus'] = 'N'
-        j = request_withinstanceinfo("/settaxon/", params)
-        if j['msg'] != 'ok':
-            return appli.ErrorFormat("settaxon Error :" + j['msg'])
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            crea_rsp = api.taxon_in_central_taxon_central_put(**params)
+        if crea_rsp['msg'] != 'ok':
+            return appli.ErrorFormat("settaxon Error :" + crea_rsp['msg'])
         txt = """<script> DoSync(); At2PopupClose(0); </script>"""
         return txt
     except Exception as e:

@@ -25,9 +25,11 @@
   <table class=" " id="tblviewtaxon">
     <tr>
       <th>Name</th>
-      <td colspan="3">{{ ht.InputText('name',taxon.name,"class=form-control required maxlength=100") }}</td>
+      <td colspan="3">{{ ht.InputText('name',taxon.name,"class=form-control required maxlength=100"
+        +(" READONLY" if taxon.id != 0 else "")) }}</td>
       <th>Type</th>
-      <td style="width: 200px">{{ ht.selectinputdict_enriched('taxotype', g.TaxoType, taxon.taxotype,addemptyrow=True,extrataginfo="class=form-control required") }}</td>
+      <td style="width: 200px">{{ ht.selectinputdict_enriched('taxotype', g.TaxoType, taxon.type,
+        addemptyrow=True,extrataginfo="class=form-control required"+(" DISABLED" if taxon.id != 0 else "")) }}</td>
     </tr>
     <tr>
       <th>Display Name</th>
@@ -36,34 +38,37 @@
     <tr>
       <th>Parent</th>
       <td colspan="5">
-        <select id="parent_id" name="parent_id" class="taxolbpop" required>
-          {% if taxon.parent_id %}
-            <option value="{{ taxon.parent_id }}">{{ taxon.parentname }}</option>
+        <select id="parent_id" name="parent_id" class="taxolbpop" {{ "DISABLED" if taxon.id != 0 else "" }} required>
+          {% if taxon.lineage|length >1 %}
+            <option value="{{ taxon.id_lineage[1] }}">{{ taxon.lineage[1] }}</option>
           {% endif %}
         </select>
       </td>
     </tr>
     <tr>
       <th>Lineage</th>
-      <td colspan="5">{{ taxon.tree.replace('>',' > ') }}</td>
+      <td colspan="5">{{ " < ".join(taxon.lineage) }}</td>
     </tr>
 
     <tr>
-      {#    <th>Source ID</th><td>{{ ht.InputText('id_source', taxon.id_source ,extrataginfo="class=form-control maxlength=20 style='width:100px'"|safe)  }} </td>#}
       <th>Source URL
         <i class="fas fa-info-circle"
            data-content="If the new category is described on the WEB, please provide the link to help the Ecotaxoserver managers to review and populate this new category for all users."></i>
       </th>
       <td colspan="5">
-        {{ ht.InputText('source_url', taxon.source_url,extrataginfo="class=form-control maxlength=200 data-parsley-sourceurl=1 data-parsley-validate-if-empty=1") }}    </td>
+        {{ ht.InputText('source_url', taxon.source_url,
+                        extrataginfo="class=form-control maxlength=200 data-parsley-sourceurl=1 data-parsley-validate-if-empty=1"
+                        +(" READONLY" if taxon.id != 0 else "")) }}    </td>
     </tr>
     <tr>
       <th>Source Desc
         <i class="fas fa-info-circle"
-           data-content="If the new category is NOT described on the WEB, please provide a description of the catégory to help other users to use it."></i>
+           data-content="If the new category is NOT described on the WEB, please provide a description of the category to help other users to use it."></i>
       </th>
       <td colspan="5">
-        {{ ht.TextArea('source_desc',4, taxon.source_desc,extrataginfo="class=form-control maxlength=1000 data-parsley-sourcedesc=1 data-parsley-validate-if-empty=1 ") }}
+        {{ ht.TextArea('source_desc', 4, taxon.source_desc,
+                        extrataginfo="class=form-control maxlength=1000 data-parsley-sourcedesc=1 data-parsley-validate-if-empty=1 "
+                        +("READONLY" if taxon.id != 0 else "")) }}
       </td>
     </tr>
     <tr>
@@ -72,20 +77,25 @@
            data-content="If you change the email, you will not be anymore able to manage this taxon."></i>
       </th>
       <td colspan="3">
-        {{ ht.InputText('creator_email', taxon.creator_email ,extrataginfo=("class=form-control maxlength=250 data-parsley-type=email "+("READONLY" if taxon.creator_email.find('@')>0 else ""))|safe) }}
+        {{ ht.InputText('creator_email', taxon.creator_email ,
+                        extrataginfo=("class=form-control maxlength=250 data-parsley-type=email "
+                        +("READONLY" if taxon.id != 0 else ""))|safe) }}
       </td>
       <th>Creation date</th>
       <td>
-        {{ ht.InputText('creation_datetime', taxon.creationdatetimefmt ,extrataginfo="class=form-control maxlength=200 pattern='\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}' style='width:150px' READONLY"|safe) }} </td>
+        {{ ht.InputText('creation_datetime', taxon.creation_datetime ,
+        extrataginfo="class=form-control maxlength=200 pattern='\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}' style='width:150px' READONLY"|safe) }} </td>
     </tr>
 
 
   </table>
   <table style="width: 100%;margin-top: 10px;">
     <tr>
+{% if taxon.id == 0 %}
       <td>
         <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Taxon</button>
       </td>
+{% endif %}
       <td style="text-align: right">
         <button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
         </button>
@@ -93,6 +103,7 @@
     </tr>
   </table>
 </form>
+{% if taxon.id == 0 %}
 <div id="formedittaxon_PostResult" style="margin-top: 10px"></div>
 <div class="panel panel-default " style="padding: 5px;">
   Naming rules to create Taxon :<br>
@@ -104,6 +115,7 @@
   In case of repeated creation error ask help to the administrators of your Ecotaxa instance
   <ul>{{ GetManagerList('Ecotaxa : Account issue')|safe }}</ul>
 </div>
+{% endif %}
 
 <style>
     .taxolbpop {
@@ -174,7 +186,6 @@
         }, messages: {en: 'You must enter a valid source URL for Phylo type'}
     });
     $('#formedittaxon').parsley();
-
 
     $('#formedittaxon').submit(function (e) {
         e.preventDefault();
