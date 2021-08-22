@@ -24,7 +24,7 @@ def get_login() -> Optional[UserModelWithRights]:
     with ApiClient(UsersApi, request) as api:
         try:
             return api.show_current_user_users_me_get()
-        except ApiException as ae:
+        except ApiException as _ae:
             return None
 
 
@@ -73,22 +73,9 @@ def DoSyncStatUpdate():
     """
         Update EcoTaxoServer with statistics about current node usage.
     """
-    Stats = database.GetAssoc2Col("""select id,sum(nbr) nbr from projects_taxo_stat group by id""")
-    j = request_withinstanceinfo("/setstat/", {'data': json.dumps(Stats)})
-    if j.get('msgversion', 'ok') != 'ok':
-        flash(j['msgversion'], 'warning')
-    if 'msg' in j:
-        PDT = database.PersistantDataTable.query.first()
-        if PDT is None:  # si record manquant
-            # Create the unique line in this table
-            PDT = database.PersistantDataTable()
-            PDT.id = 1
-            db.session.add(PDT)
-        # Update the always-existing record
-        PDT.lastserverversioncheck_datetime = datetime.datetime.now()
-        db.session.commit()
-        return j['msg']
-    return 'DoSyncStatUpdate : NetWork Error'
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        ret = api.push_taxa_stats_in_central_taxa_stats_push_to_central_get()
+    return ret["msg"]
 
 
 @app.route('/taxo/dosync', methods=['POST'])
@@ -199,7 +186,7 @@ def route_view_taxon(taxoid):
         taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=taxoid)
     # Complete with centralized info
     with ApiClient(TaxonomyTreeApi, request) as api:
-        on_central = api.taxon_in_central_taxon_central_taxon_id_get(taxon_id=taxoid)
+        on_central = api.get_taxon_in_central_taxon_central_taxon_id_get(taxon_id=taxoid)
     for a_field in FIELDS_IN_CENTRAL_ONLY:
         setattr(taxon, a_field, on_central[0][a_field])
     g.TaxoType = database.TaxoType
@@ -237,7 +224,7 @@ def route_save_taxon():
         for c in ['parent_id', 'name', 'taxotype', 'source_desc', 'source_url', 'creator_email']:
             params[c] = gvp(c)
         with ApiClient(TaxonomyTreeApi, request) as api:
-            crea_rsp = api.taxon_in_central_taxon_central_put(**params)
+            crea_rsp = api.add_taxon_in_central_taxon_central_put(**params)
         if crea_rsp['msg'] != 'ok':
             return appli.ErrorFormat("settaxon Error :" + crea_rsp['msg'])
         txt = """<script> DoSync(); At2PopupClose(0); </script>"""
