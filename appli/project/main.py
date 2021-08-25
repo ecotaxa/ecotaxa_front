@@ -18,7 +18,7 @@ from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
 from appli.utils import ApiClient, format_date_time
-from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py import ApiException, UserModelWithRights
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi, SamplesApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import (ProjectModel, SampleModel, UserModel, ObjectSetQueryRsp, TaxonModel,
                                            ProjectTaxoStatsModel)
@@ -190,6 +190,14 @@ def indexPrj(PrjId):
                 # MainContact[0]['name'])
                 flash('You cannot view this project', 'error')
             return PrintInCharte("<a href=/prj/>Select another project</a>")
+    # Logged user info
+    g.TaxonCreator = False
+    with ApiClient(UsersApi, request) as api:
+        try:
+            logged_user: UserModelWithRights = api.show_current_user_users_me_get()
+            g.TaxonCreator = 4 in logged_user.can_do
+        except ApiException as ae:
+            pass
 
     # print('%s',data)
     data["sample_for_select"] = ""

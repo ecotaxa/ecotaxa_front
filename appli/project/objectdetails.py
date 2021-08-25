@@ -4,7 +4,6 @@ import urllib.parse
 from typing import List
 
 from flask import render_template, g, flash, request
-from flask_login import current_user
 from flask_security import login_required
 
 from appli import app, PrintInCharte, gvg, gvp, ntcv, ScaleForDisplay, \
@@ -12,10 +11,10 @@ from appli import app, PrintInCharte, gvg, gvp, ntcv, ScaleForDisplay, \
 from appli.constants import ClassifQual, DayTimeList
 # noinspection SpellCheckingInspection
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py import ApiException, UserModelWithRights
 from to_back.ecotaxa_cli_py.api import (ObjectApi, ProjectsApi, TaxonomyTreeApi,
-                                         UsersApi, SamplesApi, ProcessesApi, AcquisitionsApi,
-                                         ObjectsApi)
+                                        UsersApi, SamplesApi, ProcessesApi, AcquisitionsApi,
+                                        ObjectsApi)
 from to_back.ecotaxa_cli_py.models import (ObjectModel, ProjectModel, SampleModel, AcquisitionModel,
                                            TaxonModel, UserModel, ProcessModel, HistoricalClassification, BulkUpdateReq)
 
@@ -44,9 +43,19 @@ def objectdetails(objid):
             elif ae.status in (401, 403):
                 flash('You cannot read this object', 'error')
                 return PrintInCharte("<a href=/>Back to home</a>")
-
+    # Project info
     with ApiClient(ProjectsApi, request) as api:
         obj_proj: ProjectModel = api.project_query_projects_project_id_get(obj.project_id, for_managing=False)
+    # User info
+    current_user_id = -1  # Anonymous
+    g.TaxonCreator = False
+    with ApiClient(UsersApi, request) as api:
+        try:
+            logged_user: UserModelWithRights = api.show_current_user_users_me_get()
+            current_user_id = logged_user.id
+            g.TaxonCreator = 4 in logged_user.can_do
+        except ApiException as _ae:
+            pass
 
     page = list()
     # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
@@ -68,11 +77,6 @@ def objectdetails(objid):
     # //window.location="mailto:?subject=Ecotaxa%20page%20share&body="+
     # encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n"+url);
 
-    try:
-        current_user_id = current_user.id
-    except AttributeError:
-        current_user_id = -1  # Anonymous
-
     # Injected data for taxo select
     g.PrjManager = obj_proj.highest_right == "Manage"
     g.PrjAnnotate = obj_proj.highest_right == "Annotate"
@@ -91,8 +95,8 @@ def objectdetails(objid):
         if current_user_id != -1:
             # No name for anonymous
             with ApiClient(UsersApi, request) as api:
-                user: UserModel = api.get_user_users_user_id_get(user_id=obj.classif_who)
-            page.append(" by %s (%s) " % (user.name, user.email))
+                logged_user: UserModel = api.get_user_users_user_id_get(user_id=obj.classif_who)
+            page.append(" by %s (%s) " % (logged_user.name, logged_user.email))
         if obj.classif_when is not None:
             page.append(" on %s " % obj.classif_when)
     page.append("</p>")

@@ -57,7 +57,7 @@ function FormatTaxoItem(t) {
         dropdownCssClass: "width240 taxopopup",
         language: {
            noResults: function(){
-{% if g.PrjManager %}
+{% if g.TaxonCreator %}
                var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}',{updatestat:'Y'})\" >Create category</a>";
 {% else %}
                var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
