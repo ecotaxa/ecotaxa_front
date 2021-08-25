@@ -16,6 +16,18 @@
         padding: 3px 5px;
     }
 
+    .usage_block {
+        display: inline-block;
+        white-space: nowrap;
+        width: auto;
+        height: initial;
+        margin: 2px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-right: 4px;
+        padding-left: 4px;
+    }
+
     #At2PopupWindow0 .At2PopupWindow {
         width: 1000px;
     }
@@ -91,11 +103,11 @@
   </table>
   <table style="width: 100%;margin-top: 10px;">
     <tr>
-{% if taxon.id == 0 %}
-      <td>
-        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Taxon</button>
-      </td>
-{% endif %}
+      {% if taxon.id == 0 %}
+        <td>
+          <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Taxon</button>
+        </td>
+      {% endif %}
       <td style="text-align: right">
         <button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
         </button>
@@ -104,17 +116,27 @@
   </table>
 </form>
 {% if taxon.id == 0 %}
-<div id="formedittaxon_PostResult" style="margin-top: 10px"></div>
-<div class="panel panel-default " style="padding: 5px;">
-  Naming rules to create Taxon :<br>
-  - Phylo type : Must be unique, contains only letters and -+' and not more than 1 whitespace, Start with a Uppercase
-  <br>
-  - Morpho type : Must be unique for the parent, contains only letters and -+' and not more than 1 whitespace, be
-  lowercase only.<br>
-  {#  In case of repeated creation error ask help to users listed on <a href="{{ g.taxoserver_url }}/browsetaxo/" target="_blank">this page</a>#}
-  In case of repeated creation error ask help to the administrators of your Ecotaxa instance
-  <ul>{{ GetManagerList('Ecotaxa : Account issue')|safe }}</ul>
-</div>
+  <div id="formedittaxon_PostResult" style="margin-top: 10px"></div>
+  <div class="panel panel-default " style="padding: 5px;">
+    Naming rules to create Taxon :<br>
+    - Phylo type : Must be unique, contains only letters and -+' and not more than 1 whitespace, Start with a Uppercase
+    <br>
+    - Morpho type : Must be unique for the parent, contains only letters and -+' and not more than 1 whitespace, be
+    lowercase only.<br>
+    {#  In case of repeated creation error ask help to users listed on <a href="{{ g.taxoserver_url }}/browsetaxo/" target="_blank">this page</a>#}
+    In case of repeated creation error ask help to the administrators of your Ecotaxa instance
+    <ul>{{ GetManagerList('Ecotaxa : Account issue')|safe }}</ul>
+  </div>
+{% else %}
+  Validated usages:
+  <div id="prj_usage" style="display:inline-block;margin-top: 10px"></div>
+  {% for a_usage in usage %}
+    <span class="form-control usage_block">
+    {{ a_usage.nb_validated }}&nbsp;objects&nbsp;in&nbsp;<a href="/prj/{{ a_usage.projid }}?taxo={{ taxon.id }}"
+                                                            target="_blank">{{ a_usage.title }}</a>
+    </span>
+    <span></span>
+  {% endfor %}
 {% endif %}
 
 <style>

@@ -1,17 +1,12 @@
-import datetime
-import sys
 from typing import Optional
 
 import requests
-from flask import render_template, g, flash, json, request
+from flask import render_template, g, flash, request
 
 import appli
 import appli.part.prj
 import appli.project.main
-from appli import app, PrintInCharte, database, gvg, gvp, ntcv, FAIcon
-from appli.database import ExecSQL, db
-######################################################################################################################
-from appli.project.stats import RecalcProjectTaxoStat
+from appli import app, PrintInCharte, database, gvg, gvp, FAIcon
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import UsersApi, UserModelWithRights, ApiException, TaxonomyTreeApi, TaxonModel
 
@@ -89,85 +84,18 @@ def routetaxodosync():
 
 
 def DoFullSync():
-    txt = ""
-    try:
-        UpdatableCols = ['parent_id', 'name', 'taxotype', 'taxostatus', 'id_source', 'id_instance', 'rename_to',
-                         'display_name', 'source_desc', 'source_url', 'creation_datetime', 'creator_email']
-        MaxUpdate = database.GetAll(
-            "select coalesce(max(lastupdate_datetime),to_timestamp('2000-01-01','YYYY-MM-DD')) lastupdate from taxonomy")
-        MaxUpdateDate = MaxUpdate[0]['lastupdate']
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        ret = api.pull_taxa_update_from_central_taxa_pull_from_central_get()
+    if ret["error"]:
+        flash(ret["error"], "error")
+    else:
+        ins, upd = ret["inserts"], ret["updates"]
+        if ins != 0 or upd != 0:
+            msg = "Taxonomy is now in sync, after {} addition(s) and {} update(s).".format(ins, upd)
+        else:
+            msg = "No update needed, Taxonomy was in sync already."
+        flash(msg, "success")
 
-        j = request_withinstanceinfo("/gettaxon/", {'filtertype': 'since', 'startdate': MaxUpdateDate})
-        if 'msg' in j:
-            return appli.ErrorFormat("Sync Error :" + j['msg'])
-        NbrRow = len(j)
-        NbrUpdate = NbrInsert = 0
-        txt += "Received {} rows<br>".format(NbrRow)
-        if (NbrRow > 0):
-            txt += "Taxo 0 = {}<br>".format(j[0])
-        for jtaxon in j:
-            taxon = database.Taxonomy.query.filter_by(id=int(jtaxon['id'])).first()
-            lastupdate_datetime = datetime.datetime.strptime(jtaxon['lastupdate_datetime'], '%Y-%m-%d %H:%M:%S')
-            if taxon:
-                if taxon.lastupdate_datetime == lastupdate_datetime:
-                    continue  # already up to date
-                NbrUpdate += 1
-            else:
-                if ntcv(jtaxon['rename_to']) != '':
-                    continue  # don't insert taxon that should be renamed
-                if ntcv(jtaxon['taxostatus']) == 'D':
-                    continue  # don't insert taxon that are deprecated and planned to be deleted
-                NbrInsert += 1
-                taxon = database.Taxonomy()
-                taxon.id = int(jtaxon['id'])
-                db.session.add(taxon)
-
-            for c in UpdatableCols:
-                setattr(taxon, c, jtaxon[c])
-            taxon.lastupdate_datetime = lastupdate_datetime
-            db.session.commit()
-        # Manage rename_to
-        sqlbase = "with taxorename as (select id,rename_to from taxonomy where rename_to is not null) "
-        sql = sqlbase + """select distinct obj.projid from objects obj join taxorename tr on obj.classif_id=tr.id """
-        ProjetsToRecalc = database.GetAll(sql)
-        sql = sqlbase + """update obj_head obh set classif_id=tr.rename_to 
-              from taxorename tr  where obh.classif_id=tr.id """
-        NbrRenamedObjects = ExecSQL(sql)
-        sql = sqlbase + """update obj_head obh set classif_auto_id=tr.rename_to 
-              from taxorename tr  where obh.classif_auto_id=tr.id """
-        ExecSQL(sql)
-        sql = sqlbase + """update objectsclassifhisto och set classif_id=tr.rename_to 
-              from taxorename tr  where och.classif_id=tr.id """
-        ExecSQL(sql)
-        # on efface les taxon qui doivent être renommés car ils l'ont normalement été
-        sql = """delete from taxonomy where rename_to is not null """
-        ExecSQL(sql)
-        sql = """delete from taxonomy t where taxostatus='D' 
-                  and not exists(select 1 from projects_taxo_stat where id=t.id) """
-        ExecSQL(sql)
-        # il faut recalculer projects_taxo_stat et part_histocat,part_histocat_lst pour ceux qui referencaient un
-        # taxon renomé et donc disparu
-        if NbrRenamedObjects > 0:
-            # cron.RefreshTaxoStat() operation trés longue (env 5 minutes en prod, il faut être plus selectif)
-            # permet de recalculer projects_taxo_stat
-            for Projet in ProjetsToRecalc:
-                RecalcProjectTaxoStat(Projet['projid'])
-            # recalcul part_histocat,part_histocat_lst
-            appli.part.prj.GlobalTaxoCompute()
-
-        flash("Received {} rows,Insertion : {} Update :{}".format(NbrRow, NbrInsert, NbrUpdate), "success")
-        if gvp('updatestat') == 'Y':
-            msg = DoSyncStatUpdate()
-            flash("Taxon statistics update : " + msg, "success" if msg == 'ok' else 'error')
-
-        # txt="<script>location.reload(true);</script>" # non car ça reprovoque le post de l'arrivée initiale
-        txt = "<script>window.location=window.location;</script>"
-    except:
-        msg = "Error while syncing {}".format(sys.exc_info())
-        app.logger.error(msg)
-        txt += appli.ErrorFormat(msg)
-
-    return txt
 
 # Below fields are not provided via back-end API call, because they are useless in most contexts
 FIELDS_IN_CENTRAL_ONLY = ["source_url", "source_desc", "creator_email", "creation_datetime"]
@@ -189,9 +117,13 @@ def route_view_taxon(taxoid):
         on_central = api.get_taxon_in_central_taxon_central_taxon_id_get(taxon_id=taxoid)
     for a_field in FIELDS_IN_CENTRAL_ONLY:
         setattr(taxon, a_field, on_central[0][a_field])
+    # Complete again with usage info
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        usage = api.query_taxa_usage_taxon_taxon_id_usage_get(taxon_id=taxoid)
+        usage = usage[:20]
     g.TaxoType = database.TaxoType
     g.taxoserver_url = get_taxoserver_url()
-    return render_template('taxonomy/edit.html', taxon=taxon)
+    return render_template('taxonomy/edit.html', taxon=taxon, usage=usage)
 
 
 @app.route('/taxo/new')
