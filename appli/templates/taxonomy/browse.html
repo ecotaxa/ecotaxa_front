@@ -77,7 +77,11 @@ $(document).ready(function() {
                     row_id = 'txo' + rsp[i].id;
                     row += '<tr id=' + row_id + '>';
                     row += '<td><a href="javascript:void(0);">'+rsp[i].id+'</a></td>';
-                    row += '<td>'+rsp[i].text+'</td>';
+                    if (rsp[i].renm_id) {
+                        row += '<td class="deprecated">' + rsp[i].text + '</td>';
+                    } else {
+                        row += '<td>' + rsp[i].text + '</td>';
+                    }
                     row += '<td></td>';
                     row += '<td></td>';
                     row += '</tr>';

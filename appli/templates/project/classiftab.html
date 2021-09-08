@@ -276,6 +276,7 @@ function KeyboardMoveSelection(way) {
           var droptaxoid=$(this).data('taxoid');
           var droptaxoname=$(this).data('dispname');
           // Not nice, but the whole TD is droppable so we cannot prevent the drop
+          // DEPENDS ON LABEL, BAD AND FRAGILE
           if (droptaxoname.indexOf('(D') !== -1) { alert("Cannot assign to a deprecated category"); return; }
           var jtaxolbanno=$('#taxolbanno');
           jtaxolbanno.append($('<option>', {    value: droptaxoid,    text: droptaxoname}));
