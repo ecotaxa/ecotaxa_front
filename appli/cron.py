@@ -3,10 +3,6 @@
 import appli.part.prj
 from appli.part.database import ComputeOldestSampleDateOnProject
 
-
-
-
-
 if __name__ == "__main__":
     # RefreshTaxoStat()
     from appli import app

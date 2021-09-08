@@ -511,7 +511,7 @@
             var jqannot = $('#filt_annot');
             if (jqannot.val() != null) {
                 req['filt_annot'] = String(jqannot.val());
-                TxtFilter += InGreyButton("Annotateur=" + $.map(jqannot.find('option:selected'), function (element) {
+                TxtFilter += InGreyButton("Annotator=" + $.map(jqannot.find('option:selected'), function (element) {
                     return $(element).text()
                 }).join(', '), "$(\"#filt_annot\").val(null).trigger(\"change\")");
             }

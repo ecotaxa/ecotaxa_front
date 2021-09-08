@@ -212,6 +212,7 @@ for i in range(1, 21):
 
 
 def ComputeOldestSampleDateOnProject():
+    # EcoPart stats update
     ExecSQL("update part_projects pp  "
             "   set oldestsampledate=(select min(sampledate) "
             "                          from part_samples ps "

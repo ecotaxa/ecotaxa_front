@@ -92,7 +92,7 @@ $(document).ready(function() {
                             // {"id":4,"name":"Archaea","type":"M","nb_objects":0,"nb_children_objects":0,"display_name":"Archaea",
                             // "lineage":["Archaea","living"],"id_lineage":[4,1],"children":[332,325,334322]}]
                             row_id = 'txo' + rspf[i].id;
-                            lineage = rspf[i].lineage.join(" < ");
+                            lineage = rspf[i].lineage.reverse().join(" > ");
                             type = rspf[i].type;
                             $("#"+ row_id + " :nth-child(3)").text(type);
                             $("#"+ row_id + " :nth-child(4)").text(lineage);
