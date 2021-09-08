@@ -18,3 +18,5 @@ import appli.project.purge
 import appli.project.editannot
 # noinspection PyUnresolvedReferences
 import appli.project.editdatamass
+# noinspection PyUnresolvedReferences
+import appli.project.taxo_fix
