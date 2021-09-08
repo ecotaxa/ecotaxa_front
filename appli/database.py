@@ -90,6 +90,7 @@ class Taxonomy(db.Model):
     lastupdate_datetime = db.Column(TIMESTAMP(precision=0))
     id_instance = db.Column(INTEGER)
     taxostatus = db.Column(CHAR(1), nullable=False, server_default='A')
+    # Starting 2.5.11, the below is the advised dest taxon
     rename_to = db.Column(INTEGER)
     source_url = db.Column(VARCHAR(200))
     source_desc = db.Column(VARCHAR(1000))
@@ -758,3 +759,25 @@ class Job(Model):
 
     def __str__(self):
         return "{0} ({1})".format(self.id, self.type)
+
+
+class TaxonomyChangeLog(Model):
+    """
+        Mass taxo/classification/category changes which happened before now, in a given project.
+    """
+    __tablename__ = 'taxo_change_log'
+    # _all_ objects with this category...
+    from_id = Column(INTEGER, ForeignKey('taxonomy.id', ondelete="CASCADE"), nullable=False, primary_key=True)
+    # ...moved to this category...
+    to_id = Column(INTEGER, ForeignKey('taxonomy.id', ondelete="CASCADE"), nullable=False, primary_key=True)
+    # ...in this project...
+    project_id = Column(INTEGER, ForeignKey('projects.projid', ondelete="CASCADE"), nullable=False, primary_key=True)
+    # ...for this reason.
+    why = Column(VARCHAR(1), nullable=False)
+    # It impacted this number of objects
+    impacted = Column(INTEGER, nullable=False)
+    # And occurred at this date
+    occurred_on = Column(TIMESTAMP, nullable=False)
+
+    def __str__(self):
+        return "{0}->{1} on {2}".format(self.from_id, self.to_id, self.occurred_on)

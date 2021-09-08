@@ -6,8 +6,8 @@ from flask import render_template, json, jsonify, request
 
 from appli import app, gvg, gvp
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel
 
 
 # Specialize an encoder for serializing directly the back-end response
@@ -29,6 +29,8 @@ def searchtaxo():
         res: List[TaxaSearchRsp] = api.search_taxa_taxon_set_search_get(query=term,
                                                                         project_id=prj_id)
     # TODO: temporary until the HTML goes to /api directly
+    # Filter out taxa to rename
+    res = [a_taxon for a_taxon in res if a_taxon.renm_id is None]
     return json.dumps(res, cls=BackEndJSONEncoder)
 
 

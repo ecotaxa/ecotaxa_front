@@ -251,6 +251,8 @@ code {
 .ToBeSaved .taxo {color: #D9534F;}
 .linestart{font-weight: bold; background: #aaaaaa;}
 
+.deprecated { text-decoration: line-through; }
+
 .ui-datepicker {  z-index: 4 !important; } /*Fix issue of Slider button over calendar on filter on FFX*/
 
 .taxodrop_hover { background: #5cb85c; }

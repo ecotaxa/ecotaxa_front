@@ -31,7 +31,8 @@
  {% if v['haschild'] %}
  <small><span style="width: 1em;"  class="glyphicon glyphicon-triangle-bottom categexpander" ></span></small>
  {% endif %}
-  <span class="taxodrop {% if v['haschild'] %}haschild{% endif %}" style="margin-left: {{ (0 if v['haschild'] else 1)+ v['dist']*0.9 }}em">
+  <span class="{% if v['deprecated'] %}deprecated{% endif %} taxodrop {% if v['haschild'] %}haschild{% endif %}"
+        style="margin-left: {{ (0 if v['haschild'] else 1)+ v['dist']*0.9 }}em">
     {{ v['htmldisplayname'] }}
 </span>
 <span class="taxoparent">{{ v['taxoparent']|safe }}</span>
@@ -274,8 +275,10 @@ function KeyboardMoveSelection(way) {
       drop: function( event, ui ) {
           var droptaxoid=$(this).data('taxoid');
           var droptaxoname=$(this).data('dispname');
+          // Not nice, but the whole TD is droppable so we cannot prevent the drop
+          if (droptaxoname.indexOf('(D') !== -1) { alert("Cannot assign to a deprecated category"); return; }
           var jtaxolbanno=$('#taxolbanno');
-         jtaxolbanno.append($('<option>', {    value: droptaxoid,    text: droptaxoname}));
+          jtaxolbanno.append($('<option>', {    value: droptaxoid,    text: droptaxoname}));
           var sel=[];
           sel.push(droptaxoid);
           jtaxolbanno.val(sel);

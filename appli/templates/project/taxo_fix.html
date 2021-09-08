@@ -1,0 +1,143 @@
+{% block head %}
+{# Import the bare minimum for this page #}
+<script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='select2_405/js/select2.full.js') }}"></script>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2_405/css/select2.css') }}">
+{% endblock %}
+
+{% block tail_js %}
+{#  Prevent load of old select2 which is in flask-admin templates and conflicts with "our" select2
+by overriding the block. #}
+{% endblock %}
+
+<h3>Fix Category Issues</h3>
+
+<ul>
+    <li>This page allows you to change, in batch, the classification of objects in the project.</li>
+    <li>All operations are strictly equivalent to a manual assignment in the project page, but are presented here :</li>
+    <ul>
+        <li>To give some background information on the change reason, when available.</li>
+        <li>To show the full lineage of taxa.</li>
+        <li>To save time when many objects are impacted.</li>
+    </ul>
+    <li>Changes are logged and can be reverted, by a project manager or an administrator.</li>
+</ul>
+
+{% block body %}
+
+<style> {# On agrandit la taille de la dropdown de la popup #}
+  UL#select2-taxolb-results {
+      max-height: 500px;
+  }
+  .panel-body {
+      padding:6px;
+  }
+  #rnm_table td,th {
+      padding:6px;
+  }
+  .tgt_sel {
+      width: 210px;
+  }
+
+
+
+</style>
+
+{# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
+<form method="post" action="?">
+    {% for a_ren in renames %}
+    <div class="panel panel-default" style="margin-right:auto">
+        <div class="panel-body">
+            <table id="rnm_table">
+                <th colspan="2">
+                    Replace deprecated category:
+                </th>
+                <th>{{ a_ren.lineage | reverse | join(' &gt; ') | safe }}</th>
+                <!-- The advised rename -->
+                <tr>
+                    <td colspan="2"><input type="radio" name="chc{{a_ren.id}}" value="{{a_ren.renm_id}}">
+                        With (advised)&nbsp;:&nbsp;
+                        {{targets[a_ren.renm_id].name}}
+                    </td>
+                    <td> {{ targets[a_ren.renm_id].lineage | reverse | join(' &gt; ') | safe }}</td>
+                </tr>
+                <!-- The logged renames -->
+                <!-- Custom, free choice -->
+                <tr id="{{a_ren.id}}">
+                    <td><input type="radio" name="chc{{a_ren.id}}" id="cus{{a_ren.id}}" value="?"> With&nbsp;:&nbsp;
+                    </td>
+                    <td>
+                        <select name="dest{{a_ren.id}}" data-from={{a_ren.id}} class="tgt_sel">
+                        </select>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+    <div style="position:fixed; bottom:16px; right:16px">
+        <input type=submit class="btn btn-primary" value="Proceed">
+    </div>
+    <br>
+</form>
+{% endblock %}
+
+<script>
+      show_lineage = function(src_id, tgt_id) {
+          // Set the lineage from tgt_id lookup in src_id table line
+          $.ajax({
+             type: "GET",
+             url: "/api/taxon_set/query?ids="+tgt_id,
+             success: function(rsp) {
+                // {..."lineage":["Archaea","living"]}]
+                if (rsp[0]) {
+                    lineage = rsp[0].lineage.reverse().join(" > ");
+                } else {
+                    lineage = "🙄 XHR call error - try again.";
+                }
+                $("#"+ src_id + " :nth-child(3)").text(lineage);
+             }
+          });
+};
+      $(document).ready(function () {
+          var sels = $('.tgt_sel');
+          var targets = {{ target_names | tojson }};
+          // Initialize the server-side fetching
+          sels.select2({
+              ajax: {
+                  url: "/search/taxo",
+                  dataType: 'json',
+                  delay: 250,
+                  data: function (params) {
+                      return {q: params.term, page: params.page};
+                  },
+                  processResults: function (data, page) {
+                      return {results: data};
+                  },
+                  cache: true
+              },
+              minimumInputLength: 3
+          });
+          // Set visible default value to the renamed advised taxon
+          sels.each(function(index, tgt_sel) {
+              var tgt_dataset = tgt_sel.dataset;
+              var from_id = tgt_dataset.from;
+              //var to_id = tgt_dataset.to;
+              //var to_name = targets[to_id];
+              //var option = new Option(to_name, to_id, true, true);
+              //tgt_sel.append(option);
+              //show_lineage(from_id, to_id);
+              $(tgt_sel).on("select2:select", function (evt) {
+                  var sel = $(tgt_sel).val();
+                  var radio = $("#cus"+ from_id);
+                  radio.prop("checked", true);
+                  radio.prop("value", sel);
+                  show_lineage(from_id, sel);
+              });
+          });
+
+      }); // Ready
+
+
+</script>

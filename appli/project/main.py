@@ -305,9 +305,10 @@ def indexPrj(PrjId):
             g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2?frommodel=Y')",
                                 "Predict identifications from trained model"))
             g.headmenu.append(("/Job/Create/FileImport?p=%d" % PrjId, "Import images and metadata"))
-        #g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
+            g.headmenu.append(("/prj/taxo_fix/%d" % PrjId, "Fix category issues"))
+        # g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
         g.headmenu.append(("/Job/Create/GenExport?projid=%d" % PrjId, "Export"))
-        #g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')", "Export"))
+        # g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')", "Export"))
         g.headmenuF.append(("javascript:GotoWithFilter('/Job/Create/GenExport')", "Export"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))
@@ -779,7 +780,8 @@ def GetClassifTabFromModel(proj: ProjectModel):
                      "parentclasses": "",  # the CSS classes, allowing pseudo-collapse
                      "haschild": False,  # If the node has a child
                      "name": taxon.name,
-                     "display_name": taxon.display_name}
+                     "display_name": taxon.display_name,
+                     "deprecated": taxon.renm_id}
         stats_for_taxon = populated_taxa.get(taxon.id)
         if stats_for_taxon is not None:
             for_taxon["nbr_p"] = stats_for_taxon.nb_predicted
@@ -829,11 +831,17 @@ def GetClassifTabFromModel(proj: ProjectModel):
         disp_name = line['display_name']
         if '<' in disp_name:
             parts = disp_name.split('<')
-            line['htmldisplayname'] = parts[0]
-            line['taxoparent'] = ''.join((' &lt;&nbsp;' + XSSEscape(x) for x in parts[1:]))
+            html_display_name = parts[0]
+            html_taxo_parent = ''.join((' &lt;&nbsp;' + XSSEscape(x) for x in parts[1:]))
         else:
-            line['htmldisplayname'] = disp_name
-            line['taxoparent'] = ""
+            html_display_name = disp_name
+            html_taxo_parent = ""
+        # One more case
+        deprec_tag = '(Deprecated)'
+        if deprec_tag in html_display_name:
+            html_display_name = html_display_name.replace(deprec_tag, "(D)")
+        line['htmldisplayname'] = html_display_name
+        line['taxoparent'] = html_taxo_parent
 
     return render_template('project/classiftab.html', res=restree, taxotree=json.dumps(taxotree))
 
