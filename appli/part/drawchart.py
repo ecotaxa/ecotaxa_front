@@ -273,6 +273,9 @@ def part_drawchart():
                         XLabel = "X : date, Y : " + XLabel
                     else:
                         XLabel="X : time (hour), Y : "+XLabel
+                else:
+                    if c == 'datetime':
+                        graph[i].xaxis.set_major_formatter(dateFormaterYMD())
                 graph[i].set_xlabel(XLabel)
                 chartid += 1
 
@@ -286,7 +289,10 @@ def part_drawchart():
                         if r[xcolname] is None or r['y'] is None:
                             continue
                         if ProfilVertical:
-                            data[valcount] = (-r['y'], r[xcolname])
+                            x_val = r[xcolname]
+                            if c == 'datetime':
+                                x_val = matplotlib.dates.date2num(x_val)
+                            data[valcount] = (-r['y'], x_val)
                         else:
                             if TimeAbsolute:
                                 y=matplotlib.dates.date2num(r['y'])
