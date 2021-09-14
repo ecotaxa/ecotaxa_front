@@ -73,6 +73,8 @@ def PrjEditAnnot(PrjId):
         filters["validfromdate"] = (date_filter + " " +
                                     (time_filter_hour if time_filter_hour else "00") + ":" +
                                     (time_filter_minutes if time_filter_minutes else "00"))
+        # Ask for Predicted as well, for rollback of WoRMS migrations
+        filters["statusfilter"] = "PVD"
 
     # Define how to modify them
     if new_author_id == "lastannot":
