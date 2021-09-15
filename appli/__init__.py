@@ -396,11 +396,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.10"
+ecotaxa_version = "2.5.11"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-06-16"
+    return ecotaxa_version + " 2021-09-15"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -408,6 +408,19 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-09-15 : V 2.5.11
+    Bug #653: Too many projects are visible in /prjothers/
+    Feature #606: Move cron AKA nightly clean-up operations to back-end.
+    Bug #648: nbrobj and nbrobjcum columns of taxonomy table now have a more intuitive content.
+    Bug #697: Jobs remain in 'pending' state if database is restarted
+    Feature #609: Move taxonomy management to back-end
+    Feature #573: Reduce taxon operations on EcoTaxa (a bit is missing)
+    Bug #637: Taxonomy filter creation label does not accurately reflect current user rights.
+    Feature #462: Any user managing any project can create a taxon.
+    Feature #645: Browse taxonomy page allows to get information about taxa including their usage.
+    Feature #509: Deal with deprecated taxa. Implemented in a dedicated page.
+    (part of) Feature #709: Change (many) objects to WoRMS-compatible taxonomy.
+    Bug #714: Annotation reversal did not work for Predicted only objects.
 2021-06-16 : V 2.5.10
     Bug #686: Ensure that project link is present for new export jobs.
     Feature #605 (start): Automatic classification result can now be stored by calling an API endpoint.
