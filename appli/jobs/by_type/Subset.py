@@ -6,7 +6,6 @@ from flask import render_template, g, redirect
 
 from appli import PrintInCharte, gvg, XSSEscape
 from appli.jobs.Job import Job
-from appli.project import sharedfilter
 from appli.tasks.importcommon import *
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
@@ -50,12 +49,8 @@ class SubsetJob(Job):
 
     @classmethod
     def create_or_update(cls):
-        """ In UI/flask, display of initial page (GET) or submit/resubmit (POST) """
-        method = request.method
-        if method == 'GET':
-            prj_id = int(gvg("p"))
-        elif method == 'POST':
-            prj_id = int(gvp("p"))
+        """ In UI/flask, submit/resubmit, POST """
+        prj_id = int(gvp("p"))
         with ApiClient(ProjectsApi, request) as api:
             try:
                 target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
@@ -93,10 +88,7 @@ class SubsetJob(Job):
             errors.append("You must select the object selection parameter '% of values' or '# of objects'")
 
         filters = {}
-        if method == 'GET':
-            filtertxt = cls._extract_filters_from_url(filters, target_prj)
-        elif method == 'POST':
-            filtertxt = cls._extract_filters_from_form(filters, target_prj)
+        filtertxt = cls._extract_filters_from_form(filters, target_prj)
 
         if len(errors) > 0:
             for e in errors:
