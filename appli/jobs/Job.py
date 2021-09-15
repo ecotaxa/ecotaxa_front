@@ -5,7 +5,7 @@ import requests
 from flask import g
 from werkzeug.datastructures import FileStorage
 
-from appli import gvg, XSSEscape
+from appli import gvg, XSSEscape, gvp
 from appli.project import sharedfilter
 from to_back.ecotaxa_cli_py.api import FilesApi
 from to_back.ecotaxa_cli_py.models import JobModel
@@ -102,10 +102,14 @@ class Job(object):
 
     @classmethod
     def _extract_filters_from_url(cls, filters, target_prj):
-        # Extract filter values, they are in the URL (get)
+        # Extract filter values, they are in the URL (GET)
         for k in sharedfilter.FilterList:
             if gvg(k, "") != "":
                 filters[k] = gvg(k, "")
+        return cls._remind_filters(filters, target_prj)
+
+    @classmethod
+    def _remind_filters(cls, filters, target_prj):
         # If subset was required on a filtered view, remind it in the page
         filtertxt = ""
         if len(filters) > 0:
@@ -116,6 +120,14 @@ class Job(object):
                                                                                       filters.items() if
                                                                                       v != ""]))
         return filtertxt
+
+    @classmethod
+    def _extract_filters_from_form(cls, filters, target_prj):
+        # Extract filter values, they are in the submitted values (POST)
+        for k in sharedfilter.FilterList:
+            if gvp(k, "") != "":
+                filters[k] = gvp(k, "")
+        return cls._remind_filters(filters, target_prj)
 
 
 def load_from_json(str, clazz):

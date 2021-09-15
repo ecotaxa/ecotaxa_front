@@ -13,7 +13,12 @@
       }
   </style>
 
-  <form class="form-horizontal" method="post" enctype=multipart/form-data style="margin: 5px">
+  <form class="form-horizontal" action="{{ request.path }}" method="post" enctype=multipart/form-data
+        style="margin: 5px">
+    <input type="hidden" name="p" value="{{ prj_id }}">
+    {% for var, val in filters.items() %}
+      <input type="hidden" name="{{ var }}" value="{{ val }}">
+    {% endfor %}
     <table>
       <tr>
         <td>

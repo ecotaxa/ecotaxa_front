@@ -45,12 +45,17 @@ class SubsetJob(Job):
 
         html = "<h3>Extract subset</h3>"
         return render_template('jobs/subset_create.html', header=html,
-                               form=formdata, filtertxt=filtertxt)
+                               form=formdata, prj_id=prj_id,
+                               filters=filters, filtertxt=filtertxt)
 
     @classmethod
     def create_or_update(cls):
-        """ In UI/flask, submit/resubmit of initial page, POST """
-        prj_id = int(gvg("p"))
+        """ In UI/flask, display of initial page (GET) or submit/resubmit (POST) """
+        method = request.method
+        if method == 'GET':
+            prj_id = int(gvg("p"))
+        elif method == 'POST':
+            prj_id = int(gvp("p"))
         with ApiClient(ProjectsApi, request) as api:
             try:
                 target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
@@ -88,19 +93,24 @@ class SubsetJob(Job):
             errors.append("You must select the object selection parameter '% of values' or '# of objects'")
 
         filters = {}
-        filtertxt = cls._extract_filters_from_url(filters, target_prj)
+        if method == 'GET':
+            filtertxt = cls._extract_filters_from_url(filters, target_prj)
+        elif method == 'POST':
+            filtertxt = cls._extract_filters_from_form(filters, target_prj)
 
         if len(errors) > 0:
             for e in errors:
                 flash(e, "error")
             html = "<h3>Extract subset</h3>"
             formdata = {'subsetprojecttitle': subsetprojecttitle,
+                        'grptype': grptype,
                         'valtype': valtype,
                         'vvaleur': vvaleur if valtype == 'V' else '',
                         'pvaleur': pvaleur if valtype == 'P' else '',
                         'withimg': withimg}
             return render_template('jobs/subset_create.html', header=html,
-                                   form=formdata, filtertxt=filtertxt)
+                                   form=formdata, prj_id=prj_id,
+                                   filters=filters, filtertxt=filtertxt)
         else:
             # Create the destination project
             with ApiClient(ProjectsApi, request) as api:
