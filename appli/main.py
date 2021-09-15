@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from flask import Blueprint, render_template, g, request, url_for
+from flask import Blueprint, render_template, g, request, url_for, send_from_directory
 from flask_login import current_user
 from appli import app, ObjectToStr, PrintInCharte, database, db
 from flask_security.decorators import roles_accepted
@@ -62,26 +62,23 @@ def index():
     txt += """<br><a href='/privacy'>Privacy</a></div></div></div>"""
     return PrintInCharte(txt)
 
+# Where we serve the Vue front-end
+GUI_PATH = app.root_path + "/gui/"
 
-@app.route('/test1')
-def test1():
-    txt = """Hello World! <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-            <font color=red><span class="glyphicon glyphicon-search" aria-hidden="true"></span></font>
-            <span class="glyphicon glyphicon-user" style="color:blue"></span>
-            X<br>
+# Everything there should be pre-processed e.g.:
+#ecotaxa_front/proto/ecotaxa-cli$ for f in `grep -rwl "/front/" dist/ `; do sed -e "s/\/front\//\/gui\//g" $f > $f.2; mv $f.2 $f; done
 
-           """
-    txt += "Name =" + getattr(current_user, 'name', "???") + "<br>"
-    txt += "Id =" + str(getattr(current_user, 'id', -1)) + "<br>"
-    txt += ObjectToStr(current_user)
-    txt += "<br><img src='vault/test.jpg' width=500>"
-    return render_template('layout.html', bodycontent=txt)
+@app.route('/gui')
+def gui_index():
+    return send_from_directory(GUI_PATH, 'index.html')
 
 
-@app.route('/testadmin')
-@roles_accepted(database.AdministratorLabel)
-def testadmin():
-    return "Admin OK"
+@app.route('/gui/<path:filename>')
+def gui_any(filename):
+    try:
+        return send_from_directory(GUI_PATH, filename)
+    except:
+        return gui_index()
 
 
 @app.before_request
