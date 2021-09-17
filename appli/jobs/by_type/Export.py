@@ -40,7 +40,8 @@ class ExportJob(Job):
                     "processdata": "1",
                     "acqdata": "1",
                     "sampledata": "1",
-                    "splitcsvby": ""
+                    "splitcsvby": "",
+                    "latin1": ""
                     }
 
         html = "<h3>Data Export</h3>"
@@ -74,6 +75,7 @@ class ExportJob(Job):
         only_first_image = gvp("exportimages") == "1"
         splitcsvby = gvp("splitcsvby")
         putfileonftparea = gvp("putfileonftparea") == "Y"
+        latin1 = gvp("latin1") == "1"
 
         tsv_entities = objectdata + processdata + acqdata + sampledata + histodata + commentsdata
 
@@ -104,7 +106,8 @@ class ExportJob(Job):
                             only_first_image=only_first_image,
                             sum_subtotal=sumsubtotal,
                             out_to_ftp=putfileonftparea,
-                            tsv_entities=tsv_entities)
+                            tsv_entities=tsv_entities,
+                            use_latin1=latin1)
             export_req = {"filters": filters,
                           "request": req}
             with ApiClient(ObjectsApi, request) as api:

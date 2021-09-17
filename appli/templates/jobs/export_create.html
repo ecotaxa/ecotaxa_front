@@ -91,7 +91,11 @@
         </select></td>
       </tr>
     </table>
-    </table>
+    <p>
+      Exported files are now using <a href="https://en.wikipedia.org/wiki/UTF-8">UTF-8</a> character set.
+      Should you encounter a problem reading them, you can:
+    {{ checkboxinput("latin1","1",form.latin1) }} Use previous encoding.<br>
+    </p>
     <p>
       In order to ease the transfer of large exported datasets, you can choose to export your files to the Ecotaxa FTP
       that is utilized to import your data and images.
