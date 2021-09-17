@@ -36,8 +36,6 @@ flaskAdmin.add_view(TaxonomyView(ecotaxa_db.session, category='Taxonomy', name="
 # Add links to the blueprint-managed entry points
 flaskAdmin.add_link(base.MenuLink('Ecotaxa Home', url='/'))
 
-flaskAdmin.add_link(base.MenuLink('Merge 2 categories (admin only)',
-                                  category='Taxonomy', url='/admin/db/merge2taxon'))
 flaskAdmin.add_link(base.MenuLink('Taxonomy errors (admin only)',
                                   category='Taxonomy', url='/admin/db/viewtaxoerror'))
 
