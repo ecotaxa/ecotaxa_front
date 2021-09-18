@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import List
+
 from appli import db, database, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, app, TempTaskDir, JinjaNl2BR, \
     XSSEscape, TaxoNameAddSpaces
 from flask import render_template, g, flash, request
@@ -15,7 +17,7 @@ from sklearn.decomposition import PCA
 from subprocess import Popen, TimeoutExpired, DEVNULL, PIPE
 
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ClassifyAutoReq
+from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ClassifyAutoReq, ProjectsApi, ProjectModel
 
 
 class TaskClassifAuto2(AsyncTask):
@@ -412,28 +414,41 @@ class TaskClassifAuto2(AsyncTask):
                             USE previous Learning Set :  {2}</a><br><br>OR USE another project<br><br>""".format(
                     request.query_string.decode("utf-8"), PreviousLS,
                     " + ".join(["#{0} - {1}".format(*r) for r in BasePrj]))
-        from flask_login import current_user
-        sql = """select projid,title,round(coalesce(objcount,0)*coalesce(pctvalidated,0)/100) objvalid
-                ,mappingobj,coalesce(cnn_network_id,'') cnn_network_id 
-                from projects where 1=1 """
-        sqlparam = []
-        if gvp('filt_title'):
-            sql += " and title ilike (%s) "
-            sqlparam.append(("%" + gvp('filt_title') + "%"))
-        if gvp('filt_instrum', '') != '':
-            # LS: I can do 10-km lines too :)
-            sql += " and projid in (select distinct sam.projid from acquisitions acq, samples sam where acq.acq_sample_id = sam.sampleid and acq.instrument ilike '%%'||(%s) ||'%%' ) "
-            sqlparam.append(gvp('filt_instrum'))
-        sql += " order by title"
-        ProjList = database.GetAll(sql, sqlparam, doXSSEscape=True)
-        TblBody = ""
+
+        bef = time.time()
+        title_filter = gvp('filt_title', '')
+        instrument_filter = gvp('filt_instrum', '')
+        with ApiClient(ProjectsApi, request) as api:
+            ProjList: List[ProjectModel] = api.search_projects_projects_search_get(not_granted=False,
+                                                                                   title_filter=title_filter,
+                                                                                   instrument_filter=instrument_filter,
+                                                                                   filter_subset=False)
+        with ApiClient(ProjectsApi, request) as api:
+            ProjList.extend(api.search_projects_projects_search_get(not_granted=True,
+                                                                    title_filter=title_filter,
+                                                                    instrument_filter=instrument_filter,
+                                                                    filter_subset=False))
+        app.logger.info('Get Projects API call duration: %0.3f s', time.time()-bef)
+
+        filtered_projs = []
         for r in ProjList:
-            MatchingFeatures = len(set(DecodeEqualList(r['mappingobj']).values()) & TargetFeatures)
+            MatchingFeatures = len(set(r.obj_free_cols.keys()) & TargetFeatures)
             if MatchingFeatures < int(gvp("filt_featurenbr") if gvp("filt_featurenbr") else 10):
                 continue
+            setattr(r, "matching", MatchingFeatures)
+            validated = (r.objcount if r.objcount else 0) * (r.pctvalidated if r.pctvalidated else 0) / 100
+            setattr(r, "validated", validated)
+            filtered_projs.append(r)
+
+        # Show most interesting ones in first
+        filtered_projs.sort(key=lambda r: (-r.matching, -r.validated))
+        TblBody = ""
+        for r in filtered_projs:
             TblBody += """<tr><td><input type='checkbox' class='selproj' data-prjid='{projid}'></td>
                         <td>#{projid} - {title}</td><td>{objvalid:0.0f}</td><td>{MatchingFeatures}</td><td>{cnn_network_id}</td>
-                        </tr>""".format(MatchingFeatures=MatchingFeatures, **r)
+                        </tr>""".format(MatchingFeatures=r.matching, projid=r.projid,
+                                        title=r.title, objvalid=r.validated,
+                                        cnn_network_id=r.cnn_network_id if r.cnn_network_id else "")
 
         return render_template('task/classifauto2_create_lstproj.html'
                                , url=request.query_string.decode('utf-8')
@@ -745,6 +760,6 @@ class TaskClassifAuto2(AsyncTask):
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle
         PrjId = self.param.ProjectId
         time.sleep(1)
-        #DoTaskClean(self.task.id)
+        # DoTaskClean(self.task.id)
         return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a> """.format(
             PrjId)
