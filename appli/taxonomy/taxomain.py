@@ -38,8 +38,7 @@ def routetaxobrowse():
     if user is None:
         return PrintInCharte("Please login to access this page")
     BackProjectBtn = ''
-    if gvp('updatestat') == 'Y':
-        DoFullSync()
+    DoFullSync(do_flash=True)
     if gvg('fromprj'):
         BackProjectBtn = "<a href='/prj/{}' class='btn btn-default btn-primary'>{} Back to project</a> ".format(
             int(gvg('fromprj')), FAIcon('arrow-left'))
@@ -82,21 +81,26 @@ def routetaxodosync():
         return PrintInCharte("Please login to access this page")
     if not is_admin_or_project_creator(user):
         return PrintInCharte("Insufficient rights")
-    return DoFullSync()
+    sync_msg = DoFullSync(do_flash=False)
+    return sync_msg
 
 
-def DoFullSync():
+def DoFullSync(do_flash:bool):
     with ApiClient(TaxonomyTreeApi, request) as api:
         ret = api.pull_taxa_update_from_central_taxa_pull_from_central_get()
     if ret["error"]:
-        flash(ret["error"], "error")
+        msg = str(ret["error"])
+        if do_flash:
+            flash(msg, "error")
     else:
         ins, upd = ret["inserts"], ret["updates"]
         if ins != 0 or upd != 0:
             msg = "Taxonomy is now in sync, after {} addition(s) and {} update(s).".format(ins, upd)
         else:
             msg = "No update needed, Taxonomy was in sync already."
-        flash(msg, "success")
+        if do_flash:
+            flash(msg, "success")
+    return msg
 
 
 # Below fields are not provided via back-end API call, because they are useless in most contexts

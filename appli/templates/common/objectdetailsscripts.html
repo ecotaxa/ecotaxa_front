@@ -58,7 +58,7 @@ function FormatTaxoItem(t) {
         language: {
            noResults: function(){
 {% if g.TaxonCreator %}
-               var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}',{updatestat:'Y'})\" >Create category</a>";
+               var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}')\" >Create category</a>";
 {% else %}
                var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
 {% endif %}

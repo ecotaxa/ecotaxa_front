@@ -13,9 +13,10 @@ from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel
 # Specialize an encoder for serializing directly the back-end response
 class BackEndJSONEncoder(JSONEncoder):
     def default(self, o):
-        if isinstance(o, TaxaSearchRsp):
+        try:
             return o.to_dict()
-        return JSONEncoder.default(self, o)
+        except TypeError:
+            return JSONEncoder.default(self, o)
 
 
 @app.route('/search/taxo')

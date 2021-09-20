@@ -127,10 +127,10 @@ def before_request_security():
         g.menu.append(("/part/prj/", "Particle projects management"))
     g.menu.append(("", "SEP"))
     if request.endpoint == 'indexPrj':
-        g.menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%d',{updatestat:'Y'});" % (
+        g.menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%d');" % (
             request.view_args.get('PrjId'),), "Browse Taxonomy"))
     else:
-        g.menu.append(("javascript:PostDynForm('/taxo/browse/',{updatestat:'Y'});", "Browse Taxonomy"))
+        g.menu.append(("javascript:PostDynForm('/taxo/browse/');", "Browse Taxonomy"))
     if user_can_administrate or user_can_administrate_users:
         g.menu.append(("", "SEP"))
         g.menu.append(("/admin/", "Admin Screen"))

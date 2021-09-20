@@ -49,10 +49,8 @@
 </div>
 
 <script>
-function DoSync(UpdateStat) {
+function DoSync() {
   var params={};
-  if (UpdateStat==='Y')
-    params.updatestat='Y';
   At2PopupWaitOpenLoad(1,"/taxo/dosync","EcotaxoServer Synchronisation",params);
 }
 function NewTaxon() {
