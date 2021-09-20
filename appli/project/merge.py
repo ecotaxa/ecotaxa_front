@@ -59,12 +59,12 @@ def PrjMerge(PrjId):
                 r.pctclassified = 0
             if r.pctvalidated is None:
                 r.pctvalidated = 0
-            txt += """<tr><td><a class="btn btn-primary" href='/prj/merge/{activeproject}?src={_projid}'>Select</a> {_projid}</td>
-            <td>{_title}</td>
-            <td>{_status}</td>
-            <td>{_objcount:0.0f}</td>
-            <td>{_pctvalidated:0.2f}</td>
-            <td>{_pctclassified:0.2f}</td>
+            txt += """<tr><td><a class="btn btn-primary" href='/prj/merge/{activeproject}?src={projid}'>Select</a> {projid}</td>
+            <td>{title}</td>
+            <td>{status}</td>
+            <td>{objcount:0.0f}</td>
+            <td>{pctvalidated:0.2f}</td>
+            <td>{pctclassified:0.2f}</td>
             </tr>""".format(activeproject=target_proj.projid, **r.__dict__)
         txt += "</table>"
         return PrintInCharte(txt)

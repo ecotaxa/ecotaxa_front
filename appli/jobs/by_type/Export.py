@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
-import datetime
-import time
 
 from flask import render_template, g, redirect
 
-from appli import database, PrintInCharte, gvg, XSSEscape
-from appli.project import sharedfilter
+from appli import PrintInCharte, gvg, XSSEscape
+from appli.jobs.Job import Job
 from appli.tasks.importcommon import *
 from appli.utils import ApiClient
-from appli.jobs.Job import Job
-from to_back.ecotaxa_cli_py import ApiException, ObjectApi, ExportReq, ExportRsp, ObjectsApi
-from to_back.ecotaxa_cli_py.api import ProjectsApi
-from to_back.ecotaxa_cli_py.models import CreateProjectReq, SubsetReq, SubsetRsp, ProjectModel, JobModel
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
+from to_back.ecotaxa_cli_py.models import ExportReq, ExportRsp, ProjectModel, JobModel
 
 
 class ExportJob(Job):

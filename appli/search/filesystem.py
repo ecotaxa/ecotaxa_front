@@ -3,7 +3,8 @@ from typing import List
 from flask import render_template, json, request
 
 from appli import app, gvg
-from to_back.ecotaxa_cli_py import FilesApi, DirectoryModel, DirectoryEntryModel
+from to_back.ecotaxa_cli_py.api import FilesApi
+from to_back.ecotaxa_cli_py.models import DirectoryModel, DirectoryEntryModel
 from appli.utils import ApiClient
 
 

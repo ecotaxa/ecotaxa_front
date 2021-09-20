@@ -7,8 +7,11 @@ from typing import Dict, List
 
 from flask import request
 
-from to_back.ecotaxa_cli_py import JobModel, UserModel, UsersApi, JobsApi, ApiException
 from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import UsersApi, JobsApi
+from to_back.ecotaxa_cli_py.models import UserModel,JobModel
+
 
 JOB_STATE_TO_TASK_STATE = {'P': 'Pending',
                            'R': 'Running',

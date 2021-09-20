@@ -8,7 +8,9 @@ import appli.part.prj
 import appli.project.main
 from appli import app, PrintInCharte, database, gvg, gvp, FAIcon
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import UsersApi, UserModelWithRights, ApiException, TaxonomyTreeApi, TaxonModel
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import UsersApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.models import UserModelWithRights, TaxonModel
 
 
 def get_taxoserver_url():
@@ -95,7 +97,6 @@ def DoFullSync():
         else:
             msg = "No update needed, Taxonomy was in sync already."
         flash(msg, "success")
-
 
 
 # Below fields are not provided via back-end API call, because they are useless in most contexts

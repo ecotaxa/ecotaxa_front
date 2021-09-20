@@ -4,9 +4,9 @@ from flask import render_template, g, flash, request
 
 from appli import app, PrintInCharte, XSSEscape
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException, ProjectTaxoStatsModel, TaxonomyTreeApi, TaxonModel, ObjectsApi
-from to_back.ecotaxa_cli_py.api import ProjectsApi
-from to_back.ecotaxa_cli_py.models import ProjectModel
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.models import ProjectModel, TaxonModel, ProjectTaxoStatsModel
 
 
 ######################################################################################################################
