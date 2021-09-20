@@ -65,7 +65,7 @@ def PrjMerge(PrjId):
             <td>{objcount:0.0f}</td>
             <td>{pctvalidated:0.2f}</td>
             <td>{pctclassified:0.2f}</td>
-            </tr>""".format(activeproject=target_proj.projid, **r.__dict__)
+            </tr>""".format(activeproject=target_proj.projid, **r.to_dict())
         txt += "</table>"
         return PrintInCharte(txt)
 

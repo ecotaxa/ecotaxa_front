@@ -431,23 +431,25 @@ class TaskClassifAuto2(AsyncTask):
         app.logger.info('Get Projects API call duration: %0.3f s', time.time()-bef)
 
         filtered_projs = []
+        matching_per_proj = {}
+        validated_per_proj = {}
         for r in ProjList:
             MatchingFeatures = len(set(r.obj_free_cols.keys()) & TargetFeatures)
             if MatchingFeatures < int(gvp("filt_featurenbr") if gvp("filt_featurenbr") else 10):
                 continue
-            setattr(r, "matching", MatchingFeatures)
+            matching_per_proj[r.projid] = MatchingFeatures
             validated = (r.objcount if r.objcount else 0) * (r.pctvalidated if r.pctvalidated else 0) / 100
-            setattr(r, "validated", validated)
+            validated_per_proj[r.projid] = validated
             filtered_projs.append(r)
 
         # Show most interesting ones in first
-        filtered_projs.sort(key=lambda r: (-r.matching, -r.validated))
+        filtered_projs.sort(key=lambda r: (-matching_per_proj[r.projid], -validated_per_proj[r.projid]))
         TblBody = ""
         for r in filtered_projs:
             TblBody += """<tr><td><input type='checkbox' class='selproj' data-prjid='{projid}'></td>
                         <td>#{projid} - {title}</td><td>{objvalid:0.0f}</td><td>{MatchingFeatures}</td><td>{cnn_network_id}</td>
-                        </tr>""".format(MatchingFeatures=r.matching, projid=r.projid,
-                                        title=r.title, objvalid=r.validated,
+                        </tr>""".format(MatchingFeatures=matching_per_proj[r.projid], projid=r.projid,
+                                        title=r.title, objvalid=validated_per_proj[r.projid],
                                         cnn_network_id=r.cnn_network_id if r.cnn_network_id else "")
 
         return render_template('task/classifauto2_create_lstproj.html'
