@@ -204,6 +204,7 @@ def Prjpopupeditpreset(PrjId):
     taxo_map = {taxon_rec.id: taxon_rec.display_name for taxon_rec in res}
 
     txt = ""
+    prjs_pojo = []
     for a_prj in prjs:
         # Inject taxon lists for display
         result = []
@@ -219,19 +220,21 @@ def Prjpopupeditpreset(PrjId):
             resolved = taxo_map.get(t, None)
             if resolved:
                 result.append(resolved)
-        a_prj.presetids = ",".join([str(x) for x in prj_initclassif_list])
-        a_prj.preset = ", ".join(sorted(result))
+        a_prj = a_prj.to_dict() # immutable -> to_dict()
+        a_prj["presetids"] = ",".join([str(x) for x in prj_initclassif_list])
+        a_prj["preset"] = ", ".join(sorted(result))
 
         result = []
         for t in objtaxon:
             resolved = taxo_map.get(int(t), None)
             if resolved:
                 result.append(resolved)
-        a_prj.objtaxonnotinpreset = ", ".join(sorted(result))
-        a_prj.objtaxonids = ",".join([str(x) for x in objtaxon])
+        a_prj["objtaxonnotinpreset"] = ", ".join(sorted(result))
+        a_prj["objtaxonids"] = ",".join([str(x) for x in objtaxon])
+        prjs_pojo.append(a_prj)
 
     # render the table
-    return render_template('project/popupeditpreset.html', Prj=prjs, txt=txt)
+    return render_template('project/popupeditpreset.html', Prj=prjs_pojo, txt=txt)
 
 
 ######################################################################################################################

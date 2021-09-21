@@ -117,7 +117,7 @@ def AddTaskSummaryForTemplate():
         from appli.jobs.emul import _add_jobs_to_tasks_summary
         _add_jobs_to_tasks_summary(g.tasksummary)
         # Also add experimental URL
-        if '"experimental"' in current_user.preferences:
+        if current_user.preferences is not None and '"experimental"' in current_user.preferences:
             path = request.path
             exper_path = None
             if path.startswith("/prj/merge"):

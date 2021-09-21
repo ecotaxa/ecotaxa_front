@@ -70,7 +70,6 @@ def _add_mocked_class(gen_class: Type):
 
     MyCls.__name__ = gen_class.__name__ + "2"
     mocked_classes[gen_class] = MyCls
-    print(mocked_classes)
     return MyCls
 
 
