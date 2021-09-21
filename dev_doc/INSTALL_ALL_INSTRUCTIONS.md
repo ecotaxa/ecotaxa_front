@@ -74,8 +74,8 @@ python3 runserver.py
 ## 8) To update the backend version :
 ```
 docker images
-docker rmi  <<current github ecotaxaback reference>> --force
-docker pull docker pull grololo06/ecotaxaback:<<last backend version>>
+docker rmi  <<current ecotaxaback docker image reference>> --force
+docker pull grololo06/ecotaxaback:<<last backend version>>
 ```
 ### Then update run_docker.sh with the appropriate backend version (see step 4)
 
