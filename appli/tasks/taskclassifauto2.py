@@ -446,12 +446,26 @@ class TaskClassifAuto2(AsyncTask):
         # Show most interesting ones in first
         filtered_projs.sort(key=lambda r: (-matching_per_proj[r.projid], -validated_per_proj[r.projid]))
         TblBody = ""
+        src_projs_str = gvp('srcs', '').split(",")
+        src_projs = [int(prj_str) for prj_str in src_projs_str if prj_str.isdigit()]
         for r in filtered_projs:
-            TblBody += """<tr><td><input type='checkbox' class='selproj' data-prjid='{projid}'></td>
+            matching = matching_per_proj[r.projid]
+            validated = validated_per_proj[r.projid]
+            cnn_network_id = r.cnn_network_id if r.cnn_network_id else ""
+            if r.projid in src_projs:
+                checked = 'checked="true"'
+                src_projs.remove(r.projid)
+            else:
+                checked = ""
+            TblBody += """<tr><td><input type='checkbox' {checked} class='selproj' data-prjid='{projid}'></td>
                         <td>#{projid} - {title}</td><td>{objvalid:0.0f}</td><td>{MatchingFeatures}</td><td>{cnn_network_id}</td>
-                        </tr>""".format(MatchingFeatures=matching_per_proj[r.projid], projid=r.projid,
-                                        title=r.title, objvalid=validated_per_proj[r.projid],
-                                        cnn_network_id=r.cnn_network_id if r.cnn_network_id else "")
+                        </tr>""".format(MatchingFeatures=matching, checked=checked, projid=r.projid,
+                                        title=r.title, objvalid=validated,
+                                        cnn_network_id=cnn_network_id)
+        if len(src_projs) > 0:
+            inp = "<input type='checkbox' checked='true' class='selproj' data-prjid='{projid}'>#{projid}&nbsp;"
+            filtered_by_search = "".join([inp.format(projid=prj_id) for prj_id in src_projs])
+            TblBody = "Filtered by search:&nbsp;" + filtered_by_search + TblBody
 
         return render_template('task/classifauto2_create_lstproj.html'
                                , url=request.query_string.decode('utf-8')
