@@ -411,9 +411,10 @@ class TaskClassifAuto2(AsyncTask):
             BasePrj = GetAll("select projid,title from projects where projid in ({0})".format(PreviousLS))
             if len(BasePrj):
                 PreviousTxt += """<a class='btn btn-primary' href='?{0}&src={1}'>
-                            USE previous Learning Set :  {2}</a><br><br>OR USE another project<br><br>""".format(
+                            Use previous project{3} for Learning Set :  {2}</a><br><br>OR Use another set of projects<br><br>""".format(
                     request.query_string.decode("utf-8"), PreviousLS,
-                    " + ".join(["#{0} - {1}".format(*r) for r in BasePrj]))
+                    " + ".join(["#{0} - {1}".format(*r) for r in BasePrj]),
+                    "s" if len(BasePrj) > 1 else "")
 
         bef = time.time()
         title_filter = gvp('filt_title', '')
@@ -428,7 +429,7 @@ class TaskClassifAuto2(AsyncTask):
                                                                     title_filter=title_filter,
                                                                     instrument_filter=instrument_filter,
                                                                     filter_subset=False))
-        app.logger.info('Get Projects API call duration: %0.3f s', time.time()-bef)
+        app.logger.info('Get Projects API call duration: %0.3f s', time.time() - bef)
 
         filtered_projs = []
         matching_per_proj = {}
