@@ -121,8 +121,9 @@ def route_view_taxon(taxoid):
     # Complete with centralized info
     with ApiClient(TaxonomyTreeApi, request) as api:
         on_central = api.get_taxon_in_central_taxon_central_taxon_id_get(taxon_id=taxoid)
+    taxon = taxon.to_dict()  # booster gives read-only models
     for a_field in FIELDS_IN_CENTRAL_ONLY:
-        setattr(taxon, a_field, on_central[0][a_field])
+        taxon[a_field] = on_central[0][a_field]
     # Complete again with usage info
     with ApiClient(TaxonomyTreeApi, request) as api:
         usage = api.query_taxa_usage_taxon_taxon_id_usage_get(taxon_id=taxoid)

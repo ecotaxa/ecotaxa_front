@@ -33,131 +33,132 @@
     }
 
 
-
 </style>
 <form id="formedittaxon" method="post" action="?">
-    <input type="hidden" name="id" value="{{ taxon.id }}">
+  <input type="hidden" name="id" value="{{ taxon.id }}">
+  {% if taxon.id == 0 %}
     <div class="panel panel-default text-warning" style="padding: 5px; font-size:large">
-        Once created, a taxon can never be deleted. <br>
-        If you really want to create a new taxon, please carefully review the information below before submitting.<br>
+      Once created, a taxon can never be deleted. <br>
+      If you really want to create a new taxon, please carefully review the information below before submitting.<br>
     </div>
-    <table class=" " id="tblviewtaxon">
-        <tr>
-            <th>Name</th>
-            <td colspan="3">{{ ht.InputText('name',taxon.name,"class=form-control required maxlength=100"
+  {% endif %}
+  <table class=" " id="tblviewtaxon">
+    <tr>
+      <th>Name</th>
+      <td colspan="3">{{ ht.InputText('name',taxon.name,"class=form-control required maxlength=100"
                 +(" READONLY" if taxon.id != 0 else "")) }}
-            </td>
-            <th>Type</th>
-            <td style="width: 200px">{{ ht.selectinputdict_enriched('taxotype', g.TaxoType, taxon.type,
+      </td>
+      <th>Type</th>
+      <td style="width: 200px">{{ ht.selectinputdict_enriched('taxotype', g.TaxoType, taxon.type,
                 addemptyrow=True,extrataginfo="class=form-control required"+(" DISABLED" if taxon.id != 0 else "")) }}
-            </td>
-        </tr>
-        <tr>
-            <th>Display Name</th>
-            <td colspan="5">{{ taxon.display_name }}</td>
-        </tr>
-        <tr>
-            <th>Parent</th>
-            <td colspan="5">
-                <select id="parent_id" name="parent_id" class="taxolbpop" {{ "DISABLED" if taxon.id != 0 else "" }}
+      </td>
+    </tr>
+    <tr>
+      <th>Display Name</th>
+      <td colspan="5">{{ taxon.display_name }}</td>
+    </tr>
+    <tr>
+      <th>Parent</th>
+      <td colspan="5">
+        <select id="parent_id" name="parent_id" class="taxolbpop" {{ "DISABLED" if taxon.id != 0 else "" }}
                 required>
-                {% if taxon.lineage|length >1 %}
-                <option value="{{ taxon.id_lineage[1] }}">{{ taxon.lineage[1] }}</option>
-                {% endif %}
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th>Lineage</th>
-            <td colspan="5">{{ " < ".join(taxon.lineage) }}</td>
-        </tr>
+          {% if taxon.lineage|length >1 %}
+            <option value="{{ taxon.id_lineage[1] }}">{{ taxon.lineage[1] }}</option>
+          {% endif %}
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <th>Lineage</th>
+      <td colspan="5">{{ " < ".join(taxon.lineage) }}</td>
+    </tr>
 
-        <tr>
-            <th>Source URL
-                <i class="fas fa-info-circle"
-                   data-content="If the new category is described on the WEB, please provide the link to help the Ecotaxoserver managers to review and populate this new category for all users."></i>
-            </th>
-            <td colspan="5">
-                {{ ht.InputText('source_url', taxon.source_url,
+    <tr>
+      <th>Source URL
+        <i class="fas fa-info-circle"
+           data-content="If the new category is described on the WEB, please provide the link to help the Ecotaxoserver managers to review and populate this new category for all users."></i>
+      </th>
+      <td colspan="5">
+        {{ ht.InputText('source_url', taxon.source_url,
                 extrataginfo="class=form-control maxlength=200 data-parsley-sourceurl=1
                 data-parsley-validate-if-empty=1"
                 +(" READONLY" if taxon.id != 0 else "")) }}
-            </td>
-        </tr>
-        <tr>
-            <th>Source Desc
-                <i class="fas fa-info-circle"
-                   data-content="If the new category is NOT described on the WEB, please provide a description of the category to help other users to use it."></i>
-            </th>
-            <td colspan="5">
-                {{ ht.TextArea('source_desc', 4, taxon.source_desc,
+      </td>
+    </tr>
+    <tr>
+      <th>Source Desc
+        <i class="fas fa-info-circle"
+           data-content="If the new category is NOT described on the WEB, please provide a description of the category to help other users to use it."></i>
+      </th>
+      <td colspan="5">
+        {{ ht.TextArea('source_desc', 4, taxon.source_desc,
                 extrataginfo="class=form-control maxlength=1000 data-parsley-sourcedesc=1
                 data-parsley-validate-if-empty=1 "
                 +("READONLY" if taxon.id != 0 else "")) }}
-            </td>
-        </tr>
-        <tr>
-            <th>By (email)
-                <i class="fas fa-info-circle"
-                   data-content="If you change the email, you will not be anymore able to manage this taxon."></i>
-            </th>
-            <td colspan="3">
-                {{ ht.InputText('creator_email', taxon.creator_email ,
+      </td>
+    </tr>
+    <tr>
+      <th>By (email)
+        <i class="fas fa-info-circle"
+           data-content="If you change the email, you will not be anymore able to manage this taxon."></i>
+      </th>
+      <td colspan="3">
+        {{ ht.InputText('creator_email', taxon.creator_email ,
                 extrataginfo=("class=form-control maxlength=250 data-parsley-type=email "
                 +("READONLY" if taxon.id != 0 else ""))|safe) }}
-            </td>
-            <th>Creation date</th>
-            <td>
-                {{ ht.InputText('creation_datetime', taxon.creation_datetime ,
+      </td>
+      <th>Creation date</th>
+      <td>
+        {{ ht.InputText('creation_datetime', taxon.creation_datetime ,
                 extrataginfo="class=form-control maxlength=200 pattern='\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}'
                 style='width:150px' READONLY"|safe) }}
-            </td>
-        </tr>
+      </td>
+    </tr>
 
 
-    </table>
-    <table style="width: 100%;margin-top: 10px;">
-        <tr>
-            {% if taxon.id == 0 %}
-            <td>
-                <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Taxon</button>
-            </td>
-            {% endif %}
-            <td style="text-align: right">
-                <button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
-                </button>
-            </td>
-        </tr>
-    </table>
+  </table>
+  <table style="width: 100%;margin-top: 10px;">
+    <tr>
+      {% if taxon.id == 0 %}
+        <td>
+          <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Taxon</button>
+        </td>
+      {% endif %}
+      <td style="text-align: right">
+        <button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
+        </button>
+      </td>
+    </tr>
+  </table>
 </form>
 {% if taxon.id == 0 %}
-<div id="formedittaxon_PostResult" style="margin-top: 10px"></div>
-<div class="panel panel-default " style="padding: 5px;font-size:medium">
+  <div id="formedittaxon_PostResult" style="margin-top: 10px"></div>
+  <div class="panel panel-default " style="padding: 5px;font-size:medium">
     Naming rules to create Taxon :<br>
     - Phylo type : Must be unique, contains only letters and -+' and not more than 1 whitespace, Start with a Uppercase
     <br>
     - Morpho type : Must be unique for the parent, contains only letters and -+' and not more than 1 whitespace, be
     lowercase only.<br>
-    In case of repeated creation error, or to fix a taxonomy issue, ask help from the administrators of your Ecotaxa instance
+    In case of repeated creation error, or to fix a taxonomy issue, ask help from the administrators of your Ecotaxa
+    instance
     <ul>{{ GetManagerList('Ecotaxa : Taxo issue')|safe }}</ul>
-</div>
+  </div>
 {% else %}
-Validated usages:
-<div id="prj_usage" style="display:inline-block;margin-top: 10px"></div>
-{% for a_usage in usage %}
-<span class="form-control usage_block">
+  Validated usages:
+  <div id="prj_usage" style="display:inline-block;margin-top: 10px"></div>
+  {% for a_usage in usage %}
+    <span class="form-control usage_block">
     {{ a_usage.nb_validated }}&nbsp;objects&nbsp;in&nbsp;<a href="/prj/{{ a_usage.projid }}?taxo={{ taxon.id }}"
                                                             target="_blank">{{ a_usage.title }}</a>
     </span>
-<span></span>
-{% endfor %}
+    <span></span>
+  {% endfor %}
 {% endif %}
 
 <style>
     .taxolbpop {
         width: 400px;
     }
-
 
 
 </style>
@@ -240,8 +241,6 @@ Validated usages:
     });
 
     $('#tblviewtaxon .fa-info-circle').popover({trigger: 'hover', container: "body", placement: "top"})
-
-
 
 
 </script>
