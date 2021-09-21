@@ -476,7 +476,6 @@ class TaskClassifAuto2(AsyncTask):
         # Second écran de configuration, choix des taxon utilisés dans la source
 
         # recupere les categories et le nombre d'occurence dans les projet de base/learning
-        #         sql = """select n.classif_id,t.name||case when p1.name is not null and t.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
         sql = """select n.classif_id,t.display_name as name
                 ,n.nbr
                 from (select obj.classif_id,count(*) nbr
@@ -507,6 +506,7 @@ class TaskClassifAuto2(AsyncTask):
 
     @staticmethod
     def ReadModels():
+        # FOR MODEL-BASED PREDICTION ONLY
         ModelFolder = (Path(TempTaskDir) / "../RF_models").resolve()
         Models = {}
         for directory in ModelFolder.glob("*"):
@@ -522,6 +522,7 @@ class TaskClassifAuto2(AsyncTask):
             return ""
 
     def QuestionProcessScreenSelectModel(self, Prj):
+        # FOR MODEL-BASED PREDICTION ONLY
         Models = self.ReadModels()
         # app.logger.info("Modèles = %s",Models)
         # Premier écran de configuration pour prédiction depuis un modèle, choix du projet du modèle
@@ -569,6 +570,7 @@ class TaskClassifAuto2(AsyncTask):
                                , PreviousTxt=PreviousTxt)
 
     def QuestionProcessScreenSelectModelTaxo(self, Prj):
+        # FOR MODEL-BASED PREDICTION ONLY
         # Second écran de configuration, mapping des taxon utilisés dans le modele
         PreviousTxt = self.GetFilterText()
         g.modeldir = gvp('modeldir')
@@ -668,6 +670,7 @@ class TaskClassifAuto2(AsyncTask):
                 return self.StartTask(self.param)
         else:  # valeurs par default
             if gvp('frommodel', gvg('frommodel')) == "Y":
+                # MODEL-BASED PREDICTION CHOICE
                 if gvp('modeldir') == '':
                     return self.QuestionProcessScreenSelectModel(Prj)
                 elif gvp('displaytaxomap') == 'Y':

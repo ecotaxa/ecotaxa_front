@@ -31,7 +31,8 @@ Sometimes training on detailed, morphologically homogeneous, categories makes th
     Use at most <input name="learninglimit" value="5000"> objects per category to train the model.
     <button type="submit" class="btn btn-primary">Continue to classifier option screen</button>
     <p style="margin-top: 5px;">
-      Get source &#8594; destination mapping from project: <select id="TaxoMappingFromPrj" style="width: 400px;margin-top: 5px">
+      Get source &#8594; destination mapping from project: <select id="TaxoMappingFromPrj"
+                                                                   style="width: 400px;margin-top: 5px">
       <option value="{{ prj.projid }}" selected>{{ prj.title }}</option>
     </select>
       <button type="button" class="btn btn-xs btn-primary" onclick="DoMapping()">Map</button>

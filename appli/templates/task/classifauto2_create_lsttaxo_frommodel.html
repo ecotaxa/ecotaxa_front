@@ -1,90 +1,107 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<h3>AUTOMATIC CLASSIFICATION V2: Selection of classification from Model</h3>
-{{ PreviousTxt |safe }}
+  <h3>AUTOMATIC CLASSIFICATION V2: Selection of classification from Model</h3>
+  {{ PreviousTxt |safe }}
 
-<form method="post">
-<input type="hidden" name="starttask" value="Y">
-<input type="hidden" name="ReadPostTaxoMappingFromLB" value="Y">
-<input type="hidden" name="modeldir" value="{{ g.modeldir }}">
-{{ ExtraHeader |safe }}
-<button type="submit" class="btn btn-primary">Start Prediction</button>
-<p style="margin-top: 5px;">
-  Get mapping from project: <select id="TaxoMappingFromPrj" style="width: 400px;margin-top: 5px">
-  <option value="{{ prj.projid }}" selected>{{ prj.title }}</option>
-</select>
-  <button type="button" class="btn btn-xs btn-primary" onclick="DoMapping()">Map</button>
-  <button type="button" class="btn btn-xs btn-default" onclick="ClearMapping()">Clear</button>
+  <form method="post">
+    <input type="hidden" name="starttask" value="Y">
+    <input type="hidden" name="ReadPostTaxoMappingFromLB" value="Y">
+    <input type="hidden" name="modeldir" value="{{ g.modeldir }}">
+    {{ ExtraHeader |safe }}
+    <button type="submit" class="btn btn-primary">Start Prediction</button>
+    <p style="margin-top: 5px;">
+      Get mapping from project: <select id="TaxoMappingFromPrj" style="width: 400px;margin-top: 5px">
+      <option value="{{ prj.projid }}" selected>{{ prj.title }}</option>
+    </select>
+      <button type="button" class="btn btn-xs btn-primary" onclick="DoMapping()">Map</button>
+      <button type="button" class="btn btn-xs btn-default" onclick="ClearMapping()">Clear</button>
 
-</p>
-  <script>
-  $('#TaxoMappingFromPrj').select2({
-        ajax: {
-            url: "/search/exploreproject",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {  return { q: params.term   };  },
-            processResults: function (data, page) { return { results: data};  },
-            cache: true
-        },
-        dropdownCssClass:"width400"
-    }); // Select2 Ajax
-    function DoMapping() {
-      $.getJSON("/search/gettaxomapping",{projid:$('#TaxoMappingFromPrj').val()},function (data) {
-        $(".taxolb").html("").change();
-        for(var s in data.mapping) {
-          var liste=$("#taxolb"+s);
-          for (var tel in data.taxo) {
-            var newOption = new Option(data.taxo[tel], tel, false, false);
-            liste.append(newOption)
-          }
-          liste.val(data.mapping[s]).change();
+    </p>
+    <script>
+        $('#TaxoMappingFromPrj').select2({
+            ajax: {
+                url: "/search/exploreproject",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {q: params.term};
+                },
+                processResults: function (data, page) {
+                    return {results: data};
+                },
+                cache: true
+            },
+            dropdownCssClass: "width400"
+        }); // Select2 Ajax
+        function DoMapping() {
+            $.getJSON("/search/gettaxomapping", {projid: $('#TaxoMappingFromPrj').val()}, function (data) {
+                $(".taxolb").html("").change();
+                for (var s in data.mapping) {
+                    var liste = $("#taxolb" + s);
+                    for (var tel in data.taxo) {
+                        var newOption = new Option(data.taxo[tel], tel, false, false);
+                        liste.append(newOption)
+                    }
+                    liste.val(data.mapping[s]).change();
+                }
+            });
         }
-      });
-    }
-    function ClearMapping() {
-      $(".taxolb").val('').change();
-    }
-</script>
-<table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
-    <tr><th >id</th><th width="300" style="text-align: center;">Category</th><th  style="text-align: center;">Map to appear as</th></tr>
-    {%   for r in g.TaxoList %}
-        <tr><td>{{ r[0] }}</td>
+
+        function ClearMapping() {
+            $(".taxolb").val('').change();
+        }
+    </script>
+    <table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
+      <tr>
+        <th>id</th>
+        <th width="300" style="text-align: center;">Category</th>
+        <th style="text-align: center;">Map to appear as</th>
+      </tr>
+      {% for r in g.TaxoList %}
+        <tr>
+          <td>{{ r[0] }}</td>
           <td>{{ r[1] }} </td>
-          <td><div class="input-group">
-       <select id="taxolb{{ r[0] }}" name="taxolb{{ r[0] }}" style="width: 210px" class='taxolb' > </select>
-            <span class="input-group-btn">
-                <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolb{{ r[0] }}">
+          <td>
+            <div class="input-group">
+              <select id="taxolb{{ r[0] }}" name="taxolb{{ r[0] }}" style="width: 210px" class='taxolb'> </select>
+              <span class="input-group-btn">
+                <button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#TaxoModal"
+                        data-mytargetid="taxolb{{ r[0] }}">
                     <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></button>
                 </span>
-    </div></td>
+            </div>
+          </td>
         </tr>
-    {% endfor %}
-</table>
-</form>
+      {% endfor %}
+    </table>
+  </form>
 
-<script>
-$(document).ready(function() {
-    $(".taxolb").select2({
-        ajax: {
-            url: "/search/taxo",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {  return { q: params.term, page: params.page };  },
-            processResults: function (data, page) { return { results: data};  },
-            cache: true
-        },
-        minimumInputLength: 3
-    }); // Select2 Ajax
-    $('#TaxoModal').on('show.bs.modal', function (e) {
-        var button = $(e.relatedTarget); // Button that triggered the modal
-        var targetid = button.data('mytargetid');
-         $("#TaxoModalBody").html("Loading...").load("/search/taxotree?target="+targetid);
-    });
-    }); // Ready
-</script>
+  <script>
+      $(document).ready(function () {
+          $(".taxolb").select2({
+              ajax: {
+                  url: "/search/taxo",
+                  dataType: 'json',
+                  delay: 250,
+                  data: function (params) {
+                      return {q: params.term, page: params.page};
+                  },
+                  processResults: function (data, page) {
+                      return {results: data};
+                  },
+                  cache: true
+              },
+              minimumInputLength: 3
+          }); // Select2 Ajax
+          $('#TaxoModal').on('show.bs.modal', function (e) {
+              var button = $(e.relatedTarget); // Button that triggered the modal
+              var targetid = button.data('mytargetid');
+              $("#TaxoModalBody").html("Loading...").load("/search/taxotree?target=" + targetid);
+          });
+      }); // Ready
+  </script>
 
-{% include "taxo_modal_div.html" %}
+  {% include "taxo_modal_div.html" %}
 
 {% endblock %}
