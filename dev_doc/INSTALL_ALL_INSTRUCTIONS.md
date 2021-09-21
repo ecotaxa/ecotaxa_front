@@ -39,6 +39,7 @@ docker stop ecotaxaback
 docker rm ecotaxaback
 ```
 ### Then launch the backend docker
+### (You may need to get the lastest backend version : see step 8)
 ```
 ./run_docker.sh
 ```
@@ -68,6 +69,15 @@ python3 runserver.py
 ```
 ###
 ## 7) Run frontend locally: 0.0.0.0:5001 (or something like 0.0.0.0:8080 if you have another local frontend)
+
+###
+## 8) To update the backend version :
+```
+docker images
+docker rmi  <<current ecotaxaback docker image reference>> --force
+docker pull grololo06/ecotaxaback:<<last backend version>>
+```
+### Then update run_docker.sh with the appropriate backend version (see step 4)
 
 
 ## FROM HERE, NOT FINISHED
