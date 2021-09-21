@@ -410,7 +410,7 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.11"
+ecotaxa_version = "2.5.12"
 
 
 def JinjaGetEcotaxaVersionText():
@@ -422,6 +422,16 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-09-21 : V 2.5.12
+    Feature: General performance improvement on back-end and python front-end
+    Bug #490: Private projects could appear in classification models.
+    Bug #716: Subset failed when too many samples in selection.
+    Feature #707: Remove "merge 2 categories" admin function.
+    Feature #717: Allow some users to experiment new Vue frontend.
+    Feature #256: Switch all encoding to UTF-8.
+    Bug #712: It should not be possible to validate an object without category.
+    API Bug #694: Missing value in /projects/search response.
+    Feature/bug #715: Improvement of taxon creation dialog.
 2021-09-15 : V 2.5.11
     Bug #653: Too many projects are visible in /prjothers/
     Feature #606: Move cron AKA nightly clean-up operations to back-end.
