@@ -100,6 +100,9 @@ def ErrorFormat(txt):
     """ % (txt)
 
 
+VUE_PATH = "/gui"
+
+
 def AddTaskSummaryForTemplate():
     """
         Set in global 'g' a structure to show what is currently ongoing on task side.
@@ -113,6 +116,17 @@ def AddTaskSummaryForTemplate():
         # Add jobs from back-end
         from appli.jobs.emul import _add_jobs_to_tasks_summary
         _add_jobs_to_tasks_summary(g.tasksummary)
+        # Also add experimental URL
+        if '"experimental"' in current_user.preferences:
+            path = request.path
+            exper_path = None
+            if path.startswith("/prj/merge"):
+                exper_path = VUE_PATH + path
+            if path == "/prj/":
+                exper_path = VUE_PATH + "/projects"
+            if exper_path:
+                hint = "A better version of this page is available."
+                g.experimental = '<a href="'+exper_path+'" title="'+hint+'">'+"New!</a>"
     g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
