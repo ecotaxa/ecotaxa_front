@@ -31,7 +31,6 @@ class TaskClassifAuto2(AsyncTask):
                 self.BaseProject = ""
                 self.CritVar = None
                 self.Taxo = ""
-                self.Perimeter = ""
                 self.keeplog = "no"
                 self.learninglimit = ""
                 self.CustSettings = {}
@@ -316,28 +315,21 @@ class TaskClassifAuto2(AsyncTask):
                 json.dump(Meta, (ModelFolder / "meta.json").open("w"), indent="\t")
         # ------ Fin de la partie apprentissage ou chargement du modèle
 
-        if self.param.Perimeter != 'all':
-            PerimeterWhere = " and ( classif_qual='P' or classif_qual is null)  "
-        else:
-            PerimeterWhere = ""
-        sqlparam = {}
-
-        # PerimeterWhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam,-99999)
-
         # Use the API entry point for filtering
         with ApiClient(ObjectsApi, self.cookie) as api:
             res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(self.param.ProjectId,
                                                                                          self.param.filtres)
-            PerimeterWhere += "and o.objid = any (%(objids)s) "
-            sqlparam["objids"] = sorted(res.object_ids)
+            affected_where = " and ( classif_qual='P' or classif_qual is null) and o.objid = any (%(objids)s) "
+            sqlparam = {"objids": sorted(res.object_ids)}
 
         NbrItem = \
-            GetAll("select count(*) from objects o where projid={0} {1} ".format(Prj.projid, PerimeterWhere), sqlparam)[
+            GetAll("select count(*) from objects o where projid={0} {1} ".format(Prj.projid, affected_where), sqlparam)[
                 0][
                 0]
+
         if NbrItem == 0:
-            raise Exception(
-                "No object to classify, perhaps all object already classified or you should adjust the perimeter settings as it was probably set to 'Not Validated' ")
+            msg = self.cook_no_object_message()
+            raise Exception(msg)  # Inside the task, so cannot display anything for the user
 
         sql = "select objid"
         for c in CommonKeys:
@@ -347,7 +339,7 @@ class TaskClassifAuto2(AsyncTask):
         if self.param.usescn == 'Y':
             sql += " join obj_cnn_features on obj_cnn_features.objcnnid=o.objid "
         sql += """ where projid={0} {1}
-                    order by objid""".format(Prj.projid, PerimeterWhere)
+                    order by objid""".format(Prj.projid, affected_where)
         self.pgcur.execute(sql, sqlparam)
         # logging.info("SQL=%s",sql)
         ProcessedRows = 0
@@ -492,10 +484,10 @@ class TaskClassifAuto2(AsyncTask):
             TaxoList = {int(x) for x in TaxoCSV.split(',')}
         else:
             TaxoList = {}
-        g.TaxoList = [
-            [r[0], r[1], r[2], round(100 * r[2] / s, 1), 'checked' if len(TaxoList) == 0 or r[0] in TaxoList else '']
-            for r in
-            g.TaxoList]  # Ajout du % d'objet par categorie
+        g.TaxoList = [[r[0], r[1], r[2],
+                       round(100 * r[2] / s, 1),
+                       'checked' if len(TaxoList) == 0 or r[0] in TaxoList else '']
+                      for r in g.TaxoList]  # Ajout du % d'objet par categorie
 
         ExtraHeader = "<input type='hidden' name='src' value='{}'>".format(gvp('src', gvg('src')))
         ExtraHeader += self.GetFilterText()
@@ -599,7 +591,6 @@ class TaskClassifAuto2(AsyncTask):
             if gvg("src", gvp("src", "")) != "":
                 self.param.BaseProject = database.CSVIntStringToInClause(gvg("src", gvp("src", "")))
             self.param.CritVar = gvp("CritVar")
-            self.param.Perimeter = gvp("Perimeter")
             self.param.usemodel_foldername = gvp('modeldir', '')
             if gvp('ReadPostTaxoMappingFromLB') == "Y":
                 self.param.PostTaxoMapping = ",".join(
@@ -622,30 +613,20 @@ class TaskClassifAuto2(AsyncTask):
                     errors.append("You must select some variable")
                 if self.param.Taxo == '': errors.append("You must select some category")
 
-            # Sanity check before launching the task
-            if self.param.Perimeter != 'all':
-                PerimeterWhere = " and ( classif_qual='P' or classif_qual is null)  "
-            else:
-                PerimeterWhere = ""
-
-            sqlparam = {}
-
-            # PerimeterWhere += sharedfilter.GetSQLFilter(self.param.filtres, sqlparam, -99999)
-
             # Use the API entry point for filtering
             with ApiClient(ObjectsApi, self.cookie) as api:
                 res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(self.param.ProjectId,
                                                                                              self.param.filtres)
-                PerimeterWhere += "and o.objid = any (%(objids)s) "
-                sqlparam["objids"] = sorted(res.object_ids)
+                affected_where = " and ( classif_qual='P' or classif_qual is null) and o.objid = any (%(objids)s) "
+                sqlparam = {"objids": sorted(res.object_ids)}
 
             NbrItem = \
-                GetAll("select count(*) from objects o where projid={0} {1} ".format(Prj.projid, PerimeterWhere),
+                GetAll("select count(*) from objects o where projid={0} {1} ".format(Prj.projid, affected_where),
                        sqlparam)[
                     0][0]
             if NbrItem == 0:
-                errors.append(
-                    "No object to classify, perhaps all object already classified or you should adjust the perimeter settings as it was probably set to 'Not Validated' ")
+                msg = self.cook_no_object_message()
+                errors.append(msg)
 
             if len(errors) > 0:
                 for e in errors:
@@ -654,12 +635,13 @@ class TaskClassifAuto2(AsyncTask):
                 # On ajoute les valeurs dans CustSettings pour les sauver dans le ClassifSettings du projet
                 PrjCS = DecodeEqualList(Prj.classifsettings)
                 d = self.param.CustSettings.copy()
-                if gvg("src", gvp("src",
-                                  "")) != "":  # on écrase que si les données sont saisies, sinon on prend dans le projet
+                if gvg("src", gvp("src", "")) != "":
+                    # on n'écrase que si les données sont saisies, sinon on prend dans le projet
                     d['critvar'] = self.param.CritVar
                     d['baseproject'] = self.param.BaseProject
                     d['seltaxo'] = self.param.Taxo
-                    if "usemodel_foldername" in PrjCS: d["usemodel_foldername"] = PrjCS["usemodel_foldername"]
+                    if "usemodel_foldername" in PrjCS:
+                        d["usemodel_foldername"] = PrjCS["usemodel_foldername"]
                 else:
                     d['usemodel_foldername'] = self.param.usemodel_foldername
                     if "critvar" in PrjCS: d["critvar"] = PrjCS["critvar"]
@@ -685,10 +667,8 @@ class TaskClassifAuto2(AsyncTask):
             # Certaines variable on leur propre zone d'edition, les autres sont dans la zone texte custom settings
             self.param.CritVar = d.get("critvar", "")
             self.param.Taxo = d.get("seltaxo", "")
-            self.param.Perimeter = "nmc"
             self.param.learninglimit = int(gvp("learninglimit", "5000"))
             if "critvar" in d: del d["critvar"]
-            if "perimeter" in d: del d["perimeter"]
             if "methode" in d: del d["methode"]
             if "learninglimit" in d: del d["learninglimit"]
             if "seltaxo" in d: del d["seltaxo"]
@@ -765,6 +745,12 @@ class TaskClassifAuto2(AsyncTask):
         data.src = PrjListInClause
         return render_template('task/classifauto2_create_settings.html', header=txt, data=data,
                                PreviousTxt=self.GetFilterText())
+
+    def cook_no_object_message(self):
+        msg = "No object to classify, perhaps all objects were already classified."
+        if len(self.param.filtres) > 0:
+            msg += " Note that you have active filters, which reduces potential target objects."
+        return msg
 
     def GetReverseObjMap(self, Prj):
         mappingobj = getattr(Prj, 'mappingobj', None)  # Prj peut être un objet

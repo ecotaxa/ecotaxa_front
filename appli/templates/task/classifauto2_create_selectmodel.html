@@ -53,9 +53,7 @@
     <div id=TargetFilter class="panel panel-default collapse "
          style="margin-left: 0;margin-top: 5px;width: 800px;padding: 5px;">
 
-      OBJECTS to PREDICT {{ ht.selectinputdict("Perimeter",{'nmc':"NOT Validated Objects",'all':"ALL Objects"},'nmc') }}
-
-      <br>Type in "ResetToPredicted" to (re)predict also all validated objects from the selected categories :
+      Type in "ResetToPredicted" to (re)predict also all validated objects from the selected categories :
       <input type="text" id="resetpredicted" value="" autocomplete="off" style="width: 150px;">
       <br>Display screen to map categories <input type="checkbox" id="displaytaxomap" value="Y">
       <br>else use <input style="width: 600px" id="PostTaxoMapping" value="{{ g.posttaxomapping }}">

@@ -204,9 +204,6 @@
     <div id=TargetFilter class="panel panel-default collapse "
          style="margin-left: 0px;margin-top: 5px;width: 800px;padding: 5px;">
 
-      OBJECTS to PREDICT {{ ht.selectinputdict("Perimeter",{'nmc':"NOT Validated Objects (Unclassified or Predicted)",'all':"ALL Objects (for confusion matrix computation only)"},data.Perimeter) }}
-
-      <br>
       {% if g.LsSize >150000 %}
         <b>Save model : </b><br>
         Model folder name
