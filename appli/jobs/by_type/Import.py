@@ -212,6 +212,8 @@ class ImportJob(Job):
         time.sleep(1)
         # TODO: Remove the commented, but for now we have trace information inside
         # DoTaskClean(self.task.id)
-        return "<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>" \
+        ret = "Data correctly imported from " + job.params['req']['source_path'] + "<br/>"
+        ret += "<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>" \
                "<a href='/Task/Create/TaskClassifAuto2?projid={0}' class='btn btn-primary btn-sm'" \
                "role=button>Go to Automatic Classification Screen</a> ".format(prj_id)
+        return ret
