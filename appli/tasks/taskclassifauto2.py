@@ -466,6 +466,15 @@ class TaskClassifAuto2(AsyncTask):
 
     def QuestionProcessScreenSelectSourceTaxo(self, Prj):
         # Second écran de configuration, choix des taxon utilisés dans la source
+        posted_srcs = gvp('src', gvg('src'))
+        src_prj_ids = [int(x) for x in posted_srcs.split(',') if x.isdigit()]
+        src_projs = []
+        for a_prij_id in src_prj_ids:
+            with ApiClient(ProjectsApi, request) as api:
+                src_proj: ProjectModel = api.project_query_projects_project_id_get(a_prij_id,
+                                                                                   for_managing=False)
+            src_projs.append("#%s - %s" % (src_proj.projid, src_proj.title))
+        src_prj_ids = ",".join([str(x) for x in src_prj_ids])
 
         # recupere les categories et le nombre d'occurence dans les projet de base/learning
         sql = """select n.classif_id,t.display_name as name
@@ -475,7 +484,7 @@ class TaskClassifAuto2(AsyncTask):
                       group by classif_id) n
                 JOIN taxonomy t on n.classif_id=t.id
                 left join taxonomy p1 on t.parent_id=p1.id
-                order by nbr desc,name""".format(database.CSVIntStringToInClause(gvp('src', gvg('src'))))
+                order by nbr desc,name""".format(src_prj_ids)
         g.TaxoList = GetAll(sql, None, cursor_factory=None)
         s = sum([r[2] for r in g.TaxoList])  # Nbr total d'objet par categorie
         d = DecodeEqualList(Prj.classifsettings)
@@ -492,9 +501,10 @@ class TaskClassifAuto2(AsyncTask):
         ExtraHeader = "<input type='hidden' name='src' value='{}'>".format(gvp('src', gvg('src')))
         ExtraHeader += self.GetFilterText()
 
+        src_prjs_str = ",&nbsp;".join(src_projs)
         return render_template('task/classifauto2_create_lsttaxo.html'
                                , url=request.query_string.decode('utf-8')
-                               , ExtraHeader=ExtraHeader, prj=Prj)
+                               , ExtraHeader=ExtraHeader, src_prjs=src_prjs_str, prj=Prj)
 
     @staticmethod
     def ReadModels():
