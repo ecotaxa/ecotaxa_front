@@ -1,0 +1,12 @@
+<script>
+    $(document).ready(function () {
+
+        $('#TaxoModal').on('show.bs.modal', function (e) {
+            var button = $(e.relatedTarget); // Button that triggered the modal
+            var targetid = button.data('mytargetid');
+            $("#TaxoModalBody").html("Loading...");
+            $("#TaxoModalBody").load("/search/taxotree?target=" + targetid);
+        });
+
+    }); // Ready
+</script>

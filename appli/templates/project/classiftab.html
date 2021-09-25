@@ -356,7 +356,15 @@ function KeyboardMoveSelection(way) {
         }
 
 $(document).ready(function() {
-    EnableSelect2Taxolb();
+    EnableSelect2Taxolb('#taxolbanno');
+
+        if ((typeof (Restoretaxolbid) !== 'undefined') && (typeof (Restoretaxolbid) !== '')) {
+            // Add the selected option during restore
+            var NewOption = $('<option></option').val(Restoretaxolbid).text(Restoretaxolbtxt);
+            NewOption.appendTo('#taxolbanno');
+            Restoretaxolbid = undefined;
+        }
+
 {#    Restore le surlignage jaune dans l'arbre #}
     if(typeof(RestoreHighLigthID)!=='undefined'){
       $('td[data-taxoid='+RestoreHighLigthID+']').addClass('ui-state-highlight');

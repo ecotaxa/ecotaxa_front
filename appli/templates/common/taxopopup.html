@@ -1,18 +1,15 @@
 <script>
+    // Care about initial setup of the taxonomy select + small utility
+
     function FormatTaxoItem(t) {
         if (t.pr == 1)
             return $("<u>" + XSSStrEscape(t.text) + "</u>")
         else return t.text;
     }
 
-    function EnableSelect2Taxolb() {
-        if ((typeof (Restoretaxolbid) !== 'undefined') && (typeof (Restoretaxolbid) !== '')) {
-            // Add the selected option during restore
-            var NewOption = $('<option></option').val(Restoretaxolbid).text(Restoretaxolbtxt);
-            NewOption.appendTo('#taxolbanno');
-            Restoretaxolbid = undefined;
-        }
-        var the_sel2 = $(".taxolb").select2({
+    function EnableSelect2Taxolb(selector) {
+
+        var the_sel2 = $(selector).select2({
             ajax: {
                 url: "/search/taxo",
                 dataType: 'json',
@@ -28,7 +25,7 @@
                     return {
                         q: query.term
                         {% if g.Projid %}
-                        , projid:{{ g.Projid }}
+                            , projid:{{ g.Projid }}
                         {% endif %}
                     };
                 },
@@ -48,9 +45,9 @@
             language: {
                 noResults: function () {
                     {% if g.TaxonCreator %}
-                    var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}')\" >Create category</a>";
+                        var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}')\" >Create category</a>";
                     {% else %}
-                    var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
+                        var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
                     {% endif %}
                     return $("<span>No recent/result found. " + msg + "</span>");
                 }
@@ -58,16 +55,4 @@
         }); // Select2 Ajax
     }
 
-    $(document).ready(function () {
-        EnableSelect2Taxolb();
-
-        $('#TaxoModal').on('show.bs.modal', function (e) {
-            var button = $(e.relatedTarget); // Button that triggered the modal
-            var targetid = button.data('mytargetid');
-            $("#TaxoModalBody").html("Loading...");
-            $("#TaxoModalBody").load("/search/taxotree?target=" + targetid);
-        });
-    }); // Ready
 </script>
-
-{% include "taxo_modal_div.html" %}

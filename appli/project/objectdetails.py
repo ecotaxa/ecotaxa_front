@@ -13,8 +13,8 @@ from appli.constants import ClassifQual, DayTimeList
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (ObjectApi, ProjectsApi, TaxonomyTreeApi,
-                                         UsersApi, SamplesApi, ProcessesApi, AcquisitionsApi,
-                                         ObjectsApi)
+                                        UsersApi, SamplesApi, ProcessesApi, AcquisitionsApi,
+                                        ObjectsApi)
 from to_back.ecotaxa_cli_py.models import (ObjectModel, ProjectModel, SampleModel, AcquisitionModel,
                                            UserModelWithRights,
                                            TaxonModel, UserModel, ProcessModel, HistoricalClassification, BulkUpdateReq)
@@ -138,15 +138,7 @@ def objectdetails(objid):
  <td style="width: 230px;">
      <div class="input-group">
        <select id="taxolbpop" name="taxolbpop" style="width: 200px" class='taxolb' > </select>""")
-        if gvg("ajax", "0") == "0":
-            # Avoid a second modal on the first modal
-            page.append("""<span class="input-group-btn">
-                    <button class="btn btn-default btn-sm" type="button"  data-toggle="modal" data-target="#TaxoModal" 
-                    data-mytargetid="taxolbpop" title="Search on Taxonomy Tree">
-                        <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"/></button>
-                    </span>""")
-        else:
-            page.append("<br>")
+        page.append("<br>")
         page.append("""</div><!-- /input-group -->
  <span id=PendingChangesPop></span></td><td width=30px></td><td valign=top>
     <button type="button" class="btn btn-success btn-xs" onclick="Save1Object('V');">Save as Validated</button>
