@@ -10,7 +10,7 @@
     <span class="input-group-btn">
         <button class="btn btn-default btn-sm" type="button"
                 title="Ctrl+D shortcut can also be utilized to assign category name to one or more vignettes"
-                onclick="AssignTaxoLbToSelection();">
+                onclick="AssignCurrentTaxoToSelection();">
             <span id=AssignTaxo class="glyphicon glyphicon-tags" aria-hidden="true"/></button>
         </span>
 
@@ -330,19 +330,30 @@ function KeyboardMoveSelection(way) {
     });
   }); {# Ready #}
 
-{% if g.PrjAnnotate or g.PrjManager %}
-function AssignTaxoLbToSelection() {
-    var droptaxoid = $('#taxolbanno').val();
-    if (droptaxoid) {
-        $(".ui-state-highlight").removeClass("ui-state-highlight");
-        $("td[data-taxoid='"+$('#taxolbanno').val()+"']").addClass( "ui-state-highlight" );
-        var LstTd = [];
-        $(".ui-selected").each(function () {
-            LstTd.push($(this));
-        });
-        ProcessList(LstTd, droptaxoid, $('#taxolbanno  option:selected').text());
-    }
-}
+    {% if g.PrjAnnotate or g.PrjManager %}
+        function AssignCurrentTaxoToSelection() {
+            // Assign current val, wherever it is
+            const sel2 = $('#taxolbanno');
+            let taxoid = sel2.val();
+            let taxoname;
+            if (taxoid) {
+                taxoname = $('#taxolbanno  option:selected').text();
+            } else {
+                taxoid = sel2.data('saved_val');
+                taxoname = sel2.data('saved_text');
+            }
+            if (taxoid)
+                AssignTaxoLbToSelection(taxoid, taxoname);
+        }
+        function AssignTaxoLbToSelection(taxoid, taxoname) {
+            $(".ui-state-highlight").removeClass("ui-state-highlight");
+            $("td[data-taxoid='" + taxoid + "']").addClass("ui-state-highlight");
+            var LstTd = [];
+            $(".ui-selected").each(function () {
+                LstTd.push($(this));
+            });
+            ProcessList(LstTd, taxoid, taxoname);
+        }
 
 $(document).ready(function() {
     EnableSelect2Taxolb();
@@ -356,10 +367,37 @@ $(document).ready(function() {
       $('td[data-taxoid='+RestoreActiveTaxoID+']').addClass('activeTaxo');
       RestoreActiveTaxoID=undefined;
     }
-{#    Le fait de choisir un item fait l'assignation/CTRL+A#}
-    $('#taxolbanno').on("select2:select", function (e) {
-        AssignTaxoLbToSelection();
-    });
+
+            {#    Le fait de choisir un item fait l'assignation/CTRL+A #}
+            const sel2 = $('#taxolbanno');
+            sel2.on("select2:opening", function () {
+                const selection = sel2.data('saved_text');
+                if (!selection) return;
+                // Clear the value. We clear because otherwise:
+                //    - Re-picking the same value would _not_ trigger the event select2:select above.
+                //    - Current value might appear in the middle of the list, if similar text is entered.
+                sel2.val(null).trigger("change");
+                // The "selection rendered" element (where selection is seen) has been emptied, fill it back.
+                const rdr = $('.select2-selection__rendered');
+                rdr.text(" " + selection);
+                rdr.title = selection;
+            });
+            sel2.on("select2:select", function (e) {
+                // Chosen line
+                const choice = e.params.data;
+                // Select event in the dropdown
+                AssignTaxoLbToSelection(choice.id, choice.text);
+                // Keep memory of current val & text, as they will be erased at next opening, just below.
+                sel2.data('saved_val', choice.id);
+                sel2.data('saved_text', choice.text);
+            });
+            sel2.on("select2:closing", function () {
+                // Remove all options so they don't appear (with default focus!) next time the box opens.
+                const opts = $('.select2-results__options li');
+                opts.detach();
+            });
+
+
 
 {# Gestion de la scrollbar de la liste taxo quand la souris est en bas ou en haut de la zone#}
 $(window).mousemove(function (e) {
@@ -412,11 +450,12 @@ $(document).ready(function() {
           LoadRightPane();
         }
         if(prefix==='o') {
+          // right-click menu, "-- CLASSIFY TO --"
           $('#taxolbanno').append($('<option>', {value: taxoid, text: taxoname}));
           var sel = [];
           sel.push(taxoid);
           $('#taxolbanno').val(sel).change();
-          AssignTaxoLbToSelection();
+          AssignTaxoLbToSelection(taxoid, taxoname);
         }
       },
       items: {}

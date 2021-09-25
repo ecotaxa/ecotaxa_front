@@ -1,63 +1,73 @@
-
 <script>
-function FormatTaxoItem(t) {
-  if (t.pr==1)
-    return $("<u>"+ XSSStrEscape(t.text)+"</u>")
-  else return t.text;
-}
-function EnableSelect2Taxolb() {
-  if((typeof(Restoretaxolbid)!=='undefined')&&(typeof(Restoretaxolbid)!=='')){
-    var NewOption=$('<option></option').val(Restoretaxolbid).text(Restoretaxolbtxt);
-    NewOption.appendTo('#taxolbanno');
-    Restoretaxolbid=undefined;
-  }
-    $(".taxolb").select2({
-        ajax: {
-            url: "/search/taxo",
-            dataType: 'json',
-            delay: 250,
-            data: function (query) {
-                 // Cook the query params for above url, from control's content
-                 const first = $(this).data('first_keys');
-                 if (first) {
-                     // If first letter(s) typed, use for filtering
-                     query.term = first;
-                     $(this).data('first_keys', null);
-                 }
-                 return { q: query.term
-                         {% if g.Projid %}
-                         ,projid:{{ g.Projid }}
-                         {% endif %} };
-            },
-            processResults: function (data, page) {
-                 return { results: data};
-            },
-            cache: true
-        },
-        templateResult: FormatTaxoItem,
-        dropdownCssClass: "width240 taxopopup",
-        language: {
-           noResults: function(){
-{% if g.TaxonCreator %}
-               var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}')\" >Create category</a>";
-{% else %}
-               var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
-{% endif %}
-               return $("<span>No recent/result found. "+msg+"</span>");
-           }
-       }
-    }); // Select2 Ajax
-}
-$(document).ready(function() {
-    EnableSelect2Taxolb();
+    function FormatTaxoItem(t) {
+        if (t.pr == 1)
+            return $("<u>" + XSSStrEscape(t.text) + "</u>")
+        else return t.text;
+    }
 
-    $('#TaxoModal').on('show.bs.modal', function (e) {
-        var button = $(e.relatedTarget); // Button that triggered the modal
-        var targetid = button.data('mytargetid');
-         $("#TaxoModalBody").html("Loading...");
-         $("#TaxoModalBody").load("/search/taxotree?target="+targetid);
-      });
+    function EnableSelect2Taxolb() {
+        if ((typeof (Restoretaxolbid) !== 'undefined') && (typeof (Restoretaxolbid) !== '')) {
+            // Add the selected option during restore
+            var NewOption = $('<option></option').val(Restoretaxolbid).text(Restoretaxolbtxt);
+            NewOption.appendTo('#taxolbanno');
+            Restoretaxolbid = undefined;
+        }
+        var the_sel2 = $(".taxolb").select2({
+            ajax: {
+                url: "/search/taxo",
+                dataType: 'json',
+                delay: 100,
+                data: function (query) {
+                    // Cook the query params for above url, from control's content
+                    const first = $(this).data('first_keys');
+                    if (first) {
+                        // If first letter(s) typed, use (once) for filtering
+                        query.term = first;
+                        $(this).data('first_keys', null);
+                    }
+                    return {
+                        q: query.term
+                        {% if g.Projid %}
+                        , projid:{{ g.Projid }}
+                        {% endif %}
+                    };
+                },
+                processResults: function (data, page) {
+                    // If a function was registered for call just after query, schedule it now
+                    const todo = the_sel2.data('todo_after_ajax');
+                    if (todo) {
+                        setTimeout(todo, 10);
+                        the_sel2.data('todo_after_ajax', null);
+                    }
+                    return {results: data};
+                },
+                cache: true
+            },
+            templateResult: FormatTaxoItem,
+            dropdownCssClass: "width240 taxopopup",
+            language: {
+                noResults: function () {
+                    {% if g.TaxonCreator %}
+                    var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}')\" >Create category</a>";
+                    {% else %}
+                    var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
+                    {% endif %}
+                    return $("<span>No recent/result found. " + msg + "</span>");
+                }
+            }
+        }); // Select2 Ajax
+    }
+
+    $(document).ready(function () {
+        EnableSelect2Taxolb();
+
+        $('#TaxoModal').on('show.bs.modal', function (e) {
+            var button = $(e.relatedTarget); // Button that triggered the modal
+            var targetid = button.data('mytargetid');
+            $("#TaxoModalBody").html("Loading...");
+            $("#TaxoModalBody").load("/search/taxotree?target=" + targetid);
+        });
     }); // Ready
- </script>
+</script>
 
 {% include "taxo_modal_div.html" %}

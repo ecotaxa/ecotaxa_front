@@ -386,19 +386,19 @@
             margin-top: 125px;
         }
 
-            {# Permet de fixer la largeur de la dropdown Taxo Annotation #}
+        {# Permet de fixer la largeur de la dropdown Taxo Annotation #}
 
         .width240 {
             width: 240px !important;
         }
 
-            {# Permet de fixer la largeur de la dropdown Sample #}
+        {# Permet de fixer la largeur de la dropdown Sample #}
 
         .width400 {
             width: 400px !important;
         }
 
-            {# Permet de reduire la taille et l'espace du texte du dropdown Taxo Annotation #}
+        {# Permet de reduire la taille et l'espace du texte du dropdown Taxo Annotation #}
         #select2-taxolbanno-results li {
             font-size: 12px;
             padding: 3px;
@@ -447,7 +447,7 @@
                 if (confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?") == false)
                     return;
             var TxtFilter = "", jqtaxofilter = $("#taxofilter"), jqtaxofilterlbl = $("#taxofilterlabel"), jqcolumnright = $("#column-right");
-            var req = { taxo: jqtaxofilter.val(), resultwidth: jqcolumnright.width(), windowheight: $(window).height() };
+            var req = {taxo: jqtaxofilter.val(), resultwidth: jqcolumnright.width(), windowheight: $(window).height()};
             if (jqtaxofilterlbl.val() != "")
                 TxtFilter += InGreyButton("Taxo=" + jqtaxofilterlbl.val(), "SetTaxoFilter(false)");
             $(".activeTaxo").removeClass("activeTaxo");
@@ -619,50 +619,50 @@
             var proj_id = req['projid'];
             var req_clone = $.extend({}, req); // A shallow copy is good enough
             $.ajax({
-              type: "GET",
-              url: "/api/samples/search?project_ids="+proj_id+"&id_pattern=",
-              success: function(rsp) {
-                if (rsp.length == 0) {
-                  return;
-                }
-                var first_sample_id = rsp[0].sampleid;
-                var nb_samples = rsp.length;
-                req_clone['samples'] = first_sample_id;
-                var req_start = new Date();
-                $.ajax({
-                  type: "POST",
-                  // Don't bother replicating the full query, anyway it's just for heating up caches
-                  url: "/api/object_set/"+proj_id+"/query?window_size=10000",
-                  data: JSON.stringify(req_clone),
-                  contentType: "application/json; charset=utf-8",
-                  dataType: "json",
-                  success: function(rsp) {
-                    var req_end = new Date();
-                    // We now have an estimate of time for the first sample
-                    var elapsed = req_end.getTime() - req_start.getTime();
-                    // Let's say 32 dots...
-                    elapsed = elapsed * nb_samples / 32;
+                type: "GET",
+                url: "/api/samples/search?project_ids=" + proj_id + "&id_pattern=",
+                success: function (rsp) {
+                    if (rsp.length == 0) {
+                        return;
+                    }
+                    var first_sample_id = rsp[0].sampleid;
+                    var nb_samples = rsp.length;
+                    req_clone['samples'] = first_sample_id;
+                    var req_start = new Date();
+                    $.ajax({
+                        type: "POST",
+                        // Don't bother replicating the full query, anyway it's just for heating up caches
+                        url: "/api/object_set/" + proj_id + "/query?window_size=10000",
+                        data: JSON.stringify(req_clone),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (rsp) {
+                            var req_end = new Date();
+                            // We now have an estimate of time for the first sample
+                            var elapsed = req_end.getTime() - req_start.getTime();
+                            // Let's say 32 dots...
+                            elapsed = elapsed * nb_samples / 32;
                     if (elapsed < 500) { elapsed = 500; } // Useless to show too quick animation
-                    var dots = "🔎";
-                    $('#load_progress').html(dots);
-                    var interv = setInterval(function() {
-                      dots = dots + "🔎";
-                      if ($('#load_progress').length) {
-                        $('#load_progress').html(dots);
-                      } else {
-                        clearInterval(interv);
-                      }
-                    }, elapsed);
-                  },
-                  error: function(jqXHR, textStatus, errorThrown) {
-                    $('#load_progress').html(textStatus+":"+errorThrown);
-                  }
-                });
-                $('#load_progress').html("⌚");
-              },
-              error: function(jqXHR, textStatus, errorThrown) {
-                $('#load_progress').html(textStatus+":"+errorThrown);
-              }
+                            var dots = "🔎";
+                            $('#load_progress').html(dots);
+                            var interv = setInterval(function () {
+                                dots = dots + "🔎";
+                                if ($('#load_progress').length) {
+                                    $('#load_progress').html(dots);
+                                } else {
+                                    clearInterval(interv);
+                                }
+                            }, elapsed);
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            $('#load_progress').html(textStatus + ":" + errorThrown);
+                        }
+                    });
+                    $('#load_progress').html("⌚");
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $('#load_progress').html(textStatus + ":" + errorThrown);
+                }
             });
         }
 
@@ -703,6 +703,7 @@
 
         function RefreshClassifTab(ForceRecalc) {
             var jOptionSelected = $('#taxolbanno option:selected');
+            if (!jOptionSelected) jOptionSelected = $('#taxolbanno'.data('saved_val'));
             Restoretaxolbid = jOptionSelected.val();
             Restoretaxolbtxt = jOptionSelected.text();
             Restoretaxolb = $('#taxolbanno option').detach();
@@ -711,7 +712,7 @@
             var HiddenItems = $('.classiftab td').filter(function () { return $(this).css('display') == 'none'; }).map(function () { return $(this).data('taxoid'); }).get();
             var HorizArrow = $('.classiftab td span.glyphicon-triangle-right').closest('td').map(function () { return $(this).data('taxoid'); }).get();
             var PosScrollBar = $('#divclassiftab').scrollTop();
-            var req = { taxo: $("#taxofilter").val(), taxofilterlabel: $("#taxofilterlabel").val() };
+            var req = {taxo: $("#taxofilter").val(), taxofilterlabel: $("#taxofilterlabel").val()};
             if (ForceRecalc === 'Y') req['ForceRecalc'] = 'Y';
             // This container is "forgotten" during DOM replacement below, which is natural as it's not inside
             $('.select2-container').remove();
@@ -759,7 +760,7 @@
             $('[data-toggle="tooltip"]').tooltip();
             $("#titledivtitle").css("max-width", $("#titlediv").parent().width() - 150);
             {% if g.taxofilter %}
-            SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }});
+                SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }});
             {% endif %}
 
             var PreviousSort = $('#sortby').val();
@@ -770,7 +771,7 @@
                 PreviousSort = $(this).val();
                 $("#pageoffset").val(0); {# Changement d'ordre on revient à la première page #}
                     LoadRightPane(); {# 20181024 Autorefresh #}
-                });
+            });
             $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () { LoadRightPane(); }); {# 20181024 Autorefresh #}
             {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
                 $('#sortby').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
@@ -801,89 +802,113 @@
             });
 
             {#     Ctrl + A affecte la valeur selectionnée #}
-            {#    $('#taxolbanno').closest('.input-group').find('.select2-selection--single').bind('keydown', 'Test1', function (e) { #}
             $(document).bind('keydown', 'Test1', function (e) {
                 if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
                     // CTRL but no SHIFT
                     switch (e.keyCode) {
                         case 65:
-                            {# CTRL + A #}
+                        {# CTRL + A #}
                             SelectAll(e);
                             e.preventDefault();
-                        break;
+                            break;
                         case 68:
-                            {# CTRL + D #}
-                            AssignTaxoLbToSelection();
+                        {# CTRL + D #}
+                            AssignCurrentTaxoToSelection();
                             e.preventDefault();
-                        break;
+                            break;
                         case 76:
-                            {# CTRL + L #}
+                        {# CTRL + L #}
                             ValidateSelection('V');
                             e.preventDefault();
-                        break;
+                            break;
                         case 83:
-                            {# CTRL + S #}
+                        {# CTRL + S #}
                             SavePendingChanges();
                             e.preventDefault();
-                        break;
+                            break;
                         case 37:
                             KeyboardMoveSelection("LEFT");
                             e.preventDefault();
-                        break;
+                            break;
                         case 38:
                             KeyboardMoveSelection("UP");
                             e.preventDefault();
-                        break;
+                            break;
                         case 39:
                             KeyboardMoveSelection("RIGHT");
                             e.preventDefault();
-                        break;
+                            break;
                         case 40:
                             KeyboardMoveSelection("DOWN");
                             e.preventDefault();
-                        break;
+                            break;
                     }
                 }
                 if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
                     switch (e.keyCode) {
                         case 37:
                             var curr_page = +$("#pageoffset").val();
-                            if (curr_page>0) gotopage(curr_page-1);
+                            if (curr_page > 0) gotopage(curr_page - 1);
                             e.preventDefault();
-                        break;
+                            break;
                         case 39:
                             var curr_page = +$("#pageoffset").val();
-                            gotopage(curr_page+1);
+                            gotopage(curr_page + 1);
                             e.preventDefault();
-                        break;
+                            break;
                     }
                 }
             });
 
             {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvre la popup #}
             $(document).bind('keydown', function (e) {
-                if ((document.activeElement.nodeName == 'BODY') || (document.activeElement.nodeName == 'SPAN'))
-                    if ((e.keyCode >= 65) && (e.keyCode <= 90) && !e.ctrlKey && !e.metaKey)
-                        if ($(".ui-selected").length > 0) {
-                            const typedKey = String.fromCharCode(e.keyCode).toLocaleLowerCase();
-                            const sel2 = $('#taxolbanno');
-                            // When the select2 "open" executes, it will trigger a query to the server
-                            // with what's inside, i.e. nothing. The line below will add present key
-                            // into the query params. Search for 'first_keys' magic value in code.
-                            sel2.data('first_keys', sel2.data('first_keys') && '' + typedKey);
-                            // Open the select2, it will trigger the amended query...
-                            sel2.select2("open");
-                            // ...and switch on the visibility of the beginning filter.
-                            const search = $('.taxopopup .select2-search__field');
-                            // Add current key into search as well
-                            search.val(search.val() + typedKey);
-                            // Clear previous value, so there will always be a change,
-                            // so selecting several times the same value will end up in
-                            // several times the same annotation.
-                            sel2.val("").trigger('change');
-                            //console.log(e);
-                            e.preventDefault();
-                        }
+                const node_name = document.activeElement.nodeName;
+                if (node_name !== 'BODY' && node_name !== 'SPAN') {
+                    if (e.keyCode === 13 && e.target.className === "select2-search__field") {
+                        // A RETURN was typed in the select2, which could not handle it, because not done yet,
+                        // e.g. due to a network query in progress. Try to replay it.
+                        const sel2 = $('#taxolbanno');
+                        const todo = function () {
+                            const possible = $('.select2-results__option--highlighted');
+                            if (possible.length !== 1) return;
+                            const the_one = possible.get(0);
+                            const sel_data = $(the_one).data('data');
+                            // Close the dropdown
+                            sel2.select2("close") // select2.full.js l:5516
+                            // Show the wanted option
+                            var newOption = new Option(sel_data.text, sel_data.id, false, false);
+                            sel2.append(newOption);
+                            sel2.val([sel_data.id]).change();
+                            // Assign as if the choice was made
+                            AssignTaxoLbToSelection(sel_data.id, sel_data.text)
+                        };
+                        // @see taxopopup.html for the call
+                        sel2.data('todo_after_ajax', todo);
+                    }
+                    return;
+                }
+                // Need a plain unmodified letter to start...
+                if (e.keyCode < 65 || e.keyCode > 90 || e.ctrlKey || e.metaKey)
+                    return;
+                // ...and a selection
+                if ($(".ui-selected").length === 0)
+                    return;
+                const sel2 = $('#taxolbanno');
+                const typedKey = String.fromCharCode(e.keyCode).toLocaleLowerCase();
+                // When the select2 "open" executes, it will trigger a query to the server
+                // with what's inside, i.e. nothing. The line below will add present key
+                // into the query params. Search for 'first_keys' magic value in 'taxopopup.html' code.
+                const first_keys = sel2.data('first_keys');
+                const next_first_keys = (first_keys ? first_keys : '') + typedKey;
+                sel2.data('first_keys', next_first_keys);
+                // Open the select2, it will trigger the amended query...
+                sel2.select2("open");
+                // ...and switch on the visibility of the beginning filter.
+
+                const search = $('.taxopopup .select2-search__field');
+                // Add current key into search box as well
+                search.val(next_first_keys);
+                e.preventDefault();
             });
             $('#filt_validfromdate,#filt_validtodate').datetimepicker({format: 'Y-m-d H:i'});
         }); // document.ready
@@ -993,10 +1018,10 @@
                     }
                 });
             });
-            var config = { attributes: true, childList: true, characterData: true };
+            var config = {attributes: true, childList: true, characterData: true};
             observer.observe(target, config);
             // Enable the popover
-            var option = { 'trigger': 'hover', 'html': true };
+            var option = {'trigger': 'hover', 'html': true};
             $('div.subimg').popover(option);
             $('.ddets').click(function (e) {
                 e.stopPropagation();
@@ -1075,28 +1100,28 @@
 
     </script>
     <div id="column-right">
-        RIGHT
-        {% if right=='dodefault' %}
+      RIGHT
+      {% if right=='dodefault' %}
         <script>
             $(document).ready(function () {
                 LoadRightPane();
             }); // Ready
         </script>
         Loading ....
-        {% else %}
+      {% else %}
         {{ right|safe }}
-        {% endif %}
+      {% endif %}
     </div>
-</div> {# Container #}
+  </div> {# Container #}
 
 
 
-<div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            ...
-        </div>
+      <div class="modal-content">
+        ...
+      </div>
     </div>
-</div>
+  </div>
 
 {% endblock %}
