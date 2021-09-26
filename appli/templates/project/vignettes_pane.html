@@ -1,0 +1,52 @@
+{% if data.nb_objs == 0 %}
+  <!--suppress CheckEmptyScriptTag -->
+  <b>No Result</b><br>
+{% endif %}
+{% if data.can_write %}
+  <div id='PendingChanges' class='PendingChangesClass text-danger'></div>
+  <button class='btn btn-default' onclick="$(window).scrollTop(0);">
+    <span class='glyphicon glyphicon-arrow-up '></span></button>
+  <button class='btn btn-primary' onclick='SavePendingChanges();' title='CTRL+S' id=BtnSave disabled>
+    <span class='glyphicon glyphicon-save'/> Save pending changes [CTRL+S]
+  </button>
+  <button class='btn btn-success' onclick='ValidateAll(0);'><span class='glyphicon glyphicon-ok'/>
+    <span class='glyphicon glyphicon-arrow-right'/>
+    <span id=TxtBtnValidateAll>Validate all and move to next page</span></button>
+  <button class='btn btn-success' onclick="ValidateSelection('V');">
+    <span class='glyphicon glyphicon-ok'/> Validate Selection [CTRL+L]
+  </button>
+  <button class='btn btn-warning' onclick="ValidateSelection('D');">Set Selection Dubious</button>
+  <button class='btn btn-default' onclick="$('#bottomhelp').toggle()">
+    <span class='glyphicon glyphicon-question-sign'/> Undo
+  </button>
+  <div id="bottomhelp" class="panel panel-default" style="margin:10px 0 0 40px;width:500px;display:none;">
+    To correct validation mistakes (no UNDO button in Ecotaxa):
+    <br>1. Select Validated Status
+    <br>2. Sort by : Validation date
+    <br>3. Move the most recent (erroneous) validated objects into the suitable category
+  </div>
+  <script>$("#PendingChanges2").html('');</script>
+{% endif %}
+{% if data.ipp == 0 %}
+  <!-- Navigation -->
+  <p class='inliner'> Page management not available on Fit mode</p>
+{% elif data.pagecount > 1 or data.pageoffset > 0 %}
+  <p class='inliner'> Page {{ data.pageoffset+1 }} / {{ data.pagecount }} </p>
+  <nav>
+    <ul class='pagination'>
+      {% if data.pageoffset >0 %} {# Previous #}
+        <li><a href='javascript:gotopage({{ data.pageoffset-1 }});'>&laquo;</a></li>
+      {% endif %}
+      {% for pg in data.pages %}
+        <li class='{{ 'active' if pg==data.pageoffset }}'><a href='javascript:gotopage({{ pg }});'>{{ pg+1 }}</a></li>
+      {% endfor %}
+      <li><a href='javascript:gotopage({{ data.pagecount-1 }});'>{{ data.pagecount }}</a></li> {# Last #}
+      {% if data.pageoffset  < (data.pagecount-1) %} {# Next #}
+        <li><a href='javascript:gotopage({{ data.pageoffset+1 }});'>&raquo;</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+<script>
+    PostAddImages();
+</script>

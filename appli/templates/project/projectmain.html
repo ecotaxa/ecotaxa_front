@@ -172,7 +172,8 @@
           <label for="ipp" style="margin-bottom: 0;"><span class="glyphicon glyphicon-th"></span></label>
         </td>
         <td style="padding-right: 5px;">
-          {{ ht.selectinputtuple("ipp",[('0','Fit'),('1','1'),('5','5'),('10','10'),('20','20'),('50','50'),('100','100'),('200','200'),('500','500'),('1000','1000')],data.ipp) }}
+          {{ ht.selectinputtuple("ipp",[('0','Fit'),('1','1'),('5','5'),('10','10'),('20','20'),
+          ('50','50'),('100','100'),('200','200'),('500','500'),('1000','1000')],data.ipp) }}
         </td>
         <td style="padding-right: 5px;"><label for="zoom" style="margin-bottom: 0;"><span
             class="glyphicon glyphicon-zoom-in"></span>%</label>
@@ -406,16 +407,6 @@
     </style>
     <div id="column-right">
       RIGHT
-      {% if right=='dodefault' %}
-        <script>
-            $(document).ready(function () {
-                LoadRightPane();
-            }); // Ready
-        </script>
-        Loading ....
-      {% else %}
-        {{ right|safe }}
-      {% endif %}
     </div>
   </div> {# Container #}
 
@@ -428,8 +419,8 @@
   </div>
 
   <script>
-      var PendingChanges = {};
-      var PendingChangesTaxoName = {};
+      var PendingChanges = {}; // key=object id, value=taxo id, 'V' is implied
+      var PendingChangesTaxoName = {};  // key=taxo id, value=taxo name
       var PrevTxtFilter = "INITIAL";
       var RightPanelScrollPosAfterLoad = 0;
       DragInProgress = false;
@@ -667,7 +658,12 @@
       function RefreshClassifTab() {
           // Refresh (or load from 0) the category tree
           RestoreHighLigthID = $('#categtree .ui-state-highlight').data('taxoid');
+          // Load present state of the tab's active category
           RestoreActiveTaxoID = $('#categtree .activeTaxo').data('taxoid');
+          if (!RestoreActiveTaxoID) {
+              // During initial load, the state might be in hidden param.
+              RestoreActiveTaxoID = $('#taxofilter').val();
+          }
           var HiddenItems = $('#categtree td').filter(function () {
               return $(this).css('display') === 'none';
           }).map(function () {
@@ -736,6 +732,8 @@
           {% if g.taxofilter %}
               SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }});
           {% endif %}
+
+          LoadRightPane();
 
           var PreviousSort = $('#sortby').val();
           {# Si on choisit un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields #}
@@ -1013,7 +1011,8 @@
       }
 
       function SetTaxoFilter(taxofiltervalue, taxofilterlabel, withchild) {
-          //debugger;
+          // memorize taxo filter in global hidden params
+          // TODO: Why?
           var WithChild = 'N';
           if (withchild == true) {
               taxofilterlabel += " (with child)";
@@ -1068,6 +1067,7 @@
                   td.find('.subimg').css("height", '').css("width", '').css("left", '').css("top", '').css("right", '').css("bottom", '');
                   td.find('.subimg').attr('class', 'subimg status-validated');
                   TrSet.add(td.closest('tr').attr('id'));
+                  // id is, e.g.: id="I925293"
                   PendingChanges[id.substr(1)] = droptaxoid;
                   //td.css('background-color', '#80FF80')
                   //console.log(o, id ,droptaxoid,droptaxoname);
@@ -1101,7 +1101,10 @@
           }
           function SavePendingChanges(NextPage, forcedqual) {
               {#  console.log("prev",PendingChanges); #}
-              req = {changes: PendingChanges, qual: ((forcedqual === undefined) ? 'V' : forcedqual)}
+              req = {
+                  changes: PendingChanges,
+                  qual: ((forcedqual === undefined) ? 'V' : forcedqual)
+              }
               $(".PendingChangesClass").html('<span class="label label-info">Server update in progress...</span>');
               $("#PendingChanges2").html($("#PendingChanges").html());
               $("#PendingChanges").load("/prj/ManualClassif/" + $("#projid").val(), req, function () {
@@ -1217,7 +1220,7 @@
       {% endif %}
 
       function MakeCateTreeClickableDroppable() {
-          // Category tree was loaded, from initial or XHR. Set event handlers.
+          // Category tree was loaded, from XHR. Set event handlers.
           $("#categtree td"
               {% if g.PrjAnnotate or g.PrjManager %}
                   ).droppable({
@@ -1283,9 +1286,6 @@
       }
 
       $(function () {
-
-          MakeCateTreeClickableDroppable();
-
           // Narrow the category + select tab height, which makes it scrollable.
           // TODO: Should be solvable with proper CSS
           $("#divclassiftab").outerHeight($("#column-left").innerHeight() - $("#divclassiftab").position().top);
@@ -1342,7 +1342,7 @@
                   const choice = e.params.data;
                   // Select event in the dropdown
                   AssignTaxoLbToSelection(choice.id, choice.text);
-                  // Keep memory of current val & text, as they will be erased at next opening, just below.
+                  // Keep memory of current val & text, as they will be erased at next opening, just above.
                   sel2.data('saved_val', choice.id);
                   sel2.data('saved_text', choice.text);
               });

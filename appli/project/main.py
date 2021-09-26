@@ -287,7 +287,7 @@ def indexPrj(PrjId):
         except (ValueError, ApiException):
             pass
     else:
-        g.taxofilter = g.taxofilter = g.taxofilterlabel = ""
+        g.taxofilter = g.taxochild = g.taxofilterlabel = ""
 
     g.ProjectTitle = proj.title
     g.headmenu = []  # Menu project
@@ -331,7 +331,7 @@ def indexPrj(PrjId):
     appli.AddTaskSummaryForTemplate()
     filtertab = getcommonfilters(data)
     return render_template('project/projectmain.html', top="", leftb=filtertab,
-                           right='dodefault', data=data, title='EcoTaxa ' + ntcv(proj.title))
+                           data=data, title='EcoTaxa ' + ntcv(proj.title))
 
 
 def _manager_mail(prj_title, prj_id):
@@ -672,55 +672,19 @@ def LoadRightPane():
         html.append(txt)
 
     html.append("</tr></table>")
-    if len(objs.details) == 0:
-        html.append("<b>No Result</b><br>")
-    if user_can_modify:
-        html.append("""
-        <div id='PendingChanges' class='PendingChangesClass text-danger'></div>
-        <button class='btn btn-default' onclick="$(window).scrollTop(0);">
-            <span class='glyphicon glyphicon-arrow-up ' ></span></button>
-        <button class='btn btn-primary' onclick='SavePendingChanges();' title='CTRL+S' id=BtnSave disabled>
-            <span class='glyphicon glyphicon-save' /> Save pending changes [CTRL+S]</button>
-        <button class='btn btn-success' onclick='ValidateAll(0);'><span class='glyphicon glyphicon-ok' /> 
-            <span class='glyphicon glyphicon-arrow-right' /> 
-                <span id=TxtBtnValidateAll>Validate all and move to next page</span></button>
-        <!--<button class='btn btn-success' onclick='ValidateAll(1);' title="Save changed annotations , 
-        Validate all objects in page &amp; Go to Next Page"><span class='glyphicon glyphicon-arrow-right' /> 
-        Save, Validate all &amp; Go to Next Page</button>-->
-        <button class='btn btn-success' onclick="ValidateSelection('V');">
-            <span class='glyphicon glyphicon-ok' />  Validate Selection [CTRL+L]</button>
-        <button class='btn btn-warning' onclick="ValidateSelection('D');">Set Selection Dubious</button>
-        <button class='btn btn-default' onclick="$('#bottomhelp').toggle()" >
-            <span class='glyphicon glyphicon-question-sign' /> Undo</button>
-        <div id="bottomhelp" class="panel panel-default" style="margin:10px 0 0 40px;width:500px;display:none;">
-            To correct validation mistakes (no UNDO button in Ecotaxa):
-<br>1.	Select Validated Status
-<br>2.	Sort by : Validation date
-<br>3.	Move the most recent (erroneous) validated objects into the suitable category
-</div><script>$("#PendingChanges2").html('');</script>
-        """)
-    # Gestion de la navigation entre les pages
-    if images_per_page == 0:
-        html.append("<p class='inliner'> Page management not available on Fit mode</p>")
-    elif pagecount > 1 or pageoffset > 0:
-        html.append("<p class='inliner'> Page %d / %d</p>" % (pageoffset + 1, pagecount))
-        html.append("<nav><ul class='pagination'>")
-        if pageoffset > 0:
-            html.append("<li><a href='javascript:gotopage(%d);' >&laquo;</a></li>" % (pageoffset - 1))
-        # ValueError: range() arg 3 must not be zero
-        for i in range(0, pagecount - 1, math.ceil(pagecount / 20)):
-            if i == pageoffset:
-                html.append("<li class='active'><a href='javascript:gotopage(%d);'>%d</a></li>" % (i, i + 1))
-            else:
-                html.append("<li><a href='javascript:gotopage(%d);'>%d</a></li>" % (i, i + 1))
-        html.append("<li><a href='javascript:gotopage(%d);'>%d</a></li>" % (pagecount - 1, pagecount))
-        if pageoffset < pagecount - 1:
-            html.append("<li><a href='javascript:gotopage(%d);' >&raquo;</a></li>" % (pageoffset + 1))
-        html.append("</ul></nav>")
-    html.append("""
-    <script>
-        PostAddImages();
-    </script>""")
+
+    if pagecount > 1 or pageoffset > 0:
+        page_nums = list(range(0, pagecount - 1, math.ceil(pagecount / 20)))
+    else:
+        page_nums = []
+    html.append(render_template('project/vignettes_pane.html',
+                                data={"nb_objs": len(objs.details),
+                                      "can_write": user_can_modify,
+                                      "ipp": images_per_page,
+                                      "pagecount": pagecount,
+                                      "pageoffset": pageoffset,
+                                      "pages": page_nums}))
+
     # Add stats-rendering HTML
     html.append(ClassificationPageStats.render(filtres, PrjId))
     return "\n".join(html)
@@ -858,9 +822,6 @@ def prjGetClassifTab(PrjId):
         line['taxoparent'] = html_taxo_parent
 
     return render_template('project/classiftab.html', res=restree, taxotree=json.dumps(taxotree))
-
-
-
 
 
 ######################################################################################################################
