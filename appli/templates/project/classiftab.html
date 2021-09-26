@@ -1,5 +1,7 @@
+<!--suppress CheckEmptyScriptTag -->
 <div style="width: 230px;    margin-top: 5px; margin-bottom: 5px;">
   <div class="input-group">
+    <!--suppress HtmlFormInputWithoutLabel -->
     <select id="taxolbanno" name="taxolbanno" style="width: 185px" class='taxolb' autocomplete="off"> </select>
     <span class="input-group-btn">
         <button class="btn btn-default btn-sm" type="button"
@@ -13,13 +15,7 @@
                 onclick="AssignCurrentTaxoToSelection();">
             <span id=AssignTaxo class="glyphicon glyphicon-tags" aria-hidden="true"/></button>
         </span>
-
-    {# <div style="line-height: 1.1;position: relative; top: -5px; height: 18px;cursor: pointer;">#}
-    {#<span class="label label-info" style="padding: 0px 3px 0px 3px; ; margin-left: 2px;" title="Update Counter" onclick="RefreshClassifTab();">UC</span><br>#}
-    {#        <span class="label label-info" style="padding: 0px 3px 0px 3px; ; margin-left: 2px;" title="Hide Empty Category" onclick="ToggleZeroCount();">HC</span></div>#}
-
   </div><!-- /input-group -->
-
 </div>
 
 <div id='divclassiftab' style="width: 255px;overflow-y:auto;">
@@ -515,12 +511,13 @@
     {#  Ready  #}
 
     function ToggleZeroCount() {
-        if ($('#zeroshowhide').data("show") == "0") {
+        const zsh = $('#zeroshowhide');
+        if (zsh.attr("data-show") === "0") {
             $(".zerocount").hide();
-            $('#zeroshowhide').data("show", "1").text("Show empty categories");
+            zsh.attr("data-show", "1").text("Show empty categories");
         } else {
-            $('#zeroshowhide').data("show", "0").text("Hide empty categories");
             $(".zerocount").show();
+            zsh.attr("data-show", "0").text("Hide empty categories");
         }
     }
 
