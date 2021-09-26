@@ -3,7 +3,7 @@
 {% import "ht_macros.html" as ht %}
 
 {% block headcenter %}
-  <!--suppress HtmlFormInputWithoutLabel -->
+  <!--suppress HtmlFormInputWithoutLabel, HtmlUnknownTarget -->
   <script src="/static/jquerycontextmenu/jquery.ui.position.min.js" type="text/javascript"></script>
   <script src="/static/jquerycontextmenu/jquery.contextMenu.min.js" type="text/javascript"></script>
   <link href="/static/jquerycontextmenu/jquery.contextMenu.css" rel="stylesheet" type="text/css"/>
@@ -273,55 +273,12 @@
                         title="Email a link to this page, including the current filters. Press CTRL to open it on another tab (usefull if you use GMail)"><span
                     class="glyphicon glyphicon-link"></span> Share page
                 </button>
-                <button onclick='ClearAllFilterCriteria();return false;' class="btn btn-info"
+                <button onclick='ClearAllFilterCriteria();LoadRightPane();return false;' class="btn btn-info"
                         style="width: 49%" title="Remove all selection criteria"><span
                     class="glyphicon glyphicon-remove"></span> Clear all filters
                 </button>
                 <br>
                 {{ leftb|safe }}
-                {# ------- Annotator / Freefilter ------------#}
-                <div class="filter ">
-                  <div class="form-group-sm">
-                    <label class="title">Annotator / Free filters</label>
-                    <a class="pull-right label label-default"
-                       style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
-                       onclick='ClearAnnotFree();return false;'>Clear</a>
-                    <a class="pull-right label label-info"
-                       style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;margin-right: 5px;"
-                       href=# onclick='AdvancedAnnot();return false;'>Advanced</a>
-                    <select class="form-control" id="filt_annot" name="filt_annot" style="width: 100%"
-                            multiple autocomplete="off">{{ data.filt_annot_for_select|safe }}</select>
-                  </div>
-                </div>
-                <div>
-                  <input class="form-control" type="text" style="width: 100%" id="filt_validfromdate"
-                         name="filt_validfromdate" value="" autocomplete="off"
-                         placeholder="Validation date begin">
-                  <input class="form-control" type="text" style="width: 100%" id="filt_validtodate"
-                         name="filt_validtodate" value="" autocomplete="off"
-                         placeholder="Validation date end">
-                </div>
-                <form class="form-inline">
-                  <select class="form-control" id="filt_freenum" name="filt_freenum" style="width: 49%"
-                          autocomplete="off">
-                    {{ data.filt_freenum_for_select|safe }}
-                  </select>
-                  <input class="form-control" type="text" style="width: 24%" id="filt_freenumst"
-                         name="filt_freenumst" value="{{ data.freenumst }}" autocomplete="off"
-                         placeholder=">=">
-                  <input class="form-control" type="text" style="width: 24%" id="filt_freenumend"
-                         name="filt_freenumend" value="{{ data.freenumend }}" autocomplete="off"
-                         placeholder="<=">
-                </form>
-                <form class="form-inline">
-                  <select class="form-control" id="filt_freetxt" name="filt_freetxt" style="width: 59%"
-                          autocomplete="off">
-                    {{ data.filt_freetxt_for_select|safe }}
-                  </select>
-                  <input class="form-control" type="text" style="width: 39%" id="filt_freetxtval"
-                         name="filt_freetxtval" value="{{ data.freetxtval }}" autocomplete="off"
-                         placeholder="contains">
-                </form>
                 <div class="row">
                   <div class="col-sm-12">
                     <button type="button" class="btn btn-xs btn-primary  btn-block"
@@ -447,730 +404,6 @@
             vertical-align: bottom;
         }
     </style>
-    <script>
-        var PendingChanges = {};
-        var PendingChangesTaxoName = {};
-        var PrevTxtFilter = "INITIAL";
-        var RightPanelScrollPosAfterLoad = 0;
-        DragInProgress = false;
-        drag_start_time = null;
-
-        function InGreyButton(s, eraser) {
-            return " <button type=button class='btn btn-gris btn-xs' onclick='" + eraser + ";LoadRightPane();'><div>" + s + "</div> <span class='glyphicon glyphicon-remove'></span></button>";
-        }
-
-        $('#SharePageBtn').click(function (e) {
-            if (e.ctrlKey)
-                LoadRightPane('mailN');
-            else
-                LoadRightPane('mail');
-        });
-
-        function LoadRightPane(NoAjax, SaveInProfile) {
-            document.activeElement.blur();
-            if (Object.keys(PendingChanges).length > 0)
-                if (confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?") == false)
-                    return;
-            var TxtFilter = "", jqtaxofilter = $("#taxofilter"), jqtaxofilterlbl = $("#taxofilterlabel"),
-                jqcolumnright = $("#column-right");
-            var req = {taxo: jqtaxofilter.val(), resultwidth: jqcolumnright.width(), windowheight: $(window).height()};
-            if (jqtaxofilterlbl.val() != "")
-                TxtFilter += InGreyButton("Taxo=" + jqtaxofilterlbl.val(), "SetTaxoFilter(false)");
-            $(".activeTaxo").removeClass("activeTaxo");
-            if (jqtaxofilter.val() != "")
-                $("#TabA").find("[data-taxoid=" + jqtaxofilter.val() + "]").addClass("activeTaxo");
-            req['taxochild'] = $("#taxofilterchild").val();
-            req['ipp'] = $("#ipp").val();
-            req['zoom'] = $("#zoom").val();
-            req['sortby'] = $("#sortby").val();
-            req['magenabled'] = $("#magenabled").prop("checked") ? "1" : "0";
-            req['popupenabled'] = $("#popupenabled").prop("checked") ? "1" : "0";
-            var jqstatusfilter = $("#statusfilter");
-            req['statusfilter'] = jqstatusfilter.val();
-            if (jqstatusfilter.val() != "")
-                TxtFilter += InGreyButton("Status=" + jqstatusfilter.find("option:selected").text(), "$(\"#statusfilter\").val(null)");
-            req['MapN'] = $("#filt_MapOutN").val();
-            req['MapW'] = $("#filt_MapOutW").val();
-            req['MapE'] = $("#filt_MapOutE").val();
-            req['MapS'] = $("#filt_MapOutS").val();
-            if ((req['MapN'] != "") && (req['MapW'] != "") && (req['MapE'] != "") && (req['MapS'] != ""))
-                TxtFilter += InGreyButton(" Position=(" + req['MapN'] + "," + req['MapW'] + "," + req['MapE'] + "," + req['MapS'] + ")", "ClearCoord()");
-            else {
-                delete req['MapN'];
-                delete req['MapW'];
-                delete req['MapE'];
-                delete req['MapS'];
-            }
-
-            req['depthmin'] = $("#filt_depthmin").val();
-            req['depthmax'] = $("#filt_depthmax").val();
-            if ((req['depthmin'] != "") && (req['depthmax'] != ""))
-                TxtFilter += InGreyButton(" Depth in(" + req['depthmin'] + "-" + req['depthmax'] + ")", "ClearDepths()");
-            else {
-                delete req['depthmin'];
-                delete req['depthmax'];
-            }
-            var jqfreenum = $("#filt_freenum");
-            req['freenum'] = jqfreenum.val();
-            req['freenumst'] = $("#filt_freenumst").val();
-            req['freenumend'] = $("#filt_freenumend").val();
-            if ((req['freenum'] != "") && ((req['freenumst'] != "") || (req['freenumend'] != "")))
-                TxtFilter += InGreyButton(jqfreenum.find("option:selected").text() + " in(" + req['freenumst'] + "-" + req['freenumend'] + ")"
-                    , "$(\"#filt_freenum,#filt_freenumst,#filt_freenumend\").val(null).trigger(\"change\")");
-            else {
-                delete req['freenum'];
-                delete req['freenumst'];
-                delete req['freenumend'];
-            }
-            var jqfreetxt = $("#filt_freetxt");
-            req['freetxt'] = jqfreetxt.val();
-            req['freetxtval'] = $("#filt_freetxtval").val();
-            if ((req['freetxt'] != "") && (req['freetxtval'] != ""))
-                TxtFilter += InGreyButton(jqfreetxt.find("option:selected").text() + " contains " + req['freetxtval']
-                    , "$(\"#filt_freetxt,#filt_freetxtval\").val(null).trigger(\"change\")");
-            else {
-                delete req['freetxt'];
-                delete req['freetxtval'];
-            }
-
-            var sampleid = $('#sampleid');
-            if (sampleid.val() != null)
-                req['samples'] = String(sampleid.val());
-            else req['samples'] = "";
-            if (req['samples'] != "")
-                TxtFilter += InGreyButton("Samples=" + $.map(sampleid.find('option:selected'), function (element) {
-                    return $(element).text()
-                }).join(', '), "ClearSamples()");
-            req['instrum'] = $("#filt_instrum").val();
-            if (req['instrum'] != "")
-                TxtFilter += InGreyButton("Instrument =" + req['instrum'], "ClearInstrum()");
-            var jqmonth = $('#month');
-            if (jqmonth.val() != null) {
-                req['month'] = String(jqmonth.val());
-                TxtFilter += InGreyButton("Month=" + $.map(jqmonth.find('option:selected'), function (element) {
-                    return $(element).text()
-                }).join(', '), "ClearDates()");
-            }
-            var jqannot = $('#filt_annot');
-            if (jqannot.val() != null) {
-                req['filt_annot'] = String(jqannot.val());
-                TxtFilter += InGreyButton("Annotator=" + $.map(jqannot.find('option:selected'), function (element) {
-                    return $(element).text()
-                }).join(', '), "$(\"#filt_annot\").val(null).trigger(\"change\")");
-            }
-            req['fromdate'] = $("#filt_fromdate").val();
-            if (req['fromdate'] != "")
-                TxtFilter += InGreyButton("Date &ge; " + req['fromdate'], "ClearDates()");
-            else delete req['fromdate'];
-            req['todate'] = $("#filt_todate").val();
-            if (req['todate'] != "")
-                TxtFilter += InGreyButton("Date &le; " + req['todate'], "ClearDates()");
-            else delete req['todate'];
-
-            req['fromtime'] = $("#filt_fromtime").val();
-            req['totime'] = $("#filt_totime").val();
-            if ((req['fromtime'] != "") && (req['totime'] != ""))
-                TxtFilter += InGreyButton("Time &ge; " + req['fromtime'] + ",&le;" + req['totime'], "ClearTimes()");
-            else {
-                if (req['fromtime'] != "")
-                    TxtFilter += InGreyButton("Time &ge; " + req['fromtime'], "ClearTimes()");
-                else delete req['fromtime'];
-                if (req['totime'] != "")
-                    TxtFilter += InGreyButton("Time &le; " + req['totime'], "ClearTimes()");
-                else delete req['totime'];
-            }
-            req['inverttime'] = $("#filt_inverttime").prop("checked") ? "1" : "";
-            if (req['inverttime'] == "1")
-                TxtFilter += InGreyButton("Time Invert", "$(\"#filt_inverttime\").prop(\"checked\",false)");
-            else delete req['inverttime'];
-            var jqdaytime = $('#daytime');
-            if (jqdaytime.val() != null) {
-                req['daytime'] = String(jqdaytime.val());
-                TxtFilter += InGreyButton("DayTime=" + $.map(jqdaytime.find('option:selected'), function (element) {
-                    return $(element).text()
-                }).join(', '), "ClearTimes()");
-            }
-
-            req['validfromdate'] = $("#filt_validfromdate").val();
-            if (req['validfromdate'] != "")
-                TxtFilter += InGreyButton("Valid date &ge; " + req['validfromdate'], '$(\"#filt_validfromdate\").val(\"\")');
-            else delete req['validfromdate'];
-            req['validtodate'] = $("#filt_validtodate").val();
-            if (req['validtodate'] != "")
-                TxtFilter += InGreyButton("Valid date &le; " + req['validtodate'], '$(\"#filt_validtodate\").val(\"\")');
-            else delete req['validtodate'];
-
-
-            req['sortorder'] = $('#sortorder').hasClass("glyphicon-sort-by-attributes-alt") ? "desc" : 'asc';
-            req['dispfield'] = "";
-            $("#dispfieldlist").find(".glyphicon-ok").closest("li").each(function () {
-                req['dispfield'] += " " + $(this).prop("id");
-            });
-            req['projid'] = $("#projid").val();
-            $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
-            PendingChanges = {};
-            {# After load there's no pending changes #}
-            PendingChangesTaxoName = {};
-            if (TxtFilter != "")
-                TxtFilter = "Filter: " + TxtFilter;
-            var jqpageoffset = $("#pageoffset");
-            if (TxtFilter != PrevTxtFilter) {
-                {# Si une condition change on revient page 1 #}
-                if (PrevTxtFilter != "INITIAL") // Mais pas sur le premier load de page qui peut être avec une URL qui met un filtre
-                    jqpageoffset.val(0);
-                PrevTxtFilter = TxtFilter;
-            }
-            req['pageoffset'] = jqpageoffset.val();
-            var urlparam = {}, url, k;
-            if ((NoAjax === 'mail') || (NoAjax === 'mailN')) {
-                delete req["resultwidth"];
-                delete req["windowheight"];
-                for (k in req)
-                    urlparam[k] = req[k];
-                url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + $.param(urlparam);
-                url = "mailto:?subject=Ecotaxa%20page%20share&body=" + encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n" + url);
-                if (NoAjax === 'mail')
-                    window.location = url;
-                else
-                    window.open(url, '_blank');
-                return;
-            }
-            if (typeof (NoAjax) === 'string') {
-                {# Une URL #}
-                delete req["resultwidth"];
-                delete req["windowheight"];
-                for (k in req)
-                    if (req[k] !== "")
-                        urlparam[k] = req[k];
-                url = NoAjax;
-                if (url.indexOf('?') > 0) url += "&";
-                else url += "?";
-                url += $.param(urlparam);
-                window.location = url;
-                return;
-            }
-            if (SaveInProfile == true)
-                req["saveinprofile"] = 'Y';
-            // Show spinning wheel
-            jqcolumnright.html("<img src='/static/spinningred.gif'> Loading <span id='load_progress'></span>");
-            // Launch progress indicator
-            UpdateRightPaneProgress(req);
-            // Launch real load
-            AsyncSingleLoadRightPane(jqcolumnright, req);
-            $('#headersubtitle').html(TxtFilter);
-        }
-
-        function UpdateRightPaneProgress(req) {
-            // Show a series of dots while the user is waiting for query to return
-            var proj_id = req['projid'];
-            var req_clone = $.extend({}, req); // A shallow copy is good enough
-            $.ajax({
-                type: "GET",
-                url: "/api/samples/search?project_ids=" + proj_id + "&id_pattern=",
-                success: function (rsp) {
-                    if (rsp.length == 0) {
-                        return;
-                    }
-                    var first_sample_id = rsp[0].sampleid;
-                    var nb_samples = rsp.length;
-                    req_clone['samples'] = first_sample_id;
-                    var req_start = new Date();
-                    $.ajax({
-                        type: "POST",
-                        // Don't bother replicating the full query, anyway it's just for heating up caches
-                        url: "/api/object_set/" + proj_id + "/query?window_size=10000",
-                        data: JSON.stringify(req_clone),
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        success: function (rsp) {
-                            var req_end = new Date();
-                            // We now have an estimate of time for the first sample
-                            var elapsed = req_end.getTime() - req_start.getTime();
-                            // Let's say 32 dots...
-                            elapsed = elapsed * nb_samples / 32;
-                            if (elapsed < 500) {
-                                elapsed = 500;
-                            } // Useless to show too quick animation
-                            var dots = "🔎";
-                            $('#load_progress').html(dots);
-                            var interv = setInterval(function () {
-                                dots = dots + "🔎";
-                                if ($('#load_progress').length) {
-                                    $('#load_progress').html(dots);
-                                } else {
-                                    clearInterval(interv);
-                                }
-                            }, elapsed);
-                        },
-                        error: function (jqXHR, textStatus, errorThrown) {
-                            $('#load_progress').html(textStatus + ":" + errorThrown);
-                        }
-                    });
-                    $('#load_progress').html("⌚");
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    $('#load_progress').html(textStatus + ":" + errorThrown);
-                }
-            });
-        }
-
-        var theOnlyLazyLoader = null;
-
-        var theOnlyRightPaneXHR = null;
-
-        function AsyncSingleLoadRightPane(elem, req) {
-            // Load right pane, but cancel a previous load if in progress. github #281.
-            // Below is a copy/paste/simplify of JQuery load(), as this primitive does
-            // not return the generated XHR object.
-            if (theOnlyRightPaneXHR && theOnlyRightPaneXHR.readyState != 4) {
-                // abort request in progress, we want new request results and only them
-                theOnlyRightPaneXHR.abort();
-            }
-            if (theOnlyLazyLoader !== null) {
-                // Lazy loader does the loading for detached DOM elements as well -> Gh #402 for big page size
-                theOnlyLazyLoader.destroy();
-                theOnlyLazyLoader = null;
-            }
-            theOnlyRightPaneXHR = jQuery.ajax({
-                url: "/prj/LoadRightPane",
-                type: "POST",
-                dataType: "html",
-                data: req
-            }).done(function (responseText) {
-                // Detach present DOM and inject the new one
-                elem.html(responseText);
-            }).error(function (jqXHR, opts, error) {
-                if (error !== "abort") {
-                    msg = "Request problem " + JSON.stringify(jqXHR);
-                    msg += "<br>Refreshing the page could cure this problem.";
-                    elem.html(msg);
-                }
-            });
-        }
-
-        function RefreshClassifTab() {
-            // Refresh (or load from 0) the category tree
-            RestoreHighLigthID = $('#categtree .ui-state-highlight').data('taxoid');
-            RestoreActiveTaxoID = $('#categtree .activeTaxo').data('taxoid');
-            var HiddenItems = $('#categtree td').filter(function () {
-                return $(this).css('display') === 'none';
-            }).map(function () {
-                return $(this).data('taxoid');
-            }).get();
-            var HorizArrow = $('#categtree td span.glyphicon-triangle-right').closest('td').map(function () {
-                return $(this).data('taxoid');
-            }).get();
-            var PosScrollBar = $('#divclassiftab').scrollTop();
-            // Launch a request to get table content
-            $("#categtree").load("/prjGetClassifTab/" + $("#projid").val(), {}, function () {
-                MakeCategTreeClickableDropable();
-                {#    Restore le surlignage jaune dans l'arbre #}
-                if (RestoreHighLigthID) {
-                    $('td[data-taxoid=' + RestoreHighLigthID + ']').addClass('ui-state-highlight');
-                }
-                {#    Restore le surlignage Gris dans l'arbre/activeTaxo pour filtrage #}
-                if (RestoreActiveTaxoID) {
-                    $('td[data-taxoid=' + RestoreActiveTaxoID + ']').addClass('activeTaxo');
-                }
-                $.each(HiddenItems, function (k, v) {
-                    {# Masque ceux qui etaient déjà cachés #}
-                    $('.classiftab td[data-taxoid=' + v + ']').css('display', 'none');
-                });
-                $.each(HorizArrow, function (k, v) {
-                    {# Masque ceux qui etaient déjà cachés #}
-                    $('.classiftab td[data-taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
-                });
-                $('#divclassiftab').scrollTop(PosScrollBar);
-            });
-
-        }
-
-        function SortToggle(NoRefresh) {
-            if ($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
-                $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title", "Current Sort : Descending");
-            else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title", "Current Sort : Ascending");
-            if (NoRefresh !== 'NoRefresh') {
-                $("#pageoffset").val(0);
-                {# Force le retour à la premiere page #}
-                LoadRightPane();
-                {# 20181024 Autorefresh #}
-            }
-        }
-
-        function ToggleDispField(caller) {
-            $('#' + caller).find('span').toggleClass("glyphicon-ok");
-            $('#' + caller).find('span').removeClass("ManualAdd");
-            $('#' + caller).find('span.glyphicon-ok').addClass("ManualAdd");
-            LoadRightPane();
-            {# 20181024 Autorefresh #}
-            //return false;
-        }
-
-        function gotopage(nopage) {
-            $("#pageoffset").val(nopage);
-            LoadRightPane();
-        }
-
-        $(document).ready(function () {
-            if ("{{data.sortorder}}" == "desc") {   //TOCHECK LN
-                SortToggle('NoRefresh');
-            }
-            $('[data-toggle="tooltip"]').tooltip();
-            $("#titledivtitle").css("max-width", $("#titlediv").parent().width() - 150);
-            {% if g.taxofilter %}
-                SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }});
-            {% endif %}
-
-            var PreviousSort = $('#sortby').val();
-            {# Si on choisit un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields #}
-            $('#sortby').change(function () {
-                $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
-                $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
-                PreviousSort = $(this).val();
-                $("#pageoffset").val(0);
-                {# Changement d'ordre on revient à la première page #}
-                LoadRightPane();
-                {# 20181024 Autorefresh #}
-            });
-            $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () {
-                LoadRightPane();
-            });
-            {# 20181024 Autorefresh #}
-            {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
-                $('#sortby').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-                $('#ipp').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-                $('#zoom').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
-            #}
-
-            $("#filt_annot").{{ js.select2_user() }}; // Select2 Ajax
-            $("#filt_freenum").select2({
-                ajax: {
-                    url: "/prj/GetFieldList/{{ g.Projid }}/n",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) {
-                        return {q: params.term, page: params.page};
-                    },
-                    processResults: function (data, page) {
-                        return {results: data};
-                    },
-                    cache: true
-                }, placeholder: "Num. field", dropdownCssClass: "width240"
-            });
-            $("#filt_freetxt").select2({
-                ajax: {
-                    url: "/prj/GetFieldList/{{ g.Projid }}/t",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) {
-                        return {q: params.term, page: params.page};
-                    },
-                    processResults: function (data, page) {
-                        return {results: data};
-                    },
-                    cache: true
-                }, placeholder: "Text field", dropdownCssClass: "width240"
-            });
-
-            {#     Ctrl + A affecte la valeur selectionnée #}
-            $(document).bind('keydown', 'Test1', function (e) {
-                if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
-                    // CTRL but no SHIFT
-                    switch (e.keyCode) {
-                        case 65:
-                        {# CTRL + A #}
-                            SelectAll(e);
-                            e.preventDefault();
-                            break;
-                        case 68:
-                        {# CTRL + D #}
-                            AssignCurrentTaxoToSelection();
-                            e.preventDefault();
-                            break;
-                        case 76:
-                        {# CTRL + L #}
-                            ValidateSelection('V');
-                            e.preventDefault();
-                            break;
-                        case 83:
-                        {# CTRL + S #}
-                            SavePendingChanges();
-                            e.preventDefault();
-                            break;
-                        case 37:
-                            KeyboardMoveSelection("LEFT");
-                            e.preventDefault();
-                            break;
-                        case 38:
-                            KeyboardMoveSelection("UP");
-                            e.preventDefault();
-                            break;
-                        case 39:
-                            KeyboardMoveSelection("RIGHT");
-                            e.preventDefault();
-                            break;
-                        case 40:
-                            KeyboardMoveSelection("DOWN");
-                            e.preventDefault();
-                            break;
-                    }
-                }
-                if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-                    switch (e.keyCode) {
-                        case 37:
-                            var curr_page = +$("#pageoffset").val();
-                            if (curr_page > 0) gotopage(curr_page - 1);
-                            e.preventDefault();
-                            break;
-                        case 39:
-                            var curr_page = +$("#pageoffset").val();
-                            gotopage(curr_page + 1);
-                            e.preventDefault();
-                            break;
-                    }
-                }
-            });
-
-            {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvre la popup #}
-            $(document).bind('keydown', function (e) {
-                const node_name = document.activeElement.nodeName;
-                if (node_name !== 'BODY' && node_name !== 'SPAN') {
-                    if (e.keyCode === 13 && e.target.className === "select2-search__field") {
-                        // A RETURN was typed in the select2, which could not handle it, because not done yet,
-                        // e.g. due to a network query in progress. Try to replay it.
-                        const sel2 = $('#taxolbanno');
-                        const todo = function () {
-                            const possible = $('.select2-results__option--highlighted');
-                            if (possible.length !== 1) return;
-                            const the_one = possible.get(0);
-                            const sel_data = $(the_one).data('data');
-                            // Close the dropdown
-                            sel2.select2("close") // select2.full.js l:5516
-                            // Show the wanted option
-                            var newOption = new Option(sel_data.text, sel_data.id, false, false);
-                            sel2.append(newOption);
-                            sel2.val([sel_data.id]).change();
-                            // Assign as if the choice was made
-                            AssignTaxoLbToSelection(sel_data.id, sel_data.text)
-                        };
-                        // @see taxopopup.html for the call
-                        sel2.data('todo_after_ajax', todo);
-                    }
-                    return;
-                }
-                // Need a plain unmodified letter to start...
-                if (e.keyCode < 65 || e.keyCode > 90 || e.ctrlKey || e.metaKey)
-                    return;
-                // ...and a selection
-                if ($(".ui-selected").length === 0)
-                    return;
-                const sel2 = $('#taxolbanno');
-                const typedKey = String.fromCharCode(e.keyCode).toLocaleLowerCase();
-                // When the select2 "open" executes, it will trigger a query to the server
-                // with what's inside, i.e. nothing. The line below will add present key
-                // into the query params. Search for 'first_keys' magic value in 'taxopopup.html' code.
-                const first_keys = sel2.data('first_keys');
-                const next_first_keys = (first_keys ? first_keys : '') + typedKey;
-                sel2.data('first_keys', next_first_keys);
-                // Open the select2, it will trigger the amended query...
-                sel2.select2("open");
-                // ...and switch on the visibility of the beginning filter.
-
-                const search = $('.taxopopup .select2-search__field');
-                // Add current key into search box as well
-                search.val(next_first_keys);
-                e.preventDefault();
-            });
-            $('#filt_validfromdate,#filt_validtodate').datetimepicker({format: 'Y-m-d H:i'});
-        }); // document.ready
-
-        function UpdateSelectedCounter() {
-            // Asynchronously update the selected counter, as it takes some time for jQuery to find selected nodes
-            // especially on 1000 images setting
-            setTimeout(function () {
-                var nbr = $("#column-right").find("td.ui-selected").size();
-                if (nbr > 0) nbr = nbr + " Selected";
-                else nbr = "";
-                $('#nbrselected').text(nbr);
-            }, 0);
-        }
-
-        function PostAddImages() {
-            $(document).scrollTop(0);
-            // Required to  have Select2 component working on Bootstrap Popup
-            $.fn.modal.Constructor.prototype.enforceFocus = function () {
-            };
-            // Add Zoom & lazy loading of images
-            theOnlyLazyLoader = jQuery('div#column-right img.lazy').Lazy({
-                bind: 'event',
-                afterLoad: function (element) {
-                    if ($('#magenabled').prop("checked") == false)
-                        return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
-                    AddZoom(element);
-                },
-                chainable: false // return the instance i.e. loader itself
-            });
-            // Make sub image draggable
-            jQuery('.imgtab td').draggable({
-                revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
-                cursorAt: {top: 0, left: 0},
-                start: function (event, ui) {
-                    DragInProgress = true;
-                    drag_start_time = event.timeStamp;
-                },
-                stop: function (event, ui) {
-                    DragInProgress = false;
-                    if (event.timeStamp - drag_start_time < 150) {
-                        // Less than 150ms, so not at drag, rather a click while moving mouse
-                        event.target.click();
-                    }
-                    drag_start_time = null;
-                },
-                helper: function (ev) {
-                    return $("<img src='/static/drag_cursor.png'>");
-                }
-            });
-            {#        jQuery('.imgtab td img').draggable({ revert: true, revertDuration: 0 });#}
-            // Make the cell clickable for selection
-            jQuery('.imgtab td').click(function (e) {
-                if ($(e.target).hasClass('linestart')) {
-                    var nbrselectedinline = $(e.target).closest('tr').find('td.ui-selected').size();
-                    if ((e.shiftKey) || (nbrselectedinline > 0)) { // Unselect line
-                        $(e.target).closest('tr').find('td').removeClass('ui-selected');
-                        if (window.getSelection) {
-                            if (window.getSelection().empty) {  // Chrome
-                                window.getSelection().empty();
-                            } else if (window.getSelection().removeAllRanges) {  // Firefox
-                                window.getSelection().removeAllRanges();
-                            }
-                        } else if (document.selection) {  // IE?
-                            document.selection.empty();
-                        }
-                        UpdateSelectedCounter();
-                        return;
-                    }
-                }
-                if ((e.ctrlKey) || (e.metaKey))
-                    {#  20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple #}
-                    $('.ui-selected').removeClass('ui-selected');
-                if ($(e.target).hasClass('linestart')) // select line (except this first column)
-                    $(e.target).closest('tr').find('td:nth-child(1n+2)').addClass('ui-selected');
-                else
-                    $(e.target).closest('td').toggleClass('ui-selected');
-                UpdateSelectedCounter()
-            });
-            // Make ZoomTracker Clickable for selection
-            jQuery('body').delegate('.zoomtracker', 'click', function (e) {
-                {# if ((!e.ctrlKey) && (!e.metaKey)) 20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple#}
-                if ((e.ctrlKey) || (e.metaKey))
-                    $('.ui-selected').toggleClass('ui-selected');
-                $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected');
-                UpdateSelectedCounter();
-            });
-            // setup zoomtracker creation tracking to make them draggable
-            var target = $("body")[0];
-            var observer = new MutationObserver(function (mutations) {
-                mutations.forEach(function (mutation) {
-                    var newNodes = mutation.addedNodes; // DOM NodeList
-                    if (newNodes !== null) { // If there are new nodes added
-                        var $nodes = $(newNodes); // jQuery set
-                        $nodes.each(function () {
-                            var $node = $(this);
-                            if ($node.hasClass("zoomtracker")) {
-                                //console.log("zoomtracker");
-                                jQuery($node).draggable({
-                                    revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
-                                    cursorAt: {top: 0, left: 0},
-                                    helper: function (ev) {
-                                        return $("<img src='/static/drag_cursor.png'>");
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-            var config = {attributes: true, childList: true, characterData: true};
-            observer.observe(target, config);
-            // Enable the popover
-            var option = {'trigger': 'hover', 'html': true};
-            $('div.subimg').popover(option);
-            $('.ddets').click(function (e) {
-                e.stopPropagation();
-                //            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
-                //            var win = window.open(url, '_blank');
-                var url = "/objectdetails/" + $(e.target).closest('td').find('img').prop('id').substr(1) + "?w=" + ($(window).width() - 400) + "&h=" + ($(window).height() - 40) + "&ajax=1";
-                var options = {};
-                $("#PopupDetails .modal-content").html("Loading...");
-
-                $('#PopupDetails .modal-lg').css('width', $(window).width() - 40);
-                $('#PopupDetails').modal(options);
-                $("#PopupDetails .modal-content").load(url);
-            });
-            $('#PopupDetails').on('hidden.bs.modal', function (e) {
-                $("#PopupDetails .modal-content").html("CLEAN");
-                $(".zoomContainer").remove();
-            });
-
-            jQuery('.SpanSelectAll').click(SelectAll);
-            $(document).scrollTop(RightPanelScrollPosAfterLoad);
-            RightPanelScrollPosAfterLoad = 0;
-        }  //PostAddImages
-
-        function SelectAll(e) {
-            if (!e.shiftKey)
-                jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
-            else
-                jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
-            UpdateSelectedCounter();
-        }
-
-        function ClearAllFilterCriteria() {
-            ClearCoord();
-            ClearDates();
-            ClearTimes();
-            ClearSamples();
-            ClearInstrum();
-            ClearDepths();
-            ClearAnnotFree();
-            LoadRightPane();
-        }
-
-        function ClearAnnotFree() {
-            $("#filt_freenumst,#filt_freenumend,#filt_freetxtval").val("");
-            $("#filt_annot,#filt_freenum,#filt_freetxt").val(null).trigger("change");
-        }
-
-        jQuery(window).bind('beforeunload', function () {
-            if (Object.keys(PendingChanges).length > 0)
-                return "Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?"
-        });
-
-        function GotoWithFilter(Target) {
-            LoadRightPane(Target);
-        }
-
-        function AdvancedAnnot() {
-            if ($('#projid').val() == null) return;
-            $("#PopupDetails .modal-content").html("Loading...");
-            $('#PopupDetails .modal-lg').css('width', 800);
-            $('#PopupDetails').modal({});
-
-            var url = "/search/annotators/" + $('#projid').val();
-            $("#PopupDetails .modal-content").load(url, function () {
-                var lst = "";
-                var sampleid = $('#filt_annot');
-                lst = $.map(sampleid.find('option:selected'), function (element) {
-                    return $(element).val()
-                }).join(', ');
-                $('#txtlstsample').val(lst);
-                SampleTxtToCB();
-
-            });
-
-        }
-
-    </script>
     <div id="column-right">
       RIGHT
       {% if right=='dodefault' %}
@@ -1186,7 +419,7 @@
     </div>
   </div> {# Container #}
 
-  <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+  <div id="PopupDetails" class="modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         ...
@@ -1195,6 +428,590 @@
   </div>
 
   <script>
+      var PendingChanges = {};
+      var PendingChangesTaxoName = {};
+      var PrevTxtFilter = "INITIAL";
+      var RightPanelScrollPosAfterLoad = 0;
+      DragInProgress = false;
+      drag_start_time = null;
+
+      function InGreyButton(s, eraser) {
+          // small reminder of a filter, clicking on it erases it with given function
+          return " <button type=button class='btn btn-gris btn-xs' onclick='" + eraser + ";LoadRightPane();'><div>"
+              + s + "</div> <span class='glyphicon glyphicon-remove'></span></button>";
+      }
+
+      $('#SharePageBtn').click(function (e) {
+          if (e.ctrlKey)
+              LoadRightPane('mailN');
+          else
+              LoadRightPane('mail');
+      });
+
+      function LoadRightPane(NoAjax, SaveInProfile) {
+          document.activeElement.blur();
+          if (Object.keys(PendingChanges).length > 0)
+              if (confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?") == false)
+                  return;
+
+          var TxtFilter = "", jqtaxofilter = $("#taxofilter"), jqtaxofilterlbl = $("#taxofilterlabel"),
+              jqcolumnright = $("#column-right");
+          var req = {taxo: jqtaxofilter.val(), resultwidth: jqcolumnright.width(), windowheight: $(window).height()};
+          if (jqtaxofilterlbl.val() != "")
+              TxtFilter += InGreyButton("Taxo=" + jqtaxofilterlbl.val(), "SetTaxoFilter(false)");
+          $(".activeTaxo").removeClass("activeTaxo");
+          if (jqtaxofilter.val() != "")
+              $("#TabA").find("[data-taxoid=" + jqtaxofilter.val() + "]").addClass("activeTaxo");
+
+          req['taxochild'] = $("#taxofilterchild").val();
+          req['ipp'] = $("#ipp").val();
+          req['zoom'] = $("#zoom").val();
+          req['sortby'] = $("#sortby").val();
+          req['magenabled'] = $("#magenabled").prop("checked") ? "1" : "0";
+          req['popupenabled'] = $("#popupenabled").prop("checked") ? "1" : "0";
+          var jqstatusfilter = $("#statusfilter");
+          req['statusfilter'] = jqstatusfilter.val();
+          if (jqstatusfilter.val() != "")
+              TxtFilter += InGreyButton("Status=" + jqstatusfilter.find("option:selected").text(), "$(\"#statusfilter\").val(null)");
+
+          // enrich req with filters
+          var labels = {};
+          var clearers = {};
+          GetFiltersFromTab(req, labels, clearers);
+          if ('MapN' in req)
+              TxtFilter += InGreyButton(" Position=(" + req['MapN'] + "," + req['MapW'] + "," +
+                  req['MapE'] + "," + req['MapS'] + ")", "ClearCoord()");
+          if ('depthmin' in req)
+              TxtFilter += InGreyButton(" Depth in(" + req['depthmin'] + "-" + req['depthmax'] + ")", "ClearDepths()");
+          if ('freenum' in req)
+              TxtFilter += InGreyButton(labels.freenum, clearers.freenum);
+          if ('freetxt' in req)
+              TxtFilter += InGreyButton(labels.freetxt, clearers.freetxt);
+          if ('samples' in req)
+              TxtFilter += InGreyButton("Samples=" + labels.samples, "ClearSamples()");
+          if ('instrum' in req)
+              TxtFilter += InGreyButton("Instrument =" + req['instrum'], "ClearInstrum()");
+          if ('month' in req)
+              TxtFilter += InGreyButton("Month=" + labels.month, "ClearDates()");
+          if ('filt_annot' in req)
+              TxtFilter += InGreyButton("Annotator=" + labels.filt_annot, clearers.filt_annot);
+          if ('fromdate' in req)
+              TxtFilter += InGreyButton("Date &ge; " + req['fromdate'], "ClearDates()");
+          if ('todate' in req)
+              TxtFilter += InGreyButton("Date &le; " + req['todate'], "ClearDates()");
+          if ('fromtime' in req && 'totime' in req)
+              TxtFilter += InGreyButton("Time &ge; " + req['fromtime'] + ",&le;" + req['totime'], "ClearTimes()");
+          else {
+              if ('fromtime' in req)
+                  TxtFilter += InGreyButton("Time &ge; " + req['fromtime'], "ClearTimes()");
+              if ('totime' in req)
+                  TxtFilter += InGreyButton("Time &le; " + req['totime'], "ClearTimes()");
+          }
+          if ('inverttime' in req)
+              TxtFilter += InGreyButton("Time Invert", clearers.inverttime);
+          if ('daytime' in req)
+              TxtFilter += InGreyButton("DayTime=" + labels.daytime, "ClearTimes()");
+          if ('validfromdate' in req)
+              TxtFilter += InGreyButton("Valid date &ge; " + req['validfromdate'], clearers.validfromdate);
+          if ('validtodate' in req)
+              TxtFilter += InGreyButton("Valid date &le; " + req['validtodate'], clearers.validtodate);
+
+          // enrich req with chosen sort and display fields
+          req['sortorder'] = $('#sortorder').hasClass("glyphicon-sort-by-attributes-alt") ? "desc" : 'asc';
+          req['dispfield'] = "";
+          $("#dispfieldlist").find(".glyphicon-ok").closest("li").each(function () {
+              req['dispfield'] += " " + $(this).prop("id");
+          });
+          req['projid'] = $("#projid").val();
+          $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
+          PendingChanges = {};
+          {# After load there's no pending changes #}
+          PendingChangesTaxoName = {};
+          if (TxtFilter != "")
+              TxtFilter = "Filter: " + TxtFilter;
+          var jqpageoffset = $("#pageoffset");
+          if (TxtFilter != PrevTxtFilter) {
+              {# Si une condition change on revient page 1 #}
+              if (PrevTxtFilter != "INITIAL") // Mais pas sur le premier load de page qui peut être avec une URL qui met un filtre
+                  jqpageoffset.val(0);
+              PrevTxtFilter = TxtFilter;
+          }
+          req['pageoffset'] = jqpageoffset.val();
+          var urlparam = {}, url, k;
+          if ((NoAjax === 'mail') || (NoAjax === 'mailN')) {
+              delete req["resultwidth"];
+              delete req["windowheight"];
+              for (k in req)
+                  urlparam[k] = req[k];
+              url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + $.param(urlparam);
+              url = "mailto:?subject=Ecotaxa%20page%20share&body=" + encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n" + url);
+              if (NoAjax === 'mail')
+                  window.location = url;
+              else
+                  window.open(url, '_blank');
+              return;
+          }
+          if (typeof (NoAjax) === 'string') {
+              {# Une URL #}
+              delete req["resultwidth"];
+              delete req["windowheight"];
+              for (k in req)
+                  if (req[k] !== "")
+                      urlparam[k] = req[k];
+              url = NoAjax;
+              if (url.indexOf('?') > 0) url += "&";
+              else url += "?";
+              url += $.param(urlparam);
+              window.location = url;
+              return;
+          }
+          if (SaveInProfile == true)
+              req["saveinprofile"] = 'Y';
+          // Show spinning wheel
+          jqcolumnright.html("<img src='/static/spinningred.gif'> Loading <span id='load_progress'></span>");
+          // Launch progress indicator
+          UpdateRightPaneProgress(req);
+          // Launch real load
+          AsyncSingleLoadRightPane(jqcolumnright, req);
+          $('#headersubtitle').html(TxtFilter);
+      }
+
+      function UpdateRightPaneProgress(req) {
+          // Show a series of dots while the user is waiting for query to return
+          var proj_id = req['projid'];
+          var req_clone = $.extend({}, req); // A shallow copy is good enough
+          $.ajax({
+              type: "GET",
+              url: "/api/samples/search?project_ids=" + proj_id + "&id_pattern=",
+              success: function (rsp) {
+                  if (rsp.length == 0) {
+                      return;
+                  }
+                  var first_sample_id = rsp[0].sampleid;
+                  var nb_samples = rsp.length;
+                  req_clone['samples'] = first_sample_id;
+                  var req_start = new Date();
+                  $.ajax({
+                      type: "POST",
+                      // Don't bother replicating the full query, anyway it's just for heating up caches
+                      url: "/api/object_set/" + proj_id + "/query?window_size=10000",
+                      data: JSON.stringify(req_clone),
+                      contentType: "application/json; charset=utf-8",
+                      dataType: "json",
+                      success: function (rsp) {
+                          var req_end = new Date();
+                          // We now have an estimate of time for the first sample
+                          var elapsed = req_end.getTime() - req_start.getTime();
+                          // Let's say 32 dots...
+                          elapsed = elapsed * nb_samples / 32;
+                          if (elapsed < 500) {
+                              elapsed = 500;
+                          } // Useless to show too quick animation
+                          var dots = "🔎";
+                          $('#load_progress').html(dots);
+                          var interv = setInterval(function () {
+                              dots = dots + "🔎";
+                              if ($('#load_progress').length) {
+                                  $('#load_progress').html(dots);
+                              } else {
+                                  clearInterval(interv);
+                              }
+                          }, elapsed);
+                      },
+                      error: function (jqXHR, textStatus, errorThrown) {
+                          $('#load_progress').html(textStatus + ":" + errorThrown);
+                      }
+                  });
+                  $('#load_progress').html("⌚");
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                  $('#load_progress').html(textStatus + ":" + errorThrown);
+              }
+          });
+      }
+
+      var theOnlyLazyLoader = null;
+
+      var theOnlyRightPaneXHR = null;
+
+      function AsyncSingleLoadRightPane(elem, req) {
+          // Load right pane, but cancel a previous load if in progress. github #281.
+          // Below is a copy/paste/simplify of JQuery load(), as this primitive does
+          // not return the generated XHR object.
+          if (theOnlyRightPaneXHR && theOnlyRightPaneXHR.readyState != 4) {
+              // abort request in progress, we want new request results and only them
+              theOnlyRightPaneXHR.abort();
+          }
+          if (theOnlyLazyLoader !== null) {
+              // Lazy loader does the loading for detached DOM elements as well -> Gh #402 for big page size
+              theOnlyLazyLoader.destroy();
+              theOnlyLazyLoader = null;
+          }
+          theOnlyRightPaneXHR = jQuery.ajax({
+              url: "/prj/LoadRightPane",
+              type: "POST",
+              dataType: "html",
+              data: req
+          }).done(function (responseText) {
+              // Detach present DOM and inject the new one
+              elem.html(responseText);
+          }).error(function (jqXHR, opts, error) {
+              if (error !== "abort") {
+                  msg = "Request problem " + JSON.stringify(jqXHR);
+                  msg += "<br>Refreshing the page could cure this problem.";
+                  elem.html(msg);
+              }
+          });
+      }
+
+      function RefreshClassifTab() {
+          // Refresh (or load from 0) the category tree
+          RestoreHighLigthID = $('#categtree .ui-state-highlight').data('taxoid');
+          RestoreActiveTaxoID = $('#categtree .activeTaxo').data('taxoid');
+          var HiddenItems = $('#categtree td').filter(function () {
+              return $(this).css('display') === 'none';
+          }).map(function () {
+              return $(this).data('taxoid');
+          }).get();
+          var HorizArrow = $('#categtree td span.glyphicon-triangle-right').closest('td').map(function () {
+              return $(this).data('taxoid');
+          }).get();
+          var PosScrollBar = $('#divclassiftab').scrollTop();
+          // Launch a request to get table content
+          $("#categtree").load("/prjGetClassifTab/" + $("#projid").val(), {}, function () {
+              MakeCateTreeClickableDroppable();
+              {#    Restore le surlignage jaune dans l'arbre #}
+              if (RestoreHighLigthID) {
+                  $('td[data-taxoid=' + RestoreHighLigthID + ']').addClass('ui-state-highlight');
+              }
+              {#    Restore le surlignage Gris dans l'arbre/activeTaxo pour filtrage #}
+              if (RestoreActiveTaxoID) {
+                  $('td[data-taxoid=' + RestoreActiveTaxoID + ']').addClass('activeTaxo');
+              }
+              $.each(HiddenItems, function (k, v) {
+                  {# Masque ceux qui etaient déjà cachés #}
+                  $('.classiftab td[data-taxoid=' + v + ']').css('display', 'none');
+              });
+              $.each(HorizArrow, function (k, v) {
+                  {# Masque ceux qui etaient déjà cachés #}
+                  $('.classiftab td[data-taxoid=' + v + '] span.glyphicon-triangle-bottom').removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-right");
+              });
+              $('#divclassiftab').scrollTop(PosScrollBar);
+          });
+
+      }
+
+      function SortToggle(NoRefresh) {
+          if ($('#sortorder').hasClass("glyphicon-sort-by-attributes"))
+              $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title", "Current Sort : Descending");
+          else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title", "Current Sort : Ascending");
+          if (NoRefresh !== 'NoRefresh') {
+              $("#pageoffset").val(0);
+              {# Force le retour à la premiere page #}
+              LoadRightPane();
+              {# 20181024 Autorefresh #}
+          }
+      }
+
+      function ToggleDispField(caller) {
+          $('#' + caller).find('span').toggleClass("glyphicon-ok");
+          $('#' + caller).find('span').removeClass("ManualAdd");
+          $('#' + caller).find('span.glyphicon-ok').addClass("ManualAdd");
+          LoadRightPane();
+          {# 20181024 Autorefresh #}
+          //return false;
+      }
+
+      function gotopage(nopage) {
+          $("#pageoffset").val(nopage);
+          LoadRightPane();
+      }
+
+      $(document).ready(function () {
+          if ("{{data.sortorder}}" == "desc") {   //TOCHECK LN
+              SortToggle('NoRefresh');
+          }
+          $('[data-toggle="tooltip"]').tooltip();
+          $("#titledivtitle").css("max-width", $("#titlediv").parent().width() - 150);
+          {% if g.taxofilter %}
+              SetTaxoFilter({{ g.taxofilter }}, "{{ g.taxofilterlabel }}"{{ ",true" if g.taxochild == 'Y' }});
+          {% endif %}
+
+          var PreviousSort = $('#sortby').val();
+          {# Si on choisit un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields #}
+          $('#sortby').change(function () {
+              $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
+              $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
+              PreviousSort = $(this).val();
+              $("#pageoffset").val(0);
+              {# Changement d'ordre on revient à la première page #}
+              LoadRightPane();
+              {# 20181024 Autorefresh #}
+          });
+          $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () {
+              LoadRightPane();
+          });
+
+          $(document).bind('keydown', 'Test1', function (e) {
+              if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+                  // CTRL but no SHIFT
+                  switch (e.keyCode) {
+                      case 65:
+                      {# CTRL + A #}
+                          SelectAll(e);
+                          e.preventDefault();
+                          break;
+                      case 68:
+                      {# CTRL + D #}
+                          AssignCurrentTaxoToSelection();
+                          e.preventDefault();
+                          break;
+                      case 76:
+                      {# CTRL + L #}
+                          ValidateSelection('V');
+                          e.preventDefault();
+                          break;
+                      case 83:
+                      {# CTRL + S #}
+                          SavePendingChanges();
+                          e.preventDefault();
+                          break;
+                      case 37:
+                          KeyboardMoveSelection("LEFT");
+                          e.preventDefault();
+                          break;
+                      case 38:
+                          KeyboardMoveSelection("UP");
+                          e.preventDefault();
+                          break;
+                      case 39:
+                          KeyboardMoveSelection("RIGHT");
+                          e.preventDefault();
+                          break;
+                      case 40:
+                          KeyboardMoveSelection("DOWN");
+                          e.preventDefault();
+                          break;
+                  }
+              }
+              if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+                  switch (e.keyCode) {
+                      case 37:
+                          var curr_page = +$("#pageoffset").val();
+                          if (curr_page > 0) gotopage(curr_page - 1);
+                          e.preventDefault();
+                          break;
+                      case 39:
+                          var curr_page = +$("#pageoffset").val();
+                          gotopage(curr_page + 1);
+                          e.preventDefault();
+                          break;
+                  }
+              }
+          });
+
+          {#  Si pression sur une touche alors que le focus n'est sur aucun input (donc dans body), on ouvre la popup #}
+          $(document).bind('keydown', function (e) {
+              const node_name = document.activeElement.nodeName;
+              if (node_name !== 'BODY' && node_name !== 'SPAN') {
+                  if (e.keyCode === 13 && e.target.className === "select2-search__field") {
+                      // A RETURN was typed in the select2, which could not handle it, because not done yet,
+                      // e.g. due to a network query in progress. Try to replay it.
+                      const sel2 = $('#taxolbanno');
+                      const todo = function () {
+                          const possible = $('.select2-results__option--highlighted');
+                          if (possible.length !== 1) return;
+                          const the_one = possible.get(0);
+                          const sel_data = $(the_one).data('data');
+                          // Close the dropdown
+                          sel2.select2("close") // select2.full.js l:5516
+                          // Show the wanted option
+                          var newOption = new Option(sel_data.text, sel_data.id, false, false);
+                          sel2.append(newOption);
+                          sel2.val([sel_data.id]).change();
+                          // Assign as if the choice was made
+                          AssignTaxoLbToSelection(sel_data.id, sel_data.text)
+                      };
+                      // @see taxopopup.html for the call
+                      sel2.data('todo_after_ajax', todo);
+                  }
+                  return;
+              }
+              // Need a plain unmodified letter to start...
+              if (e.keyCode < 65 || e.keyCode > 90 || e.ctrlKey || e.metaKey)
+                  return;
+              // ...and a selection
+              if ($(".ui-selected").length === 0)
+                  return;
+              const sel2 = $('#taxolbanno');
+              const typedKey = String.fromCharCode(e.keyCode).toLocaleLowerCase();
+              // When the select2 "open" executes, it will trigger a query to the server
+              // with what's inside, i.e. nothing. The line below will add present key
+              // into the query params. Search for 'first_keys' magic value in 'taxopopup.html' code.
+              const first_keys = sel2.data('first_keys');
+              const next_first_keys = (first_keys ? first_keys : '') + typedKey;
+              sel2.data('first_keys', next_first_keys);
+              // Open the select2, it will trigger the amended query...
+              sel2.select2("open");
+              // ...and switch on the visibility of the beginning filter.
+
+              const search = $('.taxopopup .select2-search__field');
+              // Add current key into search box as well
+              search.val(next_first_keys);
+              e.preventDefault();
+          });
+      }); // document.ready
+
+      function UpdateSelectedCounter() {
+          // Asynchronously update the selected counter, as it takes some time for jQuery to find selected nodes
+          // especially on 1000 images setting
+          setTimeout(function () {
+              var nbr = $("#column-right").find("td.ui-selected").size();
+              if (nbr > 0) nbr = nbr + " Selected";
+              else nbr = "";
+              $('#nbrselected').text(nbr);
+          }, 0);
+      }
+
+      function PostAddImages() {
+          $(document).scrollTop(0);
+          // Required to  have Select2 component working on Bootstrap Popup
+          $.fn.modal.Constructor.prototype.enforceFocus = function () {
+          };
+          // Add Zoom & lazy loading of images
+          theOnlyLazyLoader = jQuery('div#column-right img.lazy').Lazy({
+              bind: 'event',
+              afterLoad: function (element) {
+                  if ($('#magenabled').prop("checked") == false)
+                      return; // Si il y a une checkbox magenabled et qu'elle est decochée on ne met pas le zoom
+                  AddZoom(element);
+              },
+              chainable: false // return the instance i.e. loader itself
+          });
+          // Make sub image draggable
+          jQuery('.imgtab td').draggable({
+              revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
+              cursorAt: {top: 0, left: 0},
+              start: function (event, ui) {
+                  DragInProgress = true;
+                  drag_start_time = event.timeStamp;
+              },
+              stop: function (event, ui) {
+                  DragInProgress = false;
+                  if (event.timeStamp - drag_start_time < 150) {
+                      // Less than 150ms, so not at drag, rather a click while moving mouse
+                      event.target.click();
+                  }
+                  drag_start_time = null;
+              },
+              helper: function (ev) {
+                  return $("<img src='/static/drag_cursor.png'>");
+              }
+          });
+          {#        jQuery('.imgtab td img').draggable({ revert: true, revertDuration: 0 });#}
+          // Make the cell clickable for selection
+          jQuery('.imgtab td').click(function (e) {
+              if ($(e.target).hasClass('linestart')) {
+                  var nbrselectedinline = $(e.target).closest('tr').find('td.ui-selected').size();
+                  if ((e.shiftKey) || (nbrselectedinline > 0)) { // Unselect line
+                      $(e.target).closest('tr').find('td').removeClass('ui-selected');
+                      if (window.getSelection) {
+                          if (window.getSelection().empty) {  // Chrome
+                              window.getSelection().empty();
+                          } else if (window.getSelection().removeAllRanges) {  // Firefox
+                              window.getSelection().removeAllRanges();
+                          }
+                      } else if (document.selection) {  // IE?
+                          document.selection.empty();
+                      }
+                      UpdateSelectedCounter();
+                      return;
+                  }
+              }
+              if ((e.ctrlKey) || (e.metaKey))
+                  {#  20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple #}
+                  $('.ui-selected').removeClass('ui-selected');
+              if ($(e.target).hasClass('linestart')) // select line (except this first column)
+                  $(e.target).closest('tr').find('td:nth-child(1n+2)').addClass('ui-selected');
+              else
+                  $(e.target).closest('td').toggleClass('ui-selected');
+              UpdateSelectedCounter()
+          });
+          // Make ZoomTracker Clickable for selection
+          jQuery('body').delegate('.zoomtracker', 'click', function (e) {
+              {# if ((!e.ctrlKey) && (!e.metaKey)) 20161018 on inverse la logique CTRL permet de ne PAS faire de selection multiple#}
+              if ((e.ctrlKey) || (e.metaKey))
+                  $('.ui-selected').toggleClass('ui-selected');
+              $($(e.target).data("specs").origImg.parents("td")[0]).toggleClass('ui-selected');
+              UpdateSelectedCounter();
+          });
+          // setup zoomtracker creation tracking to make them draggable
+          var target = $("body")[0];
+          var observer = new MutationObserver(function (mutations) {
+              mutations.forEach(function (mutation) {
+                  var newNodes = mutation.addedNodes; // DOM NodeList
+                  if (newNodes !== null) { // If there are new nodes added
+                      var $nodes = $(newNodes); // jQuery set
+                      $nodes.each(function () {
+                          var $node = $(this);
+                          if ($node.hasClass("zoomtracker")) {
+                              //console.log("zoomtracker");
+                              jQuery($node).draggable({
+                                  revert: true, revertDuration: 0, cursor: "move", refreshPositions: true,
+                                  cursorAt: {top: 0, left: 0},
+                                  helper: function (ev) {
+                                      return $("<img src='/static/drag_cursor.png'>");
+                                  }
+                              });
+                          }
+                      });
+                  }
+              });
+          });
+          var config = {attributes: true, childList: true, characterData: true};
+          observer.observe(target, config);
+          // Enable the popover
+          var option = {'trigger': 'hover', 'html': true};
+          $('div.subimg').popover(option);
+          $('.ddets').click(function (e) {
+              e.stopPropagation();
+              //            var url="/objectdetails/"+$(e.target).closest('td').find('img').prop('id').substr(1);
+              //            var win = window.open(url, '_blank');
+              var url = "/objectdetails/" + $(e.target).closest('td').find('img').prop('id').substr(1) + "?w=" + ($(window).width() - 400) + "&h=" + ($(window).height() - 40) + "&ajax=1";
+              var options = {};
+              $("#PopupDetails .modal-content").html("Loading...");
+
+              $('#PopupDetails .modal-lg').css('width', $(window).width() - 40);
+              $('#PopupDetails').modal(options);
+              $("#PopupDetails .modal-content").load(url);
+          });
+          $('#PopupDetails').on('hidden.bs.modal', function (e) {
+              $("#PopupDetails .modal-content").html("CLEAN");
+              $(".zoomContainer").remove();
+          });
+
+          jQuery('.SpanSelectAll').click(SelectAll);
+          $(document).scrollTop(RightPanelScrollPosAfterLoad);
+          RightPanelScrollPosAfterLoad = 0;
+      }  //PostAddImages
+
+      function SelectAll(e) {
+          if (!e.shiftKey)
+              jQuery('.imgtab td:not(.linestart)').addClass('ui-selected');
+          else
+              jQuery('.imgtab td:not(.linestart)').removeClass('ui-selected');
+          UpdateSelectedCounter();
+      }
+
+      jQuery(window).bind('beforeunload', function () {
+          if (Object.keys(PendingChanges).length > 0)
+              return "Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?"
+      });
+
+      function GotoWithFilter(Target) {
+          LoadRightPane(Target);
+      }
+
       function SetTaxoFilter(taxofiltervalue, taxofilterlabel, withchild) {
           //debugger;
           var WithChild = 'N';
@@ -1222,9 +1039,7 @@
           } else {
               $(this).removeClass("glyphicon-triangle-right").addClass("glyphicon-triangle-bottom");
               $('#divclassiftab .visib' + $(this).closest("td").data("taxoid")).show();
-
           }
-
       }
 
       {% if g.PrjAnnotate or g.PrjManager %}
@@ -1401,7 +1216,7 @@
           }
       {% endif %}
 
-      function MakeCategTreeClickableDropable() {
+      function MakeCateTreeClickableDroppable() {
           // Category tree was loaded, from initial or XHR. Set event handlers.
           $("#categtree td"
               {% if g.PrjAnnotate or g.PrjManager %}
@@ -1469,7 +1284,7 @@
 
       $(function () {
 
-          MakeCategTreeClickableDropable();
+          MakeCateTreeClickableDroppable();
 
           // Narrow the category + select tab height, which makes it scrollable.
           // TODO: Should be solvable with proper CSS

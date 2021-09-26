@@ -1,3 +1,5 @@
+{% import "js_macros.html" as js %}
+
 <style>
   {#Permet de reduire la taille et l'espace du texte du dropdown Taxo Sample#}
   #select2-sampleid-results li {
@@ -124,7 +126,51 @@
            placeholder="Instrument">
   </div>
 </div>
-
+{# ------- Annotator / Freefilter ------------#}
+{% if data.inexplore!=True %}
+  <div class="filter ">
+    <div class="form-group-sm">
+      <label class="title">Annotator / Free filters</label>
+      <a class="pull-right label label-default"
+         style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
+         onclick='ClearAnnotFree();return false;'>Clear</a>
+      <a class="pull-right label label-info"
+         style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;margin-right: 5px;"
+         href=# onclick='AdvancedAnnot();return false;'>Advanced</a>
+      <select class="form-control" id="filt_annot" name="filt_annot" style="width: 100%"
+              multiple autocomplete="off">{{ data.filt_annot_for_select|safe }}</select>
+    </div>
+  </div>
+  <div>
+    <input class="form-control" type="text" style="width: 100%" id="filt_validfromdate"
+           name="filt_validfromdate" value="" autocomplete="off"
+           placeholder="Validation date begin">
+    <input class="form-control" type="text" style="width: 100%" id="filt_validtodate"
+           name="filt_validtodate" value="" autocomplete="off"
+           placeholder="Validation date end">
+  </div>
+  <form class="form-inline">
+    <select class="form-control" id="filt_freenum" name="filt_freenum" style="width: 49%"
+            autocomplete="off">
+      {{ data.filt_freenum_for_select|safe }}
+    </select>
+    <input class="form-control" type="text" style="width: 24%" id="filt_freenumst"
+           name="filt_freenumst" value="{{ data.freenumst }}" autocomplete="off"
+           placeholder=">=">
+    <input class="form-control" type="text" style="width: 24%" id="filt_freenumend"
+           name="filt_freenumend" value="{{ data.freenumend }}" autocomplete="off"
+           placeholder="<=">
+  </form>
+  <form class="form-inline">
+    <select class="form-control" id="filt_freetxt" name="filt_freetxt" style="width: 59%"
+            autocomplete="off">
+      {{ data.filt_freetxt_for_select|safe }}
+    </select>
+    <input class="form-control" type="text" style="width: 39%" id="filt_freetxtval"
+           name="filt_freetxtval" value="{{ data.freetxtval }}" autocomplete="off"
+           placeholder="contains">
+  </form>
+{% endif %}
 <script>
     function OpenMap(projid) {
         $("#mappanel").remove();
@@ -243,7 +289,6 @@
         $("#filt_fromdate,#filt_todate").datepicker({
             showButtonPanel: true, changeMonth: true, changeYear: true, dateFormat: "yy-mm-dd",
         });
-
         $("#time-slider-range").slider({
             range: true,
             min: 0,
@@ -262,5 +307,195 @@
             UpdateTimeSliderColor();
         });
         UpdateTimeSliderColor();
+        $("#filt_freetxt").select2({
+            ajax: {
+                url: "/prj/GetFieldList/{{ g.Projid }}/t",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {q: params.term, page: params.page};
+                },
+                processResults: function (data, page) {
+                    return {results: data};
+                },
+                cache: true
+            }, placeholder: "Text field", dropdownCssClass: "width240"
+        });
+        $('#filt_validfromdate,#filt_validtodate').datetimepicker({format: 'Y-m-d H:i'});
+        $("#filt_annot").{{ js.select2_user() }}; // Select2 Ajax
+        $("#filt_freenum").select2({
+            ajax: {
+                url: "/prj/GetFieldList/{{ g.Projid }}/n",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {q: params.term, page: params.page};
+                },
+                processResults: function (data, page) {
+                    return {results: data};
+                },
+                cache: true
+            }, placeholder: "Num. field", dropdownCssClass: "width240"
+        });
+
+
     });
+
+    function ClearAnnotFree() {
+        $("#filt_freenumst,#filt_freenumend,#filt_freetxtval").val("");
+        $("#filt_annot,#filt_freenum,#filt_freetxt").val(null).trigger("change");
+    }
+
+
+    function ClearAllFilterCriteria() {
+        ClearCoord();
+        ClearDates();
+        ClearTimes();
+        ClearSamples();
+        ClearInstrum();
+        ClearDepths();
+        ClearAnnotFree();
+    }
+
+    function GetAllSelected(jq_elem) {
+        return $.map(jq_elem.find('option:selected'),
+            function (elem) {
+                return $(elem).text()
+            }).join(', ')
+    }
+
+    function GetFiltersFromTab(req, labels, clearers) {
+        // Look in DOM for filt_ fields and complete the request
+        req['MapN'] = $("#filt_MapOutN").val();
+        req['MapW'] = $("#filt_MapOutW").val();
+        req['MapE'] = $("#filt_MapOutE").val();
+        req['MapS'] = $("#filt_MapOutS").val();
+        if ((req['MapN'] != "") && (req['MapW'] != "") && (req['MapE'] != "") && (req['MapS'] != "")) {
+            // OK it's consistent
+        } else {
+            delete req['MapN'];
+            delete req['MapW'];
+            delete req['MapE'];
+            delete req['MapS'];
+        }
+
+        req['depthmin'] = $("#filt_depthmin").val();
+        req['depthmax'] = $("#filt_depthmax").val();
+        if ((req['depthmin'] != "") && (req['depthmax'] != "")) {
+            // OK it's consistent
+        } else {
+            delete req['depthmin'];
+            delete req['depthmax'];
+        }
+
+        var jqfreenum = $("#filt_freenum");
+        req['freenum'] = jqfreenum.val();
+        req['freenumst'] = $("#filt_freenumst").val();
+        req['freenumend'] = $("#filt_freenumend").val();
+        if ((req['freenum'] !== "") && ((req['freenumst'] !== "") || (req['freenumend'] !== ""))) {
+            labels['freenum'] = jqfreenum.find("option:selected").text() +
+                " in(" + req['freenumst'] + "-" + req['freenumend'] + ")";
+            clearers['freenum'] = "$(\"#filt_freenum,#filt_freenumst,#filt_freenumend\").val(null).trigger(\"change\")";
+        } else {
+            delete req['freenum'];
+            delete req['freenumst'];
+            delete req['freenumend'];
+        }
+
+        var jqfreetxt = $("#filt_freetxt");
+        req['freetxt'] = jqfreetxt.val();
+        req['freetxtval'] = $("#filt_freetxtval").val();
+        if ((req['freetxt'] != "") && (req['freetxtval'] != "")) {
+            labels['freetxt'] = jqfreetxt.find("option:selected").text() + " contains " + req['freetxtval'];
+            clearers['freetxt'] = "$(\"#filt_freetxt,#filt_freetxtval\").val(null).trigger(\"change\")";
+        } else {
+            delete req['freetxt'];
+            delete req['freetxtval'];
+        }
+
+        var sampleid = $('#sampleid');
+        if (sampleid.val() != null) {
+            req['samples'] = String(sampleid.val());
+            labels['samples'] = GetAllSelected(sampleid);
+        }
+
+        var instrum = $("#filt_instrum");
+        if (instrum.val() !== "") {
+            req['instrum'] = instrum.val();
+        }
+
+        var jqmonth = $('#month');
+        if (jqmonth.val() != null) {
+            req['month'] = String(jqmonth.val());
+            labels['month'] = GetAllSelected(jqmonth);
+        }
+
+        var jqannot = $('#filt_annot');
+        if (jqannot.val() != null) {
+            req['filt_annot'] = String(jqannot.val());
+            labels['filt_annot'] = GetAllSelected(jqannot);
+            clearers['filt_annot'] = "$(\"#filt_annot\").val(null).trigger(\"change\")";
+        }
+
+        req['fromdate'] = $("#filt_fromdate").val();
+        if (req['fromdate'] !== "") {
+        } else delete req['fromdate'];
+
+        req['todate'] = $("#filt_todate").val();
+        if (req['todate'] !== "") {
+        } else delete req['todate'];
+
+        req['fromtime'] = $("#filt_fromtime").val();
+        req['totime'] = $("#filt_totime").val();
+        if ((req['fromtime'] !== "") && (req['totime'] !== "")) {
+        } else {
+            if (req['fromtime'] !== "") {
+            } else delete req['fromtime'];
+            if (req['totime'] !== "") {
+            } else delete req['totime'];
+        }
+
+        req['inverttime'] = $("#filt_inverttime").prop("checked") ? "1" : "";
+        if (req['inverttime'] === "1") {
+            clearers['inverttime'] = "$(\"#filt_inverttime\").prop(\"checked\",false)";
+        } else delete req['inverttime'];
+
+        var jqdaytime = $('#daytime');
+        if (jqdaytime.val() != null) {
+            req['daytime'] = String(jqdaytime.val());
+            labels['daytime'] = GetAllSelected(jqdaytime);
+        }
+
+        req['validfromdate'] = $("#filt_validfromdate").val();
+        if (req['validfromdate'] !== "") {
+            clearers['validfromdate'] = '$(\"#filt_validfromdate\").val(\"\")';
+        } else delete req['validfromdate'];
+
+        req['validtodate'] = $("#filt_validtodate").val();
+        if (req['validtodate'] !== "") {
+            clearers['validtodate'] = '$(\"#filt_validtodate\").val(\"\")';
+        } else delete req['validtodate'];
+
+    }
+
+    function AdvancedAnnot() {
+        if ($('#projid').val() == null) return;
+        $("#PopupDetails .modal-content").html("Loading...");
+        $('#PopupDetails .modal-lg').css('width', 800);
+        $('#PopupDetails').modal({});
+
+        var url = "/search/annotators/" + $('#projid').val();
+        $("#PopupDetails .modal-content").load(url, function () {
+            var lst = "";
+            var sampleid = $('#filt_annot');
+            lst = $.map(sampleid.find('option:selected'), function (element) {
+                return $(element).val()
+            }).join(', ');
+            $('#txtlstsample').val(lst);
+            SampleTxtToCB();
+
+        });
+
+    }
+
 </script>
