@@ -3,144 +3,147 @@
 {% import "ht_macros.html" as ht %}
 
 {% block headcenter %}
-<script src="/static/jquerycontextmenu/jquery.ui.position.min.js" type="text/javascript"></script>
-<script src="/static/jquerycontextmenu/jquery.contextMenu.min.js" type="text/javascript"></script>
-<link href="/static/jquerycontextmenu/jquery.contextMenu.css" rel="stylesheet" type="text/css" />
-<script src="/static/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
-<link href="/static/jquery.datetimepicker.min.css" rel="stylesheet" type="text/css" />
-<script src="/static/jquery.nearest.min.js" type="text/javascript"></script>
+  <script src="/static/jquerycontextmenu/jquery.ui.position.min.js" type="text/javascript"></script>
+  <script src="/static/jquerycontextmenu/jquery.contextMenu.min.js" type="text/javascript"></script>
+  <link href="/static/jquerycontextmenu/jquery.contextMenu.css" rel="stylesheet" type="text/css"/>
+  <script src="/static/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+  <link href="/static/jquery.datetimepicker.min.css" rel="stylesheet" type="text/css"/>
+  <script src="/static/jquery.nearest.min.js" type="text/javascript"></script>
 
-{% if g.headmenu %}
-<table width="100%">
-    <tr>
+  {% if g.headmenu %}
+    <table width="100%">
+      <tr>
         <td style="white-space: nowrap;width: 170px;">
-            <div class="btn-group" style="margin-right: 5px">
-                <button type="button" class="btn btn-default" data-toggle="dropdown"
-                    style="padding: 6px;">Project</button>
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+          <div class="btn-group" style="margin-right: 5px">
+            <button type="button" class="btn btn-default" data-toggle="dropdown"
+                    style="padding: 6px;">Project
+            </button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
                     aria-expanded="false" style="padding: 6px;">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-left" role="menu">
-                    {%   for m in g.headmenu %}
-                    {% if m[1]=="SEP"%}
-                    <li class="divider"></li>
-                    {% else %}
-                    <li><a href="{{ m[0] }}">{{ m[1] }}</a></li>
-                    {% endif %}
-                    {%  endfor %}
-                </ul>
-            </div>
-            <div class="btn-group" style="margin-right: 5px">
-                <button type="button" class="btn btn-default" data-toggle="dropdown"
-                    style="padding: 6px;">Filtered</button>
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-left" role="menu">
+              {% for m in g.headmenu %}
+                {% if m[1]=="SEP" %}
+                  <li class="divider"></li>
+                {% else %}
+                  <li><a href="{{ m[0] }}">{{ m[1] }}</a></li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="btn-group" style="margin-right: 5px">
+            <button type="button" class="btn btn-default" data-toggle="dropdown"
+                    style="padding: 6px;">Filtered
+            </button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
                     aria-expanded="false" style="padding: 6px;">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-left" role="menu">
-                    {%   for m in g.headmenuF %}
-                    {% if m[1]=="SEP"%}
-                    <li class="divider"></li>
-                    {% else %}
-                    <li><a href="{{ m[0] }}">{{ m[1] }}</a></li>
-                    {% endif %}
-                    {%  endfor %}
-                </ul>
-            </div>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-left" role="menu">
+              {% for m in g.headmenuF %}
+                {% if m[1]=="SEP" %}
+                  <li class="divider"></li>
+                {% else %}
+                  <li><a href="{{ m[0] }}">{{ m[1] }}</a></li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
 
         </td>
         <td>
-            <div id="titlediv">
-                <div id=titledivtitle
-                    style="font-size: 18px;max-width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden; vertical-align: bottom;display: inline-block;">
-                    {{ g.ProjectTitle }}</div>
-                <div style="font-size: 12px;vertical-align: bottom;display: inline-block;"> (<span id=objcount></span>)
-                </div>
+          <div id="titlediv">
+            <div id=titledivtitle
+                 style="font-size: 18px;max-width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden; vertical-align: bottom;display: inline-block;">
+              {{ g.ProjectTitle }}</div>
+            <div style="font-size: 12px;vertical-align: bottom;display: inline-block;"> (<span id=objcount></span>)
             </div>
-            <div id="projectProgress" class="progress"
-                style="    height: 6px;    margin-bottom: 0;    margin-top: 1px;">
-                <div id="progress-bar-validated" class="progress-bar" style="width: 0;background-color: #5CB85C;"></div>
-                <div id="progress-bar-predicted" class="progress-bar" style="width: 0;background-color: #5bc0de;"></div>
-                <div id="progress-bar-dubious" class="progress-bar" style="width: 0;background-color: #F0AD4E;"></div>
-            </div>
-            <div id="headersubtitle" style="color:#FF6600;overflow-y: auto;height: 42px;"> </div>
+          </div>
+          <div id="projectProgress" class="progress"
+               style="    height: 6px;    margin-bottom: 0;    margin-top: 1px;">
+            <div id="progress-bar-validated" class="progress-bar" style="width: 0;background-color: #5CB85C;"></div>
+            <div id="progress-bar-predicted" class="progress-bar" style="width: 0;background-color: #5bc0de;"></div>
+            <div id="progress-bar-dubious" class="progress-bar" style="width: 0;background-color: #F0AD4E;"></div>
+          </div>
+          <div id="headersubtitle" style="color:#FF6600;overflow-y: auto;height: 42px;"></div>
 
         </td>
-    </tr>
-</table>
-{% else %}
-<table width="100%">
-    <tr>
+      </tr>
+    </table>
+  {% else %}
+    <table width="100%">
+      <tr>
         <td width="14%"></td>
         <td>
-            <div id="titlediv">
-                <div id=titledivtitle
-                    style="font-size: 18px;max-width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden; vertical-align: bottom;display: inline-block;">
-                    {{ g.ProjectTitle }}
-                </div>
+          <div id="titlediv">
+            <div id=titledivtitle
+                 style="font-size: 18px;max-width: 300px;white-space: nowrap; text-overflow: ellipsis; overflow: hidden; vertical-align: bottom;display: inline-block;">
+              {{ g.ProjectTitle }}
             </div>
+          </div>
         </td>
-    </tr>
-</table>
-{% endif %} {# If headmenu #}
+      </tr>
+    </table>
+  {% endif %} {# If headmenu #}
 
 {% endblock %}
 
 {% block body %}
-<div id="topbar">
+  <div id="topbar">
     <input type="hidden" id="projid" value="{{ g.Projid }}">
     <input type="hidden" id="taxofilter" value="" autocomplete="off">
     <input type="hidden" id="taxofilterlabel" value="" autocomplete="off">
     <input type="hidden" id="taxofilterchild" value="" autocomplete="off">
     <input type="hidden" id="pageoffset" value="{{ data.pageoffset }}" autocomplete="off">
     <table>
-        <tr>
-            <td>
-                <button type="button" class="btn btn-xs btn-primary" onclick="LoadRightPane();" style="width: 260px;">
-                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update view &amp; apply
-                    filter</button>
-                {{ top|safe }}
-            </td>
-            <td>
-                &nbsp;
-                <span class="btn btn-xs SpanSelectAll rm5"
-                    title="CTRL+A shortcut to select all. Hold shift key to unselect all">Select all</span>
+      <tr>
+        <td>
+          <button type="button" class="btn btn-xs btn-primary" onclick="LoadRightPane();" style="width: 260px;">
+            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update view &amp; apply
+            filter
+          </button>
+          {{ top|safe }}
+        </td>
+        <td>
+          &nbsp;
+          <span class="btn btn-xs SpanSelectAll rm5"
+                title="CTRL+A shortcut to select all. Hold shift key to unselect all">Select all</span>
 
-                <span class="glyphicon glyphicon-sort rm5"></span>
-            </td>
-            <td>
-                <select name="sortby" id="sortby" style="width: 100px" class="form-control rm5">
+          <span class="glyphicon glyphicon-sort rm5"></span>
+        </td>
+        <td>
+          <select name="sortby" id="sortby" style="width: 100px" class="form-control rm5">
 
-                    {% for key, value in data.sortlist.items() %}
-                    <option value="{{ key|e }}" {{ 'selected' if key==data.sortby }}> {{ value|e }}</option>
-                    {% endfor %}
-                </select>
-            </td>
-            <td>
-                <button type="button" class="btn btn-default btn-xs rm5" onclick="SortToggle();"
-                    title="Current Sort : Ascending">
+            {% for key, value in data.sortlist.items() %}
+              <option value="{{ key|e }}" {{ 'selected' if key==data.sortby }}> {{ value|e }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td>
+          <button type="button" class="btn btn-default btn-xs rm5" onclick="SortToggle();"
+                  title="Current Sort : Ascending">
                     <span id="sortorder" class="glyphicon glyphicon-sort-by-attributes"
-                        aria-hidden="true"></span></button>
+                          aria-hidden="true"></span></button>
 
-                <div class="btn-group rm5">
-                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">
-                        Display &nbsp;<span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <ul id="dispfieldlist" class="dropdown-menu">
-                        {% for key, value in data.fieldlist.items() %}
-                        <li id="dispfield_{{ key }}"> <a href="javascript:ToggleDispField('dispfield_{{ key }}');">
-                                {{ value|e }} <span
-                                    class="glyphicon {{ 'glyphicon-ok' if key in data.dispfield }}"></span></a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </td> {% if not g.PublicViewMode %}
-            <td>
-                <label for="statusfilter" data-toggle="tooltip" data-placement="bottom" data-html="true" class="rm5"
-                    style="margin-bottom: 0;" title="
+          <div class="btn-group rm5">
+            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+              Display &nbsp;<span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul id="dispfieldlist" class="dropdown-menu">
+              {% for key, value in data.fieldlist.items() %}
+                <li id="dispfield_{{ key }}"><a href="javascript:ToggleDispField('dispfield_{{ key }}');">
+                  {{ value|e }} <span
+                    class="glyphicon {{ 'glyphicon-ok' if key in data.dispfield }}"></span></a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </td> {% if not g.PublicViewMode %}
+        <td>
+          <label for="statusfilter" data-toggle="tooltip" data-placement="bottom" data-html="true" class="rm5"
+                 style="margin-bottom: 0;" title="
         <p style='text-align: left'>
         <b>All</b>: all images</br>
         <b>Unvalidated</b>: all images to validate (unclassified, predicted only and dubious)</br>
@@ -150,176 +153,182 @@
         <b>Valid. by others</b>: identification done by other users</br>
         <b>Valid. by me</b>: identification done by me</br>
         <b>Dubious</b>: dubious identification</div>">
-                    Status </label></td>
-            <td style="padding-right: 5px;" class="rm5">
-                <select name="statusfilter" id="statusfilter" class="form-control" data-original-title="" title=""
-                    style="width: 100px">
-                    {% for key, value in data.statuslist.items() %}
-                    <option value="{{ key|e }}" {{ 'selected' if key==data.statusfilter }}> {{ value|e }}</option>
-                    {% endfor %}
-                </select></td>
-            {% else %}
-            <td>
-                <input type="hidden" name="statusfilter" id="statusfilter" value="">
-                Status : Validated Only&nbsp;
-            </td>
-            {% endif %}
-            <td style="padding-right: 5px;">
-                <label for="ipp" style="margin-bottom: 0;"><span class="glyphicon glyphicon-th"></span></label>
-            </td>
-            <td style="padding-right: 5px;">
-                {{ ht.selectinputtuple("ipp",[('0','Fit'),('1','1'),('5','5'),('10','10'),('20','20'),('50','50'),('100','100'),('200','200'),('500','500'),('1000','1000')],data.ipp) }}
-            </td>
-            <td style="padding-right: 5px;"> <label for="zoom" style="margin-bottom: 0;"><span
-                        class="glyphicon glyphicon-zoom-in"></span>%</label>
-            </td>
-            <td style="padding-right: 5px;">
-                {{ ht.selectinput_form_control("zoom",['10','20','30','40','50','60','70','80','90','100','200'],data.zoom) }}</td>
-            <td>
-            </td>
-            <td>
-                <label for="magenabled" style="margin-bottom: 0;">
-                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-                </label>
-                {{ ht.checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
-            </td>
-            <td>
-                <label for="popupenabled" style="margin-bottom: 0;padding-left: 8px;">
-                    <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
-                </label>
-                {{ ht.checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
-            </td>
-            <td>&nbsp;
-                <button type=button class="btn btn-primary btn-xs" onclick="LoadRightPane();">
-                    <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-                </button>
-                <span id='PendingChanges2' class='text-danger'></span>
-            </td>
-            <td><span id="nbrselected" style="margin-left: 10px;"></span>&nbsp;
-            </td>
-        </tr>
+            Status </label></td>
+        <td style="padding-right: 5px;" class="rm5">
+          <select name="statusfilter" id="statusfilter" class="form-control" data-original-title="" title=""
+                  style="width: 100px">
+            {% for key, value in data.statuslist.items() %}
+              <option value="{{ key|e }}" {{ 'selected' if key==data.statusfilter }}> {{ value|e }}</option>
+            {% endfor %}
+          </select></td>
+      {% else %}
+        <td>
+          <input type="hidden" name="statusfilter" id="statusfilter" value="">
+          Status : Validated Only&nbsp;
+        </td>
+      {% endif %}
+        <td style="padding-right: 5px;">
+          <label for="ipp" style="margin-bottom: 0;"><span class="glyphicon glyphicon-th"></span></label>
+        </td>
+        <td style="padding-right: 5px;">
+          {{ ht.selectinputtuple("ipp",[('0','Fit'),('1','1'),('5','5'),('10','10'),('20','20'),('50','50'),('100','100'),('200','200'),('500','500'),('1000','1000')],data.ipp) }}
+        </td>
+        <td style="padding-right: 5px;"><label for="zoom" style="margin-bottom: 0;"><span
+            class="glyphicon glyphicon-zoom-in"></span>%</label>
+        </td>
+        <td style="padding-right: 5px;">
+          {{ ht.selectinput_form_control("zoom",['10','20','30','40','50','60','70','80','90','100','200'],data.zoom) }}</td>
+        <td>
+        </td>
+        <td>
+          <label for="magenabled" style="margin-bottom: 0;">
+            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+          </label>
+          {{ ht.checkboxinput("magenabled","1",data.magenabled,"style='margin:0px;'") }}
+        </td>
+        <td>
+          <label for="popupenabled" style="margin-bottom: 0;padding-left: 8px;">
+            <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+          </label>
+          {{ ht.checkboxinput("popupenabled","1",data.popupenabled,"style='margin:0px;'") }}
+        </td>
+        <td>&nbsp;
+          <button type=button class="btn btn-primary btn-xs" onclick="LoadRightPane();">
+            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+          </button>
+          <span id='PendingChanges2' class='text-danger'></span>
+        </td>
+        <td><span id="nbrselected" style="margin-left: 10px;"></span>&nbsp;
+        </td>
+      </tr>
     </table>
-</div>
-{% include "common/taxopopup.html" %}
-{% include "taxo_modal_div.html" %}
-{% include "taxo_modal_div_js.html" %}
+  </div>
+  {% include "common/taxopopup.html" %}
+  {% include "taxo_modal_div.html" %}
+  {% include "taxo_modal_div_js.html" %}
 
-<div id="bodycontainer">
+  <div id="bodycontainer">
     <div id="column-left" class="panelzzz " style="position: fixed;	top: 120px;	bottom: 0;	width: 260px;
 	                overflow-y: hidden; overflow-x: hidden;margin-bottom: 0;">
-        <div class="bodyleft" style="margin-left: 2px; width: 257px;">
-            <script>
-                $(document).ready(function () {
-                    $('#myTabs .nav-tabs a').click(function (e) {
-                        e.preventDefault();
-                        $(this).tab('show');
-                    });
+      <div class="bodyleft" style="margin-left: 2px; width: 257px;">
+        <script>
+            $(document).ready(function () {
+                $('#myTabs .nav-tabs a').click(function (e) {
+                    e.preventDefault();
+                    $(this).tab('show');
+                });
 
-                    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                        if ($(e.target).attr('href') == '#TabB') {# Doit être fait dans le changement de tab car au debut l'onglet n'est pas visible et le calcul est faut #}
+                $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                    if ($(e.target).attr('href') == '#TabB') {# Doit être fait dans le changement de tab car au debut l'onglet n'est pas visible et le calcul est faut #}
                         $("#TabB").outerHeight($("#column-left").innerHeight() - $("#TabB").position().top);
-                    });
-                }); {# ready #}
-                function DispClassificationHelp(projid) {
-                    $("#PopupDetails .modal-content").load("/static/taxofilterhelp_20190128.html");
-                    $('#PopupDetails').modal({});
-                }
+                });
+            });
+            {# ready #}
+
+            function DispClassificationHelp(projid) {
+                $("#PopupDetails .modal-content").load("/static/taxofilterhelp_20190128.html");
+                $('#PopupDetails').modal({});
+            }
 
 
-            </script>
-            <div id="myTabs">
-                <!-- Nav tabs -->
-                <ul class="nav nav-tabs nav-justified" role="tablist">
-                    <li role="presentation" class="active">
-                        <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Taxonomy filter
-                            <span title="Taxo filter help" class="glyphicon glyphicon-info-sign" style="color: black"
-                                onclick="DispClassificationHelp()"></span>
-                        </a>
+        </script>
+        <div id="myTabs">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs nav-justified" role="tablist">
+            <li role="presentation" class="active">
+              <a href="#TabA" aria-controls="home" role="tab" data-toggle="tab">Taxonomy filter
+                <span title="Taxo filter help" class="glyphicon glyphicon-info-sign" style="color: black"
+                      onclick="DispClassificationHelp()"></span>
+              </a>
 
-                    </li>
-                    <li role="presentation">
-                        <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Other filters</a>
-                    </li>
-                </ul>
-                <div class="tab-content">
-                    <!-- Tab panes -->
-                    {# Classification #}
-                    <div role="tabpanel" class="tab-pane active" id="TabA">
-                        {{ lefta|safe }}
-                    </div>
-                    {# Filters #}
-                    <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;overflow-x: hidden;">
-                        <div id="TabBInner" style="width: 240px;">
-                            <button class="btn btn-info" style="width: 49%" id=SharePageBtn
-                                title="Email a link to this page, including the current filters. Press CTRL to open it on another tab (usefull if you use GMail)"><span
-                                    class="glyphicon glyphicon-link"></span> Share page</button>
-                            <button onclick='ClearAllFilterCriteria();return false;' class="btn btn-info"
-                                style="width: 49%" title="Remove all selection criteria"><span
-                                    class="glyphicon glyphicon-remove"></span> Clear all filters</button>
-                            <br>
-                            {{ leftb|safe }}
-                            {# ------- Annotator / Freefilter ------------#}
-                            <div class="filter ">
-                                <div class="form-group-sm">
-                                    <label class="title">Annotator / Free filters</label>
-                                    <a class="pull-right label label-default"
-                                        style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
-                                        onclick='ClearAnnotFree();return false;'>Clear</a>
-                                    <a class="pull-right label label-info"
-                                        style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;margin-right: 5px;"
-                                        href=# onclick='AdvancedAnnot();return false;'>Advanced</a>
-                                    <select class="form-control" id="filt_annot" name="filt_annot" style="width: 100%"
-                                        multiple autocomplete="off">{{ data.filt_annot_for_select|safe }}</select>
-                                </div>
-                            </div>
-                            <div>
-                                <input class="form-control" type="text" style="width: 100%" id="filt_validfromdate"
-                                    name="filt_validfromdate" value="" autocomplete="off"
-                                    placeholder="Validation date begin">
-                                <input class="form-control" type="text" style="width: 100%" id="filt_validtodate"
-                                    name="filt_validtodate" value="" autocomplete="off"
-                                    placeholder="Validation date end">
-                            </div>
-                            <form class="form-inline">
-                                <select class="form-control" id="filt_freenum" name="filt_freenum" style="width: 49%"
-                                    autocomplete="off">
-                                    {{ data.filt_freenum_for_select|safe }}
-                                </select>
-                                <input class="form-control" type="text" style="width: 24%" id="filt_freenumst"
-                                    name="filt_freenumst" value="{{ data.freenumst }}" autocomplete="off"
-                                    placeholder=">=">
-                                <input class="form-control" type="text" style="width: 24%" id="filt_freenumend"
-                                    name="filt_freenumend" value="{{ data.freenumend }}" autocomplete="off"
-                                    placeholder="<=">
-                            </form>
-                            <form class="form-inline">
-                                <select class="form-control" id="filt_freetxt" name="filt_freetxt" style="width: 59%"
-                                    autocomplete="off">
-                                    {{ data.filt_freetxt_for_select|safe }}
-                                </select>
-                                <input class="form-control" type="text" style="width: 39%" id="filt_freetxtval"
-                                    name="filt_freetxtval" value="{{ data.freetxtval }}" autocomplete="off"
-                                    placeholder="contains">
-                            </form>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <button type="button" class="btn btn-xs btn-primary  btn-block"
-                                        onclick="LoadRightPane();">
-                                        <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update view
-                                        &amp; apply filter</button>
-                                    <button class="btn btn-xs btn-info btn-block" onclick="LoadRightPane(false,true);"
-                                        title="Save current settings for the filters, in this project">Save
-                                        filters</button>
-                                    <a href='?' type="button" class="btn btn-xs btn-info btn-block"
-                                        title="Load saved filter criteria and reload the page">Apply saved filters and
-                                        update view</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </li>
+            <li role="presentation">
+              <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Other filters</a>
+            </li>
+          </ul>
+          <div class="tab-content">
+            <!-- Tab panes -->
+            {# Classification #}
+            <div role="tabpanel" class="tab-pane active" id="TabA">
+              {{ lefta|safe }}
             </div>
+            {# Filters #}
+            <div role="tabpanel" class="tab-pane" id="TabB" style="overflow-y: auto;overflow-x: hidden;">
+              <div id="TabBInner" style="width: 240px;">
+                <button class="btn btn-info" style="width: 49%" id=SharePageBtn
+                        title="Email a link to this page, including the current filters. Press CTRL to open it on another tab (usefull if you use GMail)"><span
+                    class="glyphicon glyphicon-link"></span> Share page
+                </button>
+                <button onclick='ClearAllFilterCriteria();return false;' class="btn btn-info"
+                        style="width: 49%" title="Remove all selection criteria"><span
+                    class="glyphicon glyphicon-remove"></span> Clear all filters
+                </button>
+                <br>
+                {{ leftb|safe }}
+                {# ------- Annotator / Freefilter ------------#}
+                <div class="filter ">
+                  <div class="form-group-sm">
+                    <label class="title">Annotator / Free filters</label>
+                    <a class="pull-right label label-default"
+                       style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
+                       onclick='ClearAnnotFree();return false;'>Clear</a>
+                    <a class="pull-right label label-info"
+                       style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;margin-right: 5px;"
+                       href=# onclick='AdvancedAnnot();return false;'>Advanced</a>
+                    <select class="form-control" id="filt_annot" name="filt_annot" style="width: 100%"
+                            multiple autocomplete="off">{{ data.filt_annot_for_select|safe }}</select>
+                  </div>
+                </div>
+                <div>
+                  <input class="form-control" type="text" style="width: 100%" id="filt_validfromdate"
+                         name="filt_validfromdate" value="" autocomplete="off"
+                         placeholder="Validation date begin">
+                  <input class="form-control" type="text" style="width: 100%" id="filt_validtodate"
+                         name="filt_validtodate" value="" autocomplete="off"
+                         placeholder="Validation date end">
+                </div>
+                <form class="form-inline">
+                  <select class="form-control" id="filt_freenum" name="filt_freenum" style="width: 49%"
+                          autocomplete="off">
+                    {{ data.filt_freenum_for_select|safe }}
+                  </select>
+                  <input class="form-control" type="text" style="width: 24%" id="filt_freenumst"
+                         name="filt_freenumst" value="{{ data.freenumst }}" autocomplete="off"
+                         placeholder=">=">
+                  <input class="form-control" type="text" style="width: 24%" id="filt_freenumend"
+                         name="filt_freenumend" value="{{ data.freenumend }}" autocomplete="off"
+                         placeholder="<=">
+                </form>
+                <form class="form-inline">
+                  <select class="form-control" id="filt_freetxt" name="filt_freetxt" style="width: 59%"
+                          autocomplete="off">
+                    {{ data.filt_freetxt_for_select|safe }}
+                  </select>
+                  <input class="form-control" type="text" style="width: 39%" id="filt_freetxtval"
+                         name="filt_freetxtval" value="{{ data.freetxtval }}" autocomplete="off"
+                         placeholder="contains">
+                </form>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <button type="button" class="btn btn-xs btn-primary  btn-block"
+                            onclick="LoadRightPane();">
+                      <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span> Update view
+                      &amp; apply filter
+                    </button>
+                    <button class="btn btn-xs btn-info btn-block" onclick="LoadRightPane(false,true);"
+                            title="Save current settings for the filters, in this project">Save
+                      filters
+                    </button>
+                    <a href='?' type="button" class="btn btn-xs btn-info btn-block"
+                       title="Load saved filter criteria and reload the page">Apply saved filters and
+                      update view</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
     {#          <div id="column-right" style="position: absolute;top: 150px;left: 270px;bottom: 0px;right: 1px;overflow: auto;"> #}
     <style>
@@ -448,7 +457,8 @@
             if (Object.keys(PendingChanges).length > 0)
                 if (confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?") == false)
                     return;
-            var TxtFilter = "", jqtaxofilter = $("#taxofilter"), jqtaxofilterlbl = $("#taxofilterlabel"), jqcolumnright = $("#column-right");
+            var TxtFilter = "", jqtaxofilter = $("#taxofilter"), jqtaxofilterlbl = $("#taxofilterlabel"),
+                jqcolumnright = $("#column-right");
             var req = {taxo: jqtaxofilter.val(), resultwidth: jqcolumnright.width(), windowheight: $(window).height()};
             if (jqtaxofilterlbl.val() != "")
                 TxtFilter += InGreyButton("Taxo=" + jqtaxofilterlbl.val(), "SetTaxoFilter(false)");
@@ -471,13 +481,21 @@
             req['MapS'] = $("#filt_MapOutS").val();
             if ((req['MapN'] != "") && (req['MapW'] != "") && (req['MapE'] != "") && (req['MapS'] != ""))
                 TxtFilter += InGreyButton(" Position=(" + req['MapN'] + "," + req['MapW'] + "," + req['MapE'] + "," + req['MapS'] + ")", "ClearCoord()");
-            else { delete req['MapN']; delete req['MapW']; delete req['MapE']; delete req['MapS']; }
+            else {
+                delete req['MapN'];
+                delete req['MapW'];
+                delete req['MapE'];
+                delete req['MapS'];
+            }
 
             req['depthmin'] = $("#filt_depthmin").val();
             req['depthmax'] = $("#filt_depthmax").val();
             if ((req['depthmin'] != "") && (req['depthmax'] != ""))
                 TxtFilter += InGreyButton(" Depth in(" + req['depthmin'] + "-" + req['depthmax'] + ")", "ClearDepths()");
-            else { delete req['depthmin']; delete req['depthmax']; }
+            else {
+                delete req['depthmin'];
+                delete req['depthmax'];
+            }
             var jqfreenum = $("#filt_freenum");
             req['freenum'] = jqfreenum.val();
             req['freenumst'] = $("#filt_freenumst").val();
@@ -485,21 +503,30 @@
             if ((req['freenum'] != "") && ((req['freenumst'] != "") || (req['freenumend'] != "")))
                 TxtFilter += InGreyButton(jqfreenum.find("option:selected").text() + " in(" + req['freenumst'] + "-" + req['freenumend'] + ")"
                     , "$(\"#filt_freenum,#filt_freenumst,#filt_freenumend\").val(null).trigger(\"change\")");
-            else { delete req['freenum']; delete req['freenumst']; delete req['freenumend']; }
+            else {
+                delete req['freenum'];
+                delete req['freenumst'];
+                delete req['freenumend'];
+            }
             var jqfreetxt = $("#filt_freetxt");
             req['freetxt'] = jqfreetxt.val();
             req['freetxtval'] = $("#filt_freetxtval").val();
             if ((req['freetxt'] != "") && (req['freetxtval'] != ""))
                 TxtFilter += InGreyButton(jqfreetxt.find("option:selected").text() + " contains " + req['freetxtval']
                     , "$(\"#filt_freetxt,#filt_freetxtval\").val(null).trigger(\"change\")");
-            else { delete req['freetxt']; delete req['freetxtval']; }
+            else {
+                delete req['freetxt'];
+                delete req['freetxtval'];
+            }
 
             var sampleid = $('#sampleid');
             if (sampleid.val() != null)
                 req['samples'] = String(sampleid.val());
             else req['samples'] = "";
             if (req['samples'] != "")
-                TxtFilter += InGreyButton("Samples=" + $.map(sampleid.find('option:selected'), function (element) { return $(element).text() }).join(', '), "ClearSamples()");
+                TxtFilter += InGreyButton("Samples=" + $.map(sampleid.find('option:selected'), function (element) {
+                    return $(element).text()
+                }).join(', '), "ClearSamples()");
             req['instrum'] = $("#filt_instrum").val();
             if (req['instrum'] != "")
                 TxtFilter += InGreyButton("Instrument =" + req['instrum'], "ClearInstrum()");
@@ -545,7 +572,9 @@
             var jqdaytime = $('#daytime');
             if (jqdaytime.val() != null) {
                 req['daytime'] = String(jqdaytime.val());
-                TxtFilter += InGreyButton("DayTime=" + $.map(jqdaytime.find('option:selected'), function (element) { return $(element).text() }).join(', '), "ClearTimes()");
+                TxtFilter += InGreyButton("DayTime=" + $.map(jqdaytime.find('option:selected'), function (element) {
+                    return $(element).text()
+                }).join(', '), "ClearTimes()");
             }
 
             req['validfromdate'] = $("#filt_validfromdate").val();
@@ -565,7 +594,8 @@
             });
             req['projid'] = $("#projid").val();
             $(".zoomtracker,.zoomstatus,.magnifyarea,.cursorshade").remove();
-            PendingChanges = {}; {# After load there's no pending changes #}
+            PendingChanges = {};
+            {# After load there's no pending changes #}
             PendingChangesTaxoName = {};
             if (TxtFilter != "")
                 TxtFilter = "Filter: " + TxtFilter;
@@ -644,7 +674,9 @@
                             var elapsed = req_end.getTime() - req_start.getTime();
                             // Let's say 32 dots...
                             elapsed = elapsed * nb_samples / 32;
-                    if (elapsed < 500) { elapsed = 500; } // Useless to show too quick animation
+                            if (elapsed < 500) {
+                                elapsed = 500;
+                            } // Useless to show too quick animation
                             var dots = "🔎";
                             $('#load_progress').html(dots);
                             var interv = setInterval(function () {
@@ -711,8 +743,14 @@
             Restoretaxolb = $('#taxolbanno option').detach();
             RestoreHighLigthID = $('.ui-droppable.ui-state-highlight').data('taxoid');
             RestoreActiveTaxoID = $('.ui-droppable.activeTaxo').data('taxoid');
-            var HiddenItems = $('.classiftab td').filter(function () { return $(this).css('display') == 'none'; }).map(function () { return $(this).data('taxoid'); }).get();
-            var HorizArrow = $('.classiftab td span.glyphicon-triangle-right').closest('td').map(function () { return $(this).data('taxoid'); }).get();
+            var HiddenItems = $('.classiftab td').filter(function () {
+                return $(this).css('display') == 'none';
+            }).map(function () {
+                return $(this).data('taxoid');
+            }).get();
+            var HorizArrow = $('.classiftab td span.glyphicon-triangle-right').closest('td').map(function () {
+                return $(this).data('taxoid');
+            }).get();
             var PosScrollBar = $('#divclassiftab').scrollTop();
             var req = {taxo: $("#taxofilter").val(), taxofilterlabel: $("#taxofilterlabel").val()};
             if (ForceRecalc === 'Y') req['ForceRecalc'] = 'Y';
@@ -737,8 +775,10 @@
                 $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title", "Current Sort : Descending");
             else $('#sortorder').removeClass("glyphicon-sort-by-attributes-alt").addClass("glyphicon-sort-by-attributes").closest('button').prop("title", "Current Sort : Ascending");
             if (NoRefresh !== 'NoRefresh') {
-                $("#pageoffset").val(0); {# Force le retour à la premiere page #}
-                LoadRightPane(); {# 20181024 Autorefresh #}
+                $("#pageoffset").val(0);
+                {# Force le retour à la premiere page #}
+                LoadRightPane();
+                {# 20181024 Autorefresh #}
             }
         }
 
@@ -746,7 +786,8 @@
             $('#' + caller).find('span').toggleClass("glyphicon-ok");
             $('#' + caller).find('span').removeClass("ManualAdd");
             $('#' + caller).find('span.glyphicon-ok').addClass("ManualAdd");
-            LoadRightPane(); {# 20181024 Autorefresh #}
+            LoadRightPane();
+            {# 20181024 Autorefresh #}
             //return false;
         }
 
@@ -771,10 +812,15 @@
                 $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
                 $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
                 PreviousSort = $(this).val();
-                $("#pageoffset").val(0); {# Changement d'ordre on revient à la première page #}
-                    LoadRightPane(); {# 20181024 Autorefresh #}
+                $("#pageoffset").val(0);
+                {# Changement d'ordre on revient à la première page #}
+                LoadRightPane();
+                {# 20181024 Autorefresh #}
             });
-            $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () { LoadRightPane(); }); {# 20181024 Autorefresh #}
+            $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () {
+                LoadRightPane();
+            });
+            {# 20181024 Autorefresh #}
             {#  Plus stylé sous FFX mais plus de ressource et la dropdown est moins compacte
                 $('#sortby').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
                 $('#ipp').select2({ minimumResultsForSearch: Infinity, dropdownAutoWidth: true });
@@ -787,8 +833,12 @@
                     url: "/prj/GetFieldList/{{ g.Projid }}/n",
                     dataType: 'json',
                     delay: 250,
-                    data: function (params) { return { q: params.term, page: params.page }; },
-                    processResults: function (data, page) { return { results: data }; },
+                    data: function (params) {
+                        return {q: params.term, page: params.page};
+                    },
+                    processResults: function (data, page) {
+                        return {results: data};
+                    },
                     cache: true
                 }, placeholder: "Num. field", dropdownCssClass: "width240"
             });
@@ -797,8 +847,12 @@
                     url: "/prj/GetFieldList/{{ g.Projid }}/t",
                     dataType: 'json',
                     delay: 250,
-                    data: function (params) { return { q: params.term, page: params.page }; },
-                    processResults: function (data, page) { return { results: data }; },
+                    data: function (params) {
+                        return {q: params.term, page: params.page};
+                    },
+                    processResults: function (data, page) {
+                        return {results: data};
+                    },
                     cache: true
                 }, placeholder: "Text field", dropdownCssClass: "width240"
             });
@@ -929,7 +983,8 @@
         function PostAddImages() {
             $(document).scrollTop(0);
             // Required to  have Select2 component working on Bootstrap Popup
-            $.fn.modal.Constructor.prototype.enforceFocus = function () { };
+            $.fn.modal.Constructor.prototype.enforceFocus = function () {
+            };
             // Add Zoom & lazy loading of images
             theOnlyLazyLoader = jQuery('div#column-right img.lazy').Lazy({
                 bind: 'event',
@@ -1115,8 +1170,6 @@
       {% endif %}
     </div>
   </div> {# Container #}
-
-
 
   <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
     <div class="modal-dialog modal-lg">
