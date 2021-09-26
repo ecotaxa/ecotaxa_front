@@ -253,9 +253,10 @@
               <div id='divclassiftab' style="width: 255px;overflow-y:auto;">
                 <div id="categtree">
                   <!-- content from XHR call, same as refresh -->
+                  Loading...
                 </div>
                 <div style="margin-top: 3px;">
-                  <a href="javascript:RefreshClassifTab('Y');" class="btn btn-primary btn-xs" style="width: 45%;"
+                  <a href="javascript:RefreshClassifTab();" class="btn btn-primary btn-xs" style="width: 45%;"
                      title="It may slow the application.">Recalc. counts <span
                       class="glyphicon glyphicon-repeat"></span></a>
                   <button type="button" class="btn btn-xs btn-primary" id="zeroshowhide" onclick="ToggleZeroCount()"
@@ -747,7 +748,7 @@
             });
         }
 
-        function RefreshClassifTab(ForceRecalc) {
+        function RefreshClassifTab() {
             // Refresh (or load from 0) the category tree
             RestoreHighLigthID = $('#categtree .ui-state-highlight').data('taxoid');
             RestoreActiveTaxoID = $('#categtree .activeTaxo').data('taxoid');
@@ -760,13 +761,8 @@
                 return $(this).data('taxoid');
             }).get();
             var PosScrollBar = $('#divclassiftab').scrollTop();
-            // Cook a request to get table content
-            var req = {
-                taxo: $("#taxofilter").val(),
-                taxofilterlabel: $("#taxofilterlabel").val()
-            };
-            if (ForceRecalc === 'Y') req['ForceRecalc'] = 'Y';
-            $("#categtree").load("/prjGetClassifTab/" + $("#projid").val(), req, function () {
+            // Launch a request to get table content
+            $("#categtree").load("/prjGetClassifTab/" + $("#projid").val(), {}, function () {
                 MakeCategTreeClickableDropable();
                 {#    Restore le surlignage jaune dans l'arbre #}
                 if (RestoreHighLigthID) {
