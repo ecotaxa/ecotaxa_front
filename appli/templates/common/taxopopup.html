@@ -55,4 +55,12 @@
         }); // Select2 Ajax
     }
 
+    function SetTaxolbValue(selector, taxoid, taxoname) {
+        // Set the value on category select
+        var taxolb = $(selector);
+        taxolb.append($('<option>', {value: taxoid, text: taxoname}));
+        taxolb.val([taxoid]);
+        taxolb.change();
+    }
+
 </script>

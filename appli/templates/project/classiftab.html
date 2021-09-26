@@ -1,5 +1,5 @@
 <!--suppress CheckEmptyScriptTag -->
-<div style="width: 230px;    margin-top: 5px; margin-bottom: 5px;">
+<div style="width: 230px; margin-top: 5px; margin-bottom: 5px;">
   <div class="input-group">
     <!--suppress HtmlFormInputWithoutLabel -->
     <select id="taxolbanno" name="taxolbanno" style="width: 185px" class='taxolb' autocomplete="off"> </select>
@@ -49,7 +49,7 @@
 
   <div style="margin-top: 3px;">
     <a href="javascript:RefreshClassifTab('Y');" class="btn btn-primary btn-xs" style="width: 45%;"
-       title="It may slow the application. Please use the UC (update count) button instead">Recalc. counts <span
+       title="It may slow the application.">Recalc. counts <span
         class="glyphicon glyphicon-repeat"></span></a>
     <button type="button" class="btn btn-xs btn-primary" id="zeroshowhide" onclick="ToggleZeroCount()" data-show="0">
       Hide empty categories
@@ -76,8 +76,6 @@
         $("#taxofilter").val(taxofiltervalue);
         $("#taxofilterlabel").val(taxofilterlabel);
         $("#taxofilterchild").val(WithChild);
-
-
     }
 
     function CategExpanderClick(e) {
@@ -283,12 +281,7 @@
                         alert("Cannot assign to a deprecated category");
                         return;
                     }
-                    var jtaxolbanno = $('#taxolbanno');
-                    jtaxolbanno.append($('<option>', {value: droptaxoid, text: droptaxoname}));
-                    var sel = [];
-                    sel.push(droptaxoid);
-                    jtaxolbanno.val(sel);
-                    jtaxolbanno.change();
+                    SetTaxolbValue('#taxolbanno', droptaxoid, droptaxoname);
                     var NbrChanged = 0;
                     var LstTd = [];
                     ui.draggable.each(function (e, o) {
@@ -346,7 +339,7 @@
             let taxoid = sel2.val();
             let taxoname;
             if (taxoid) {
-                taxoname = $('#taxolbanno  option:selected').text();
+                taxoname = $('#taxolbanno option:selected').text();
             } else {
                 taxoid = sel2.data('saved_val');
                 taxoname = sel2.data('saved_text');
@@ -385,7 +378,7 @@
                 RestoreActiveTaxoID = undefined;
             }
 
-            {#    Le fait de choisir un item fait l'assignation/CTRL+A #}
+            {#    Le fait de choisir un item fait l'assignation/CTRL+D #}
             const sel2 = $('#taxolbanno');
             sel2.on("select2:opening", function () {
                 const selection = sel2.data('saved_text');
