@@ -289,8 +289,6 @@ def indexPrj(PrjId):
     else:
         g.taxofilter = g.taxofilter = g.taxofilterlabel = ""
 
-    classiftab = GetClassifTabFromModel(proj)
-
     g.ProjectTitle = proj.title
     g.headmenu = []  # Menu project
     g.headmenuF = []  # Menu Filtered
@@ -332,7 +330,7 @@ def indexPrj(PrjId):
 
     appli.AddTaskSummaryForTemplate()
     filtertab = getcommonfilters(data)
-    return render_template('project/projectmain.html', top="", lefta=classiftab, leftb=filtertab,
+    return render_template('project/projectmain.html', top="", leftb=filtertab,
                            right='dodefault', data=data, title='EcoTaxa ' + ntcv(proj.title))
 
 
@@ -729,13 +727,24 @@ def LoadRightPane():
 
 
 ######################################################################################################################
-
-def GetClassifTabFromModel(proj: ProjectModel):
+# noinspection PyPep8Naming
+@app.route('/prjGetClassifTab/<int:PrjId>', methods=['GET', 'POST'])
+def prjGetClassifTab(PrjId):
     """
         Classification tab contains:
             - All taxa from project's init list, populated or not.
             - All taxa having a count in the project.
     """
+    # Security & sanity checks
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+        except ApiException as _ae:
+            return "Project doesn't exists"
+
+    # Public view is when the project is visible, but the current user has no right on it.
+    publicViewMode = proj.highest_right == ""
+
     # Get used taxa inside the project
     with ApiClient(ProjectsApi, request) as api:
         stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats_project_set_taxo_stats_get(ids=str(proj.projid),
@@ -795,6 +804,11 @@ def GetClassifTabFromModel(proj: ProjectModel):
         children_by_id.setdefault(parent_id_here, []).append(taxon.id)
         res_by_id[taxon.id] = for_taxon
 
+    # Remove WIP information for public, old bug
+    if publicViewMode:
+        for a_taxon in res_by_id.values():
+            a_taxon["nbr_p"] = a_taxon["nbr_d"] = 0
+
     # Go down the tree, in sets, one for each level
     try:
         nodes_to_mark = set(children_by_id[None])
@@ -846,25 +860,7 @@ def GetClassifTabFromModel(proj: ProjectModel):
     return render_template('project/classiftab.html', res=restree, taxotree=json.dumps(taxotree))
 
 
-######################################################################################################################
-# noinspection PyPep8Naming
-@app.route('/prjGetClassifTab/<int:PrjId>', methods=['GET', 'POST'])
-@login_required
-def prjGetClassifTab(PrjId):
-    # Security & sanity checks
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
-        except ApiException as _ae:
-            return "Project doesn't exists"
 
-    g.Projid = proj.projid
-    g.PrjManager = proj.highest_right == "Manage"
-    g.PrjAnnotate = proj.highest_right == "Annotate"
-    # Public view is when the project is visible, but the current user has no right on it.
-    g.PublicViewMode = proj.highest_right == ""
-
-    return GetClassifTabFromModel(proj)
 
 
 ######################################################################################################################
