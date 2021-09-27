@@ -1,21 +1,26 @@
 # -*- coding: utf-8 -*-
+import datetime
+import json
+import logging
+import os
+import re
+import sys
+import time
+from pathlib import Path
+from subprocess import Popen, TimeoutExpired, DEVNULL, PIPE
 from typing import List
+
+import numpy as np
+from flask import render_template, g, flash, request
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
 
 from appli import db, database, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, app, TempTaskDir, JinjaNl2BR, \
     XSSEscape, TaxoNameAddSpaces
-from flask import render_template, g, flash, request
-import logging, time, re, json, datetime, sys, os
-from appli.tasks.taskmanager import AsyncTask, DoTaskClean
-from appli.database import GetAll, ExecSQL
+from appli.database import GetAll
 from appli.project import sharedfilter
 from appli.project.stats import UpdateProjectStat, RecalcProjectTaxoStat
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from pathlib import Path
-from sklearn.externals import joblib
-from sklearn.decomposition import PCA
-from subprocess import Popen, TimeoutExpired, DEVNULL, PIPE
-
+from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ClassifyAutoReq, ProjectsApi, ProjectModel
 
