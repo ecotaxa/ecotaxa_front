@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import datetime
 import json
 import logging
 import os
-import re
 import sys
 import time
 from pathlib import Path
@@ -15,8 +13,8 @@ from flask import render_template, g, flash, request
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
 
-from appli import db, database, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, app, TempTaskDir, JinjaNl2BR, \
-    XSSEscape, TaxoNameAddSpaces
+from appli import db, database, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, app, TempTaskDir, \
+    XSSEscape
 from appli.database import GetAll
 from appli.project import sharedfilter
 from appli.project.stats import UpdateProjectStat, RecalcProjectTaxoStat
@@ -25,7 +23,9 @@ from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ClassifyAutoReq, ProjectsApi, ProjectModel
 
 
+# noinspection PyPep8Naming,PyUnboundLocalVariable
 class TaskClassifAuto2(AsyncTask):
+    # noinspection PyPep8Naming
     class Params(AsyncTask.Params):
         def __init__(self, InitStr=None):
             self.steperrors = []
@@ -40,10 +40,6 @@ class TaskClassifAuto2(AsyncTask):
                 self.learninglimit = ""
                 self.CustSettings = {}
                 self.PostTaxoMapping = ""
-                self.savemodel_foldername = ""
-                self.savemodel_title = ""
-                self.savemodel_comments = ""
-                self.usemodel_foldername = ""
                 self.filtres = {}
                 self.usescn = ""
 
@@ -84,9 +80,9 @@ class TaskClassifAuto2(AsyncTask):
         output_dir = WorkDir / "scn_output"
         if not output_dir.exists(): output_dir.mkdir()
         vaultdir = (Path(TempTaskDir) / "../vault/").resolve().as_posix() + "/"
-        model_dir = Path(
-            os.path.normpath((Path(TempTaskDir) / "../SCN_networks" / Prj.cnn_network_id).as_posix())).resolve()
-        meta = json.load((model_dir / "meta.json").open('r'))
+        scn_model_dir = Path(os.path.normpath((Path(TempTaskDir) / "../SCN_networks" / Prj.cnn_network_id).as_posix())). \
+            resolve()
+        meta = json.load((scn_model_dir / "meta.json").open('r'))
         TStep = time.time()
         NbrLig = 0
         with scn_input.open('w') as finput:
@@ -102,7 +98,7 @@ class TaskClassifAuto2(AsyncTask):
             return True
         TStep = time.time()
         env = {
-            "MODEL_DIR": model_dir.as_posix(),
+            "MODEL_DIR": scn_model_dir.as_posix(),
             "OUTPUT_DIR": output_dir.resolve().as_posix(),
             # input data
             "UNLABELED_DATA_FN": scn_input.as_posix(),
@@ -132,7 +128,7 @@ class TaskClassifAuto2(AsyncTask):
             scn_binary = sys.executable + " " + (
                     Path(TempTaskDir) / "../appli/tasks/simulateur_SCN.py").resolve().as_posix()
 
-        shelloption = scn_binary.find('launch.sh') >= 0
+        shelloption = scn_binary.endswith('.sh')
 
         logging.info("scn_binary=" + scn_binary)
         # bufsize=1: Line buffering
@@ -151,7 +147,7 @@ class TaskClassifAuto2(AsyncTask):
         InsSQL = """insert into obj_cnn_features(objcnnid, cnn01, cnn02, cnn03, cnn04, cnn05, cnn06, cnn07, cnn08, cnn09, cnn10, cnn11, cnn12, cnn13, cnn14, cnn15, cnn16, cnn17, cnn18, cnn19, cnn20, cnn21, cnn22, cnn23, cnn24, cnn25, cnn26, cnn27, cnn28, cnn29, cnn30, cnn31, cnn32, cnn33, cnn34, cnn35, cnn36, cnn37, cnn38, cnn39, cnn40, cnn41, cnn42, cnn43, cnn44, cnn45, cnn46, cnn47, cnn48, cnn49, cnn50) 
                     values(%(objcnnid)s,%(cnn01)s,%(cnn02)s,%(cnn03)s,%(cnn04)s,%(cnn05)s,%(cnn06)s,%(cnn07)s,%(cnn08)s,%(cnn09)s,%(cnn10)s,%(cnn11)s,%(cnn12)s,%(cnn13)s,%(cnn14)s,%(cnn15)s,%(cnn16)s,%(cnn17)s,%(cnn18)s,%(cnn19)s,%(cnn20)s,%(cnn21)s,%(cnn22)s,%(cnn23)s,%(cnn24)s,%(cnn25)s,%(cnn26)s,%(cnn27)s,%(cnn28)s,%(cnn29)s,%(cnn30)s,%(cnn31)s,%(cnn32)s,%(cnn33)s,%(cnn34)s,%(cnn35)s,%(cnn36)s,%(cnn37)s,%(cnn38)s,%(cnn39)s,%(cnn40)s,%(cnn41)s,%(cnn42)s,%(cnn43)s,%(cnn44)s,%(cnn45)s,%(cnn46)s,%(cnn47)s,%(cnn48)s,%(cnn49)s,%(cnn50)s )"""
 
-        pca = joblib.load(model_dir / "feature_pca.jbl")
+        pca = joblib.load(scn_model_dir / "feature_pca.jbl")
 
         def ProcessLig():
             nonlocal LigData, InsSQL, upcur, LigID, pca
@@ -196,128 +192,90 @@ class TaskClassifAuto2(AsyncTask):
                            [el.split(':') for el in self.param.PostTaxoMapping.split(',') if el != '']}
         logging.info("PostTaxoMapping = %s ", PostTaxoMapping)
 
-        if self.param.usemodel_foldername != '':  # Utilisation d'un modèle existant
-            ModelFolderName = self.param.usemodel_foldername
-            ModelFolder = Path("../../RF_models") / ModelFolderName
-            if not ModelFolder.is_dir():
-                raise Exception("Invalid model directory RF_models/{} ".format(ModelFolderName))
-            Meta = json.load((ModelFolder / "meta.json").open("r"))
-            if Meta.get('scn_model', '') != "":
-                self.param.usescn = 'Y'
-
         CNNCols = ""
         if self.param.usescn == 'Y':
             if not self.ComputeSCNFeatures(Prj):
                 return
             CNNCols = "".join([",cnn%02d" % (i + 1) for i in range(50)])
 
-        if self.param.usemodel_foldername != '':  # Utilisation d'un modèle existant
-            self.UpdateProgress(1, "Load model from file")
-            Classifier = joblib.load(ModelFolder / 'random_forest.jbl')
-            zooprocess_fields = Meta.get('zooprocess_fields', Meta.get('zooprocess_fields:'))
-            CommonKeys = zooprocess_fields  # on utilise un array et pas un set car il faut imperativement respecter l'ordre des colonnes du modèle
-            zooprocess_medians = Meta.get('zooprocess_medians')
-            DefVal = {}  # valeurs par défaut pour les données manquantes, clé colonne dans le projet source ex : n61:1.234
-            for c, m in zip(zooprocess_fields, zooprocess_medians):
-                if c not in MapPrj:
-                    raise Exception("Column {} present in model but missing in project".format(c))
-                DefVal[MapPrj[c]] = m
-            # CommonKeys = CommonKeys.intersection(set(zooprocess_fields))
-        else:  # Calcul du modèlé à partir de projets sources
-            self.UpdateProgress(1, "Retrieve Data from Learning Set")
-            PrjListInClause = database.CSVIntStringToInClause(self.param.BaseProject)
-            LstPrjSrc = GetAll("select projid,mappingobj from projects where projid in({0})".format(PrjListInClause))
-            MapPrjBase = {}
-            for PrjBase in LstPrjSrc:
-                # gènere la reverse mapping
-                MapPrjBase[PrjBase['projid']] = self.GetReverseObjMap(PrjBase)
-                # et cherche l'intersection des attributs communs
-                CommonKeys = CommonKeys.intersection(set(MapPrjBase[PrjBase['projid']].keys()))
-            if self.param.learninglimit:
-                self.param.learninglimit = int(self.param.learninglimit)  # convert
-            logging.info("MapPrj %s", MapPrj)
-            logging.info("MapPrjBase %s", MapPrjBase)
-            CritVar = self.param.CritVar.split(",")
-            # ne garde que les colonnes communes qui sont aussi selectionnées.
-            CommonKeys = CommonKeys.intersection(set(CritVar))
-            # Calcule les mediane
-            sql = ""
-            for BasePrj in LstPrjSrc:
-                bprojid = BasePrj['projid']
-                if sql != "": sql += " union all "
-                sql += "select 1"
-                for c in CommonKeys:
-                    sql += ",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {1}".format(
-                        MapPrjBase[bprojid][c], MapPrj[c])
-                sql += " from objects "
-                sql += " where projid={0} and classif_id is not null and classif_qual='V'".format(bprojid)
-            if self.param.learninglimit:
-                LimitHead = """ with objlist as ( select objid from (
-                            select obj.objid,row_number() over(PARTITION BY classif_id order by random_value) rang
-                            from objects obj
-                            where obj.projid in ({0}) and obj.classif_id is not null
-                            and classif_qual='V' ) q where rang <={1} ) """.format(PrjListInClause,
-                                                                                   self.param.learninglimit)
-                LimitFoot = """ and objid in ( select objid from objlist ) """
-                sql = LimitHead + sql + LimitFoot
-            else:
-                LimitHead = LimitFoot = ""
-            DefVal = GetAll(sql)[0]
-            # Extrait les données du learning set
-            sql = ""
-            for BasePrj in LstPrjSrc:
-                bprojid = BasePrj['projid']
-                if sql != "": sql += " \nunion all "
-                sql = "select classif_id"
-                for c in CommonKeys:
-                    sql += ",coalesce(case when {0} not in ('Infinity','-Infinity','NaN') then {0} end,{1}) as {2}".format(
-                        MapPrjBase[bprojid][c], DefVal[MapPrj[c]], MapPrj[c])
-                sql += CNNCols + " from objects "
-                if self.param.usescn == 'Y':
-                    sql += " join obj_cnn_features on obj_cnn_features.objcnnid=objects.objid "
-                sql += """ where classif_id is not null and classif_qual='V'
-                            and projid in ({0})
-                            and classif_id in ({1}) """.format(PrjListInClause, self.param.Taxo)
-            if self.param.learninglimit:
-                sql = LimitHead + sql + LimitFoot
-            # Convertie le LS en tableau NumPy
-            DBRes = np.array(GetAll(sql))
-            LSSize = DBRes.shape[0]
-            learn_cat = DBRes[:, 0]  # Que la classif
-            learn_var = DBRes[:, 1:]  # exclu l'objid & la classif
-            DBRes = None  # libere la mémoire
-            logging.info('DB Conversion to NP : %0.3f s', time.time() - TInit)
-            logging.info("Variable shape %d Row, %d Col", *learn_var.shape)
-            # Note : La multiplication des jobs n'est pas forcement plus performante, en tous cas sur un petit ensemble.
-            Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, class_weight="balanced")
+        # Calcul du modèle à partir de projets sources
+        self.UpdateProgress(1, "Retrieve Data from Learning Set")
+        PrjListInClause = database.CSVIntStringToInClause(self.param.BaseProject)
+        LstPrjSrc = GetAll("select projid,mappingobj from projects where projid in({0})".format(PrjListInClause))
+        MapPrjBase = {}
+        for PrjBase in LstPrjSrc:
+            # gènere la reverse mapping
+            MapPrjBase[PrjBase['projid']] = self.GetReverseObjMap(PrjBase)
+            # et cherche l'intersection des attributs communs
+            CommonKeys = CommonKeys.intersection(set(MapPrjBase[PrjBase['projid']].keys()))
+        if self.param.learninglimit:
+            self.param.learninglimit = int(self.param.learninglimit)  # convert
+        logging.info("MapPrj %s", MapPrj)
+        logging.info("MapPrjBase %s", MapPrjBase)
+        CritVar = self.param.CritVar.split(",")
+        # ne garde que les colonnes communes qui sont aussi selectionnées.
+        CommonKeys = CommonKeys.intersection(set(CritVar))
+        # Calcule les mediane
+        sql = ""
+        for BasePrj in LstPrjSrc:
+            bprojid = BasePrj['projid']
+            if sql != "":
+                sql += " union all "
+            sql += "select 1"
+            for c in CommonKeys:
+                sql += ",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {1}".format(
+                    MapPrjBase[bprojid][c], MapPrj[c])
+            sql += " from objects "
+            sql += " where projid={0} and classif_id is not null and classif_qual='V'".format(bprojid)
+        if self.param.learninglimit:
+            LimitHead = """ with objlist as ( select objid from (
+                        select obj.objid,row_number() over(PARTITION BY classif_id order by random_value) rang
+                        from objects obj
+                        where obj.projid in ({0}) and obj.classif_id is not null
+                        and classif_qual='V' ) q where rang <={1} ) """.format(PrjListInClause,
+                                                                               self.param.learninglimit)
+            LimitFoot = """ and objid in ( select objid from objlist ) """
+            sql = LimitHead + sql + LimitFoot
+        else:
+            LimitHead = LimitFoot = ""
+        DefVal = GetAll(sql)[0]
+        # Extrait les données du learning set
+        sql = ""
+        for BasePrj in LstPrjSrc:
+            bprojid = BasePrj['projid']
+            if sql != "": sql += " \nunion all "
+            sql = "select classif_id"
+            for c in CommonKeys:
+                sql += ",coalesce(case when {0} not in ('Infinity','-Infinity','NaN') then {0} end,{1}) as {2}".format(
+                    MapPrjBase[bprojid][c], DefVal[MapPrj[c]], MapPrj[c])
+            sql += CNNCols + " from objects "
+            if self.param.usescn == 'Y':
+                sql += " join obj_cnn_features on obj_cnn_features.objcnnid=objects.objid "
+            sql += """ where classif_id is not null and classif_qual='V'
+                        and projid in ({0})
+                        and classif_id in ({1}) """.format(PrjListInClause, self.param.Taxo)
+        if self.param.learninglimit:
+            sql = LimitHead + sql + LimitFoot
+        # Convertie le LS en tableau NumPy
+        DBRes = np.array(GetAll(sql))
+        LSSize = DBRes.shape[0]
+        learn_cat = DBRes[:, 0]  # Que la classif
+        learn_var = DBRes[:, 1:]  # exclu l'objid & la classif
+        DBRes = None  # libere la mémoire
+        logging.info('DB Conversion to NP : %0.3f s', time.time() - TInit)
+        logging.info("Variable shape %d Row, %d Col", *learn_var.shape)
+        # Note : La multiplication des jobs n'est pas forcement plus performante, en tous cas sur un petit ensemble.
+        Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, class_weight="balanced")
 
-            # TStep = time.time()
-            # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
-            # toute la colonne et du coup la colonne est supprimé car on ne peut pas calculer la moyenne.
-            # learn_var = Imputer().fit_transform(learn_var)
-            # learn_var[learn_var==np.nan] = -99999 Les Nan sont des NULL dans la base traités parle coalesce
-            # logging.info('Clean input variables :  %0.3f s', time.time() - TStep)
-            TStep = time.time()
-            Classifier.fit(learn_var, learn_cat)
-            logging.info('Model fit duration :  %0.3f s', time.time() - TStep)
-            if self.param.savemodel_foldername != "":  # Il faut sauver le modèle
-                ModelFolderName = re.sub('[^\w-]', '_', self.param.savemodel_foldername.strip())
-                ModelFolder = Path("../../RF_models") / ModelFolderName
-                if not ModelFolder.is_dir():
-                    ModelFolder.mkdir()
-                joblib.dump(Classifier, ModelFolder / 'random_forest.jbl')
-                Meta = {"zooprocess_fields": [], "zooprocess_medians": [], "name": self.param.savemodel_title
-                    , "comments": self.param.savemodel_comments, 'date': datetime.datetime.now().isoformat()
-                    , "scn_model": "", "type": "RandomForest-ZooProcess", "n_objects": LSSize}
-                for c in CommonKeys:
-                    Meta["zooprocess_fields"].append(c)
-                    Meta["zooprocess_medians"].append(DefVal[MapPrj[c]])
-                Meta['categories'] = {r[0]: r[1] for r in
-                                      database.GetTaxoNameFromIdList([int(x) for x in Classifier.classes_])}
-                Meta['scn_model'] = ""
-                if self.param.usescn == 'Y':
-                    Meta['scn_model'] = Prj.cnn_network_id
-                json.dump(Meta, (ModelFolder / "meta.json").open("w"), indent="\t")
+        # TStep = time.time()
+        # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
+        # toute la colonne et du coup la colonne est supprimé car on ne peut pas calculer la moyenne.
+        # learn_var = Imputer().fit_transform(learn_var)
+        # learn_var[learn_var==np.nan] = -99999 Les Nan sont des NULL dans la base traités parle coalesce
+        # logging.info('Clean input variables :  %0.3f s', time.time() - TStep)
+        TStep = time.time()
+        Classifier.fit(learn_var, learn_cat)
+        logging.info('Model fit duration :  %0.3f s', time.time() - TStep)
         # ------ Fin de la partie apprentissage ou chargement du modèle
 
         # Use the API entry point for filtering
@@ -511,83 +469,12 @@ class TaskClassifAuto2(AsyncTask):
                                , url=request.query_string.decode('utf-8')
                                , ExtraHeader=ExtraHeader, src_prjs=src_prjs_str, prj=Prj)
 
-    @staticmethod
-    def ReadModels():
-        # FOR MODEL-BASED PREDICTION ONLY
-        ModelFolder = (Path(TempTaskDir) / "../RF_models").resolve()
-        Models = {}
-        for directory in ModelFolder.glob("*"):
-            if directory.is_dir() and (directory / "meta.json").is_file():
-                Models[directory.name] = json.load((directory / "meta.json").open("r"))
-        return Models
-
     def GetFilterText(self):
         TxtFiltres = sharedfilter.GetTextFilter(self.param.filtres)
         if TxtFiltres:
             return "<p><span style='color:red;font-weight:bold;font-size:large;'>USING Active Project Filters</span><BR>Filters : " + TxtFiltres + "</p>"
         else:
             return ""
-
-    def QuestionProcessScreenSelectModel(self, Prj):
-        # FOR MODEL-BASED PREDICTION ONLY
-        Models = self.ReadModels()
-        # app.logger.info("Modèles = %s",Models)
-        # Premier écran de configuration pour prédiction depuis un modèle, choix du projet du modèle
-        PreviousTxt = self.GetFilterText()
-        d = DecodeEqualList(Prj.classifsettings)
-        g.posttaxomapping = d.get('posttaxomapping', "")
-        # TargetFeatures = set(DecodeEqualList(Prj.mappingobj).values())
-        TargetFeatures = set(self.GetReverseObjMap(Prj).keys())
-
-        TblBody = ""
-        sortedmodellist = sorted(Models.keys(), key=str.lower)
-        for modeldir in sortedmodellist:
-            r = Models[modeldir]
-            # bug sur les fichiers initiaux qui avaient : en trop dans le nom de cette entrée
-            ModelFeatures = set(r.get('zooprocess_fields', r.get('zooprocess_fields:')))
-            MatchingFeatures = len(ModelFeatures & TargetFeatures)
-            if MatchingFeatures < int(gvp("filt_featurenbr") if gvp("filt_featurenbr") else 10):
-                continue
-            if gvp('filt_title'):
-                if r['name'].lower().find(gvp('filt_title').lower()) < 0 and modeldir.lower().find(
-                        gvp('filt_title').lower()) < 0:
-                    continue
-            Radio = ""
-            #  Pour être compatible foit utiliser le même SCN que le projet ou ne pas en utiliser
-            if (r['scn_model'] == Prj.cnn_network_id) or (r['scn_model'] == ''):
-                Radio = "<input name=selmodel type='radio' class='selmodel ' data-modeldir='{0}' {1}>".format(modeldir
-                                                                                                              ,
-                                                                                                              "checked" if modeldir == d.get(
-                                                                                                                  'usemodel_foldername') else "")
-            if len(ModelFeatures) != MatchingFeatures:
-                MatchingFeatures = 'Missing'
-                Radio = ""
-            TaxoDetails = " <span class='showcat'>Show categories</span><span style='display: none'><br>" \
-                          + TaxoNameAddSpaces(
-                ', '.join(sorted(r.get('categories', {}).values(), key=lambda v: v.upper()))) + "</span>"
-            TblBody += """<tr><td> {6}</td>
-                        <td>{0} - {1}{7}{5}</td><td>{2:0.0f}</td><td>{3}</td><td>{4}</td>
-                        </tr>""".format(modeldir, r['name'], r['n_objects'], MatchingFeatures, r['scn_model']
-                                        , "<br>Comments : " + JinjaNl2BR(r.get('comments')) if r.get('comments') else ""
-                                        , Radio, TaxoDetails)
-
-        return render_template('task/classifauto2_create_selectmodel.html'
-                               , url=request.query_string.decode('utf-8')
-                               , TblBody=TblBody
-                               , PreviousTxt=PreviousTxt)
-
-    def QuestionProcessScreenSelectModelTaxo(self, Prj):
-        # FOR MODEL-BASED PREDICTION ONLY
-        # Second écran de configuration, mapping des taxon utilisés dans le modele
-        PreviousTxt = self.GetFilterText()
-        g.modeldir = gvp('modeldir')
-        ModelFolder = Path("RF_models") / g.modeldir
-        Meta = json.load((ModelFolder / "meta.json").open("r"))
-        categories = Meta.get("categories", "")
-        g.TaxoList = database.GetTaxoNameFromIdList([int(x) for x in categories])
-        return render_template('task/classifauto2_create_lsttaxo_frommodel.html'
-                               , url=request.query_string.decode('utf-8')
-                               , prj=Prj, PreviousTxt=PreviousTxt)
 
     def QuestionProcess(self):
         Prj = database.Projects.query.filter_by(projid=gvg("projid")).first()
@@ -606,7 +493,6 @@ class TaskClassifAuto2(AsyncTask):
             if gvg("src", gvp("src", "")) != "":
                 self.param.BaseProject = database.CSVIntStringToInClause(gvg("src", gvp("src", "")))
             self.param.CritVar = gvp("CritVar")
-            self.param.usemodel_foldername = gvp('modeldir', '')
             if gvp('ReadPostTaxoMappingFromLB') == "Y":
                 self.param.PostTaxoMapping = ",".join(
                     (x[6:] + ":" + gvp(x) for x in request.form if x[0:6] == "taxolb"))
@@ -614,19 +500,15 @@ class TaskClassifAuto2(AsyncTask):
                 self.param.PostTaxoMapping = gvp("PostTaxoMapping")
             self.param.learninglimit = gvp("learninglimit")
             self.param.keeplog = gvp("keeplog")
-            self.param.savemodel_foldername = gvp("savemodel_foldername")
-            self.param.savemodel_title = gvp("savemodel_title")
-            self.param.savemodel_comments = gvp("savemodel_comments")
             self.param.usescn = gvp("usescn", "")
             # self.param.Taxo=",".join( (x[4:] for x in request.form if x[0:4]=="taxo") )
             self.param.Taxo = gvp('Taxo')
             self.param.CustSettings = DecodeEqualList(gvp("TxtCustSettings"))
             g.TxtCustSettings = gvp("TxtCustSettings")
             # Verifier la coherence des données
-            if self.param.usemodel_foldername == '':
-                if self.param.CritVar == '' and self.param.usescn == "":
-                    errors.append("You must select some variable")
-                if self.param.Taxo == '': errors.append("You must select some category")
+            if self.param.CritVar == '' and self.param.usescn == "":
+                errors.append("You must select some variable")
+            if self.param.Taxo == '': errors.append("You must select some category")
 
             # Use the API entry point for filtering
             with ApiClient(ObjectsApi, self.cookie) as api:
@@ -655,10 +537,7 @@ class TaskClassifAuto2(AsyncTask):
                     d['critvar'] = self.param.CritVar
                     d['baseproject'] = self.param.BaseProject
                     d['seltaxo'] = self.param.Taxo
-                    if "usemodel_foldername" in PrjCS:
-                        d["usemodel_foldername"] = PrjCS["usemodel_foldername"]
                 else:
-                    d['usemodel_foldername'] = self.param.usemodel_foldername
                     if "critvar" in PrjCS: d["critvar"] = PrjCS["critvar"]
                     if "baseproject" in PrjCS: d["baseproject"] = PrjCS["baseproject"]
                     if "seltaxo" in PrjCS: d["seltaxo"] = PrjCS["seltaxo"]
@@ -666,29 +545,28 @@ class TaskClassifAuto2(AsyncTask):
                 Prj.classifsettings = EncodeEqualList(d)
                 return self.StartTask(self.param)
         else:  # valeurs par default
-            if gvp('frommodel', gvg('frommodel')) == "Y":
-                # MODEL-BASED PREDICTION CHOICE
-                if gvp('modeldir') == '':
-                    return self.QuestionProcessScreenSelectModel(Prj)
-                elif gvp('displaytaxomap') == 'Y':
-                    return self.QuestionProcessScreenSelectModelTaxo(Prj)
-            else:
-                if gvp('src', gvg('src')) == "":
-                    return self.QuestionProcessScreenSelectSource(Prj)
-                elif gvp('seltaxo', gvg('seltaxo')) == "":
-                    return self.QuestionProcessScreenSelectSourceTaxo(Prj)
+            if gvp('src', gvg('src')) == "":
+                return self.QuestionProcessScreenSelectSource(Prj)
+            elif gvp('seltaxo', gvg('seltaxo')) == "":
+                return self.QuestionProcessScreenSelectSourceTaxo(Prj)
 
             d = DecodeEqualList(Prj.classifsettings)
             # Certaines variable on leur propre zone d'edition, les autres sont dans la zone texte custom settings
             self.param.CritVar = d.get("critvar", "")
             self.param.Taxo = d.get("seltaxo", "")
             self.param.learninglimit = int(gvp("learninglimit", "5000"))
-            if "critvar" in d: del d["critvar"]
-            if "methode" in d: del d["methode"]
-            if "learninglimit" in d: del d["learninglimit"]
-            if "seltaxo" in d: del d["seltaxo"]
-            if "PostTaxoMapping" in d: del d["PostTaxoMapping"]
-            if "baseproject" in d: del d["baseproject"]
+            if "critvar" in d:
+                del d["critvar"]
+            if "methode" in d:
+                del d["methode"]
+            if "learninglimit" in d:
+                del d["learninglimit"]
+            if "seltaxo" in d:
+                del d["seltaxo"]
+            if "PostTaxoMapping" in d:
+                del d["PostTaxoMapping"]
+            if "baseproject" in d:
+                del d["baseproject"]
             g.TxtCustSettings = EncodeEqualList(d)
             self.param.Taxo = ",".join((x[4:] for x in request.form if x[0:4] == "taxo" and x[0:6] != "taxolb"))
             self.param.PostTaxoMapping = ",".join((x[6:] + ":" + gvp(x) for x in request.form if x[0:6] == "taxolb"))
@@ -712,7 +590,7 @@ class TaskClassifAuto2(AsyncTask):
                                                             revobjmapbaseByProj[PrjBase['projid']][k])
             case += " end "
             sql += ",count({0}) {1}_nbr,variance({0})!=0 {1}_dist ".format(case, revobjmap[
-                k])  # on nommeles colonnes avec les colonne du project cible pour eviter les caractères spéciaux
+                k])  # on nomme les colonnes avec les colonnes du project cible pour eviter les caractères spéciaux
         sql += " from (select * from objects where projid in ({0}) and classif_qual='V' LIMIT 50000 ) objects ".format(
             PrjListInClause)
         stat = GetAll(sql)[0]

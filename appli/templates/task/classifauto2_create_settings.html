@@ -199,21 +199,6 @@
       </tr>
     </table>
     {# ----------- Partie Gestion des Taxon destination --------------------- #}
-    <a href="#TargetFilter" data-toggle="collapse">
-      <span class="glyphicon glyphicon-plus-sign"></span> Advanced settings</a>
-    <div id=TargetFilter class="panel panel-default collapse "
-         style="margin-left: 0px;margin-top: 5px;width: 800px;padding: 5px;">
-
-      {% if g.LsSize >150000 %}
-        <b>Save model : </b><br>
-        Model folder name
-        <input type="text" name="savemodel_foldername" value="" autocomplete="off" style="width: 150px;">
-        <br>Model Title <input type="text" name="savemodel_title" value="" autocomplete="off" style="width: 350px;">
-        <br>Comments <textarea name="savemodel_comments" rows="2" cols="80"></textarea>
-      {% else %}
-        <b>Not enought objects in the Learning Set to save the model</b>
-      {% endif %}
-    </div>
 
     <div class="form-group">
       {{ label("Custom Settings <br>(Taxonomy Post Mapping)"|safe) }}

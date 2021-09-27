@@ -298,10 +298,6 @@ def indexPrj(PrjId):
                 ("/Task/Create/TaskClassifAuto2?projid=%d" % PrjId, "Train and Predict identifications V2"))
             g.headmenuF.append(
                 ("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2')", "Train and Predict identifications V2"))
-            g.headmenu.append(("/Task/Create/TaskClassifAuto2?projid=%d&frommodel=Y" % PrjId,
-                               "Predict identifications from trained model"))
-            g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2?frommodel=Y')",
-                                "Predict identifications from trained model"))
             g.headmenu.append(("/Job/Create/FileImport?p=%d" % PrjId, "Import images and metadata"))
             g.headmenu.append(("/prj/taxo_fix/%d" % PrjId, "Fix category issues"))
         # g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
