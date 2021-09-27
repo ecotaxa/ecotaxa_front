@@ -18,6 +18,9 @@ SortableObjectFields = OrderedDict([("orig_id", "Image Name"),
                                     ("classif_when", "Validation date"),
                                     ("random_value", "Random")])
 
+# We need another paradigm as both sample, acquisition and object have an orig_id column
+MappableParentColumns = ["sam_orig_id", "acq_orig_id"]
+
 
 def GetClassifQualClass(q):
     """

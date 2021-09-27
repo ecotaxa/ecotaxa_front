@@ -158,7 +158,8 @@ def PrjEdit(PrjId, privs_only=False):
     g.predeftaxo.sort(key=lambda r: r[1].lower())
 
     # TODO: Get from metadata
-    g.maplist = list(MappableObjectColumns)
+    g.maplist = list(SortableParentFields.keys())
+    g.maplist.extend(list(MappableObjectColumns))
     g.maplist.extend(target_proj.obj_free_cols.keys())
 
     # TODO: move to back-end

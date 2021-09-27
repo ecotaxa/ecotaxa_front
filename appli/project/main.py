@@ -13,7 +13,8 @@ from hyphenator import Hyphenator
 import appli
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, gvg, gvp, DecodeEqualList, ScaleForDisplay, ntcv, XSSEscape
-from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields, GetClassifQualClass
+from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields, GetClassifQualClass, \
+    MappableParentColumns
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
@@ -50,6 +51,8 @@ def GetFieldListFromModel(proj_model: ProjectModel, presentation_field):
             fieldlist2[objmap[field]] = dispname
         elif field in MappableObjectColumnsSet:
             # ... but sometimes not, e.g. mapping objtime to 'Sampling Time'
+            fieldlist2[field] = dispname
+        elif field in MappableParentColumns:
             fieldlist2[field] = dispname
 
     ret = collections.OrderedDict()
@@ -462,6 +465,8 @@ def LoadRightPane():
         elif a_col == "classifname":
             # Historical, kept for old URLs which might have been transmitted to third-parties
             return "txo.name"
+        elif a_col in MappableParentColumns:
+            return a_col.replace("_", ".", 1)
         return None
 
     # Compute optional columns needed under the image
