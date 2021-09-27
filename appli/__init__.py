@@ -410,11 +410,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.12"
+ecotaxa_version = "2.5.13"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-09-15"
+    return ecotaxa_version + " 2021-09-28"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -422,6 +422,17 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-09-28 : V 2.5.13
+    Feature #530: After an import, remind the import source. 
+    Feature #665: Improve a bit the wording in prediction pages.
+    Bug #518: Projects choices is lost in prediction page 1 if filtering is used.
+    Feature #142: Prediction target choice is confusing, if on a filtered set then it's just redundant.  
+    Feature #65: More wording in prediction pages (step 3).
+    Feature #517: In prediction step 2, remind the data source(s) chosen at step 1.
+    Feature #572: Remove "Predict identifications from trained model" which is very limited and never used.
+    Bug #728: Various, small and annoying issues in the most used control of the whole application (category marking select)
+    Feature #690: Add a 150% zoom option.
+    Feature #554: It's now possible to add sample and acquisition names in the fields displayed during classification.
 2021-09-21 : V 2.5.12
     Feature: General performance improvement on back-end and python front-end
     Bug #490: Private projects could appear in classification models.
