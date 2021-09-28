@@ -1200,11 +1200,27 @@
                           break;
                       case 'LEFT':
                           next_sel = present_sel.prev();
-                          if (!next_sel[0] || next_sel.hasClass("linestart")) return;  // Previous is beginning of line
+                          if (!next_sel[0] || next_sel.hasClass("linestart")) { // Previous is beginning of line
+                              // Move to line above
+                              parent = present_sel.parent().parent().parent();
+                              const line_above = parent.prev();
+                              if (!line_above.hasClass('imgtab')) return; // Not a line
+                              const all_tds = line_above.find("td");
+                              if (all_tds.length < 2) return; // Need the linestart + one image
+                              next_sel = $(all_tds.get(all_tds.length-1));
+                          }
                           break;
                       case 'RIGHT':
                           next_sel = present_sel.next();
-                          if (!next_sel[0]) return;  // No element on the right, i.e. end of line
+                          if (!next_sel[0]) {   // No element on the right, i.e. end of line
+                              // Move to line below
+                              parent = present_sel.parent().parent().parent();
+                              const line_below = parent.next();
+                              if (!line_below.hasClass('imgtab')) return; // Not a line
+                              const all_tds = line_below.find("td");
+                              if (all_tds.length < 2) return; // Need the linestart + one image
+                              next_sel = $(all_tds.get(1));
+                          }
                           break;
                   }
                   present_sel.removeClass('ui-selected');
