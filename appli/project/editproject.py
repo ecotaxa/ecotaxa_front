@@ -9,7 +9,7 @@ from flask_security import login_required
 from appli import app, PrintInCharte, gvp, XSSEscape, TempTaskDir
 ######################################################################################################################
 from appli.utils import ApiClient
-from appli.constants import MappableObjectColumns
+from appli.constants import MappableObjectColumns, MappableParentColumns
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (ProjectsApi, UsersApi, TaxonomyTreeApi, MiscApi)
 from to_back.ecotaxa_cli_py.models import (ProjectModel, UserModel, TaxonModel, ProjectTaxoStatsModel)
@@ -158,7 +158,7 @@ def PrjEdit(PrjId, privs_only=False):
     g.predeftaxo.sort(key=lambda r: r[1].lower())
 
     # TODO: Get from metadata
-    g.maplist = list(SortableParentFields.keys())
+    g.maplist = list(MappableParentColumns)
     g.maplist.extend(list(MappableObjectColumns))
     g.maplist.extend(target_proj.obj_free_cols.keys())
 
@@ -221,7 +221,7 @@ def Prjpopupeditpreset(PrjId):
             resolved = taxo_map.get(t, None)
             if resolved:
                 result.append(resolved)
-        a_prj = a_prj.to_dict() # immutable -> to_dict()
+        a_prj = a_prj.to_dict()  # immutable -> to_dict()
         a_prj["presetids"] = ",".join([str(x) for x in prj_initclassif_list])
         a_prj["preset"] = ", ".join(sorted(result))
 

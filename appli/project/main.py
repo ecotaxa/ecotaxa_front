@@ -466,7 +466,7 @@ def LoadRightPane():
             # Historical, kept for old URLs which might have been transmitted to third-parties
             return "txo.name"
         elif a_col in MappableParentColumns:
-            return a_col.replace("_", ".", 1)
+            return a_col.replace("_", ".", 1)  # e.g. sam_orig_id -> sam.orig_id
         return None
 
     # Compute optional columns needed under the image
