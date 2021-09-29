@@ -131,6 +131,13 @@
   <div class="filter ">
     <div class="form-group-sm">
       <label class="title">Annotator / Free filters</label>
+      <span
+        title="In Text field, you can use ^ for exact match at the beginning and $ for exact match at the end.
+E.g. : if 'oo' returns 'pool', 'goose', 'zoo' and 'oops'
+then '^oo' only matches 'oops',
+and 'oo$' only matches 'zoo'
+while '^oo$' matches nothing."
+        data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
       <a class="pull-right label label-default"
          style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
          onclick='ClearAnnotFree();return false;'>Clear</a>
