@@ -14,7 +14,8 @@ from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import UserModelWithRights
 
-vaultBP = Blueprint('vault', __name__, static_url_path='/vault', static_folder='../vault')
+vaultBP = Blueprint('vault', __name__,
+                    static_url_path='/vault', static_folder='../vault')
 app.register_blueprint(vaultBP)
 
 
@@ -62,11 +63,13 @@ def index():
     txt += """<br><a href='/privacy'>Privacy</a></div></div></div>"""
     return PrintInCharte(txt)
 
+
 # Where we serve the Vue front-end
 GUI_PATH = app.root_path + "/gui/"
 
 # Everything there should be pre-processed e.g.:
-#ecotaxa_front/proto/ecotaxa-cli$ for f in `grep -rwl "/front/" dist/ `; do sed -e "s/\/front\//\/gui\//g" $f > $f.2; mv $f.2 $f; done
+# ecotaxa_front/proto/ecotaxa-cli$ for f in `grep -rwl "/front/" dist/ `; do sed -e "s/\/front\//\/gui\//g" $f > $f.2; mv $f.2 $f; done
+
 
 @app.route('/gui')
 def gui_index():
@@ -113,11 +116,13 @@ def before_request_security():
     # current_user.is_authenticated
     g.cookieGAOK = request.cookies.get('GAOK', '')
     g.menu = []
-    g.menu.append((url_for("index"), "Home / Explore"))
+    g.menu.append((url_for("index"), "Home"))
+    g.menu.append(("/explore/", "Explore"))
     if len(mru_projects) > 0:
-        g.menu.append(("/prj/", "Select Project", "SUB"))
+        g.menu.append(("/prj/", "Contribute to a project", "SUB"))
         for a_prj in mru_projects:
-            g.menu.append(("/prj/%d" % a_prj.projid, "[%d] %s" % (a_prj.projid, a_prj.title)))
+            g.menu.append(("/prj/%d" % a_prj.projid,
+                          "[%d] %s" % (a_prj.projid, a_prj.title)))
         g.menu.append(("", "NOSUB"))
     else:
         # TODO: I can't see the menu _at all_ for unlogged users?
@@ -130,7 +135,8 @@ def before_request_security():
         g.menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%d');" % (
             request.view_args.get('PrjId'),), "Browse Taxonomy"))
     else:
-        g.menu.append(("javascript:PostDynForm('/taxo/browse/');", "Browse Taxonomy"))
+        g.menu.append(
+            ("javascript:PostDynForm('/taxo/browse/');", "Browse Taxonomy"))
     if user_can_administrate or user_can_administrate_users:
         g.menu.append(("", "SEP"))
         g.menu.append(("/admin/", "Admin Screen"))
@@ -151,7 +157,8 @@ def before_teardown_commitdb(error):
             except:
                 g.db.rollback()
     except Exception as e:  # si probleme d'accés à g.db ou d'operation sur la transaction on passe silencieusement
-        app.logger.error("before_teardown_commitdb : Unhandled exception (can be safely ignored) : {0} ".format(e))
+        app.logger.error(
+            "before_teardown_commitdb : Unhandled exception (can be safely ignored) : {0} ".format(e))
 
 
 @app.after_request
