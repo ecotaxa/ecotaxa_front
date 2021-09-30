@@ -44,6 +44,7 @@ docker rm ecotaxaback
 ./run_docker.sh
 ```
 ### hereunder an example of run_docker.sh, to adapt according to your ecotaxa_dev directory
+### Important : see the version (2.5) of ecotaxaback at the very end
 ```
 #!/bin/bash
 # 33:33 is www-data
