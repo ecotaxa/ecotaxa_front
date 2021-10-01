@@ -130,7 +130,7 @@ class Projects(db.Model):
     classiffieldlist = db.Column(VARCHAR)  # Fields available on sort & displayed field of Manual classif screen
     popoverfieldlist = db.Column(VARCHAR)  # Fields available on popover of Manual classif screen
     comments = db.Column(VARCHAR)
-    projtype = db.Column(VARCHAR(50))
+    description = db.Column(VARCHAR)
     fileloaded = db.Column(VARCHAR)
     rf_models_used = db.Column(VARCHAR)
     cnn_network_id = db.Column(VARCHAR(50))

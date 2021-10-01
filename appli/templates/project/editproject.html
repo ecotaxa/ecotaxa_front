@@ -57,9 +57,14 @@
     </tr>
 
 <tr><td>Project Description</td><td>
-        <input type="text" maxlength="50" class="form-control" id="projtype" name="projtype"
-               value="{{ data.projtype|default('',true) }}">
+        <textarea class="form-control" id="proj_description" name="description"
+               rows="2">{{ data.description|default('',true) }}</textarea>
       </td>
+    <td>A short paragraph describing the dataset, to make it discoverable by others in EcoTaxa and elsewhere.
+        It should indicate which organisms are targeted (e.g. mesozooplankton), where (e.g. Bering Sea),
+        when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed with a ZooScan) they were collected,
+        the scientific program that motivated the work and who ran it (e.g. SCOR program coordinated by the Laboratoire
+        d'Océanographie de Villefranche).</td>
 </tr>
 
   <tr><td>Definition of preset for manual sorting
@@ -124,7 +129,8 @@ Available fields :
   <tr><td>Comments</td><td>
         <textarea  class="form-control" id="comments" name="comments"
                    rows="4">{{ data.comments|default('',true) }}</textarea>
-    </td><td>
+    </td>
+      <td>Any technical, practical details that need to be shared with other users able to access this project.
     </td></tr>
 {% endif %}
   <tr><td>Privileges</td><td colspan="1">
