@@ -245,7 +245,7 @@ code {
 .status-validated { background: #d7edcf; }
 .status-dubious { background: #F0AD4E; }
 .status-predicted { background: #d0e8f4; }
-.status-unknown { }
+.status-unknown { background: #f2f2f2;} /* This is not the same thing as setting this class empty ! */
 .rightfixedfont{text-align: right; font-family: Courier;}
 .rightfixedfonttd td {text-align: right; font-family: Courier;}
 .ToBeSaved .taxo {color: #D9534F;}
