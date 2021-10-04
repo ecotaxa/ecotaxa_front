@@ -15,7 +15,7 @@ from sklearn.externals import joblib
 
 from appli import db, database, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, app, TempTaskDir, \
     XSSEscape
-from appli.database import GetAll
+from appli.database import GetAll, CSVIntStringToInClause
 from appli.project import sharedfilter
 from appli.project.stats import UpdateProjectStat, RecalcProjectTaxoStat
 from appli.tasks.taskmanager import AsyncTask
@@ -63,7 +63,7 @@ class TaskClassifAuto2(AsyncTask):
             self.task.taskstate = "Error"
             return False
         if self.param.BaseProject != '':
-            PrjListInClause = database.CSVIntStringToInClause(self.param.BaseProject + ',' + str(self.param.ProjectId))
+            PrjListInClause = CSVIntStringToInClause(self.param.BaseProject + ',' + str(self.param.ProjectId))
         else:
             PrjListInClause = str(self.param.ProjectId)
         # Find the _potentially_ useful for SCN rows and update their cnn_feature lines
@@ -204,7 +204,7 @@ class TaskClassifAuto2(AsyncTask):
 
         # Calcul du modèle à partir de projets sources
         self.UpdateProgress(1, "Retrieve Data from Learning Set")
-        PrjListInClause = database.CSVIntStringToInClause(self.param.BaseProject)
+        PrjListInClause = CSVIntStringToInClause(self.param.BaseProject)
         LstPrjSrc = GetAll("select projid,mappingobj from projects where projid in({0})".format(PrjListInClause))
         MapPrjBase = {}
         for PrjBase in LstPrjSrc:
@@ -553,7 +553,7 @@ class TaskClassifAuto2(AsyncTask):
             # validation du second ecran
             self.param.ProjectId = gvg("projid")
             if gvg("src", gvp("src", "")) != "":
-                self.param.BaseProject = database.CSVIntStringToInClause(gvg("src", gvp("src", "")))
+                self.param.BaseProject = CSVIntStringToInClause(gvg("src", gvp("src", "")))
             self.param.CritVar = gvp("CritVar")
             if gvp('ReadPostTaxoMappingFromLB') == "Y":
                 self.param.PostTaxoMapping = ",".join(
