@@ -17,7 +17,7 @@ from appli import db, database, PrintInCharte, gvp, gvg, EncodeEqualList, Decode
     XSSEscape
 from appli.database import GetAll, CSVIntStringToInClause
 from appli.project import sharedfilter
-from appli.project.stats import UpdateProjectStat, RecalcProjectTaxoStat
+from appli.project.stats import UpdateProjectStat
 from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ClassifyAutoReq, ProjectsApi, ProjectModel, \
@@ -55,7 +55,7 @@ class TaskClassifAuto2(AsyncTask):
     def SPCommon(self):
         logging.info("Execute SPCommon for Automatic Classification V2 Task %d" % self.task.id)
 
-    def ComputeSCNFeatures(self, Prj):
+    def ComputeSCNFeatures(self, Prj: ProjectModel):
         logging.info("Start SCN features Computation ")
         # Minimal sanity check
         if Prj.cnn_network_id is None or len(Prj.cnn_network_id) == 0:
@@ -188,9 +188,13 @@ class TaskClassifAuto2(AsyncTask):
         logging.info("Start Step 1")
         TInit = time.time()
 
-        Prj = database.Projects.query.filter_by(projid=self.param.ProjectId).first()
-        MapPrj = self.GetReverseObjMap(Prj)  # Dict NomVariable=>N° colonne ex Area:n42
+        prj_id = self.param.ProjectId
+        with ApiClient(ProjectsApi, self.cookie) as api:
+            target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+
+        MapPrj = self.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
         CommonKeys = set(MapPrj.keys())
+
         # PostTaxoMapping décodé sous la forme source:target
         PostTaxoMapping = {int(el[0].strip()): int(el[1].strip()) for el in
                            [el.split(':') for el in self.param.PostTaxoMapping.split(',') if el != '']}
@@ -198,7 +202,7 @@ class TaskClassifAuto2(AsyncTask):
 
         CNNCols = ""
         if self.param.usescn == 'Y':
-            if not self.ComputeSCNFeatures(Prj):
+            if not self.ComputeSCNFeatures(target_prj):
                 return
             CNNCols = "".join([",cnn%02d" % (i + 1) for i in range(50)])
 
@@ -292,7 +296,7 @@ class TaskClassifAuto2(AsyncTask):
             sqlparam = {"objids": sorted(res.object_ids)}
 
         NbrItem = \
-            GetAll("select count(*) from objects o where projid={0} {1} ".format(Prj.projid, affected_where), sqlparam)[
+            GetAll("select count(*) from objects o where projid={0} {1} ".format(target_prj.projid, affected_where), sqlparam)[
                 0][
                 0]
 
@@ -308,7 +312,7 @@ class TaskClassifAuto2(AsyncTask):
         if self.param.usescn == 'Y':
             sql += " join obj_cnn_features on obj_cnn_features.objcnnid=o.objid "
         sql += """ where projid={0} {1}
-                    order by objid""".format(Prj.projid, affected_where)
+                    order by objid""".format(target_prj.projid, affected_where)
         self.pgcur.execute(sql, sqlparam)
         # logging.info("SQL=%s",sql)
         ProcessedRows = 0
@@ -345,14 +349,9 @@ class TaskClassifAuto2(AsyncTask):
                          , ProcessedRows, NbrItem
                          , time.time() - TStep, TStep2 - TStep, TStep3 - TStep2, time.time() - TStep3)
 
-        RecalcProjectTaxoStat(Prj.projid)
-        UpdateProjectStat(Prj.projid)
+        UpdateProjectStat(target_prj.projid)
         self.task.taskstate = "Done"
         self.UpdateProgress(100, "Classified %d objects" % ProcessedRows)
-        # self.task.taskstate="Error"
-        # self.UpdateProgress(10,"Test Error")
-        # if self.param.IntraStep==1:
-        # sinon on pose une question
 
     def QuestionProcessScreenSelectSource(self, target_prj: ProjectModel):
 
@@ -636,7 +635,7 @@ class TaskClassifAuto2(AsyncTask):
             self.param.PostTaxoMapping = ",".join((x[6:] + ":" + gvp(x) for x in request.form if x[0:6] == "taxolb"))
 
         # Determination des criteres/variables utilisées par l'algo de learning
-        revobjmap = self.GetAugmentedReverseObjectMap(target_prj)
+        revobjmap = self.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
         CommonKeys = set(revobjmap.keys())
 
         # Loop over source projects, get their keys and determine a set of common keys (for dest + all srcs)
@@ -670,7 +669,8 @@ class TaskClassifAuto2(AsyncTask):
         for col, count, variance in zip(stats.columns, stats.counts, stats.variances):
             prfx, name = col.split(".")
             critlist[name][1] = round(100 * (1 - count / stats.total))  # % Missing dans Learning Set
-            critlist[name][2] = ' ' if variance is None else ('Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
+            critlist[name][2] = ' ' if variance is None else (
+                'Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
 
         # Calcul des stat du projet cible
         with ApiClient(ProjectsApi, request) as api:
@@ -679,9 +679,9 @@ class TaskClassifAuto2(AsyncTask):
                                                                               names=names_for_stats)
         for col, count, variance in zip(stats.columns, stats.counts, stats.variances):
             prfx, name = col.split(".")
-            critlist[name][3] = round(100 * (1 - count / stats.total))   # % Missing dans cible
-            critlist[name][4] = ' ' if variance is None else ('Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
-
+            critlist[name][3] = round(100 * (1 - count / stats.total))  # % Missing dans cible
+            critlist[name][4] = ' ' if variance is None else (
+                'Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
 
         # Calcule des stat de la dispo des données SCN
         g.SCN = None
