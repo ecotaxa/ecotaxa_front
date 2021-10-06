@@ -6,7 +6,7 @@ import sys
 import time
 from pathlib import Path
 from subprocess import Popen, TimeoutExpired, DEVNULL, PIPE
-from typing import List
+from typing import List, Any
 
 import numpy as np
 from flask import render_template, g, flash, request
@@ -208,62 +208,62 @@ class TaskClassifAuto2(AsyncTask):
 
         # Calcul du modèle à partir de projets sources
         self.UpdateProgress(1, "Retrieve Data from Learning Set")
-        PrjListInClause = CSVIntStringToInClause(self.param.BaseProject)
-        LstPrjSrc = GetAll("select projid,mappingobj from projects where projid in({0})".format(PrjListInClause))
-        MapPrjBase = {}
-        for PrjBase in LstPrjSrc:
-            # gènere la reverse mapping
-            MapPrjBase[PrjBase['projid']] = self.GetReverseObjMap(PrjBase)
-            # et cherche l'intersection des attributs communs
-            CommonKeys = CommonKeys.intersection(set(MapPrjBase[PrjBase['projid']].keys()))
+
+        revobjmapbaseByProj = {}
+        base_projects = self.param.BaseProject
+        src_prj_ids = [int(prj_id) for prj_id in base_projects.split(",")]
+
+        self.api_read_projects(self.cookie, src_prj_ids, revobjmapbaseByProj, CommonKeys)
+
         if self.param.learninglimit:
             self.param.learninglimit = int(self.param.learninglimit)  # convert
         logging.info("MapPrj %s", MapPrj)
-        logging.info("MapPrjBase %s", MapPrjBase)
+        logging.info("MapPrjBase %s", revobjmapbaseByProj)
         CritVar = self.param.CritVar.split(",")
 
         # ne garde que les colonnes communes qui sont aussi selectionnées.
-        CommonKeys = CommonKeys.intersection(set(CritVar))
+        CommonKeys.intersection_update(set(CritVar))
         # Calcule les medianes
         sql = ""
-        for BasePrj in LstPrjSrc:
-            bprojid = BasePrj['projid']
+        for bprojid in src_prj_ids:
             if sql != "":
                 sql += " union all "
             sql += "select 1"
             for c in CommonKeys:
-                sql += ",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {1}".format(
-                    MapPrjBase[bprojid][c], MapPrj[c])
+                sql += ",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {1}". \
+                    format(revobjmapbaseByProj[bprojid][c], MapPrj[c])
             sql += " from objects "
             sql += " where projid={0} and classif_id is not null and classif_qual='V'".format(bprojid)
 
         if self.param.learninglimit:
+            # random() instead?
             LimitHead = """ with objlist as ( select objid from (
                         select obj.objid,row_number() over(PARTITION BY classif_id order by random_value) rang
                         from objects obj
                         where obj.projid in ({0}) and obj.classif_id is not null
-                        and classif_qual='V' ) q where rang <={1} ) """.format(PrjListInClause,
-                                                                               self.param.learninglimit)
+                        and classif_qual='V' ) q where rang <={1} ) """. \
+                format(base_projects, self.param.learninglimit)
             LimitFoot = """ and objid in ( select objid from objlist ) """
             sql = LimitHead + sql + LimitFoot
         else:
             LimitHead = LimitFoot = ""
         DefVal = GetAll(sql)[0]
+
         # Extrait les données du learning set
         sql = ""
-        for BasePrj in LstPrjSrc:
-            bprojid = BasePrj['projid']
-            if sql != "": sql += " \nunion all "
+        for bprojid in src_prj_ids:
+            if sql != "":
+                sql += " \nunion all "
             sql = "select classif_id"
             for c in CommonKeys:
                 sql += ",coalesce(case when {0} not in ('Infinity','-Infinity','NaN') then {0} end,{1}) as {2}".format(
-                    MapPrjBase[bprojid][c], DefVal[MapPrj[c]], MapPrj[c])
+                    revobjmapbaseByProj[bprojid][c], DefVal[MapPrj[c]], MapPrj[c])
             sql += CNNCols + " from objects "
             if self.param.usescn == 'Y':
                 sql += " join obj_cnn_features on obj_cnn_features.objcnnid=objects.objid "
             sql += """ where classif_id is not null and classif_qual='V'
-                        and projid in ({0})
-                        and classif_id in ({1}) """.format(PrjListInClause, self.param.Taxo)
+                        and projid in({0})
+                        and classif_id in ({1}) """.format(base_projects, self.param.Taxo)
         if self.param.learninglimit:
             sql = LimitHead + sql + LimitFoot
         # Convertie le LS en tableau NumPy
@@ -296,7 +296,8 @@ class TaskClassifAuto2(AsyncTask):
             sqlparam = {"objids": sorted(res.object_ids)}
 
         NbrItem = \
-            GetAll("select count(*) from objects o where projid={0} {1} ".format(target_prj.projid, affected_where), sqlparam)[
+            GetAll("select count(*) from objects o where projid={0} {1} ".format(target_prj.projid, affected_where),
+                   sqlparam)[
                 0][
                 0]
 
@@ -464,6 +465,16 @@ class TaskClassifAuto2(AsyncTask):
                                                                filter_subset=False))
         app.logger.info('Get Projects API call duration: %0.3f s', time.time() - bef)
         return ret
+
+    @classmethod
+    def api_read_projects(cls, auth: Any, src_prj_ids: List[int], revobjmapbaseByProj, CommonKeys):
+        """ Read project's free columns and add them to the common set """
+        for src_prj_id in src_prj_ids:
+            with ApiClient(ProjectsApi, auth) as api:
+                proj: ProjectModel = api.project_query_projects_project_id_get(src_prj_id,
+                                                                               for_managing=False)
+            revobjmapbaseByProj[src_prj_id] = cls.GetAugmentedReverseObjectMap(proj)
+            CommonKeys.intersection_update(set(revobjmapbaseByProj[src_prj_id].keys()))
 
     def QuestionProcessScreenSelectSourceTaxo(self, target_prj: ProjectModel):
         # Second écran de configuration, choix des taxon utilisés dans la source
@@ -635,23 +646,17 @@ class TaskClassifAuto2(AsyncTask):
             self.param.PostTaxoMapping = ",".join((x[6:] + ":" + gvp(x) for x in request.form if x[0:6] == "taxolb"))
 
         # Determination des criteres/variables utilisées par l'algo de learning
-        revobjmap = self.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
+        revobjmap = TaskClassifAuto2.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
         CommonKeys = set(revobjmap.keys())
 
         # Loop over source projects, get their keys and determine a set of common keys (for dest + all srcs)
         # Note: given the harcoded values in @see GetAugmentedReverseObjectMap, the common keys comprise
         # at least depth_min and depth_max
-        revobjmapbaseByProj = {}
         src_prj_lst = gvp("src", gvg("src"))
+        revobjmapbaseByProj = {}
         src_prj_ids = [int(prj_id) for prj_id in src_prj_lst.split(",") if prj_id.isdigit()]
-        src_projs: List[ProjectModel] = []
-        for src_prj_id in src_prj_ids:
-            with ApiClient(ProjectsApi, request) as api:
-                proj: ProjectModel = api.project_query_projects_project_id_get(src_prj_id,
-                                                                               for_managing=False)
-            src_projs.append(proj)
-            revobjmapbaseByProj[src_prj_id] = self.GetAugmentedReverseObjectMap(proj)
-            CommonKeys = CommonKeys.intersection(set(revobjmapbaseByProj[src_prj_id].keys()))
+
+        self.api_read_projects(request, src_prj_ids, revobjmapbaseByProj, CommonKeys)
 
         # critlist[NomCol] 0:NomCol , 1:LS % validé rempli , 2:LS Nbr distincte ,3:Cible % rempli ,4:Cible % NV Rempli Inutile ?
         critlist = {k: [k, -1, -1, -1, -1] for k in CommonKeys}
@@ -672,7 +677,7 @@ class TaskClassifAuto2(AsyncTask):
             critlist[name][2] = ' ' if variance is None else (
                 'Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
 
-        # Calcul des stat du projet cible
+        # Calcul des stats du projet cible
         with ApiClient(ProjectsApi, request) as api:
             stats: ProjectSetColumnStatsModel = \
                 api.project_set_get_column_stats_project_set_column_stats_get(ids=str(target_prj.projid),
@@ -727,7 +732,8 @@ class TaskClassifAuto2(AsyncTask):
         revobjmap['depth_max'] = 'depth_max'
         return revobjmap
 
-    def GetAugmentedReverseObjectMap(self, prj: ProjectModel):
+    @classmethod
+    def GetAugmentedReverseObjectMap(cls, prj: ProjectModel):
         """ Return numerical free columns for a project + 2 hard-coded ones """
         ret = {k: v for k, v in prj.obj_free_cols.items() if k[0] == 'n'}
         ret['depth_min'] = 'depth_min'
