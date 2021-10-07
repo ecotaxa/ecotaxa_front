@@ -1,3 +1,5 @@
+VUE_PATH = "/gui"
+
 from collections import OrderedDict
 
 from appli.utils import ApiClient

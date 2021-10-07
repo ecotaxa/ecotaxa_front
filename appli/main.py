@@ -14,10 +14,12 @@ from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import UserModelWithRights
 
+# VUE_PATH == "/gui"
+from appli.constants import VUE_PATH
+
 vaultBP = Blueprint('vault', __name__,
                     static_url_path='/vault', static_folder='../vault')
 app.register_blueprint(vaultBP)
-
 
 @app.route('/')
 def index():
@@ -34,6 +36,12 @@ def index():
                         <p><strong>Message from the application manager</strong></p>{0}
                     </div>
                 """.format(message)
+    # Link to new EcoTaxa about page : see https://github.com/ecotaxa/ecotaxa_dev/issues/701
+    # We have to do something like : txt += '<a href="https://ecotaxa.obs-vlfr.fr/gui/ecotaxa_about>About EcoTaxa...</a>'    
+    txt +="<div>\n"
+    txt += '<a href="' + VUE_PATH + '/ecotaxa_about' + '">About EcoTaxa...</a>\n'
+    txt +="</div>\n"    
+
     # Lecture de la partie Haute
     NomFichier = 'appli/static/home/home.html'
     if not os.path.exists(NomFichier):
@@ -54,6 +62,7 @@ def index():
 		</div>		
 	</div>
 """
+    '''
     NomFichier = 'appli/static/home/homebottom.html'
     if not os.path.exists(NomFichier):
         NomFichier = 'appli/static/home/homebottom-model.html'
@@ -61,22 +70,21 @@ def index():
     with open(NomFichier, 'r', encoding='utf8') as f:
         txt += f.read()
     txt += """<br><a href='/privacy'>Privacy</a></div></div></div>"""
+    '''
     return PrintInCharte(txt)
 
-
 # Where we serve the Vue front-end
-GUI_PATH = app.root_path + "/gui/"
+GUI_PATH = app.root_path + "/gui/" # TODO ? replace /gui by VUE_PATH ?
 
 # Everything there should be pre-processed e.g.:
 # ecotaxa_front/proto/ecotaxa-cli$ for f in `grep -rwl "/front/" dist/ `; do sed -e "s/\/front\//\/gui\//g" $f > $f.2; mv $f.2 $f; done
 
-
-@app.route('/gui')
+@app.route('/gui') # TODO ? replace /gui by VUE_PATH ?
 def gui_index():
     return send_from_directory(GUI_PATH, 'index.html')
 
 
-@app.route('/gui/<path:filename>')
+@app.route('/gui/<path:filename>') # TODO ? replace /gui by VUE_PATH ?
 def gui_any(filename):
     try:
         return send_from_directory(GUI_PATH, filename)

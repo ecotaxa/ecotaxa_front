@@ -100,8 +100,8 @@ def ErrorFormat(txt):
     """ % (txt)
 
 
-VUE_PATH = "/gui"
-
+# VUE_PATH == "/gui"
+from appli.constants import VUE_PATH
 
 def AddTaskSummaryForTemplate():
     """
