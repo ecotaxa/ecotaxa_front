@@ -511,7 +511,19 @@ class ObjectsApi(object):
     def get_object_set_object_set_project_id_query_post(self, project_id, project_filters, **kwargs):  # noqa: E501
         """Get Object Set  # noqa: E501
 
-        Return object ids for the given project with the filters.  Optionally:      - fields will specify the needed object (and ancilliary entities) fields     - order_field will order the result using given field, If prefixed with \"-\" then it will be reversed.     - window_start & window_size allows to return only a slice of the result.  Fields follow the naming convention: `prefix.field`.     Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.     Use a comma to separate fields.     - Column obj.imgcount contains the total count of images for the object.  # noqa: E501
+        Return object ids for the given project with the filters.  Optionally:      - fields will specify the needed object (and ancilliary entities) fields     - order_field will order the result using given field, If prefixed with \"-\" then it will be reversed.     - window_start & window_size allows to return only a slice of the result.  Fields follow the naming convention: `prefix.field`.     Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.     Use a comma to separate fields.     - Column obj.imgcount contains the total count of images for the object.
+        More help:
+        You can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.
+        **Note that the following fields must be prefixed with the header “obj.” ** (for example ==> obj.orig_id):
+        acquisid classif_auto_id classif_auto_score classif_auto_when classif_crossvalidation_id classif_qual classif_qual
+        classif_id classif_qual classif_who classif_when complement_info depth_max depth_min
+        latitude longitude objdate object_link objid objtime orig_id random_value similarity sunpos
+        **Note that the following fields must be prefixed with the header “img.“ ** (for example ==> img.file_name):
+        file_name height imgid imgrank file_name orig objid file_name thumb_file_name thumb_height thumb_width width
+        **Note that the following fields must be prefixed with the header “txo.” ** (for example ==> txo.display_name):
+        creation_datetime creator_email display_name id id_instance id_source lastupdate_datetime
+        name nbrobj nbrobjcum parent_id rename_to source_desc source_url taxostatus taxotype
+        **All other fields must be prefixed by the header “fre.“ ** (for example ==> fre.circ.).  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.get_object_set_object_set_project_id_query_post(project_id, project_filters, async_req=True)
@@ -541,7 +553,19 @@ class ObjectsApi(object):
     def get_object_set_object_set_project_id_query_post_with_http_info(self, project_id, project_filters, **kwargs):  # noqa: E501
         """Get Object Set  # noqa: E501
 
-        Return object ids for the given project with the filters.  Optionally:      - fields will specify the needed object (and ancilliary entities) fields     - order_field will order the result using given field, If prefixed with \"-\" then it will be reversed.     - window_start & window_size allows to return only a slice of the result.  Fields follow the naming convention: `prefix.field`.     Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.     Use a comma to separate fields.     - Column obj.imgcount contains the total count of images for the object.  # noqa: E501
+        Return object ids for the given project with the filters.  Optionally:      - fields will specify the needed object (and ancilliary entities) fields     - order_field will order the result using given field, If prefixed with \"-\" then it will be reversed.     - window_start & window_size allows to return only a slice of the result.  Fields follow the naming convention: `prefix.field`.     Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.     Use a comma to separate fields.     - Column obj.imgcount contains the total count of images for the object.
+        More help:
+        You can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.
+        **Note that the following fields must be prefixed with the header “obj.” ** (for example ==> obj.orig_id):
+        acquisid classif_auto_id classif_auto_score classif_auto_when classif_crossvalidation_id classif_qual classif_qual
+        classif_id classif_qual classif_who classif_when complement_info depth_max depth_min
+        latitude longitude objdate object_link objid objtime orig_id random_value similarity sunpos
+        **Note that the following fields must be prefixed with the header “img.“ ** (for example ==> img.file_name):
+        file_name height imgid imgrank file_name orig objid file_name thumb_file_name thumb_height thumb_width width
+        **Note that the following fields must be prefixed with the header “txo.” ** (for example ==> txo.display_name):
+        creation_datetime creator_email display_name id id_instance id_source lastupdate_datetime
+        name nbrobj nbrobjcum parent_id rename_to source_desc source_url taxostatus taxotype
+        **All other fields must be prefixed by the header “fre.“ ** (for example ==> fre.circ.).  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.get_object_set_object_set_project_id_query_post_with_http_info(project_id, project_filters, async_req=True)
