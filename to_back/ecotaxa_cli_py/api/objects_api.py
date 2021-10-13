@@ -515,7 +515,7 @@ class ObjectsApi(object):
         More help:
         You can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.
         **Note that the following fields must be prefixed with the header “obj.” ** (for example ==> obj.orig_id):
-        acquisid classif_auto_id classif_auto_score classif_auto_when classif_crossvalidation_id classif_qual classif_qual
+        acquisid classif_auto_id classif_auto_score classif_auto_when classif_crossvalidation_id
         classif_id classif_qual classif_who classif_when complement_info depth_max depth_min
         latitude longitude objdate object_link objid objtime orig_id random_value similarity sunpos
         **Note that the following fields must be prefixed with the header “img.“ ** (for example ==> img.file_name):
@@ -557,7 +557,7 @@ class ObjectsApi(object):
         More help:
         You can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.
         **Note that the following fields must be prefixed with the header “obj.” ** (for example ==> obj.orig_id):
-        acquisid classif_auto_id classif_auto_score classif_auto_when classif_crossvalidation_id classif_qual classif_qual
+        acquisid classif_auto_id classif_auto_score classif_auto_when classif_crossvalidation_id
         classif_id classif_qual classif_who classif_when complement_info depth_max depth_min
         latitude longitude objdate object_link objid objtime orig_id random_value similarity sunpos
         **Note that the following fields must be prefixed with the header “img.“ ** (for example ==> img.file_name):
