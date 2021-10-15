@@ -219,11 +219,12 @@ class TaskClassifAuto2(AsyncTask):
             self.param.learninglimit = int(self.param.learninglimit)  # convert
         logging.info("MapPrj %s", MapPrj)
         logging.info("MapPrjBase %s", revobjmapbaseByProj)
-        CritVar = self.param.CritVar.split(",")
 
         # ne garde que les colonnes communes qui sont aussi selectionnées.
+        CritVar = self.param.CritVar.split(",")
         CommonKeys.intersection_update(set(CritVar))
-        # Calcule les medianes
+
+        # Online help says "Missing values are replaced by the median value for this feature from the learning set."
         sql = ""
         for bprojid in src_prj_ids:
             if sql != "":
@@ -240,8 +241,8 @@ class TaskClassifAuto2(AsyncTask):
             LimitHead = """ with objlist as ( select objid from (
                         select obj.objid,row_number() over(PARTITION BY classif_id order by random_value) rang
                         from objects obj
-                        where obj.projid in ({0}) and obj.classif_id is not null
-                        and classif_qual='V' ) q where rang <={1} ) """. \
+                        where obj.projid in ({0}) and obj.classif_id is not null and classif_qual='V' ) q 
+                        where rang <={1} ) """. \
                 format(base_projects, self.param.learninglimit)
             LimitFoot = """ and objid in ( select objid from objlist ) """
             sql = LimitHead + sql + LimitFoot
@@ -614,8 +615,12 @@ class TaskClassifAuto2(AsyncTask):
                     if "baseproject" in PrjCS: d["baseproject"] = PrjCS["baseproject"]
                     if "seltaxo" in PrjCS: d["seltaxo"] = PrjCS["seltaxo"]
                 d['posttaxomapping'] = self.param.PostTaxoMapping
-                # Update project TODO
-                target_prj.classifsettings = EncodeEqualList(d)
+                # Update project classification settings
+                with ApiClient(ProjectsApi, request) as api:
+                    api. \
+                        set_project_predict_settings_projects_project_id_prediction_settings_put(project_id=prj_id,
+                                                                                                 settings=EncodeEqualList(
+                                                                                                     d))
                 return self.StartTask(self.param)
         else:  # valeurs par default
             if gvp('src', gvg('src')) == "":
@@ -646,7 +651,7 @@ class TaskClassifAuto2(AsyncTask):
             self.param.PostTaxoMapping = ",".join((x[6:] + ":" + gvp(x) for x in request.form if x[0:6] == "taxolb"))
 
         # Determination des criteres/variables utilisées par l'algo de learning
-        revobjmap = TaskClassifAuto2.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
+        revobjmap = self.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
         CommonKeys = set(revobjmap.keys())
 
         # Loop over source projects, get their keys and determine a set of common keys (for dest + all srcs)
@@ -663,8 +668,9 @@ class TaskClassifAuto2(AsyncTask):
 
         # Prepare names for the API call
         names_for_stats = ",".join(["fre.%s" % col for col in CommonKeys])
-        names_for_stats = names_for_stats.replace("fre.depth_min", "obj.depth_min").replace("fre.depth_max",
-                                                                                            "obj.depth_max")
+        names_for_stats = names_for_stats \
+            .replace("fre.depth_min", "obj.depth_min") \
+            .replace("fre.depth_max", "obj.depth_max")
         # Stats on training set
         with ApiClient(ProjectsApi, request) as api:
             stats: ProjectSetColumnStatsModel = \
@@ -688,7 +694,7 @@ class TaskClassifAuto2(AsyncTask):
             critlist[name][4] = ' ' if variance is None else (
                 'Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
 
-        # Calcule des stat de la dispo des données SCN
+        # Calcul des stats de la dispo des données SCN
         g.SCN = None
         if app.config.get("SCN_ENABLED", False):
             sql = """
@@ -721,16 +727,6 @@ class TaskClassifAuto2(AsyncTask):
         if len(self.param.filtres) > 0:
             msg += " Note that you have active filters, which reduces potential target objects."
         return msg
-
-    def GetReverseObjMap(self, Prj):
-        mappingobj = getattr(Prj, 'mappingobj', None)  # Prj peut être un objet
-        if mappingobj is None:  # ou un ligne de requete
-            mappingobj = Prj['mappingobj']
-        revobjmap = {v: k for k, v in DecodeEqualList(mappingobj).items() if k[0] == 'n'}
-        # /!\ These are plain obj_head columns!
-        revobjmap['depth_min'] = 'depth_min'
-        revobjmap['depth_max'] = 'depth_max'
-        return revobjmap
 
     @classmethod
     def GetAugmentedReverseObjectMap(cls, prj: ProjectModel):
