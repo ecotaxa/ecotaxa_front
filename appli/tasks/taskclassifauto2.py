@@ -458,18 +458,15 @@ class TaskClassifAuto2(AsyncTask):
             validated = validated_per_proj[a_maybe_src_prj.projid]
             cnn_network_id = a_maybe_src_prj.cnn_network_id if a_maybe_src_prj.cnn_network_id else ""
             if a_maybe_src_prj.projid in src_projs:
-                checked = 'checked="true"'
+                checked = True
                 src_projs.remove(a_maybe_src_prj.projid)
             elif a_maybe_src_prj.projid in settings_prj_ids:
-                checked = 'checked="true"'
+                checked = True
             else:
-                checked = ""
-            line = """<tr><td><input type='checkbox' {checked} class='selproj' data-prjid='{projid}'></td>
-                      <td>#{projid} - {title}</td><td>{objvalid:0.0f}</td><td>{MatchingFeatures}</td><td>{cnn_network_id}</td>
-                      </tr>""".format(MatchingFeatures=matching, checked=checked, projid=a_maybe_src_prj.projid,
-                                      title=a_maybe_src_prj.title, objvalid=validated,
-                                      cnn_network_id=cnn_network_id)
-            if checked == "":
+                checked = False
+            line = {"checked": checked, "projid": a_maybe_src_prj.projid, "title": a_maybe_src_prj.title,
+                    "validated_nb": int(validated), "matching_nb": matching, "deep_model": cnn_network_id}
+            if not checked:
                 table_lines.append(line)
             else:
                 table_lines.insert(0, line)
@@ -496,10 +493,11 @@ class TaskClassifAuto2(AsyncTask):
                                           for prj_id in src_projs])
             table_lines.insert(0, "Not in table due to filter:&nbsp;" + filtered_by_search)
 
-        return render_template('task/classifauto2_create_lstproj.html'
-                               , url=request.query_string.decode('utf-8')
-                               , TblBody="".join(table_lines)
-                               , filters_info=filters_info)
+        return render_template('task/classifauto2_create_lstproj.html',
+                               url=request.query_string.decode('utf-8'),
+                               prj_table=table_lines,
+                               deep_features=target_prj.cnn_network_id,
+                               filters_info=filters_info)
 
     @staticmethod
     def api_read_accessible_projects(instrument_filter, title_filter):
@@ -567,6 +565,10 @@ class TaskClassifAuto2(AsyncTask):
         taxo_table = [[taxon_id, taxa_per_id[taxon_id].display_name, nbr_v]
                       for taxon_id, nbr_v in validated_categ_count.items()]
         taxo_table.sort(key=lambda r: r[2], reverse=True)
+        # There are < in display names which make them unbreakable during resize
+        for a_row in taxo_table:
+            if "<" in a_row[1]:
+                a_row[1] = a_row[1].replace("<", " < ")
 
         # Get previous settings which influence how to display the categories (pre-checked or not)
         d = DecodeEqualList(target_prj.classifsettings)

@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 
-
 {% block body %}
   <h3>PREDICTION: Choice of Learning Set data source</h3>
   {{ filters_info|safe }}
@@ -21,10 +20,10 @@
         &nbsp;&nbsp;&nbsp;&nbsp;- How many objects you want to use as reference for the prediction.<br>
         &nbsp;&nbsp;&nbsp;&nbsp;- For these objects, which features are relevant to the prediction.<br>
         This Learning set will then be used for running the prediction task.
-        &nbsp;<span data-toggle="tooltip"
+        &nbsp;<span data-container="body" data-toggle="tooltip"
                     data-placement="right" data-html="true"
                     title="
-<p style='text-align: left'>You can run the Subset tool to :<br><ul style='text-align: left'>
+<p style='text-align: left'>You can run the Subset tool to :<ul style='text-align: left'>
 <li>Create a Learning set that you will later improve
 <li>Check validation of a project using a randomly limited number of objects from the project</ul></p>"
                     class="glyphicon glyphicon-question-sign"></span>
@@ -32,7 +31,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="panel panel-default col-md-offset-4" style='display: inline-block; margin-bottom: 8px'>
+    <div class="panel panel-default col-md-offset-1 col-md-7" style='display: inline-block; margin-bottom: 8px'>
       <div class="panel-body" style="padding: 5px;">
         <form method="post" id="search">
           <input type="hidden" value="" name="srcs" id="search_srcs">
@@ -45,33 +44,83 @@
           Instrument :
           <input style="width: 100px;" name="filt_instrum" id="filt_instrum"
                  value="{{ request.form.get('filt_instrum','') }}" type="text">
-          <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList();"
+          <span class="glyphicon glyphicon-search" onclick="DispInstrumList();"
                 style="cursor: pointer;"></span>
           <button type="button" onclick='FilterWithProjectSelection();' class="btn btn-primary">Filter
           </button>
         </form>
       </div>
     </div>
+    <div class="col-md-4">
+      {% if deep_features %}
+        Project deep features model: <span id="prj_deep">{{ deep_features }}</span>.
+      {% else %}
+        <span class="label-warning">No deep features model for the project.</span>
+      {% endif %}
+      <br>Model is <span id="deep_used"></span>
+      <span data-container="body" data-toggle="tooltip"
+            data-placement="right" data-html="true"
+            title="<p>Your project deep features model must exist (see with a Manager if not the case),
+and be the same as in _all_ source projects, to allow deep features extraction and prediction improvement.</p>"
+            class="glyphicon glyphicon-question-sign"></span>
+    </div>
   </div>
-  <table style='margin-left: 10px;width: 95%'>
-    <tr>
-      <td>
-      </td>
-    </tr>
-  </table>
-  <table class='table table-bordered table-verycondensed table-hover' style='margin-left: 10px;width: 95%'>
-    <tr>
-      <th style='width:20px'></th>
-      <th># - Title</th>
-      <th style='width:100px'># Validated</th>
-      <th style='width:100px'># Matching features</th>
-      <th style='width:100px'>CNN Network</th>
-    </tr>
-    {{ TblBody|safe }}
-  </table>
+
+  <div class="center-block" style="margin-left: 1em;max-width:96%">
+    <table class='table table-verycondensed table-hover'>
+      <tr>
+        <th style='width:20px'></th>
+        <th># - Title</th>
+        <th style='width:100px'># Validated</th>
+        <th style='width:100px'># Matching features</th>
+        <th style='width:100px'>Deep features model</th>
+      </tr>
+      {% for line in prj_table %}
+        <tr>
+          <td><input type='checkbox' {{ "checked" if line.checked }}
+                     onchange="SyncDeepPossible()"
+                     class='selproj' data-prjid='{{ line.projid }}'>
+          </td>
+          <td>#{{ line.projid }} - {{ line.title }}</td>
+          <td>{{ line.validated_nb }}</td>
+          <td>{{ line.matching_nb }}</td>
+          <td id="deep{{ line.projid }}">{{ line.deep_model }}</td>
+        </tr>
+      {% endfor %}
+      {{ TblBody|safe }}
+    </table>
+  </div>
+
   <script>
+
+      function SyncDeepPossible() {
+          // Tell the user if using deep features will be possible or not
+          const prj_model = $("#prj_deep").text();
+          const feedback = $("#deep_used");
+          if (prj_model === "") {
+              feedback.text("missing.");
+              return;
+          }
+          var ok = true;
+          const sel_models = $(".selproj:checked").map(function () {
+              const prj_id = $(this).data('prjid');
+              const deep_for_prj = $("#deep" + prj_id).text();
+              if (prj_model !== deep_for_prj) {
+                  ok = false;
+              }
+          });
+          if (ok) {
+              feedback.attr("class", "label-success");
+              feedback.text("usable.");
+          } else {
+              feedback.attr("class", "label-warning");
+              feedback.text("not usable.");
+          }
+      }
+
       $(function () {
-          $('[data-toggle="tooltip"]').tooltip()
+          $('[data-toggle="tooltip"]').tooltip();
+          SyncDeepPossible();
       })
 
       function SubmitProjectSelection() {

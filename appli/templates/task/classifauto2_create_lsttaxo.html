@@ -18,13 +18,15 @@
           only objects validated in below chosen categories will be present in the Learning Set being built.<br>
           Optionally, each category can <b>appear</b> as another category, generally a parent one, to the machine
           learning
-          algorithm.&nbsp;<span data-toggle="tooltip" data-placement="right" data-html="true" title="
+          algorithm.&nbsp;<span data-container="body" data-toggle="tooltip"
+                                data-placement="right" data-html="true" title="
 <p style='text-align: left'>The model will be trained with objects currently validated in the categories in the left column, within the projects selected at the previous step. It will therefore only be able to recognise those.
 <br>Sometimes training on detailed, morphologically homogeneous, categories makes the model better but only a broader category is ecologically meaningful. In that case, all objects classified in the detailed categories can be regrouped in a broader one. This is done by mapping all detailed categories to the same broad category in the right column.
 </p>"
                                 class="glyphicon glyphicon-question-sign"></span>
-          <li>The experience shows that it is often more efficient to predict into a limited number of
-        categories and then validate in detail using more categories.</li>
+        <li>The experience shows that it is often more efficient to predict into a limited number of
+          categories and then validate in detail using more categories.
+        </li>
         </p>
 
       </div>
@@ -33,41 +35,39 @@
     <input type='hidden' name='src' value='{{ src_prj_ids }}'>
     <input type="hidden" name="seltaxo" value="Y">
 
-    <div class="row">
-      <div class="col-md-offset-1 col-md-4">
-        Learn from max. <input maxlength="8" size="4" id="per_cat" name="learninglimit"
-                               value="5000" oninput="UpdateLSCountLimit();"> objects per category.
-        &nbsp;<span data-toggle="tooltip" data-placement="right" data-html="true" title="
+    <div style="margin-left: 1%; max-width: 96%">
+      <table class="table table-condensed" id="TblTaxo">
+        <tr>
+          <td colspan="6">
+            Learn from max. <input maxlength="8" size="4" id="per_cat" name="learninglimit"
+                                   value="5000" oninput="UpdateLSCountLimit();"> objects per category.
+            &nbsp;<span data-toggle="tooltip" data-placement="right" data-html="true" title="
 <p style='text-align: left'>By limiting very populated categories e.g. detritus, you give more chances to small categories to be recognized by the algorithm. </p>"
-                    class="glyphicon glyphicon-question-sign"></span>
-        <br>
-        Total is currently <span id="total_objs" class="rightfixedfont">0</span> objects.
-      </div>
-
-      <div class="col-sm-offset-1 col-md-4">
-        <p>
-          Make categories appear like in: <select id="TaxoMappingFromPrj" style="width: 400px;margin-top: 5px">
-        </select>
-        </p>
-      </div>
-
-    </div>
-    <div>
-      <table class="table table-bordered table-condensed" style="margin-left: 10px; width: auto" id="TblTaxo">
+                        class="glyphicon glyphicon-question-sign"></span>
+            <br>
+            Total is currently <span id="total_objs" class="rightfixedfont">0</span> objects.
+          </td>
+          <td></td>
+          <td>
+            Make categories appear like in:
+            <br><select id="TaxoMappingFromPrj" style="width: 20em;">
+          </select>
+          </td>
+        </tr>
         <tr>
           <th>(id)</th>
           <th><input type="checkbox" id="all_taxa" onclick="SelDeselAll(this);" value="Y"></th>
-          <th width="200" style="text-align: center;">Source (validated) category</th>
+          <th style="text-align: center">Source (validated) category</th>
           <th style="text-align: center;"># source</th>
           <th style="text-align: center;">% source</th>
           <th style="text-align: center;"># learning set</th>
-          <th style="border: none;width: 48px"></th>
+          <th style="border: none;width: 32px"></th>
           <th style="text-align: center;">Appear as category</th>
         </tr>
         {% for r in g.TaxoList %}
           <tr>
             <td>({{ r[0] }})</td>
-            <td><input type="checkbox" value="Y" name="taxo{{ r[0] }}"
+            <td><input type="checkbox" style="width: 1em;" value="Y" name="taxo{{ r[0] }}"
                        onchange="UpdateLSCount($(this));"
                        data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" {{ r[4] }}></td>
             <td>{{ r[1] }}</td>
@@ -82,7 +82,7 @@
             <td>
               <div class="input-group">
                 <select id="taxolb{{ r[0] }}" name="taxolb{{ r[0] }}" data-taxoid="{{ r[0] }}"
-                        style="width: 210px" class='taxolb'>
+                        style="width: 10em" class='taxolb'>
                 </select>
               </div>
             </td>
