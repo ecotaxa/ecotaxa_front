@@ -18,130 +18,89 @@
     <input type="hidden" id="src" name="src" value="{{ data.src }}">
     <input type="hidden" id="PostTaxoMapping" name="PostTaxoMapping" value="{{ data.PostTaxoMapping }}">
 
-    <div class="row">
+    <div>
       <div class="col-md-4">
 
         <p style="padding-left: 100px;">
           <button type="submit" class="btn btn-primary">Start prediction task</button>
         </p>
 
-        <div class="form-group">
-          <label class="col-sm-6 control-label">Keep log of previous automatic classification</label>
-          <div class="col-sm-4">
-            {{ ht.selectinputdict("keeplog",{'no':"No",'yes':"Yes"},"no") }}
-          </div> <!-- col-sm-4 -->
-        </div><!-- /form-group -->
+        <div class="form-group row">
+          <div class="col-md-offset-1">
+            <div>
+              <label for="keeplog" class="control-label">Keep log of previous prediction</label>
+              {{ ht.selectinputdict("keeplog",{'no':"No",'yes':"Yes"},"no") }}
+            </div>
+            <div>
+              <label for="usescn" class="control-label">Add deep features</label>
+                    <span data-container="body" data-toggle="tooltip"
+            data-placement="right" data-html="true" title="
+<p style='text-align: left'>Deep learning features will complement the ones you chose and add quality to the prediction.</p>"
+            class="glyphicon glyphicon-question-sign"></span>
+              <input type="checkbox" name="usescn" id="usescn" value="Y">
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="panel panel-default col-md-6">
         <p>
-          In this last step, you can choose which features will be associated to each object in this Learning Set, and start a prediction task using the Learning Set.<br>
-            <li>Classification settings are recorded in Ecotaxa for the next prediction.
+          You have chosen {{ g.LsSize }} reference objects to build the Learning Set. In this last step, you can choose
+          which features to associate with each of these objects, and
+          start a prediction task using the Learning Set. To help in choice, simple statistics on these features' values
+          are presented in the table below.<br>
+        <li>Features with a single, constant value, or no value at all, are useless for prediction and are
+          automatically excluded. They are listed here as a reminder.
+        </li>
+        <li>Missing values will be replaced by the median value for this feature from the chosen objects.
+        </li>
+
+        <li>Prediction settings are recorded in EcoTaxa for the next prediction.</li>
         </p>
       </div>
     </div>
 
-    <table>
-      <tr>
-        <td valign="top">
-          {# ----------- Partie Gestion des Features --------------------- #}
-          Features to use:<br>
-          <input type="text" name="CritVar" id="CritVar" value="{{ data.CritVar }}" style="width: 400px;display: None">
-          Select <a name="tbltop2" href="#tbltop2"
-                    onclick="$('#TblVar input').prop( 'checked', true );ComputeCritVar();return false;">ALL</a>
-          / <a href="#tbltop2" onclick="UncheckNonPertinent();return false;" title="uncheck missing %>=25%">Most
-          revelant</a>
-          {#    / <a href="#tbltop2" onclick="CheckBasedOnText();return false;" title="Usefull to copy setting from another project" >Text field content</a>#}
-          / <a href="#tbltop2"
-               onclick="$('#TblVar input').prop( 'checked', false );ComputeCritVar();return false;">None</a>
-          - <a href="#variable-help" data-toggle="collapse" class="help">Features help</a>
-          <div id=variable-help class="panel panel-default collapse "
-               style="margin-left: 0px;margin-top: 5px;width: 500px">
-            <div style="margin:5px;">
-              <span class=" glyphicon glyphicon-info-sign"></span>
-              <ul>
-                <li>Statistics are computed on 50,000 objects drawn randomly from the training data and the data to
-                  classify: for each feature, the number of distinct values and the percentage of missing values are
-                  computed.
-                </li>
-                <li>Features with a single, constant value (i.e. with no variance ==> Distinct=N) are useless for
-                  classification and are automatically excluded.
-                </li>
-                <li>Features with more than 25% of values missing may not be helpful and are excluded when selecting
-                  ?Most relevant? features.
-                </li>
-                <li>Missing values are replaced by the median value for this feature from the learning set.
-                </li>
-              </ul>
-            </div>
-          </div>
 
-          <table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
-            <tr>
-              <th rowspan="2">Select</th>
-              <th width="200" rowspan="2" style="text-align: center;">Object feature<br><span
-                  style="font-weight: normal">Statistics on {{ g.LsSize }} objects</span></th>
-              <th width="100" colspan="2" style="text-align: center;line-height: 1;">Learning set</th>
-              <th width="100" colspan="2" style="text-align: center;">Objects to predict</th>
-            </tr>
-            <tr>
-              <th>% missing</th>
-              <!--              <th>Distinct</th> ON n'affiche plus ça -->
-              <th>% missing</th>
-              <th>Distinct</th>
-            </tr>
-            {% for r in g.critlist %}
-              <tr>
-                <td> {% if (r[2]=="Y") %}
-                  <input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[0] }}">
-                {% endif %}
-                </td>
-                <td>{{ r[0] }}</td>
-                <td class="rightfixedfont">{{ r[1] }}</td>
-                <td class="rightfixedfont">{{ r[2] }}</td>
-                <td class="rightfixedfont">{{ r[3] }}</td>
-                <td class="rightfixedfont">{{ r[4] }}</td>
-              </tr>
-            {% endfor %}
-          </table>
-        </td>
-        <td style="width: 20px"></td>
-        <td valign="top">
-          {% if g.SCN %}
-            Use Deep Learning features :
-            {% if g.SCNImpossible %}
-              <div class="bg-warning"><span class="glyphicon glyphicon-exclamation-sign"></span> Not Available
-                : {{ g.SCNImpossible }}</div>
-            {% else %}
-              <input type="checkbox" name="usescn" id="usescn" value="Y">
-            {% endif %}
-            <br>This functionnality require availaibility of SCN/Deep learning features
-            <style>
-                #TblScn td:nth-child(1) {
-                    max-width: 300px;
-                }
-            </style>
+    {# ----------- Partie Gestion des Features --------------------- #}
+    <input type="text" name="CritVar" id="CritVar" value="{{ data.CritVar }}" style="width: 400px;display: None">
 
-            <table class="table table-bordered table-condensed" style="width: auto" id="TblScn">
-              <tr>
-                <th>Project</th>
-                <th># Obj</th>
-                <th># Missing SCN Features</th>
-                <th>SCN Network</th>
-              </tr>
-              {% for r in g.SCN %}
-                <tr>
-                  <td>{{ r['projid'] }} - {{ r['title'] }}</td>
-                  <td>{{ r['nbr'] }}</td>
-                  <td>{{ r['miss_scn'] }}</td>
-                  <td>{{ r['scnmodel'] }}</td>
-                </tr>
-              {% endfor %}
-            </table>
-          {% endif %}
-        </td>
-      </tr>
-    </table>
+    <div style="margin-left:20%; display: inline-block">
+
+      <a href="#" onclick="UncheckNonPertinent();return false;" title="uncheck missing %>=25%">Select most
+        relevant</a>
+
+      <span data-container="body" data-toggle="tooltip"
+            data-placement="right" data-html="true" title="
+<p style='text-align: left'>Click to exclude features with more than 25% of missing values, which may not be helpful.
+          </li></p>"
+            class="glyphicon glyphicon-question-sign"></span>
+
+      <table class="table table-condensed" style="width: auto" id="TblVar">
+        <tr>
+          <th></th>
+          <th style="text-align: center;"></th>
+          <th colspan="4" style="text-align: center;line-height: 1;">% missing</th>
+        </tr>
+        <tr>
+          <th><input type="checkbox" id="all_features" onclick="SelDeselAllFeatures(this);" value="Y"></th>
+          <th>Feature</th>
+          <th>In reference</th>
+          <th>In to-predict</th>
+        </tr>
+        {% for r in g.critlist %}
+          <tr>
+            <td>
+              {% if (r[2]=="Y") %}
+                <input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[0] }}">
+              {% endif %}
+            </td>
+            <td>{{ r[0] }}</td>
+            <td style="text-align:center">{{ r[1] }}</td>
+            <td style="text-align:center">{{ r[3] }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
 
     <input type="hidden" name="starttask" value="Y">
 
@@ -154,7 +113,11 @@
           else {
               UncheckNonPertinent();
           }
+
+          $('#all_features').prop('indeterminate', true);
+
       }); // Ready
+
       function ComputeCritVar() {
           var cv = "";
           $('#TblVar input').each(function () {
@@ -168,6 +131,7 @@
       }
 
       function CheckBasedOnText() {
+          // Restore previous choice which was written in a hidden field
           var cv = $('#CritVar').val();
           var cvl = cv.split(",");
           //console.log(cvl);
@@ -187,12 +151,25 @@
               var checkit = true;
               if ((isNaN(v)) || (v >= 25)) {# Clean si moins de 25% de données sources remplis #}
                   checkit = false;
-              v = parseInt($(this).find("td:nth-child(5)").text());
-              if ((isNaN(v)) || (v >= 25)) {#  Clean si moins de 25% de données cibles remplis #}
-                  checkit = false;
               $(this).find("input").prop("checked", checkit);
           });
           ComputeCritVar();
       }
+
+      function SelDeselAllFeatures(el) {
+          const all_feats = $('#TblVar input');
+          if ($(el).prop('checked')) {
+              all_feats.prop('checked', true);
+          } else {
+              all_feats.prop('checked', false);
+          }
+          ComputeCritVar();
+      }
+
+      $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+      })
+
+
   </script>
 {% endblock %}
