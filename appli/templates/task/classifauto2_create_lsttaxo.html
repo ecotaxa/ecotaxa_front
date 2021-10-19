@@ -2,131 +2,246 @@
 
 
 {% block body %}
-  <h3>AUTOMATIC CLASSIFICATION V2: Selection of classification from Learning Set</h3>
-  <p>Train on the following categories and, optionally, map them to others when predicting the identification of new
-    objects.&nbsp;<span data-toggle="tooltip" data-placement="right" data-html="true" title="
+  <h3>PREDICTION: Choice of Learning Set categories and size</h3>
+  {{ filters_info|safe }}
+  <form method="post">
+
+    <div class="row">
+      <div class="col-md-offset-1 col-md-4">
+        <button type="submit" class="btn btn-primary">Next: Choose features in selected objects</button>
+        </button>
+      </div>
+
+      <div class="panel panel-default col-md-6">
+
+        <p>From data source, which is : {{ src_prjs|safe }},
+          only objects validated in below chosen categories will be present in the Learning Set being built.<br>
+          Optionally, each category can <b>appear</b> as another category, generally a parent one, to the machine
+          learning
+          algorithm.&nbsp;<span data-toggle="tooltip" data-placement="right" data-html="true" title="
 <p style='text-align: left'>The model will be trained with objects currently validated in the categories in the left column, within the projects selected at the previous step. It will therefore only be able to recognise those.
-Sometimes training on detailed, morphologically homogeneous, categories makes the model better but only a broader category is ecologically meaningful. In that case, all objects classified in the detailed categories can be regrouped in a broader one. This is done by mapping all detailed categories to the same broad category in the right column.
+<br>Sometimes training on detailed, morphologically homogeneous, categories makes the model better but only a broader category is ecologically meaningful. In that case, all objects classified in the detailed categories can be regrouped in a broader one. This is done by mapping all detailed categories to the same broad category in the right column.
 </p>"
-                        class="glyphicon glyphicon-question-sign"></span></p>
-  Data source : {{ src_prjs|safe }}
+                                class="glyphicon glyphicon-question-sign"></span>
+          <li>The experience shows that it is often more efficient to predict into a limited number of
+        categories and then validate in detail using more categories.</li>
+        </p>
+
+      </div>
+    </div>
+
+    <input type='hidden' name='src' value='{{ src_prj_ids }}'>
+    <input type="hidden" name="seltaxo" value="Y">
+
+    <div class="row">
+      <div class="col-md-offset-1 col-md-4">
+        Learn from max. <input maxlength="8" size="4" id="per_cat" name="learninglimit"
+                               value="5000" oninput="UpdateLSCountLimit();"> objects per category.
+        &nbsp;<span data-toggle="tooltip" data-placement="right" data-html="true" title="
+<p style='text-align: left'>By limiting very populated categories e.g. detritus, you give more chances to small categories to be recognized by the algorithm. </p>"
+                    class="glyphicon glyphicon-question-sign"></span>
+        <br>
+        Total is currently <span id="total_objs" class="rightfixedfont">0</span> objects.
+      </div>
+
+      <div class="col-sm-offset-1 col-md-4">
+        <p>
+          Make categories appear like in: <select id="TaxoMappingFromPrj" style="width: 400px;margin-top: 5px">
+        </select>
+        </p>
+      </div>
+
+    </div>
+    <div>
+      <table class="table table-bordered table-condensed" style="margin-left: 10px; width: auto" id="TblTaxo">
+        <tr>
+          <th>(id)</th>
+          <th><input type="checkbox" id="all_taxa" onclick="SelDeselAll(this);" value="Y"></th>
+          <th width="200" style="text-align: center;">Source (validated) category</th>
+          <th style="text-align: center;"># source</th>
+          <th style="text-align: center;">% source</th>
+          <th style="text-align: center;"># learning set</th>
+          <th style="border: none;width: 48px"></th>
+          <th style="text-align: center;">Appear as category</th>
+        </tr>
+        {% for r in g.TaxoList %}
+          <tr>
+            <td>({{ r[0] }})</td>
+            <td><input type="checkbox" value="Y" name="taxo{{ r[0] }}"
+                       onchange="UpdateLSCount($(this));"
+                       data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" {{ r[4] }}></td>
+            <td>{{ r[1] }}</td>
+            <td class="rightfixedfont" title="Click to select from top till here" style="cursor: s-resize;"
+                onclick="ApplyCountFilter({{ r[2] }});">{{ r[2] }}
+            </td>
+            <td class="rightfixedfont" title="Click to select from top till here" style="cursor: s-resize;"
+                onclick="ApplyPercentFilter({{ r[3] }});">{{ r[3] }} %
+            </td>
+            <td class="rightfixedfont"></td>
+            <td class="rightfixedfont" style="border: none"></td>
+            <td>
+              <div class="input-group">
+                <select id="taxolb{{ r[0] }}" name="taxolb{{ r[0] }}" data-taxoid="{{ r[0] }}"
+                        style="width: 210px" class='taxolb'>
+                </select>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </form>
+
+  <div class="modal" style="position:absolute;overflow:initial;display:none;max-width:450px"
+       id="LineageModal" tabindex="-1" role="dialog"
+       aria-labelledby="myModalLabel" aria-hidden="true">
+    <div>
+      <div class="modal-content" style="box-shadow:initial;-webkit-box-shadow:initial;">
+        <div class="modal-body">
+          <div id="lineage_choice"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
-      function Applyfilter() {
-          $('#TblTaxo input').prop('checked', false);
-          var Limit = parseInt($('#selectlimit').val());
-          var LimitType = $('#selecttype').val();
-          $('#TblTaxo input').each(function () {
-              if ((LimitType == 'N') && ($(this).data("nbr") >= Limit))
-                  $(this).prop('checked', true);
-              if ((LimitType == 'P') && ($(this).data("pct") >= Limit))
-                  $(this).prop('checked', true);
+      function UpdateLSCount(jq_el) {
+          // Change of a checkbox, align values and total
+          const jq_total = $("#total_objs");
+          const per_cat = parseInt($("#per_cat").val());
+          let total_objs = parseInt(jq_total.text());
+          const ls_col = jq_el.parent().siblings().eq(4);
+          if (jq_el.prop('checked')) {
+              if (Number.isNaN(per_cat)) { // No limit
+                  ls_txt = jq_el.data("nbr");
+              } else { // Apply limit
+                  ls_txt = Math.min(jq_el.data("nbr"), per_cat);
+              }
+              total_objs += ls_txt;
+          } else {
+              ls_txt = "";
+              total_objs -= parseInt(ls_col.text());
+          }
+          ls_col.text(ls_txt);
+          jq_total.text(total_objs)
+      }
+
+      function UpdateAllLSCounts() {
+          // Initialize the total count from displayed
+          $('#TblTaxo td input').each(function () {
+              const jq_this = $(this);
+              if (jq_this.prop('checked')) {
+                  UpdateLSCount(jq_this);
+              }
           });
       }
 
-  </script>
+      function UpdateLSCountLimit() {
+          // Limit change, update all counts
+          $('#TblTaxo td input').each(function () {
+              const jq_this = $(this);
+              if (jq_this.prop('checked')) {
+                  jq_this.prop('checked', false);
+                  UpdateLSCount(jq_this);
+                  jq_this.prop('checked', true);
+                  UpdateLSCount(jq_this);
+              }
+          });
+      }
 
-  <form method="post">
-    <input type="hidden" name="seltaxo" value="Y">
-    {{ ExtraHeader |safe }}
-    Use at most <input name="learninglimit" value="5000"> objects per category to train the model.
-    <button type="submit" class="btn btn-primary">Continue to classifier option screen</button>
-    <p style="margin-top: 5px;">
-      Get source &#8594; destination mapping from project: <select id="TaxoMappingFromPrj"
-                                                                   style="width: 400px;margin-top: 5px">
-      <option value="{{ prj.projid }}" selected>{{ prj.title }}</option>
-    </select>
-      <button type="button" class="btn btn-xs btn-primary" onclick="DoMapping()">Map</button>
-      <button type="button" class="btn btn-xs btn-default" onclick="ClearMapping()">Clear</button>
-
-    </p>
-    <script>
-        $('#TaxoMappingFromPrj').select2({
-            ajax: {
-                url: "/search/exploreproject",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {q: params.term};
-                },
-                processResults: function (data, page) {
-                    return {results: data};
-                },
-                cache: true
-            },
-            dropdownCssClass: "width400"
-        }); // Select2 Ajax
-        function DoMapping() {
-            $.getJSON("/search/gettaxomapping", {projid: $('#TaxoMappingFromPrj').val()}, function (data) {
-                $(".taxolb").html("").change();
-                for (var s in data.mapping) {
-                    var liste = $("#taxolb" + s);
-                    for (var tel in data.taxo) {
-                        var newOption = new Option(data.taxo[tel], tel, false, false);
-                        liste.append(newOption)
-                    }
-                    liste.val(data.mapping[s]).change();
-                }
-            });
-        }
-
-        function ClearMapping() {
-            $(".taxolb").val('').change();
-        }
-    </script>
-    select Categories with more than <input type="text" id="selectlimit" value="20" size="2">
-    <select id="selecttype">
-      <option value="N">Objects</option>
-      <option value="P">% of objects</option>
-    </select>
-    <input type="button" class="btn" value="Select" onclick="Applyfilter()"><br>
-    Select <a href="#" onclick="$('#TblTaxo input').prop( 'checked', true )">ALL</a>
-    / <a href="#" onclick="$('#TblTaxo input').prop( 'checked', false );">None</a>
-    <table class="table table-bordered table-condensed" style="width: auto" id="TblTaxo">
-      <tr>
-        <th colspan="2">(id) Select</th>
-        <th width="200" style="text-align: center;">Source (validated) category</th>
-        <th style="text-align: center;">Nbr</th>
-        <th style="text-align: center;">%</th>
-        <th style="text-align: center;">Destination (predicted) category</th>
-      </tr>
-      {% for r in g.TaxoList %}
-        <tr>
-          <td>({{ r[0] }})</td>
-          <td><input type="checkbox" value="Y" name="taxo{{ r[0] }}" data-nbr="{{ r[2] }}"
-                     data-pct="{{ r[3] }}" {{ r[4] }}></td>
-          <td>{{ r[1] }} </td>
-          <td class="rightfixedfont">{{ r[2] }}</td>
-          <td class="rightfixedfont">{{ r[3] }} %</td>
-          <td>
-            <div class="input-group">
-              <select id="taxolb{{ r[0] }}" name="taxolb{{ r[0] }}" style="width: 210px" class='taxolb'> </select>
-              <span class="input-group-btn">
-                <button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#TaxoModal"
-                        data-mytargetid="taxolb{{ r[0] }}">
-                    <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></button>
-                </span>
-            </div>
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
-  </form>
-
-  <script>
       $(function () {
           $('[data-toggle="tooltip"]').tooltip()
       })
 
-      function SubmitProjectSelection() {
-          var srclst = $(".selproj:checked").map(function () {
-              return $(this).data('prjid');
-          }).get().join(',');
-          PostDynForm("?{{ url }}", {src: srclst});
+      function ApplyVarFilter(limit, dta) {
+          const all_inputs = $('#TblTaxo td input');
+          all_inputs.each(function () {
+              const jq_this = $(this);
+              const present = jq_this.prop('checked');
+              const next = jq_this.data(dta) >= limit;
+              if (next !== present) {
+                  jq_this.prop('checked', next);
+                  UpdateLSCount(jq_this);
+              }
+          });
+      }
+
+      function ApplyCountFilter(limit) {
+          ApplyVarFilter(limit, "nbr");
+      }
+
+      function ApplyPercentFilter(limit) {
+          ApplyVarFilter(limit, "pct");
+      }
+
+      function SelDeselAll(el) {
+          if ($(el).prop('checked')) {
+              ApplyPercentFilter(-1);
+          } else {
+              ApplyPercentFilter(101);
+          }
+      }
+
+      function LoadLineageHelper(jq_taxolb) {
+          // Load the lineage in the invisible div, for the given line
+          const taxoid = jq_taxolb.data("taxoid");
+          $.ajax({
+              type: "GET",
+              url: "/api/taxon_set/query?ids=" + taxoid,
+              success: function (rspf) {
+                  // e.g. rsp: {"id":4,"name":"Archaea","type":"M","nb_objects":0,"nb_children_objects":0,"display_name":"Archaea",
+                  // "lineage":["Archaea","living"],"id_lineage":[4,1],"children":[332,325,334322]}]
+                  const lineage = rspf[0].lineage;
+                  const id_lineage = rspf[0].id_lineage;
+                  var click_lineage = lineage.map(function (txo, i) {
+                      if (i > 0) {
+                          return "<a href='#' data-tgt='" + taxoid + "' data-txoid='" + id_lineage[i] + "' >" + txo + "</a>";
+                      } else {
+                          // The base taxon itself, no use making it selectable
+                          return txo;
+                      }
+                  });
+                  const lin_html = click_lineage.join(" &lt; ");
+                  $('#lineage_choice').html(lin_html);
+                  // Need to bind the events later, when elements have appeared
+                  const anchors = $('#lineage_choice a');
+                  anchors.on("click", function (e) {
+                      var jq_this = $(this);
+                      const tgtid = jq_this.data("tgt");
+                      const txoid = jq_this.data("txoid");
+                      const txotxt = jq_this.text();
+                      const sel2 = $("#taxolb" + tgtid);
+                      // Set the option on the LB
+                      var newOption = new Option(txotxt, txoid, false, false);
+                      sel2.append(newOption);
+                      sel2.val([txoid]).change();
+                      e.preventDefault(); // Don't scroll to top
+                  });
+                  // Position the lineage modal
+                  const offs = jq_taxolb.parent().offset();
+                  const width = jq_taxolb.parent().width();
+                  const jq_modal = $('#LineageModal');
+                  jq_modal.css('margin-top', offs.top + 'px');
+                  jq_modal.css('margin-left', offs.left + width - window.scrollX + 'px');
+                  if (modal_lineage_timer !== null) {
+                      clearTimeout(modal_lineage_timer);
+                  }
+                  jq_modal.show();
+              }
+          });
+      }
+
+      var modal_lineage_timer = null;
+
+      function UnloadLineageHelper(jq_taxolb) {
+          modal_lineage_timer = setTimeout(function () {
+              $('#LineageModal').hide();
+          }, 300);
       }
 
       $(document).ready(function () {
-          $(".taxolb").select2({
+          const sel2 = $(".taxolb");
+          sel2.select2({
               ajax: {
                   url: "/search/taxo",
                   dataType: 'json',
@@ -141,15 +256,64 @@ Sometimes training on detailed, morphologically homogeneous, categories makes th
               },
               minimumInputLength: 3
           }); // Select2 Ajax
-          $('#TaxoModal').on('show.bs.modal', function (e) {
-              var button = $(e.relatedTarget); // Button that triggered the modal
-              var targetid = button.data('mytargetid');
-              $("#TaxoModalBody").html("Loading...");
-              $("#TaxoModalBody").load("/search/taxotree?target=" + targetid);
+          sel2.on("select2:open", function () {
+              LoadLineageHelper($(this));
           });
-      }); // Ready
-  </script>
+          sel2.on("select2:close", function () {
+              UnloadLineageHelper($(this));
+          });
 
-  {% include "taxo_modal_div.html" %}
+          $('#all_taxa').prop('indeterminate', true);
+          UpdateAllLSCounts();
+
+          const prj_sel = $('#TaxoMappingFromPrj');
+          prj_sel.select2({
+              ajax: {
+                  url: "/search/exploreproject",
+                  dataType: 'json',
+                  delay: 250,
+                  data: function (params) {
+                      return {q: params.term, opts: 'with_prediction_pre_mapping'};
+                  },
+                  processResults: function (data, page) {
+                      return {results: data};
+                  },
+                  cache: true
+              },
+              allowClear: true,
+              placeholder: "Project search",
+              dropdownCssClass: "width400"
+          }); // Select2 Ajax
+
+          prj_sel.on("select2:select", function (e) {
+              DoMapping();
+          });
+
+          prj_sel.on("select2:unselecting", function (e) {
+              ClearMapping();
+          });
+
+      }); // Ready
+
+      function DoMapping() {
+          $.getJSON("/search/gettaxomapping", {projid: $('#TaxoMappingFromPrj').val()}, function (data) {
+              $(".taxolb").val('').change();
+              console.log("JSON from gettaxomapping", data);
+              for (var s in data.mapping) {
+                  var liste = $("#taxolb" + s);
+                  for (var tel in data.taxo) {
+                      var newOption = new Option(data.taxo[tel], tel, false, false);
+                      liste.append(newOption)
+                  }
+                  liste.val(data.mapping[s]).change();
+              }
+          });
+      }
+
+      function ClearMapping() {
+          $(".taxolb").val([]).change();
+      }
+
+  </script>
 
 {% endblock %}

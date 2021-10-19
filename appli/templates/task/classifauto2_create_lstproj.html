@@ -2,57 +2,60 @@
 
 
 {% block body %}
-  <h3>AUTOMATIC CLASSIFICATION V2: Selection of Learning Set (source)</h3>
-  <p>A Learning Set is validated data from one or several projects &nbsp;<span data-toggle="tooltip"
-                                                                               data-placement="right" data-html="true"
-                                                                               title="
-<p style='text-align: left'>You can run the SUBSET tool to :<br><ul style='text-align: left'>
+  <h3>PREDICTION: Choice of Learning Set data source</h3>
+  {{ filters_info|safe }}
+
+  <div class="row">
+    <div class="col-md-offset-1 col-md-4">
+      <button class='btn btn-primary' onclick='SubmitProjectSelection();'>Next: Choose objects in selected
+        projects
+      </button>
+    </div>
+
+    <div class="panel panel-default col-md-6">
+      <p>A Learning Set AKA <a
+          href="https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Training_data_set">Training
+        Data Set</a> is built using validated data from one or several projects.<br>
+        Inside these projects, you will be able, in next pages, to specify: <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;- Which categories you're interested in predicting.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;- How many objects you want to use as reference for the prediction.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;- For these objects, which features are relevant to the prediction.<br>
+        This Learning set will then be used for running the prediction task.
+        &nbsp;<span data-toggle="tooltip"
+                    data-placement="right" data-html="true"
+                    title="
+<p style='text-align: left'>You can run the Subset tool to :<br><ul style='text-align: left'>
 <li>Create a Learning set that you will later improve
 <li>Check validation of a project using a randomly limited number of objects from the project</ul></p>"
-                                                                               class="glyphicon glyphicon-question-sign"></span>
-  </p>
-
-  {{ PreviousTxt |safe }}
-
-  <table>
+                    class="glyphicon glyphicon-question-sign"></span>
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="panel panel-default col-md-offset-4" style='display: inline-block; margin-bottom: 8px'>
+      <div class="panel-body" style="padding: 5px;">
+        <form method="post" id="search">
+          <input type="hidden" value="" name="srcs" id="search_srcs">
+          Filter on title :
+          <input style="width: 100px;" name="filt_title" id="filt_title"
+                 value="{{ request.form.get('filt_title','') }}" type="text">
+          # Matching features &ge;
+          <input style="width: 30px;" name="filt_featurenbr" id="filt_featurenbr"
+                 value="{{ request.form.get('filt_featurenbr','10') }}" type="text">
+          Instrument :
+          <input style="width: 100px;" name="filt_instrum" id="filt_instrum"
+                 value="{{ request.form.get('filt_instrum','') }}" type="text">
+          <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList();"
+                style="cursor: pointer;"></span>
+          <button type="button" onclick='FilterWithProjectSelection();' class="btn btn-primary">Filter
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <table style='margin-left: 10px;width: 95%'>
     <tr>
-      <td width='400px'>
-        <button class='btn btn-primary' onclick='SubmitProjectSelection();'>Select projects below then click me</button>
-      </td>
       <td>
-        <div class="panel panel-default" style='display: inline-block; width: 400px;margin-bottom: 0;'>
-          <div class="panel-body">
-            <form method="post" id="search">
-              <input type="hidden" value="" name="srcs" id="search_srcs">
-              <table>
-                <tbody>
-                <tr>
-                  <td>Common features &ge;</td>
-                  <td><input style="width: 100px;" name="filt_featurenbr" id="filt_featurenbr"
-                             value="{{ request.form.get('filt_featurenbr','10') }}" type="text"></td>
-
-                </tr>
-                <tr>
-                  <td>Filter on title :</td>
-                  <td><input style="width: 100px;" name="filt_title" id="filt_title"
-                             value="{{ request.form.get('filt_title','') }}" type="text"></td>
-                  <td rowspan="3" style="vertical-align: top">
-                    <button type="button" onclick='FilterWithProjectSelection();' class="btn btn-primary">Search
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Instrument :</td>
-                  <td><input style="width: 100px;" name="filt_instrum" id="filt_instrum"
-                             value="{{ request.form.get('filt_instrum','') }}" type="text">
-                    <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList();"
-                          style="cursor: pointer;"></span></td>
-                </tr>
-                </tbody>
-              </table>
-            </form>
-          </div>
-        </div>
       </td>
     </tr>
   </table>
@@ -60,7 +63,7 @@
     <tr>
       <th style='width:20px'></th>
       <th># - Title</th>
-      <th style='width:100px'># valid.</th>
+      <th style='width:100px'># Validated</th>
       <th style='width:100px'># Matching features</th>
       <th style='width:100px'>CNN Network</th>
     </tr>
@@ -95,6 +98,7 @@
               url += "?projid=" + projid
           $("#PopupDetails .modal-content").load(url);
       }
+
   </script>
   <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
     <div class="modal-dialog modal-lg">

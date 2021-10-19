@@ -21,7 +21,8 @@ from appli.project.stats import UpdateProjectStat
 from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ClassifyAutoReq, ProjectsApi, ProjectModel, \
-    ApiException, ProjectTaxoStatsModel, TaxonomyTreeApi, TaxonModel, ProjectSetColumnStatsModel
+    ApiException, ProjectTaxoStatsModel, TaxonomyTreeApi, TaxonModel, ProjectSetColumnStatsModel, PredictionReq, \
+    PredictionRsp, JobsApi, JobModel
 
 
 # noinspection PyPep8Naming,PyUnboundLocalVariable
@@ -183,12 +184,55 @@ class TaskClassifAuto2(AsyncTask):
             ProcessLig()
         return True
 
+    OBJECT_VARS = {"depth_max", "depth_min"}
+
     def SPStep1(self):
         logging.info("Input Param = %s" % (self.param.__dict__,))
+
+        # Extract params into properly formatted vars
+        prj_id = self.param.ProjectId
+        src_prj_ids = [int(prj_id) for prj_id in self.param.BaseProject.split(",")]
+        use_scn = self.param.usescn == 'Y'
+        #
+        learning_limit = None
+        if self.param.learninglimit:
+            learning_limit = int(self.param.learninglimit)
+        # Chosen vars need to be prefixed
+        chosen_vars = self.param.CritVar.split(",")
+        obj_vars = ["obj." + a_var if a_var in self.OBJECT_VARS else "fre." + a_var
+                    for a_var in chosen_vars]
+        categories = [int(classif_id) for classif_id in self.param.Taxo.split(",")]
+        filters = self.param.filtres
+
         logging.info("Start Step 1")
         TInit = time.time()
 
-        prj_id = self.param.ProjectId
+        # Prepare back-end call
+        req = PredictionReq(project_id=prj_id,
+                            source_project_ids=src_prj_ids,
+                            learning_limit=learning_limit,
+                            categories=categories,
+                            features=obj_vars,
+                            use_scn=use_scn)
+        with ApiClient(ObjectsApi, self.cookie) as api:
+            rsp: PredictionRsp = api.predict_object_set_object_set_predict_post({'filters': filters,
+                                                                                 'request': req})
+
+        # Wait for the back-end job to complete
+        job_id = rsp.job_id
+        while True:
+            with ApiClient(JobsApi, self.cookie) as api:
+                job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
+            if job.state in ('E', 'F'):
+                break
+            logging.info("Job: %s", job)
+            time.sleep(5)
+
+        self.task.taskstate = "Done"
+        self.UpdateProgress(100, "Job completed on back-end")
+
+        return
+
         with ApiClient(ProjectsApi, self.cookie) as api:
             target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
 
@@ -219,9 +263,9 @@ class TaskClassifAuto2(AsyncTask):
             self.param.learninglimit = int(self.param.learninglimit)  # convert
         logging.info("MapPrj %s", MapPrj)
         logging.info("MapPrjBase %s", revobjmapbaseByProj)
+        CritVar = self.param.CritVar.split(",")
 
         # ne garde que les colonnes communes qui sont aussi selectionnées.
-        CritVar = self.param.CritVar.split(",")
         CommonKeys.intersection_update(set(CritVar))
 
         # Online help says "Missing values are replaced by the median value for this feature from the learning set."
@@ -336,9 +380,10 @@ class TaskClassifAuto2(AsyncTask):
             # Typage important pour les perf postgresql
             SqlParam = [{'cat': int(Classifier.classes_[mc]), 'p': r[mc], 'id': int(i)} for i, mc, r in
                         zip(Tget_Ids, ResultMaxCol, Result)]
-            for i, v in enumerate(SqlParam):
-                if v['cat'] in PostTaxoMapping:
-                    SqlParam[i]['cat'] = PostTaxoMapping[v['cat']]
+            # TODO: This is indeed a Post-prediction mapping, but the UI in a pre-training One
+            # for i, v in enumerate(SqlParam):
+            #     if v['cat'] in PostTaxoMapping:
+            #         SqlParam[i]['cat'] = PostTaxoMapping[v['cat']]
             TStep3 = time.time()
             # Call auto classification storage primitive on back-end
             with ApiClient(ObjectsApi, self.cookie) as api:
@@ -356,7 +401,8 @@ class TaskClassifAuto2(AsyncTask):
         self.UpdateProgress(100, "Classified %d objects" % ProcessedRows)
 
     def QuestionProcessScreenSelectSource(self, target_prj: ProjectModel):
-
+        # First configuration page, choose base projects
+        # The page reloads itself when using the "Search" button
         try:
             # In case the filter box was used, validate it.
             if gvp("filt_featurenbr"):
@@ -366,42 +412,26 @@ class TaskClassifAuto2(AsyncTask):
         except ValueError:
             flash("Common features must be an integer", category="error")
             return PrintInCharte("<a href='#' onclick='history.back();'>Back</a>")
+        title_filter = gvp('filt_title', '')
+        instrument_filter = gvp('filt_instrum', '')
+        filters_info = self.GetFilterText()
+        src_projs_str = gvp('srcs', '').split(",")
+        src_projs = [int(prj_str) for prj_str in src_projs_str if prj_str.isdigit()]
 
-        # First configuration page, choose base projects
-        filters_and_choices_info = self.GetFilterText()
+        # Get previous choices AKA settings which are stored at project level
         settings = DecodeEqualList(target_prj.classifsettings)
         target_features = set(target_prj.obj_free_cols.keys())
 
         previous_ls = settings.get("baseproject", "")  # a coma-separated list of project IDs
         if previous_ls != "":
             # We can have one or several base projects, which are reminded here
-            maybe_base_prj_ids = [int(prj_id) for prj_id in previous_ls.split(",") if prj_id.isdigit()]
-            # Get their titles
-            base_prj_infos = []
-            not_found_msg = "(ignored, not found)"
-            for a_base_prj_id in maybe_base_prj_ids:
-                with ApiClient(ProjectsApi, request) as api:
-                    try:
-                        proj: ProjectModel = api.project_query_projects_project_id_get(a_base_prj_id,
-                                                                                       for_managing=False)
-                        base_prj_infos.append((a_base_prj_id, proj.title))
-                    except ApiException as _ae:
-                        # The base project might be gone or not visible to current user
-                        base_prj_infos.append((a_base_prj_id, not_found_msg))
+            settings_prj_ids = [int(prj_id) for prj_id in previous_ls.split(",") if prj_id.isdigit()]
+        else:
+            settings_prj_ids = []
 
-            if base_prj_infos:
-                # Recompute LS valid projects list
-                previous_ls = ",".join([str(proj_id) for proj_id, proj_title in base_prj_infos
-                                        if proj_title != not_found_msg])
-                self_req = request.query_string.decode("utf-8")  # Is == to the HTML form submit with previous values
-                plural = "s" if len(base_prj_infos) > 1 else ""
-                recall_str = " + ".join(["#{0} - {1}".format(*r) for r in base_prj_infos])
-                filters_and_choices_info += """<a class='btn btn-primary' href='?{0}&src={1}'>
-                            Use previous project{3} for Learning Set :  {2}</a><br><br>OR Use another set of projects<br><br>""" \
-                    .format(self_req, previous_ls, recall_str, plural)
+        # Collect information for out-of-table projects as well
+        no_tbl_projs = {}  # key: project ID, value: ProjectModel
 
-        title_filter = gvp('filt_title', '')
-        instrument_filter = gvp('filt_instrum', '')
         # Collect all projects matching the conditions
         usable_proj_list = self.api_read_accessible_projects(instrument_filter, title_filter)
 
@@ -412,6 +442,7 @@ class TaskClassifAuto2(AsyncTask):
         for a_maybe_src_prj in usable_proj_list:
             matching_features = len(set(a_maybe_src_prj.obj_free_cols.keys()) & target_features)
             if matching_features < filt_featurenbr:
+                no_tbl_projs[a_maybe_src_prj.projid] = a_maybe_src_prj
                 continue
             matching_per_proj[a_maybe_src_prj.projid] = matching_features
             validated = (a_maybe_src_prj.objcount if a_maybe_src_prj.objcount else 0) * \
@@ -419,11 +450,9 @@ class TaskClassifAuto2(AsyncTask):
             validated_per_proj[a_maybe_src_prj.projid] = validated
             filtered_projs.append(a_maybe_src_prj)
 
-        # Show most interesting ones in first
+        # Sort to have the most interesting ones in first
         filtered_projs.sort(key=lambda r: (-matching_per_proj[r.projid], -validated_per_proj[r.projid]))
         table_lines = []
-        src_projs_str = gvp('srcs', '').split(",")
-        src_projs = [int(prj_str) for prj_str in src_projs_str if prj_str.isdigit()]
         for a_maybe_src_prj in filtered_projs:
             matching = matching_per_proj[a_maybe_src_prj.projid]
             validated = validated_per_proj[a_maybe_src_prj.projid]
@@ -431,6 +460,8 @@ class TaskClassifAuto2(AsyncTask):
             if a_maybe_src_prj.projid in src_projs:
                 checked = 'checked="true"'
                 src_projs.remove(a_maybe_src_prj.projid)
+            elif a_maybe_src_prj.projid in settings_prj_ids:
+                checked = 'checked="true"'
             else:
                 checked = ""
             line = """<tr><td><input type='checkbox' {checked} class='selproj' data-prjid='{projid}'></td>
@@ -438,18 +469,37 @@ class TaskClassifAuto2(AsyncTask):
                       </tr>""".format(MatchingFeatures=matching, checked=checked, projid=a_maybe_src_prj.projid,
                                       title=a_maybe_src_prj.title, objvalid=validated,
                                       cnn_network_id=cnn_network_id)
-            table_lines.append(line)
+            if checked == "":
+                table_lines.append(line)
+            else:
+                table_lines.insert(0, line)
+
+        # Collect project info for missing IDs. We need remaining ALL selected source projects and settings ones
+        base_prj_infos = []
+        not_found_msg = "(ignored, not found)"
+        for a_base_prj_id in settings_prj_ids + src_projs:
+            if a_base_prj_id in no_tbl_projs:
+                continue
+            with ApiClient(ProjectsApi, request) as api:
+                try:
+                    proj: ProjectModel = api.project_query_projects_project_id_get(a_base_prj_id,
+                                                                                   for_managing=False)
+                    no_tbl_projs[a_base_prj_id] = proj
+                except ApiException as _ae:
+                    # The base project might be gone or not visible to current user
+                    base_prj_infos.append((a_base_prj_id, not_found_msg))
 
         if len(src_projs) > 0:
             # Remaining source projects are filtered by display, but still valid in selection
-            inp = "<input type='checkbox' checked='true' class='selproj' data-prjid='{projid}'>#{projid}&nbsp;"
-            filtered_by_search = "".join([inp.format(projid=prj_id) for prj_id in src_projs])
-            table_lines.insert(0, "Filtered by search:&nbsp;" + filtered_by_search)
+            inp = "<input type='checkbox' checked='true' class='selproj' data-prjid='{projid}'>#{projid}&nbsp;-&nbsp;{title} "
+            filtered_by_search = "".join([inp.format(projid=prj_id, title=no_tbl_projs[prj_id].title)
+                                          for prj_id in src_projs])
+            table_lines.insert(0, "Not in table due to filter:&nbsp;" + filtered_by_search)
 
         return render_template('task/classifauto2_create_lstproj.html'
                                , url=request.query_string.decode('utf-8')
                                , TblBody="".join(table_lines)
-                               , PreviousTxt=filters_and_choices_info)
+                               , filters_info=filters_info)
 
     @staticmethod
     def api_read_accessible_projects(instrument_filter, title_filter):
@@ -530,13 +580,13 @@ class TaskClassifAuto2(AsyncTask):
                        'checked' if len(settings_taxo_set) == 0 or r[0] in settings_taxo_set else '']
                       for r in taxo_table]  # Add object % and 'checked' or not
 
-        ExtraHeader = "<input type='hidden' name='src' value='{}'>".format(gvp('src', gvg('src')))
-        ExtraHeader += self.GetFilterText()
+        filters_text = self.GetFilterText()
 
         src_prjs_str = ",&nbsp;".join(src_projs)
         return render_template('task/classifauto2_create_lsttaxo.html'
                                , url=request.query_string.decode('utf-8')
-                               , ExtraHeader=ExtraHeader, src_prjs=src_prjs_str, prj=target_prj)
+                               , filters_info=filters_text, src_prj_ids=src_prj_ids_sql,
+                               src_prjs=src_prjs_str, prj=target_prj)
 
     def GetFilterText(self):
         TxtFiltres = sharedfilter.GetTextFilter(self.param.filtres)
@@ -633,6 +683,7 @@ class TaskClassifAuto2(AsyncTask):
             # Certaines variable on leur propre zone d'edition, les autres sont dans la zone texte custom settings
             self.param.CritVar = d.get("critvar", "")
             self.param.Taxo = d.get("seltaxo", "")
+            # Référence for the 5000: Ricour Florian & al 2022
             self.param.learninglimit = int(gvp("learninglimit", "5000"))
             if "critvar" in d:
                 del d["critvar"]

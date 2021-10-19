@@ -36,9 +36,27 @@ def searchsamples():
 @app.route("/search/exploreproject")
 def searchexploreproject():
     # Public page
+    qry = gvg("q")
+    options = gvg("opts")
     with ApiClient(ProjectsApi, request) as api:
-        prjs: List[ProjectModel] = api.search_projects_projects_search_get(title_filter=gvg("q"))
-    for_disp = [dict(id=p.projid, text=p.title) for p in prjs]
+        prjs: List[ProjectModel] = api.search_projects_projects_search_get(title_filter=qry)
+
+    # Do a variable filtering depending on the options
+    def prj_filter(prj):
+        return True
+
+    if options == 'with_prediction_pre_mapping':
+        def prj_filter(prj):
+            prediction_settings = prj.classifsettings
+            if prediction_settings is None:
+                return False
+            if "posttaxomapping=" not in prediction_settings:
+                return False
+            if "posttaxomapping=\n" in prediction_settings:
+                return False
+            logging.info("classifsetting:", prediction_settings)
+            return True
+    for_disp = [dict(id=p.projid, text=p.title) for p in prjs if prj_filter(p)]
     return json.dumps(for_disp)
 
 

@@ -9,15 +9,9 @@
           padding-top: 0px !important;
           padding-bottom: 0px !important;
       }
-
-      {# On condense encore plus #}
-      #TblTaxo td:nth-child(1) {
-          font-size: small;
-          padding: 0
-      }
   </style>
   {{ PreviousTxt|safe }}
-  <h3>AUTOMATIC CLASSIFICATION : SETTINGS </h3>
+  <h3>PREDICTION: Choice of features and settings </h3>
   <form class="form-horizontal" method="post">
     <input type="hidden" id="learninglimit" name="learninglimit" value="{{ data.learninglimit }}">
     <input type="hidden" id="Taxo" name="Taxo" value="{{ data.Taxo }}">
@@ -27,81 +21,31 @@
     <div class="row">
       <div class="col-md-4">
 
+        <p style="padding-left: 100px;">
+          <button type="submit" class="btn btn-primary">Start prediction task</button>
+        </p>
+
         <div class="form-group">
           <label class="col-sm-6 control-label">Keep log of previous automatic classification</label>
           <div class="col-sm-4">
             {{ ht.selectinputdict("keeplog",{'no':"No",'yes':"Yes"},"no") }}
           </div> <!-- col-sm-4 -->
         </div><!-- /form-group -->
-
-        <p style="padding-left: 100px;">
-          <button type="submit" class="btn btn-primary">Train and predict identifications</button>
-        </p>
-
       </div>
-      <div class="col-md-8">
-        <div class="panel  panel-default">
-          <ul>
-            <li>The prediction (automatic classification) will never replace the manual validation
-            <li>Default settings for the classification have been validated by experts. User should keep them in most
-              cases
-            <li>Classification settings are recorded in Ecotaxa for the next prediction
-            <li>Categories selected for the prediction should be correctly validated by expert
-            <li>The experience shows that it is often more efficient to automatically classify into a limited number of
-              categories and then validate in detail using more categories
-          </ul>
-        </div>
+
+      <div class="panel panel-default col-md-6">
+        <p>
+          In this last step, you can choose which features will be associated to each object in this Learning Set, and start a prediction task using the Learning Set.<br>
+            <li>Classification settings are recorded in Ecotaxa for the next prediction.
+        </p>
       </div>
     </div>
-    {#ROW#}
-
-    <script>
-        function ComputeCritVar() {
-            var cv = "";
-            $('#TblVar input').each(function () {
-                if ($(this).prop("checked")) {
-                    if (cv != "")
-                        cv += ",";
-                    cv += $(this).data("var");
-                }
-            });
-            $('#CritVar').val(cv);
-        }
-
-        function CheckBasedOnText() {
-            var cv = $('#CritVar').val();
-            var cvl = cv.split(",");
-            //console.log(cvl);
-            $('#TblVar input').each(function () {
-                if ($(this).prop("checked", cvl.indexOf($(this).data("var")) >= 0)) {
-                    if (cv != "")
-                        cv += ",";
-                    cv += $(this).data("var");
-                }
-            });
-        }
-
-        function UncheckNonPertinent() {
-            var perimetre = $('#Perimeter').val();
-            $('#TblVar tr').each(function () {
-                var v = parseInt($(this).find("td:nth-child(3)").text());
-                var checkit = true;
-                if ((isNaN(v)) || (v >= 25)) {# Clean si moins de 25% de données sources remplis #}
-                    checkit = false;
-                v = parseInt($(this).find("td:nth-child(5)").text());
-                if ((isNaN(v)) || (v >= 25)) {#  Clean si moins de 25% de données cibles remplis #}
-                    checkit = false;
-                $(this).find("input").prop("checked", checkit);
-            });
-            ComputeCritVar();
-        }
-    </script>
 
     <table>
       <tr>
         <td valign="top">
-          {# ----------- Partie Gestion des Variable --------------------- #}
-          Using variables :<br>
+          {# ----------- Partie Gestion des Features --------------------- #}
+          Features to use:<br>
           <input type="text" name="CritVar" id="CritVar" value="{{ data.CritVar }}" style="width: 400px;display: None">
           Select <a name="tbltop2" href="#tbltop2"
                     onclick="$('#TblVar input').prop( 'checked', true );ComputeCritVar();return false;">ALL</a>
@@ -110,7 +54,7 @@
           {#    / <a href="#tbltop2" onclick="CheckBasedOnText();return false;" title="Usefull to copy setting from another project" >Text field content</a>#}
           / <a href="#tbltop2"
                onclick="$('#TblVar input').prop( 'checked', false );ComputeCritVar();return false;">None</a>
-          - <a href="#variable-help" data-toggle="collapse" class="help">Variable help</a>
+          - <a href="#variable-help" data-toggle="collapse" class="help">Features help</a>
           <div id=variable-help class="panel panel-default collapse "
                style="margin-left: 0px;margin-top: 5px;width: 500px">
             <div style="margin:5px;">
@@ -124,7 +68,7 @@
                   classification and are automatically excluded.
                 </li>
                 <li>Features with more than 25% of values missing may not be helpful and are excluded when selecting
-                  “Most relevant” features.
+                  ?Most relevant? features.
                 </li>
                 <li>Missing values are replaced by the median value for this feature from the learning set.
                 </li>
@@ -135,14 +79,14 @@
           <table class="table table-bordered table-condensed" style="width: auto" id="TblVar">
             <tr>
               <th rowspan="2">Select</th>
-              <th width="200" rowspan="2" style="text-align: center;">Object variable<br><span
+              <th width="200" rowspan="2" style="text-align: center;">Object feature<br><span
                   style="font-weight: normal">Statistics on {{ g.LsSize }} objects</span></th>
               <th width="100" colspan="2" style="text-align: center;line-height: 1;">Learning set</th>
               <th width="100" colspan="2" style="text-align: center;">Objects to predict</th>
             </tr>
             <tr>
               <th>% missing</th>
-              <th>Distinct</th>
+              <!--              <th>Distinct</th> ON n'affiche plus ça -->
               <th>% missing</th>
               <th>Distinct</th>
             </tr>
@@ -198,25 +142,9 @@
         </td>
       </tr>
     </table>
-    {# ----------- Partie Gestion des Taxon destination --------------------- #}
-
-    <div class="form-group">
-      {{ label("Custom Settings <br>(Taxonomy Post Mapping)"|safe) }}
-      <div class="col-sm-4">
-        <textarea class="form-control" id="TxtCustSettings" name="TxtCustSettings"
-                  rows="4">{{ g.TxtCustSettings }}</textarea>
-      </div>
-      <div class="col-sm-4">
-        PostTaxoMapping=PredictecID:TargetId,PredictecID:TargetId,...
-      </div>
-    </div>
 
     <input type="hidden" name="starttask" value="Y">
-    <div class="form-group">
-      <div class="col-sm-offset-2 col-sm-2">
-        <button type="submit" class="btn btn-primary">START Automatic PREDICTION of IDs</button>
-      </div>
-    </div>
+
   </form>
   <script>
       $(document).ready(function () {
@@ -227,5 +155,44 @@
               UncheckNonPertinent();
           }
       }); // Ready
+      function ComputeCritVar() {
+          var cv = "";
+          $('#TblVar input').each(function () {
+              if ($(this).prop("checked")) {
+                  if (cv != "")
+                      cv += ",";
+                  cv += $(this).data("var");
+              }
+          });
+          $('#CritVar').val(cv);
+      }
+
+      function CheckBasedOnText() {
+          var cv = $('#CritVar').val();
+          var cvl = cv.split(",");
+          //console.log(cvl);
+          $('#TblVar input').each(function () {
+              if ($(this).prop("checked", cvl.indexOf($(this).data("var")) >= 0)) {
+                  if (cv != "")
+                      cv += ",";
+                  cv += $(this).data("var");
+              }
+          });
+      }
+
+      function UncheckNonPertinent() {
+          var perimetre = $('#Perimeter').val();
+          $('#TblVar tr').each(function () {
+              var v = parseInt($(this).find("td:nth-child(3)").text());
+              var checkit = true;
+              if ((isNaN(v)) || (v >= 25)) {# Clean si moins de 25% de données sources remplis #}
+                  checkit = false;
+              v = parseInt($(this).find("td:nth-child(5)").text());
+              if ((isNaN(v)) || (v >= 25)) {#  Clean si moins de 25% de données cibles remplis #}
+                  checkit = false;
+              $(this).find("input").prop("checked", checkit);
+          });
+          ComputeCritVar();
+      }
   </script>
 {% endblock %}
