@@ -9,6 +9,11 @@
           padding-top: 0px !important;
           padding-bottom: 0px !important;
       }
+
+      #TblVar tbody {
+          display: table-cell;
+          vertical-align: baseline;
+      }
   </style>
   {{ PreviousTxt|safe }}
   <h3>PREDICTION: Choice of features and settings </h3>
@@ -33,10 +38,10 @@
             </div>
             <div>
               <label for="usescn" class="control-label">Add deep features</label>
-                    <span data-container="body" data-toggle="tooltip"
-            data-placement="right" data-html="true" title="
-<p style='text-align: left'>Deep learning features will complement the ones you chose and add quality to the prediction.</p>"
-            class="glyphicon glyphicon-question-sign"></span>
+              <span data-container="body" data-toggle="tooltip"
+                    data-placement="right" data-html="true" title="
+<p style='text-align: left'>Deep learning features will complement the ones you picked and add quality to the prediction.</p>"
+                    class="glyphicon glyphicon-question-sign"></span>
               <input type="checkbox" name="usescn" id="usescn" value="Y">
             </div>
           </div>
@@ -52,7 +57,7 @@
         <li>Features with a single, constant value, or no value at all, are useless for prediction and are
           automatically excluded. They are listed here as a reminder.
         </li>
-        <li>Missing values will be replaced by the median value for this feature from the chosen objects.
+        <li>Missing values will be replaced by the median value for this feature from the reference objects.
         </li>
 
         <li>Prediction settings are recorded in EcoTaxa for the next prediction.</li>
@@ -64,7 +69,7 @@
     {# ----------- Partie Gestion des Features --------------------- #}
     <input type="text" name="CritVar" id="CritVar" value="{{ data.CritVar }}" style="width: 400px;display: None">
 
-    <div style="margin-left:20%; display: inline-block">
+    <div style="display: inline-block">
 
       <a href="#" onclick="UncheckNonPertinent();return false;" title="uncheck missing %>=25%">Select most
         relevant</a>
@@ -92,12 +97,29 @@
             <td>
               {% if (r[2]=="Y") %}
                 <input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[0] }}">
+              {% else %}
+                <input type="checkbox" disabled>
               {% endif %}
             </td>
             <td>{{ r[0] }}</td>
             <td style="text-align:center">{{ r[1] }}</td>
             <td style="text-align:center">{{ r[3] }}</td>
           </tr>
+          {% if (loop.index0 % 15) == 14 and (loop.index0 / 15) >0 %}
+            </tbody>
+            <tbody>
+            <tr>
+              <th></th>
+              <th style="text-align: center;"></th>
+              <th colspan="4" style="text-align: center;line-height: 1;">% missing</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th>Feature</th>
+              <th>In reference</th>
+              <th>In to-predict</th>
+            </tr>
+          {% endif %}
         {% endfor %}
       </table>
     </div>
@@ -120,9 +142,9 @@
 
       function ComputeCritVar() {
           var cv = "";
-          $('#TblVar input').each(function () {
+          $('#TblVar td input').each(function () {
               if ($(this).prop("checked")) {
-                  if (cv != "")
+                  if (cv !== "")
                       cv += ",";
                   cv += $(this).data("var");
               }
@@ -135,9 +157,9 @@
           var cv = $('#CritVar').val();
           var cvl = cv.split(",");
           //console.log(cvl);
-          $('#TblVar input').each(function () {
+          $('#TblVar td input').each(function () {
               if ($(this).prop("checked", cvl.indexOf($(this).data("var")) >= 0)) {
-                  if (cv != "")
+                  if (cv !== "")
                       cv += ",";
                   cv += $(this).data("var");
               }
@@ -157,7 +179,7 @@
       }
 
       function SelDeselAllFeatures(el) {
-          const all_feats = $('#TblVar input');
+          const all_feats = $('#TblVar td input');
           if ($(el).prop('checked')) {
               all_feats.prop('checked', true);
           } else {

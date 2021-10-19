@@ -229,7 +229,12 @@ class TaskClassifAuto2(AsyncTask):
             time.sleep(5)
 
         self.task.taskstate = "Done"
-        self.UpdateProgress(100, "Job completed on back-end")
+        if job.state == 'E':
+            self.task.taskstate = 'Error'
+            self.UpdateProgress(100, "Job failed on back-end")
+        else:
+            self.task.taskstate = 'Done'
+            self.UpdateProgress(100, "Job completed on back-end")
 
         return
 
@@ -653,7 +658,7 @@ class TaskClassifAuto2(AsyncTask):
             if len(errors) > 0:
                 for e in errors:
                     flash(e, "error")
-            else:  # Pas d'erreur, on memorize les parametres dans le projet et on lance la tache
+            else:  # Pas d'erreur, on memorise les parametres dans le projet et on lance la tache
                 # On ajoute les valeurs dans CustSettings pour les sauver dans le ClassifSettings du projet
                 PrjCS = DecodeEqualList(target_prj.classifsettings)
                 d = self.param.CustSettings.copy()
@@ -724,14 +729,16 @@ class TaskClassifAuto2(AsyncTask):
         names_for_stats = names_for_stats \
             .replace("fre.depth_min", "obj.depth_min") \
             .replace("fre.depth_max", "obj.depth_max")
-        # Stats on training set
+        # Stats on training set, i.e. projects+categories+limit
         with ApiClient(ProjectsApi, request) as api:
             stats: ProjectSetColumnStatsModel = \
                 api.project_set_get_column_stats_project_set_column_stats_get(ids=src_prj_lst,
-                                                                              names=names_for_stats)
+                                                                              names=names_for_stats,
+                                                                              limit=self.param.learninglimit,
+                                                                              categories=self.param.Taxo)
         g.LsSize = stats.total
         for col, count, variance in zip(stats.columns, stats.counts, stats.variances):
-            prfx, name = col.split(".")
+            prfx, name = col.split(".", 1)
             critlist[name][1] = round(100 * (1 - count / stats.total))  # % Missing dans Learning Set
             critlist[name][2] = ' ' if variance is None else (
                 'Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
@@ -742,7 +749,7 @@ class TaskClassifAuto2(AsyncTask):
                 api.project_set_get_column_stats_project_set_column_stats_get(ids=str(target_prj.projid),
                                                                               names=names_for_stats)
         for col, count, variance in zip(stats.columns, stats.counts, stats.variances):
-            prfx, name = col.split(".")
+            prfx, name = col.split(".", 1)
             critlist[name][3] = round(100 * (1 - count / stats.total))  # % Missing dans cible
             critlist[name][4] = ' ' if variance is None else (
                 'Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
@@ -750,22 +757,24 @@ class TaskClassifAuto2(AsyncTask):
         # Calcul des stats de la dispo des données SCN
         g.SCN = None
         if app.config.get("SCN_ENABLED", False):
-            sql = """
-              select p.projid,p.title,n.nbr,n.nbr-nbrscn miss_scn,cnn_network_id scnmodel
-              from projects p
-              join (select obj.projid,count(*) nbr,count(cnn.objcnnid) nbrscn  
-                    from objects obj
-                    left join obj_cnn_features cnn on obj.objid=cnn.objcnnid  
-                    where obj.projid in({0}) group by projid) N on n.projid=p.projid
-              order by p.projid
-              """.format(src_prj_lst + (",%d" % target_prj.projid))
-            g.SCN = GetAll(sql)
-            g.SCNImpossible = None
-            DistinctSCN = {r['scnmodel'] for r in g.SCN}
-            if None in DistinctSCN:
-                g.SCNImpossible = "Some project are not configured for Deep Learning"
-            elif len(DistinctSCN) > 1:
-                g.SCNImpossible = "All projects must use the same Network"
+            g.SCN = 1
+            # This takes ages I'm not sure it's of any interest to the user
+            # sql = """
+            #   select p.projid,p.title,n.nbr,n.nbr-nbrscn miss_scn,cnn_network_id scnmodel
+            #   from projects p
+            #   join (select obj.projid,count(*) nbr,count(cnn.objcnnid) nbrscn
+            #         from objects obj
+            #         left join obj_cnn_features cnn on obj.objid=cnn.objcnnid
+            #         where obj.projid in({0}) group by projid) N on n.projid=p.projid
+            #   order by p.projid
+            #   """.format(src_prj_lst + (",%d" % target_prj.projid))
+            # g.SCN = GetAll(sql)
+            # g.SCNImpossible = None
+            # DistinctSCN = {r['scnmodel'] for r in g.SCN}
+            # if None in DistinctSCN:
+            #     g.SCNImpossible = "Some project are not configured for Deep Learning"
+            # elif len(DistinctSCN) > 1:
+            #     g.SCNImpossible = "All projects must use the same Network"
 
         g.critlist = list(critlist.values())
         g.critlist.sort(key=lambda t: t[0])
@@ -784,7 +793,7 @@ class TaskClassifAuto2(AsyncTask):
     @classmethod
     def GetAugmentedReverseObjectMap(cls, prj: ProjectModel):
         """ Return numerical free columns for a project + 2 hard-coded ones """
-        ret = {k: v for k, v in prj.obj_free_cols.items() if k[0] == 'n'}
+        ret = {k: v for k, v in prj.obj_free_cols.items() if v[0] == 'n'}
         ret['depth_min'] = 'depth_min'
         ret['depth_max'] = 'depth_max'
         return ret

@@ -54,7 +54,6 @@ def searchexploreproject():
                 return False
             if "posttaxomapping=\n" in prediction_settings:
                 return False
-            logging.info("classifsetting:", prediction_settings)
             return True
     for_disp = [dict(id=p.projid, text=p.title) for p in prjs if prj_filter(p)]
     return json.dumps(for_disp)
