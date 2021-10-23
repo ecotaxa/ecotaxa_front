@@ -298,9 +298,9 @@ def indexPrj(PrjId):
     if g.PrjAnnotate or g.PrjManager:
         if proj.status == "Annotate":
             g.headmenu.append(
-                ("/Task/Create/TaskClassifAuto2?projid=%d" % PrjId, "Train and Predict identifications V2"))
+                ("/Task/Create/TaskClassifAuto2?projid=%d" % PrjId, "Train and Predict classifications"))
             g.headmenuF.append(
-                ("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2')", "Train and Predict identifications V2"))
+                ("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2')", "Train and Predict classifications"))
             g.headmenu.append(("/Job/Create/FileImport?p=%d" % PrjId, "Import images and metadata"))
             g.headmenu.append(("/prj/taxo_fix/%d" % PrjId, "Fix category issues"))
         # g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
@@ -559,7 +559,7 @@ def LoadRightPane():
     for dtl in objs.details:
         # Access API result by name for readability
         dtl: Dict[str, Any] = dict(zip(api_cols, dtl))
-        format_date_time(dtl, {"obj.classif_when"}, {"obj.objtime"})
+        format_date_time(dtl, {"obj.classif_when", "obj.classif_auto_when"}, {"obj.objtime"})
         filename = dtl['img.file_name']
         origwidth: int = dtl['img.width']
         origheight: int = dtl['img.height']
@@ -650,6 +650,9 @@ def LoadRightPane():
             elif fld == 'obj.classif_when':
                 if dtl['obj.classif_when']:
                     bottom_txts.append("Validation date : %s" % dtl['obj.classif_when'])
+            elif fld == 'obj.classif_auto_when':
+                if dtl['obj.classif_auto_when']:
+                    bottom_txts.append("Prediction date : %s" % dtl['obj.classif_auto_when'])
             elif fld == 'obj.orig_id':
                 before_brs = "<div style='word-break: break-all;'>%s</div>" % dtl['obj.orig_id']
             else:

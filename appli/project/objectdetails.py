@@ -5,6 +5,7 @@ from typing import List
 
 from flask import render_template, g, flash, request
 from flask_security import login_required
+from markupsafe import escape
 
 from appli import app, PrintInCharte, gvg, gvp, ntcv, ScaleForDisplay, \
     ComputeLimitForImage, nonetoformat, XSSEscape
@@ -260,15 +261,17 @@ def objectdetails(objid):
     with ApiClient(ObjectApi, request) as api:
         history: List[HistoricalClassification] = api.object_query_history_object_object_id_history_get(objid)
 
+    dte = obj.classif_when if obj.classif_qual in ('D','V') else \
+        (obj.classif_auto_when if obj.classif_qual == 'P' else None)
     page.append("""<div role="tabpanel" class="tab-pane" id="tabdclassiflog">
 Current Classification : Quality={} , date={}
     <table class='table table-bordered table-condensed'><tr>
     <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""".format(obj.classif_qual,
-                                                                                          obj.classif_when))
+                                                                                          dte))
     for classif_desc in history:
         vals = [getattr(classif_desc, fld)
                 for fld in ('classif_date', 'classif_type', 'taxon_name', 'user_name', 'classif_qual')]
-        vals = [str(a_val) if a_val is not None else "-"
+        vals = [escape(str(a_val)) if a_val is not None else "-"
                 for a_val in vals]
         page.append("<tr><td>" + ("</td><td>".join(vals)) + "</td></tr>")
     page.append("</table></div>")

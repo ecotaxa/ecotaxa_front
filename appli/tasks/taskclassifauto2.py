@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-import os
-import sys
 import time
-from pathlib import Path
-from subprocess import Popen, TimeoutExpired, DEVNULL, PIPE
 from typing import List, Any
 
 import numpy as np
 from flask import render_template, g, flash, request
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.externals import joblib
 
-from appli import db, database, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, app, TempTaskDir, \
-    XSSEscape
+from appli import db, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, app, XSSEscape
 from appli.database import GetAll, CSVIntStringToInClause
 from appli.project import sharedfilter
 from appli.project.stats import UpdateProjectStat
@@ -38,7 +31,6 @@ class TaskClassifAuto2(AsyncTask):
                 self.BaseProject = ""
                 self.CritVar = None
                 self.Taxo = ""
-                self.keeplog = "no"
                 self.learninglimit = ""
                 self.CustSettings = {}
                 self.PostTaxoMapping = ""
@@ -55,134 +47,6 @@ class TaskClassifAuto2(AsyncTask):
 
     def SPCommon(self):
         logging.info("Execute SPCommon for Automatic Classification V2 Task %d" % self.task.id)
-
-    def ComputeSCNFeatures(self, Prj: ProjectModel):
-        logging.info("Start SCN features Computation ")
-        # Minimal sanity check
-        if Prj.cnn_network_id is None or len(Prj.cnn_network_id) == 0:
-            logging.error("No SCN Network set for this project. See settings.")
-            self.task.taskstate = "Error"
-            return False
-        if self.param.BaseProject != '':
-            PrjListInClause = CSVIntStringToInClause(self.param.BaseProject + ',' + str(self.param.ProjectId))
-        else:
-            PrjListInClause = str(self.param.ProjectId)
-        # Find the _potentially_ useful for SCN rows and update their cnn_feature lines
-        sql = """select objid,file_name from (
-                select obj.objid,  images.file_name,rank() over(partition by obj.objid order by images.imgid) rang
-                    from objects obj
-                    join images on images.objid=obj.objid
-                    left join obj_cnn_features cnn on obj.objid=cnn.objcnnid                    
-                    where obj.projid in({0}) and cnn.objcnnid is NULL
-                    ) Q 
-                    where rang=1
-                    """.format(PrjListInClause)
-        self.pgcur.execute(sql)
-        WorkDir = Path(self.GetWorkingDir())
-        scn_input = WorkDir / "scn_input.csv"
-        output_dir = WorkDir / "scn_output"
-        if not output_dir.exists(): output_dir.mkdir()
-        vaultdir = (Path(TempTaskDir) / "../vault/").resolve().as_posix() + "/"
-        # Configure the execution
-        scn_model_dir = Path(os.path.normpath((Path(TempTaskDir) / "../SCN_networks" / Prj.cnn_network_id).as_posix())). \
-            resolve()
-        meta = json.load((scn_model_dir / "meta.json").open('r'))
-        TStep = time.time()
-        NbrLig = 0
-        with scn_input.open('w') as finput:
-            while True:
-                # recupère les images des objets à calculer
-                DBRes = self.pgcur.fetchmany(1000)
-                if len(DBRes) == 0:
-                    break
-                NbrLig += len(DBRes)
-                finput.writelines(("%s,%s%s\n" % (r[0], vaultdir, r[1]) for r in DBRes))
-        if NbrLig == 0:
-            logging.info("No Missing SCN Features")
-            return True
-        TStep = time.time()
-        env = {
-            "MODEL_DIR": scn_model_dir.as_posix(),
-            "OUTPUT_DIR": output_dir.resolve().as_posix(),
-            # input data
-            "UNLABELED_DATA_FN": scn_input.as_posix(),
-            # start at the last epoch (NB: this is the previous STOP_EPOCH - 1 because of 0-based indexing)
-            "EPOCH": str(meta['epoch']),
-            # stop early = do not train
-            "STOP_EPOCH": "0",
-            # whether to compute features on the input file
-            "DUMP_FEATURES": "1"
-        }
-        # display the current environment
-        for k, v in env.items():
-            logging.info("{}: {}".format(k, v))
-
-        # time out for the communication with the binary
-        # beware, this is for the full execution event while execution can be long for training
-        timeout_in_s = 1200
-
-        scn_binary = app.config['SCN_BINARY']
-        # recopie toutes les variables d'environnement utile pour l'environnement simulé
-        for k, v in os.environ.items():
-            env[k] = v
-        # TEST sur le PC de laurent avec script de simulation
-        if scn_binary == 'TEST_PC_LAURENT':
-            # for extra in ['PATH','SYSTEMROOT']:
-            #     env[extra]= os.environ[extra]
-            scn_binary = sys.executable + " " + (
-                    Path(TempTaskDir) / "../appli/tasks/simulateur_SCN.py").resolve().as_posix()
-
-        shelloption = scn_binary.endswith('.sh')
-
-        logging.info("scn_binary=" + scn_binary)
-        # bufsize=1: Line buffering
-        with Popen(scn_binary, shell=shelloption, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, env=env,
-                   universal_newlines=True, bufsize=1) as p:
-            try:
-                outs, errs = p.communicate(timeout=timeout_in_s)
-            except TimeoutExpired:
-                p.kill()
-                outs, errs = p.communicate()
-        logging.info("Return code: {}".format(p.returncode))
-        logging.info("Output: \n%s", outs)
-        logging.info("Errors: %s", errs)
-
-        upcur = db.engine.raw_connection().cursor()
-        InsSQL = """insert into obj_cnn_features(objcnnid, cnn01, cnn02, cnn03, cnn04, cnn05, cnn06, cnn07, cnn08, cnn09, cnn10, cnn11, cnn12, cnn13, cnn14, cnn15, cnn16, cnn17, cnn18, cnn19, cnn20, cnn21, cnn22, cnn23, cnn24, cnn25, cnn26, cnn27, cnn28, cnn29, cnn30, cnn31, cnn32, cnn33, cnn34, cnn35, cnn36, cnn37, cnn38, cnn39, cnn40, cnn41, cnn42, cnn43, cnn44, cnn45, cnn46, cnn47, cnn48, cnn49, cnn50) 
-                    values(%(objcnnid)s,%(cnn01)s,%(cnn02)s,%(cnn03)s,%(cnn04)s,%(cnn05)s,%(cnn06)s,%(cnn07)s,%(cnn08)s,%(cnn09)s,%(cnn10)s,%(cnn11)s,%(cnn12)s,%(cnn13)s,%(cnn14)s,%(cnn15)s,%(cnn16)s,%(cnn17)s,%(cnn18)s,%(cnn19)s,%(cnn20)s,%(cnn21)s,%(cnn22)s,%(cnn23)s,%(cnn24)s,%(cnn25)s,%(cnn26)s,%(cnn27)s,%(cnn28)s,%(cnn29)s,%(cnn30)s,%(cnn31)s,%(cnn32)s,%(cnn33)s,%(cnn34)s,%(cnn35)s,%(cnn36)s,%(cnn37)s,%(cnn38)s,%(cnn39)s,%(cnn40)s,%(cnn41)s,%(cnn42)s,%(cnn43)s,%(cnn44)s,%(cnn45)s,%(cnn46)s,%(cnn47)s,%(cnn48)s,%(cnn49)s,%(cnn50)s )"""
-
-        pca = joblib.load(scn_model_dir / "feature_pca.jbl")
-
-        def ProcessLig():
-            nonlocal LigData, InsSQL, upcur, LigID, pca
-            # pour générer un fichier de test
-            # pca = PCA(n_components=50)
-            # pca.fit(np.array(LigData))
-            # pca_fn = model_dir/"feature_pca.jbl"
-            # joblib.dump(pca, pca_fn)
-
-            pcares = pca.transform(np.array(LigData))
-            SQLParam = [{"cnn%02d" % (i + 1): float(x) for i, x in enumerate(feat)} for feat in pcares]
-            for i in range(len(SQLParam)):
-                SQLParam[i]['objcnnid'] = LigID[i]
-            database.ExecSQL("delete from obj_cnn_features where objcnnid= any(%s)", (LigID,))
-            upcur.executemany(InsSQL, SQLParam)
-            upcur.connection.commit()
-            LigData = []
-            LigID = []
-
-        with (output_dir / 'unlabeled_features.csv').open('r') as fout:
-            LigID = []
-            LigData = []
-            for l in fout:
-                Lig = l.split(',')
-                LigID.append(int(Lig[0]))
-                LigData.append([float(x) for x in Lig[2:]])
-                if len(LigData) > 100:
-                    ProcessLig()
-        if len(LigData) > 0:
-            ProcessLig()
-        return True
 
     OBJECT_VARS = {"depth_max", "depth_min"}
 
@@ -242,7 +106,7 @@ class TaskClassifAuto2(AsyncTask):
             target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
 
         MapPrj = self.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
-        CommonKeys = set(MapPrj.keys())
+        common_features = set(MapPrj.keys())
 
         # PostTaxoMapping décodé sous la forme source:target
         PostTaxoMapping = {int(el[0].strip()): int(el[1].strip()) for el in
@@ -251,7 +115,9 @@ class TaskClassifAuto2(AsyncTask):
 
         CNNCols = ""
         if self.param.usescn == 'Y':
-            if not self.ComputeSCNFeatures(target_prj):
+            # Late import due to circular dependency
+            from .prediction_deep_features import ComputeSCNFeatures
+            if not ComputeSCNFeatures(self, target_prj):
                 return
             CNNCols = "".join([",cnn%02d" % (i + 1) for i in range(50)])
 
@@ -262,7 +128,7 @@ class TaskClassifAuto2(AsyncTask):
         base_projects = self.param.BaseProject
         src_prj_ids = [int(prj_id) for prj_id in base_projects.split(",")]
 
-        self.api_read_projects(self.cookie, src_prj_ids, revobjmapbaseByProj, CommonKeys)
+        self.api_read_projects(self.cookie, src_prj_ids, revobjmapbaseByProj, common_features)
 
         if self.param.learninglimit:
             self.param.learninglimit = int(self.param.learninglimit)  # convert
@@ -271,33 +137,33 @@ class TaskClassifAuto2(AsyncTask):
         CritVar = self.param.CritVar.split(",")
 
         # ne garde que les colonnes communes qui sont aussi selectionnées.
-        CommonKeys.intersection_update(set(CritVar))
+        common_features.intersection_update(set(CritVar))
 
         # Online help says "Missing values are replaced by the median value for this feature from the learning set."
-        sql = ""
-        for bprojid in src_prj_ids:
-            if sql != "":
-                sql += " union all "
-            sql += "select 1"
-            for c in CommonKeys:
-                sql += ",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {1}". \
-                    format(revobjmapbaseByProj[bprojid][c], MapPrj[c])
-            sql += " from objects "
-            sql += " where projid={0} and classif_id is not null and classif_qual='V'".format(bprojid)
-
-        if self.param.learninglimit:
-            # random() instead?
-            LimitHead = """ with objlist as ( select objid from (
-                        select obj.objid,row_number() over(PARTITION BY classif_id order by random_value) rang
-                        from objects obj
-                        where obj.projid in ({0}) and obj.classif_id is not null and classif_qual='V' ) q 
-                        where rang <={1} ) """. \
-                format(base_projects, self.param.learninglimit)
-            LimitFoot = """ and objid in ( select objid from objlist ) """
-            sql = LimitHead + sql + LimitFoot
-        else:
-            LimitHead = LimitFoot = ""
-        DefVal = GetAll(sql)[0]
+        # sql = ""
+        # for bprojid in src_prj_ids:
+        #     if sql != "":
+        #         sql += " union all "
+        #     sql += "select 1"
+        #     for c in common_features:
+        #         sql += ",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {1}". \
+        #             format(revobjmapbaseByProj[bprojid][c], MapPrj[c])
+        #     sql += " from objects "
+        #     sql += " where projid={0} and classif_id is not null and classif_qual='V'".format(bprojid)
+        #
+        # if self.param.learninglimit:
+        #     # random() instead?
+        #     LimitHead = """ with objlist as ( select objid from (
+        #                 select obj.objid,row_number() over(PARTITION BY classif_id order by random_value) rang
+        #                 from objects obj
+        #                 where obj.projid in ({0}) and obj.classif_id is not null and classif_qual='V' ) q
+        #                 where rang <={1} ) """. \
+        #         format(base_projects, self.param.learninglimit)
+        #     LimitFoot = """ and objid in ( select objid from objlist ) """
+        #     sql = LimitHead + sql + LimitFoot
+        # else:
+        #     LimitHead = LimitFoot = ""
+        # DefVal = GetAll(sql)[0]
 
         # Extrait les données du learning set
         sql = ""
@@ -305,7 +171,7 @@ class TaskClassifAuto2(AsyncTask):
             if sql != "":
                 sql += " \nunion all "
             sql = "select classif_id"
-            for c in CommonKeys:
+            for c in common_features:
                 sql += ",coalesce(case when {0} not in ('Infinity','-Infinity','NaN') then {0} end,{1}) as {2}".format(
                     revobjmapbaseByProj[bprojid][c], DefVal[MapPrj[c]], MapPrj[c])
             sql += CNNCols + " from objects "
@@ -316,6 +182,7 @@ class TaskClassifAuto2(AsyncTask):
                         and classif_id in ({1}) """.format(base_projects, self.param.Taxo)
         if self.param.learninglimit:
             sql = LimitHead + sql + LimitFoot
+
         # Convertie le LS en tableau NumPy
         DBRes = np.array(GetAll(sql))
         LSSize = DBRes.shape[0]
@@ -325,7 +192,8 @@ class TaskClassifAuto2(AsyncTask):
         logging.info('DB Conversion to NP : %0.3f s', time.time() - TInit)
         logging.info("Variable shape %d Row, %d Col", *learn_var.shape)
         # Note : La multiplication des jobs n'est pas forcement plus performante, en tous cas sur un petit ensemble.
-        Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1, class_weight="balanced")
+        Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1,
+                                            class_weight="balanced")
 
         # TStep = time.time()
         # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
@@ -335,6 +203,7 @@ class TaskClassifAuto2(AsyncTask):
         # logging.info('Clean input variables :  %0.3f s', time.time() - TStep)
         TStep = time.time()
         Classifier.fit(learn_var, learn_cat)
+
         logging.info('Model fit duration :  %0.3f s', time.time() - TStep)
         # ------ Fin de la partie apprentissage ou chargement du modèle
 
@@ -356,7 +225,7 @@ class TaskClassifAuto2(AsyncTask):
             raise Exception(msg)  # Inside the task, so cannot display anything for the user
 
         sql = "select objid"
-        for c in CommonKeys:
+        for c in common_features:
             sql += ",coalesce(case when {0} not in ('Infinity','-Infinity','NaN') then {0} end,{1}) as {0}".format(
                 MapPrj[c], DefVal[MapPrj[c]])
         sql += CNNCols + " from objects o "
@@ -395,7 +264,7 @@ class TaskClassifAuto2(AsyncTask):
                 req = ClassifyAutoReq(target_ids=[a_classif['id'] for a_classif in SqlParam],
                                       classifications=[a_classif['cat'] for a_classif in SqlParam],
                                       scores=[a_classif['p'] for a_classif in SqlParam],
-                                      keep_log=self.param.keeplog == 'Yes')
+                                      keep_log=False)
                 api.classify_auto_object_set_object_set_classify_auto_post(classify_auto_req=req)
             logging.info('Chunk Db Extract %d/%d, Classification and Db Save :  %0.3f s %0.3f+%0.3f+%0.3f'
                          , ProcessedRows, NbrItem
@@ -521,14 +390,14 @@ class TaskClassifAuto2(AsyncTask):
         return ret
 
     @classmethod
-    def api_read_projects(cls, auth: Any, src_prj_ids: List[int], revobjmapbaseByProj, CommonKeys):
+    def api_read_projects(cls, auth: Any, src_prj_ids: List[int], revobjmapbaseByProj, common_features):
         """ Read project's free columns and add them to the common set """
         for src_prj_id in src_prj_ids:
             with ApiClient(ProjectsApi, auth) as api:
                 proj: ProjectModel = api.project_query_projects_project_id_get(src_prj_id,
                                                                                for_managing=False)
             revobjmapbaseByProj[src_prj_id] = cls.GetAugmentedReverseObjectMap(proj)
-            CommonKeys.intersection_update(set(revobjmapbaseByProj[src_prj_id].keys()))
+            common_features.intersection_update(set(revobjmapbaseByProj[src_prj_id].keys()))
 
     def QuestionProcessScreenSelectSourceTaxo(self, target_prj: ProjectModel):
         # Second écran de configuration, choix des taxon utilisés dans la source
@@ -629,7 +498,6 @@ class TaskClassifAuto2(AsyncTask):
             else:
                 self.param.PostTaxoMapping = gvp("PostTaxoMapping")
             self.param.learninglimit = gvp("learninglimit")
-            self.param.keeplog = gvp("keeplog")
             self.param.usescn = gvp("usescn", "")
             # self.param.Taxo=",".join( (x[4:] for x in request.form if x[0:4]=="taxo") )
             self.param.Taxo = gvp('Taxo')
@@ -640,25 +508,25 @@ class TaskClassifAuto2(AsyncTask):
                 errors.append("You must select some variable")
             if self.param.Taxo == '': errors.append("You must select some category")
 
-            # Use the API entry point for filtering
+            # Use the API entry point for querying the impacted objects. At these point we just need
+            # to know if it's != 0
             with ApiClient(ObjectsApi, self.cookie) as api:
-                res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(self.param.ProjectId,
-                                                                                             self.param.filtres)
-                affected_where = " and ( classif_qual='P' or classif_qual is null) and o.objid = any (%(objids)s) "
-                sqlparam = {"objids": sorted(res.object_ids)}
+                filters = dict(self.param.filtres)
+                filters["statusfilter"] = "UP"
+                res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(
+                    project_id=self.param.ProjectId,
+                    project_filters=filters,
+                    window_size=100)
 
-            NbrItem = \
-                GetAll("select count(*) from objects o where projid={0} {1} ".format(target_prj.projid, affected_where),
-                       sqlparam)[
-                    0][0]
-            if NbrItem == 0:
+            if len(res.object_ids) == 0:
                 msg = self.cook_no_object_message()
                 errors.append(msg)
 
             if len(errors) > 0:
                 for e in errors:
                     flash(e, "error")
-            else:  # Pas d'erreur, on memorise les parametres dans le projet et on lance la tache
+            else:
+                # Pas d'erreur, on memorise les parametres dans le projet et on lance la tache
                 # On ajoute les valeurs dans CustSettings pour les sauver dans le ClassifSettings du projet
                 PrjCS = DecodeEqualList(target_prj.classifsettings)
                 d = self.param.CustSettings.copy()
@@ -710,7 +578,7 @@ class TaskClassifAuto2(AsyncTask):
 
         # Determination des criteres/variables utilisées par l'algo de learning
         revobjmap = self.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
-        CommonKeys = set(revobjmap.keys())
+        common_features = set(revobjmap.keys())
 
         # Loop over source projects, get their keys and determine a set of common keys (for dest + all srcs)
         # Note: given the harcoded values in @see GetAugmentedReverseObjectMap, the common keys comprise
@@ -719,16 +587,14 @@ class TaskClassifAuto2(AsyncTask):
         revobjmapbaseByProj = {}
         src_prj_ids = [int(prj_id) for prj_id in src_prj_lst.split(",") if prj_id.isdigit()]
 
-        self.api_read_projects(request, src_prj_ids, revobjmapbaseByProj, CommonKeys)
+        self.api_read_projects(request, src_prj_ids, revobjmapbaseByProj, common_features)
 
-        # critlist[NomCol] 0:NomCol , 1:LS % validé rempli , 2:LS Nbr distincte ,3:Cible % rempli ,4:Cible % NV Rempli Inutile ?
-        critlist = {k: [k, -1, -1, -1, -1] for k in CommonKeys}
+        # critlist[feature] 0:feature , 1:% validated , 2:distinct
+        critlist = {k: [k, -1, -1] for k in common_features}
 
         # Prepare names for the API call
-        names_for_stats = ",".join(["fre.%s" % col for col in CommonKeys])
-        names_for_stats = names_for_stats \
-            .replace("fre.depth_min", "obj.depth_min") \
-            .replace("fre.depth_max", "obj.depth_max")
+        names_for_stats = ",".join(["fre.%s" % col for col in common_features if col not in self.OBJECT_VARS])
+        names_for_stats += ("," if names_for_stats else "") + ",".join(["obj.%s" % col for col in self.OBJECT_VARS])
         # Stats on training set, i.e. projects+categories+limit
         with ApiClient(ProjectsApi, request) as api:
             stats: ProjectSetColumnStatsModel = \
@@ -739,20 +605,8 @@ class TaskClassifAuto2(AsyncTask):
         g.LsSize = stats.total
         for col, count, variance in zip(stats.columns, stats.counts, stats.variances):
             prfx, name = col.split(".", 1)
-            critlist[name][1] = round(100 * (1 - count / stats.total))  # % Missing dans Learning Set
-            critlist[name][2] = ' ' if variance is None else (
-                'Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
-
-        # Calcul des stats du projet cible
-        with ApiClient(ProjectsApi, request) as api:
-            stats: ProjectSetColumnStatsModel = \
-                api.project_set_get_column_stats_project_set_column_stats_get(ids=str(target_prj.projid),
-                                                                              names=names_for_stats)
-        for col, count, variance in zip(stats.columns, stats.counts, stats.variances):
-            prfx, name = col.split(".", 1)
-            critlist[name][3] = round(100 * (1 - count / stats.total))  # % Missing dans cible
-            critlist[name][4] = ' ' if variance is None else (
-                'Y' if variance != 0 else 'N')  # Distinct values N si une seule ou pas de valeur
+            critlist[name][1] = round(100 * (1 - count / stats.total))  # % Missing in source projects
+            critlist[name][2] = ' ' if variance is None else ('Y' if variance != 0 else 'N')
 
         # Calcul des stats de la dispo des données SCN
         g.SCN = None
@@ -782,7 +636,7 @@ class TaskClassifAuto2(AsyncTask):
         data = self.param
         data.src = src_prj_lst
         return render_template('task/classifauto2_create_settings.html', header=txt, data=data,
-                               PreviousTxt=self.GetFilterText())
+                               filters_info=self.GetFilterText())
 
     def cook_no_object_message(self):
         msg = "No object to classify, perhaps all objects were already classified."
@@ -794,8 +648,8 @@ class TaskClassifAuto2(AsyncTask):
     def GetAugmentedReverseObjectMap(cls, prj: ProjectModel):
         """ Return numerical free columns for a project + 2 hard-coded ones """
         ret = {k: v for k, v in prj.obj_free_cols.items() if v[0] == 'n'}
-        ret['depth_min'] = 'depth_min'
-        ret['depth_max'] = 'depth_max'
+        for an_obj_var in cls.OBJECT_VARS:
+            ret[an_obj_var] = an_obj_var
         return ret
 
     def GetDoneExtraAction(self):

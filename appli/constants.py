@@ -18,7 +18,7 @@ MappableObjectColumnsSet = set(MappableObjectColumns)
 SortableObjectFields = OrderedDict([("orig_id", "Image Name"),
                                     ("classif_auto_score", "Score"),
                                     ("classif_when", "Validation date"),
-                                    ("random_value", "Random")])
+                                    ("classif_auto_when", "Prediction date")])
 
 # We need another paradigm as both sample, acquisition and object have an orig_id column
 MappableParentColumns = ["sam_orig_id", "acq_orig_id"]

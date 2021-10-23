@@ -1,148 +1,103 @@
 {% extends "layout.html" %}
-{% import "ht_macros.html" as ht %}
 
 
 
 {% block body %}
   <style>
-      .table-condensed tr td {
-          padding-top: 0px !important;
-          padding-bottom: 0px !important;
+      #VarsDiv label {
+          font-weight: 500;
       }
 
-      #TblVar tbody {
-          display: table-cell;
-          vertical-align: baseline;
+      #VarsDiv span {
+          display: inline-block;
+          min-width: 9em;
+          text-align: center;
       }
   </style>
   {{ PreviousTxt|safe }}
   <h3>PREDICTION: Choice of features and settings </h3>
+  {{ filters_info|safe }}
   <form class="form-horizontal" method="post">
     <input type="hidden" id="learninglimit" name="learninglimit" value="{{ data.learninglimit }}">
     <input type="hidden" id="Taxo" name="Taxo" value="{{ data.Taxo }}">
     <input type="hidden" id="src" name="src" value="{{ data.src }}">
     <input type="hidden" id="PostTaxoMapping" name="PostTaxoMapping" value="{{ data.PostTaxoMapping }}">
+    <input type="hidden" name="CritVar" id="CritVar" value="{{ data.CritVar }}">
+    <input type="hidden" name="starttask" value="Y">
 
-    <div>
+    <div class="row">
       <div class="col-md-4">
 
-        <p style="padding-left: 100px;">
+        <p class="text-center">
           <button type="submit" class="btn btn-primary">Start prediction task</button>
         </p>
 
         <div class="form-group row">
-          <div class="col-md-offset-1">
+          <div class="text-center">
             <div>
-              <label for="keeplog" class="control-label">Keep log of previous prediction</label>
-              {{ ht.selectinputdict("keeplog",{'no':"No",'yes':"Yes"},"no") }}
-            </div>
-            <div>
-              <label for="usescn" class="control-label">Add deep features</label>
+              <label for="usescn" class="control-label" style="font-size:larger">Add deep features</label>
               <span data-container="body" data-toggle="tooltip"
                     data-placement="right" data-html="true" title="
-<p style='text-align: left'>Deep learning features will complement the ones you picked and add quality to the prediction.</p>"
+<p style='text-align: left'>Deep learning features will complement the ones you pick and add quality to the prediction.</p>"
                     class="glyphicon glyphicon-question-sign"></span>
-              <input type="checkbox" name="usescn" id="usescn" value="Y">
+              <input type="checkbox" name="usescn" id="usescn" checked value="Y">
             </div>
           </div>
         </div>
       </div>
 
-      <div class="panel panel-default col-md-6">
+      <div class="panel panel-default col-md-7">
         <p>
           You have chosen {{ g.LsSize }} reference objects to build the Learning Set. In this last step, you can choose
           which features to associate with each of these objects, and
-          start a prediction task using the Learning Set. To help in choice, simple statistics on these features' values
-          are presented in the table below.<br>
-        <li>Features with a single, constant value, or no value at all, are useless for prediction and are
-          automatically excluded. They are listed here as a reminder.
+          start a prediction task using the Learning Set.<br>
+        <li>Prediction will be better if you exclude features which are not related to the classification,
+          e.g. coordinates in the raw image.
+        </li>
+        <li>Features with a single, constant value, or too many missing values, are useless for prediction and are
+          automatically excluded. Some of them are listed here as a reminder.
         </li>
         <li>Missing values will be replaced by the median value for this feature from the reference objects.
         </li>
-
         <li>Prediction settings are recorded in EcoTaxa for the next prediction.</li>
         </p>
       </div>
     </div>
 
+    <div style="margin-left: 1%; max-width: 96%">
 
-    {# ----------- Partie Gestion des Features --------------------- #}
-    <input type="text" name="CritVar" id="CritVar" value="{{ data.CritVar }}" style="width: 400px;display: None">
-
-    <div style="display: inline-block">
-
-      <a href="#" onclick="UncheckNonPertinent();return false;" title="uncheck missing %>=25%">Select most
-        relevant</a>
-
-      <span data-container="body" data-toggle="tooltip"
-            data-placement="right" data-html="true" title="
-<p style='text-align: left'>Click to exclude features with more than 25% of missing values, which may not be helpful.
-          </li></p>"
-            class="glyphicon glyphicon-question-sign"></span>
-
-      <table class="table table-condensed" style="width: auto" id="TblVar">
-        <tr>
-          <th></th>
-          <th style="text-align: center;"></th>
-          <th colspan="4" style="text-align: center;line-height: 1;">% missing</th>
-        </tr>
-        <tr>
-          <th><input type="checkbox" id="all_features" onclick="SelDeselAllFeatures(this);" value="Y"></th>
-          <th>Feature</th>
-          <th>In reference</th>
-          <th>In to-predict</th>
-        </tr>
+      <label>
+        <input type="checkbox" id="all_features" onclick="SelDeselAllFeatures(this);" value="Y">
+      </label>
+      <div id="VarsDiv">
         {% for r in g.critlist %}
-          <tr>
-            <td>
+          <span>
+            <label>{{ r[0] }}
               {% if (r[2]=="Y") %}
                 <input type="checkbox" value="Y" name="var{{ r[0] }}" data-var="{{ r[0] }}">
               {% else %}
-                <input type="checkbox" disabled>
+                <input type="checkbox" value="" disabled>
               {% endif %}
-            </td>
-            <td>{{ r[0] }}</td>
-            <td style="text-align:center">{{ r[1] }}</td>
-            <td style="text-align:center">{{ r[3] }}</td>
-          </tr>
-          {% if (loop.index0 % 15) == 14 and (loop.index0 / 15) >0 %}
-            </tbody>
-            <tbody>
-            <tr>
-              <th></th>
-              <th style="text-align: center;"></th>
-              <th colspan="4" style="text-align: center;line-height: 1;">% missing</th>
-            </tr>
-            <tr>
-              <th></th>
-              <th>Feature</th>
-              <th>In reference</th>
-              <th>In to-predict</th>
-            </tr>
-          {% endif %}
+            </label>
+           </span>
         {% endfor %}
-      </table>
+      </div>
     </div>
-
-    <input type="hidden" name="starttask" value="Y">
 
   </form>
   <script>
       $(document).ready(function () {
-          $('#TblVar').on('click', 'input', ComputeCritVar);
-          if ($('#CritVar').val() !== "")
+          $('#VarsDiv').on('click', 'input:enabled', ComputeCritVar);
+          if ($('#CritVar').val() !== "") {
               CheckBasedOnText();
-          else {
-              UncheckNonPertinent();
           }
-
           $('#all_features').prop('indeterminate', true);
 
       }); // Ready
 
       function ComputeCritVar() {
           var cv = "";
-          $('#TblVar td input').each(function () {
+          $('#VarsDiv input:enabled').each(function () {
               if ($(this).prop("checked")) {
                   if (cv !== "")
                       cv += ",";
@@ -156,30 +111,20 @@
           // Restore previous choice which was written in a hidden field
           var cv = $('#CritVar').val();
           var cvl = cv.split(",");
-          //console.log(cvl);
-          $('#TblVar td input').each(function () {
+          $('#VarsDiv input:enabled').each(function () {
               if ($(this).prop("checked", cvl.indexOf($(this).data("var")) >= 0)) {
                   if (cv !== "")
                       cv += ",";
                   cv += $(this).data("var");
               }
           });
-      }
-
-      function UncheckNonPertinent() {
-          var perimetre = $('#Perimeter').val();
-          $('#TblVar tr').each(function () {
-              var v = parseInt($(this).find("td:nth-child(3)").text());
-              var checkit = true;
-              if ((isNaN(v)) || (v >= 25)) {# Clean si moins de 25% de données sources remplis #}
-                  checkit = false;
-              $(this).find("input").prop("checked", checkit);
+          $('#VarsDiv input:disabled').each(function () {
+              $(this).prop("checked", false);
           });
-          ComputeCritVar();
       }
 
       function SelDeselAllFeatures(el) {
-          const all_feats = $('#TblVar td input');
+          const all_feats = $('#VarsDiv input:enabled');
           if ($(el).prop('checked')) {
               all_feats.prop('checked', true);
           } else {
