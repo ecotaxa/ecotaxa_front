@@ -238,12 +238,15 @@ class TaskClassifAuto2(AsyncTask):
     @classmethod
     def api_read_projects(cls, auth: Any, src_prj_ids: List[int], revobjmapbaseByProj, common_features):
         """ Read project's free columns and add them to the common set """
+        ret = []
         for src_prj_id in src_prj_ids:
             with ApiClient(ProjectsApi, auth) as api:
                 proj: ProjectModel = api.project_query_projects_project_id_get(src_prj_id,
                                                                                for_managing=False)
             revobjmapbaseByProj[src_prj_id] = cls.GetAugmentedReverseObjectMap(proj)
             common_features.intersection_update(set(revobjmapbaseByProj[src_prj_id].keys()))
+            ret.append(proj)
+        return ret
 
     def QuestionProcessScreenSelectSourceTaxo(self, target_prj: ProjectModel):
         # Second écran de configuration, choix des taxa utilisés dans la source
@@ -433,7 +436,7 @@ class TaskClassifAuto2(AsyncTask):
         revobjmapbaseByProj = {}
         src_prj_ids = [int(prj_id) for prj_id in src_prj_lst.split(",") if prj_id.isdigit()]
 
-        self.api_read_projects(request, src_prj_ids, revobjmapbaseByProj, common_features)
+        src_projs = self.api_read_projects(request, src_prj_ids, revobjmapbaseByProj, common_features)
 
         # critlist[feature] 0:feature , 1:% validated , 2:distinct
         critlist = {k: [k, -1, -1] for k in common_features}
@@ -454,27 +457,10 @@ class TaskClassifAuto2(AsyncTask):
             critlist[name][1] = round(100 * (1 - count / stats.total))  # % Missing in source projects
             critlist[name][2] = ' ' if variance is None else ('Y' if variance != 0 else 'N')
 
-        # Calcul des stats de la dispo des données SCN
         g.SCN = None
         if app.config.get("SCN_ENABLED", False):
-            g.SCN = 1
-            # This takes ages I'm not sure it's of any interest to the user
-            # sql = """
-            #   select p.projid,p.title,n.nbr,n.nbr-nbrscn miss_scn,cnn_network_id scnmodel
-            #   from projects p
-            #   join (select obj.projid,count(*) nbr,count(cnn.objcnnid) nbrscn
-            #         from objects obj
-            #         left join obj_cnn_features cnn on obj.objid=cnn.objcnnid
-            #         where obj.projid in({0}) group by projid) N on n.projid=p.projid
-            #   order by p.projid
-            #   """.format(src_prj_lst + (",%d" % target_prj.projid))
-            # g.SCN = GetAll(sql)
-            # g.SCNImpossible = None
-            # DistinctSCN = {r['scnmodel'] for r in g.SCN}
-            # if None in DistinctSCN:
-            #     g.SCNImpossible = "Some project are not configured for Deep Learning"
-            # elif len(DistinctSCN) > 1:
-            #     g.SCNImpossible = "All projects must use the same Network"
+            cnn_networks = set([target_prj.cnn_network_id]+[a_prj.cnn_network_id for a_prj in src_projs])
+            g.SCN = target_prj.cnn_network_id is not None and len(cnn_networks) == 1
 
         g.critlist = list(critlist.values())
         g.critlist.sort(key=lambda t: t[0])
