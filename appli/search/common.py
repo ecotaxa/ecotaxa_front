@@ -5,7 +5,7 @@ from flask import render_template, request, json
 
 from appli import app, gvg, DecodeEqualList
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py.api import SamplesApi, InstrumentApi, TaxonomyTreeApi, ProjectsApi
+from to_back.ecotaxa_cli_py.api import SamplesApi, InstrumentsApi, TaxonomyTreeApi, ProjectsApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, SampleModel, TaxonModel, ProjectUserStatsModel
 
 
@@ -64,7 +64,7 @@ def searchinstrumlist():
     project_ids = ""
     if gvg("projid") != "":
         project_ids = gvg("projid")
-    with ApiClient(InstrumentApi, request) as api:
+    with ApiClient(InstrumentsApi, request) as api:
         instrums: List[str] = api.instrument_query_instruments_get(project_ids=project_ids)
     txt = "List of available Intruments : <hr><ul id=InstrumList>"
     for r in instrums:

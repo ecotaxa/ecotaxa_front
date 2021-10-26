@@ -10,12 +10,12 @@ from appli.api_proxy import BACKEND_URL
 from to_back import booster
 from to_back.ecotaxa_cli_py import ApiClient as _ApiClient
 from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
-    AcquisitionsApi, ProcessesApi, ObjectApi, TaxonomyTreeApi, MiscApi, InstrumentApi, FilesApi, JobsApi
+    AcquisitionsApi, ProcessesApi, ObjectApi, TaxonomyTreeApi, MiscApi, InstrumentsApi, FilesApi, JobsApi
 
 # Lol, generics in python
 A = TypeVar('A', ProjectsApi, UsersApi, ObjectsApi, ObjectApi,
             SamplesApi, AcquisitionsApi, ProcessesApi, TaxonomyTreeApi,
-            MiscApi, InstrumentApi, FilesApi, JobsApi)
+            MiscApi, InstrumentsApi, FilesApi, JobsApi)
 
 
 class ApiClient(Generic[A]):
