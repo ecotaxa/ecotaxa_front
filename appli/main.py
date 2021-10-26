@@ -38,9 +38,9 @@ def index():
                 """.format(message)
     # Link to new EcoTaxa about page : see https://github.com/ecotaxa/ecotaxa_dev/issues/701
     # We have to do something like : txt += '<a href="https://ecotaxa.obs-vlfr.fr/gui/ecotaxa_about>About EcoTaxa...</a>'    
-    txt +="<div>\n"
-    txt += '<a href="' + VUE_PATH + '/ecotaxa_about' + '">About EcoTaxa...</a>\n'
-    txt +="</div>\n"    
+    # txt +="<div>\n"
+    # txt += '<a href="' + VUE_PATH + '/ecotaxa_about' + '">About EcoTaxa...</a>\n'
+    # txt +="</div>\n"
 
     # Lecture de la partie Haute
     NomFichier = 'appli/static/home/home.html'
@@ -62,7 +62,6 @@ def index():
 		</div>		
 	</div>
 """
-    '''
     NomFichier = 'appli/static/home/homebottom.html'
     if not os.path.exists(NomFichier):
         NomFichier = 'appli/static/home/homebottom-model.html'
@@ -70,7 +69,6 @@ def index():
     with open(NomFichier, 'r', encoding='utf8') as f:
         txt += f.read()
     txt += """<br><a href='/privacy'>Privacy</a></div></div></div>"""
-    '''
     return PrintInCharte(txt)
 
 # Where we serve the Vue front-end
