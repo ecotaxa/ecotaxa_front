@@ -3,17 +3,14 @@ import logging
 import time
 from typing import List, Any
 
-import numpy as np
 from flask import render_template, g, flash, request
-from sklearn.ensemble import RandomForestClassifier
 
 from appli import db, PrintInCharte, gvp, gvg, EncodeEqualList, DecodeEqualList, app, XSSEscape
-from appli.database import GetAll, CSVIntStringToInClause
+from appli.database import CSVIntStringToInClause
 from appli.project import sharedfilter
-from appli.project.stats import UpdateProjectStat
 from appli.tasks.taskmanager import AsyncTask
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ClassifyAutoReq, ProjectsApi, ProjectModel, \
+from to_back.ecotaxa_cli_py import ObjectsApi, ObjectSetQueryRsp, ProjectsApi, ProjectModel, \
     ApiException, ProjectTaxoStatsModel, TaxonomyTreeApi, TaxonModel, ProjectSetColumnStatsModel, PredictionReq, \
     PredictionRsp, JobsApi, JobModel
 
@@ -68,8 +65,21 @@ class TaskClassifAuto2(AsyncTask):
         categories = [int(classif_id) for classif_id in self.param.Taxo.split(",")]
         filters = self.param.filtres
 
-        logging.info("Start Step 1")
-        TInit = time.time()
+        # TRANSITORY: Still use Linux executable for generating deep features
+        if self.param.usescn == 'Y':
+            # Fetch the target project for the SCN settings
+            with ApiClient(ProjectsApi, self.cookie) as api:
+                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+            # Late import due to circular dependency
+            from .prediction_deep_features import ComputeSCNFeatures
+            self.UpdateProgress(5, "Generating missing deep features")
+            if not ComputeSCNFeatures(self, target_prj):
+                self.task.taskstate = "Error"
+                self.UpdateProgress(5, "Deep features generation failed. See logs.")
+                return
+
+        # logging.info("Start Step 1")
+        # TInit = time.time()
 
         # Prepare back-end call
         req = PredictionReq(project_id=prj_id,
@@ -82,197 +92,33 @@ class TaskClassifAuto2(AsyncTask):
             rsp: PredictionRsp = api.predict_object_set_object_set_predict_post({'filters': filters,
                                                                                  'request': req})
 
-        # Wait for the back-end job to complete
+        # Wait for the back-end job to complete, copying its messages
+        pct = self.task.progresspct
+        msg = self.task.progressmsg
         job_id = rsp.job_id
         while True:
             with ApiClient(JobsApi, self.cookie) as api:
                 job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
+            if job.progress_pct != pct or job.progress_msg != msg:
+                pct = job.progress_pct
+                msg = job.progress_msg
+                self.UpdateProgress(pct, msg)
             if job.state in ('E', 'F'):
                 break
-            logging.info("Job: %s", job)
             time.sleep(5)
 
+        # Copy Job status into task
         self.task.taskstate = "Done"
         if job.state == 'E':
             self.task.taskstate = 'Error'
-            self.UpdateProgress(100, "Job failed on back-end")
+            self.UpdateProgress(100, "See Prediction Job which failed")
         else:
-            self.task.taskstate = 'Done'
-            self.UpdateProgress(100, "Job completed on back-end")
+            self.UpdateProgress(100, job.progress_msg)
 
-        return
-
-        with ApiClient(ProjectsApi, self.cookie) as api:
-            target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
-
-        MapPrj = self.GetAugmentedReverseObjectMap(target_prj)  # Dict NomVariable=>N° colonne ex Area:n42
-        common_features = set(MapPrj.keys())
-
-        # PostTaxoMapping décodé sous la forme source:target
-        PostTaxoMapping = {int(el[0].strip()): int(el[1].strip()) for el in
-                           [el.split(':') for el in self.param.PostTaxoMapping.split(',') if el != '']}
-        logging.info("PostTaxoMapping = %s ", PostTaxoMapping)
-
-        CNNCols = ""
-        if self.param.usescn == 'Y':
-            # Late import due to circular dependency
-            from .prediction_deep_features import ComputeSCNFeatures
-            if not ComputeSCNFeatures(self, target_prj):
-                return
-            CNNCols = "".join([",cnn%02d" % (i + 1) for i in range(50)])
-
-        # Calcul du modèle à partir de projets sources
-        self.UpdateProgress(1, "Retrieve Data from Learning Set")
-
-        revobjmapbaseByProj = {}
-        base_projects = self.param.BaseProject
-        src_prj_ids = [int(prj_id) for prj_id in base_projects.split(",")]
-
-        self.api_read_projects(self.cookie, src_prj_ids, revobjmapbaseByProj, common_features)
-
-        if self.param.learninglimit:
-            self.param.learninglimit = int(self.param.learninglimit)  # convert
-        logging.info("MapPrj %s", MapPrj)
-        logging.info("MapPrjBase %s", revobjmapbaseByProj)
-        CritVar = self.param.CritVar.split(",")
-
-        # ne garde que les colonnes communes qui sont aussi selectionnées.
-        common_features.intersection_update(set(CritVar))
-
-        # Online help says "Missing values are replaced by the median value for this feature from the learning set."
-        # sql = ""
-        # for bprojid in src_prj_ids:
-        #     if sql != "":
-        #         sql += " union all "
-        #     sql += "select 1"
-        #     for c in common_features:
-        #         sql += ",coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY {0}),-9999) as {1}". \
-        #             format(revobjmapbaseByProj[bprojid][c], MapPrj[c])
-        #     sql += " from objects "
-        #     sql += " where projid={0} and classif_id is not null and classif_qual='V'".format(bprojid)
-        #
-        # if self.param.learninglimit:
-        #     # random() instead?
-        #     LimitHead = """ with objlist as ( select objid from (
-        #                 select obj.objid,row_number() over(PARTITION BY classif_id order by random_value) rang
-        #                 from objects obj
-        #                 where obj.projid in ({0}) and obj.classif_id is not null and classif_qual='V' ) q
-        #                 where rang <={1} ) """. \
-        #         format(base_projects, self.param.learninglimit)
-        #     LimitFoot = """ and objid in ( select objid from objlist ) """
-        #     sql = LimitHead + sql + LimitFoot
-        # else:
-        #     LimitHead = LimitFoot = ""
-        # DefVal = GetAll(sql)[0]
-
-        # Extrait les données du learning set
-        sql = ""
-        for bprojid in src_prj_ids:
-            if sql != "":
-                sql += " \nunion all "
-            sql = "select classif_id"
-            for c in common_features:
-                sql += ",coalesce(case when {0} not in ('Infinity','-Infinity','NaN') then {0} end,{1}) as {2}".format(
-                    revobjmapbaseByProj[bprojid][c], DefVal[MapPrj[c]], MapPrj[c])
-            sql += CNNCols + " from objects "
-            if self.param.usescn == 'Y':
-                sql += " join obj_cnn_features on obj_cnn_features.objcnnid=objects.objid "
-            sql += """ where classif_id is not null and classif_qual='V'
-                        and projid in({0})
-                        and classif_id in ({1}) """.format(base_projects, self.param.Taxo)
-        if self.param.learninglimit:
-            sql = LimitHead + sql + LimitFoot
-
-        # Convertie le LS en tableau NumPy
-        DBRes = np.array(GetAll(sql))
-        LSSize = DBRes.shape[0]
-        learn_cat = DBRes[:, 0]  # Que la classif
-        learn_var = DBRes[:, 1:]  # exclu l'objid & la classif
-        DBRes = None  # libere la mémoire
-        logging.info('DB Conversion to NP : %0.3f s', time.time() - TInit)
-        logging.info("Variable shape %d Row, %d Col", *learn_var.shape)
-        # Note : La multiplication des jobs n'est pas forcement plus performante, en tous cas sur un petit ensemble.
-        Classifier = RandomForestClassifier(n_estimators=300, min_samples_leaf=2, n_jobs=1,
-                                            class_weight="balanced")
-
-        # TStep = time.time()
-        # cette solution ne convient pas, car lorsqu'on l'applique par bloc de 100 parfois il n'y a pas de valeur dans
-        # toute la colonne et du coup la colonne est supprimé car on ne peut pas calculer la moyenne.
-        # learn_var = Imputer().fit_transform(learn_var)
-        # learn_var[learn_var==np.nan] = -99999 Les Nan sont des NULL dans la base traités parle coalesce
-        # logging.info('Clean input variables :  %0.3f s', time.time() - TStep)
-        TStep = time.time()
-        Classifier.fit(learn_var, learn_cat)
-
-        logging.info('Model fit duration :  %0.3f s', time.time() - TStep)
-        # ------ Fin de la partie apprentissage ou chargement du modèle
-
-        # Use the API entry point for filtering
-        with ApiClient(ObjectsApi, self.cookie) as api:
-            res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(self.param.ProjectId,
-                                                                                         self.param.filtres)
-            affected_where = " and ( classif_qual='P' or classif_qual is null) and o.objid = any (%(objids)s) "
-            sqlparam = {"objids": sorted(res.object_ids)}
-
-        NbrItem = \
-            GetAll("select count(*) from objects o where projid={0} {1} ".format(target_prj.projid, affected_where),
-                   sqlparam)[
-                0][
-                0]
-
-        if NbrItem == 0:
-            msg = self.cook_no_object_message()
-            raise Exception(msg)  # Inside the task, so cannot display anything for the user
-
-        sql = "select objid"
-        for c in common_features:
-            sql += ",coalesce(case when {0} not in ('Infinity','-Infinity','NaN') then {0} end,{1}) as {0}".format(
-                MapPrj[c], DefVal[MapPrj[c]])
-        sql += CNNCols + " from objects o "
-        if self.param.usescn == 'Y':
-            sql += " join obj_cnn_features on obj_cnn_features.objcnnid=o.objid "
-        sql += """ where projid={0} {1}
-                    order by objid""".format(target_prj.projid, affected_where)
-        self.pgcur.execute(sql, sqlparam)
-        # logging.info("SQL=%s",sql)
-        ProcessedRows = 0
-        while True:
-            self.UpdateProgress(15 + 85 * (ProcessedRows / NbrItem), "Processed %d/%d" % (ProcessedRows, NbrItem))
-            TStep = time.time()
-            # recupère les variables des objets à classifier
-            DBRes = np.array(self.pgcur.fetchmany(100))
-            if len(DBRes) == 0:
-                break
-            ProcessedRows += len(DBRes)
-            Tget_Ids = DBRes[:, 0]  # Que l'objid
-            Tget_var = DBRes[:, 1:]  # exclu l'objid
-            TStep2 = time.time()
-            # Tget_var= Imputer().fit_transform(Tget_var) # voir commentaire sur learn_var
-            # Tget_var[Tget_var==np.nan] = -99999
-            Result = Classifier.predict_proba(Tget_var)
-            ResultMaxCol = np.argmax(Result, axis=1)
-            # Typage important pour les perf postgresql
-            SqlParam = [{'cat': int(Classifier.classes_[mc]), 'p': r[mc], 'id': int(i)} for i, mc, r in
-                        zip(Tget_Ids, ResultMaxCol, Result)]
-            # TODO: This is indeed a Post-prediction mapping, but the UI in a pre-training One
-            # for i, v in enumerate(SqlParam):
-            #     if v['cat'] in PostTaxoMapping:
-            #         SqlParam[i]['cat'] = PostTaxoMapping[v['cat']]
-            TStep3 = time.time()
-            # Call auto classification storage primitive on back-end
-            with ApiClient(ObjectsApi, self.cookie) as api:
-                req = ClassifyAutoReq(target_ids=[a_classif['id'] for a_classif in SqlParam],
-                                      classifications=[a_classif['cat'] for a_classif in SqlParam],
-                                      scores=[a_classif['p'] for a_classif in SqlParam],
-                                      keep_log=False)
-                api.classify_auto_object_set_object_set_classify_auto_post(classify_auto_req=req)
-            logging.info('Chunk Db Extract %d/%d, Classification and Db Save :  %0.3f s %0.3f+%0.3f+%0.3f'
-                         , ProcessedRows, NbrItem
-                         , time.time() - TStep, TStep2 - TStep, TStep3 - TStep2, time.time() - TStep3)
-
-        UpdateProjectStat(target_prj.projid)
-        self.task.taskstate = "Done"
-        self.UpdateProgress(100, "Classified %d objects" % ProcessedRows)
+        # TODO: This is indeed a Post-prediction mapping, but the UI in a pre-training One
+        # for i, v in enumerate(SqlParam):
+        #     if v['cat'] in PostTaxoMapping:
+        #         SqlParam[i]['cat'] = PostTaxoMapping[v['cat']]
 
     def QuestionProcessScreenSelectSource(self, target_prj: ProjectModel):
         # First configuration page, choose base projects
@@ -400,7 +246,7 @@ class TaskClassifAuto2(AsyncTask):
             common_features.intersection_update(set(revobjmapbaseByProj[src_prj_id].keys()))
 
     def QuestionProcessScreenSelectSourceTaxo(self, target_prj: ProjectModel):
-        # Second écran de configuration, choix des taxon utilisés dans la source
+        # Second écran de configuration, choix des taxa utilisés dans la source
 
         # Get via API all implied projects
         posted_srcs = gvp('src', gvg('src'))
