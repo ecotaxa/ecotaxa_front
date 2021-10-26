@@ -109,7 +109,7 @@
         <td>
           &nbsp;
           <span class="btn btn-xs SpanSelectAll rm5"
-                title="CTRL+A shortcut to select all. Hold shift key to unselect all">Select all</span>
+                title="Ctrl+A shortcut to select all. Hold shift key to unselect all">Select all</span>
 
           <span class="glyphicon glyphicon-sort rm5"></span>
         </td>
@@ -767,6 +767,11 @@
                       case 76:
                       {# CTRL + L #}
                           ValidateSelection('V');
+                          e.preventDefault();
+                          break;
+                      case 85:
+                      {# CTRL + U #}
+                          ValidateSelection('D');
                           e.preventDefault();
                           break;
                       case 83:
