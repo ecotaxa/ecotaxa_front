@@ -64,6 +64,11 @@ class TaskClassifAuto2(AsyncTask):
                     for a_var in chosen_vars]
         categories = [int(classif_id) for classif_id in self.param.Taxo.split(",")]
         filters = self.param.filtres
+        if len(self.param.PostTaxoMapping) > 0:
+            pre_map_txt = [mpg.split(":") for mpg in self.param.PostTaxoMapping.split(",")]
+        else:
+            pre_map_txt = []
+        pre_mapping = {int(from_): int(to) for from_, to in pre_map_txt}
 
         # TRANSITORY: Still use Linux executable for generating deep features
         if self.param.usescn == 'Y':
@@ -87,7 +92,8 @@ class TaskClassifAuto2(AsyncTask):
                             learning_limit=learning_limit,
                             categories=categories,
                             features=obj_vars,
-                            use_scn=use_scn)
+                            use_scn=use_scn,
+                            pre_mapping=pre_mapping)
         with ApiClient(ObjectsApi, self.cookie) as api:
             rsp: PredictionRsp = api.predict_object_set_object_set_predict_post({'filters': filters,
                                                                                  'request': req})
@@ -114,11 +120,6 @@ class TaskClassifAuto2(AsyncTask):
             self.UpdateProgress(100, "See Prediction Job which failed")
         else:
             self.UpdateProgress(100, job.progress_msg)
-
-        # TODO: This is indeed a Post-prediction mapping, but the UI in a pre-training One
-        # for i, v in enumerate(SqlParam):
-        #     if v['cat'] in PostTaxoMapping:
-        #         SqlParam[i]['cat'] = PostTaxoMapping[v['cat']]
 
     def QuestionProcessScreenSelectSource(self, target_prj: ProjectModel):
         # First configuration page, choose base projects
@@ -459,7 +460,7 @@ class TaskClassifAuto2(AsyncTask):
 
         g.SCN = None
         if app.config.get("SCN_ENABLED", False):
-            cnn_networks = set([target_prj.cnn_network_id]+[a_prj.cnn_network_id for a_prj in src_projs])
+            cnn_networks = set([target_prj.cnn_network_id] + [a_prj.cnn_network_id for a_prj in src_projs])
             g.SCN = target_prj.cnn_network_id is not None and len(cnn_networks) == 1
 
         g.critlist = list(critlist.values())
@@ -490,5 +491,5 @@ class TaskClassifAuto2(AsyncTask):
         PrjId = self.param.ProjectId
         time.sleep(1)
         # DoTaskClean(self.task.id)
-        return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a> """.format(
-            PrjId)
+        return """<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>
+        Go to Manual Classification Screen</a> """.format(PrjId)
