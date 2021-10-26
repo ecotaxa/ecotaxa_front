@@ -410,11 +410,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.13"
+ecotaxa_version = "2.5.14"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-09-28"
+    return ecotaxa_version + " 2021-10-26"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -422,6 +422,14 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2021-10-26 : V 2.5.14
+    Feature #740: Add a keyboard shortcut for setting selection to Dubious.
+    Feature #731: Clear-up difference between project description and comments.
+    Feature #605: Move (partly) prediction AKA auto classification execution into back-end.
+    Feature #593: Simplify taxonomy filters possibilities/syntax.
+    Feature #462: Remove the option to subset without images.
+    Feature #354: Split Home/Explore menu item into separate items.
+    Bug #148: Setting "Use Deep Learning features" is not remembered between predictions (fixed as side-effect of #605)
 2021-09-28 : V 2.5.13
     Feature #530: After an import, remind the import source. 
     Feature #665: Improve a bit the wording in prediction pages.
