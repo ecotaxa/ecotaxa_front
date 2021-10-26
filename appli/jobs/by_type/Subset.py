@@ -39,8 +39,7 @@ class SubsetJob(Job):
                     'grptype': 'C',
                     'valtype': 'P',
                     'vvaleur': "",
-                    'pvaleur': "10",
-                    'withimg': False}
+                    'pvaleur': "10"}
 
         html = "<h3>Extract subset</h3>"
         return render_template('jobs/subset_create.html', header=html,
@@ -63,7 +62,6 @@ class SubsetJob(Job):
         valtype = gvp("valtype")
         vvaleur = gvp("vvaleur")
         pvaleur = gvp("pvaleur")
-        withimg = gvp("withimg")
         grptype = gvp("grptype")
 
         errors = []
@@ -98,8 +96,7 @@ class SubsetJob(Job):
                         'grptype': grptype,
                         'valtype': valtype,
                         'vvaleur': vvaleur if valtype == 'V' else '',
-                        'pvaleur': pvaleur if valtype == 'P' else '',
-                        'withimg': withimg}
+                        'pvaleur': pvaleur if valtype == 'P' else ''}
             return render_template('jobs/subset_create.html', header=html,
                                    form=formdata, prj_id=prj_id,
                                    filters=filters, filtertxt=filtertxt)
@@ -117,8 +114,7 @@ class SubsetJob(Job):
                                 dest_prj_id=new_prj_id,
                                 group_type=grptype,
                                 limit_type=valtype,
-                                limit_value=valeur,
-                                do_images=(withimg == 'Y'))
+                                limit_value=valeur)
                 rsp: SubsetRsp = api.project_subset_projects_project_id_subset_post(project_id=prj_id,
                                                                                     subset_req=req)
             return redirect("/Job/Monitor/%d" % rsp.job_id)
