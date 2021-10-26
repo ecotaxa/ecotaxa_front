@@ -28,6 +28,7 @@ def ComputeSCNFeatures(pred_task: TaskClassifAuto2, Prj: ProjectModel):
         logging.error("No SCN Network set for this project. See settings.")
         pred_task.task.taskstate = "Error"
         return False
+    # Build the list of project that we need features computed from
     if pred_task.param.BaseProject != '':
         PrjListInClause = CSVIntStringToInClause(pred_task.param.BaseProject + ',' + str(pred_task.param.ProjectId))
     else:
@@ -46,7 +47,8 @@ def ComputeSCNFeatures(pred_task: TaskClassifAuto2, Prj: ProjectModel):
     WorkDir = Path(pred_task.GetWorkingDir())
     scn_input = WorkDir / "scn_input.csv"
     output_dir = WorkDir / "scn_output"
-    if not output_dir.exists(): output_dir.mkdir()
+    if not output_dir.exists():
+        output_dir.mkdir()
     vaultdir = (Path(TempTaskDir) / "../vault/").resolve().as_posix() + "/"
     # Configure the execution
     scn_model_dir = Path(os.path.normpath((Path(TempTaskDir) / "../SCN_networks" / Prj.cnn_network_id).as_posix())). \
@@ -111,6 +113,9 @@ def ComputeSCNFeatures(pred_task: TaskClassifAuto2, Prj: ProjectModel):
     logging.info("Return code: {}".format(p.returncode))
     logging.info("Output: \n%s", outs)
     logging.info("Errors: %s", errs)
+    if p.returncode != 0:
+        logging.info("Something went wrong during SCN Features generation")
+        return False
 
     upcur = db.engine.raw_connection().cursor()
     InsSQL = """insert into obj_cnn_features(objcnnid, cnn01, cnn02, cnn03, cnn04, cnn05, cnn06, cnn07, cnn08, cnn09, cnn10, cnn11, cnn12, cnn13, cnn14, cnn15, cnn16, cnn17, cnn18, cnn19, cnn20, cnn21, cnn22, cnn23, cnn24, cnn25, cnn26, cnn27, cnn28, cnn29, cnn30, cnn31, cnn32, cnn33, cnn34, cnn35, cnn36, cnn37, cnn38, cnn39, cnn40, cnn41, cnn42, cnn43, cnn44, cnn45, cnn46, cnn47, cnn48, cnn49, cnn50) 
