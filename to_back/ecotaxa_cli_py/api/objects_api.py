@@ -36,13 +36,13 @@ class ObjectsApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def classify_auto_object_set_object_set_classify_auto_post(self, classify_auto_req, **kwargs):  # noqa: E501
+    def classify_auto_object_set(self, classify_auto_req, **kwargs):  # noqa: E501
         """Classify Auto Object Set  # noqa: E501
 
         **Set automatic classification** of a set of objects.  **Returns the number of updated entities.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.classify_auto_object_set_object_set_classify_auto_post(classify_auto_req, async_req=True)
+        >>> thread = api.classify_auto_object_set(classify_auto_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.classify_auto_object_set_object_set_classify_auto_post_with_http_info(classify_auto_req, **kwargs)  # noqa: E501
+        return self.classify_auto_object_set_with_http_info(classify_auto_req, **kwargs)  # noqa: E501
 
-    def classify_auto_object_set_object_set_classify_auto_post_with_http_info(self, classify_auto_req, **kwargs):  # noqa: E501
+    def classify_auto_object_set_with_http_info(self, classify_auto_req, **kwargs):  # noqa: E501
         """Classify Auto Object Set  # noqa: E501
 
         **Set automatic classification** of a set of objects.  **Returns the number of updated entities.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.classify_auto_object_set_object_set_classify_auto_post_with_http_info(classify_auto_req, async_req=True)
+        >>> thread = api.classify_auto_object_set_with_http_info(classify_auto_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method classify_auto_object_set_object_set_classify_auto_post" % key
+                    " to method classify_auto_object_set" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'classify_auto_req' is set
         if self.api_client.client_side_validation and ('classify_auto_req' not in local_var_params or  # noqa: E501
                                                         local_var_params['classify_auto_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `classify_auto_req` when calling `classify_auto_object_set_object_set_classify_auto_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `classify_auto_req` when calling `classify_auto_object_set`")  # noqa: E501
 
         collection_formats = {}
 
@@ -154,13 +154,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def classify_object_set_object_set_classify_post(self, classify_req, **kwargs):  # noqa: E501
+    def classify_object_set(self, classify_req, **kwargs):  # noqa: E501
         """Classify Object Set  # noqa: E501
 
         **Change classification and/or qualification for a set of objects.**  **Returns the number of updated entities.**  🔒 Current user needs at *least Annotate* right on all projects of specified objects.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.classify_object_set_object_set_classify_post(classify_req, async_req=True)
+        >>> thread = api.classify_object_set(classify_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -177,15 +177,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.classify_object_set_object_set_classify_post_with_http_info(classify_req, **kwargs)  # noqa: E501
+        return self.classify_object_set_with_http_info(classify_req, **kwargs)  # noqa: E501
 
-    def classify_object_set_object_set_classify_post_with_http_info(self, classify_req, **kwargs):  # noqa: E501
+    def classify_object_set_with_http_info(self, classify_req, **kwargs):  # noqa: E501
         """Classify Object Set  # noqa: E501
 
         **Change classification and/or qualification for a set of objects.**  **Returns the number of updated entities.**  🔒 Current user needs at *least Annotate* right on all projects of specified objects.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.classify_object_set_object_set_classify_post_with_http_info(classify_req, async_req=True)
+        >>> thread = api.classify_object_set_with_http_info(classify_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -222,14 +222,14 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method classify_object_set_object_set_classify_post" % key
+                    " to method classify_object_set" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'classify_req' is set
         if self.api_client.client_side_validation and ('classify_req' not in local_var_params or  # noqa: E501
                                                         local_var_params['classify_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `classify_req` when calling `classify_object_set_object_set_classify_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `classify_req` when calling `classify_object_set`")  # noqa: E501
 
         collection_formats = {}
 
@@ -272,13 +272,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def compute_project_cnn_project_do_cnn_get(self, proj_id, **kwargs):  # noqa: E501
+    def compute_project_cnn(self, proj_id, **kwargs):  # noqa: E501
         """Compute Project Cnn  # noqa: E501
 
         **Generate CNN features** for the requested project.  **Returns a string containing the number of generated features.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.compute_project_cnn_project_do_cnn_get(proj_id, async_req=True)
+        >>> thread = api.compute_project_cnn(proj_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -295,15 +295,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.compute_project_cnn_project_do_cnn_get_with_http_info(proj_id, **kwargs)  # noqa: E501
+        return self.compute_project_cnn_with_http_info(proj_id, **kwargs)  # noqa: E501
 
-    def compute_project_cnn_project_do_cnn_get_with_http_info(self, proj_id, **kwargs):  # noqa: E501
+    def compute_project_cnn_with_http_info(self, proj_id, **kwargs):  # noqa: E501
         """Compute Project Cnn  # noqa: E501
 
         **Generate CNN features** for the requested project.  **Returns a string containing the number of generated features.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.compute_project_cnn_project_do_cnn_get_with_http_info(proj_id, async_req=True)
+        >>> thread = api.compute_project_cnn_with_http_info(proj_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -340,14 +340,14 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method compute_project_cnn_project_do_cnn_get" % key
+                    " to method compute_project_cnn" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'proj_id' is set
         if self.api_client.client_side_validation and ('proj_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['proj_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `proj_id` when calling `compute_project_cnn_project_do_cnn_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `proj_id` when calling `compute_project_cnn`")  # noqa: E501
 
         collection_formats = {}
 
@@ -386,13 +386,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def erase_object_set_object_set_delete(self, request_body, **kwargs):  # noqa: E501
+    def erase_object_set(self, request_body, **kwargs):  # noqa: E501
         """Erase Object Set  # noqa: E501
 
         **Delete the objects with given object ids.**   **Returns** the number of  : **deleted objects**, 0, **deleated image rows** and **deleated image files**.  🔒 Current user needs *Manage* right on all projects of specified objects.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.erase_object_set_object_set_delete(request_body, async_req=True)
+        >>> thread = api.erase_object_set(request_body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -409,15 +409,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.erase_object_set_object_set_delete_with_http_info(request_body, **kwargs)  # noqa: E501
+        return self.erase_object_set_with_http_info(request_body, **kwargs)  # noqa: E501
 
-    def erase_object_set_object_set_delete_with_http_info(self, request_body, **kwargs):  # noqa: E501
+    def erase_object_set_with_http_info(self, request_body, **kwargs):  # noqa: E501
         """Erase Object Set  # noqa: E501
 
         **Delete the objects with given object ids.**   **Returns** the number of  : **deleted objects**, 0, **deleated image rows** and **deleated image files**.  🔒 Current user needs *Manage* right on all projects of specified objects.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.erase_object_set_object_set_delete_with_http_info(request_body, async_req=True)
+        >>> thread = api.erase_object_set_with_http_info(request_body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -454,14 +454,14 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method erase_object_set_object_set_delete" % key
+                    " to method erase_object_set" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'request_body' is set
         if self.api_client.client_side_validation and ('request_body' not in local_var_params or  # noqa: E501
                                                         local_var_params['request_body'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `request_body` when calling `erase_object_set_object_set_delete`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `request_body` when calling `erase_object_set`")  # noqa: E501
 
         collection_formats = {}
 
@@ -504,13 +504,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def export_object_set_object_set_export_post(self, body_export_object_set_object_set_export_post, **kwargs):  # noqa: E501
+    def export_object_set(self, body_export_object_set_object_set_export_post, **kwargs):  # noqa: E501
         """Export Object Set  # noqa: E501
 
         **Start an export job for the given object set and options.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.export_object_set_object_set_export_post(body_export_object_set_object_set_export_post, async_req=True)
+        >>> thread = api.export_object_set(body_export_object_set_object_set_export_post, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -527,15 +527,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.export_object_set_object_set_export_post_with_http_info(body_export_object_set_object_set_export_post, **kwargs)  # noqa: E501
+        return self.export_object_set_with_http_info(body_export_object_set_object_set_export_post, **kwargs)  # noqa: E501
 
-    def export_object_set_object_set_export_post_with_http_info(self, body_export_object_set_object_set_export_post, **kwargs):  # noqa: E501
+    def export_object_set_with_http_info(self, body_export_object_set_object_set_export_post, **kwargs):  # noqa: E501
         """Export Object Set  # noqa: E501
 
         **Start an export job for the given object set and options.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.export_object_set_object_set_export_post_with_http_info(body_export_object_set_object_set_export_post, async_req=True)
+        >>> thread = api.export_object_set_with_http_info(body_export_object_set_object_set_export_post, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -572,14 +572,14 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method export_object_set_object_set_export_post" % key
+                    " to method export_object_set" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'body_export_object_set_object_set_export_post' is set
         if self.api_client.client_side_validation and ('body_export_object_set_object_set_export_post' not in local_var_params or  # noqa: E501
                                                         local_var_params['body_export_object_set_object_set_export_post'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `body_export_object_set_object_set_export_post` when calling `export_object_set_object_set_export_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `body_export_object_set_object_set_export_post` when calling `export_object_set`")  # noqa: E501
 
         collection_formats = {}
 
@@ -622,13 +622,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_object_set_object_set_project_id_query_post(self, project_id, project_filters, **kwargs):  # noqa: E501
+    def get_object_set(self, project_id, project_filters, **kwargs):  # noqa: E501
         """Get Object Set  # noqa: E501
 
         Returns **filtred object Ids** for the given project.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_object_set_object_set_project_id_query_post(project_id, project_filters, async_req=True)
+        >>> thread = api.get_object_set(project_id, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -650,15 +650,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.get_object_set_object_set_project_id_query_post_with_http_info(project_id, project_filters, **kwargs)  # noqa: E501
+        return self.get_object_set_with_http_info(project_id, project_filters, **kwargs)  # noqa: E501
 
-    def get_object_set_object_set_project_id_query_post_with_http_info(self, project_id, project_filters, **kwargs):  # noqa: E501
+    def get_object_set_with_http_info(self, project_id, project_filters, **kwargs):  # noqa: E501
         """Get Object Set  # noqa: E501
 
         Returns **filtred object Ids** for the given project.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_object_set_object_set_project_id_query_post_with_http_info(project_id, project_filters, async_req=True)
+        >>> thread = api.get_object_set_with_http_info(project_id, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -705,18 +705,18 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_object_set_object_set_project_id_query_post" % key
+                    " to method get_object_set" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `get_object_set_object_set_project_id_query_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `get_object_set`")  # noqa: E501
         # verify the required parameter 'project_filters' is set
         if self.api_client.client_side_validation and ('project_filters' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_filters'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_filters` when calling `get_object_set_object_set_project_id_query_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_filters` when calling `get_object_set`")  # noqa: E501
 
         collection_formats = {}
 
@@ -769,13 +769,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_object_set_summary_object_set_project_id_summary_post(self, project_id, only_total, project_filters, **kwargs):  # noqa: E501
+    def get_object_set_summary(self, project_id, only_total, project_filters, **kwargs):  # noqa: E501
         """Get Object Set Summary  # noqa: E501
 
         For the given project, with given filters, **return the classification summary**.          i.e.:              - Total number of objects  And optionnaly  - Number of Validated ones - Number of Dubious ones - Number of Predicted ones       # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_object_set_summary_object_set_project_id_summary_post(project_id, only_total, project_filters, async_req=True)
+        >>> thread = api.get_object_set_summary(project_id, only_total, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -794,15 +794,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.get_object_set_summary_object_set_project_id_summary_post_with_http_info(project_id, only_total, project_filters, **kwargs)  # noqa: E501
+        return self.get_object_set_summary_with_http_info(project_id, only_total, project_filters, **kwargs)  # noqa: E501
 
-    def get_object_set_summary_object_set_project_id_summary_post_with_http_info(self, project_id, only_total, project_filters, **kwargs):  # noqa: E501
+    def get_object_set_summary_with_http_info(self, project_id, only_total, project_filters, **kwargs):  # noqa: E501
         """Get Object Set Summary  # noqa: E501
 
         For the given project, with given filters, **return the classification summary**.          i.e.:              - Total number of objects  And optionnaly  - Number of Validated ones - Number of Dubious ones - Number of Predicted ones       # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_object_set_summary_object_set_project_id_summary_post_with_http_info(project_id, only_total, project_filters, async_req=True)
+        >>> thread = api.get_object_set_summary_with_http_info(project_id, only_total, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -843,22 +843,22 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_object_set_summary_object_set_project_id_summary_post" % key
+                    " to method get_object_set_summary" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `get_object_set_summary_object_set_project_id_summary_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `get_object_set_summary`")  # noqa: E501
         # verify the required parameter 'only_total' is set
         if self.api_client.client_side_validation and ('only_total' not in local_var_params or  # noqa: E501
                                                         local_var_params['only_total'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `only_total` when calling `get_object_set_summary_object_set_project_id_summary_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `only_total` when calling `get_object_set_summary`")  # noqa: E501
         # verify the required parameter 'project_filters' is set
         if self.api_client.client_side_validation and ('project_filters' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_filters'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_filters` when calling `get_object_set_summary_object_set_project_id_summary_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_filters` when calling `get_object_set_summary`")  # noqa: E501
 
         collection_formats = {}
 
@@ -905,13 +905,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def predict_object_set_object_set_predict_post(self, body_predict_object_set_object_set_predict_post, **kwargs):  # noqa: E501
+    def predict_object_set(self, body_predict_object_set_object_set_predict_post, **kwargs):  # noqa: E501
         """Predict Object Set  # noqa: E501
 
         **Start a prediction** AKA automatic classification for the given object set and options.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.predict_object_set_object_set_predict_post(body_predict_object_set_object_set_predict_post, async_req=True)
+        >>> thread = api.predict_object_set(body_predict_object_set_object_set_predict_post, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -928,15 +928,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.predict_object_set_object_set_predict_post_with_http_info(body_predict_object_set_object_set_predict_post, **kwargs)  # noqa: E501
+        return self.predict_object_set_with_http_info(body_predict_object_set_object_set_predict_post, **kwargs)  # noqa: E501
 
-    def predict_object_set_object_set_predict_post_with_http_info(self, body_predict_object_set_object_set_predict_post, **kwargs):  # noqa: E501
+    def predict_object_set_with_http_info(self, body_predict_object_set_object_set_predict_post, **kwargs):  # noqa: E501
         """Predict Object Set  # noqa: E501
 
         **Start a prediction** AKA automatic classification for the given object set and options.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.predict_object_set_object_set_predict_post_with_http_info(body_predict_object_set_object_set_predict_post, async_req=True)
+        >>> thread = api.predict_object_set_with_http_info(body_predict_object_set_object_set_predict_post, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -973,14 +973,14 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method predict_object_set_object_set_predict_post" % key
+                    " to method predict_object_set" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'body_predict_object_set_object_set_predict_post' is set
         if self.api_client.client_side_validation and ('body_predict_object_set_object_set_predict_post' not in local_var_params or  # noqa: E501
                                                         local_var_params['body_predict_object_set_object_set_predict_post'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `body_predict_object_set_object_set_predict_post` when calling `predict_object_set_object_set_predict_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `body_predict_object_set_object_set_predict_post` when calling `predict_object_set`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1023,13 +1023,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def query_object_set_parents_object_set_parents_post(self, request_body, **kwargs):  # noqa: E501
+    def query_object_set_parents(self, request_body, **kwargs):  # noqa: E501
         """Query Object Set Parents  # noqa: E501
 
         **Return object ids, with parent ones and projects** for the objects in given list.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.query_object_set_parents_object_set_parents_post(request_body, async_req=True)
+        >>> thread = api.query_object_set_parents(request_body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1046,15 +1046,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.query_object_set_parents_object_set_parents_post_with_http_info(request_body, **kwargs)  # noqa: E501
+        return self.query_object_set_parents_with_http_info(request_body, **kwargs)  # noqa: E501
 
-    def query_object_set_parents_object_set_parents_post_with_http_info(self, request_body, **kwargs):  # noqa: E501
+    def query_object_set_parents_with_http_info(self, request_body, **kwargs):  # noqa: E501
         """Query Object Set Parents  # noqa: E501
 
         **Return object ids, with parent ones and projects** for the objects in given list.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.query_object_set_parents_object_set_parents_post_with_http_info(request_body, async_req=True)
+        >>> thread = api.query_object_set_parents_with_http_info(request_body, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1091,14 +1091,14 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method query_object_set_parents_object_set_parents_post" % key
+                    " to method query_object_set_parents" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'request_body' is set
         if self.api_client.client_side_validation and ('request_body' not in local_var_params or  # noqa: E501
                                                         local_var_params['request_body'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `request_body` when calling `query_object_set_parents_object_set_parents_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `request_body` when calling `query_object_set_parents`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1141,13 +1141,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def reclassify_object_set_object_set_project_id_reclassify_post(self, project_id, forced_id, reason, project_filters, **kwargs):  # noqa: E501
+    def reclassify_object_set(self, project_id, forced_id, reason, project_filters, **kwargs):  # noqa: E501
         """Reclassify Object Set  # noqa: E501
 
         Regardless of present classification or state, **set the new classification for this object set.**  If the filter designates \"all with given classification\", add a TaxonomyChangeLog entry.  **Returns the number of affected objects.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.reclassify_object_set_object_set_project_id_reclassify_post(project_id, forced_id, reason, project_filters, async_req=True)
+        >>> thread = api.reclassify_object_set(project_id, forced_id, reason, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1167,15 +1167,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.reclassify_object_set_object_set_project_id_reclassify_post_with_http_info(project_id, forced_id, reason, project_filters, **kwargs)  # noqa: E501
+        return self.reclassify_object_set_with_http_info(project_id, forced_id, reason, project_filters, **kwargs)  # noqa: E501
 
-    def reclassify_object_set_object_set_project_id_reclassify_post_with_http_info(self, project_id, forced_id, reason, project_filters, **kwargs):  # noqa: E501
+    def reclassify_object_set_with_http_info(self, project_id, forced_id, reason, project_filters, **kwargs):  # noqa: E501
         """Reclassify Object Set  # noqa: E501
 
         Regardless of present classification or state, **set the new classification for this object set.**  If the filter designates \"all with given classification\", add a TaxonomyChangeLog entry.  **Returns the number of affected objects.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.reclassify_object_set_object_set_project_id_reclassify_post_with_http_info(project_id, forced_id, reason, project_filters, async_req=True)
+        >>> thread = api.reclassify_object_set_with_http_info(project_id, forced_id, reason, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1218,26 +1218,26 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method reclassify_object_set_object_set_project_id_reclassify_post" % key
+                    " to method reclassify_object_set" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `reclassify_object_set_object_set_project_id_reclassify_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `reclassify_object_set`")  # noqa: E501
         # verify the required parameter 'forced_id' is set
         if self.api_client.client_side_validation and ('forced_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['forced_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `forced_id` when calling `reclassify_object_set_object_set_project_id_reclassify_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `forced_id` when calling `reclassify_object_set`")  # noqa: E501
         # verify the required parameter 'reason' is set
         if self.api_client.client_side_validation and ('reason' not in local_var_params or  # noqa: E501
                                                         local_var_params['reason'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `reason` when calling `reclassify_object_set_object_set_project_id_reclassify_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `reason` when calling `reclassify_object_set`")  # noqa: E501
         # verify the required parameter 'project_filters' is set
         if self.api_client.client_side_validation and ('project_filters' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_filters'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_filters` when calling `reclassify_object_set_object_set_project_id_reclassify_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_filters` when calling `reclassify_object_set`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1286,13 +1286,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post(self, project_id, project_filters, **kwargs):  # noqa: E501
+    def reset_object_set_to_predicted(self, project_id, project_filters, **kwargs):  # noqa: E501
         """Reset Object Set To Predicted  # noqa: E501
 
         **Reset to Predicted** all objects for the given project with the filters.  Return **NULL upon success.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post(project_id, project_filters, async_req=True)
+        >>> thread = api.reset_object_set_to_predicted(project_id, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1310,15 +1310,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post_with_http_info(project_id, project_filters, **kwargs)  # noqa: E501
+        return self.reset_object_set_to_predicted_with_http_info(project_id, project_filters, **kwargs)  # noqa: E501
 
-    def reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post_with_http_info(self, project_id, project_filters, **kwargs):  # noqa: E501
+    def reset_object_set_to_predicted_with_http_info(self, project_id, project_filters, **kwargs):  # noqa: E501
         """Reset Object Set To Predicted  # noqa: E501
 
         **Reset to Predicted** all objects for the given project with the filters.  Return **NULL upon success.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post_with_http_info(project_id, project_filters, async_req=True)
+        >>> thread = api.reset_object_set_to_predicted_with_http_info(project_id, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1357,18 +1357,18 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post" % key
+                    " to method reset_object_set_to_predicted" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `reset_object_set_to_predicted`")  # noqa: E501
         # verify the required parameter 'project_filters' is set
         if self.api_client.client_side_validation and ('project_filters' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_filters'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_filters` when calling `reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_filters` when calling `reset_object_set_to_predicted`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1413,13 +1413,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def revert_object_set_to_history_object_set_project_id_revert_to_history_post(self, project_id, dry_run, project_filters, **kwargs):  # noqa: E501
+    def revert_object_set_to_history(self, project_id, dry_run, project_filters, **kwargs):  # noqa: E501
         """Revert Object Set To History  # noqa: E501
 
         **Revert all objects for the given project**, with the filters, to the target.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.revert_object_set_to_history_object_set_project_id_revert_to_history_post(project_id, dry_run, project_filters, async_req=True)
+        >>> thread = api.revert_object_set_to_history(project_id, dry_run, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1439,15 +1439,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.revert_object_set_to_history_object_set_project_id_revert_to_history_post_with_http_info(project_id, dry_run, project_filters, **kwargs)  # noqa: E501
+        return self.revert_object_set_to_history_with_http_info(project_id, dry_run, project_filters, **kwargs)  # noqa: E501
 
-    def revert_object_set_to_history_object_set_project_id_revert_to_history_post_with_http_info(self, project_id, dry_run, project_filters, **kwargs):  # noqa: E501
+    def revert_object_set_to_history_with_http_info(self, project_id, dry_run, project_filters, **kwargs):  # noqa: E501
         """Revert Object Set To History  # noqa: E501
 
         **Revert all objects for the given project**, with the filters, to the target.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.revert_object_set_to_history_object_set_project_id_revert_to_history_post_with_http_info(project_id, dry_run, project_filters, async_req=True)
+        >>> thread = api.revert_object_set_to_history_with_http_info(project_id, dry_run, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1490,22 +1490,22 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method revert_object_set_to_history_object_set_project_id_revert_to_history_post" % key
+                    " to method revert_object_set_to_history" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `revert_object_set_to_history_object_set_project_id_revert_to_history_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `revert_object_set_to_history`")  # noqa: E501
         # verify the required parameter 'dry_run' is set
         if self.api_client.client_side_validation and ('dry_run' not in local_var_params or  # noqa: E501
                                                         local_var_params['dry_run'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `dry_run` when calling `revert_object_set_to_history_object_set_project_id_revert_to_history_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `dry_run` when calling `revert_object_set_to_history`")  # noqa: E501
         # verify the required parameter 'project_filters' is set
         if self.api_client.client_side_validation and ('project_filters' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_filters'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_filters` when calling `revert_object_set_to_history_object_set_project_id_revert_to_history_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_filters` when calling `revert_object_set_to_history`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1554,13 +1554,13 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def update_object_set_object_set_update_post(self, bulk_update_req, **kwargs):  # noqa: E501
+    def update_object_set(self, bulk_update_req, **kwargs):  # noqa: E501
         """Update Object Set  # noqa: E501
 
         Do the required **update for each objects in the set.**   **Returns the number of updated entities.**  🔒 Current user needs *Manage* right on all projects of specified objects.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_object_set_object_set_update_post(bulk_update_req, async_req=True)
+        >>> thread = api.update_object_set(bulk_update_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1577,15 +1577,15 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.update_object_set_object_set_update_post_with_http_info(bulk_update_req, **kwargs)  # noqa: E501
+        return self.update_object_set_with_http_info(bulk_update_req, **kwargs)  # noqa: E501
 
-    def update_object_set_object_set_update_post_with_http_info(self, bulk_update_req, **kwargs):  # noqa: E501
+    def update_object_set_with_http_info(self, bulk_update_req, **kwargs):  # noqa: E501
         """Update Object Set  # noqa: E501
 
         Do the required **update for each objects in the set.**   **Returns the number of updated entities.**  🔒 Current user needs *Manage* right on all projects of specified objects.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_object_set_object_set_update_post_with_http_info(bulk_update_req, async_req=True)
+        >>> thread = api.update_object_set_with_http_info(bulk_update_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -1622,14 +1622,14 @@ class ObjectsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method update_object_set_object_set_update_post" % key
+                    " to method update_object_set" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'bulk_update_req' is set
         if self.api_client.client_side_validation and ('bulk_update_req' not in local_var_params or  # noqa: E501
                                                         local_var_params['bulk_update_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `bulk_update_req` when calling `update_object_set_object_set_update_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `bulk_update_req` when calling `update_object_set`")  # noqa: E501
 
         collection_formats = {}
 

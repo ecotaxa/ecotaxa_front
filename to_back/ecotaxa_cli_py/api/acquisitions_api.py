@@ -36,13 +36,13 @@ class AcquisitionsApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def acquisition_query_acquisition_acquisition_id_get(self, acquisition_id, **kwargs):  # noqa: E501
+    def acquisition_query(self, acquisition_id, **kwargs):  # noqa: E501
         """Acquisition Query  # noqa: E501
 
         Returns **information about the acquisition** corresponding to the given id.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.acquisition_query_acquisition_acquisition_id_get(acquisition_id, async_req=True)
+        >>> thread = api.acquisition_query(acquisition_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class AcquisitionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.acquisition_query_acquisition_acquisition_id_get_with_http_info(acquisition_id, **kwargs)  # noqa: E501
+        return self.acquisition_query_with_http_info(acquisition_id, **kwargs)  # noqa: E501
 
-    def acquisition_query_acquisition_acquisition_id_get_with_http_info(self, acquisition_id, **kwargs):  # noqa: E501
+    def acquisition_query_with_http_info(self, acquisition_id, **kwargs):  # noqa: E501
         """Acquisition Query  # noqa: E501
 
         Returns **information about the acquisition** corresponding to the given id.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.acquisition_query_acquisition_acquisition_id_get_with_http_info(acquisition_id, async_req=True)
+        >>> thread = api.acquisition_query_with_http_info(acquisition_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class AcquisitionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method acquisition_query_acquisition_acquisition_id_get" % key
+                    " to method acquisition_query" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'acquisition_id' is set
         if self.api_client.client_side_validation and ('acquisition_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['acquisition_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `acquisition_id` when calling `acquisition_query_acquisition_acquisition_id_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `acquisition_id` when calling `acquisition_query`")  # noqa: E501
 
         collection_formats = {}
 
@@ -150,13 +150,13 @@ class AcquisitionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def acquisitions_search_acquisitions_search_get(self, project_id, **kwargs):  # noqa: E501
+    def acquisitions_search(self, project_id, **kwargs):  # noqa: E501
         """Acquisitions Search  # noqa: E501
 
         Returns the **list of all acquisitions for a given project**.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.acquisitions_search_acquisitions_search_get(project_id, async_req=True)
+        >>> thread = api.acquisitions_search(project_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -173,15 +173,15 @@ class AcquisitionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.acquisitions_search_acquisitions_search_get_with_http_info(project_id, **kwargs)  # noqa: E501
+        return self.acquisitions_search_with_http_info(project_id, **kwargs)  # noqa: E501
 
-    def acquisitions_search_acquisitions_search_get_with_http_info(self, project_id, **kwargs):  # noqa: E501
+    def acquisitions_search_with_http_info(self, project_id, **kwargs):  # noqa: E501
         """Acquisitions Search  # noqa: E501
 
         Returns the **list of all acquisitions for a given project**.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.acquisitions_search_acquisitions_search_get_with_http_info(project_id, async_req=True)
+        >>> thread = api.acquisitions_search_with_http_info(project_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -218,14 +218,14 @@ class AcquisitionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method acquisitions_search_acquisitions_search_get" % key
+                    " to method acquisitions_search" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `acquisitions_search_acquisitions_search_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `acquisitions_search`")  # noqa: E501
 
         collection_formats = {}
 
@@ -264,13 +264,13 @@ class AcquisitionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def update_acquisitions_acquisition_set_update_post(self, bulk_update_req, **kwargs):  # noqa: E501
+    def update_acquisitions(self, bulk_update_req, **kwargs):  # noqa: E501
         """Update Acquisitions  # noqa: E501
 
         Do the required **update for each acquisition in the set**.  **Return the number of updated entities.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_acquisitions_acquisition_set_update_post(bulk_update_req, async_req=True)
+        >>> thread = api.update_acquisitions(bulk_update_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -287,15 +287,15 @@ class AcquisitionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.update_acquisitions_acquisition_set_update_post_with_http_info(bulk_update_req, **kwargs)  # noqa: E501
+        return self.update_acquisitions_with_http_info(bulk_update_req, **kwargs)  # noqa: E501
 
-    def update_acquisitions_acquisition_set_update_post_with_http_info(self, bulk_update_req, **kwargs):  # noqa: E501
+    def update_acquisitions_with_http_info(self, bulk_update_req, **kwargs):  # noqa: E501
         """Update Acquisitions  # noqa: E501
 
         Do the required **update for each acquisition in the set**.  **Return the number of updated entities.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_acquisitions_acquisition_set_update_post_with_http_info(bulk_update_req, async_req=True)
+        >>> thread = api.update_acquisitions_with_http_info(bulk_update_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -332,14 +332,14 @@ class AcquisitionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method update_acquisitions_acquisition_set_update_post" % key
+                    " to method update_acquisitions" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'bulk_update_req' is set
         if self.api_client.client_side_validation and ('bulk_update_req' not in local_var_params or  # noqa: E501
                                                         local_var_params['bulk_update_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `bulk_update_req` when calling `update_acquisitions_acquisition_set_update_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `bulk_update_req` when calling `update_acquisitions`")  # noqa: E501
 
         collection_formats = {}
 

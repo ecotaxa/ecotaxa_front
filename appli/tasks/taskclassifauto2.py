@@ -74,7 +74,7 @@ class TaskClassifAuto2(AsyncTask):
         if self.param.usescn == 'Y':
             # Fetch the target project for the SCN settings
             with ApiClient(ProjectsApi, self.cookie) as api:
-                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             # Late import due to circular dependency
             from .prediction_deep_features import ComputeSCNFeatures
             self.UpdateProgress(5, "Generating missing deep features")
@@ -95,8 +95,8 @@ class TaskClassifAuto2(AsyncTask):
                             use_scn=use_scn,
                             pre_mapping=pre_mapping)
         with ApiClient(ObjectsApi, self.cookie) as api:
-            rsp: PredictionRsp = api.predict_object_set_object_set_predict_post({'filters': filters,
-                                                                                 'request': req})
+            rsp: PredictionRsp = api.predict_object_set({'filters': filters,
+                                                         'request': req})
 
         # Wait for the back-end job to complete, copying its messages
         pct = self.task.progresspct
@@ -104,7 +104,7 @@ class TaskClassifAuto2(AsyncTask):
         job_id = rsp.job_id
         while True:
             with ApiClient(JobsApi, self.cookie) as api:
-                job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
+                job: JobModel = api.get_job(job_id=job_id)
             if job.progress_pct != pct or job.progress_msg != msg:
                 pct = job.progress_pct
                 msg = job.progress_msg
@@ -200,8 +200,8 @@ class TaskClassifAuto2(AsyncTask):
                 continue
             with ApiClient(ProjectsApi, request) as api:
                 try:
-                    proj: ProjectModel = api.project_query_projects_project_id_get(a_base_prj_id,
-                                                                                   for_managing=False)
+                    proj: ProjectModel = api.project_query(a_base_prj_id,
+                                                           for_managing=False)
                     no_tbl_projs[a_base_prj_id] = proj
                 except ApiException as _ae:
                     # The base project might be gone or not visible to current user
@@ -224,15 +224,15 @@ class TaskClassifAuto2(AsyncTask):
     def api_read_accessible_projects(instrument_filter, title_filter):
         bef = time.time()
         with ApiClient(ProjectsApi, request) as api:
-            ret: List[ProjectModel] = api.search_projects_projects_search_get(not_granted=False,
-                                                                              title_filter=title_filter,
-                                                                              instrument_filter=instrument_filter,
-                                                                              filter_subset=False)
+            ret: List[ProjectModel] = api.search_projects(not_granted=False,
+                                                          title_filter=title_filter,
+                                                          instrument_filter=instrument_filter,
+                                                          filter_subset=False)
         with ApiClient(ProjectsApi, request) as api:
-            ret.extend(api.search_projects_projects_search_get(not_granted=True,
-                                                               title_filter=title_filter,
-                                                               instrument_filter=instrument_filter,
-                                                               filter_subset=False))
+            ret.extend(api.search_projects(not_granted=True,
+                                           title_filter=title_filter,
+                                           instrument_filter=instrument_filter,
+                                           filter_subset=False))
         app.logger.info('Get Projects API call duration: %0.3f s', time.time() - bef)
         return ret
 
@@ -242,8 +242,8 @@ class TaskClassifAuto2(AsyncTask):
         ret = []
         for src_prj_id in src_prj_ids:
             with ApiClient(ProjectsApi, auth) as api:
-                proj: ProjectModel = api.project_query_projects_project_id_get(src_prj_id,
-                                                                               for_managing=False)
+                proj: ProjectModel = api.project_query(src_prj_id,
+                                                       for_managing=False)
             revobjmapbaseByProj[src_prj_id] = cls.GetAugmentedReverseObjectMap(proj)
             common_features.intersection_update(set(revobjmapbaseByProj[src_prj_id].keys()))
             ret.append(proj)
@@ -258,14 +258,14 @@ class TaskClassifAuto2(AsyncTask):
         src_projs = []
         for a_prij_id in src_prj_ids:
             with ApiClient(ProjectsApi, request) as api:
-                src_proj: ProjectModel = api.project_query_projects_project_id_get(a_prij_id,
-                                                                                   for_managing=False)
+                src_proj: ProjectModel = api.project_query(a_prij_id,
+                                                           for_managing=False)
             src_projs.append("#%s - %s" % (src_proj.projid, src_proj.title))
         src_prj_ids_sql = ",".join([str(x) for x in src_prj_ids])  # By chance it's an OK format for the API as well
 
         # Get the number of validated objects of each category in all source projects
         with ApiClient(ProjectsApi, request) as api:
-            stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats_project_set_taxo_stats_get(
+            stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(
                 ids=src_prj_ids_sql,
                 taxa_ids="all")
         validated_categ_count = dict()
@@ -281,7 +281,7 @@ class TaskClassifAuto2(AsyncTask):
         # Get info on them
         with ApiClient(TaxonomyTreeApi, request) as api:
             taxa_ids = "+".join([str(x) for x in validated_categ_count.keys()])
-            taxa: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=taxa_ids)
+            taxa: List[TaxonModel] = api.query_taxa_set(ids=taxa_ids)
         taxa_per_id = {taxon.id: taxon for taxon in taxa}
 
         # Get the number of validated objects of each category in each source project
@@ -325,7 +325,7 @@ class TaskClassifAuto2(AsyncTask):
         prj_id = int(gvg("projid"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -363,7 +363,7 @@ class TaskClassifAuto2(AsyncTask):
             with ApiClient(ObjectsApi, self.cookie) as api:
                 filters = dict(self.param.filtres)
                 filters["statusfilter"] = "UP"
-                res: ObjectSetQueryRsp = api.get_object_set_object_set_project_id_query_post(
+                res: ObjectSetQueryRsp = api.get_object_set(
                     project_id=self.param.ProjectId,
                     project_filters=filters,
                     window_size=100)
@@ -393,9 +393,9 @@ class TaskClassifAuto2(AsyncTask):
                 # Update project classification settings
                 with ApiClient(ProjectsApi, request) as api:
                     api. \
-                        set_project_predict_settings_projects_project_id_prediction_settings_put(project_id=prj_id,
-                                                                                                 settings=EncodeEqualList(
-                                                                                                     d))
+                        set_project_predict_settings(project_id=prj_id,
+                                                     settings=EncodeEqualList(
+                                                         d))
                 return self.StartTask(self.param)
         else:  # valeurs par default
             if gvp('src', gvg('src')) == "":
@@ -448,10 +448,10 @@ class TaskClassifAuto2(AsyncTask):
         # Stats on training set, i.e. projects+categories+limit
         with ApiClient(ProjectsApi, request) as api:
             stats: ProjectSetColumnStatsModel = \
-                api.project_set_get_column_stats_project_set_column_stats_get(ids=src_prj_lst,
-                                                                              names=names_for_stats,
-                                                                              limit=self.param.learninglimit,
-                                                                              categories=self.param.Taxo)
+                api.project_set_get_column_stats(ids=src_prj_lst,
+                                                 names=names_for_stats,
+                                                 limit=self.param.learninglimit,
+                                                 categories=self.param.Taxo)
         g.LsSize = stats.total
         for col, count, variance in zip(stats.columns, stats.counts, stats.variances):
             prfx, name = col.split(".", 1)

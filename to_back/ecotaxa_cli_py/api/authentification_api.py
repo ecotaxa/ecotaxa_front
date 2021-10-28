@@ -36,13 +36,13 @@ class AuthentificationApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def login_login_post(self, login_req, **kwargs):  # noqa: E501
+    def login(self, login_req, **kwargs):  # noqa: E501
         """Login  # noqa: E501
 
         **Login barrier,**   If successful, the login will returns a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.login_login_post(login_req, async_req=True)
+        >>> thread = api.login(login_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class AuthentificationApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.login_login_post_with_http_info(login_req, **kwargs)  # noqa: E501
+        return self.login_with_http_info(login_req, **kwargs)  # noqa: E501
 
-    def login_login_post_with_http_info(self, login_req, **kwargs):  # noqa: E501
+    def login_with_http_info(self, login_req, **kwargs):  # noqa: E501
         """Login  # noqa: E501
 
         **Login barrier,**   If successful, the login will returns a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.login_login_post_with_http_info(login_req, async_req=True)
+        >>> thread = api.login_with_http_info(login_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class AuthentificationApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method login_login_post" % key
+                    " to method login" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'login_req' is set
         if self.api_client.client_side_validation and ('login_req' not in local_var_params or  # noqa: E501
                                                         local_var_params['login_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `login_req` when calling `login_login_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `login_req` when calling `login`")  # noqa: E501
 
         collection_formats = {}
 

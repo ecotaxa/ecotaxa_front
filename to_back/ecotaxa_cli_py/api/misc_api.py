@@ -36,13 +36,13 @@ class MiscApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def do_nothing_noop_get(self, **kwargs):  # noqa: E501
+    def do_nothing(self, **kwargs):  # noqa: E501
         """Do Nothing  # noqa: E501
 
         **This entry point will just do nothing.**  It's also used for exporting models we need on client side.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.do_nothing_noop_get(async_req=True)
+        >>> thread = api.do_nothing(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -58,15 +58,15 @@ class MiscApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.do_nothing_noop_get_with_http_info(**kwargs)  # noqa: E501
+        return self.do_nothing_with_http_info(**kwargs)  # noqa: E501
 
-    def do_nothing_noop_get_with_http_info(self, **kwargs):  # noqa: E501
+    def do_nothing_with_http_info(self, **kwargs):  # noqa: E501
         """Do Nothing  # noqa: E501
 
         **This entry point will just do nothing.**  It's also used for exporting models we need on client side.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.do_nothing_noop_get_with_http_info(async_req=True)
+        >>> thread = api.do_nothing_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -101,7 +101,7 @@ class MiscApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method do_nothing_noop_get" % key
+                    " to method do_nothing" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
@@ -141,13 +141,13 @@ class MiscApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def system_error_error_get(self, **kwargs):  # noqa: E501
+    def system_error(self, **kwargs):  # noqa: E501
         """System Error  # noqa: E501
 
         **Return a 500 internal error**, on purpose so the stack trace is visible and client can see what it gives.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.system_error_error_get(async_req=True)
+        >>> thread = api.system_error(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -163,15 +163,15 @@ class MiscApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.system_error_error_get_with_http_info(**kwargs)  # noqa: E501
+        return self.system_error_with_http_info(**kwargs)  # noqa: E501
 
-    def system_error_error_get_with_http_info(self, **kwargs):  # noqa: E501
+    def system_error_with_http_info(self, **kwargs):  # noqa: E501
         """System Error  # noqa: E501
 
         **Return a 500 internal error**, on purpose so the stack trace is visible and client can see what it gives.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.system_error_error_get_with_http_info(async_req=True)
+        >>> thread = api.system_error_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -206,7 +206,7 @@ class MiscApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method system_error_error_get" % key
+                    " to method system_error" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
@@ -246,13 +246,13 @@ class MiscApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def used_constants_constants_get(self, **kwargs):  # noqa: E501
+    def used_constants(self, **kwargs):  # noqa: E501
         """Used Constants  # noqa: E501
 
         **Return useful strings for user dialog.**  Now also used for values extracted from Config.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.used_constants_constants_get(async_req=True)
+        >>> thread = api.used_constants(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -268,15 +268,15 @@ class MiscApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.used_constants_constants_get_with_http_info(**kwargs)  # noqa: E501
+        return self.used_constants_with_http_info(**kwargs)  # noqa: E501
 
-    def used_constants_constants_get_with_http_info(self, **kwargs):  # noqa: E501
+    def used_constants_with_http_info(self, **kwargs):  # noqa: E501
         """Used Constants  # noqa: E501
 
         **Return useful strings for user dialog.**  Now also used for values extracted from Config.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.used_constants_constants_get_with_http_info(async_req=True)
+        >>> thread = api.used_constants_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -311,7 +311,7 @@ class MiscApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method used_constants_constants_get" % key
+                    " to method used_constants" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']

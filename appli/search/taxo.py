@@ -27,8 +27,8 @@ def searchtaxo():
         prj_id = -1
     # Relay to back-end
     with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxaSearchRsp] = api.search_taxa_taxon_set_search_get(query=term,
-                                                                        project_id=prj_id)
+        res: List[TaxaSearchRsp] = api.search_taxa(query=term,
+                                                   project_id=prj_id)
     # TODO: temporary until the HTML goes to /api directly
     # Filter out taxa to rename
     res = [a_taxon for a_taxon in res if a_taxon.renm_id is None]
@@ -48,17 +48,17 @@ def taxotreerootjson():
     if parent == '#':
         # Root nodes
         with ApiClient(TaxonomyTreeApi, request) as api:
-            roots: List[TaxonModel] = api.query_root_taxa_taxa_get()
+            roots: List[TaxonModel] = api.query_root_taxa()
         res = [(r.id, r.name, None, r.nb_objects + r.nb_children_objects, len(r.children) > 0) for r in roots]
     else:
         # Children of the requested parent_id, when opening the tree
         # Fetch the parent for getting its children
         with ApiClient(TaxonomyTreeApi, request) as api:
-            parents: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=str(parent))
+            parents: List[TaxonModel] = api.query_taxa_set(ids=str(parent))
         children_ids = "+".join([str(child_id) for child_id in parents[0].children])
         # Fetch children, for their names and to know if they have children
         with ApiClient(TaxonomyTreeApi, request) as api:
-            children: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=children_ids)
+            children: List[TaxonModel] = api.query_taxa_set(ids=children_ids)
         res = [(r.id, r.name, parent, r.nb_objects + r.nb_children_objects, len(r.children) > 0) for r in children]
     res.sort(key=lambda r: r[1])
 
@@ -81,7 +81,7 @@ def taxoresolve():
     lst = [int(x) for x in idlist.split(",") if x.isdigit()]
     node_ids = "+".join([str(x) for x in lst])
     with ApiClient(TaxonomyTreeApi, request) as api:
-        nodes: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=node_ids)
+        nodes: List[TaxonModel] = api.query_taxa_set(ids=node_ids)
     # The sort below is a bit useless as the control (select2) has its own order
     nodes.sort(key=lambda r: r.display_name.lower())
     taxomap = {a_node.id: a_node.display_name for a_node in nodes}

@@ -20,7 +20,7 @@ def get_taxoserver_url():
 def get_login() -> Optional[UserModelWithRights]:
     with ApiClient(UsersApi, request) as api:
         try:
-            return api.show_current_user_users_me_get()
+            return api.show_current_user()
         except ApiException as _ae:
             return None
 
@@ -70,7 +70,7 @@ def DoSyncStatUpdate():
         Update EcoTaxoServer with statistics about current node usage.
     """
     with ApiClient(TaxonomyTreeApi, request) as api:
-        ret = api.push_taxa_stats_in_central_taxa_stats_push_to_central_get()
+        ret = api.push_taxa_stats_in_central()
     return ret["msg"]
 
 
@@ -85,9 +85,9 @@ def routetaxodosync():
     return sync_msg
 
 
-def DoFullSync(do_flash:bool):
+def DoFullSync(do_flash: bool):
     with ApiClient(TaxonomyTreeApi, request) as api:
-        ret = api.pull_taxa_update_from_central_taxa_pull_from_central_get()
+        ret = api.pull_taxa_update_from_central()
     if ret["error"]:
         msg = str(ret["error"])
         if do_flash:
@@ -117,16 +117,16 @@ def route_view_taxon(taxoid):
         return PrintInCharte("Please login to access this page")
     # Get local data
     with ApiClient(TaxonomyTreeApi, request) as api:
-        taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=taxoid)
+        taxon: TaxonModel = api.query_taxa(taxon_id=taxoid)
     # Complete with centralized info
     with ApiClient(TaxonomyTreeApi, request) as api:
-        on_central = api.get_taxon_in_central_taxon_central_taxon_id_get(taxon_id=taxoid)
+        on_central = api.get_taxon_in_central(taxon_id=taxoid)
     taxon = taxon.to_dict()  # booster gives read-only models
     for a_field in FIELDS_IN_CENTRAL_ONLY:
         taxon[a_field] = on_central[0][a_field]
     # Complete again with usage info
     with ApiClient(TaxonomyTreeApi, request) as api:
-        usage = api.query_taxa_usage_taxon_taxon_id_usage_get(taxon_id=taxoid)
+        usage = api.query_taxa_usage(taxon_id=taxoid)
         usage = usage[:20]
     g.TaxoType = database.TaxoType
     g.taxoserver_url = get_taxoserver_url()
@@ -163,7 +163,7 @@ def route_save_taxon():
         for c in ['parent_id', 'name', 'taxotype', 'source_desc', 'source_url', 'creator_email']:
             params[c] = gvp(c)
         with ApiClient(TaxonomyTreeApi, request) as api:
-            crea_rsp = api.add_taxon_in_central_taxon_central_put(**params)
+            crea_rsp = api.add_taxon_in_central(**params)
         if crea_rsp['msg'] != 'ok':
             return appli.ErrorFormat("settaxon Error :" + crea_rsp['msg'])
         txt = """<script> DoSync(); At2PopupClose(0); </script>"""

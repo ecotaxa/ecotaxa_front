@@ -53,7 +53,7 @@ def PrjEditDataMass(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
@@ -79,7 +79,7 @@ def PrjEditDataMass(PrjId):
         new_value = gvp('newvalue')
         # Query the filtered list in project, if no filter then it's the whole project
         with ApiClient(ObjectsApi, request) as api:
-            res = api.get_object_set_object_set_project_id_query_post(PrjId, filtres)
+            res = api.get_object_set(PrjId, filtres)
         # Call the back-end service, depending on the field to update
         updates = [{"ucol": field, "uval": new_value}]
         if tablecode in ("h", "f"):
@@ -88,37 +88,37 @@ def PrjEditDataMass(PrjId):
                 updates.append({"ucol": "classif_when", "uval": "current_timestamp"})
                 updates.append({"ucol": "classif_who", "uval": str(current_user.id)})
             with ApiClient(ObjectsApi, request) as api:
-                nb_rows = api.update_object_set_object_set_update_post(BulkUpdateReq(target_ids=res.object_ids,
-                                                                                     updates=updates))
+                nb_rows = api.update_object_set(BulkUpdateReq(target_ids=res.object_ids,
+                                                              updates=updates))
         elif tablecode == "p":
             # Process update, same key as acquisitions
             tgt_processes = [a_parent for a_parent in set(res.acquisition_ids) if a_parent]
             with ApiClient(ProcessesApi, request) as api:
-                nb_rows = api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=tgt_processes,
-                                                                                     updates=updates))
+                nb_rows = api.update_processes(BulkUpdateReq(target_ids=tgt_processes,
+                                                             updates=updates))
         elif tablecode == "a":
             # Acquisition update
             tgt_acquisitions = [a_parent for a_parent in set(res.acquisition_ids) if a_parent]
             with ApiClient(AcquisitionsApi, request) as api:
-                nb_rows = api.update_acquisitions_acquisition_set_update_post(BulkUpdateReq(target_ids=tgt_acquisitions,
-                                                                                            updates=updates))
+                nb_rows = api.update_acquisitions(BulkUpdateReq(target_ids=tgt_acquisitions,
+                                                                updates=updates))
         elif tablecode == "s":
             # Sample update
             tgt_samples = [a_parent for a_parent in set(res.sample_ids) if a_parent]
             with ApiClient(SamplesApi, request) as api:
-                nb_rows = api.update_samples_sample_set_update_post(BulkUpdateReq(target_ids=tgt_samples,
-                                                                                  updates=updates))
+                nb_rows = api.update_samples(BulkUpdateReq(target_ids=tgt_samples,
+                                                           updates=updates))
         flash('%s data rows updated' % nb_rows, 'success')
 
     if field == 'latitude' or field == 'longitude' or gvp('recompute') == 'Y':
         with ApiClient(ProjectsApi, request) as api:
-            api.project_recompute_geography_projects_project_id_recompute_geo_post(PrjId)
+            api.project_recompute_geography(PrjId)
         flash('All samples latitude and longitude updated', 'success')
 
     if len(filtres):
         # Query the filtered list in project
         with ApiClient(ObjectsApi, request) as api:
-            object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres).object_ids
+            object_ids: List[int] = api.get_object_set(PrjId, filtres).object_ids
         # Warn the user
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
                "USING Active Project Filters, {0} objects</span>". \
@@ -143,7 +143,7 @@ def PrjResetToPredicted(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
@@ -163,7 +163,7 @@ def PrjResetToPredicted(PrjId):
     if proceed == 'Y':
         # Do the job on back-end
         with ApiClient(ObjectsApi, request) as api:
-            api.reset_object_set_to_predicted_object_set_project_id_reset_to_predicted_post(PrjId, filtres)
+            api.reset_object_set_to_predicted(PrjId, filtres)
 
         # flash('Data updated', 'success')
         txt += "<a href='/prj/%s' class='btn btn-primary'>Back to project</a> " % target_proj.projid
@@ -173,7 +173,7 @@ def PrjResetToPredicted(PrjId):
     if len(filtres):
         # Query the filtered list in project
         with ApiClient(ObjectsApi, request) as api:
-            object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres).object_ids
+            object_ids: List[int] = api.get_object_set(PrjId, filtres).object_ids
         # Warn the user
         txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
                "USING Active Project Filters, {0} objects</span>" \

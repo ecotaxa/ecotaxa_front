@@ -3,9 +3,9 @@ from typing import List
 from flask import render_template, json, request
 
 from appli import app, gvg
+from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import FilesApi
 from to_back.ecotaxa_cli_py.models import DirectoryModel, DirectoryEntryModel
-from appli.utils import ApiClient
 
 
 @app.route('/common/ServerFolderSelect')
@@ -30,7 +30,7 @@ def ServerFolderSelectJSON():
     # Call back-end for directory content
     with ApiClient(FilesApi, request) as api:
         # List files remotely
-        dir_desc: DirectoryModel = api.list_common_files_common_files_get(path=current_path)
+        dir_desc: DirectoryModel = api.list_common_files(path=current_path)
         entries_in_dir: List[DirectoryEntryModel] = dir_desc.entries
 
     res = []

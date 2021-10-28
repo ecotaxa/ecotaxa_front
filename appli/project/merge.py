@@ -17,7 +17,7 @@ def PrjMerge(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exist"
@@ -42,7 +42,7 @@ def PrjMerge(PrjId):
                 """
         # Fetch the potential merge sources
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-            rsp: List[ProjectModel] = api.search_projects_projects_search_get(for_managing=True)
+            rsp: List[ProjectModel] = api.search_projects(for_managing=True)
 
         # TODO: XSSEscape??
         # Display them
@@ -72,7 +72,7 @@ def PrjMerge(PrjId):
     src_prj_id = int(gvg('src'))
     with ApiClient(ProjectsApi, request) as api:
         try:
-            source_proj: ProjectModel = api.project_query_projects_project_id_get(src_prj_id, for_managing=True)
+            source_proj: ProjectModel = api.project_query(src_prj_id, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Source project doesn't exist"
@@ -86,9 +86,9 @@ def PrjMerge(PrjId):
     if not gvg('merge'):  # Ici la src à été choisie et vérifiée
         # Validate the merge
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-            rsp: MergeRsp = api.project_merge_projects_project_id_merge_post(project_id=target_proj.projid,
-                                                                             source_project_id=source_proj.projid,
-                                                                             dry_run=True)
+            rsp: MergeRsp = api.project_merge(project_id=target_proj.projid,
+                                              source_project_id=source_proj.projid,
+                                              dry_run=True)
 
         for an_error in rsp.errors:
             flash(an_error, "error")
@@ -107,9 +107,9 @@ def PrjMerge(PrjId):
     if gvg('merge') == 'Y':
         # Do the real merge
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-            rsp: MergeRsp = api.project_merge_projects_project_id_merge_post(project_id=target_proj.projid,
-                                                                             source_project_id=source_proj.projid,
-                                                                             dry_run=False)
+            rsp: MergeRsp = api.project_merge(project_id=target_proj.projid,
+                                              source_project_id=source_proj.projid,
+                                              dry_run=False)
 
         txt += "<div class='alert alert-success' role='alert'>Fusion Done successfully</div>"
         txt += "<br><a class='btn btn-lg btn-primary' href='/prj/%s'>Back to target project</a>" % target_proj.projid

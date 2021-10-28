@@ -10,8 +10,7 @@ from flask import request
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi, JobsApi
-from to_back.ecotaxa_cli_py.models import UserModel,JobModel
-
+from to_back.ecotaxa_cli_py.models import UserModel, JobModel
 
 JOB_STATE_TO_TASK_STATE = {'P': 'Pending',
                            'R': 'Running',
@@ -43,7 +42,7 @@ def _pseudo_task(user_cache: Dict, a_job: JobModel):
     owner: UserModel = user_cache.get(a_job.owner_id)
     if owner is None:
         with ApiClient(UsersApi, request) as api:
-            owner = api.get_user_users_user_id_get(user_id=a_job.owner_id)
+            owner = api.get_user(user_id=a_job.owner_id)
         user_cache[a_job.owner_id] = owner
     ret.owner_rel = owner
     # ret.inputparam.update(a_job.result)
@@ -54,7 +53,7 @@ def _pseudo_task(user_cache: Dict, a_job: JobModel):
 def _add_jobs_to_task_list(tasks, wants_admin):
     # Add jobs from back-end
     with ApiClient(JobsApi, request) as api:
-        api_jobs: List[JobModel] = api.list_jobs_jobs_get(for_admin=wants_admin)
+        api_jobs: List[JobModel] = api.list_jobs(for_admin=wants_admin)
         # Mimic tasks for display
         cache = {}
         tasks.extend([_pseudo_task(cache, a_job) for a_job in api_jobs])
@@ -65,10 +64,10 @@ def _clean_jobs(clean_all: bool, clean_done: bool, clean_error: bool, wants_admi
     # Clean some/all jobs depending on request
     ret = []
     with ApiClient(JobsApi, request) as api:
-        api_jobs: List[JobModel] = api.list_jobs_jobs_get(for_admin=wants_admin)
+        api_jobs: List[JobModel] = api.list_jobs(for_admin=wants_admin)
         for a_job in api_jobs:
             if clean_all or (clean_error and a_job.state == 'E') or (clean_done and a_job.state == 'F'):
-                api.erase_job_jobs_job_id_delete(job_id=a_job.id)
+                api.erase_job(job_id=a_job.id)
                 ret.append("Cleaned job %d" % a_job.id)
     return "<br>".join(ret)
 
@@ -77,7 +76,7 @@ def _add_jobs_to_tasks_summary(summary):
     from appli.utils import ApiClient
     with ApiClient(JobsApi, request) as api:
         try:
-            api_jobs: List[JobModel] = api.list_jobs_jobs_get(for_admin=False)
+            api_jobs: List[JobModel] = api.list_jobs(for_admin=False)
             for a_job in api_jobs:
                 state = JOB_STATE_TO_TASK_STATE.get(a_job.state, a_job.state)
                 if state in summary:

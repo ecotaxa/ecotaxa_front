@@ -17,7 +17,7 @@ def EMODnet_export(prj_id):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            source_proj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=True)
+            source_proj: ProjectModel = api.project_query(prj_id, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 flash("Project doesn't exist", 'error')

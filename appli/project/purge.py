@@ -17,7 +17,7 @@ def prjPurge(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
@@ -39,7 +39,7 @@ def prjPurge(PrjId):
         if len(filtres):
             # Query objects, using filters, in project
             with ApiClient(ObjectsApi, request) as api:
-                object_ids: List[int] = api.get_object_set_object_set_project_id_query_post(PrjId, filtres).object_ids
+                object_ids: List[int] = api.get_object_set(PrjId, filtres).object_ids
             obj_list_txt = "\n".join((str(r) for r in object_ids))
 
             txt += "<span style='color:red;font-weight:bold;font-size:large;'>" \
@@ -64,16 +64,16 @@ def prjPurge(PrjId):
         if gvp("objlist") == "DELETEALL":
             # DELETE all objects
             with ApiClient(ProjectsApi, request) as api:
-                no, noh, ni, nbrfile = api.erase_project_projects_project_id_delete(project_id=PrjId,
-                                                                                    only_objects=gvp(
-                                                                                        "destroyproject") != "Y")
+                no, noh, ni, nbrfile = api.erase_project(project_id=PrjId,
+                                                         only_objects=gvp(
+                                                             "destroyproject") != "Y")
         else:
             # DELETE some objects in project
             objs = [int(x.strip()) for x in gvp("objlist").splitlines() if x.strip() != ""]
             err = None
             with ApiClient(ObjectsApi, request) as api:
                 try:
-                    res: ObjectSetQueryRsp = api.query_object_set_parents_object_set_parents_post(objs)
+                    res: ObjectSetQueryRsp = api.query_object_set_parents(objs)
                 except ApiException as ae:
                     if ae.status in (401, 403):
                         err = 'At least one object does not belong to you'
@@ -91,7 +91,7 @@ def prjPurge(PrjId):
                 return PrintInCharte(txt + "<br><br><a href ='/prj/{0}'>Back to project home</a>".format(PrjId))
 
             with ApiClient(ObjectsApi, request) as api:
-                no, noh, ni, nbrfile = api.erase_object_set_object_set_delete(objs)
+                no, noh, ni, nbrfile = api.erase_object_set(objs)
 
         txt += "Deleted %d Objects, %d ObjectHisto, %d Images in Database and %d files" % (no, noh, ni, nbrfile)
 

@@ -36,13 +36,13 @@ class InstrumentsApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def instrument_query_instruments_get(self, project_ids, **kwargs):  # noqa: E501
+    def instrument_query(self, project_ids, **kwargs):  # noqa: E501
         """Instrument Query  # noqa: E501
 
         Returns the list of instruments, inside specific project(s).  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.instrument_query_instruments_get(project_ids, async_req=True)
+        >>> thread = api.instrument_query(project_ids, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class InstrumentsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.instrument_query_instruments_get_with_http_info(project_ids, **kwargs)  # noqa: E501
+        return self.instrument_query_with_http_info(project_ids, **kwargs)  # noqa: E501
 
-    def instrument_query_instruments_get_with_http_info(self, project_ids, **kwargs):  # noqa: E501
+    def instrument_query_with_http_info(self, project_ids, **kwargs):  # noqa: E501
         """Instrument Query  # noqa: E501
 
         Returns the list of instruments, inside specific project(s).  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.instrument_query_instruments_get_with_http_info(project_ids, async_req=True)
+        >>> thread = api.instrument_query_with_http_info(project_ids, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class InstrumentsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method instrument_query_instruments_get" % key
+                    " to method instrument_query" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_ids' is set
         if self.api_client.client_side_validation and ('project_ids' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_ids'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_ids` when calling `instrument_query_instruments_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_ids` when calling `instrument_query`")  # noqa: E501
 
         collection_formats = {}
 

@@ -30,15 +30,15 @@ def indexProjects(Others=False):
         filt_subset = session.get('prjfilt_subset', '')
 
     with ApiClient(ProjectsApi, request) as api:
-        prjs: List[ProjectModel] = api.search_projects_projects_search_get(also_others=Others,
-                                                                           title_filter=filt_title,
-                                                                           instrument_filter=filt_instrum,
-                                                                           filter_subset=(filt_subset == 'Y'))
+        prjs: List[ProjectModel] = api.search_projects(also_others=Others,
+                                                       title_filter=filt_title,
+                                                       instrument_filter=filt_instrum,
+                                                       filter_subset=(filt_subset == 'Y'))
     # Sort for consistency
     prjs.sort(key=lambda prj: prj.title.strip().lower())
 
     with ApiClient(UsersApi, request) as api:
-        user: UserModelWithRights = api.show_current_user_users_me_get()
+        user: UserModelWithRights = api.show_current_user()
 
     if Others:
         CanCreate = False
@@ -46,7 +46,7 @@ def indexProjects(Others=False):
         CanCreate = 1 in user.can_do
 
     with ApiClient(TaxonomyTreeApi, request) as api:
-        status: TaxonomyTreeStatus = api.taxa_tree_status_taxa_status_get()
+        status: TaxonomyTreeStatus = api.taxa_tree_status()
         try:
             last_refresh = datetime.datetime.strptime(status.last_refresh, '%Y-%m-%dT%H:%M:%S')
         except ValueError:

@@ -15,7 +15,7 @@ def deprecation_management(prj_id):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_get(prj_id)
+            target_proj: ProjectModel = api.project_query(prj_id)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exists"
@@ -38,10 +38,10 @@ def deprecation_management(prj_id):
             src_id, tgt_id = a_todo
             with ApiClient(ObjectsApi, request) as api:
                 filters = {"taxo": str(src_id)}
-                nb_ok = api.reclassify_object_set_object_set_project_id_reclassify_post(project_id=prj_id,
-                                                                                        forced_id=tgt_id,
-                                                                                        project_filters=filters,
-                                                                                        reason='W')
+                nb_ok = api.reclassify_object_set(project_id=prj_id,
+                                                  forced_id=tgt_id,
+                                                  project_filters=filters,
+                                                  reason='W')
             nb_objs += nb_ok
         # Tell user
         flash("%d objects fixed." % nb_objs)
@@ -51,7 +51,7 @@ def deprecation_management(prj_id):
 
         # Get the list of taxa used in this project
         with ApiClient(ProjectsApi, request) as api:
-            stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats_project_set_taxo_stats_get(
+            stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(
                 ids=str(target_proj.projid),
                 taxa_ids="all")
             populated_taxa = {stat.used_taxa[0]: stat
@@ -61,7 +61,7 @@ def deprecation_management(prj_id):
         # Get full info on the deprecated ones
         with ApiClient(TaxonomyTreeApi, request) as api:
             taxa_ids = "+".join([str(x) for x in populated_taxa.keys()])
-            used_taxa: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=taxa_ids)
+            used_taxa: List[TaxonModel] = api.query_taxa_set(ids=taxa_ids)
         renames = [taxon for taxon in used_taxa
                    if taxon.renm_id is not None]
         renames.sort(key=lambda r: r.name)
@@ -71,13 +71,13 @@ def deprecation_management(prj_id):
                        if taxon.renm_id is not None]
         with ApiClient(TaxonomyTreeApi, request) as api:
             taxa_ids = "+".join(advised_ids)
-            advised_taxa: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=taxa_ids)
+            advised_taxa: List[TaxonModel] = api.query_taxa_set(ids=taxa_ids)
         advised_targets = {taxon.id: taxon for taxon in advised_taxa}
 
         # From logs, determine what was done before by users
         with ApiClient(TaxonomyTreeApi, request) as api:
             taxa_ids = "+".join([str(x.id) for x in renames])
-            community_taxa: List[TaxonModel] = api.reclassif_stats_taxa_reclassification_stats_get(taxa_ids=taxa_ids)
+            community_taxa: List[TaxonModel] = api.reclassif_stats(taxa_ids=taxa_ids)
             assert len(renames) == len(community_taxa)
         community_targets = {}
         for a_src, a_tgt in zip(renames, community_taxa):

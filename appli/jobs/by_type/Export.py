@@ -23,7 +23,7 @@ class ExportJob(Job):
         prj_id = int(gvg("projid"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -51,7 +51,7 @@ class ExportJob(Job):
         prj_id = int(gvg("projid"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -108,7 +108,7 @@ class ExportJob(Job):
             export_req = {"filters": filters,
                           "request": req}
             with ApiClient(ObjectsApi, request) as api:
-                rsp: ExportRsp = api.export_object_set_object_set_export_post(export_req)
+                rsp: ExportRsp = api.export_object_set(export_req)
             return redirect("/Job/Monitor/%d" % rsp.job_id)
 
     # noinspection PyUnresolvedReferences

@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from flask import Blueprint, render_template, g, request, url_for, send_from_directory
-from flask_login import current_user
-from appli import app, ObjectToStr, PrintInCharte, database, db
-from flask_security.decorators import roles_accepted
-import appli.part
 import os
 
+from flask import Blueprint, g, request, url_for, send_from_directory
+
+from appli import app, PrintInCharte
 # definition d'un second répertoire traité en statique en plus de static
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
@@ -15,11 +13,11 @@ from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import UserModelWithRights
 
 # VUE_PATH == "/gui"
-from appli.constants import VUE_PATH
 
 vaultBP = Blueprint('vault', __name__,
                     static_url_path='/vault', static_folder='../vault')
 app.register_blueprint(vaultBP)
+
 
 @app.route('/')
 def index():
@@ -71,18 +69,20 @@ def index():
     txt += """<br><a href='/privacy'>Privacy</a></div></div></div>"""
     return PrintInCharte(txt)
 
+
 # Where we serve the Vue front-end
-GUI_PATH = app.root_path + "/gui/" # TODO ? replace /gui by VUE_PATH ?
+GUI_PATH = app.root_path + "/gui/"  # TODO ? replace /gui by VUE_PATH ?
+
 
 # Everything there should be pre-processed e.g.:
 # ecotaxa_front/proto/ecotaxa-cli$ for f in `grep -rwl "/front/" dist/ `; do sed -e "s/\/front\//\/gui\//g" $f > $f.2; mv $f.2 $f; done
 
-@app.route('/gui') # TODO ? replace /gui by VUE_PATH ?
+@app.route('/gui')  # TODO ? replace /gui by VUE_PATH ?
 def gui_index():
     return send_from_directory(GUI_PATH, 'index.html')
 
 
-@app.route('/gui/<path:filename>') # TODO ? replace /gui by VUE_PATH ?
+@app.route('/gui/<path:filename>')  # TODO ? replace /gui by VUE_PATH ?
 def gui_any(filename):
     try:
         return send_from_directory(GUI_PATH, filename)
@@ -110,7 +110,7 @@ def before_request_security():
     mru_projects = []
     with ApiClient(UsersApi, request) as api:
         try:
-            user: UserModelWithRights = api.show_current_user_users_me_get()
+            user: UserModelWithRights = api.show_current_user()
             user_is_logged = True
             user_can_create = 1 in user.can_do
             user_can_administrate = 2 in user.can_do
@@ -128,7 +128,7 @@ def before_request_security():
         g.menu.append(("/prj/", "Contribute to a project", "SUB"))
         for a_prj in mru_projects:
             g.menu.append(("/prj/%d" % a_prj.projid,
-                          "[%d] %s" % (a_prj.projid, a_prj.title)))
+                           "[%d] %s" % (a_prj.projid, a_prj.title)))
         g.menu.append(("", "NOSUB"))
     else:
         # TODO: I can't see the menu _at all_ for unlogged users?

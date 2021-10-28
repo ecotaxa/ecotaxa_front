@@ -5,7 +5,6 @@ from flask import g, flash, request, render_template
 from flask_security import login_required
 
 from appli import app, PrintInCharte, gvg
-
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi
@@ -20,7 +19,7 @@ def PrjEditAnnot(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 return "Project doesn't exist"
@@ -45,7 +44,7 @@ def PrjEditAnnot(PrjId):
         LstUserNew = OrderedDict({'lastannot': "Previous Annotation available, or prediction, or Nothing"})
         # TODO: It would be nice to offer only relevant users as a choice
         with ApiClient(UsersApi, request) as api:
-            all_users: List[UserModel] = api.search_user_users_search_get(by_name="%%")
+            all_users: List[UserModel] = api.search_user(by_name="%%")
         # No guaranteed order from API, so sort now, see #475 for the strip()
         all_users.sort(key=lambda user: user.name.strip())
         # Complete selection lists
@@ -65,7 +64,7 @@ def PrjEditAnnot(PrjId):
     else:
         with ApiClient(UsersApi, request) as api:
             # Let the eventual 404 propagate
-            old_author: UserModel = api.get_user_users_user_id_get(user_id=int(old_author_id))
+            old_author: UserModel = api.get_user(user_id=int(old_author_id))
         # Only return objects classified by the requested user, and exclude him/her from history picking
         filters["filt_last_annot"] = old_author_id
         from_txt = "Replace current classification, when done by <b>%s</b>" % old_author.name
@@ -85,7 +84,7 @@ def PrjEditAnnot(PrjId):
     else:
         with ApiClient(UsersApi, request) as api:
             # Let the eventual 404 propagate
-            new_author: UserModel = api.get_user_users_user_id_get(user_id=int(new_author_id))
+            new_author: UserModel = api.get_user(user_id=int(new_author_id))
         target_for_api = new_author_id
         to_txt = "With previous classification done by <b>%s</b>, except if already the case" % new_author.name
 
@@ -94,7 +93,7 @@ def PrjEditAnnot(PrjId):
         # Query the filtered list in project, if no filter then it's the whole project
         with ApiClient(ObjectsApi, request) as api:
             # TODO: It's getting long these primitive names...
-            call = api.revert_object_set_to_history_object_set_project_id_revert_to_history_post
+            call = api.revert_object_set_to_history
             res: ObjectSetRevertToHistoryRsp = call(project_id=PrjId,
                                                     project_filters=filters,
                                                     target=target_for_api,
@@ -118,7 +117,7 @@ def PrjEditAnnot(PrjId):
             return PrintInCharte("<a href='#' onclick='history.back();'>Back</a>")
         filters["taxo"] = selected_taxa
         with ApiClient(ObjectsApi, request) as api:
-            call = api.revert_object_set_to_history_object_set_project_id_revert_to_history_post
+            call = api.revert_object_set_to_history
             res: ObjectSetRevertToHistoryRsp = call(project_id=PrjId,
                                                     project_filters=filters,
                                                     target=target_for_api,

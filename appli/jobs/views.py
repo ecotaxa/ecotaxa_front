@@ -1,14 +1,14 @@
 import flask
 from flask import request, render_template, Response, redirect, g
 
-from appli import app, gvp, PrintInCharte, gvg, XSSEscape, AddTaskSummaryForTemplate
+from appli import app, PrintInCharte, gvg, XSSEscape, AddTaskSummaryForTemplate
 from appli.jobs.Job import Job
 # noinspection PyUnresolvedReferences
 from appli.jobs.by_type import *  # Import all for job searching in class hierarchy
+from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import JobsApi, UsersApi, ProjectsApi
 from to_back.ecotaxa_cli_py.models import JobModel, ProjectModel
-from appli.utils import ApiClient
 
 
 @app.route('/Job/Create/<job_type>', methods=['GET', 'POST'])
@@ -34,7 +34,7 @@ def jobDisplay(job_id: int):
     AddTaskSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
         try:
-            job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
+            job: JobModel = api.get_job(job_id=job_id)
         except ApiException as ae:
             if ae.status in (401, 403):
                 # Not logged in
@@ -42,12 +42,12 @@ def jobDisplay(job_id: int):
             elif ae.status == 404:
                 return PrintInCharte("This job doesn't exist anymore, perhaps it was automatically purged")
     with ApiClient(UsersApi, request) as api:
-        owner = api.get_user_users_user_id_get(user_id=job.owner_id)
+        owner = api.get_user(user_id=job.owner_id)
 
     txt = ""
     if gvg('log') == "Y":
         with ApiClient(JobsApi, request) as api:
-            rsp = api.get_job_log_file_jobs_job_id_log_get(job_id=job_id)
+            rsp = api.get_job_log_file(job_id=job_id)
         return Response(rsp, mimetype="text/plain")
 
     # if gvg('CustomDetails') == "Y":
@@ -66,7 +66,7 @@ def jobDisplay(job_id: int):
     if proj_id:
         # Inject project title in headers
         with ApiClient(ProjectsApi, request) as api:
-            target_prj: ProjectModel = api.project_query_projects_project_id_get(proj_id, for_managing=False)
+            target_prj: ProjectModel = api.project_query(proj_id, for_managing=False)
         g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(target_prj.projid,
                                                                               XSSEscape(target_prj.title))
 
@@ -86,7 +86,7 @@ def jobAsk(job_id: int):
     AddTaskSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
         try:
-            job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
+            job: JobModel = api.get_job(job_id=job_id)
         except ApiException as ae:
             if ae.status in (401, 403):
                 # Not logged in
@@ -94,7 +94,7 @@ def jobAsk(job_id: int):
             elif ae.status == 404:
                 return PrintInCharte("This job doesn't exist anymore, perhaps it was automatically purged")
     with ApiClient(UsersApi, request) as api:
-        owner = api.get_user_users_user_id_get(user_id=job.owner_id)
+        owner = api.get_user(user_id=job.owner_id)
 
     if job.state != 'A':
         return ""
@@ -124,7 +124,7 @@ def jobGetStatus(job_id: int):
     """
     try:
         with ApiClient(JobsApi, request) as api:
-            job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
+            job: JobModel = api.get_job(job_id=job_id)
 
         progress = job.progress_pct
         if progress is None:
@@ -169,7 +169,7 @@ def jobGetStatus(job_id: int):
 def jobForceRestart(job_id: int):
     AddTaskSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
-        api.restart_job_jobs_job_id_restart_get(job_id=job_id)
+        api.restart_job(job_id=job_id)
     return redirect("/Job/Monitor/%d" % job_id)
 
 
@@ -178,7 +178,7 @@ def jobCleanup(job_id: int):
     AddTaskSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
         try:
-            job: JobModel = api.get_job_jobs_job_id_get(job_id=job_id)
+            job: JobModel = api.get_job(job_id=job_id)
             proj_id = job.params.get("prj_id")
             if proj_id is None and job.params.get("req") is not None:
                 proj_id = job.params["req"].get("project_id")
@@ -189,7 +189,7 @@ def jobCleanup(job_id: int):
             elif ae.status == 404:
                 return PrintInCharte("This job doesn't exist anymore, perhaps it was automatically purged")
     with ApiClient(JobsApi, request) as api:
-        api.erase_job_jobs_job_id_delete(job_id=job_id)
+        api.erase_job(job_id=job_id)
 
     msg = ""
     if proj_id:

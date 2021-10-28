@@ -29,14 +29,14 @@ class SimpleImportJob(Job):
         prj_id = int(gvg("p"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                _target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                _target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
 
         # Load previous values from user preferences
         with ApiClient(UsersApi, request) as api:
-            preset_str = api.get_current_user_prefs_users_my_preferences_project_id_get(prj_id, cls.PREFS_KEY)
+            preset_str = api.get_current_user_prefs(prj_id, cls.PREFS_KEY)
             preset = load_from_json(preset_str, dict)
 
         # Display the form, enrich it first
@@ -53,7 +53,7 @@ class SimpleImportJob(Job):
         prj_id = int(gvg("p"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                _target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                _target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -76,22 +76,22 @@ class SimpleImportJob(Job):
             values[fld] = a_val
         # dry run call for checking input
         with ApiClient(ProjectsApi, request) as api:
-            rsp: SimpleImportRsp = api.simple_import_simple_import_project_id_post(project_id=prj_id,
-                                                                                   simple_import_req=req,
-                                                                                   dry_run=True)
+            rsp: SimpleImportRsp = api.simple_import(project_id=prj_id,
+                                                     simple_import_req=req,
+                                                     dry_run=True)
         errors.extend(rsp.errors)
         # Check for errors. If any, stay in current state.
         if not flash_any_error(errors):
             # Save preferences
             with ApiClient(UsersApi, request) as api:
                 val_to_write = json.dumps(values)
-                api.set_current_user_prefs_users_my_preferences_project_id_put(prj_id, cls.PREFS_KEY, val_to_write)
+                api.set_current_user_prefs(prj_id, cls.PREFS_KEY, val_to_write)
 
             # Run for real
             with ApiClient(ProjectsApi, request) as api:
-                rsp: SimpleImportRsp = api.simple_import_simple_import_project_id_post(project_id=prj_id,
-                                                                                       simple_import_req=req,
-                                                                                       dry_run=False)
+                rsp: SimpleImportRsp = api.simple_import(project_id=prj_id,
+                                                         simple_import_req=req,
+                                                         dry_run=False)
                 job_id = rsp.job_id
                 return redirect("/Job/Monitor/%d" % job_id)
 
@@ -109,12 +109,12 @@ class SimpleImportJob(Job):
         """ Set the names for the form fields which take numerical IDs """
         if form.get('userlb') is not None:
             with ApiClient(UsersApi, request) as api:
-                user: UserModel = api.get_user_users_user_id_get(user_id=int(form['userlb']))
+                user: UserModel = api.get_user(user_id=int(form['userlb']))
             if user:
                 form["annot_name"] = user.name
         if form.get('taxolb') is not None:
             with ApiClient(TaxonomyTreeApi, request) as api:
-                nodes: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=form['taxolb'])
+                nodes: List[TaxonModel] = api.query_taxa_set(ids=form['taxolb'])
             if nodes:
                 form["taxo_name"] = nodes[0].name
 

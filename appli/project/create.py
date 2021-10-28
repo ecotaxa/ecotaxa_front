@@ -12,7 +12,7 @@ from to_back.ecotaxa_cli_py.models import CreateProjectReq
 def SimpleCreate():
     with ApiClient(ProjectsApi, request) as api:
         req = CreateProjectReq(title=gvp("projtitle"))
-        rsp: int = api.create_project_projects_create_post(req)
+        rsp: int = api.create_project(req)
 
     # return "<a href='/prj/{0}' class='btn btn-primary'>Project Created ! Open IT</a>".format(Prj.projid)
     return "<script>window.location='/prj/{0}';</script>".format(rsp)

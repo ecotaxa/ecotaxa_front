@@ -36,13 +36,13 @@ class CollectionsApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def collection_by_short_title_collections_by_short_title_get(self, q, **kwargs):  # noqa: E501
+    def collection_by_short_title(self, q, **kwargs):  # noqa: E501
         """Collection By Short Title  # noqa: E501
 
         Return the **single collection with this short title**.  *For published datasets.*  ⚠️ DO NOT MODIFY BEHAVIOR ⚠️   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.collection_by_short_title_collections_by_short_title_get(q, async_req=True)
+        >>> thread = api.collection_by_short_title(q, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.collection_by_short_title_collections_by_short_title_get_with_http_info(q, **kwargs)  # noqa: E501
+        return self.collection_by_short_title_with_http_info(q, **kwargs)  # noqa: E501
 
-    def collection_by_short_title_collections_by_short_title_get_with_http_info(self, q, **kwargs):  # noqa: E501
+    def collection_by_short_title_with_http_info(self, q, **kwargs):  # noqa: E501
         """Collection By Short Title  # noqa: E501
 
         Return the **single collection with this short title**.  *For published datasets.*  ⚠️ DO NOT MODIFY BEHAVIOR ⚠️   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.collection_by_short_title_collections_by_short_title_get_with_http_info(q, async_req=True)
+        >>> thread = api.collection_by_short_title_with_http_info(q, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class CollectionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method collection_by_short_title_collections_by_short_title_get" % key
+                    " to method collection_by_short_title" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'q' is set
         if self.api_client.client_side_validation and ('q' not in local_var_params or  # noqa: E501
                                                         local_var_params['q'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `q` when calling `collection_by_short_title_collections_by_short_title_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `q` when calling `collection_by_short_title`")  # noqa: E501
 
         collection_formats = {}
 
@@ -150,13 +150,13 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def collection_by_title_collections_by_title_get(self, q, **kwargs):  # noqa: E501
+    def collection_by_title(self, q, **kwargs):  # noqa: E501
         """Collection By Title  # noqa: E501
 
         Return the **single collection with this title**.  *For published datasets.*  ⚠️ DO NOT MODIFY BEHAVIOR ⚠️   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.collection_by_title_collections_by_title_get(q, async_req=True)
+        >>> thread = api.collection_by_title(q, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -173,15 +173,15 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.collection_by_title_collections_by_title_get_with_http_info(q, **kwargs)  # noqa: E501
+        return self.collection_by_title_with_http_info(q, **kwargs)  # noqa: E501
 
-    def collection_by_title_collections_by_title_get_with_http_info(self, q, **kwargs):  # noqa: E501
+    def collection_by_title_with_http_info(self, q, **kwargs):  # noqa: E501
         """Collection By Title  # noqa: E501
 
         Return the **single collection with this title**.  *For published datasets.*  ⚠️ DO NOT MODIFY BEHAVIOR ⚠️   # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.collection_by_title_collections_by_title_get_with_http_info(q, async_req=True)
+        >>> thread = api.collection_by_title_with_http_info(q, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -218,14 +218,14 @@ class CollectionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method collection_by_title_collections_by_title_get" % key
+                    " to method collection_by_title" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'q' is set
         if self.api_client.client_side_validation and ('q' not in local_var_params or  # noqa: E501
                                                         local_var_params['q'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `q` when calling `collection_by_title_collections_by_title_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `q` when calling `collection_by_title`")  # noqa: E501
 
         collection_formats = {}
 
@@ -264,13 +264,13 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def create_collection_collections_create_post(self, create_collection_req, **kwargs):  # noqa: E501
+    def create_collection(self, create_collection_req, **kwargs):  # noqa: E501
         """Create Collection  # noqa: E501
 
         **Create a collection** with at least one project inside.  Returns the created collection Id.  🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.create_collection_collections_create_post(create_collection_req, async_req=True)
+        >>> thread = api.create_collection(create_collection_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -287,15 +287,15 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.create_collection_collections_create_post_with_http_info(create_collection_req, **kwargs)  # noqa: E501
+        return self.create_collection_with_http_info(create_collection_req, **kwargs)  # noqa: E501
 
-    def create_collection_collections_create_post_with_http_info(self, create_collection_req, **kwargs):  # noqa: E501
+    def create_collection_with_http_info(self, create_collection_req, **kwargs):  # noqa: E501
         """Create Collection  # noqa: E501
 
         **Create a collection** with at least one project inside.  Returns the created collection Id.  🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.create_collection_collections_create_post_with_http_info(create_collection_req, async_req=True)
+        >>> thread = api.create_collection_with_http_info(create_collection_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -332,14 +332,14 @@ class CollectionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method create_collection_collections_create_post" % key
+                    " to method create_collection" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'create_collection_req' is set
         if self.api_client.client_side_validation and ('create_collection_req' not in local_var_params or  # noqa: E501
                                                         local_var_params['create_collection_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `create_collection_req` when calling `create_collection_collections_create_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `create_collection_req` when calling `create_collection`")  # noqa: E501
 
         collection_formats = {}
 
@@ -382,13 +382,13 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def emodnet_format_export_collections_collection_id_export_emodnet_get(self, collection_id, dry_run, with_zeroes, auto_morpho, with_computations, **kwargs):  # noqa: E501
+    def emodnet_format_export(self, collection_id, dry_run, with_zeroes, auto_morpho, with_computations, **kwargs):  # noqa: E501
         """Emodnet Format Export  # noqa: E501
 
         **Export the collection in EMODnet format**, @see https://www.emodnet-ingestion.eu  Produces a DwC-A archive into a temporary directory, ready for download.  Maybe useful, a reader in Python: https://python-dwca-reader.readthedocs.io/en/latest/index.html  🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.emodnet_format_export_collections_collection_id_export_emodnet_get(collection_id, dry_run, with_zeroes, auto_morpho, with_computations, async_req=True)
+        >>> thread = api.emodnet_format_export(collection_id, dry_run, with_zeroes, auto_morpho, with_computations, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -409,15 +409,15 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(collection_id, dry_run, with_zeroes, auto_morpho, with_computations, **kwargs)  # noqa: E501
+        return self.emodnet_format_export_with_http_info(collection_id, dry_run, with_zeroes, auto_morpho, with_computations, **kwargs)  # noqa: E501
 
-    def emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(self, collection_id, dry_run, with_zeroes, auto_morpho, with_computations, **kwargs):  # noqa: E501
+    def emodnet_format_export_with_http_info(self, collection_id, dry_run, with_zeroes, auto_morpho, with_computations, **kwargs):  # noqa: E501
         """Emodnet Format Export  # noqa: E501
 
         **Export the collection in EMODnet format**, @see https://www.emodnet-ingestion.eu  Produces a DwC-A archive into a temporary directory, ready for download.  Maybe useful, a reader in Python: https://python-dwca-reader.readthedocs.io/en/latest/index.html  🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.emodnet_format_export_collections_collection_id_export_emodnet_get_with_http_info(collection_id, dry_run, with_zeroes, auto_morpho, with_computations, async_req=True)
+        >>> thread = api.emodnet_format_export_with_http_info(collection_id, dry_run, with_zeroes, auto_morpho, with_computations, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -462,30 +462,30 @@ class CollectionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method emodnet_format_export_collections_collection_id_export_emodnet_get" % key
+                    " to method emodnet_format_export" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'collection_id' is set
         if self.api_client.client_side_validation and ('collection_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['collection_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `collection_id` when calling `emodnet_format_export_collections_collection_id_export_emodnet_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `collection_id` when calling `emodnet_format_export`")  # noqa: E501
         # verify the required parameter 'dry_run' is set
         if self.api_client.client_side_validation and ('dry_run' not in local_var_params or  # noqa: E501
                                                         local_var_params['dry_run'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `dry_run` when calling `emodnet_format_export_collections_collection_id_export_emodnet_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `dry_run` when calling `emodnet_format_export`")  # noqa: E501
         # verify the required parameter 'with_zeroes' is set
         if self.api_client.client_side_validation and ('with_zeroes' not in local_var_params or  # noqa: E501
                                                         local_var_params['with_zeroes'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `with_zeroes` when calling `emodnet_format_export_collections_collection_id_export_emodnet_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `with_zeroes` when calling `emodnet_format_export`")  # noqa: E501
         # verify the required parameter 'auto_morpho' is set
         if self.api_client.client_side_validation and ('auto_morpho' not in local_var_params or  # noqa: E501
                                                         local_var_params['auto_morpho'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `auto_morpho` when calling `emodnet_format_export_collections_collection_id_export_emodnet_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `auto_morpho` when calling `emodnet_format_export`")  # noqa: E501
         # verify the required parameter 'with_computations' is set
         if self.api_client.client_side_validation and ('with_computations' not in local_var_params or  # noqa: E501
                                                         local_var_params['with_computations'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `with_computations` when calling `emodnet_format_export_collections_collection_id_export_emodnet_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `with_computations` when calling `emodnet_format_export`")  # noqa: E501
 
         collection_formats = {}
 
@@ -532,13 +532,13 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def erase_collection_collections_collection_id_delete(self, collection_id, **kwargs):  # noqa: E501
+    def erase_collection(self, collection_id, **kwargs):  # noqa: E501
         """Erase Collection  # noqa: E501
 
         **Delete the collection**,   i.e. the precious fields, as the projects are just linked-at from the collection.  🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.erase_collection_collections_collection_id_delete(collection_id, async_req=True)
+        >>> thread = api.erase_collection(collection_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -555,15 +555,15 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.erase_collection_collections_collection_id_delete_with_http_info(collection_id, **kwargs)  # noqa: E501
+        return self.erase_collection_with_http_info(collection_id, **kwargs)  # noqa: E501
 
-    def erase_collection_collections_collection_id_delete_with_http_info(self, collection_id, **kwargs):  # noqa: E501
+    def erase_collection_with_http_info(self, collection_id, **kwargs):  # noqa: E501
         """Erase Collection  # noqa: E501
 
         **Delete the collection**,   i.e. the precious fields, as the projects are just linked-at from the collection.  🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.erase_collection_collections_collection_id_delete_with_http_info(collection_id, async_req=True)
+        >>> thread = api.erase_collection_with_http_info(collection_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -600,14 +600,14 @@ class CollectionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method erase_collection_collections_collection_id_delete" % key
+                    " to method erase_collection" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'collection_id' is set
         if self.api_client.client_side_validation and ('collection_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['collection_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `collection_id` when calling `erase_collection_collections_collection_id_delete`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `collection_id` when calling `erase_collection`")  # noqa: E501
 
         collection_formats = {}
 
@@ -646,13 +646,13 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_collection_collections_collection_id_get(self, collection_id, **kwargs):  # noqa: E501
+    def get_collection(self, collection_id, **kwargs):  # noqa: E501
         """Get Collection  # noqa: E501
 
         Returns **information about the collection** corresponding to the given id.   🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_collection_collections_collection_id_get(collection_id, async_req=True)
+        >>> thread = api.get_collection(collection_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -669,15 +669,15 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.get_collection_collections_collection_id_get_with_http_info(collection_id, **kwargs)  # noqa: E501
+        return self.get_collection_with_http_info(collection_id, **kwargs)  # noqa: E501
 
-    def get_collection_collections_collection_id_get_with_http_info(self, collection_id, **kwargs):  # noqa: E501
+    def get_collection_with_http_info(self, collection_id, **kwargs):  # noqa: E501
         """Get Collection  # noqa: E501
 
         Returns **information about the collection** corresponding to the given id.   🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_collection_collections_collection_id_get_with_http_info(collection_id, async_req=True)
+        >>> thread = api.get_collection_with_http_info(collection_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -714,14 +714,14 @@ class CollectionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_collection_collections_collection_id_get" % key
+                    " to method get_collection" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'collection_id' is set
         if self.api_client.client_side_validation and ('collection_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['collection_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `collection_id` when calling `get_collection_collections_collection_id_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `collection_id` when calling `get_collection`")  # noqa: E501
 
         collection_formats = {}
 
@@ -760,13 +760,13 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def search_collections_collections_search_get(self, title, **kwargs):  # noqa: E501
+    def search_collections(self, title, **kwargs):  # noqa: E501
         """Search Collections  # noqa: E501
 
         **Search for collections.**  🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.search_collections_collections_search_get(title, async_req=True)
+        >>> thread = api.search_collections(title, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -783,15 +783,15 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.search_collections_collections_search_get_with_http_info(title, **kwargs)  # noqa: E501
+        return self.search_collections_with_http_info(title, **kwargs)  # noqa: E501
 
-    def search_collections_collections_search_get_with_http_info(self, title, **kwargs):  # noqa: E501
+    def search_collections_with_http_info(self, title, **kwargs):  # noqa: E501
         """Search Collections  # noqa: E501
 
         **Search for collections.**  🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.search_collections_collections_search_get_with_http_info(title, async_req=True)
+        >>> thread = api.search_collections_with_http_info(title, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -828,14 +828,14 @@ class CollectionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method search_collections_collections_search_get" % key
+                    " to method search_collections" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'title' is set
         if self.api_client.client_side_validation and ('title' not in local_var_params or  # noqa: E501
                                                         local_var_params['title'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `title` when calling `search_collections_collections_search_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `title` when calling `search_collections`")  # noqa: E501
 
         collection_formats = {}
 
@@ -874,13 +874,13 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def update_collection_collections_collection_id_put(self, collection_id, collection_model, **kwargs):  # noqa: E501
+    def update_collection(self, collection_id, collection_model, **kwargs):  # noqa: E501
         """Update Collection  # noqa: E501
 
         **Update the collection**. Note that some updates are silently failing when not compatible  with the composing projects.   **Returns NULL upon success.**   🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_collection_collections_collection_id_put(collection_id, collection_model, async_req=True)
+        >>> thread = api.update_collection(collection_id, collection_model, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -898,15 +898,15 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.update_collection_collections_collection_id_put_with_http_info(collection_id, collection_model, **kwargs)  # noqa: E501
+        return self.update_collection_with_http_info(collection_id, collection_model, **kwargs)  # noqa: E501
 
-    def update_collection_collections_collection_id_put_with_http_info(self, collection_id, collection_model, **kwargs):  # noqa: E501
+    def update_collection_with_http_info(self, collection_id, collection_model, **kwargs):  # noqa: E501
         """Update Collection  # noqa: E501
 
         **Update the collection**. Note that some updates are silently failing when not compatible  with the composing projects.   **Returns NULL upon success.**   🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_collection_collections_collection_id_put_with_http_info(collection_id, collection_model, async_req=True)
+        >>> thread = api.update_collection_with_http_info(collection_id, collection_model, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -945,18 +945,18 @@ class CollectionsApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method update_collection_collections_collection_id_put" % key
+                    " to method update_collection" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'collection_id' is set
         if self.api_client.client_side_validation and ('collection_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['collection_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `collection_id` when calling `update_collection_collections_collection_id_put`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `collection_id` when calling `update_collection`")  # noqa: E501
         # verify the required parameter 'collection_model' is set
         if self.api_client.client_side_validation and ('collection_model' not in local_var_params or  # noqa: E501
                                                         local_var_params['collection_model'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `collection_model` when calling `update_collection_collections_collection_id_put`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `collection_model` when calling `update_collection`")  # noqa: E501
 
         collection_formats = {}
 

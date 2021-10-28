@@ -23,8 +23,8 @@ def searchsamples():
     pattern = gvg("q")
     # Do back-end call
     with ApiClient(SamplesApi, request) as api:
-        samples: List[SampleModel] = api.samples_search_samples_search_get(project_ids=project_ids,
-                                                                           id_pattern=pattern)
+        samples: List[SampleModel] = api.samples_search(project_ids=project_ids,
+                                                        id_pattern=pattern)
     if gvg("format", 'J') == 'J':  # version JSon par defaut
         return json.dumps([dict(id=s.sampleid, text=s.orig_id) for s in samples])
     else:
@@ -39,7 +39,7 @@ def searchexploreproject():
     qry = gvg("q")
     options = gvg("opts")
     with ApiClient(ProjectsApi, request) as api:
-        prjs: List[ProjectModel] = api.search_projects_projects_search_get(title_filter=qry)
+        prjs: List[ProjectModel] = api.search_projects(title_filter=qry)
 
     # Do a variable filtering depending on the options
     def prj_filter(prj):
@@ -65,7 +65,7 @@ def searchinstrumlist():
     if gvg("projid") != "":
         project_ids = gvg("projid")
     with ApiClient(InstrumentsApi, request) as api:
-        instrums: List[str] = api.instrument_query_instruments_get(project_ids=project_ids)
+        instrums: List[str] = api.instrument_query(project_ids=project_ids)
     txt = "List of available Intruments : <hr><ul id=InstrumList>"
     for r in instrums:
         txt += "\n<li>{0}</li>".format(r)
@@ -89,7 +89,7 @@ def searchgettaxomapping():
     # taxa from classif and target taxa.
     proj_id = int(gvg("projid"))
     with ApiClient(ProjectsApi, request) as api:
-        proj: ProjectModel = api.project_query_projects_project_id_get(proj_id, for_managing=False)
+        proj: ProjectModel = api.project_query(proj_id, for_managing=False)
     # Example proj.classifsetting
     #     baseproject=1850,1578,1581
     #     critvar=%area,angle,area,area_exc,bx,by,cdexc,centroids,circ.,circex,convarea,convperim,cv,elongation,esd,fcons,feret,feretareaexc,fractal,height,histcum1,histcum2,histcum3,intden,kurt,major,max,mean,meanpos,median,min,minor,mode,nb1,nb2,perim.,perimareaexc,perimferet,perimmajor,range,skelarea,skew,slope,sr,stddev,symetrieh,symetriehc,symetriev,symetrievc,thickr,width,x,xm,xstart,y,ym,ystart
@@ -105,7 +105,7 @@ def searchgettaxomapping():
         # Collect name for each needed id
         lst = "+".join(res['mapping'].values())
         with ApiClient(TaxonomyTreeApi, request) as api:
-            taxo_info: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=lst)
+            taxo_info: List[TaxonModel] = api.query_taxa_set(ids=lst)
         # Fill in result list
         res['taxo'] = {taxon_rec.id: taxon_rec.display_name for taxon_rec in taxo_info}
 
@@ -116,6 +116,6 @@ def searchgettaxomapping():
 def searchannot(PrjId):
     # Return all annotators for a project
     with ApiClient(ProjectsApi, request) as api:
-        stats: List[ProjectUserStatsModel] = api.project_set_get_user_stats_project_set_user_stats_get(ids=str(PrjId))
+        stats: List[ProjectUserStatsModel] = api.project_set_get_user_stats(ids=str(PrjId))
     res = [(r.id, r.name) for r in stats[0].annotators]
     return render_template('search/annot.html', samples=res)

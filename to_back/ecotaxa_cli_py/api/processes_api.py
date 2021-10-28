@@ -36,13 +36,13 @@ class ProcessesApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def process_query_process_process_id_get(self, process_id, **kwargs):  # noqa: E501
+    def process_query(self, process_id, **kwargs):  # noqa: E501
         """Process Query  # noqa: E501
 
         Returns **information about the process** corresponding to the given id.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.process_query_process_process_id_get(process_id, async_req=True)
+        >>> thread = api.process_query(process_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class ProcessesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.process_query_process_process_id_get_with_http_info(process_id, **kwargs)  # noqa: E501
+        return self.process_query_with_http_info(process_id, **kwargs)  # noqa: E501
 
-    def process_query_process_process_id_get_with_http_info(self, process_id, **kwargs):  # noqa: E501
+    def process_query_with_http_info(self, process_id, **kwargs):  # noqa: E501
         """Process Query  # noqa: E501
 
         Returns **information about the process** corresponding to the given id.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.process_query_process_process_id_get_with_http_info(process_id, async_req=True)
+        >>> thread = api.process_query_with_http_info(process_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class ProcessesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method process_query_process_process_id_get" % key
+                    " to method process_query" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'process_id' is set
         if self.api_client.client_side_validation and ('process_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['process_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `process_id` when calling `process_query_process_process_id_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `process_id` when calling `process_query`")  # noqa: E501
 
         collection_formats = {}
 
@@ -150,13 +150,13 @@ class ProcessesApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def update_processes_process_set_update_post(self, bulk_update_req, **kwargs):  # noqa: E501
+    def update_processes(self, bulk_update_req, **kwargs):  # noqa: E501
         """Update Processes  # noqa: E501
 
         Do the required **update for each process in the set.**  **Returns the number of updated entities.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_processes_process_set_update_post(bulk_update_req, async_req=True)
+        >>> thread = api.update_processes(bulk_update_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -173,15 +173,15 @@ class ProcessesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.update_processes_process_set_update_post_with_http_info(bulk_update_req, **kwargs)  # noqa: E501
+        return self.update_processes_with_http_info(bulk_update_req, **kwargs)  # noqa: E501
 
-    def update_processes_process_set_update_post_with_http_info(self, bulk_update_req, **kwargs):  # noqa: E501
+    def update_processes_with_http_info(self, bulk_update_req, **kwargs):  # noqa: E501
         """Update Processes  # noqa: E501
 
         Do the required **update for each process in the set.**  **Returns the number of updated entities.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_processes_process_set_update_post_with_http_info(bulk_update_req, async_req=True)
+        >>> thread = api.update_processes_with_http_info(bulk_update_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -218,14 +218,14 @@ class ProcessesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method update_processes_process_set_update_post" % key
+                    " to method update_processes" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'bulk_update_req' is set
         if self.api_client.client_side_validation and ('bulk_update_req' not in local_var_params or  # noqa: E501
                                                         local_var_params['bulk_update_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `bulk_update_req` when calling `update_processes_process_set_update_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `bulk_update_req` when calling `update_processes`")  # noqa: E501
 
         collection_formats = {}
 

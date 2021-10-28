@@ -7,9 +7,9 @@ from flask import render_template, g, flash, request, json
 from flask_security import login_required
 
 from appli import app, PrintInCharte, gvp, XSSEscape, TempTaskDir
+from appli.constants import MappableObjectColumns, MappableParentColumns
 ######################################################################################################################
 from appli.utils import ApiClient
-from appli.constants import MappableObjectColumns, MappableParentColumns
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (ProjectsApi, UsersApi, TaxonomyTreeApi, MiscApi)
 from to_back.ecotaxa_cli_py.models import (ProjectModel, UserModel, TaxonModel, ProjectTaxoStatsModel)
@@ -21,7 +21,7 @@ def PrjEdit(PrjId, privs_only=False):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=True)
+            target_proj: ProjectModel = api.project_query(PrjId, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
                 flash("Project doesn't exist", 'error')
@@ -37,7 +37,7 @@ def PrjEdit(PrjId, privs_only=False):
     g.users = collections.OrderedDict()
     users_by_id = {}
     with ApiClient(UsersApi, request) as api:
-        all_users: List[UserModel] = api.search_user_users_search_get(by_name="%%")
+        all_users: List[UserModel] = api.search_user(by_name="%%")
     for a_user in sorted(all_users, key=lambda u: u.name.strip().lower()):
         g.users[str(a_user.id)] = a_user.name.strip()
         users_by_id[a_user.id] = a_user
@@ -138,8 +138,8 @@ def PrjEdit(PrjId, privs_only=False):
         with ApiClient(ProjectsApi, request) as api:
             try:
                 if do_update:
-                    api.update_project_projects_project_id_put(project_id=target_proj.projid,
-                                                               project_model=target_proj)
+                    api.update_project(project_id=target_proj.projid,
+                                       project_model=target_proj)
             except ApiException as ae:
                 flash("Update problem: %s" % ae, "error")
 
@@ -153,7 +153,7 @@ def PrjEdit(PrjId, privs_only=False):
 
     lst = [str(tid) for tid in target_proj.init_classif_list]
     with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=" ".join(lst))
+        res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))
     g.predeftaxo = [(r.id, r.display_name) for r in res]
     g.predeftaxo.sort(key=lambda r: r[1].lower())
 
@@ -167,7 +167,7 @@ def PrjEdit(PrjId, privs_only=False):
 
     # TODO: Cache of course, it's constants!
     with ApiClient(MiscApi, request) as api:
-        possible_licenses = api.used_constants_constants_get().license_texts
+        possible_licenses = api.used_constants().license_texts
 
     return render_template('project/editproject.html', data=target_proj,
                            possible_licenses=possible_licenses)
@@ -180,12 +180,12 @@ def PrjEdit(PrjId, privs_only=False):
 def Prjpopupeditpreset(PrjId):
     # Query accessible projects
     with ApiClient(ProjectsApi, request) as api:
-        prjs: List[ProjectModel] = api.search_projects_projects_search_get(also_others=False,
-                                                                           filter_subset=False)
+        prjs: List[ProjectModel] = api.search_projects(also_others=False,
+                                                       filter_subset=False)
     # And their statistics
     prj_ids = " ".join([str(a_prj.projid) for a_prj in prjs])
     with ApiClient(ProjectsApi, request) as api:
-        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats_project_set_taxo_stats_get(ids=prj_ids)
+        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=prj_ids)
 
     # Sort for consistency
     prjs.sort(key=lambda prj: prj.title.strip().lower())
@@ -201,7 +201,7 @@ def Prjpopupeditpreset(PrjId):
     # Collect name for each existing id
     lst = [str(tid) for tid in taxa_ids_for_all if tid != -1]
     with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=" ".join(lst))
+        res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))
     taxo_map = {taxon_rec.id: taxon_rec.display_name for taxon_rec in res}
 
     txt = ""

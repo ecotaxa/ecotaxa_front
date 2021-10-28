@@ -36,13 +36,13 @@ class WIPApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def system_status_status_get(self, **kwargs):  # noqa: E501
+    def system_status(self, **kwargs):  # noqa: E501
         """System Status  # noqa: E501
 
         **Report the status**, mainly used for verifying that the server is up.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.system_status_status_get(async_req=True)
+        >>> thread = api.system_status(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -58,15 +58,15 @@ class WIPApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.system_status_status_get_with_http_info(**kwargs)  # noqa: E501
+        return self.system_status_with_http_info(**kwargs)  # noqa: E501
 
-    def system_status_status_get_with_http_info(self, **kwargs):  # noqa: E501
+    def system_status_with_http_info(self, **kwargs):  # noqa: E501
         """System Status  # noqa: E501
 
         **Report the status**, mainly used for verifying that the server is up.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.system_status_status_get_with_http_info(async_req=True)
+        >>> thread = api.system_status_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -101,7 +101,7 @@ class WIPApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method system_status_status_get" % key
+                    " to method system_status" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']

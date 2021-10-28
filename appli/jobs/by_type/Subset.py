@@ -25,7 +25,7 @@ class SubsetJob(Job):
         prj_id = int(gvg("p"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -52,7 +52,7 @@ class SubsetJob(Job):
         prj_id = int(gvp("p"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -107,7 +107,7 @@ class SubsetJob(Job):
                                        title=subsetprojecttitle,
                                        visible=False)
                 # TODO: The new project has status ANNOTATE. Is it important?
-                new_prj_id: int = api.create_project_projects_create_post(req)
+                new_prj_id: int = api.create_project(req)
             # Do the cloning
             with ApiClient(ProjectsApi, request) as api:
                 req = SubsetReq(filters=filters,
@@ -115,8 +115,8 @@ class SubsetJob(Job):
                                 group_type=grptype,
                                 limit_type=valtype,
                                 limit_value=valeur)
-                rsp: SubsetRsp = api.project_subset_projects_project_id_subset_post(project_id=prj_id,
-                                                                                    subset_req=req)
+                rsp: SubsetRsp = api.project_subset(project_id=prj_id,
+                                                    subset_req=req)
             return redirect("/Job/Monitor/%d" % rsp.job_id)
 
     # noinspection PyUnresolvedReferences

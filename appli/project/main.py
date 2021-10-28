@@ -114,8 +114,8 @@ def _set_filters_from_prefs_and_get(page_vars, prj_id, a_request):
     # Read user preferences related to this project
     with ApiClient(UsersApi, a_request) as api:
         try:
-            prefs: str = api.get_current_user_prefs_users_my_preferences_project_id_get(project_id=prj_id,
-                                                                                        key=_FILTERS_KEY)
+            prefs: str = api.get_current_user_prefs(project_id=prj_id,
+                                                    key=_FILTERS_KEY)
             user_vals = json.loads(prefs)
             page_vars.update(user_vals)
         except ApiException as ae:
@@ -135,8 +135,8 @@ def _set_prefs_from_filters(filters, prj_id):
     # Read present values
     with ApiClient(UsersApi, request) as api:
         try:
-            prefs: str = api.get_current_user_prefs_users_my_preferences_project_id_get(project_id=prj_id,
-                                                                                        key=_FILTERS_KEY)
+            prefs: str = api.get_current_user_prefs(project_id=prj_id,
+                                                    key=_FILTERS_KEY)
             user_vals = json.loads(prefs)
             if not isinstance(user_vals, dict):
                 user_vals = {}
@@ -157,9 +157,9 @@ def _set_prefs_from_filters(filters, prj_id):
         user_vals.update(prefs_update)
         with ApiClient(UsersApi, request) as api:
             val_to_write = json.dumps(user_vals)
-            api.set_current_user_prefs_users_my_preferences_project_id_put(project_id=prj_id,
-                                                                           key=_FILTERS_KEY,
-                                                                           value=val_to_write)
+            api.set_current_user_prefs(project_id=prj_id,
+                                       key=_FILTERS_KEY,
+                                       value=val_to_write)
 
 
 ######################################################################################################################
@@ -177,7 +177,7 @@ def indexPrj(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+            proj: ProjectModel = api.project_query(PrjId, for_managing=False)
         except ApiException as ae:
             if ae.status == 404:
                 flash("Project doesn't exists", 'error')
@@ -197,7 +197,7 @@ def indexPrj(PrjId):
     g.TaxonCreator = False
     with ApiClient(UsersApi, request) as api:
         try:
-            logged_user: UserModelWithRights = api.show_current_user_users_me_get()
+            logged_user: UserModelWithRights = api.show_current_user()
             g.TaxonCreator = 4 in logged_user.can_do
         except ApiException as ae:
             pass
@@ -207,8 +207,8 @@ def indexPrj(PrjId):
     if data.get("samples"):
         # Sample filter was posted, select the corresponding items.
         with ApiClient(SamplesApi, request) as api:
-            samples: List[SampleModel] = api.samples_search_samples_search_get(project_ids=str(PrjId),
-                                                                               id_pattern="")
+            samples: List[SampleModel] = api.samples_search(project_ids=str(PrjId),
+                                                            id_pattern="")
         sample_ids = set(data['samples'].split(","))
         for a_sample in samples:
             # TODO: Could be filtered server-side
@@ -250,7 +250,7 @@ def indexPrj(PrjId):
         for an_id in user_ids:
             with ApiClient(UsersApi, request) as api:
                 try:
-                    user: UserModel = api.get_user_users_user_id_get(user_id=an_id)
+                    user: UserModel = api.get_user(user_id=an_id)
                 except ApiException as _ae:
                     # Ignore this one
                     continue
@@ -285,7 +285,7 @@ def indexPrj(PrjId):
         try:
             taxon_id = int(gvg("taxo"))
             with ApiClient(TaxonomyTreeApi, request) as api:
-                taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=taxon_id)
+                taxon: TaxonModel = api.query_taxa(taxon_id=taxon_id)
             g.taxofilterlabel = taxon.name
         except (ValueError, ApiException):
             pass
@@ -394,7 +394,7 @@ def LoadRightPane():
     PrjId = gvp("projid")
     with ApiClient(ProjectsApi, request) as api:
         try:
-            proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+            proj: ProjectModel = api.project_query(PrjId, for_managing=False)
         except ApiException as ae:
             if ae.status == 404:
                 return "Invalid project"
@@ -507,12 +507,12 @@ def LoadRightPane():
         needed_fields = ",".join(api_cols)
         while True:
             objs: ObjectSetQueryRsp = \
-                api.get_object_set_object_set_project_id_query_post(project_id=PrjId,
-                                                                    project_filters=filtres,
-                                                                    fields=needed_fields,
-                                                                    order_field=sort_col_signed,
-                                                                    window_size=ippdb,
-                                                                    window_start=pageoffset * ippdb)
+                api.get_object_set(project_id=PrjId,
+                                   project_filters=filtres,
+                                   fields=needed_fields,
+                                   order_field=sort_col_signed,
+                                   window_size=ippdb,
+                                   window_start=pageoffset * ippdb)
             pagecount = math.ceil(objs.total_ids / ippdb)
             if pageoffset < pagecount:
                 # There are objects to view, we're done
@@ -706,7 +706,7 @@ def prjGetClassifTab(PrjId):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
-            proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+            proj: ProjectModel = api.project_query(PrjId, for_managing=False)
         except ApiException as _ae:
             return "Project doesn't exists"
 
@@ -715,8 +715,8 @@ def prjGetClassifTab(PrjId):
 
     # Get used taxa inside the project
     with ApiClient(ProjectsApi, request) as api:
-        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats_project_set_taxo_stats_get(ids=str(proj.projid),
-                                                                                                  taxa_ids="all")
+        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=str(proj.projid),
+                                                                       taxa_ids="all")
     populated_taxa = {stat.used_taxa[0]: stat
                       for stat in stats
                       if stat.used_taxa[0] != -1}  # filter unclassified
@@ -724,7 +724,7 @@ def prjGetClassifTab(PrjId):
     # Get info on them + the ones from project configuration
     with ApiClient(TaxonomyTreeApi, request) as api:
         taxa_ids = "+".join([str(x) for x in set(proj.init_classif_list).union(populated_taxa.keys())])
-        taxa: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=taxa_ids)
+        taxa: List[TaxonModel] = api.query_taxa_set(ids=taxa_ids)
     taxa.sort(key=lambda r: r.name)
     present_ids = {taxon.id for taxon in taxa}
 
@@ -854,7 +854,7 @@ def PrjGetFieldListFromModel(proj: ProjectModel, field_type, term):
 @login_required
 def PrjGetFieldListAjax(PrjId, typefield):
     with ApiClient(ProjectsApi, request) as api:
-        proj: ProjectModel = api.project_query_projects_project_id_get(PrjId, for_managing=False)
+        proj: ProjectModel = api.project_query(PrjId, for_managing=False)
         # A direct Ajax call with wrong context -> let the eventual HTTP error throw
     term = gvg("q")
     fieldlist = PrjGetFieldListFromModel(proj, typefield, term)

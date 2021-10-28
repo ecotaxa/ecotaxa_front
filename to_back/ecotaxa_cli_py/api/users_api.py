@@ -36,13 +36,13 @@ class UsersApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def get_current_user_prefs_users_my_preferences_project_id_get(self, project_id, key, **kwargs):  # noqa: E501
+    def get_current_user_prefs(self, project_id, key, **kwargs):  # noqa: E501
         """Get Current User Prefs  # noqa: E501
 
         **Returns one preference**, for a project and the currently authenticated user.  Available keys are **cwd**, **img_import** and **filters**.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_current_user_prefs_users_my_preferences_project_id_get(project_id, key, async_req=True)
+        >>> thread = api.get_current_user_prefs(project_id, key, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -60,15 +60,15 @@ class UsersApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.get_current_user_prefs_users_my_preferences_project_id_get_with_http_info(project_id, key, **kwargs)  # noqa: E501
+        return self.get_current_user_prefs_with_http_info(project_id, key, **kwargs)  # noqa: E501
 
-    def get_current_user_prefs_users_my_preferences_project_id_get_with_http_info(self, project_id, key, **kwargs):  # noqa: E501
+    def get_current_user_prefs_with_http_info(self, project_id, key, **kwargs):  # noqa: E501
         """Get Current User Prefs  # noqa: E501
 
         **Returns one preference**, for a project and the currently authenticated user.  Available keys are **cwd**, **img_import** and **filters**.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_current_user_prefs_users_my_preferences_project_id_get_with_http_info(project_id, key, async_req=True)
+        >>> thread = api.get_current_user_prefs_with_http_info(project_id, key, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -107,18 +107,18 @@ class UsersApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_current_user_prefs_users_my_preferences_project_id_get" % key
+                    " to method get_current_user_prefs" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `get_current_user_prefs_users_my_preferences_project_id_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `get_current_user_prefs`")  # noqa: E501
         # verify the required parameter 'key' is set
         if self.api_client.client_side_validation and ('key' not in local_var_params or  # noqa: E501
                                                         local_var_params['key'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `key` when calling `get_current_user_prefs_users_my_preferences_project_id_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `key` when calling `get_current_user_prefs`")  # noqa: E501
 
         collection_formats = {}
 
@@ -159,13 +159,13 @@ class UsersApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_user_users_user_id_get(self, user_id, **kwargs):  # noqa: E501
+    def get_user(self, user_id, **kwargs):  # noqa: E501
         """Get User  # noqa: E501
 
         Returns **information about the user** corresponding to the given id.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_user_users_user_id_get(user_id, async_req=True)
+        >>> thread = api.get_user(user_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -182,15 +182,15 @@ class UsersApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.get_user_users_user_id_get_with_http_info(user_id, **kwargs)  # noqa: E501
+        return self.get_user_with_http_info(user_id, **kwargs)  # noqa: E501
 
-    def get_user_users_user_id_get_with_http_info(self, user_id, **kwargs):  # noqa: E501
+    def get_user_with_http_info(self, user_id, **kwargs):  # noqa: E501
         """Get User  # noqa: E501
 
         Returns **information about the user** corresponding to the given id.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_user_users_user_id_get_with_http_info(user_id, async_req=True)
+        >>> thread = api.get_user_with_http_info(user_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -227,14 +227,14 @@ class UsersApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_user_users_user_id_get" % key
+                    " to method get_user" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'user_id' is set
         if self.api_client.client_side_validation and ('user_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['user_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `user_id` when calling `get_user_users_user_id_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `user_id` when calling `get_user`")  # noqa: E501
 
         collection_formats = {}
 
@@ -273,13 +273,13 @@ class UsersApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_users_users_get(self, **kwargs):  # noqa: E501
+    def get_users(self, **kwargs):  # noqa: E501
         """Get Users  # noqa: E501
 
         Returns the list of **all users** with their information.   🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_users_users_get(async_req=True)
+        >>> thread = api.get_users(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -295,15 +295,15 @@ class UsersApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.get_users_users_get_with_http_info(**kwargs)  # noqa: E501
+        return self.get_users_with_http_info(**kwargs)  # noqa: E501
 
-    def get_users_users_get_with_http_info(self, **kwargs):  # noqa: E501
+    def get_users_with_http_info(self, **kwargs):  # noqa: E501
         """Get Users  # noqa: E501
 
         Returns the list of **all users** with their information.   🔒 *For admins only.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_users_users_get_with_http_info(async_req=True)
+        >>> thread = api.get_users_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -338,7 +338,7 @@ class UsersApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_users_users_get" % key
+                    " to method get_users" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
@@ -378,13 +378,13 @@ class UsersApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def search_user_users_search_get(self, **kwargs):  # noqa: E501
+    def search_user(self, **kwargs):  # noqa: E501
         """Search User  # noqa: E501
 
         **Search users using various criteria**, search is case insensitive and might contain % chars.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.search_user_users_search_get(async_req=True)
+        >>> thread = api.search_user(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -401,15 +401,15 @@ class UsersApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.search_user_users_search_get_with_http_info(**kwargs)  # noqa: E501
+        return self.search_user_with_http_info(**kwargs)  # noqa: E501
 
-    def search_user_users_search_get_with_http_info(self, **kwargs):  # noqa: E501
+    def search_user_with_http_info(self, **kwargs):  # noqa: E501
         """Search User  # noqa: E501
 
         **Search users using various criteria**, search is case insensitive and might contain % chars.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.search_user_users_search_get_with_http_info(async_req=True)
+        >>> thread = api.search_user_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -446,7 +446,7 @@ class UsersApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method search_user_users_search_get" % key
+                    " to method search_user" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
@@ -488,13 +488,13 @@ class UsersApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def set_current_user_prefs_users_my_preferences_project_id_put(self, project_id, key, value, **kwargs):  # noqa: E501
+    def set_current_user_prefs(self, project_id, key, value, **kwargs):  # noqa: E501
         """Set Current User Prefs  # noqa: E501
 
         **Sets one preference**, for a project and for the currently authenticated user.  Available keys are **cwd**, **img_import** and **filters**.  The key disappears if set to empty string.  **Returns NULL upon success.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.set_current_user_prefs_users_my_preferences_project_id_put(project_id, key, value, async_req=True)
+        >>> thread = api.set_current_user_prefs(project_id, key, value, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -513,15 +513,15 @@ class UsersApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.set_current_user_prefs_users_my_preferences_project_id_put_with_http_info(project_id, key, value, **kwargs)  # noqa: E501
+        return self.set_current_user_prefs_with_http_info(project_id, key, value, **kwargs)  # noqa: E501
 
-    def set_current_user_prefs_users_my_preferences_project_id_put_with_http_info(self, project_id, key, value, **kwargs):  # noqa: E501
+    def set_current_user_prefs_with_http_info(self, project_id, key, value, **kwargs):  # noqa: E501
         """Set Current User Prefs  # noqa: E501
 
         **Sets one preference**, for a project and for the currently authenticated user.  Available keys are **cwd**, **img_import** and **filters**.  The key disappears if set to empty string.  **Returns NULL upon success.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.set_current_user_prefs_users_my_preferences_project_id_put_with_http_info(project_id, key, value, async_req=True)
+        >>> thread = api.set_current_user_prefs_with_http_info(project_id, key, value, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -562,22 +562,22 @@ class UsersApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method set_current_user_prefs_users_my_preferences_project_id_put" % key
+                    " to method set_current_user_prefs" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_id' is set
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_id` when calling `set_current_user_prefs_users_my_preferences_project_id_put`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_id` when calling `set_current_user_prefs`")  # noqa: E501
         # verify the required parameter 'key' is set
         if self.api_client.client_side_validation and ('key' not in local_var_params or  # noqa: E501
                                                         local_var_params['key'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `key` when calling `set_current_user_prefs_users_my_preferences_project_id_put`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `key` when calling `set_current_user_prefs`")  # noqa: E501
         # verify the required parameter 'value' is set
         if self.api_client.client_side_validation and ('value' not in local_var_params or  # noqa: E501
                                                         local_var_params['value'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `value` when calling `set_current_user_prefs_users_my_preferences_project_id_put`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `value` when calling `set_current_user_prefs`")  # noqa: E501
 
         collection_formats = {}
 
@@ -620,13 +620,13 @@ class UsersApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def show_current_user_users_me_get(self, **kwargs):  # noqa: E501
+    def show_current_user(self, **kwargs):  # noqa: E501
         """Show Current User  # noqa: E501
 
         Returns **currently authenticated user's** (i.e. you) information, permissions and last used projects.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.show_current_user_users_me_get(async_req=True)
+        >>> thread = api.show_current_user(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -642,15 +642,15 @@ class UsersApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.show_current_user_users_me_get_with_http_info(**kwargs)  # noqa: E501
+        return self.show_current_user_with_http_info(**kwargs)  # noqa: E501
 
-    def show_current_user_users_me_get_with_http_info(self, **kwargs):  # noqa: E501
+    def show_current_user_with_http_info(self, **kwargs):  # noqa: E501
         """Show Current User  # noqa: E501
 
         Returns **currently authenticated user's** (i.e. you) information, permissions and last used projects.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.show_current_user_users_me_get_with_http_info(async_req=True)
+        >>> thread = api.show_current_user_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -685,7 +685,7 @@ class UsersApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method show_current_user_users_me_get" % key
+                    " to method show_current_user" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']

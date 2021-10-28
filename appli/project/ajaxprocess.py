@@ -39,7 +39,7 @@ def PrjManualClassif(_PrjId):
             req = ClassifyReq(target_ids=object_ids,
                               classifications=classifications,
                               wanted_qualification=wanted_qualif)
-            nb_upd = api.classify_object_set_object_set_classify_post(req)
+            nb_upd = api.classify_object_set(req)
         if nb_upd < 0:
             # Not all was done
             ret = '<span class="label label-danger">Unable to save _all_ changes</span>'
@@ -66,8 +66,8 @@ def PrjUpdateComment(ObjId):
     updates = [{"ucol": "complement_info", "uval": gvp('comment')}]
     with ApiClient(ObjectsApi, request) as api:
         try:
-            nb_rows = api.update_object_set_object_set_update_post(BulkUpdateReq(target_ids=[ObjId],
-                                                                                 updates=updates))
+            nb_rows = api.update_object_set(BulkUpdateReq(target_ids=[ObjId],
+                                                          updates=updates))
         except ApiException as ae:
             if ae.status == 404:
                 return "Object doesn't exists"

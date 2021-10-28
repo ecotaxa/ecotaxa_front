@@ -29,7 +29,7 @@ class ImportJob(Job):
         prj_id = int(gvg("p"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -39,8 +39,8 @@ class ImportJob(Job):
         g.appmanagermailto = get_app_manager_mail(request)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as api:
-            server_path = api.get_current_user_prefs_users_my_preferences_project_id_get(prj_id,
-                                                                                         "cwd")
+            server_path = api.get_current_user_prefs(prj_id,
+                                                     "cwd")
         return render_template(cls.STEP0_TEMPLATE, header="",
                                ServerPath=server_path,
                                TxtTaxoMap="")
@@ -51,7 +51,7 @@ class ImportJob(Job):
         prj_id = int(gvg("p"))
         with ApiClient(ProjectsApi, request) as api:
             try:
-                target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -86,7 +86,7 @@ class ImportJob(Job):
                 # Compute directory to open next time, we pick the parent to avoid double import of the same
                 # directory or zip.
                 cwd = str(Path(server_path).parent)
-                api.set_current_user_prefs_users_my_preferences_project_id_put(prj_id, "cwd", cwd)
+                api.set_current_user_prefs(prj_id, "cwd", cwd)
 
         req = ImportReq(source_path=file_to_load,
                         taxo_mappings=taxo_map,
@@ -96,7 +96,7 @@ class ImportJob(Job):
 
         with ApiClient(ProjectsApi, request) as api:
             try:
-                rsp: ImportRsp = api.import_file_file_import_project_id_post(prj_id, req)
+                rsp: ImportRsp = api.import_file(prj_id, req)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("Not enough permission for importing into this project")
@@ -114,8 +114,8 @@ class ImportJob(Job):
         if server_path == "":
             # Get stored last value for this project
             with ApiClient(UsersApi, request) as api:
-                server_path = api.get_current_user_prefs_users_my_preferences_project_id_get(prj_id,
-                                                                                             "cwd")
+                server_path = api.get_current_user_prefs(prj_id,
+                                                         "cwd")
         return render_template(cls.STEP0_TEMPLATE, header="",
                                data=req, ServerPath=server_path,
                                TxtTaxoMap=str_taxo_mapping)
@@ -137,7 +137,7 @@ class ImportJob(Job):
         txt = "<h1>Text File Importation Task</h1>"
         prj_id = job.params["prj_id"]
         with ApiClient(ProjectsApi, request) as api:
-            target_prj: ProjectModel = api.project_query_projects_project_id_get(prj_id, for_managing=False)
+            target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
         # Feed global template values
         g.prjtitle = target_prj.title
         g.prjprojid = target_prj.projid
@@ -171,7 +171,7 @@ class ImportJob(Job):
                    "taxa": categs}
         with ApiClient(JobsApi, request) as api:
             try:
-                api.reply_job_question_jobs_job_id_answer_post(job_id=job.id, body=answers)
+                api.reply_job_question(job_id=job.id, body=answers)
             except ApiException as ae:
                 flash_any_error([str(ae)])
                 return render_template('jobs/import_question1.html',
@@ -194,7 +194,7 @@ class ImportJob(Job):
         # param.TaxoFound is rsp.found_taxa, so key=taxon name (seen in TSV), value=resolved ID
         node_ids = "+".join([str(x) for x in set(self.param.TaxoFound.values())])
         with ApiClient(TaxonomyTreeApi, request) as api:
-            nodes: List[TaxonModel] = api.query_taxa_set_taxon_set_query_get(ids=node_ids)
+            nodes: List[TaxonModel] = api.query_taxa_set(ids=node_ids)
         nodes_dict = {a_node.id: a_node.name for a_node in nodes}
         # issue a line per resolved name
         txt = "<p><u>Used mapping, usable for next import</u></p>"

@@ -36,13 +36,13 @@ class SamplesApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def sample_query_sample_sample_id_get(self, sample_id, **kwargs):  # noqa: E501
+    def sample_query(self, sample_id, **kwargs):  # noqa: E501
         """Sample Query  # noqa: E501
 
         Returns **information about the sample** corresponding to the given id.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.sample_query_sample_sample_id_get(sample_id, async_req=True)
+        >>> thread = api.sample_query(sample_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class SamplesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.sample_query_sample_sample_id_get_with_http_info(sample_id, **kwargs)  # noqa: E501
+        return self.sample_query_with_http_info(sample_id, **kwargs)  # noqa: E501
 
-    def sample_query_sample_sample_id_get_with_http_info(self, sample_id, **kwargs):  # noqa: E501
+    def sample_query_with_http_info(self, sample_id, **kwargs):  # noqa: E501
         """Sample Query  # noqa: E501
 
         Returns **information about the sample** corresponding to the given id.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.sample_query_sample_sample_id_get_with_http_info(sample_id, async_req=True)
+        >>> thread = api.sample_query_with_http_info(sample_id, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class SamplesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method sample_query_sample_sample_id_get" % key
+                    " to method sample_query" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'sample_id' is set
         if self.api_client.client_side_validation and ('sample_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['sample_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `sample_id` when calling `sample_query_sample_sample_id_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `sample_id` when calling `sample_query`")  # noqa: E501
 
         collection_formats = {}
 
@@ -150,13 +150,13 @@ class SamplesApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def sample_set_get_stats_sample_set_taxo_stats_get(self, sample_ids, **kwargs):  # noqa: E501
+    def sample_set_get_stats(self, sample_ids, **kwargs):  # noqa: E501
         """Sample Set Get Stats  # noqa: E501
 
         Returns **classification statistics** for the given set of samples.  EXPECT A SLOW RESPONSE : No cache of such information anywhere.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.sample_set_get_stats_sample_set_taxo_stats_get(sample_ids, async_req=True)
+        >>> thread = api.sample_set_get_stats(sample_ids, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -173,15 +173,15 @@ class SamplesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.sample_set_get_stats_sample_set_taxo_stats_get_with_http_info(sample_ids, **kwargs)  # noqa: E501
+        return self.sample_set_get_stats_with_http_info(sample_ids, **kwargs)  # noqa: E501
 
-    def sample_set_get_stats_sample_set_taxo_stats_get_with_http_info(self, sample_ids, **kwargs):  # noqa: E501
+    def sample_set_get_stats_with_http_info(self, sample_ids, **kwargs):  # noqa: E501
         """Sample Set Get Stats  # noqa: E501
 
         Returns **classification statistics** for the given set of samples.  EXPECT A SLOW RESPONSE : No cache of such information anywhere.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.sample_set_get_stats_sample_set_taxo_stats_get_with_http_info(sample_ids, async_req=True)
+        >>> thread = api.sample_set_get_stats_with_http_info(sample_ids, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -218,14 +218,14 @@ class SamplesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method sample_set_get_stats_sample_set_taxo_stats_get" % key
+                    " to method sample_set_get_stats" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'sample_ids' is set
         if self.api_client.client_side_validation and ('sample_ids' not in local_var_params or  # noqa: E501
                                                         local_var_params['sample_ids'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `sample_ids` when calling `sample_set_get_stats_sample_set_taxo_stats_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `sample_ids` when calling `sample_set_get_stats`")  # noqa: E501
 
         collection_formats = {}
 
@@ -264,13 +264,13 @@ class SamplesApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def samples_search_samples_search_get(self, project_ids, id_pattern, **kwargs):  # noqa: E501
+    def samples_search(self, project_ids, id_pattern, **kwargs):  # noqa: E501
         """Samples Search  # noqa: E501
 
         **Search for samples.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.samples_search_samples_search_get(project_ids, id_pattern, async_req=True)
+        >>> thread = api.samples_search(project_ids, id_pattern, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -288,15 +288,15 @@ class SamplesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.samples_search_samples_search_get_with_http_info(project_ids, id_pattern, **kwargs)  # noqa: E501
+        return self.samples_search_with_http_info(project_ids, id_pattern, **kwargs)  # noqa: E501
 
-    def samples_search_samples_search_get_with_http_info(self, project_ids, id_pattern, **kwargs):  # noqa: E501
+    def samples_search_with_http_info(self, project_ids, id_pattern, **kwargs):  # noqa: E501
         """Samples Search  # noqa: E501
 
         **Search for samples.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.samples_search_samples_search_get_with_http_info(project_ids, id_pattern, async_req=True)
+        >>> thread = api.samples_search_with_http_info(project_ids, id_pattern, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -335,18 +335,18 @@ class SamplesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method samples_search_samples_search_get" % key
+                    " to method samples_search" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'project_ids' is set
         if self.api_client.client_side_validation and ('project_ids' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_ids'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `project_ids` when calling `samples_search_samples_search_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_ids` when calling `samples_search`")  # noqa: E501
         # verify the required parameter 'id_pattern' is set
         if self.api_client.client_side_validation and ('id_pattern' not in local_var_params or  # noqa: E501
                                                         local_var_params['id_pattern'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `id_pattern` when calling `samples_search_samples_search_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `id_pattern` when calling `samples_search`")  # noqa: E501
 
         collection_formats = {}
 
@@ -387,13 +387,13 @@ class SamplesApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def update_samples_sample_set_update_post(self, bulk_update_req, **kwargs):  # noqa: E501
+    def update_samples(self, bulk_update_req, **kwargs):  # noqa: E501
         """Update Samples  # noqa: E501
 
         Do the required **update for each sample in the set.**   Any non-null field in the model is written to every impacted sample.  **Returns the number of updated entities.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_samples_sample_set_update_post(bulk_update_req, async_req=True)
+        >>> thread = api.update_samples(bulk_update_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -410,15 +410,15 @@ class SamplesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.update_samples_sample_set_update_post_with_http_info(bulk_update_req, **kwargs)  # noqa: E501
+        return self.update_samples_with_http_info(bulk_update_req, **kwargs)  # noqa: E501
 
-    def update_samples_sample_set_update_post_with_http_info(self, bulk_update_req, **kwargs):  # noqa: E501
+    def update_samples_with_http_info(self, bulk_update_req, **kwargs):  # noqa: E501
         """Update Samples  # noqa: E501
 
         Do the required **update for each sample in the set.**   Any non-null field in the model is written to every impacted sample.  **Returns the number of updated entities.**  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_samples_sample_set_update_post_with_http_info(bulk_update_req, async_req=True)
+        >>> thread = api.update_samples_with_http_info(bulk_update_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -455,14 +455,14 @@ class SamplesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method update_samples_sample_set_update_post" % key
+                    " to method update_samples" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'bulk_update_req' is set
         if self.api_client.client_side_validation and ('bulk_update_req' not in local_var_params or  # noqa: E501
                                                         local_var_params['bulk_update_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `bulk_update_req` when calling `update_samples_sample_set_update_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `bulk_update_req` when calling `update_samples`")  # noqa: E501
 
         collection_formats = {}
 

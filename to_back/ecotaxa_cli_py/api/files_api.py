@@ -36,13 +36,13 @@ class FilesApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def list_common_files_common_files_get(self, path, **kwargs):  # noqa: E501
+    def list_common_files(self, path, **kwargs):  # noqa: E501
         """List Common Files  # noqa: E501
 
         **List the common files** which are usable for some file-related operations.  *e.g. import.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.list_common_files_common_files_get(path, async_req=True)
+        >>> thread = api.list_common_files(path, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -59,15 +59,15 @@ class FilesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.list_common_files_common_files_get_with_http_info(path, **kwargs)  # noqa: E501
+        return self.list_common_files_with_http_info(path, **kwargs)  # noqa: E501
 
-    def list_common_files_common_files_get_with_http_info(self, path, **kwargs):  # noqa: E501
+    def list_common_files_with_http_info(self, path, **kwargs):  # noqa: E501
         """List Common Files  # noqa: E501
 
         **List the common files** which are usable for some file-related operations.  *e.g. import.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.list_common_files_common_files_get_with_http_info(path, async_req=True)
+        >>> thread = api.list_common_files_with_http_info(path, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -104,14 +104,14 @@ class FilesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method list_common_files_common_files_get" % key
+                    " to method list_common_files" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'path' is set
         if self.api_client.client_side_validation and ('path' not in local_var_params or  # noqa: E501
                                                         local_var_params['path'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `path` when calling `list_common_files_common_files_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `path` when calling `list_common_files`")  # noqa: E501
 
         collection_formats = {}
 
@@ -150,13 +150,13 @@ class FilesApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def list_user_files_my_files_sub_path_get(self, sub_path, **kwargs):  # noqa: E501
+    def list_user_files(self, sub_path, **kwargs):  # noqa: E501
         """List User Files  # noqa: E501
 
         **List the private files** which are usable for some file-related operations.  *e.g. import.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.list_user_files_my_files_sub_path_get(sub_path, async_req=True)
+        >>> thread = api.list_user_files(sub_path, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -173,15 +173,15 @@ class FilesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.list_user_files_my_files_sub_path_get_with_http_info(sub_path, **kwargs)  # noqa: E501
+        return self.list_user_files_with_http_info(sub_path, **kwargs)  # noqa: E501
 
-    def list_user_files_my_files_sub_path_get_with_http_info(self, sub_path, **kwargs):  # noqa: E501
+    def list_user_files_with_http_info(self, sub_path, **kwargs):  # noqa: E501
         """List User Files  # noqa: E501
 
         **List the private files** which are usable for some file-related operations.  *e.g. import.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.list_user_files_my_files_sub_path_get_with_http_info(sub_path, async_req=True)
+        >>> thread = api.list_user_files_with_http_info(sub_path, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -218,14 +218,14 @@ class FilesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method list_user_files_my_files_sub_path_get" % key
+                    " to method list_user_files" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'sub_path' is set
         if self.api_client.client_side_validation and ('sub_path' not in local_var_params or  # noqa: E501
                                                         local_var_params['sub_path'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `sub_path` when calling `list_user_files_my_files_sub_path_get`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `sub_path` when calling `list_user_files`")  # noqa: E501
 
         collection_formats = {}
 
@@ -264,13 +264,13 @@ class FilesApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def put_user_file_my_files_post(self, file, **kwargs):  # noqa: E501
+    def post_user_file(self, file, **kwargs):  # noqa: E501
         """Put User File  # noqa: E501
 
         **Upload a file for the current user.**  The returned text will contain a serve-side path which is usable for some file-related operations.  *e.g. import.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.put_user_file_my_files_post(file, async_req=True)
+        >>> thread = api.post_user_file(file, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -289,15 +289,15 @@ class FilesApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.put_user_file_my_files_post_with_http_info(file, **kwargs)  # noqa: E501
+        return self.post_user_file_with_http_info(file, **kwargs)  # noqa: E501
 
-    def put_user_file_my_files_post_with_http_info(self, file, **kwargs):  # noqa: E501
+    def post_user_file_with_http_info(self, file, **kwargs):  # noqa: E501
         """Put User File  # noqa: E501
 
         **Upload a file for the current user.**  The returned text will contain a serve-side path which is usable for some file-related operations.  *e.g. import.*  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.put_user_file_my_files_post_with_http_info(file, async_req=True)
+        >>> thread = api.post_user_file_with_http_info(file, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
@@ -338,14 +338,14 @@ class FilesApi(object):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method put_user_file_my_files_post" % key
+                    " to method post_user_file" % key
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
         # verify the required parameter 'file' is set
         if self.api_client.client_side_validation and ('file' not in local_var_params or  # noqa: E501
                                                         local_var_params['file'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `file` when calling `put_user_file_my_files_post`")  # noqa: E501
+            raise ApiValueError("Missing the required parameter `file` when calling `post_user_file`")  # noqa: E501
 
         collection_formats = {}
 

@@ -38,7 +38,7 @@ def objectdetails(objid):
     # Security & sanity checks
     with ApiClient(ObjectApi, request) as api:
         try:
-            obj: ObjectModel = api.object_query_object_object_id_get(objid)
+            obj: ObjectModel = api.object_query(objid)
         except ApiException as ae:
             if ae.status == 404:
                 return "Object doesn't exists"
@@ -47,13 +47,13 @@ def objectdetails(objid):
                 return PrintInCharte("<a href=/>Back to home</a>")
     # Project info
     with ApiClient(ProjectsApi, request) as api:
-        obj_proj: ProjectModel = api.project_query_projects_project_id_get(obj.project_id, for_managing=False)
+        obj_proj: ProjectModel = api.project_query(obj.project_id, for_managing=False)
     # User info
     current_user_id = -1  # Anonymous
     g.TaxonCreator = False
     with ApiClient(UsersApi, request) as api:
         try:
-            logged_user: UserModelWithRights = api.show_current_user_users_me_get()
+            logged_user: UserModelWithRights = api.show_current_user()
             current_user_id = logged_user.id
             g.TaxonCreator = 4 in logged_user.can_do
         except ApiException as _ae:
@@ -86,7 +86,7 @@ def objectdetails(objid):
     page.append("</p><p>Classification :")
     if obj.classif_id:
         with ApiClient(TaxonomyTreeApi, request) as api:
-            taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=obj.classif_id)
+            taxon: TaxonModel = api.query_taxa(taxon_id=obj.classif_id)
         page.append("<br>&emsp;<b>%s</b>" % XSSEscape(taxon.display_name))
         page.append("<br>&emsp;" + (" &lt; ".join(taxon.lineage)) + " (id=%s)" % obj.classif_id)
     else:
@@ -97,7 +97,7 @@ def objectdetails(objid):
         if current_user_id != -1:
             # No name for anonymous
             with ApiClient(UsersApi, request) as api:
-                logged_user: UserModel = api.get_user_users_user_id_get(user_id=obj.classif_who)
+                logged_user: UserModel = api.get_user(user_id=obj.classif_who)
             page.append(" by %s (%s) " % (logged_user.name, logged_user.email))
         if obj.classif_when is not None:
             page.append(" on %s " % obj.classif_when)
@@ -171,7 +171,7 @@ def objectdetails(objid):
 
     if obj.classif_auto_id:
         with ApiClient(TaxonomyTreeApi, request) as api:
-            taxon: TaxonModel = api.query_taxa_taxon_taxon_id_get(taxon_id=obj.classif_auto_id)
+            taxon: TaxonModel = api.query_taxa(taxon_id=obj.classif_auto_id)
         classif_auto_name = taxon.lineage[0]
         if obj.classif_auto_score:
             classif_auto_name += " (%0.3f)" % (obj.classif_auto_score,)
@@ -210,12 +210,12 @@ def objectdetails(objid):
 
     # insertion des champs Sample, Acquisition & Processing dans leurs onglets respectifs
     with ApiClient(SamplesApi, request) as api:
-        sample: SampleModel = api.sample_query_sample_sample_id_get(sample_id=obj.sample_id)
+        sample: SampleModel = api.sample_query(sample_id=obj.sample_id)
     with ApiClient(AcquisitionsApi, request) as api:
-        acquisition: AcquisitionModel = api.acquisition_query_acquisition_acquisition_id_get(
+        acquisition: AcquisitionModel = api.acquisition_query(
             acquisition_id=obj.acquisid)
     with ApiClient(ProcessesApi, request) as api:
-        process: ProcessModel = api.process_query_process_process_id_get(process_id=obj.acquisid)
+        process: ProcessModel = api.process_query(process_id=obj.acquisid)
 
     for entity_desc in (("Sample", sample, "sample", obj_proj.sample_free_cols),
                         ("Acquisition", acquisition, "acquis", obj_proj.acquisition_free_cols),
@@ -259,9 +259,9 @@ def objectdetails(objid):
 
     # Affichage de l'historique des classifications
     with ApiClient(ObjectApi, request) as api:
-        history: List[HistoricalClassification] = api.object_query_history_object_object_id_history_get(objid)
+        history: List[HistoricalClassification] = api.object_query_history(objid)
 
-    dte = obj.classif_when if obj.classif_qual in ('D','V') else \
+    dte = obj.classif_when if obj.classif_qual in ('D', 'V') else \
         (obj.classif_auto_when if obj.classif_qual == 'P' else None)
     page.append("""<div role="tabpanel" class="tab-pane" id="tabdclassiflog">
 Current Classification : Quality={} , date={}
@@ -318,7 +318,7 @@ def objectdetailsupdate(objid):
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
 
     with ApiClient(ObjectApi, request) as api:
-        obj: ObjectModel = api.object_query_object_object_id_get(objid)
+        obj: ObjectModel = api.object_query(objid)
 
     table = gvp("table")
     field = gvp("field")
@@ -334,20 +334,20 @@ def objectdetailsupdate(objid):
     try:
         if table == "object":
             with ApiClient(ObjectsApi, request) as api:
-                api.update_object_set_object_set_update_post(BulkUpdateReq(target_ids=[objid],
-                                                                           updates=updates))
+                api.update_object_set(BulkUpdateReq(target_ids=[objid],
+                                                    updates=updates))
         elif table == "process":
             with ApiClient(ProcessesApi, request) as api:
-                api.update_processes_process_set_update_post(BulkUpdateReq(target_ids=[obj.acquisid],
-                                                                           updates=updates))
+                api.update_processes(BulkUpdateReq(target_ids=[obj.acquisid],
+                                                   updates=updates))
         elif table == "acquis":
             with ApiClient(AcquisitionsApi, request) as api:
-                api.update_acquisitions_acquisition_set_update_post(BulkUpdateReq(target_ids=[obj.acquisid],
-                                                                                  updates=updates))
+                api.update_acquisitions(BulkUpdateReq(target_ids=[obj.acquisid],
+                                                      updates=updates))
         elif table == "sample":
             with ApiClient(SamplesApi, request) as api:
-                api.update_samples_sample_set_update_post(BulkUpdateReq(target_ids=[obj.sample_id],
-                                                                        updates=updates))
+                api.update_samples(BulkUpdateReq(target_ids=[obj.sample_id],
+                                                 updates=updates))
     except Exception as E:
         exc = str(E)
         for exc_line in exc.split("\n"):
