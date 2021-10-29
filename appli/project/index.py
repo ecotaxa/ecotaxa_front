@@ -1,4 +1,5 @@
 import datetime
+import jsonpickle
 from typing import List
 
 from flask import render_template, flash, session, request, Markup
@@ -57,12 +58,20 @@ def indexProjects(Others=False):
         fashtxt += "  <a href='/taxo/browse/' class='btn btn-primary btn-xs'>Synchronize to check Ecotaxa version</a>"
         flash(Markup(fashtxt), 'warning')
 
+    # https://pynative.com/make-python-class-json-serializable/
+    # https://stackoverflow.com/questions/24719592/sending-data-as-json-object-from-python-to-javascript-with-jinja
+    # Encode Object into JSON formatted Data using jsonpickle
+    # https://www.npmjs.com/package/jsonpickle
+    # https://github.com/cuthbertLab/jsonpickleJS/blob/master/tests/testUnpickle.html
+    # See the cuthbertLab/music21 and cuthbertLab/music21j projects and especially the .show('vexflow') component for an example of how jsonpickleJS can be extremely useful for projects that have parallel data structures between Python and Javascript.    
+    # pl:List = [prjs[0]] # use pl instead of prjs if you want to test with only one project
+    #varJSON = jsonpickle.encode(prjs, unpicklable=False)
     return PrintInCharte(
+        #render_template('project/projects_list.html', PrjList=varJSON, CanCreate=CanCreate,                        
         render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
                         filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
                         Others=Others, isadmin=2 in user.can_do,
                         _manager_mail=_manager_mail))
-
 
 ######################################################################################################################
 @app.route('/prjothers/')
