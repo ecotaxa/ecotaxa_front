@@ -7,26 +7,29 @@
     content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,viewport-fit=cover">
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <title>Vuejs</title>
-  <script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script>
+  <!--script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script-->
+  <script src="https://unpkg.com/vue@next"></script>
+
+  <!--script src="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.min.js"></script-->
 
   <link
     href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600"
     rel="stylesheet">
 
   <link href="https://unpkg.com/primevue@3.8.1/resources/primevue.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.css" rel="stylesheet">
   <!-- Take the old good boostrap theme used in historic EcoTaxa -->
-  <link href="https://unpkg.com/primevue@3.8.1/resources/themes/bootstrap4-light-blue/theme.css" rel="stylesheet">
+  <link href="https://unpkg.com/primevue@3.8.1/resources/themes/bootstrap4-light-blue/theme.css" rel="stylesheet" >
+  <!--link href="https://unpkg.com/primevue@3.8.1/resources/themes/nova-accent/theme.css" rel="stylesheet" -->  
 
   <link href="https://unpkg.com/primeicons@4.1.0/primeicons.css" rel="stylesheet">
-  <link href="https://unpkg.com/primeflex@2.0.0/primeflex.min.css" rel=stylesheet type=text/css>
-
+  
   <script src="https://unpkg.com/primevue@3.8.1/utils/utils.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/api/api.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/config/config.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/ripple/ripple.min.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/paginator/paginator.min.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/inputtext/inputtext.min.js"></script>
-  <script src="https://unpkg.com/primevue@3.8.1/outputtext/outputtext.min.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/button/button.min.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/inputnumber/inputnumber.min.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/selectbutton/selectbutton.min.js"></script>
@@ -44,8 +47,9 @@
   <script src="https://unpkg.com/primevue@3.8.1/column/column.min.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/columngroup/columngroup.min.js"></script>
 
-  <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/primeflex.css">
-  <!--link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/themes/saga-blue.css"-->
+  <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/primeflex.css" >
+  <!--link rel="stylesheet" href="https://unpkg.com/browse/bootstrap@3.3.7/dist/css/bootstrap.css"-->
+  <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/themes/saga-blue.css"-->
   <link rel="stylesheet" href="https://unpkg.com/primeicons@4.1.0/primeicons.css">
 
   <script src="https://unpkg.com/primevue@3.8.1/fileupload/fileupload.js"></script>
@@ -82,19 +86,53 @@
       </p-column>
       <p-column field="quantity" header="Quantity" :sortable="true"></p-column>
       </p-dataTable-->
-    <br-->
+    <br>
 
-      <p-datatable filterDisplay="menu" v-model:filters="filters" :globalFilterFields="['instrument','title']"
-        class="p-datatable p-component p-datatable-hoverable-rows p-datatable-responsive-stack p-datatable-gridlines card p-datatable-sm"        
-        :value="{{PrjList}}" sort-mode="multiple" var="proj" dataKey="projid" filterDisplay="menu"
-        v-model:filters="filters" :globalFilterFields="[
+
+    <!--p-datatable filterDisplay="menu" v-model:filters="filters" :globalFilterFields="['instrument','title']"
+    -        class="p-datatable p-component p-datatable-hoverable-rows p-datatable-responsive-stack p-datatable-gridlines card p-datatable-sm"        
+    -        :value="{{PrjList}}" sort-mode="multiple" var="proj" dataKey="projid" filterDisplay="menu"
+    -        v-model:filters="filters" :globalFilterFields="[ 
+  
+  class="p-component p-datatable-hoverable-rows p-datatable-responsive-stack p-datatable-gridlines card p-datatable-sm"
+  
+  -->
+    
+      <p-datatable :value="{{PrjList}}"
+        class="p-datatable-gridlines"
+        sort-mode="multiple"
+        filter-mode="multiple"             
+        data-key="projid"
+        :filter="true"
+        filter-display="menu"
+        v-model:filters="filters"
+        :globalFilterFields="[
           'instrument',
-          'title',
-        ]">
-        <p-template #loading> Loading records. Please wait. </p-template>
-        <p-column field="instrument" header="Instrument" :sortable="true"></p-column>
-        <p-column field="title" header="Title" :sortable="true" :filter="true"></p-column>
-        <p-column field="projid" header="Proj. ID" :sortable="true" :filter="true"></p-column>
+          'title'
+        ]"
+      >
+        <template #loading> Loading records. Please wait. </template>
+        <p-column class="p-virtualscroller" field="instrument" header="Instrument" :sortable="true" :filterable="true">
+          <!--template #filter="{ filterModel }">
+            <p-inputtext
+              type="text"
+              v-model="filterModel.value"
+              class="p-column-filter"
+              placeholder="Search by instrument"
+            />
+          </template-->
+        </p-column>
+        <p-column class="p-virtualscroller" field="title" header="Title" :sortable="true" :filterable="true">
+          <template #filter="{ filterModel }">
+            <p-inputtext
+              type="text"
+              v-model="filterModel.value"
+              class="p-column-filter"
+              placeholder="Search by title"
+            />
+          </template>
+        </p-column>
+        <p-column field="projid" header="Proj. ID" :sortable="true"></p-column>
         <p-column field="status" header="Project status" :sortable="true"></p-column>
         <p-column field="objcount" header="Object count" :sortable="true"></p-column>
         <p-column field="pctvalidated" header="% validated" :sortable="true"></p-column>
@@ -125,7 +163,7 @@
       setup() {
         return {
           cat: null,
-          filters: {},
+          filters: ref({}),
           x: 45,
           y: ref("EMPTY"),
           vuePrjList: null,
@@ -149,7 +187,6 @@
         'p-columngroup': primevue.columngroup,
         'p-columnfilter': primevue.columnfilter,
         'p-inputtext': primevue.inputtext,
-        'p-outputtext': primevue.outputtext,
         'p-inputnumber': primevue.inputnumber,
         'p-selectbutton': primevue.selectbutton,
         'p-button': primevue.button,
@@ -157,6 +194,7 @@
         'p-fieldset': primevue.fieldset,
         'p-progressbar': primevue.progressbar,
         'p-badge': primevue.badge,
+        'p-virtualscroller': primevue.virtualscroller
       },
 
       created() {
@@ -187,6 +225,7 @@
           });
       },
       mounted() {
+        //console.log(App);
       },
       methods: {
         clearFilters() {
@@ -211,6 +250,25 @@
     app.use(PrimeVue);
     app.directive('ripple', primevue.ripple);
     app.directive('tooltip', primevue.tooltip);
+/*
+    app.directive('p-datatable', primevue.datatable);
+    app.directive('p-column', primevue.column);
+    app.directive('p-columngroup', primevue.columngroup);
+    app.directive('p-columnfilter', primevue.columnfilter,);
+    app.directive('p-inputtext', primevue.inputtext);
+    app.directive('p-inputnumber', primevue.inputnumber);
+    app.directive('p-selectbutton', primevue.selectbutton);
+    app.directive('p-button', primevue.button);
+    app.directive('p-dropdown', primevue.dropdown);
+    app.directive('p-fieldset', primevue.fieldset);
+    app.directive('p-progressbar', primevue.progressbar);
+    app.directive('p-badge', primevue.badge);
+*/
+
+    //console.log(app);
+    app.config.compilerOptions.isCustomElement = tag => tag === 'VirtualScroller';
+    app.config.isCustomElement = tag => tag === 'VirtualScroller';
+
     app.mount("#app");
 
   </script>
