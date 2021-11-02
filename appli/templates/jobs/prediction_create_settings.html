@@ -18,11 +18,11 @@
   <h3>PREDICTION: Choice of features and settings </h3>
   {{ filters_info|safe }}
   <form class="form-horizontal" method="post">
-    <input type="hidden" id="learninglimit" name="learninglimit" value="{{ data.learninglimit }}">
-    <input type="hidden" id="Taxo" name="Taxo" value="{{ data.Taxo }}">
     <input type="hidden" id="src" name="src" value="{{ data.src }}">
-    <input type="hidden" id="PostTaxoMapping" name="PostTaxoMapping" value="{{ data.PostTaxoMapping }}">
-    <input type="hidden" name="CritVar" id="CritVar" value="{{ data.CritVar }}">
+    <input type="hidden" id="Taxo" name="Taxo" value="{{ data.taxo }}">
+    <input type="hidden" id="learninglimit" name="learninglimit" value="{{ data.learninglimit }}">
+    <input type="hidden" id="PostTaxoMapping" name="PostTaxoMapping" value="{{ data.pre_mapping }}">
+    <input type="hidden" name="CritVar" id="CritVar" value="{{ data.features }}">
     <input type="hidden" name="starttask" value="Y">
 
     <div class="row">
