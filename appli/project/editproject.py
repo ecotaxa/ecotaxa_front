@@ -241,14 +241,22 @@ def Prjpopupeditpreset(PrjId):
 ######################################################################################################################
 def _GetSCNNetworks():
     models = {}
-    model_folder = (Path(TempTaskDir) / "../SCN_networks")
+    model_folder = Path(app.config['MODELSAREA'])
+    valid_if = "dim_reducer.pickle"
+    prfx = "io_"
     model_folder = Path(os.path.normpath(model_folder.as_posix()))
     if model_folder.exists():
         model_folder = model_folder.resolve()
         for a_dir in model_folder.glob("*"):
-            if a_dir.is_dir() and (a_dir / "meta.json").is_file():
-                models[a_dir.name] = json.load((a_dir / "meta.json").open("r"))
-                # Models[dir.name] = json.load((dir / "meta.json").open("r")).get('name',dir.name)
+            if not a_dir.is_dir():
+                continue
+            if not (a_dir / valid_if).is_file():
+                continue
+            dir_name = a_dir.name
+            if not dir_name.startswith(prfx):
+                continue
+            dir_name = dir_name[len(prfx):]
+            models[dir_name] = {"name": dir_name}
     return models
 
 
