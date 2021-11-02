@@ -7,17 +7,22 @@
     content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,viewport-fit=cover">
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <title>Vuejs</title>
-  <!--script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script-->
-  <script src="https://unpkg.com/vue@next"></script>
-
-  <!--script src="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.min.js"></script-->
 
   <link
     href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600"
     rel="stylesheet">
 
+  <!--script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script-->
+  <script src="https://unpkg.com/vue@next"></script>
+
+  <!--script src="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.min.js"></script-->
+  <!--script src="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.esm.js"></script-->  
+  <!--link href="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.css" rel="stylesheet"-->
+  <!--link href="https://github.com/Akryum/vue-virtual-scroller/blob/master/dist/vue-virtual-scroller.min.js"></script-->
+
+  
   <link href="https://unpkg.com/primevue@3.8.1/resources/primevue.min.css" rel="stylesheet">
-  <link href="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.css" rel="stylesheet">
+
   <!-- Take the old good boostrap theme used in historic EcoTaxa -->
   <link href="https://unpkg.com/primevue@3.8.1/resources/themes/bootstrap4-light-blue/theme.css" rel="stylesheet" >
   <!--link href="https://unpkg.com/primevue@3.8.1/resources/themes/nova-accent/theme.css" rel="stylesheet" -->  
@@ -107,27 +112,27 @@
         filter-display="menu"
         v-model:filters="filters"
         :globalFilterFields="[
-          'instrument',
-          'title'
+          'title',
+          'instrument'
         ]"
       >
         <template #loading> Loading records. Please wait. </template>
         <p-column class="p-virtualscroller" field="instrument" header="Instrument" :sortable="true" :filterable="true">
-          <!--template #filter="{ filterModel }">
+          <template #filter="{ filterModel }">
             <p-inputtext
               type="text"
               v-model="filterModel.value"
-              class="p-column-filter"
+              class="p-column-filter p-virtualscroller"
               placeholder="Search by instrument"
             />
-          </template-->
+          </template>
         </p-column>
         <p-column class="p-virtualscroller" field="title" header="Title" :sortable="true" :filterable="true">
           <template #filter="{ filterModel }">
             <p-inputtext
               type="text"
               v-model="filterModel.value"
-              class="p-column-filter"
+              class="p-column-filter p-virtualscroller"
               placeholder="Search by title"
             />
           </template>
@@ -194,7 +199,7 @@
         'p-fieldset': primevue.fieldset,
         'p-progressbar': primevue.progressbar,
         'p-badge': primevue.badge,
-        'p-virtualscroller': primevue.virtualscroller
+        //'p-virtualscroller': primevue.virtualscroller
       },
 
       created() {
@@ -239,7 +244,7 @@
 
           this.filters = {
             global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-            intrument: filterDef,
+            instrument: filterDef,
             title: filterDef
           };
         },
@@ -266,8 +271,8 @@
 */
 
     //console.log(app);
-    app.config.compilerOptions.isCustomElement = tag => tag === 'VirtualScroller';
-    app.config.isCustomElement = tag => tag === 'VirtualScroller';
+    //app.config.compilerOptions.isCustomElement = tag => tag === 'virtual-scroller';
+    //app.config.isCustomElement = tag => tag === 'virtual-scroller';
 
     app.mount("#app");
 
