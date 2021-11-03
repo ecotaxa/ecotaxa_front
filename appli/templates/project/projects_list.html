@@ -12,16 +12,16 @@
     href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600"
     rel="stylesheet">
 
-    <script src="https://unpkg.com/vue@next"></script>
-<script src="https://unpkg.com/primevue@^3.8.1/core/core.min.js"></script>
-  
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="https://unpkg.com/primevue@^3.8.1/core/core.min.js"></script>
+
   <link href="https://unpkg.com/primevue@3.8.1/resources/primevue.min.css" rel="stylesheet">
 
   <!-- Take the old good boostrap theme used in historic EcoTaxa -->
-  <link href="https://unpkg.com/primevue@3.8.1/resources/themes/bootstrap4-light-blue/theme.css" rel="stylesheet" >
-  <!--link href="https://unpkg.com/primevue@3.8.1/resources/themes/nova-accent/theme.css" rel="stylesheet" -->  
+  <link href="https://unpkg.com/primevue@3.8.1/resources/themes/bootstrap4-light-blue/theme.css" rel="stylesheet">
+  <!--link href="https://unpkg.com/primevue@3.8.1/resources/themes/nova-accent/theme.css" rel="stylesheet" -->
   <link href="https://unpkg.com/primeicons@4.1.0/primeicons.css" rel="stylesheet">
-  
+
   <script src="https://unpkg.com/primevue@3.8.1/utils/utils.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/api/api.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/config/config.js"></script>
@@ -44,8 +44,8 @@
   <script src="https://unpkg.com/primevue@3.8.1/column/column.min.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/columngroup/columngroup.min.js"></script>
 
-  <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/primeflex.css" >
-  <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/themes/saga-blue.css"-->
+  <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/primeflex.css">
+  <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/themes/saga-blue.css" -->
   <link rel="stylesheet" href="https://unpkg.com/primeicons@4.1.0/primeicons.css">
 
   <script src="https://unpkg.com/primevue@3.8.1/fileupload/fileupload.js"></script>
@@ -57,52 +57,50 @@
 <body>
   <div id="app" class="container-fluid">
     <br>
-    
-      <p-datatable :value="{{PrjList}}"
-        class="p-datatable-gridlines"
-        sort-mode="multiple"
-        filter-mode="multiple"             
-        data-key="projid"
-        :filter="true"
-        filter-display="menu"
-        v-model:filters="filters"
-        :globalFilterFields="[
+
+    <p-datatable :value="{{PrjList}}" class="p-datatable-gridlines card p-datatable-sm" sort-mode="multiple"
+      data-key="projid" filter-display="menu" v-model:filters="filters" :globalFilterFields="[
           'title',
-          'instrument'
-        ]"
-      >
-        <template #loading> Loading records. Please wait. </template>
-        <p-column field="instrument" header="Instrument" :sortable="true" >
-          <template #filter="{ filterModel }">
-            <p-inputtext
-              type="text"
-              v-model="filterModel.value"
-              class="p-column-filter"
-              placeholder="Search by instrument"
-            />
-          </template>
-        </p-column>
-        <p-column field="title" header="Title" :sortable="true" >
-          <template #filter="{ filterModel }">
-            <p-inputtext
-              type="text"
-              v-model="filterModel.value"
-              class="p-column-filter"
-              placeholder="Search by title"
-            />
-          </template>
-        </p-column>
-        <p-column field="projid" header="Proj. ID" :sortable="true"></p-column>
-        <p-column field="status" header="Project status" :sortable="true"></p-column>
-        <p-column field="objcount" header="Object count" :sortable="true"></p-column>
-        <p-column field="pctvalidated" header="% validated" :sortable="true"></p-column>
-        <p-column field="pctclassified" header="% classified" :sortable="true"></p-column>
-        <p-column field="license" header="License" :sortable="true"></p-column>
-        <p-column field="cnn_network_id" header="CNN Network" :sortable="true"></p-column>
-        <p-column field="comments" header="Comment" :sortable="true"></p-column>
-        <p-column field="contact.name" header="Contact" :sortable="true"></p-column>
-        <p-column field="contact.email" header="Mail" :sortable="true"></p-column>
-      </p-dataTable>
+          'instrument',
+          'status',
+          'objcount'
+        ]">
+      <template #loading> Loading records. Please wait. </template>
+      <p-column field="instrument" header="Instrument" :sortable="true">
+        <template #filter="{ filterModel }">
+          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by instrument" />
+        </template>
+      </p-column>
+      <p-column field="title" header="Title" :sortable="true">
+        <template #filter="{ filterModel }">
+          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by title" />
+        </template>
+      </p-column>
+      <p-column field="projid" header="Proj. ID" :sortable="true"></p-column>
+      <p-column field="status" header="Proj. status" :sortable="true">
+        <template #filter="{ filterModel }">
+          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by proj. status" />
+        </template>
+      </p-column>
+      <p-column field="objcount" header="Nb. objects" :sortable="true" data-type="numeric">
+        <template #filter="{ filterModel }">
+          <p-inputnumber
+            type="numeric"
+            v-model="filterModel.value"
+            class="p-column-filter"
+            placeholder="Search by Nb. objects"
+          />
+        </template>
+      </p-column>
+      <p-column field="pctvalidated" header="% validated" :sortable="true"></p-column>
+      <p-column field="pctclassified" header="% classified" :sortable="true"></p-column>
+      <p-column field="license" header="License" :sortable="true"></p-column>
+      <p-column field="cnn_network_id" header="CNN Network" :sortable="true"></p-column>
+      <p-column field="comments" header="Comment" :sortable="true"></p-column>
+      <p-column field="contact.name" header="Contact" :sortable="true"></p-column>
+      <p-column field="contact.email" header="Mail" :sortable="true"></p-column>
+    </p-dataTable>
 
   </div>
 
@@ -122,23 +120,7 @@
       delimiters: ['${', '}'],
       setup() {
         return {
-          cat: null,
           filters: ref({}),
-          x: 45,
-          y: ref("EMPTY"),
-          vuePrjList: null,
-          products: [
-            { "id": "1000", "code": "f230fh0g3", "name": "Bamboo Watch", "description": "Product Description", "image": "bamboo-watch.jpg", "price": 65, "category": "Accessories", "quantity": 24, "inventoryStatus": "INSTOCK", "rating": 5 },
-            { "id": "1001", "code": "nvklal433", "name": "Black Watch", "description": "Product Description", "image": "black-watch.jpg", "price": 72, "category": "Accessories", "quantity": 61, "inventoryStatus": "INSTOCK", "rating": 4 },
-            { "id": "1002", "code": "zz21cz3c1", "name": "Blue Band", "description": "Product Description", "image": "blue-band.jpg", "price": 79, "category": "Fitness", "quantity": 2, "inventoryStatus": "LOWSTOCK", "rating": 3 },
-            { "id": "1003", "code": "244wgerg2", "name": "Blue T-Shirt", "description": "Product Description", "image": "blue-t-shirt.jpg", "price": 29, "category": "Clothing", "quantity": 25, "inventoryStatus": "INSTOCK", "rating": 5 },
-            { "id": "1004", "code": "h456wer53", "name": "Bracelet", "description": "Product Description", "image": "bracelet.jpg", "price": 15, "category": "Accessories", "quantity": 73, "inventoryStatus": "INSTOCK", "rating": 4 },
-            { "id": "1005", "code": "av2231fwg", "name": "Brown Purse", "description": "Product Description", "image": "brown-purse.jpg", "price": 120, "category": "Accessories", "quantity": 0, "inventoryStatus": "OUTOFSTOCK", "rating": 4 },
-            { "id": "1006", "code": "bib36pfvm", "name": "Chakra Bracelet", "description": "Product Description", "image": "chakra-bracelet.jpg", "price": 32, "category": "Accessories", "quantity": 5, "inventoryStatus": "LOWSTOCK", "rating": 3 },
-            { "id": "1007", "code": "mbvjkgip5", "name": "Galaxy Earrings", "description": "Product Description", "image": "galaxy-earrings.jpg", "price": 34, "category": "Accessories", "quantity": 23, "inventoryStatus": "INSTOCK", "rating": 5 },
-            { "id": "1008", "code": "vbb124btr", "name": "Game Controller", "description": "Product Description", "image": "game-controller.jpg", "price": 99, "category": "Electronics", "quantity": 2, "inventoryStatus": "LOWSTOCK", "rating": 4 },
-            { "id": "1009", "code": "cm230f032", "name": "Gaming Set", "description": "Product Description", "image": "gaming-set.jpg", "price": 299, "category": "Electronics", "quantity": 63, "inventoryStatus": "INSTOCK", "rating": 3 }
-          ],
         };
       },
       components: {
@@ -200,7 +182,9 @@
           this.filters = {
             global: { value: null, matchMode: FilterMatchMode.CONTAINS },
             instrument: filterDef,
-            title: filterDef
+            title: filterDef,
+            status: filterDef,
+            objcount: filterDef,            
           };
         },
       }
@@ -208,24 +192,24 @@
 
     const app = createApp(App);
     app.use(PrimeVue);
-//    app.component('p-dropdown', primevue.dropdown);    
+    //    app.component('p-dropdown', primevue.dropdown);    
     app.directive('ripple', primevue.ripple);
     app.directive('tooltip', primevue.tooltip);
-//    app.directive('p-dropdown', primevue.dropdown);    
-/*
-    app.directive('p-datatable', primevue.datatable);
-    app.directive('p-column', primevue.column);
-    app.directive('p-columngroup', primevue.columngroup);
-    app.directive('p-columnfilter', primevue.columnfilter,);
-    app.directive('p-inputtext', primevue.inputtext);
-    app.directive('p-inputnumber', primevue.inputnumber);
-    app.directive('p-selectbutton', primevue.selectbutton);
-    app.directive('p-button', primevue.button);
-
-    app.directive('p-fieldset', primevue.fieldset);
-    app.directive('p-progressbar', primevue.progressbar);
-    app.directive('p-badge', primevue.badge);
-*/
+    //    app.directive('p-dropdown', primevue.dropdown);    
+    /*
+        app.directive('p-datatable', primevue.datatable);
+        app.directive('p-column', primevue.column);
+        app.directive('p-columngroup', primevue.columngroup);
+        app.directive('p-columnfilter', primevue.columnfilter,);
+        app.directive('p-inputtext', primevue.inputtext);
+        app.directive('p-inputnumber', primevue.inputnumber);
+        app.directive('p-selectbutton', primevue.selectbutton);
+        app.directive('p-button', primevue.button);
+    
+        app.directive('p-fieldset', primevue.fieldset);
+        app.directive('p-progressbar', primevue.progressbar);
+        app.directive('p-badge', primevue.badge);
+    */
 
     //console.log(app);
     //app.config.compilerOptions.isCustomElement = tag => tag === 'virtual-scroller';
