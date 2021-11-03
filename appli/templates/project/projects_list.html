@@ -12,21 +12,14 @@
     href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600"
     rel="stylesheet">
 
-  <!--script src="https://unpkg.com/vue@3.2.20/dist/vue.global.js"></script-->
-  <script src="https://unpkg.com/vue@next"></script>
-
-  <!--script src="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.min.js"></script-->
-  <!--script src="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.esm.js"></script-->  
-  <!--link href="https://unpkg.com/vue-virtual-scroller@1.0.10/dist/vue-virtual-scroller.css" rel="stylesheet"-->
-  <!--link href="https://github.com/Akryum/vue-virtual-scroller/blob/master/dist/vue-virtual-scroller.min.js"></script-->
-
+    <script src="https://unpkg.com/vue@next"></script>
+<script src="https://unpkg.com/primevue@^3.8.1/core/core.min.js"></script>
   
   <link href="https://unpkg.com/primevue@3.8.1/resources/primevue.min.css" rel="stylesheet">
 
   <!-- Take the old good boostrap theme used in historic EcoTaxa -->
   <link href="https://unpkg.com/primevue@3.8.1/resources/themes/bootstrap4-light-blue/theme.css" rel="stylesheet" >
   <!--link href="https://unpkg.com/primevue@3.8.1/resources/themes/nova-accent/theme.css" rel="stylesheet" -->  
-
   <link href="https://unpkg.com/primeicons@4.1.0/primeicons.css" rel="stylesheet">
   
   <script src="https://unpkg.com/primevue@3.8.1/utils/utils.js"></script>
@@ -48,60 +41,22 @@
   <script src="https://unpkg.com/primevue@3.8.1/badge/badge.min.js"></script>
 
   <script src="https://unpkg.com/primevue@3.8.1/datatable/datatable.min.js"></script>
-  <script src="https://unpkg.com/primevue@3.8.1/core/core.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/column/column.min.js"></script>
   <script src="https://unpkg.com/primevue@3.8.1/columngroup/columngroup.min.js"></script>
 
   <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/primeflex.css" >
-  <!--link rel="stylesheet" href="https://unpkg.com/browse/bootstrap@3.3.7/dist/css/bootstrap.css"-->
   <link rel="stylesheet" href="https://unpkg.com/primeflex@3.1.0/themes/saga-blue.css"-->
   <link rel="stylesheet" href="https://unpkg.com/primeicons@4.1.0/primeicons.css">
 
   <script src="https://unpkg.com/primevue@3.8.1/fileupload/fileupload.js"></script>
-
   <!--script src="https://unpkg.com/vue-upload-component@3.0.47"></script-->
-
   <script src="https://unpkg.com/axios@0.21.1/dist/axios.min.js"></script>
 
 </head>
 
 <body>
   <div id="app" class="container-fluid">
-    <!-- example to perform my test -->
-    <!-- p-datatable filterDisplay="menu" v-model:filters="filters" :globalFilterFields="['code','name']"
-      class="p-datatable p-component p-datatable-hoverable-rows p-datatable-responsive-stack p-datatable-gridlines card p-datatable-sm"
-      :value="products" responsiveLayout="scroll" sort-mode="multiple">
-      <p-column class="p-column-filter p-column-title" filter :filter="true" :filterMatchMode="contains" field="code"
-        header="Codee" :sortable="true" :filterable="true">
-        <template #filter="{ filterModel }">
-          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by name" />
-        </template>
-      </p-column>
-      <p-column filter class="p-column-filter p-column-title" :filter="true" :filterMatchMode="contains" field="name"
-        header="Name" :sortable="true" :filterable="true">
-        <template #filter="{ filterModel }">
-          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by name" />
-        </template>
-      </p-column>
-      <p-column field="category" header="Category" :sortable="true" filterBy="#{cat}" headerText="Id"
-        filterMatchMode="contains">
-        <p-outputtext value="#{cat}" />
-      </p-column>
-
-      </p-column>
-      <p-column field="quantity" header="Quantity" :sortable="true"></p-column>
-      </p-dataTable-->
     <br>
-
-
-    <!--p-datatable filterDisplay="menu" v-model:filters="filters" :globalFilterFields="['instrument','title']"
-    -        class="p-datatable p-component p-datatable-hoverable-rows p-datatable-responsive-stack p-datatable-gridlines card p-datatable-sm"        
-    -        :value="{{PrjList}}" sort-mode="multiple" var="proj" dataKey="projid" filterDisplay="menu"
-    -        v-model:filters="filters" :globalFilterFields="[ 
-  
-  class="p-component p-datatable-hoverable-rows p-datatable-responsive-stack p-datatable-gridlines card p-datatable-sm"
-  
-  -->
     
       <p-datatable :value="{{PrjList}}"
         class="p-datatable-gridlines"
@@ -117,22 +72,22 @@
         ]"
       >
         <template #loading> Loading records. Please wait. </template>
-        <p-column class="p-virtualscroller" field="instrument" header="Instrument" :sortable="true" :filterable="true">
+        <p-column field="instrument" header="Instrument" :sortable="true" >
           <template #filter="{ filterModel }">
             <p-inputtext
               type="text"
               v-model="filterModel.value"
-              class="p-column-filter p-virtualscroller"
+              class="p-column-filter"
               placeholder="Search by instrument"
             />
           </template>
         </p-column>
-        <p-column class="p-virtualscroller" field="title" header="Title" :sortable="true" :filterable="true">
+        <p-column field="title" header="Title" :sortable="true" >
           <template #filter="{ filterModel }">
             <p-inputtext
               type="text"
               v-model="filterModel.value"
-              class="p-column-filter p-virtualscroller"
+              class="p-column-filter"
               placeholder="Search by title"
             />
           </template>
@@ -253,8 +208,10 @@
 
     const app = createApp(App);
     app.use(PrimeVue);
+//    app.component('p-dropdown', primevue.dropdown);    
     app.directive('ripple', primevue.ripple);
     app.directive('tooltip', primevue.tooltip);
+//    app.directive('p-dropdown', primevue.dropdown);    
 /*
     app.directive('p-datatable', primevue.datatable);
     app.directive('p-column', primevue.column);
@@ -264,7 +221,7 @@
     app.directive('p-inputnumber', primevue.inputnumber);
     app.directive('p-selectbutton', primevue.selectbutton);
     app.directive('p-button', primevue.button);
-    app.directive('p-dropdown', primevue.dropdown);
+
     app.directive('p-fieldset', primevue.fieldset);
     app.directive('p-progressbar', primevue.progressbar);
     app.directive('p-badge', primevue.badge);
