@@ -298,14 +298,12 @@ def indexPrj(PrjId):
     if g.PrjAnnotate or g.PrjManager:
         if proj.status == "Annotate":
             g.headmenu.append(
-                ("/Task/Create/TaskClassifAuto2?projid=%d" % PrjId, "Train and Predict classifications"))
+                ("/Job/Create/Prediction?projid=%d" % PrjId, "Train and Predict classifications"))
             g.headmenuF.append(
-                ("javascript:GotoWithFilter('/Task/Create/TaskClassifAuto2')", "Train and Predict classifications"))
+                ("javascript:GotoWithFilter('/Job/Create/Prediction')", "Train and Predict classifications"))
             g.headmenu.append(("/Job/Create/FileImport?p=%d" % PrjId, "Import images and metadata"))
             g.headmenu.append(("/prj/taxo_fix/%d" % PrjId, "Fix category issues"))
-        # g.headmenu.append(("/Task/Create/TaskExportTxt?projid=%d" % PrjId, "Export"))
         g.headmenu.append(("/Job/Create/GenExport?projid=%d" % PrjId, "Export"))
-        # g.headmenuF.append(("javascript:GotoWithFilter('/Task/Create/TaskExportTxt')", "Export"))
         g.headmenuF.append(("javascript:GotoWithFilter('/Job/Create/GenExport')", "Export"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))

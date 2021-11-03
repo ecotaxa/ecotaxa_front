@@ -34,3 +34,4 @@ SQLAlchemy==1.2.15
 Werkzeug==0.14.1
 WTForms==2.2.1
 hyphenator==0.6.0
+jsonpickle==2.0.0

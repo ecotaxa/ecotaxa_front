@@ -149,10 +149,6 @@ def TaskFactory(ClassName, task=None):
     from appli.tasks.test import TaskTest
     if ClassName == "TaskTest":
         return TaskTest(task)
-    # Tasks running in present component
-    from appli.tasks.taskclassifauto2 import TaskClassifAuto2
-    if ClassName == "TaskClassifAuto2":
-        return TaskClassifAuto2(task)
     # Particle module tasks
     from .taskpartzooscanimport import TaskPartZooscanImport
     if ClassName == "TaskPartZooscanImport":

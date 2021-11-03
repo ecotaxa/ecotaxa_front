@@ -110,7 +110,7 @@ class Job(object):
 
     @classmethod
     def _remind_filters(cls, filters, target_prj):
-        # If subset was required on a filtered view, remind it in the page
+        # Remind filters in the page
         filtertxt = ""
         if len(filters) > 0:
             filtertxt += ",".join([k + "=" + v for k, v in filters.items() if v != ""])
