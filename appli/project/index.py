@@ -1,5 +1,5 @@
 import datetime
-import jsonpickle
+
 from typing import List
 
 from flask import render_template, flash, session, request, Markup
@@ -65,13 +65,29 @@ def indexProjects(Others=False):
     # https://github.com/cuthbertLab/jsonpickleJS/blob/master/tests/testUnpickle.html
     # See the cuthbertLab/music21 and cuthbertLab/music21j projects and especially the .show('vexflow') component for an example of how jsonpickleJS can be extremely useful for projects that have parallel data structures between Python and Javascript.    
     # pl:List = [prjs[0]] # use pl instead of prjs if you want to test with only one project
-    #varJSON = jsonpickle.encode(prjs, unpicklable=False)
-    return PrintInCharte(
-        #render_template('project/projects_list.html', PrjList=varJSON, CanCreate=CanCreate,                        
-        render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
-                        filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
+    #connectPythonToPrime:bool = True
+    connectPythonToPrime:bool = False
+    if (connectPythonToPrime):
+        import jsonpickle # need of jsonpickle only in that case
+        # Do all the "boring" work in the Python part.
+        # Basically, everything that cannot be done easily on the HTML side should be done on the Python side ;-)
+        for oneProj in prjs:
+            if (oneProj.pctvalidated != None):
+                oneProj.pctvalidated = round(oneProj.pctvalidated, 2)
+            if (oneProj.pctclassified != None):
+                oneProj.pctclassified = round(oneProj.pctclassified, 2)            
+        varJSON = jsonpickle.encode(prjs, unpicklable=False)
+        return PrintInCharte(
+            render_template('project/projects_list.html', PrjList=varJSON, CanCreate=CanCreate,
+            filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
                         Others=Others, isadmin=2 in user.can_do,
                         _manager_mail=_manager_mail))
+    else: # "historic" code
+        return PrintInCharte(
+            render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
+                        filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
+                        Others=Others, isadmin=2 in user.can_do,
+                        _manager_mail=_manager_mail))        
 
 ######################################################################################################################
 @app.route('/prjothers/')

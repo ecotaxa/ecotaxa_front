@@ -63,8 +63,23 @@
           'title',
           'instrument',
           'status',
-          'objcount'
-        ]">
+          'objcount',
+          'pctvalidated',
+          'pctclassified',
+          'license',
+          'cnn_network_id',
+          'comments',
+          ]">
+      <template #header>
+        <div class="flex justify-content-between">
+          <p-button label="Clear" class="p-button-outlined" @click="clearFilters()">
+            Clear filters
+          </p-button>
+          <span class="p-input-icon-left">
+            <p-inputtext v-model="filters['global'].value" placeholder="Search everywhere" />
+          </span>
+        </div>
+      </template>
       <template #loading> Loading records. Please wait. </template>
       <p-column field="instrument" header="Instrument" :sortable="true">
         <template #filter="{ filterModel }">
@@ -77,27 +92,53 @@
           <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by title" />
         </template>
       </p-column>
-      <p-column field="projid" header="Proj. ID" :sortable="true"></p-column>
+      <p-column field="projid" header="Proj. ID" :sortable="true">
+        <template #body="{ data }">
+          <a :href="projLink(data.projid)">${ data.projid }</a>
+        </template>
+      </p-column>
       <p-column field="status" header="Proj. status" :sortable="true">
         <template #filter="{ filterModel }">
-          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by proj. status" />
+          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by proj. status" />
         </template>
       </p-column>
       <p-column field="objcount" header="Nb. objects" :sortable="true" data-type="numeric">
         <template #filter="{ filterModel }">
-          <p-inputnumber
-            type="numeric"
-            v-model="filterModel.value"
-            class="p-column-filter"
-            placeholder="Search by Nb. objects"
-          />
+          <p-inputnumber type="numeric" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by Nb. objects" />
         </template>
       </p-column>
-      <p-column field="pctvalidated" header="% validated" :sortable="true"></p-column>
-      <p-column field="pctclassified" header="% classified" :sortable="true"></p-column>
-      <p-column field="license" header="License" :sortable="true"></p-column>
-      <p-column field="cnn_network_id" header="CNN Network" :sortable="true"></p-column>
-      <p-column field="comments" header="Comment" :sortable="true"></p-column>
+      <p-column field="pctvalidated" header="% validated" :sortable="true" data-type="numeric">
+        <template #filter="{ filterModel }">
+          <p-inputnumber type="numeric" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by % validated" />
+        </template>
+      </p-column>
+      <p-column field="pctclassified" header="% classified" :sortable="true" data-type="numeric">
+        <template #filter="{ filterModel }">
+          <p-inputnumber type="numeric" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by % classified" />
+        </template>
+      </p-column>
+      <p-column field="license" header="License" :sortable="true">
+        <template #filter="{ filterModel }">
+          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by license" />
+        </template>
+      </p-column>
+      <p-column field="cnn_network_id" header="CNN Network" :sortable="true">
+        <template #filter="{ filterModel }">
+          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by CNN Network" />
+        </template>
+      </p-column>
+      <p-column field="comments" header="Comment">
+        <template #filter="{ filterModel }">
+          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by comment" />
+        </template>
+      </p-column>
       <p-column field="contact.name" header="Contact" :sortable="true"></p-column>
       <p-column field="contact.email" header="Mail" :sortable="true"></p-column>
     </p-dataTable>
@@ -105,6 +146,35 @@
   </div>
 
   <script lang='ts'>
+
+
+    function computeUrlLink(sublink = "", projectID = "") {
+      // !! N.B. TAKEN from ecotaxa/ecotaxa_front/proto/ecotaxa-cli/src/utils/utilsProjectAbout.ts
+      //return "https://ecotaxa.obs-vlfr.fr" + sublink + projectID; // Keep this line for debugging
+      // We assume sublink starts and ends with a /
+      // Used elsewhere so put in a separate file and function
+      const findDoubleSlash = window.location.pathname.indexOf("//");
+      let findSlash = 0;
+      if (findDoubleSlash == -1) {
+        // not found
+        findSlash = window.location.pathname.indexOf("/");
+      } else {
+        findSlash = window.location.pathname.indexOf("/", findDoubleSlash + 2);
+      }
+      let mySub = "";
+      if (findSlash != -1)
+        mySub = window.location.pathname.substring(0, findSlash);
+      else mySub = window.location.pathname;
+      mySub += sublink + projectID; // e.g. sublink === "/prj"
+      return mySub;
+      // With sublink==="/prj/" and projectID==="185"  
+      // it will return :
+      // "localhost:8080/prj/185" if we are on localhost, 
+      // or
+      // "https://ecotaxa.obs-vlfr.fr/prj/185 if we are on the production
+      // N.B. see module.exports.proxy.target in vue.config.js
+    }
+
     // Read 
     // https://stackoverflow.com/questions/24719592/sending-data-as-json-object-from-python-to-javascript-with-jinja
     // https://stackoverflow.com/questions/64414997/how-to-decode-jsonpickle-data-in-angular-typescript-file    
@@ -170,6 +240,10 @@
         //console.log(App);
       },
       methods: {
+        projLink(projid) {
+          return computeUrlLink("/prj/", projid.toString());
+        },
+
         clearFilters() {
           this.initFilters();
         },
@@ -184,7 +258,12 @@
             instrument: filterDef,
             title: filterDef,
             status: filterDef,
-            objcount: filterDef,            
+            objcount: filterDef,
+            pctvalidated: filterDef,
+            pctclassified: filterDef,
+            license: filterDef,
+            cnn_network_id: filterDef,
+            comments: filterDef,
           };
         },
       }
