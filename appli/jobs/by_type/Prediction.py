@@ -200,7 +200,7 @@ class PredictionJob(Job):
         if len(categories) == 0:
             errors.append("You must select some category")
 
-        # Use the API entry point for querying the impacted objects. At these point we just need
+        # Use the API entry point for querying the impacted objects. At this point we just need
         # to know if it's != 0
         with ApiClient(ObjectsApi, request) as api:
             filters = {}
@@ -217,10 +217,10 @@ class PredictionJob(Job):
 
         if len(errors) == 0:
             # Save parameters
-            sav = {'critvar': obj_vars,
-                   'baseproject': src_prj_ids,
-                   'seltaxo': categories,
-                   'posttaxomapping': pre_mapping}
+            sav = {'critvar': gvp("CritVar"),
+                   'baseproject': gvp("src"),
+                   'seltaxo': gvp("Taxo"),
+                   'posttaxomapping': gvp("PostTaxoMapping")}
             # Update project classification settings
             with ApiClient(ProjectsApi, request) as api:
                 api.set_project_predict_settings(project_id=target_prj.projid,
