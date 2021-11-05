@@ -103,6 +103,7 @@ def ErrorFormat(txt):
 # VUE_PATH == "/gui"
 from appli.constants import VUE_PATH
 
+
 def AddTaskSummaryForTemplate():
     """
         Set in global 'g' a structure to show what is currently ongoing on task side.
@@ -126,7 +127,7 @@ def AddTaskSummaryForTemplate():
                 exper_path = VUE_PATH + "/projects"
             if exper_path:
                 hint = "A better version of this page is available."
-                g.experimental = '<a href="'+exper_path+'" title="'+hint+'">'+"New!</a>"
+                g.experimental = '<a href="' + exper_path + '" title="' + hint + '">' + "New!</a>"
     g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
@@ -800,3 +801,12 @@ def load_admin():
 
 
 load_admin()
+
+
+def load_ecopart():
+    # Import a sub-application for EcoPart, transitory for cleanup
+    from .part.ecopart_blueprint import part_app
+    app.register_blueprint(part_app)
+
+
+load_ecopart()
