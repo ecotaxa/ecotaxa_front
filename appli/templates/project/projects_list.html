@@ -56,26 +56,28 @@
 
 <body>
   <div id="app" class="container-fluid">
-    <br>
-
-    <p-datatable :value="{{PrjList}}" class="p-datatable-gridlines card p-datatable-sm" sort-mode="multiple"
-      data-key="projid" filter-display="menu" v-model:filters="filters" :globalFilterFields="[
-          'title',
-          'instrument',
-          'status',
-          'objcount',
-          'pctvalidated',
-          'pctclassified',
-          'license',
-          'cnn_network_id',
-          'comments',
-          ]">
+    <p-datatable :value="{{PrjList}}"
+      class="p-datatable p-component p-datatable-responsive-stack p-datatable-gridlines card p-datatable-sm"
+      sort-mode="multiple" :paginator="true" :rows="15" paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink
+      RowsPerPageDropdown" :rowsPerPageOptions="[15,30,50]" data-key="projid" filter-display="menu"
+      v-model:filters="filters" :globalFilterFields="[
+      'title',
+      'instrument',
+      'status',
+      'objcount',
+      'pctvalidated',
+      'pctclassified',
+      'license',
+      'cnn_network_id',
+      'comments',
+      'contact.email'
+      ]">
       <template #header>
         <div class="flex justify-content-between">
-          <p-button label="Clear" class="p-button-outlined" @click="clearFilters()">
+          <p-button label="Clear" class="p-button p-component p-button-outlined" @click="clearFilters()">
             Clear filters
           </p-button>
-          <span class="p-input-icon-left">
+          <span class="p-input-icon-left"><i class="pi pi-search"></i>
             <p-inputtext v-model="filters['global'].value" placeholder="Search everywhere" />
           </span>
         </div>
@@ -139,14 +141,26 @@
             placeholder="Search by comment" />
         </template>
       </p-column>
-      <p-column field="contact.name" header="Contact" :sortable="true"></p-column>
-      <p-column field="contact.email" header="Mail" :sortable="true"></p-column>
+      <p-column field="contact.name" header="Contact" :sortable="true">
+        <template #body="{ data }">
+          <span v-if="data.contact !== null && data.contact !== undefined">
+            <a :href="buildMail(data.contact.email)">${ data.contact.name }</a>
+          </span>
+        </template>
+      </p-column>
     </p-dataTable>
-
+    <div class="col-sm-6 col-sm-offset-3">
+      <br>          
+      {% if Others %}
+      <a href="/prj/" class="btn  btn-block btn-primary">Back to projects list</a>
+      {% else %}
+      <a href="/prjothers/" class="btn  btn-block btn-primary">Show projects in which you are not registered</a>
+      {% endif %}
+      <br>      
+    </div>
   </div>
 
   <script lang='ts'>
-
 
     function computeUrlLink(sublink = "", projectID = "") {
       // !! N.B. TAKEN from ecotaxa/ecotaxa_front/proto/ecotaxa-cli/src/utils/utilsProjectAbout.ts
@@ -211,8 +225,9 @@
 
       created() {
         //console.log(this.$route.query.PrjList);
-        const self = this;
+        //const self = this;
         this.initFilters();
+        /*
         axios.get('/api/users/me')
           .then(function (rsp) {
             // handle success
@@ -234,12 +249,17 @@
           })
           .then(function () {
             self.projects_loading = false;
-          });
+          });*/
       },
       mounted() {
         //console.log(App);
       },
       methods: {
+
+        buildMail(email) {
+          return "mailto:" + email;
+        },
+
         projLink(projid) {
           return computeUrlLink("/prj/", projid.toString());
         },
@@ -264,6 +284,7 @@
             license: filterDef,
             cnn_network_id: filterDef,
             comments: filterDef,
+            email: filterDef,
           };
         },
       }
