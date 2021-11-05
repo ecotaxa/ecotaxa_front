@@ -10,6 +10,7 @@ import appli.part.prj
 from flask_security import login_required
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,TextAreaField
 from pathlib import Path
+from .ecopart_blueprint import part_app
 
 class UvpSampleForm(Form):
     pprojid = StringField("Part. project ID",[validators.DataRequired()])
@@ -87,7 +88,7 @@ def delete_sample(psampleid):
     db.session.commit()
 
 
-@app.route('/part/sampleedit/<int:psampleid>',methods=['get','post'])
+@part_app.route('/sampleedit/<int:psampleid>',methods=['get','post'])
 @login_required
 def part_sampleedit(psampleid):
     model = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()

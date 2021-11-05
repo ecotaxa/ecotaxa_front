@@ -6,7 +6,10 @@ from flask_login import current_user
 from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedCol
 import operator
 
-@app.route('/part/')
+from appli.part.ecopart_blueprint import part_app
+
+
+@part_app.route('/')
 def indexPart():
     class FiltForm(Form):
         filt_proj = SelectMultipleField(choices=[['','']]+database.GetAll(
@@ -114,7 +117,7 @@ def GetFilteredSamples(Filter=None,GetVisibleOnly=False,ForceVerticalIfNotSpecif
     sql+=""" order by s.psampleid     """
     return database.GetAll(sql,sqlparam)
 
-@app.route('/part/searchsample')
+@part_app.route('/searchsample')
 def Partsearchsample():
     samples =GetFilteredSamples()
     res=[]
@@ -123,7 +126,7 @@ def Partsearchsample():
         res.append(r)
     return json.dumps(res)
 
-# @app.route('/part/statsample')
+# @part_app.route('/statsample')
 def PartstatsampleGetData():
     samples =GetFilteredSamples()
     if len(samples )==0:
@@ -245,7 +248,7 @@ group by slice order by slice""".format(sampleinclause))
         order by tree""".format(sampleinclause))
     return data
 
-@app.route('/part/statsample')
+@part_app.route('/statsample')
 def Partstatsample():
     data=PartstatsampleGetData()
     if isinstance(data,str):
@@ -254,7 +257,7 @@ def Partstatsample():
     # return json.dumps(data)
 
 
-@app.route('/part/getsamplepopover/<int:psampleid>')
+@part_app.route('/getsamplepopover/<int:psampleid>')
 def Partgetsamplepopover(psampleid):
     sql="""select s.psampleid,s.profileid,p.ptitle,ep.title,p.cruise,p.ship ,p.projid,p.pprojid
       ,round(cast(s.latitude as NUMERIC),4) latitude,round(cast(s.longitude as NUMERIC),4) longitude

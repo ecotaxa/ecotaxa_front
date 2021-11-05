@@ -11,6 +11,8 @@ import numpy as np
 from appli.part import PartDetClassLimit,PartRedClassLimit,GetClassLimitTxt,CTDFixedColByKey
 from matplotlib.ticker import FuncFormatter, MaxNLocator
 
+from .ecopart_blueprint import part_app
+
 DepthTaxoHistoLimit=[0,25,50,75,100,125,150,200,250,300,350,400,450,500,600,700,800,900,1000,1250,1500,1750,2000,2250,2500,2750
     ,3000,3250,3500,3750,4000,4250,4500,4750,5000,5250,5500,5750,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,20000,50000]
 def GetTaxoHistoLimit(MaxDepth):
@@ -39,7 +41,7 @@ class dateFormaterYMD(matplotlib.ticker.Formatter):
             return "-"
         return matplotlib.dates.num2date(x).strftime("%Y-%m-%d")
 
-@app.route('/part/drawchart')
+@part_app.route('/drawchart')
 def part_drawchart():
     Couleurs=("#FF0000","#4385FF","#00BE00","#AA6E28","#FF9900","#FFD8B1","#808000","#FFEA00","#FFFAC8","#BEFF00",
         "#AAFFC3","#008080","#64FFFF","#000080","#800000","#820096","#E6BEFF","#FF00FF","#808080","#FFC9DE","#000000" )

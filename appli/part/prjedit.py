@@ -9,6 +9,8 @@ import appli.part.database as partdatabase,collections,re,csv
 from flask_security import login_required
 from wtforms  import Form, BooleanField, StringField, validators,DateTimeField,IntegerField,FloatField,SelectField,TextAreaField
 
+from .ecopart_blueprint import part_app
+
 class UvpPrjForm(Form):
     ptitle = StringField("Particle Project title")
     rawfolder = StringField("rawfolder")
@@ -38,7 +40,7 @@ class UvpPrjForm(Form):
     enable_descent_filter = StringField("Enable descent filter")
 
 
-@app.route('/part/prjedit/<int:pprojid>',methods=['get','post'])
+@part_app.route('/prjedit/<int:pprojid>',methods=['get','post'])
 @login_required
 def part_prjedit(pprojid):
     g.headcenter="<h3>Particle Project Metadata edition</h3>"
@@ -97,7 +99,7 @@ def part_prjedit(pprojid):
     return PrintInCharte(render_template("part/prjedit.html", form=form, prjid=model.pprojid))
 
 
-@app.route('/part/readprojectmeta',methods=['get','post'])
+@part_app.route('/readprojectmeta',methods=['get','post'])
 @login_required
 def part_readprojectmeta():
     res={}

@@ -10,8 +10,9 @@ import appli.part.uvp6remote_sample_import as uvp6remote_sample_import
 import appli.part.database as partdatabase
 import appli.part.sampleedit as sampleedit
 from flask_security import login_required
+from .ecopart_blueprint import part_app
 
-@app.route('/part/prj/')
+@part_app.route('/prj/')
 @login_required
 def part_prj():
     params={}
@@ -41,7 +42,7 @@ def part_prj():
         render_template('part/list.html', PrjList=res, CanCreate=CanCreate, AppManagerMailto=appli.GetAppManagerMailto()
                         , filt_title=gvg('filt_title'), filt_subset=gvg('filt_subset'), filt_instrum=gvg('filt_instrum')))
 
-@app.route('/part/prj_uvpgraph/<int:PrjId>/<int:offset>')
+@part_app.route('/prj_uvpgraph/<int:PrjId>/<int:offset>')
 @login_required
 def part_prj_vpgraph(PrjId,offset):
     Prj=GetAll("""select pp.* from part_projects pp where pprojid=%s""",(PrjId,))
@@ -76,7 +77,7 @@ def part_prj_vpgraph(PrjId,offset):
     return PrintInCharte(txt)
 
 
-@app.route('/part/prj/<int:PrjId>')
+@part_app.route('/prj/<int:PrjId>')
 @login_required
 def part_prj_main(PrjId):
     # Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
@@ -184,7 +185,7 @@ def GlobalTaxoCompute():
     for S in Samples:
         ComputeZooHisto(S['psampleid'],S['instrumtype'])
 
-@app.route('/part/prjcalc/<int:PrjId>',methods=['post'])
+@part_app.route('/prjcalc/<int:PrjId>',methods=['post'])
 @login_required
 def part_prjcalc(PrjId):
     Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()

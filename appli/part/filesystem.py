@@ -7,7 +7,7 @@ from flask import render_template, json
 from appli import app, gvg
 
 
-@app.route('/part/ServerFolderSelect')
+@part_app.route('/ServerFolderSelect')
 def ServerFolderSelect():
     res = []
     # the HTML id of the element which will be updated once selection is done
@@ -16,7 +16,7 @@ def ServerFolderSelect():
                            targetid=target_id, ziponly=gvg('ZipOnly', 'N'))
 
 
-@app.route('/part/ServerFolderSelectJSON')
+@part_app.route('/ServerFolderSelectJSON')
 def ServerFolderSelectJSON():
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     CurrentPath = ServerRoot
