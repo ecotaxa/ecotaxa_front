@@ -80,15 +80,9 @@ def PrintInCharte(txt, title=None):
     :return: Texte rendu
     """
     AddTaskSummaryForTemplate()
-    module = ''  # Par defaut c'est Ecotaxa
-    if request.path.find('/part') >= 0:
-        module = 'part'
     if not title:
-        if module == 'part':
-            title = 'EcoPart'
-        else:
-            title = 'EcoTaxa'
-    return render_template('layout.html', bodycontent=txt, module=module, title=title)
+        title = 'EcoTaxa'
+    return render_template('layout.html', bodycontent=txt, title=title)
 
 
 def ErrorFormat(txt):

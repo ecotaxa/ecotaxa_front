@@ -36,29 +36,11 @@
 <link rel="stylesheet" href="/static/fontawesome-free-5.5.0-web/css/all.min.css">
 <link rel="stylesheet" href="/static/bootstrap.dropdown.submenu.css">
 
-<script>
-function AddZoom(element)
-{
-//index=element.attr("id").substring(1,10)
-var pos=element.attr("pos");
-element.addimagezoom({ // single image zoom
-		zoomrange: [4, 10],
-		magnifiersize: [400,400],
-		magnifierpos: pos,
-		cursorshade: true,
-		largeimage: '/vault/'+element.attr('data-zoom-image')
-	});
-};
-
-$(document).ready(function() {
-});
-</script>
-
 <div id="empty_fixed" style="position: fixed; z-index: 13; top: 0px; left: 0px; display: block;"></div>
 <div id="divheadinfo" class="headinfo">
 <div class="headinfo panel panel-default">  <div class="panel-body" style="padding: 1px 5px 1px 5px;">
 <table width="100%"><tr>
-    <td width="140px"><a href="/"><img height="30" src="/static/logo_ecotaxa_25.png" style="margin: 10px 0"></a></td>
+    <td width="145px"><a href="/part/"><img src="/static/logo_ecopart.png"></a></td>
 
     <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
     <td align="right">{{ g.experimental |safe}}</td>
