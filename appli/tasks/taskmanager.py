@@ -146,9 +146,6 @@ class AsyncTask:
 
 
 def TaskFactory(ClassName, task=None):
-    from appli.tasks.test import TaskTest
-    if ClassName == "TaskTest":
-        return TaskTest(task)
     # Particle module tasks
     from .taskpartzooscanimport import TaskPartZooscanImport
     if ClassName == "TaskPartZooscanImport":

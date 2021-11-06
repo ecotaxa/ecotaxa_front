@@ -117,7 +117,7 @@ def FullDBRestore(UseExistingDatabase=False):
     """
     Will restore an exported DB as is and replace all existing data
     """
-    from appli.tasks.taskimportdb import RestoreDBFull
+    from appli.db_imp_exp import RestoreDBFull
     if UseExistingDatabase:
         print("You have specified the UseExistingDatabase option, the database itself will be kept, "
               "but all its content will be removed")
