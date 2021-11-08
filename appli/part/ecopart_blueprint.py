@@ -6,7 +6,7 @@ from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import UsersApi, UserModelWithRights, ApiException
 
 PART_URL = "/part/"
-ECOTAXA_URL = "/"
+ECOTAXA_URL = "http://localhost:5001/"
 PART_STORAGE_URL = "/vault/"
 
 part_app = Blueprint(name='ecopart',

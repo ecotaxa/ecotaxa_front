@@ -8,10 +8,13 @@ from appli import app, database
 from appli.part import GetClassLimitTxt
 from appli.part.constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
 from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, ECOTAXA_URL
+from appli.part.remote import EcoTaxaInstance
 
 
 @part_app.route('/')
 def indexPart():
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+
     class FiltForm(Form):
         filt_proj = SelectMultipleField(choices=[['', '']] + database.GetAll(
             "SELECT projid,concat(title,' (',cast(projid AS VARCHAR),')') "
@@ -37,10 +40,9 @@ def indexPart():
     form = FiltForm(filt_data)
     form.taxolb.choices = [['', '']]
     if (len(request.args.getlist('taxolb'))):
-        form.taxolb.choices += database.GetAll(
-            "SELECT id,display_name "
-            "FROM taxonomy where id in (%s) ORDER BY id,lower(display_name) " % (
-                ",".join((str(int(x)) for x in request.args.getlist('taxolb')))))
+        # Si l'on a passé la liste des catégories, la rajouter dans le select2 au chargement de la page
+        classif_ids = [int(x) for x in request.args.getlist('taxolb')]
+        form.taxolb.choices += ecotaxa_if.get_taxo(classif_ids)
     g.headcenter = """<h1 style='text-align: center;cursor: pointer;' >
       <span onclick="$('#particleinfodiv').toggle()"><b>PARTICLE</b> module <span class='glyphicon glyphicon-info-sign'></span> </span> 
       <a href='%s' style='font-size:medium;margin-left: 50px;'>Go to Ecotaxa</a></h2>""" % ECOTAXA_URL
@@ -238,30 +240,16 @@ def PartstatsampleGetData():
             where ps.psampleid in ({0})
             group by ps.psampleid) ps
 group by slice order by slice""".format(sampleinclause))
-    data['taxolist'] = database.GetAll("""
-        select classif_id,t.name nom 
-        ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
-     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t.name) tree
-        from (SELECT distinct hl.classif_id
+    # On récupère la liste des catégories pour les samples concernés
+    classif_ids = database.GetAll("""
+        SELECT distinct hl.classif_id
             from part_samples ps
             join part_histocat_lst hl on ps.psampleid = hl.psampleid
-            where ps.psampleid in ({0} ) ) cat
-        join taxonomy t on cat.classif_id=t.id
-        left join taxonomy t1 on t.parent_id=t1.id
-        left join taxonomy t2 on t1.parent_id=t2.id
-        left join taxonomy t3 on t2.parent_id=t3.id
-        left join taxonomy t4 on t3.parent_id=t4.id
-        left join taxonomy t5 on t4.parent_id=t5.id
-        left join taxonomy t6 on t5.parent_id=t6.id
-        left join taxonomy t7 on t6.parent_id=t7.id
-        left join taxonomy t8 on t7.parent_id=t8.id
-        left join taxonomy t9 on t8.parent_id=t9.id
-        left join taxonomy t10 on t9.parent_id=t10.id
-        left join taxonomy t11 on t10.parent_id=t11.id
-        left join taxonomy t12 on t11.parent_id=t12.id
-        left join taxonomy t13 on t12.parent_id=t13.id
-        left join taxonomy t14 on t13.parent_id=t14.id                
-        order by tree""".format(sampleinclause))
+            where ps.psampleid in ({0})""".format(sampleinclause))
+    # Format retourné, par exemple: [ [85061], [85039] ....]
+    classif_ids = [an_id[0] for an_id in classif_ids]
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    data['taxolist'] = ecotaxa_if.get_taxo2(classif_ids)
     return data
 
 
