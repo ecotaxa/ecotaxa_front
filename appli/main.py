@@ -6,7 +6,7 @@ import os
 from flask import Blueprint, g, request, url_for, send_from_directory
 
 from appli import app, PrintInCharte
-# definition d'un second répertoire traité en statique en plus de static
+from appli.part.ecopart_blueprint import before_part_request, PART_URL
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi
@@ -93,6 +93,8 @@ def gui_any(filename):
 @app.before_request
 def before_request_security():
     # time.sleep(0.1)
+    if "/part/" in request.url:
+        return before_part_request()
     # print("URL="+request.url)
     # app.logger.info("URL="+request.url)
     g.db = None
@@ -133,9 +135,9 @@ def before_request_security():
     else:
         # TODO: I can't see the menu _at all_ for unlogged users?
         g.menu.append(("/prj/", "Select Project"))
-    g.menu.append(("/part/", "Particle Module"))
+    g.menu.append((PART_URL, "Particle Module"))
     if user_is_logged:
-        g.menu.append(("/part/prj/", "Particle projects management"))
+        g.menu.append((PART_URL+"prj/", "Particle projects management"))
     g.menu.append(("", "SEP"))
     if request.endpoint == 'indexPrj':
         g.menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%d');" % (
@@ -146,7 +148,7 @@ def before_request_security():
     if user_can_administrate or user_can_administrate_users:
         g.menu.append(("", "SEP"))
         g.menu.append(("/admin/", "Admin Screen"))
-        g.menu.append(("/Task/listall", "Task Manager"))
+        g.menu.append(("/Jobs/listall", "Task Manager"))
 
     g.useradmin = user_can_administrate_users
     g.appliadmin = user_can_administrate

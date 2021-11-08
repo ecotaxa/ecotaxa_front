@@ -325,7 +325,7 @@ def indexPrj(PrjId):
         # g.headmenu.append(("", "SEP"))
         # g.headmenu.append(("/prj/emodnet/%d" % PrjId, "EMODnet export"))
 
-    appli.AddTaskSummaryForTemplate()
+    appli.AddJobsSummaryForTemplate()
     filtertab = getcommonfilters(data)
     return render_template('project/projectmain.html', top="", leftb=filtertab,
                            data=data, title='EcoTaxa ' + ntcv(proj.title))

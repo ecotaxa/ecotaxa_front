@@ -1,0 +1,25 @@
+-------- ARCH --------------
+
+- DB table temp_tasks belongs to EcoPart
+
+--------- TODO --------------
+
+- move temp_tasks to EcoPart DB definition
+
+- login delegate to EcoTaxa
+
+- "EcoTaxa folder temptask/task%06d (useful for huge files)"
+
+- finish replacements of /part with {{ url_for() }}
+
+- cron.py for EcoPart
+
+- separate temptasks directory for jobs vs tasks
+
+- refs to projects table
+
+- refs to objects table
+
+- refs to taxonomy table
+
+- join with user information

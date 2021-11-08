@@ -2,11 +2,10 @@
 import datetime
 import time
 
-from flask import render_template, g, redirect
+from flask import render_template, g, redirect, request, flash
 
-from appli import PrintInCharte, gvg, XSSEscape
+from appli import PrintInCharte, gvg, XSSEscape, gvp
 from appli.jobs.Job import Job
-from appli.tasks.importcommon import *
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi

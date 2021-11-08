@@ -1,14 +1,5 @@
-import logging
 import math
 import re
-from pathlib import Path
-
-from flask import request, flash
-
-from appli import gvp, app, UtfDiag
-from appli.database import GetAll
-# object_annotation_category_id
-from appli.tasks.taskmanager import AsyncTask
 
 
 # retourne le flottant image de la chaine en faisant la conversion ou None
@@ -70,39 +61,3 @@ def calcpixelfromesd_aa_exp(esd, aa, exp):
     """
     pxfloat = pow((math.pi / (aa)) * ((esd / 2) ** 2), 1 / exp)
     return math.floor(round(pxfloat, 3))
-
-
-def get_file_from_form(a_task: AsyncTask, errors):
-    """
-        Common treatment of "file" fields in several tasks.
-    """
-    FileToSave = None
-    FileToSaveFileName = None
-    uploadfile = request.files.get("uploadfile")
-    if uploadfile is not None and uploadfile.filename != '':  # import d'un fichier par HTTP
-        FileToSave = uploadfile  # La copie est faite plus tard, car à ce moment là, le repertoire
-        # de la tache n'est pas encore créé
-        FileToSaveFileName = "uploaded.zip"
-        # noinspection PyUnresolvedReferences
-        a_task.param.InData = "uploaded.zip"
-    elif len(gvp("ServerPath")) < 2:
-        errors.append("Input Folder/File Too Short")
-    else:
-        ServerRoot = Path(app.config['SERVERLOADAREA'])
-        sp = ServerRoot.joinpath(Path(gvp("ServerPath")))
-        if not sp.exists():  # verifie que le repertoire existe
-            errors.append("Input Folder/File Invalid")
-            UtfDiag(errors, str(sp))
-        else:
-            # noinspection PyUnresolvedReferences
-            a_task.param.InData = sp.as_posix()
-    return FileToSave, FileToSaveFileName
-
-
-def flash_any_error(errors):
-    if len(errors) > 0:
-        for e in errors:
-            flash(e, "error")
-        return True
-    else:
-        return False

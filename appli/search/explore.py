@@ -44,7 +44,7 @@ def indexExplore():
 
     right='dodefault'
     classiftab=""
-    appli.AddTaskSummaryForTemplate()
+    appli.AddJobsSummaryForTemplate()
     filtertab=getcommonfilters(data)
     return render_template('search/explore.html',top="",lefta=classiftab,leftb=filtertab
                            ,right=right,data=data)

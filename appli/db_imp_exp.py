@@ -106,7 +106,7 @@ def RestoreDBFull(UseExistingDatabase=False):
     print("Restore Images")
     cur.execute("select images.* from images ")
     # vaultroot=Path("../vault")
-    vaultroot = Path(os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"../../vault")))
+    vaultroot = Path(os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"../vault")))
     for r in cur:
         if r['file_name']:
             zipimagefile = "images/%s.img" % r['imgid']
@@ -122,5 +122,5 @@ def RestoreDBFull(UseExistingDatabase=False):
                 shutil.move(zipimagefile, vaultroot.joinpath(r['thumb_file_name']).as_posix())
 
     # Clean Up du repertoire
-    os.chdir("..")
+    os.chdir("")
     shutil.rmtree("DBFullRestore")

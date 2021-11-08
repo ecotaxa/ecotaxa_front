@@ -1,7 +1,8 @@
 import flask
 from flask import request, render_template, Response, redirect, g
+from flask_login import login_required, current_user
 
-from appli import app, PrintInCharte, gvg, XSSEscape, AddTaskSummaryForTemplate
+from appli import app, PrintInCharte, gvg, XSSEscape, AddJobsSummaryForTemplate, database
 from appli.jobs.Job import Job
 # noinspection PyUnresolvedReferences
 from appli.jobs.by_type import *  # Import all for job searching in class hierarchy
@@ -16,7 +17,7 @@ def jobCreate(job_type: str):
     """
         Used from menu (GET) and in self-submitted POST.
     """
-    AddTaskSummaryForTemplate()
+    AddJobsSummaryForTemplate()
     job_cls = Job.find_job_class_by_name(Job, job_type)
     assert job_cls is not None, "%s not known as a job UI type" % job_type
     if request.method == 'GET':
@@ -31,7 +32,7 @@ def jobDisplay(job_id: int):
     """
         Used from full job display (GET) and in self-submitted POST.
     """
-    AddTaskSummaryForTemplate()
+    AddJobsSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
         try:
             job: JobModel = api.get_job(job_id=job_id)
@@ -83,7 +84,7 @@ def jobAsk(job_id: int):
     """
         Used for jobs needing user input during the processing.
     """
-    AddTaskSummaryForTemplate()
+    AddJobsSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
         try:
             job: JobModel = api.get_job(job_id=job_id)
@@ -112,7 +113,7 @@ def jobMonitor(job_id: int):
     """
         Single-job monitoring.
     """
-    AddTaskSummaryForTemplate()
+    AddJobsSummaryForTemplate()
     return render_template('jobs/monitor.html', job_id=job_id)
 
 
@@ -167,7 +168,7 @@ def jobGetStatus(job_id: int):
 
 @app.route('/Job/ForceRestart/<int:job_id>', methods=['GET'])
 def jobForceRestart(job_id: int):
-    AddTaskSummaryForTemplate()
+    AddJobsSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
         api.restart_job(job_id=job_id)
     return redirect("/Job/Monitor/%d" % job_id)
@@ -175,7 +176,7 @@ def jobForceRestart(job_id: int):
 
 @app.route('/Job/Clean/<int:job_id>', methods=['GET'])
 def jobCleanup(job_id: int):
-    AddTaskSummaryForTemplate()
+    AddJobsSummaryForTemplate()
     with ApiClient(JobsApi, request) as api:
         try:
             job: JobModel = api.get_job(job_id=job_id)
@@ -195,8 +196,39 @@ def jobCleanup(job_id: int):
     if proj_id:
         msg += "<a href='/prj/%s'>Back to project</a><br>" % proj_id
 
-    msg += '<br><a href="/Task/listall"><span class="label label-info"> Back to Task List</span></a>'
+    msg += '<br><a href="/Jobs/listall"><span class="label label-info"> Back to Task List</span></a>'
     if gvg('thengotoproject') == 'Y':
         return redirect("/prj/%d" % proj_id)
     else:
         return PrintInCharte(msg)
+
+
+@app.route('/Jobs/listall')
+@login_required
+def ListJobs():
+    from appli.jobs.emul import _build_jobs_list, _clean_jobs
+    g.headcenter = "<H3>Task Monitor</h3>"
+    AddJobsSummaryForTemplate()
+
+    # TODO: Remove DB dependency
+    seeall = ""
+    is_admin = current_user.has_role(database.AdministratorLabel)
+    wants_admin = gvg("seeall") == 'Y'
+    if is_admin and wants_admin:
+        seeall = '&seeall=Y'
+
+    txt = ""
+    if gvg("cleandone") == 'Y' or gvg("cleanerror") == 'Y' or gvg("cleanall") == 'Y':
+        txt = "Cleaning process result :<br>"
+        clean_all = gvg("cleanall") == 'Y'
+        clean_done = gvg("cleandone") == 'Y'
+        clean_error = gvg("cleanerror") == 'Y'
+        txt += _clean_jobs(clean_all, clean_done, clean_error, wants_admin)
+
+    # txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default'
+    # href=?cleanerror=Y>Clean All Error</a>   <a class='btn btn-default' href=?cleanall=Y>Clean All
+    # (warning !!!)</a>  Task count : "+str(len(tasks))
+    tasks = _build_jobs_list(wants_admin)
+    return render_template('jobs/listall.html', jobs=tasks, header=txt,
+                           len_tasks=len(tasks), seeall=seeall,
+                           IsAdmin=is_admin)

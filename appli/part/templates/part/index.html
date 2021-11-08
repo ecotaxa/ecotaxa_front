@@ -1,0 +1,845 @@
+<style>
+    .headinfo {
+        margin-bottom: 5px;
+    }
+
+    .select2-results__option {
+        padding: 0px;
+    }
+
+    #filter1 td:nth-child(1) {
+        width: 100px;
+    }
+
+    #filter1 td {
+        padding-bottom: 2px;
+    }
+
+    #geofilter .form-control {
+        width: 100px;
+        display: inline-block;
+    }
+
+    #map .popover {
+        max-width: 380px;
+    }
+
+    .select2-selection {
+        overflow: hidden !important;
+    }
+
+    .select2-selection__rendered {
+        white-space: normal !important;
+        word-break: break-all !important;
+    }
+</style>
+
+<div id="particleinfodiv" class="panel panel-default" style="margin-left: 50px;margin-right: 50px;display: none;
+position: absolute;z-index: 100;">
+  <div class="panel-body">
+    <h3>General introduction</h3>
+    This PARTICLE module of ECOTAXA is designed to host data from the Underwater Vision Profiler (UVP) and the LIIST
+    instruments. It permits to:
+    <br>• Load particle data and associate them with CTD data and zooplankton images loaded and annotated in Ecotaxa
+    <br>• Process size spectra from the particle data
+    <br>• Download the resulting particle spectra, the CTD and the zooplankton data according to defined permissions
+    <br>• Visualize data and permit their promotion thanks to the internet access
+    <h3>Datasets status</h3>
+    The datasets can have different status (PRIVATE, PARTIALLY or FULLY AVAILABLE). If the data you are interested to
+    visualize or download are not accessible, you can contact the different project managers and data owners using the
+    links provided in the STATISTICS display.
+    <br>The data owners are always indicated in the datasets that you download. Please contact them to get additional
+    information and discuss publications.
+    <br>By default, all particle and CTD data can be displayed in the graph section and limited resolution data
+    downloaded.
+    <br>Unless the data owner changes the delays, the full particle and CTD data will be available after 24 months from
+    acquisition.
+    <br>Unless the data owner changes the delays and if the Ecotaxa associated project is annotated and visible, the
+    validated zooplankton data will be available after 36 months from acquisition.
+    <br>You can get full access to any dataset (project) by getting annotation or management permission to the
+    associated Ecotaxa annotation project (for UVP projects only).
+    <br>Warning about the zooplankton datasets: only validated (e.g. annotation visually checked by experts) are
+    included in the displayed and downloaded datasets. Please check the validation ratio in the statistics page and in
+    the data summary exported with the data. Do not hesitate to visit the Ecotaxa project to check the quality of the
+    annotation.
+    <h3>Data provider information</h3>
+    This application is designed to facilitate the processing and the display of the LISST and UVP datasets.
+    <br>A mobile instance will be available (contact <a href="mailto:marc.picheral@obs-vlfr.fr">marc.picheral@obs-vlfr.fr</a>)
+    for field processing of your data but the importation of the projects will have to be done again on the server
+    instance when back to shore.
+    <br>We recommend keeping the default settings for the delays to release your datasets and make the associated
+    Ecotaxa project visible. This will allow the access of the results and the visualization of the images.
+
+    <h3>Citation and disclaimer</h3>
+    If you use EcoTaxa or Ecotaxa particle module in your work, we would appreciate that:
+    <br>• you cite it as: Picheral M, Colin S, Irisson J-O (2017). EcoTaxa, a tool for the taxonomic classification of
+    images.
+    <a href="http://ecotaxa.obs-vlfr.fr">http://ecotaxa.obs-vlfr.fr</a>.
+    <br>• you consider setting aside some funds in your next grant to support its maintenance and development. Contact
+    us to estimate what would be both reasonable and useful.
+    <br>The Particle module of Ecotaxa was funded by SOERE MOOSE…..
+    <br>Contact: <a href="mailto:marc.picheral@obs-vlfr.fr">marc.picheral@obs-vlfr.fr</a> / Development by: <a
+      href="http://www.altidev.com" target="_blank">Altidev</a>
+    <br>Disclaimer: The managers of the EcoTaxa application are not responsible for the safekeeping of the images and
+    associated data it hosts, even if they make their best to keep the application stable and secure.
+  </div>
+</div>
+
+<div style="margin: 2px;">
+
+  <link rel="stylesheet" href="/static/openlayers/ol.css" type="text/css">
+  <table style="width: 100%">
+    <tr>
+      <td style="width: 400px;vertical-align: top;">
+        <form id="filt_form" class="form-group-sm">
+          <b>Sample filters :</b>
+
+          {#----------- Début formulaire filtrage -------------#}
+          <table id="filter1" style="width: 95%">
+            <tr>
+              <td style="vertical-align: top">
+                <button class="btn btn-primary btn-xs" style="width: 100%" id=SharePageBtn type="button"
+                        title="Email a link to this page, including the current filters. Press CTRL to open it on another tab (usefull if you use GMail)">
+                  <span class="glyphicon glyphicon-link"></span> Share page
+                </button>
+
+              </td>
+              <td>
+                <table style="width:100%;" id="geofilter">
+                  <tr>
+                    <td colspan="2" style="padding-left: 40px;">North <input type="text" class="form-control"
+                                                                             id="MapOutN" name="MapN"
+                                                                             value="{{ reqfields['MapN'] }}">
+                      <button type="button" class="btn btn-xs btn-primary pull-right"
+                              style="margin-right: 5px;margin-top: 3px;" onClick="DrawInputOnMap();">Draw On Map
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 2px;white-space: nowrap;">West <input type="text" class="form-control"
+                                                                              id="MapOutW" name="MapW"
+                                                                              value="{{ reqfields['MapW'] }}"></td>
+                    <td>East <input type="text" class="form-control" id="MapOutE" name="MapE"
+                                    value="{{ reqfields['MapE'] }}"></td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="padding-left: 40px;">South <input type="text" class="form-control"
+                                                                             id="MapOutS" name="MapS"
+                                                                             value="{{ reqfields['MapS'] }}">
+                      <button type="button" class="btn btn-xs btn-primary pull-right"
+                              style="margin-right: 5px;margin-top: 3px;" onClick="ClearGeoFilter();">Clear
+                      </button>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+            <tr>
+              <td>Date between</td>
+              <td><input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_fromdate"
+                         name="filt_fromdate" autocomplete="off" placeholder="Begin"
+                         value="{{ reqfields['filt_fromdate'] }}">
+                and <input class="form-control" type="text" style="width: 100px;display: inline-block" id="filt_todate"
+                           name="filt_todate" autocomplete="off" placeholder="End"
+                           value="{{ reqfields['filt_todate'] }}">
+                <button type="button" class="btn btn-xs btn-primary pull-right"
+                        style="margin-right: 5px;margin-top: 3px;" onClick="ClearDateFilter();">Clear
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Instrument</td>
+              <td>{{ form.filt_instrum(style="width:100px") }}  </td>
+            </tr>
+            <tr>
+              <td>Profile type</td>
+              <td>{{ form.filt_proftype(style="width:100px") }}
+                <span class='glyphicon glyphicon-info-sign' onclick="$('#dotlegend2').toggle()"></span> <br>
+                <div id="dotlegend2" style="display: none">
+  <span style="color: black;">Oblique casts (from gliders) are displayed as depth casts
+
+                </div>
+
+              </td>
+            </tr>
+            <tr>
+              <td>Ecotaxa Project</td>
+              <td>{{ form.filt_proj(style="width:100%") }}</td>
+            </tr>
+            <tr>
+              <td>Particle Project</td>
+              <td>{{ form.filt_uproj(style="width:100%") }}</td>
+            </tr>
+          </table>
+          <div style="margin-top: 5px">
+            <button type="button" id="btfilt" class="btn btn-primary" onclick="DoSearch()" style="width: 140px;"><span
+                class="glyphicon glyphicon-search"></span> Apply filters
+            </button>
+            <button type="button" id="btfilt" class="btn btn-primary" onclick="DisplayAll()" style="width: 200px;"><span
+                class="glyphicon glyphicon-erase"></span> Display all
+            </button>
+            <br>
+            <button type="button" id="btfilt" class="btn btn-primary" onclick="DoExport()"
+                    style="margin-top: 5px;width: 140px;"
+                    {% if not  current_user.is_authenticated %}disabled{% endif %}><span
+                class="glyphicon glyphicon-export"></span> Export selection
+            </button>
+            <button type="button" id="btfilt" class="btn btn-primary" onclick="ShowStat()"
+                    style="margin-top: 5px;width: 200px;"><span class="glyphicon glyphicon-signal"></span> Display
+              selection statistics
+            </button>
+            <br>
+            Dot color legend <span class='glyphicon glyphicon-info-sign' onclick="$('#dotlegend').toggle()"></span> <br>
+            <div id="dotlegend" style="display: none">
+              <span style="color: black;"><b>Private</b> : Hidden data</span><br>
+              <span
+                  style="color: red;"><b>Visible</b> : Graphs are visible and limited CTD & particle export allowed </span><br>
+              <span style="color: orange;"><b>Exportable</b> : Full CTD & particle export allowed (plankton hidden or absent)</span><br>
+              <span style="color: green;"><b>Exportable</b> : Full CTD & particle & plankton export allowed </span><br>
+
+            </div>
+
+
+          </div>
+
+        </form>
+      </td>
+      {#----------- Fin formulaire filtrage -------------#}
+      <td style="vertical-align: top;position: relative;">
+        <div id="map" class="map" style="width: 100%; height: 450px;">
+          Displaying Map requires Internet Access to load map from https://services.arcgisonline.com
+        </div>
+        <div id="samplecount" style="position: absolute;top: 430px; left:10px;font-weight: bold;">-</div>
+      </td>
+    </tr>
+  </table>
+  <div id="ajaxlog"></div>
+
+  {#----------- Debut formulaire Graphique -------------#}
+  <table style="width: 100%">
+    <tr>
+      <td style="width: 400px;vertical-align: top;padding-right: 10px">
+        <div class="panel panel-default" id="graphconfig">
+          <div class="panel-body" style="padding: 5px;">
+            <b>Graph configuration</b>
+            <button type="button" class="btn btn-sm btn-primary pull-right" onclick="ProcessDraw()"><span
+                class="glyphicon glyphicon-ok"></span> Draw graph
+            </button>
+            <br>
+            <form id="formgraphconfig">
+              Reduced particle histogram - <span id=redhelpericon class="glyphicon glyphicon-check"
+                                                 style="cursor: pointer" data-html="true" data-placement="bottom"
+                                                 data-content=""></span> <br>
+              {{ form.gpr(style="width:100%") }}<br>
+              Detailed particle histogram - <span id=dethelpericon class="glyphicon glyphicon-check"
+                                                  style="cursor: pointer" data-html="true" data-placement="bottom"
+                                                  data-content=""></span> <br>
+              {{ form.gpd(style="width:100%") }}<br>
+              CTD Data - <span id=ctdhelpericon class="glyphicon glyphicon-check" style="cursor: pointer"
+                               data-html="true" data-placement="bottom" data-content=""></span> <br>
+              {{ form.ctd(style="width:100%") }}<br>
+              {# ------- Depth ------------#}
+              <div style="width:70%;display: inline-block">
+                <div class="form-group-sm">
+                  <label class="title">Pressure [db]</label>
+                  <span
+                      title="Positive values. Both values are required. Each object has a min and max pressure. Both values must be in the selected range for the object to be displayed."
+                      data-toggle="tooltip" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
+                  <a class="pull-right label label-default"
+                     style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
+                     onclick='ClearDepths();return false;'>Clear</a>
+
+                  <div class="form-inline">
+                    <div class="input-group" style="width: 49%">
+                      <div class="input-group-addon"><span class="glyphicon glyphicon-triangle-bottom"></span></div>
+                      <input class="form-control" type="text" id="filt_depthmin" name="filt_depthmin"
+                             value="{{ reqfields['filt_depthmin'] }}" autocomplete="off" value=""
+                             placeholder="Min [db]">
+                    </div>
+                    <div class="input-group" style="width: 49%">
+                      <div class="input-group-addon"><span class="glyphicon glyphicon-triangle-top"></span></div>
+                      <input class="form-control" type="text" id="filt_depthmax" name="filt_depthmax"
+                             value="{{ reqfields['filt_depthmax'] }}" autocomplete="off" value=""
+                             placeholder="Max [db]">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="title">DATA Scale : </label>
+                <input type="radio" name="XScale" value="I" {{ 'checked' if reqfields['XScale']not in ('O','S') }}>
+                Linear
+                - <input type="radio" name="XScale" value="O" {{ 'checked' if reqfields['XScale']=='O' }}> Log
+                - <input type="radio" name="XScale" value="S" {{ 'checked' if reqfields['XScale']=='S' }}> Symlog
+              </div>
+              <div>
+                <label class="title">TIME Scale : </label>
+                <input type="radio" name="TimeScale"
+                       value="R" {{ 'checked' if not reqfields['TimeScale'] or reqfields['TimeScale']not in ('A') }}>
+                Relative
+                - <input type="radio" name="TimeScale" value="A"{{ 'checked' if reqfields['TimeScale']=='A' }}> Absolute
+              </div>
+
+              {# ------- Taxo Filter ------------#}
+              <div>
+                <div class="form-group-sm">
+                  <label class="title">Validated Plankton filter </label>
+                  <a class="pull-right clear label label-default" href='javascript:ClearTaxo();'
+                     style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;">Clear</a>
+                  {{ form.taxolb(style="width:100%") }}
+                  {#        <select id="taxolb" name="taxolb" multiple="multiple" style="width: 100%"  autocomplete="off">  </select>#}
+                </div>
+              </div>
+              <div>
+                <input type="checkbox" id="taxochild" name="taxochild" value="1"
+                       style='margin:0;' {{ 'checked' if reqfields['taxochild']=='1' }}>
+                Sum abundance of children categories
+              </div>
+
+              <div class="FilterToggle" style="display:none;cursor:pointer;">
+                <span onclick="$('.FilterToggle').toggle();"><span class="glyphicon glyphicon-triangle-right"></span>Show filters</span>
+              </div>
+
+
+              <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css"/>
+              <script src="/static/jstree/jstree.min.js"></script>
+
+
+              <style>
+                  .tree li a {
+                      padding-right: 20px !important;
+                      background: url(icons/Star-icon.png) top right no-repeat;
+                  }
+
+                  .tree li.clicked a {
+                      padding-right: 20px !important;
+                      background: url(icons/Star-icon.png) top right no-repeat #BEEBFF;
+                  }
+
+                  .tree li a.hover,
+                  .tree li a:hover {
+                      padding-right: 20px !important;
+                      background: url(icons/Star-icon.png) top right no-repeat #D8F0FA;
+                  }
+
+                  .taxo_tree_selected .v {
+                      background-color: #777777;
+                  }
+              </style>
+              <div id="jstreeexp">
+                <ul>
+                  <li>Root node 1</li>
+                  <li>Root node 2</li>
+                </ul>
+              </div>
+
+              <script>
+                  $(function () {
+                      var jstreeexp = $('#jstreeexp');
+                      var taxolb = $('#taxolb');
+                      jstreeexp.jstree({
+                          'core': {
+                              "animation": 0,
+                              "themes": {"stripes": false, "icons": false},
+                              'data': {
+                                  'dataType': 'JSON',
+                                  'url': '/search/taxotreejson',
+                                  'data': function (node) {
+                                      return {'id': node.id};
+                                  }
+                              }
+                          }
+                      });
+
+                      jstreeexp.delegate(".TaxoSel", 'click',
+                          function (o) {
+                              o.preventDefault();
+                              var id = $(o.target).closest("li").attr("id");
+                              var valeur = $(o.target).prev().html();
+                              if ($(o.target).hasClass("glyphicon"))
+                                  valeur = $(o.target).parent().prev().html();
+                              $('#SelectedID').html(id);
+                              $('#SelectedName').html(valeur);
+                              taxolb.append($('<option>', {value: id, text: valeur}));
+                              var sel = taxolb.val();
+                              if (sel === null) sel = [];
+                              sel.push(id);
+                              taxolb.val(sel);
+                              taxolb.change();
+                          });
+
+                      $("#jstree").bind("select_node.jstree", function (e, data) {
+                          $("#jstree").jstree('open_node', data.node);
+                      });
+                      {# Quand on ouvre une branche de l'arbre on met à jours les background pour les nouveaux noeuds  #}
+                      jstreeexp.on('after_open.jstree', function () {
+                          $('#taxolb').change();
+                      });
+
+                      taxolb.change(function () { {# Mise à jour des background dans l'arbre #}
+                          $(".taxo_tree_selected").removeClass("taxo_tree_selected");
+                          var taxofilterarray = [];
+                          taxolb.find(':selected').each(function (i, selected) {
+                              taxofilterarray[i] = "#" + $(selected).val();
+                          });
+                          $(taxofilterarray.join(",")).addClass("taxo_tree_selected");
+                      });
+
+                  });
+
+                  function ClearTaxo() {
+                      $("#taxolb").val(null).trigger("change");
+                  }
+              </script>
+            </form>
+          </div>
+        </div>
+      </td>
+      {#----------- Fin formulaire Graphique -------------#}
+      <td style="vertical-align: top;"> {#----------- Zone destination du Graphique -------------#}
+        <div id="graphdest" style="width: 100%;display: inline-block;"></div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<script>
+    $("#filt_fromdate,#filt_todate").datepicker({
+        showButtonPanel: true, changeMonth: true, changeYear: true, dateFormat: "yy-mm-dd"
+    });
+    $('#filt_proj,#filt_uproj').select2({closeOnSelect: false});
+    $('#filt_proftype').select2({minimumResultsForSearch: -1});
+    $('#gpr,#gpd,#ctd').select2();
+
+    function DoSearch() {
+        {#    $('#ajaxlog').append("Start DoSearch");#}
+        var url = "{{url_for('.Partsearchsample')}}?" + $('#filt_form').serialize();
+        {#    $('#ajaxlog').append("<br>URL="+url);#}
+        $.getJSON(url, function (data) {
+            {#        $('#ajaxlog').append( "<br>" +data.length+" samples found");#}
+            SampleSource.clear();
+            SampleSourceNotVisible.clear();
+            SampleSourceVisible.clear();
+            SampleSourceExportCTD.clear();
+            var d = new Date();
+            $('#samplecount').html(data.length + " samples - " + d.toUTCString() + "<span style='font-weight:normal'> - Use Shift+drag for Rectangle Zooming, Use Alt+drag for Rectangle Selection</span>");
+            $.each(data, function (key, val) {
+                var iconFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.transform([val['long'], val['lat']], 'EPSG:4326', 'EPSG:3857'))
+                    , psampleid: val['id']
+                });
+                if (val['visibility'][1] == 'Y')
+                    SampleSource.addFeature(iconFeature);
+                else if (val['visibility'][0] == 'Y')
+                    SampleSourceExportCTD.addFeature(iconFeature);
+                else if (val['visibility'][0] == 'V')
+                    SampleSourceVisible.addFeature(iconFeature);
+                else
+                    SampleSourceNotVisible.addFeature(iconFeature);
+                {#            $('#ajaxlog').append( "<br>-" + val['id']+val['lat']  );#}
+            });
+        });
+    }
+
+    function ShowStat() {
+        var url = "{{url_for('.Partstatsample')}}?" + $('#filt_form').serialize();
+        $('#graphdest').html("<div id=waiter><img src='/static/spinningred.gif' >Processing your request, please wait....</div>"
+        ).load(url, function (response, status, xhr) {
+            if (status == "error") {
+                $("#graphdest").html(xhr.status + " " + xhr.statusText);
+            }
+        });
+    }
+
+    function DisplayAll() {
+        $('#filt_form')[0].reset();
+        {# Efface tous les champs simples #}
+        $("#filt_form select").each(function () {
+            $(this).val([]).change();
+        });
+        {# Vide les select2 #}
+        DrawInputOnMap();
+        DoSearch();
+    }
+
+    function DoExport() {
+        var url = "{{ url_for('.TaskCreateRouter',ClassName='TaskPartExport') }}?" + $('#filt_form').serialize() + "&" + $('#formgraphconfig').serialize();
+        window.location = url;
+    }
+
+    function ProcessDraw() {
+        var url = "{{url_for('.part_drawchart')}}?" + $('#filt_form').serialize() + "&" + $('#formgraphconfig').serialize() + "&r=" + Math.random();
+        var img = $("<div id=waiter><img src='/static/spinningred.gif' >Processing your request, please wait....</div><img src='" + url + "' style='max-width: 100%;'>");
+        img.load(function () {
+            $('#waiter').hide();
+        });
+        $('#graphdest').text('').append(img);
+    }
+
+
+    $('#SharePageBtn').click(function (e) {
+        var base = '{{ url_for(".indexPart") }}?';
+        var url = window.location.protocol + "//" + window.location.host + base + $('#filt_form').serialize() + "&" + $('#formgraphconfig').serialize();
+        url = "mailto:?subject=EcoPart%20page%20share&body=" + encodeURIComponent("Hello,\n\nAn EcoPart user want share this page with you \n" + url);
+        if (e.ctrlKey)
+            window.open(url, '_blank');
+        else
+            window.location = url;
+    });
+
+    function ClearDepths() {
+        $("#filt_depthmin,#filt_depthmax").val("");
+    }
+
+    $(document).ready(function () {
+        $("#taxolb").select2({
+            ajax: {
+                url: "/search/taxo",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {q: params.term, page: params.page};
+                },
+                processResults: function (data, page) {
+                    return {results: data};
+                },
+                cache: true
+            },
+            minimumInputLength: 3
+        }); // Select2 Ajax
+        $('[data-toggle="tooltip"]').tooltip();
+        DoSearch();
+    });
+</script>
+{#------------- Gestion cartographie -------------------------#}
+<script src="/static/openlayers/ol.js" type="text/javascript"></script>
+<script>
+    var map, vectorSource, SampleSource, SampleSourceNotVisible, MapPopupContent;
+
+    function InitMap() {
+        var attribution = new ol.Attribution({
+            html: 'Tiles © <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer">ArcGIS</a>'
+        });
+        var mousePositionControl = new ol.control.MousePosition({
+            coordinateFormat: ol.coordinate.createStringXY(4),
+            projection: 'EPSG:4326',
+            undefinedHTML: '&nbsp;'
+        });
+        map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.XYZ({
+                        attributions: [attribution],
+                        {% if LocalGIS %}
+                            url: '/static/tiles/tile_{z}_{y}_{x}.jpg',maxZoom: 6
+                        {% else %}
+                            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+                        {% endif %}
+                    })
+                })
+            ],
+            controls: ol.control.defaults({
+                attributionOptions: ({
+                    collapsible: false
+                })
+            }).extend([mousePositionControl]),
+            target: 'map',
+            view: new ol.View({
+                center: [0, 47],
+                zoom: parseFloat($("#map").css('height')) / 450 {# Mise à l'echelle, affiche toute la hauteur à l'echelle 1 sur une zone de 450px de haut #}
+            })
+        });
+
+// a DragBox interaction used to select features by drawing boxes
+        var dragBox = new ol.interaction.DragBox({
+            condition: ol.events.condition.altKeyOnly,
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({color: [0, 0, 255, 1]})
+            })
+        });
+
+        map.addInteraction(dragBox);
+
+        dragBox.on('boxend', function (e) {
+            var extent = dragBox.getGeometry().getExtent();
+            // Calcule les tableau sous forme X/Longitude , Y/Lattitude
+            var bottomleft = ol.proj.transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326');
+            var topright = ol.proj.transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326');
+            if ((bottomleft[0] < -180) || (bottomleft[0] > 180))
+                bottomleft[0] = (bottomleft[0] + 180 + 720) % 360 - 180;
+            if ((topright[0] < -180) || (topright[0] > 180))
+                topright[0] = (topright[0] + 180 + 720) % 360 - 180;
+            if (topright[0] < -180) topright[0] += 360;
+            $("#MapOutN").val(topright[1].toFixed(4));
+            $("#MapOutW").val(bottomleft[0].toFixed(4));
+            $("#MapOutE").val(topright[0].toFixed(4));
+            $("#MapOutS").val(bottomleft[1].toFixed(4));
+            DrawInputOnMap();
+        });
+
+// Create vector source and the feature to it.
+        vectorSource = new ol.source.Vector();
+        var vectorLayer = new ol.layer.Vector({source: vectorSource});
+
+        var RedIconStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                anchor: [0.5, 0.5],
+                size: [40, 40],
+                offset: [52, 0],
+                opacity: 1,
+                scale: 0.19,
+                src: '/static/dots2.png'
+            })
+        });
+        var OrangeIconStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                anchor: [0.5, 0.5],
+                size: [40, 40],
+                offset: [208, 0],
+                opacity: 1,
+                scale: 0.19,
+                src: '/static/dots2.png'
+            })
+        });
+        var BlackIconStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                anchor: [0.5, 0.5],
+                size: [40, 40],
+                offset: [156, 0],
+                opacity: 1,
+                scale: 0.19,
+                src: '/static/dots2.png'
+            })
+        });
+
+        var GreenIconStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                anchor: [0.5, 0.5],
+                size: [40, 40],
+                offset: [0, 0],
+                opacity: 1,
+                scale: 0.19,
+                src: '/static/dots2.png'
+            })
+        });
+
+        SampleSource = new ol.source.Vector();
+        SampleSourceNotVisible = new ol.source.Vector();
+        SampleSourceVisible = new ol.source.Vector();
+        SampleSourceExportCTD = new ol.source.Vector();
+        var SampleLayer = new ol.layer.Vector({source: SampleSource, style: GreenIconStyle});
+        var SampleNotVisibleLayer = new ol.layer.Vector({source: SampleSourceNotVisible, style: BlackIconStyle});
+        var SampleVisibleLayer = new ol.layer.Vector({source: SampleSourceVisible, style: RedIconStyle});
+        var SampleExportCTDLayer = new ol.layer.Vector({source: SampleSourceExportCTD, style: OrangeIconStyle});
+// Add the vector layer to the map.
+        map.addLayer(vectorLayer);
+        map.addLayer(SampleLayer);
+        map.addLayer(SampleNotVisibleLayer);
+        map.addLayer(SampleVisibleLayer);
+        map.addLayer(SampleExportCTDLayer);
+
+        var MapPopupElt = document.getElementById('MapPopup');
+        var popup = new ol.Overlay({
+            element: MapPopupElt,
+            positioning: 'bottom-center',
+            stopEvent: false,
+            offset: [3, 0]
+        });
+        map.addOverlay(popup);
+// display popup on click
+        map.on('click', function (evt) {
+            var feature = map.forEachFeatureAtPixel(evt.pixel,
+                function (feature) {
+                    return feature;
+                });
+
+            if (feature) {
+                var coordinates = feature.getGeometry().getCoordinates();
+                {#    popup.setPosition(coordinates); Utilisation de l'evt plutot pour traiter le monde cyclique#}
+                popup.setPosition(evt.coordinate);
+                {#    console.log(coordinates,evt.coordinate);#}
+                MapPopupContent = 'Get Data for sample ' + feature.get('psampleid');
+                $(MapPopupElt).popover({
+                    'placement': 'right',
+                    'html': true,
+                    'content': function () {
+                        return MapPopupContent;
+                    }
+                });
+                $(MapPopupElt).popover('show');
+                var url =
+                    '{{ url_for(".Partgetsamplepopover", psampleid="999999999") }}'.replace("999999999", feature.get('psampleid'));
+                $.get(url, function (data) {
+                    MapPopupContent = data;
+                    $(MapPopupElt).popover('show');
+                });
+            } else
+                $(MapPopupElt).popover('destroy');
+        });
+
+    } //InitMap
+    function GetMapPopupContent() {
+        return MapPopupContent;
+    }
+
+    function DrawSelectionRectangle(a) { {# X Y X Y  #}
+        var ring = [[a[0], a[1]], [a[2], a[1]], [a[2], a[3]], [a[0], a[3]], [a[0], a[1]]];
+        var polygon = new ol.geom.Polygon([ring]);
+        polygon.transform('EPSG:4326', 'EPSG:3857');
+        // Create feature with polygon.
+        var feature = new ol.Feature(polygon);
+        vectorSource.clear();
+        vectorSource.addFeature(feature);
+    }
+
+    function DrawInputOnMap() {
+        var MapOutW = parseFloat($("#MapOutW").val());
+        var MapOutN = parseFloat($("#MapOutN").val());
+        var MapOutE = parseFloat($("#MapOutE").val());
+        var MapOutS = parseFloat($("#MapOutS").val());
+        if (MapOutW > MapOutE) {
+            DrawSelectionRectangle([MapOutW, MapOutN, MapOutE + 360, MapOutS]);
+        } else {
+            DrawSelectionRectangle([MapOutW, MapOutN, MapOutE, MapOutS]);
+        }
+    }
+
+    function ClearGeoFilter() {
+        $("#MapOutW,#MapOutN,#MapOutE,#MapOutS").val("");
+        DrawInputOnMap();
+    }
+
+    function ClearDateFilter() {
+        $("#filt_fromdate,#filt_todate").val("");
+    }
+
+    $(function () {  {# Initialisation de la carte #}
+        $("#map").html("");
+        InitMap();
+    });
+
+    $(function () {
+        {#  Gestion du popup de selection rapide réduit #}
+        $('body').on("click", "#redhelpertab td", function () {
+            var begin = parseInt($(this).data('begin'));
+            var end = parseInt($(this).data('end'));
+            var rowtype = $(this).closest('tr').data('type');
+            var i;
+            var gpr = $('#gpr');
+            if (end === 0)
+                gpr.find("option[value^='" + rowtype + "']").prop('selected', false);
+            else
+                for (i = begin; i <= end; i++)
+                    gpr.find("option[value='" + rowtype + i + "']").prop('selected', true);
+            $("#redhelpericon").popover('hide');
+            gpr.trigger('change');
+        });
+        var srcredhelpericon = $("#srcredhelpericon");
+        $("#redhelpericon").data('content', srcredhelpericon.html()).popover();
+        srcredhelpericon.remove();
+        {#  Gestion du popup de selection rapide détaillé #}
+        $('body').on("click", "#dethelpertab td", function () {
+            var begin = parseInt($(this).data('begin'));
+            var end = parseInt($(this).data('end'));
+            var rowtype = $(this).closest('tr').data('type');
+            var i;
+            var gpr = $('#gpd');
+            if (end === 0)
+                gpr.find("option[value^='" + rowtype + "']").prop('selected', false);
+            else
+                for (i = begin; i <= end; i++)
+                    gpr.find("option[value='" + rowtype + i + "']").prop('selected', true);
+            $("#dethelpericon").popover('hide');
+            gpr.trigger('change');
+        });
+        srcredhelpericon = $("#srcdethelpericon");
+        $("#dethelpericon").data('content', srcredhelpericon.html()).popover();
+        srcredhelpericon.remove();
+        {#  Gestion du popup de selection rapide CTD #}
+        $('body').on("click", "#ctdhelpertab td", function () {
+            var begin = parseInt($(this).data('begin'));
+            var i;
+            var gpr = $('#ctd');
+            if (begin === 0)
+                gpr.find("option").prop('selected', false);
+            else
+                gpr.find("option").prop('selected', true);
+            $("#ctdhelpericon").popover('hide');
+            gpr.trigger('change');
+        });
+        srcredhelpericon = $("#srcctdhelpericon");
+        $("#ctdhelpericon").data('content', srcredhelpericon.html()).popover();
+        srcredhelpericon.remove();
+        DrawInputOnMap();
+    });
+</script>
+<div id='MapPopup'></div>
+<style>
+    table.Grille {
+        border-color: black;
+        border-width: 1px;
+        border-style: solid;
+        border-collapse: collapse;
+    }
+
+    table.Grille td, table.Grille th {
+        border-width: 1px;
+        border-style: solid;
+        border-color: black;
+        padding: 2px 3px 2px 3px;
+    }
+
+    #redhelpertab td, #dethelpertab td, #ctdhelpertab td {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    #formgraphconfig .popover {
+        max-width: 100%;
+    }
+</style>
+<div id="srcredhelpericon">
+  <table id="redhelpertab" class="Grille">
+    <tr data-type="cl">
+      <th>LPM</th>
+      <td data-begin="1" data-end="15">All</td>
+      <td data-begin="1" data-end="5">Class 1-5</td>
+      <td data-begin="6" data-end="12">UVP class 6-12</td>
+      <td data-begin="0" data-end="0">None</td>
+    </tr>
+    <tr data-type="bv">
+      <th>BV</th>
+      <td data-begin="1" data-end="15">All</td>
+      <td data-begin="1" data-end="5">Class 1-5</td>
+      <td data-begin="6" data-end="12">UVP class 6-12</td>
+      <td data-begin="0" data-end="0">None</td>
+    </tr>
+  </table>
+</div>
+<div id="srcdethelpericon">
+  <table id="dethelpertab" class="Grille" style="width: 300px;">
+    <tr data-type="cl">
+      <th>LPM</th>
+      <td data-begin="1" data-end="45">All</td>
+      <td data-begin="1" data-end="16">Class 1-16</td>
+      <td data-begin="17" data-end="45">UVP class 17-45</td>
+      <td data-begin="0" data-end="0">None</td>
+    </tr>
+    <tr data-type="bv">
+      <th>BV</th>
+      <td data-begin="1" data-end="45">All</td>
+      <td data-begin="1" data-end="16">Class 1-16</td>
+      <td data-begin="17" data-end="45">UVP class 17-45</td>
+      <td data-begin="0" data-end="0">None</td>
+    </tr>
+  </table>
+</div>
+<div id="srcctdhelpericon">
+  <table id="ctdhelpertab" class="Grille" style="width: 300px;">
+    <tr>
+      <td data-begin="1" data-end="45">All</td>
+      <td data-begin="0" data-end="0">None</td>
+    </tr>
+  </table>
+</div>

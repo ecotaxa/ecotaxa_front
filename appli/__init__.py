@@ -79,16 +79,10 @@ def PrintInCharte(txt, title=None):
     :param txt: Texte à affiche
     :return: Texte rendu
     """
-    AddTaskSummaryForTemplate()
-    module = ''  # Par defaut c'est Ecotaxa
-    if request.path.find('/part') >= 0:
-        module = 'part'
+    AddJobsSummaryForTemplate()
     if not title:
-        if module == 'part':
-            title = 'EcoPart'
-        else:
-            title = 'EcoTaxa'
-    return render_template('layout.html', bodycontent=txt, module=module, title=title)
+        title = 'EcoTaxa'
+    return render_template('layout.html', bodycontent=txt, title=title)
 
 
 def ErrorFormat(txt):
@@ -104,19 +98,16 @@ def ErrorFormat(txt):
 from appli.constants import VUE_PATH
 
 
-def AddTaskSummaryForTemplate():
+def AddJobsSummaryForTemplate():
     """
-        Set in global 'g' a structure to show what is currently ongoing on task side.
+        Set in global 'g' a structure to show what is currently ongoing on jobs side.
         @see appli/templates/layout.html
     """
     from flask_login import current_user
     if getattr(current_user, 'id', -1) > 0:
-        g.tasksummary = appli.database.GetAssoc2Col(
-            "SELECT taskstate,count(*) from temp_tasks WHERE owner_id=%(owner_id)s group by taskstate"
-            , {'owner_id': current_user.id})
-        # Add jobs from back-end
-        from appli.jobs.emul import _add_jobs_to_tasks_summary
-        _add_jobs_to_tasks_summary(g.tasksummary)
+        # Summarize from back-end
+        from appli.jobs.emul import _build_jobs_summary
+        g.jobs_summary = _build_jobs_summary()
         # Also add experimental URL
         if current_user.preferences is not None and '"experimental"' in current_user.preferences:
             path = request.path
@@ -349,7 +340,6 @@ def UtfDiag3(path: str):
 
 # Ici les imports des modules qui definissent des routes
 import appli.main
-import appli.tasks.taskmanager
 import appli.search.view
 import appli.project.view
 import appli.part.view

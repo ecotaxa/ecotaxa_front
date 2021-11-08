@@ -1,0 +1,346 @@
+{# Renders field for bootstrap 3 standards.
+
+    Params:
+        field - WTForm field
+        kwargs - pass any arguments you want in order to put them into the html attributes.
+        There are few exceptions: for - for_, class - class_, class__ - class_
+
+    Example usage:
+        {{ macros.render_field(form.email, placeholder='Input email', type='email') }}
+#}
+{% macro render_field(field, label_visible=true) -%}
+  {{ "<tr>"|safe if 'o' in kwargs.get('tr','oc') }}
+  <td class="{% if field.errors %}has-error{% endif %} {{ kwargs.pop('class_', '') }}  ">
+    {% if (field.type != 'HiddenField' and field.type !='CSRFTokenField') and label_visible %}
+      <label for="{{ field.id }}" class="control-label"
+          {% if kwargs.get('help') %} data-toggle="popover" data-placement="right"
+             data-content="{{ kwargs.get('help') }}" data-html="true"{% endif %}
+      >{{ field.label.text }}
+        {% if kwargs.get('help') %} <span class="glyphicon glyphicon-info-sign"></span> {% endif %}
+        {% if field.flags.required %} <span style="font-weight: bold;color: red;">*</span> {% endif %}
+      </label>
+    {% endif %}
+  </td>
+  <td {{ "colspan="+(kwargs.pop('colspan')|string) if kwargs.get('colspan') }} >
+    {#        {{ field(class_='form-control', **kwargs) }}#}
+    {{ field(**kwargs) }}
+    {% if kwargs.get('suffix') %} {{ kwargs.get('suffix') }}{% endif %}
+    {% if field.errors %}
+      {% for e in field.errors %}
+        <p class="help-block">{{ e }}</p>
+      {% endfor %}
+    {% endif %}
+  </td>    {{ "</tr>"|safe if 'c' in kwargs.get('tr','oc') }}
+{%- endmacro %}
+
+{# Renders checkbox fields since they are represented differently in bootstrap
+    Params:
+        field - WTForm field (there are no check, but you should put here only BooleanField.
+        kwargs - pass any arguments you want in order to put them into the html attributes.
+        There are few exceptions: for - for_, class - class_, class__ - class_
+
+    Example usage:
+        {{ macros.render_checkbox_field(form.remember_me) }}
+ #}
+{% macro render_checkbox_field(field) -%}
+  {{ "<tr>"|safe if 'o' in kwargs.get('tr','oc') }}
+  <td>
+    {{ field.label }}
+  </td>
+  <td>
+    {{ field(type='checkbox', **kwargs) }}
+  </td>
+  {{ "</tr>"|safe if 'c' in kwargs.get('tr','oc') }}
+{%- endmacro %}
+
+{# Renders radio field
+    Params:
+        field - WTForm field (there are no check, but you should put here only BooleanField.
+        kwargs - pass any arguments you want in order to put them into the html attributes.
+        There are few exceptions: for - for_, class - class_, class__ - class_
+
+    Example usage:
+        {{ macros.render_radio_field(form.answers) }}
+ #}
+{% macro render_radio_field(field) -%}
+  {% for value, label, _ in field.iter_choices() %}
+    <div class="radio">
+      <label>
+        <input type="radio" name="{{ field.id }}" id="{{ field.id }}" value="{{ value }}">{{ label }}
+      </label>
+    </div>
+  {% endfor %}
+{%- endmacro %}
+
+{# Renders WTForm in bootstrap way. There are two ways to call function:
+     - as macros: it will render all field forms using cycle to iterate over them
+     - as call: it will insert form fields as you specify:
+     e.g. {% call macros.render_form(form, action_url=url_for('login_view'), action_text='Login',
+                                        class_='login-form') %}
+                {{ macros.render_field(form.email, placeholder='Input email', type='email') }}
+                {{ macros.render_field(form.password, placeholder='Input password', type='password') }}
+                {{ macros.render_checkbox_field(form.remember_me, type='checkbox') }}
+            {% endcall %}
+
+     Params:
+        form - WTForm class
+        action_url - url where to submit this form
+        action_text - text of submit button
+        class_ - sets a class for form
+    #}
+{% macro render_form(form, action_url='', action_text='Submit', class_='', btn_class='btn btn-default') -%}
+
+  <form method="POST" action="{{ action_url }}" role="form" class="{{ class_ }}">
+    {{ form.hidden_tag() if form.hidden_tag }}
+    {% if caller %}
+      {{ caller() }}
+    {% else %}
+      {% for f in form %}
+        {% if f.type == 'BooleanField' %}
+          {{ render_checkbox_field(f) }}
+        {% elif f.type == 'RadioField' %}
+          {{ render_radio_field(f) }}
+        {% else %}
+          {{ render_field(f) }}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    <button type="submit" class="{{ btn_class }}">{{ action_text }} </button>
+  </form>
+{%- endmacro %}
+
+
+<style>
+    #edittab {
+        margin: 10px;
+    }
+
+    #edittab td:nth-child(2n+1) {
+        width: 240px;
+        padding-right: 15px;
+        padding-left: 5px;
+    }
+
+    #projid {
+        max-width: 700px;
+    }
+</style>
+
+
+<form method="POST" role="form" class="">
+  <table id="edittab">
+    <tr>
+      <td colspan="4">
+        <a href="#create-project" data-toggle="collapse"><b>DATA organization <span
+            class="glyphicon glyphicon-info-sign"></span></a></p>
+        <div id="create-project" class="collapse panel panel-default">
+          <div class="panel-body">
+            <p><b>Underwater Vision Profiler (UVP) 5 :</b>
+            <ul>
+              <li>PARTICLE and CTD data: the data must be organized in a « Zooprocess » architecture:
+                <ul>
+                  <li>Instrument parameters : « uvp5_configuration_data.txt » in
+                    « :\uvp5_snXXX_cruise\config\UVP5_Settings\ »
+                  </li>
+                  <li>Cruise information and data ownership : « cruise_info.txt » in « :\uvp5_snXXX_cruise\config\</li>
+                  <li>Sample (profile) metadata : « uvp5_header_snXXX_cruise.txt » in « :\uvp5_snXXX_cruise\meta\ » :
+                    THIS FILE MUST ABSOLUTELY EXIST to IMPORT YOUR DATA.
+                  </li>
+                  <li>Particle UVP data files (*.bru, *.dat & *.hdr) will be accessed by the application in :
+                    <ul>
+                      <li>« :\uvp5_snXXX_cruise\raw\ »</li>
+                      <li>« :\uvp5_snXXX_cruise\work\ » if processed by Zooprocess</li>
+                      <li>« :\uvp5_snXXX_cruise\results\ » if processed by Zooprocess and not present in the previous
+                        folders
+                      </li>
+                    </ul>
+                  </li>
+                  <li>CTD data (optional) in « :\uvp5_snXXX_cruise\ctd_data_cnv\ » (see the import page about formating
+                    CTD data for importation)
+                  </li>
+                </ul>
+              <li>Zooplancton and detritus images : the data must be organized in a « Zooprocess » architecture:
+                Processed images and associated TSV files will be imported separately from the
+                « :\uvp5_snXXX_cruise\work\ » folder into the ECOTAXA associated project (not in this Particle module)
+            </ul>
+
+            <b>Underwater Vision Profiler (UVP) 6 through UVPAPP :</b>
+            <ul>
+              <li>PARTICLE and CTD data: the data must be organized in a « Zooprocess » architecture:
+                <ul>
+                  <li>Sample (profile) metadata : « uvp6_header_snXXX_cruise.txt » in « :\uvp6_snXXX_cruise\meta\ » :
+                    THIS FILE MUST ABSOLUTELY EXIST to IMPORT YOUR DATA.
+                  </li>
+                  <li>Particle UVP data files (SampleName_Particule.zip) in « :\uvp6_snXXX_cruise\ecodata\ »
+                  <li>CTD data (optional) in « :\uvp2_snXXX_cruise\ctd_data_cnv\ » (see the import page about formating
+                    CTD data for importation)
+                  </li>
+                </ul>
+            </ul>
+            <b>LISST :</b>
+            <ul>
+              <li>PARTICLE and CTD data: the data must be organized in a « Zooprocess » architecture:
+                <ul>
+                  <li>Cruise information and data ownership : « cruise_info.txt » in « :\lisst_snXXX_cruise\config\</li>
+                  <li>Sample (profile) metadata : « lisst_header_snXXX_cruise.txt » in « :\lisst_snXXX_cruise\meta\ »
+                  </li>
+                  <li>Particle UVP data (*.asc) will be accessed by the module in : « :\uvp5_snXXX_cruise\work\ »</li>
+                </ul>
+              <li>CTD data (optional) in « :\lisst_snXXX_cruise\ctd_data_cnv\ » (see the import page about formating CTD
+                data for importation)
+              </li>
+            </ul>
+            </p>
+          </div>
+        </div>
+
+      </td>
+    </tr>
+    {{ render_field(form.ptitle,tr='oc',style="width:450px;",colspan=3) }}
+    <tr>
+      <td><label for="rawfolder" class="control-label"><a href="#info2" data-toggle="collapse" style="color: black">Root
+        folder <span class="glyphicon glyphicon-info-sign"></span></a></label></td>
+      <td colspan="3">
+        <div class="input-group" style="width: 700px;">
+          <input type="text" class="form-control" id="ServerPath" name="rawfolder"
+                 value="{{ form.rawfolder.data or "" }}" onchange="ServerPathChange()">
+          <span class="input-group-btn">
+        <button class="btn btn-default" type="button" data-toggle="modal" data-target="#FileModal">
+            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button>
+        <button class="btn btn-default" type="button" onclick="ReadMeta();">
+            Read cruise information</button>
+    </span>
+        </div>
+        <div id="info2" class="collapse panel panel-default">
+          <div class="panel-body">
+            SELECT the UVP or LISST root folder from the drive (request FTP permission from the application manager to
+            load your projects or load data from a local drive).
+            <br> Press "Read Metadata" button to read the « cruise_info.txt » file again
+          </div>
+        </div>
+
+      </td>
+    </tr>
+    {{ render_field(form.ownerid,tr='oc',colspan=3,help="name of the unique manager of the project, to be selected in the EcoTaxa user list. The project owner will manage the permissions in relation to the permissions of the associated EcoTaxa project (if the project exists)") }}
+    {{ render_field(form.projid,tr='oc',colspan=3,help="associated project where you will import the images from the « work » folders. <br>You can create a new associated project here.") }}
+    {{ render_field(form.instrumtype,tr='o',help="selected from the root folder name<br><b>MUST BE :</b> uvp5,uvp6,lisst or uvp6remote") }}
+    {{ render_field(form.default_instrumsn,tr='c',help="selected from the root folder name") }}
+    {{ render_field(form.op_name,tr='o',help="people who managed the acquisition of the data") }}
+    {{ render_field(form.op_email,tr='c') }}
+    {{ render_field(form.cs_name,tr='o',help="people who conducted the cruise") }}
+    {{ render_field(form.cs_email,tr='c') }}
+    {{ render_field(form.do_name,tr='o',help="people who own the dataset, important for publication permissions") }}
+    {{ render_field(form.do_email,tr='c') }}
+    {{ render_field(form.prj_acronym,tr='o',help="free field (e.g., as filled in the cruise_info.txt file)") }}
+    {{ render_field(form.default_depthoffset,tr='c',help="""The depth offset is the vertical distance between the pressure sensor and the imaged zone (positive if pressure sensor above imaged area). This information can be filled in the <b>project</b> metadata page for the entire project or at <b>sample</b> level.<br><br>
+In case the <b>project</b> depth offset is documented, it will override the <b>sample</b> depth offsets for the process of the project.<br><br>
+The <b>project</b> depth offset is automatically set to 1.2 if your instrument is UVP5 during read project metadata operation as the <b>sample</b> depth offsets are not documented in the instrument metadata.<br><br>
+The <b>sample</b> depth offsets are set in the instrument metadata for the UVP6 instrument and automatically documented in EcoPart for each sample.""") }}
+    {{ render_field(form.cruise,tr='o',help="selected from the root folder name") }}
+    {{ render_field(form.ship,tr='c') }}
+    {{ render_field(form.enable_descent_filter,tr='oc',help="""The Descent filter operates <b>during the import</b> of the samples. It checks the pressure and removes images acquired when UVP is ascending. The filter applies only on UVP data (LISST and UVP6remote excluded).
+
+<br>NO : no filtering in any case
+<br>YES : applied on 'depth' samples of the project
+<br>EMPTY : automatically applies the 'YES' rule for UVP5 and the 'NO' rule for UVP6
+""") }}
+    {{ render_field(form.prj_info,tr='oc',colspan=3,style="width:500px;",help="read from the cruise_info.txt file") }}
+    {{ render_field(form.public_visibility_deferral_month,tr='o',style="width:50px;",suffix='Months',help="delay after which data will be displayed") }}
+    <td colspan="2">The delay starting date is the date of the older sample of the project. See the sample metadata page
+      to visualize resulting display/download dates
+    </td>
+    </tr>
+    {{ render_field(form.public_partexport_deferral_month,tr='o',style="width:50px;",suffix='Months',help="delay to allow data downloading") }}
+    {{ render_field(form.public_zooexport_deferral_month,tr='c',style="width:50px;",suffix='Months',help="note that the associated project must be VISIBLE") }}
+    <tr>
+      <td colspan="4" style="border-bottom: 1px #555 solid;">Connexion to data server</td>
+    </tr>
+    <tr>
+      <td colspan="4" style="height: 5px;"></td>
+    </tr>
+    {{ render_field(form.remote_type,tr='oc',style="width:100px;") }}
+    {{ render_field(form.remote_url,tr='o',style="width:300px;",help="Hostname/IP @ of remote server for FTP<br> URL for http & https") }}
+    {{ render_field(form.remote_directory,tr='c',style="width:300px;",help="directory on remote server with / as separator") }}
+    {{ render_field(form.remote_user,tr='o',style="width:100px;") }}
+    {{ render_field(form.remote_password,tr='c',style="width:100px;") }}
+    {{ render_field(form.remote_vectorref,tr='c',style="width:300px;",help="This reference can help searching in associated databases. It can be the serial number of the glider, the IMO number of the ARGO float") }}
+    <tr>
+      <td colspan="4" style="padding-top: 10px">
+        <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>
+
+        {% if prjid>0 %}
+          <a href="/part/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
+          <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-danger"><span
+              class="glyphicon glyphicon-erase"></span> Remove project
+          </button>
+        {% else %}
+          <a href="/part/prj/" class="btn btn-warning"> Cancel</a>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+</form>
+Remote UVP6 data are automatically pulled once per day. You can force the import of the samples from the "IMPORT SAMPLE" menu of the project.
+<br>
+Please remove the "Host" information to stop the automatic pooling when the remote data acquisition ends. It will reduce the workload on the application.
+
+
+<div class="modal " id="confirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Are you sure you want remove this project</h4>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="/part/prjedit/{{ prjid }}" style="display: inline-block">
+          <input type="hidden" name="delete" value="Y">
+          <button class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove project</button>
+        </form>
+        <button type="button" class="btn btn-warning" onclick="$('#confirm').modal('hide')"> Cancel</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal " id="FileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="ModalLabel">Select a folder or a zip file</h4>
+      </div>
+      <div class="modal-body">
+        <div id="FileModalBody">...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#FileModal').on('show.bs.modal', function () {
+            $("#TaxoModalBody").html("");
+            {# Pour eviter les conflit sur le jstree suite à des ouverture successive car le jstree est dans la modal cachée #}
+            $("#FileModalBody").html("Loading...").load("/common/ServerFolderSelect");
+        });
+        $('[data-toggle="popover"]').popover();
+    });
+
+    function ReadMeta() {
+        $.getJSON("/part/readprojectmeta", {path: $("#ServerPath").val()}, function (data) {
+            $.each(data, function (key, val) {
+                $('#' + key).val(val);
+            });
+        });
+    }
+
+    function ServerPathChange() {
+        ReadMeta();
+    }
+
+</script>

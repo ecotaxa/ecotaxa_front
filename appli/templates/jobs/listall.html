@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% macro PutInLabel(job) -%}
+  {% set state=job.state %}
+  {% set id=job.id %}
+  {% if state=="Question" %}
+    <a href="/Job/Question/{{ id }}">
+      <button class="btn btn-xs btn-warning">{{ state }}</button>
+    </a>
+  {% elif state=="Error" %}
+    <a href="/Job/Show/{{ id }}">
+      <button class="btn btn-xs btn-danger">{{ state }}</button>
+    </a>
+  {% elif state=="Running" %}
+    <a href="/Job/Show/{{ id }}">
+      <button class="btn btn-xs btn-info">{{ state }}</button>
+    </a>
+  {% elif state=="Done" %}
+    <a href="/Job/Show/{{ id }}">
+      <button class="btn btn-xs btn-success">{{ state }}</button>
+    </a>
+  {% elif state=="Pending" %}
+    <a href="/Job/Show/{{ id }}">
+      <button class="btn btn-xs btn-gris">{{ state }}</button>
+    </a>
+  {% else %}
+    {{ state }}
+  {% endif %}
+{%- endmacro %}
+
+{% block body %}
+  <a class='btn btn-default' href=?cleandone=Y{{ seeall }}>Clean All Done</a>
+  <a class='btn btn-default' href=?cleanerror=Y{{ seeall }}>Clean All Error</a>
+  <a class='btn btn-default' href=?cleanall=Y{{ seeall }}>Clean All (warning !!!)</a>  Task count : {{ len_tasks }}
+  <a class='btn btn-default' href=?seeall=Y>See All users tasks </a>
+  <table class="table">
+    <tr>
+      <th>ID</th>
+      <th>Task type</th>
+      <th>Owner</th>
+      <th>State</th>
+      <th>Step</th>
+      <th width="60px">%</th>
+      <th>Message</th>
+      <th>Creation date</th>
+      <th>Last update</th>
+    </tr>
+    {% for jb in jobs %}
+
+      <tr>
+        <td><a href="/Job/Show/{{ jb.id }}"> {{ jb.id }}
+          <button class="btn btn-xs btn-primary">View</button>
+        </a></td>
+        <td>Task{{ jb.type }}
+          {% set prj_id = jb.params["ProjectId"] %}
+          {% if prj_id %}
+            <br/>in <a href="/prj/{{ prj_id }} ">{{ prj_id }}</a>
+          {% endif %}
+        </td>
+        <td><a href="mailto:{{ jb.owner_id.email }}">{{ jb.owner_id.name }}</a></td>
+        <td>{{ PutInLabel(jb) }}</td>
+        <td>{{ jb.step }}</td>
+        <td>{{ jb.progress_pct }} %</td>
+        <td>{{ jb.progress_msg }}</td>
+        <td>{{ jb.creation_date|datetime }}</td>
+        <td>{{ jb.updated_on|datetime }}</td>
+      </tr>
+
+    {% endfor %}
+  </table>
+
+{% endblock %}

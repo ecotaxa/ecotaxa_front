@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import time
+from pathlib import Path
 from typing import List
 
-from flask import render_template, g, redirect
+from flask import render_template, g, redirect, request, flash
 
-from appli import PrintInCharte, gvg
+from appli import PrintInCharte, gvg, gvp, app
 from appli.constants import get_app_manager_mail
 from appli.jobs.Job import Job
-from appli.tasks.importcommon import *
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi, JobsApi
@@ -173,7 +173,7 @@ class ImportJob(Job):
             try:
                 api.reply_job_question(job_id=job.id, body=answers)
             except ApiException as ae:
-                flash_any_error([str(ae)])
+                cls.flash_any_error([str(ae)])
                 return render_template('jobs/import_question1.html',
                                        header="", taxo=not_found_taxo, users=not_found_users,
                                        job=job)
