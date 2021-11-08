@@ -124,7 +124,7 @@ class TaskPartZooscanImport(AsyncTask):
         txt += "<h3>Task Creation</h3>"
         Prj = partdatabase.part_projects.query.filter_by(pprojid=gvg("p")).first()
         if Prj is None:
-            return PrintInCharte(ErrorFormat("This project doesn't exists"));
+            return PrintInCharte(ErrorFormat("This project doesn't exist"));
         if Prj.instrumtype not in LstInstrumType:
             return PrintInCharte(
                 ErrorFormat("Instrument type '%s' not in list : %s" % (Prj.instrumtype, ','.join(LstInstrumType))));

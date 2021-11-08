@@ -269,12 +269,12 @@ The <b>sample</b> depth offsets are set in the instrument metadata for the UVP6 
         <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-save "></span> Save</button>
 
         {% if prjid>0 %}
-          <a href="/part/prj/{{ prjid }}" class="btn btn-warning"> Cancel</a>
+          <a href="{{ url_for('.part_prj_main', PrjId=prjid) }}" class="btn btn-warning"> Cancel</a>
           <button type="button" onclick="$('#confirm').modal('show')" class="btn btn-danger"><span
               class="glyphicon glyphicon-erase"></span> Remove project
           </button>
         {% else %}
-          <a href="/part/prj/" class="btn btn-warning"> Cancel</a>
+          <a href="{{ url_for('.part_prj') }}" class="btn btn-warning"> Cancel</a>
         {% endif %}
       </td>
     </tr>
@@ -294,7 +294,7 @@ Please remove the "Host" information to stop the automatic pooling when the remo
         <h4 class="modal-title" id="ModalLabel">Are you sure you want remove this project</h4>
       </div>
       <div class="modal-body">
-        <form method="post" action="/part/prjedit/{{ prjid }}" style="display: inline-block">
+        <form method="post" action="{{ url_for('.part_prjedit', pprojid=prjid) }}" style="display: inline-block">
           <input type="hidden" name="delete" value="Y">
           <button class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove project</button>
         </form>
@@ -332,7 +332,7 @@ Please remove the "Host" information to stop the automatic pooling when the remo
     });
 
     function ReadMeta() {
-        $.getJSON("/part/readprojectmeta", {path: $("#ServerPath").val()}, function (data) {
+        $.getJSON("{{ url_for('.part_readprojectmeta') }}", {path: $("#ServerPath").val()}, function (data) {
             $.each(data, function (key, val) {
                 $('#' + key).val(val);
             });

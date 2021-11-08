@@ -175,7 +175,7 @@
             $('#FileModal').on('show.bs.modal', function () {
                 $("#TaxoModalBody").html("");
                 {# Pour eviter les conflit sur le jstree suite à des ouverture successive car le jstree est dans la modal cachée #}
-                $("#FileModalBody").html("Loading...").load("/part/ServerFolderSelect");
+                $("#FileModalBody").html("Loading...").load("{{ url_for('.part_ServerFolderSelect') }}");
             });
             $(".taxolb").select2({
                 ajax: {

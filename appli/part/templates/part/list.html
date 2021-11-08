@@ -5,7 +5,7 @@
 
 
       {% if  CanCreate==True %}
-        <a href="/part/prjedit/0" class="btn btn-success">Create a new Particle project</a>
+        <a href="{{ url_for('.part_prjedit', pprojid=0)}}" class="btn btn-success">Create a new Particle project</a>
       {% else %}
         <p style="margin-bottom: 0">To create a new project and upload data in it, please contact the user
           manager(s): </p>
@@ -52,7 +52,7 @@
   <tbody>
   {% for r in PrjList %}
     <tr>
-      <td><a class='btn btn-primary' href='/part/prj/{{ r[0] }}'>Select</a></td>
+      <td><a class='btn btn-primary' href="{{ url_for('.part_prj_main', PrjId=r[0]) }}">Select</a></td>
       <td> {{ r[1] }} [{{ r[0] }}] {{ ("<a href='mailto:"+r['email']+"'>"+r['name']+"</a>") |safe if r['email'] }}</td>
       <td>{{ r['instrumtype'] or "" }}</td>
       <td>{{ r['title'] or "" }}</td>
