@@ -8,12 +8,12 @@ from wtforms import Form, StringField, validators, IntegerField, FloatField, Sel
     TextAreaField
 
 import appli
-from . import database as partdatabase
+from .. import database as partdatabase
 import csv
 import re
 from appli import app, database, gvg, gvp, ErrorFormat
 from appli.database import db
-from .ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
+from ..ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
 
 
 class UvpPrjForm(Form):

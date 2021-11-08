@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import database as partdatabase
+from appli.part import database as partdatabase
 import csv
 import datetime
 import io
@@ -10,7 +10,7 @@ import math
 import zipfile
 from appli import database
 from appli import db, app, EncodeEqualList
-from .constants import CTDFixedCol
+from appli.part.constants import CTDFixedCol
 
 
 # Purge les espace et converti le Nan en vide
@@ -106,7 +106,7 @@ def ImportCTD(psampleid, user_name, user_email):
         raise Exception("ImportCTD: Sample %d missing" % psampleid)
     Prj = partdatabase.part_projects.query.filter_by(pprojid=UvpSample.pprojid).first()
     if Prj.instrumtype == 'uvp6remote':
-        import appli.part.uvp_sample_import as uvp_sample_import
+        import appli.part.funcs.uvp_sample_import as uvp_sample_import
         rawfileinvault = uvp_sample_import.GetPathForRawHistoFile(UvpSample.psampleid)
         zf = zipfile.ZipFile(rawfileinvault, "r")
         if 'CTD.txt' not in zf.namelist():

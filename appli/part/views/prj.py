@@ -5,15 +5,15 @@ from flask_login import current_user
 from flask_security import login_required
 
 import appli
-import appli.part.common_sample_import as common_import
+import appli.part.funcs.common_sample_import as common_import
 import appli.part.database as partdatabase
-import appli.part.lisst_sample_import as lisst_sample_import
-import appli.part.sampleedit as sampleedit
-import appli.part.uvp6remote_sample_import as uvp6remote_sample_import
-import appli.part.uvp_sample_import as uvp_sample_import
+import appli.part.funcs.lisst_sample_import as lisst_sample_import
+from . import sampleedit
+import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
+import appli.part.funcs.uvp_sample_import as uvp_sample_import
 from appli import app, database, gvg, gvp, ErrorFormat
 from appli.database import GetAll
-from .ecopart_blueprint import part_app, part_PrintInCharte, PART_STORAGE_URL, PART_URL
+from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_STORAGE_URL, PART_URL
 
 
 @part_app.route('/prj/')

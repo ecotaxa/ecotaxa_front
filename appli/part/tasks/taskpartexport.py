@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
-from appli import db, app, database, PrintInCharte, gvp, gvg, DecodeEqualList, ntcv
+from appli import db, app, database, gvp, gvg, DecodeEqualList, ntcv
 from flask import render_template, g, flash, request
-import logging, os, csv, re, datetime
-import zipfile, psycopg2.extras, json
+import logging, os, datetime
+import zipfile, psycopg2.extras
 from flask_login import current_user
 from pathlib import Path
 
 from ..ecopart_blueprint import PART_URL
 from .taskmanager import AsyncTask
 from appli.database import GetAll, GetAssoc
-from ..part_main import GetFilteredSamples, PartstatsampleGetData
+from appli.part.views.part_main import GetFilteredSamples, PartstatsampleGetData
 from appli.part import GetClassLimitTxt, GetPartClassLimitListText
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
-from .. import uvp_sample_import as uvp_sample_import
-from appli.part.drawchart import GetTaxoHistoWaterVolumeSQLExpr
+from ..funcs import uvp_sample_import as uvp_sample_import
+from appli.part.views.drawchart import GetTaxoHistoWaterVolumeSQLExpr
 import bz2, shutil
 
 

@@ -8,7 +8,7 @@ import io
 import numpy as np
 
 import appli.part.database as partdatabase
-import appli.part.uvp_sample_import as uvp_sample_import
+import appli.part.funcs.uvp_sample_import as uvp_sample_import
 import csv
 import datetime
 import logging
@@ -17,7 +17,7 @@ import shutil
 import tempfile
 import zipfile
 from appli import db, database, ntcv
-from appli.part.common_sample_import import ToFloat, GenerateReducedParticleHistogram
+from appli.part.funcs.common_sample_import import ToFloat, GenerateReducedParticleHistogram
 
 
 class ATagParser(HTMLParser):

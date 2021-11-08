@@ -5,7 +5,7 @@ import numpy as np, zipfile, configparser, io, bz2, sys
 import matplotlib.pyplot as plt
 from appli import database
 from appli.part.constants import PartDetClassLimit
-from appli.part.common_sample_import import CleanValue, ToFloat, GetTicks, GenerateReducedParticleHistogram
+from appli.part.funcs.common_sample_import import CleanValue, ToFloat, GetTicks, GenerateReducedParticleHistogram
 from appli.part.tasks.importcommon import ConvTextDegreeToDecimalDegree, calcpixelfromesd_aa_exp
 
 

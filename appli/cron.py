@@ -1,6 +1,6 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-import appli.part.prj
+import appli.part.views.prj
 from appli.part.database import ComputeOldestSampleDateOnProject
 
 if __name__ == "__main__":
@@ -20,7 +20,7 @@ if __name__ == "__main__":
             g.db = None
             app.logger.info("EcoPart...")
             ComputeOldestSampleDateOnProject()
-            appli.part.prj.GlobalTaxoCompute()
+            appli.part.views.prj.GlobalTaxoCompute()
             app.logger.info("EcoPart tasks+EcoTaxa one...")
             # Keep EcoPart auto clean
             app.logger.info(AutoClean())

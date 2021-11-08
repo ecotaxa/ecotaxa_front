@@ -8,7 +8,7 @@ import logging
 from appli import database
 from appli import db, app
 from appli.part.constants import PartDetClassLimit
-from appli.part.common_sample_import import CleanValue, ToFloat, GenerateReducedParticleHistogram
+from appli.part.funcs.common_sample_import import CleanValue, ToFloat, GenerateReducedParticleHistogram
 
 
 def CreateOrUpdateSample(pprojid, headerdata):

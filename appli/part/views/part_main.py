@@ -6,8 +6,8 @@ from wtforms import Form, SelectField, SelectMultipleField
 
 from appli import app, database
 from appli.part import GetClassLimitTxt
-from .constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
-from .ecopart_blueprint import part_app, part_PrintInCharte, ECOTAXA_URL
+from appli.part.constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
+from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, ECOTAXA_URL
 
 
 @part_app.route('/')

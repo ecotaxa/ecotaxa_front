@@ -296,8 +296,8 @@ def RecomputePart(ProjectID, What, User, Email):
     with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
         g.db = None
         import appli.part.database as partdatabase
-        import appli.part.prj as prj
-        import appli.part.common_sample_import as common_import
+        import appli.part.views.prj as prj
+        import appli.part.funcs.common_sample_import as common_import
         Prj = partdatabase.part_projects.query.filter_by(pprojid=ProjectID).first()
         Samples = database.GetAll("select psampleid,profileid from part_samples where pprojid=(%s)", [ProjectID])
         for S in Samples:
@@ -322,8 +322,8 @@ def RecomputePart(ProjectID, What, User, Email):
 def partpoolserver():
     with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
         g.db = None
-        import appli.part.uvp6remote_sample_import as uvp6remote_sample_import
-        import appli.part.common_sample_import as common_import
+        import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
+        import appli.part.funcs.common_sample_import as common_import
         Lst = database.GetAll(
             """select pprojid,ptitle from part_projects where coalesce(remote_type,'')!='' and coalesce(remote_url,'')!='' """)
         for P in Lst:

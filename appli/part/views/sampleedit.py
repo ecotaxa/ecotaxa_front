@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from flask import render_template, flash, request
+from flask import flash, request
 from flask import render_template, redirect
 # from . import prj as PartPrj
 from flask_security import login_required
@@ -8,11 +8,11 @@ from wtforms import Form, BooleanField, StringField, validators, DateTimeField, 
 
 import appli
 import appli.part.database as partdatabase
-import appli.part.prj
-import appli.part.uvp_sample_import as sample_import
+import appli.part.views.prj
+import appli.part.funcs.uvp_sample_import as sample_import
 from appli import database, gvp
 from appli.database import db
-from .ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
+from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
 
 
 class UvpSampleForm(Form):
@@ -106,9 +106,9 @@ def part_sampleedit(psampleid):
             setattr(model, k, v)
         db.session.commit()
         if gvp('forcerecalc') == 'Y':
-            appli.part.prj.ComputeHistoDet(model.psampleid, model.project.instrumtype)
-            appli.part.prj.ComputeHistoRed(model.psampleid, model.project.instrumtype)
-            appli.part.prj.ComputeZooMatch(model.psampleid, model.project.projid)
+            appli.part.views.prj.ComputeHistoDet(model.psampleid, model.project.instrumtype)
+            appli.part.views.prj.ComputeHistoRed(model.psampleid, model.project.instrumtype)
+            appli.part.views.prj.ComputeZooMatch(model.psampleid, model.project.projid)
             flash("Histograms have been recomputed", "success")
         return redirect("%sprj/" % PART_URL + str(model.pprojid))
     return part_PrintInCharte(render_template("part/sampleedit.html", form=form, prjid=model.pprojid
