@@ -6,6 +6,8 @@
 
 --------- TODO --------------
 
+- refs to taxonomy table
+
 - move temp_tasks to EcoPart DB definition
 
 - separate temptasks directory for jobs vs tasks
@@ -19,7 +21,5 @@
 - refs to projects table
 
 - refs to objects table
-
-- refs to taxonomy table
 
 - join with user information

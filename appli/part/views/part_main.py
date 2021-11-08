@@ -46,7 +46,7 @@ def indexPart():
       <a href='%s' style='font-size:medium;margin-left: 50px;'>Go to Ecotaxa</a></h2>""" % ECOTAXA_URL
     return part_PrintInCharte(
         render_template('part/index.html', form=form, LocalGIS=app.config.get("LOCALGIS", False),
-                        reqfields=request.args))
+                        reqfields=request.args, ecotaxa=ECOTAXA_URL))
 
 
 def GetSQLVisibility():

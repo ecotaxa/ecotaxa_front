@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
-from appli import db, app, database, PrintInCharte, gvp, gvg, ErrorFormat
-from flask import render_template, flash, request, g
-from flask_login import current_user
-import logging, csv, time, re
+import csv
+import logging
+import re
+import time
 from pathlib import Path
 
+from flask import render_template, flash, request, g
+from flask_login import current_user
+
+import appli.part.database as partdatabase
+import appli.part.funcs.common_sample_import
+import appli.part.funcs.lisst_sample_import
+import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
+import appli.part.funcs.uvp_sample_import
+import appli.part.views.prj
+import appli.project.main
+from appli import db, app, database, PrintInCharte, gvp, gvg, ErrorFormat
 from appli.part.ecopart_blueprint import PART_URL
 from .taskmanager import AsyncTask, DoTaskClean
-import appli.project.main
-import appli.part.database as partdatabase
 from ..constants import LstInstrumType
-import appli.part.funcs.uvp_sample_import, appli.part.funcs.common_sample_import, appli.part.funcs.lisst_sample_import, \
-    appli.part.views.prj
-import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
 
 
 class TaskPartZooscanImport(AsyncTask):
@@ -71,7 +77,8 @@ class TaskPartZooscanImport(AsyncTask):
                     if Prj.instrumtype in ('uvp5', 'uvp6'):
                         psampleid = appli.part.funcs.uvp_sample_import.CreateOrUpdateSample(self.param.pprojid, sample)
                     if Prj.instrumtype == 'lisst':
-                        psampleid = appli.part.funcs.lisst_sample_import.CreateOrUpdateSample(self.param.pprojid, sample)
+                        psampleid = appli.part.funcs.lisst_sample_import.CreateOrUpdateSample(self.param.pprojid,
+                                                                                              sample)
                     self.UpdateProgress(100 * (NbrDone + 0.1) / Nbr,
                                         "Metadata of profile %s  processed" % (sample['profileid']))
 
