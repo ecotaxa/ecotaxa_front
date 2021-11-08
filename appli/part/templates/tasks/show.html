@@ -1,48 +1,44 @@
-{% extends "layout.html" %}
+{% extends "part/layout.html" %}
 
-{% set state2label = dict({'P': 'Pending',
-'E': 'Error',
-'R': 'Running',
-'A': 'Question',
-'F': 'Finished'}) %}
 {% block body %}
 
   <p>
-    <a href="/Job/Clean/{{ job.id }}">
+    <a href="{{ url_for('.TaskClean', TaskID=task.id) }}">
       <button class="btn btn-danger">Clean task data</button>
     </a>
-    <a href="/Jobs/listall">
+    <a href="{{ url_for('.ListTasks') }}">
       <button class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span> Back to tasks list</button>
     </a>
   </p>
 
-  {% if job.taskstate=="Error" %}
+  {% if task.taskstate=="Error" %}
     <div class="alert alert-danger">
       <p>This task has errors. Check the error messages below, fix these errors, go back to your project and restart
-        your job.</p>
+        your task.</p>
     </div>
   {% endif %}
 
   <table class="table table-condensed">
     <tr>
       <th>Task ID</th>
-      <td>{{ job.id }}</td>
+      <td>{{ task.id }}</td>
     </tr>
     <tr>
       <th width="150px">Class</th>
-      <td>Task{{ job.type }}</td>
+      <td>{{ task.taskclass }}</td>
     </tr>
     <tr>
       <th width="150px">Owner</th>
-      <td><a href="mailto:{{ owner.email }}">{{ owner.name }}</a></td>
+      <td>{{ task.owner_rel }}</td>
     </tr>
     <tr>
       <th>State</th>
-      <td>{{ state2label[job.state]|safe }}
-        {% if job.state=="Q" %}
-          <a href="/Job/Question/{{ job.id }}"><span class="label label-warning">Go</span></a>
-        {% elif job.state in ("E", "R") %}
-          <a href="/Job/ForceRestart/{{ job.id }}">
+      <td>{{ task.taskstate }}
+        {% if task.taskstate=="Question" %}
+          <a href="{{ url_for('.TaskQuestionRouter', TaskID=task.id) }}"><span class="label label-warning">Go</span></a>
+        {% endif %}
+        {% if task.taskstate=="Error" or task.taskstate=="Running" %}
+          <a href="{{ url_for('.TaskForceRestart', TaskID=task.id) }}">
             <button class="btn btn-danger btn-sm">Force restart</button>
           </a>
         {% endif %}
@@ -51,41 +47,41 @@
     </tr>
     <tr>
       <th>Step</th>
-      <td>{{ job.taskstep }}</td>
+      <td>{{ task.taskstep }}</td>
     </tr>
     <tr>
       <th>Progress</th>
-      <td>{{ job.progress_pct }}%</td>
+      <td>{{ task.progresspct }}%</td>
     </tr>
     <tr>
       <th>Message</th>
-      <td>{{ job.progress_msg }}
+      <td>{{ task.progressmsg }}
         <ul>
-          {% for e in job.errors %}
+          {% for e in steperror %}
             <li>{{ e }}</li>
           {% endfor %}
         </ul>
       </td>
     </tr>
     <tr class="collapse">
-      <th>Input Parameters</th>
-      <td>{{ job.params|string }}</td>
+      <th>Input Param</th>
+      <td>{{ task.inputparam }}</td>
+    </tr>
     </tr>
     <tr class="collapse">
       <th>Question Data</th>
-      <td>{{ job.questiondata|string }}</td>
+      <td>{{ task.questiondata }}</td>
+    </tr>
     </tr>
     <tr class="collapse">
       <th>Answer Data</th>
-      <td>{{ job.answerdata|string }}</td>
+      <td>{{ task.answerdata }}</td>
     </tr>
   </table>
 
   <p><a class="btn" data-toggle="collapse" data-target=".collapse">View internal details &raquo;</a></p>
 
   <p><a class="btn" href="?log=Y">View log file &raquo;</a></p>
-
-  {% if CustomDetailsAvail %}<p><a class="btn" href="?CustomDetails=Y">View custom details &raquo;</a></p>{% endif %}
 
   <p>{{ extratext|safe }}</p>
 

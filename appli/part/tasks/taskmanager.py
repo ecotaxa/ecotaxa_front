@@ -12,10 +12,11 @@ from flask import render_template, g, flash, jsonify, request
 from flask_login import current_user
 from flask_security import login_required
 
-from appli import db, app, PrintInCharte, gvg, AddTaskSummaryForTemplate, database, gvp, XSSEscape
-from appli.database import ExecSQL, GetAll
-
+from appli import db, app, PrintInCharte, gvg, database, gvp
+from appli.database import GetAll
 # Environment variable for transmitting cookie, i.e. web session, to subprocess
+from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_URL, part_AddTaskSummaryForTemplate
+
 ECOTAXA_COOKIE = "ECOTAXA_COOKIE"
 
 
@@ -85,7 +86,8 @@ class AsyncTask:
 
     def GetWorkingDir(self):
         return os.path.normpath(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../temptask/task%06d" % (int(self.task.id))))
+            os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                         "../../../temptask/task%06d" % (int(self.task.id))))
 
     def GetWorkingSchema(self):
         return "task%06d" % (int(self.task.id))
@@ -123,7 +125,7 @@ class AsyncTask:
             FileToSave.save(os.path.join(self.GetWorkingDir(), FileToSaveFileName))
         # cmd=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../runtask.py"))
         cmdfull = app.PythonExecutable + " " + os.path.normpath(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../runtask.py " + str(self.task.id)))
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "../exe/runtask.py " + str(self.task.id)))
         app.logger.info("Start Task process : %s" % (cmdfull,))
         # os.spawnv(os.P_NOWAIT,  sys.executable, (sys.executable,cmd, str(self.task.id))) # Ne marche pas
         # system marche, mais c'est un appel bloquant donc on le met dans une thread separé
@@ -131,11 +133,7 @@ class AsyncTask:
         import _thread
         _thread.start_new_thread(os.system, (cmdfull,))
         flash("Task %d subprocess Created " % (self.task.id,), "success")
-        ProjectID = getattr(self.param, 'ProjectId', None)
-        if ProjectID:
-            Prj = database.Projects.query.filter_by(projid=ProjectID).first()
-            g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
-        return render_template('task/monitor.html', TaskID=self.task.id, RedirectToMonitor=True)
+        return render_template('tasks/monitor.html', TaskID=self.task.id, RedirectToMonitor=True)
 
     class Params:
         def __init__(self, InitStr=None):
@@ -153,8 +151,7 @@ def TaskFactory(ClassName, task=None):
     from .taskpartexport import TaskPartExport
     if ClassName == "TaskPartExport":
         return TaskPartExport(task)
-
-    raise Exception("Invalid class name in TaskFactory : %s" % (ClassName,))
+    raise Exception("Invalid class name in TaskFactory : '%s'" % (ClassName,))
 
 
 def LoadTask(taskid, cookie_from_env=False):
@@ -180,12 +177,11 @@ def LoadTask(taskid, cookie_from_env=False):
     return ret
 
 
-@app.route('/Task/listall')
+@part_app.route('/Task/listall')
 @login_required
 def ListTasks():
-    from appli.jobs.emul import _add_jobs_to_task_list, _clean_jobs
     g.headcenter = "<H3>Task Monitor</h3>"
-    AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate()
 
     seeall = ""
     is_admin = current_user.has_role(database.AdministratorLabel)
@@ -205,23 +201,18 @@ def ListTasks():
         for t in tasks:
             if clean_all or (clean_done and t.taskstate == 'Done') or (clean_error and t.taskstate == 'Error'):
                 txt += DoTaskClean(t.id)
-        txt += _clean_jobs(clean_all, clean_done, clean_error, wants_admin)
 
         tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
-    # txt += "<a class='btn btn-default'  href=?cleandone=Y>Clean All Done</a> <a class='btn btn-default'
-    # href=?cleanerror=Y>Clean All Error</a>   <a class='btn btn-default' href=?cleanall=Y>Clean All
-    # (warning !!!)</a>  Task count : "+str(len(tasks))
-    _add_jobs_to_task_list(tasks, wants_admin)
-    return render_template('task/listall.html', tasks=tasks, header=txt,
+    return render_template('tasks/listall.html', tasks=tasks, header=txt,
                            len_tasks=len(tasks), seeall=seeall,
                            IsAdmin=is_admin)
 
 
-@app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
+@part_app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
 @login_required
 def TaskCreateRouter(ClassName):
     gvp('dummy')  # Protection bug flask connection reset si on fait post sans lire les champs
-    AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate()
     task = TaskFactory(ClassName)
     # Get the cookie from HTTP client
     task.cookie = request.cookies.get('session')
@@ -229,22 +220,23 @@ def TaskCreateRouter(ClassName):
     return task.QuestionProcess()
 
 
-@app.route('/Task/Question/<int:TaskID>', methods=['GET', 'POST'])
+@part_app.route('/Task/Question/<int:TaskID>', methods=['GET', 'POST'])
 @login_required
 def TaskQuestionRouter(TaskID):
-    AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate()
     task = LoadTask(TaskID)
     return task.QuestionProcess()
 
 
-@app.route('/Task/Show/<int:TaskID>', methods=['GET'])
+@part_app.route('/Task/Show/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskShow(TaskID):
-    AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate()
     # noinspection PyBroadException
     try:
         task = LoadTask(TaskID)
-    except Exception:
+    except Exception as e:
+        print(e)
         return PrintInCharte("This task doesn't exist anymore, perhaps it was automatically purged")
 
     txt = ""
@@ -252,19 +244,13 @@ def TaskShow(TaskID):
         WorkingDir = task.GetWorkingDir()
         # app.send_static_file(os.path.join(WorkingDir,"TaskLog.txt"))
         return flask.send_from_directory(WorkingDir, "TaskLog.txt")
-    if gvg('blog') == "Y":
-        WorkingDir = task.GetWorkingDir()
-        # app.send_static_file(os.path.join(WorkingDir,"TaskLog.txt"))
-        return flask.send_from_directory(WorkingDir, "TaskLogBack.txt")
-    if gvg('CustomDetails') == "Y":
-        return task.ShowCustomDetails()
     if "GetResultFile" in dir(task):
         f = task.GetResultFile()
         if f is None:
             txt += "Error, final file not available"
         else:
-            txt += "<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' role='button'>Get file %s</a>" % (
-                TaskID, f, f)
+            txt += "<a href='%sTask/GetFile/%d/%s' class='btn btn-primary btn-sm ' role='button'>Get file %s</a>" % (
+                PART_URL, TaskID, f, f)
 
     CustomDetailsAvail = "ShowCustomDetails" in dir(task)
     # noinspection PyBroadException
@@ -272,16 +258,12 @@ def TaskShow(TaskID):
         decodedsteperrors = json.loads(task.task.inputparam).get("steperrors")
     except Exception:
         decodedsteperrors = ["Task Decoding Error"]
-    ProjectID = getattr(task.param, 'ProjectId', None)
-    if ProjectID:
-        Prj = database.Projects.query.filter_by(projid=ProjectID).first()
-        g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
-    return render_template('task/show.html', task=task.task, steperror=decodedsteperrors,
+    return render_template('tasks/show.html', task=task.task, steperror=decodedsteperrors,
                            CustomDetailsAvail=CustomDetailsAvail, extratext=txt)
 
 
 # noinspection PyUnusedLocal
-@app.route('/Task/GetFile/<int:TaskID>/<filename>', methods=['GET'])
+@part_app.route('/Task/GetFile/<int:TaskID>/<filename>', methods=['GET'])
 @login_required
 def TaskGetFile(TaskID, filename):
     task = LoadTask(TaskID)
@@ -289,40 +271,29 @@ def TaskGetFile(TaskID, filename):
     return flask.send_from_directory(WorkingDir, task.GetResultFile())
 
 
-@app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
+@part_app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskForceRestart(TaskID):
-    AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate()
     task = LoadTask(TaskID)
     return task.StartTask(step=task.task.taskstep)
 
 
-@app.route('/Task/Clean/<int:TaskID>', methods=['GET'])
+@part_app.route('/Task/Clean/<int:TaskID>', methods=['GET'])
 @login_required
 def TaskClean(TaskID):
-    AddTaskSummaryForTemplate()
-    if gvg('thengotoproject') == 'Y':
-        task = LoadTask(TaskID)
-        ProjectID = getattr(task.param, 'ProjectId', None)
-    else:
-        ProjectID = ''
+    part_AddTaskSummaryForTemplate()
     Msg = DoTaskClean(TaskID)
-    Msg += '<br><a href="/Task/listall"><span class="label label-info"> Back to Task List</span></a>'
-    if ProjectID:
-        Msg += """"<script>
-            window.location.href = "/prj/%s"
-        </script>""" % (ProjectID,)
+    Msg += '<br><a href="%s/Task/listall"><span class="label label-info"> Back to Task List</span></a>' % PART_URL
     return PrintInCharte(Msg)
 
 
 def DoTaskClean(TaskID):
     task = LoadTask(TaskID)
-    ProjectID = getattr(task.param, 'ProjectId', None)
     WorkingDir = task.GetWorkingDir()
     Msg = "Erasing Task %d <br>" % TaskID
     # noinspection PyBroadException
     try:
-        ExecSQL("DROP SCHEMA  IF EXISTS  task%06d CASCADE" % TaskID)
         if os.path.exists(WorkingDir):
             shutil.rmtree(WorkingDir)
             Msg += "Temp Folder Erased (%s)<br>" % WorkingDir
@@ -331,8 +302,6 @@ def DoTaskClean(TaskID):
         Msg += "DB Record Erased<br>"
     except Exception:
         flash("Error While erasing " + str(sys.exc_info()), 'error')
-    if ProjectID:
-        Msg += "<a href='/prj/%s'>Back to project</a><br>" % ProjectID
     CustomReturnURL = getattr(task.param, 'CustomReturnURL', None)
     CustomReturnLabel = getattr(task.param, 'CustomReturnLabel', None)
     if CustomReturnLabel and CustomReturnURL:
@@ -340,9 +309,9 @@ def DoTaskClean(TaskID):
     return Msg
 
 
-@app.route('/Task/GetStatus/<int:TaskID>', methods=['GET'])
+@part_app.route('/Task/GetStatus/<int:TaskID>', methods=['GET'])
 def TaskGetStatus(TaskID):
-    AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate()
     try:
         task = LoadTask(TaskID)
         Progress = task.task.progresspct
@@ -374,22 +343,15 @@ def TaskGetStatus(TaskID):
                     elif f == '':
                         pass  # Parfois l'export ne retourne pas de fichier car envoi sur FTP
                     else:
-                        rep['d']['ExtraAction'] = "<a href='/Task/GetFile/%d/%s' class='btn btn-primary btn-sm ' " \
+                        rep['d']['ExtraAction'] = "<a href='%sTask/GetFile/%d/%s' class='btn btn-primary btn-sm ' " \
                                                   "role='button'>Get file %s</a>" \
-                                                  % (TaskID, f, f)
-                        if getattr(task.param, 'ProjectId', None):
-                            rep['d']['ExtraAction'] += " <a href='/Task/Clean/%d?thengotoproject=Y' " \
-                                                       "class='btn btn-primary btn-sm ' " \
-                                                       "role='button'>FORCE Delete of %s and back to project " \
-                                                       "(no danger for the original database) </a>" \
-                                                       % (TaskID, f)
-                        else:
-                            rep['d']['ExtraAction'] += " <a href='/Task/Clean/%d' class='btn btn-primary btn-sm ' " \
-                                                       "role='button'>FORCE Delete of %s (no danger for the " \
-                                                       "original database) </a>" \
-                                                       % (TaskID, f)
+                                                  % (PART_URL, TaskID, f, f)
+                        rep['d']['ExtraAction'] += " <a href='%sTask/Clean/%d' class='btn btn-primary btn-sm ' " \
+                                                   "role='button'>FORCE Delete of %s (no danger for the " \
+                                                   "original database) </a>" \
+                                                   % (PART_URL, TaskID, f)
                         rep['d']['ExtraAction'] += "<br>Local users can also retrieve the file on the " \
-                                                   "Ecotaxa folder temptask/task%06d (useful for huge files)" \
+                                                   "EcoTaxa folder temptask/task%06d (useful for huge files)" \
                                                    % (int(task.task.id))
 
             if task.task.taskstate == "Error":
@@ -400,35 +362,32 @@ def TaskGetStatus(TaskID):
     return jsonify(rep)
 
 
-@app.route('/Task/autoclean/')
+@part_app.route('/Task/autoclean/')
 def AutoCleanManual():
-    return PrintInCharte(AutoClean())
+    return part_PrintInCharte(AutoClean())
 
 
 def AutoClean():
-    """ Called from cron.py """
+    """ Called from cron.py TODO """
     TaskList = GetAll("""SELECT id, owner_id, taskclass, taskstate, taskstep, progresspct, progressmsg,
        inputparam, creationdate, lastupdate, questiondata, answerdata
   FROM temp_tasks
   where lastupdate<current_timestamp - interval '30 days'
       or ( lastupdate<current_timestamp - interval '7 days' and taskstate='Done' )
       or ( creationdate<current_timestamp - interval '1 days' and lastupdate is null)""")
-    txt = "Cleanning process result :<br>"
+    txt = "Cleaning process result :<br>"
     for t in TaskList:
         txt += DoTaskClean(t['id'])
     return txt
 
 
-@app.route('/Task/Monitor/<int:TaskID>', methods=['GET'])
+@part_app.route('/Task/Monitor/<int:TaskID>', methods=['GET'])
 def TaskMonitor(TaskID):
-    AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate()
     # noinspection PyBroadException
     try:
         task = LoadTask(TaskID)
-        ProjectID = getattr(task.param, 'ProjectId', None)
-        if ProjectID:
-            Prj = database.Projects.query.filter_by(projid=ProjectID).first()
-            g.headcenter = "<h4>Project : <a href='/prj/{0}'>{1}</a></h4>".format(Prj.projid, XSSEscape(Prj.title))
-        return render_template('task/monitor.html', TaskID=task.task.id)
-    except Exception:
-        return PrintInCharte("This task doesn't exist anymore, perhaps it was automaticaly purged")
+        return render_template('tasks/monitor.html', TaskID=task.task.id)
+    except Exception as e:
+        print(e)
+        return PrintInCharte("This task doesn't exist anymore, perhaps it was automatically purged")

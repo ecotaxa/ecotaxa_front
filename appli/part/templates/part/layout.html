@@ -1,27 +1,28 @@
 <!DOCTYPE html>
 {% macro input(name, value='', smcol='2', type='text', size=20, extra="") -%}
-    <div class="col-sm-{{ smcol }}">
-        <input type="{{ type }}"  class="form-control" id="{{ name }}" name="{{ name }}" value="{{ value|e }}" size="{{ size }}" {{ extra }}>
-    </div>
+  <div class="col-sm-{{ smcol }}">
+    <input type="{{ type }}" class="form-control" id="{{ name }}" name="{{ name }}" value="{{ value|e }}"
+           size="{{ size }}" {{ extra }}>
+  </div>
 {%- endmacro %}
 
 {% macro label(txt, smcol='2') -%}
-     <label class="col-sm-{{ smcol }} control-label">{{ txt }}</label>
+  <label class="col-sm-{{ smcol }} control-label">{{ txt }}</label>
 {%- endmacro %}
 
 
 
 <html>
 <head lang="en">
-<link rel="stylesheet" type="text/css" href="/static/DataTables1.10.18/Bootstrap-3.3.7/css/bootstrap.min.css"/>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui/jquery-ui.min.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style20211027.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2_405/css/select2.css') }}">
+  <link rel="stylesheet" type="text/css" href="/static/DataTables1.10.18/Bootstrap-3.3.7/css/bootstrap.min.css"/>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui/jquery-ui.min.css') }}">
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style20211027.css') }}">
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='select2_405/css/select2.css') }}">
 
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
 </head>
 <body>
 
@@ -30,81 +31,102 @@
 <script type="text/javascript" src="/static/DataTables1.10.18/Bootstrap-3.3.7/js/bootstrap.min.js"></script>
 <script src="{{ url_for('static', filename='select2_405/js/select2.full.js') }}"></script>
 <script src="{{ url_for('static', filename='jquery.lazy.1.7.10.min.js') }}"></script>
-<link rel="stylesheet" href="/static/multizoom.css" type="text/css" />
+<link rel="stylesheet" href="/static/multizoom.css" type="text/css"/>
 <script type="text/javascript" src="/static/multizoom.js"></script>
-<script src="{{ url_for('static', filename='common_20201020.js')}}"></script>
+<script src="{{ url_for('static', filename='common_20201020.js') }}"></script>
 <link rel="stylesheet" href="/static/fontawesome-free-5.5.0-web/css/all.min.css">
 <link rel="stylesheet" href="/static/bootstrap.dropdown.submenu.css">
 
 <div id="empty_fixed" style="position: fixed; z-index: 13; top: 0px; left: 0px; display: block;"></div>
 <div id="divheadinfo" class="headinfo">
-<div class="headinfo panel panel-default">  <div class="panel-body" style="padding: 1px 5px 1px 5px;">
-<table width="100%"><tr>
-    <td width="145px"><a href="/part/"><img src="/static/logo_ecopart.png"></a></td>
+  <div class="headinfo panel panel-default">
+    <div class="panel-body" style="padding: 1px 5px 1px 5px;">
+      <table width="100%">
+        <tr>
+          <td width="145px"><a href="/part/"><img src="/static/logo_ecopart.png"></a></td>
 
-    <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
-    <td align="right">{{ g.experimental |safe}}</td>
-    <td align="right" width="300px">
-        {% if not current_user.is_authenticated %}
-            Not logged ( <a href="{{ url_for_security('login') }}">log in / register</a> )
-        {% else %}
-            {%  if g.tasksummary %} <a href="/Task/listall">
-            {%  if g.tasksummary.Pending  %}<span class="label label-default">Pending : {{g.tasksummary['Pending']}}</span>{% endif %}
-            {%  if g.tasksummary.Question  %}<span class="label label-warning">Question : {{g.tasksummary['Question']}}</span>{% endif %}
-            {%  if g.tasksummary.Running  %}<span class="label label-info">Run : {{g.tasksummary['Running']}}</span>{% endif %}
-            {%  if g.tasksummary.Error  %}<span class="label label-danger">Error :{{g.tasksummary['Error']}}</span>{% endif %}
-            {%  if g.tasksummary.Done  %}<span class="label label-success">Done :{{g.tasksummary['Done']}}</span>{% endif %}</a><br>{% endif %}
-            {{ current_user.name }} (<a href="{{ url_for_security('logout') }}">log out</a>)
-{% if g.menu %}
-    <br><div class="btn-group" style="width:100px;margin-right: 10px">
-    <button type="button" class="btn btn-default"  data-toggle="dropdown">Action</button>
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-        <span class="caret"></span>
-        <span class="sr-only">Toggle Dropdown</span>
-    </button>
-    <ul class="dropdown-menu dropdown-menu-right" role="menu">
-      {% for m in g.menu %}
-          {% if m[1]=="SEP"%}
-            <li class="divider"></li>
-          {% elif m[2]=="SUB"%}
-            <li class="dropdown-submenu">
-                <a href="{{ m[0] }}">{{ m[1] }}</a>
-		  	 <ul class="dropdown-menu">
-          {% elif m[1]=="NOSUB"%}
-			 </ul>
-            </li>
-          {% else %}
-            <li><a class="dropdown-item" href="{{ m[0] }}">{{ m[1] }}</a></li>
-          {% endif %}
-      {%  endfor %}
-  </ul>
-</div>
-{% endif %} {# If menu #}
-{% endif %}  {# If Authenticated #}
-    </td>
-</tr></table>
-</div></div>
+          <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
+          <td align="right">{{ g.experimental |safe }}</td>
+          <td align="right" width="300px">
+            {% if not current_user.is_authenticated %}
+              Not logged ( <a href="{{ url_for_security('login') }}">log in / register</a> )
+            {% else %}
+              {% if g.tasksummary %} <a href="{{ url_for('.ListTasks') }}">
+                {% if g.tasksummary.Pending %}
+                  <span class="label label-default">Pending : {{ g.tasksummary['Pending'] }}</span>{% endif %}
+                {% if g.tasksummary.Question %}
+                  <span class="label label-warning">Question : {{ g.tasksummary['Question'] }}</span>{% endif %}
+                {% if g.tasksummary.Running %}
+                  <span class="label label-info">Run : {{ g.tasksummary['Running'] }}</span>{% endif %}
+                {% if g.tasksummary.Error %}
+                  <span class="label label-danger">Error :{{ g.tasksummary['Error'] }}</span>{% endif %}
+                {% if g.tasksummary.Done %}
+                  <span class="label label-success">Done :{{ g.tasksummary['Done'] }}</span>{% endif %}</a><br>
+              {% endif %}
+              {{ current_user.name }} (<a href="{{ url_for_security('logout') }}">log out</a>)
+              {% if g.menu %}
+                <br>
+                <div class="btn-group" style="width:100px;margin-right: 10px">
+                  <button type="button" class="btn btn-default" data-toggle="dropdown">Action</button>
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                          aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    {% for m in g.menu %}
+                      {% if m[1]=="SEP" %}
+                        <li class="divider"></li>
+                      {% elif m[2]=="SUB" %}
+                        <li class="dropdown-submenu">
+                          <a href="{{ m[0] }}">{{ m[1] }}</a>
+                          <ul class="dropdown-menu">
+                            {% elif m[1]=="NOSUB" %}
+                          </ul>
+                        </li>
+                      {% else %}
+                        <li><a class="dropdown-item" href="{{ m[0] }}">{{ m[1] }}</a></li>
+                      {% endif %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %} {# If menu #}
+            {% endif %}  {# If Authenticated #}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
   {% for message in get_flashed_messages(true) %}
-    <div class="alert alert-{{ message[0]|replace("message","info")|replace("error","danger") }} alert-dismissible" role="alert" >{{ message[1] }}</div>
+    <div class="alert alert-{{ message[0]|replace("message","info")|replace("error","danger") }} alert-dismissible"
+         role="alert">{{ message[1] }}</div>
   {% endfor %}
-    {{ header|safe }}
-</div>{# headinfo #}
+  {{ header|safe }}
+</div>
+{# headinfo #}
 <!-- Main body -->
 <div id="bodydiv">
-{% block body %}{% endblock %}
-    {{ bodycontent|safe }}
+  {% block body %}{% endblock %}
+  {{ bodycontent|safe }}
 </div>
 
 {% if g.google_analytics_id and g.cookieGAOK=='Y' %}
   <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-  ga('create', '{{  g.google_analytics_id }} ', 'auto');
-  ga('set', 'anonymizeIp', true);
-  ga('send', 'pageview');
-</script>
+      (function (i, s, o, g, r, a, m) {
+          i['GoogleAnalyticsObject'] = r;
+          i[r] = i[r] || function () {
+              (i[r].q = i[r].q || []).push(arguments)
+          }, i[r].l = 1 * new Date();
+          a = s.createElement(o),
+              m = s.getElementsByTagName(o)[0];
+          a.async = 1;
+          a.src = g;
+          m.parentNode.insertBefore(a, m)
+      })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+      ga('create', '{{  g.google_analytics_id }} ', 'auto');
+      ga('set', 'anonymizeIp', true);
+      ga('send', 'pageview');
+  </script>
 {% endif %}
 {#<div style="position: fixed;top:0;left: 0px;z-index: 100;color:red;display: none;" id="ZoomWarning">Ecotaxa is designed to use 100% browser zoom</div>#}
 {#<script>#}
@@ -115,20 +137,27 @@
 {#CheckBrowserZoom();#}
 {#window.resize =CheckBrowserZoom;#}
 {#</script>#}
-{% if g.cookieGAOK=='' and g.google_analytics_id  %}
-  <div style="position: fixed;bottom: 0;height: 100px;left: 0;;right:0;background-color: rgba(0,0,0,0.90);color: white;z-index: 10000;" id="DivGAAccept">
-  <div style="display: flex;align-items: center; width: 1000px;margin-right: auto;margin-left: auto;margin-top: 20px;">
-  <div style="flex: 1;min-width: 81%;">We use cookies on this site to analyze traffic, remember your preferences,
-    and optimize your experience. Click “Accept” to consent to the continued use of cookies or visit our <a href="/privacy">Privacy Policy</a> to see how you can make changes to your cookie settings.</div>
-  <div style="flex: 1;"> <button type="button" class="btn btn-warning" id="BtGAAccept">Accept</button></div>
-  </div>
+{% if g.cookieGAOK=='' and g.google_analytics_id %}
+  <div
+      style="position: fixed;bottom: 0;height: 100px;left: 0;;right:0;background-color: rgba(0,0,0,0.90);color: white;z-index: 10000;"
+      id="DivGAAccept">
+    <div
+        style="display: flex;align-items: center; width: 1000px;margin-right: auto;margin-left: auto;margin-top: 20px;">
+      <div style="flex: 1;min-width: 81%;">We use cookies on this site to analyze traffic, remember your preferences,
+        and optimize your experience. Click “Accept” to consent to the continued use of cookies or visit our <a
+            href="/privacy">Privacy Policy</a> to see how you can make changes to your cookie settings.
+      </div>
+      <div style="flex: 1;">
+        <button type="button" class="btn btn-warning" id="BtGAAccept">Accept</button>
+      </div>
+    </div>
   </div>
   <script>
-  $('#BtGAAccept').click(function () {
-    $.get('/setprivacy/Y',function () {
-        $('#DivGAAccept').hide();
+      $('#BtGAAccept').click(function () {
+          $.get('/setprivacy/Y', function () {
+              $('#DivGAAccept').hide();
+          });
       });
-  });
   </script>
 {% endif %}
 </body>

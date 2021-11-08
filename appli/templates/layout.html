@@ -66,12 +66,12 @@ $(document).ready(function() {
         {% if not current_user.is_authenticated %}
             Not logged ( <a href="{{ url_for_security('login') }}">log in / register</a> )
         {% else %}
-            {%  if g.tasksummary %} <a href="/Task/listall">
-            {%  if g.tasksummary.Pending  %}<span class="label label-default">Pending : {{g.tasksummary['Pending']}}</span>{% endif %}
-            {%  if g.tasksummary.Question  %}<span class="label label-warning">Question : {{g.tasksummary['Question']}}</span>{% endif %}
-            {%  if g.tasksummary.Running  %}<span class="label label-info">Run : {{g.tasksummary['Running']}}</span>{% endif %}
-            {%  if g.tasksummary.Error  %}<span class="label label-danger">Error :{{g.tasksummary['Error']}}</span>{% endif %}
-            {%  if g.tasksummary.Done  %}<span class="label label-success">Done :{{g.tasksummary['Done']}}</span>{% endif %}</a><br>{% endif %}
+            {%  if g.jobs_summary %} <a href="/Jobs/listall">
+            {%  if g.jobs_summary.Pending  %}<span class="label label-default">Pending : {{g.jobs_summary['Pending']}}</span>{% endif %}
+            {%  if g.jobs_summary.Question  %}<span class="label label-warning">Question : {{g.jobs_summary['Question']}}</span>{% endif %}
+            {%  if g.jobs_summary.Running  %}<span class="label label-info">Run : {{g.jobs_summary['Running']}}</span>{% endif %}
+            {%  if g.jobs_summary.Error  %}<span class="label label-danger">Error :{{g.jobs_summary['Error']}}</span>{% endif %}
+            {%  if g.jobs_summary.Done  %}<span class="label label-success">Done :{{g.jobs_summary['Done']}}</span>{% endif %}</a><br>{% endif %}
             {{ current_user.name }} (<a href="{{ url_for_security('logout') }}">log out</a>)
 {% if g.menu %}
     <br><div class="btn-group" style="width:100px;margin-right: 10px">

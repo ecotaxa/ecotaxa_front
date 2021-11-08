@@ -148,7 +148,7 @@ def before_request_security():
     if user_can_administrate or user_can_administrate_users:
         g.menu.append(("", "SEP"))
         g.menu.append(("/admin/", "Admin Screen"))
-        g.menu.append(("/Task/listall", "Task Manager"))
+        g.menu.append(("/Jobs/listall", "Task Manager"))
 
     g.useradmin = user_can_administrate_users
     g.appliadmin = user_can_administrate

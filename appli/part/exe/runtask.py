@@ -7,7 +7,8 @@ import sys
 import traceback
 
 from appli import db, app, g
-from appli.tasks.taskmanager import LoadTask
+from appli.part.tasks.taskmanager import LoadTask
+
 
 def _tweak_stacks():
     """
@@ -30,9 +31,10 @@ def _tweak_stacks():
                     remote_stack = remote_stack[ndx2:]
                     break
     if rpc_start and remote_stack:
-        return "".join(tb[:rpc_start])+"\n".join(remote_stack)
+        return "".join(tb[:rpc_start]) + "\n".join(remote_stack)
     else:
         return "".join(tb)
+
 
 if __name__ == '__main__':
     task = None
@@ -46,8 +48,8 @@ if __name__ == '__main__':
         taskid = int(sys.argv[1])
         # taskid=1
         # On se place dans le repertoire de travail
-        workingdir = os.path.normpath(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "temptask/task%06d" % (int(taskid))))
+        tempdir = "../../../temptask/task%06d" % int(taskid)
+        workingdir = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), tempdir))
         os.chdir(workingdir)
         # On active le logger
         LoggingFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -83,5 +85,3 @@ if __name__ == '__main__':
             task.task.progressmsg = "Unhandled SubProcess Exception : " + str(sys.exc_info())
             db.session.commit()
         logging.error("Unhandled SubProcess Exception \n%s", _tweak_stacks())
-
-

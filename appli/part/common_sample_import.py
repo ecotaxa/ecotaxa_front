@@ -1,26 +1,33 @@
-from appli import db,app, database , ObjectToStr,PrintInCharte,gvp,gvg,VaultRootDir,DecodeEqualList,ntcv,EncodeEqualList,CreateDirConcurrentlyIfNeeded
 from pathlib import Path
-import appli.part.database as partdatabase, logging,re,datetime,csv,math,zipfile,io
+
 import numpy as np
-import matplotlib.pyplot as plt
+
+from . import database as partdatabase
+import csv
+import datetime
+import io
+import math
+import zipfile
 from appli import database
-from appli.part import PartDetClassLimit,CTDFixedCol
-from flask_login import current_user
+from appli import db, app, EncodeEqualList
+from .constants import CTDFixedCol
 
 
 # Purge les espace et converti le Nan en vide
 def CleanValue(v):
     if type(v) != str:
         return v
-    v=v.strip()
-    if (v.lower()=='nan') or (v.lower()=='na') :
-        v=''
-    if v.lower().find('inf')>=0:
-        v=''
+    v = v.strip()
+    if (v.lower() == 'nan') or (v.lower() == 'na'):
+        v = ''
+    if v.lower().find('inf') >= 0:
+        v = ''
     return v
+
+
 # retourne le flottant image de la chaine en faisant la conversion ou None
 def ToFloat(value):
-    if value=='': return None
+    if value == '': return None
     try:
         return float(value)
     except ValueError:
@@ -29,13 +36,14 @@ def ToFloat(value):
 
 def GetTicks(MaxVal):
     if np.isnan(MaxVal):
-        MaxVal=100 #Arbitraire si MaxVal n'est pas valide
-    if MaxVal<1:
-        MaxVal=1
-    Step=math.pow(10,math.floor(math.log10(MaxVal)))
-    if(MaxVal/Step)<3:
-        Step=Step/2
-    return np.arange(0,MaxVal,Step)
+        MaxVal = 100  # Arbitraire si MaxVal n'est pas valide
+    if MaxVal < 1:
+        MaxVal = 1
+    Step = math.pow(10, math.floor(math.log10(MaxVal)))
+    if (MaxVal / Step) < 3:
+        Step = Step / 2
+    return np.arange(0, MaxVal, Step)
+
 
 def GenerateReducedParticleHistogram(psampleid):
     """
@@ -43,7 +51,7 @@ def GenerateReducedParticleHistogram(psampleid):
     :param psampleid:
     :return:
     """
-    if database.GetAll("select count(*) from part_histopart_det where psampleid="+str(psampleid))[0][0]<=0:
+    if database.GetAll("select count(*) from part_histopart_det where psampleid=" + str(psampleid))[0][0] <= 0:
         return "<span style='color: red;'>Reduced Histogram can't be computer without Detailed histogram</span>"
     database.ExecSQL("delete from part_histopart_reduit where psampleid=" + str(psampleid))
     sql = """insert into part_histopart_reduit(psampleid, lineno, depth,datetime,  watervolume
@@ -81,51 +89,51 @@ def GenerateReducedParticleHistogram(psampleid):
       coalesce(biovol37,0)+coalesce(biovol38,0)+coalesce(biovol39,0) as bv13,
       coalesce(biovol40,0)+coalesce(biovol41,0)+coalesce(biovol42,0) as bv14, 
       coalesce(biovol43,0)+coalesce(biovol44,0)+coalesce(biovol45,0) as bv15
-    from part_histopart_det where psampleid="""+str(psampleid)
+    from part_histopart_det where psampleid=""" + str(psampleid)
     database.ExecSQL(sql)
     return " reduced Histogram computed"
 
 
-def ImportCTD(psampleid,user_name,user_email):
+def ImportCTD(psampleid, user_name, user_email):
     """
     Importe les données CTD 
     :param psampleid:
     :return:
     """
 
-    UvpSample= partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
+    UvpSample = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     if UvpSample is None:
-        raise Exception("ImportCTD: Sample %d missing"%psampleid)
+        raise Exception("ImportCTD: Sample %d missing" % psampleid)
     Prj = partdatabase.part_projects.query.filter_by(pprojid=UvpSample.pprojid).first()
     if Prj.instrumtype == 'uvp6remote':
         import appli.part.uvp_sample_import as uvp_sample_import
         rawfileinvault = uvp_sample_import.GetPathForRawHistoFile(UvpSample.psampleid)
-        zf=zipfile.ZipFile(rawfileinvault, "r")
-        if 'CTD.txt' not in zf.namelist() :
+        zf = zipfile.ZipFile(rawfileinvault, "r")
+        if 'CTD.txt' not in zf.namelist():
             app.logger.info("CTD.txt file missing")
             return False
-        fctb=zf.open('CTD.txt', 'r')
-        tsvfile = io.TextIOWrapper(fctb,encoding='latin_1')
+        fctb = zf.open('CTD.txt', 'r')
+        tsvfile = io.TextIOWrapper(fctb, encoding='latin_1')
     else:  # process normal par traitement du repertoire des données
         ServerRoot = Path(app.config['SERVERLOADAREA'])
         DossierUVPPath = ServerRoot / Prj.rawfolder
-        CtdFile =  DossierUVPPath / "ctd_data_cnv"/(UvpSample.profileid+".ctd")
+        CtdFile = DossierUVPPath / "ctd_data_cnv" / (UvpSample.profileid + ".ctd")
         if not CtdFile.exists():
             app.logger.info("CTD file %s missing", CtdFile.as_posix())
             return False
         app.logger.info("Import CTD file %s", CtdFile.as_posix())
-        tsvfile=CtdFile.open('r',encoding='latin_1')
+        tsvfile = CtdFile.open('r', encoding='latin_1')
 
     Rdr = csv.reader(tsvfile, delimiter='\t')
-    HeadRow=Rdr.__next__()
+    HeadRow = Rdr.__next__()
     # Analyser la ligne de titre et assigner à chaque ID l'attribut
     # Construire la table d'association des attributs complémentaires.
-    ExtramesID=0
-    Mapping=[]
-    ExtraMapping ={}
-    for ic,c in enumerate(HeadRow):
-        clow=c.lower().strip()
-        if clow=="chloro fluo [mg chl/m3]":clow="chloro fluo [mg chl m-3]"
+    ExtramesID = 0
+    Mapping = []
+    ExtraMapping = {}
+    for ic, c in enumerate(HeadRow):
+        clow = c.lower().strip()
+        if clow == "chloro fluo [mg chl/m3]": clow = "chloro fluo [mg chl m-3]"
         if clow == "conductivity [ms/cm]": clow = "conductivity [ms cm-1]"
         if clow == "depth [salt water, m]": clow = "depth [m]"
         if clow == "fcdom factory [ppb qse]": clow = "fcdom [ppb qse]"
@@ -138,35 +146,36 @@ def ImportCTD(psampleid,user_name,user_email):
         if clow == "pressure in water column [db]": clow = "pressure [db]"
         if clow == "spar [µmol m-2 s-1]": clow = "spar [umol m-2 s-1]"
         if clow in CTDFixedCol:
-            Target=CTDFixedCol[clow]
+            Target = CTDFixedCol[clow]
         else:
             # print (clow)
             ExtramesID += 1
-            Target ='extrames%02d'%ExtramesID
-            ExtraMapping['%02d'%ExtramesID]=c
-            if ExtramesID>20:
+            Target = 'extrames%02d' % ExtramesID
+            ExtraMapping['%02d' % ExtramesID] = c
+            if ExtramesID > 20:
                 raise Exception("ImportCTD: Too much CTD data, column %s skipped" % c)
         Mapping.append(Target)
-    app.logger.info("Mapping = %s",Mapping)
-    database.ExecSQL("delete from part_ctd where psampleid=%s"%psampleid)
-    for i,r in enumerate(Rdr):
-        cl=partdatabase.part_ctd()
-        cl.psampleid=psampleid
-        cl.lineno=i
-        for i,c in enumerate(Mapping):
-            v=CleanValue(r[i])
-            if v!='':
-                if c=='qc_flag':
+    app.logger.info("Mapping = %s", Mapping)
+    database.ExecSQL("delete from part_ctd where psampleid=%s" % psampleid)
+    for i, r in enumerate(Rdr):
+        cl = partdatabase.part_ctd()
+        cl.psampleid = psampleid
+        cl.lineno = i
+        for i, c in enumerate(Mapping):
+            v = CleanValue(r[i])
+            if v != '':
+                if c == 'qc_flag':
                     setattr(cl, c, int(float(v)))
-                elif c=='datetime':
-                    setattr(cl, c, datetime.datetime(int(v[0:4]),int(v[4:6]),int(v[6:8]),int(v[8:10]),int(v[10:12]),int(v[12:14]),int(v[14:17])*1000))
+                elif c == 'datetime':
+                    setattr(cl, c, datetime.datetime(int(v[0:4]), int(v[4:6]), int(v[6:8]), int(v[8:10]), int(v[10:12]),
+                                                     int(v[12:14]), int(v[14:17]) * 1000))
                 else:
-                    setattr(cl,c,v)
+                    setattr(cl, c, v)
         db.session.add(cl)
         db.session.commit()
-    UvpSample.ctd_desc=EncodeEqualList(ExtraMapping)
-    UvpSample.ctd_import_datetime=datetime.datetime.now()
-    UvpSample.ctd_import_name=user_name
+    UvpSample.ctd_desc = EncodeEqualList(ExtraMapping)
+    UvpSample.ctd_import_datetime = datetime.datetime.now()
+    UvpSample.ctd_import_name = user_name
     UvpSample.ctd_import_email = user_email
     db.session.commit()
     return True

@@ -5,6 +5,7 @@ from pathlib import Path
 from flask import render_template, json
 
 from appli import app, gvg
+from ecopart_blueprint import part_app
 
 
 @part_app.route('/ServerFolderSelect')

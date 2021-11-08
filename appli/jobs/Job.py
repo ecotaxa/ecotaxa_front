@@ -2,7 +2,7 @@ import json
 from json import JSONDecodeError
 
 import requests
-from flask import g
+from flask import g, flash
 from werkzeug.datastructures import FileStorage
 
 from appli import gvg, XSSEscape, gvp
@@ -128,6 +128,15 @@ class Job(object):
             if gvp(k, "") != "":
                 filters[k] = gvp(k, "")
         return cls._remind_filters(filters, target_prj)
+
+    @classmethod
+    def flash_any_error(cls, errors):
+        if len(errors) > 0:
+            for e in errors:
+                flash(e, "error")
+            return True
+        else:
+            return False
 
 
 def load_from_json(str, clazz):

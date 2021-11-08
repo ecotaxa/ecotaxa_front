@@ -3,11 +3,10 @@ import json
 import time
 from typing import Dict, List
 
-from flask import render_template, redirect
+from flask import render_template, redirect, request
 
-from appli import PrintInCharte, gvg
+from appli import PrintInCharte, gvg, gvp
 from appli.jobs.Job import Job, load_from_json
-from appli.tasks.importcommon import *
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi
@@ -81,7 +80,7 @@ class SimpleImportJob(Job):
                                                      dry_run=True)
         errors.extend(rsp.errors)
         # Check for errors. If any, stay in current state.
-        if not flash_any_error(errors):
+        if not cls.flash_any_error(errors):
             # Save preferences
             with ApiClient(UsersApi, request) as api:
                 val_to_write = json.dumps(values)
