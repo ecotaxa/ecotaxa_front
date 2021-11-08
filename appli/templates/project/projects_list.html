@@ -57,6 +57,7 @@
 <body>
   <div id="app" class="container-fluid">
     <p-datatable :value="{{PrjList}}"
+      :multi-sort-meta="multiSortMeta"
       class="p-datatable p-component p-datatable-responsive-stack p-datatable-gridlines card p-datatable-sm"
       sort-mode="multiple" :paginator="true" :rows="15" paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink
       RowsPerPageDropdown" :rowsPerPageOptions="[15,30,50]" data-key="projid" filter-display="menu"
@@ -205,6 +206,10 @@
       setup() {
         return {
           filters: ref({}),
+          multiSortMeta: [
+            {field: 'instrument', order: 1},
+        ]  
+
         };
       },
       components: {
@@ -224,32 +229,7 @@
       },
 
       created() {
-        //console.log(this.$route.query.PrjList);
-        //const self = this;
         this.initFilters();
-        /*
-        axios.get('/api/users/me')
-          .then(function (rsp) {
-            // handle success
-            self.user_name = rsp.data.name;
-          })
-          .catch(function (error) {
-            // handle error
-            self.user_name = "NOT LOGGED";
-          });
-        axios.get('/api/projects/search?for_managing=true')
-          .then(function (rsp) {
-            // handle success
-            for (const a_prj of rsp.data) {
-              self.projects.push({ name: a_prj.title, code: a_prj.projid })
-            }
-          })
-          .catch(function (error) {
-            // handle error
-          })
-          .then(function () {
-            self.projects_loading = false;
-          });*/
       },
       mounted() {
         //console.log(App);
@@ -292,29 +272,8 @@
 
     const app = createApp(App);
     app.use(PrimeVue);
-    //    app.component('p-dropdown', primevue.dropdown);    
     app.directive('ripple', primevue.ripple);
     app.directive('tooltip', primevue.tooltip);
-    //    app.directive('p-dropdown', primevue.dropdown);    
-    /*
-        app.directive('p-datatable', primevue.datatable);
-        app.directive('p-column', primevue.column);
-        app.directive('p-columngroup', primevue.columngroup);
-        app.directive('p-columnfilter', primevue.columnfilter,);
-        app.directive('p-inputtext', primevue.inputtext);
-        app.directive('p-inputnumber', primevue.inputnumber);
-        app.directive('p-selectbutton', primevue.selectbutton);
-        app.directive('p-button', primevue.button);
-    
-        app.directive('p-fieldset', primevue.fieldset);
-        app.directive('p-progressbar', primevue.progressbar);
-        app.directive('p-badge', primevue.badge);
-    */
-
-    //console.log(app);
-    //app.config.compilerOptions.isCustomElement = tag => tag === 'virtual-scroller';
-    //app.config.isCustomElement = tag => tag === 'virtual-scroller';
-
     app.mount("#app");
 
   </script>
