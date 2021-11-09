@@ -9,7 +9,7 @@ if __name__ == "__main__":
     from flask import g
     import logging
     import traceback
-    from appli.tasks.taskmanager import AutoClean
+    from appli.part.tasks.taskmanager import AutoClean
 
     app.logger.setLevel(logging.DEBUG)
     for h in app.logger.handlers:

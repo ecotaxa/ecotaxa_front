@@ -13,10 +13,13 @@ from ftplib import FTP
 from html.parser import HTMLParser
 
 import numpy as np
+from flask import request
 
 import appli.part.database as partdatabase
 import appli.part.funcs.uvp_sample_import as uvp_sample_import
 from appli import db, ntcv
+from appli.part.ecopart_blueprint import ECOTAXA_URL
+from appli.part.remote import EcoTaxaInstance
 from ..db_utils import ExecSQL, GetAll
 from ..funcs.common_sample_import import ToFloat, GenerateReducedParticleHistogram
 
@@ -298,6 +301,7 @@ def GenerateTaxonomyHistogram(psampleid):
     :param psampleid:
     :return:
     """
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
     PartSample = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     if PartSample is None:
         raise Exception("GenerateTaxonomyHistogram: Sample %d missing" % psampleid)
@@ -318,15 +322,18 @@ def GenerateTaxonomyHistogram(psampleid):
                     TaxoIds[i] = int(MetaData.get('category_name_%d' % (i + 1), ''))
                 except:
                     TaxoIds[i] = 0
-            InClause = ','.join([str(x) for x in TaxoIds if x > 0])
-            if InClause == '':
+
+            valid_ids = [x for x in TaxoIds if x > 0]
+            if len(valid_ids) == 0:
                 raise Exception("GenerateTaxonomyHistogram: Sample %d no valid category_name_" % psampleid)
-            TaxoDB = [int(x['id']) for x in GetAll("select id from taxonomy where id in(%s)" % (InClause,))]
+            TaxoDB = set([tid for tid, _name in ecotaxa_if.get_taxo(valid_ids)])
+
             for i in range(40):
                 if TaxoIds[i] > 0:
                     if TaxoIds[i] not in TaxoDB:
-                        raise Exception("GenerateTaxonomyHistogram: Sample %d category_name_%d is not a vlid taxoid" % (
-                        psampleid, (i + 1)))
+                        raise Exception(
+                            "GenerateTaxonomyHistogram: Sample %d category_name_%d is not a known taxoid" %
+                            (psampleid, (i + 1)))
 
         with zf.open('TAXO2.txt', 'r') as ftaxob:
             ftaxo = io.TextIOWrapper(ftaxob, encoding='latin_1')
