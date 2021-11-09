@@ -13,7 +13,7 @@ from flask_login import current_user
 from flask_security import login_required
 
 from appli import db, app, PrintInCharte, gvg, database, gvp
-from appli.database import GetAll
+from ..db_utils import GetAll
 # Environment variable for transmitting cookie, i.e. web session, to subprocess
 from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_URL, part_AddTaskSummaryForTemplate
 

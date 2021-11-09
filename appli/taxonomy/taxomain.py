@@ -4,7 +4,6 @@ import requests
 from flask import render_template, g, flash, request
 
 import appli
-import appli.part.prj
 import appli.project.main
 from appli import app, PrintInCharte, database, gvg, gvp, FAIcon
 from appli.utils import ApiClient
@@ -122,8 +121,9 @@ def route_view_taxon(taxoid):
     with ApiClient(TaxonomyTreeApi, request) as api:
         on_central = api.get_taxon_in_central(taxon_id=taxoid)
     taxon = taxon.to_dict()  # booster gives read-only models
+    taxon_on_central = on_central[0].to_dict()
     for a_field in FIELDS_IN_CENTRAL_ONLY:
-        taxon[a_field] = on_central[0][a_field]
+        taxon[a_field] = taxon_on_central[a_field]
     # Complete again with usage info
     with ApiClient(TaxonomyTreeApi, request) as api:
         usage = api.query_taxa_usage(taxon_id=taxoid)

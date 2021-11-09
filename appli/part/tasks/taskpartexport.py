@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
-from appli import db, app, database, PrintInCharte, gvp, gvg, DecodeEqualList, ntcv
+from appli import db, app, database, gvp, gvg, DecodeEqualList, ntcv
 from flask import render_template, g, flash, request
-import logging, os, csv, re, datetime
-import zipfile, psycopg2.extras, json
+import logging, os, datetime
+import zipfile, psycopg2.extras
 from flask_login import current_user
 from pathlib import Path
 
+from ..db_utils import GetAssoc2Col
 from ..ecopart_blueprint import PART_URL
 from .taskmanager import AsyncTask
 from appli.database import GetAll, GetAssoc
-from ..part_main import GetFilteredSamples, PartstatsampleGetData
+from appli.part.views.part_main import GetFilteredSamples, PartstatsampleGetData
 from appli.part import GetClassLimitTxt, GetPartClassLimitListText
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
-from .. import uvp_sample_import as uvp_sample_import
-from appli.part.drawchart import GetTaxoHistoWaterVolumeSQLExpr
+from ..funcs import uvp_sample_import as uvp_sample_import
+from appli.part.views.drawchart import GetTaxoHistoWaterVolumeSQLExpr
 import bz2, shutil
 
 
@@ -61,7 +62,7 @@ class TaskPartExport(AsyncTask):
                         where s.psampleid in (%s)
                         order by s.profileid
                         """ % ((",".join([str(x[0]) for x in self.param.samples])),)
-        samples = database.GetAll(sql)
+        samples = GetAll(sql)
         self.OwnerList = {S['dataowner'] for S in samples}
         return samples
 
@@ -297,7 +298,7 @@ class TaskPartExport(AsyncTask):
                     t = [None for i in range(3 * len(lstcat))]
                     logging.info("sqlhisto = %s ; %s" % (sqlhisto, S["psampleid"]))
                     CatHisto = GetAll(sqlhisto, {'psampleid': S["psampleid"]})
-                    WV = database.GetAssoc2Col(sqlWV, {'psampleid': S["psampleid"]})
+                    WV = GetAssoc2Col(sqlWV, {'psampleid': S["psampleid"]})
                     for i in range(len(CatHisto)):
                         h = CatHisto[i]
                         idx = lstcat[h['classif_id']]['idx']
@@ -356,7 +357,7 @@ class TaskPartExport(AsyncTask):
                         f.write("\t%s avgesd [mm]" % (v['tree']))
                     f.write("\n")
                 t = [None for i in range(3 * len(lstcat))]
-                WV = database.GetAssoc2Col(sqlWV, {'psampleid': S["psampleid"]})
+                WV = GetAssoc2Col(sqlWV, {'psampleid': S["psampleid"]})
                 for i in range(len(CatHisto)):
                     h = CatHisto[i]
                     idx = lstcat[h['classif_id']]['idx']
@@ -1007,7 +1008,7 @@ order by tree""".format(lstcatwhere)
                 self.param.what = "RED"
                 self.param.fileformat = "ODV"
 
-            LstUsers = database.GetAll("""select distinct u.email,u.name,Lower(u.name)
+            LstUsers = GetAll("""select distinct u.email,u.name,Lower(u.name)
             FROM users_roles ur join users u on ur.user_id=u.id
             where ur.role_id=2
             and u.active=TRUE and email like '%@%'

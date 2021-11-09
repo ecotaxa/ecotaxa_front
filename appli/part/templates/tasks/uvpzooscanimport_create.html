@@ -164,41 +164,5 @@
 
     </form>
 
-    <script>
-        function TaxoHelperBtAdd() {
-            var s = $('#oldname').val() + "=" + $('#taxolb option:selected').text();
-            var txt = $('#TxtTaxoMap');
-            txt.val(txt.val() + s + "\n");
-        }
-
-        $(document).ready(function () {
-            $('#FileModal').on('show.bs.modal', function () {
-                $("#TaxoModalBody").html("");
-                {# Pour eviter les conflit sur le jstree suite à des ouverture successive car le jstree est dans la modal cachée #}
-                $("#FileModalBody").html("Loading...").load("/part/ServerFolderSelect");
-            });
-            $(".taxolb").select2({
-                ajax: {
-                    url: "/search/taxo",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) {
-                        return {q: params.term, page: params.page};
-                    },
-                    processResults: function (data) {
-                        return {results: data};
-                    },
-                    cache: true
-                },
-                minimumInputLength: 3
-            }); // Select2 Ajax
-            $('#TaxoModal').on('show.bs.modal', function () {
-                $("#FileModalBody").html("");
-                $("#TaxoModalBody").html("Loading...").load("/search/taxotree?target=taxolb");
-            });
-        }); // Ready
-    </script>
-
-
   </div>
 {% endblock %}

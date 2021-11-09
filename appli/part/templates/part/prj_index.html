@@ -28,7 +28,7 @@
 
     </div>
   </div>
-  <form action="/part/prjcalc/{{ PrjId }}" method="post" id="FormSamples">
+  <form action="{{url_for('.part_prjcalc', PrjId=PrjId)}}" method="post" id="FormSamples">
     <table id="tblsample2" class="table table-bordered table-condensed" style="width: auto;">
       <thead>
       <tr>
@@ -61,7 +61,7 @@
       {% for r in dbsample %}
         <tr>
           <td><input type="checkbox" name="s_{{ r['psampleid'] }}" value="Y"></td>
-          <td>{{ r['psampleid'] }} <a href="/part/sampleedit/{{ r['psampleid'] }}"><span
+          <td>{{ r['psampleid'] }} <a href="{{ url_for('.part_sampleedit',psampleid=r['psampleid']) }}"><span
               class="glyphicon glyphicon-pencil"></span></a></td>
           <td>{{ r['profileid'] }}</td>
           <td>{{ r['filename'] }}</td>
@@ -115,7 +115,7 @@
 
 {% if Prj.instrumtype=='uvp5' or Prj.instrumtype=='uvp6' %}
   <br>SHOW IMPORTATION RESULT GRAPH : {% for i in range(0,dbsample|length,50) %}
-  <a href="/part/prj_uvpgraph/{{ Prj.pprojid }}/{{ i }}" class="btn btn-primary btn-xs">Page {{ (i//50)+1}}</a>
+  <a href="{{ url_for('.part_prj_vpgraph',PrjId=Prj.pprojid, offset=i) }}" class="btn btn-primary btn-xs">Page {{ (i//50)+1}}</a>
 {% endfor %}
 {% endif %}
 
@@ -162,7 +162,7 @@
             var c = champs[i];
             postdata[c['name']] = c['value'];
         }
-        PostDynForm("/part/prjcalc/{{ PrjId }}", postdata);
+        PostDynForm("{{ url_for('.part_prjcalc', PrjId=PrjId) }}", postdata);
     }
 
     $(document).ready(function () {

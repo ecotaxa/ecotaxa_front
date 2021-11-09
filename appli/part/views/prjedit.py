@@ -8,12 +8,13 @@ from wtforms import Form, StringField, validators, IntegerField, FloatField, Sel
     TextAreaField
 
 import appli
-from . import database as partdatabase
+from .. import database as partdatabase
 import csv
 import re
 from appli import app, database, gvg, gvp, ErrorFormat
 from appli.database import db
-from .ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
+from ..db_utils import GetAll
+from ..ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
 
 
 class UvpPrjForm(Form):
@@ -68,12 +69,12 @@ def part_prjedit(pprojid):
         model.public_zooexport_deferral_month = app.config.get('PART_DEFAULT_PLANKTON_EXPORT_DELAY', '')
 
     UvpPrjForm.ownerid = SelectField('Project Owner',
-                                     choices=database.GetAll("SELECT id,name FROM users ORDER BY trim(lower(name))"),
+                                     choices=GetAll("SELECT id,name FROM users ORDER BY trim(lower(name))"),
                                      coerce=int)
     UvpPrjForm.instrumtype = SelectField('Instrument type',
                                          choices=[(x, x) for x in ("", "uvp5", "uvp6", "lisst", "uvp6remote")])
     UvpPrjForm.projid = SelectField('Ecotaxa Project',
-                                    choices=[(0, ''), (-1, 'Create a new EcoTaxa project')] + database.GetAll(
+                                    choices=[(0, ''), (-1, 'Create a new EcoTaxa project')] + GetAll(
                                         "SELECT projid,concat(title,' (',cast(projid as varchar),')') FROM projects ORDER BY lower(title)"),
                                     coerce=int)
     UvpPrjForm.remote_type = SelectField('Remote type', choices=[(x, x) for x in ("", "ARGO", "TSV LOV")])

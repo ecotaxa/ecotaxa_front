@@ -43,7 +43,7 @@
     <div class="panel-body" style="padding: 1px 5px 1px 5px;">
       <table width="100%">
         <tr>
-          <td width="145px"><a href="/part/"><img src="/static/logo_ecopart.png"></a></td>
+          <td width="145px"><a href="{{ url_for('.indexPart') }}"><img src="/static/logo_ecopart.png"></a></td>
 
           <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
           <td align="right">{{ g.experimental |safe }}</td>

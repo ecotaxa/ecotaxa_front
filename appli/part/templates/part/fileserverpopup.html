@@ -33,7 +33,7 @@
                 "themes": {"stripes": false, "icons": false},
                 'data': {
                     'dataType': 'JSON',
-                    'url': '/part/ServerFolderSelectJSON',
+                    'url': '{{ url_for(".part_ServerFolderSelectJSON") }}',
                     'data': function (node) {
                         return {'id': node.id, "ZipOnly": '{{ziponly}}'};
                     }

@@ -5,11 +5,11 @@ from pathlib import Path
 from flask import render_template, json
 
 from appli import app, gvg
-from ecopart_blueprint import part_app
+from appli.part.ecopart_blueprint import part_app
 
 
 @part_app.route('/ServerFolderSelect')
-def ServerFolderSelect():
+def part_ServerFolderSelect():
     res = []
     # the HTML id of the element which will be updated once selection is done
     target_id = gvg("target", "ServerPath")
@@ -18,7 +18,7 @@ def ServerFolderSelect():
 
 
 @part_app.route('/ServerFolderSelectJSON')
-def ServerFolderSelectJSON():
+def part_ServerFolderSelectJSON():
     ServerRoot = Path(app.config['SERVERLOADAREA'])
     CurrentPath = ServerRoot
     parent = gvg("id")

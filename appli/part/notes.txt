@@ -2,24 +2,33 @@
 
 - DB table temp_tasks belongs to EcoPart
 
+- finish replacements of /part with {{ url_for() }}
+
 --------- TODO --------------
 
+- refs to taxonomy table (80 matches in 6 files)
+
+- refs to database.Projects SQLAlchemy wrapper (2 matches)
+
+- refs to projects table in SQL (9 matches)
+
+- refs to samples table in SQL (8 matches)
+
+- refs to objects table (3 matches)
+
 - move temp_tasks to EcoPart DB definition
+
+- separate temptasks directory for jobs vs tasks
 
 - login delegate to EcoTaxa
 
 - "EcoTaxa folder temptask/task%06d (useful for huge files)"
 
-- finish replacements of /part with {{ url_for() }}
-
 - cron.py for EcoPart
 
-- separate temptasks directory for jobs vs tasks
-
-- refs to projects table
-
-- refs to objects table
-
-- refs to taxonomy table
-
 - join with user information
+
+------------ ISSUES ---------------
+
+- connection to EcoTaxa by background process: no cookie, generally speaking which user to take?
+-> Create an admin EcoPart user

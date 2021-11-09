@@ -280,7 +280,7 @@ The <b>sample</b> depth offsets are set in the instrument metadata for the UVP6 
         <h4 class="modal-title" id="ModalLabel">Are you sure you want remove this sample</h4>
       </div>
       <div class="modal-body">
-        <form method="post" action="/part/sampleedit/{{ psampleid }}" style="display: inline-block">
+        <form method="post" action="{{ url_for('.part_sampleedit', psampleid=psampleid) }}" style="display: inline-block">
           <input type="hidden" name="delete" value="Y">
           <button class="btn btn-danger"><span class="glyphicon glyphicon-erase"></span> Confirm Remove sample</button>
         </form>
