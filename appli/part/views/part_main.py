@@ -7,6 +7,7 @@ from wtforms import Form, SelectField, SelectMultipleField
 from appli import app, database
 from appli.part import GetClassLimitTxt
 from appli.part.constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
+from appli.part.db_utils import GetAll
 from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, ECOTAXA_URL
 from appli.part.remote import EcoTaxaInstance
 
@@ -16,11 +17,11 @@ def indexPart():
     ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
 
     class FiltForm(Form):
-        filt_proj = SelectMultipleField(choices=[['', '']] + database.GetAll(
+        filt_proj = SelectMultipleField(choices=[['', '']] + GetAll(
             "SELECT projid,concat(title,' (',cast(projid AS VARCHAR),')') "
             "FROM projects where projid in (select projid from part_projects) "
             "ORDER BY lower(title)"))
-        filt_uproj = SelectMultipleField(choices=[['', '']] + database.GetAll(
+        filt_uproj = SelectMultipleField(choices=[['', '']] + GetAll(
             "SELECT pprojid,concat(ptitle,' (',cast(pprojid AS VARCHAR),')') "
             "FROM part_projects ORDER BY lower(ptitle)"))
         gpr = SelectMultipleField(
@@ -131,7 +132,7 @@ def GetFilteredSamples(Filter=None, GetVisibleOnly=False, ForceVerticalIfNotSpec
     if GetVisibleOnly:
         sql = "select * from (" + sql + ") s where visible=true "
     sql += """ order by s.psampleid     """
-    return database.GetAll(sql, sqlparam)
+    return GetAll(sql, sqlparam)
 
 
 @part_app.route('/searchsample')
@@ -153,7 +154,7 @@ def PartstatsampleGetData():
     data = {'nbrsample': len(samples), 'nbrvisible': sum(1 for x in samples if x['visible'])}
     data['nbrnotvisible'] = data['nbrsample'] - data['nbrvisible']
     sqlvisible, sqljoin = GetSQLVisibility()
-    data['partprojcount'] = database.GetAll("""SELECT pp.ptitle,count(*) nbr
+    data['partprojcount'] = GetAll("""SELECT pp.ptitle,count(*) nbr
           ,count(case when organizedbydeepth then 1 end) nbrdepth
           ,count(case when not organizedbydeepth then 1 end) nbrtime
           ,pp.do_email,do_name,qpp.email,qpp.name,pp.instrumtype,pp.pprojid
@@ -177,20 +178,20 @@ def PartstatsampleGetData():
         where ps.psampleid in ({0} )
         group by pp.ptitle,pp.do_email,do_name,qpp.email,qpp.name,p.visible,pp.instrumtype,pp.pprojid,visibility,uppowner.name,uppowner.email
         order by pp.ptitle""".format(sampleinclause, sqlvisible, sqljoin))
-    data['instrumcount'] = database.GetAll("""SELECT coalesce(pp.instrumtype,'not defined') instrum,count(*) nbr
+    data['instrumcount'] = GetAll("""SELECT coalesce(pp.instrumtype,'not defined') instrum,count(*) nbr
         from part_samples ps
         join part_projects pp on ps.pprojid=pp.pprojid
         where ps.psampleid in ({0} )
         group by pp.instrumtype
         order by pp.instrumtype""".format(sampleinclause))
-    data['taxoprojcount'] = database.GetAll("""SELECT coalesce(p.title,'not associated') title,p.projid,count(*) nbr
+    data['taxoprojcount'] = GetAll("""SELECT coalesce(p.title,'not associated') title,p.projid,count(*) nbr
         from part_samples ps
         join part_projects pp on ps.pprojid=pp.pprojid
         left join projects p on pp.projid=p.projid
         where ps.psampleid in ({0} )
         group by p.title,p.projid
         order by p.title""".format(sampleinclause))
-    # data['taxostat']=database.GetAll("""select round(100*count(case when nbr=nbrval then 1 end)/count(*),1) pctval100pct
+    # data['taxostat']=GetAll("""select round(100*count(case when nbr=nbrval then 1 end)/count(*),1) pctval100pct
     #       ,round(100*count(case when nbrval>0 and nbr=nbrval then 1 end)/count(*),1) pctpartval
     #       ,round(100*sum(nbrval)/sum(nbr),1) as pctobjval
     #     from (SELECT ps.sampleid,count(*) nbr,count(case when classif_qual='V' then 1 end) nbrval
@@ -204,7 +205,7 @@ def PartstatsampleGetData():
     #     data['taxostat'] ={}
     # else:
     #     data['taxostat']={k: float(v) for k, v in data['taxostat'][0].items()}
-    TaxoStat = database.GetAll("""SELECT ps.sampleid,count(*) nbr,count(case when classif_qual='V' then 1 end) nbrval,ps.pprojid
+    TaxoStat = GetAll("""SELECT ps.sampleid,count(*) nbr,count(case when classif_qual='V' then 1 end) nbrval,ps.pprojid
             from part_samples ps
             join objects oh on oh.sampleid=ps.sampleid
             where ps.psampleid in ({0})
@@ -232,7 +233,7 @@ def PartstatsampleGetData():
             data['taxostatbyproj'][k] = round(100 * r['nbrobjval'] / r['nbrobj'], 1)
     print(data['taxostatbyproj'])
 
-    data['depthhisto'] = database.GetAll("""SELECT coalesce(case when bottomdepth<500 then '0- 500' else trunc(bottomdepth,-3)||'-'||(trunc(bottomdepth,-3)+1000) end,'Not defined') slice
+    data['depthhisto'] = GetAll("""SELECT coalesce(case when bottomdepth<500 then '0- 500' else trunc(bottomdepth,-3)||'-'||(trunc(bottomdepth,-3)+1000) end,'Not defined') slice
       , count(*) nbr
       from (select ps.psampleid,cast(coalesce(max(depth),ps.bottomdepth) as NUMERIC) bottomdepth
             from part_samples ps
@@ -241,7 +242,7 @@ def PartstatsampleGetData():
             group by ps.psampleid) ps
 group by slice order by slice""".format(sampleinclause))
     # On récupère la liste des catégories pour les samples concernés
-    classif_ids = database.GetAll("""
+    classif_ids = GetAll("""
         SELECT distinct hl.classif_id
             from part_samples ps
             join part_histocat_lst hl on ps.psampleid = hl.psampleid
@@ -250,6 +251,7 @@ group by slice order by slice""".format(sampleinclause))
     classif_ids = [an_id[0] for an_id in classif_ids]
     ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
     data['taxolist'] = ecotaxa_if.get_taxo2(classif_ids)
+    data['taxolist'].sort(key=lambda r: r['tree'])
     return data
 
 
@@ -272,7 +274,7 @@ def Partgetsamplepopover(psampleid):
       left join projects ep on p.projid = ep.projid
       where s.psampleid=%(psampleid)s
       """
-    data = database.GetAll(sql, {'psampleid': psampleid})[0]
+    data = GetAll(sql, {'psampleid': psampleid})[0]
     txt = """ID : {psampleid}<br>
     Profile ID : {profileid}<br>
     Project : {ptitle} ({pprojid})<br>

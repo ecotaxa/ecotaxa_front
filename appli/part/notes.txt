@@ -18,7 +18,8 @@
 
 - cron.py for EcoPart
 
-- refs to projects table
+- refs to projects table in SQL
+- refs to database.Projects
 
 - refs to objects table
 

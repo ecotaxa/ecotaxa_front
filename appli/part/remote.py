@@ -33,6 +33,10 @@ class EcoTaxaInstance(object):
         res: List[TaxonModel] = tta.query_taxa_set(param)
         return [(r.id, r.display_name) for r in res]
 
+    @staticmethod
+    def lt_tree(names: List[str]):
+        return ">".join(reversed(names))
+
     def get_taxo2(self, classif_ids: List[int]) -> List[Dict[str, Any]]:
         """
             Return taxonomy information for given list of IDs, another format...
@@ -41,4 +45,4 @@ class EcoTaxaInstance(object):
         param = ','.join([str(an_id) for an_id in classif_ids])
         res: List[TaxonModel] = tta.query_taxa_set(param)
         # TODO toto
-        return [{"classid_id": r.id, "nom": r.display_name, "tree": "toto"} for r in res]
+        return [{"classid_id": r.id, "nom": r.display_name, "tree": self.lt_tree(r.lineage)} for r in res]

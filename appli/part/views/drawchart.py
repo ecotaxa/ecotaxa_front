@@ -1,20 +1,21 @@
 import io
 import math
+import traceback
+
 import matplotlib
 import matplotlib.dates
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.ticker
 import numpy as np
-import traceback
 from flask import request, send_file
 
-from appli import database, gvg
-
-from appli.part.views import part_main as umain
+from appli import gvg
 from appli.part import GetClassLimitTxt
 from appli.part.constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
+from appli.part.db_utils import GetAll, GetAssoc2Col
 from appli.part.ecopart_blueprint import part_app
+from appli.part.views import part_main as umain
 
 DepthTaxoHistoLimit = [0, 25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1250,
                        1500, 1750, 2000, 2250, 2500, 2750
@@ -153,7 +154,7 @@ def part_drawchart():
                 graph[i].set_xlabel(XLabel)
                 chartid += 1
             for rs in samples:
-                DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})
+                DBData = GetAll(sql, {'psampleid': rs['psampleid']})
                 data = np.empty((len(DBData), 2))
                 for i, c in enumerate(gpr):
                     xcolname = "c%d" % i
@@ -237,7 +238,7 @@ def part_drawchart():
                 graph[i].set_xlabel(XLabel)
                 chartid += 1
             for rs in samples:
-                DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})
+                DBData = GetAll(sql, {'psampleid': rs['psampleid']})
                 data = np.empty((len(DBData), 2))
                 for i, c in enumerate(gpd):
                     xcolname = "c%d" % i
@@ -313,7 +314,7 @@ def part_drawchart():
                 chartid += 1
 
             for rs in samples:
-                DBData = database.GetAll(sql, {'psampleid': rs['psampleid']})
+                DBData = GetAll(sql, {'psampleid': rs['psampleid']})
                 data = np.empty((len(DBData), 2))
                 for i, c in enumerate(gctd):
                     xcolname = "c%d" % i
@@ -361,7 +362,7 @@ def part_drawchart():
                     """.format(GetTaxoHistoWaterVolumeSQLExpr("depth"), DepthFilter)
             graph = list(range(0, len(gtaxo)))
             for i, c in enumerate(gtaxo):
-                NomTaxo = database.GetAll("""select concat(t.name,' (',p.name,')') nom 
+                NomTaxo = GetAll("""select concat(t.name,' (',p.name,')') nom 
                       from taxonomy t 
                       left JOIN taxonomy p on t.parent_id=p.id 
                       where t.id= %(taxoid)s""", {'taxoid': c})[0]['nom']
@@ -385,8 +386,8 @@ def part_drawchart():
                 chartid += 1
                 for isample, rs in enumerate(samples):
                     if rs['visibility'][1] >= 'V':  # Visible ou exportable
-                        DBData = database.GetAll(sql, {'psampleid': rs['psampleid'], 'taxoid': c})
-                        WV = database.GetAssoc2Col(sqlWV, {'psampleid': rs['psampleid']})
+                        DBData = GetAll(sql, {'psampleid': rs['psampleid'], 'taxoid': c})
+                        WV = GetAssoc2Col(sqlWV, {'psampleid': rs['psampleid']})
                     else:  # si pas le droit, on fait comme s'il n'y avait pas de données.
                         DBData = []
                         WV = {}

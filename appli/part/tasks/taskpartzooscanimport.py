@@ -11,14 +11,16 @@ from flask_login import current_user
 import appli.part.database as partdatabase
 import appli.part.funcs.common_sample_import
 import appli.part.funcs.lisst_sample_import
+import appli.part.funcs.nightly
 import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
 import appli.part.funcs.uvp_sample_import
 import appli.part.views.prj
 import appli.project.main
-from appli import db, app, database, PrintInCharte, gvp, gvg, ErrorFormat
+from appli import db, app, PrintInCharte, gvp, gvg, ErrorFormat
 from appli.part.ecopart_blueprint import PART_URL
 from .taskmanager import AsyncTask, DoTaskClean
 from ..constants import LstInstrumType
+from ..db_utils import GetAssoc
 
 
 class TaskPartZooscanImport(AsyncTask):
@@ -115,7 +117,7 @@ class TaskPartZooscanImport(AsyncTask):
 
                     NbrDone += 1
 
-        partdatabase.ComputeOldestSampleDateOnProject()
+        appli.part.funcs.nightly.ComputeOldestSampleDateOnProject()
         self.task.taskstate = "Done"
         self.UpdateProgress(100, "Processing done")
         # self.task.taskstate="Error"
@@ -143,7 +145,7 @@ class TaskPartZooscanImport(AsyncTask):
         # if Prj.CheckRight(2)==False:
         #     return PrintInCharte("ACCESS DENIED for this project");
         self.param.pprojid = gvg("p")
-        dbsample = database.GetAssoc("""select profileid,psampleid,filename,stationid,firstimage,lastimg,lastimgused,comment,histobrutavailable
+        dbsample = GetAssoc("""select profileid,psampleid,filename,stationid,firstimage,lastimg,lastimgused,comment,histobrutavailable
               ,(select count(*) from part_histopart_det where psampleid=s.psampleid) nbrlinedet
               ,(select count(*) from part_histopart_reduit where psampleid=s.psampleid) nbrlinereduit
               ,(select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo

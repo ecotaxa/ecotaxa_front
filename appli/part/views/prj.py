@@ -12,8 +12,8 @@ from . import sampleedit
 import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
 import appli.part.funcs.uvp_sample_import as uvp_sample_import
 from appli import app, database, gvg, gvp, ErrorFormat
-from appli.database import GetAll
 from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_STORAGE_URL, PART_URL
+from ..db_utils import ExecSQL, GetAll
 
 
 @part_app.route('/prj/')
@@ -59,7 +59,7 @@ def part_prj_vpgraph(PrjId, offset):
         return part_PrintInCharte(ErrorFormat("Access Denied"))
     g.headcenter = "<h4>Particle Project %s : %s</h4><a href='%sprj/%s'>Project home</a>" % (
         Prj['projid'], Prj['ptitle'], PART_URL, Prj['pprojid'],)
-    dbsample = database.GetAll("""select psampleid,filename,profileid from part_samples s where pprojid=%s
+    dbsample = GetAll("""select psampleid,filename,profileid from part_samples s where pprojid=%s
           ORDER BY filename desc limit 50 OFFSET %s 
           """ % (PrjId, offset))
     txt = """<style>
@@ -101,7 +101,7 @@ def part_prj_main(PrjId):
         return part_PrintInCharte(ErrorFormat("Access Denied"))
     g.headcenter = "<h4>Particle Project %s : %s</h4><a href='%s'>Particle Module Home</a>" % (
         Prj['projid'], Prj['ptitle'], PART_URL)
-    dbsample = database.GetAll("""select profileid,psampleid,organizedbydeepth,filename,stationid,firstimage,lastimg,lastimgused,sampleid
+    dbsample = GetAll("""select profileid,psampleid,organizedbydeepth,filename,stationid,firstimage,lastimg,lastimgused,sampleid
           ,histobrutavailable,comment,daterecalculhistotaxo,ctd_import_datetime,sampledate,imp_descent_filtered_row,imp_removed_empty_slice
           ,(select count(*) from part_histopart_det where psampleid=s.psampleid) nbrlinedet
           ,(select count(*) from part_histopart_reduit where psampleid=s.psampleid) nbrlinereduit
@@ -149,12 +149,12 @@ def ComputeHistoRed(psampleid, instrumtype):
 
 def ComputeZooMatch(psampleid, projid):
     if projid is not None:
-        ecosample = database.GetAll("""select samples.sampleid from samples
+        ecosample = GetAll("""select samples.sampleid from samples
                                         join part_samples ps on psampleid=%s
                                         where samples.projid=%s and samples.orig_id=ps.profileid""",
                                     (psampleid, int(projid)))
         if len(ecosample) == 1:
-            database.ExecSQL("update part_samples set sampleid=%s where psampleid=%s",
+            ExecSQL("update part_samples set sampleid=%s where psampleid=%s",
                              (ecosample[0]['sampleid'], psampleid))
             return " Matched"
         else:
@@ -177,14 +177,14 @@ def ComputeZooHisto(psampleid, instrumtype):
 
 def GlobalTaxoCompute():
     # Sample Particule sans liens etabli avec Zoo qui sont liables
-    Samples = database.GetAll("""select ps.psampleid,pp.projid from samples
+    Samples = GetAll("""select ps.psampleid,pp.projid from samples
             join part_samples ps on samples.orig_id=ps.profileid
             join part_projects pp on ps.pprojid = pp.pprojid and samples.projid=pp.projid
             where ps.sampleid is null""")
     for S in Samples:
         logging.info("Matching %s %s", S['psampleid'], ComputeZooMatch(S['psampleid'], S['projid']))
     # sample ayant un objet qui à été classifié depuis le dernier calcul de l'histogramme
-    Samples = database.GetAll("""select psampleid, daterecalculhistotaxo,pp.instrumtype
+    Samples = GetAll("""select psampleid, daterecalculhistotaxo,pp.instrumtype
                 from part_samples ps
                 join part_projects pp on ps.pprojid = pp.pprojid 
                 where ps.sampleid is not null
@@ -214,7 +214,7 @@ def part_prjcalc(PrjId):
     app.logger.info("CheckedSampleList=%s", CheckedSampleList)
     app.logger.info("dohistodet=%s,domatchecotaxa=%s,dohistotaxo=%s", gvp('dohistodet'), gvp('domatchecotaxa'),
                     gvp('dohistotaxo'))
-    dbsample = database.GetAll("""select profileid,psampleid,filename,sampleid,histobrutavailable
+    dbsample = GetAll("""select profileid,psampleid,filename,sampleid,histobrutavailable
           ,(select count(*) from part_histopart_det where psampleid=s.psampleid) nbrlinedet
           from part_samples s
           where pprojid=%s and psampleid = any (%s)""", (PrjId, CheckedSampleList))

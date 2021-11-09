@@ -1,16 +1,16 @@
-from pathlib import Path
-
-import numpy as np
-
-from appli.part import database as partdatabase
 import csv
 import datetime
 import io
 import math
 import zipfile
-from appli import database
+from pathlib import Path
+
+import numpy as np
+
 from appli import db, app, EncodeEqualList
+from appli.part import database as partdatabase
 from appli.part.constants import CTDFixedCol
+from ..db_utils import ExecSQL, GetAll
 
 
 # Purge les espace et converti le Nan en vide
@@ -51,9 +51,9 @@ def GenerateReducedParticleHistogram(psampleid):
     :param psampleid:
     :return:
     """
-    if database.GetAll("select count(*) from part_histopart_det where psampleid=" + str(psampleid))[0][0] <= 0:
+    if GetAll("select count(*) from part_histopart_det where psampleid=" + str(psampleid))[0][0] <= 0:
         return "<span style='color: red;'>Reduced Histogram can't be computer without Detailed histogram</span>"
-    database.ExecSQL("delete from part_histopart_reduit where psampleid=" + str(psampleid))
+    ExecSQL("delete from part_histopart_reduit where psampleid=" + str(psampleid))
     sql = """insert into part_histopart_reduit(psampleid, lineno, depth,datetime,  watervolume
     , class01, class02, class03, class04, class05, class06, class07, class08, class09, class10, class11, class12, class13, class14, class15
     , biovol01, biovol02, biovol03, biovol04, biovol05, biovol06, biovol07, biovol08, biovol09, biovol10, biovol11, biovol12, biovol13, biovol14, biovol15
@@ -90,7 +90,7 @@ def GenerateReducedParticleHistogram(psampleid):
       coalesce(biovol40,0)+coalesce(biovol41,0)+coalesce(biovol42,0) as bv14, 
       coalesce(biovol43,0)+coalesce(biovol44,0)+coalesce(biovol45,0) as bv15
     from part_histopart_det where psampleid=""" + str(psampleid)
-    database.ExecSQL(sql)
+    ExecSQL(sql)
     return " reduced Histogram computed"
 
 
@@ -156,7 +156,7 @@ def ImportCTD(psampleid, user_name, user_email):
                 raise Exception("ImportCTD: Too much CTD data, column %s skipped" % c)
         Mapping.append(Target)
     app.logger.info("Mapping = %s", Mapping)
-    database.ExecSQL("delete from part_ctd where psampleid=%s" % psampleid)
+    ExecSQL("delete from part_ctd where psampleid=%s" % psampleid)
     for i, r in enumerate(Rdr):
         cl = partdatabase.part_ctd()
         cl.psampleid = psampleid

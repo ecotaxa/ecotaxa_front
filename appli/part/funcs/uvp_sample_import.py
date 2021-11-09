@@ -5,8 +5,9 @@ import numpy as np, zipfile, configparser, io, bz2, sys
 import matplotlib.pyplot as plt
 from appli import database
 from appli.part.constants import PartDetClassLimit
-from appli.part.funcs.common_sample_import import CleanValue, ToFloat, GetTicks, GenerateReducedParticleHistogram
-from appli.part.tasks.importcommon import ConvTextDegreeToDecimalDegree, calcpixelfromesd_aa_exp
+from ..db_utils import ExecSQL, GetAll, GetAssoc
+from ..funcs.common_sample_import import CleanValue, ToFloat, GetTicks, GenerateReducedParticleHistogram
+from ..tasks.importcommon import ConvTextDegreeDotMinuteToDecimalDegree, calcpixelfromesd_aa_exp
 
 
 def CreateOrUpdateSample(pprojid, headerdata):
@@ -37,9 +38,8 @@ def CreateOrUpdateSample(pprojid, headerdata):
     m = re.search("(\d{4})(\d{2})(\d{2})-?(\d{2})(\d{2})(\d{2})?",
                   sampledatetxt)  # YYYYMMDD-HHMMSS avec tiret central et secondes optionnelles
     Sample.sampledate = datetime.datetime(*[int(x) if x else 0 for x in m.group(1, 2, 3, 4, 5, 6)])
-    Sample.latitude = ConvTextDegreeToDecimalDegree(headerdata['latitude'],
-                                                    False)  # false car dans les fichiers UVP historique c'est la notation degree.minute
-    Sample.longitude = ConvTextDegreeToDecimalDegree(headerdata['longitude'], False)
+    Sample.latitude = ConvTextDegreeDotMinuteToDecimalDegree(headerdata['latitude'])  # dans les fichiers UVP historique c'est la notation degree.minute
+    Sample.longitude = ConvTextDegreeDotMinuteToDecimalDegree(headerdata['longitude'])
     Sample.organizedbydeepth = headerdata.get('sampletype',
                                               'P') == 'P'  # Nouvelle colonne optionnel, par défaut organisé par (P)ression
     # 2020-05-01 : ce champ est à present actualisé lors du traitement du sample
@@ -809,7 +809,7 @@ def GenerateParticleHistogram(psampleid):
     Fig.savefig(GetPathForImportGraph(psampleid, 'particle'))
     Fig.clf()
 
-    database.ExecSQL("delete from part_histopart_det where psampleid=" + str(psampleid))
+    ExecSQL("delete from part_histopart_det where psampleid=" + str(psampleid))
     sql = """insert into part_histopart_det(psampleid, lineno, depth,  watervolume,datetime
         , class01, class02, class03, class04, class05, class06, class07, class08, class09, class10, class11, class12, class13, class14
         , class15, class16, class17, class18, class19, class20, class21, class22, class23, class24, class25, class26, class27, class28, class29
@@ -847,7 +847,7 @@ def GenerateParticleHistogram(psampleid):
             sqlparam['class%02d' % (k + 1)] = PartByClassAndTranche[k, i]
         for k in range(0, 45):
             sqlparam['biovol%02d' % (k + 1)] = BioVolByClassAndTranche[k, i]
-        database.ExecSQL(sql, sqlparam)
+        ExecSQL(sql, sqlparam)
 
     GenerateReducedParticleHistogram(psampleid)
 
@@ -865,6 +865,7 @@ def GenerateTaxonomyHistogram(psampleid):
     if UvpSample.sampleid is None:
         raise Exception("GenerateTaxonomyHistogram: Ecotaxa sampleid required in Sample %d " % psampleid)
     pixel = UvpSample.acq_pixel
+    # Lire le projet EcoTaxa correspondant
     EcoPrj = database.Projects.query.filter_by(projid=Prj.projid).first()
     if EcoPrj is None:
         raise Exception("GenerateTaxonomyHistogram: Ecotaxa project %d missing" % Prj.projid)
@@ -883,12 +884,12 @@ def GenerateTaxonomyHistogram(psampleid):
     if DepthOffset is None:
         DepthOffset = 0
 
-    # LstTaxo=database.GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,avg({areacol}) as avgarea,count(*) nbr
+    # LstTaxo=GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,avg({areacol}) as avgarea,count(*) nbr
     #             from objects
     #             WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL and classif_qual='V'
     #             group by classif_id,floor((depth_min+{DepthOffset})/5)"""
     #                         .format(sampleid=UvpSample.sampleid,areacol=areacol,DepthOffset=DepthOffset))
-    LstTaxoDet = database.GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,{areacol} areacol
+    LstTaxoDet = GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,{areacol} areacol
                 from objects
                 WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL and classif_qual='V'
                 """
@@ -904,12 +905,12 @@ def GenerateTaxonomyHistogram(psampleid):
         biovolume = pow(esd / 2, 3) * 4 * math.pi / 3
         LstTaxo[cle]['bvsum'] += biovolume
 
-    LstVol = database.GetAssoc(
+    LstVol = GetAssoc(
         """select cast(round((depth-2.5)/5) as INT) tranche,watervolume from part_histopart_reduit where psampleid=%s""" % psampleid)
     # 0 Taxoid, tranche
     # TblTaxo=np.empty([len(LstTaxo),4])
-    database.ExecSQL("delete from part_histocat_lst where psampleid=%s" % psampleid)
-    database.ExecSQL("delete from part_histocat where psampleid=%s" % psampleid)
+    ExecSQL("delete from part_histocat_lst where psampleid=%s" % psampleid)
+    ExecSQL("delete from part_histocat where psampleid=%s" % psampleid)
     sql = """insert into part_histocat(psampleid, classif_id, lineno, depth, watervolume, nbr, avgesd, totalbiovolume)
             values({psampleid},{classif_id},{lineno},{depth},{watervolume},{nbr},{avgesd},{totalbiovolume})"""
     for r in LstTaxo.values():
@@ -918,14 +919,14 @@ def GenerateTaxonomyHistogram(psampleid):
         watervolume = 'NULL'
         if r['tranche'] in LstVol:
             watervolume = LstVol[r['tranche']]['watervolume']
-        database.ExecSQL(sql.format(
+        ExecSQL(sql.format(
             psampleid=psampleid, classif_id=r['classif_id'], lineno=r['tranche'], depth=r['tranche'] * 5 + 2.5,
             watervolume=watervolume
             , nbr=r['nbr'], avgesd=avgesd, totalbiovolume=biovolume))
-    database.ExecSQL("""insert into part_histocat_lst(psampleid, classif_id) 
+    ExecSQL("""insert into part_histocat_lst(psampleid, classif_id) 
             select distinct psampleid,classif_id from part_histocat where psampleid=%s""" % psampleid)
 
-    database.ExecSQL("""update part_samples set daterecalculhistotaxo=current_timestamp  
+    ExecSQL("""update part_samples set daterecalculhistotaxo=current_timestamp  
             where psampleid=%s""" % psampleid)
 
     # TblTaxo[i,0:2]=r['avgarea'],r['nbr']

@@ -1,7 +1,7 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import appli.part.views.prj
-from appli.part.database import ComputeOldestSampleDateOnProject
+from appli.part.funcs.nightly import ComputeOldestSampleDateOnProject
 
 if __name__ == "__main__":
     # RefreshTaxoStat()

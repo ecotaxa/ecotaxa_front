@@ -12,6 +12,7 @@ import appli.part.views.prj
 import appli.part.funcs.uvp_sample_import as sample_import
 from appli import database, gvp
 from appli.database import db
+from ..db_utils import ExecSQL
 from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
 
 
@@ -88,7 +89,7 @@ def delete_sample(psampleid):
         RawHistoFile.unlink()
     model = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     for t in ('part_histopart_reduit', 'part_histopart_det', 'part_histocat', 'part_histocat_lst', 'part_ctd'):
-        database.ExecSQL("delete from " + t + " where psampleid=" + str(model.psampleid))
+        ExecSQL("delete from " + t + " where psampleid=" + str(model.psampleid))
     db.session.delete(model)
     db.session.commit()
 

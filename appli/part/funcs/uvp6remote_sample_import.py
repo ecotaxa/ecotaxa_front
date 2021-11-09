@@ -1,23 +1,24 @@
+import csv
+import datetime
+import io
+import logging
 import os
+import re
+import shutil
 import ssl
+import tempfile
 import urllib.request
+import zipfile
 from ftplib import FTP
 from html.parser import HTMLParser
 
-import io
 import numpy as np
 
 import appli.part.database as partdatabase
 import appli.part.funcs.uvp_sample_import as uvp_sample_import
-import csv
-import datetime
-import logging
-import re
-import shutil
-import tempfile
-import zipfile
-from appli import db, database, ntcv
-from appli.part.funcs.common_sample_import import ToFloat, GenerateReducedParticleHistogram
+from appli import db, ntcv
+from ..db_utils import ExecSQL, GetAll
+from ..funcs.common_sample_import import ToFloat, GenerateReducedParticleHistogram
 
 
 class ATagParser(HTMLParser):
@@ -266,7 +267,7 @@ def GenerateParticleHistogram(psampleid):
                         HistoByTranche[Tranche]['NbrParClasse'][classe] += NbrParClasse[classe]
             logging.info("Line count %d" % NbrLine)
 
-            database.ExecSQL("delete from part_histopart_det where psampleid=" + str(psampleid))
+            ExecSQL("delete from part_histopart_det where psampleid=" + str(psampleid))
             sql = """insert into part_histopart_det(psampleid, lineno, depth,  watervolume,datetime
                 , class17, class18, class19, class20, class21, class22, class23, class24, class25, class26, class27, class28, class29
                 , class30, class31, class32, class33, class34)
@@ -287,7 +288,7 @@ def GenerateParticleHistogram(psampleid):
 
                 for classe in range(18):
                     sqlparam['class%02d' % (17 + classe)] = HistoByTranche[Tranche]['NbrParClasse'][classe]
-                database.ExecSQL(sql, sqlparam)
+                ExecSQL(sql, sqlparam)
     GenerateReducedParticleHistogram(psampleid)
 
 
@@ -320,7 +321,7 @@ def GenerateTaxonomyHistogram(psampleid):
             InClause = ','.join([str(x) for x in TaxoIds if x > 0])
             if InClause == '':
                 raise Exception("GenerateTaxonomyHistogram: Sample %d no valid category_name_" % psampleid)
-            TaxoDB = [int(x['id']) for x in database.GetAll("select id from taxonomy where id in(%s)" % (InClause,))]
+            TaxoDB = [int(x['id']) for x in GetAll("select id from taxonomy where id in(%s)" % (InClause,))]
             for i in range(40):
                 if TaxoIds[i] > 0:
                     if TaxoIds[i] not in TaxoDB:
@@ -367,8 +368,8 @@ def GenerateTaxonomyHistogram(psampleid):
                             classe]
             logging.info("Line count %d" % NbrLine)
 
-            database.ExecSQL("delete from part_histocat_lst where psampleid=%s" % psampleid)
-            database.ExecSQL("delete from part_histocat where psampleid=%s" % psampleid)
+            ExecSQL("delete from part_histocat_lst where psampleid=%s" % psampleid)
+            ExecSQL("delete from part_histocat where psampleid=%s" % psampleid)
             sql = """INSERT INTO part_histocat(psampleid, classif_id, lineno, depth, watervolume, nbr, avgesd, totalbiovolume)
                     VALUES(%(psampleid)s,%(classif_id)s,%(lineno)s,%(depth)s,%(watervolume)s,%(nbr)s,%(avgesd)s,%(totalbiovolume)s)"""
             sqlparam = {'psampleid': psampleid}
@@ -383,8 +384,8 @@ def GenerateTaxonomyHistogram(psampleid):
                         sqlparam['nbr'] = HistoByTranche[Tranche]['NbrParClasse'][classe]
                         sqlparam['avgesd'] = HistoByTranche[Tranche]['SizeParClasse'][classe]
                         sqlparam['totalbiovolume'] = None
-                        database.ExecSQL(sql, sqlparam)
-            database.ExecSQL("""insert into part_histocat_lst(psampleid, classif_id) 
+                        ExecSQL(sql, sqlparam)
+            ExecSQL("""insert into part_histocat_lst(psampleid, classif_id) 
             select distinct psampleid,classif_id from part_histocat where psampleid=%s""" % psampleid)
 
 

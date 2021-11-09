@@ -5,9 +5,9 @@ import numpy as np
 import appli.part.database as partdatabase
 import csv
 import logging
-from appli import database
 from appli import db, app
 from appli.part.constants import PartDetClassLimit
+from ..db_utils import ExecSQL
 from appli.part.funcs.common_sample_import import CleanValue, ToFloat, GenerateReducedParticleHistogram
 
 
@@ -139,7 +139,7 @@ def GenerateParticleHistogram(psampleid):
             HistoByTranche[Tranche, 0] += 1
     HistoByTranche[:, 1:46] /= HistoByTranche[:, 0, np.newaxis]
 
-    database.ExecSQL("delete from part_histopart_det where psampleid=" + str(psampleid))
+    ExecSQL("delete from part_histopart_det where psampleid=" + str(psampleid))
     sql = """insert into part_histopart_det(psampleid, lineno, depth,  watervolume
         , biovol01, biovol02, biovol03, biovol04, biovol05, biovol06, biovol07, biovol08, biovol09, biovol10, biovol11, biovol12, biovol13, biovol14
         , biovol15, biovol16, biovol17, biovol18, biovol19, biovol20, biovol21, biovol22, biovol23, biovol24, biovol25, biovol26, biovol27, biovol28, biovol29
@@ -158,6 +158,6 @@ def GenerateParticleHistogram(psampleid):
         # sqlparam['watervolume'] = VolumeParTranche[i]
         for k in range(0, 45):
             sqlparam['biovol%02d' % (k + 1)] = r[k + 1]
-        database.ExecSQL(sql, sqlparam)
+        ExecSQL(sql, sqlparam)
 
     GenerateReducedParticleHistogram(psampleid)

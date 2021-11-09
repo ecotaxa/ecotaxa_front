@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from appli import db,app,g
-from sqlalchemy.dialects.postgresql import BIGINT,FLOAT,VARCHAR,DATE,TIME,DOUBLE_PRECISION,INTEGER,CHAR,TIMESTAMP
-from sqlalchemy import Index,Sequence,func
-from appli.database import ExecSQL
+from sqlalchemy import Index
+from sqlalchemy.dialects.postgresql import BIGINT, VARCHAR, DOUBLE_PRECISION, INTEGER, CHAR, TIMESTAMP
+
+from appli import db
+
 
 class part_projects(db.Model):
     __tablename__ = 'part_projects'
@@ -211,9 +212,3 @@ for i in range(1, 21):
     setattr(part_ctd, "extrames%02d" % i, db.Column(DOUBLE_PRECISION))
 
 
-def ComputeOldestSampleDateOnProject():
-    # EcoPart stats update
-    ExecSQL("update part_projects pp  "
-            "   set oldestsampledate=(select min(sampledate) "
-            "                          from part_samples ps "
-            "                         where ps.pprojid=pp.pprojid)")
