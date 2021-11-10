@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import List, Dict
+
 from appli import db, app, database, gvp, gvg, DecodeEqualList, ntcv
 from flask import render_template, g, flash, request
 import logging, os, datetime
@@ -6,15 +8,15 @@ import zipfile, psycopg2.extras
 from flask_login import current_user
 from pathlib import Path
 
-from ..db_utils import GetAssoc2Col
-from ..ecopart_blueprint import PART_URL
+from ..db_utils import GetAssoc2Col, GetAll, GetAssoc
+from ..ecopart_blueprint import PART_URL, ECOTAXA_URL
 from .taskmanager import AsyncTask
-from appli.database import GetAll, GetAssoc
-from appli.part.views.part_main import GetFilteredSamples, PartstatsampleGetData
+from ..remote import EcoTaxaInstance
+from ..views.part_main import GetFilteredSamples, PartstatsampleGetData
 from appli.part import GetClassLimitTxt, GetPartClassLimitListText
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
 from ..funcs import uvp_sample_import as uvp_sample_import
-from appli.part.views.drawchart import GetTaxoHistoWaterVolumeSQLExpr
+from ..views.drawchart import GetTaxoHistoWaterVolumeSQLExpr
 import bz2, shutil
 
 
@@ -74,7 +76,7 @@ class TaskPartExport(AsyncTask):
         for O in self.OwnerList:
             f.write("//<Owner1>{}</Owner1>\n".format(O))
 
-    def CreateRED(self):
+    def CreateREDuced(self):
         logging.info("CreateRED Input Param = %s" % (self.param.__dict__))
         AsODV = (self.param.fileformat == 'ODV')
         samples = self.GetSamples()
@@ -194,56 +196,21 @@ class TaskPartExport(AsyncTask):
         f = None
         TaxoList = self.param.redfiltres.get('taxo', [])
         # On liste les categories pour fixer les colonnes de l'export
-        # if self.param.redfiltres.get('taxochild','')=='1' and len(TaxoList)>0:
         if len(TaxoList) > 0:
-            # c'est la liste des taxo passées en paramètres
-            sqllstcat = """select t.id,concat(t.name,'('||t1.name||')') nom
-        , rank() over (order by t14.name,t13.name,t12.name,t11.name,t10.name,t9.name,t8.name,t7.name,t6.name,t5.name,t4.name,t3.name,t2.name,t1.name,t.name)-1 idx
-,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
-     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t.name) tree
-                        from taxonomy t 
-                        left join taxonomy t1 on t.parent_id=t1.id
-                        left join taxonomy t2 on t1.parent_id=t2.id
-                        left join taxonomy t3 on t2.parent_id=t3.id
-                        left join taxonomy t4 on t3.parent_id=t4.id
-                        left join taxonomy t5 on t4.parent_id=t5.id
-                        left join taxonomy t6 on t5.parent_id=t6.id
-                        left join taxonomy t7 on t6.parent_id=t7.id
-                        left join taxonomy t8 on t7.parent_id=t8.id
-                        left join taxonomy t9 on t8.parent_id=t9.id
-                        left join taxonomy t10 on t9.parent_id=t10.id
-                        left join taxonomy t11 on t10.parent_id=t11.id
-                        left join taxonomy t12 on t11.parent_id=t12.id
-                        left join taxonomy t13 on t12.parent_id=t13.id
-                        left join taxonomy t14 on t13.parent_id=t14.id
-                        where t.id in ({0})
-                        """.format(",".join([str(x) for x in TaxoList]))
-            logging.info("sqllstcat = %s" % sqllstcat)
+            # c'est la liste des taxo passée en paramètre
+            classif_ids = [int(x) for x in TaxoList]
+            logging.info("classif_ids from params = %s" % classif_ids)
         else:
+            # on liste les taxo de tous les samples concernés
             SampleIdsForTaxoExport = [str(x[0]) for x in self.param.samples if x[3][1] == 'Y']
             if len(SampleIdsForTaxoExport) == 0:
                 SampleIdsForTaxoExport = ['-1']
-            sqllstcat = """select t.id,concat(t.name,'('||t1.name||')') nom
-            , rank() over (order by t14.name,t13.name,t12.name,t11.name,t10.name,t9.name,t8.name,t7.name,t6.name,t5.name,t4.name,t3.name,t2.name,t1.name,t.name)-1 idx
-,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
-     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t.name) tree
-                    from (select distinct classif_id from part_histocat where psampleid in ( {0}) {1} ) cat
-                    join taxonomy t on cat.classif_id=t.id
-                    left join taxonomy t1 on t.parent_id=t1.id
-                    left join taxonomy t2 on t1.parent_id=t2.id
-                    left join taxonomy t3 on t2.parent_id=t3.id
-                    left join taxonomy t4 on t3.parent_id=t4.id
-                    left join taxonomy t5 on t4.parent_id=t5.id
-                    left join taxonomy t6 on t5.parent_id=t6.id
-                    left join taxonomy t7 on t6.parent_id=t7.id
-                    left join taxonomy t8 on t7.parent_id=t8.id
-                    left join taxonomy t9 on t8.parent_id=t9.id
-                    left join taxonomy t10 on t9.parent_id=t10.id
-                    left join taxonomy t11 on t10.parent_id=t11.id
-                    left join taxonomy t12 on t11.parent_id=t12.id
-                    left join taxonomy t13 on t12.parent_id=t13.id
-                    left join taxonomy t14 on t13.parent_id=t14.id
-                    """.format((",".join(SampleIdsForTaxoExport)), DepthFilter)
+            sql_cats_dans_samples = "select distinct classif_id from part_histocat where psampleid in ({0}) {1}" \
+                .format((",".join(SampleIdsForTaxoExport)), DepthFilter)
+            classif_ids = [x for x, in GetAll(sql_cats_dans_samples)]
+            logging.info("classif_ids from samples = %s" % classif_ids)
+        lstcat = self.ecotaxa_if.get_taxo3(classif_ids)
+        logging.info("lstcat = %s" % lstcat)
             # x[3][1]==Y ==> Zoo exportable
         if self.param.redfiltres.get('taxochild', '') == '1' and len(TaxoList) > 0:
             sqlTaxoTreeFrom = " \njoin taxonomy t0 on h.classif_id=t0.id "
@@ -270,7 +237,7 @@ class TaskPartExport(AsyncTask):
                 from part_histocat h where psampleid=%(psampleid)s {0}
                 group by classif_id,tranche
                 order by tranche """.format(DepthFilter, GetTaxoHistoWaterVolumeSQLExpr('depth', 'middle'))
-        lstcat = GetAssoc(sqllstcat)
+
         if AsODV:  # ------------ RED Categories AS ODV
             nomfichier = BaseFileName + "_ZOO_odv.txt"
             fichier = os.path.join(self.GetWorkingDir(), nomfichier)
@@ -282,7 +249,8 @@ class TaskPartExport(AsyncTask):
                     HeaderSuffix = "w/ children"
                 else:
                     HeaderSuffix = "w/o children"
-                LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
+                LstHead:List[Dict] = sorted(lstcat.values(), key=lambda cat: cat['tree'])
+                self._add_idx_in_category_list(LstHead)
                 for v in LstHead:
                     f.write(";%s %s [# m-3]" % (v['nom'], HeaderSuffix))
                 for v in LstHead:
@@ -292,7 +260,7 @@ class TaskPartExport(AsyncTask):
                 f.write("\n")
                 for S in samples:
                     if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
-                        continue  # pas les permission d'exporter le ZOO de ce sample le saute
+                        continue  # pas les permission d'exporter le ZOO de ce sample on le saute
                     L = [S['cruise'], S['site'], S['station'], S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['instrumsn'], S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude']]
                     t = [None for i in range(3 * len(lstcat))]
@@ -327,13 +295,14 @@ class TaskPartExport(AsyncTask):
                             L = ['', '', '', '', '', '', '', '', '', '', '']
             zfile.write(nomfichier)
         else:  # ------------ RED Categories AS TSV
+            # TODO: Much copy/paste from above.
             ZooFileParStation = {}
             if self.param.aggregatefiles:  # Un seul fichier avec tous les fichiers aggrégés dedans
                 nomfichier = BaseFileName + "_ZOO_Aggregated.tsv"
             CreateFile = True
             for S in samples:
                 if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
-                    continue  # pas les permission d'exporter le ZOO de ce sample le saute
+                    continue  # pas la permission d'exporter le ZOO de ce sample on le saute
                 CatHisto = GetAll(sqlhisto, {'psampleid': S["psampleid"]})
                 if len(CatHisto) == 0: continue  # on ne genere pas les fichiers vides.
                 if not self.param.aggregatefiles:
@@ -348,7 +317,8 @@ class TaskPartExport(AsyncTask):
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume [L]")
                     if self.param.aggregatefiles:
                         f.write("\tProject")
-                    LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
+                    LstHead = sorted(lstcat.values(), key=lambda cat: cat['tree'])
+                    self._add_idx_in_category_list(LstHead)
                     for v in LstHead:
                         f.write("\t%s [# m-3]" % (v['tree']))
                     for v in LstHead:
@@ -413,7 +383,12 @@ class TaskPartExport(AsyncTask):
                     f.write("\n")
             zfile.write(nomfichier)
 
-    def CreateDET(self):
+    def _add_idx_in_category_list(self, LstHead):
+        """ Rajoute une clef d'ordre dans chaque dictionnaire de la liste triée """
+        for v, ndx in zip(LstHead, range(len(LstHead))):
+            v['idx'] = ndx
+
+    def CreateDETailed(self):
         logging.info("CreateDET Input Param = %s" % (self.param.__dict__,))
         AsODV = (self.param.fileformat == 'ODV')
         # Prj=partdatabase.part_projects.query.filter_by(pprojid=self.param.pprojid).first()
@@ -542,7 +517,7 @@ class TaskPartExport(AsyncTask):
         sqllstcat = """select distinct classif_id from part_histocat hc where psampleid in ({0}) {1} 
                             """.format((",".join(SampleIdsForTaxoExport)), DepthFilter)
         # x[3][1]==Y ==> Zoo exportable
-        if self.param.excludenotliving:  # On ne prend que ceux qui ne sont pas desendant de not-living
+        if self.param.excludenotliving:  # On ne prend que ceux qui ne sont pas descendants de not-living
             sqlTaxoTreeFrom = " \njoin taxonomy t0 on hc.classif_id=t0.id "
             for i in range(1, 15):
                 sqlTaxoTreeFrom += " \nleft join taxonomy t{0} on t{1}.parent_id=t{0}.id ".format(i, i - 1)
@@ -923,12 +898,13 @@ order by tree""".format(lstcatwhere)
 
     def SPStep1(self):
         logging.info("Input Param = %s" % (self.param.__dict__,))
+        self.ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, self.cookie)
         # dictionnaire par sample
         self.samplesdict = {int(x[0]): x for x in self.param.samples}
         if self.param.what == "RED":
-            self.CreateRED()
+            self.CreateREDuced()
         elif self.param.what == "DET":
-            self.CreateDET()
+            self.CreateDETailed()
         elif self.param.what == "RAW":
             self.CreateRAW()
         else:

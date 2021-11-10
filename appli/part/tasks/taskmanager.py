@@ -284,8 +284,8 @@ def TaskForceRestart(TaskID):
 def TaskClean(TaskID):
     part_AddTaskSummaryForTemplate()
     Msg = DoTaskClean(TaskID)
-    Msg += '<br><a href="%s/Task/listall"><span class="label label-info"> Back to Task List</span></a>' % PART_URL
-    return PrintInCharte(Msg)
+    Msg += '<br><a href="%sTask/listall"><span class="label label-info"> Back to Task List</span></a>' % PART_URL
+    return part_PrintInCharte(Msg)
 
 
 def DoTaskClean(TaskID):
