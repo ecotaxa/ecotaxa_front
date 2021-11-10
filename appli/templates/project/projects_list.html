@@ -66,12 +66,13 @@
       'instrument',
       'status',
       'objcount',
+      'nb_taxa',      
       'pctvalidated',
       'pctclassified',
       'license',
       'cnn_network_id',
       'comments',
-      'contact.email'
+      'user_Status'
       ]">
       <template #header>
         <div class="flex justify-content-between">
@@ -100,6 +101,12 @@
           <a :href="projLink(data.projid)">${ data.projid }</a>
         </template>
       </p-column>
+      <p-column field="user_Status" header="Your status" :sortable="true">
+        <template #filter="{ filterModel }">
+          <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by user status" />
+        </template>
+      </p-column>
       <p-column field="status" header="Proj. status" :sortable="true">
         <template #filter="{ filterModel }">
           <p-inputtext type="text" v-model="filterModel.value" class="p-column-filter"
@@ -110,6 +117,12 @@
         <template #filter="{ filterModel }">
           <p-inputnumber type="numeric" v-model="filterModel.value" class="p-column-filter"
             placeholder="Search by Nb. objects" />
+        </template>
+      </p-column>
+      <p-column field="nb_taxa" header="Nb. taxa" :sortable="true" data-type="numeric">
+        <template #filter="{ filterModel }">
+          <p-inputnumber type="numeric" v-model="filterModel.value" class="p-column-filter"
+            placeholder="Search by Nb. taxa" />
         </template>
       </p-column>
       <p-column field="pctvalidated" header="% validated" :sortable="true" data-type="numeric">
@@ -259,12 +272,14 @@
             title: filterDef,
             status: filterDef,
             objcount: filterDef,
+            nb_taxa: filterDef,
             pctvalidated: filterDef,
             pctclassified: filterDef,
             license: filterDef,
             cnn_network_id: filterDef,
             comments: filterDef,
             email: filterDef,
+            user_Status: filterDef
           };
         },
       }
