@@ -13,7 +13,7 @@ from ..ecopart_blueprint import PART_URL, ECOTAXA_URL
 from .taskmanager import AsyncTask
 from ..remote import EcoTaxaInstance
 from ..views.part_main import GetFilteredSamples, PartstatsampleGetData
-from appli.part import GetClassLimitTxt, GetPartClassLimitListText
+from .. import GetClassLimitTxt, GetPartClassLimitListText
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
 from ..funcs import uvp_sample_import as uvp_sample_import
 from ..views.drawchart import GetTaxoHistoWaterVolumeSQLExpr
@@ -507,30 +507,32 @@ class TaskPartExport(AsyncTask):
         TaxoList = self.param.redfiltres.get('taxo', [])
         # On liste les categories pour fixer les colonnes de l'export
         # liste toutes les cat pour les samples et la depth
+        # x[3][1]==Y ==> Zoo exportable
         SampleIdsForTaxoExport = [str(x[0]) for x in self.param.samples if x[3][1] == 'Y']
         if len(SampleIdsForTaxoExport) == 0:
             SampleIdsForTaxoExport = ['-1']
 
-        sqllstcat = """select distinct classif_id from part_histocat hc where psampleid in ({0}) {1} 
+        # TODO: dup code
+        sql_cats_dans_samples = """select distinct classif_id 
+                                     from part_histocat hc 
+                                     where psampleid in ({0}) {1} 
                             """.format((",".join(SampleIdsForTaxoExport)), DepthFilter)
-        # x[3][1]==Y ==> Zoo exportable
-        if self.param.excludenotliving:  # On ne prend que ceux qui ne sont pas descendants de not-living
-            sqlTaxoTreeFrom = " \njoin taxonomy t0 on hc.classif_id=t0.id "
-            for i in range(1, 15):
-                sqlTaxoTreeFrom += " \nleft join taxonomy t{0} on t{1}.parent_id=t{0}.id ".format(i, i - 1)
-            sqllstcat = sqllstcat.replace(" hc", " hc" + sqlTaxoTreeFrom)
-            for i in range(0, 15):
-                sqllstcat += " and (t{0}.id is null or t{0}.name!='not-living') ".format(i)
-
-        logging.info("sqllstcat = %s" % sqllstcat)
-        lstcatwhere = GetAll(sqllstcat)
-        if lstcatwhere:
-            lstcatwhere = ",".join(
-                (str(x[0]) for x in lstcatwhere))  # extraction de la 1ère colonne seulement et mise en format in
-        else:
-            lstcatwhere = "-1"
+        classif_ids = [x for x, in GetAll(sql_cats_dans_samples)]
+        if self.param.excludenotliving:
+            # On ne prend que ceux qui ne sont pas descendants de not-living
+            logging.info("classif_ids to filter: %s", sorted(classif_ids))
+            lstcat = self.ecotaxa_if.get_taxo2(classif_ids)
+            classif_ids = [a_cat["classif_id"]
+                           for a_cat in lstcat
+                           if not a_cat["tree"].startswith("not-living>")]
+            logging.info("Filtered classif_ids: %s", sorted(classif_ids))
+        if len(classif_ids) == 0:
+            # Défaut à 'rien ne matche'
+            classif_ids = [-1]
+        lstcatwhere = ",".join((str(x) for x in classif_ids))
         logging.info("lstcatwhere = %s" % lstcatwhere)
-        sqllstcat = """with RECURSIVE th(id ) AS (
+
+        sql_cats_dans_samples = """with RECURSIVE th(id ) AS (
     SELECT t.id
     FROM taxonomy t
     WHERE t.id IN ({0})
@@ -562,7 +564,7 @@ left join taxonomy t12 on t11.parent_id=t12.id
 left join taxonomy t13 on t12.parent_id=t13.id
 left join taxonomy t14 on t13.parent_id=t14.id )q
 order by tree""".format(lstcatwhere)
-        lstcat = GetAssoc(sqllstcat)
+        lstcat = GetAssoc(sql_cats_dans_samples)
         logging.info("lstcat = %s" % lstcat)
 
         sqlhisto = """select classif_id,lineno,psampleid,depth,watervolume ,avgesd,nbr,totalbiovolume from part_histocat h where psampleid=%(psampleid)s {0} and classif_id in ({1})
