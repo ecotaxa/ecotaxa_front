@@ -211,30 +211,27 @@ class TaskPartExport(AsyncTask):
             logging.info("classif_ids from samples = %s" % classif_ids)
         lstcat = self.ecotaxa_if.get_taxo3(classif_ids)
         logging.info("lstcat = %s" % lstcat)
-            # x[3][1]==Y ==> Zoo exportable
+        # x[3][1]==Y ==> Zoo exportable
         if self.param.redfiltres.get('taxochild', '') == '1' and len(TaxoList) > 0:
-            sqlTaxoTreeFrom = " \njoin taxonomy t0 on h.classif_id=t0.id "
-            for i in range(1, 15):
-                sqlTaxoTreeFrom += " \nleft join taxonomy t{0} on t{1}.parent_id=t{0}.id ".format(i, i - 1)
+            # Filtre sur les catégories, _avec aggrégation sur leurs enfants_
             sqlhisto = ""
             for taxo in TaxoList:
-                sqlTaxoTreeWhere = " and ( h.classif_id = {}  ".format(taxo)
-                for i in range(1, 15):
-                    sqlTaxoTreeWhere += " or t{0}.id= {1}".format(i, taxo)
-                sqlTaxoTreeWhere += ")"
+                child_classif_ids = [str(x) for x in self.ecotaxa_if.get_taxo_subtree(int(taxo))]
+                logging.info("%d descendants for %d", len(child_classif_ids), taxo)
+                sqlTaxoTreeWhere = " and h.classif_id in (" + ",".join(child_classif_ids) + ")"
                 if sqlhisto != "":
                     sqlhisto += " \nunion all\n "
                 sqlhisto += """select {1} as classif_id, h.psampleid,h.depth,h.lineno,h.avgesd,h.nbr,h.totalbiovolume ,h.watervolume
-                    from part_histocat h {2} 
-                    where psampleid=%(psampleid)s {0} {3} """.format(DepthFilter, taxo, sqlTaxoTreeFrom,
-                                                                     sqlTaxoTreeWhere)
+                    from part_histocat h
+                    where psampleid=%(psampleid)s {0} {2} """.format(DepthFilter, taxo, sqlTaxoTreeWhere)
             sqlhisto = """select classif_id,{0} as tranche ,avg(avgesd) avgesd,sum(nbr) nbr,sum(totalbiovolume) totalbiovolume 
                 from ({1}) q
                 group by classif_id,tranche
                 order by tranche """.format(GetTaxoHistoWaterVolumeSQLExpr('depth', 'middle'), sqlhisto)
         else:
             sqlhisto = """select classif_id,{1} as tranche ,avg(avgesd) avgesd,sum(nbr) nbr,sum(totalbiovolume) totalbiovolume 
-                from part_histocat h where psampleid=%(psampleid)s {0}
+                from part_histocat h 
+                where psampleid=%(psampleid)s {0}
                 group by classif_id,tranche
                 order by tranche """.format(DepthFilter, GetTaxoHistoWaterVolumeSQLExpr('depth', 'middle'))
 
@@ -249,7 +246,7 @@ class TaskPartExport(AsyncTask):
                     HeaderSuffix = "w/ children"
                 else:
                     HeaderSuffix = "w/o children"
-                LstHead:List[Dict] = sorted(lstcat.values(), key=lambda cat: cat['tree'])
+                LstHead: List[Dict] = sorted(lstcat.values(), key=lambda cat: cat['tree'])
                 self._add_idx_in_category_list(LstHead)
                 for v in LstHead:
                     f.write(";%s %s [# m-3]" % (v['nom'], HeaderSuffix))
