@@ -210,6 +210,7 @@ class TaskPartExport(AsyncTask):
             classif_ids = [x for x, in GetAll(sql_cats_dans_samples)]
             logging.info("classif_ids from samples = %s" % classif_ids)
         lstcat = self.ecotaxa_if.get_taxo3(classif_ids)
+        self._add_idx_in_category_dict(lstcat)
         logging.info("lstcat = %s" % lstcat)
         # x[3][1]==Y ==> Zoo exportable
         if self.param.redfiltres.get('taxochild', '') == '1' and len(TaxoList) > 0:
@@ -246,8 +247,7 @@ class TaskPartExport(AsyncTask):
                     HeaderSuffix = "w/ children"
                 else:
                     HeaderSuffix = "w/o children"
-                LstHead: List[Dict] = sorted(lstcat.values(), key=lambda cat: cat['tree'])
-                self._add_idx_in_category_list(LstHead)
+                LstHead: List[Dict] = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                 for v in LstHead:
                     f.write(";%s %s [# m-3]" % (v['nom'], HeaderSuffix))
                 for v in LstHead:
@@ -314,8 +314,7 @@ class TaskPartExport(AsyncTask):
                     f.write("Profile\tRawfilename\tyyyy-mm-dd hh:mm\tDepth [m]\tSampled volume [L]")
                     if self.param.aggregatefiles:
                         f.write("\tProject")
-                    LstHead = sorted(lstcat.values(), key=lambda cat: cat['tree'])
-                    self._add_idx_in_category_list(LstHead)
+                    LstHead = sorted(lstcat.values(), key=lambda cat: cat['idx'])
                     for v in LstHead:
                         f.write("\t%s [# m-3]" % (v['tree']))
                     for v in LstHead:
@@ -380,9 +379,10 @@ class TaskPartExport(AsyncTask):
                     f.write("\n")
             zfile.write(nomfichier)
 
-    def _add_idx_in_category_list(self, LstHead):
-        """ Rajoute une clef d'ordre dans chaque dictionnaire de la liste triée """
-        for v, ndx in zip(LstHead, range(len(LstHead))):
+    def _add_idx_in_category_dict(self, cats_dict):
+        """ Rajoute une clef d'ordre dans chaque dictionnaire valeur du dictionnaire """
+        cats_vals: List[Dict] = sorted(cats_dict.values(), key=lambda cat: cat['tree'])
+        for v, ndx in zip(cats_vals, range(len(cats_vals))):
             v['idx'] = ndx
 
     def CreateDETailed(self):
@@ -515,7 +515,7 @@ class TaskPartExport(AsyncTask):
         # TODO: dup code
         sql_cats_dans_samples = """select distinct classif_id 
                                      from part_histocat hc 
-                                     where psampleid in ({0}) {1} 
+                                    where psampleid in ({0}) {1} 
                             """.format((",".join(SampleIdsForTaxoExport)), DepthFilter)
         classif_ids_dans_samples = [x for x, in GetAll(sql_cats_dans_samples)]
         if self.param.excludenotliving:
@@ -534,16 +534,15 @@ class TaskPartExport(AsyncTask):
 
         # On récupère toutes les catégories parentes de toutes les catégories présentes
         lstcat = self.ecotaxa_if.get_taxo_all_parents(classif_ids_dans_samples)
-        cats_vals: List[Dict] = sorted(lstcat.values(), key=lambda cat: cat['tree'])
-        self._add_idx_in_category_list(cats_vals)
+        self._add_idx_in_category_dict(lstcat)
         logging.info("DET %s lstcat = %s" % (len(lstcat), lstcat))
 
         sql_histo = """select classif_id,lineno,psampleid,depth,watervolume ,avgesd,nbr,totalbiovolume 
         from part_histocat h 
         where psampleid=%(psampleid)s {0} and classif_id in ({1})
              """.format(DepthFilter, lstcatwhere)
-        # Ajout calcul des cumul sur les parents via un requete récursive qui duplique les données sur toutes la hierarchie
-        # Puis qui somme à chaque niveau
+        # Ajout calcul des cumul sur les parents via une requête récursive qui duplique les données sur toute la hiérarchie
+        # Puis qui aggrège à chaque niveau (somme/moyenne)
         sqlhisto = """with recursive t(classif_id,lineno,psampleid,depth,watervolume ,avgesd,nbr,totalbiovolume)   
               as ( {0} 
             union all
