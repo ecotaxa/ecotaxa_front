@@ -103,3 +103,13 @@ class EcoTaxaInstance(object):
             ret.extend(level_res)
             search = level_res.copy()
         return ret
+
+    def get_taxo_all_parents(self, classif_ids: List[int]) -> Dict[int, Dict[str, Any]]:
+        """
+            Get all parent categories + self, for the given ones, recursively until roots.
+        """
+        parent_ids = set()  # Use a set to avoid overlap
+        res = self.query_taxa_set(classif_ids)
+        for r in res:
+            parent_ids.update(r.id_lineage)
+        return self.get_taxo3(list(parent_ids))

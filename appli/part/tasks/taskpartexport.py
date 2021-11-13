@@ -373,8 +373,8 @@ class TaskPartExport(AsyncTask):
                          S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude'], S['acq_aa'],
                          S['acq_exp'], S['acq_pixel']]
                     L.append(BaseFileName + "_PAR_" + S['station'] + ".tsv")
-                    L.append(
-                        ZooFileParStation[S['station']] if S['station'] in ZooFileParStation else "no data available")
+                    L.append(ZooFileParStation[S['station']]
+                             if S['station'] in ZooFileParStation else "no data available")
                     L.append(S['ptitle'])
                     f.write("\t".join((str(ntcv(x)) for x in L)))
                     f.write("\n")
@@ -517,57 +517,30 @@ class TaskPartExport(AsyncTask):
                                      from part_histocat hc 
                                      where psampleid in ({0}) {1} 
                             """.format((",".join(SampleIdsForTaxoExport)), DepthFilter)
-        classif_ids = [x for x, in GetAll(sql_cats_dans_samples)]
+        classif_ids_dans_samples = [x for x, in GetAll(sql_cats_dans_samples)]
         if self.param.excludenotliving:
             # On ne prend que ceux qui ne sont pas descendants de not-living
-            logging.info("classif_ids to filter: %s", sorted(classif_ids))
-            lstcat = self.ecotaxa_if.get_taxo2(classif_ids)
-            classif_ids = [a_cat["classif_id"]
-                           for a_cat in lstcat
-                           if not a_cat["tree"].startswith("not-living>")]
-            logging.info("Filtered classif_ids: %s", sorted(classif_ids))
-        if len(classif_ids) == 0:
+            logging.info("classif_ids to filter: %s", sorted(classif_ids_dans_samples))
+            ecotaxa_cats = self.ecotaxa_if.get_taxo2(classif_ids_dans_samples)
+            classif_ids_dans_samples = [a_cat["classif_id"]
+                                        for a_cat in ecotaxa_cats
+                                        if not a_cat["tree"].startswith("not-living>")]
+            logging.info("Filtered classif_ids: %s", sorted(classif_ids_dans_samples))
+        if len(classif_ids_dans_samples) == 0:
             # Défaut à 'rien ne matche'
-            classif_ids = [-1]
-        lstcatwhere = ",".join((str(x) for x in classif_ids))
-        logging.info("lstcatwhere = %s" % lstcatwhere)
+            classif_ids_dans_samples = [-1]
+        lstcatwhere = ",".join((str(x) for x in classif_ids_dans_samples))
+        logging.info("DET lstcatwhere = %s" % lstcatwhere)
 
-        sql_cats_dans_samples = """with RECURSIVE th(id ) AS (
-    SELECT t.id
-    FROM taxonomy t
-    WHERE t.id IN ({0})
-union ALL
-select distinct tlink.parent_id
-from th join taxonomy tlink on tlink.id=th.id
-where tlink.parent_id is not null
-)
-select id,nom,rank() over (order by tree)-1 idx,tree
-from (
-SELECT t0.id,concat(t0.name,'('||t1.name||')') nom
-,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
-     t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) tree
-from
-(select distinct * from th) thd
-join taxonomy t0 on thd.id=t0.id
-left join taxonomy t1 on t0.parent_id=t1.id
-left join taxonomy t2 on t1.parent_id=t2.id
-left join taxonomy t3 on t2.parent_id=t3.id
-left join taxonomy t4 on t3.parent_id=t4.id
-left join taxonomy t5 on t4.parent_id=t5.id
-left join taxonomy t6 on t5.parent_id=t6.id
-left join taxonomy t7 on t6.parent_id=t7.id
-left join taxonomy t8 on t7.parent_id=t8.id
-left join taxonomy t9 on t8.parent_id=t9.id
-left join taxonomy t10 on t9.parent_id=t10.id
-left join taxonomy t11 on t10.parent_id=t11.id
-left join taxonomy t12 on t11.parent_id=t12.id
-left join taxonomy t13 on t12.parent_id=t13.id
-left join taxonomy t14 on t13.parent_id=t14.id )q
-order by tree""".format(lstcatwhere)
-        lstcat = GetAssoc(sql_cats_dans_samples)
-        logging.info("lstcat = %s" % lstcat)
+        # On récupère toutes les catégories parentes de toutes les catégories présentes
+        lstcat = self.ecotaxa_if.get_taxo_all_parents(classif_ids_dans_samples)
+        cats_vals: List[Dict] = sorted(lstcat.values(), key=lambda cat: cat['tree'])
+        self._add_idx_in_category_list(cats_vals)
+        logging.info("DET %s lstcat = %s" % (len(lstcat), lstcat))
 
-        sqlhisto = """select classif_id,lineno,psampleid,depth,watervolume ,avgesd,nbr,totalbiovolume from part_histocat h where psampleid=%(psampleid)s {0} and classif_id in ({1})
+        sql_histo = """select classif_id,lineno,psampleid,depth,watervolume ,avgesd,nbr,totalbiovolume 
+        from part_histocat h 
+        where psampleid=%(psampleid)s {0} and classif_id in ({1})
              """.format(DepthFilter, lstcatwhere)
         # Ajout calcul des cumul sur les parents via un requete récursive qui duplique les données sur toutes la hierarchie
         # Puis qui somme à chaque niveau
@@ -575,14 +548,14 @@ order by tree""".format(lstcatwhere)
               as ( {0} 
             union all
             select taxonomy.parent_id classif_id,t.lineno,t.psampleid,t.depth,t.watervolume ,t.avgesd,t.nbr,t.totalbiovolume
-            from taxonomy join t on taxonomy.id=t.classif_id
-            where taxonomy.parent_id is not null
+              from taxonomy join t on taxonomy.id=t.classif_id
+             where taxonomy.parent_id is not null
             )
             select classif_id,lineno,psampleid,depth,watervolume,
                   avg(avgesd) avgesd,sum(nbr) nbr,sum(totalbiovolume) totalbiovolume
             from t
             group by classif_id,lineno,psampleid,depth,watervolume              
-        """.format(sqlhisto)
+        """.format(sql_histo)
         sqlhisto += " order by lineno"
         if AsODV:
             nomfichier = BaseFileName + "_ZOO_odv.txt"
