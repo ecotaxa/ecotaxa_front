@@ -1,7 +1,7 @@
 #
 # Holder for interface with 'remote' system, namely EcoTaxa
 #
-from typing import List, Tuple, Dict, Any, Union
+from typing import List, Tuple, Dict, Any, Union, Optional
 
 from flask import Request
 from werkzeug.local import LocalProxy
@@ -65,6 +65,13 @@ class EcoTaxaInstance(object):
             return taxo
         return "%s(%s)" % (taxo, parent)
 
+    @staticmethod
+    def parent_id(id_lineage: List[int]) -> Optional[int]:
+        try:
+            return id_lineage[1]
+        except IndexError:  # no parent
+            return None
+
     def get_taxo2(self, classif_ids: List[int]) -> List[Dict[str, Any]]:
         """
             Return taxonomy information for given list of IDs, another format...
@@ -78,7 +85,11 @@ class EcoTaxaInstance(object):
             Return taxonomy information for given list of IDs, third format...
         """
         res = self.query_taxa_set(classif_ids)
-        return {r.id: {"id": r.id, "nom": self.parent_heses(r.lineage), "tree": self.lt_tree(r.lineage)}
+        lineage_of = self.lt_tree
+        parent_of = self.parent_id
+        return {r.id: {"id": r.id, "pid": parent_of(r.id_lineage),
+                       "nom": self.parent_heses(r.lineage),
+                       "tree": lineage_of(r.lineage)}
                 for r in res}
 
     def get_taxo_children(self, classif_ids: List[int], res: List[int]) -> None:
@@ -111,5 +122,6 @@ class EcoTaxaInstance(object):
         parent_ids = set()  # Use a set to avoid overlap
         res = self.query_taxa_set(classif_ids)
         for r in res:
+            # queried taxa appear in the id_lineage, so it's self+all parents
             parent_ids.update(r.id_lineage)
         return self.get_taxo3(list(parent_ids))

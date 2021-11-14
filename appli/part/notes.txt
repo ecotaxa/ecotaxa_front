@@ -6,7 +6,7 @@
 
 --------- TODO --------------
 
-- refs to taxonomy DB table (24 matches in 3 files)
+- refs to taxonomy DB table (20 matches in 3 files)
 
 - refs to database.Projects SQLAlchemy wrapper (2 matches)
 

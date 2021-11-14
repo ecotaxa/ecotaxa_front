@@ -529,31 +529,37 @@ class TaskPartExport(AsyncTask):
         if len(classif_ids_dans_samples) == 0:
             # Défaut à 'rien ne matche'
             classif_ids_dans_samples = [-1]
+
         lstcatwhere = ",".join((str(x) for x in classif_ids_dans_samples))
         logging.info("DET lstcatwhere = %s" % lstcatwhere)
 
-        # On récupère toutes les catégories parentes de toutes les catégories présentes
+        # On récupère toutes les catégories parentes de toutes les catégories présentes,
+        # car elles vont apparaître dans le résultat final
         lstcat = self.ecotaxa_if.get_taxo_all_parents(classif_ids_dans_samples)
         self._add_idx_in_category_dict(lstcat)
         logging.info("DET %s lstcat = %s" % (len(lstcat), lstcat))
 
-        sql_histo = """select classif_id,lineno,psampleid,depth,watervolume ,avgesd,nbr,totalbiovolume 
+        sql_histo = """select classif_id, lineno, psampleid, depth, watervolume, avgesd, nbr, totalbiovolume 
         from part_histocat h 
-        where psampleid=%(psampleid)s {0} and classif_id in ({1})
-             """.format(DepthFilter, lstcatwhere)
+        where psampleid=%(psampleid)s {0} and classif_id in ({1}) """.format(DepthFilter, lstcatwhere)
         # Ajout calcul des cumul sur les parents via une requête récursive qui duplique les données sur toute la hiérarchie
         # Puis qui aggrège à chaque niveau (somme/moyenne)
-        sqlhisto = """with recursive t(classif_id,lineno,psampleid,depth,watervolume ,avgesd,nbr,totalbiovolume)   
+        mini_taxo = ["(%s,%s)" % (r["id"], r["pid"] if r["pid"] else "NULL")
+                     for r in lstcat.values()]
+        sqlhisto = """WITH recursive subtaxo (id,parent_id) AS (VALUES %s),
+        """ % ",".join(mini_taxo)
+        sqlhisto += """    h4t(classif_id, lineno, psampleid, depth, watervolume, avgesd, nbr, totalbiovolume)   
               as ( {0} 
             union all
-            select taxonomy.parent_id classif_id,t.lineno,t.psampleid,t.depth,t.watervolume ,t.avgesd,t.nbr,t.totalbiovolume
-              from taxonomy join t on taxonomy.id=t.classif_id
-             where taxonomy.parent_id is not null
+            select txo.parent_id classif_id, h4t.lineno, h4t.psampleid, 
+                   h4t.depth, h4t.watervolume, h4t.avgesd, h4t.nbr, h4t.totalbiovolume
+              from subtaxo txo join h4t on txo.id = h4t.classif_id
+             where txo.parent_id is not null
             )
-            select classif_id,lineno,psampleid,depth,watervolume,
-                  avg(avgesd) avgesd,sum(nbr) nbr,sum(totalbiovolume) totalbiovolume
-            from t
-            group by classif_id,lineno,psampleid,depth,watervolume              
+            select classif_id, lineno, psampleid, 
+                   depth, watervolume, avg(avgesd) avgesd, sum(nbr) nbr, sum(totalbiovolume) totalbiovolume
+            from h4t
+            group by classif_id, lineno, psampleid, depth, watervolume              
         """.format(sql_histo)
         sqlhisto += " order by lineno"
         if AsODV:
