@@ -1,23 +1,27 @@
 # -*- coding: utf-8 -*-
+import bz2
+import datetime
+import logging
+import os
+import shutil
+import zipfile
+from pathlib import Path
 from typing import List, Dict
 
-from appli import db, app, database, gvp, gvg, DecodeEqualList, ntcv
+import psycopg2.extras
 from flask import render_template, g, flash, request
-import logging, os, datetime
-import zipfile, psycopg2.extras
 from flask_login import current_user
-from pathlib import Path
 
-from ..db_utils import GetAssoc2Col, GetAll, GetAssoc
-from ..ecopart_blueprint import PART_URL, ECOTAXA_URL
+from appli import db, app, gvp, gvg, DecodeEqualList, ntcv
 from .taskmanager import AsyncTask
-from ..remote import EcoTaxaInstance
-from ..views.part_main import GetFilteredSamples, PartstatsampleGetData
 from .. import GetClassLimitTxt, GetPartClassLimitListText
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
+from ..db_utils import GetAssoc2Col, GetAll
+from ..ecopart_blueprint import PART_URL, ECOTAXA_URL
 from ..funcs import uvp_sample_import as uvp_sample_import
+from ..remote import EcoTaxaInstance
 from ..views.drawchart import GetTaxoHistoWaterVolumeSQLExpr
-import bz2, shutil
+from ..views.part_main import GetFilteredSamples, PartstatsampleGetData
 
 
 class TaskPartExport(AsyncTask):
@@ -709,20 +713,26 @@ class TaskPartExport(AsyncTask):
         self.param.OutFile = BaseFileName + ".zip"
         zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
-        sql = """select s.*
-          ,pp.ptitle,pp.rawfolder,concat(u.name,' ('||u.email||')') ownerid,pp.projid,pp.instrumtype,pp.op_name,pp.op_email,pp.cs_name,pp.cs_email
-          ,pp.do_name,pp.do_email,pp.prj_info,pp.prj_acronym,pp.cruise,pp.ship,pp.default_instrumsn,pp.default_depthoffset
-          ,(select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo
-          ,(select count(*) from part_ctd where psampleid=s.psampleid) nbrlinectd
-          ,p.mappingobj
+        sql = """select s.*,
+          pp.ptitle, pp.rawfolder, concat(u.name,' ('||u.email||')') ownerid, pp.projid, pp.instrumtype, pp.op_name, 
+          pp.op_email, pp.cs_name, pp.cs_email, pp.do_name, pp.do_email, pp.prj_info, pp.prj_acronym, 
+          pp.cruise, pp.ship, pp.default_instrumsn, pp.default_depthoffset,
+          (select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo,
+          (select count(*) from part_ctd where psampleid=s.psampleid) nbrlinectd
         from part_samples s
         join part_projects pp on s.pprojid=pp.pprojid
-        LEFT JOIN projects p on pp.projid=p.projid
         LEFT JOIN users u on pp.ownerid=u.id
         where s.psampleid in (%s)
         order by s.profileid
         """ % ((",".join([str(x[0]) for x in self.param.samples])),)
         samples = GetAll(sql)
+        # On a tous les samples EcoPart voulus, on récupère les projets EcoTaxa correspondants
+        ecotaxa_projs = {}  # EcoTaxa project (value) à partir de EcoPart project ID (key)
+        for S in samples:
+            part_project_id = S["pprojid"]
+            ecotaxa_project_id = S["projid"]
+            if part_project_id not in ecotaxa_projs:
+                ecotaxa_projs[part_project_id] = self.ecotaxa_if.get_project(ecotaxa_project_id)
         # Fichiers particule
         for S in samples:
             if S['histobrutavailable'] and S['instrumtype'] in ('uvp5', 'uvp6'):
@@ -739,7 +749,7 @@ class TaskPartExport(AsyncTask):
             if S['histobrutavailable'] and S['instrumtype'] in ('uvp6remote'):
                 zfile.write(uvp_sample_import.GetPathForRawHistoFile(S['psampleid']),
                             arcname="{0}_rawfiles.zip".format(S['profileid']))
-        # fichiers CTD
+        # Fichiers CTD
         CTDFileParPSampleID = {}
         for S in samples:
             if S['nbrlinectd'] > 0:
@@ -780,7 +790,7 @@ class TaskPartExport(AsyncTask):
             if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
                 continue  # pas les permission d'exporter le ZOO de ce sample le saute
             if S['nbrlinetaxo'] > 0:
-                TaxoReverseMapping = {v: k for k, v in DecodeEqualList(ntcv(S['mappingobj'])).items()}
+                TaxoReverseMapping = ecotaxa_projs[S["pprojid"]].obj_free_cols
                 nomfichier = "{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'], S['profileid'], DTNomFichier)
                 ZooFileParPSampleID[S["psampleid"]] = nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)

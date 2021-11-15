@@ -6,8 +6,8 @@ from typing import List, Tuple, Dict, Any, Union, Optional
 from flask import Request
 from werkzeug.local import LocalProxy
 
-from to_back.ecotaxa_cli_py import ApiClient, TaxonModel
-from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
+from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel
+from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi
 
 
 class EcoTaxaInstance(object):
@@ -125,3 +125,23 @@ class EcoTaxaInstance(object):
             # queried taxa appear in the id_lineage, so it's self+all parents
             parent_ids.update(r.id_lineage)
         return self.get_taxo3(list(parent_ids))
+
+    # def get_projects(self, project_ids: List[int]) -> List[ProjectModel]:
+    #     """
+    #         Get all projects by their IDs.
+    #     """
+    #     pra = ProjectsApi(self._get_client())
+    #     ret = []
+    #     for a_prjid in project_ids:
+    #         a_proj: ProjectModel = pra.project_query(project_id=a_prjid)
+    #         ret.append(a_proj)
+    #     return ret
+
+    def get_project(self, project_id: int) -> Optional[ProjectModel]:
+        """
+            Get a single project by its ID.
+            Return None if not found (from API point of view, meaning it could be missing or not visible)
+        """
+        pra = ProjectsApi(self._get_client())
+        a_proj: ProjectModel = pra.project_query(project_id=project_id)
+        return a_proj
