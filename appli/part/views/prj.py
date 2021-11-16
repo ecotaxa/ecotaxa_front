@@ -135,11 +135,11 @@ def part_prj_main(PrjId):
 
 def ComputeZooMatch(psampleid, projid):
     """ On essaie de raccrocher les samples EcoTaxa aux samples EcoPart
-        La règle: orig_id EcoTaxa identique au profileid EcoPart -> C'est bon"""
+        La règle: orig_id EcoTaxa identique au profileid EcoPart -> C'est bon """
     if projid is not None:
-        ecosample = GetAll("""select samples.sampleid from samples
+        ecosample = GetAll("""select sam.sampleid from samples sam
                                 join part_samples ps on psampleid=%s
-                               where samples.projid=%s and samples.orig_id=ps.profileid""",
+                               where sam.projid=%s and sam.orig_id=ps.profileid""",
                            (psampleid, int(projid)))
         if len(ecosample) == 1:
             ExecSQL("update part_samples set sampleid=%s where psampleid=%s",
@@ -153,9 +153,9 @@ def ComputeZooMatch(psampleid, projid):
 
 def GlobalTaxoCompute():
     # Sample Particule sans liens etabli avec Zoo qui sont liables
-    Samples = GetAll("""select ps.psampleid,pp.projid from samples
-            join part_samples ps on samples.orig_id=ps.profileid
-            join part_projects pp on ps.pprojid = pp.pprojid and samples.projid=pp.projid
+    Samples = GetAll("""select ps.psampleid,pp.projid from samples sam
+            join part_samples ps on sam.orig_id=ps.profileid
+            join part_projects pp on ps.pprojid = pp.pprojid and sam.projid=pp.projid
             where ps.sampleid is null""")
     for S in Samples:
         logging.info("Matching %s %s", S['psampleid'], ComputeZooMatch(S['psampleid'], S['projid']))

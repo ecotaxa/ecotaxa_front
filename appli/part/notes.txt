@@ -8,11 +8,11 @@
 
 - refs to taxonomy DB table (20 matches in 3 files)
 
-- refs to database.Projects SQLAlchemy wrapper (2 matches)
+- refs to database.Projects SQLAlchemy wrapper (2 matches, /!\ 1 create)
 
 - refs to projects table in SQL (7 matches)
 
-- refs to samples table in SQL (8 matches)
+- refs to samples table in SQL (3 matches)
 
 - refs to objects table (3 matches)
 
