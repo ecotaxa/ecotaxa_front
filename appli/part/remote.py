@@ -126,16 +126,14 @@ class EcoTaxaInstance(object):
             parent_ids.update(r.id_lineage)
         return self.get_taxo3(list(parent_ids))
 
-    # def get_projects(self, project_ids: List[int]) -> List[ProjectModel]:
-    #     """
-    #         Get all projects by their IDs.
-    #     """
-    #     pra = ProjectsApi(self._get_client())
-    #     ret = []
-    #     for a_prjid in project_ids:
-    #         a_proj: ProjectModel = pra.project_query(project_id=a_prjid)
-    #         ret.append(a_proj)
-    #     return ret
+    def get_visible_projects(self) -> List[ProjectModel]:
+        """
+            Get all visible projects.
+        """
+        pra = ProjectsApi(self._get_client())
+        ret = pra.search_projects(title_filter="", not_granted=False)
+        ret.extend(pra.search_projects(title_filter="", not_granted=True))
+        return ret
 
     def get_project(self, project_id: int) -> Optional[ProjectModel]:
         """

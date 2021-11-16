@@ -10,7 +10,7 @@
 
 - refs to database.Projects SQLAlchemy wrapper (2 matches)
 
-- refs to projects table in SQL (8 matches)
+- refs to projects table in SQL (7 matches)
 
 - refs to samples table in SQL (8 matches)
 
@@ -27,6 +27,10 @@
 - cron.py for EcoPart
 
 - join with user information
+
+- refs to users table in SQL, also kept in part_ DB tables (part_projects.owner_id)
+
+- refs to projectspriv table in SQL for asserting current user rights on EcoTaxa projects (2 matches)
 
 ------------ ISSUES ---------------
 

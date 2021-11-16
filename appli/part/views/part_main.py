@@ -16,11 +16,17 @@ from appli.part.remote import EcoTaxaInstance
 def indexPart():
     ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
 
+    # Liste des projets liés _et visibles_
+    linked_prjs = set([a_ref for a_ref, in GetAll("select distinct projid from part_projects")])
+    prjs = ecotaxa_if.get_visible_projects()
+    prjs.sort(key=lambda p: p.title.lower())
+    prjs = [[prj.projid, "%s(%d)" % (prj.title, prj.projid)]
+            for prj in prjs
+            if prj.projid in linked_prjs]
+
     class FiltForm(Form):
-        filt_proj = SelectMultipleField(choices=[['', '']] + GetAll(
-            "SELECT projid,concat(title,' (',cast(projid AS VARCHAR),')') "
-            "FROM projects where projid in (select projid from part_projects) "
-            "ORDER BY lower(title)"))
+        filt_proj = SelectMultipleField(choices=[['', '']] + prjs)
+        # Tous les projets EcoPart
         filt_uproj = SelectMultipleField(choices=[['', '']] + GetAll(
             "SELECT pprojid,concat(ptitle,' (',cast(pprojid AS VARCHAR),')') "
             "FROM part_projects ORDER BY lower(ptitle)"))
