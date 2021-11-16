@@ -9,15 +9,11 @@ from typing import Optional
 
 import flask
 from flask import render_template, g, flash, jsonify, request
-from flask_login import current_user
-from flask_security import login_required
 
-from appli import db, app, PrintInCharte, gvg, database, gvp
+from appli import db, app, gvg, gvp
+from ..ecopart_blueprint import part_app, part_PrintInCharte, PART_URL, part_AddTaskSummaryForTemplate, ECOTAXA_URL
 from ..db_utils import GetAll
-# Environment variable for transmitting cookie, i.e. web session, to subprocess
-from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_URL, part_AddTaskSummaryForTemplate
-
-ECOTAXA_COOKIE = "ECOTAXA_COOKIE"
+from ..remote import EcoTaxaInstance
 
 
 class Task(db.Model):
@@ -58,6 +54,8 @@ class AsyncTask:
         An asynchronous task, AKA a job.
         The same class is used in forked python processes and in flask app.
     """
+    # Environment variable for transmitting cookie, i.e. web session, to subprocess
+    ECOTAXA_COOKIE = "ECOTAXA_COOKIE"
 
     def __init__(self, task: Optional[Task] = None):
         if task is None:
@@ -117,7 +115,7 @@ class AsyncTask:
         # Get request cookie for session transmission
         cookie = request.cookies.get('session')
         if cookie is not None:
-            os.environ[ECOTAXA_COOKIE] = cookie
+            os.environ[self.ECOTAXA_COOKIE] = cookie
         workingdir = self.GetWorkingDir()
         if not os.path.exists(workingdir):
             os.mkdir(workingdir)
@@ -167,30 +165,32 @@ def LoadTask(taskid, cookie_from_env=False):
     # Amend the task with Web session cookie
     if cookie_from_env:
         # Find the cookie in environment variable
-        ret.cookie = os.environ.get(ECOTAXA_COOKIE)
+        ret.cookie = os.environ.get(AsyncTask.ECOTAXA_COOKIE)
     else:
         # Get the cookie from HTTP client
         try:
             ret.cookie = request.cookies.get('session')
         except RuntimeError:
-            ret.cookie = os.environ.get(ECOTAXA_COOKIE)
+            ret.cookie = os.environ.get(AsyncTask.ECOTAXA_COOKIE)
     return ret
 
 
 @part_app.route('/Task/listall')
-@login_required
 def ListTasks():
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
     g.headcenter = "<H3>Task Monitor</h3>"
-    part_AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate(ecotaxa_if)
 
     seeall = ""
-    is_admin = current_user.has_role(database.AdministratorLabel)
+    is_admin = (2 in ecotaxa_user.can_do)
     wants_admin = gvg("seeall") == 'Y'
     if is_admin and wants_admin:
         tasks = Task.query.filter_by().order_by(Task.id.desc()).all()
         seeall = '&seeall=Y'
     else:
-        tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
+        tasks = Task.query.filter_by(owner_id=ecotaxa_user.id).order_by(Task.id.desc()).all()
 
     txt = ""
     if gvg("cleandone") == 'Y' or gvg("cleanerror") == 'Y' or gvg("cleanall") == 'Y':
@@ -202,42 +202,48 @@ def ListTasks():
             if clean_all or (clean_done and t.taskstate == 'Done') or (clean_error and t.taskstate == 'Error'):
                 txt += DoTaskClean(t.id)
 
-        tasks = Task.query.filter_by(owner_id=current_user.id).order_by(Task.id.desc()).all()
+        tasks = Task.query.filter_by(owner_id=ecotaxa_user.id).order_by(Task.id.desc()).all()
     return render_template('tasks/listall.html', tasks=tasks, header=txt,
                            len_tasks=len(tasks), seeall=seeall,
                            IsAdmin=is_admin)
 
 
 @part_app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
-@login_required
 def TaskCreateRouter(ClassName):
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
     gvp('dummy')  # Protection bug flask connection reset si on fait post sans lire les champs
-    part_AddTaskSummaryForTemplate()
+    part_AddTaskSummaryForTemplate(ecotaxa_if)
     task = TaskFactory(ClassName)
     # Get the cookie from HTTP client
     task.cookie = request.cookies.get('session')
-    task.task.owner_id = current_user.get_id()
+    task.task.owner_id = ecotaxa_user.id
     return task.QuestionProcess()
 
 
 @part_app.route('/Task/Question/<int:TaskID>', methods=['GET', 'POST'])
-@login_required
 def TaskQuestionRouter(TaskID):
-    part_AddTaskSummaryForTemplate()
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
+    part_AddTaskSummaryForTemplate(ecotaxa_if)
     task = LoadTask(TaskID)
     return task.QuestionProcess()
 
 
 @part_app.route('/Task/Show/<int:TaskID>', methods=['GET'])
-@login_required
 def TaskShow(TaskID):
-    part_AddTaskSummaryForTemplate()
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
+    part_AddTaskSummaryForTemplate(ecotaxa_if)
     # noinspection PyBroadException
     try:
         task = LoadTask(TaskID)
     except Exception as e:
         print(e)
-        return PrintInCharte("This task doesn't exist anymore, perhaps it was automatically purged")
+        return part_PrintInCharte(ecotaxa_if, "This task doesn't exist anymore, perhaps it was automatically purged")
 
     txt = ""
     if gvg('log') == "Y":
@@ -264,28 +270,34 @@ def TaskShow(TaskID):
 
 # noinspection PyUnusedLocal
 @part_app.route('/Task/GetFile/<int:TaskID>/<filename>', methods=['GET'])
-@login_required
 def TaskGetFile(TaskID, filename):
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
     task = LoadTask(TaskID)
     WorkingDir = task.GetWorkingDir()
     return flask.send_from_directory(WorkingDir, task.GetResultFile())
 
 
 @part_app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
-@login_required
 def TaskForceRestart(TaskID):
-    part_AddTaskSummaryForTemplate()
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
+    part_AddTaskSummaryForTemplate(ecotaxa_if)
     task = LoadTask(TaskID)
     return task.StartTask(step=task.task.taskstep)
 
 
 @part_app.route('/Task/Clean/<int:TaskID>', methods=['GET'])
-@login_required
 def TaskClean(TaskID):
-    part_AddTaskSummaryForTemplate()
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
+    part_AddTaskSummaryForTemplate(ecotaxa_if)
     Msg = DoTaskClean(TaskID)
     Msg += '<br><a href="%sTask/listall"><span class="label label-info"> Back to Task List</span></a>' % PART_URL
-    return part_PrintInCharte(Msg)
+    return part_PrintInCharte(ecotaxa_if, Msg)
 
 
 def DoTaskClean(TaskID):
@@ -311,7 +323,10 @@ def DoTaskClean(TaskID):
 
 @part_app.route('/Task/GetStatus/<int:TaskID>', methods=['GET'])
 def TaskGetStatus(TaskID):
-    part_AddTaskSummaryForTemplate()
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
+    part_AddTaskSummaryForTemplate(ecotaxa_if)
     try:
         task = LoadTask(TaskID)
         Progress = task.task.progresspct
@@ -364,7 +379,8 @@ def TaskGetStatus(TaskID):
 
 @part_app.route('/Task/autoclean/')
 def AutoCleanManual():
-    return part_PrintInCharte(AutoClean())
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    return part_PrintInCharte(ecotaxa_if, AutoClean())
 
 
 def AutoClean():
@@ -383,11 +399,12 @@ def AutoClean():
 
 @part_app.route('/Task/Monitor/<int:TaskID>', methods=['GET'])
 def TaskMonitor(TaskID):
-    part_AddTaskSummaryForTemplate()
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    part_AddTaskSummaryForTemplate(ecotaxa_if)
     # noinspection PyBroadException
     try:
         task = LoadTask(TaskID)
         return render_template('tasks/monitor.html', TaskID=task.task.id)
     except Exception as e:
         print(e)
-        return PrintInCharte("This task doesn't exist anymore, perhaps it was automatically purged")
+        return part_PrintInCharte(ecotaxa_if, "This task doesn't exist anymore, perhaps it was automatically purged")

@@ -6,6 +6,7 @@ from flask_script import Manager
 # noinspection PyDeprecation
 from flask_security.utils import encrypt_password
 
+import appli.part.funcs.histograms
 from appli import app, g
 from appli import db, user_datastore, database
 
@@ -303,9 +304,9 @@ def RecomputePart(ProjectID, What, User, Email):
         for S in Samples:
             print("Processing particle sample %s:%s" % (S['psampleid'], S['profileid']))
             if 'D' in What:
-                print("Det=", prj.ComputeHistoDet(S['psampleid'], Prj.instrumtype))
+                print("Det=", appli.part.funcs.histograms.ComputeHistoDet(S['psampleid'], Prj.instrumtype))
             if 'R' in What:
-                print("Red=", prj.ComputeHistoRed(S['psampleid'], Prj.instrumtype))
+                print("Red=", appli.part.funcs.histograms.ComputeHistoRed(S['psampleid'], Prj.instrumtype))
             if 'M' in What:
                 print("Match=", prj.ComputeZooMatch(S['psampleid'], Prj.projid))
             if 'C' in What:
@@ -315,7 +316,7 @@ def RecomputePart(ProjectID, What, User, Email):
         for S in Samples:
             if 'T' in What and S['sampleid']:
                 print("Zoo for particle sample %s:%s=" % (S['psampleid'], S['profileid']),
-                      prj.ComputeZooHisto(S['psampleid'], Prj.instrumtype))
+                      appli.part.funcs.histograms.ComputeZooHisto(S['psampleid'], Prj.instrumtype))
 
 
 @manager.command

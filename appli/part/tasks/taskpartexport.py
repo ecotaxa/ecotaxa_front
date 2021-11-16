@@ -10,7 +10,6 @@ from typing import List, Dict
 
 import psycopg2.extras
 from flask import render_template, g, flash, request
-from flask_login import current_user
 
 from appli import db, app, gvp, gvg, DecodeEqualList, ntcv
 from .taskmanager import AsyncTask
@@ -917,6 +916,7 @@ class TaskPartExport(AsyncTask):
         # self.UpdateProgress(10,"Test Error")
 
     def QuestionProcess(self):
+        ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
         backurl = ("%s?{0}" % PART_URL).format(str(request.query_string, 'utf-8'))
         txt = "<a href='{0}'>Back to Particle Module Home page</a>".format(backurl)
         txt += "<h3>Particle sample data export</h3>"
@@ -934,8 +934,8 @@ class TaskPartExport(AsyncTask):
             TxtFiltres = ",".join([k + "=" + v for k, v in self.param.filtres.items() if v != ""])
         else:
             TxtFiltres = ""
-        # applique le filtre des sample et passe la liste à la tache car besoin de currentuser
-        self.param.samples = GetFilteredSamples(Filter=self.param.filtres, GetVisibleOnly=True
+        # applique le filtre des sample et passe la liste à la tache car besoin du 'current user' (ou pas!)
+        self.param.samples = GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=self.param.filtres, GetVisibleOnly=True
                                                 # Les exports Reduit Particule se contente de la visibité les autres requiert l'export
                                                 # Pour le Zoo c'est traité dans la routine d'export elle même
                                                 , RequiredPartVisibility=('V' if self.param.what == 'RED' else 'Y'))
@@ -944,9 +944,12 @@ class TaskPartExport(AsyncTask):
             # Le projet de base est choisi second écran ou validation du second ecran
             if gvp('starttask') == "Y":
                 # validation du second ecran
+                ecotaxa_user = ecotaxa_if.get_current_user()
                 self.param.what = gvp("what")
-                self.param.user_name = current_user.name
-                self.param.user_email = current_user.email
+                # TODO: Not really needed, it's just for writing author in the ODV header,
+                # and in the task subprocess we have current user as well.
+                self.param.user_name = ecotaxa_user.name
+                self.param.user_email = ecotaxa_user.email
                 self.param.putfileonftparea = gvp("putfileonftparea")
                 if self.param.what == 'RED':
                     self.param.fileformat = gvp("fileformat")
@@ -978,7 +981,7 @@ class TaskPartExport(AsyncTask):
             order by Lower(u.name)""")
             g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
 
-            statdata = PartstatsampleGetData()
+            statdata = PartstatsampleGetData(self.ecotaxa_if)
             if isinstance(statdata, str):
                 statdata = False
             html = render_template('tasks/partexport_create.html', header=txt, data=self.param

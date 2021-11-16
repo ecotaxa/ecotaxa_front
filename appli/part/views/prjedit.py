@@ -1,20 +1,19 @@
+import csv
+import re
 from pathlib import Path
 
 from flask import json, redirect
 from flask import render_template, flash, request, g
-from flask_login import current_user
-from flask_security import login_required
 from wtforms import Form, StringField, validators, IntegerField, FloatField, SelectField, \
     TextAreaField
 
 import appli
-from .. import database as partdatabase
-import csv
-import re
 from appli import app, database, gvg, gvp, ErrorFormat
 from appli.database import db
+from .. import database as partdatabase
 from ..db_utils import GetAll
-from ..ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
+from ..ecopart_blueprint import part_app, part_PrintInCharte, PART_URL, ECOTAXA_URL
+from ..remote import EcoTaxaInstance
 
 
 class UvpPrjForm(Form):
@@ -49,20 +48,22 @@ class UvpPrjForm(Form):
 
 
 @part_app.route('/prjedit/<int:pprojid>', methods=['get', 'post'])
-@login_required
 def part_prjedit(pprojid):
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
     g.headcenter = "<h3>Particle Project Metadata edition</h3>"
     if pprojid > 0:
         model = partdatabase.part_projects.query.filter_by(pprojid=pprojid).first()
-        if model.ownerid != current_user.id and not current_user.has_role(database.AdministratorLabel):
-            return part_PrintInCharte(ErrorFormat("Access Denied"))
+        if model.ownerid != ecotaxa_user.id and not (2 in ecotaxa_user.can_do):
+            return part_PrintInCharte(ecotaxa_if, ErrorFormat("Access Denied"))
     else:
-        if not (current_user.has_role(database.AdministratorLabel) or current_user.has_role(
-                database.ProjectCreatorLabel)):
-            return part_PrintInCharte(ErrorFormat("Access Denied"))
+        # <= 0, i.e. 'créer un nouveau projet'
+        if not ((2 in ecotaxa_user.can_do) or (1 in ecotaxa_user.can_do)):
+            return part_PrintInCharte(ecotaxa_if, ErrorFormat("Access Denied"))
         model = partdatabase.part_projects()
         model.pprojid = 0
-        model.ownerid = current_user.id
+        model.ownerid = ecotaxa_user.id
         # model.default_depthoffset=1.2
         model.public_visibility_deferral_month = app.config.get('PART_DEFAULT_VISIBLE_DELAY', '')
         model.public_partexport_deferral_month = app.config.get('PART_DEFAULT_GENERAL_EXPORT_DELAY', '')
@@ -96,7 +97,7 @@ def part_prjedit(pprojid):
             db.session.add(model)
         for k, v in form.data.items():
             setattr(model, k, v)
-        if model.projid == 0:  # 0 permet de dire aucun projet WTForm ne sait pas gére None avec coerce=int
+        if model.projid == 0:  # 0 permet de dire 'aucun projet' car WTForm ne sait pas gérer None avec coerce=int
             model.projid = None
         if model.projid == -1:  # création d'un projet Ecotaxa
             model.projid = None
@@ -106,17 +107,16 @@ def part_prjedit(pprojid):
             db.session.commit()
             EcotaxaProjectMember = database.ProjectsPriv()
             EcotaxaProjectMember.projid = EcotaxaProject.projid  # L'utilisateur courant est Manager de ce projet
-            EcotaxaProjectMember.member = current_user.id
+            EcotaxaProjectMember.member = ecotaxa_user.id
             EcotaxaProjectMember.privilege = 'Manage'
             db.session.add(EcotaxaProjectMember)
             model.projid = EcotaxaProject.projid  # On affecte le nouveau projet au projet Particle.
         db.session.commit()
         return redirect("%sprj/" % PART_URL + str(model.pprojid))
-    return part_PrintInCharte(render_template("part/prjedit.html", form=form, prjid=model.pprojid))
+    return part_PrintInCharte(ecotaxa_if, render_template("part/prjedit.html", form=form, prjid=model.pprojid))
 
 
 @part_app.route('/readprojectmeta', methods=['get', 'post'])
-@login_required
 def part_readprojectmeta():
     res = {}
     ServerRoot = Path(app.config['SERVERLOADAREA'])

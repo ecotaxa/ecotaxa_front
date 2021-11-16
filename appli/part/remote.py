@@ -6,7 +6,7 @@ from typing import List, Tuple, Dict, Any, Union, Optional
 from flask import Request
 from werkzeug.local import LocalProxy
 
-from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel
+from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UsersApi, UserModelWithRights, ApiException
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi
 
 
@@ -26,6 +26,18 @@ class EcoTaxaInstance(object):
         ret.configuration.access_token = self.token
         ret.configuration.host = self.base_url
         return ret
+
+    def get_current_user(self) -> Optional[UserModelWithRights]:
+        """
+            Return currently connected EcoTaxa user
+        """
+        usa = UsersApi(self._get_client())
+        try:
+            usr: UserModelWithRights = usa.show_current_user()
+            return usr
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return None
 
     def query_taxa_set(self, classif_ids: List[int]) -> List[TaxonModel]:
         tta = TaxonomyTreeApi(self._get_client())
@@ -132,7 +144,10 @@ class EcoTaxaInstance(object):
         """
         pra = ProjectsApi(self._get_client())
         ret = pra.search_projects(title_filter="", not_granted=False)
-        ret.extend(pra.search_projects(title_filter="", not_granted=True))
+        granted = set([prj.projid for prj in ret])
+        not_granted = pra.search_projects(title_filter="", not_granted=True)
+        # TODO: below is a workaround for not-logged users, in this case the list is twice the same
+        ret.extend([prj for prj in not_granted if prj.projid not in granted])
         return ret
 
     def get_project(self, project_id: int) -> Optional[ProjectModel]:

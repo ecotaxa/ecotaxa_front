@@ -11,11 +11,12 @@ import numpy as np
 from flask import request, send_file
 
 from appli import gvg
-from appli.part import GetClassLimitTxt
-from appli.part.constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
-from appli.part.db_utils import GetAll, GetAssoc2Col
-from appli.part.ecopart_blueprint import part_app
-from appli.part.views import part_main as umain
+from .. import GetClassLimitTxt
+from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
+from ..db_utils import GetAll, GetAssoc2Col
+from ..ecopart_blueprint import part_app, ECOTAXA_URL
+from ..remote import EcoTaxaInstance
+from ..views import part_main as umain
 
 DepthTaxoHistoLimit = [0, 25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1250,
                        1500, 1750, 2000, 2250, 2500, 2750
@@ -58,6 +59,7 @@ class dateFormaterYMD(matplotlib.ticker.Formatter):
 
 @part_app.route('/drawchart')
 def part_drawchart():
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
     Couleurs = (
         "#FF0000", "#4385FF", "#00BE00", "#AA6E28", "#FF9900", "#FFD8B1", "#808000", "#FFEA00", "#FFFAC8", "#BEFF00",
         "#AAFFC3", "#008080", "#64FFFF", "#000080", "#800000", "#820096", "#E6BEFF", "#FF00FF", "#808080", "#FFC9DE",
@@ -81,7 +83,7 @@ def part_drawchart():
         ProfilVertical = Filter.get('filt_proftype', '') == 'V'
         if not ProfilVertical:
             gpd.append('depth')  # si ce sont des profils temporels, on ajoute une trace pour les profondeurs
-        samples = umain.GetFilteredSamples(Filter=Filter, GetVisibleOnly=True, RequiredPartVisibility='V')
+        samples = umain.GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=Filter, GetVisibleOnly=True, RequiredPartVisibility='V')
         for S in samples:
             if S['pprojid'] not in PrjColorMap:
                 PrjColorMap[S['pprojid']] = Couleurs[len(PrjColorMap) % len(Couleurs)]

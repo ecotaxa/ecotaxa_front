@@ -6,21 +6,19 @@ import time
 from pathlib import Path
 
 from flask import render_template, flash, request, g
-from flask_login import current_user
 
 import appli.part.database as partdatabase
-import appli.part.funcs.common_sample_import
-import appli.part.funcs.lisst_sample_import
-import appli.part.funcs.nightly
-import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
-import appli.part.funcs.uvp_sample_import
-import appli.part.views.prj
+import appli.part.funcs.histograms
+from ..funcs import uvp_sample_import, lisst_sample_import, common_sample_import, uvp6remote_sample_import, nightly
+from ..funcs import histograms
+from ..views import prj
 import appli.project.main
 from appli import db, app, PrintInCharte, gvp, gvg, ErrorFormat
-from appli.part.ecopart_blueprint import PART_URL
+from ..ecopart_blueprint import PART_URL, ECOTAXA_URL, part_PrintInCharte
 from .taskmanager import AsyncTask, DoTaskClean
 from ..constants import LstInstrumType
 from ..db_utils import GetAssoc
+from ..remote import EcoTaxaInstance
 
 
 class TaskPartZooscanImport(AsyncTask):
@@ -77,63 +75,65 @@ class TaskPartZooscanImport(AsyncTask):
                 if self.param.profiletoprocess.get(sample['profileid']):
                     logging.info("Process profile %s " % (sample['profileid']))
                     if Prj.instrumtype in ('uvp5', 'uvp6'):
-                        psampleid = appli.part.funcs.uvp_sample_import.CreateOrUpdateSample(self.param.pprojid, sample)
+                        psampleid = uvp_sample_import.CreateOrUpdateSample(self.param.pprojid, sample)
                     if Prj.instrumtype == 'lisst':
-                        psampleid = appli.part.funcs.lisst_sample_import.CreateOrUpdateSample(self.param.pprojid,
-                                                                                              sample)
+                        psampleid = lisst_sample_import.CreateOrUpdateSample(self.param.pprojid,
+                                                                             sample)
                     self.UpdateProgress(100 * (NbrDone + 0.1) / Nbr,
                                         "Metadata of profile %s  processed" % (sample['profileid']))
 
                     if not self.param.ProcessOnlyMetadata:
                         if Prj.instrumtype in ('uvp5', 'uvp6'):
                             logging.info("UVP Sample %d Metadata processed, Raw histogram in progress" % (psampleid,))
-                            appli.part.funcs.uvp_sample_import.GenerateRawHistogram(psampleid)
+                            uvp_sample_import.GenerateRawHistogram(psampleid)
                             self.UpdateProgress(100 * (NbrDone + 0.6) / Nbr,
                                                 "Raw histogram of profile %s  processed, Particle histogram in progress" % (
                                                     sample['profileid']))
-                            appli.part.funcs.uvp_sample_import.GenerateParticleHistogram(psampleid)
+                            uvp_sample_import.GenerateParticleHistogram(psampleid)
                             self.UpdateProgress(100 * (NbrDone + 0.7) / Nbr,
                                                 "Particle histogram of profile %s  processed, CTD in progress" % (
                                                     sample['profileid']))
                         if Prj.instrumtype == 'lisst':
                             logging.info(
                                 "LISST Sample %d Metadata processed, Particle histogram in progress" % (psampleid,))
-                            appli.part.funcs.lisst_sample_import.GenerateParticleHistogram(psampleid)
+                            lisst_sample_import.GenerateParticleHistogram(psampleid)
                             self.UpdateProgress(100 * (NbrDone + 0.7) / Nbr,
                                                 "Detailed histogram of profile %s  processed, CTD histogram in progress" % (
                                                     sample['profileid']))
 
                         if Prj.instrumtype in ('uvp5', 'uvp6', 'lisst'):
-                            appli.part.funcs.common_sample_import.ImportCTD(psampleid, self.param.user_name,
-                                                                            self.param.user_email)
+                            common_sample_import.ImportCTD(psampleid, self.param.user_name,
+                                                           self.param.user_email)
                             self.UpdateProgress(100 * (NbrDone + 0.95) / Nbr,
                                                 "CTD of profile %s  processed" % (sample['profileid']))
 
-                    appli.part.views.prj.ComputeHistoDet(psampleid, Prj.instrumtype)
-                    appli.part.views.prj.ComputeHistoRed(psampleid, Prj.instrumtype)
+                    histograms.ComputeHistoDet(psampleid, Prj.instrumtype)
+                    histograms.ComputeHistoRed(psampleid, Prj.instrumtype)
                     if Prj.projid is not None:  # on essaye de matcher que si on a un projet Ecotaxa
-                        appli.part.views.prj.ComputeZooMatch(psampleid, Prj.projid)
-                        appli.part.views.prj.ComputeZooHisto(psampleid, Prj.instrumtype)
+                        prj.ComputeZooMatch(psampleid, Prj.projid)
+                        histograms.ComputeZooHisto(psampleid, Prj.instrumtype)
 
                     NbrDone += 1
 
-        appli.part.funcs.nightly.ComputeOldestSampleDateOnProject()
+        nightly.ComputeOldestSampleDateOnProject()
         self.task.taskstate = "Done"
         self.UpdateProgress(100, "Processing done")
         # self.task.taskstate="Error"
         # self.UpdateProgress(10,"Test Error")
 
     def QuestionProcess(self):
+        ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+        ecotaxa_user = ecotaxa_if.get_current_user()
         ServerRoot = Path(app.config['SERVERLOADAREA'])
         txt = "<h1>Particle ZooScan folder Importation Task</h1>"
         errors = []
         txt += "<h3>Task Creation</h3>"
         Prj = partdatabase.part_projects.query.filter_by(pprojid=gvg("p")).first()
         if Prj is None:
-            return PrintInCharte(ErrorFormat("This project doesn't exist"));
+            return part_PrintInCharte(ecotaxa_if, ErrorFormat("This project doesn't exist"));
         if Prj.instrumtype not in LstInstrumType:
-            return PrintInCharte(
-                ErrorFormat("Instrument type '%s' not in list : %s" % (Prj.instrumtype, ','.join(LstInstrumType))));
+            return part_PrintInCharte(ecotaxa_if, ErrorFormat(
+                "Instrument type '%s' not in list : %s" % (Prj.instrumtype, ','.join(LstInstrumType))));
         g.prjtitle = Prj.ptitle
         g.prjprojid = Prj.pprojid
         # g.prjowner=Prj.owneridrel.name
@@ -171,12 +171,12 @@ class TaskPartZooscanImport(AsyncTask):
             DirName = DossierUVPPath.name
             m = re.search(R"([^_]+)_(.*)", DirName)
             if m.lastindex != 2:
-                return PrintInCharte(ErrorFormat("Le repertoire projet n'as pas un nom standard"))
+                return part_PrintInCharte(ecotaxa_if, ErrorFormat("Le répertoire projet n'a pas un nom standard"))
             else:
                 FichierHeader = DossierUVPPath / "meta" / (m.group(1) + "_header_" + m.group(2) + ".txt")
 
             if not FichierHeader.exists():
-                return PrintInCharte(ErrorFormat("Le fichier header n'existe pas :" + FichierHeader.as_posix()))
+                return part_PrintInCharte(ecotaxa_if, ErrorFormat("Le fichier header n'existe pas :" + FichierHeader.as_posix()))
             else:
                 # print("ouverture de " + FichierHeader)
                 with open(FichierHeader.as_posix(), encoding="latin_1") as FichierHeaderHandler:
@@ -197,8 +197,8 @@ class TaskPartZooscanImport(AsyncTask):
 
         if gvp('starttask') == "Y":
             self.param.ProcessOnlyMetadata = (gvp('onlymeta', 'N') == 'Y')
-            self.param.user_name = current_user.name
-            self.param.user_email = current_user.email
+            self.param.user_name = ecotaxa_user.name
+            self.param.user_email = ecotaxa_user.email
             for f in request.form:
                 self.param.profiletoprocess[request.form.get(f)] = "Y"
 
@@ -212,7 +212,7 @@ class TaskPartZooscanImport(AsyncTask):
         else:  # valeurs par default
 
             if len(self.param.profilelistinheader) == 0:
-                return PrintInCharte(ErrorFormat("No sample available in file %s" % (FichierHeader.as_posix())))
+                return part_PrintInCharte(ecotaxa_if, ErrorFormat("No sample available in file %s" % (FichierHeader.as_posix())))
             # print("%s"%(self.param.profilelistinheader))
         return render_template('tasks/uvpzooscanimport_create.html', header=txt, data=self.param,
                                ServerPath=gvp("ServerPath"), TxtTaxoMap=gvp("TxtTaxoMap"))
