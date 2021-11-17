@@ -1,10 +1,11 @@
-import logging
+from typing import List
 
 from flask import render_template, request, g
 
 import appli
 import appli.part.database as partdatabase
 from appli import app, gvg, gvp, ErrorFormat
+from to_back.ecotaxa_cli_py import SampleModel
 from . import sampleedit
 from ..db_utils import ExecSQL, GetAll
 from ..ecopart_blueprint import part_app, part_PrintInCharte, PART_STORAGE_URL, PART_URL, ECOTAXA_URL
@@ -146,21 +147,40 @@ def ComputeZooMatch(ecotaxa_if: EcoTaxaInstance, psampleid, projid):
                     (ecosample[0].sampleid, psampleid))
             return " Matched"
         else:
-            return " <span style='color: orange;'>%d match found in EcoTaxa</span>"%len(ecosample)
+            return " <span style='color: orange;'>%d match found in EcoTaxa</span>" % len(ecosample)
     else:
         return " <span style='color: red;'>Ecotaxa sample matching impossible if Particle project not linked to an Ecotaxa project</span>"
 
 
-def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance):
+def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance, logger):
     # cron nightly
-    # Sample Particule sans liens etabli avec Zoo qui sont liables
-    Samples = GetAll("""select ps.psampleid,pp.projid from samples sam
-            join part_samples ps on sam.orig_id=ps.profileid
-            join part_projects pp on ps.pprojid = pp.pprojid and sam.projid=pp.projid
-            where ps.sampleid is null""")
-    for S in Samples:
-        logging.info("Matching %s %s", S['psampleid'], ComputeZooMatch(ecotaxa_if, S['psampleid'], S['projid']))
-    # sample ayant un objet qui à été classifié depuis le dernier calcul de l'histogramme
+    # Détermination des samples orphelins, i.e.:
+    # - dont les projets sont rattachés à un projet EcoTaxa
+    # - mais dont les samples ne sont pas (ou pas correctement) rattachés à un sample EcoTaxa
+    linked_samples = GetAll("""select pp.projid, ps.sampleid, ps.psampleid, ps.profileid 
+                                 from part_samples ps
+                                 join part_projects pp on ps.pprojid = pp.pprojid 
+                                where pp.projid is not null""")
+    fetched_samples = {}
+    logger.info("Ensuring consistency of links to EcoTaxa")
+    for to_check in linked_samples:
+        ecotaxa_projid = to_check["projid"]
+        samples_for_proj: List[SampleModel] = fetched_samples.get(ecotaxa_projid)
+        if samples_for_proj is None:
+            samples_for_proj = ecotaxa_if.all_samples_for_project(ecotaxa_projid)  # La totale
+            fetched_samples[ecotaxa_projid] = samples_for_proj
+        # Correspondance
+        sampleid = to_check["sampleid"]
+        profileid = to_check["profileid"]
+        for a_sample in samples_for_proj:
+            if a_sample.sampleid == sampleid and a_sample.orig_id == profileid:
+                break
+        else:
+            # TODO: pas super efficace mais ça arrive rarement et puis c'est un job
+            psampleid = to_check["psampleid"]
+            logger.info("Matching %s %s", psampleid, ComputeZooMatch(ecotaxa_if, psampleid, ecotaxa_projid))
+    # sample ayant un objet qui a été classifié depuis le dernier calcul de l'histogramme
+    logger.info("Refreshing histograms if needed")
     Samples = GetAll("""select psampleid, daterecalculhistotaxo,pp.instrumtype
                 from part_samples ps
                 join part_projects pp on ps.pprojid = pp.pprojid 

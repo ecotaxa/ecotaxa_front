@@ -169,3 +169,7 @@ class EcoTaxaInstance(object):
         # Search is case-insensitive and we need exact match
         return [a_sam for a_sam in res
                 if a_sam.orig_id == orig_id]
+
+    def all_samples_for_project(self, projid):
+        sma = SamplesApi(self._get_client())
+        return sma.samples_search(str(projid), "")
