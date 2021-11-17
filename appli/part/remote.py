@@ -7,7 +7,7 @@ from flask import Request
 from werkzeug.local import LocalProxy
 
 from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UsersApi, UserModelWithRights, ApiException, \
-    SamplesApi, SampleModel
+    SamplesApi, SampleModel, ObjectsApi, ObjectSetQueryRsp
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi
 
 
@@ -105,6 +105,17 @@ class EcoTaxaInstance(object):
                        "tree": lineage_of(r.lineage)}
                 for r in res}
 
+    def get_taxo_tree(self, classif_id: int, cache: Dict[int, str]) -> str:
+        """
+            Return textual lineage for the given category, store in cache for cheaper repeated calls.
+        """
+        ret = cache.get(classif_id)
+        if ret is None:
+            res = self.query_taxa_set([classif_id])[0]
+            ret = self.lt_tree(res.lineage)
+            cache[classif_id] = ret
+        return ret
+
     def get_taxo_children(self, classif_ids: List[int], res: List[int]) -> None:
         """
             Get immediate children for each category ID.
@@ -170,6 +181,23 @@ class EcoTaxaInstance(object):
         return [a_sam for a_sam in res
                 if a_sam.orig_id == orig_id]
 
-    def all_samples_for_project(self, projid):
+    def all_samples_for_project(self, projid: int):
         sma = SamplesApi(self._get_client())
         return sma.samples_search(str(projid), "")
+
+    def get_objects_for_sample(self, projid: int, sampleid: int, cols: List[str], only_validated: bool):
+        """
+            Query all objects in given sample, return the prefixed-less column names.
+        """
+        oba = ObjectsApi(self._get_client())
+        filters = {"samples": str(sampleid)}
+        if only_validated:
+            filters["statusfilter"] = 'V'
+        res: ObjectSetQueryRsp = oba.get_object_set(fields=",".join(cols),
+                                                    project_id=projid,
+                                                    project_filters=filters)
+        ret = []
+        for an_obj in res.details:
+            db_like_obj = {col.split(".", 1)[1]: val for col, val in zip(cols, an_obj)}
+            ret.append(db_like_obj)
+        return ret

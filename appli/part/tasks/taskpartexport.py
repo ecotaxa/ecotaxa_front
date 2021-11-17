@@ -712,6 +712,7 @@ class TaskPartExport(AsyncTask):
         self.param.OutFile = BaseFileName + ".zip"
         zfile = zipfile.ZipFile(os.path.join(self.GetWorkingDir(), self.param.OutFile)
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
+        self.UpdateProgress(10, "Getting samples")
         sql = """select s.*,
           pp.ptitle, pp.rawfolder, concat(u.name,' ('||u.email||')') ownerid, pp.projid, pp.instrumtype, pp.op_name, 
           pp.op_email, pp.cs_name, pp.cs_email, pp.do_name, pp.do_email, pp.prj_info, pp.prj_acronym, 
@@ -727,6 +728,7 @@ class TaskPartExport(AsyncTask):
         samples = GetAll(sql)
         # On a tous les samples EcoPart voulus, on récupère les projets EcoTaxa correspondants
         ecotaxa_projs = {}  # EcoTaxa project (value) à partir de EcoPart project ID (key)
+        self.UpdateProgress(20, "Fetching projects")
         for S in samples:
             part_project_id = S["pprojid"]
             ecotaxa_project_id = S["projid"]
@@ -750,10 +752,12 @@ class TaskPartExport(AsyncTask):
                             arcname="{0}_rawfiles.zip".format(S['profileid']))
         # Fichiers CTD
         CTDFileParPSampleID = {}
+        self.UpdateProgress(30, "Producing CTD files")
         for S in samples:
+            psampleid = S["psampleid"]
             if S['nbrlinectd'] > 0:
                 nomfichier = "{0}_{1}_CTD_raw_{2}.tsv".format(S['filename'], S['profileid'], DTNomFichier)
-                CTDFileParPSampleID[S["psampleid"]] = nomfichier
+                CTDFileParPSampleID[psampleid] = nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, "wt") as f:
                     cols = sorted(CTDFixedColByKey.keys())
@@ -762,7 +766,7 @@ class TaskPartExport(AsyncTask):
                                       from part_ctd where psampleid=%s 
                                       ORDER BY lineno""".format(
                         ",".join(cols), ",".join(["extrames%02d" % (i + 1) for i in range(20)]))
-                        , (S['psampleid'],))
+                        , (psampleid,))
                     cols.remove('depth')
                     cols = ["depth", "datetime"] + cols  # passe dept et datetime en premieres colonnes
                     colsname = [CTDFixedColByKey[x] for x in cols]
@@ -779,62 +783,57 @@ class TaskPartExport(AsyncTask):
                 zfile.write(nomfichier)
         # Fichiers ZOO
         ZooFileParPSampleID = {}
-        for S in samples:
+        nb_samples = len(samples)
+        taxo_cache = {}  # On évite de faire plein de fois des queries API qui rendent le même résultat
+        for sample_num, S in enumerate(samples, 1):
+            self.UpdateProgress(40 + (50 * sample_num / nb_samples),
+                                "Producing ZOO file %d/%d" % (sample_num, nb_samples))
+            psampleid = S["psampleid"]
             DepthOffset = S['default_depthoffset']
             if DepthOffset is None:
                 DepthOffset = S['acq_depthoffset']
             if DepthOffset is None:
                 DepthOffset = 0
 
-            if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
-                continue  # pas les permission d'exporter le ZOO de ce sample le saute
+            if self.samplesdict[psampleid][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+                continue  # pas les permission d'exporter le ZOO de ce sample, on le saute
             if S['nbrlinetaxo'] > 0:
-                TaxoReverseMapping = ecotaxa_projs[S["pprojid"]].obj_free_cols
+                ecotaxa_proj = ecotaxa_projs[S["pprojid"]]
+                TaxoReverseMapping = ecotaxa_proj.obj_free_cols  # key: free column name, value: DB column name
                 nomfichier = "{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'], S['profileid'], DTNomFichier)
-                ZooFileParPSampleID[S["psampleid"]] = nomfichier
+                ZooFileParPSampleID[psampleid] = nomfichier
                 fichier = os.path.join(self.GetWorkingDir(), nomfichier)
                 with open(fichier, "wt") as f:
-                    # excludenotliving
-                    sql = """select of.*, oh.orig_id
-                        ,t0.display_name as "name", classif_qual ,ps.psampleid                        
-                        ,((oh.depth_min+oh.depth_max)/2)+{DepthOffset} as depth_including_offset,objid
-                        ,concat(t14.name||'>',t13.name||'>',t12.name||'>',t11.name||'>',t10.name||'>',t9.name||'>',t8.name||'>',t7.name||'>',
-                                t6.name||'>',t5.name||'>',t4.name||'>',t3.name||'>',t2.name||'>',t1.name||'>',t0.name) taxo_hierarchy
-                      from part_samples ps
-                      join samples sam on ps.sampleid = sam.sampleid
-                      join acquisitions acq on sam.sampleid = acq.acq_sample_id
-                      join obj_head oh on acq.acquisid = oh.acquisid
-                      join obj_field of on of.objfid=oh.objid                      
-                        join taxonomy t0 on oh.classif_id=t0.id
-                        left join taxonomy t1 on t0.parent_id=t1.id
-                        left join taxonomy t2 on t1.parent_id=t2.id
-                        left join taxonomy t3 on t2.parent_id=t3.id
-                        left join taxonomy t4 on t3.parent_id=t4.id
-                        left join taxonomy t5 on t4.parent_id=t5.id
-                        left join taxonomy t6 on t5.parent_id=t6.id
-                        left join taxonomy t7 on t6.parent_id=t7.id
-                        left join taxonomy t8 on t7.parent_id=t8.id
-                        left join taxonomy t9 on t8.parent_id=t9.id
-                        left join taxonomy t10 on t9.parent_id=t10.id
-                        left join taxonomy t11 on t10.parent_id=t11.id
-                        left join taxonomy t12 on t11.parent_id=t12.id
-                        left join taxonomy t13 on t12.parent_id=t13.id
-                        left join taxonomy t14 on t13.parent_id=t14.id                                           
-                      where ps.psampleid=%s """.format(DepthOffset=DepthOffset)
-                    if self.param.excludenotliving:
-                        sql += " and coalesce(t14.name,t13.name,t12.name,t11.name,t10.name,t9.name,t8.name,t7.name,t6.name,t5.name,t4.name,t3.name,t2.name,t1.name,t0.name)!='not-living' "
-                    if self.param.includenotvalidated == False:
-                        sql += " and oh.classif_qual='V' "
-                    res = GetAll(sql, (S['psampleid'],))
+                    # Query the related objects
+                    sampleid = S['sampleid']  # Get EcoTaxa sample num
+                    queried_columns = ["obj.objid", "obj.orig_id", "obj.classif_id", "obj.classif_qual",
+                                       "obj.depth_min", "obj.depth_max",
+                                       "txo.name"]
+                    queried_columns.extend(["fre.%s" % free_col for free_col in TaxoReverseMapping.keys()])
+                    api_res = self.ecotaxa_if.get_objects_for_sample(ecotaxa_proj.projid, sampleid, queried_columns,
+                                                                     not self.param.includenotvalidated)
+                    # Do some calculations/filtering for returned data
+                    res = []
+                    for an_obj in api_res:
+                        an_obj["depth_including_offset"] = (an_obj["depth_min"] + an_obj["depth_max"]) / 2 + DepthOffset
+                        an_obj["psampleid"] = psampleid
+                        classif_id = an_obj["classif_id"]
+                        if classif_id is None:
+                            continue
+                        hier = self.ecotaxa_if.get_taxo_tree(classif_id, taxo_cache)
+                        if self.param.excludenotliving:
+                            if hier.startswith('not-living'):
+                                continue
+                        an_obj["taxo_hierarchy"] = hier
+                        res.append(an_obj)
+                    # Produce text file from gathered data
                     cols = ['orig_id', 'objid', 'name', 'taxo_hierarchy', 'classif_qual', 'depth_including_offset',
                             'psampleid']
                     extracols = list(TaxoReverseMapping.keys())
                     extracols.sort()
-                    colsname = cols[:]
                     if extracols:
-                        colsname.extend(extracols)
-                        cols.extend([TaxoReverseMapping.get(x, None) for x in extracols])
-                    f.write("\t".join(colsname) + "\n")
+                        cols.extend(extracols)
+                    f.write("\t".join(cols) + "\n")
                     for R in res:
                         L = [R[c] if c else '' for c in cols]
                         f.write("\t".join((str(ntcv(x)) for x in L)))
@@ -861,9 +860,11 @@ class TaskPartExport(AsyncTask):
             'prj_info', 'prj_acronym', 'cruise', 'ship', 'default_instrumsn', 'default_depthoffset')
         nomfichier = BaseFileName + "_Export_metadata_summary.tsv"
         fichier = os.path.join(self.GetWorkingDir(), nomfichier)
+        self.UpdateProgress(90, "Producing summary files")
         with open(fichier, 'w', encoding='latin-1') as f:
             f.write("\t".join(cols) + "\tParticle filename\tCTD filename\tPlankton filename\n")
             for S in samples:
+                psampleid = S["psampleid"]
                 L = [S[c] for c in cols]
                 for i, v in enumerate(L):
                     if isinstance(v, str):
@@ -873,10 +874,10 @@ class TaskPartExport(AsyncTask):
                     [
                         "{0}_{1}_PAR_raw_{2}.tsv".format(S['filename'], S['profileid'], DTNomFichier) if S[
                             'histobrutavailable'] else None,
-                        CTDFileParPSampleID[S["psampleid"]] if S[
-                                                                   "psampleid"] in CTDFileParPSampleID else "no data available",
-                        ZooFileParPSampleID[S["psampleid"]] if S[
-                                                                   "psampleid"] in ZooFileParPSampleID else "no data available"
+                        CTDFileParPSampleID[psampleid] if psampleid in CTDFileParPSampleID
+                        else "no data available",
+                        ZooFileParPSampleID[psampleid] if psampleid in ZooFileParPSampleID
+                        else "no data available"
                     ])
                 f.write("\t".join((str(ntcv(x)) for x in L)))
                 f.write("\n")
@@ -907,11 +908,11 @@ class TaskPartExport(AsyncTask):
             shutil.copyfile(fichier.as_posix(), fichierdest.as_posix())
             self.param.OutFile = ''
             self.task.taskstate = "Done"
-            self.UpdateProgress(100,
-                                "Export successfull : File '%s' is available on the 'Exported_data' FTP folder" % NomFichier)
+            self.UpdateProgress(100, "Export successful : File '%s' is available on "
+                                     "the 'Exported_data' FTP folder" % NomFichier)
         else:
             self.task.taskstate = "Done"
-            self.UpdateProgress(100, "Export successfull")
+            self.UpdateProgress(100, "Export successful")
         # self.task.taskstate="Error"
         # self.UpdateProgress(10,"Test Error")
 
@@ -981,7 +982,7 @@ class TaskPartExport(AsyncTask):
             order by Lower(u.name)""")
             g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
 
-            statdata = PartstatsampleGetData(self.ecotaxa_if)
+            statdata = PartstatsampleGetData(ecotaxa_if)
             if isinstance(statdata, str):
                 statdata = False
             html = render_template('tasks/partexport_create.html', header=txt, data=self.param

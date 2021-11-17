@@ -6,19 +6,13 @@
 
 --------- TODO --------------
 
-- refs to taxonomy DB table (20 matches in 3 files)
+- refs to taxonomy DB table (5 matches in 2 files)
 
 - refs to database.Projects SQLAlchemy wrapper (2 matches, /!\ 1 create)
 - refs to projects table in SQL (7 matches)
 - refs to part_projects.project SQLAlchemy relation (3 matches in sampleedit.py)
 
-- refs to samples table in SQL (1 match)
-
-- refs to acquisitions table in SQL (1 match)
-- refs to obj_head table in SQL (1 match)
-- refs to obj_fields in SQL (1 match)
-
-- refs to objects table (3 matches) -> /!\ the view contains projects, samples, obj_fields
+- refs to objects table (3 matches) -> /!\ the view contains projects, samples, obj_head, obj_fields
 
 - move temp_tasks to EcoPart DB definition
 
@@ -42,3 +36,10 @@
 -> Create an admin EcoPart user?
 
 ----------- DONE -------------
+
+- refs to acquisitions table in SQL (1 match)
+- refs to obj_head table in SQL (1 match)
+- refs to obj_fields in SQL (1 match)
+
+- refs to samples table in SQL (1 match)
+
