@@ -868,7 +868,8 @@ def GenerateTaxonomyHistogram(psampleid):
     # Lire le projet EcoTaxa correspondant
     EcoPrj = database.Projects.query.filter_by(projid=Prj.projid).first()
     if EcoPrj is None:
-        raise Exception("GenerateTaxonomyHistogram: Ecotaxa project %d missing" % Prj.projid)
+        raise Exception("GenerateTaxonomyHistogram: EcoTaxa project %s missing in EcoPart project %s"
+                        % (Prj.projid, Prj.pprojid))
     objmap = DecodeEqualList(EcoPrj.mappingobj)
     areacol = None
     for k, v in objmap.items():
