@@ -109,7 +109,7 @@ def part_sampleedit(psampleid):
         if gvp('forcerecalc') == 'Y':
             histograms.ComputeHistoDet(model.psampleid, model.project.instrumtype)
             histograms.ComputeHistoRed(model.psampleid, model.project.instrumtype)
-            prj.ComputeZooMatch(model.psampleid, model.project.projid)
+            prj.ComputeZooMatch(ecotaxa_if, model.psampleid, model.project.projid)
             flash("Histograms have been recomputed", "success")
         return redirect("%sprj/" % PART_URL + str(model.pprojid))
     return part_PrintInCharte(ecotaxa_if, render_template("part/sampleedit.html", form=form, prjid=model.pprojid,

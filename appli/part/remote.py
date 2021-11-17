@@ -6,7 +6,8 @@ from typing import List, Tuple, Dict, Any, Union, Optional
 from flask import Request
 from werkzeug.local import LocalProxy
 
-from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UsersApi, UserModelWithRights, ApiException
+from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UsersApi, UserModelWithRights, ApiException, \
+    SamplesApi, SampleModel
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi
 
 
@@ -158,3 +159,13 @@ class EcoTaxaInstance(object):
         pra = ProjectsApi(self._get_client())
         a_proj: ProjectModel = pra.project_query(project_id=project_id)
         return a_proj
+
+    def search_samples(self, projid: int, orig_id: str) -> List[SampleModel]:
+        """
+            Inside given project, look for samples by orig_id.
+        """
+        sma = SamplesApi(self._get_client())
+        res = sma.samples_search(str(projid), orig_id)
+        # Search is case-insensitive and we need exact match
+        return [a_sam for a_sam in res
+                if a_sam.orig_id == orig_id]

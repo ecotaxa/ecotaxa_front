@@ -12,7 +12,7 @@
 
 - refs to projects table in SQL (7 matches)
 
-- refs to samples table in SQL (3 matches)
+- refs to samples table in SQL (2 matches)
 
 - refs to objects table (3 matches)
 
@@ -35,4 +35,4 @@
 ------------ ISSUES ---------------
 
 - connection to EcoTaxa by background process: no cookie, generally speaking which user to take?
--> Create an admin EcoPart user
+-> Create an admin EcoPart user?

@@ -47,9 +47,10 @@ def part_prj():
         CanCreate = True
     g.headcenter = "<h4>Particle Projects management</h4><a href='%s'>Particle Module Home</a>" % PART_URL
     return part_PrintInCharte(ecotaxa_if,
-        render_template('part/list.html', PrjList=res, CanCreate=CanCreate, AppManagerMailto=appli.GetAppManagerMailto()
-                        , filt_title=gvg('filt_title'), filt_subset=gvg('filt_subset'),
-                        filt_instrum=gvg('filt_instrum')))
+                              render_template('part/list.html', PrjList=res, CanCreate=CanCreate,
+                                              AppManagerMailto=appli.GetAppManagerMailto()
+                                              , filt_title=gvg('filt_title'), filt_subset=gvg('filt_subset'),
+                                              filt_instrum=gvg('filt_instrum')))
 
 
 @part_app.route('/prj_uvpgraph/<int:PrjId>/<int:offset>')
@@ -130,35 +131,35 @@ def part_prj_main(PrjId):
                      , "Not Defined" if Prj['zooexport_date'] is None else Prj['zooexport_date'].strftime("%Y-%m-%d"))
 
     return part_PrintInCharte(ecotaxa_if,
-        render_template('part/prj_index.html', PrjId=PrjId, dbsample=dbsample, Prj=Prj, VisibilityText=VisibilityText))
+                              render_template('part/prj_index.html', PrjId=PrjId, dbsample=dbsample, Prj=Prj,
+                                              VisibilityText=VisibilityText))
 
 
-def ComputeZooMatch(psampleid, projid):
-    """ On essaie de raccrocher les samples EcoTaxa aux samples EcoPart
-        La règle: orig_id EcoTaxa identique au profileid EcoPart -> C'est bon """
+def ComputeZooMatch(ecotaxa_if: EcoTaxaInstance, psampleid, projid):
+    """ On essaie de raccrocher un sample EcoTaxa à ce sample EcoPart
+        La règle: orig_id EcoTaxa identique au profileid EcoPart, dans le projet lié -> C'est bon """
     if projid is not None:
-        ecosample = GetAll("""select sam.sampleid from samples sam
-                                join part_samples ps on psampleid=%s
-                               where sam.projid=%s and sam.orig_id=ps.profileid""",
-                           (psampleid, int(projid)))
+        profileid, = GetAll("""select profileid from part_samples ps where psampleid=%d""" % psampleid)[0]
+        ecosample = ecotaxa_if.search_samples(projid, profileid)
         if len(ecosample) == 1:
             ExecSQL("update part_samples set sampleid=%s where psampleid=%s",
-                    (ecosample[0]['sampleid'], psampleid))
+                    (ecosample[0].sampleid, psampleid))
             return " Matched"
         else:
-            return " <span style='color: orange;'>No match found in Ecotaxa</span>"
+            return " <span style='color: orange;'>%d match found in EcoTaxa</span>"%len(ecosample)
     else:
         return " <span style='color: red;'>Ecotaxa sample matching impossible if Particle project not linked to an Ecotaxa project</span>"
 
 
-def GlobalTaxoCompute():
+def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance):
+    # cron nightly
     # Sample Particule sans liens etabli avec Zoo qui sont liables
     Samples = GetAll("""select ps.psampleid,pp.projid from samples sam
             join part_samples ps on sam.orig_id=ps.profileid
             join part_projects pp on ps.pprojid = pp.pprojid and sam.projid=pp.projid
             where ps.sampleid is null""")
     for S in Samples:
-        logging.info("Matching %s %s", S['psampleid'], ComputeZooMatch(S['psampleid'], S['projid']))
+        logging.info("Matching %s %s", S['psampleid'], ComputeZooMatch(ecotaxa_if, S['psampleid'], S['projid']))
     # sample ayant un objet qui à été classifié depuis le dernier calcul de l'histogramme
     Samples = GetAll("""select psampleid, daterecalculhistotaxo,pp.instrumtype
                 from part_samples ps
@@ -207,7 +208,7 @@ def part_prjcalc(PrjId):
         if gvp('dohistored') == 'Y':
             txt += prefix + ComputeHistoRed(S['psampleid'], Prj.instrumtype)
         if gvp('domatchecotaxa') == 'Y':
-            txt += prefix + ComputeZooMatch(S['psampleid'], Prj.projid)
+            txt += prefix + ComputeZooMatch(ecotaxa_if, S['psampleid'], Prj.projid)
         if gvp('dohistotaxo') == 'Y':
             txt += prefix + ComputeZooHisto(S['psampleid'], Prj.instrumtype)
             # try:

@@ -46,6 +46,7 @@ class TaskPartZooscanImport(AsyncTask):
         self.pgcur = db.engine.raw_connection().cursor()
 
     def SPStep1(self):
+        ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, self.cookie)
         logging.info("Input Param = %s" % (self.param.__dict__))
         logging.info("Start Step 1")
         Prj = partdatabase.part_projects.query.filter_by(pprojid=self.param.pprojid).first()
@@ -110,7 +111,7 @@ class TaskPartZooscanImport(AsyncTask):
                     histograms.ComputeHistoDet(psampleid, Prj.instrumtype)
                     histograms.ComputeHistoRed(psampleid, Prj.instrumtype)
                     if Prj.projid is not None:  # on essaye de matcher que si on a un projet Ecotaxa
-                        prj.ComputeZooMatch(psampleid, Prj.projid)
+                        prj.ComputeZooMatch(ecotaxa_if, psampleid, Prj.projid)
                         histograms.ComputeZooHisto(psampleid, Prj.instrumtype)
 
                     NbrDone += 1
