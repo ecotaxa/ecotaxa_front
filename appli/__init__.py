@@ -84,6 +84,29 @@ def PrintInCharte(txt, title=None):
         title = 'EcoTaxa'
     return render_template('layout.html', bodycontent=txt, title=title)
 
+def PrintInCharte_bs4(txt, title=None): # for bootstrap 4
+    """
+    Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
+    :param txt: Texte à affiche
+    :return: Texte rendu
+    """
+    AddJobsSummaryForTemplate()
+    if not title:
+        title = 'EcoTaxa'
+    return render_template('layout_bs4.html', bodycontent=txt, title=title)
+
+def PrintInCharte_bs5(txt, title=None): # for bootstrap 5
+    """
+    Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
+    :param txt: Texte à affiche
+    :return: Texte rendu
+    """
+    AddJobsSummaryForTemplate()
+    if not title:
+        title = 'EcoTaxa'
+    return render_template('layout_bs5.html', bodycontent=txt, title=title)
+
+
 
 def ErrorFormat(txt):
     return """
