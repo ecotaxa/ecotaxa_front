@@ -70,8 +70,8 @@ def indexProjects(Others=False):
     connectPythonToPrime:bool = False
     #connectPythonToPrime: bool = True
     if connectPythonToPrime:
-        # from appli import PrintInCharte_bs5
-        from appli import PrintInCharte_bs4
+        from appli import PrintInCharte_bs5
+        #from appli import PrintInCharte_bs4
         import jsonpickle  # need of jsonpickle only in that case
         # Do all the "boring" work in the Python part.
         # Basically, everything that cannot be done easily on the HTML side should be done on the Python side ;-)
@@ -105,18 +105,17 @@ def indexProjects(Others=False):
         # varJSON = json.dumps(list_of_dicts) # ==> says "Object of type UserModel2 is not JSON serializable"
         # send it to HTML Datatable Prime component
 
-        return PrintInCharte_bs4(
-            render_template('project/projects_list.html', PrjList=varJSON, CanCreate=CanCreate,
-                            filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
-                            Others=Others, isadmin=2 in user.can_do,
-                            _manager_mail=_manager_mail))
-
-        # boostrap 5 to come soon : maybe needs projects_list_bs4.html and projects_list_bs5.html ?
-        #return PrintInCharte_bs5(
+        #return PrintInCharte_bs4(
         #    render_template('project/projects_list.html', PrjList=varJSON, CanCreate=CanCreate,
         #                    filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
         #                    Others=Others, isadmin=2 in user.can_do,
         #                    _manager_mail=_manager_mail))
+
+        return PrintInCharte_bs5(
+            render_template('project/projects_list_bs5.html', PrjList=varJSON, CanCreate=CanCreate,
+                            filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
+                            Others=Others, isadmin=2 in user.can_do,
+                            _manager_mail=_manager_mail))
     else:  # "historic" code
         return PrintInCharte(
             render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
