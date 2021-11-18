@@ -60,7 +60,7 @@ class part_samples(db.Model):
     profileid = db.Column(VARCHAR(250),nullable=False)
     filename = db.Column(VARCHAR(250),nullable=False)
     sampleid = db.Column(INTEGER,db.ForeignKey('samples.sampleid'))
-    sample=db.relationship("Samples")
+    # sample=db.relationship("Samples") # unused
     latitude = db.Column(DOUBLE_PRECISION)
     longitude = db.Column(DOUBLE_PRECISION)
     organizedbydeepth = db.Column(db.Boolean())

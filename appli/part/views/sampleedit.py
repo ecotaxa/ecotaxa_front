@@ -2,18 +2,16 @@ from pathlib import Path
 
 from flask import flash, request
 from flask import render_template, redirect
-# from . import prj as PartPrj
-from flask_security import login_required
 from wtforms import Form, BooleanField, StringField, validators, DateTimeField, IntegerField, FloatField, TextAreaField
 
-import appli
-import appli.part.database as partdatabase
-import appli.part.views.prj
-import appli.part.funcs.uvp_sample_import as sample_import
-from appli import database, gvp
+from appli import gvp
 from appli.database import db
+from ..ecopart_blueprint import part_app, part_PrintInCharte, PART_URL, ECOTAXA_URL
 from ..db_utils import ExecSQL
-from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_URL
+from ..funcs import histograms, uvp_sample_import as sample_import
+from ..remote import EcoTaxaInstance
+from . import prj
+from .. import database as partdatabase
 
 
 class UvpSampleForm(Form):
@@ -95,8 +93,10 @@ def delete_sample(psampleid):
 
 
 @part_app.route('/sampleedit/<int:psampleid>', methods=['get', 'post'])
-@login_required
 def part_sampleedit(psampleid):
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # @login_required
     model = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     form = UvpSampleForm(request.form, model)
     if gvp('delete') == 'Y':
@@ -107,10 +107,11 @@ def part_sampleedit(psampleid):
             setattr(model, k, v)
         db.session.commit()
         if gvp('forcerecalc') == 'Y':
-            appli.part.views.prj.ComputeHistoDet(model.psampleid, model.project.instrumtype)
-            appli.part.views.prj.ComputeHistoRed(model.psampleid, model.project.instrumtype)
-            appli.part.views.prj.ComputeZooMatch(model.psampleid, model.project.projid)
+            histograms.ComputeHistoDet(model.psampleid, model.project.instrumtype)
+            histograms.ComputeHistoRed(model.psampleid, model.project.instrumtype)
+            prj.ComputeZooMatch(ecotaxa_if, model.psampleid, model.project.projid)
             flash("Histograms have been recomputed", "success")
         return redirect("%sprj/" % PART_URL + str(model.pprojid))
-    return part_PrintInCharte(render_template("part/sampleedit.html", form=form, prjid=model.pprojid
-                                              , psampleid=model.psampleid, acq_descent_filter=model.acq_descent_filter))
+    return part_PrintInCharte(ecotaxa_if, render_template("part/sampleedit.html", form=form, prjid=model.pprojid,
+                                                          psampleid=model.psampleid,
+                                                          acq_descent_filter=model.acq_descent_filter))

@@ -1,26 +1,31 @@
 import operator
 
 from flask import render_template, g, json, request
-from flask_login import current_user
 from wtforms import Form, SelectField, SelectMultipleField
 
-from appli import app, database
-from appli.part import GetClassLimitTxt
-from appli.part.constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
-from appli.part.db_utils import GetAll
-from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, ECOTAXA_URL
-from appli.part.remote import EcoTaxaInstance
+from appli import app
+from .. import GetClassLimitTxt
+from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
+from ..db_utils import GetAll
+from ..ecopart_blueprint import part_app, part_PrintInCharte, ECOTAXA_URL
+from ..remote import EcoTaxaInstance
 
 
 @part_app.route('/')
 def indexPart():
     ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
 
+    # Liste des projets liés _et visibles_
+    linked_prjs = set([a_ref for a_ref, in GetAll("select distinct projid from part_projects")])
+    prjs = ecotaxa_if.get_visible_projects()
+    prjs.sort(key=lambda p: p.title.lower())
+    prjs = [[prj.projid, "%s(%d)" % (prj.title, prj.projid)]
+            for prj in prjs
+            if prj.projid in linked_prjs]
+
     class FiltForm(Form):
-        filt_proj = SelectMultipleField(choices=[['', '']] + GetAll(
-            "SELECT projid,concat(title,' (',cast(projid AS VARCHAR),')') "
-            "FROM projects where projid in (select projid from part_projects) "
-            "ORDER BY lower(title)"))
+        filt_proj = SelectMultipleField(choices=[['', '']] + prjs)
+        # Tous les projets EcoPart
         filt_uproj = SelectMultipleField(choices=[['', '']] + GetAll(
             "SELECT pprojid,concat(ptitle,' (',cast(pprojid AS VARCHAR),')') "
             "FROM part_projects ORDER BY lower(ptitle)"))
@@ -47,27 +52,30 @@ def indexPart():
     g.headcenter = """<h1 style='text-align: center;cursor: pointer;' >
       <span onclick="$('#particleinfodiv').toggle()"><b>PARTICLE</b> module <span class='glyphicon glyphicon-info-sign'></span> </span> 
       <a href='%s' style='font-size:medium;margin-left: 50px;'>Go to Ecotaxa</a></h2>""" % ECOTAXA_URL
-    return part_PrintInCharte(
+    return part_PrintInCharte(ecotaxa_if,
         render_template('part/index.html', form=form, LocalGIS=app.config.get("LOCALGIS", False),
                         reqfields=request.args, ecotaxa=ECOTAXA_URL))
 
 
-def GetSQLVisibility():
+def GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
+    ecotaxa_user = ecotaxa_if.get_current_user()
     sqljoin = ""
-    if current_user.has_role(database.AdministratorLabel):
+    if ecotaxa_user is not None and 2 in ecotaxa_user.can_do:
+        # Connected and Admin
         sqlvisible = "'YY'"
     else:
         sqlvisible = "case "
-        if current_user.is_authenticated:
-            sqlvisible += " when pp.ownerid=%d then 'YY' " % (current_user.id)
+        if ecotaxa_user is not None:
+            # Filter the EcoPart projects using the connected user
+            sqlvisible += " when pp.ownerid=%d then 'YY' " % (ecotaxa_user.id)
             sqlvisible += " when ppriv.privilege in('Manage','Annotate') then 'YY' "
             sqljoin = "  left Join projectspriv ppriv on pp.projid = ppriv.projid and ppriv.member=%d" % (
-                current_user.id,)
+                ecotaxa_user.id,)
         sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
                        and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date 
                        and oldestsampledate+make_interval(0,public_zooexport_deferral_month)<=current_date 
                        and p.visible then 'YY' """
-        if current_user.is_authenticated:
+        if ecotaxa_user is not None:
             sqlvisible += """ when ppriv.member is not null and oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date then 
                                 case when oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date
                                 then 'YV'
@@ -85,12 +93,12 @@ def GetSQLVisibility():
 # La colonne calculé visibility est la synthèse des règle du projet associé
 # 2 Lettre Visibilité Part et Zoo pouvant être N=>No , V=>Visibilité simple, Y=> Export
 # La colonne calculé visible le résultat de la comparaison entre visibility et  RequiredPart&ZooVisibility
-def GetFilteredSamples(Filter=None, GetVisibleOnly=False, ForceVerticalIfNotSpecified=False
+def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=False, ForceVerticalIfNotSpecified=False
                        , RequiredPartVisibility='N', RequiredZooVisibility='N'):
     sqlparam = {}
     if Filter is None:  # si filtre non spécifié on utilise GET
         Filter = request.args
-    sqlvisible, sqljoin = GetSQLVisibility()
+    sqlvisible, sqljoin = GetSQLVisibility(ecotaxa_if)
     sql = "select s.psampleid,s.latitude,s.longitude,cast (" + sqlvisible + """ as varchar(2) ) as visibility,s.profileid,s.pprojid,pp.ptitle
     from part_samples s
     JOIN part_projects pp on s.pprojid=pp.pprojid
@@ -137,7 +145,8 @@ def GetFilteredSamples(Filter=None, GetVisibleOnly=False, ForceVerticalIfNotSpec
 
 @part_app.route('/searchsample')
 def Partsearchsample():
-    samples = GetFilteredSamples()
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    samples = GetFilteredSamples(ecotaxa_if)
     res = []
     for s in samples:
         r = {'id': s['psampleid'], 'lat': s['latitude'], 'long': s['longitude'], 'visibility': s['visibility']}
@@ -146,14 +155,14 @@ def Partsearchsample():
 
 
 # @part_app.route('/statsample')
-def PartstatsampleGetData():
-    samples = GetFilteredSamples()
+def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
+    samples = GetFilteredSamples(ecotaxa_if)
     if len(samples) == 0:
         return "No Data selected"
     sampleinclause = ",".join([str(x[0]) for x in samples])
     data = {'nbrsample': len(samples), 'nbrvisible': sum(1 for x in samples if x['visible'])}
     data['nbrnotvisible'] = data['nbrsample'] - data['nbrvisible']
-    sqlvisible, sqljoin = GetSQLVisibility()
+    sqlvisible, sqljoin = GetSQLVisibility(ecotaxa_if)
     data['partprojcount'] = GetAll("""SELECT pp.ptitle,count(*) nbr
           ,count(case when organizedbydeepth then 1 end) nbrdepth
           ,count(case when not organizedbydeepth then 1 end) nbrtime
@@ -249,7 +258,6 @@ group by slice order by slice""".format(sampleinclause))
             where ps.psampleid in ({0})""".format(sampleinclause))
     # Format retourné, par exemple: [ [85061], [85039] ....]
     classif_ids = [an_id[0] for an_id in classif_ids]
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
     data['taxolist'] = ecotaxa_if.get_taxo2(classif_ids)
     data['taxolist'].sort(key=lambda r: r['tree'])
     return data
@@ -257,7 +265,8 @@ group by slice order by slice""".format(sampleinclause))
 
 @part_app.route('/statsample')
 def Partstatsample():
-    data = PartstatsampleGetData()
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    data = PartstatsampleGetData(ecotaxa_if)
     if isinstance(data, str):
         return data
     return render_template('part/stats.html', data=data, raw=json.dumps(data), ecotaxa=ECOTAXA_URL)

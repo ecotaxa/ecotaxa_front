@@ -1,24 +1,25 @@
-import logging
+from typing import List
 
 from flask import render_template, request, g
-from flask_login import current_user
-from flask_security import login_required
 
 import appli
-import appli.part.funcs.common_sample_import as common_import
 import appli.part.database as partdatabase
-import appli.part.funcs.lisst_sample_import as lisst_sample_import
+from appli import app, gvg, gvp, ErrorFormat
+from to_back.ecotaxa_cli_py import SampleModel
 from . import sampleedit
-import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
-import appli.part.funcs.uvp_sample_import as uvp_sample_import
-from appli import app, database, gvg, gvp, ErrorFormat
-from appli.part.ecopart_blueprint import part_app, part_PrintInCharte, PART_STORAGE_URL, PART_URL
 from ..db_utils import ExecSQL, GetAll
+from ..ecopart_blueprint import part_app, part_PrintInCharte, PART_STORAGE_URL, PART_URL, ECOTAXA_URL
+from ..funcs import common_sample_import as common_import
+from ..funcs import uvp_sample_import
+from ..funcs.histograms import ComputeHistoDet, ComputeHistoRed, ComputeZooHisto
+from ..remote import EcoTaxaInstance
 
 
 @part_app.route('/prj/')
-@login_required
 def part_prj():
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
     params = {}
     sql = """select pprojid,ptitle,up.ownerid,u.name,u.email,rawfolder,instrumtype,ep.title
             ,(select count(*) from part_samples where pprojid=up.pprojid) samplecount
@@ -27,10 +28,14 @@ def part_prj():
             LEFT JOIN users u on ownerid=u.id
           """
     sql += " where 1=1 "
-    if not current_user.has_role(database.AdministratorLabel):
-        sql += "  and ownerid=%d" % (current_user.id,)
+    if 2 in ecotaxa_user.can_do:
+        # No filtering for admins
+        pass
+    else:
+        # Only part_projects for this user
+        sql += "  and ownerid=%d" % (ecotaxa_user.id,)
     if gvg('filt_title', '') != '':
-        sql += " and (  up.ptitle ilike '%%'||%(title)s ||'%%' or to_char(up.pprojid,'999999') like '%%'||%(title)s or ep.title ilike '%%'||%(title)s ||'%%' or to_char(ep.projid,'999999') like '%%'||%(title)s) "
+        sql += " and ( up.ptitle ilike '%%'||%(title)s ||'%%' or to_char(up.pprojid,'999999') like '%%'||%(title)s or ep.title ilike '%%'||%(title)s ||'%%' or to_char(ep.projid,'999999') like '%%'||%(title)s) "
         params['title'] = gvg('filt_title')
     if gvg('filt_instrum', '') != '':
         sql += " and up.instrumtype ilike '%%'||%(filt_instrum)s ||'%%'  "
@@ -39,24 +44,27 @@ def part_prj():
     res = GetAll(sql, params)  # ,debug=True
     # app.logger.info("res=%s",res)
     CanCreate = False
-    if current_user.has_role(database.AdministratorLabel) or current_user.has_role(database.ProjectCreatorLabel):
+    if (2 in ecotaxa_user.can_do) or (1 in ecotaxa_user.can_do):  # User can Administrate or create projects
         CanCreate = True
     g.headcenter = "<h4>Particle Projects management</h4><a href='%s'>Particle Module Home</a>" % PART_URL
-    return part_PrintInCharte(
-        render_template('part/list.html', PrjList=res, CanCreate=CanCreate, AppManagerMailto=appli.GetAppManagerMailto()
-                        , filt_title=gvg('filt_title'), filt_subset=gvg('filt_subset'),
-                        filt_instrum=gvg('filt_instrum')))
+    return part_PrintInCharte(ecotaxa_if,
+                              render_template('part/list.html', PrjList=res, CanCreate=CanCreate,
+                                              AppManagerMailto=appli.GetAppManagerMailto()
+                                              , filt_title=gvg('filt_title'), filt_subset=gvg('filt_subset'),
+                                              filt_instrum=gvg('filt_instrum')))
 
 
 @part_app.route('/prj_uvpgraph/<int:PrjId>/<int:offset>')
-@login_required
 def part_prj_vpgraph(PrjId, offset):
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
     Prj = GetAll("""select pp.* from part_projects pp where pprojid=%s""", (PrjId,))
     if len(Prj) != 1:
-        return part_PrintInCharte(ErrorFormat("Project doesn't exists"))
+        return part_PrintInCharte(ecotaxa_if, ErrorFormat("Project doesn't exists"))
     Prj = Prj[0]
-    if Prj['ownerid'] != current_user.id and not current_user.has_role(database.AdministratorLabel):
-        return part_PrintInCharte(ErrorFormat("Access Denied"))
+    if Prj['ownerid'] != ecotaxa_user.id and not (2 in ecotaxa_user.can_do):
+        return part_PrintInCharte(ecotaxa_if, ErrorFormat("Access Denied"))
     g.headcenter = "<h4>Particle Project %s : %s</h4><a href='%sprj/%s'>Project home</a>" % (
         Prj['projid'], Prj['ptitle'], PART_URL, Prj['pprojid'],)
     dbsample = GetAll("""select psampleid,filename,profileid from part_samples s where pprojid=%s
@@ -82,12 +90,14 @@ def part_prj_vpgraph(PrjId, offset):
                      vault=PART_STORAGE_URL
                      , idepth=uvp_sample_import.GetPathForImportGraph(s['psampleid'], 'depth', True)
                      , ipart=uvp_sample_import.GetPathForImportGraph(s['psampleid'], 'particle', True))
-    return part_PrintInCharte(txt)
+    return part_PrintInCharte(ecotaxa_if, txt)
 
 
 @part_app.route('/prj/<int:PrjId>')
-@login_required
 def part_prj_main(PrjId):
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
     # Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
     Prj = GetAll("""select pp.*
                     ,oldestsampledate+make_interval(0,public_visibility_deferral_month) visibility_date  
@@ -95,10 +105,10 @@ def part_prj_main(PrjId):
                     ,oldestsampledate+make_interval(0,public_zooexport_deferral_month) zooexport_date 
                     from part_projects pp where pprojid=%s""", (PrjId,))
     if len(Prj) != 1:
-        return part_PrintInCharte(ErrorFormat("Project doesn't exists"))
+        return part_PrintInCharte(ecotaxa_if, ErrorFormat("Project doesn't exists"))
     Prj = Prj[0]
-    if Prj['ownerid'] != current_user.id and not current_user.has_role(database.AdministratorLabel):
-        return part_PrintInCharte(ErrorFormat("Access Denied"))
+    if Prj['ownerid'] != ecotaxa_user.id and not (2 in ecotaxa_user.can_do):
+        return part_PrintInCharte(ecotaxa_if, ErrorFormat("Access Denied"))
     g.headcenter = "<h4>Particle Project %s : %s</h4><a href='%s'>Particle Module Home</a>" % (
         Prj['projid'], Prj['ptitle'], PART_URL)
     dbsample = GetAll("""select profileid,psampleid,organizedbydeepth,filename,stationid,firstimage,lastimg,lastimgused,sampleid
@@ -121,69 +131,56 @@ def part_prj_main(PrjId):
                      , "Not Defined" if Prj['partexport_date'] is None else Prj['partexport_date'].strftime("%Y-%m-%d")
                      , "Not Defined" if Prj['zooexport_date'] is None else Prj['zooexport_date'].strftime("%Y-%m-%d"))
 
-    return part_PrintInCharte(
-        render_template('part/prj_index.html', PrjId=PrjId, dbsample=dbsample, Prj=Prj, VisibilityText=VisibilityText))
+    return part_PrintInCharte(ecotaxa_if,
+                              render_template('part/prj_index.html', PrjId=PrjId, dbsample=dbsample, Prj=Prj,
+                                              VisibilityText=VisibilityText))
 
 
-def ComputeHistoDet(psampleid, instrumtype):
-    try:
-        if instrumtype in ('uvp5', 'uvp6'):
-            uvp_sample_import.GenerateParticleHistogram(psampleid)
-            return " Detailed & reduced Histogram computed"
-        elif instrumtype == 'lisst':
-            lisst_sample_import.GenerateParticleHistogram(psampleid)
-            return " Detailed & reduced Histogram computed"
-        elif instrumtype == 'uvp6remote':
-            uvp6remote_sample_import.GenerateParticleHistogram(psampleid)
-            return " Detailed & reduced Histogram computed"
-        else:
-            Msg = 'Invalid instrument'
-    except Exception as E:
-        Msg = str(E)
-    return " <span style='color: red;'>" + Msg + "</span>"
-
-
-def ComputeHistoRed(psampleid, instrumtype):
-    return uvp_sample_import.GenerateReducedParticleHistogram(psampleid)
-
-
-def ComputeZooMatch(psampleid, projid):
+def ComputeZooMatch(ecotaxa_if: EcoTaxaInstance, psampleid, projid):
+    """ On essaie de raccrocher un sample EcoTaxa à ce sample EcoPart
+        La règle: orig_id EcoTaxa identique au profileid EcoPart, dans le projet lié -> C'est bon """
     if projid is not None:
-        ecosample = GetAll("""select samples.sampleid from samples
-                                        join part_samples ps on psampleid=%s
-                                        where samples.projid=%s and samples.orig_id=ps.profileid""",
-                                    (psampleid, int(projid)))
+        profileid, = GetAll("""select profileid from part_samples ps where psampleid=%d""" % psampleid)[0]
+        ecosample = ecotaxa_if.search_samples(projid, profileid)
         if len(ecosample) == 1:
             ExecSQL("update part_samples set sampleid=%s where psampleid=%s",
-                             (ecosample[0]['sampleid'], psampleid))
+                    (ecosample[0].sampleid, psampleid))
             return " Matched"
         else:
-            return " <span style='color: orange;'>No match found in Ecotaxa</span>"
+            return " <span style='color: orange;'>%d match found in EcoTaxa</span>" % len(ecosample)
     else:
         return " <span style='color: red;'>Ecotaxa sample matching impossible if Particle project not linked to an Ecotaxa project</span>"
 
 
-def ComputeZooHisto(psampleid, instrumtype):
-    try:
-        if instrumtype == 'uvp6remote':
-            uvp6remote_sample_import.GenerateTaxonomyHistogram(psampleid)
+def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance, logger):
+    # cron nightly
+    # Détermination des samples orphelins, i.e.:
+    # - dont les projets sont rattachés à un projet EcoTaxa
+    # - mais dont les samples ne sont pas (ou pas correctement) rattachés à un sample EcoTaxa
+    linked_samples = GetAll("""select pp.projid, ps.sampleid, ps.psampleid, ps.profileid 
+                                 from part_samples ps
+                                 join part_projects pp on ps.pprojid = pp.pprojid 
+                                where pp.projid is not null""")
+    fetched_samples = {}
+    logger.info("Ensuring consistency of links to EcoTaxa")
+    for to_check in linked_samples:
+        ecotaxa_projid = to_check["projid"]
+        samples_for_proj: List[SampleModel] = fetched_samples.get(ecotaxa_projid)
+        if samples_for_proj is None:
+            samples_for_proj = ecotaxa_if.all_samples_for_project(ecotaxa_projid)  # La totale
+            fetched_samples[ecotaxa_projid] = samples_for_proj
+        # Correspondance
+        sampleid = to_check["sampleid"]
+        profileid = to_check["profileid"]
+        for a_sample in samples_for_proj:
+            if a_sample.sampleid == sampleid and a_sample.orig_id == profileid:
+                break
         else:
-            uvp_sample_import.GenerateTaxonomyHistogram(psampleid)
-        return " Taxonomy Histogram computed"
-    except Exception as E:
-        logging.exception("Taxonomy Histogram can't be computed ")
-        return " <span style='color: red;'>Taxonomy Histogram can't be computed : %s </span>" % (E)
-
-
-def GlobalTaxoCompute():
-    # Sample Particule sans liens etabli avec Zoo qui sont liables
-    Samples = GetAll("""select ps.psampleid,pp.projid from samples
-            join part_samples ps on samples.orig_id=ps.profileid
-            join part_projects pp on ps.pprojid = pp.pprojid and samples.projid=pp.projid
-            where ps.sampleid is null""")
-    for S in Samples:
-        logging.info("Matching %s %s", S['psampleid'], ComputeZooMatch(S['psampleid'], S['projid']))
-    # sample ayant un objet qui à été classifié depuis le dernier calcul de l'histogramme
+            # TODO: pas super efficace mais ça arrive rarement et puis c'est un job
+            psampleid = to_check["psampleid"]
+            logger.info("Matching %s %s", psampleid, ComputeZooMatch(ecotaxa_if, psampleid, ecotaxa_projid))
+    # sample ayant un objet qui a été classifié depuis le dernier calcul de l'histogramme
+    logger.info("Refreshing histograms if needed")
     Samples = GetAll("""select psampleid, daterecalculhistotaxo,pp.instrumtype
                 from part_samples ps
                 join part_projects pp on ps.pprojid = pp.pprojid 
@@ -199,11 +196,13 @@ def GlobalTaxoCompute():
 
 
 @part_app.route('/prjcalc/<int:PrjId>', methods=['post'])
-@login_required
 def part_prjcalc(PrjId):
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_user = ecotaxa_if.get_current_user()
+    assert ecotaxa_user is not None  # i.e. @login_required
     Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
-    if Prj.ownerid != current_user.id and not current_user.has_role(database.AdministratorLabel):
-        return part_PrintInCharte(ErrorFormat("Access Denied"))
+    if Prj.ownerid != ecotaxa_user.id and not (2 in ecotaxa_user.can_do):
+        return part_PrintInCharte(ecotaxa_if, ErrorFormat("Access Denied"))
     txt = ""
     CheckedSampleList = []
     for f in request.form:
@@ -229,7 +228,7 @@ def part_prjcalc(PrjId):
         if gvp('dohistored') == 'Y':
             txt += prefix + ComputeHistoRed(S['psampleid'], Prj.instrumtype)
         if gvp('domatchecotaxa') == 'Y':
-            txt += prefix + ComputeZooMatch(S['psampleid'], Prj.projid)
+            txt += prefix + ComputeZooMatch(ecotaxa_if, S['psampleid'], Prj.projid)
         if gvp('dohistotaxo') == 'Y':
             txt += prefix + ComputeZooHisto(S['psampleid'], Prj.instrumtype)
             # try:
@@ -238,7 +237,7 @@ def part_prjcalc(PrjId):
             # except Exception as E:
             #     txt += prefix + " <span style='color: red;'>Taxonomy Histogram can't be computed : %s </span>"%(E)
         if gvp('doctdimport') == 'Y':
-            if common_import.ImportCTD(S['psampleid'], current_user.name, current_user.email):
+            if common_import.ImportCTD(S['psampleid'], ecotaxa_user.name, ecotaxa_user.email):
                 txt += prefix + " CTD imported"
             else:
                 txt += prefix + " <span style='color: red;'>CTD No file</span>"
@@ -247,4 +246,4 @@ def part_prjcalc(PrjId):
     # txt+="<br>dbsample = %s"%(dbsample)
     txt += "<br><br><a href=%sprj/%s class='btn btn-primary'><span class='glyphicon glyphicon-arrow-left'>" \
            "</span> Back to project samples list</a>" % (PART_URL, PrjId)
-    return part_PrintInCharte(txt)
+    return part_PrintInCharte(ecotaxa_if, txt)

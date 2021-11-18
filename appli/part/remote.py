@@ -6,8 +6,9 @@ from typing import List, Tuple, Dict, Any, Union, Optional
 from flask import Request
 from werkzeug.local import LocalProxy
 
-from to_back.ecotaxa_cli_py import ApiClient, TaxonModel
-from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
+from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UsersApi, UserModelWithRights, ApiException, \
+    SamplesApi, SampleModel, ObjectsApi, ObjectSetQueryRsp
+from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi
 
 
 class EcoTaxaInstance(object):
@@ -26,6 +27,18 @@ class EcoTaxaInstance(object):
         ret.configuration.access_token = self.token
         ret.configuration.host = self.base_url
         return ret
+
+    def get_current_user(self) -> Optional[UserModelWithRights]:
+        """
+            Return currently connected EcoTaxa user
+        """
+        usa = UsersApi(self._get_client())
+        try:
+            usr: UserModelWithRights = usa.show_current_user()
+            return usr
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return None
 
     def query_taxa_set(self, classif_ids: List[int]) -> List[TaxonModel]:
         tta = TaxonomyTreeApi(self._get_client())
@@ -92,6 +105,17 @@ class EcoTaxaInstance(object):
                        "tree": lineage_of(r.lineage)}
                 for r in res}
 
+    def get_taxo_tree(self, classif_id: int, cache: Dict[int, str]) -> str:
+        """
+            Return textual lineage for the given category, store in cache for cheaper repeated calls.
+        """
+        ret = cache.get(classif_id)
+        if ret is None:
+            res = self.query_taxa_set([classif_id])[0]
+            ret = self.lt_tree(res.lineage)
+            cache[classif_id] = ret
+        return ret
+
     def get_taxo_children(self, classif_ids: List[int], res: List[int]) -> None:
         """
             Get immediate children for each category ID.
@@ -125,3 +149,55 @@ class EcoTaxaInstance(object):
             # queried taxa appear in the id_lineage, so it's self+all parents
             parent_ids.update(r.id_lineage)
         return self.get_taxo3(list(parent_ids))
+
+    def get_visible_projects(self) -> List[ProjectModel]:
+        """
+            Get all visible projects.
+        """
+        pra = ProjectsApi(self._get_client())
+        ret = pra.search_projects(title_filter="", not_granted=False)
+        granted = set([prj.projid for prj in ret])
+        not_granted = pra.search_projects(title_filter="", not_granted=True)
+        # TODO: below is a workaround for not-logged users, in this case the list is twice the same
+        ret.extend([prj for prj in not_granted if prj.projid not in granted])
+        return ret
+
+    def get_project(self, project_id: int) -> Optional[ProjectModel]:
+        """
+            Get a single project by its ID.
+            Return None if not found (from API point of view, meaning it could be missing or not visible)
+        """
+        pra = ProjectsApi(self._get_client())
+        a_proj: ProjectModel = pra.project_query(project_id=project_id)
+        return a_proj
+
+    def search_samples(self, projid: int, orig_id: str) -> List[SampleModel]:
+        """
+            Inside given project, look for samples by orig_id.
+        """
+        sma = SamplesApi(self._get_client())
+        res = sma.samples_search(str(projid), orig_id)
+        # Search is case-insensitive and we need exact match
+        return [a_sam for a_sam in res
+                if a_sam.orig_id == orig_id]
+
+    def all_samples_for_project(self, projid: int):
+        sma = SamplesApi(self._get_client())
+        return sma.samples_search(str(projid), "")
+
+    def get_objects_for_sample(self, projid: int, sampleid: int, cols: List[str], only_validated: bool):
+        """
+            Query all objects in given sample, return the prefixed-less column names.
+        """
+        oba = ObjectsApi(self._get_client())
+        filters = {"samples": str(sampleid)}
+        if only_validated:
+            filters["statusfilter"] = 'V'
+        res: ObjectSetQueryRsp = oba.get_object_set(fields=",".join(cols),
+                                                    project_id=projid,
+                                                    project_filters=filters)
+        ret = []
+        for an_obj in res.details:
+            db_like_obj = {col.split(".", 1)[1]: val for col, val in zip(cols, an_obj)}
+            ret.append(db_like_obj)
+        return ret
