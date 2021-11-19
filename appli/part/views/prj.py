@@ -181,18 +181,21 @@ def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance, logger):
             logger.info("Matching %s %s", psampleid, ComputeZooMatch(ecotaxa_if, psampleid, ecotaxa_projid))
     # sample ayant un objet qui a été classifié depuis le dernier calcul de l'histogramme
     logger.info("Refreshing histograms if needed")
-    Samples = GetAll("""select psampleid, daterecalculhistotaxo,pp.instrumtype
+    Samples = GetAll("""select ps.psampleid, ps.daterecalculhistotaxo, pp.instrumtype
                 from part_samples ps
                 join part_projects pp on ps.pprojid = pp.pprojid 
                 where ps.sampleid is not null
                 and (exists (select 1 from objects obj
-                              where obj.sampleid=ps.sampleid 
-                                and obj.classif_when>ps.daterecalculhistotaxo)
+                              where obj.sampleid = ps.sampleid 
+                                and obj.classif_when > ps.daterecalculhistotaxo)
                     or ps.daterecalculhistotaxo is null 
-                    or exists (select 1 from part_histocat_lst hc where hc.psampleid=ps.psampleid and classif_id not in (select id from taxonomy)) 
+                    or exists (select 1 from part_histocat_lst hc 
+                                where hc.psampleid = ps.psampleid and hc.classif_id not in (select id from taxonomy)) 
                 )""")
     for S in Samples:
-        ComputeZooHisto(S['psampleid'], S['instrumtype'])
+        psampleid, instrumtype = S['psampleid'], S['instrumtype']
+        logger.info("Computing histogram for %s (%)", psampleid, instrumtype)
+        ComputeZooHisto(ecotaxa_if, psampleid, instrumtype)
 
 
 @part_app.route('/prjcalc/<int:PrjId>', methods=['post'])
@@ -230,7 +233,7 @@ def part_prjcalc(PrjId):
         if gvp('domatchecotaxa') == 'Y':
             txt += prefix + ComputeZooMatch(ecotaxa_if, S['psampleid'], Prj.projid)
         if gvp('dohistotaxo') == 'Y':
-            txt += prefix + ComputeZooHisto(S['psampleid'], Prj.instrumtype)
+            txt += prefix + ComputeZooHisto(ecotaxa_if, S['psampleid'], Prj.instrumtype)
             # try:
             #     uvp_sample_import.GenerateTaxonomyHistogram(S['psampleid'])
             #     txt += prefix + " Taxonomy Histogram computed"
