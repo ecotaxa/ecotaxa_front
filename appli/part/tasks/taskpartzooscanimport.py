@@ -112,7 +112,7 @@ class TaskPartZooscanImport(AsyncTask):
                     histograms.ComputeHistoRed(psampleid, Prj.instrumtype)
                     if Prj.projid is not None:  # on essaye de matcher que si on a un projet Ecotaxa
                         prj.ComputeZooMatch(ecotaxa_if, psampleid, Prj.projid)
-                        histograms.ComputeZooHisto(psampleid, Prj.instrumtype)
+                        histograms.ComputeZooHisto(ecotaxa_if, psampleid, Prj.instrumtype)
 
                     NbrDone += 1
 

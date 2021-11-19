@@ -7,6 +7,7 @@ from appli import database
 from appli.part.constants import PartDetClassLimit
 from ..db_utils import ExecSQL, GetAll, GetAssoc
 from ..funcs.common_sample_import import CleanValue, ToFloat, GetTicks, GenerateReducedParticleHistogram
+from ..remote import EcoTaxaInstance
 from ..tasks.importcommon import ConvTextDegreeDotMinuteToDecimalDegree, calcpixelfromesd_aa_exp
 
 
@@ -38,7 +39,8 @@ def CreateOrUpdateSample(pprojid, headerdata):
     m = re.search("(\d{4})(\d{2})(\d{2})-?(\d{2})(\d{2})(\d{2})?",
                   sampledatetxt)  # YYYYMMDD-HHMMSS avec tiret central et secondes optionnelles
     Sample.sampledate = datetime.datetime(*[int(x) if x else 0 for x in m.group(1, 2, 3, 4, 5, 6)])
-    Sample.latitude = ConvTextDegreeDotMinuteToDecimalDegree(headerdata['latitude'])  # dans les fichiers UVP historique c'est la notation degree.minute
+    Sample.latitude = ConvTextDegreeDotMinuteToDecimalDegree(
+        headerdata['latitude'])  # dans les fichiers UVP historique c'est la notation degree.minute
     Sample.longitude = ConvTextDegreeDotMinuteToDecimalDegree(headerdata['longitude'])
     Sample.organizedbydeepth = headerdata.get('sampletype',
                                               'P') == 'P'  # Nouvelle colonne optionnel, par défaut organisé par (P)ression
@@ -852,7 +854,7 @@ def GenerateParticleHistogram(psampleid):
     GenerateReducedParticleHistogram(psampleid)
 
 
-def GenerateTaxonomyHistogram(psampleid):
+def GenerateTaxonomyHistogram(ecotaxa_if: EcoTaxaInstance, psampleid):
     """
     Génération de l'histogramme Taxonomique 
     :param psampleid:
@@ -863,51 +865,51 @@ def GenerateTaxonomyHistogram(psampleid):
         raise Exception("GenerateTaxonomyHistogram: Sample %d missing" % psampleid)
     Prj = partdatabase.part_projects.query.filter_by(pprojid=UvpSample.pprojid).first()
     if UvpSample.sampleid is None:
-        raise Exception("GenerateTaxonomyHistogram: Ecotaxa sampleid required in Sample %d " % psampleid)
+        raise Exception("GenerateTaxonomyHistogram: EcoTaxa sampleid is required in Sample %d " % psampleid)
     pixel = UvpSample.acq_pixel
+
     # Lire le projet EcoTaxa correspondant
-    EcoPrj = database.Projects.query.filter_by(projid=Prj.projid).first()
-    if EcoPrj is None:
-        raise Exception("GenerateTaxonomyHistogram: EcoTaxa project %s missing in EcoPart project %s"
+    ecotaxa_proj = ecotaxa_if.get_project(Prj.projid)
+    if ecotaxa_proj is None:
+        raise Exception("GenerateTaxonomyHistogram: EcoTaxa project %s could not be read in EcoPart project %s"
                         % (Prj.projid, Prj.pprojid))
-    objmap = DecodeEqualList(EcoPrj.mappingobj)
-    areacol = None
-    for k, v in objmap.items():
-        if v.lower() == 'area':
-            areacol = k
-            break
+    areacol = ecotaxa_proj.obj_free_cols.get("area")
     if areacol is None:
-        raise Exception("GenerateTaxonomyHistogram: esd attribute required in Ecotaxa project %d" % Prj.projid)
+        raise Exception("GenerateTaxonomyHistogram: area attribute is required in EcoTaxa project %d" % Prj.projid)
     # app.logger.info("Esd col is %s",areacol)
+
     DepthOffset = Prj.default_depthoffset
     if DepthOffset is None:
         DepthOffset = UvpSample.acq_depthoffset
     if DepthOffset is None:
         DepthOffset = 0
 
-    # LstTaxo=GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,avg({areacol}) as avgarea,count(*) nbr
-    #             from objects
-    #             WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL and classif_qual='V'
-    #             group by classif_id,floor((depth_min+{DepthOffset})/5)"""
-    #                         .format(sampleid=UvpSample.sampleid,areacol=areacol,DepthOffset=DepthOffset))
-    LstTaxoDet = GetAll("""select classif_id,floor((depth_min+{DepthOffset})/5) tranche,{areacol} areacol
-                from objects
-                WHERE sampleid={sampleid} and classif_id is not NULL and depth_min is not NULL and {areacol} is not NULL and classif_qual='V'
-                """
-                                 .format(sampleid=UvpSample.sampleid, areacol=areacol, DepthOffset=DepthOffset))
+    queried_columns = ["obj.classif_id", "obj.classif_qual", "obj.depth_min", "fre.area"]
+    api_res = ecotaxa_if.get_objects_for_sample(ecotaxa_proj.projid, UvpSample.sampleid, queried_columns,
+                                                only_validated=True)
+    # Do some calculations/filtering for returned data
+    res = []
+    for an_obj in api_res:
+        if an_obj["classif_id"] is None or an_obj["depth_min"] is None or an_obj["area"] is None:
+            continue
+        an_obj["tranche"] = int((an_obj["depth_min"] + DepthOffset) / 5)
+        res.append(an_obj)
+
     LstTaxo = {}
-    for r in LstTaxoDet:
+    for r in res:
+        # On aggrège par catégorie+tranche d'eau
         cle = "{}/{}".format(r['classif_id'], r['tranche'])
         if cle not in LstTaxo:
             LstTaxo[cle] = {'nbr': 0, 'esdsum': 0, 'bvsum': 0, 'classif_id': r['classif_id'], 'tranche': r['tranche']}
         LstTaxo[cle]['nbr'] += 1
-        esd = 2 * math.sqrt(r['areacol'] * (pixel ** 2) / math.pi)
+        esd = 2 * math.sqrt(r['area'] * (pixel ** 2) / math.pi)
         LstTaxo[cle]['esdsum'] += esd
         biovolume = pow(esd / 2, 3) * 4 * math.pi / 3
         LstTaxo[cle]['bvsum'] += biovolume
 
-    LstVol = GetAssoc(
-        """select cast(round((depth-2.5)/5) as INT) tranche,watervolume from part_histopart_reduit where psampleid=%s""" % psampleid)
+    LstVol = GetAssoc("""select cast(round((depth-2.5)/5) as INT) tranche, watervolume 
+    from part_histopart_reduit 
+    where psampleid=%s""" % psampleid)
     # 0 Taxoid, tranche
     # TblTaxo=np.empty([len(LstTaxo),4])
     ExecSQL("delete from part_histocat_lst where psampleid=%s" % psampleid)
@@ -929,6 +931,3 @@ def GenerateTaxonomyHistogram(psampleid):
 
     ExecSQL("""update part_samples set daterecalculhistotaxo=current_timestamp  
             where psampleid=%s""" % psampleid)
-
-    # TblTaxo[i,0:2]=r['avgarea'],r['nbr']
-    # TblTaxo[:,2]=

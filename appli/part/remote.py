@@ -187,7 +187,7 @@ class EcoTaxaInstance(object):
 
     def get_objects_for_sample(self, projid: int, sampleid: int, cols: List[str], only_validated: bool):
         """
-            Query all objects in given sample, return the prefixed-less column names.
+            Query all objects in given sample, return the prefix-less column names.
         """
         oba = ObjectsApi(self._get_client())
         filters = {"samples": str(sampleid)}

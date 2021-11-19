@@ -1,6 +1,7 @@
 import logging
 
 from . import uvp_sample_import, lisst_sample_import, uvp6remote_sample_import
+from ..remote import EcoTaxaInstance
 
 
 def ComputeHistoDet(psampleid, instrumtype):
@@ -25,13 +26,13 @@ def ComputeHistoRed(psampleid, instrumtype):
     return uvp_sample_import.GenerateReducedParticleHistogram(psampleid)
 
 
-def ComputeZooHisto(psampleid, instrumtype):
+def ComputeZooHisto(ecotaxa_if: EcoTaxaInstance, psampleid, instrumtype):
     try:
         if instrumtype == 'uvp6remote':
-            uvp6remote_sample_import.GenerateTaxonomyHistogram(psampleid)
+            uvp6remote_sample_import.GenerateTaxonomyHistogram(ecotaxa_if, psampleid)
         else:
-            uvp_sample_import.GenerateTaxonomyHistogram(psampleid)
+            uvp_sample_import.GenerateTaxonomyHistogram(ecotaxa_if,psampleid)
         return " Taxonomy Histogram computed"
     except Exception as E:
-        logging.exception("Taxonomy Histogram can't be computed ")
-        return " <span style='color: red;'>Taxonomy Histogram can't be computed : %s </span>" % (E)
+        logging.exception("Taxonomy Histogram can't be computed (%s)", E)
+        return " <span style='color: red;'>Taxonomy Histogram can't be computed : %s </span>" % str(E)
