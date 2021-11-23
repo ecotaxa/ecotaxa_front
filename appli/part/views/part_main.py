@@ -53,14 +53,19 @@ def indexPart():
       <span onclick="$('#particleinfodiv').toggle()"><b>PARTICLE</b> module <span class='glyphicon glyphicon-info-sign'></span> </span> 
       <a href='%s' style='font-size:medium;margin-left: 50px;'>Go to Ecotaxa</a></h2>""" % ECOTAXA_URL
     return part_PrintInCharte(ecotaxa_if,
-        render_template('part/index.html', form=form, LocalGIS=app.config.get("LOCALGIS", False),
-                        reqfields=request.args, ecotaxa=ECOTAXA_URL))
+                              render_template('part/index.html', form=form, LocalGIS=app.config.get("LOCALGIS", False),
+                                              reqfields=request.args, ecotaxa=ECOTAXA_URL))
 
 
 def _GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
     # Génère 2 bouts de SQL qui extraient les données de visiblité des projets EcoPart et EcoTaxa
     # Il est supposé que l'alias SQL 'p' est la table projects et 'pp' la table part_projects
     ecotaxa_user = ecotaxa_if.get_current_user()
+
+    SQL_PART_PRJ_VISIBLE = "oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date"
+    SQL_PART_PRJ_EXPORTABLE = "oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date"
+    SQL_ZOO_PRJ_EXPORTABLE = "oldestsampledate+make_interval(0,public_zooexport_deferral_month)<=current_date"
+
     sqljoin = ""
     if ecotaxa_user is not None and 2 in ecotaxa_user.can_do:
         # Connected and Admin
@@ -68,30 +73,31 @@ def _GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
     else:
         sqlvisible = "case "
         if ecotaxa_user is not None:
-            # Filter the EcoPart projects using the connected user
+            # Project owner can access, shortcut-ting date constraints
             sqlvisible += " when pp.ownerid=%d then 'YY' " % (ecotaxa_user.id)
             # Allow EcoTaxa users to export the whole if they can modify the corresponding EcoTaxa project
             sqlvisible += " when ppriv.privilege in('Manage','Annotate') then 'YY' "
-            sqljoin = "  left Join projectspriv ppriv on pp.projid = ppriv.projid and ppriv.member=%d" % (
-                ecotaxa_user.id,)
+            sqljoin = "  left Join projectspriv ppriv on pp.projid = ppriv.projid and ppriv.member=%d" % \
+                      (ecotaxa_user.id,)
         # Cas général, si le projet EcoTaxa est visible c'est bon
-        sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
-                           and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date 
-                           and oldestsampledate+make_interval(0,public_zooexport_deferral_month)<=current_date 
+        sqlvisible += """ when """ + SQL_PART_PRJ_VISIBLE + """ 
+                           and """ + SQL_PART_PRJ_EXPORTABLE + """  
+                           and """ + SQL_ZOO_PRJ_EXPORTABLE + """  
                            and p.visible then 'YY' """
         if ecotaxa_user is not None:
-            # Any right on the associated project means 'V'iew
-            sqlvisible += """ when ppriv.member is not null 
-                                and oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
+            # Any right on the associated EcoTaxa project means 'V'iew on it.
+            sqlvisible += """ when ppriv.member is not null -- i.e. 'View' as the 2 other rights are managed above
+                                and """ + SQL_PART_PRJ_VISIBLE + """ 
                                 then 
-                                case when oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date
+                                case when """ + SQL_PART_PRJ_EXPORTABLE + """
                                 then 'YV'
                                 else 'VV' end """
-        sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
-                           and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date  
+        # If SQL 'when' arrives here, it's that all special grants above did not match
+        sqlvisible += """ when """ + SQL_PART_PRJ_VISIBLE + """ 
+                           and """ + SQL_PART_PRJ_EXPORTABLE + """  
                           then case when p.visible then 'YV' else 'YN' end  """
-        sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date
-                       then case when p.visible then 'VV' else 'VN' end  """
+        sqlvisible += """ when """ + SQL_PART_PRJ_VISIBLE + """ 
+                          then case when p.visible then 'VV' else 'VN' end  """
         sqlvisible += " else 'NN' end "
     return (sqlvisible, sqljoin)
 
@@ -99,7 +105,7 @@ def _GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
 # Retourne la liste des samples correspondant à un des filtres.
 # La colonne calculée visibility est la synthèse des règles du projet associé
 # 2 Lettre Visibilité Part et Zoo pouvant être N=>No , V=>Visibilité simple, Y=>Export
-# Note: On utilise l'ordre alphabétique pour la hiérachie des droits. Y > V > N
+# Note: On utilise l'ordre alphabétique pour la hiérachie des droits: Y > V > N
 # La colonne calculée visible le résultat de la comparaison entre visibility et RequiredPart&ZooVisibility
 def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=False, ForceVerticalIfNotSpecified=False
                        , MinimumPartVisibility='N', MinimumZooVisibility='N'):
