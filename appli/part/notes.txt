@@ -28,6 +28,8 @@
 
 - refs to users table in SQL, also kept in part_ DB tables (part_projects.owner_id)
 
+- ref to users_roles in SQL (for listing role 2, a single generic mail PIQv)
+
 - refs to projectspriv table in SQL for asserting current user rights on EcoTaxa projects (2 matches)
 
 ------------ ISSUES ---------------

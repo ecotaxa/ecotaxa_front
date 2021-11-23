@@ -57,7 +57,9 @@ def indexPart():
                         reqfields=request.args, ecotaxa=ECOTAXA_URL))
 
 
-def GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
+def _GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
+    # Génère 2 bouts de SQL qui extraient les données de visiblité des projets EcoPart et EcoTaxa
+    # Il est supposé que l'alias SQL 'p' est la table projects et 'pp' la table part_projects
     ecotaxa_user = ecotaxa_if.get_current_user()
     sqljoin = ""
     if ecotaxa_user is not None and 2 in ecotaxa_user.can_do:
@@ -68,21 +70,26 @@ def GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
         if ecotaxa_user is not None:
             # Filter the EcoPart projects using the connected user
             sqlvisible += " when pp.ownerid=%d then 'YY' " % (ecotaxa_user.id)
+            # Allow EcoTaxa users to export the whole if they can modify the corresponding EcoTaxa project
             sqlvisible += " when ppriv.privilege in('Manage','Annotate') then 'YY' "
             sqljoin = "  left Join projectspriv ppriv on pp.projid = ppriv.projid and ppriv.member=%d" % (
                 ecotaxa_user.id,)
+        # Cas général, si le projet EcoTaxa est visible c'est bon
         sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
-                       and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date 
-                       and oldestsampledate+make_interval(0,public_zooexport_deferral_month)<=current_date 
-                       and p.visible then 'YY' """
+                           and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date 
+                           and oldestsampledate+make_interval(0,public_zooexport_deferral_month)<=current_date 
+                           and p.visible then 'YY' """
         if ecotaxa_user is not None:
-            sqlvisible += """ when ppriv.member is not null and oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date then 
+            # Any right on the associated project means 'V'iew
+            sqlvisible += """ when ppriv.member is not null 
+                                and oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
+                                then 
                                 case when oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date
                                 then 'YV'
                                 else 'VV' end """
         sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date 
-                       and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date  
-                       then case when p.visible then 'YV' else 'YN' end  """
+                           and oldestsampledate+make_interval(0,public_partexport_deferral_month)<=current_date  
+                          then case when p.visible then 'YV' else 'YN' end  """
         sqlvisible += """ when oldestsampledate+make_interval(0,public_visibility_deferral_month)<=current_date
                        then case when p.visible then 'VV' else 'VN' end  """
         sqlvisible += " else 'NN' end "
@@ -90,19 +97,21 @@ def GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
 
 
 # Retourne la liste des samples correspondant à un des filtres.
-# La colonne calculé visibility est la synthèse des règle du projet associé
-# 2 Lettre Visibilité Part et Zoo pouvant être N=>No , V=>Visibilité simple, Y=> Export
-# La colonne calculé visible le résultat de la comparaison entre visibility et  RequiredPart&ZooVisibility
+# La colonne calculée visibility est la synthèse des règles du projet associé
+# 2 Lettre Visibilité Part et Zoo pouvant être N=>No , V=>Visibilité simple, Y=>Export
+# Note: On utilise l'ordre alphabétique pour la hiérachie des droits. Y > V > N
+# La colonne calculée visible le résultat de la comparaison entre visibility et RequiredPart&ZooVisibility
 def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=False, ForceVerticalIfNotSpecified=False
-                       , RequiredPartVisibility='N', RequiredZooVisibility='N'):
+                       , MinimumPartVisibility='N', MinimumZooVisibility='N'):
     sqlparam = {}
     if Filter is None:  # si filtre non spécifié on utilise GET
         Filter = request.args
-    sqlvisible, sqljoin = GetSQLVisibility(ecotaxa_if)
-    sql = "select s.psampleid,s.latitude,s.longitude,cast (" + sqlvisible + """ as varchar(2) ) as visibility,s.profileid,s.pprojid,pp.ptitle
-    from part_samples s
-    JOIN part_projects pp on s.pprojid=pp.pprojid
-    LEFT JOIN projects p on pp.projid=p.projid """
+    sqlvisible, sqljoin = _GetSQLVisibility(ecotaxa_if)
+    sql = "select s.psampleid, s.latitude, s.longitude,cast (" + sqlvisible + """ as varchar(2) ) as visibility, 
+            s.profileid, s.pprojid, pp.ptitle
+            from part_samples s
+            join part_projects pp on s.pprojid=pp.pprojid
+            left join projects p on pp.projid=p.projid """
     sql += sqljoin
     sql += " where 1=1 "
 
@@ -125,7 +134,7 @@ def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=
         sql += " and s.sampledate< to_date(%(todate)s,'YYYY-MM-DD')+1 "
         sqlparam['todate'] = Filter.get("filt_todate")
     if Filter.get("filt_proj", '') != "":
-        sql += " and p.projid in (%s) " % (','.join([str(int(x)) for x in request.args.getlist("filt_proj")]))
+        sql += " and pp.projid in (%s) " % (','.join([str(int(x)) for x in request.args.getlist("filt_proj")]))
     if Filter.get("filt_uproj", '') != "":
         sql += " and pp.pprojid in (%s) " % (','.join([str(int(x)) for x in request.args.getlist("filt_uproj")]))
     if Filter.get("filt_instrum", '') != "":
@@ -135,8 +144,8 @@ def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=
         sql += " and organizedbydeepth = %s " % (
             True if Filter.get("filt_proftype", '' if ForceVerticalIfNotSpecified == False else 'V') == 'V' else False)
 
-    sql = """select s.*,case when substr(visibility,1,1)>='%s' and substr(visibility,2,1)>='%s' then true end as visible 
-            from (%s ) s """ % (RequiredPartVisibility, RequiredZooVisibility, sql)
+    sql = """select s.*, case when substr(visibility,1,1)>='%s' and substr(visibility,2,1)>='%s' then true end as visible 
+            from (%s ) s """ % (MinimumPartVisibility, MinimumZooVisibility, sql)
     if GetVisibleOnly:
         sql = "select * from (" + sql + ") s where visible=true "
     sql += """ order by s.psampleid     """
@@ -162,8 +171,8 @@ def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
     sampleinclause = ",".join([str(x[0]) for x in samples])
     data = {'nbrsample': len(samples), 'nbrvisible': sum(1 for x in samples if x['visible'])}
     data['nbrnotvisible'] = data['nbrsample'] - data['nbrvisible']
-    sqlvisible, sqljoin = GetSQLVisibility(ecotaxa_if)
-    data['partprojcount'] = GetAll("""SELECT pp.ptitle,count(*) nbr
+    sqlvisible, sqljoin = _GetSQLVisibility(ecotaxa_if)
+    part_proj_count_SQL = """SELECT pp.ptitle,count(*) nbr
           ,count(case when organizedbydeepth then 1 end) nbrdepth
           ,count(case when not organizedbydeepth then 1 end) nbrtime
           ,pp.do_email,do_name,qpp.email,qpp.name,pp.instrumtype,pp.pprojid
@@ -186,7 +195,8 @@ def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
         
         where ps.psampleid in ({0} )
         group by pp.ptitle,pp.do_email,do_name,qpp.email,qpp.name,p.visible,pp.instrumtype,pp.pprojid,visibility,uppowner.name,uppowner.email
-        order by pp.ptitle""".format(sampleinclause, sqlvisible, sqljoin))
+        order by pp.ptitle""".format(sampleinclause, sqlvisible, sqljoin)
+    data['partprojcount'] = GetAll(part_proj_count_SQL)
     data['instrumcount'] = GetAll("""SELECT coalesce(pp.instrumtype,'not defined') instrum,count(*) nbr
         from part_samples ps
         join part_projects pp on ps.pprojid=pp.pprojid

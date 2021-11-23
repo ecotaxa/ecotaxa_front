@@ -939,7 +939,7 @@ class TaskPartExport(AsyncTask):
         self.param.samples = GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=self.param.filtres, GetVisibleOnly=True
                                                 # Les exports Reduit Particule se contente de la visibité les autres requiert l'export
                                                 # Pour le Zoo c'est traité dans la routine d'export elle même
-                                                , RequiredPartVisibility=('V' if self.param.what == 'RED' else 'Y'))
+                                                , MinimumPartVisibility=('V' if self.param.what == 'RED' else 'Y'))
 
         if self.task.taskstep == 0:
             # Le projet de base est choisi second écran ou validation du second ecran
@@ -975,6 +975,7 @@ class TaskPartExport(AsyncTask):
                 self.param.what = "RED"
                 self.param.fileformat = "ODV"
 
+            # Get all users with role "Users Administrator"
             LstUsers = GetAll("""select distinct u.email,u.name,Lower(u.name)
             FROM users_roles ur join users u on ur.user_id=u.id
             where ur.role_id=2

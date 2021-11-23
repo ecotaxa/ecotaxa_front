@@ -83,7 +83,7 @@ def part_drawchart():
         ProfilVertical = Filter.get('filt_proftype', '') == 'V'
         if not ProfilVertical:
             gpd.append('depth')  # si ce sont des profils temporels, on ajoute une trace pour les profondeurs
-        samples = umain.GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=Filter, GetVisibleOnly=True, RequiredPartVisibility='V')
+        samples = umain.GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=Filter, GetVisibleOnly=True, MinimumPartVisibility='V')
         for S in samples:
             if S['pprojid'] not in PrjColorMap:
                 PrjColorMap[S['pprojid']] = Couleurs[len(PrjColorMap) % len(Couleurs)]
