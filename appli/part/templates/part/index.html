@@ -430,10 +430,13 @@ position: absolute;z-index: 100;">
                     , psampleid: val['id']
                 });
                 if (val['visibility'][1] == 'Y')
+                    // Zoo visible
                     SampleSource.addFeature(iconFeature);
                 else if (val['visibility'][0] == 'Y')
+                    // Part exportable
                     SampleSourceExportCTD.addFeature(iconFeature);
                 else if (val['visibility'][0] == 'V')
+                    // Part visible
                     SampleSourceVisible.addFeature(iconFeature);
                 else
                     SampleSourceNotVisible.addFeature(iconFeature);

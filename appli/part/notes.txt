@@ -9,7 +9,7 @@
 - refs to taxonomy DB table (1 match in 1 file)
 
 - refs to database.Projects SQLAlchemy wrapper (1 match, /!\ 1 create)
-- refs to projects table in SQL (7 matches)
+- refs to projects table in SQL (5 matches)
 - refs to part_projects.project SQLAlchemy relation (3 matches in sampleedit.py)
 
 - refs to objects table (2 matches) -> /!\ the view contains projects, samples, obj_head, obj_fields
@@ -28,9 +28,9 @@
 
 - refs to users table in SQL, also kept in part_ DB tables (part_projects.owner_id)
 
-- ref to users_roles in SQL (for listing role 2, a single generic mail PIQv)
+- ref to users_roles in SQL (for listing role 2, a single generic mail PIQv for prod')
 
-- refs to projectspriv table in SQL for asserting current user rights on EcoTaxa projects (2 matches)
+- refs to projectspriv table in SQL for asserting current user rights on EcoTaxa projects (1 match)
 
 ------------ ISSUES ---------------
 
