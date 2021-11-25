@@ -979,12 +979,8 @@ class TaskPartExport(AsyncTask):
                 self.param.fileformat = "ODV"
 
             # Tous les "Users Administrator"
-            LstUsers = GetAll("""select distinct u.email,u.name,Lower(u.name)
-            FROM users_roles ur join users u on ur.user_id=u.id
-            where ur.role_id=2
-            and u.active=TRUE and email like '%@%'
-            order by Lower(u.name)""")
-            g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
+            LstUsers = ecotaxa_if.get_users_admins()
+            g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(r.email) for r in LstUsers])
 
             # On récolte les stats sur la sélection courante
             statdata = PartstatsampleGetData(ecotaxa_if)
