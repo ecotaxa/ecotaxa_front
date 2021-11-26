@@ -1,0 +1,324 @@
+// N.B. 
+// 1) install sass by "npm install -g sass"
+// 2) "sass --version" gives 1.43.5 compiled with dart2js 2.14.4, we cannot say that it shall not work with another version, but we tested with this one and it worked
+// 3) Compile this .scss like : "sass ecotaxa.scss > ecotaxa.css"
+
+// Useful 
+// https://sass-lang.com/guide
+// http://ipssidm.com/raisons-dabandonner-css-classique-sass/
+// https://www.ionos.fr/digitalguide/sites-internet/developpement-web/sass-tutoriel/
+// https://www.w3schools.com/sass/
+
+@import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600";
+@import "https://unpkg.com/primevue@3.8.2/resources/primevue.min";
+@import "https://unpkg.com/primevue@3.8.2/resources/themes/bootstrap4-light-blue/theme";
+@import "https://unpkg.com/primeicons@4.1.0/primeicons";
+// @import "https://unpkg.com/primeflex@3.1.0/primeflex"; sass does not like it (I don't know why), so make a local copy hereunder
+@import "./primeflex.scss";  // primeflex 3.1.0 for the moment
+@import "https://unpkg.com/primeflex@3.1.0/themes/saga-blue";
+@import "https://unpkg.com/primeicons@4.1.0/primeicons";
+
+$EcoTaxaBackColor: white;
+
+html {
+  font-size: 90%;
+}
+
+body {
+  font-family: 'Source Sans Pro', sans-serif, Helvetica, Arial;
+  background-color: $EcoTaxaBackColor;
+  text-align: center;
+  color: #333; // like in historic EcoTaxa
+  line-height: 1.42857143; // like in historic EcoTaxa
+}
+
+/*
+#app {
+  font-family: 'Source Sans Pro', sans-serif, Helvetica, Arial;
+  background-color:$EcoTaxaBackColor;
+  text-align: center;  
+}*/
+
+// START HERE TO CUSTOMIZE the Eco properties
+$EcoTaxaBorderColor : rgb(170, 170, 170); // border of cells
+
+$EcoTaxaLightPinkColor : rgb(255, 218, 223);
+$EcoTaxaLightBlueColor : lightblue;
+$EcoTaxaLightGreenColor : rgb(180, 233, 180);
+$EcoTaxaLightYellowColor : lightyellow;
+$EcoTaxaLightOrangeColor : rgb(253, 213, 139);
+
+$EcoTaxaUnclassifiedColor: lightgrey;
+$EcoTaxaValidatedColor: #5cb85c; // RGBA(92,184,92,255)
+$EcoTaxaDubiousColor: #f0ad4e; // rgba(240,173,78,255)
+$EcoTaxaPredictedColor:#5bc0de; // rgba(91,192,222,255)
+
+$EcoTaxaSampleColor: $EcoTaxaLightPinkColor;
+$EcoTaxaAcquAndProcColor: $EcoTaxaLightBlueColor;
+$EcoTaxaObjectColor: $EcoTaxaLightGreenColor;
+
+$EcoTaxaBadgeInsideColor:white;
+$EcoTaxaBadgeBackgroundColor:grey;
+
+.EcoTaxaBannerGeneric {
+  @extend .flex;
+  @extend .justify-content-between;
+
+  /*
+  img {
+    height: 30px;
+    margin: 10px 10px;
+  }*/
+
+  img {
+    height: 1.8rem;
+    margin: 0.6rem 0.6rem;
+  }
+
+
+  h1 {
+    @extend .text-center;
+  }
+}
+
+.EcoTaxaFocusIntro {
+  text-align: left;
+  //@extend .p-5;
+  //@extend .m-3;
+  @extend .text-left;
+}
+
+$free_cols_cell-width: 10rem;
+
+// https://www.w3schools.com/cssref/tryit.asp?filename=trycss_grid-template-columns
+@mixin EcoTaxaGridContainer($my-back-color : lightgrey) {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto;
+  grid-gap: 0px;
+
+  div {
+    border: 1px solid;
+    border-color: $EcoTaxaBorderColor;
+    background-color: $my-back-color;
+    text-align: center;
+  }
+}
+
+.EcoTaxaCard {
+  >div {
+    @extend .formgrid;
+    @extend .grid;
+
+    >div {
+      @extend .field;
+      @extend .col;
+    }
+  }
+}
+
+
+/* https://www.w3schools.com/css/css_inline-block.asp */
+/* https://www.w3schools.com/cssref/tryit.asp?filename=trycss3_box-sizing */
+
+.EcoTaxaVignette {
+  background-color: transparent; // for the moment
+  box-sizing: border-box; // content-box or border-box ?
+  display: inline-block;
+  padding: 0.2rem;
+  background-color: lightgrey; // lightblue;
+  text-align: center; // justify does not work well
+  font-weight: bold; // works
+  width: auto;
+  word-break: break-word; // break-all normal
+
+  div {
+    background: #d7edcf; // color for validated or predicted or unclassified for instance
+
+    div {
+      word-break: break-all;
+      font-weight: normal; // works    
+      text-align: left;
+    }
+  }
+}
+
+.EcoTaxaGroupSponsors {
+  a {
+    @extend .EcoTaxaLogoSponsor;
+  }
+}
+
+.EcoTaxaLogoSponsor:hover .EcoTaxaLogoImage {
+  opacity: 0.3;
+}
+
+.EcoTaxaLogoSponsor {
+  img {
+    @extend .EcoTaxaLogoImage;
+  }
+}
+
+.EcoTaxaLogoImage {
+  opacity: 1;
+  transition: .5s ease;
+  backface-visibility: hidden;
+  height: 5rem !important; // "!important" is important :) 
+  // 5rem === 80px, like in historic EcoTaxa
+  vertical-align: middle;
+  float: right;
+  // margin:0rem; // auto, or between 1 and 1.5 rem at first glance
+  margin-right: 1.5rem; // between 1 and 1.5 rem at first glance
+}
+
+.EcoTaxaAboutPage {
+  text-align: left;
+  @extend .flex;
+  @extend .flex-wrap;
+  padding: 1rem;
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: normal;
+    max-width: 100rem;
+  }
+}
+
+.EcoTaxaAboutPageIntro {
+  @extend .EcoTaxaAboutPage;
+  font-style: italic;
+}
+
+.EcoTaxaSamples {
+  @include EcoTaxaGridContainer($EcoTaxaLightPinkColor);
+}
+
+.EcoTaxaAcquOrProc {
+  @include EcoTaxaGridContainer($EcoTaxaLightBlueColor);
+}
+
+.EcoTaxaObjects {
+  @include EcoTaxaGridContainer($EcoTaxaLightGreenColor);
+}
+
+/* I keep this one (made with bootstrap) commented in case JO changes his mind ;-)
+.EcoTaxaListGroupHorizontal {
+  @extend .list-group-horizontal;
+  @extend .list-group;
+}
+.list-group {
+  flex-wrap: wrap;  
+  display: center;
+}
+*/
+
+@mixin free-cols($my-back-color : lightgrey) {
+  border: 1px solid;
+  border-color: $EcoTaxaBorderColor;
+  background-color: $my-back-color;
+  min-width: $free_cols_cell-width;
+}
+
+.EcoTaxaSmallColumn {
+  width: 6rem;
+  //min-width: 5rem;
+}
+
+// N.B. rename EcoTaxaAverageColumnS to EcoTaxaAverageColumn if you want fixed width for the concerned columns
+// But this does not seem necessary for the moment
+.EcoTaxaAverageColumnS {
+  width: 10rem;
+  //min-width: 8rem;
+}
+
+.EcoTaxaCNN {
+  width: 11rem;
+  flex-wrap: wrap;
+}
+
+.EcoTaxaLargeColumn {
+  width: 20rem;
+  //min-width: 30rem;
+}
+
+.EcoTaxaSamplesTablePrime {
+
+  td:nth-of-type(1) {
+    background: lightgrey;
+  }
+
+  td:nth-of-type(2) {
+    background: lightgrey;
+  }
+
+  td:nth-of-type(3) {
+    background: $EcoTaxaUnclassifiedColor;
+  }
+
+  td:nth-of-type(4) {
+    background: $EcoTaxaValidatedColor;
+  }
+
+  td:nth-of-type(5) {
+    background: $EcoTaxaDubiousColor;
+  }
+
+  td:nth-of-type(6) {
+    background: $EcoTaxaPredictedColor;
+  }
+
+  // if more columns arrive...
+  td:nth-of-type(7) {
+    background: $EcoTaxaLightYellowColor;
+  }
+
+  td:nth-of-type(8) {
+    background: $EcoTaxaLightOrangeColor;
+  }
+}
+
+.EcoTaxaProjectUsersPrime {
+  td:nth-of-type(1) {
+    background: lightgrey;
+  }
+
+  td:nth-of-type(2) {
+    background: lightgrey;
+  }
+
+  td:nth-of-type(3) {
+    background: $EcoTaxaLightBlueColor;
+  }
+
+  td:nth-of-type(4) {
+    background: $EcoTaxaLightPinkColor;
+  }
+}
+
+.EcoTaxaTaxaTablePrime {
+  td:nth-of-type(1) {
+    background: $EcoTaxaUnclassifiedColor;
+  }
+
+  td:nth-of-type(2) {
+    background: $EcoTaxaValidatedColor;
+  }
+
+  td:nth-of-type(3) {
+    background: $EcoTaxaDubiousColor;
+  }
+
+  td:nth-of-type(4) {
+    background: $EcoTaxaPredictedColor;
+  }
+
+  // if more columns arrive...
+  td:nth-of-type(5) {
+    background: $EcoTaxaLightYellowColor;
+  }
+
+  td:nth-of-type(6) {
+    background: $EcoTaxaLightOrangeColor;
+  }
+}
