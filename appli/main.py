@@ -18,56 +18,63 @@ vaultBP = Blueprint('vault', __name__,
                     static_url_path='/vault', static_folder='../vault')
 app.register_blueprint(vaultBP)
 
-
 @app.route('/')
 def index():
-    txt = """<div style='margin:5px;'><div id="homeText"'>"""
-    # lecture du message de l'application manager
-    NomFichier = 'appli/static/home/appmanagermsg.html'
-    if os.path.exists(NomFichier):
-        with open(NomFichier, 'r', encoding='utf8') as f:
-            message = f.read()
-            if len(message) > 5:
-                txt += """
-                    <div class="alert alert-warning alert-dismissable" role="alert">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <p><strong>Message from the application manager</strong></p>{0}
-                    </div>
-                """.format(message)
-    # Link to new EcoTaxa about page : see https://github.com/ecotaxa/ecotaxa_dev/issues/701
-    # We have to do something like : txt += '<a href="https://ecotaxa.obs-vlfr.fr/gui/ecotaxa_about>About EcoTaxa...</a>'    
-    # txt +="<div>\n"
-    # txt += '<a href="' + VUE_PATH + '/ecotaxa_about' + '">About EcoTaxa...</a>\n'
-    # txt +="</div>\n"
+    from appli.project.__init__ import connectPythonToPrime    
+    if connectPythonToPrime:
+        from appli import PrintInCharte_bs5    
+        from flask import render_template
+        return PrintInCharte_bs5(
+            render_template("project/about_ecotaxa.html")
+        )
+    else:
+        txt = """<div style='margin:5px;'><div id="homeText"'>"""
+        # lecture du message de l'application manager
+        NomFichier = 'appli/static/home/appmanagermsg.html'
+        if os.path.exists(NomFichier):
+            with open(NomFichier, 'r', encoding='utf8') as f:
+                message = f.read()
+                if len(message) > 5:
+                    txt += """
+                        <div class="alert alert-warning alert-dismissable" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <p><strong>Message from the application manager</strong></p>{0}
+                        </div>
+                    """.format(message)
+        # Link to new EcoTaxa about page : see https://github.com/ecotaxa/ecotaxa_dev/issues/701
+        # We have to do something like : txt += '<a href="https://ecotaxa.obs-vlfr.fr/gui/ecotaxa_about>About EcoTaxa...</a>'    
+        # txt +="<div>\n"
+        # txt += '<a href="' + VUE_PATH + '/ecotaxa_about' + '">About EcoTaxa...</a>\n'
+        # txt +="</div>\n"
 
-    # Lecture de la partie Haute
-    NomFichier = 'appli/static/home/home.html'
-    if not os.path.exists(NomFichier):
-        NomFichier = 'appli/static/home/home-model.html'
-    with open(NomFichier, 'r', encoding='utf8') as f:
-        txt += f.read()
-    txt += """
-	</div>
-	<div class="row" id="homeSelectors" style="margin-top: 20px; margin-bottom: 20px;">
-		<div class="col-sm-4">
-        <a href="/explore/" class="btn btn-primary btn-lg btn-block">Explore images</a>
-		</div>
-		<div class="col-sm-4">
-        <a href="/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
-		</div>		
-		<div class="col-sm-4">
-        <a href="/part/" class="btn btn-primary btn-lg  btn-block">Particle module</a>
-		</div>		
-	</div>
-"""
-    NomFichier = 'appli/static/home/homebottom.html'
-    if not os.path.exists(NomFichier):
-        NomFichier = 'appli/static/home/homebottom-model.html'
-    txt += """<div class="row" id="homeLegal"><div class="col-sm-12">"""
-    with open(NomFichier, 'r', encoding='utf8') as f:
-        txt += f.read()
-    txt += """<br><a href='/privacy'>Privacy</a></div></div></div>"""
-    return PrintInCharte(txt)
+        # Lecture de la partie Haute
+        NomFichier = 'appli/static/home/home.html'
+        if not os.path.exists(NomFichier):
+            NomFichier = 'appli/static/home/home-model.html'
+        with open(NomFichier, 'r', encoding='utf8') as f:
+            txt += f.read()
+        txt += """
+        </div>
+        <div class="row" id="homeSelectors" style="margin-top: 20px; margin-bottom: 20px;">
+            <div class="col-sm-4">
+            <a href="/explore/" class="btn btn-primary btn-lg btn-block">Explore images</a>
+            </div>
+            <div class="col-sm-4">
+            <a href="/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
+            </div>		
+            <div class="col-sm-4">
+            <a href="/part/" class="btn btn-primary btn-lg  btn-block">Particle module</a>
+            </div>		
+        </div>
+    """
+        NomFichier = 'appli/static/home/homebottom.html'
+        if not os.path.exists(NomFichier):
+            NomFichier = 'appli/static/home/homebottom-model.html'
+        txt += """<div class="row" id="homeLegal"><div class="col-sm-12">"""
+        with open(NomFichier, 'r', encoding='utf8') as f:
+            txt += f.read()
+        txt += """<br><a href='/privacy'>Privacy</a></div></div></div>"""
+        return PrintInCharte(txt)
 
 
 # Where we serve the Vue front-end

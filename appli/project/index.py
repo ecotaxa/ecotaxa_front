@@ -12,6 +12,7 @@ from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, UserModelWithRights, TaxonomyTreeStatus, ProjectTaxoStatsModel
 
+from appli.project.__init__ import connectPythonToPrime
 
 # noinspection PyPep8Naming
 @app.route('/prj/')
@@ -67,8 +68,6 @@ def indexProjects(Others=False):
     # See the cuthbertLab/music21 and cuthbertLab/music21j projects and especially the .show('vexflow') component for an example of how jsonpickleJS can be extremely useful for projects that have parallel data structures between Python and Javascript.
     # pl:List = [prjs[0]] # use pl instead of prjs if you want to test with only one project
 
-    connectPythonToPrime:bool = False
-    #connectPythonToPrime: bool = True
     if connectPythonToPrime:
         from appli import PrintInCharte_bs5
         #from appli import PrintInCharte_bs4
