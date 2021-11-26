@@ -4,6 +4,7 @@ from flask import render_template, g, json, request
 from wtforms import Form, SelectField, SelectMultipleField
 
 from appli import app
+from to_back.ecotaxa_cli_py import ProjectModel
 from .. import GetClassLimitTxt
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
 from ..db_utils import GetAll
@@ -131,7 +132,7 @@ def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=
     if Filter is None:  # si filtre non spécifié on utilise GET
         Filter = request.args
     sqlvisible = _GetSQLVisibility(ecotaxa_if)
-    sql = "select s.psampleid, s.latitude, s.longitude,cast (" + sqlvisible + """ as varchar(2) ) as visibility, 
+    sql = "select s.psampleid, s.latitude, s.longitude, cast (" + sqlvisible + """ as varchar(2) ) as visibility, 
             s.profileid, s.pprojid, pp.ptitle, pp.projid
             from part_samples s
             join part_projects pp on s.pprojid = pp.pprojid """
@@ -172,11 +173,15 @@ def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=
         sql = "select * from (" + sql + ") s where visible=true "
     sql += """ order by s.psampleid     """
     ret = GetAll(sql, sqlparam)
+
     # Enrichissement avec les infos des projets EcoTaxa
-    visible_prjids = set([prj.projid for prj in ecotaxa_if.get_visible_projects()])
+    visible_prjs = ecotaxa_if.get_visible_projects()
+    visible_prjids = set([prj.projid for prj in visible_prjs])
     for a_line in ret:
         ecotaxa_prjid = a_line["projid"]
-        ecotaxa_proj_visible = 'Y' if ecotaxa_prjid in visible_prjids else 'V' if ecotaxa_prjid is None else 'N'
+        ecotaxa_proj_visible = 'Y' if ecotaxa_prjid in visible_prjids \
+            else 'V' if ecotaxa_prjid is None \
+            else 'N'
         a_line["visibility"] += ecotaxa_proj_visible
         # On peut simplifier, mais comme ça on voit la similarité avec le test SQL + haut
         if not (ecotaxa_proj_visible >= MinimumZooVisibility):
@@ -185,14 +190,14 @@ def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=
     if GetVisibleOnly:
         ret = [a_line for a_line in ret
                if a_line["visible"]]
-    return ret
+    return ret, visible_prjs
 
 
 @part_app.route('/searchsample')
 def Partsearchsample():
     # Utilisé pour remplir la carte de la home page
     ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
-    samples = GetFilteredSamples(ecotaxa_if)
+    samples, _ignored = GetFilteredSamples(ecotaxa_if)
     res = []
     for s in samples:
         r = {'id': s['psampleid'], 'lat': s['latitude'], 'long': s['longitude'], 'visibility': s['visibility']}
@@ -200,61 +205,106 @@ def Partsearchsample():
     return json.dumps(res)
 
 
+def _getZooProjectManager(prj: ProjectModel):
+    # Recherche du Contact ou premier Manager pour le projet
+    if prj.contact is not None:
+        return prj.contact
+    prj.managers.sort(key=lambda u: u.id)
+    return prj.managers[0]
+
+
 # @part_app.route('/statsample')
 def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
-    samples = GetFilteredSamples(ecotaxa_if)
+    # Button "Display selection statistics"
+    samples, zoo_projects = GetFilteredSamples(ecotaxa_if)
     if len(samples) == 0:
         return "No Data selected"
-    sampleinclause = ",".join([str(x[0]) for x in samples])
-    data = {'nbrsample': len(samples), 'nbrvisible': sum(1 for x in samples if x['visible'])}
+
+    # On stocke les infos sorties du filtrage, pour éviter de re-quérir des data qu'on a déjà
+    samples_per_id = {s['psampleid']: s for s in samples}
+    # /!\, en théorie c'est une liste de samples pour chaque projet , là on en stocke un seul, au pif
+    samples_per_project = {s['pprojid']: s for s in samples}
+    zoo_per_projid = {p.projid: p for p in zoo_projects}
+
+    sampleinclause = ",".join([str(k) for k in samples_per_id.keys()])
+
+    # Tableau "Sample statistics"
+    data = {'nbrsample': len(samples),
+            'nbrvisible': sum(1 for x in samples if x['visible'])}
     data['nbrnotvisible'] = data['nbrsample'] - data['nbrvisible']
-    sqlvisible = _GetSQLVisibility(ecotaxa_if)
+
+    # Tableau "TABLE of PROJECT STATS"
     part_proj_count_SQL = """
-    select pp.ptitle, count(*) nbr,
-           count(case when organizedbydeepth then 1 end) nbrdepth,
-           count(case when not organizedbydeepth then 1 end) nbrtime,
-           pp.do_email, do_name, qpp.email, qpp.name, pp.instrumtype, pp.pprojid,
-           count(ps.sampleid ) nbrtaxo, p.visible, visibility,
-           uppowner.name uppowner_name,uppowner.email uppowner_email
+    select pp.ptitle, pp.ownerid, pp.do_email, pp.do_name, pp.instrumtype, pp.pprojid, pp.projid, -- part_projects infos
+           count(case when ps.organizedbydeepth then 1 end) nbrdepth, -- aggregates
+           count(case when not ps.organizedbydeepth then 1 end) nbrtime,
+           count(ps.sampleid) nbrtaxo, 
+           null::varchar as visibility, -- placeholders for completing from API info
+           null::varchar as name, null::varchar as email,
+           null::varchar as zoo_owner_name, null::varchar as zoo_owner_email
       from part_samples ps
-      join (select pp.*, cast ({1} as varchar(2) ) as visibility
-              from part_projects pp
-           ) pp on ps.pprojid = pp.pprojid
-      -- Récupération du premier manager par projet EcoTaxa
-      left join ( select * from ( select u.email, u.name, pp.projid, rank() OVER (PARTITION BY pp.projid ORDER BY pp.id) rang
-                                    from projectspriv pp join users u on pp.member=u.id
-                                   where pp.privilege='Manage' and u.active=true 
-                                ) q where rang=1 
-                ) qpp on qpp.projid=pp.projid
-      left join projects p on pp.projid = p.projid
-      left join users uppowner on pp.ownerid=uppowner.id         
-      where ps.psampleid in ({0})
-      group by pp.ptitle, pp.do_email, do_name, qpp.email, qpp.name, 
-               p.visible, pp.instrumtype, pp.pprojid, visibility, 
-               uppowner.name, uppowner.email
-      order by pp.ptitle""".format(sampleinclause, sqlvisible)
-    data['partprojcount'] = GetAll(part_proj_count_SQL)
+      join part_projects pp on ps.pprojid = pp.pprojid
+     where ps.psampleid in ({0})
+     group by pp.ptitle, pp.ownerid, pp.do_email, pp.do_name, pp.instrumtype, pp.pprojid, pp.projid
+     order by pp.ptitle""".format(sampleinclause)
+    projects_stats = GetAll(part_proj_count_SQL)
+    for a_line in projects_stats:
+        # La visibilité est celle d'un sample quelconque puisqu'elle est basée sur les projets
+        pprojid = a_line["pprojid"]
+        a_line["visibility"] = samples_per_project[pprojid]["visibility"]
+        # Récupération des infos utilisateur
+        ownerid = a_line["ownerid"]
+        usr = ecotaxa_if.get_user_by_id(ownerid)
+        if usr is not None:
+            a_line["name"] = usr.name
+            a_line["email"] = usr.email
+        # Extraction des infos du projet Zoo
+        zoo_projid = a_line["projid"]
+        if zoo_projid is None:
+            continue
+        zoo_proj: ProjectModel = zoo_per_projid.get(zoo_projid)
+        if zoo_proj is None:
+            continue
+        zoo_proj_mgr = _getZooProjectManager(zoo_proj)
+        a_line["zoo_owner_name"] = zoo_proj_mgr.name
+        a_line["zoo_owner_email"] = zoo_proj_mgr.email
+    data['partprojcount'] = projects_stats
+
+    # Tableau "Sample count per instrument"
     data['instrumcount'] = GetAll("""
-        select coalesce(pp.instrumtype,'not defined') instrum,count(*) nbr
+        select coalesce(pp.instrumtype, 'not defined') instrum, count(*) nbr
           from part_samples ps
           join part_projects pp on ps.pprojid=pp.pprojid
          where ps.psampleid in ({0} )
          group by pp.instrumtype
          order by pp.instrumtype""".format(sampleinclause))
-    data['taxoprojcount'] = GetAll("""
-        select coalesce(p.title,'not associated') title, p.projid, count(*) nbr
-          from part_samples ps
-          join part_projects pp on ps.pprojid = pp.pprojid
-          left join projects p on pp.projid = p.projid
-          where ps.psampleid in ({0} )
-          group by p.title,p.projid
-          order by p.title""".format(sampleinclause))
 
-    TaxoStat = GetAll("""SELECT ps.sampleid,count(*) nbr,count(case when classif_qual='V' then 1 end) nbrval,ps.pprojid
+    # Tableau "Sample per Taxonomy project"
+    per_zoo_proj_stats = {}
+    NO_ZOO = "not associated"
+    NOT_VISIBLE_ZOO = "not visible"
+    for a_line in samples:
+        zoo_projid = a_line["projid"]
+        if zoo_projid is None:
+            title = NO_ZOO
+        else:
+            zoo_proj: ProjectModel = zoo_per_projid.get(zoo_projid)
+            if zoo_proj is None:
+                title = NOT_VISIBLE_ZOO
+            else:
+                title = zoo_proj.title
+        zoo_4_sample = per_zoo_proj_stats.get(zoo_projid)
+        if zoo_4_sample is None:
+            zoo_4_sample = {'title': title, 'projid': zoo_projid, 'nbr': 0}
+            per_zoo_proj_stats[zoo_projid] = zoo_4_sample
+        zoo_4_sample['nbr'] += 1
+    data['taxoprojcount'] = [val for val in per_zoo_proj_stats.values()]
+
+    TaxoStat = GetAll("""SELECT ps.sampleid, count(*) nbr, count(case when classif_qual='V' then 1 end) nbrval, ps.pprojid
             from part_samples ps
             join objects oh on oh.sampleid=ps.sampleid
             where ps.psampleid in ({0})
-            group by ps.sampleid,ps.pprojid  """.format(sampleinclause))
+            group by ps.sampleid, ps.pprojid  """.format(sampleinclause))
     ResultTaxoStat = {'nbrobj': 0, 'nbrobjval': 0, 'pctval100pct': 0, 'pctpartval': 0, 'pctobjval': 0}
     TaxoStatByProj = {}
     for r in TaxoStat:
@@ -264,8 +314,10 @@ def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
             TaxoStatByProj[r['pprojid']] = {'nbrobj': 0, 'nbrobjval': 0, 'pctobjval': 0}
         TaxoStatByProj[r['pprojid']]['nbrobj'] += r['nbr']
         TaxoStatByProj[r['pprojid']]['nbrobjval'] += r['nbrval']
-        if r['nbr'] == r['nbrval']: ResultTaxoStat['pctval100pct'] += 1
-        if r['nbr'] > r['nbrval']: ResultTaxoStat['pctpartval'] += 1
+        if r['nbr'] == r['nbrval']:
+            ResultTaxoStat['pctval100pct'] += 1
+        if r['nbr'] > r['nbrval']:
+            ResultTaxoStat['pctpartval'] += 1
     if len(TaxoStat) > 0:
         ResultTaxoStat['pctval100pct'] = round(100 * ResultTaxoStat['pctval100pct'] / len(TaxoStat), 1)
         ResultTaxoStat['pctpartval'] = round(100 * ResultTaxoStat['pctpartval'] / len(TaxoStat), 1)
@@ -276,7 +328,6 @@ def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
     for k, r in TaxoStatByProj.items():
         if r['nbrobj']:
             data['taxostatbyproj'][k] = round(100 * r['nbrobjval'] / r['nbrobj'], 1)
-    print(data['taxostatbyproj'])
 
     data['depthhisto'] = GetAll("""SELECT coalesce(case when bottomdepth<500 then '0- 500' else trunc(bottomdepth,-3)||'-'||(trunc(bottomdepth,-3)+1000) end,'Not defined') slice
       , count(*) nbr

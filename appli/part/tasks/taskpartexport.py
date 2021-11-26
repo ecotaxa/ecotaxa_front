@@ -939,7 +939,7 @@ class TaskPartExport(AsyncTask):
         else:
             TxtFiltres = ""
         # applique le filtre des sample et passe la liste à la tache car besoin du 'current user' (ou pas!)
-        self.param.samples = GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=self.param.filtres, GetVisibleOnly=True
+        self.param.samples, _ignored = GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=self.param.filtres, GetVisibleOnly=True
                                                 # Les exports Reduit Particule se contente de la visibité les autres requiert l'export
                                                 # Pour le Zoo c'est traité dans la routine d'export elle même
                                                 , MinimumPartVisibility=('V' if self.param.what == 'RED' else 'Y'))
