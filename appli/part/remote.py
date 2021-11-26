@@ -7,7 +7,7 @@ from flask import Request
 from werkzeug.local import LocalProxy
 
 from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UsersApi, UserModelWithRights, ApiException, \
-    SamplesApi, SampleModel, ObjectsApi, ObjectSetQueryRsp
+    SamplesApi, SampleModel, ObjectsApi, ObjectSetQueryRsp, UserModel
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi
 
 
@@ -39,6 +39,13 @@ class EcoTaxaInstance(object):
         except ApiException as ae:
             if ae.status in (401, 403):
                 return None
+
+    def get_users_admins(self) -> List[UserModel]:
+        """
+            Return user administrators.
+        """
+        usa = UsersApi(self._get_client())
+        return usa.get_users_admins()
 
     def query_taxa_set(self, classif_ids: List[int]) -> List[TaxonModel]:
         tta = TaxonomyTreeApi(self._get_client())
@@ -187,7 +194,7 @@ class EcoTaxaInstance(object):
 
     def get_objects_for_sample(self, projid: int, sampleid: int, cols: List[str], only_validated: bool):
         """
-            Query all objects in given sample, return the prefixed-less column names.
+            Query all objects in given sample, return the prefix-less column names.
         """
         oba = ObjectsApi(self._get_client())
         filters = {"samples": str(sampleid)}

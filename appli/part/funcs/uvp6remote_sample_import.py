@@ -295,13 +295,12 @@ def GenerateParticleHistogram(psampleid):
     GenerateReducedParticleHistogram(psampleid)
 
 
-def GenerateTaxonomyHistogram(psampleid):
+def GenerateTaxonomyHistogram(ecotaxa_if: EcoTaxaInstance, psampleid):
     """
     Génération de l'histogramme Taxonomique
     :param psampleid:
     :return:
     """
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
     PartSample = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()
     if PartSample is None:
         raise Exception("GenerateTaxonomyHistogram: Sample %d missing" % psampleid)

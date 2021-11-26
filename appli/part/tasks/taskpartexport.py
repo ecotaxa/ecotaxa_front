@@ -205,7 +205,7 @@ class TaskPartExport(AsyncTask):
             logging.info("classif_ids from params = %s" % classif_ids)
         else:
             # on liste les taxo de tous les samples concernés
-            SampleIdsForTaxoExport = [str(x[0]) for x in self.param.samples if x[3][1] == 'Y']
+            SampleIdsForTaxoExport = self.exportable_sample_ids()
             if len(SampleIdsForTaxoExport) == 0:
                 SampleIdsForTaxoExport = ['-1']
             sql_cats_dans_samples = "select distinct classif_id from part_histocat where psampleid in ({0}) {1}" \
@@ -215,7 +215,6 @@ class TaskPartExport(AsyncTask):
         lstcat = self.ecotaxa_if.get_taxo3(classif_ids)
         self._add_idx_in_category_dict(lstcat)
         logging.info("lstcat = %s" % lstcat)
-        # x[3][1]==Y ==> Zoo exportable
         if self.param.redfiltres.get('taxochild', '') == '1' and len(TaxoList) > 0:
             # Filtre sur les catégories, _avec aggrégation sur leurs enfants_
             sqlhisto = ""
@@ -259,7 +258,7 @@ class TaskPartExport(AsyncTask):
                     f.write(";%s avgesd %s [mm]" % (v['nom'], HeaderSuffix))
                 f.write("\n")
                 for S in samples:
-                    if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+                    if not self.is_zoo_exportable(S["psampleid"]):
                         continue  # pas les permission d'exporter le ZOO de ce sample on le saute
                     L = [S['cruise'], S['site'], S['station'], S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['instrumsn'], S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude']]
@@ -301,7 +300,7 @@ class TaskPartExport(AsyncTask):
                 nomfichier = BaseFileName + "_ZOO_Aggregated.tsv"
             CreateFile = True
             for S in samples:
-                if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+                if not self.is_zoo_exportable(S["psampleid"]):
                     continue  # pas la permission d'exporter le ZOO de ce sample on le saute
                 CatHisto = GetAll(sqlhisto, {'psampleid': S["psampleid"]})
                 if len(CatHisto) == 0: continue  # on ne genere pas les fichiers vides.
@@ -370,7 +369,6 @@ class TaskPartExport(AsyncTask):
                     "profile\tCruise\tSite\tDataOwner\tRawfilename\tInstrument\tCTDrosettefilename\tyyyy-mm-dd hh:mm\tLatitude \tLongitude\taa\texp\tPixel size\tParticle filename\tPlankton filename\tProject\n")
 
                 for S in samples:
-                    visibility = self.samplesdict[S["psampleid"]][3]
                     L = [S['station'], S['cruise'], S['site'], S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude'], S['acq_aa'],
                          S['acq_exp'], S['acq_pixel']]
@@ -510,8 +508,7 @@ class TaskPartExport(AsyncTask):
         TaxoList = self.param.redfiltres.get('taxo', [])
         # On liste les categories pour fixer les colonnes de l'export
         # liste toutes les cat pour les samples et la depth
-        # x[3][1]==Y ==> Zoo exportable
-        SampleIdsForTaxoExport = [str(x[0]) for x in self.param.samples if x[3][1] == 'Y']
+        SampleIdsForTaxoExport = self.exportable_sample_ids()
         if len(SampleIdsForTaxoExport) == 0:
             SampleIdsForTaxoExport = ['-1']
 
@@ -586,7 +583,7 @@ class TaskPartExport(AsyncTask):
                     f.write(";%s avgesd %s [mm]" % (v['nom'], HeaderSuffix))
                 f.write("\n")
                 for S in samples:
-                    if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+                    if not self.is_zoo_exportable(S["psampleid"]):
                         continue  # pas les permission d'exporter le ZOO de ce sample le saute
                     L = [S['cruise'], S['site'], S['station'], S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['instrumsn'], S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude']]
@@ -625,7 +622,7 @@ class TaskPartExport(AsyncTask):
                 nomfichier = BaseFileName + "_ZOO_Aggregated.tsv"
             CreateFile = True
             for S in samples:
-                if self.samplesdict[S["psampleid"]][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+                if not self.is_zoo_exportable(S["psampleid"]):
                     continue  # pas les permission d'exporter le ZOO de ce sample le saute
                 CatHisto = GetAll(sqlhisto, {'psampleid': S["psampleid"]})
                 if len(CatHisto) == 0: continue  # on ne genere pas les fichiers vides.
@@ -692,7 +689,6 @@ class TaskPartExport(AsyncTask):
                     "profile\tCruise\tSite\tDataOwner\tRawfilename\tInstrument\tCTDrosettefilename\tyyyy-mm-dd hh:mm\tLatitude \tLongitude\taa\texp\tPixel size\tParticle filename\tPlankton filename\tProject\n")
 
                 for S in samples:
-                    visibility = self.samplesdict[S["psampleid"]][3]
                     L = [S['station'], S['cruise'], S['site'], S['dataowner'], S['rawfilename'], S['instrumtype'],
                          S['ctd_origfilename'], S['sampledate'], S['latitude'], S['longitude'], S['acq_aa'],
                          S['acq_exp'], S['acq_pixel']
@@ -795,7 +791,7 @@ class TaskPartExport(AsyncTask):
             if DepthOffset is None:
                 DepthOffset = 0
 
-            if self.samplesdict[psampleid][3][1] != 'Y':  # 3 = visibility, 1 =Second char=Zoo visibility
+            if not self.is_zoo_exportable(S["psampleid"]):
                 continue  # pas les permission d'exporter le ZOO de ce sample, on le saute
             if S['nbrlinetaxo'] > 0:
                 ecotaxa_proj = ecotaxa_projs[S["pprojid"]]
@@ -883,6 +879,13 @@ class TaskPartExport(AsyncTask):
                 f.write("\n")
         zfile.write(nomfichier)
 
+    def is_zoo_exportable(self, psampleid):
+        # 3 = visibility, 1 =Second char=Zoo visibility
+        return self.samplesdict[psampleid][3][1] == 'Y'
+
+    def exportable_sample_ids(self):
+        return [str(x[0]) for x in self.param.samples if x[3][1] == 'Y']
+
     def SPStep1(self):
         logging.info("Input Param = %s" % (self.param.__dict__,))
         self.ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, self.cookie)
@@ -939,7 +942,7 @@ class TaskPartExport(AsyncTask):
         self.param.samples = GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=self.param.filtres, GetVisibleOnly=True
                                                 # Les exports Reduit Particule se contente de la visibité les autres requiert l'export
                                                 # Pour le Zoo c'est traité dans la routine d'export elle même
-                                                , RequiredPartVisibility=('V' if self.param.what == 'RED' else 'Y'))
+                                                , MinimumPartVisibility=('V' if self.param.what == 'RED' else 'Y'))
 
         if self.task.taskstep == 0:
             # Le projet de base est choisi second écran ou validation du second ecran
@@ -975,13 +978,11 @@ class TaskPartExport(AsyncTask):
                 self.param.what = "RED"
                 self.param.fileformat = "ODV"
 
-            LstUsers = GetAll("""select distinct u.email,u.name,Lower(u.name)
-            FROM users_roles ur join users u on ur.user_id=u.id
-            where ur.role_id=2
-            and u.active=TRUE and email like '%@%'
-            order by Lower(u.name)""")
-            g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(*r) for r in LstUsers])
+            # Tous les "Users Administrator"
+            LstUsers = ecotaxa_if.get_users_admins()
+            g.LstUser = ",".join(["<a href='mailto:{0}'>{0}</a></li> ".format(r.email) for r in LstUsers])
 
+            # On récolte les stats sur la sélection courante
             statdata = PartstatsampleGetData(ecotaxa_if)
             if isinstance(statdata, str):
                 statdata = False

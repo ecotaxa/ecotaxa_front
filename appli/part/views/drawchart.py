@@ -83,7 +83,8 @@ def part_drawchart():
         ProfilVertical = Filter.get('filt_proftype', '') == 'V'
         if not ProfilVertical:
             gpd.append('depth')  # si ce sont des profils temporels, on ajoute une trace pour les profondeurs
-        samples = umain.GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=Filter, GetVisibleOnly=True, RequiredPartVisibility='V')
+        samples = umain.GetFilteredSamples(ecotaxa_if=ecotaxa_if, Filter=Filter,
+                                           GetVisibleOnly=True, MinimumPartVisibility='V')
         for S in samples:
             if S['pprojid'] not in PrjColorMap:
                 PrjColorMap[S['pprojid']] = Couleurs[len(PrjColorMap) % len(Couleurs)]
@@ -186,7 +187,7 @@ def part_drawchart():
                             if ProfilVertical:
                                 graph[i].set_xscale('log')
                             else:
-                                graph[i].set_yscale('log');
+                                graph[i].set_yscale('log')
                         if gvg('XScale') == 'S':
                             if ProfilVertical:
                                 graph[i].set_xscale('symlog')
@@ -268,7 +269,7 @@ def part_drawchart():
                             if ProfilVertical:
                                 graph[i].set_xscale('log')
                             else:
-                                graph[i].set_yscale('log');
+                                graph[i].set_yscale('log')
                         if gvg('XScale') == 'S':
                             if ProfilVertical:
                                 graph[i].set_xscale('symlog')
@@ -348,30 +349,33 @@ def part_drawchart():
         # traitement des Graphes TAXO
         if len(gtaxo) > 0:
             # sql = "select depth y ,1000*nbr/watervolume as x from part_histocat h "
-            sql = "select depth y ,nbr as x from part_histocat h "
-            if gvg('taxochild') == '1':
-                sql += " join taxonomy t0 on h.classif_id=t0.id "
-                for i in range(1, 15):
-                    sql += " left join taxonomy t{0} on t{1}.parent_id=t{0}.id ".format(i, i - 1)
-            # sql += " where psampleid=%(psampleid)s  and ( classif_id = %(taxoid)s and watervolume>0"
-            sql += " where psampleid=%(psampleid)s  and ( classif_id = %(taxoid)s "
-            if gvg('taxochild') == '1':
-                for i in range(1, 15):
-                    sql += " or t{}.id= %(taxoid)s".format(i)
-            sql += " ){} order by Y""".format(DepthFilter)
+            sql = "select ph.depth y, ph.nbr as x from part_histocat ph "
+            with_taxo_children = gvg('taxochild') == '1'
+            sql += " where ph.psampleid = %(psampleid)s  and ph.classif_id in %(taxoid)s "
+            sql += " {} order by Y""".format(DepthFilter)
+
             sqlWV = """ select {0} tranche,sum(watervolume) from part_histopart_det 
                     where psampleid=%(psampleid)s {1} group by tranche
                     """.format(GetTaxoHistoWaterVolumeSQLExpr("depth"), DepthFilter)
             graph = list(range(0, len(gtaxo)))
-            for i, c in enumerate(gtaxo):
-                NomTaxo = GetAll("""select concat(t.name,' (',p.name,')') nom 
-                      from taxonomy t 
-                      left JOIN taxonomy p on t.parent_id=p.id 
-                      where t.id= %(taxoid)s""", {'taxoid': c})[0]['nom']
-                if gvg('taxochild') == '1':
+            gtaxo_ids = [int(t) for t in gtaxo]
+            # On appelle l'API pour avoir les noms à afficher
+            taxo_infos = ecotaxa_if.get_taxo3(gtaxo_ids)
+            # 1 graphe par taxo demandée
+            for i, a_taxo_id in enumerate(gtaxo_ids):
+                NomTaxo = taxo_infos[a_taxo_id]["nom"]
+                if with_taxo_children:
                     NomTaxo += " and children"
                 graph[i] = Fig.add_subplot(FigSizeY, FigSizeX, chartid + 1)
                 graph[i].set_xlabel('%s #/m3' % (NomTaxo))
+
+                # On pré-calcule le sous-arbre taxo, au besoin
+                if with_taxo_children:
+                    # TODO: On pourrait accélérer pour les gros sous-arbres en récupérant tous les histo
+                    # et en les filtrant par coincidence du lineage
+                    taxoids = tuple(ecotaxa_if.get_taxo_subtree(a_taxo_id))
+                else:
+                    taxoids = (a_taxo_id,)
 
                 # graph[i].set_yscale('log')
                 def format_fn(tick_val, tick_pos):
@@ -388,7 +392,7 @@ def part_drawchart():
                 chartid += 1
                 for isample, rs in enumerate(samples):
                     if rs['visibility'][1] >= 'V':  # Visible ou exportable
-                        DBData = GetAll(sql, {'psampleid': rs['psampleid'], 'taxoid': c})
+                        DBData = GetAll(sql, {'psampleid': rs['psampleid'], 'taxoid': taxoids})
                         WV = GetAssoc2Col(sqlWV, {'psampleid': rs['psampleid']})
                     else:  # si pas le droit, on fait comme s'il n'y avait pas de données.
                         DBData = []
