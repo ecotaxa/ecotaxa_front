@@ -112,8 +112,8 @@
             <td>{{ v['nbrtaxo'] }}</td>
             <td>{{ data.taxostatbyproj[v['pprojid']] }}</td>
             <td><a href="mailto:{{ v['do_email'] or "" }}">{{ v['do_name'] or "" }}</td>
-            <td><a href="mailto:{{ v['uppowner_email'] or "" }}">{{ v['uppowner_name'] or "" }}</td>
             <td><a href="mailto:{{ v['email'] or "" }}">{{ v['name'] or "" }}</td>
+            <td><a href="mailto:{{ v['zoo_owner_email'] or "" }}">{{ v['zoo_owner_name'] or "" }}</td>
             <td>{{ {'Y':'Full export','V':'Limited export','N':'Private'}[v['visibility'][0]] }} </td>
             <td>{{ {'Y':'Full export','V':'Visible','N':'Private'}[v['visibility'][1]] }} </td>
           </tr>
