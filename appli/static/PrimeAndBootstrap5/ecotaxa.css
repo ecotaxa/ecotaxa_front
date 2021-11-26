@@ -1,10 +1,18 @@
+/* Generated, see ecotaxa.scss */
+/* Generated, see ecotaxa.scss */
+/* Generated, see ecotaxa.scss */
+/* Generated, see ecotaxa.scss */
+/* Generated, see ecotaxa.scss */
+
 @import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600";
 @import "https://unpkg.com/primevue@3.8.2/resources/primevue.min";
 @import "https://unpkg.com/primevue@3.8.2/resources/themes/bootstrap4-light-blue/theme";
 @import "https://unpkg.com/primeicons@4.1.0/primeicons";
 @import "https://unpkg.com/primeflex@3.1.0/themes/saga-blue";
 @import "https://unpkg.com/primeicons@4.1.0/primeicons";
-.grid, .EcoTaxaCard > div {
+
+.grid,
+.EcoTaxaCard>div {
   display: flex;
   flex-wrap: wrap;
   margin-right: -0.5rem;
@@ -12,9 +20,11 @@
   margin-top: -0.5rem;
 }
 
-.grid > .col, .EcoTaxaCard > div > .col, .EcoTaxaCard > div > div,
-.grid > [class*=col],
-.EcoTaxaCard > div > [class*=col] {
+.grid>.col,
+.EcoTaxaCard>div>.col,
+.EcoTaxaCard>div>div,
+.grid>[class*=col],
+.EcoTaxaCard>div>[class*=col] {
   box-sizing: border-box;
 }
 
@@ -24,12 +34,14 @@
   margin-top: 0;
 }
 
-.grid-nogutter > .col, .EcoTaxaCard > div.grid-nogutter > div,
-.grid-nogutter > [class*=col-] {
+.grid-nogutter>.col,
+.EcoTaxaCard>div.grid-nogutter>div,
+.grid-nogutter>[class*=col-] {
   padding: 0;
 }
 
-.col, .EcoTaxaCard > div > div {
+.col,
+.EcoTaxaCard>div>div {
   flex-grow: 1;
   flex-basis: 0;
   padding: 0.5rem;
@@ -185,6 +197,7 @@
     width: 100%;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:col-1 {
     flex: 0 0 auto;
@@ -258,6 +271,7 @@
     width: 100%;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:col-1 {
     flex: 0 0 auto;
@@ -331,6 +345,7 @@
     width: 100%;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:col-1 {
     flex: 0 0 auto;
@@ -404,6 +419,7 @@
     width: 100%;
   }
 }
+
 .col-offset-0 {
   margin-left: 0 !important;
 }
@@ -509,6 +525,7 @@
     margin-left: 100% !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:col-offset-0 {
     margin-left: 0 !important;
@@ -562,6 +579,7 @@
     margin-left: 100% !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:col-offset-0 {
     margin-left: 0 !important;
@@ -615,6 +633,7 @@
     margin-left: 100% !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:col-offset-0 {
     margin-left: 0 !important;
@@ -668,6 +687,7 @@
     margin-left: 100% !important;
   }
 }
+
 .text-0 {
   color: var(--surface-0) !important;
 }
@@ -1205,21 +1225,25 @@
     background-color: transparent !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:bg-transparent {
     background-color: transparent !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:bg-transparent {
     background-color: transparent !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:bg-transparent {
     background-color: transparent !important;
   }
 }
+
 .border-transparent {
   border-color: transparent !important;
 }
@@ -1229,21 +1253,25 @@
     border-color: transparent !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:border-transparent {
     border-color: transparent !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:border-transparent {
     border-color: transparent !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:border-transparent {
     border-color: transparent !important;
   }
 }
+
 .text-blue-50 {
   color: var(--blue-50) !important;
 }
@@ -7472,73 +7500,80 @@
   border-color: var(--surface-hover);
 }
 
-.field, .EcoTaxaCard > div > div {
+.field,
+.EcoTaxaCard>div>div {
   margin-bottom: 1rem;
 }
 
-.field > label, .EcoTaxaCard > div > div > label {
+.field>label,
+.EcoTaxaCard>div>div>label {
   display: inline-block;
   margin-bottom: 0.5rem;
 }
 
-.field.grid > label, .EcoTaxaCard > div > div.grid > label, .EcoTaxaCard > div.field > label, .EcoTaxaCard > div.EcoTaxaCard > div > label {
+.field.grid>label,
+.EcoTaxaCard>div>div.grid>label,
+.EcoTaxaCard>div.field>label,
+.EcoTaxaCard>div.EcoTaxaCard>div>label {
   display: flex;
   align-items: center;
 }
 
-.field > small, .EcoTaxaCard > div > div > small {
+.field>small,
+.EcoTaxaCard>div>div>small {
   margin-top: 0.25rem;
 }
 
-.field.grid, .EcoTaxaCard > div > div.grid,
+.field.grid,
+.EcoTaxaCard>div>div.grid,
 .formgrid.grid,
-.EcoTaxaCard > div {
+.EcoTaxaCard>div {
   margin-top: 0;
 }
 
 .field.grid .col-fixed,
 .formgrid.grid .col-fixed,
-.EcoTaxaCard > div .col-fixed,
+.EcoTaxaCard>div .col-fixed,
 .field.grid .col,
 .formgrid.grid .col,
-.EcoTaxaCard > div .col,
-.EcoTaxaCard > div > div,
+.EcoTaxaCard>div .col,
+.EcoTaxaCard>div>div,
 .field.grid .col-1,
 .formgrid.grid .col-1,
-.EcoTaxaCard > div .col-1,
+.EcoTaxaCard>div .col-1,
 .field.grid .col-2,
 .formgrid.grid .col-2,
-.EcoTaxaCard > div .col-2,
+.EcoTaxaCard>div .col-2,
 .field.grid .col-3,
 .formgrid.grid .col-3,
-.EcoTaxaCard > div .col-3,
+.EcoTaxaCard>div .col-3,
 .field.grid .col-4,
 .formgrid.grid .col-4,
-.EcoTaxaCard > div .col-4,
+.EcoTaxaCard>div .col-4,
 .field.grid .col-5,
 .formgrid.grid .col-5,
-.EcoTaxaCard > div .col-5,
+.EcoTaxaCard>div .col-5,
 .field.grid .col-6,
 .formgrid.grid .col-6,
-.EcoTaxaCard > div .col-6,
+.EcoTaxaCard>div .col-6,
 .field.grid .col-7,
 .formgrid.grid .col-7,
-.EcoTaxaCard > div .col-7,
+.EcoTaxaCard>div .col-7,
 .field.grid .col-8,
 .formgrid.grid .col-8,
-.EcoTaxaCard > div .col-8,
+.EcoTaxaCard>div .col-8,
 .field.grid .col-9,
 .formgrid.grid .col-9,
-.EcoTaxaCard > div .col-9,
+.EcoTaxaCard>div .col-9,
 .field.grid .col-10,
 .formgrid.grid .col-10,
-.EcoTaxaCard > div .col-10,
+.EcoTaxaCard>div .col-10,
 .field.grid .col-11,
 .formgrid.grid .col-11,
-.EcoTaxaCard > div .col-11,
+.EcoTaxaCard>div .col-11,
 .field.grid .col-12,
 .formgrid.grid .col-12,
-.EcoTaxaCard > div .col-12 {
+.EcoTaxaCard>div .col-12 {
   padding-top: 0;
   padding-bottom: 0;
 }
@@ -7549,15 +7584,17 @@
   align-items: flex-start;
 }
 
-.formgroup-inline .field, .formgroup-inline .EcoTaxaCard > div > div,
+.formgroup-inline .field,
+.formgroup-inline .EcoTaxaCard>div>div,
 .formgroup-inline .field-checkbox,
 .formgroup-inline .field-radiobutton {
   margin-right: 1rem;
 }
 
-.formgroup-inline .field > label, .formgroup-inline .EcoTaxaCard > div > div > label,
-.formgroup-inline .field-checkbox > label,
-.formgroup-inline .field-radiobutton > label {
+.formgroup-inline .field>label,
+.formgroup-inline .EcoTaxaCard>div>div>label,
+.formgroup-inline .field-checkbox>label,
+.formgroup-inline .field-radiobutton>label {
   margin-right: 0.5rem;
   margin-bottom: 0;
 }
@@ -7569,8 +7606,8 @@
   align-items: center;
 }
 
-.field-checkbox > label,
-.field-radiobutton > label {
+.field-checkbox>label,
+.field-radiobutton>label {
   margin-left: 0.5rem;
   line-height: 1;
 }
@@ -7591,7 +7628,10 @@
   display: inline-block !important;
 }
 
-.flex, .EcoTaxaAboutPage, .EcoTaxaAboutPageIntro, .EcoTaxaBannerGeneric {
+.flex,
+.EcoTaxaAboutPage,
+.EcoTaxaAboutPageIntro,
+.EcoTaxaBannerGeneric {
   display: flex !important;
 }
 
@@ -7624,6 +7664,7 @@
     display: inline-flex !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:hidden {
     display: none !important;
@@ -7649,6 +7690,7 @@
     display: inline-flex !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:hidden {
     display: none !important;
@@ -7674,6 +7716,7 @@
     display: inline-flex !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:hidden {
     display: none !important;
@@ -7699,7 +7742,9 @@
     display: inline-flex !important;
   }
 }
-.text-center, .EcoTaxaBannerGeneric h1 {
+
+.text-center,
+.EcoTaxaBannerGeneric h1 {
   text-align: center !important;
 }
 
@@ -7707,7 +7752,8 @@
   text-align: justify !important;
 }
 
-.text-left, .EcoTaxaFocusIntro {
+.text-left,
+.EcoTaxaFocusIntro {
   text-align: left !important;
 }
 
@@ -7732,6 +7778,7 @@
     text-align: right !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:text-center {
     text-align: center !important;
@@ -7749,6 +7796,7 @@
     text-align: right !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:text-center {
     text-align: center !important;
@@ -7766,6 +7814,7 @@
     text-align: right !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:text-center {
     text-align: center !important;
@@ -7783,6 +7832,7 @@
     text-align: right !important;
   }
 }
+
 .underline {
   text-decoration: underline !important;
 }
@@ -7824,6 +7874,7 @@
     text-overflow: ellipsis !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:text-overflow-clip {
     text-overflow: clip !important;
@@ -7833,6 +7884,7 @@
     text-overflow: ellipsis !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:text-overflow-clip {
     text-overflow: clip !important;
@@ -7842,6 +7894,7 @@
     text-overflow: ellipsis !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:text-overflow-clip {
     text-overflow: clip !important;
@@ -7851,6 +7904,7 @@
     text-overflow: ellipsis !important;
   }
 }
+
 .font-light {
   font-weight: 300 !important;
 }
@@ -7892,6 +7946,7 @@
     font-weight: 700 !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:font-light {
     font-weight: 300 !important;
@@ -7913,6 +7968,7 @@
     font-weight: 700 !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:font-light {
     font-weight: 300 !important;
@@ -7934,6 +7990,7 @@
     font-weight: 700 !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:font-light {
     font-weight: 300 !important;
@@ -7955,6 +8012,7 @@
     font-weight: 700 !important;
   }
 }
+
 .font-italic {
   font-style: italic !important;
 }
@@ -8056,6 +8114,7 @@
     font-size: 6rem !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:text-xs {
     font-size: 0.75rem !important;
@@ -8105,6 +8164,7 @@
     font-size: 6rem !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:text-xs {
     font-size: 0.75rem !important;
@@ -8154,6 +8214,7 @@
     font-size: 6rem !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:text-xs {
     font-size: 0.75rem !important;
@@ -8203,6 +8264,7 @@
     font-size: 6rem !important;
   }
 }
+
 .line-height-1 {
   line-height: 1 !important;
 }
@@ -8260,6 +8322,7 @@
     flex-direction: column-reverse !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:flex-row {
     flex-direction: row !important;
@@ -8277,6 +8340,7 @@
     flex-direction: column-reverse !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:flex-row {
     flex-direction: row !important;
@@ -8294,6 +8358,7 @@
     flex-direction: column-reverse !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:flex-row {
     flex-direction: row !important;
@@ -8311,7 +8376,10 @@
     flex-direction: column-reverse !important;
   }
 }
-.flex-wrap, .EcoTaxaAboutPage, .EcoTaxaAboutPageIntro {
+
+.flex-wrap,
+.EcoTaxaAboutPage,
+.EcoTaxaAboutPageIntro {
   flex-wrap: wrap !important;
 }
 
@@ -8336,6 +8404,7 @@
     flex-wrap: nowrap !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:flex-wrap {
     flex-wrap: wrap !important;
@@ -8349,6 +8418,7 @@
     flex-wrap: nowrap !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:flex-wrap {
     flex-wrap: wrap !important;
@@ -8362,6 +8432,7 @@
     flex-wrap: nowrap !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:flex-wrap {
     flex-wrap: wrap !important;
@@ -8375,6 +8446,7 @@
     flex-wrap: nowrap !important;
   }
 }
+
 .justify-content-start {
   justify-content: flex-start !important;
 }
@@ -8387,7 +8459,8 @@
   justify-content: center !important;
 }
 
-.justify-content-between, .EcoTaxaBannerGeneric {
+.justify-content-between,
+.EcoTaxaBannerGeneric {
   justify-content: space-between !important;
 }
 
@@ -8424,6 +8497,7 @@
     justify-content: space-evenly !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:justify-content-start {
     justify-content: flex-start !important;
@@ -8449,6 +8523,7 @@
     justify-content: space-evenly !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:justify-content-start {
     justify-content: flex-start !important;
@@ -8474,6 +8549,7 @@
     justify-content: space-evenly !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:justify-content-start {
     justify-content: flex-start !important;
@@ -8499,6 +8575,7 @@
     justify-content: space-evenly !important;
   }
 }
+
 .align-content-start {
   align-content: flex-start !important;
 }
@@ -8548,6 +8625,7 @@
     align-content: space-evenly !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:align-content-start {
     align-content: flex-start !important;
@@ -8573,6 +8651,7 @@
     align-content: space-evenly !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:align-content-start {
     align-content: flex-start !important;
@@ -8598,6 +8677,7 @@
     align-content: space-evenly !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:align-content-start {
     align-content: flex-start !important;
@@ -8623,6 +8703,7 @@
     align-content: space-evenly !important;
   }
 }
+
 .align-items-stretch {
   align-items: stretch !important;
 }
@@ -8664,6 +8745,7 @@
     align-items: baseline !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:align-items-stretch {
     align-items: stretch !important;
@@ -8685,6 +8767,7 @@
     align-items: baseline !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:align-items-stretch {
     align-items: stretch !important;
@@ -8706,6 +8789,7 @@
     align-items: baseline !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:align-items-stretch {
     align-items: stretch !important;
@@ -8727,6 +8811,7 @@
     align-items: baseline !important;
   }
 }
+
 .align-self-auto {
   align-self: auto !important;
 }
@@ -8776,6 +8861,7 @@
     align-self: baseline !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:align-self-auto {
     align-self: auto !important;
@@ -8801,6 +8887,7 @@
     align-self: baseline !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:align-self-auto {
     align-self: auto !important;
@@ -8826,6 +8913,7 @@
     align-self: baseline !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:align-self-auto {
     align-self: auto !important;
@@ -8851,6 +8939,7 @@
     align-self: baseline !important;
   }
 }
+
 .flex-order-0 {
   order: 0 !important;
 }
@@ -8908,6 +8997,7 @@
     order: 6 !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:flex-order-0 {
     order: 0 !important;
@@ -8937,6 +9027,7 @@
     order: 6 !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:flex-order-0 {
     order: 0 !important;
@@ -8966,6 +9057,7 @@
     order: 6 !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:flex-order-0 {
     order: 0 !important;
@@ -8995,6 +9087,7 @@
     order: 6 !important;
   }
 }
+
 .flex-1 {
   flex: 1 1 0% !important;
 }
@@ -9028,6 +9121,7 @@
     flex: none !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:flex-1 {
     flex: 1 1 0% !important;
@@ -9045,6 +9139,7 @@
     flex: none !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:flex-1 {
     flex: 1 1 0% !important;
@@ -9062,6 +9157,7 @@
     flex: none !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:flex-1 {
     flex: 1 1 0% !important;
@@ -9079,6 +9175,7 @@
     flex: none !important;
   }
 }
+
 .flex-grow-0 {
   flex-grow: 0 !important;
 }
@@ -9096,6 +9193,7 @@
     flex-grow: 1 !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:flex-grow-0 {
     flex-grow: 0 !important;
@@ -9105,6 +9203,7 @@
     flex-grow: 1 !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:flex-grow-0 {
     flex-grow: 0 !important;
@@ -9114,6 +9213,7 @@
     flex-grow: 1 !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:flex-grow-0 {
     flex-grow: 0 !important;
@@ -9123,6 +9223,7 @@
     flex-grow: 1 !important;
   }
 }
+
 .flex-shrink-0 {
   flex-shrink: 0 !important;
 }
@@ -9140,6 +9241,7 @@
     flex-shrink: 1 !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:flex-shrink-0 {
     flex-shrink: 0 !important;
@@ -9149,6 +9251,7 @@
     flex-shrink: 1 !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:flex-shrink-0 {
     flex-shrink: 0 !important;
@@ -9158,6 +9261,7 @@
     flex-shrink: 1 !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:flex-shrink-0 {
     flex-shrink: 0 !important;
@@ -9167,6 +9271,7 @@
     flex-shrink: 1 !important;
   }
 }
+
 .p-0 {
   padding: 0rem !important;
 }
@@ -9708,6 +9813,7 @@
     padding-bottom: 5rem !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:p-0 {
     padding: 0rem !important;
@@ -9979,6 +10085,7 @@
     padding-bottom: 5rem !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:p-0 {
     padding: 0rem !important;
@@ -10250,6 +10357,7 @@
     padding-bottom: 5rem !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:p-0 {
     padding: 0rem !important;
@@ -10521,6 +10629,7 @@
     padding-bottom: 5rem !important;
   }
 }
+
 .m-0 {
   margin: 0rem !important;
 }
@@ -11602,6 +11711,7 @@
     margin-bottom: auto !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:m-0 {
     margin: 0rem !important;
@@ -12143,6 +12253,7 @@
     margin-bottom: auto !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:m-0 {
     margin: 0rem !important;
@@ -12684,6 +12795,7 @@
     margin-bottom: auto !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:m-0 {
     margin: 0rem !important;
@@ -13225,6 +13337,7 @@
     margin-bottom: auto !important;
   }
 }
+
 .shadow-none {
   box-shadow: none !important;
 }
@@ -13298,6 +13411,7 @@
     box-shadow: 0px 9px 46px 8px rgba(0, 0, 0, 0.12), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 11px 15px rgba(0, 0, 0, 0.2) !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:shadow-none {
     box-shadow: none !important;
@@ -13335,6 +13449,7 @@
     box-shadow: 0px 9px 46px 8px rgba(0, 0, 0, 0.12), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 11px 15px rgba(0, 0, 0, 0.2) !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:shadow-none {
     box-shadow: none !important;
@@ -13372,6 +13487,7 @@
     box-shadow: 0px 9px 46px 8px rgba(0, 0, 0, 0.12), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 11px 15px rgba(0, 0, 0, 0.2) !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:shadow-none {
     box-shadow: none !important;
@@ -13409,6 +13525,7 @@
     box-shadow: 0px 9px 46px 8px rgba(0, 0, 0, 0.12), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 11px 15px rgba(0, 0, 0, 0.2) !important;
   }
 }
+
 .border-none {
   border-width: 0px !important;
   border-style: none;
@@ -13722,6 +13839,7 @@
     border-bottom-style: solid;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:border-none {
     border-width: 0px !important;
@@ -13879,6 +13997,7 @@
     border-bottom-style: solid;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:border-none {
     border-width: 0px !important;
@@ -14036,6 +14155,7 @@
     border-bottom-style: solid;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:border-none {
     border-width: 0px !important;
@@ -14193,6 +14313,7 @@
     border-bottom-style: solid;
   }
 }
+
 .border-solid {
   border-style: solid !important;
 }
@@ -14226,6 +14347,7 @@
     border-style: double !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:border-solid {
     border-style: solid !important;
@@ -14243,6 +14365,7 @@
     border-style: double !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:border-solid {
     border-style: solid !important;
@@ -14260,6 +14383,7 @@
     border-style: double !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:border-solid {
     border-style: solid !important;
@@ -14277,6 +14401,7 @@
     border-style: double !important;
   }
 }
+
 .border-round-left {
   border-top-left-radius: var(--border-radius);
   border-bottom-left-radius: var(--border-radius);
@@ -14318,6 +14443,7 @@
     border-bottom-right-radius: var(--border-radius);
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:border-round-left {
     border-top-left-radius: var(--border-radius);
@@ -14339,6 +14465,7 @@
     border-bottom-right-radius: var(--border-radius);
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:border-round-left {
     border-top-left-radius: var(--border-radius);
@@ -14360,6 +14487,7 @@
     border-bottom-right-radius: var(--border-radius);
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:border-round-left {
     border-top-left-radius: var(--border-radius);
@@ -14381,6 +14509,7 @@
     border-bottom-right-radius: var(--border-radius);
   }
 }
+
 .border-noround {
   border-radius: 0 !important;
 }
@@ -14406,6 +14535,7 @@
     border-radius: 50% !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:border-noround {
     border-radius: 0 !important;
@@ -14419,6 +14549,7 @@
     border-radius: 50% !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:border-noround {
     border-radius: 0 !important;
@@ -14432,6 +14563,7 @@
     border-radius: 50% !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:border-noround {
     border-radius: 0 !important;
@@ -14445,6 +14577,7 @@
     border-radius: 50% !important;
   }
 }
+
 .w-full {
   width: 100% !important;
 }
@@ -14486,6 +14619,7 @@
     width: max-content !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:w-full {
     width: 100% !important;
@@ -14507,6 +14641,7 @@
     width: max-content !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:w-full {
     width: 100% !important;
@@ -14528,6 +14663,7 @@
     width: max-content !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:w-full {
     width: 100% !important;
@@ -14549,6 +14685,7 @@
     width: max-content !important;
   }
 }
+
 .h-full {
   height: 100% !important;
 }
@@ -14574,6 +14711,7 @@
     height: auto !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:h-full {
     height: 100% !important;
@@ -14587,6 +14725,7 @@
     height: auto !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:h-full {
     height: 100% !important;
@@ -14600,6 +14739,7 @@
     height: auto !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:h-full {
     height: 100% !important;
@@ -14613,6 +14753,7 @@
     height: auto !important;
   }
 }
+
 .min-w-0 {
   min-width: 0px !important;
 }
@@ -14654,6 +14795,7 @@
     min-width: max-content !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:min-w-0 {
     min-width: 0px !important;
@@ -14675,6 +14817,7 @@
     min-width: max-content !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:min-w-0 {
     min-width: 0px !important;
@@ -14696,6 +14839,7 @@
     min-width: max-content !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:min-w-0 {
     min-width: 0px !important;
@@ -14717,6 +14861,7 @@
     min-width: max-content !important;
   }
 }
+
 .max-w-0 {
   max-width: 0px !important;
 }
@@ -14758,6 +14903,7 @@
     max-width: max-content !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:max-w-0 {
     max-width: 0px !important;
@@ -14779,6 +14925,7 @@
     max-width: max-content !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:max-w-0 {
     max-width: 0px !important;
@@ -14800,6 +14947,7 @@
     max-width: max-content !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:max-w-0 {
     max-width: 0px !important;
@@ -14821,6 +14969,7 @@
     max-width: max-content !important;
   }
 }
+
 .min-h-0 {
   min-height: 0px !important;
 }
@@ -14846,6 +14995,7 @@
     min-height: 100vh !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:min-h-0 {
     min-height: 0px !important;
@@ -14859,6 +15009,7 @@
     min-height: 100vh !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:min-h-0 {
     min-height: 0px !important;
@@ -14872,6 +15023,7 @@
     min-height: 100vh !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:min-h-0 {
     min-height: 0px !important;
@@ -14885,6 +15037,7 @@
     min-height: 100vh !important;
   }
 }
+
 .max-h-0 {
   max-height: 0px !important;
 }
@@ -14910,6 +15063,7 @@
     max-height: 100vh !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:max-h-0 {
     max-height: 0px !important;
@@ -14923,6 +15077,7 @@
     max-height: 100vh !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:max-h-0 {
     max-height: 0px !important;
@@ -14936,6 +15091,7 @@
     max-height: 100vh !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:max-h-0 {
     max-height: 0px !important;
@@ -14949,6 +15105,7 @@
     max-height: 100vh !important;
   }
 }
+
 .w-1 {
   width: 8.3333% !important;
 }
@@ -15046,6 +15203,7 @@
     width: 100% !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:w-1 {
     width: 8.3333% !important;
@@ -15095,6 +15253,7 @@
     width: 100% !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:w-1 {
     width: 8.3333% !important;
@@ -15144,6 +15303,7 @@
     width: 100% !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:w-1 {
     width: 8.3333% !important;
@@ -15193,6 +15353,7 @@
     width: 100% !important;
   }
 }
+
 .w-1rem {
   width: 1rem !important;
 }
@@ -15434,6 +15595,7 @@
     width: 30rem !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:w-1rem {
     width: 1rem !important;
@@ -15555,6 +15717,7 @@
     width: 30rem !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:w-1rem {
     width: 1rem !important;
@@ -15676,6 +15839,7 @@
     width: 30rem !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:w-1rem {
     width: 1rem !important;
@@ -15797,6 +15961,7 @@
     width: 30rem !important;
   }
 }
+
 .h-1rem {
   height: 1rem !important;
 }
@@ -16038,6 +16203,7 @@
     height: 30rem !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:h-1rem {
     height: 1rem !important;
@@ -16159,6 +16325,7 @@
     height: 30rem !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:h-1rem {
     height: 1rem !important;
@@ -16280,6 +16447,7 @@
     height: 30rem !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:h-1rem {
     height: 1rem !important;
@@ -16401,6 +16569,7 @@
     height: 30rem !important;
   }
 }
+
 .static {
   position: static !important;
 }
@@ -16442,6 +16611,7 @@
     position: sticky !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:static {
     position: static !important;
@@ -16463,6 +16633,7 @@
     position: sticky !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:static {
     position: static !important;
@@ -16484,6 +16655,7 @@
     position: sticky !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:static {
     position: static !important;
@@ -16505,6 +16677,7 @@
     position: sticky !important;
   }
 }
+
 .top-auto {
   top: auto !important;
 }
@@ -16538,6 +16711,7 @@
     top: 100% !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:top-auto {
     top: auto !important;
@@ -16555,6 +16729,7 @@
     top: 100% !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:top-auto {
     top: auto !important;
@@ -16572,6 +16747,7 @@
     top: 100% !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:top-auto {
     top: auto !important;
@@ -16589,6 +16765,7 @@
     top: 100% !important;
   }
 }
+
 .left-auto {
   left: auto !important;
 }
@@ -16622,6 +16799,7 @@
     left: 100% !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:left-auto {
     left: auto !important;
@@ -16639,6 +16817,7 @@
     left: 100% !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:left-auto {
     left: auto !important;
@@ -16656,6 +16835,7 @@
     left: 100% !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:left-auto {
     left: auto !important;
@@ -16673,6 +16853,7 @@
     left: 100% !important;
   }
 }
+
 .right-auto {
   right: auto !important;
 }
@@ -16706,6 +16887,7 @@
     right: 100% !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:right-auto {
     right: auto !important;
@@ -16723,6 +16905,7 @@
     right: 100% !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:right-auto {
     right: auto !important;
@@ -16740,6 +16923,7 @@
     right: 100% !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:right-auto {
     right: auto !important;
@@ -16757,6 +16941,7 @@
     right: 100% !important;
   }
 }
+
 .bottom-auto {
   bottom: auto !important;
 }
@@ -16790,6 +16975,7 @@
     bottom: 100% !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:bottom-auto {
     bottom: auto !important;
@@ -16807,6 +16993,7 @@
     bottom: 100% !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:bottom-auto {
     bottom: auto !important;
@@ -16824,6 +17011,7 @@
     bottom: 100% !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:bottom-auto {
     bottom: auto !important;
@@ -16841,6 +17029,7 @@
     bottom: 100% !important;
   }
 }
+
 .overflow-auto {
   overflow: auto !important;
 }
@@ -16874,6 +17063,7 @@
     overflow: scroll !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:overflow-auto {
     overflow: auto !important;
@@ -16891,6 +17081,7 @@
     overflow: scroll !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:overflow-auto {
     overflow: auto !important;
@@ -16908,6 +17099,7 @@
     overflow: scroll !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:overflow-auto {
     overflow: auto !important;
@@ -16925,6 +17117,7 @@
     overflow: scroll !important;
   }
 }
+
 .overflow-x-auto {
   overflow-x: auto !important;
 }
@@ -16958,6 +17151,7 @@
     overflow-x: scroll !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:overflow-x-auto {
     overflow-x: auto !important;
@@ -16975,6 +17169,7 @@
     overflow-x: scroll !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:overflow-x-auto {
     overflow-x: auto !important;
@@ -16992,6 +17187,7 @@
     overflow-x: scroll !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:overflow-x-auto {
     overflow-x: auto !important;
@@ -17009,6 +17205,7 @@
     overflow-x: scroll !important;
   }
 }
+
 .overflow-y-auto {
   overflow-y: auto !important;
 }
@@ -17042,6 +17239,7 @@
     overflow-y: scroll !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:overflow-y-auto {
     overflow-y: auto !important;
@@ -17059,6 +17257,7 @@
     overflow-y: scroll !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:overflow-y-auto {
     overflow-y: auto !important;
@@ -17076,6 +17275,7 @@
     overflow-y: scroll !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:overflow-y-auto {
     overflow-y: auto !important;
@@ -17093,6 +17293,7 @@
     overflow-y: scroll !important;
   }
 }
+
 .z-auto {
   z-index: auto !important;
 }
@@ -17150,6 +17351,7 @@
     z-index: 5 !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:z-auto {
     z-index: auto !important;
@@ -17179,6 +17381,7 @@
     z-index: 5 !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:z-auto {
     z-index: auto !important;
@@ -17208,6 +17411,7 @@
     z-index: 5 !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:z-auto {
     z-index: auto !important;
@@ -17237,6 +17441,7 @@
     z-index: 5 !important;
   }
 }
+
 .bg-repeat {
   background-repeat: repeat !important;
 }
@@ -17286,6 +17491,7 @@
     background-repeat: space !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:bg-repeat {
     background-repeat: repeat !important;
@@ -17311,6 +17517,7 @@
     background-repeat: space !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:bg-repeat {
     background-repeat: repeat !important;
@@ -17336,6 +17543,7 @@
     background-repeat: space !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:bg-repeat {
     background-repeat: repeat !important;
@@ -17361,6 +17569,7 @@
     background-repeat: space !important;
   }
 }
+
 .bg-auto {
   background-size: auto !important;
 }
@@ -17386,6 +17595,7 @@
     background-size: contain !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:bg-auto {
     background-size: auto !important;
@@ -17399,6 +17609,7 @@
     background-size: contain !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:bg-auto {
     background-size: auto !important;
@@ -17412,6 +17623,7 @@
     background-size: contain !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:bg-auto {
     background-size: auto !important;
@@ -17425,6 +17637,7 @@
     background-size: contain !important;
   }
 }
+
 .bg-bottom {
   background-position: bottom !important;
 }
@@ -17498,6 +17711,7 @@
     background-position: top !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:bg-bottom {
     background-position: bottom !important;
@@ -17535,6 +17749,7 @@
     background-position: top !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:bg-bottom {
     background-position: bottom !important;
@@ -17572,6 +17787,7 @@
     background-position: top !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:bg-bottom {
     background-position: bottom !important;
@@ -17609,6 +17825,7 @@
     background-position: top !important;
   }
 }
+
 .select-none {
   user-select: none !important;
 }
@@ -17874,6 +18091,7 @@
     transform: translateY(-100%) !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:translate-x-0 {
     transform: translateX(0%) !important;
@@ -17899,6 +18117,7 @@
     transform: translateY(-100%) !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:translate-x-0 {
     transform: translateX(0%) !important;
@@ -17924,6 +18143,7 @@
     transform: translateY(-100%) !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:translate-x-0 {
     transform: translateX(0%) !important;
@@ -17949,6 +18169,7 @@
     transform: translateY(-100%) !important;
   }
 }
+
 .rotate-45 {
   transform: rotate(45deg) !important;
 }
@@ -17998,6 +18219,7 @@
     transform: rotate(-180deg) !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:rotate-45 {
     transform: rotate(45deg) !important;
@@ -18023,6 +18245,7 @@
     transform: rotate(-180deg) !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:rotate-45 {
     transform: rotate(45deg) !important;
@@ -18048,6 +18271,7 @@
     transform: rotate(-180deg) !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:rotate-45 {
     transform: rotate(45deg) !important;
@@ -18073,6 +18297,7 @@
     transform: rotate(-180deg) !important;
   }
 }
+
 .origin-center {
   transform-origin: center !important;
 }
@@ -18146,6 +18371,7 @@
     transform-origin: top-left !important;
   }
 }
+
 @media screen and (min-width: 768px) {
   .md\:origin-center {
     transform-origin: center !important;
@@ -18183,6 +18409,7 @@
     transform-origin: top-left !important;
   }
 }
+
 @media screen and (min-width: 992px) {
   .lg\:origin-center {
     transform-origin: center !important;
@@ -18220,6 +18447,7 @@
     transform-origin: top-left !important;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .xl\:origin-center {
     transform-origin: center !important;
@@ -18257,145 +18485,174 @@
     transform-origin: top-left !important;
   }
 }
+
 @keyframes fadein {
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
 }
+
 @keyframes fadeout {
   0% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
   }
 }
+
 @keyframes scalein {
   0% {
     opacity: 0;
     transform: scaleY(0.8);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 1;
     transform: scaleY(1);
   }
 }
+
 @keyframes slidedown {
   0% {
     max-height: 0;
   }
+
   100% {
     max-height: auto;
   }
 }
+
 @keyframes slideup {
   0% {
     max-height: 1000px;
   }
+
   100% {
     max-height: 0;
   }
 }
+
 @keyframes fadeinleft {
   0% {
     opacity: 0;
     transform: translateX(-100%);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 1;
     transform: translateX(0%);
   }
 }
+
 @keyframes fadeoutleft {
   0% {
     opacity: 1;
     transform: translateX(0%);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 0;
     transform: translateX(-100%);
   }
 }
+
 @keyframes fadeinright {
   0% {
     opacity: 0;
     transform: translateX(100%);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 1;
     transform: translateX(0%);
   }
 }
+
 @keyframes fadeoutright {
   0% {
     opacity: 1;
     transform: translateX(0%);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 0;
     transform: translateX(100%);
   }
 }
+
 @keyframes fadeinup {
   0% {
     opacity: 0;
     transform: translateY(-100%);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0%);
   }
 }
+
 @keyframes fadeoutup {
   0% {
     opacity: 1;
     transform: translateY(0%);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 0;
     transform: translateY(-100%);
   }
 }
+
 @keyframes fadeindown {
   0% {
     opacity: 0;
     transform: translateY(100%);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0%);
   }
 }
+
 @keyframes fadeoutdown {
   0% {
     opacity: 1;
     transform: translateY(0%);
     transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);
   }
+
   100% {
     opacity: 0;
     transform: translateY(100%);
   }
 }
+
 @keyframes animate-width {
   0% {
     width: 0;
   }
+
   100% {
     width: 100%;
   }
 }
+
 .fadein {
   animation: fadein 0.15s linear;
 }
@@ -18585,10 +18842,12 @@ body {
     margin: 10px 10px;
   }*/
 }
+
 .EcoTaxaBannerGeneric img {
   height: 1.8rem;
   margin: 0.6rem 0.6rem;
 }
+
 .EcoTaxaFocusIntro {
   text-align: left;
 }
@@ -18606,20 +18865,27 @@ body {
   width: auto;
   word-break: break-word;
 }
+
 .EcoTaxaVignette div {
   background: #d7edcf;
 }
+
 .EcoTaxaVignette div div {
   word-break: break-all;
   font-weight: normal;
   text-align: left;
 }
 
-.EcoTaxaLogoSponsor:hover .EcoTaxaLogoImage, .EcoTaxaLogoSponsor:hover img, .EcoTaxaGroupSponsors a:hover .EcoTaxaLogoImage, .EcoTaxaGroupSponsors a:hover img {
+.EcoTaxaLogoSponsor:hover .EcoTaxaLogoImage,
+.EcoTaxaLogoSponsor:hover img,
+.EcoTaxaGroupSponsors a:hover .EcoTaxaLogoImage,
+.EcoTaxaGroupSponsors a:hover img {
   opacity: 0.3;
 }
 
-.EcoTaxaLogoImage, .EcoTaxaLogoSponsor img, .EcoTaxaGroupSponsors a img {
+.EcoTaxaLogoImage,
+.EcoTaxaLogoSponsor img,
+.EcoTaxaGroupSponsors a img {
   opacity: 1;
   transition: 0.5s ease;
   backface-visibility: hidden;
@@ -18629,11 +18895,14 @@ body {
   margin-right: 1.5rem;
 }
 
-.EcoTaxaAboutPage, .EcoTaxaAboutPageIntro {
+.EcoTaxaAboutPage,
+.EcoTaxaAboutPageIntro {
   text-align: left;
   padding: 1rem;
 }
-.EcoTaxaAboutPage h1, .EcoTaxaAboutPageIntro h1,
+
+.EcoTaxaAboutPage h1,
+.EcoTaxaAboutPageIntro h1,
 .EcoTaxaAboutPage h2,
 .EcoTaxaAboutPageIntro h2,
 .EcoTaxaAboutPage h3,
@@ -18653,6 +18922,7 @@ body {
   grid-template-columns: auto auto auto auto auto auto;
   grid-gap: 0px;
 }
+
 .EcoTaxaSamples div {
   border: 1px solid;
   border-color: #aaaaaa;
@@ -18665,6 +18935,7 @@ body {
   grid-template-columns: auto auto auto auto auto auto;
   grid-gap: 0px;
 }
+
 .EcoTaxaAcquOrProc div {
   border: 1px solid;
   border-color: #aaaaaa;
@@ -18677,6 +18948,7 @@ body {
   grid-template-columns: auto auto auto auto auto auto;
   grid-gap: 0px;
 }
+
 .EcoTaxaObjects div {
   border: 1px solid;
   border-color: #aaaaaa;
@@ -18714,24 +18986,31 @@ body {
 .EcoTaxaSamplesTablePrime td:nth-of-type(1) {
   background: lightgrey;
 }
+
 .EcoTaxaSamplesTablePrime td:nth-of-type(2) {
   background: lightgrey;
 }
+
 .EcoTaxaSamplesTablePrime td:nth-of-type(3) {
   background: lightgrey;
 }
+
 .EcoTaxaSamplesTablePrime td:nth-of-type(4) {
   background: #5cb85c;
 }
+
 .EcoTaxaSamplesTablePrime td:nth-of-type(5) {
   background: #f0ad4e;
 }
+
 .EcoTaxaSamplesTablePrime td:nth-of-type(6) {
   background: #5bc0de;
 }
+
 .EcoTaxaSamplesTablePrime td:nth-of-type(7) {
   background: lightyellow;
 }
+
 .EcoTaxaSamplesTablePrime td:nth-of-type(8) {
   background: #fdd58b;
 }
@@ -18739,12 +19018,15 @@ body {
 .EcoTaxaProjectUsersPrime td:nth-of-type(1) {
   background: lightgrey;
 }
+
 .EcoTaxaProjectUsersPrime td:nth-of-type(2) {
   background: lightgrey;
 }
+
 .EcoTaxaProjectUsersPrime td:nth-of-type(3) {
   background: lightblue;
 }
+
 .EcoTaxaProjectUsersPrime td:nth-of-type(4) {
   background: #ffdadf;
 }
@@ -18752,18 +19034,23 @@ body {
 .EcoTaxaTaxaTablePrime td:nth-of-type(1) {
   background: lightgrey;
 }
+
 .EcoTaxaTaxaTablePrime td:nth-of-type(2) {
   background: #5cb85c;
 }
+
 .EcoTaxaTaxaTablePrime td:nth-of-type(3) {
   background: #f0ad4e;
 }
+
 .EcoTaxaTaxaTablePrime td:nth-of-type(4) {
   background: #5bc0de;
 }
+
 .EcoTaxaTaxaTablePrime td:nth-of-type(5) {
   background: lightyellow;
 }
+
 .EcoTaxaTaxaTablePrime td:nth-of-type(6) {
   background: #fdd58b;
 }
