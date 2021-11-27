@@ -210,7 +210,10 @@ def _getZooProjectManager(prj: ProjectModel):
     if prj.contact is not None:
         return prj.contact
     prj.managers.sort(key=lambda u: u.id)
-    return prj.managers[0]
+    if len(prj.managers) > 0:
+        return prj.managers[0]
+    else:
+        return None
 
 
 # @part_app.route('/statsample')
@@ -266,8 +269,11 @@ def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
         if zoo_proj is None:
             continue
         zoo_proj_mgr = _getZooProjectManager(zoo_proj)
-        a_line["zoo_owner_name"] = zoo_proj_mgr.name
-        a_line["zoo_owner_email"] = zoo_proj_mgr.email
+        if zoo_proj_mgr is not None:
+            a_line["zoo_owner_name"] = zoo_proj_mgr.name
+            a_line["zoo_owner_email"] = zoo_proj_mgr.email
+        else:
+            a_line["zoo_owner_name"] = 'private'
     data['partprojcount'] = projects_stats
 
     # Tableau "Sample count per instrument"

@@ -224,8 +224,14 @@ class EcoTaxaInstance(object):
         """
         sma = SamplesApi(self._get_client())
         ret = []
-        for a_param_chunk in self._valid_URL_chunks(zoo_sample_ids):
-            ret.extend(sma.sample_set_get_stats(a_param_chunk))
+        try:
+            for a_param_chunk in self._valid_URL_chunks(zoo_sample_ids):
+                ret.extend(sma.sample_set_get_stats(a_param_chunk))
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return []
+            else:
+                raise
         return ret
 
     def get_objects_for_sample(self, projid: int, sampleid: int, cols: List[str], only_validated: bool):
