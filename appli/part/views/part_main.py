@@ -133,7 +133,7 @@ def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=
         Filter = request.args
     sqlvisible = _GetSQLVisibility(ecotaxa_if)
     sql = "select s.psampleid, s.latitude, s.longitude, cast (" + sqlvisible + """ as varchar(2) ) as visibility, 
-            s.profileid, s.pprojid, pp.ptitle, pp.projid
+            s.profileid, s.pprojid, s.sampleid, pp.ptitle, pp.projid
             from part_samples s
             join part_projects pp on s.pprojid = pp.pprojid """
     sql += " where 1=1 "
@@ -222,7 +222,7 @@ def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
 
     # On stocke les infos sorties du filtrage, pour éviter de re-quérir des data qu'on a déjà
     samples_per_id = {s['psampleid']: s for s in samples}
-    # /!\, en théorie c'est une liste de samples pour chaque projet , là on en stocke un seul, au pif
+    # /!\, en théorie c'est une _liste_ de samples pour chaque projet, là on en stocke un seul, au pif
     samples_per_project = {s['pprojid']: s for s in samples}
     zoo_per_projid = {p.projid: p for p in zoo_projects}
 
@@ -293,36 +293,48 @@ def PartstatsampleGetData(ecotaxa_if: EcoTaxaInstance):
                 title = NOT_VISIBLE_ZOO
             else:
                 title = zoo_proj.title
-        zoo_4_sample = per_zoo_proj_stats.get(zoo_projid)
-        if zoo_4_sample is None:
-            zoo_4_sample = {'title': title, 'projid': zoo_projid, 'nbr': 0}
-            per_zoo_proj_stats[zoo_projid] = zoo_4_sample
+        zoo_4_sample = per_zoo_proj_stats.setdefault(zoo_projid, {'title': title, 'projid': zoo_projid, 'nbr': 0})
         zoo_4_sample['nbr'] += 1
     data['taxoprojcount'] = [val for val in per_zoo_proj_stats.values()]
 
-    TaxoStat = GetAll("""SELECT ps.sampleid, count(*) nbr, count(case when classif_qual='V' then 1 end) nbrval, ps.pprojid
-            from part_samples ps
-            join objects oh on oh.sampleid=ps.sampleid
-            where ps.psampleid in ({0})
-            group by ps.sampleid, ps.pprojid  """.format(sampleinclause))
     ResultTaxoStat = {'nbrobj': 0, 'nbrobjval': 0, 'pctval100pct': 0, 'pctpartval': 0, 'pctobjval': 0}
-    TaxoStatByProj = {}
-    for r in TaxoStat:
-        ResultTaxoStat['nbrobj'] += r['nbr']
-        ResultTaxoStat['nbrobjval'] += r['nbrval']
-        if r['pprojid'] not in TaxoStatByProj:
-            TaxoStatByProj[r['pprojid']] = {'nbrobj': 0, 'nbrobjval': 0, 'pctobjval': 0}
-        TaxoStatByProj[r['pprojid']]['nbrobj'] += r['nbr']
-        TaxoStatByProj[r['pprojid']]['nbrobjval'] += r['nbrval']
-        if r['nbr'] == r['nbrval']:
+    TaxoStatByProj = {}  # clef: part proj id,
+    # Récupération des stats sur EcoTaxa
+    zoo_sample_ids = [a_line['sampleid'] for a_line in samples if a_line['sampleid'] is not None]
+    zoo_stats = {s.sample_id: s for s in ecotaxa_if.get_samples_stats(zoo_sample_ids)}
+    nb_stats = 0
+    # Calcul des aggrégats
+    for a_line in samples:
+        zoo_sample_id = a_line['sampleid']
+        if zoo_sample_id is None:  # Pas lié à un sample
+            continue
+        try:
+            zoo_sample = zoo_stats[zoo_sample_id]
+        except KeyError:
+            # Référence invalide à un sample EcoTaxa
+            continue
+        # Aggrégats globaux
+        nb_stats += 1
+        not_validated = zoo_sample.nb_unclassified + zoo_sample.nb_dubious + zoo_sample.nb_predicted
+        total_obj = not_validated + zoo_sample.nb_validated
+        ResultTaxoStat['nbrobj'] += total_obj
+        ResultTaxoStat['nbrobjval'] += zoo_sample.nb_validated
+        if not_validated == 0:
             ResultTaxoStat['pctval100pct'] += 1
-        if r['nbr'] > r['nbrval']:
+        else:
             ResultTaxoStat['pctpartval'] += 1
-    if len(TaxoStat) > 0:
-        ResultTaxoStat['pctval100pct'] = round(100 * ResultTaxoStat['pctval100pct'] / len(TaxoStat), 1)
-        ResultTaxoStat['pctpartval'] = round(100 * ResultTaxoStat['pctpartval'] / len(TaxoStat), 1)
+        # Aggrégats par projet EcoPart
+        pprojid = a_line['pprojid']
+        stats_4_proj = TaxoStatByProj.setdefault(pprojid, {'nbrobj': 0, 'nbrobjval': 0})
+        stats_4_proj['nbrobj'] += total_obj
+        stats_4_proj['nbrobjval'] += zoo_sample.nb_validated
+
+    if nb_stats > 0:
+        ResultTaxoStat['pctval100pct'] = round(100 * ResultTaxoStat['pctval100pct'] / nb_stats, 1)
+        ResultTaxoStat['pctpartval'] = round(100 * ResultTaxoStat['pctpartval'] / nb_stats, 1)
     if ResultTaxoStat['nbrobj'] > 0:
         ResultTaxoStat['pctobjval'] = round(100 * ResultTaxoStat['nbrobjval'] / ResultTaxoStat['nbrobj'], 1)
+
     data['taxostat'] = ResultTaxoStat
     data['taxostatbyproj'] = {}
     for k, r in TaxoStatByProj.items():

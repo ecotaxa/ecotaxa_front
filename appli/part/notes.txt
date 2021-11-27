@@ -6,13 +6,12 @@
 
 --------- TODO --------------
 
-- refs to taxonomy DB table (1 match in 1 file, cron function)
+- refs to taxonomy DB table (1 match in GlobalTaxoCompute AKA cron)
+- refs to objects DB view (1 match in GlobalTaxoCompute AKA cron)
 
 - refs to database.Projects SQLAlchemy wrapper (1 match, /!\ 1 create)
 - refs to projects table in SQL (3 matches)
 - refs to part_projects.project SQLAlchemy relation (3 matches in sampleedit.py)
-
-- refs to objects table (2 matches) -> /!\ the view contains projects, samples, obj_head, obj_fields
 
 - refs to users table in SQL (2 matches)
 
