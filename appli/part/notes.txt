@@ -13,7 +13,7 @@
 - refs to projects table in SQL (3 matches)
 - refs to part_projects.project SQLAlchemy relation (3 matches in sampleedit.py)
 
-- refs to users table in SQL (2 matches)
+- refs to users table in SQL (1 match)
 
 - move temp_tasks to EcoPart DB definition
 
@@ -24,8 +24,6 @@
 - "EcoTaxa folder temptask/task%06d (useful for huge files)"
 
 - cron.py for EcoPart
-
-- join with user information
 
 - refs to projectspriv table in SQL for asserting current user rights on EcoTaxa projects (1 match)
 
