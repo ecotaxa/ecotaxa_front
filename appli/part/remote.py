@@ -204,6 +204,19 @@ class EcoTaxaInstance(object):
         a_proj: ProjectModel = pra.project_query(project_id=project_id)
         return a_proj
 
+    def search_projects(self, title: str) -> List[ProjectModel]:
+        """
+            Search projects by title (the EcoTaxa way)
+            TODO: Factorize with get_visible_projects
+        """
+        pra = ProjectsApi(self._get_client())
+        ret = pra.search_projects(title_filter=title, not_granted=False)
+        granted = set([prj.projid for prj in ret])
+        not_granted = pra.search_projects(title_filter=title, not_granted=True)
+        # TODO: below is a workaround for not-logged users, in this case the list is twice the same
+        ret.extend([prj for prj in not_granted if prj.projid not in granted])
+        return ret
+
     def search_samples(self, projid: int, orig_id: str) -> List[SampleModel]:
         """
             Inside given project, look for samples by orig_id.
