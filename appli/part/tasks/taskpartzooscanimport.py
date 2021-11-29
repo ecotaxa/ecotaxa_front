@@ -7,13 +7,12 @@ from pathlib import Path
 
 from flask import render_template, flash, request, g
 
-import appli.part.database as partdatabase
-import appli.part.funcs.histograms
+from appli import db, app, gvp, gvg, ErrorFormat
+
+from .. import database as partdatabase
 from ..funcs import uvp_sample_import, lisst_sample_import, common_sample_import, uvp6remote_sample_import, nightly
 from ..funcs import histograms
 from ..views import prj
-import appli.project.main
-from appli import db, app, PrintInCharte, gvp, gvg, ErrorFormat
 from ..ecopart_blueprint import PART_URL, ECOTAXA_URL, part_PrintInCharte
 from .taskmanager import AsyncTask, DoTaskClean
 from ..constants import LstInstrumType
@@ -177,7 +176,8 @@ class TaskPartZooscanImport(AsyncTask):
                 FichierHeader = DossierUVPPath / "meta" / (m.group(1) + "_header_" + m.group(2) + ".txt")
 
             if not FichierHeader.exists():
-                return part_PrintInCharte(ecotaxa_if, ErrorFormat("Le fichier header n'existe pas :" + FichierHeader.as_posix()))
+                return part_PrintInCharte(ecotaxa_if,
+                                          ErrorFormat("Le fichier header n'existe pas :" + FichierHeader.as_posix()))
             else:
                 # print("ouverture de " + FichierHeader)
                 with open(FichierHeader.as_posix(), encoding="latin_1") as FichierHeaderHandler:
@@ -213,7 +213,8 @@ class TaskPartZooscanImport(AsyncTask):
         else:  # valeurs par default
 
             if len(self.param.profilelistinheader) == 0:
-                return part_PrintInCharte(ecotaxa_if, ErrorFormat("No sample available in file %s" % (FichierHeader.as_posix())))
+                return part_PrintInCharte(ecotaxa_if,
+                                          ErrorFormat("No sample available in file %s" % (FichierHeader.as_posix())))
             # print("%s"%(self.param.profilelistinheader))
         return render_template('tasks/uvpzooscanimport_create.html', header=txt, data=self.param,
                                ServerPath=gvp("ServerPath"), TxtTaxoMap=gvp("TxtTaxoMap"))

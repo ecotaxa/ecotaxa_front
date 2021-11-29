@@ -710,26 +710,34 @@ class TaskPartExport(AsyncTask):
                                 , 'w', allowZip64=True, compression=zipfile.ZIP_DEFLATED)
         self.UpdateProgress(10, "Getting samples")
         sql = """select s.*,
-          pp.ptitle, pp.rawfolder, concat(u.name,' ('||u.email||')') ownerid, pp.projid, pp.instrumtype, pp.op_name, 
+          pp.ptitle, pp.rawfolder, pp.ownerid as owner_id, pp.projid, pp.instrumtype, pp.op_name, 
           pp.op_email, pp.cs_name, pp.cs_email, pp.do_name, pp.do_email, pp.prj_info, pp.prj_acronym, 
           pp.cruise, pp.ship, pp.default_instrumsn, pp.default_depthoffset,
           (select count(*) from part_histocat where psampleid=s.psampleid) nbrlinetaxo,
-          (select count(*) from part_ctd where psampleid=s.psampleid) nbrlinectd
+          (select count(*) from part_ctd where psampleid=s.psampleid) nbrlinectd,
+          null::varchar as ownerid -- placeholder
         from part_samples s
         join part_projects pp on s.pprojid=pp.pprojid
-        LEFT JOIN users u on pp.ownerid=u.id
         where s.psampleid in (%s)
         order by s.profileid
         """ % ((",".join([str(x[0]) for x in self.param.samples])),)
         samples = GetAll(sql)
+        # On complète les users si possible
+        for S in samples:
+            owner_id = S['owner_id']
+            person = self.ecotaxa_if.get_user_by_id(owner_id)
+            if person is None:
+                S['ownerid'] = "Private"
+            else:
+                S['ownerid'] = person.name+" ("+person.email+")"
         # On a tous les samples EcoPart voulus, on récupère les projets EcoTaxa correspondants
-        ecotaxa_projs = {}  # EcoTaxa project (value) à partir de EcoPart project ID (key)
+        zoo_projs = {}  # EcoTaxa project (value) à partir de EcoPart project ID (key)
         self.UpdateProgress(20, "Fetching projects")
         for S in samples:
             part_project_id = S["pprojid"]
             ecotaxa_project_id = S["projid"]
-            if part_project_id not in ecotaxa_projs:
-                ecotaxa_projs[part_project_id] = self.ecotaxa_if.get_project(ecotaxa_project_id)
+            if part_project_id not in zoo_projs:
+                zoo_projs[part_project_id] = self.ecotaxa_if.get_project(ecotaxa_project_id)
         # Fichiers particule
         for S in samples:
             if S['histobrutavailable'] and S['instrumtype'] in ('uvp5', 'uvp6'):
@@ -794,7 +802,7 @@ class TaskPartExport(AsyncTask):
             if not self.is_zoo_exportable(S["psampleid"]):
                 continue  # pas les permission d'exporter le ZOO de ce sample, on le saute
             if S['nbrlinetaxo'] > 0:
-                ecotaxa_proj = ecotaxa_projs[S["pprojid"]]
+                ecotaxa_proj = zoo_projs[S["pprojid"]]
                 TaxoReverseMapping = ecotaxa_proj.obj_free_cols  # key: free column name, value: DB column name
                 nomfichier = "{0}_{1}_ZOO_raw_{2}.tsv".format(S['filename'], S['profileid'], DTNomFichier)
                 ZooFileParPSampleID[psampleid] = nomfichier

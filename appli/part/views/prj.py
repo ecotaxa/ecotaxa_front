@@ -21,30 +21,52 @@ def part_prj():
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     params = {}
-    sql = """select pprojid,ptitle,up.ownerid,u.name,u.email,rawfolder,instrumtype,ep.title
-            ,(select count(*) from part_samples where pprojid=up.pprojid) samplecount
-            from part_projects up
-            left JOIN projects ep on up.projid=ep.projid
-            LEFT JOIN users u on ownerid=u.id
+    sql = """select up.pprojid, up.ptitle, up.ownerid, up.rawfolder, up.instrumtype, up.projid,
+                    (select count(*) from part_samples ps where ps.pprojid = up.pprojid) as samplecount,
+                    null::varchar as name, null::varchar as email, -- placeholders 
+                    null::varchar as title
+               from part_projects up
           """
     sql += " where 1=1 "
     if 2 in ecotaxa_user.can_do:
-        # No filtering for admins
+        # Les admins EcoTaxa peuvent tout voir
         pass
     else:
-        # Only part_projects for this user
-        sql += "  and ownerid=%d" % (ecotaxa_user.id,)
+        # Filtrage des projets appartenant à l'utilisateur courant
+        sql += "  and up.ownerid = %d" % (ecotaxa_user.id,)
+    # Si filtrage, c'est un "OU" sur le titre des projets des 2 modules
+    zoo_projects = {p.projid: p for p in ecotaxa_if.search_projects(title=gvg('filt_title', ''))}
     if gvg('filt_title', '') != '':
-        sql += " and ( up.ptitle ilike '%%'||%(title)s ||'%%' or to_char(up.pprojid,'999999') like '%%'||%(title)s or ep.title ilike '%%'||%(title)s ||'%%' or to_char(ep.projid,'999999') like '%%'||%(title)s) "
+        sql += " and ( up.ptitle ilike '%%'||%(title)s ||'%%' or to_char(up.pprojid,'999999') like '%%'||%(title)s " \
+               "       or up.projid = any(%(zoo_projs)s) ) "
         params['title'] = gvg('filt_title')
+        params['zoo_projs'] = [projid for projid in zoo_projects.keys()]
     if gvg('filt_instrum', '') != '':
         sql += " and up.instrumtype ilike '%%'||%(filt_instrum)s ||'%%'  "
         params['filt_instrum'] = gvg('filt_instrum')
-    sql += " order by lower(ep.title),lower(ptitle)"
-    res = GetAll(sql, params)  # ,debug=True
-    # app.logger.info("res=%s",res)
+    res = GetAll(sql, params)
+    # On complète les trous des 'placeholders'.
+    for a_line in res:
+        projid = a_line['projid']
+        if projid is not None:
+            zoo_proj = zoo_projects.get(projid)
+            if zoo_proj is None:
+                # Un appel par projet manquant. Pas mieux avec l'API au 28/11/2021.
+                zoo_proj = ecotaxa_if.get_project(projid)
+                if zoo_proj is not None:
+                    zoo_projects[projid] = zoo_proj
+            if zoo_proj is not None:
+                a_line['title'] = zoo_proj.title
+        ownerid = a_line['ownerid']
+        if ownerid is not None:
+            user = ecotaxa_if.get_user_by_id(ownerid)
+            if user is not None:
+                a_line['name'] = user.name
+                a_line['email'] = user.email
+    # Tri en mémoire
+    res.sort(key=lambda r: (r['title'] if r['title'] else chr(256))+r['ptitle'])
     CanCreate = False
-    if (2 in ecotaxa_user.can_do) or (1 in ecotaxa_user.can_do):  # User can Administrate or create projects
+    if (2 in ecotaxa_user.can_do) or (1 in ecotaxa_user.can_do):  # User can Administrate or create projects in EcoTaxa
         CanCreate = True
     g.headcenter = "<h4>Particle Projects management</h4><a href='%s'>Particle Module Home</a>" % PART_URL
     return part_PrintInCharte(ecotaxa_if,

@@ -869,11 +869,11 @@ def GenerateTaxonomyHistogram(ecotaxa_if: EcoTaxaInstance, psampleid):
     pixel = UvpSample.acq_pixel
 
     # Lire le projet EcoTaxa correspondant
-    ecotaxa_proj = ecotaxa_if.get_project(Prj.projid)
-    if ecotaxa_proj is None:
+    zoo_proj = ecotaxa_if.get_project(Prj.projid)
+    if zoo_proj is None:
         raise Exception("GenerateTaxonomyHistogram: EcoTaxa project %s could not be read in EcoPart project %s"
                         % (Prj.projid, Prj.pprojid))
-    areacol = ecotaxa_proj.obj_free_cols.get("area")
+    areacol = zoo_proj.obj_free_cols.get("area")
     if areacol is None:
         raise Exception("GenerateTaxonomyHistogram: area attribute is required in EcoTaxa project %d" % Prj.projid)
     # app.logger.info("Esd col is %s",areacol)
@@ -885,7 +885,7 @@ def GenerateTaxonomyHistogram(ecotaxa_if: EcoTaxaInstance, psampleid):
         DepthOffset = 0
 
     queried_columns = ["obj.classif_id", "obj.classif_qual", "obj.depth_min", "fre.area"]
-    api_res = ecotaxa_if.get_objects_for_sample(ecotaxa_proj.projid, UvpSample.sampleid, queried_columns,
+    api_res = ecotaxa_if.get_objects_for_sample(zoo_proj.projid, UvpSample.sampleid, queried_columns,
                                                 only_validated=True)
     # Do some calculations/filtering for returned data
     res = []

@@ -7,7 +7,7 @@ from flask import Request
 from werkzeug.local import LocalProxy
 
 from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UsersApi, UserModelWithRights, ApiException, \
-    SamplesApi, SampleModel, ObjectsApi, ObjectSetQueryRsp, UserModel
+    SamplesApi, SampleModel, ObjectsApi, ObjectSetQueryRsp, UserModel, SampleTaxoStatsModel
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi
 
 
@@ -21,12 +21,31 @@ class EcoTaxaInstance(object):
         if isinstance(request_or_cookie, LocalProxy):
             request_or_cookie = request_or_cookie.cookies.get('session')
         self.token = request_or_cookie
+        # A bit of caching as instances don't survive a HTTP request
+        self.users_by_id = {}
 
     def _get_client(self):
         ret = ApiClient()
         ret.configuration.access_token = self.token
         ret.configuration.host = self.base_url
         return ret
+
+    @staticmethod
+    def _valid_URL_chunks(ids: List[int]):
+        """
+            Generator for coma-separated list of IDs, with a max length for URL compliance.
+        """
+        params_char_len = 0
+        params = []
+        for an_id in ids:
+            an_id_str = str(an_id)
+            params.append(an_id_str)
+            params_char_len += 3 + len(an_id_str)  # 3 is '%2C'
+            if params_char_len > 32768:
+                yield ",".join(params)
+                params_char_len = 0
+                params.clear()
+        yield ",".join(params)
 
     def get_current_user(self) -> Optional[UserModelWithRights]:
         """
@@ -44,13 +63,19 @@ class EcoTaxaInstance(object):
         """
             Return any EcoTaxa user information
         """
+        if userid in self.users_by_id:
+            return self.users_by_id[userid]
         usa = UsersApi(self._get_client())
         try:
             usr: UserModel = usa.get_user(userid)
-            return usr
+            ret = usr
         except ApiException as ae:
             if ae.status in (401, 403):
-                return None
+                ret = None
+            else:
+                raise
+        self.users_by_id[userid] = ret
+        return ret
 
     def get_users_admins(self) -> List[UserModel]:
         """
@@ -62,19 +87,8 @@ class EcoTaxaInstance(object):
     def query_taxa_set(self, classif_ids: List[int]) -> List[TaxonModel]:
         tta = TaxonomyTreeApi(self._get_client())
         ret = []
-        # This ends up in a '%2C'-separated list in the URL, as it's a GET.
-        # So we have to take care about the query length -> split in manageable parts.
-        params_char_len = 0
-        params = []
-        for an_id in classif_ids:
-            an_id_str = str(an_id)
-            params.append(an_id_str)
-            params_char_len += 3 + len(an_id_str)
-            if params_char_len > 32768:
-                ret.extend(tta.query_taxa_set(",".join(params)))
-                params_char_len = 0
-                params.clear()
-        ret.extend(tta.query_taxa_set(",".join(params)))
+        for a_param_chunk in self._valid_URL_chunks(classif_ids):
+            ret.extend(tta.query_taxa_set(a_param_chunk))
         return ret
 
     def get_taxo(self, classif_ids: List[int]) -> List[Tuple[int, str]]:
@@ -187,8 +201,43 @@ class EcoTaxaInstance(object):
             Return None if not found (from API point of view, meaning it could be missing or not visible)
         """
         pra = ProjectsApi(self._get_client())
-        a_proj: ProjectModel = pra.project_query(project_id=project_id)
+        try:
+            a_proj: ProjectModel = pra.project_query(project_id=project_id)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return None
+            else:
+                raise
         return a_proj
+
+    def create_new_project(self, title: str) -> Optional[ProjectModel]:
+        """
+            Create a project with this title.
+        """
+        pra = ProjectsApi(self._get_client())
+        try:
+            req = {"title": title,
+                   "visible": False}
+            new_projid = pra.create_project(create_project_req=req)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return None
+            else:
+                raise
+        return new_projid
+
+    def search_projects(self, title: str) -> List[ProjectModel]:
+        """
+            Search projects by title (the EcoTaxa way)
+            TODO: Factorize with get_visible_projects
+        """
+        pra = ProjectsApi(self._get_client())
+        ret = pra.search_projects(title_filter=title, not_granted=False)
+        granted = set([prj.projid for prj in ret])
+        not_granted = pra.search_projects(title_filter=title, not_granted=True)
+        # TODO: below is a workaround for not-logged users, in this case the list is twice the same
+        ret.extend([prj for prj in not_granted if prj.projid not in granted])
+        return ret
 
     def search_samples(self, projid: int, orig_id: str) -> List[SampleModel]:
         """
@@ -203,6 +252,22 @@ class EcoTaxaInstance(object):
     def all_samples_for_project(self, projid: int):
         sma = SamplesApi(self._get_client())
         return sma.samples_search(str(projid), "")
+
+    def get_samples_stats(self, zoo_sample_ids: List[int]) -> List[SampleTaxoStatsModel]:
+        """
+            Get stats about samples, the usual ones: number, validated or not...
+        """
+        sma = SamplesApi(self._get_client())
+        ret = []
+        try:
+            for a_param_chunk in self._valid_URL_chunks(zoo_sample_ids):
+                ret.extend(sma.sample_set_get_stats(a_param_chunk))
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return []
+            else:
+                raise
+        return ret
 
     def get_objects_for_sample(self, projid: int, sampleid: int, cols: List[str], only_validated: bool):
         """

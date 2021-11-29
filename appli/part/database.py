@@ -18,7 +18,7 @@ class part_projects(db.Model):
     ownerid = db.Column(db.Integer,db.ForeignKey('users.id'))
     owneridrel=db.relationship("users")
     projid = db.Column(INTEGER,db.ForeignKey('projects.projid'))
-    project=db.relationship("Projects")
+    #project=db.relationship("Projects")
     instrumtype = db.Column(VARCHAR(50))
     op_name = db.Column(VARCHAR(100))
     op_email = db.Column(VARCHAR(100))

@@ -671,8 +671,9 @@ position: absolute;z-index: 100;">
                     }
                 });
                 $(MapPopupElt).popover('show');
-                var url =
-                    '{{ url_for(".Partgetsamplepopover", psampleid="999999999") }}'.replace("999999999", feature.get('psampleid'));
+                // Un peu d'acrobatie car url_for est server-side
+                var url = '{{ url_for(".Partgetsamplepopover", psampleid="999999999") }}'
+                url = url.replace("999999999", feature.get('psampleid'));
                 $.get(url, function (data) {
                     MapPopupContent = data;
                     $(MapPopupElt).popover('show');

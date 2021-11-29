@@ -107,9 +107,12 @@ def part_sampleedit(psampleid):
             setattr(model, k, v)
         db.session.commit()
         if gvp('forcerecalc') == 'Y':
-            histograms.ComputeHistoDet(model.psampleid, model.project.instrumtype)
-            histograms.ComputeHistoRed(model.psampleid, model.project.instrumtype)
-            prj.ComputeZooMatch(ecotaxa_if, model.psampleid, model.project.projid)
+            zoo_projid = model.project.projid
+            instrumtype = model.project.instrumtype
+            psampleid =  model.psampleid
+            histograms.ComputeHistoDet(psampleid, instrumtype)
+            histograms.ComputeHistoRed(psampleid, instrumtype)
+            prj.ComputeZooMatch(ecotaxa_if, psampleid, zoo_projid)
             flash("Histograms have been recomputed", "success")
         return redirect("%sprj/" % PART_URL + str(model.pprojid))
     return part_PrintInCharte(ecotaxa_if, render_template("part/sampleedit.html", form=form, prjid=model.pprojid,
