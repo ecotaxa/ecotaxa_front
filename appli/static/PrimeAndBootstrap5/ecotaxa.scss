@@ -10,13 +10,8 @@
 // https://www.w3schools.com/sass/
 
 @import "https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600";
-@import "https://unpkg.com/primevue@3.8.2/resources/primevue.min";
-@import "https://unpkg.com/primevue@3.8.2/resources/themes/bootstrap4-light-blue/theme";
-@import "https://unpkg.com/primeicons@4.1.0/primeicons";
 // @import "https://unpkg.com/primeflex@3.1.0/primeflex"; sass does not like it (I don't know why), so make a local copy hereunder
-@import "./primeflex.scss";  // primeflex 3.1.0 for the moment
-@import "https://unpkg.com/primeflex@3.1.0/themes/saga-blue";
-@import "https://unpkg.com/primeicons@4.1.0/primeicons";
+@import "./primeflex";  // primeflex 3.1.0 for the moment
 
 $EcoTaxaBackColor: white;
 
