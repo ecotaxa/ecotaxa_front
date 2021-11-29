@@ -6,10 +6,7 @@
 
 --------- TODO --------------
 
-- refs to taxonomy DB table (1 match in GlobalTaxoCompute AKA cron)
-- refs to objects DB view (1 match in GlobalTaxoCompute AKA cron)
-
-- config file
+- config file, adding back-end URL (_hardcoded_ for now)
 
 - move temp_tasks to EcoPart DB definition
 
@@ -48,3 +45,5 @@
 - ref to database.ProjectsPriv SQLAlchemy wrapper (1 match, /!\ 1 create in part_prjedit)
 - ref to projects table in SQL (1 match: part_prjedit)
 
+- refs to taxonomy DB table (1 match in GlobalTaxoCompute AKA cron)
+- refs to objects DB view (1 match in GlobalTaxoCompute AKA cron)

@@ -79,7 +79,7 @@ def ExecSQL(sql, params=None, debug=False):
         part_app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
         db.engine.connect()
         raise
-    except:  # noqa
+    except Exception as e:  # noqa
         part_app.logger.debug("ExecSQL Exception SQL = %s %s", sql, params)
         cur.connection.rollback()
         raise
@@ -106,7 +106,7 @@ def GetAll(sql, params=None, debug=False, cursor_factory=psycopg2.extras.DictCur
         part_app.logger.debug("Connection was invalidated!, Try to reconnect for next HTTP request")
         db.engine.connect()
         raise
-    except:  # noqa
+    except Exception as e:  # noqa
         part_app.logger.debug("GetAll Exception SQL = %s %s", sql, params)
         cur.connection.rollback()
         raise

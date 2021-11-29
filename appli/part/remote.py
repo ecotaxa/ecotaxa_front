@@ -1,6 +1,7 @@
 #
 # Holder for interface with 'remote' system, namely EcoTaxa
 #
+from datetime import datetime
 from typing import List, Tuple, Dict, Any, Union, Optional
 
 from flask import Request
@@ -285,3 +286,17 @@ class EcoTaxaInstance(object):
             db_like_obj = {col.split(".", 1)[1]: val for col, val in zip(cols, an_obj)}
             ret.append(db_like_obj)
         return ret
+
+    def search_objects_validated_after(self, projid: int, sampleid: Optional[int], part_sample_date: datetime):
+        """
+            Query all objects in given sample, return the prefix-less column names.
+        """
+        oba = ObjectsApi(self._get_client())
+        filters = {"validfromdate": part_sample_date.strftime("%Y-%m-%d %H:%M"),
+                   "window_size": 100}
+        if sampleid is not None:
+            filters["samples"] = str(sampleid)
+        res: ObjectSetQueryRsp = oba.get_object_set(fields="obj.classif_when",
+                                                    project_id=projid,
+                                                    project_filters=filters)
+        return res.object_ids
