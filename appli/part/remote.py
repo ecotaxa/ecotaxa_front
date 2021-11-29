@@ -201,7 +201,13 @@ class EcoTaxaInstance(object):
             Return None if not found (from API point of view, meaning it could be missing or not visible)
         """
         pra = ProjectsApi(self._get_client())
-        a_proj: ProjectModel = pra.project_query(project_id=project_id)
+        try:
+            a_proj: ProjectModel = pra.project_query(project_id=project_id)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return None
+            else:
+                raise
         return a_proj
 
     def search_projects(self, title: str) -> List[ProjectModel]:

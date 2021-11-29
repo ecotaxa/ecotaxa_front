@@ -384,15 +384,25 @@ def Partstatsample():
 
 @part_app.route('/getsamplepopover/<int:psampleid>')
 def Partgetsamplepopover(psampleid):
-    sql = """select s.psampleid, s.profileid, p.ptitle, ep.title, p.cruise, p.ship, p.projid, p.pprojid,
+    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    sql = """select s.psampleid, s.profileid, p.ptitle, p.cruise, p.ship, p.projid, p.pprojid,
       round(cast(s.latitude as NUMERIC),4) latitude,round(cast(s.longitude as NUMERIC),4) longitude,
-      to_char(s.sampledate,'YYYY-MM-DD HH24:MI') sampledate
+      to_char(s.sampledate,'YYYY-MM-DD HH24:MI') sampledate,
+      null::varchar as title -- placeholder
       from part_samples s
-      LEFT JOIN part_projects p on s.pprojid=p.pprojid
-      left join projects ep on p.projid = ep.projid
+      left join part_projects p on s.pprojid=p.pprojid
       where s.psampleid=%(psampleid)s
       """
     data = GetAll(sql, {'psampleid': psampleid})[0]
+    zoo_projid = data['projid']
+    if zoo_projid is not None:
+        zoo_proj = ecotaxa_if.get_project(zoo_projid)
+        if zoo_proj is None:
+            data['title'] = "Not visible"
+        else:
+            data['title'] = zoo_proj.title
+    else:
+        data['title'] = "Absent"
     txt = """ID : {psampleid}<br>
     Profile ID : {profileid}<br>
     Project : {ptitle} ({pprojid})<br>
