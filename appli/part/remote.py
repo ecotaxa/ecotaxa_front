@@ -210,6 +210,22 @@ class EcoTaxaInstance(object):
                 raise
         return a_proj
 
+    def create_new_project(self, title: str) -> Optional[ProjectModel]:
+        """
+            Create a project with this title.
+        """
+        pra = ProjectsApi(self._get_client())
+        try:
+            req = {"title": title,
+                   "visible": False}
+            new_projid = pra.create_project(create_project_req=req)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return None
+            else:
+                raise
+        return new_projid
+
     def search_projects(self, title: str) -> List[ProjectModel]:
         """
             Search projects by title (the EcoTaxa way)

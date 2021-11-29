@@ -9,8 +9,7 @@
 - refs to taxonomy DB table (1 match in GlobalTaxoCompute AKA cron)
 - refs to objects DB view (1 match in GlobalTaxoCompute AKA cron)
 
-- refs to database.Projects SQLAlchemy wrapper (1 match, /!\ 1 create)
-- refs to projects table in SQL (1 match: part_prjedit)
+- config file
 
 - move temp_tasks to EcoPart DB definition
 
@@ -44,3 +43,8 @@
 - refs to projectspriv table in SQL for asserting current user rights on EcoTaxa projects (1 match)
 
 - refs to part_samples.project SQLAlchemy relation (2 matches in sampleedit.py) -> OK it's a relation to part_projects
+
+- ref to database.Projects SQLAlchemy wrapper (1 match, /!\ 1 create in part_prjedit)
+- ref to database.ProjectsPriv SQLAlchemy wrapper (1 match, /!\ 1 create in part_prjedit)
+- ref to projects table in SQL (1 match: part_prjedit)
+

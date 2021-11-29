@@ -8,7 +8,7 @@ from wtforms import Form, StringField, validators, IntegerField, FloatField, Sel
     TextAreaField
 
 import appli
-from appli import app, database, gvg, gvp, ErrorFormat
+from appli import app, gvg, gvp, ErrorFormat
 from appli.database import db
 from .. import database as partdatabase
 from ..db_utils import GetAll
@@ -74,9 +74,12 @@ def part_prjedit(pprojid):
                                      coerce=int)
     UvpPrjForm.instrumtype = SelectField('Instrument type',
                                          choices=[(x, x) for x in ("", "uvp5", "uvp6", "lisst", "uvp6remote")])
+    # On récupère les projets visibles pour remplir la liste de sélection
+    zoo_projs = [(prj.projid, "%s (%d)" % (prj.title, prj.projid))
+                 for prj in ecotaxa_if.get_visible_projects()]
+    new_prj_label = 'Create a new EcoTaxa project with same title'
     UvpPrjForm.projid = SelectField('Ecotaxa Project',
-                                    choices=[(0, ''), (-1, 'Create a new EcoTaxa project')] + GetAll(
-                                        "SELECT projid,concat(title,' (',cast(projid as varchar),')') FROM projects ORDER BY lower(title)"),
+                                    choices=[(0, ''), (-1, new_prj_label)] + zoo_projs,
                                     coerce=int)
     UvpPrjForm.remote_type = SelectField('Remote type', choices=[(x, x) for x in ("", "ARGO", "TSV LOV")])
     UvpPrjForm.enable_descent_filter = SelectField('Enable descent filter',
@@ -99,18 +102,14 @@ def part_prjedit(pprojid):
             setattr(model, k, v)
         if model.projid == 0:  # 0 permet de dire 'aucun projet' car WTForm ne sait pas gérer None avec coerce=int
             model.projid = None
-        if model.projid == -1:  # création d'un projet Ecotaxa
+        if model.projid == -1:  # création d'un projet EcoTaxa avec le même titre
             model.projid = None
-            EcotaxaProject = database.Projects()
-            EcotaxaProject.title = model.ptitle  # Nommé comme le projet Particle
-            db.session.add(EcotaxaProject)
-            db.session.commit()
-            EcotaxaProjectMember = database.ProjectsPriv()
-            EcotaxaProjectMember.projid = EcotaxaProject.projid  # L'utilisateur courant est Manager de ce projet
-            EcotaxaProjectMember.member = ecotaxa_user.id
-            EcotaxaProjectMember.privilege = 'Manage'
-            db.session.add(EcotaxaProjectMember)
-            model.projid = EcotaxaProject.projid  # On affecte le nouveau projet au projet Particle.
+            new_projid = ecotaxa_if.create_new_project(model.ptitle)
+            if new_projid is None:
+                flash("Could not create EcoTaxa project, check your rights.", "error")
+            else:
+                flash("EcoTaxa project %d created." % new_projid)
+            model.projid = new_projid
         db.session.commit()
         return redirect("%sprj/" % PART_URL + str(model.pprojid))
     return part_PrintInCharte(ecotaxa_if, render_template("part/prjedit.html", form=form, prjid=model.pprojid))
