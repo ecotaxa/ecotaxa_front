@@ -11,7 +11,6 @@
 
 - refs to database.Projects SQLAlchemy wrapper (1 match, /!\ 1 create)
 - refs to projects table in SQL (2 matches: Partgetsamplepopover and part_prjedit)
-- refs to part_projects.project SQLAlchemy relation (3 matches in sampleedit.py)
 
 - move temp_tasks to EcoPart DB definition
 
@@ -22,8 +21,6 @@
 - "EcoTaxa folder temptask/task%06d (useful for huge files)"
 
 - cron.py for EcoPart
-
-- refs to projectspriv table in SQL for asserting current user rights on EcoTaxa projects (1 match)
 
 ------------ ISSUES ---------------
 
@@ -44,3 +41,6 @@
 
 - refs to users table in SQL (1 match)
 
+- refs to projectspriv table in SQL for asserting current user rights on EcoTaxa projects (1 match)
+
+- refs to part_samples.project SQLAlchemy relation (2 matches in sampleedit.py) -> OK it's a relation to part_projects

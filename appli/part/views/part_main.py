@@ -85,6 +85,9 @@ def _GetSQLVisibility(ecotaxa_if: EcoTaxaInstance):
     sql_case.append(" else 'N' ")
 
     sqlvisible = "case " + "".join(sql_case) + "end"
+    #
+    # CODE PRECEDENT AU CAS OU
+    #
     # if ecotaxa_user is not None and 2 in ecotaxa_user.can_do:
     #     # Connected and Admin
     #     sqlvisible = "'YY'"
