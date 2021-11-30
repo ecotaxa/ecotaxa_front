@@ -1,0 +1,12 @@
+# The header is *very* important, especially the langage and content-type
+# N.B. command is "msgfmt -c -o ecotaxa.mo ecotaxa.po"
+msgid ""
+msgstr ""
+"Last-Translator: Laurent Reese <laurent.reese@imev-mer.fr>\n"
+"Language: fr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "If_you_use_EcoTaxa"
+msgstr "Si vous utilisez EcoTaxa dans votre travail, nous vous serions reconnaissants de le citer comme : Picheral M, Colin S, Irisson J-O (2017). EcoTaxa, un outil de classification taxonomique des images."
+msgid "EcoTaxa_is_a_web_application"
+msgstr "EcoTaxa est une application web dédiée à l'exploration visuelle et à l'annotation taxonomique d'images qui illustrent la beauté de la biodiversité planctonique."
