@@ -6,7 +6,7 @@
 import logging.handlers
 import sys
 
-from appli import app
+from part_app.app import part_app
 
 if __name__ == '__main__':
     # app.debug = True
@@ -16,8 +16,10 @@ if __name__ == '__main__':
     handler.setLevel(logging.INFO)
     LoggingFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     handler.setFormatter(logging.Formatter(LoggingFormat))
-    app.logger.addHandler(handler)
-    app.logger.info("EcoTaxa (dev) Startup")
+    part_app.logger.addHandler(handler)
+    part_app.logger.info("EcoPart (dev) Startup")
+    # L'executable est l'interpreteur qui a permis de lancer, mais en WSGI c'est écrasé par le lanceur WSGI
+    if part_app.PythonExecutable == "TBD":  # si pas forcé par un fichier de configuration
+        part_app.PythonExecutable = sys.executable
 
-
-    app.run(host='0.0.0.0', port=5001, threaded=True)
+    part_app.run(host='0.0.0.0', port=5002, threaded=True)
