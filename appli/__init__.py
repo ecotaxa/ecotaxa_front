@@ -42,11 +42,6 @@ app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = (
     'Your account is disabled. Email to the User manager (list on the left) to re-activate.', 'error')
 app.logger.setLevel(10)
 
-if 'PYTHONEXECUTABLE' in app.config:
-    app.PythonExecutable = app.config['PYTHONEXECUTABLE']
-else:
-    app.PythonExecutable = "TBD"
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app, session_options={
     'expire_on_commit': True})  # expire_on_commit évite d'avoir des select quand on manipule les objets aprés un commit.
@@ -61,9 +56,6 @@ import appli.database
 # Setup Flask-Security
 user_datastore = appli.securitycachedstore.SQLAlchemyUserDatastoreCACHED(db, database.users, database.roles)
 security = Security(app, user_datastore)
-
-app.MRUClassif = {}  # Dictionnaire des valeurs recement utilisé par les classifications
-app.MRUClassif_lock = threading.Lock()
 
 
 def ObjectToStr(o):
@@ -84,7 +76,8 @@ def PrintInCharte(txt, title=None):
         title = 'EcoTaxa'
     return render_template('layout.html', bodycontent=txt, title=title)
 
-def PrintInCharte_bs4(txt, title=None): # for bootstrap 4
+
+def PrintInCharte_bs4(txt, title=None):  # for bootstrap 4
     """
     Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
     :param txt: Texte à affiche
@@ -95,7 +88,8 @@ def PrintInCharte_bs4(txt, title=None): # for bootstrap 4
         title = 'EcoTaxa'
     return render_template('layout_bs4.html', bodycontent=txt, title=title)
 
-def PrintInCharte_bs5(txt, title=None): # for bootstrap 5
+
+def PrintInCharte_bs5(txt, title=None):  # for bootstrap 5
     """
     Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
     :param txt: Texte à affiche
@@ -105,7 +99,6 @@ def PrintInCharte_bs5(txt, title=None): # for bootstrap 5
     if not title:
         title = 'EcoTaxa'
     return render_template('layout_bs5.html', bodycontent=txt, title=title)
-
 
 
 def ErrorFormat(txt):
@@ -365,7 +358,6 @@ def UtfDiag3(path: str):
 import appli.main
 import appli.search.view
 import appli.project.view
-import appli.part.view
 import appli.taxonomy.taxomain
 import appli.usermgmnt
 import appli.api_proxy
@@ -814,12 +806,3 @@ def load_admin():
 
 
 load_admin()
-
-
-def load_ecopart():
-    # Import a sub-application for EcoPart, transitory for cleanup
-    from .part.ecopart_blueprint import part_app
-    app.register_blueprint(part_app)
-
-
-load_ecopart()

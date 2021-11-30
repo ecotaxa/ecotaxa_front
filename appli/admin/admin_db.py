@@ -2,8 +2,6 @@ from flask import request, escape
 from flask_security import login_required
 from flask_security.decorators import roles_accepted
 
-import appli
-import appli.cron
 from .admin_blueprint import adminBlueprint as admin_bp, render_in_admin_blueprint
 from appli import database, gvg, gvp
 from appli.database import GetAll, ExecSQL, db
@@ -134,9 +132,8 @@ def dbadmin_viewbloat():
 @roles_accepted(database.AdministratorLabel)
 def dbadmin_recomputestat():
     # TODO: API call, if we leave the menu entry...
-    appli.cron.RefreshTaxoStat()
-    appli.cron.RefreshAllProjectsStat()
-    return render_in_admin_blueprint("admin2/admin_page.html", body="Statistics recompute done")
+    return render_in_admin_blueprint("admin2/admin_page.html",
+                                     body="Statistics recompute is not possible anymore in the UI")
 
 
 @admin_bp.route('/db/console', methods=['GET', 'POST'])

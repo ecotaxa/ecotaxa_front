@@ -6,7 +6,7 @@ import os
 from flask import Blueprint, g, request, url_for, send_from_directory
 
 from appli import app, PrintInCharte
-from appli.part.ecopart_blueprint import before_part_request, PART_URL
+from part_app.urls import PART_URL
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi
@@ -100,8 +100,6 @@ def gui_any(filename):
 @app.before_request
 def before_request_security():
     # time.sleep(0.1)
-    if "/part/" in request.url:
-        return before_part_request()
     # print("URL="+request.url)
     # app.logger.info("URL="+request.url)
     g.db = None
