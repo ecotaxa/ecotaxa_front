@@ -64,7 +64,7 @@ def part_prj():
                 a_line['name'] = user.name
                 a_line['email'] = user.email
     # Tri en mémoire
-    res.sort(key=lambda r: (r['title'] if r['title'] else chr(256))+r['ptitle'])
+    res.sort(key=lambda r: (r['title'] if r['title'] else chr(256)) + r['ptitle'])
     CanCreate = False
     if (2 in ecotaxa_user.can_do) or (1 in ecotaxa_user.can_do):  # User can Administrate or create projects in EcoTaxa
         CanCreate = True
@@ -163,15 +163,17 @@ def ComputeZooMatch(ecotaxa_if: EcoTaxaInstance, psampleid, projid):
         La règle: orig_id EcoTaxa identique au profileid EcoPart, dans le projet lié -> C'est bon """
     if projid is not None:
         profileid, = GetAll("""select profileid from part_samples ps where psampleid=%d""" % psampleid)[0]
-        ecosample = ecotaxa_if.search_samples(projid, profileid)
-        if len(ecosample) == 1:
+        zoo_samples = ecotaxa_if.search_samples(projid, profileid)
+        if len(zoo_samples) == 1:
+            matching_id = zoo_samples[0].sampleid
             ExecSQL("update part_samples set sampleid=%s where psampleid=%s",
-                    (ecosample[0].sampleid, psampleid))
-            return " Matched"
+                    (matching_id, psampleid))
+            return " Matched", matching_id
         else:
-            return " <span style='color: orange;'>%d match found in EcoTaxa</span>" % len(ecosample)
+            return " <span style='color: orange;'>%d match found in EcoTaxa</span>" % len(zoo_samples), None
     else:
-        return " <span style='color: red;'>Ecotaxa sample matching impossible if Particle project not linked to an Ecotaxa project</span>"
+        return " <span style='color: red;'>Ecotaxa sample matching impossible if Particle " \
+               "project not linked to an Ecotaxa project</span>", None
 
 
 def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance, logger):
@@ -179,11 +181,13 @@ def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance, logger):
     # Détermination des samples orphelins, i.e.:
     # - dont les projets sont rattachés à un projet EcoTaxa
     # - mais dont les samples ne sont pas (ou pas correctement) rattachés à un sample EcoTaxa
-    linked_samples = GetAll("""select pp.projid, ps.sampleid, ps.psampleid, ps.profileid 
+    linked_samples = GetAll("""select pp.projid, ps.sampleid, ps.psampleid, ps.profileid, 
+                                      coalesce(ps.daterecalculhistotaxo, 'epoch'::timestamp) daterecalculhistotaxo
                                  from part_samples ps
                                  join part_projects pp on ps.pprojid = pp.pprojid 
                                 where pp.projid is not null""")
-    fetched_samples = {}
+    fetched_samples = {}  # clef: EcoTaxa project ID, valeur: liste des samples EcoTaxa contenus
+    sample_links_per_project = {}  # Mémorisation des liens valides. clef: EcoTaxa project ID, valeur: {} avec clef = EcoTaxa sample ID
     logger.info("Ensuring consistency of links to EcoTaxa")
     for to_check in linked_samples:
         ecotaxa_projid = to_check["projid"]
@@ -192,31 +196,81 @@ def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance, logger):
             samples_for_proj = ecotaxa_if.all_samples_for_project(ecotaxa_projid)  # La totale
             fetched_samples[ecotaxa_projid] = samples_for_proj
         # Correspondance
+        psampleid = to_check["psampleid"]
         sampleid = to_check["sampleid"]
         profileid = to_check["profileid"]
         for a_sample in samples_for_proj:
             if a_sample.sampleid == sampleid and a_sample.orig_id == profileid:
+                # Le lien est bon
+                for_proj = sample_links_per_project.setdefault(ecotaxa_projid, {})
+                for_proj[sampleid] = to_check
                 break
         else:
             # TODO: pas super efficace mais ça arrive rarement et puis c'est un job
-            psampleid = to_check["psampleid"]
-            logger.info("Matching %s %s", psampleid, ComputeZooMatch(ecotaxa_if, psampleid, ecotaxa_projid))
-    # sample ayant un objet qui a été classifié depuis le dernier calcul de l'histogramme
-    logger.info("Refreshing histograms if needed")
-    Samples = GetAll("""select ps.psampleid, ps.daterecalculhistotaxo, pp.instrumtype
-                from part_samples ps
-                join part_projects pp on ps.pprojid = pp.pprojid 
+            match_result, sampleid = ComputeZooMatch(ecotaxa_if, psampleid, ecotaxa_projid)
+            logger.info("Matching %s => %s", psampleid, match_result)
+            if sampleid is not None:
+                # Le lien est réparé
+                for_proj = sample_links_per_project.setdefault(ecotaxa_projid, {})
+                to_check["sampleid"] = sampleid
+                for_proj[sampleid] = to_check
+
+    # sample ayant une référence invalide à une catégorie (si c'est possible)
+    # récolte des classif_id référencés
+    logger.info("Verify stale categories references... querying DB")
+    used_classif_ids = [an_id for an_id, in GetAll("""select distinct ph.classif_id from part_histocat ph""")]
+    logger.info("Verify stale categories references... API call")
+    taxos = ecotaxa_if.get_taxo3(used_classif_ids)
+    invalid_taxos = set(used_classif_ids).difference(taxos.keys())
+    if len(invalid_taxos) > 0:
+        logger.info("Invalid categories found: %s", str(invalid_taxos))
+        sample_stale_taxo = GetAll("""select ps.psampleid, pp.instrumtype
+                 from part_samples ps
+                 join part_projects pp on ps.pprojid = pp.pprojid 
+                 join part_histocat ph on ph.psampleid = ps.psampleid
                 where ps.sampleid is not null
-                and (exists (select 1 from objects obj
-                              where obj.sampleid = ps.sampleid 
-                                and obj.classif_when > ps.daterecalculhistotaxo)
-                    or ps.daterecalculhistotaxo is null 
-                    or exists (select 1 from part_histocat_lst hc 
-                                where hc.psampleid = ps.psampleid and hc.classif_id not in (select id from taxonomy)) 
-                )""")
-    for S in Samples:
+                  and ph.classif_id = any (%(invalids)s)""", {"invalids": list(invalid_taxos)})
+    else:
+        sample_stale_taxo = []
+    # sample sans histogramme
+    logger.info("Refreshing histograms if needed... querying samples with no histogram date")
+    samples_no_histo = GetAll("""select ps.psampleid, pp.instrumtype
+                 from part_samples ps
+                 join part_projects pp on ps.pprojid = pp.pprojid 
+                where ps.sampleid is not null
+                  and ps.daterecalculhistotaxo is null""")
+    # sample ayant un objet qui a été classifié depuis le dernier calcul de l'histogramme
+    logger.info("Refreshing histograms if needed... querying obsolete samples")
+    # On regarde pour chacun des projets d'abord...
+    calls = 0
+    obsolete_sample_ids = []
+    for zoo_projid, samples_links in sample_links_per_project.items():
+        # Si le projet tout entier n'a pas été validé après le dernier sample, on peut le sauter
+        max_calcul_proj = max([a_sample['daterecalculhistotaxo'] for a_sample in samples_links.values()])
+        logger.info("Fast checking project %d using %s", zoo_projid, max_calcul_proj)
+        fresher_objects = ecotaxa_if.search_objects_validated_after(zoo_projid, None, max_calcul_proj)
+        if len(fresher_objects) == 0:
+            continue
+        # Il faut vérifier sample par sample
+        logger.info("Fast check revealed the need to dig into project %d", zoo_projid)
+        for zoo_sampleid, a_sample in samples_links.items():
+            part_sample_date = a_sample['daterecalculhistotaxo']
+            psampleid = a_sample['psampleid']
+            calls += 1
+            fresher_objects = ecotaxa_if.search_objects_validated_after(zoo_projid, zoo_sampleid, part_sample_date)
+            if len(fresher_objects) > 0:
+                logger.info("%d in %d: %d fresher", zoo_projid, psampleid, len(fresher_objects))
+                obsolete_sample_ids.append(psampleid)
+            else:
+                if calls % 200 == 0:
+                    logger.info("%d API calls done", calls)
+    samples_obsolete_histo = GetAll("""select ps.psampleid, pp.instrumtype
+                 from part_samples ps
+                 join part_projects pp on ps.pprojid = pp.pprojid
+                where ps.psampleid = any(%(obs_ids)s)""", {"obs_ids": obsolete_sample_ids})
+    for S in sample_stale_taxo + samples_no_histo + samples_obsolete_histo:
         psampleid, instrumtype = S['psampleid'], S['instrumtype']
-        logger.info("Computing histogram for %s (%)", psampleid, instrumtype)
+        logger.info("Computing histogram for %s (%s)", psampleid, instrumtype)
         ComputeZooHisto(ecotaxa_if, psampleid, instrumtype)
 
 
@@ -253,7 +307,7 @@ def part_prjcalc(PrjId):
         if gvp('dohistored') == 'Y':
             txt += prefix + ComputeHistoRed(S['psampleid'], Prj.instrumtype)
         if gvp('domatchecotaxa') == 'Y':
-            txt += prefix + ComputeZooMatch(ecotaxa_if, S['psampleid'], Prj.projid)
+            txt += prefix + ComputeZooMatch(ecotaxa_if, S['psampleid'], Prj.projid)[0]
         if gvp('dohistotaxo') == 'Y':
             txt += prefix + ComputeZooHisto(ecotaxa_if, S['psampleid'], Prj.instrumtype)
             # try:
