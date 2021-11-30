@@ -24,8 +24,14 @@ def index():
     if connectPythonToPrime:
         from appli import PrintInCharte_bs5    
         from flask import render_template
+        import gettext
+        language = gettext.translation ('ecotaxa', 'messages', ['fr'] ) # or 'en' or 'cn' ...
+        language.install() # hummm, not sure it is necessary
         return PrintInCharte_bs5(
-            render_template("project/about_ecotaxa.html")
+            render_template(    "project/about_ecotaxa.html",
+                                EcoTaxa_is_a_web_application = language.gettext("EcoTaxa_is_a_web_application"),
+                                If_you_use_EcoTaxa = language.gettext("If_you_use_EcoTaxa")
+            )
         )
     else:
         txt = """<div style='margin:5px;'><div id="homeText"'>"""
