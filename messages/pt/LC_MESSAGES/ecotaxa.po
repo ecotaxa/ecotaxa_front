@@ -1,0 +1,65 @@
+# The header is *very* important, especially the langage and content-type
+# N.B. command is "msgfmt -c -o ecotaxa.mo ecotaxa.po"
+msgid ""
+msgstr ""
+"Last-Translator: Laurent Reese <laurent.reese@imev-mer.fr>\n"
+"Language: pt\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+
+msgid   "EcoTaxa_about_page"
+msgstr   "EcoTaxa sobre a página"
+
+msgid   "Welcome_to_EcoTaxa"
+msgstr   "Bem-vindo a EcoTaxa"
+
+msgid   "EcoTaxa_is_a_web_application"
+msgstr   "EcoTaxa é uma aplicação web dedicada à exploração visual e à anotação taxonómica de imagens que ilustram a beleza da biodiversidade planctónica."
+
+msgid   "If_you_use_EcoTaxa"
+msgstr   "Se utilizar EcoTaxa no seu trabalho, agradecíamos que o citasse como tal: Picheral M, Colin S, Irisson J-O (2017). EcoTaxa, uma ferramenta para a classificação taxonómica de imagens."
+
+msgid   "The_development_of_EcoTaxa"
+msgstr   "O desenvolvimento de EcoTaxa é tornado possível graças ao apoio de:"
+
+msgid   "Sorbonne_Université_and_CNRS"
+msgstr   "Sorbonne Université e CNRS, que pagam os salários do pessoal permanente que supervisiona o seu desenvolvimento."
+
+msgid   "The_Programme_Investissements_d_Avenir"
+msgstr   "O Programa Investissements d'Avenir que financiou o desenvolvimento da versão original da aplicação através do projecto Oceanomics, dedicado à análise das amostras dos Oceanos de Tara [45k euros]."
+
+msgid   "The_Partner_University_Fund"
+msgstr   "O Fundo Universitário Parceiro que financiou o hardware em que EcoTaxa funcionou durante vários anos e a solução de aprendizagem de máquinas que permitiu, através de um projecto conjunto entre a Université Pierre et Marie Curie (agora Sorbonne Université) e a Universidade de Miami [15k euros]."
+
+msgid   "The_CNRS_LEFE_program"
+msgstr   "O programa CNRS LEFE que permitiu a renovação do backend de aprendizagem da máquina, através do projecto DL-PIC [10k]"
+
+msgid   "The_Belmont_Forum"
+msgstr   "O Belmont Forum, que financia uma revisão global da candidatura através do projecto WWWPIC [500k euros]."
+
+msgid   "The_Watertools_company"
+msgstr   "A empresa Watertools, que doou dinheiro para tornar a interface de EcoTaxa mais fácil de traduzir, em chinês em particular [30k euros]."
+
+msgid   "The_maintenance_of_the_software"
+msgstr   "A manutenção do software e hardware que permite o funcionamento de EcoTaxa depende do apoio dos seus utilizadores, que podem ser oficialmente facturados pela Plataforma de Imagem Quantitativa de Villefranche. Agradecíamos muito se considerasse reservar alguns fundos na sua próxima subvenção para este fim. Contacte-nos para estimar o que seria ao mesmo tempo razoável e útil."
+
+msgid   "The_persons_who_made_EcoTaxa"
+msgstr   "As pessoas que tornaram EcoTaxa possível são:"
+
+msgid   "Marc_Picheral_and"
+msgstr   "Marc Picheral e Jean-Olivier Irisson: especificações e supervisão de projectos"
+
+msgid   "Sébastien_Colin"
+msgstr   "Sébastien Colin: especificação inicial"
+
+msgid   "Developers"
+msgstr   "Altidev, Laurent Salinas, Laurent Reese: desenvolvimento"
+
+msgid   "Deep_learning"
+msgstr   "Simon-Martin Schröder, Benjamin Graham: implementação de aprendizagem profunda"
+
+msgid   "testing_and_feedback"
+msgstr   "Amanda Elineau, Corinne Desnos, Laetitia Jalabert e a equipa do COMPLEx do Laboratoire d'Océanographie de Villefranche (LOV): testes e feedback"
+
+msgid   "Disclaimer"
+msgstr   "Aviso: Se anotar imagens em EcoTaxa não pode reclamar qualquer retribuição dos gestores da aplicação, mas pode então descarregar e utilizar os resultados do seu trabalho. Mesmo que dêem o seu melhor para manter a aplicação estável e segura, os gestores da aplicação EcoTaxa não são responsáveis pela guarda das imagens e dados associados que hospeda. São responsáveis pela realização de cópias de segurança regulares."
