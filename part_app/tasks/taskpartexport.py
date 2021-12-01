@@ -11,15 +11,15 @@ from typing import List, Dict
 import psycopg2.extras
 from flask import render_template, g, flash, request
 
-from ..txt_utils import GetClassLimitTxt, GetPartClassLimitListText, DecodeEqualList, ntcv
-from ..http_utils import gvg, gvp
 from .taskmanager import AsyncTask
-from ..urls import PART_URL, ECOTAXA_URL
 from ..app import part_app, db
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedColByKey
 from ..db_utils import GetAssoc2Col, GetAll
 from ..funcs import uvp_sample_import as uvp_sample_import
+from ..http_utils import gvg, gvp
 from ..remote import EcoTaxaInstance
+from ..txt_utils import GetClassLimitTxt, GetPartClassLimitListText, DecodeEqualList, ntcv
+from ..urls import PART_URL
 from ..views.drawchart import GetTaxoHistoWaterVolumeSQLExpr
 from ..views.part_main import GetFilteredSamples, PartstatsampleGetData
 

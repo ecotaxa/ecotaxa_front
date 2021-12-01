@@ -16,7 +16,6 @@ from ..db_utils import GetAll, GetAssoc2Col
 from ..http_utils import gvg
 from ..remote import EcoTaxaInstance
 from ..txt_utils import GetClassLimitTxt
-from ..urls import ECOTAXA_URL
 from ..views import part_main as umain
 
 DepthTaxoHistoLimit = [0, 25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1250,

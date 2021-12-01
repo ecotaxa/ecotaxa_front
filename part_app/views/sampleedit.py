@@ -4,15 +4,15 @@ from flask import flash, request
 from flask import render_template, redirect
 from wtforms import Form, BooleanField, StringField, validators, DateTimeField, IntegerField, FloatField, TextAreaField
 
-from ..http_utils import gvg, gvp
 from . import part_PrintInCharte
-from ..urls import ECOTAXA_URL, PART_URL
+from . import prj
+from .. import database as partdatabase
 from ..app import part_app, db
 from ..db_utils import ExecSQL
 from ..funcs import histograms, uvp_sample_import as sample_import
+from ..http_utils import gvp
 from ..remote import EcoTaxaInstance
-from . import prj
-from .. import database as partdatabase
+from ..urls import PART_URL
 
 
 class UvpSampleForm(Form):

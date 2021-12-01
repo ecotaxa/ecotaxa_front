@@ -3,14 +3,14 @@ import operator
 from flask import render_template, g, json, request
 from wtforms import Form, SelectField, SelectMultipleField
 
-from ..txt_utils import GetClassLimitTxt
 from to_back.ecotaxa_cli_py import ProjectModel
 from . import part_PrintInCharte
-from ..urls import ECOTAXA_URL
 from ..app import part_app
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
 from ..db_utils import GetAll
 from ..remote import EcoTaxaInstance
+from ..txt_utils import GetClassLimitTxt
+from ..urls import ECOTAXA_URL
 
 
 @part_app.route('/')

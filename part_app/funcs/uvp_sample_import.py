@@ -1,27 +1,27 @@
+import bz2
+import configparser
 import csv
 import datetime
+import io
 import logging
 import math
 import re
-from pathlib import Path
-
-import bz2
-import configparser
-import io
-import matplotlib.pyplot as plt
-import numpy as np
 import sys
 import zipfile
+from pathlib import Path
 
-from ..fs_utils import CreateDirConcurrentlyIfNeeded
-from ..txt_utils import DecodeEqualList
+import matplotlib.pyplot as plt
+import numpy as np
+
 from .. import database as partdatabase
 from ..app import part_app, db, VaultRootDir
 from ..constants import PartDetClassLimit
 from ..db_utils import ExecSQL, GetAssoc
+from ..fs_utils import CreateDirConcurrentlyIfNeeded
 from ..funcs.common_sample_import import CleanValue, ToFloat, GetTicks, GenerateReducedParticleHistogram
 from ..remote import EcoTaxaInstance
 from ..tasks.importcommon import ConvTextDegreeDotMinuteToDecimalDegree, calcpixelfromesd_aa_exp
+from ..txt_utils import DecodeEqualList
 
 
 def CreateOrUpdateSample(pprojid, headerdata):

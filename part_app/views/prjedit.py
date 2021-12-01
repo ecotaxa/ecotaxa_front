@@ -7,14 +7,14 @@ from flask import render_template, flash, request, g
 from wtforms import Form, StringField, validators, IntegerField, FloatField, SelectField, \
     TextAreaField
 
-from ..txt_utils import DecodeEqualList
-from ..http_utils import gvg, gvp, ErrorFormat
-from ..app import part_app, db
-from .. import database as partdatabase
-from ..db_utils import GetAll
 from . import part_PrintInCharte
-from ..urls import PART_URL, ECOTAXA_URL
+from .. import database as partdatabase
+from ..app import part_app, db
+from ..db_utils import GetAll
+from ..http_utils import gvg, gvp, ErrorFormat
 from ..remote import EcoTaxaInstance
+from ..txt_utils import DecodeEqualList
+from ..urls import PART_URL
 
 
 class UvpPrjForm(Form):
