@@ -262,12 +262,6 @@ def ComputeLimitForImage(imgwidth, imgheight, LimitWidth, LimitHeight):
     return width, height
 
 
-def GetAppManagerMailto():
-    # Left here for EcoPart
-    if 'APPMANAGER_EMAIL' in app.config and 'APPMANAGER_NAME' in app.config:
-        return "<a href='mailto:{APPMANAGER_EMAIL}'>{APPMANAGER_NAME} ({APPMANAGER_EMAIL})</a>".format(**app.config)
-    return ""
-
 
 def CalcAstralDayTime(Date, Time, Latitude, Longitude):
     """
