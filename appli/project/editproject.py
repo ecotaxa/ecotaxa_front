@@ -3,10 +3,10 @@ import os
 from pathlib import Path
 from typing import List
 
-from flask import render_template, g, flash, request, json
+from flask import render_template, g, flash, request
 from flask_security import login_required
 
-from appli import app, PrintInCharte, gvp, XSSEscape, TempTaskDir
+from appli import app, PrintInCharte, gvp, XSSEscape
 from appli.constants import MappableObjectColumns, MappableParentColumns
 ######################################################################################################################
 from appli.utils import ApiClient

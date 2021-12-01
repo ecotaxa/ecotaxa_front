@@ -15,7 +15,7 @@ from ..remote import EcoTaxaInstance
 
 @part_app.route('/')
 def indexPart():
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
 
     # Liste des projets liés _et visibles_
     linked_prjs = set([a_ref for a_ref, in GetAll("select distinct projid from part_projects")])
@@ -201,7 +201,7 @@ def GetFilteredSamples(ecotaxa_if: EcoTaxaInstance, Filter=None, GetVisibleOnly=
 @part_app.route('/searchsample')
 def Partsearchsample():
     # Utilisé pour remplir la carte de la home page
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     samples, _ignored = GetFilteredSamples(ecotaxa_if)
     res = []
     for s in samples:
@@ -376,7 +376,7 @@ group by slice order by slice""".format(sampleinclause))
 @part_app.route('/statsample')
 def Partstatsample():
     # Button "Display selection statistics"
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     data = PartstatsampleGetData(ecotaxa_if)
     if isinstance(data, str):
         return data
@@ -386,7 +386,7 @@ def Partstatsample():
 
 @part_app.route('/getsamplepopover/<int:psampleid>')
 def Partgetsamplepopover(psampleid):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     sql = """select s.psampleid, s.profileid, p.ptitle, p.cruise, p.ship, p.projid, p.pprojid,
       round(cast(s.latitude as NUMERIC),4) latitude,round(cast(s.longitude as NUMERIC),4) longitude,
       to_char(s.sampledate,'YYYY-MM-DD HH24:MI') sampledate,

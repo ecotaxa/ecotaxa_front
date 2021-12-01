@@ -7,11 +7,11 @@ from pathlib import Path
 
 import numpy as np
 
-from appli import EncodeEqualList
 from .. import database as partdatabase
 from ..app import part_app, db
 from ..constants import CTDFixedCol
 from ..db_utils import ExecSQL, GetAll
+from ..txt_utils import EncodeEqualList
 
 
 # Purge les espace et converti le Nan en vide

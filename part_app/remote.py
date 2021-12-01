@@ -7,9 +7,11 @@ from typing import List, Tuple, Dict, Any, Union, Optional
 from flask import Request
 from werkzeug.local import LocalProxy
 
-from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UsersApi, UserModelWithRights, ApiException, \
-    SamplesApi, SampleModel, ObjectsApi, ObjectSetQueryRsp, UserModel, SampleTaxoStatsModel
-from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi
+from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UserModelWithRights, ApiException, \
+    SampleModel, ObjectSetQueryRsp, UserModel, SampleTaxoStatsModel
+from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi, SamplesApi, UsersApi, ObjectsApi
+
+from .urls import ECOTAXA_API_URL
 
 
 class EcoTaxaInstance(object):
@@ -17,8 +19,8 @@ class EcoTaxaInstance(object):
         Access to a remote EcoTaxa instance via API calls.
     """
 
-    def __init__(self, base_url: str, request_or_cookie: Union[str, LocalProxy, Request]):
-        self.base_url = base_url + "api"
+    def __init__(self, request_or_cookie: Union[str, LocalProxy, Request]):
+        self.base_url = ECOTAXA_API_URL
         if isinstance(request_or_cookie, LocalProxy):
             request_or_cookie = request_or_cookie.cookies.get('session')
         self.token = request_or_cookie

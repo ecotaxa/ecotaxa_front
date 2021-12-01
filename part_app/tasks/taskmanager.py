@@ -9,7 +9,7 @@ from typing import Optional
 import flask
 from flask import render_template, g, flash, jsonify, request
 
-from appli import gvg, gvp
+from ..http_utils import gvg, gvp
 from ..app import part_app, db
 from ..db_utils import GetAll
 from ..remote import EcoTaxaInstance
@@ -169,7 +169,7 @@ def LoadTask(taskid, cookie_from_env=False):
 
 @part_app.route('/Task/listall')
 def ListTasks():
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     g.headcenter = "<H3>Task Monitor</h3>"
@@ -207,7 +207,7 @@ def ListTasks():
 
 @part_app.route('/Task/Create/<ClassName>', methods=['GET', 'POST'])
 def TaskCreateRouter(ClassName):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     gvp('dummy')  # Protection bug flask connection reset si on fait post sans lire les champs
@@ -221,7 +221,7 @@ def TaskCreateRouter(ClassName):
 
 @part_app.route('/Task/Question/<int:TaskID>', methods=['GET', 'POST'])
 def TaskQuestionRouter(TaskID):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     part_AddTaskSummaryForTemplate(ecotaxa_if)
@@ -231,7 +231,7 @@ def TaskQuestionRouter(TaskID):
 
 @part_app.route('/Task/Show/<int:TaskID>', methods=['GET'])
 def TaskShow(TaskID):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     part_AddTaskSummaryForTemplate(ecotaxa_if)
@@ -271,7 +271,7 @@ def TaskShow(TaskID):
 # noinspection PyUnusedLocal
 @part_app.route('/Task/GetFile/<int:TaskID>/<filename>', methods=['GET'])
 def TaskGetFile(TaskID, filename):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     task = LoadTask(TaskID)
@@ -281,7 +281,7 @@ def TaskGetFile(TaskID, filename):
 
 @part_app.route('/Task/ForceRestart/<int:TaskID>', methods=['GET'])
 def TaskForceRestart(TaskID):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     part_AddTaskSummaryForTemplate(ecotaxa_if)
@@ -291,7 +291,7 @@ def TaskForceRestart(TaskID):
 
 @part_app.route('/Task/Clean/<int:TaskID>', methods=['GET'])
 def TaskClean(TaskID):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     part_AddTaskSummaryForTemplate(ecotaxa_if)
@@ -323,7 +323,7 @@ def DoTaskClean(TaskID):
 
 @part_app.route('/Task/GetStatus/<int:TaskID>', methods=['GET'])
 def TaskGetStatus(TaskID):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     part_AddTaskSummaryForTemplate(ecotaxa_if)
@@ -379,7 +379,7 @@ def TaskGetStatus(TaskID):
 
 @part_app.route('/Task/autoclean/')
 def AutoCleanManual():
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     return part_PrintInCharte(ecotaxa_if, AutoClean())
 
 
@@ -399,7 +399,7 @@ def AutoClean():
 
 @part_app.route('/Task/Monitor/<int:TaskID>', methods=['GET'])
 def TaskMonitor(TaskID):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     part_AddTaskSummaryForTemplate(ecotaxa_if)
     # noinspection PyBroadException
     try:

@@ -19,12 +19,7 @@ if sys.platform.startswith('win32'):
             reload(_fix)
     sys.base_prefix = virtualprefix
 
-VaultRootDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "vault")
-if not os.path.exists(VaultRootDir):
-    os.mkdir(VaultRootDir)
-TempTaskDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "temptask")
-if not os.path.exists(TempTaskDir):
-    os.mkdir(TempTaskDir)
+
 
 from flask import Flask, render_template, request, g
 from flask_sqlalchemy import SQLAlchemy
@@ -251,19 +246,6 @@ def FormatSuccess(Msg, *args, DoNotEscape=False, **kwargs):
     txt = txt.replace('__BR__', '<br>')
     return "<div class='alert alert-success' role='alert'>{}</div>".format(txt)
 
-
-def CreateDirConcurrentlyIfNeeded(DirPath: pathlib.Path):
-    """
-    Permets de créer le répertoire passé en paramètre s'il n'existe pas et le crée si nécessaire.
-    Si la création échoue, il teste s'il n'a pas été créé par un autre processus, et dans ce cas ne remonte pas d'erreur.
-    :param DirPath: répertoire à créer sous forme de path
-    """
-    try:
-        if not DirPath.exists():
-            DirPath.mkdir()
-    except Exception as e:
-        if not DirPath.exists():
-            raise e
 
 
 def ComputeLimitForImage(imgwidth, imgheight, LimitWidth, LimitHeight):

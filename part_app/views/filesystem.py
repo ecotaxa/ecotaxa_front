@@ -4,7 +4,7 @@ from pathlib import Path
 
 from flask import render_template, json
 
-from appli import gvg
+from ..http_utils import gvg, gvp
 from ..app import part_app
 
 

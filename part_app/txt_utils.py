@@ -20,3 +20,29 @@ def GetPartClassLimitListText(LimitTab):
         else:
             res += ', %.4g mm' % (LimitTab[i])
     return res
+
+
+def DecodeEqualList(txt):
+    res = {}
+    for l in str(txt).splitlines():
+        ls = l.split('=', 1)
+        if len(ls) == 2:
+            res[ls[0].strip().lower()] = ls[1].strip().lower()
+    return res
+
+
+def EncodeEqualList(map):
+    l = ["%s=%s" % (k, v) for k, v in map.items()]
+    l.sort()
+    return "\n".join(l)
+
+
+def ntcv(v):
+    """
+    Permet de récuperer une chaine que la source soit une chaine ou un None issue d'une DB
+    :param v: Chaine potentiellement None
+    :return: V ou chaine vide
+    """
+    if v is None:
+        return ""
+    return v

@@ -2,23 +2,24 @@ from typing import List
 
 from flask import render_template, request, g
 
-from appli import gvg, gvp, ErrorFormat, GetAppManagerMailto
-from .. import database as partdatabase
+from appli import ErrorFormat, GetAppManagerMailto
 from to_back.ecotaxa_cli_py import SampleModel
-from . import sampleedit
-from ..db_utils import ExecSQL, GetAll
 from . import part_PrintInCharte
+from . import sampleedit
+from .. import database as partdatabase
 from ..app import part_app
-from ..urls import PART_STORAGE_URL, PART_URL, ECOTAXA_URL
+from ..db_utils import ExecSQL, GetAll
 from ..funcs import common_sample_import as common_import
 from ..funcs import uvp_sample_import
 from ..funcs.histograms import ComputeHistoDet, ComputeHistoRed, ComputeZooHisto
+from ..http_utils import gvg, gvp
 from ..remote import EcoTaxaInstance
+from ..urls import PART_STORAGE_URL, PART_URL
 
 
 @part_app.route('/prj/')
 def part_prj():
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     params = {}
@@ -79,7 +80,7 @@ def part_prj():
 
 @part_app.route('/prj_uvpgraph/<int:PrjId>/<int:offset>')
 def part_prj_vpgraph(PrjId, offset):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     Prj = GetAll("""select pp.* from part_projects pp where pprojid=%s""", (PrjId,))
@@ -118,7 +119,7 @@ def part_prj_vpgraph(PrjId, offset):
 
 @part_app.route('/prj/<int:PrjId>')
 def part_prj_main(PrjId):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     # Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()
@@ -278,7 +279,7 @@ def GlobalTaxoCompute(ecotaxa_if: EcoTaxaInstance, logger):
 
 @part_app.route('/prjcalc/<int:PrjId>', methods=['post'])
 def part_prjcalc(PrjId):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     Prj = partdatabase.part_projects.query.filter_by(pprojid=PrjId).first()

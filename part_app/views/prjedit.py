@@ -7,7 +7,9 @@ from flask import render_template, flash, request, g
 from wtforms import Form, StringField, validators, IntegerField, FloatField, SelectField, \
     TextAreaField
 
-from appli import gvg, gvp, ErrorFormat, DecodeEqualList
+from appli import ErrorFormat
+from ..txt_utils import DecodeEqualList
+from ..http_utils import gvg, gvp
 from ..app import part_app, db
 from .. import database as partdatabase
 from ..db_utils import GetAll
@@ -49,7 +51,7 @@ class UvpPrjForm(Form):
 
 @part_app.route('/prjedit/<int:pprojid>', methods=['get', 'post'])
 def part_prjedit(pprojid):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # i.e. @login_required
     g.headcenter = "<h3>Particle Project Metadata edition</h3>"

@@ -1,11 +1,12 @@
+import os
 
-from urls import ECOTAXA_URL, PART_URL, PART_STORAGE_URL
+from .urls import ECOTAXA_URL, PART_URL, PART_STORAGE_URL
 
 from flask import Flask, Blueprint
 from flask import g, request
 from flask_sqlalchemy import SQLAlchemy
 
-from remote import EcoTaxaInstance
+from .remote import EcoTaxaInstance
 part_app = Flask('part_app')  # Il faut donner le nom du module, le premier paramètre n'est pas libre _du tout_
 
 part_app.config.from_pyfile('config.cfg')
@@ -25,6 +26,11 @@ vaultBP = Blueprint('vault', __name__,
                     static_folder='../vault')
 part_app.register_blueprint(vaultBP)
 
+VaultRootDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "vault")
+assert os.path.exists(VaultRootDir)
+
+TempTaskDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "temptask")
+assert os.path.exists(TempTaskDir)
 
 @part_app.before_request
 def before_part_request():
@@ -32,7 +38,7 @@ def before_part_request():
         Hook before each request.
     """
     g.db = None
-    g.ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    g.ecotaxa_if = EcoTaxaInstance(request)
     # print(request.form)
     user_is_logged = False
     user_can_create = False

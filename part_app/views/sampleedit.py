@@ -4,7 +4,7 @@ from flask import flash, request
 from flask import render_template, redirect
 from wtforms import Form, BooleanField, StringField, validators, DateTimeField, IntegerField, FloatField, TextAreaField
 
-from appli import gvp
+from ..http_utils import gvg, gvp
 from . import part_PrintInCharte
 from ..urls import ECOTAXA_URL, PART_URL
 from ..app import part_app, db
@@ -95,7 +95,7 @@ def delete_sample(psampleid):
 
 @part_app.route('/sampleedit/<int:psampleid>', methods=['get', 'post'])
 def part_sampleedit(psampleid):
-    ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+    ecotaxa_if = EcoTaxaInstance(request)
     ecotaxa_user = ecotaxa_if.get_current_user()
     assert ecotaxa_user is not None  # @login_required
     model = partdatabase.part_samples.query.filter_by(psampleid=psampleid).first()

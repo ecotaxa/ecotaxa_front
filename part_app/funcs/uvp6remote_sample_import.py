@@ -14,7 +14,7 @@ from html.parser import HTMLParser
 
 import numpy as np
 
-from appli import ntcv
+from ..txt_utils import ntcv
 from .. import database as partdatabase
 from ..app import db
 from ..db_utils import ExecSQL

@@ -11,8 +11,8 @@ from typing import List, Dict
 import psycopg2.extras
 from flask import render_template, g, flash, request
 
-from appli import gvp, gvg, DecodeEqualList, ntcv
-from txt_utils import GetClassLimitTxt, GetPartClassLimitListText
+from ..txt_utils import GetClassLimitTxt, GetPartClassLimitListText, DecodeEqualList, ntcv
+from ..http_utils import gvg, gvp
 from .taskmanager import AsyncTask
 from ..urls import PART_URL, ECOTAXA_URL
 from ..app import part_app, db
@@ -897,7 +897,7 @@ class TaskPartExport(AsyncTask):
 
     def SPStep1(self):
         logging.info("Input Param = %s" % (self.param.__dict__,))
-        self.ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, self.cookie)
+        self.ecotaxa_if = EcoTaxaInstance(self.cookie)
         # dictionnaire par sample
         self.samplesdict = {int(x[0]): x for x in self.param.samples}
         if self.param.what == "RED":
@@ -929,7 +929,7 @@ class TaskPartExport(AsyncTask):
         # self.UpdateProgress(10,"Test Error")
 
     def QuestionProcess(self):
-        ecotaxa_if = EcoTaxaInstance(ECOTAXA_URL, request)
+        ecotaxa_if = EcoTaxaInstance(request)
         backurl = ("%s?{0}" % PART_URL).format(str(request.query_string, 'utf-8'))
         txt = "<a href='{0}'>Back to Particle Module Home page</a>".format(backurl)
         txt += "<h3>Particle sample data export</h3>"

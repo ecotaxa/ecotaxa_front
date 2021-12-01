@@ -13,9 +13,10 @@ import numpy as np
 import sys
 import zipfile
 
-from appli import VaultRootDir, DecodeEqualList, CreateDirConcurrentlyIfNeeded
+from ..fs_utils import CreateDirConcurrentlyIfNeeded
+from ..txt_utils import DecodeEqualList
 from .. import database as partdatabase
-from ..app import part_app, db
+from ..app import part_app, db, VaultRootDir
 from ..constants import PartDetClassLimit
 from ..db_utils import ExecSQL, GetAssoc
 from ..funcs.common_sample_import import CleanValue, ToFloat, GetTicks, GenerateReducedParticleHistogram
