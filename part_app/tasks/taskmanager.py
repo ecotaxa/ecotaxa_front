@@ -9,11 +9,11 @@ from typing import Optional
 import flask
 from flask import render_template, g, flash, jsonify, request
 
-from ..http_utils import gvg, gvp
 from ..app import part_app, db
 from ..db_utils import GetAll
+from ..http_utils import gvg, gvp
 from ..remote import EcoTaxaInstance
-from ..urls import PART_URL, ECOTAXA_URL
+from ..urls import PART_URL
 from ..views import part_PrintInCharte, part_AddTaskSummaryForTemplate
 
 

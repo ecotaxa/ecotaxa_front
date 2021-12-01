@@ -1,7 +1,7 @@
 import datetime
 
-from flask import g
 import psycopg2.extras
+from flask import g
 
 from .app import part_app, db
 

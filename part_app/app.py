@@ -1,12 +1,12 @@
 import os
 
-from .urls import ECOTAXA_URL, PART_URL, PART_STORAGE_URL
-
 from flask import Flask, Blueprint
 from flask import g, request
 from flask_sqlalchemy import SQLAlchemy
 
 from .remote import EcoTaxaInstance
+from .urls import ECOTAXA_URL, PART_URL
+
 part_app = Flask('part_app')  # Il faut donner le nom du module, le premier paramètre n'est pas libre _du tout_
 
 part_app.config.from_pyfile('config.cfg')
@@ -52,7 +52,7 @@ def before_part_request():
     g.user = user
     g.cookieGAOK = request.cookies.get('GAOK', '')
     g.menu = []
-    g.menu.append((ECOTAXA_URL, "Home"))
+    g.menu.append((ECOTAXA_URL, "EcoTaxa"))
     g.menu.append((PART_URL, "Particle Module"))
     if user_is_logged:
         g.menu.append((PART_URL + "prj/", "Particle projects management"))

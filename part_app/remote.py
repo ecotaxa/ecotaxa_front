@@ -8,11 +8,13 @@ from flask import Request
 from werkzeug.local import LocalProxy
 
 from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UserModelWithRights, ApiException, \
-    SampleModel, ObjectSetQueryRsp, UserModel, SampleTaxoStatsModel
+    SampleModel, ObjectSetQueryRsp, UserModel, SampleTaxoStatsModel, TaxaSearchRsp
 from to_back.ecotaxa_cli_py.api import AuthentificationApi, TaxonomyTreeApi, ProjectsApi, SamplesApi, UsersApi, \
     ObjectsApi
-
 from .urls import ECOTAXA_API_URL
+
+# The cookie set in the session with EcoTaxa token
+ECOTAXA_COOKIE = 'ecotaxa'
 
 
 class EcoTaxaInstance(object):
@@ -23,7 +25,7 @@ class EcoTaxaInstance(object):
     def __init__(self, request_or_cookie: Union[str, LocalProxy, Request]):
         self.base_url = ECOTAXA_API_URL
         if isinstance(request_or_cookie, LocalProxy):
-            request_or_cookie = request_or_cookie.cookies.get('session')
+            request_or_cookie = request_or_cookie.cookies.get(ECOTAXA_COOKIE)
         self.token = request_or_cookie
         # A bit of caching as instances don't survive a HTTP request
         self.users_by_id = {}
@@ -94,6 +96,17 @@ class EcoTaxaInstance(object):
         for a_param_chunk in self._valid_URL_chunks(classif_ids):
             ret.extend(tta.query_taxa_set(a_param_chunk))
         return ret
+
+    def search_taxa(self, term: str) -> List[TaxaSearchRsp]:
+        tta = TaxonomyTreeApi(self._get_client())
+        return tta.search_taxa(term)
+
+    def get_taxo_roots(self) -> List[TaxonModel]:
+        """
+            Return the roots of the taxonomy AKA category tree.
+        """
+        tta = TaxonomyTreeApi(self._get_client())
+        return tta.query_root_taxa()
 
     def get_taxo(self, classif_ids: List[int]) -> List[Tuple[int, str]]:
         """

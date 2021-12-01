@@ -14,13 +14,13 @@ from html.parser import HTMLParser
 
 import numpy as np
 
-from ..txt_utils import ntcv
 from .. import database as partdatabase
 from ..app import db
 from ..db_utils import ExecSQL
 from ..funcs import uvp_sample_import as uvp_sample_import
 from ..funcs.common_sample_import import ToFloat, GenerateReducedParticleHistogram
 from ..remote import EcoTaxaInstance
+from ..txt_utils import ntcv
 
 
 class ATagParser(HTMLParser):

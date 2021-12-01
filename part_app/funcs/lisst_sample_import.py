@@ -1,12 +1,12 @@
+import csv
+import logging
 from pathlib import Path
 
 import numpy as np
 
 from .. import database as partdatabase
-import csv
-import logging
-from ..constants import PartDetClassLimit
 from ..app import part_app, db
+from ..constants import PartDetClassLimit
 from ..db_utils import ExecSQL
 from ..funcs.common_sample_import import CleanValue, ToFloat, GenerateReducedParticleHistogram
 

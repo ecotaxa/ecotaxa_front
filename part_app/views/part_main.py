@@ -3,14 +3,14 @@ import operator
 from flask import render_template, g, json, request
 from wtforms import Form, SelectField, SelectMultipleField
 
-from ..txt_utils import GetClassLimitTxt
 from to_back.ecotaxa_cli_py import ProjectModel
 from . import part_PrintInCharte
-from ..urls import ECOTAXA_URL
 from ..app import part_app
 from ..constants import PartDetClassLimit, PartRedClassLimit, CTDFixedCol
 from ..db_utils import GetAll
 from ..remote import EcoTaxaInstance
+from ..txt_utils import GetClassLimitTxt
+from ..urls import ECOTAXA_URL
 
 
 @part_app.route('/')
@@ -53,7 +53,7 @@ def indexPart():
         form.taxolb.choices += ecotaxa_if.get_taxo(classif_ids)
     g.headcenter = """<h1 style='text-align: center;cursor: pointer;' >
       <span onclick="$('#particleinfodiv').toggle()"><b>PARTICLE</b> module <span class='glyphicon glyphicon-info-sign'></span> </span> 
-      <a href='%s' style='font-size:medium;margin-left: 50px;'>Go to Ecotaxa</a></h2>""" % ECOTAXA_URL
+      <a href='%s' style='font-size:medium;margin-left: 50px;'>Go to EcoTaxa</a></h2>""" % ECOTAXA_URL
     return part_PrintInCharte(ecotaxa_if,
                               render_template('part/index.html', form=form,
                                               LocalGIS=part_app.config.get("LOCALGIS", False),

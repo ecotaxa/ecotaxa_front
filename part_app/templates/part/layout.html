@@ -40,14 +40,33 @@
     <div class="panel-body" style="padding: 1px 5px 1px 5px;">
       <table width="100%">
         <tr>
-          <td width="145px"><a href="{{ url_for('.indexPart') }}"><img
-              src="{{ url_for('static', filename='logo_ecopart.png') }}"></a></td>
-
+          <td width="145px"><a href="{{ url_for('.indexPart') }}">
+            <img src="{{ url_for('static', filename='logo_ecopart.png') }}"></a></td>
           <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
-          <td align="right">{{ g.experimental |safe }}</td>
           <td align="right" width="300px">
             {% if not g.user %}
-              Not logged ( <a href="{{ url_for('.login') }}">log in / register</a> )
+              <div id="not_logged">
+                Not logged ( <a href="#" onclick="$('#login').show();$('#not_logged').hide();">log in</a>
+                <span class='glyphicon glyphicon-info-sign'
+                      title="Use your EcoTaxa account."
+                      data-toggle="tooltip" data-placement="left"></span> )
+              </div>
+              <div id="login" style="display: none">
+                <form class="form-signin" action="{{ url_for('.login') }}" method="POST" name="login_user_form">
+                  <div>
+                    <label for="inputEmail" class="sr-only">Email address</label>
+                    <input name="email" id="email" placeholder="Email address" required autofocus>
+                  </div>
+                  <div>
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input type="password" name="password" id="password" placeholder="Password" required>
+                  </div>
+                  <div>
+                    <button class="btn-small" onclick="$('#login').hide();$('#not_logged').show();">Cancel</button>
+                    <button class="btn-small" type="submit">Log in</button>
+                  </div>
+                </form>
+              </div>
             {% else %}
               {% if g.tasksummary %} <a href="{{ url_for('.ListTasks') }}">
                 {% if g.tasksummary.Pending %}

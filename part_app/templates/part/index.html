@@ -344,7 +344,7 @@ position: absolute;z-index: 100;">
                               "themes": {"stripes": false, "icons": false},
                               'data': {
                                   'dataType': 'JSON',
-                                  'url': '{{ ecotaxa }}search/taxotreejson',
+                                  'url': "{{ url_for('.taxo_tree') }}",
                                   'data': function (node) {
                                       return {'id': node.id};
                                   }
@@ -500,7 +500,7 @@ position: absolute;z-index: 100;">
     $(document).ready(function () {
         $("#taxolb").select2({
             ajax: {
-                url: "{{ ecotaxa }}search/taxo",
+                url: "{{ url_for('.search_taxo') }}",
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {

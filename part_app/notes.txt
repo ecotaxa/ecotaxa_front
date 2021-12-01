@@ -1,11 +1,9 @@
 
 --------- TODO --------------
 
-- login delegate to EcoTaxa
+- back-end uses the same DB sequence as EcoPart temp tasks -> fork the sequence... or not as whole DB will be forked.
 
-- back-end uses the same DB sequence as EcoPart temp tasks
-
-- separate temptasks directory for jobs vs tasks
+- separate temptasks directory for jobs vs tasks -> necessary as precisely, the sequences will evolve in //
 
 - "EcoTaxa folder temptask/task%06d (useful for huge files)"
 
@@ -55,3 +53,6 @@
 -------- ARCH --------------
 
 - DB table temp_tasks belongs to EcoPart
+
+- login delegate to EcoTaxa
+
