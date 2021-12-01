@@ -87,7 +87,7 @@ position: absolute;z-index: 100;">
 
 <div style="margin: 2px;">
 
-  <link rel="stylesheet" href="/static/openlayers/ol.css" type="text/css">
+  <link rel="stylesheet" href="{{ url_for('static',filename='openlayers/ol.css') }}" type="text/css">
   <table style="width: 100%">
     <tr>
       <td style="width: 400px;vertical-align: top;">
@@ -302,8 +302,8 @@ position: absolute;z-index: 100;">
               </div>
 
 
-              <link rel="stylesheet" href="/static/jstree/themes/default/style.min.css"/>
-              <script src="/static/jstree/jstree.min.js"></script>
+              <link rel="stylesheet" href="{{ url_for('static',filename='jstree/themes/default/style.min.css') }}"/>
+              <script src="{{ url_for('static',filename='jstree/jstree.min.js') }}"></script>
 
 
               <style>
@@ -537,7 +537,7 @@ position: absolute;z-index: 100;">
                     source: new ol.source.XYZ({
                         attributions: [attribution],
                         {% if LocalGIS %}
-                            url: '/static/tiles/tile_{z}_{y}_{x}.jpg',maxZoom: 6
+                            url: "{{ url_for('static',filename='tiles/tile_{z}_{y}_{x}.jpg')}},maxZoom: 6
                         {% else %}
                             url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
                         {% endif %}

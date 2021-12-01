@@ -1,9 +1,11 @@
 
 --------- TODO --------------
 
-- separate temptasks directory for jobs vs tasks
-
 - login delegate to EcoTaxa
+
+- back-end uses the same DB sequence as EcoPart temp tasks
+
+- separate temptasks directory for jobs vs tasks
 
 - "EcoTaxa folder temptask/task%06d (useful for huge files)"
 
