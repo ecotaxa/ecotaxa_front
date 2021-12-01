@@ -7,9 +7,8 @@ from flask import render_template, flash, request, g
 from wtforms import Form, StringField, validators, IntegerField, FloatField, SelectField, \
     TextAreaField
 
-from appli import ErrorFormat
 from ..txt_utils import DecodeEqualList
-from ..http_utils import gvg, gvp
+from ..http_utils import gvg, gvp, ErrorFormat
 from ..app import part_app, db
 from .. import database as partdatabase
 from ..db_utils import GetAll

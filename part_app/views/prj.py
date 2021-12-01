@@ -2,7 +2,6 @@ from typing import List
 
 from flask import render_template, request, g
 
-from appli import ErrorFormat, GetAppManagerMailto
 from to_back.ecotaxa_cli_py import SampleModel
 from . import part_PrintInCharte
 from . import sampleedit
@@ -12,7 +11,7 @@ from ..db_utils import ExecSQL, GetAll
 from ..funcs import common_sample_import as common_import
 from ..funcs import uvp_sample_import
 from ..funcs.histograms import ComputeHistoDet, ComputeHistoRed, ComputeZooHisto
-from ..http_utils import gvg, gvp
+from ..http_utils import gvg, gvp, ErrorFormat, GetAppManagerMailto
 from ..remote import EcoTaxaInstance
 from ..urls import PART_STORAGE_URL, PART_URL
 
@@ -73,7 +72,7 @@ def part_prj():
     g.headcenter = "<h4>Particle Projects management</h4><a href='%s'>Particle Module Home</a>" % PART_URL
     return part_PrintInCharte(ecotaxa_if,
                               render_template('part/list.html', PrjList=res, CanCreate=CanCreate,
-                                              AppManagerMailto=GetAppManagerMailto()
+                                              AppManagerMailto=GetAppManagerMailto(part_app)
                                               , filt_title=gvg('filt_title'), filt_subset=gvg('filt_subset'),
                                               filt_instrum=gvg('filt_instrum')))
 

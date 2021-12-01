@@ -7,14 +7,13 @@ from pathlib import Path
 
 from flask import render_template, flash, request, g
 
-from appli import ErrorFormat
 from .taskmanager import AsyncTask, DoTaskClean
 from ..urls import PART_URL, ECOTAXA_URL
 from .. import database as partdatabase
 from ..app import part_app, db
 from ..constants import LstInstrumType
 from ..db_utils import GetAssoc
-from ..http_utils import gvg, gvp
+from ..http_utils import gvg, gvp, ErrorFormat
 from ..funcs import histograms
 from ..funcs import uvp_sample_import, lisst_sample_import, common_sample_import, uvp6remote_sample_import, nightly
 from ..remote import EcoTaxaInstance

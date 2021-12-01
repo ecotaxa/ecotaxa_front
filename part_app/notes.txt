@@ -1,25 +1,13 @@
--------- ARCH --------------
-
-- DB table temp_tasks belongs to EcoPart
 
 --------- TODO --------------
 
-- split manager.py -> EcoPart sequences to recompute
+- login delegate to EcoTaxa
 
-- config file, adding back-end URL (_hardcoded_ for now)
+- back-end uses the same DB sequence as EcoPart temp tasks
 
 - separate temptasks directory for jobs vs tasks
 
-- login delegate to EcoTaxa
-
 - "EcoTaxa folder temptask/task%06d (useful for huge files)"
-
-- cron.py for EcoPart
-
------------- ISSUES ---------------
-
-- connection to EcoTaxa by background process: no cookie, generally speaking which user to take?
--> Create an admin EcoPart user?
 
 ----------- DONE -------------
 
@@ -51,3 +39,19 @@
 - Remove ForeignKey calls
 
 - finish replacements of /part with {{ url_for() }}
+
+- split manager.py -> EcoPart sequences to recompute
+
+- config file, adding back-end URL (_hardcoded_ for now) - bah it's a single-site installation
+
+- cron.py for EcoPart
+
+------------ ISSUES ---------------
+
+- connection to EcoTaxa by background process: no cookie, generally speaking which user to take?
+-> Create an admin EcoPart user?
+-> Command-line or cookie in env.
+
+-------- ARCH --------------
+
+- DB table temp_tasks belongs to EcoPart

@@ -380,11 +380,11 @@ def TaskGetStatus(TaskID):
 @part_app.route('/Task/autoclean/')
 def AutoCleanManual():
     ecotaxa_if = EcoTaxaInstance(request)
-    return part_PrintInCharte(ecotaxa_if, AutoClean())
+    return part_PrintInCharte(ecotaxa_if, TasksCleanup())
 
 
-def AutoClean():
-    """ Called from cron.py TODO """
+def TasksCleanup():
+    """ Called from cron.py """
     TaskList = GetAll("""SELECT id, owner_id, taskclass, taskstate, taskstep, progresspct, progressmsg,
        inputparam, creationdate, lastupdate, questiondata, answerdata
   FROM temp_tasks

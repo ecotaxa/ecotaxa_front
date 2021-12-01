@@ -9,7 +9,8 @@ from werkzeug.local import LocalProxy
 
 from to_back.ecotaxa_cli_py import ApiClient, TaxonModel, ProjectModel, UserModelWithRights, ApiException, \
     SampleModel, ObjectSetQueryRsp, UserModel, SampleTaxoStatsModel
-from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi, SamplesApi, UsersApi, ObjectsApi
+from to_back.ecotaxa_cli_py.api import AuthentificationApi, TaxonomyTreeApi, ProjectsApi, SamplesApi, UsersApi, \
+    ObjectsApi
 
 from .urls import ECOTAXA_API_URL
 
@@ -302,3 +303,19 @@ class EcoTaxaInstance(object):
                                                     project_id=projid,
                                                     project_filters=filters)
         return res.object_ids
+
+
+def log_in_ecotaxa(user: str, password: str) -> Optional[str]:
+    """
+        Log in to EcoTaxa and return a token if success
+    """
+    cli = ApiClient()
+    login_req = {"username": user,
+                 "password": password}
+    cli.configuration.host = ECOTAXA_API_URL
+    aaa = AuthentificationApi(cli)
+    try:
+        return aaa.login(login_req)
+    except ApiException as _ae:
+        return None
+    return None
