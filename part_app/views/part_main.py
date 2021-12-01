@@ -53,7 +53,7 @@ def indexPart():
         form.taxolb.choices += ecotaxa_if.get_taxo(classif_ids)
     g.headcenter = """<h1 style='text-align: center;cursor: pointer;' >
       <span onclick="$('#particleinfodiv').toggle()"><b>PARTICLE</b> module <span class='glyphicon glyphicon-info-sign'></span> </span> 
-      <a href='%s' style='font-size:medium;margin-left: 50px;'>Go to Ecotaxa</a></h2>""" % ECOTAXA_URL
+      <a href='%s' style='font-size:medium;margin-left: 50px;'>Go to EcoTaxa</a></h2>""" % ECOTAXA_URL
     return part_PrintInCharte(ecotaxa_if,
                               render_template('part/index.html', form=form,
                                               LocalGIS=part_app.config.get("LOCALGIS", False),
