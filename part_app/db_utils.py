@@ -10,7 +10,6 @@ GlobalDebugSQL = False
 
 # GlobalDebugSQL=True
 def GetAssoc(sql, params=None, debug=False, cursor_factory=psycopg2.extras.DictCursor, keyid=0):
-    from . import app
     if g.db is None:
         g.db = db.engine.raw_connection()
     cur = g.db.cursor(cursor_factory=cursor_factory)
@@ -38,7 +37,6 @@ def GetAssoc(sql, params=None, debug=False, cursor_factory=psycopg2.extras.DictC
 
 
 def GetAssoc2Col(sql, params=None, debug=False, dicttype=dict):
-    from . import app
     if g.db is None:
         g.db = db.engine.raw_connection()
     cur = g.db.cursor()
@@ -66,7 +64,6 @@ def GetAssoc2Col(sql, params=None, debug=False, dicttype=dict):
 
 
 def ExecSQL(sql, params=None, debug=False):
-    from . import app
     if g.db is None:
         g.db = db.engine.raw_connection()
     cur = g.db.cursor()
@@ -94,7 +91,6 @@ def ExecSQL(sql, params=None, debug=False):
 
 # Les parametres doivent être passés au format (%s)
 def GetAll(sql, params=None, debug=False, cursor_factory=psycopg2.extras.DictCursor):
-    from . import app
     if g.db is None:
         g.db = db.engine.raw_connection()
     cur = g.db.cursor(cursor_factory=cursor_factory)

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-import part_app.database as partdatabase
+from .. import database as partdatabase
 import csv
 import logging
 from ..constants import PartDetClassLimit

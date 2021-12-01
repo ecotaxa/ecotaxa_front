@@ -1,12 +1,12 @@
 # manage.py
-import os, sys, shutil
+import os
+import shutil
 
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 # noinspection PyDeprecation
 from flask_security.utils import encrypt_password
 
-import appli.part.funcs.histograms
 from appli import app, g
 from appli import db, user_datastore, database
 
@@ -83,15 +83,6 @@ def createsampledata():
 
 
 @manager.command
-def ForceTest1Values():
-    from appli.tasks.taskmanager import LoadTask
-    t = LoadTask(14)
-    t.param.IntraStep = 0
-    t.task.taskstep = 1
-    t.UpdateParam()
-
-
-@manager.command
 def ResetDBSequence(cur=None):
     with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
         g.db = None
@@ -105,11 +96,8 @@ def ResetDBSequence(cur=None):
         cur.execute("SELECT setval('seq_projectspriv', (SELECT max(id) FROM projectspriv), true)")
         cur.execute("SELECT setval('seq_samples', (SELECT max(sampleid) FROM samples), true)")
         cur.execute("SELECT setval('seq_taxonomy', (SELECT max(id) FROM taxonomy), true)")
-        cur.execute("SELECT setval('seq_temp_tasks', (SELECT max(id) FROM temp_tasks), true)")
         cur.execute("SELECT setval('seq_users', (SELECT max(id) FROM users), true)")
         cur.execute("SELECT setval('roles_id_seq', (SELECT max(id) FROM roles), true)")
-        cur.execute("SELECT setval('part_projects_pprojid_seq', (SELECT max(pprojid) FROM part_projects), true)")
-        cur.execute("SELECT setval('part_samples_psampleid_seq', (SELECT max(psampleid) FROM part_samples), true)")
         print("Sequence Reset Done")
 
 
@@ -276,71 +264,6 @@ def UpdateSunPos(ProjId):
                 app.logger.error("Astral error : %s", e)
 
         # print(Result)
-
-
-@manager.option('-p', '--projectid', dest='ProjectID', type=int, default=None, required=True,
-                help="Particle project ID")
-@manager.option('-w', '--what', dest='What', default=None, required=True,
-                help="""What should be recomputed, a set of letter i.e : DRMTC
-D : Compute detailed histogram 
-R : Compute Reduced histogram
-M : Match Ecotaxa sample
-T : Compute taxonomy histogram
-C : CTD import""")
-@manager.option('-u', '--user', dest='User', default=None, help="User Name for CTD Import")
-@manager.option('-e', '--email', dest='Email', default=None, help="Email for CTD Import")
-def RecomputePart(ProjectID, What, User, Email):
-    if 'C' in What:
-        if User is None or Email is None:
-            print("-u and -e options are required for CTD import")
-            quit(-1)
-    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
-        g.db = None
-        import appli.part.database as partdatabase
-        import appli.part.views.prj as prj
-        import appli.part.funcs.common_sample_import as common_import
-        Prj = partdatabase.part_projects.query.filter_by(pprojid=ProjectID).first()
-        Samples = database.GetAll("select psampleid,profileid from part_samples where pprojid=(%s)", [ProjectID])
-        for S in Samples:
-            print("Processing particle sample %s:%s" % (S['psampleid'], S['profileid']))
-            if 'D' in What:
-                print("Det=", appli.part.funcs.histograms.ComputeHistoDet(S['psampleid'], Prj.instrumtype))
-            if 'R' in What:
-                print("Red=", appli.part.funcs.histograms.ComputeHistoRed(S['psampleid'], Prj.instrumtype))
-            if 'M' in What:
-                print("Match=", prj.ComputeZooMatch(S['psampleid'], Prj.projid))
-            if 'C' in What:
-                print("CTD=", "Imported" if common_import.ImportCTD(S['psampleid'], User, Email) else 'CTD No file')
-        Samples = database.GetAll("select psampleid,profileid,sampleid from part_samples where pprojid=(%s)",
-                                  [ProjectID])
-        for S in Samples:
-            if 'T' in What and S['sampleid']:
-                print("Zoo for particle sample %s:%s=" % (S['psampleid'], S['profileid']),
-                      appli.part.funcs.histograms.ComputeZooHisto(S['psampleid'], Prj.instrumtype))
-
-
-@manager.command
-def partpoolserver():
-    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
-        g.db = None
-        import appli.part.funcs.uvp6remote_sample_import as uvp6remote_sample_import
-        import appli.part.funcs.common_sample_import as common_import
-        Lst = database.GetAll(
-            """select pprojid,ptitle from part_projects where coalesce(remote_type,'')!='' and coalesce(remote_url,'')!='' """)
-        for P in Lst:
-            print("pollserver for project {pprojid} : {ptitle}".format(**P))
-            try:
-                RSF = uvp6remote_sample_import.RemoteServerFetcher(P['pprojid'])
-                LstSampleID = RSF.FetchServerDataForProject([])
-                if not LstSampleID:
-                    continue
-                for psampleid in LstSampleID:
-                    print("uvp6remote Sample %d Metadata processed, Détailled histogram in progress" % (psampleid,))
-                    uvp6remote_sample_import.GenerateParticleHistogram(psampleid)
-                    print("Try to import CTD")
-                    print(common_import.ImportCTD(psampleid, "Automatic", ""))
-            except:
-                print('Error : ' + str(sys.exc_info()))
 
 
 if __name__ == "__main__":
