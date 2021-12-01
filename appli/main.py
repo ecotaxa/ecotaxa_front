@@ -25,12 +25,28 @@ def index():
         from appli import PrintInCharte_bs5    
         from flask import render_template
         import gettext
-        language = gettext.translation ('ecotaxa', 'messages', ['fr'] ) # or 'en' or 'cn' ...
+        language = gettext.translation ('ecotaxa', 'messages', ['en'] ) # 'fr' or 'en' or 'cn' or 'pt' ...
         language.install() # hummm, not sure it is necessary
         return PrintInCharte_bs5(
+            # EcoTaxa_about_page and Welcome_to_EcoTaxa not yet used here
             render_template(    "project/about_ecotaxa.html",
                                 EcoTaxa_is_a_web_application = language.gettext("EcoTaxa_is_a_web_application"),
-                                If_you_use_EcoTaxa = language.gettext("If_you_use_EcoTaxa")
+                                If_you_use_EcoTaxa = language.gettext("If_you_use_EcoTaxa"),
+                                The_development_of_EcoTaxa = language.gettext("The_development_of_EcoTaxa"),
+                                Sorbonne_Université_and_CNRS = language.gettext("Sorbonne_Université_and_CNRS"),
+                                The_Programme_Investissements_d_Avenir = language.gettext("The_Programme_Investissements_d_Avenir"),
+                                The_Partner_University_Fund = language.gettext("The_Partner_University_Fund"),
+                                The_CNRS_LEFE_program = language.gettext("The_CNRS_LEFE_program"),
+                                The_Belmont_Forum = language.gettext("The_Belmont_Forum"),
+                                The_Watertools_company = language.gettext("The_Watertools_company"),
+                                The_maintenance_of_the_software = language.gettext("The_maintenance_of_the_software"),
+                                The_persons_who_made_EcoTaxa = language.gettext("The_persons_who_made_EcoTaxa"),
+                                Marc_Picheral_and = language.gettext("Marc_Picheral_and"),
+                                Sébastien_Colin = language.gettext("Sébastien_Colin"),
+                                Developers = language.gettext("Developers"),
+                                Deep_learning = language.gettext("Deep_learning"),
+                                testing_and_feedback = language.gettext("testing_and_feedback"),
+                                Disclaimer = language.gettext("Disclaimer")
             )
         )
     else:
