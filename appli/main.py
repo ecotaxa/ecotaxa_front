@@ -24,8 +24,9 @@ def index():
     if connectPythonToPrime:    
         def find_language():
             # Get the browser current language
-            import gettext            
-            KNOWN_LANGAGES = ['en','pt','cn','fr'] # TODO put this constant in ecotaxa_dev/appli/project/__init__.py ?
+            import gettext
+            # see https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1 to get all the 2 digits country codes           
+            KNOWN_LANGAGES = ['en','pt','zh','fr'] # TODO put this constant in ecotaxa_dev/appli/project/__init__.py ?
             curLang:str = ''
             prefLangs = request.accept_languages
             if prefLangs is not None:
@@ -35,7 +36,7 @@ def index():
                     curLang:str = l[0][:2] # first 2 letters show the country, and translations tables folders are organised this way
                     if curLang in KNOWN_LANGAGES:
                         try:
-                            lang = gettext.translation ('ecotaxa', 'messages', [curLang] ) # curLang == 'fr' or 'en' or 'cn' or 'pt' ...
+                            lang = gettext.translation ('ecotaxa', 'messages', [curLang] ) # curLang == 'fr' or 'en' or 'zh' or 'pt' ...
                             okCurLang = True
                         except: # language corrupted or not existing
                             okCurLang = False
