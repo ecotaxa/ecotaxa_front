@@ -20,13 +20,38 @@ app.register_blueprint(vaultBP)
 
 @app.route('/')
 def index():
-    from appli.project.__init__ import connectPythonToPrime    
-    if connectPythonToPrime:
+    from appli.project.__init__ import connectPythonToPrime
+    if connectPythonToPrime:    
+        def find_language():
+            # Get the browser current language
+            import gettext            
+            KNOWN_LANGAGES = ['en','pt','cn','fr'] # TODO put this constant in ecotaxa_dev/appli/project/__init__.py ?
+            curLang:str = ''
+            prefLangs = request.accept_languages
+            if prefLangs is not None:
+                # Here, there is at least one language            
+                # First one is the prefered language in the list of handled languages
+                for l in prefLangs:
+                    curLang:str = l[0][:2] # first 2 letters show the country, and translations tables folders are organised this way
+                    if curLang in KNOWN_LANGAGES:
+                        try:
+                            lang = gettext.translation ('ecotaxa', 'messages', [curLang] ) # curLang == 'fr' or 'en' or 'cn' or 'pt' ...
+                            okCurLang = True
+                        except: # language corrupted or not existing
+                            okCurLang = False
+                        if okCurLang:
+                            lang.install()
+                            return lang
+                    # try the next language
+            # Tried all the languages without success, or there is no supported langage
+            curLang = 'en' # desperate, so take english as last solution
+            lang = gettext.translation ('ecotaxa', 'messages', [curLang] )
+            lang.install()
+            return lang
+
         from appli import PrintInCharte_bs5    
-        from flask import render_template
-        import gettext
-        language = gettext.translation ('ecotaxa', 'messages', ['en'] ) # 'fr' or 'en' or 'cn' or 'pt' ...
-        language.install() # hummm, not sure it is necessary
+        from flask import render_template, request
+        language = find_language()
         return PrintInCharte_bs5(
             # EcoTaxa_about_page and Welcome_to_EcoTaxa not yet used here
             render_template(    "project/about_ecotaxa.html",
