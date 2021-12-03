@@ -55,7 +55,7 @@ msgstr   "Sébastien Colin：初始规格"
 msgid   "Developers"
 msgstr "Altidev, Laurent Salinas, Laurent Reese: 发展"
 
-msgid   "Deep learning"
+msgid   "Deep_learning"
 msgstr "Simon-Martin Schröder、Benjamin Graham：深度学习实施"
 
 msgid   "testing_and_feedback"
