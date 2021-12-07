@@ -17,31 +17,31 @@ msgid "EcoTaxa_is_a_web_application"
 msgstr "EcoTaxa est une application web dédiée à l'exploration visuelle et à l'annotation taxonomique d'images qui illustrent la beauté de la biodiversité planctonique."
 
 msgid "If_you_use_EcoTaxa"
-msgstr "Si vous utilisez EcoTaxa dans votre travail, nous vous serions reconnaissants de le citer comme : Picheral M, Colin S, Irisson J-O (2017). EcoTaxa, un outil de classification taxonomique des images."
+msgstr "Si vous utilisez EcoTaxa dans votre travail, nous vous serions reconnaissants de le citer comme : Picheral M, Colin S, Irisson J-O (2017). EcoTaxa, un outil de classification taxonomique des images : <a href='http://ecotaxa.obs-vlfr.fr'>http://ecotaxa.obs-vlfr.fr</a>"
 
 msgid  "The_development_of_EcoTaxa"
 msgstr "Le développement d'EcoTaxa est rendu possible par le soutien de :"
 
 msgid "Sorbonne_Université_and_CNRS"
-msgstr "Sorbonne Université et le CNRS, qui paient les salaires du personnel permanent chargé de superviser son développement."
+msgstr "Sorbonne Université et le <a href='www.cnrs.fr'>CNRS</a>, qui paient les salaires du personnel permanent chargé de superviser son développement."
 
 msgid "The_Programme_Investissements_d_Avenir"
-msgstr "Le Programme Investissements d'Avenir qui a financé le développement de la version originale de l'application à travers le projet Oceanomics, dédié à l'analyse des échantillons de Tara Oceans [45k€]."
+msgstr "<a href='https://www.gouvernement.fr/le-programme-d-investissements-d-avenir'>Le Programme Investissements d'Avenir</a> qui a financé le développement de la version originale de l'application à travers le projet Oceanomics, dédié à l'analyse des échantillons de Tara Oceans [45k€]."
 
 msgid "The_Partner_University_Fund"
-msgstr   "Le Fonds des universités partenaires qui a financé le matériel sur lequel EcoTaxa a fonctionné pendant plusieurs années et la solution d'apprentissage automatique qu'il a permis, dans le cadre d'un projet conjoint entre l'Université Pierre et Marie Curie (maintenant Sorbonne Université) et l'Université de Miami [15k€]."
+msgstr "Le <a href='https://face-foundation.org/higher-education/partner-university-fund/'>Fonds des universités partenaires</a> qui a financé le matériel sur lequel EcoTaxa a fonctionné pendant plusieurs années et la solution d'apprentissage automatique qu'il a permis, dans le cadre d'un projet conjoint entre l'Université Pierre et Marie Curie (maintenant Sorbonne Université) et l'Université de Miami [15k€]."
 
 msgid "The_CNRS_LEFE_program"
-msgstr "Le programme LEFE du CNRS qui a permis de renouveler le backend de la machine d'apprentissage, à travers le projet DL-PIC [10k€]."
+msgstr "Le programme <a href='https://programmes.insu.cnrs.fr/lefe/'>LEFE</a> du CNRS qui a permis de renouveler le backend de la machine d'apprentissage, à travers le projet DL-PIC [10k€]."
 
 msgid "The_Belmont_Forum"
-msgstr "Le Belmont Forum, qui finance un examen global de la demande par le biais du projet WWWPIC [500k€]."
+msgstr "Le <a href='https://www.belmontforum.org/'>Belmont Forum</a>, qui finance un examen global de la demande par le biais du projet WWWPIC [500k€]."
 
 msgid "The_Watertools_company"
-msgstr "La société Watertools, qui a fait un don pour faciliter la traduction de l'interface d'EcoTaxa, notamment en chinois [30k€]."
+msgstr "La société <a href='http://www.watertools.cn/'>Watertools</a>, qui a fait un don pour faciliter la traduction de l'interface d'EcoTaxa, notamment en chinois [30k€]."
 
 msgid "The_maintenance_of_the_software"
-msgstr "La maintenance du logiciel et du matériel qui permet à EcoTaxa de fonctionner dépend du soutien de ses utilisateurs, qui peuvent être officiellement facturés par la Plateforme d'Imagerie Quantitative de Villefranche. Nous vous serions très reconnaissants si vous pouviez envisager de réserver des fonds à cet effet dans votre prochaine subvention. Contactez-nous pour estimer ce qui serait à la fois raisonnable et utile."
+msgstr "La maintenance du logiciel et du matériel qui permet à EcoTaxa de fonctionner dépend du soutien de ses utilisateurs, qui peuvent être officiellement facturés par la <a href='https://www.sorbonne-universite.fr/plateformes-techniques/plateforme-dimagerie-quantitative-de-villefranche-sur-mer-piqv'>Plateforme d'Imagerie Quantitative de Villefranche</a>. Nous vous serions très reconnaissants si vous pouviez envisager de réserver des fonds à cet effet dans votre prochaine subvention. Contactez-nous pour estimer ce qui serait à la fois raisonnable et utile."
 
 msgid "The_persons_who_made_EcoTaxa"
 msgstr "Les personnes qui ont rendu EcoTaxa possible sont :"
@@ -59,7 +59,7 @@ msgid "Deep_learning"
 msgstr "Simon-Martin Schröder, Benjamin Graham: implementation de l'apprentissage profond"
 
 msgid "testing_and_feedback"
-msgstr "Amanda Elineau, Corinne Desnos, Laetitia Jalabert et l'équipe COMPLEx du Laboratoire d'Océanographie de Villefranche (LOV) : tests et retours d'expérience."
+msgstr "Amanda Elineau, Corinne Desnos, Laetitia Jalabert et l'équipe COMPLEx du <a href='https://lov.imev-mer.fr/'>Laboratoire d'Océanographie de Villefranche</a> (LOV) : tests et retours d'expérience."
 
 msgid "Disclaimer"
 msgstr "Avertissement : Si vous annotez des images dans EcoTaxa, vous ne pouvez prétendre à aucune rétribution de la part des gestionnaires de l'application mais vous pouvez ensuite télécharger et utiliser les résultats de votre travail. Même s'ils font de leur mieux pour maintenir l'application stable et sécurisée, les gestionnaires de l'application EcoTaxa ne sont pas responsables de la sauvegarde des images et des données associées qu'elle héberge. Il vous appartient d'effectuer des sauvegardes régulières."

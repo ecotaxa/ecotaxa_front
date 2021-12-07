@@ -35,7 +35,7 @@ def index():
                 for l in prefLangs:
                     curLang:str = l[0][:2] # first 2 letters show the country, and translations tables folders are organised this way
                     if curLang in KNOWN_LANGAGES:
-                        try:
+                        try: # N.B. [curLang] and not curLang in the following line
                             lang = gettext.translation ('ecotaxa', 'messages', [curLang] ) # curLang == 'fr' or 'en' or 'zh' or 'pt' ...
                             okCurLang = True
                         except: # language corrupted or not existing
