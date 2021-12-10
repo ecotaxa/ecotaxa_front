@@ -59,6 +59,7 @@ docker run \
 grololo06/ecotaxaback:2.5
 ```
 ## 5) Activate the python environment by running, in the ~/ecotaxa/ecotaxa_dev directory
+### (if the ~/ecotaxa/ecotaxa_dev/venv directory does not exist, go to step 9)
 ```
 source venv/bin/activate
 ```
@@ -79,6 +80,57 @@ docker rmi  <<current ecotaxaback docker image reference>> --force
 docker pull grololo06/ecotaxaback:<<last backend version>>
 ```
 ### Then update run_docker.sh with the appropriate backend version (see step 4)
+
+###
+## 9) Create the venv directory
+### This *must* be done using python3.6 (install it if necessary)
+### do *not* uninstall python3.8 (or higher) from your OS, do *not* replace python3.8 by python3.6
+### in ecotaxa_dev directory, run
+```
+python3.6 -m pip install -r requirements.txt
+```
+### This will create a .local folder in your home directory, copy and rename it to ecotaxa_dev/venv folder
+### requirements.txt contains the python packages necessary for the spaghetti
+### requirements.txt may look like :
+```
+alembic==1.0.5
+astral==1.7.1
+Flask==1.0.2
+Flask-Admin==1.5.3
+Flask-BabelEx==0.9.3
+Flask-Login==0.4.1
+Flask-Mail==0.9.1
+Flask-Migrate==2.3.1
+Flask-Principal==0.4.0
+Flask-Script==2.0.6
+Flask-Security==3.0.0
+Flask-SQLAlchemy==2.3.2
+Flask-WTF==0.14.2
+itsdangerous==1.1.0
+Jinja2==2.10
+joblib==0.13.0
+kiwisolver==1.0.1
+Mako==1.0.7
+MarkupSafe==1.1.0
+# matplotlib==3.0.2
+numpy==1.15.4
+passlib==1.7.1
+Pillow==5.4.1
+psycopg2==2.7.6.1
+python-dateutil==2.7.5
+python-editor==1.0.3
+pytz==2018.9
+requests==2.21.0
+scikit-learn==0.20.2
+scipy==1.2.0
+six==1.12.0
+speaklater==1.3
+SQLAlchemy==1.2.15
+testresources==2.0.1
+Werkzeug==0.14.1
+WTForms==2.2.1
+hyphenator==0.6.0
+```
 
 
 ## FROM HERE, NOT FINISHED
