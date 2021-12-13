@@ -157,7 +157,7 @@ python3.6 -m venv venv --without-pip
 source venv/bin/activate
 ```
 ### You see the "(venv)" prompt on the left, showing that you are in a python virtual environment
-### then downlod get-pip.py, and run
+### then downlod get-pip.py (from https://bootstrap.pypa.io/get-pip.py), and run
 ```
 python3.6 get-pip.py
 python3.6 -m pip --version     ==> should answer with version 3.6
