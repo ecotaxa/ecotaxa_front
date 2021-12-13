@@ -136,7 +136,7 @@ source venv/bin/activate
 python3.6 runserver.py
 ```
 ###
-## 7) Run frontend locally: 0.0.0.0:5001 (or something like 0.0.0.0:8080 if you have another local frontend)
+## 7) In your internet browser, run frontend locally: 0.0.0.0:5001 (or something like 0.0.0.0:8080 if you have another local frontend)
 
 ###
 ## 8) To update the backend version :
