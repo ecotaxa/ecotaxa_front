@@ -87,7 +87,7 @@ source venv/bin/activate
 ### like : (venv) laurentr@laurentr-Latitude-7420:~$
 ## 6) Launch the spaghetti **from the venv environment**, in the ~/ecotaxa/ecotaxa_dev directory
 ```
-python3 runserver.py
+python3.6 runserver.py
 ```
 ###
 ## 7) Run frontend locally: 0.0.0.0:5001 (or something like 0.0.0.0:8080 if you have another local frontend)
@@ -138,7 +138,7 @@ joblib==0.13.0
 kiwisolver==1.0.1
 Mako==1.0.7
 MarkupSafe==1.1.0
-# matplotlib==3.0.2
+matplotlib==3.0.2
 numpy==1.15.4
 passlib==1.7.1
 Pillow==5.4.1
