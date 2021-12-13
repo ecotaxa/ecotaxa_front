@@ -58,6 +58,21 @@ docker run \
 --mount type=bind,source=/home/laurentr/ecotaxa/ecotaxa_dev/plankton_rw,target=/plankton_rw \
 grololo06/ecotaxaback:2.5
 ```
+### when launching run_docker.sh, if you get the error
+```
+Exception ignored in: <function Service.__del__ at 0x7f89f49c6430>
+Traceback (most recent call last):
+  File "/app/API_operations/helpers/Service.py", line 168, in __del__
+    if self.session is not None:
+AttributeError: session
+```
+### then you must add the lines 
+```
+host    all             postgres        127.0.0.1/32           trust 
+host    all             postgres        172.17.0.1/24          trust 
+```
+### to your file /etc/postgresql/13/main/pg_hba.conf
+
 ## 5) Activate the python environment by running, in the ~/ecotaxa/ecotaxa_dev directory
 ### (if the ~/ecotaxa/ecotaxa_dev/venv directory does not exist, go to step 9)
 ```
