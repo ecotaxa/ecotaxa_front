@@ -34,7 +34,7 @@ service postgresql restart
 ###
 ## 3') Create a config.cfg file + a plankton_rw directory
 ### Create an ecotaxa_dev/plankton_rw folder.
-### In the ecotaxa_dev/appli folder, create a config.cfg file that looks like
+### In the ecotaxa_dev/appli folder, create a config.cfg file that looks like :
 ```
 DEBUG = False
 SECRET_KEY = 'THIS KEY MUST BE CHANGED'
