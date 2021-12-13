@@ -6,7 +6,7 @@
 ```
 git pull
 ```
-## 2) Check how postgresql is running
+## 2) Check how postgresql is running (version 13 on December 2021)
 ### To see if the command is understood, even if an error (e.g. about the role) is returned
 ```
 psql
