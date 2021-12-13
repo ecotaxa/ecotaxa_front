@@ -160,7 +160,7 @@ source venv/bin/activate
 ### then downlod get-pip.py (from https://bootstrap.pypa.io/get-pip.py) into ecotaxa_dev, and run
 ```
 python3.6 get-pip.py
-python3.6 -m pip --version     ==> should answer with version 3.6
+python3.6 -m pip --version     ==> should answer with python version 3.6
 python3.6 -m pip install -r requirements.txt
 ```
 ### requirements.txt contains the python packages necessary for the spaghetti
