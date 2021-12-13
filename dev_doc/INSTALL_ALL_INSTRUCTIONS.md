@@ -156,8 +156,8 @@ docker pull grololo06/ecotaxaback:<<last backend version>>
 python3.6 -m venv venv --without-pip
 source venv/bin/activate
 ```
-### You see the "(venv)" prompt on the left, showing that you are in a python virtual environment
-### then downlod get-pip.py (from https://bootstrap.pypa.io/get-pip.py) into ecotaxa_dev, and run
+### You see the "(venv)" prompt on the left, showing that you are in a python virtual environment.
+### Then downlod get-pip.py (from https://bootstrap.pypa.io/get-pip.py) into ecotaxa_dev, and run
 ```
 python3.6 get-pip.py
 python3.6 -m pip --version     ==> should answer with python version 3.6
@@ -205,7 +205,6 @@ Werkzeug==0.14.1
 WTForms==2.2.1
 hyphenator==0.6.0
 ```
-
 
 ## FROM HERE, NOT FINISHED
 ## FROM HERE, NOT FINISHED
