@@ -116,7 +116,6 @@ python3.6 get-pip.py
 python3.6 -m pip --version     ==> should answer with version 3.6
 python3.6 -m pip install -r requirements.txt
 ```
-### This will create a .local folder in your home directory, copy and rename it to ecotaxa_dev/venv folder
 ### requirements.txt contains the python packages necessary for the spaghetti
 ### requirements.txt may look like :
 ```
