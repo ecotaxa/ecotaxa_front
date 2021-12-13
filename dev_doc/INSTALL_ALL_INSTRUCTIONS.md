@@ -72,6 +72,11 @@ host    all             postgres        127.0.0.1/32           trust
 host    all             postgres        172.17.0.1/24          trust 
 ```
 ### to your file /etc/postgresql/13/main/pg_hba.conf
+### and the line
+```
+listen_addresses = 'localhost,172.17.0.1'
+```
+### to your file /etc/postgresql/13/main/postgresql.conf
 
 ## 5) Activate the python environment by running, in the ~/ecotaxa/ecotaxa_dev directory
 ### (if the ~/ecotaxa/ecotaxa_dev/venv directory does not exist, go to step 9)
