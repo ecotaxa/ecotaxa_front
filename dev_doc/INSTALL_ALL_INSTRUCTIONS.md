@@ -33,7 +33,7 @@ service postgresql restart
 ### see point 2) to verify that it is running
 ###
 ## 3') Create a config.cfg file
-### in the ecotaxa_dev/appli folder, create a config.cgf file that looks like
+### in the ecotaxa_dev/appli folder, create a config.cfg file that looks like
 ```
 DEBUG = False
 SECRET_KEY = 'THIS KEY MUST BE CHANGED'
@@ -179,6 +179,7 @@ Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
 itsdangerous==1.1.0
 Jinja2==2.10
+jsonpickle==2.0.0
 joblib==0.13.0
 kiwisolver==1.0.1
 Mako==1.0.7
