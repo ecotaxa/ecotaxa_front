@@ -107,6 +107,13 @@ docker pull grololo06/ecotaxaback:<<last backend version>>
 ### do *not* uninstall python3.8 (or higher) from your OS, do *not* replace python3.8 by python3.6
 ### in ecotaxa_dev directory, run
 ```
+python3.6 -m venv venv --without-pip
+source venv/bin/activate
+```
+### then downlod get-pip.py, and run
+```
+python3.6 get-pip.py
+python3.6 -m pip --version     ==> should answer with version 3.6
 python3.6 -m pip install -r requirements.txt
 ```
 ### This will create a .local folder in your home directory, copy and rename it to ecotaxa_dev/venv folder
