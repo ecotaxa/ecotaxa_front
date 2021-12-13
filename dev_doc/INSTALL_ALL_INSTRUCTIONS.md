@@ -32,6 +32,49 @@ service postgresql restart
 ```
 ### see point 2) to verify that it is running
 ###
+## 3') Create a config.cfg file
+### in the ecotaxa_dev/appli folder, create a config.cgf file that looks like
+```
+DEBUG = False
+SECRET_KEY = 'THIS KEY MUST BE CHANGED'
+DB_USER="postgres"
+DB_PASSWORD=""
+DB_HOST="localhost"
+DB_PORT="5432"
+DB_DATABASE="ecotaxa3"
+DB_TOOLSDIR=""  #   "" = Use system Path
+#DB_TOOLSDIR="..\\PG94\\App\\PgSQL\\bin"
+# SQLALCHEMY_ECHO=True
+SQLALCHEMY_ECHO=False
+APPMANAGER_EMAIL="EnterYourEmail@Domain.com"
+APPMANAGER_NAME="YourName"
+USERNAME='admin'
+PASSWORD='default'
+THUMBSIZELIMIT=400
+SERVERLOADAREA='D:\\SERVERLOADAREA'
+FTPEXPORTAREA='D:/FTPAREA'
+#PYTHONEXECUTABLE=R"..\Python\Scripts\python.exe"
+SERVERURL='http://ecotaxa.MyDomain.Com/'
+SQLALCHEMY_POOL_RECYCLE=7200
+# If you want to enable Googla analytics tracking
+# GOOGLE_ANALYTICS_ID="UA-XXXXXXX-1"
+# If you want to enable reCaptcha for user creation
+# RECAPTCHAID="YourreCaptchaID"
+# RECAPTCHASECRET="YourSecret"
+# LOCALGIS=True
+PART_DEFAULT_VISIBLE_DELAY=2
+PART_DEFAULT_GENERAL_EXPORT_DELAY=24
+PART_DEFAULT_PLANKTON_EXPORT_DELAY=36
+SCN_ENABLED=False
+SCN_BINARY="PathToSCNApplicationBinary"
+##################################### ECOTAXA Package Configuration don't need to be changed #########################################"
+SECURITY_PASSWORD_HASH="sha512_crypt"
+SECURITY_PASSWORD_SALT="YYfDY3FID"
+SECURITY_CHANGEABLE=True
+SECURITY_POST_CHANGE_VIEW="/"
+SECURITY_SEND_PASSWORD_CHANGE_EMAIL=False
+SQLALCHEMY_DATABASE_URI="postgresql+psycopg2://"+DB_USER+":"+DB_PASSWORD+"@"+DB_HOST+":"+DB_PORT+"/"+DB_DATABASE
+```
 ## 4) Run the backend docker
 ### You may need to stop properly the backend docker before running run_docker.sh
 ```
