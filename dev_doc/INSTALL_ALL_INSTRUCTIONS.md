@@ -102,7 +102,7 @@ docker run \
 grololo06/ecotaxaback:2.5
 ```
 ### N.B. change the line "--mount type=bind,source=/var/run/postgresql,target=/var/run/postgresql" into
-### "--mount type=bind,source=/home/oldLinux/var/run/postgresql,target=/var/run/postgresql" if your database is stored on another partition like /home/oldLinux/var/run/postgresql
+### "--mount type=bind,source=/home/oldLinux/var/run/postgresql,target=/var/run/postgresql" if your database is stored on another partition mounted like /home/oldLinux/var/run/postgresql
 ### when launching run_docker.sh, if you get the error
 ```
 Exception ignored in: <function Service.__del__ at 0x7f89f49c6430>
