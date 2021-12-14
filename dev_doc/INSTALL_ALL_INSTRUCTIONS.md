@@ -33,7 +33,7 @@ service postgresql restart
 ### see point 2) to verify that it is running
 ###
 ## 3') Create a config.cfg file + a plankton_rw directory
-### Create an ecotaxa_dev/plankton_rw folder.
+### Create an ecotaxa_dev/plankton_rw folder (plankton_rw will referenced used in run_docker.sh, see step 4).
 ### In the ecotaxa_dev/appli folder, create a config.cfg file that looks like :
 ```
 DEBUG = False
