@@ -2,7 +2,7 @@
 ### Please fix this doc when you use it and find improvements
 ##
 # I) To perform regularly : (reboot, softwares updates, components stopped or crashed)
-## 1) Get the last versions, inside ...ecotaxa_dev folder, run
+## 1) Get the last versions, inside ...ecotaxa_dev and ...ecotaxa_back folders, run
 ```
 git pull
 ```
