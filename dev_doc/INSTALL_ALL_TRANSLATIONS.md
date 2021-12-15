@@ -38,7 +38,7 @@ or
 ```
 ### N.B. _() is an alias for gettext(), and Babel understands both
 ### N.B. Do NOT use accents of special latin characters in the translation IDs
-## The extraction command is (~/ecotaxa/ecotaxa_dev is our python folder):
+### The extraction command is (~/ecotaxa/ecotaxa_dev is our python folder):
 ```
 pybabel extract ~/ecotaxa/ecotaxa_dev -o locale/base.pot
 ```
