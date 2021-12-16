@@ -241,7 +241,12 @@ msgstr ""
 msgid "Disclaimer"
 msgstr ""
 ```
-## 9) Fill in this .po file with all the msgstr translated strings
+### if new translated texts arrive in the python code, repeat step 7, and instead of an "init" command at step 8, just update by :
+```
+pybabel update -i locale/base.pot -l fr -d messages -D ecotaxa
+```
+### This will update the corresponding .po file with new translations, without damaging the old translations
+## 9) Fill in this .po file with all the necessary msgstr translated strings
 ## 10) Build the corresponding .mo (machine object) file that will be used when running the python executable, by :
 ```
 msgfmt -c -o ecotaxa.mo ecotaxa.po
