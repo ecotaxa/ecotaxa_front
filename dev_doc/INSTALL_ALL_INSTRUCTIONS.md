@@ -154,7 +154,6 @@ docker pull grololo06/ecotaxaback:<<last backend version>>
 ### In ecotaxa_dev directory, run
 ```
 python3.6 -m venv venv --without-pip
-source venv/bin/activate
 ```
 ### You see the "(venv)" prompt on the left, showing that you are in a python virtual environment.
 ### Then download get-pip.py (from https://bootstrap.pypa.io/get-pip.py) into ecotaxa_dev, and run
