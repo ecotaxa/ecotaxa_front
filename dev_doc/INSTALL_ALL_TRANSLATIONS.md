@@ -1,5 +1,15 @@
 # INSTALL ECOTAXA TRANSLATIONS MECHANISM ON A PC Ubuntu
 ### Please fix this doc when you use it and find improvements
+### See the sites :
+### https://docs.readthedocs.io/en/stable/development/i18n.html
+### https://docs.python.org/fr/3.6/library/gettext.html
+### https://www.mattlayman.com/blog/2015/i18n/
+### https://lokalise.com/blog/beginners-guide-to-python-i18n/
+### https://phrase.com/blog/posts/detecting-a-users-locale/
+## 0) Detect and mark the strings that you want to "internationalize"
+### A solution to detect all the strings in a python project is :
+### a) Use *pyinstaller* to build a unique executable from you python project.
+### b) Then run the *strings* command on this executable to get all the strings : only a subset of them will be "internationalized".
 ## 1) If not done, install the virtualenv tool :
 ```
 pip3 install virtualenv
@@ -28,6 +38,7 @@ pybabel --version
 ```
 mkdir locale
 ```
+
 ## 7) Extract the "international" strings from your python working folder. Those are strings used inside the .py files like
 ```
 ...gettext("ONE_TRANSLATION_ID")
@@ -38,7 +49,7 @@ or
 ```
 ### N.B. _() is an alias for gettext(), and Babel understands both
 ### N.B. Do NOT use accents of special latin characters in the translation IDs
-## The extraction command is (~/ecotaxa/ecotaxa_dev is our python folder):
+### The extraction command is (~/ecotaxa/ecotaxa_dev is our python folder):
 ```
 pybabel extract ~/ecotaxa/ecotaxa_dev -o locale/base.pot
 ```
@@ -241,7 +252,12 @@ msgstr ""
 msgid "Disclaimer"
 msgstr ""
 ```
-## 9) Fill in this .po file with all the msgstr translated strings
+### if other new translated texts arrive in the python code, repeat step 7, and instead of an "init" command at step 8, just update by :
+```
+pybabel update -i locale/base.pot -l fr -d messages -D ecotaxa
+```
+### This will update the corresponding .po file with other new translations, without damaging the old translations
+## 9) Fill in this .po file with all the necessary msgstr translated strings
 ## 10) Build the corresponding .mo (machine object) file that will be used when running the python executable, by :
 ```
 msgfmt -c -o ecotaxa.mo ecotaxa.po
