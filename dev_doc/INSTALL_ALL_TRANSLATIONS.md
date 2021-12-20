@@ -1,5 +1,12 @@
 # INSTALL ECOTAXA TRANSLATIONS MECHANISM ON A PC Ubuntu
 ### Please fix this doc when you use it and find improvements
+### See the sites :
+### https://docs.readthedocs.io/en/stable/development/i18n.html
+### https://docs.python.org/fr/3.6/library/gettext.html
+### https://www.mattlayman.com/blog/2015/i18n/
+### https://lokalise.com/blog/beginners-guide-to-python-i18n/
+### https://phrase.com/blog/posts/detecting-a-users-locale/
+
 ## 1) If not done, install the virtualenv tool :
 ```
 pip3 install virtualenv
@@ -28,6 +35,10 @@ pybabel --version
 ```
 mkdir locale
 ```
+## 6') Detect and mark the strings that you want to "internationalize"
+### A solution to detect all the strings in a python project is :
+### a) Use *pyinstaller* to build a unique executable from you python project.
+### b) Then run the *strings* command on this executable to get all the strings : only a subset of them will be "internationalized".
 ## 7) Extract the "international" strings from your python working folder. Those are strings used inside the .py files like
 ```
 ...gettext("ONE_TRANSLATION_ID")
