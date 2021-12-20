@@ -22,7 +22,7 @@ msgstr   "Se você usa EcoTaxa em seu trabalho, agradeceríamos se você citasse
 msgid   "The_development_of_EcoTaxa"
 msgstr   "O desenvolvimento de EcoTaxa é tornado possível graças ao apoio de:"
 
-msgid   "Sorbonne_Université_and_CNRS"
+msgid   "Sorbonne_Universite_and_CNRS"
 msgstr   "A Sorbonne University e o <a href='www.cnrs.fr'> CNRS </a>, que pagam os salários do pessoal permanente responsável pela supervisão de seu desenvolvimento."
 
 msgid   "The_Programme_Investissements_d_Avenir"
@@ -49,7 +49,7 @@ msgstr   "As pessoas que tornaram EcoTaxa possível são:"
 msgid   "Marc_Picheral_and"
 msgstr   "Marc Picheral e Jean-Olivier Irisson: especificações e supervisão de projectos"
 
-msgid   "Sébastien_Colin"
+msgid   "Sebastien_Colin"
 msgstr   "Sébastien Colin: especificação inicial"
 
 msgid   "Developers"

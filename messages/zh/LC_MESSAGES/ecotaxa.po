@@ -22,7 +22,7 @@ msgstr  "如果您在工作中使用 EcoTaxa，如果您将其引用为：Picher
 msgid   "The_development_of_EcoTaxa"
 msgstr  "EcoTaxa的发展得到了以下方面的支持。"
 
-msgid   "Sorbonne_Université_and_CNRS"
+msgid   "Sorbonne_Universite_and_CNRS"
 msgstr  "索邦大学和<a href='www.cnrs.fr'>CNRS</a>，支付负责监督其发展的长期工作人员的工资。"
 
 msgid   "The_Programme_Investissements_d_Avenir"
@@ -49,7 +49,7 @@ msgstr  "使EcoTaxa成为可能的人是：。"
 msgid   "Marc_Picheral_and"
 msgstr  "Marc Picheral和Jean-Olivier Irisson：规格和项目监督"
 
-msgid   "Sébastien_Colin"
+msgid   "Sebastien_Colin"
 msgstr  "Sébastien Colin：初始规格"
 
 msgid   "Developers"
