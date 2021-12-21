@@ -13,5 +13,5 @@ npm install -g sass
 sass --watch ecotaxa.scss:ecotaxa.css
 ```
 ### It will warn each time the ecotaxa.scss file is recompiled
-## 5) Run the application :
+## 5) Run the web application :
 ### Each time ecotaxa.scss is modified, ecotaxa.css is regenerated and the styles will be automatically updated in your (Chrome) browser.
