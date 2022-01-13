@@ -6,7 +6,8 @@ import os
 from flask import Blueprint, g, request, url_for, send_from_directory
 
 from appli import app, PrintInCharte
-from part_app.urls import PART_URL
+
+PART_URL = "http://localhost:5002"  # TODO: A config
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi
@@ -18,62 +19,67 @@ vaultBP = Blueprint('vault', __name__,
                     static_url_path='/vault', static_folder='../vault')
 app.register_blueprint(vaultBP)
 
+
 @app.route('/')
 def index():
     from appli.project.__init__ import connectPythonToPrime
-    if connectPythonToPrime:    
+    if connectPythonToPrime:
         def find_language():
             # Get the browser current language
             import gettext
             # see https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1 to get all the 2 digits country codes           
-            KNOWN_LANGAGES = ['en','pt','zh','fr'] # TODO put this constant in ecotaxa_dev/appli/project/__init__.py ?
-            curLang:str = ''
+            KNOWN_LANGAGES = ['en', 'pt', 'zh',
+                              'fr']  # TODO put this constant in ecotaxa_dev/appli/project/__init__.py ?
+            curLang: str = ''
             prefLangs = request.accept_languages
             if prefLangs is not None:
                 # Here, there is at least one language            
                 # First one is the prefered language in the list of handled languages
                 for l in prefLangs:
-                    curLang:str = l[0][:2] # first 2 letters show the country, and translations tables folders are organised this way
+                    curLang: str = l[0][
+                                   :2]  # first 2 letters show the country, and translations tables folders are organised this way
                     if curLang in KNOWN_LANGAGES:
-                        try: # N.B. [curLang] and not curLang in the following line
-                            lang = gettext.translation ('ecotaxa', 'messages', [curLang] ) # curLang == 'fr' or 'en' or 'zh' or 'pt' ...
+                        try:  # N.B. [curLang] and not curLang in the following line
+                            lang = gettext.translation('ecotaxa', 'messages',
+                                                       [curLang])  # curLang == 'fr' or 'en' or 'zh' or 'pt' ...
                             okCurLang = True
-                        except: # language corrupted or not existing
+                        except:  # language corrupted or not existing
                             okCurLang = False
                         if okCurLang:
                             lang.install()
                             return lang
                     # try the next language
             # Tried all the languages without success, or there is no supported langage
-            curLang = 'en' # desperate, so take english as last solution
-            lang = gettext.translation ('ecotaxa', 'messages', [curLang] )
+            curLang = 'en'  # desperate, so take english as last solution
+            lang = gettext.translation('ecotaxa', 'messages', [curLang])
             lang.install()
             return lang
 
-        from appli import PrintInCharte_bs5    
+        from appli import PrintInCharte_bs5
         from flask import render_template, request
         language = find_language()
         return PrintInCharte_bs5(
             # EcoTaxa_about_page and Welcome_to_EcoTaxa not yet used here
-            render_template(    "project/about_ecotaxa.html",
-                                EcoTaxa_is_a_web_application = language.gettext("EcoTaxa_is_a_web_application"),
-                                If_you_use_EcoTaxa = language.gettext("If_you_use_EcoTaxa"),
-                                The_development_of_EcoTaxa = language.gettext("The_development_of_EcoTaxa"),
-                                Sorbonne_Universite_and_CNRS = language.gettext("Sorbonne_Universite_and_CNRS"),
-                                The_Programme_Investissements_d_Avenir = language.gettext("The_Programme_Investissements_d_Avenir"),
-                                The_Partner_University_Fund = language.gettext("The_Partner_University_Fund"),
-                                The_CNRS_LEFE_program = language.gettext("The_CNRS_LEFE_program"),
-                                The_Belmont_Forum = language.gettext("The_Belmont_Forum"),
-                                The_Watertools_company = language.gettext("The_Watertools_company"),
-                                The_maintenance_of_the_software = language.gettext("The_maintenance_of_the_software"),
-                                The_persons_who_made_EcoTaxa = language.gettext("The_persons_who_made_EcoTaxa"),
-                                Marc_Picheral_and = language.gettext("Marc_Picheral_and"),
-                                Sebastien_Colin = language.gettext("Sebastien_Colin"),
-                                Developers = language.gettext("Developers"),
-                                Deep_learning = language.gettext("Deep_learning"),
-                                testing_and_feedback = language.gettext("testing_and_feedback"),
-                                Disclaimer = language.gettext("Disclaimer")
-            )
+            render_template("project/about_ecotaxa.html",
+                            EcoTaxa_is_a_web_application=language.gettext("EcoTaxa_is_a_web_application"),
+                            If_you_use_EcoTaxa=language.gettext("If_you_use_EcoTaxa"),
+                            The_development_of_EcoTaxa=language.gettext("The_development_of_EcoTaxa"),
+                            Sorbonne_Universite_and_CNRS=language.gettext("Sorbonne_Universite_and_CNRS"),
+                            The_Programme_Investissements_d_Avenir=language.gettext(
+                                "The_Programme_Investissements_d_Avenir"),
+                            The_Partner_University_Fund=language.gettext("The_Partner_University_Fund"),
+                            The_CNRS_LEFE_program=language.gettext("The_CNRS_LEFE_program"),
+                            The_Belmont_Forum=language.gettext("The_Belmont_Forum"),
+                            The_Watertools_company=language.gettext("The_Watertools_company"),
+                            The_maintenance_of_the_software=language.gettext("The_maintenance_of_the_software"),
+                            The_persons_who_made_EcoTaxa=language.gettext("The_persons_who_made_EcoTaxa"),
+                            Marc_Picheral_and=language.gettext("Marc_Picheral_and"),
+                            Sebastien_Colin=language.gettext("Sebastien_Colin"),
+                            Developers=language.gettext("Developers"),
+                            Deep_learning=language.gettext("Deep_learning"),
+                            testing_and_feedback=language.gettext("testing_and_feedback"),
+                            Disclaimer=language.gettext("Disclaimer")
+                            )
         )
     else:
         txt = """<div style='margin:5px;'><div id="homeText"'>"""
@@ -188,9 +194,7 @@ def before_request_security():
     else:
         # TODO: I can't see the menu _at all_ for unlogged users?
         g.menu.append(("/prj/", "Select Project"))
-    g.menu.append((PART_URL, "Particle Module"))
-    if user_is_logged:
-        g.menu.append((PART_URL+"prj/", "Particle projects management"))
+    g.menu.append((PART_URL, "Go to EcoPart"))
     g.menu.append(("", "SEP"))
     if request.endpoint == 'indexPrj':
         g.menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%d');" % (
@@ -202,6 +206,7 @@ def before_request_security():
         g.menu.append(("", "SEP"))
         g.menu.append(("/admin/", "Admin Screen"))
         g.menu.append(("/Jobs/listall", "Task Manager"))
+    g.menu.append(("", "SEP"))
 
     g.useradmin = user_can_administrate_users
     g.appliadmin = user_can_administrate

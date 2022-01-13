@@ -392,11 +392,11 @@ order by Lower(u.name)""")
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
 
 
-ecotaxa_version = "2.5.15"
+ecotaxa_version = "2.6.0"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2021-11-03"
+    return ecotaxa_version + " 2022-01-13"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -404,6 +404,8 @@ app.jinja_env.filters['nl2br'] = JinjaNl2BR
 app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2022-01-13 : V 2.6.0
+    Feature #747: Remove EcoPart related code from EcoTaxa.
 2021-10-26 : V 2.5.15
     Feature #745: Move deep features generation to back-end.
 2021-10-26 : V 2.5.14
