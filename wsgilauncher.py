@@ -24,12 +24,3 @@ LoggingFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 handler.setFormatter(logging.Formatter(LoggingFormat))
 application.logger.addHandler(handler)
 application.logger.info("App WSGI Startup")
-
-if application.PythonExecutable=="TBD":
-    if sys.platform.startswith('win32'):
-        # version Virtual Env
-        # application.PythonExecutable=os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Scripts\python.exe"))
-        if not Path(application.PythonExecutable).exists(): # version Ecotaxa portable
-            application.PythonExecutable= "python.exe" # sous apache il n'as pas le nom de l'exe, grace à venv il est dans le path
-    else:
-        application.PythonExecutable='/usr/local/bin/python3'
