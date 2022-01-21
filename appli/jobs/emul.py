@@ -27,7 +27,6 @@ def _enrich_job(user_cache: Dict, a_job: JobModel):
     if "req" in a_job.params and "project_id" in a_job.params["req"]:
         # noinspection PyUnresolvedReferences
         a_job.params["ProjectId"] = str(a_job.params["req"]["project_id"])
-    a_job.params = json.dumps(a_job.params)
     owner: UserModel = user_cache.get(a_job.owner_id)
     if owner is None:
         with ApiClient(UsersApi, request) as api:
