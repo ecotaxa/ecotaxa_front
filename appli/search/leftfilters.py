@@ -1,84 +1,100 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, render_template, g, flash,request,url_for,json
-from flask_login import current_user
-from appli import app,ObjectToStr,PrintInCharte,database,gvg,gvp
-from appli.database import GetAll
-from pathlib import Path
-from flask_security import Security, SQLAlchemyUserDatastore
-from flask_security.decorators import roles_accepted
-import os,time
+from typing import List
+
+from flask import render_template, g, request, json
+
+from appli import app, gvg
+from appli.utils import ApiClient, get_all_visible_projects
+from to_back.ecotaxa_cli_py import SamplesApi, SampleModel, ProjectsApi, ProjectModel, ApiException
 
 
 @app.route('/search/mappopup/')
 def search_mappopup():
-    g.filtertxt=""
+    g.filtertxt = ""
     if gvg('projid'):
-        g.Projid=gvg('projid')
-        sqlparam={'projid': [int(x) for x in gvg("projid").split(',')]};
-        g.filtertxt+="Project = "+",".join((x[0] for x in GetAll("select title from projects where projid=any (%(projid)s) ",sqlparam)))
+        g.Projid = gvg('projid')
+        projids = [int(x) for x in gvg("projid").split(',')]
+        titles = []
+        with ApiClient(ProjectsApi, request) as api:
+            for a_proj in projids:
+                project: ProjectModel = api.project_query(project_id=a_proj)
+                titles.append(project.title)
+        g.filtertxt += "Project = " + ",".join(titles)
 
-    if gvg('taxoid'):
-        g.taxoid=gvg('taxoid')
-        sqlparam={'taxoid': [int(x) for x in gvg("taxoid").split(',')]};
-        g.filtertxt+=" ,Taxonomy = "+",".join((x[0] for x in GetAll("select name from taxonomy where id=any (%(taxoid)s) ",sqlparam)))
-        if gvg('taxochild'):
-            g.taxochild=gvg('taxochild')
-            g.filtertxt += "(with child)"
+    # TODO: It's a bit useless to have this, as all other filters are not taken into account.
+    # Either the map reflects the selection, with all criteria, or not.
+    # if gvg('taxoid'):
+    #     g.taxoid = gvg('taxoid')
+    #     taxa_names = []
+    #     with ApiClient(TaxonomyTreeApi, request) as api:
+    #         categs: List[TaxonModel] = api.query_taxa_set(gvg('taxoid'))
+    #     for a_taxon in categs:
+    #         taxa_names.append(a_taxon.display_name)
+    #     g.filtertxt += " ,Taxonomy = " + ",".join(taxa_names)
+    #     if gvg('taxochild'):
+    #         g.taxochild = gvg('taxochild')
+    #         g.filtertxt += "(with child)"
+
     return render_template('search/mappopup.html')
+
 
 @app.route('/search/mappopup/samples/')
 def search_mappopup_samples():
+    """
+        AJAX call to return data for drawing samples points in the global map.
+    """
     app.logger.info(request.args)
-    if gvg('projid') or gvg('taxoid'):
-        sqlparam={}
-        sql="SELECT distinct sampleid, longitude,latitude from samples where latitude is not NULL and longitude is not NULL "
-        if gvg('projid'):
-            sql+=" and projid=any (%(projid)s) "
-            sqlparam['projid'] = [int(x) for x in gvg("projid").split(',')];
-        if gvg('taxoid'):
-            sql+=" and sampleid in (select sampleid from objects where classif_id=any (%(taxoid)s) "
-            sqlparam['taxoid'] = [int(x) for x in gvg("taxoid").split(',')];
-            if gvg("taxochild") == "1":
-                sqlparam['taxoid'] = [int(x[0]) for x in GetAll("""WITH RECURSIVE rq(id) as ( select id FROM taxonomy where id =any (%(taxoid)s)
-                                        union
-                                        SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id 
-                                        ) select id from rq """ ,{"taxoid":sqlparam['taxoid']})]
-
-            if gvg('projid'): sql+=" and projid=any (%(projid)s) "
-            sql += " ) " # optimisation qui provoque de faux résultats : and (t.nbrobjcum>0 or t.nbrobj>0)
-
-        res=GetAll(sql,sqlparam);
+    if gvg('projid'):
+        projids = [int(x) for x in gvg("projid").split(',')]
     else:
-        res=GetAll("""SELECT latitude,longitude,max(sampleid) sampleid from (
-                SELECT sampleid, cast(round(CAST (s.longitude AS numeric),1) as double PRECISION) longitude
-                      ,cast(round(cast(s.latitude AS numeric) ,1)as double PRECISION) latitude
-                      from samples s
-                       join projects p on s.projid=p.projid and p.visible=true
-                      where s.latitude is not NULL and s.longitude is not NULL  
-                ) q
-                group by latitude,longitude """)
-    ores=[]
-    for s in res:
-        r={'id':s['sampleid'],'lat':s['latitude'],'long':s['longitude']}
-        ores.append(r)
+        projids = [a_proj.projid for a_proj in get_all_visible_projects()]
+    str_project_ids = "+".join([str(p) for p in projids])
+    with ApiClient(SamplesApi, request) as api:
+        samples: List[SampleModel] = api.samples_search(project_ids=str_project_ids,
+                                                        id_pattern='%')
+
+    # TODO: Put into API one day
+    #     if gvg('taxoid'):
+    #         sql += " and sampleid in (select sampleid from objects where classif_id=any (%(taxoid)s) "
+    #         sqlparam['taxoid'] = [int(x) for x in gvg("taxoid").split(',')];
+    #         if gvg("taxochild") == "1":
+    #             sqlparam['taxoid'] = [int(x[0]) for x in GetAll("""WITH RECURSIVE rq(id) as ( select id FROM taxonomy where id =any (%(taxoid)s)
+    #                                     union
+    #                                     SELECT t.id FROM rq JOIN taxonomy t ON rq.id = t.parent_id
+    #                                     ) select id from rq """, {"taxoid": sqlparam['taxoid']})]
+    #
+    #         if gvg('projid'): sql += " and projid=any (%(projid)s) "
+    #         sql += " ) "  # optimisation qui provoque de faux résultats : and (t.nbrobjcum>0 or t.nbrobj>0)
+    #
+    #     res = GetAll(sql, sqlparam)
+
+    ores = []
+    for sam in samples:
+        ores.append({'id': sam.projid, 'lat': sam.latitude, 'long': sam.longitude})
     return json.dumps(ores)
 
 
 @app.route('/search/mappopup/getsamplepopover/<int:sampleid>')
-def search_mappopup_samplepopover(sampleid):
-    sql="""select s.sampleid,s.orig_id,ep.title,ep.projid
-      ,round(cast(s.latitude as NUMERIC),4) latitude,round(cast(s.longitude as NUMERIC),4) longitude
-      from samples s
-      join projects ep on ep.projid = s.projid
-      where s.sampleid=%(sampleid)s
-      """
-    data=database.GetAll(sql,{'sampleid':sampleid})[0]
-    txt="""ID : {sampleid}<br>
+def search_mappopup_samplepopover(sampleid: int):
+    """
+        AJAX call for getting a sample information.
+    """
+    try:
+        with ApiClient(SamplesApi, request) as api:
+            sample: SampleModel = api.sample_query(sample_id=sampleid)
+        with ApiClient(ProjectsApi, request) as api:
+            project: ProjectModel = api.project_query(project_id=sample.projid)
+    except ApiException as ae:
+        return str(api)
+    txt = """ID : {sampleid}<br>
     Original ID : {orig_id}<br>
     Project : {title} ({projid})<br>
     Lat/Lon : {latitude}/{longitude}
-    """.format(**data)
+    """.format(sampleid=sample.sampleid, orig_id=sample.orig_id,
+               title=project.title, projid=project.projid,
+               latitude=round(sample.latitude, 4), longitude=round(sample.longitude, 4))
     return txt
 
+
 def getcommonfilters(data):
-    return render_template('search/commonfilters.html',data=data)
+    return render_template('search/commonfilters.html', data=data)

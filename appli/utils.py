@@ -1,14 +1,14 @@
 #
 # Utility defs not depending on the Flask app.
 #
-from typing import Type, TypeVar, Generic, Union, Dict
+from typing import Type, TypeVar, Generic, Union, Dict, List
 
-from flask import Request
+from flask import Request, request
 from werkzeug.local import LocalProxy
 
 from appli.api_proxy import BACKEND_URL
 from to_back import booster
-from to_back.ecotaxa_cli_py import ApiClient as _ApiClient
+from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectModel, ProjectsApi, ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
     AcquisitionsApi, ProcessesApi, ObjectApi, TaxonomyTreeApi, MiscApi, InstrumentsApi, FilesApi, JobsApi
 
@@ -61,3 +61,12 @@ def format_date_time(rec: Dict, date_cols=(), time_cols=()):
             continue
         # 13:15:37 -> 13:15
         rec[a_col] = val[:5]
+
+
+def get_all_visible_projects() -> List[ProjectModel]:
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            projects: List[ProjectModel] = api.search_projects(title_filter="%")
+            return [prj for prj in projects if prj.visible]  # Narrow to visible ones, even for logged users
+        except ApiException as ae:
+            return []

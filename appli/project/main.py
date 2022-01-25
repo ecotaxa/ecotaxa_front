@@ -388,8 +388,12 @@ def FormatNameForVignetteDisplay(category_name, hyphenator):
 # noinspection SpellCheckingInspection,PyPep8Naming
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
 def LoadRightPane():
-    # Security & sanity checks
     PrjId = gvp("projid")
+    return LoadRightPaneForProj(PrjId, False, False)
+
+
+def LoadRightPaneForProj(PrjId:str, read_only:bool, force_first_page:bool):
+    # Security & sanity checks
     with ApiClient(ProjectsApi, request) as api:
         try:
             proj: ProjectModel = api.project_query(PrjId, for_managing=False)
@@ -398,7 +402,6 @@ def LoadRightPane():
                 return "Invalid project"
             elif ae.status in (401, 403):
                 return "Access Denied"
-
     # get filter values from POST
     Filt = {}
     for col, v in FilterList.items():
@@ -408,14 +411,14 @@ def LoadRightPane():
 
     # Public view is when the project is visible, but the current user has no right on it.
     g.PublicViewMode = proj.highest_right == ""
-    user_can_modify = proj.highest_right in ("Manage", "Annotate")
+    user_can_modify = proj.highest_right in ("Manage", "Annotate") and not read_only
 
     # récupération des parametres d'affichage
     filtres = {}
     for col in sharedfilter.FilterList:
         filtres[col] = gvp(col, "")
-    if g.PublicViewMode:  # Si c'est une lecture publique
-        filtres["statusfilter"] = "V"  # Les anonymes ne peuvent voir que les objets validés
+    if g.PublicViewMode or read_only:  # Si c'est une lecture publique, ou dans la page Explore
+        filtres["statusfilter"] = "V"  # Ne voir que les objets validés
 
     pageoffset = int(gvp("pageoffset", "0"))
     sortby = Filt["sortby"]
@@ -675,10 +678,15 @@ def LoadRightPane():
 
     html.append("</tr></table>")
 
+    if force_first_page:
+        pagecount  = 1
+        pageoffset = 0
+
     if pagecount > 1 or pageoffset > 0:
         page_nums = list(range(0, pagecount - 1, math.ceil(pagecount / 20)))
     else:
         page_nums = []
+
     html.append(render_template('project/vignettes_pane.html',
                                 data={"nb_objs": len(objs.details),
                                       "can_write": user_can_modify,
