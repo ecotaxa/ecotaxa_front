@@ -4,8 +4,8 @@ from appli import app as main_app
 # We cannot avoid to know the application DB...
 from appli.database import db as ecotaxa_db
 # Create admin
-from .admin_views import UsersView, UsersViewRestricted, ProjectsViewLight, ProjectsView, ObjectsView, \
-    ObjectsFieldsView, SamplesView, ProcessView, AcquisitionsView
+from .admin_views import UsersView, UsersViewRestricted, ProjectsViewLight, ProjectsView, \
+    SamplesView, ProcessView, AcquisitionsView
 
 # class MyHomeView(AdminIndexView):
 #     @expose('/')
@@ -26,11 +26,9 @@ flaskAdmin.add_view(UsersViewRestricted(ecotaxa_db.session, name="users", endpoi
 
 flaskAdmin.add_view(ProjectsViewLight(ecotaxa_db.session, endpoint="projectlight", category='Projects'))
 flaskAdmin.add_view(ProjectsView(ecotaxa_db.session, name="Projects (Full)", category='Projects'))
-flaskAdmin.add_view(ObjectsView(ecotaxa_db.session, category='Objects'))
-flaskAdmin.add_view(ObjectsFieldsView(ecotaxa_db.session, category='Objects'))
-flaskAdmin.add_view(SamplesView(ecotaxa_db.session, category='Objects'))
-flaskAdmin.add_view(ProcessView(ecotaxa_db.session, category='Objects'))
-flaskAdmin.add_view(AcquisitionsView(ecotaxa_db.session, category='Objects'))
+flaskAdmin.add_view(SamplesView(ecotaxa_db.session, category='Structure'))
+flaskAdmin.add_view(ProcessView(ecotaxa_db.session, category='Structure'))
+flaskAdmin.add_view(AcquisitionsView(ecotaxa_db.session, category='Structure'))
 
 # Add links to the blueprint-managed entry points
 flaskAdmin.add_link(base.MenuLink('Ecotaxa Home', url='/'))

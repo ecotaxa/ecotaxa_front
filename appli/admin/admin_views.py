@@ -222,32 +222,3 @@ class AcquisitionsView(ModelView):
     def is_accessible(self):
         return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
 
-
-
-
-class ObjectsView(ModelView):
-    column_list = ('objid', 'orig_id', 'acquisid', 'classif_qual', 'objdate',)
-    column_filters = ('objid', 'orig_id', 'acquisid', 'classif_qual')
-    form_overrides = dict(complement_info=TextAreaField)
-    form_excluded_columns = ('classif_id', 'classif_auto', 'acquis',
-                             'images', 'sample', 'classiffier', 'objfrel')
-    form_ajax_refs = {'classif': {'fields': ('name',)}}
-
-    def __init__(self, session, **kwargs):
-        super(ObjectsView, self).__init__(ecotaxa_db_def.Objects, session, **kwargs)
-
-    def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
-
-
-class ObjectsFieldsView(ModelView):
-    column_list = ('objfid',)
-    column_filters = ('objfid',)
-    column_searchable_list = ()
-    form_excluded_columns = ('objhrel',)
-
-    def __init__(self, session, **kwargs):
-        super(ObjectsFieldsView, self).__init__(ecotaxa_db_def.ObjectsFields, session, **kwargs)
-
-    def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
