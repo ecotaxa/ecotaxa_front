@@ -2,7 +2,6 @@
 import os
 import shutil
 
-from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 # noinspection PyDeprecation
 from flask_security.utils import encrypt_password
@@ -11,9 +10,6 @@ from appli import app, g
 from appli import db, user_datastore, database
 
 manager = Manager(app)
-
-migrate = Migrate(app, db)
-manager.add_command('db', MigrateCommand)
 
 
 @manager.command
@@ -63,8 +59,6 @@ def dbcreate():
     with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
         g.db = None
         db.create_all()
-        from flask_migrate import stamp
-        stamp(revision='head')
         database.ExecSQL("""create view objects as 
                   select sam.projid, sam.sampleid, obh.*, obh.acquisid as processid, ofi.*
                     from obj_head obh

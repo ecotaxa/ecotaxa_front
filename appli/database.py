@@ -559,17 +559,6 @@ def CSVIntStringToInClause(InStr):
     return ",".join([str(int(x)) for x in InStr.split(',')])
 
 
-def GetTaxoNameFromIdList(IdList):
-    #     sql = """SELECT tf.id, tf.name||case when p1.name is not null and
-    #     tf.name not like '%% %%'  then ' ('||p1.name||')' else ' ' end as name
-    sql = """SELECT tf.id, tf.display_name as name
-             FROM taxonomy tf
-            left join taxonomy p1 on tf.parent_id=p1.id
-            WHERE  tf.id = any (%s) 
-            order by tf.name """
-    return GetAll(sql, [IdList])
-
-
 # Small hack to be able to copy/paste from back-end DB definition code
 _Model = db.Model
 
