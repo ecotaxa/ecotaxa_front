@@ -5,7 +5,7 @@ from appli import app as main_app
 from appli.database import db as ecotaxa_db
 # Create admin
 from .admin_views import UsersView, UsersViewRestricted, ProjectsViewLight, ProjectsView, ObjectsView, \
-    ObjectsFieldsView, SamplesView, ProcessView, AcquisitionsView, TaxonomyView
+    ObjectsFieldsView, SamplesView, ProcessView, AcquisitionsView
 
 # class MyHomeView(AdminIndexView):
 #     @expose('/')
@@ -31,13 +31,9 @@ flaskAdmin.add_view(ObjectsFieldsView(ecotaxa_db.session, category='Objects'))
 flaskAdmin.add_view(SamplesView(ecotaxa_db.session, category='Objects'))
 flaskAdmin.add_view(ProcessView(ecotaxa_db.session, category='Objects'))
 flaskAdmin.add_view(AcquisitionsView(ecotaxa_db.session, category='Objects'))
-flaskAdmin.add_view(TaxonomyView(ecotaxa_db.session, category='Taxonomy', name="Edit Taxonomy"))
 
 # Add links to the blueprint-managed entry points
 flaskAdmin.add_link(base.MenuLink('Ecotaxa Home', url='/'))
-
-flaskAdmin.add_link(base.MenuLink('Taxonomy errors (admin only)',
-                                  category='Taxonomy', url='/admin/db/viewtaxoerror'))
 
 flaskAdmin.add_link(base.MenuLink('View DB Size (admin only)',
                                   category='Database', url='/admin/db/viewsizes'))

@@ -36,28 +36,6 @@ ORDER BY c.relkind DESC, pg_relation_size(('"' || c.relname || '"')::regclass) D
     return render_in_admin_blueprint("admin2/admin_page.html", body=txt)
 
 
-@admin_bp.route('/db/viewtaxoerror')
-@login_required
-@roles_accepted(database.AdministratorLabel)
-def dbadmin_viewtaxoerror():
-    sql = """Select 'Missing parent' reason,t.id,t.parent_id,t.name,t.id_source
-from taxonomy t where parent_id not in (select id from taxonomy);
-"""
-    cur = db.engine.raw_connection().cursor()
-    try:
-        txt = "<h4>Database Taxonomy errors</h4>"
-        txt += "<table class='table table-bordered table-condensed table-hover'>"
-        cur.execute(sql)
-        txt += "<tr><td>" + ("</td><td>".join([x[0] for x in cur.description])) + "</td></tr>"
-        for r in cur:
-            txt += "<tr><td>" + ("</td><td>".join([str(x) for x in r])) + "</td></tr>"
-        txt += "</table>"
-    finally:
-        cur.close()
-
-    return render_in_admin_blueprint("admin2/admin_page.html", body=txt)
-
-
 @admin_bp.route('/db/viewbloat')
 @login_required
 @roles_accepted(database.AdministratorLabel)

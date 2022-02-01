@@ -223,19 +223,6 @@ class AcquisitionsView(ModelView):
         return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
 
 
-class TaxonomyView(ModelView):
-    column_list = ('id', 'parent_id', 'name', 'id_source')
-    column_filters = ('id', 'parent_id', 'name', 'id_source')
-    column_searchable_list = ('name',)
-    page_size = 100
-
-    # form_columns = ('id','parent_id', 'name','id_source')
-    # form_overrides = dict(dataportal_descriptor  =TextAreaField )
-    def __init__(self, session, **kwargs):
-        super(TaxonomyView, self).__init__(ecotaxa_db_def.Taxonomy, session, **kwargs)
-
-    def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
 
 
 class ObjectsView(ModelView):
