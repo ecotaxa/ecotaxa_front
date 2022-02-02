@@ -2,6 +2,7 @@ import flask
 from flask import request, render_template, Response, redirect, g
 from flask_login import login_required, current_user
 
+import appli.constants
 from appli import app, PrintInCharte, gvg, XSSEscape, AddJobsSummaryForTemplate, database
 from appli.jobs.Job import Job
 # noinspection PyUnresolvedReferences
@@ -212,7 +213,7 @@ def ListJobs():
 
     # TODO: Remove DB dependency
     seeall = ""
-    is_admin = current_user.has_role(database.AdministratorLabel)
+    is_admin = current_user.has_role(appli.constants.AdministratorLabel)
     wants_admin = gvg("seeall") == 'Y'
     if is_admin and wants_admin:
         seeall = '&seeall=Y'

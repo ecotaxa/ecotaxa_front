@@ -117,7 +117,7 @@ def index():
             <a href="/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
             </div>		
             <div class="col-sm-4">
-            <a href="/part/" class="btn btn-primary btn-lg  btn-block">Particle module</a>
+            <a href="/TODO FAUX/" class="btn btn-primary btn-lg  btn-block">Particle module</a>
             </div>		
         </div>
     """

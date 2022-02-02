@@ -14,9 +14,10 @@ from flask_login import current_user
 # noinspection PyDeprecation
 from flask_security.utils import encrypt_password
 from wtforms import TextAreaField
-from wtforms.fields import SelectField, TextField, PasswordField
+from wtforms.fields import SelectField, StringField, PasswordField
 from wtforms.validators import ValidationError
 
+import appli.constants
 from appli import database as ecotaxa_db_def
 
 from appli.database import GetAll
@@ -55,7 +56,7 @@ class UsersView(ModelView):
                     'country', 'usercreationreason')
     column_searchable_list = ('email', 'name')
     form_overrides = {
-        'email': TextField,
+        'email': StringField,
         'password': PasswordField,
         'usercreationreason': TextAreaField,
         'country': SelectField
@@ -102,7 +103,7 @@ class UsersView(ModelView):
     )
 
     def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
+        return current_user.has_role(appli.constants.AdministratorLabel)
 
     edit_template = 'admin2/users_edit.html'
     create_template = 'admin2/users_create.html'
@@ -119,8 +120,8 @@ class UsersViewRestricted(UsersView):
         super(UsersViewRestricted, self).__init__(session, **kwargs)
 
     def is_accessible(self):
-        return (not current_user.has_role(ecotaxa_db_def.AdministratorLabel)) \
-               and current_user.has_role(ecotaxa_db_def.UserAdministratorLabel)
+        return (not current_user.has_role(appli.constants.AdministratorLabel)) \
+               and current_user.has_role(appli.constants.UserAdministratorLabel)
 
 
 # Permet de presenter la Vue Inline sous forme de tableau sans les titres.
@@ -165,7 +166,7 @@ class ProjectsView(ModelView):
         super(ProjectsView, self).__init__(ecotaxa_db_def.Projects, session, **kwargs)
 
     def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
+        return current_user.has_role(appli.constants.AdministratorLabel)
 
 
 class ProjectsViewLight(ModelView):
@@ -183,7 +184,7 @@ class ProjectsViewLight(ModelView):
         super(ProjectsViewLight, self).__init__(ecotaxa_db_def.Projects, session, **kwargs)
 
     def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
+        return current_user.has_role(appli.constants.AdministratorLabel)
 
 
 class SamplesView(ModelView):
@@ -196,7 +197,7 @@ class SamplesView(ModelView):
         super(SamplesView, self).__init__(ecotaxa_db_def.Samples, session, **kwargs)
 
     def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
+        return current_user.has_role(appli.constants.AdministratorLabel)
 
 
 class ProcessView(ModelView):
@@ -208,7 +209,7 @@ class ProcessView(ModelView):
         super(ProcessView, self).__init__(ecotaxa_db_def.Process, session, **kwargs)
 
     def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
+        return current_user.has_role(appli.constants.AdministratorLabel)
 
 
 class AcquisitionsView(ModelView):
@@ -220,5 +221,5 @@ class AcquisitionsView(ModelView):
         super(AcquisitionsView, self).__init__(ecotaxa_db_def.Acquisitions, session, **kwargs)
 
     def is_accessible(self):
-        return current_user.has_role(ecotaxa_db_def.AdministratorLabel)
+        return current_user.has_role(appli.constants.AdministratorLabel)
 

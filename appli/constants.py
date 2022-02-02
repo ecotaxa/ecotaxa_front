@@ -1,10 +1,10 @@
 VUE_PATH = "/gui"
 
-from collections import OrderedDict
+BACKEND_HOST = "localhost"
+BACKEND_PORT = 8000
+BACKEND_URL = "http://%s:%d" % (BACKEND_HOST, BACKEND_PORT)
 
-from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py.api import MiscApi
-from to_back.ecotaxa_cli_py.models import Constants
+from collections import OrderedDict
 
 ClassifQual = {'P': 'predicted', 'D': 'dubious', 'V': 'validated'}
 
@@ -31,10 +31,6 @@ def GetClassifQualClass(q):
     return 'status-' + ClassifQual.get(q, "unknown")
 
 
-def get_app_manager_mail(request):
-    with ApiClient(MiscApi, request) as api:
-        consts: Constants = api.used_constants()
-    mgr_coords = consts.app_manager
-    if mgr_coords[0] and mgr_coords[1]:
-        return "<a href='mailto:{1}'>{0} ({1})</a>".format(mgr_coords[0], mgr_coords[1])
-    return ""
+AdministratorLabel = "Application Administrator"
+UserAdministratorLabel = "Users Administrator"
+ProjectCreatorLabel = "Project creator"

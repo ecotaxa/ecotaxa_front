@@ -6,6 +6,7 @@ from flask_script import Manager
 # noinspection PyDeprecation
 from flask_security.utils import encrypt_password
 
+import appli.constants
 from appli import app, g
 from appli import db, user_datastore, database
 
@@ -26,15 +27,15 @@ def createadminuser():
     from appli.database import roles
     r = roles.query.filter_by(id=1).first()
     if r is None:
-        print("Create role ", database.AdministratorLabel)
+        print("Create role ", appli.constants.AdministratorLabel)
         # noinspection PyArgumentList
-        db.session.add(roles(id=1, name=database.AdministratorLabel))
+        db.session.add(roles(id=1, name=appli.constants.AdministratorLabel))
         db.session.commit()
     r = roles.query.filter_by(id=2).first()
     if r is None:
-        print("Create role ", database.UserAdministratorLabel)
+        print("Create role ", appli.constants.UserAdministratorLabel)
         # noinspection PyArgumentList
-        db.session.add(roles(id=2, name=database.UserAdministratorLabel))
+        db.session.add(roles(id=2, name=appli.constants.UserAdministratorLabel))
         db.session.commit()
 
     u = user_datastore.find_user(email='admin')
@@ -211,7 +212,6 @@ def UpdateSunPos(ProjId):
     will update Sunpos field for object of the given project
     if projid = * all projects are updated
     """
-    from appli import CalcAstralDayTime
     from astral import AstralError
     with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
         g.db = None
@@ -262,3 +262,33 @@ def UpdateSunPos(ProjId):
 
 if __name__ == "__main__":
     manager.run()
+
+
+def CalcAstralDayTime(Date, Time, Latitude, Longitude):
+    """
+    Calcule la position du soleil pour l'heure donnée.
+    :param Date: Date UTC
+    :param Time:  Heure UTC
+    :param Latitude: Latitude
+    :param Longitude: Longitude
+    :return: D pour Day, U pour Dusk/crépuscule, N pour Night/Nuit, A pour Aube/Dawn
+    """
+    from astral import Location
+    l = Location()
+    l.solar_depression = 'nautical'
+    l.latitude = Latitude
+    l.longitude = Longitude
+    s = l.sun(date=Date, local=False)
+    # print(Date,Time,Latitude,Longitude,s,)
+    Result = '?'
+    Inter = ({'d': 'sunrise', 'f': 'sunset', 'r': 'D'}
+             , {'d': 'sunset', 'f': 'dusk', 'r': 'U'}
+             , {'d': 'dusk', 'f': 'dawn', 'r': 'N'}
+             , {'d': 'dawn', 'f': 'sunrise', 'r': 'A'}
+             )
+    for I in Inter:
+        if s[I['d']].time() < s[I['f']].time() and (Time >= s[I['d']].time() and Time <= s[I['f']].time()):
+            Result = I['r']
+        elif s[I['d']].time() > s[I['f']].time() and (Time >= s[I['d']].time() or Time <= s[I['f']].time()):
+            Result = I['r']  # Changement de jour entre les 2 parties de l'intervalle
+    return Result

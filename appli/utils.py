@@ -6,14 +6,14 @@ from typing import Type, TypeVar, Generic, Union, Dict, List
 from flask import Request, request
 from werkzeug.local import LocalProxy
 
-from appli.api_proxy import BACKEND_URL
+from appli.constants import BACKEND_URL
 from to_back import booster
-from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectModel, ProjectsApi, ApiException
-from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
+from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectModel, ApiException
+from to_back.ecotaxa_cli_py.api import AuthentificationApi, ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
     AcquisitionsApi, ProcessesApi, ObjectApi, TaxonomyTreeApi, MiscApi, InstrumentsApi, FilesApi, JobsApi
 
 # Lol, generics in python
-A = TypeVar('A', ProjectsApi, UsersApi, ObjectsApi, ObjectApi,
+A = TypeVar('A', AuthentificationApi, ProjectsApi, UsersApi, ObjectsApi, ObjectApi,
             SamplesApi, AcquisitionsApi, ProcessesApi, TaxonomyTreeApi,
             MiscApi, InstrumentsApi, FilesApi, JobsApi)
 

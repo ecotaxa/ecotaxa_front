@@ -6,7 +6,7 @@ from typing import List
 from flask import render_template, g, redirect, request, flash
 
 from appli import PrintInCharte, gvg, gvp, app
-from appli.constants import get_app_manager_mail
+from appli.back_config import get_app_manager_mail
 from appli.jobs.Job import Job
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException

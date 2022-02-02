@@ -14,11 +14,10 @@ from flask import request, Response
 from werkzeug.wsgi import wrap_file
 
 from appli import app
+from appli.constants import BACKEND_HOST, BACKEND_PORT
 
-BACKEND_HOST = "localhost"
-BACKEND_PORT = 8000
+
 # noinspection HttpUrlsUsage
-BACKEND_URL = "http://%s:%d" % (BACKEND_HOST, BACKEND_PORT)
 
 
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'DELETE', 'PUT'])

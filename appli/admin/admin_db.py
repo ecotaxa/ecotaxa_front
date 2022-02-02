@@ -2,14 +2,15 @@ from flask import request, escape
 from flask_security import login_required
 from flask_security.decorators import roles_accepted
 
+import appli.constants
+from appli import gvp
+from appli.database import GetAll, db
 from .admin_blueprint import adminBlueprint as admin_bp, render_in_admin_blueprint
-from appli import database, gvg, gvp
-from appli.database import GetAll, ExecSQL, db
 
 
 @admin_bp.route('/db/viewsizes')
 @login_required
-@roles_accepted(database.AdministratorLabel)
+@roles_accepted(appli.constants.AdministratorLabel)
 def dbadmin_viewsizes():
     sql = """SELECT c.relname, c.relkind, CASE WHEN c.relkind='i' THEN c2.tablename ELSE c.relname END fromtable,pg_relation_size(('"' || c.relname || '"')::regclass)/(1024*1024) szMB
 FROM
@@ -38,7 +39,7 @@ ORDER BY c.relkind DESC, pg_relation_size(('"' || c.relname || '"')::regclass) D
 
 @admin_bp.route('/db/viewbloat')
 @login_required
-@roles_accepted(database.AdministratorLabel)
+@roles_accepted(appli.constants.AdministratorLabel)
 def dbadmin_viewbloat():
     sql = """SELECT
         schemaname, tablename, reltuples::bigint, relpages::bigint, otta,
@@ -107,7 +108,7 @@ def dbadmin_viewbloat():
 
 @admin_bp.route('/db/recomputestat')
 @login_required
-@roles_accepted(database.AdministratorLabel)
+@roles_accepted(appli.constants.AdministratorLabel)
 def dbadmin_recomputestat():
     # TODO: API call, if we leave the menu entry...
     return render_in_admin_blueprint("admin2/admin_page.html",
@@ -116,7 +117,7 @@ def dbadmin_recomputestat():
 
 @admin_bp.route('/db/console', methods=['GET', 'POST'])
 @login_required
-@roles_accepted(database.AdministratorLabel)
+@roles_accepted(appli.constants.AdministratorLabel)
 def dbadmin_console():
     sql = gvp("sql")
     if len(request.form) > 0 and request.referrer != request.url:  # si post doit venir de cette page

@@ -2,34 +2,14 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 
-import os, sys, pathlib, urllib.parse
-
-# Permet de traiter le probleme de l'execution dans un virtualenv sous windows de mathplotlib qui requiert TCL
-if sys.platform.startswith('win32'):
-    virtualprefix = sys.base_prefix
-    if hasattr(sys, 'real_prefix'):
-        sys.base_prefix = sys.real_prefix
-    if float(sys.winver.replace('-32', '')) < 3.5:
-        from tkinter import _fix
-
-        if "TCL_LIBRARY" not in os.environ:
-            # reload module, so that sys.real_prefix be used
-            from imp import reload
-
-            reload(_fix)
-    sys.base_prefix = virtualprefix
-
-
+import sys, urllib.parse
 
 from flask import Flask, render_template, request, g
 from flask_sqlalchemy import SQLAlchemy
-from flask_security import Security
-import inspect, html, math, threading, traceback
-import appli.securitycachedstore
-# TODO: This is not useful anymore for EcoTaxa.
-import matplotlib
+from flask_security import Security, SQLAlchemyUserDatastore
+import inspect, html, math, traceback
 
-matplotlib.use('Agg')
+from appli.security_on_backend import BackEndUserDatastore, CustomLoginForm
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')
@@ -49,8 +29,9 @@ def XSSEscape(txt):
 import appli.database
 
 # Setup Flask-Security
-user_datastore = appli.securitycachedstore.SQLAlchemyUserDatastoreCACHED(db, database.users, database.roles)
-security = Security(app, user_datastore)
+#user_datastore = SQLAlchemyUserDatastore(db, database.users, database.roles)
+user_datastore = BackEndUserDatastore(None, None)
+security = Security(app, user_datastore, login_form=CustomLoginForm)
 
 
 def ObjectToStr(o):
@@ -120,16 +101,16 @@ def AddJobsSummaryForTemplate():
         from appli.jobs.emul import _build_jobs_summary
         g.jobs_summary = _build_jobs_summary()
         # Also add experimental URL
-        if current_user.preferences is not None and '"experimental"' in current_user.preferences:
-            path = request.path
-            exper_path = None
-            if path.startswith("/prj/merge"):
-                exper_path = VUE_PATH + path
-            if path == "/prj/":
-                exper_path = VUE_PATH + "/projects"
-            if exper_path:
-                hint = "A better version of this page is available."
-                g.experimental = '<a href="' + exper_path + '" title="' + hint + '">' + "New!</a>"
+        # if current_user.preferences is not None and '"experimental"' in current_user.preferences:
+        #     path = request.path
+        #     exper_path = None
+        #     if path.startswith("/prj/merge"):
+        #         exper_path = VUE_PATH + path
+        #     if path == "/prj/":
+        #         exper_path = VUE_PATH + "/projects"
+        #     if exper_path:
+        #         hint = "A better version of this page is available."
+        #         g.experimental = '<a href="' + exper_path + '" title="' + hint + '">' + "New!</a>"
     g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
@@ -247,7 +228,6 @@ def FormatSuccess(Msg, *args, DoNotEscape=False, **kwargs):
     return "<div class='alert alert-success' role='alert'>{}</div>".format(txt)
 
 
-
 def ComputeLimitForImage(imgwidth, imgheight, LimitWidth, LimitHeight):
     width = imgwidth
     height = imgheight
@@ -260,37 +240,6 @@ def ComputeLimitForImage(imgwidth, imgheight, LimitWidth, LimitHeight):
         width = math.trunc(imgwidth * height / imgheight)
         if width == 0: width = 1
     return width, height
-
-
-
-def CalcAstralDayTime(Date, Time, Latitude, Longitude):
-    """
-    Calcule la position du soleil pour l'heure donnée.
-    :param Date: Date UTC
-    :param Time:  Heure UTC
-    :param Latitude: Latitude
-    :param Longitude: Longitude
-    :return: D pour Day, U pour Dusk/crépuscule, N pour Night/Nuit, A pour Aube/Dawn
-    """
-    from astral import Location
-    l = Location()
-    l.solar_depression = 'nautical'
-    l.latitude = Latitude
-    l.longitude = Longitude
-    s = l.sun(date=Date, local=False)
-    # print(Date,Time,Latitude,Longitude,s,)
-    Result = '?'
-    Inter = ({'d': 'sunrise', 'f': 'sunset', 'r': 'D'}
-             , {'d': 'sunset', 'f': 'dusk', 'r': 'U'}
-             , {'d': 'dusk', 'f': 'dawn', 'r': 'N'}
-             , {'d': 'dawn', 'f': 'sunrise', 'r': 'A'}
-             )
-    for I in Inter:
-        if s[I['d']].time() < s[I['f']].time() and (Time >= s[I['d']].time() and Time <= s[I['f']].time()):
-            Result = I['r']
-        elif s[I['d']].time() > s[I['f']].time() and (Time >= s[I['d']].time() or Time <= s[I['f']].time()):
-            Result = I['r']  # Changement de jour entre les 2 parties de l'intervalle
-    return Result
 
 
 _utf_warn = "HINT: Did you use utf-8 while transferring?"
