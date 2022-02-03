@@ -4,6 +4,7 @@ import urllib.parse
 from typing import List
 
 from flask import render_template, g, flash, request
+from flask_login import current_user
 from flask_security import login_required
 from markupsafe import escape
 
@@ -51,13 +52,11 @@ def objectdetails(objid):
     # User info
     current_user_id = -1  # Anonymous
     g.TaxonCreator = False
-    with ApiClient(UsersApi, request) as api:
-        try:
-            logged_user: UserModelWithRights = api.show_current_user()
-            current_user_id = logged_user.id
-            g.TaxonCreator = 4 in logged_user.can_do
-        except ApiException as _ae:
-            pass
+    # current_user is either an ApiUserWrapper or an anonymous one from flask
+    if current_user.is_authenticated:
+        logged_user: UserModelWithRights = current_user.api_user
+        current_user_id = logged_user.id
+        g.TaxonCreator = 4 in logged_user.can_do
 
     page = list()
     # Dans cet écran on utilise ElevateZoom car sinon en mode popup il y a conflit avec les images sous la popup
@@ -95,10 +94,10 @@ def objectdetails(objid):
     if obj.classif_who is not None:
         page.append("<br>&emsp;%s " % (ClassifQual.get(obj.classif_qual, "To be classified")))
         if current_user_id != -1:
-            # No name for anonymous
+            # No name for anonymous viewer
             with ApiClient(UsersApi, request) as api:
-                logged_user: UserModel = api.get_user(user_id=obj.classif_who)
-            page.append(" by %s (%s) " % (logged_user.name, logged_user.email))
+                contributor: UserModel = api.get_user(user_id=obj.classif_who)
+            page.append(" by %s (%s) " % (contributor.name, contributor.email))
         if obj.classif_when is not None:
             page.append(" on %s " % obj.classif_when)
     page.append("</p>")

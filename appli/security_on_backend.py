@@ -39,7 +39,7 @@ class ApiUserWrapper(object):
         return role == AdministratorLabel and 2 in self.api_user.can_do
 
     @property
-    def roles(self) -> List[str]:
+    def roles(self) -> List:
         if 2 in self.api_user.can_do:
             return [AdministratorRole]
         return []
@@ -71,9 +71,12 @@ class BackEndUserDatastore(UserDatastore):
         assert len(kwargs) == 1
         assert "id" in kwargs
         id_ = kwargs["id"]
-        with ApiClient(UsersApi, request) as api:
-            curr_user: UserModelWithRights = api.show_current_user()
-        assert str(curr_user.id) == str(id_), "%s vs %s" % (curr_user.id, id_)
+        try:
+            with ApiClient(UsersApi, request) as api:
+                curr_user: UserModelWithRights = api.show_current_user()
+            assert str(curr_user.id) == str(id_), "%s vs %s" % (curr_user.id, id_)
+        except (ApiException, AssertionError):
+            return None
         # This will feed 'current_user' Flask global
         return ApiUserWrapper(curr_user)
 

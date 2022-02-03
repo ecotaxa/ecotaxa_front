@@ -2,6 +2,7 @@ from typing import Optional
 
 import requests
 from flask import render_template, g, flash, request
+from flask_login import current_user
 
 import appli
 import appli.project.main
@@ -17,11 +18,9 @@ def get_taxoserver_url():
 
 
 def get_login() -> Optional[UserModelWithRights]:
-    with ApiClient(UsersApi, request) as api:
-        try:
-            return api.show_current_user()
-        except ApiException as _ae:
-            return None
+    # current_user is either an ApiUserWrapper or an anonymous one from flask
+    if current_user.is_authenticated:
+        return current_user.api_user
 
 
 def is_admin_or_project_creator(user: UserModelWithRights) -> bool:

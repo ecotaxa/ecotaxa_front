@@ -4,14 +4,11 @@
 import os
 
 from flask import Blueprint, g, request, url_for, send_from_directory
+from flask_login import current_user
 
 from appli import app, PrintInCharte
 
 PART_URL = "http://localhost:5002"  # TODO: A config
-from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import UsersApi
-from to_back.ecotaxa_cli_py.models import UserModelWithRights
 
 # VUE_PATH == "/gui"
 
@@ -163,25 +160,18 @@ def before_request_security():
         return
     if "/api/" in request.url:
         return
-    # print(request.form)
-    user_is_logged = False
-    user_can_create = False
     user_can_administrate = False
     user_can_administrate_users = False
     mru_projects = []
-    with ApiClient(UsersApi, request) as api:
-        try:
-            user: UserModelWithRights = api.show_current_user()
-            user_is_logged = True
-            user_can_create = 1 in user.can_do
-            user_can_administrate = 2 in user.can_do
-            user_can_administrate_users = 3 in user.can_do
-            mru_projects = user.last_used_projects
-        except ApiException as ae:
-            if ae.status in (401, 403):
-                pass
-    # current_user.is_authenticated
+    # current_user is either an ApiUserWrapper or an anonymous one from flask
+    if current_user.is_authenticated:
+        user_can_administrate = 2 in current_user.can_do
+        user_can_administrate_users = 3 in current_user.can_do
+        mru_projects = current_user.last_used_projects
     g.cookieGAOK = request.cookies.get('GAOK', '')
+    g.useradmin = user_can_administrate_users
+    g.appliadmin = user_can_administrate
+    # TODO: A bit useless as unlogged users have no menu to use
     g.menu = []
     g.menu.append((url_for("index"), "Home"))
     g.menu.append(("/explore/", "Explore"))
@@ -192,8 +182,7 @@ def before_request_security():
                            "[%d] %s" % (a_prj.projid, a_prj.title)))
         g.menu.append(("", "NOSUB"))
     else:
-        # TODO: I can't see the menu _at all_ for unlogged users?
-        g.menu.append(("/prj/", "Select Project"))
+        g.menu.append(("/prj/", "Contribute to a project"))
     g.menu.append((PART_URL, "Go to EcoPart"))
     g.menu.append(("", "SEP"))
     if request.endpoint == 'indexPrj':
@@ -207,8 +196,6 @@ def before_request_security():
         g.menu.append(("/admin/", "Admin Screen"))
         g.menu.append(("/Jobs/listall", "Task Manager"))
 
-    g.useradmin = user_can_administrate_users
-    g.appliadmin = user_can_administrate
     g.menu.append(("", "SEP"))
     g.menu.append(("/change", "Change Password"))
 
@@ -228,6 +215,9 @@ def before_teardown_commitdb(error):
 
 @app.after_request
 def after_request(response):
-    response.headers[
-        'Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: cdnjs.cloudflare.com server.arcgisonline.com www.google.com www.gstatic.com www.google-analytics.com cdn.ckeditor.com cdn.jsdelivr.net unpkg.com fonts.googleapis.com fonts.gstatic.com ecotaxa.obs-vlfr.fr;frame-ancestors 'self';form-action 'self';"
+    response.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: " \
+                                                  "cdnjs.cloudflare.com server.arcgisonline.com www.google.com " \
+                                                  "www.gstatic.com www.google-analytics.com cdn.ckeditor.com " \
+                                                  "cdn.jsdelivr.net unpkg.com fonts.googleapis.com fonts.gstatic.com " \
+                                                  "ecotaxa.obs-vlfr.fr;frame-ancestors 'self';form-action 'self';"
     return response

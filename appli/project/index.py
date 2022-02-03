@@ -1,18 +1,18 @@
 import datetime
-
 from typing import List
 
 from flask import render_template, flash, session, request, Markup
+from flask_login import current_user
 from flask_security import login_required
 
 from appli import app, PrintInCharte, gvg
+from appli.project.__init__ import connectPythonToPrime
 ######################################################################################################################
 from appli.project.main import _manager_mail
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, UserModelWithRights, TaxonomyTreeStatus, ProjectTaxoStatsModel
 
-from appli.project.__init__ import connectPythonToPrime
 
 # noinspection PyPep8Naming
 @app.route('/prj/')
@@ -39,8 +39,9 @@ def indexProjects(Others=False):
     # Sort for consistency
     prjs.sort(key=lambda prj: prj.title.strip().lower())
 
-    with ApiClient(UsersApi, request) as apiUser:
-        user: UserModelWithRights = apiUser.show_current_user()
+    # current_user is either an ApiUserWrapper or an anonymous one from flask,
+    # but we're in @login_required, so
+    user: UserModelWithRights = current_user.api_user
 
     if Others:
         CanCreate = False

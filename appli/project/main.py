@@ -7,6 +7,7 @@ from json import JSONDecodeError
 from typing import List, Dict, Any
 
 from flask import render_template, g, flash, json, request, url_for
+from flask_login import current_user
 from flask_security import login_required
 from hyphenator import Hyphenator
 
@@ -22,7 +23,7 @@ from appli.utils import ApiClient, format_date_time
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi, SamplesApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import (ProjectModel, SampleModel, UserModel, ObjectSetQueryRsp, TaxonModel,
-                                           ProjectTaxoStatsModel, UserModelWithRights)
+                                           ProjectTaxoStatsModel)
 
 
 ######################################################################################################################
@@ -195,12 +196,9 @@ def indexPrj(PrjId):
             return PrintInCharte("<a href=/prj/>Select another project</a>")
     # Logged user info
     g.TaxonCreator = False
-    with ApiClient(UsersApi, request) as api:
-        try:
-            logged_user: UserModelWithRights = api.show_current_user()
-            g.TaxonCreator = 4 in logged_user.can_do
-        except ApiException as ae:
-            pass
+    # current_user is either an ApiUserWrapper or an anonymous one from flask
+    if current_user.is_authenticated:
+        g.TaxonCreator = 4 in current_user.can_do
 
     # print('%s',data)
     data["sample_for_select"] = ""
