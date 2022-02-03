@@ -23,6 +23,9 @@ SortableObjectFields = OrderedDict([("orig_id", "Image Name"),
 # We need another paradigm as both sample, acquisition and object have an orig_id column
 MappableParentColumns = ["sam_orig_id", "acq_orig_id"]
 
+TaxoType = {'P': 'Phylo', 'M': 'Morpho'}
+TaxoStatus = {'A': 'Active', 'D': 'Deprecated', 'N': 'Not reviewed'}
+
 
 def GetClassifQualClass(q):
     """

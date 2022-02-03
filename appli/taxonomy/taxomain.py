@@ -6,7 +6,8 @@ from flask_login import current_user
 
 import appli
 import appli.project.main
-from appli import app, PrintInCharte, database, gvg, gvp, FAIcon
+from appli import app, PrintInCharte, gvg, gvp, FAIcon
+from appli.constants import TaxoType
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi, TaxonomyTreeApi
@@ -127,7 +128,7 @@ def route_view_taxon(taxoid):
     with ApiClient(TaxonomyTreeApi, request) as api:
         usage = api.query_taxa_usage(taxon_id=taxoid)
         usage = usage[:20]
-    g.TaxoType = database.TaxoType
+    g.TaxoType = TaxoType
     g.taxoserver_url = get_taxoserver_url()
     return render_template('taxonomy/edit.html', taxon=taxon, usage=usage)
 
@@ -146,7 +147,7 @@ def route_add_taxon():
         return PrintInCharte("Insufficient rights")
     # Create a blank taxon
     taxon = {'id': 0, 'creator_email': user.email, 'tree': '', 'creation_datetime': ''}
-    g.TaxoType = database.TaxoType
+    g.TaxoType = TaxoType
     g.taxoserver_url = get_taxoserver_url()
     return render_template('taxonomy/edit.html', taxon=taxon)
 
