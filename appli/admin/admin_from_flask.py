@@ -4,8 +4,9 @@ from appli import app as main_app
 # We cannot avoid to know the application DB...
 from appli.database import db as ecotaxa_db
 # Create admin
-from .admin_views import UsersView, UsersViewRestricted, ProjectsViewLight, ProjectsView, \
+from .admin_views import ProjectsViewLight, ProjectsView, \
     SamplesView, ProcessView, AcquisitionsView
+from .views.users import UsersView, UsersViewRestricted
 
 # class MyHomeView(AdminIndexView):
 #     @expose('/')
@@ -21,8 +22,9 @@ flaskAdmin = Admin(app=main_app,
                    template_mode="bootstrap2")
 
 # Add flask-admin related views
-flaskAdmin.add_view(UsersView(ecotaxa_db.session, name="Users"))
-flaskAdmin.add_view(UsersViewRestricted(ecotaxa_db.session, name="users", endpoint="userrest"))
+flaskAdmin.add_view(UsersView())
+# TODO: Is it for self-maintenance of account? If yes, does not belong in admin blueprint
+#flaskAdmin.add_view(UsersViewRestricted(ecotaxa_db.session, name="users", endpoint="userrest"))
 
 flaskAdmin.add_view(ProjectsViewLight(ecotaxa_db.session, endpoint="projectlight", category='Projects'))
 flaskAdmin.add_view(ProjectsView(ecotaxa_db.session, name="Projects (Full)", category='Projects'))

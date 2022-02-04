@@ -4,23 +4,19 @@
 #
 # flask_admin views for EcoTaxa DB
 #
+
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import InlineModelFormList
 from flask_admin.contrib.sqla.form import InlineModelConverter
 from flask_admin.form import SecureForm
-from flask_admin.helpers import get_form_data
 from flask_admin.model.form import InlineFormAdmin
 from flask_login import current_user
 # noinspection PyDeprecation
-from flask_security.utils import encrypt_password
 from wtforms import TextAreaField
-from wtforms.fields import SelectField, StringField, PasswordField
-from wtforms.validators import ValidationError
+from wtforms.fields import SelectField
 
 import appli.constants
 from appli import database as ecotaxa_db_def
-
-from appli.database import GetAll
 
 
 class SecureStrippingBaseForm(SecureForm):
@@ -41,87 +37,6 @@ def _strip_filter(value):
     if value is not None and hasattr(value, 'strip'):
         return value.strip()
     return value
-
-
-# noinspection PyProtectedMember
-class UsersView(ModelView):
-    # Disable model creation
-    can_create = True
-    # Enable CSRF check
-    form_base_class = SecureStrippingBaseForm
-
-    # Override displayed fields
-    column_list = ('email', 'mail_status', 'name', 'organisation', 'active', 'roles', 'country')
-    form_columns = ('email', 'mail_status', 'mail_status_date', 'name', 'organisation', 'active', 'roles', 'password',
-                    'country', 'usercreationreason')
-    column_searchable_list = ('email', 'name')
-    form_overrides = {
-        'email': StringField,
-        'password': PasswordField,
-        'usercreationreason': TextAreaField,
-        'country': SelectField
-    }
-
-    def __init__(self, session, **kwargs):
-        # You can pass name and other parameters if you want to
-        super(UsersView, self).__init__(ecotaxa_db_def.users, session, **kwargs)
-
-    def update_model(self, form, model):
-        # Do not set password if its field is empty.
-        if not form._fields['password'].data:
-            del form._fields['password']
-        else:
-            # noinspection PyDeprecation
-            form._fields['password'].data = encrypt_password(form._fields['password'].data)
-        return super(UsersView, self).update_model(form, model)
-
-    def create_model(self, form):
-        # noinspection PyDeprecation
-        form._fields['password'].data = encrypt_password(form._fields['password'].data)
-        return super(UsersView, self).create_model(form)
-
-    # noinspection PyMethodParameters
-    def checkpasswordequal(form, field):
-        if field.data != form._fields['password_confirm'].data:
-            raise ValidationError("Password Confirmation doesn't match")
-
-    def edit_form(self, obj=None):
-        form = self._edit_form_class(get_form_data(), obj=obj)
-        form.country.choices = [('', '')] + GetAll("""select countryname k,countryname v from countrylist order by 1""")
-        return form
-
-    def create_form(self, obj=None):
-        return self.edit_form(obj)
-
-    def scaffold_form(self):
-        form_class = super(UsersView, self).scaffold_form()
-        form_class.password_confirm = PasswordField('Password Confirmation')
-        return form_class
-
-    form_args = dict(
-        password=dict(validators=[checkpasswordequal])
-    )
-
-    def is_accessible(self):
-        return current_user.has_role(appli.constants.AdministratorLabel)
-
-    edit_template = 'admin2/users_edit.html'
-    create_template = 'admin2/users_create.html'
-
-
-class UsersViewRestricted(UsersView):
-    # Enable CSRF check
-    form_base_class = SecureStrippingBaseForm
-
-    form_columns = ('email', 'name', 'organisation', 'active', 'password')
-
-    def __init__(self, session, **kwargs):
-        # You can pass name and other parameters if you want to
-        super(UsersViewRestricted, self).__init__(session, **kwargs)
-
-    def is_accessible(self):
-        return (not current_user.has_role(appli.constants.AdministratorLabel)) \
-               and current_user.has_role(appli.constants.UserAdministratorLabel)
 
 
 # Permet de presenter la Vue Inline sous forme de tableau sans les titres.
@@ -222,4 +137,3 @@ class AcquisitionsView(ModelView):
 
     def is_accessible(self):
         return current_user.has_role(appli.constants.AdministratorLabel)
-
