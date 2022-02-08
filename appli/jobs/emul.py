@@ -9,7 +9,7 @@ from flask import request
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi, JobsApi
-from to_back.ecotaxa_cli_py.models import UserModel, JobModel
+from to_back.ecotaxa_cli_py.models import MinUserModel, JobModel
 
 JOB_STATE_TO_USER_STATE = {'P': 'Pending',
                            'R': 'Running',
@@ -27,7 +27,7 @@ def _enrich_job(user_cache: Dict, a_job: JobModel):
     if "req" in a_job.params and "project_id" in a_job.params["req"]:
         # noinspection PyUnresolvedReferences
         a_job.params["ProjectId"] = str(a_job.params["req"]["project_id"])
-    owner: UserModel = user_cache.get(a_job.owner_id)
+    owner: MinUserModel = user_cache.get(a_job.owner_id)
     if owner is None:
         with ApiClient(UsersApi, request) as api:
             owner = api.get_user(user_id=a_job.owner_id)

@@ -10,7 +10,7 @@ from appli.jobs.Job import Job, load_from_json
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi
-from to_back.ecotaxa_cli_py.models import SimpleImportReq, SimpleImportRsp, ProjectModel, UserModel, TaxonModel, \
+from to_back.ecotaxa_cli_py.models import SimpleImportReq, SimpleImportRsp, ProjectModel, MinUserModel, TaxonModel, \
     JobModel
 
 
@@ -108,7 +108,7 @@ class SimpleImportJob(Job):
         """ Set the names for the form fields which take numerical IDs """
         if form.get('userlb') is not None:
             with ApiClient(UsersApi, request) as api:
-                user: UserModel = api.get_user(user_id=int(form['userlb']))
+                user: MinUserModel = api.get_user(user_id=int(form['userlb']))
             if user:
                 form["annot_name"] = user.name
         if form.get('taxolb') is not None:

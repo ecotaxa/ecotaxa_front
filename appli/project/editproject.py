@@ -12,7 +12,7 @@ from appli.constants import MappableObjectColumns, MappableParentColumns
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (ProjectsApi, UsersApi, TaxonomyTreeApi, MiscApi)
-from to_back.ecotaxa_cli_py.models import (ProjectModel, UserModel, TaxonModel, ProjectTaxoStatsModel)
+from to_back.ecotaxa_cli_py.models import (ProjectModel, MinUserModel, TaxonModel, ProjectTaxoStatsModel)
 
 
 @app.route('/prj/edit/<int:PrjId>', methods=['GET', 'POST'])
@@ -37,7 +37,7 @@ def PrjEdit(PrjId, privs_only=False):
     g.users = collections.OrderedDict()
     users_by_id = {}
     with ApiClient(UsersApi, request) as api:
-        all_users: List[UserModel] = api.search_user(by_name="%%")
+        all_users: List[MinUserModel] = api.search_user(by_name="%%")
     for a_user in sorted(all_users, key=lambda u: u.name.strip().lower()):
         g.users[str(a_user.id)] = a_user.name.strip()
         users_by_id[a_user.id] = a_user

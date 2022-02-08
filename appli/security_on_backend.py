@@ -4,13 +4,13 @@
 from typing import List
 
 from flask import request
-from flask_security.forms import LoginForm
 from flask_security.datastore import UserDatastore
+from flask_security.forms import LoginForm
 from flask_security.utils import get_message
 
 from appli.constants import AdministratorLabel
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import UserModel, UserModelWithRights, LoginReq, ApiException
+from to_back.ecotaxa_cli_py import UserModelWithRights, LoginReq, ApiException, MinUserModel
 from to_back.ecotaxa_cli_py.api import UsersApi, AuthentificationApi
 
 
@@ -48,7 +48,7 @@ class ApiUserWrapper(object):
         return getattr(self.api_user, item)
 
 
-anon_user = UserModel(id=-1, email="", name="Anonymous")
+anon_user = MinUserModel(id=-1, email="", name="Anonymous")
 
 
 class BackEndUserDatastore(UserDatastore):

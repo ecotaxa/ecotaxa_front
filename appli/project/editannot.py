@@ -8,7 +8,7 @@ from appli import app, PrintInCharte, gvg
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi
-from to_back.ecotaxa_cli_py.models import ProjectModel, UserModel, ObjectSetRevertToHistoryRsp, HistoricalLastClassif
+from to_back.ecotaxa_cli_py.models import ProjectModel, MinUserModel, ObjectSetRevertToHistoryRsp, HistoricalLastClassif
 
 
 ######################################################################################################################
@@ -44,7 +44,7 @@ def PrjEditAnnot(PrjId):
         LstUserNew = OrderedDict({'lastannot': "Previous Annotation available, or prediction, or Nothing"})
         # TODO: It would be nice to offer only relevant users as a choice
         with ApiClient(UsersApi, request) as api:
-            all_users: List[UserModel] = api.search_user(by_name="%%")
+            all_users: List[MinUserModel] = api.search_user(by_name="%%")
         # No guaranteed order from API, so sort now, see #475 for the strip()
         all_users.sort(key=lambda user: user.name.strip())
         # Complete selection lists
@@ -64,7 +64,7 @@ def PrjEditAnnot(PrjId):
     else:
         with ApiClient(UsersApi, request) as api:
             # Let the eventual 404 propagate
-            old_author: UserModel = api.get_user(user_id=int(old_author_id))
+            old_author: MinUserModel = api.get_user(user_id=int(old_author_id))
         # Only return objects classified by the requested user, and exclude him/her from history picking
         filters["filt_last_annot"] = old_author_id
         from_txt = "Replace current classification, when done by <b>%s</b>" % old_author.name
@@ -84,7 +84,7 @@ def PrjEditAnnot(PrjId):
     else:
         with ApiClient(UsersApi, request) as api:
             # Let the eventual 404 propagate
-            new_author: UserModel = api.get_user(user_id=int(new_author_id))
+            new_author: MinUserModel = api.get_user(user_id=int(new_author_id))
         target_for_api = new_author_id
         to_txt = "With previous classification done by <b>%s</b>, except if already the case" % new_author.name
 

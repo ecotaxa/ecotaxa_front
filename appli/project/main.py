@@ -22,7 +22,7 @@ from appli.search.leftfilters import getcommonfilters
 from appli.utils import ApiClient, format_date_time
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi, SamplesApi, TaxonomyTreeApi
-from to_back.ecotaxa_cli_py.models import (ProjectModel, SampleModel, UserModel, ObjectSetQueryRsp, TaxonModel,
+from to_back.ecotaxa_cli_py.models import (ProjectModel, SampleModel, MinUserModel, ObjectSetQueryRsp, TaxonModel,
                                            ProjectTaxoStatsModel)
 
 
@@ -248,7 +248,7 @@ def indexPrj(PrjId):
         for an_id in user_ids:
             with ApiClient(UsersApi, request) as api:
                 try:
-                    user: UserModel = api.get_user(user_id=an_id)
+                    user: MinUserModel = api.get_user(user_id=an_id)
                 except ApiException as _ae:
                     # Ignore this one
                     continue

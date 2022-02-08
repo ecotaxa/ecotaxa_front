@@ -19,7 +19,7 @@ from to_back.ecotaxa_cli_py.api import (ObjectApi, ProjectsApi, TaxonomyTreeApi,
                                         ObjectsApi)
 from to_back.ecotaxa_cli_py.models import (ObjectModel, ProjectModel, SampleModel, AcquisitionModel,
                                            UserModelWithRights,
-                                           TaxonModel, UserModel, ProcessModel, HistoricalClassification, BulkUpdateReq)
+                                           TaxonModel, MinUserModel, ProcessModel, HistoricalClassification, BulkUpdateReq)
 
 
 @app.route('/objectdetails/<int:objid>')
@@ -96,7 +96,7 @@ def objectdetails(objid):
         if current_user_id != -1:
             # No name for anonymous viewer
             with ApiClient(UsersApi, request) as api:
-                contributor: UserModel = api.get_user(user_id=obj.classif_who)
+                contributor: MinUserModel = api.get_user(user_id=obj.classif_who)
             page.append(" by %s (%s) " % (contributor.name, contributor.email))
         if obj.classif_when is not None:
             page.append(" on %s " % obj.classif_when)
