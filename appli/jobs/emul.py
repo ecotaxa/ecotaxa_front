@@ -30,7 +30,7 @@ def _enrich_job(user_cache: Dict, a_job: JobModel):
     owner: MinUserModel = user_cache.get(a_job.owner_id)
     if owner is None:
         with ApiClient(UsersApi, request) as api:
-            owner = api.get_user(user_id=a_job.owner_id)
+            owner: MinUserModel = api.get_user(user_id=a_job.owner_id)
         user_cache[a_job.owner_id] = owner
     a_job.owner_id = owner  # TODO: a bit dirty, replacing an ID with a model
     return a_job

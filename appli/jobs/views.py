@@ -8,7 +8,7 @@ from appli.jobs.Job import Job
 # noinspection PyUnresolvedReferences
 from appli.jobs.by_type import *  # Import all for job searching in class hierarchy
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py import ApiException, MinUserModel
 from to_back.ecotaxa_cli_py.api import JobsApi, UsersApi, ProjectsApi
 from to_back.ecotaxa_cli_py.models import JobModel, ProjectModel
 
@@ -44,7 +44,7 @@ def jobDisplay(job_id: int):
             elif ae.status == 404:
                 return PrintInCharte("This job doesn't exist anymore, perhaps it was automatically purged")
     with ApiClient(UsersApi, request) as api:
-        owner = api.get_user(user_id=job.owner_id)
+        owner: MinUserModel = api.get_user(user_id=job.owner_id)
 
     txt = ""
     if gvg('log') == "Y":
@@ -96,7 +96,7 @@ def jobAsk(job_id: int):
             elif ae.status == 404:
                 return PrintInCharte("This job doesn't exist anymore, perhaps it was automatically purged")
     with ApiClient(UsersApi, request) as api:
-        owner = api.get_user(user_id=job.owner_id)
+        _owner: MinUserModel = api.get_user(user_id=job.owner_id)
 
     if job.state != 'A':
         return ""

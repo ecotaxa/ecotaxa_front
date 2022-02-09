@@ -37,3 +37,9 @@ def GetClassifQualClass(q):
 AdministratorLabel = "Application Administrator"
 UserAdministratorLabel = "Users Administrator"
 ProjectCreatorLabel = "Project creator"
+TaxonCreatorLabel = "Taxon Creator"
+
+API_GLOBAL_ROLES = {1: ProjectCreatorLabel,
+                    2: AdministratorLabel,
+                    3: UserAdministratorLabel,
+                    4: TaxonCreatorLabel}

@@ -1,43 +1,206 @@
 <div class="well " style="margin-top: 5px;margin-bottom:5px;">
 
-<a href="javascript:$('#expandablehelp').toggle(); void(0);">Show detailed help <i  class="icon-question-sign"></i></a><br>
-<div id="expandablehelp" style="display: none;">
-<b>TO CREATE a project :</b>
-<ul><li>Provide a meaningful title such as “Zooscan 2015 Tara” or “FLOWCAM 2015 msm325” to facilitate later project selection and sorting
-<li>Select suitable options
-<li>Add Privileges for one Project manager at least when you create a project
+  <a href="javascript:$('#expandablehelp').toggle(); void(0);">Show detailed help <i class="icon-question-sign"></i></a><br>
+  <div id="expandablehelp" style="display: none;">
+    <b>TO CREATE a project :</b>
+    <ul>
+      <li>Provide a meaningful title such as “Zooscan 2015 Tara” or “FLOWCAM 2015 msm325” to facilitate later project
+        selection and sorting
+      <li>Select suitable options
+      <li>Add Privileges for one Project manager at least when you create a project
     </ul>
-<b>TO DELETE a Project</b> :  The project must be emptied
-<ul><li>go to project to remove objects before deleting the project.
-<li>Go to object tool to remove objects
-</ul>
-<table class="table table-bordered table-condensed" style="width: 850px" >
-<tr><td width="300px"> </td><th width="70px">Visitor</th><th width="70px">Annotator</th><th  width="70px" style="text-align:center;">Project manager</th>
-    <th width="70px" style="text-align:center;">User manager</th><th width="70px" style="text-align:center;">Application manager</th></tr>
-<tr><th>ROLE</th><th style="text-align:center;">Projet</th><th style="text-align:center;">Projet</th><th style="text-align:center;">Projet</th><th>Application</th><th>Application</th></tr>
-<tr><td>Explore projects (visible project, validated images)</td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Register USER</td><td></td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>View images in project (all status) </td><td></td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Annotate images (manual classification)</td><td></td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Export project data</td><td></td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Export XML</td><td></td><td style="text-align:center;"><b>X</b></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Invite annotators in project</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Automatic classification</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Import new objects in project</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Set project status</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Create subset from project</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Create category preset list</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Merge Projects</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Remove objects from project</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Manage/Delete Project</td><td></td><td></td><td style="text-align:center;"><b>X</b></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Manage the taxonomy list</td><td></td><td></td><td></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Create category in taxonomy</td><td></td><td></td><td></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Create/Manage project</td><td></td><td></td><td></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Register project managers</td><td></td><td></td><td></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Export project to other instance</td><td></td><td></td><td></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
-<tr><td>Import project from other instance</td><td></td><td></td><td></td><td></td><td style="text-align:center;"><b>X</b></td></tr>
+    <b>TO DELETE a Project</b> : The project must be emptied
+    <ul>
+      <li>go to project to remove objects before deleting the project.
+      <li>Go to object tool to remove objects
+    </ul>
+    <table class="table table-bordered table-condensed" style="width: 850px">
+      <tr>
+        <td width="300px"></td>
+        <th width="70px">Visitor</th>
+        <th width="70px">Annotator</th>
+        <th width="70px" style="text-align:center;">Project manager</th>
+        <th width="70px" style="text-align:center;">User manager</th>
+        <th width="70px" style="text-align:center;">Application manager</th>
+      </tr>
+      <tr>
+        <th>ROLE</th>
+        <th style="text-align:center;">Projet</th>
+        <th style="text-align:center;">Projet</th>
+        <th style="text-align:center;">Projet</th>
+        <th>Application</th>
+        <th>Application</th>
+      </tr>
+      <tr>
+        <td>Explore projects (visible project, validated images)</td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Register USER</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>View images in project (all status)</td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Annotate images (manual classification)</td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Export project data</td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Export XML</td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Invite annotators in project</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Automatic classification</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Import new objects in project</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Set project status</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Create subset from project</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Create category preset list</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Merge Projects</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Remove objects from project</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Manage/Delete Project</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Manage the taxonomy list</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Create category in taxonomy</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Create/Manage project</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Register project managers</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Export project to other instance</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
+      <tr>
+        <td>Import project from other instance</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:center;"><b>X</b></td>
+      </tr>
 
     </table>
-</div>
+  </div>
 
 </div>

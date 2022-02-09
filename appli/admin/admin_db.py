@@ -4,8 +4,9 @@ from flask_security.decorators import roles_accepted
 
 import appli.constants
 from appli import gvp
-from appli.database import GetAll, db
+from to_back.ecotaxa_cli_py import AdminApi
 from .admin_blueprint import adminBlueprint as admin_bp, render_in_admin_blueprint
+from ..utils import ApiClient
 
 
 @admin_bp.route('/db/viewsizes')
@@ -22,11 +23,12 @@ WHERE c.relnamespace = ns.oid
  AND c.relkind IN ('r' ,'i')
 ORDER BY c.relkind DESC, pg_relation_size(('"' || c.relname || '"')::regclass) DESC
 """
-    res = GetAll(sql)  # ,debug=True
+    with ApiClient(AdminApi, request) as api:
+        res = api.db_direct_query(q=sql)
     txt = "<h4>Database objects size (public schema only)</h4>"
     txt += """<table class='table table-bordered table-condensed table-hover' style="width:500px;">
             <tr><th width=200>Object</td><th witdth=200>Table</td><th width=100>Size (Mb)</td></tr>"""
-    for r in res:
+    for r in res['data']:
         txt += """<tr><td>{0}</td>
         <td>{2}</td>
         <td>{3}</td>
@@ -92,17 +94,14 @@ def dbadmin_viewbloat():
       WHERE sml.relpages - otta > 0 OR ipages - iotta > 10
       ORDER BY wastedbytes DESC, wastedibytes DESC
 """
-    cur = db.engine.raw_connection().cursor()
-    try:
-        txt = "<h4>Database objects wasted space</h4>"
-        txt += "<table class='table table-bordered table-condensed table-hover'>"
-        cur.execute(sql)
-        txt += "<tr><td>" + ("</td><td>".join([x[0] for x in cur.description])) + "</td></tr>"
-        for r in cur:
-            txt += "<tr><td>" + ("</td><td>".join([str(x) for x in r])) + "</td></tr>"
-        txt += "</table>"
-    finally:
-        cur.close()
+    with ApiClient(AdminApi, request) as api:
+        res = api.db_direct_query(q=sql)
+    txt = "<h4>Database objects wasted space</h4>"
+    txt += "<table class='table table-bordered table-condensed table-hover'>"
+    txt += "<tr><td>" + ("</td><td>".join(res['header'])) + "</td></tr>"
+    for r in res['data']:
+        txt += "<tr><td>" + ("</td><td>".join([str(x) for x in r])) + "</td></tr>"
+    txt += "</table>"
     return render_in_admin_blueprint("admin2/admin_page.html", body=txt)
 
 
@@ -130,35 +129,32 @@ def dbadmin_console():
     </form>"""
     if gvp("doselect"):
         txt += "<br>Select Result :"
-        cur = db.engine.raw_connection().cursor()
         try:
-            cur.execute(sql)
+            with ApiClient(AdminApi, request) as api:
+                res = api.db_direct_query(q=sql)
             txt += "<table class='table table-condensed table-bordered'>"
-            for c in cur.description:
-                txt += "<td>%s</td>" % c[0]
-            for r in cur:
+            for c in res['header']:
+                txt += "<td>%s</td>" % c
+            for r in res['data']:
                 s = "<tr>"
                 for c in r:
                     s += "<td>%s</td>" % c
                 txt += s + "</tr>"
             txt += "</table>"
-
         except Exception as e:
             txt += "<br>Error = %s" % e
-            cur.connection.rollback()
-        finally:
-            cur.close()
     if gvp("dodml"):
-        txt += "<br>DML Result :"
-        cur = db.engine.raw_connection().cursor()
-        try:
-            cur.execute(sql)
-            txt += "%s rows impacted" % cur.rowcount
-            cur.connection.commit()
-        except Exception as e:
-            txt += "<br>Error = %s" % e
-            cur.connection.rollback()
-        finally:
-            cur.close()
+        txt = "Under review"
+        # txt += "<br>DML Result :"
+        # cur = db.engine.raw_connection().cursor()
+        # try:
+        #     cur.execute(sql)
+        #     txt += "%s rows impacted" % cur.rowcount
+        #     cur.connection.commit()
+        # except Exception as e:
+        #     txt += "<br>Error = %s" % e
+        #     cur.connection.rollback()
+        # finally:
+        #     cur.close()
 
     return render_in_admin_blueprint("admin2/admin_page.html", body=txt)
