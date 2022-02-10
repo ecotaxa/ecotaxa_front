@@ -10,6 +10,8 @@ from flask_security.utils import encrypt_password
 from appli import app, database, db, gvp, ErrorFormat
 from appli import gvg
 from appli.back_config import get_country_names
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import UsersApi
 
 
 @app.route('/register')
@@ -87,10 +89,10 @@ def dologincreate():
 
 @app.route('/ajaxorganisationlist')
 def ajaxorganisationlist():
-    LstOrga = database.GetAll(
-        "select * from (select distinct organisation from users where organisation ilike %(term)s)q order by upper(organisation)"
-        , ({'term': '%' + gvg('term', '') + '%'}))
-    return json.dumps([o['organisation'] for o in LstOrga])
+    with ApiClient(UsersApi, request) as api:
+        lst_orgs = api.search_organizations(name='%' + gvg('term', '') + '%')
+    lst_orgs.sort()
+    return json.dumps(lst_orgs)
 
 
 @app.route('/ajaxcountrylist')
