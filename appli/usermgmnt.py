@@ -9,6 +9,7 @@ from flask_security.utils import encrypt_password
 
 from appli import app, database, db, gvp, ErrorFormat
 from appli import gvg
+from appli.back_config import get_country_names
 
 
 @app.route('/register')
@@ -92,18 +93,14 @@ def ajaxorganisationlist():
     return json.dumps([o['organisation'] for o in LstOrga])
 
 
-@app.route('/ajaxcoutrylist')
-def ajaxcoutrylist():
-    Lst = database.GetAll("select countryname from countrylist where countryname ilike %(term)s order by countryname"
-                          , ({'term': '%' + gvg('term', '') + '%'}))
-    res = [{'id': o['countryname'], 'text': o['countryname']} for o in Lst]
+@app.route('/ajaxcountrylist')
+def ajaxcountrylist():
+    # TODO: Use same method as the form in admin, i.e. full list to browser, once
+    q = gvg('term', '')
+    Lst = filter(lambda cntry: q in cntry, get_country_names(request))
+    res = [{'id': o, 'text': o} for o in Lst]
     res.append({'id': 'Other', 'text': 'Other'})
     return json.dumps({"results": res})
-
-
-@app.route('/usercount')
-def ajaxusercount():
-    return str(database.GetAll("select count(*) from users")[0][0])
 
 
 @app.route('/privacy')
