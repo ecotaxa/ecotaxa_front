@@ -29,7 +29,6 @@ def XSSEscape(txt):
 import appli.database
 
 # Setup Flask-Security
-#user_datastore = SQLAlchemyUserDatastore(db, database.users, database.roles)
 user_datastore = BackEndUserDatastore(None, None)
 security = Security(app, user_datastore, login_form=CustomLoginForm)
 
