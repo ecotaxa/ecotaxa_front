@@ -14,43 +14,6 @@ manager = Manager(app)
 
 
 @manager.command
-def hello():
-    print("hello")
-
-
-@manager.command
-def createadminuser():
-    """
-    Create Admin User in the database admin/password
-    """
-
-    from appli.database import roles
-    r = roles.query.filter_by(id=1).first()
-    if r is None:
-        print("Create role ", appli.constants.AdministratorLabel)
-        # noinspection PyArgumentList
-        db.session.add(roles(id=1, name=appli.constants.AdministratorLabel))
-        db.session.commit()
-    r = roles.query.filter_by(id=2).first()
-    if r is None:
-        print("Create role ", appli.constants.UserAdministratorLabel)
-        # noinspection PyArgumentList
-        db.session.add(roles(id=2, name=appli.constants.UserAdministratorLabel))
-        db.session.commit()
-
-    u = user_datastore.find_user(email='admin')
-    if u is not None:
-        print("drop user ", u)
-        user_datastore.delete_user(u)
-        db.session.commit()
-    print("Create user 'admin' with password 'ecotaxa'")
-    # noinspection PyDeprecation
-    user_datastore.create_user(email='admin', password=encrypt_password('ecotaxa'), name="Application Administrator")
-    user_datastore.add_role_to_user('admin', 'Application Administrator')
-    db.session.commit()
-
-
-@manager.command
 def dbdrop():
     db.drop_all()
 
@@ -166,8 +129,8 @@ def CreateDB(UseExistingDatabase=False):
 
         print("Create the Schema")
         dbcreate()
-        print("Create Roles & Users & Country list")
-        createadminuser()
+        print("NOT CREATING Roles & Users & Country list")
+        # createadminuser()
         sql = """INSERT INTO countrylist(countryname) VALUES
 ('Afghanistan'),('Albania'),('Algeria'),('America'),('Andorra'),('Angola'),('Antigua'),('Argentina'),('Armenia'),
 ('Australia'),('Austria'),('Azerbaijan'),
