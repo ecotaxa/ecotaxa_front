@@ -50,13 +50,6 @@ class users(db.Model, UserMixin):
     def __str__(self):
         return "{0} ({1})".format(self.name, self.email)
 
-
-# noinspection PyPep8Naming
-class countrylist(db.Model, UserMixin):
-    __tablename__ = 'countrylist'
-    countryname = db.Column(db.String(50), primary_key=True, nullable=False)
-
-
 class Projects(db.Model):
     __tablename__ = 'projects'
     projid = db.Column(INTEGER, db.Sequence('seq_projects'), primary_key=True)
