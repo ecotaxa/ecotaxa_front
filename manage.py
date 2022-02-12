@@ -41,25 +41,6 @@ def createsampledata():
 
 
 @manager.command
-def ResetDBSequence(cur=None):
-    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
-        g.db = None
-        print("Start Sequence Reset")
-        if cur is None:
-            cur = db.session
-        cur.execute("SELECT setval('seq_acquisitions', (SELECT max(acquisid) FROM acquisitions), true)")
-        cur.execute("SELECT setval('seq_images', (SELECT max(imgid) FROM images), true)")
-        cur.execute("SELECT setval('seq_objects', (SELECT max(objid) FROM obj_head), true)")
-        cur.execute("SELECT setval('seq_projects', (SELECT max(projid) FROM projects), true)")
-        cur.execute("SELECT setval('seq_projectspriv', (SELECT max(id) FROM projectspriv), true)")
-        cur.execute("SELECT setval('seq_samples', (SELECT max(sampleid) FROM samples), true)")
-        cur.execute("SELECT setval('seq_taxonomy', (SELECT max(id) FROM taxonomy), true)")
-        cur.execute("SELECT setval('seq_users', (SELECT max(id) FROM users), true)")
-        cur.execute("SELECT setval('roles_id_seq', (SELECT max(id) FROM roles), true)")
-        print("Sequence Reset Done")
-
-
-@manager.command
 def FullDBRestore(UseExistingDatabase=False):
     """
     Will restore an exported DB as is and replace all existing data
