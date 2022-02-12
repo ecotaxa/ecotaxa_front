@@ -23,13 +23,6 @@ def dbcreate():
     with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
         g.db = None
         db.create_all()
-        database.ExecSQL("""create view objects as 
-                  select sam.projid, sam.sampleid, obh.*, obh.acquisid as processid, ofi.*
-                    from obj_head obh
-                    join acquisitions acq on obh.acquisid = acq.acquisid
-                    join samples sam on acq.acq_sample_id = sam.sampleid 
-                    left join obj_field ofi on obh.objid = ofi.objfid -- allow elimination by planner
-                    """)
 
 
 @manager.command
