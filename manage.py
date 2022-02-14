@@ -3,12 +3,10 @@ import os
 import shutil
 
 from flask_script import Manager
-# noinspection PyDeprecation
-from flask_security.utils import encrypt_password
 
-import appli.constants
 from appli import app, g
-from appli import db, user_datastore, database
+from appli import db, database
+
 
 manager = Manager(app)
 
@@ -107,89 +105,5 @@ def CreateDB(UseExistingDatabase=False):
         print("Creation Done")
 
 
-@manager.command
-def UpdateSunPos(ProjId):
-    """
-    will update Sunpos field for object of the given project
-    if projid = * all projects are updated
-    """
-    from astral import AstralError
-    with app.app_context():  # Création d'un contexte pour utiliser les fonction GetAll,ExecSQL qui mémorisent
-        g.db = None
-        param = []
-        sql = """select distinct objdate, objtime, 
-                                 round(cast(latitude as NUMERIC),4) latitude,
-                                 round(cast(longitude as NUMERIC),4) longitude
-                   from obj_head
-                 where objdate is not null 
-                   and objtime is not null  
-                   and longitude is not null 
-                   and latitude is not null
-     """
-        if ProjId != '*':
-            sql += " and projid=%s "
-            param.append(ProjId)
-        Obj = database.GetAll(sql, param)
-        for o in Obj:
-            # l=Location()
-            # l.latitude=o['latitude']
-            # l.longitude = o['longitude']
-            # s=l.sun(date=o['objdate'],local=False)
-            # dt=datetime.datetime(o['objdate'].year,o['objdate'].month,o['objdate'].day,o['objtime'].hour,
-            # o['objtime'].minute,o['objtime'].second,tzinfo=pytz.UTC)
-            # if s['sunset'].time()>s['sunrise'].time() \
-            #         and dt.time()>=s['sunset'].time(): Result='N'
-            # elif dt>=s['dusk']: Result='U'
-            # elif dt>=s['sunrise']: Result='D'
-            app.logger.info("Process %s %s %s %s", o['objdate'], o['objtime'], o['latitude'], o['longitude'])
-            try:
-                Result = CalcAstralDayTime(o['objdate'], o['objtime'], o['latitude'], o['longitude'])
-                sql = "update obj_head set sunpos=%s " \
-                      " where objdate=%s " \
-                      "   and objtime=%s " \
-                      "   and round(cast(latitude as NUMERIC),4) = %s " \
-                      "   and round(cast(longitude as NUMERIC),4) = %s "
-                param = [Result, o['objdate'], o['objtime'], o['latitude'], o['longitude']]
-                if ProjId != '*':
-                    sql += " and projid=%s "
-                    param.append(ProjId)
-                database.ExecSQL(sql, param)
-                app.logger.info(Result)
-            except AstralError as e:
-                app.logger.error("Astral error : %s", e)
-
-        # print(Result)
-
-
 if __name__ == "__main__":
     manager.run()
-
-
-def CalcAstralDayTime(Date, Time, Latitude, Longitude):
-    """
-    Calcule la position du soleil pour l'heure donnée.
-    :param Date: Date UTC
-    :param Time:  Heure UTC
-    :param Latitude: Latitude
-    :param Longitude: Longitude
-    :return: D pour Day, U pour Dusk/crépuscule, N pour Night/Nuit, A pour Aube/Dawn
-    """
-    from astral import Location
-    l = Location()
-    l.solar_depression = 'nautical'
-    l.latitude = Latitude
-    l.longitude = Longitude
-    s = l.sun(date=Date, local=False)
-    # print(Date,Time,Latitude,Longitude,s,)
-    Result = '?'
-    Inter = ({'d': 'sunrise', 'f': 'sunset', 'r': 'D'}
-             , {'d': 'sunset', 'f': 'dusk', 'r': 'U'}
-             , {'d': 'dusk', 'f': 'dawn', 'r': 'N'}
-             , {'d': 'dawn', 'f': 'sunrise', 'r': 'A'}
-             )
-    for I in Inter:
-        if s[I['d']].time() < s[I['f']].time() and (Time >= s[I['d']].time() and Time <= s[I['f']].time()):
-            Result = I['r']
-        elif s[I['d']].time() > s[I['f']].time() and (Time >= s[I['d']].time() or Time <= s[I['f']].time()):
-            Result = I['r']  # Changement de jour entre les 2 parties de l'intervalle
-    return Result

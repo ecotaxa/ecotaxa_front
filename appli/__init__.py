@@ -2,14 +2,22 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 
-import sys, urllib.parse
+import html
+import inspect
+import math
+import sys
+import traceback
+import urllib.parse
+from typing import List
 
 from flask import Flask, render_template, request, g
+from flask_login import current_user
+from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
-from flask_security import Security, SQLAlchemyUserDatastore
-import inspect, html, math, traceback
 
 from appli.security_on_backend import BackEndUserDatastore, CustomLoginForm
+from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')
@@ -329,15 +337,19 @@ def JinjaNl2BR(t):
     return t.replace('\n', '<br>\n')
 
 
-def JinjaGetManagerList(sujet=""):
-    LstUsers = database.GetAll("""select distinct u.email,u.name,Lower(u.name)
-FROM users_roles ur join users u on ur.user_id=u.id
-where ur.role_id=2
-and u.active=TRUE and email like '%@%'
-order by Lower(u.name)""")
+def JinjaGetUsersManagerList(sujet=""):
+    if current_user.is_authenticated:
+        # With a connected user, return administrators
+        with ApiClient(UsersApi, request) as api:
+            admin_users: List[MinUserModel] = api.get_admin_users()
+    else:
+        # With an anonymous user, return user administrators (for account issues)
+        with ApiClient(UsersApi, request) as api:
+            admin_users: List[MinUserModel] = api.get_users_admins()
     if sujet:
         sujet = "?" + urllib.parse.urlencode({"subject": sujet}).replace('+', '%20')
-    return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, *r) for r in LstUsers])
+    return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, r.email, r.name)
+                     for r in admin_users])
 
 
 ecotaxa_version = "2.6.0"
@@ -349,7 +361,8 @@ def JinjaGetEcotaxaVersionText():
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
 app.jinja_env.filters['nl2br'] = JinjaNl2BR
-app.jinja_env.globals.update(GetManagerList=JinjaGetManagerList, GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
+app.jinja_env.globals.update(GetManagerList=JinjaGetUsersManagerList,
+                             GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
 2022-01-13 : V 2.6.0
