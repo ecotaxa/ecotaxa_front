@@ -21,6 +21,7 @@
   {% endif %}
   <p><br>List of Application administrators :
     {{ admin_users }}
+  {{ GetManagerList('General admin need')|safe }}
   </p>
 
 {% endblock %}

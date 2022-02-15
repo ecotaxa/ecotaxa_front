@@ -31,18 +31,7 @@ def render_in_admin_blueprint(template, **kwargs):
 
 @adminBlueprint.route('/')
 def our_admin_root():
-    if current_user.is_authenticated:
-        # With a connected user, return administrators
-        with ApiClient(UsersApi, request) as api:
-            admin_users: List[MinUserModel] = api.get_admin_users()
-    else:
-        # With an anonymous user, return user administrators (for account issues)
-        with ApiClient(UsersApi, request) as api:
-            admin_users: List[MinUserModel] = api.get_users_admins()
-
-    admins = ", ".join(["%s(%s)" % (r.name, r.email) for r in admin_users])
-    return render_in_admin_blueprint('admin2/index_with_others.html',
-                                     admin_users=admins)
+    return render_in_admin_blueprint('admin2/index_with_others.html')
 
 
 # Import extra routes
