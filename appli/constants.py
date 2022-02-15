@@ -43,3 +43,12 @@ API_GLOBAL_ROLES = {1: ProjectCreatorLabel,
                     2: AdministratorLabel,
                     3: UserAdministratorLabel,
                     4: TaxonCreatorLabel}
+
+
+def is_static_unprotected(path: str):
+    """ For these entry points, we just serve with not much check, security is elsewhere.
+        This is for dev. environment, as nginx does proper redirects in production """
+    for a_start in ("/static/", "/vault/", "/api/"):
+        if path.startswith(a_start):
+            return True
+    return False

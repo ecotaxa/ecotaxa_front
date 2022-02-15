@@ -102,7 +102,6 @@ def AddJobsSummaryForTemplate():
         Set in global 'g' a structure to show what is currently ongoing on jobs side.
         @see appli/templates/layout.html
     """
-    from flask_login import current_user
     if getattr(current_user, 'id', -1) > 0:
         # Summarize from back-end
         from appli.jobs.emul import _build_jobs_summary
@@ -181,7 +180,7 @@ def EncodeEqualList(map):
 
 def ScaleForDisplay(v):
     """
-    Permet de supprimer les decimales supplementaires des flottant en fonctions de la valeur et de ne rien faire au reste
+    Permet de supprimer les decimales supplementaires des flottant en fonction de la valeur et de ne rien faire au reste
     :param v: Valeur à ajuster
     :return: Texte formaté
     """

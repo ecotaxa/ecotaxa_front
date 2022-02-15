@@ -8,7 +8,7 @@ from flask_security.datastore import UserDatastore
 from flask_security.forms import LoginForm
 from flask_security.utils import get_message
 
-from appli.constants import AdministratorLabel
+from appli.constants import AdministratorLabel, is_static_unprotected
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import UserModelWithRights, LoginReq, ApiException, MinUserModel
 from to_back.ecotaxa_cli_py.api import UsersApi, AuthentificationApi
@@ -67,6 +67,9 @@ class BackEndUserDatastore(UserDatastore):
         """
             It's assumed that the call is made from current request.
         """
+        if is_static_unprotected(request.path):
+            # Save an API call for unprotected routes
+            return None
         assert args == ()
         assert len(kwargs) == 1
         assert "id" in kwargs

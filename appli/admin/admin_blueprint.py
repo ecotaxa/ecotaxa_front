@@ -1,11 +1,6 @@
-from typing import List
-
 from flask import Blueprint, render_template
 from flask_admin import helpers
 from flask_admin.helpers import get_url
-from flask_login import current_user
-
-from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 
 adminBlueprint = Blueprint(name='admin_custom',
                            import_name=__name__,
