@@ -115,6 +115,11 @@ def PrjEditDataMass(PrjId):
             api.project_recompute_geography(PrjId)
         flash('All samples latitude and longitude updated', 'success')
 
+    if gvp('recompute2') == 'Y':
+        with ApiClient(ProjectsApi, request) as api:
+            nb_upd = api.project_recompute_sunpos(PrjId)
+        flash('%d sun position changed in the project' % nb_upd, 'success')
+
     if len(filtres):
         # Query the filtered list in project
         with ApiClient(ObjectsApi, request) as api:
