@@ -2,11 +2,11 @@
 # Some python hacking for speeding-up deserialization of openapi structures
 #
 import datetime
-import json
 import re
 from types import MethodType
-from typing import Dict, Union, Type, Tuple
+from typing import Dict, Union, Type, Tuple, Optional, Any
 
+import orjson
 from dateutil.parser import parse
 
 from . import ecotaxa_cli_py
@@ -21,7 +21,7 @@ for nat_klass_str, nat_klass in ApiClient.NATIVE_TYPES_MAPPING.items():
 atomic_types.remove(object)
 
 
-def get_openapi_class(klass_str: str) -> Tuple[Type, Type]:
+def get_openapi_class(klass_str: str) -> Tuple[Type, Union[str, Type, int, None]]:
     try:
         return openapi_classes[klass_str], openapi_compo.get(klass_str)
     except KeyError:
@@ -31,7 +31,9 @@ def get_openapi_class(klass_str: str) -> Tuple[Type, Type]:
 
 def add_openapi_class(klass_str: str):
     if klass_str.startswith('list['):
-        sub_kls_str = re.match(r'list\[(.*)]', klass_str).group(1)
+        cls_re = re.match(r'list\[(.*)]', klass_str)
+        assert cls_re
+        sub_kls_str = cls_re.group(1)
         sub_kls, compo = get_openapi_class(sub_kls_str)
         openapi_classes[klass_str] = list
         if compo is None:
@@ -39,7 +41,9 @@ def add_openapi_class(klass_str: str):
         else:
             openapi_compo[klass_str] = sub_kls_str
     elif klass_str.startswith('dict('):
-        sub_kls_str = re.match(r'dict\(([^,]*), (.*)\)', klass_str).group(2)
+        cls_re2 = re.match(r'dict\(([^,]*), (.*)\)', klass_str)
+        assert cls_re2
+        sub_kls_str = cls_re2.group(2)
         sub_kls, compo = get_openapi_class(sub_kls_str)
         openapi_classes[klass_str] = dict
         if compo is None:
@@ -58,17 +62,16 @@ def add_openapi_class(klass_str: str):
 mocked_classes: Dict[Type, Type] = {}
 
 
+def _mocked_to_dict(self) -> Dict[str, Any]:
+    return {nm: getattr(self, nm) for nm in self.__slots__}
+
+
 def _add_mocked_class(gen_class: Type):
-    class MyCls(object):
-        # Receiver for JSON deser
-        openapi_types = gen_class.openapi_types
-        attribute_map = gen_class.attribute_map
-        __slots__ = list(gen_class.openapi_types.keys())
-
-        def to_dict(self):
-            return {nm: getattr(self, nm) for nm in self.__slots__}
-
-    MyCls.__name__ = gen_class.__name__ + "2"
+    MyCls = type(gen_class.__name__ + "2", (object,),
+                 {"openapi_types": gen_class.openapi_types,
+                  "attribute_map": gen_class.attribute_map,
+                  "__slots__": list(gen_class.openapi_types.keys()),
+                  "to_dict": _mocked_to_dict})
     mocked_classes[gen_class] = MyCls
     return MyCls
 
@@ -99,7 +102,7 @@ def to_obj(json_obj, klass):
             else:
                 return type1(json_obj)
 
-    type2 = openapi_compo.get(klass)
+    type2: Optional[type] = openapi_compo.get(klass)
 
     if type1 == list:
         return [to_obj(o, type2) for o in json_obj]
@@ -154,7 +157,7 @@ def _sped_up_deser(self, response, response_type):
 
     # fetch data from response object
     try:
-        data = json.loads(response.data)
+        data = orjson.loads(response.data)
         data2 = to_obj(data, response_type)
         return data2
     except ValueError:
@@ -166,7 +169,7 @@ def _sped_up_deser(self, response, response_type):
 def boost(api_client: ApiClient):
     # Inject a faster version of deserialize
     assert "deserialize" in dir(api_client)
-    api_client.deserialize = MethodType(_sped_up_deser, api_client)
+    api_client.deserialize = MethodType(_sped_up_deser, api_client)  # type:ignore
 
 # if __name__ == '__main__':
 #     import time
