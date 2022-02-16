@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from typing import List, Any
+from typing import List, Any, Final, Tuple, Optional, Dict
 
 from flask import render_template, g, redirect, flash, request
 
@@ -17,9 +17,9 @@ class PredictionJob(Job):
     """
         Prediction, just GUI here, bulk of work subcontracted to back-end.
     """
-    UI_NAME = "Prediction"
+    UI_NAME: Final = "Prediction"
 
-    OBJECT_VARS = {"depth_max", "depth_min"}
+    OBJECT_VARS: Final = {"depth_max", "depth_min"}
 
     @classmethod
     def initial_dialog(cls):
@@ -48,7 +48,7 @@ class PredictionJob(Job):
             return cls.start_task()
 
     @classmethod
-    def get_target_project(cls):
+    def get_target_project(cls) -> Tuple[Optional[ProjectModel], str]:
         # The project is in the URL, get it and check access
         prj_id = int(gvg("projid"))
         with ApiClient(ProjectsApi, request) as api:
@@ -63,7 +63,7 @@ class PredictionJob(Job):
         g.prjtitle = target_prj.title
         g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_prj.projid, XSSEscape(target_prj.title))
         # Compute filters for telling the user
-        filters = {}
+        filters: Dict[str, str] = {}
         filters_html = cls.GetFilterText(cls._extract_filters_from_url(filters, target_prj))
         return target_prj, filters_html
 
@@ -261,6 +261,9 @@ class PredictionJob(Job):
         chosen_vars = gvp("CritVar").split(",")
         obj_vars = ["obj." + a_var if a_var in cls.OBJECT_VARS else "fre." + a_var
                     for a_var in chosen_vars]
+        if obj_vars == ['fre.']:
+            # Tricky case with 0 var
+            obj_vars.clear()
         chosen_taxo = gvp("Taxo").split(",")
         categories = [int(classif_id) for classif_id in chosen_taxo]
         pre_taxo_mapping = gvp("PostTaxoMapping")
@@ -368,7 +371,7 @@ class PredictionJob(Job):
                                src_prjs=src_prjs_str, prj=target_prj)
 
     @classmethod
-    def GetFilterText(cls, filters_text):
+    def GetFilterText(cls, filters_text) -> str:
         if filters_text:
             return "<p><span style='color:red;font-weight:bold;font-size:large;'" \
                    ">USING Active Project Filters</span><BR>Filters : " + filters_text + "</p>"

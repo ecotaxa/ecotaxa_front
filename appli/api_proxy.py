@@ -76,7 +76,7 @@ def _copy_headers_and_session(req_headers):
 
 def _copy_back_headers(response: HTTPResponse):
     """ Copy response headers into relayed response """
-    excluded_headers = {}  # ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+    excluded_headers = ()  # ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
     rsp_headers = [(name.lower(), value.lower()) for (name, value) in response.getheaders()
                    if name.lower() not in excluded_headers]
     return rsp_headers
@@ -84,10 +84,10 @@ def _copy_back_headers(response: HTTPResponse):
 
 def _piggyback_response(response: HTTPResponse, is_chunked: bool):
     """ Inject below reader into the HTTPResponse """
-    response.orig_read = response.read
-    response.nb_bytes = 0
-    response.is_chunked = is_chunked
-    response.read = types.MethodType(_my_read, response)
+    response.orig_read = response.read  # type:ignore
+    response.nb_bytes = 0  # type:ignore
+    response.is_chunked = is_chunked  # type:ignore
+    response.read = types.MethodType(_my_read, response)  # type:ignore
 
 
 def _my_read(self, amt):

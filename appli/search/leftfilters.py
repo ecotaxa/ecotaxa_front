@@ -80,12 +80,12 @@ def search_mappopup_samplepopover(sampleid: int):
         AJAX call for getting a sample information.
     """
     try:
-        with ApiClient(SamplesApi, request) as api:
-            sample: SampleModel = api.sample_query(sample_id=sampleid)
-        with ApiClient(ProjectsApi, request) as api:
-            project: ProjectModel = api.project_query(project_id=sample.projid)
+        with ApiClient(SamplesApi, request) as sapi:
+            sample: SampleModel = sapi.sample_query(sample_id=sampleid)
+        with ApiClient(ProjectsApi, request) as papi:
+            project: ProjectModel = papi.project_query(project_id=sample.projid)
     except ApiException as ae:
-        return str(api)
+        return str(ae)
     txt = """ID : {sampleid}<br>
     Original ID : {orig_id}<br>
     Project : {title} ({projid})<br>
@@ -96,5 +96,5 @@ def search_mappopup_samplepopover(sampleid: int):
     return txt
 
 
-def getcommonfilters(data):
+def getcommonfilters(data) -> str:
     return render_template('search/commonfilters.html', data=data)

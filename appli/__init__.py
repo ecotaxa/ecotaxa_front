@@ -8,47 +8,33 @@ import math
 import sys
 import traceback
 import urllib.parse
-from typing import List
+from typing import List, Optional
 
 from flask import Flask, render_template, request, g
 from flask_login import current_user
 from flask_security import Security
-from flask_sqlalchemy import SQLAlchemy
 
-from appli.security_on_backend import BackEndUserDatastore, CustomLoginForm
-from appli.utils import ApiClient
+from appli.security_on_backend import BackEndUserDatastore, CustomLoginForm, CustomChangePasswordForm
+from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 
 app = Flask("appli")
 app.config.from_pyfile('config.cfg')
 app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = (
-    'Your account is disabled. Email to the User manager (list on the left) to re-activate.', 'error')
+    'Your account is disabled. Email the User manager (list on the left) to re-activate.', 'error')
 app.logger.setLevel(10)
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app, session_options={
-    'expire_on_commit': True})  # expire_on_commit évite d'avoir des select quand on manipule les objets aprés un commit.
+# Setup Flask-Security
+app.config["SECURITY_PASSWORD_HASH"] = "plaintext"  # No hashing, which will be done server-side
+user_datastore = BackEndUserDatastore()
+security = Security(app, user_datastore, login_form=CustomLoginForm, change_password_form=CustomChangePasswordForm)
 
 
 def XSSEscape(txt):
     return html.escape(txt)
 
 
-import appli.database
-
-# Setup Flask-Security
-user_datastore = BackEndUserDatastore(None, None)
-security = Security(app, user_datastore, login_form=CustomLoginForm)
-
-
-def ObjectToStr(o):
-    #    return str([(n, v) for n, v in inspect.getmembers(o) if((not inspect.ismethod(v))and  (not inspect.isfunction(v))and  (n!='__module__')and  (n!='__doc__') and  (n!='__dict__') and  (n!='__dir__')and  (n!='__delattr__')and  (n!='__dir__')and  (n!='__dir__') )])
-    return str([(n, v) for n, v in inspect.getmembers(o) if (
-            ('method' not in str(v)) and (not inspect.isfunction(v)) and (n != '__module__') and (
-            n != '__doc__') and (n != '__dict__') and (n != '__dir__') and (n != '__weakref__'))])
-
-
-def PrintInCharte(txt, title=None):
+def PrintInCharte(txt: str, title: Optional[str] = None):
     """
     Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
     :param txt: Texte à affiche
@@ -60,49 +46,25 @@ def PrintInCharte(txt, title=None):
     return render_template('layout.html', bodycontent=txt, title=title)
 
 
-def PrintInCharte_bs4(txt, title=None):  # for bootstrap 4
-    """
-    Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
-    :param txt: Texte à affiche
-    :return: Texte rendu
-    """
-    AddJobsSummaryForTemplate()
-    if not title:
-        title = 'EcoTaxa'
-    return render_template('layout_bs4.html', bodycontent=txt, title=title)
-
-
-def PrintInCharte_bs5(txt, title=None):  # for bootstrap 5
-    """
-    Permet d'afficher un texte (qui ne sera pas echapé dans la charte graphique
-    :param txt: Texte à affiche
-    :return: Texte rendu
-    """
-    AddJobsSummaryForTemplate()
-    if not title:
-        title = 'EcoTaxa'
-    return render_template('layout_bs5.html', bodycontent=txt, title=title)
-
-
-def ErrorFormat(txt):
+def ErrorFormat(txt: str) -> str:
     return """
 <div class='cell panel ' style='background-color: #f2dede; margin: 15px;'><div class='body' >
 				<table style='background-color: #f2dede'><tr><td width='50px' style='color: red;font-size: larger'> <span class='glyphicon glyphicon-exclamation-sign'></span></td>
 				<td style='color: red;font-size: larger;vertical-align: middle;'><B>%s</B></td>
 				</tr></table></div></div>
-    """ % (txt)
+    """ % txt
 
 
 # VUE_PATH == "/gui"
 from appli.constants import VUE_PATH
 
 
-def AddJobsSummaryForTemplate():
+def AddJobsSummaryForTemplate() -> None:
     """
         Set in global 'g' a structure to show what is currently ongoing on jobs side.
         @see appli/templates/layout.html
     """
-    if getattr(current_user, 'id', -1) > 0:
+    if current_user.is_authenticated:
         # Summarize from back-end
         from appli.jobs.emul import _build_jobs_summary
         g.jobs_summary = _build_jobs_summary()
@@ -120,35 +82,27 @@ def AddJobsSummaryForTemplate():
     g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
 
 
-def gvg(varname, defvalue=''):
+def gvg(varname: str, defvalue: str = '') -> str:
     """
     Permet de récuperer une variable dans la Chaine GET ou de retourner une valeur par defaut
     :param varname: Variable à récuperer
     :param defvalue: Valeur par default
-    :return: Chaine de la variable ou valeur par default si elle n'existe pas
+    :return: Chaine de la variable ou valeur par defaut si elle n'existe pas
     """
     return request.args.get(varname, defvalue)
 
 
-def gvp(varname, defvalue=''):
+def gvp(varname: str, defvalue: str = '') -> str:
     """
     Permet de récuperer une variable dans la Chaine POST ou de retourner une valeur par defaut
     :param varname: Variable à récuperer
     :param defvalue: Valeur par default
-    :return: Chaine de la variable ou valeur par default si elle n'existe pas
+    :return: Chaine de la variable ou valeur par defaut si elle n'existe pas
     """
-    return request.form.get(varname, defvalue)
-
-
-def ntcv(v):
-    """
-    Permet de récuperer une chaine que la source soit une chaine ou un None issue d'une DB
-    :param v: Chaine potentiellement None
-    :return: V ou chaine vide
-    """
-    if v is None:
-        return ""
-    return v
+    ret = request.form.get(varname, defvalue)
+    # TODO: form is ImmutableMultiDict, meaning that .get can (and does) return list
+    # -> the signature is wrong in flask/werkzeug source.
+    return ret
 
 
 def nonetoformat(v, fmt: str):
@@ -176,23 +130,6 @@ def EncodeEqualList(map):
     l = ["%s=%s" % (k, v) for k, v in map.items()]
     l.sort()
     return "\n".join(l)
-
-
-def ScaleForDisplay(v):
-    """
-    Permet de supprimer les decimales supplementaires des flottant en fonction de la valeur et de ne rien faire au reste
-    :param v: Valeur à ajuster
-    :return: Texte formaté
-    """
-    if isinstance(v, float):
-        if abs(v) < 100:
-            return "%0.2f" % (v)
-        else:
-            return "%0.f" % (v)
-    elif v is None:
-        return ""
-    else:
-        return v
 
 
 def XSSUnEscape(txt):
@@ -322,7 +259,6 @@ def unhandled_exception(e):
         html.escape(str(e.__class__)), html.escape(str(e)))
     for i in tb_list[::-1]:
         s += "\n" + html.escape(i)
-    db.session.rollback()
     return render_template('errors/500.html', trace=s), 500
 
 
@@ -337,14 +273,15 @@ def JinjaNl2BR(t):
 
 
 def JinjaGetUsersManagerList(sujet=""):
+    admin_users: List[MinUserModel]
     if current_user.is_authenticated:
         # With a connected user, return administrators
         with ApiClient(UsersApi, request) as api:
-            admin_users: List[MinUserModel] = api.get_admin_users()
+            admin_users = api.get_admin_users()
     else:
         # With an anonymous user, return user administrators (for account issues)
         with ApiClient(UsersApi, request) as api:
-            admin_users: List[MinUserModel] = api.get_users_admins()
+            admin_users = api.get_users_admins()
     if sujet:
         sujet = "?" + urllib.parse.urlencode({"subject": sujet}).replace('+', '%20')
     return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, r.email, r.name)

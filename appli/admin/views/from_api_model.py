@@ -2,7 +2,7 @@
 # Build a view from API model
 #
 import datetime
-from typing import Any, Type, List, Tuple, Final
+from typing import Any, Type, List, Tuple, Final, Dict
 
 from flask_admin.model import BaseModelView
 from flask_admin.model.helpers import prettify_name
@@ -28,7 +28,7 @@ class APIModelView(BaseModelView):
         # Call super() _after_ at it calls, in turn, some methods here
         super().__init__(model=model, name=name, endpoint=name)
 
-    def ui_class_from_type(self, attr_type: str):
+    def ui_class_from_type(self, attr_type: str) -> Type:
         """
             We have very little information on the model in openapi specs.
         """
@@ -45,21 +45,21 @@ class APIModelView(BaseModelView):
         return ret
 
     def scaffold_form(self) -> Type:
-        class MyForm(Form):
-            pass
 
+        field_dict: Dict[str, Type] = dict()
         for an_attrib, its_type in self.types.items():
             if an_attrib in self.form_excluded_columns:  # Comply with interface
                 continue
             ui_elem_clazz = self.form_overrides.get(an_attrib)  # Comply with interface
             if ui_elem_clazz is None:
-                ui_elem_clazz = self.ui_class_from_type(its_type)
+                ui_elem_clazz = self.ui_class_from_type(its_type)  # type:ignore
             if ui_elem_clazz:
                 label = prettify_name(an_attrib)
                 validators = [DataRequired()] if an_attrib in self.mandatory_columns else []
                 ui_elem = ui_elem_clazz(label=label, validators=validators)
-                setattr(MyForm, an_attrib, ui_elem)
-        return MyForm
+                field_dict[an_attrib] = ui_elem
+
+        return type(self.name + 'Form', (self.form_base_class,), field_dict)
 
     def scaffold_list_columns(self):
         # Show all columns in list view, by default
@@ -88,7 +88,8 @@ class APIModelView(BaseModelView):
         """
         tpe = self.types[field]
         deflt = self.DEFAULT_FROM_TYPE[tpe]
-        model_list.sort(key=lambda mdl: getattr(mdl, field) if getattr(mdl, field) is not None else deflt,
+        model_list.sort(key=lambda mdl: getattr(mdl, field)  # type:ignore
+        if getattr(mdl, field) is not None else deflt,  # type:ignore
                         reverse=reverse)
 
     def search_in_models(self, model_list: List, search_fields: Tuple[str, ...], search: str) -> List:

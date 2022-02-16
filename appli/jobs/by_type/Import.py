@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 from pathlib import Path
-from typing import List
+from typing import List, ClassVar
 
 from flask import render_template, g, redirect, request, flash
 
@@ -19,17 +19,17 @@ class ImportJob(Job):
         Import, just GUI here, bulk of job subcontracted to back-end.
         Also serves as a base class for import update as pages are very similar.
     """
-    UI_NAME = "FileImport"
+    UI_NAME: ClassVar = "FileImport"
 
-    STEP0_TEMPLATE = "jobs/import_create.html"
+    STEP0_TEMPLATE: ClassVar = "jobs/import_create.html"
 
     @classmethod
-    def initial_dialog(cls):
+    def initial_dialog(cls) -> str:
         """ In UI/flask, initial load, GET """
         prj_id = int(gvg("p"))
-        with ApiClient(ProjectsApi, request) as api:
+        with ApiClient(ProjectsApi, request) as papi:
             try:
-                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
+                target_prj: ProjectModel = papi.project_query(prj_id, for_managing=False)
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
@@ -38,9 +38,9 @@ class ImportJob(Job):
         g.prjmanagermailto = target_prj.managers[0].email
         g.appmanagermailto = get_app_manager_mail(request)
         # Get stored last server path value for this project, if any
-        with ApiClient(UsersApi, request) as api:
-            server_path = api.get_current_user_prefs(prj_id,
-                                                     "cwd")
+        with ApiClient(UsersApi, request) as uapi:
+            server_path = uapi.get_current_user_prefs(prj_id,
+                                                      "cwd")
         return render_template(cls.STEP0_TEMPLATE, header="",
                                ServerPath=server_path,
                                TxtTaxoMap="")

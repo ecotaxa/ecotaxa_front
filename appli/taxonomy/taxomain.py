@@ -22,6 +22,7 @@ def get_login() -> Optional[UserModelWithRights]:
     # current_user is either an ApiUserWrapper or an anonymous one from flask
     if current_user.is_authenticated:
         return current_user.api_user
+    return None
 
 
 def is_admin_or_project_creator(user: UserModelWithRights) -> bool:

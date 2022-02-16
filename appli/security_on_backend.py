@@ -4,8 +4,10 @@
 from typing import List
 
 from flask import request
+from flask_login import current_user
+from flask_security import RoleMixin
 from flask_security.datastore import UserDatastore
-from flask_security.forms import LoginForm
+from flask_security.forms import LoginForm, ChangePasswordForm
 from flask_security.utils import get_message
 
 from appli.constants import AdministratorLabel, is_static_unprotected
@@ -14,7 +16,7 @@ from to_back.ecotaxa_cli_py import UserModelWithRights, LoginReq, ApiException, 
 from to_back.ecotaxa_cli_py.api import UsersApi, AuthentificationApi
 
 
-class AdministratorRole(object):
+class AdministratorRole(RoleMixin):
     name: str = AdministratorLabel
 
 
@@ -41,8 +43,16 @@ class ApiUserWrapper(object):
     @property
     def roles(self) -> List:
         if 2 in self.api_user.can_do:
-            return [AdministratorRole]
+            return [AdministratorRole()]
         return []
+
+    @property
+    def fs_uniquifier(self) -> int:
+        return self.id
+
+    @fs_uniquifier.setter
+    def fs_uniquifier(self, value):
+        self.id = value
 
     def __getattr__(self, item):
         return getattr(self.api_user, item)
@@ -51,11 +61,20 @@ class ApiUserWrapper(object):
 anon_user = MinUserModel(id=-1, email="", name="Anonymous")
 
 
+class UserModelForSecurity(UserModelWithRights):
+    fs_uniquifier = None
+
+
 class BackEndUserDatastore(UserDatastore):
     """
         This is a very partial implementation, maybe more methods to implement if it fails
         in one of the 'raise' below.
     """
+
+    def __init__(self):
+        # Args are for mapping an ORM, which is unused in our case
+        # But we need the Security module for forms
+        super().__init__(UserModelForSecurity, UserModelWithRights)
 
     def get_user(self, id_or_email):
         raise
@@ -71,9 +90,9 @@ class BackEndUserDatastore(UserDatastore):
             # Save an API call for unprotected routes
             return None
         assert args == ()
-        assert len(kwargs) == 1
-        assert "id" in kwargs
-        id_ = kwargs["id"]
+        assert len(kwargs) == 1, "%d args when 1 expected" % len(kwargs)
+        assert "fs_uniquifier" in kwargs
+        id_ = kwargs["fs_uniquifier"]
         try:
             with ApiClient(UsersApi, request) as api:
                 curr_user: UserModelWithRights = api.show_current_user()
@@ -89,16 +108,26 @@ class BackEndUserDatastore(UserDatastore):
         """
         pass
 
+    def put(self, user):
+        """
+            Called by flask_security when a user changes password.
+        """
+        api_user = current_user.api_user.to_dict()
+        api_user["password"] = user.password
+        with ApiClient(UsersApi, request) as api:
+            api.update_user(api_user["id"], api_user)
+
 
 class CustomLoginForm(LoginForm):
+
     def validate(self):
         """
             Validate using back-end call
         """
-        # Call base form for standard validations
-        if not super(LoginForm, self).validate():
-            return False
-        # Got to back-end
+        # Don't call base form validation, it gives a bit too much information.
+        # if not super(LoginForm, self).validate():
+        #     return False
+        # Go to back-end
         req = LoginReq(username=self.email.data, password=self.password.data)
         try:
             with ApiClient(AuthentificationApi, "") as api:
@@ -110,4 +139,22 @@ class CustomLoginForm(LoginForm):
             return False
         # noinspection PyAttributeOutsideInit
         self.user = ApiUserWrapper(curr_user)
+        return True
+
+
+class CustomChangePasswordForm(ChangePasswordForm):
+
+    def validate(self):
+        # Skip the validation in just-above-class
+        if not super(ChangePasswordForm, self).validate():
+            return False
+        try:
+            req = LoginReq(username=current_user.email, password=self.password.data)
+            with ApiClient(AuthentificationApi, "") as api:
+                api.login(req)
+        except ApiException as ae:
+            return False
+        if self.password.data == self.new_password.data:
+            self.password.errors.append(get_message('PASSWORD_IS_THE_SAME')[0])
+            return False
         return True

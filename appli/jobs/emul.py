@@ -2,7 +2,7 @@
 # Some functions to interface with historical task management
 #
 import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from flask import request
 
@@ -18,7 +18,7 @@ JOB_STATE_TO_USER_STATE = {'P': 'Pending',
                            'F': 'Done'}
 
 
-def _enrich_job(user_cache: Dict, a_job: JobModel):
+def _enrich_job(user_cache: Dict[int, MinUserModel], a_job: JobModel):
     """ Enrich back-end job for display """
     a_job.state = JOB_STATE_TO_USER_STATE.get(a_job.state, a_job.state)
     if "prj_id" in a_job.params:
@@ -27,10 +27,10 @@ def _enrich_job(user_cache: Dict, a_job: JobModel):
     if "req" in a_job.params and "project_id" in a_job.params["req"]:
         # noinspection PyUnresolvedReferences
         a_job.params["ProjectId"] = str(a_job.params["req"]["project_id"])
-    owner: MinUserModel = user_cache.get(a_job.owner_id)
+    owner: Optional[MinUserModel] = user_cache.get(a_job.owner_id)
     if owner is None:
         with ApiClient(UsersApi, request) as api:
-            owner: MinUserModel = api.get_user(user_id=a_job.owner_id)
+            owner = api.get_user(user_id=a_job.owner_id)
         user_cache[a_job.owner_id] = owner
     a_job.owner_id = owner  # TODO: a bit dirty, replacing an ID with a model
     return a_job

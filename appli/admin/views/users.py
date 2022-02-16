@@ -112,10 +112,10 @@ class UsersView(APIModelView):
     def init_search(self):
         return True
 
-    def search_placeholder(self):
+    def search_placeholder(self) -> str:
         return ", ".join(self.column_searchable_list)
 
-    def get_filters(self):
+    def get_filters(self) -> None:
         return None
 
     def get_list(self, page, sort_field, sort_desc, search, filters,
@@ -173,18 +173,3 @@ class UsersView(APIModelView):
     def delete_model(self, model):
         # Cannot delete
         raise
-
-
-class UsersViewRestricted(UsersView):
-    # Enable CSRF check
-    form_base_class = SecureStrippingBaseForm
-
-    form_columns = ('email', 'name', 'organisation', 'active', 'password')
-
-    def __init__(self):
-        # You can pass name and other parameters if you want to
-        super(UsersViewRestricted, self).__init__()
-
-    def is_accessible(self):
-        return (not current_user.has_role(appli.constants.AdministratorLabel)) \
-               and current_user.has_role(appli.constants.UserAdministratorLabel)

@@ -118,14 +118,14 @@ def PrjEditAnnot(PrjId):
         filters["taxo"] = selected_taxa
         with ApiClient(ObjectsApi, request) as api:
             call = api.revert_object_set_to_history
-            res: ObjectSetRevertToHistoryRsp = call(project_id=PrjId,
-                                                    project_filters=filters,
-                                                    target=target_for_api,
-                                                    dry_run=False)
+            res2: ObjectSetRevertToHistoryRsp = call(project_id=PrjId,
+                                                     project_filters=filters,
+                                                     target=target_for_api,
+                                                     dry_run=False)
         # Display change outcome
         return PrintInCharte(render_template("project/MassAnnotationEdition.html",
                                              header=header,
-                                             nb_rows=len(res.last_entries),
+                                             nb_rows=len(res2.last_entries),
                                              projid=target_proj.projid))
 
 

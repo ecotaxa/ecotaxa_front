@@ -6,9 +6,10 @@
 #
 import json
 from collections import OrderedDict
-from typing import Dict
+from typing import Dict, Final
 
-from appli import ScaleForDisplay, ntcv
+from appli import ntcv
+from appli.utils import ScaleForDisplay
 
 
 class ClassificationPageStats(object):
@@ -17,7 +18,7 @@ class ClassificationPageStats(object):
     """
 
     @staticmethod
-    def render(filters, projid):
+    def render(filters, projid) -> str:
         # Make API call params from filters
         form_json = json.dumps(filters)
         ajax_call = """
@@ -68,12 +69,12 @@ class PopoverPane(object):
     """
 
     # The fields displayable by default, whatever the setup in the project
-    always_there = OrderedDict([("usr.name", "by"),
-                                ("txp.name", "parent"),
-                                ("sam.orig_id", "in"),
-                                ("obj.orig_id", "Image Name"),
-                                ("obj.classif_auto_score", "Score"),
-                                ("obj.classif_when", "Validation date")])
+    always_there: Final = OrderedDict([("usr.name", "by"),
+                                       ("txp.name", "parent"),
+                                       ("sam.orig_id", "in"),
+                                       ("obj.orig_id", "Image Name"),
+                                       ("obj.classif_auto_score", "Score"),
+                                       ("obj.classif_when", "Validation date")])
 
     def __init__(self, field_list, row):
         """

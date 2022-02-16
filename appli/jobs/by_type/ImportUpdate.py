@@ -19,6 +19,6 @@ class ImportUpdateJob(ImportJob):
         return True
 
     @classmethod
-    def _update_mode(cls, ui_option) -> str:
+    def _update_mode(cls, ui_option: str) -> str:
         """ Update something, at least objects or objects+classifications """
         return "Cla" if ui_option == "Y" else "Yes"

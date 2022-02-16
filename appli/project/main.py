@@ -4,7 +4,7 @@ import os
 import urllib.parse
 from collections import OrderedDict
 from json import JSONDecodeError
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 from flask import render_template, g, flash, json, request, url_for
 from flask_login import current_user
@@ -13,13 +13,13 @@ from hyphenator import Hyphenator
 
 import appli
 import appli.project.sharedfilter as sharedfilter
-from appli import app, PrintInCharte, gvg, gvp, DecodeEqualList, ScaleForDisplay, ntcv, XSSEscape
+from appli import app, PrintInCharte, gvg, gvp, DecodeEqualList, ntcv, XSSEscape
 from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields, GetClassifQualClass, \
     MappableParentColumns
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
-from appli.utils import ApiClient, format_date_time
+from appli.utils import ApiClient, format_date_time, ScaleForDisplay
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi, SamplesApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import (ProjectModel, SampleModel, MinUserModel, ObjectSetQueryRsp, TaxonModel,
@@ -66,20 +66,20 @@ def GetFieldListFromModel(proj_model: ProjectModel, presentation_field):
 
 # Contient la liste des filtres & parametres de cet écran avec les valeurs par défaut
 # noinspection SpellCheckingInspection
-FilterList = {"MapN": '', "MapW": '', "MapE": '', "MapS": '',
-              "depthmin": '', "depthmax": '',
-              "samples": '',
-              "fromdate": '', "todate": '', "inverttime": '',
-              "fromtime": '', "totime": '',
-              "instrum": '', "month": '', "daytime": '',
-              "freetxt": '', "freetxtval": '', "filt_annot": '',
-              "freenum": '', "freenumst": '', "freenumend": '',
-              "statusfilter": '',
-              # Display parameters, not filters
-              "sortby": "", "sortorder": "", "dispfield": "",
-              "ipp": 100, "zoom": 100, "magenabled": 0,
-              "popupenabled": 0,
-              }
+FilterList: Dict[str, str] = {"MapN": '', "MapW": '', "MapE": '', "MapS": '',
+                              "depthmin": '', "depthmax": '',
+                              "samples": '',
+                              "fromdate": '', "todate": '', "inverttime": '',
+                              "fromtime": '', "totime": '',
+                              "instrum": '', "month": '', "daytime": '',
+                              "freetxt": '', "freetxtval": '', "filt_annot": '',
+                              "freenum": '', "freenumst": '', "freenumend": '',
+                              "statusfilter": '',
+                              # Display parameters, not filters
+                              "sortby": "", "sortorder": "", "dispfield": "",
+                              "ipp": "100", "zoom": "100", "magenabled": "0",
+                              "popupenabled": "0",
+                              }
 FilterListAutoSave = ("statusfilter",
                       "sortby", "sortorder", "dispfield",
                       'ipp', 'zoom', 'magenabled',
@@ -228,7 +228,7 @@ def indexPrj(PrjId):
     # Generate the selection if the parameter is set in the URL - free numeric column
     data["filt_freenum_for_select"] = ""
     if data.get('freenum', '') != "":
-        for r in PrjGetFieldListFromModel(proj, 'n', ''):  # type: dict
+        for r in PrjGetFieldListFromModel(proj, 'n', ''):
             if r['id'] == data['freenum']:
                 data["filt_freenum_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],
                                                                                                         r['text'])
@@ -236,7 +236,7 @@ def indexPrj(PrjId):
     # Generate the selection if the parameter is set in the URL - free textual column
     data["filt_freetxt_for_select"] = ""
     if data.get('freetxt', '') != "":
-        for r in PrjGetFieldListFromModel(proj, 't', ''):  # type: dict
+        for r in PrjGetFieldListFromModel(proj, 't', ''):
             if r['id'] == data['freetxt']:
                 data["filt_freetxt_for_select"] = "\n<option value='{0}' selected>{1}</option> ".format(r['id'],
                                                                                                         r['text'])
@@ -246,12 +246,15 @@ def indexPrj(PrjId):
     if data.get('filt_annot', '') != "":
         user_ids = [int(x) for x in data["filt_annot"].split(',') if x.isdigit()]
         for an_id in user_ids:
+            ko = False
             with ApiClient(UsersApi, request) as api:
                 try:
                     user: MinUserModel = api.get_user(user_id=an_id)
                 except ApiException as _ae:
                     # Ignore this one
-                    continue
+                    ko = True
+            if ko:
+                continue
             data["filt_annot_for_select"] += "\n<option value='{0}' selected>{1}</option> ".format(user.id, user.name)
 
     # We can display what we can sort
@@ -267,8 +270,9 @@ def indexPrj(PrjId):
     for k, v in displayable_fields.items():
         sortlist[k] = v
 
-    data["statuslist"] = collections.OrderedDict({"": "All"})
-    data["statuslist"].update(STATUSES)
+    statuslist = collections.OrderedDict({"": "All"})
+    statuslist.update(STATUSES)
+    data["statuslist"] = statuslist
 
     g.Projid = proj.projid
     g.PrjManager = proj.highest_right == "Manage"
@@ -386,22 +390,22 @@ def FormatNameForVignetteDisplay(category_name, hyphenator):
 # noinspection SpellCheckingInspection,PyPep8Naming
 @app.route('/prj/LoadRightPane', methods=['GET', 'POST'])
 def LoadRightPane():
-    PrjId = gvp("projid")
-    return LoadRightPaneForProj(PrjId, False, False)
+    PrjId: str = gvp("projid")
+    return LoadRightPaneForProj(int(PrjId), False, False)
 
 
-def LoadRightPaneForProj(PrjId:str, read_only:bool, force_first_page:bool):
+def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     # Security & sanity checks
-    with ApiClient(ProjectsApi, request) as api:
+    with ApiClient(ProjectsApi, request) as capi:
         try:
-            proj: ProjectModel = api.project_query(PrjId, for_managing=False)
+            proj: ProjectModel = capi.project_query(PrjId, for_managing=False)
         except ApiException as ae:
             if ae.status == 404:
                 return "Invalid project"
             elif ae.status in (401, 403):
                 return "Access Denied"
     # get filter values from POST
-    Filt = {}
+    Filt: Dict[str, str] = {}
     for col, v in FilterList.items():
         Filt[col] = gvp(col, v)
 
@@ -496,7 +500,7 @@ def LoadRightPaneForProj(PrjId:str, read_only:bool, force_first_page:bool):
         api_cols.extend([a_col for a_col in popover_prfxed_cols.keys()
                          if a_col is not None and a_col not in api_cols])
     else:
-        popover_prfxed_cols = {}
+        popover_prfxed_cols = OrderedDict()
 
     # Query objects, using filters and page size, in project
     with ApiClient(ObjectsApi, request) as api:
@@ -555,9 +559,10 @@ def LoadRightPaneForProj(PrjId:str, read_only:bool, force_first_page:bool):
     # print("PageWidth=%s, WindowHeight=%s"%(PageWidth,WindowHeight))
     hyphenator = LatinHyphenator()
     # Calcul des dimensions et affichage des images
-    for dtl in objs.details:
+    obj_dtl: List[str]
+    for obj_dtl in objs.details:
         # Access API result by name for readability
-        dtl: Dict[str, Any] = dict(zip(api_cols, dtl))
+        dtl: Dict[str, Any] = dict(zip(api_cols, obj_dtl))
         format_date_time(dtl, {"obj.classif_when", "obj.classif_auto_when"}, {"obj.objtime"})
         filename = dtl['img.file_name']
         origwidth: int = dtl['img.width']
@@ -677,7 +682,7 @@ def LoadRightPaneForProj(PrjId:str, read_only:bool, force_first_page:bool):
     html.append("</tr></table>")
 
     if force_first_page:
-        pagecount  = 1
+        pagecount = 1
         pageoffset = 0
 
     if pagecount > 1 or pageoffset > 0:
@@ -805,7 +810,7 @@ def prjGetClassifTab(PrjId):
     # Flatten the list, in order
     restree = []
 
-    def add_lines_in_order(taxo_id):
+    def add_lines_in_order(taxo_id) -> None:
         for a_child in children_by_id.get(taxo_id, ()):
             restree.append(res_by_id[a_child])
             add_lines_in_order(a_child)
@@ -834,7 +839,7 @@ def prjGetClassifTab(PrjId):
 
 ######################################################################################################################
 
-def PrjGetFieldListFromModel(proj: ProjectModel, field_type, term):
+def PrjGetFieldListFromModel(proj: ProjectModel, field_type: str, term: str):
     """
         Return the list of free columns for the project, for any entity,
          with given type ('' matches all) and matching with term ('' matches all).

@@ -86,14 +86,14 @@ def PrjMerge(PrjId):
     if not gvg('merge'):  # Ici la src à été choisie et vérifiée
         # Validate the merge
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-            rsp: MergeRsp = api.project_merge(project_id=target_proj.projid,
-                                              source_project_id=source_proj.projid,
-                                              dry_run=True)
+            rsp2: MergeRsp = api.project_merge(project_id=target_proj.projid,
+                                               source_project_id=source_proj.projid,
+                                               dry_run=True)
 
-        for an_error in rsp.errors:
+        for an_error in rsp2.errors:
             flash(an_error, "error")
 
-        if len(rsp.errors) == 0:
+        if len(rsp2.errors) == 0:
             txt += FormatError(""" <span class='glyphicon glyphicon-warning-sign'></span>
             Warning project {1} - {2}<br>
             Will be destroyed, its content will be transfered in the target project.<br>
@@ -107,9 +107,9 @@ def PrjMerge(PrjId):
     if gvg('merge') == 'Y':
         # Do the real merge
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-            rsp: MergeRsp = api.project_merge(project_id=target_proj.projid,
-                                              source_project_id=source_proj.projid,
-                                              dry_run=False)
+            _rsp: MergeRsp = api.project_merge(project_id=target_proj.projid,
+                                               source_project_id=source_proj.projid,
+                                               dry_run=False)
 
         txt += "<div class='alert alert-success' role='alert'>Fusion Done successfully</div>"
         txt += "<br><a class='btn btn-lg btn-primary' href='/prj/%s'>Back to target project</a>" % target_proj.projid

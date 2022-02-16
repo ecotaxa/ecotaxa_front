@@ -1,5 +1,6 @@
 import json
 from json import JSONDecodeError
+from typing import Optional, Dict
 
 import requests
 from flask import g, flash
@@ -49,7 +50,7 @@ class Job(object):
         return ""
 
     @classmethod
-    def final_download_action(cls, job_id, prj_id, out_file):
+    def final_download_action(cls, job_id, prj_id, out_file: Optional[str]) -> str:
         if out_file is None:
             return "Error, final file not available"
 
@@ -101,7 +102,7 @@ class Job(object):
             return request.form.get("ServerPath", ""), None
 
     @classmethod
-    def _extract_filters_from_url(cls, filters, target_prj):
+    def _extract_filters_from_url(cls, filters: Dict[str, str], target_prj) -> str:
         # Extract filter values, they are in the URL (GET)
         for k in sharedfilter.FilterList:
             if gvg(k, "") != "":

@@ -1,7 +1,7 @@
 #
 # Utility defs not depending on the Flask app.
 #
-from typing import Type, TypeVar, Generic, Union, Dict, List
+from typing import Type, TypeVar, Generic, Union, Dict, List, Optional
 
 from flask import Request, request
 from werkzeug.local import LocalProxy
@@ -25,12 +25,12 @@ class ApiClient(Generic[A]):
         api_client = _ApiClient()
         booster.boost(api_client)
         if isinstance(token, LocalProxy):
-            token = token.cookies.get('session')
+            token = token.cookies.get('session')  # type:ignore
         api_client.configuration.access_token = token
         # Note: No trailing / in URL
         api_client.configuration.host = BACKEND_URL
         # Call constructor on base class
-        self.under = api_class(api_client)
+        self.under: A = api_class(api_client)
 
     def __enter__(self) -> A:
         return self.under
@@ -70,3 +70,33 @@ def get_all_visible_projects() -> List[ProjectModel]:
             return [prj for prj in projects if prj.visible]  # Narrow to visible ones, even for logged users
         except ApiException as ae:
             return []
+
+
+def ScaleForDisplay(v) -> str:
+    """
+    Permet de supprimer les decimales supplementaires des flottant en fonction de la valeur et de ne rien faire au reste
+    :param v: Valeur à ajuster
+    :return: Texte formaté
+    """
+    if isinstance(v, float):
+        if abs(v) < 100:
+            return "%0.2f" % v
+        else:
+            return "%0.f" % v
+    elif v is None:
+        return ""
+    elif isinstance(v, str):
+        return v
+    else:
+        return str(v)
+
+
+def ntcv(v: Optional[str]) -> str:
+    """
+    Permet de récuperer une chaine que la source soit une chaine ou un None issue d'une DB
+    :param v: Chaine potentiellement None
+    :return: V ou chaine vide
+    """
+    if v is None:
+        return ""
+    return v

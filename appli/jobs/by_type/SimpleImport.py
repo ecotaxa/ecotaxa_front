@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import time
-from typing import Dict, List
+from typing import Dict, List, Final
 
 from flask import render_template, redirect, request
 
@@ -20,7 +20,7 @@ class SimpleImportJob(Job):
     """
     UI_NAME = "SimpleImport"
 
-    PREFS_KEY = "img_import"
+    PREFS_KEY: Final = "img_import"
 
     @classmethod
     def initial_dialog(cls):
@@ -87,11 +87,11 @@ class SimpleImportJob(Job):
                 api.set_current_user_prefs(prj_id, cls.PREFS_KEY, val_to_write)
 
             # Run for real
-            with ApiClient(ProjectsApi, request) as api:
-                rsp: SimpleImportRsp = api.simple_import(project_id=prj_id,
-                                                         simple_import_req=req,
-                                                         dry_run=False)
-                job_id = rsp.job_id
+            with ApiClient(ProjectsApi, request) as papi:
+                rsp2: SimpleImportRsp = papi.simple_import(project_id=prj_id,
+                                                           simple_import_req=req,
+                                                           dry_run=False)
+                job_id = rsp2.job_id
                 return redirect("/Job/Monitor/%d" % job_id)
 
         # Display the form, enrich it first
@@ -112,8 +112,8 @@ class SimpleImportJob(Job):
             if user:
                 form["annot_name"] = user.name
         if form.get('taxolb') is not None:
-            with ApiClient(TaxonomyTreeApi, request) as api:
-                nodes: List[TaxonModel] = api.query_taxa_set(ids=form['taxolb'])
+            with ApiClient(TaxonomyTreeApi, request) as tapi:
+                nodes: List[TaxonModel] = tapi.query_taxa_set(ids=form['taxolb'])
             if nodes:
                 form["taxo_name"] = nodes[0].name
 

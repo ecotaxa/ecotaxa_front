@@ -2,12 +2,15 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import os
+from typing import Optional, List, Tuple, Union
 
 from flask import Blueprint, g, request, url_for, send_from_directory
+from flask.typing import ResponseReturnValue
 from flask_login import current_user
 
 from appli import app, PrintInCharte
 from appli.constants import is_static_unprotected
+from appli.main_vue import index_vue
 
 PART_URL = "http://localhost:5002"  # TODO: A config
 
@@ -22,63 +25,7 @@ app.register_blueprint(vaultBP)
 def index():
     from appli.project.__init__ import connectPythonToPrime
     if connectPythonToPrime:
-        def find_language():
-            # Get the browser current language
-            import gettext
-            # see https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1 to get all the 2 digits country codes           
-            KNOWN_LANGAGES = ['en', 'pt', 'zh',
-                              'fr']  # TODO put this constant in ecotaxa_dev/appli/project/__init__.py ?
-            curLang: str = ''
-            prefLangs = request.accept_languages
-            if prefLangs is not None:
-                # Here, there is at least one language            
-                # First one is the prefered language in the list of handled languages
-                for l in prefLangs:
-                    curLang: str = l[0][
-                                   :2]  # first 2 letters show the country, and translations tables folders are organised this way
-                    if curLang in KNOWN_LANGAGES:
-                        try:  # N.B. [curLang] and not curLang in the following line
-                            lang = gettext.translation('ecotaxa', 'messages',
-                                                       [curLang])  # curLang == 'fr' or 'en' or 'zh' or 'pt' ...
-                            okCurLang = True
-                        except:  # language corrupted or not existing
-                            okCurLang = False
-                        if okCurLang:
-                            lang.install()
-                            return lang
-                    # try the next language
-            # Tried all the languages without success, or there is no supported langage
-            curLang = 'en'  # desperate, so take english as last solution
-            lang = gettext.translation('ecotaxa', 'messages', [curLang])
-            lang.install()
-            return lang
-
-        from appli import PrintInCharte_bs5
-        from flask import render_template, request
-        language = find_language()
-        return PrintInCharte_bs5(
-            # EcoTaxa_about_page and Welcome_to_EcoTaxa not yet used here
-            render_template("project/about_ecotaxa.html",
-                            EcoTaxa_is_a_web_application=language.gettext("EcoTaxa_is_a_web_application"),
-                            If_you_use_EcoTaxa=language.gettext("If_you_use_EcoTaxa"),
-                            The_development_of_EcoTaxa=language.gettext("The_development_of_EcoTaxa"),
-                            Sorbonne_Universite_and_CNRS=language.gettext("Sorbonne_Universite_and_CNRS"),
-                            The_Programme_Investissements_d_Avenir=language.gettext(
-                                "The_Programme_Investissements_d_Avenir"),
-                            The_Partner_University_Fund=language.gettext("The_Partner_University_Fund"),
-                            The_CNRS_LEFE_program=language.gettext("The_CNRS_LEFE_program"),
-                            The_Belmont_Forum=language.gettext("The_Belmont_Forum"),
-                            The_Watertools_company=language.gettext("The_Watertools_company"),
-                            The_maintenance_of_the_software=language.gettext("The_maintenance_of_the_software"),
-                            The_persons_who_made_EcoTaxa=language.gettext("The_persons_who_made_EcoTaxa"),
-                            Marc_Picheral_and=language.gettext("Marc_Picheral_and"),
-                            Sebastien_Colin=language.gettext("Sebastien_Colin"),
-                            Developers=language.gettext("Developers"),
-                            Deep_learning=language.gettext("Deep_learning"),
-                            testing_and_feedback=language.gettext("testing_and_feedback"),
-                            Disclaimer=language.gettext("Disclaimer")
-                            )
-        )
+        return index_vue()
     else:
         txt = """<div style='margin:5px;'><div id="homeText"'>"""
         # lecture du message de l'application manager
@@ -150,12 +97,12 @@ def gui_any(filename):
 
 
 @app.before_request
-def before_request_security():
+def before_request_security() -> Optional[ResponseReturnValue]:
     # time.sleep(0.1)
     # print("URL="+request.url)
     # app.logger.info("URL="+request.url)
     if is_static_unprotected(request.path):
-        return
+        return None
     user_can_administrate = False
     user_can_administrate_users = False
     mru_projects = []
@@ -168,32 +115,33 @@ def before_request_security():
     g.useradmin = user_can_administrate_users
     g.appliadmin = user_can_administrate
     # TODO: A bit useless as unlogged users have no menu to use
-    g.menu = []
-    g.menu.append((url_for("index"), "Home"))
-    g.menu.append(("/explore/", "Explore"))
+    menu: List[Union[Tuple[str, str], Tuple[str, str, str]]] = []
+    menu.append((url_for("index"), "Home"))
+    menu.append(("/explore/", "Explore"))
     if len(mru_projects) > 0:
-        g.menu.append(("/prj/", "Contribute to a project", "SUB"))
+        menu.append(("/prj/", "Contribute to a project", "SUB"))
         for a_prj in mru_projects:
-            g.menu.append(("/prj/%d" % a_prj.projid,
-                           "[%d] %s" % (a_prj.projid, a_prj.title)))
-        g.menu.append(("", "NOSUB"))
+            menu.append(("/prj/%d" % a_prj.projid,
+                         "[%d] %s" % (a_prj.projid, a_prj.title)))
+        menu.append(("", "NOSUB"))
     else:
-        g.menu.append(("/prj/", "Contribute to a project"))
-    g.menu.append((PART_URL, "Go to EcoPart"))
-    g.menu.append(("", "SEP"))
-    if request.endpoint == 'indexPrj':
-        g.menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%d');" % (
-            request.view_args.get('PrjId'),), "Browse Taxonomy"))
+        menu.append(("/prj/", "Contribute to a project"))
+    menu.append((PART_URL, "Go to EcoPart"))
+    menu.append(("", "SEP"))
+    if request.endpoint == 'indexPrj' and request.view_args is not None:
+        from_prj = request.view_args.get('PrjId')
+        menu.append(("javascript:PostDynForm('/taxo/browse/?fromprj=%s');" % from_prj, "Browse Taxonomy"))
     else:
-        g.menu.append(
-            ("javascript:PostDynForm('/taxo/browse/');", "Browse Taxonomy"))
+        menu.append(("javascript:PostDynForm('/taxo/browse/');", "Browse Taxonomy"))
     if user_can_administrate or user_can_administrate_users:
-        g.menu.append(("", "SEP"))
-        g.menu.append(("/admin/", "Admin Screen"))
-        g.menu.append(("/Jobs/listall", "Task Manager"))
+        menu.append(("", "SEP"))
+        menu.append(("/admin/", "Admin Screen"))
+        menu.append(("/Jobs/listall", "Task Manager"))
 
-    g.menu.append(("", "SEP"))
-    g.menu.append(("/change", "Change Password"))
+    menu.append(("", "SEP"))
+    menu.append(("/change", "Change Password"))
+    g.menu = menu
+    return None
 
 
 @app.after_request

@@ -4,19 +4,19 @@ from flask_security import login_required
 from flask_security.decorators import roles_accepted
 
 import appli.constants
-from appli import database, gvp
+from appli import gvp
 from .admin_blueprint import adminBlueprint as admin_bp, render_in_admin_blueprint
 
 
 @admin_bp.route('/others/edithomemessage', methods=['GET', 'POST'])
 @login_required
 @roles_accepted(appli.constants.AdministratorLabel)
-def admin_edithomemessage():
+def admin_edithomemessage() -> str:
     txt = "<h4>Edit home page message</h4>"
     txt += "<script src='//cdn.ckeditor.com/4.6.0/full/ckeditor.js'></script>"
     message = ""
     NomFichier = 'appli/static/home/appmanagermsg.html'
-    if gvp("msg", None) is not None:
+    if gvp("msg") != '':
         with open(NomFichier, 'w', encoding='utf-8', newline="\n") as f:
             f.write(gvp("msg"))
     if os.path.exists(NomFichier):

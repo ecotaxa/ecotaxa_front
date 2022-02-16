@@ -8,11 +8,10 @@ from flask_login import current_user
 from flask_security import login_required
 from markupsafe import escape
 
-from appli import app, PrintInCharte, gvg, gvp, ntcv, ScaleForDisplay, \
-    ComputeLimitForImage, nonetoformat, XSSEscape
+from appli import app, PrintInCharte, gvg, gvp, ntcv, ComputeLimitForImage, nonetoformat, XSSEscape
 from appli.constants import ClassifQual, DayTimeList
 # noinspection SpellCheckingInspection
-from appli.utils import ApiClient
+from appli.utils import ApiClient, ScaleForDisplay
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (ObjectApi, ProjectsApi, TaxonomyTreeApi,
                                         UsersApi, SamplesApi, ProcessesApi, AcquisitionsApi,
@@ -37,9 +36,9 @@ def objectdetails(objid):
         window_height = 20000
 
     # Security & sanity checks
-    with ApiClient(ObjectApi, request) as api:
+    with ApiClient(ObjectApi, request) as oapi:
         try:
-            obj: ObjectModel = api.object_query(objid)
+            obj: ObjectModel = oapi.object_query(objid)
         except ApiException as ae:
             if ae.status == 404:
                 return "Object doesn't exists"
@@ -47,8 +46,8 @@ def objectdetails(objid):
                 flash('You cannot read this object', 'error')
                 return PrintInCharte("<a href=/>Back to home</a>")
     # Project info
-    with ApiClient(ProjectsApi, request) as api:
-        obj_proj: ProjectModel = api.project_query(obj.project_id, for_managing=False)
+    with ApiClient(ProjectsApi, request) as papi:
+        obj_proj: ProjectModel = papi.project_query(obj.project_id, for_managing=False)
     # User info
     current_user_id = -1  # Anonymous
     g.TaxonCreator = False
@@ -169,9 +168,9 @@ def objectdetails(objid):
             aria-controls="tabdaddcomments" role="tab" data-toggle="tab">Edit complementary informations</a></li>""")
 
     if obj.classif_auto_id:
-        with ApiClient(TaxonomyTreeApi, request) as api:
-            taxon: TaxonModel = api.query_taxa(taxon_id=obj.classif_auto_id)
-        classif_auto_name = taxon.lineage[0]
+        with ApiClient(TaxonomyTreeApi, request) as tapi:
+            taxon2: TaxonModel = tapi.query_taxa(taxon_id=obj.classif_auto_id)
+        classif_auto_name = taxon2.lineage[0]
         if obj.classif_auto_score:
             classif_auto_name += " (%0.3f)" % (obj.classif_auto_score,)
     else:
