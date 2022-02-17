@@ -4,7 +4,7 @@
 import datetime
 import re
 from types import MethodType
-from typing import Dict, Union, Type, Tuple, Optional, Any
+from typing import Dict, Union, Type, Tuple, Optional
 
 import orjson
 from dateutil.parser import parse
@@ -62,16 +62,12 @@ def add_openapi_class(klass_str: str):
 mocked_classes: Dict[Type, Type] = {}
 
 
-def _mocked_to_dict(self) -> Dict[str, Any]:
-    return {nm: getattr(self, nm) for nm in self.__slots__}
-
-
 def _add_mocked_class(gen_class: Type):
     MyCls = type(gen_class.__name__ + "2", (object,),
                  {"openapi_types": gen_class.openapi_types,
                   "attribute_map": gen_class.attribute_map,
                   "__slots__": list(gen_class.openapi_types.keys()),
-                  "to_dict": _mocked_to_dict})
+                  "to_dict": lambda self: {nm: getattr(self, nm) for nm in self.__slots__}})
     mocked_classes[gen_class] = MyCls
     return MyCls
 

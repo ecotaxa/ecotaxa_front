@@ -22,7 +22,6 @@ setup(
         'appli/jobs/emul.py',
         'appli/jobs/Job.py',
         'appli/jobs/views.py',
-        # 'to_back/booster.py', Problem with 'dict' method in generated faster classes e.g. UserModel2...
-        # ...problem is visible in category search boxes
+        'to_back/booster.py', # Problem was visible in category search boxes, and in project setting - "Pick from other projects"
     ]),
 )
