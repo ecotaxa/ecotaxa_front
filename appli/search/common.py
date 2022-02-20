@@ -3,8 +3,8 @@ from typing import List
 
 from flask import render_template, request, json
 
-from appli import app, gvg, DecodeEqualList
-from appli.utils import ApiClient
+from appli import app, gvg
+from appli.utils import ApiClient, DecodeEqualList
 from to_back.ecotaxa_cli_py.api import SamplesApi, InstrumentsApi, TaxonomyTreeApi, ProjectsApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, SampleModel, TaxonModel, ProjectUserStatsModel
 

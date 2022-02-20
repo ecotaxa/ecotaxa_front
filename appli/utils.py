@@ -100,3 +100,18 @@ def ntcv(v: Optional[str]) -> str:
     if v is None:
         return ""
     return v
+
+
+def DecodeEqualList(txt: str) -> Dict[str, str]:
+    res = {}
+    for l in txt.splitlines():
+        ls = l.split('=', 1)
+        if len(ls) == 2:
+            res[ls[0].strip().lower()] = ls[1].strip().lower()
+    return res
+
+
+def EncodeEqualList(map: Dict[str, str]) -> str:
+    l = ["%s=%s" % (k, v) for k, v in map.items()]
+    l.sort()
+    return "\n".join(l)

@@ -117,21 +117,6 @@ def nonetoformat(v, fmt: str):
     return ("{0:" + fmt + "}").format(v)
 
 
-def DecodeEqualList(txt):
-    res = {}
-    for l in str(txt).splitlines():
-        ls = l.split('=', 1)
-        if len(ls) == 2:
-            res[ls[0].strip().lower()] = ls[1].strip().lower()
-    return res
-
-
-def EncodeEqualList(map):
-    l = ["%s=%s" % (k, v) for k, v in map.items()]
-    l.sort()
-    return "\n".join(l)
-
-
 def XSSUnEscape(txt):
     return html.unescape(txt)
 

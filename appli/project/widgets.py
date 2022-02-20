@@ -6,7 +6,8 @@
 #
 import json
 from collections import OrderedDict
-from typing import Dict, Final
+import typing
+from typing import Dict, Final, List, Any
 
 from appli import ntcv
 from appli.utils import ScaleForDisplay
@@ -76,15 +77,15 @@ class PopoverPane(object):
                                        ("obj.classif_auto_score", "Score"),
                                        ("obj.classif_when", "Validation date")])
 
-    def __init__(self, field_list, row):
+    def __init__(self, field_list: typing.OrderedDict[str, str], row: Dict[str, Any]):
         """
         """
-        self.field_list: OrderedDict = field_list
-        self.row: Dict = row
+        self.field_list = field_list
+        self.row = row
 
-    def render(self, width_on_row):
+    def render(self, width_on_row: int) -> str:
         row = self.row
-        lines = []
+        lines: List[str] = []
         poptitletxt = self.row['obj.orig_id']
         for fld, disp in self.field_list.items():
             if fld == 'obj.orig_id':

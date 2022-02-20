@@ -4,7 +4,7 @@ import os
 import urllib.parse
 from collections import OrderedDict
 from json import JSONDecodeError
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Optional
 
 from flask import render_template, g, flash, json, request, url_for
 from flask_login import current_user
@@ -13,13 +13,13 @@ from hyphenator import Hyphenator
 
 import appli
 import appli.project.sharedfilter as sharedfilter
-from appli import app, PrintInCharte, gvg, gvp, DecodeEqualList, ntcv, XSSEscape
-from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields, GetClassifQualClass, \
-    MappableParentColumns
+from appli import app, PrintInCharte, gvg, gvp, ntcv, XSSEscape
+from appli.constants import DayTimeList, MappableObjectColumnsSet, SortableObjectFields, MappableParentColumns, \
+    ClassifQual
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
-from appli.utils import ApiClient, format_date_time, ScaleForDisplay
+from appli.utils import ApiClient, format_date_time, ScaleForDisplay, DecodeEqualList
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi, SamplesApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import (ProjectModel, SampleModel, MinUserModel, ObjectSetQueryRsp, TaxonModel,
@@ -28,7 +28,7 @@ from to_back.ecotaxa_cli_py.models import (ProjectModel, SampleModel, MinUserMod
 
 ######################################################################################################################
 
-def GetFieldListFromModel(proj_model: ProjectModel, presentation_field):
+def GetFieldListFromModel(proj_model: ProjectModel, presentation_field: str) -> OrderedDict:
     """
         For a given presentation field, return an ordered dict of correspondence
         between the DB column name and what the user will see for this value.
@@ -45,7 +45,7 @@ def GetFieldListFromModel(proj_model: ProjectModel, presentation_field):
     # cette boucle permet de faire le lien avec le nom de la colonne (si elle existe).
     # e.g. objtime=time\r\nequiv_diameter=diameter [px]
     presentation = DecodeEqualList(getattr(proj_model, presentation_field))
-    fieldlist2 = {}  # key: db column, value: displayed label
+    fieldlist2: Dict[str, str] = {}  # key: db column, value: displayed label
     for field, dispname in presentation.items():
         if field in objmap:
             # 99% of display fields are from 'free columns'...
@@ -56,7 +56,7 @@ def GetFieldListFromModel(proj_model: ProjectModel, presentation_field):
         elif field in MappableParentColumns:
             fieldlist2[field] = dispname
 
-    ret = collections.OrderedDict()
+    ret = OrderedDict()
     # Return in alphabetical order of the visible label, e.g. 'plla546.min'
     for k, v in sorted(fieldlist2.items(), key=lambda t: t[1]):
         ret[k] = v
@@ -161,6 +161,20 @@ def _set_prefs_from_filters(filters, prj_id):
             api.set_current_user_prefs(project_id=prj_id,
                                        key=_FILTERS_KEY,
                                        value=val_to_write)
+
+
+def prefix_db_col(a_col: str, col_2_free: Dict[str, str]) -> Optional[str]:
+    # Return a column with a prefix in API convention, depending on its origin
+    if a_col in MappableObjectColumnsSet or a_col in SortableObjectFields:
+        return "obj." + a_col
+    elif a_col in col_2_free:
+        return "fre." + col_2_free[a_col]
+    elif a_col == "classifname":
+        # Historical, kept for old URLs which might have been transmitted to third-parties
+        return "txo.name"
+    elif a_col in MappableParentColumns:
+        return a_col.replace("_", ".", 1)  # e.g. sam_orig_id -> sam.orig_id
+    return None
 
 
 ######################################################################################################################
@@ -374,7 +388,10 @@ MAX_LEN_BEFORE_HYPHEN = 12
 
 
 # noinspection PyPep8Naming
-def FormatNameForVignetteDisplay(category_name, hyphenator):
+def FormatNameForVignetteDisplay(category_name: str, hyphenator, cache: Dict[str, str]):
+    cached = cache.get(category_name)
+    if cached is not None:
+        return cached
     # If the name is composed, use different styles for parts
     parts = ntcv(category_name).split('<')
     part0 = parts[0]
@@ -396,9 +413,9 @@ def LoadRightPane():
 
 def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     # Security & sanity checks
-    with ApiClient(ProjectsApi, request) as capi:
+    with ApiClient(ProjectsApi, request) as papi:
         try:
-            proj: ProjectModel = capi.project_query(PrjId, for_managing=False)
+            proj: ProjectModel = papi.project_query(PrjId, for_managing=False)
         except ApiException as ae:
             if ae.status == 404:
                 return "Invalid project"
@@ -439,7 +456,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     if popup_enabled:
         popover_columns = GetFieldListFromModel(proj, presentation_field='popoverfieldlist')
     else:
-        popover_columns = {}
+        popover_columns = OrderedDict()
 
     possible_proj_fields = GetFieldListFromModel(proj, presentation_field='classiffieldlist')
 
@@ -457,20 +474,10 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     api_cols_to_display = OrderedDict()
 
     # Add to query the needed columns, from project settings and current query
-    col_2_free = {v: k for k, v in proj.obj_free_cols.items()}
-
-    def prefix_db_col(a_col):
-        # Return a column with a prefix in API convention, depending on its origin
-        if a_col in MappableObjectColumnsSet or a_col in SortableObjectFields:
-            return "obj." + a_col
-        elif a_col in col_2_free:
-            return "fre." + col_2_free[a_col]
-        elif a_col == "classifname":
-            # Historical, kept for old URLs which might have been transmitted to third-parties
-            return "txo.name"
-        elif a_col in MappableParentColumns:
-            return a_col.replace("_", ".", 1)  # e.g. sam_orig_id -> sam.orig_id
-        return None
+    # obj_free_cols is e.g. area	"n01"
+    #                       bbox-0	"n02"
+    # As the query contains "n01", we need to ask the API "bbox-0"
+    col_2_free: Dict[str, str] = {v: k for k, v in proj.obj_free_cols.items()}
 
     # Compute optional columns needed under the image
     for col in posted_columns_list:
@@ -483,8 +490,8 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
             col_label = col
         else:
             continue
-        # Tranform into an API-naming column name
-        prfx_col = prefix_db_col(col)
+        # Transform into an API-naming column name
+        prfx_col = prefix_db_col(col, col_2_free)
         if prfx_col is not None:
             api_cols.append(prfx_col)
             api_cols_to_display[prfx_col] = col_label
@@ -492,13 +499,13 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     # namely the standard columns + the customized ones (per project)
     if popup_enabled:
         popover_prfxed_cols = PopoverPane.always_there.copy()
-        api_cols.extend([a_col for a_col in PopoverPane.always_there.keys()
-                         if a_col not in api_cols])
         # Change setup columns to API notation
-        popover_prfxed_cols.update(OrderedDict([(prefix_db_col(k), v)
-                                                for k, v in popover_columns.items()]))
+        for k, v in popover_columns.items():
+            api_col = prefix_db_col(k, col_2_free)
+            if api_col:
+                popover_prfxed_cols[api_col] = v
         api_cols.extend([a_col for a_col in popover_prfxed_cols.keys()
-                         if a_col is not None and a_col not in api_cols])
+                         if a_col not in api_cols])
     else:
         popover_prfxed_cols = OrderedDict()
 
@@ -506,7 +513,9 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     with ApiClient(ObjectsApi, request) as api:
         sort_col_signed = None
         if sortby != "":
-            sort_col_signed = ("-" if sortorder.lower() == "desc" else "") + prefix_db_col(sortby)
+            api_sortby = prefix_db_col(sortby, col_2_free)
+            if api_sortby:
+                sort_col_signed = ("-" if sortorder.lower() == "desc" else "") + api_sortby
         needed_fields = ",".join(api_cols)
         while True:
             objs: ObjectSetQueryRsp = \
@@ -558,6 +567,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         WindowHeight = 200
     # print("PageWidth=%s, WindowHeight=%s"%(PageWidth,WindowHeight))
     hyphenator = LatinHyphenator()
+    categ_cache: Dict[str, str] = {}  # Cache of html code per category
     # Calcul des dimensions et affichage des images
     obj_dtl: List[str]
     for obj_dtl in objs.details:
@@ -620,7 +630,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                                       height + 45 + 14 * len(api_cols_to_display))
         if cellwidth < 80:
             cellwidth = 80  # on considère au moins 80 car avec les label c'est rarement moins
-        # Met la fenetre de zoon la ou il y a plus de place, sachant qu'elle fait 400px
+        # Met la fenetre de zoom là ou il y a plus de place, sachant qu'elle fait 400px
         #  et ne peut donc pas être calée à gauche des premieres images.
         if (WidthOnRow + cellwidth) > (PageWidth / 2):
             pos = 'left'
@@ -644,7 +654,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
             popattribute = ""
 
         # Generate text box under the image
-        bottom_txts = []
+        bottom_txts: List[str] = []
         before_brs = ""
         for fld, disp in api_cols_to_display.items():
             if fld == 'obj.classif_auto_score' and dtl["obj.classif_qual"] == 'V':
@@ -666,14 +676,15 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         imgcount_lbl = "(%d)" % imgcount if imgcount is not None and imgcount > 1 else ""
         comment_present = "<b>!</b> " if dtl['obj.complement_info'] not in (None, "") else ""
 
-        txt += """<div class='subimg {1}' {2}>
-<div class='taxo'>{0}</div>
+        name_chunk = FormatNameForVignetteDisplay(display_name, hyphenator, categ_cache)
+        txt += """<div class='subimg status-{0}' {1}>
+<div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
-<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div>""" \
-            .format(FormatNameForVignetteDisplay(display_name, hyphenator),
-                    GetClassifQualClass(dtl['obj.classif_qual']),
-                    popattribute, bottomtxt, imgcount_lbl, comment_present)
-        txt += "</td>"
+<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div></td>""" \
+            .format(ClassifQual.get(dtl['obj.classif_qual'], "unknown"), popattribute,
+                    name_chunk,
+                    bottomtxt,
+                    imgcount_lbl, comment_present)
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
         WidthOnRow += cellwidth + 5  # 5 = border-spacing = espace inter image
