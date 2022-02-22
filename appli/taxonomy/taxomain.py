@@ -53,18 +53,6 @@ def routetaxobrowse():
                                          create_ok=is_admin_or_project_creator(user)))
 
 
-def request_withinstanceinfo(urlend, params):
-    """
-        Issue a REST query on EcoTaxoServer
-    """
-    params['id_instance'] = app.config.get('TAXOSERVER_INSTANCE_ID')
-    params['sharedsecret'] = app.config.get('TAXOSERVER_SHARED_SECRET')
-    params['ecotaxa_version'] = appli.ecotaxa_version
-
-    r = requests.post(get_taxoserver_url() + urlend, params)
-    return r.json()
-
-
 def DoSyncStatUpdate():
     """
         Update EcoTaxoServer with statistics about current node usage.

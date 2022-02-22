@@ -135,7 +135,7 @@ class CustomLoginForm(LoginForm):
             with ApiClient(UsersApi, token) as api:
                 curr_user: UserModelWithRights = api.show_current_user()
         except ApiException as ae:
-            self.password.errors.append(get_message('INVALID_PASSWORD')[0])
+            self.password.errors += get_message('INVALID_PASSWORD')[0],
             return False
         # noinspection PyAttributeOutsideInit
         self.user = ApiUserWrapper(curr_user)

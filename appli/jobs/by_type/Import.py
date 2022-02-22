@@ -214,6 +214,6 @@ class ImportJob(Job):
         # DoTaskClean(self.task.id)
         ret = "Data correctly imported from " + job.params['req']['source_path'] + "<br/>"
         ret += "<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>" \
-               "<a href='/Task/Create/TaskClassifAuto2?projid={0}' class='btn btn-primary btn-sm'" \
+               "<a href='/Job/Create/Prediction?projid={0}' class='btn btn-primary btn-sm'" \
                "role=button>Go to Automatic Classification Screen</a> ".format(prj_id)
         return ret

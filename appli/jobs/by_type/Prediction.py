@@ -4,9 +4,9 @@ from typing import List, Any, Final, Tuple, Optional, Dict
 
 from flask import render_template, g, redirect, flash, request
 
-from appli import PrintInCharte, gvg, XSSEscape, DecodeEqualList, EncodeEqualList, gvp, app
+from appli import PrintInCharte, gvg, XSSEscape, gvp, app
 from appli.jobs.Job import Job
-from appli.utils import ApiClient
+from appli.utils import ApiClient, DecodeEqualList, EncodeEqualList
 from to_back.ecotaxa_cli_py import ApiException, ObjectsApi, ObjectSetQueryRsp, ProjectSetColumnStatsModel, \
     ProjectTaxoStatsModel, PredictionReq, PredictionRsp
 from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi

@@ -2,156 +2,210 @@
 
 
 {% block body %}
-<style>
-.required::after {content: " *";font-weight: bold;color: red;}
-#ui-id-1 {max-height: 400px; overflow-y: scroll;}
-#organisation.parsley-success {
-  color: inherit;
-  background-color: inherit;
-  border: 1px solid #ccc;
-}
-
-</style>
-{{ txt }}
-<div style="margin-left: 50px;width: 600px;">
-  <h3>Create an EcoTaxa account</h3>
-<form method="post" action="?"  id="MainForm">
-<table>
-  <tr><td><label for="firstname" class="required">First name</label></td><td><label for="lastname" class="required">Last name</label></td></tr>
-  <tr><td style="padding-right: 10px"><input class="form-control" id="firstname" name="firstname" placeholder="John" required></td>
-    <td><input class="form-control" id="lastname" name="lastname" placeholder="Doe" required></td></tr>
-
-  <tr><td colspan="2"><label for="email" class="required">Email address</label></td></tr>
-  <tr><td colspan="2"><input type="email" class="form-control" id="email" name="email" placeholder="john.doe@foo.edu" required></td></tr>
-
-  <tr><td><label for="password" class="required">Password</label></td><td><label for="passwordconfirm" class="required">Password confirmation</label></td></tr>
-  <tr><td style="padding-right: 10px"><input type="password" class="form-control" id="password" name="password" placeholder="Type your password" required minlength="6"></td>
-    <td><input type="password" class="form-control" id="passwordconfirm" name="passwordconfirm" placeholder="Retype your password" required data-parsley-equalto="#password"></td></tr>
-
-  <tr><td colspan="2"><p style="font-size: small;line-height: 1;"><b>Warning</b>: This server does not use encrypted communication (https) for performance reasons. <br>This means that your password can be collected by a third party spying on the connection. Be careful which password you use here.</p></td></tr>
-
-  <tr><td colspan="2"><label for="organisation" class="required">Organisation</label></td></tr>
-  <tr><td colspan="2">
-  <div class="input-group" style="width: 100%">
-    <input class="form-control" id="organisation" name="organisation" placeholder="Select from the list or type a new name" autocomplete="off" required data-parsley-errors-container="#OrgaError">
-      <span class="input-group-btn" >
-        <button class="btn btn-default" type="button" id="orgabtn" tabindex="-1" style="height: 34px;"><span class="fas fa-caret-down"></span></button>
-      </span>
-  </div>
-    <div id="OrgaError"></div>
-  </td></tr>
-
-<tr><td colspan="2"><label for="country" class="required">Country</label></td></tr>
-  <tr><td colspan="2">
-  <select class="form-control" id="country" name="country" required data-parsley-errors-container="#CountryError"></select>
-  <div id="CountryError"></div>
-  </td></tr>
-
-<tr><td colspan="2"><label for="usercreationreason" style="font-weight: normal">Planned usage of EcoTaxa</label></td></tr>
-  <tr><td colspan="2">
-  <textarea class="form-control" id="usercreationreason" name="usercreationreason" rows="3"></textarea>
-  </td></tr>
-
-<tr><td colspan="2">
-  <input type="checkbox" id=agree name="agree" required data-parsley-errors-container="#CBError">
-  <label for="agree" style="vertical-align: top" class="required"> I agree with the following usage conditions:</label>
-  <p style="font-size: small;line-height: 1;">- I will make a reasonable use of the resources of this system.
-    <br>- I accept that my annotation activity and statistics are tracked and shared with the members of the projects I participate in and the EcoTaxa team, for the application to function.
-</p>
-  <div id="CBError"></div>
-  <span class="required"> </span> Required fields
-
-</td></tr>
-
-</table>
-<input type='hidden' name='g-recaptcha-response' id='g-recaptcha-response' value=''>
-
-  <button type="submit" class="btn btn-success"><span class="fas fa-check"></span> Create me</button>
-<a href="/" class="btn btn-default">Cancel</a>
-
-</form>
-<div id="PostResult" style="margin: 20px 50px "></div>
-
-<p style="margin-top: 10px">In case of problem with this registration page, please email one the following persons so that they can create an account manually for you:</p>
-				<ul>
-                    {{ GetManagerList('EcoTaxa account creation request')|safe }}
-        </ul>
-
-</div>
-
-<script src="/static/parsley.min.js"></script>
-<script>
-$('#country').select2({
-  ajax: {url:"/ajaxcountrylist", dataType: 'json'}
-});
-$("#country").change(function() {
-  $("#country").trigger('input')
-});
-
-$( function() {
-    $( "#organisation" ).autocomplete({
-      source: '/ajaxorganisationlist'
-      ,minLength: 0
-      ,close:function (event,ui) {
-{#        $("#country").focus();#}
-        $( "#organisation" ).parsley().validate()
+  <style>
+      .required::after {
+          content: " *";
+          font-weight: bold;
+          color: red;
       }
 
-    });
-  } );
+      #ui-id-1 {
+          max-height: 400px;
+          overflow-y: scroll;
+      }
 
-$('#orgabtn').click(function () {
-  var input=$( "#organisation" );
-  var wasOpen = input.autocomplete( "widget" ).is( ":visible" );
-  // Close if already visible
-  if ( wasOpen ) {
-    return;
-  }
-  input.autocomplete( "search", "" );
-});
-$(document).click(function () {
-  var input=$( "#organisation" );
-  var wasOpen = input.autocomplete( "widget" ).is( ":visible" );
-  // Close if already visible
-  if ( wasOpen ) {
-    input.autocomplete( "close" );
-    return;
-  }
-});
+      #organisation.parsley-success {
+          color: inherit;
+          background-color: inherit;
+          border: 1px solid #ccc;
+      }
+
+  </style>
+  {{ txt }}
+  <div style="margin-left: 50px;width: 600px;">
+    <h3>Create an EcoTaxa account</h3>
+    <form method="post" action="?" id="MainForm">
+      <table>
+        <tr>
+          <td><label for="firstname" class="required">First name</label></td>
+          <td><label for="lastname" class="required">Last name</label></td>
+        </tr>
+        <tr>
+          <td style="padding-right: 10px"><input class="form-control" id="firstname" name="firstname" placeholder="John"
+                                                 required></td>
+          <td><input class="form-control" id="lastname" name="lastname" placeholder="Doe" required></td>
+        </tr>
+
+        <tr>
+          <td colspan="2"><label for="email" class="required">Email address</label></td>
+        </tr>
+        <tr>
+          <td colspan="2"><input type="email" class="form-control" id="email" name="email"
+                                 placeholder="john.doe@foo.edu" required></td>
+        </tr>
+
+        <tr>
+          <td><label for="password" class="required">Password</label></td>
+          <td><label for="passwordconfirm" class="required">Password confirmation</label></td>
+        </tr>
+        <tr>
+          <td style="padding-right: 10px"><input type="password" class="form-control" id="password" name="password"
+                                                 placeholder="Type your password" required minlength="6"></td>
+          <td><input type="password" class="form-control" id="passwordconfirm" name="passwordconfirm"
+                     placeholder="Retype your password" required data-parsley-equalto="#password"></td>
+        </tr>
+        <tr>
+          {% if request.scheme != 'https' %}
+            <td colspan="2"><p style="font-size: small;line-height: 1;"><b>Warning</b>: This connection does not use
+              encrypted communication (https). Your password can be collected by a third
+              party spying on the connection. Be careful which password you use here.</p></td>
+            </tr>
+          {% endif %}
+        <tr>
+          <td colspan="2"><label for="organisation" class="required">Organisation</label></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <div class="input-group" style="width: 100%">
+              <input class="form-control" id="organisation" name="organisation"
+                     placeholder="Select from the list or type a new name" autocomplete="off" required
+                     data-parsley-errors-container="#OrgaError">
+              <span class="input-group-btn">
+        <button class="btn btn-default" type="button" id="orgabtn" tabindex="-1" style="height: 34px;"><span
+            class="fas fa-caret-down"></span></button>
+      </span>
+            </div>
+            <div id="OrgaError"></div>
+          </td>
+        </tr>
+
+        <tr>
+          <td colspan="2"><label for="country" class="required">Country</label></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <select class="form-control" id="country" name="country" required
+                    data-parsley-errors-container="#CountryError"></select>
+            <div id="CountryError"></div>
+          </td>
+        </tr>
+
+        <tr>
+          <td colspan="2"><label for="usercreationreason" style="font-weight: normal">Planned usage of EcoTaxa</label>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <textarea class="form-control" id="usercreationreason" name="usercreationreason" rows="3"></textarea>
+          </td>
+        </tr>
+
+        <tr>
+          <td colspan="2">
+            <input type="checkbox" id=agree name="agree" required data-parsley-errors-container="#CBError">
+            <label for="agree" style="vertical-align: top" class="required"> I agree with the following usage
+              conditions:</label>
+            <p style="font-size: small;line-height: 1;">- I will make a reasonable use of the resources of this system.
+              <br>- I accept that my annotation activity and statistics are tracked and shared with the members of the
+              projects I participate in and the EcoTaxa team, for the application to function.
+            </p>
+            <div id="CBError"></div>
+            <span class="required"> </span> Required fields
+
+          </td>
+        </tr>
+
+      </table>
+      <input type='hidden' name='g-recaptcha-response' id='g-recaptcha-response' value=''>
+
+      <button type="submit" class="btn btn-success"><span class="fas fa-check"></span> Create me</button>
+      <a href="/" class="btn btn-default">Cancel</a>
+
+    </form>
+    <div id="PostResult" style="margin: 20px 50px "></div>
+
+    <p style="margin-top: 10px">In case of problem with this registration page, please email one the following persons
+      so that they can create an account manually for you:</p>
+    <ul>
+      {{ GetManagerList('EcoTaxa account creation request')|safe }}
+    </ul>
+
+  </div>
+
+  <script src="/static/parsley.min.js"></script>
+  <script>
+      $('#country').select2({
+          ajax: {url: "/ajaxcountrylist", dataType: 'json'}
+      });
+      $("#country").change(function () {
+          $("#country").trigger('input')
+      });
+
+      $(function () {
+          $("#organisation").autocomplete({
+              source: '/ajaxorganisationlist'
+              , minLength: 0
+              , close: function (event, ui) {
+                  {#        $("#country").focus();#}
+                  $("#organisation").parsley().validate()
+              }
+
+          });
+      });
+
+      $('#orgabtn').click(function () {
+          var input = $("#organisation");
+          var wasOpen = input.autocomplete("widget").is(":visible");
+          // Close if already visible
+          if (wasOpen) {
+              return;
+          }
+          input.autocomplete("search", "");
+      });
+      $(document).click(function () {
+          var input = $("#organisation");
+          var wasOpen = input.autocomplete("widget").is(":visible");
+          // Close if already visible
+          if (wasOpen) {
+              input.autocomplete("close");
+              return;
+          }
+      });
 
 
-$("#organisation").change(function() {
-  $("#organisation").trigger('input')
-});
+      $("#organisation").change(function () {
+          $("#organisation").trigger('input')
+      });
 
-$(function () {
-  $('#MainForm').parsley();
-  $('#MainForm').submit(function(e){
-          e.preventDefault();
-          $('#MainForm').parsley().validate();
-          $("#PostResult").html("<img src='/static/spinningred.gif'>");
-          var formobj=objectifyForm("MainForm");
-          $("#PostResult").load('/dologincreate',formobj);
-        });
+      $(function () {
+          $('#MainForm').parsley();
+          $('#MainForm').submit(function (e) {
+              e.preventDefault();
+              $('#MainForm').parsley().validate();
+              $("#PostResult").html("<img src='/static/spinningred.gif'>");
+              var formobj = objectifyForm("MainForm");
+              $("#PostResult").load('/dologincreate', formobj);
+          });
 
-});
+      });
 
 
-</script>
+  </script>
 
-  {% if g.reCaptchaID %}
-<script src='https://www.google.com/recaptcha/api.js?render={{ g.reCaptchaID }}'></script>
-<script>
-function runrecaptcha(){
-  grecaptcha.execute('{{ g.reCaptchaID }}', {action: 'createuser'})
-  .then(function(token) {
-  // Verify the token on the server.
-  document.getElementById('g-recaptcha-response').value=token;
-  });
-}
-grecaptcha.ready(runrecaptcha);
+  {% if reCaptchaID %}
+    <script src='https://www.google.com/recaptcha/api.js?render={{ reCaptchaID }}'></script>
+    <script>
+        function runrecaptcha() {
+            grecaptcha.execute('{{ reCaptchaID }}', {action: 'createuser'})
+                .then(function (token) {
+                    // Verify the token on the server.
+                    document.getElementById('g-recaptcha-response').value = token;
+                });
+        }
 
-</script>
-{% endif %}
+        grecaptcha.ready(runrecaptcha);
+
+    </script>
+  {% endif %}
 
 {% endblock %}

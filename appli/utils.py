@@ -102,13 +102,15 @@ def ntcv(v: Optional[str]) -> str:
     return v
 
 
-def DecodeEqualList(txt: str) -> Dict[str, str]:
-    res = {}
-    for l in txt.splitlines():
-        ls = l.split('=', 1)
+def DecodeEqualList(txt: Optional[str]) -> Dict[str, str]:
+    ret: Dict[str, str] = {}
+    if txt is None:
+        return ret
+    for a_line in txt.splitlines():
+        ls = a_line.split('=', 1)
         if len(ls) == 2:
-            res[ls[0].strip().lower()] = ls[1].strip().lower()
-    return res
+            ret[ls[0].strip().lower()] = ls[1].strip().lower()
+    return ret
 
 
 def EncodeEqualList(map: Dict[str, str]) -> str:
