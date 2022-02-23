@@ -273,11 +273,11 @@ def JinjaGetUsersManagerList(sujet=""):
                      for r in admin_users])
 
 
-ecotaxa_version = "2.6.0"
+ecotaxa_version = "2.6.1"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2022-01-13"
+    return ecotaxa_version + " 2022-02-23"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -286,6 +286,12 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetUsersManagerList,
                              GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2022-02-23 : V 2.6.1
+    Feature #738: Relax constraint on acquisition ID unicity per project.
+    Feature #729: Maps are now fed from back-end only.
+    Feature #724: latin-1 encoding option for reports is now gone
+    Arch feature #765: Make python front-end use only the back-end as data source.
+    Feature #675: Put limits on the number of files/objects which can be imported.
 2022-01-13 : V 2.6.0
     Feature #747: Remove EcoPart related code from EcoTaxa.
 2021-10-26 : V 2.5.15

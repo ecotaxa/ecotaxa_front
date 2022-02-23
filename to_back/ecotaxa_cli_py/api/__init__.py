@@ -7,6 +7,7 @@ from to_back.ecotaxa_cli_py.api.files_api import FilesApi
 from to_back.ecotaxa_cli_py.api.taxonomy_tree_api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.api.wip_api import WIPApi
 from to_back.ecotaxa_cli_py.api.acquisitions_api import AcquisitionsApi
+from to_back.ecotaxa_cli_py.api.admin_api import AdminApi
 from to_back.ecotaxa_cli_py.api.authentification_api import AuthentificationApi
 from to_back.ecotaxa_cli_py.api.collections_api import CollectionsApi
 from to_back.ecotaxa_cli_py.api.instruments_api import InstrumentsApi
