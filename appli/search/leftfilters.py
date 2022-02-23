@@ -43,7 +43,7 @@ def search_mappopup_samples():
     """
         AJAX call to return data for drawing samples points in the global map.
     """
-    app.logger.info(request.args)
+    app.logger.info("Search mappopup req: %s", request.args)
     if gvg('projid'):
         projids = [int(x) for x in gvg("projid").split(',')]
     else:

@@ -63,6 +63,10 @@ mocked_classes: Dict[Type, Type] = {}
 
 
 def _add_mocked_class(gen_class: Type):
+    if hasattr(gen_class, "allowable_values"):
+        # It's an Enum
+        mocked_classes[gen_class] = str
+        return
     MyCls = type(gen_class.__name__ + "2", (object,),
                  {"openapi_types": gen_class.openapi_types,
                   "attribute_map": gen_class.attribute_map,
@@ -116,6 +120,7 @@ def to_obj(json_obj, klass):
         try:
             ret = mocked_classes.get(type1)()
         except TypeError:
+            # Mock was not generated yet
             _add_mocked_class(type1)
             ret = mocked_classes.get(type1)()
 
@@ -127,6 +132,9 @@ def to_obj(json_obj, klass):
         else:
             if json_obj is None:
                 return None
+            if isinstance(ret, str):
+                # Enums map to str
+                return str(json_obj)
             for fld, tpe in ret.openapi_types.items():
                 val = getattr(json_obj, fld)
                 val = to_obj(val, tpe)
