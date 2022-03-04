@@ -1,104 +1,126 @@
 <table>
   <tr>
     <td style="width: 600px;vertical-align: top;">
-{%  if Others %}
-  <h3>Other projects</h3>
-  <p>To have access to these projects, request access to the project manager.</p>
-{% else %}
-<span style="font-size: x-large;font-weight: bold;">Select a project </span>
-  {% include "jobs/import_create_shared_doc.html" %}
+      {% if Others %}
+        <h3>Other projects</h3>
+        <p>To have access to these projects, request access to the project manager.</p>
+      {% else %}
+        <span style="font-size: x-large;font-weight: bold;">Select a project </span>
+        {% include "jobs/import_create_shared_doc.html" %}
 
-{% if  CanCreate==True %}
-  <button class="btn btn-success" onclick="CreateProject();">Create a new project</button>
-{% else %}
-  <p style="margin-bottom: 0">To create a new project and upload images in it, please contact the user manager(s): </p><ul>{{ GetManagerList('Ecotaxa : Please provide me the Project creation rights')|safe }}</ul>
-{% endif %}
-{% endif %} {# If Others #}
-</td>
-  <td style="padding-left: 50px;vertical-align: top;">
-  <div class="panel panel-default">
-  <div class="panel-body">
-    <form method="get">
-      <table>
-        <tr>
-          <td>Filter on title :</td>
-          <td><input type="text"  style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}"></td>
-          <td rowspan="2" style="vertical-align: top"><button type="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search"></span> Search</button></td>
-        </tr>
-        <tr>
-          <td style="padding-right: 10px;">Exclude subsets :</td>
-          <td><input type="checkbox" value="Y" name="filt_subset"  {%  if filt_subset=='Y'  %}checked{%  endif  %}></td>
-        </tr>
-        <tr>
-          <td>Instrument : </td>
-          <td style="padding-right: 10px;"><input type="text" style="width: 100px;" name="filt_instrum" id="filt_instrum" value="{{ filt_instrum }}">
-                <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});" style="cursor: pointer;"></span></td>
-          <td  style="vertical-align: top"><a href="?filt_title=&filt_instrum=" class="btn btn-sm btn-default btn-block"><span class="glyphicon glyphicon-remove"></span> Clear</a></td>
-        </tr>
-      </table>
-    </form>
-  </div></div>
+        {% if  CanCreate==True %}
+          <button class="btn btn-success" onclick="CreateProject();">Create a new project</button>
+        {% else %}
+          <p style="margin-bottom: 0">To create a new project and upload images in it, please contact the user
+            manager(s): </p>
+          <ul>{{ GetManagerList('Ecotaxa : Please provide me the Project creation rights')|safe }}</ul>
+        {% endif %}
+      {% endif %} {# If Others #}
+    </td>
+    <td style="padding-left: 50px;vertical-align: top;">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <form method="get">
+            <table>
+              <tr>
+                <td>Filter on title :</td>
+                <td><input type="text" style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}">
+                </td>
+                <td rowspan="2" style="vertical-align: top">
+                  <button type="submit" class="btn btn-primary btn-block"><span
+                      class="glyphicon glyphicon-search"></span> Search
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding-right: 10px;">Exclude subsets :</td>
+                <td><input type="checkbox" value="Y" name="filt_subset" {% if filt_subset=='Y' %}checked{% endif %}>
+                </td>
+              </tr>
+              <tr>
+                <td>Instrument :</td>
+                <td style="padding-right: 10px;"><input type="text" style="width: 100px;" name="filt_instrum"
+                                                        id="filt_instrum" value="{{ filt_instrum }}">
+                  <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});"
+                        style="cursor: pointer;"></span></td>
+                <td style="vertical-align: top"><a href="?filt_title=&filt_instrum="
+                                                   class="btn btn-sm btn-default btn-block"><span
+                    class="glyphicon glyphicon-remove"></span> Clear</a></td>
+              </tr>
+            </table>
+          </form>
+        </div>
+      </div>
     </td>
   </tr>
 </table>
 <table class='table table-hover table-verycondensed projectsList'>
-        <thead><tr>
-                <th></th>
-                <th>Title [ID]</th>
-                <th>Status</th>
-                <th>Nb objects</th>
-                <th>%&nbsp;validated</th>
-                <th>%&nbsp;classified</th>
-            </tr>
-        </thead>
-        <tbody>
-{%   for r in PrjList %}
-<tr><td>
-{%  if Others %}
-  <a class='btn btn-primary' href='mailto:{{r.managers[0].email|safe if r.managers}}?{{_manager_mail(r.title, r.projid)|safe if r.managers}}'>REQUEST ACCESS</a>
-  {% if r.visible==True or isadmin  %}
-    <a class='btn btn-primary' href='/prj/{{ r.projid }}'>View</a>
-    {% endif %}
-{% else %}
-  <a class='btn btn-primary' href='/prj/{{r.projid}}'>Select</a>
-{% endif %}
-
-  </td>
-  <td> {{ r.title }} [{{ r.projid }}] {{ ("<a href='mailto:"+r.managers[0].email+"'>"+r.managers[0].name+"</a>") |safe if r.managers }}</td>
-  <td>{{ r.status }}</td>
-  <td>{{ '{0:0.0f}'.format(r.objcount) if r.objcount else 0.0 }}</td>
-  <td>{{ '{0:0.2f}'.format(r.pctvalidated) if r.pctvalidated else 0.0 }}</td>
-  <td>{{ '{0:0.2f}'.format(r.pctclassified) if r.pctclassified else 0.0 }}</td>
+  <thead>
+  <tr>
+    <th></th>
+    <th>Title [ID]</th>
+    <th>Status</th>
+    <th>Nb objects</th>
+    <th>%&nbsp;validated</th>
+    <th>%&nbsp;classified</th>
   </tr>
-{%  endfor %}
+  </thead>
+  <tbody>
+  {% for r in PrjList %}
+    <tr>
+      <td>
+        {% if Others %}
+          <a class='btn btn-primary'
+             href='mailto:{{ r.managers[0].email|safe if r.managers }}?{{ _manager_mail(r.title, r.projid)|safe if r.managers }}'>REQUEST
+            ACCESS</a>
+          {% if r.visible==True or isadmin %}
+            <a class='btn btn-primary' href='/prj/{{ r.projid }}'>View</a>
+          {% endif %}
+        {% else %}
+          <a class='btn btn-primary' href='/prj/{{ r.projid }}'>Select</a>
+        {% endif %}
 
-</tbody></table>
+      </td>
+      <td> {{ r.title }}
+        [{{ r.projid }}] {{ ("<a href='mailto:"+r.managers[0].email+"'>"+r.managers[0].name+"</a>") |safe if r.managers }}</td>
+      <td>{{ r.status }}</td>
+      <td>{{ '{0:0.0f}'.format(r.objcount) if r.objcount else 0.0 }}</td>
+      <td>{{ '{0:0.2f}'.format(r.pctvalidated) if r.pctvalidated else 0.0 }}</td>
+      <td>{{ '{0:0.2f}'.format(r.pctclassified) if r.pctclassified else 0.0 }}</td>
+    </tr>
+  {% endfor %}
+
+  </tbody>
+</table>
 <div class="col-sm-6 col-sm-offset-3">
-{%  if Others %}
-  <a href="/prj/" class="btn  btn-block btn-primary">Back to projects list</a>
-{% else %}
-  <a href="/prjothers/" class="btn  btn-block btn-primary">Show projects in which you are not registered</a>
-{% endif %}
+  {% if Others %}
+    <a href="/prj/" class="btn  btn-block btn-primary">Back to projects list</a>
+  {% else %}
+    <a href="/prjothers/" class="btn  btn-block btn-primary">Show projects in which you are not registered</a>
+  {% endif %}
 </div>
 <script>
-  function DispInstrumList(projid){
-  $("#PopupDetails .modal-content").html("Loading...");
-  $('#PopupDetails .modal-lg').css('width',$(window).width()/2);
-  $('#PopupDetails').modal({});
-  var url="/search/instrumlist"
-  if(typeof (projid)!="undefined")
-    url+="?projid="+projid
-  $("#PopupDetails .modal-content").load(url);
-}
-function CreateProject() {
-  $('#PopupCreateProject').modal({});
-}
-function DoCreateProject() {
-  $('#resultcreate').load('/prj/simplecreate/',{projtitle:$('#newprojecttitle').val()});
+    function DispInstrumList(projid) {
+        $("#PopupDetails .modal-content").html("Loading...");
+        $('#PopupDetails .modal-lg').css('width', $(window).width() / 2);
+        $('#PopupDetails').modal({});
+        var url = "/search/instrumlist"
+        if (typeof (projid) != "undefined")
+            url += "?projid=" + projid
+        $("#PopupDetails .modal-content").load(url);
+    }
 
-{#  alert("Not Yet implemted")#}
-}
-$('#filt_title').focus();
+    function CreateProject() {
+        $('#PopupCreateProject').modal({});
+    }
+
+    function DoCreateProject() {
+        $('#resultcreate').load('/prj/simplecreate/', {projtitle: $('#newprojecttitle').val()});
+
+        {#  alert("Not Yet implemted")#}
+    }
+
+    $('#filt_title').focus();
 
 </script>
 <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
@@ -113,21 +135,30 @@ $('#filt_title').focus();
   <div class="modal-dialog modal-lg">
     <div class="modal-content" style="width: 600px; padding: 20px;">
       <h3>Create a new project</h3>
-      Project Title : <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control" style="width: 400px;" autocomplete="off">
-      <br><button class="btn btn-success" onclick="DoCreateProject();">Create the project</button>
+      Project Title : <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control"
+                             style="width: 400px;" autocomplete="off">
+      <br>
+      <button class="btn btn-success" onclick="DoCreateProject();">Create the project</button>
       <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
       <div id="resultcreate" style="margin: 10px 0;"></div>
 
-    <div id="ImportantNote" class="panel panel-danger" >
-  <div class="panel-heading">
-    <h3 class="panel-title">IMPORTANT NOTE
-    <button type="button" class="close" aria-label="Close" onclick="$('#ImportantNote').hide();"><span aria-hidden="true">&times;</span></button>
-    </h3>
-  </div>
-  <div class="panel-body">
-The maintenance and improvement of EcoTaxa is not free. We would appreciate that you set aside some funds in your next grant to support it.
-    <br><a href="mailto:picheral@obs-vlfr.fr" title="Press CTRL to open it on another tab (usefull if you use GMail)">Contact us</a> to estimate what would be both reasonable and useful.
-    </div></div>
+<!--
+      <div id="ImportantNote" class="panel panel-danger">
+        <div class="panel-heading">
+          <h3 class="panel-title">IMPORTANT NOTE
+            <button type="button" class="close" aria-label="Close" onclick="$('#ImportantNote').hide();"><span
+                aria-hidden="true">&times;</span></button>
+          </h3>
+        </div>
+        <div class="panel-body">
+          The maintenance and improvement of EcoTaxa is not free. We would appreciate that you set aside some funds in
+          your next grant to support it.
+          <br><a href="mailto:picheral@obs-vlfr.fr"
+                 title="Press CTRL to open it on another tab (usefull if you use GMail)">Contact us</a> to estimate what
+          would be both reasonable and useful.
+        </div>
+      </div>
+-->
 
     </div>
   </div>
