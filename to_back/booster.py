@@ -159,14 +159,16 @@ def _sped_up_deser(self, response, response_type):
     if response_type == "file":
         return self._ApiClient__deserialize_file(response)
 
-    # fetch data from response object
+    # Fetch data from response object
+    data = response.data
     try:
-        data = orjson.loads(response.data)
-        data2 = to_obj(data, response_type)
-        return data2
+        loaded = orjson.loads(data)
+        ret = to_obj(loaded, response_type)
+        return ret
     except ValueError:
-        data = response.data
+        pass
 
+    # Fallback to openapi deserializer
     return self._ApiClient__deserialize(data, response_type)
 
 

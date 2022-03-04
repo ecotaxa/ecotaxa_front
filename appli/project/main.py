@@ -388,16 +388,18 @@ MAX_LEN_BEFORE_HYPHEN = 12
 
 
 # noinspection PyPep8Naming
-def FormatNameForVignetteDisplay(category_name: str, hyphenator, cache: Dict[str, str]):
+def FormatNameForVignetteDisplay(category_name: Optional[str], hyphenator, cache: Dict[str, str]) -> str:
+    if category_name is None:
+        category_name = ""
     cached = cache.get(category_name)
     if cached is not None:
         return cached
     # If the name is composed, use different styles for parts
-    parts = ntcv(category_name).split('<')
+    parts = category_name.split('<')
     part0 = parts[0]
     if len(part0) >= MAX_LEN_BEFORE_HYPHEN:
         part0 = hyphenator.hyphenize(part0)
-    restxt = "<span class='cat_name'>{}</span>".format(part0)
+    restxt: str = "<span class='cat_name'>{}</span>".format(part0)
     if len(parts) > 1:
         restxt += "<span class='cat_ancestor'> &lt;&nbsp;{}</span>".format(" &lt;&nbsp;".join(parts[1:]))
     return restxt
@@ -573,18 +575,19 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     for obj_dtl in objs.details:
         # Access API result by name for readability
         dtl: Dict[str, Any] = dict(zip(api_cols, obj_dtl))
-        format_date_time(dtl, {"obj.classif_when", "obj.classif_auto_when"}, {"obj.objtime"})
-        filename = dtl['img.file_name']
-        origwidth: int = dtl['img.width']
-        origheight: int = dtl['img.height']
-        thumbfilename = dtl['img.thumb_file_name']
-        thumbwidth = dtl['img.thumb_width']
-        display_name = dtl['txo.display_name']
-        imgcount = dtl['obj.imgcount']
+        format_date_time(dtl, ("obj.classif_when", "obj.classif_auto_when"), ("obj.objtime",))
+        filename: str = dtl['img.file_name']
+        origwidth: Optional[int] = dtl['img.width']
+        origheight: Optional[int] = dtl['img.height']
+        thumbfilename: Optional[str] = dtl['img.thumb_file_name']
+        thumbwidth: Optional[int] = dtl['img.thumb_width']
+        display_name: Optional[str] = dtl['txo.display_name']
+        imgcount: int = dtl['obj.imgcount']
         if origwidth is None:  # pas d'image associée, pas trés normal mais arrive pour les subset sans images
-            width = 80
-            height = 40
+            origwidth = width = 80
+            origheight = height = 40
         else:
+            assert origheight is not None
             width = origwidth * zoom // 100
             height = origheight * zoom // 100
         if max(width, height) < 75:  # en dessous de 75 px de coté on ne fait plus le scaling

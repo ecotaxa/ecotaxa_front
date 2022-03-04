@@ -1,7 +1,7 @@
 #
 # Utility defs not depending on the Flask app.
 #
-from typing import Type, TypeVar, Generic, Union, Dict, List, Optional
+from typing import Type, TypeVar, Generic, Union, Dict, List, Optional, Tuple
 
 from flask import Request, request
 from werkzeug.local import LocalProxy
@@ -40,11 +40,12 @@ class ApiClient(Generic[A]):
         pass
 
 
-def format_date_time(rec: Dict, date_cols=(), time_cols=()):
+def format_date_time(rec: Dict[str, str], date_cols: Tuple[str, ...] = (), time_cols: Tuple[str, ...] = ()):
     """
         Format known date & time columns from their JSON representation.
         Minimal sanity check of the input.
     """
+    val: Optional[str]
     for a_col in date_cols:
         val = rec.get(a_col)
         if val is None:

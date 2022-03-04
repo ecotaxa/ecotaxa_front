@@ -1,5 +1,5 @@
 #
-# Run with: $ python setup.py build_ext --inplace
+# Build with: $ python setup.py build_ext --inplace
 #
 # Erase with: $ find appli to_back -name "*.so" -delete; rm *.so
 #
@@ -22,6 +22,6 @@ setup(
         'appli/jobs/emul.py',
         'appli/jobs/Job.py',
         'appli/jobs/views.py',
-        'to_back/booster.py', # Problem was visible in category search boxes, and in project setting - "Pick from other projects"
+        'to_back/booster.py', # A problem _was_ visible in category search boxes, and in project setting - "Pick from other projects"
     ]),
 )
