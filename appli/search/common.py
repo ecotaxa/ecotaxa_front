@@ -61,7 +61,7 @@ def searchexploreproject():
 
 @app.route("/search/instrumlist")
 def searchinstrumlist():
-    project_ids = ""
+    project_ids = "all"
     if gvg("projid") != "":
         project_ids = gvg("projid")
     with ApiClient(InstrumentsApi, request) as api:
