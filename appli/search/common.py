@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import List
 
-from flask import render_template, request, json
+from flask import render_template, request, json, jsonify
 
 from appli import app, gvg
 from appli.utils import ApiClient, DecodeEqualList
@@ -66,7 +66,7 @@ def searchinstrumlist():
         project_ids = gvg("projid")
     with ApiClient(InstrumentsApi, request) as api:
         instrums: List[str] = api.instrument_query(project_ids=project_ids)
-    txt = "List of available Intruments : <hr><ul id=InstrumList>"
+    txt = "List of available Instruments : <hr><ul id=InstrumList>"
     for r in instrums:
         txt += "\n<li>{0}</li>".format(r)
     txt += """</ul>
@@ -81,6 +81,15 @@ def searchinstrumlist():
     </script>
     """
     return txt
+
+
+@app.route("/search/instruments")
+def search_instruments():
+    # Search for instruments
+    qry = gvg("q")
+    with ApiClient(InstrumentsApi, request) as api:
+        instrums: List[str] = api.instrument_query(project_ids="all")
+    return jsonify([an_ins for an_ins in instrums if qry in an_ins.lower()])
 
 
 @app.route("/search/gettaxomapping")

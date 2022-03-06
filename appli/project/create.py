@@ -11,7 +11,7 @@ from to_back.ecotaxa_cli_py.models import CreateProjectReq
 @login_required
 def SimpleCreate():
     with ApiClient(ProjectsApi, request) as api:
-        req = CreateProjectReq(title=gvp("projtitle"))
+        req = CreateProjectReq(title=gvp("projtitle"), instrument=gvp("proj_instrument"))
         rsp: int = api.create_project(req)
 
     # return "<a href='/prj/{0}' class='btn btn-primary'>Project Created ! Open IT</a>".format(Prj.projid)

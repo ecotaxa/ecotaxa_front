@@ -21,3 +21,24 @@
         minimumInputLength: 2
     })
 {%- endmacro %}
+{% macro select2_instrument() -%}
+     select2({
+        ajax: {
+            url: "/search/instruments",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { q: params.term, page: params.page };
+            },
+            processResults: function (data, page) {
+                return { results: data.map(function(rec) {
+                    return {'id':rec, 'text':rec};
+                    })
+                };
+            },
+            cache: true,
+        },
+        placeholder: 'search instrument...',
+        allowClear: false
+    })
+{%- endmacro %}
