@@ -2,6 +2,7 @@
 # Some python hacking for speeding-up deserialization of openapi structures
 #
 import datetime
+import json
 import re
 from types import MethodType
 from typing import Dict, Union, Type, Tuple, Optional
@@ -166,7 +167,7 @@ def _sped_up_deser(self, response, response_type):
         ret = to_obj(loaded, response_type)
         return ret
     except ValueError:
-        pass
+        data = json.loads(data)
 
     # Fallback to openapi deserializer
     return self._ApiClient__deserialize(data, response_type)
