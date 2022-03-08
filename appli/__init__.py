@@ -92,6 +92,17 @@ def gvg(varname: str, defvalue: str = '') -> str:
     return request.args.get(varname, defvalue)
 
 
+def gvgm(varname: str) -> List[str]:
+    """
+    Permet de récuperer, pour une variable, toutes les valeurs dans la Chaine GET
+    :param varname: Variable à récuperer
+    :return: Liste des valeurs ou liste vide si la variable n'est pas présente
+    """
+    lst = request.args.getlist(varname)
+    # On filtre les valeurs vides
+    return [a_val for a_val in lst if a_val]
+
+
 def gvp(varname: str, defvalue: str = '') -> str:
     """
     Permet de récuperer une variable dans la Chaine POST ou de retourner une valeur par defaut

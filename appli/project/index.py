@@ -5,7 +5,7 @@ from flask import render_template, flash, session, request, Markup
 from flask_login import current_user
 from flask_security import login_required
 
-from appli import app, PrintInCharte, gvg
+from appli import app, PrintInCharte, gvg, gvgm
 from appli.project.__init__ import connectPythonToPrime
 ######################################################################################################################
 from appli.project.index_vue import vue_projects_index
@@ -22,8 +22,15 @@ def indexProjects(Others=False):
     filt_title = gvg('filt_title', session.get('prjfilt_title', ''))
     session['prjfilt_title'] = filt_title
 
-    filt_instrum = gvg('filt_instrum', session.get('prjfilt_instrum', ''))
-    session['prjfilt_instrum'] = filt_instrum
+    if 'filt_instrum' not in request.args:
+        sess_filt_instrum = session.get('prjfilt_instrum', '')
+        if sess_filt_instrum:
+            filt_instrum = sess_filt_instrum.split("|")
+        else:
+            filt_instrum = []
+    else:
+        filt_instrum = gvgm('filt_instrum')  # Get from posted
+        session['prjfilt_instrum'] = "|".join(filt_instrum)
 
     # Les checkbox ne sont pas transmises si elle ne sont pas coché,
     if 'filt_title' in request.args:  # donc si le filtre du titre est transmis on utilise le get
@@ -32,11 +39,13 @@ def indexProjects(Others=False):
     else:  # Sinon on prend la valeur de la session.
         filt_subset = session.get('prjfilt_subset', '')
 
-    with ApiClient(ProjectsApi, request) as apiProj:
-        prjs: List[ProjectModel] = apiProj.search_projects(also_others=Others,
-                                                           title_filter=filt_title,
-                                                           instrument_filter=filt_instrum,
-                                                           filter_subset=(filt_subset == 'Y'))
+    prjs: List[ProjectModel] = []
+    for an_instrument in filt_instrum:
+        with ApiClient(ProjectsApi, request) as apiProj:
+            prjs.extend(apiProj.search_projects(also_others=Others,
+                                                title_filter=filt_title,
+                                                instrument_filter=an_instrument,
+                                                filter_subset=(filt_subset == 'Y')))
     # Sort for consistency
     prjs.sort(key=lambda prj: prj.title.strip().lower())
 

@@ -30,6 +30,7 @@
                 <td>Filter on title :</td>
                 <td><input type="text" style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}">
                 </td>
+                <td>&nbsp;&nbsp;</td>
                 <td rowspan="2" style="vertical-align: top">
                   <button type="submit" class="btn btn-primary btn-block"><span
                       class="glyphicon glyphicon-search"></span> Search
@@ -42,11 +43,12 @@
                 </td>
               </tr>
               <tr>
-                <td>Instrument :</td>
-                <td style="padding-right: 10px;"><input type="text" style="width: 100px;" name="filt_instrum"
-                                                        id="filt_instrum" value="{{ filt_instrum }}">
-                  <span class="glyphicon glyphicon-question-sign" onclick="DispInstrumList({{ g.Projid }});"
-                        style="cursor: pointer;"></span></td>
+                <td>Instruments :</td>
+                <td style="padding-right: 10px;">
+                  <select multiple="multiple" id="filt_instrum" name="filt_instrum" class="form-control">
+                  </select>
+                </td>
+                <td></td>
                 <td style="vertical-align: top"><a href="?filt_title=&filt_instrum="
                                                    class="btn btn-sm btn-default btn-block"><span
                     class="glyphicon glyphicon-remove"></span> Clear</a></td>
@@ -58,7 +60,7 @@
     </td>
   </tr>
 </table>
-<table id="projects-tbl" class='table table-hover table-verycondensed projectsList'>
+<table id="projects-tbl" class='table table-hover table-verycondensed projectsList datatable'>
   <thead>
   <tr>
     <th class="no-sort"></th>
@@ -105,21 +107,13 @@
     <a href="/prjothers/" class="btn  btn-block btn-primary">Show projects in which you are not registered</a>
   {% endif %}
 </div>
-<script>
-</script>
-<div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      ...
-    </div>
-  </div>
-</div>
+
 
 <div id="PopupCreateProject" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
   <div class="modal-dialog modal-lg">
     <div class="modal-content" style="width: 600px; padding: 20px;">
       <h3>Create a new project</h3>
-      Instrument : <select class="form-control" id="new_proj_inst" name="new_proj_inst" class="form-control"
+      Instrument : <select id="new_proj_inst" name="new_proj_inst" class="form-control"
                            style="width: 50%"></select> <br>
       Project Title : <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control"
                              style="width: 400px;" autocomplete="off">
@@ -151,16 +145,6 @@
 </div>
 
 <script>
-    function DispInstrumList(projid) {
-        $("#PopupDetails .modal-content").html("Loading...");
-        $('#PopupDetails .modal-lg').css('width', $(window).width() / 2);
-        $('#PopupDetails').modal({});
-        var url = "/search/instrumlist"
-        if (typeof (projid) != "undefined")
-            url += "?projid=" + projid
-        $("#PopupDetails .modal-content").load(url);
-    }
-
     function CreateProject() {
         $('#PopupCreateProject').modal({});
     }
@@ -180,6 +164,7 @@
 
     $(document).ready(function () {
         $("#new_proj_inst").{{ js.select2_instrument() }};
+        $("#filt_instrum").{{ js.select2_instrument() }};
         $('#projects-tbl').dataTable({
             paging: false, searching: false,
             columnDefs: [
@@ -188,4 +173,20 @@
             "order": []
         });
     });
+</script>
+<script>
+    $(document).ready(function () {
+        {%  if filt_instrum|length > 0 %}
+            // Set selection in instruments list
+            var sel2 = $('#filt_instrum');
+            var from_filt = [];
+            {% for an_instrum in filt_instrum %}
+                var newOption = new Option("{{ an_instrum }}", "{{ an_instrum }}", false, false);
+                from_filt.push("{{ an_instrum }}");
+                sel2.append(newOption).trigger('change');
+            {% endfor %}
+            sel2.val(from_filt);
+        {%  endif %}
+    });
+
 </script>
