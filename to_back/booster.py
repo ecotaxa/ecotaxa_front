@@ -167,7 +167,12 @@ def _sped_up_deser(self, response, response_type):
         ret = to_obj(loaded, response_type)
         return ret
     except ValueError:
-        data = json.loads(data)
+        pass  # try json
+
+    try:
+        data = json.loads(response.data)
+    except ValueError:
+        data = response.data  # it's expected e.g. for plain text in job logs. a bit crappy anyway.
 
     # Fallback to openapi deserializer
     return self._ApiClient__deserialize(data, response_type)
