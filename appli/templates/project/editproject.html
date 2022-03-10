@@ -1,198 +1,255 @@
-
 {% extends "layout.html" %}
 {% import "js_macros.html" as js %}
 {% import "ht_macros.html" as ht %}
 
 {% block body %}
 <form class="form-horizontal" method="post" action="?" id="form1">
-{% if g.privs_only %}
+    {% if g.privs_only %}
     <h3>Edit project # {{ data.projid }} - privileges&nbsp;
         <a href="/prj/edit/{{ data.projid }}" style="font-size: medium;"
            class="btn btn-xs btn-primary">Edit all</a>
     </h3>
-{% else %}
+    {% else %}
     <h3>Edit project # {{ data.projid }} -
         <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;"
            class="btn btn-xs btn-primary">Edit privileges only</a>
-      <button type="button" style="position:absolute; right:5%"
-              onmousedown="SubmitForm();" class="btn btn-primary">Save</button>
+        <button type="button" style="position:absolute; right:5%"
+                onmousedown="SubmitForm();" class="btn btn-primary">Save
+        </button>
     </h3>
-{% endif %}
-{% if not g.contact_user_id %}
+    {% endif %}
+    {% if not g.contact_user_id %}
     <span class="alert-danger">IMPORTANT : A contact person needs to be designated among the current project managers. Use the "Edit privileges only" button or scroll down to bottom of the page.</span>
-{% endif %}
+    {% endif %}
 
-  <table class=table width="100%">
-{% if not g.privs_only %}
-    <tr><td width="200px">Project Title </td><td colspan=2 >
-        <input type="text"  class="form-control" id="title" name="title"  value="{{ data.title }}" style="width: 500px" >
-    </td></tr>
-    <tr>
-        <td>Data sharing license</td>
-        <td>
-            {% for k,v in possible_licenses.items() %}
+    <table class=table width="100%">
+        {% if not g.privs_only %}
+        <tr>
+            <td>Instrument</td>
+            <td><select id="instrument" name="instrument" class="form-control"
+                        style="width: 30%">
+            </select>
+            </td>
+        </tr>
+        <tr>
+            <td width="200px">Project Title</td>
+            <td colspan=2>
+                <input type="text" class="form-control" id="title" name="title" value="{{ data.title }}"
+                       style="width: 500px">
+            </td>
+        </tr>
+        <tr>
+            <td>Data sharing license</td>
+            <td>
+                {% for k,v in possible_licenses.items() %}
                 <input type="radio" name="license"
                        value="{{ k }}"
-                    {{ 'checked' if data.license==k }}>
+                       {{ 'checked' if data.license==k }}>
                 {{ v | safe }}<br>
-            {% endfor %}
-        </td>
-        <td>
-        </td>
-    </tr>
-    <tr>
-        <td>Visible for all visitors<br>(only validated objects)</td>
-        <td>
-           <input type="checkbox"  style="height:20px;" id="visible" name="visible"
-                  value="Y" {{ 'checked' if data.visible else "" }}>
-        </td>
-        <td></td>
-    </tr>
-
-    <tr>
-        <td>Status</td>
-        <td >
-        {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status)  }}
-        </td>
-    </tr>
-
-<tr><td>Project Description</td><td>
-        <textarea class="form-control" id="proj_description" name="description"
-               rows="2">{{ data.description|default('',true) }}</textarea>
-      </td>
-    <td>A short paragraph describing the dataset, to make it discoverable by others in EcoTaxa and elsewhere.
-        It should indicate which organisms are targeted (e.g. mesozooplankton), where (e.g. Bering Sea),
-        when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed with a ZooScan) they were collected,
-        the scientific program that motivated the work and who ran it (e.g. SCOR program coordinated by the Laboratoire
-        d'Océanographie de Villefranche).</td>
-</tr>
-
-  <tr><td>Definition of preset for manual sorting
-  <br><button class="btn btn-default" type="button" onclick="PickPresetFromOthersProject();">
-          <i class="fas fa-clone"></i> Pick from others projects</button>
-  </td><td>
-        <input type="hidden"  class="form-control" id="initclassiflist" name="initclassiflist"
-               value="{{ data.init_classif_list|default('',true) }}">
-      <select id='inittaxo' class="taxolb" style="width: 100%;" multiple>
-    {% for r in g.predeftaxo %}
-      <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
-    {% endfor %}
-  </select>
-    </td><td>
-The PRESET tool permits to create a pre-defined list of categories for the sorting of the images from the project
-<ul><li>The list can be directly copied from another project (use Pick from other projects)
-    <li>New categories can be added using the auto completion function
-</ul>
-  </td></tr>
-
-  <tr><td>Fields available for<br>sorting & Display<br>In the manual classification page</td><td>
-        <textarea  class="form-control" id="classiffieldlist" name="classiffieldlist"
-                   rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
-    </td><td>
-    Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
-<br>Example : depth_min=minimum depth [m] where
-<ul><li>depth_min is the variable from the imported TSV file
-<li>minimum depth [m] is the displayed name</ul>
-Notes :
-<ul><li>the table can be copied from another project (opened in a different tab)
-<li>only LOWER CASE</ul>
-Available fields :
-    {% for x in  g.maplist %}{{ x }}, {% endfor %}
-
-   </td></tr>
-  <tr><td>Fields displayed in image popover<br>in the manual classification page</td><td>
-        <textarea  class="form-control" id="popoverfieldlist" name="popoverfieldlist"
-                   rows="8">{{ data.popoverfieldlist|default('',true) }}</textarea>
-    </td><td>
-        Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
-<br>Example : depth_min=minimum depth [m] where
-<ul><li>depth_min is the variable from the imported TSV file
-<li>minimum depth [m] is the displayed name</ul>
-Notes :
-<ul><li>the table can be copied from another project (opened in a different tab)
-<li>only LOWER CASE</ul>
-Available fields :
-    {% for x in  g.maplist %}{{ x }}, {% endfor %}
-
-   </td></tr>
-  <tr><td>SCN Network</td><td>
-        <select  class="form-control" id="cnn_network_id" name="cnn_network_id" >
-        <option value=""></option>
-        {% for k,v in g.scn.items() %}
-          <option value="{{ k }}" {{ 'selected' if data.cnn_network_id==k }}>{{ v.name }}</option>
-        {% endfor %}
-        </select>
-    </td>
-      <td>SCN Network used for prediction, if you change it, existing features computed with this network will be erased.
-    <br>New features will be recomputed during the next automatic classification.
-    </td></tr>
-  <tr><td>Comments</td><td>
-        <textarea  class="form-control" id="comments" name="comments"
-                   rows="4">{{ data.comments|default('',true) }}</textarea>
-    </td>
-      <td>Any technical, practical details that need to be shared with other users able to access this project.
-    </td></tr>
-{% endif %}
-  <tr><td>Privileges</td><td colspan="1">
-        <table class="table table-bordered table-verycondensed" style="width:500px;">
-          <tr>
-            <td>Name</td>
-            <td>Privilege</td>
-            <td>Contact</td>
-            <td>Delete</td>
-          </tr>
-          {% for pr in g.members %}
-          <tr>
-            <td>{{ ht.selectinputdict('priv_'~pr.member_id~'_member', g.users, pr.member_id) }}</td>
-            <td>{{ ht.selectinput('priv_'~pr.member_id~'_privilege', ('View', 'Annotate','Manage'), pr.privilege) }}</td>
-            <td><input type="radio" name="contact_user_id"
-                       value="{{ pr.member_id }}"
-                    {{ 'disabled' if pr.privilege != 'Manage' }}
-                    {{ 'checked' if pr.member_id == g.contact_user_id }}>
+                {% endfor %}
             </td>
-            <td><input type="checkbox" name="priv_{{ pr.member_id }}_delete" value="Y"></td>
-          </tr>
-          {% endfor %}
-          <tr>
-            <td>New privilege :</td>
-            <td colspan="3"></td>
-          </tr>
-          <tr>
-            <td>{{ ht.selectinputdict('priv_new_member', g.users, '',true) }}</td>
-            <td>{{ ht.selectinput('priv_new_privilege', ('View', 'Annotate','Manage'), '') }}</td>
+            <td>
+            </td>
+        </tr>
+        <tr>
+            <td>Visible for all visitors<br>(only validated objects)</td>
+            <td>
+                <input type="checkbox" style="height:20px;" id="visible" name="visible"
+                       value="Y" {{ 'checked' if data.visible else "" }}>
+            </td>
             <td></td>
-            <td></td>
-          </tr>
+        </tr>
 
-        </table>
+        <tr>
+            <td>Status</td>
+            <td>
+                {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status) }}
+            </td>
+        </tr>
 
-    </td>
-      <td>
-          The roles in short:
-<ul>
-    <li>Viewers can view the project even when it is private; the project is listed in their project list.</li>
-    <li>Annotators can classify objects.</li>
-    <li>Managers can import and delete data, as well as change project settings.</li>
-    <li>The contact person is a Manager, displayed in the project table and serving as the contact point for other users and EcoTaxa's managers.</li>
-</ul>
-      </td></tr>
+        <tr>
+            <td>Project Description</td>
+            <td>
+        <textarea class="form-control" id="proj_description" name="description"
+                  rows="2">{{ data.description|default('',true) }}</textarea>
+            </td>
+            <td>A short paragraph describing the dataset, to make it discoverable by others in EcoTaxa and elsewhere.
+                It should indicate which organisms are targeted (e.g. mesozooplankton), where (e.g. Bering Sea),
+                when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed with a ZooScan) they were
+                collected,
+                the scientific program that motivated the work and who ran it (e.g. SCOR program coordinated by the
+                Laboratoire
+                d'Océanographie de Villefranche).
+            </td>
+        </tr>
 
-</table>
+        <tr>
+            <td>Definition of preset for manual sorting
+                <br>
+                <button class="btn btn-default" type="button" onclick="PickPresetFromOthersProject();">
+                    <i class="fas fa-clone"></i> Pick from others projects
+                </button>
+            </td>
+            <td>
+                <input type="hidden" class="form-control" id="initclassiflist" name="initclassiflist"
+                       value="{{ data.init_classif_list|default('',true) }}">
+                <select id='inittaxo' class="taxolb" style="width: 100%;" multiple>
+                    {% for r in g.predeftaxo %}
+                    <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                The PRESET tool permits to create a pre-defined list of categories for the sorting of the images from
+                the project
+                <ul>
+                    <li>The list can be directly copied from another project (use Pick from other projects)
+                    <li>New categories can be added using the auto completion function
+                </ul>
+            </td>
+        </tr>
 
-  <input type="hidden" name="save" value="Y">
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-1">
-      <button type="button" onmousedown="SubmitForm();" class="btn btn-primary">Save</button>
+        <tr>
+            <td>Fields available for<br>sorting & Display<br>In the manual classification page</td>
+            <td>
+        <textarea class="form-control" id="classiffieldlist" name="classiffieldlist"
+                  rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
+            </td>
+            <td>
+                Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
+                <br>Example : depth_min=minimum depth [m] where
+                <ul>
+                    <li>depth_min is the variable from the imported TSV file
+                    <li>minimum depth [m] is the displayed name
+                </ul>
+                Notes :
+                <ul>
+                    <li>the table can be copied from another project (opened in a different tab)
+                    <li>only LOWER CASE
+                </ul>
+                Available fields :
+                {% for x in g.maplist %}{{ x }}, {% endfor %}
+
+            </td>
+        </tr>
+        <tr>
+            <td>Fields displayed in image popover<br>in the manual classification page</td>
+            <td>
+        <textarea class="form-control" id="popoverfieldlist" name="popoverfieldlist"
+                  rows="8">{{ data.popoverfieldlist|default('',true) }}</textarea>
+            </td>
+            <td>
+                Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
+                <br>Example : depth_min=minimum depth [m] where
+                <ul>
+                    <li>depth_min is the variable from the imported TSV file
+                    <li>minimum depth [m] is the displayed name
+                </ul>
+                Notes :
+                <ul>
+                    <li>the table can be copied from another project (opened in a different tab)
+                    <li>only LOWER CASE
+                </ul>
+                Available fields :
+                {% for x in g.maplist %}{{ x }}, {% endfor %}
+
+            </td>
+        </tr>
+        <tr>
+            <td>SCN Network</td>
+            <td>
+                <select class="form-control" id="cnn_network_id" name="cnn_network_id">
+                    <option value=""></option>
+                    {% for k,v in g.scn.items() %}
+                    <option value="{{ k }}" {{
+                    'selected' if data.cnn_network_id==k }}>{{ v.name }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>SCN Network used for prediction, if you change it, existing features computed with this network will be
+                erased.
+                <br>New features will be recomputed during the next automatic classification.
+            </td>
+        </tr>
+        <tr>
+            <td>Comments</td>
+            <td>
+        <textarea class="form-control" id="comments" name="comments"
+                  rows="4">{{ data.comments|default('',true) }}</textarea>
+            </td>
+            <td>Any technical, practical details that need to be shared with other users able to access this project.
+            </td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td>Privileges</td>
+            <td colspan="1">
+                <table class="table table-bordered table-verycondensed" style="width:500px;">
+                    <tr>
+                        <td>Name</td>
+                        <td>Privilege</td>
+                        <td>Contact</td>
+                        <td>Delete</td>
+                    </tr>
+                    {% for pr in g.members %}
+                    <tr>
+                        <td>{{ ht.selectinputdict('priv_'~pr.member_id~'_member', g.users, pr.member_id) }}</td>
+                        <td>{{ ht.selectinput('priv_'~pr.member_id~'_privilege', ('View', 'Annotate','Manage'),
+                            pr.privilege) }}
+                        </td>
+                        <td><input type="radio" name="contact_user_id"
+                                   value="{{ pr.member_id }}"
+                                   {{ 'disabled' if pr.privilege != 'Manage' }}
+                            {{ 'checked' if pr.member_id == g.contact_user_id }}>
+                        </td>
+                        <td><input type="checkbox" name="priv_{{ pr.member_id }}_delete" value="Y"></td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td>New privilege :</td>
+                        <td colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <td>{{ ht.selectinputdict('priv_new_member', g.users, '',true) }}</td>
+                        <td>{{ ht.selectinput('priv_new_privilege', ('View', 'Annotate','Manage'), '') }}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                </table>
+
+            </td>
+            <td>
+                The roles in short:
+                <ul>
+                    <li>Viewers can view the project even when it is private; the project is listed in their project
+                        list.
+                    </li>
+                    <li>Annotators can classify objects.</li>
+                    <li>Managers can import and delete data, as well as change project settings.</li>
+                    <li>The contact person is a Manager, displayed in the project table and serving as the contact point
+                        for other users and EcoTaxa's managers.
+                    </li>
+                </ul>
+            </td>
+        </tr>
+
+    </table>
+
+    <input type="hidden" name="save" value="Y">
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-1">
+            <button type="button" onmousedown="SubmitForm();" class="btn btn-primary">Save</button>
+        </div>
+        <div class="col-sm-2">
+            <a href="/prj/{{ data.projid }}" class="btn btn-warning">Cancel, back to project</a>
+        </div>
     </div>
-    <div class="col-sm-2">
-      <a href="/prj/{{ data.projid }}" class="btn btn-warning">Cancel, back to project</a>
-    </div>
-  </div>
 
 </form>
 
 
- <script>
+<script>
 $(document).ready(function() {
     $(".taxolb").select2({
         ajax: {
@@ -226,8 +283,17 @@ $(document).ready(function() {
     $('#license').change(function(event) {
         show_license_help($(this)[0].value);
     });
-    // initial value
+    // initial value of license
     show_license_help('{{ data.license }}');
+    $("#instrument").{{ js.select2_instrument() }};
+}); // Ready
+
+$(document).ready(function() {
+    // initial value of instrument
+    var sel2 = $('#instrument');
+    var newOption = new Option("{{ data.instrument }}", "{{ data.instrument }}", false, false);
+    sel2.append(newOption).trigger('change');
+    sel2.val("{{ data.instrument }}");
 }); // Ready
 
 $('#inittaxo').on("change", function (e) {
@@ -247,7 +313,8 @@ function SubmitForm()
 function PickPresetFromOthersProject() {
   At2PopupWaitOpenLoad(2,'/prj/popupeditpreset/{{ data.projid }}','Pick preset from other projects',{});
 }
- </script>
+
+</script>
 
 
 {% include "taxo_modal_div.html" %}

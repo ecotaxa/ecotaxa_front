@@ -32,15 +32,16 @@ def indexProjects(Others=False):
         filt_instrum = gvgm('filt_instrum')  # Get from posted
         session['prjfilt_instrum'] = "|".join(filt_instrum)
 
-    # Les checkbox ne sont pas transmises si elle ne sont pas coché,
-    if 'filt_title' in request.args:  # donc si le filtre du titre est transmis on utilise le get
+    # Les checkbox ne sont pas transmises si elles ne sont pas cochées...
+    if 'filt_title' in request.args:  # ...donc si le filtre du titre est transmis on utilise le get
         filt_subset = gvg('filt_subset', "")
         session['prjfilt_subset'] = filt_subset
     else:  # Sinon on prend la valeur de la session.
         filt_subset = session.get('prjfilt_subset', '')
 
     prjs: List[ProjectModel] = []
-    for an_instrument in filt_instrum:
+    qry_filt_instrum = [''] if len(filt_instrum) == 0 else filt_instrum
+    for an_instrument in qry_filt_instrum:
         with ApiClient(ProjectsApi, request) as apiProj:
             prjs.extend(apiProj.search_projects(also_others=Others,
                                                 title_filter=filt_title,
