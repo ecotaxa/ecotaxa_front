@@ -10,7 +10,7 @@ from appli.project.__init__ import connectPythonToPrime
 ######################################################################################################################
 from appli.project.index_vue import vue_projects_index
 from appli.project.main import _manager_mail
-from appli.utils import ApiClient
+from appli.utils import ApiClient, BuildManagersMail
 from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, UserModelWithRights, TaxonomyTreeStatus
 
@@ -72,6 +72,17 @@ def indexProjects(Others=False):
         fashtxt += "  <a href='/taxo/browse/' class='btn btn-primary btn-xs'>Synchronize to check Ecotaxa version</a>"
         flash(Markup(fashtxt), 'warning')
 
+    # Construct a mailto: link, in case the instrument is not found
+    mailto_instrument = BuildManagersMail(link_text="Not in the list",
+                                          subject="Request for adding an instrument to EcoTaxa",
+                                          body="""**Information for creation**
+                                          
+Instrument name:
+URL of the description in the BODC L22 vocabulary http://vocab.nerc.ac.uk/collection/L22/current/ :
+
+**Reason for creation**
+Explain how widely the instrument is distributed and why it should be added to the standard list.
+""")
     if connectPythonToPrime:
         return vue_projects_index(PrjList=prjs, user=user, CanCreate=CanCreate,
                                   filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
@@ -80,7 +91,7 @@ def indexProjects(Others=False):
         return PrintInCharte(
             render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
                             filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
-                            Others=Others, isadmin=2 in user.can_do,
+                            Others=Others, isadmin=2 in user.can_do, mailto_instrument=mailto_instrument,
                             _manager_mail=_manager_mail))
 
 

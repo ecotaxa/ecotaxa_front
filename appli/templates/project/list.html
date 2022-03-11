@@ -114,7 +114,8 @@
     <div class="modal-content" style="width: 600px; padding: 20px;">
       <h3>Create a new project</h3>
       Instrument : <select id="new_proj_inst" name="new_proj_inst" class="form-control"
-                           style="width: 50%"></select> <br>
+                           style="width: 50%"></select>
+      {{ mailto_instrument|safe }}<br>
       Project Title : <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control"
                              style="width: 400px;" autocomplete="off">
       <br>

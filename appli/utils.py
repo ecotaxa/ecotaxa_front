@@ -1,14 +1,16 @@
 #
 # Utility defs not depending on the Flask app.
 #
+import urllib.parse
 from typing import Type, TypeVar, Generic, Union, Dict, List, Optional, Tuple
 
 from flask import Request, request
+from flask_login import current_user
 from werkzeug.local import LocalProxy
 
 from appli.constants import BACKEND_URL
 from to_back import booster
-from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectModel, ApiException
+from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectModel, ApiException, MinUserModel, UsersApi
 from to_back.ecotaxa_cli_py.api import AuthentificationApi, ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
     AcquisitionsApi, ProcessesApi, ObjectApi, TaxonomyTreeApi, MiscApi, InstrumentsApi, FilesApi, JobsApi, AdminApi
 
@@ -118,3 +120,34 @@ def EncodeEqualList(map: Dict[str, str]) -> str:
     l = ["%s=%s" % (k, v) for k, v in map.items()]
     l.sort()
     return "\n".join(l)
+
+
+def BuildManagersMail(link_text: str, subject: str = "", body: str = ""):
+    """
+        Build a mailto link to all app managers.
+    """
+    admin_users = get_managers()
+    emails = ";".join([usr.email for usr in admin_users])
+    params = {}
+    if subject:
+        params["subject"] = subject
+    if body:
+        params["body"] = body
+    if params:
+        txt_params = "?" + urllib.parse.urlencode(params).replace('+', '%20')
+    else:
+        txt_params = ""
+    return "<a href='mailto:{0}{1}'>{2}</a>".format(emails, txt_params, link_text)
+
+
+def get_managers() -> List[MinUserModel]:
+    ret: List[MinUserModel]
+    if current_user.is_authenticated:
+        # With a connected user, return administrators
+        with ApiClient(UsersApi, request) as api:
+            ret = api.get_admin_users()
+    else:
+        # With an anonymous user, return user administrators (for account issues)
+        with ApiClient(UsersApi, request) as api:
+            ret = api.get_users_admins()
+    return ret
