@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% import "js_macros.html" as js %}
 
 {% block body %}
   <h3>PREDICTION: Choice of Learning Set data source</h3>
@@ -37,15 +38,14 @@
           <input type="hidden" value="" name="srcs" id="search_srcs">
           Filter on title :
           <input style="width: 100px;" name="filt_title" id="filt_title"
-                 value="{{ request.form.get('filt_title','') }}" type="text">
+                 value="{{ filt_title }}" type="text">
           # Matching features &ge;
           <input style="width: 30px;" name="filt_featurenbr" id="filt_featurenbr"
-                 value="{{ request.form.get('filt_featurenbr','10') }}" type="text">
+                 value="{{ filt_features_nbr }}" type="text">
           Instrument :
-          <input style="width: 100px;" name="filt_instrum" id="filt_instrum"
-                 value="{{ request.form.get('filt_instrum','') }}" type="text">
-          <span class="glyphicon glyphicon-search" onclick="DispInstrumList();"
-                style="cursor: pointer;"></span>
+          <select id="filt_instrum" name="filt_instrum" class="form-control"
+                  style="width: 100px;">
+          </select>
           <button type="button" onclick='FilterWithProjectSelection();' class="btn btn-primary">Filter
           </button>
         </form>
@@ -70,6 +70,7 @@ and be the same as in _all_ source projects, to allow deep features extraction a
     <table class='table table-verycondensed table-hover'>
       <tr>
         <th style='width:20px'></th>
+        <th>Inst.</th>
         <th># - Title</th>
         <th style='width:100px'># Validated</th>
         <th style='width:100px'># Matching features</th>
@@ -81,6 +82,7 @@ and be the same as in _all_ source projects, to allow deep features extraction a
                      onchange="SyncDeepPossible()"
                      class='selproj' data-prjid='{{ line.projid }}'>
           </td>
+          <td>{{ line.instrument }}</td>
           <td>#{{ line.projid }} - {{ line.title }}</td>
           <td>{{ line.validated_nb }}</td>
           <td>{{ line.matching_nb }}</td>
@@ -118,11 +120,6 @@ and be the same as in _all_ source projects, to allow deep features extraction a
           }
       }
 
-      $(function () {
-          $('[data-toggle="tooltip"]').tooltip();
-          SyncDeepPossible();
-      })
-
       function SubmitProjectSelection() {
           var srclst = $(".selproj:checked").map(function () {
               return $(this).data('prjid');
@@ -138,22 +135,13 @@ and be the same as in _all_ source projects, to allow deep features extraction a
           $('#search').submit();
       }
 
-      function DispInstrumList(projid) {
-          $("#PopupDetails .modal-content").html("Loading...");
-          $('#PopupDetails .modal-lg').css('width', $(window).width() / 2);
-          $('#PopupDetails').modal({});
-          var url = "/search/instrumlist"
-          if (typeof (projid) != "undefined")
-              url += "?projid=" + projid
-          $("#PopupDetails .modal-content").load(url);
-      }
+      $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+          SyncDeepPossible();
+          $("#filt_instrum").{{ js.select2_instrument('true') }};
+          const filt_instrum = "{{ filt_instrum }}";
+          {{ js.select2_setval('#filt_instrum', 'filt_instrum', 'filt_instrum') }}
+      })
 
   </script>
-  <div id="PopupDetails" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        ...
-      </div>
-    </div>
-  </div>
 {% endblock %}

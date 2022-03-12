@@ -21,7 +21,7 @@
         minimumInputLength: 2
     })
 {%- endmacro %}
-{% macro select2_instrument() -%}
+{% macro select2_instrument(can_clear='false') -%}
      select2({
         ajax: {
             url: "/search/instruments",
@@ -39,6 +39,14 @@
             cache: true,
         },
         placeholder: 'search instrument...',
-        allowClear: false
+        allowClear: {{ can_clear }}
     })
+{%- endmacro %}
+{% macro select2_setval(jqs, txt, val) -%}
+    {
+    const sel2 = $('{{ jqs }}');
+    const newOption = new Option({{ txt }}, {{ val }}, false, false);
+    sel2.append(newOption).trigger('change');
+    sel2.val({{ val }});
+    }
 {%- endmacro %}

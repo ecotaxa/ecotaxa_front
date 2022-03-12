@@ -296,17 +296,15 @@
       const instr_from_prj = "{{ data.instrument }}";
 
       $(document).ready(function () {
-          // initial value of instrument
-          const sel2 = $('#instrument');
-          const newOption = new Option(instr_from_prj, instr_from_prj, false, false);
-          sel2.append(newOption).trigger('change');
-          sel2.val("{{ data.instrument }}");
+          {{ js.select2_setval('#instrument', 'instr_from_prj', 'instr_from_prj') }}
       }); // Ready
 
       $('#instrument').on("change", function (e) {
+          // another instrument was selected
           const new_instr = $(this).val();
           const chg_warning = $("#change_warning");
           if ((instr_from_prj !== "?") && (new_instr !== instr_from_prj)) {
+              // warn if it's not just changing from 'unknown'
               chg_warning.show();
           } else {
               chg_warning.hide();

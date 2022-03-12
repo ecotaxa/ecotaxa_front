@@ -74,7 +74,7 @@ class PredictionJob(Job):
         target_prj, filters_html = cls.get_target_project()
         if target_prj is None:
             return PrintInCharte(filters_html)
-        # The page reloads itself when using the "Search" button
+        # The page reloads itself (POST) when using the "Search" button
         try:
             # In case the filter box was used, validate it.
             if gvp("filt_featurenbr"):
@@ -85,7 +85,10 @@ class PredictionJob(Job):
             flash("Common features must be an integer", category="error")
             return PrintInCharte("<a href='#' onclick='history.back();'>Back</a>")
         title_filter = gvp('filt_title', '')
-        instrument_filter = gvp('filt_instrum', '')
+        if request.method == "GET":
+            instrument_filter = target_prj.instrument
+        else:
+            instrument_filter = gvp('filt_instrum', '')
 
         src_projs_str = gvp('srcs', '').split(",")
         src_projs = [int(prj_str) for prj_str in src_projs_str if prj_str.isdigit()]
@@ -137,7 +140,8 @@ class PredictionJob(Job):
             else:
                 checked = False
             line = {"checked": checked, "projid": a_maybe_src_prj.projid, "title": a_maybe_src_prj.title,
-                    "validated_nb": int(validated), "matching_nb": matching, "deep_model": cnn_network_id}
+                    "validated_nb": int(validated), "matching_nb": matching, "deep_model": cnn_network_id,
+                    "instrument": a_maybe_src_prj.instrument}
             if not checked:
                 table_lines.append(line)
             else:
@@ -168,7 +172,9 @@ class PredictionJob(Job):
                                url=request.query_string.decode('utf-8'),
                                prj_table=table_lines,
                                deep_features=target_prj.cnn_network_id,
-                               filters_info=filters_html)
+                               filters_info=filters_html,
+                               filt_title=title_filter, filt_features_nbr=filt_featurenbr,
+                               filt_instrum=instrument_filter)
 
     #################################################################################################
 
