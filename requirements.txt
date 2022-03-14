@@ -33,5 +33,5 @@ types-certifi
 types-requests
 types-six
 # QA & compilation
-mypy==0.931
+mypy==0.940
 mypy_extensions==0.4.3

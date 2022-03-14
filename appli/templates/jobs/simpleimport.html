@@ -67,20 +67,6 @@
             <td><input type="text" name="depthmax" class="form-control" style="width:70px;"
                        value="{{ preset.depthmax|default('',true) }}"></td>
         </tr>
-        {#
-        <tr>
-            <td>Instrument</td>
-            <td>
-                <select name="instrument">
-                    <option></option>
-                    {% for v in instrum %}
-                    <option value="{{ v.instrument }}" {{
-                    "selected" if preset.instrument==v.instrument }}>{{ v.instrument }}</option>
-                    {% endfor %}
-                </select>
-            </td>
-        </tr>
-        #}
         <tr>
             <td colspan="2">Optional annotation category for ALL images</td>
             <td colspan="2">
