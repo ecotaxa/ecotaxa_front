@@ -480,8 +480,6 @@
               TxtFilter += InGreyButton(labels.freetxt, clearers.freetxt);
           if ('samples' in req)
               TxtFilter += InGreyButton("Samples=" + labels.samples, "ClearSamples()");
-          if ('instrum' in req)
-              TxtFilter += InGreyButton("Instrument =" + req['instrum'], "ClearInstrum()");
           if ('month' in req)
               TxtFilter += InGreyButton("Month=" + labels.month, "ClearDates()");
           if ('filt_annot' in req)

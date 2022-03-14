@@ -115,29 +115,32 @@
   </div>
 </div>
 {# ------- Instrument ------------#}
-<div class="filter ">
-  <div class="form-group-sm">
-    <label class="title">Instrument</label> <span class="glyphicon glyphicon-question-sign"
-                                                  onclick="DispInstrumList({{ g.Projid }});"
-                                                  style="cursor: pointer;"></span>
-    <a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
-       onclick='ClearInstrum();return false;'>Clear</a>
-    <input class="form-control" type="text" id="filt_instrum" name="filt_instrum" value="{{ data.instrum }}"
-           placeholder="Instrument">
+{% if data.inexplore==True %}
+  <div class="filter ">
+    <div class="form-group-sm">
+      <label class="title">Instrument</label> <span class="glyphicon glyphicon-question-sign"
+                                                    onclick="DispInstrumList({{ g.Projid }});"
+                                                    style="cursor: pointer;"></span>
+      <a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
+         onclick='ClearInstrum();return false;'>Clear</a>
+      <input class="form-control" type="text" id="filt_instrum" name="filt_instrum" value="{{ data.instrum }}"
+             placeholder="Instrument">
+    </div>
   </div>
-</div>
+{% endif %}
 {# ------- Annotator / Freefilter ------------#}
 {% if data.inexplore!=True %}
   <div class="filter ">
     <div class="form-group-sm">
       <label class="title">Annotator / Free filters</label>
       <span
-        title="In Text field, you can use ^ for 'starts with' and $ for 'ends with'.
+          title="In Text field, you can use ^ for 'starts with' and $ for 'ends with'.
 E.g. : If 'oo' returns 'pool', 'goose', 'zoo' and 'oops'
 then '^oo' only matches 'oops',
 and 'oo$' only matches 'zoo'
 while '^oo$' matches nothing."
-        data-toggle="tooltip" data-container="body" data-placement="right" class="glyphicon glyphicon-info-sign"></span>
+          data-toggle="tooltip" data-container="body" data-placement="right"
+          class="glyphicon glyphicon-info-sign"></span>
       <a class="pull-right label label-default"
          style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href=#
          onclick='ClearAnnotFree();return false;'>Clear</a>
@@ -225,11 +228,20 @@ while '^oo$' matches nothing."
         $("#filt_inverttime").prop("checked", false);
         $("#daytime").val(null).trigger("change");
     }
-
-    function ClearInstrum() {
-        $("#filt_instrum").val("");
-    }
-
+    {% if data.inexplore==True %}
+        function ClearInstrum() {
+            $("#filt_instrum").val("");
+        }
+        function DispInstrumList(projid) {
+            $("#PopupDetails .modal-content").html("Loading...");
+            $('#PopupDetails .modal-lg').css('width', $(window).width() / 2);
+            $('#PopupDetails').modal({});
+            var url = "/search/instrumlist"
+            if (typeof (projid) != "undefined")
+                url += "?projid=" + projid
+            $("#PopupDetails .modal-content").load(url);
+        }
+    {% endif %}
     function ClearSamples() {
         $("#sampleid").val(null).trigger("change");
     }
@@ -262,16 +274,6 @@ while '^oo$' matches nothing."
             $("#time-slider-range .ui-slider-range").css('background-color', '#555')
             $("#time-slider-range").css('background-color', '#fff')
         }
-    }
-
-    function DispInstrumList(projid) {
-        $("#PopupDetails .modal-content").html("Loading...");
-        $('#PopupDetails .modal-lg').css('width', $(window).width() / 2);
-        $('#PopupDetails').modal({});
-        var url = "/search/instrumlist"
-        if (typeof (projid) != "undefined")
-            url += "?projid=" + projid
-        $("#PopupDetails .modal-content").load(url);
     }
 
     $(document).ready(function () {
@@ -426,10 +428,12 @@ while '^oo$' matches nothing."
             labels['samples'] = GetAllSelected(sampleid);
         }
 
-        var instrum = $("#filt_instrum");
-        if (instrum.val() !== "") {
-            req['instrum'] = instrum.val();
-        }
+        {% if data.inexplore==True %}
+            var instrum = $("#filt_instrum");
+            if (instrum.val() !== "") {
+                req['instrum'] = instrum.val();
+            }
+        {% endif %}
 
         var jqmonth = $('#month');
         if (jqmonth.val() != null) {

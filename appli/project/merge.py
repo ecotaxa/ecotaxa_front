@@ -30,7 +30,8 @@ def PrjMerge(PrjId):
 
     if not gvg('src'):
         # No submit -> preliminary page display
-        txt += """<ul><li>You are allowed to merge projects that you are allowed to manage
+        txt += """<ul><li>You are allowed to merge projects that you manage and contain images from the <b>same</b> instrument.
+         (Hint: use the <a href='/prj/edit/%d'>projects settings</a> to change this if needed).
 <li>User privileges from both projects will be added
 <li>This tool allows to merge two projects in a single projet (called Current project). The added project will then be automatically deleted. If object data are not consistent between both projects :
 <ul><li>New data fields are added to the Current project.
@@ -39,15 +40,16 @@ def PrjMerge(PrjId):
 <li>Acquisitions with same acq_id on both sides will <b>not</b> be updated from added project.
 </ul><li>Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.
 </ul>
-                """
+                """ % target_proj.projid
         # Fetch the potential merge sources
         with ApiClient(ProjectsApi, request.cookies.get('session')) as api:
-            rsp: List[ProjectModel] = api.search_projects(for_managing=True)
+            rsp: List[ProjectModel] = api.search_projects(for_managing=True,
+                                                          instrument_filter=target_proj.instrument)
 
         # TODO: XSSEscape??
         # Display them
         txt += """<table class='table table-bordered table-hover table-verycondensed'>
-                <tr><th width=120>ID</td><th>Title</td><th width=100>Status</th><th width=100>Nbr Obj</th>
+                <tr><th width=120>ID</td><th width=60>Inst.</td><th>Title</td><th width=100>Status</th><th width=100>Nbr Obj</th>
             <th width=100>% Validated</th><th width=100>% Classified</th></tr>"""
         for r in rsp:
             # Don't merge into self :)
@@ -60,6 +62,7 @@ def PrjMerge(PrjId):
             if r.pctvalidated is None:
                 r.pctvalidated = 0
             txt += """<tr><td><a class="btn btn-primary" href='/prj/merge/{activeproject}?src={projid}'>Select</a> {projid}</td>
+            <td>{instrument}</td>
             <td>{title}</td>
             <td>{status}</td>
             <td>{objcount:0.0f}</td>
