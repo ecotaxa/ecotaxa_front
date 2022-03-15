@@ -15,9 +15,9 @@
         {% if CanCreate==True %}
           <button class="btn btn-success" onclick="CreateProject();">Create a new project</button>
         {% else %}
-          <p style="margin-bottom: 0">To create a new project and upload images in it, please contact the user
-            manager(s): </p>
-          <ul>{{ GetManagerList('Ecotaxa : Please provide me the Project creation rights')|safe }}</ul>
+          <p style="margin-bottom: 0">To create a new project and upload images in it, please contact the application
+            manager:</p>
+          <ul> {{ mailto_create_right|safe }} </ul>
         {% endif %}
       {% endif %} {# If Others #}
     </td>

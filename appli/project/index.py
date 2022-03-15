@@ -6,6 +6,7 @@ from flask_login import current_user
 from flask_security import login_required
 
 from appli import app, PrintInCharte, gvg, gvgm
+from appli.back_config import get_app_manager_mail
 from appli.project.__init__ import connectPythonToPrime
 ######################################################################################################################
 from appli.project.index_vue import vue_projects_index
@@ -83,6 +84,8 @@ URL of the description in the BODC L22 vocabulary http://vocab.nerc.ac.uk/collec
 **Reason for creation**
 Explain how widely the instrument is distributed and why it should be added to the standard list.
 """)
+    # App manager mail for granting right to create
+    mailto_create_right = get_app_manager_mail(request, "EcoTaxa : Please provide me the Project creation right")
     if connectPythonToPrime:
         return vue_projects_index(PrjList=prjs, user=user, CanCreate=CanCreate,
                                   filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
@@ -92,6 +95,7 @@ Explain how widely the instrument is distributed and why it should be added to t
             render_template('project/list.html', PrjList=prjs, CanCreate=CanCreate,
                             filt_title=filt_title, filt_subset=filt_subset, filt_instrum=filt_instrum,
                             Others=Others, isadmin=2 in user.can_do, mailto_instrument=mailto_instrument,
+                            mailto_create_right=mailto_create_right,
                             _manager_mail=_manager_mail))
 
 
