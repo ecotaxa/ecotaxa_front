@@ -18,14 +18,15 @@ from to_back.ecotaxa_cli_py.api import (ObjectApi, ProjectsApi, TaxonomyTreeApi,
                                         ObjectsApi)
 from to_back.ecotaxa_cli_py.models import (ObjectModel, ProjectModel, SampleModel, AcquisitionModel,
                                            UserModelWithRights,
-                                           TaxonModel, MinUserModel, ProcessModel, HistoricalClassification, BulkUpdateReq)
+                                           TaxonModel, MinUserModel, ProcessModel, HistoricalClassification,
+                                           BulkUpdateReq)
 
 
 @app.route('/objectdetails/<int:objid>')
 def objectdetails(objid):
     # récuperation et ajustement des dimensions de la zone d'affichage
     try:
-        page_width = int(gvg("w")) - 40  # on laisse un peu de marge à droite et la scroolbar
+        page_width = int(gvg("w")) - 40  # on laisse un peu de marge à droite et la scrollbar
         if page_width < 200:
             page_width = 20000
         window_height = int(gvg("h")) - 40  # on laisse un peu de marge en haut
@@ -82,23 +83,29 @@ def objectdetails(objid):
     g.PrjAnnotate = obj_proj.highest_right == "Annotate"
 
     page.append("</p><p>Classification :")
+    taxon_name = None
+    taxon_type = None
     if obj.classif_id:
         with ApiClient(TaxonomyTreeApi, request) as api:
             taxon: TaxonModel = api.query_taxa(taxon_id=obj.classif_id)
-        page.append("<br>&emsp;<b>%s</b>" % XSSEscape(taxon.display_name))
+        taxon_name = XSSEscape(taxon.display_name)
+        taxon_type = taxon.type
+        page.append("<br>&emsp;<b>%s</b>" % taxon_name)
         page.append("<br>&emsp;" + (" &lt; ".join(taxon.lineage)) + " (id=%s)" % obj.classif_id)
     else:
         page.append("<br>&emsp;<b>Unknown</b>")
 
+    classifier_name = None
     if obj.classif_who is not None:
         page.append("<br>&emsp;%s " % (ClassifQual.get(obj.classif_qual, "To be classified")))
         if current_user_id != -1:
             # No name for anonymous viewer
             with ApiClient(UsersApi, request) as api:
                 contributor: MinUserModel = api.get_user(user_id=obj.classif_who)
-            page.append(" by %s (%s) " % (contributor.name, contributor.email))
+            classifier_name = contributor.name
+            page.append(" by %s (%s) " % (classifier_name, contributor.email))
         if obj.classif_when is not None:
-            page.append(" on %s " % obj.classif_when)
+            page.append(" on %s " % obj.classif_when.replace(microsecond=0))
     page.append("</p>")
 
     if obj.object_link is not None:
@@ -262,13 +269,18 @@ def objectdetails(objid):
     dte = obj.classif_when if obj.classif_qual in ('D', 'V') else \
         (obj.classif_auto_when if obj.classif_qual == 'P' else None)
     page.append("""<div role="tabpanel" class="tab-pane" id="tabdclassiflog">
-Current Classification : Quality={} , date={}
+    History : 
     <table class='table table-bordered table-condensed'><tr>
-    <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""".format(obj.classif_qual,
-                                                                                          dte))
+    <td>Date</td><td>Type</td><td>Taxo</td><td>Author</td><td>Quality</td></tr>""")
+    # Current classification in first
+    current = HistoricalClassification(classif_date=dte, classif_qual=obj.classif_qual, user_name=classifier_name,
+                                       classif_type=taxon_type, taxon_name=taxon_name)
+    history.sort(key=lambda r: r.classif_date, reverse=True)
+    history.insert(0, current)
     for classif_desc in history:
         vals = [getattr(classif_desc, fld)
                 for fld in ('classif_date', 'classif_type', 'taxon_name', 'user_name', 'classif_qual')]
+        vals[0] = vals[0].replace(microsecond=0) if vals[0] else vals[0]
         vals = [escape(str(a_val)) if a_val is not None else "-"
                 for a_val in vals]
         page.append("<tr><td>" + ("</td><td>".join(vals)) + "</td></tr>")
@@ -281,7 +293,7 @@ Current Classification : Quality={} , date={}
         <button type="button" class='btn btn-primary' onclick="UpdateComment();">Save additional comment</button>
         <span id=ajaxresultcomment></span>
         """ % (ntcv(obj.complement_info),))
-        page.append("</div>")
+    page.append("</div>")
 
     # Affichage de la carte
     page.append("""
