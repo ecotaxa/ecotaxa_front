@@ -881,4 +881,6 @@ def PrjGetFieldListAjax(PrjId, typefield):
         # A direct Ajax call with wrong context -> let the eventual HTTP error throw
     term = gvg("q")
     fieldlist = PrjGetFieldListFromModel(proj, typefield, term)
+    if typefield == "n":
+        fieldlist.insert(0, {'id': "oscore", 'text': "Score"})
     return json.dumps(fieldlist)

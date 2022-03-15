@@ -333,7 +333,7 @@ while '^oo$' matches nothing."
         $('#filt_validfromdate,#filt_validtodate').datetimepicker({format: 'Y-m-d H:i'});
         $("#filt_annot").{{ js.select2_user() }}; // Select2 Ajax
         $("#filt_freenum").select2({
-            ajax: {
+            ajax: { // TODO: Why this is dynamic? Values change not very often...
                 url: "/prj/GetFieldList/{{ g.Projid }}/n",
                 dataType: 'json',
                 delay: 250,
