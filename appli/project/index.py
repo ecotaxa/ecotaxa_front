@@ -23,21 +23,19 @@ def indexProjects(Others=False):
     filt_title = gvg('filt_title', session.get('prjfilt_title', ''))
     session['prjfilt_title'] = filt_title
 
-    if 'filt_instrum' not in request.args:
+    if 'filt_title' in request.args:
+        # It was a form submit, but _only_ 'filt_title' is _always_ posted,
+        # both the checkbox and the select2 are not transmitted if not filled
+        filt_instrum = gvgm('filt_instrum')  # Get instrument from posted
+        session['prjfilt_instrum'] = "|".join(filt_instrum)
+        filt_subset = gvg('filt_subset', '')  # Get subset filter from posted
+        session['prjfilt_subset'] = filt_subset
+    else:
         sess_filt_instrum = session.get('prjfilt_instrum', '')
         if sess_filt_instrum:
             filt_instrum = sess_filt_instrum.split("|")
         else:
             filt_instrum = []
-    else:
-        filt_instrum = gvgm('filt_instrum')  # Get from posted
-        session['prjfilt_instrum'] = "|".join(filt_instrum)
-
-    # Les checkbox ne sont pas transmises si elles ne sont pas cochées...
-    if 'filt_title' in request.args:  # ...donc si le filtre du titre est transmis on utilise le get
-        filt_subset = gvg('filt_subset', "")
-        session['prjfilt_subset'] = filt_subset
-    else:  # Sinon on prend la valeur de la session.
         filt_subset = session.get('prjfilt_subset', '')
 
     prjs: List[ProjectModel] = []
