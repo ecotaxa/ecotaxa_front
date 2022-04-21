@@ -25,7 +25,11 @@ app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = (
 app.logger.setLevel(10)
 
 # Setup Flask-Security
+# @see https://pythonhosted.org/Flask-Security/configuration.html
 app.config["SECURITY_PASSWORD_HASH"] = "plaintext"  # No hashing, which will be done server-side
+app.config["SECURITY_CHANGEABLE"] = True
+app.config["SECURITY_POST_CHANGE_VIEW"] = "/"
+app.config["SECURITY_SEND_PASSWORD_CHANGE_EMAIL"] = False
 user_datastore = BackEndUserDatastore()
 security = Security(app, user_datastore, login_form=CustomLoginForm, change_password_form=CustomChangePasswordForm)
 

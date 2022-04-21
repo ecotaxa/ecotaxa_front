@@ -63,7 +63,7 @@ def indexProjects(Others=False):
         try:
             last_refresh = datetime.datetime.strptime(
                 status.last_refresh, '%Y-%m-%dT%H:%M:%S')
-        except ValueError:
+        except (ValueError, TypeError):
             last_refresh = None
     if last_refresh is None or (datetime.datetime.now() - last_refresh).days > 7:
         fashtxt = "Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days, " \
