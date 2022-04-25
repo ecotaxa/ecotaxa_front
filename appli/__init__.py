@@ -25,7 +25,11 @@ app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = (
 app.logger.setLevel(10)
 
 # Setup Flask-Security
+# @see https://pythonhosted.org/Flask-Security/configuration.html
 app.config["SECURITY_PASSWORD_HASH"] = "plaintext"  # No hashing, which will be done server-side
+app.config["SECURITY_CHANGEABLE"] = True
+app.config["SECURITY_POST_CHANGE_VIEW"] = "/"
+app.config["SECURITY_SEND_PASSWORD_CHANGE_EMAIL"] = False
 user_datastore = BackEndUserDatastore()
 security = Security(app, user_datastore, login_form=CustomLoginForm, change_password_form=CustomChangePasswordForm)
 
@@ -284,11 +288,11 @@ def JinjaGetUsersManagerList(sujet=""):
                      for r in admin_users])
 
 
-ecotaxa_version = "2.6.1"
+ecotaxa_version = "2.6.2"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2022-02-23"
+    return ecotaxa_version + " 2022-03-16"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -297,6 +301,14 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetUsersManagerList,
                              GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2022-03-16 : V 2.6.2
+    Feature #751: Improve display of classification history in object details.
+    Feature #473: Make score available for use as a filter.
+    Feature #522: Rename EMODnet export to Darwin Core.
+    Feature #264: Promote instrument as a project-level field.
+    Feature #730: Remove funding notes.
+    Feature #784: Restrict exposed mail for permission queries to _the_ app administrator.
+    Feature #778: Add internal taxonomic ID to DOI export.
 2022-02-23 : V 2.6.1
     Feature #738: Relax constraint on acquisition ID unicity per project.
     Feature #729: Maps are now fed from back-end only.
