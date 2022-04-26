@@ -9,17 +9,14 @@ from flask.typing import ResponseReturnValue
 from flask_login import current_user
 
 from appli import app, PrintInCharte
+from appli.api_proxy import proxy_request
 from appli.constants import is_static_unprotected
 from appli.main_vue import index_vue
 
 PART_URL = "http://localhost:5002"  # TODO: A config
 
+
 # VUE_PATH == "/gui"
-
-vaultBP = Blueprint('vault', __name__,
-                    static_url_path='/vault', static_folder='../vault')
-app.register_blueprint(vaultBP)
-
 
 @app.route('/')
 def index():
@@ -94,6 +91,11 @@ def gui_any(filename):
         return send_from_directory(GUI_PATH, filename)
     except:
         return gui_index()
+
+
+@app.route('/vault/<path:filename>')
+def get_from_vault(filename):
+    return proxy_request("api/vault/" + filename)
 
 
 @app.before_request
