@@ -13,8 +13,7 @@ from urllib.parse import urlencode
 from flask import request, Response
 from werkzeug.wsgi import wrap_file
 
-from appli import app
-from appli.constants import BACKEND_HOST, BACKEND_PORT
+from appli import app, backend_url
 
 
 # noinspection HttpUrlsUsage
@@ -44,7 +43,7 @@ def proxy_request(path):
     else:
         return "Not implemented"
     # Do the call itself
-    req = HTTPConnection(host=BACKEND_HOST, port=BACKEND_PORT)
+    req = HTTPConnection(host=backend_url[7:])
     if params:
         url += "?" + urlencode(params)
     req.request(method=method, url=url, body=body, headers=headers)

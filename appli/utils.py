@@ -8,7 +8,6 @@ from flask import Request, request
 from flask_login import current_user
 from werkzeug.local import LocalProxy
 
-from appli.constants import BACKEND_URL
 from to_back import booster
 from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectModel, ApiException, MinUserModel, UsersApi
 from to_back.ecotaxa_cli_py.api import AuthentificationApi, ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
@@ -30,7 +29,8 @@ class ApiClient(Generic[A]):
             token = token.cookies.get('session')  # type:ignore
         api_client.configuration.access_token = token
         # Note: No trailing / in URL
-        api_client.configuration.host = BACKEND_URL
+        from appli import backend_url
+        api_client.configuration.host = backend_url
         # Call constructor on base class
         self.under: A = api_class(api_client)
 

@@ -4,16 +4,14 @@
 import os
 from typing import Optional, List, Tuple, Union
 
-from flask import Blueprint, g, request, url_for, send_from_directory
+from flask import g, request, url_for, send_from_directory
 from flask.typing import ResponseReturnValue
 from flask_login import current_user
 
-from appli import app, PrintInCharte
+from appli import app, PrintInCharte, ecopart_url
 from appli.api_proxy import proxy_request
 from appli.constants import is_static_unprotected
 from appli.main_vue import index_vue
-
-PART_URL = "http://localhost:5002"  # TODO: A config
 
 
 # VUE_PATH == "/gui"
@@ -59,10 +57,10 @@ def index():
             <a href="/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
             </div>		
             <div class="col-sm-4">
-            <a href="/TODO FAUX/" class="btn btn-primary btn-lg  btn-block">Particle module</a>
+            <a href="%s" class="btn btn-primary btn-lg  btn-block">Particle module</a>
             </div>		
         </div>
-    """
+    """ % ecopart_url
         NomFichier = 'appli/static/home/homebottom.html'
         if not os.path.exists(NomFichier):
             NomFichier = 'appli/static/home/homebottom-model.html'
@@ -95,6 +93,7 @@ def gui_any(filename):
 
 @app.route('/vault/<path:filename>')
 def get_from_vault(filename):
+    # Serve an image, if e.g. apache or nginx did not intercept the query
     return proxy_request("api/vault/" + filename)
 
 
@@ -128,7 +127,7 @@ def before_request_security() -> Optional[ResponseReturnValue]:
         menu.append(("", "NOSUB"))
     else:
         menu.append(("/prj/", "Contribute to a project"))
-    menu.append((PART_URL, "Go to EcoPart"))
+    menu.append((ecopart_url, "Go to EcoPart"))
     menu.append(("", "SEP"))
     if request.endpoint == 'indexPrj' and request.view_args is not None:
         from_prj = request.view_args.get('PrjId')

@@ -164,8 +164,9 @@ def PrjEdit(PrjId, privs_only=False):
     g.maplist.extend(list(MappableObjectColumns))
     g.maplist.extend(target_proj.obj_free_cols.keys())
 
-    # TODO: move to back-end
-    g.scn = _GetSCNNetworks()
+    with ApiClient(MiscApi, request) as api:
+        possible_models = api.query_ml_models()
+    g.scn = {a_model.name: {"name": a_model.name} for a_model in possible_models}
 
     # TODO: Cache of course, it's constants!
     with ApiClient(MiscApi, request) as api:
@@ -238,28 +239,6 @@ def Prjpopupeditpreset(PrjId):
 
     # render the table
     return render_template('project/popupeditpreset.html', Prj=prjs_pojo, txt=txt)
-
-
-######################################################################################################################
-def _GetSCNNetworks():
-    models = {}
-    model_folder = Path(app.config['MODELSAREA'])
-    valid_if = "dim_reducer.pickle"
-    prfx = "io_"
-    model_folder = Path(os.path.normpath(model_folder.as_posix()))
-    if model_folder.exists():
-        model_folder = model_folder.resolve()
-        for a_dir in model_folder.glob("*"):
-            if not a_dir.is_dir():
-                continue
-            if not (a_dir / valid_if).is_file():
-                continue
-            dir_name = a_dir.name
-            if not dir_name.startswith(prfx):
-                continue
-            dir_name = dir_name[len(prfx):]
-            models[dir_name] = {"name": dir_name}
-    return models
 
 
 ######################################################################################################################

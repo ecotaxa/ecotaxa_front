@@ -1,6 +1,5 @@
 from typing import Optional
 
-import requests
 from flask import render_template, g, flash, request
 from flask_login import current_user
 
@@ -9,12 +8,12 @@ import appli.project.main
 from appli import app, PrintInCharte, gvg, gvp, FAIcon
 from appli.constants import TaxoType
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import UsersApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import UserModelWithRights, TaxonModel
 
 
 def get_taxoserver_url():
+    # TODO: Already a config on back-end side
     return app.config.get('TAXOSERVER_URL')
 
 
@@ -118,7 +117,6 @@ def route_view_taxon(taxoid):
         usage = api.query_taxa_usage(taxon_id=taxoid)
         usage = usage[:20]
     g.TaxoType = TaxoType
-    g.taxoserver_url = get_taxoserver_url()
     return render_template('taxonomy/edit.html', taxon=taxon, usage=usage)
 
 
@@ -137,7 +135,6 @@ def route_add_taxon():
     # Create a blank taxon
     taxon = {'id': 0, 'creator_email': user.email, 'tree': '', 'creation_datetime': ''}
     g.TaxoType = TaxoType
-    g.taxoserver_url = get_taxoserver_url()
     return render_template('taxonomy/edit.html', taxon=taxon)
 
 

@@ -33,6 +33,12 @@ app.config["SECURITY_SEND_PASSWORD_CHANGE_EMAIL"] = False
 user_datastore = BackEndUserDatastore()
 security = Security(app, user_datastore, login_form=CustomLoginForm, change_password_form=CustomChangePasswordForm)
 
+# Read more config
+backend_url = app.config["BACKEND_URL"]
+assert backend_url.startswith("http://")
+assert not backend_url.endswith("/")
+
+ecopart_url = app.config["ECOPART_URL"]
 
 def XSSEscape(txt):
     return html.escape(txt)

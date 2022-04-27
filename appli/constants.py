@@ -2,10 +2,6 @@ from typing import Final
 
 VUE_PATH = "/gui"
 
-BACKEND_HOST = "localhost"
-BACKEND_PORT = 8000
-BACKEND_URL = "http://%s:%d" % (BACKEND_HOST, BACKEND_PORT)
-
 from collections import OrderedDict
 
 ClassifQual: Final = {'P': 'predicted', 'D': 'dubious', 'V': 'validated'}
