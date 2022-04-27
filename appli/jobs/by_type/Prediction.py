@@ -451,10 +451,8 @@ class PredictionJob(Job):
             critlist[name][1] = round(100 * (1 - count / stats.total))  # % Missing in source projects
             critlist[name][2] = ' ' if variance is None else ('Y' if variance != 0 else 'N')
 
-        g.SCN = None
-        if app.config.get("SCN_ENABLED", False):
-            cnn_networks = set([target_prj.cnn_network_id] + [a_prj.cnn_network_id for a_prj in src_projs])
-            g.SCN = target_prj.cnn_network_id is not None and len(cnn_networks) == 1
+        cnn_networks = set([target_prj.cnn_network_id] + [a_prj.cnn_network_id for a_prj in src_projs])
+        g.SCN = target_prj.cnn_network_id is not None and len(cnn_networks) == 1
 
         g.critlist = list(critlist.values())
         g.critlist.sort(key=lambda t: t[0])
