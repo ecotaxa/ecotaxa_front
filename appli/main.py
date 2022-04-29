@@ -150,6 +150,6 @@ def after_request(response):
     response.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: " \
                                                   "cdnjs.cloudflare.com server.arcgisonline.com www.google.com " \
                                                   "www.gstatic.com www.google-analytics.com cdn.ckeditor.com " \
-                                                  "cdn.jsdelivr.net unpkg.com fonts.googleapis.com fonts.gstatic.com " \
-                                                  "ecotaxa.obs-vlfr.fr;frame-ancestors 'self';form-action 'self';"
+                                                  "cdn.jsdelivr.net unpkg.com fonts.googleapis.com fonts.gstatic.com;" \
+                                                  "frame-ancestors 'self';form-action 'self';"
     return response
