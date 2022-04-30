@@ -18,8 +18,3 @@ docker run --rm --network="host" -v ${PWD}/..:/client -u $(id -u ${USER}):$(id -
  --minimal-update \
  --additional-properties=generateSourceCodeOnly=true,packageName=to_back.ecotaxa_cli_py \
  -o /client
-# Remove the _api_ in defs which come from leading /api in URLs
-#for f in ecotaxa_cli_py/api/*.py
-#do
-#  sed -i 's/_api_/_/g' $f
-#done
