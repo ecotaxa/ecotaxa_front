@@ -7,7 +7,7 @@ VERSION=2.6.3
 # Copy all source files
 rsync -avr --delete --exclude-from=not_to_copy.lst .. py/
 # Build
-docker build $NO_CACHE -t ecotaxa/ecotaxafront -f prod_image/Dockerfile .
+docker build $NO_CACHE -t ecotaxa/ecotaxa_front -f prod_image/Dockerfile .
 # Push to docker hub
-#docker tag ecotaxa/ecotaxafront:latest ecotaxa/ecotaxafront:$VERSION
-#docker push ecotaxa/ecotaxafront:$VERSION
+#docker tag ecotaxa/ecotaxa_front:latest ecotaxa/ecotaxa_front:$VERSION
+#docker push ecotaxa/ecotaxa_front:$VERSION
