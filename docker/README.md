@@ -4,7 +4,7 @@ Example run command:
 
     docker run --rm --name ecotaxafront \ 
     -u 1000:1000 --network host \
-    -v $PWD/../appli/config.cfg:/app/appli/config.cfg \ 
+    -v $PWD/../config:/app/config \ 
     ecotaxa/ecotaxafront 
 
 The --network host is necessary for now for the front-end to be able to reach the back-end on same machine.
@@ -41,7 +41,7 @@ recreate containers.
 
     docker run --rm --name ecotaxafront \
     --network econet -u 1000:1000 \
-    -v $PWD/../appli/config.cfg:/app/appli/config.cfg \
+    -v $PWD/../appli/config:/app/config \
     ecotaxa/ecotaxa_front
 
 #### Nginx reverse proxy:

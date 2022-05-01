@@ -15,7 +15,7 @@ def admin_edithomemessage() -> str:
     txt = "<h4>Edit home page message</h4>"
     txt += "<script src='//cdn.ckeditor.com/4.6.0/full/ckeditor.js'></script>"
     message = ""
-    NomFichier = 'appli/static/home/appmanagermsg.html'
+    NomFichier = appli.constants.APP_MANAGER_MESSAGE_FILE
     if gvp("msg") != '':
         with open(NomFichier, 'w', encoding='utf-8', newline="\n") as f:
             f.write(gvp("msg"))

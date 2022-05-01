@@ -16,8 +16,7 @@ __pycache__
 .mypy_cache
 run.build
 run.bin
-config.cfg
-config.cfg.template
+config/*
 to_back/ecotaxa_cli_py/test
 to_back/ecotaxa_cli_py/docs
 

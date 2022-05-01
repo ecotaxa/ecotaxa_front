@@ -10,7 +10,7 @@ from flask_login import current_user
 
 from appli import app, PrintInCharte, ecopart_url
 from appli.api_proxy import proxy_request
-from appli.constants import is_static_unprotected
+from appli.constants import is_static_unprotected, APP_MANAGER_MESSAGE_FILE, CUSTOM_HOME_TOP, CUSTOM_HOME_BOTTOM
 from appli.main_vue import index_vue
 
 
@@ -24,7 +24,7 @@ def index():
     else:
         txt = """<div style='margin:5px;'><div id="homeText"'>"""
         # lecture du message de l'application manager
-        NomFichier = 'appli/static/home/appmanagermsg.html'
+        NomFichier = APP_MANAGER_MESSAGE_FILE
         if os.path.exists(NomFichier):
             with open(NomFichier, 'r', encoding='utf8') as f:
                 message = f.read()
@@ -42,7 +42,7 @@ def index():
         # txt +="</div>\n"
 
         # Lecture de la partie Haute
-        NomFichier = 'appli/static/home/home.html'
+        NomFichier = CUSTOM_HOME_TOP
         if not os.path.exists(NomFichier):
             NomFichier = 'appli/static/home/home-model.html'
         with open(NomFichier, 'r', encoding='utf8') as f:
@@ -61,7 +61,7 @@ def index():
             </div>		
         </div>
     """ % ecopart_url
-        NomFichier = 'appli/static/home/homebottom.html'
+        NomFichier = CUSTOM_HOME_BOTTOM
         if not os.path.exists(NomFichier):
             NomFichier = 'appli/static/home/homebottom-model.html'
         txt += """<div class="row" id="homeLegal"><div class="col-sm-12">"""

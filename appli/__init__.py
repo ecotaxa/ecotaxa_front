@@ -19,7 +19,7 @@ from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 
 app = Flask("appli")
-app.config.from_pyfile('config.cfg')
+app.config.from_pyfile('../config/config.cfg')
 app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = (
     'Your account is disabled. Email the User manager (list on the left) to re-activate.', 'error')
 app.logger.setLevel(10)

@@ -34,6 +34,12 @@ API_GLOBAL_ROLES: Final = {1: ProjectCreatorLabel,
                            3: UserAdministratorLabel,
                            4: TaxonCreatorLabel}
 
+# Override default home page with some external (to app) files
+# TODO: It can be discussed if these files are local to the python front-end or should be stored on the back-end instead
+APP_MANAGER_MESSAGE_FILE = 'config/appmanagermsg.html'
+CUSTOM_HOME_TOP = 'config/hometop.html'
+CUSTOM_HOME_BOTTOM = 'config/homebottom.html'
+
 
 def is_static_unprotected(path: str) -> bool:
     """ For these entry points, we just serve with not much check, security is elsewhere.
