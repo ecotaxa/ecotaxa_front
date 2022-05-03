@@ -5,6 +5,7 @@ MAINTAINER grololo06 <grololo06@users.noreply.github.com>
 RUN apt-get update
 
 RUN apt-get install \
+    vim \
     uwsgi uwsgi-plugin-python3 \
     python3.8 python3.8-venv \
     --no-install-recommends --yes

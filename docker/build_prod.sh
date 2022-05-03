@@ -1,7 +1,7 @@
 #!/bin/bash
-VERSION=2.6.2
+VERSION=2.6.3
 # In case of doubt on the image sanity, uncomment below
-# NO_CACHE=--no-cache
+NO_CACHE=--no-cache
 # Preliminary, log using ecotaxa docker account
 #docker login -u ecotaxa
 # Copy all source files
