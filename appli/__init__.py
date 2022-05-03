@@ -294,11 +294,11 @@ def JinjaGetUsersManagerList(sujet=""):
                      for r in admin_users])
 
 
-ecotaxa_version = "2.6.2"
+ecotaxa_version = "2.6.3"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2022-03-16"
+    return ecotaxa_version + " 2022-05-03"
 
 
 app.jinja_env.filters['datetime'] = JinjaFormatDateTime
@@ -307,6 +307,14 @@ app.jinja_env.globals.update(GetManagerList=JinjaGetUsersManagerList,
                              GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
 
 """Changelog
+2022-05-03 : V 2.6.3
+    Feature #804: Make the front-end deliverable as a Docker image.
+    Feature #798: Clean the configuration file(s) for proper source/config separation.
+    Feature #799: Allow the back-end to serve image files.
+    Feature #801: Make ML models owned by back-end, add an entry point in /api
+    Bug #800: Project visibility was lost when modifying project rights _only_.
+    Bug (back) #42: Check rights in /object_set/export.
+    Bug (back) #40: Add Content-Length http header while getting a job file.
 2022-03-16 : V 2.6.2
     Feature #751: Improve display of classification history in object details.
     Feature #473: Make score available for use as a filter.
