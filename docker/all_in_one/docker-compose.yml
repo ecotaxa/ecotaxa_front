@@ -1,0 +1,61 @@
+version: "3"
+services:
+  nginx:
+    image: nginx:1.21.6
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./vault:/vault
+    networks:
+      econet:
+    ports:
+      - 8088:80
+    depends_on:
+      - ecotaxafront
+      - ecotaxaback
+  ecotaxafront:
+    image: ecotaxa/ecotaxa_front:2.6.3
+    volumes:
+      - ./front_config:/app/config
+    networks:
+      econet:
+    depends_on:
+      - ecotaxaback
+  ecotaxaback:
+    image: ecotaxa/ecotaxa_back:2.6.3
+    volumes:
+      - ./back_config.ini:/config.ini
+      - ./ftp_area:/ftp_area
+      - ./file_srv:/file_srv
+      - ./vault:/vault
+      - ./models:/models
+      - temp_jobs:/temp_jobs
+    networks:
+      econet:
+    depends_on:
+      - pgdb
+  ecotaxagpuback:
+    image: ecotaxa/ecotaxa_gpu_back:2.6.3
+    restart: always
+    volumes:
+      - ./back_config.ini:/config.ini
+      - ./vault:/vault
+      - ./models:/models
+      - temp_jobs:/temp_jobs
+    networks:
+      econet:
+    depends_on:
+      - pgdb
+  pgdb:
+    image: postgres:13.6
+    networks:
+      econet:
+    # Uncomment to be able to access the DB, in case.
+    #    ports:
+    #      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+networks:
+  econet:
+    driver: bridge
+volumes:
+  temp_jobs:
