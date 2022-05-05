@@ -5,21 +5,29 @@ Docker tool on your PC. Tested only on amd64 processor family.
 
 HOWTO:
 
-In same directory as present file:
+In same directory as present file, and a system-native shell (e.g. CMD.exe on windows):
 
 $ docker-compose -p portable up
 
 All services will bring up, and spit tons of errors as there is no database yet.
 
-Now build the DB, in another shell so the docker-compose still runs:
+In another shell, so the docker-compose still runs and provides output, list the created docker images:
 
-$ docker exec -it portable_ecotaxaback_1 bash
+$ docker ps
+
+The back-end docker should appear in the list, and be running. Its name will likely be portable_ecotaxaback_1 or portable-ecotaxaback-1.
+
+Now build the DB, using the found name:
+
+$ docker exec -it portable-ecotaxaback-1 bash
 root@97aab8baa6b0:/app# PYTHONPATH=. python cmds/manage.py db create --password mysecretpassword --db-name ecotaxa
 root@97aab8baa6b0:/app# PYTHONPATH=. python cmds/manage.py db build
 Adding user 'administrator'
 root@97aab8baa6b0:/app# exit
 
 The errors should stop in the first shell.
-You should be able to connect to http://localhost:8088 using administrator/ecotaxa
+You should now be able to connect to http://localhost:8088 using administrator/ecotaxa
+
+Before e.g. trying to import some data, it's better to fetch the official taxonomy tree, by using http://localhost:8088/taxo/browse/ (and waiting...)
 
 
