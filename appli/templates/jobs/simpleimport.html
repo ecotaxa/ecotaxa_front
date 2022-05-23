@@ -1,5 +1,5 @@
 {% import "js_macros.html" as js %}
-
+{% import "files_macros.html" as up %}
 <h3>Simple import</h3>
 <p>This procedure allows to import images in jpg, png, gif (possibly animated) formats. It will associate a fixed &
     reduced set of metadata, that you can enter below.</p>
@@ -31,7 +31,7 @@
             <div class="form-group">
                 <label class="control-label">Upload folder(s) compressed as a zip file</label>
                 <input class="form-control" type="file" id="uploadfile" name="uploadfile" size="200">
-                <p class="help-block">zip all the images in an archive (<100Mb).</p>
+                {{ up.help_block(True ,'zip all the images in an archive (<',')')}}                
             </div>
         </div>
     </div>
