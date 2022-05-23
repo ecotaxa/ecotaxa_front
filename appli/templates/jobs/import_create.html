@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
+{% import "files_macros.html" as up %}
 {% block headcenter %}
   <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
 {% endblock %}
-
 {% block body %}
 
   <div class="panel panel-default" style="margin: 0px 5px">
@@ -90,7 +90,7 @@
             <div class="form-group">
               <label class="control-label">Upload folder(s) compressed as a zip file</label>
               <input class="form-control" type="file" id="uploadfile" name="uploadfile" size="200">
-              <p class="help-block">Only for &lt;&nbsp;100MB zip files.</p>
+                 {{ up.help_block(True)}}
             </div>
           </div>
         </div>
