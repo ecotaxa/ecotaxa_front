@@ -253,10 +253,14 @@
                   processResults: function (data, page) {
                       return {results: data};
                   },
+                 
                   cache: true
               },
+              placeholder: 'select category...',
+              allowClear: true,
               minimumInputLength: 3
-          }); // Select2 Ajax
+          }); 
+          // Select2 Ajax
           sel2.on("select2:open", function () {
               LoadLineageHelper($(this));
           });
