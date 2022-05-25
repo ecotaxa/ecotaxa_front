@@ -1353,7 +1353,7 @@
                   //    - Current value might appear in the middle of the list, if similar text is entered.
                   sel2.val(null).trigger("change");
                   // The "selection rendered" element (where selection is seen) has been emptied, fill it back.
-                  const rdr = $('.select2-selection__rendered');
+                  const rdr = $('[id*="-'+ sel2.prop('id')+'-"].select2-selection__rendered'); // #808 select on id because .select2-selection__rendered is used on each select2 item
                   rdr.text(" " + selection);
                   rdr.title = selection;
               });
