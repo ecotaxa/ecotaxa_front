@@ -1,128 +1,141 @@
 <script src="{{ url_for('static', filename='DataTables-1.11.5/datatables.js') }}"></script>
 
-
 {% import "js_macros.html" as js %}
 <table>
-  <tr>
-    <td style="width: 600px;vertical-align: top;">
-      {% if Others %}
-        <h3>Other projects</h3>
-        <p>To have access to these projects, request access to the project manager.</p>
-      {% else %}
-        <span style="font-size: x-large;font-weight: bold;">Select a project </span>
-        {% include "jobs/import_create_shared_doc.html" %}
-
-        {% if CanCreate==True %}
-          <button class="btn btn-success" onclick="CreateProject();">Create a new project</button>
-        {% else %}
-          <p style="margin-bottom: 0">To create a new project and upload images in it, please contact the application
-            manager:</p>
-          <ul> {{ mailto_create_right|safe }} </ul>
-        {% endif %}
-      {% endif %} {# If Others #}
-    </td>
-    <td style="padding-left: 50px;vertical-align: top;">
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <form method="get">
-            <table>
-              <tr>
-                <td>Filter on title :</td>
-                <td><input type="text" style="width: 100px;" name="filt_title" id="filt_title" value="{{ filt_title }}">
-                </td>
-                <td>&nbsp;&nbsp;</td>
-                <td rowspan="2" style="vertical-align: top">
-                  <button type="submit" class="btn btn-primary btn-block"><span
-                      class="glyphicon glyphicon-search"></span> Search
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding-right: 10px;">Exclude subsets :</td>
-                <td><input type="checkbox" value="Y" name="filt_subset" {% if filt_subset=='Y' %}checked{% endif %}>
-                </td>
-              </tr>
-              <tr>
-                <td>Instruments :</td>
-                <td style="padding-right: 10px;">
-                  <select multiple="multiple" id="filt_instrum" name="filt_instrum" class="form-control">
-                  </select>
-                </td>
-                <td></td>
-                <td style="vertical-align: top"><a href="?filt_title=" class="btn btn-sm btn-default btn-block">
-                  <span class="glyphicon glyphicon-remove"></span> Clear</a></td>
-              </tr>
-            </table>
-          </form>
-        </div>
-      </div>
-    </td>
-  </tr>
-</table>
-<table id="projects-tbl" class='table table-hover table-verycondensed projectsList datatable'>
-  <thead>
-  <tr>
-    <th class="no-sort"></th>
-    <th>Inst.</th>
-    <th>Title [ID]</th>
-    <th>Status</th>
-    <th>Nb objects</th>
-    <th>%&nbsp;validated</th>
-    <th>%&nbsp;classified</th>
-  </tr>
-  </thead>
-  <tbody>
-  {% for r in PrjList %}
     <tr>
-      <td>
-        {% if Others %}
-          <a class='btn btn-primary'
-             href='mailto:{{ r.managers[0].email|safe if r.managers }}?{{ _manager_mail(r.title, r.projid)|safe if r.managers }}'>REQUEST
-            ACCESS</a>
-          {% if r.visible==True or isadmin %}
-            <a class='btn btn-primary' href='/prj/{{ r.projid }}'>View</a>
-          {% endif %}
-        {% else %}
-          <a class='btn btn-primary' href='/prj/{{ r.projid }}'>Select</a>
-        {% endif %}
-
-      </td>
-      <td> {{ r.instrument }}
-      <td> {{ r.title }}
-        [{{ r.projid }}] {{ ("<a href='mailto:"+r.managers[0].email+"'>"+r.managers[0].name+"</a>") |safe if r.managers }}</td>
-      <td>{{ r.status }}</td>
-      <td>{{ '{0:0.0f}'.format(r.objcount) if r.objcount else 0 }}</td>
-      <td>{{ '{0:0.2f}'.format(r.pctvalidated) if r.pctvalidated else 0.0 }}</td>
-      <td>{{ '{0:0.2f}'.format(r.pctclassified) if r.pctclassified else 0.0 }}</td>
+        <td style="width: 600px; vertical-align: top">
+            {% if Others %}
+            <h3>Other projects</h3>
+            <p>
+                To have access to these projects, request access to the project manager.
+            </p>
+            {% else %}
+            <span style="font-size: x-large; font-weight: bold">Select a project
+            </span> {% include "jobs/import_create_shared_doc.html" %} {% if CanCreate==True %}
+            <button class="btn btn-success" onclick="CreateProject();">
+                Create a new project
+            </button> {% else %}
+            <p style="margin-bottom: 0">
+                To create a new project and upload images in it, please contact the application manager:
+            </p>
+            <ul>
+                {{ mailto_create_right|safe }}
+            </ul>
+            {% endif %} {% endif %} {# If Others #}
+        </td>
+        <td style="padding-left: 50px; vertical-align: top">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <form method="get">
+                        <table>
+                            <tr>
+                                <td>Filter on title :</td>
+                                <td>
+                                    <input type="text" style="width: 100px" name="filt_title" id="filt_title"
+                                        value="{{ filt_title }}" />
+                                </td>
+                                <td>&nbsp;&nbsp;</td>
+                                <td rowspan="2" style="vertical-align: top">
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <span class="glyphicon glyphicon-search"></span> Search
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding-right: 10px">Exclude subsets :</td>
+                                <td>
+                                    <input type="checkbox" value="Y" name="filt_subset" {% if filt_subset=='Y'
+                                        %}checked{% endif %}>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Instruments :</td>
+                                <td style="padding-right: 10px">
+                                    <select multiple="multiple" id="filt_instrum" name="filt_instrum"
+                                        class="form-control"></select>
+                                </td>
+                                <td></td>
+                                <td style="vertical-align: top">
+                                    <a href="?filt_title=" class="btn btn-sm btn-default btn-block">
+                                        <span class="glyphicon glyphicon-remove"></span> Clear</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </td>
     </tr>
-  {% endfor %}
-
-  </tbody>
+</table>
+<table id="projects-tbl" class="table table-hover table-verycondensed projectsList datatable">
+    <thead>
+        <tr>
+            <th class="no-sort"></th>
+            <th>Inst.</th>
+            <th>Title [ID]</th>
+            <th>Status</th>
+            <th>Nb objects</th>
+            <th>%&nbsp;validated</th>
+            <th>%&nbsp;classified</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in PrjList %} {% if r.managers %} {% set manager_to_contact = r.managers[0] if r.contact == None else
+        r.contact %} {% set data_contact = '' if r.contact == None else ' data-contact="Contact" ' %} {% endif %}
+        <tr>
+            <td>
+                {% if Others %}
+                <a class="btn btn-primary" {{ data_contact }} href="mailto:{{ manager_to_contact.email|safe if r.managers }}?{{ _manager_mail(r.title, r.projid)|safe if r.managers }}">REQUEST
+                    ACCESS
+                </a> {% if r.visible==True or isadmin %}
+                <a class="btn btn-primary" href="/prj/{{ r.projid }}">View</a> {% endif %} {% else %}
+                <a class="btn btn-primary" href="/prj/{{ r.projid }}">Select</a> {% endif %}
+            </td>
+            <td>{{ r.instrument }}</td>
+            <td>
+                {{ r.title }} [{{ r.projid }}] {{ ("<a href='mailto:"+manager_to_contact.email+"'
+                    " + data_contact  +" >"+manager_to_contact.name+"</a>") |safe if
+                r.managers }}
+            </td>
+            <td>{{ r.status }}</td>
+            <td>{{ '{0:0.0f}'.format(r.objcount) if r.objcount else 0 }}</td>
+            <td>
+                {{ '{0:0.2f}'.format(r.pctvalidated) if r.pctvalidated else 0.0 }}
+            </td>
+            <td>
+                {{ '{0:0.2f}'.format(r.pctclassified) if r.pctclassified else 0.0 }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 <div class="col-sm-6 col-sm-offset-3">
-  {% if Others %}
-    <a href="/prj/" class="btn  btn-block btn-primary">Back to projects list</a>
-  {% else %}
-    <a href="/prjothers/" class="btn  btn-block btn-primary">Show projects in which you are not registered</a>
-  {% endif %}
+    {% if Others %}
+    <a href="/prj/" class="btn btn-block btn-primary">Back to projects list</a> {% else %}
+    <a href="/prjothers/" class="btn btn-block btn-primary">Show projects in which you are not registered</a>
+    {% endif %}
 </div>
 
+<div id="PopupCreateProject" class="modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="width: 600px; padding: 20px">
+            <h3>Create a new project</h3>
+            Instrument :
+            <select id="new_proj_inst" name="new_proj_inst" class="form-control" style="width: 50%"></select>
+            {{ mailto_instrument|safe }}<br />
+            Project Title :
+            <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control" style="width: 400px"
+                autocomplete="off" />
+            <br />
+            <button class="btn btn-success" onclick="DoCreateProject();">
+                Create the project
+            </button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+                Cancel
+            </button>
+            <div id="resultcreate" style="margin: 10px 0"></div>
 
-<div id="PopupCreateProject" class="modal " tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content" style="width: 600px; padding: 20px;">
-      <h3>Create a new project</h3>
-      Instrument : <select id="new_proj_inst" name="new_proj_inst" class="form-control"
-                           style="width: 50%"></select>
-      {{ mailto_instrument|safe }}<br>
-      Project Title : <input name="newprojecttitle" id="newprojecttitle" type="text" class="form-control"
-                             style="width: 400px;" autocomplete="off">
-      <br>
-      <button class="btn btn-success" onclick="DoCreateProject();">Create the project</button>
-      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-      <div id="resultcreate" style="margin: 10px 0;"></div>
-
-      <!--
+            <!--
             <div id="ImportantNote" class="panel panel-danger">
               <div class="panel-heading">
                 <h3 class="panel-title">IMPORTANT NOTE
@@ -134,14 +147,12 @@
                 The maintenance and improvement of EcoTaxa is not free. We would appreciate that you set aside some funds in
                 your next grant to support it.
                 <br><a href="mailto:picheral@obs-vlfr.fr"
-                       title="Press CTRL to open it on another tab (usefull if you use GMail)">Contact us</a> to estimate what
-                would be both reasonable and useful.
-              </div>
-            </div>
-      -->
-
+                       title="Press CTRL to open it on another tab (usefull if you use GMail)">Contact us</a> to estimate what would be both reasonable and useful.
+                </div>
+                </div>
+                -->
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
@@ -150,14 +161,12 @@
     }
 
     function DoCreateProject() {
-        $('#resultcreate').load('/prj/simplecreate/',
-            {
-                projtitle: $('#newprojecttitle').val(),
-                proj_instrument: $('#new_proj_inst').val()
-            }
-        );
+        $('#resultcreate').load('/prj/simplecreate/', {
+            projtitle: $('#newprojecttitle').val(),
+            proj_instrument: $('#new_proj_inst').val()
+        });
 
-        {#  alert("Not Yet implemted")#}
+        // alert("Not Yet implemted")
     }
 
     $('#filt_title').focus();
@@ -166,27 +175,29 @@
         $("#new_proj_inst").{{ js.select2_instrument() }};
         $("#filt_instrum").{{ js.select2_instrument() }};
         $('#projects-tbl').dataTable({
-            paging: false, searching: false,
-            columnDefs: [
-                {orderable: false, targets: 0}
-            ],
+            paging: false,
+            searching: false,
+            columnDefs: [{
+                orderable: false,
+                targets: 0
+            }],
             "order": []
         });
     });
 </script>
 <script>
     $(document).ready(function () {
-        {%  if filt_instrum|length > 0 %}
-            // Set selection in instruments list
-            var sel2 = $('#filt_instrum');
-            var from_filt = [];
-            {% for an_instrum in filt_instrum %}
-                var newOption = new Option("{{ an_instrum }}", "{{ an_instrum }}", false, false);
-                from_filt.push("{{ an_instrum }}");
-                sel2.append(newOption).trigger('change');
-            {% endfor %}
-            sel2.val(from_filt);
-        {%  endif %}
+        if($('a[data-contact]').length > 0) {
+               $("head").append($('<style>a[data-contact]::after { z-index:10;margin:-12px 4px auto 8px;font-size:.625em;font-weight:600;text-decoration:none!important;padding:1px 4px;border-radius:3px;background-color:#337ab7;color:#fff;content:attr(data-contact) }</style>'));
+         }
+        {%if filt_instrum | length > 0 %}
+        // Set selection in instruments list
+        var sel2 = $('#filt_instrum');
+        var from_filt = []; {% for an_instrum in filt_instrum %}
+        var newOption = new Option("{{ an_instrum }}", "{{ an_instrum }}", false, false);
+        from_filt.push("{{ an_instrum }}");
+        sel2.append(newOption).trigger('change'); {% endfor %}
+        sel2.val(from_filt);
+        {% endif %}
     });
-
 </script>
