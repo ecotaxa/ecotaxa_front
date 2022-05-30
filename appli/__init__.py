@@ -14,24 +14,37 @@ from flask import Flask, render_template, request, g
 from flask_login import current_user
 from flask_security import Security
 
-from appli.security_on_backend import BackEndUserDatastore, CustomLoginForm, CustomChangePasswordForm
+from appli.security_on_backend import (
+    BackEndUserDatastore,
+    CustomLoginForm,
+    CustomChangePasswordForm,
+)
 from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 
 app = Flask("appli")
-app.config.from_pyfile('../config/config.cfg')
-app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = (
-    'Your account is disabled. Email the User manager (list on the left) to re-activate.', 'error')
+app.config.from_pyfile("../config/config.cfg")
+app.config["SECURITY_MSG_DISABLED_ACCOUNT"] = (
+    "Your account is disabled. Email the User manager (list on the left) to re-activate.",
+    "error",
+)
 app.logger.setLevel(10)
 
 # Setup Flask-Security
 # @see https://pythonhosted.org/Flask-Security/configuration.html
-app.config["SECURITY_PASSWORD_HASH"] = "plaintext"  # No hashing, which will be done server-side
+app.config[
+    "SECURITY_PASSWORD_HASH"
+] = "plaintext"  # No hashing, which will be done server-side
 app.config["SECURITY_CHANGEABLE"] = True
 app.config["SECURITY_POST_CHANGE_VIEW"] = "/"
 app.config["SECURITY_SEND_PASSWORD_CHANGE_EMAIL"] = False
 user_datastore = BackEndUserDatastore()
-security = Security(app, user_datastore, login_form=CustomLoginForm, change_password_form=CustomChangePasswordForm)
+security = Security(
+    app,
+    user_datastore,
+    login_form=CustomLoginForm,
+    change_password_form=CustomChangePasswordForm,
+)
 
 # Read more config
 backend_url = app.config["BACKEND_URL"]
@@ -39,6 +52,7 @@ assert backend_url.startswith("http://")
 assert not backend_url.endswith("/")
 
 ecopart_url = app.config["ECOPART_URL"]
+
 
 def XSSEscape(txt):
     return html.escape(txt)
@@ -52,17 +66,20 @@ def PrintInCharte(txt: str, title: Optional[str] = None):
     """
     AddJobsSummaryForTemplate()
     if not title:
-        title = 'EcoTaxa'
-    return render_template('layout.html', bodycontent=txt, title=title)
+        title = "EcoTaxa"
+    return render_template("layout.html", bodycontent=txt, title=title)
 
 
 def ErrorFormat(txt: str) -> str:
-    return """
+    return (
+        """
 <div class='cell panel ' style='background-color: #f2dede; margin: 15px;'><div class='body' >
 				<table style='background-color: #f2dede'><tr><td width='50px' style='color: red;font-size: larger'> <span class='glyphicon glyphicon-exclamation-sign'></span></td>
 				<td style='color: red;font-size: larger;vertical-align: middle;'><B>%s</B></td>
 				</tr></table></div></div>
-    """ % txt
+    """
+        % txt
+    )
 
 
 # VUE_PATH == "/gui"
@@ -71,12 +88,13 @@ from appli.constants import VUE_PATH
 
 def AddJobsSummaryForTemplate() -> None:
     """
-        Set in global 'g' a structure to show what is currently ongoing on jobs side.
-        @see appli/templates/layout.html
+    Set in global 'g' a structure to show what is currently ongoing on jobs side.
+    @see appli/templates/layout.html
     """
     if current_user.is_authenticated:
         # Summarize from back-end
         from appli.jobs.emul import _build_jobs_summary
+
         g.jobs_summary = _build_jobs_summary()
         # Also add experimental URL
         # if current_user.preferences is not None and '"experimental"' in current_user.preferences:
@@ -89,10 +107,10 @@ def AddJobsSummaryForTemplate() -> None:
         #     if exper_path:
         #         hint = "A better version of this page is available."
         #         g.experimental = '<a href="' + exper_path + '" title="' + hint + '">' + "New!</a>"
-    g.google_analytics_id = app.config.get('GOOGLE_ANALYTICS_ID', '')
+    g.google_analytics_id = app.config.get("GOOGLE_ANALYTICS_ID", "")
 
 
-def gvg(varname: str, defvalue: str = '') -> str:
+def gvg(varname: str, defvalue: str = "") -> str:
     """
     Permet de récuperer une variable dans la Chaine GET ou de retourner une valeur par defaut
     :param varname: Variable à récuperer
@@ -113,7 +131,7 @@ def gvgm(varname: str) -> List[str]:
     return [a_val for a_val in lst if a_val]
 
 
-def gvp(varname: str, defvalue: str = '') -> str:
+def gvp(varname: str, defvalue: str = "") -> str:
     """
     Permet de récuperer une variable dans la Chaine POST ou de retourner une valeur par defaut
     :param varname: Variable à récuperer
@@ -124,6 +142,17 @@ def gvp(varname: str, defvalue: str = '') -> str:
     # TODO: form is ImmutableMultiDict, meaning that .get can (and does) return list
     # -> the signature is wrong in flask/werkzeug source.
     return ret
+
+
+def gvpm(varname: str) -> List[str]:
+    """
+    Permet de récuperer, pour une variable, toutes les valeurs dans la Chaine POST
+    :param varname: Variable à récuperer
+    :return: Liste des valeurs ou liste vide si la variable n'est pas présente
+    """
+    lst = request.form.getlist(varname)
+    # On filtre les valeurs vides
+    return [a_val for a_val in lst if a_val]
 
 
 def nonetoformat(v, fmt: str):
@@ -143,8 +172,8 @@ def XSSUnEscape(txt):
 
 
 def TaxoNameAddSpaces(name):
-    Parts = [XSSEscape(x) for x in ntcv(name).split('<')]
-    return ' &lt;&nbsp;'.join(Parts)  # premier espace secable, second non
+    Parts = [XSSEscape(x) for x in ntcv(name).split("<")]
+    return " &lt;&nbsp;".join(Parts)  # premier espace secable, second non
 
 
 def FormatError(Msg, *args, DoNotEscape=False, **kwargs):
@@ -152,15 +181,15 @@ def FormatError(Msg, *args, DoNotEscape=False, **kwargs):
     txt = Msg.format(*args, **kwargs)
     app.logger.error("FormatError from {} : {}".format(caller_frameinfo.function, txt))
     if not DoNotEscape:
-        Msg = Msg.replace('\n', '__BR__')
+        Msg = Msg.replace("\n", "__BR__")
     txt = Msg.format(*args, **kwargs)
     if not DoNotEscape:
         txt = XSSEscape(txt)
-    txt = txt.replace('__BR__', '<br>')
+    txt = txt.replace("__BR__", "<br>")
     return "<div class='alert alert-danger' role='alert'>{}</div>".format(txt)
 
 
-def FAIcon(classname, styleclass='fas'):
+def FAIcon(classname, styleclass="fas"):
     return "<span class='{} fa-{}'></span> ".format(styleclass, classname)
 
 
@@ -169,11 +198,11 @@ def FormatSuccess(Msg, *args, DoNotEscape=False, **kwargs):
     if not DoNotEscape:
         txt = XSSEscape(txt)
     if not DoNotEscape:
-        Msg = Msg.replace('\n', '__BR__')
+        Msg = Msg.replace("\n", "__BR__")
     txt = Msg.format(*args, **kwargs)
     if not DoNotEscape:
         txt = XSSEscape(txt)
-    txt = txt.replace('__BR__', '<br>')
+    txt = txt.replace("__BR__", "<br>")
     return "<div class='alert alert-success' role='alert'>{}</div>".format(txt)
 
 
@@ -183,11 +212,13 @@ def ComputeLimitForImage(imgwidth, imgheight, LimitWidth, LimitHeight):
     if width > LimitWidth:
         width = LimitWidth
         height = math.trunc(imgheight * width / imgwidth)
-        if height == 0: height = 1
+        if height == 0:
+            height = 1
     if height > LimitHeight:
         height = LimitHeight
         width = math.trunc(imgwidth * height / imgheight)
-        if width == 0: width = 1
+        if width == 0:
+            width = 1
     return width, height
 
 
@@ -262,20 +293,22 @@ def unhandled_exception(e):
     # Ajout des informations d'exception dans le template custom
     tb_list = traceback.format_tb(e.__traceback__)
     s = "<b>Error:</b> %s <br><b>Description: </b>%s \n<b>Traceback:</b>" % (
-        html.escape(str(e.__class__)), html.escape(str(e)))
+        html.escape(str(e.__class__)),
+        html.escape(str(e)),
+    )
     for i in tb_list[::-1]:
         s += "\n" + html.escape(i)
-    return render_template('errors/500.html', trace=s), 500
+    return render_template("errors/500.html", trace=s), 500
 
 
-def JinjaFormatDateTime(d, format='%Y-%m-%d %H:%M:%S'):
+def JinjaFormatDateTime(d, format="%Y-%m-%d %H:%M:%S"):
     if d is None:
         return ""
     return d.strftime(format)
 
 
 def JinjaNl2BR(t):
-    return t.replace('\n', '<br>\n')
+    return t.replace("\n", "<br>\n")
 
 
 def JinjaGetUsersManagerList(sujet=""):
@@ -289,24 +322,43 @@ def JinjaGetUsersManagerList(sujet=""):
         with ApiClient(UsersApi, request) as api:
             admin_users = api.get_users_admins()
     if sujet:
-        sujet = "?" + urllib.parse.urlencode({"subject": sujet}).replace('+', '%20')
-    return " ".join(["<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(sujet, r.email, r.name)
-                     for r in admin_users])
+        sujet = "?" + urllib.parse.urlencode({"subject": sujet}).replace("+", "%20")
+    return " ".join(
+        [
+            "<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(
+                sujet, r.email, r.name
+            )
+            for r in admin_users
+        ]
+    )
 
 
-ecotaxa_version = "2.6.3"
+ecotaxa_version = "2.6.4"
 
 
 def JinjaGetEcotaxaVersionText():
     return ecotaxa_version + " 2022-05-03"
 
 
-app.jinja_env.filters['datetime'] = JinjaFormatDateTime
-app.jinja_env.filters['nl2br'] = JinjaNl2BR
-app.jinja_env.globals.update(GetManagerList=JinjaGetUsersManagerList,
-                             GetEcotaxaVersionText=JinjaGetEcotaxaVersionText)
+app.jinja_env.filters["datetime"] = JinjaFormatDateTime
+app.jinja_env.filters["nl2br"] = JinjaNl2BR
+app.jinja_env.globals.update(
+    GetManagerList=JinjaGetUsersManagerList,
+    GetEcotaxaVersionText=JinjaGetEcotaxaVersionText,
+)
 
 """Changelog
+2022-05-30 : V 2.6.4
+    Bug #820: Difference in country treatment between self-registration and admin form
+    Bug #818: Importing a zip file of a few MB is impossible
+    Bug #817: page 2 Train&Predict : deletion of input not possible
+    Bug #815: Sample information on map not pulled form the correct project 
+    Feature #813: removed mail to marc.picheral@obs-vlfr.fr download line from the frontpage.
+    Bug #794: Nice error message when same user is twice in the members list during rights on a project
+    Bug #734: Overriding an existing user in privileges list keeps him/her 
+    Feature : client side validation  + add member  in Privileges list 
+    Bug #808: "Other filters" tab keeps memory of previous classification label
+    Feature #589: ui Display the contact name (rather than manager name)  in the project list
 2022-05-03 : V 2.6.3
     Feature #804: Make the front-end deliverable as a Docker image.
     Feature #798: Clean the configuration file(s) for proper source/config separation.
@@ -703,6 +755,7 @@ def load_admin():
     # IMPORTANT: The admin blueprint needs to be loaded before flaskAdmin below,
     # as it registers routes/templates in /admin, and flask-admin does it as well.
     from .admin.admin_blueprint import adminBlueprint
+
     app.register_blueprint(adminBlueprint)
     # noinspection PyUnresolvedReferences
     from .admin.admin_from_flask import flaskAdmin

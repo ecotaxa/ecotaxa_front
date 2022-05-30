@@ -1,336 +1,529 @@
 {% extends "layout.html" %}
 {% import "js_macros.html" as js %}
 {% import "ht_macros.html" as ht %}
-
 {% block body %}
-  <form class="form-horizontal" method="post" action="?" id="form1">
-    {% if g.privs_only %}
-      <h3>Edit project # {{ data.projid }} - privileges&nbsp;
-        <a href="/prj/edit/{{ data.projid }}" style="font-size: medium;"
-           class="btn btn-xs btn-primary">Edit all</a>
-      </h3>
-    {% else %}
-      <h3>Edit project # {{ data.projid }} -
-        <a href="/prj/editpriv/{{ data.projid }}" style="font-size: medium;"
-           class="btn btn-xs btn-primary">Edit privileges only</a>
-        <button type="button" style="position:absolute; right:5%"
-                onmousedown="SubmitForm();" class="btn btn-primary">Save
-        </button>
-      </h3>
-    {% endif %}
-    {% if not g.contact_user_id %}
-      <span class="alert-danger">IMPORTANT : A contact person needs to be designated among the current project managers. Use the "Edit privileges only" button or scroll down to bottom of the page.</span>
-    {% endif %}
+<form class="form-horizontal" method="post" action="?" id="form1" autocomplete="off">
+  {% if privs_only %}
+  <h3>Edit project # {{ target_proj.projid }} - privileges&nbsp;
+    <a href="/prj/edit/{{ target_proj.projid }}" style="font-size: medium;" class="btn btn-xs btn-primary">Edit all</a>
+  </h3>
+  {% else %}
+  <h3>Edit project # {{ target_proj.projid }} <!---
+   <a href="/prj/editpriv/{{ target_proj.projid }}" style="font-size: medium;" class="btn btn-xs btn-primary">Edit
+      privileges only</a>-->
+      <button type="button" style="position:absolute; right:5%" data-action="submit" data-target="#form1"
+      class="btn btn-primary">Save
+    </button>
+  </h3>
+  {% endif %}
+  {% if not target_proj.contact %}
+  <span class="alert-danger">IMPORTANT : A contact person needs to be designated among the current project managers. Use
+    the "Edit privileges only" button or scroll down to bottom of the page.</span>
+  {% endif %}
+  <table class=table width="100%">
+    {% if not privs_only %}
+    <tr>
+      <td>Instrument</td>
+      <td><select id="instrument" name="instrument" class="form-control" style="width: 30%">
+        </select>
+        <span id="change_warning" class="alert-warning">Changing the instrument associated with a project may affect the
+          behaviour of EcoTaxa in various ways and should not be done except to correct a mistake.</span>
+      </td>
+    </tr>
+    <tr>
+      <td width="200px">Project Title</td>
+      <td colspan=2>
+        <input type="text" class="form-control" id="title" name="title" value="{{ target_proj.title }}"
+          style="width: 500px">
+      </td>
+    </tr>
+    <tr>
+      <td>Data sharing license</td>
+      <td>
+        {% for k,v in possible_licenses.items() %}
+        <input type="radio" name="license" value="{{ k }}" {{ 'checked' if target_proj.license==k }}>
+        {{ v | safe }}<br>
+        {% endfor %}
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td>Visible for all visitors<br>(only validated objects)</td>
+      <td>
+        <input type="checkbox" style="height:20px;" id="visible" name="visible" value="Y" {{ 'checked' if
+          target_proj.visible else '' }}>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Status</td>
+      <td>
+        {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=target_proj.status) }}
+      </td>
+    </tr>
 
-    <table class=table width="100%">
-      {% if not g.privs_only %}
-        <tr>
-          <td>Instrument</td>
-          <td><select id="instrument" name="instrument" class="form-control"
-                      style="width: 30%">
-          </select>
-          <span id="change_warning" class="alert-warning">Changing the instrument associated with a project may affect the behaviour of EcoTaxa in various ways and should not be done except to correct a mistake.</span>
-          </td>
-        </tr>
-        <tr>
-          <td width="200px">Project Title</td>
-          <td colspan=2>
-            <input type="text" class="form-control" id="title" name="title" value="{{ data.title }}"
-                   style="width: 500px">
-          </td>
-        </tr>
-        <tr>
-          <td>Data sharing license</td>
-          <td>
-            {% for k,v in possible_licenses.items() %}
-              <input type="radio" name="license"
-                     value="{{ k }}"
-                  {{ 'checked' if data.license==k }}>
-              {{ v | safe }}<br>
-            {% endfor %}
-          </td>
-          <td>
-          </td>
-        </tr>
-        <tr>
-          <td>Visible for all visitors<br>(only validated objects)</td>
-          <td>
-            <input type="checkbox" style="height:20px;" id="visible" name="visible"
-                   value="Y" {{ 'checked' if data.visible else "" }}>
-          </td>
-          <td></td>
-        </tr>
-
-        <tr>
-          <td>Status</td>
-          <td>
-            {{ ht.selectinput('status', ("Annotate", "ExploreOnly","Annotate No Prediction"), value=data.status) }}
-          </td>
-        </tr>
-
-        <tr>
-          <td>Project Description</td>
-          <td>
+    <tr>
+      <td>Project Description</td>
+      <td>
         <textarea class="form-control" id="proj_description" name="description"
-                  rows="2">{{ data.description|default('',true) }}</textarea>
-          </td>
-          <td>A short paragraph describing the dataset, to make it discoverable by others in EcoTaxa and elsewhere.
-            It should indicate which organisms are targeted (e.g. mesozooplankton), where (e.g. Bering Sea),
-            when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed with a ZooScan) they were
-            collected,
-            the scientific program that motivated the work and who ran it (e.g. SCOR program coordinated by the
-            Laboratoire
-            d'Océanographie de Villefranche).
-          </td>
-        </tr>
+          rows="2">{{ target_proj.description|default('',true) }}</textarea>
+      </td>
+      <td>A short paragraph describing the dataset, to make it discoverable by others in EcoTaxa and elsewhere.
+        It should indicate which organisms are targeted (e.g. mesozooplankton), where (e.g. Bering Sea),
+        when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed with a ZooScan) they were
+        collected,
+        the scientific program that motivated the work and who ran it (e.g. SCOR program coordinated by the
+        Laboratoire
+        d'Océanographie de Villefranche).
+      </td>
+    </tr>
 
-        <tr>
-          <td>Definition of preset for manual sorting
-            <br>
-            <button class="btn btn-default" type="button" onclick="PickPresetFromOthersProject();">
-              <i class="fas fa-clone"></i> Pick from others projects
-            </button>
-          </td>
-          <td>
-            <input type="hidden" class="form-control" id="initclassiflist" name="initclassiflist"
-                   value="{{ data.init_classif_list|default('',true) }}">
-            <select id='inittaxo' class="taxolb" style="width: 100%;" multiple>
-              {% for r in g.predeftaxo %}
-                <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
-              {% endfor %}
-            </select>
-          </td>
-          <td>
-            The PRESET tool permits to create a pre-defined list of categories for the sorting of the images from
-            the project
-            <ul>
-              <li>The list can be directly copied from another project (use Pick from other projects)
-              <li>New categories can be added using the auto completion function
-            </ul>
-          </td>
-        </tr>
+    <tr>
+      <td>Definition of preset for manual sorting
+        <br>
+        <button class="btn btn-default" type="button" data-action="pick-preset">
+          <i class="fas fa-clone"></i> Pick from others projects
+        </button>
+      </td>
+      <td>
+        <input type="hidden" class="form-control" id="initclassiflist" name="initclassiflist"
+          value="{{ target_proj.init_classif_list|default('',true) }}">
+        <select id='inittaxo' class="taxolb" style="width: 100%;" multiple>
+          {% for r in predeftaxo %}
+          <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>
+        The PRESET tool permits to create a pre-defined list of categories for the sorting of the images from
+        the project
+        <ul>
+          <li>The list can be directly copied from another project (use Pick from other projects)
+          <li>New categories can be added using the auto completion function
+        </ul>
+      </td>
+    </tr>
 
-        <tr>
-          <td>Fields available for<br>sorting & Display<br>In the manual classification page</td>
-          <td>
+    <tr>
+      <td>Fields available for<br>sorting & Display<br>In the manual classification page</td>
+      <td>
         <textarea class="form-control" id="classiffieldlist" name="classiffieldlist"
-                  rows="8">{{ data.classiffieldlist|default('',true) }}</textarea>
-          </td>
-          <td>
-            Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
-            <br>Example : depth_min=minimum depth [m] where
-            <ul>
-              <li>depth_min is the variable from the imported TSV file
-              <li>minimum depth [m] is the displayed name
-            </ul>
-            Notes :
-            <ul>
-              <li>the table can be copied from another project (opened in a different tab)
-              <li>only LOWER CASE
-            </ul>
-            Available fields :
-            {% for x in g.maplist %}{{ x }}, {% endfor %}
+          rows="8">{{ target_proj.classiffieldlist|default('',true) }}</textarea>
+      </td>
+      <td>
+        Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
+        <br>Example : depth_min=minimum depth [m] where
+        <ul>
+          <li>depth_min is the variable from the imported TSV file
+          <li>minimum depth [m] is the displayed name
+        </ul>
+        Notes :
+        <ul>
+          <li>the table can be copied from another project (opened in a different tab)
+          <li>only LOWER CASE
+        </ul>
+        Available fields :
+        {% for x in maplist %}{{ x }}, {% endfor %}
 
-          </td>
-        </tr>
-        <tr>
-          <td>Fields displayed in image popover<br>in the manual classification page</td>
-          <td>
+      </td>
+    </tr>
+    <tr>
+      <td>Fields displayed in image popover<br>in the manual classification page</td>
+      <td>
         <textarea class="form-control" id="popoverfieldlist" name="popoverfieldlist"
-                  rows="8">{{ data.popoverfieldlist|default('',true) }}</textarea>
-          </td>
-          <td>
-            Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
-            <br>Example : depth_min=minimum depth [m] where
-            <ul>
-              <li>depth_min is the variable from the imported TSV file
-              <li>minimum depth [m] is the displayed name
-            </ul>
-            Notes :
-            <ul>
-              <li>the table can be copied from another project (opened in a different tab)
-              <li>only LOWER CASE
-            </ul>
-            Available fields :
-            {% for x in g.maplist %}{{ x }}, {% endfor %}
+          rows="8">{{ target_proj.popoverfieldlist|default('',true) }}</textarea>
+      </td>
+      <td>
+        Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
+        <br>Example : depth_min=minimum depth [m] where
+        <ul>
+          <li>depth_min is the variable from the imported TSV file
+          <li>minimum depth [m] is the displayed name
+        </ul>
+        Notes :
+        <ul>
+          <li>the table can be copied from another project (opened in a different tab)
+          <li>only LOWER CASE
+        </ul>
+        Available fields :
+        {% for x in maplist %}{{ x }}, {% endfor %}
 
-          </td>
-        </tr>
-        <tr>
-          <td>SCN Network</td>
-          <td>
-            <select class="form-control" id="cnn_network_id" name="cnn_network_id">
-              <option value=""></option>
-              {% for k,v in g.scn.items() %}
-                <option value="{{ k }}" {{ 'selected' if data.cnn_network_id==k }}>{{ v.name }}</option>
-              {% endfor %}
-            </select>
-          </td>
-          <td>SCN Network used for prediction, if you change it, existing features computed with this network will be
-            erased.
-            <br>New features will be recomputed during the next automatic classification.
-          </td>
-        </tr>
-        <tr>
-          <td>Comments</td>
-          <td>
+      </td>
+    </tr>
+    <tr>
+      <td>SCN Network</td>
+      <td>
+        <select class="form-control" id="cnn_network_id" name="cnn_network_id">
+          <option value=""></option>
+          {% for k,v in scn.items() %}
+          <option value="{{ k }}" {{ 'selected' if target_proj.cnn_network_id==k }}>{{ v.name }}</option>
+          {% endfor %}
+        </select>
+      </td>
+      <td>SCN Network used for prediction, if you change it, existing features computed with this network will be
+        erased.
+        <br>New features will be recomputed during the next automatic classification.
+      </td>
+    </tr>
+    <tr>
+      <td>Comments</td>
+      <td>
         <textarea class="form-control" id="comments" name="comments"
-                  rows="4">{{ data.comments|default('',true) }}</textarea>
-          </td>
-          <td>Any technical, practical details that need to be shared with other users able to access this project.
-          </td>
-        </tr>
-      {% endif %}
-      <tr>
-        <td>Privileges</td>
-        <td colspan="1">
-          <table class="table table-bordered table-verycondensed" style="width:500px;">
-            <tr>
-              <td>Name</td>
-              <td>Privilege</td>
-              <td>Contact</td>
-              <td>Delete</td>
-            </tr>
-            {% for pr in g.members %}
-              <tr>
-                <td>{{ ht.selectinputdict('priv_'~pr.member_id~'_member', g.users, pr.member_id) }}</td>
-                <td>{{ ht.selectinput('priv_'~pr.member_id~'_privilege', ('View', 'Annotate','Manage'),
-                            pr.privilege) }}
-                </td>
-                <td><input type="radio" name="contact_user_id"
-                           value="{{ pr.member_id }}"
-                    {{ 'disabled' if pr.privilege != 'Manage' }}
-                    {{ 'checked' if pr.member_id == g.contact_user_id }}>
-                </td>
-                <td><input type="checkbox" name="priv_{{ pr.member_id }}_delete" value="Y"></td>
-              </tr>
-            {% endfor %}
-            <tr>
-              <td>New privilege :</td>
-              <td colspan="3"></td>
-            </tr>
-            <tr>
-              <td>{{ ht.selectinputdict('priv_new_member', g.users, '',true) }}</td>
-              <td>{{ ht.selectinput('priv_new_privilege', ('View', 'Annotate','Manage'), '') }}</td>
-              <td></td>
-              <td></td>
-            </tr>
+          rows="4">{{ target_proj.comments|default('',true) }}</textarea>
+      </td>
+      <td>Any technical, practical details that need to be shared with other users able to access this target_proj.
+      </td>
+    </tr>
+    {% endif %}
+    <tr>
+      <td>Privileges</td>
+      <td colspan="1">
+        <table id="section-privileges" class="table table-bordered table-verycondensed" style="width:500px;" data-alert="true">
+          <tr>
+            <td>Name</td>
+            <td>Privilege</td>
+            <td>Contact</td>
+            <td>Delete</td>
+          </tr>
+          {% for pr in members %}
 
-          </table>
+          <tr data-block="member">
+            <td data-elem="ident">{{ ht.selectinputdict('members[member][]',users, pr.member_id) }}
 
-        </td>
-        <td>
-          The roles in short:
-          <ul>
-            <li>Viewers can view the project even when it is private; the project is listed in their project
-              list.
-            </li>
-            <li>Annotators can classify objects.</li>
-            <li>Managers can import and delete data, as well as change project settings.</li>
-            <li>The contact person is a Manager, displayed in the project table and serving as the contact point
-              for other users and EcoTaxa's managers.
-            </li>
-          </ul>
-        </td>
-      </tr>
+            <td data-elem="priv">{{ ht.selectinput("members[privilege][]", ('View', 'Annotate','Manage'),
+              pr.privilege) }}
+            </td>
+            <td data-elem="contact"><input type="radio" name="contact_user_id" value="{{ pr.member_id }}" {{ 'disabled'
+                if pr.privilege !='Manage' }} {{ 'checked' if (target_proj.contact and
+                pr.member_id==target_proj.contact.id) }}>
+            </td>
+            <td data-elem="delet"><input type="checkbox" name="members[delet][]" value="{{ pr.member_id }}"
+                {{ 'disabled' if (target_proj.contact and pr.member_id==target_proj.contact.id) }}></td>
+          </tr>
+          {% endfor %}
+          <tr>
+            <td>New privilege :</td>
+            <td colspan="3"></td>
+          </tr>
+          <tr data-block="member" data-mod="new">
+            <td data-elem="ident">{{ ht.selectinputdict('members[member][]',users,'',true) }}</td>
+            <td data-elem="priv">{{ ht.selectinput("members[privilege][]", ('View', 'Annotate','Manage'), '') }}</td>
+            <td data-elem="contact"><input type="radio" name="contact_user_id" value="" disabled>
+            </td>
+            <td data-elem="delet"><input type="checkbox" name="members[delet][]" value=""></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="text-right"><button id="addmember" class="btn btn-secondary" data-action="addline"
+                data-target="member">New Member</button></td>
+          </tr>
+        </table>
 
-    </table>
+      </td>
+      <td>
+        The roles in short:
+        <ul>
+          <li>Viewers can view the project even when it is private; the project is listed in their project
+            list.
+          </li>
+          <li>Annotators can classify objects.</li>
+          <li>Managers can import and delete data, as well as change project settings.</li>
+          <li>The contact person is a Manager, displayed in the project table and serving as the contact point
+            for other users and EcoTaxa's managers.
+          </li>
+        </ul>
+      </td>
+    </tr>
 
-    <input type="hidden" name="save" value="Y">
-    <div class="form-group">
-      <div class="col-sm-offset-2 col-sm-1">
-        <button type="button" onmousedown="SubmitForm();" class="btn btn-primary">Save</button>
-      </div>
-      <div class="col-sm-2">
-        <a href="/prj/{{ data.projid }}" class="btn btn-warning">Cancel, back to project</a>
-      </div>
+  </table>
+
+  <input type="hidden" name="save" value="Y">
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-1">
+      <button type="button" data-action="submit" data-target="#form1" class="btn btn-primary">Save</button>
     </div>
+    <div class="col-sm-2">
+      <a href="/prj/{{ target_proj.projid }}" class="btn btn-warning">Cancel, back to project</a>
+    </div>
+  </div>
+</form>
 
-  </form>
+<script>
+
+  const instr_from_prj = "{{ target_proj.instrument }}";
+  const newAlert = function (text, type = 'warning', options = { title: '', relid: null, duration: null, buttons: null }) {
+    if(options.relid !== null) $('#'+options.relid).remove();
+    const alerttype = { 'danger': 'IMPORTANT :', 'warning': 'ATTENTION: ', 'info': 'INFORMATION: ', 'success': 'SUCCESS :', 'error': 'ERROR: ' };
+    const alertbox = $('<div class="alert alert-' + type + ' alert-dismissible w-lg-50 w-md-75 mx-2" '+ ((options.relid === null)?'':' id="' +options.relid+'"') +'  role="alert">' +
+      '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span>' +
+      '</button></div>');
+    alertbox.append('<p><strong>' + alerttype[type] + ((options.title === undefined || options.title === '') ? '' : ': ' + options.title) + ' </strong>' + text + '</p>');
+    if (type === 'confirm') {
+      alertbox.append('<div class="btn-group"><button class="btn btn-primary" data-value=true>Ok</button><button class="btn btn-cancel" data-value=false>Cancel</button></div>');
+      alertbox.find('button[data-value]').click(function (e) { return $(this).data('value'); });
+    }
+
+    const bf = ($('[data-alert]').length) ? $('[data-alert]') : $('form');
+    bf.before(alertbox);
+    alertbox.alert();
+    alertbox.on('close.bs.alert', function() { 
+      $(this).fadeOut('slow');
+    });
+    if (options.duration !== undefined && options.duration !== null) {
+      setTimeout(function () { if (alertbox) { alertbox.alert('close'); alertbox.alert('dispose'); } }, options.duration);
+    }
+
+  }
+  $(document).ready(function () {
+    $.fn.setfocus = function () {
+      $(this).find('select[name*="[member]"]').select2('open');
+    }
 
 
-  <script>
-      $(document).ready(function () {
-          $(".taxolb").select2({
-              ajax: {
-                  url: "/search/taxo",
-                  dataType: 'json',
-                  delay: 250,
-                  data: function (params) {
-                      return {q: params.term, page: params.page};
-                  },
-                  processResults: function (data, page) {
-                      return {results: data};
-                  },
-                  cache: true
-              },
-              minimumInputLength: 3
-          }); // Select2 Ajax
-          $("select[name$=member]").{{ js.select2_user() }}; // Select2 Ajax
-          $('#TaxoModal').on('show.bs.modal', function (e) {
-              var button = $(e.relatedTarget); // Button that triggered the modal
-              var targetid = button.data('mytargetid');
-              $("#TaxoModalBody").html("Loading...");
-              $("#TaxoModalBody").load("/search/taxotree?target=" + targetid);
+    $(".taxolb").select2({
+      ajax: {
+        url: "/search/taxo",
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return { q: params.term, page: params.page };
+        },
+        processResults: function (data, page) {
+          return { results: data };
+        },
+        cache: true
+      },
+      minimumInputLength: 3
+    });
+    $('#TaxoModal').on('show.bs.modal', function (e) {
+      var button = $(e.relatedTarget); // Button that triggered the modal
+      var targetid = button.data('mytargetid');
+      $("#TaxoModalBody").html("Loading...");
+      $("#TaxoModalBody").load("/search/taxotree?target=" + targetid);
+    });
+
+    // Select2 Ajax   members privileges
+    errortxt = {'nomanager':'A manager person needs to be designated among the current project persons',
+                'nobody':'One person, at least, needs to be related to the project',
+                'nocontact':'A contact person needs to be designated among the current project managers.',
+               }
+    $('[data-block="member"][data-mod="new"]').find('input[name="contact_user_id"], input[name*="[delet]"]').addClass('hide');
+    $("select[name*='[member]']").{{ js.select2_user() }}; // Select2 Ajax
+
+    // init member lines events       
+    $('[data-block="member"]').each(function () {
+      const member = $(this).find("select[name*='[member]']");
+      // change Select2 verif duplicates and add input related fields the same id value  
+      member.on('select2:selecting', function (e) {
+        const value = e.params.args.data;
+        const finds = $("select[name*='[member]'] option[value='" + value.id + "']:selected");
+        const relid = $(this).data('relid'); 
+        if(relid !== null) $('#'+relid+'.alert .close').click();
+        if (finds.length > 0) { 
+          $(this).select2('close');
+          newAlert('User ' + value.text + ' cannot be duplicated in the list.', 'warning',{relid: 'rel' + value.id});
+           $(this).data('relid','rel'+value.id);
+           e.preventDefault();
+           return false;
+         
+        } else {
+          const items = $(e.target).closest('[data-block="member"]').find('input[name="contact_user_id"], input[name*="[delet]"]');
+          items.each(function () {
+            $(this).attr('value', value.id);
+            $(this).removeClass('hide');
+            if ($(this).attr('name') !== 'contact_user_id') $(this).removeAttr('disabled');
           });
-          // A Dict[str,str] in python loads fine in JS var
-          var choice_to_help =
-          {{ possible_licenses | safe }}
-          var show_license_help = function (sel) {
-              var help = choice_to_help[sel];
-              if (help.startsWith("http")) {
-                  // If a link, show it clickable
-                  help = "<a target='_new' href='" + help + "'>" + help + "</a>";
-              }
-              $("#license_explain").html(help);
-          };
-          // on change handler
-          $('#license').change(function (event) {
-              show_license_help($(this)[0].value);
-          });
-          // initial value of license
-          show_license_help('{{ data.license }}');
-          $("#instrument").{{ js.select2_instrument() }};
-      }); // Ready
-
-      const instr_from_prj = "{{ data.instrument }}";
-
-      $(document).ready(function () {
-          {{ js.select2_setval('#instrument', 'instr_from_prj', 'instr_from_prj') }}
-      }); // Ready
-
-      $('#instrument').on("change", function (e) {
-          // another instrument was selected
-          const new_instr = $(this).val();
-          const chg_warning = $("#change_warning");
-          if ((instr_from_prj !== "?") && (new_instr !== instr_from_prj)) {
-              // warn if it's not just changing from 'unknown'
-              chg_warning.show();
+          return true;
+        }
+      });
+      // clear related values in input fields when select2 clears  
+      member.on('select2:clear', function (e) {
+        const items = $(e.target).closest('[data-block="member"]').find('input[name="contact_user_id"], input[name*="[delet]"]');
+        items.each(function () {
+          $(this).attr('value', '');
+        });
+      });
+      // enable/disable contact when privilege changes
+      $(this).find("select[name*='[privilege]']").change(function (e) {
+        const elem = $(this);
+        let contact = elem.closest('[data-block="member"]').find('input[name="contact_user_id"]');
+        let delet = elem.closest('[data-block="member"]').find('input[name*="[delet]"]');
+        if (contact.length) {
+          if (elem.val() == 'Manage') {
+            contact.removeAttr('disabled');
           } else {
-              chg_warning.hide();
+            contact.attr('disabled', 'disabled');
+            contact.removeAttr('checked');
+            delet.removeAttr('disabled');
           }
+          if ($("select[name*='[privilege]'] option[value='Manage']:selected").length === 0) { newAlert(errortxt['nomanager'], 'danger'); }
+        }
       });
-
-      $('#inittaxo').on("change", function (e) {
-          var selected = [];
-          $('#inittaxo :selected').each(function () {
-              selected.push($(this).val())
+      // contact changes
+      $(this).find('input[name="contact_user_id"]').change(function (e) {
+        if ($(this).is(':checked')) {
+          const v = $(this).val();
+          $('input[name*="[delet]"]').each(function () {
+            if ($(this).attr('value') !== v) {
+              $(this).removeAttr('disabled');
+            } else {
+              $(this).removeAttr('checked').attr('disabled', 'disabled');
+            }
           });
-          $("#initclassiflist").val(selected.join())
+        }
       });
+      // delete check if is contact manager - or if is new line - not first one - remove the member line      
+      $(this).find('input[name*="[delet]"]').change(function (e) {
+        const line = $(this).closest('[data-block="member"]');
+        const box = line.find('input[name="contact_user_id"]');
+        if ($(this).is(':checked')) {
+          //TO DO : choose to remove the line for new one / or all / or mark as disabled  
+          /* if(line.data('mod') === 'new' && $('[data-block="member"]').length > 0) {
+             line.remove(); 
+           } else { */
+          line.data('mod', 'remove');
+          box.removeAttr('ckecked');
+          box.attr('disabled', 'disabled');
+          line.find('[name*="[member]"],[name*="[privilege]"]').attr('disabled', 'disabled');
+          // }
 
-      function SubmitForm() { {# On passe par cette fonction intermediaire car quand on avait le focus sur un select2 dans certaines
-     situations ca ne faisait pas le post #}
-          document.getElementById("form1").submit();
+        } else {
+          line.data('mod', null);
+          if (line.find('[name*="[privilege]"]').val() === 'Manage') box.removeAttr('disabled');
+          line.find('[name*="[member]"],[name*="[privilege]"]').removeAttr('disabled');
+        }
+      });
+    });
+    // add member line clone of last data-block
+    const addLine = function (line, separ) {
+      const style = line.find('.select2').attr('style');
+      // deactivate select2 before cloning with events          
+      line.find('select[name*="[member]"]').select2('destroy');
+      let newline = line.clone(true);
+      line.find('select[name*="[member]"]').{{ js.select2_user() }};
+      // reset all values
+      const items = newline.find('[data-elem] input');
+      items.each(function () { $(this).removeAttr('checked').val(''); });
+      const newselect = newline.find('select[name*="[member]"]');
+      newselect.attr('tabindex', '-1').val('');
+      newselect.find('option:selected').removeAttr('selected');
+      newselect.{{ js.select2_user() }};
+      newselect.trigger('select2:clear');
+      newline.find('[name*="[delet]"]').addClass('hide');
+      newline.find('select').each(function() {$(this).removeAttr('disabled');});
+      newline.find('.select2').attr('style', style);
+      separ.before(newline.data('mod', 'new'));
+    }
+    // button add member
+    $('#addmember').click(function (e) {
+      e.preventDefault();
+      const line = $('[data-block="' + $(this).data('target') + '"]').last();
+      if (line.length > 0) {
+        newone = line.find('select[name*="[member]"]');
+        if (newone.length) {
+          if (newone.val() !== '') {
+            addLine(line, $(this).closest('tr'));
+          } else {
+            line.setfocus();
+          }
+        }
       }
+    });
 
-      function PickPresetFromOthersProject() {
-          At2PopupWaitOpenLoad(2, '/prj/popupeditpreset/{{ data.projid }}', 'Pick preset from other projects', {});
+    // A Dict[str,str] in python loads fine in JS var
+    const choice_to_help = {{ possible_licenses | safe
+  }};
+  const show_license_help = function (sel) {
+    const help = choice_to_help[sel];
+    if (help.startsWith("http")) {
+      // If a link, show it clickable
+      help = "<a target='_new' href='" + help + "'>" + help + "</a>";
+    }
+    $("#license_explain").html(help);
+  };
+  // on change handler
+  $('#license').change(function (event) {
+    show_license_help($(this)[0].value);
+  });
+  // initial value of license
+  show_license_help('{{ target_proj.license }}');
+  $("#instrument").{{ js.select2_instrument() }};
+
+  {{ js.select2_setval('#instrument', 'instr_from_prj', 'instr_from_prj') }}
+
+
+  $('#instrument').on("change", function (e) {
+    // another instrument was selected
+    const new_instr = $(this).val();
+    const chg_warning = $("#change_warning");
+    if ((instr_from_prj !== "?") && (new_instr !== instr_from_prj)) {
+      // warn if it's not just changing from 'unknown'
+      chg_warning.show();
+    } else {
+      chg_warning.hide();
+    }
+  });
+  $('#inittaxo').on("change", function (e) {
+    var selected = [];
+    $('#inittaxo :selected').each(function () {
+      selected.push($(this).val())
+    });
+    $("#initclassiflist").val(selected.join());
+  });
+  function HasMember() {
+    let n = 0;
+    $('[data-block="member"]').each(function() {
+      const m = $(this).data('mod');
+     switch(m) {
+       case 'new':
+        if ($(this).find('select[name*="[member]"]').val() > 0) n++; 
+       break;
+       case 'remove':
+       break;
+       default:
+        n++;
+       break;
+       }
+    });
+    if (n === 0) {
+      newAlert(errortxt['nobody'], 'danger');
+      return false;
+      } else return true;
+  }
+  function CleanForm() {
+    $('[data-block="member"]').each(function () {
+      if ($(this).data('mod') === 'remove') $(this).remove();
+    });   
+  }
+  // check managers and contact_user_id on submit
+  function CheckContact() {
+    if ($("[name*='[privilege]'] option[value='Manage']:selected").length === 0) {
+      newAlert(errortxt['nomanager'], 'danger');
+      return false;
       }
+    // check contact       
+    if ($("[name='contact_user_id']:checked").length === 0) {
+      newAlert(errortxt['nocontact'], 'danger');
+      return false;
+    }
+    return true;
+  }
 
-  </script>
+  $('[data-action="submit"]').on("mousedown", function (e) {
+    CleanForm(); //remove   members lines to delete
+    if(HasMember()  === true && CheckContact() === true) {
+      $('#form1').submit(); 
+      }
+  });
+
+  $('[data-action="pick-preset"]').click(function (e) {
+    At2PopupWaitOpenLoad(2, '/prj/popupeditpreset/{{ target_proj.projid }}', 'Pick preset from other projects', {});
+  });
+
+    }); // Ready               
+</script>
 
 
-  {% include "taxo_modal_div.html" %}
+{% include "taxo_modal_div.html" %}
 
 {% endblock %}
