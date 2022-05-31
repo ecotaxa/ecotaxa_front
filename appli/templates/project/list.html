@@ -75,7 +75,7 @@
   {% for r in PrjList %}
   {% if r.managers %}
   {% set manager_to_contact = r.managers[0] if r.contact == None else r.contact %} 
-    {% set data_contact = 'data-nocontact' if r.contact == None else ' data-contact="Contact" ' %}
+    {% set data_contact = '' if r.contact == None else ' data-contact="Contact" ' %}
   {% endif %}
     <tr>
       <td>
