@@ -73,12 +73,15 @@
   </thead>
   <tbody>
   {% for r in PrjList %}
+  {% if r.managers %}
+  {% set manager_to_contact = r.managers[0] if r.contact == None else r.contact %} 
+    {% set data_contact = 'data-nocontact' if r.contact == None else ' data-contact="Contact" ' %}
+  {% endif %}
     <tr>
       <td>
         {% if Others %}
-          <a class='btn btn-primary'
-             href='mailto:{{ r.managers[0].email|safe if r.managers }}?{{ _manager_mail(r.title, r.projid)|safe if r.managers }}'>REQUEST
-            ACCESS</a>
+           <a class="btn btn-primary" {{ data_contact }} href="mailto:{{ manager_to_contact.email|safe if r.managers }}?{{ _manager_mail(r.title, r.projid)|safe if r.managers }}">
+           REQUEST ACCESS</a>
           {% if r.visible==True or isadmin %}
             <a class='btn btn-primary' href='/prj/{{ r.projid }}'>View</a>
           {% endif %}
@@ -89,7 +92,7 @@
       </td>
       <td> {{ r.instrument }}
       <td> {{ r.title }}
-        [{{ r.projid }}] {{ ("<a href='mailto:"+r.managers[0].email+"'>"+r.managers[0].name+"</a>") |safe if r.managers }}</td>
+        [{{ r.projid }}] {{ ("<a href='mailto:"+manager_to_contact.email+"' " + data_contact  +" >"+manager_to_contact.name+"</a>") |safe if r.managers }}</td>
       <td>{{ r.status }}</td>
       <td>{{ '{0:0.0f}'.format(r.objcount) if r.objcount else 0 }}</td>
       <td>{{ '{0:0.2f}'.format(r.pctvalidated) if r.pctvalidated else 0.0 }}</td>
@@ -176,6 +179,9 @@
 </script>
 <script>
     $(document).ready(function () {
+        if($('a[data-contact]').length > 0) {
+               $("head").append($('<style>a[data-contact]::after { z-index:10;margin:-12px 4px auto 8px;font-size:.625em;font-weight:600;text-decoration:none!important;padding:1px 4px;border-radius:3px;background-color:#337ab7;color:#fff;content:attr(data-contact) }</style>'));
+         }
         {%  if filt_instrum|length > 0 %}
             // Set selection in instruments list
             var sel2 = $('#filt_instrum');
