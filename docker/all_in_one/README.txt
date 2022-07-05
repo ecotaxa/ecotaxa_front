@@ -1,7 +1,8 @@
 
 PRE-REQUISITES:
 
-Docker tool on your PC. Tested only on amd64 processor family.
+Install Docker on your computer. On Mac OS and Windows, install Docker Desktop from https://www.docker.com/products/docker-desktop/.
+Tested Linux, Windows and Mac OS (but amd64 and M1 architectures).
 
 HOWTO:
 
@@ -20,6 +21,9 @@ The back-end docker should appear in the list, and be running. Its name will lik
 Now build the DB, using the found name:
 
 $ docker exec -it portable-ecotaxaback-1 bash
+
+and run the following commands:
+
 root@97aab8baa6b0:/app# PYTHONPATH=. python cmds/manage.py db create --password mysecretpassword --db-name ecotaxa
 root@97aab8baa6b0:/app# PYTHONPATH=. python cmds/manage.py db build
 Adding user 'administrator'
@@ -29,5 +33,3 @@ The errors should stop in the first shell.
 You should now be able to connect to http://localhost:8088 using administrator/ecotaxa
 
 Before e.g. trying to import some data, it's better to fetch the official taxonomy tree, by using http://localhost:8088/taxo/browse/ (and waiting...)
-
-
