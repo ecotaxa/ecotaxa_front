@@ -1,0 +1,64 @@
+{% extends './v2/layout.html' %}
+{% macro card(sponsor,display = 'block', divide='',h='96') -%}
+<div class="card w-64 h-{{h}} {{ display }} md:divide-y overflow-hidden text-ellipsis">
+  <figure class="w-64 h-48 bg-white mt-0 {{divide}} "> <a href="{{sponsor.url}}" target="_blank"><img class="object-cover object-scale-down w-48 h-32 m-8" src="/static/gui/images/logos/{{sponsor.logo}}" alt="logo {{sponsor.name}}"></a></figure>
+  <div class="text-sm w-64 p-2 text-stone-700 overflow-hidden">
+      <h4 class="font-medium"><a href="{{sponsor.url}}" target="_blank" class="text-secondlbue-700 ">{{sponsor.name}} </a></h4>
+    {% if sponsor.text %}
+    <div class="overflow-hidden text-ellipsis">{{sponsor.text}}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{%- endmacro %}
+
+{% block body %}
+<div class="container px-8 py-12 pt-64 mt-12 mb-24 mx-auto bg-gradient-to-b  from-transparent to-mainblue-50 shadow"  id="page">
+
+  <section data-elem="usage" class="max-w-screen-md prose lg:prose-xl prose-stone min-w-[80%]">
+      <h1>{{_('Welcome to Ecotaxa')}}</h1>
+      <aside">{{_("EcoTaxa is a web application dedicated to the visual exploration and the taxonomic annotation of images that illustrate the beauty of planktonic biodiversity.")}}</aside>
+    <p class="prose prose-md min-w-full">{{_("If you use EcoTaxa in your work, we would appreciate if you cite it as:<br><blockquote class='text-base'>Picheral M, Colin S, Irisson J-O (2017). <br>EcoTaxa, a tool for the taxonomic classification of images: <a href='http://ecotaxa.obs-vlfr.fr'>http://ecotaxa.obs-vlfr.fr</a></blockquote>")|safe}}</p>
+
+  </section>
+  <section data-block="sponsors" class="mx-2">
+    <!-- sponsors cards horizontal slider -->
+    <div class=" w-full pt-2 pb-2 flex flex-row flex-wrap gap-6 pb-14 no-prose">
+      {% for sponsor in sponsors %}
+      {% if 'sponsors' in sponsor.keys() %}
+      {% set h = '64' if ('text' in sponsor.keys() and sponsor.text !='') else '96' %}
+        {% set w=(8*sponsor.sponsors|length)|string() + 'rem' if h == '64' else '64' %}
+      <div class="w-[{{w}}] h-auto h-min-96 flex flex-col overflow-y-visible md:w-auto md:h-96 md:overflow-y-hidden rounded bg-white shadow md:px-3 ">
+        <div class="h-{{h}} flex md:flex-row md:flex-nowrap">
+        {% for sponsor in sponsor.sponsors %}
+        {{ card(sponsor,'md:inline-block','md:border-r border-stone-100 ',h)}}
+        {% endfor %}
+      </div>
+      {% if h == '64' %}
+      <div class="block break-all  md:text-ellipsis md:verflow-hidden">{{ sponsor.text|safe}}</div>
+      {% endif %}
+      </div>
+      {% else %}
+      <div class="w-64 h-min-96 md:h-96 bg-white rounded shadow ">
+        {{ card(sponsor) }}
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+    <!-- end cards slider -->
+  </section>
+  <section data-block="who" class="prose lg:prose-xl prose-stone min-w-[80%]">
+    <p >
+      {{_("The maintenance of the software and hardware that allows EcoTaxa to run depends on the support of its users, who can be officially billed by the <a href='https://www.sorbonne-universite.fr/plateformes-techniques/plateforme-dimagerie-quantitative-de-villefranche-sur-mer-piqv'>Quantitative Imaging Platform of Villefranche</a>. We would very much appreciate if you would consider setting aside some funds in your next grant for this. Contact us to estimate what would be both reasonable and useful.")|safe}}</p>
+    <p>{{_("The persons who made EcoTaxa possible are:")}}</p>
+    <ul class="prose prose-ul:ul">
+      <li class="prose prose-li:li">{{_("MMarc Picheral and Jean-Olivier Irisson: specifications and project supervision")}}</li>
+      <li class="prose prose-li">{{_("Sébastien Colin: initial specification")}}</li>
+      <li class="prose prose-li">{{_("Altidev, Laurent Salinas, Laurent Reese: development")}}</li>
+      <li class="prose prose-li">{{_("Simon-Martin Schröder, Benjamin Graham: deep learning implementation")}}</li>
+      <li class="prose prose-li">{{_("Amanda Elineau, Corinne Desnos, Laetitia Jalabert and the COMPLEx team of the <a href='https://lov.imev-mer.fr/'>Laboratoire d'Océanographie de Villefranche</a> (LOV): testing and feedback")|safe}}</li>
+    </ul>
+    <div class="prose prose-sm mt-4 min-w-[80%]"><strong>{{_('Disclaimer :')}}</strong>{{_("If you annotate images in EcoTaxa you cannot claim for any retribution from the application managers but you can then download and use the results of your work. Even if they make their best to keep the application stable and secure, the managers of the EcoTaxa application are not liable for the safekeeping of the images and associated data it hosts. You are responsible for performing regular backups.")}}</div>
+</div>
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "./v2/layout.html" %}
+{% block body %}
+<div class="justify-items-center flex  md:flex-row  w-full lg:w-10/12 xl:w-1/3  mt-64 px-2 lg:mx-auto">
+  <div id="home-registration" class=" w-96  h-96 md:w-1/2 -mt-8 overflow-hidden border border-transparent background-register md:flex-2 shadow px-2 mr-8 sm:px-4 ">
+    <form method="get" action="gui/register">
+      <fieldset >
+        <legend >{{_('Register')}}</legend>
+        <button id="register" class="button is-action w-full text-center hover:bg-transparent" type="submit"><span><i class="icon icon-user-plus inline-block w-0 h-0"></i>{{ _('Create your EcoTaxa account')}}</span></button>
+        <div class="mt-4 leading-snug text-mainblue-900 ">
+          <p>In case of registration problem or if you want to avoid Google reCaptcha on Account creation page for privacy reasons
+            , please send an email to one the following persons in order to proceed to a manual account creation</p>
+          <ul class=" inline mb-2 py-2">{{ GetManagerList('Ecotaxa : Account issue')|safe }}</ul>
+        </div>
+        <a href="/privacy" class=" text-white ">{{ _('Our privacy statement')}}</a>
+      </fieldset>
+    </form>
+  </div>
+  <div id="home-login" class=" w-96 h-96 md:w-1/2  border border-stone-300 -mt-8 md:flex-2 shadow px-2 sm:px-4 ">
+    {% include './v2/security/_login.html' %}
+    {# include "./v2/security/_menu.html" #}
+  </div>
+</div>
+{% endblock %}

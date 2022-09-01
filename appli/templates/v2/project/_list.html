@@ -1,0 +1,31 @@
+
+{# table fields settings #}
+{% set tableid = 'projects-list'%}
+{% set ths = [{'label':'ID','sort':'desc','field':'projid','id':True,'select':'controls'},{'label':'Instrument','field' :'instrument','primary':True},{'label':'Title','field':'title','request':'about','primary':True,'subfield':'contact','sublabel':' - manager or
+contact'},{'label':'Status','field':'status'},{'label':'Visibility','field':'visible','icon':'check'},{'label':'License','field':'license'},{'label':'Deep feature extractor','field':'cnn_network_id'},{'label':'License','field':'license'},{'label':'Nb objects','field':'objcount','format':'number'},{'label':'%
+validated','field':'pctvalidated','format':'decimal', default:'0.0'}] %}
+{% if partial == True %}
+{% include "v2/project/components/_projects_list.html" %}
+{% else %}
+{% block body %}
+<div class="container mx-auto px-4 block" data-block="projects">
+  <div class="w-100 relative h-auto mx-auto py-4 block text-left " id="{{ tableid }}-header">
+    {% if CanCreate == True %}
+    {% set modal_title = _("How to prepare data") %}
+  {% set data = {'file':'_help_jobs_prepare_data'} %}
+    <a  class="button is-action float-left clear-left" href="/prj/create">{{_('Create new project')}} </a>
+    {%  else %}
+    {% set modal_title = _("Access projects") %}
+      {% set data = {'file':'_help_project_req_access'} %}
+    {% endif %}
+    {% from './v2/macros/macros.html' import modal %}
+
+    {{ modal(id='help-project-import-data',modal_title=modal_title,type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'},data = data) }}
+  </div>
+  <div  data-block="{{ tableid }}">
+    {% include "v2/project/components/_projects_list.html" %}
+  </div>
+
+</div>
+{% endblock %}
+{% endif %}

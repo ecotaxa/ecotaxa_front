@@ -1,0 +1,37 @@
+  <div class="flex flex-wrap  pl-2 md:pl-8 pr-4 w-full justify-between">
+    <div class="w-4/12 lg:w-2/12 "><a class="uppercase text-xl font-bold text-left text-white">
+        <a href="/gui/prj"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa_2.5.png') }}" id="ecotaxa-logo" alt="Ecotaxa 3.0" /></a>
+    </div>
+    <div class=" flex flex-grow items-right order-2">
+      <nav id="secondary-nav" class="flex md:flex-row  ml-auto ">
+        <!--<div class="aside-nav-item"><a class="px-3 py-1 flex items-center text-xs leading-snug " href="/docs/">Docs</a></div>-->
+
+          {% if not  current_user.is_authenticated %}<div class="user-nav-item flex-grow">
+          <a class="text-sm px-3 py-1" href="/gui/login"><i class="icon icon-circle-user align-top mx-1"></i><span>{{_('log in')}}</a>
+          {% else %}
+          <div class="aside-nav-item hidden md:flex">
+            <a href="/notifications/"><span class="hidden md:show block mb-1">
+                Notifications </span></a>
+              <div class="flex flex-row flex-nowrap">
+                {% set jobs_summary = {'Pending':2,'Question':3,'Run':1,'Error':4,'Done':3} %}
+                {% from './v2/macros/macros.html' import nav_notifications %}
+                {{ nav_notifications(jobs_summary,'/notifications/','div')|safe }}</div>
+            </div><div class="user-nav-item block relative"><a href="#" class="dropdown mt-1  text-xs" id="user-nav" aria-expanded=true aria-haspopup=true><div><i class="icon icon-user-circle-sm align-text-bottom mx-1 invert"></i><span>{{ current_user.name }}</span></div></a>
+          <!-- user profile and sign-out -->
+          <div class="dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="user-nav" tabindex="-1">
+    <div class="py-1" role="none">
+      <a href="gui/user/profile"  class="dropdown-item"  tabindex="-1" role="menuitem">{{ _('profile') }}</a>
+      <a href="#" tabindex="-1" class="dropdown-item" role="menuitem">{{ _('help') }}</a>
+    </div>
+    <div class="py-1" role="none">
+      <a href="/logout" tabindex="-1"  class="dropdown-item"  role="menuitem">{{ _('logout') }}</a>
+    </div>
+  </div>
+        {%endif%}
+        </div>
+      </nav>
+
+    <div class="flex pl-4 text-sm order-3 items-right uppercase ">
+<a class="lg:pl-3 pr-0 pt-0.5 static top-0 " href="/admin/"><i class="icon-lg icon-admin invert "></i></a></div>
+    </div>
+  </div>

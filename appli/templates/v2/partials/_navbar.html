@@ -1,0 +1,65 @@
+<div class="w-4/12 relative flex justify-between  px-2  sm-w-full sm:justify-start sm:order-2 md:order-1">
+  {% if target_proj %}
+  <nav id="level-one-nav" class="top-0 hidden md:flex md:flex-row line-top js js-scrollspy">
+    <ul class="flex flex-row ml-auto">
+      <li class="nav-item ">
+        <a href="/prj/" title="{{ _('home') }} ">
+          <i class="icon-lg icon-home invert"></i>
+        </a>
+      </li>
+      <li class="nav-item animate active">
+        <a href="#" class="dropdown">Project</a>
+           <div class="dropdown-menu"><a href="/gui/prj/{{target_proj.projid}}"  class="dropdown-item" role="menuitem">{{_('settings')}}</a>
+             <a href="/gui/prj/create"  class="dropdown-item" role="menuitem">{{_('new project')}}</a><a href="/gui/prj"  class="dropdown-item" role="menuitem">{{_('Projects list') }}</a></div>
+        </li>
+      <li class="nav-item animate">
+        <a href="/Job/Create/FileImport?p={{target_proj.projid}}">
+          Import
+        </a>
+      </li>
+      <li class="nav-item animate">
+        <a href="/Job/Create/Prediction?projid={{target_proj.projid}}">
+          Predict
+        </a>
+      </li>
+      <li class="nav-item animate">
+        <a href="#">
+          Check
+        </a>
+      </li>
+      <li class="nav-item animate">
+        <a href="/Job/Create/GenExport?projid={{target_proj.projid}}">
+          Export
+        </a>
+      </li>
+      <li class="nav-item animate">
+        <a href="#">
+          Tools
+          <!--<li  class="nav-item animate">
+                              <a href="/prj/{{prjid}}">
+                                Members
+                              </a>
+                            </li>-->
+        </a>
+      </li>
+      <li class="nav-item animate">
+        <a href="#">
+          History
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+  {% endif %}
+  <button class="cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block md:hidden outline-none focus:outline-none" type="button">
+    <span class="block relative w-6 h-px rounded-sm bg-white"></span>
+    <span class="block relative w-6 h-px rounded-sm bg-white mt-1"></span>
+    <span class="block relative w-6 h-px rounded-sm bg-white mt-1"></span>
+  </button>
+</div>
+<div class="md:w-6/12 items-right px-4 items-center sm:order-3 md:order-2">
+  <nav id="level-two-nav"></nav>
+</div>
+<div class="md:w-2/12 items-right sm:order-1 md:order-3">
+
+</div>

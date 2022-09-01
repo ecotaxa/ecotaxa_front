@@ -1,0 +1,17 @@
+
+{# project  about : stats display #}
+
+{% if partial != False %}
+<span>area=area [pixel] meangreyobjet=mean [0-255] fractal_box=fractal maxferetdiam=maxferetdiam symetrieh=symetrieh symetriev=symetriev compactnes=compactnes roughness = roughness thick_r = thick_r bord = cut kurtosis = kurt skewness = skew rectangularity =rectangularity transparence=transparence elongation=elongation cdist=cdist compactness=compactness cutted20=cut </span>
+{% else %}
+{% block body %}
+<div class="container mx-auto px-4 block" data-block="projects">
+  <section class="w-100 mx-auto py-4 block text-left relative" id="project-stats-header">
+    {% set help_file = '_help_project_stats.html' %}
+    {% set modal_title = _("Project_about") %}
+    {% from './v2/macros/macros.html' import modal %}
+    {{ modal(id='help-project-stats',modal_title=modal_title,btn='',modal_content='./v2/help/' + help_file, type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'}) }}
+  </section>
+</div>
+{% endblock %}
+{% endif %}

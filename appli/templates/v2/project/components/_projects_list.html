@@ -1,0 +1,179 @@
+{# custom content in cell  #}
+{% macro subfield(f,r,name=None) -%}
+{%  if f == 'contact' or f =='controls' %}
+{# contact data #}
+{% if r.managers %}
+  {% set manager_to_contact = r.managers[0] if r.contact == None else r.contact %}
+  {% set data_contact = '' if r.contact == None else ' data-contact="Contact" ' %}
+  {% set title_contact = '' if r.contact == None else '' %}
+{# end contact data #}
+  {% if f == 'contact' %}
+    <a class="contact" href="mailto:{{ manager_to_contact.email }}" {{ data_contact|safe }} data-title="{{ title_contact  }}"> {{ manager_to_contact.name }} </a>
+  {% elif f == 'controls' %}
+  <div class="is-controls">
+      {% if (r.status != 'ExploreOnly' and (r.projid in can_access['Manage']|list + can_access['Annotate']|list )) or isadmin %}
+      <a class="is is-annotate order-1" href='/prj/{{ r[name] }}' data-title="{{  _('Annotate') + ' ' +  r[name]|string() }}">{{ _('Annotate')}}</a>
+      {% if (r.projid in can_access['Manage']|list) or isadmin %}
+      <a class="is is-manage order-2" href='/prj/edit/{{ r[name] }}' data-title="{{ _('Manage') + ' ' + r[name]|string() }}">{{ _('Manage')}}</a>
+      {% endif %}
+      {% else %}
+      {% if (r.projid in can_access['View']|list or isadmin )  %}
+      <a class="is is-view order-1 " href='/prj/{{ r[name] }}' data-title="{{ r[name] }}">{{ _('View') }}</a>
+      {% else %}
+      {% if r.visible %}
+        <a class="is is-view order-1 " href='/prj/{{ r[name] }}' data-title="{{ r[name] }}">{{ _('View') }}</a>
+      {% endif %}
+      <a class="is is-request order-2" {{ data_contact }} href="mailto:{{ manager_to_contact.email|safe if r.managers }}?{{ _manager_mail(r.title, r.projid)|safe if r.managers }}">
+     {{ _('Request_Access') }}</a>
+      {% endif %}
+      {% endif %}
+    </div>
+  {% endif %}
+  {% endif %}
+  {% elif f =='projid' %}
+    [{{r[f]}}]
+  {% elif f == 'presets' %}
+    {{ preset_buttons(th) }}
+  {% elif f == 'privileges' %}
+  {% set rights = {'managers':'managers','annotators':'annotators','viewers': 'viewers'} %}
+  {% for right,textright in rights.items() %}
+   <div class=" rights " >
+  {% if r[right] | length %}
+   {{ textright }} :<ul data-r="{{right}}">
+  {% for member in r[right] %}
+  <li data-u="{{ member.id }}">{{ member.name }}</li>
+  {% endfor%}
+  </ul>
+  {% endif %}
+  </div>
+  {% endfor%}
+  {% elif f == 'icon' %}
+  {% set val = name  if r==True  else 'no-' + name %}
+  {% if name=='chk' %}
+  <input type="checkbox" {{ 'checked' if r == True }} class="accent-success-500 border-none">
+  {% else %}
+    <i class="icon-sm icon-{{ val }}" title="{{r}}"></i>
+  {% endif %}
+  {% else %}
+  {{ r[f] }}
+    {% endif %}
+{%- endmacro %}
+
+{# add extra select col with checkbox or radio or custom content #}
+{% macro columns_id(r,th,mulitple) -%}
+   <th scope="row"  {{' data-id='+ r['projid']|string  }} >
+   {% if th.select == 'id' %}
+       <input type="{{'checkbox' if multiple == True else 'radio' }}"  class="{{ 'form-checkbox' if multiple != True }}" value="{{r[th.field]}}" id="{{th.field}}{{'s' if multiple }}_{{r[th.field]}}" name="{{th.field}}{{'s[]' if multiple }}">
+{%  elif th.select =='controls' %}
+  {{ subfield(th.select,r,th.field) }}
+{% else %}
+  {{ select_column(th.select,r,th.selectcells) }}
+{% endif %}
+</th>
+<td>{{ r[th.field]}}</td>
+{%- endmacro %}
+
+{# preset buttons #}
+{% macro select_column(f,r,selectcells=None) -%}
+{% if f == 'presets' and selectcells %}
+<div class="is-presets">
+{% for selectcell in selectcells %}
+  {{ cell_button(selectcell,r,f)}}
+{% endfor%}
+
+</div>
+{% else %}
+  {{ cell_button(f,r) }}
+{% endif %}
+{%- endmacro %}
+{# cell button #}
+
+{# buttons to pick taxo from other projects  #}
+{% macro cell_button(type,r, cell = None) -%}
+{% if cell == 'presets'  %}
+<button class="is is-preset {{ 'extra' if cell =='presets' and type!='preset' }}">
+{% if type =='preset' and (not cell or r[cell]!='') %}
+<i class="icon-md icon-plus-sm"></i>{{ _('preset') }}
+{%elif  not cell or  r[cell]!='' %}
+<i class="icon-md icon-plus-sm"></i>{{ _('extra') }}
+{% endif %}
+{% else %}
+<button class="is is-preset">
+{{ _('import full settings') if type == 'settings'  else _('import') }}
+{% endif %}</button>
+{%- endmacro %}
+
+
+{% macro project_row(r,ths,trclass='') -%}
+      <tr  {{ 'class=' + trclass  if trclass !='' }}>
+
+  {%  for th in ths %}
+
+  {% if 'select' in th.keys() %}
+  {% set multiple = True if 'multiple' in th.keys() else False %}
+    {{ columns_id(r,th,multiple) }}
+  {% else %}
+    {% set value = subfield('icon',r[th.field],th['icon']) if 'icon' in th.keys()  else r[th.field] %}
+    {% set value = th.default if 'default' in th.keys() and not value else value %}
+    {% set value = '<details><summary data-action=request data-what=' + th.request + '>' + value|string + '</summary></details>' if 'request' in th and ((r.status =='Annotate' or r.status =='View') and (r.projid in can_access['View']|list + can_access['Manage']|list + can_access['Annotate']|list )   or isadmin  ) else value %}
+    {% set value = subfield('privileges', r ) if th.field == 'privileges' else value %}
+    {% set value = th['true'] if ('true' in th) else  value %}
+    {% set class = 'font-normal' if 'primary' in th.keys() else '' %}
+    {% set class = class + ' ' + th['format'] if 'format' in th.keys() else class %}
+    {% if 'hidden' in th.keys() and th.hidden == True %}
+    <td class="hidden" >{{ r.contact.id if (th.field == 'contact' and r.contact ) else False if (th.field =='contact') else value  }}</td>
+    {% else %}
+    <td{{ ' class=' + th.class  if ('class' in th.keys()) }} >{{ format_all(value,th['format']) if 'format' in th.keys() else  value|safe if ('request' in th) else value|escape  }} {{ subfield(th.subfield,r) if 'subfield' in th.keys() }}</td>
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+  </tr>
+  {%- endmacro %}
+  {% macro control_rows(th) -%}
+  {% if th.select =='controls' %}
+  {{ _('Access') }}
+  {% elif multiple  %}
+    <label for="check_{{th.select}}">
+      <input type="checkbox" value="all" name="ids[]" id="check_{{th.select}}">select all</label>
+  {% else %}
+  {{ _('select') }}
+  {% endif %}
+  {%- endmacro %}
+  {% if partial %}
+  {# add rows to current table -  to list all projects ( add not_granted projects - replace view others projects - partial content only rows to be inserted in target table )#}
+  {% for r in prjlist %}
+      {{ project_row(r,ths)}}
+  {% endfor %}
+  {% else %}
+<table id="{{ tableid }}" class="w-full shadow-1 my-8 js js-datatable"  {{ 'data-import=' + typeimport if typeimport }}  data-paging=false data-filters="filt_title,filt_instrum,filt_subset" data-perPage="{{prjlist|length}}">
+  <caption>{% if not typeimport %}
+    {% include './v2/project/_headerlist.html' %}
+  {% endif %} </caption>
+  <thead>
+  <tr>
+        {% for th in ths %}
+        {% if th.hidden == True %}
+              <th class="hidden" {{ ' data-name=' + th.field if typeimport and th.field in importfields }} {{ ' data-inputname=' +th.inputname if typeimport  and 'inputname' in th.keys() }} {{ ' data-autocomplete=' + th.autocomplete if 'autocomplete' in th.keys()}}  data-sortable=false></th>
+        {% else %}
+        {% if 'id' in th.keys() and (th.id == True or 'select' in th.keys()) %}
+        <th {{ ' data-sortable=false ' if (th.notsortable or 'select' in th )  }} {{ 'data-what=' + typeimport if typeimport }} {{ 'data-whatparts=' + th.selectcells|join(',') if typeimport and 'selectcells' in th }}  {{ 'data-inputname=' + th.inputname  if 'inputname' in th.keys()}} {{ ' data-action="' + th.action + '"  data-target="[name=' + "'"+ th.field +"s[]'"+ ']"' if th.action }}>{{ control_rows(th) if 'select' in th.keys()  }}</th>
+        {% endif %}
+    <th {{ ' data-sortable=false ' if th.notsortable   }} {{ ' data-name=' +th.field if typeimport and th.field in importfields }} {{ ' data-inputname=' +th.inputname if typeimport  and 'inputname' in th.keys() }} {{ ' data-autocomplete=' + th.autocomplete if 'autocomplete' in th.keys()}}  {{ ' data-sorfield ="' + th.sort + '"' if 'sort' in th.keys() }} {{ ' scope="' + th.scope + '"' if th.scope  }} {{ 'class=large' if th.field == 'title'}}>{{ th.label}} {{ '<span class="sublabel">'|safe + th.sublabel + '</span>'|safe if 'sublabel' in th}}</th>
+    {%endif%}
+    {% endfor %}
+  </tr>
+  </thead>
+    <tbody>
+    {# last_used_projects - display first inseparate tbody #}
+    {% if last_used_projects%}
+    {% for r in last_used_projects %}
+      {{ project_row(r,ths,'last-used') }}
+    {% endfor %}
+    {% endif%}
+    {# remaining list of prjs#}
+  {% for r in prjlist %}
+    {{ project_row(r,ths)}}
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}

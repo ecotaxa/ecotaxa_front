@@ -1,0 +1,17 @@
+{% macro alerttype(type ="info") -%}
+{% set titles = { 'danger': _('IMPORTANT :'),  'warning': _('ATTENTION:'),  'info': _('INFORMATION:'),  'success': _('SUCCESS:'),  'error': _('ERROR:')} %}
+{{ titles[type] }}
+{%- endmacro %}
+<div class="alert alert-{{ type if type}} {{ 'alert-dismissible' if disimissible == True }} {{ 'inverse' if inverse == True }} {{ 'md:w-3/4 lg:w-1/2 mx-2' if (extra and extra.inset == True) }}  {{ 'mt-1 text-sm' if (extra and extra.small == True) }}" {{ 'id=' + relid  if relid !=''  }} role="alert">
+{% if dismissible == True %}
+  <button type="button" class="close" data-dismiss="alert" aria-label="{{ _('Close') }}"><span aria-hidden="true">&times;</span></button>
+{% endif %}
+{% if title !='' %}
+<strong class="text-xl leading-12 font-bold">{{ alerttype(type) }} {{ title}} </strong><p> {{ message }}</p>
+{% else %}
+{{ message }}
+{% endif %}
+{% if type == 'confirm' %}
+  <div class="btn-group flex justify-end"><button class="button is-cancel"  value=false>{{_('Cancel') }}</button><button class="button is-ok"  value=true>{{_('Ok')}}</button></div>
+{% endif %}
+</div>

@@ -1,0 +1,11 @@
+<section class="flex mt-12 ">
+  <div class="mx-auto alert  alert-info inverse pt-12 pb-4 w-96 h-96 before:content-[''] text-center">
+    <i class="block icon-xl scale-[1.5] p-1 icon-info mx-auto mb-8 rounded-full border-4 border-stone-900"></i>
+  <h2 class="font-extrabold text-xl scale-[3]  text-stone-900 mb-6">{{ title if title else 'Error'}}</h2>
+  <p class="text-stone-800 p-4">
+{{ message }}</p>
+{% if link!=""%}
+<a href="{{ link }}">{{ linktext if linktext !="" else link }}</a>
+{%endif%}
+</div>
+</section>
