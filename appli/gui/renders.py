@@ -3,7 +3,7 @@
 # Copyright (C) 2015-2020  Picheral, Colin, Irisson (UPMC-CNRS)
 #
 #
-# V2 new font interface
+# V2 new font interface projects list
 #
 
 from typing import List
@@ -23,7 +23,7 @@ from to_back.ecotaxa_cli_py.models import (
 )
 
 
-def ListProjects(Others=False) -> str:
+def list_projects(all=False) -> str:
 
     filt_title = gvg("filt_title", session.get("prjfilt_title", ""))
     session["prjfilt_title"] = filt_title
@@ -49,7 +49,7 @@ def ListProjects(Others=False) -> str:
         with ApiClient(ProjectsApi, request) as apiProj:
             prjs.extend(
                 apiProj.search_projects(
-                    also_others=Others,
+                    also_others=all,
                     title_filter=filt_title,
                     instrument_filter=an_instrument,
                     filter_subset=(filt_subset == "Y"),
@@ -61,11 +61,8 @@ def ListProjects(Others=False) -> str:
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
-
-    if Others:
-        CanCreate = False
-    else:
-        CanCreate = 1 in user.can_do
+    print(user.can_do)
+    CanCreate = user and (1 in user.can_do)
 
     with ApiClient(TaxonomyTreeApi, request) as apiTaxo:
         status: TaxonomyTreeStatus = apiTaxo.taxa_tree_status()
@@ -100,27 +97,20 @@ Explain how widely the instrument is distributed and why it should be added to t
     mailto_create_right = get_app_manager_mail(
         request, "EcoTaxa : Please provide me the Project creation right"
     )
-    from appli.gui.commontools import ExperimentalHeader
+
+    from appli.gui.commontools import experimental_header
 
     return render_template(
-        "v2/project/list.html",
+        "v2/index.html",
         PrjList=prjs,
         CanCreate=CanCreate,
         filt_title=filt_title,
         filt_subset=filt_subset,
         filt_instrum=filt_instrum,
-        Others=Others,
+        all=all,
         isadmin=2 in user.can_do,
         mailto_instrument=mailto_instrument,
         mailto_create_right=mailto_create_right,
         _manager_mail=_manager_mail,
-        experimental=ExperimentalHeader(),
+        experimental=experimental_header(),
     )
-
-
-def RenderAbout() -> str:
-
-    from appli.gui.staticlistes import sponsors
-
-    print(sponsors)
-    return render_template("v2/about_ecotaxa.html", sponsors=sponsors)

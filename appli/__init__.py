@@ -82,10 +82,6 @@ def ErrorFormat(txt: str) -> str:
     )
 
 
-# VUE_PATH == "/gui"
-from appli.constants import VUE_PATH
-
-
 def AddJobsSummaryForTemplate() -> None:
     """
     Set in global 'g' a structure to show what is currently ongoing on jobs side.
@@ -259,6 +255,9 @@ def UtfDiag3(path: str):
     return ""
 
 
+# import routes && functions for the new interface
+import appli.gui.main
+
 # Ici les imports des modules qui definissent des routes
 import appli.main
 import appli.search.view
@@ -333,11 +332,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.6.4"
+ecotaxa_version = "2.6.5"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2022-05-30"
+    return ecotaxa_version + " 2022-09-01"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -348,15 +347,18 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2022-09-01: V 2.6.5
+    Feature : routing to new ui for pages projects list, project create, login, about, privacy - tools to import settings.
+    Features #824 : add functionalities  to projects list - done for selection page ( left to do merge & prediction , select for collection)
 2022-05-30 : V 2.6.4
     Bug #820: Difference in country treatment between self-registration and admin form
     Bug #818: Importing a zip file of a few MB is impossible
     Bug #817: page 2 Train&Predict : deletion of input not possible
-    Bug #815: Sample information on map not pulled form the correct project 
+    Bug #815: Sample information on map not pulled form the correct project
     Feature #813: removed mail to marc.picheral@obs-vlfr.fr download line from the frontpage.
     Bug #794: Nice error message when same user is twice in the members list during rights on a project
-    Bug #734: Overriding an existing user in privileges list keeps him/her 
-    Feature : client side validation  + add member  in Privileges list 
+    Bug #734: Overriding an existing user in privileges list keeps him/her
+    Feature : client side validation  + add member  in Privileges list
     Bug #808: "Other filters" tab keeps memory of previous classification label
     Feature #589: ui Display the contact name (rather than manager name)  in the project list
 2022-05-03 : V 2.6.3
@@ -394,10 +396,10 @@ app.jinja_env.globals.update(
     Feature #354: Split Home/Explore menu item into separate items.
     Bug #148: Setting "Use Deep Learning features" is not remembered between predictions (fixed as side-effect of #605)
 2021-09-28 : V 2.5.13
-    Feature #530: After an import, remind the import source. 
+    Feature #530: After an import, remind the import source.
     Feature #665: Improve a bit the wording in prediction pages.
     Bug #518: Projects choices is lost in prediction page 1 if filtering is used.
-    Feature #142: Prediction target choice is confusing, if on a filtered set then it's just redundant.  
+    Feature #142: Prediction target choice is confusing, if on a filtered set then it's just redundant.
     Feature #65: More wording in prediction pages (step 3).
     Feature #517: In prediction step 2, remind the data source(s) chosen at step 1.
     Feature #572: Remove "Predict identifications from trained model" which is very limited and never used.
@@ -431,7 +433,7 @@ app.jinja_env.globals.update(
     Bug #686: Ensure that project link is present for new export jobs.
     Feature #605 (start): Automatic classification result can now be stored by calling an API endpoint.
     Bug #687: When an import job goes wild, it can generate an un-displayable number of errors.
-    Bug #688: Seldom but confusing python error when a job starts.    
+    Bug #688: Seldom but confusing python error when a job starts.
 2021-06-10 : V 2.5.9
     Feature #600: Move export function(s) to back-end
     Feature #603: Add image references to exported data, even if without images themselves
@@ -448,7 +450,7 @@ app.jinja_env.globals.update(
     Feature #590: Move file navigation to back-end.
     Features #673, #672: Add/adapt API entry points for new front-end. @See #382
     Bug #614: Api could not be used interactively from /api/docs generated page.
-    Bug #657: A TIFF file could crash the import. 
+    Bug #657: A TIFF file could crash the import.
 2021-05-05 : V 2.5.7
     Feature #660: Add a column to Collection and expose a search API entry point using it.
     Bug #659: In a mirrored DB setup, project creation is sometime not visible immediately.
@@ -463,15 +465,15 @@ app.jinja_env.globals.update(
 2021-02-11 : V 2.5.5
     Feature #603: Export abundances / concentrations of 0 in DwCA export
     Bug #583 (starting): Set-up database storage of information about images on disk. Add an API
-        entry point to store MD5 of present files. 
+        entry point to store MD5 of present files.
     Feature #579: Amend database to store users email validity information.
     Bug #602 (Api): PUT projects/{project_id} i.e. project update fails silently on some errors
-    Feature #612: Relocate admin app in a dedicated sub-app. 
-    Bug #587: "Visible for all visitors" checkbox cannot be changed in project settings". 
+    Feature #612: Relocate admin app in a dedicated sub-app.
+    Bug #587: "Visible for all visitors" checkbox cannot be changed in project settings".
 2021-02-03 : V 2.5.4
-    Bug #548 (starting): Move object orig_id from obj_field DB table to obj_head. 
+    Bug #548 (starting): Move object orig_id from obj_field DB table to obj_head.
     Bug #523: Cosmetic fix (order of categories in project settings page).
-    Feature #436 (continues): Use more entry points from backend, around Samples and Taxonomy. 
+    Feature #436 (continues): Use more entry points from backend, around Samples and Taxonomy.
     Feature #411: Remove DB export and import. App. export is better even if slower.
 2021-01-28 : V 2.5.3
     Feature #430: Move selection using CTRL-key + arrows in manual classification page
@@ -488,13 +490,13 @@ app.jinja_env.globals.update(
     Feature #565: Add a Contact Person per project
     Feature #4: Add a "Recent projects" list (with last accesses projects)
     Bug #541: Ensure that the objects hierarchy is consistent
-    Bug #567: Under some conditions, FastAPI framework leaks request resource (DB session) 
+    Bug #567: Under some conditions, FastAPI framework leaks request resource (DB session)
 2021-01-14 : V 2.5.1
     Feature #529: Show a progress bar while loading in the manual classification window.
     Bug #549: Cryptic error when import update fails due to rights problem.
     Bug #556: Fields are not updated in object_set/update when mixing plain and free columns.
     Bug #538: Space in sample names made them unselectable in "Pick from other projects" child window.
-    Regression due to #523 fix: Preset were erased from project after editing rights only. 
+    Regression due to #523 fix: Preset were erased from project after editing rights only.
 2020-12-08 : V 2.5.0
     Bug #542: During export with images, arrange that resultsets from DB are flushed to disk instead of remaining opened.
     Bug #537: There is now a decent progress bar during export.
@@ -511,7 +513,7 @@ app.jinja_env.globals.update(
     Bug #501: It was possible to delete objects outside current project.
     Bug #499: Last imported path was not recorded for 'import update'.
     Bug #68: Inconsistency in 'Import Database' UI.
-    Bug #345: Users were told late that nothing has to be done during automatic classification.    
+    Bug #345: Users were told late that nothing has to be done during automatic classification.
 2020-10-29 : V 2.4.5
     Bug #516: No title for project in anonymous view mode.
     Feature #426: Minimal UI to export a project in DwC format. Menu is hidden.
@@ -523,7 +525,7 @@ app.jinja_env.globals.update(
     Feature #435: Object details is now implemented on back-end.
     Bug #414: Useless commit appears as a warning in PG logs.
     Feature #321: Proper message when a user who cannot create a taxon needs one.
-    Bug #342: Taxon select box has no MRU or create link in object details window. 
+    Bug #342: Taxon select box has no MRU or create link in object details window.
     Bug #422: Update sun position when related metadata changes.
     Bug #341: Filter "NaN" and "NA" even in text columns.
     Feature #435: Move classification/validation to back-end.
@@ -551,7 +553,7 @@ app.jinja_env.globals.update(
     Bug #368: Saving with opened autocompletion left an unused window in the page upper left corner.
     Bug #483: Cryptic error during import with too large image files.
     Bug #484: Right checking was wrong for READ action.
-    Bug #466: Make optional a previously mandatory column during import update.    
+    Bug #466: Make optional a previously mandatory column during import update.
 2020-09-16 : V 2.4.2
     Feature #245: More API primitives implemented on back-end, namely mass update and reset to predicted.
     Bugfix #465: Right-click menu in category is cropped and moves with right pane.
@@ -604,14 +606,14 @@ app.jinja_env.globals.update(
 2020-04-20 : V 2.2.4
     Bugfix/Regression #340 les imports d'objets sont en notation degrée decimaux et non pas degree.minutes
     Réduction du nombre de décimales lors des conversions des latitudes et longitudes exprimées en minutes
-    Suppression de warning de dépraciation sur WTForm validators.required 
+    Suppression de warning de dépraciation sur WTForm validators.required
 2020-02-07 : V 2.2.3
     Ajout de normpath sur certaines resolution de chemin suite à problème avec des lien sympboliques
 2020-01-29 : V 2.2.2
     Part : Modification comportement default_depthoffset now override
     Part import : uvp6 sample use Pressure_offset
-    Part export : Divers bugfix 
-    Part view : Ajustement groupe de classes 
+    Part export : Divers bugfix
+    Part view : Ajustement groupe de classes
 2020-01-14 : V 2.2.1
     Generation vignette : Largeur minimale pour voir au moins l'echelle
     Gestion UVP6 Remote : Format LOV TSV
@@ -622,7 +624,7 @@ app.jinja_env.globals.update(
     Part export : gestion aggregation des TSV sur détaillé et réduit + nom projet dans les summary
     Part import : ajustement format LOV TSV
     Part import : ignore les samples sans depth si profil vertical sinon si depth invalide mise à 0
-      
+
 2019-08-18 : V 2.2.0
     Intégration of UVPApp Data Format
 2019-04-18 : V 2.1.0
@@ -635,7 +637,7 @@ app.jinja_env.globals.update(
     Integration with EcotaxoServer
     Handling new display_name child<parent #87,#172
     Python Packages upgrade (flask, numpy, scikit, .... ), Bootstrap Upgrade
-    fix/improve #216,#274,#284,#280 
+    fix/improve #216,#274,#284,#280
 2018.11.22 : V 1.6.1
     Minor fix
 2018.11.14 : V 1.6
