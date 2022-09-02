@@ -18,7 +18,12 @@
     </div>
 </fieldset>
 <div class="submit-box">
-    <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-login"><i class="icon icon-check inline-block before:fill-white mr-2.5"></i>{{ _('Login') }}</button>
+    <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-login"><i class="icon icon-check invert mr-2.5"></i>{{ _('Login') }}</button>
     </div>
 {#  {{ render_field(login_user_form.next) }}#}
 </form>
+
+{% if current_user.is_authenticated%}
+<div class="w-auto mx-auto p-12 text-sm">
+{{ _('Already authenticated. page should redirect to projects list')}}</div>
+{% endif%}

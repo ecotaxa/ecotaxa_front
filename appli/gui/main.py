@@ -32,8 +32,8 @@ def gui_index():
 @app.route("/gui/login")
 @app.route("/gui/login/")
 def gui_login() -> str:
-    if current_user.is_authenticated:
-        return redirect("/gui/prj")
+    # if current_user.is_authenticated:
+    #    return redirect("/gui/prj")
     from appli.gui.commontools import RenderTemplate, webstats
 
     wstats = webstats(app)

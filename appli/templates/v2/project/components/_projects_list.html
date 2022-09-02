@@ -145,7 +145,7 @@
       {{ project_row(r,ths)}}
   {% endfor %}
   {% else %}
-<table id="{{ tableid }}" class="w-full shadow-1 my-8 js js-datatable"  {{ 'data-import=' + typeimport if typeimport }}  data-paging=false data-filters="filt_title,filt_instrum,filt_subset" data-perPage="{{prjlist|length}}">
+<table id="{{ tableid }}" class="w-full shadow-1 my-8 js js-datatable"  {{ 'data-import=' + typeimport if typeimport }}  data-paging=false data-filters="filt_title,filt_instrum,filt_subset" data-perPage="{{prjlist|length +10000}}">
   <caption>{% if not typeimport %}
     {% include './v2/project/_headerlist.html' %}
   {% endif %} </caption>

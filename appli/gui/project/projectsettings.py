@@ -300,7 +300,13 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                     api.update_project(
                         project_id=target_proj.projid, project_model=target_proj
                     )
-
+                flash(
+                    "Project "
+                    + target_proj.title
+                    + " updated. redirect to import or classif ",
+                    "success",
+                )
+                return redirect("/gui/prj")
             except ApiException as ae:
                 raise ApiException(status=ae.status, reason="Update problem: %s" % ae)
     lst = [str(tid) for tid in target_proj.init_classif_list]
