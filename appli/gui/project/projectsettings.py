@@ -89,16 +89,15 @@ def _possible_licenses():
             raise ApiException(status=ae.status)
 
 
-def _prj_users_list(ids):
+def _prj_users_list(ids: list) -> dict:
     try:
         users_list = {}
         with ApiClient(UsersApi, request) as api:
-            if ids == None:
-                all_users: List[MinUserModel] = api.search_user(by_name="%%")
-            else:
-                all_users: List[MinUserModel] = api.get_users(ids=ids)
+            all_users: List[MinUserModel] = api.search_user(by_name="%%")
+
             for a_user in sorted(all_users, key=lambda u: u.name.strip().lower()):
-                users_list[str(a_user.id)] = a_user
+                if (str(a_user.id)) in ids:
+                    users_list[str(a_user.id)] = a_user
         return users_list
     except ApiException as ae:
         if ae.status == 404:
@@ -144,14 +143,18 @@ def _user_cando(autho):
 def prj_create() -> str:
     if not _user_cando(1):
         return render_template("v2/error.html", title="403")
-
-    if gvp("save") == "Y":
+    to_save = gvp("save")
+    if to_save == "Y":
+        title = gvp("title")
+        instrument = gvp("instrument")
+        if title == "" or instrument == "":
+            flash("project must have a title and instrument", "error")
+            to_save = False
+    if to_save:
         try:
             from to_back.ecotaxa_cli_py.models import CreateProjectReq
 
             with ApiClient(ProjectsApi, request) as api:
-                title = gvp("title")
-                instrument = gvp("instrument")
                 req = CreateProjectReq(title=title, instrument=instrument)
                 rsp: int = api.create_project(req)
                 return prj_edit(rsp, new=True)
@@ -186,7 +189,6 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         posted_contact_id = None
 
         for a_var in request.form:
-            print(a_var)
             # Update the project (from API call) with posted variables
 
             if a_var in dir(target_proj):
@@ -211,7 +213,6 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         target_proj.visible = gvp("visible") == "Y"
         if previous_cnn != target_proj.cnn_network_id:
             flash("SCN features erased", "success")
-            do_update = True
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
         do_update = True
         contact_user = None
@@ -234,13 +235,12 @@ def prj_edit(prjid: int, new: bool = False) -> str:
 
         # list all privileges in list_users key:'id'
         if len(data["member"]):
-            ids = ",".join(data["member"])
+            ids = data["member"]
 
             users_list = _prj_users_list(ids=ids)
         else:
-            users_list = []
+            users_list = {}
             do_update = False
-
         for i in range(len(data["member"])):
             member = data["member"][i]
             if member in users_list.keys():
@@ -272,12 +272,11 @@ def prj_edit(prjid: int, new: bool = False) -> str:
             else:
                 # member is not in users list
                 err_msg.append(
-                    "Error member to be added is no more in users list "
-                    + users_list[member].name
+                    "Error member to be added is no more in users list " + member
                 )
                 do_update = False
         for msg in err_msg:
-            flash(msg)
+            flash(msg, "error")
         if contact_user == None:
             flash(
                 "A contact person needs to be designated among the current project managers. "
@@ -294,21 +293,23 @@ def prj_edit(prjid: int, new: bool = False) -> str:
             do_update = False
 
         # Update on back-end
-        with ApiClient(ProjectsApi, request) as api:
-            try:
-                if do_update:
+        if do_update:
+            with ApiClient(ProjectsApi, request) as api:
+                try:
                     api.update_project(
                         project_id=target_proj.projid, project_model=target_proj
                     )
-                flash(
-                    "Project "
-                    + target_proj.title
-                    + " updated. redirect to import or classif ",
-                    "success",
-                )
-                return redirect("/gui/prj")
-            except ApiException as ae:
-                raise ApiException(status=ae.status, reason="Update problem: %s" % ae)
+                    flash(
+                        "Project "
+                        + target_proj.title
+                        + " updated. redirect to import or classif ",
+                        "success",
+                    )
+                    return redirect("/gui/prj")
+                except ApiException as ae:
+                    raise ApiException(
+                        status=ae.status, reason="Update problem: %s" % ae
+                    )
     lst = [str(tid) for tid in target_proj.init_classif_list]
     with ApiClient(TaxonomyTreeApi, request) as api:
         res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))

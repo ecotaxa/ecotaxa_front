@@ -175,6 +175,7 @@ def get_error_message(message: str) -> str:
             "nocontact": "A contact person needs to be designated among the current project managers.",
             "emptyname": "A privilege is incomplete. Please select a member name or delete the privilege row",
             "oneatleast": "One member at least is required with Manage privilege and contact property  ",
+            "uhasnopriv": "privilege is missing",
         }
     )
     if message in list_errors.keys():
