@@ -130,20 +130,6 @@ def gui_importsettings(prjid: int = 0):
         )
 
 
-# taxo search taxo by IDs
-@app.route("/gui/search/taxoset", methods=["GET", "POST"])
-@app.route("/gui/search/taxoset/", methods=["GET", "POST"])
-@login_required
-def gui_search_taxoset():
-    ids = gvp("ids")
-    if len(ids):
-        from appli.gui.search.search_taxo import search_taxoset
-
-        return search_taxoset(ids)
-    else:
-        return None
-
-
 # help
 @app.route("/gui/help/<path:filename>")
 @login_required
@@ -178,7 +164,7 @@ def gui_alert():
         dismissible = True
     else:
         dismissible = False
-    message = get_error_message(gvp("message"))
+    message = gvp("message")
     return render_template(
         "v2/partials/_alertbox.html",
         type=gvp("type"),
@@ -244,6 +230,18 @@ def gui_stream():
 
 
 # utility display functions for jinja template
+@app.template_filter("urlencode")
+def urlencode_filter(s):
+    import urllib
+    from markupsafe import Markup
+
+    if type(s) == "Markup":
+        s = s.unescape()
+    s = s.encode("utf8")
+    s = urllib.parse.quote_plus(s)
+    return Markup(s)
+
+
 @app.context_processor
 def utility_processor():
     def format_all(value, f="number", locale="fr_FR"):

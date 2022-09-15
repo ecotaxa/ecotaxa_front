@@ -8,23 +8,31 @@
 
 from typing import List
 
-from appli import gvg, gvgm
+
 from flask import session, request, render_template, flash
 from flask_login import current_user
-from flask_security import login_required
-from appli.project.main import _manager_mail
-from appli.back_config import get_app_manager_mail
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
+
+from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py.models import (
     ProjectModel,
     UserModelWithRights,
-    TaxonomyTreeStatus,
 )
 
 # list of project privileges
 def list_privileges() -> dict:
     return dict({"viewers": "View", "annotators": "Annotate", "managers": "Manage"})
+
+
+def _get_mailto_manager(request, type: str = "") -> str:
+    from to_back.ecotaxa_cli_py import MiscApi, Constants
+
+    with ApiClient(MiscApi, request) as api:
+        consts: Constants = api.used_constants()
+        mgr_coords = consts.app_manager
+        from appli.gui.commontools import build_mail
+
+        return build_mail(emails=mgr_coords[1], type=type, text=mgr_coords[0])
 
 
 def _get_mailto_instrument() -> str:
@@ -34,22 +42,11 @@ def _get_mailto_instrument() -> str:
 
     admin_users = get_managers()
     emails = ";".join([usr.email for usr in admin_users])
-    return build_mail(
-        emails=emails,
-        link_text="Not in the list",
-        subject="Request for adding an instrument to EcoTaxa",
-        body="""**Information for creation**
-
-    Instrument name:
-    URL of the description in the BODC L22 vocabulary http://vocab.nerc.ac.uk/collection/L22/current/ :
-
-    **Reason for creation**
-    Explain how widely the instrument is distributed and why it should be added to the standard list.
-    """,
-    )
+    return build_mail(emails=emails, type="instrument_not_in_the_list")
 
 
 def _get_projects_filters() -> dict:
+    from appli import gvg, gvgm
 
     filt_title = gvg("filt_title", session.get("prjfilt_title", ""))
     session["prjfilt_title"] = filt_title
@@ -87,7 +84,7 @@ def _prjs_list(listall: bool = False, filt: dict = None) -> List[ProjectModel]:
                 )
             )
     # Sort for consistency - removed to test
-    # prjs.sort(key=lambda prj: prj.title.strip().lower())
+    prjs.sort(key=lambda prj: prj.title.strip().lower())
     return prjs
 
 
@@ -95,9 +92,9 @@ def projects_list(
     listall: bool = False,
     partial: bool = False,
     action: str = "",
-    typeimport: str = "all",
-    type: str = "json",
-):
+    typeimport: str = None,
+) -> str:
+    from appli.project.main import _manager_mail
 
     # projects ids and rights for current_user
     if not current_user.is_authenticated:
@@ -112,6 +109,7 @@ def projects_list(
 
     if action != "":
         listall = False
+        partial = True
     prjs = _prjs_list(False, filt)
     if len(prjs) == 0 and listall == False:
         has_proj = False
@@ -119,7 +117,7 @@ def projects_list(
     # if listall add not granted projects
     if listall == True:
         prjs = prjs + _prjs_list(True, filt)
-
+    # prjs = prjs + prjs + prjs + prjs + prjs + prjs + prjs
     # reformat  current_user privileges
     rights = list_privileges()
     for k, v in rights.items():
@@ -128,73 +126,58 @@ def projects_list(
             for u in getattr(prj, k):
                 if current_user.id == u.id:
                     can_access[v].append(prj.projid)
-        # current_user is either an ApiUserWrapper or an anonymous one from flask,
+    # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
     CanCreate = user and (1 in user.can_do)
-    mailto_instrument = _get_mailto_instrument()
-    # App manager mail for granting right to create
-    mailto_create_right = get_app_manager_mail(
-        request, "EcoTaxa : Please provide me the Project creation right"
+    isadmin = user and (2 in user.can_do)
+
+    maildata = dict(
+        {
+            # mail_instrument not in use
+            #        "mail_instrument": _get_mailto_instrument(),
+            "mailto_create_right": _get_mailto_manager(
+                request, type="ask_for_creation_right"
+            ),
+            "_manager_mail": _manager_mail,
+        }
     )
     # separate last_used_projects from pjs
     last_used_projects = list(p.projid for p in current_user.last_used_projects)
-    last_used_projects = list(filter(lambda p: p.projid in last_used_projects, prjs))
-    if len(last_used_projects):
-        prjs = list(set(prjs) - set(last_used_projects))
-    if action == "" and partial == False:
+    from appli.gui.project.projects_list_interface import (
+        project_table_columns,
+        render_for_js,
+    )
 
+    columns = project_table_columns(action, typeimport)
+    tabledef = dict(
+        {
+            "columns": columns,
+            "data": render_for_js(prjs, columns, can_access, isadmin),
+            "last_used": last_used_projects,
+        }
+    )
+    if action == "" and not partial:
+        template = "v2/index.html"
         from appli.gui.commontools import experimental_header
 
-        return render_template(
-            "v2/index.html",
-            prjlist=prjs,
-            last_used_projects=last_used_projects,
-            CanCreate=CanCreate,
-            filters=filt,
-            can_access=can_access,
-            listall=listall,
-            isadmin=2 in user.can_do,
-            mailto_instrument=mailto_instrument,
-            mailto_create_right=mailto_create_right,
-            _manager_mail=_manager_mail,
-            has_proj=has_proj,
-            experimental=experimental_header(),
-        )
-    elif action != "":
-        # imports - partial= True and listall= false
-        if action == "importsettings":
-            # if type == "json" get data in json format
-            return render_template(
-                "v2/project/_listimport.html",
-                prjlist=prjs,
-                last_used_projects=last_used_projects,
-                filters=filt,
-                listall=False,
-                typeimport=typeimport,
-                isadmin=2 in user.can_do,
-            )
+        experimental = experimental_header()
 
     else:
-        # partial == True : send header from template and rows from other template / separated and dispatched  in js - do better one day  -  action 'request' key "projects" in js
-        response = render_template(
-            "v2/project/_list.html",
-            prjlist=prjs,
-            last_used_projects=last_used_projects,
-            filters=filt,
-            listall=listall,
-            partial=partial,
-            can_access=can_access,
-            mailto_instrument=mailto_instrument,
-            mailto_create_right=mailto_create_right,
-            _manager_mail=_manager_mail,
-            isadmin=2 in user.can_do,
-        )
+        template = "v2/project/_listcontainer.html"
+        experimental = ""
 
-        if response != "":
-            response = (
-                response
-                + "<--- header --->"
-                + render_template("v2/project/_headerlist.html", listall=listall)
-            )
-        return response
+    return render_template(
+        template,
+        tabledef=tabledef,
+        CanCreate=CanCreate,
+        filters=filt,
+        can_access=can_access,
+        listall=listall,
+        partial=partial,
+        isadmin=isadmin,
+        maildata=maildata,
+        has_proj=has_proj,
+        typeimport=typeimport,
+        experimental=experimental,
+    )

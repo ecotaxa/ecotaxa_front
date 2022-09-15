@@ -138,8 +138,7 @@ def _user_cando(autho):
 
 ######################################################################################################################
 
-# @app.route("/gui/prj/create", methods=["GET", "POST"])
-# @login_required
+
 def prj_create() -> str:
     if not _user_cando(1):
         return render_template("v2/error.html", title="403")
@@ -172,8 +171,6 @@ def prj_create() -> str:
     )
 
 
-# @app.route("/gui/prj/edit/<int:prjid>", methods=["GET", "POST"])
-# @login_required
 def prj_edit(prjid: int, new: bool = False) -> str:
     # Security & sanity checks
     # get target_proj
@@ -196,6 +193,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                 setattr(target_proj, a_var, gvp(a_var))
             if a_var == "contact_user_id":
                 posted_contact_id = gvp(a_var)
+            # take inittaxo[] instead of initclassiflist - double usage
             elif a_var == "inittaxo[]":
                 posted_classif_list = gvpm(a_var)
                 posted_classif_list = ",".join(posted_classif_list)
