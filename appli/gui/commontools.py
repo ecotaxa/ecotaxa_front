@@ -112,23 +112,11 @@ def RenderTemplate(
         )
 
 
-def build_mail(emails: str, link_text: str, subject: str = "", body: str = ""):
-    import urllib.parse
-
+def build_mail(emails: str, type: str = "", text: str = "") -> str:
     """
-    Build a mailto link to all app managers.
+    Build a mailto link .
     """
-
-    params = {}
-    if subject:
-        params["subject"] = subject
-    if body:
-        params["body"] = body
-    if params:
-        txt_params = "?" + urllib.parse.urlencode(params).replace("+", "%20")
-    else:
-        txt_params = ""
-    return "<a href='mailto:{0}{1}'>{2}</a>".format(emails, txt_params, link_text)
+    return render_template("./v2/mail/_mailto.html", emails=emails, type=type)
 
 
 def find_language() -> NullTranslations:
@@ -167,24 +155,6 @@ def find_language() -> NullTranslations:
     return lang
 
 
-def get_error_message(message: str) -> str:
-    list_errors = dict(
-        {
-            "nomanager": "A manager person needs to be designated among the current project persons",
-            "nobody": "One person, at least, needs to be related to the project",
-            "nocontact": "A contact person needs to be designated among the current project managers.",
-            "emptyname": "A privilege is incomplete. Please select a member name or delete the privilege row",
-            "oneatleast": "One member at least is required with Manage privilege and contact property  ",
-            "uhasnopriv": "privilege is missing",
-        }
-    )
-    if message in list_errors.keys():
-        return list_errors[message]
-    else:
-        return message
-        return False
-
-
 def last_taxo_refresh(partial: bool = False):
     import datetime
 
@@ -196,7 +166,7 @@ def last_taxo_refresh(partial: bool = False):
             "Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days, "
             "Ask application administrator to do it."
         )  # +str(PDT.lastserverversioncheck_datetime)
-        flashtxt += "  <a href='/taxo/browse/' class='btn btn-primary btn-xs'>Synchronize to check Ecotaxa version</a>"
+        flashtxt += "  <a href='/taxo/browse/' class='underline underline-offset-2 font-normal text-sm'>Synchronize to check Ecotaxa version</a>"
         flash(Markup(flashtxt), "warning")
 
 

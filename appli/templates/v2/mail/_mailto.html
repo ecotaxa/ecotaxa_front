@@ -1,0 +1,19 @@
+{% if emails !="" %}
+{% if type == 'instrument_not_in_the_list' %}
+ {% set text =_("Not in the list") %}
+ {% set params ="?"  + "Request for adding an instrument to EcoTaxa" | urlencode %}
+  {% set params = params + '&body=' + _("**Information for creation**
+Instrument name:
+URL of the description in the BODC L22 vocabulary http://vocab.nerc.ac.uk/collection/L22/current/ :
+
+**Reason for creation**
+Explain how widely the instrument is distributed and why it should be added to the standard list.
+") %}
+{% elif type == "ask_for_creation_right" %}
+{% set params = "?" + _("EcoTaxa : Please provide me the Project creation right") | urlencode  %}
+{% else %}
+{% set params = "?" + _('Request') %}
+{% endif %}
+
+<a href='mailto:{{emails}}{{params}}'>{{text}}</a>
+{% endif %}
