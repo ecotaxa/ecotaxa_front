@@ -1,12 +1,11 @@
 <form id="form-signin" action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
 {# login_user_form.hidden_tag() #}
-<fieldset><legend>{{ _('Sign_in') }}</legend>
+<fieldset class="mb-0.5"><legend>{{ _('Sign in') }}</legend>
     <div class="form-box relative">
     <label for="email" class="over" >{{_('Email')}}</label>
-    <input name="email" id="email" class="form-input" placeholder="Email address" required autofocus>
+    <input name="email" id="email" class="form-input" placeholder="Email address" type="email" required autofocus>
     {# display_field_errors(login_user_form.email) #}
     </div>
-
     <div class="form-box relative">
     <label for="password" class="over">Password</label>
     <input type="password" name="password" id="password" class="form-input" placeholder="your password" required>
@@ -18,7 +17,7 @@
     </div>
 </fieldset>
 <div class="submit-box">
-    <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-login"><i class="icon icon-check invert mr-2.5"></i>{{ _('Login') }}</button>
+    <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-login"><i class="icon icon-check invert mr-2.5"></i>{{ _('sign in') }}</button>
     </div>
 {#  {{ render_field(login_user_form.next) }}#}
 </form>

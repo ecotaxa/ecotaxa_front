@@ -14,12 +14,12 @@
 {% macro modal(id,btn = {'class':'','text':'','data':''},modal_title='',modal_content='',type='modal-popup', position='' ,summary_pos={'float':'','clear':''} ,data='') -%}
 <details {{' id=' + type if type=='modal-help' }} class="modal-container  {{ type }} {{ position }}" {{ 'data-form=' + data.form if 'form' in data }} {{ 'data-file=' + data.file if 'file' in data }}>
   {% if type=='modal-popup' %}
-  <summary><a class="{{ btn['class'] if btn['class'] else 'button is-action inline-block' }}" data-for="{{ id }}" {{ btn['data'] if btn['data']  }}>
+  <summary><div class="{{ btn['class'] if btn['class'] else 'button is-action inline-block' }}" data-for="{{ id }}" {{ btn['data'] if btn['data']  }}>
     {#icon#}
     {%if btn and 'icon' in btn%}
     <i class=" icon {{ btn['icon']|safe }}"></i>
     {% endif%}
-    {{ btn['text']|safe if btn['text'] else '' }}</a></summary>
+    {{ btn['text']|safe if btn['text'] else '' }}</div></summary>
   <div class="modal" id="{{ id }}" >
     <div class="modal-body peer-checked" for="{{ id }}">
       <div class="modal-title">
@@ -74,8 +74,8 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro form_group_radio(id,name,val,label,value) -%}
-<div class="group-radio"><input type="radio" class="peer" name="{{ name }}" id="{{ id}}" value="{{ val }}" {{ 'checked' if val==value }}>
+{% macro form_group_radio(id,name,val,label,value,required=False) -%}
+<div class="group-radio"><input type="radio" class="peer" name="{{ name }}" id="{{ id}}" value="{{ val }}" {{'required' if required==True else ''}} {{ 'checked' if val==value }}>
   <label for="{{id}}" class="peer-checked:bg-pchecked-400  peer-checked:text-white  peer-checked:shadow">{{ label | safe }}</label></div>
 {%- endmacro %}
 

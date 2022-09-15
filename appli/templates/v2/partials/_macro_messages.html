@@ -1,0 +1,13 @@
+{% macro get_error_message(message, type) -%}
+{% set list_errors =
+      {
+          "nomanager": _("A manager person needs to be designated among the current project persons"),
+          "nobody": _("One person, at least, needs to be related to the project"),
+          "nocontact": _("A contact person needs to be designated among the current project managers."),
+          "emptyname": _("A privilege is incomplete. Please select a member name or delete the privilege row"),
+          "oneatleast": _("One member at least is required with Manage privilege and contact property  "),
+          "uhasnopriv": _("privilege is missing"),
+      }
+  %}
+  {{ list_errors[message] if message in list_errors else type }}
+{%-endmacro %}  

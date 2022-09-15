@@ -1,0 +1,31 @@
+{% set tableid ='projects-list'%}
+{% if not partial%}
+<div class="container mx-auto px-4 block" data-block="projects">
+  <div class="w-100 relative h-auto mx-auto py-4 block text-left " id="{{ tableid }}-header">
+    {% if CanCreate == True %}
+    {% set modal_title = _("How to prepare data") %}
+  {% set data = {'file':'_help_jobs_prepare_data'} %}
+    <a  class="button is-action float-left clear-left" href="/gui/prj/create">{{_('Create new project')}} </a>
+    {%  else %}
+    {% set modal_title = _("Access projects") %}
+      {% set data = {'file':'_help_project_req_access'} %}
+    {% endif %}
+    {% from './v2/macros/macros.html' import modal %}
+
+    {{ modal(id='help-project-import-data',modal_title=modal_title,type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'},data = data) }}
+    <div class="caption">
+      {% include './v2/project/_headerlist.html' %}
+  </div>
+  </div>
+  {% endif%}
+  {% if typeimport and typeimport == 'taxo' %}
+  {# for taxo import #}
+  <div class="flex flex-row flex-wrap mx-auto"><div id="data-import"></div><button id="submit-import"  class="button is-preset inverse text-base hide">{{ _('Import')}}</button></div>
+  {% endif%}
+  {% set textbtn =  _('import full settings') if typeimport and typeimport =='settings' else _('preset') if typeimport == 'taxo' else _('import') %}
+
+    <div id="{{'import-' + tableid if typeimport else tableid }}" class="{{ 'import-projects-list' if typeimport }} max-w-full shadow-1 my-8 js js-datatable"  {{ ' data-import=' + typeimport if typeimport }} {{ 'data-btn=' + textbtn if typeimport }} {{ 'data-btn1=' + _('extra') if typeimport and typeimport =='taxo' }} data-paging=false data-filters="filt_title,filt_instrum,filt_subset">
+  {# todo: replace by a call to server in gridjs#}
+  {% include './v2/project/components/_table_script.html'%}
+  </div>
+  </div>

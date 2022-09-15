@@ -1,4 +1,4 @@
-  <div class="block import-projects-list" data-typeimport="{{ typeimport }}">
+<div class=" import-projects-list" d id="{{ tableid }}" class="w-full shadow-1 my-8 js js-datatable"  data-import={{ typeimport }} data-paging=false data-filters="filt_title,filt_instrum,filt_subset" data-perPage="{{prjlist|length +10000}}">
     {% set tableid = 'table-import'%}
     {% if typeimport == 'taxo' %}
     {% set ths = [{'label':'Title [ID]','sort':'desc','field':'title','id':False,'subfield':'projid','select':'presets','selectcells':['preset','objtaxonnotinpreset'],'inputname':'inittaxo[]'},{'label':_('Preset categories'),'field' :'preset','autocomplete':'presetids','class':'ellipsis'},{'label':_('Extra categories used'),'escape':True, 'class':'ellipsis','field':'objtaxonnotinpreset','autocomplete':'objtaxonids'},{'label':'presetids','hidden':true,'field':'presetids'},{'label':'notinpresetids','field':'objtaxonids','hidden':true}] %}
@@ -21,7 +21,7 @@
     {% endif %}
     {% endif %}
 
-    {% include "v2/project/components/_projects_list.html" %}
+    {% include "v2/project/components/_table_script.html" %}
   </div>
 <!--  <form id="formfilter">
     <table style="margin-bottom: 10px;">

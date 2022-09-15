@@ -1,0 +1,4 @@
+{% if tabledef %}
+{# tabledef contains columns def and prjs - projects list in json format with only necessary columns to display or import #}
+  <pre id="tabledef" class="hidden">{"columns": {{ tabledef.columns|tojson|safe }},"data": {{ tabledef.data|tojson }} ,"last_used":{{ tabledef.last_used|tojson|safe}}}</pre>
+  {% endif %}
