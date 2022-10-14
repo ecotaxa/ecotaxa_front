@@ -55,11 +55,10 @@ CUSTOM_HOME_BOTTOM = "config/homebottom.html"
 # new interface ( path + name of static rep for css and js)
 GUI_PATH = "/gui"
 # translations path i18n
-TRANSLATION_PATH = "/locale"
+TRANSLATION_PATH = "i18n"
 # translations default locale
-DEFAULT_LOCALE = "en-uk"
 
-KNOWN_LANGAGES = [
+KNOWN_LANGUAGES = [
     "en",
     "pt",
     "zh",
