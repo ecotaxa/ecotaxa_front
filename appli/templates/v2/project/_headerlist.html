@@ -1,7 +1,8 @@
-<div class="table-filters py-4  font-btn  leading-snug">
-  {% if not has_proj %}
-  <div id="welcome-info">{{_('To start using EcoTaxa, you need to [Create a project] or ask for permission in the list below')}}</div>
+<div id="table-filters" class="hide">
+  {% if not current_user.last_used_projects %}
+  <div id="welcome-info">{{_('To start using EcoTaxa, you need to <a href="/gui/prj/create">Create a project</a> or ask for permission in the list below')}}</div>
   {% else %}
+
  <div class=" is-title inline">{{ _('All projects') if listall==True else  _('Accessible projects') }}</div>
 
   <a href="/gui/prj{{'/listall' if listall != True }}" class="is-filter inline " data-action="add-filters" data-noprev=true>{{ _('Show only accessible projects') if listall == True else  _('Show all projects')}}<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">

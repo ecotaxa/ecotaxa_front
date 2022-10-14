@@ -1,0 +1,4 @@
+{% if notifs is iterable %}
+{% for label,notif in notifs.items() %}
+<span class="notif is-{{ label|lower }}" title="{{label}}"><a href="/Jobs/listall">{{notif|string()}}</a></span>
+{% endfor %} {% endif %}

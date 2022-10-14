@@ -2,7 +2,11 @@
 {# project  about : stats display #}
 
 {% if partial != False %}
-<span>area=area [pixel] meangreyobjet=mean [0-255] fractal_box=fractal maxferetdiam=maxferetdiam symetrieh=symetrieh symetriev=symetriev compactnes=compactnes roughness = roughness thick_r = thick_r bord = cut kurtosis = kurt skewness = skew rectangularity =rectangularity transparence=transparence elongation=elongation cdist=cdist compactness=compactness cutted20=cut </span>
+
+<div class="tab_stats">
+  {% if proj %}<p> prj ----{{proj.projid}}</p>
+  <p></p>{% endif %}</div>
+
 {% else %}
 {% block body %}
 <div class="container mx-auto px-4 block" data-block="projects">

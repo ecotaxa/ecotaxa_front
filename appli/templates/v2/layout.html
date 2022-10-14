@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="{{lang if lang !='' else 'en'}}">
-
 <head>
+
   <link rel=stylesheet type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}">
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title if title else 'Ecotaxa 3.0' }}</title>
+  <title>{{ 'Ecotaxa 3.0'}} {{ target_proj.title if target_proj and target_proj.projid else ''}}</title>
 </head>
-
 <body>
   <div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }} flex flex-col">
     <nav class="drop-shadow-2 mb-3 sticky top-0 z-40">
@@ -41,7 +40,7 @@
 </div>
       <div class="w-full">
         {% block body %}{% endblock %}
-        {{ bodycontent|safe }}
+        {% block bodycontent%} {% endblock %}
       </div>
         <a class="up pageup js js-scrollpy" data-threshold="hscreen" data-action="gotop"></a>
     </main>

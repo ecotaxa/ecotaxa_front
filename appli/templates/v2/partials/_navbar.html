@@ -1,4 +1,4 @@
-<div class="w-4/12 relative flex justify-between  px-2  sm-w-full sm:justify-start sm:order-2 md:order-1">
+<!--()<div class="w-4/12 relative flex justify-between  px-2  sm-w-full sm:justify-start sm:order-2 md:order-1">
   {% if target_proj %}
   <nav id="level-one-nav" class="top-0 hidden md:flex md:flex-row line-top js js-scrollspy">
     <ul class="flex flex-row ml-auto">
@@ -35,11 +35,11 @@
       <li class="nav-item animate">
         <a href="#">
           Tools
-          <!--<li  class="nav-item animate">
+          <li  class="nav-item animate">
                               <a href="/prj/{{prjid}}">
                                 Members
                               </a>
-                            </li>-->
+                            </li>
         </a>
       </li>
       <li class="nav-item animate">
@@ -62,4 +62,23 @@
 </div>
 <div class="md:w-2/12 items-right sm:order-1 md:order-3">
 
-</div>
+</div>-->
+  <div class="w-full  text-center  pt-3 md:pt-0 md:basis-6/12"><ul class="inline-block ml-8"><li class="nav-item inline-block animate">
+        <a href="/gui/prj/" title="{{_('projects list')}}">
+            <i class="icon-lg icon-home invert mb-0 mt-auto"></i>
+        </a><li class="nav-item inline-block animate">
+        <a href="/Job/Create/FileImport?p={{target_proj.projid}}">
+          Import
+        </a>
+      </li><li class="nav-item inline-block animate">
+            <a href="/prj/{{target_proj.projid}}">
+              Classify
+            </a>
+          </li>
+      <li class="nav-item inline-block animate">
+        <a href="/Job/Create/Prediction?projid={{target_proj.projid}}">
+          Predict
+        </a></li><li class="nav-item inline-block animate">
+              <a href="/Job/Create/GenExport?projid={{target_proj.projid}}">
+                Export
+              </a></li></ul></div>

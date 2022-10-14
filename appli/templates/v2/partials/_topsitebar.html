@@ -1,8 +1,10 @@
   <div class="flex flex-wrap  pl-2 md:pl-8 pr-4 w-full justify-between">
-    <div class="w-4/12 lg:w-2/12 "><a class="uppercase text-xl font-bold text-left text-white">
-        <a href="/gui/prj"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa_2.5.png') }}" id="ecotaxa-logo" alt="Ecotaxa 3.0" /></a>
-    </div>
-    <div class=" flex flex-grow items-right order-2">
+    <div class="md:basis-3/12 lg:basis-2/12 "><a class="uppercase text-xl font-bold text-left text-white">
+        <a href="/gui/prj"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa.png') }}" id="ecotaxa-logo" alt="Ecotaxa 3.0" /></a>
+    </div>{% if target_proj and target_proj.projid %}
+    <div class="text-center flex-grow text-secondblue-50 lg:text-base oveflow-hidden truncate text-ellipsis break-all py-2 md:py-0 order-3 md:order-2">{{ target_proj.title }} [{{ target_proj.projid }}]</div>
+    {% endif %}
+    <div class="md:basis-3/12 flex items-right order-2 md:order-3 ">
       <nav id="secondary-nav" class="flex md:flex-row  ml-auto ">
         <!--<div class="aside-nav-item"><a class="px-3 py-1 flex items-center text-xs leading-snug " href="/docs/">Docs</a></div>-->
 
@@ -12,10 +14,8 @@
           <div class="aside-nav-item hidden md:flex">
             <a href="/notifications/"><span class="hidden md:show block mb-1">
                 Notifications </span></a>
-              <div class="flex flex-row flex-nowrap">
-                {% set jobs_summary = {'Pending':2,'Question':3,'Run':1,'Error':4,'Done':3} %}
-                {% from './v2/macros/macros.html' import nav_notifications %}
-                {{ nav_notifications(jobs_summary,'/notifications/','div')|safe }}</div>
+              <div class="flex flex-row flex-nowrap align-text-bottom mt-0.5 mr-1 js js-notifications">
+              </div>
             </div><div class="user-nav-item block relative"><a href="#" class="dropdown mt-1  text-xs" id="user-nav" aria-expanded=true aria-haspopup=true><div><i class="icon icon-user-circle-sm align-text-bottom mx-1 invert"></i><span>{{ current_user.name }}</span></div></a>
           <!-- user profile and sign-out -->
           <div class="dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="user-nav" tabindex="-1">
