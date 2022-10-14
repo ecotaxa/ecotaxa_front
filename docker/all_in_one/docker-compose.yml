@@ -13,7 +13,7 @@ services:
       - ecotaxafront
       - ecotaxaback
   ecotaxafront:
-    image: ecotaxa/ecotaxa_front:2.6.3
+    image: ecotaxa/ecotaxa_front:2.6.5
     volumes:
       - ./front_config:/app/config
     networks:
