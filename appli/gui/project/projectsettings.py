@@ -1,13 +1,12 @@
 import collections
 import os
-import gettext
 from pathlib import Path
 from typing import List
 
 from flask import render_template, flash, request, redirect
 from flask_security import login_required
 from flask_login import current_user
-from appli import app, PrintInCharte, gvp, gvpm, XSSEscape
+from appli import app, PrintInCharte, gvp, gvpm
 from appli.constants import MappableObjectColumns, MappableParentColumns
 
 ######################################################################################################################
@@ -22,6 +21,7 @@ from to_back.ecotaxa_cli_py.models import (
 )
 
 ###############################################common for create && edit  #######################################################################
+from appli.gui.staticlistes import py_messages
 
 
 def get_target_prj(prjid) -> ProjectModel:
@@ -36,14 +36,14 @@ def get_target_prj(prjid) -> ProjectModel:
             if ae.status == 404:
                 raise ApiException(
                     status=ae.status,
-                    eason="Project doesn't exist",
+                    reason=py_messages["project404"],
                 )
 
             elif ae.status in (401, 403):
                 # description='<a href="/gui/prj/">Select another project</a>',
                 raise ApiException(
                     status=ae.status,
-                    reason="You cannot edit settings for this project",
+                    reason=py_messages["cannoteditsettings"],
                 )
             else:
                 raise ApiException(status=ae.status)
@@ -58,11 +58,9 @@ def _possible_models():
         return scn
     except ApiException as ae:
         if ae.status == 404:
-            flash("No possible model", "error")
-            # return PrintInCharte("<a href=/prj/>Select another project</a>")
+            flash(py_messages["possiblemodel404"], "error")
         elif ae.status in (401, 403):
-            flash("You cannot access this info", "error")
-            # return PrintInCharte("<a href=/prj/>Select another project</a>")
+            flash(py_messages["cannotaccessinfo"], "error")
 
 
 def _possible_licenses():
@@ -76,13 +74,13 @@ def _possible_licenses():
         if ae.status == 404:
             raise ApiException(
                 status=ae.status,
-                reason="No possible model",
+                reason=py_messages["license404"],
             )
 
         elif ae.status in (401, 403):
             raise ApiException(
                 status=ae.status,
-                reason="You cannot access this info",
+                reason=py_messages["cannotaccessinfo"],
             )
 
         else:
@@ -101,10 +99,10 @@ def _prj_users_list(ids: list) -> dict:
         return users_list
     except ApiException as ae:
         if ae.status == 404:
-            raise ApiException(status=ae.status, reason="No users list")
+            raise ApiException(status=ae.status, reason=py_messages["nouserslist"])
             # return PrintInCharte("<a href=/prj/></a>")
         elif ae.status in (401, 403):
-            raise ApiException(status=ae.status, reason="You cannot access this info")
+            raise ApiException(status=ae.status, reason=py_messages["cannotaccessinfo"])
         else:
             raise ApiException(status=ae.status)
 
@@ -114,16 +112,18 @@ def _proj_privileges(prjid):
 
 
 def _cannot_do_message(autho, prjid=0):
-    message = _("not autho")
+    message = py_messages["notautho"]
+    from appli.gui.staticlistes.py import py_messages
+
     if autho == 1:
         if prjid == 0:
-            message = _("Not_autho_prj_create")
+            message = py_messages["noauthoprjcreate"]
         else:
-            message = _("Not_autho_prj_edit")
-    elif auto == 2:
-        message = _("Not_autho_2")
-    elif auto == 3:
-        message = _("Not_autho_3")
+            message = py_messages["noauthoprjedit"]
+    elif autho == 2:
+        message = py_messages["noautho2"]  # ???
+    elif autho == 3:
+        message = py_messages["noautho3"]  # ???
     return message
 
 
@@ -147,7 +147,7 @@ def prj_create() -> str:
         title = gvp("title")
         instrument = gvp("instrument")
         if title == "" or instrument == "":
-            flash("project must have a title and instrument", "error")
+            flash(py_messages["titleinstrumentrequired"], "error")
             to_save = False
     if to_save:
         try:
@@ -159,7 +159,9 @@ def prj_create() -> str:
                 return prj_edit(rsp, new=True)
 
         except ApiException as ae:
-            raise ApiException(status=ae.status, reason="Error in project creation")
+            raise ApiException(
+                status=ae.status, reason=py_messages["errorprojectcreate"]
+            )
     scn = _possible_models()
     possible_licenses = _possible_licenses()
     return render_template(
@@ -184,21 +186,15 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
         posted_contact_id = None
-
+        # Update the project (from API call) with posted variables
         for a_var in request.form:
-            # Update the project (from API call) with posted variables
-
-            if a_var in dir(target_proj):
-                # TODO: Big assumption here, variables need to have same name as Model fields
-                setattr(target_proj, a_var, gvp(a_var))
-            if a_var == "contact_user_id":
-                posted_contact_id = gvp(a_var)
             # take inittaxo[] instead of initclassiflist - double usage
-            elif a_var == "inittaxo[]":
+            if a_var == "inittaxo[]":
                 posted_classif_list = gvpm(a_var)
                 posted_classif_list = ",".join(posted_classif_list)
                 # The original list is displayed using str(list), so there is a bit of formatting inside
                 posted_classif_list = posted_classif_list.replace(" ", "")
+                # TODO : verif must not be necessary anymore
                 if posted_classif_list and posted_classif_list[0] == "[":
                     posted_classif_list = posted_classif_list[1:]
                 if posted_classif_list and posted_classif_list[-1] == "]":
@@ -208,9 +204,15 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                     for cl_id in posted_classif_list.split(",")
                     if cl_id.isdigit()
                 ]
+            elif a_var in dir(target_proj):
+                # TODO: Big assumption here, variables need to have same name as Model fields
+                setattr(target_proj, a_var, gvp(a_var))
+            if a_var == "contact_user_id":
+                posted_contact_id = gvp(a_var)
+
         target_proj.visible = gvp("visible") == "Y"
         if previous_cnn != target_proj.cnn_network_id:
-            flash("SCN features erased", "success")
+            flash("scnerased", "success")
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
         do_update = True
         contact_user = None
@@ -248,9 +250,9 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                     for right, members_added in members_by_right.items():
                         if member_to_add in members_added:
                             if right != priv:
-                                # check duplicates with diff rights - but impossible with the new front js (does not send duplicates or elements to delete )
+                                # check duplicates with diff rights - must be impossible with the new front js (does not send duplicates or elements to delete )
                                 err_msg.append(
-                                    "Member already registered with differents privileges "
+                                    py_messages["memberexistdifferentpriv"]
                                     + users_list[member].name
                                 )
                                 do_update = False
@@ -264,21 +266,18 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                 else:
                     # privilege empty
                     err_msg.append(
-                        "Privileges are not set for member " + users_list[member].name
+                        py_messages["privnotsetfor"] + users_list[member].name
                     )
 
             else:
                 # member is not in users list
-                err_msg.append(
-                    "Error member to be added is no more in users list " + member
-                )
+                err_msg.append(py_messages["membernomoreinlist"] + member)
                 do_update = False
         for msg in err_msg:
             flash(msg, "error")
         if contact_user == None:
             flash(
-                "A contact person needs to be designated among the current project managers. "
-                'Use the "Edit privileges only" button or scroll down to bottom of the page.',
+                py_messages["getcontactuserinmanagers"],
                 "error",
             )
             do_update = False
@@ -287,7 +286,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
             target_proj.contact = contact_user
         # Managers sanity check
         if len(target_proj.managers) == 0:
-            flash("At least one manager is needed", "error")
+            flash(py_messages["managerrequired"], "error")
             do_update = False
 
         # Update on back-end
@@ -297,16 +296,23 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                     api.update_project(
                         project_id=target_proj.projid, project_model=target_proj
                     )
-                    flash(
-                        "Project "
-                        + target_proj.title
-                        + " updated. redirect to import or classif ",
-                        "success",
-                    )
-                    return redirect("/gui/prj")
+                    # flash(
+                    #    py_messages["projectupdated"]
+                    #    + target_proj.title
+                    #    + " redirect to import or classif ",
+                    #    "success",
+                    # )
+                    if new == True:
+                        # redirect to import
+                        redir = "/Job/Create/FileImport?p=" + str(target_proj.projid)
+                    else:
+                        # redirect to classif
+                        redir = "/prj/" + str(target_proj.projid)
+                    return redirect(redir)
                 except ApiException as ae:
                     raise ApiException(
-                        status=ae.status, reason="Update problem: %s" % ae
+                        status=ae.status,
+                        reason=py_messages["updateexception"] + "%s" % ae,
                     )
     lst = [str(tid) for tid in target_proj.init_classif_list]
     with ApiClient(TaxonomyTreeApi, request) as api:
@@ -329,6 +335,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         "View": target_proj.viewers.copy(),
     }
     # members_by_rights = members_by_right.copy()
+
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=target_proj,
@@ -342,72 +349,3 @@ def prj_edit(prjid: int, new: bool = False) -> str:
 
 
 ######################################################################################################################
-# noinspection PyUnusedLocal
-def prj_import_taxo(prjid=0):
-    # Query accessible projects
-    with ApiClient(ProjectsApi, request) as api:
-        prjs: List[ProjectModel] = api.search_projects(
-            also_others=False, filter_subset=False
-        )
-    # And their statistics
-    prj_ids = " ".join([str(a_prj.projid) for a_prj in prjs])
-    with ApiClient(ProjectsApi, request) as api:
-        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=prj_ids)
-
-    # Sort for consistency
-    prjs.sort(key=lambda prj: prj.title.strip().lower())
-    # Collect id for each taxon to show
-    taxa_ids_for_all = set()
-    stats_per_project = {}
-    for a_prj in prjs:
-        taxa_ids_for_all.update(a_prj.init_classif_list)
-    for a_stat in stats:
-        taxa_ids_for_all.update(a_stat.used_taxa)
-        stats_per_project[a_stat.projid] = a_stat.used_taxa
-    # Collect name for each existing id
-    lst = [str(tid) for tid in taxa_ids_for_all if tid != -1]
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))
-    taxo_map = {taxon_rec.id: taxon_rec.display_name for taxon_rec in res}
-
-    txt = ""
-    prjs_pojo = []
-    for a_prj in prjs:
-        # exclude current prj
-        if a_prj.projid != prjid:
-            # Inject taxon lists for display
-            prj_initclassif_list = set(a_prj.init_classif_list)
-            try:
-                objtaxon = set(stats_per_project[a_prj.projid])
-            except KeyError:
-                # No stats
-                objtaxon = set()
-            # 'Extra' are the taxa used, but not in the classification preset
-            result = []
-            objtaxon.difference_update(prj_initclassif_list)
-            for t in prj_initclassif_list:
-                resolved = taxo_map.get(t, None)
-                if resolved:
-                    result.append(resolved)
-            a_prj = a_prj.to_dict()  # immutable -> to_dict()
-            a_prj["presetids"] = ",".join([str(x) for x in prj_initclassif_list])
-            a_prj["preset"] = ", ".join(sorted(result))
-
-            result = []
-            for t in objtaxon:
-                resolved = taxo_map.get(int(t), None)
-                if resolved:
-                    result.append(resolved)
-            a_prj["objtaxonnotinpreset"] = ", ".join(sorted(result))
-            a_prj["objtaxonids"] = ",".join([str(x) for x in objtaxon])
-            # show only projects with classif preset or extra
-            if len(prj_initclassif_list) or len(objtaxon):
-                prjs_pojo.append(a_prj)
-
-    # render the table
-    return render_template(
-        "v2/project/_listimport.html",
-        prjlist=prjs_pojo,
-        typeimport="taxo",
-        txt=txt,
-    )
