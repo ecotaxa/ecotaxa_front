@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-
 import html
 import inspect
 import math
@@ -10,7 +9,7 @@ import traceback
 import urllib.parse
 from typing import List, Optional
 
-from flask import Flask, render_template, request, g
+from flask import Flask, render_template, Markup, request, g
 from flask_login import current_user
 from flask_security import Security
 
@@ -21,6 +20,7 @@ from appli.security_on_backend import (
 )
 from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
+
 
 app = Flask("appli")
 app.config.from_pyfile("../config/config.cfg")
@@ -52,6 +52,18 @@ assert backend_url.startswith("http://")
 assert not backend_url.endswith("/")
 
 ecopart_url = app.config["ECOPART_URL"]
+
+# config and setup babel
+from appli.constants import KNOWN_LANGUAGES, TRANSLATION_PATH
+from flask_babel import Babel
+
+app.config["BABEL_TRANSLATION_DIRECTORIES"] = TRANSLATION_PATH
+babel = Babel(app)
+
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(KNOWN_LANGUAGES)
 
 
 def XSSEscape(txt):
@@ -113,7 +125,10 @@ def gvg(varname: str, defvalue: str = "") -> str:
     :param defvalue: Valeur par default
     :return: Chaine de la variable ou valeur par defaut si elle n'existe pas
     """
-    return request.args.get(varname, defvalue)
+    ret = request.args.get(varname, defvalue)
+    # escape  no tag in get request
+    ret = Markup.striptags(ret)
+    return ret
 
 
 def gvgm(varname: str) -> List[str]:
@@ -123,8 +138,10 @@ def gvgm(varname: str) -> List[str]:
     :return: Liste des valeurs ou liste vide si la variable n'est pas présente
     """
     lst = request.args.getlist(varname)
-    # On filtre les valeurs vides
-    return [a_val for a_val in lst if a_val]
+    # filter empty values
+    # return [a_val for a_val in lst if a_val]
+    # and escape  no tag in get request
+    return [Markup.striptags(a_val) for a_val in lst if a_val]
 
 
 def gvp(varname: str, defvalue: str = "") -> str:
@@ -135,6 +152,8 @@ def gvp(varname: str, defvalue: str = "") -> str:
     :return: Chaine de la variable ou valeur par defaut si elle n'existe pas
     """
     ret = request.form.get(varname, defvalue)
+    # escape
+    ret = Markup.striptags(ret)
     # TODO: form is ImmutableMultiDict, meaning that .get can (and does) return list
     # -> the signature is wrong in flask/werkzeug source.
     return ret
@@ -147,8 +166,10 @@ def gvpm(varname: str) -> List[str]:
     :return: Liste des valeurs ou liste vide si la variable n'est pas présente
     """
     lst = request.form.getlist(varname)
-    # On filtre les valeurs vides
-    return [a_val for a_val in lst if a_val]
+    # filter empty values
+    # return [a_val for a_val in lst if a_val]
+    # escape
+    return [Markup.striptags(a_val) for a_val in lst if a_val]
 
 
 def nonetoformat(v, fmt: str):
@@ -347,6 +368,9 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2022-10-14: V 2.6.6
+    Feature : new ui for pages projects list, project create, login, about, privacy - tools to import settings, taxonomy, privileges.
+    Feature : Babel translations for the new ui.
 2022-09-01: V 2.6.5
     Feature : routing to new ui for pages projects list, project create, login, about, privacy - tools to import settings.
     Features #824 : add functionalities  to projects list - done for selection page ( left to do merge & prediction , select for collection)
