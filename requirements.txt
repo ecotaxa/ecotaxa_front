@@ -8,7 +8,8 @@ Flask==2.0.3
 Werkzeug==2.0.3
 Flask-Admin==1.6.0
 # dep of Flask-Security
-Flask-BabelEx==0.9.4
+#Flask-BabelEx==0.9.4 # remove replaced by Flask-Babel
+Flask-Babel==2.0.0 
 Flask-Login==0.5.0
 Flask-Mail==0.9.1
 Flask-Principal==0.4.0
@@ -27,7 +28,7 @@ requests==2.27.1
 # Latin hyphenation of taxa names
 hyphenator==0.6.0
 # For PrimeVue experiment
-jsonpickle==2.1.0
+#jsonpickle==2.1.0
 # Typings
 types-python-dateutil
 types-certifi

@@ -1,0 +1,1225 @@
+# Portuguese translations for PROJECT.
+# Copyright (C) 2022 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2022-10-14 12:07+0200\n"
+"PO-Revision-Date: 2022-09-22 16:08+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: pt\n"
+"Language-Team: pt <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.1\n"
+
+#: appli/gui/staticlistes.py:20
+msgid "Sorbonne Universite and CNRS"
+msgstr ""
+
+#: appli/gui/staticlistes.py:33
+msgid ""
+"Sorbonne University and the CNRS, which pay the salaries of the permanent"
+" staff responsible for supervising its development."
+msgstr ""
+
+#: appli/gui/staticlistes.py:38
+msgid "The Programme Investissements d'Avenir"
+msgstr ""
+
+#: appli/gui/staticlistes.py:41
+msgid ""
+"The Future Investments Program  which financed the development of the "
+"original version of the application through the Oceanomics project, "
+"dedicated to the analysis of Tara Oceans samples [45k €]."
+msgstr ""
+
+#: appli/gui/staticlistes.py:46
+msgid "The Partner University Fund"
+msgstr ""
+
+#: appli/gui/staticlistes.py:49
+msgid ""
+"The Partner University Fund  that funded the hardware on which EcoTaxa "
+"ran for several years and the machine learning solution it permitted, "
+"through a joint project between Université Pierre et Marie Curie (now "
+"Sorbonne Université) and the University of Miami [15k€]."
+msgstr ""
+
+#: appli/gui/staticlistes.py:54
+msgid "The CNRS LEFE program"
+msgstr ""
+
+#: appli/gui/staticlistes.py:57
+msgid ""
+"The CNRS LEFE program that allowed to renew the machine learning backend,"
+" through the project DL-PIC [10k€]."
+msgstr ""
+
+#: appli/gui/staticlistes.py:62
+msgid "The Belmont Forum"
+msgstr ""
+
+#: appli/gui/staticlistes.py:65
+msgid ""
+"The Belmont Forum, which funds an overall review of the application "
+"through the WWWPIC project [500k€]."
+msgstr ""
+
+#: appli/gui/staticlistes.py:70
+msgid "The Watertools company"
+msgstr ""
+
+#: appli/gui/staticlistes.py:73
+msgid ""
+"The Watertools company, who donated money to make the interface of "
+"EcoTaxa easier to translate, in Chinese in particular [30k€]."
+msgstr ""
+
+#: appli/gui/staticlistes.py:81
+msgid "A manager person needs to be designated among the current project persons"
+msgstr ""
+
+#: appli/gui/staticlistes.py:84
+msgid "One person, at least, needs to be related to the project"
+msgstr ""
+
+#: appli/gui/staticlistes.py:85
+msgid ""
+"A contact person needs to be designated among the current project "
+"managers."
+msgstr ""
+
+#: appli/gui/staticlistes.py:88
+msgid ""
+"A privilege is incomplete. Please select a member name or delete the "
+"privilege row"
+msgstr ""
+
+#: appli/gui/staticlistes.py:91
+msgid ""
+"One member at least is required with Manage privilege and contact "
+"property  "
+msgstr ""
+
+#: appli/gui/staticlistes.py:94
+msgid "privilege is missing"
+msgstr ""
+
+#: appli/gui/staticlistes.py:95
+msgid ""
+"Taxonomy synchronization and Ecotaxa version check wasn’t done during the"
+" last 7 days. Ask application administrator to do it."
+msgstr ""
+
+#: appli/gui/staticlistes.py:99
+msgid "Synchronize to check Ecotaxa version"
+msgstr ""
+
+#: appli/gui/staticlistes.py:101
+msgid "Error retrieving possible models"
+msgstr ""
+
+#: appli/gui/staticlistes.py:102
+msgid "Error retrieving licenses"
+msgstr ""
+
+#: appli/gui/staticlistes.py:103
+msgid "Project does not exist"
+msgstr ""
+
+#: appli/gui/staticlistes.py:104
+msgid "The page does not exists."
+msgstr ""
+
+#: appli/gui/staticlistes.py:105
+msgid "Access not authorized "
+msgstr ""
+
+#: appli/gui/staticlistes.py:106
+msgid "You cannot access this information"
+msgstr ""
+
+#: appli/gui/staticlistes.py:107
+msgid "You cannot edit settings for this project"
+msgstr ""
+
+#: appli/gui/staticlistes.py:108
+msgid "No users list"
+msgstr ""
+
+#: appli/gui/staticlistes.py:109
+msgid "Not authorized to create a project"
+msgstr ""
+
+#: appli/gui/staticlistes.py:110
+msgid "Not authorized to edit a project"
+msgstr ""
+
+#: appli/gui/staticlistes.py:111
+msgid "A project must have a title and instrument"
+msgstr ""
+
+#: appli/gui/staticlistes.py:112
+msgid ""
+"Changing the instrument associated with a project may affect the "
+"behaviour of EcoTaxa in various ways and should not be done except to "
+"correct a mistake."
+msgstr ""
+
+#: appli/gui/staticlistes.py:115
+msgid "Error in project creation"
+msgstr ""
+
+#: appli/gui/staticlistes.py:116
+msgid "SCN features erased"
+msgstr ""
+
+#: appli/gui/staticlistes.py:117
+msgid "Member already registered with differents privileges "
+msgstr ""
+
+#: appli/gui/staticlistes.py:120
+msgid "Privileges are not set for member "
+msgstr ""
+
+#: appli/gui/staticlistes.py:121
+msgid "Error member to be added is no more in users list "
+msgstr ""
+
+#: appli/gui/staticlistes.py:122
+msgid ""
+"A contact person needs to be designated among the current project "
+"managers. "
+msgstr ""
+
+#: appli/gui/staticlistes.py:125
+msgid "At least one manager is needed"
+msgstr ""
+
+#: appli/gui/staticlistes.py:126
+msgid "Update problem: "
+msgstr ""
+
+#: appli/gui/staticlistes.py:127
+msgid "Project updated"
+msgstr ""
+
+#: appli/gui/staticlistes.py:128
+msgid "Privileges where not imported correctly."
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:20
+#: appli/templates/v2/project/projectsettings.html:63
+#: appli/templates/v2/project/projectsettings.html:65
+msgid "Instrument"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:134
+msgid "select"
+msgstr ""
+
+#: appli/templates/v2/about.html:19
+msgid "Welcome to Ecotaxa"
+msgstr ""
+
+#: appli/templates/v2/about.html:20
+msgid ""
+"EcoTaxa is a web application dedicated to the visual exploration and the "
+"taxonomic annotation of images that illustrate the beauty of planktonic "
+"biodiversity."
+msgstr ""
+
+#: appli/templates/v2/about.html:21
+msgid "If you use EcoTaxa in your work, we would appreciate if you cite it as:"
+msgstr ""
+
+#: appli/templates/v2/about.html:21
+msgid "Picheral M, Colin S, Irisson J-O (2017)."
+msgstr ""
+
+#: appli/templates/v2/about.html:21
+msgid "EcoTaxa, a tool for the taxonomic classification of images :"
+msgstr ""
+
+#: appli/templates/v2/about.html:52
+msgid ""
+"The maintenance of the software and hardware that allows EcoTaxa to run "
+"depends on the support of its users, who can be officially billed by the "
+"<a href='https://www.sorbonne-universite.fr/plateformes-techniques"
+"/plateforme-dimagerie-quantitative-de-villefranche-sur-mer-piqv' "
+"target='_blank'>Quantitative Imaging Platform of Villefranche</a>. We "
+"would very much appreciate if you would consider setting aside some funds"
+" in your next grant for this. Contact us to estimate what would be both "
+"reasonable and useful."
+msgstr ""
+
+#: appli/templates/v2/about.html:53
+msgid "The persons who made EcoTaxa possible are:"
+msgstr ""
+
+#: appli/templates/v2/about.html:55
+msgid ""
+"MMarc Picheral and Jean-Olivier Irisson: specifications and project "
+"supervision"
+msgstr ""
+
+#: appli/templates/v2/about.html:56
+msgid "Sébastien Colin: initial specification"
+msgstr ""
+
+#: appli/templates/v2/about.html:57
+msgid "Altidev, Laurent Salinas, Laurent Reese: development"
+msgstr ""
+
+#: appli/templates/v2/about.html:58
+msgid "Simon-Martin Schröder, Benjamin Graham: deep learning implementation"
+msgstr ""
+
+#: appli/templates/v2/about.html:59
+msgid ""
+"Amanda Elineau, Corinne Desnos, Laetitia Jalabert and the COMPLEx team of"
+" the <a href='https://lov.imev-mer.fr/'>Laboratoire d'Océanographie de "
+"Villefranche</a> (LOV): testing and feedback"
+msgstr ""
+
+#: appli/templates/v2/about.html:61
+msgid "Disclaimer :"
+msgstr ""
+
+#: appli/templates/v2/about.html:61
+msgid ""
+"If you annotate images in EcoTaxa you cannot claim for any retribution "
+"from the application managers but you can then download and use the "
+"results of your work. Even if they make their best to keep the "
+"application stable and secure, the managers of the EcoTaxa application "
+"are not liable for the safekeeping of the images and associated data it "
+"hosts. You are responsible for performing regular backups."
+msgstr ""
+
+#: appli/templates/v2/login.html:8
+msgid "Register"
+msgstr ""
+
+#: appli/templates/v2/login.html:9
+msgid "Create your EcoTaxa account"
+msgstr ""
+
+#: appli/templates/v2/login.html:15
+msgid "Our privacy statement"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:3
+#: appli/templates/v2/project/_listcontainer.html:6
+msgid "How to prepare data"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:4
+msgid "In a folder place:"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:5
+msgid "image files"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:7
+msgid ""
+"Colour and 8-bits greyscale images are supported, in <code>jpg</code>, "
+"<code>png</code>,<code>gif</code>\n"
+"                (possibly animated) formats."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:11
+msgid ""
+"a <code><a href=\"https://en.wikipedia.org/wiki/Tab-"
+"separated_values\">tsv</a></code> (TAB separated file)\n"
+"            which can be .txt or .tsv extension. File name must start "
+"with ecotaxa (ecotaxa*.txt or ecotaxa*.tsv)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:15
+msgid ""
+"It contains the metadata for each image. This file can be created in a "
+"spreadsheet application (see\n"
+"                formats and examples below)."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:18
+msgid "Line 1 contains column headers"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:19
+msgid "Line 2 contains data format codes; [f] for floats, [t] for text"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:20
+msgid "Line 3...n contain data for each image"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:25
+msgid ""
+"The metadata and data for each image is organised in various levels "
+"(image, object, process, sample, etc.). All\n"
+"        column names must be prefixed with the level name "
+"(<code>img_***</code>, <code>object_***</code>, etc.). Some\n"
+"        common fields, used to filter data, must be named and sometimes "
+"formatted in a certain way (required format in\n"
+"        blue), which is documented below. But, overall, the only two "
+"mandatory fields are\n"
+"        <code class=\"text-coral-400\">img_file_name</code> and <code "
+"class=\"text-coral-400\">object_id</code> (in red)."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:32
+msgid "IMAGE"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:34
+msgid ""
+"<code class=\"text-coral-400\">img_file_name</code> [t]: name of the "
+"image file in the folder (including\n"
+"                    extension)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:37
+msgid ""
+"<code>img_rank</code> [f] : rank of image to be displayed, in case of "
+"existence of multiple (&lt;10)\n"
+"                    images for one object. Starts at 1."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:42
+msgid ""
+"OBJECT: one object to be classified, usually one organism. One object can"
+" be represented by several images.\n"
+"            In this <code>tsv</code> file, there is one line per image "
+"which means the object data gets repeated on\n"
+"            several lines."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:46
+msgid ""
+"[t] : identifier of the object, must be unique in the\n"
+"                    project. It will be displayed in the object page"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:49
+msgid "URL of an associated website"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:50
+msgid "latitude"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:50
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:51
+msgid "decimal degrees"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:51
+msgid "longitude"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:52
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:61
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:62
+msgid "YYYYMMDD"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:53
+msgid "HHMMSS"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:54
+msgid "minimum depth of object"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:54
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:56
+msgid "meters"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:56
+msgid "maximum depth of object"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:59
+msgid "And, for already classified objects"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:63
+msgid ""
+"class of the object with optionally its direct parent\n"
+"                    following separated by left angle bracket without "
+"whitespace \"Cnidaria&lt;Hydrozoa\" or old style\n"
+"                    between brackets \"Cnidaria (Hydrozoa)\""
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:67
+msgid ""
+"Ecotaxa ID of the class of the object, generally\n"
+"                    from an Ecotaxa export"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:70
+msgid "name of the person who identified the object"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:71
+msgid "email of the person who identified the object"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:72
+msgid "predicted"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
+msgid "dubious"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:77
+msgid "or"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
+msgid "validated"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:75
+msgid "And additional object-related fields"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:77
+msgid ""
+"other fields relative to the object. Up to 500 [f] fields and\n"
+"                    20 [t] ones."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:82
+msgid "PROCESS: metadata relative to the processing of the raw images"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:84
+msgid ""
+"identifier. The processing information is associated with the\n"
+"                    acquisition on the same line. If missing, a dummy "
+"processing identifier will be created."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:87
+msgid "other fields relative to the process. Up to 30 of them."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:90
+msgid "ACQUISITION: metadata relative to the image acquisition"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:92
+msgid ""
+"identifier of the image acquisition, must be unique in the project. If\n"
+"                    missing, a dummy acquisition identifier will be "
+"created."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:95
+msgid "other fields relative to the acquisition. Up to 30 of them."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:98
+msgid "SAMPLE: a collection event"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:100
+msgid ""
+"identifier of the sample, must be unique in the project. If missing, a\n"
+"                    dummy sample identifier will be created."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:103
+msgid "other fields relative to the sample. Up to 30 of them."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:107
+msgid "You can download example tsv files"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:109
+msgid "Minimal example"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:109
+msgid "for fully manual entry"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:110
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:113
+msgid "Full featured example"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:110
+msgid ""
+"with unknown\n"
+"            objects only"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:113
+msgid ""
+"with already\n"
+"            classified objects"
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:117
+msgid ""
+"Several such importation folders can be placed alongside each other in a "
+"main folder. Pointing at that main\n"
+"        folder will import all subfolders recursively. EcoTaxa will read "
+"all <code>tsv</code> files and then import the\n"
+"        images they point to. When \"Skip <code>tsv</code> that have "
+"already been imported\" is ticked, the names of\n"
+"        <code>tsv</code> files are recorded and those already imported "
+"are not re-imported. For ongoing projects, this\n"
+"        allows to simply put new data alongside the old import folders "
+"and have EcoTaxa only import the new ones."
+msgstr ""
+
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:122
+msgid "So overall, the hierarchy can look like"
+msgstr ""
+
+#: appli/templates/v2/help/_help_project_req_access.html:4
+msgid "Access Projects"
+msgstr ""
+
+#: appli/templates/v2/help/_help_project_req_access.html:6
+msgid "Other projects"
+msgstr ""
+
+#: appli/templates/v2/help/_help_project_req_access.html:7
+msgid "to have access to these projects, request access to the project manager."
+msgstr ""
+
+#: appli/templates/v2/help/_help_project_req_access.html:11
+msgid ""
+"To create a new project and upload images in it, please contact the "
+"application\n"
+"    manager:"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:4
+msgid "Project settings"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:5
+msgid "description"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:5
+msgid ""
+"A short paragraph describing the dataset, to make it discoverable by "
+"others in EcoTaxa and elsewhere.\n"
+"    It should indicate which organisms are targeted (e.g. "
+"mesozooplankton), where (e.g. Bering Sea),\n"
+"    when (e.g. from 2000 to 2010) and how (e.g. plankton net samples "
+"processed with a ZooScan) they were\n"
+"    collected,\n"
+"    the scientific program that motivated the work and who ran it (e.g. "
+"SCOR program coordinated by the\n"
+"    Laboratoire\n"
+"    d'Océanographie de Villefranche)."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:13
+#: appli/templates/v2/project/projectsettings.html:56
+msgid "Comments"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:13
+msgid ""
+"Any technical, practical details that need to be shared with other users "
+"able to access this target_proj."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:15
+#: appli/templates/v2/project/projectsettings.html:86
+msgid "Deep feature extractor"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:15
+msgid ""
+"SCN Network used for prediction, if you change it, existing features "
+"computed with this network will be\n"
+"    erased.\n"
+"    <br>New features will be recomputed during the next automatic "
+"classification."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:19
+msgid "Definition of preset for manual sorting"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:20
+msgid ""
+"The PRESET tool permits to create a pre-defined list of categories for "
+"the sorting of the images from\n"
+"    the project"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:23
+msgid ""
+"The list can be directly copied from another project (use Pick from other"
+" projects)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:24
+msgid "New categories can be added using the auto completion function"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:25
+#: appli/templates/v2/project/projectsettings.html:126
+msgid "Presets"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:26
+msgid ""
+"Format : Var=var_name (Var : imported variable, var_name : displayed "
+"variable name)\n"
+"        <br>Example : depth_min=minimum depth [m] where"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:29
+msgid "depth_min is the variable from the imported TSV file"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:30
+msgid "minimum depth [m] is the displayed name"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:32
+msgid "Notes :"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:34
+msgid "the table can be copied from another project (opened in a different tab)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:35
+msgid "only LOWER CASE"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:41
+msgid "Licenses"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:49
+msgid "The roles in short:"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:51
+msgid ""
+"Viewers can view the project even when it is private; the project is "
+"listed in their project\n"
+"      list."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:54
+msgid "Annotators can classify objects."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:55
+msgid "Managers can import and delete data, as well as change project settings."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:56
+msgid ""
+"The contact person is a Manager, displayed in the project table and "
+"serving as the contact point for other users and EcoTaxa's managers."
+msgstr ""
+
+#: appli/templates/v2/help/_help_summary.html:6
+msgid "readmore"
+msgstr ""
+
+#: appli/templates/v2/help/_help_summary.html:13
+msgid "Help Summary"
+msgstr ""
+
+#: appli/templates/v2/help/_layout.html:18
+msgid "Help summary"
+msgstr ""
+
+#: appli/templates/v2/macros/macros.html:38
+msgid "Please wait ..."
+msgstr ""
+
+#: appli/templates/v2/mail/_mailto.html:3
+msgid "Not in the list"
+msgstr ""
+
+#: appli/templates/v2/mail/_mailto.html:4
+msgid "Request for adding an instrument to EcoTaxa"
+msgstr ""
+
+#: appli/templates/v2/mail/_mailto.html:5
+msgid ""
+"**Information for creation**\n"
+"Instrument name:\n"
+"URL of the description in the BODC L22 vocabulary "
+"http://vocab.nerc.ac.uk/collection/L22/current/ :\n"
+"\n"
+"**Reason for creation**\n"
+"Explain how widely the instrument is distributed and why it should be "
+"added to the standard list.\n"
+msgstr ""
+
+#: appli/templates/v2/mail/_mailto.html:13
+msgid "EcoTaxa : Please provide me the Project creation right"
+msgstr ""
+
+#: appli/templates/v2/mail/_mailto.html:15
+msgid "Request"
+msgstr ""
+
+#: appli/templates/v2/partials/_alertbox.html:2
+msgid "IMPORTANT :"
+msgstr ""
+
+#: appli/templates/v2/partials/_alertbox.html:2
+msgid "ATTENTION:"
+msgstr ""
+
+#: appli/templates/v2/partials/_alertbox.html:2
+msgid "INFORMATION:"
+msgstr ""
+
+#: appli/templates/v2/partials/_alertbox.html:2
+msgid "SUCCESS:"
+msgstr ""
+
+#: appli/templates/v2/partials/_alertbox.html:2
+msgid "ERROR:"
+msgstr ""
+
+#: appli/templates/v2/partials/_alertbox.html:14
+msgid "Close"
+msgstr ""
+
+#: appli/templates/v2/partials/_alertbox.html:22
+#: appli/templates/v2/project/projectsettings.html:176
+msgid "Cancel"
+msgstr ""
+
+#: appli/templates/v2/partials/_alertbox.html:22
+msgid "Ok"
+msgstr ""
+
+#: appli/templates/v2/partials/_footer.html:16
+msgid "About"
+msgstr ""
+
+#: appli/templates/v2/partials/_footer.html:16
+msgid "Privacy"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:6
+msgid "home"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:12
+msgid "settings"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:13
+#: appli/templates/v2/project/projectsettings.html:44
+msgid "new project"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:13
+msgid "Projects list"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:67
+msgid "projects list"
+msgstr ""
+
+#: appli/templates/v2/partials/_topsitebar.html:12
+msgid "log in"
+msgstr ""
+
+#: appli/templates/v2/partials/_topsitebar.html:23
+msgid "profile"
+msgstr ""
+
+#: appli/templates/v2/partials/_topsitebar.html:24
+msgid "help"
+msgstr ""
+
+#: appli/templates/v2/partials/_topsitebar.html:27
+msgid "logout"
+msgstr ""
+
+#: appli/templates/v2/project/_headerimport.html:5
+msgid "Clear"
+msgstr ""
+
+#: appli/templates/v2/project/_headerimport.html:6
+msgid "Replace taxonomy"
+msgstr ""
+
+#: appli/templates/v2/project/_headerimport.html:6
+msgid "Replace privileges"
+msgstr ""
+
+#: appli/templates/v2/project/_headerimport.html:6
+msgid "Replace"
+msgstr ""
+
+#: appli/templates/v2/project/_headerimport.html:7
+msgid "Add to taxonomy"
+msgstr ""
+
+#: appli/templates/v2/project/_headerimport.html:7
+msgid "Add to privileges"
+msgstr ""
+
+#: appli/templates/v2/project/_headerimport.html:7
+msgid "Import"
+msgstr ""
+
+#: appli/templates/v2/project/_headerlist.html:3
+msgid ""
+"To start using EcoTaxa, you need to <a href=\"/gui/prj/create\">Create a "
+"project</a> or ask for permission in the list below"
+msgstr ""
+
+#: appli/templates/v2/project/_headerlist.html:6
+msgid "All projects"
+msgstr ""
+
+#: appli/templates/v2/project/_headerlist.html:6
+msgid "Accessible projects"
+msgstr ""
+
+#: appli/templates/v2/project/_headerlist.html:8
+msgid "Show only accessible projects"
+msgstr ""
+
+#: appli/templates/v2/project/_headerlist.html:8
+msgid "Show all projects"
+msgstr ""
+
+#: appli/templates/v2/project/_listcontainer.html:8
+msgid "Create a project"
+msgstr ""
+
+#: appli/templates/v2/project/_listcontainer.html:10
+msgid "Access projects"
+msgstr ""
+
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "import full settings"
+msgstr ""
+
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "preset"
+msgstr ""
+
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "import"
+msgstr ""
+
+#: appli/templates/v2/project/_listcontainer.html:22
+msgid "extra"
+msgstr ""
+
+#: appli/templates/v2/project/_listcontainer.html:23
+msgid "please wait"
+msgstr ""
+
+#: appli/templates/v2/project/_stats.html:15
+msgid "Project_about"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:5
+#: appli/templates/v2/project/projectsettings.html:145
+msgid "Name"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:7
+#: appli/templates/v2/project/projectsettings.html:146
+msgid "Privilege"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:12
+#: appli/templates/v2/project/projectsettings.html:147
+msgid "Contact"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:15
+msgid "Remove"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:16
+msgid "to delete a user with Manage privilege , modify the privilege attribute"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:19
+msgid "Pick from other project"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:25
+msgid "pick from projects"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:34
+msgid "How to edit a project settings"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:34
+msgid "How to create a project"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:37
+msgid "this field is required"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:37
+msgid "this field is invalid"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:37
+msgid "imported"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:44
+msgid "project"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:48
+msgid "Title"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:49
+msgid "a title is required"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:49
+msgid "new"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:51
+msgid "Description"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:71
+msgid "Status"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:74
+msgid "Annotate"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:74
+msgid "Explore Only"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:74
+msgid "Annotate No Prediction"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:81
+msgid "Visible for all visitors"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:81
+msgid "only validated objects"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:96
+msgid "License"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:109
+msgid "Taxonomy"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:110
+msgid "Pick taxonomy from other projects"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:115
+msgid "select a category"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:127
+msgid "Pick presets from other projects"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:142
+msgid "Pick privileges from other projects"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:171
+msgid "New privilege"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:176
+msgid "Cancel, back to project "
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:176
+msgid "Save"
+msgstr ""
+
+#: appli/templates/v2/security/_login.html:3
+msgid "Sign in"
+msgstr ""
+
+#: appli/templates/v2/security/_login.html:5
+msgid "Email"
+msgstr ""
+
+#: appli/templates/v2/security/_login.html:14
+msgid "forgot password?"
+msgstr ""
+
+#: appli/templates/v2/security/_login.html:16
+msgid "remember me"
+msgstr ""
+
+#: appli/templates/v2/security/_login.html:20
+msgid "sign in"
+msgstr ""
+
+#: appli/templates/v2/security/_login.html:27
+msgid "Already authenticated. page should redirect to projects list"
+msgstr ""
+
+#~ msgid ""
+#~ "EcoTaxa is a web application dedicated"
+#~ " to the visual exploration and the"
+#~ " taxonomic annotation of images that "
+#~ "illustrate the beauty of planktonic "
+#~ "biodiversity."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The maintenance of the software and "
+#~ "hardware that allows EcoTaxa to run "
+#~ "depends on the support of its "
+#~ "users, who can be officially billed "
+#~ "by the <a href='https://www.sorbonne-"
+#~ "universite.fr/plateformes-techniques/plateforme-"
+#~ "dimagerie-quantitative-de-villefranche-sur-"
+#~ "mer-piqv'>Quantitative Imaging Platform of "
+#~ "Villefranche</a>. We would very much "
+#~ "appreciate if you would consider setting"
+#~ " aside some funds in your next "
+#~ "grant for this. Contact us to "
+#~ "estimate what would be both reasonable"
+#~ " and useful."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "ECOtaxta update language text EcoTaxa is"
+#~ " a web application dedicated to the"
+#~ " visual exploration and the taxonomic "
+#~ "annotation of images that illustrate the"
+#~ " beauty of planktonic biodiversity."
+#~ msgstr ""
+
+#~ msgid ""
+#~ " test tradu updat The maintenance "
+#~ "of the software and hardware that "
+#~ "allows EcoTaxa to run depends on "
+#~ "the support of its users, who can"
+#~ " be officially billed by the <a "
+#~ "href='https://www.sorbonne-universite.fr/plateformes-"
+#~ "techniques/plateforme-dimagerie-quantitative-de-"
+#~ "villefranche-sur-mer-piqv'>Quantitative "
+#~ "Imaging Platform of Villefranche</a>. We "
+#~ "would very much appreciate if you "
+#~ "would consider setting aside some funds"
+#~ " in your next grant for this. "
+#~ "Contact us to estimate what would "
+#~ "be both reasonable and useful."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Maintenance of the software and hardware"
+#~ " that allows EcoTaxa to run depends"
+#~ " on the support of its users, "
+#~ "who can be officially billed by "
+#~ "the <a href='https://www.sorbonne-universite.fr"
+#~ "/plateformes-techniques/plateforme-dimagerie-"
+#~ "quantitative-de-villefranche-sur-mer-"
+#~ "piqv'>Quantitative Imaging Platform of "
+#~ "Villefranche</a>. We would very much "
+#~ "appreciate if you would consider setting"
+#~ " aside some funds in your next "
+#~ "grant for this. Contact us to "
+#~ "estimate what would be both reasonable"
+#~ " and useful."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "To start using EcoTaxa, you need "
+#~ "to [Create a project] or ask for"
+#~ " permission in the list below"
+#~ msgstr ""
+
+#~ msgid "Create new project"
+#~ msgstr ""
+
+#~ msgid "How to edit create a project"
+#~ msgstr ""
+
+#~ msgid "Restricted access"
+#~ msgstr ""
+
+#~ msgid "not autho"
+#~ msgstr ""
+
+#~ msgid "Not_autho_prj_create"
+#~ msgstr ""
+
+#~ msgid "Not_autho_prj_edit"
+#~ msgstr ""
+
+#~ msgid "Not_autho_2"
+#~ msgstr ""
+
+#~ msgid "Not_autho_3"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you use EcoTaxa in your work,"
+#~ " we would appreciate if you cite "
+#~ "it as:<br><blockquote class='text-base'>Picheral "
+#~ "M, Colin S, Irisson J-O (2017). "
+#~ "<br>EcoTaxa, a tool for the taxonomic"
+#~ " classification of images: <a "
+#~ "href='http://ecotaxa.obs-vlfr.fr'>http://ecotaxa.obs-"
+#~ "vlfr.fr</a></blockquote>"
+#~ msgstr ""
+
+#~ msgid "Preset categories"
+#~ msgstr ""
+
+#~ msgid "Extra categories used"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "IMPORTANT : A contact person needs "
+#~ "to be designated among the current "
+#~ "project managers. Use\n"
+#~ "            the \"Edit privileges only\" "
+#~ "button or scroll down to bottom of"
+#~ " the page."
+#~ msgstr ""
+
