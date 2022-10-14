@@ -2,7 +2,7 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from typing import List, Dict, Optional
-from flask import render_template, request, flash, Markup, session
+from flask import render_template, request, flash, session
 from flask_login import current_user
 from appli.constants import GUI_PATH
 
@@ -73,7 +73,7 @@ def experimental_header(filename: str = "") -> str:
     return experimental
 
 
-def _jobs_summary_data() -> Dict:
+def jobs_summary_data() -> Dict:
     """
     Return a structure to show what is currently ongoing on jobs side.
     """
@@ -95,7 +95,7 @@ def RenderTemplate(
 ) -> str:
     import os
 
-    jobs_summary = _jobs_summary_data()
+    jobs_summary = jobs_summary_data()
     experimental = experimental_header()
     if filename[-1] == "/":
         filename = filename[:-1]
@@ -119,55 +119,16 @@ def build_mail(emails: str, type: str = "", text: str = "") -> str:
     return render_template("./v2/mail/_mailto.html", emails=emails, type=type)
 
 
-def find_language() -> NullTranslations:
-
-    # Get the browser current language
-    import gettext
-    from appli.constants import KNOWN_LANGUAGES, TRANSLATION_PATH, DEFAULT_LOCALE
-
-    # see https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1 to get all the 2 digits country codes
-    # TODO put this constant in ecotaxa_dev/appli/project/__init__.py ?
-    curLang: str = ""
-    prefLangs = request.accept_languages
-    if prefLangs is not None:
-        # Here, there is at least one language
-        # First one is the prefered language in the list of handled languages
-        for l in prefLangs:
-            curLang = l[0][
-                :2
-            ]  # first 2 letters show the country, and translations tables folders are organised this way
-            if curLang in KNOWN_LANGAGES:
-                try:  # N.B. [curLang] and not curLang in the following line
-                    lang = gettext.translation(
-                        "ecotaxa", "messages", [curLang]
-                    )  # curLang == 'fr' or 'en' or 'zh' or 'pt' ...
-                    okCurLang = True
-                except:  # language corrupted or not existing
-                    okCurLang = False
-                if okCurLang:
-                    lang.install()
-                    return lang
-            # try the next language
-    # Tried all the languages without success, or there is no supported langage
-    curLang = "en"  # desperate, so take english as last solution
-    lang = gettext.translation("ecotaxa", "messages", [curLang])
-    lang.install()
-    return lang
-
-
 def last_taxo_refresh(partial: bool = False):
     import datetime
+    from appli.gui.staticlistes import py_messages
 
     if partial == True:
         return
     last_refresh = _get_last_refresh()
     if last_refresh is None or (datetime.datetime.now() - last_refresh).days > 7:
-        flashtxt = (
-            "Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days, "
-            "Ask application administrator to do it."
-        )  # +str(PDT.lastserverversioncheck_datetime)
-        flashtxt += "  <a href='/taxo/browse/' class='underline underline-offset-2 font-normal text-sm'>Synchronize to check Ecotaxa version</a>"
-        flash(Markup(flashtxt), "warning")
+
+        flash(py_messages["taxosynchro"], "warning")
 
 
 def breadcrumbs(filename: str) -> list:
