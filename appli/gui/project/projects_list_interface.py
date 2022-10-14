@@ -1,9 +1,10 @@
 # list : full project list table def - homepage
 # import-[...] settings table def - projectsettings page create or update
+from flask_babel import _
 
 
-def project_table_columns(action: str, typeimport: str) -> list:
-    if action == "":
+def project_table_columns(typeimport: str) -> list:
+    if typeimport == "":
         selection = "list"
     else:
         selection = "import"
@@ -13,8 +14,13 @@ def project_table_columns(action: str, typeimport: str) -> list:
                 "label": "ID",
                 "sortable": "desc",
                 "field": "projid",
+                "format": "number",
             },
-            {"label": "Instrument", "field": "instrument"},
+            {
+                "label": _("Instrument"),
+                "field": "instrument",
+                "autocomplete": "instrument",
+            },
             {
                 "label": "Title",
                 "field": "title",
@@ -28,10 +34,9 @@ def project_table_columns(action: str, typeimport: str) -> list:
                 "label": "Visibility",
                 "field": "visible",
                 "format": "check",
-                "true": "Y",
+                "value": "Y",
             },
-            {"label": "License", "field": "license"},
-            {"label": "Deep feature extractor", "field": "cnn_network_id"},
+            {"label": "License", "field": "license", "format": "license"},
             {"label": "Nb objects", "field": "objcount", "format": "number"},
             {
                 "label": "%validated",
@@ -39,45 +44,46 @@ def project_table_columns(action: str, typeimport: str) -> list:
                 "format": "progress",
                 "default": "0.0",
             },
+            # hidden columns
+            {"label": "Description", "field": "description", "hidden": "true"},
+            {"label": "Free columns", "field": "obj_free_cols", "hidden": "true"},
+            {"label": "Members", "field": "privileges", "hidden": "true"},
         ],
         "import": {
             "commons": [
                 {
                     "label": "ID",
                     "field": "projid",
+                    "format": "number",
                 },
                 {
                     "label": "Instrument",
                     "field": "instrument",
+                    "autocomplete": "instrument",
                 },
                 {
-                    "label": "Title [ID]",
+                    "label": "Title",
                     "field": "title",
-                    "subfield": "projid",
                 },
             ],
             "taxo": [
                 {
                     "label": "Preset categories",
                     "field": "preset",
-                    "class": "ellipsis",
-                    "autocomplete": "presetids",
+                    "format": "taxons",
                 },
                 {
                     "label": "Extra categories used",
-                    "class": "ellipsis",
                     "field": "objtaxonnotinpreset",
-                    "autocomplete": "objtaxonids",
+                    "format": "taxons",
                 },
-                {"label": "presetids", "hidden": "true", "field": "presetids"},
-                {"label": "notinpresetids", "field": "objtaxonids", "hidden": "true"},
             ],
             "privileges": [
                 {"label": "Members", "field": "privileges"},
                 {"label": "contact", "hidden": "true", "field": "contact"},
             ],
             "fields": [
-                {"label": "presets", "field": "popoverfieldlist"},
+                {"label": "presets", "field": "popoverfieldlist", "format": "text"},
             ],
             "settings": [
                 {"label": "status", "field": "status"},
@@ -89,11 +95,11 @@ def project_table_columns(action: str, typeimport: str) -> list:
                 {
                     "label": "visible",
                     "field": "visible",
-                    "icon": "check",
-                    "true": "Y",
+                    "format": "check",
+                    "value": "Y",
                     "hidden": "true",
                 },
-                {"label": "presets", "field": "popoverfieldlist"},
+                {"label": "presets", "field": "popoverfieldlist", "format": "text"},
                 {
                     "label": "init classif",
                     "field": "init_classif_list",
@@ -107,14 +113,16 @@ def project_table_columns(action: str, typeimport: str) -> list:
         "taxo": {
             "field": "select",
             "select": "taxo",
+            "parts": ["preset", "objtaxonnotinpreset"],
             "selectcells": [
-                ["preset", "presetids"],
-                ["objtaxonnotinpreset", "objtaxonids"],
+                "preset",
+                "objtaxonnotinpreset",
             ],
         },
         "privileges": {
             "field": "select",
             "select": "privileges",
+            "parts": ["privileges"],
             "selectcells": ["privileges", "contact"],
         },
         "fields": {
@@ -123,6 +131,7 @@ def project_table_columns(action: str, typeimport: str) -> list:
             "selectcells": ["popoverfieldlist"],
         },
         "settings": {
+            "label": _("select"),
             "field": "select",
             "select": "settings",
             "selectcells": [
@@ -151,14 +160,26 @@ def project_table_columns(action: str, typeimport: str) -> list:
         # tag seletected columns to import
         for i, th in enumerate(ths):
             ths[i]["data"] = dict({})
+            if "autocomplete" in th:
+                ths[i]["data"].update({"autocomplete": th["autocomplete"]})
+            if "parts" in th:
+                ths[i]["data"].update({"parts": th["parts"]})
+            if "value" in th:
+                ths[i]["data"].update({"value": th["value"]})
             if th["field"] in select[typeimport]["selectcells"]:
-                ths[i]["data"].update({"name": th["field"], "id": "projid"})
+                ths[i]["data"].update({"name": th["field"]})
+
+            elif th["field"] == "select":
+                ths[i]["data"].update({"what": typeimport})
+
         return ths
     else:
         return [{"field": "select", "select": "controls"}] + columns[selection]
 
 
 def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) -> list:
+    import json
+
     jsonprjs = list([])
     for prj in prjs:
         jsonprj = list([])
@@ -180,14 +201,14 @@ def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) ->
                     for u in right:
                         privileges[keypriv].append(u.to_dict())
 
-                jsonprj.append(dict({column["field"]: privileges}))
+                jsonprj.append(json.dumps(privileges))
 
             else:
 
                 # if subfield  append object which will be formatted by the js component
                 if column["field"] == "select":
                     if column["select"] == "controls":
-                        select = list([])
+                        select = dict({})
                         if prj.status != "ExploreOnly" and (
                             (
                                 prj.projid
@@ -195,18 +216,22 @@ def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) ->
                             )
                             or isadmin
                         ):
-                            select.append(list(["A", "Annotate"]))
+                            select.update({"A": "Annotate"})
                         elif prj.projid in can_access["View"] or isadmin:
-                            select.append(list(["V", "View"]))
+                            select.update({"V": "View"})
                         else:
                             if prj.visible:
-                                select.append("View")
-                            select.append(list(["R", "Request Access"]))
+                                select.update({"V": "View"})
+                            select.update({"R": "Request Access"})
                         if prj.projid in can_access["Manage"] or isadmin:
-                            select.append(list(["M", "Manage"]))
-                        attrvalue = list(select)
+                            select.update({"M": "Manage"})
+                        attrvalue = select
                     else:
                         attrvalue = ""
+
+                elif type(prj) == dict:
+                    # data come from different types (if taxo it's  dict)
+                    attrvalue = prj[column["field"]]
                 else:
                     attrvalue = getattr(prj, column["field"])
                 if "request" in column:
@@ -232,6 +257,7 @@ def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) ->
                             attrvalue = prj.managers[0].to_dict()
                         else:
                             attrvalue = ""
-                jsonprj.append(attrvalue)
+
+                jsonprj.append(json.dumps(attrvalue))
         jsonprjs.append(jsonprj)
     return jsonprjs
