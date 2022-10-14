@@ -8,9 +8,10 @@ from flask_security import login_required
 from flask_login import current_user
 from appli import app, gvg, gvp
 
-
 from to_back.ecotaxa_cli_py.exceptions import ApiException
 from werkzeug.exceptions import HTTPException
+from flask_babel import _
+from appli.gui.staticlistes import py_messages
 
 
 @app.route("/gui")
@@ -70,9 +71,27 @@ def gui_prj(listall: bool = False) -> str:
     from appli.gui.commontools import last_taxo_refresh
 
     last_taxo_refresh(partial)
+    from appli.gui.project.projects_list import projects_list_page
+
+    return projects_list_page(listall=listall, partial=partial)
+
+
+@app.route("/gui/prjlist/", methods=["GET"])
+@login_required
+def gui_prjlist(listall: bool = False) -> str:
     from appli.gui.project.projects_list import projects_list
 
-    return projects_list(listall=listall, partial=partial)
+    typeimport = gvg("typeimport")
+    return projects_list(listall=listall, typeimport=typeimport)
+
+
+@app.route("/gui/prj/importsettings", methods=["GET", "POST"])
+@login_required
+def gui_importsettings(prjid: int = 0) -> str:
+    typeimport = gvg("typeimport")
+    from appli.gui.project.projects_list import projects_list_page
+
+    return projects_list_page(listall=False, partial=True, typeimport=typeimport)
 
 
 @app.route("/gui/prj/create", methods=["GET", "POST"])
@@ -111,37 +130,22 @@ def gui_prj_about(prjid):
     return prj_stats(prjid, partial, params)
 
 
-@app.route("/gui/prj/importsettings", methods=["GET", "POST"])
-@login_required
-def gui_importsettings(prjid: int = 0):
-    prjid = gvg("prjid")
-    typeimport = gvg("typeimport")
-
-    if typeimport == "taxo":
-        from appli.gui.project.projectsettings import prj_import_taxo
-
-        return prj_import_taxo(prjid)
-
-    else:
-        from appli.gui.project.projects_list import projects_list
-
-        return projects_list(
-            listall=False, partial=True, action="importsettings", typeimport=typeimport
-        )
-
-
 # help
 @app.route("/gui/help/<path:filename>")
 @login_required
 def gui_help(filename):
     from os.path import exists
+    from markupsafe import escape
 
+    filename = escape(filename)
     if filename[0:1] != "_":
         return render_template(".v2/help.html", filename=filename)
     filename = "/v2/help/" + filename + ".html"
     if not exists("appli/templates" + filename):
         return render_template(
-            "./v2/partials/_error.html", title="404", message=filename + "not found"
+            "./v2/partials/_error.html",
+            title="404",
+            message=py_messages["notfound"] + filename,
         )
     return render_template("." + filename, partial=True)
 
@@ -151,7 +155,7 @@ def gui_help(filename):
 def gui_alert():
     from appli import gvp
     import uuid
-    from appli.gui.commontools import get_error_message
+    from appli.gui.staticlistes import py_messages
 
     id = str(uuid.uuid1())
     inverse = gvp("inverse")
@@ -165,10 +169,16 @@ def gui_alert():
     else:
         dismissible = False
     message = gvp("message")
+
+    if message in py_messages:
+        pymessage = py_messages[message]
+    else:
+        pymessage = None
     return render_template(
         "v2/partials/_alertbox.html",
         type=gvp("type"),
         title=gvp("title"),
+        pymessage=pymessage,
         message=message,
         inverse=inverse,
         dismissible=dismissible,
@@ -181,6 +191,9 @@ def gui_alert():
 @app.route("/gui/<path:filename>")
 @login_required
 def gui_other(filename):
+    from markupsafe import escape
+
+    filename = escape(filename)
     filename = filename.replace("/", "")
     if os.path.isfile("v2/" + filename):
         return render_template("v2/" + filename)
@@ -188,45 +201,19 @@ def gui_other(filename):
         return render_template("v2/_" + filename)
     else:
         return render_template(
-            "v2/error.html", title="404", message=_("The page does not exists.")
+            "v2/error.html", title="404", message=py_messages["page404"]
         )
 
 
-# push special infos to admins ( daily maintenance credentials expired to begin with)
-def nightly_jobs_stream(type=None, user_id=None):
-    from to_back.ecotaxa_cli_py.api import AdminApi
-    from appli.utils import ApiClient
-    import json, datetime
-
-    format = "%Y-%m-%d"
-    pgformat = "YYYY-MM-DD"
-    dt = datetime.date.today().strftime(format)
-    sql = (
-        "SELECT job.type,job.state,job.creation_date,job.owner_id FROM job WHERE to_char(job.creation_date,'"
-        + pgformat
-        + "') != '"
-        + dt
-        + "'"
-    )
-    if type != None:
-        sql += " AND job.type NOT LIKE '" + type + "'"
-    if user_id != None:
-        sql += " AND job.owner_id != " + user_id
-
-    with ApiClient(AdminApi, request) as api:
-        res = api.db_direct_query(q=sql)
-        return json.dumps(res["data"])
-
-
-@app.route("/adminstream/", methods=["GET", "POST"])
+# @app.route("/gui/adminstream/", methods=["GET", "POST"])
+@app.route("/gui/jobssummary/", methods=["GET", "POST"])
 @login_required
 def gui_stream():
-    from to_back.ecotaxa_cli_py.models import UserModelWithRights
+    from appli.gui.commontools import jobs_summary_data
 
-    user: UserModelWithRights = current_user.api_user
-    if user and (2 in user.can_do):
-        return nightly_jobs_stream(type="NightlyMaintenance", user_id=None)
-    return ""
+    return render_template(
+        "./v2/partials/_notifications.html", notifs=jobs_summary_data()
+    )
 
 
 # utility display functions for jinja template
