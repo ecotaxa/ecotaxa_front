@@ -126,8 +126,6 @@ def gvg(varname: str, defvalue: str = "") -> str:
     :return: Chaine de la variable ou valeur par defaut si elle n'existe pas
     """
     ret = request.args.get(varname, defvalue)
-    # escape  no tag in get request
-    ret = Markup.striptags(ret)
     return ret
 
 
@@ -140,8 +138,8 @@ def gvgm(varname: str) -> List[str]:
     lst = request.args.getlist(varname)
     # filter empty values
     # return [a_val for a_val in lst if a_val]
-    # and escape  no tag in get request
-    return [Markup.striptags(a_val) for a_val in lst if a_val]
+
+    return [a_val for a_val in lst if a_val]
 
 
 def gvp(varname: str, defvalue: str = "") -> str:
@@ -152,8 +150,6 @@ def gvp(varname: str, defvalue: str = "") -> str:
     :return: Chaine de la variable ou valeur par defaut si elle n'existe pas
     """
     ret = request.form.get(varname, defvalue)
-    # escape
-    ret = Markup.striptags(ret)
     # TODO: form is ImmutableMultiDict, meaning that .get can (and does) return list
     # -> the signature is wrong in flask/werkzeug source.
     return ret
@@ -168,8 +164,7 @@ def gvpm(varname: str) -> List[str]:
     lst = request.form.getlist(varname)
     # filter empty values
     # return [a_val for a_val in lst if a_val]
-    # escape
-    return [Markup.striptags(a_val) for a_val in lst if a_val]
+    return [a_val for a_val in lst if a_val]
 
 
 def nonetoformat(v, fmt: str):
@@ -353,11 +348,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.6.5"
+ecotaxa_version = "2.6.6"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2022-09-01"
+    return ecotaxa_version + " 2022-10-21"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -368,6 +363,9 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2022-10-21: V 2.6.6
+    Feature : optimize tables display , optimize speed
+    Feature: about project page and details in tables
 2022-10-14: V 2.6.6
     Feature : new ui for pages projects list, project create, login, about, privacy - tools to import settings, taxonomy, privileges.
     Feature : Babel translations for the new ui.
