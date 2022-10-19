@@ -38,6 +38,8 @@ function Save1Object(classqual) {
         return (str + '').replace(/([^>\\r\\n]?)(\\r\\n|\\n\\r|\\r|\\n)/g, '$1' + breakTag + '$2');
     }
   function UpdateComment() {
+    var v = $('#compinfo').val();
+    if(v.trim() !== '') $('#compinfo').val( htmlEntities(v));
     var req={comment:$('#compinfo').val()};
     $("#ajaxresultcomment").html('<span class="label label-info">Server update in progress...</span>')
         .load("/prj/UpdateComment/{{ objid }}",req,function(){
@@ -48,7 +50,9 @@ function Save1Object(classqual) {
     $("#linktabdaddcomments").click();
     window.scrollTo(0,document.body.scrollHeight);
   }
-
+  function htmlEntities(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
 {% endif %} {# if g.PrjAnnotate or g.PrjManager #}
 {# Gestion de la carte #}
 var map,vectorSource,SampleSource;
