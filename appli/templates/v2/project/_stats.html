@@ -39,6 +39,7 @@
   {% if partial %}
   <a href="/gui/prj/about/{{ target_proj.projid }}" class="w-auto ml-auto float-right clear-both font-btn text-xs  font-medium rounded border border-stone-600 py-0.5 px-2 mb-6" >{{_('more stats')}}</a>
   {% else %}
+  {% if stats %}
   <div class=" stat-item flex flex-row">
     <span class="stat-label">{{_('stats')}} </span><div class="stat-info">
       <div class="py-2 border-bottom-2 border-stone-100 mb-2 ">{{ stats[3] }}</div>
@@ -49,7 +50,7 @@
 <div class="pr-2">{{ stat}}</div>
 {%endif%}
       {%endfor%}</div>{%endif%}</div>
-  </div> {%endif%}
+  </div> {% endif %}{%endif%}
 {% endif %}</div>
 
 {%-endmacro %}

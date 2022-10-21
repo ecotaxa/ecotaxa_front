@@ -32,14 +32,14 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
     from appli.gui.project.projects_list_interface import render_stat_proj
 
     statproj = render_stat_proj(prj)
-    with ApiClient(ProjectsApi, request) as api:
-        stats: list = api.project_stats(prjid)
+    # with ApiClient(ProjectsApi, request) as api:
+    #    stats: list = api.project_stats(prjid)
 
     return render_template(
         "v2/project/_stats.html",
         partial=partial,
         target_proj=statproj,
         prjstat=prjstat,
-        stats=stats,
+        # stats=stats,
         used_taxa=usedtaxa,
     )
