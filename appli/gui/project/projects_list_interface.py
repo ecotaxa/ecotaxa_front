@@ -1,5 +1,10 @@
 # list : full project list table def - homepage
 # import-[...] settings table def - projectsettings page create or update
+from to_back.ecotaxa_cli_py.models import (
+    ProjectModel,
+    MinUserModel,
+)
+
 from flask_babel import _
 
 
@@ -45,9 +50,9 @@ def project_table_columns(typeimport: str) -> list:
                 "default": "0.0",
             },
             # hidden columns
-            {"label": "Description", "field": "description", "hidden": "true"},
-            {"label": "Free columns", "field": "obj_free_cols", "hidden": "true"},
-            {"label": "Members", "field": "privileges", "hidden": "true"},
+            # {"label": "Description", "field": "description", "hidden": "true"},
+            # {"label": "Free columns", "field": "obj_free_cols", "hidden": "true"},
+            # {"label": "Members", "field": "privileges", "hidden": "true"},
         ],
         "import": {
             "commons": [
@@ -177,8 +182,19 @@ def project_table_columns(typeimport: str) -> list:
         return [{"field": "select", "select": "controls"}] + columns[selection]
 
 
+def render_stat_proj(prj: ProjectModel) -> dict:
+    return dict(
+        {
+            "projid": prj.projid,
+            "title": prj.title,
+            "description": prj.description,
+            "privileges": _render_privileges(prj),
+            "cnn_network_id": prj.cnn_network_id,
+        }
+    )
+
+
 def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) -> list:
-    import json
 
     jsonprjs = list([])
     for prj in prjs:
@@ -187,21 +203,8 @@ def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) ->
         for column in columns:
 
             if column["field"] == "privileges":
-                privileges = dict({})
-                rights = dict(
-                    {
-                        "managers": prj.managers,
-                        "annotators": prj.annotators,
-                        "viewers": prj.viewers,
-                    }
-                )
-                for keypriv, right in rights.items():
-                    privileges.update(dict({keypriv: []}))
-
-                    for u in right:
-                        privileges[keypriv].append(u.to_dict())
-
-                jsonprj.append(json.dumps(privileges))
+                privileges = _render_privileges(prj)
+                jsonprj.append(privileges)
 
             else:
 
@@ -216,15 +219,15 @@ def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) ->
                             )
                             or isadmin
                         ):
-                            select.update({"A": "Annotate"})
+                            select.update(dict({"A": "Annotate"}))
                         elif prj.projid in can_access["View"] or isadmin:
-                            select.update({"V": "View"})
+                            select.update(dict({"V": "View"}))
                         else:
                             if prj.visible:
-                                select.update({"V": "View"})
-                            select.update({"R": "Request Access"})
+                                select.update(dict({"V": "View"}))
+                            select.update(dict({"R": "Request Access"}))
                         if prj.projid in can_access["Manage"] or isadmin:
-                            select.update({"M": "Manage"})
+                            select.update(dict({"M": "Manage"}))
                         attrvalue = select
                     else:
                         attrvalue = ""
@@ -232,21 +235,25 @@ def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) ->
                 elif type(prj) == dict:
                     # data come from different types (if taxo it's  dict)
                     attrvalue = prj[column["field"]]
+
                 else:
                     attrvalue = getattr(prj, column["field"])
+
                 if "request" in column:
                     if column["request"] == "about":
-                        if (prj.status == "Annotate" or prj.status == "View") and (
+                        if (
                             isadmin
-                            or prj.projid
-                            in can_access["View"]
-                            + can_access["Manage"]
-                            + can_access["Annotate"]
+                            or (prj.status == "Annotate" or prj.status == "View")
+                            and (
+                                prj.projid
+                                in can_access["View"]
+                                + can_access["Manage"]
+                                + can_access["Annotate"]
+                            )
                         ):
                             attrvalue = list([attrvalue, 1])
                         else:
                             attrvalue = list([attrvalue, 0])
-
                 if "hidden" in column:
                     if column["field"] == "contact":
                         if prj.contact:
@@ -258,6 +265,24 @@ def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) ->
                         else:
                             attrvalue = ""
 
-                jsonprj.append(json.dumps(attrvalue))
+                jsonprj.append(attrvalue)
         jsonprjs.append(jsonprj)
     return jsonprjs
+
+
+def _render_privileges(prj: ProjectModel) -> dict:
+    privileges = dict({})
+    rights = dict(
+        {
+            "managers": prj.managers,
+            "annotators": prj.annotators,
+            "viewers": prj.viewers,
+        }
+    )
+    for keypriv, right in rights.items():
+        privileges.update(dict({keypriv: []}))
+
+        for u in right:
+
+            privileges[keypriv].append(u.to_dict())
+    return privileges

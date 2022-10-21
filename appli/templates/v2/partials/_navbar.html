@@ -66,7 +66,11 @@
   <div class="w-full  text-center  pt-3 md:pt-0 md:basis-6/12"><ul class="inline-block ml-8"><li class="nav-item inline-block animate">
         <a href="/gui/prj/" title="{{_('projects list')}}">
             <i class="icon-lg icon-home invert mb-0 mt-auto"></i>
-        </a><li class="nav-item inline-block animate">
+        </a></li><li class="nav-item inline-block animate">
+        <a href="/gui/prj/edit/{{target_proj.projid}}">
+          Settings
+        </a>
+      </li><li class="nav-item inline-block animate">
         <a href="/Job/Create/FileImport?p={{target_proj.projid}}">
           Import
         </a>
@@ -81,4 +85,8 @@
         </a></li><li class="nav-item inline-block animate">
               <a href="/Job/Create/GenExport?projid={{target_proj.projid}}">
                 Export
-              </a></li></ul></div>
+              </a></li><li class="nav-item inline-block animate">
+              <a href="/gui/prj/about/{{target_proj.projid}}">
+                About
+              </a>
+            </li></ul></div>

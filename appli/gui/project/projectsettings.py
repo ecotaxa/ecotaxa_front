@@ -6,8 +6,7 @@ from typing import List
 from flask import render_template, flash, request, redirect
 from flask_security import login_required
 from flask_login import current_user
-from appli import app, PrintInCharte, gvp, gvpm
-from appli.constants import MappableObjectColumns, MappableParentColumns
+from appli import app, gvp, gvpm
 
 ######################################################################################################################
 from appli.utils import ApiClient
@@ -21,7 +20,6 @@ from to_back.ecotaxa_cli_py.models import (
 )
 
 ###############################################common for create && edit  #######################################################################
-from appli.gui.staticlistes import py_messages
 
 
 def get_target_prj(prjid) -> ProjectModel:
@@ -32,18 +30,17 @@ def get_target_prj(prjid) -> ProjectModel:
             return target_proj
 
         except ApiException as ae:
-            # description='<a href="/gui/prj/">Select another project</a>',
             if ae.status == 404:
                 raise ApiException(
                     status=ae.status,
-                    reason=py_messages["project404"],
+                    reason="project404",
                 )
 
             elif ae.status in (401, 403):
                 # description='<a href="/gui/prj/">Select another project</a>',
                 raise ApiException(
                     status=ae.status,
-                    reason=py_messages["cannoteditsettings"],
+                    reason="cannoteditsettings",
                 )
             else:
                 raise ApiException(status=ae.status)
@@ -58,9 +55,9 @@ def _possible_models():
         return scn
     except ApiException as ae:
         if ae.status == 404:
-            flash(py_messages["possiblemodel404"], "error")
+            flash("possiblemodel404", "error")
         elif ae.status in (401, 403):
-            flash(py_messages["cannotaccessinfo"], "error")
+            flash("cannotaccessinfo", "error")
 
 
 def _possible_licenses():
@@ -74,13 +71,13 @@ def _possible_licenses():
         if ae.status == 404:
             raise ApiException(
                 status=ae.status,
-                reason=py_messages["license404"],
+                reason="license404",
             )
 
         elif ae.status in (401, 403):
             raise ApiException(
                 status=ae.status,
-                reason=py_messages["cannotaccessinfo"],
+                reason="cannotaccessinfo",
             )
 
         else:
@@ -99,10 +96,9 @@ def _prj_users_list(ids: list) -> dict:
         return users_list
     except ApiException as ae:
         if ae.status == 404:
-            raise ApiException(status=ae.status, reason=py_messages["nouserslist"])
-            # return PrintInCharte("<a href=/prj/></a>")
+            raise ApiException(status=ae.status, reason="nouserslist")
         elif ae.status in (401, 403):
-            raise ApiException(status=ae.status, reason=py_messages["cannotaccessinfo"])
+            raise ApiException(status=ae.status, reason="cannotaccessinfo")
         else:
             raise ApiException(status=ae.status)
 
@@ -112,18 +108,17 @@ def _proj_privileges(prjid):
 
 
 def _cannot_do_message(autho, prjid=0):
-    message = py_messages["notautho"]
-    from appli.gui.staticlistes.py import py_messages
+    message = "notautho"
 
     if autho == 1:
         if prjid == 0:
-            message = py_messages["noauthoprjcreate"]
+            message = "noauthoprjcreate"
         else:
-            message = py_messages["noauthoprjedit"]
+            message = "noauthoprjedit"
     elif autho == 2:
-        message = py_messages["noautho2"]  # ???
+        message = "noautho2"  # ???
     elif autho == 3:
-        message = py_messages["noautho3"]  # ???
+        message = "noautho3"  # ???
     return message
 
 
@@ -137,6 +132,18 @@ def _user_cando(autho):
 
 
 ######################################################################################################################
+# utils
+def taxo_with_names(ids: list) -> list:
+    from markupsafe import escape
+
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(ids))
+    taxo_names = [(r.id, escape(r.display_name)) for r in res]
+    taxo_names.sort(key=lambda r: r[1].lower())
+    return taxo_names
+
+
+######################################################################################################################
 
 
 def prj_create() -> str:
@@ -147,7 +154,7 @@ def prj_create() -> str:
         title = gvp("title")
         instrument = gvp("instrument")
         if title == "" or instrument == "":
-            flash(py_messages["titleinstrumentrequired"], "error")
+            flash("titleinstrumentrequired", "error")
             to_save = False
     if to_save:
         try:
@@ -159,9 +166,7 @@ def prj_create() -> str:
                 return prj_edit(rsp, new=True)
 
         except ApiException as ae:
-            raise ApiException(
-                status=ae.status, reason=py_messages["errorprojectcreate"]
-            )
+            raise ApiException(status=ae.status, reason="errorprojectcreate")
     scn = _possible_models()
     possible_licenses = _possible_licenses()
     return render_template(
@@ -176,12 +181,15 @@ def prj_create() -> str:
 def prj_edit(prjid: int, new: bool = False) -> str:
     # Security & sanity checks
     # get target_proj
+
+    from appli.gui.staticlistes import py_messages
+
     target_proj = get_target_prj(prjid)
     if not target_proj:
         return
     # Reconstitute members list with privs
     # data structure used in both display & submit
-
+    redir = ""
     if gvp("save") == "Y":
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
@@ -191,14 +199,8 @@ def prj_edit(prjid: int, new: bool = False) -> str:
             # take inittaxo[] instead of initclassiflist - double usage
             if a_var == "inittaxo[]":
                 posted_classif_list = gvpm(a_var)
-                posted_classif_list = ",".join(posted_classif_list)
                 # The original list is displayed using str(list), so there is a bit of formatting inside
-                posted_classif_list = posted_classif_list.replace(" ", "")
-                # TODO : verif must not be necessary anymore
-                if posted_classif_list and posted_classif_list[0] == "[":
-                    posted_classif_list = posted_classif_list[1:]
-                if posted_classif_list and posted_classif_list[-1] == "]":
-                    posted_classif_list = posted_classif_list[:-1]
+                posted_classif_list = ",".join(posted_classif_list).replace(" ", "")
                 target_proj.init_classif_list = [
                     int(cl_id)
                     for cl_id in posted_classif_list.split(",")
@@ -277,7 +279,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
             flash(msg, "error")
         if contact_user == None:
             flash(
-                py_messages["getcontactuserinmanagers"],
+                "getcontactuserinmanagers",
                 "error",
             )
             do_update = False
@@ -286,44 +288,36 @@ def prj_edit(prjid: int, new: bool = False) -> str:
             target_proj.contact = contact_user
         # Managers sanity check
         if len(target_proj.managers) == 0:
-            flash(py_messages["managerrequired"], "error")
+            flash("managerrequired", "error")
             do_update = False
 
         # Update on back-end
+
         if do_update:
             with ApiClient(ProjectsApi, request) as api:
                 try:
                     api.update_project(
                         project_id=target_proj.projid, project_model=target_proj
                     )
-                    # flash(
-                    #    py_messages["projectupdated"]
-                    #    + target_proj.title
-                    #    + " redirect to import or classif ",
-                    #    "success",
-                    # )
+                    flash(
+                        py_messages["projectupdated"] + target_proj.title,
+                        "success",
+                    )
                     if new == True:
-                        # redirect to import
+                        # redirect to import after 3 s
                         redir = "/Job/Create/FileImport?p=" + str(target_proj.projid)
                     else:
                         # redirect to classif
                         redir = "/prj/" + str(target_proj.projid)
-                    return redirect(redir)
+                    # return redirect(redir)
                 except ApiException as ae:
                     raise ApiException(
                         status=ae.status,
-                        reason=py_messages["updateexception"] + "%s" % ae,
+                        reason="updateexception" + "%s" % ae,
                     )
     lst = [str(tid) for tid in target_proj.init_classif_list]
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))
-    predeftaxo = [(r.id, r.display_name) for r in res]
-    predeftaxo.sort(key=lambda r: r[1].lower())
-    # TODO: Get from metadata
-
-    maplist = list(MappableParentColumns)
-    maplist.extend(list(MappableObjectColumns))
-    maplist.extend(target_proj.obj_free_cols.keys())
+    # common func used in project stats
+    predeftaxo = taxo_with_names(lst)
 
     scn = _possible_models()
 
@@ -334,17 +328,18 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         "Annotate": target_proj.annotators.copy(),
         "View": target_proj.viewers.copy(),
     }
-    # members_by_rights = members_by_right.copy()
+    from appli.gui.commontools import crsf_token
 
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=target_proj,
         members_by_right=members_by_right,
         scn=scn,
-        maplist=maplist,
+        crsf_token=crsf_token(),
         predeftaxo=predeftaxo,
         possible_licenses=possible_licenses,
         new=new,
+        # redir=redir,
     )
 
 

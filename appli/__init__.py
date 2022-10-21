@@ -366,6 +366,7 @@ app.jinja_env.globals.update(
 2022-10-21: V 2.6.6
     Feature : optimize tables display , optimize speed
     Feature: about project page and details in tables
+    Feature: stats display  
 2022-10-14: V 2.6.6
     Feature : new ui for pages projects list, project create, login, about, privacy - tools to import settings, taxonomy, privileges.
     Feature : Babel translations for the new ui.

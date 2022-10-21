@@ -1,5 +1,5 @@
 {% extends "./v2/layout.html" %}
-{% from "./v2/macros/macros.html" import form_group_radio, inputdict, modal , alertbox %}
+{% from "./v2/macros/macros.html" import form_group_radio, inputdict, modal , alertbox with context %}
 {% macro member_cells(index,member = {id: 0,name:'',email:'',delet:false},privilege = ''  ,autocomplete = False,required = False) -%}
 {% set contact = target_proj.contact if (target_proj and target_proj.contact) else 0 %}
 <div data-elem="ident"  data-title=" {{ _('Name') }}">
@@ -34,9 +34,9 @@
   {% set modal_title = _("How to edit a project settings") if target_proj.projid else _("How to create a project")%}
   {% set data = {'file':'_help_projectsettings'} %}
   {{ modal(id='help-editproject',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
-  <form method="post" action="?" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs hide' if (target_proj and target_proj.projid) }} relative mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}">
-    {% if target_proj and target_proj.projid %}
-    <span data-dismiss="tabs" class="absolute z-10 right-2 top-1.5 md:right-12 md:top-5 cursor-pointer"><i class="icon icon-arrow-pointing-out opacity-50 hover:opacity-100"></i></span>
+  <form method="post" action="?" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs hide' if (target_proj and target_proj.projid) }} relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}">
+   <input type="hidden" name="crsf_token" value={{ crsf_token }}>  {% if target_proj and target_proj.projid %}
+    <span data-dismiss="tabs" class="absolute z-10 top-0 -mt-8 right-[calc(100%-2.5rem)] hidden md:block md:ml-auto  md:mt-0 md:right-12 md:top-5 cursor-pointer"><i class="icon icon-arrow-pointing-out opacity-50 hover:opacity-100"></i></span>
     <input type="hidden" name="id" id="projid" value="{{target_proj.projid}}">
     {% endif %}
     <div class="fieldset-wrapper  w-full">
@@ -64,7 +64,7 @@
             {# ,data= ( ' data-action=alert-confirm data-event=change data-message="' + _('Changing the instrument associated with a project may affect the behaviour of EcoTaxa in various ways and should not be done except to correct a mistake.') + '"' if target_proj.projid else '')#}
             {{ inputdict('instrument','instrument',value = target_proj.instrument, label=target_proj.instrument,type='instr', placeholder=_('Instrument'),required= True,autocomplete=True ) }}
             {% if target_proj.projid  %}
-            {{ alertbox(type='warning', message="modinstrumentwarning",inverse = True,extra = {'small': True},to_fetch=True )}}
+            {{ alertbox(type='warning', message="modinstrumentwarning",inverse = True,extra = {'small': True} )}}
             {% endif %}
           </div>
           <div class="form-box">
@@ -134,11 +134,11 @@
 
         </fieldset>
       </div>
-      <div class="md:w-1/2 last:mx-auto last:md:w-2/3 tab">
+      <div class="w-full md:w-1/2 last:mx-auto last:md:w-full tab">
         <fieldset id="section-privileges" class="js js-privilege" {{ 'data-u=' + current_user.id|string() }} data-alert="true">
           <legend class="tab-control">Privileges</legend>
         <div class="tab-content">{% if target_proj.projid and not target_proj.contact %}
-          {{ alertbox(type='danger', message="nocontact",dismissible = True, inverse = True,extra = {'small': True})}}
+          {{ alertbox(type='danger', message="nocontact",dismissible = True, inverse = True, extra = {'small': True})}}
               {% endif %} {{ pick_from_other(False,key='privileges',modal_title= _('Pick privileges from other projects')) }}
               <div class="flex flex-col w-full px-4" >
             <div class="row" data-headers="true">
@@ -177,4 +177,7 @@
 </div>
 </form>
 </div>
+{% if redir and redir !='' %}
+<span class="js js-redir" data-redir="{{redir}}"></span>
+{%endif%}
 {% endblock %}

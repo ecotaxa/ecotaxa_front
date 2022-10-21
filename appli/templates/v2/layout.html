@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="{{lang if lang !='' else 'en'}}">
 <head>
-
-  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}">
+  {% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else '2.6.6'%}
+  <link rel=stylesheet rel="preload" type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}?v={{ ecotaxa_version  }}">
+ <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='/gui/images/apple-touch-icon.png') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='/gui/images/favicon-32x32.png')}}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='/gui/images/favicon-16x16.png')}}">
+<link rel="manifest" href="{{ url_for('static', filename='/gui/images/site.webmanifest')}}">
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" user-scalable="no"] >
+  <meta http-equiv="refresh">
   <title>{{ 'Ecotaxa 3.0'}} {{ target_proj.title if target_proj and target_proj.projid else ''}}</title>
 </head>
 <body>
@@ -25,7 +30,7 @@
     <main {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton.jpg') + '\')" class="bg-image" '| safe if bg }}>
        {% if not mask_alert  %}
        <div id="top-alerts" class="w-full px-2 md:px-0 group-alert-top js js-observer">
-       {% from "./v2/macros/macros.html" import topalerts %}
+       {% from "./v2/macros/macros.html" import topalerts with context%}
          {{ topalerts() }}
        </div>
          {% endif %}
@@ -47,7 +52,7 @@
     <footer class="fixed block w-screen bottom-0 z-40 background-bottom pt-1 pb-2">{% include './v2/partials/_footer.html' %}</footer>
   </div>
 
-  <script type="module" src="{{ url_for('static', filename='gui/js/main.js') }}"></script>
+  <script type="module" rel="preload" src="{{ url_for('static', filename='gui/js/main.js') }}?v={{ ecotaxa_version }}"></script>
 
   {% if google_analytics_id %}
   {% if cookieGAOK=='Y' %}

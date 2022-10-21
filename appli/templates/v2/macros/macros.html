@@ -82,15 +82,15 @@
 
 
 
-{% macro alertbox(type,message,title='', inverse=false, dismissible = false, relid ='',extra=False, translated= False, is_safe = False,to_fetch= False) -%}
-{% include './v2/partials/_alertbox.html' %}
+{% macro alertbox(type,message,title='', inverse=false, dismissible = false, relid ='',extra=False,  is_safe = False,to_fetch= False) -%}
+{% include './v2/partials/_alertbox.html' with context%}
 {%- endmacro %}
 
 {% macro topalerts() -%}
 {% set messages = get_flashed_messages(true)  %}
 {% if messages|length > 0 %}
 {% for message in messages %}
-{{ alertbox(type=message[0]|replace("message","info"),dismissible = True, message=message[1],translated = True, is_safe = True  )}}
+{{ alertbox(type=message[0]|replace("message","info"),dismissible = True, message=message[1], is_safe = True  )}}
 {% endfor %}
 {% endif %}
 {%- endmacro %}

@@ -121,14 +121,13 @@ def build_mail(emails: str, type: str = "", text: str = "") -> str:
 
 def last_taxo_refresh(partial: bool = False):
     import datetime
-    from appli.gui.staticlistes import py_messages
 
     if partial == True:
         return
     last_refresh = _get_last_refresh()
     if last_refresh is None or (datetime.datetime.now() - last_refresh).days > 7:
 
-        flash(py_messages["taxosynchro"], "warning")
+        flash("taxosynchro", "warning")
 
 
 def breadcrumbs(filename: str) -> list:
@@ -148,3 +147,15 @@ def breadcrumbs(filename: str) -> list:
         if crumb in apptree.keys():
             breadcrumb.append(dict({"link": "/".join(link), "text": apptree[crumb]}))
     return breadcrumb
+
+
+#
+# crsf_token
+
+
+def crsf_token():
+    import string
+    import secrets
+
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for i in range(45))

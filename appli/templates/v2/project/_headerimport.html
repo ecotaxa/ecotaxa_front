@@ -1,6 +1,6 @@
 
 <div>{# args data.key data.form #}
-<div id="data-import-{{data.key}}" class="overflow-hidden overflow-y-auto max-h-36 md:max-h-36" ></div>
+<div id="data-import-{{data.key}}" class="overflow-hidden resize-v max-h-36 md:max-h-36" ></div>
 <div class="btns-import mt-1">
 <button class="button is-secondary inverse text-base hide disabled:opacity-60" id="clear-import-{{data.key}}">{{_('Clear')}}</button>
 <button id="replace-import-{{data.key}}"  data-replace="replace" class="button is-preset inverse text-base hide disabled:opacity-60">{{ _('Replace taxonomy') if data.key == 'taxo' else _('Replace privileges') if data.key =='privileges' else _('Replace')}}</button>

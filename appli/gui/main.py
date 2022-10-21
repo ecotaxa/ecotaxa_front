@@ -3,7 +3,7 @@
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import os
 from typing import List
-from flask import request, redirect, url_for, render_template
+from flask import request, url_for, render_template
 from flask_security import login_required
 from flask_login import current_user
 from appli import app, gvg, gvp
@@ -65,8 +65,7 @@ def gui_privacy() -> str:
 @app.route("/gui/prj/", methods=["GET"])
 @login_required
 def gui_prj(listall: bool = False) -> str:
-    partial = gvg("partial")
-    partial = partial == "true"
+    partial = False
 
     from appli.gui.commontools import last_taxo_refresh
 
@@ -79,10 +78,30 @@ def gui_prj(listall: bool = False) -> str:
 @app.route("/gui/prjlist/", methods=["GET"])
 @login_required
 def gui_prjlist(listall: bool = False) -> str:
+    # gzip not really necessary - jsonifiy with separators
+    from flask import make_response
+    import json
     from appli.gui.project.projects_list import projects_list
 
     typeimport = gvg("typeimport")
-    return projects_list(listall=listall, typeimport=typeimport)
+    gz = gvg("gzip")
+
+    content = json.dumps(
+        projects_list(listall=listall, typeimport=typeimport), separators=[",", ":"]
+    ).encode("utf-8")
+    encoding = "utf-8"
+    if gz:
+        import gzip
+
+        content = gzip.compress(content, 7)
+        encoding = "gzip"
+    response = make_response(content)
+
+    response.headers["Content-length"] = len(content)
+    response.headers["Content-Encoding"] = encoding
+    response.headers["Content-Type"] = "application/json"
+
+    return response
 
 
 @app.route("/gui/prj/importsettings", methods=["GET", "POST"])
@@ -91,7 +110,10 @@ def gui_importsettings(prjid: int = 0) -> str:
     typeimport = gvg("typeimport")
     from appli.gui.project.projects_list import projects_list_page
 
-    return projects_list_page(listall=False, partial=True, typeimport=typeimport)
+    partial = request.headers.get("X-Requested-With") and (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
+    return projects_list_page(listall=False, partial=partial, typeimport=typeimport)
 
 
 @app.route("/gui/prj/create", methods=["GET", "POST"])
@@ -114,20 +136,19 @@ def gui_prj_edit(prjid):
 @app.route("/gui/prj/listall/", methods=["GET"])
 @login_required
 def gui_prj_all():
-    filt_subset = gvg("filt_subset")  # Get subset filter from posted
     return gui_prj(listall=True)
 
 
 @app.route("/gui/prj/about/<int:prjid>")
 @login_required
 def gui_prj_about(prjid):
-    partial = gvg("partial")
-    partial = partial == "true"
-
     from appli.gui.project.project_stats import prj_stats
 
-    params = {"limit": "5000"}
-    return prj_stats(prjid, partial, params)
+    params = dict({"limit": "5000"})
+    partial = request.headers.get("X-Requested-With") and (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
+    return prj_stats(prjid, partial=partial, params=params)
 
 
 # help
@@ -147,7 +168,10 @@ def gui_help(filename):
             title="404",
             message=py_messages["notfound"] + filename,
         )
-    return render_template("." + filename, partial=True)
+    partial = request.headers.get("X-Requested-With") and (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
+    return render_template("." + filename, partial=partial)
 
 
 # alert boxes xhr
@@ -170,15 +194,10 @@ def gui_alert():
         dismissible = False
     message = gvp("message")
 
-    if message in py_messages:
-        pymessage = py_messages[message]
-    else:
-        pymessage = None
     return render_template(
         "v2/partials/_alertbox.html",
         type=gvp("type"),
         title=gvp("title"),
-        pymessage=pymessage,
         message=message,
         inverse=inverse,
         dismissible=dismissible,
@@ -231,38 +250,35 @@ def urlencode_filter(s):
 
 @app.context_processor
 def utility_processor():
-    def format_all(value, f="number", locale="fr_FR"):
+    def message_translation(message: str, type: str, is_safe: bool = False) -> dict:
+        from appli.gui.staticlistes import py_messages
 
-        if f == "number":
-            if value == None:
-                return "0"
-            return "{0:0.0f}".format(value)
-            # return format_number(number, format, locale)
-        elif f == "decimal":
-            if value == None:
-                return ""
-            elif int(value) == 100 or int(value) == 0:
-                return "{0:0.0f}".format(value)
-            return "{0:0.2f}".format(value)
+        if message in py_messages:
+            return py_messages[message]
+        if is_safe:
+            return message
+        return type
 
-        elif f == "html":
-            if value == None:
-                return ""
-            return value.replace("<", "&#60;")
-
-        else:
-            return number
-
-    return dict(format_all=format_all)
+    return dict(message_translation=message_translation)
 
 
 @app.errorhandler(ApiException)
 def handle_exception(e):
     # pass through HTTP errors
+
     if isinstance(e, HTTPException):
         return e
     # non-HTTP exceptions only
+    partial = request.headers.get("X-Requested-With") and (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
     return (
-        render_template("./v2/error.html", title=e.status, message=e.reason),
+        render_template(
+            "./v2/error.html",
+            title=e.status,
+            partial=partial,
+            message=e.reason,
+            is_safe=True,
+        ),
         e.status,
     )

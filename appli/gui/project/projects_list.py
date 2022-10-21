@@ -168,9 +168,7 @@ def projects_list(
             "has_proj": has_proj,
         }
     )
-    import json
-
-    return json.dumps(tabledef)
+    return tabledef
 
 
 # project list page without projects list data
@@ -208,7 +206,6 @@ def projects_list_page(
 
     if typeimport != "":
         listall = False
-        partial = True
 
     if typeimport == "" and not partial:
         template = "v2/index.html"
@@ -281,7 +278,6 @@ def _prj_import_taxo(prjid: int = 0) -> list:
                 for t in prj_initclassif_list
                 if t in taxo_map
             )
-
             a_prj["objtaxonnotinpreset"] = dict(
                 (t, escape(taxo_map.get(int(t)))) for t in objtaxon if t in taxo_map
             )

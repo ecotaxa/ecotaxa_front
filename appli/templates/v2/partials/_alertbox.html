@@ -3,20 +3,17 @@
 {{ titles[type] }}
 {%- endmacro %}
 {% if to_fetch == True %}
-<div class="js js-alerts" data-what="alert" data-message={{message}} {{ 'data-dismissible=false' if not disimissible }}></div>
+<div class="js js-alerts" data-what="alert" data-type={{type}} data-message={{message}} data-extra={{extra}} {{ 'data-dismissible=true' if disimissible else '' }}></div>
 {% else %}
-{% if not translated %}
-{% set message = pymessage if pymessage else message if is_safe else type %}
-{% endif %}
-
-<div class="alert alert-{{ type if type}} {{ 'alert-dismissible' if disimissible == True }} {{ 'inverse' if inverse == True }} {{ 'md:w-3/4 lg:w-1/2 mx-2' if (extra and extra.inset == True) }}  {{ 'mt-1 text-sm' if (extra and extra.small == True) }}" {{ 'id=' + relid  if relid !=''  }}  role="alert">
+<div class="alert alert-{{ type if type}} {{ 'alert-dismissible' if disimissible == True }}  {{ 'text-xs' if extra and 'small' in extra }} {{ 'inverse' if inverse == True }} {{ 'md:w-3/4 lg:w-1/2 mx-2' if (extra and extra.inset == True) }}  {{ 'mt-1 text-sm' if (extra and extra.small == True) }}" {{ 'id=' + relid  if relid !=''  }}  {{'data-message=' + codemessage if codemessage else ''}}  role="alert">
 {% if dismissible == True %}
   <button type="button" class="close" data-dismiss="alert" aria-label="{{ _('Close') }}"><span aria-hidden="true">&times;</span></button>
 {% endif %}
+{% set message = message_translation(message, type, is_safe)%}
 {% if title !='' %}
-<strong class="text-xl leading-12 font-bold">{{ alerttype(type) }} {{ title}} </strong><p> {{ message|safe if is_safe else message  }}</p>
+<strong class="text-xl leading-12 font-bold">{{ alerttype(type) }} {{ title}} </strong><p > {{ message|safe if is_safe else message  }}</p>
 {% else %}
-{{ message|safe if is_safe else message }}
+{{  message|safe if is_safe else message }}
 {% endif %}
 {% if type == 'confirm' %}
   <div class="btn-group flex justify-end"><button class="button is-cancel"  value=false>{{_('Cancel') }}</button><button class="button is-ok"  value=true>{{_('Ok')}}</button></div>

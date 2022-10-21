@@ -1,21 +1,72 @@
-
 {# project  about : stats display #}
 
-{% if partial != False %}
+{% macro tabstats()-%}
+<div class="short_stats">
+  {%if partial and stats  %}
+  {% set created = stats[0].split('created ') %}
+<div class="font-normal">  {{ _('created') }} {{ created[1] if created|length > 0 }}</div>
+{%endif %}
+<p>{{target_proj.description }}</p>
+{% if target_proj.privileges is iterable %}
+<div class="stat-item"><div class="flex flex-row flex-wrap">
+  {% for right,members in target_proj.privileges.items() %}
+  <div class="rights  ml-2 first:ml-0" data-r={{ right }}>
+  {% for member in members %}
+  <span >{{member.name }} <a href="mailto:{{member.email}}">{{member.email}}</a></span>
+  {% endfor %}
+</div>
+{% endfor %}
 
-<div class="tab_stats">
-  {% if proj %}<p> prj ----{{proj.projid}}</p>
-  <p></p>{% endif %}</div>
+</div></div>
+{% endif %}
+<div class="stat-item">
+<span class=stat-label>{{_('Deep feature extractor')}} :</span><span class="stat-info">{{target_proj.cnn_network_id}}</span></div>
+  {% if prjstat %}
+  <div class=" stat-item flex flex-row">
 
-{% else %}
+  <span class="stat-label">{{_('used taxa')}} :</span><div class="stat-info ts-wrapper multi">{% for taxon in used_taxa %}
+    <span class="item" data-id={{taxon[0]}}>{{ taxon[1] }}</span>
+    {%endfor%}</div>
+  </div>
+  <div class="stat-item flex flex-row">
+  <span class="stat-label">{{_('classification')}} :</span>
+  <div class="flex flex_row  stat-info">
+  <div class="pr-2"><span>{{_('nb_unclassified')}} : </span><span class="font-normal">{{ prjstat.nb_unclassified}}</span></div>
+  <div class="pr-2"><span>{{_('validated')}} : </span><span class=" text-validated font-normal">{{ prjstat.nb_validated}}</span></div>
+  <div class="pr-2"><span class="">{{_('dubious')}} : </span><span class="text-dubious font-normal">{{ prjstat.nb_dubious}}</span></div>
+  <div class="pr-2"><span class="">{{_('predicted')}} : </span><span class="text-predicted font-normal">{{ prjstat.nb_predicted }}</span></div>
+  </div></div>
+  {% if partial %}
+  <a href="/gui/prj/about/{{ target_proj.projid }}" class="w-auto ml-auto float-right clear-both font-btn text-xs  font-medium rounded border border-stone-600 py-0.5 px-2 mb-6" >{{_('more stats')}}</a>
+  {% else %}
+  <div class=" stat-item flex flex-row">
+    <span class="stat-label">{{_('stats')}} </span><div class="stat-info">
+      <div class="py-2 border-bottom-2 border-stone-100 mb-2 ">{{ stats[3] }}</div>
+    <div class="py-2 border-bottom-2 border-stone-100 mb-2">{{ stats[1]}}</div>
+    <div class="py-2">{{ stats[2]}}</div>
+    {%if stats|length > 3 %}<div class="flex flex-row flex-wrap">{% for stat in stats %}
+      {% if loop.index > 3 %}
+<div class="pr-2">{{ stat}}</div>
+{%endif%}
+      {%endfor%}</div>{%endif%}</div>
+  </div> {%endif%}
+{% endif %}</div>
+
+{%-endmacro %}
+{% if not partial  %}
+{% extends 'v2/layout.html'%}
 {% block body %}
 <div class="container mx-auto px-4 block" data-block="projects">
-  <section class="w-100 mx-auto py-4 block text-left relative" id="project-stats-header">
+  <div class="w-100 mx-auto py-4 block text-left relative" id="project-stats-header">
     {% set help_file = '_help_project_stats.html' %}
-    {% set modal_title = _("Project_about") %}
-    {% from './v2/macros/macros.html' import modal %}
+    {% set modal_title = _("About Project") %}
+    {% from './v2/macros/macros.html' import modal with context %}
     {{ modal(id='help-project-stats',modal_title=modal_title,btn='',modal_content='./v2/help/' + help_file, type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'}) }}
-  </section>
+  </div>
+  <h2 class="font-medium py-1 mb-4">{{_('About')}} {{stats[0] if stats else target_proj.title + ['+ target_proj.projid +']}} </h2>
+  {{ tabstats() }}
 </div>
 {% endblock %}
+{% else %}
+  {{ tabstats() }}
 {% endif %}
