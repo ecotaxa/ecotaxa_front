@@ -1,0 +1,78 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/macros/macros.html" import modal  %}
+{% block body %}
+  <div class="container mx-auto" >
+    {% set data = {'file':'_help_job_monitor'} %}
+    {{ modal(id='help-editproject',modal_title= _(" WARNING : this is an asynchronous process."), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+
+
+  <div class="w-auto"><div id="spinner-icon" class="hidden mx-auto my-8"><img src="{{ url_for('static', filename='AjaxLoading.gif') }}"/></div>
+  <div id="statusdiv"></div>
+  <div id="progressbar" class="hidden h-8 w-96"></div>
+</div>
+
+  </div>
+  <script>
+  window.addEventListener('load', () => {
+    const jobID = {{ job_id }};
+    console.log('monitor ', jobID)
+    let intervalHandle;
+
+      const statusdiv = document.getElementById("statusdiv");
+      let stopTimer = false;
+      const progress_bar = (show,percent=0,description=``) => {
+        const spinner = document.getElementById('spinner-icon');
+        const progressbar = document.getElementById('progressbar');
+        if (show === false)  {
+         spinner.classList.add('hidden');
+         progressbar.classList.add('hidden');
+        }
+        else {
+          spinner.classList.remove('hidden');
+          progressbar.classList.remove('hidden');
+          progressbar.innerHTML=description;
+                }
+      }
+      const check_job_status = () => {
+        console.log('checkjob')
+        fetch("Job/GetStatus/" + jobID).then(json=> response.json()).then(response => {
+          if (stopTimer === true) return;
+          if (response.d != null) {
+                // We're running and have status - so:
+              progress_bar(true,response.d.PercentComplete,response.d.WorkDescription);
+
+                if (response.d.IsComplete) {
+                    stopTimer = true;
+                    statusdiv.innerHTML = `<div class="alert alert-success" role="alert">Task Complete :${response.d.WorkDescription}<br>${response.d.ExtraAction}</div>`;
+
+                    progress_bar(false);
+                    clearInterval(intervalHandle);
+                } else if (response.d.IsError) {
+                    stopTimer = true;
+                    statusdiv.innerHTML =`<div class="alert alert-danger" role="alert">${response.d.WorkDescription}<a href="/Job/Show/${jobID}" class="button is-danger" role="button">Show Task</a></div>`;
+                    progress_bar(false);
+                    clearInterval(intervalHandle);
+                }
+            } else if (response.q != null) {
+                stopTimer = true;
+                // Redirection vers question
+                statusdiv.innerHTML =`<div class="alert alert-warning" role="alert">${response.q.Message}<a href="${response.q.Url}" class="button is-info" role="button">Go</a></div>`;
+                progress_bar(false);
+                clearInterval(intervalHandle);
+            } else {
+                stopTimer = true;
+                // The background process isn't running or there was a problem - reset.
+                statusdiv.innerHTML= `?`;
+
+                progress_bar(false);
+                clearInterval(intervalHandle);
+            }
+        }).catch(err => {  statusdiv.innerHTML =`Error from AJAX call: ${err}`;
+
+        });
+      }
+      intervalHandle = setInterval(check_job_status(), 1000);
+
+          });
+  </script>
+{% endblock %}

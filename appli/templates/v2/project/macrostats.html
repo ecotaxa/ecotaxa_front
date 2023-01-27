@@ -1,0 +1,15 @@
+{% set types = ['validated','dubious','predicted','unclassified']%}
+{%macro taxo_row(taxastat,typerow='taxon', addon = '')-%}
+
+<tr><th class="item font-light" data-id="{{taxastat.id}}" scope="row">{{ taxastat.name if typerow == 'taxon' else taxastat.sampleid }}</th>{{addon}}
+    {%- for type in types -%}
+   {% set total= taxastat.nb_unclassified +  taxastat.nb_validated + taxastat.nb_dubious + taxastat.nb_predicted %}
+    <td  class="number nb_{{type}}">  {% set percent = ((taxastat['nb_'+type]/total)*100)|round(1) if total>0 else 0 %}
+      {%- if percent > 0 -%}<span class="progress-{{type}}">{{ taxastat['nb_'+type] }}</span>
+      {%- endif -%}</td>
+    {%- endfor -%}
+  </tr>
+{%-endmacro%}
+{%macro taxo_th_row()-%}
+<th scope="col" >{{_('validated')}}</th><th scope="col">{{_('dubious')}}</th><th scope="col">{{_('predicted')}}</th><th scope="col" >{{_('unclassified')}}</th>
+{%-endmacro%}

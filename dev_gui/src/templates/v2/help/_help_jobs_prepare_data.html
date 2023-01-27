@@ -1,0 +1,144 @@
+{% extends "./v2/help/_layout.html" %}
+{% block article %}
+<article>  <h2 class="help-title">{{ _('How to prepare data')}} </h2>
+  <h3>{{ _('In a folder place:') }}</h3><dl>
+        <dt>{{ _('image files') }}</dt>
+        <dd>
+            <p>{{ _('Colour and 8-bits greyscale images are supported, in <code>jpg</code>, <code>png</code>,<code>gif</code>
+                (possibly animated) formats.') }}</p>
+        </dd>
+
+        <dt>{{ _('a <code><a href="https://en.wikipedia.org/wiki/Tab-separated_values">tsv</a></code> (TAB separated file)
+            which can be .txt or .tsv extension. File name must start with ecotaxa (ecotaxa*.txt or ecotaxa*.tsv)') }}
+        </dt>
+        <dd>
+            <p>{{ _('It contains the metadata for each image. This file can be created in a spreadsheet application (see
+                formats and examples below).') }}</p>
+            <ul>
+                <li>{{ _('Line 1 contains column headers') }}</li>
+                <li>{{ _('Line 2 contains data format codes; [f] for floats, [t] for text') }}</li>
+                <li>{{ _('Line 3...n contain data for each image') }}</li>
+            </ul>
+        </dd>
+    </dl>
+    <p>
+      {{ _('The metadata and data for each image is organised in various levels (image, object, process, sample, etc.). All
+        column names must be prefixed with the level name (<code>img_***</code>, <code>object_***</code>, etc.). Some
+        common fields, used to filter data, must be named and sometimes formatted in a certain way (required format in
+        blue), which is documented below. But, overall, the only two mandatory fields are
+        <code class="text-coral-400">img_file_name</code> and <code class="text-coral-400">object_id</code> (in red).') }}
+    </p>
+    <ul>
+        <li>{{ _('IMAGE') }}
+            <ul>
+                <li>{{ _('<code class="text-coral-400">img_file_name</code> [t]: name of the image file in the folder (including
+                    extension)') }}
+                </li>
+                <li>{{ _('<code>img_rank</code> [f] : rank of image to be displayed, in case of existence of multiple (&lt;10)
+                    images for one object. Starts at 1.') }}
+                </li>
+            </ul>
+        </li>
+        <li>{{ _('OBJECT: one object to be classified, usually one organism. One object can be represented by several images.
+            In this <code>tsv</code> file, there is one line per image which means the object data gets repeated on
+            several lines.') }}
+            <ul>
+                <li><code class="text-coral-400">object_id</code> {{ _('[t] : identifier of the object, must be unique in the
+                    project. It will be displayed in the object page') }}
+                </li>
+                <li><code>object_link</code>[f] :  {{ _('URL of an associated website') }}</li>
+                <li><code>object_lat</code> [f] : {{ _('latitude') }}, <span class="underline underline-offset-2">{{ _('decimal degrees') }}</span></li>
+                <li><code>object_lon</code> [f] :  {{ _('longitude') }}, <span class="underline underline-offset-2">{{ _('decimal degrees') }}</span></li>
+                <li><code>object_date</code> [f] : ISO8601 <span class="underline underline-offset-2">{{ _('YYYYMMDD') }}</span> UTC</li>
+                <li><code>object_time</code> [f] : ISO8601 <span class="underline underline-offset-2">{{ _('HHMMSS') }}</span> UTC</li>
+                <li><code>object_depth_min</code> [f] : {{ _('minimum depth of object') }}, <span class="underline underline-offset-2">{{ _('meters') }}</span>
+                </li>
+                <li><code>object_depth_max</code> [f] : {{ _('maximum depth of object') }}, <span class="underline underline-offset-2">{{ _('meters') }}</span>
+                </li>
+            </ul>
+            {{ _('And, for already classified objects') }}
+            <ul>
+                <li><code>object_annotation_date</code> [t] : ISO8601 <span class="underline underline-offset-2">{{ _('YYYYMMDD') }}</span> UTC</li>
+                <li><code>object_annotation_time</code> [t] : ISO8601 <span class="underline underline-offset-2">{{ _('YYYYMMDD') }}</span> UTC</li>
+                <li><code>object_annotation_category</code> [t] : {{ _('class of the object with optionally its direct parent
+                    following separated by left angle bracket without whitespace "Cnidaria&lt;Hydrozoa" or old style
+                    between brackets "Cnidaria (Hydrozoa)"') }}
+                </li>
+                <li><code>object_annotation_category_id</code> [f] : {{ _('Ecotaxa ID of the class of the object, generally
+                    from an Ecotaxa export') }}
+                </li>
+                <li><code>object_annotation_person_name</code> [t] : {{ _('name of the person who identified the object') }}</li>
+                <li><code>object_annotation_person_email</code> [t] : {{ _('email of the person who identified the object') }}</li>
+                <li><code>object_annotation_status</code> [t] : <span class="text-predicted">{{ _('predicted') }}</span>, <span
+                        class="text-dubious">{{ _('dubious') }}</span>, {{ _('or') }} <span class="text-validated">{{ _('validated') }}</span></li>
+            </ul>
+            {{ _('And additional object-related fields') }}
+            <ul>
+                <li><code>object_***</code> [f] {{ _('or') }} [t] : {{ _('other fields relative to the object. Up to 500 [f] fields and
+                    20 [t] ones.') }}
+                </li>
+            </ul>
+        </li>
+        <li>{{ _('PROCESS: metadata relative to the processing of the raw images') }}
+            <ul>
+                <li><code>process_id</code> [t] : {{ _('identifier. The processing information is associated with the
+                    acquisition on the same line. If missing, a dummy processing identifier will be created.') }}
+                </li>
+                <li><code>process_***</code> [t] : {{ _('other fields relative to the process. Up to 30 of them.') }}</li>
+            </ul>
+        </li>
+        <li>{{ _('ACQUISITION: metadata relative to the image acquisition') }}
+            <ul>
+                <li><code>acq_id</code> [t] : {{ _('identifier of the image acquisition, must be unique in the project. If
+                    missing, a dummy acquisition identifier will be created.') }}
+                </li>
+                <li><code>acq_***</code> [t] : {{ _('other fields relative to the acquisition. Up to 30 of them.') }}</li>
+            </ul>
+        </li>
+        <li>{{ _('SAMPLE: a collection event') }}
+            <ul>
+                <li><code>sample_id</code> [t] : {{ _('identifier of the sample, must be unique in the project. If missing, a
+                    dummy sample identifier will be created.') }}
+                </li>
+                <li><code>sample_***</code> [t] : {{ _('other fields relative to the sample. Up to 30 of them.') }}</li>
+            </ul>
+        </li>
+    </ul>
+    <p>{{ _('You can download example tsv files') }}</p>
+    <ul>
+        <li><a href="/static/examples/ecotaxa_table_minimum.tsv">{{ _('Minimal example') }}</a>, {{ _('for fully manual entry') }}</li>
+        <li><a href="/static/examples/ecotaxa_table_without_classification.tsv">{{ _('Full featured example') }}</a>, {{ _('with unknown
+            objects only') }}
+        </li>
+        <li><a href="/static/examples/ecotaxa_table_with_classification.tsv">{{ _('Full featured example') }}</a>, {{ _('with already
+            classified objects') }}
+        </li>
+    </ul>
+    <p>{{ _('Several such importation folders can be placed alongside each other in a main folder. Pointing at that main
+        folder will import all subfolders recursively. EcoTaxa will read all <code>tsv</code> files and then import the
+        images they point to. When "Skip <code>tsv</code> that have already been imported" is ticked, the names of
+        <code>tsv</code> files are recorded and those already imported are not re-imported. For ongoing projects, this
+        allows to simply put new data alongside the old import folders and have EcoTaxa only import the new ones.') }}</p>
+    {{ _('So overall, the hierarchy can look like') }}
+    <ul class="list-none">
+        <li><span><i class="icon-lg icon-folder-open"></i> import_folder</span>
+            <ul class="list-none">
+                <li><span><i class="icon icon-folder-open-sm"></i> my_data_1</span>
+                    <ul class="list-none">
+                        <li><i class="icon icon-image-sm p-0.5"></i> img_1.jpg</li>
+                        <li><i class="icon icon-image-sm p-0.5"></i> img_2.jpg</li>
+                        <li><i class="icon icon-image-sm p-0.5"></i> img_3.jpg</li>
+                        <li><i class="icon icon-document-sm"></i> table.tsv</li>
+                    </ul>
+                </li>
+                <li><span><i class="icon icon-folder-open-sm"></i> my_data_2</span>
+                    <ul class="list-none">
+                        <li><i class="icon icon-document-sm"></i> description.tsv</li>
+                        <li><i class="icon icon-image-sm p-0.5"></i> DCN001.jpg</li>
+                        <li><i class="icon icon-image-sm  p-0.5"></i> IMG234.png</li>
+                        <li><i class="icon icon-image-sm p-0.5"></i> anim.gif</li>
+                    </ul>
+                </li>
+            </ul></li></ul>
+</article>
+{% endblock %}

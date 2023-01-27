@@ -7,219 +7,412 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-10-14 12:07+0200\n"
+"POT-Creation-Date: 2023-01-27 12:19+0100\n"
 "PO-Revision-Date: 2022-10-14 12:08+0200\n"
 "Last-Translator: \n"
-"Language-Team: fr <LL@li.org>\n"
 "Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "Generated-By: Babel 2.10.1\n"
-"X-Generator: Poedit 3.1.1\n"
 
-#: appli/gui/staticlistes.py:20
+#: appli/gui/staticlistes.py:24
 msgid "Sorbonne Universite and CNRS"
 msgstr ""
 
-#: appli/gui/staticlistes.py:33
+#: appli/gui/staticlistes.py:37
 msgid ""
-"Sorbonne University and the CNRS, which pay the salaries of the permanent "
-"staff responsible for supervising its development."
+"Sorbonne University and the CNRS, which pay the salaries of the permanent"
+" staff responsible for supervising its development."
 msgstr ""
 
-#: appli/gui/staticlistes.py:38
+#: appli/gui/staticlistes.py:42
 msgid "The Programme Investissements d'Avenir"
 msgstr ""
 
-#: appli/gui/staticlistes.py:41
+#: appli/gui/staticlistes.py:45
 msgid ""
-"The Future Investments Program  which financed the development of the original "
-"version of the application through the Oceanomics project, dedicated to the "
-"analysis of Tara Oceans samples [45k €]."
+"The Future Investments Program  which financed the development of the "
+"original version of the application through the Oceanomics project, "
+"dedicated to the analysis of Tara Oceans samples [45k €]."
 msgstr ""
 
-#: appli/gui/staticlistes.py:46
+#: appli/gui/staticlistes.py:50
 msgid "The Partner University Fund"
 msgstr ""
 
-#: appli/gui/staticlistes.py:49
+#: appli/gui/staticlistes.py:53
 msgid ""
-"The Partner University Fund  that funded the hardware on which EcoTaxa ran for "
-"several years and the machine learning solution it permitted, through a joint "
-"project between Université Pierre et Marie Curie (now Sorbonne Université) and "
-"the University of Miami [15k€]."
+"The Partner University Fund  that funded the hardware on which EcoTaxa "
+"ran for several years and the machine learning solution it permitted, "
+"through a joint project between Université Pierre et Marie Curie (now "
+"Sorbonne Université) and the University of Miami [15k€]."
 msgstr ""
 
-#: appli/gui/staticlistes.py:54
+#: appli/gui/staticlistes.py:58
 msgid "The CNRS LEFE program"
 msgstr ""
 
-#: appli/gui/staticlistes.py:57
+#: appli/gui/staticlistes.py:61
 msgid ""
-"The CNRS LEFE program that allowed to renew the machine learning backend, "
-"through the project DL-PIC [10k€]."
+"The CNRS LEFE program that allowed to renew the machine learning backend,"
+" through the project DL-PIC [10k€]."
 msgstr ""
 
-#: appli/gui/staticlistes.py:62
+#: appli/gui/staticlistes.py:66
 msgid "The Belmont Forum"
 msgstr ""
 
-#: appli/gui/staticlistes.py:65
+#: appli/gui/staticlistes.py:69
 msgid ""
-"The Belmont Forum, which funds an overall review of the application through "
-"the WWWPIC project [500k€]."
+"The Belmont Forum, which funds an overall review of the application "
+"through the WWWPIC project [500k€]."
 msgstr ""
 
-#: appli/gui/staticlistes.py:70
+#: appli/gui/staticlistes.py:74
 msgid "The Watertools company"
 msgstr ""
 
-#: appli/gui/staticlistes.py:73
+#: appli/gui/staticlistes.py:77
 msgid ""
-"The Watertools company, who donated money to make the interface of EcoTaxa "
-"easier to translate, in Chinese in particular [30k€]."
+"The Watertools company, who donated money to make the interface of "
+"EcoTaxa easier to translate, in Chinese in particular [30k€]."
 msgstr ""
 
-#: appli/gui/staticlistes.py:81
+#: appli/gui/staticlistes.py:114
 msgid "A manager person needs to be designated among the current project persons"
 msgstr ""
 
-#: appli/gui/staticlistes.py:84
+#: appli/gui/staticlistes.py:117
 msgid "One person, at least, needs to be related to the project"
 msgstr ""
 
-#: appli/gui/staticlistes.py:85
+#: appli/gui/staticlistes.py:118
 msgid ""
-"A contact person needs to be designated among the current project managers."
-msgstr ""
-
-#: appli/gui/staticlistes.py:88
-msgid ""
-"A privilege is incomplete. Please select a member name or delete the privilege "
-"row"
-msgstr ""
-
-#: appli/gui/staticlistes.py:91
-msgid ""
-"One member at least is required with Manage privilege and contact property  "
-msgstr ""
-
-#: appli/gui/staticlistes.py:94
-msgid "privilege is missing"
-msgstr ""
-
-#: appli/gui/staticlistes.py:95
-msgid ""
-"Taxonomy synchronization and Ecotaxa version check wasn’t done during the last "
-"7 days. Ask application administrator to do it."
-msgstr ""
-
-#: appli/gui/staticlistes.py:99
-msgid "Synchronize to check Ecotaxa version"
-msgstr ""
-
-#: appli/gui/staticlistes.py:101
-msgid "Error retrieving possible models"
-msgstr ""
-
-#: appli/gui/staticlistes.py:102
-msgid "Error retrieving licenses"
-msgstr ""
-
-#: appli/gui/staticlistes.py:103
-msgid "Project does not exist"
-msgstr "Le projet n'existe pas"
-
-#: appli/gui/staticlistes.py:104
-msgid "The page does not exists."
-msgstr "La page n'existe pas."
-
-#: appli/gui/staticlistes.py:105
-msgid "Access not authorized "
-msgstr "Accès non autorisé"
-
-#: appli/gui/staticlistes.py:106
-msgid "You cannot access this information"
-msgstr ""
-
-#: appli/gui/staticlistes.py:107
-msgid "You cannot edit settings for this project"
-msgstr ""
-
-#: appli/gui/staticlistes.py:108
-msgid "No users list"
-msgstr ""
-
-#: appli/gui/staticlistes.py:109
-msgid "Not authorized to create a project"
-msgstr ""
-
-#: appli/gui/staticlistes.py:110
-msgid "Not authorized to edit a project"
-msgstr ""
-
-#: appli/gui/staticlistes.py:111
-msgid "A project must have a title and instrument"
-msgstr ""
-
-#: appli/gui/staticlistes.py:112
-msgid ""
-"Changing the instrument associated with a project may affect the behaviour of "
-"EcoTaxa in various ways and should not be done except to correct a mistake."
-msgstr ""
-
-#: appli/gui/staticlistes.py:115
-msgid "Error in project creation"
-msgstr ""
-
-#: appli/gui/staticlistes.py:116
-msgid "SCN features erased"
-msgstr ""
-
-#: appli/gui/staticlistes.py:117
-msgid "Member already registered with differents privileges "
-msgstr ""
-
-#: appli/gui/staticlistes.py:120
-msgid "Privileges are not set for member "
+"A contact person needs to be designated among the current project "
+"managers."
 msgstr ""
 
 #: appli/gui/staticlistes.py:121
-msgid "Error member to be added is no more in users list "
-msgstr ""
-
-#: appli/gui/staticlistes.py:122
 msgid ""
-"A contact person needs to be designated among the current project managers. "
+"A privilege is incomplete. Please select a member name or delete the "
+"privilege row"
 msgstr ""
 
-#: appli/gui/staticlistes.py:125
-msgid "At least one manager is needed"
-msgstr ""
-
-#: appli/gui/staticlistes.py:126
-msgid "Update problem: "
+#: appli/gui/staticlistes.py:124
+msgid ""
+"One member at least is required with Manage privilege and contact "
+"property  "
 msgstr ""
 
 #: appli/gui/staticlistes.py:127
-msgid "Project updated"
+msgid "privilege is missing"
 msgstr ""
 
 #: appli/gui/staticlistes.py:128
+msgid ""
+"Taxonomy synchronization and Ecotaxa version check wasn’t done during the"
+" last 7 days. Ask application administrator to do it."
+msgstr ""
+
+#: appli/gui/staticlistes.py:132
+msgid "Synchronize to check Ecotaxa version"
+msgstr ""
+
+#: appli/gui/staticlistes.py:134
+msgid "Error retrieving possible models"
+msgstr ""
+
+#: appli/gui/staticlistes.py:135
+msgid "Error retrieving licenses"
+msgstr ""
+
+#: appli/gui/staticlistes.py:136
+msgid "Project does not exist"
+msgstr "Le projet n'existe pas"
+
+#: appli/gui/staticlistes.py:137
+msgid "The page does not exists."
+msgstr "La page n'existe pas."
+
+#: appli/gui/staticlistes.py:138
+msgid "Access not authorized "
+msgstr "Accès non autorisé"
+
+#: appli/gui/staticlistes.py:139
+msgid "You cannot access this information"
+msgstr ""
+
+#: appli/gui/staticlistes.py:140
+msgid "You cannot edit settings for this project"
+msgstr ""
+
+#: appli/gui/staticlistes.py:141
+msgid "No users list"
+msgstr ""
+
+#: appli/gui/staticlistes.py:142
+msgid "Not authorized to create a project"
+msgstr ""
+
+#: appli/gui/staticlistes.py:143
+msgid "Not authorized to edit a project"
+msgstr ""
+
+#: appli/gui/staticlistes.py:144
+msgid "A project must have a title and instrument"
+msgstr ""
+
+#: appli/gui/staticlistes.py:145
+msgid ""
+"Changing the instrument associated with a project may affect the "
+"behaviour of EcoTaxa in various ways and should not be done except to "
+"correct a mistake."
+msgstr ""
+
+#: appli/gui/staticlistes.py:148
+msgid "Error in project creation"
+msgstr ""
+
+#: appli/gui/staticlistes.py:149
+msgid "SCN features erased"
+msgstr ""
+
+#: appli/gui/staticlistes.py:150
+msgid "Member already registered with differents privileges "
+msgstr ""
+
+#: appli/gui/staticlistes.py:153
+msgid "Privileges are not set for member "
+msgstr ""
+
+#: appli/gui/staticlistes.py:154
+msgid "Error member to be added is no more in users list "
+msgstr ""
+
+#: appli/gui/staticlistes.py:155
+msgid ""
+"A contact person needs to be designated among the current project "
+"managers. "
+msgstr ""
+
+#: appli/gui/staticlistes.py:158
+msgid "At least one manager is needed"
+msgstr ""
+
+#: appli/gui/staticlistes.py:159
+msgid "Update problem: "
+msgstr ""
+
+#: appli/gui/staticlistes.py:160
+msgid "Project updated"
+msgstr ""
+
+#: appli/gui/staticlistes.py:161
 msgid "Privileges where not imported correctly."
 msgstr ""
 
-#: appli/gui/project/projects_list_interface.py:20
+#: appli/gui/staticlistes.py:166
+msgid "Error on file upload"
+msgstr ""
+
+#: appli/gui/staticlistes.py:167
+msgid "no permission to import"
+msgstr ""
+
+#: appli/gui/staticlistes.py:169
+msgid "no permission to upload"
+msgstr ""
+
+#: appli/gui/staticlistes.py:170
+msgid "no file to upload"
+msgstr ""
+
+#: appli/gui/staticlistes.py:172
+msgid "no permission to list"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:306
+#: appli/gui/staticlistes.py:177
+msgid "Manage"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:303
+#: appli/gui/staticlistes.py:178 appli/gui/staticlistes.py:191
+#: appli/templates/v2/partials/_navbar.html:7
+#: appli/templates/v2/project/projectsettings.html:74
+msgid "Annotate"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:304
+#: appli/gui/staticlistes.py:179 appli/templates/v2/jobs/listall.html:54
+#: appli/templates/v2/jobs/show.html:69
+msgid "View"
+msgstr ""
+
+#: appli/gui/staticlistes.py:184
+msgid "Manager"
+msgstr ""
+
+#: appli/gui/staticlistes.py:185
+msgid "Annotator"
+msgstr ""
+
+#: appli/gui/staticlistes.py:186
+msgid "Viewer"
+msgstr ""
+
+#: appli/gui/staticlistes.py:192
+#: appli/templates/v2/project/projectsettings.html:74
+msgid "Explore Only"
+msgstr ""
+
+#: appli/gui/staticlistes.py:193
+#: appli/templates/v2/project/projectsettings.html:74
+msgid "Annotate No Prediction"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:19
+#: appli/gui/project/projects_list_interface.py:56
+#: appli/gui/project/projects_list_interface.py:114
+#: appli/templates/v2/jobs/listall.html:40
+msgid "ID"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:25
+#: appli/gui/project/projects_list_interface.py:61
 #: appli/templates/v2/project/projectsettings.html:63
 #: appli/templates/v2/project/projectsettings.html:65
 msgid "Instrument"
 msgstr "Instrument"
 
-#: appli/gui/project/projects_list_interface.py:134
+#: appli/gui/project/projects_list_interface.py:30
+#: appli/gui/project/projects_list_interface.py:66
+#: appli/templates/v2/project/projectsettings.html:48
+msgid "Title"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:36
+#: appli/gui/project/projects_list_interface.py:84
+#: appli/gui/project/projects_list_interface.py:93
+msgid "contact"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:37
+#: appli/templates/v2/project/projectsettings.html:71
+msgid "Status"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:39
+#: appli/gui/project/projects_list_interface.py:97
+msgid "Visibility"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:44
+#: appli/templates/v2/project/_fullstats.html:75
+#: appli/templates/v2/project/projectsettings.html:96
+msgid "License"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:45
+msgid "Nb objects"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:47
+msgid "%validated"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:72
+msgid "Preset categories"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:77
+msgid "Extra categories used"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:83
+msgid "Members"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:90
+msgid "status"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:91
+#: appli/templates/v2/help/_help_projectsettings.html:5
+msgid "description"
+msgstr "trad fr description"
+
+#: appli/gui/project/projects_list_interface.py:92
+msgid "comments"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:94
+msgid "members"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:95
+msgid "license"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:103
+msgid "presets"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:105
+msgid "init classif"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:109
+msgid "Deep feature ext."
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:121
+msgid "Sample ID"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:125
+msgid "used taxa"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:131
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
+#: appli/templates/v2/project/_macrostats.html:17
+#: appli/templates/v2/project/_stats.html:56
+#: appli/templates/v2/project/macrostats.html:14
+msgid "validated"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:132
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
+#: appli/templates/v2/project/_macrostats.html:17
+#: appli/templates/v2/project/_stats.html:57
+#: appli/templates/v2/project/macrostats.html:14
+msgid "dubious"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:133
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:72
+#: appli/templates/v2/project/_macrostats.html:17
+#: appli/templates/v2/project/_stats.html:58
+#: appli/templates/v2/project/macrostats.html:14
+msgid "predicted"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:135
+#: appli/templates/v2/project/_macrostats.html:17
+msgid "none"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface.py:163
 msgid "select"
 msgstr "Sélectionner"
+
+#: appli/gui/project/projects_list_interface.py:305
+msgid "Request Access"
+msgstr ""
 
 #: appli/templates/v2/about.html:19
 msgid "Welcome to Ecotaxa"
@@ -232,7 +425,8 @@ msgid ""
 "biodiversity."
 msgstr ""
 " Ecotaxa est une application dédiée à l'exploration et l'annotation "
-"taxonomique d'images qui illustrent la beauté de la biodiversité du plancton."
+"taxonomique d'images qui illustrent la beauté de la biodiversité du "
+"plancton."
 
 #: appli/templates/v2/about.html:21
 msgid "If you use EcoTaxa in your work, we would appreciate if you cite it as:"
@@ -246,66 +440,67 @@ msgstr ""
 msgid "EcoTaxa, a tool for the taxonomic classification of images :"
 msgstr ""
 
-#: appli/templates/v2/about.html:52
+#: appli/templates/v2/about.html:53
+#, fuzzy
 msgid ""
 "The maintenance of the software and hardware that allows EcoTaxa to run "
-"depends on the support of its users, who can be officially billed by the <a "
-"href='https://www.sorbonne-universite.fr/plateformes-techniques/plateforme-"
-"dimagerie-quantitative-de-villefranche-sur-mer-piqv' "
-"target='_blank'>Quantitative Imaging Platform of Villefranche</a>. We would "
-"very much appreciate if you would consider setting aside some funds in your "
-"next grant for this. Contact us to estimate what would be both reasonable and "
-"useful."
+"depends on the support of its users, who can be officially billed by the "
+"<a href='https://piqv.imev-mer.fr/' target='_blank'>Quantitative Imaging "
+"Platform of Villefranche</a>. We would very much appreciate if you would "
+"consider setting aside some funds in your next grant for this. Contact us"
+" to estimate what would be both reasonable and useful."
 msgstr ""
-"La maintenance du logiciel et du matériel qui permet à EcoTaxa de fonctionner "
-"dépend du soutien de ses utilisateurs, qui peuvent être officiellement "
-"facturés par la <a href='https://www.sorbonne-universite.fr/plateformes-"
-"techniques/plateforme-dimagerie-quantitative-de-villefranche-sur-mer-piqv' "
-"target='_blank'>Plateforme d'Imagerie Quantitative de Villefranche</a>. Nous "
-"vous serions très reconnaissants si vous pouviez envisager de réserver des "
-"fonds à cet effet dans votre prochaine subvention. Contactez-nous pour estimer "
-"ce qui serait à la fois raisonnable et utile."
+"La maintenance du logiciel et du matériel qui permet à EcoTaxa de "
+"fonctionner dépend du soutien de ses utilisateurs, qui peuvent être "
+"officiellement facturés par la <a href='https://www.sorbonne-"
+"universite.fr/plateformes-techniques/plateforme-dimagerie-quantitative-"
+"de-villefranche-sur-mer-piqv' target='_blank'>Plateforme d'Imagerie "
+"Quantitative de Villefranche</a>. Nous vous serions très reconnaissants "
+"si vous pouviez envisager de réserver des fonds à cet effet dans votre "
+"prochaine subvention. Contactez-nous pour estimer ce qui serait à la fois"
+" raisonnable et utile."
 
-#: appli/templates/v2/about.html:53
+#: appli/templates/v2/about.html:54
 msgid "The persons who made EcoTaxa possible are:"
 msgstr "Les personnes à l'origine du développement d'Ecotaxa sont :"
 
-#: appli/templates/v2/about.html:55
-msgid ""
-"MMarc Picheral and Jean-Olivier Irisson: specifications and project supervision"
-msgstr ""
-
 #: appli/templates/v2/about.html:56
-msgid "Sébastien Colin: initial specification"
+msgid ""
+"Marc Picheral and Jean-Olivier Irisson: specifications and project "
+"supervision"
 msgstr ""
 
 #: appli/templates/v2/about.html:57
-msgid "Altidev, Laurent Salinas, Laurent Reese: development"
+msgid "Sébastien Colin: initial specification"
 msgstr ""
 
 #: appli/templates/v2/about.html:58
-msgid "Simon-Martin Schröder, Benjamin Graham: deep learning implementation"
+msgid "Altidev, Laurent Salinas, Laurent Reese: development"
 msgstr ""
 
 #: appli/templates/v2/about.html:59
-msgid ""
-"Amanda Elineau, Corinne Desnos, Laetitia Jalabert and the COMPLEx team of the "
-"<a href='https://lov.imev-mer.fr/'>Laboratoire d'Océanographie de "
-"Villefranche</a> (LOV): testing and feedback"
+msgid "Simon-Martin Schröder, Benjamin Graham: deep learning implementation"
 msgstr ""
 
-#: appli/templates/v2/about.html:61
+#: appli/templates/v2/about.html:60
+msgid ""
+"Amanda Elineau, Corinne Desnos, Laetitia Jalabert and the COMPLEx team of"
+" the <a href='https://lov.imev-mer.fr/' target='_blank'>Laboratoire "
+"d'Océanographie de Villefranche</a> (LOV): testing and feedback"
+msgstr ""
+
+#: appli/templates/v2/about.html:62
 msgid "Disclaimer :"
 msgstr ""
 
-#: appli/templates/v2/about.html:61
+#: appli/templates/v2/about.html:62
 msgid ""
-"If you annotate images in EcoTaxa you cannot claim for any retribution from "
-"the application managers but you can then download and use the results of your "
-"work. Even if they make their best to keep the application stable and secure, "
-"the managers of the EcoTaxa application are not liable for the safekeeping of "
-"the images and associated data it hosts. You are responsible for performing "
-"regular backups."
+"If you annotate images in EcoTaxa you cannot claim for any retribution "
+"from the application managers but you can then download and use the "
+"results of your work. Even if they make their best to keep the "
+"application stable and secure, the managers of the EcoTaxa application "
+"are not liable for the safekeeping of the images and associated data it "
+"hosts. You are responsible for performing regular backups."
 msgstr ""
 
 #: appli/templates/v2/login.html:8
@@ -316,13 +511,336 @@ msgstr ""
 msgid "Create your EcoTaxa account"
 msgstr ""
 
+#: appli/templates/v2/login.html:11
+msgid ""
+"In case of registration problem or if you want to avoid Google reCaptcha "
+"on Account creation page for privacy reasons\n"
+"        ,please send an email to one the following persons in order to "
+"proceed to a manual account creation"
+msgstr ""
+
 #: appli/templates/v2/login.html:15
 msgid "Our privacy statement"
 msgstr ""
 
+#: appli/templates/v2/login.html:26
+msgid "Already authenticated. page should redirect to projects list"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:6
+msgid "Privacy statement"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:7
+msgid ""
+"\n"
+"This policy describes the information we collect from you, how we use "
+"that information and our legal basis for doing so. It also covers whether"
+" and how that information may be shared and your rights and choices "
+"regarding the information you provide to us."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:9
+msgid "What We Collect and Receive"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:11
+msgid ""
+"In order for us to provide you the best possible experience on our "
+"websites, we need to collect and process certain information."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:12
+msgid "Usage data"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:12
+msgid ""
+"when you visit our site, Google analytics will store several information "
+"about your navigation (see Google analytics privacy below)."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:13
+msgid "Classification activity"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:13
+msgid ""
+"we store your classification activity in order to track the "
+"classification of each object and to generate statistics shared with "
+"project members and EcoTaxa team."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:14
+msgid "Cookies"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:14
+msgid ""
+"we use cookies (small data files transferred onto computers or devices by"
+" sites) only for the technical purpose of session and settings "
+"management."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:15
+msgid "Create an account"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:15
+msgid ""
+"when you sign up for and open an account , we may ask you to provide us "
+"with information such as your name, email address and details about your "
+"organization."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:17
+msgid "Opt-out of website tracking"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:20
+msgid "You can opt out of being tracked by Google Analytics."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:21
+msgid "Your current setting"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:23
+msgid " G.A. Tracker enabled"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:24
+msgid "G.A. Tracker disabled"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:25
+msgid ""
+"Theses information is very useful for us, we encourage you to enable the "
+"G.A. tracker."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:29
+msgid "Google Analytics NOT enabled on this server"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:31
+msgid "Your Rights"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:34
+msgid ""
+"You have the right to be informed of Personal Data processed by us, a "
+"right to rectification/correction, erasure and restriction of processing."
+" You also have the right to ask from us a structured, common and machine-"
+"readable format of Personal Data you provided to us."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:36
+msgid ""
+"We can only identify you via your email address and we can only adhere to"
+" your request and provide information if we have Personal Data about you "
+"through you having made contact with us directly."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:38
+msgid ""
+"To exercise any of the rights mentioned in this Privacy Policy and/or in "
+"the event of questions or comments relating to the use of Personal Data "
+"you may contact us :"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:40
+msgid ""
+"In addition, you have the right to lodge a complaint with the data "
+"protection authority in your jurisdiction."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:41
+msgid "Third-party services we use"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:43
+msgid ""
+"When you visit our websites, or purchase products or services, we use the"
+" following third party services which may collect personal data:"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:48
+msgid "Recipient"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:51
+msgid "Purpose of processing"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:54
+msgid "Lawful basis"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:57
+msgid "Data location"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:60
+msgid "Personal data collected by the third party"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:63
+msgid "Privacy policy"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:70
+msgid "Google Analytics"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:73
+msgid ""
+"To collect and analyse information about how you interact with our "
+"website (web analytics)."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:76
+msgid "Explicit consent"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:79 appli/templates/v2/privacy.html:100
+msgid "USA"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:82
+msgid ""
+"Anonymize IP address, Pages visited, browser, device used and information"
+" sent by the web browser."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:85 appli/templates/v2/privacy.html:106
+#: appli/templates/v2/privacy.html:127
+msgid "link"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:94
+msgid "To avoid creation of spam account"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:97 appli/templates/v2/privacy.html:118
+msgid "Legitimate interest"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:103
+msgid "IP address, Cookie"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:115
+msgid "Display map"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:121
+msgid "WorldWide"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:124
+msgid "IP address"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:134
+msgid "Retention of data"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:135
+msgid ""
+"We will retain your information as long as your account is associated "
+"with existing objects.\n"
+"Google Analytics will keep information during 26 Months."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:138
+msgid "Security"
+msgstr ""
+
+#: appli/templates/v2/privacy.html:139
+msgid "We do our best to keep your information safe."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:140
+msgid "Your password is salted and hashed with a non-reversible algorithm."
+msgstr ""
+
+#: appli/templates/v2/privacy.html:141
+msgid "This server use encrypted communication (https)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:4
+#: appli/templates/v2/jobs/import.html:36
+#: appli/templates/v2/partials/_navbar.html:16
+#: appli/templates/v2/project/_headerimport.html:7
+msgid "Import"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:5
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:3
 #: appli/templates/v2/project/_listcontainer.html:6
 msgid "How to prepare data"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:6
+msgid ""
+"How to import data from\n"
+"   zooprocess"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:37
+msgid "Image Only import"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:39
+msgid ""
+"If you have only image and no data file you can use the simple import "
+"here."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:40
+msgid "Re-import and Update Metadata"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:42
+msgid "If you have already loaded your images and you want update your metadata."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_monitor.html:4
+msgid "Job monitoring"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_monitor.html:5
+msgid "WARNING : this is an asynchronous process."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_monitor.html:6
+msgid "You can either"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_monitor.html:8
+msgid ""
+"Open another tab or window to continue working in EcoTaxa (and monitor "
+"the progress of the task switching to\n"
+"        this page from time to time)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_monitor.html:10
+msgid ""
+"Leave this page to continue working in EcoTaxa (and click on the \"Run\" "
+"or \"Done\" buttons on the upper right\n"
+"        of the Ecotaxa topper to monitor the progress of the task or "
+"check its completion)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_monitor.html:12
+msgid ""
+"Asynchronous tasks are utilized for processes that can be long. They can "
+"create temporary data (like export file)\n"
+"    that can be manually removed at the end of the process even if "
+"EcoTaxa will do it for you on a regular schedule.\n"
+"    Remaining tasks can be checked using the \"Done\" or \"Error\" top "
+"right buttons."
 msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:4
@@ -342,10 +860,10 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:11
 msgid ""
-"a <code><a href=\"https://en.wikipedia.org/wiki/Tab-separated_values\">tsv</"
-"a></code> (TAB separated file)\n"
-"            which can be .txt or .tsv extension. File name must start with "
-"ecotaxa (ecotaxa*.txt or ecotaxa*.tsv)"
+"a <code><a href=\"https://en.wikipedia.org/wiki/Tab-"
+"separated_values\">tsv</a></code> (TAB separated file)\n"
+"            which can be .txt or .tsv extension. File name must start "
+"with ecotaxa (ecotaxa*.txt or ecotaxa*.tsv)"
 msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:15
@@ -369,16 +887,16 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:25
 msgid ""
-"The metadata and data for each image is organised in various levels (image, "
-"object, process, sample, etc.). All\n"
-"        column names must be prefixed with the level name (<code>img_***</"
-"code>, <code>object_***</code>, etc.). Some\n"
+"The metadata and data for each image is organised in various levels "
+"(image, object, process, sample, etc.). All\n"
+"        column names must be prefixed with the level name "
+"(<code>img_***</code>, <code>object_***</code>, etc.). Some\n"
 "        common fields, used to filter data, must be named and sometimes "
 "formatted in a certain way (required format in\n"
-"        blue), which is documented below. But, overall, the only two mandatory "
-"fields are\n"
-"        <code class=\"text-coral-400\">img_file_name</code> and <code class="
-"\"text-coral-400\">object_id</code> (in red)."
+"        blue), which is documented below. But, overall, the only two "
+"mandatory fields are\n"
+"        <code class=\"text-coral-400\">img_file_name</code> and <code "
+"class=\"text-coral-400\">object_id</code> (in red)."
 msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:32
@@ -387,8 +905,8 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:34
 msgid ""
-"<code class=\"text-coral-400\">img_file_name</code> [t]: name of the image "
-"file in the folder (including\n"
+"<code class=\"text-coral-400\">img_file_name</code> [t]: name of the "
+"image file in the folder (including\n"
 "                    extension)"
 msgstr ""
 
@@ -401,10 +919,10 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:42
 msgid ""
-"OBJECT: one object to be classified, usually one organism. One object can be "
-"represented by several images.\n"
-"            In this <code>tsv</code> file, there is one line per image which "
-"means the object data gets repeated on\n"
+"OBJECT: one object to be classified, usually one organism. One object can"
+" be represented by several images.\n"
+"            In this <code>tsv</code> file, there is one line per image "
+"which means the object data gets repeated on\n"
 "            several lines."
 msgstr ""
 
@@ -480,21 +998,9 @@ msgstr ""
 msgid "email of the person who identified the object"
 msgstr ""
 
-#: appli/templates/v2/help/_help_jobs_prepare_data.html:72
-msgid "predicted"
-msgstr ""
-
-#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
-msgid "dubious"
-msgstr ""
-
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:73
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:77
 msgid "or"
-msgstr ""
-
-#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
-msgid "validated"
 msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:75
@@ -529,7 +1035,8 @@ msgstr ""
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:92
 msgid ""
 "identifier of the image acquisition, must be unique in the project. If\n"
-"                    missing, a dummy acquisition identifier will be created."
+"                    missing, a dummy acquisition identifier will be "
+"created."
 msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:95
@@ -581,16 +1088,16 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:117
 msgid ""
-"Several such importation folders can be placed alongside each other in a main "
-"folder. Pointing at that main\n"
-"        folder will import all subfolders recursively. EcoTaxa will read all "
-"<code>tsv</code> files and then import the\n"
-"        images they point to. When \"Skip <code>tsv</code> that have already "
-"been imported\" is ticked, the names of\n"
-"        <code>tsv</code> files are recorded and those already imported are not "
-"re-imported. For ongoing projects, this\n"
-"        allows to simply put new data alongside the old import folders and "
-"have EcoTaxa only import the new ones."
+"Several such importation folders can be placed alongside each other in a "
+"main folder. Pointing at that main\n"
+"        folder will import all subfolders recursively. EcoTaxa will read "
+"all <code>tsv</code> files and then import the\n"
+"        images they point to. When \"Skip <code>tsv</code> that have "
+"already been imported\" is ticked, the names of\n"
+"        <code>tsv</code> files are recorded and those already imported "
+"are not re-imported. For ongoing projects, this\n"
+"        allows to simply put new data alongside the old import folders "
+"and have EcoTaxa only import the new ones."
 msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:122
@@ -621,20 +1128,16 @@ msgid "Project settings"
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:5
-msgid "description"
-msgstr "trad fr description"
-
-#: appli/templates/v2/help/_help_projectsettings.html:5
 msgid ""
-"A short paragraph describing the dataset, to make it discoverable by others in "
-"EcoTaxa and elsewhere.\n"
-"    It should indicate which organisms are targeted (e.g. mesozooplankton), "
-"where (e.g. Bering Sea),\n"
-"    when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed "
-"with a ZooScan) they were\n"
+"A short paragraph describing the dataset, to make it discoverable by "
+"others in EcoTaxa and elsewhere.\n"
+"    It should indicate which organisms are targeted (e.g. "
+"mesozooplankton), where (e.g. Bering Sea),\n"
+"    when (e.g. from 2000 to 2010) and how (e.g. plankton net samples "
+"processed with a ZooScan) they were\n"
 "    collected,\n"
-"    the scientific program that motivated the work and who ran it (e.g. SCOR "
-"program coordinated by the\n"
+"    the scientific program that motivated the work and who ran it (e.g. "
+"SCOR program coordinated by the\n"
 "    Laboratoire\n"
 "    d'Océanographie de Villefranche)."
 msgstr ""
@@ -646,39 +1149,42 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:13
 msgid ""
-"Any technical, practical details that need to be shared with other users able "
-"to access this target_proj."
+"Any technical, practical details that need to be shared with other users "
+"able to access this target_proj."
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:15
+#: appli/templates/v2/project/_stats.html:44
 #: appli/templates/v2/project/projectsettings.html:86
 msgid "Deep feature extractor"
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:15
 msgid ""
-"SCN Network used for prediction, if you change it, existing features computed "
-"with this network will be\n"
+"SCN Network used for prediction, if you change it, existing features "
+"computed with this network will be\n"
 "    erased.\n"
 "    <br>New features will be recomputed during the next automatic "
 "classification."
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:19
+#: appli/templates/v2/project/_stats.html:41
+#: appli/templates/v2/project/projectsettings.html:113
 msgid "Definition of preset for manual sorting"
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:20
 msgid ""
-"The PRESET tool permits to create a pre-defined list of categories for the "
-"sorting of the images from\n"
+"The PRESET tool permits to create a pre-defined list of categories for "
+"the sorting of the images from\n"
 "    the project"
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:23
 msgid ""
-"The list can be directly copied from another project (use Pick from other "
-"projects)"
+"The list can be directly copied from another project (use Pick from other"
+" projects)"
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:24
@@ -692,8 +1198,8 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:26
 msgid ""
-"Format : Var=var_name (Var : imported variable, var_name : displayed variable "
-"name)\n"
+"Format : Var=var_name (Var : imported variable, var_name : displayed "
+"variable name)\n"
 "        <br>Example : depth_min=minimum depth [m] where"
 msgstr ""
 
@@ -727,8 +1233,8 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:51
 msgid ""
-"Viewers can view the project even when it is private; the project is listed in "
-"their project\n"
+"Viewers can view the project even when it is private; the project is "
+"listed in their project\n"
 "      list."
 msgstr ""
 
@@ -742,8 +1248,8 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:56
 msgid ""
-"The contact person is a Manager, displayed in the project table and serving as "
-"the contact point for other users and EcoTaxa's managers."
+"The contact person is a Manager, displayed in the project table and "
+"serving as the contact point for other users and EcoTaxa's managers."
 msgstr ""
 
 #: appli/templates/v2/help/_help_summary.html:6
@@ -756,6 +1262,262 @@ msgstr ""
 
 #: appli/templates/v2/help/_layout.html:18
 msgid "Help summary"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:2
+msgid "Advanced options"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:4
+msgid "Optional taxonomy mapping"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:5
+msgid ""
+"This allows to change the name of the categories of previously classified"
+" objects to match the names in the UniEuk taxonomic framework included in"
+" the application."
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:6
+msgid "Examples:"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:6
+msgid "crust_cop = Copepoda"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:6
+msgid "gelatinous medusae = Cnidaria (Hydrozoa) "
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:8
+msgid "Imported name"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:8
+msgid "imported name"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:11
+msgid "taxo pick"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_advanced_options.html:13
+msgid "taxonomy"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_options.html:3
+msgid "Skip <code>tsv</code> files that have already been imported"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_options.html:8
+msgid "Skip objects that have already been imported"
+msgstr ""
+
+#: appli/templates/v2/jobs/_to_import_summary.html:1
+msgid "Total objects"
+msgstr ""
+
+#: appli/templates/v2/jobs/_to_import_summary.html:2
+msgid "Total TSV"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:7
+#: appli/templates/v2/jobs/import_create.html:9
+msgid "How to import data"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:8
+#: appli/templates/v2/jobs/import_create.html:11
+#: appli/templates/v2/project/projectsettings.html:37
+msgid "this field is required"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:8
+#: appli/templates/v2/jobs/import_create.html:11
+#: appli/templates/v2/project/projectsettings.html:37
+msgid "this field is invalid"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:10
+msgid "Type of import"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:14
+msgid "Images+TSV files"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:14
+msgid "Images Only"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:14
+msgid "TSV files only"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:18
+msgid "Project"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:20
+msgid "Select a file or directory to import"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:21
+msgid "upload"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:21
+msgid "Browse"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:21
+msgid "or Drop Files or Directories Here"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:21
+msgid "Or select from My Files"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:21
+#: appli/templates/v2/jobs/import_create.html:14
+msgid "Upload entire folder(s) or folder(s) compressed as a zip file"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:27
+msgid "File to import"
+msgstr ""
+
+#: appli/templates/v2/jobs/import_create.html:22
+msgid "All files compressed - click to download for test "
+msgstr ""
+
+#: appli/templates/v2/jobs/import_create.html:32
+msgid "Start import Images and TSV files"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:31
+msgid "Task count"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:32
+msgid "Clean all Done"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:33
+msgid "Clean all Error"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:34
+msgid "Clean all Warning"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:35
+msgid "See user tasks"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:35
+msgid "See all users tasks"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:41
+msgid "Task type"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:42 appli/templates/v2/jobs/show.html:36
+msgid "Owner"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:43 appli/templates/v2/jobs/show.html:40
+msgid "State"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:44 appli/templates/v2/jobs/show.html:53
+msgid "Step"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:46 appli/templates/v2/jobs/show.html:61
+msgid "Message"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:47
+msgid "Creation date"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:48
+msgid "Last update"
+msgstr ""
+
+#: appli/templates/v2/jobs/listall.html:56
+msgid "Task"
+msgstr ""
+
+#: appli/templates/v2/jobs/monitor.html:6
+msgid " WARNING : this is an asynchronous process."
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:12
+msgid "Clean task data"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:15
+msgid "Back to tasks list"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:21
+msgid ""
+"This task has errors. Check the error messages below, fix these errors, "
+"go back to your project and restart\n"
+"        your job."
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:28
+msgid "Task ID"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:32
+msgid "Class"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:43
+msgid "Go"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:46
+msgid "Force restart"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:57
+msgid "Progress"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:69
+msgid "Hide"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:69
+msgid "internal details"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:71
+msgid "Input Parameters"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:75
+msgid "Question Data"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:79
+msgid "Answer Data"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:83
+msgid "View log file"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:85
+msgid "View custom details"
 msgstr ""
 
 #: appli/templates/v2/macros/macros.html:38
@@ -774,12 +1536,12 @@ msgstr ""
 msgid ""
 "**Information for creation**\n"
 "Instrument name:\n"
-"URL of the description in the BODC L22 vocabulary http://vocab.nerc.ac.uk/"
-"collection/L22/current/ :\n"
+"URL of the description in the BODC L22 vocabulary "
+"http://vocab.nerc.ac.uk/collection/L22/current/ :\n"
 "\n"
 "**Reason for creation**\n"
-"Explain how widely the instrument is distributed and why it should be added to "
-"the standard list.\n"
+"Explain how widely the instrument is distributed and why it should be "
+"added to the standard list.\n"
 msgstr ""
 
 #: appli/templates/v2/mail/_mailto.html:13
@@ -810,62 +1572,155 @@ msgstr ""
 msgid "ERROR:"
 msgstr ""
 
-#: appli/templates/v2/partials/_alertbox.html:14
+#: appli/templates/v2/partials/_alertbox.html:10
 msgid "Close"
 msgstr ""
 
-#: appli/templates/v2/partials/_alertbox.html:22
+#: appli/templates/v2/partials/_alertbox.html:19
 #: appli/templates/v2/project/projectsettings.html:176
 msgid "Cancel"
 msgstr ""
 
-#: appli/templates/v2/partials/_alertbox.html:22
+#: appli/templates/v2/partials/_alertbox.html:19
 msgid "Ok"
 msgstr ""
 
-#: appli/templates/v2/partials/_footer.html:16
+#: appli/templates/v2/partials/_error.html:4
+msgid "Error"
+msgstr ""
+
+#: appli/templates/v2/partials/_error.html:6
+msgid "error"
+msgstr ""
+
+#: appli/templates/v2/partials/_footer.html:17
+#: appli/templates/v2/partials/_navbar.html:28
+#: appli/templates/v2/project/_fullstats.html:71
 msgid "About"
 msgstr ""
 
-#: appli/templates/v2/partials/_footer.html:16
+#: appli/templates/v2/partials/_footer.html:17
 msgid "Privacy"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:6
-msgid "home"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:12
-msgid "settings"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:13
-#: appli/templates/v2/project/projectsettings.html:44
-msgid "new project"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:13
-msgid "Projects list"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:67
+#: appli/templates/v2/partials/_navbar.html:2
 msgid "projects list"
 msgstr ""
 
-#: appli/templates/v2/partials/_topsitebar.html:12
+#: appli/templates/v2/partials/_navbar.html:12
+msgid "Predict"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:21
+msgid "Export"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:24
+msgid "Settings"
+msgstr ""
+
+#: appli/templates/v2/partials/_topsitebar.html:11
+msgid "search project"
+msgstr ""
+
+#: appli/templates/v2/partials/_topsitebar.html:40
 msgid "log in"
 msgstr ""
 
-#: appli/templates/v2/partials/_topsitebar.html:23
+#: appli/templates/v2/partials/_topsitebar.html:51
 msgid "profile"
 msgstr ""
 
-#: appli/templates/v2/partials/_topsitebar.html:24
+#: appli/templates/v2/partials/_topsitebar.html:52
 msgid "help"
 msgstr ""
 
-#: appli/templates/v2/partials/_topsitebar.html:27
+#: appli/templates/v2/partials/_topsitebar.html:55
 msgid "logout"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:8
+msgid "Taxon"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:8
+msgid "sort on"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:8
+msgid "name"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:8
+msgid "lineage"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:17
+msgid "Total"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:49
+#: appli/templates/v2/project/_fullstats.html:83
+#: appli/templates/v2/project/_fullstats.html:96
+msgid "show all rows"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:49
+#: appli/templates/v2/project/_fullstats.html:83
+#: appli/templates/v2/project/_fullstats.html:96
+msgid "hide rows"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:58
+msgid "Used taxa"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:67
+msgid "About Project"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:81
+msgid "Users"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:84
+msgid "User"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:84
+#: appli/templates/v2/project/projectsettings.html:7
+#: appli/templates/v2/project/projectsettings.html:146
+msgid "Privilege"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:84
+msgid "number of actions"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:84
+msgid "last annotation date"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:94
+msgid "Samples"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:97
+#: appli/templates/v2/project/_listcontainer.html:23
+msgid "Please wait"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:97
+#: appli/templates/v2/project/_listcontainer.html:23
+msgid "Data loaded. Displaying..."
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:98
+msgid "Load samples stats"
+msgstr ""
+
+#: appli/templates/v2/project/_fullstats.html:99
+msgid "go to classification filtered on selected samples"
 msgstr ""
 
 #: appli/templates/v2/project/_headerimport.html:5
@@ -892,8 +1747,12 @@ msgstr ""
 msgid "Add to privileges"
 msgstr ""
 
-#: appli/templates/v2/project/_headerimport.html:7
-msgid "Import"
+#: appli/templates/v2/project/_headerimport.html:8
+msgid "expand importzone"
+msgstr ""
+
+#: appli/templates/v2/project/_headerimport.html:8
+msgid "shrink importzone"
 msgstr ""
 
 #: appli/templates/v2/project/_headerlist.html:3
@@ -942,22 +1801,26 @@ msgstr ""
 msgid "extra"
 msgstr ""
 
-#: appli/templates/v2/project/_listcontainer.html:23
-msgid "please wait"
+#: appli/templates/v2/project/_stats.html:27
+msgid "Privileges"
 msgstr ""
 
-#: appli/templates/v2/project/_stats.html:15
-msgid "Project_about"
+#: appli/templates/v2/project/_stats.html:54
+msgid "Classification summary"
+msgstr ""
+
+#: appli/templates/v2/project/_stats.html:59
+#: appli/templates/v2/project/macrostats.html:14
+msgid "unclassified"
+msgstr ""
+
+#: appli/templates/v2/project/_stats.html:64
+msgid "about"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:5
 #: appli/templates/v2/project/projectsettings.html:145
 msgid "Name"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:7
-#: appli/templates/v2/project/projectsettings.html:146
-msgid "Privilege"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:12
@@ -966,7 +1829,11 @@ msgid "Contact"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:15
-msgid "Remove"
+msgid "remove"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:15
+msgid "restore"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:16
@@ -990,14 +1857,6 @@ msgid "How to create a project"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:37
-msgid "this field is required"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:37
-msgid "this field is invalid"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:37
 msgid "imported"
 msgstr ""
 
@@ -1005,8 +1864,8 @@ msgstr ""
 msgid "project"
 msgstr ""
 
-#: appli/templates/v2/project/projectsettings.html:48
-msgid "Title"
+#: appli/templates/v2/project/projectsettings.html:44
+msgid "new project"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:49
@@ -1021,32 +1880,12 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: appli/templates/v2/project/projectsettings.html:71
-msgid "Status"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:74
-msgid "Annotate"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:74
-msgid "Explore Only"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:74
-msgid "Annotate No Prediction"
-msgstr ""
-
 #: appli/templates/v2/project/projectsettings.html:81
 msgid "Visible for all visitors"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:81
 msgid "only validated objects"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:96
-msgid "License"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:109
@@ -1101,9 +1940,37 @@ msgstr ""
 msgid "sign in"
 msgstr ""
 
-#: appli/templates/v2/security/_login.html:27
-msgid "Already authenticated. page should redirect to projects list"
-msgstr ""
-
 #~ msgid "Restricted access"
 #~ msgstr "Accès restreint"
+
+#~ msgid ""
+#~ "MMarc Picheral and Jean-Olivier Irisson:"
+#~ " specifications and project supervision"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Amanda Elineau, Corinne Desnos, Laetitia "
+#~ "Jalabert and the COMPLEx team of "
+#~ "the <a href='https://lov.imev-mer.fr/'>Laboratoire"
+#~ " d'Océanographie de Villefranche</a> (LOV): "
+#~ "testing and feedback"
+#~ msgstr ""
+
+#~ msgid "home"
+#~ msgstr ""
+
+#~ msgid "settings"
+#~ msgstr ""
+
+#~ msgid "Projects list"
+#~ msgstr ""
+
+#~ msgid "please wait"
+#~ msgstr ""
+
+#~ msgid "Project_about"
+#~ msgstr ""
+
+#~ msgid "Remove"
+#~ msgstr ""
+

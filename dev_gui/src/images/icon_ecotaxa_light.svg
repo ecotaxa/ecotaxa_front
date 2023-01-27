@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32.18642"
+   height="29.597118"
+   viewBox="0 0 30.174768 27.747299"
+   id="svg2"
+   version="1.1"
+   sodipodi:docname="icon_ecotaxa_light.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2560"
+     inkscape:window-height="1403"
+     id="namedview4695"
+     showgrid="false"
+     inkscape:zoom="7.9737492"
+     inkscape:cx="-6.7943922"
+     inkscape:cy="14.798559"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2"
+     inkscape:snap-text-baseline="true" />
+  <defs
+     id="defs4" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="Layer 1">
+    <rect
+       style="fill:#244d7c;fill-opacity:1;stroke:#244d7c;stroke-width:2.53124997;stroke-opacity:1;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect828"
+       width="31.627216"
+       height="29.510897"
+       x="-0.3527199"
+       y="-1.0581598"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"
+       inkscape:export-filename="/home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front/appli/static/favicon.ico.png" />
+  </g>
+  <g
+     transform="matrix(1.6813953,0,0,1.6813953,-102.00999,-22.07053)"
+     id="text4146"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:110.00000238%;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+  <path
+     id="path4236"
+     d="M 16.536178,14.013993 H 8.2407768 V 0.55000007 H 29.446274"
+     style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#eaeaea;stroke-width:1.10000014;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Avenir Next';-inkscape-font-specification:'Avenir Next';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#f9f9f9;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+     x="12.893536"
+     y="27.747299"
+     id="text4222"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:31.85595703px;line-height:1.10000002;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#f9f9f9;"
+       id="tspan4224"
+       x="12.893536"
+       y="27.747299">E</tspan></text>
+  <path
+     style="fill:none;fill-rule:evenodd;stroke:#eaeaea;stroke-width:1.10000014;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="M 8.0749519,6.2388441 H 0"
+     id="path4234" />
+</svg>

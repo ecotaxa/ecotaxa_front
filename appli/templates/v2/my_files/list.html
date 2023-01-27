@@ -1,0 +1,9 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/my_files/_macros.html" import dir_list  %}
+
+{%block body%}
+<div class="container mx-auto px-4 block" data-block="my_files">
+  List of my files
+  {{ dir_list(dirlist) }}
+  </div>
+  {%endblock%}

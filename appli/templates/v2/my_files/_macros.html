@@ -1,0 +1,13 @@
+{% macro dir_list(entries) -%}
+{{entries}}
+{% if entries is iterable %}
+<ul>
+{% for entry in entries%}
+<li>
+{{ entry.path }}
+  {{ dir_list(entry.entries)}}
+</li>
+{%endfor%}
+</ul> {% else%} {{ entries }}
+{%endif%}
+{%-endmacro %}

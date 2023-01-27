@@ -1,0 +1,88 @@
+{% extends "./v2/layout.html" %}
+
+{% set state2label = dict({'P': 'Pending',
+'E': 'Error',
+'R': 'Running',
+'A': 'Question',
+'F': 'Finished'}) %}
+{% block body %}
+<div class="container mx-auto mt-8">
+<div class="py-8">
+    <a href="/gui/job/clean/{{ job.id }}">
+      <button class="button is-danger inverse">{{_('Clean task data')}}</button>
+    </a>
+    <a href="/gui/jobs/listall">
+      <button class="button ml-4 ">{{_('Back to tasks list')}}</button>
+    </a>
+  </div>
+
+  {% if job.taskstate=="Error" %}
+    <div class="alert alert-danger">
+      <p>{{_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart
+        your job.')}}</p>
+    </div>
+  {% endif %}
+
+  <table class="dataTable-table jobs table-condensed">
+   <tr>
+      <th>{{_('Task ID')}}</th>
+      <td>{{ job.id }}</td>
+    </tr>
+    <tr>
+      <th >{{_('Class')}}</th>
+      <td>Task{{ job.type }}</td>
+    </tr>
+    <tr>
+      <th>{{_('Owner')}}</th>
+      <td><a href="mailto:{{ owner.email }}">{{ owner.name }}</a></td>
+    </tr>
+    <tr>
+      <th>{{_('State')}}</th>
+      <td>{{ state2label[job.state]|safe }}
+        {% if job.state=="Q" %}
+          <a href="/gui/job/question/{{ job.id }}"><span class="label label-warning">{{_('Go')}}</span></a>
+        {% elif job.state in ("E", "R") %}
+          <a href="/gui/job/forcerestart/{{ job.id }}">
+            <button class="btn btn-danger btn-sm">{{_('Force restart')}}</button>
+          </a>
+        {% endif %}
+
+      </td>
+    </tr>
+    <tr>
+      <th>{{_('Step')}}</th>
+      <td>{{ job.taskstep }}</td>
+    </tr>
+    <tr>
+      <th>{{_('Progress')}}</th>
+      <td>{{ job.progress_pct }}%</td>
+    </tr>
+    <tr>
+      <th>{{_('Message')}}</th>
+      <td>{{ job.progress_msg }}
+        <ul>
+          {% for e in job.errors %}
+            <li>{{ e }}</li>
+          {% endfor %}
+        </ul>
+      </td>
+    </tr><tr><td colspan="2" class="ml-2 text-left ""><a class="font-btn triggershow" data-action="toggle"  data-target=".collapse" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_('internal details')}}</a></td></tr></tbody><tbody >
+    <tr class="collapse hide">
+      <th>{{_('Input Parameters')}}</th>
+      <td>{{ job.params|string }}</td>
+    </tr>
+    <tr class="collapse hide">
+      <th>{{_('Question Data')}}</th>
+      <td>{{ job.questiondata|string }}</td>
+    </tr>
+    <tr class="collapse hide">
+      <th>{{_('Answer Data')}}</th>
+      <td>{{ job.answerdata|string }}</td>
+    </tr></tbody>
+  </table>
+  <details class="overflow-hidden px-2 mb-24"><summary class="text-lg font-btn font-semibold py-0.5 is-default inverse" data-action="request" data-href="?log=Y">{{_('View log file')}}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>
+
+  {% if customdetails %}<details><summary class="text-lg font-btn font-semibold py-0.5 is-info inverse" data-action="request" data-href="?customdetails=Y">{{_('View custom details') }}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>{% endif %}
+
+</div>
+{% endblock %}

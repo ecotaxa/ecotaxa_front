@@ -1,0 +1,60 @@
+{% extends "./v2/help/_layout.html" %}
+{% block article %}
+<article id="help-editproject">
+    <h2 class="help-title">{{_('Project settings')}} </h2>
+  <details id="help_proj_description"><summary>{{_('description')}}</summary><div>{{ _("A short paragraph describing the dataset, to make it discoverable by others in EcoTaxa and elsewhere.
+    It should indicate which organisms are targeted (e.g. mesozooplankton), where (e.g. Bering Sea),
+    when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed with a ZooScan) they were
+    collected,
+    the scientific program that motivated the work and who ran it (e.g. SCOR program coordinated by the
+    Laboratoire
+    d'Océanographie de Villefranche).") | safe}}</div>
+  </details>
+  <details id="help_comments" ><summary>{{_('Comments')}}</summary><div>{{_('Any technical, practical details that need to be shared with other users able to access this target_proj.')}}</div>
+  </details>
+  <details id="help_cnn_network_id" ><summary>{{_('Deep feature extractor')}}</summary><div>{{ _('SCN Network used for prediction, if you change it, existing features computed with this network will be
+    erased.
+    <br>New features will be recomputed during the next automatic classification.') | safe }} </div>
+  </details>
+  <details id="help_initclassiflist" ><summary>{{_('Definition of preset for manual sorting')}}</summary><div>
+  {{_('The PRESET tool permits to create a pre-defined list of categories for the sorting of the images from
+    the project')}}
+    <ul>
+      <li>{{_('The list can be directly copied from another project (use Pick from other projects)')}}
+      <li>{{_('New categories can be added using the auto completion function')}}    </ul></div></details>
+    <details id="help_popoverfieldlist"><summary>{{_('Presets')}}</summary><div>
+        {{_('Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
+        <br>Example : depth_min=minimum depth [m] where')| safe }}
+        <ul>
+          <li>{{_('depth_min is the variable from the imported TSV file')}}</li>
+          <li>{{_('minimum depth [m] is the displayed name') }}</li>
+        </ul>
+        {{_('Notes :')}}
+        <ul>
+          <li>{{_('the table can be copied from another project (opened in a different tab)')}}</li>
+          <li>{{_('only LOWER CASE')}}</li>
+        </ul>
+        Available fields :
+          {% for x in maplist %}{{ x }}, {% endfor %}
+</div></details>
+{% if possible_licenses is iterable %}
+<details id="help_proj_license"><summary>{{_('Licenses')}}</summary>
+  <div>
+{% for k,v in possible_licenses %}
+<details><summary>{{k}}</summary><div> {{ v | safe }} </div></details>
+{% endfor %}
+</div>
+</details>
+{% endif %}
+<details  id="help_project_privileges"><summary>{{_('The roles in short:')}}</summary>
+  <ul>
+    <li>{{_('Viewers can view the project even when it is private; the project is listed in their project
+      list.')}}
+    </li>
+    <li>{{_('Annotators can classify objects.')}}</li>
+    <li>{{ _('Managers can import and delete data, as well as change project settings.')}}</li>
+    <li>{{_("The contact person is a Manager, displayed in the project table and serving as the contact point for other users and EcoTaxa's managers.")}}
+    </li>
+  </ul></details>
+  </article>
+  {% endblock %}

@@ -1,0 +1,10 @@
+{%-macro stepper(steps, active)-%}
+{% set steps = [{"name":"upload"},{"name":"import"},{"name":"classify"}]%}
+<div id="stepper" class="stepper-wrapper">
+  {%for step in steps %}
+  <div class="stepper-item {{'completed' if loop.index <active else 'active' if loop.index == active else 'next'}} ">
+    <div class="step-counter">{{loop.index}}</div>
+    <div class="step-name">{{step.name}}</div>
+  </div>{%endfor%}
+</div>
+{%-endmacro-%}
