@@ -8,3 +8,5 @@ Please read the documentation.
 
 To start, provided that you have a proper running back-end, you must create a short file `config/config.cfg`.
 You can use `appli/config-model.cfg` as template.
+
+This project is tested with BrowserStack.
