@@ -15,13 +15,13 @@
 {% endfor%}
 {%- endmacro %}
 <nav id="nav-help">
-  <a href="#" data-action="request" data-what="help" data-file="_help_summary" data-title="{{_('Help summary')}}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-4 ml-4 fill-gold-200" viewBox="0 0 20 20">
+  <a href="#" data-action="request" data-what="help" data-file="_help_summary" data-title="{{_('Help summary')}}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-4 ml-4 fill-help-200" viewBox="0 0 20 20">
     <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
   </svg></a></nav>
 <div id="breadscrumb-help">{{ breadscrumb }}</div>
-<div id="main-help" class="prose-invert prose-xs md:prose-sm lg:prose-md prose-stone selection:bg-gold-100 selection:text-gold-900 js js-observer">
+<div id="main-help" class="modal-content"><div class=" py-8 pr-16 pl-12  mb-12 prose-invert prose-xs md:prose-sm lg:prose-md prose-stone selection:bg-help-100 selection:text-help-900">
   {% endif %}
   {% block article %}{% endblock %}
   {% if not partial%}
-</div>
+</div></div>
   {% endif %}

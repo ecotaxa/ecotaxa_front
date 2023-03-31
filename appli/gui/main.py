@@ -3,20 +3,19 @@
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import os
 from typing import List
-from flask import request, url_for, render_template
+from flask import request, url_for, render_template, flash, redirect
 from flask_security import login_required
 from flask_login import current_user
-from appli import app, gvg, gvp
-
+from appli import app, gvg, gvp, constants
+from appli.gui.commontools import is_partial_request
 from to_back.ecotaxa_cli_py.exceptions import ApiException
 from werkzeug.exceptions import HTTPException
 from flask_babel import _
 from appli.gui.staticlistes import py_messages
 
-import appli.gui.jobs.main
-
 
 @app.route("/gui")
+@app.route("/gui/")
 @app.route("/gui/home")
 @app.route("/gui/index")
 def gui_index():
@@ -24,26 +23,78 @@ def gui_index():
 
     wstats = webstats(app)
     if current_user.is_authenticated:
-        filename = "index"
-        bg = False
+        return gui_prj()
     else:
-        filename = "login"
-        bg = True
-    return RenderTemplate(filename, webstats=wstats, bg=bg)
+        return gui_login()
 
 
-@app.route("/gui/login")
-@app.route("/gui/login/")
+@app.route("/gui/login", methods=["GET", "POST"])
+@app.route("/gui/login/", methods=["GET", "POST"])
 def gui_login() -> str:
     # if current_user.is_authenticated:
     #    return redirect("/gui/prj")
-    from appli.gui.commontools import RenderTemplate, webstats
+    from appli.gui.commontools import webstats
 
     wstats = webstats(app)
     return render_template("v2/login.html", webstats=wstats, bg=True)
 
 
-@app.route("/gui/about")
+@app.route(
+    "/gui/register", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
+)
+@app.route(
+    "/gui/register/", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
+)
+@app.route("/gui/register/<instid>", defaults={"instid": None}, methods=["GET", "POST"])
+@app.route("/gui/register/<instid>/<token>", methods=["GET", "POST"])
+def gui_register(instid=None, token=None) -> str:
+    # if current_user.is_authenticated:
+    # return redirect("/gui/prj")
+    err = None
+    email = None
+    sentmail = gvg("sentmail", None)
+    if instid == None and token == None:
+        createaccount = False
+        if request.method == "POST":
+            # validate email
+            email = gvp("register_email")
+            from appli.gui.users.commontools import send_mail, validation_message
+
+            msg = validation_message(email)
+            err = send_mail(email, msg)
+            if err == None:
+                return redirect(url_for("gui_register", sentmail=email))
+            else:
+                flash(err, "error")
+                return redirect(url_for("gui_register"))
+    elif instid != None and token != None:
+        createaccount = True
+        if request.method == "POST":
+            from appli.gui.users.commontools import user_create, ACCOUNT_USER_CREATE
+
+            [redir, err] = user_create(-1, isfrom=None)
+            if err == None:
+                return redirect(url_for(redir))
+
+        elif token != None:
+            from appli.gui.users.commontools import account_page, ACCOUNT_USER_CREATE
+
+            return account_page(
+                action=ACCOUNT_USER_CREATE,
+                usrid=-1,
+                isfrom=None,
+                template="v2/register.html",
+                token=token,
+            )
+
+    return render_template(
+        "v2/register.html",
+        bg=True,
+        sentmail=sentmail,
+        createaccount=createaccount,
+    )
+
+
 @app.route("/gui/about/")
 def gui_about() -> str:
     from appli.gui.staticlistes import sponsors
@@ -73,17 +124,21 @@ def gui_prj(listall: bool = False) -> str:
 
 @app.route("/gui/prjlist/", methods=["GET"])
 @login_required
-def gui_prjlist(listall: bool = False) -> str:
+def gui_prjlist() -> str:
     # gzip not really necessary - jsonifiy with separators
     from flask import make_response
     import json
     from appli.gui.project.projects_list import projects_list
 
+    listall = gvg("listall", False)
+    print("listalll-----------------")
+    print(listall)
     typeimport = gvg("typeimport")
     gz = gvg("gzip")
-
+    gz = True
     content = json.dumps(
-        projects_list(listall=listall, typeimport=typeimport), separators=[",", ":"]
+        projects_list(listall=listall, typeimport=typeimport),
+        separators=[",", ":"],
     ).encode("utf-8")
     encoding = "utf-8"
     if gz:
@@ -100,15 +155,13 @@ def gui_prjlist(listall: bool = False) -> str:
     return response
 
 
-@app.route("/gui/prj/importsettings", methods=["GET", "POST"])
+@app.route("/gui/prj/importsettings", methods=["GET"])
 @login_required
 def gui_importsettings(prjid: int = 0) -> str:
     typeimport = gvg("typeimport")
     from appli.gui.project.projects_list import projects_list_page
 
-    partial = request.headers.get("X-Requested-With") and (
-        request.headers.get("X-Requested-With") == "XMLHttpRequest"
-    )
+    partial = is_partial_request(request)
     return projects_list_page(listall=False, partial=partial, typeimport=typeimport)
 
 
@@ -128,7 +181,6 @@ def gui_prj_edit(prjid):
     return prj_edit(prjid)
 
 
-@app.route("/gui/prj/listall", methods=["GET"])
 @app.route("/gui/prj/listall/", methods=["GET"])
 @login_required
 def gui_prj_all():
@@ -141,9 +193,7 @@ def gui_prj_about(prjid):
     from appli.gui.project.project_stats import prj_stats
 
     params = dict({"limit": "5000"})
-    partial = request.headers.get("X-Requested-With") and (
-        request.headers.get("X-Requested-With") == "XMLHttpRequest"
-    )
+    partial = is_partial_request(request)
 
     return prj_stats(prjid, partial=partial, params=params)
 
@@ -155,9 +205,7 @@ def gui_prj_aboutsamples(prjid):
     import json
     from appli.gui.project.project_stats import prj_samples_stats
 
-    partial = request.headers.get("X-Requested-With") and (
-        request.headers.get("X-Requested-With") == "XMLHttpRequest"
-    )
+    partial = is_partial_request(request)
     format = gvg("format", "json")
     content = prj_samples_stats(prjid, partial=partial, format=format)
     if format == "json":
@@ -189,9 +237,7 @@ def gui_help(filename):
             title="404",
             message=py_messages["notfound"] + filename,
         )
-    partial = request.headers.get("X-Requested-With") and (
-        request.headers.get("X-Requested-With") == "XMLHttpRequest"
-    )
+    partial = is_partial_request(request)
     return render_template("." + filename, partial=partial)
 
 
@@ -204,6 +250,11 @@ def gui_alert():
     inverse = gvp("inverse")
     dismissible = gvp("dismissible")
     codemessage = gvp("codemessage")
+    is_safe = gvp("is_safe")
+    if is_safe:
+        is_safe = True
+    else:
+        is_safe = False
     if inverse == "true":
         inverse = True
     else:
@@ -222,6 +273,7 @@ def gui_alert():
         codemessage=codemessage,
         inverse=inverse,
         dismissible=dismissible,
+        is_safe=is_safe,
         extra=gvp("extra"),
         partial=True,
     )
@@ -232,6 +284,7 @@ def gui_alert():
 def gui_other(filename):
     from markupsafe import escape
 
+    partial = is_partial_request(request)
     filename = escape(filename)
     filename = filename.replace("/", "")
     if os.path.isfile("v2/" + filename):
@@ -240,11 +293,13 @@ def gui_other(filename):
         return render_template("v2/_" + filename)
     else:
         return render_template(
-            "v2/error.html", title="404", message=py_messages["page404"]
+            "v2/error.html",
+            title="404",
+            message=py_messages["page404"],
+            partial=partial,
         )
 
 
-# @app.route("/gui/adminstream/", methods=["GET", "POST"])
 @app.route("/gui/jobssummary/", methods=["GET", "POST"])
 @login_required
 def gui_stream():
@@ -254,6 +309,17 @@ def gui_stream():
         "./v2/partials/_notifications.html", notifs=jobs_summary_data()
     )
 
+
+# @app.route("/gui/adminstream/", methods=["GET", "POST"])
+@app.route("/gui/colors/", methods=["GET"])
+def gui_graphicpalette():
+    return render_template("./v2/palette.html")
+
+
+import appli.gui.project.main
+import appli.gui.jobs.main
+import appli.gui.me.main
+import appli.gui.admin.main
 
 # utility display functions for jinja template
 @app.template_filter("urlencode")
@@ -275,6 +341,11 @@ def utility_processor():
 
         if message in py_messages:
             return py_messages[message]
+        else:
+            from appli.gui.jobs.staticlistes import py_messages
+
+            if message in py_messages["messages"]:
+                return py_messages["messages"][message]
         if is_safe:
             return message
         return type
@@ -283,6 +354,9 @@ def utility_processor():
         import uuid
 
         return str(uuid.uuid1())
+
+    def cap_words(str):
+        return str.title()
 
     def def_language():
         from appli import get_locale
@@ -315,6 +389,7 @@ def utility_processor():
         breadcrumbs=gui_breadcrumbs,
         g_status=g_status,
         def_language=def_language,
+        cap_words=cap_words,
     )
 
 
@@ -325,12 +400,10 @@ def handle_exception(e):
     if isinstance(e, HTTPException):
         return e
     # non-HTTP exceptions only
-    partial = request.headers.get("X-Requested-With") and (
-        request.headers.get("X-Requested-With") == "XMLHttpRequest"
-    )
+    partial = is_partial_request(request)
     return (
         render_template(
-            "./v2/error.html",
+            "/v2/error.html",
             title=e.status,
             partial=partial,
             message=e.reason,
@@ -338,3 +411,19 @@ def handle_exception(e):
         ),
         e.status,
     )
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return handle_exception(e)
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    return handle_exception(e)
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    app.logger.exception(e)
+    return handle_exception(e)

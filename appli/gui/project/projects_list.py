@@ -13,7 +13,7 @@ from flask import session, request, render_template
 from flask_login import current_user
 from appli.utils import ApiClient
 
-from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi, AuthentificationApi
 from to_back.ecotaxa_cli_py.models import (
     ProjectModel,
     UserModelWithRights,
@@ -52,18 +52,9 @@ def _get_projects_filters() -> dict:
     from appli import gvg, gvgm
 
     filt_title = gvg("filt_title", "")
-    # session["prjfilt_title"] = filt_title
-    filt_instrum = gvgm("filt_instrum")  # Get instrument from posted
-    # session["prjfilt_instrum"] = "|".join(filt_instrum)
-    filt_subset = gvg("filt_subset", "")  # Get subset filter from posted
-    # session["prjfilt_subset"] = filt_subset
-    # if filt_subset == "":
-    #    sess_filt_instrum = session.get("prjfilt_instrum", "")
-    #    if sess_filt_instrum:
-    #        filt_instrum = sess_filt_instrum.split("|")
-    #    else:
-    #        filt_instrum = []
-    #    filt_subset = session.get("prjfilt_subset", "")
+    filt_instrum = gvgm("filt_instrum")
+    filt_subset = gvg("filt_subset", "")
+
     return dict(
         {
             "title": filt_title,
@@ -73,100 +64,122 @@ def _get_projects_filters() -> dict:
     )
 
 
-def _prjs_list(listall: bool = False, filt: dict = None) -> List[ProjectModel]:
-    # remove filts because of session - must be revised
+def _prjs_list_api(
+    listall: bool = False, filt: dict = {}, for_managing: bool = False
+) -> list:
+    import requests
 
-    prjs: List[ProjectModel] = []
-    qry_filt_instrum = [""] if len(filt["instrum"]) == 0 else filt["instrum"]
+    prjs = list([])
+    qry_filt_instrum = (
+        [""]
+        if ("instrum" not in filt or len(filt["instrum"]) == 0)
+        else filt["instrum"]
+    )
     for an_instrument in qry_filt_instrum:
-        with ApiClient(ProjectsApi, request) as apiProj:
-            prjs.extend(
-                apiProj.search_projects(
-                    not_granted=listall,
-                    title_filter=filt["title"],
-                    instrument_filter=an_instrument,
-                    filter_subset=(filt["subset"] == "Y"),
-                )
-            )
-    # Sort for consistency - removed to test
-    prjs.sort(key=lambda prj: prj.title.strip().lower())
+        payload = dict(
+            {
+                "not_granted": listall,
+                "title_filter": filt["title"],
+                "instrument_filter": an_instrument,
+                "filter_subset": (filt["subset"] == "Y"),
+                "for_managing": for_managing,
+            }
+        )
+        with ApiClient(ProjectsApi, request) as apiproj:
+            url = (
+                apiproj.api_client.configuration.host + "/projects/search/"
+            )  # endpoint is nowhere available as a const :(
+            token = apiproj.api_client.configuration.access_token
+            headers = {
+                "Authorization": "Bearer " + token,
+            }
+        r = requests.get(url, headers=headers, params=payload)
+        if r.status_code == 200:
+            prjs.extend(r.json())
+        else:
+            r.raise_for_status()
     return prjs
 
 
 def projects_list(
     listall: bool = False,
     partial: bool = False,
+    for_managing: bool = False,
+    selection="list",
+    filt=None,
     typeimport: str = "",
 ) -> str:
+    import datetime
     from appli.project.main import _manager_mail
 
     # projects ids and rights for current_user
     if not current_user.is_authenticated:
-        return json_dumps(
-            dict(
-                {
-                    "error": True,
-                    "status": 403,
-                    "title": "403",
-                    "message": py_messages["restrictedaccess"],
-                }
-            )
+        return dict(
+            {
+                "error": True,
+                "status": 403,
+                "title": "403",
+                "message": py_messages["restrictedaccess"],
+            }
         )
 
-    # projects list
-    # action format dict {name: str = '',type: str =''}
     can_access = {}
-    filt = _get_projects_filters()
+    if filt == None:
+        filt = _get_projects_filters()
     prjs = []
-    has_proj = True
+    hasproj = True
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
     isadmin = user and (2 in user.can_do)
-
     last_used_projects = list(p.projid for p in current_user.last_used_projects)
     if typeimport != "":
         listall = False
     if typeimport == "taxo":
-        prjs = _prj_import_taxo()
+        prjs = _prj_import_taxo_api()
     else:
-        # get access granted projects list
-        prjs = _prjs_list(False, filt)
+        prjs = _prjs_list_api(listall, filt, for_managing=for_managing)
         if len(prjs) == 0 and listall == False:
-            has_proj = False
+            hasproj = False
             listall = True
             # if listall add not granted projects
-            if listall == True:
-                prjs = prjs + _prjs_list(True, filt)
-        lastprjs = list(filter(lambda p: p.projid in last_used_projects, prjs))
+            prjs = _prjs_list_api(True, filt, for_managing=for_managing)
+        now = datetime.datetime.now()
+        lastprjs = list(filter(lambda p: p["projid"] in last_used_projects, prjs))
         # separate last_used_projects from pjs
-        if len(last_used_projects):
-            prjs = list(set(prjs) - set(lastprjs))
+        if len(lastprjs):
+            prjs = list(filter(lambda p: p["projid"] not in last_used_projects, prjs))
             prjs = lastprjs + prjs
         if typeimport == "":
+
             # reformat  current_user privileges with projects id list -usage in  main projects list
             rights = list_privileges()
             for k, v in rights.items():
                 can_access.update({v: []})
                 for prj in prjs:
-                    for u in getattr(prj, k):
-                        if current_user.id == u.id:
-                            can_access[v].append(prj.projid)
+                    for u in prj[k]:
+                        if current_user.id == u["id"]:
+                            can_access[v].append(prj["projid"])
 
-    from appli.gui.project.projects_list_interface import (
+    from appli.gui.project.projects_list_interface_json import (
         project_table_columns,
         render_for_js,
     )
 
-    columns = project_table_columns(typeimport)
+    columns = project_table_columns(typeimport, selection=selection)
     tabledef = dict(
         {
             "columns": columns,
             "data": render_for_js(prjs, columns, can_access, isadmin),
-            "last_used": last_used_projects,
-            "has_proj": has_proj,
         }
     )
+    if typeimport == "":
+        tabledef.update(
+            {
+                "lastused": last_used_projects,
+                "hasproj": hasproj,
+            }
+        )
     return tabledef
 
 
@@ -189,20 +202,16 @@ def projects_list_page(
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
-    CanCreate = user and (1 in user.can_do)
+    # no more project creator
+    if user.id:
+        CanCreate = True
+    else:
+        CanCreate = False
     isadmin = user and (2 in user.can_do)
 
-    maildata = dict(
-        {
-            # mail_instrument not in use
-            #        "mail_instrument": _get_mailto_instrument(),
-            "mailto_create_right": _get_mailto_manager(
-                request, type="ask_for_creation_right"
-            ),
-            "_manager_mail": _manager_mail,
-        }
-    )
+    from appli.gui.project.projects_list_interface_json import project_table_columns
 
+    columns = project_table_columns(typeimport)
     if typeimport != "":
         listall = False
 
@@ -215,6 +224,8 @@ def projects_list_page(
     else:
         template = "v2/project/_listcontainer.html"
         experimental = ""
+    lastprjs = list([p.projid for p in current_user.last_used_projects])
+    import json
 
     return render_template(
         template,
@@ -222,33 +233,55 @@ def projects_list_page(
         listall=listall,
         partial=partial,
         isadmin=isadmin,
-        maildata=maildata,
+        columns=json.dumps(columns),
+        last_used_projects=lastprjs,
         typeimport=typeimport,
         experimental=experimental,
     )
 
 
 # new import taxo ( no more separate ids and text)
-def _prj_import_taxo(prjid: int = 0) -> list:
-    from markupsafe import escape
+def _prj_import_taxo_api(prjid: int = 0, filt: dict = None) -> list:
+    import requests
 
-    # Query accessible projects
-    with ApiClient(ProjectsApi, request) as api:
-        prjs: List[ProjectModel] = api.search_projects(
-            also_others=False, filter_subset=False
-        )
-    # And their statistics
-    prj_ids = " ".join([str(a_prj.projid) for a_prj in prjs])
+    prjs = list([])
+    qry_filt_instrum = (
+        [""] if (filt == None or len(filt["instrum"]) == 0) else filt["instrum"]
+    )
+    for an_instrument in qry_filt_instrum:
+        with ApiClient(ProjectsApi, request) as apiproj:
+            url = (
+                apiproj.api_client.configuration.host + "/projects/search/"
+            )  # endpoint is nowhere available as a const :(
+            token = apiproj.api_client.configuration.access_token
+            headers = {
+                "Authorization": "Bearer " + token,
+                # "Content-Range": reqheaders["Content-Range"],
+            }
+            payload = dict(
+                {
+                    "not_granted": False,
+                    "instrument_filter": an_instrument,
+                    "filter_subset": False,
+                }
+            )
+            r = requests.get(url, headers=headers, params=payload)
+            if r.status_code == 200:
+                prjs.extend(r.json())
+            else:
+                r.raise_for_status()
+
+    prj_ids = " ".join([str(a_prj["projid"]) for a_prj in prjs])
     with ApiClient(ProjectsApi, request) as api:
         stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=prj_ids)
 
     # Sort for consistency
-    prjs.sort(key=lambda prj: prj.title.strip().lower())
+    prjs.sort(key=lambda prj: prj["title"].strip().lower())
     # Collect id for each taxon to show
     taxa_ids_for_all = set()
     stats_per_project = {}
     for a_prj in prjs:
-        taxa_ids_for_all.update(a_prj.init_classif_list)
+        taxa_ids_for_all.update(a_prj["init_classif_list"])
     for a_stat in stats:
         taxa_ids_for_all.update(a_stat.used_taxa)
         stats_per_project[a_stat.projid] = a_stat.used_taxa
@@ -261,24 +294,21 @@ def _prj_import_taxo(prjid: int = 0) -> list:
     prjs_pojo = []
     for a_prj in prjs:
         # exclude current prj
-        if a_prj.projid != prjid:
+        if a_prj["projid"] != prjid:
             # Inject taxon lists for display
-            prj_initclassif_list = set(a_prj.init_classif_list)
+            prj_initclassif_list = set(a_prj["init_classif_list"])
             try:
-                objtaxon = set(stats_per_project[a_prj.projid])
+                objtaxon = set(stats_per_project[a_prj["projid"]])
             except KeyError:
                 # No stats
                 objtaxon = set()
             # 'Extra' are the taxa used, but not in the classification preset
             objtaxon.difference_update(prj_initclassif_list)
-            a_prj = a_prj.to_dict()  # immutable -> to_dict()
             a_prj["preset"] = dict(
-                (t, escape(taxo_map.get(int(t))))
-                for t in prj_initclassif_list
-                if t in taxo_map
+                (t, taxo_map.get(int(t))) for t in prj_initclassif_list if t in taxo_map
             )
             a_prj["objtaxonnotinpreset"] = dict(
-                (t, escape(taxo_map.get(int(t)))) for t in objtaxon if t in taxo_map
+                (t, taxo_map.get(int(t))) for t in objtaxon if t in taxo_map
             )
             # return only prjs with taxons
             if len(a_prj["preset"]) or len(a_prj["objtaxonnotinpreset"]):

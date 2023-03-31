@@ -158,6 +158,7 @@ def prj_create() -> str:
         "v2/project/projectsettings.html",
         target_proj=None,
         members=None,
+        new=True,
         scn=scn,
         possible_licenses=possible_licenses,
     )
@@ -284,18 +285,22 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                     api.update_project(
                         project_id=target_proj.projid, project_model=target_proj
                     )
+                    if new == True:
+                        message = py_messages["projectcreated"]
+                    else:
+                        message = py_messages["projectupdated"]
                     flash(
-                        py_messages["projectupdated"] + target_proj.title,
+                        message + " " + target_proj.title,
                         "success",
                     )
-                    if new == True:
-                        # redirect to import after 3 s
-                        # redir = "/Job/Create/FileImport?p=" + str(target_proj.projid)
-                        redir = "/prj/" + str(target_proj.projid) + "?next=import"
-                    else:
-                        # redirect to classif
-                        redir = "/prj/" + str(target_proj.projid) + "?next=classif"
-                    return redirect(redir)
+                    # if new == True:
+                    # redirect to import after 3 s
+                    # redir = "/Job/Create/FileImport?p=" + str(target_proj.projid)
+                    # redir = "/prj/" + str(target_proj.projid) + "?next=import"
+                    # else:
+                    # redirect to classif
+                    # redir = "/prj/" + str(target_proj.projid) + "?next=classif"
+                    # return redirect(redir)
                 except ApiException as ae:
                     raise ApiException(
                         status=ae.status,

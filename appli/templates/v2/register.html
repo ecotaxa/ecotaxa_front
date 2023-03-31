@@ -1,0 +1,26 @@
+{%set bg = True%}
+{% extends "./v2/layout.html" %}
+{% from "./v2/macros/macros.html" import modal , alertbox with context %}
+{% block body %}
+<div class=" w-full lg:w-6/12  mx-auto mt-24 pt-8 px-2">
+  {% set modal_title = _("How to register to Ecotaxa")%}
+  {% set data = {'file':'_help_register_to_ecotaxa'} %}
+  {{ modal(id='help-registertoecotaxa',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+<div id="home-registration" class=" w-full mb-12 -mt-8 overflow-hidden border border-transparent shadow px-2 mx-auto sm:px-4">
+{% if sentmail %}
+<div class="info inverse mt-48 px-8  py-8">{{_('A validation link has been sent to')}} <strong>{{sentmail}}</strong><br>{{_('Please, check your email (and junk mail if necessary) and click the link to validate and continue your account creation process.')}}</div>
+{% elif createaccount ==True and token %}
+{% set legend =_('EcoTaxa: create an account') %}
+{% set redir ="gui/register/"%}
+{% include('v2/users/_user.html')%}
+{%  else %}
+{% include('v2/security/_register.html')%}
+{% endif%}
+  </div>
+</div>
+
+  {% if current_user.is_authenticated%}
+  <div class="w-auto mx-auto p-12 text-sm">
+  {{ _('Already authenticated. page should redirect to projects list')}}</div>
+  {% endif%}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'v2/admin/layout.html' %}
+{% block body %}
+<div class="container mx-auto">
+    <div class="alert alert-info inverse js js-alert" data-dismissible=true role="alert">You have Administrator privileges</div>
+    <div><h2 class="font-black my-4">List of Application administrators :</h2>
+    {% if admin_users is iterable %}
+    <ul>
+    {% for admin_user in admin_users %}
+    <li><strong>
+    {{ cap_words(admin_user.name) }} </strong><<a href="mailto:{{admin_user.email}}">{{admin_user.email}}</a>></li>
+    {%endfor%}
+    </ul>
+    {%endif%}
+  </div>
+</div>
+{% endblock %}

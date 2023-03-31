@@ -1,0 +1,15 @@
+{% extends 'v2/mail/layout.html'%}
+{% block body%}
+{%if usrid ==-1%}
+{{_("A new EcoTaxa account has been created.")}}
+{% else %}
+{{_("A EcoTaxa account has been modified :")}} {{ usrid}}
+{% endif%}
+{% for key,label in {"name":_('Name'),"email":_('Email'), "country":_('Country'),"organisation":_('Organisation'),"usercreationreason":_('Creation reason')}.items() %}
+<div style="padding:1rem;flex"><strong>{{label}}</strong> <span> {{ account[key]}}</span></div>
+{% endfor%}
+{{_(" Please click on the following link to validate the account.")}}
+            <a href="{{link}}" style="color:rgb(52,167,173)">{{link}}</a>
+          <p>
+{{_("Or contact the user for more information : ")}}{{account["email"]}}</p>
+{%endblock%}

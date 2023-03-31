@@ -1,0 +1,14 @@
+  <div class="form-box">
+    <label for="can_do">{{_('Roles')}} </label>
+      {% for role in roles %}
+      {% if role[0]|int in user.can_do %}
+      <span class="block ml-4">{{ role[1] }}</span>
+      {%endif%}
+      {% endfor %}
+  </div>
+  <div class="form-box">
+    <label for="last_used_projects">{{_('Last used projects')}} </label>
+    <ul class="ml-4">{% for prj in user.last_used_projects%}
+      <li><a href="/gui/prj/{{prj.projid}}" class="text-mainblue-900">{{prj.title }} [{{prj.projid}}]</a></li>
+      {%endfor %}<ul>
+  </div>

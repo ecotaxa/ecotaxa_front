@@ -1,9 +1,9 @@
 {% macro alerttype(type ="info") -%}
-{% set titles = { 'danger': _('IMPORTANT :'),  'warning': _('ATTENTION:'),  'info': _('INFORMATION:'),  'success': _('SUCCESS:'),  'error': _('ERROR:')} %}
+{% set titles = { 'danger': _('IMPORTANT :'),  'warning': _('WARNING:'),  'info': _('INFORMATION:'),  'success': _('SUCCESS:'),  'error': _('ERROR:')} %}
 {{ titles[type] }}
 {%- endmacro %}
-{% if to_fetch == True %}
-<div class="js js-alerts" data-what="alert" data-type={{type}} id ={{unique_id() }}  {{'data-message='+ message if message }} data-extra={{extra}} {{ "data-dismissible=true" if dismissible }}  {{'data-codeid=true' if codeid }}></div>
+{% if tofetch == True %}
+<div class="js js-alert" data-what="alert" data-type={{type}} id ={{unique_id() }}  {{'data-message='+ message  if message }} data-extra={{extra}} {{ "data-dismissible=true" if dismissible }}  {{'data-codeid=true' if codeid }}></div>
 {% else %}
 <div class="alert alert-{{ type if type}}  {{ 'text-xs' if extra and 'small' in extra }} {{ 'inverse' if inverse == True }} {{ 'md:w-3/4 lg:w-1/2 mx-2' if (extra and extra.inset == True) }}  {{ 'mt-1 text-sm' if (extra and extra.small == True) }}" id ={{unique_id() }} {{'data-message=' + message if message }} {{'data-codeid=true' if codeid }} data-type={{type}} {{ "data-dismissible=true" if dismissible }} role="alert">
 {% if dismissible == True %}
@@ -11,7 +11,9 @@
 {% endif %}
 {% set message = message_translation(message, type, is_safe)%}
 {% if title !='' %}
-<strong class="text-xl leading-12 font-bold">{{ alerttype(type) }} {{ title}} </strong><p > {{ message|safe if is_safe else message  }}</p>
+<strong class="text-xl leading-12 font-bold">{{ alerttype(type) }} {{ title}} </strong><p> {{ message|safe if is_safe else message  }}</p>
+{% elif type=="confirm" %}
+<div  class="message font-semi-bold"><i class="icon icon-warning"></i>{{  message|safe if is_safe else message }}</div>
 {% else %}
 {{  message|safe if is_safe else message }}
 {% endif %}

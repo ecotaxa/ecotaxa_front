@@ -4,7 +4,7 @@ from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import FilesApi
 
 from appli.utils import ApiClient
-from appli.gui.staticlistes import py_messages_job
+from appli.gui.jobs.staticlistes import py_messages
 
 
 def dir_list(subdir):
@@ -16,7 +16,7 @@ def dir_list(subdir):
             if ae.status in (401, 403):
                 raise ApiException(
                     status=ae.status,
-                    reason=py_messages_job["dirlist"]["nopermission"],
+                    reason=py_messages["dirlist"]["nopermission"],
                 )
             elif ae.status == 404:
                 dirlist = dict({"path": ""})
@@ -26,7 +26,7 @@ def dir_list(subdir):
     return dirlist, None
 
 
-def upload_file(subdir, request):
+async def upload_file(subdir, request):
     import json
 
     uploaded = request.files.get("file")
@@ -34,7 +34,14 @@ def upload_file(subdir, request):
     reqheaders = json.loads(json.dumps({k: v for k, v in request.headers.items()}))
     # final = gvp("final")
     # uploadedchunk: FileStorage = request.files.get("file")
-    print(reqheaders["Content-Range"])
+    # print(reqheaders["Content-Range"])
+    body = b""
+    async for chunk in request.stream():
+        body += chunk
+
+    print(body)
+    await response(scope, receive, send)
+
     if final:
         if uploaded is not None and uploaded.filename != "":
             # Relay the file to back-end
@@ -46,7 +53,7 @@ def upload_file(subdir, request):
                 token = api.api_client.configuration.access_token
                 headers = {
                     "Authorization": "Bearer " + token,
-                    "Content-Range": reqheaders["Content-Range"],
+                    # "Content-Range": reqheaders["Content-Range"],
                 }
                 # 'requests' lib sends fine the name to back-end
                 uploaded.name = uploaded.filename
@@ -60,6 +67,4 @@ def upload_file(subdir, request):
                 return rsp.json(), None
 
         else:
-            return None, dict(
-                {"err": 422, "message": py_messages_job["upload"]["nofile"]}
-            )
+            return None, dict({"err": 422, "message": py_messages["upload"]["nofile"]})

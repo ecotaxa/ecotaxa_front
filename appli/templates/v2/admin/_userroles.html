@@ -1,0 +1,15 @@
+<div class=" w-full md:w-1/2 tab-content">
+  <div class="form-box">
+    <label for="can_do">{{_('Roles')}} </label>
+    <select id="can_do" name="can_do" multiple class="form-select">
+      <option value=""></option>
+      {% for k,v in roles %}
+      <option value="{{ k }}" {{ 'selected' if k in  current_user.can_do }}>{{ v }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-box">
+    <label for="active">{{_('Active')}} <span class="togle ml-1 inline"><input type="checkbox" id="active" name="active" value=true {{ 'checked=true' if
+      user.active == True else '' }}></span></label>
+  </div>
+    </div>

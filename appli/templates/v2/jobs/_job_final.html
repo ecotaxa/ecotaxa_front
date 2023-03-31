@@ -1,0 +1,4 @@
+{%if jobid %}
+<a href="/gui/job/clean/{{jobid}}{{'?thengotoproject=Y' if target_proj and target_proj.projid else '' }}" class="button is-secondary inverse" role="button">{{_('FORCE Delete of ')}} {{jobid}} {{ _('and back to project') if target_proj and target_proj.projid else ''}}</a>
+<small>{{_('(no danger for the original database)')}}</small>
+{%endif%}

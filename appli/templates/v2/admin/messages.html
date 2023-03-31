@@ -1,0 +1,35 @@
+{% extends "./v2/admin/layout.html" %}
+{% from "./v2/macros/macros.html" import  inputdict, modal , alertbox with context %}
+
+{% block body %}
+<div class="container mx-auto">
+  {% set modal_title = _("Messages")%}
+  {% set data = {'file':'_help_site_messages'} %}
+  {{ modal(id='help-sitemessages',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+
+  {% if msgkey %}
+{% set message = messages[msgkey] if messages %}
+  <form action="" method="post" class="js js-submit">
+
+      <div class="form-box"><label>{{msgkey}}  {{_('Message to display : ')}}</label>
+      <textarea name="msg" class="form-input">message</textarea>
+      </div>
+      <div class="form-box mb-8 w-auto float-left clear-right">
+            <a href ="/gui/admin/messages" class="button is-secondary inverse">{{_('Cancel')}}</a>  <button type="submit" class="button is-primary ">{{_('Save')}}</button>
+            </div>
+      </form>
+  {% elif messages is iterable %}
+  <div class="js js-datatable" id="admin-messages-list">
+  <table ><thead><tr><th></th><th>{{_('type')}}</th><th>{{_('message')}}</th></tr></thead>
+    <tbody>
+      {% for key,message in messages.items()%}
+      <tr><td><div class="is-controls"><a class="btn is-edit order-2" href="{{key}}">{{_('edit')}}</a></div></td><td>{{key}}</td><td>{{message}}</td></tr>
+  {% endfor %}
+  </tbody>
+  </table></div>
+  {% endif%}
+</div>
+{% if redir and redir !='' %}
+<span class="js js-redir" data-redir="{{redir}}"></span>
+{%endif%}
+{% endblock %}

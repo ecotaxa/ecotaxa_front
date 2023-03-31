@@ -348,11 +348,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.6.6"
+ecotaxa_version = "2.6.9"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2022-10-21"
+    return ecotaxa_version + " 2023-03-31"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -363,10 +363,14 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2023-03-31: V 2.6.9
+    Feature: Registration
+    Feature: Jobs
+    Feature: Tools
 2022-10-21: V 2.6.6
     Feature : optimize tables display , optimize speed
     Feature: about project page and details in tables
-    Feature: stats display  
+    Feature: stats display
 2022-10-14: V 2.6.6
     Feature : new ui for pages projects list, project create, login, about, privacy - tools to import settings, taxonomy, privileges.
     Feature : Babel translations for the new ui.

@@ -4,13 +4,13 @@
 {% block body %}
     <div class="container mx-auto">
       {% set data = {'file':'_help_job_import'} %}
-      {{ modal(id='help-editproject',modal_title= _("How to import data"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+      {{ modal(id='help-job-import',modal_title= _("How to import data"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
       <form class="js js-submit js-import" method="post" action=""  id="formupload" enctype="multipart/form-data" data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" onsubmit="return false" >
         <div class="flex flex-row"><div class="form-box md:basis-2/3 order-2 md:order-1">
           <label for="status">{{ _('Type of import') }} <i data-for="help_type_import" data-action="request" data-what="help"></i></label>
           <div class="form-group" role="group">
             {% set required = True %}
-            {% set typeimport = null if not typeimport %}
+            {% set typeimport = None if not typeimport %}
             {% for st in (("images-tsv",_("Images+TSV files")),("images",_("Images Only")),("tsv",_("TSV files only"))) %}
             {{ form_group_radio('typeimport' + loop.index|string(),'typeimport',st[0],st[1],typeimport,required=required)}}
             {% endfor %}

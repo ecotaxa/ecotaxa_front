@@ -1,0 +1,17 @@
+{% extends "./v2/admin/layout.html" %}
+{% from "./v2/macros/macros.html" import  inputdict, modal , alertbox with context %}
+
+{% block body %}
+<div class="container mx-auto">
+  {% set modal_title = _("How to edit a user account") if user.id else _("How to create a user account")%}
+  {% set data = {'file':'_help_user_account'} %}
+  {{ modal(id='help-useraccount',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+  {% set legend = _('user') + ' ' + user.id|string() if user.id else _('new user') %}
+  {% set incadmin = "v2/admin/_userroles.html"%}
+  {% set redir ="gui/admin/users/"%}
+{% include('v2/users/_user.html')%}
+</div>
+{% if redir and redir !='' %}
+<span class="js js-redir" data-redir="{{redir}}"></span>
+{%endif%}
+{% endblock %}

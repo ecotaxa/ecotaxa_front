@@ -63,7 +63,8 @@ def indexProjects(Others=False):
     if Others:
         CanCreate = False
     else:
-        CanCreate = 1 in user.can_do
+        # CanCreate = 1 in user.can_do
+        CanCreate = True
 
     with ApiClient(TaxonomyTreeApi, request) as apiTaxo:
         status: TaxonomyTreeStatus = apiTaxo.taxa_tree_status()

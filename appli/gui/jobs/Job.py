@@ -52,32 +52,30 @@ class Job(object):
         return ""
 
     @classmethod
-    def final_download_action(cls, job_id, prj_id, out_file: Optional[str]) -> str:
-        if out_file is None:
-            return "Error, final file not available"
+    def get_target_prj(cls, prj_id: int, full: bool = False):
+        from flask import request
+        from to_back.ecotaxa_cli_py.api import ProjectsApi
+        from to_back.ecotaxa_cli_py.models import ProjectModel
 
-        ret = (
-            "<a href='/api/jobs/%d/file' class='btn btn-primary btn-sm ' "
-            "role='button'>Get file %s</a>" % (job_id, out_file)
-        )
-        if prj_id is not None:
-            ret += (
-                " <a href='/Job/Clean/%d?thengotoproject=Y' "
-                "class='btn btn-primary btn-sm ' "
-                "role='button'>FORCE Delete of %s and back to project "
-                "(no danger for the original database) </a>" % (job_id, out_file)
-            )
-        else:
-            ret += (
-                " <a href='/Job/Clean/%d' class='btn btn-primary btn-sm ' "
-                "role='button'>FORCE Delete of %s (no danger for the "
-                "original database) </a>" % (job_id, out_file)
-            )
-        ret += (
-            "<br>Local users can also retrieve the file in the "
-            "EcoTaxa folder temptask/task%06d (useful for huge files)" % job_id
-        )
-        return ret
+        with ApiClient(ProjectsApi, request) as api:
+            try:
+                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
+            except ApiException as ae:
+                if ae.status in (401, 403):
+                    raise ApiException(
+                        status=ae.status,
+                        reason=py_messages["access403"],
+                    )
+                else:
+                    ApiException(
+                        status=ae.status,
+                        reason=ae.reason,
+                    )
+        if target_prj:
+            if full == True:
+                return target_prj
+            return dict({"title": target_prj.title, "projid": target_prj.projid})
+        return None
 
     @classmethod
     def get_file_from_form(cls, request):
@@ -116,33 +114,24 @@ class Job(object):
             return request.form.get("ServerPath", ""), None
 
     @classmethod
-    def _extract_filters_from_url(cls, filters: Dict[str, str], target_prj) -> str:
+    def extract_filters_from_url(cls, filters: Dict[str, str]) -> str:
         # Extract filter values, they are in the URL (GET)
-        for k in sharedfilter.FilterList:
-            if gvg(k, "") != "":
-                filters[k] = gvg(k, "")
-        return cls._remind_filters(filters, target_prj)
-
-    @classmethod
-    def _remind_filters(cls, filters, target_prj):
-        # Remind filters in the page
-        filtertxt = ""
-        if len(filters) > 0:
-            filtertxt += ",".join([k + "=" + v for k, v in filters.items() if v != ""])
-            g.headcenter = "<h4><a href='/prj/{0}?{2}'>{1}</a></h4>".format(
-                target_prj.projid,
-                XSSEscape(target_prj.title),
-                "&".join([k + "=" + v for k, v in filters.items() if v != ""]),
+        filters = list(
+            filter(
+                lambda f: f[1] != "",
+                [(k, gvg(k, "")) for k in sharedfilter.FilterList],
             )
-        return filtertxt
+        )
+        return filters
 
     @classmethod
-    def _extract_filters_from_form(cls, filters, target_prj):
-        # Extract filter values, they are in the submitted values (POST)
-        for k in sharedfilter.FilterList:
-            if gvp(k, "") != "":
-                filters[k] = gvp(k, "")
-        return cls._remind_filters(filters, target_prj)
+    def extract_filters_from_form(cls, filters: Dict[str, str]) -> str:
+        # Extract filter values, they are in the URL (GET)
+        return list(
+            filter(
+                lambda f: f[1] != "", [(k, gvp(k, "")) for k in sharedfilter.FilterList]
+            )
+        )
 
     @classmethod
     def flash_any_error(cls, errors):

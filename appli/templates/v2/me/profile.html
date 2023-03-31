@@ -1,0 +1,21 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/macros/macros.html" import modal , alertbox with context %}
+{% block body %}
+<div class=" container px-2 mx-auto">
+  {% set modal_title = _("How to edit your account")%}
+  {% set data = {'file':'_help_edit_account'} %}
+  {{ modal(id='help-edit_account',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+{% if err %}
+<div class="danger">Error {{ err}}</div>
+{% elif waitforvalidation %}
+<div class="info inverse">{{_('Your account will be activated after validation')}}</div>
+{% elif user %}
+{% set legend =_('Profile') %}
+{% set redir ="gui/me/profile/"%}
+{% set incprofile = 'v2/me/_withrights.html'%}
+{% include('v2/users/_user.html')%}
+{%  else %}
+{{_(' error no user ')}}
+{% endif%}
+</div>
+{% endblock %}

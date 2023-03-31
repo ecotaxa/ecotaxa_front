@@ -7,8 +7,7 @@ from flask import render_template, redirect, request, flash
 
 from appli import gvg, gvp, app
 from appli.gui.jobs.Job import Job
-from appli.gui.project.projects_list_interface import render_prj_summary
-from appli.gui.staticlistes import py_messages_job
+from appli.gui.jobs.staticlistes import py_messages
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (
@@ -39,17 +38,7 @@ class UploadJob(Job):
     def initial_dialog(cls) -> str:
         """In UI/flask, initial load, GET"""
         prj_id = int(gvg("p"))
-        with ApiClient(ProjectsApi, request) as papi:
-            try:
-                target_prj: ProjectModel = papi.project_query(
-                    prj_id, for_managing=False
-                )
-            except ApiException as ae:
-                if ae.status in (401, 403):
-                    raise ApiException(
-                        status=ae.status,
-                        reason="accessdeniedforproj",
-                    )
+        target_proj = cls.get_target_prj(prj_id)
 
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
@@ -59,7 +48,7 @@ class UploadJob(Job):
             header="",
             ServerPath=server_path,
             TxtTaxoMap="",
-            target_proj=render_prj_summary(target_prj),
+            target_proj=target_proj,
             prjmanagermail=target_prj.managers[0].email,
         )
 
@@ -67,18 +56,7 @@ class UploadJob(Job):
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page"""
         prj_id = int(gvg("p"))
-        with ApiClient(ProjectsApi, request) as api:
-            try:
-                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
-            except ApiException as ae:
-                if ae.status in (401, 403):
-                    raise ApiException(
-                        status=ae.status,
-                        reason="npoimport",
-                    )
-
-                else:
-                    raise
+        target_proj = cls.get_target_prj(prj_id)
         errors = []
         # file_to_load, error = Job.get_file_from_stream(request)
 
@@ -90,7 +68,7 @@ class UploadJob(Job):
                 if ae.status in (401, 403):
                     raise ApiException(
                         status=ae.status,
-                        reason=py_messages_job["dirlist"]["nopermission"],
+                        reason=py_messages["dirlist"]["nopermission"],
                     )
                 else:
                     raise
@@ -104,7 +82,7 @@ class UploadJob(Job):
             file_to_load=file_to_load,
             dirlist=dirlist,
             ServerPath=server_path,
-            target_proj=render_prj_summary(target_prj),
+            target_proj=rtarget_proj,
         )
 
     @classmethod

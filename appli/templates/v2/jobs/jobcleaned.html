@@ -1,0 +1,9 @@
+{%if not partial%}
+{% extends "./v2/layout.html" %}
+{% endif %}
+{% block body %}
+{% if projid %}
+<a href='/prj/{{projid}}'>{{_('Back to project')}}</a>
+{%endif %}
+<a href="/gui/jobs/listall">Back to Task List</a>
+{% endblock %}

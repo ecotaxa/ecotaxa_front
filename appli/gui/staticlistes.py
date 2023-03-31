@@ -135,7 +135,7 @@ py_messages = dict(
         "license404": _("Error retrieving licenses"),
         "project404": _("Project does not exist"),
         "page404": _("The page does not exists."),
-        "access403": _("Access not authorized "),
+        "access403": _("Access denied "),
         "cannotaccessinfo": _("You cannot access this information"),
         "cannoteditsettings": _("You cannot edit settings for this project"),
         "nouserslist": _("No users list"),
@@ -157,19 +157,9 @@ py_messages = dict(
         ),
         "managerrequired": _("At least one manager is needed"),
         "updateexception": _("Update problem: "),
+        "projectcreated": _("Project created"),
         "projectupdated": _("Project updated"),
         "importpriverror": _("Privileges where not imported correctly."),
-    }
-)
-py_messages_job = dict(
-    {
-        "filetoloaderror": _("Error on file upload"),
-        "import": {"nopermission": _("no permission to import")},
-        "upload": {
-            "nopermission": _("no permission to upload"),
-            "nofile": _("no file to upload"),
-        },
-        "dirlist": {"nopermission": _("no permission to list")},
     }
 )
 py_project_rights = dict(

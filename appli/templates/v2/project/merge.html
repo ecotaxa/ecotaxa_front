@@ -1,0 +1,52 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/project/macros.html" import header_project_job with context %}
+{%block body%}
+<div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_merge" >
+  <div class="w-100 mx-auto py-4 block text-left relative" id="project-merge-header">
+    {% set data = {'file':'_help_project_merge'} %}
+    {{header_project_job(_('Project Merge / Fusion'),data, _('Merge project'))}}
+  </div>
+  {% if processstep  %}
+  {% include('/v2/project/_merge_process.html') with context%}
+<a class="button is-secondary inverse w-full sm:w-96 text-center" href="{{'/gui/prj/merge/'+ target_proj.projid|string if processstep=='ask' else '/prj/' + target_proj.projid|string}}">{{ _("Back to list") if processstep =="ask" else  _('Back to target project') if (processstep=="end")  else  _("Back to project home")}}</a>
+{% else %}
+<div class="block-info"><ul><li>{{_('You are allowed to merge projects that you manage and contain images from the <strong>same</strong> instrument.
+     (Hint: use the <a href="/gui/prj/edit/{{target_proj.projid}}">projects settings</a> to change this if needed).')}}</li>
+<li>{{_('User privileges from both projects will be added')}}</li>
+<li>{{_('This tool allows to merge two projects in a single projet (called Current project). The added project will then be automatically deleted. If object data are not consistent between both projects :')}}
+<ul><li>{{_('New data fields are added to the Current project.')}}</li>
+<li>{{_('The resulting project will thus contain partially documented datafields.')}}</li>
+<li>{{_('Samples with same sample_id on both sides will <strong>not</strong> be updated from added project.')}}</li>
+<li>{{_('Acquisitions with same acq_id on both sides will <strong>not</strong> be updated from added project.')}}</li>
+</ul></li><li>{{_('Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.')}}</li>
+</ul>    </div>
+  <form action=? method="post" id="form-merge" class="js js-submit">
+{% if source_proj %}<div class="alert alert-warning">{{_('Source project : ') ~ source_proj.title ~ '['~ source_proj.projid ~']' ~ _(' this project will be destroyed') }}</div>
+<input type="hidden" name="merge" value =" Y">
+{% set txtsubmit = _('Merge')%}
+{% else %}
+{% set txtsubmit = _('Validate before merge')%}
+{% if prjstomerge is iterable %}
+
+<div class="js js-datatable mt-4" data-sortable=true {{ ' data-searchable=true'  if prjstomerge|length > 20 else ''}}>
+<table>
+<thead><tr><th data-type="html">{{_('Select')}}</th><th>{{_('ID')}}</th><th>{{_('Instrument')}}</th><th>{{_('Title')}}</th><th>{{_('Status')}}</th><th>{{_('Nbr Obj')}}</th>
+            <th>{{_('%s Validated').format('%')}}</th><th>{{_('%s Classified').format('%')}}</th></tr></thead><tbody>
+        {%for prj in prjstomerge -%}
+        <tr><td><input type="radio" name="src" value="{{prj.projid}}" class="form-radio" required></td><td>{{prj.projid}}</td>
+            <td>{{prj.instrument}}</td>
+            <td>{{prj.title}}</td>
+            <td>{{prj.status}}</td>
+            <td>{{'' if prj.ojbcount== None else "%.0f"|format(prj.objcount|int) }}</td>
+            <td>{{"%.2f"|format(prj.pctvalidated|float) if prj.pctvalidated != None else '0'}}</td>
+            <td>{{"%.2f"|format(prj.pctclassified|float) if prj.pctclassified != None else '0'}}</td>
+            </tr>
+          {%-endfor%}
+          </tbody>
+  </table></div>
+  {%endif%}
+    {%endif%}
+    <a href ="/gui/prj/{{target_proj.projid}}" class="button is-secondary inverse">{{_('Cancel')}}</a> <button type="submit" class="button is-primary">{{txtsubmit }}</button>
+     </form>
+     {% endif%}
+{%endblock%}

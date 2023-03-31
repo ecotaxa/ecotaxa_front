@@ -25,7 +25,7 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
         req_taxa = ""
     else:
         req_taxa = "all"
-    from appli.gui.project.projects_list_interface import render_stat_proj
+    from appli.gui.project.projects_list_interface_json import render_stat_proj
 
     statproj = render_stat_proj(prj, partial)
 
@@ -58,6 +58,7 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
                 name = n[0][1]
                 taxastats[i]["name"] = name
                 taxastats[i]["lineage"] = n[0][2]
+        from to_back.ecotaxa_cli_py.models import ProjectUserStatsModel
 
         with ApiClient(ProjectsApi, request) as api:
             annotators_stats: List[
@@ -141,18 +142,20 @@ def prj_samples_stats(prjid: int, partial: bool, format: str = "json") -> str:
 
     with ApiClient(SamplesApi, request) as api:
         samplestats: List[SampleModel] = api.sample_set_get_stats(sample_ids=sample_ids)
-    from appli.gui.project.projects_list_interface import (
+    from appli.gui.project.projects_list_interface_json import (
         project_table_columns,
         render_samples_stats,
     )
 
-    columns = project_table_columns("", "samples") + project_table_columns(
-        "", "validations"
-    )
+    columns = {
+        **project_table_columns("", "samples"),
+        **project_table_columns("", "validations"),
+    }
     tabledef = dict(
         {
             "columns": columns,
             "data": render_samples_stats(samples, samplestats, partial, format),
+            "type": "json",
         }
     )
     if format == "json":

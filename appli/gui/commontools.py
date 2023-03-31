@@ -2,11 +2,10 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from typing import List, Dict, Optional
-from flask import render_template, request, flash, session
+from flask import render_template, request, redirect, flash, session, url_for
 from flask_login import current_user
 from appli.constants import GUI_PATH
 
-from gettext import NullTranslations
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import (
@@ -44,7 +43,6 @@ def experimental_header(filename: str = "") -> str:
         checkpath = keypath[0]
         if len(keypath) > 1:
             checkpath = checkpath + "/" + keypath[1]
-        print("path =" + path)
         if checkpath not in newpath:
             return ""
         hint = "A new version of this page is available."
@@ -152,7 +150,6 @@ def breadcrumbs() -> list:
                         crumbdict.update(dict({"action": crumbs[i + 1]}))
                 crumblist.append(crumbdict)
                 parent = crumb
-    print(crumblist)
     return crumblist
 
 
@@ -176,6 +173,13 @@ def breadcrumb(tree: dict, crumb: str, parent: str = "") -> str:
         return None
 
 
+def html_to_text(html: str) -> str:
+    import re
+
+    pattrns = re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});")
+    return re.sub(pattrns, "", html)
+
+
 # recursive to_dict
 def todict(obj):
     import enum, collections
@@ -195,6 +199,27 @@ def todict(obj):
     elif hasattr(obj, "__dict__"):
         return todict(vars(obj))
     return obj
+
+
+# messages
+
+
+def py_get_messages(type):
+    from appli.gui.staticlistes import py_messages
+
+    if type == "project":
+        from appli.gui.project.staticlistes import py_messages as py_messages_type
+    elif type == "jobs":
+        from appli.gui.jobs.staticlistes import py_messages as py_messages_type
+
+    return {**py_messages, **py_messages_type}
+
+
+# partial request - fetch - XHR
+def is_partial_request(request):
+    return request.headers.get("X-Requested-With") and (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
 
 
 #

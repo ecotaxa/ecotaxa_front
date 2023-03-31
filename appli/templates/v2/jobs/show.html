@@ -1,5 +1,6 @@
+{%if not partial%}
 {% extends "./v2/layout.html" %}
-
+{% endif%}
 {% set state2label = dict({'P': 'Pending',
 'E': 'Error',
 'R': 'Running',
@@ -7,15 +8,22 @@
 'F': 'Finished'}) %}
 {% block body %}
 <div class="container mx-auto mt-8">
-<div class="py-8">
-    <a href="/gui/job/clean/{{ job.id }}">
-      <button class="button is-danger inverse">{{_('Clean task data')}}</button>
-    </a>
-    <a href="/gui/jobs/listall">
-      <button class="button ml-4 ">{{_('Back to tasks list')}}</button>
-    </a>
+<div class="py-8 flex flex-col">
+  {% if job and job.id %}
+  <div><div id="spinner-icon" class="hidden mx-auto my-8"><img src="{{ url_for('static', filename='AjaxLoading.gif') }}"></div>
+  <div id="statusdiv" ><span class="inline-block font-semibold"></span><div class="inline-block pl-4"></div></div>
+  <div id="progressbar" class="hidden h-8 w-96"></div>
   </div>
-
+  {% if job.state =="E" or job.state=="F" %}
+  <div>
+    <a href="/gui/job/clean/{{ job.id }}" class="button is-danger inverse">{{_('Clean task data')}}</a>
+    <a href="/gui/jobs/listall" class="button ml-4 ">{{_('Back to tasks list')}}</a></div>
+    {% endif %}
+  {%elif jobid %}
+  <a href="/gui/job/clean/{{jobid}}{{'?thengotoproject=Y' if target_proj and target_proj.projid else '' }}" class="button is-secondary inverse" role="button">{{_('FORCE Delete of ')}} {{jobid}} {{ _('and back to project') if target_proj and target_proj.projid else ''}}</a>
+  <small>{{_('(no danger for the original database)')}}</small>
+  {%endif%}
+  </div>
   {% if job.taskstate=="Error" %}
     <div class="alert alert-danger">
       <p>{{_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart
@@ -23,7 +31,7 @@
     </div>
   {% endif %}
 
-  <table class="dataTable-table jobs table-condensed">
+  <table class="datatable-table jobs table-condensed">
    <tr>
       <th>{{_('Task ID')}}</th>
       <td>{{ job.id }}</td>
@@ -55,7 +63,7 @@
     </tr>
     <tr>
       <th>{{_('Progress')}}</th>
-      <td>{{ job.progress_pct }}%</td>
+      <td>{{ job.progress_pct|string + '%' if job.progress_pct != None else '' }}</td>
     </tr>
     <tr>
       <th>{{_('Message')}}</th>
@@ -80,9 +88,103 @@
       <td>{{ job.answerdata|string }}</td>
     </tr></tbody>
   </table>
-  <details class="overflow-hidden px-2 mb-24"><summary class="text-lg font-btn font-semibold py-0.5 is-default inverse" data-action="request" data-href="?log=Y">{{_('View log file')}}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>
+  <details class="overflow-hidden px-2 mb-24"><summary class="text-lg font-btn font-semibold py-0.5 is-default inverse" data-action="request" data-href="/gui/job/show/{{job.id}}?log=Y">{{_('View log file')}}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>
 
-  {% if customdetails %}<details><summary class="text-lg font-btn font-semibold py-0.5 is-info inverse" data-action="request" data-href="?customdetails=Y">{{_('View custom details') }}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>{% endif %}
+  {% if customdetails %}<details><summary class="text-lg font-btn font-semibold py-0.5 is-info inverse" data-action="request" data-href="/gui/job/show/{{job.id}}?customdetails=Y">{{_('View custom details') }}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>{% endif %}
 
 </div>
+
+<script>
+window.addEventListener('load', () => {
+  const jobid = {{ job.id }};
+  let   options = {};
+    options.headers = options.headers || {};
+    options.headers['X-Requested-With'] = 'XMLHttpRequest';
+    if (!options.credentials) options.credentials = 'same-origin';
+  let intervalHandle;
+      const spinner = document.getElementById('spinner-icon');
+  const statusdiv = document.getElementById("statusdiv");
+    let stop = false;
+    const progress_bar = (show,percent=0,description=``) => {
+
+      if (!percent) percent = 0;
+      if(!description) description ="In progress";
+
+      const progressbar = document.getElementById('progressbar');
+      if (show === false)  {
+       if(spinner) spinner.remove();
+      }
+      else {
+       if(spinner) spinner.classList.remove('hidden');
+      if(progressbar) progressbar.classList.remove('hidden');
+
+
+              }
+
+    }
+    const display_errors= (errors) => {
+      statusdiv.firstChild.innerHTML = `<div class="alert alert-danger">${errors.join(`</div><div>`)}</div>`;
+    }
+    const display_next = async (url) => {
+      fetch(url, options).then(response => response.text()).then(response => {
+      statusdiv.lastChild.insertAdjacentHTML('beforeend', response);
+          });
+
+    }
+        let html = [];
+    const check_job_status = () => {
+        fetch("/gui/job/status/" + jobid, options).then(response => response.json()).then(job => {
+          if(job.errors.length) {
+          clearInterval(intervalHandle);
+            progress_bar(false);
+          display_errors(job.errors);
+        }
+        if (stop === true) return;
+
+        if (job) {
+            switch(job.state) {
+              case "A":
+                // question
+                stop = true;
+                display_next("/gui/job/question/" + job.id);
+                progress_bar(false);
+                clearInterval(intervalHandle);
+              break;
+              case "F":
+              stop = true;
+              progress_bar(false);
+              if(spinner) spinner.remove();
+              clearInterval(intervalHandle);
+              if(job.finalaction) {
+                console.log('finalaction', job.finalaction)
+                html.push(job.finalaction);
+              }
+              if(job.description) {
+                statusdiv.firstChild.innerHTML = job.description;
+              }
+
+          //  display_next("/gui/job/show/"+job.id+'?monitor=true');
+
+              break;
+              case "E":
+              stop = true;
+              progress_bar(false);
+              spinner.remove();
+              clearInterval(intervalHandle);
+
+            display_errors(job.errors);
+              break;
+              case "P":
+              // pending
+              break;
+            }
+            progress_bar(true,job.progress_pct,job.progress_msg);
+      }
+      if(statusdiv)  statusdiv.childNodes[1].innerHTML = html.join('');
+      if(stop === false) setTimeout(check_job_status,1000);
+    });
+        }
+     check_job_status();
+      });
+</script>
 {% endblock %}

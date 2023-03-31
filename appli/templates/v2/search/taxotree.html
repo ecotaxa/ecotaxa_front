@@ -1,0 +1,65 @@
+<style>
+    .tree li a {
+        padding-right: 20px !important;
+        background: url(icons/Star-icon.png) top right no-repeat;
+    }
+
+    .tree li.clicked a {
+        padding-right: 20px !important;
+        background: url(icons/Star-icon.png) top right no-repeat #BEEBFF;
+    }
+
+    .tree li a.hover,
+    .tree li a:hover {
+        padding-right: 20px !important;
+        background: url(icons/Star-icon.png) top right no-repeat #D8F0FA;
+    }
+</style>
+
+{# Id = <span id="SelectedID">----</span> Name = <span id="SelectedName">----</span> #}
+
+<div id="js js-hierarchy">
+</div>
+
+<script>
+
+    $(function () {
+        $('#jstree').jstree({
+            'core': {
+                "animation": 0,
+                "themes": {"stripes": false, "icons": false},
+                'data': {
+                    'dataType': 'JSON',
+                    'url': '/search/taxotreejson',
+                    'data': function (node) {
+                        return {'id': node.id};
+                    }
+                }
+            }
+        });
+
+        $("#jstree").delegate(".TaxoSel", 'click',
+            function (o) {
+                o.preventDefault();
+                var id = $(o.target).closest("li").attr("id");
+                var valeur = $(o.target).prev().html();
+                if ($(o.target).hasClass("glyphicon"))
+                    valeur = $(o.target).parent().prev().html();
+                $('#SelectedID').html(id);
+                $('#SelectedName').html(valeur);
+                $('#{{ targetid }}').append($('<option>', {value: id, text: valeur}));
+//              var sel=$("#taxolb").val();
+//              if(sel==null) sel=[];
+//              sel.push(id);
+//              $('#{{ targetid }}').val(sel);
+                $('#{{ targetid }}').val(id);
+                $('#{{ targetid }}').change();
+                $('#TaxoModal').modal("hide");
+            });
+
+        $("#jstree").bind("select_node.jstree", function (e, data) {
+            $("#jstree").jstree('open_node', data.node);
+        })
+
+    });
+</script>

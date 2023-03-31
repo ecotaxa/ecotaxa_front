@@ -1,0 +1,52 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/project/macros.html" import header_project_job with context %}
+{%block body%}
+<div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_editdatamass" >
+  <div class="w-100 mx-auto py-4 block text-left relative" id="project-editdatamass-header">
+    {% set data = {'file':'_help_project_editdatamass'} %}
+    {{header_project_job(_('Project Mass data edition'),data, _('Merge project'))}}
+  </div>
+{% if error==404 %}
+<a href="/gui/prj/" class="alert alert-warning">{{_('Select another project')}}</a>
+{% elif error==401 or error == 403 %}
+<a href="/gui/prj/" class="alert alert-danger">{{_('Select another project')}}</a>
+{% elif target_proj and target_proj.projid %}
+<form method=post class="mb-0 pb-0">  <fieldset><div class="alert alert-warning inverse">
+{%if warning >0 %}
+{{_('USING Active Project Filters')}} {{objectids|length}} {{_('objects')}}
+  {%else%}
+  {{_('Apply to ALL ENTITIES OF THE PROJECT (NO Active Filters)')}}
+{%endif %}</div>
+
+<div class="form-box">
+    <label for="field">{{_('Field to update:')}}</label>
+    <select name="field" id="field" class="form-select" class="js is-autocomplete"><option>{{_('select your field')}}</option>
+      {% for f in lst %}
+        <option value="{{ f['id'] }}">{{ f['text'] }}</option>
+      {% endfor %}
+    </select>
+    </div>
+  <div class="form-box">
+<label for="newvalue">{{_('New value:')}}</label>
+<input name="newvalue" id="newvalue" class="form-input" type="text">
+    </div>
+    <div class="form-box">
+        <button type="submit" class="button is-warning w-96">{{_('Apply MASS data modification')}}</button>
+  </div>
+
+<div class="block-info">
+  <strong class="text-lg">{{_('Notes:')}}</strong><br>
+  <ul><li>{{_('Date must be filled with this format YYYY-MM-DD')}}</li>
+    <li>{{_('Time must be filled with this format HH:MM:SS (HH=0-23)')}}</li>
+    <li>{{_('Most ID (except orig_id) are internals ID. They can be found in the Object details page')}}</li>
+    <li>{{_('Classif_id update will cause update of classif_who and classif_when and insert a line in historical.')}}</li>
+  </ul>
+</div></fieldset>
+</form>
+<form method="post" class="my-0 py-0"><fieldset>
+  <button name="recompute" value="Y" type="submit" class="button is-primary inverse w-full sm:w-96 sm:mr-4">{{_('Recompute sample latitude and longitude')}} </button>
+  <button name="recompute2" value="Y" type="submit" class="button is-primary inverse w-full sm:w-96">{{_('Recompute sun position (VERY LONG)')}}</button></fieldset>
+</form>
+{%endif%}
+</div>
+{%endblock%}

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from flask import render_template, g, redirect, request, flash
-
-from appli import PrintInCharte, gvg, XSSEscape, gvp
+from flask import render_template, redirect, request, flash
+from appli import gvg, gvp
+from appli.gui.jobs.staticlistes import py_messages
 from appli.gui.jobs.Job import Job
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
@@ -16,52 +16,35 @@ class ExportJob(Job):
     """
 
     UI_NAME = "GenExport"
+    STEP0_TEMPLATE = "/v2/jobs/export.html"
+    STEP1_TEMPLATE = "/v2/jobs/_final_download.html"
+    EXPORT_TYPE = "TSV"
 
     @classmethod
     def initial_dialog(cls):
         """In UI/flask, initial load, GET"""
         prj_id = int(gvg("projid"))
-        with ApiClient(ProjectsApi, request) as api:
-            try:
-                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
-            except ApiException as ae:
-                if ae.status in (401, 403):
-                    return PrintInCharte("ACCESS DENIED for this project")
-        g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(
-            target_prj.projid, XSSEscape(target_prj.title)
-        )
+        target_proj = cls.get_target_prj(prj_id)
+        from appli.gui.jobs.job_interface import export_format_options
 
         filters = {}
-        filtertxt = cls._extract_filters_from_url(filters, target_prj)
+        filtertxt = cls.extract_filters_from_url(filters)
 
-        formdata = {
-            "what": "TSV",
-            "objectdata": "1",
-            "processdata": "1",
-            "acqdata": "1",
-            "sampledata": "1",
-            "splitcsvby": "",
-        }
+        formatoptions = export_format_options(cls.EXPORT_TYPE)
 
-        html = "<h3>Data Export</h3>"
         return render_template(
-            "jobs/export_create.html", header=html, form=formdata, filtertxt=filtertxt
+            cls.STEP0_TEMPLATE,
+            formatoptions=formatoptions,
+            formdata=dict({"what": cls.EXPORT_TYPE}),
+            filters=filters,
+            target_proj=target_proj,
         )
 
     @classmethod
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page, POST"""
         prj_id = int(gvg("projid"))
-        with ApiClient(ProjectsApi, request) as api:
-            try:
-                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
-            except ApiException as ae:
-                if ae.status in (401, 403):
-                    return PrintInCharte("ACCESS DENIED for this project")
-        g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(
-            target_prj.projid, XSSEscape(target_prj.title)
-        )
-
+        target_proj = cls.get_target_prj(prj_id)
         what = gvp("what")
         objectdata = "O" if gvp("objectdata") == "1" else ""
         processdata = "P" if gvp("processdata") == "1" else ""
@@ -76,7 +59,6 @@ class ExportJob(Job):
         exportimages = gvp("exportimages") != ""
         only_first_image = gvp("exportimages") == "1"
         splitcsvby = gvp("splitcsvby")
-        putfileonftparea = gvp("putfileonftparea") == "Y"
 
         tsv_entities = (
             objectdata + processdata + acqdata + sampledata + histodata + commentsdata
@@ -85,21 +67,19 @@ class ExportJob(Job):
         errors = []
         # Check data validity
         # if len(subsetprojecttitle) < 5:
-        #     errors.append("Project name too short")
 
         filters = {}
-        filtertxt = cls._extract_filters_from_url(filters, target_prj)
+        filtertxt = cls.extract_filters_from_url(filters)
 
         if len(errors) > 0:
             for e in errors:
                 flash(e, "error")
-            html = "<h3>Export</h3>"
             formdata = {}
             return render_template(
-                "jobs/export_create.html",
-                header=html,
+                cls.STEP0_TEMPLATE,
                 form=formdata,
                 filtertxt=filtertxt,
+                target_proj=target_proj,
             )
         else:
             # Do the export on back-end side
@@ -113,18 +93,29 @@ class ExportJob(Job):
                 with_internal_ids=internalids,
                 only_first_image=only_first_image,
                 sum_subtotal=sumsubtotal,
-                out_to_ftp=putfileonftparea,
+                out_to_ftp=False,
                 tsv_entities=tsv_entities,
                 use_latin1=False,
             )
+
             export_req = {"filters": filters, "request": req}
+
             with ApiClient(ObjectsApi, request) as api:
                 rsp: ExportRsp = api.export_object_set(export_req)
-            return redirect("/Job/Monitor/%d" % rsp.job_id)
+            return redirect("/gui/job/show/%d" % rsp.job_id)
 
     # noinspection PyUnresolvedReferences
     @classmethod
     def final_action(cls, job: JobModel):
-        prj_id = job.params["req"]["project_id"]
-        out_file = job.result["out_file"]
-        return cls.final_download_action(job.id, prj_id, out_file)
+        if job.state == "F":
+            projid = job.params["req"]["project_id"]
+            target_proj = cls.get_target_prj(projid)
+            return render_template(
+                cls.STEP1_TEMPLATE,
+                jobid=job.id,
+                projid=projid,
+                outfile=job.result["out_file"],
+                target_proj=target_proj,
+            )
+        else:
+            return ""

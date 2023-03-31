@@ -9,7 +9,7 @@ Werkzeug==2.0.3
 Flask-Admin==1.6.0
 # dep of Flask-Security
 #Flask-BabelEx==0.9.4 # remove replaced by Flask-Babel
-Flask-Babel==2.0.0 
+Flask-Babel==2.0.0
 Flask-Login==0.5.0
 Flask-Mail==0.9.1
 Flask-Principal==0.4.0
@@ -37,3 +37,5 @@ types-six
 # QA & compilation
 mypy==0.940
 mypy_extensions==0.4.3
+# Auth validation
+itsdangerous==2.0.1

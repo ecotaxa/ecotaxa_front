@@ -1,0 +1,25 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/macros/macros.html" import form_group_radio, checkbox_radio, alertbox with context %}
+{% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
+{% block body %}
+<div class="container mx-auto">
+  <div class="w-100 mx-auto py-4 block text-left relative" id="project-subset-header">
+  {% set data = {'file':'_help_job_export_summary'} %}
+  {{header_project_job(_('Summary Export'),data, _('How to export summary data'))}}
+</div>
+  <form method="post" class="js js-submit" enctype=multipart/form-data>
+    <div class="flex flex-row "><div class="form-box md:basis-1/3 order-3 md:order-2  flex-1 items-center oveflow-y-hidden">{{display_filters(filters)}}<input type="hidden" type="text" name="projid" id="projid" value="{{target_proj.projid}}"></div></div>
+    <div class="w-full">
+          <fieldset id="options_SUM"><legend class="text-center">{{formatoptions.SUM.label }} <small class="lowercase font-normal block">{{formatoptions.SUM.legend if formatoptions.SUM.legend else '' }}</small></legend>
+        <div class="form-box"><label>{{_('Count per category and')}} <select name="sumsubtotal" class="form-select w-auto">
+          <option value="">{{_('Whole Project')}}</option>
+          <option value="S">{{_('Sample')}}</option>
+          <option value="A">{{_('Acquisition')}}</option>
+        </select></div></fieldset>
+              <input type="hidden" name="starttask" value="Y">
+      <div class="form-box mb-8 w-auto float-left clear-right">
+            <a href ="/prj/{{target_proj.projid}}" class="button is-secondary inverse">{{_('Cancel')}}</a>  <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>
+            </div></div>
+        </form>
+        </div>
+{% endblock %}

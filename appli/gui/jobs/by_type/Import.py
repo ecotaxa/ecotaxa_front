@@ -3,13 +3,12 @@ import time
 from pathlib import Path
 from typing import List, ClassVar
 
-from flask import render_template, g, redirect, request, flash
+from flask import render_template, redirect, request, flash
 
 from appli import PrintInCharte, gvg, gvp, app
 from appli.back_config import get_app_manager_mail
 from appli.gui.jobs.Job import Job
-from appli.gui.project.projects_list_interface import render_prj_summary
-from appli.gui.staticlistes import py_messages_job
+from appli.gui.jobs.staticlistes import py_messages
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (
@@ -38,34 +37,24 @@ class ImportJob(Job):
     UI_NAME: ClassVar = "FileImport"
 
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/import.html"
-    STEP1_TEMPLATE: ClassVar = "/v2/jobs/_import_directives.html"
 
     @classmethod
     def initial_dialog(cls) -> str:
         """In UI/flask, initial load, GET"""
         prj_id = int(gvg("p"))
-        with ApiClient(ProjectsApi, request) as papi:
-            try:
-                target_prj: ProjectModel = papi.project_query(
-                    prj_id, for_managing=False
-                )
-            except ApiException as ae:
-                if ae.status in (401, 403):
-                    raise ApiException(
-                        status=ae.status,
-                        reason="accessdeniedforproj",
-                    )
+        target_proj = cls.get_target_prj(prj_id, full=True)
 
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
             server_path = uapi.get_current_user_prefs(prj_id, "cwd")
         return render_template(
             cls.STEP0_TEMPLATE,
-            header="",
             ServerPath=server_path,
             TxtTaxoMap="",
-            target_proj=render_prj_summary(target_prj),
-            prjmanagermail=target_prj.managers[0].email,
+            target_proj=dict(
+                {"title": target_proj.title, "projid": target_proj.projid}
+            ),
+            prjmanagermail=target_proj.managers[0].email,
             appmanagermailto=get_app_manager_mail(request),
         )
 
@@ -74,18 +63,8 @@ class ImportJob(Job):
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page"""
         prj_id = int(gvg("p"))
-        with ApiClient(ProjectsApi, request) as api:
-            try:
-                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
-            except ApiException as ae:
-                if ae.status in (401, 403):
-                    raise ApiException(
-                        status=ae.status,
-                        reason="npoimport",
-                    )
+        target_proj = cls.get_target_prj(prj_id)
 
-                else:
-                    raise
         # Form Submit -> check and store values to use
         errors = []
         file_to_load = gvp("file_to_load", "")
@@ -106,7 +85,7 @@ class ImportJob(Job):
         if file_to_load == "":
             file_to_load, error = Job.get_file_from_form(request)
             if error is not None:
-                flash(py_messages_job["filetoloaderror"], "error")
+                flash(py_messages["filetoloaderror"], "error")
                 return error
         # Save preferences
         server_path = gvp("ServerPath")
@@ -133,7 +112,7 @@ class ImportJob(Job):
                 if ae.status in (401, 403):
                     raise ApiException(
                         status=ae.status,
-                        reason=py_messages_job["import"]["nopermission"],
+                        reason=py_messages["access403"],
                     )
                 else:
                     raise
@@ -144,7 +123,7 @@ class ImportJob(Job):
         else:
             # The task should be running
             job_id = rsp.job_id
-            return redirect("/gui/job/monitor/%d" % job_id)
+            return redirect("/gui/job/show/%d" % job_id)
 
         if server_path == "":
             # Get stored last value for this project
@@ -156,7 +135,7 @@ class ImportJob(Job):
             data=req,
             ServerPath=server_path,
             TxtTaxoMap=str_taxo_mapping,
-            target_proj=render_prj_summary(target_prj),
+            target_proj=target_proj,
         )
 
     @classmethod
@@ -175,8 +154,7 @@ class ImportJob(Job):
         """The back-end need some data for proceeding"""
         txt = "<h1>Text File Importation Task</h1>"
         prj_id = job.params["prj_id"]
-        with ApiClient(ProjectsApi, request) as api:
-            target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
+        target_proj = cls.get_target_prj(prj_id)
 
         # Feed local values
         not_found_taxo = job.question["missing_taxa"]
@@ -187,7 +165,7 @@ class ImportJob(Job):
             taxo=not_found_taxo,
             users=not_found_users,
             job=job,
-            target_proj=render_prj_summary(target_prj),
+            target_proj=target_proj,
         )
 
     @classmethod
@@ -226,7 +204,7 @@ class ImportJob(Job):
                     users=not_found_users,
                     job=job,
                 )
-        return redirect("/gui/job/monitor/%d" % job.id)
+        return redirect("/gui/job/show/%d" % job.id)
 
     @classmethod
     def _must_skip_existing_objects(cls) -> bool:
