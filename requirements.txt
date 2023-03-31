@@ -5,7 +5,7 @@
 
 # Web
 Flask==2.0.3
-Werkzeug==2.0.3
+Werkzeug==2.2.3
 Flask-Admin==1.6.0
 # dep of Flask-Security
 #Flask-BabelEx==0.9.4 # remove replaced by Flask-Babel
