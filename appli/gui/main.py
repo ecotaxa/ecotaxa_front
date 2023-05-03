@@ -19,13 +19,60 @@ from appli.gui.staticlistes import py_messages
 @app.route("/gui/home")
 @app.route("/gui/index")
 def gui_index():
-    from appli.gui.commontools import RenderTemplate, webstats
-
-    wstats = webstats(app)
     if current_user.is_authenticated:
         return gui_prj()
     else:
         return gui_login()
+
+
+@app.route(
+    "/gui/forgotten", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
+)
+@app.route(
+    "/gui/forgotten/", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
+)
+@app.route("/gui/forgotten/<instid>", defaults={"token": None}, methods=["GET", "POST"])
+@app.route("/gui/forgotten/<instid>/<token>", methods=["GET", "POST"])
+def gui_forgotten(instid=None, token=None) -> str:
+    err = None
+    email = None
+    sentmail = gvg("sentmail", None)
+    if instid == None and token == None:
+        if request.method == "POST":
+            email = gvp("request_email", None)
+            if email != None:
+                from appli.gui.users.commontools import (
+                    send_mail,
+                    reset_password_message,
+                )
+
+                msg = reset_password_message(email)
+                err = send_mail(email, msg)
+                if err == None:
+                    return redirect(url_for("gui_forgotten", sentmail=email))
+                else:
+                    flash(err, "error")
+                    return redirect(url_for("gui_forgotten"))
+    elif instid != None and token != None:
+        if request.method == "POST":
+            from appli.gui.users.commontools import reset_password
+
+            email = get_mail_from_token(token, True)
+            if email == False:
+                return redirect(url_for("gui_forgotten"))
+            pwd = gvp("request_pwd")
+            if pwd != None:
+                [redir, err] = reset_password(email, token, pwd)
+                if err == None:
+                    return redirect(url_for(redir))
+
+        elif token != None:
+            from appli.gui.users.commontools import get_mail_from_token
+
+            if get_mail_from_token(token, True) == False:
+                token = None
+
+    return render_template("v2/security/forgotten.html", bg=True, token=token)
 
 
 @app.route("/gui/login", methods=["GET", "POST"])
@@ -33,10 +80,8 @@ def gui_index():
 def gui_login() -> str:
     # if current_user.is_authenticated:
     #    return redirect("/gui/prj")
-    from appli.gui.commontools import webstats
 
-    wstats = webstats(app)
-    return render_template("v2/login.html", webstats=wstats, bg=True)
+    return render_template("v2/login.html", bg=True)
 
 
 @app.route(
@@ -45,7 +90,7 @@ def gui_login() -> str:
 @app.route(
     "/gui/register/", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
 )
-@app.route("/gui/register/<instid>", defaults={"instid": None}, methods=["GET", "POST"])
+@app.route("/gui/register/<instid>", defaults={"token": None}, methods=["GET", "POST"])
 @app.route("/gui/register/<instid>/<token>", methods=["GET", "POST"])
 def gui_register(instid=None, token=None) -> str:
     # if current_user.is_authenticated:
@@ -131,8 +176,6 @@ def gui_prjlist() -> str:
     from appli.gui.project.projects_list import projects_list
 
     listall = gvg("listall", False)
-    print("listalll-----------------")
-    print(listall)
     typeimport = gvg("typeimport")
     gz = gvg("gzip")
     gz = True
@@ -235,7 +278,7 @@ def gui_help(filename):
         return render_template(
             "./v2/partials/_error.html",
             title="404",
-            message=py_messages["notfound"] + filename,
+            message=py_messages["page404"] + filename,
         )
     partial = is_partial_request(request)
     return render_template("." + filename, partial=partial)
@@ -244,9 +287,6 @@ def gui_help(filename):
 # alert boxes xhr
 @app.route("/gui/alertbox", methods=["GET", "POST"])
 def gui_alert():
-    from appli import gvp
-    from appli.gui.staticlistes import py_messages
-
     inverse = gvp("inverse")
     dismissible = gvp("dismissible")
     codemessage = gvp("codemessage")

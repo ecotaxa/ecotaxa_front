@@ -348,11 +348,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.6.9"
+ecotaxa_version = "2.6.9.1"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2023-03-31"
+    return ecotaxa_version + " 2023-04-04"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -363,6 +363,9 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2023-04-04: V 2.6.9.1
+    Fix table samples sort
+    Fix menus
 2023-03-31: V 2.6.9
     Feature: Registration
     Feature: Jobs

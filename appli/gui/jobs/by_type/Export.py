@@ -97,7 +97,6 @@ class ExportJob(Job):
                 tsv_entities=tsv_entities,
                 use_latin1=False,
             )
-
             export_req = {"filters": filters, "request": req}
 
             with ApiClient(ObjectsApi, request) as api:

@@ -1,8 +1,10 @@
 {% extends "./v2/layout.html" %}
 {% from "./v2/macros/macros.html" import form_group_radio, inputdict, modal , alertbox with context %}
 {% macro member_cells(index,member = {id: 0,name:'',email:'',delet:false},privilege = ''  ,autocomplete = False,required = False) -%}
+{% from "./v2/macros/macros.html" import form_group_radio, inputdict with context %}
 {% set contact = target_proj.contact if (target_proj and target_proj.contact) else 0 %}
 <div data-elem="ident"  data-title=" {{ _('Name') }}">
+
   {{ inputdict('members_member_' + index,'members[member][' + index + ']',value = member.id, label=member.name,type='user',required=required,autocomplete=autocomplete,options=[(member.id,member.name)]) }}</div>
 <div data-elem="priv" data-title="{{ _('Privilege') }}">
   <div class="form-group group-sm">{% for pr in ('View','Annotate','Manage') %}
@@ -23,7 +25,7 @@
   {# set the form id to import to and the header include for taxo imports #}
   {% set data = {'form':'#formu','key': key, 'header': './v2/project/_headerimport.html'} if (key == 'taxo' or key == 'privileges') else {'form':'#formu','key': key} %}
   {% set icon = 'icon-duplicate-sm' if new == False else 'icon-duplicate'%}
-  {% set btn = {'class':'button is-import is-pick'+(' new' if new == True else ''),'title':modal_title,'icon':icon,'text': _('pick from projects') ,'data':' data-action=request data-what=settings data-target=unique data-key=' + key + ' data-projid=' + (target_proj.projid|string() if (target_proj and target_proj.projid > 0) else '0')}%}
+  {% set btn = {'class':'button is-import is-pick'+(' new' if new == True else ''),'title':modal_title,'icon':icon,'text': _('pick from projects') ,'data':' data-request=settings data-target=unique data-key=' + key + ' data-projid=' + (target_proj.projid|string() if (target_proj and target_proj.projid > 0) else '0')}%}
   {{ modal('importfrom_' + key,  btn = btn,modal_title = modal_title, data=data) }}
 </div>
 {% endif %}
@@ -35,7 +37,7 @@
   {% set modal_title = _("How to edit a project settings") if target_proj.projid else _("How to create a project")%}
   {% set data = {'file':'_help_projectsettings'} %}
   {{ modal(id='help-editproject',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
-  <form method="post" action="?" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs hide' if (target_proj and target_proj.projid) }} relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}">
+  <form method="post" action="?" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs hide' if (target_proj and target_proj.projid) }} relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}" novalidate>
    <input type="hidden" name="crsf_token" value={{ crsf_token }}>  {% if target_proj and target_proj.projid %}
     <span data-dismiss="tabs" class="absolute z-10 top-0 -mt-8 right-[calc(100%-2.5rem)] hidden md:block md:ml-auto  md:mt-0 md:right-12 md:top-5 cursor-pointer fill-stone-900 border-stone-700 hover:border-b-2" title="{{_('click to expand/shrink tabs')}}"><i class="icon-lg tabs-display expand opacity-50 hover:opacity-100"></i></span>
     <input type="hidden" name="id" id="projid" value="{{target_proj.projid}}">
@@ -49,12 +51,12 @@
             <label for="title">{{_('Title')}}</label>
             <input type="text" id="title" name="title" class="form-input" value="{{ target_proj.title }}" required data-required="{{_('a title is required')}}" data-new="{{_('new')}}" placeholder="project title"></div>
           <div class="form-box">
-            <label for="proj_description">{{_('Description')}} <i data-for="help_proj_description" data-action="request" data-what="help"></i></label>
+            <label for="proj_description">{{_('Description')}} <i data-for="help_proj_description" data-request="help"></i></label>
             <textarea id="proj_description" name="description" class="form-textarea" placeholder="project description" rows="4">{{ target_proj.description|default('',true) }}</textarea>
 
           </div>
           <div class="form-box">
-            <label for="comments">{{ _('Comments')}}<i data-for="help_comments" data-action="request" data-what="help"></i></label>
+            <label for="comments">{{ _('Comments')}}<i data-for="help_comments" data-request="help"></i></label>
             <textarea id="comments" name="comments" class="form-textarea" placeholder="project comments" rows="4">{{ target_proj.comments|default('',true) }}</textarea>
 
           </div>
@@ -84,7 +86,7 @@
               target_proj.visible else '' }}></span></label>
           </div>
           <div class="form-box">
-            <label for="cnn_network_id" >{{_('Deep feature extractor')}}<i data-for="help_cnn_network_id" data-action="request" data-what="help"></i></label>
+            <label for="cnn_network_id" >{{_('Deep feature extractor')}}<i data-for="help_cnn_network_id" data-request="help"></i></label>
             <select id="cnn_network_id" name="cnn_network_id" class="form-select">
               <option value=""></option>
               {% for k,v in scn.items() %}
@@ -94,7 +96,7 @@
 
           </div>
           <div class="form-box">
-            <label for="proj_license"  >{{ _('License') }}<i data-for="help_proj_license" data-action="request" data-what="help"></i></label>
+            <label for="proj_license"  >{{ _('License') }}<i data-for="help_proj_license" data-request="help"></i></label>
             <div class="form-group" id="proj_license" role="group">
                 {% set required = True %}
               {% for k in possible_licenses.keys() %}
@@ -111,7 +113,7 @@
             pick_from_other(False,key='taxo',modal_title= _('Pick taxonomy from other projects')) }}
 
           <div class="form-box">
-            <label for="inittaxo">{{_('Definition of preset for manual sorting')}}<i data-for="help_initclassiflist" data-action="request" data-what="help"></i></label>
+            <label for="inittaxo">{{_('Definition of preset for manual sorting')}}<i data-for="help_initclassiflist" data-request="help"></i></label>
 
             <select id='inittaxo' class="js js-autocomplete taxolb" name="inittaxo[]" data-type="taxo" data-importfield="{{'taxo' if target_proj.projid else 'init_classif_list' }}" class="form-multiselect" placeholder="{{_('select a category')}}" multiple autocomplete="off">
              {% for r in predeftaxo %}
@@ -128,7 +130,7 @@
             pick_from_other(False,key='fields',modal_title= _('Pick presets from other projects')) }}
 
           <div class="form-box">
-            <label for="popoverfieldlist">Fields displayed in image popover <em>in the manual classification page</em><i data-for="help_popoverfieldlist" data-action="request" data-what="help"></i></label>
+            <label for="popoverfieldlist">Fields displayed in image popover <em>in the manual classification page</em><i data-for="help_popoverfieldlist" data-request="help"></i></label>
             <textarea id="popoverfieldlist" name="popoverfieldlist" class="form-textarea" rows="8">{{ target_proj.popoverfieldlist|default('',true) }}</textarea>
             </div>
           </div>
@@ -141,10 +143,10 @@
         <div class="tab-content">{% if target_proj.projid and not target_proj.contact %}
           {{ alertbox(type='danger', message="nocontact",dismissible = True, inverse = True, extra = {'small': True})}}
               {% endif %} {{ pick_from_other(False,key='privileges',modal_title= _('Pick privileges from other projects')) }}
-        <div class="flex flex-col w-full px-4" >
+        <div class="flex flex-col w-full px-4" id="listprivileges" >
             <div class="row" data-headers="true">
               <div class="th ident">{{ _('Name') }}</div>
-              <div class="th priv label">{{ _('Privilege') }}<i data-for="help_project_privileges" data-action="request" data-what="help"></i></div>
+              <div class="th priv label">{{ _('Privilege') }}<i data-for="help_project_privileges" data-request="help"></i></div>
               <div class="th contact">{{ _('Contact') }}</div>
             </div>
             {% if members_by_right is iterable and members_by_right|length > 0 %}
@@ -169,13 +171,13 @@
 
           <!-- add privilege -->
           <div class="w-full block">
-            <button id="addmember" class="button is-new float-right clear-right text-left" data-target="member" data-add="block" title="{{ _('New privilege') }}"><i class="icon icon-plus-sm align-bottom mr-1"></i>{{ _('New privilege') }}</button>
+            <button id="addmember" type="button" class="button is-new float-right clear-right text-left" data-target="member" data-add="block" title="{{ _('New privilege') }}"><i class="icon icon-plus-sm align-bottom mr-1"></i>{{ _('New privilege') }}</button>
           </div>  </div>  </fieldset></div>
 
     </div>
 
 <div class="w-full text-left my-8"> <input type="hidden" name="save" value="Y">
-  <a href="/prj/{{ target_proj.projid }}" class="button is-secondary inverse" title="{{ _('Cancel, back to project ') }}">{{ _('Cancel') }}</a> <button type="button" data-action="submit" data-target="#formu" data-event="mousedown" class="button is-primary">{{_('Save')}}</button>
+  <a href="/prj/{{ target_proj.projid }}" class="button is-secondary inverse" title="{{ _('Cancel, back to project ') }}">{{ _('Cancel') }}</a> <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button>
 </div>
 </form>
 </div>

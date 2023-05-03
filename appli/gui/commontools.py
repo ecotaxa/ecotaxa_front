@@ -83,33 +83,6 @@ def jobs_summary_data() -> Dict:
     return ""
 
 
-def webstats(app) -> str:
-    return app.config.get("GOOGLE_ANALYTICS_ID", "")
-
-
-# temporary while 2 interfaces live together
-def RenderTemplate(
-    filename="index", templates="v2/", title="EcoTaxa 2.6", webstats="", bg=False
-) -> str:
-    import os
-
-    jobs_summary = jobs_summary_data()
-    experimental = experimental_header()
-    if filename[-1] == "/":
-        filename = filename[:-1]
-    if os.path.exists("appli/templates/" + templates + filename + ".html"):
-        return render_template(
-            templates + filename + ".html",
-            jobs_summary=jobs_summary,
-            webstats=webstats,
-            experimental=experimental,
-            current_user=current_user,
-            title=title,
-            bg=bg,
-            gui=GUI_PATH + "/",
-        )
-
-
 def build_mail(emails: str, type: str = "", text: str = "") -> str:
     """
     Build a mailto link .

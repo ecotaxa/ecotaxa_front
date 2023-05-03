@@ -22,6 +22,16 @@ ACCOUNT_USER_EDIT = "edit"
 IS_FROM_ADMIN = "admin"
 
 
+def _get_captcha() -> list:
+    no_bot = None
+    reCaptchaID = app.config.get("RECAPTCHAID")
+    if reCaptchaID:
+        response = gvp("g-recaptcha-response")
+        remoteip = _public_ip()
+        no_bot = [remoteip, response]
+    return no_bot
+
+
 def check_is_admin(user: dict) -> bool:
     thisuser: UserModelWithRights = user
     return thisuser and (2 in thisuser.can_do)
@@ -106,15 +116,12 @@ def user_account(usrid: int, isfrom: str, action: str = None) -> list:
         except ApiException as ae:
             return [None, str(ae)]
     elif action == ACCOUNT_USER_CREATE and usrid == -1:
-        no_bot = None
-        reCaptchaID = app.config.get("RECAPTCHAID")
-        if reCaptchaID:
-            response = gvp("g-recaptcha-response")
-            remoteip = request.remote_addr
-            no_bot = [remoteip, response]
+
         try:
             with ApiClient(UsersApi, request) as api:
-                ret = api.create_user(user_model_with_rights=posted)
+                ret = api.create_user(
+                    user_model_with_rights=posted, no_bot=_get_captcha()
+                )
             response = [posted, None]
         except ApiException as ae:
             return [None, str(ae)]
@@ -155,7 +162,7 @@ def account_page(
                 auth_email = False
                 reCaptchaID = app.config.get("RECAPTCHAID")
                 if token:
-                    auth_email = _get_mail_from_token(token)
+                    auth_email = get_mail_from_token(token)
                 if auth_email == False:
                     return render_template("v2/error.html", error=403)
                 else:
@@ -197,37 +204,95 @@ def account_page(
     )
 
 
-def _generate_mail_token(email: str) -> str:
+def reset_password(email: str, token: str, pwd: str) -> str:
+    err = None
+    if get_mail_from_token(token, True) != False and pwd != None:
+        no_bot = _get_captcha()
+        try:
+            with ApiClient(UsersApi, request) as api:
+                ret = api.reset_user_password(
+                    resetpassword=pwd,
+                    no_bot=no_bot,
+                )
+                return ["gui_login", None]
+
+        except ApiException as ae:
+            err = str(ae)
+    else:
+        err = True
+
+    return ["gui_forgotten", err]
+
+
+def _public_ip() -> str:
+    if request.environ.get("HTTP_X_FORWARDED_FOR") is None:
+        return request.environ["REMOTE_ADDR"]
+    else:
+        return request.environ["HTTP_X_FORWARDED_FOR"]
+
+
+def _generate_mail_token(email: str, action: str = "accountrequest") -> str:
     from itsdangerous import URLSafeTimedSerializer
 
     auths = URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="accountrequest")
     # token = build_serializer().dumps({"email": email, "action": "accountrequest"}) // for _back
-    token = auths.dumps({"email": email, "action": "accountrequest"})
+    token = auths.dumps(
+        {
+            "email": email,
+            "action": action,
+            "ip": _public_ip(),
+            "instance": constants.APP_INSTANCE_ID,
+        }
+    )
     return token
 
 
-def _get_mail_from_token(token: str) -> str:
+def get_mail_from_token(token: str, verifip=False) -> str:
     from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
     auths = URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="accountrequest")
     try:
-        # email = build_serializer().loads(token,max_age =24*3600) // for _back
         email = auths.loads(token, max_age=24 * 3600)
     except (BadSignature, SignatureExpired):
         flash("error bad signature - token for creation has expired", "error")
         return False
 
     if email.get("email") and email.get("action"):
-        return email.get("email")
+        if verifip == False or (email.get("ip") == _public_ip()):
+            return email.get("email")
     else:
-        flash("error no email", "error")
+        flash("error invalid token", "error")
         return False
 
 
+def reset_password_message(email: str) -> MIMEMultipart:
+    url = "gui_forgotten"
+    token = _generate_mail_token(email, "resetpassword")
+    recipients = [email]
+    msg = MIMEMultipart()
+    msg["Subject"] = "EcoTaxa reset password"
+
+    msg["To"] = ", ".join(recipients)
+    msg["ReplyTo"] = constants.APP_NOREPLY
+    html = render_template(
+        "v2/mail/_mail_reset_password.html",
+        email=constants.APP_EMAIL_ASSISTANCE,
+        link=("{0}/{1}/{2}").format(
+            request.url_root + "/" + url_for(url), constants.APP_INSTANCE_ID, token
+        ),
+    )
+    text = MIMEText(
+        html_to_text(html),
+        "plain",
+    )
+    html = MIMEText(html, "html")
+    msg.attach(text)
+    msg.attach(html)
+    return msg
+
+
 def account_verify_message(usrid: int, account: dict = None) -> MIMEMultipart:
-    ecotaxainstance = "instanceid1"
     url = "gui_userlist"
-    assistemail = "assistance@ecotaxa.org"
     recipients = [constants.APP_EMAIL_VALIDATE_ACCOUNT]
     msg = MIMEMultipart()
     msg["Subject"] = "EcoTaxa account creation"
@@ -245,31 +310,25 @@ def account_verify_message(usrid: int, account: dict = None) -> MIMEMultipart:
         "plain",
     )
     html = MIMEText(html, "html")
-
-    # Attach parts into message container.
-    # According to RFC 2046, the last part of a multipart message, in this case
-    # the HTML message, is best and preferred.
     msg.attach(text)
     msg.attach(html)
     return msg
 
 
 def validation_message(email: str) -> MIMEMultipart:
-    ecotaxainstance = "instanceid1"
     url = "gui_register"
-    assistemail = "assistance@ecotaxa.org"
     recipients = [email]
     msg = MIMEMultipart()
     msg["Subject"] = "EcoTaxa email validation"
 
     msg["To"] = ", ".join(recipients)
-    msg["ReplyTo"] = "no.reply@ecotaxa.org"
+    msg["ReplyTo"] = constants.APP_NOREPLY
     token = _generate_mail_token(email)
     html = render_template(
         "v2/mail/_mail_validate.html",
-        email=assistemail,
+        email=constants.APP_EMAIL_ASSISTANCE,
         link=("{0}/{1}/{2}").format(
-            request.url_root + "/" + url_for(url), ecotaxainstance, token
+            request.url_root + "/" + url_for(url), constants.APP_INSTANCE_ID, token
         ),
     )
     text = MIMEText(
@@ -277,10 +336,6 @@ def validation_message(email: str) -> MIMEMultipart:
         "plain",
     )
     html = MIMEText(html, "html")
-
-    # Attach parts into message container.
-    # According to RFC 2046, the last part of a multipart message, in this case
-    # the HTML message, is best and preferred.
     msg.attach(text)
     msg.attach(html)
     return msg

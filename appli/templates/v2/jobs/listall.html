@@ -38,7 +38,7 @@
 {%if cleanresult|length%}
 <div class="alert alert-info inverse" data-dismissible=true> <strong>{{_('Cleaning process')}} {{cleanresult|length ~ ' ' ~ _('jobs cleaned') }} </strong> {{cleanresult|join(', ')}}</div>
 {% endif %}
-  <table class="datatable-table jobs">
+  <table class="table-table jobs">
     <thead>
       <tr>
       <th>{{_('ID')}}</th>

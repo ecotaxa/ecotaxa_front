@@ -50,7 +50,7 @@
   {% set pos = pos + prop + '-' + val + ' ' if val!='' %}
   {% endfor %}
   {% endif %}
-  <summary class="aside-label" {{ 'data-action=request data-what=help' if type=='modal-help' }}  ><span class="summary-title">{{ modal_title }}</span></summary>
+  <summary class="aside-label" {{ 'data-request=help' if type=='modal-help' }}  ><span class="summary-title">{{ modal_title }}</span></summary>
   <div class="modal" id="{{ id }}" >
   <div class="aside-body">
       {% set modal_content='./v2/help/index.html' if (modal_content == '' and type=='modal-help') else modal_content %}
@@ -67,7 +67,7 @@
 <select {{ 'multiple' if multiple }} name="{{ name }}" id="{{ id }}" class="form-select js js-autocomplete" data-placeholder="{{ placeholder }}" data-type="{{ type }}" {{ 'required' if required }}  {{ data if data }}>
 
   {% if options != None and options is iterable%}
-      <option value="" {{ 'selected' if value =='' or value==0 }} {{ 'disabled hidden' if value == 0  }}>{{ placeholder +'...'}}</option>
+      <option value='' {{ 'selected' if value =='' or value==0 }} {{ 'disabled hidden' if value == 0  }}>{{ placeholder +'...'}}</option>
   {% for option in options%}
 
   {% set v= option[0] if option is not string  else option %}

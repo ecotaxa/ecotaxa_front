@@ -127,7 +127,6 @@ def projects_list(
     if filt == None:
         filt = _get_projects_filters()
     prjs = []
-    hasproj = True
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
@@ -140,7 +139,6 @@ def projects_list(
     else:
         prjs = _prjs_list_api(listall, filt, for_managing=for_managing)
         if len(prjs) == 0 and listall == False:
-            hasproj = False
             listall = True
             # if listall add not granted projects
             prjs = _prjs_list_api(True, filt, for_managing=for_managing)
@@ -177,7 +175,6 @@ def projects_list(
         tabledef.update(
             {
                 "lastused": last_used_projects,
-                "hasproj": hasproj,
             }
         )
     return tabledef

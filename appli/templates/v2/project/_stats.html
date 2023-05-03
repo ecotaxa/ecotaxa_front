@@ -24,7 +24,7 @@
 <p class="py-4">{{target_proj.description }}</p>
 {%-endif-%}
 {% if target_proj.privileges is iterable %}
-<div class="stat-item "><span class="stat-label">{{_('Privileges')}} <i data-for="help_proj_stats_privileges" data-action="request" data-what="help"></i></span>
+<div class="stat-item "><span class="stat-label">{{_('Privileges')}} <i data-for="help_proj_stats_privileges" data-request="help"></i></span>
   <div class="stat-info">
   {% for right,members in target_proj.privileges.items() %}
   <div class="flex flex-row flex-wrap mb-2">
@@ -41,7 +41,7 @@
 <div class="stat-item"><span class="stat-label">{{_('Definition of preset for manual sorting')}}</span><span class="stat-info">{{taxo_list(initclassiflist)}}</span></div>
 {% endif%}
 <div class="stat-item">
-<span class=stat-label>{{_('Deep feature extractor')}} <i data-for="help_proj_stats_deep_feature_extractor" data-action="request" data-what="help"></i></span><span class="stat-info">{{target_proj.cnn_network_id}}</span></div>
+<span class=stat-label>{{_('Deep feature extractor')}} <i data-for="help_proj_stats_deep_feature_extractor" data-request="help"></i></span><span class="stat-info">{{target_proj.cnn_network_id}}</span></div>
 </div>
 {%-endmacro %}
 

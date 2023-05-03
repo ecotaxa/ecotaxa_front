@@ -45,7 +45,7 @@
              <div class="form-box"><label for="">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True,options=organisations)}}</div>
               <div class="form-box"><label for="">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
           <div class="form-box">
-            <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}}<i data-for="help_comments" data-action="request" data-what="help"></i></label>
+            <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}}<i data-for="help_comments" data-request="help"></i></label>
             <textarea id="usercreationreason" name="usercreationreason" class="form-textarea" placeholder="{{_('creation reason')}}" rows="4">{{ user.usercreationreason|default('',true) }}</textarea>
 
           </div>{%if  createaccount == True and not incadmin %}
@@ -62,7 +62,7 @@
       </fieldset>{%-endif-%}</div>
       <fieldset>{%if  reCaptchaID%}<input type='hidden' name='g-recaptcha-response' id='g-recaptcha-response' value=''>{%endif%}
 <div class="w-full text-left mb-8"> <input type="hidden" name="save" value="Y">
-  <a href="{{back}}" class="button is-secondary inverse" title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a> <button type="button" data-action="submit" data-target="#formu" data-event="mousedown" class="button is-primary">{{_('Save')}}</button>
+  <a href="{{back}}" class="button is-secondary inverse" title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a> <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button>
 </div></fieldset>
 </form>
 {% if reCaptchaID %}

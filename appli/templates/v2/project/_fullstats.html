@@ -5,12 +5,10 @@
 {%-endmacro%}
 {% macro table_taxo_stats(taxastats)-%}
 <table>
-  <thead><tr><th data-altsort="lineage" data-tip=1 scope="col" data-type="html">{{_('Taxon')}} <small data-delonexport class="sorton lowercase"><span class="ml-2 "> {{_('sort on')}} </span><a href="#" class="active" role="button" >{{_('name')}}</a> <a href="#" role="button">{{_('lineage')}}</a></small></th><th scope="col" data-name='lineage' data-hidden=true>{{_('lineage')}}</th>{{ taxo_th_row()}}</tr></thead>
+  <thead><tr><th><div data-name="Taxon" data-altsort="lineage" data-tip=1 scope="col" data-type="html">{{_('Taxon')}} <small data-delonexport class="sorton lowercase"><span class="ml-2 "> {{_('sort on')}} </span><a href="#" class="active" role="button" >{{_('name')}}</a> <a href="#" role="button">{{_('lineage')}}</a></small></th><th scope="col" data-name='lineage' data-mask=true>{{_('lineage')}}</div></th>{{ taxo_th_row()}}</tr></thead>
   <tbody>
-
     {%- if taxastats is iterable -%}
     {%-for taxastat in taxastats-%}
-
 {{taxo_row(taxastat,'taxon',taxastat.lineage|reverse|join('>'))}}
 {%- endfor-%}
 {%-endif-%}
@@ -46,7 +44,7 @@
 {%-endmacro%}
 {% macro taxo_tab(taxastats) -%}
 {% set types = ['validated','dubious','predicted','unclassified']%}
-<div id="stats_{{target_proj.projid}}_used_taxa" class="js js-datatable block w-full max-tabstat-h" data-instanceid="used_taxa"  data-expand="{{_('show all rows')}}" data-shrink="{{_('hide rows')}}" data-export="tsv" data-sortable=true {{'data-searchable=true' if taxastats is iterable and taxastats|length > 20 }}>
+<div id="stats_{{target_proj.projid}}_used_taxa" class="js js-datatable block w-full overflow-x-hidden max-tabstat-h" data-instanceid="used_taxa"  data-expand="{{_('show all rows')}}" data-shrink="{{_('hide rows')}}" data-export="tsv" data-sortable=true {{'data-searchable=true' if taxastats is iterable and taxastats|length > 20 }}>
 {{ table_taxo_stats(taxastats)}}</div>
 {%-endmacro%}
 
@@ -54,7 +52,7 @@
 {% if taxastats %}
 <section class="separate">
 <div class="stat-item">
-<span class="stat-label">{{_('Used taxa')}} <i data-for="help_proj_stats_used_taxa" data-action="request" data-what="help"></i></span>
+<span class="stat-label">{{_('Used taxa')}} <i data-for="help_proj_stats_used_taxa" data-request="help"></i></span>
 <div class="stat-info">{{ taxo_list(used_taxa) if partial else taxo_tab(taxastats)}}</div>
 </div></section>
 {% endif %}
@@ -71,13 +69,13 @@
   <section  class="separate">
   {{ proj_settings() }}
   <div class="stat-item">
-  <span class="stat-label ">{{_('License')}} <i data-for="help_proj_stats_license" data-action="request" data-what="help"></i></span><span class="stat-info js js-license" data-withlink=true>{{target_proj.license}}</span></div>
+  <span class="stat-label ">{{_('License')}} <i data-for="help_proj_stats_license" data-request="help"></i></span><span class="stat-info js js-license" data-withlink=true>{{target_proj.license}}</span></div>
   </section>
   {{ tabstats() }}
   {% if annotators  is iterable %}
   <section  class="separate">
   <div class="stat-item">
-    <span class="stat-label  tab-control">{{_('Users')}} <i data-for="help_proj_stats_users" data-action="request" data-what="help"></i></span>
+    <span class="stat-label  tab-control">{{_('Users')}} <i data-for="help_proj_stats_users" data-request="help"></i></span>
     <div class="stat-info flex flex-row flex-wrap mb-4 tab-content">
       <div id="stats_{{target_proj.projid}}_users" class="js js-datatable block w-full max-tabstat-h" data-instanceid="users" data-sortable=true data-export="tsv" data-expand="{{_('show all rows')}}" data-shrink="{{_('hide rows')}}" {{'data-searchable=true' if annotators is iterable and annotators|length > 20 }}>
         <table><thead><tr><th scope="col">{{_('User')}}</th><th scope="col">{{_('Privilege')}}</th><th scope="col">{{_('number of actions')}}</th><th scope="col">{{_('last annotation date')}}</th></tr></thead>
@@ -90,7 +88,7 @@
  </table>
   </div></div></div></section> {% endif %}
   <section  class="separate">
-  <div class="stat-item"><span class="stat-label tab-control">{{_('Samples')}} <i data-for="help_proj_stats_samples" data-action="request" data-what="help"></i></span>
+  <div class="stat-item"><span class="stat-label tab-control">{{_('Samples')}} <i data-for="help_proj_stats_samples" data-request="help"></i></span>
     <div class="stat-info">
     <div id="stats_{{target_proj.projid}}_samples" class="js js-datatable block w-full max-tabstat-h" data-instanceid="samplestats" data-select="selectmultiple" data-cellid="sampleid" data-searchable="true"  data-onselect="/prj/{{target_proj.projid}}?samples=" data-expand="{{_('show all rows')}}" data-shrink="{{_('hide rows')}}" data-from="prjsamplestats" data-fromid="{{target_proj.projid}}" data-defer="a.is-pick" data-export="tsv" data-sortable=true>
     <div id="wait-please" data-wait="{{_('Please wait')}}" data-loaded="{{_( 'Data loaded. Displaying...')}}" class="hide"> {{ _('Please wait')}}...</div>

@@ -1,8 +1,7 @@
-<div id="table-filters" class="datatable-filters">
+<div id="table-filters" class="  order-3 sm:order-1 w-full  mx-auto sm:-mt-16 block sm:inline-block text-center">
   {% if not current_user.last_used_projects %}
   <div id="welcome-info">{{_('To start using EcoTaxa, you need to <a href="/gui/prj/create">Create a project</a> or ask for permission in the list below')}}</div>
   {% else %}
-
  <div class=" is-title inline">{{ _('Other projects') if listall==True else  _('Accessible projects') }}</div>
   <a href="/gui/prj{{'/listall' if listall != True }}" class="is-filter inline" data-action="add-filters" data-noprev=true>{{ _('Show only accessible projects') if listall == True else  _('Show other projects')}}<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
   <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />

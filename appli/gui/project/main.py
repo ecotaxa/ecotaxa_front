@@ -192,7 +192,7 @@ def prj_merge(projid):
     prjstomerge = prj_list_to_merge(target_proj, excludeprjs=excludeprjs)
     return render_template(
         "./v2/project/merge.html",
-        target_proj=dict({"projid": target_proj.projid, "title": target_proj.title}),
+        target_proj=target_proj,
         prjstomerge=prjstomerge,
     )
 

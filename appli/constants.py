@@ -53,7 +53,10 @@ APP_GUI_MESSAGE_FILE = "config/messages.json"
 CUSTOM_HOME_TOP = "config/hometop.html"
 CUSTOM_HOME_BOTTOM = "config/homebottom.html"
 # settings for account creation - if exists and valid email a mail is sent after registration for external validation of account
-APP_EMAIL_VALIDATE_ACCOUNT = "beatrice.caraveo@imev-mer.fr"
+APP_EMAIL_VALIDATE_ACCOUNT = "xxx@xxx"
+APP_EMAIL_ASSISTANCE = "assistance@mail"
+APP_NOREPLY = "no.reply@mail"
+APP_INSTANCE_ID = "V_1"
 # new interface ( path + name of static rep for css and js)
 GUI_PATH = "/gui"
 # translations path i18n

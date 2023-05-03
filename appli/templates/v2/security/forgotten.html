@@ -1,0 +1,16 @@
+{% extends "v2/layout.html" %}
+{%block body%}
+<div class=" w-full lg:w-96  mx-auto mt-24 md:mt-48 pt-8 px-2">
+<div id="home-forgotten" class=" w-full mb-12 overflow-hidden border border-transparent shadow px-2 mx-auto sm:px-4">
+<form id="form-forgotten" action="{{ url_for('gui_forgotten') }}" method="POST" name="forgotten_user_form">
+<fieldset class="mb-0.5"><legend>{{ _('Reset Password request') }}</legend>
+    <div class="form-box relative">
+    <label for="request_email" class="over" >{{_('Email')}}</label>
+    <input name="request_email" id="request_email" class="form-input" placeholder="Your email address" type="email" required autofocus>
+    </div>
+
+<div class="submit-box">
+    <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-forgotten"><i class="icon icon-check invert mr-2.5"></i>{{ _('Send') }}</button>
+    </div></fieldset>
+</form></div></div>
+{%endblock%}

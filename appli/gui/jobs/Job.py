@@ -1,12 +1,12 @@
 import json
-from json import JSONDecodeError
+
 from typing import Optional, Dict
 
 import requests
-from flask import g, flash
+from flask import flash
 from werkzeug.datastructures import FileStorage
 
-from appli import gvg, XSSEscape, gvp
+from appli import gvg, gvp
 from appli.project import sharedfilter
 from to_back.ecotaxa_cli_py.api import FilesApi
 from to_back.ecotaxa_cli_py.models import JobModel
@@ -74,7 +74,17 @@ class Job(object):
         if target_prj:
             if full == True:
                 return target_prj
-            return dict({"title": target_prj.title, "projid": target_prj.projid})
+            return dict(
+                {
+                    "title": target_prj.title,
+                    "projid": target_prj.projid,
+                    "managers": target_prj.managers,
+                    "annotators": target_prj.annotators,
+                    "viewers": target_prj.viewers,
+                    "status": target_prj.status,
+                    "license": target_prj.license,
+                }
+            )
         return None
 
     @classmethod
@@ -145,6 +155,8 @@ class Job(object):
 
 def load_from_json(str, clazz):
     """deserialize a json value of expected class"""
+    from json import JSONDecodeError
+
     try:
         ret = json.loads(str)
     except JSONDecodeError:

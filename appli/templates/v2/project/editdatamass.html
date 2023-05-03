@@ -5,12 +5,15 @@
   <div class="w-100 mx-auto py-4 block text-left relative" id="project-editdatamass-header">
     {% set data = {'file':'_help_project_editdatamass'} %}
     {{header_project_job(_('Project Mass data edition'),data, _('Merge project'))}}
-  </div>
+    <div class="block-disclaimer flex"><span class="icon icon-fire-sm h-100"></span><div>{{_('Best practices are to edit the metadata in the ecotaxa_*.tsv file that you import and use the <a href="/gui/job/import">["Re-import and update metadata"]</a> tool.')}}
+      {{_(' This way the metadata is consistent between EcoTaxa and your own file archive.')}} {{_('If you cannot do it, this tool allows you to change the metadata of many objects at once, at your own risk. EcoTaxa does not keep a history of changes in metadata.')}}</div>
+  </div></div>
 {% if error==404 %}
 <a href="/gui/prj/" class="alert alert-warning">{{_('Select another project')}}</a>
 {% elif error==401 or error == 403 %}
 <a href="/gui/prj/" class="alert alert-danger">{{_('Select another project')}}</a>
 {% elif target_proj and target_proj.projid %}
+
 <form method=post class="mb-0 pb-0">  <fieldset><div class="alert alert-warning inverse">
 {%if warning >0 %}
 {{_('USING Active Project Filters')}} {{objectids|length}} {{_('objects')}}

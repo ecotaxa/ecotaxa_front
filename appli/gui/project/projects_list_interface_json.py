@@ -21,7 +21,6 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                     "label": _("ID"),
                     "sortable": "desc",
                     "format": "number",
-                    "sort": "desc",
                 },
                 "instrument": {
                     "label": _("Instrument"),
@@ -33,10 +32,10 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                     "subfield": "contact",
                     "sublabel": " - manager or contact",
                 },
-                "contact": {"label": _("Contact"), "hidden": "true"},
-                "annotators": {"label": _("Annotators"), "hidden": "true"},
-                "managers": {"label": _("Managers"), "hidden": "true"},
-                "viewers": {"label": _("Viewers"), "hidden": "true"},
+                "contact": {"label": _("Contact"), "hidden": True},
+                "annotators": {"label": _("Annotators"), "hidden": True},
+                "managers": {"label": _("Managers"), "hidden": True},
+                "viewers": {"label": _("Viewers"), "hidden": True},
                 "status": {"label": _("Status")},
                 "visible": {
                     "label": _("Visibility"),
@@ -102,8 +101,12 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
         },
         "samples": dict(
             {
-                "select": {"select": "selectmultiple", "field": "sampleid"},
-                "sampleid": {"hidden": "true"},
+                "select": {
+                    "select": "selectmultiple",
+                    "field": "sampleid",
+                    "emptydata": "sampleid",
+                },
+                "sampleid": {"hidden": True},
                 "orig_id": {
                     "label": _("Sample ID"),
                 },

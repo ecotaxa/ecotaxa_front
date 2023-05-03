@@ -150,7 +150,7 @@ def job_question(job_id: int):
 @login_required
 def job_status(jobid: int):
     """
-    Ajax entry point for getting a job status. Called only from view jobs/monitor.html.
+    Ajax entry point for getting a job status. Called only from view jobs/show.html.
     """
     try:
         with ApiClient(JobsApi, request) as api:
@@ -160,7 +160,6 @@ def job_status(jobid: int):
         rep["finalaction"] = job_cls.final_action(job)
     except ValueError as e:  # Exception as e:
         rep = dict({"errors": [{"err": e.status, "message": str(e)}]})
-    print(rep)
     return rep
 
 

@@ -1,10 +1,9 @@
 <nav id="secondary-nav" class="js js-nav">
-  <!-- project nav  and secondary classif nav and filters -->
-  <div class="px-4 w-full relative"><div id="menu-burger" class="burger">
+<div class="w-full relative mt-2 md:mt-0 py-4"><div id="menu-burger" class="burger" data-target="navbar-menu">
 <div id="bar1" class="bar"></div>
 <div id="bar2" class="bar"></div>
 <div id="bar3" class="bar"></div>
-</div><ul id="navbar-menu" ><li>
+</div><ul id="navbar-menu"><li class="hidden sm:visible">
         <a href="/gui/prj/" title="{{_('projects list')}}" class="text-lg uppercase">
           &laquo;
         </a></li>
@@ -35,14 +34,21 @@
             {{_('Settings')}}
           </a>
         </li><li><div>{{_('Tools')}}</div>
-    {% set disabled=''%}
-    <ul aria-expanded=false>
-      <li><a href="/gui/job/create/Subset?p={{target_proj.projid}}" {{disabled}}>{{_('<strong>Extract</strong> Subset')}}</a></li>
-    <li><a href="/gui/prj/merge/{{target_proj.projid}}"  {{disabled}}>{{_('<strong>Merge</strong> another project in this project')}}</a></li>
-    <li><a href="/gui/prj/editannot/{{target_proj.projid}}"  {{disabled}}>{{_('<strong>Edit or erase</strong> annotations massively')}}</a></li>
-    <li><a href="/gui/prj/editdatamass/{{target_proj.projid}}"  {{disabled}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
-    <li><a href="/gui/prj/resettopredicted/{{target_proj.projid}}"  {{disabled}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
-    <li><a href="/gui/prj/purge/{{target_proj.projid}}"  {{disabled}}>{{_('<strong>Delete</strong> object or project')}}</a></li>
+      {% set disabled = namespace(value=" class=disabled disabled=disabled") %}
+      {% if target_proj.status!='ExploreOnly' -%}
+      {% for manager in target_proj.managers -%}
+      {%if current_user.id|int == manager.id|int -%}
+        {%- set disabled.value="" -%}
+        {%-endif%}
+        {%-endfor%}
+    {%- endif%}
+      <ul aria-expanded=false>
+      <li><a href="/gui/job/create/Subset?p={{target_proj.projid}}" {{disabled.value if target_proj.status=='ExploreOnly'}}>{{_('<strong>Extract</strong> Subset')}}</a></li>
+    <li><a href="/gui/prj/merge/{{target_proj.projid}}"  {{disabled.value}}>{{_('<strong>Merge</strong> another project in this project')}}</a></li>
+    <li><a href="/gui/prj/editannot/{{target_proj.projid}}"  {{disabled.value}}>{{_('<strong>Edit or erase</strong> annotations massively')}}</a></li>
+    <li><a href="/gui/prj/editdatamass/{{target_proj.projid}}"  {{disabled.value}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
+    <li><a href="/gui/prj/resettopredicted/{{target_proj.projid}}"  {{disabled.value}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
+    <li><a href="/gui/prj/purge/{{target_proj.projid}}"  {{disabled.value}}>{{_('<strong>Delete</strong> object or project')}}</a></li>
     <li><a href="/prj/taxo_fix/{{target_proj.projid}}" {{'' if( target_proj and target_proj.status == "annotate" and (current_user in target_proj.managers or  current_user in target_proj.annotators))  else  ''}}>{{_('<strong>Fix</strong> category issues')}}</a></li>
       </ul>
   </li><li>
