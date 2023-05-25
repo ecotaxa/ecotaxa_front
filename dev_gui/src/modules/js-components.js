@@ -1,166 +1,183 @@
 import DOMPurify from 'dompurify';
-import {
+/*import {
   AlertBox
 } from "../modules/alert-boxes.js";
-import {
-  ProjectPrivileges
-} from "../modules/project-privileges.js";
-
-import {
-  TableComponent
-} from '../modules/table-component.js';
 
 import {
   JsTomSelect
 } from "../modules/js-tom-select.js";
-
 import {
-  FormSubmit,
+  FormSubmit
 } from "../modules/form-submit.js";
 import {
-  fetchSettings
+  ProjectPrivileges
+} from '../modules/project-privileges.js';
+import {
+  JsTabs
+} from '../modules/js-tabs.js';
+import {
+  JsAccordion
+} from '../modules/js-accordion.js';
+import {
+  JsImport
+} from '../modules/js-import.js';*/
+import {
+  fetchSettings,
+  format_license
 } from '../modules/utils.js';
+import {
+  domselectors
+} from '../modules/modules-config.js';
 export class JsComponents {
-  async apply(element = document) {
+  items = {};
+  async applyTo(element = document) {
     if (!element) return;
     await this.activate(element);
   }
   async activate(element) {
     const items = element.querySelectorAll('.js');
-
+    // dynamic import of necessary modules
+    let dynamics = {};
     items.forEach(async item => {
       let actions = item.classList;
       actions.forEach(async (action) => {
         if (action.indexOf('js-') === 0) {
           switch (action) {
-            /*case "js-redir":
-              if (document.querySelector('form')) document.querySelector('form').disabled = true;
-              setTimeout(() => {
-                const url = DOMPurify.sanitize(item.dataset.redir);
-                history.replaceState(null, document.title, window.location.href);
-                window.location.href = url;
-              }, 3000);
-              break;*/
             case 'js-privacy':
               const opts = document.querySelectorAll('.RDOpt')
               opts.forEach(opt => opt.addEventListener('click', (e) => {
-                fetch('/setprivacy/' + DOMPurify.sanitize(e.target.value), fethSettings()).then(response => response.text()).then(text => {
-                  //text = DOMPurify.sanitize(text);
-                  location.reload(true)
-                })
+
+                fetch('/setprivacy/' + DOMPurify.sanitize(e.target.value), fetchSettings()).then(response => response.text()).then(text => {
+                  window.location.reload(true);
+                });
               }))
-              break;
-            case 'js-datatable':
-              const tbl = new TableComponent(item);
+
               break;
 
+            case 'js-datatable':
+              if (!dynamics.TableComponent) {
+                let {
+                  TableComponent
+                } = await import('../modules/table-component.js');
+                dynamics.TableComponent = TableComponent;
+              }
+
+              const tbl = new dynamics.TableComponent(item);
+              break;
             case 'js-hierarchy':
               break;
-            case 'js-snap':
-              // init modalcontainer with snap properties ( for scroll / pause on paragraphes )
-              const modalcontainer = document.querySelector('.modal-container');
-              if (modalcontainer === null) return;
-              const snapmodal = modalcontainer.querySelector('.modal');
-              if (snapmodal === null) return (['snap-y', 'snap-mandatory']).forEach(cl => (snapmodal.classList.add(cl)));
-              const siblings = modalcontainer.querySelectorAll('details');
-
-              siblings.forEach(sibling => {
-                (['snap-always', 'snap-top']).forEach(cl => {
-                  sibling.classList.add(cl);
-                })
-              })
+            case 'js-topsearch':
+              const searchcontainer = item;
+              if (!searchcontainer) return;
 
               break;
             case 'js-autocomplete':
-              const jsTomSelect = new JsTomSelect();
-
-              jsTomSelect.apply(item);
+              if (!dynamics.JsTomSelect) {
+                let {
+                  JsTomSelect
+                } = await
+                import(`../modules/js-tom-select.js`);
+                dynamics.JsTomSelect = JsTomSelect;
+              }
+              const jsTomSelect = new dynamics.JsTomSelect();
+              jsTomSelect.applyTo(item);
               break;
             case 'js-privilege':
-              // add member line clone of last data-block="member"
-
-              const projectPrivileges = new ProjectPrivileges();
-              const handleprivileges = async () => {
-                return await projectPrivileges.submitPrivileges();
+              if (!dynamics.ProjectPrivileges) {
+                let {
+                  ProjectPrivileges
+                } = await import('../modules/project-privileges.js');
+                dynamics.ProjectPrivileges = ProjectPrivileges;
               }
-              //remove deleted , clean && validate datas , format names before sending the form
-              const form = item.closest('form');
-              const formSubmit = new FormSubmit(form);
-              formSubmit.addHandler(handleprivileges);
-
+              const projectPrivileges = new dynamics.ProjectPrivileges();
               break;
             case 'js-tabs':
-              let btns = item.querySelectorAll('.tab-control');
-              if (btns.length === 0) {
-                btns = item.querySelectorAll('legend');
+              if (!dynamics.JsTabs) {
+                let {
+                  JsTabs
+                } = await
+                import(`../modules/js-tabs.js`);
+                dynamics.JsTabs = JsTabs;
               }
-              let l = 0;
-              btns.forEach((btn, index) => {
-                const target = (btn.dataset.target) ? item.querySelector('#' + btn.dataset.target) : btn.closest('.tab');
-                if (!target) return;
-                const show_content = (tab, show) => {
-                  const tabcontents = tab.querySelectorAll('.tab-content');
-                  tabcontents.forEach(tabcontent => {
-                    if (show === true) tabcontent.classList.remove('hide');
-                    else tabcontent.classList.add('hide');
-                  });
-                };
-                btn.style.left = l + 'px';
-                if (index === 0) {
-                  target.classList.add('active');
-                  show_content(target, true);
-                } else show_content(target, false);
-                l += parseInt(btn.offsetWidth) + 20;
-                btn.addEventListener('click', (e) => {
-                  if (e.currentTarget.disabled === true) {
-                    e.preventDefault();
-                    return;
-                  }
-                  const oldactive = target.parentElement.querySelector('.tab.active');
+              const jsTabs = new dynamics.JsTabs(item);
+              break;
+            case 'js-nav':
+              const location = window.location.href.split('?');
+              const tag = (item.dataset.tag) ? item.dataset.tag : 'ul';
 
-                  if (oldactive !== null) {
-                    oldactive.classList.remove('active');
-                    show_content(oldactive, false);
-                  }
-                  target.classList.add('active');
-                  show_content(target, true);
-                });
-
-              })
-              const dismiss = item.querySelector('[data-dismiss="tabs"]');
-              if (dismiss) dismiss.addEventListener('click', (e) => {
-                let icon;
-                if (item.classList.contains('js-tabs')) {
-                  item.classList.remove('js-tabs');
-                  btns.forEach(btn => btn.disabled = true);
-                  icon = item.querySelector('.icon-arrow-pointing-out');
-                  icon.classList.remove('icon-arrow-pointing-out');
-                  icon.classList.add('icon-arrow-pointing-in');
-                } else {
-                  item.classList.add('js-tabs');
-                  btns.forEach(btn => btn.disabled = false);
-                  icon = item.querySelector('.icon-arrow-pointing-in');
-                  icon.classList.remove('icon-arrow-pointing-in');
-                  icon.classList.add('icon-arrow-pointing-out');
+              const links = item.querySelectorAll(tag + ' a');
+              links.forEach(link => {
+                const href = link.href.split('?');
+                if (href[0] === location[0]) {
+                  link.parentElement.classList.add('active');
+                  return;
                 }
+
               });
+              const burger = item.querySelector(domselectors.component.navigation.burgermenu);
+              if (!burger) return;
+              const target = (burger.dataset.target) ? document.getElementById(burger.dataset.target) : burger.nextElementSibling;
+              if (!target) return;
+              burger.addEventListener('click', (e) => {
+                item.classList.toggle('open');
+              });
+              break;
+            case 'js-import':
+              if (!dynamics.JsImport) {
+                let {
+                  JsImport
+                } = await
+                import(`../modules/js-import.js`);
+                dynamics.JsImport = JsImport;
+              }
+              const jsImport = new dynamics.JsImport(item);
+              break;
+            case 'js-my-files':
+              if (!dynamics.JsMyFiles) {
+                let {
+                  JsImport
+                } = await
+                import(`../modules/js-my-files.js`);
+                dynamics.JsMyFiles = JsMyFiles;
+              }
+              const jsMyFiles = new dynamics.JsMyFiles(item);
+              break;
+            case 'js-upload':
+              if (!dynamics.JsUpload) {
+                let {
+                  JsUpload
+                } = await
+                import(`../modules/js-upload.js`);
+                dynamics.JsUpload = JsUpload;
+              }
+              const jsUpload = new dynamics.JsUpload(item);
+              break;
+            case "js-submit":
+              if (!dynamics.FormSubmit) {
+                let {
+                  FormSubmit
+                } = await
+                import(`../modules/form-submit.js`);
+                dynamics.FormSubmit = FormSubmit;
+              }
+              const formSubmit = new dynamics.FormSubmit(item);
 
               break;
-            case 'js-alerts':
+
+            case 'js-alert':
               if (!item.dataset.message) return;
-              const alert = new AlertBox(item).build(DOMPurify.sanitize(item.dataset.message), ((item.dataset.type) ? DOMPurify.sanitize(item.dataset.type) : 'warning'), item, {
-                dismissible: (item.dataset.dismissible) ? item.dataset.dismissible : true,
-                insertafter: true,
-                codemessage: item.dataset.message,
-                callback: () => {
-                  item.remove();
-                }
-              });
-              break;
+              if (!dynamics.AlertBox) {
+                let {
+                  AlertBox
+                } = await
+                import(`../modules/alert-boxes.js`);
+                dynamics.AlertBox = AlertBox;
+              }
+              const alert = new dynamics.AlertBox().build(item);
               break;
             case 'js-notifications':
               const checkNotifs = (tim) => {
-                fetch('/gui/jobssummary', fetchSettings()).then(response => response.text()).then(html => {
+                fetch('/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {
                   item.innerHTML = DOMPurify.sanitize(html);
                   /*if (tim < 600000) tim = 60000;
                   setTimeout(() => {
@@ -170,7 +187,28 @@ export class JsComponents {
               }
               checkNotifs(60000);
               break;
-            case 'js-search-autocomplete':
+            case 'js-accordion':
+              if (!dynamics.JsAccordion) {
+                let {
+                  JsAccordion
+                } = await
+                import(`../modules/js-accordion.js`);
+                dynamics.JsAccordion = JsAccordion;
+              }
+              item.querySelectorAll(((item.dataset.detail) ? item.dataset.detail : 'detail')).forEach(el => {
+                const summary = el.querySelector(((item.dataset.summary) ? item.dataset.summary : 'summary'));
+                const jsAccordion = new dynamics.JsAccordion(el, null, null, null, {}, summary);
+              })
+              break;
+            case 'js-license':
+              if (!dynamics.format_license) {
+                let {
+                  format_license
+                } = await
+                import(`../modules/utils.js`);
+                dynamics.format_license = format_license;
+              }
+              item.innerHTML = dynamics.format_license(DOMPurify.sanitize(item.innerHTML), (item.dataset.withlink));
               break;
             case 'js-observer':
               /*  const observer = new MutationObserver(mutations => {
@@ -188,13 +226,13 @@ export class JsComponents {
 
                   }
                   console.log('mutation', mutations)
-                  if (mutations.length) this.apply(item);
+                  if (mutations.length) this.init(item);
                 });
               observer.observe(item, {
                 childList: true,
                 subtree: true
               });
-              this.apply(item);*/
+              this.init(item);*/
               break;
           }
         }

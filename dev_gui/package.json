@@ -1,6 +1,9 @@
 {
   "scripts": {
+    "clean": "rmdir /s /q node_modules",
+    "reinstall": "npm run clean && npm install",
     "watch": "webpack --watch",
+    "startcheck": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_nodockerdb.sh'",
     "watchstartfront": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa.sh' && webpack --watch",
     "watchstarttest": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_nodockerdb.sh' && webpack --watch",
     "startfront": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_dockerfront.sh' ",
@@ -8,28 +11,25 @@
     "start": "webpack-dev-server --mode development --config webpack.config.js",
     "build": "webpack build --mode production --config webpack.config.prod.js "
   },
-  "browser": {
-    "[module-name]": false
-  },
   "devDependencies": {
     "@babel/core": "^7.17.12",
     "@babel/plugin-external-helpers": "^7.17.12",
     "@babel/preset-env": "^7.18.2",
     "@babel/preset-typescript": "^7.17.12",
+    "@babel/register": "^7.18.9",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/forms": "^0.5.2",
     "@tailwindcss/typography": "^0.5.2",
     "autoprefixer": "^10.4.7",
     "babel-core": "^6.26.3",
-    "babel-loader": "^8.2.5",
-    "bulma": "^0.9.4",
+    "babel-loader": "^8.3.0",
+    "babel-preset-env": "^1.7.0",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "css-minimizer-webpack-plugin": "^4.0.0",
     "eslint-webpack-plugin": "^3.1.1",
     "file-loader": "^6.2.0",
     "html-loader": "^3.1.0",
-    "jsdoc": "^3.6.10",
     "mini-css-extract-plugin": "^2.6.0",
     "mocha": "^10.0.0",
     "postcss": "^8.4.14",
@@ -39,22 +39,19 @@
     "terser-webpack-plugin": "^5.3.1",
     "ts-loader": "^9.3.0",
     "typescript": "^4.6.4",
-    "webpack": "^5.72.1",
+    "webpack": "^5.83.0",
     "webpack-bundle-analyzer": "^4.5.0",
-    "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.9.0"
+    "webpack-cli": "^4.9.2"
   },
   "dependencies": {
     "@babel/runtime": "^7.18.3",
     "core-js": "^3.22.8",
+    "dayjs": "^1.11.7",
     "deep-equal": "^2.0.5",
     "dompurify": "^2.4.0",
-    "list.js": "^2.3.1",
+    "fflate": "^0.7.4",
     "path": "^0.12.7",
-    "serialize-javascript": "^6.0.0",
-    "simple-datatables": "^3.2.2",
-    "tippy.js": "^6.3.7",
-    "tom-select": "^2.0.2",
+    "tom-select": "^2.2.2",
     "validator": "^13.7.0"
   },
   "engines": {

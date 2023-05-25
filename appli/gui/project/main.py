@@ -1,7 +1,6 @@
 from typing import List
 from flask import flash, request, render_template
-from flask_security import login_required
-from flask_login import current_user
+from flask_login import current_user, login_required
 from appli import app, gvp, gvg
 from appli.project import sharedfilter
 from appli.utils import ApiClient
@@ -93,6 +92,43 @@ def prj_purge(projid):
         target_proj=target_proj,
         deleted=deleted,
     )
+
+
+@app.route("/gui/prjsforprediction/<int:projid>", methods=["GET", "POST"])
+@login_required
+def prj_list_for_prediction(projid) -> list:
+    from appli.gui.jobs.prediction_lists import projects_for_prediction_list
+
+    prjs = projects_for_prediction_list(projid)
+    from appli.gui.project.projects_list_interface_json import (
+        project_table_columns,
+    )
+
+    columns = project_table_columns("", selection="prediction")
+
+    tabledef = dict({"columns": columns, "data": prjs, "type": "json"})
+    # gzip not really necessary - jsonifiy with separators
+    from flask import make_response
+    import json
+
+    gz = gvg("gzip")
+    content = json.dumps(
+        tabledef,
+        separators=[",", ":"],
+    ).encode("utf-8")
+    encoding = "utf-8"
+    if gz:
+        import gzip
+
+        content = gzip.compress(content, 7)
+        encoding = "gzip"
+    response = make_response(content)
+
+    response.headers["Content-length"] = len(content)
+    response.headers["Content-Encoding"] = encoding
+    response.headers["Content-Type"] = "application/json"
+
+    return response
 
 
 def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list:

@@ -1,0 +1,81 @@
+import {
+  css,
+  domselectors
+} from '../modules/modules-config.js';
+let instance = null;
+export class JsTabs {
+
+  constructor(item, options = {}) {
+    if (!instance) {
+      let btns = item.querySelectorAll(domselectors.component.tabs.tabcontrol);
+      if (btns.length === 0) {
+        btns = item.querySelectorAll(((item.dataset.selector) ? item.dataset.selector : 'legend'));
+
+      }
+
+      this.toggledisable = (item.dataset.toggledisable) ? true : false;
+      let l = 0;
+      btns.forEach((btn, index) => {
+        const target = (btn.dataset.target) ? item.querySelector('#' + btn.dataset.target) : btn.closest(domselectors.component.tabs.tab);
+        if (!target) return;
+        const ev = (item.dataset.event) ? item.dataset.event : 'click';
+        btn.style.left = l + 'px';
+        if (index === 0) {
+          target.classList.add(css.active);
+          this.toggleTab(target, true);
+        } else this.toggleTab(target, false);
+        l += parseInt(btn.offsetWidth) + 20;
+        btn.addEventListener(ev, (e) => {
+          if (e.currentTarget.disabled === true) {
+            e.preventDefault();
+            return;
+          }
+          const oldactive = item.dataset.selector ? target.parentElement.querySelector('.' + css.active) : item.querySelector(domselectors.component.tabs.tab + '.' + css.active);
+          if (oldactive !== null) {
+            oldactive.classList.remove(css.active);
+            this.toggleTab(oldactive, false);
+          }
+          target.classList.add(css.active);
+          this.toggleTab(target, true);
+        });
+      })
+      if (!item.dataset.toggle) this.toggleDisplayListener(item, btns);
+      instance = this;
+    }
+    return instance;
+  }
+
+  toggleTab(tab, show) {
+    let what = (this.togglewhat) ? document.querySelector(this.togglewhat) : null;
+    let tabcontents = tab.querySelectorAll(domselectors.component.tabs.tabcontent);
+    if (tabcontents.length === 0) tabcontents = [tab];
+    tabcontents.forEach(tabcontent => {
+      if (show === true) tabcontent.classList.remove(css.hide);
+      else if (!tab.classList.contains('active')) tabcontent.classList.add(css.hide);
+      if (this.toggledisable === true) {
+        tabcontent.querySelectorAll('input, select, button, textarea').forEach(el => {
+          if (show) {
+            el.removeAttribute('disabled');
+            if (what) what.value = el.dataset.what;
+          } else el.disabled = true;
+        });
+      }
+    });
+
+  }
+  toggleDisplayListener(item, btns) {
+    // flat/ tabs display
+    const dismiss = item.querySelector('[data-dismiss="tabs"]');
+    const toggle_tab = ((index, btn, show) => {
+      btn.disabled = show;
+      this.toggleTab(btn.closest(domselectors.component.tabs.tab), show);
+    })
+    if (dismiss) dismiss.addEventListener('click', (e) => {
+      const icon = item.querySelector('.tabs-display');
+      btns.forEach((btn, index) => toggle_tab(index, btn, (item.classList.contains(css.component.tabs.name))));
+      item.classList.toggle(css.component.tabs.name);
+      icon.classList.toggle('expand');
+      icon.classList.toggle('shrink');
+    });
+  }
+}

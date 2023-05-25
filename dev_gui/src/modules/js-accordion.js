@@ -3,6 +3,7 @@
 // used in tables imports when cells contains lots of data
 // apply mostly to details tags
 export class JsAccordion {
+  // animation and specific display on accordions list / details tag open 
   constructor(el, callbackopen = null, callbackclose = null, content = null, options = {}, summary = null) {
     // Store the <details> element
     this.el = el;

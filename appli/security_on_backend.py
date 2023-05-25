@@ -12,7 +12,12 @@ from flask_security.utils import get_message
 
 from appli.constants import AdministratorLabel, is_static_unprotected
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import UserModelWithRights, LoginReq, ApiException, MinUserModel
+from to_back.ecotaxa_cli_py import (
+    UserModelWithRights,
+    LoginReq,
+    ApiException,
+    MinUserModel,
+)
 from to_back.ecotaxa_cli_py.api import UsersApi, AuthentificationApi
 
 
@@ -21,7 +26,6 @@ class AdministratorRole(RoleMixin):
 
 
 class ApiUserWrapper(object):
-
     def __init__(self, api_user):
         self.api_user: UserModelWithRights = api_user
         self.password = "X"
@@ -67,8 +71,8 @@ class UserModelForSecurity(UserModelWithRights):
 
 class BackEndUserDatastore(UserDatastore):
     """
-        This is a very partial implementation, maybe more methods to implement if it fails
-        in one of the 'raise' below.
+    This is a very partial implementation, maybe more methods to implement if it fails
+    in one of the 'raise' below.
     """
 
     def __init__(self):
@@ -84,7 +88,7 @@ class BackEndUserDatastore(UserDatastore):
 
     def find_user(self, *args, **kwargs):
         """
-            It's assumed that the call is made from current request.
+        It's assumed that the call is made from current request.
         """
         if is_static_unprotected(request.path):
             # Save an API call for unprotected routes
@@ -104,13 +108,13 @@ class BackEndUserDatastore(UserDatastore):
 
     def commit(self):
         """
-            Called by flask_security to ensure that e.g. password went from plain to encrypted in the DB.
+        Called by flask_security to ensure that e.g. password went from plain to encrypted in the DB.
         """
         pass
 
     def put(self, user):
         """
-            Called by flask_security when a user changes password.
+        Called by flask_security when a user changes password.
         """
         api_user = current_user.api_user.to_dict()
         api_user["password"] = user.password
@@ -119,10 +123,9 @@ class BackEndUserDatastore(UserDatastore):
 
 
 class CustomLoginForm(LoginForm):
-
     def validate(self):
         """
-            Validate using back-end call
+        Validate using back-end call
         """
         # Don't call base form validation, it gives a bit too much information.
         # if not super(LoginForm, self).validate():
@@ -135,7 +138,7 @@ class CustomLoginForm(LoginForm):
             with ApiClient(UsersApi, token) as api:
                 curr_user: UserModelWithRights = api.show_current_user()
         except ApiException as ae:
-            self.password.errors += get_message('INVALID_PASSWORD')[0],
+            self.password.errors += (get_message("INVALID_PASSWORD")[0],)
             return False
         # noinspection PyAttributeOutsideInit
         self.user = ApiUserWrapper(curr_user)
@@ -143,7 +146,6 @@ class CustomLoginForm(LoginForm):
 
 
 class CustomChangePasswordForm(ChangePasswordForm):
-
     def validate(self):
         # Skip the validation in just-above-class
         if not super(ChangePasswordForm, self).validate():
@@ -155,6 +157,6 @@ class CustomChangePasswordForm(ChangePasswordForm):
         except ApiException as ae:
             return False
         if self.password.data == self.new_password.data:
-            self.password.errors.append(get_message('PASSWORD_IS_THE_SAME')[0])
+            self.password.errors.append(get_message("PASSWORD_IS_THE_SAME")[0])
             return False
         return True

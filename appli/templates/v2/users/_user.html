@@ -1,6 +1,8 @@
   {% from "./v2/macros/macros.html" import inputdict %}
+  {% from "./v2/captcha.html" import captcha, scriptcaptcha%}
   {%macro password_box()-%}
   {% set disabled=""%}
+
   <div class="form-box">
   {% if user and user.id and user.id>0 %}
   <a class="font-semibold py-2 text-center block"  data-action="toggle" data-disabled="input">{{_('modify password')}}<i class="icon icon-chevron-down" data-toggle="icon-chevron-down,icon-chevron-up"></i></a>
@@ -17,7 +19,7 @@
     {% endif%}
     </div>
   {%-endmacro%}
-  <form method="post" action="" id="formu" autocomplete="off" class="js js-submit relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false"">
+  <form method="post" action="" id="formu" autocomplete="off" class="js js-submit relative mt-12 md:mt-8"  {{ 'data-captcha="g-recaptcha-response" data-captchakey='+reCaptchaID if  createaccount == True and not incadmin }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false"">
    <input type="hidden" name="crsf_token" value={{ crsf_token }}>
       <input type="hidden" name="id" id="id" value="{{user.id if user.id else -1  }}">
     <div class="fieldset-wrapper md:flex-row md:flex-nowrap">
@@ -50,7 +52,7 @@
 
           </div>{%if  createaccount == True and not incadmin %}
           {% include('v2/users/_acceptconditions.html') with context%}
-                      {% endif %}
+                          {% endif %}
             </fieldset>{%-if incadmin or incprofile-%}<fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 pl-4 md:w-1/2'}}">
               {% if incadmin  %}
                 <legend class="tab-control">{{_('Security')}}</legend>
@@ -60,23 +62,8 @@
 {% include(incprofile) with context %}
 {%endif%}
       </fieldset>{%-endif-%}</div>
-      <fieldset>{%if  reCaptchaID%}<input type='hidden' name='g-recaptcha-response' id='g-recaptcha-response' value=''>{%endif%}
+      <fieldset>
 <div class="w-full text-left mb-8"> <input type="hidden" name="save" value="Y">
   <a href="{{back}}" class="button is-secondary inverse" title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a> <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button>
-</div></fieldset>
+</div></fieldset>{%if  createaccount == True and not incadmin %}{{captcha(reCaptchaID)}}  {{scriptcaptcha(reCaptchaID)}}{%endif%}
 </form>
-{% if reCaptchaID %}
-  <script src='https://www.google.com/recaptcha/api.js?render={{ reCaptchaID }}'></script>
-  <script>
-      function runrecaptcha() {
-          grecaptcha.execute('{{ reCaptchaID }}', {action: 'createuser'})
-              .then(function (token) {
-                  // Verify the token on the server.
-                  document.getElementById('g-recaptcha-response').value = token;
-              });
-      }
-
-      grecaptcha.ready(runrecaptcha);
-
-  </script>
-{% endif %}

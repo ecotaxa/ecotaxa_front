@@ -59,7 +59,9 @@ class Job(object):
 
         with ApiClient(ProjectsApi, request) as api:
             try:
-                target_prj: ProjectModel = api.project_query(prj_id, for_managing=False)
+                target_proj: ProjectModel = api.project_query(
+                    prj_id, for_managing=False
+                )
             except ApiException as ae:
                 if ae.status in (401, 403):
                     raise ApiException(
@@ -71,18 +73,18 @@ class Job(object):
                         status=ae.status,
                         reason=ae.reason,
                     )
-        if target_prj:
+        if target_proj:
             if full == True:
-                return target_prj
+                return target_proj
             return dict(
                 {
-                    "title": target_prj.title,
-                    "projid": target_prj.projid,
-                    "managers": target_prj.managers,
-                    "annotators": target_prj.annotators,
-                    "viewers": target_prj.viewers,
-                    "status": target_prj.status,
-                    "license": target_prj.license,
+                    "title": target_proj.title,
+                    "projid": target_proj.projid,
+                    "managers": target_proj.managers,
+                    "annotators": target_proj.annotators,
+                    "viewers": target_proj.viewers,
+                    "status": target_proj.status,
+                    "license": target_proj.license,
                 }
             )
         return None

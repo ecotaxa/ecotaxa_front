@@ -2,7 +2,6 @@ export class ScrollSpy {
   pos = 0;
   throttle = false;
   menu = null;
-
   constructor(callback, options = {}) {
     if (!callback) return;
     if (typeof options !== 'object') return;

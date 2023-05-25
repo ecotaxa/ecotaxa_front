@@ -12,7 +12,7 @@
     <ul id="user-menu" role="menu" aria-orientation="vertical" aria-labelledby="user-nav-item" aria-expanded=false tabindex="-1" >
 <li><a href="/gui/me/profile"  tabindex="-1" role="menuitem"><i class="icon icon-user" class="p-1 opacity-80" title="{{_('profile')}}"></i> {{ _('Profile') }}</a></li>
 <!--  <li><a href="/gui/me/files/" tabindex="-1" role="menuitem"><i class="icon icon-document-text" class="p-1 opacity-80" title="{{_('My Files')}}"></i> {{ _('Files') }}</a></li>-->
-<li class="separ"><a href="/logout" tabindex="-1"  role="menuitem"><i class="icon icon-arrow-right-on-rectangle-sm" class="opacity-80" title="{{_('logout')}}"></i> {{ _('Logout') }}</a></li></ul></div>
+<li class="separ"><a href="{{ url_for("gui_logout")}}" tabindex="-1"  role="menuitem"><i class="icon icon-arrow-right-on-rectangle-sm" class="opacity-80" title="{{_('logout')}}"></i> {{ _('Logout') }}</a></li></ul></div>
 {% if 3 in current_user.can_do %}
 <a class="lg:pl-1 pr-0 pt-0.5" href="/gui/admin/" target="_winadmin"><i class="icon-lg icon-admin invert "></i></a>
 {%endif%}

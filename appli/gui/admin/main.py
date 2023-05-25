@@ -1,10 +1,9 @@
 import os
 import flask
 from flask import request, render_template, redirect, flash
-from flask_security import login_required
 from flask_security.decorators import roles_accepted
 
-from flask_login import current_user
+from flask_login import current_user, login_required
 from flask_babel import _
 from typing import List
 from appli import app, gvg, gvp, constants
@@ -68,7 +67,9 @@ def _users_list(listall: bool = False, filt: dict = None) -> List[UserModelWithR
     return users
 
 
-def _check_is_admin(user):
+def _check_is_admin(user=None):
+    if user == None:
+        user = current_user.api_user
     thisuser: UserModelWithRights = user
     return thisuser and (2 in thisuser.can_do)
 
@@ -85,9 +86,7 @@ def allusers_list():
     tabledef = dict(
         {
             "columns": columns,
-            "data": render_for_js(
-                users, columns, isadmin=_check_is_admin(current_user.api_user)
-            ),
+            "data": render_for_js(users, columns),
         }
     )
     return tabledef
@@ -105,6 +104,7 @@ def gui_userlist(listall: bool = False) -> str:
 
     gz = gvg("gzip")
     content = json.dumps(allusers_list(), separators=[",", ":"]).encode("utf-8")
+
     encoding = "utf-8"
     if gz:
         import gzip
@@ -206,7 +206,7 @@ def gui_user_edit(usrid):
 def gui_site_message(msgkey) -> str:
     import json
 
-    file = constants.APP_GUI_MESSAGE_FILE
+    file = app.config.get("APP_GUI_MESSAGE_FILE")
 
     if os.path.exists(file):
 
@@ -214,14 +214,19 @@ def gui_site_message(msgkey) -> str:
             messages = json.loads(f.read())
 
     else:
-        messages = dict({"info": "", "maintenance": ""})
-    print(request.method)
+        initcontent = {"content": "", "active": False, "date": ""}
+        messages = dict({"info": initcontent, "maintenance": initcontent})
+
     if request.method == "POST":
+        from datetime import datetime
+
         msg = gvp("msg")
-        print("#################################")
-        print(msg)
-        print(msgkey)
-        messages[msgkey] = msg
+        active = gvp("active", 0)
+        messages[msgkey] = {
+            "content": msg,
+            "active": int(active),
+            "date": str(datetime.now()),
+        }
         with open(file, "w", encoding="utf-8", newline="\n") as f:
             f.write(json.dumps(messages))
         flash("message saved", "success")

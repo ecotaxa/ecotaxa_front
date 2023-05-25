@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[856],{4856:(e,t,a)=>{a.r(t),a.d(t,{default:()=>r});var s=a(2817);function r(e){return{taxa:(t,a,r,n={})=>{Array.isArray(t)||(n.childNodes=[]);let d=[];return t.forEach((e=>{d.push(e[1])})),n.childnodes=[{nodeName:"DIV",attributes:{class:s.iv.tip,"data-num":d.length},childnodes:[e.setTextNode(d.join(", "))]}],n}}}}}]);

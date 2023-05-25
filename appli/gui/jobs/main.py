@@ -1,7 +1,6 @@
 import flask
 from flask import request, render_template, Response, redirect, url_for, flash
-from flask_security import login_required
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 import appli.constants
 from appli import app, gvg

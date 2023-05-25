@@ -1,20 +1,21 @@
 import DOMPurify from 'dompurify';
 import {
-  ProjectPrivileges
-} from "../modules/project-privileges.js";
-import {
   JsTomSelect
-
 } from "../modules/js-tom-select.js";
 import {
+  ProjectPrivileges
+} from '../modules/project-privileges.js';
+import {
   fetchSettings,
-  unescape_html
+  unescape_html,
+
 } from '../modules/utils.js';
 import {
   models,
   typeimport,
   css,
-  defined_privileges
+  defined_privileges,
+  domselectors
 } from '../modules/modules-config.js';
 const key_privileges = Object.keys(defined_privileges).reduce(function(result, key) {
   result[key] = key;
@@ -32,105 +33,127 @@ export class DataImport {
   button;
   clearbutton;
   replacebutton;
-  doc = null;
-  constructor(grid, what = '', selector = null) {
-    if (!grid) return;
-    grid = grid instanceof HTMLElement ? null : ((typeof(grid) === 'object') ? grid : null);
-    const doc = grid instanceof HTMLElement ? grid : ((typeof(grid) === 'object') ? grid.table : document.querySelector(grid));
-    what = DOMPurify.sanitize(what);
-    if (!instance || instance.doc !== doc) {
+  tabbutton;
+  tbl = null;
+  constructor(tbl, what = null, selector = null) {
+    if (!tbl) return;
+    // tbl is a TableComponent  ?
+    this.tbl = (typeof(tbl) === 'object') ? tbl : null;
+    // get the table from table component or html table element id
+    this.dom = (this.tbl) ? this.tbl.dom : document.getElementById(tbl);
+    if (!this.dom) return;
+    what = (what) ? DOMPurify.sanitize(what) : (tbl && tbl.params && tbl.params.import) ? tbl.params.import : (this.dom.dataset.import) ? DOMPurify.sanitize(this.dom.dataset.import) : null;
+    if (!instance || instance.doc !== this.dom) {
       // defaultoptions - keep like that
       const options = {
         importcontainer: '#data-import-' + what,
         btns: '.btns-imports',
         button: '#add-import-' + what,
         replacebutton: '#replace-import-' + what,
-        clearbutton: "#clear-import-" + what,
+        tabbutton: '#tab-import-' + what,
         selector: 'data-id',
 
       };
-      this.doc = doc;
       this.selector = (selector) ? selector : options.selector;
       this.importcontainer = options.importcontainer instanceof HTMLElement ? options.importcontainer : document.querySelector(options.importcontainer);
-      this.form = (options.form) ? ((options.form) instanceof HTMLElement ? options.form : document.querySelector(options.form)) : this.doc.closest('form');
+      this.form = (options.form) ? ((options.form) instanceof HTMLElement ? options.form : document.querySelector(options.form)) : this.dom.closest('form');
       this.button = options.button instanceof HTMLElement ? options.button : document.querySelector(options.button);
       this.replacebutton = options.replacebutton instanceof HTMLElement ? options.replacebutton : document.querySelector(options.replacebutton);
-      this.clearbutton = options.clearbutton instanceof HTMLElement ? options.clearbutton : document.querySelector(options.clearbutton);
-      this.init(grid, options);
+      this.tabbutton = options.tabbutton instanceof HTMLElement ? options.tabbutton : document.querySelector(options.tabbutton);
+      this.init(options);
       instance = this;
+
     }
     return instance;
   }
 
-  init(grid, options) {
-
+  init(options) {
     // hide importzone
     this.showImport(false);
     // remove line of target proj
-
-    let projid = this.form.querySelector('#projid');
+    let projid = this.form.querySelector('#' + domselectors.projid);
     if (projid && projid.value) {
-      projid = this.doc.querySelector('[' + this.selector + '="' + projid.value + '"]');
+      projid = this.dom.querySelector('[' + this.selector + '="' + projid.value + '"]');
       if (projid) projid.classList.add(css.hide);
 
     }
-    this.selectors = this.doc.querySelectorAll('[' + this.selector + '] button, [' + this.selector + '] input');
+    const indextocheck = this.indexToCheck();
+    this.selectors = this.dom.querySelectorAll('[' + this.selector + '] button, [' + this.selector + '] input');
     this.selectors.forEach(selector => {
       // checkbox possible
-      const evt = (selector.tagName.toLowerCase() === 'input') ? 'change' : 'click';
-      const apply_selection = (e) => {
-        const target = e.currentTarget;
-        const index = Array.from(target.parentElement.children).indexOf((target));
-        target.disabled = true;
-        this.toImport(grid, target.parentElement, index);
+      const index = Array.from(selector.parentElement.children).indexOf((selector));
+
+      if (indextocheck && selector.closest('tr').children[indextocheck[index]].innerHTML === '') selector.disabled = true;
+      else {
+        const evt = (selector.tagName.toLowerCase() === 'input') ? 'change' : 'click';
+        const apply_selection = (e) => {
+          const target = e.currentTarget;
+          target.disabled = true;
+          this.toImport(target.parentElement, index);
+        };
+        selector.removeEventListener(evt, apply_selection, false);
+        selector.addEventListener(evt, apply_selection, false);
       };
-      selector.removeEventListener(evt, apply_selection, false);
-      selector.addEventListener(evt, apply_selection, false);
     });
-
-    if (this.button) this.showImport(false);
+    if (this.button) {
+      this.tabbutton.addEventListener('click', (e) => {
+        this.resizeZone(e);
+      });
+      this.showImport(false);
+    }
   }
+  columnProperty(name, index, th) {
+    if (this.tbl) return (this.tbl.grid.columns[index].hasOwnProperty(name)) ? this.tbl.grid.columns[index][name] : null;
+    else return (th.dataset[name]) ? th.dataset.name : null;
+  }
+  columnIndex(prop, value) {
+    if (this.tbl) return this.tbl.grid.columns.findIndex(column => (column.hasOwnProperty(prop) && column[prop] === value));
+    else return Array.from(this.dom.querySelectorAll('thead th')).findIndex(th => (th.dataset[prop] && th.dataset[prop] === value));
+  }
+  rowIndex(td, trs) {
+    const ref = (td.parentElement) ? td.parentElement : null;
+    if (!ref) return null;
+    return trs.findIndex(tr => (tr === ref));
+  }
+  toImport(td, whatpart = 0) {
+    const grid = (this.tbl) ? this.tbl.grid : null;
+    const thcells = Array.from(this.dom.querySelectorAll('thead th'));
+    const trs = Array.from(this.dom.querySelectorAll('tbody tr'));
 
-  toImport(grid, col, whatpart = 0) {
-    const thcells = (grid === null) ? this.doc.querySelectorAll('thead th') : grid.headings;
-    const rows = (grid === null) ? this.doc.querySelectorAll('tbody tr') : grid.data;
-    const datajson = grid.options.data.data; // cell values in json  - no parse
-    if (col.tagName.toLowerCase() !== 'td') col = col.closest('td');
-    const rowindex = (col.closest('tr')) ? col.closest('tr').dataIndex : null;
+    const datas = (grid) ? grid.data : trs.map(tr => {
+      return Array.from(tr.childNodes).forEach(cell => {
+        return cell.innerText;
+      });
+    }); // cell values in json  - no parse
+    if (td.tagName.toLowerCase() !== 'td') td = td.closest('td');
+    const rowindex = this.rowIndex(td, trs);
     if (rowindex === null) return;
     let showbtns = true;
-    const cellindex = col.cellIndex; // change cellIndex to TableColIndex if no table component
+    const cellindex = td.cellIndex;
     const th = thcells[cellindex];
-    const cols = rows[rowindex].cells;
-    const what = th.dataset.what;
+    const tds = trs[rowindex];
+    const what = this.columnProperty('what', cellindex, th);
     if (!what) return;
-    const parts = (th.dataset.parts) ? th.dataset.parts.split(',') : null;
+    const parts = this.columnProperty('parts', cellindex, th);
     let contact = null;
-    const selectcells = (th.dataset.selectcells) ? ((th.dataset.parts) ? [th.dataset.parts.split(',')[whatpart]] : th.dataset.selectcells.split(',')) : null;
+    let selectcells = this.columnProperty('selectcells', cellindex, th);
+    selectcells = (selectcells) ? ((parts) ? [parts[whatpart]] : selectcells) : null;
     if (!selectcells) return;
-    if (what === typeimport.settings) this.imports[models.contact] = this.findContact(thcells, datajson[rowindex]);
+    if (what === typeimport.settings) this.imports[models.contact] = this.findContact(thcells, datas[rowindex]);
     const importzone = (what === typeimport.taxo || what === typeimport.privileges) ? this.createImportzone(what) : null;
+    let ts = null;
     selectcells.forEach((name, index) => {
-      index = null;
-      thcells.every((t, idx) => {
-        if (t.dataset.name === name) {
-          index = idx;
-          return false;
-        }
-        return true;
-      });
-
-      if (index !== null) {
+      index = this.columnIndex('name', name);
+      if (index >= 0) {
         // show import buttons if importzone
-
-        const cell = rows[rowindex].cells[index];
-        const celldata = datajson[rowindex][index];
+        const cell = trs[rowindex].cells[index];
+        const celldata = datas[rowindex][index];
         cell.classList.add(css.selected);
         const thcell = thcells[index];
         switch (what) {
           case typeimport.taxo:
             // accumulate and show in import win - move the form field in modal win to view the changes and benefit of tom-select component functs...
-            const ts = importzone.tomselect;
+            ts = importzone.tomselect;
             let taxons = celldata;
             if (taxons) {
               if (ts) {
@@ -186,72 +209,68 @@ export class DataImport {
           case typeimport.privileges:
             const privs = celldata;
             // set everybody to 'view' if more than one project imported
-            const resetpriv = ((importzone.tomselect && importzone.tomselect.items.length > 0) || (importzone.selectedIndex > 0));
+            const resetpriv = ((ts && ts.items.length > 0) || (importzone.selectedIndex > 0));
 
             if (!importzone.dataset.init) {
-              Object.keys(privs).forEach(priv => {
-                importzone.insertAdjacentHTML('afterbegin', `<optgroup value="${priv}" label="${priv}"></optgroup>`);
-              });
+              /*    const optgroups = [];
+                  Object.keys(privs).forEach(priv => {
+                    //  importzone.insertAdjacentHTML('afterbegin', `<optgroup value="${priv}" label="${priv}"></optgroup>`);
+                    optgroups.push({
+                      value: priv,
+                      label: priv
+                    });
+                  });*/
               const jsTomSelect = new JsTomSelect();
-              jsTomSelect.apply(importzone);
+              jsTomSelect.applyTo(importzone);
               importzone.dataset.init = true;
             }
+            ts = importzone.tomselect;
 
-            if (importzone.tomselect) {
-              // add members grouped by priv
-              const members = [...importzone.tomselect.items];
+            Object.entries(privs).forEach(([priv, members]) => {
+              members.sort((a, b) => {
+                return (b.name > a.name);
+              });
               members.forEach(member => {
-                member = importzone.tomselect.options[member];
-                if (member) {
-                  const priv = (resetpriv) ? key_privileges.viewers : member.optgroup;
+                const newpriv = (resetpriv) ? key_privileges.viewers : priv; // viewer if more than one project imported
+                let opt;
 
-                  privs[priv].push({
-                    id: member.id,
-                    name: member.name
-                  });
-                } else this.messageZone(member);
-              });
-
-              importzone.tomselect.clear();
-              importzone.tomselect.refreshOptions();
-
-              Object.entries(privs).forEach(([priv, members]) => {
-                members.sort((a, b) => {
-                  return (b.name > a.name);
-                });
-                members.forEach(member => {
-                  const newpriv = (resetpriv) ? key_privileges.viewers : priv; // viewer if more than one project imported
-                  const optgroup = importzone.querySelector('[value="' + newpriv + '"]');
-                  if (importzone.querySelector('option[value="' + member.id + '"]') === null) {
-                    optgroup.insertAdjacentHTML('afterbegin', `<option value="${member.id}" data-optgroup=${newpriv} selected="selected">${member.name}</option>`);
-                    if (importzone.tomselect && !importzone.tomselect.getOption(member.id)) {
-                      importzone.tomselect.addOption({
-                        id: member.id,
-                        name: unescape_html(member.name),
-                        optgroup: newpriv
-                      });
-                    }
+                if (ts) {
+                  opt = ts.items.indexOf(member.id);
+                  if (opt >= 0) {
+                    ts.removeItem(member.id);
+                    ts.removeOption(member.id);
                   }
-                  importzone.tomselect.addItem(member.id);
-                });
 
+                  // addoption && addItem
+                  opt = {
+                    optgroup: newpriv
+                  }
+                  opt[ts.settings.valueField] = member.id;
+                  opt[ts.settings.searchField] = member.name;
+                  opt[ts.settings.labelField] = member.name;
+                  ts.addOption(opt);
+                  ts.addItem(member.id);
+                } else {
+                  opt = importzone.querySelector('option[value="' + member.id + '"]');
+                  if (opt === null) {
+                    opt = document.createElement('option');
+                    opt.value = member.id;
+                    opt.dataset.optgroup = newpriv;
+                    opt.selected = opt.defaultSelected = true;
+                    opt.text = member.name;
+                    importzone.add(opt);
+
+                  } else opt.dataset.optgroup = newpriv;
+                }
               });
+              importzone.tomselect.refreshOptions();
+            });
+            console.log('privs', privs);
+            console.log('importzone', importzone);
+            console.log('ts', ts);
+            showbtns = (((ts) ? ts.items.length : importzone.selectedIndex + 1) > 0);
 
-              showbtns = (importzone.tomselect.items.length > 0);
-            }
-            /*else {
-                                     importzone.options.forEach(option => {
-                                       if (option.selected) {
-                                         privs[item.optgroup].push({
-                                           id: option.value,
-                                           name: option.text,
-                                           optgroup: option.dataset.optgroup
-                                         });
-                                         option.selected = false;
-                                       }
-                                     });
 
-                                   }*/
             break;
           default:
 
@@ -270,7 +289,7 @@ export class DataImport {
                 return true;
               });
               if (el !== null) {
-                el = datajson[rowindex][el];
+                el = datas[rowindex][el];
 
                 this.imports[name].key = el;
               }
@@ -280,7 +299,6 @@ export class DataImport {
             break;
         }
       };
-
     });
 
     if (thcells.length) {
@@ -307,32 +325,12 @@ export class DataImport {
       this.makeImport(e.currentTarget, selectcells, what, true);
 
     });
-    this.clearbutton.addEventListener('click', (e) => {
-      if (!this.importcontainer) return;
-      const field = this.importcontainer.querySelector('#' + this.importid);
-      if (field) {
-        if (field.tomselect) {
-          field.tomselect.clear();
-          field.tomselect.refreshOptions();
-        } else field.value = '';
-      }
-      this.selectors.forEach(selector => {
-        if (selector.disabled) {
-          selector.disabled = false;
-          selector.closest('tr').querySelectorAll('.selected').forEach(el => {
-            el.classList.remove(css.selected);
-          });
-        }
-      });
-      this.button.disabled = false;
-      this.replacebutton.disabled = false;
-      //this.showImport(false);
-    });
+
     this.button.dataset.activated = true;
     this.replacebutton.dataset.activated = true;
   }
 
-  findContact(thcells, cols) {
+  findContact(thcells, tds) {
     let contact = null;
     thcells.every((t, idx) => {
       if (t.dataset.name && t.dataset.name === models.contact) {
@@ -341,13 +339,12 @@ export class DataImport {
       }
       return true;
     });
-    //if (contact) contact = cols[contact] ? JSON.parse(cols[contact].data.trim()) : 0;
-    if (contact) contact = cols[contact] ? cols[contact] : 0;
+    if (contact) contact = tds[contact] ? tds[contact] : 0;
 
     return contact;
   }
 
-  renderPrivileges(importzone, clear = false) {
+  renderPrivileges(importzone, replace = false) {
     let privileges = {};
     const tzone = importzone.tomselect;
     const pushpriv = (member, priv) => {
@@ -359,6 +356,7 @@ export class DataImport {
       if (privileges[priv]) privileges[priv].push(obj);
       else privileges[priv] = [obj];
     }
+
     if (tzone) {
       const members = [...tzone.items];
       const options = Object.assign({}, tzone.options);
@@ -373,7 +371,9 @@ export class DataImport {
       })
     }
 
-    if (this.importPrivileges(privileges, clear)) {
+
+    if (this.importPrivileges(privileges, replace)) {
+
       if (tzone) {
         tzone.clear();
         tzone.clearOptions();
@@ -394,7 +394,24 @@ export class DataImport {
     const contact = ((this.imports[models.contact]) ? this.imports[models.contact] : null);
     return (projectPrivileges.importPrivileges(privileges, clear, contact, importedtag, dismiss));
   }
-
+  activateClear() {
+    const clearbutton = document.getElementById('clear-' + this.importid);
+    if (!clearbutton) return;
+    clearbutton.addEventListener('click', (e) => {
+      if (!this.importcontainer) return;
+      this.selectors.forEach(selector => {
+        if (selector.disabled) {
+          selector.disabled = false;
+          selector.closest('tr').querySelectorAll('.selected').forEach(el => {
+            el.classList.remove(css.selected);
+          });
+        }
+      });
+      this.button.disabled = false;
+      this.replacebutton.disabled = false;
+      this.showImport(false);
+    });
+  }
   createImportzone(name) {
     this.showImport(true);
     let importzone = this.importcontainer.querySelector('#' + this.importid);
@@ -429,17 +446,21 @@ export class DataImport {
         if (ts) {
           importzone = this.importcontainer.querySelector('#' + this.importid);
           const jsTomSelect = new JsTomSelect();
-          jsTomSelect.apply(importzone);
+          jsTomSelect.applyTo(importzone);
 
         }
+        this.activateClear();
+
       }
     }
+
     return importzone;
 
   }
 
   makeImport(btn, selectcells, what, close = false) {
-    let done = false;
+    let done = false,
+      ts = null;
     const importzone = (this.importcontainer) ? this.importcontainer.querySelector('#' + this.importid) : null;
     switch (what) {
       case typeimport.taxo:
@@ -448,7 +469,7 @@ export class DataImport {
         const import_target = this.form.querySelector('#' + importzone.dataset.origin);
 
         if (!import_target) return false;
-        const ts = import_target.tomselect;
+        ts = import_target.tomselect;
         if (ts) {
           // only if replace specified
           if (btn.dataset.replace && btn.dataset.replace === 'replace') {
@@ -480,13 +501,14 @@ export class DataImport {
       case typeimport.privileges:
         if (!importzone) return false;
         done = this.renderPrivileges(importzone, (btn.dataset.replace && btn.dataset.replace === 'replace'));
+
         break;
       default:
         selectcells.forEach((name, index) => {
           let input = ((this.form.querySelector('[data-importfield="' + name + '"]')) ? this.form.querySelector('[data-importfield="' + name + '"]') : this.form.querySelector('[name="' + name + '"]'));
 
           if (input && this.imports[name] !== undefined) {
-            const ts = input.tomselect;
+            ts = input.tomselect;
 
             if (name === 'init_classif_list') {
               let ids = this.imports[name];
@@ -589,10 +611,28 @@ export class DataImport {
   }
 
   dismiss(clear = false) {
-    const container = this.doc.closest('details');
+    if (this.button) this.showImport(false);
+    const container = this.dom.closest('details');
     if (container) {
       container.open = false;
       if (clear === true) container.querySelector(this.content_selector).innerHTML = ``;
+    }
+
+  }
+  indexToCheck() {
+    // index of cells to check if empty and disable row  import btn
+    const grid = (this.tbl) ? this.tbl.grid : null;
+    if (!grid) return [0];
+    let index = grid.columns.findIndex(column => (column.what && column.what === typeimport.taxo));
+    if (index === -1) return [0];
+    const parts = (grid.columns[index].parts) ? grid.columns[index].parts : null;
+    if (parts) {
+      const indextocheck = grid.columns.filter((column, i) => {
+        if (parts.indexOf(column.name) >= 0) return i;
+      }).map(v => {
+        return v.index;
+      });
+      return indextocheck;
     }
 
   }
@@ -603,18 +643,33 @@ export class DataImport {
     if (show === false) {
       this.button.classList.add(css.hide);
       this.replacebutton.classList.add(css.hide);
-      this.clearbutton.classList.add(css.hide);
       this.importcontainer.classList.add(css.hide);
+      this.tabbutton.classList.add(css.hide);
+
     } else {
       this.button.classList.remove(css.hide);
       this.replacebutton.classList.remove(css.hide);
-      this.clearbutton.classList.remove(css.hide);
+
       this.importcontainer.classList.remove(css.hide);
-      this.button.disabled = this.clearbutton.disabled = false;
+      this.button.disabled = false;
+      const importzone = this.importcontainer.querySelector('#' + this.importid);
+      if (importzone) {
+        this.tabbutton.classList.remove(css.hide);
+        if (importzone.tomselect && importzone.tomselect.control.offsetHeight < importzone.tomselect.control.scrollHeight) {
+          this.tabbutton.disabled = false;
+        } else this.tabbutton.disabled = true;
+      }
     }
   }
-  // htmlentities  for taxo tags - no usage
-  htmlEntities(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // resize importzone
+  resizeZone(e) {
+    const div = this.importcontainer.closest(domselectors.component.import.zoneimport);
+    if (!div) return;
+    div.parentElement.classList.toggle(css.showfull);
+    const icon = e.currentTarget.querySelector('i');
+    if (icon) {
+      icon.classList.toggle('icon-arrow-pointing-out');
+      icon.classList.toggle('icon-arrow-pointing-in');
+    }
   }
 }

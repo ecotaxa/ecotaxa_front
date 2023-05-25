@@ -97,13 +97,13 @@ def user_account(usrid: int, isfrom: str, action: str = None) -> list:
         posted["active"] = gvp("active", False)
     else:
         try:
-            constants.APP_EMAIL_VALIDATE_ACCOUNT
+            app.config.get("APP_VALIDATE_ACCOUNT")
             if action == ACCOUNT_USER_EDIT:
                 currentemail = gvp("currentemail").strip()
                 if posted["email"] != currentemail:
                     posted["active"] = False
             else:
-                posted["active"] = False
+                posted["active"] = True
         except:
             pass
 
@@ -116,12 +116,13 @@ def user_account(usrid: int, isfrom: str, action: str = None) -> list:
         except ApiException as ae:
             return [None, str(ae)]
     elif action == ACCOUNT_USER_CREATE and usrid == -1:
-
         try:
+            no_bot = _get_captcha()
+            posted["id"] = -1
+            posted["usercreationdate"] = None
+            new_user = UserModelWithRights(**posted)
             with ApiClient(UsersApi, request) as api:
-                ret = api.create_user(
-                    user_model_with_rights=posted, no_bot=_get_captcha()
-                )
+                ret = api.create_user(user_model_with_rights=new_user, no_bot=no_bot)
             response = [posted, None]
         except ApiException as ae:
             return [None, str(ae)]
@@ -130,14 +131,12 @@ def user_account(usrid: int, isfrom: str, action: str = None) -> list:
     if isfrom != IS_FROM_ADMIN and posted["active"] == False:
 
         del posted["password"]
-        msg = account_verify_message(usrid, posted)
-
-        if msg == None:
+        err = account_validate(usrid, posted)
+        if err == None:
             flash("Error while creating your account ... contact us ", "error")
             return ["gui_login", None]
         else:
-            err = send_mail(constants.APP_EMAIL_VALIDATE_ACCOUNT, msg)
-            flash("Your account is created. validation process ...", "info")
+            flash("Your account is created. Validation process ...", "info")
             return ["gui_login", None]
     else:
         flash("Your account is created", "success")
@@ -241,7 +240,7 @@ def _generate_mail_token(email: str, action: str = "accountrequest") -> str:
             "email": email,
             "action": action,
             "ip": _public_ip(),
-            "instance": constants.APP_INSTANCE_ID,
+            "instance": app.config.get("APP_INSTANCE_ID"),
         }
     )
     return token
@@ -265,7 +264,7 @@ def get_mail_from_token(token: str, verifip=False) -> str:
         return False
 
 
-def reset_password_message(email: str) -> MIMEMultipart:
+def api_reset_password_message(email: str) -> MIMEMultipart:
     url = "gui_forgotten"
     token = _generate_mail_token(email, "resetpassword")
     recipients = [email]
@@ -273,12 +272,14 @@ def reset_password_message(email: str) -> MIMEMultipart:
     msg["Subject"] = "EcoTaxa reset password"
 
     msg["To"] = ", ".join(recipients)
-    msg["ReplyTo"] = constants.APP_NOREPLY
+    msg["ReplyTo"] = app.config.get("APP_NOREPLY")
     html = render_template(
         "v2/mail/_mail_reset_password.html",
-        email=constants.APP_EMAIL_ASSISTANCE,
+        email=app.config.get("APP_EMAIL_ASSISTANCE"),
         link=("{0}/{1}/{2}").format(
-            request.url_root + "/" + url_for(url), constants.APP_INSTANCE_ID, token
+            request.url_root + "/" + url_for(url),
+            app.config.get("APP_INSTANCE_ID"),
+            token,
         ),
     )
     text = MIMEText(
@@ -291,9 +292,81 @@ def reset_password_message(email: str) -> MIMEMultipart:
     return msg
 
 
-def account_verify_message(usrid: int, account: dict = None) -> MIMEMultipart:
-    url = "gui_userlist"
-    recipients = [constants.APP_EMAIL_VALIDATE_ACCOUNT]
+def reset_password_message(email: str) -> MIMEMultipart:
+    url = "gui_forgotten"
+    token = _generate_mail_token(email, "resetpassword")
+    recipients = [email]
+    msg = MIMEMultipart()
+    msg["Subject"] = "EcoTaxa reset password"
+
+    msg["To"] = ", ".join(recipients)
+    msg["ReplyTo"] = app.config.get("APP_NOREPLY")
+    html = render_template(
+        "v2/mail/_mail_reset_password.html",
+        email=app.config.get("APP_EMAIL_ASSISTANCE"),
+        link=("{0}/{1}/{2}").format(
+            request.url_root + "/" + url_for(url),
+            app.config.get("APP_INSTANCE_ID"),
+            token,
+        ),
+    )
+    text = MIMEText(
+        html_to_text(html),
+        "plain",
+    )
+    html = MIMEText(html, "html")
+    msg.attach(text)
+    msg.attach(html)
+    return msg
+
+
+def api_account_validate(usrid: int, account: dict = None) -> dict:
+    url = "gui_users_list_page"
+    subject = "EcoTaxa account creation"
+    replyto = account["email"]
+    html = render_template(
+        "v2/mail/_mail_account_validation.html",
+        account=account,
+        usrid=usrid,
+        link=("{0}").format(request.url_root + url_for(url)),
+    )
+    text = html_to_text(html)
+    payload = dict(
+        {
+            "accountreq": None,
+            "msg": dict(
+                {
+                    "subject": subject,
+                    "html": html,
+                    "text": text,
+                    "replyto": account["email"],
+                }
+            ),
+            "tokenStr": None,
+        }
+    )
+    return call_api_direct(payload, "/account/validate")
+
+
+def call_api_direct(payload: dict, entrypoint: str):
+    import requests
+    import json
+
+    with ApiClient(UsersApi, request) as apiaccount:
+        url = (
+            apiaccount.api_client.configuration.host + entrypoint
+        )  # endpoint is nowhere available as a const :(
+        r = requests.post(url, params=payload, data=json.dumps(payload))
+
+        if r.status_code == 200:
+            return r
+        else:
+            return r
+
+
+def account_validate(usrid: int, account: dict = None) -> MIMEMultipart:
+    url = "gui_users_list_page"
+    recipients = [app.config.get("APP_VALIDATE_ACCOUNT")]
     msg = MIMEMultipart()
     msg["Subject"] = "EcoTaxa account creation"
 
@@ -303,7 +376,7 @@ def account_verify_message(usrid: int, account: dict = None) -> MIMEMultipart:
         "v2/mail/_mail_account_validation.html",
         account=account,
         usrid=usrid,
-        link=("{0}").format(request.url_root + "/" + url_for(url)),
+        link=("{0}").format(request.url_root + url_for(url)),
     )
     text = MIMEText(
         html_to_text(html),
@@ -312,23 +385,86 @@ def account_verify_message(usrid: int, account: dict = None) -> MIMEMultipart:
     html = MIMEText(html, "html")
     msg.attach(text)
     msg.attach(html)
-    return msg
+    err = send_mail(app.config.get("APP_VALIDATE_ACCOUNT"), msg, account["email"])
+    return err
 
 
-def validation_message(email: str) -> MIMEMultipart:
+def api_toback_account_verify(email: str) -> dict:
+    url = "gui_register"
+    subject = "EcoTaxa email validation"
+    tokenStr = app.config.get("VERIFY_TOKENSTR")
+    html = render_template(
+        "v2/mail/_mail_validate.html",
+        email=app.config.get("APP_EMAIL_ASSISTANCE"),
+        link=("{0}/{1}/{2}").format(
+            request.url_root + url_for(url),
+            app.config.get("APP_INSTANCE_ID"),
+            tokenStr,
+        ),
+    )
+    accountreq = dict(
+        {"recipient": email, "ip": _public_ip(), "action": "accountrequest"}
+    )
+    text = html_to_text(html)
+    with ApiClient(AccountManagerService, request) as api:
+        ret = api.account_verify(
+            accountreq,
+            dict({"subject": subject, "html": html, "text": text, "replyto": None}),
+            tokenStr,
+        )
+    return ret
+
+
+def api_account_verify(email: str) -> dict:
+    url = "gui_register"
+    subject = "EcoTaxa email validation"
+    tokenStr = app.config.get("VERIFY_TOKENSTR")
+    html = render_template(
+        "v2/mail/_mail_validate.html",
+        email=app.config.get("APP_EMAIL_ASSISTANCE"),
+        link=("{0}/{1}").format(
+            request.url_root + url_for(url),
+            tokenStr,
+        ),
+    )
+    accountreq = dict(
+        {"recipient": email, "ip": _public_ip(), "action": "accountrequest"}
+    )
+    text = html_to_text(html)
+    payload = dict(
+        {
+            "accountreq": accountreq,
+            "msg": dict(
+                {
+                    "subject": subject,
+                    "html": html,
+                    "text": text,
+                    "replyto": None,
+                }
+            ),
+            "tokenStr": tokenStr,
+        }
+    )
+    res = call_api_direct(payload, "/account/verify")
+    return res
+
+
+def account_verify(email: str) -> MIMEMultipart:
     url = "gui_register"
     recipients = [email]
     msg = MIMEMultipart()
     msg["Subject"] = "EcoTaxa email validation"
 
     msg["To"] = ", ".join(recipients)
-    msg["ReplyTo"] = constants.APP_NOREPLY
+    msg["ReplyTo"] = app.config.get("APP_NOREPLY")
     token = _generate_mail_token(email)
+
     html = render_template(
         "v2/mail/_mail_validate.html",
-        email=constants.APP_EMAIL_ASSISTANCE,
-        link=("{0}/{1}/{2}").format(
-            request.url_root + "/" + url_for(url), constants.APP_INSTANCE_ID, token
+        email=app.config.get("APP_EMAIL_ASSISTANCE"),
+        link=("{0}/{1}").format(
+            request.url_root + url_for(url),
+            token,
         ),
     )
     text = MIMEText(
@@ -338,22 +474,22 @@ def validation_message(email: str) -> MIMEMultipart:
     html = MIMEText(html, "html")
     msg.attach(text)
     msg.attach(html)
-    return msg
+    return send_mail(email, msg)
 
 
-def send_mail(email: str, msg: MIMEMultipart) -> dict:
+def send_mail(email: str, msg: MIMEMultipart, replyto: str = None) -> dict:
     import smtplib, ssl
 
     # starttls and 587  - avec ssl 465
-    from appli.gui.admin.datamail import SENDER_EMAIL, SENDER_PWD
-
-    sender_email = SENDER_EMAIL
-    pwd = SENDER_PWD
+    sender_email = app.config.get("SENDER_EMAIL")
+    pwd = app.config.get("SENDER_PWD")
     msg["From"] = sender_email
     recipients = [email]
+    if replyto != None:
+        msg["Reply-To"] = replyto
     context = ssl.create_default_context()
-
-    with smtplib.SMTP_SSL("ssl0.ovh.net", 465, context=context) as smtp:
+    mailhost = app.config.get("APP_MAIL_HOST")
+    with smtplib.SMTP_SSL(mailhost, 465, context=context) as smtp:
         # server = smtplib.SMTP("ssl0.ovh.net:587")
         # server.ehlo()
         # server.starttls()

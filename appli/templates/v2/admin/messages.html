@@ -8,22 +8,26 @@
   {{ modal(id='help-sitemessages',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
 
   {% if msgkey %}
-{% set message = messages[msgkey] if messages %}
+{% set message = messages[msgkey] if messages|length  %}{{messages}}
   <form action="" method="post" class="js js-submit">
 
       <div class="form-box"><label>{{msgkey}}  {{_('Message to display : ')}}</label>
-      <textarea name="msg" class="form-input">message</textarea>
+      <textarea name="msg" class="form-input">{{message["content"]}}</textarea>
       </div>
+
+            <div class="form-box"><label>{{_('active')}}
+            <input type="checkbox" name="active" value="1" {{ 'checked' if message["active"]==1}}></label>
+            </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
             <a href ="/gui/admin/messages" class="button is-secondary inverse">{{_('Cancel')}}</a>  <button type="submit" class="button is-primary ">{{_('Save')}}</button>
             </div>
       </form>
   {% elif messages is iterable %}
   <div class="js js-datatable" id="admin-messages-list">
-  <table ><thead><tr><th></th><th>{{_('type')}}</th><th>{{_('message')}}</th></tr></thead>
+  <table ><thead><tr><th></th><th>{{_('type')}}</th><th>{{_('message')}}</th><th>{{_('active')}}</th><th>{{_('date')}}</th></tr></thead>
     <tbody>
       {% for key,message in messages.items()%}
-      <tr><td><div class="is-controls"><a class="btn is-edit order-2" href="{{key}}">{{_('edit')}}</a></div></td><td>{{key}}</td><td>{{message}}</td></tr>
+      <tr><td><div class="is-controls"><a class="btn is-edit order-2" href="{{key}}">{{_('edit')}}</a></div></td><td>{{key}}</td><td>{{message["content"]}}</td><td>{{'<i class="icon-sm icon-check"></i>'|safe if message["active"]==1 else '' }}</td><td>{{message["date"]}}</td></tr>
   {% endfor %}
   </tbody>
   </table></div>

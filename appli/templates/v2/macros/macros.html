@@ -64,6 +64,7 @@
 {%- endmacro %}
 {% macro inputdict(id,name,value=0, label='', type = '', multiple = False,placeholder='Select', required = False, autocomplete=False,data='',options=None) -%}
 {% if autocomplete == True %}
+
 <select {{ 'multiple' if multiple }} name="{{ name }}" id="{{ id }}" class="form-select js js-autocomplete" data-placeholder="{{ placeholder }}" data-type="{{ type }}" {{ 'required' if required }}  {{ data if data }}>
 
   {% if options != None and options is iterable%}

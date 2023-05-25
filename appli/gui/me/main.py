@@ -1,7 +1,6 @@
 import flask
 from flask import request, render_template, redirect, flash
-from flask_security import login_required
-from flask_login import current_user
+from flask_login import current_user, login_required
 from appli import app, gvp
 from appli.gui.commontools import is_partial_request
 

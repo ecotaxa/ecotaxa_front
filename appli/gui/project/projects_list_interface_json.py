@@ -51,6 +51,27 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                 },
             }
         ),
+        "prediction": dict(
+            {
+                "select": {
+                    "select": "selectmultiple",
+                    "field": "projid",
+                    "emptydata": "projid",
+                },
+                "projid": {
+                    "label": "ID",
+                },
+                "instrument": {
+                    "label": _("Instrument"),
+                },
+                "title": {
+                    "label": _("Title"),
+                },
+                "validated_nb": {"label": _("Validated nb"), "format": "number"},
+                "matching_nb": {"label": _("Matching nb"), "format": "number"},
+                "deep_model": {"label": _("Deep features")},
+            }
+        ),
         "import": {
             "commons": dict(
                 {
@@ -329,10 +350,12 @@ def render_stat_proj_json(prj: dict, partial: bool = True) -> dict:
     return _extract_items(prj, keepkeys)
 
 
-def render_for_js(prjs: list, columns: list, can_access: list, isadmin: bool) -> list:
+def render_for_js(prjs: list, columns: list, can_access: list) -> list:
     from appli.gui.staticlistes import py_project_status
     from datetime import datetime
+    from appli.gui.admin.main import _check_is_admin
 
+    isadmin = _check_is_admin()
     jsonprjs = list([])
     translations = dict(
         {

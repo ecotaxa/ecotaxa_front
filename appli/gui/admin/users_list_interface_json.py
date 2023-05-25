@@ -53,7 +53,7 @@ def user_table_columns(selection: str = "list") -> list:
     return columns[selection]
 
 
-def render_for_js(users: list, columns: list, isadmin: bool) -> list:
+def render_for_js(users: list, columns: list) -> list:
     from datetime import datetime
 
     jsonusers = list([])

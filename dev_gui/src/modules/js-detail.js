@@ -4,6 +4,7 @@ import {
   default_messages
 } from '../modules/modules-config.js';
 let instance = null;
+//special details info - about in project lists
 export class JsDetail {
   current = null; // this.current item - only one this.current at a time  / toggle when accordion style
   constructor(detail, wrapper, options = {}) {
@@ -14,7 +15,6 @@ export class JsDetail {
         waitdiv: null
       }
       this.options = Object.assign(defaultOptions, options);
-
       Object.freeze(this.options);
       this.wrapper = wrapper;
       this.detail = detail;

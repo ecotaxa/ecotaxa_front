@@ -168,15 +168,9 @@ def projects_list(
     tabledef = dict(
         {
             "columns": columns,
-            "data": render_for_js(prjs, columns, can_access, isadmin),
+            "data": render_for_js(prjs, columns, can_access),
         }
     )
-    if typeimport == "":
-        tabledef.update(
-            {
-                "lastused": last_used_projects,
-            }
-        )
     return tabledef
 
 
@@ -208,7 +202,7 @@ def projects_list_page(
 
     from appli.gui.project.projects_list_interface_json import project_table_columns
 
-    columns = project_table_columns(typeimport)
+    # columns = project_table_columns(typeimport)
     if typeimport != "":
         listall = False
 
@@ -222,15 +216,13 @@ def projects_list_page(
         template = "v2/project/_listcontainer.html"
         experimental = ""
     lastprjs = list([p.projid for p in current_user.last_used_projects])
-    import json
-
     return render_template(
         template,
         CanCreate=CanCreate,
         listall=listall,
         partial=partial,
         isadmin=isadmin,
-        columns=json.dumps(columns),
+        # columns=json.dumps(columns),
         last_used_projects=lastprjs,
         typeimport=typeimport,
         experimental=experimental,

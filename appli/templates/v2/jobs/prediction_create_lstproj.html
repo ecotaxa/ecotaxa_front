@@ -1,0 +1,125 @@
+{% extends "v2/layout.html" %}
+{% from "./v2/macros/macros.html" import inputdict, alertbox with context %}
+{% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
+{% set deep_features = target_proj.cnn_network_id if target_proj else None%}
+{% block body %}
+<div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="job_prediction" >
+  <div class="w-100 mx-auto py-4 block text-left relative" id="job-prediction-header">
+    {% set data = {'file':'_help_prediction'} %}
+    {{header_project_job(_('PREDICTION: Choice of Learning Set data source'),data, _('Prediction'))}}
+    <div class="block-info">{{_('A Learning Set AKA <a href="https://en.wikipedia.org/wiki/Training,_validation,_and_test_sets#Training_data_set" target="_blank">Training Data Set</a> is built using validated data from one or several projects.')}}
+  <br>{{_('Inside these projects, you will be able, in next pages, to specify:')}}
+<ul><li>{{_("Which categories you're interested in predicting.")}}</li><li>{{_('How many objects you want to use as reference for the prediction.')}}</li><li>{{_('For these objects, which features are relevant to the prediction.')}}</li></ul>
+{{_('This Learning set will then be used for running the prediction task.')}}<div data-toggle="tooltip" data-placement="right">{{_('You can run the Subset tool to:')}}
+  <ul><li>{{_('Create a Learning set that you will later improve')}}</li>
+<li>{{_('Check validation of a project using a randomly limited number of objects from the project')}}</li></ul>
+        <//div>
+  </div></div>
+  {{display_filters(filters)}}
+  {{ filters_info|safe }}
+      <button class='button is-primary hidden'>Next: Choose objects in selected projects
+      </button>
+  <div class="flex flex-row justify-between">
+    <div class="md:w-2/3">
+        <form method="post" id="search" class="w-full">
+          <fieldset class="flex flex-row w-full  border border-stone-600">
+          <input type="hidden" value="" name="srcs" id="search_srcs">
+          <div class="form-box"><label>{{_('Filter on title:')}}</label>
+          <input class="form-input" name="filt_title" id="filt_title"
+                 value="{{ filt_title }}" type="text"></div>
+          <div class="form-box"><label>{{_('# Matching features >')}}</label>
+          <input class="form-input" name="filt_featurenbr" id="filt_featurenbr"
+                 value="{{ filt_features_nbr }}" type="text"></div>
+                 <div class="form-box flex-grow"><label>{{_('Instrument:')}}</label>
+            {{ inputdict('filt_instrum','filt_instrum',value = target_proj.instrument, label=target_proj.instrument,type='instr', placeholder=_('Instrument'),required= True,autocomplete=True ) }}
+        </div><div class="form-box flex items-end">
+          <button type="button"  class="button is-secondary">Filter
+          </button></div></fieldset>
+        </form>
+</div>
+    <div  class="md:w-1/3">
+      {% if deep_features %}
+        {{_('Project deep features model:')}} <span id="prj_deep">{{ deep_features }}</span>.
+      {% else %}
+        <span class="label-warning">{{_('No deep features model for the project.')}}</span>
+      {% endif %}
+      <br>{{_('Model is')}} <span id="deep_used"></span>
+      <div  data-toggle="tooltip">{{_('Your project deep features model must exist (see with a Manager if not the case),
+and be the same as in _all_ source projects, to allow deep features extraction and prediction improvement.')}}</div>
+    </div>
+  </div>
+
+  <div class="js js-datatable"  data-from="prjpredict" data-searchchable=true data-instanceid="prediction_create_lstproj" data-fromid={{target_proj.projid}} data-select="selectmultiple" data-onselect="/gui/job/create/Prediction?projid={{target_proj.projid}}&srcs">
+  <!--  <table>
+      <tr>
+        <th></th>
+        <th>Inst.</th>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Validated</th>
+        <th>Matching features</th>
+        <th>Deep features model</th>
+      </tr>
+      {% for line in prj_table %}
+        <tr>
+          <td><input type='checkbox' {{ "checked" if line.checked }} name="prediction_create_lstproj[]"
+                   class='selproj' data-prjid='{{ line.projid }}' value={{line.projid}} data-addaction="syncdeepossible">
+          </td>
+          <td>{{line.projid}}</td>
+          <td>{{ line.instrument }}</td>
+          <td>{{ line.title }}</td>
+          <td>{{ line.validated_nb }}</td>
+          <td>{{ line.matching_nb }}</td>
+          <td id="deep{{ line.projid }}">{{ line.deep_model }}</td>
+        </tr>
+      {% endfor %}
+      {{ TblBody|safe }}
+    </table>-->
+    <div class="selectaction absinput rounded shadow-sm w-auto p-4 font-normal text-secondblue-50 bg-stone-700  hide" data-input="search_srcs" data-form="search"><i class="icon icon-cancel p-1 -mt-3 -mr-3 invert float-right" data-dismiss=".selectaction"></i><a class="text-sm small-caps ">{{_('Next: Choose objects in selected projects')}}</a></div>
+
+  </div></div>
+  <script>
+      /*function SyncDeepPossible() {
+          // Tell the user if using deep features will be possible or not
+          const prj_model = $("#prj_deep").text();
+          const feedback = $("#deep_used");
+          if (prj_model === "") {
+              feedback.text("missing.");
+              return;
+          }
+          var ok = true;
+          const sel_models = $(".selproj:checked").map(function () {
+              const prj_id = $(this).data('prjid');
+              const deep_for_prj = $("#deep" + prj_id).text();
+              if (prj_model !== deep_for_prj) {
+                  ok = false;
+              }
+          });
+          if (ok) {
+              feedback.attr("class", "label-success");
+              feedback.text("usable.");
+          } else {
+              feedback.attr("class", "label-warning");
+              feedback.text("not usable.");
+          }
+      }
+
+      function SubmitProjectSelection() {
+          var srclst = $(".selproj:checked").map(function () {
+              return $(this).data('prjid');
+          }).get().join(',');
+          PostDynForm("?{{ url|safe }}", {src: srclst});
+      }
+
+      function FilterWithProjectSelection() {
+          var srclst = $(".selproj:checked").map(function () {
+              return $(this).data('prjid');
+          }).get().join(',');
+          $('#search_srcs').prop("value", srclst);
+          $('#search').submit();
+      }*/
+
+
+
+  </script>
+{% endblock %}

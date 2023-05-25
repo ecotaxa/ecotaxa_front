@@ -2,27 +2,34 @@
 // line with member name , priviliege , is contact , and delete functionality
 import DOMPurify from 'dompurify';
 import {
-  alertconfig,
+  FormSubmit,
+} from "../modules/form-submit.js";
+import {
   AlertBox
 } from "../modules/alert-boxes.js";
 import {
   JsTomSelect
 } from "../modules/js-tom-select.js";
-import {
-  className
-} from '../modules/utils.js';
+
 import {
   rights,
-  defined_privileges
+  defined_privileges,
+  alertconfig,
+  css
 } from '../modules/modules-config.js';
-const err_messages = {
+const codemessages = {
   oneatleast: 'oneatleast',
+  nomanager: 'nomanager',
+  nocontact: 'nocontact',
+  uhasnopriv: 'uhasnopriv',
+  importpriverror: 'importpriverror',
+  emptyname: 'emptyname'
 }
 let instance = null;
 export class ProjectPrivileges {
   //TODO: rewrite to not depend on DOM select
   options;
-  alerts = [];
+  alertBox;
   // current user id;
   current_uid;
   fieldset;
@@ -51,10 +58,20 @@ export class ProjectPrivileges {
       if (this.options.addbtn) this.addListener();
       const lines = this.fieldset.querySelectorAll('[data-block="' + this.options.target + '"]');
       this.current_uid = this.fieldset.dataset.u;
-
+      this.alertBox = new AlertBox();
       lines.forEach((line) => {
         this.activateEvents(line);
       });
+
+      //remove deleted , clean && validate datas , format names before sending the form
+      const form = this.fieldset.closest('form');
+      const formSubmit = new FormSubmit(form);
+      // handler - verify privileges before settings form submit
+      const submit_privileges = async () => {
+        const resp = await this.cleanPrivileges();
+        return resp;
+      }
+      formSubmit.addHandler(submit_privileges);
       instance = this;
     }
     return instance;
@@ -136,7 +153,7 @@ export class ProjectPrivileges {
             el.selectedIndex = -1;
             break;
           case 'label':
-            el.classList.remove('peer-checked');
+            el.classList.remove(css.peerchecked);
             break;
         }
         if (el.tomselect) {
@@ -145,12 +162,12 @@ export class ProjectPrivileges {
           el.tomselect.destroy();
 
         }
-        if (el.classList.contains('tomselected')) {
+        if (el.classList.contains(css.component.autocomplete.tomselected)) {
           has_autocomplete = el;
           el.classList.forEach(cl => {
             if (cl.indexOf('ts-') == 0) el.classList.remove(cl);
           })
-          el.classList.remove('tomselected');
+          el.classList.remove(css.component.autocomplete.tomselected);
           if (el.type == "select-one") delete el.type;
 
         }
@@ -166,7 +183,7 @@ export class ProjectPrivileges {
     /* clear and add tom-select functionalities - only after adding line to the dom*/
     if (has_autocomplete !== null) {
       const jsTomSelect = new JsTomSelect();
-      jsTomSelect.apply(has_autocomplete);
+      jsTomSelect.applyTo(has_autocomplete);
       has_autocomplete.tomselect.clearOptions();
       let options = this.fieldset.dataset.options;
       options = (options) ? options : [];
@@ -190,20 +207,19 @@ export class ProjectPrivileges {
       contact,
       delet
     } = this.getInputs(line, priv);
-
     if (!member || !privs || !contact || !delet) return;
-    // sanitize
 
+    // sanitize
     mb.key = DOMPurify.sanitize(mb.key);
     mb.value = DOMPurify.sanitize(mb.value);
-    if (member.tomselect) {
-
-      let addmb = {}
-      addmb[member.tomselect.settings.valueField] = mb.key;
-      addmb[member.tomselect.settings.labelField] = mb.value;
-      if (!member.tomselect.getOption(mb.key)) member.tomselect.addOption(addmb);
-      member.tomselect.addItem(mb.key, false);
-      member.tomselect.refreshOptions();
+    const ts = member.tomselect;
+    if (ts) {
+      ts.clear();
+      const addmb = {}
+      addmb[ts.settings.valueField] = mb.key;
+      addmb[ts.settings.labelField] = addmb[ts.settings.searchField] = mb.value;
+      ts.addOption(addmb);
+      ts.setValue([mb.key]);
     } else {
       const selected = member.querySelector('select option[value="' + mb.key + '"]');
       if (selected) selected.selected = true;
@@ -219,9 +235,7 @@ export class ProjectPrivileges {
 
   }
   getInputs(line, priv = false) {
-
     const member = line.querySelector("[name*='[" + this.options.ident + "]']");
-
     let privs;
     if (priv) {
       privs = line.querySelector('input[name*="[' + this.options.privilege + ']"][value="' + priv + '"]');
@@ -236,34 +250,38 @@ export class ProjectPrivileges {
       delet: delet
     };
   }
-  async importPrivileges(privileges, clear = false, contact = null, importedtag = null, dismiss = null) {
-    let lastline = (clear === true) ? null : true;
+  async importPrivileges(privileges, replace = false, contact = null, importedtag = null, dismiss = null) {
+    let lastline = !replace;
+
     try {
       Object.entries(privileges).forEach(([priv, members]) => {
         members.forEach((member) => {
           if (!lastline) lastline = this.clearAll(true);
           else lastline = this.newLine(true, member.id);
-
           if (lastline) {
-
             this.setLine(lastline, {
               key: member.id,
               value: member.name,
             }, priv, (contact && (parseInt(contact.id) === parseInt(member.id))));
             if (importedtag) importedtag(lastline);
-            if (dismiss) dismiss();
+
           }
 
         });
 
       });
+      if (dismiss) dismiss();
+      this.alertBox.dismissAlert(codemessages.importpriverror);
       return true;
     } catch (err) {
-
-      await new AlertBox().build('importpriverror', alertconfig.danger, 'importpriv', {
-        dismissible: true
+      await this.alertBox.build({
+        dismissible: true,
+        message: codemessages.importpriverror,
+        codeid: true,
+        parent: this.fieldset_alert_zone,
+        type: alertconfig.danger,
       });
-      console.log('err', err)
+      console.log('err', err);
       return false;
     }
   }
@@ -287,7 +305,11 @@ export class ProjectPrivileges {
         // manager - can't delete line - can choose as contact
         dl.disabled = true;
         ct.disabled = false;
-        //  if (ct.checked) ct.checked = true;
+        // dismiss related alert
+        this.alertBox.dismissAlert(codemessages.nomanager);
+        if (ct.checked) {
+          this.alertBox.dismissAlert(codemessages.nocontact);
+        }
       } else {
         // not manager - can delet line - cannot chose as contact
         //  if (ct.checked === true) ct.dispatchEvent(new Event('click'));
@@ -298,6 +320,11 @@ export class ProjectPrivileges {
 
       if (synchro === true) {
         synchroSiblings(line);
+      }
+      // dismiss alerts
+      if (!dl.ckecked) {
+        this.alertBox.dismissAlert(codemessages.nobody);
+        this.alertBox.dismissAlert(codemessages.oneatleast);
       }
     }
     const synchroSiblings = (line) => {
@@ -313,6 +340,12 @@ export class ProjectPrivileges {
 
     member.addEventListener('change', (e) => {
       contact.value = member.value;
+      // dismiss alert
+      if (member.value) {
+        this.alertBox.dismissAlert(codemessages.emptyname);
+        this.alertBox.dismissAlert(codemessages.oneatleast);
+        this.alertBox.dismissAlert(codemessages.nobody);
+      }
     })
 
     privs.forEach((priv) => {
@@ -336,20 +369,25 @@ export class ProjectPrivileges {
     //
     delet.addEventListener('click', (e) => {
       // at least one priv line
-
+      const deletlabel = delet.closest('label');
       const lines = this.fieldset.querySelectorAll('[data-block="' + this.options.target + '"]:not([data-mod="remove"])');
       if (lines.length <= 1 && e.target.checked) {
         delet.disabled = true;
         delet.checked = false;
-        new AlertBox(this.alerts[err_messages.oneatleast]).build(err_messages.oneatleast, alertconfig.warning, (e.target.id || '0'), {
+        this.alertBox.build({
           dismissible: true,
+          message: codemessages.oneatleast,
+          codemessage: codemessages.oneatleast,
+          type: alertconfig.warning,
+          parent: (e.currentTarget.id || null)
         });
         return;
       } else if (e.target.checked) {
-        this.dissmissMessage(err_messages.oneatleast);
+        this.alertBox.dismissAlert(codemessages.oneatleast);
         if (line.classList.contains('new')) {
           line.remove();
         } else {
+          if (deletlabel && deletlabel.dataset.restore) deletlabel.setAttribute('title', deletlabel.dataset.restore);
           line.setAttribute('data-mod', 'remove');
           privs.forEach(priv => {
             priv.disabled = true;
@@ -360,6 +398,7 @@ export class ProjectPrivileges {
           member.disabled = true;
         }
       } else {
+        if (deletlabel && deletlabel.dataset.remove) deletlabel.setAttribute('title', deletlabel.dataset.remove);
         line.removeAttribute('data-mod');
         privs.forEach(priv => priv.disabled = false);
         contact.disabled = false;
@@ -391,21 +430,29 @@ export class ProjectPrivileges {
       let n = managers.length;
 
       if (n === 0) {
-        await new AlertBox().build('nomanager', alertconfig.danger, id, {
+        await this.alertBox.build({
           dismissible: true,
+          message: codemessages.nomanager,
+          codeid: true,
+          type: alertconfig.danger,
+          parent: this.fieldset_alert_zone,
         });
         return false;
-      }
+      } else this.alertBox.dismissAlert(codemessages.nomanager);
       // check contact
       const contact = this.fieldset.querySelector('[name="' + this.options.contactfieldname + '"]:checked');
 
       if (contact === null) {
-        this.alerts[err_messages.nocontact] = new AlertBox(this.alerts[err_messages.nocontact]).build(err_messages.nocontact, alertconfig.danger, this.fieldset_alert_zone, {
-          dismissible: true
+        await this.alertBox.build({
+          dismissible: true,
+          codeid: true,
+          message: codemessages.nocontact,
+          type: alertconfig.danger,
+          parent: this.fieldset_alert_zone
         });
         return false;
       }
-      if (this.alerts[err_messages.nocontact]) this.alerts[err_messages.contact].dismissAlert();
+      this.alertBox.dismissAlert(codemessages.nocontact);
       return true;
     }
     const hasMember = (line) => {
@@ -447,9 +494,13 @@ export class ProjectPrivileges {
           const lineno = line.querySelector('[name*="[' + this.options.ident + ']"]');
           lineno.focus();
           if (lineno.tomselect) lineno.tomselect.focus();
-          this.alerts[err_messages.emptyname] = await new AlertBox(this.alerts[err_messages.emptyname]).build(err_messages.emptyname, alertconfig.warning, line, {
+          await this.alertBox.build({
             dismissible: true,
             insertafter: true,
+            message: codemessages.emptyname,
+            codeid: true,
+            type: alertconfig.warning,
+            parent: line
           });
           const resp = false; // no confimbox just wait for user action
           // callback when confirmbox response is chosen if 'confirm'
@@ -461,12 +512,17 @@ export class ProjectPrivileges {
 
           } else return false;
         } else if (!hasPriv(line)) {
-          await new AlertBox().build('uhasnopriv', alertconfig.warning, line, {
+          this.alertBox.dismissAlert(codemessages.emptyname);
+          await this.alertBox.build({
             dismissible: true,
             insertafter: true,
+            codeid: true,
+            message: codemessages.uhasnopriv,
+            type: alertconfig.warning,
+            parent: line
           });
           verif = false;
-        }
+        } else this.alertBox.dismissAlert(codemessages.uhasnopriv);
       }
       if (!verif) return verif;
       for (const line of lines) {
@@ -474,13 +530,15 @@ export class ProjectPrivileges {
       }
 
       if (n === 0) {
-        // to position error messages correctly when js-tabs is activated
-
-        await new AlertBox().build('nobody', alertconfig.danger, this.fieldset_alert_zone, {
+        await this.alertBox.build({
           dismissible: true,
+          codeid: true,
+          message: codemessages.nobody,
+          type: alertconfig.warning,
+          parent: this.fieldset_alert_zone
         });
         return false;
-      }
+      } else this.alertBox.dismissAlert(codemessages.nobody);
       return true;
     } else return false;
   }
@@ -499,7 +557,7 @@ export class ProjectPrivileges {
 
   clearAll(ret = false) {
     const lines = this.fieldset.querySelectorAll('[data-block="' + this.options.target + '"]');
-
+    let keepindex = -1;
     lines.forEach((line, index) => {
       const {
         member,
@@ -507,16 +565,18 @@ export class ProjectPrivileges {
         contact,
         delet
       } = this.getInputs(line);
-      if (index > 0 && (this.current_uid !== member.value)) line.remove();
+      if (this.current_uid === member.value) keepindex = index;
+      if (index > 0 || (keepindex > 0 && keepindex !== index)) line.remove();
     });
     //
-    this.clearLine(lines[0], 0);
-    this.activateEvents(lines[0]);
-    if (ret === true) return lines[0];
+    console.log('keepindex', keepindex)
+    const line = this.newLine(true);
+    if (keepindex !== 0) {
+      lines[0].remove();
+      console.log('rem line0', lines)
+    }
+    if (ret === true) return line;
   }
-  // hook on form submit verify privileges
-  async submitPrivileges() {
-    const resp = await this.cleanPrivileges();
-    return resp;
-  }
+
+
 }

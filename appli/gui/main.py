@@ -4,14 +4,16 @@
 import os
 from typing import List
 from flask import request, url_for, render_template, flash, redirect
-from flask_security import login_required
-from flask_login import current_user
+
+from flask_login import current_user, login_required
 from appli import app, gvg, gvp, constants
 from appli.gui.commontools import is_partial_request
 from to_back.ecotaxa_cli_py.exceptions import ApiException
 from werkzeug.exceptions import HTTPException
 from flask_babel import _
 from appli.gui.staticlistes import py_messages
+
+login_required.login_view = "gui/login"
 
 
 @app.route("/gui")
@@ -25,6 +27,15 @@ def gui_index():
         return gui_login()
 
 
+@app.route("/gui/logout", methods=["GET", "POST"])
+@app.route("/gui/logout/", methods=["GET", "POST"])
+def gui_logout():
+    from flask_login import logout_user
+
+    logout_user()
+    return redirect(url_for("gui_login"))
+
+
 @app.route(
     "/gui/forgotten", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
 )
@@ -36,6 +47,8 @@ def gui_index():
 def gui_forgotten(instid=None, token=None) -> str:
     err = None
     email = None
+    # not finished
+    return render_template("v2/security/forgotten.html", bg=True, token=None)
     sentmail = gvg("sentmail", None)
     if instid == None and token == None:
         if request.method == "POST":
@@ -80,39 +93,41 @@ def gui_forgotten(instid=None, token=None) -> str:
 def gui_login() -> str:
     # if current_user.is_authenticated:
     #    return redirect("/gui/prj")
+    if request.method == "POST":
+        from appli.gui.users.user import login_validate
 
+        if login_validate():
+            next = gvp("next")
+
+            return redirect(next)
     return render_template("v2/login.html", bg=True)
 
 
-@app.route(
-    "/gui/register", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
-)
-@app.route(
-    "/gui/register/", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
-)
-@app.route("/gui/register/<instid>", defaults={"token": None}, methods=["GET", "POST"])
-@app.route("/gui/register/<instid>/<token>", methods=["GET", "POST"])
+@app.route("/gui/register", defaults={"token": None}, methods=["GET", "POST"])
+@app.route("/gui/register/", defaults={"token": None}, methods=["GET", "POST"])
+@app.route("/gui/register/<token>", methods=["GET", "POST"])
 def gui_register(instid=None, token=None) -> str:
     # if current_user.is_authenticated:
     # return redirect("/gui/prj")
     err = None
     email = None
     sentmail = gvg("sentmail", None)
-    if instid == None and token == None:
+    if token == None:
         createaccount = False
         if request.method == "POST":
             # validate email
             email = gvp("register_email")
-            from appli.gui.users.commontools import send_mail, validation_message
 
-            msg = validation_message(email)
-            err = send_mail(email, msg)
+            from appli.gui.users.commontools import account_verify
+
+            err = account_verify(email)
+
             if err == None:
                 return redirect(url_for("gui_register", sentmail=email))
             else:
                 flash(err, "error")
                 return redirect(url_for("gui_register"))
-    elif instid != None and token != None:
+    elif token != None:
         createaccount = True
         if request.method == "POST":
             from appli.gui.users.commontools import user_create, ACCOUNT_USER_CREATE
@@ -121,7 +136,7 @@ def gui_register(instid=None, token=None) -> str:
             if err == None:
                 return redirect(url_for(redir))
 
-        elif token != None:
+        else:
             from appli.gui.users.commontools import account_page, ACCOUNT_USER_CREATE
 
             return account_page(
@@ -137,6 +152,7 @@ def gui_register(instid=None, token=None) -> str:
         bg=True,
         sentmail=sentmail,
         createaccount=createaccount,
+        reCaptchaID=app.config.get("RECAPTCHAID"),
     )
 
 
@@ -194,7 +210,6 @@ def gui_prjlist() -> str:
     response.headers["Content-length"] = len(content)
     response.headers["Content-Encoding"] = encoding
     response.headers["Content-Type"] = "application/json"
-
     return response
 
 
@@ -350,6 +365,20 @@ def gui_stream():
     )
 
 
+# cookie for sitemessaging
+@app.route("/gui/setmsgcookie", methods=["POST"])
+def gui_setmsgcookie():
+    cookiename = gvp("name")
+    cookievalue = gvp("value")
+    print(cookiename)
+    from flask import make_response
+
+    response = make_response("")
+    if cookiename != "" and cookievalue != "":
+        response.set_cookie(cookiename, cookievalue)
+    return response, 302
+
+
 # @app.route("/gui/adminstream/", methods=["GET", "POST"])
 @app.route("/gui/colors/", methods=["GET"])
 def gui_graphicpalette():
@@ -423,6 +452,41 @@ def utility_processor():
 
         return breadcrumbs()
 
+    def get_referer() -> str:
+        referer = gvp("next", request.referrer)
+        if referer == None or url_for("gui_login") in referer:
+            referer = url_for("gui_index")
+        return referer
+
+    def global_messages() -> str:
+        if not current_user.is_authenticated:
+            return ""
+        cookiename = "ecotaxa_userinfo"
+
+        import json, time
+
+        file = app.config.get("APP_GUI_MESSAGE_FILE")
+        ret = {}
+
+        if os.path.exists(file):
+
+            with open(file, "r", encoding="utf-8") as f:
+                messages = json.loads(f.read())
+
+            for key, message in messages.items():
+                name = key + cookiename
+                dailyinfo = request.cookies.get(name)
+                if message["active"] == 1 and (dailyinfo != message["date"]):
+                    ret[key] = message
+        if len(ret):
+            return render_template(
+                "v2/partials/_top_messages.html",
+                messages=ret,
+                cookiename=cookiename,
+            )
+        else:
+            return ""
+
     return dict(
         message_translation=message_translation,
         unique_id=unique_id,
@@ -430,6 +494,8 @@ def utility_processor():
         g_status=g_status,
         def_language=def_language,
         cap_words=cap_words,
+        get_referer=get_referer,
+        global_messages=global_messages,
     )
 
 

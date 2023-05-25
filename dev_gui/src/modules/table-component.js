@@ -1,414 +1,1004 @@
-import {
-  DataTable
-} from "simple-datatables";
 import DOMPurify from 'dompurify';
 import equal from 'deep-equal';
 import {
-  ActivItems
-} from "../modules/activ-items.js";
-import {
-  DataImport
-} from '../modules/data-import.js';
-
-import {
-  JsAccordion
-} from '../modules/js-accordion.js';
-import {
-  JsDetail
-} from '../modules/js-detail.js';
-import {
   fetchSettings,
+  download_url,
+  string_to_boolean,
+  sort_items,
+  is_object,
+  debounce
 } from '../modules/utils.js';
 import {
   css,
+  models,
   domselectors,
-  models
+  default_messages
 } from '../modules/modules-config.js';
-let instance = null;
+let instance = [];
 // valid fetch urlparts
-const fetchfroms = ['prjlist'];
-const tablecss = Object.assign(css, {
-  tipinline: 'tip-inline',
+const fetchfroms = {
+  prjlist: '/gui/prjlist/',
+  prjsamplestats: '/gui/prjsamplestats',
+  userslist: '/gui/admin/userslist',
+  prjpredict: '/gui/prjsforprediction/'
+};
+// specifc css
+const tablecss = {
+  showfull: 'showfull',
+  tipinline: "tip-inline",
+  searchresults: "search-results",
+  selectaction: "selectaction",
+  absinput: 'absinput',
+  disabled: 'table-disabled',
+  ascending: 'table-ascending',
+  descending: 'table-descending',
+  tipover: 'tipover absolute z-10 text-stone-50 rounded bg-stone-600 px-2 py-0.5 -mt-5 ml-12 '
+};
+const tableselectors = {
+  table: '.table-table',
+  wrapper: '.table-wrapper',
+  top: '.table-top',
+  input: '.table-input',
+  search: '.table-search',
+  filters: '.table-filters',
+  sorter: '.table-sorter',
+  details: 'details[data-what="about"]',
+  tip: '.' + css.component.table.tip,
+  tipover: '.tipover',
+  wait: 'wait-please',
+  sorton: '.sorton',
+};
 
-});
-const dom_selectors = Object.assign(domselectors, {
-  datatable: '.dataTable-table',
-  datatable_top: '.dataTable-top',
-  datatable_search: '.dataTable-input',
-  table_filters: 'table-filters',
-  wait: 'wait-please'
-});
 Object.freeze(tablecss);
-Object.freeze(dom_selectors);
+Object.freeze(tableselectors);
+const dynamics = {};
 
 export class TableComponent {
-  columns = [];
-  datas = [];
-  grid = null;
+  instanceid = null;
+  grid = {
+    columns: [],
+    active: [],
+    hidden: [],
+    data: []
+  };
+  domdef = {
+    columns: [],
+    data: [],
+  };
+  wrapper = null;
+  dom = null;
   params = null;
-  last_used = null;
-  importfields = null;
-
+  _events = {};
+  eventnames = {
+    init: "table.init",
+    update: "table.update",
+    refresh: "table.refresh",
+    resize: "table.resize",
+    search: "table.search",
+    searchend: "table.searchend",
+    sorting: "table.sorting",
+    sorted: "table.sorted",
+    dismiss: 'table.dismiss'
+  }
+  labels = {
+    placeholder: "Search...",
+    perPage: "{select} entries per page",
+    noRows: "No entries found",
+    info: "Showing {start} to {end} of {rows} entries",
+    noResults: "No result match your search query"
+  };
+  cellidname = "id";
+  searching = false;
+  sorting = false;
+  initialized = false;
+  plugins = {};
   constructor(container, options = {}) {
     if (!container) return;
     container = container instanceof HTMLElement ? container : document.querySelector(container);
-
-    if (!instance || !equal(container.dataset, instance.params)) {
+    if (!container) return;
+    //can select multiples tables in one page  or load data in the same table
+    this.instanceid = (container.dataset.instanceid) ? container.dataset.instanceid : document.querySelectorAll('table').length;
+    if (!instance[this.instanceid] || !equal(container.dataset, instance[this.instanceid].params)) {
       this.init(container);
     } else this.refresh();
-    return instance;
+    return instance[this.instanceid];
+
+  }
+  init(container) {
+    this.params = container.dataset;
+    let table = container.querySelector('table');
+    if (!table) {
+      table = document.createElement('table');
+      container.appendChild(table);
+    }
+    table.id = 'table-' + container.id;
+    table.classList.add(tableselectors.table.substr(1))
+    this.dom = table;
+    let top = {
+      nodename: "DIV",
+      attributes: {
+        class: tableselectors.top.substr(1)
+      }
+    };
+    if (this.params.sortable) top.childnodes = [{
+      nodename: "DIV",
+      attributes: {
+        class: tableselectors.search.substr(1)
+      },
+      html: `<input type="search" name="table-search" placeholder="${this.labels.placeholder}" class="${tableselectors.input.substr(1)}  ${css.input}">`
+    }];
+    let wrapper = this.objToElement({
+      nodename: 'DIV',
+      attributes: {
+        class: tableselectors.wrapper.substr(1)
+      },
+      childnodes: [top]
+    });
+    container.appendChild(wrapper);
+    wrapper.appendChild(table);
+    this.wrapper = wrapper;
+
+    this.labels = (this.params.labels) ? this.params.labels : this.labels;
+    // cellid
+    this.cellidname = (this.params.hasOwnProperty("cellid")) ? this.params.cellid : this.cellidname;
+    // only valid from values - fetchfroms
+    this.params.from = (this.params.from) ? DOMPurify.sanitize(this.params.from) : null;
+    const from = (this.params.from) ? ((Object.keys(fetchfroms).indexOf(this.params.from) >= 0) ? window.location.href.split('/gui/')[0] + fetchfroms[this.params.from] : null) : null;
+    if (from) {
+      if (this.params.defer) this.deferLoad(container, from);
+      else this.fetchData(container, from);
+    } else this.tableActivate(container);
+  }
+  /**
+   * Add custom event listener
+   * @param  {String} event
+   * @param  {Function} callback
+   * @return {Void}
+   */
+  on(event, callback) {
+    this._events = this._events || {}
+    this._events[event] = this._events[event] || []
+    this._events[event].push(callback)
   }
 
-  init(container) {
-    // valid from values - fetchfroms
-    let from = (container.dataset.from) ? ((fetchfroms.indexOf(container.dataset.from) >= 0) ? '/gui/' + DOMPurify.sanitize(container.dataset.from) + '/' : null) : null;
-    if (!from) return;
-    if (container.dataset.import) from += '?' + new URLSearchParams({
-      typeimport: DOMPurify.sanitize(container.dataset.import),
-      gz: true,
-    });
-    this.waitActivate(container);
-    fetch(from, fetchSettings()).then(response => response.json()).then(tabledef => {
-      this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : 'Data loaded. Displaying...');
-      this.columns = tabledef.columns;
-      this.params = container.dataset;
-      this.datas = tabledef.data;
-      this.last_used = tabledef.last_used; // table activate
-      this.tableActivate(container, this.convertColumns());
-      // dismiss table when dismiss modal
-      container.addEventListener('dissmisstable', (e) => {
-        console.log('destroy table');
-        this.destroy();
-      });
+  /**
+   * Remove custom event listener
+   * @param  {String} event
+   * @param  {Function} callback
+   * @return {Void}
+   */
+  off(event, callback) {
+    this._events = this._events || {}
+    if (event in this._events === false) return
+    this._events[event].splice(this._events[event].indexOf(callback), 1)
+  }
+  emit(event, ...args) {
+    if (event in this._events === false) return;
+    for (let i = 0; i < this._events[event].length; i++) {
+      this._events[event][i](...args);
+    }
 
-      this.grid.on('datatable.init', () => {
-        // hide and move waitdiv in the wrapper for inner elements display
-        this.waitdiv.classList.add(tablecss.hide);
-        // move import zones and/or search zone - reorg the page display
-        this.grid.wrapper.append(this.waitdiv);
-        container.style.top = container.offsetTop + 'px';
-        // fetch once the same table
-        container.dataset.table = this.params.table = true;
-        this.grid.table.classList.remove(tablecss.hide);
-        const search = this.grid.wrapper.querySelector(dom_selectors.datatable_search);
-        // like any other form element
-        search.classList.add(tablecss.input);
-        if (this.importfields) {
-          this.initImport(container.dataset.import);
-          this.waitdiv.remove();
-        } else {
-          const top = this.grid.wrapper.querySelector(dom_selectors.datatable_top);
-          if (top) {
-            const filters = document.querySelector(dom_selectors.table_filters);
-            // insert  filters node  in datatable top
-            if (filters) top.prepend(filters);
-          }
-          if (container.dataset.caption && item.querySelector('caption')) container.querySelector('caption').contentText = item.dataset.caption;
-        }
-        // init about if exists
-        this.initDetails();
-        this.activItems = new ActivItems();
-        this.activItems.apply(this.grid.table);
-      });
-      this.grid.on('datatable.search', (query, matched) => {
-        return this.search(query, matched);
-      });
-      this.grid.on('datatable.refresh', (e) => {
-        return this.refresh(e);
-      });
-      //
-
-      instance = this;
-    }).catch(err => {
-      console.log('err', err);
-    })
   }
   waitActivate(container) {
-    const waitdiv = container.querySelector('#' + dom_selectors.wait);
+    let waitdiv = container.querySelector('#' + tableselectors.wait);
     if (!waitdiv) {
       waitdiv = document.createElement('div');
-      waitdiv.id = dom_selectors.wait;
+      waitdiv.id = tableselectors.wait;
       container.append(waitdiv);
     }
     this.waitdiv = waitdiv;
+    this.timer = new Date();
   }
-  tableActivate(container, cols) {
-    const table = container.querySelector('table');
-    if (!table) {
-      table = document.createElement('table');
-      container.append(table);
-    }
-    table.id = 'table-' + container.id;
-    const grid = new DataTable(table, {
-      data: {
-        headings: cols.map(column => ((column.name) ? column.name : ``)),
-        data: this.datas
-      },
-      columns: cols,
-      searchable: true,
-      fixedHeight: false,
-      paging: false,
-      perPage: 100000,
-      perPageSelect: false,
-      scrollY: (this.importfields) ? true : false,
-      layer: {
-        top: "{search}",
-        bottom: "{pagination}"
-      }
 
+  waitDesactivate(message = null, type = 'info') {
+    if (!this.waitdiv) return;
+    if (message) this.waitdiv.innerHTML = `<div class="${type}">${message}</div>`;
+    else this.waitdiv.classList.add(css.hide);
+  }
+
+  deferLoad(container, from) {
+    const btn = container.querySelector(this.params.defer);
+    if (!btn) return;
+
+    btn.addEventListener('click', (e) => {
+      this.fetchData(container, from);
+      btn.remove();
     });
-    this.grid = grid;
+  }
+
+  fetchData(container, fromurl, pagestart = 0) {
+    this.waitActivate(container);
+    const pagesize = (this.params.pagesize) ? this.params.pagesize : 0;
+
+    let from = (this.params.import) ? fromurl + '?' + new URLSearchParams({
+      typeimport: DOMPurify.sanitize(this.params.import),
+      window_start: pagestart,
+      window_size: pagesize,
+      gz: true,
+    }) : ((pagesize) ? fromurl + '?' + new URLSearchParams({
+      window_start: pagestart,
+      window_size: pagesize,
+      listall: ((this.params.listall) ? this.params.listall : false)
+    }) : ((this.params.listall) ? fromurl + '?' + new URLSearchParams({
+      listall: ((this.params.listall) ? this.params.listall : false)
+    }) : fromurl));
+    if (this.params.fromid) from += '/' + this.params.fromid;
+
+    fetch(from, fetchSettings()).then(response => {
+      if (response.ok) return response.json();
+      return Promise.reject(response);
+    }).then(async tabledef => {
+
+      if (this.waitdiv) this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : default_messages.dataloaded);
+      if (pagestart === 0) {
+        await this.tableActivate(container, tabledef);
+      } else if (tabledef.length) this.domInsertRows(tabledef);
+      else pagesize = 0;
+      if (pagesize > 0) this.fetchData(container, fromurl, pagestart + pagesize);
+    })
+  }
+  async dataToTable(tabledef) {
+    if (!tabledef.data) return;
+    if (tabledef.columns) {
+      await this.convertColumns(tabledef);
+      let tr;
+      let thead = this.dom.tHead;
+      if (!thead) {
+        // create table headings
+        thead = document.createElement('thead');
+        tr = document.createElement('tr');
+        this.dom.appendChild(thead);
+      } else if (!thead.querySelector('tr')) {
+        tr = document.createElement('tr');
+
+      } else {
+        tr = thead.querySelector('tr');
+        tr.innerHTML = ``;
+      }
+      let tbody = (this.dom.tBodies.length) ? this.dom.tBodies[0] : null;
+      if (!tbody) {
+        tbody = document.createElement('tbody');
+        this.dom.appendChild(tbody);
+      }
+      const isjson = (!tabledef.hasOwnProperty('data') || (tabledef.hasOwnProperty('type') && tabledef.type === "json"));
+
+      this.grid.columns.forEach((column, index) => {
+
+        if (!column.hidden) {
+          const th = document.createElement('th');
+          th.innerHTML = column.label;
+          if (column.sort) th.dataset.sort = column.sort;
+          th.dataset.sortable = (column.sortable) ? true : false;
+          tr.appendChild(th);
+          this.grid.active.push(index);
+        } else this.grid.hidden.push(index);
+
+      });
+
+
+      thead.appendChild(tr);
+      if (isjson) {
+        this.grid.data = [];
+        tabledef.data.forEach((data, i) => {
+          const row = [];
+          let j = 0;
+          Object.entries(tabledef.columns).forEach(([key, column], i) => {
+            if (!column.hasOwnProperty('emptydata')) {
+              if (data.hasOwnProperty(key)) row[j] = data[key];
+              else if (column.field && data.hasOwnProperty(column.field)) row[j] = data[column.field];
+              else row[j] = null;
+              j++;
+            }
+          });
+          this.grid.data.push(row);
+        });
+
+      } else this.grid.data = tabledef.data;
+      const tfoot = this.dom.tFoot;
+      if (this.grid.active.length === 0) {
+        tbody.innerHTML = `<tr><td>${this.labels.noRows}</td</tr>`;
+        if (tfoot) tfoot.remove();
+        return;
+      } else if (tfoot && tfoot.querySelector('tr')) {
+        const tf = tfoot.querySelector('tr').childNodes;
+        this.grid.hidden.forEach(i => {
+          tf[i].remove();
+        });
+      };
+
+      this.renderTbody(tbody);
+    }
+  }
+
+  tableToData() {
+    if (!this.dom.querySelector('thead')) return;
+    this.dom.classList.add('hide');
+    const cell_to_obj = (cell) => {
+      const obj = {
+        data: cell.innerText,
+      }
+      if (cell.innerText !== cell.innerHTML) obj.html = cell.innerHTML;
+      return obj;
+    }
+    const ths = (this.dom.querySelectorAll('thead tr th').length) ? this.dom.querySelectorAll('thead tr th') : this.dom.querySelectorAll('thead tr td');
+    const trs = this.dom.querySelectorAll('tbody tr');
+    let active = 0,
+      hidden = 0;
+
+    function find_label(th) {
+      if (th.childNodes.length) return find_label(th.childNodes[0]);
+      else return th.innerText;
+    }
+    ths.forEach((th, index) => {
+      const col = Object.assign({}, th.dataset);
+      if (col.mask) th.classList.add('hidden');
+      if (col.hidden && string_to_boolean(col.hidden)) {
+        col.hidden = true;
+        th.remove();
+      }
+      col.label = find_label(th);
+      col.index = index;
+      if (col.hidden) this.grid.hidden.push(index);
+      else this.grid.active.push(index);
+      this.grid.columns.push(col);
+    });
+    const cellid = this.getCellId(this.cellidname);
+    trs.forEach((tr, i) => {
+      if (cellid < 0) tr.dataset.id = i;
+      else if (i === cellid) tr.dataset.id = this.getCellData(i, this.cellidname, cellid);
+      const data = [];
+      tr.querySelectorAll('th,td').forEach((td, index) => {
+        if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add('hidden');
+        if (this.grid.hidden.indexOf(index) >= 0) td.remove();
+        data.push(td.innerText);
+      });
+      this.grid.data.push(data)
+    });
+
+    this.dom.querySelectorAll('tfoot tr th').forEach((td, index) => {
+      if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add('hidden');
+      if (this.grid.hidden.indexOf(index) >= 0) td.remove();
+    });
+    this.dom.classList.remove('hide');
+  }
+  renderTbody(tbody) {
+    const l = this.grid.data.length;
+    for (let i = 0; i < l; i++) {
+      const tr = this.createTableRow(this.grid.data[i], i);
+      tbody.append(tr);
+    };
+
+
+
+  }
+  async tableActivate(container, tabledef = null) {
+    this.on(this.eventnames.init, () => {
+      // hide and move waitdiv in the wrapper for inner elements display
+      this.waitDesactivate();
+      if (this.afterLoad) this.afterLoad();
+      // move import zones and/or search zone - reorg the page display
+      container.style.top = container.offsetTop + 'px';
+      // fetch once the same table
+      container.dataset.table = this.params.table = true;
+      this.dom.classList.remove(css.hide);
+      this.initSearch();
+      this.initSort();
+      this.initPlugins(container);
+    });
+    // dismiss table when dismiss modal
+    this.on(this.eventnames.dismiss, (e) => {
+      console.log('destroy table');
+      this.destroy();
+    });
+    if (tabledef) tabledef = await this.dataToTable(tabledef);
+    else await this.tableToData();
+    setTimeout(() => {
+      this.emit(this.eventnames.init)
+      this.initialized = true
+    }, 10)
+    instance[this.instanceid] = this;
+
+  }
+
+  tableAppendRows(rows) {
+    console.log('rows');
   }
   destroy() {
     if (this.dataImport) this.dataImport = null;
-    if (this.activItems) this.ActivItems = null;
-    this.grid = null;
-    instance = null;
+    this.dom = null;
+    delete instance[this.instanceid];
   }
   refresh(e) {
-    this.selectors.forEach(selector => {
+    if (this.dataImport && this.dataImport.selectors) this.dataImport.selectors.forEach(selector => {
       if (this.disabled) this.disabled = false;
     });
   }
-  search(query, matched) {
-    if (query.trim().length < 3) return;
-    console.log('searching', this.grid.searching)
-    console.log('query', query);
-    console.log('matched', matched);
-    console.log('searching', this.grid.searching)
-  }
-
   labelFormatter(column) {
     let align = ``;
     if (['number', 'progress', 'decimal'].find(format => format === column.format)) align = css.right;
     if (column.subfield) return `${column.label} <span class="sublabel">${column.sublabel}</span>`;
-    else if (column.label) return `<span class="col-${column.field} ${align}">${column.label}</span>`;
+    else if (column.label) return `<span class="${align}">${column.label}</span>`;
     else return ``;
   }
-  getCellData(cell, row) {
-    //get json data directly from fetched data
-    cell.data = ``;
-    return this.datas[row.dataIndex][cell.cellIndex];
+  getCellId(name, state = null) {
+    let cols = this.grid.columns.filter(column => (column.name === name));
+    return (cols.length) ? cols[0].index : -1;
   }
-  getFormatter(format, column, table = 'projects') {
-    //formatters for diff tables - one for the moment - formats sepcified in gui/project/projects_list_interface.py
-    const contactcellid = this.columns.findIndex((column) => column.field == models.contact);
-    const cellid = this.columns.findIndex((column) => column.field == models.projid);
-    const formatters = {
-      'contact': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        let value;
-        const id = this.datas[row.dataIndex][cellid];
-        if (column.request && column.request == 'about') {
 
-          //cell is an array with title and  boolean which tells if about is autho or not
-          // display stats and info about the project if ok
-          if (data[1]) value = `<details data-id=${id} data-what=${column.request}><summary>${data[0]} [${id}]</summary></details>`;
-          else value = data[0] + ' [' + id + ']';
-        } else value = data + ' [' + id + ']';
-        const contact = this.datas[row.dataIndex][contactcellid];
-        if (contact) {
-          const iscontact = (contact.contact) ? `data-contact=${contact.contact}` : ``;
-          return `<div class="ellipsis">${value} <a href="mailto:${contact.email}" class="contact" ${iscontact}>${contact.name}</a></div>`;
-        } else return value;
+  getCellData(rowIndex, name, cellIndex = null) {
+    cellIndex = (cellIndex === null) ? this.getCellId(name) : cellIndex;
+    if (cellIndex < 0) return null;
+    return (this.grid.data.length) ? ((this.grid.data[rowIndex]) ? this.grid.data[rowIndex][cellIndex] : null) : null;
+  }
+
+  rowAttributes(tr, index) {
+    const id = this.getCellData(index, this.cellidname);
+    tr.dataset.id = id;
+    if (this.setRowAttributes) tr = this.setRowAttributes(this, tr, id);
+    return tr;
+  }
+
+  createTableRow(row, index, isheader = false) {
+    const tr = document.createElement('tr');
+    let td;
+    this.grid.columns.forEach(column => {
+      if (column.hasOwnProperty('hidden') && column.hidden === true) return;
+      const cell = row[column.index];
+      if (column.hasOwnProperty("render")) {
+        td = column.render(cell, index, column.index);
+        td.nodename = (isheader) ? 'TH' : 'TD';
+        td = this.objToElement(td);
+      } else {
+        td = (isheader) ? document.createElement('th') : document.createElement('td');
+        td.appendChild(document.createTextNode(cell));
+      }
+      tr.appendChild(td);
+    })
+    return this.rowAttributes(tr, index);
+  }
+
+  objToElement(obj) {
+
+    if (obj.nodename === "#text") return document.createTextNode(obj.data);
+    const el = document.createElement(obj.nodename);
+    if (obj.hasOwnProperty("html")) el.innerHTML = obj.html;
+    else el.contentText = obj.data;
+    if (obj.hasOwnProperty("attributes")) {
+      for (const attr in obj.attributes) {
+        el.setAttribute(attr, obj.attributes[attr]);
+      }
+    }
+    if (obj.hasOwnProperty("childnodes")) {
+      obj.childnodes.forEach(childnode => {
+
+        el.appendChild(this.objToElement(childnode));
+      });
+
+    }
+    return el;
+  }
+
+  setTextNode(value) {
+    return {
+      nodename: "#text",
+      data: value
+    };
+  }
+  async getFormatters() {
+    let formatters = {
+      controls: (value, rowIndex, cellIndex, td = {}) => {
+        const column = this.grid.columns[cellIndex];
+        const id = this.getCellData(rowIndex, column.field);
+        const actions = (column.actions) ? column.actions : null;
+        if (!actions) return ``;
+        let controls = [];
+        Object.entries(actions).forEach(([key, action]) => {
+          controls.push({
+            nodename: "A",
+            attributes: {
+              class: `btn is-${key} `,
+              href: `${action.link}/${id}`
+            },
+            childnodes: [this.setTextNode(action.label)]
+          });
+
+        });
+        if (!td.hasOwnProperty('attributes')) td.attributes = {};
+        td.attributes.class = css.component.table.controls;
+        td.childnodes = controls;
+        return td;
       },
-      'imports': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        const id = this.datas[row.dataIndex][cellid];
-        row.dataset.id = id;
-        if (!column.select || !column.selectcells) return data;
-        let btns = ``,
-          txt = (this.params.btn) ? this.params.btn : 'import';
+      select: (value, rowIndex, cellIndex, td = {}) => {
+        const column = this.grid.columns[cellIndex];
+        value = (isNaN(value)) ? this.getCellData(rowIndex, column.field) : value;
 
-        switch (column.select) {
-          case models.taxo:
-            ((column.parts) ? column.parts : column.selectcells).forEach((value, index) => {
-              let impid = this.columns.findIndex((column) => column.field == value);
-              impid = ((impid < 0 || this.datas[row.dataIndex][impid] === "{}") ? `disabled` : ``);
-              if (index > 0) txt = (this.params.btn1) ? this.params.btn1 : 'extra';
-              btns += `<button class="btn is-preset ${impid}"  ${impid}><i class="icon-md ${((impid === '')? `icon-plus-sm`:``)}"></i>${txt}</button>`;
-            });
-            break;
-          case models.settings:
-          case models.privileges:
-          case models.fields:
-            btns = `<button class="btn is-preset">${txt}</button>`;
-            break;
-        }
-        return btns;
-      },
-      'controls': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        const id = this.datas[row.dataIndex][cellid];
-        const index = this.last_used.indexOf(parseInt(id));
-
-        if (index >= 0) {
-          row.classList.add('last-used');
-          this.last_used[index] = row;
-        }
-        let controls = ``;
-        for (const [key, action] of Object.entries(data)) {
-          switch (key) {
-            case "A":
-              controls += `<a class = "btn is-annotate order-1" href = "/prj/${id}">${action}</a>`;
-              break;
-            case "V":
-              controls += `<a class = "btn is-view order-1" href = "/prj/${id}">${action}</a>`;
-              break;
-            case "M":
-              controls += `<a class = "btn is-manage order-2" href = "/gui/prj/edit/${id}">${action}</a>`;
-              break;
-            case "R":
-              const contact = this.datas[row.dataIndex][contactcellid];
-              controls += `<a class = "btn is-request order-2" href = "mailto:${contact.email}?${id}">${action}</a>`;
-              break;
+        td.childnodes = [{
+          nodename: "INPUT",
+          attributes: {
+            type: "radio",
+            name: `${this.instanceid}select`,
+            value: String(value)
           }
-        };
-        return `<div class="is-controls">` + controls + `</div>`;
+        }];
+        return td;
       },
-      'decimal': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        if (data === 'None' || data === '' || data === null) return ``;
-        data = parseFloat(data).toFixed(2);
-        if (data - parseInt(data) === 0) data = parseInt(data);
-        cell.classList.add(column.format);
-        return data;
-        //return `<div class="${column.format}">${data}</div>`;
+      selectmultiple: (value, rowIndex, cellIndex, td = {}) => {
+        const column = this.grid.columns[cellIndex];
+        value = (isNaN(value)) ? ((column.hasOwnProperty('field')) ? this.getCellData(rowIndex, column.field) : value) : value;
+        td.childnodes = [{
+          nodename: "INPUT",
+          attributes: {
+            type: "checkbox",
+            name: `${this.instanceid}select[]`,
+            value: String(value)
+          }
+        }];
+        return td;
       },
-      'number': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        if (data === 'None' || data === '' || data === null) return ``;
-        cell.classList.add(column.format);
-        return parseInt(data);
-        //  return `<div class="${column.format}">${parseInt(data)}</div>`;
+      decimal: (value, rowIndex, cellIndex, td = {}) => {
+        if (isNaN(value)) value = 0;
+        value = parseFloat(value).toFixed(2);
+        if (value - parseInt(value) === 0) value = parseInt(value);
+
+        if (!td.hasOwnProperty('attributes')) td.attributes = {};
+        td.attributes.class = css.number;
+        td.childnodes = [this.setTextNode(value)];
+        return td;
       },
-      'check': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        let val;
-        switch (data) {
+      number: (value, rowIndex, cellIndex, td = {}) => {
+        if (isNaN(value)) value = 0;
+        if (!td.hasOwnProperty('attributes')) td.attributes = {};
+        td.attributes.class = css.number;
+        td.childnodes = [this.setTextNode(value)];
+        return td;
+      },
+      check: (value, rowIndex, cellIndex, td = {}) => {
+        if (isNaN(value)) value = ``;
+        switch (value) {
           case true:
           case 'Y':
           case 1:
-            val = "";
+            value = "";
             break;
           default:
-            val = "no-";
+            value = "no-";
             break;
         }
-        return `<i class="icon-sm icon-${val}check"></i>`;
-      },
-      'progress': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-
-        if (data === 'None' || data === '' || data === null) return ``;
-        data = parseFloat(data).toFixed(2);
-        if (data - parseInt(data) === 0) data = parseInt(data);
-        return `<data class="${column.format}" style="width:${data}%">${data}</data>`;
-      },
-      'license': (data, cell, row) => {
-        data = this.datas[row.dataIndex][cell.cellIndex];
-        const tbcell = {
-          "CC0 1.0": "ca",
-          "CC BY 4.0": "cb",
-          "CC BY-NC 4.0": "cbn"
+        const icon = {
+          nodename: "I",
+          attributes: {
+            class: `icon-sm  icon-${value}check `
+          },
+          childnodes: []
         }
-        if (tbcell[data]) return `<span class="cc" data-title="${data}">${tbcell[data]}</span>`;
+        const column = this.grid.columns[cellIndex];
+        const id = this.getCellData(rowIndex, this.cellidname);
+        if (column.hasOwnProperty("toggle")) td.childnodes = [{
+          nodename: "A",
+          attributes: {
+            "data-request": "toggle",
+            "data-action": `${column.toggle.link}/${id}`,
+            "href": "javascript:void()"
+
+          },
+          childnodes: [icon]
+
+        }]
+        else td.childnodes = [icon];
+        return td;
+      },
+      text: (value, rowIndex, cellIndex, td = {}) => {
+        if (value === null) td.childnodes = [];
         else {
-          switch (data) {
-            case "Copyright":
-              return `<span class="txcc"  data-title="${data}">&copy;</span>`;
-            case "not choosen":
-              return `<span data-title="${data}"></span>`;
+          value = value.replaceAll('\r\n', ', ');
+          if (value !== ``) td.childnodes = [{
+            nodename: "DIV",
+            attributes: {
+              class: css.component.table.tip
+            },
+            childnodes: [this.setTextNode(value)]
+          }];
+          else td.childnodes = [];
+        }
+        return td;
+      },
+      default: (value, rowIndex, cellIndex, td = {}) => {
+        if (value === null || value === ``) td.childnodes = [];
+        else td.childnodes = [this.setTextNode(value)];
+        return td;
+      }
+
+    }
+    let tablecustom = null;
+
+    switch (this.params.from) {
+      case 'prjlist':
+        tablecustom = await import('../modules/table-project.js');
+        this.cellidname = models.projid;
+        break;
+      case 'prjsamplestats':
+        tablecustom = await import('../modules/table-sample.js');
+        this.cellidname = models.sampleid;
+        break;
+      case "prjpredict":
+        tablecustom = await import('../modules/table-prediction.js');
+        this.cellidname = models.projid;
+
+        break;
+    }
+
+    return (tablecustom) ? { ...formatters,
+      ...tablecustom.default(this)
+    } : formatters;
+
+
+  }
+  async convertColumns(tabledef) {
+    const columns = (tabledef.columns) ? tabledef.columns : ((this.params.columns) ? JSON.parse(this.params.columns) : null);
+    if (!columns) return;
+    const formatters = await this.getFormatters();
+    //
+    const fields = [];
+    Object.entries(tabledef.columns).forEach(([key, column]) => {
+      if (!column.hasOwnProperty('emptydata')) fields.push(key);
+    });
+    const map_column = (key, column, index) => {
+      if (!column) return {
+        index: index,
+        name: key,
+        hidden: true
+      };
+      let col = {
+        index: index,
+        name: key,
+        label: this.labelFormatter(column),
+        sortable: true,
+
+      };
+      col.index = (column.hasOwnProperty('emptydata')) ? fields.indexOf(column.emptydata) : fields.indexOf(key);
+      if (column.notsortable) col.sortable = false;
+      else if (column.sortable) col.sort = col.sortable;
+      col.searchable = (col.notsearchable) ? false : true;
+      if (column.hidden) col.hidden = string_to_boolean(column.hidden);
+      if (['number', 'decimal'].find(format => format === column.format)) col.type = 'number';
+      let render = null;
+      switch (key) {
+        case 'select':
+          const select = (column.select && column.select == "controls") ? "controls" : ((column.selectcells) ? "imports" : column.select);
+          if (select) {
+            col = { ...column,
+              ...col
+            }
+
+            col.sortable = col.searchable = false;
+          }
+          break;
+      }
+      if (!column.hasOwnProperty('hidden')) {
+        const select = (column.select && column.select == models.controls) ? models.controls : ((column.selectcells) ? models.imports : column.select)
+        const format = (column.format) ? column.format : ((column.subfield) ? column.subfield : ((select) ? select : "default"));
+        if (formatters && formatters[format]) col.render = formatters[format];
+
+      }
+      return col;
+    }
+
+    this.grid.columns = Object.entries(columns).map(([key, column], index) => map_column(key, column, index));
+  }
+  initEvents() {
+    this.on(this.eventnames.update, () => {
+      if (this.dom.classList.contains(css.hide)) this.dom.classList.remove(css.hide);
+
+    });
+  }
+  initPlugins(container) {
+    if (this.params.import && this.initImport) this.initImport(this);
+    if (this.params.expand) this.makeExpandable(container);
+    if (this.params.export) this.makeExportable(container);
+    if (this.params.details || this.dom.querySelector(tableselectors.details)) this.initDetails();
+    else this.initEvents();
+    if (this.params.onselect) this.initSelect(container);
+    if (this.dom.querySelector(tableselectors.tip)) this.initTips();
+    if (this.dom.querySelectorAll('thead [data-altsort]').length) this.initAlternateSort(this.dom.querySelectorAll('thead [data-altsort]'));
+    if (this.params.filters) {
+      const top = this.wrapper.querySelector(tableselectors.top);
+      if (top && top.children.length) {
+        const filters = document.querySelector(tableselectors.filters);
+        // insert  filters node  in datatable top
+        if (filters) top.prepend(filters);
+      }
+    }
+  }
+  initSort() {
+    const ths = this.dom.querySelectorAll('thead th');
+    let index = 0;
+    this.grid.columns.forEach((column, i) => {
+      if (column.hasOwnProperty('hidden')) return;
+      if (column.sortable) {
+        const th = ths[index];
+        const a = document.createElement('a');
+        a.classList.add(tableselectors.sorter.substr(1));
+        a.appendChild(th.childNodes[0]);
+        th.appendChild(a);
+        th.childNodes.forEach(child => {
+          th.appendChild(child);
+        });
+
+        a.addEventListener('click', (e) => {
+          e.stopImmediatePropagation();
+          if (this.sorting === true || this.searching === true) {
+            e.preventDefault();
+            return false;
+          }
+          this.sortColumn(th, column.index);
+        });
+      }
+      index++;
+    });
+    this.sorting = false;
+    // remove details when sorting
+    this.on(this.eventnames.sorting, (direction, index) => {
+
+      if (this.plugins.hasOwnProperty('jsDetail')) this.plugins['jsDetail'].activeDetail(false);
+      this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
+        a.classList.add(((i === index) ? css.wait : css.disabled));
+      });
+      this.sorting = true;
+    });
+    // remove details when sorting
+    this.on(this.eventnames.sorted, (direction, index) => {
+      console.log('timeend', (Date.now() - this.dt));
+      this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
+        a.classList.remove(((i === index) ? css.wait : css.disabled))
+      });
+      this.sorting = false;
+    });
+  }
+  sortColumn(th, index, dir = null) {
+    dir = (dir === null) ? ((th.classList.contains(tablecss.ascending)) ? false : (th.classList.contains(tablecss.descending)) ? true : ((th.dataset.sort) ? false : true)) : dir;
+    th.classList.toggle(tablecss.ascending);
+    th.classList.toggle(tablecss.descending);
+    // get the real index of cell data
+
+    //  console.log(th.cellIndex, this.grid.columns[index])
+    //  index = this.grid.columns[index].index;
+    this.emit(this.eventnames.sorting, dir, th.cellIndex);
+    let rows = this.grid.data.map((row, i) => {
+      const cell = is_object(row[index]) ? JSON.stringify(row[index]) : ((Array.isArray(row[index])) ? row[index][0] : row[index]);
+      return {
+        value: typeof cell === "string" ? cell.toLowerCase() : ((cell === null) ? 0 : cell),
+        row: i
+      }
+    });
+
+    const compare_coldata = function(a, b) {
+      const x = (dir ? a.value : b.value);
+      const y = (dir ? b.value : a.value);
+      //  const temp = (y === null) - (x === null) || +(parseFloat(x) > parseFloat(y)) || -(parseFloat(x) < parseFloat(y));
+      const temp = parseFloat(x) - parseFloat(y);
+      const bool = isNaN(temp) ? x.localeCompare(y) : temp;
+      return bool;
+    };
+
+    if (dir === false) {
+      th.classList.remove(tablecss.ascending);
+      th.classList.add(tablecss.descending);
+      th.setAttribute("aria-sort", "descending");
+    } else {
+      th.classList.remove(tablecss.descending);
+      th.classList.add(tablecss.ascending);
+      th.setAttribute("aria-sort", "ascending");
+    }
+
+    /* Clear asc/desc class names from the last sorted column's th if it isn't the same as the one that was just clicked */
+    if (this.dom.dataset.lastth !== undefined && th.cellIndex != this.dom.dataset.lastth) {
+      const headings = this.dom.querySelectorAll("thead th");
+      headings[this.dom.dataset.lastth].classList.remove(tablecss.descending);
+      headings[this.dom.dataset.lastth].classList.remove(tablecss.ascending);
+      headings[this.dom.dataset.lastth].removeAttribute("aria-sort");
+
+    }
+    this.dom.dataset.lastth = th.cellIndex;
+
+    rows.sort((a, b) => {
+      return compare_coldata(a, b);
+    });
+    const tbody = this.dom.querySelector('tbody');
+    const clone = tbody.cloneNode();
+    const trs = tbody.querySelectorAll('tr');
+    tbody.innerHTML = ``;
+    this.dt = Date.now();
+    console.log('timestar', this.dt);
+    const sorted = [];
+    rows.forEach((r, i) => {
+      clone.appendChild(trs[r.row]);
+      sorted.push(this.grid.data[r.row]);
+
+    });
+    this.grid.data = sorted;
+    this.dom.replaceChild(clone, tbody);
+
+    this.emit(this.eventnames.sorted, dir, th.cellIndex);
+
+
+  }
+
+  tableSearch(input, casesensitive = false) {
+    function search_string(str, casesensitive) {
+      str = (casesensitive) ? str : str.toLowerCase();
+      return str; // str.replace(/[-[\]{}()*+?.,\\^$|#]/g, '\\$&');
+    }
+
+    function search_queries(str, casesensitive) {
+      str = search_string(str, casesensitive);
+      let strs = [];
+      let phrase;
+      while ((phrase = str.match(/"([^"]+)"/)) !== null) {
+
+        strs.push(phrase[1]);
+        str = str.substring(0, phrase.index) + str.substring(phrase.index + phrase[0].length);
+      }
+      // Get remaining space-separated words (if any)
+      str = str.trim();
+      if (str.length) strs = strs.concat(str.split(/\s+/));
+      return strs;
+    }
+
+    let queries = search_queries(input.value);
+    let datas = this.grid.data,
+      indexes = [];
+    const trs = this.dom.querySelectorAll('tbody tr');
+    const cellid = this.getCellId(this.cellidname);
+    queries.forEach(qry => {
+      indexes = [];
+      datas = datas.filter((data, j) => {
+        const found = data.filter(cell => {
+          switch (typeof cell) {
+            case 'object':
+              cell = (cell) ? Object.values(cell).join(' ') : ``;
+              break;
+            case 'array':
+              cell = cell.join(' ');
+              break;
+            default:
+              cell = String(cell);
               break;
           }
 
+          return ((casesensitive) ? cell.indexOf(qry) : cell.toLowerCase().indexOf(qry)) > -1;
+        });
+
+        if (found.length > 0) {
+          if (cellid < 0) indexes.push(String(j));
+          else indexes.push(String(data[cellid]));
+          return data;
         }
-        return data;
-      },
-      'privileges': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        let rights = ``;
-        for (const [right, members] of Object.entries(data)) {
-          let mb = [];
-          if (members.length) {
-            for (const member of members) {
-              mb.push(member.name);
-            }
-            rights += `<div class="rights" data-r=${right}>${mb.join(`, `)}</div>`;
-          }
-        }
-        return rights;
-      },
-      'taxons': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        cell.classList.add('tip');
-        const num = Object.keys(data).length;
-        if (num > 0) {
-          data = Object.values(data).join(', ');
-          return `<div  data-num="${num}">${data}</div>`;
-        } else return ``;
-      },
-      'text': (data, cell, row) => {
-        data = this.getCellData(cell, row);
-        if (data) {
-          cell.classList.add('tip');
-          data = data.replaceAll('\r\n', ', ');
-          if (data !== '') return `<div >${data}</div>`;
+      });
+
+    });
+
+    trs.forEach((tr, index) => {
+      if ((queries.length > 0 && indexes.length === 0) || (indexes.length && indexes.indexOf(tr.dataset.id) < 0)) tr.classList.add('hidden');
+      else tr.classList.remove('hidden');
+    });
+
+  }
+
+  initSearch() {
+    this.searching = false;
+    // search items
+    const searchinput = this.wrapper.querySelector(tableselectors.search + ' input');
+    if (!searchinput) return;
+    let searchstring = ``;
+    const search_terms = debounce((el) => {
+      searchstring = el.value;
+      this.tableSearch(el);
+    }, 500);
+    searchinput.addEventListener("keyup", (e) => {
+      e.preventDefault();
+      search_terms(e.currentTarget);
+    })
+    searchinput.addEventListener("click", (e) => {
+
+      if (searchstring !== e.currentTarget.value) search_terms(e.currentTarget);
+
+    })
+    let timesearch = false;
+    this.on(this.eventnames.search, (query, matched) => {
+      if (this.plugins.hasOwnProperty('jsDetail')) this.plugins['jsDetail'].activeDetail(false);
+      this.searching = true;
+    });
+    this.on(this.eventnames.searchend, (query, matched) => {
+
+      this.searching = false;
+    });
+    this.on(this.eventnames.update, () => {
+      if (timesearch === false) {
+        timesearch = true;
+        setTimeout(() => {
+          refresh_details();
+          delete this.dom.dataset.issearching;
+          timesearch = false;
+        }, 300);
+      }
+    });
+  }
+  initSelect(container) {
+    const inputs = this.dom.querySelectorAll('input[name^="' + this.instanceid + '"]');
+    if (inputs.length === 0) return;
+    const inputname = inputs[0].name;
+    let selectaction = container.querySelector('.' + tablecss.selectaction);
+    if (!selectaction) return;
+    document.body.append(selectaction);
+    selectaction.querySelector('a').addEventListener('click', (e) => {
+      let vals = [];
+      inputs.forEach(input => {
+        if (input.checked) vals.push(input.value);
+      });
+      if (selectaction.dataset.input) {
+        document.getElementById(selectaction.dataset.input).value = vals.join(',');
+        if (selectaction.dataset.form) document.getElementById(selectaction.dataset.form).submit();
+      } else e.currentTarget.href = this.params.onselect + encodeURI(vals.join(','));
+
+    });
+    const close = selectaction.querySelector('[data-dismiss]');
+    if (close) close.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      popup_selected(null, null);
+    });
+
+    const popup_selected = (top = null, left = null, forceclose = false) => {
+      if (selectaction.dataset.close) {
+        document.body.append(selectaction);
+        close.classList.remove('hidden');
+        selectaction.classList.add(tablecss.absinput);
+      }
+      if (top !== null && left !== null) {
+        selectaction.classList.remove(css.hide);
+        selectaction.style.top = top + 'px';
+        selectaction.style.left = left + 'px';
+
+      } else {
+        if (forceclose === true) {
+          selectaction.classList.add(css.hide);
+          delete selectaction.dataset.close;
+        } else {
+          selectaction.dataset.close = true;
+          close.classList.add('hidden');
+          const toptable = this.wrapper.querySelector(tableselectors.top) ? this.wrapper.querySelector(tableselectors.top) : this.wrapper;
+          toptable.prepend(selectaction);
+          selectaction.classList.remove(tablecss.absinput);
+
         }
       }
-    };
-
-    return formatters[format];
-  }
-
-  mapColumn(column, index) {
-    const col = {
-      select: index,
-      sortable: true,
-      searchable: true,
-      hidden: false,
-      name: this.labelFormatter(column)
-    };
-    if (column.notsortable) col.sortable = "false";
-    if (!column.notsearchable) col.searchable = true;
-    if (column.hidden === "true") col.hidden = "true";
-    if (column.request) col.request = column.request;
-    if (['number', 'progress', 'decimal'].find(format => format === column.format)) col.type = 'number';
-    switch (column.field) {
-      case 'select':
-        const select = (column.select && column.select == "controls") ? "controls" : ((column.selectcells) ? "imports" : null)
-        if (select) {
-          this.importfields = column.selectcells;
-          col.render = this.getFormatter(select, column);
-          col.sortable = "false";
-          col.searchable = "false";
-        }
-        break;
-      default:
-        if (column.format) {
-          col.render = this.getFormatter(column.format, column);
-        } else if (column.subfield) {
-          col.render = this.getFormatter(column.subfield, column);
-        } else col.render = (data, cell, row) => {
-          return this.getCellData(cell, row);
-        }
-        break;
     }
-    return col;
+    inputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        if (input.checked) popup_selected(input.offsetTop, input.offsetLeft);
+        else if (this.dom.querySelectorAll('input[name^="' + this.instanceid + '"]:checked').length === 0) popup_selected(null, null, true);
+      });
+    });
+    if (this.dom.querySelectorAll('input[name^="' + this.instanceid + '"]:checked').length > 0) {
+      selectaction.classList.remove(css.hide);
+      popup_selected(null, null);
+    }
   }
-
-  convertColumns() {
-    return this.columns.map((column, index) => this.mapColumn(column, index));
-  }
-
-  initDetails() { // TODO : generic
+  async initDetails() { // TODO : generic
     // about - one div to display cell details make it appear as table row expanding
-    const wrapper = this.grid.wrapper;
-    let about = wrapper.querySelector('#' + tablecss.tipinline) ? wrapper.querySelector('#' + tablecss.tipinline) : tablecss.tipinline;
-    const options = {
+    const wrapper = this.wrapper;
+
+    const about = wrapper.querySelector('#' + tablecss.tipinline) ? wrapper.querySelector('#' + tablecss.tipinline) : tablecss.tipinline;
+    if (!dynamics.JsDetail) {
+      const {
+        JsDetail
+      } = await
+      import('../modules/js-detail.js');
+      dynamics.JsDetail = JsDetail;
+    }
+    const jsDetail = new dynamics.JsDetail(about, wrapper, {
       waitdiv: this.waitdiv
-    };
-    const jsDetail = new JsDetail(about, wrapper, options); // specific to about details in table
+    }); // specific to about details in table
     // hide / show disable details zone
     const callbackclose = (el, callback = null) => {
       jsDetail.activeDetail(false);
@@ -422,12 +1012,13 @@ export class TableComponent {
         if (callback) callback();
       } else {
         if (jsDetail.current) jsDetail.current.querySelector('summary').click();
-        const url = '/gui/prj/about/' + el.dataset.id + '?' +
+        const url = this.params.detailsurl + el.dataset.id + '?' +
           new URLSearchParams({
             partial: true
           });
         jsDetail.activeDetail(true);
         // append to cell details and display
+
         fetch(url, fetchSettings()).then(response => response.text()).then(html => {
           jsDetail.expandDetail(el, html);
           if (callback) callback();
@@ -437,60 +1028,208 @@ export class TableComponent {
       }
 
     }
-    const activate_details = () => {
-      for (let item of this.grid.table.querySelectorAll('details[data-what="about"]')) {
-        const projid = item.dataset.id;
+    if (!dynamics.JsAccordion) {
+      const {
+        JsAccordion
+      } = await import('../modules/js-accordion.js');
+      dynamics.JsAccordion = JsAccordion;
+    }
+
+    const refresh_details = () => {
+      if (this.dom.classList.contains(css.hide)) this.dom.classList.remove(css.hide);
+      const details = this.dom.querySelectorAll(tableselectors.details);
+      if (!details) return;
+      details.forEach(item => {
         if (!item.dataset.id) return;
-        item = new JsAccordion(item, callbackopen, callbackclose, jsDetail.detail);
-      };
+
+        item = new dynamics.JsAccordion(item, callbackopen, callbackclose, jsDetail.detail);
+      });
     }
-    activate_details();
-    // remove details when sorting
-    this.grid.on('datatable.sort', function(column, direction) {
-      jsDetail.activeDetail(false);
-      activate_details();
-    });
-
+    this.plugins['jsDetail'] = jsDetail;
+    refresh_details();
   }
-  initImport(what) {
-    //  // add resizer to enable full view of imported datas
-    /*
-              let rs = this.doc.closest(this.content_selector);
-              rs = (rs) ? rs.previousElementSibling : null;
-              if (rs) {
 
-                rs = rs.children[0];
-                if (rs) {
-                  const search = this.doc.parentElement.querySelector('.dataTable-search');
-                  if (search) rs.insertBefore(search, rs.lastChild);
-                }
-              }*/
-    this.columns.forEach((column, index) => {
-      if (this.importfields.indexOf(column.field) >= 0) {
-        this.grid.headings[index].dataset.name = column.field;
+  initAlternateSort(cols) {
 
-      }
-      if (column.selectcells) this.grid.headings[index].dataset.selectcells = column.selectcells;
-      if (column.data) {
-        for (const [key, value] of Object.entries(column.data)) {
-          this.grid.headings[index].setAttribute('data-' + key, value);
-        }
-      }
+    let tdcols = [];
+    cols.forEach(col => {
+      const tdcol = col.closest('th');
+      Object.entries(col.dataset).forEach(([k, v]) => {
+        tdcol.dataset[k] = v;
+        col.classList.add('inline-block')
+      });
+      tdcols.push(tdcol);
     });
+    cols = tdcols;
+    // end fix
 
-    this.dataImport = new DataImport(this.grid, what);
+    let coltosort;
+    const sortalternate = (col) => {
+      let todir;
+      // keep the same dir if sort on col changes
+      if (parseInt(col.dataset.sortactive) === parseInt(coltosort)) {
+        todir = (col.classList.contains(tablecss.ascending)) ? 'desc' : ((col.classList.contains(tablecss.descending)) ? 'asc' : 'asc');
+      } else todir = (col.classList.contains(tablecss.ascending)) ? 'asc' : (col.classList.contains(tablecss.descending)) ? 'desc' : 'asc';
+      //  this.grid.columns.sort(coltosort, todir);
 
-  }
-  /*initShowTip() {
-    for (const tip of this.grid.table.querySelectorAll('.tip')) {
-      const showtip = tip.firstElementChild;
-      if (showtip && showtip.scrollHeight > showtip.offsetHeight) {
-        showtip.addEventListener('click', (e) => {
-          if (tip.classList.contains('showfull')) tip.classList.remove('showfull');
-          else tip.classList.add('showfull');
+      this.sortColumn(col, coltosort, todir);
+
+    }
+    cols.forEach(col => {
+      const altsort = (col.dataset.altsort) ? col.dataset.altsort.split(',') : null;
+      if (!altsort) return;
+      const csssorter = col.querySelector(tableselectors.sorter);
+      if (csssorter) csssorter.classList.add(tablecss.disabled);
+      const control = col.querySelector(tableselectors.sorton);
+      // prevents imbricated links
+      col.append(control);
+      const triggers = col.querySelectorAll('[role="button"]');
+
+      col.addEventListener('click', (e) => {
+        e.preventDefault();
+        sortalternate(col);
+      }, false);
+      const changecoltosort = (cl, index) => {
+        if (index === 0) coltosort = this.grid.columns.findIndex(column => (column.index === cl.cellIndex));
+        else coltosort = this.grid.columns.findIndex(column => (column.name === altsort[index - 1]));
+      }
+      col.dataset.sortactive = col.cellIndex;
+      triggers.forEach((trigger, index) => {
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          const active = e.currentTarget.parentElement.querySelector('.active');
+          if (active) active.classList.remove('active');
+          e.currentTarget.classList.add('active');
+          changecoltosort(col, index);
         });
+      });
+      if (col.dataset.tip) {
 
-      } else tip.classList.remove('tip');
-    }
-  }*/
+        Object.values(this.dom.rows).forEach((row, index) => {
+          if (index === 0) return;
+          const coltip = this.grid.columns.findIndex(column => (column.name === altsort[parseInt(col.dataset.tip) - 1]));
+
+          if (row.cells.length === 0 || coltip === col.cellIndex) return;
+          row.cells[col.cellIndex].addEventListener('mouseenter', (e) => {
+
+            const tip = document.createElement('div');
+            tip.setAttribute('class', tablecss.tipover);
+            tip.innerHTML = row.cells[coltip].innerHTML;
+            e.currentTarget.append(tip);
+          });
+          row.cells[col.cellIndex].addEventListener('mouseout', (e) => {
+            const tip = e.currentTarget.querySelector(tableselectors.tipover);
+            if (tip) tip.remove();
+          });
+        });
+      }
+    });
+
+  }
+
+
+  closeShowfull() {
+    const showfull = document.querySelector('.' + css.component.table.tip + '.' + tablecss.showfull);
+    if (showfull) showfull.click();
+  }
+  makeExpandable(container) {
+    if (container.querySelector('table').offsetHeight < container.offsetHeight + container.querySelector('table tbody tr').offsetHeight) return;
+    const btn = document.createElement('div');
+    btn.classList.add('button-expand');
+    btn.classList.add('border-t');
+    btn.title = this.params.expand;
+    btn.innerHTML = `<span class="small-caps block mx-auto p-0">${this.params.expand}</span><i class="clear-both p-0 mx-auto icon icon-chevron-down hover:fill-secondblue-500"></i><span class="small-caps block mx-auto p-0 hidden">${
+                  this.params.shrink}</span>`;
+    container.parentElement.insertBefore(btn, container.nextElementSibling);
+    container.classList.add('overflow-y-hidden');
+    container.classList.remove('max-tabstat-h');
+    container.parentElement.style.height = 'auto';
+    const h = parseInt(this.wrapper.querySelector('tbody tr').offsetHeight) * ((this.params.maxrows) ? this.params.maxrows : 20);
+    container.classList.add('max-h-[' + h + 'px]');
+    container.style.height = h + 'px';
+    btn.addEventListener('click', (e) => {
+      this.closeShowfull();
+      btn.classList.toggle('border-t');
+      btn.classList.toggle('border-b');
+      const ico = btn.querySelector('i');
+      ico.classList.toggle('icon-chevron-down');
+      ico.classList.toggle('icon-chevron-up');
+      container.classList.toggle('overflow-y-hidden');
+      container.classList.toggle('max-h-[' + h + 'px]');
+      btn.querySelectorAll('span').forEach(span => {
+        span.classList.toggle('hidden');
+      });
+      if (container.classList.contains('overflow-y-hidden')) container.style.height = h + 'px';
+      else container.style.height = 'auto';
+    });
+  }
+  makeExportable(container) {
+    const btn = document.createElement('div');
+    btn.classList.add('button-export');
+    btn.classList.add('is-pick');
+    btn.innerHTML = `<i class="icon icon-arrow-down-on-square"></i><span>${((this.params.exportlabel) ? this.params.exportlabel : 'export statistics ')}</span>`;
+    container.prepend(btn);
+    const columns = this.grid.columns;
+    let exclude_columns = [];
+    this.grid.columns.forEach((column, index) => {
+      if (column.name === 'select') exclude_columns.push(column.index);
+    });
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!this.dynamics) this.dynamics = {};
+      if (!this.dynamics.exportCSV) {
+        const {
+          exportCSV // or exportJSON, exportSQL
+        } = await
+        import("../modules/js-export-csv.js");
+
+        this.dynamics.exportCSV = exportCSV;
+      }
+      let str = this.dynamics.exportCSV(this, {
+        download: false,
+        linedelimiter: "\n",
+        columndelimiter: "\t",
+        skipcolumns: exclude_columns
+      });
+      str = encodeURI(`data:text/tsv;charset=utf-8,${str}`);
+
+      download_url(str, ((container.id) ? container.id : 'stats_proj') + '.tsv');
+
+    });
+  }
+  initTips() {
+    // show big cell content
+    let current = null;
+    this.dom.querySelectorAll(tableselectors.tip).forEach(tip => {
+      tip.addEventListener('mouseenter', (e) => {
+        if (tip.classList.contains(tablecss.showfull) || (tip.scrollHeight > tip.offsetHeight)) {
+          tip.style.cursor = 'pointer';
+        }
+      });
+      tip.addEventListener('click', (e) => {
+        const styleparent = window.getComputedStyle(tip.parentElement);
+        const style = window.getComputedStyle(tip.parentElement);
+        if (tip.classList.contains(tablecss.showfull)) {
+          tip.classList.remove(tablecss.showfull);
+          tip.parentElement.style.minHeight = 'none';
+          tip.parentElement.style.height = 'auto';
+          tip.style.maxWidth = tip.dataset.w + 'px';
+          tip.style.padding = tip.dataset.p + 'px';
+          current = null;
+        } else if (tip.scrollHeight > tip.offsetHeight) {
+          if (current) current.classList.remove(tablecss.showfull);
+          const h = parseInt(tip.clientHeight);
+          tip.parentElement.style.minHeight = tip.parentElement.style.height = (((h < parseInt(styleparent.maxHeight)) ? h : parseInt(styleparent.maxHeight)) - 2 * parseInt(styleparent.padding)) + 'px';
+          if (!tip.dataset.w) tip.dataset.w = parseInt(tip.clientWidth);
+          if (!tip.dataset.p) tip.dataset.p = parseInt(style.padding);
+          tip.style.maxWidth = parseInt(tip.clientWidth) + 'px';
+          tip.classList.add(tablecss.showfull);
+          tip.style.top = (parseInt(tip.offsetTop) - parseInt(styleparent.padding)) + 'px';
+          current = tip;
+
+        }
+
+      });
+    });
+  }
 }
