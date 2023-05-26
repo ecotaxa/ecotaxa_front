@@ -348,11 +348,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.0_beta"
+ecotaxa_version = "2.7.0"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2023-05-25"
+    return ecotaxa_version + " 2023-05-26"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -363,8 +363,9 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2023-05-26: V 2.7.0
 2023-05-25: V 2.7.0_beta
-    Features : new front features - users - login - validation - removed js component simple-datatables 
+    Features : new front features - users - login - validation - removed js component simple-datatables
 2023-04-04: V 2.6.9.1
     Fix table samples sort
     Fix menus
