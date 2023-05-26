@@ -1,5 +1,5 @@
   {% from "./v2/macros/macros.html" import inputdict %}
-  {% from "./v2/captcha.html" import captcha, scriptcaptcha%}
+  {% from "./v2/macros/_captcha.html" import captcha, scriptcaptcha%}
   {%macro password_box()-%}
   {% set disabled=""%}
 
@@ -39,7 +39,7 @@
           {% endif %}
           <div class="form-box">
             <label for="email">{{_('Email')}}</label>
-            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}"  data-sub="enable" required data-required="{{_('an email is required')}}" data-new="{{_('new')}}" placeholder="{{_('Email')}}"></div>
+            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}"  data-sub="enable" {{'disabled' if createaccount == True and not incadmin else ''}} required data-required="{{_('an email is required')}}" data-new="{{_('new')}}" placeholder="{{_('Email')}}"></div>
             {%if createaccount != True or user and user.email %}
             <input type="hidden" name="currentemail" value="{{user.email}}">
             {%endif%}

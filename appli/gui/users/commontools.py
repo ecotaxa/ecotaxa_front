@@ -103,7 +103,7 @@ def user_account(usrid: int, isfrom: str, action: str = None) -> list:
                 if posted["email"] != currentemail:
                     posted["active"] = False
             else:
-                posted["active"] = True
+                posted["active"] = False
         except:
             pass
 
