@@ -3,7 +3,7 @@
 {% for help in helps %}
 <details><summary>{{ help['name'] }}</summary><div>{% if 'links' in help %}
   {{ listhelp(help['links']) if 'links' in help}}
-{% else %} <p>{{ help['resume'] }}</p> <a href="#" data-action="request" data-what="help" data-file="{{ help['file'] }}" data-target="main-help" data-title="{{ help['title'] if 'title' in help }}"> {{ _('readmore') }}  </a>
+{% else %} <p>{{ help['resume'] }}</p> <a href="#" data-request="help" data-file="{{ help['file'] }}" data-target="main-help" data-title="{{ help['title'] if 'title' in help }}"> {{ _('readmore') }}  </a>
 {% endif%} </div>
 </details>
 {% endfor%}

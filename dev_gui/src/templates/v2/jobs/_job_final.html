@@ -1,0 +1,5 @@
+{%if jobid %}
+{%set thengo = 'Y' if target_proj and target_proj.projid else ''%}
+<a href="{{url_for('gui_job_cleanup', jobid= jobid, thengotoproject=thengo)}}" class="button is-secondary inverse" role="button">{{_('FORCE Delete of ')}} {{jobid}} {{ _('and back to project') if target_proj and target_proj.projid else ''}}</a>
+<small>{{_('(no danger for the original database)')}}</small>
+{%endif%}

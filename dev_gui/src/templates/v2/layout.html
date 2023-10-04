@@ -1,31 +1,27 @@
 <!DOCTYPE html>
 <html lang="{{lang if lang !='' else 'en'}}">
 <head>
-  {% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else '2.6.6'%}
+  {% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else '2.6.8'%}
 <link rel=stylesheet rel="preload" type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}?v={{ ecotaxa_version  }}">
  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='/gui/images/apple-touch-icon.png') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='/gui/images/favicon-32x32.png')}}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='/gui/images/favicon-16x16.png')}}">
 <link rel="manifest" href="{{ url_for('static', filename='/gui/images/site.webmanifest')}}">
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1" user-scalable="no"] >
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" user-scalable="no">
   <meta http-equiv="refresh">
-  <title>{{ 'Ecotaxa 3.0'}} {{ target_proj.title if target_proj and target_proj.projid else ''}}</title>
+  <title>Ecotaxa 3.0 {{ target_proj.title if target_proj and target_proj.projid else ''}}</title>
 </head>
-<body>
+<body>{{global_messages()|safe}}
   <div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }} flex flex-col">
-    <nav class="drop-shadow-2 mb-3 sticky top-0 z-40">
+    <nav id="main-navbar">
       <header class="background-top h-12 p-1 pt-3.5 {{ 'solo' if not (target_proj and target_proj.projid) }}">
         <!--   logo / notifs /user-nav /admin -->
-        {% include './v2/partials/_topsitebar.html' %}</header>
-      {% if target_proj and target_proj.projid %}
-      <nav class="flex flex-wrap  md:basis-9/12 md:items-right px-2 h-16 pb-0.5 pt-1.5 background-nav">
-        <!-- project nav  and secondary classif nav and filters -->
-        <div class="px-4" id="main-nav">
-          {% include './v2/partials/_navbar.html'%}</div>
-      </nav>
-      {% endif %}
+        {%- include './v2/partials/_topsitebar.html' -%}</header>
+      {%- if target_proj and target_proj.projid -%}
+      {%- include './v2/partials/_navbar.html' with context -%}
+      {%- endif -%}
     </nav>
     <main  {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton.jpg') + '\')" class="bg-image" '| safe if bg }}>
        {% if not mask_alert  %}
@@ -36,7 +32,6 @@
          {% endif %}
       <div class="w-full">
         {% block body %}{% endblock %}
-        {% block bodycontent%} {% endblock %}
       </div>
         <a class="up pageup js js-scrollpy" data-threshold="hscreen" data-action="gotop"></a>
     </main>
@@ -71,17 +66,10 @@
         and optimize your experience. Click “Accept” to consent to the continued use of cookies or visit our <a href="/privacy" class="text-white underline underline-offset-2 mx-2">Privacy Policy</a> to see how you can make changes to your cookie settings.
       </div>
       <div class="flex-1">
-        <button type="button" class="button is-secondary border-stone-100 text-sm text-stone-100 hover:border-white  hover:text-white" id="BtGAAccept">Accept</button>
+        <button type="button" class="button is-secondary border-stone-100 text-sm text-stone-100 hover:border-white  hover:text-white" data-request="privacy" data-what="accept"  id="BtGAAccept">Accept</button>
       </div>
     </div>
   </div>
-  <!--<script>
-    $('#BtGAAccept').click(function() {
-      $.get('/setprivacy/Y', function() {
-        $('#DivGAAccept').hide();
-      });
-    });
-  </script>-->
   {% endif %}
   {% endif %}
 </body>

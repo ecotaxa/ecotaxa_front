@@ -132,5 +132,5 @@ export const defined_privileges = {
 
 export const filter_files = {
   images: "png,jpeg,jpg,gif",
-  tsv: "txt,tsv"
+  tsv: "txt,tsv,zip, gzip,gz"
 }

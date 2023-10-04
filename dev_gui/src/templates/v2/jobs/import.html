@@ -1,35 +1,20 @@
 {% extends "./v2/layout.html" %}
 {% from "./v2/macros/macros.html" import form_group_radio, inputdict, modal , alertbox with context %}
-{% from "./v2/my_files/_macros.html" import dir_list  %}
 {% block body %}
     <div class="container mx-auto">
       {% set data = {'file':'_help_job_import'} %}
-      {{ modal(id='help-editproject',modal_title= _("How to import data"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
-      <form class="js js-submit js-import" method="post" action=""  id="formupload" enctype="multipart/form-data" data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" onsubmit="return false" >
-        <div class="flex flex-row"><div class="form-box md:basis-2/3 order-2 md:order-1">
-          <label for="status">{{ _('Type of import') }} <i data-for="help_type_import" data-action="request" data-what="help"></i></label>
-          <div class="form-group" role="group">
-            {% set required = True %}
-            {% set typeimport = null if not typeimport %}
-            {% for st in (("images-tsv",_("Images+TSV files")),("images",_("Images Only")),("tsv",_("TSV files only"))) %}
-            {{ form_group_radio('typeimport' + loop.index|string(),'typeimport',st[0],st[1],typeimport,required=required)}}
-            {% endfor %}
-          </div>
-        </div><div class="form-box md:basis-1/3 order-1 md:order-2"><label>{{_('Project')}}</label><div class="text-base font-semibold uppercase align-bottom">{{ target_proj.title if target_proj and target_proj.projid}} <input type="hidden" type="text" value="{{target_proj.projid}}"></div></div></div>
+      {{ modal(id='help-job-import',modal_title= _("How to import data"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+      <form class="js js-submit js-import" method="post" action=""  id="formupload" data-displayselection="dirlist" data-showfiles="{{_('Select from My Files')}}" enctype="multipart/form-data" data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" onsubmit="return false" >
         <div class="flex flex-row">
-            <div class="form-box md:basis-1/3"><label>{{_('Select a file or directory to import')}}<i data-for="help_upload_file" data-action="request" data-what="help"></i></label>
-               <div class="dirlist" id="dirlist" data-ended="{{_('upload')}}" data-textbrowse="{{_('Browse')}}" data-textdrop="{{_('or Drop Files or Directories Here')}}" data-label="{{_('Or select from My Files')}}" data-upload-label="{{_('Upload entire folder(s) or folder(s) compressed as a zip file')}}"></div>
-               <div id="counter"></div>
-               <div class="for-DragDrop"></div>
-
-
+            <div class="form-box md:basis-1/3"><label>{{_('Select a file or a directory to import')}}<i data-for="help_upload_file" data-request="help"></i></label>
+               {%include("./v2/my_files/_list.html")%}
             </div>
-<div class="form-box md:basis-1/3"><div><label for="file_to_load">{{_('File to import')}}<i data-for="help_import_options" data-action="request" data-what="help"></i></label><ul id="results" class="displayresults"></ul><input type="hidden" id="file_to_load" name="file_to_load" class="form-input" value="{{ file_to_load }}" required >{%include('/v2/jobs/_to_import_summary.html')%}
+<div class="form-box md:basis-1/3"><div><label for="file_to_load">{{_('File to import')}}<i data-for="help_import_options" data-request="help"></i></label><ul id="results" class="displayresults"></ul><input type="hidden" id="file_to_load" name="file_to_load" class="form-input" value="{{ file_to_load }}" required >{%include('/v2/jobs/_to_import_summary.html')%}
 <div class="form-box"  id="import_options">{%include('/v2/jobs/_import_options.html')%}</div>
 </div>
 
-</div><div class="form-box md:basis-1/3" id="import_options">{%include('/v2/jobs/_import_advanced_options.html')%}</div>
-          </div>
+</div>
+          </div>  <div class="form-box md:basis-1/3" id="import_options">{%include('/v2/jobs/_import_advanced_options.html')%}</div>
 <div class="flex justify-end">
         <div class="form-box ">
             <input type="hidden" name="starttask" value="Y">
@@ -63,5 +48,5 @@
           re-import TSV files to update metadata and data</a>
       </div>
     </div>
-  </div>--></div>
+  </div>-->
 {% endblock %}

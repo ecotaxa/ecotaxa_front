@@ -35,10 +35,18 @@ export class JsTomSelect {
             item.tomselect.removeItem(v);
           }
         })
-      },
-      on_clear = function() {
-        if (item.tagName.toLowerCase() === 'select') item.selectedIndex = -1;
-      };
+      }
+    /*,
+          on_clear = function() {
+
+            if (item.tagName.toLowerCase() === 'select')
+              item.querySelectorAll('option:checked').forEach(option => {
+                option.removeAttribute('selected');
+              });
+            item.selectedIndex = -1;
+            return true;
+          }*/
+    ;
 
     switch (type) {
       case models.project:
@@ -51,19 +59,27 @@ export class JsTomSelect {
             openOnFocus: false,
             maxItems: 1,
             allowEmptyOption: false,
-            onItemAdd: function(e) {
-              if (e != item.dataset.value) {
-                let href = window.location.href.split('/');
-                href.pop();
-                href = href.join('/') + '/' + e;
-
-                window.open(href, '_blank').focus();
-              }
-              this.removeItem(e);
-              return;
-            }
           }
         };
+        if (!item.dataset.noaction) option.settings.onItemAdd = function(e) {
+          if (e != item.dataset.value) {
+            let href = window.location.href.split('?');
+            if (href.length > 1) {
+              href[1] = href[1].split("=");
+              href[1][1] = e;
+              href[1] = href[1].join("=");
+              href = href.join("?");
+            } else {
+              href = window.location.href.split('/');
+              href.pop();
+              href = href.join('/') + '/' + e;
+            }
+            window.open(href, '_blank').focus();
+          }
+          this.removeItem(e);
+          return;
+        }
+
         break;
 
       case models.user:
@@ -119,6 +135,7 @@ export class JsTomSelect {
           valueField: 'id',
           labelField: 'text',
           searchField: 'text',
+          closeAfterSelect: false,
           onInitialize: () => {
             const wrapper = document.getElementById(id).nextElementSibling;
             if (!wrapper.classList.contains('ts-wrapper')) return;
@@ -133,6 +150,7 @@ export class JsTomSelect {
     }
     const default_settings = {
       create: false,
+      minOptions: 0,
       maxOptions: null,
       preload: false,
       hideSelected: true,
@@ -147,7 +165,7 @@ export class JsTomSelect {
         return query.length > 2
       },
       onItemRemove: function() {
-        if (this.items.length === 0) on_clear();
+        return true;
       },
       load: function(query, callback) {
         query = DOMPurify.sanitize(query);
@@ -227,16 +245,18 @@ export class JsTomSelect {
 
       }
     }
+
     option.settings.plugins = {
       'clear_button': {
         title: (item.dataset.clear) ? item.dataset.clear : 'Clear all',
         html: (data) => {
-          return `<div class="${data.className}" id="clear-${id}" title="${data.title}"><i class="icon ${(multiple)?``:'p-[0.125rem]'} icon-backspace-sm"></i></div>`;
+          return `<div class="${data.className}" id="clear-${id}" title="${data.title}"><i class="icon ${(multiple)?``:'p-[0.125rem]'} icon-x-circle-sm ${(multiple)?``:` opacity-50`}"></i></div>`;
         }
       }
     }
     option.settings.onClear = function() {
-      on_clear();
+      item.tomselect.clear();
+      return true;
     }
     if (multiple) {
       option.settings.plugins = { ...option.settings.plugins,

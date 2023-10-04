@@ -1,0 +1,24 @@
+{% extends 'v2/admin/layout.html' %}
+{% block body %}
+<div class="container mx-auto pt-2">
+  {% if current_user.is_app_admin==True -%}
+    <div class="alert alert-info inverse js js-alert" data-dismissible=true role="alert">{{_('You have Administrator privileges')}}</div>
+    {%-endif%}
+    {% if current_user.is_users_admin==True -%}
+      <div class="alert alert-info inverse js js-alert" data-dismissible=true role="alert">{{_('You have Users Administrator privileges')}}</div>
+      {%-endif%}
+    {% set list_labels ={"application":_('List of Application Administrators :'),"users":_('List of Users Administrators :')}%}
+    {% for key, users in admin_users.items()%}
+    <div class="p-2"><h2 class="font-black my-4">{{ list_labels[key]}}</h2>
+    {% if users is iterable %}
+    <ul>
+    {% for user in users %}
+    <li><strong>
+    {{ cap_words(user.name) }} </strong><<a href="mailto:{{user.email}}">{{user.email}}</a>></li>
+    {%endfor%}
+    </ul>
+    {%endif%}
+  </div>
+  {%endfor%}
+</div>
+{% endblock %}

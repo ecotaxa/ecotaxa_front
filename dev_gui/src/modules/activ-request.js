@@ -158,7 +158,7 @@ export class ActivRequest {
 
   makeCloseRequest(item) {
     item.addEventListener(ev, async (e) => {
-      modal = await this.callModal(item);
+      const modal = await this.callModal(item);
       if (modal) modal.dismissModal();
     });
   }

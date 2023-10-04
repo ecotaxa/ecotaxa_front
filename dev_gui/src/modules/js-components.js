@@ -1,26 +1,4 @@
 import DOMPurify from 'dompurify';
-/*import {
-  AlertBox
-} from "../modules/alert-boxes.js";
-
-import {
-  JsTomSelect
-} from "../modules/js-tom-select.js";
-import {
-  FormSubmit
-} from "../modules/form-submit.js";
-import {
-  ProjectPrivileges
-} from '../modules/project-privileges.js';
-import {
-  JsTabs
-} from '../modules/js-tabs.js';
-import {
-  JsAccordion
-} from '../modules/js-accordion.js';
-import {
-  JsImport
-} from '../modules/js-import.js';*/
 import {
   fetchSettings,
   format_license
@@ -56,7 +34,7 @@ export class JsComponents {
 
             case 'js-datatable':
               if (!dynamics.TableComponent) {
-                let {
+                const {
                   TableComponent
                 } = await import('../modules/table-component.js');
                 dynamics.TableComponent = TableComponent;
@@ -66,25 +44,22 @@ export class JsComponents {
               break;
             case 'js-hierarchy':
               break;
-            case 'js-topsearch':
-              const searchcontainer = item;
-              if (!searchcontainer) return;
-
-              break;
             case 'js-autocomplete':
-              if (!dynamics.JsTomSelect) {
-                let {
-                  JsTomSelect
-                } = await
-                import(`../modules/js-tom-select.js`);
-                dynamics.JsTomSelect = JsTomSelect;
+              if (!item.hasOwnProperty('tomselect')) {
+                if (!dynamics.JsTomSelect) {
+                  const {
+                    JsTomSelect
+                  } = await
+                  import(`../modules/js-tom-select.js`);
+                  dynamics.JsTomSelect = JsTomSelect;
+                }
+                const jsTomSelect = new dynamics.JsTomSelect();
+                jsTomSelect.applyTo(item);
               }
-              const jsTomSelect = new dynamics.JsTomSelect();
-              jsTomSelect.applyTo(item);
               break;
             case 'js-privilege':
               if (!dynamics.ProjectPrivileges) {
-                let {
+                const {
                   ProjectPrivileges
                 } = await import('../modules/project-privileges.js');
                 dynamics.ProjectPrivileges = ProjectPrivileges;
@@ -124,7 +99,7 @@ export class JsComponents {
               break;
             case 'js-import':
               if (!dynamics.JsImport) {
-                let {
+                const {
                   JsImport
                 } = await
                 import(`../modules/js-import.js`);
@@ -134,8 +109,8 @@ export class JsComponents {
               break;
             case 'js-my-files':
               if (!dynamics.JsMyFiles) {
-                let {
-                  JsImport
+                const {
+                  JsMyFiles
                 } = await
                 import(`../modules/js-my-files.js`);
                 dynamics.JsMyFiles = JsMyFiles;
@@ -161,7 +136,6 @@ export class JsComponents {
                 dynamics.FormSubmit = FormSubmit;
               }
               const formSubmit = new dynamics.FormSubmit(item);
-
               break;
 
             case 'js-alert':

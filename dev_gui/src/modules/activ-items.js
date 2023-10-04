@@ -75,7 +75,7 @@ export class ActivItems {
           break;
         case 'setvalue':
           if (!item.dataset.what || !item.dataset.target) return;
-          const dest = document.getElementById(item.dataset.target);
+          const dest = (item.dataset.target) ? document.getElementById(item.dataset.target) : null;
           if (!dest) return;
           item.addEventListener(ev, (e) => {
             dest.value = item.dataset.what;

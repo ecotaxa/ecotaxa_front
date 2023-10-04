@@ -58,7 +58,7 @@ a {@apply no-underline}
  /* list with separator */
 
   /* layout  and backgrounds */
-    .bg-image {background-blend-mode:multiply;background-color:transparent;background-image:var(--bg-image);background-position:top;background-repeat:no-repeat;margin-top:-1rem}
+    .bg-image {background-blend-mode:multiply;background-color:transparent;background-image:var(--bg-image);background-position:top;background-repeat:no-repeat;margin-top:-1rem;padding-top:0.75rem}
     .text-nav {@apply text-secondblue-300 hover:text-secondblue-200}
     /*main header logo / notifs /user-nav /admin*/
     .background-top {@apply bg-gradient-to-r z-10 from-mainblue-800 to-mainblue-600 relative  drop-shadow-sm border-mainblue-700 ;
@@ -66,7 +66,7 @@ a {@apply no-underline}
     .background-register {@apply bg-gradient-to-r from-mainblue-500 to-mainblue-400   drop-shadow-sm}
     .background-nav {@apply drop-shadow-sm border-b-2 border-mainblue-600  bg-gradient-to-r from-mainblue-700  to-mainblue-600  relative ;} /* */
     .background-bottom {@apply relative bg-gradient-to-r from-mainblue-100 to-stone-100  text-stone-900 border-stone-200 bg-transparent h-8}
-    .background-top.solo {@apply pb-12 }
+    .background-top.solo {@apply pb-12}
     .line-top {@apply bg-transparent}
     .bg-peerchecked {@apply bg-pchecked-400}
     .text-peerchecked {@apply text-white}
@@ -132,7 +132,7 @@ details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-sto
 }
 details.modal-aside[open]  {@apply overflow-y-auto overscroll-none }
 details.modal-container:not([open]) > summary {@apply block w-auto }
-details summary.aside-label::after, details.modal-popup summary::after , details.modal-search summary::after {@apply  absolute fill-stone-600 hover:fill-help-500  right-4 top-4  opacity-0 w-0 h-0 transform duration-1000;
+details summary.aside-label::after, details.modal-popup summary::after , details.project-search summary::after {@apply  absolute fill-stone-600 hover:fill-help-500  right-4 top-4  opacity-0 w-0 h-0 transform duration-300;
 content:url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentcolor'><path fill-rule='evenodd' d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z' clip-rule='evenodd' /></svg>");
 }
 details.modal-right {@apply  w-auto  h-full min-h-full  top-0 right-0  }
@@ -148,7 +148,7 @@ details:not([open]) summary.aside-label::before {@apply w-6 h-6 align-text-botto
 details[open] summary.aside-label::before {@apply absolute bg-stone-100 text-base stroke-help-300 left-0 shadow-inner top-[50%] -translate-y-[50%] w-8 h-8 z-10 ml-0 block py-1.5  px-1.5 rounded-r-full ;
   content:url("data:image/svg+xml;utf8, <svg xmlns='http://www.w3.org/2000/svg'  fill='none' viewBox='0 0 24 24' stroke='currentcolor' stroke-width='2'><path stroke-linecap='round' stroke-linejoin='round' d='M9 5l7 7-7 7' /></svg>");
 }
-details[open] summary.aside-label::after, details.modal-popup[open] summary::after , details.modal-search[open] summary::after{@apply absolute fill-stone-600 hover:fill-help-500 right-4 top-4 w-5 h-5 z-10 block p-0.5  opacity-100 ;}
+details[open] summary.aside-label::after, details.modal-popup[open] summary::after, details.project-search[open] summary::after {@apply absolute fill-stone-600 hover:fill-help-500 right-4 top-4 w-5 h-5 z-10 block p-0.5  opacity-100 ;}
 details:not([open]) .up {@apply hidden}
 details[open] .up {@apply block stroke-stone-700 text-stone-700 bg-transparent}
 .modal-title {@apply block text-stone-700 px-1.5 py-2 pointer-events-auto ;
@@ -156,12 +156,12 @@ details[open] .up {@apply block stroke-stone-700 text-stone-700 bg-transparent}
 .modal-title .h3 , .modal-title h3 {@apply text-lg font-bold ;
 }
 
-/*modal-search topbar slide panel */
-header details.modal-search:not([open]) {@apply  w-auto inline-block max-w-[2.5rem] ml-2 }
-header details.modal-search[open] {@apply fixed z-90 top-0 left-0 w-full max-w-full bg-stone-50 h-32 block }
-header details.modal-search[open] .modal {@apply w-full h-full block text-stone-800 opacity-100 px-4}
-header details.modal-search[open] .modal-title {@apply w-[90%] py-0 font-semibold uppercase text-base }
-header details.modal-search[open] .modal-content {@apply mt-1 w-auto mx-auto h-full}
+/*project-search topbar slide panel */
+header details.project-search:not([open]) {@apply  w-auto inline-block max-w-[2.5rem] ml-2 }
+header details.project-search[open] {@apply fixed z-90 top-0 left-0 w-full max-w-full bg-mainblue-700 h-36 block }
+header details.project-search[open] summary {@apply invert z-[100]}
+header details.project-search[open] summary i {@apply opacity-0}
+details.project-search[open] summary::after {@apply  fill-stone-50 hover:fill-white  top-0.5 right-0.5  duration-100;}
 
 /* aside-modal help details content */
 details[open].modal-help {@apply z-80  p-0 }
@@ -173,29 +173,26 @@ details.modal-help .modal summary::marker {@apply text-help-300 }
 details.modal-help:not[open]  .modal summary  {@apply font-medium text-lg text-stone-900 block mb-1 }
 article.table-of-contents > details > summary {@apply text-xl font-bold uppercase}
 article.table-of-contents > details > summary::marker {@apply content-none;}
-
-article.table-of-contents > details > summary::before {@apply content-[attr(data-marker)];
-}
-
-article.table-of-contents > details[open] > summary::before {@apply content-[attr(data-marker-open)];
-  }
+article.table-of-contents > details > summary::before {@apply content-[attr(data-marker)];}
+article.table-of-contents > details[open] > summary::before {@apply content-[attr(data-marker-open)];}
 /*forms inputs && label */
 input[class="form-"],  textarea[class="form-"] {@apply block w-full}
 input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"], .form-select ,.form-input , textarea.form-textarea   {@apply global-form-input }
-.form-input:focus, .form-select:focus , .form-textarea:focus  {@apply ring-0 ring-transparent border-secondblue-300} /* important otherwise field border color on focus does not work correctly */
+.form-input:focus, .form-select:focus , .form-textarea:focus  {@apply ring-0 ring-transparent border-secondblue-200 valid-check} /* important otherwise field border color on focus does not work correctly */
+
 /* todo: simplification*/
 .form-checkbox, .form-radio {@apply text-stone-700 mr-2}
 :not(.group-radio) input[type="radio"], input[type="checkbox"], :not(.group-radio) input.form-checkbox, :not(.group-radio) input.form-radio {@apply appearance-none indeterminate:bg-transparent  cursor-pointer pointer-events-auto  relative ring-offset-0 w-2.5 h-2.5 ring-2 border-transparent ring-offset-transparent	ring-current enabled:hover:ring-secondblue-400  disabled:opacity-50  checked:ring-secondblue-700 checked:bg-transparent leading-snug  checked:disabled:after:content-none; }
 :not(.group-radio) input[type="radio"]:not(.form-checkbox)  {@apply rounded-full after:absolute relative  checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-secondblue-400 checked:after:rounded-full checked:after:content-[''] ; }
 input[type="checkbox"],  input[type="checkbox"].form-checkbox , :not(.group-radio) input[type="radio"].form-checkbox { @apply ring-offset-0  ring-offset-transparent rounded-none after:absolute checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1 checked:after:h-2  checked:after:border-secondblue-400 checked:after:border-r-2 checked:after:border-b-2 checked:after:rotate-45 checked:after:content-[''] align-baseline;}
-input[type="checkbox"][readonly] {@apply pointer-events-none cursor-not-allowed checked:after:border-stone-600 enabled:hover:ring-stone-800}
+input[type="checkbox"][readonly] {@apply pointer-events-none cursor-not-allowed checked:after:border-stone-800 ring-offset-transparent enabled:hover:ring-transparent enabled:ring-transparent}
 input[type="password"]::before {@apply mr-0.5 text-stone-500 icon-sm icon-lock-sm content-[''] opacity-50 } /*forms specials */
   legend {@apply bg-transparent text-stone-900 hover:text-stone-800 px-1 py-2 font-btn font-bold  mx-auto block text-sm md:text-base uppercase border-b-2 border-stone-100 }
   fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  md:mr-2 last:mr-0 p-0 }
-  .form-box , .submit-box {@apply md:px-2 py-4 mb-4 md:mb-2 mx-0}
+  .form-box , .submit-box {@apply md:px-2 py-2 mb-2 md:mb-1 mx-0 }
   .form-box label {@apply text-base font-semibold text-stone-900 bg-transparent }
   .form-box .checkbox-label {@apply text-sm font-normal}
-  .form-box.relative label.over {@apply absolute top-0 left-4 z-10 px-1 pt-0.5 pb-0 ml-0.5 w-auto rounded-t align-baseline bg-white }
+  .form-box.relative label.over {@apply absolute top-0 left-4 z-10 px-1 pt-0.5 pb-0 -mt-1 ml-0.5 w-auto rounded-t align-baseline bg-white max-w-full overflow-hidden text-ellipsis}
   .fieldset-wrapper {@apply w-full flex   flex-wrap}
   .fieldset > div {@apply border-t border-stone-200}
     /*inline group radios as buttons */
@@ -216,7 +213,7 @@ input[type="password"]::before {@apply mr-0.5 text-stone-500 icon-sm icon-lock-s
   .block-info {@apply block drop-shadow-sm px-4 py-4 my-2 text-stone-800 bg-stone-50 border border-stone-100}
   .block-disclaimer {@apply block drop-shadow-sm px-4 py-4 mb-2 text-sm  font-normal bg-transparent md:w-[80%] md:mx-auto border border-dotted border-stone-200 }
   .bock-disclaimer a {@apply text-stone-900 font-bold}
-  label.required {@apply after:content-['_*'] after:text-stone-600 after:hover:text-warning-700  after:inline}
+label.required {@apply after:content-['_*'] after:text-stone-600 after:hover:text-warning-700  after:inline after:whitespace-nowrap after:text-ellipsis}
 /* my_files list*/
 .entries li:not(.on) ul {@apply hidden}
 /*js upload dropzone*/
@@ -227,15 +224,21 @@ input[type="password"]::before {@apply mr-0.5 text-stone-500 icon-sm icon-lock-s
 .displayresults.active {@apply  bg-success-50}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-50}
+.dirlist > .entries {@apply h-auto max-h-[50%] block  overflow-y-hidden}
+.dirlist [data-name] {@apply ml-4}
 .entryD {@apply text-base font-normal}
-.entryF {@apply text-sm ml-2}
+.on > .entryD {@apply font-semibold }
+.dirlist .wait .entryD {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
+.entries .entryF {@apply text-sm font-light}
+.entries [data-name$=".tsv"] .entryF {@apply font-normal}
+.entryF .icon-image-sm {@apply opacity-80}
 /* form with tabs */
 form.js-tabs  .fieldset-wrapper {@apply relative }
 form.js-tabs .tab-control {@apply absolute top-0 left-0 -mt-6 md:-mt-4}
 form.js-tabs .tab {@apply md:w-full last:md:w-full h-0 bg-inherit }
 form.js-tabs .tab.active {@apply h-auto }
 
-form.js-tabs .hide , .modal .hide , table.hide , tr.hide , tbody.hide thead.hide , tfoot.hide, div.hide {@apply hidden h-0;content-visibility: hidden;}
+form.js-tabs .hide , .modal .hide , table.hide , tr.hide , tbody.hide thead.hide , tfoot.hide, div.hide , input.hide , select.hide button.hide, a.hide{@apply hidden h-0;content-visibility: hidden;}
 form.js-tabs legend.tab-control {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
 form.js-tabs .tab.active legend.tab-control {@apply border-stone-600 text-stone-900  opacity-100 }
 /* tabs expand shrink */
@@ -253,6 +256,8 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
 /* footer */
 #nav-footer {@apply sticky bottom-0 left-0}
 #nav-footer a { @apply text-xs font-btn  uppercase px-3 py-1 flex items-center font-medium text-stone-800}
+#nav-footer li.submenu:hover > a , #nav-footer li.submenu:active > a {@apply opacity-0}
+#nav-footer li.submenu:hover > ul, #nav-footer li.submenu:active > ul {@apply block -translate-y-[100%] absolute}
 /* go to top */
 .up {@apply fixed block bottom-4 right-4 bg-transparent cursor-pointer icon-lg icon-up}
 .up.scrollspy {@apply opacity-100}
@@ -265,14 +270,18 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
   .centered {@apply top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]}
   .topcentered {@apply top-[15%] left-[50%] -translate-x-[50%] -translate-y-[85%]}
   /* global forms elements input*/
-  .form-box label.invalid {@apply after:text-sm after:italic  after:text-danger-500 after:px-1 after:py-1 after:border-danger-500 after:ml-1 after:inline-block after:h-4 after:w-32 rounded-full after:content-[attr(data-invalid)];}
-  .global-form-input {@apply  appearance-none block w-full px-4 py-2  text-stone-900  border  border-stone-300 rounded  font-light m-0 focus:text-secondblue-800 ring-0 outline-0 outline-transparent ring-transparent active:border-secondblue-300 focus:font-normal focus:border-secondblue-300}
-  .input-validate:invalid, .input-validate.invalid {@apply  relative border-danger-500  ring-danger-500  }
+  .valid-check {@apply invalid:border-danger-400 after:invalid:content-["✖"] after:invalid:text-danger-400 valid:border-secondblue-300 after:valid:content-["✓"] after:valid:text-secondblue-300 }
+  .form-box label.invalid {@apply after:text-sm after:italic  after:text-danger-500 after:px-1 after:py-1 after:border-danger-500 after:ml-1 after:h-4 after:w-32 rounded-full after:content-[attr(data-invalid)] after:inline after:whitespace-nowrap after:text-ellipsis;}
+  .global-form-input {@apply  appearance-none block w-full px-4 py-2  text-stone-900  border  border-stone-300 rounded  font-light m-0 focus:text-secondblue-800 ring-0 outline-0 outline-transparent ring-transparent active:border-secondblue-300 focus:font-normal focus:border-secondblue-300  valid-check}
+  .input-validate:invalid, .input-validate.invalid {@apply  relative border-danger-500  ring-danger-500 valid-check }
+
 /*  .input-validate:valid, .ts-wrapper.input-validate:not(.invalid) {@apply border-success-500 ring-success-500}*/
 /**********************************************/
 /* all icons                                 */
 /*********************************************/
 /* icons */
+.icon-x-circle {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>');}
+.icon-x-circle-sm {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>')}
 .icon-backspace {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z"/></svg>')}
 .icon-backspace-sm {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M7.22 3.22A.75.75 0 017.75 3h9A2.25 2.25 0 0119 5.25v9.5A2.25 2.25 0 0116.75 17h-9a.75.75 0 01-.53-.22L.97 10.53a.75.75 0 010-1.06l6.25-6.25zm3.06 4a.75.75 0 10-1.06 1.06L10.94 10l-1.72 1.72a.75.75 0 101.06 1.06L12 11.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L12 8.94l-1.72-1.72z" clip-rule="evenodd" /></svg>')}
 .icon-lock-sm {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentcolor" class="fill-current"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>')
@@ -302,6 +311,10 @@ content: url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" 
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentcolor" class="fill-current"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>')}
 .icon-info::before {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>')
+
+}
+.icon-arrow-path {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>')}
+.icon-arrow-path-sm {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd" /></svg>')
 
 }
 .icon-chevron-left {color: white;
@@ -348,22 +361,18 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" c
 }
 .icon-plus-sm::before {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" class="fill-current" viewBox="0 0 20 20" fill="currentcolor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" /></svg>')
 }
-.icon-photo::before {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="strokeCurrent"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>')}
-.icon-photo-sm::before {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentcolor" class="fillCurrent"><path fill-rule="evenodd" d="M1 5.25A2.25 2.25 0 013.25 3h13.5A2.25 2.25 0 0119 5.25v9.5A2.25 2.25 0 0116.75 17H3.25A2.25 2.25 0 011 14.75v-9.5zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 00.75-.75v-2.69l-2.22-2.219a.75.75 0 00-1.06 0l-1.91 1.909.47.47a.75.75 0 11-1.06 1.06L6.53 8.091a.75.75 0 00-1.06 0l-2.97 2.97zM12 7a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd" /></svg>')}
 
 .icon-folder::before {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="strokeCurrent"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>')
+content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>')
 }
 .icon-folder-sm::before {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentcolor" class="fillCurrent"><path d="M3.75 3A1.75 1.75 0 002 4.75v3.26a3.235 3.235 0 011.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM3.75 9A1.75 1.75 0 002 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-4.5A1.75 1.75 0 0016.25 9H3.75z" /></svg>')
+content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentcolor" class="fill-current"><path d="M3.75 3A1.75 1.75 0 002 4.75v3.26a3.235 3.235 0 011.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM3.75 9A1.75 1.75 0 002 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-4.5A1.75 1.75 0 0016.25 9H3.75z" /></svg>')
 }
 .icon-folder-plus::before {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="strokeCurrent"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>')
+content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>')
 }
 .icon-folder-plus-sm::before {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" class="fillCurrent" viewBox="0 0 20 20" fill="currentcolor"><path fill-rule="evenodd" d="M3.75 3A1.75 1.75 0 002 4.75v10.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-8.5A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM10 8a.75.75 0 01.75.75v1.5h1.5a.75.75 0 010 1.5h-1.5v1.5a.75.75 0 01-1.5 0v-1.5h-1.5a.75.75 0 010-1.5h1.5v-1.5A.75.75 0 0110 8z" clip-rule="evenodd" /></svg>')
+content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" class="fill-current" viewBox="0 0 20 20" fill="currentcolor"><path fill-rule="evenodd" d="M3.75 3A1.75 1.75 0 002 4.75v10.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0018 15.25v-8.5A1.75 1.75 0 0016.25 5h-4.836a.25.25 0 01-.177-.073L9.823 3.513A1.75 1.75 0 008.586 3H3.75zM10 8a.75.75 0 01.75.75v1.5h1.5a.75.75 0 010 1.5h-1.5v1.5a.75.75 0 01-1.5 0v-1.5h-1.5a.75.75 0 010-1.5h1.5v-1.5A.75.75 0 0110 8z" clip-rule="evenodd" /></svg>')
 }
 .icon-folder-open::before {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg"  class="stroke-current"  fill="none" viewBox="0 0 24 24" stroke="currentcolor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>')
@@ -516,18 +525,18 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 /* top navigation and user menu         */
 /****************************************/
 #secondary-nav {@apply flex flex-row flex-wrap  md:basis-9/12 px-0  sm:px-2 h-[3.5rem] pb-0.5 pt-1.5 background-nav}
-#user-nav-item {@apply relative block h-auto text-left pl-0}
+
 /*burger*/
-#menu-burger {@apply w-6 h-12  ml-4 bg-transparent inline-block}
+#menu-burger {@apply w-5 h-12  ml-4 bg-transparent inline-block cursor-pointer}
 .js-nav.open {@apply w-full h-full block px-2 mx-0 relative}
 .js-nav.open > div {@apply mt-2.5 pt-8 }
 .js-nav:not(.open) #menu-burger {@apply sm:hidden }
-.open #menu-burger {@apply w-3  mt-2  ml-[calc(100%-20px)] absolute z-90}
-.bar { @apply h-0.5 my-1  w-full bg-stone-50 block rounded-sm ease-in-out duration-300 }
-.open .bar {@apply bg-stone-100}
-.open #bar1 {@apply transform translate-y-[6px] -rotate-45}
+.open #menu-burger {@apply w-3  mt-2 right-2 absolute z-90}
+.bar { @apply h-[1px] my-1  w-full bg-stone-50 block rounded-sm ease-in-out duration-300 }
+.open .bar {@apply bg-stone-100 first:w-full w-full}
+.open #bar1 {@apply transform translate-y-[5px] -rotate-45}
 .open #bar2 {@apply opacity-0 }
-.open #bar3 {@apply transform -translate-y-[6px] rotate-45}
+.open #bar3 {@apply transform -translate-y-[5px] rotate-45}
 
 /*dropdown secondary nav and user */
 #main-navbar {@apply drop-shadow-sm mb-3 sticky top-0 z-60 }
@@ -535,29 +544,29 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 :not(.open) #navbar-menu {@apply hidden  sm:block transform duration-300 }
 .open #navbar-menu {@apply block bg-mainblue-600 h-auto w-full mx-0 px-4 py-4  sm:block transform duration-300 }
 #navbar-menu > li {@apply sm:inline-block relative h-8 animate hover:bg-transparent}
-:not(.open)  #navbar-menu li > ul , #user-menu {@apply left-0 absolute hidden w-64 sm:w-96 z-80 mt-0 bg-transparent pt-5 }
-.open  #navbar-menu li > ul {@apply relative visible w-full }
-#navbar-menu > li:hover > ul, #user-nav-item:hover > ul {@apply block -mt-4}
+:not(.open)  #navbar-menu li > ul  {@apply absolute left-0 hidden w-64 sm:w-96 z-80 mt-0 bg-transparent pt-4}
+.open  #navbar-menu li > ul {@apply relative w-full }
+#navbar-menu > li:hover > ul , #navbar-menu > li:active > ul {@apply block md:-mt-4}
 #navbar-menu li > ul > li, #user-menu > li {@apply text-secondblue-50 text-sm px-1 pt-1.5 pb-0.5  block last:rounded-b   last:pb-4 first:pt-2.5 pl-5 pr-1.5 py-2}
 .open #navbar-menu li > ul > li {@apply last:rounded-none block}
 #navbar-menu li > ul > li {@apply hover:bg-mainblue-100   bg-gradient-to-r from-mainblue-100 to-secondblue-100 }
 #navbar-menu i {@apply text-nav}
-#aside-nav-item {@apply  hidden md:flex}
-#aside-nav-item a {@apply px-3 py-0.5 flex flex-wrap items-center text-stone-50 hover:text-stone-100 text-sm leading-snug text-white hover:text-stone-50    }
+#aside-nav-item {@apply  hidden md:flex }
+#aside-nav-item a {@apply px-3 py-0.5 flex flex-wrap items-end text-stone-50 hover:text-stone-100 text-sm leading-snug text-white hover:text-stone-50    }
 #navbar-menu li > div {@apply w-auto inline-block clear-both}
 #navbar-menu li a  , #navbar-menu li > div {@apply pr-4 font-medium text-nav text-sm md:text-base leading-snug relative}
 #navbar-menu > li.active > a, #navbar-menu li.active > div, #navbar-menu > li.active i {@apply text-secondblue-200 font-semibold ;}
 #navbar-menu > li > ul > li a {@apply font-btn font-normal text-[.925rem]  text-mainblue-600 hover:text-mainblue-700}
 #navbar-menu > li > ul > li a strong {@apply text-mainblue-600 hover:text-mainblue-700}
-#user-nav-item {@apply w-auto max-w-[16rem] sm:max-w-[24rem] inline-block relative }
-#user-menu {@apply right-0 pt-3.5 ml-2 top-10 sm:w-64 left-[calc(100%-8rem)] sm:left-[calc(100%-12rem)] }
+#ident-user-item #user-menu {@apply hidden  absolute right-0 w-64 z-90  border-t-[2rem] border-transparent -mt-2 -mr-4 md:mr-0}
+#ident-user-item:hover #user-menu, #user-menu:hover , #ident-user-item:active #user-menu, #user-menu:active {@apply block }
+header:not(.solo) #ident-user-item #user-menu {@apply -mt-5}
+#ident-user-item:hover #user-menu , #ident-user-item:active #user-menu  {@apply transform duration-300}
 #user-menu > li {@apply bg-gradient-to-l from-stone-50 to-white  hover:bg-mainblue-100 py-1.5}
 #user-menu > li > a {@apply text-stone-700 hover:text-stone-600 }
-#user-nav-item .ident {@apply  truncate text-ellipsis overflow-hidden}
-#user-nav-item .ident span {@apply hidden sm:inline }
 #user-menu .separ {@apply border-t border-mainblue-50}
+
 /*admin-menu*/
-#navbar-menu.admin-menu ul {@apply -mt-4}
 #navbar-menu.admin-menu li > ul > li {@apply hover:bg-stone-50   bg-gradient-to-r from-stone-100 to-stone-200 }
 #navbar-menu.admin-menu > li > a , #navbar-menu.admin-menu > li.active > a {@apply hover:text-secondblue-100 text-secondblue-50}
 #navbar-menu.admin-menu > li > ul > li a , #navbar-menu.admin-menu> li > ul > li.active a {@apply hover:text-secondblue-600 text-secondblue-700}
@@ -589,7 +598,7 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 .table-table th:not([data-sortable="false"]).table-ascending {@apply text-secondblue-800}
 .table-table tr {@apply border-b  border-stone-50 text-stone-600  hover:bg-mainblue-50  hover:shadow-sm  hover:border-secondblue-200  text-stone-700 font-light text-sm  hover:text-stone-900  focus:border-secondblue-200 max-w-full}
 .table-table td {@apply border-none pl-6  py-1.5 pr-2 text-left max-h-16 align-text-top  }
-.table-table .number, .table-table .decimal ,.table-table th[data-type="number"] , .table-table .progress {@apply text-right whitespace-nowrap }
+.table-table .number, .table-table .decimal ,.table-table th[data-type="number"] , .table-table th[data-type="validation"], .table-table .progress {@apply text-right whitespace-nowrap }
 .table-table tfoot td {@apply font-normal}
 .table-table tr td.is-controls, .table-table tr th.is-controls {@apply pl-2}
 .table-ellipsis {@apply overflow-hidden w-full max-w-[340px] md:max-w-[260px] lg:max-w-[460px]  hover:h-auto break-all max-h-48 }
@@ -604,17 +613,18 @@ input[type="search"]::-webkit-search-cancel-button{@apply relative right-1  icon
 .table-pagination-list li {@apply inline-block border rounded bg-stone-50 border-secondblue-100 text-secondblue-600 px-2  mr-1.5}
 .table-pagination-list li.pager {@apply bg-white border-none}
 .table-pagination-list li.active {@apply bg-white shadow}
-.table-wrapper {@apply h-full w-full block max-w-full}
+.table-wrapper {@apply h-full w-full block max-w-full }
+.large-table .table-wrapper {@apply overflow-x-auto}
 .table-top , .table-bottom {@apply flex md:flex-row w-full justify-between pb-1 pr-1 z-20 ;}
 .table-info {@apply py-4}
 .table-filters {@apply order-1 text-center align-bottom ml-auto md:basis-2/4 py-2 ;}
 .table-dropdown {@apply order-3 w-96;}
-.table-sorter {@apply static p-0  cursor-pointer}
+.table-sorter {@apply static p-0 cursor-pointer}
 .table-dropdown {@apply opacity-0 !important}
 .table-ascending .table-sorter::after, .table-descending .table-sorter::before {@apply opacity-70 transition max-h-8 ease-in-out ;}
 .table-sorter::after {@apply border-4 border-b-secondblue-700 top-4  opacity-100 border-t-transparent;}
 .table-sorter::before { @apply border-t-4 border-t-secondblue-700 bottom-4 opacity-100 border-solid ;}
-.table-sorter::before, .table-sorter::after {@apply absolute h-0 w-0 border-l-4  border-r-4  border-l-transparent border-r-transparent border-solid opacity-20 left-2;content:''}
+.table-sorter::before, .table-sorter::after {@apply absolute h-0 w-0 border-l-4 border-r-4  border-l-transparent border-r-transparent border-solid opacity-20 left-2;content:''}
 .table-sorter.disabled {@apply cursor-wait }
 .table-sorter.wait {@apply cursor-wait bg-danger-500}
 .table-search .table-input::before {@apply h-5 w-5 mr-2 static top-0 left-0;
@@ -678,7 +688,7 @@ td div[data-num] {@apply before:font-normal before:mr-1 before:bg-stone-600 befo
 .max-tabstat-h {@apply  md:max-h-[500px]}
 .button-export {@apply float-right }
 .short-stats {@apply overflow-hidden}
-section.separate {@apply after:w-96 before:h-[0.5] w-full h-auto pb-8 pt-4 block after:block after:mx-auto after:bg-stone-800 after:content-["_"]}
+section.separate {@apply after:w-96 before:h-[0.5] w-full h-auto pb-8 pt-4 block after:block after:mx-auto after:bg-stone-800 after:mb-8 after:content-["_"]}
 .stat-label {@apply font-medium pr-2 w-full md:basis-2/12 }
 .stat-info {@apply pr-2 w-full md:basis-10/12 md:ml-auto}
 .stat-item {@apply py-2 px-0 md:px-4 w-full md:flex md:flex-row h-auto}
@@ -712,13 +722,13 @@ option[disabled][hidden], .ts-control .item[data-value=""] {@apply text-stone-30
 .ts-wrapper.form-select {@apply py-0.5 px-0}
 .ts-wrapper.form-select .ts-control {@apply block border-none border-transparent bg-transparent m-0 focus:border-0}
 .ts-wrapper.multi .ts-control {@apply border-stone-300 }
-.ts-wrapper.multi.focus .ts-control {@apply border-transparent }
+.ts-wrapper.multi.focus .ts-control {@apply border-transparent ring-0 outline-0  }
 .ts-wrapper.single.focus , .ts-wrapper.multi.focus {@apply rounded border border-secondblue-300 ring-0 outline-0 bg-transparent }
 
 .ts-wrapper.multi  .item  {@apply py-1 flex inline-flex text-xs rounded bg-stone-100 text-stone-900 shadow w-auto inline px-1.5 pl-1 ml-1  my-1 align-middle !important;}
 .ts-dropdown .option {@apply text-sm text-stone-800 }
 .ts-dropdown [data-selectable] .highlight {@apply text-sm bg-secondblue-200 !important}
-.ts-dropdown .option.active , .ts-dropdown .option:hover {@apply bg-stone-50 !important}
+.ts-dropdown .option.active , .ts-dropdown .option:hover, .ts-dropdown .option:active {@apply bg-stone-50 !important}
 .ts-dropdown .option.active {@apply font-normal text-black !important }
 .ts-wrapper.multi .item.active {@apply text-stone-700 font-light}
 .ts-wrapper.multi .item.last-active {@apply text-stone-700 bg-stone-50 }
@@ -730,7 +740,7 @@ select[class*="ts-hidden"] {@apply hidden}
 .ts-dropdown-content {@apply block text-base}
 .ts-dropdown-content[type='taxo'] {@apply block text-sm }
 /*text bigger in top-search*/
-details.modal-search .ts-dropdown .option ,  details.modal-search .ts-dropdown .option.active {@apply text-base}
+details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdown .option.active {@apply text-base}
 /* form fieldset privileges*/
 /* project form - section privileges */
 /* project settings privileges */
@@ -975,7 +985,7 @@ table tr {@apply border-t border-stone-300 max-w-full overflow-auto}
 table tbody tr td:last-child {@apply float-right clear-right}
 }
 /*tooltips */
-[data-title]:hover:after {@apply absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 content-[attr(data-title)] block rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
+[data-title]:hover:after , [data-title]:active:after {@apply absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 content-[attr(data-title)] block rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
 
 /* licenses */
 
@@ -994,7 +1004,7 @@ table tbody tr td:last-child {@apply float-right clear-right}
           letter-spacing: 0.1rem;
           }
           span.txcc, span.cc {@apply relative;}
-          span.cc:hover:after,  span.txcc:hover:after {@apply absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 content-[attr(data-title)] block rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;
+          span.cc:hover:after,  span.txcc:hover:after , span.cc:hover:active,  span.txcc:hover:active  {@apply absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 content-[attr(data-title)] block rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;
                   }
           }
 /*hack chrome small-caps too small*/

@@ -1,17 +1,13 @@
-<nav id="nav-footer" class="flex flex-row w-full items-center"><ul class="w-1/3 flex inline-flex mx-auto "><li><a id="languages" class="dropdown">EN</a>
-<!-- Dropdown menu -->
-<div id="list-languages" class="z-10 hidden bg-white divide-y divide-gray-100 rounded shadow">
-  {% set lg = def_language()%} {{ 'lg=' + lg }}
-    <ul class="dropdown-menu py-1   text-white text-sm" aria-labelledby="languages">
-      <li>
-        <a href="#" class=" dropdown-item px-4 py-2 font-light "{{ 'selected' if lg == 'fr'}}>FR</a>
-      </li>
-      <li>
-        <a href="#" class=" dropdown-item px-4 py-2 font-light ">EN</a>
-      </li>
-      <li>
-        <a href="#" class="dropdown-item px-4 py-2 font-light " {{ 'selected' if lg == 'zh'}}>CN</a>
-      </li>
-    </ul>
-</div></li>
-<li><a href="/gui/about">{{ _('About') }}</a></li><li><a href="/gui/privacy">{{_('Privacy')}}</a></li></ul></nav>
+<nav id="nav-footer" class="flex flex-row w-full items-center"><ul class="inline-flex w-auto mx-auto bg-inherit">
+<li class="submenu">
+  {%- set lgpref = def_language()-%}
+  {%- set lgs ={"fr":"FR","en":"EN","zh":_('CN')} -%}
+  <a href="#">{{lgs[lgpref] if lgpref in lgs else lgpref}}</a>
+  <ul class=" py-1  text-sm r bg-inherit drop-shadow mt-1 flex flex-col">
+    {%- for k,lg in lgs.items() -%}
+    <li class="pt-1 bg-mainblue-50 order-{{loop.index if lgpref != k else lgs|length+1}} {{'underline' if lgpref==k else ''}} ">
+      <a href="#" class="px-4 py-2 inline">{{lg}}</a>
+    </li>
+  {%-endfor%}
+  </ul>
+</li><li><a href="{{ url_for("gui_about")}}">{{ _('About') }}</a></li><li><a href="{{ url_for("gui_privacy")}}">{{_('Privacy')}}</a></li></ul></nav>

@@ -1,5 +1,6 @@
+{%if not partial%}
 {% extends "./v2/layout.html" %}
-
+{% endif%}
 {% set state2label = dict({'P': 'Pending',
 'E': 'Error',
 'R': 'Running',
@@ -7,15 +8,20 @@
 'F': 'Finished'}) %}
 {% block body %}
 <div class="container mx-auto mt-8">
-<div class="py-8">
-    <a href="/gui/job/clean/{{ job.id }}">
-      <button class="button is-danger inverse">{{_('Clean task data')}}</button>
-    </a>
-    <a href="/gui/jobs/listall">
-      <button class="button ml-4 ">{{_('Back to tasks list')}}</button>
-    </a>
+<div class="py-8 flex flex-col">
+  {% if job and job.id  %}
+  {% include '/v2/jobs/_monitor.html'%}
+  {% if job.state =="E" or job.state=="F" %}
+  <div>
+    <a href="{{ url_for('gui_job_cleanup', jobid=job.id)}}" class="button is-danger inverse">{{_('Clean task data')}}</a>
+    <a href="{{url_for('gui_list_jobs')}}" class="button ml-4 ">{{_('Back to tasks list')}}</a></div>
+    {% endif %}
+  {%elif jobid %}
+  {%set thengo = 'Y' if target_proj and target_proj.projid else ''%}
+  <a href="{{url_for('gui_job_cleanup', jobid= jobid, thengotoproject=thengo)}}" class="button is-secondary inverse" role="button">{{_('FORCE Delete of ')}} {{jobid}} {{ _('and back to project') if target_proj and target_proj.projid else ''}}</a>
+  <small>{{_('(no danger for the original database)')}}</small>
+  {%endif%}
   </div>
-
   {% if job.taskstate=="Error" %}
     <div class="alert alert-danger">
       <p>{{_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart
@@ -23,7 +29,7 @@
     </div>
   {% endif %}
 
-  <table class="dataTable-table jobs table-condensed">
+  <table class="datatable-table jobs table-condensed">
    <tr>
       <th>{{_('Task ID')}}</th>
       <td>{{ job.id }}</td>
@@ -40,9 +46,9 @@
       <th>{{_('State')}}</th>
       <td>{{ state2label[job.state]|safe }}
         {% if job.state=="Q" %}
-          <a href="/gui/job/question/{{ job.id }}"><span class="label label-warning">{{_('Go')}}</span></a>
+          <a href="{{url_for("gui_job_question", job_id=job.id)}}"><span class="label label-warning">{{_('Go')}}</span></a>
         {% elif job.state in ("E", "R") %}
-          <a href="/gui/job/forcerestart/{{ job.id }}">
+          <a href="{{url_for("gui_job_force_restart", job_id=job.id)}}">
             <button class="btn btn-danger btn-sm">{{_('Force restart')}}</button>
           </a>
         {% endif %}
@@ -55,7 +61,7 @@
     </tr>
     <tr>
       <th>{{_('Progress')}}</th>
-      <td>{{ job.progress_pct }}%</td>
+      <td>{{ job.progress_pct|string + '%' if job.progress_pct != None else '' }}</td>
     </tr>
     <tr>
       <th>{{_('Message')}}</th>
@@ -80,9 +86,11 @@
       <td>{{ job.answerdata|string }}</td>
     </tr></tbody>
   </table>
-  <details class="overflow-hidden px-2 mb-24"><summary class="text-lg font-btn font-semibold py-0.5 is-default inverse" data-action="request" data-href="?log=Y">{{_('View log file')}}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>
+  <details class="overflow-hidden px-2 mb-24"><summary class="text-lg font-btn font-semibold py-0.5 is-default inverse" data-request="logfile" data-href="{{url_for("gui_job_show", job_id=job.id)}}?log=Y">{{_('View log file')}}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>
 
-  {% if customdetails %}<details><summary class="text-lg font-btn font-semibold py-0.5 is-info inverse" data-action="request" data-href="?customdetails=Y">{{_('View custom details') }}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>{% endif %}
+  {% if customdetails %}<details><summary class="text-lg font-btn font-semibold py-0.5 is-info inverse" data-request="logfile" data-href="{{url_for("gui_job_show", job_id=job.id)}}?customdetails=Y">{{_('View custom details') }}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>{% endif %}
 
 </div>
+
+
 {% endblock %}

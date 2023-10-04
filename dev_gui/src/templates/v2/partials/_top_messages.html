@@ -1,0 +1,4 @@
+{% if messages is iterable %}
+{% for msgkey,message in messages.items() %}
+<div class="topmessage {{ msgkey|lower }} " id="topmessage-{{msgkey}}" title="{{msgkey}}"><div class="inline-block">{{message["content"]|string()}}</div><div class="absolute right-1 top-0.5" aria-hidden="true"  data-dismiss="topmessage-{{msgkey}}" data-action="dismisscook" data-value="{{message['date']}}" data-cook="{{msgkey}}{{cookiename}}"><i class="icon-sm icon-cancel"></i></div></div>
+{% endfor %} {% endif %}

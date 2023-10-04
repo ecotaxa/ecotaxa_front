@@ -8,6 +8,7 @@
     "watchstarttest": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_nodockerdb.sh' && webpack --watch",
     "startfront": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_dockerfront.sh' ",
     "starttest": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_nodockerdb.sh' ",
+    "startngnix": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_ngnixh2.sh' && webpack --watch",
     "start": "webpack-dev-server --mode development --config webpack.config.js",
     "build": "webpack build --mode production --config webpack.config.prod.js "
   },
@@ -39,7 +40,7 @@
     "terser-webpack-plugin": "^5.3.1",
     "ts-loader": "^9.3.0",
     "typescript": "^4.6.4",
-    "webpack": "^5.83.0",
+    "webpack": "^5.86.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^4.9.2"
   },
@@ -49,9 +50,10 @@
     "dayjs": "^1.11.7",
     "deep-equal": "^2.0.5",
     "dompurify": "^2.4.0",
-    "fflate": "^0.7.4",
+    "fflate": "^0.8.0",
     "path": "^0.12.7",
     "tom-select": "^2.2.2",
+    "uuid": "^9.0.0",
     "validator": "^13.7.0"
   },
   "engines": {

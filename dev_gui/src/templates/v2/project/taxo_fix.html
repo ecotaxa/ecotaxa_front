@@ -1,0 +1,199 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/macros/macros.html" import inputdict%}
+{% from "./v2/project/macros.html" import header_project_job with context %}
+{%block body%}
+<div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_massannotation" >
+  <div class="w-100 mx-auto py-4 block text-left relative" id="project-massannotation-header">
+    {% set data = {'file':'_help_project_fix_category_issues'} %}
+    {{header_project_job(_('Fix category issues '),data, _('How to fix category issues'))}}
+  </div>
+{% if error==404 %}
+<a href="/gui/prj/" class="alert alert-warning">{{_('Select another project')}}</a>
+{%elif error =="nocat"%}
+<a href="javascript:history.back()">{{_('Back')}}</a>
+{%elif target_proj and target_proj.projid%}
+<div class="block-info">
+<ul>
+  <li>{{_('This page allows you to change, in batch, the classification of objects in the project.')}}</li>
+  <li>{{_('All operations are strictly equivalent to a manual assignment in the project page, but are presented here :')}}</li>
+  <ul>
+    <li>{{_('To give some background information on the change reason, when available.')}}</li>
+    <li>{{_('To show the full lineage of taxa.')}}</li>
+    <li>{{_('To save time when many objects are impacted.')}}</li>
+  </ul>
+  <li>{{_('Changes are logged and can be reverted, by a project manager or an administrator.')}}</li>
+</ul>
+</div>
+  <fdiv class="form-box"><label>Copy choices made in project:</label>
+    {{ inputdict('projid','projid',value ='', label='',type='exploreproject', placeholder=_('choices made in project'),required= True,autocomplete=True , options=) }}
+
+      <select class="form-control prj_sel" id="projid" name="projid" autocomplete="off">
+      </select>
+      <input type=button id="projid_btn" class="btn btn-primary" value="Go">
+      <span id="go_res"></span>
+    </div>
+  </div>
+
+  {# Gestion de la selection de Taxonomie Via un Select2 Ajax multiple #}
+  <form method="post" action="?">
+    {% for a_ren in renames %}
+      {% set advised = advised_targets[a_ren.renm_id] %}
+      {% set community = community_targets[a_ren.id] %}
+      <div class="panel panel-default" style="margin-right:auto">
+        <div class="panel-body">
+          <table id="rnm_table">
+            <th colspan="2">
+              Replace deprecated category : <span class="deprecated">{{ a_ren.name }}</span>
+            </th>
+            <th>{{ a_ren.lineage | reverse | join(' &gt; ') | safe }}</th>
+            <!-- The advised rename -->
+            <tr>
+              <td colspan="2"><input type="radio" name="chc{{ a_ren.id }}" value="{{ a_ren.renm_id }}">
+                With (advised)&nbsp;:&nbsp;
+                {{ advised.name }}
+              </td>
+              <td> {{ advised.lineage | reverse | join(' &gt; ') | safe }}</td>
+            </tr>
+            <!-- The community renames -->
+            {% if community %}
+              <tr>
+                <td colspan="2"><input type="radio" name="chc{{ a_ren.id }}" value="{{ community.id }}">
+                  With (chosen by others)&nbsp;:&nbsp;
+                  {{ community.name }}
+                </td>
+                <td> {{ community.lineage | reverse | join(' &gt; ') | safe }}</td>
+              </tr>
+            {% endif %}
+            <!-- Custom, free choice -->
+            <tr id="{{ a_ren.id }}">
+              <td><input type="radio" name="chc{{ a_ren.id }}" id="cus{{ a_ren.id }}" value="?"> With&nbsp;:&nbsp;
+              </td>
+              <td>
+                <select name="sel{{ a_ren.id }}" data-from="{{ a_ren.id }}" class="taxo_sel">
+                </select>
+              </td>
+              <td></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    {% endfor %}
+    <div style="position:fixed; bottom:16px; right:16px">
+      <input type=submit class="btn btn-primary" value="Proceed">
+    </div>
+    <br>
+  </form>
+
+
+<script>
+    show_lineage = function (src_id, tgt_id) {
+        // Set the lineage from tgt_id lookup in src_id table line
+        $.ajax({
+            type: "GET",
+            url: "/api/taxon_set/query?ids=" + tgt_id,
+            success: function (rsp) {
+                // {..."lineage":["Archaea","living"]}]
+                if (rsp[0]) {
+                    lineage = rsp[0].lineage.reverse().join(" > ");
+                } else {
+                    lineage = "🙄 XHR call error - try again.";
+                }
+                $("#" + src_id + " :nth-child(3)").text(lineage);
+                // also toggle the corresponding radio
+                var radio = $("#cus" + src_id);
+                radio.prop("checked", true);
+                radio.prop("value", tgt_id);
+            }
+        });
+    };
+    $(document).ready(function () {
+        var sels = $('.taxo_sel');
+        // Initialize the server-side fetching
+        sels.select2({
+            ajax: {
+                url: "/search/taxo",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {q: params.term, page: params.page};
+                },
+                processResults: function (data, page) {
+                    return {results: data};
+                },
+                cache: true
+            },
+            minimumInputLength: 3
+        });
+        // Set visible default value to the renamed advised taxon
+        sels.each(function (index, taxo_sel) {
+            var tgt_dataset = taxo_sel.dataset;
+            var from_id = tgt_dataset.from;
+            //var to_id = tgt_dataset.to;
+            //var to_name = advised_targets[to_id];
+            $(taxo_sel).on("select2:select", function (evt) {
+                var sel = $(taxo_sel).val();
+                show_lineage(from_id, sel);
+            });
+        });
+
+        $("#projid").select2({
+            ajax: {
+                url: "/search/exploreproject",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {q: params.term};
+                },
+                processResults: function (data, page) {
+                    return {results: data};
+                },
+                cache: true
+            },
+            dropdownCssClass: "width400",
+            minimumInputLength: 3
+        }); // Select2 Ajax
+
+        // Fill choices from another project
+        fill_choices = function () {
+            var sel = $("#projid").val();
+            $.ajax({
+                type: "GET",
+                url: "/api/taxa/reclassification_history/" + sel,
+                success: function (rsp) {
+                    // [{"from":58246,"to":31693,"name":"Alexandrium 01"},...]
+                    var ok_set = 0;
+                    rsp.forEach(function (a_hist) {
+                        console.log(a_hist);
+                        // Find a radio with the right values
+                        var ok_radio_with_val = $(':radio[name="chc' + a_hist.from + '"][value="' + a_hist.to + '"]');
+                        if (ok_radio_with_val.length > 0) {
+                            ok_radio_with_val.prop('checked', true);
+                            ok_set += 1;
+                        } else {
+                            // Find the select with 'from' value
+                            var ok_select = $('[name="sel' + a_hist.from + '"]');
+                            if (ok_select.length > 0) {
+                                // Simulate a select
+                                var option = new Option(a_hist.name, a_hist.to, true, true);
+                                ok_select.append(option);
+                                show_lineage(a_hist.from, a_hist.to);
+                                ok_set += 1;
+                            }
+                        }
+                    });
+                    $("#go_res").text(ok_set + " value(s) set");
+                }
+            });
+        }
+
+        $("#projid_btn").click(function (evt) {
+            fill_choices();
+        });
+
+    }); // Ready
+
+
+</script>
+
+{%endif%}
+{%endblock%}

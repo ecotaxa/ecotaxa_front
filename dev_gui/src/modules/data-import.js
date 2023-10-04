@@ -265,9 +265,7 @@ export class DataImport {
               });
               importzone.tomselect.refreshOptions();
             });
-            console.log('privs', privs);
-            console.log('importzone', importzone);
-            console.log('ts', ts);
+
             showbtns = (((ts) ? ts.items.length : importzone.selectedIndex + 1) > 0);
 
 
@@ -552,11 +550,18 @@ export class DataImport {
               }
             } else if (ts) {
               let el = {};
-              el[ts.settings.valueField] = this.imports[name]['key'];
-              el[ts.settings.searchField] = unescape_html(this.imports[name]['value']);
+              if (typeof(this.imports[name]) == 'string') {
+                el[ts.settings.labelField] = this.imports[name];
+                el[ts.settings.valueField] = this.imports[name];
+                el[ts.settings.searchField] = unescape_html(this.imports[name]);
+              } else {
+                el[ts.settings.labelField] = this.imports[name]['key'];
+                el[ts.settings.valueField] = this.imports[name]['key'];
+                el[ts.settings.searchField] = unescape_html(this.imports[name]['value']);
+              }
               ts.addOption(el);
               ts.addItem(el[input.tomselect.settings.valueField]);
-              ts.refreshOptions();
+              //  ts.refreshOptions();
             } else {
               const type = (input.type) ? input.type : input.tagName.toLowerCase();
               switch (input.type) {

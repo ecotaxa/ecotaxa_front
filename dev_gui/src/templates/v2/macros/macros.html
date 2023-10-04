@@ -21,7 +21,7 @@
     {% endif%}
     <span>{{btn['text'] if btn['text'] else '' }}</span></div></summary>
   <div class="modal" id="{{ id }}" aria-modal="true" role="dialog" >
-    <div class="modal-body peer-checked" for="{{ id }}">
+    <div class="modal-body" for="{{ id }}">
       <div class="modal-title">
         <div class="block w-full">
         <span class="h3">{{modal_title}}</span></div>
@@ -50,9 +50,9 @@
   {% set pos = pos + prop + '-' + val + ' ' if val!='' %}
   {% endfor %}
   {% endif %}
-  <summary class="aside-label" {{ 'data-action=request data-what=help' if type=='modal-help' }}  ><span class="summary-title">{{ modal_title }}</span></summary>
+  <summary class="aside-label" {{ 'data-request=help' if type=='modal-help' }}  ><span class="summary-title">{{ modal_title }}</span></summary>
   <div class="modal" id="{{ id }}" >
-    <div class="aside-body py-4 px-5 peer-checked">
+  <div class="aside-body">
       {% set modal_content='./v2/help/index.html' if (modal_content == '' and type=='modal-help') else modal_content %}
       {% include modal_content  ignore missing %}
 
@@ -62,12 +62,23 @@
   <div class="up" data-action="gotop" data-target="{{ id }}"></div>
 </details>
 {%- endmacro %}
-
-{% macro inputdict(id,name,value=0, label='', type = '', multiple = False,placeholder='Select', required = False, autocomplete=False,data='') -%}
+{% macro inputdict(id,name,value=0, label='', type = '', multiple = False,placeholder='Select', required = False, autocomplete=False,data='',options=None) -%}
 {% if autocomplete == True %}
 
 <select {{ 'multiple' if multiple }} name="{{ name }}" id="{{ id }}" class="form-select js js-autocomplete" data-placeholder="{{ placeholder }}" data-type="{{ type }}" {{ 'required' if required }}  {{ data if data }}>
-  <option value="{{ value }}" {{ 'selected' if value !=0 }} {{ 'disabled hidden' if value == 0  }}>{{ placeholder +'...' if (value == '' or value == 0) else label }}</option>
+
+  {% if options != None and options is iterable%}
+      <option value='' {{ 'selected' if value =='' or value==0 }} {{ 'disabled hidden' if value == 0  }}>{{ placeholder +'...'}}</option>
+  {% for option in options%}
+
+  {% set v= option[0] if option is not string  else option %}
+    {% set l= option[1] if option is not string  else option %}
+    <option value="{{ v }}" {{ 'selected' if v == value or (type=='country' and l==value) }} >{{ l }}</option>
+  {%endfor%}
+  {%else %}
+      <option value="{{value}}" {{ 'selected' if value ==value}} {{ 'disabled hidden' if value == 0  }}>{{ label}}</option>
+  {%endif%}
+
 </select>
 {% else %}
 <div class="form-box">
@@ -76,14 +87,17 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro form_group_radio(id,name,val,label,value,required=False) -%}
-<div class="group-radio"><input type="radio" class="peer" name="{{ name }}" id="{{ id}}" value="{{ val }}" {{'required' if required==True else ''}} {{ 'checked' if val==value }}>
-  <label for="{{id}}" class="peer-checked:bg-pchecked-400  peer-checked:text-white  peer-checked:shadow">{{ label }}</label></div>
+{% macro form_group_radio(id,name,val,label,value,required=False,help='',extra='') -%}
+<div class="group-radio"><input type="radio" class="peer" name="{{ name }}" id="{{ id}}" value="{{ val }}" {{'required' if required==True else ''}} {{ 'checked' if val==value }} {{extra}}>
+  <label for="{{id}}" class="peer-checked:bg-pchecked-400  peer-checked:text-white  peer-checked:shadow" {{help}}>{{ label }}</label></div>
+{%- endmacro %}
+{% macro checkbox_radio(name, id , checkedvalue, value='', label="",type="checkbox",extra='') -%}
+  <label class="checkbox-label"><input type="{{type}}" name="{{ name }}" id="{{ id }}" class="form-checkbox"
+         value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }} {{ extra|safe }}> {{ label }}</label>
 {%- endmacro %}
 
 
-
-{% macro alertbox(type,message,title='', inverse=false, dismissible = False, codeid= True,extra=False,  is_safe = False,to_fetch= False) -%}
+{% macro alertbox(type,message,title='', inverse=False, dismissible = False, codeid= True,extra=False,  is_safe = False,tofetch= False) -%}
 {% include './v2/partials/_alertbox.html' with context%}
 {%- endmacro %}
 

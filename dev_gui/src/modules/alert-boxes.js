@@ -144,7 +144,7 @@ export class AlertBox {
 
   }
   getBoxById(id) {
-    return (document.getElementById(id)) ? document.getElementById(id) : document.querySelector('[data-message="' + id + '"]');
+    return (id !== '' && document.getElementById(id)) ? document.getElementById(id) : document.querySelector('[data-message="' + id + '"]');
   }
   refreshAlert(id) {
     const box = this.getBoxById(id);

@@ -3,23 +3,23 @@
   {% set state=job.state %}
   {% set id=job.id %}
   {% if state=="Question" %}
-    <a href="/gui/job/question/{{ id }}">
+    <a href="{{url_for("gui_job_question", job_id=id)}}">
       <button class="button text-sm is-warning  py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Error" %}
-    <a href="/gui/job/show/{{ id }}">
-      <button class="button text-sm is-danger  py-0.5">{{ state }}</button>
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
+      <button class="button text-sm is-error py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Running" %}
-    <a href="/gui/job/show/{{ id }}">
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
       <button class="button text-sm is-running px-2  py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Done" %}
-    <a href="/gui/job/show/{{ id }}">
-      <button class="button text-sm is-success  py-0.5">{{ state }}</button>
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
+      <button class="button text-sm is-done py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Pending" %}
-    <a href="/gui/job/show/{{ id }}">
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
       <button class="button text-sm is-pending  py-0.5">{{ state }}</button>
     </a>
   {% else %}
@@ -28,13 +28,17 @@
 {%- endmacro %}
 
 {% block body %}  <div class="container mx-auto my-8">
-<div class="flex flex-row mb-8"><span class="mr-2 text-lg align-bottom font-semibold p-2">{{_('Task count') }} : {{ len_tasks }}</span>
-  <a class="button text-sm is-success inverse mr-2 py-1 " href=?cleandone=Y{{ seeall }}>{{_('Clean all Done')}}</a>
-  <a class="button text-sm is-danger inverse  mr-2 py-1 " href=?cleanerror=Y{{ seeall }}>{{_('Clean all Error')}}</a>
-  <a class="button text-sm is-warning inverse mr-2 py-1" href=?cleanall=Y{{ seeall }}>{{_('Clean all Warning')}}</a>
+<div class="flex flex-row mb-8"><span class="mr-2 text-lg align-bottom font-semibold p-2">{{_('Task count') }} : {{ jobs|length }}</span>
+{%if jobs|length %}
+  <a class="button text-sm is-done inverse mr-2 py-1 " href=?cleandone=Y{{ seeall }}>{{_('Clean all Done')}}</a>
+  <a class="button text-sm is-error inverse  mr-2 py-1 " href=?cleanerror=Y{{ seeall }}>{{_('Clean all Error')}}</a>
+  <a class="button text-sm is-danger mr-2 py-1" data-event="click" data-action="alert-confirm" data-alert=true data-message="{{_('You are about to clean all tasks of the list')}}" href=?cleanall=Y{{ seeall }}>{{_('Clean all')}} <strong>{{'Warning !!!'}}</strong></a>
+  {%endif%}
 <a class="button text-sm is-info inverse mr-2 py-1" href={{'?' if seeall else '?seeall=Y' }}>{{_('See user tasks') if seeall else _('See all users tasks') }} </a></div>
-
-  <table class="dataTable-table jobs">
+{%if cleanresult|length%}
+<div class="alert alert-info inverse" data-dismissible=true> <strong>{{_('Cleaning process')}} {{cleanresult|length ~ ' ' ~ _('jobs cleaned') }} </strong> {{cleanresult|join(', ')}}</div>
+{% endif %}
+  <table class="table-table jobs">
     <thead>
       <tr>
       <th>{{_('ID')}}</th>
@@ -50,20 +54,20 @@
     {% for jb in jobs %}
 
       <tr>
-        <td><a href="/gui/job/show/{{ jb.id }}"> {{ jb.id }}
+        <td><a href="{{url_for("gui_job_show", job_id=jb.id)}}"> {{ jb.id }}
           <button class="py-0.5 px-1 inline-block shadow-none small-caps rounded text-stone-700 hover:text-stone-900 border border-stone-200">{{_('View')}}</button>
         </a></td>
         <td>{{_('Task') + jb.type }}
-          {% set prj_id = jb.params["ProjectId"] %}
-          {% if prj_id %}
-            <br/>in <a href="/prj/{{ prj_id }} ">{{ prj_id }}</a>
+          {% set projid = jb.params["projid"] %}
+          {% if projid %}
+            <br/>in <a href="/prj/{{ projid }} ">{{ projid }}</a>
           {% endif %}
         </td>
-        <td><a href="mailto:{{ jb.owner_id.email }}">{{ jb.owner_id.name }}</a></td>
+        <td><a href="mailto:{{ jb.owner_id.email }}">{{ jb.owner.name }}</a></td>
         <td>{{ PutInLabel(jb) }}</td>
         <td>{{ jb.step }}</td>
         <td class="whitespace-nowrap">{{ jb.progress_pct }} %</td>
-        <td>{{ jb.progress_msg }}</td>
+        <td>{%- if jb.progress_msg|length>255-%}<div class="static-tip">{{jb.progress_msg}}</div>{%- else -%}{{ jb.progress_msg }}{%- endif -%}</td>
         <td>{{ jb.creation_date|datetime }}</td>
         <td>{{ jb.updated_on|datetime }}</td>
       </tr>

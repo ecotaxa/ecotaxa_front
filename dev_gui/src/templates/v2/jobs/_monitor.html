@@ -1,0 +1,4 @@
+<div data-id="{{job.id}}" data-request="monitor" data-event="load" data-state={{job.state}}  {{'data-out=true' if job.outfile else ''}}>
+<div id="spinner-icon" class="hidden mx-auto my-8"><img src="{{ url_for('static', filename='AjaxLoading.gif') }}"></div>
+<div id="statusdiv" ><span class="inline-block font-semibold"></span><div class="inline-block pl-4"></div></div>
+<div id="progressbar" class="hidden h-8 w-96"></div></div>
