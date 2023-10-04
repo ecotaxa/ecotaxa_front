@@ -58,21 +58,8 @@ class Job(object):
         from to_back.ecotaxa_cli_py.models import ProjectModel
 
         with ApiClient(ProjectsApi, request) as api:
-            try:
-                target_proj: ProjectModel = api.project_query(
-                    prj_id, for_managing=False
-                )
-            except ApiException as ae:
-                if ae.status in (401, 403):
-                    raise ApiException(
-                        status=ae.status,
-                        reason=py_messages["access403"],
-                    )
-                else:
-                    ApiException(
-                        status=ae.status,
-                        reason=ae.reason,
-                    )
+            target_proj: ProjectModel = api.project_query(prj_id, for_managing=False)
+
         if target_proj:
             if full == True:
                 return target_proj

@@ -24,7 +24,7 @@
         <form action=? method="post" id="form-purge" class="js js-submit">
         <div class="form-box"><textarea name="objlist" id="objlist" class="form-textarea" cols="15" rows="20" autocomplete=off>{{objlist|join("\n")}}</textarea></div>
         <div class="form-box"><label><input type=checkbox name="destroyproject" value=Y> {{_('DELETE project after "DELETEALL" action')}}</label></div>
-        <a href ="/gui/prj/{{target_proj.projid}}" class="button is-secondary inverse">{{_('Cancel')}}</a> <button type="submit" class="button is-danger">{{_('ERASE THESE OBJECTS !!! IRREVERSIBLE !!!!!')}}</button>
+        <button type="submit" class="button is-danger">{{_('ERASE THESE OBJECTS !!! IRREVERSIBLE !!!!!')}}</button> <a href ="/gui/prj/{{target_proj.projid}}" class="button is-secondary inverse">{{_('Cancel')}}</a> 
         </form>
               {%endif%}
               {%endif%}

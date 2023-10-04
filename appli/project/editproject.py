@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List
 
 from flask import render_template, g, flash, request, json
-from flask_security import login_required
+from flask_login import login_required
 
 from appli import app, PrintInCharte, gvp, gvpm, XSSEscape
 from appli.constants import MappableObjectColumns, MappableParentColumns
@@ -29,6 +29,7 @@ def PrjEdit(PrjId, privs_only=False):
         try:
             target_proj: ProjectModel = api.project_query(PrjId, for_managing=True)
         except ApiException as ae:
+            print("********************* exception")
             if ae.status == 404:
                 flash("Project doesn't exist", "error")
                 return PrintInCharte("<a href=/prj/>Select another project</a>")

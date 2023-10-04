@@ -110,12 +110,7 @@ class ImportJob(Job):
                 rsp: ImportRsp = api.import_file(prj_id, req)
             except ApiException as ae:
                 if ae.status in (401, 403):
-                    raise ApiException(
-                        status=ae.status,
-                        reason=py_messages["access403"],
-                    )
-                else:
-                    raise
+                    ae.reason = py_messages["access403"]
 
         if len(rsp.errors) > 0:
             for e in errors:
@@ -123,7 +118,7 @@ class ImportJob(Job):
         else:
             # The task should be running
             job_id = rsp.job_id
-            return redirect("/gui/job/show/%d" % job_id)
+            return redirect(url_for("gui_job_show", job_id=job_id))
 
         if server_path == "":
             # Get stored last value for this project
@@ -204,7 +199,7 @@ class ImportJob(Job):
                     users=not_found_users,
                     job=job,
                 )
-        return redirect("/gui/job/show/%d" % job.id)
+        return redirect(url_for("gui_job_show", job_id=job.id))
 
     @classmethod
     def _must_skip_existing_objects(cls) -> bool:

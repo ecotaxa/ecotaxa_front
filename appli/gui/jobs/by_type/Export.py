@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import render_template, redirect, request, flash
+from flask import render_template, redirect, request, flash, url_for
 from appli import gvg, gvp
 from appli.gui.jobs.staticlistes import py_messages
 from appli.gui.jobs.Job import Job
@@ -101,7 +101,7 @@ class ExportJob(Job):
 
             with ApiClient(ObjectsApi, request) as api:
                 rsp: ExportRsp = api.export_object_set(export_req)
-            return redirect("/gui/job/show/%d" % rsp.job_id)
+            return redirect(url_for("gui_job_show", job_id=rsp.job_id))
 
     # noinspection PyUnresolvedReferences
     @classmethod

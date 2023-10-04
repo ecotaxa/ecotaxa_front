@@ -1,5 +1,6 @@
 # list : full project list table def - homepage
 # import-[...] settings table def - projectsettings page create or update
+
 from to_back.ecotaxa_cli_py.models import (
     ProjectModel,
     MinUserModel,
@@ -139,12 +140,12 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
         ),
         "validations": dict(
             {
-                "nb_validated": {"label": _("validated"), "format": "validation"},
-                "nb_dubious": {"label": _("dubious"), "format": "validation"},
-                "nb_predicted": {"label": _("predicted"), "format": "validation"},
+                "nb_validated": {"label": _("validated"), "format": "number"},
+                "nb_dubious": {"label": _("dubious"), "format": "number"},
+                "nb_predicted": {"label": _("predicted"), "format": "number"},
                 "nb_unclassified": {
                     "label": _("none"),
-                    "format": "validation",
+                    "format": "number",
                 },
             }
         ),
@@ -353,9 +354,9 @@ def render_stat_proj_json(prj: dict, partial: bool = True) -> dict:
 def render_for_js(prjs: list, columns: list, can_access: list) -> list:
     from appli.gui.staticlistes import py_project_status
     from datetime import datetime
-    from appli.gui.admin.main import _check_is_admin
+    from flask_login import current_user
 
-    isadmin = _check_is_admin()
+    isadmin = current_user.is_authenticated and current_user.is_app_admin == True
     jsonprjs = list([])
     translations = dict(
         {
@@ -430,12 +431,7 @@ def render_for_js(prjs: list, columns: list, can_access: list) -> list:
                         if (
                             isadmin
                             or (prj["status"] == "Annotate" or prj["status"] == "View")
-                            and (
-                                prj["projid"]
-                                in can_access["View"]
-                                + can_access["Manage"]
-                                + can_access["Annotate"]
-                            )
+                            and (prj["projid"] in can_access["Manage"])
                         ):
                             attrvalue = list([attrvalue, 1])
                         else:

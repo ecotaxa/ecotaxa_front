@@ -1,5 +1,5 @@
 from flask import request
-from flask_security import login_required
+from flask_login import login_required
 
 from appli import app, gvp
 from appli.utils import ApiClient
@@ -8,7 +8,7 @@ from to_back.ecotaxa_cli_py.api import ObjectsApi
 from to_back.ecotaxa_cli_py.models import ClassifyReq, BulkUpdateReq
 
 
-@app.route('/prj/ManualClassif/<int:_PrjId>', methods=['GET', 'POST'])
+@app.route("/prj/ManualClassif/<int:_PrjId>", methods=["GET", "POST"])
 @login_required
 def PrjManualClassif(_PrjId):
     object_ids = []
@@ -32,13 +32,15 @@ def PrjManualClassif(_PrjId):
     if len(object_ids) == 0:
         return '<span class="label label-warning">No pending change to update</span>'
     # The needed classif_qual, i.e., as it comes from UI, 'V' for validated or 'D' for dubious
-    wanted_qualif = gvp('qual')
+    wanted_qualif = gvp("qual")
 
     try:
         with ApiClient(ObjectsApi, request) as api:
-            req = ClassifyReq(target_ids=object_ids,
-                              classifications=classifications,
-                              wanted_qualification=wanted_qualif)
+            req = ClassifyReq(
+                target_ids=object_ids,
+                classifications=classifications,
+                wanted_qualification=wanted_qualif,
+            )
             nb_upd = api.classify_object_set(req)
         if nb_upd < 0:
             # Not all was done
@@ -59,15 +61,16 @@ def PrjManualClassif(_PrjId):
     return ret
 
 
-@app.route('/prj/UpdateComment/<int:ObjId>', methods=['GET', 'POST'])
+@app.route("/prj/UpdateComment/<int:ObjId>", methods=["GET", "POST"])
 @login_required
 def PrjUpdateComment(ObjId):
     # Update single field of object
-    updates = [{"ucol": "complement_info", "uval": gvp('comment')}]
+    updates = [{"ucol": "complement_info", "uval": gvp("comment")}]
     with ApiClient(ObjectsApi, request) as api:
         try:
-            nb_rows = api.update_object_set(BulkUpdateReq(target_ids=[ObjId],
-                                                          updates=updates))
+            nb_rows = api.update_object_set(
+                BulkUpdateReq(target_ids=[ObjId], updates=updates)
+            )
         except ApiException as ae:
             if ae.status == 404:
                 return "Object doesn't exists"

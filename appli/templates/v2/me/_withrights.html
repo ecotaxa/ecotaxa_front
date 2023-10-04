@@ -1,5 +1,5 @@
   <div class="form-box">
-    <label for="can_do">{{_('Roles')}} </label>
+    <label>{{_('Roles')}} </label>
       {% for role in roles %}
       {% if role[0]|int in user.can_do %}
       <span class="block ml-4">{{ role[1] }}</span>
@@ -7,8 +7,14 @@
       {% endfor %}
   </div>
   <div class="form-box">
-    <label for="last_used_projects">{{_('Last used projects')}} </label>
+    <label>{{_('Last used projects')}} </label>
     <ul class="ml-4">{% for prj in user.last_used_projects%}
-      <li><a href="/gui/prj/{{prj.projid}}" class="text-mainblue-900">{{prj.title }} [{{prj.projid}}]</a></li>
+      <li><a href="{{url_for("gui_prj_edit", prjid=prj.projid)}}" class="text-mainblue-900"><strong>[{{prj.projid}}]</strong> {{prj.title }} </a></li>
       {%endfor %}<ul>
   </div>
+  {% if user.status_admin_comment%}
+  <div class="form-box">
+    <label>{{_('Users Administrator comment')}}</label>
+    <em class="block ml-4">{{ user.status_admin_comment}}</em>
+    </div>
+{%endif%}

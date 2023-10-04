@@ -3,23 +3,23 @@
   {% set state=job.state %}
   {% set id=job.id %}
   {% if state=="Question" %}
-    <a href="/gui/job/question/{{ id }}">
+    <a href="{{url_for("gui_job_question", job_id=id)}}">
       <button class="button text-sm is-warning  py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Error" %}
-    <a href="/gui/job/show/{{ id }}">
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
       <button class="button text-sm is-error py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Running" %}
-    <a href="/gui/job/show/{{ id }}">
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
       <button class="button text-sm is-running px-2  py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Done" %}
-    <a href="/gui/job/show/{{ id }}">
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
       <button class="button text-sm is-done py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Pending" %}
-    <a href="/gui/job/show/{{ id }}">
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
       <button class="button text-sm is-pending  py-0.5">{{ state }}</button>
     </a>
   {% else %}
@@ -54,7 +54,7 @@
     {% for jb in jobs %}
 
       <tr>
-        <td><a href="/gui/job/show/{{ jb.id }}"> {{ jb.id }}
+        <td><a href="{{url_for("gui_job_show", job_id=jb.id)}}"> {{ jb.id }}
           <button class="py-0.5 px-1 inline-block shadow-none small-caps rounded text-stone-700 hover:text-stone-900 border border-stone-200">{{_('View')}}</button>
         </a></td>
         <td>{{_('Task') + jb.type }}

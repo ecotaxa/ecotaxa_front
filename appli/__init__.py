@@ -10,41 +10,16 @@ import urllib.parse
 from typing import List, Optional
 
 from flask import Flask, render_template, Markup, request, g
-from flask_login import current_user
-from flask_security import Security
+from flask_login import current_user, LoginManager
 
-from appli.security_on_backend import (
-    BackEndUserDatastore,
-    CustomLoginForm,
-    CustomChangePasswordForm,
-)
 from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
-
+from appli.security_on_backend import user_from_api
+from to_back.ecotaxa_cli_py import ApiException
 
 app = Flask("appli")
 app.config.from_pyfile("../config/config.cfg")
-app.config["SECURITY_MSG_DISABLED_ACCOUNT"] = (
-    "Your account is disabled. Email the User manager (list on the left) to re-activate.",
-    "error",
-)
 app.logger.setLevel(10)
-
-# Setup Flask-Security
-# @see https://pythonhosted.org/Flask-Security/configuration.html
-app.config[
-    "SECURITY_PASSWORD_HASH"
-] = "plaintext"  # No hashing, which will be done server-side
-app.config["SECURITY_CHANGEABLE"] = True
-app.config["SECURITY_POST_CHANGE_VIEW"] = "/"
-app.config["SECURITY_SEND_PASSWORD_CHANGE_EMAIL"] = False
-user_datastore = BackEndUserDatastore()
-security = Security(
-    app,
-    user_datastore,
-    login_form=CustomLoginForm,
-    change_password_form=CustomChangePasswordForm,
-)
 
 # Read more config
 backend_url = app.config["BACKEND_URL"]
@@ -59,6 +34,15 @@ from flask_babel import Babel
 
 app.config["BABEL_TRANSLATION_DIRECTORIES"] = TRANSLATION_PATH
 babel = Babel(app)
+# set up login manager
+login_manager = LoginManager()
+login_manager.login_view = "gui_login"
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return user_from_api(user_id)
 
 
 @babel.localeselector
@@ -104,18 +88,7 @@ def AddJobsSummaryForTemplate() -> None:
         from appli.jobs.emul import _build_jobs_summary
 
         g.jobs_summary = _build_jobs_summary()
-        # Also add experimental URL
-        # if current_user.preferences is not None and '"experimental"' in current_user.preferences:
-        #     path = request.path
-        #     exper_path = None
-        #     if path.startswith("/prj/merge"):
-        #         exper_path = VUE_PATH + path
-        #     if path == "/prj/":
-        #         exper_path = VUE_PATH + "/projects"
-        #     if exper_path:
-        #         hint = "A better version of this page is available."
-        #         g.experimental = '<a href="' + exper_path + '" title="' + hint + '">' + "New!</a>"
-    g.google_analytics_id = app.config.get("GOOGLE_ANALYTICS_ID", "")
+        g.google_analytics_id = app.config.get("GOOGLE_ANALYTICS_ID", "")
 
 
 def gvg(varname: str, defvalue: str = "") -> str:
@@ -283,22 +256,36 @@ import appli.usermgmnt
 import appli.api_proxy
 import appli.project.emodnet
 import appli.jobs.views
+from appli.gui.commontools import new_ui_error
+
+# error handlers
 
 
 @app.errorhandler(404)
 def not_found(e):
-    return render_template("errors/404.html"), 404
+    return new_ui_error(e)
+
+
+@app.errorhandler(401)
+def unauthorized(e):
+    return new_ui_error(e)
 
 
 @app.errorhandler(403)
 def forbidden(e):
-    return render_template("errors/403.html"), 403
+    return new_ui_error(e)
 
 
 @app.errorhandler(500)
 def internal_server_error(e):
     app.logger.exception(e)
-    return render_template("errors/500.html"), 500
+    return new_ui_error(e)
+
+
+@app.errorhandler(ApiException)
+def handle_apiexception(e):
+    app.logger.exception(e)
+    return new_ui_error(e)
 
 
 @app.errorhandler(Exception)
@@ -313,7 +300,8 @@ def unhandled_exception(e):
     )
     for i in tb_list[::-1]:
         s += "\n" + html.escape(i)
-    return render_template("errors/500.html", trace=s), 500
+    return new_ui_error(e, True, trace=s)
+    # return render_template("errors/500.html", trace=s), 500
 
 
 def JinjaFormatDateTime(d, format="%Y-%m-%d %H:%M:%S"):
@@ -348,11 +336,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.0"
+ecotaxa_version = "2.7.1"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2023-05-26"
+    return ecotaxa_version + " 2023-10-03"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -363,6 +351,11 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2023-10-03: V 2.7.1
+    Features : login , register , admin , user profile replaced by new version - user login and registration follow major modification in the API users
+    Fix error reporting (merge new and current error handling)
+    Fix error 500 in  missing files in new contextual help ( 404 )
+    Fix removed everything related to Flask_security
 2023-05-26: V 2.7.0
 2023-05-25: V 2.7.0_beta
     Features : new front features - users - login - validation - removed js component simple-datatables
@@ -783,17 +776,3 @@ app.jinja_env.globals.update(
              Included license.txt File
 
 """
-
-
-def load_admin():
-    # Import a sub-application for admin
-    # IMPORTANT: The admin blueprint needs to be loaded before flaskAdmin below,
-    # as it registers routes/templates in /admin, and flask-admin does it as well.
-    from .admin.admin_blueprint import adminBlueprint
-
-    app.register_blueprint(adminBlueprint)
-    # noinspection PyUnresolvedReferences
-    from .admin.admin_from_flask import flaskAdmin
-
-
-load_admin()

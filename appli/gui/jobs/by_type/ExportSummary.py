@@ -82,7 +82,7 @@ class ExportSummaryJob(Job):
             export_req = {"filters": filters, "request": req}
             with ApiClient(ObjectsApi, request) as api:
                 rsp: ExportRsp = api.export_object_set(export_req)
-            return redirect("/gui/job/show/%d" % rsp.job_id)
+            return redirect(url_for("gui_job_show", job_id=rsp.job_id))
 
     # noinspection PyUnresolvedReferences
     @classmethod

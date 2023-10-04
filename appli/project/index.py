@@ -2,8 +2,7 @@ import datetime
 from typing import List
 
 from flask import render_template, flash, session, request, Markup
-from flask_login import current_user
-from flask_security import login_required
+from flask_login import current_user, login_required
 
 from appli import app, PrintInCharte, gvg, gvgm
 from appli.back_config import get_app_manager_mail

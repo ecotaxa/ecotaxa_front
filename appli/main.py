@@ -3,13 +3,14 @@
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import os
 from typing import Optional, List, Tuple, Union
-
-from flask import g, request, url_for, send_from_directory
+from flask import g, request, url_for, send_from_directory, session
 from flask.typing import ResponseReturnValue
 from flask_login import current_user
 from appli import app, PrintInCharte, ecopart_url
 from appli.api_proxy import proxy_request
 from appli.constants import (
+    AdministratorLabel,
+    UserAdministratorLabel,
     is_static_unprotected,
     APP_MANAGER_MESSAGE_FILE,
     CUSTOM_HOME_TOP,
@@ -80,17 +81,14 @@ def before_request_security() -> Optional[ResponseReturnValue]:
     # app.logger.info("URL="+request.url)
     if is_static_unprotected(request.path):
         return None
-    user_can_administrate = False
-    user_can_administrate_users = False
     mru_projects = []
     # current_user is either an ApiUserWrapper or an anonymous one from flask
-    if current_user.is_authenticated:
-        user_can_administrate = 2 in current_user.can_do
-        user_can_administrate_users = 3 in current_user.can_do
-        mru_projects = current_user.last_used_projects
     g.cookieGAOK = request.cookies.get("GAOK", "")
-    g.useradmin = user_can_administrate_users
-    g.appliadmin = user_can_administrate
+    if not current_user.is_authenticated:
+        return None
+    mru_projects = current_user.last_used_projects
+    # new admin is on - not needed anymore but keep to use old admin for this release only
+    g.appliadmin = 2 in current_user.can_do
     # TODO: A bit useless as unlogged users have no menu to use
     menu: List[Union[Tuple[str, str], Tuple[str, str, str]]] = []
     menu.append((url_for("index"), "Home"))
@@ -116,13 +114,14 @@ def before_request_security() -> Optional[ResponseReturnValue]:
         )
     else:
         menu.append(("javascript:PostDynForm('/taxo/browse/');", "Browse Taxonomy"))
-    if user_can_administrate or user_can_administrate_users:
+    if current_user.is_admin == True:
         menu.append(("", "SEP"))
-        menu.append(("/admin/", "Admin Screen"))
-        menu.append(("/Jobs/listall", "Task Manager"))
+        menu.append(("/gui/admin/", "Admin Screen"))
+        if current_user.is_app_admin == True:
+            menu.append(("/Jobs/listall", "Task Manager"))
 
     menu.append(("", "SEP"))
-    menu.append(("/change", "Change Password"))
+    menu.append(("/gui/me/profile", "Profile"))
     g.menu = menu
     from appli.gui.commontools import experimental_header
 

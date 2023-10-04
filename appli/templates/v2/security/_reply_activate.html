@@ -1,0 +1,21 @@
+{%if not partial %}
+{% extends "v2/layout.html" %}
+  {%endif%}
+  {%block body%}
+  {% if response[0]|int ==0%}
+   <div class="alert is-success">
+   {% if response|length ==3  and response[3]== True %}
+  <strong>{{_('Thank you. You will be informed by email when your account is activated.')}}</strong>
+
+  <p><a href="{{url_for("gui_index")}}">{{_('Home')}}</a></p>
+    {% else %}
+    <strong>{{response[1] if response| length >1 else _('You account is active')}}</strong>
+
+    <p><a href="{{url_for("gui_login")}}">{{_('Log in')}}</a></p>
+    {% endif%}
+  {% else %}
+   <div class="alert is-warning">
+<strong>{{_('The request to activate your account is not done.')}} </strong>
+<p>{{_('An error occurred.')}}</p>{{response[1] if response|length>1 else ''}}
+{%endif%}{{back_to_form()}}
+{%endblock%}

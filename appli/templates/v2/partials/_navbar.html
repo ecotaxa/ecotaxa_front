@@ -9,28 +9,28 @@
         </a></li>
         {% if target_proj and target_proj.projid > 0 %}
         <li>
-              <a href="/prj/{{target_proj.projid}}">
+              <a href="{{ url_for('indexPrj',PrjId=target_proj.projid)}}">
                 {{_('Annotate')}}
               </a>
             </li>
             <li>
-              <a href="/Job/Create/Prediction?projid={{target_proj.projid}}">
+              <a href="{{url_for("gui_job_create",job_type="Prediction",projid=target_proj.projid) }}">
                 {{_('Predict')}}
               </a></li>
               {% endif %}
             <li>
       <!--  <a href="/gui/job/create/FileImport?p={{target_proj.projid}}">-->
-      <a href="/Job/Create/FileImport?p={{target_proj.projid}}">
+      <a href="{{url_for("gui_job_create",job_type="FileImport", p=target_proj.projid) }}">
           {{_('Import')}}
         </a>
       </li>
     <li><div>{{_('Export')}}</div><ul aria-expanded=false><li>
-              <a href="/gui/job/create/GenExport?projid={{target_proj.projid}}">
+              <a href="{{url_for("gui_job_create",job_type="GenExport", projid=target_proj.projid)}}">
               {{_('<strong>Full</strong> export')}}
-              </a></li><li><a href="/gui/job/create/SumExport?projid={{target_proj.projid}}">
+              </a></li><li><a href="{{url_for("gui_job_create",job_type="SumExport", projid=target_proj.projid) }}">
                 {{_('<strong>Summary</strong> export')}}
                 </a></li></ul></li><li>
-          <a href="/gui/prj/edit/{{target_proj.projid}}">
+          <a href="{{url_for('gui_prj_edit',prjid=target_proj.projid)}}">
             {{_('Settings')}}
           </a>
         </li><li><div>{{_('Tools')}}</div>
@@ -43,16 +43,16 @@
         {%-endfor%}
     {%- endif%}
       <ul aria-expanded=false>
-      <li><a href="/gui/job/create/Subset?p={{target_proj.projid}}" {{disabled.value if target_proj.status=='ExploreOnly'}}>{{_('<strong>Extract</strong> Subset')}}</a></li>
-    <li><a href="/gui/prj/merge/{{target_proj.projid}}"  {{disabled.value}}>{{_('<strong>Merge</strong> another project in this project')}}</a></li>
-    <li><a href="/gui/prj/editannot/{{target_proj.projid}}"  {{disabled.value}}>{{_('<strong>Edit or erase</strong> annotations massively')}}</a></li>
-    <li><a href="/gui/prj/editdatamass/{{target_proj.projid}}"  {{disabled.value}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
-    <li><a href="/gui/prj/resettopredicted/{{target_proj.projid}}"  {{disabled.value}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
-    <li><a href="/gui/prj/purge/{{target_proj.projid}}"  {{disabled.value}}>{{_('<strong>Delete</strong> object or project')}}</a></li>
-    <li><a href="/prj/taxo_fix/{{target_proj.projid}}" {{'' if( target_proj and target_proj.status == "annotate" and (current_user in target_proj.managers or  current_user in target_proj.annotators))  else  ''}}>{{_('<strong>Fix</strong> category issues')}}</a></li>
+      <li><a href="{{url_for("gui_job_create",job_type="Subset", p =target_proj.projid) }}" {{disabled.value if target_proj.status=='ExploreOnly'}}>{{_('<strong>Extract</strong> Subset')}}</a></li>
+    <li><a href="{{url_for('gui_prj_merge', projid=target_proj.projid)}}"  {{disabled.value}}>{{_('<strong>Merge</strong> another project in this project')}}</a></li>
+    <li><a href="{{url_for('gui_prj_editannot', projid=target_proj.projid)}}"  {{disabled.value}}>{{_('<strong>Edit or erase</strong> annotations massively')}}</a></li>
+    <li><a href="{{url_for('gui_prj_edit_datamass', projid=target_proj.projid)}}"  {{disabled.value}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
+    <li><a href="{{url_for('gui_prj_reset_to_predicted',projid=target_proj.projid)}}"  {{disabled.value}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
+    <li><a href="{{url_for('gui_prj_purge',projid=target_proj.projid)}}"  {{disabled.value}}>{{_('<strong>Delete</strong> object or project')}}</a></li>
+    <li><a href="{{url_for('deprecation_management',prj_id=target_proj.projid)}}" {{'' if( target_proj and target_proj.status == "annotate" and (current_user in target_proj.managers or  current_user in target_proj.annotators))  else  ''}}>{{_('<strong>Fix</strong> category issues')}}</a></li>
       </ul>
   </li><li>
-              <a href="/gui/prj/about/{{target_proj.projid}}">
+              <a href="{{url_for('gui_prj_about',projid=target_proj.projid)}}">
                 {{_('About')}}
               </a>
             </li></ul>

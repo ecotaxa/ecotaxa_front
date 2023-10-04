@@ -1,0 +1,10 @@
+{%if not partial %}
+{% extends "v2/layout.html" %}
+  {%endif%}
+  {%- macro back_to_form()-%}
+  <div class="mx-auto w-auto font-bold"><a href="javascript:window.location.reload()">{{_('Back')}}</a></div></div>
+  {%-endmacro%}
+  {%block body%}{%include('/v2/security/_reply_'+type+'.html')%}
+
+<div class="text-center my-2"><a href="/gui/" class="p-1 rounded-sm font-normal">{{_('Back to home page')}}</a></div>
+{%endblock%}

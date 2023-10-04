@@ -5,5 +5,5 @@
 {% if projid %}
 <a href='/prj/{{projid}}'>{{_('Back to project')}}</a>
 {%endif %}
-<a href="/gui/jobs/listall">Back to Task List</a>
+<a href="{{url_for("gui_list_jobs")}}">Back to Task List</a>
 {% endblock %}

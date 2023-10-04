@@ -35,11 +35,11 @@
   <form method="post" class="js js-submit js-tabs " data-event="click" data-selector="[name='what'][data-target]" data-toggle=true data-togglewhat="#what" data-toggledisable=true enctype=multipart/form-data>
     <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" type="text" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
-  <fieldset class="w-full md:w-1/2 tab mb-0 pb-0"><legend class="text-center tab-control" data-what="TSV">{{_("options")}} </legend>
+  <fieldset class="w-full md:w-1/2 tab mb-0 pb-0"><legend class="text-center tab-control" data-what="TSV">{{_("Custom")}} </legend>
     <div class="tab-content pt-2" id="TSV"><div class="form-box">{{select_export_options(formatoptions.data.TSV)}}</div>
     <div class="form-box">{{select_export_images(formatoptions.fields.TSV.exportimages)}}</div>
     </div></fieldset><fieldset class="w-full md:w-1/2 tab my-0 py-0">
-  <legend class="text-center tab-control"  data-what="BAK" >{{_("Options for Backup")}} </legend><div class="tab-content pt-2" id="BAK">
+  <legend class="text-center tab-control"  data-what="BAK" >{{_("Backup")}} </legend><div class="tab-content pt-2" id="BAK">
   <div class="form-box">{{select_export_options(formatoptions.data.BAK)}}</div>
     <div class="form-box">{{select_export_images(formatoptions.fields.BAK.exportimages)}}
       </div></div></fieldset><fieldset class="w-full -mt-4 pt-0 block">
@@ -52,7 +52,7 @@
             <input type="hidden" name="starttask" value="Y">
             <input type="hidden" name="what" id="what" value="TSV">
       <div class="form-box mb-8 w-auto float-left clear-right">
-            <a href ="/prj/{{target_proj.projid}}" class="button is-secondary inverse">{{_('Cancel')}}</a>  <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>
+          <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>  <a href ="/prj/{{target_proj.projid}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
             </div>
         </form>
         </div>

@@ -1,0 +1,53 @@
+  {% from "./v2/macros/macros.html" import inputdict %}
+  {% from "./v2/macros/_captcha.html" import captcha, scriptcaptcha%}
+  {% from "./v2/users/_profile_macro.html" import promail_required %}
+  <form method="post" action="" id="formu" autocomplete="off" class="js js-submit relative mt-12 md:mt-8"  {{ 'data-captcha="g-recaptcha-response" data-captchakey='+reCaptchaID if  createaccount == True and not incadmin }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false"">
+   <input type="hidden" name="crsf_token" value={{ crsf_token }}>
+   {% if token %}<input type="hidden" name="token" value={{ token }}>
+   {% endif%}
+
+      <div class="fieldset-wrapper">
+      <fieldset class="w-full  mx-auto">
+        <legend class="tab-control">{{_('Please provide valid information')}} {{_('to reactivate your account') if user.action and  user.action=='update' else _('to complete the creation of your account') }}</legend>
+        <input type="hidden" name="reason" id="reason" value="{{user.reason}}">
+        {%set reason = user.reason if user and user.reason else None%}
+          {% if 'name' == reason or reason=='all'%}
+            <div class="flex flex-row">
+                <em class="block">{{_('Please enter a full firstname and lastname')}}</em>
+            {% for key,label  in {'first':_('First name'),'last':_('Last name')}.items()%}
+            <div class="form-box">
+            <label for="name">{{label}}</label>
+            <input type="text" id="{{key}}name" name="{{key}}name" class="form-input" value="{{ user[key+'name']}}" required data-required="{{_('this field is required')}}" data-new="{{_('new')}}" placeholder="{{label}}"></div>
+            {%endfor%}</div>
+            {%- endif%}
+          {%if 'email'==reason or reason=='all' -%}
+          <div class="form-box">
+            <label for="email">{{_('Email')}}</label>
+            <input type="email" id="email" name="email" class="form-input" value=""   required data-required="{{_('an email is required')}}" placeholder="{{_('Email')}}">{{promail_required('danger','text-sm')}}
+            {%if (user and user.email) %}
+            <input type="hidden" name="currentemail" value="{{user.email}}">
+            {%-endif%}</div>
+            {%-endif-%}
+            {% if 'organisation'== reason or reason=='all' -%}
+             <div class="form-box">  <em class="block">{{_('Please provide a valid organisation name')}}</em><label for="">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True,options=organisations)}}</div>
+              {%- endif %}
+              {% if 'creationreason'== reason or reason=='all' -%}
+              <div class="form-box">
+                <em class="block">{{_('Please detail your answer')}}</em>
+            <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}}<i data-for="help_comments" data-request="help"></i></label>
+            <textarea id="usercreationreason" name="usercreationreason" class="form-textarea" placeholder="{{_('A few sentences describing how in which context you will use EcoTaxa')}}" rows="4">{{ user.usercreationreason|default('',true) }}</textarea>
+
+          </div>{%-endif%}
+            <div class="form-box">
+            <label for="password">{{_('Your password')}}</label>
+            <input type="password" id="password" name="password" class="form-input" minlength="6" maxlength="20" required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">
+          </div>
+          {% if not user.action or user.action!='update'-%}
+          {% include('v2/users/_acceptconditions.html') with context-%}
+          {%endif-%}
+        </fieldset></div>
+      <fieldset>
+<div class="w-full text-left mb-8"> <input type="hidden" name="save" value="Y">
+  <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{back}}" class="button is-secondary inverse" title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a>
+</div></fieldset>{%if  createaccount == True and not incadmin %}{{captcha(reCaptchaID)}}  {{scriptcaptcha(reCaptchaID)}}{%endif%}
+</form>

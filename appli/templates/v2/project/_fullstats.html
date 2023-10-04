@@ -16,7 +16,7 @@
     {% set total=  taxastats|sum(attribute='nb_validated') +   taxastats|sum(attribute='nb_dubious') +  taxastats|sum(attribute='nb_predicted') +  taxastats|sum(attribute='nb_unclassified') %}
     {%- for type in types -%}
       {% set percent = ((taxastats|sum(attribute='nb_'+type)/total)*100)|round(1) if total>0 else 0 %}
-      <th  class="number"><div class="progress"><span class="progress-{{type}}"  style="width:{{ percent }}%">{{ taxastats|sum(attribute='nb_'+type)}}</span></div></th>
+      <th  data-type="number"><div class="progress"><span class="progress-{{type}}"  style="width:{{ percent }}%">{{ taxastats|sum(attribute='nb_'+type)}}</span></div></th>
     {%-endfor-%}
   </tr></tfoot>
 </table>
@@ -78,7 +78,7 @@
     <span class="stat-label  tab-control">{{_('Users')}} <i data-for="help_proj_stats_users" data-request="help"></i></span>
     <div class="stat-info flex flex-row flex-wrap mb-4 tab-content">
       <div id="stats_{{target_proj.projid}}_users" class="js js-datatable block w-full max-tabstat-h" data-instanceid="users" data-sortable=true data-export="tsv" data-expand="{{_('show all rows')}}" data-shrink="{{_('hide rows')}}" {{'data-searchable=true' if annotators is iterable and annotators|length > 20 }}>
-        <table><thead><tr><th scope="col">{{_('User')}}</th><th scope="col">{{_('Privilege')}}</th><th scope="col">{{_('number of actions')}}</th><th scope="col">{{_('last annotation date')}}</th></tr></thead>
+        <table><thead><tr><th scope="col">{{_('User')}}</th><th scope="col">{{_('Privilege')}}</th><th  data-type="number" scope="col">{{_('number of actions')}}</th><th  data-type="number" scope="col">{{_('last annotation date')}}</th></tr></thead>
           <tbody>
  {% for annotator in annotators %}
  <tr><th class="font-normal" scope="row">{{ annotator.name }}</th><td>{{get_privilege(annotator.id)}}</td><td class="number">{{ annotator.nb_actions }}</td><td class="number">{{ annotator.last_annot if annotator.last_annot != None else '' }}</td></tr>

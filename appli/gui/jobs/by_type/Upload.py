@@ -66,12 +66,8 @@ class UploadJob(Job):
                 dirlist = api.list_user_files("ecotaxa_import")
             except ApiException as ae:
                 if ae.status in (401, 403):
-                    raise ApiException(
-                        status=ae.status,
-                        reason=py_messages["dirlist"]["nopermission"],
-                    )
-                else:
-                    raise
+                    ae.reason = py_messages["dirlist"]["nopermission"]
+
         from appli.gui.commontools import todict
 
         dirlist = todict(dirlist)

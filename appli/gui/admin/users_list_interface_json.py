@@ -1,5 +1,6 @@
 # list : full users list table def - admin
 from flask_babel import _
+from flask import url_for
 
 
 def user_table_columns(selection: str = "list") -> list:
@@ -9,7 +10,11 @@ def user_table_columns(selection: str = "list") -> list:
                 "select": "controls",
                 "field": "id",
                 "actions": {
-                    "edit": {"link": "edit", "label": _("edit"), "type": "button"}
+                    "edit": {
+                        "link": url_for("gui_user_edit", usrid=-1),
+                        "label": _("edit"),
+                        "type": "button",
+                    }
                 },
             },
             "id": {
@@ -36,11 +41,11 @@ def user_table_columns(selection: str = "list") -> list:
                 "label": _("Country"),
             },
             "can_do": {"label": _("Auth"), "hidden": "true"},
-            "active": {
+            "mail_status": {"label": _("@Status")},
+            "status": {
                 "label": _("Active"),
-                "format": "check",
                 "toggle": {
-                    "link": "activate",
+                    "link": url_for("gui_user_activate", usrid=-1, token=None),
                     "labels": {
                         "on": _("click to activate"),
                         "off": _("click to desactivate"),

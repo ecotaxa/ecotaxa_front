@@ -19,26 +19,26 @@ from appli import app, backend_url
 # noinspection HttpUrlsUsage
 
 
-@app.route('/api/<path:path>', methods=['GET', 'POST', 'DELETE', 'PUT'])
+@app.route("/api/<path:path>", methods=["GET", "POST", "DELETE", "PUT"])
 def proxy_request(path):
     start = time.time()
     # Prepare request data
     method = request.method
-    url = f'/api/{path}'
-    body = request.get_data()  # Copy body, e.g. json params
+    url = f"/api/{path}"
+    body = request.get_data()
     headers = _copy_headers_and_session(request.headers)
-    if method == 'POST':
+    if method == "POST":
         params = request.args  # re-encode URL params if any
         if path == "login":
             # Proxy the login which is here and not in backend yet
             # TODO
             pass
-    elif method == 'GET':
+    elif method == "GET":
         # From URL
         params = request.values  # join of request.args and request.form
-    elif method == 'DELETE':
+    elif method == "DELETE":
         params = request.args
-    elif method == 'PUT':
+    elif method == "PUT":
         params = request.args
     else:
         return "Not implemented"
@@ -46,6 +46,7 @@ def proxy_request(path):
     req = HTTPConnection(host=backend_url[7:])
     if params:
         url += "?" + urlencode(params)
+
     req.request(method=method, url=url, body=body, headers=headers)
     rsp: HTTPResponse = req.getresponse()
     app.logger.debug("API call duration: %0.2fms", ((time.time() - start) * 1000))
@@ -56,33 +57,38 @@ def proxy_request(path):
     app.logger.debug("Chunked: %s", is_chunked)
     _piggyback_response(rsp, is_chunked)
     # Sort of stream the response
-    response = Response(wrap_file({}, rsp, 1024), rsp.status, rsp_headers, direct_passthrough=True)
+    response = Response(
+        wrap_file({}, rsp, 1024), rsp.status, rsp_headers, direct_passthrough=True
+    )
     app.logger.debug("API relay duration: %0.2fms", ((time.time() - start) * 1000))
     return response
 
 
 def _copy_headers_and_session(req_headers):
-    """ Copy incoming headers into relayed request """
+    """Copy incoming headers into relayed request"""
     # Clone headers as they are immutable
     ret = {name: value for (name, value) in req_headers.items()}
     # If there is a session cookie then transform it into a security bearer,
     # to authenticate GETs from browsers also connected to main site.
-    session_cookie = request.cookies.get('session')
+    session_cookie = request.cookies.get("session")
     if session_cookie is not None:
         ret["Authorization"] = "Bearer " + session_cookie
     return ret
 
 
 def _copy_back_headers(response: HTTPResponse):
-    """ Copy response headers into relayed response """
+    """Copy response headers into relayed response"""
     excluded_headers = ()  # ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    rsp_headers = [(name.lower(), value.lower()) for (name, value) in response.getheaders()
-                   if name.lower() not in excluded_headers]
+    rsp_headers = [
+        (name.lower(), value.lower())
+        for (name, value) in response.getheaders()
+        if name.lower() not in excluded_headers
+    ]
     return rsp_headers
 
 
 def _piggyback_response(response: HTTPResponse, is_chunked: bool):
-    """ Inject below reader into the HTTPResponse """
+    """Inject below reader into the HTTPResponse"""
     response.orig_read = response.read  # type:ignore
     response.nb_bytes = 0  # type:ignore
     response.is_chunked = is_chunked  # type:ignore
@@ -90,7 +96,7 @@ def _piggyback_response(response: HTTPResponse, is_chunked: bool):
 
 
 def _my_read(self, amt):
-    """ Add into stream the chunk markers when needed """
+    """Add into stream the chunk markers when needed"""
     ret = self.orig_read(amt)
     at_eof = len(ret) == 0
     if self.is_chunked:

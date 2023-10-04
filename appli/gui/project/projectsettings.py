@@ -3,9 +3,11 @@ import os
 from pathlib import Path
 from typing import List
 
-from flask import render_template, flash, request, redirect
+from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user, login_required
+from werkzeug.exceptions import HTTPException
 from appli import app, gvp, gvpm
+from appli.gui.staticlistes import py_messages
 
 ######################################################################################################################
 from appli.utils import ApiClient
@@ -22,84 +24,41 @@ from to_back.ecotaxa_cli_py.models import (
 
 
 def get_target_prj(prjid) -> ProjectModel:
-
-    with ApiClient(ProjectsApi, request) as api:
-        try:
+    try:
+        with ApiClient(ProjectsApi, request) as api:
             target_proj: ProjectModel = api.project_query(prjid, for_managing=True)
-            return target_proj
-
-        except ApiException as ae:
-            if ae.status == 404:
-                raise ApiException(
-                    status=ae.status,
-                    reason="project404",
-                )
-
-            elif ae.status in (401, 403):
-                # description='<a href="/gui/prj/">Select another project</a>',
-                raise ApiException(
-                    status=ae.status,
-                    reason="cannoteditsettings",
-                )
-            else:
-                raise ApiException(status=ae.status)
+        return target_proj
+    except ApiException as ae:
+        if ae.status == 404:
+            flash(str(ae.status) + " - " + py_messages["project404"], "error")
+        elif ae.status in (401, 403):
+            flash(str(ae.status) + " - " + py_messages["cannoteditsettings"], "error")
+        return None
 
 
 def _possible_models():
-    try:
-        with ApiClient(MiscApi, request) as api:
-            possibles = api.query_ml_models()
+    with ApiClient(MiscApi, request) as api:
+        possibles = api.query_ml_models()
 
-        scn = {a_model.name: {"name": a_model.name} for a_model in possibles}
-        return scn
-    except ApiException as ae:
-        if ae.status == 404:
-            flash("possiblemodel404", "error")
-        elif ae.status in (401, 403):
-            flash("cannotaccessinfo", "error")
+    scn = {a_model.name: {"name": a_model.name} for a_model in possibles}
+    return scn
 
 
 def _possible_licenses():
     # TODO: Cache of course, it's constants!
-    try:
-        with ApiClient(MiscApi, request) as api:
-            possibles = api.used_constants().license_texts
-        return possibles
-    except ApiException as ae:
-
-        if ae.status == 404:
-            raise ApiException(
-                status=ae.status,
-                reason="license404",
-            )
-
-        elif ae.status in (401, 403):
-            raise ApiException(
-                status=ae.status,
-                reason="cannotaccessinfo",
-            )
-
-        else:
-            raise ApiException(status=ae.status)
+    with ApiClient(MiscApi, request) as api:
+        possibles = api.used_constants().license_texts
+    return possibles
 
 
 def _prj_users_list(ids: list) -> dict:
-    try:
-        users_list = {}
-        with ApiClient(UsersApi, request) as api:
-            all_users: List[MinUserModel] = api.search_user(by_name="%%")
-
-            for a_user in sorted(all_users, key=lambda u: u.name.strip().lower()):
-                if (str(a_user.id)) in ids:
-                    users_list[str(a_user.id)] = a_user
-        return users_list
-    except ApiException as ae:
-        if ae.status == 404:
-            raise ApiException(status=ae.status, reason="nouserslist")
-        elif ae.status in (401, 403):
-            raise ApiException(status=ae.status, reason="cannotaccessinfo")
-        else:
-            raise ApiException(status=ae.status)
+    users_list = {}
+    with ApiClient(UsersApi, request) as api:
+        all_users: List[MinUserModel] = api.search_user(by_name="%%")
+        for a_user in sorted(all_users, key=lambda u: u.name.strip().lower()):
+            if (str(a_user.id)) in ids:
+                users_list[str(a_user.id)] = a_user
+    return users_list
 
 
 def _proj_privileges(prjid):
@@ -123,7 +82,7 @@ def _cannot_do_message(autho, prjid=0):
 
 def _user_cando(autho):
     user: UserModelWithRights = current_user.api_user
-    if not user or not user.active or autho not in user.can_do:
+    if not user or not current_user.is_active or autho not in user.can_do:
         flash(_cannot_do_message(autho), "error")
         return False
     else:
@@ -132,7 +91,7 @@ def _user_cando(autho):
 
 def prj_create() -> str:
     if not _user_cando(1):
-        return render_template("v2/error.html", title="403")
+        raise HTTPException(403)
     to_save = gvp("save")
     if to_save == "Y":
         title = gvp("title")
@@ -141,16 +100,12 @@ def prj_create() -> str:
             flash("titleinstrumentrequired", "error")
             to_save = False
     if to_save:
-        try:
-            from to_back.ecotaxa_cli_py.models import CreateProjectReq
+        from to_back.ecotaxa_cli_py.models import CreateProjectReq
 
-            with ApiClient(ProjectsApi, request) as api:
-                req = CreateProjectReq(title=title, instrument=instrument)
-                rsp: int = api.create_project(req)
-                return prj_edit(rsp, new=True)
-
-        except ApiException as ae:
-            raise ApiException(status=ae.status, reason="errorprojectcreate")
+        with ApiClient(ProjectsApi, request) as api:
+            req = CreateProjectReq(title=title, instrument=instrument)
+            rsp: int = api.create_project(req)
+        return prj_edit(rsp, new=True)
     scn = _possible_models()
     possible_licenses = _possible_licenses()
     return render_template(
@@ -170,8 +125,8 @@ def prj_edit(prjid: int, new: bool = False) -> str:
     from appli.gui.staticlistes import py_messages
 
     target_proj = get_target_prj(prjid)
-    if not target_proj:
-        return
+    if target_proj is None:
+        return redirect(url_for("gui_prj"))
     # Reconstitute members list with privs
     # data structure used in both display & submit
     redir = ""
@@ -180,23 +135,21 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         previous_cnn = target_proj.cnn_network_id
         posted_contact_id = None
         # Update the project (from API call) with posted variables
-        for a_var in request.form:
-            # take inittaxo[] instead of initclassiflist - double usage
-            if a_var == "inittaxo[]":
-                posted_classif_list = gvpm(a_var)
-                # The original list is displayed using str(list), so there is a bit of formatting inside
-                posted_classif_list = ",".join(posted_classif_list).replace(" ", "")
-                target_proj.init_classif_list = [
-                    int(cl_id)
-                    for cl_id in posted_classif_list.split(",")
-                    if cl_id.isdigit()
-                ]
-            elif a_var in dir(target_proj):
-                # TODO: Big assumption here, variables need to have same name as Model fields
-                setattr(target_proj, a_var, gvp(a_var))
-            if a_var == "contact_user_id":
-                posted_contact_id = gvp(a_var)
 
+        # same names as in target_proj
+        for a_var in request.form:
+            if a_var in dir(target_proj):
+                setattr(target_proj, a_var, gvp(a_var))
+
+        # other
+        posted_classif_list = gvpm("inittaxo[]")
+        # The original list is displayed using str(list), so there is a bit of formatting inside
+        posted_classif_list = ",".join(posted_classif_list).replace(" ", "")
+        target_proj.init_classif_list = [
+            int(cl_id) for cl_id in posted_classif_list.split(",") if cl_id.isdigit()
+        ]
+
+        posted_contact_id = gvp("contact_user_id")
         target_proj.visible = gvp("visible") == "Y"
         if previous_cnn != target_proj.cnn_network_id:
             flash("scnerased", "success")
@@ -279,8 +232,8 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         # Update on back-end
 
         if do_update:
-            with ApiClient(ProjectsApi, request) as api:
-                try:
+            try:
+                with ApiClient(ProjectsApi, request) as api:
                     api.update_project(
                         project_id=target_proj.projid, project_model=target_proj
                     )
@@ -300,11 +253,9 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                     # redirect to classif
                     # redir = "/prj/" + str(target_proj.projid) + "?next=classif"
                     # return redirect(redir)
-                except ApiException as ae:
-                    raise ApiException(
-                        status=ae.status,
-                        reason="updateexception" + "%s" % ae,
-                    )
+                    return redirect(request.referrer)
+            except ApiException as ae:
+                flash(py_messages["updateexception"] + "%s" % ae.reason)
     lst = [str(tid) for tid in target_proj.init_classif_list]
     # common func used in project stats
     from appli.gui.taxonomy.tools import taxo_with_names

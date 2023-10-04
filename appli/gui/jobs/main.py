@@ -17,7 +17,7 @@ from to_back.ecotaxa_cli_py.models import JobModel, ProjectModel
 
 @app.route("/gui/job/create/<job_type>", methods=["GET", "POST"])
 @login_required
-def job_create(job_type: str):
+def gui_job_create(job_type: str):
 
     """
     Used from menu (GET) and in self-submitted POST.
@@ -38,34 +38,9 @@ def job_create(job_type: str):
         return job_cls.create_or_update()
 
 
-@app.route("/gui/jobs/my_files/", methods=["GET", "POST"])
-@login_required
-async def files_operations(subdir: str = ""):
-    """
-    Interface to direct API calls to my_file.
-    """
-
-    if request.method == "GET":
-        from appli.gui.jobs.tools import dir_list
-
-        dirlist, err = dir_list(subdir)
-        if err == None:
-            err = 0
-            from appli.gui.commontools import todict
-
-            response = todict(dirlist)
-    else:
-        from appli.gui.jobs.tools import upload_file
-
-        response, err = await upload_file(subdir, request)
-        if err == None:
-            err = 0
-    return dict({"err": err, "response": response})
-
-
 @app.route("/gui/job/show/<int:job_id>", methods=["GET", "POST"])
 @login_required
-def job_display(job_id: int):
+def gui_job_show(job_id: int):
     """
     Used from full job display (GET) and in self-submitted POST.
     """
@@ -79,7 +54,7 @@ def job_display(job_id: int):
                 flash(py_messages["notauthorized"], "error")
             elif ae.status == 404:
                 flash(py_messages["notfound"], "error")
-            return redirect(url_for("list_jobs"))
+            return redirect(url_for("gui_list_jobs"))
 
     with ApiClient(UsersApi, request) as uapi:
         owner: MinUserModel = uapi.get_user(user_id=job.owner_id)
@@ -116,7 +91,7 @@ def job_display(job_id: int):
 
 @app.route("/gui/job/question/<int:job_id>", methods=["GET", "POST"])
 @login_required
-def job_question(job_id: int):
+def gui_job_question(job_id: int):
     """
     Used for jobs needing user input during the processing.
     """
@@ -130,7 +105,7 @@ def job_question(job_id: int):
                 return ""
             elif ae.status == 404:
                 flash(py_messages["upload"]["nofile"], "error")
-                return redirect("/gui/job/listall")
+                return redirect(url_for("gui_list_jobs"))
     with ApiClient(UsersApi, request) as uapi:
         owner: MinUserModel = uapi.get_user(user_id=job.owner_id)
 
@@ -145,15 +120,15 @@ def job_question(job_id: int):
         return job_cls.treat_question_reply(job)
 
 
-@app.route("/gui/job/status/<int:jobid>", methods=["GET"])
+@app.route("/gui/job/status/<int:job_id>", methods=["GET"])
 @login_required
-def job_status(jobid: int):
+def gui_job_status(job_id: int):
     """
     Ajax entry point for getting a job status. Called only from view jobs/show.html.
     """
     try:
         with ApiClient(JobsApi, request) as api:
-            job: JobModel = api.get_job(job_id=jobid)
+            job: JobModel = api.get_job(job_id=job_id)
         job_cls = Job.find_job_class_by_name(Job, job.type)
         rep = job.to_dict()
         rep["finalaction"] = job_cls.final_action(job)
@@ -164,15 +139,15 @@ def job_status(jobid: int):
 
 @app.route("/gui/job/forcerestart/<int:job_id>", methods=["GET"])
 @login_required
-def job_force_restart(job_id: int):
+def gui_job_force_restart(job_id: int):
     with ApiClient(JobsApi, request) as api:
         api.restart_job(job_id=job_id)
-    return redirect("/gui/job/show/%d" % job_id)
+    return redirect(url_for("gui_job_show", job_id=job_id))
 
 
 @app.route("/gui/job/clean/<int:jobid>", methods=["GET"])
 @login_required
-def job_cleanup(jobid: int):
+def gui_job_cleanup(jobid: int):
     py_messages = py_get_messages("jobs")
     with ApiClient(JobsApi, request) as api:
         try:
@@ -199,7 +174,7 @@ def job_cleanup(jobid: int):
 
 @app.route("/gui/jobs/listall")
 @login_required
-def list_jobs():
+def gui_list_jobs():
 
     # TODO: Remove DB dependency
     seeall = ""

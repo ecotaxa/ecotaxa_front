@@ -114,10 +114,9 @@
 
           <div class="form-box">
             <label for="inittaxo">{{_('Definition of preset for manual sorting')}}<i data-for="help_initclassiflist" data-request="help"></i></label>
-
             <select id='inittaxo' class="js js-autocomplete taxolb" name="inittaxo[]" data-type="taxo" data-importfield="{{'taxo' if target_proj.projid else 'init_classif_list' }}" class="form-multiselect" placeholder="{{_('select a category')}}" multiple autocomplete="off">
              {% for r in predeftaxo %}
-              <option value="{{ r[0] }}" selected> {{ r[1] }}</option>
+              <option value="{{ r[0] }}" selected="selected"> {{ r[1] }}</option>
               {% endfor %}
             </select>
 
@@ -177,7 +176,7 @@
     </div>
 
 <div class="w-full text-left my-8"> <input type="hidden" name="save" value="Y">
-  <a href="/prj/{{ target_proj.projid }}" class="button is-secondary inverse" title="{{ _('Cancel, back to project ') }}">{{ _('Cancel') }}</a> <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button>
+  <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="/prj/{{ target_proj.projid }}" class="button is-secondary inverse" title="{{ _('Cancel, back to project ') }}">{{ _('Cancel') }}</a>
 </div>
 </form>
 </div>

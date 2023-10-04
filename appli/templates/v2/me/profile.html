@@ -11,7 +11,7 @@
 <div class="info inverse">{{_('Your account will be activated after validation')}}</div>
 {% elif user %}
 {% set legend =_('Profile') %}
-{% set redir ="gui/me/profile/"%}
+{% set redir = url_for("gui_me_profile")%}
 {% set incprofile = 'v2/me/_withrights.html'%}
 {% include('v2/users/_user.html')%}
 {%  else %}

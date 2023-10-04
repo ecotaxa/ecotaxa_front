@@ -1,9 +1,17 @@
 {% extends "./v2/layout.html" %}
-{% from "./v2/my_files/_macros.html" import dir_list  %}
+{% from "./v2/macros/macros.html" import form_group_radio, inputdict, modal , alertbox with context %}
 
-{%block body%}
-<div class="container mx-auto px-4 block" data-block="my_files">
-  List of my files
-  {{ dir_list(dirlist) }}
-  </div>
-  {%endblock%}
+{% block body %}
+    <div class="container mx-auto">
+      {% set data = {'file':'_help_my_files'} %}
+      {{ modal(id='help-my-files',modal_title= _("My Files"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+          <div class=" md:w-1/2">
+            <div class="form-box ">
+                {%include("./v2/my_files/_list.html") %}
+            </div>
+<div class="flex flex-col">
+
+          </div></div>
+
+    </div>
+{% endblock %}

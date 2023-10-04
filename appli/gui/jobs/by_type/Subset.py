@@ -122,7 +122,7 @@ class SubsetJob(Job):
                     limit_value=valeur,
                 )
                 rsp: SubsetRsp = api.project_subset(project_id=projid, subset_req=req)
-            return redirect("/gui/job/show/%d" % rsp.job_id)
+            return redirect(url_for("gui_job_show", job_id=rsp.job_id))
 
     # noinspection PyUnresolvedReferences
     @classmethod

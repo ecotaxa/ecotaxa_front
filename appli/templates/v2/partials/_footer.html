@@ -1,13 +1,13 @@
-<nav id="nav-footer" class="flex flex-row w-full items-center"><ul class="inline-flex w-auto mx-auto ">
-<li id="list-languages" >
+<nav id="nav-footer" class="flex flex-row w-full items-center"><ul class="inline-flex w-auto mx-auto bg-inherit">
+<li class="submenu">
   {%- set lgpref = def_language()-%}
   {%- set lgs ={"fr":"FR","en":"EN","zh":_('CN')} -%}
-      <a href="#">{{lgs[lgpref] if lgpref in lgs else lgpref}}</a>
-  <ul class="sub-menu up py-1  text-sm" aria-labelledby="languages">
+  <a href="#">{{lgs[lgpref] if lgpref in lgs else lgpref}}</a>
+  <ul class=" py-1  text-sm r bg-inherit drop-shadow mt-1 flex flex-col">
     {%- for k,lg in lgs.items() -%}
-    <li>
-      <a href="#" class="px-4 py-2 inline font-light" {{ ' selected ' if lgpref == k else '' }}>{{lg}}</a>
+    <li class="pt-1 bg-mainblue-50 order-{{loop.index if lgpref != k else lgs|length+1}} {{'underline' if lgpref==k else ''}} ">
+      <a href="#" class="px-4 py-2 inline">{{lg}}</a>
     </li>
   {%-endfor%}
   </ul>
-</li><li><a href="/gui/about">{{ _('About') }}</a></li><li><a href="/gui/privacy">{{_('Privacy')}}</a></li></ul></nav>
+</li><li><a href="{{ url_for("gui_about")}}">{{ _('About') }}</a></li><li><a href="{{ url_for("gui_privacy")}}">{{_('Privacy')}}</a></li></ul></nav>

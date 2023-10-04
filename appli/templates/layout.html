@@ -69,14 +69,14 @@
     <div class="panel-body" style="padding: 1px 5px 1px 5px;">
       <table width="100%">
         <tr>
-          <td width="140px"><a href="/"><img height="30" src="/static/logo_ecotaxa_26-4Amanada.png" style="margin: 10px 0"></a>
+          <td width="140px"><a href="/"><img height="30" src="/static/logo_ecotaxa_26.png" style="margin: 10px 0"></a>
           </td>
 
           <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
           <td align="right">{{ g.experimental |safe }}</td>
           <td align="right" width="300px">
             {% if not current_user.is_authenticated %}
-              Not logged ( <a href="{{ url_for_security('login') }}">log in / register</a> )
+              Not logged ( <a href="{{ url_for('gui_login') }}">log in / register</a> )
             {% else %}
               {% if g.jobs_summary %} <a href="/Jobs/listall">
                 {% if g.jobs_summary.Pending %}
@@ -90,7 +90,7 @@
                 {% if g.jobs_summary.Done %}
                   <span class="label label-success">Done :{{ g.jobs_summary['Done'] }}</span>{% endif %}</a><br>
               {% endif %}
-              {{ current_user.name }} (<a href="{{ url_for_security('logout') }}">log out</a>)
+              {{ current_user.name }} (<a href="{{ url_for('gui_logout') }}">log out</a>)
               {% if g.menu %}
                 <br>
                 <div class="btn-group" style="width:100px;margin-right: 10px">

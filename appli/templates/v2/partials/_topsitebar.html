@@ -10,32 +10,33 @@
 {%-endif-%}
   {%-endmacro%}
   {% macro add_search() -%}
-  <details class="modal-search no-marker js js-topsearch"><summary class="trigger"><i class="icon icon-search invert"></i></summary>
-<div class="modal"><div class="modal-content"><div class="w-full md:w-[420px] mx-auto"><label class="uppercase text-base leading-loose font-semibold mr-1">{{_("Search project by title")}}</label><select id="filter-projects" name="project" class="form-select single js js-autocomplete align-baseline" data-type="project" data-value={{target_proj.projid}}  tabindex="-1"></select></div></div></details>
+  <details class="project-search no-marker"><summary class="trigger"><i class="icon icon-search invert"></i></summary>
+<div class="w-full md:w-[420px] mx-auto  overflow-y-visible overscroll-none px-2 "><label class="uppercase text-base leading-loose font-semibold mr-1  text-stone-50">{{_("Search project by title")}}</label><select id="filter-projects" name="project" class="form-select single js js-autocomplete align-baseline" data-type="project" data-value={{target_proj.projid if target_proj else 0}}  tabindex="-1"></select></div></details>
   {%-endmacro%}
   {%macro show_breadcrumbs(all=True) -%}
      {%- set crumbs = breadcrumbs() -%}
-
-    {%- if crumbs is iterable and crumbs|length-%}
+     {%- if crumbs|length ==0 and current_user.is_authenticated %}
+     {%-set crumbs=[{"url":"prj/","text":_('Home')},{"url":url_for("gui_me_profile"),"text":"Profile"}]-%}
+     {%-endif%}
+     {%- if crumbs is iterable and crumbs|length-%}
     {%if all == False%}
     {% set crumbs = [crumbs[0]]%}
-    {% endif%}
+    {%- endif%}
   <div class="breadcrumbs {{'all' if all else 'title' }} whitespace-nowrap mr-2 ">
     {%- for crumb in crumbs -%}
-      <a href="/gui/{{ crumb.url  }}{{'/' + crumb.id if id in crumb.keys() }}">{{ crumb.text }}</a>
+      <a href="{{ crumb.url  }}{{'/' + crumb.id|string if 'id' in crumb.keys() else ''}}">{{ crumb.text }}</a>
   {%- endfor -%}
     </div>
+    {%else -%}
   {%-endif%}
   {%-endmacro%}
-  <div class="flex flex-wrap  pl-2 xl:pl-8 pr-4 w-full justify-between">
+  <div class="flex  flex-wrap pl-2 xl:pl-8 pr-4 w-full justify-between">
     <div class="w-[140px]">
-        <a href="/gui/prj"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa.png') }}" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0" /></a>
-    </div>
-    <div class="flex items-right md:flex-row  md:flex-nowrap  {{ 'mt-4 font-semibold md:mt-2 md:font-light' if not target_proj else 'mt-2 md:mt-0' }} text-secondblue-50 md:justify-center  py-2 md:py-0 order-3 md:order-2 text-sm md:text-base xl:text-lg">
-    {% if target_proj and target_proj.projid %}{{ show_breadcrumbs(False)}}<div id="top-nav-projects" class="top-title truncate ellipsis overflow-hidden break-all ml-2 ">{{maketitle()}} </div>{{add_search()}}
-    {% endif %}</div>
-    <div class="max-w-[220px] flex items-right order-2 md:order-3 ">
-    {% include 'v2/partials/_navuser.html' with context%}
-
-    </div>
+        <a href="/prj/"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa.png') }}" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0" /></a>
+    </div><div class="flex md:flex-row  md:flex-nowrap flex-grow  w-full md:w-auto {{ 'mt-4 font-semibold md:mt-2 md:font-light' if not target_proj else 'mt-2 md:mt-0' }} text-secondblue-50 md:justify-center py-2  md:py-0 order-3 md:order-2 text-sm md:text-base xl:text-lg">
+      {{ show_breadcrumbs(True)}}
+      {% if current_user.is_authenticated and  target_proj and target_proj.projid -%}
+     <div id="top-nav-projects" class="top-title truncate ellipsis overflow-hidden break-all">{{maketitle()}} </div>
+        {{add_search()}}{%endif%}</div>
+    {%- include 'v2/partials/_navuser.html' with context-%}
   </div>

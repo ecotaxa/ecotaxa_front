@@ -162,6 +162,51 @@ py_messages = dict(
         "importpriverror": _("Privileges where not imported correctly."),
     }
 )
+
+py_user = dict(
+    {
+        "invalidpassword": _("Password is not valid"),
+        "invaliddata": _("Data are not valid"),
+        "notadmin": _("Not an administrator"),
+        "notfound": _("Not found"),
+        "notauthorized": _("No authorization to modify this account"),
+        "profilesuccess": {
+            "create": _("Account created"),
+            "update": _("Account updated"),
+            "activate": _("Thank you for the confirmation. You can log in."),
+        },
+        "mailsuccess": _(
+            " A confirmation email has been sent to the email address provided. Click on the link therein to verify it."
+        ),
+        "profileerror": {
+            "create": _("Account not created"),
+            "update": _("Account not updated"),
+            "activate": _("Account not activated."),
+        },
+        "mailerror": _("Confirmation email  not sent."),
+        "errusrid": _("Wrong user id"),
+        "usernoaction": _("No action specified"),
+        "passwordrequired": _("Password required"),
+        "activationrequest": _(
+            "An activation request has been sent to the administrator. You will receive instructions to modify your email which is no longer accepted."
+        ),
+        "passwordrule": _(
+            "The password must be : - minimum length 8 - 1 or more numeric - 1 or more uppercase - 1 or more lowercase - 1 or more  "
+        ),
+        "wrongstatus": _("Status value error"),
+        "statusnotauthorized": {
+            "2": _("Please modify your personal data as requested before by email."),
+            "-1": _("Access denied "),
+            "0": _(
+                "Account waiting for validation. We will verify your informations and activate your account. You will be informed by email of any issue.",
+            ),
+            "waiting": _("Account is waiting for mail confirmation."),
+            "emailchanged": _(
+                "You have changed your email address and need to verify this new address. A confirmation email has been sent to this new address. Click on the link therein to verify it."
+            ),
+        },
+    }
+)
 py_project_rights = dict(
     {
         "managers": _("Manage"),

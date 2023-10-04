@@ -1,7 +1,9 @@
 from flask import request, render_template
 from appli.utils import ApiClient, DecodeEqualList
 from to_back.ecotaxa_cli_py.api import ProjectsApi
+from to_back.ecotaxa_cli_py import ApiException
 from appli.constants import MappableObjectColumns, MappableParentColumns
+from appli.gui.staticlistes import py_messages
 
 
 def prj_stats(prjid: int, partial: bool, params: dict) -> str:
@@ -11,7 +13,6 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
     limit = 5000
     if "limit" in params:
         limit = params["limit"]
-
     # Stats for about infos in table partial = True or full about page partial = False
     from appli.gui.project.projectsettings import get_target_prj
 
@@ -28,7 +29,6 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
     from appli.gui.project.projects_list_interface_json import render_stat_proj
 
     statproj = render_stat_proj(prj, partial)
-
     with ApiClient(ProjectsApi, request) as api:
         taxo_stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(
             ids=str(prjid), taxa_ids=req_taxa
@@ -42,7 +42,6 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
                 taxastats = taxo_stats[0]
                 used_taxa.extend([str(t) for t in taxastats.used_taxa])
                 taxastats = [taxastats.to_dict()]
-
         from appli.gui.taxonomy.tools import taxo_with_names, taxo_with_lineage
         from markupsafe import escape
 
@@ -65,7 +64,6 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
                 ProjectUserStatsModel
             ] = api.project_set_get_user_stats(ids=str(prjid))
         if isinstance(annotators_stats, Iterable) and len(annotators_stats) > 0:
-
             for r in annotators_stats[0].annotators:
                 f = list(
                     filter(
@@ -79,7 +77,6 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
                 else:
                     nb_actions = 0
                     last_annot = None
-
                 annotators.append(
                     dict(
                         {
@@ -105,7 +102,6 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
                             }
                         )
                     )
-
     # translations
     from appli.gui.staticlistes import (
         py_project_status,
@@ -139,7 +135,6 @@ def prj_samples_stats(prjid: int, partial: bool, format: str = "json") -> str:
             project_ids=prjid, id_pattern=""
         )
     sample_ids = ",".join(list([str(sample.sampleid) for sample in samples]))
-
     with ApiClient(SamplesApi, request) as api:
         samplestats: List[SampleModel] = api.sample_set_get_stats(sample_ids=sample_ids)
     from appli.gui.project.projects_list_interface_json import (

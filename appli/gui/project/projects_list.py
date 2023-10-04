@@ -8,9 +8,9 @@
 
 from typing import List
 
-
 from flask import session, request, render_template
 from flask_login import current_user
+from werkzeug.exceptions import HTTPException
 from appli.utils import ApiClient
 
 from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi, AuthentificationApi
@@ -119,7 +119,7 @@ def projects_list(
                 "error": True,
                 "status": 403,
                 "title": "403",
-                "message": py_messages["restrictedaccess"],
+                "message": py_messages["access403"],
             }
         )
 
@@ -131,25 +131,21 @@ def projects_list(
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
     isadmin = user and (2 in user.can_do)
-    last_used_projects = list(p.projid for p in current_user.last_used_projects)
     if typeimport != "":
         listall = False
     if typeimport == "taxo":
         prjs = _prj_import_taxo_api()
     else:
         prjs = _prjs_list_api(listall, filt, for_managing=for_managing)
-        if len(prjs) == 0 and listall == False:
-            listall = True
-            # if listall add not granted projects
-            prjs = _prjs_list_api(True, filt, for_managing=for_managing)
         now = datetime.datetime.now()
-        lastprjs = list(filter(lambda p: p["projid"] in last_used_projects, prjs))
-        # separate last_used_projects from pjs
-        if len(lastprjs):
+        # last_used_projects are put on top of list in the interface
+        last_used_projects = list(p.projid for p in current_user.last_used_projects)
+        if len(last_used_projects):
+            lastprjs = list(filter(lambda p: p["projid"] in last_used_projects, prjs))
+            # separate last_used_projects from pjs
             prjs = list(filter(lambda p: p["projid"] not in last_used_projects, prjs))
             prjs = lastprjs + prjs
         if typeimport == "":
-
             # reformat  current_user privileges with projects id list -usage in  main projects list
             rights = list_privileges()
             for k, v in rights.items():
@@ -186,10 +182,7 @@ def projects_list_page(
 
     # projects ids and rights for current_user
     if not current_user.is_authenticated:
-        return render_template(
-            "v2/error.html", title="403", message=py_messages["restrictedaccess"]
-        )
-
+        raise HTTPException(403)
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
@@ -205,17 +198,15 @@ def projects_list_page(
     # columns = project_table_columns(typeimport)
     if typeimport != "":
         listall = False
-
     if typeimport == "" and not partial:
         template = "v2/index.html"
         from appli.gui.commontools import experimental_header
 
         experimental = experimental_header()
-
     else:
         template = "v2/project/_listcontainer.html"
         experimental = ""
-    lastprjs = list([p.projid for p in current_user.last_used_projects])
+    lastprjs = [p.projid for p in user.last_used_projects]
     return render_template(
         template,
         CanCreate=CanCreate,
@@ -263,7 +254,6 @@ def _prj_import_taxo_api(prjid: int = 0, filt: dict = None) -> list:
     prj_ids = " ".join([str(a_prj["projid"]) for a_prj in prjs])
     with ApiClient(ProjectsApi, request) as api:
         stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=prj_ids)
-
     # Sort for consistency
     prjs.sort(key=lambda prj: prj["title"].strip().lower())
     # Collect id for each taxon to show

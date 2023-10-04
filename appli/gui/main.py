@@ -2,18 +2,19 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import os
-from typing import List
-from flask import request, url_for, render_template, flash, redirect
 
+from flask import request, url_for, render_template, redirect, flash
 from flask_login import current_user, login_required
 from appli import app, gvg, gvp, constants
 from appli.gui.commontools import is_partial_request
 from to_back.ecotaxa_cli_py.exceptions import ApiException
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, NotFound
 from flask_babel import _
-from appli.gui.staticlistes import py_messages
+from appli.gui.staticlistes import py_messages, py_user
 
 login_required.login_view = "gui/login"
+
+HOMEPAGE = "/prj/"
 
 
 @app.route("/gui")
@@ -29,6 +30,7 @@ def gui_index():
 
 @app.route("/gui/logout", methods=["GET", "POST"])
 @app.route("/gui/logout/", methods=["GET", "POST"])
+@login_required
 def gui_logout():
     from flask_login import logout_user
 
@@ -36,124 +38,114 @@ def gui_logout():
     return redirect(url_for("gui_login"))
 
 
-@app.route(
-    "/gui/forgotten", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
-)
-@app.route(
-    "/gui/forgotten/", defaults={"instid": None, "token": None}, methods=["GET", "POST"]
-)
-@app.route("/gui/forgotten/<instid>", defaults={"token": None}, methods=["GET", "POST"])
-@app.route("/gui/forgotten/<instid>/<token>", methods=["GET", "POST"])
-def gui_forgotten(instid=None, token=None) -> str:
-    err = None
-    email = None
-    # not finished
-    return render_template("v2/security/forgotten.html", bg=True, token=None)
-    sentmail = gvg("sentmail", None)
-    if instid == None and token == None:
-        if request.method == "POST":
-            email = gvp("request_email", None)
-            if email != None:
-                from appli.gui.users.commontools import (
-                    send_mail,
-                    reset_password_message,
-                )
-
-                msg = reset_password_message(email)
-                err = send_mail(email, msg)
-                if err == None:
-                    return redirect(url_for("gui_forgotten", sentmail=email))
-                else:
-                    flash(err, "error")
-                    return redirect(url_for("gui_forgotten"))
-    elif instid != None and token != None:
-        if request.method == "POST":
-            from appli.gui.users.commontools import reset_password
-
-            email = get_mail_from_token(token, True)
-            if email == False:
-                return redirect(url_for("gui_forgotten"))
-            pwd = gvp("request_pwd")
-            if pwd != None:
-                [redir, err] = reset_password(email, token, pwd)
-                if err == None:
-                    return redirect(url_for(redir))
-
-        elif token != None:
-            from appli.gui.users.commontools import get_mail_from_token
-
-            if get_mail_from_token(token, True) == False:
-                token = None
-
-    return render_template("v2/security/forgotten.html", bg=True, token=token)
-
-
 @app.route("/gui/login", methods=["GET", "POST"])
 @app.route("/gui/login/", methods=["GET", "POST"])
 def gui_login() -> str:
-    # if current_user.is_authenticated:
-    #    return redirect("/gui/prj")
+    if current_user.is_authenticated:
+        # return old interface projects list
+        # return redirect(url_for("gui_prj"))
+        return redirect("/prj/")
+
     if request.method == "POST":
-        from appli.gui.users.user import login_validate
+        from appli.security_on_backend import login_validate
+        from appli.gui.commontools import safe_url_redir
 
-        if login_validate():
-            next = gvp("next")
-
-            return redirect(next)
+        email = gvp("email", None)
+        password = gvp("password", None)
+        remember = gvp("remember", None)
+        if email == None or password == None:
+            flash(py_user["invaliddata"], "error")
+        else:
+            resp, redir = login_validate(email, password, (remember == "y"))
+            if resp:
+                next = gvp("next", "")
+                if next.strip() != "":
+                    next = safe_url_redir(next)
+                if next != "":
+                    return redirect(next)
+            elif redir:
+                return redirect(redir)
+            else:
+                return redirect(url_for("gui_login"))
     return render_template("v2/login.html", bg=True)
 
 
 @app.route("/gui/register", defaults={"token": None}, methods=["GET", "POST"])
 @app.route("/gui/register/", defaults={"token": None}, methods=["GET", "POST"])
 @app.route("/gui/register/<token>", methods=["GET", "POST"])
-def gui_register(instid=None, token=None) -> str:
-    # if current_user.is_authenticated:
-    # return redirect("/gui/prj")
-    err = None
-    email = None
-    sentmail = gvg("sentmail", None)
-    if token == None:
-        createaccount = False
-        if request.method == "POST":
-            # validate email
-            email = gvp("register_email")
+def gui_register(token=None) -> str:
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+    partial = is_partial_request(request)
+    if request.method == "POST":
+        from appli.gui.users.commontools import user_create, _get_value_from_token
 
-            from appli.gui.users.commontools import account_verify
-
-            err = account_verify(email)
-
-            if err == None:
-                return redirect(url_for("gui_register", sentmail=email))
+        redir = HOMEPAGE
+        resp = user_create(-1, isfrom=None)
+        email = gvp("register_email", None)
+        action = None
+        token = gvp("token", None)
+        if email is None:
+            email = gvp("email", None)
+            password = gvp("password")
+        if token is None:
+            if resp[0] == 0:
+                message = py_user["mailsuccess"]
+                redir = HOMEPAGE
+                type = "success"
             else:
-                flash(err, "error")
-                return redirect(url_for("gui_register"))
-    elif token != None:
-        createaccount = True
-        if request.method == "POST":
-            from appli.gui.users.commontools import user_create, ACCOUNT_USER_CREATE
-
-            [redir, err] = user_create(-1, isfrom=None)
-            if err == None:
-                return redirect(url_for(redir))
-
+                redir = "gui_register"
+                message = resp[1] + " " + py_user["mailerror"]
+                type = "error"
         else:
-            from appli.gui.users.commontools import account_page, ACCOUNT_USER_CREATE
 
-            return account_page(
-                action=ACCOUNT_USER_CREATE,
-                usrid=-1,
-                isfrom=None,
-                template="v2/register.html",
-                token=token,
+            if resp[0] == 0:
+                if len(resp) <= 3 or resp[3] == False:
+                    message = py_user["profilesuccess"]["create"]
+                    redir = "gui_login"
+                else:
+                    message = py_user["statusnotauthorized"]["0"]
+
+                type = "success"
+            else:
+                message = py_user["statusnotauthorized"]["0"]
+                type = "error"
+        if partial:
+            response = (resp[0], message, resp[2], resp[3])
+            return render_template(
+                "v2/security/reply.html",
+                bg=True,
+                type="register",
+                response=response,
+                partial=partial,
             )
+        else:
+            flash(message, type)
+            if redir != HOMEPAGE:
+                redir = url_for(redir)
+            return redirect(redir)
+        if token:
+            action = _get_value_from_token(token, "action")
+        else:
+            action = None
 
-    return render_template(
-        "v2/register.html",
-        bg=True,
-        sentmail=sentmail,
-        createaccount=createaccount,
-        reCaptchaID=app.config.get("RECAPTCHAID"),
-    )
+    if token is not None:
+        from appli.gui.users.commontools import account_page, ACCOUNT_USER_CREATE
+
+        return account_page(
+            action=ACCOUNT_USER_CREATE,
+            usrid=-1,
+            isfrom=None,
+            template="v2/register.html",
+            token=token,
+        )
+    else:
+        return render_template(
+            "v2/register.html",
+            bg=True,
+            token=token,
+            reCaptchaID=app.config.get("RECAPTCHAID"),
+        )
 
 
 @app.route("/gui/about/")
@@ -175,9 +167,6 @@ def gui_privacy() -> str:
 def gui_prj(listall: bool = False) -> str:
     partial = False
 
-    from appli.gui.commontools import last_taxo_refresh
-
-    last_taxo_refresh(partial)
     from appli.gui.project.projects_list import projects_list_page
 
     return projects_list_page(listall=listall, partial=partial)
@@ -192,6 +181,10 @@ def gui_prjlist() -> str:
     from appli.gui.project.projects_list import projects_list
 
     listall = gvg("listall", False)
+    if listall == "False" or not listall:
+        listall = False
+    else:
+        listall = True
     typeimport = gvg("typeimport")
     gz = gvg("gzip")
     gz = True
@@ -232,6 +225,7 @@ def gui_prj_create():
 
 
 @app.route("/gui/prj/edit/<int:prjid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
 @login_required
 def gui_prj_edit(prjid):
     from appli.gui.project.projectsettings import prj_edit
@@ -245,27 +239,27 @@ def gui_prj_all():
     return gui_prj(listall=True)
 
 
-@app.route("/gui/prj/about/<int:prjid>")
+@app.route("/gui/prj/about/<int:projid>")
 @login_required
-def gui_prj_about(prjid):
+def gui_prj_about(projid):
     from appli.gui.project.project_stats import prj_stats
 
     params = dict({"limit": "5000"})
     partial = is_partial_request(request)
 
-    return prj_stats(prjid, partial=partial, params=params)
+    return prj_stats(projid, partial=partial, params=params)
 
 
-@app.route("/gui/prjsamplestats/<int:prjid>")
+@app.route("/gui/prjsamplestats/<int:projid>")
 @login_required
-def gui_prj_aboutsamples(prjid):
+def gui_prj_aboutsamples(projid):
     from flask import make_response
     import json
     from appli.gui.project.project_stats import prj_samples_stats
 
     partial = is_partial_request(request)
     format = gvg("format", "json")
-    content = prj_samples_stats(prjid, partial=partial, format=format)
+    content = prj_samples_stats(projid, partial=partial, format=format)
     if format == "json":
         content = json.dumps(content, separators=[",", ":"]).encode("utf-8")
         encoding = "utf-8"
@@ -279,6 +273,11 @@ def gui_prj_aboutsamples(prjid):
 
 
 # help
+@app.route("/gui/help/register")
+def gui_help_nologin():
+    return render_template(".v2/help/help_register.html")
+
+
 @app.route("/gui/help/<path:filename>")
 @login_required
 def gui_help(filename):
@@ -290,11 +289,7 @@ def gui_help(filename):
         return render_template(".v2/help.html", filename=filename)
     filename = "/v2/help/" + filename + ".html"
     if not exists("appli/templates" + filename):
-        return render_template(
-            "./v2/partials/_error.html",
-            title="404",
-            message=py_messages["page404"] + filename,
-        )
+        raise NotFound(description=py_messages["page404"] + filename)
     partial = is_partial_request(request)
     return render_template("." + filename, partial=partial)
 
@@ -302,35 +297,26 @@ def gui_help(filename):
 # alert boxes xhr
 @app.route("/gui/alertbox", methods=["GET", "POST"])
 def gui_alert():
-    inverse = gvp("inverse")
-    dismissible = gvp("dismissible")
+    inverse = gvp("inverse", False)
+    dismissible = gvp("dismissible", False)
     codemessage = gvp("codemessage")
-    is_safe = gvp("is_safe")
-    if is_safe:
-        is_safe = True
-    else:
-        is_safe = False
-    if inverse == "true":
-        inverse = True
-    else:
-        inverse = False
-    if dismissible == "true":
-        dismissible = True
-    else:
-        dismissible = False
+    is_safe = gvp("is_safe", False)
+    is_safe = bool(is_safe)
+    inverse = bool(inverse)
+    dismissible = bool(dismissible)
     message = gvp("message")
+    type = gvp("type")
+    title = gvp("title")
+    from appli.gui.commontools import alert_box
 
-    return render_template(
-        "v2/partials/_alertbox.html",
-        type=gvp("type"),
-        title=gvp("title"),
-        message=message,
-        codemessage=codemessage,
+    return alert_box(
+        type=type,
+        title=title,
         inverse=inverse,
         dismissible=dismissible,
+        codemessage=str(codemessage),
         is_safe=is_safe,
-        extra=gvp("extra"),
-        partial=True,
+        message=message,
     )
 
 
@@ -342,17 +328,15 @@ def gui_other(filename):
     partial = is_partial_request(request)
     filename = escape(filename)
     filename = filename.replace("/", "")
-    if os.path.isfile("v2/" + filename):
+    try:
         return render_template("v2/" + filename)
-    elif os.path.isfile("v2/_" + filename):
-        return render_template("v2/_" + filename)
-    else:
-        return render_template(
-            "v2/error.html",
-            title="404",
-            message=py_messages["page404"],
-            partial=partial,
-        )
+    except Exception as e:
+        if partial:
+            template = "_error"
+        else:
+            template = "error"
+
+        return render_template("v2/" + template + ".html", error=404, message="page404")
 
 
 @app.route("/gui/jobssummary/", methods=["GET", "POST"])
@@ -370,7 +354,6 @@ def gui_stream():
 def gui_setmsgcookie():
     cookiename = gvp("name")
     cookievalue = gvp("value")
-    print(cookiename)
     from flask import make_response
 
     response = make_response("")
@@ -388,6 +371,7 @@ def gui_graphicpalette():
 import appli.gui.project.main
 import appli.gui.jobs.main
 import appli.gui.me.main
+import appli.gui.files.main
 import appli.gui.admin.main
 
 # utility display functions for jinja template
@@ -452,15 +436,23 @@ def utility_processor():
 
         return breadcrumbs()
 
-    def get_referer() -> str:
-        referer = gvp("next", request.referrer)
-        if referer == None or url_for("gui_login") in referer:
-            referer = url_for("gui_index")
-        return referer
+    def get_referrer() -> str:
+        import functools
+
+        GO_INDEX = ["gui_login", "gui_forgotten", "gui_register"]
+        referrer = gvp("next", request.referrer)
+        goindex = functools.reduce(lambda a, b: a or referrer == url_for(b), GO_INDEX)
+        if referrer == None or goindex:
+            # referrer = url_for("gui_index")
+            referer = HOMEPAGE
+        return referrer
 
     def global_messages() -> str:
         if not current_user.is_authenticated:
             return ""
+        from appli.gui.commontools import last_taxo_refresh
+
+        last_taxo_refresh()
         cookiename = "ecotaxa_userinfo"
 
         import json, time
@@ -487,6 +479,11 @@ def utility_processor():
         else:
             return ""
 
+    def api_password_regexp():
+        from appli.gui.users.commontools import api_password_regexp
+
+        return api_password_regexp()
+
     return dict(
         message_translation=message_translation,
         unique_id=unique_id,
@@ -494,42 +491,7 @@ def utility_processor():
         g_status=g_status,
         def_language=def_language,
         cap_words=cap_words,
-        get_referer=get_referer,
+        get_referrer=get_referrer,
         global_messages=global_messages,
+        api_password_regexp=api_password_regexp,
     )
-
-
-@app.errorhandler(ApiException)
-def handle_exception(e):
-    # pass through HTTP errors
-
-    if isinstance(e, HTTPException):
-        return e
-    # non-HTTP exceptions only
-    partial = is_partial_request(request)
-    return (
-        render_template(
-            "/v2/error.html",
-            title=e.status,
-            partial=partial,
-            message=e.reason,
-            is_safe=True,
-        ),
-        e.status,
-    )
-
-
-@app.errorhandler(404)
-def not_found(e):
-    return handle_exception(e)
-
-
-@app.errorhandler(403)
-def forbidden(e):
-    return handle_exception(e)
-
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    app.logger.exception(e)
-    return handle_exception(e)

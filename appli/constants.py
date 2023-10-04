@@ -1,5 +1,4 @@
 from typing import Final
-
 from collections import OrderedDict
 
 ClassifQual: Final = {"P": "predicted", "D": "dubious", "V": "validated"}
@@ -36,14 +35,10 @@ TaxoStatus: Final = {"A": "Active", "D": "Deprecated", "N": "Not reviewed"}
 
 AdministratorLabel: Final = "Application Administrator"
 UserAdministratorLabel: Final = "Users Administrator"
-# ProjectCreatorLabel: Final = "Project creator"
-# TaxonCreatorLabel: Final = "Taxon Creator"
 
 API_GLOBAL_ROLES: Final = {
-    # 1: ProjectCreatorLabel,
     2: AdministratorLabel,
     3: UserAdministratorLabel,
-    # 4: TaxonCreatorLabel,
 }
 
 # Override default home page with some external (to app) files

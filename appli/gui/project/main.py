@@ -1,6 +1,7 @@
 from typing import List
 from flask import flash, request, render_template
-from flask_login import current_user, login_required
+from flask_login import current_user, login_required, fresh_login_required
+from werkzeug.exceptions import HTTPException, NotFound
 from appli import app, gvp, gvg
 from appli.project import sharedfilter
 from appli.utils import ApiClient
@@ -12,8 +13,9 @@ from appli.gui.commontools import is_partial_request, py_get_messages
 
 
 @app.route("/gui/prj/purge/<int:projid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
 @login_required
-def prj_purge(projid):
+def gui_prj_purge(projid):
     backto = False
     objlist = []
     deleted = None
@@ -27,9 +29,10 @@ def prj_purge(projid):
             target_proj: ProjectModel = api.project_query(projid, for_managing=True)
         except ApiException as ae:
             if ae.status == 404:
-                return render_template("./v2/error.html", message="project404")
+                raise NotFound(404, description=py_messages["project404"])
             elif ae.status in (401, 403):
                 flash(py_messages["cannotpurgeprj"], "error")
+                raise HTTPException(ae.status)
 
     if gvp("objlist") == "":
         # Extract filter values
@@ -96,7 +99,7 @@ def prj_purge(projid):
 
 @app.route("/gui/prjsforprediction/<int:projid>", methods=["GET", "POST"])
 @login_required
-def prj_list_for_prediction(projid) -> list:
+def gui_prj_list_for_prediction(projid) -> list:
     from appli.gui.jobs.prediction_lists import projects_for_prediction_list
 
     prjs = projects_for_prediction_list(projid)
@@ -154,8 +157,9 @@ def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list
 
 
 @app.route("/gui/prj/merge/<int:projid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
 @login_required
-def prj_merge(projid):
+def gui_prj_merge(projid):
     # Security & sanity checks
     py_messages = py_get_messages("project")
     with ApiClient(ProjectsApi, request) as api:
@@ -236,6 +240,7 @@ def prj_merge(projid):
 ######################################################################################################################
 # noinspection PyPep8Naming,SpellCheckingInspection
 @app.route("/gui/prj/editannot/<int:projid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
 @login_required
 def gui_prj_editannot(projid):
     from to_back.ecotaxa_cli_py.api import UsersApi
@@ -431,8 +436,9 @@ def _gui_digest_changes(api_result):
 
 ######################################################################################################################
 @app.route("/gui/prj/resettopredicted/<int:projid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
 @login_required
-def prj_reset_to_predicted(projid):
+def gui_prj_reset_to_predicted(projid):
     # noinspection PyStatementEffect
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
     error = None
@@ -523,6 +529,7 @@ def _get_field_list(prj_model: ProjectModel) -> list:
 
 
 @app.route("/gui/prj/editdatamass/<int:projid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
 @login_required
 def gui_prj_edit_datamass(projid):
     # noinspection PyStatementEffect
@@ -653,6 +660,7 @@ def gui_prj_edit_datamass(projid):
 
 ######################################################################################################################
 @app.route("/gui/prj/taxofix/<int:projid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
 def gui_deprecation_management(projid):
     from to_back.ecotaxa_cli_py.api import ObjectsApi, TaxonomyTreeApi
     from to_back.ecotaxa_cli_py.models import TaxonModel, ProjectTaxoStatsModel

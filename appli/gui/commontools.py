@@ -2,16 +2,21 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from typing import List, Dict, Optional
-from flask import render_template, request, redirect, flash, session, url_for
+from flask import render_template, request, redirect, flash, session, url_for, Markup
 from flask_login import current_user
 from appli.constants import GUI_PATH
 
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.models import (
     ProjectModel,
     UserModelWithRights,
     TaxonomyTreeStatus,
+)
+from appli.constants import (
+    AdministratorLabel,
+    UserAdministratorLabel,
 )
 
 
@@ -101,12 +106,14 @@ def last_taxo_refresh(partial: bool = False):
         flash("taxosynchro", "warning")
 
 
-def breadcrumbs() -> list:
+def breadcrumbs(default=None) -> list:
     from appli.gui.staticlistes import apptree
 
     crumbs = request.path.split("/")
     if "gui" in crumbs:
         crumbs.remove("gui")
+    if default != None:
+        crumbs.append(default)
     crumblist = []
     parent = ""
     url = []
@@ -115,7 +122,7 @@ def breadcrumbs() -> list:
             crumbvalue = breadcrumb(apptree, crumb, parent)
             url.append(crumb)
             if crumbvalue != None:
-                crumbdict = dict({"url": "/".join(url), "id": next, "text": crumbvalue})
+                crumbdict = dict({"url": "/gui/" + "/".join(url), "text": crumbvalue})
                 if len(crumbs) == i + 2:
                     if isinstance(crumbs[i + 1], int) or crumbs[i + 1].isdigit():
                         crumbdict.update(dict({"id": crumbs[i + 1]}))
@@ -177,9 +184,11 @@ def todict(obj):
 # messages
 
 
-def py_get_messages(type):
+def py_get_messages(type=None):
     from appli.gui.staticlistes import py_messages
 
+    if type == None:
+        return {**py_messages}
     if type == "project":
         from appli.gui.project.staticlistes import py_messages as py_messages_type
     elif type == "jobs":
@@ -195,6 +204,116 @@ def is_partial_request(request):
     )
 
 
+# alertbox
+def aler_box(
+    type: str,
+    title: str,
+    codemessage,
+    message: str,
+    dismissible: bool = False,
+    inverse: bool = False,
+    is_safe: bool = False,
+):
+    return render_template(
+        "v2/partials/_alertbox.html",
+        type=type,
+        title=title,
+        message=message,
+        codemessage=codemessage,
+        inverse=inverse,
+        dismissible=dismissible,
+        is_safe=is_safe,
+        extra=gvp("extra"),
+        partial=True,
+    )
+
+
+def alert_box(
+    type: str,
+    title: str,
+    codemessage: str,
+    message: str,
+    dismissible: bool = False,
+    inverse: bool = False,
+    is_safe: bool = False,
+    extra: str = None,
+):
+    return render_template(
+        "v2/partials/_alertbox.html",
+        type=type,
+        title=title,
+        message=message,
+        codemessage=codemessage,
+        inverse=inverse,
+        dismissible=dismissible,
+        is_safe=is_safe,
+        extra=extra,
+        partial=True,
+    )
+
+
+# new_ui_error
+def new_ui_error(e, is_exception: bool = False, trace: str = None):
+    new_ui = request.path.find("/gui/") >= 0
+    description = []
+    code = 500
+    if is_exception or not hasattr(e, "code"):
+        if trace:
+            description.append(str(trace))
+    else:
+        code = e.code
+    partial = is_partial_request(request)
+    if isinstance(e, ApiException):
+        exception = format_exception(e)
+        code = exception[2]
+        if code != 500:
+            if partial:
+                return alert_box(
+                    type="error",
+                    title=_("error"),
+                    dismissible=True,
+                    codemessage=str(code),
+                    message=exception[1],
+                )
+            elif code not in [403, 401]:
+                flash(exception[1], "error")
+                return redirect(request.referrer)
+        description.append(exception[1])
+
+    else:
+        py_messages = py_get_messages()
+        if hasattr(e, "name") and e.name != None:
+            description.append(str(e.name))
+        if hasattr(e, "description") and e.description != None:
+            if e.description.find("v2/help/_") <= 0:
+                description.append(str(e.description))
+            else:
+                description.append(py_messages["page404"])
+        if hasattr(e, "response") and e.response != None:
+            description.append(str(e.response))
+        if code == 403 or code == 401:
+            message = py_messages["access403"]
+            description.append(message)
+    if not new_ui and code in [404, 403, 500]:
+        return (
+            render_template(
+                "errors/" + str(code) + ".html", trace=Markup("<br>".join(description))
+            ),
+            code,
+        )
+    else:
+        return (
+            render_template(
+                "/v2/error.html",
+                title=code,
+                partial=partial,
+                message=Markup("<br>".join(description)),
+                is_safe=True,
+            ),
+            code,
+        )
+
+
 #
 # crsf_token
 
@@ -205,3 +324,52 @@ def crsf_token():
 
     alphabet = string.ascii_letters + string.digits
     return "".join(secrets.choice(alphabet) for i in range(45))
+
+
+# format_exception
+
+
+def format_exception(ae, partial=True):
+    if hasattr(ae, "status"):
+        msg = str(ae.status)
+    else:
+        msg = ""
+    if hasattr(ae, "body"):
+        import json
+
+        detail = ""
+        if isinstance(ae.body, str):
+            if ae.status == 500:
+                body = ae.body
+            else:
+                body = json.loads(ae.body)
+                if "detail" in body:
+                    detail = str(body["detail"])
+        elif isinstance(ae.body, object):
+            detail = json.dumps(ae.body)
+        msg = msg + " - " + detail
+    if partial:
+        return (1, msg, ae.status)
+    else:
+        return render_template(
+            "v2/error.html", error=ae.status, message=msg, partial=partial
+        )
+
+
+def safe_url_redir(url: str) -> str:
+    """
+    remove domain from redirect
+    """
+    if url is not None:
+        url = url.strip()
+    if not url:
+        return False
+    from urllib.parse import urlparse
+
+    redir = urlparse(url)
+    url = (
+        redir.path
+        + str("?" + redir.query if redir.query != "" else "")
+        + str("#" + redir.fragment if redir.fragment != "" else "")
+    )
+    return url
