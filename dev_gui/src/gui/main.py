@@ -58,13 +58,13 @@ def gui_login() -> str:
         else:
             resp, redir = login_validate(email, password, (remember == "y"))
             if resp:
-                next = gvp("next", "")
-                if next.strip() != "":
-                    next = safe_url_redir(next)
-                if next != "":
-                    return redirect(next)
-            elif redir:
-                return redirect(redir)
+                next = gvp("next", None)
+                if next != None:
+                    if next.strip() != "":
+                        next = safe_url_redir(next)
+                        return redirect(next)
+                if redir:
+                    return redirect(redir)
             else:
                 return redirect(url_for("gui_login"))
     return render_template("v2/login.html", bg=True)

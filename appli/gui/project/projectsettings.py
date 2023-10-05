@@ -24,16 +24,9 @@ from to_back.ecotaxa_cli_py.models import (
 
 
 def get_target_prj(prjid) -> ProjectModel:
-    try:
-        with ApiClient(ProjectsApi, request) as api:
-            target_proj: ProjectModel = api.project_query(prjid, for_managing=True)
-        return target_proj
-    except ApiException as ae:
-        if ae.status == 404:
-            flash(str(ae.status) + " - " + py_messages["project404"], "error")
-        elif ae.status in (401, 403):
-            flash(str(ae.status) + " - " + py_messages["cannoteditsettings"], "error")
-        return None
+    with ApiClient(ProjectsApi, request) as api:
+        target_proj: ProjectModel = api.project_query(prjid, for_managing=True)
+    return target_proj
 
 
 def _possible_models():
