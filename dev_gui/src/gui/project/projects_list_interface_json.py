@@ -108,7 +108,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
             ),
             "fields": dict(
                 {
-                    "popoverfieldlist": {"label": "presets", "format": "text"},
+                    "classiffieldlist": {"label": "presets", "format": "text"},
                 }
             ),
             "settings": dict(
@@ -116,7 +116,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                     "status": {"label": _("status")},
                     "privileges": {"label": _("members"), "format": "privileges"},
                     "license": {"label": _("license"), "format": "license"},
-                    "popoverfieldlist": {"label": _("presets"), "format": "text"},
+                    "classiffieldlist": {"label": _("presets"), "format": "text"},
                     "cnn_network_id": {"label": _("Deep feature ext.")},
                 }
             ),
@@ -174,7 +174,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
             "select": {
                 "what": "fields",
                 "field": "projid",
-                "selectcells": ["popoverfieldlist"],
+                "selectcells": ["classiffieldlist"],
             }
         },
         "settings": {
@@ -192,7 +192,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                     "visible",
                     "status",
                     "license",
-                    "popoverfieldlist",
+                    "classiffieldlist",
                     "init_classif_list",
                     "privileges",
                 ],

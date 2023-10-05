@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-10-04 18:23+0200\n"
+"POT-Creation-Date: 2023-10-05 15:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.10.1\n"
 
-#: appli/gui/commontools.py:273 appli/templates/v2/partials/_error.html:5
+#: appli/gui/commontools.py:249 appli/templates/v2/partials/_error.html:5
 msgid "error"
 msgstr ""
 
@@ -309,57 +309,65 @@ msgid "Please modify your personal data as requested before by email."
 msgstr ""
 
 #: appli/gui/staticlistes.py:200
+msgid "Account desactivated."
+msgstr ""
+
+#: appli/gui/staticlistes.py:201
+msgid "Account desactivated. Could be waiting for email confirmation."
+msgstr ""
+
+#: appli/gui/staticlistes.py:202
 msgid ""
 "Account waiting for validation. We will verify your informations and "
 "activate your account. You will be informed by email of any issue."
 msgstr ""
 
-#: appli/gui/staticlistes.py:203
+#: appli/gui/staticlistes.py:205
 msgid "Account is waiting for mail confirmation."
 msgstr ""
 
-#: appli/gui/staticlistes.py:204
+#: appli/gui/staticlistes.py:206
 msgid ""
 "You have changed your email address and need to verify this new address. "
 "A confirmation email has been sent to this new address. Click on the link"
 " therein to verify it."
 msgstr ""
 
-#: appli/gui/staticlistes.py:212
+#: appli/gui/staticlistes.py:214
 msgid "Manage"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:365
-#: appli/gui/staticlistes.py:213 appli/gui/staticlistes.py:226
+#: appli/gui/staticlistes.py:215 appli/gui/staticlistes.py:228
 #: appli/templates/v2/partials/_navbar.html:13
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Annotate"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:366
-#: appli/gui/staticlistes.py:214 appli/templates/v2/jobs/listall.html:58
+#: appli/gui/staticlistes.py:216 appli/templates/v2/jobs/listall.html:58
 #: appli/templates/v2/jobs/show.html:75
 msgid "View"
 msgstr ""
 
-#: appli/gui/staticlistes.py:219
+#: appli/gui/staticlistes.py:221
 msgid "Manager"
 msgstr ""
 
-#: appli/gui/staticlistes.py:220
+#: appli/gui/staticlistes.py:222
 msgid "Annotator"
 msgstr ""
 
-#: appli/gui/staticlistes.py:221
+#: appli/gui/staticlistes.py:223
 msgid "Viewer"
 msgstr ""
 
-#: appli/gui/staticlistes.py:227
+#: appli/gui/staticlistes.py:229
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Explore Only"
 msgstr ""
 
-#: appli/gui/staticlistes.py:228
+#: appli/gui/staticlistes.py:230
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Annotate No Prediction"
 msgstr ""
@@ -2303,11 +2311,11 @@ msgstr ""
 msgid "Users Administrator comment"
 msgstr ""
 
-#: appli/templates/v2/me/home.html:4 appli/templates/v2/me/index.html:4
+#: appli/templates/v2/me/index.html:4
 msgid "My profile"
 msgstr ""
 
-#: appli/templates/v2/me/home.html:5 appli/templates/v2/me/index.html:5
+#: appli/templates/v2/me/index.html:5
 msgid "My files"
 msgstr ""
 
@@ -3093,6 +3101,10 @@ msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:129
 msgid "Pick presets from other projects"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:132
+msgid "Fields available for sorting and display In the manual classification page"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:144

@@ -129,8 +129,8 @@
             pick_from_other(False,key='fields',modal_title= _('Pick presets from other projects')) }}
 
           <div class="form-box">
-            <label for="popoverfieldlist">Fields displayed in image popover <em>in the manual classification page</em><i data-for="help_popoverfieldlist" data-request="help"></i></label>
-            <textarea id="popoverfieldlist" name="popoverfieldlist" class="form-textarea" rows="8">{{ target_proj.popoverfieldlist|default('',true) }}</textarea>
+            <label for="classiffieldlist">{{_('Fields available for sorting and display In the manual classification page')}}<i data-for="help_classiffieldlist" data-request="help"></i></label>
+            <textarea id="classiffieldlist" name="classiffieldlist" class="form-textarea" rows="8">{{ target_proj.classiffieldlist|default('',true) }}</textarea>
             </div>
           </div>
 
