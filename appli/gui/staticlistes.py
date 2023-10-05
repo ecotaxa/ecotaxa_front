@@ -197,7 +197,9 @@ py_user = dict(
         "statusnotauthorized": {
             "2": _("Please modify your personal data as requested before by email."),
             "-1": _("Access denied "),
-            "0": _(
+            "0": _("Account desactivated."),
+            "00": _("Account desactivated. Could be waiting for email confirmation."),
+            "01": _(
                 "Account waiting for validation. We will verify your informations and activate your account. You will be informed by email of any issue.",
             ),
             "waiting": _("Account is waiting for mail confirmation."),

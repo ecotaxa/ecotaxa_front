@@ -204,30 +204,6 @@ def is_partial_request(request):
     )
 
 
-# alertbox
-def aler_box(
-    type: str,
-    title: str,
-    codemessage,
-    message: str,
-    dismissible: bool = False,
-    inverse: bool = False,
-    is_safe: bool = False,
-):
-    return render_template(
-        "v2/partials/_alertbox.html",
-        type=type,
-        title=title,
-        message=message,
-        codemessage=codemessage,
-        inverse=inverse,
-        dismissible=dismissible,
-        is_safe=is_safe,
-        extra=gvp("extra"),
-        partial=True,
-    )
-
-
 def alert_box(
     type: str,
     title: str,
@@ -264,8 +240,8 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
         code = e.code
     partial = is_partial_request(request)
     if isinstance(e, ApiException):
+        code = e.status
         exception = format_exception(e)
-        code = exception[2]
         if code != 500:
             if partial:
                 return alert_box(
