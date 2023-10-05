@@ -14,13 +14,13 @@
               </a>
             </li>
             <li>
-              <a href="{{url_for("gui_job_create",job_type="Prediction",projid=target_proj.projid) }}">
+              <a href="{{url_for("jobCreate",job_type="Prediction",projid=target_proj.projid) }}">
                 {{_('Predict')}}
               </a></li>
               {% endif %}
             <li>
       <!--  <a href="/gui/job/create/FileImport?p={{target_proj.projid}}">-->
-      <a href="{{url_for("gui_job_create",job_type="FileImport", p=target_proj.projid) }}">
+      <a href="{{url_for("jobCreate",job_type="FileImport", p=target_proj.projid) }}">
           {{_('Import')}}
         </a>
       </li>
