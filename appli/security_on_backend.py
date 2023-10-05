@@ -21,6 +21,7 @@ from appli.constants import (
     API_GLOBAL_ROLES,
 )
 from appli.back_config import get_user_constants
+from appli.gui.staticlistes import py_user
 from functools import wraps
 
 
@@ -125,10 +126,13 @@ def user_from_api(user_id):
     try:
         with ApiClient(UsersApi, request) as api:
             curr_user: UserModelWithRights = api.show_current_user()
-        if user_id != -1 and str(user_id) != str(curr_user.id):
-            raise ApiException(status=403, reason="Bad ID")
+        if curr_user != None and (
+            str(user_id) != str(curr_user.id)
+            or curr_user.status != ApiUserStatus["active"]
+        ):
+            curr_user = anon_user
     except (ApiException):
-        if current_user.is_athenticated:
+        if current_user.is_authenticated:
             logout_user()
         curr_user = anon_user
     curr_user = ApiUserWrapper(curr_user, ApiUserStatus)
