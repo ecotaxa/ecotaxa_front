@@ -4,11 +4,11 @@ let instance = null;
 const formcss = {
   invalid: 'invalid',
   inputvalidate: 'input-validate',
-  togglepw: 'togglepw',
-  pw: 'pw'
 }
 import {
   fetchSettings,
+  get_captcha_response
+
 } from '../modules/utils.js';
 export class FormSubmit {
   handlers = [];
@@ -31,67 +31,23 @@ export class FormSubmit {
     return instance;
   }
   init() {
-
     // init the form ( options like beforeunload etc...)
+
     this.form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const res = await this.submitForm();
-
-    });
-    if (this.form.dataset.captcha) {
-      const captchakey = this.form.dataset.captchakey;
-      if (!captchakey) return;
-      const captchacode = document.getElementById(captchakey);
-      const captcharesponse = this.form.dataset.captcha;
-      captchacode.addEventListener('load', (e) => {
-        //
-        const onloadCallback = function() {
-          grecaptcha.render('g-recaptcha', {
-            'sitekey': captchakey
-          });
-
-
-        }
-        window.onloadCallback = onloadCallback;
-        //
-        /*
-                grecaptcha.ready(function() {
-                  grecaptcha.render(captcharesponse, {
-                    "sitekey": captchakey
-                  });
-                  grecaptcha.execute(captchakey, {
-                    action: 'createuser'
-                  }).then(function(token) {
-                    // Add your logic to submit to your backend server here.
-                    console.log('token ', token)
-                    document.getElementById(captcharesponse).value = token;
-                  });
-                });
-              });*/
-
-
-      });
-      /*const captcha_handler = function() {
-        return true;
+      const captcha = this.form.dataset.captcha ? document.getElementById(this.form.dataset.captcha) : null;
+      if (captcha !== null) {
+        const res_captcha = await get_captcha_response(captcha);
+        if (res_captcha !== true) return false;
       }
-      this.handlers.push(captcha_handler);*/
-    }
+      const res = await this.submitForm();
+      return res;
+    });
     this.specialFields();
   }
   specialFields() {
     // check if there is a password confirm input
     // add show text for password fields
-    this.form.querySelectorAll('input[type="password"]').forEach(input => {
-      const view = document.createElement('i');
-      view.classList.add(formcss.togglepw);
-      view.classList.add(formcss.pw);
-      input.parentNode.insertBefore(view, input.nextSibling);
-      view.addEventListener('click', () => {
-        if (input.type === "password") input.type = "text";
-        else input.type = "password";
-        view.classList.toggle(formcss.pw);
-      })
-    })
 
     this.form.querySelectorAll('input[data-match]').forEach(input => {
       //
@@ -111,8 +67,8 @@ export class FormSubmit {
         if (item.checkValidity() === true) {
           item.dataset.invalid = '';
           item.setCustomValidity("");
-          if (item == input) label.classList.remove(formcss.invalid);
-          else labeltarget.classList.remove(formcss.invalid);
+          if (item == input && label !== null) label.classList.remove(formcss.invalid);
+          else if (labeltarget !== null) labeltarget.classList.remove(formcss.invalid);
           item.classList.remove(formcss.inputvalidate);
           if (item.value !== itemtarget.value) {
             input.setCustomValidity(invalid);
@@ -280,16 +236,17 @@ export class FormSubmit {
         if (this.options.fetch) this.formFetch(this.options.fetch);
         else this.form.submit();
         this.fieldEnable(false);
+        return true;
       } else return false;
     } else return false;
   }
 
   displayResponse(response, error = false) {
+    console.log('response', response)
     const el = document.createElement('div');
     el.insertAdjacentHTML('afterbegin', response);
     if (error !== false) el.classList.add('is-error');
     this.form.parentElement.insertBefore(el, this.form);
     this.form.remove();
-
   }
 }

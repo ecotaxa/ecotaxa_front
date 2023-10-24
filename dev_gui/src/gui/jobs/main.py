@@ -64,7 +64,6 @@ def gui_job_show(job_id: int):
         with ApiClient(JobsApi, request) as japi:
             rsp = japi.get_job_log_file(job_id=job_id)
         return Response(rsp, mimetype="text/plain")
-
     target_prj = job.params.get("target_prj")
     target_prj = None
     if target_prj:
@@ -207,11 +206,14 @@ def gui_list_jobs():
     tasks = []
     from appli.gui.jobs.job_interface import display_job
 
-    with ApiClient(JobsApi, request) as api:
-        apijobs: List[JobModel] = api.list_jobs(for_admin=wantsadmin)
-        cache = {}
-        tasks.extend([display_job(cache, ajob) for ajob in apijobs])
-        tasks.sort(key=lambda t: t["id"], reverse=True)
+    try:
+        with ApiClient(JobsApi, request) as api:
+            apijobs: List[JobModel] = api.list_jobs(for_admin=wantsadmin)
+    except ApiException:
+        apijobs = []
+    cache = {}
+    tasks.extend([display_job(cache, ajob) for ajob in apijobs])
+    tasks.sort(key=lambda t: t["id"], reverse=True)
 
     return render_template(
         "./v2/jobs/listall.html",

@@ -6,13 +6,18 @@ import {
   css
 } from '../modules/modules-config.js';
 import {
-  fetchSettings
+  fetchSettings,
+  get_catcha_reponse
 } from '../modules/utils.js';
 const localcss = {
   trigger: {
     show: 'triggershow',
     hide: 'triggerhide'
-  }
+  },
+  icon: 'icon',
+  iconeyeslash: 'icon-eye-dark-slash',
+  iconeye: 'icon-eye-dark',
+  wrap: 'password-wrapper'
 };
 export class ActivItems {
   /*  activate functions */
@@ -72,6 +77,42 @@ export class ActivItems {
               behavior: 'smooth'
             });
           });
+          break;
+        case 'captcha':
+          const formu = (item.dataset.formid) ? document.getElementById(item.dataset.formid) : item.form;
+          if (formu !== null) {
+            if (formu.classList.contains("js-submit")) formu.dataset.captcha = item.id;
+            else formu.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              resp = await get_captcha_response(item);
+              if (resp === true) return formu.submit();
+              return false;
+            });
+          }
+          break;
+        case 'wrapeye':
+          const wrap = document.createElement('div');
+          wrap.classList.add(localcss.wrap);
+          const view = document.createElement('i');
+          view.classList.add(localcss.icon);
+          view.classList.add(localcss.iconeyeslash);
+          item.parentNode.insertBefore(wrap, item);
+          wrap.append(item);
+          wrap.append(view);
+          view.addEventListener('click', () => {
+            let icoadd, icorem;
+            if (item.type === "password") {
+              item.type = "text";
+              icoadd = localcss.iconeye;
+              icorem = localcss.iconeyeslash;
+            } else {
+              item.type = "password";
+              icoadd = localcss.iconeyeslash;
+              icorem = localcss.iconeye;
+            }
+            view.classList.remove(icorem);
+            view.classList.add(icoadd);
+          })
           break;
         case 'setvalue':
           if (!item.dataset.what || !item.dataset.target) return;

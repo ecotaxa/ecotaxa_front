@@ -38,12 +38,12 @@ async def gui_me_upload(subdir: str = "") -> str:
 @app.route("/gui/me/profile", methods=["GET", "POST"])
 @login_required
 def gui_me_profile() -> str:
-    from appli.gui.users.commontools import user_edit, account_page, ACCOUNT_USER_EDIT
+    from appli.gui.users.users import user_edit, account_page, ACCOUNT_USER_EDIT
 
     if not current_user:
         return redirect(url_for("gui_home"))
     if request.method == "POST":
-        reponse = user_edit(current_user.api_user.id, isfrom=None)
+        reponse = user_edit(current_user.api_user.id, isfrom=False)
         if reponse[0] == 0:
             flash(reponse[1], "success")
         else:
@@ -57,7 +57,7 @@ def gui_me_profile() -> str:
     return account_page(
         action=ACCOUNT_USER_EDIT,
         usrid=current_user.api_user.id,
-        isfrom=None,
+        isfrom=False,
         template="v2/me/profile.html",
     )
 
@@ -69,7 +69,7 @@ def gui_me_activate(token: str) -> str:
         return redirect(url_for("gui_me_profile"))
     user_id = -1
     if request.method == "POST":
-        from appli.gui.users.commontools import api_user_activate, _get_value_from_token
+        from appli.gui.users.users import api_user_activate, _get_value_from_token
 
         partial = is_partial_request(request)
         if token:
@@ -131,7 +131,7 @@ def gui_me_forgotten(token: str = None) -> str:
         partial = True
         email = gvp("request_email", None)
         pwd = gvp("request_password", None)
-        from appli.gui.users.commontools import reset_password
+        from appli.gui.users.users import reset_password
 
         response = reset_password(email, token, pwd, url="gui_me_forgotten")
         return render_template(

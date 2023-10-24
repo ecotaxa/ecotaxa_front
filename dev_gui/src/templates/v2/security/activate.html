@@ -1,20 +1,20 @@
 {%if not partial %}
 {% extends "v2/layout.html" %}
   {%endif%}
-  {% from "./v2/macros/_captcha.html" import captcha, scriptcaptcha%}
+  {% from "./v2/macros/_captcha.html" import captcha%}
 {%block body%}
 <div class=" w-full  lg:w-96 mx-auto mt-24 md:mt-48 pt-8 px-2">
 <div id="home-activate" class=" w-full mb-12 overflow-hidden border border-transparent shadow px-2 mx-auto sm:px-4">
 
-<form id="form-activate" action="{{ url_for('gui_me_activate', token=token) }}" class="js js-submit" method="POST" name="activate_user_form">
+<form id="form-activate" action="{{ url_for('gui_me_activate', token=token) }}" class="js js-submit" method="POST" name="activate_user_form" >
      <input type="hidden" name="crsf_token" value={{ crsf_token }}>
      <div class="form-box"><label for="password">{{_('Enter your password to confirm your new email address')}}</label>
-       <input type="password" id="password" name="password" class="form-input" minlength="8" maxlength="20" pattern={{api_password_regexp()}} required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">
+       <input type="password" id="password" name="password" class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern={{api_password_regexp()}} required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">
        </div>
   <div class="submit-box">
     <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-activate"><i class="icon icon-check invert mr-2.5"></i>{{ _('Confirm my email address') }}</button>
     </div></fieldset>
-  {{captcha(reCaptchaID)}}  {{scriptcaptcha(reCaptchaID)}}
+  {{captcha(formid="form-activate")}}
 </form>
 </div></div>
 {%endblock%}

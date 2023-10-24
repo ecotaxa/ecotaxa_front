@@ -1,12 +1,12 @@
   {%block body%}
-  {% if response[0]|int == 0 %}
+  {% if response != None and response|length and  response[0]|int == 0 %}
    <div class="alert is-success">
 {% if token %}
 <strong>{{_('Your password has been modified')}}</strong>
 <p><a href="{{url_for("gui_login")}}">{{_('Login')}}</a></p>
 {% else %}
 <strong>{{_('A reset password email has been sent to')}} {{email}}</strong>
-<p> {{_('Click on the link provided in the email to reset your password.')}}</p>
+<p> {{_('Click on the link provided in the email to reset your password.')}}<br><em class="font-bold  text-sm">{{_('Please, check spam and junk mails if you can not find this email in your inbox.')}}</em></p>
 {% endif%}
 {% else %}
  <div class="alert is-warning">

@@ -9,7 +9,7 @@
   <div class="form-box">
     <label>{{_('Last used projects')}} </label>
     <ul class="ml-4">{% for prj in user.last_used_projects%}
-      <li><a href="{{url_for("gui_prj_edit", prjid=prj.projid)}}" class="text-mainblue-900"><strong>[{{prj.projid}}]</strong> {{prj.title }} </a></li>
+      <li><a href="{{url_for("gui_prj_classify", projid=prj.projid)}}" class="text-mainblue-900"><strong>[{{prj.projid}}]</strong> {{prj.title }} </a></li>
       {%endfor %}<ul>
   </div>
   {% if user.status_admin_comment%}

@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="{{lang if lang !='' else 'en'}}">
 <head>
-  {% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else '2.6.8'%}
+  <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+   <meta name="viewport" content="width=device-width, initial-scale=1" user-scalable="no">
+   <meta http-equiv="refresh">
+  {% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else ''%}
 <link rel=stylesheet rel="preload" type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}?v={{ ecotaxa_version  }}">
  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='/gui/images/apple-touch-icon.png') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='/gui/images/favicon-32x32.png')}}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='/gui/images/favicon-16x16.png')}}">
 <link rel="manifest" href="{{ url_for('static', filename='/gui/images/site.webmanifest')}}">
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width, initial-scale=1" user-scalable="no">
-  <meta http-equiv="refresh">
+
   <title>Ecotaxa 3.0 {{ target_proj.title if target_proj and target_proj.projid else ''}}</title>
 </head>
 <body>{{global_messages()|safe}}

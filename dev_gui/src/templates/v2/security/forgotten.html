@@ -1,7 +1,7 @@
 {%if not partial %}
 {% extends "v2/layout.html" %}
   {%endif%}
-  {% from "./v2/macros/_captcha.html" import captcha, scriptcaptcha%}
+  {% from "./v2/macros/_captcha.html" import captcha%}
     {% from "./v2/users/_profile_macro.html" import password_regexp %}
 {%block body%}
 <div class=" w-full lg:w-96  mx-auto mt-24 md:mt-48 pt-8 px-2">
@@ -12,10 +12,10 @@
   <fieldset class="mb-0.5"><legend>{{ _('Enter your new password') }}</legend>
       <div class="form-box" class="relative">
       <label for="request_password" class="over">{{_('New password')}}</label>
-      <input name="request_password" id="request_password" class="form-input" placeholder="Your new password" type="password"  pattern="{{api_password_regexp()}}"  required autofocus>
+      <input name="request_password" id="request_password" class="form-input" data-action="wrapeye" placeholder="Your new password" type="password"  pattern="{{api_password_regexp()}}"  required autofocus>
       {{password_regexp()}}
       <label for="request_passwordconfirm">{{_('New password confirmation')}}</label>
-      <input type="password" id="request_passwordconfirm" name="request_passwordconfirm"  class="form-input"  pattern="{{api_password_regexp()}}"  required data-match="request_password" data-matchinvalid="{{_('password does not match')}}" data-new="{{_('new')}}" placeholder="{{_('New password confirmation')}}">
+      <input type="password" id="request_passwordconfirm" name="request_passwordconfirm"  class="form-input"  data-action="wrapeye" pattern="{{api_password_regexp()}}"  required data-match="request_password" data-matchinvalid="{{_('password does not match')}}" data-new="{{_('new')}}" placeholder="{{_('New password confirmation')}}">
       <input type="hidden" name="request_email" value={{ email }}>
       </div>
   {% else%}
@@ -28,7 +28,7 @@
 <div class="submit-box">
     <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-forgotten"><i class="icon icon-check invert mr-2.5"></i>{{ _('Send') }}</button>
     </div></fieldset>
-  {{captcha(reCaptchaID)}}  {{scriptcaptcha(reCaptchaID)}}
+  {{captcha(formid="form-forgotten")}}
 </form>
 </div></div>
 {%endblock%}

@@ -1,31 +1,15 @@
-{%-macro captcha(reCaptchaID)%}
-  {% if reCaptchaID %}
-    <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
-        <div id="g-recaptcha"></div>
-      <script>
-       const onloadCallback = function() {
-          grecaptcha.render('g-recaptcha', {
-            'sitekey' : '{{reCaptchaID}}'
-          });
+{%-macro captcha(formid)-%}
+<style type="text/css">
+    </style>
+  <!--  <script type="text/javascript">
+      const dropz = document.getElementById('captcha-slider');
+      const slider = dropz.querySelector(".slider");
+      const mask= dropz.querySelector(".slider-mask");
+      slider.addEventListener("dragstart",(e) => {
 
-      /*    document.querySelector('form').addEventListener('submit',(e)=> {
-            e.preventDefault();
-             const token = grecaptcha.getResponse();
-             console.log('token ' , token)
-              document.getElementById('g-recaptcha-response').value = token;
-          });*/
-      }
-      window.onloadCallback = onloadCallback;
-  /*   grecaptcha.ready(function() {
-        grecaptcha.execute('{{ reCaptchaID }}', {action: 'submit'}).then(function(token) {
-            // Add your logic to submit to your backend server here.
-            console.log('token ' , token)
-             document.getElementById('g-recaptcha-response').value = token;
-        });
-      });*/
-    </script>
-  {% endif %}
-{%endmacro-%}
-{%-macro scriptcaptcha(reCaptchaID)-%}
-    <script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=invisible' id="{{ reCaptchaID }}" async defer></script>
-{%endmacro-%}
+      })
+    </script>-->
+<div id="home-captcha" data-action="captcha" data-formid={{formid}} data-url="/gui/getcaptcha">
+<div id="captcha-slider" class="relative"><div class="sliderbg"></div><div class="slider-mask" class="w-full absolute z-2 left-0"><div class="slider" class="w-8 h-8 bg-main-blue-700"><i class="icon-lg icon-chevron-right inverse"></i></div></div><span class="text-sm submitlabel text-white" data-text="{{_('Slide right to enable Submit')}}">{{_('Slide right to enable submit')}}</span></div>
+  <input id="home-captcha-response"  name="home-captcha-response"  type="hidden"></div>
+{%-endmacro-%}

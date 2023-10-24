@@ -6,8 +6,8 @@ function fetchSettings(options) {
   options.headers['X-Requested-With'] = 'XMLHttpRequest';
   if (!options.credentials) options.credentials = 'include';
   options.redirect = "error";
+  options.cache = "no-cache";
   return options;
-
 }
 
 function string_to_boolean(str) {
@@ -186,6 +186,20 @@ function dom_purify(item, type = null) {
     .map(word => word.replace(word[0], word[0].toString().toUpperCase()))
     .join('')
 }*/
+async function get_captcha_response(item) {
+  const captcha = item.querySelector('input[name="home-captcha-response"]');
+  if (captcha === null) return false;
+  const response = await fetch(item.dataset.url, fetchSettings({
+    method: "post",
+    body: "reply=true"
+  }));
+  const token = await response.text();
+  if (token !== null) {
+    captcha.value = token;
+    return true;
+  } else return false;
+}
+
 export {
   fetchSettings,
   unescape_html,
@@ -198,4 +212,5 @@ export {
   add_custom_events,
   dom_purify,
   create_box,
+  get_captcha_response
 }

@@ -33,7 +33,9 @@ const tablecss = {
   disabled: 'table-disabled',
   ascending: 'table-ascending',
   descending: 'table-descending',
-  tipover: 'tipover absolute z-10 text-stone-50 rounded bg-stone-600 px-2 py-0.5 -mt-5 ml-12 '
+  tipover: 'tipover absolute z-10 text-stone-50 rounded bg-stone-600 px-2 py-0.5 -mt-5 ml-12 ',
+  hide: 'hide',
+  nowrap: 'truncate',
 };
 const tableselectors = {
   table: '.table-table',
@@ -197,14 +199,16 @@ export class TableComponent {
       listall: ((this.params.listall) ? this.params.listall : false)
     }) : fromurl));
     if (this.params.fromid) from += '/' + this.params.fromid;
+    this.dt = Date.now();
 
     fetch(from, fetchSettings()).then(response => {
       if (response.ok) return response.json();
       return Promise.reject(response);
     }).then(async tabledef => {
-
       if (this.waitdiv) this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : default_messages.dataloaded);
       if (pagestart === 0) {
+        console.log('seconds to fetch', (Date.now() - this.dt) / 1000);
+        this.dt = Date.now();
         await this.tableActivate(container, tabledef);
       } else if (tabledef.length) this.domInsertRows(tabledef);
       else pagesize = 0;
@@ -290,7 +294,7 @@ export class TableComponent {
   tableToData() {
     if (!this.dom.querySelector('thead')) return;
     const datalastused = (this.params.lastused && this.params.lastused.length > 0) ? [] : null;
-    this.dom.classList.add('hide');
+    this.dom.classList.add(tablecss.hide);
     const cell_to_obj = (cell) => {
       const obj = {
         data: cell.innerText,
@@ -341,7 +345,7 @@ export class TableComponent {
       if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add('hidden');
       if (this.grid.hidden.indexOf(index) >= 0) td.remove();
     });
-    this.dom.classList.remove('hide');
+    this.dom.classList.remove(tablecss.hide);
     return;
   }
   renderTbody(tbody) {
@@ -357,19 +361,20 @@ export class TableComponent {
   async tableActivate(container, tabledef = null) {
     this.on(this.eventnames.init, () => {
       // hide and move waitdiv in the wrapper for inner elements display
+      this.dom.classList.remove(tablecss.hide);
       this.waitDesactivate();
       if (this.afterLoad) this.afterLoad();
       // move import zones and/or search zone - reorg the page display
       container.style.top = container.offsetTop + 'px';
       // fetch once the same table
       container.dataset.table = this.params.table = true;
-      this.dom.classList.remove(css.hide);
 
     });
     this.on(this.eventnames.load, () => {
       this.initSearch();
       this.initSort();
       this.initPlugins(container);
+      console.log('plugin loaded', (Date.now() - this.dt) / 1000);
     });
     // dismiss table when dismiss modal
     this.on(this.eventnames.dismiss, (e) => {
@@ -379,8 +384,8 @@ export class TableComponent {
     else await this.tableToData();
     if (this.grid.data.length) this.emit(this.eventnames.load);
     setTimeout(() => {
-      this.emit(this.eventnames.init)
-      this.initialized = true
+      this.emit(this.eventnames.init);
+      this.initialized = true;
     }, 10)
     instance[this.instanceid] = this;
 
@@ -673,7 +678,7 @@ export class TableComponent {
   }
   initEvents() {
     this.on(this.eventnames.update, () => {
-      if (this.dom.classList.contains(css.hide)) this.dom.classList.remove(css.hide);
+      if (this.dom.classList.contains(tablecss.hide)) this.dom.classList.remove(tablecss.hide);
 
     });
   }
@@ -697,6 +702,7 @@ export class TableComponent {
     }
   }
   initSort() {
+
     const ths = this.dom.querySelectorAll('thead th');
     let index = 0;
     this.grid.columns.forEach((column, i) => {
@@ -734,7 +740,6 @@ export class TableComponent {
     });
     // remove details when sorting
     this.on(this.eventnames.sorted, (direction, index) => {
-      console.log('timeend', (Date.now() - this.dt));
       this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
         a.classList.remove(((i === index) ? css.wait : css.disabled))
       });
@@ -794,8 +799,6 @@ export class TableComponent {
     const clone = tbody.cloneNode();
     const trs = tbody.querySelectorAll('tr');
     tbody.innerHTML = ``;
-    this.dt = Date.now();
-    console.log('timestar', this.dt);
     const sorted = [];
     rows.forEach((r, i) => {
       clone.appendChild(trs[r.row]);
@@ -1025,7 +1028,7 @@ export class TableComponent {
     }
 
     const refresh_details = () => {
-      if (this.dom.classList.contains(css.hide)) this.dom.classList.remove(css.hide);
+      if (this.dom.classList.contains(tablecss.hide)) this.dom.classList.remove(tablecss.hide);
       const details = this.dom.querySelectorAll(tableselectors.details);
       if (!details) return;
       details.forEach(item => {

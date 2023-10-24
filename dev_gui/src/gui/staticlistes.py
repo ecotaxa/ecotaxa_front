@@ -101,8 +101,11 @@ apptree = dict(
         },
         "job": {
             "root": "Jobs",
-            "one": "Job",
-            "children": {"/": "user jobs", "/listall": "all users jobs"},
+            "one": "Jobs",
+            "children": {
+                "/listall": "user jobs",
+                "/listall?seeall=Y": "all users jobs",
+            },
         },
         "privacy": "Privacy",
         "about": "About Ecotaxa",
@@ -136,8 +139,13 @@ py_messages = dict(
         "project404": _("Project does not exist"),
         "page404": _("The page does not exists."),
         "access403": _("Access denied "),
+        "accessonly": {
+            "manage": _("Visible only by managers"),
+            "manageannotate": _("Visible only by managers and annotators"),
+        },
         "cannotaccessinfo": _("You cannot access this information"),
         "cannoteditsettings": _("You cannot edit settings for this project"),
+        "selectotherproject": _("Select another project"),
         "nouserslist": _("No users list"),
         "noauthoprjcreate": _("Not authorized to create a project"),
         "noauthoprjedit": _("Not authorized to edit a project"),
@@ -169,7 +177,19 @@ py_user = dict(
         "invaliddata": _("Data are not valid"),
         "notadmin": _("Not an administrator"),
         "notfound": _("Not found"),
-        "notauthorized": _("No authorization to modify this account"),
+        "novalidationservices": _("Service is not active"),
+        "notauthorized": _("Not authorized"),
+        "checkspam": _(
+            "Please, check spam and junk mails if you can't find this email in your inbox."
+        ),
+        "badsignature": _("Token is not valid"),
+        "signexpired": _("Signature expired"),
+        "status": {
+            "active": "Account active",
+            "pending": "Account waiting for email confirmation",
+            "blocked": "Account blocked",
+            "inactive": "Account desactivated",
+        },
         "profilesuccess": {
             "create": _("Account created"),
             "update": _("Account updated"),
@@ -197,12 +217,14 @@ py_user = dict(
         "statusnotauthorized": {
             "2": _("Please modify your personal data as requested before by email."),
             "-1": _("Access denied "),
-            "0": _(
+            "0": _("Account desactivated."),
+            "00": _("Account desactivated. Could be waiting for email confirmation."),
+            "01": _(
                 "Account waiting for validation. We will verify your informations and activate your account. You will be informed by email of any issue.",
             ),
             "waiting": _("Account is waiting for mail confirmation."),
             "emailchanged": _(
-                "You have changed your email address and need to verify this new address. A confirmation email has been sent to this new address. Click on the link therein to verify it."
+                "You have changed your email address and need to verify this new address. A confirmation email has been sent to this new address. Click on the link therein to verify it. "
             ),
         },
     }

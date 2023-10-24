@@ -1,0 +1,15 @@
+{%-macro captcha(reCaptchaID,formid)-%}
+  {%- if reCaptchaID -%}
+  <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
+  <div class="g-recaptcha" id="g-recaptcha" ></div>
+    <script type="text/javascript">
+    function onLoadCallback() {
+      const widgetId=grecaptcha.render('g-recaptcha', {
+         'sitekey' : '{{reCaptchaID}}',
+       });
+    //   grecaptcha.reset(widgetId);
+       }
+</script>
+<script src=https://www.google.com/recaptcha/api.js?onload=onLoadCallback&render=explicit id="{{ReCaptchaID}}" async defer></script>
+  {%- endif -%}
+{%-endmacro-%}

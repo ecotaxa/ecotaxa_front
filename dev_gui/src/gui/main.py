@@ -74,78 +74,13 @@ def gui_login() -> str:
 @app.route("/gui/register/", defaults={"token": None}, methods=["GET", "POST"])
 @app.route("/gui/register/<token>", methods=["GET", "POST"])
 def gui_register(token=None) -> str:
+
     if current_user.is_authenticated:
         return redirect(url_for("index"))
     partial = is_partial_request(request)
-    if request.method == "POST":
-        from appli.gui.users.commontools import user_create, _get_value_from_token
+    from appli.gui.users.users import user_register
 
-        redir = HOMEPAGE
-        resp = user_create(-1, isfrom=None)
-        email = gvp("register_email", None)
-        action = None
-        token = gvp("token", None)
-        if email is None:
-            email = gvp("email", None)
-            password = gvp("password")
-        if token is None:
-            if resp[0] == 0:
-                message = py_user["mailsuccess"]
-                redir = HOMEPAGE
-                type = "success"
-            else:
-                redir = "gui_register"
-                message = resp[1] + " " + py_user["mailerror"]
-                type = "error"
-        else:
-
-            if resp[0] == 0:
-                if len(resp) <= 3 or resp[3] == False:
-                    message = py_user["profilesuccess"]["create"]
-                    redir = "gui_login"
-                else:
-                    message = py_user["statusnotauthorized"]["0"]
-
-                type = "success"
-            else:
-                message = py_user["statusnotauthorized"]["0"]
-                type = "error"
-        if partial:
-            response = (resp[0], message, resp[2], resp[3])
-            return render_template(
-                "v2/security/reply.html",
-                bg=True,
-                type="register",
-                response=response,
-                partial=partial,
-            )
-        else:
-            flash(message, type)
-            if redir != HOMEPAGE:
-                redir = url_for(redir)
-            return redirect(redir)
-        if token:
-            action = _get_value_from_token(token, "action")
-        else:
-            action = None
-
-    if token is not None:
-        from appli.gui.users.commontools import account_page, ACCOUNT_USER_CREATE
-
-        return account_page(
-            action=ACCOUNT_USER_CREATE,
-            usrid=-1,
-            isfrom=None,
-            template="v2/register.html",
-            token=token,
-        )
-    else:
-        return render_template(
-            "v2/register.html",
-            bg=True,
-            token=token,
-            reCaptchaID=app.config.get("RECAPTCHAID"),
-        )
+    return user_register(token, partial=partial)
 
 
 @app.route("/gui/about/")
@@ -153,6 +88,22 @@ def gui_about() -> str:
     from appli.gui.staticlistes import sponsors
 
     return render_template("v2/about.html", sponsors=sponsors, bg=True)
+
+
+@app.route("/gui/getcaptcha", methods=["POST"])
+def gui_get_captcha() -> str:
+    reply = gvp("reply", None)
+    from appli.gui.users.users import encode_homecaptcha
+
+    return encode_homecaptcha(reply)
+
+
+@app.route("/gui/checkcaptcha")
+def gui_check_captcha() -> str:
+    from appli.gui.users.users import check_homecaptcha
+
+    token = gvg("r", None)
+    return check_homecaptcha(token)
 
 
 @app.route("/gui/privacy")
@@ -326,6 +277,7 @@ def gui_other(filename):
     from markupsafe import escape
 
     partial = is_partial_request(request)
+
     filename = escape(filename)
     filename = filename.replace("/", "")
     try:
@@ -335,8 +287,7 @@ def gui_other(filename):
             template = "_error"
         else:
             template = "error"
-
-        return render_template("v2/" + template + ".html", error=404, message="page404")
+    return render_template("v2/" + template + ".html", error=404, message="page404")
 
 
 @app.route("/gui/jobssummary/", methods=["GET", "POST"])
@@ -480,7 +431,7 @@ def utility_processor():
             return ""
 
     def api_password_regexp():
-        from appli.gui.users.commontools import api_password_regexp
+        from appli.gui.users.users import api_password_regexp
 
         return api_password_regexp()
 

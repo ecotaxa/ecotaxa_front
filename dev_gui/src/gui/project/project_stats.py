@@ -4,6 +4,7 @@ from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py import ApiException
 from appli.constants import MappableObjectColumns, MappableParentColumns
 from appli.gui.staticlistes import py_messages
+from to_back.ecotaxa_cli_py.models import ProjectModel
 
 
 def prj_stats(prjid: int, partial: bool, params: dict) -> str:
@@ -17,6 +18,18 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
     from appli.gui.project.projectsettings import get_target_prj
 
     prj = get_target_prj(prjid)
+    if prj is None:
+        if partial:
+            return render_template(
+                "v2/partials/_error.html",
+                error=403,
+                message=py_messages["accessonly"]["manage"],
+                partial=True,
+                is_safe=True,
+            )
+        else:
+            flash(py_messages["selectotherproject"], "info")
+            return redirect(url_for("gui_prj"))
     used_taxa = list([])
     taxastats = list(dict({}))
     annotators = None

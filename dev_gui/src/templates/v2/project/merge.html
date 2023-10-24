@@ -20,14 +20,11 @@
 <li>{{_('Acquisitions with same acq_id on both sides will <strong>not</strong> be updated from added project.')}}</li>
 </ul></li><li>{{_('Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.')}}</li>
 </ul>    </div>
+
   <form action=? method="post" id="form-merge" class="js js-submit">
 {% if source_proj %}<div class="alert alert-warning">{{_('Source project : ') ~ source_proj.title ~ '['~ source_proj.projid ~']' ~ _(' this project will be destroyed') }}</div>
 <input type="hidden" name="merge" value =" Y">
-{% set txtsubmit = _('Merge')%}
-{% else %}
-{% set txtsubmit = _('Validate before merge')%}
-{% if prjstomerge is iterable %}
-
+{% elif prjstomerge is iterable  %}
 <div class="js js-datatable mt-4" data-sortable=true {{ ' data-searchable=true'  if prjstomerge|length > 20 else ''}}>
 <table>
 <thead><tr><th data-type="html">{{_('Select')}}</th><th>{{_('ID')}}</th><th>{{_('Instrument')}}</th><th>{{_('Title')}}</th><th>{{_('Status')}}</th><th>{{_('Nbr Obj')}}</th>
@@ -44,9 +41,12 @@
           {%-endfor%}
           </tbody>
   </table></div>
+  {% else %}<strong>{{_('No matching project found.')}}</strong>
+  <a href="{{url_for("gui_prj")}}">{{_('Back to projects list.')}}</a>
+  {% endif%}
   {%endif%}
+    {% if prjstomerge|length > 0 or source_proj%}
+    <button type="submit" class="button is-primary">{{ _('Merge') if source_proj else _('Validate before merge') }}</button> <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
     {%endif%}
-    <button type="submit" class="button is-primary">{{txtsubmit }}</button> <a href ="/gui/prj/{{target_proj.projid}}" class="button is-secondary inverse">{{_('Cancel')}}</a> 
      </form>
-     {% endif%}
 {%endblock%}

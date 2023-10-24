@@ -1,5 +1,5 @@
 {%-macro has_to_mod_profile(current_user)-%}
-{%- if current_user and (current_user.mail_status== False or (current_user.status_admin_comment !=None  and comment.strip()!="")) -%}
+{%- if current_user and (current_user.mail_status== False or current_user.status_admin_comment !=None) -%}
 {%- from "./v2/users/_profile_macro.html" import profile_comment -%}
 {{profile_comment(current_user.status_admin_comment,current_user.mail_status)}}
 {%-endif-%}
@@ -20,7 +20,7 @@
 <!--<li><a href="{{url_for("gui_me_files")}}"><i class="icon icon-document-text" class="p-1 opacity-80" title="{{_('My Files')}}"></i> {{ _('Files') }}</a></li>-->
 {%if current_user.last_used_projects|length >0 %}
 <li class="separ"><i class="icon icon-folder" class="p-1 opacity-80" title="{{_('last used projects')}}"></i> <span class="text-stone-700" >{{_('Last Used Projects')}}</span><ul class="text-xs mt-2 ml-6">
-{% for prj in current_user.last_used_projects %}<li><a href="{{url_for("indexPrj", PrjId=prj.projid)}}" class="text-ellipsis max-w-full text-stone-800 hover:text-mainblue-700"><strong>[{{prj.projid}}]</strong> {{prj.title}}</a>{%endfor%}</ul>
+{% for prj in current_user.last_used_projects %}<li><a href="{{url_for("gui_prj_classify", projid=prj.projid)}}" class="text-ellipsis max-w-full text-stone-800 hover:text-mainblue-700"><strong>[{{prj.projid}}]</strong> {{prj.title}}</a>{%endfor%}</ul>
 </li>
 {%endif%}
 <li class="separ"><a href="{{ url_for("gui_logout")}}"><i class="icon icon-arrow-right-on-rectangle-sm" class="opacity-80" title="{{_('logout')}}"></i> {{ _('Logout') }}</a></li></ul></div>

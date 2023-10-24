@@ -204,30 +204,6 @@ def is_partial_request(request):
     )
 
 
-# alertbox
-def aler_box(
-    type: str,
-    title: str,
-    codemessage,
-    message: str,
-    dismissible: bool = False,
-    inverse: bool = False,
-    is_safe: bool = False,
-):
-    return render_template(
-        "v2/partials/_alertbox.html",
-        type=type,
-        title=title,
-        message=message,
-        codemessage=codemessage,
-        inverse=inverse,
-        dismissible=dismissible,
-        is_safe=is_safe,
-        extra=gvp("extra"),
-        partial=True,
-    )
-
-
 def alert_box(
     type: str,
     title: str,
@@ -264,13 +240,13 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
         code = e.code
     partial = is_partial_request(request)
     if isinstance(e, ApiException):
+        code = e.status
         exception = format_exception(e)
-        code = exception[2]
         if code != 500:
             if partial:
                 return alert_box(
                     type="error",
-                    title=_("error"),
+                    title="error",
                     dismissible=True,
                     codemessage=str(code),
                     message=exception[1],
@@ -326,10 +302,7 @@ def crsf_token():
     return "".join(secrets.choice(alphabet) for i in range(45))
 
 
-# format_exception
-
-
-def format_exception(ae, partial=True):
+def format_exception(ae, partial=True) -> tuple:
     if hasattr(ae, "status"):
         msg = str(ae.status)
     else:
@@ -340,7 +313,7 @@ def format_exception(ae, partial=True):
         detail = ""
         if isinstance(ae.body, str):
             if ae.status == 500:
-                body = ae.body
+                detail = ae.body
             else:
                 body = json.loads(ae.body)
                 if "detail" in body:
@@ -348,12 +321,7 @@ def format_exception(ae, partial=True):
         elif isinstance(ae.body, object):
             detail = json.dumps(ae.body)
         msg = msg + " - " + detail
-    if partial:
-        return (1, msg, ae.status)
-    else:
-        return render_template(
-            "v2/error.html", error=ae.status, message=msg, partial=partial
-        )
+        return ae.status, msg
 
 
 def safe_url_redir(url: str) -> str:

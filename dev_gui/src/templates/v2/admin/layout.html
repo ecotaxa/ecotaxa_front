@@ -22,7 +22,7 @@
 <!DOCTYPE html>
 <html lang="{{lang if lang !='' else 'en'}}">
 <head>
-  {% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else '2.6.8'%}
+  {% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else ''%}
 <link rel=stylesheet rel="preload" type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}?v={{ ecotaxa_version  }}">
  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='/gui/images/apple-touch-icon.png') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='/gui/images/favicon-32x32.png')}}">

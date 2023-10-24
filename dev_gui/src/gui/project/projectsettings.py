@@ -25,7 +25,14 @@ from to_back.ecotaxa_cli_py.models import (
 
 def get_target_prj(prjid) -> ProjectModel:
     with ApiClient(ProjectsApi, request) as api:
-        target_proj: ProjectModel = api.project_query(prjid, for_managing=True)
+        try:
+            target_proj: ProjectModel = api.project_query(prjid, for_managing=True)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                flash(py_messages["notauthorized"], "error")
+            elif ae.status == 404:
+                flash(py_messages["project404"], "error")
+            return None
     return target_proj
 
 
@@ -119,6 +126,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
 
     target_proj = get_target_prj(prjid)
     if target_proj is None:
+        flash(py_messages["selectotherproject"], "info")
         return redirect(url_for("gui_prj"))
     # Reconstitute members list with privs
     # data structure used in both display & submit

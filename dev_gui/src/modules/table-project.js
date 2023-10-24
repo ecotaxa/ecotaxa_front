@@ -8,6 +8,7 @@ import {
 
 import equal from 'deep-equal';
 css.lastused = "last-used";
+css.small = "tdsmall"
 export const initImport = async (state) => {
   const {
     DataImport
@@ -229,6 +230,12 @@ export default function(state) {
     },
     license: (value, rowIndex, cellIndex, td = {}) => {
       td.html = format_license(value, true);
+      return td;
+    },
+    status: (value, rowIndex, cellIndex, td = {}) => {
+      td.attributes = (td.hasOwnProperty('attributes')) ? td.attributes : {};
+      td.attributes["class"] = (td.attributes["class"]) ? td.attributes["class"] + css.small : css.small;
+      td.html = value;
       return td;
     },
     privileges: (value, rowIndex, cellIndex, td = {}) => {

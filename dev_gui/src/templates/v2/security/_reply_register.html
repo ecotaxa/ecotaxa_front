@@ -14,7 +14,7 @@
 {%-endif%}</p>
     {% endif %}
     {% else %}
-     <div class="alert is-warning">
+     <div class="alert is-danger">
     <h3>{{_('Error')}} {{ response[0]}}</h3> {{response[1] if response|length >1 else ''}}
     {% if token %}
       <p>{{_('The account has not been created.')}}</p>

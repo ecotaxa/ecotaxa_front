@@ -12,6 +12,15 @@ from to_back.ecotaxa_cli_py.models import ProjectModel, ObjectSetQueryRsp, Merge
 from appli.gui.commontools import is_partial_request, py_get_messages
 
 
+@app.route("/gui/prj/<int:projid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
+@login_required
+def gui_prj_classify(projid):
+    from appli.project.main import indexPrj
+
+    return indexPrj(projid)
+
+
 @app.route("/gui/prj/purge/<int:projid>", methods=["GET", "POST"])
 # TODO - fresh_login_required
 @login_required
