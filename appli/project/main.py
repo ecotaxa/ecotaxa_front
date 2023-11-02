@@ -271,8 +271,8 @@ def indexPrj(PrjId):
     # Logged user info
     g.TaxonCreator = False
     # current_user is either an ApiUserWrapper or an anonymous one from flask
-    if current_user.is_authenticated:
-        g.TaxonCreator = 4 in current_user.can_do
+    if current_user.is_authenticated and hasattr(current_user, "api_user"):
+        g.TaxonCreator = 4 in current_user.api_user.can_do
 
     # print('%s',data)
     data["sample_for_select"] = ""
