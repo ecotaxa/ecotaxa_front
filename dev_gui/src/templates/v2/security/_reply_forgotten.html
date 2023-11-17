@@ -10,7 +10,7 @@
 {% endif%}
 {% else %}
  <div class="alert is-warning">
-<h3>{{_('Error')}} {{reponse}}</h3> {{response[1] if response|length >1 else ''}}
+<h3>{{_('Error')}} {{response}}</h3> {{response[1] if response != None and response|length >1 else ''}}
 {% if token%}
   <p>{{_('Your password was not modified.')}}</p>
 {% else %}

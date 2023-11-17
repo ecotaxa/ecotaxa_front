@@ -21,6 +21,8 @@ from appli.constants import (
 
 
 def _get_last_refresh() -> str:
+    if not current_user.is_authenticated:
+        return None
     import datetime
 
     with ApiClient(TaxonomyTreeApi, request) as apiTaxo:
@@ -29,8 +31,9 @@ def _get_last_refresh() -> str:
             last_refresh = datetime.datetime.strptime(
                 status.last_refresh, "%Y-%m-%dT%H:%M:%S"
             )
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, ApiException):
             last_refresh = None
+
     return last_refresh
 
 
@@ -233,6 +236,7 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
     new_ui = request.path.find("/gui/") >= 0
     description = []
     code = 500
+
     if is_exception or not hasattr(e, "code"):
         if trace:
             description.append(str(trace))
@@ -278,14 +282,15 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
             code,
         )
     else:
+        temp = render_template(
+            "/v2/error.html",
+            title=str(code),
+            partial=partial,
+            message=Markup("<br>".join(description)),
+            is_safe=True,
+        )
         return (
-            render_template(
-                "/v2/error.html",
-                title=code,
-                partial=partial,
-                message=Markup("<br>".join(description)),
-                is_safe=True,
-            ),
+            temp,
             code,
         )
 

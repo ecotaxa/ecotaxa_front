@@ -20,12 +20,12 @@
     {% endif%}
     </div>
   {%-endmacro%}
-  <form method="post" action="" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch="html"' if createaccount==True and current_user== None }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
+  <form method="post" action="" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch=html' if createaccount==True and current_user.is_anonymous else '' }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
    <input type="hidden" name="crsf_token" value={{ crsf_token }}>
    {% if token!="" and token!=None %}<input type="hidden" id="token" name="token" value={{ token }}>
    {% endif%}
       <input type="hidden" name="id" id="id" value="{{user.id if user.id else -1  }}">
-      {% if user and user|attr("status.admin_comment") != None and user.status_admin_comment!=None and user.status_admin_comment.strip() !="" %}
+      {% if user and  user.status_admin_comment and user.status_admin_comment.strip() !="" %}
         {{ alertbox(type='info', message=user.status.admin_comment,inverse = True,extra = {'small': True} )}}
       {%endif%}
     <div class="fieldset-wrapper md:flex-row md:flex-nowrap">
@@ -45,7 +45,7 @@
           {% endif %}
           <div class="form-box">
             <label for="email">{{_('Email')}}</label>
-            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}"  data-sub="enable" {{'disabled' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" data-new="{{_('new')}}" placeholder="{{_('Email')}}">
+            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" data-sub="enable"  {{'  disabled' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" data-new="{{_('new')}}" placeholder="{{_('Email')}}">
             {%if createaccount != True or (user and user.email) -%}
             {% set type="warning"-%}
             <input type="hidden" name="currentemail" value="{{user.email}}">
@@ -85,5 +85,6 @@
       <fieldset>
 <div class="w-full text-left mb-8"> <input type="hidden" name="save" value="Y">
   <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{back}}" class="button is-secondary inverse" title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a>
-</div></fieldset>{%if createaccount == True and not incadmin %}{{captcha(formid="formu")}}  {%endif%}
+</div></fieldset>{%if createaccount == True and not incadmin %}{%set uid=unique_id()%}
+{{captcha("formu",uid)}}  {%endif%}
 </form>

@@ -33,8 +33,7 @@ def gui_files_dirlist(sub_path: str = ""):
             sub_path = "/ecotaxa_import"
         else:
             sub_path = "/ecotaxa_import/" + sub_path
-            print("------")
-            print(sub_path)
+            print("---SUB_PATH---", sub_path)
         dirlist, err = dir_list(sub_path)
         from appli.gui.commontools import todict
 

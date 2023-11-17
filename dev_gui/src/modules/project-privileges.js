@@ -47,12 +47,14 @@ export class ProjectPrivileges {
         delet: 'delet',
         contact: 'contact',
         contactfieldname: 'contact_user_id',
-
+        domselectors: {
+          tabcontent: '.tab-content'
+        }
       };
       this.options = Object.assign({}, defaultOptions, options);
       this.fieldset = document.querySelector(this.options.groupid);
       if (!this.fieldset) return;
-      this.fieldset_alert_zone = this.fieldset.querySelector('.tab-content') ? this.fieldset.querySelector('.tab-content') : this.fieldset;
+      this.fieldset_alert_zone = this.fieldset.querySelector(this.options.domselectors.tabcontent) ? this.fieldset.querySelector(this.options.domselectors.tabcontent) : this.fieldset;
       this.options.separ = this.options.separ instanceof HTMLElement ? this.options.separ : (document.querySelector(this.options.separ) ? document.querySelector(this.options.separ) : null);
       this.options.addbtn = this.options.addbtn instanceof HTMLElement ? this.options.addbtn : document.querySelector(this.options.addbtn);
       if (this.options.addbtn) this.addListener();

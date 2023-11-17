@@ -39,11 +39,11 @@ sponsors = list(
             ),
         },
         {
-            "name": _("The Programme Investissements d'Avenir"),
+            "name": _("The Future Investments Program"),
             "url": "https://www.gouvernement.fr/le-programme-d-investissements-d-avenir",
             "logo": "marianne.png",
             "text": _(
-                "The Future Investments Program  which financed the development of the original version of the application through the Oceanomics project, dedicated to the analysis of Tara Oceans samples [45k €]."
+                "which financed the development of the original version of the application through the Oceanomics project, dedicated to the analysis of Tara Oceans samples."
             ),
         },
         {
@@ -51,7 +51,7 @@ sponsors = list(
             "url": "https://face-foundation.org/higher-education/partner-university-fund/",
             "logo": "Face-Logo.svg",
             "text": _(
-                "The Partner University Fund  that funded the hardware on which EcoTaxa ran for several years and the machine learning solution it permitted, through a joint project between Université Pierre et Marie Curie (now Sorbonne Université) and the University of Miami [15k€]."
+                "funded the hardware on which EcoTaxa ran for several years and the machine learning solution it permitted, through a joint project between Université Pierre et Marie Curie (now Sorbonne Université) and the University of Miami."
             ),
         },
         {
@@ -59,7 +59,7 @@ sponsors = list(
             "url": "https://programmes.insu.cnrs.fr/lefe/",
             "logo": "Logo-LEFE.jpg",
             "text": _(
-                "The CNRS LEFE program that allowed to renew the machine learning backend, through the project DL-PIC [10k€]."
+                "which allowed to renew the machine learning backend, through the project DL-PIC."
             ),
         },
         {
@@ -67,7 +67,7 @@ sponsors = list(
             "url": "https://www.belmontforum.org/",
             "logo": "bf-logo.png",
             "text": _(
-                "The Belmont Forum, which funds an overall review of the application through the WWWPIC project [500k€]."
+                "which funds an overall review of the application through the WWWPIC project."
             ),
         },
         {
@@ -75,11 +75,61 @@ sponsors = list(
             "url": "http://www.watertools.cn/",
             "logo": "bocweb_logo.png",
             "text": _(
-                "The Watertools company, who donated money to make the interface of EcoTaxa easier to translate, in Chinese in particular [30k€]."
+                "which donated money to make the interface of EcoTaxa easier to translate, in Chinese in particular."
+            ),
+        },
+        {
+            "name": _("The JERICO-S3 project"),
+            "url": "https://www.jerico-ri.eu/projects/jerico-s3/",
+            "logo": "jerico-s3-logo.png",
+            "text": _(
+                "which allowed the development of software pipelines to input data in EcoTaxa and supported the overall running of the service."
+            ),
+        },
+        {
+            "name": _("The Blue-Cloud project"),
+            "url": "https://cordis.europa.eu/project/id/101094227",
+            "logo": "blue-cloud-logo.png",
+            "text": _(
+                "which funded the extension of EcoTaxa's Application Programming Interface to allow it to interact with their data querying system."
+            ),
+        },
+        {
+            "name": _("The Blue-Cloud2026 project"),
+            "url": "https://blue-cloud.org/",
+            "logo": "eosc-blue-cloud-2026-logo.png",
+            "text": _(
+                "which extended the work of the first Blue-Cloud project to allow finer querying of EcoTaxa's data through its Application Programming Interface and more accessible data thanks to the increased use of standard vocabularies."
+            ),
+        },
+        {
+            "name": _("The LOVNOWER project"),
+            "url": "https://www.fotonower.com/",
+            "logo": "fotonower-logo.png",
+            "text": _(
+                "with the company FOTONOWER, which explored machine learning solutions to improve the automatic classification system in EcoTaxa as well as implement a visual similarity search feature."
+            ),
+        },
+        {
+            "name": _("The DTO-BioFlow project"),
+            "url": "https://dto-bioflow.eu/",
+            "logo": "dto-bioflow-logo.jpg",
+            "text": _(
+                "which facilitated the flow of high quality data from EcoTaxa to the Digital Twin of the Ocean by improving quality control procedures before EcoTaxa and in its output as a DarwinCore Archive files."
+            ),
+        },
+        {
+            "name": _("The ANERIS project"),
+            "url": "https://aneris.eu/",
+            "logo": "aneris-logo.png",
+            "text": _(
+                "which funded the development of dedicated pipelines for the automatic processing of images using EcoTaxa as a quality checking solution."
             ),
         },
     ]
 )
+
+
 # breadcrumb tree
 apptree = dict(
     {

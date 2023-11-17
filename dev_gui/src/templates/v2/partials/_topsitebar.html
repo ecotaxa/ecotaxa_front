@@ -32,8 +32,8 @@
   {%-endmacro%}
   <div class="flex  flex-wrap pl-2 xl:pl-8 pr-4 w-full justify-between">
     <div class="w-[140px]">
-        <a href="/prj/"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa.png') }}" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0" /></a>
-    </div><div class="flex md:flex-row  md:flex-nowrap flex-grow  w-full md:w-auto {{ 'mt-4 font-semibold md:mt-2 md:font-light' if not target_proj else 'mt-2 md:mt-0' }} text-secondblue-50 md:justify-center py-2  md:py-0 order-3 md:order-2 text-sm md:text-base xl:text-lg">
+        <a href="/prj/"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa.png') }}" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0"></a>
+    </div><div class="flex md:flex-row  md:flex-nowrap flex-grow  w-auto {{ 'mt-4 font-semibold md:mt-2 md:font-light' if not target_proj else 'mt-2 md:mt-0' }} text-secondblue-50 md:justify-center py-2  md:py-0 order-3 md:order-2 text-sm md:text-base xl:text-lg">
       {{ show_breadcrumbs(False)}}
       {% if current_user.is_authenticated and  target_proj and target_proj.projid -%}
      <div id="top-nav-projects" class="top-title truncate ellipsis overflow-hidden break-all">{{maketitle()}} </div>

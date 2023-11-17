@@ -14,7 +14,8 @@
   <div class="submit-box">
     <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-activate"><i class="icon icon-check invert mr-2.5"></i>{{ _('Confirm my email address') }}</button>
     </div></fieldset>
-  {{captcha(formid="form-activate")}}
+      {%set uid=unique_id()%}
+  {{captcha("form-activate",uid)}}
 </form>
 </div></div>
 {%endblock%}

@@ -5,7 +5,6 @@ from typing import List
 
 from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user, login_required
-from werkzeug.exceptions import HTTPException
 from appli import app, gvp, gvpm
 from appli.gui.staticlistes import py_messages
 
@@ -91,7 +90,10 @@ def _user_cando(autho):
 
 def prj_create() -> str:
     if not _user_cando(1):
-        raise HTTPException(403)
+        from werkzeug.exceptions import Forbidden
+        from appli.gui.staticlistes import py_user
+
+        raise Forbidden(py_user["notauthorized"])
     to_save = gvp("save")
     if to_save == "Y":
         title = gvp("title")

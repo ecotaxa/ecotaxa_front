@@ -8,7 +8,7 @@ from flask_login import current_user, login_required
 from appli import app, gvg, gvp, constants
 from appli.gui.commontools import is_partial_request
 from to_back.ecotaxa_cli_py.exceptions import ApiException
-from werkzeug.exceptions import HTTPException, NotFound
+from werkzeug.exceptions import NotFound
 from flask_babel import _
 from appli.gui.staticlistes import py_messages, py_user
 
@@ -59,6 +59,7 @@ def gui_login() -> str:
             resp, redir = login_validate(email, password, (remember == "y"))
             if resp:
                 next = gvp("next", None)
+                print("text %s" % next)
                 if next != None:
                     if next.strip() != "":
                         next = safe_url_redir(next)
@@ -88,14 +89,6 @@ def gui_about() -> str:
     from appli.gui.staticlistes import sponsors
 
     return render_template("v2/about.html", sponsors=sponsors, bg=True)
-
-
-@app.route("/gui/getcaptcha", methods=["POST"])
-def gui_get_captcha() -> str:
-    reply = gvp("reply", None)
-    from appli.gui.users.users import encode_homecaptcha
-
-    return encode_homecaptcha(reply)
 
 
 @app.route("/gui/checkcaptcha")
@@ -275,18 +268,18 @@ def gui_alert():
 @login_required
 def gui_other(filename):
     from markupsafe import escape
+    from os.path import exists
 
     partial = is_partial_request(request)
-
-    filename = escape(filename)
-    filename = filename.replace("/", "")
-    try:
-        return render_template("v2/" + filename)
-    except Exception as e:
-        if partial:
-            template = "_error"
-        else:
-            template = "error"
+    if partial:
+        template = "_error"
+    else:
+        template = "error"
+    if filename:
+        filename = escape(filename)
+        filename = filename.replace("/", "")
+        if exists("templates/v2/" + filename):
+            return render_template("v2/" + filename)
     return render_template("v2/" + template + ".html", error=404, message="page404")
 
 

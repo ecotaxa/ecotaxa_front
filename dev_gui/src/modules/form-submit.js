@@ -5,11 +5,13 @@ const formcss = {
   invalid: 'invalid',
   inputvalidate: 'input-validate',
 }
+const domselectors = {
+  captcha: '.js-captcha'
+}
 import {
-  fetchSettings,
-  get_captcha_response
-
+  fetchSettings
 } from '../modules/utils.js';
+
 export class FormSubmit {
   handlers = [];
   form = null;
@@ -35,11 +37,6 @@ export class FormSubmit {
 
     this.form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const captcha = this.form.dataset.captcha ? document.getElementById(this.form.dataset.captcha) : null;
-      if (captcha !== null) {
-        const res_captcha = await get_captcha_response(captcha);
-        if (res_captcha !== true) return false;
-      }
       const res = await this.submitForm();
       return res;
     });
@@ -179,13 +176,15 @@ export class FormSubmit {
   }
   fieldEnable(enable = true) {
     this.form.querySelectorAll('input[data-sub="enable"]').forEach(input => {
-      if (enable === true) input.removeAttribute('disabled');
-      else input.disabled = true;
+      if (enable === true) {
+        input.removeAttribute("disabled");
+      } else input.disabled = true;
     });
   }
 
   async submitHandler() {
     if (!this.validateFields()) return false;
+
     if (this.handlers.length === 0) return true;
     let resp = true;
     // series
@@ -224,25 +223,28 @@ export class FormSubmit {
       })
       .catch(err => {
         this.displayResponse(err, true)
+      }).finally(response => {
+        this.form.disabled = true;
       });
     return false;
   }
 
   async submitForm() {
+    this.fieldEnable();
     if (this.validateFields(false)) {
+      const isbot = (this.form.querySelector(domselectors.captcha)) ? (this.form.dataset.isbot ? (this.form.dataset.isbot === true) : true) : false;
+      if (isbot === true) return false;
       const yessubmit = await this.submitHandler();
       if (yessubmit) {
-        this.fieldEnable();
         if (this.options.fetch) this.formFetch(this.options.fetch);
         else this.form.submit();
-        this.fieldEnable(false);
+        this.form.disabled = true;
         return true;
       } else return false;
     } else return false;
   }
 
   displayResponse(response, error = false) {
-    console.log('response', response)
     const el = document.createElement('div');
     el.insertAdjacentHTML('afterbegin', response);
     if (error !== false) el.classList.add('is-error');

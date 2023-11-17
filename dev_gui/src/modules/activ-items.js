@@ -78,18 +78,6 @@ export class ActivItems {
             });
           });
           break;
-        case 'captcha':
-          const formu = (item.dataset.formid) ? document.getElementById(item.dataset.formid) : item.form;
-          if (formu !== null) {
-            if (formu.classList.contains("js-submit")) formu.dataset.captcha = item.id;
-            else formu.addEventListener('submit', async (e) => {
-              e.preventDefault();
-              resp = await get_captcha_response(item);
-              if (resp === true) return formu.submit();
-              return false;
-            });
-          }
-          break;
         case 'wrapeye':
           const wrap = document.createElement('div');
           wrap.classList.add(localcss.wrap);

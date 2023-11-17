@@ -14,12 +14,12 @@
 <div id="home-registration" class=" w-full mb-12 -mt-8 overflow-hidden border border-transparent shadow px-2 mx-auto sm:px-4">
 {% if sentmail %}
 <div class="info inverse mt-48 px-8  py-8">{{_('A validation link has been sent to')}} <strong>{{sentmail}}</strong><br>{{_('Please, check your email (and junk mail if necessary) and click the link to validate and continue your account creation process.')}}</div>
-{% elif token %}
+{% elif token or not api_email_verification %}
 {% set legend =_('EcoTaxa: create an account') %}
 {% set redir ="gui/register/"%}
 {%if usrid==-1 or user %}
 {% include('v2/users/_user.html')%}
-{% elif usrid !=-1 %}
+{% elif usrid !=-1 and api_account_validation==True %}
 <form method="post" class="js js-submit mt-24 pt-24">
   <input type="hidden" name="token" value="{{token}}"
 <div class="form-box"><label for="password">{{_('Enter your password to get access to your profile')}}</label>
@@ -35,5 +35,4 @@
 {% include('v2/security/_register.html')%}
 {% endif%}
   </div>{% endif%}
-</div>
 {% endblock %}

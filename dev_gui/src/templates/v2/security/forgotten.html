@@ -28,7 +28,8 @@
 <div class="submit-box">
     <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-forgotten"><i class="icon icon-check invert mr-2.5"></i>{{ _('Send') }}</button>
     </div></fieldset>
-  {{captcha(formid="form-forgotten")}}
+      {%set uid=unique_id()%}
+  {{captcha("form-forgotten", uid)}}
 </form>
 </div></div>
 {%endblock%}

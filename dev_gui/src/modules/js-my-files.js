@@ -11,10 +11,14 @@ import {
 import {
   generate_uuid,
 } from '../modules/files/file-utils.js';
+import {
+  AlertBox
+} from "../modules/alert-boxes.js";
 const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
 
 let instance = null;
 export class JsMyFiles {
+  alertBox = null;
   done = true;
   jsDirToZip = null;
   counters = {};
@@ -30,10 +34,10 @@ export class JsMyFiles {
       if (!container) return;
       dom_purify(container, 'dataset');
       this.container = container;
-
+      console.log(window.location.origin + "/gui/files/list")
       const defaultOptions = {
 
-        url: "https://193.49.112.116:5001/gui/files/list",
+        url: window.location.origin + "/gui/files/list",
         compress: {
           label: 'compress'
         },
@@ -176,7 +180,8 @@ export class JsMyFiles {
     if (el) el.remove();
     tag = (tag) ? ((tag === 'select') ? 'optiongroup' : tag) : 'ul';
     const subtag = (tag === 'ul') ? 'li' : 'option';
-    fetch(this.options.url + ((subdir) ? '/' + subdir : ''), fetchSettings()).then(response => response.json()).then(async json => {
+    console.log('list subdir', subdir)
+    fetch(this.options.url + ((subdir) ? subdir : ''), fetchSettings()).then(response => response.json()).then(async json => {
       console.log('jspn', json)
       if (json.entries && json.entries.length) {
         if (parent.dataset.label) parent.insertAdjacentHTML('afterbegin', `<label>${parent.dataset.label}</label>`);
@@ -194,30 +199,49 @@ export class JsMyFiles {
         [directories, files].forEach(entries => {
           entries.forEach((entry) => {
             const ext = entry.name.split('.').pop();
+            const del = `<i class="icon-sm icon-trash delentry ml-2 hidden" alt="delete"></i>`;
             const entrydetail = `<span class="entry${entry.type}"><i class="icon p-[0.125rem] icon-${((entry.type === "D") ? 'folder-sm' : ((filter_files.images.split(',').indexOf(ext)>=0)?'image-sm':'document-sm'))} align-text-bottom mb-0.5 mr-0.5"></i>${entry.name}</span>`;
             html.push(`<${subtag} ${(entry.type==='D')?`draggable="true"`:``} data-name="${entry.name}" ${(tag==='select')?` class="entry${entry.type}"`:``}>${entrydetail}`);
-            html.push(`</${subtag}>`);
+            html.push(`${del}</${subtag}>`);
           });
         });
         html.push(`</${tag}>`);
         parent.insertAdjacentHTML('beforeend', html.join(``));
 
-        parent.querySelectorAll('.entryD').forEach(dir => dir.addEventListener('click', (e) => {
-          e.stopImmediatePropagation();
-          const dirlist = e.currentTarget.parentElement;
+        parent.querySelectorAll('.entryD').forEach(dir => {
+          dir.addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            const dirlist = e.currentTarget.parentElement;
 
-          dirlist.classList.toggle('on');
-          const ico = e.currentTarget.querySelector('i.icon');
-          if (ico) {
-            ico.classList.toggle('icon-folder-sm');
-            ico.classList.toggle('icon-folder-open-sm');
-          }
-          if (dirlist.classList.contains('on')) {
-            if (!dirlist.dataset.load) {
-              this.serverList(dirlist, ((subdir) ? subdir + '/' : '/') + dirlist.dataset.name, tag);
+            dirlist.classList.toggle('on');
+            const ico = e.currentTarget.querySelector('i.icon');
+            if (ico) {
+              ico.classList.toggle('icon-folder-sm');
+              ico.classList.toggle('icon-folder-open-sm');
             }
-          }
-        }));
+            if (dirlist.classList.contains('on')) {
+              if (!dirlist.dataset.load) {
+                this.serverList(dirlist, ((subdir) ? subdir + '/' : '/') + dirlist.dataset.name, tag);
+              }
+            }
+          });
+          dir.querySelectorAll('.entryF').forEach(file => {
+            const del_file = () => {
+              alert('del', delfile.parentElement.dataset.name);
+            }
+            const trash = e.currentTarget.parentElement.querySelector('.delentry');
+            console.log('trash', trash)
+            file.addEventListener('mouseenter', (e) => {
+              console.log('file', e)
+              trash.classList.remove('hidden');
+              file.addEventListener('click', del_file);
+            });
+            file.addEventListener('mouseout', (e) => {
+              trash.classList.add('hidden');
+              file.removeEventListener('click', del_file);
+            });
+          });
+        });
 
       }
       await this.addUploadDialog(this.container);
@@ -308,16 +332,25 @@ export class JsMyFiles {
           console.log('ready')
           this.initDisplays();
         });
-        this.jsDirToZip.on(this.jsDirToZip.eventnames.message, (e) => {
+        this.jsDirToZip.on(this.jsDirToZip.eventnames.message, async (e) => {
           console.log('e', e);
+          let type = 'info';
           switch (e.name) {
             case 'console':
-              console.log(e.message)
+              console.log('console', e);
+              type = 'warning'
               break;
             default:
               console.log('message', e);
           }
-
+          if (this.alertBox === null) this.alertBox = this.alertBox = new AlertBox();
+          await this.alertBox.build({
+            dismissible: true,
+            message: e.message,
+            codeid: true,
+            parent: this.container,
+            type: type,
+          });
         });
         const self = this;
         this.jsDirToZip.on(this.jsDirToZip.eventnames.ready, (e) => {
@@ -327,20 +360,23 @@ export class JsMyFiles {
           self.fileCounter(e.name, e.filepath, e.size);
         });
         this.jsDirToZip.on(this.jsDirToZip.eventnames.complete, (e) => {
+
           if (!e || !e.name) {
             console.log('no emit complete name');
             return;
           }
-          console.log('e----------------------sendfile', e)
+
           self.showControl(e.name, ((e.hasOwnProperty('bigfile') && e.bigfile) ? 'zipped' : 'zip'), (e.hasOwnProperty('part')) ? e.part : ((e.hasOwnProperty('bigfile')) ? e.bigfile : null));
         });
         this.jsDirToZip.on(this.jsDirToZip.eventnames.pending, (e) => {
           self.showControl(this.jsDirToZip.eventnames.pending, ((e && e.hasOwnProperty('bigfile') && e.bigfile) ? 'zipped' : 'zip'));
         });
         this.jsDirToZip.on(this.jsDirToZip.eventnames.gzip, (e) => {
+          console.log('gzipped', e)
           self.showControl(this.jsDirToZip.eventnames.gzip, 'zipped', e);
         });
         this.jsDirToZip.on(this.jsDirToZip.eventnames.terminate, (e) => {
+          console.log('terminate', e)
           self.showControl(this.jsDirToZip.eventnames.terminate, ((e && e.hasOwnProperty('bigfile') && e.bigfile) ? 'zipped' : 'zip'));
         });
       }
@@ -433,7 +469,7 @@ export class JsMyFiles {
     const btn = this[this.options.btnprefix + 'zip' + target];
     console.log('shoiwcontrol', btn)
     if (!btn) return;
-    btn.disabled = false;
+    btn.removeAttribute("disabled");
     switch (action) {
       case this.jsDirToZip.eventnames.ready:
         if (btn.dataset.message) delete btn.dataset.message;
@@ -472,21 +508,24 @@ export class JsMyFiles {
           bigfile: opts
         };
         btn.textContent = `Upload zip file`;
+        if (message.bigfile !== null) btn.textContent += ` ` + opts;
         btn.dataset.message = JSON.stringify(message);
         console.log('messageup', message)
         break;
       case this.jsDirToZip.eventnames.pending:
         btn.textContent = ` Pending ` + ((target !== 'zip') ? ' big file' : '');
         btn.dataset.message = '';
-        btn.disabled = true;
+        btn.setAttribute("disabled", true);
         break;
       case this.jsDirToZip.eventnames.gzip:
         text = `compress and send separately big file :${(opts && opts.bigfile)?opts.bigfile:``} ${(opts && opts.size)?opts.size:``}`;
         btn.textContent = text;
+        btn.removeAttribute("disabled");
+        console.log('optsbigfl', opts)
         btn.dataset.message = JSON.stringify({
           name: this.jsDirToZip.eventnames.endzip,
           path: this.path,
-          bigfile: opts.bigfile
+          bigfile: (opts.hasOwnProperty("bigfile") && opts.bigfile !== "")
         });
         break;
       case this.jsDirToZip.eventnames.terminate:
@@ -496,8 +535,10 @@ export class JsMyFiles {
         //default:
         btn.dataset.message = JSON.stringify({
           name: 'ready',
+          bigfile: (target !== 'zip')
         });
-        btn.textContent = `End!!`;
+        btn.textContent = `End!! ${ ((target !== 'zip') ? 'bigfile' : '')}`;
+
         break;
     }
     if (btn.dataset.message) btn.classList.remove(css.hide);

@@ -1,15 +1,5 @@
-{%-macro captcha(formid)-%}
-<style type="text/css">
-    </style>
-  <!--  <script type="text/javascript">
-      const dropz = document.getElementById('captcha-slider');
-      const slider = dropz.querySelector(".slider");
-      const mask= dropz.querySelector(".slider-mask");
-      slider.addEventListener("dragstart",(e) => {
-
-      })
-    </script>-->
-<div id="home-captcha" data-action="captcha" data-formid={{formid}} data-url="/gui/getcaptcha">
-<div id="captcha-slider" class="relative"><div class="sliderbg"></div><div class="slider-mask" class="w-full absolute z-2 left-0"><div class="slider" class="w-8 h-8 bg-main-blue-700"><i class="icon-lg icon-chevron-right inverse"></i></div></div><span class="text-sm submitlabel text-white" data-text="{{_('Slide right to enable Submit')}}">{{_('Slide right to enable submit')}}</span></div>
-  <input id="home-captcha-response"  name="home-captcha-response"  type="hidden"></div>
+{%-macro captcha(formid,uid)-%}
+<div id="home-captcha" class="js js-captcha" data-url="{{url_for('static',filename='gui/js/botdetect-clean.min.js')}}" data-response="home-captcha-response">
+<div class="comment-captcha">{{_("If you see this field don't modify its content")}}<input type="text" id="home-captcha-response" name="home-captcha-response" value="" placeholder="{{uid}}" alt="{{_('home-captcha-response')}}"></div>
+</div>
 {%-endmacro-%}

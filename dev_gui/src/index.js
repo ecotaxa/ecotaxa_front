@@ -11,6 +11,7 @@ import {
 import {
   ActivRequest
 } from "../src/modules/activ-request.js";
+
 window.addEventListener('load', async () => {
   /*  const source = new EventSource('/adminstream/');
     source.onmessage = function(event) {
@@ -57,7 +58,6 @@ window.addEventListener('load', async () => {
   }
 
   // enhance ui activate components  js js-componentname
-
   const jsComponents = new JsComponents();
   jsComponents.applyTo();
   /*** activate data-action  **/

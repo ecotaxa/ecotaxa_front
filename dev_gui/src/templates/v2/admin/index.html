@@ -14,7 +14,7 @@
     <ul>
     {% for user in users %}
     <li><strong>
-    {{ cap_words(user.name) }} </strong><<a href="mailto:{{user.email}}">{{user.email}}</a>></li>
+    {{ cap_words(user.name) }} </strong><a href="mailto:{{user.email}}">{{user.email}}</a></li>
     {%endfor%}
     </ul>
     {%endif%}

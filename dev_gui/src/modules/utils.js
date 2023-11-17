@@ -186,19 +186,7 @@ function dom_purify(item, type = null) {
     .map(word => word.replace(word[0], word[0].toString().toUpperCase()))
     .join('')
 }*/
-async function get_captcha_response(item) {
-  const captcha = item.querySelector('input[name="home-captcha-response"]');
-  if (captcha === null) return false;
-  const response = await fetch(item.dataset.url, fetchSettings({
-    method: "post",
-    body: "reply=true"
-  }));
-  const token = await response.text();
-  if (token !== null) {
-    captcha.value = token;
-    return true;
-  } else return false;
-}
+
 
 export {
   fetchSettings,
@@ -211,6 +199,5 @@ export {
   debounce,
   add_custom_events,
   dom_purify,
-  create_box,
-  get_captcha_response
+  create_box
 }

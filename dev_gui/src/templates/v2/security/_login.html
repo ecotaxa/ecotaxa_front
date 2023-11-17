@@ -17,7 +17,7 @@
         <input  id="remember" name="remember" class="ml-1 mr-2" type="checkbox" value="y">{{ _('remember me')}}</label>
     </div>
 </fieldset>
-<input type="hidden" name="next" value="{{next}}">
+<input type="hidden" name="next" value="{{next if next != None else ''}}">
 <div class="submit-box">
     <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-login"><i class="icon icon-check invert mr-2.5"></i>{{ _('Log in') }}</button>
     </div>

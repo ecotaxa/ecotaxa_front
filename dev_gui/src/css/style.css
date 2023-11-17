@@ -177,7 +177,7 @@ article.table-of-contents > details > summary::before {@apply content-[attr(data
 article.table-of-contents > details[open] > summary::before {@apply content-[attr(data-marker-open)];}
 /*forms inputs && label */
 input[class="form-"],  textarea[class="form-"] {@apply block w-full}
-input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"], .form-select ,.form-input , textarea.form-textarea   {@apply global-form-input  }
+input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"], .form-select ,.form-input , textarea.form-textarea   {@apply global-form-input  selection:bg-mainblue-200}
 .form-input:focus, .form-select:focus , .form-textarea:focus  {@apply ring-0 ring-transparent border-secondblue-200 valid-check} /* important otherwise field border color on focus does not work correctly */
 .form-select option , select option {@apply active:bg-secondblue-300  focus:bg-secondblue-200 hover:bg-secondblue-200 checked:bg-secondblue-300 selection:bg-secondblue-300}
 /* todo: simplification*/
@@ -186,6 +186,7 @@ input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] 
 :not(.group-radio) input[type="radio"]:not(.form-checkbox)  {@apply rounded-full after:absolute relative  checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-secondblue-400 checked:after:rounded-full checked:after:content-[''] ; }
 input[type="checkbox"],  input[type="checkbox"].form-checkbox , :not(.group-radio) input[type="radio"].form-checkbox { @apply ring-offset-0  ring-offset-transparent rounded-none after:absolute checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1 checked:after:h-2  checked:after:border-secondblue-400 checked:after:border-r-2 checked:after:border-b-2 checked:after:rotate-45 checked:after:content-[''] align-baseline;}
 input[type="checkbox"][readonly] {@apply pointer-events-none cursor-not-allowed checked:after:border-stone-800 ring-offset-transparent enabled:hover:ring-transparent enabled:ring-transparent}
+
 /*forms specials */
 div.password-wrapper {@apply relative}
 div.password-wrapper input.form-input {@apply pr-12}
@@ -217,6 +218,16 @@ fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  m
   .block-disclaimer {@apply block drop-shadow-sm px-4 py-4 mb-2 text-sm  font-normal bg-transparent md:w-[80%] md:mx-auto border border-dotted border-stone-200 }
   .bock-disclaimer a {@apply text-stone-900 font-bold}
 label.required {@apply after:content-['_*'] after:text-stone-600 after:hover:text-warning-700  after:inline after:whitespace-nowrap after:text-ellipsis}
+/*captcha*/
+button[type="submit"][disabled] {@apply border-stone-500 border-l-stone-50 }
+button.submitslider {@apply min-w-[200px]}
+.slidermask {@apply absolute w-full h-full bg-stone-500 border border-stone-500 top-0 left-0 block rounded after:text-sm after:leading-snug after:content-[attr(data-title)] after:text-stone-50 hover:after:text-stone-50; -webkit-user-select: none; -webkit-touch-callout: none;}
+/*.icoslider {@apply icon-lg icon-chevron-right invert my-auto}*/
+.slider {@apply absolute h-full w-8 top-0 left-0 bg-transparent  rounded-l p-0; -webkit-user-select: none; -webkit-touch-callout: none;}
+.icoslider {@apply border-l-stone-200 border-t-transparent border-b-transparent  w-0 h-0 mx-0 my-auto border-l-[24px] border-t-[22px] border-b-[22px] block  hover:border-l-stone-100}
+.comment-captcha {@apply hidden}
+/*special for safari bug*/
+
 /* my_files list*/
 .entries li:not(.on) ul {@apply hidden}
 /*js upload dropzone*/
@@ -845,7 +856,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /*******************************/
 /* alerts                      */
 /*******************************/
-.alert, .alertbox  {@apply mx-auto block container mb-4 my-0.5 px-4 py-1 font-light drop-shadow-sm rounded-bl rounded-br}
+.alert, .alertbox  {@apply mx-auto block container mb-4 my-0.5 px-4 py-1 font-light drop-shadow-sm rounded-bl rounded-br relative}
 .alert:not(.admin-alert) {@apply rounded}
 /*.alert-reponse {@apply border  mx-auto block container mb-4 my-0.5 px-4 py-2 font-light w-96  fixed right-0 top-0 z-[5000] drop-shadow-sm}*/
 .alert-reponse {@apply border  mx-auto block container mb-4 my-0.5 px-4 py-2 font-light w-full fixed top-0 z-[50000] drop-shadow-sm  transition transform translate-y-32 }
@@ -976,7 +987,7 @@ td .tipover {@apply absolute z-10 rounded bg-stone-400 text-stone-50 text-xs px-
 .node_circle {fill: #707070;}
 .node_label {font-size: 10px; font-family: sans-serif;}
 
-@media only screen and (max-width: 760px)  {
+@media only screen and (max-width: 768px)  {
   table,
   table thead,
   table tbody,
@@ -989,13 +1000,10 @@ td .tipover {@apply absolute z-10 rounded bg-stone-400 text-stone-50 text-xs px-
 table tr {@apply border-t border-stone-300 max-w-full overflow-auto}
   table tbody tr td:nth-of-type(n+1) {@apply inline-block;
 }
-  table tbody tr td:before { @apply font-semibold block;
-
-  }
-  table tbody tr td::before {
-    content: attr('data-name');
-  }
+table tbody tr td:before { @apply font-semibold block content-[attr('data-name')]  }
 .table-table td {@apply px-1}
+.prjlist .table-table tr {@apply block h-auto max-h-full overflow-y-visible}
+.prjlist .table-table td {@apply block h-auto max-h-full}
 table tbody tr td:last-child {@apply float-right clear-right}
 }
 /*tooltips */

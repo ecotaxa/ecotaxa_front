@@ -1,7 +1,7 @@
 import os
 import flask
 from flask import request, url_for, render_template, redirect, flash, escape
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import Forbidden
 from flask_login import current_user, login_required
 from flask_babel import _
 from typing import List
@@ -141,7 +141,9 @@ def gui_users_list_page(
 ) -> str:
 
     if not current_user.is_authenticated:
-        raise HTTPException(403)
+        from appli.gui.staticlistes import py_user
+
+        raise Forbidden(py_user["notauthorized"])
     if partial == True:
         template = "v2/admin/_userslistcontainer.html"
     else:
@@ -169,7 +171,9 @@ def gui_users_list_page(
 @login_required
 def gui_user_activate(usrid: int, status_name: str = None) -> str:
     if not current_user.is_authenticated:
-        raise HTTPException(403)
+        from appli.gui.staticlistes import py_user
+
+        raise Forbidden(py_user["notauthorized"])
     from appli.gui.users.users import api_get_user
     from appli.back_config import get_user_constants
 

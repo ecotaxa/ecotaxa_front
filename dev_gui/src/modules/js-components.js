@@ -6,6 +6,7 @@ import {
 import {
   domselectors
 } from '../modules/modules-config.js';
+
 export class JsComponents {
   items = {};
   async applyTo(element = document) {
@@ -137,7 +138,16 @@ export class JsComponents {
               }
               const formSubmit = new dynamics.FormSubmit(item);
               break;
-
+            case 'js-captcha':
+              if (!dynamics.JsCaptcha) {
+                const {
+                  JsCaptcha
+                } = await import('../modules/js-captcha.js');
+                dynamics.JsCaptcha = JsCaptcha;
+              }
+              const jsCaptcha = new dynamics.JsCaptcha(item);
+              jsCaptcha.init();
+              break;
             case 'js-alert':
               if (!item.dataset.message) return;
               if (!dynamics.AlertBox) {
