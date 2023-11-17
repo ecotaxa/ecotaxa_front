@@ -10,7 +10,7 @@ from typing import List
 
 from flask import session, request, render_template
 from flask_login import current_user
-from werkzeug.exceptions import HTTPException
+
 from appli.utils import ApiClient
 
 from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi, AuthentificationApi
@@ -182,7 +182,10 @@ def projects_list_page(
 
     # projects ids and rights for current_user
     if not current_user.is_authenticated:
-        raise HTTPException(403)
+        from appli.gui.staticlistes import py_user
+        from werkzeug.exceptions import Forbidden
+
+        raise Forbidden(py_user["notauthorized"])
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
@@ -228,6 +231,12 @@ def _prj_import_taxo_api(prjid: int = 0, filt: dict = None) -> list:
     qry_filt_instrum = (
         [""] if (filt == None or len(filt["instrum"]) == 0) else filt["instrum"]
     )
+    if current_user.is_app_admin == True:
+        not_granted = True
+        for_managing = True
+    else:
+        not_granted = False
+        for_managing = False
     for an_instrument in qry_filt_instrum:
         with ApiClient(ProjectsApi, request) as apiproj:
             url = (
@@ -240,7 +249,8 @@ def _prj_import_taxo_api(prjid: int = 0, filt: dict = None) -> list:
             }
             payload = dict(
                 {
-                    "not_granted": False,
+                    "for_managing": for_managing,
+                    "not_granted": not_granted,
                     "instrument_filter": an_instrument,
                     "filter_subset": False,
                 }

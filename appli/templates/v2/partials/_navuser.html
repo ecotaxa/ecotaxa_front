@@ -1,12 +1,12 @@
 {%-macro has_to_mod_profile(current_user)-%}
-{%- if current_user and (current_user.mail_status== False or (current_user.status_admin_comment !=None  and comment.strip()!="")) -%}
+{%- if current_user and (current_user.mail_status== False or current_user.status_admin_comment !=None) -%}
 {%- from "./v2/users/_profile_macro.html" import profile_comment -%}
 {{profile_comment(current_user.status_admin_comment,current_user.mail_status)}}
 {%-endif-%}
 {%-endmacro-%}
-<nav class="flex md:flex-row  max-w-64 order-{{order|string if order else '2'}} md:order-3 mr-0 justify-end">
+<nav class="flex md:flex-row  max-w-64 order-3 md:order-3 mr-0 justify-end">
 {% if not  current_user.is_authenticated %}<div id="user-nav-item">
-    <a class="text-sm px-3 py-1 font-normal text-stone-50" href="/gui/login"><i class="icon icon-circle-user align-top mx-1"></i><span>{{_('Log in')}}</a></div>
+    <a class="text-sm px-3 py-1 font-normal text-stone-50" href="/gui/login"><i class="icon icon-circle-user align-top mx-1"></i>{{_('Log in')}}</a></div>
     {% else %}
     <div id="aside-nav-item">
       <a href="/notifications/"><span class="hidden md:show block mb-1">
@@ -16,15 +16,15 @@
       </div><div id="ident-user-item"><a href="{{url_for("gui_me")}}"><i class="icon icon-user-sm align-text-bottom mx-1 invert cursor-pointer md:cursor-default" title="{{ current_user.name }}"></i><span class="text-xs text-secondblue-50 w-[0px] max-w-[0px] lg:w-auto lg:max-w-[75px] truncate text-ellipsis hidden sm:inline">{{current_user.name}}</span></a>
     <!-- user profile and sign-out -->
 <ul id="user-menu" >
-<li><a href="{{url_for("gui_me_profile")}}"><i class="icon icon-user" class="p-1 opacity-80" title="{{_('profile')}}"></i> {{ _('Profile') }}</a>{{has_to_mod_profile(current_user)}}{{ current_user.name }}</li>
-<!--<li><a href="{{url_for("gui_me_files")}}"><i class="icon icon-document-text" class="p-1 opacity-80" title="{{_('My Files')}}"></i> {{ _('Files') }}</a></li>-->
+<li><a href="{{url_for("gui_me_profile")}}"><i class="icon icon-user p-1 opacity-80" title="{{_('profile')}}"></i> {{ _('Profile') }}</a>{{has_to_mod_profile(current_user)}}{{ current_user.name }}</li>
+<li><a href="{{url_for("gui_me_files")}}"><i class="icon icon-document-text" class="p-1 opacity-80" title="{{_('My Files')}}"></i> {{ _('Files') }}</a></li>
 {%if current_user.last_used_projects|length >0 %}
-<li class="separ"><i class="icon icon-folder" class="p-1 opacity-80" title="{{_('last used projects')}}"></i> <span class="text-stone-700" >{{_('Last Used Projects')}}</span><ul class="text-xs mt-2 ml-6">
-{% for prj in current_user.last_used_projects %}<li><a href="{{url_for("indexPrj", PrjId=prj.projid)}}" class="text-ellipsis max-w-full text-stone-800 hover:text-mainblue-700"><strong>[{{prj.projid}}]</strong> {{prj.title}}</a>{%endfor%}</ul>
+<li class="separ"><i class="icon icon-folder p-1 opacity-80" title="{{_('last used projects')}}"></i> <span class="text-stone-700" >{{_('Last Used Projects')}}</span><ul class="text-xs mt-2 ml-6">
+{% for prj in current_user.last_used_projects %}<li><a href="{{url_for("gui_prj_classify", projid=prj.projid)}}" class="text-ellipsis max-w-full text-stone-800 hover:text-mainblue-700"><strong>[{{prj.projid}}]</strong> {{prj.title}}</a>{%endfor%}</ul>
 </li>
 {%endif%}
-<li class="separ"><a href="{{ url_for("gui_logout")}}"><i class="icon icon-arrow-right-on-rectangle-sm" class="opacity-80" title="{{_('logout')}}"></i> {{ _('Logout') }}</a></li></ul></div>
+<li class="separ"><a href="{{ url_for("gui_logout")}}"><i class="icon icon-arrow-right-on-rectangle-sm opacity-80" title="{{_('logout')}}"></i> {{ _('Logout') }}</a></li></ul></div>
 {% if current_user.is_admin %}
-<a class="lg:pl-1 pr-0 pt-0.5 ml-4 order-4" href="/gui/admin/" target="_winadmin"><i class="icon-lg icon-admin invert "></i></a>
+<a class="lg:pl-1 pr-0 pt-0.5 ml-4 order-4" href="/gui/admin/" target="winadmin"><i class="icon-lg icon-admin invert"></i></a>
 {%endif%}
   {%endif%}</nav>

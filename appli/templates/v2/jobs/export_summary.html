@@ -18,7 +18,7 @@
         </select></div></fieldset>
               <input type="hidden" name="starttask" value="Y">
       <div class="form-box mb-8 w-auto float-left clear-right">
-         <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>  <a href ="/prj/{{target_proj.projid}}" class="button is-secondary inverse">{{_('Cancel')}}</a> 
+         <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>  <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a> 
             </div></div>
         </form>
         </div>

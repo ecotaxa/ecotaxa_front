@@ -36,11 +36,15 @@
         </li><li><div>{{_('Tools')}}</div>
       {% set disabled = namespace(value=" class=disabled disabled=disabled") %}
       {% if target_proj.status!='ExploreOnly' -%}
+       {%if current_user.is_app_admin == True -%}
+         {%- set disabled.value="" -%}
+       {%else -%}
       {% for manager in target_proj.managers -%}
       {%if current_user.id|int == manager.id|int -%}
         {%- set disabled.value="" -%}
         {%-endif%}
         {%-endfor%}
+        {%-endif-%}
     {%- endif%}
       <ul aria-expanded=false>
       <li><a href="{{url_for("gui_job_create",job_type="Subset", p =target_proj.projid) }}" {{disabled.value if target_proj.status=='ExploreOnly'}}>{{_('<strong>Extract</strong> Subset')}}</a></li>

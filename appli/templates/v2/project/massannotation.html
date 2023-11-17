@@ -16,12 +16,12 @@
 {%elif target_proj and target_proj.projid%}
 {% if nbrows!=None -%}
 <div class='alert alert-success' role='alert'>{{_('Annotation replacement Done successfully. Updated')}} {{nb_rows}} {{_('Rows')}}</div>
-<a class="button inverse w-full sm:w-96" href="/prj/{{target_proj.projid}}">{{_('Back to target project')}}</a>
+<a class="button inverse w-full sm:w-96" href="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}">{{_('Back to target project')}}</a>
 {% else %}
 {% if authors is iterable -%}
 {% if authors|length == 0 %}
 <div class='alert alert-info inverse' role='alert'> {{_('Nothing to replace')}}</div>
-<a class="button inverse w-full sm:w-96" href="/prj/{{target_proj.projid}}">{{_('Back to target project')}}</a>
+<a class="button inverse w-full sm:w-96" href="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}">{{_('Back to target project')}}</a>
 {%else%}
 {%set optionauthors ={"from":("anyuser",_('Any User')),"to":("lastannot",_('Previous Annotation available, or prediction, or Nothing'))}%}
 <form method="post" class="my-0 py-0">

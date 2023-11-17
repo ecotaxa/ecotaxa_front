@@ -1,7 +1,7 @@
 from typing import List
 from flask import flash, request, render_template
 from flask_login import current_user, login_required, fresh_login_required
-from werkzeug.exceptions import HTTPException, NotFound
+from werkzeug.exceptions import NotFound
 from appli import app, gvp, gvg
 from appli.project import sharedfilter
 from appli.utils import ApiClient
@@ -10,6 +10,15 @@ from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, ObjectSetQueryRsp, MergeRsp
 
 from appli.gui.commontools import is_partial_request, py_get_messages
+
+
+@app.route("/gui/prj/<int:projid>", methods=["GET", "POST"])
+# TODO - fresh_login_required
+@login_required
+def gui_prj_classify(projid):
+    from appli.project.main import indexPrj
+
+    return indexPrj(projid)
 
 
 @app.route("/gui/prj/purge/<int:projid>", methods=["GET", "POST"])
@@ -32,7 +41,8 @@ def gui_prj_purge(projid):
                 raise NotFound(404, description=py_messages["project404"])
             elif ae.status in (401, 403):
                 flash(py_messages["cannotpurgeprj"], "error")
-                raise HTTPException(ae.status)
+                if ae.status == 401:
+                    raiseuNAUT(ae.status)
 
     if gvp("objlist") == "":
         # Extract filter values

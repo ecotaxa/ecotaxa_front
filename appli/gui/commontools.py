@@ -21,6 +21,8 @@ from appli.constants import (
 
 
 def _get_last_refresh() -> str:
+    if not current_user.is_authenticated:
+        return None
     import datetime
 
     with ApiClient(TaxonomyTreeApi, request) as apiTaxo:
@@ -29,8 +31,9 @@ def _get_last_refresh() -> str:
             last_refresh = datetime.datetime.strptime(
                 status.last_refresh, "%Y-%m-%dT%H:%M:%S"
             )
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, ApiException):
             last_refresh = None
+
     return last_refresh
 
 
@@ -233,6 +236,7 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
     new_ui = request.path.find("/gui/") >= 0
     description = []
     code = 500
+
     if is_exception or not hasattr(e, "code"):
         if trace:
             description.append(str(trace))
@@ -246,7 +250,7 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
             if partial:
                 return alert_box(
                     type="error",
-                    title=_("error"),
+                    title="error",
                     dismissible=True,
                     codemessage=str(code),
                     message=exception[1],
@@ -278,14 +282,15 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
             code,
         )
     else:
+        temp = render_template(
+            "/v2/error.html",
+            title=str(code),
+            partial=partial,
+            message=Markup("<br>".join(description)),
+            is_safe=True,
+        )
         return (
-            render_template(
-                "/v2/error.html",
-                title=code,
-                partial=partial,
-                message=Markup("<br>".join(description)),
-                is_safe=True,
-            ),
+            temp,
             code,
         )
 
@@ -302,10 +307,7 @@ def crsf_token():
     return "".join(secrets.choice(alphabet) for i in range(45))
 
 
-# format_exception
-
-
-def format_exception(ae, partial=True):
+def format_exception(ae, partial=True) -> tuple:
     if hasattr(ae, "status"):
         msg = str(ae.status)
     else:
@@ -316,7 +318,7 @@ def format_exception(ae, partial=True):
         detail = ""
         if isinstance(ae.body, str):
             if ae.status == 500:
-                body = ae.body
+                detail = ae.body
             else:
                 body = json.loads(ae.body)
                 if "detail" in body:
@@ -324,12 +326,7 @@ def format_exception(ae, partial=True):
         elif isinstance(ae.body, object):
             detail = json.dumps(ae.body)
         msg = msg + " - " + detail
-    if partial:
-        return (1, msg, ae.status)
-    else:
-        return render_template(
-            "v2/error.html", error=ae.status, message=msg, partial=partial
-        )
+        return ae.status, msg
 
 
 def safe_url_redir(url: str) -> str:

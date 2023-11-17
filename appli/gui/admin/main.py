@@ -1,7 +1,7 @@
 import os
 import flask
 from flask import request, url_for, render_template, redirect, flash, escape
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import Forbidden
 from flask_login import current_user, login_required
 from flask_babel import _
 from typing import List
@@ -141,7 +141,9 @@ def gui_users_list_page(
 ) -> str:
 
     if not current_user.is_authenticated:
-        raise HTTPException(403)
+        from appli.gui.staticlistes import py_user
+
+        raise Forbidden(py_user["notauthorized"])
     if partial == True:
         template = "v2/admin/_userslistcontainer.html"
     else:
@@ -158,40 +160,60 @@ def gui_users_list_page(
     "/gui/admin/users/activate/<int:usrid>", defaults={"token": None}, methods=["GET"]
 )
 @app.route(
-    "/gui/admin/users/activate/<int:usrid>/", defaults={"token": None}, methods=["GET"]
+    "/gui/admin/users/activate/<int:usrid>/",
+    defaults={"status_name": None},
+    methods=["GET", "POST"],
 )
-@app.route("/gui/admin/users/activate/<int:usrid>/<token>", methods=["GET"])
+@app.route(
+    "/gui/admin/users/activate/<int:usrid>/<status_name>", methods=["GET", "POST"]
+)
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
-def gui_user_activate(usrid: int, token: str = None) -> str:
+def gui_user_activate(usrid: int, status_name: str = None) -> str:
     if not current_user.is_authenticated:
-        raise HTTPException(403)
+        from appli.gui.staticlistes import py_user
 
-    from appli.gui.users.commontools import api_user_activate
+        raise Forbidden(py_user["notauthorized"])
+    from appli.gui.users.users import api_get_user
+    from appli.back_config import get_user_constants
 
-    reason = gvg("reason", None)
-    if reason != None:
-        status = 2
+    (
+        ApiUserStatus,
+        API_PASSWORD_REGEXP,
+        API_EMAIL_VERIFICATION,
+        API_ACCOUNT_VALIDATION,
+        SHORT_TOKEN_AGE,
+        PROFILE_TOKEN_AGE,
+    ) = get_user_constants(request)
+    if request.method == "GET" and status_name != "active":
+
+        user = api_get_user(usrid)
+
+        print(ApiUserStatus)
+        if status_name != None and status_name in ApiUserStatus.keys():
+            user.status = ApiUserStatus[status_name]
+        return render_template(
+            "v2/admin/activate.html", user=user, status_name=status_name
+        )
+    from appli.gui.users.users import api_user_activate
+
+    reason = gvp("status_admin_comment", None)
+    if reason != None and status_name != "blocked":
+        status = ApiUserStatus["pending"]
     else:
-        status = int(gvg("status", 1))
-    reponse = api_user_activate(usrid, status)
-
-    if reponse == 0:
+        status = int(gvp("status", 1))
+    response = api_user_activate(usrid, status, reason=reason)
+    if response[0] == 0:
         type = "success"
-        if status == 1:
-            message = " is active"
-        else:
-            message = " is not active"
     else:
         type = "error"
-        if status == 1:
-            message = " not activated"
-        else:
-            message = " not desactivated"
-    message = "User " + str(usrid) + message
+
+    message = "User " + str(usrid) + " " + response[1]
     flash(message, type)
     if type == "error":
-        return redirect(url_for("gui_user_edit", id=usrid))
+        return redirect(
+            url_for("gui_user_activate", usrid=usrid, status_name=status_name)
+        )
     return redirect(url_for("gui_users_list_page"))
 
     return render_template(
@@ -206,26 +228,23 @@ def gui_user_activate(usrid: int, token: str = None) -> str:
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
 def gui_user_create():
-
-    from appli.gui.users.commontools import (
+    from appli.gui.users.users import (
         user_create,
         account_page,
         ACCOUNT_USER_CREATE,
-        IS_FROM_ADMIN,
     )
 
     if request.method == "POST":
-        reponse = user_create(usrid=-1, isfrom=IS_FROM_ADMIN)
-        if reponse == 0:
+        response = user_create(usrid=-1, isfrom=True)
+        if response == 0:
             flash("user created", "success")
         else:
-            message = reponse[1]
-            flash(message, "error")
-        return redirect(url_for("gui_users_list_page"))
+            flash(response[1], "error")
+            return redirect(url_for("gui_users_list_page"))
     return account_page(
         action=ACCOUNT_USER_CREATE,
         usrid=-1,
-        isfrom=IS_FROM_ADMIN,
+        isfrom=True,
         template="v2/admin/user.html",
     )
 
@@ -237,15 +256,14 @@ def gui_user_create():
 def gui_user_edit(usrid):
     if usrid == -1:
         return redirect(url_for("gui_user_create"))
-    from appli.gui.users.commontools import (
+    from appli.gui.users.users import (
         user_edit,
         account_page,
         ACCOUNT_USER_EDIT,
-        IS_FROM_ADMIN,
     )
 
     if request.method == "POST":
-        reponse = user_edit(usrid, isfrom=IS_FROM_ADMIN)
+        reponse = user_edit(usrid, isfrom=True)
         if reponse[0] == 0:
             flash(reponse[1], "success")
             return redirect(url_for("gui_user_edit", usrid=usrid))
@@ -256,7 +274,7 @@ def gui_user_edit(usrid):
     return account_page(
         action=ACCOUNT_USER_EDIT,
         usrid=usrid,
-        isfrom=IS_FROM_ADMIN,
+        isfrom=True,
         template="v2/admin/user.html",
     )
 

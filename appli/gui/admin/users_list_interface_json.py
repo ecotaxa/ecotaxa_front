@@ -41,16 +41,11 @@ def user_table_columns(selection: str = "list") -> list:
                 "label": _("Country"),
             },
             "can_do": {"label": _("Auth"), "hidden": "true"},
-            "mail_status": {"label": _("@Status")},
+            "mail_status": {"label": _("@Status"), "format": "check"},
             "status": {
-                "label": _("Active"),
-                "toggle": {
-                    "link": url_for("gui_user_activate", usrid=-1, token=None),
-                    "labels": {
-                        "on": _("click to activate"),
-                        "off": _("click to desactivate"),
-                    },
-                },
+                "label": _("Status"),
+                "format": "button",
+                "link": url_for("gui_user_activate", usrid=-1, token=None),
             },
         },
     }

@@ -9,7 +9,7 @@
     </div>
     <div class="form-box relative">
     <label for="password" class="over required">Password</label>
-    <input type="password" name="password" id="password" class="form-input" placeholder="your password" required>
+    <input type="password" name="password" id="password" class="form-input" data-action="wrapeye" placeholder="your password" required>
     {{password_regexp()}}
     </div>
     <div class="form-box py-0.5 mb-0.5"><a class="leading-6 text-xs italic float-right clear-right" href="{{url_for('gui_me_forgotten')}}">{{ _('forgot password?')}}</a>
@@ -17,7 +17,7 @@
         <input  id="remember" name="remember" class="ml-1 mr-2" type="checkbox" value="y">{{ _('remember me')}}</label>
     </div>
 </fieldset>
-<input type="hidden" name="next" value="{{next}}">
+<input type="hidden" name="next" value="{{next if next != None else ''}}">
 <div class="submit-box">
     <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-login"><i class="icon icon-check invert mr-2.5"></i>{{ _('Log in') }}</button>
     </div>

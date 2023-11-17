@@ -1,14 +1,14 @@
 {%-macro promail_required(type="info",textsize='',user=None)-%}
 {%- if not user or user.mail_status == False  -%}
-<em  class="block alert whitespace-normal h-auto is-{{type if type else 'info'}} mt-0 mb-0 inverse p-1 {{textsize}} max-w-full whitespace-normal">
+<em  class="block alertbox whitespace-normal h-auto is-{{type if type else 'info'}} mt-0 mb-0 inverse p-1 {{textsize}} max-w-full whitespace-normal">
 {{_('Please provide a professional or academic email.')}} {{_('Email addresses from Gmail, Hotmail , Yahoo , Outlook, Protonmail and similar providers are not accepted.')}}
 </em>
 {%-endif%}
 {%-endmacro-%}
 {%-macro profile_comment(comment,email_status, type="info",textsize='') -%}
-{%- if comment!= None and comment.strip()!="" -%}
-<em class="block alert whitespace-normal h-auto is-{{type if type else 'info'}} mt-0 mb-0 inverse p-1 {{textsize}} max-w-full">
-<a href="{{url_for("gui_me_profile")}}" class="overflow-x-hidden mb-0"><i class="icon icon-warning-sm"></i>
+{%- if comment !=None and comment.strip()!="" -%}
+<em class="block alertbox whitespace-normal h-auto is-{{type if type else 'info'}} mt-0 mb-0 inverse p-1 {{textsize}} max-w-full">
+<a href="{{url_for("gui_me_profile")}}" class="overflow-x-hidden mb-0">
 {{ comment }}</a>
 {%-if email_status == False -%}
 {{_('Please click on this link to confirm your email address')}}

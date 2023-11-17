@@ -61,10 +61,8 @@ def index():
     NomFichier = CUSTOM_HOME_BOTTOM
     if not os.path.exists(NomFichier):
         NomFichier = "appli/static/home/homebottom-model.html"
-    txt += """<div class="row" id="homeLegal"><div class="col-sm-12">"""
     with open(NomFichier, "r", encoding="utf8") as f:
         txt += f.read()
-    txt += """<br><a href='/privacy'>Privacy</a></div></div></div>"""
     return PrintInCharte(txt)
 
 
@@ -87,8 +85,6 @@ def before_request_security() -> Optional[ResponseReturnValue]:
     if not current_user.is_authenticated:
         return None
     mru_projects = current_user.last_used_projects
-    # new admin is on - not needed anymore but keep to use old admin for this release only
-    g.appliadmin = 2 in current_user.can_do
     # TODO: A bit useless as unlogged users have no menu to use
     menu: List[Union[Tuple[str, str], Tuple[str, str, str]]] = []
     menu.append((url_for("index"), "Home"))
@@ -134,7 +130,7 @@ def after_request(response):
     response.headers["Content-Security-Policy"] = (
         "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: "
         "cdnjs.cloudflare.com server.arcgisonline.com www.google.com "
-        "www.gstatic.com www.google-analytics.com cdn.ckeditor.com "
+        "www.gstatic.com www.google-analytics.com cdn.ckeditor.com www.googletagmanager.com "
         "cdn.jsdelivr.net unpkg.com fonts.googleapis.com fonts.gstatic.com;"
         "frame-ancestors 'self';form-action 'self';"
     )

@@ -66,6 +66,10 @@ class ApiUserWrapper(object):
         return False
 
     @property
+    def can_do(self) -> list:
+        return self.api_user.can_do
+
+    @property
     def roles(self) -> List:
         roles = []
         for rolevalue, rolename in API_GLOBAL_ROLES.items():
@@ -132,8 +136,6 @@ def user_from_api(user_id):
         ):
             curr_user = anon_user
     except (ApiException):
-        if current_user.is_authenticated:
-            logout_user()
         curr_user = anon_user
     curr_user = ApiUserWrapper(curr_user, ApiUserStatus)
     return curr_user
@@ -165,23 +167,23 @@ def login_validate(email: str, password: str, remember: bool = False):
         from appli.gui.staticlistes import py_user
 
         if ae.status == 401 and "detail" in ae.body:
-            message = json.loads(ae.body)["detail"][0].split("#")
-            if len(message) > 2:
-                user_status = message[0]
-                user_id = message[2]
-                if message[0] in py_user["statusnotauthorized"]:
+            userdata = json.loads(ae.body)["detail"][0]
+            if (
+                API_ACCOUNT_VALIDATION == True
+                or API_EMAIL_VERIFICATION == True
+                and isinstance(userdata, "dict")
+            ):
+                if int(userdata["status"]) == ApiUserStatus["pending"]:
+                    return True, userdata
+                elif str(userdata["status"]) in py_user["statusnotauthorized"]:
                     if (
-                        int(message[0]) == ApiUserStatus["inactive"]
-                        and message[1] == "W"
+                        int(userdata["status"]) == ApiUserStatus["inactive"]
+                        and userdata["mail_status"] == False
                     ):
-                        flash(py_user["statusnotauthorized"][message[1]], "warning")
-                        return False, None
+                        flash(py_user["statusnotauthorized"]["W"], "warning")
                     else:
-                        flash(py_user["statusnotauthorized"][message[0]], "warning")
-                        if int(message[0]) == ApiUserStatus["pending"]:
-                            return False, url_for(
-                                "gui_me_activate", user_id=int(user_id)
-                            )
+                        flash(py_user["statusnotauthorized"]["0"], "warning")
+                        return False, url_for("gui_me_activate", user_id=userdata["id"])
                 else:
                     flash(py_user["not_authorized"], "error")
         else:

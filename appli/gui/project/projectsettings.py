@@ -5,7 +5,6 @@ from typing import List
 
 from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user, login_required
-from werkzeug.exceptions import HTTPException
 from appli import app, gvp, gvpm
 from appli.gui.staticlistes import py_messages
 
@@ -25,7 +24,14 @@ from to_back.ecotaxa_cli_py.models import (
 
 def get_target_prj(prjid) -> ProjectModel:
     with ApiClient(ProjectsApi, request) as api:
-        target_proj: ProjectModel = api.project_query(prjid, for_managing=True)
+        try:
+            target_proj: ProjectModel = api.project_query(prjid, for_managing=True)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                flash(py_messages["notauthorized"], "error")
+            elif ae.status == 404:
+                flash(py_messages["project404"], "error")
+            return None
     return target_proj
 
 
@@ -84,7 +90,10 @@ def _user_cando(autho):
 
 def prj_create() -> str:
     if not _user_cando(1):
-        raise HTTPException(403)
+        from werkzeug.exceptions import Forbidden
+        from appli.gui.staticlistes import py_user
+
+        raise Forbidden(py_user["notauthorized"])
     to_save = gvp("save")
     if to_save == "Y":
         title = gvp("title")
@@ -119,6 +128,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
 
     target_proj = get_target_prj(prjid)
     if target_proj is None:
+        flash(py_messages["selectotherproject"], "info")
         return redirect(url_for("gui_prj"))
     # Reconstitute members list with privs
     # data structure used in both display & submit

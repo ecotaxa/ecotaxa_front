@@ -1,31 +1,5 @@
-{%-macro captcha(reCaptchaID)%}
-  {% if reCaptchaID %}
-    <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
-        <div id="g-recaptcha"></div>
-      <script>
-       const onloadCallback = function() {
-          grecaptcha.render('g-recaptcha', {
-            'sitekey' : '{{reCaptchaID}}'
-          });
-
-      /*    document.querySelector('form').addEventListener('submit',(e)=> {
-            e.preventDefault();
-             const token = grecaptcha.getResponse();
-             console.log('token ' , token)
-              document.getElementById('g-recaptcha-response').value = token;
-          });*/
-      }
-      window.onloadCallback = onloadCallback;
-  /*   grecaptcha.ready(function() {
-        grecaptcha.execute('{{ reCaptchaID }}', {action: 'submit'}).then(function(token) {
-            // Add your logic to submit to your backend server here.
-            console.log('token ' , token)
-             document.getElementById('g-recaptcha-response').value = token;
-        });
-      });*/
-    </script>
-  {% endif %}
-{%endmacro-%}
-{%-macro scriptcaptcha(reCaptchaID)-%}
-    <script src='https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=invisible' id="{{ reCaptchaID }}" async defer></script>
-{%endmacro-%}
+{%-macro captcha(formid,uid)-%}
+<div id="home-captcha" class="js js-captcha" data-url="{{url_for('static',filename='gui/js/botdetect-clean.min.js')}}" data-response="home-captcha-response">
+<div class="comment-captcha">{{_("If you see this field don't modify its content")}}<input type="text" id="home-captcha-response" name="home-captcha-response" value="" placeholder="{{uid}}" alt="{{_('home-captcha-response')}}"></div>
+</div>
+{%-endmacro-%}

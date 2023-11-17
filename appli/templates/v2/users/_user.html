@@ -1,35 +1,38 @@
   {% from "./v2/macros/macros.html" import inputdict %}
-  {% from "./v2/macros/_captcha.html" import captcha, scriptcaptcha%}
+  {% from "./v2/macros/_captcha.html" import captcha%}
   {% from "./v2/users/_profile_macro.html" import promail_required, password_regexp %}
   {%macro password_box()-%}
   {% set disabled=""%}
 
   <div class="form-box">
   {% if user and user.id and user.id>0 %}
-  <a class="font-semibold py-2 text-center block"  data-action="toggle" data-disabled="input">{{_('Password modification')}}<i class="icon icon-chevron-down" data-toggle="icon-chevron-down,icon-chevron-up"></i></a>
+  <a class="font-semibold py-2 text-center block cursor-pointer"  data-action="toggle" data-disabled="input">{{_('Password modification')}}<i class="icon icon-chevron-down" data-toggle="icon-chevron-down,icon-chevron-up"></i></a>
     <div id="change-password"  >
   {% endif%}
   {% set fieldp="password" if createaccount==True else "newpassword"%}
     <label for="{{fieldp}}">{{_('Password') if createaccount==True else _('New password')}}</label>
-    <input type="password" id="password" name="{{fieldp}}" class="form-input" minlength="8" maxlength="20"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} data-new="{{_('new')}}" placeholder="{{_('Password')}}">
+  <input type="password" id="password" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="20"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} data-new="{{_('new')}}" placeholder="{{_('Password')}}">
     {{ password_regexp()}}
     <label for="password_confirm">{{_('Password confirmation')}}</label>
-    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" minlength="8" maxlength="20" pattern="{{api_password_regexp()}}" data-match="password" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" data-new="{{_('new')}}" placeholder="{{_('Password confirmation')}}">
-    {% if user and user.id and user.id>0%}
+    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern="{{api_password_regexp()}}" data-match="password" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" data-new="{{_('new')}}" placeholder="{{_('Password confirmation')}}">
+     {% if user and user.id and user.id>0%}
     </div>
     {% endif%}
     </div>
   {%-endmacro%}
-  <form method="post" action="" id="formu" class="js js-submit relative mt-12 md:mt-8"  {{ 'data-captcha="g-recaptcha-response" data-captchakey='+reCaptchaID if  createaccount == True and not incadmin }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
+  <form method="post" action="" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch=html' if createaccount==True and current_user.is_anonymous else '' }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
    <input type="hidden" name="crsf_token" value={{ crsf_token }}>
-   {% if token %}<input type="hidden" id="token" name="token" value={{ token }}>
+   {% if token!="" and token!=None %}<input type="hidden" id="token" name="token" value={{ token }}>
    {% endif%}
       <input type="hidden" name="id" id="id" value="{{user.id if user.id else -1  }}">
+      {% if user and  user.status_admin_comment and user.status_admin_comment.strip() !="" %}
+        {{ alertbox(type='info', message=user.status.admin_comment,inverse = True,extra = {'small': True} )}}
+      {%endif%}
     <div class="fieldset-wrapper md:flex-row md:flex-nowrap">
       <fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 md:w-1/2'}}">
         <legend class="tab-control">{{legend if legend else ''}}</legend>
-          {% if createaccount == True%}
-            <div class="flex flex-row">
+          {% if user.id==-1 and createaccount==True%}
+          <div class="flex flex-row">
             {% for key,label  in {'first':_('First name'),'last':_('Last name')}.items()%}
             <div class="form-box w-[50%]">
             <label for="name">{{label}}</label>
@@ -42,7 +45,7 @@
           {% endif %}
           <div class="form-box">
             <label for="email">{{_('Email')}}</label>
-            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}"  data-sub="enable" {{'disabled' if token else '' }} required data-required="{{_('an email is required')}}" data-new="{{_('new')}}" placeholder="{{_('Email')}}">
+            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" data-sub="enable"  {{'  disabled' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" data-new="{{_('new')}}" placeholder="{{_('Email')}}">
             {%if createaccount != True or (user and user.email) -%}
             {% set type="warning"-%}
             <input type="hidden" name="currentemail" value="{{user.email}}">
@@ -52,14 +55,22 @@
             {% if createaccount == True or (user and user.mail_status!=True )-%}
             {{promail_required(type,'text-sm',user)}}
             {%endif-%}</div>
-            {{password_box()}}
+            {% if (createaccount==True and user.id==-1 ) or not createaccount %}
+                 {{password_box()}}
+             {%endif%}
              <div class="form-box"><label for="">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True,options=organisations)}}</div>
               <div class="form-box"><label for="">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
           <div class="form-box">
             <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}}</label>
             <textarea id="usercreationreason" name="usercreationreason" class="form-textarea" placeholder="{{_('A few sentences describing how in which context you will use EcoTaxa')}}" rows="4">{{ user.usercreationreason|default('',true) }}</textarea>
-
-          </div>{%if  createaccount == True and not incadmin %}
+          </div>
+          {% if createaccount==True and user.id!=-1%}
+          <div class="form-box">
+          <label for="password">{{_('Your password')}}</label>
+          <input type="password" id="password" name="password" class="form-input" data-action="wrapeye" minlength="8" maxlength="20" required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">
+        </div>
+          {%endif%}
+          {%if  createaccount == True and user.id==-1 and  not incadmin %}
           {% include('v2/users/_acceptconditions.html') with context%}
                           {% endif %}
             </fieldset>{%-if incadmin or incprofile-%}<fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 pl-4 md:w-1/2'}}">
@@ -74,5 +85,6 @@
       <fieldset>
 <div class="w-full text-left mb-8"> <input type="hidden" name="save" value="Y">
   <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{back}}" class="button is-secondary inverse" title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a>
-</div></fieldset>{%if  createaccount == True and not incadmin %}{{captcha(reCaptchaID)}}  {{scriptcaptcha(reCaptchaID)}}{%endif%}
+</div></fieldset>{%if createaccount == True and not incadmin %}{%set uid=unique_id()%}
+{{captcha("formu",uid)}}  {%endif%}
 </form>

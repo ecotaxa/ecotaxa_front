@@ -2,7 +2,7 @@
 {% extends "v2/layout.html" %}
   {%endif%}
   {%block body%}
-  {% if response[0]|int ==0%}
+  {% if response != None and response|length and response[0]|int ==0%}
    <div class="alert is-success">
    {% if response|length ==3  and response[3]== True %}
   <strong>{{_('Thank you. You will be informed by email when your account is activated.')}}</strong>

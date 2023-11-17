@@ -1,13 +1,12 @@
-  {% from "./v2/macros/_captcha.html" import captcha, scriptcaptcha%}
+  {% from "./v2/macros/_captcha.html" import captcha%}
     {% from "./v2/users/_profile_macro.html" import promail_required %}
-<form id="form-register" action="/gui/register/" method="POST"  class="js js-submit" name="register_user_form" >
+<form id="form-register" action="/gui/register/" method="POST"  class="js js-submit" data-fetch="html" name="register_user_form" >
 <fieldset class="mb-0.5"><legend>{{ _('EcoTaxa: create an account') }}</legend>
     <div class="form-box relative">
     <label for="register_email" class="over" data-request="help" data-for="help_choose_email">{{_('Your email')}}</label>
     <input name="register_email" id="register_email" class="form-input" placeholder="Email address" type="email" required autofocus>
     {{promail_required('info','text-xs')}}
-    </div><div class="submit-box">
-    <button id="register" class="button is-action hover:bg-mainblue-200 focus-check text-center font-semibold w-full" type="submit">{{ _('Create account') }}</button>
-    </div></fieldset>
-    {{captcha(reCaptchaID)}}  {{scriptcaptcha(reCaptchaID)}}
+    </div><div class="submit-box">  <button id="register" type="submit" class="button is-action hover:bg-mainblue-200 focus-check text-center font-semibold w-full"> {{_('Create account') }}</button>  </div></fieldset>
+    {%set uid=unique_id()%}
+      {{captcha("form-register",uid)}}
 </form>

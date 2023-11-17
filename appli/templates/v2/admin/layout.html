@@ -6,7 +6,7 @@
 <div id="bar1" class="bar"></div>
 <div id="bar2" class="bar"></div>
 <div id="bar3" class="bar"></div>
-</div><ul id="navbar-menu" class="admin-menu"><li><a class="uppercase" href="/gui/admin/" target="_winadmin">Home<i class="icon-sm icon-admin invert "></i></a></li>
+</div><ul id="navbar-menu" class="admin-menu"><li><a class="uppercase" href="/gui/admin/" target="winadmin">Home<i class="icon-sm icon-admin invert "></i></a></li>
 {%-else-%}<ul aria-expanded=false>{%-endif%}
 
 {%for key,menuitem in menuitems.items()-%}
@@ -19,27 +19,14 @@
 </ul>
 {%endif%}
 {%-endmacro-%}
-<!DOCTYPE html>
-<html lang="{{lang if lang !='' else 'en'}}">
-<head>
-  {% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else '2.6.8'%}
-<link rel=stylesheet rel="preload" type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}?v={{ ecotaxa_version  }}">
- <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='/gui/images/apple-touch-icon.png') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='/gui/images/favicon-32x32.png')}}">
-<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='/gui/images/favicon-16x16.png')}}">
-<link rel="manifest" href="{{ url_for('static', filename='/gui/images/site.webmanifest')}}">
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width, initial-scale=1" user-scalable="no">
-  <meta http-equiv="refresh">
-  <title>Ecotaxa 3.0 ADMIN</title>
-</head>
+{% set title = 'Ecotaxa 3.0 ADMIN'%}
+{% include 'v2/partials/_head.html' %}
 <body>
   <div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }} flex flex-col">
       <header class="bg-gradient-to-r from-stone-800 to-stone-600 h-12 p-1 pt-3.5">
         <div class="flex flex-wrap  pl-2 md:pl-2 pr-4 w-full justify-between">
           <div class="order-1 ">
-              <a href="{{url_for("index")}}" target="_winecotaxa"  class="text-secondblue-300 fill-secondblue-200"  title="{{_('back to Ecotaxa')}}"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa_ico.png') }}" class="object-scale-down h-8 py-0.5 mb-1" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0" /></a>
+              <a href="{{url_for("index")}}" target="winecotaxa"  class="text-secondblue-300 fill-secondblue-200"  title="{{_('back to Ecotaxa')}}"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa_ico.png') }}" class="object-scale-down h-8 py-0.5 mb-1" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0"></a>
           </div>
             <div class="flex  md:flex-row  md:flex-nowrap flex-grow  w-full md:w-auto  md:flex-nowrap text-stone-50 md:justify-center py-2  md:py-0 order-3 md:order-2 text-sm md:text-base lg:text-lg">
                   <nav class="js js-nav block w-auto mx-auto h-full">{{ display_menu(admin_menu(),0)}}</nav>
@@ -47,20 +34,11 @@
               {% include 'v2/partials/_navuser.html' with context%}
         </div>
   </header>
-    <main {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton.jpg') + '\')" class="bg-image" '| safe if bg }}>
-       {% if not mask_alert  %}
-       <div id="top-alerts" class="w-full px-2 group-alert-top">
-       {% from "./v2/macros/macros.html" import topalerts with context%}
-         {{ topalerts() }}
-       </div>
-         {% endif %}
-      <div class="w-full">
-        {% block body %}{% endblock %}
-      </div>
-        <a class="up pageup js js-scrollpy" data-threshold="hscreen" data-action="gotop"></a>
-    </main>
-    <footer class="fixed block w-screen bottom-0 z-40 background-bottom pt-1 pb-2">{% include './v2/partials/_footer.html' %}</footer>
-  </div>
-<script  src="{{ url_for('static', filename='gui/main.js') }}?v={{ ecotaxa_version }}"></script>
+  <main  {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton.jpg') + '\')" class="bg-image" '| safe if bg }}>
+  {% include "v2/partials/_maintop.html"%}
+  <div class="w-full">
+    {% block body %}{% endblock %}
+  </div></main></div>
+    {% include "v2/partials/_mainbottom.html"%}
 </body>
 </html>
