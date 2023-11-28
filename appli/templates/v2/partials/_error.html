@@ -12,3 +12,7 @@
 <pre>{{ trace|safe }}</pre>
     {% endblock %}
 </section>
+{%- if not current_user or not current_user.is_authenticated -%}
+<script type="text/javascript">setTimeout(function() {window.location.href="{{url_for("gui_login")}}";},5000);</script>
+<a href="{{url_for("gui_login")}}" class="mx-auto">Log in</a>
+{%-endif%}

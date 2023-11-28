@@ -39,5 +39,6 @@ def get_user_constants(request) -> tuple:
             consts.account_validation,
             consts.short_token_age,
             consts.profile_token_age,
+            consts.add_ticket,
         )
     return current_app.config["API_USER_CONSTANTS"]

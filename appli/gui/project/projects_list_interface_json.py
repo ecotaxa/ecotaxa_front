@@ -37,7 +37,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                 "annotators": {"label": _("Annotators"), "hidden": True},
                 "managers": {"label": _("Managers"), "hidden": True},
                 "viewers": {"label": _("Viewers"), "hidden": True},
-                "status": {"label": _("Status")},
+                "status": {"label": _("Status"), "format": "status"},
                 "visible": {
                     "label": _("Visibility"),
                     "format": "check",

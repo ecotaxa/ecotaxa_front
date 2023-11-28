@@ -28,6 +28,7 @@ from appli.security_on_backend import ApiUserWrapper
     API_ACCOUNT_VALIDATION,
     SHORT_TOKEN_AGE,
     PROFILE_TOKEN_AGE,
+    ADD_TICKET,
 ) = get_user_constants(request)
 
 ACCOUNT_USER_CREATE = "create"

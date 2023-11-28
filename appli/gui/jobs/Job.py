@@ -8,6 +8,7 @@ from werkzeug.datastructures import FileStorage
 
 from appli import gvg, gvp
 from appli.project import sharedfilter
+from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import FilesApi
 from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
@@ -57,6 +58,7 @@ class Job(object):
         from to_back.ecotaxa_cli_py.api import ProjectsApi
         from to_back.ecotaxa_cli_py.models import ProjectModel
 
+        target_proj = None
         with ApiClient(ProjectsApi, request) as api:
             try:
                 target_proj: ProjectModel = api.project_query(
@@ -64,9 +66,12 @@ class Job(object):
                 )
             except ApiException as ae:
                 if ae.status in (401, 403):
+                    from appli.gui.commontools import py_get_messages
+
+                    py_messages = py_get_messages("project")
                     ae.reason = py_messages["access403"]
 
-        if target_proj:
+        if target_proj != None:
             if full == True:
                 return target_proj
             return dict(

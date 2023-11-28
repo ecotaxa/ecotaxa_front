@@ -126,6 +126,7 @@ def user_from_api(user_id):
         API_ACCOUNT_VALIDATION,
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
+        ADD_TICKET,
     ) = get_user_constants(request)
     try:
         with ApiClient(UsersApi, request) as api:
@@ -155,6 +156,7 @@ def login_validate(email: str, password: str, remember: bool = False):
         API_ACCOUNT_VALIDATION,
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
+        ADD_TICKET,
     ) = get_user_constants(request)
     req = LoginReq(username=email, password=password)
 

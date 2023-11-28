@@ -282,10 +282,10 @@ def internal_server_error(e):
     return new_ui_error(e)
 
 
-@app.errorhandler(ApiException)
-def handle_apiexception(e):
-    app.logger.exception(e)
-    return new_ui_error(e)
+# @app.errorhandler(ApiException)
+# def handle_apiexception(e):
+#    app.logger.exception(e)
+#    return new_ui_error(e)
 
 
 @app.errorhandler(Exception)
@@ -336,11 +336,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.1"
+ecotaxa_version = "2.7.2"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2023-10-03"
+    return ecotaxa_version + " 2023-11-28"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -351,6 +351,13 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2023-11-28: V 2.7.2
+    Fix Safari bug ( js in user mod profile )
+    Fix Chrome bug (js my-files filepath)
+    Fix current_user in security_on_backend
+    Feature js-captcha
+    Feature user register better response and error message
+    Feature ticket for user validation
 2023-10-03: V 2.7.1
     Features : login , register , admin , user profile replaced by new version - user login and registration follow major modification in the API users
     Fix error reporting (merge new and current error handling)

@@ -184,20 +184,27 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
         API_ACCOUNT_VALIDATION,
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
+        ADD_TICKET,
     ) = get_user_constants(request)
+
     if request.method == "GET" and status_name != "active":
-
         user = api_get_user(usrid)
-
-        print(ApiUserStatus)
         if status_name != None and status_name in ApiUserStatus.keys():
             user.status = ApiUserStatus[status_name]
         return render_template(
-            "v2/admin/activate.html", user=user, status_name=status_name
+            "v2/admin/activate.html",
+            user=user,
+            status_name=status_name,
+            add_ticket=ADD_TICKET,
         )
     from appli.gui.users.users import api_user_activate
 
     reason = gvp("status_admin_comment", None)
+
+    if ADD_TICKET != "":
+        ticket = gvp("ticket", None)
+        if ticket != None:
+            reason = ticket + ADD_TICKET + reason
     if reason != None and status_name != "blocked":
         status = ApiUserStatus["pending"]
     else:
