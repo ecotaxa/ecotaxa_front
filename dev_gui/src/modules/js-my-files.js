@@ -327,7 +327,6 @@ export class JsMyFiles {
           JsDirToZip
         } = await import('../modules/files/js-dirtozip.js');
         this.jsDirToZip = new JsDirToZip();
-        console.log('jsdirtozp')
         this.jsDirToZip.on(this.jsDirToZip.eventnames.ready, (e) => {
           console.log('ready')
           this.initDisplays();
@@ -340,6 +339,9 @@ export class JsMyFiles {
               console.log('console', e);
               type = 'warning'
               break;
+            case 'error':
+              type = 'error';
+              console.log('error', e);
             default:
               console.log('message', e);
           }
@@ -494,6 +496,7 @@ export class JsMyFiles {
         message = {
           name: this.jsDirToZip.eventnames.bigfile,
           path: this.path,
+          bigfile: true
         };
 
         const filepath = opts;
@@ -518,13 +521,13 @@ export class JsMyFiles {
         btn.setAttribute("disabled", true);
         break;
       case this.jsDirToZip.eventnames.gzip:
-        text = `compress and send separately big file :${(opts && opts.bigfile)?opts.bigfile:``} ${(opts && opts.size)?opts.size:``}`;
+        text = `compressing separately big file :${(opts && opts.bigfile)?opts.bigfile:``} ${(opts && opts.size)?opts.size:``}`;
         btn.textContent = text;
-        btn.removeAttribute("disabled");
+        btn.setAttribute("disabled", true);
         console.log('optsbigfl', opts)
         btn.dataset.message = JSON.stringify({
           name: this.jsDirToZip.eventnames.endzip,
-          path: this.path,
+          path: (opts.hasOwnProperty("bigfile")) ? opts.bigfile : e.path,
           bigfile: (opts.hasOwnProperty("bigfile") && opts.bigfile !== "")
         });
         break;
@@ -564,7 +567,7 @@ export class JsMyFiles {
     const btn = document.getElementById(display);
     if (!btn) {
       parent = (parent) ? parent : this.dropzone;
-      parent.insertAdjacentHTML('beforeend', `<div id="${display}" class="button ${display} ${css.hide} ">`);
+      parent.insertAdjacentHTML('beforeend', `<button id="${display}" class="button ${display} ${css.mright} ${css.hide}"></button>`);
       this[btnkey] = document.getElementById(display);
       this[btnkey].addEventListener('click', async (e) => {
         this.emitToZip(e.currentTarget);

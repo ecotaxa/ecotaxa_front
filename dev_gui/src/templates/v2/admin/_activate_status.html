@@ -7,7 +7,16 @@
     {% endfor %}
   </div>
 </div>
+{%- set comment = user.status_admin_comment %}
+{%-if add_ticket and add_ticket !="" and current_user.is_users_admin == True -%}
+  {%- set comments = user.status_admin_comment.split(add_ticket) -%}
+  {% if comments|length >1 -%}
+  {%- set ticket = comments[0]-%}
+  {%- set comment = comments[1]-%}
+  {%-endif-%}
+<div class="form-box  flex flex-row"><label for="ticket" class="whitespace-nowrap mr-4">{{_('Ticket code')}}:</label><input type="text" class="form-input " name="ticket" id="ticket" value="{{ticket}}"></div>
+{%-endif-%}
 <div class="form-box">
   <label for="status_admin_comment">{{_('Comment about required modifications')}}</label>
-  <textarea id="status_admin_comment" name="status_admin_comment" rows=2 maxlength="250" class="w-full form-input">{{ '' if user.status_admin_comment == 'None' else user.status_admin_comment}}</textarea>
+  <textarea id="status_admin_comment" name="status_admin_comment" rows=2 maxlength="250" class="w-full form-input">{{ '' if  comment == 'None' else comment}}</textarea>
   </div>

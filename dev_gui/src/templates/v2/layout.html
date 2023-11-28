@@ -15,7 +15,7 @@
   <div class="w-full">
     {% block body %}{% endblock %}
   </div></main></div>
-    {% include "v2/partials/_mainbottom.html"%}
+  {% include "v2/partials/_mainbottom.html" %}
   {% if g_status('google_analytics_id') %}
   {% set cookieGAOK =  g_status('cookieGAOK') %}
   {% if cookieGAOK =='Y' %}

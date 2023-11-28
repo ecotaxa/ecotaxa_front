@@ -7,6 +7,7 @@
     <form method="post" action="" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch="html"' if createaccount==True and current_user== None }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
      <input type="hidden" name="crsf_token" value={{ crsf_token }}>
     <input type="hidden" name="id" id="id" value="{{user.id if user.id else -1  }}">
+  
       <div class="px-2 pb-8 border-b border-stone-50 mb-4">
     {% for  prop,label in {"name":_("Name"),"email":_("Email"),"country":_("Country"),"organisation":_("Organisation"),"creationreason":_("Planned usage of EcoTaxa")}.items() %}
       <div class="grid w-full py-1">

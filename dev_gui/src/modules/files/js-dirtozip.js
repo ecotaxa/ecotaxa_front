@@ -109,26 +109,29 @@ export class JsDirToZip {
         if (!e.bigfile && this.zip) {
           console.log('zipend', this.zip)
           this.zip.end();
-        } else if (e.bigfile && this.gzipped.name) console.log('-------------------------gzipped end ', this.gzipped)
+        } else if (e.bigfile && this.gzipped) console.log('-------------------------gzipped end ', this.gzipped)
         const message = {
           name: this.eventnames.sendfile
         };
         if (e.part) {
           message["part"] = e.part;
         } else this.part = 0;
-        if (e.bigfile) message["bigfile"] = e.bigfile;
+        if (e.hasOwnProperty("bigfile")) message["bigfile"] = e.bigfile;
+        if (e.hasOwnProperty("path")) message["path"] = e.path;
         console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%', e)
         this.emit(this.eventnames.complete, message);
       });
 
       this.on(this.eventnames.sendfile, async (e) => {
-        let file = (e.bigfile) ? this.gzipped : await this.getFile();
+        console.log('eventsendfile', e)
+        let file = (e.bigfile) ? await this.getFile(this.gzipped): await this.getFile();
         console.log('sendfile', file)
-        /*  if (e.bigfile) this.sendChunk((e.path ? e.path : ''));
+        /* if (e.bigfile) this.sendChunk((e.path ? e.path : ''));
           else */
         this.sendZipFile(file, (e.path ? e.path : ''), null, (e.bigfile ? e.bigfile : false));
       });
       this.on(this.eventnames.bigfile, (e) => {
+        console.log('onsendchunk', e)
         this.sendChunk((e.path ? e.path : ''));
       });
     }
@@ -211,6 +214,8 @@ export class JsDirToZip {
   }
   async sendBigFile(file, callback, filepath) {
     console.log('sendbigfilepath', filepath)
+    this.dt = Date.now();
+    filepath = (filepath.indexOf('/') === 0) ? filepath.substr(1) : filepath;
     /*let filepath = file.webkitRelativePath;
     filepath = (filepath === '') ? dirname + '/' + file.name : filepath;*/
     const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
@@ -245,31 +250,23 @@ export class JsDirToZip {
       const selfi = this;
       const gzipped = new Gzip({
         level: 9,
-        filename: file.name
+        filename: filepath
       });
       gzipped.ondata = (data, final) => {
         if (final) {
           console.log('final BIGFILE%%%%%%%%%%%%%%%%%%%%' + selfi.eventnames.bigfile, filepath)
-          selfi.emit(selfi.eventnames.counter, {
-            name: 'zip',
-            filepath: filepath,
-            size: file.size
-          });
-          selfi.gzipped = streamhandle;
-          console.log('big file *******************', this.gzipped);
           selfi.emit(selfi.eventnames.complete, {
             name: selfi.eventnames.bigfile,
             bigfile: filepath
 
           });
-
           console.log('callbackbig', callback)
-          //  gzipped.terminate();
-          //  streamhandle.close();
-
+          streamhandle.close();
+          console.log('timetozip', (Date.now() - this.dt) / 1000)
+          selfi.gzipped = filestream;
+          console.log('big file *******************' + filepath, selfi.gzipped);
 
         } else {
-
           streamhandle.write(data, {
             at: pos
           });
@@ -393,11 +390,15 @@ export class JsDirToZip {
   }
 
   async sendChunk(path, start = 0, chunknum = 0, chunksize = MAXSIZE) {
-    const file = (this.gzipped.kind) ? await this.gzipped.getFile(): file;
+    console.log('send chunk ', this.gzipped)
+    console.log('chunkpath', path)
+    const file = (this.gzipped) ? await this.getFile(this.gzipped): await this.getFile();
+    console.log('file', file)
     path = path.split('/');
     path.pop();
     path = path.join('/');
     const end = Math.min(start + chunksize, file.size);
+    console.log('end---', end)
     if (end === file.size) {
 
       this.sendZipFile(file, path, null, true);
@@ -413,11 +414,13 @@ export class JsDirToZip {
     }
     return chunknum;
   }
-  async getFile() {
-    const file = await this.filestream.getFile();
+  async getFile(filestream = null) {
+    filestream = (filestream === null) ? this.filestream : filestream;
+    const file = await filestream.getFile();
     return file;
   }
   async sendZipFile(file, path, callbackchunk = null, isbigfile = false) {
+    console.log('sendzipfile------------_______________________' + isbigfile, file)
     const message = (isbigfile) ? {
       bigfile: file.name
     } : {};
