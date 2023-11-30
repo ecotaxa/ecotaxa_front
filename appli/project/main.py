@@ -173,7 +173,6 @@ def _set_filters_from_prefs_and_get(page_vars, prj_id, a_request):
         a_val: a_request.args[a_val]
         for a_val in FilterList.keys() & a_request.args.keys()
     }
-    page_vars.update(posted_vals)
     # Read user preferences related to this project
     with ApiClient(UsersApi, a_request) as api:
         try:
@@ -188,6 +187,8 @@ def _set_filters_from_prefs_and_get(page_vars, prj_id, a_request):
             pass
         except ValueError:
             pass
+    # Override with GET values
+    page_vars.update(posted_vals)
 
 
 def _set_prefs_from_filters(filters, prj_id):
