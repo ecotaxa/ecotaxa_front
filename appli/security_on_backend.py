@@ -185,7 +185,7 @@ def login_validate(email: str, password: str, remember: bool = False):
                         flash(py_user["statusnotauthorized"]["W"], "warning")
                     else:
                         flash(py_user["statusnotauthorized"]["0"], "warning")
-                        return False, url_for("gui_me_activate", user_id=userdata["id"])
+                        return False, userdata
                 else:
                     flash(py_user["not_authorized"], "error")
         else:

@@ -410,7 +410,9 @@ def user_account(
             message = py_user["profilesuccess"]["update"]
             if not isfrom:
                 if API_EMAIL_VERIFICATION != False:
-                    if api_user["email"] != currentemail:
+                    if api_user["email"] != currentemail and (
+                        current_user.is_anonymous or not current_user.active
+                    ):
                         message = (
                             py_user["statusnotauthorized"]["emailchanged"]
                             + py_user["checkspam"]
@@ -496,6 +498,7 @@ def account_page(
         createaccount=(action == ACCOUNT_USER_CREATE),
         api_email_verification=API_EMAIL_VERIFICATION,
         api_account_validation=API_ACCOUNT_VALIDATION,
+        add_ticket=ADD_TICKET,
         token=token,
         isfrom=isfrom,
         reCaptchaID=reCaptchaID,
@@ -602,8 +605,12 @@ def api_current_user(redir: bool = True):
         curr_user = user_from_api(current_user.id)
         from flask_login import logout_user, confirm_login
 
+        # if the current_user is not an admin and the email was changed
         if (
-            curr_user.email != current_user.email
+            (
+                curr_user.email != current_user.email
+                and (curr_user.is_admin != True or current_user.is_users_admin != True)
+            )
             or curr_user.id <= 0
             or curr_user.status != ApiUserStatus["active"]
         ):
