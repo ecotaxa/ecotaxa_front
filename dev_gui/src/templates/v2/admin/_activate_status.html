@@ -7,9 +7,9 @@
     {% endfor %}
   </div>
 </div>
-{%- set comment = user.status_admin_comment %}
-{%-if add_ticket and add_ticket !="" and current_user.is_users_admin == True -%}
-  {%- set comments = user.status_admin_comment.split(add_ticket) -%}
+{%- set comment = user.status_admin_comment if  user.status_admin_comment else '' %}
+{%-if add_ticket != None and add_ticket !=""  and current_user.is_users_admin == True -%}
+  {%- set comments = user.status_admin_comment.split(add_ticket) if user.status_admin_comment else '' -%}
   {% if comments|length >1 -%}
   {%- set ticket = comments[0]-%}
   {%- set comment = comments[1]-%}

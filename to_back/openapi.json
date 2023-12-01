@@ -2,7 +2,7 @@
   "openapi":"3.0.2",
   "info":{
     "title":"EcoTaxa",
-    "version":"0.0.34"
+    "version":"0.0.35"
   },
   "servers":[
     {
@@ -1265,7 +1265,7 @@
         "tags":[
           "collections"
         ],
-        "summary":"Emodnet Format Export",
+        "summary":"Darwin Core Format Export",
         "description":"**Export the collection in Darwin Core format, e.g. for EMODnet portal**, @see https://www.emodnet-ingestion.eu\n\nProduces a DwC-A (https://dwc.tdwg.org/) archive into a temporary directory, ready for download.\n\nMaybe useful, a reader in Python: https://python-dwca-reader.readthedocs.io/en/latest/index.html\n\nNote: Only manageable collections can be exported.",
         "operationId":"darwin_core_format_export",
         "requestBody":{
@@ -5815,6 +5815,12 @@
             "type":"integer",
             "description":"Profile modification token lifespan.",
             "default":24
+          },
+          "add_ticket":{
+            "title":"ticket separator",
+            "type":"string",
+            "description":"string separator, permits to add ticket number when asking more information before user validation",
+            "default":""
           }
         },
         "description":"Values which can be considered identical over the lifetime of the back-end."
@@ -5902,19 +5908,6 @@
             "default":false,
             "example":false
           },
-          "pre_mapping":{
-            "title":"Categories mapping",
-            "type":"object",
-            "additionalProperties":{
-              "type":"integer"
-            },
-            "description":"Mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon. Note: These are EcoTaxa categories, WoRMS mapping happens after, whatever.",
-            "default":{},
-            "example":{
-              "456":956,
-              "2456":213
-            }
-          },
           "include_predicted":{
             "title":"Include predicted",
             "type":"boolean",
@@ -5941,6 +5934,20 @@
               "ABO"
             ]
           },
+          "computations_pre_mapping":{
+            "title":"Computation mapping",
+            "type":"object",
+            "additionalProperties":{
+              "type":"integer"
+            },
+            "description":"Mapping from present taxon (key) to output replacement one (value), during computations. Use a 0 replacement to _discard_ the objects with present taxon. Note: These are EcoTaxa categories, WoRMS mapping happens after, whatever.",
+            "default":{},
+            "example":{
+              "456":956,
+              "2456":213,
+              "93672":0
+            }
+          },
           "formulae":{
             "title":"Computation formulas",
             "type":"object",
@@ -5954,6 +5961,18 @@
               "total_water_volume":"sam.tot_vol/1000",
               "individual_volume":"4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3"
             }
+          },
+          "extra_xml":{
+            "title":"Extra XML",
+            "type":"array",
+            "items":{
+              "type":"string"
+            },
+            "description":"XML blocks which will be output, reformatted, inside the <dataset> tag of produced EML. Formal schema is in dataset section of: https://eml.ecoinformatics.org/schema/eml_xsd ",
+            "default":[],
+            "example":[
+              "<associatedParty>\n    <individualName><givenName>Coco</givenName><surName>Rico</surName>\n    </individualName>\n    <organizationName>CHICK</organizationName>\n      </associatedParty>"
+            ]
           }
         },
         "additionalProperties":false,
@@ -7294,8 +7313,9 @@
             1820
           ],
           "features":[
-            "area",
-            "esd"
+            "fre.area",
+            "fre.esd",
+            "obj.depth_max"
           ],
           "use_scn":true
         }
@@ -8716,8 +8736,7 @@
             "title":"User's password'",
             "type":"string",
             "description":"Encrypted (or not) password.",
-            "example":"$foobar45$",
-            "private":true
+            "example":"$foobar45$"
           },
           "name":{
             "title":"Name",
