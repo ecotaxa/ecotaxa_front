@@ -56,15 +56,16 @@ def gui_login() -> str:
         if email == None or password == None:
             flash(py_user["invaliddata"], "error")
         else:
-            resp, redir = login_validate(email, password, (remember == "y"))
+            resp, userdata = login_validate(email, password, (remember == "y"))
             if resp:
                 next = gvp("next", None)
                 if next != None:
                     if next.strip() != "":
                         next = safe_url_redir(next)
                         return redirect(next)
-                if redir:
-                    return redirect(redir)
+            elif isinstance(userdata, dict):
+                redir = url_for("gui_me_activate", token="no")
+                return redirect(redir)
             else:
                 return redirect(url_for("gui_login"))
     return render_template("v2/login.html", bg=True)
@@ -402,17 +403,27 @@ def utility_processor():
 
         file = app.config.get("APP_GUI_MESSAGE_FILE")
         ret = {}
-
         if os.path.exists(file):
-
+            messages = None
             with open(file, "r", encoding="utf-8") as f:
-                messages = json.loads(f.read())
+                try:
+                    messages = json.loads(f.read())
+                except json.JSONDecodeError as e:
+                    print("Invalid JSON syntax:", e)
+            if isinstance(messages, dict):
+                for key, message in messages.items():
+                    name = key + cookiename
+                    dailyinfo = request.cookies.get(name)
+                    print(dailyinfo)
+                    print(message)
+                    if isinstance(message, dict) and (
+                        "active" in message
+                        and message["active"] == 1
+                        and "date" in message
+                        and dailyinfo != message["date"]
+                    ):
+                        ret[key] = message
 
-            for key, message in messages.items():
-                name = key + cookiename
-                dailyinfo = request.cookies.get(name)
-                if message["active"] == 1 and (dailyinfo != message["date"]):
-                    ret[key] = message
         if len(ret):
             return render_template(
                 "v2/partials/_top_messages.html",
