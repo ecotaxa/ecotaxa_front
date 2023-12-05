@@ -1,7 +1,7 @@
 {% set types = ['validated','dubious','predicted','unclassified']%}
 {%macro taxo_row(taxastat,typerow='taxon', addon = '')-%}
 
-<tr><td class="item font-normal" data-id="{{taxastat.used_taxa[0]}}" >{{ taxastat.name if typerow == 'taxon' else taxastat.sampleid }}</td>
+<tr><td class="item font-normal " data-id="{{taxastat.used_taxa[0]}}" >{{ taxastat.name if typerow == 'taxon' else taxastat.sampleid }}</td>
   <td>{{addon}}</td>
     {%- for type in types -%}
    {% set total= taxastat.nb_unclassified +  taxastat.nb_validated + taxastat.nb_dubious + taxastat.nb_predicted %}

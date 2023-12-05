@@ -5,7 +5,7 @@
     <select id="can_do" name="can_do" multiple class="form-select">
       <option value="">Default</option>
       {% for k,v in roles %}
-      <option value="{{ k }}" {{ 'selected' if user.can_do and k|int in  user.can_do }}>{{ v }}</option>
+      <option value="{{ k }}" {{ 'selected=selected' if user.can_do and k|int in  user.can_do }}>{{ v }}</option>
       {% endfor %}
     </select>
   </div>

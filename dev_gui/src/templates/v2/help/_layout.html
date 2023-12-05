@@ -1,8 +1,8 @@
 
 {% if current_user %}
-{% set helps =[{'name':'Request access','file':'_help_project_req_access','resume':'all info to request access to project and participate'},{'name':'How to prepare data','file':'_help_jobs_prepare_data'},{'name':'Import data','file':'_help_job_import'},{'name':'Project settings','file':'_help_projectsettings'},{'name':'Job monitoring','file':'_help_job_monitor'},{'name':'About Project','file':'_help_project_stats'}]%}
+{% set helps =[{'name':'Access','file':'_help_project_req_access','resume':'all info to create and participate to projects'},{'name':'How to prepare data','file':'_help_jobs_prepare_data'},{'name':'Import data','file':'_help_job_import'},{'name':'Project settings','file':'_help_projectsettings'},{'name':'Job monitoring','file':'_help_job_monitor'},{'name':'About Project','file':'_help_project_stats'}]%}
 {% else %}
-{% set helps =[{'name':'Request access','file':'_help_project_req_access'}]%}
+{% set helps =[{'name':'Access','file':'_help_project_req_access'}]%}
 {% endif %}
 {% if not partial%}
 {% macro menuhelp(helps) -%}

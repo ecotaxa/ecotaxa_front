@@ -1,15 +1,14 @@
-{%-macro captcha(reCaptchaID,formid)-%}
-  {%- if reCaptchaID -%}
-  <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
-  <div class="g-recaptcha" id="g-recaptcha" ></div>
-    <script type="text/javascript">
-    function onLoadCallback() {
-      const widgetId=grecaptcha.render('g-recaptcha', {
-         'sitekey' : '{{reCaptchaID}}',
-       });
-    //   grecaptcha.reset(widgetId);
-       }
+<input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
+<script src=https://www.google.com/recaptcha/api.js?render={{reCaptchaID}} ></script>
+      <script type="text/javascript">
+        const captchaform= document.getElementById("{{formid}}");
+        if (captchaform !== null) {
+        const formbtn = captchaform.querySelector('[type="submit"]');
+        if(formbtn !== null) {
+          formbtn.disabled=true;
+          grecaptcha.ready(function() {
+          document.getElementById('g-recaptcha-response').value=window.localStorage['_grecaptcha'];
+          formbtn.disabled=false;
+          });
+}}
 </script>
-<script src=https://www.google.com/recaptcha/api.js?onload=onLoadCallback&render=explicit id="{{ReCaptchaID}}" async defer></script>
-  {%- endif -%}
-{%-endmacro-%}

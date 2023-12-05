@@ -1,6 +1,4 @@
-{%-macro captcha(reCaptchaID,formid)-%}
-  {%- if reCaptchaID -%}
-    <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
+  <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
 <script src=https://www.google.com/recaptcha/api.js?render={{ReCaptchaID}} async defer></script>
       <script type="text/javascript">
         function onClick(e) {
@@ -12,5 +10,3 @@
         });
       }
     </script>
-  {%- endif -%}
-{%-endmacro-%}

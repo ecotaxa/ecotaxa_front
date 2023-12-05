@@ -154,6 +154,7 @@ export class TableComponent {
       if (this.params.defer) this.deferLoad(container, from);
       else this.fetchData(container, from);
     } else this.tableActivate(container);
+    this.dt = Date.now();
   }
 
   waitActivate(container) {

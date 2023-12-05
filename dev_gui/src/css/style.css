@@ -178,8 +178,10 @@ article.table-of-contents > details[open] > summary::before {@apply content-[att
 /*forms inputs && label */
 input[class="form-"],  textarea[class="form-"] {@apply block w-full}
 input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"], .form-select ,.form-input , textarea.form-textarea   {@apply global-form-input  selection:bg-mainblue-200}
-.form-input:focus, .form-select:focus , .form-textarea:focus  {@apply ring-0 ring-transparent border-secondblue-200 valid-check} /* important otherwise field border color on focus does not work correctly */
-.form-select option , select option {@apply active:bg-secondblue-300  focus:bg-secondblue-200 hover:bg-secondblue-200 checked:bg-secondblue-300 selection:bg-secondblue-300}
+.form-input:focus, .form-select:focus, .form-textarea:focus  {@apply ring-0 ring-transparent border-secondblue-200  selection:bg-secondblue-300 } /* important otherwise field border color on focus does not work correctly */
+.form-input, .form-textarea  {@apply focus:valid-check }
+select option[selected="selected"], select option[selected=true], select option[selected="true"] , select option[selected=""]  {@apply font-semibold bg-secondblue-200 }
+select option:active, select option:focus  {@apply font-semibold bg-secondblue-200 }
 /* todo: simplification*/
 .form-checkbox, .form-radio {@apply text-stone-700 mr-2}
 :not(.group-radio) input[type="radio"], input[type="checkbox"], :not(.group-radio) input.form-checkbox, :not(.group-radio) input.form-radio {@apply appearance-none indeterminate:bg-transparent  cursor-pointer pointer-events-auto  relative ring-offset-0 w-2.5 h-2.5 ring-2 border-transparent ring-offset-transparent	ring-current enabled:hover:ring-secondblue-400  disabled:opacity-50  checked:ring-secondblue-700 checked:bg-transparent leading-snug  checked:disabled:after:content-none; }
@@ -219,12 +221,12 @@ fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  m
   .bock-disclaimer a {@apply text-stone-900 font-bold}
 label.required {@apply after:content-['_*'] after:text-stone-600 after:hover:text-warning-700  after:inline after:whitespace-nowrap after:text-ellipsis}
 /*captcha*/
-button[type="submit"][disabled] {@apply border-stone-500 border-l-stone-50 }
+button[type="submit"][disabled] {@apply border-stone-400 border-l-stone-100 }
 button.submitslider {@apply min-w-[200px]}
-.slidermask {@apply absolute w-full h-full bg-stone-500 border border-stone-500 top-0 left-0 block rounded after:text-sm after:leading-snug after:content-[attr(data-title)] after:text-stone-50 hover:after:text-stone-50; -webkit-user-select: none; -webkit-touch-callout: none;}
+.slidermask {@apply absolute w-full  mx-auto h-full bg-stone-400  border border-stone-400 top-0 left-0 block rounded after:text-sm after:leading-snug after:content-[attr(data-title)] after:text-stone-50 hover:after:text-stone-50; -webkit-user-select: none; -webkit-touch-callout: none;}
 /*.icoslider {@apply icon-lg icon-chevron-right invert my-auto}*/
-.slider {@apply absolute h-full w-8 top-0 left-0 bg-transparent  rounded-l p-0; -webkit-user-select: none; -webkit-touch-callout: none;}
-.icoslider {@apply border-l-stone-200 border-t-transparent border-b-transparent  w-0 h-0 mx-0 my-auto border-l-[24px] border-t-[22px] border-b-[22px] block  hover:border-l-stone-100}
+.slider {@apply absolute h-full w-8 top-0 left-0 bg-transparent rounded-l p-0; -webkit-user-select: none; -webkit-touch-callout: none;}
+.icoslider {@apply border-l-stone-100 border-t-transparent border-b-transparent w-0 h-0 -mx-0 my-auto border-l-[24px] border-t-[22px] border-b-[22px] block  hover:border-l-stone-100}
 .comment-captcha {@apply hidden}
 /*special for safari bug*/
 
@@ -238,7 +240,7 @@ button.submitslider {@apply min-w-[200px]}
 .displayresults.active {@apply  bg-success-50}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-50}
-.dirlist > .entries {@apply h-auto max-h-[50%] block  overflow-y-hidden}
+.dirlist > .entries {@apply h-auto max-h-[50%] block overflow-y-hidden }
 .dirlist [data-name] {@apply ml-4}
 .entryD {@apply text-base font-normal}
 .on > .entryD {@apply font-semibold }
@@ -565,12 +567,12 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 #navbar-menu > li {@apply sm:inline-block relative h-8 animate hover:bg-transparent}
 :not(.open)  #navbar-menu li > ul  {@apply absolute left-0 hidden w-64 sm:w-96 z-80 mt-0 bg-transparent pt-4}
 .open  #navbar-menu li > ul {@apply relative w-full }
-#navbar-menu > li:hover > ul , #navbar-menu > li:active > ul {@apply block md:-mt-3}
+#navbar-menu > li:hover > ul , #navbar-menu > li:active > ul {@apply block -mt-5 md:-mt-3}
 #navbar-menu li > ul > li, #user-menu > li {@apply text-secondblue-50 text-sm px-1 pt-1.5 pb-0.5  block last:rounded-b   last:pb-4 first:pt-2.5 pl-5 pr-1.5 py-2}
 .open #navbar-menu li > ul > li {@apply last:rounded-none block}
 #navbar-menu li > ul > li {@apply hover:bg-mainblue-100   bg-gradient-to-r from-mainblue-100 to-secondblue-100 }
 #navbar-menu i {@apply text-nav}
-#aside-nav-item {@apply  hidden md:flex }
+#aside-nav-item {@apply  flex }
 #aside-nav-item a {@apply px-3 py-0.5 flex flex-wrap items-end text-stone-50 hover:text-stone-100 text-sm leading-snug text-white hover:text-stone-50    }
 #navbar-menu li > div {@apply w-auto inline-block clear-both}
 #navbar-menu li a  , #navbar-menu li > div {@apply pr-4 font-medium text-nav text-sm md:text-base leading-snug relative}
@@ -584,7 +586,8 @@ header:not(.solo) #ident-user-item #user-menu {@apply -mt-5}
 #user-menu > li {@apply bg-gradient-to-l from-stone-50 to-white  hover:bg-mainblue-100 py-1.5}
 #user-menu > li > a {@apply text-stone-700 hover:text-stone-600 }
 #user-menu .separ {@apply border-t border-mainblue-50}
-
+/*top page title and search*/
+ .top-title {@apply truncate ellipsis overflow-hidden break-all }
 /*admin-menu*/
 #navbar-menu.admin-menu li > ul > li {@apply hover:bg-stone-50   bg-gradient-to-r from-stone-100 to-stone-200 }
 #navbar-menu.admin-menu > li > a , #navbar-menu.admin-menu > li.active > a {@apply hover:text-secondblue-100 text-secondblue-50}
@@ -620,7 +623,7 @@ header:not(.solo) #ident-user-item #user-menu {@apply -mt-5}
    content-visibility: auto;
    contain-intrinsic-height: auto 4rem;}
 .table-table td {@apply border-none pl-6  py-1.5 pr-2 text-left max-h-16 align-text-top ;}
-.table-table .number, .table-table .decimal ,.table-table th[data-type="number"] , .table-table th[data-type="validation"], .table-table .progress {@apply text-right whitespace-nowrap }
+.table-table .number, .table-table .decimal ,.table-table th[data-type="number"] , .table-table th[data-type="validation"], .table-table .progress {@apply text-right whitespace-nowrap}
 .table-table tfoot td {@apply font-normal}
 .table-table tr td.is-controls, .table-table tr th.is-controls {@apply pl-2}
 .table-ellipsis {@apply overflow-hidden w-full max-w-[340px] md:max-w-[260px] lg:max-w-[460px]  hover:h-auto break-all max-h-48 }
@@ -684,7 +687,7 @@ td details.open {@apply static;}
 /* progress bar */
 /*data.progress {@apply relative before:float-right after:text-left after:text-xs after:text-stone-700 before:bg-stone-700 before:h-0.5 before:bottom-0  before:overflow-x-hidden before:absolute z-10 before:block after:block after:content-[attr(data-v)] after:z-20 after:absolute after:bottom-0.5 after:left-0 after:overflow-x-visible max-w-[64px] before:w-full bg-stone-200 h-0.5 block overflow-hidden }*/
 td.progress {@apply min-w-[96px] }
-.progress data {@apply relative before:bg-stone-200 before:h-0.5 before:left-0 before:bottom-0 overflow-x-visible before:block before:z-[2] block max-w-[64px] before:w-[64px]  before:max-w-[64px] before:absolute after:absolute after:bg-stone-700 after:h-0.5 after:block  after:left-0 after:bottom-0 after:z-[4] after:overflow-x-hidden bg-transparent after:w-full h-full}
+.progress data {@apply relative before:bg-stone-200 before:h-0.5 before:left-0  before:bottom-0 overflow-x-visible before:block before:z-[2] block max-w-[64px] before:w-[64px]  before:max-w-[64px] before:absolute after:absolute after:bg-stone-700 after:h-0.5 after:block  after:left-0 after:bottom-0 after:z-[4] after:overflow-x-hidden bg-transparent after:w-full h-full}
 
 /* taxa list expand/shrink*/
 td > .tip, td > .static-tip {@apply max-h-24 w-auto overflow-hidden block text-clip text-ellipsis whitespace-normal p-1}
@@ -715,9 +718,9 @@ section.separate {@apply after:w-96 before:h-[0.5] w-full h-auto pb-8 pt-4 block
 .stat-label {@apply font-medium pr-2 w-full md:basis-2/12 }
 .stat-info {@apply pr-2 w-full md:basis-10/12 md:ml-auto}
 .stat-item {@apply py-2 px-0 md:px-4 w-full md:flex md:flex-row h-auto}
-.stat-info .progress {@apply inline-block float-right whitespace-nowrap min-w-[64px] max-w-[85%]}
-.stat-info .progress span {@apply relative inline-block before:h-1 before:block before:w-full before:absolute before:bottom-0  p-0 m-0 mb-0.5 text-right}
-.stat-info .progress span.progress-dubious {@apply text-dubious-dark before:bg-dubious-light }
+.stat-info .progress {@apply inline-block  whitespace-nowrap min-w-[64px] max-w-[85%] overflow-x-visible}
+.stat-info .progress span {@apply relative inline-block before:h-1 before:block before:w-full before:absolute before:bottom-0  p-0 m-0 mb-0.5 }
+.stat-info .progress span.progress-dubious {@apply text-dubious-dark before:bg-dubious-light}
 .stat-info .progress span.progress-validated {@apply text-validated-dark before:bg-validated-light}
 .stat-info .progress span.progress-unclassified {@apply text-stone-600 before:bg-stone-600}
 .stat-info .progress span.progress-predicted {@apply text-predicted-dark before:bg-predicted-light }
@@ -895,9 +898,9 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /*******************************/
 /* topmessages                */
 /*******************************/
-.topmessage {@apply block bg-stone-50 m-0 px-4 py-1 font-medium sticky top-0}
-.topmessage.info {@apply  text-info-700 }
-.topmessage.maintenance {@apply text-warning-700}
+.topmessage {@apply block bg-stone-50 m-0 pl-4 pr-6 py-3 font-normal sticky z-[100000] top-0 h-16 overflow-y-hidden}
+.topmessage.info {@apply  bg-info-50 text-info-700 }
+.topmessage.maintenance {@apply  bg-warning-50 text-warning-700}
 /*******************************/
 /* small hacks and adjustments */
 /*******************************/
@@ -1002,8 +1005,8 @@ table tr {@apply border-t border-stone-300 max-w-full overflow-auto}
 }
 table tbody tr td:before { @apply font-semibold block content-[attr('data-name')]  }
 .table-table td {@apply px-1}
-.prjlist .table-table tr {@apply block h-auto max-h-full overflow-y-visible}
-.prjlist .table-table td {@apply block h-auto max-h-full}
+.prjlist .table-table tr {@apply block h-auto max-h-full overflow-y-visible;contain:none}
+.prjlist .table-table td {@apply block h-auto max-h-full;contain:none}
 table tbody tr td:last-child {@apply float-right clear-right}
 }
 /*tooltips */

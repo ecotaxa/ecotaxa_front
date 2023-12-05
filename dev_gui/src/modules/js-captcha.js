@@ -34,7 +34,6 @@ export class JsCaptcha {
     // hpot suppose that the bot fills an invisible input field
     const resp = this.captcha.dataset.response ? this.captcha.dataset.response : null;
     if (resp === null) return true;
-    console.log("challenge" + resp.value, resp.placeholder);
     return (resp.value !== resp.placeholder);
   }
   buttonSlider() {
@@ -75,7 +74,6 @@ export class JsCaptcha {
       BotDetect.detector.setProofOfWorkFn(proof_of_work);
       BotDetect.collector.enableTraps();
       BotDetect.collector.collect().then(results => {
-        console.log('result', results);
         const output = BotDetect.detector.detect(results);
         this.is_bot = (output === 'bot');
       });
@@ -83,10 +81,8 @@ export class JsCaptcha {
   }
 
   submitOnCondition() {
-    console.log('thisform', this.form)
     if (this.form === null) return;
     if (this.form.classList.contains("js-submit")) {
-      console.log('thisbofform', this.is_bot)
       this.form.dataset.isbot = this.is_bot;
     } else this.form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -104,13 +100,11 @@ class DragSliderBtn {
 
     function canMove(x) {
       if (parseInt(slidermask.style.left) >= Math.floor(parseInt(boundingrect.width)) - 4) {
-        console.log('enabled', form)
         form.dataset.enabled = true;
         btn.removeAttribute('disabled');
         slidermask.remove();
         slidermask = null;
         slider.remove();
-        console.log('slider', slider)
         return false;
       }
       return true;
@@ -158,7 +152,6 @@ class DragSliderBtn {
       }
     });
     slider.addEventListener('dragstart', function() {
-      console.log('dragstart')
       return false;
     });
   }

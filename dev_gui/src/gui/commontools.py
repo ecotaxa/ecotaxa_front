@@ -277,7 +277,9 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
     if not new_ui and code in [404, 403, 500]:
         return (
             render_template(
-                "errors/" + str(code) + ".html", trace=Markup("<br>".join(description))
+                "errors/" + str(code) + ".html",
+                trace=Markup("<br>".join(description)),
+                error=code,
             ),
             code,
         )
@@ -286,6 +288,7 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
             "/v2/error.html",
             title=str(code),
             partial=partial,
+            error=code,
             message=Markup("<br>".join(description)),
             is_safe=True,
         )

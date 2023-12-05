@@ -1,4 +1,4 @@
-  {% from "./v2/macros/_captcha.html" import captcha%}
+  {% from "./v2/macros/_captcha.html" import captcha with context %}
     {% from "./v2/users/_profile_macro.html" import promail_required %}
 <form id="form-register" action="/gui/register/" method="POST"  class="js js-submit" data-fetch="html" name="register_user_form" >
 <fieldset class="mb-0.5"><legend>{{ _('EcoTaxa: create an account') }}</legend>

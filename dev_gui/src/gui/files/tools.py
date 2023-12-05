@@ -11,8 +11,6 @@ def dir_list(subdir):
     with ApiClient(FilesApi, request) as api:
         try:
             #: DirectoryModel
-            print("######################subdir-")
-            print(subdir)
             dirlist = api.list_user_files(subdir)
         except ApiException as ae:
             if ae.status in (401, 403):
@@ -28,7 +26,6 @@ def upload_file(subdir):
     import json
     import requests
 
-    print("----------------body - upload ---------------")
     # body = request.get_data()
     # print(body)
     # uploaded = gvp("file")
@@ -56,9 +53,6 @@ def upload_file(subdir):
             files={"file": uploaded},
             headers=headers,
         )
-
-        print("upsent---------------------------------------------------")
-        print(rsp)
         if rsp.status_code != 200:
             return rsp.text
         else:

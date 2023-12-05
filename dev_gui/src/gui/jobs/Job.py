@@ -66,9 +66,8 @@ class Job(object):
                 )
             except ApiException as ae:
                 if ae.status in (401, 403):
-                    from appli.gui.commontools import py_get_messages
+                    from appli.gui.staticlistes import py_messages
 
-                    py_messages = py_get_messages("project")
                     ae.reason = py_messages["access403"]
 
         if target_proj != None:

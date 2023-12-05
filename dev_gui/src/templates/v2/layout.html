@@ -1,6 +1,6 @@
 {% set title= 'Ecotaxa 3.0' + target_proj.title if target_proj and target_proj.projid else 'Ecotaxa 3.0'%}
-{% include 'v2/partials/_head.html'%}
-<body>{{global_messages()|safe}}
+{% include 'v2/partials/_head.html' %}
+<body>{%- if not site_error and current_user.is_authenticated-%}{{global_messages()|safe}}{%-endif-%}
   <div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }} flex flex-col">
     <nav id="main-navbar">
       <header class="background-top h-12 p-1 pt-3.5 {{ 'solo' if not (target_proj and target_proj.projid) }}">
@@ -16,26 +16,10 @@
     {% block body %}{% endblock %}
   </div></main></div>
   {% include "v2/partials/_mainbottom.html" %}
+
   {% if g_status('google_analytics_id') %}
   {% set cookieGAOK =  g_status('cookieGAOK') %}
-  {% if cookieGAOK =='Y' %}
-  <script>
-    (function (i, s, o, g, r, a, m) {
-          i['GoogleAnalyticsObject'] = r;
-          i[r] = i[r] || function () {
-              (i[r].q = i[r].q || []).push(arguments)
-          }, i[r].l = 1 * new Date();
-          a = s.createElement(o),
-              m = s.getElementsByTagName(o)[0];
-          a.async = 1;
-          a.src = g;
-          m.parentNode.insertBefore(a, m)
-      })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-      ga('create', '{{  g.google_analytics_id }} ', 'auto');
-      ga('set', 'anonymizeIp', true);
-      ga('send', 'pageview');
-  </script>
-  {% elif cookieGAOK =='' %}
+  {% if cookieGAOK =='' %}
   <div  id="DivGAAccept" class="fixed z-50 bottom-0 h-[100px] left-0 right-0 bg-stone-900 text-stone-100 text-sm  ">
     <div class=" flex items-center w-full lg:w-2/3 mx-auto px-4  mt-4">
       <div class="flex-grow mr-4">We use cookies on this site to analyze traffic, remember your preferences,

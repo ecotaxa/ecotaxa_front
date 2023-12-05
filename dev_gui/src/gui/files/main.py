@@ -10,15 +10,12 @@ from appli import app, gvp
 def gui_files_upload(sub_path: str = ""):
     from appli.gui.files.tools import upload_file
 
-    print("----UPLOAD--")
-    print(sub_path)
     if sub_path == "":
         sub_path = "/ecotaxa_import"
     else:
         sub_path = "/ecotaxa_import/" + sub_path
 
     response = upload_file(sub_path)
-    print(response)
     return response
 
 
@@ -33,7 +30,6 @@ def gui_files_dirlist(sub_path: str = ""):
             sub_path = "/ecotaxa_import"
         else:
             sub_path = "/ecotaxa_import/" + sub_path
-            print("---SUB_PATH---", sub_path)
         dirlist, err = dir_list(sub_path)
         from appli.gui.commontools import todict
 

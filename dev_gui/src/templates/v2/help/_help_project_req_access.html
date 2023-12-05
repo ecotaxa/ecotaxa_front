@@ -2,14 +2,14 @@
 {% block article %}
 <article >
   <h2 class="help-title">{{ _('Access Projects')}} </h2>
+  <details id="req-access">
+  <summary>
+  {{_('Any registered and active user has permission to create a project')}}</summary>
+    <ul><a href="{{url_for('gui_prj_create')}}">{{_('Create a new project')}}</a> </details>
   <details id="req-others" >
   <summary>{{_('Other projects') }}</summary>
-  <p>[{{ _('to have access to these projects, request access to the project manager.') }}</p>
+  <p>{{ _('to have access to these projects, request access to the project manager.') }}</p>
 </details>
-<details id="req-access">
-<summary>
-{{_('To create a new project and upload images in it, please contact the application
-    manager:') }}</summary>
-  <ul> {{ mailto_create_right|safe }} </ul>  </details>
+
 </article>
 {% endblock %}

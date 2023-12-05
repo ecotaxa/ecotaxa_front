@@ -14,6 +14,7 @@ export class ActivRequest {
     if (!element) return;
     element.querySelectorAll('[data-request]').forEach(item => {
       const ev = item.dataset.event || 'click';
+
       if (ev === 'load') this.makeRequest(item);
       else item.addEventListener(ev, async (e) => {
         await this.makeRequest(item);
@@ -42,8 +43,9 @@ export class ActivRequest {
       case models.help:
         item.dataset.what = models.help;
         modal = await this.callModal(item);
+
         const modalbox = (modal) ? modal.modal : null;
-        if (!modal) return;
+        if (!modal || !modalbox) return;
         const file = (item.dataset.file) ? ((item.dataset.file !== modalbox.dataset.currentfile) ? item.dataset.file : null) : modalbox.dataset.file;
         const target = (item.dataset.target) ? document.querySelector('#' + item.dataset.target + ' article') : modalbox.querySelector(domselectors.component.modal.mainhelp + " article");
         if (!target) return;
@@ -59,9 +61,10 @@ export class ActivRequest {
             this.applyTo(target);
             //open and open only the selected info
             if (item.dataset.for) modal.modalOpen(item);
-
           }
-        } else if (!file) modal.openContent(item);
+        } else if (!file || file === undefined) {
+          if (item.dataset.for) modal.modalOpen(item);
+        }
         break;
 
       case models.settings:
@@ -121,7 +124,6 @@ export class ActivRequest {
             if (url.length > 1) url = url.join('?') + '&' + item.dataset.href.substr(1);
             else url = url[0] + item.dataset.href;
           }
-          console.log('url', url)
           callback = (html) => {
             let content = item.nextElementSibling;
             if (!content) {

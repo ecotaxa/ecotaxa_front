@@ -1,4 +1,5 @@
-  {% set mail_status = {True:_("Verified"),False:_("Waiting verification"), None:_("Not verified")}%}<div class="form-box"><label for="mail_status">{{_('Email status')}} <span class="ml-1 inline">{{mail_status[user.mail_status]}}</span></label>
+{% set mail_status = {True:_("Verified"),False:_("Waiting verification"), None:_("Not verified")}%}
+<div class="form-box"><label for="mail_status">{{_('Email status')}} <span class="ml-1 inline">{{mail_status[user.mail_status]}}</span></label>
 </div><div class="form-box">
   <label for="status">{{ _('Status') }}</label>
   <div class="form-group" role="group">
@@ -8,7 +9,7 @@
   </div>
 </div>
 {%- set comment = user.status_admin_comment if  user.status_admin_comment else '' %}
-{%-if add_ticket != None and add_ticket !=""  and current_user.is_users_admin == True -%}
+{%-if add_ticket and add_ticket !=""  and current_user.is_users_admin == True -%}
   {%- set comments = user.status_admin_comment.split(add_ticket) if user.status_admin_comment else '' -%}
   {% if comments|length >1 -%}
   {%- set ticket = comments[0]-%}

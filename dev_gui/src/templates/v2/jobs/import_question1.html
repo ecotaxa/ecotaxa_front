@@ -1,11 +1,11 @@
-{% extends "./v2/layout.html" %}
+{% extends "v2/layout.html" %}
 {% from "v2/macros/macros.html" import modal %}
 {% block headcenter %}
-  <h4><a href="/prj/{{ target_proj.projid }}">{{ target_proj.title }}</a></h4>
+  <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
 {% endblock %}
 
 {% block body %}
-  <div style="margin: 5px;">
+  <div class="container mx-auto">
     <h2>{{_('Import data (step 2 of 2)')}}</h2>
 
 
@@ -77,42 +77,18 @@
       </div>
     </form>
   </div>
-
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui/jquery-ui.min.css') }}">
+  <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='jquery-ui/jquery-ui.min.js') }}"></script>
   <script>
-    window.addEventListener('load', (e) => {
-      taxobtn = document.getElementById('TaxoModal');
-      if(taxobtn!==null) {
-        taxobtn.addEventListener('click',(e) => {
-
-        })
-      }
-    })
-    /*
       $(document).ready(function () {
-          $(".taxolb").select2({
-              ajax: {
-                  url: "/search/taxo",
-                  dataType: 'json',
-                  delay: 250,
-                  data: function (params) {
-                      return {q: params.term, page: params.page};
-                  },
-                  processResults: function (data, page) {
-                      return {results: data};
-                  },
-                  cache: true
-              },
-              minimumInputLength: 3
-          }); // Select2 Ajax
-          $(".userlb").{{ js.select2_user() }}; // Select2 Ajax
-
           $('#TaxoModal').on('show.bs.modal', function (e) {
               var button = $(e.relatedTarget); // Button that triggered the modal
               var targetid = button.data('mytargetid');
               $("#TaxoModalBody").html("Loading...");
               $("#TaxoModalBody").load("/search/taxotree?target=" + targetid);
           });
-      }); */ // Ready
+      }); // Ready
   </script>
 
 

@@ -23,14 +23,14 @@ export const exportCSV = function(state, options = {}, hidden = true) {
   };
 
   function text_convert(text) {
+    if (text === null || text === undefined) return null;
     text = text.trim();
     text = text.replace(/\s{2,}/g, " ");
     text = text.replace(/\n/g, "  ");
     text = text.replace(/"/g, "\"\"");
     //have to manually encode "#" as encodeURI leaves it as is.
     text = text.replace(/#/g, "%23");
-    if (text.includes(","));
-    text = `"${text}"`;
+    if (text.includes(",")) text = `"${text}"`;
     return text;
   }
 
@@ -38,14 +38,8 @@ export const exportCSV = function(state, options = {}, hidden = true) {
     row = row.join(options.columndelimiter);
     return row.trim();
   }
-
-
-
-  let rows = [
-
-    ],
+  let rows = [],
     row = [];
-
   const columns = [];
   state.grid.columns.forEach(column => {
     if ((hidden === true || !column.hasOwnProperty('hidden')) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(column.index) < 0)) {
@@ -55,13 +49,10 @@ export const exportCSV = function(state, options = {}, hidden = true) {
         index: column.index
       };
       //headings
-
       row.push(text_convert(obj.name));
       columns.push(obj);
     }
   });
-
-
   rows.push(make_line(row));
   const trs = state.dom.querySelectorAll('tbody tr');
   for (let i = 0; i < trs.length; i++) {
@@ -78,24 +69,19 @@ export const exportCSV = function(state, options = {}, hidden = true) {
     rows.push(make_line(row));
   }
 
-  const str = rows.join(options.linedelimiter)
-
+  const str = rows.join(options.linedelimiter);
   // Download
   if (options.download) {
     // Create a link to trigger the download
     link = document.createElement("a")
     link.href = encodeURI(`data:text/csv;charset=utf-8,${str}`)
     link.download = `${options.filename || "datatable_export"}.csv`
-
     // Append the link
-    document.body.appendChild(link)
-
+    document.body.appendChild(link);
     // Trigger the download
-    link.click()
-
+    link.click();
     // Remove the link
-    document.body.removeChild(link)
+    document.body.removeChild(link);
   }
-
-  return str
+  return str;
 }
