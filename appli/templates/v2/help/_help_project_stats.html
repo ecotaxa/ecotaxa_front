@@ -1,0 +1,49 @@
+{% extends "./v2/help/_layout.html" %}
+{% block article %}
+<article id="help-aboutproject">
+    <h2 class="help-title">{{_('About Project')}} </h2>
+    <details  id="help_proj_stats_privileges"><summary>{{_('The roles in short:')}}</summary>
+      <ul>
+        <li>{{_('Viewers can view the project even when it is private; the project is listed in their project
+          list.')}}
+        </li>
+        <li>{{_('Annotators can classify objects.')}}</li>
+        <li>{{ _('Managers can import and delete data, as well as change project settings.')}}</li>
+        <li>{{_("The contact person is a Manager, displayed in the project table and serving as the contact point for other users and EcoTaxa's managers.")}}
+        </li>
+      </ul></details>
+  <details id="help_proj_stats_description"><summary>{{_('description')}}</summary><div>{{ _("A short paragraph describing the dataset, to make it discoverable by others in EcoTaxa and elsewhere.
+    It should indicate which organisms are targeted (e.g. mesozooplankton), where (e.g. Bering Sea),
+    when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed with a ZooScan) they were
+    collected,
+    the scientific program that motivated the work and who ran it (e.g. SCOR program coordinated by the
+    Laboratoire
+    d'Océanographie de Villefranche).") | safe}}</div>
+  </details>
+
+  <details id="help_proj_stats_deep_feature_extractor" ><summary>{{_('Deep feature extractor')}}</summary><div>{{ _('SCN Network used for prediction, if you change it, existing features computed with this network will be
+    erased.
+    <br>New features will be recomputed during the next automatic classification.') | safe }} </div>
+  </details>
+
+  {% if possible_licenses is iterable %}
+  <details id="help_proj_stats_license"><summary>{{_('Licenses')}}</summary>
+    <div>
+  {% for k,v in possible_licenses %}
+  <details><summary>{{k}}</summary><div> {{ v | safe }} </div></details>
+  {% endfor %}
+  </div>
+  </details>
+  {% endif %}
+  <details id="help_proj_stats_used_taxa" ><summary>{{_('Used Taxa')}}</summary><div>
+  {{_('Taxa used in the projects. Sort by lineage or name . Option : export statistics as CSV.')}}
+  </div></details>
+  <details id="help_proj_stats_users" ><summary>{{_('Users')}}</summary><div>
+  {{_('All users - active or not -  who have annoted the project. Option : export statistics as CSV.')}}
+  </div></details>
+  <details id="help_proj_stats_samples" ><summary>{{_('Samples')}}</summary><div>
+  {{_('All samples with used taxa. Option : export statistics as CSV.')}}
+  </div></details>
+
+  </article>
+  {% endblock %}

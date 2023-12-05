@@ -340,7 +340,7 @@ ecotaxa_version = "2.7.2"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2023-11-28"
+    return ecotaxa_version + " 2023-12-08"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -351,13 +351,16 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
-2023-11-28: V 2.7.2
+2023-12-08: V 2.7.2
     Fix Safari bug ( js in user mod profile )
     Fix Chrome bug (js my-files filepath)
     Fix current_user in security_on_backend
     Feature js-captcha
     Feature user register better response and error message
-    Feature ticket for user validation
+    Feature ticket for user validation in admin validation
+    Feature new UI pages for projects list, project settings, about project, project tools, project export
+    Modify classification page navigation - send to new UI if exists
+    Feature google analytics tags version upgrade
 2023-10-03: V 2.7.1
     Features : login , register , admin , user profile replaced by new version - user login and registration follow major modification in the API users
     Fix error reporting (merge new and current error handling)

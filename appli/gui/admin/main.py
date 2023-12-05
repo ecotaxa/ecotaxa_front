@@ -184,6 +184,7 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
         API_ACCOUNT_VALIDATION,
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
+        RECAPTCHAID,
         ADD_TICKET,
     ) = get_user_constants(request)
 

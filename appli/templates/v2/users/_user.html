@@ -1,5 +1,5 @@
   {% from "./v2/macros/macros.html" import inputdict %}
-  {% from "./v2/macros/_captcha.html" import captcha%}
+  {% from "./v2/macros/_captcha.html" import captcha with context%}
   {% from "./v2/users/_profile_macro.html" import promail_required, password_regexp %}
   {%macro password_box()-%}
   {% set disabled=""%}

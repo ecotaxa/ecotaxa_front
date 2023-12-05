@@ -1,0 +1,98 @@
+{% extends "v2/layout.html" %}
+{% from "v2/macros/macros.html" import modal %}
+{% block headcenter %}
+  <h4><a href="/prj/{{ g.prjprojid }}">{{ g.prjtitle }}</a></h4>
+{% endblock %}
+
+{% block body %}
+  <div class="container mx-auto">
+    <h2>{{_('Import data (step 2 of 2)')}}</h2>
+
+
+    <h3>{{_('Question reason')}}</h3>
+    {{ job.progress_msg |nl2br|safe }}
+
+    <h3>{{_('Taxonomy manual mapping')}}</h3>
+    <form class="form-horizontal" method="post">
+      {% if (taxo|length())>0 %}
+
+        <p class="help-block">If you <em>really</em> cannot find a suitable category
+        <ol>
+          <li>{{_('Create it in the Taxonomy management')}} <a href="/taxo/browse/?fromtask={{ job.id }}">{{_('HERE')}}</a></li>
+          <li>{{_('map your category into one of the temporary categories for now (<code>temporary_1</code>, <code>temporary_2</code>,
+            etc.)')}}
+          </li>
+          <li>{{_('then contact your project manager and request the creation of the category')}}</li>
+        </ol>{{_('
+        Once the category is created, you will be able to move your objects from <code>temporary_*</code> to the newly
+        created category.')}}
+        </p>
+
+        <table>
+          {% for T in taxo %}
+            <tr>
+              <td> {{ T }} : <input type="hidden" name="orig{{ loop.index }}" value="{{ T }}"></td>
+              <td>
+                <div class="input-group">
+                  <select id="taxolb{{ loop.index }}" name="taxolb{{ loop.index }}" style="width: 210px"
+                          class='js js-autocomplete taxolb'  data-type="taxo" autocomplete="off" class="form-select"> </select>
+                  <span class="input-group-btn">
+                <button class="btn btn-default btn-sm " type="button" data-toggle="modal"  data-target="#TaxoModal"
+                        data-mytargetid="taxolb{{ loop.index }}">
+                  <span id=OpenTaxoLB class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                </button>
+                {{modal('TaxoModal',btn={'class':'button text-sm icon icon-list'})}}
+                </span>
+                </div><!-- /input-group -->
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+
+
+      {% if (users|length())>0 %}
+        <h3>Users manual mapping</h3>
+        {% for U in users %}
+          <div class="form-group">
+            <div class="col-lg-offset-1">
+            {{ U }}:
+            </div>
+            {#{{ label(loop.index~" - "+U)  }} #}
+            <input type="hidden" name="origuser{{ loop.index }}" value="{{ U }}">
+            <div class="col-lg-offset-3">
+              <select id="userlb{{ loop.index }}" name="userlb{{ loop.index }}" style="width: 210px"
+                      class='userlb js js-autocomplete' data-type="user"> </select>
+            </div>
+          </div>
+        {% endfor %}
+
+      {% endif %}
+      <input type="hidden" name="starttask" value="Y">
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-2">
+          <br>
+          <button type="submit" class="btn btn-primary btn-block">Continue</button>
+        </div>
+      </div>
+    </form>
+  </div>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='jquery-ui/jquery-ui.min.css') }}">
+  <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='jquery-ui/jquery-ui.min.js') }}"></script>
+  <script>
+      $(document).ready(function () {
+          $('#TaxoModal').on('show.bs.modal', function (e) {
+              var button = $(e.relatedTarget); // Button that triggered the modal
+              var targetid = button.data('mytargetid');
+              $("#TaxoModalBody").html("Loading...");
+              $("#TaxoModalBody").load("/search/taxotree?target=" + targetid);
+          });
+      }); // Ready
+  </script>
+
+
+  {% include "taxo_modal_div.html" %}
+
+
+{% endblock %}

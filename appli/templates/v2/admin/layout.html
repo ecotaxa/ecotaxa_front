@@ -8,7 +8,6 @@
 <div id="bar3" class="bar"></div>
 </div><ul id="navbar-menu" class="admin-menu"><li><a class="uppercase" href="/gui/admin/" target="winadmin">Home<i class="icon-sm icon-admin invert "></i></a></li>
 {%-else-%}<ul aria-expanded=false>{%-endif%}
-
 {%for key,menuitem in menuitems.items()-%}
 <li ><a href="{{menuitem.url if menuitem.url else '#'+key}}" class="{{ 'uppercase' if level==0 else 'capitalize'}} text-stone-100 hover:text-stone-50">{{menuitem.label}}</a>
 {%if menuitem.links -%}

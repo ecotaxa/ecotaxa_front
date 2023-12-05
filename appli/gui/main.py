@@ -368,6 +368,7 @@ def utility_processor():
                 "cookieGAOK": request.cookies.get("GAOK", ""),
             }
         )
+
         if key != None:
             if key in g_data:
                 return g_data[key]
@@ -414,8 +415,6 @@ def utility_processor():
                 for key, message in messages.items():
                     name = key + cookiename
                     dailyinfo = request.cookies.get(name)
-                    print(dailyinfo)
-                    print(message)
                     if isinstance(message, dict) and (
                         "active" in message
                         and message["active"] == 1

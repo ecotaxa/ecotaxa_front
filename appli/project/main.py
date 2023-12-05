@@ -395,65 +395,93 @@ def indexPrj(PrjId):
     g.ProjectTitle = proj.title
     g.headmenu = []  # Menu project
     g.headmenuF = []  # Menu Filtered
+    arr_url_old = {
+        "prediction": "/Job/Create/Prediction?projid=%d" % PrjId,
+        "predictionf": "javascript:GotoWithFilter('/Job/Create/Prediction')",
+        "import": "/Job/Create/FileImport?p=%d" % PrjId,
+        "taxofix": "/prj/taxo_fix/%d" % PrjId,
+        "export": "/Job/Create/GenExport?projid=%d" % PrjId,
+        "exportf": "javascript:GotoWithFilter('/Job/Create/GenExport')",
+        "edit": "/prj/edit/%d" % PrjId,
+        "subset": "/Job/Create/Subset?p=%d" % PrjId,
+        "subsetf": "javascript:GotoWithFilter('/Job/Create/Subset?p=%d')" % PrjId,
+        "merge": "/prj/merge/%d" % PrjId,
+        "annot": "/prj/EditAnnot/%d" % PrjId,
+        "editamass": "/prj/editdatamass/%d" % PrjId,
+        "editamassf": "javascript:GotoWithFilter('/prj/editdatamass/%d')" % PrjId,
+        "resettopredicted": "/prj/resettopredicted/%d" % PrjId,
+        "resettopredictedf": "javascript:GotoWithFilter('/prj/resettopredicted/%d')"
+        % PrjId,
+        "purge": "/prjPurge/%d" % PrjId,
+        "purgef": "javascript:GotoWithFilter('/prjPurge/%d')" % PrjId,
+    }
+    arr_url = {
+        "prediction": "/Job/Create/Prediction?projid=%d" % PrjId,
+        "predictionf": "javascript:GotoWithFilter('/Job/Create/Prediction')",
+        "import": "/Job/Create/FileImport?p=%d" % PrjId,
+        "taxofix": "/prj/taxo_fix/%d" % PrjId,
+        "export": "/gui/job/create/GenExport?projid=%d" % PrjId,
+        "exportf": "javascript:GotoWithFilter('/gui/job/create/GenExport')",
+        "edit": "/gui/prj/edit/%d" % PrjId,
+        "subset": "/gui/job/create/Subset?p=%d" % PrjId,
+        "subsetf": "javascript:GotoWithFilter('/gui/job/create/Subset?p=%d')" % PrjId,
+        "merge": "/gui/prj/merge/%d" % PrjId,
+        "annot": "/gui/prj/editannot/%d" % PrjId,
+        "editamass": "/gui/prj/editdatamass/%d" % PrjId,
+        "editamassf": "javascript:GotoWithFilter('/gui/prj/editdatamass/%d')" % PrjId,
+        "resettopredicted": "/gui/prj/resettopredicted/%d" % PrjId,
+        "resettopredictedf": "javascript:GotoWithFilter('/gui/prj/resettopredicted/%d')"
+        % PrjId,
+        "purge": "/gui/prj/purge/%d" % PrjId,
+        "purgef": "javascript:GotoWithFilter('/gui/prj/purge/%d')" % PrjId,
+    }
     if g.PrjAnnotate or g.PrjManager:
         if proj.status == "Annotate":
             g.headmenu.append(
                 (
-                    "/Job/Create/Prediction?projid=%d" % PrjId,
+                    arr_url["prediction"],
                     "Train and Predict classifications",
                 )
             )
             g.headmenuF.append(
                 (
-                    "javascript:GotoWithFilter('/Job/Create/Prediction')",
+                    arr_url["predictionf"],
                     "Train and Predict classifications",
                 )
             )
-            g.headmenu.append(
-                ("/Job/Create/FileImport?p=%d" % PrjId, "Import images and metadata")
-            )
-            g.headmenu.append(("/prj/taxo_fix/%d" % PrjId, "Fix category issues"))
-        g.headmenu.append(("/Job/Create/GenExport?projid=%d" % PrjId, "Export"))
-        g.headmenuF.append(
-            ("javascript:GotoWithFilter('/Job/Create/GenExport')", "Export")
-        )
+            g.headmenu.append((arr_url["import"], "Import images and metadata"))
+            g.headmenu.append((arr_url["taxofix"], "Fix category issues"))
+        g.headmenu.append((arr_url["export"], "Export"))
+        g.headmenuF.append((arr_url["exportf"], "Export"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
-        g.headmenu.append(("/prj/edit/%d" % PrjId, "Edit project settings"))
-        g.headmenu.append(("/Job/Create/Subset?p=%d" % PrjId, "Extract Subset"))
+        g.headmenu.append((arr_url["edit"], "Edit project settings"))
+        g.headmenu.append((arr_url["subset"], "Extract Subset"))
         g.headmenuF.append(
             (
-                "javascript:GotoWithFilter('/Job/Create/Subset?p=%d')" % PrjId,
+                arr_url["subsetf"],
                 "Extract Subset",
             )
         )
-        g.headmenu.append(
-            ("/prj/merge/%d" % PrjId, "Merge another project in this project")
-        )
-        g.headmenu.append(
-            ("/prj/EditAnnot/%d" % PrjId, "Edit or erase annotations massively")
-        )
-        g.headmenu.append(("/prj/editdatamass/%d" % PrjId, "Batch edit metadata"))
+        g.headmenu.append((arr_url["merge"], "Merge another project in this project"))
+        g.headmenu.append((arr_url["annot"], "Edit or erase annotations massively"))
+        g.headmenu.append((arr_url["editamass"], "Batch edit metadata"))
         g.headmenuF.append(
             (
-                "javascript:GotoWithFilter('/prj/editdatamass/%d')" % PrjId,
+                arr_url["editamassf"],
                 "Batch edit metadata",
             )
         )
-        g.headmenu.append(
-            ("/prj/resettopredicted/%d" % PrjId, "Reset status to Predicted")
-        )
+        g.headmenu.append((arr_url["resettopredicted"], "Reset status to Predicted"))
         g.headmenuF.append(
             (
-                "javascript:GotoWithFilter('/prj/resettopredicted/%d')" % PrjId,
+                arr_url["resettopredictedf"],
                 "Reset status to Predicted",
             )
         )
-        g.headmenu.append(("/prjPurge/%d" % PrjId, "Delete objects or project"))
-        g.headmenuF.append(
-            ("javascript:GotoWithFilter('/prjPurge/%d')" % PrjId, "Delete objects")
-        )
+        g.headmenu.append((arr_url["purge"], "Delete objects or project"))
+        g.headmenuF.append((arr_url["purgef"], "Delete objects"))
         # EMODNet Audit & Export
         # g.headmenu.append(("", "SEP"))
         # g.headmenu.append(("/prj/emodnet/%d" % PrjId, "EMODnet export"))

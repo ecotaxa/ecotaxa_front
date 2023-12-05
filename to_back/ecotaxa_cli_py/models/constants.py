@@ -42,6 +42,7 @@ class Constants(object):
         'account_validation': 'bool',
         'short_token_age': 'int',
         'profile_token_age': 'int',
+        'recaptchaid': 'bool',
         'add_ticket': 'str'
     }
 
@@ -55,10 +56,11 @@ class Constants(object):
         'account_validation': 'account_validation',
         'short_token_age': 'short_token_age',
         'profile_token_age': 'profile_token_age',
+        'recaptchaid': 'recaptchaid',
         'add_ticket': 'add_ticket'
     }
 
-    def __init__(self, license_texts=None, app_manager=["",""], countries=[], user_status=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, add_ticket='', local_vars_configuration=None):  # noqa: E501
+    def __init__(self, license_texts=None, app_manager=["",""], countries=[], user_status=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, add_ticket='', local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -73,6 +75,7 @@ class Constants(object):
         self._account_validation = None
         self._short_token_age = None
         self._profile_token_age = None
+        self._recaptchaid = None
         self._add_ticket = None
         self.discriminator = None
 
@@ -94,6 +97,8 @@ class Constants(object):
             self.short_token_age = short_token_age
         if profile_token_age is not None:
             self.profile_token_age = profile_token_age
+        if recaptchaid is not None:
+            self.recaptchaid = recaptchaid
         if add_ticket is not None:
             self.add_ticket = add_ticket
 
@@ -303,6 +308,29 @@ class Constants(object):
         """
 
         self._profile_token_age = profile_token_age
+
+    @property
+    def recaptchaid(self):
+        """Gets the recaptchaid of this Constants.  # noqa: E501
+
+        use Google ReCaptcha  # noqa: E501
+
+        :return: The recaptchaid of this Constants.  # noqa: E501
+        :rtype: bool
+        """
+        return self._recaptchaid
+
+    @recaptchaid.setter
+    def recaptchaid(self, recaptchaid):
+        """Sets the recaptchaid of this Constants.
+
+        use Google ReCaptcha  # noqa: E501
+
+        :param recaptchaid: The recaptchaid of this Constants.  # noqa: E501
+        :type: bool
+        """
+
+        self._recaptchaid = recaptchaid
 
     @property
     def add_ticket(self):

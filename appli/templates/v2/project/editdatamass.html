@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_editdatamass" >
   <div class="w-100 mx-auto py-4 block text-left relative" id="project-editdatamass-header">
     {% set data = {'file':'_help_project_editdatamass'} %}
-    {{header_project_job(_('Project Mass data edition'),data, _('Merge project'))}}
+    {{header_project_job(_('Project Mass data edition'),data, _('Mass data edition'))}}
     <div class="block-disclaimer flex"><span class="icon icon-fire-sm h-100"></span><div>{{_('Best practices are to edit the metadata in the ecotaxa_*.tsv file that you import and use the <a href="{{url_for("gui_job_create", job_type="FileImport")}}">["Re-import and update metadata"]</a> tool.')}}
       {{_(' This way the metadata is consistent between EcoTaxa and your own file archive.')}} {{_('If you cannot do it, this tool allows you to change the metadata of many objects at once, at your own risk. EcoTaxa does not keep a history of changes in metadata.')}}</div>
   </div></div>

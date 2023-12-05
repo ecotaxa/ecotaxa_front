@@ -11,12 +11,12 @@
     {%-for taxastat in taxastats-%}
 {{taxo_row(taxastat,'taxon',taxastat.lineage|reverse|join('>'))}}
 {%- endfor-%}
-{%-endif-%}
-</tbody><tfoot><tr><th>{{_('Total')}}</th><th></th>
+{%-endif-%}</tbody><tfoot class="max-w-full">
+<tr><th>{{_('Total')}}</th><th class="hidden"></th>
     {% set total=  taxastats|sum(attribute='nb_validated') +   taxastats|sum(attribute='nb_dubious') +  taxastats|sum(attribute='nb_predicted') +  taxastats|sum(attribute='nb_unclassified') %}
     {%- for type in types -%}
       {% set percent = ((taxastats|sum(attribute='nb_'+type)/total)*100)|round(1) if total>0 else 0 %}
-      <th  data-type="number"><div class="progress"><span class="progress-{{type}}"  style="width:{{ percent }}%">{{ taxastats|sum(attribute='nb_'+type)}}</span></div></th>
+      <th  class="number nb_{{type}} text-left border-l border-stone-800"><div class="progress w-auto"><span class="progress-{{type}}" style="width:{{ percent }}%;">{{ taxastats|sum(attribute='nb_'+type)}}</span></div></th>
     {%-endfor-%}
   </tr></tfoot>
 </table>

@@ -78,6 +78,7 @@ def gui_me_activate(token: str) -> str:
         API_ACCOUNT_VALIDATION,
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
+        RECAPTCHAID,
         ADD_TICKET,
     ) = get_user_constants(request)
     if request.method == "POST":
@@ -120,13 +121,17 @@ def gui_me_activate(token: str) -> str:
                 response=response,
                 partial=partial,
             )
+    reCaptchaID = None
+    # google recaptcha or homecaptcha
+    if RECAPTCHAID == True:
+        reCaptchaID = app.config.get("RECAPTCHAID")
     return render_template(
         "v2/security/activate.html",
         bg=True,
         token=token,
         api_email_verification=API_EMAIL_VERIFICATION,
         api_account_validation=API_ACCOUNT_VALIDATION,
-        reCaptchaID=app.config.get("RECAPTCHAID"),
+        reCaptchaID=reCaptchaID,
         user_id=user_id,
     )
 
@@ -161,10 +166,14 @@ def gui_me_forgotten(token: str = None) -> str:
             partial=partial,
             response=response,
         )
+    reCaptchaID = None
+    # google recaptcha or homecaptha
 
+    if RECAPTCHAID == True:
+        reCaptchaID = app.config.get("RECAPTCHAID")
     return render_template(
         "./v2/security/forgotten.html",
         bg=True,
         token=token,
-        reCaptchaID=app.config.get("RECAPTCHAID"),
+        reCaptchaID=reCaptchaID,
     )

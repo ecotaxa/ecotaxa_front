@@ -5816,6 +5816,12 @@
             "description":"Profile modification token lifespan.",
             "default":24
           },
+          "recaptchaid":{
+            "title":"Google ReCaptcha",
+            "type":"boolean",
+            "description":"use Google ReCaptcha",
+            "default":false
+          },
           "add_ticket":{
             "title":"ticket separator",
             "type":"string",
