@@ -4,7 +4,7 @@
 <div id="bar2" class="bar"></div>
 <div id="bar3" class="bar"></div>
 </div><ul id="navbar-menu"><li class="hidden sm:visible">
-        <a href="/gui/prj/" title="{{_('projects list')}}" class="text-lg uppercase">
+        <a href="{{ url_for("gui_prj")}}" title="{{_('projects list')}}" class="text-lg uppercase">
           &laquo;
         </a></li>
         {% if target_proj and target_proj.projid > 0 %}

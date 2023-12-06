@@ -9,9 +9,9 @@
       {{_(' This way the metadata is consistent between EcoTaxa and your own file archive.')}} {{_('If you cannot do it, this tool allows you to change the metadata of many objects at once, at your own risk. EcoTaxa does not keep a history of changes in metadata.')}}</div>
   </div></div>
 {% if error==404 %}
-<a href="/gui/prj/" class="alert alert-warning">{{_('Select another project')}}</a>
+<a href="{{ url_for("gui_prj")}}" class="alert alert-warning">{{_('Select another project')}}</a>
 {% elif error==401 or error == 403 %}
-<a href="/gui/prj/" class="alert alert-danger">{{_('Select another project')}}</a>
+<a href="{{ url_for("gui_prj")}}" class="alert alert-danger">{{_('Select another project')}}</a>
 {% elif target_proj and target_proj.projid %}
 
 <form method=post class="mb-0 pb-0">  <fieldset><div class="alert alert-warning inverse">

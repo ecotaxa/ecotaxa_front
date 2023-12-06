@@ -1,5 +1,5 @@
 {%if processstep =="ask"%}
-<form method="post" action="/gui/prj/merge/{{target_proj.projid}}" class="py-4 mb-2 pl-0"><input type="hidden" name="src" value="{{source_proj.projid}}"><input type="hidden" name="merge" value="Y">
+<form method="post" action="{{url_for("gui_prj_merge", projid=target_proj.projid)}}" class="py-4 mb-2 pl-0"><input type="hidden" name="src" value="{{source_proj.projid}}"><input type="hidden" name="merge" value="Y">
   <div class="w-auto mb-2 alert alert-warning inverse">
         {{_('Warning: ')}} {{_('source project')}} <strong class="ml-2">[{{source_proj.projid}}] {{source_proj.title}}</strong>
         {{_('Will be destroyed.')}}<br>{{_('Its content will be transfered in the target project')}} <strong class="ml-2">[{{target_proj.projid}}] {{target_proj.title}}</strong><br>

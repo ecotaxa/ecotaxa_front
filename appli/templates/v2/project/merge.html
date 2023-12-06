@@ -8,10 +8,10 @@
   </div>
   {% if processstep  %}
   {% include('/v2/project/_merge_process.html') with context%}
-<a class="button is-secondary inverse w-full sm:w-96 text-center" href="{{'/gui/prj/merge/'+ target_proj.projid|string if processstep=='ask' else '/prj/' + target_proj.projid|string}}">{{ _("Back to list") if processstep =="ask" else  _('Back to target project') if (processstep=="end")  else  _("Back to project home")}}</a>
+<a class="button is-secondary inverse w-full sm:w-96 text-center" href="{{url_for("gui_prj_merge",projid= target_proj.projid) if processstep=='ask' else url_for("gui_prj",projid=target_proj.projid)}}">{{ _("Back to list") if processstep =="ask" else  _('Back to target project') if (processstep=="end")  else  _("Back to project home")}}</a>
 {% else %}
 <div class="block-info"><ul><li>{{_('You are allowed to merge projects that you manage and contain images from the <strong>same</strong> instrument.
-     (Hint: use the <a href="/gui/prj/edit/{{target_proj.projid}}">projects settings</a> to change this if needed).')}}</li>
+     (Hint: use the <a href="{{ url_for("gui_prj_edit", projid=target_proj.projid)}}">projects settings</a> to change this if needed).')}}</li>
 <li>{{_('User privileges from both projects will be added')}}</li>
 <li>{{_('This tool allows to merge two projects in a single projet (called Current project). The added project will then be automatically deleted. If object data are not consistent between both projects :')}}
 <ul><li>{{_('New data fields are added to the Current project.')}}</li>

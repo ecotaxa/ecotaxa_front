@@ -1,4 +1,4 @@
-{% extends "./v2/layout.html" %}
+{{ url_for("gui_prj")}}{% extends "./v2/layout.html" %}
 {% from "./v2/project/macros.html" import header_project_job with context %}
 {%block body%}
 <div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_resettopredicted" >
@@ -7,7 +7,7 @@
     {{header_project_job(_('Project reset status to predicted'),data, _('Merge project'))}}
   </div>
   {%if error!=None %}
-  <a href="/gui/prj/" class="alert alert-danger">Error {{error}} {{_('Select another project')}}</a>
+  <a href="{{ url_for("gui_prj")}}" class="alert alert-danger">Error {{error}} {{_('Select another project')}}</a>
 {% elif target_proj and target_proj.projid%}
 {% if not proceed%}
 <form method="post">
