@@ -61,7 +61,7 @@
 </div>
 {%endif %}
 <span class="w-auto ml-auto float-right clear-both  mb-6">
-<a href="/gui/prj/about/{{ target_proj.projid }}" class="btn is-about" ><!--<i class="icon-lg icon-chart-bar-square-w p-1 invert"></i>-->{{_('about')}}</a></span>
+<a href="{{url_for("gui_prj_about",projid=target_proj.projid )}}" class="btn is-about" ><!--<i class="icon-lg icon-chart-bar-square-w p-1 invert"></i>-->{{_('about')}}</a></span>
 
 {% else %}
 {% include './v2/project/_fullstats.html'%}

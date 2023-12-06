@@ -23,6 +23,7 @@ export class JsTomSelect {
     const id = item.getAttribute('id');
     const multiple = item.hasAttribute('multiple');
     const type = item.dataset.type;
+
     let option = {
         url: '',
         settings: settings
@@ -36,6 +37,13 @@ export class JsTomSelect {
           }
         })
       }
+    if (item.dataset.create && item.dataset.create === 'true') {
+      //  option.settings.create = true;
+      //    option.settings.createOnBlur = true;
+      option.settings.create = true;
+      option.settings.addPrecedence = true;
+
+    }
     /*,
           on_clear = function() {
 
@@ -131,20 +139,22 @@ export class JsTomSelect {
         });
 
         option.url = "/search/taxo";
-        option.settings = {
-          valueField: 'id',
-          labelField: 'text',
-          searchField: 'text',
-          closeAfterSelect: false,
-          onInitialize: () => {
-            const wrapper = document.getElementById(id).nextElementSibling;
-            if (!wrapper.classList.contains('ts-wrapper')) return;
-            const tags = wrapper.querySelectorAll(domselectors.component.tomselect.tsdelet);
-            tags.forEach(tag => {
-              init_canceltag(tag);
-            })
-          }
+        option.settings = { ...option.settings,
+          ...{
+            valueField: 'id',
+            labelField: 'text',
+            searchField: 'text',
+            closeAfterSelect: false,
+            onInitialize: () => {
+              const wrapper = document.getElementById(id).nextElementSibling;
+              if (!wrapper.classList.contains('ts-wrapper')) return;
+              const tags = wrapper.querySelectorAll(domselectors.component.tomselect.tsdelet);
+              tags.forEach(tag => {
+                init_canceltag(tag);
+              })
+            }
 
+          }
         }
         break;
     }

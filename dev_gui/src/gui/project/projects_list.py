@@ -231,12 +231,13 @@ def _prj_import_taxo_api(prjid: int = 0, filt: dict = None) -> list:
     qry_filt_instrum = (
         [""] if (filt == None or len(filt["instrum"]) == 0) else filt["instrum"]
     )
-    if current_user.is_app_admin == True:
-        not_granted = True
-        for_managing = True
-    else:
-        not_granted = False
-        for_managing = False
+    # if current_user.is_app_admin == True:
+    #    not_granted = True
+    #    for_managing = True
+    # else:
+    # full list avaliable to import
+    not_granted = False
+    for_managing = False
     for an_instrument in qry_filt_instrum:
         with ApiClient(ProjectsApi, request) as apiproj:
             url = (

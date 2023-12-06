@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 from typing import List, ClassVar
 
-from flask import render_template, redirect, request, flash
+from flask import render_template, redirect, request, flash, url_for
 
 from appli import PrintInCharte, gvg, gvp, app
 from appli.back_config import get_app_manager_mail
@@ -152,12 +152,11 @@ class ImportJob(Job):
         target_proj = cls.get_target_prj(prj_id)
 
         # Feed local values
-
         not_found_taxo = job.question["missing_taxa"]
         not_found_users = job.question["missing_users"]
 
         return render_template(
-            "v2/jobs/import_question1.html",
+            "v2/jobs/_import_question.html",
             header=txt,
             taxo=not_found_taxo,
             users=not_found_users,
@@ -195,7 +194,7 @@ class ImportJob(Job):
             except ApiException as ae:
                 cls.flash_any_error([str(ae)])
                 return render_template(
-                    "v2/jobs/import_question1.html",
+                    "v2/jobs/_import_question.html",
                     header="",
                     taxo=not_found_taxo,
                     users=not_found_users,

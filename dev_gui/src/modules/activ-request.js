@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify';
 import {
   fetchSettings,
+  unescape_html,
 } from '../modules/utils.js';
 import {
   domselectors,
@@ -96,25 +97,65 @@ export class ActivRequest {
 
       case models.taxotree:
         modal = await this.callModal(item);
+
         if (!modal) return;
-        /*
-          url = '/gui/search/taxotreejson?' + new URLSearchParams({
-            id: '#',
-            targetid: ((item.dataset.targetid) ? item.dataset.targetid : '')
-          })
 
-          const modalcontent = modal.setContent('<h3>Hierarchy</h3><div></div>');
-
-          format = 'json';
-          callback = (json) => {
-            //  modal.modalOpen();
-          }*/
-        url = '/search/taxotree?' + +new URLSearchParams({
-          target: ((item.dataset.target) ? item.dataset.target : '')
-        });
-        callback = (response) => {
-          console.log(response);
+        if (!dynamics.JSONTree) {
+          let {
+            JSONTree
+          } = await
+          import(`../modules/js-tree.js`);
+          dynamics.JSONTree = JSONTree;
         }
+        const tree = document.createElement('div');
+        modal.setContent('');
+        modal.modalcontent.append(tree);
+        modal.modalOpen(item);
+        const jsontree = new dynamics.JSONTree(tree);
+        const fetch_tree = function(element = null, node = null) {
+          const id = (node === null) ? "#" : parseInt(node.id);
+          const treeurl = '/gui/search/taxotreejson?' + new URLSearchParams({
+            id: id
+          });;
+          fetch(treeurl, fetchSettings()).then(response => response.text()).then(json => {
+            if (element === null) jsontree.json(JSON.parse(json));
+            else {
+              jsontree.json(JSON.parse(json), element);
+              element.resolve();
+            }
+          }).catch(err => {
+            console.log('err', err)
+          });
+
+        }
+        jsontree.once('fetch', function(element, node) {
+          node.loaded = true;
+          fetch_tree(element, node);
+        });
+        jsontree.on('select', function(element) {
+          if (!element || !element.id) return;
+          if (item.dataset.targetid) {
+            const opt = document.getElementById(item.dataset.targetid) ? document.getElementById(item.dataset.targetid) : null;
+            let value;
+            if (opt && opt.tomselect) {
+              const ts = opt.tomselect;
+              const key = element.id;
+              const text = element.textContent;
+              if (!ts.getItem(key)) {
+                if (!ts.getOption(key)) {
+                  let obj = {};
+                  obj[ts.settings.valueField] = key;
+                  obj[ts.settings.labelField] = unescape_html(text.trim());
+                  ts.addOption(obj);
+                }
+              }
+              ts.addItem(key);
+              value = key;
+            } else value = element.id;
+            modal.modal.open = false;
+          }
+        });
+        fetch_tree();
         break;
       default:
         if (item.dataset.href) {
@@ -179,6 +220,5 @@ export class ActivRequest {
       });
     }
   }
-
 
 }

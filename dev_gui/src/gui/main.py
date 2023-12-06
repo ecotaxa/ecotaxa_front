@@ -317,6 +317,7 @@ import appli.gui.jobs.main
 import appli.gui.me.main
 import appli.gui.files.main
 import appli.gui.admin.main
+import appli.gui.taxonomy.main
 
 # utility display functions for jinja template
 @app.template_filter("urlencode")

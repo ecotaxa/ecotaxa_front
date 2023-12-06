@@ -11,16 +11,22 @@ export class ModalContainer {
   modalcontent = null;
   constructor(trigger) {
     const defaultOptions = {};
+
     // todo search for options in the item data attrs
     if (!this.modal && (!this.trigger || this.trigger !== trigger)) {
       this.trigger = trigger;
 
       if (trigger.dataset.what === models.help) {
         this.modal = (document.getElementById(domselectors.component.modal.help.substr(1))) ? document.getElementById(domselectors.component.modal.help.substr(1)) : document.querySelector(domselectors.component.modal.help);
-      } else if (trigger.dataset.target && trigger.dataset.target !== 'unique') this.modal = document.getElementById(trigger.dataset.target);
-      else this.modal = trigger.closest(domselectors.component.modal.modalcontainer);
-      this.modalcontent = this.modal.querySelector(domselectors.component.modal.modalcontent);
+      } else if (trigger.dataset.target && trigger.dataset.target !== 'unique') {
+        const md = document.getElementById(trigger.dataset.target);
+        if (md && md.classList.contains(domselectors.component.modal.modalcontainer.substr(1))) this.modal = md;
+        else if (md) this.modal = md.closest(domselectors.component.modal.modalcontainer);
+        else this.modal = trigger.closest(domselectors.component.modal.modalcontainer);
 
+      } else this.modal = trigger.closest(domselectors.component.modal.modalcontainer);
+      this.modalcontent = this.modal.querySelector(domselectors.component.modal.modalcontent);
+      if (this.modal === null) return null;
       this.addListeners();
     }
     return this;
@@ -43,6 +49,7 @@ export class ModalContainer {
   setContent(html) {
     // data have been sanitzed before in other scripts and from the server
     html = html instanceof HTMLElement ? html.outerHTML : html;
+
     this.modalcontent.innerHTML = html;
     return this.modalcontent;
   }
@@ -53,23 +60,23 @@ export class ModalContainer {
     return this.modal.querySelector(selector);
   }
   modalOpen(trigger) {
-    if (!this.modal.open) this.modal.open = true;
+    if (!this.modal.hasOwnProperty('open')) this.modal.open = true;
     this.openContent(trigger);
-
-
   }
 
   openContent(trigger) {
 
     if (!trigger.dataset.for) return;
     if (trigger.dataset.close) return this.dismissModal();
-    const siblings = this.getContentSiblings();
-    siblings.forEach(sibling => {
-      if (sibling !== trigger) sibling.removeAttribute('open');
-    });
-    const paragraph = this.modal.querySelector('#' + trigger.dataset.for);
-    if (paragraph) paragraph.open = true;
-    else console.log('help ' + trigger.dataset.for+'display error', this.modal);
+    if (this.modal.classList.contains(domselectors.component.modal.help.substr(1))) {
+      const siblings = this.getContentSiblings();
+      siblings.forEach(sibling => {
+        if (sibling !== trigger) sibling.removeAttribute('open');
+      });
+      const paragraph = this.modal.querySelector('#' + trigger.dataset.for);
+      if (paragraph) paragraph.open = true;
+      else console.log('help ' + trigger.dataset.for+'display error', this.modal);
+    }
     this.toggleAction(trigger);
   }
 

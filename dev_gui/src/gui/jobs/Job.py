@@ -30,7 +30,6 @@ class Job(object):
         Find a subclass with given UI name.
         """
         for job_sub_class in clazz.__subclasses__():
-
             if job_sub_class.UI_NAME == name:
                 return job_sub_class
             else:

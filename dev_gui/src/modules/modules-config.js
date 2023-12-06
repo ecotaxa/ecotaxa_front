@@ -115,6 +115,9 @@ export const domselectors = {
     navigation: {
       burgermenu: '.burger',
     },
+    tree: {
+      ident: 'simple-tree'
+    }
   }
 };
 export const default_messages = {

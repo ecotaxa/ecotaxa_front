@@ -132,7 +132,7 @@ details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-sto
 }
 details.modal-aside[open]  {@apply overflow-y-auto overscroll-none }
 details.modal-container:not([open]) > summary {@apply block w-auto }
-details summary.aside-label::after, details.modal-popup summary::after , details.project-search summary::after {@apply  absolute fill-stone-600 hover:fill-help-500  right-4 top-4  opacity-0 w-0 h-0 transform duration-300;
+details summary.aside-label::after, details.modal-popup > summary::after , details.project-search > summary::after {@apply  absolute fill-stone-600 hover:fill-help-500  right-4 top-4  opacity-0 w-0 h-0 transform duration-300;
 content:url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentcolor'><path fill-rule='evenodd' d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z' clip-rule='evenodd' /></svg>");
 }
 details.modal-right {@apply  w-auto  h-full min-h-full  top-0 right-0  }
@@ -142,7 +142,7 @@ details:not([open]) summary.aside-label::after {@apply text-base bg-transparent;
   }
 details:not([open]) summary.aside-label .summary-title {@apply inline-block}
 details[open] summary.aside-label .summary-title {@apply hidden w-0}
-details.no-marker > summary::marker {@apply w-0 h-0 hidden;content:''}
+details.no-marker > summary::marker ,.simple-tree details > summary::marker {@apply w-0 h-0 hidden;content:''}
 details:not([open]) summary.aside-label::before {@apply w-6 h-6 align-text-bottom leading-snug inline-block mr-0.5 ;content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" stroke="currentcolor"  fill="none" viewBox="0 0 24 24"  stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>');
 }
 details[open] summary.aside-label::before {@apply absolute bg-stone-100 text-base stroke-help-300 left-0 shadow-inner top-[50%] -translate-y-[50%] w-8 h-8 z-10 ml-0 block py-1.5  px-1.5 rounded-r-full ;
@@ -540,7 +540,8 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" c
 content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentcolor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>');
 
 }
-
+.icon-list-bullet {
+content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>')}
 }
 /*****************************************/
 /* top navigation and user menu         */
@@ -759,7 +760,9 @@ option[disabled][hidden], .ts-control .item[data-value=""] {@apply text-stone-30
 .ts-wrapper.multi .item.active {@apply text-stone-700 font-light}
 .ts-wrapper.multi .item.last-active {@apply text-stone-700 bg-stone-50 }
 .ts-wrapper.multi .item.active.last-active {@apply text-stone-900 bg-stone-50 font-medium}
-.ts-wrapper.multi .item.new {@apply border border-stone-300 bg-white text-stone-900 }
+.ts-wrapper.multi .item.new {@apply border border-stone-300 bg-white text-stone-900  }
+/*.ts-wrapper .item.new {@apply after:content-['']}
+.ts-wrapper .item.new:after {content:''}*/
 .ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto; }
 .ts-wrapper .item .ts-delet::before {@apply icon-cancel}
 select[class*="ts-hidden"] {@apply hidden}

@@ -6,8 +6,9 @@ from appli.gui.jobs.staticlistes import py_messages
 from appli.gui.jobs.Job import Job
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
+from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi
 from to_back.ecotaxa_cli_py.models import ExportReq, ExportRsp, ProjectModel, JobModel
+from appli.back_config import get_app_manager_mail
 
 
 class ExportSummaryJob(Job):
@@ -19,6 +20,30 @@ class ExportSummaryJob(Job):
     STEP0_TEMPLATE = "/v2/jobs/export_summary.html"
     STEP1_TEMPLATE = "/v2/jobs/_final_download.html"
     EXPORT_TYPE = "SUM"
+
+    @classmethod
+    def initial_dialog(cls) -> str:
+        """In UI/flask, initial load, GET"""
+        prj_id = int(gvg("projid"))
+        target_proj = cls.get_target_prj(prj_id, full=True)
+
+        # Get stored last server path value for this project, if any
+        with ApiClient(UsersApi, request) as uapi:
+            server_path = uapi.get_current_user_prefs(prj_id, "cwd")
+        return render_template(
+            cls.STEP0_TEMPLATE,
+            ServerPath=server_path,
+            TxtTaxoMap="",
+            target_proj=dict(
+                {
+                    "title": target_proj.title,
+                    "projid": target_proj.projid,
+                }
+            ),
+            prjmanagermail=target_proj.managers[0].email,
+            appmanagermailto=get_app_manager_mail(request),
+            referer=request.referrer,
+        )
 
     @classmethod
     def create_or_update(cls):

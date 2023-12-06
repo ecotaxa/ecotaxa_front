@@ -1,4 +1,4 @@
-{% extends "./v2/layout.html" %}
+{{ url_for("gui_prj")}}{% extends "./v2/layout.html" %}
 {% from "./v2/macros/macros.html" import inputdict%}
 {% from "./v2/project/macros.html" import header_project_job with context %}
 {%block body%}
@@ -8,9 +8,9 @@
     {{header_project_job(_('Project Edit / Erase annotation massively'),data, _('Merge project'))}}
   </div>
 {% if error==404 %}
-<a href="/gui/prj/" class="alert alert-warning">{{_('Select another project')}}</a>
+<a href="{{ url_for("gui_prj")}}" class="alert alert-warning">{{_('Select another project')}}</a>
 {% elif error==401 or error == 403 %}
-<a href="/gui/prj/" class="alert alert-danger">{{_('Select another project')}}</a>
+<a href="{{ url_for("gui_prj")}}" class="alert alert-danger">{{_('Select another project')}}</a>
 {%elif error =="nocat"%}
 <a href="javascript:history.back()">{{_('Back')}}</a>
 {%elif target_proj and target_proj.projid%}

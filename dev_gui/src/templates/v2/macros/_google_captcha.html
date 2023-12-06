@@ -7,6 +7,7 @@
         if(formbtn !== null) {
           formbtn.disabled=true;
           grecaptcha.ready(function() {
+            grecaptcha.reset();
           document.getElementById('g-recaptcha-response').value=window.localStorage['_grecaptcha'];
           formbtn.disabled=false;
           });
