@@ -119,9 +119,6 @@ def before_request_security() -> Optional[ResponseReturnValue]:
     menu.append(("", "SEP"))
     menu.append(("/gui/me/profile", "Profile"))
     g.menu = menu
-    from appli.gui.commontools import experimental_header
-
-    g.experimental = experimental_header()
     return None
 
 

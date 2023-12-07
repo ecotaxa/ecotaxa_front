@@ -198,17 +198,13 @@ def projects_list_page(
 
     from appli.gui.project.projects_list_interface_json import project_table_columns
 
-    # columns = project_table_columns(typeimport)
     if typeimport != "":
         listall = False
     if typeimport == "" and not partial:
-        template = "v2/index.html"
-        from appli.gui.commontools import experimental_header
-
-        experimental = experimental_header()
+        template = "v2/project/index.html"
     else:
         template = "v2/project/_listcontainer.html"
-        experimental = ""
+
     lastprjs = [p.projid for p in user.last_used_projects]
     return render_template(
         template,
@@ -219,7 +215,6 @@ def projects_list_page(
         # columns=json.dumps(columns),
         last_used_projects=lastprjs,
         typeimport=typeimport,
-        experimental=experimental,
     )
 
 

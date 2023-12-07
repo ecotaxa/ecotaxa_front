@@ -74,7 +74,7 @@
           </td>
 
           <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
-          <td align="right">{{ g.experimental |safe }}</td>
+          <td align="right"></td>
           <td align="right" width="300px">
             {% if not current_user.is_authenticated %}
               Not logged ( <a href="{{ url_for('gui_login') }}">log in / register</a> )

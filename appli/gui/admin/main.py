@@ -152,7 +152,6 @@ def gui_users_list_page(
         template,
         listall=listall,
         partial=partial,
-        experimental="",
     )
 
 
@@ -227,7 +226,6 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
     return render_template(
         "./v2/admin/users.html",
         isadmin=_check_is_admin(current_user.api_user),
-        experimental="",
     )
 
 
