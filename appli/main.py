@@ -49,7 +49,7 @@ def index():
         <a href="/explore/" class="btn btn-primary btn-lg btn-block">Explore images</a>
         </div>
         <div class="col-sm-4">
-        <a href="/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
+        <a href="/gui/prj/" class="btn btn-primary btn-lg  btn-block">Contribute to a project</a>
         </div>
         <div class="col-sm-4">
         <a href="%s" class="btn btn-primary btn-lg  btn-block">Particle module</a>
@@ -114,7 +114,7 @@ def before_request_security() -> Optional[ResponseReturnValue]:
         menu.append(("", "SEP"))
         menu.append(("/gui/admin/", "Admin Screen"))
         if current_user.is_app_admin == True:
-            menu.append(("/Jobs/listall", "Task Manager"))
+            menu.append(("/gui/jobs/listall", "Task Manager"))
 
     menu.append(("", "SEP"))
     menu.append(("/gui/me/profile", "Profile"))
@@ -129,9 +129,9 @@ def before_request_security() -> Optional[ResponseReturnValue]:
 def after_request(response):
     response.headers["Content-Security-Policy"] = (
         "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: "
-        "cdnjs.cloudflare.com server.arcgisonline.com www.google.com "
-        "www.gstatic.com www.google-analytics.com cdn.ckeditor.com  "
+        "cdnjs.cloudflare.com server.arcgisonline.com www.google.com *.googletagmanager.com *.google-analytics.com *.analytics.google.com"
+        "www.gstatic.com cdn.ckeditor.com  "
         "cdn.jsdelivr.net unpkg.com fonts.googleapis.com fonts.gstatic.com;"
-        "frame-ancestors 'self';form-action 'self'; script-src 'nonce-{SERVER-GENERATED-NONCE}'; img-src www.googletagmanager.com"
+        "frame-ancestors 'self';form-action 'self';  "
     )
     return response
