@@ -1,15 +1,18 @@
 <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
-<script src=https://www.google.com/recaptcha/api.js?render={{reCaptchaID}} ></script>
+<script src=https://www.google.com/recaptcha/api.js?render={{reCaptchaID}}&onload=reCaptchaCallback ></script>
       <script type="text/javascript">
+        function reCaptchaCallback() {
         const captchaform= document.getElementById("{{formid}}");
         if (captchaform !== null) {
         const formbtn = captchaform.querySelector('[type="submit"]');
         if(formbtn !== null) {
           formbtn.disabled=true;
           grecaptcha.ready(function() {
-            grecaptcha.reset();
-          document.getElementById('g-recaptcha-response').value=window.localStorage['_grecaptcha'];
-          formbtn.disabled=false;
+              grecaptcha.execute("{{reCaptchaID}}").then(function(token) {
+                document.getElementById('g-recaptcha-response').value=token;
+                formbtn.disabled=false;
+              });
           });
-}}
+
+}}}
 </script>
