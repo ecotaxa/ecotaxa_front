@@ -22,14 +22,14 @@
   <small>{{_('(no danger for the original database)')}}</small>
   {%endif%}
   </div>
-  {% if job.taskstate=="Error" %}
+  {% if job.state=="E" %}
     <div class="alert alert-danger">
       <p>{{_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart
         your job.')}}</p>
     </div>
   {% endif %}
 
-  <table class="datatable-table jobs table-condensed">
+  <table class="table-table jobs md:table-condensed">
    <tr>
       <th>{{_('Task ID')}}</th>
       <td>{{ job.id }}</td>
@@ -64,24 +64,26 @@
       <td>{{ job.progress_pct|string + '%' if job.progress_pct != None else '' }}</td>
     </tr>
     <tr>
-      <th>{{_('Message')}}</th>
+      <th>{{_('Message')}} </th>
       <td>{{ job.progress_msg }}
+        {% if job.errors|length%}<a class="font-btn triggershow block" data-action="toggle"  data-target=".collapseerrors" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_(' all errors')}}</a>{%endif%}
+        <div  class="collapseerrors">
         <ul>
           {% for e in job.errors %}
-            <li>{{ e }}</li>
+            <li >{{ e }}</li>
           {% endfor %}
-        </ul>
+        </ul></div>
       </td>
-    </tr><tr><td colspan="2" class="ml-2 text-left ""><a class="font-btn triggershow" data-action="toggle"  data-target=".collapse" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_('internal details')}}</a></td></tr></tbody><tbody >
-    <tr class="collapse hide">
+    </tr><tr><td colspan="2" class="ml-2 text-left ""><a class="font-btn triggershow" data-action="toggle"  data-target=".togglecollapse" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_('internal details')}}</a></td></tr>
+    <tr class="togglecollapse">
       <th>{{_('Input Parameters')}}</th>
       <td>{{ job.params|string }}</td>
     </tr>
-    <tr class="collapse hide">
+    <tr class="togglecollapse">
       <th>{{_('Question Data')}}</th>
       <td>{{ job.questiondata|string }}</td>
     </tr>
-    <tr class="collapse hide">
+    <tr class="togglecollapse">
       <th>{{_('Answer Data')}}</th>
       <td>{{ job.answerdata|string }}</td>
     </tr></tbody>

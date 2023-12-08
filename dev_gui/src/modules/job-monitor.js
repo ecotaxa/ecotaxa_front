@@ -24,7 +24,9 @@ export function jobMonitor(item) {
 
   }
   const display_errors = (errors) => {
-    statusdiv.firstChild.innerHTML = `<div class="alert alert-danger">${errors.join(`</div><div>`)}</div>`;
+    const erroone = errors.shift();
+    const other = (errors.lentgh) ? `<a class="font-btn triggershow" data-action="toggle"  data-target=".alert-errors" data-show="View" data-hide="Hide">{{_('all errors...')}}</a><div class="alert-errors hide">${errors.join(`<br>`)}</div>` : ``;
+    statusdiv.firstChild.innerHTML = `<div class="alert alert-danger" data-dismissible="true">${errorone} ${other}</div>`;
   }
   const display_next = async (url) => {
     fetch(url, fetchSettings()).then(response => response.text()).then(response => {
@@ -36,7 +38,7 @@ export function jobMonitor(item) {
   const check_job_status = () => {
     fetch("/gui/job/status/" + jobid, fetchSettings).then(response => response.json()).then(job => {
 
-      if (job.errors.length) {
+      if (job.errors.length && job.state != 'E') {
         clearInterval(intervalHandle);
         progress_bar(false);
         display_errors(job.errors);
@@ -66,10 +68,15 @@ export function jobMonitor(item) {
             progress_bar(false);
             spinner.remove();
             clearInterval(intervalHandle);
-            display_errors(job.errors);
+
             break;
           case "P":
             // pending
+
+            break;
+          case "R":
+            // running
+            display_errors(job.errors);
             break;
         }
         progress_bar(true, job.progress_pct, job.progress_msg);

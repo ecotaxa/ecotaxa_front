@@ -11,7 +11,7 @@
   <div class="font-normal py-4 px-4">
     <div> {{ _('%s Objects deleted ').format(deleted.no) }} </div> <div>{{_('%s ObjectHisto').format(deleted.noh)}} </div> <div>{{_('%s Images in Database').format(deleted.ni)}} </div> <div>{{_('%s Files').format(deleted.nf)}} </div>
 </div>
-<div class="mx-auto"><a class="button is-secondary inverse" href="{{{{ url_for("gui_prj")}} if backto else {{ url_for("gui_prj",projid=target_proj.projid)}}">{{ _("Back to projects list") if backto else _("Back to project home")}}</a></div>
+<div class="mx-auto"><a class="button is-secondary inverse" href="{{ url_for("gui_prj") if backto else  url_for("gui_prj",projid=target_proj.projid)}}">{{ _("Back to projects list") if backto else _("Back to project home")}}</a></div>
 {% else %}
   {% if activefilter == True%}
     <div class="text-danger-500 font-normal text-lg mx-auto">{{_('USING Active Project Filters')}} {{objlist|length}} {{_('objects')}}</div>

@@ -4,11 +4,11 @@
   {% set id=job.id %}
   {% if state=="Question" %}
     <a href="{{url_for("gui_job_question", job_id=id)}}">
-      <button class="button text-sm is-warning  py-0.5">{{ state }}</button>
+      <button class="button  text-sm is-warning  py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Error" %}
     <a href="{{url_for("gui_job_show", job_id =id)}}">
-      <button class="button text-sm is-error py-0.5">{{ state }}</button>
+      <button class="button  text-sm is-error py-0.5">{{ state }}</button>
     </a>
   {% elif state=="Running" %}
     <a href="{{url_for("gui_job_show", job_id =id)}}">
@@ -27,14 +27,14 @@
   {% endif %}
 {%- endmacro %}
 
-{% block body %}  <div class="container mx-auto my-8">
-<div class="flex flex-row mb-8"><span class="mr-2 text-lg align-bottom font-semibold p-2">{{_('Task count') }} : {{ jobs|length }}</span>
+{% block body %}  <div class="container mx-auto my-8"><div class="mr-2 text-base md:text-lg font-semibold p-2 whitespace-nowrap inline-block">{{_('Task count') }} <em>({{_('all users tasks') if seeall else _('user tasks')}})</em> : {{ jobs|length }}</div>
+<div class="mb-8 w-auto max-w-full grid grid-cols-2 gap-1 sm:flex sm:flex-row inline-block">
 {%if jobs|length %}
-  <a class="button text-sm is-done inverse mr-2 py-1 " href=?cleandone=Y{{ seeall }}>{{_('Clean all Done')}}</a>
-  <a class="button text-sm is-error inverse  mr-2 py-1 " href=?cleanerror=Y{{ seeall }}>{{_('Clean all Error')}}</a>
-  <a class="button text-sm is-danger mr-2 py-1" data-event="click" data-action="alert-confirm" data-alert=true data-message="{{_('You are about to clean all tasks of the list')}}" href=?cleanall=Y{{ seeall }}>{{_('Clean all')}} <strong>{{'Warning !!!'}}</strong></a>
+  <a class="button text-sm is-done inverse mx-1 py-1 mb-1 sm:mb-0 sm:w-auto  whitespace-nowrap" href=?cleandone=Y{{ seeall }}>{{_('Clean all Done')}}</a>
+  <a class="button text-sm is-error inverse  mx-1 py-1 mb-1 sm:mb-0  sm:w-auto whitespace-nowrap" href=?cleanerror=Y{{ seeall }}>{{_('Clean all Error')}}</a>
+  <a class="button text-sm is-danger mx-1 py-1 mb-1 sm:mb-0 sm:w-auto whitespace-nowrap" data-event="click" data-action="alert-confirm" data-alert=true data-message="{{_('You are about to clean all tasks of the list')}}" href=?cleanall=Y{{ seeall }}>{{_('Clean all')}} <strong>{{'Warning !!!'}}</strong></a>
   {%endif%}
-<a class="button text-sm is-info inverse mr-2 py-1" href={{'?' if seeall else '?seeall=Y' }}>{{_('See user tasks') if seeall else _('See all users tasks') }} </a></div>
+<a class="button text-sm is-info inverse mx-1 py-1 mb-1 sm:mb-0 sm:w-auto whitespace-nowrap" href={{'?' if seeall else '?seeall=Y' }}>{{_('See user tasks') if seeall else _('See all users tasks') }} </a></div>
 {%if cleanresult|length%}
 <div class="alert alert-info inverse" data-dismissible=true> <strong>{{_('Cleaning process')}} {{cleanresult|length ~ ' ' ~ _('jobs cleaned') }} </strong> {{cleanresult|join(', ')}}</div>
 {% endif %}

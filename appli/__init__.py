@@ -361,6 +361,8 @@ app.jinja_env.globals.update(
     Feature new UI pages for projects list, project settings, about project, project tools, project export
     Modify classification page navigation - send to new UI if exists
     Feature google analytics tags version upgrade
+    Fix: remove experimental "new"
+    Feature : better top navigation 
 2023-10-03: V 2.7.1
     Features : login , register , admin , user profile replaced by new version - user login and registration follow major modification in the API users
     Fix error reporting (merge new and current error handling)

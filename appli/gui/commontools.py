@@ -129,7 +129,6 @@ def last_taxo_refresh(partial: bool = False):
 def breadcrumbs(default=None) -> list:
     from appli.gui.staticlistes import apptree
 
-    print(apptree)
     crumbs = request.path.split("/")
     if "gui" in crumbs:
         crumbs.remove("gui")

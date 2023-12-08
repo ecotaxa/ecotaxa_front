@@ -16,15 +16,15 @@
   {%macro show_breadcrumbs(all=True) -%}
      {%- set crumbs = breadcrumbs() -%}
      {%- if crumbs|length ==0 and current_user.is_authenticated %}
-     {%-set crumbs=[{"url":"/prj/","text":_('Home')},{"url":url_for("gui_me_profile"),"text":"Profile"}]-%}
+     {%-set crumbs=[{"url":url_for("gui_index"),"text":_('Home')},{"url":url_for("gui_prj"),"text":_('Projects')}]-%}
+     {%elif all ==False and crumbs is iterable  and crumbs|length %}
+     {% set crumbs = crumbs %}
      {%-endif%}
      {%- if crumbs is iterable and crumbs|length-%}
-    {%if all == False%}
-    {% set crumbs = [crumbs[0]]%}
-    {%- endif%}
+
   <div class="breadcrumbs {{'all' if all else 'title' }} whitespace-nowrap mr-2 ">
     {%- for crumb in crumbs -%}
-      <a href="{{ crumb.url  }}{{'/' + crumb.id|string if 'id' in crumb.keys() else ''}}">{{ crumb.text }}</a>
+      <a href="{{ crumb.url }}">{{ crumb.text }}</a>
   {%- endfor -%}
     </div>
     {%else -%}
@@ -32,8 +32,8 @@
   {%-endmacro%}
   <div class="flex  flex-wrap md:flex-nowrap pl-2 xl:pl-8 pr-4 w-full justify-between">
     <div class="w-[140px]">
-        <a href="/prj/"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa.png') }}" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0"></a>
-    </div><div class="flex md:flex-row  md:flex-nowrap flex-grow  w-auto {{ 'mt-4 font-semibold md:mt-2 md:font-light' if not target_proj else 'mt-2 md:mt-0' }} text-secondblue-50 md:justify-center py-2  md:py-0 order-3 md:order-2 text-sm md:text-base xl:text-lg">
+        <a href="{{url_for("gui_index")}}"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa.png') }}" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0"></a>
+    </div><div class="flex md:flex-row  md:flex-nowrap flex-grow  w-auto {{ 'mt-4 font-semibold md:mt-2 md:font-light' if not target_proj else 'mt-2 md:mt-0' }} text-secondblue-50 md:justify-center py-2  md:py-0 order-3  sm:order-2 text-sm md:text-base xl:text-lg">
       {{ show_breadcrumbs(False)}}
       {% if current_user.is_authenticated and  target_proj and target_proj.projid -%}
      <div id="top-nav-projects" class="top-title">{{maketitle()}} </div>

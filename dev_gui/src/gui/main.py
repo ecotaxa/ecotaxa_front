@@ -14,7 +14,7 @@ from appli.gui.staticlistes import py_messages, py_user
 
 login_required.login_view = "gui/login"
 
-HOMEPAGE = "/prj/"
+HOMEPAGE = "/gui/"
 
 
 @app.route("/gui")
@@ -22,10 +22,8 @@ HOMEPAGE = "/prj/"
 @app.route("/gui/home")
 @app.route("/gui/index")
 def gui_index():
-    if current_user.is_authenticated:
-        return gui_prj()
-    else:
-        return gui_login()
+    ecoparturl = app.config.get("ECOPART_URL", "")
+    return render_template("v2/index.html", ecoparturl=ecoparturl)
 
 
 @app.route("/gui/logout", methods=["GET", "POST"])
@@ -44,7 +42,7 @@ def gui_login() -> str:
     if current_user.is_authenticated:
         # return old interface projects list
         # return redirect(url_for("gui_prj"))
-        return redirect("/prj/")
+        return redirect(HOMEPAGE)
 
     if request.method == "POST":
         from appli.security_on_backend import login_validate
@@ -86,7 +84,7 @@ def gui_register(token=None) -> str:
 
 @app.route("/gui/about/")
 def gui_about() -> str:
-    from appli.gui.staticlistes import sponsors
+    from appli.gui.sponsorslist import sponsors
 
     return render_template("v2/about.html", sponsors=sponsors, bg=True)
 
@@ -272,7 +270,7 @@ def gui_other(filename):
 
     partial = is_partial_request(request)
     if partial:
-        template = "_error"
+        template = "partials/_error"
     else:
         template = "error"
     if filename:

@@ -56,7 +56,6 @@ class SimpleTree extends Emitter {
     }
     this.parent = parent.appendChild(document.createElement('details'));
     this.parent.appendChild(document.createElement('summary'));
-
     this.parent.open = true;
     // use this function to alter a node before being passed to this.file or this.folder
     this.interrupt = node => node;

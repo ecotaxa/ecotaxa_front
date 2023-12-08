@@ -3,7 +3,7 @@
 {# set max_size = config.MAX_CONTENT_LENGTH #}
 {% set max_size = 500  * 1024 * 1024 %}
 {% if with_input == True %}
-    <input type ="hidden" name="MAX_FILE_SIZE" value="{{ max_size }}"> 
-{% endif %}    
-<p class="help-block"> {{ 'Only for > ' if before == None else before }} {{ (max_size / (1024 * 1024))|int }}MB {{ 'zip files' if after == None else after }}.</p>
+    <input type ="hidden" name="MAX_FILE_SIZE" value="{{ max_size }}">
+{% endif %}
+<p class="help-block"> {{ 'Only for < '  if before == None else before }} {{ (max_size / (1024 * 1024))|int }}MB {{ 'zip files' if after == None else after }}.</p>
 {%- endmacro %}

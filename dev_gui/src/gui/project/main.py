@@ -152,18 +152,21 @@ def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list
         filt=dict({"title": None, "instrum": [target_proj.instrument], "subset": None}),
         for_managing=True,
     )
-    prjstomerge = list([])
-
     for prj in prjs:
         r = True
         if prj["projid"] not in excludeprjs:
-            for u in prj["managers"]:
-                if current_user.id == u["id"]:
-                    r = False
-                    prjstomerge.append(prj)
+            if current_user.is_admin == True:
+                r = False
+            elif len(prj["managers"]):
+                for u in prj["managers"]:
+                    if u["id"] == current_user.id:
+                        r = False
+                        break
+        # del not granted
         if r == True:
             prjs.remove(prj)
-    return prjstomerge
+        # return prjs to merge
+    return prjs
 
 
 @app.route("/gui/prj/merge/<int:projid>", methods=["GET", "POST"])

@@ -38,8 +38,25 @@ def _get_last_refresh() -> str:
 
 
 def experimental_header(filename: str = "") -> str:
-    # Add experimental URL for vips
-    from appli.gui.staticlistes import vip_list, newpath
+    # Add experimental URL for vips ------ keep to use again with classification tests
+
+    # 2 Marc ,4 JO ,5 Amanda, 75 Laetitia, 1267 & 1604 Julie, 760 & 1080 & 878 Laurent, 193 Louis , 847 Zoe,768 Camille, 1001 Lucas , Bea 1562, 358 Solène // 1601 pour test sur db test
+    vip_list = [2, 4, 5, 75, 1001, 847, 1267, 1604, 358, 1562, 1601, 760, 1080]
+    # paths
+    newpath = [
+        "login",
+        "prj",
+        "prj/edit",
+        "prj/",
+        "prj/about",
+        "prj/listall",
+        "prj/listall/",
+        "jobs/listall/",
+        "jobs/listall",
+        "job/show",
+        "about",
+        "privacy",
+    ]
 
     path = request.path
 
@@ -121,7 +138,7 @@ def breadcrumbs(default=None) -> list:
     parent = ""
     url = []
     for i, crumb in enumerate(crumbs):
-        if crumb != "":
+        if crumb != "" or (i == 0):
             crumbvalue = breadcrumb(apptree, crumb, parent)
             url.append(crumb)
             if crumbvalue != None:
@@ -148,6 +165,7 @@ def breadcrumb(tree: dict, crumb: str, parent: str = "") -> str:
         if isinstance(tree[crumb], str):
             return tree[crumb]
         elif isinstance(tree[crumb], dict):
+
             if "root" in tree[crumb]:
                 return tree[crumb]["root"]
             else:

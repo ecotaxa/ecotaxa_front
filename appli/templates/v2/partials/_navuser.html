@@ -4,7 +4,7 @@
 {{profile_comment(current_user.status_admin_comment,current_user.mail_status)}}
 {%-endif-%}
 {%-endmacro-%}
-<nav class="flex md:flex-row  max-w-64 order-1 md:order-3 mr-0 justify-end">
+<nav class="flex md:flex-row  max-w-64 order-2 md:order-3 mr-0 justify-between">
 {% if not  current_user.is_authenticated %}<div id="user-nav-item"><a class="text-sm p-1 font-normal text-secondblue-100" href="{{url_for("gui_login")}}">{{_('Log in')}}</a><span class="text-stone-50 text-sm">/</span><a class="text-sm p-1 font-normal text-secondblue-100" href="{{url_for("gui_register")}}">{{_('Register')}}</a></div>
     {% else %}
     <div id="aside-nav-item">
