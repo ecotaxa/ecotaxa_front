@@ -171,6 +171,7 @@ def gui_job_cleanup(jobid: int):
         )
 
 
+@app.route("/gui/jobs/")
 @app.route("/gui/jobs/listall")
 @login_required
 def gui_list_jobs():

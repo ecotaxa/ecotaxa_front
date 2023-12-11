@@ -163,13 +163,13 @@ export class JsComponents {
               const checkNotifs = (tim) => {
                 fetch('/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {
                   item.innerHTML = DOMPurify.sanitize(html);
-                  /*if (tim < 600000) tim = 60000;
+                  if (tim < 30000) tim = 30000;
                   setTimeout(() => {
                     checkNotifs(tim);
-                  }, tim);*/
+                  }, tim);
                 });
               }
-              checkNotifs(60000);
+              checkNotifs(30000);
               break;
             case 'js-accordion':
               if (!dynamics.JsAccordion) {

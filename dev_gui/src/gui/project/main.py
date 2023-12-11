@@ -1,7 +1,7 @@
 from typing import List
-from flask import flash, request, render_template
+from flask import flash, request, render_template, redirect, url_for
 from flask_login import current_user, login_required, fresh_login_required
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, Unauthorized, Forbidden
 from appli import app, gvp, gvg
 from appli.project import sharedfilter
 from appli.utils import ApiClient
@@ -10,6 +10,17 @@ from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, ObjectSetQueryRsp, MergeRsp
 
 from appli.gui.commontools import is_partial_request, py_get_messages
+from appli.gui.project.projectsettings import get_target_prj
+from appli.gui.staticlistes import py_messages
+
+
+@app.route("/gui/prj/noright/<int:projid>")
+# TODO - fresh_login_required
+@login_required
+def gui_prj_noright(projid):
+    from appli.project.main import indexPrj
+
+    return render_template("v2/project/noright.html", projid=projid)
 
 
 @app.route("/gui/prj/<int:projid>", methods=["GET", "POST"])
@@ -33,17 +44,10 @@ def gui_prj_purge(projid):
 
     user: UserModelWithRights = current_user.api_user
     isadmin = user and (2 in user.can_do)
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            target_proj: ProjectModel = api.project_query(projid, for_managing=True)
-        except ApiException as ae:
-            if ae.status == 404:
-                raise NotFound(404, description=py_messages["project404"])
-            elif ae.status in (401, 403):
-                flash(py_messages["cannotpurgeprj"], "error")
-                if ae.status == 401:
-                    raiseuNAUT(ae.status)
-
+    target_proj = get_target_prj(projid)
+    if target_proj is None:
+        flash(py_messages["selectotherproject"], "info")
+        return redirect(url_for("gui_prj_noright", projid=projid))
     if gvp("objlist") == "":
         # Extract filter values
         filters = {}
@@ -184,8 +188,9 @@ def gui_prj_merge(projid):
             elif ae.status in (401, 403):
                 err = py_messages["cannotmergeprj"]
             else:
-                raise
-            flash(ae.status + " " + ae.reason, "error")
+                err = ae.status + " " + ae.reason
+            flash(err, "error")
+            return redirect(url_for("gui_prj_noright", projid=projid))
 
     excludeprjs = [target_proj.projid]
     prjstomerge = None
@@ -297,7 +302,10 @@ def gui_prj_editannot(projid):
             elif ae.status in (401, 403):
                 flash("You cannot do mass annotation edition on this project", "error")
             error = ae.status
-
+            return redirect(url_for("gui_prj_noright", projid=projid))
+    if target_proj.status == "ExploreOnly":
+        flash("You cannot do mass annotation edition on this project", "error")
+        return redirect(url_for("gui_prj_no_right", projid=target_proj.projid))
     # ############### 1er Ecran
     if not (old_author_id and new_author_id):
 
@@ -467,7 +475,7 @@ def gui_prj_reset_to_predicted(projid):
             elif ae.status in (401, 403):
                 flash("You cannot do reset to predicted on this project", "error")
             error = ae.status
-
+            return redirect(url_for("gui_prj_noright", projid=projid))
     filters = {}
     for k in sharedfilter.FilterList:
         if gvg(k):
@@ -557,8 +565,8 @@ def gui_prj_edit_datamass(projid):
                 flash("Project doesn't exists", "warning")
             elif ae.status in (401, 403):
                 flash("You cannot do mass data edition on this project", "error")
-
             error = ae.status
+            return redirect(url_for("gui_prj_noright", projid=projid))
 
     objectids = None
     error = None
@@ -690,6 +698,7 @@ def gui_deprecation_management(projid):
             elif ae.status in (401, 403):
                 flash("You cannot do category fix on this project", "error")
             error = ae.status
+            return redirect(url_for("gui_prj_noright", projid=projid))
 
     if request.method == "POST":
         # Posted form

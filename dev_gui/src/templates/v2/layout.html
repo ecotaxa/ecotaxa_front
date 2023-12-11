@@ -10,7 +10,7 @@
       {%- include './v2/partials/_navbar.html' with context -%}
       {%- endif -%}
     </nav>
-  <main  {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton.jpg') + '\')" class="bg-image" '| safe if bg }}>
+  <main  {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton'+bg_scale()+'.jpg') + '\');" class="bg-image" '| safe if bg }}>
   {% include "v2/partials/_maintop.html"%}
   <div class="w-full">
     {% block body %}{% endblock %}

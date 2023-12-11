@@ -25,6 +25,8 @@ class ExportJob(Job):
         """In UI/flask, initial load, GET"""
         prj_id = int(gvg("projid"))
         target_proj = cls.get_target_prj(prj_id)
+        if target_proj == None:
+            return render_template(cls.NOPROJ_TEMPLATE, projid=prj_id)
         from appli.gui.jobs.job_interface import export_format_options
 
         filters = {}

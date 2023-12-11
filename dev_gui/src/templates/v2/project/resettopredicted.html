@@ -1,10 +1,10 @@
-{{ url_for("gui_prj")}}{% extends "./v2/layout.html" %}
+{% extends "./v2/layout.html" %}
 {% from "./v2/project/macros.html" import header_project_job with context %}
 {%block body%}
 <div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_resettopredicted" >
   <div class="w-100 mx-auto py-4 block text-left relative" id="project-resettopredicted-header">
     {% set data = {'file':'_help_project_resettopredicted'} %}
-    {{header_project_job(_('Project reset status to predicted'),data, _('Merge project'))}}
+    {{header_project_job(_('Project reset status to predicted'),data, _('Reset status to predicted'))}}
   </div>
   {%if error!=None %}
   <a href="{{ url_for("gui_prj")}}" class="alert alert-danger">Error {{error}} {{_('Select another project')}}</a>
@@ -29,7 +29,6 @@
 {% elif proceed =="Y"%}
 {%endif%}
 <a href="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button inverse w-full sm:w-96 mt-2 ml-4 text-center">{{_('Back to project')}}</a>
-
 {% endif %}
 </div>
 {%endblock%}

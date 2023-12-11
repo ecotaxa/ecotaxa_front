@@ -12,7 +12,7 @@ from flask import session, request, render_template
 from flask_login import current_user
 
 from appli.utils import ApiClient
-
+from werkzeug.exceptions import Forbidden
 from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi, AuthentificationApi
 from to_back.ecotaxa_cli_py.models import (
     ProjectModel,
@@ -183,7 +183,6 @@ def projects_list_page(
     # projects ids and rights for current_user
     if not current_user.is_authenticated:
         from appli.gui.staticlistes import py_user
-        from werkzeug.exceptions import Forbidden
 
         raise Forbidden(py_user["notauthorized"])
     # current_user is either an ApiUserWrapper or an anonymous one from flask,

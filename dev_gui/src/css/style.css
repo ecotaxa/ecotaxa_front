@@ -830,8 +830,8 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /* breadcrumbs                 */
 /******************************/
 .breadcrumbs {@apply flex flex-wrap m-0 p-0 font-light pr-1 text-secondblue-300}
-.breadcrumbs.title {@apply uppercase font-semibold text-secondblue-200  align-bottom after:px-1}
-.breadcrumbs a {@apply after:content-[">"]  last:font-normal  hover:text-secondblue-300  after:px-1 after:text-secondblue-200 after:lg:text-lg after:md:text-base after:inline after:last:content-none ; }
+.breadcrumbs.title {@apply uppercase  font-semibold text-secondblue-200  align-bottom after:px-1}
+.breadcrumbs a {@apply after:content-[">"] last:font-normal  hover:text-secondblue-300  after:px-1 after:text-secondblue-200 after:lg:text-lg after:md:text-base after:inline after:last:content-none ; }
 
 /*******************************/
 /* navbar notifications        */
@@ -992,11 +992,12 @@ td .tipover {@apply absolute z-10 rounded bg-stone-400 text-stone-50 text-xs px-
 .tree_link {fill: none; stroke: #A0A0A0; stroke-width: 0.5;}
 .node_circle {fill: #707070;}
 .node_label {font-size: 10px; font-family: sans-serif;}
-@media only screen and (max-width: 420px)  {
+@media only screen and (max-width: 720px)  {
 /* list breadcrumbs length */
 .breadcrumbs a:first-child, .breadcrumbs a:nth-child(n+3) {@apply  hide }
 .top-title {@apply max-w-[85%]}
 }
+
 @media only screen and (max-width: 768px)  {
   table,
   table thead,

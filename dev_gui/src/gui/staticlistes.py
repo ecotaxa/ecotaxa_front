@@ -49,6 +49,7 @@ py_messages = dict(
             "One member at least is required with Manage privilege and contact property  "
         ),
         "uhasnopriv": _("privilege is missing"),
+        "notauthorized": _("Not authorized"),
         "taxosynchro": _(
             "Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days. Ask application administrator to do it."
         )

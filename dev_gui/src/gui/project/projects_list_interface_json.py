@@ -400,7 +400,9 @@ def render_for_js(prjs: list, columns: list, can_access: list) -> list:
                             or isadmin
                         ):
                             select.update(translations["controls"]["A"])
-                        elif prj["projid"] in can_access["View"] or isadmin:
+                        elif prj["projid"] in (
+                            can_access["View"] + can_access["Manage"] or isadmin
+                        ):
                             select.update(translations["controls"]["V"])
                         else:
                             if prj["visible"]:

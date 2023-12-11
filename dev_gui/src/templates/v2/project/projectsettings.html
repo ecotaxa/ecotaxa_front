@@ -176,7 +176,7 @@
     </div>
 
 <div class="w-full text-left my-8"> <input type="hidden" name="save" value="Y">
-  <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="/prj/{{ target_proj.projid }}" class="button is-secondary inverse" title="{{ _('Cancel, back to project ') }}">{{ _('Cancel') }}</a>
+  <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{url_for("gui_prj_classify", projid= target_proj.projid) }}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to project ') }}">{{ _('Cancel') }}</a>
 </div>
 </form>
 </div>

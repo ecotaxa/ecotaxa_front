@@ -4,14 +4,14 @@
 <div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_purge" >
   <div class="w-100 mx-auto py-4 block text-left relative" id="project-purge-header">
     {% set data = {'file':'_help_project_purge'} %}
-    {{header_project_job(_('Erase objects tool'),data, _('Delete project'))}}
+    {{header_project_job(_('Erase objects tool'),data, _('Delete objects or project'))}}
   </div>
   {% if deleted != None %}
 
   <div class="font-normal py-4 px-4">
     <div> {{ _('%s Objects deleted ').format(deleted.no) }} </div> <div>{{_('%s ObjectHisto').format(deleted.noh)}} </div> <div>{{_('%s Images in Database').format(deleted.ni)}} </div> <div>{{_('%s Files').format(deleted.nf)}} </div>
 </div>
-<div class="mx-auto"><a class="button is-secondary inverse" href="{{ url_for("gui_prj") if backto else  url_for("gui_prj",projid=target_proj.projid)}}">{{ _("Back to projects list") if backto else _("Back to project home")}}</a></div>
+<div class="mx-auto"><a class="button is-secondary inverse" href="{{ url_for("gui_prj") if backto else  url_for("gui_prj_classify",projid=target_proj.projid)}}">{{ _("Back to projects list") if backto else _("Back to project home")}}</a></div>
 {% else %}
   {% if activefilter == True%}
     <div class="text-danger-500 font-normal text-lg mx-auto">{{_('USING Active Project Filters')}} {{objlist|length}} {{_('objects')}}</div>
@@ -24,7 +24,7 @@
         <form action=? method="post" id="form-purge" class="js js-submit">
         <div class="form-box"><textarea name="objlist" id="objlist" class="form-textarea" cols="15" rows="20" autocomplete=off>{{objlist|join("\n")}}</textarea></div>
         <div class="form-box"><label><input type=checkbox name="destroyproject" value=Y> {{_('DELETE project after "DELETEALL" action')}}</label></div>
-        <button type="submit" class="button is-danger">{{_('ERASE THESE OBJECTS !!! IRREVERSIBLE !!!!!')}}</button> <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
+        <button type="submit" class="button is-danger">{{_('ERASE THESE OBJECTS !!! IRREVERSIBLE !!!!!')}}</button> <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse" data-title="{{_('Cancel and back to project')}}">{{_('Cancel')}}</a>
         </form>
               {%endif%}
               {%endif%}

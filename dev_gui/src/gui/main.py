@@ -17,6 +17,7 @@ login_required.login_view = "gui/login"
 HOMEPAGE = "/gui/"
 
 
+@app.route("/")
 @app.route("/gui")
 @app.route("/gui/")
 @app.route("/gui/home")
@@ -104,6 +105,7 @@ def gui_privacy() -> str:
     return render_template("v2/privacy.html")
 
 
+@app.route("/prj/", methods=["GET"])
 @app.route("/gui/prj/", methods=["GET"])
 @login_required
 def gui_prj(listall: bool = False) -> str:
@@ -436,6 +438,24 @@ def utility_processor():
 
         return api_password_regexp()
 
+    def bg_scale():
+        bg = str(app.config.get("BG_SCALE") or "")
+        if bg != "" and os.path.exists(
+            "static/gui/images/montage_plankton" + bg + ".jpg"
+        ):
+            return bg
+        else:
+            return ""
+
+    def logo_special():
+        logo = str(app.config.get("LOGO_SPECIAL") or "")
+        if logo != "" and os.path.exists(
+            "static/gui/images/logo_ecotaxa" + logo + ".png"
+        ):
+            return logo
+        else:
+            return ""
+
     return dict(
         message_translation=message_translation,
         unique_id=unique_id,
@@ -446,4 +466,6 @@ def utility_processor():
         get_referrer=get_referrer,
         global_messages=global_messages,
         api_password_regexp=api_password_regexp,
+        bg_scale=bg_scale,
+        logo_special=logo_special,
     )
