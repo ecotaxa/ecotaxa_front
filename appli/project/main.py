@@ -464,24 +464,29 @@ def indexPrj(PrjId):
                 "Extract Subset",
             )
         )
-        g.headmenu.append((arr_url["merge"], "Merge another project in this project"))
-        g.headmenu.append((arr_url["annot"], "Edit or erase annotations massively"))
-        g.headmenu.append((arr_url["editamass"], "Batch edit metadata"))
-        g.headmenuF.append(
-            (
-                arr_url["editamassf"],
-                "Batch edit metadata",
+        if proj.status == "Annotate":
+            g.headmenu.append(
+                (arr_url["merge"], "Merge another project in this project")
             )
-        )
-        g.headmenu.append((arr_url["resettopredicted"], "Reset status to Predicted"))
-        g.headmenuF.append(
-            (
-                arr_url["resettopredictedf"],
-                "Reset status to Predicted",
+            g.headmenu.append((arr_url["annot"], "Edit or erase annotations massively"))
+            g.headmenu.append((arr_url["editamass"], "Batch edit metadata"))
+            g.headmenuF.append(
+                (
+                    arr_url["editamassf"],
+                    "Batch edit metadata",
+                )
             )
-        )
-        g.headmenu.append((arr_url["purge"], "Delete objects or project"))
-        g.headmenuF.append((arr_url["purgef"], "Delete objects"))
+            g.headmenu.append(
+                (arr_url["resettopredicted"], "Reset status to Predicted")
+            )
+            g.headmenuF.append(
+                (
+                    arr_url["resettopredictedf"],
+                    "Reset status to Predicted",
+                )
+            )
+            g.headmenu.append((arr_url["purge"], "Delete objects or project"))
+            g.headmenuF.append((arr_url["purgef"], "Delete objects"))
         # EMODNet Audit & Export
         # g.headmenu.append(("", "SEP"))
         # g.headmenu.append(("/prj/emodnet/%d" % PrjId, "EMODnet export"))

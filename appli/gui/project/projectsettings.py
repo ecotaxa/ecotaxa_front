@@ -129,7 +129,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
     target_proj = get_target_prj(prjid)
     if target_proj is None:
         flash(py_messages["selectotherproject"], "info")
-        return redirect(url_for("gui_prj"))
+        return redirect(url_for("gui_prj_noright", projid=prjid))
     # Reconstitute members list with privs
     # data structure used in both display & submit
     redir = ""

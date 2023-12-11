@@ -84,7 +84,7 @@
       </fieldset>{%-endif-%}</div>
       <fieldset>
 <div class="w-full text-left mb-8"> <input type="hidden" name="save" value="Y">
-  <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{back}}" class="button is-secondary inverse" title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a>
+  <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{back}}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a>
 </div></fieldset>{%if createaccount == True and not incadmin %}{%set uid=unique_id()%}
 {{captcha("formu",uid)}}  {%endif%}
 </form>

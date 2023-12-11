@@ -20,6 +20,7 @@ class Job(object):
     """
 
     JOB_ID_POST_PARAM = "job_id"
+    NOPROJ_TEMPLATE = "/v2/project/noright.html"
 
     def __init__(self):
         pass
@@ -30,7 +31,6 @@ class Job(object):
         Find a subclass with given UI name.
         """
         for job_sub_class in clazz.__subclasses__():
-
             if job_sub_class.UI_NAME == name:
                 return job_sub_class
             else:

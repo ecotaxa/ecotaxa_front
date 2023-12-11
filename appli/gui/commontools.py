@@ -142,7 +142,7 @@ def breadcrumbs(default=None) -> list:
             crumbvalue = breadcrumb(apptree, crumb, parent)
             url.append(crumb)
             if crumbvalue != None:
-                crumbdict = dict({"url": "/gui/" + "/".join(url), "text": crumbvalue})
+                crumbdict = dict({"url": "/gui" + "/".join(url), "text": crumbvalue})
                 if len(crumbs) == i + 2:
                     if isinstance(crumbs[i + 1], int) or crumbs[i + 1].isdigit():
                         crumbdict.update(dict({"id": crumbs[i + 1]}))

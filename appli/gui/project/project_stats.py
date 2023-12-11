@@ -1,4 +1,4 @@
-from flask import request, render_template
+from flask import request, render_template, flash
 from appli.utils import ApiClient, DecodeEqualList
 from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py import ApiException
@@ -70,12 +70,17 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
                 name = n[0][1]
                 taxastats[i]["name"] = name
                 taxastats[i]["lineage"] = n[0][2]
+
         from to_back.ecotaxa_cli_py.models import ProjectUserStatsModel
 
         with ApiClient(ProjectsApi, request) as api:
-            annotators_stats: List[
-                ProjectUserStatsModel
-            ] = api.project_set_get_user_stats(ids=str(prjid))
+            try:
+                annotators_stats: List[
+                    ProjectUserStatsModel
+                ] = api.project_set_get_user_stats(ids=str(prjid))
+            except ApiException as ae:
+                annotators_stats = None
+                flash("error in getting user stats " + str(ae.status), "error")
         if isinstance(annotators_stats, Iterable) and len(annotators_stats) > 0:
             for r in annotators_stats[0].annotators:
                 f = list(

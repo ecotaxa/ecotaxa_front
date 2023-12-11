@@ -1,5 +1,5 @@
 <nav id="secondary-nav" class="js js-nav">
-<div class="w-full relative mt-2 md:mt-0 py-4"><div id="menu-burger" class="burger" data-target="navbar-menu">
+<div class="w-full relative mt-1 md:mt-0 py-4"><div id="menu-burger" class="burger" data-target="navbar-menu">
 <div id="bar1" class="bar"></div>
 <div id="bar2" class="bar"></div>
 <div id="bar3" class="bar"></div>
@@ -8,19 +8,31 @@
           &laquo;
         </a></li>
         {% if target_proj and target_proj.projid > 0 %}
+        {% set disabled = namespace(value=" class=disabled disabled=disabled") %}
+        {% if target_proj.status!='ExploreOnly' -%}
+         {%if current_user.is_app_admin == True -%}
+           {%- set disabled.value="" -%}
+         {%else -%}
+        {% for manager in target_proj.managers -%}
+        {%if current_user.id|int == manager.id|int -%}
+          {%- set disabled.value="" -%}
+          {%-endif%}
+          {%-endfor%}
+          {%-endif-%}
+      {%- endif%}
         <li>
               <a href="{{ url_for('indexPrj',PrjId=target_proj.projid)}}">
-                {{_('Annotate')}}
+                {{_('Annotate') if target_proj.status=='Annotate' else _('View')}}
               </a>
             </li>
             <li>
-              <a href="{{url_for("jobCreate",job_type="Prediction",projid=target_proj.projid) }}">
+              <a href="{{url_for("jobCreate",job_type="Prediction",projid=target_proj.projid) }}" {{disabled.value if target_proj.status!='Annotate'}}>
                 {{_('Predict')}}
               </a></li>
               {% endif %}
             <li>
       <!--  <a href="/gui/job/create/FileImport?p={{target_proj.projid}}">-->
-      <a href="{{url_for("jobCreate",job_type="FileImport", p=target_proj.projid) }}">
+      <a href="{{url_for("jobCreate",job_type="FileImport", p=target_proj.projid) }}" {{disabled.value  if target_proj.status!='Annotate'}}>
           {{_('Import')}}
         </a>
       </li>
@@ -34,18 +46,6 @@
             {{_('Settings')}}
           </a>
         </li><li><div>{{_('Tools')}}</div>
-      {% set disabled = namespace(value=" class=disabled disabled=disabled") %}
-      {% if target_proj.status!='ExploreOnly' -%}
-       {%if current_user.is_app_admin == True -%}
-         {%- set disabled.value="" -%}
-       {%else -%}
-      {% for manager in target_proj.managers -%}
-      {%if current_user.id|int == manager.id|int -%}
-        {%- set disabled.value="" -%}
-        {%-endif%}
-        {%-endfor%}
-        {%-endif-%}
-    {%- endif%}
       <ul aria-expanded=false>
       <li><a href="{{url_for("gui_job_create",job_type="Subset", p =target_proj.projid) }}" {{disabled.value if target_proj.status=='ExploreOnly'}}>{{_('<strong>Extract</strong> Subset')}}</a></li>
     <li><a href="{{url_for('gui_prj_merge', projid=target_proj.projid)}}"  {{disabled.value}}>{{_('<strong>Merge</strong> another project in this project')}}</a></li>
@@ -53,7 +53,7 @@
     <li><a href="{{url_for('gui_prj_edit_datamass', projid=target_proj.projid)}}"  {{disabled.value}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
     <li><a href="{{url_for('gui_prj_reset_to_predicted',projid=target_proj.projid)}}"  {{disabled.value}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
     <li><a href="{{url_for('gui_prj_purge',projid=target_proj.projid)}}"  {{disabled.value}}>{{_('<strong>Delete</strong> object or project')}}</a></li>
-    <li><a href="{{url_for('deprecation_management',prj_id=target_proj.projid)}}" {{'' if( target_proj and target_proj.status == "annotate" and (current_user in target_proj.managers or  current_user in target_proj.annotators))  else  ''}}>{{_('<strong>Fix</strong> category issues')}}</a></li>
+    <li><a href="{{url_for('deprecation_management',prj_id=target_proj.projid)}}" {{'' if( target_proj and target_proj.status == "annotate" and (current_user in target_proj.managers or  current_user in target_proj.annotators))  else  ''}}  {{disabled.value}}>{{_('<strong>Fix</strong> category issues')}}</a></li>
       </ul>
   </li><li>
               <a href="{{url_for('gui_prj_about',projid=target_proj.projid)}}">

@@ -26,7 +26,8 @@ class ExportSummaryJob(Job):
         """In UI/flask, initial load, GET"""
         prj_id = int(gvg("projid"))
         target_proj = cls.get_target_prj(prj_id, full=True)
-
+        if target_proj == None:
+            return render_template(cls.NOPROJ_TEMPLATE, projid=prj_id)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
             server_path = uapi.get_current_user_prefs(prj_id, "cwd")

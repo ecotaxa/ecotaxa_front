@@ -83,7 +83,6 @@
  {% for annotator in annotators %}
  <tr><th class="font-normal" scope="row">{{ annotator.name }}</th><td>{{get_privilege(annotator.id)}}</td><td class="number">{{ annotator.nb_actions }}</td><td class="number">{{ annotator.last_annot if annotator.last_annot != None else '' }}</td></tr>
  {% endfor %}
-
  </tbody>
  </table>
   </div></div></div></section> {% endif %}

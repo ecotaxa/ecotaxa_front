@@ -29,6 +29,8 @@ class SubsetJob(Job):
         """In UI/flask, initial load, GET"""
         projid = int(gvg("p"))
         target_proj = cls.get_target_prj(projid)
+        if target_proj == None:
+            return render_template(cls.NOPROJ_TEMPLATE, projid=projid)
         filters = {}
         filters = cls.extract_filters_from_url(filters)
 
