@@ -4,15 +4,15 @@
 {{profile_comment(current_user.status_admin_comment,current_user.mail_status)}}
 {%-endif-%}
 {%-endmacro-%}
-<nav class="flex  md:flex-row  max-w-64 sm:order-2 order-3 mr-0 justify-between">
-{% if not  current_user.is_authenticated %}<div id="user-nav-item"><a class="text-sm p-1 font-normal text-secondblue-100" href="{{url_for("gui_login")}}">{{_('Log in')}}</a><span class="text-stone-50 text-sm">/</span><a class="text-sm p-1 font-normal text-secondblue-100" href="{{url_for("gui_register")}}">{{_('Register')}}</a></div>
+<nav class="flex  md:flex-row  max-w-64 {{ 'order-2 md:order-3 mr-0 ml-auto md:ml-1 ' if target_proj else 'order-3 justify-between'}} mr-0 ">
+{% if not  current_user.is_authenticated %}<div id="user-nav-item" class="mt-1 md:mt-2"><a class="text-sm p-1 font-normal text-secondblue-100" href="{{url_for("gui_login")}}#home-login">{{_('Log in')}}</a><span class="text-stone-50 text-sm">/</span><a class="text-sm p-1 font-normal text-secondblue-100" href="{{url_for("gui_register")}}">{{_('Register')}}</a></div>
     {% else %}
     <div id="aside-nav-item">
       <a href="/notifications/"><span class="hidden lg:show block mb-1">
           Notifications </span></a>
         <div class="flex flex-row flex-nowrap align-text-bottom mt-0.5 mr-0.5 md:mr-1 js js-notifications">
         </div>
-      </div><div id="ident-user-item"><a href="{{url_for("gui_me")}}"><i class="icon icon-user-sm align-text-bottom mx-1 invert cursor-pointer md:cursor-default" title="{{ current_user.name }}"></i><span class="text-xs text-secondblue-50 w-[0px] max-w-[0px] lg:w-auto lg:max-w-[75px] truncate text-ellipsis hidden md:inline">{{current_user.name}}</span></a>
+      </div><div id="ident-user-item"><a href="{{url_for("gui_me")}}"><i class="icon icon-user-sm align-text-bottom mx-1 invert cursor-pointer md:cursor-default" title="{{ current_user.name }}"></i><span class="text-xs text-secondblue-50 w-[0px] max-w-[0px] lg:w-auto lg:max-w-[75px] truncate text-ellipsis hidden lg:visible lg:inline">{{current_user.name}}</span></a>
     <!-- user profile and sign-out -->
 <ul id="user-menu" >
 <li><a href="{{url_for("gui_me_profile")}}"><i class="icon icon-user p-1 opacity-80" title="{{_('profile')}}"></i> {{ _('Profile') }}</a>{{has_to_mod_profile(current_user)}}{{ current_user.name }}</li>

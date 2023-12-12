@@ -362,7 +362,9 @@ app.jinja_env.globals.update(
     Modify classification page navigation - send to new UI if exists
     Feature google analytics tags version upgrade
     Fix: remove experimental "new"
-    Feature : better top navigation 
+    Feature : better top navigation
+    Featrure : logo parameter
+    Feature : homepage message and top maintenance and info message
 2023-10-03: V 2.7.1
     Features : login , register , admin , user profile replaced by new version - user login and registration follow major modification in the API users
     Fix error reporting (merge new and current error handling)

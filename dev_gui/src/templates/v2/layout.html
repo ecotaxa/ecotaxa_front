@@ -1,6 +1,6 @@
 {% set title= 'Ecotaxa 3.0' + target_proj.title if target_proj and target_proj.projid else 'Ecotaxa 3.0'%}
 {% include 'v2/partials/_head.html' %}
-<body>{%- if not site_error and current_user.is_authenticated-%}{{global_messages()|safe}}{%-endif-%}
+<body>{%- if not site_error -%}{%- include('v2/partials/_top_messages.html')-%}{%-endif-%}
   <div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }} flex flex-col">
     <nav id="main-navbar">
       <header class="background-top h-12 p-1 pt-3.5 {{ 'solo' if not (target_proj and target_proj.projid) }}">

@@ -1,5 +1,5 @@
   {%block body%}
-  {% if response[0]|int == 0 %}{{response}}
+  {% if response[0]|int == 0 %}
  <div class="alert is-success">
    {%- if (not api_email_verification  or token) and not api_account_validation -%}
    <h3>{{_('Welcome, your account has been created.')}}</h3>

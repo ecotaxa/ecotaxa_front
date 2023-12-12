@@ -228,13 +228,13 @@ def gui_help(filename):
     from os.path import exists
     from markupsafe import escape
 
+    partial = is_partial_request(request)
     filename = escape(filename)
     if filename[0:1] != "_":
         return render_template(".v2/help.html", filename=filename)
     filename = "/v2/help/" + filename + ".html"
     if not exists("appli/templates" + filename):
-        raise NotFound(description=py_messages["page404"] + filename)
-    partial = is_partial_request(request)
+        return render_template("v2/help/index.html", notfound=filename, partial=partial)
     return render_template("." + filename, partial=partial)
 
 
@@ -394,11 +394,11 @@ def utility_processor():
         return referrer
 
     def global_messages() -> str:
-        if not current_user.is_authenticated:
-            return ""
-        from appli.gui.commontools import last_taxo_refresh
+        if current_user.is_authenticated:
+            from appli.gui.commontools import last_taxo_refresh
 
-        last_taxo_refresh()
+            last_taxo_refresh()
+
         cookiename = "ecotaxa_userinfo"
 
         import json, time
@@ -425,13 +425,9 @@ def utility_processor():
                         ret[key] = message
 
         if len(ret):
-            return render_template(
-                "v2/partials/_top_messages.html",
-                messages=ret,
-                cookiename=cookiename,
-            )
+            return {"messages": ret, "cookiename": cookiename}
         else:
-            return ""
+            return None
 
     def api_password_regexp():
         from appli.gui.users.users import api_password_regexp
@@ -441,7 +437,7 @@ def utility_processor():
     def bg_scale():
         bg = str(app.config.get("BG_SCALE") or "")
         if bg != "" and os.path.exists(
-            "static/gui/images/montage_plankton" + bg + ".jpg"
+            os.path.join(app.static_folder, "gui/images/montage_plankton" + bg + ".jpg")
         ):
             return bg
         else:
@@ -450,7 +446,7 @@ def utility_processor():
     def logo_special():
         logo = str(app.config.get("LOGO_SPECIAL") or "")
         if logo != "" and os.path.exists(
-            "static/gui/images/logo_ecotaxa" + logo + ".png"
+            os.path.join(app.static_folder, "gui/images/logo_ecotaxa" + logo + ".png")
         ):
             return logo
         else:

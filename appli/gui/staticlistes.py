@@ -28,6 +28,7 @@ apptree = dict(
                 "/listall?seeall=Y": "all users jobs",
             },
         },
+        "job": "Job",
         "privacy": "Privacy",
         "about": "About Ecotaxa",
     }
@@ -95,7 +96,7 @@ py_messages = dict(
 
 py_user = dict(
     {
-        "invalidpassword": _("Password is not valid"),
+        "invalidpassword": _("Invalid credentials"),
         "invaliddata": _("Data are not valid"),
         "notadmin": _("Not an administrator"),
         "notfound": _("Not found"),

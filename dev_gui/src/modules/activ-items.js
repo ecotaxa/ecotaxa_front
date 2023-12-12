@@ -180,6 +180,14 @@ export class ActivItems {
           });
           item.classList.add('disabled');
           break;
+        case 'viewall':
+          const target = item.closest(item.dataset.target);
+          if (target === null) return;
+          item.addEventListener('click', (e) => {
+            if (!target.classList.contains('viewall') && target.firstChild.offsetHeight <= target.offsetHeight) return;
+            target.classList.toggle('viewall');
+          })
+          break;
       }
     });
   }

@@ -1126,7 +1126,8 @@ export class TableComponent {
     if (showfull) showfull.click();
   }
   makeExpandable(container) {
-    if (container.querySelector('table').offsetHeight < container.offsetHeight + container.querySelector('table tbody tr').offsetHeight) return;
+    const margin = container.querySelector('table tr') ? container.querySelector('table tr').offsetHeight : 0;
+    if (container.querySelector('table').offsetHeight < container.offsetHeight - margin) return;
     const btn = document.createElement('div');
     btn.classList.add('button-expand');
     btn.classList.add('border-t');

@@ -58,7 +58,7 @@ a {@apply no-underline}
  /* list with separator */
 
   /* layout  and backgrounds */
-    .bg-image {background-blend-mode:multiply;background-color:transparent;background-image:var(--bg-image);background-position:top;background-repeat:no-repeat;margin-top:-1rem;padding-top:0.75rem}
+    .bg-image {background-blend-mode:luminosity;background-color:transparent;background-image:var(--bg-image);background-position:top;background-repeat:no-repeat;margin-top:-1rem;padding-top:0.75rem}
     .text-nav {@apply text-secondblue-300 hover:text-secondblue-200}
     /*main header logo / notifs /user-nav /admin*/
     .background-top {@apply bg-gradient-to-r z-10 from-mainblue-800 to-mainblue-600 relative  drop-shadow-sm border-mainblue-700 ;
@@ -257,6 +257,7 @@ form.js-tabs .tab.active {@apply h-auto }
 form.js-tabs .hide , .modal .hide , table.hide , tr.hide , tbody.hide thead.hide , tfoot.hide, div.hide , input.hide , select.hide button.hide, a.hide{@apply hidden h-0;content-visibility: hidden;}
 form.js-tabs legend.tab-control {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
 form.js-tabs .tab.active legend.tab-control {@apply border-stone-600 text-stone-900  opacity-100 }
+form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2}
 /* tabs expand shrink */
 .tabs-display.expand  {@apply icon-chevron-down}
 .tabs-display.shrink {@apply icon-chevron-up}
@@ -549,7 +550,7 @@ content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" fi
 #secondary-nav {@apply flex flex-row flex-wrap  md:basis-9/12 px-0  sm:px-2 h-[3.5rem] pb-0.5 pt-1.5 background-nav}
 
 /*burger*/
-#menu-burger {@apply w-5 h-12  ml-4 bg-transparent inline-block cursor-pointer}
+#menu-burger {@apply w-5 h-12  ml-4 bg-transparent inline-block cursor-pointer mt-2}
 .js-nav.open {@apply w-full h-full block px-2 mx-0 relative}
 .js-nav.open > div {@apply mt-2.5 pt-8 }
 .js-nav:not(.open) #menu-burger {@apply sm:hidden }
@@ -661,6 +662,14 @@ input[type="search"]::-webkit-search-cancel-button{@apply relative right-1  icon
 .sorton a {@apply  mx-1 hover:font-normal }
 .sorton a.active {@apply  font-normal bg-secondblue-100 rounded px-1}
 a.disabled {@apply pointer-events-none;}
+/*******************************/
+/* table sticky top  , h-scroll  */
+/*******************************/
+.sticky-top .table-top, .h-scroll .table-top {@apply  sticky top-0 z-10 h-14 bg-white }
+.sticky-top table thead , .h-scroll table thead {@apply sticky top-0 z-10 w-full}
+.h-scroll {@apply relative}
+.h-scroll table {@apply md:max-h-[85%] md:overflow-hidden}
+.h-scroll table tbody {@apply max-h-full md:overflow-y-auto}
 /***********************/
 /* projects list      */
 /**********************/
@@ -831,7 +840,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /******************************/
 .breadcrumbs {@apply flex flex-wrap m-0 p-0 font-light pr-1 text-secondblue-300}
 .breadcrumbs.title {@apply uppercase  font-semibold text-secondblue-200  align-bottom after:px-1}
-.breadcrumbs a {@apply after:content-[">"] last:font-normal  hover:text-secondblue-300  after:px-1 after:text-secondblue-200 after:lg:text-lg after:md:text-base after:inline after:last:content-none ; }
+.breadcrumbs a {@apply after:content-[">"] last:font-normal  hover:text-secondblue-300  after:px-1 after:text-secondblue-200 after:text-sm after:xl:text-lg after:lg:text-base after:inline after:last:content-none ; }
 
 /*******************************/
 /* navbar notifications        */
@@ -904,6 +913,9 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .topmessage {@apply block bg-stone-50 m-0 pl-4 pr-6 py-3 font-normal sticky z-[100000] top-0 h-16 overflow-y-hidden}
 .topmessage.info {@apply  bg-info-50 text-info-700 }
 .topmessage.maintenance {@apply  bg-warning-50 text-warning-700}
+.topmessage.viewall {@apply h-auto }
+.topmessage:not(.viewall) .icon {@apply icon-chevron-down}
+.topmessage.viewall .icon {@apply icon-chevron-up}
 /*******************************/
 /* small hacks and adjustments */
 /*******************************/
@@ -938,6 +950,7 @@ details[open].toggle-summary summary span {@apply hidden}
 #main-help a:not([data-request]) {@apply text-stone-900 font-normal}
 /*help files main title */
 #main-help article > h2 , article .help-title {@apply text-center uppercase text-xl font-bold text-stone-700}
+
 /*******************************/
 /* table import add styles    */
 /*******************************/
@@ -992,9 +1005,8 @@ td .tipover {@apply absolute z-10 rounded bg-stone-400 text-stone-50 text-xs px-
 .tree_link {fill: none; stroke: #A0A0A0; stroke-width: 0.5;}
 .node_circle {fill: #707070;}
 .node_label {font-size: 10px; font-family: sans-serif;}
-@media only screen and (max-width: 720px)  {
+@media only screen and (max-width: 767px)  {
 /* list breadcrumbs length */
-.breadcrumbs a:first-child, .breadcrumbs a:nth-child(n+3) {@apply  hide }
 .top-title {@apply max-w-[85%]}
 }
 

@@ -288,6 +288,7 @@ def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
             {
                 "projid": prj.projid,
                 "title": prj.title,
+                "status": prj.status,
                 "description": prj.description,
                 "privileges": _render_privileges(prj),
                 "cnn_network_id": prj.cnn_network_id,
@@ -299,6 +300,7 @@ def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
             {
                 "projid": prj.projid,
                 "title": prj.title,
+                "status": prj.status,
                 "description": prj.description,
                 "comments": prj.comments,
                 "privileges": _render_privileges(prj),
@@ -400,8 +402,8 @@ def render_for_js(prjs: list, columns: list, can_access: list) -> list:
                             or isadmin
                         ):
                             select.update(translations["controls"]["A"])
-                        elif prj["projid"] in (
-                            can_access["View"] + can_access["Manage"] or isadmin
+                        elif isadmin or prj["projid"] in (
+                            can_access["View"] + can_access["Manage"]
                         ):
                             select.update(translations["controls"]["V"])
                         else:

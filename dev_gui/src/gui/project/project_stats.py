@@ -1,4 +1,4 @@
-from flask import request, render_template, flash
+from flask import request, render_template, flash, redirect, url_for
 from appli.utils import ApiClient, DecodeEqualList
 from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py import ApiException

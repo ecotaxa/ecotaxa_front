@@ -25,10 +25,10 @@
 {% if source_proj %}<div class="alert alert-warning">{{_('Source project : ') ~ source_proj.title ~ '['~ source_proj.projid ~']' ~ _(' this project will be destroyed') }}</div>
 <input type="hidden" name="merge" value =" Y">
 {% elif prjstomerge is iterable  %}
-<div class="js js-datatable my-4 max-h-100 overflow-y-hidden" data-sortable=true {{ ' data-searchable=true'  if prjstomerge|length > 20 else ''}} data-table=true>
-<table id="merge_prj_list">
-<thead class="sticky "><tr><th data-type="html">{{_('Select')}}</th><th>{{_('ID')}}</th><th>{{_('Instrument')}}</th><th>{{_('Title')}}</th><th>{{_('Status')}}</th><th>{{_('Nbr Obj')}}</th>
-            <th>{{_('%s Validated').format('%')}}</th><th>{{_('%s Classified').format('%')}}</th></tr></thead><tbody class=" max-h-100">
+<div  id="merge_prj_list" class="js js-datatable my-4 h-scroll" data-sortable=true {{ ' data-searchable=true'  if prjstomerge|length > 20 else ''}} data-table=true>
+<table >
+<thead><tr><th data-type="html">{{_('Select')}}</th><th>{{_('ID')}}</th><th>{{_('Instrument')}}</th><th>{{_('Title')}}</th><th>{{_('Status')}}</th><th>{{_('Nbr Obj')}}</th>
+            <th>{{_('%s Validated').format('%')}}</th><th>{{_('%s Classified').format('%')}}</th></tr></thead><tbody>
         {%for prj in prjstomerge -%}
         <tr><td><input type="radio" name="src" value="{{prj.projid}}" class="form-radio" required></td><td>{{prj.projid}}</td>
             <td>{{prj.instrument}}</td>
