@@ -665,11 +665,9 @@ a.disabled {@apply pointer-events-none;}
 /*******************************/
 /* table sticky top  , h-scroll  */
 /*******************************/
-.sticky-top .table-top, .h-scroll .table-top {@apply  sticky top-0 z-10 h-14 bg-white }
-.sticky-top table thead , .h-scroll table thead {@apply sticky top-0 z-10 w-full}
-.h-scroll {@apply relative}
-.h-scroll table {@apply md:max-h-[85%] md:overflow-hidden}
-.h-scroll table tbody {@apply max-h-full md:overflow-y-auto}
+.sticky-top .table-top  {@apply  sticky top-0 z-10 h-14 bg-white }
+.sticky-top table thead   {@apply sticky top-0 z-10 w-full}
+
 /***********************/
 /* projects list      */
 /**********************/

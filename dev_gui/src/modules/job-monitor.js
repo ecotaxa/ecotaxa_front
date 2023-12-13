@@ -36,7 +36,7 @@ export function jobMonitor(item) {
   }
   let html = [];
   const check_job_status = () => {
-    fetch("/gui/job/status/" + jobid, fetchSettings).then(response => response.json()).then(job => {
+    fetch(window.location.origin + "/gui/job/status/" + jobid, fetchSettings).then(response => response.json()).then(job => {
 
       if (job.errors.length && job.state != 'E') {
         clearInterval(intervalHandle);
@@ -50,7 +50,7 @@ export function jobMonitor(item) {
           case "A":
             // question
             stop = true;
-            display_next("/gui/job/question/" + job.id);
+            display_next(window.location.origin + "/gui/job/question/" + job.id);
             progress_bar(false);
             clearInterval(intervalHandle);
             break;

@@ -161,12 +161,10 @@ export class JsComponents {
               break;
             case 'js-notifications':
               const checkNotifs = (tim) => {
-                fetch('/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {
+                fetch(window.location.origin + '/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {
                   item.innerHTML = DOMPurify.sanitize(html);
                   if (tim < 30000) tim = 30000;
-                  setTimeout(() => {
-                    checkNotifs(tim);
-                  }, tim);
+                  //setTimeout(() => {checkNotifs(tim);}, tim);
                 });
               }
               checkNotifs(30000);

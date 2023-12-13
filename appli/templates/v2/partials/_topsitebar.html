@@ -23,7 +23,7 @@
      {%- if crumbs is iterable and crumbs|length-%}
   <div class="breadcrumbs {{'all' if all else 'title' }} whitespace-nowrap mr-2  ">
     {%- for crumb in crumbs -%}
-      <a href="{{ crumb.url if loop.index < crumbs|length else '#top'}}" >{{ crumb.text }}</a>
+      <a href="{{ crumb.url }}" >{{ crumb.text }}</a>
   {%- endfor -%}
     </div>
   {%-endif%}

@@ -149,7 +149,9 @@ export class TableComponent {
     this.cellidname = (this.params.hasOwnProperty("cellid")) ? this.params.cellid : this.cellidname;
     // only valid from values - fetchfroms
     this.params.from = (this.params.from) ? DOMPurify.sanitize(this.params.from) : null;
-    const from = (this.params.from) ? ((Object.keys(fetchfroms).indexOf(this.params.from) >= 0) ? window.location.href.split('/gui/')[0] + fetchfroms[this.params.from] : null) : null;
+    const href = window.location.origin; // window.location.href.split('/gui/')[0]
+
+    const from = (this.params.from) ? ((Object.keys(fetchfroms).indexOf(this.params.from) >= 0) ? href + fetchfroms[this.params.from] : null) : null;
     if (from) {
       if (this.params.defer) this.deferLoad(container, from);
       else this.fetchData(container, from);
@@ -1127,7 +1129,7 @@ export class TableComponent {
   }
   makeExpandable(container) {
     const margin = container.querySelector('table tr') ? container.querySelector('table tr').offsetHeight : 0;
-    if (container.querySelector('table').offsetHeight < container.offsetHeight - margin) return;
+    if (container.querySelector('table').offsetHeight < container.offsetHeight + margin) return;
     const btn = document.createElement('div');
     btn.classList.add('button-expand');
     btn.classList.add('border-t');

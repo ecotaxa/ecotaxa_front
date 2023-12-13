@@ -336,11 +336,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.2"
+ecotaxa_version = "2.7.2.1"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2023-12-08"
+    return ecotaxa_version + " 2023-12-13"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -351,6 +351,11 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2023-12-08: V 2.7.2.1
+    Fix or try to script version
+    Fix url relative in tables script
+    Fix stats export csv
+    Fix stats display
 2023-12-08: V 2.7.2
     Fix Safari bug ( js in user mod profile )
     Fix Chrome bug (js my-files filepath)

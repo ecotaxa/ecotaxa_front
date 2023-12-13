@@ -119,7 +119,7 @@ export class AlertBox {
     params.append('dismissible', options.dismissible);
     params.append('is_safe', true);
     if (options.codeid) params.append('codeid', options.codeid);
-    fetch(options.template_url, fetchSettings({
+    fetch(window.location.origin + options.template_url, fetchSettings({
       method: 'POST',
       body: params
     })).then(response =>

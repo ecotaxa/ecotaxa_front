@@ -40,7 +40,6 @@ export class ActivItems {
           const what = item.dataset.what ? item.dataset.what : css.hide;
           const disabled = item.dataset.disabled ? item.dataset.disabled : null;
           const toggle_target = (t) => {
-            console.log('togglewhat ' + what, t.classList)
             t.classList.toggle(what);
             if (disabled) {
               t.querySelectorAll(disabled).forEach(el => {
@@ -51,7 +50,6 @@ export class ActivItems {
           }
           item.addEventListener(ev, (e) => {
             targets.forEach(t => {
-              console.log('targetsforclick' + ev, t)
               toggle_target(t);
             });
 
@@ -155,7 +153,7 @@ export class ActivItems {
               const params = new FormData();
               params.append("name", item.dataset.cook);
               params.append("value", item.dataset.value);
-              fetch('/gui/setmsgcookie', fetchSettings({
+              fetch(window.location.origin + '/gui/setmsgcookie', fetchSettings({
                 method: "POST",
                 body: params
               }));

@@ -190,7 +190,7 @@ export default function(state) {
           case "M":
             node.attributes = {
               class: "btn is-manage order-2",
-              href: `/gui/prj/edit/${id}`
+              href: window.location.origin + `/gui/prj/edit/${id}`
             };
             break;
           case "R":

@@ -41,6 +41,8 @@ export const exportCSV = function(state, options = {}, hidden = true) {
   let rows = [],
     row = [];
   const columns = [];
+  const theads = state.dom.querySelectorAll('thead th');
+  console.log(theads)
   state.grid.columns.forEach(column => {
     if ((hidden === true || !column.hasOwnProperty('hidden')) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(column.index) < 0)) {
       const obj = {
@@ -49,20 +51,27 @@ export const exportCSV = function(state, options = {}, hidden = true) {
         index: column.index
       };
       //headings
-      row.push(text_convert(obj.name));
-      columns.push(obj);
+      if ((hidden === true || !column.hidden) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(column.index) < 0)) {
+        let label = theads[column.index].dataset.name ? theads[column.index].dataset.name : theads[column.index].contentText;
+        if (!label) label = 'C' + column.index;
+        row.push(text_convert(label));
+        columns.push(obj);
+      }
     }
   });
   rows.push(make_line(row));
   const trs = state.dom.querySelectorAll('tbody tr');
+
   for (let i = 0; i < trs.length; i++) {
     row = [];
 
-    columns.forEach(column => {
+    const tds = trs[i].querySelectorAll('th,td');
+    state.grid.columns.forEach((column) => {
       const index = column.index;
       if ((hidden === true || !column.hidden) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(index) < 0)) {
-        const value = (column.hidden) ? state.grid.data[i][index] : trs[i].childNodes[index].innerText;
+        const value = (column.hidden) ? state.grid.data[i][index] : (tds[index]) ? tds[index].innerText : 'None';
         row.push(text_convert(value));
+
       }
     });
 

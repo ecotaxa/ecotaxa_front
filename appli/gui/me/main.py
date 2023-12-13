@@ -150,6 +150,18 @@ def gui_me_activate(token: str) -> str:
 def gui_me_forgotten(token: str = None) -> str:
     if current_user.is_authenticated:
         return redirect(url_for("gui_me_profile"))
+    from appli.back_config import get_user_constants
+
+    (
+        ApiUserStatus,
+        API_PASSWORD_REGEXP,
+        API_EMAIL_VERIFICATION,
+        API_ACCOUNT_VALIDATION,
+        SHORT_TOKEN_AGE,
+        PROFILE_TOKEN_AGE,
+        RECAPTCHAID,
+        ADD_TICKET,
+    ) = get_user_constants(request)
     if request.method == "POST":
         partial = True
         email = gvp("request_email", None)

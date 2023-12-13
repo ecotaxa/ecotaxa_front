@@ -10,7 +10,7 @@
 <div class="form-box mb-8 w-auto float-left clear-right">
   {%- if referer -%}
    <a href ="{{ referer}}" class="button is-secondary inverse mr-2">{{_('Back')}}</a>
-   {%-endif -%}<a href ="{{url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Annotate')}}</a>
+   {%-endif -%}<a href ="{{url_for("gui_prj_classify",projid=target_proj.projid) if target_prj else url_for("gui_prj")}}" class="button is-secondary inverse">{{_('Back to project')}}</a>
       </div>
         </div>
 {% endblock %}

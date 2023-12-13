@@ -1,4 +1,4 @@
 <a class="up pageup js js-scrollpy" data-threshold="hscreen" data-action="gotop"></a>
 <footer class="fixed block w-screen bottom-0 z-40 background-bottom pt-1 pb-2">{% include './v2/partials/_footer.html' %}</footer>
-{% set ecotaxa_version = GetEcotaxaVersionText().split(' ')[0] if GetEcotaxaVersionText is defined else '' %}
+{% set ecotaxa_version = GetEcotaxaVersionText().replace(' ','') if GetEcotaxaVersionText is defined else ''%}
 <script  src="{{ url_for('static', filename='gui/main.js') }}?v={{ ecotaxa_version }}"></script>

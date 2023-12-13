@@ -60,7 +60,7 @@
     <li><a href="{{url_for('gui_prj_merge', projid=target_proj.projid)}}"  {{disabled.value  if target_proj.status=="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Merge</strong> another project in this project')}}</a></li>
     <li><a href="{{url_for('gui_prj_editannot', projid=target_proj.projid)}}"  {{disabled.value   if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Edit or erase</strong> annotations massively')}}</a></li>
     <li><a href="{{url_for('gui_prj_edit_datamass', projid=target_proj.projid)}}"   {{disabled.value   if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
-    <li><a href="{{url_for('gui_prj_reset_to_predicted',projid=target_proj.projid)}}"   {{disabled.value   if target_proj.status !="Annotate" or  privilege.value!="Manage"}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
+    <li><a href="{{url_for('gui_prj_reset_to_predicted',projid=target_proj.projid)}}"   {{disabled.value   if target_proj.status !="Annotate" and  privilege.value!="Manage"}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
     <li><a href="{{url_for('gui_prj_purge',projid=target_proj.projid)}}"   {{disabled.value  if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Delete</strong> object or project')}}</a></li>
     <li><a href="{{url_for('deprecation_management',prj_id=target_proj.projid)}}"  {{disabled.value  if target_proj.status =="ExploreOnly" or  privilege.value=="View" or privilege.value==""}}>{{_('<strong>Fix</strong> category issues')}}</a></li>
       </ul>

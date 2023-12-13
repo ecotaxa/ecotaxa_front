@@ -19,7 +19,7 @@
             <input type="checkbox" name="active" value="1" {{ 'checked' if message["active"]==1}}></label>
             </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
-      <button type="submit" class="button is-primary ">{{_('Save')}}</button>  <a href ="/gui/admin/messages" class="button is-secondary inverse">{{_('Cancel')}}</a>  
+      <button type="submit" class="button is-primary ">{{_('Save')}}</button>  <a href ="/gui/admin/messages" class="button is-secondary inverse">{{_('Cancel')}}</a>
             </div>
       </form>
   {% elif messages is iterable %}
