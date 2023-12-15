@@ -35,12 +35,7 @@ class ExportSummaryJob(Job):
             cls.STEP0_TEMPLATE,
             ServerPath=server_path,
             TxtTaxoMap="",
-            target_proj=dict(
-                {
-                    "title": target_proj.title,
-                    "projid": target_proj.projid,
-                }
-            ),
+            target_proj=target_proj,
             prjmanagermail=target_proj.managers[0].email,
             appmanagermailto=get_app_manager_mail(request),
             referer=request.referrer,

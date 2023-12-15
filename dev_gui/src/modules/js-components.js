@@ -4,7 +4,8 @@ import {
   format_license
 } from '../modules/utils.js';
 import {
-  domselectors
+  domselectors,
+  css
 } from '../modules/modules-config.js';
 
 export class JsComponents {
@@ -80,12 +81,15 @@ export class JsComponents {
             case 'js-nav':
               const location = window.location.href.split('?');
               const tag = (item.dataset.tag) ? item.dataset.tag : 'ul';
-
               const links = item.querySelectorAll(tag + ' a');
               links.forEach(link => {
                 const href = link.href.split('?');
                 if (href[0] === location[0]) {
-                  link.parentElement.classList.add('active');
+                  link.parentElement.classList.add(css.active);
+                  const root = link.closest('ul');
+                  if (root && root.parentElement) {
+                    if (root.parentElement.tagName === 'LI') root.parentElement.classList.add(css.active);
+                  }
                   return;
                 }
 
@@ -161,7 +165,7 @@ export class JsComponents {
               break;
             case 'js-notifications':
               const checkNotifs = (tim) => {
-                fetch(window.location.origin + '/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {
+                fetch('/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {
                   item.innerHTML = DOMPurify.sanitize(html);
                   if (tim < 30000) tim = 30000;
                   //setTimeout(() => {checkNotifs(tim);}, tim);
@@ -215,6 +219,9 @@ export class JsComponents {
                 subtree: true
               });
               this.init(item);*/
+              break;
+            case 'js-addtags':
+
               break;
           }
         }

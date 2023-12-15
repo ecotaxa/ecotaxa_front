@@ -73,7 +73,7 @@ export class ActivRequest {
         if (!modal) return;
         const container = modal.modalcontent ? modal.modalcontent.querySelector('[data-import]') : null;
         if (!container || (item.dataset.key !== container.dataset.import || !container.dataset.table)) {
-          url = window.location.origin + '/gui/prj/importsettings?' + new URLSearchParams({
+          url = '/gui/prj/importsettings?' + new URLSearchParams({
             prjid: ((item.dataset.projid) ? item.dataset.projid : ''),
             typeimport: ((item.dataset.key) ? item.dataset.key : typeimport.settings)
           });
@@ -114,7 +114,7 @@ export class ActivRequest {
         const jsontree = new dynamics.JSONTree(tree);
         const fetch_tree = function(element = null, node = null) {
           const id = (node === null) ? "#" : parseInt(node.id);
-          const treeurl = window.location.origin + '/gui/search/taxotreejson?' + new URLSearchParams({
+          const treeurl = '/gui/search/taxotreejson?' + new URLSearchParams({
             id: id
           });;
           fetch(treeurl, fetchSettings()).then(response => response.text()).then(json => {

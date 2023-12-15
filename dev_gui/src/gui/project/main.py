@@ -103,7 +103,7 @@ def gui_prj_purge(projid):
     return render_template(
         "./v2/project/purge.html",
         isadmin=isadmin,
-        partial=is_partial_request,
+        partial=is_partial_request(request),
         objlist=objlist,
         backto=backto,
         target_proj=target_proj,

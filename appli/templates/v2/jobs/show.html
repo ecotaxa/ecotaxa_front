@@ -11,11 +11,16 @@
 <div class="py-8 flex flex-col">
   {% if job and job.id  %}
   {% include '/v2/jobs/_monitor.html'%}
-  {% if job.state =="E" or job.state=="F" %}
-  <div>
+  <div>  {% if job.state =="E" or job.state=="F" %}
     <a href="{{ url_for('gui_job_cleanup', jobid=job.id)}}" class="button is-danger inverse">{{_('Clean task data')}}</a>
-    <a href="{{url_for('gui_list_jobs')}}" class="button ml-4 ">{{_('Back to tasks list')}}</a></div>
-    {% endif %}
+    <a href="{{url_for('gui_list_jobs')}}" class="button ml-4 ">{{_('Back to tasks list')}}</a>  {% endif %}
+  {%- set projid = target_proj.projid if (target_proj and target_proj.projid) else 0 -%}
+  {%  set projid = job.params.prj_id if (projid==0 and job.params and "prj_id" in job.params) else projid %}
+  {%  set projid = job.params.req.project_id if (projid==0 and job.params and job.params.req and "project_id" in  job.params.req) else projid %}
+  {%- if projid>0 -%}
+  <a href="{{url_for('gui_prj_classify', projid=projid)}}" class="button ml-4">{{_('Back to project')}} <strong>{{projid|string}}</strong></a>
+  {%-endif-%}</div>
+
   {%elif jobid %}
   {%set thengo = 'Y' if target_proj and target_proj.projid else ''%}
   <a href="{{url_for('gui_job_cleanup', jobid= jobid, thengotoproject=thengo)}}" class="button is-secondary inverse" role="button">{{_('FORCE Delete of ')}} {{jobid}} {{ _('and back to project') if target_proj and target_proj.projid else ''}}</a>
@@ -28,7 +33,6 @@
         your job.')}}</p>
     </div>
   {% endif %}
-
   <table class="table-table jobs md:table-condensed">
    <tr>
       <th>{{_('Task ID')}}</th>
@@ -88,11 +92,9 @@
       <td>{{ job.answerdata|string }}</td>
     </tr></tbody>
   </table>
-  <details class="overflow-hidden px-2 mb-24"><summary class="text-lg font-btn font-semibold py-0.5 is-default inverse" data-request="logfile" data-href="{{url_for("gui_job_show", job_id=job.id)}}?log=Y">{{_('View log file')}}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>
+  <details class="overflow-hidden px-2 mb-24"><summary class="text-lg font-btn font-semibold py-0.5 is-default inverse" data-request="logfile" data-href="{{url_for("gui_job_show", job_id=job.id)}}?log=Y">{{_('View log file')}} </summary><pre id="joblog" class="w-full my-4 break-all text-sm text-stone-900  whitespace-pre-line"></pre></details>
 
-  {% if customdetails %}<details><summary class="text-lg font-btn font-semibold py-0.5 is-info inverse" data-request="logfile" data-href="{{url_for("gui_job_show", job_id=job.id)}}?customdetails=Y">{{_('View custom details') }}</summary><pre class="w-full my-4 break-all text-sm text-stone-900"></pre></details>{% endif %}
+  {% if customdetails %}<details><summary class="text-lg font-btn font-semibold py-0.5 is-info inverse" data-request="logfile" data-href="{{url_for("gui_job_show", job_id=job.id)}}?customdetails=Y">{{_('View custom details') }}</summary><pre class="w-full my-4 break-all text-sm text-stone-900 whitespace-pre-line"></pre></details>{% endif %}
 
 </div>
-
-
 {% endblock %}

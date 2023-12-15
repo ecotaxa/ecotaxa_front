@@ -42,7 +42,7 @@ export class JsTomSelect {
       //    option.settings.createOnBlur = true;
       option.settings.create = true;
       option.settings.addPrecedence = true;
-
+      console.log('option', option)
     }
     /*,
           on_clear = function() {
@@ -58,6 +58,7 @@ export class JsTomSelect {
 
     switch (type) {
       case models.project:
+        // for top navigation search
         option.url = "/gui/prjlist/";
         option.settings = { ...option.settings,
           ...{
@@ -69,27 +70,8 @@ export class JsTomSelect {
             allowEmptyOption: false,
           }
         };
-        if (!item.dataset.noaction) option.settings.onItemAdd = function(e) {
-          if (e != item.dataset.value) {
-            let href = window.location.href.split('?');
-            if (href.length > 1) {
-              href[1] = href[1].split("=");
-              href[1][1] = e;
-              href[1] = href[1].join("=");
-              href = href.join("?");
-            } else {
-              href = window.location.href.split('/');
-              href.pop();
-              href = href.join('/') + '/' + e;
-            }
-            window.open(href, '_blank').focus();
-          }
-          this.removeItem(e);
-          return;
-        }
 
         break;
-
       case models.user:
         option.url = "/api/users/search?by_name=";
         option.settings = { ...option.settings,
@@ -205,10 +187,12 @@ export class JsTomSelect {
         }
         if (url !== null) fetch(url, fetchSettings()).then(response => response.json()).then(json => {
           if (type === models.project) {
+
             if (json.data && json.data.length) json = json.data.map(row => {
               return {
                 id: row[1],
-                text: row[3][0]
+                text: row[3][0],
+                rights: row[0]
               }
 
             });
@@ -247,7 +231,7 @@ export class JsTomSelect {
           //  const cancel = ((multiple) ? `<i class="${domselectors.component.tomselect.tsdelet.substr(1)}"></i>` : ``);
           // use ts plugin remove_button
           const cancel = ``;
-          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(el[this.settings.labelField])} ${ cancel }</div>`);
+          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(el[this.settings.labelField]) } ${ cancel }</div>`);
         },
         no_results: function(data, escape) {
           return DOMPurify.sanitize('<div class="no-results">' + ((item.dataset.noresults) ? item.dataset.noresults : 'No result found for ') + escape(data.input) + '</div>');
@@ -291,12 +275,48 @@ export class JsTomSelect {
       // add
       ts.wrapper.setAttribute('data-component', 'tom-select');
       switch (type) {
-        case 'taxo':
+        case models.taxo:
           ts.on('item_add', (v, el) => {
             if (el !== null) el.classList.add('new');
             //  el = el.querySelector('.ts-delet');
             //  if (el !== null) init_canceltag(el);
           });
+          break;
+        case models.project:
+          // add data-noaction just to select a project
+          if (item.dataset.dest) {
+
+            ts.on('item_add', (v, el) => {
+              if (v != item.dataset.value && ts.options[v] && !el.querySelector('a')) {
+                const links = {
+                  "A": "/prj/",
+                  "V": "/prj/",
+                  "M": "/gui/prj/edit/"
+                };
+                const rights = ts.options[v].rights;
+                const keys = Object.keys(rights);
+                if (keys) {
+                  if (keys.length > 1) {
+                    Object.entries(rights).forEach(([k, r]) => {
+                      el.insertAdjacentHTML('beforeend', ` <a data-k="${k}" class="small-caps font-normal ml-2">${r}</a>`);
+                    });
+                    el.querySelectorAll('a').forEach(lk => {
+                      lk.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(links[e.target.dataset.k] + v, `_proj${v}`).focus();
+                        ts.removeItem(v);
+                      });
+                    })
+                  } else {
+                    console.log('lik', links[keys[0]])
+                    window.open(links[keys[0]] + v, `_proj${v}`).focus();
+                    ts.removeItem(v);
+                  }
+                }
+              }
+            });
+          }
           break;
           /*  case 'user':
               if (item.dataset.priv) ts.on("item_add", function(v, el) {

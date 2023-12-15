@@ -17,7 +17,7 @@
     <div class="text-danger-500 font-normal text-lg mx-auto">{{_('USING Active Project Filters')}} {{objlist|length}} {{_('objects')}}</div>
       {%else%}
       {% set toremove = _('to remove all objects from this project.')%}
-      <div class="text-info">{{_('Enter the')}} <a class="button is-secondary inverse btn" data-request="objects_ids" data-target="objlist" data-id="{{target_proj.projid}}">{{_('list of internal object id')}}</a> {{_('you want to delete or')}} <a class="button is-secondary inverse btn" data-action="setvalue" data-what="DELETEALL" data-target="objlist" title="{{_('click') ~ ' ' ~ toremove}}">"DELETEALL"</a> {{toremove}}
+      <div class="text-info">{{_('Enter the')}} <span class="font-normal uppercase" data-id="{{target_proj.projid}}">{{_('list of internal object id')}}</span> {{_('you want to delete or')}} <a class="button is-secondary inverse btn" data-action="setvalue" data-what="DELETEALL" data-target="objlist" title="{{_('click') ~ ' ' ~ toremove}}">"DELETEALL"</a> {{toremove}}
       <div class="text-sm pt-2"><p><i class="icon icon-alert align-text-bottom p-0.5"></i> {{_('Around 10000 objects are deleted per second, so on a big project it can be long,
       a NGinx Error may happen, but erase process is still working in background.')}}. {{ _('Statistics are not updated during erase project.')}}</p></div>
     </div>

@@ -3,7 +3,7 @@
 {%- set cookiename = messages.cookiename if "cookiename" in messages else ""-%}
 {%- for msgkey,message in messages.messages.items() -%}
 {%- if msgkey!="homepage" -%}
-<div class="topmessage {{ msgkey|lower }}" id="topmessage-{{msgkey}}"><div class="inline-block mx-auto w-auto ">{{message["content"].replace('\n','<br>')|string()|safe}}</div><div class="mx-auto my-1 absolute -bottom-2.5 left-[50%] -translate-x-[50%] z-[1] cursor-pointer" data-action="viewall" data-target=".topmessage" data-title="{{_('view full message')}}"><i class="icon"></i></div><div class="absolute right-2 top-0.5" aria-hidden="true"  data-dismiss="topmessage-{{msgkey}}" data-action="dismisscook" data-value="{{message['date']}}" data-cook="{{msgkey}}{{cookiename}}"><i class="icon-sm icon-cancel"></i></div></div>
+<div class="topmessage {{ msgkey|lower }} js js-addtags" id="topmessage-{{msgkey}}"><div class="inline-block mx-auto w-auto ">{{message["content"].replace('\n','<br>')|string()|safe}}</div><div class="mx-auto my-1 absolute -bottom-2.5 left-[50%] -translate-x-[50%] z-[1] cursor-pointer" data-action="viewall" data-target=".topmessage" data-title="{{_('view full message')}}"><i class="icon"></i></div><div class="absolute right-2 top-0.5" aria-hidden="true"  data-dismiss="topmessage-{{msgkey}}" data-action="dismisscook" data-value="{{message['date']}}" data-cook="{{msgkey}}{{cookiename}}"><i class="icon-sm icon-cancel"></i></div></div>
 {%- elif homepage  and  homepage.__class__.__name__=='Namespace'  -%}
 {%- set homepage.value={"message":message,"cookiename":cookiename} -%}
 {%-endif-%}

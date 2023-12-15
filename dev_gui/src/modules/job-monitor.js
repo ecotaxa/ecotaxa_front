@@ -23,10 +23,16 @@ export function jobMonitor(item) {
     }
 
   }
-  const display_errors = (errors) => {
-    const erroone = errors.shift();
-    const other = (errors.lentgh) ? `<a class="font-btn triggershow" data-action="toggle"  data-target=".alert-errors" data-show="View" data-hide="Hide">{{_('all errors...')}}</a><div class="alert-errors hide">${errors.join(`<br>`)}</div>` : ``;
-    statusdiv.firstChild.innerHTML = `<div class="alert alert-danger" data-dismissible="true">${errorone} ${other}</div>`;
+  const display_errors = (errors, jobstate, msg = '') => {
+    if (!errors || errors.length === 0) {
+      if (msg.length) statusdiv.firstChild.innerHTML = msg;
+      return;
+    }
+    if (errors.length && jobstate != 'E' && jobstate !== 'F') {
+      const divalert = statusdiv.querySelector('.alert');
+      if (divalert === null) statusdiv.insertAdjacentHTML('beforeend', `<div class="alert alert-danger inverse" data-dismissible="true">${errors.join(`<br>`)}</div> `);
+      else divalert.insertAdjacentHTML('beforeend', errors.join(`<br>`));
+    }
   }
   const display_next = async (url) => {
     fetch(url, fetchSettings()).then(response => response.text()).then(response => {
@@ -36,12 +42,11 @@ export function jobMonitor(item) {
   }
   let html = [];
   const check_job_status = () => {
-    fetch(window.location.origin + "/gui/job/status/" + jobid, fetchSettings).then(response => response.json()).then(job => {
-
-      if (job.errors.length && job.state != 'E') {
+    fetch("/gui/job/status/" + jobid, fetchSettings).then(response => response.json()).then(job => {
+      if (job.errors.length) {
         clearInterval(intervalHandle);
         progress_bar(false);
-        display_errors(job.errors);
+        display_errors(job.errors, job.state);
       }
       if (stop === true) return;
 
@@ -50,7 +55,7 @@ export function jobMonitor(item) {
           case "A":
             // question
             stop = true;
-            display_next(window.location.origin + "/gui/job/question/" + job.id);
+            display_next("/gui/job/question/" + job.id);
             progress_bar(false);
             clearInterval(intervalHandle);
             break;
@@ -76,7 +81,7 @@ export function jobMonitor(item) {
             break;
           case "R":
             // running
-            display_errors(job.errors);
+            display_errors(job.errors, job.state, job.progress_msg);
             break;
         }
         progress_bar(true, job.progress_pct, job.progress_msg);

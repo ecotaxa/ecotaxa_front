@@ -149,9 +149,8 @@ export class TableComponent {
     this.cellidname = (this.params.hasOwnProperty("cellid")) ? this.params.cellid : this.cellidname;
     // only valid from values - fetchfroms
     this.params.from = (this.params.from) ? DOMPurify.sanitize(this.params.from) : null;
-    const href = window.location.origin; // window.location.href.split('/gui/')[0]
 
-    const from = (this.params.from) ? ((Object.keys(fetchfroms).indexOf(this.params.from) >= 0) ? href + fetchfroms[this.params.from] : null) : null;
+    const from = (this.params.from) ? ((Object.keys(fetchfroms).indexOf(this.params.from) >= 0) ? fetchfroms[this.params.from] : null) : null;
     if (from) {
       if (this.params.defer) this.deferLoad(container, from);
       else this.fetchData(container, from);
@@ -1092,9 +1091,9 @@ export class TableComponent {
       triggers.forEach((trigger, index) => {
         trigger.addEventListener('click', (e) => {
           e.preventDefault();
-          const active = e.currentTarget.parentElement.querySelector('.active');
-          if (active) active.classList.remove('active');
-          e.currentTarget.classList.add('active');
+          const active = e.currentTarget.parentElement.querySelector('.' + css.active);
+          if (active) active.classList.remove(css.active);
+          e.currentTarget.classList.add(css.active);
           changecoltosort(col, index);
         });
       });

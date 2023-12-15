@@ -59,6 +59,10 @@ def make_user_response(code, message: str) -> tuple:
 def user_register(token: str = None, partial: bool = False) -> str:
     if current_user.is_authenticated:
         raise UnprocessableEntity()
+    reCaptchaID = None
+    # google recaptcha or homecaptcha
+    if RECAPTCHAID == True:
+        reCaptchaID = app.config.get("RECAPTCHAID")
     action = ACCOUNT_USER_CREATE
     usrid = -1
     if token is not None:
@@ -95,12 +99,12 @@ def user_register(token: str = None, partial: bool = False) -> str:
             usrid=int(usrid),
             isfrom=False,
             template="v2/register.html",
+            api_email_verification=API_EMAIL_VERIFICATION,
+            api_account_validation=API_ACCOUNT_VALIDATION,
+            reCaptchaID=reCaptchaID,
             token=token,
         )
-    reCaptchaID = None
-    # google recaptcha or homecaptcha
-    if RECAPTCHAID == True:
-        reCaptchaID = app.config.get("RECAPTCHAID")
+
     return render_template(
         "v2/register.html",
         bg=True,

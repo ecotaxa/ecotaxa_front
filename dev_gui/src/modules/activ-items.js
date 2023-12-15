@@ -153,7 +153,7 @@ export class ActivItems {
               const params = new FormData();
               params.append("name", item.dataset.cook);
               params.append("value", item.dataset.value);
-              fetch(window.location.origin + '/gui/setmsgcookie', fetchSettings({
+              fetch('/gui/setmsgcookie', fetchSettings({
                 method: "POST",
                 body: params
               }));

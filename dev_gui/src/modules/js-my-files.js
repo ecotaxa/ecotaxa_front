@@ -34,10 +34,10 @@ export class JsMyFiles {
       if (!container) return;
       dom_purify(container, 'dataset');
       this.container = container;
-      console.log(window.location.origin + "/gui/files/list")
+      console.log("/gui/files/list")
       const defaultOptions = {
 
-        url: window.location.origin + "/gui/files/list",
+        url: "/gui/files/list",
         compress: {
           label: 'compress'
         },

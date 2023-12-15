@@ -1,5 +1,5 @@
 <div class="container block h-full relative mx-auto mt-16 md:mt-24 lg:48  md:pt-8 ">{%- if homepage and homepage.value is mapping and "message" in homepage.value -%}
-<div class="homepage bg-gradient-to-b  from-transparent to-mainblue-50 font-normal py-4 pt-10 px-8 mx-2 my-8" id="homepage-homepage"><div class="inline-block mx-auto w-auto ">{{homepage.value["message"]["content"].replace('\n','<br>')|string()|safe}}</div></div>
+<div class="homepage js js-addtags bg-gradient-to-b  from-transparent to-mainblue-50 font-normal py-4 pt-10 px-8 mx-2 my-8" id="homepage-homepage"><div class="inline-block mx-auto w-auto ">{{homepage.value["message"]["content"].replace('\n','<br>')|string()|safe}}</div></div>
 {%-endif-%}<div class="grid grid-rows-3 md:grid-cols-3 md:grid-rows-1 gap-4 mx-2" id="homeSelectors">
   	<!-- For explore -->
         <div class="md:mr-4 flex flex-col">
