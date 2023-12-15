@@ -10,7 +10,7 @@
   <a href="{{ url_for("gui_prj")}}" class="alert alert-danger">Error {{error}} {{_('Select another project')}}</a>
 {% elif target_proj and target_proj.projid%}
 {% if not proceed%}
-<form method="post">
+<form method="post" action="{{request.url}}">
   <div class="alert alert-danger inverse">
   {%if warning>0 %}
   {{_('USING Active Project Filters')}} {{objectids|length}} {{_('objects')}}

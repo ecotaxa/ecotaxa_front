@@ -32,7 +32,7 @@
   {% set data = {'file':'_help_job_export'} %}
   {{header_project_job(_('Full export'),data, _('How to export data'))}}
 </div>
-  <form method="post" class="js js-submit js-tabs " data-event="click" data-selector="[name='what'][data-target]" data-toggle=true data-togglewhat="#what" data-toggledisable=true enctype=multipart/form-data>
+  <form method="post" action="{{request.url}}" class="js js-submit js-tabs " data-event="click" data-selector="[name='what'][data-target]" data-toggle=true data-togglewhat="#what" data-toggledisable=true enctype=multipart/form-data>
     <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" type="text" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
   <fieldset class="w-full md:w-1/2 tab mb-0 pb-0"><legend class="text-center tab-control" data-what="TSV">{{_("Custom")}} </legend>

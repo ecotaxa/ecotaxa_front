@@ -449,7 +449,9 @@ def gui_dbadmin_console():
     else:
         txt = "<div class='alert is-danger'>Warning : This screen must be used only by experts</div>"
         txt += (
-            "<form method=post>SQL : <textarea name=sql rows=15 cols=100 class='form-input'>%s</textarea><br>"
+            "<form method=post action="
+            + request.path
+            + ">SQL : <textarea name=sql rows=15 cols=100 class='form-input'>%s</textarea><br>"
             % escape(sql)
         )
         txt += """<input type=submit class='button is-primary' name=doselect value='Execute Select'>

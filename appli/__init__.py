@@ -336,11 +336,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.2.1"
+ecotaxa_version = "2.7.2.2"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2023-12-13"
+    return ecotaxa_version + " 2023-12-15"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -351,6 +351,10 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2023-12-15: V 2.7.2.2
+    Fix recaptcha 
+    Fix jobs
+    Fix main search for projects
 2023-12-08: V 2.7.2.1
     Fix or try to script version
     Fix url relative in tables script

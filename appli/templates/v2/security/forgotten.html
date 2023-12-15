@@ -6,7 +6,7 @@
 {%block body%}
 <div class=" w-full lg:w-96  mx-auto mt-24 md:mt-48 pt-8 px-2">
 <div id="home-forgotten" class=" w-full mb-12 overflow-hidden border border-transparent shadow px-2 mx-auto sm:px-4">
-<form id="form-forgotten"class="js js-submit" data-fetch="html"  action="{{ url_for('gui_me_forgotten', token=token) }}" method="POST" name="forgotten_user_form">
+<form id="form-forgotten" class="js js-submit" data-fetch="html"  action="{{ url_for('gui_me_forgotten', token=token) }}" method="POST" name="forgotten_user_form">
      <input type="hidden" name="crsf_token" value={{ crsf_token }}>
   {% if token%}
   <fieldset class="mb-0.5"><legend>{{ _('Enter your new password') }}</legend>

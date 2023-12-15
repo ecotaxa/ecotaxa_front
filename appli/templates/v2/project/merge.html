@@ -21,7 +21,7 @@
 </ul></li><li>{{_('Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.')}}</li>
 </ul>    </div>
 
-  <form action=? method="post" id="form-merge" class="js js-submit">
+  <form action={{request.url}} method="post" id="form-merge" class="js js-submit">
 {% if source_proj %}<div class="alert alert-warning">{{_('Source project : ') ~ source_proj.title ~ '['~ source_proj.projid ~']' ~ _(' this project will be destroyed') }}</div>
 <input type="hidden" name="merge" value =" Y">
 {% elif prjstomerge is iterable  %}
@@ -42,11 +42,11 @@
           </tbody>
   </table></div>
   {% else %}<strong>{{_('No matching project found.')}}</strong>
-  <a href="{{url_for("gui_prj_classify")}}">{{_('Back to projects list.')}}</a>
+  <a href="{{url_for("gui_prj")}}">{{_('Back to projects list.')}}</a>
   {% endif%}
   {%endif%}
     {% if prjstomerge|length > 0 or source_proj%}
-    <button type="submit" class="button is-primary">{{ _('Merge') if source_proj else _('Validate before merge') }}</button> <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse" data-title="{{_('Cancel and back to project')}}">{{_('Cancel')}}</a>
+  {%if not source_proj%}  <button type="submit" class="button is-primary">{{ _('Merge') if source_proj else _('Validate before merge') }}</button>{%endif%} <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse" data-title="{{_('Cancel and back to project')}}">{{_('Cancel')}}</a>
     {%endif%}
      </form>
 {%endblock%}
