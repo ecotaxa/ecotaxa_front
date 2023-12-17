@@ -588,6 +588,12 @@ def FormatNameForVignetteDisplay(
 @app.route("/prj/LoadRightPane", methods=["GET", "POST"])
 def LoadRightPane():
     PrjId: str = gvp("projid")
+    seed_object_id: str = gvp("seed_object_id")
+    if seed_object_id:
+        print(" Here we want to do a similiraty search !")
+        import logging
+        logger = logging.getLogger()
+        logger.info(" Here we want to do a similiraty search logger ! !")
     return LoadRightPaneForProj(int(PrjId), False, False)
 
 
@@ -910,7 +916,8 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         txt += """<div class='subimg status-{0}' {1}>
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
-<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div></td>""".format(
+<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span></div>
+<div class='ddsim'><span class='ddsims'><span class='glyphicon glyphicon-search'></span>{4} {5}</div></td>""".format(
             ClassifQual.get(dtl["obj.classif_qual"], "unknown"),
             popattribute,
             name_chunk,
