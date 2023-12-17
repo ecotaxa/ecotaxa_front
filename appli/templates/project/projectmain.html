@@ -318,10 +318,19 @@
             text-decoration: underline;
             color: #00c;
         }
+        .ddsim {
+            text-align: left;
+            font-size: 10px;
+            margin-top: -3px;
+            margin-bottom: -1px;
+            text-decoration: underline;
+            color: #00c;
+        }
 
-        .ddets {
+        .ddets .ddsims {
             cursor: pointer;
         }
+
 
         .categexpander {
             cursor: pointer;
@@ -986,6 +995,10 @@
               $('#PopupDetails').modal(options);
               $("#PopupDetails .modal-content").load(url);
           });
+    
+          $('.ddsim').click(function (e) {
+              console.log("Please do a similiraty search from this photo")
+          })
           $('#PopupDetails').on('hidden.bs.modal', function (e) {
               $("#PopupDetails .modal-content").html("CLEAN");
               $(".zoomContainer").remove();
