@@ -576,7 +576,8 @@ class ObjectsApi(object):
             'fields',
             'order_field',
             'window_start',
-            'window_size'
+            'window_size',
+            'sim_search'
         ]
         all_params.extend(
             [
@@ -639,8 +640,10 @@ class ObjectsApi(object):
         # Authentication setting
         auth_settings = ['BearerOrCookieAuth']  # noqa: E501
 
+        query_or_sim_search = "similarity_search" if local_var_params.get('sim_search', False) else "query"
+
         return self.api_client.call_api(
-            '/object_set/{project_id}/query', 'POST',
+            '/object_set/{project_id}/' + query_or_sim_search, 'POST',
             path_params,
             query_params,
             header_params,
