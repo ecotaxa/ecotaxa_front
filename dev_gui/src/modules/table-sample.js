@@ -11,9 +11,9 @@ export default function(state) {
         html.push(v[1]);
       });
       td.childnodes = [{
-        nodeName: 'DIV',
+        nodename: 'DIV',
         attributes: {
-          class: css.tip,
+          class: css.component.table.tip,
           "data-num": html.length
         },
         childnodes: [state.setTextNode(html.join(`, `))]

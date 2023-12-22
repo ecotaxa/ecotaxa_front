@@ -44,6 +44,8 @@ def gui_job_show(job_id: int):
     """
     Used from full job display (GET) and in self-submitted POST.
     """
+    # from appli.gui.project.projectsettings import get_target_prj
+
     py_messages = py_get_messages("jobs")
     job = None
     with ApiClient(JobsApi, request) as api:
@@ -64,17 +66,22 @@ def gui_job_show(job_id: int):
         with ApiClient(JobsApi, request) as japi:
             rsp = japi.get_job_log_file(job_id=job_id)
         return Response(rsp, mimetype="text/plain")
-    target_prj = job.params.get("target_prj")
-    target_prj = None
-    if target_prj:
-        target_prj = render_prj_summary(target_prj)
+    target_proj = None
+    # will be added added later
+    # projid = None
+    # if "req" in job.params:
+    #    for idx in ["project_id", "prj_id"]:
+    #        if idx in job.params["req"]:
+    #            projid = job.params["req"][idx]
+    #            break
+    # if projid:
+    #    target_proj = get_target_prj(projid)
     steperrors = None
     customdetails = None
     if job.state != "E" and job.state != "F":
         codemessage = "jobmonitor"
     else:
         codemessage = None
-
     return render_template(
         "./v2/jobs/show.html",
         job=job,
@@ -82,7 +89,7 @@ def gui_job_show(job_id: int):
         partial=is_partial_request(request),
         monitor=gvg("monitor"),
         steperrors=steperrors,
-        target_proj=target_prj,
+        target_proj=target_proj,
         customdetails=customdetails,
         codemessage=codemessage,
     )
@@ -94,6 +101,9 @@ def gui_job_question(job_id: int):
     """
     Used for jobs needing user input during the processing.
     """
+    from appli.jobs.views import jobAsk
+
+    return jobAsk(job_id)
     py_messages = py_get_messages("jobs")
     with ApiClient(JobsApi, request) as japi:
         try:

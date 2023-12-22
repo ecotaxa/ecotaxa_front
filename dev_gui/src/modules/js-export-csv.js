@@ -42,7 +42,6 @@ export const exportCSV = function(state, options = {}, hidden = true) {
     row = [];
   const columns = [];
   const theads = state.dom.querySelectorAll('thead th');
-  console.log(theads)
   state.grid.columns.forEach(column => {
     if ((hidden === true || !column.hasOwnProperty('hidden')) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(column.index) < 0)) {
       const obj = {

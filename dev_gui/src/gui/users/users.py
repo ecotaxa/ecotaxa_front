@@ -169,6 +169,7 @@ def user_create(
         age = PROFILE_TOKEN_AGE
     if isfrom == True or API_EMAIL_VERIFICATION == False:
         resp = user_account(-1, isfrom, action=action, token=token)
+        return resp
     elif token != None or API_EMAIL_VERIFICATION == False:
         if token != None:
             usrid, token = _verifiy_validation_throw(
@@ -184,6 +185,7 @@ def user_create(
             "name": "",
         }
         resp = api_user_create(posted, token)
+
     redir = "gui_index"
     if token is None:
         if resp[0] == 0:

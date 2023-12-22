@@ -246,7 +246,7 @@ export class TableComponent {
 
         if (!column.hidden) {
           const th = document.createElement('th');
-          th.innerHTML = column.label;
+          th.innerHTML = DOMPurify.sanitize(column.label);
           if (column.sort) th.dataset.sort = column.sort;
           if (column.format) th.dataset.type = column.type;
           th.dataset.sortable = (column.sortable) ? true : false;
@@ -260,6 +260,7 @@ export class TableComponent {
       thead.appendChild(tr);
       const datalastused = (this.params.lastused && this.params.lastused.length > 0) ? [] : null;
       //#TODO lastused reorder
+      console.log('isjon', isjson)
       if (isjson) {
         this.grid.data = [];
         tabledef.data.forEach((data, i) => {
@@ -367,7 +368,7 @@ export class TableComponent {
       this.waitDesactivate();
       if (this.afterLoad) this.afterLoad();
       // move import zones and/or search zone - reorg the page display
-      container.style.top = container.offsetTop + 'px';
+      //container.style.top = container.offsetTop + 'px';
       // fetch once the same table
       container.dataset.table = this.params.table = true;
 
@@ -451,7 +452,6 @@ export class TableComponent {
   }
 
   objToElement(obj) {
-
     if (obj.nodename === "#text") return document.createTextNode(obj.data);
     const el = document.createElement(obj.nodename);
     if (obj.hasOwnProperty("html")) el.innerHTML = obj.html;
@@ -1127,8 +1127,8 @@ export class TableComponent {
     if (showfull) showfull.click();
   }
   makeExpandable(container) {
-    const margin = container.querySelector('table tr') ? container.querySelector('table tr').offsetHeight : 0;
-    if (container.querySelector('table').offsetHeight < container.offsetHeight + margin) return;
+    console.log(container.offsetHeight, container.getBoundingClientRect())
+    if (container.querySelector('table').offsetHeight < container.offsetHeight) return;
     const btn = document.createElement('div');
     btn.classList.add('button-expand');
     btn.classList.add('border-t');
@@ -1239,4 +1239,5 @@ export class TableComponent {
       }
     });
   }
+
 }

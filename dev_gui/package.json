@@ -9,7 +9,6 @@
     "startfront": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_dockerfront.sh' ",
     "starttest": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_nodockerdb.sh' ",
     "startngnix": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_ngnixh2.sh' && webpack --watch",
-    "start": "webpack-dev-server --mode development --config webpack.config.js",
     "build": "webpack build --mode production --config webpack.config.prod.js "
   },
   "devDependencies": {

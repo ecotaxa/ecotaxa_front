@@ -1,14 +1,11 @@
-<input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response" value="">
-
 <script type="text/javascript">
   const formcaptcha= document.getElementById('{{formid}}');
   const formbtn = (formcaptcha)?formcaptcha.querySelector('[type="submit"]'):null;
   if (formbtn) {
     formbtn.classList.add('g-recaptcha');formbtn.dataset.sitekey="{{reCaptchaID}}";
     formbtn.dataset.callback="onSubmit";}
-
 function onSubmit(token) {
-                  document.getElementById('{{formid}}').submit();
+          if(formcaptcha.formsubmit) formcaptcha.formsubmit.submitForm(); else formcaptcha.submit();
        }
 </script>
-<script id="google-recaptcha" src=https://www.google.com/recaptcha/api.js async defer></script>
+<script id="google-recaptcha" src=https://www.google.com/recaptcha/api.js></script>

@@ -1,6 +1,5 @@
 import validator from 'validator';
 import DOMPurify from 'dompurify';
-let instance = null;
 const formcss = {
   invalid: 'invalid',
   inputvalidate: 'input-validate',
@@ -9,7 +8,8 @@ const domselectors = {
   captcha: '.js-captcha'
 }
 import {
-  fetchSettings
+  fetchSettings,
+  decode_HTMLEntities
 } from '../modules/utils.js';
 
 export class FormSubmit {
@@ -17,7 +17,7 @@ export class FormSubmit {
   form = null;
   listener = null;
   constructor(form, options = {}) {
-    if (!instance) {
+    if (!form.formsubmit) {
       if (!form) return;
       this.form = form instanceof HTMLElement ? form : document.querySelector(form);
       const defaultOptions = {
@@ -28,9 +28,9 @@ export class FormSubmit {
       if (!this.form) return;
       this.validateFields(true);
       this.init();
-      instance = this;
+      form.formsubmit = this;
     }
-    return instance;
+    return form.formsubmit;
   }
   init() {
     // init the form ( options like beforeunload etc...)
@@ -112,18 +112,19 @@ export class FormSubmit {
     if (['textarea', 'input'].indexOf(field.tagName.toLowerCase()) >= 0) {
 
     }
+
     if (['select', 'input[type="checkbox"]'].indexOf(field.tagName.toLowerCase()) >= 0) {
       field.querySelectorAll('option:checked').forEach(option => {
-        option.value = DOMPurify.sanitize(option.value);
+        option.value = decode_HTMLEntities(DOMPurify.sanitize(option.value));
       });
 
-    } else field.value = DOMPurify.sanitize(field.value);
+    } else field.value = decode_HTMLEntities(DOMPurify.sanitize(field.value));
 
     const rep = field.checkValidity();
 
-    if (field.classList.contains('select-one')) {
-      console.log('select rep', rep);
-    }
+    /*  if (field.classList.contains('select-one')) {
+
+    }*/
     const label = field.closest('.form-box') ? field.closest('.form-box').querySelector('label') : null;
 
     if (rep && label) {

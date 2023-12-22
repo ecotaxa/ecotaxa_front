@@ -42,7 +42,6 @@ export class JsTomSelect {
       //    option.settings.createOnBlur = true;
       option.settings.create = true;
       option.settings.addPrecedence = true;
-      console.log('option', option)
     }
     /*,
           on_clear = function() {
@@ -309,7 +308,6 @@ export class JsTomSelect {
                       });
                     })
                   } else {
-                    console.log('lik', links[keys[0]])
                     window.open(links[keys[0]] + v, `_proj${v}`).focus();
                     ts.removeItem(v);
                   }

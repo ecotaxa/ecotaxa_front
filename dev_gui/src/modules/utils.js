@@ -40,6 +40,12 @@ function unescape_html(str) {
     .replace(/&quot;/g, '"');
 }
 
+function decode_HTMLEntities(text) {
+  const area = document.createElement('textarea');
+  area.innerHTML = text;
+  return area.value;
+}
+
 function format_license(data, withlink = false) {
   const tbcell = {
     "CC0 1.0": ["ca", "https://creativecommons.org/publicdomain/zero/1.0/"],
@@ -199,5 +205,6 @@ export {
   debounce,
   add_custom_events,
   dom_purify,
-  create_box
+  create_box,
+  decode_HTMLEntities
 }

@@ -44,6 +44,7 @@ a {@apply no-underline}
       display: inline;
     }
 }
+
   }
 
 @layer components {
@@ -544,33 +545,52 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 .icon-list-bullet {content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>')
 }
 }
+/*thin scrollbar chrome && safari */
+::-webkit-scrollbar {
+  width: 3px;
+}
+body::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(60, 60, 60, 0.5);
+  border-radius: 6px;
+  border: transparent;
+}
 /*****************************************/
 /* top navigation and user menu         */
 /****************************************/
 #secondary-nav {@apply flex flex-row flex-wrap  md:basis-9/12 px-0  sm:px-2 h-[3.5rem] pb-0.5 pt-1.5 background-nav}
-
+/*burger menus */
+.burger {@apply absolute w-5 h-4  top-6 ml-4 bg-transparent inline-block cursor-pointer mt-2 duration-500;}
+.burger-icon{ @apply h-[1px] absolute w-full bg-danger-500 block rounded-sm  duration-500 before:absolute before:-top-2 before:rounded-sm before:w-full before:bg-stone-50 before:block after:rounded-sm after:w-full after:bg-stone-50 after:block  after:top-6 before:h-[1px] after:h-[1px]}
+.open .burger-icon {@apply duration-500 bg-transparent before:rotate-45 after:-rotate-45 before:scale-x-125 after:scale-x-125 before:translate-x-1 before:translate-y-1 after:translate-x-1 after:-translate-y-1 top-4 right-1}
 /*burger*/
-#menu-burger {@apply w-5 h-12  ml-4 bg-transparent inline-block cursor-pointer mt-2}
 .js-nav.open {@apply w-full h-full block px-2 mx-0 relative}
 .js-nav.open > div {@apply mt-2.5 pt-8 }
 .js-nav:not(.open) #menu-burger {@apply sm:hidden }
 .open #menu-burger {@apply w-3  mt-2 right-2 absolute z-90}
+/*#menu-burger {@apply w-5 h-12  ml-4 bg-transparent inline-block cursor-pointer mt-2}
+
 .bar { @apply h-[1px] my-1  w-full bg-stone-50 block rounded-sm ease-in-out duration-300 }
 .open .bar {@apply bg-stone-100 first:w-full w-full}
 .open #bar1 {@apply transform translate-y-[5px] -rotate-45}
 .open #bar2 {@apply opacity-0 }
-.open #bar3 {@apply transform -translate-y-[5px] rotate-45}
+.open #bar3 {@apply transform -translate-y-[5px] rotate-45}*/
 
 /*dropdown secondary nav and user */
-#main-navbar {@apply drop-shadow-sm mb-12 sm:mb-3 sticky top-0 z-60  }
+#main-navbar {@apply drop-shadow-sm  mb-3 md:mb-4 sticky top-0 z-60  }
 #navbar-menu {@apply h-8 overflow-visible bg-transparent absolute z-70  mt-1.5 ml-4 lg:ml-8 w-auto}
 :not(.open) #navbar-menu {@apply hidden  sm:block transform duration-300 }
 .open #navbar-menu {@apply block bg-mainblue-600 h-auto w-full mx-0 px-4 py-4  sm:block transform duration-300 }
 #navbar-menu > li {@apply sm:inline-block relative h-8 animate hover:bg-transparent}
 :not(.open)  #navbar-menu li > ul  {@apply absolute left-0 hidden w-64 sm:w-96 z-80 mt-0 bg-transparent pt-4}
 .open  #navbar-menu li > ul {@apply relative w-full }
-#navbar-menu > li:hover > ul , #navbar-menu > li:active > ul {@apply block -mt-5 md:-mt-3}
-#navbar-menu li > ul > li, #user-menu > li {@apply text-secondblue-50 text-sm px-1 pt-1.5 pb-0.5  block last:rounded-b   last:pb-4 first:pt-2.5 pl-5 pr-1.5 py-2}
+#navbar-menu > li:hover > ul , #navbar-menu > li:active > ul {@apply block -mt-5 md:-mt-3 }
+#navbar-menu li > ul > li, .u-menu > li {@apply text-secondblue-50 text-sm px-1 pt-1.5 pb-0.5  block last:rounded-b   last:pb-4 first:pt-2.5 pl-5 pr-1.5 py-2}
 .open #navbar-menu li > ul > li {@apply last:rounded-none block}
 #navbar-menu li > ul > li {@apply hover:bg-mainblue-100   bg-gradient-to-r from-mainblue-100 to-secondblue-100 }
 #navbar-menu i {@apply text-nav}
@@ -582,19 +602,20 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 #navbar-menu > li > ul > li a {@apply font-btn font-normal text-[.925rem]  text-mainblue-600 hover:text-mainblue-700}
 #navbar-menu > li > ul > li a strong {@apply text-mainblue-600 hover:text-mainblue-700}
 #navbar-menu > li > ul > li.active a  {@apply font-semibold}
-#ident-user-item #user-menu {@apply hidden  absolute right-0 w-64 z-90  border-t-[2rem] border-transparent -mt-2 -mr-4 md:mr-0}
-#ident-user-item:hover #user-menu, #user-menu:hover , #ident-user-item:active #user-menu, #user-menu:active {@apply block }
-header:not(.solo) #ident-user-item #user-menu {@apply -mt-5}
+.u-menu {@apply hidden  absolute right-0 w-64 z-90  border-t-[2rem] border-transparent top-8 -mr-4 md:mr-0}
+#ident-user-item:hover #user-menu, #ident-user-item:active #user-menu, #user-menu:active , #tool-item:hover .u-menu , .u-menu:hover,#tool-item:active .u-menu , .u-menu:active {@apply block }
+header:not(.solo) .u-menu {@apply -mt-2}
 #ident-user-item:hover #user-menu , #ident-user-item:active #user-menu  {@apply transform duration-300}
-#user-menu > li {@apply bg-gradient-to-l from-stone-50 to-white  hover:bg-mainblue-100 py-1.5}
-#user-menu > li > a {@apply text-stone-700 hover:text-stone-600 }
-#user-menu .separ {@apply border-t border-mainblue-50}
+.u-menu > li {@apply bg-gradient-to-l from-stone-50 to-white  hover:bg-mainblue-100 py-1.5}
+.u-menu > li > a {@apply text-stone-700 hover:text-stone-600 }
+.-menu .separ {@apply border-t border-mainblue-50}
 /*top page title and search*/
  .top-title {@apply truncate ellipsis overflow-hidden break-all }
 /*admin-menu*/
 #navbar-menu.admin-menu li > ul > li {@apply hover:bg-stone-50   bg-gradient-to-r from-stone-100 to-stone-200 }
 #navbar-menu.admin-menu > li > a , #navbar-menu.admin-menu > li.active > a {@apply hover:text-secondblue-100 text-secondblue-50}
 #navbar-menu.admin-menu > li > ul > li a , #navbar-menu.admin-menu> li > ul > li.active a {@apply hover:text-secondblue-600 text-secondblue-700}
+
 /**************************/
 /* projects list  btn     */
 /**************************/
@@ -617,7 +638,7 @@ header:not(.solo) #ident-user-item #user-menu {@apply -mt-5}
 
 /*custom tables*/
 .table-table {@apply w-full bg-transparent border-collapse max-w-full;contain:'strict' }
-.table-table thead  {@apply w-full}
+.table-table thead  {@apply w-full max-w-full}
 .table-table thead tr th {@apply border-b bg-stone-50 truncate max-h-8 p-4 pl-6 pb-3 text-base text-left font-btn font-semibold capitalize text-secondblue-700 relative;}
 .table-table th[scope="row"] {@apply text-left}
 .table-table th:not([data-sortable="false"]).table-ascending {@apply text-secondblue-800}
@@ -643,7 +664,7 @@ input[type="search"]::-webkit-search-cancel-button{@apply relative right-1  icon
 .table-pagination-list li.active {@apply bg-white shadow}
 .table-wrapper {@apply h-full w-full block max-w-full ;}
 .large-table .table-wrapper {@apply overflow-x-auto;contain: strict;  contain-intrinsic-height: 300px;}
-.table-top , .table-bottom {@apply flex md:flex-row w-full justify-between pb-1 pr-1 z-20 ;}
+.table-top , .table-bottom {@apply flex md:flex-row w-full justify-between pb-1 pr-1 z-20;}
 .table-info {@apply py-4}
 .table-filters {@apply order-1 text-center align-bottom ml-auto md:basis-2/4 py-2 ;}
 .table-dropdown {@apply order-3 w-96;}
@@ -666,8 +687,8 @@ a.disabled {@apply pointer-events-none;}
 /*******************************/
 /* table sticky top  , h-scroll  */
 /*******************************/
-.sticky-top .table-top  {@apply  sticky top-0 z-10 h-14 bg-white }
-.sticky-top table thead   {@apply sticky top-0 z-10 w-full}
+.sticky-top .table-top  {@apply  sticky  top-16 z-20 h-14 bg-white }
+.sticky-top table thead  , .sticky-top .table-table thead   {@apply top-12 sticky z-20 w-full}
 
 /***********************/
 /* projects list      */
@@ -727,12 +748,12 @@ section.separate {@apply after:w-96 before:h-[0.5] w-full h-auto pb-8 pt-4 block
 .stat-label {@apply font-medium pr-2 w-full md:basis-2/12 }
 .stat-info {@apply pr-2 w-full md:basis-10/12 md:ml-auto}
 .stat-item {@apply py-2 px-0 md:px-4 w-full md:flex md:flex-row h-auto}
-.stat-info .progress {@apply inline-block  whitespace-nowrap min-w-[64px] max-w-[85%] overflow-x-visible}
-.stat-info .progress span {@apply relative inline-block before:h-1 before:block before:w-full before:absolute before:bottom-0  p-0 m-0 mb-0.5 }
-.stat-info .progress span.progress-dubious {@apply text-dubious-dark before:bg-dubious-light}
-.stat-info .progress span.progress-validated {@apply text-validated-dark before:bg-validated-light}
-.stat-info .progress span.progress-unclassified {@apply text-stone-600 before:bg-stone-600}
-.stat-info .progress span.progress-predicted {@apply text-predicted-dark before:bg-predicted-light }
+.stat-info .progress {@apply inline-block  whitespace-nowrap min-w-[64px] max-w-[96px] }
+.stat-info .progress data {@apply before:block before:mr-0 before:ml-auto before:h-1 after:h-1 after:mr-0 after:ml-auto after:right-0 before:right-0 after:block max-w-[64px] before:w-[64px]  before:max-w-[64px]}
+.stat-info .progress data.progress-dubious {@apply text-dubious-dark after:bg-dubious-light}
+.stat-info .progress data.progress-validated {@apply text-validated-dark after:bg-validated-light}
+.stat-info .progress data.progress-unclassified {@apply text-stone-600 after:bg-stone-600}
+.stat-info .progress data.progress-predicted {@apply text-predicted-dark after:bg-predicted-light }
 .stat-info label.rights {@apply font-semibold small-caps basis-1/12 }
 td .item {@apply after:content-[',_'] last:after:content-none}
 
@@ -837,14 +858,14 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /********************************/
 /* breadcrumbs                 */
 /******************************/
-.breadcrumbs {@apply flex flex-wrap m-0 p-0 font-light pr-1 text-secondblue-300}
+.breadcrumbs {@apply flex flex-nowrap m-0 p-0 font-light pr-1 text-secondblue-300}
 .breadcrumbs.title {@apply uppercase  font-semibold text-secondblue-200  align-bottom after:px-1}
-.breadcrumbs a {@apply after:content-[">"] last:font-normal  hover:text-secondblue-300  after:px-1 after:text-secondblue-200 after:text-sm after:xl:text-lg after:lg:text-base after:inline after:last:content-none ; }
+.breadcrumbs a {@apply after:content-[">"] hover:text-secondblue-300  after:px-1 after:text-secondblue-200 after:text-sm after:xl:text-lg after:lg:text-base after:inline after:last:content-none ; }
 
 /*******************************/
 /* navbar notifications        */
 /*******************************/
-.notif {@apply p-1 relative whitespace-nowrap align-text-bottom font-medium border text-sm  font-btn rounded-full h-5 w-5 mx-0.5 overflow-hidden}
+.notif {@apply p-1 relative whitespace-nowrap align-text-bottom font-medium border text-xs font-btn rounded-full h-5 w-5 mx-[.1rem] sm:mx-0.5 first:ml-0 last:mr-0 overflow-hidden}
 .notif a {@apply absolute centered text-xs text-inherit}
 .text-error {@apply text-stone-700}
 .is-danger {@apply bg-danger-500 text-danger-50 border-danger-500}
@@ -954,26 +975,26 @@ details[open].toggle-summary summary span {@apply hidden}
 /* table import add styles    */
 /*******************************/
 .import-projects-list .table-container {@apply lg:max-w-full overflow-hidden overflow-x-auto }
-.import-projects-list .table-top {@apply  sticky top-0 z-10 h-14 bg-white }
-.import-projects-list .table-search {@apply mr-2 mt-0.5}
-.import-projects-list .table-table {@apply w-full overflow-hidden}
-.import-projects-list .table-table thead {@apply sticky top-0 z-10 w-full}
+.import-projects-list .table-top {@apply  sticky top-0 z-10 h-14 bg-white m-0 p-0 w-full}
+.import-projects-list .table-search {@apply pr-2 pt-0.5 bg-white}
+.import-projects-list .table-table {@apply w-full max-w-full overflow-x-auto}
+.import-projects-list .table-table thead {@apply sticky top-12 z-20 w-full max-w-full}
 .import-projects-list .table-table thead tr th {@apply  shadow-none;}
 /* set custom column width*/
-.import-projects-list .table-table thead tr th .col-title {@apply  min-w-[28rem];}
-.import-projects-list .table-table tbody {@apply w-full h-full overscroll-auto hover:overscroll-contain}
+.import-projects-list .table-table thead tr th {@apply  w-auto max-w-[8rem];}
+.import-projects-list .table-table tbody {@apply w-full max-w-full h-full overscroll-auto hover:overscroll-contain }
 .import-projects-list .table-table td:first-child {@apply whitespace-nowrap }
-.import-projects-list .table-table td:not(:first-child) {@apply  max-h-24 whitespace-normal md:max-w-[25%] overflow-hidden  }
+.import-projects-list .table-table td:not(:first-child) {@apply  max-h-24 whitespace-break-spaces md:max-w-[20%] overflow-hidden  }
 
 /*importzone limited view*/
-div.data-import {@apply overflow-hidden max-h-36 }
+div.data-import {@apply  max-h-36   overflow-y-auto overscroll-contain}
 /*importzone full view*/
 div.showfull {@apply relative h-auto max-h-[75%] overflow-hidden}
-div.zone-import {@apply block w-full h-auto overflow-y-auto }
-div.showfull div.zone-import {@apply relative w-full h-full z-50 overflow-y-visible}
+div.zone-import {@apply block w-full h-auto overflow-hidden }
+div.showfull div.zone-import {@apply relative w-full h-full z-50}
 div.btns-import {@apply h-12}
-div.showfull div.data-import  {@apply max-h-[80%]  overflow-hidden}
-div.data-import .ts-wrapper.multi {@apply max-h-[25%] h-auto  }
+div.showfull div.data-import  {@apply max-h-[80%] }
+div.data-import .ts-wrapper.multi {@apply max-h-full overflow-hidden}
 div.showfull div.zone-import > div.btns-import {@apply max-h-[100%] }
 div.showfull div.data-import .ts-wrapper.multi {@apply absolute -mt-[100%] z-60 overflow-y-visible}/* hover:absolute hover:max-h-full hover:z-60 hover:overflow-y-visible*/
 .import-projects-list .selected {@apply text-stone-200 text-xs max-h-8 bg-secondblue-100}

@@ -13,7 +13,7 @@
     {{ job.progress_msg |nl2br|safe }}
 
     <h3>{{_('Taxonomy manual mapping')}}</h3>
-    <form method="post">
+    <form method="post" action="{{request.path}}">
       {% if (taxo|length())>0 %}
         <p class="help-block">If you <em>really</em> cannot find a suitable category
         <ol>

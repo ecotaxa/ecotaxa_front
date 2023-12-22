@@ -6,16 +6,16 @@ const TerserPlugin = require("terser-webpack-plugin");
 const ESLintPlugin = require('eslint-webpack-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const dirRoot = "dev_gui/";
-const destRoot = 'appli/';
+const dirRoot = "/home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front/dev_gui/src/";
+const destRoot = '/home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front/appli/';
 let config = {
   entry: "./src/index.js",
   mode: 'production',
   output: {
-    path: path.resolve(__dirname, dirRoot + "static/gui/"),
+    path: path.resolve(__dirname, destRoot + "static/gui/"),
     publicPath: '/static/gui/',
     filename: (pathData) => {
-      return pathData.chunk.name === 'main' ? '[name].js' : 'modules/[name].js';
+      return pathData.chunk.name === 'main' ? '[name].[contenthash].js' : 'modules/[name].[contenthash].js';
     },
     clean: true,
   },
@@ -80,38 +80,34 @@ let config = {
   optimization: {
     minimizer: [
       new TerserPlugin(), `...`,
-      new CssMinimizerPlugin(),
+      new CssMinimizerPlugin({
+        test: /\.css$/i,
+      }),
     ],
     minimize: true,
 
   },
+  devtool: 'source-map',
   plugins: [
     new MiniCssExtractPlugin({
       linkType: "text/css",
-      filename: "./css/[name].css"
+      filename: "./css/[name].[contenthash].css"
     }),
     new CopyPlugin({
       patterns: [{
-          from: dirRoot + "../src/templates/v2",
+          from: dirRoot + "templates/v2",
           to: destRoot + "templates/v2"
         },
         {
-          from: dirRoot + "static/gui",
-          to: destRoot + "static/gui"
-        },
-        {
-          from: dirRoot + "../src/gui",
+          from: dirRoot + "gui",
           to: destRoot + "gui"
         },
         {
-          from: dirRoot + "../src/images",
+          from: dirRoot + "images",
           to: destRoot + "static/gui/images"
         },
         {
-          from: dirRoot + "../src/css/icons",
-          to: destRoot + "static/gui/css/icons"
-        }, {
-          from: dirRoot + "../src/css/fonts",
+          from: dirRoot + "css/fonts",
           to: destRoot + "static/gui/css/fonts"
         },
       ],

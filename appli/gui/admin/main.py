@@ -242,7 +242,7 @@ def gui_user_create():
 
     if request.method == "POST":
         response = user_create(usrid=-1, isfrom=True)
-        if response == 0:
+        if response[0] == 0:
             flash("user created", "success")
         else:
             flash(response[1], "error")

@@ -11,14 +11,14 @@
     {%-for taxastat in taxastats-%}
 {{taxo_row(taxastat,'taxon',taxastat.lineage|reverse|join('>'))}}
 {%- endfor-%}
-{%-endif-%}</tbody><tfoot class="max-w-full">
-<th>{{_('Total')}}</th><th class="hidden"></th>
+{%-endif-%}</tbody><tfoot class="w-full max-w-full"><tr>
+<th class="text-left ml-2" scope="col">{{_('Total')}}</th><th class="hidden"></th>
     {% set total=  taxastats|sum(attribute='nb_validated') +   taxastats|sum(attribute='nb_dubious') +  taxastats|sum(attribute='nb_predicted') +  taxastats|sum(attribute='nb_unclassified') %}
     {%- for type in types -%}
       {% set percent = ((taxastats|sum(attribute='nb_'+type)/total)*100)|round(1) if total>0 else 0 %}
-      <th  class="number nb_{{type}} text-left"><div class="progress w-auto"><span class="progress-{{type}}" style="width:{{ percent }}%;">{{ taxastats|sum(attribute='nb_'+type)}}</span></div></th>
+      <th  class="nb_{{type}} text-right"><div class="progress">{{ taxastats|sum(attribute='nb_'+type)}}<data class="progress-{{type}} ml-auto mr-0" style="width:{{ percent }}%;"></data></div></th>
     {%-endfor-%}
-  </tfoot>
+  </tr></tfoot>
 </table>
 {%-endmacro%}
 {% macro taxo_stats(taxastats) -%}
@@ -65,7 +65,7 @@
     {% from './v2/macros/macros.html' import modal with context %}
     {{ modal(id='help-project-stats',modal_title=modal_title,btn='',modal_content='./v2/help/' + help_file, type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'}) }}
   </div>
-  <h2 class="font-semibold py-1">{{_('About')}} {{ target_proj.title }} </h2>
+  <h2 class="font-semibold py-1">{{_('About')}} {{ target_proj.title}} </h2>
   <section  class="separate">
   {{ proj_settings() }}
   <div class="stat-item">
@@ -93,7 +93,7 @@
     <div id="wait-please" data-wait="{{_('Please wait')}}" data-loaded="{{_( 'Data loaded. Displaying...')}}" class="hide"> {{ _('Please wait')}}...</div>
     <a class="is-pick cursor-pointer mx-auto"><i class="icon-lg icon-chart-bar-square"></i> <span class="small-caps">{{_('Load samples stats')}}</span></a>
     <div class="selectaction absinput rounded shadow-sm w-auto p-4 font-normal text-secondblue-50 bg-stone-700  hide"><i class="icon icon-cancel p-1 -mt-3 -mr-3 invert float-right" data-dismiss=".selectaction"></i><a class="text-sm small-caps ">{{_('go to classification filtered on selected samples')}}</a></div>
-    </div></div>
+  </div></div>
   </div></section>
 
 </div>
