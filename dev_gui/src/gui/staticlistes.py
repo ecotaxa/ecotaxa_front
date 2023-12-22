@@ -28,7 +28,7 @@ apptree = dict(
                 "/listall?seeall=Y": "all users jobs",
             },
         },
-        "job": "Job",
+        "job": "Jobs",
         "privacy": "Privacy",
         "about": "About Ecotaxa",
     }
