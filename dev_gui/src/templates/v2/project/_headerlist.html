@@ -1,9 +1,0 @@
-<div id="table-filters" class="  order-3 sm:order-1 w-full clear-both md:clear-none block md:inline-block text-center">
-  {% if current_user.last_used_projects|length == 0 %}
-  <div id="welcome-info">{{_('To start using EcoTaxa, you need to <a href="'+url_for('gui_prj_create')+'">Create a project</a> or ask for permission in the list of <a href="'+url_for("gui_prj_all")+'">projects</a>')}}</div>
-  {% else %}
- <div class=" is-title inline   md:-mt-8 ">{{ _('Other projects') if listall==True else  _('Accessible projects') }}</div>
-  <a href="{{url_for("gui_prj_all") if listall != True else url_for("gui_prj") }}" class="is-filter inline" data-action="add-filters" data-noprev=true>{{ _('Show only accessible projects') if listall == True else  _('Show other projects')}}<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
-  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-</svg></a> {% endif %}
-  </div>

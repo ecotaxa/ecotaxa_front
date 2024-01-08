@@ -1,6 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{html,js}", "./src/css/icons/*.svg"],
+  content: ["./src/**/*.{html,js}",
+    "../appli/templates/v2/**/*.html"
+  ],
   exclude: '/node-modules/',
   darkMode: 'media', // or 'class'
   theme: {
@@ -131,7 +133,7 @@ module.exports = {
         'light': '#F0FDF4',
         'dark': '#0fab33',
       },
-      error: {
+      err: {
         '50': '#FEF2F2',
         '100': '#FEE2E2',
         '200': '#FECACA',
@@ -1257,6 +1259,8 @@ module.exports = {
     'focus-visible',
     'active',
     'disabled',
+    'valid',
+    'invalid',
   ],
   corePlugins: {
     aspectRatio: false,

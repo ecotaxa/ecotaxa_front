@@ -1,6 +1,5 @@
 const webpack = require("webpack");
 const path = require("path");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const ESLintPlugin = require('eslint-webpack-plugin');
@@ -12,8 +11,8 @@ let config = {
   entry: "./src/index.js",
   mode: 'development',
   output: {
-    path: path.resolve(__dirname, destRoot + "static/gui/"),
-    publicPath: '/static/gui/',
+    path: path.resolve(__dirname, destRoot + "static/gui/src/"),
+    publicPath: '/static/gui/src/',
     filename: (pathData) => {
       return pathData.chunk.name === 'main' ? '[name].js' : 'modules/[name].js';
     },
@@ -27,31 +26,13 @@ let config = {
         exclude: [/\.min\.js$/, /node_modules/, /babel-helpers/],
       },
       {
-        test: /\.(scss)$/i,
-        use: [MiniCssExtractPlugin.loader,
-          {
-            loader: "css-loader"
-          },
-        ],
-      },
-      {
         test: /\.css$/i,
         include: path.resolve(__dirname, 'src'),
         exclude: /node_modules/,
         use: [
-          'style-loader',
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              esModule: false,
-            },
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 1
-            }
-          },
+          "style-loader",
+          'css-loader',
+
           'postcss-loader'
         ]
       },
@@ -68,7 +49,7 @@ let config = {
       "assert": false
     },
     alias: {
-      "request$": "xhr"
+      "request$": "xhr",
     }
   },
   stats: {
@@ -122,35 +103,8 @@ let config = {
         },*/
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      linkType: "text/css",
-      filename: "./css/[name].css"
-    }),
     new BundleAnalyzerPlugin(),
-    new CopyPlugin({
-      patterns: [{
-          from: dirRoot + "templates/v2",
-          to: destRoot + "templates/v2"
-        },
-        {
-          from: dirRoot + "gui",
-          to: destRoot + "gui"
-        },
-        {
-          from: dirRoot + "images",
-          to: destRoot + "static/gui/images"
-        },
-        {
-          from: dirRoot + "css/fonts",
-          to: destRoot + "static/gui/css/fonts"
-        },
-      ],
-    }),
   ],
-  devServer: {
-    port: 3000,
-    hot: true,
-  },
   devtool: 'eval-source-map'
 }
 
