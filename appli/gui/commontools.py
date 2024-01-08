@@ -25,14 +25,14 @@ def _get_last_refresh() -> str:
         return None
     import datetime
 
-    with ApiClient(TaxonomyTreeApi, request) as apiTaxo:
-        status: TaxonomyTreeStatus = apiTaxo.taxa_tree_status()
-        try:
+    try:
+        with ApiClient(TaxonomyTreeApi, request) as apiTaxo:
+            status: TaxonomyTreeStatus = apiTaxo.taxa_tree_status()
             last_refresh = datetime.datetime.strptime(
                 status.last_refresh, "%Y-%m-%dT%H:%M:%S"
             )
-        except (ValueError, TypeError, ApiException):
-            last_refresh = None
+    except (ValueError, TypeError, ApiException):
+        last_refresh = None
 
     return last_refresh
 
@@ -129,7 +129,10 @@ def last_taxo_refresh(partial: bool = False):
 def breadcrumbs(default=None) -> list:
     from appli.gui.staticlistes import apptree
 
-    crumbs = request.path.split("/")
+    crumbs = request.path.split("?")
+    crumbs = crumbs[0].split("/")
+    if "static" in crumbs:
+        return {}
     if "gui" in crumbs:
         crumbs.remove("gui")
     if default != None:
@@ -137,41 +140,45 @@ def breadcrumbs(default=None) -> list:
     crumblist = []
     parent = ""
     url = []
+    tree = apptree
     for i, crumb in enumerate(crumbs):
         if crumb != "" or (i == 0):
-            crumbvalue = breadcrumb(apptree, crumb, parent)
+            crumbvalue, childtree = breadcrumb(tree, crumb)
             url.append(crumb)
             if crumbvalue != None:
-                crumbdict = dict({"url": "/gui" + "/".join(url), "text": crumbvalue})
-                if len(crumbs) == i + 2:
-                    if isinstance(crumbs[i + 1], int) or crumbs[i + 1].isdigit():
-                        crumbdict.update(dict({"id": crumbs[i + 1]}))
-                    else:
-                        crumbdict.update(dict({"action": crumbs[i + 1]}))
+                crumbdict = dict({"url": "/".join(url), "text": crumbvalue})
+                if (
+                    i + 2 == len(crumbs)
+                    and isinstance(crumbs[i + 1], int)
+                    or crumb.isdigit()
+                ):
+                    crumbdict.update(dict({"id": crumbs[i + 1]}))
                 crumblist.append(crumbdict)
-                parent = crumb
+            if childtree != None:
+                tree = childtree
+
     return crumblist
 
 
-def breadcrumb(tree: dict, crumb: str, parent: str = "") -> str:
-
+def breadcrumb(tree: dict, crumb: str) -> tuple:
     if isinstance(tree, str):
-        return tree
-    if parent != "" and parent in tree.keys():
-        tree = tree[parent]
-        if isinstance(tree, dict) and "children" in tree.keys():
-            tree = tree["children"]
-    if isinstance(tree, dict) and crumb in tree.keys():
-        if isinstance(tree[crumb], str):
-            return tree[crumb]
-        elif isinstance(tree[crumb], dict):
-
-            if "root" in tree[crumb]:
-                return tree[crumb]["root"]
-            else:
-                return breadcrumb(tree[crumb])
-    else:
-        return None
+        return tree, None
+    if isinstance(tree, dict):
+        if crumb in tree.keys():
+            if isinstance(tree[crumb], str):
+                return tree[crumb], None
+            elif isinstance(tree[crumb], dict):
+                if "children" in tree[crumb]:
+                    childtree = tree[crumb]["children"]
+                else:
+                    childtree = None
+                if "root" in tree[crumb]:
+                    return tree[crumb]["root"], childtree
+                elif "one" in tree[crumb]:
+                    return tree[crumb]["one"], childtree
+                else:
+                    return None, childtree
+    return None, None
 
 
 def html_to_text(html: str) -> str:
