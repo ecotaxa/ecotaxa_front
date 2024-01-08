@@ -27,7 +27,7 @@ class SubsetJob(Job):
     @classmethod
     def initial_dialog(cls):
         """In UI/flask, initial load, GET"""
-        projid = int(gvg("p"))
+        projid = int(gvg("projid"))
         target_proj = cls.get_target_prj(projid)
         if target_proj == None:
             return render_template(cls.NOPROJ_TEMPLATE, projid=projid)
