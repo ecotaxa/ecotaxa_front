@@ -31,7 +31,6 @@ a {@apply no-underline}
     [disabled] {@apply cursor-not-allowed }
 /*  small caps */
 .small-caps, .text-xs.small-caps, .text-sm.small-caps {font-variant-caps: all-small-caps;}
-
 /* icon colors */
 .fill-current path {fill:currentcolor;}
 .stroke-current path {stroke:currentcolor}
@@ -48,6 +47,19 @@ a {@apply no-underline}
   }
 
 @layer components {
+  /* top nav fixed position  and top margin to main */
+  #layout {@apply p-0 m-0}
+  #layout > header {@apply h-14 z-60 w-full block fixed top-0}
+  #layout > header:not(.solo) {@apply h-24}
+  #layout > header:not(.solo) + main {@apply mt-32}
+  #layout > header.solo + main {@apply mt-20}
+  /*vertically and horizontally centered */
+  .centered {@apply top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]}
+  .topcentered {@apply top-[15%] left-[50%] -translate-x-[50%] -translate-y-[85%]}
+  /*container in page with secondnav */
+  /* global forms elements input*/
+.mark-input {@apply after:block after:w-6 after:h-6 after:absolute after:top-0 after:left-1 after:z-80}
+.global-form-input {@apply  appearance-none block w-full px-4 py-2  text-stone-900  border  border-stone-300 rounded  read-only:bg-stone-50 font-light m-0 focus:text-secondblue-800 ring-0 outline-none outline-transparent ring-transparent active:border-secondblue-300 focus:font-normal focus:border-secondblue-300}
 /* icons */
  .icon {@apply h-5 w-5}
 .icon-lg {@apply h-6 w-6  }
@@ -67,7 +79,7 @@ a {@apply no-underline}
     .background-register {@apply bg-gradient-to-r from-mainblue-500 to-mainblue-400   drop-shadow-sm}
     .background-nav {@apply drop-shadow-sm border-b-2 border-mainblue-600  bg-gradient-to-r from-mainblue-700  to-mainblue-600  relative ;} /* */
     .background-bottom {@apply relative bg-gradient-to-r from-mainblue-100 to-stone-100  text-stone-900 border-stone-200 bg-transparent h-8}
-    .background-top.solo {@apply pb-12}
+    .background-top.solo {@apply mb-3 md:mb-4}
     .line-top {@apply bg-transparent}
     .bg-peerchecked {@apply bg-pchecked-400}
     .text-peerchecked {@apply text-white}
@@ -126,7 +138,7 @@ details.modal-container[open] summary > * {@apply hidden}
 details.modal-popup[open] .modal {@apply delay-100  bg-white opacity-100 rounded-lg p-4  shadow-lg z-20 w-full h-full mx-auto  pb-12  }
 details.modal-popup[open] .modal-body {@apply relative block h-full w-full sm:px-4 md:px-8  overflow-hidden  }
 details.modal-popup[open] .modal-title {@apply my-2}
-details.modal-popup[open] .modal-content {@apply w-full block border-t border-stone-200 p-2   }
+details.modal-popup[open] .modal-content {@apply w-full block border-t border-stone-200 }
 details.modal-popup[open] .modal-footer {@apply  p-4   }
 details.modal-popup.inside[open] .modal {@apply min-h-[96]}
 details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-stone-700  drop-shadow-sm opacity-100 mt-0 mr-0  w-full min-w-full h-full min-h-full overflow-hidden;
@@ -177,31 +189,37 @@ article.table-of-contents > details > summary::marker {@apply content-none;}
 article.table-of-contents > details > summary::before {@apply content-[attr(data-marker)];}
 article.table-of-contents > details[open] > summary::before {@apply content-[attr(data-marker-open)];}
 /*forms inputs && label */
-input[class="form-"],  textarea[class="form-"] {@apply block w-full}
-input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"], .form-select ,.form-input , textarea.form-textarea   {@apply global-form-input  selection:bg-mainblue-200}
-.form-input:focus, .form-select:focus, .form-textarea:focus  {@apply ring-0 ring-transparent border-secondblue-200  selection:bg-secondblue-300 } /* important otherwise field border color on focus does not work correctly */
-.form-input, .form-textarea  {@apply focus:valid-check }
+input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"] , .form-select, .form-textarea, .form-input, .form-multiselect {@apply global-form-input block w-full selection:bg-mainblue-200 }
+.form-input:focus, .form-select:focus, .form-textarea:focus  {@apply focus:ring-0 focus:ring-transparent focus:border-secondblue-200  focus:selection:bg-secondblue-300 } /* important otherwise field border color on focus does not work correctly */
 select option[selected="selected"], select option[selected=true], select option[selected="true"] , select option[selected=""]  {@apply font-semibold bg-secondblue-200 }
 select option:active, select option:focus  {@apply font-semibold bg-secondblue-200 }
+.form-select, .form-textarea, .form-input, .form-multiselect {@apply relative valid:z-0 invalid:border-danger-400 invalid:ring-danger-400 valid:mark-input invalid:mark-input invalid:after:content-["✖"] invalid:after:text-danger-400  valid:border-secondblue-300 valid:ring-secondblue-300 valid:after:content-["aaaa"] valid:after:text-secondblue-300}
+/*tom-select*/
+[class^="form-"]:valid + .ts-wrapper {@apply  border-secondblue-300 ring-secondblue-300}
+[class^="form-"]:invalid + .ts-wrapper {@apply  ring-danger-400 border-danger-400}
+.ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto; }
+.ts-wrapper .item .ts-delet::before {@apply icon-cancel}
 /* todo: simplification*/
 .form-checkbox, .form-radio {@apply text-stone-700 mr-2}
 :not(.group-radio) input[type="radio"], input[type="checkbox"], :not(.group-radio) input.form-checkbox, :not(.group-radio) input.form-radio {@apply appearance-none indeterminate:bg-transparent  cursor-pointer pointer-events-auto  relative ring-offset-0 w-2.5 h-2.5 ring-2 border-transparent ring-offset-transparent	ring-current enabled:hover:ring-secondblue-400  disabled:opacity-50  checked:ring-secondblue-700 checked:bg-transparent leading-snug  checked:disabled:after:content-none; }
 :not(.group-radio) input[type="radio"]:not(.form-checkbox)  {@apply rounded-full after:absolute relative  checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-secondblue-400 checked:after:rounded-full checked:after:content-[''] ; }
 input[type="checkbox"],  input[type="checkbox"].form-checkbox , :not(.group-radio) input[type="radio"].form-checkbox { @apply ring-offset-0  ring-offset-transparent rounded-none after:absolute checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1 checked:after:h-2  checked:after:border-secondblue-400 checked:after:border-r-2 checked:after:border-b-2 checked:after:rotate-45 checked:after:content-[''] align-baseline;}
 input[type="checkbox"][readonly] {@apply pointer-events-none cursor-not-allowed checked:after:border-stone-800 ring-offset-transparent enabled:hover:ring-transparent enabled:ring-transparent}
-
+/*labels */
+label.required , .label.required {@apply w-auto inline-block after:content-['_*'] after:text-stone-600 hover:after:text-warning-700  after:inline after:whitespace-nowrap }
+label.input-invalid , .label.input-invalid {@apply after:text-sm after:italic  after:text-danger-500 after:px-1 after:py-1 after:border-danger-500 after:ml-1 after:h-4 after:w-32 rounded-full after:content-[attr(data-isinvalid)] after:inline after:whitespace-nowrap after:text-ellipsis;}
 /*forms specials */
 div.password-wrapper {@apply relative}
 div.password-wrapper input.form-input {@apply pr-12}
 div.password-wrapper i {@apply absolute right-2 top-[50%] -translate-y-[50%] z-[2]}
 legend {@apply bg-transparent text-stone-900 hover:text-stone-800 px-1 py-2 font-btn font-bold  mx-auto block text-sm md:text-base uppercase border-b-2 border-stone-100 }
 fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  md:mr-2 last:mr-0 p-0 }
-  .form-box , .submit-box {@apply md:px-2 py-2 mb-2 md:mb-1 mx-0 }
-  .form-box label {@apply text-base font-semibold text-stone-900 bg-transparent }
-  .form-box .checkbox-label {@apply text-sm font-normal}
-  .form-box.relative label.over {@apply absolute top-0 left-4 z-10 px-1 pt-0.5 pb-0 -mt-1 ml-0.5 w-auto rounded-t align-baseline bg-white max-w-full overflow-hidden text-ellipsis}
-  .fieldset-wrapper {@apply w-full flex   flex-wrap}
-  .fieldset > div {@apply border-t border-stone-200}
+.form-box , .submit-box {@apply md:px-2 py-2 mb-2 md:mb-1 mx-0 }
+/*.form-box label , .form-box .label {@apply text-base font-semibold text-stone-900 bg-transparent }*/
+.form-box .checkbox-label {@apply text-sm font-normal}
+.form-box.relative label.over , .form-box.relative .label.over {@apply absolute top-0 left-4 z-10 px-1 pt-0.5 pb-0 -mt-1 ml-0.5 w-auto rounded-t align-baseline bg-white max-w-full overflow-hidden text-ellipsis}
+.fieldset-wrapper {@apply w-full flex   flex-wrap}
+.fieldset > div {@apply border-t border-stone-200}
     /*inline group radios as buttons */
   .form-group {@apply w-full;font-size:0}
   .group-radio {@apply flex inline-flex flex-grow mx-0 px-0 text-base align-middle}
@@ -220,13 +238,12 @@ fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  m
   .block-info {@apply block drop-shadow-sm px-4 py-4 my-2 text-stone-800 bg-stone-50 border border-stone-100}
   .block-disclaimer {@apply block drop-shadow-sm px-4 py-4 mb-2 text-sm  font-normal bg-transparent md:w-[80%] md:mx-auto border border-dotted border-stone-200 }
   .bock-disclaimer a {@apply text-stone-900 font-bold}
-label.required {@apply after:content-['_*'] after:text-stone-600 after:hover:text-warning-700  after:inline after:whitespace-nowrap after:text-ellipsis}
 /*captcha*/
 button[type="submit"][disabled] {@apply border-stone-400 border-l-stone-100 }
 button.submitslider {@apply min-w-[200px]}
-.slidermask {@apply absolute w-full  mx-auto h-full bg-stone-400  border border-stone-400 top-0 left-0 block rounded after:text-sm after:leading-snug after:content-[attr(data-title)] after:text-stone-50 hover:after:text-stone-50; -webkit-user-select: none; -webkit-touch-callout: none;}
+.slidermask {@apply absolute w-full  mx-auto h-full bg-stone-400  border border-stone-400 top-0 left-0 block rounded after:text-sm after:leading-snug after:content-[attr(data-title)] after:text-stone-50 hover:after:text-stone-50  select-none touch-none;}
 /*.icoslider {@apply icon-lg icon-chevron-right invert my-auto}*/
-.slider {@apply absolute h-full w-8 top-0 left-0 bg-transparent rounded-l p-0; -webkit-user-select: none; -webkit-touch-callout: none;}
+.slider {@apply absolute h-full w-8 top-0 left-0 bg-transparent rounded-l p-0 select-none touch-none;}
 .icoslider {@apply border-l-stone-100 border-t-transparent border-b-transparent w-0 h-0 -mx-0 my-auto border-l-[24px] border-t-[22px] border-b-[22px] block  hover:border-l-stone-100}
 .comment-captcha {@apply hidden}
 /*special for safari bug*/
@@ -280,21 +297,12 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
 .up {@apply fixed block bottom-4 right-4 bg-transparent cursor-pointer icon-lg icon-up}
 .up.scrollspy {@apply opacity-100}
 .pageup {@apply bottom-16}
-
+/*tooltips */
+[data-title]:hover:after , [data-title]:active:after {@apply absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-50 content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
 }
 
 @layer utilities {
-  /*vertically and horizontally centered */
-  .centered {@apply top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]}
-  .topcentered {@apply top-[15%] left-[50%] -translate-x-[50%] -translate-y-[85%]}
-  /* global forms elements input*/
-  .valid-check {@apply invalid:border-danger-400 after:invalid:content-["✖"] after:invalid:text-danger-400 valid:border-secondblue-300 after:valid:content-["✓"] after:valid:text-secondblue-300 selection:bg-secondblue-300 }
-  .form-box label.invalid {@apply after:text-sm after:italic  after:text-danger-500 after:px-1 after:py-1 after:border-danger-500 after:ml-1 after:h-4 after:w-32 rounded-full after:content-[attr(data-invalid)] after:inline after:whitespace-nowrap after:text-ellipsis;}
-  .global-form-input {@apply  appearance-none block w-full px-4 py-2  text-stone-900  border  border-stone-300 rounded read-only:bg-stone-50 font-light m-0 focus:text-secondblue-800 ring-0 outline-none outline-transparent ring-transparent active:border-secondblue-300 focus:font-normal focus:border-secondblue-300  valid-check}
-  .input-validate:invalid, .input-validate.invalid {@apply  relative border-danger-500  ring-danger-500 valid-check }
-
-/*  .input-validate:valid, .ts-wrapper.input-validate:not(.invalid) {@apply border-success-500 ring-success-500}*/
-/**********************************************/
+ /**********************************************/
 /* all icons                                 */
 /*********************************************/
 /* icons */
@@ -493,11 +501,11 @@ content:url('data:image/svg+xml; utf8,  <svg xmlns="http://www.w3.org/2000/svg" 
 .icon-user-sm {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg"  class="fill-current"  viewBox="0 0 20 20" fill="currentcolor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" /></svg>')
 }
-.icon-duplicate-sm {
+.icon-carboncopy-sm {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentcolor" class="fill-current"><path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" /><path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" /></svg>')
 }
 
-.icon-duplicate {
+.icon-carboncopy {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentcolor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>');
 }
 
@@ -563,11 +571,11 @@ body::-webkit-scrollbar {
 /*****************************************/
 /* top navigation and user menu         */
 /****************************************/
-#secondary-nav {@apply flex flex-row flex-wrap  md:basis-9/12 px-0  sm:px-2 h-[3.5rem] pb-0.5 pt-1.5 background-nav}
+#secondary-nav {@apply flex flex-row flex-wrap  md:basis-9/12 px-0  sm:px-2 h-[3rem] pb-0.5 pt-1 background-nav}
 /*burger menus */
-.burger {@apply absolute w-5 h-4  top-6 ml-4 bg-transparent inline-block cursor-pointer mt-2 duration-500;}
-.burger-icon{ @apply h-[1px] absolute w-full bg-danger-500 block rounded-sm  duration-500 before:absolute before:-top-2 before:rounded-sm before:w-full before:bg-stone-50 before:block after:rounded-sm after:w-full after:bg-stone-50 after:block  after:top-6 before:h-[1px] after:h-[1px]}
-.open .burger-icon {@apply duration-500 bg-transparent before:rotate-45 after:-rotate-45 before:scale-x-125 after:scale-x-125 before:translate-x-1 before:translate-y-1 after:translate-x-1 after:-translate-y-1 top-4 right-1}
+.burger {@apply  w-5 h-4 relative ml-4 bg-transparent inline-block cursor-pointer mt-1.5 duration-500;}
+.burger-icon{ @apply h-[1px] absolute w-full bg-stone-50 block rounded-sm  duration-500 before:absolute before:-mt-1.5 before:rounded-sm before:w-full before:bg-stone-50 before:block after:rounded-sm after:w-full after:bg-stone-50 after:block  after:mt-1.5 before:h-[1px] after:h-[1px]}
+.open .burger-icon {@apply duration-500 bg-transparent before:-rotate-45 after:rotate-45 before:mt-0 after:mt-0 top-4 right-1}
 /*burger*/
 .js-nav.open {@apply w-full h-full block px-2 mx-0 relative}
 .js-nav.open > div {@apply mt-2.5 pt-8 }
@@ -582,15 +590,16 @@ body::-webkit-scrollbar {
 .open #bar3 {@apply transform -translate-y-[5px] rotate-45}*/
 
 /*dropdown secondary nav and user */
-#main-navbar {@apply drop-shadow-sm  mb-3 md:mb-4 sticky top-0 z-60  }
-#navbar-menu {@apply h-8 overflow-visible bg-transparent absolute z-70  mt-1.5 ml-4 lg:ml-8 w-auto}
+#main-navbar {@apply drop-shadow-sm  block w-full p-0}
+#navbar-menu {@apply overflow-visible bg-transparent absolute z-70  mt-0 ml-4 lg:ml-8 w-auto}
 :not(.open) #navbar-menu {@apply hidden  sm:block transform duration-300 }
 .open #navbar-menu {@apply block bg-mainblue-600 h-auto w-full mx-0 px-4 py-4  sm:block transform duration-300 }
 #navbar-menu > li {@apply sm:inline-block relative h-8 animate hover:bg-transparent}
 :not(.open)  #navbar-menu li > ul  {@apply absolute left-0 hidden w-64 sm:w-96 z-80 mt-0 bg-transparent pt-4}
 .open  #navbar-menu li > ul {@apply relative w-full }
+.open  #navbar-menu li {@apply h-auto }
 #navbar-menu > li:hover > ul , #navbar-menu > li:active > ul {@apply block -mt-5 md:-mt-3 }
-#navbar-menu li > ul > li, .u-menu > li {@apply text-secondblue-50 text-sm px-1 pt-1.5 pb-0.5  block last:rounded-b   last:pb-4 first:pt-2.5 pl-5 pr-1.5 py-2}
+#navbar-menu li > ul > li, .u-menu > li {@apply text-secondblue-50 text-sm px-1 pt-1.5 pb-0.5  block last:rounded-b last:pb-4 first:pt-2.5 pl-5 pr-1.5 py-2}
 .open #navbar-menu li > ul > li {@apply last:rounded-none block}
 #navbar-menu li > ul > li {@apply hover:bg-mainblue-100   bg-gradient-to-r from-mainblue-100 to-secondblue-100 }
 #navbar-menu i {@apply text-nav}
@@ -602,16 +611,16 @@ body::-webkit-scrollbar {
 #navbar-menu > li > ul > li a {@apply font-btn font-normal text-[.925rem]  text-mainblue-600 hover:text-mainblue-700}
 #navbar-menu > li > ul > li a strong {@apply text-mainblue-600 hover:text-mainblue-700}
 #navbar-menu > li > ul > li.active a  {@apply font-semibold}
-.u-menu {@apply hidden  absolute right-0 w-64 z-90  border-t-[2rem] border-transparent top-8 -mr-4 md:mr-0}
+.u-menu {@apply hidden  absolute right-0 w-64 z-90  border-t-8 top-12 border-transparent md:mr-0}
 #ident-user-item:hover #user-menu, #ident-user-item:active #user-menu, #user-menu:active , #tool-item:hover .u-menu , .u-menu:hover,#tool-item:active .u-menu , .u-menu:active {@apply block }
-header:not(.solo) .u-menu {@apply -mt-2}
-#ident-user-item:hover #user-menu , #ident-user-item:active #user-menu  {@apply transform duration-300}
+#ident-user-item:hover #user-menu , #ident-user-item:active #user-menu  {@apply transform duration-300 }
 .u-menu > li {@apply bg-gradient-to-l from-stone-50 to-white  hover:bg-mainblue-100 py-1.5}
 .u-menu > li > a {@apply text-stone-700 hover:text-stone-600 }
 .-menu .separ {@apply border-t border-mainblue-50}
 /*top page title and search*/
  .top-title {@apply truncate ellipsis overflow-hidden break-all }
 /*admin-menu*/
+#navbar-menu.admin-menu li > ul  {@apply -mt-1.5}
 #navbar-menu.admin-menu li > ul > li {@apply hover:bg-stone-50   bg-gradient-to-r from-stone-100 to-stone-200 }
 #navbar-menu.admin-menu > li > a , #navbar-menu.admin-menu > li.active > a {@apply hover:text-secondblue-100 text-secondblue-50}
 #navbar-menu.admin-menu > li > ul > li a , #navbar-menu.admin-menu> li > ul > li.active a {@apply hover:text-secondblue-600 text-secondblue-700}
@@ -653,7 +662,7 @@ header:not(.solo) .u-menu {@apply -mt-2}
 .table-ellipsis {@apply overflow-hidden w-full max-w-[340px] md:max-w-[260px] lg:max-w-[460px]  hover:h-auto break-all max-h-48 }
 .table-table .overflow {@apply overflow-x-visible w-full h-auto break-all max-h-full }
 .table-dropdown label, .table-bottom  {@apply font-normal text-sm text-stone-400}
-.table-search {@apply md:basis-1/4 ml-auto order-2 w-96;}
+.table-search {@apply md:basis-1/4 ml-auto order-2 w-96 my-2;}
 .table-search .table-input::placeholder {@apply pl-8;}
 .table-search .table-input {@apply bg-transparent relative  ml-0.5 }
 /* search input cancel icon */
@@ -687,13 +696,13 @@ a.disabled {@apply pointer-events-none;}
 /*******************************/
 /* table sticky top  , h-scroll  */
 /*******************************/
-.sticky-top .table-top  {@apply  sticky  top-16 z-20 h-14 bg-white }
-.sticky-top table thead  , .sticky-top .table-table thead   {@apply top-12 sticky z-20 w-full}
-
+.sticky-top {@apply relative }
+.sticky-top .table-top {@apply sticky  top-0 z-20 h-14 bg-white }
+.sticky-top .table-table thead {@apply sticky top-14 z-20}
 /***********************/
 /* projects list      */
 /**********************/
-.prjlist .table-top {@apply sticky  top-16 z-20 h-14 bg-white }
+.prjlist .table-top {@apply sticky  top-14 z-20 h-14 bg-white }
 .prjlist .table-table thead {@apply sticky  top-28 z-20}
 .prjlist .table-table thead tr th {@apply  bg-stone-300 hover:text-secondblue-500 text-secondblue-900  border-secondblue-100 shadow-sm;}
 .prjlist .table-table th .sublabel {@apply text-xs font-light text-stone-500 }
@@ -764,39 +773,7 @@ td .item {@apply after:content-[',_'] last:after:content-none}
 .rights.annotators {@apply text-secondblue-500 }
 .rights.managers  {@apply text-stone-800}
 .rights.viewers  {@apply text-stone-500}
-/*******************************/
-/* tom-select                 */
-/*******************************/
-.ts-dropdown, .ts-wrapper .item , .ts-control input {@apply text-stone-700 text-sm md:text-base rounded leading-normal mr-2 sm:mr-0 !important}
-.ts-control input {@apply font-normal text-secondblue-400 py-0 !important}
-option[disabled][hidden], .ts-control .item[data-value=""] {@apply text-stone-300 focus:font-medium !important}
-/* style for single */
 
-.ts-wrapper.single .item {@apply leading-normal}
-.ts-wrapper.single .item.hide {@apply hidden}
-/* style for multiple */
-.ts-wrapper.form-select {@apply py-0.5 px-0}
-.ts-wrapper.form-select .ts-control {@apply block border-none border-transparent bg-transparent m-0 focus:border-0}
-.ts-wrapper.multi .ts-control {@apply border-stone-300 }
-.ts-wrapper.multi.focus .ts-control {@apply border-transparent ring-0 outline-none  }
-.ts-wrapper.single.focus , .ts-wrapper.multi.focus {@apply rounded border border-secondblue-300 ring-0 outline-none bg-transparent }
-
-.ts-wrapper.multi  .item  {@apply py-1 flex inline-flex text-xs rounded bg-stone-100 text-stone-900 shadow w-auto inline px-1.5 pl-1 ml-1  my-1 align-middle !important;}
-.ts-dropdown .option {@apply text-sm text-stone-800 }
-.ts-dropdown [data-selectable] .highlight {@apply text-sm bg-secondblue-200 !important}
-.ts-dropdown .option.active , .ts-dropdown .option:hover, .ts-dropdown .option:active {@apply bg-stone-50 !important}
-.ts-dropdown .option.active {@apply font-normal text-black !important }
-.ts-wrapper.multi .item.active {@apply text-stone-700 font-light}
-.ts-wrapper.multi .item.last-active {@apply text-stone-700 bg-stone-50 }
-.ts-wrapper.multi .item.active.last-active {@apply text-stone-900 bg-stone-50 font-medium}
-.ts-wrapper.multi .item.new {@apply border border-stone-300 bg-white text-stone-900  }
-/*.ts-wrapper .item.new {@apply after:content-['']}
-.ts-wrapper .item.new:after {content:''}*/
-.ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto; }
-.ts-wrapper .item .ts-delet::before {@apply icon-cancel}
-select[class*="ts-hidden"] {@apply hidden}
-.ts-dropdown-content {@apply block text-base}
-.ts-dropdown-content[type='taxo'] {@apply block text-sm }
 /*text bigger in top-search*/
 details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdown .option.active {@apply text-base}
 /* form fieldset privileges*/
@@ -822,9 +799,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 #section-privileges .row .form-line-delet:not(:checked) {@apply icon-x-mark}
 #section-privileges .row .form-line-delet:checked {@apply icon-reply-sm p-1}
 #section-privileges .row.newone {@apply pt-6 pb-4 pl-4 border-2 border-stone-900 mb-4 hidden }
-#section-privileges .ts-wrapper.form-select { @apply border-0 rounded-none  }
-#section-privileges .ts-wrapper.form-select.focus { @apply text-secondblue-400 bg-secondblue-50  }
-#section-privileges .ts-control {@apply border-none border-b-2 border-b-black bg-transparent overflow-hidden }
+
 /* import privileges */
 
 .is-manage {@apply bg-stone-600 text-stone-50  px-2 ring-stone-600 hover:ring-stone-700 hover:bg-stone-700 hover:text-white}
@@ -832,10 +807,9 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .is-request {@apply hover:ring-secondblue-500 px-2 hover:text-secondblue-500 ring-stone-500 text-stone-500 bg-transparent}
 .is-view {@apply  ring-secondblue-400 text-secondblue-50 px-2 hover:bg-secondblue-400 hover:ring-secondblue-500 bg-transparent text-secondblue-400 hover:text-white px-1.5 }
 .itempriv {@apply relative after:hover:absolute after:hover:-mt-4 after:hover:px-1 after:hover:py-0.5 after:hover:shadow-sm after:hover:left-0  after:content-[none] before:px-2 before:mr-1 text-sm after:text-xs before:font-bold  after:bg-stone-50 after:p-0.5 after:rounded after:shadow-sm before:small-caps after:small-caps  !important}
-.ts-wrapper.multi .item[data-inlist] {@apply before:underline  before:underline-offset-2 drop-shadow-none before:decoration-secondblue-500 font-normal bg-stone-50 shadow-none }
-.ts-wrapper.multi .item.item-annotators {@apply itempriv before:content-['A'] after:hover:content-['Annotator'] after:text-secondblue-500 before:text-secondblue-500 !important}
-.ts-wrapper.multi .item.item-managers {@apply itempriv before:content-['M']  after:hover:content-['Manager'] before:text-stone-800  after:text-stone-600    !important}
-.ts-wrapper.multi .item.item-viewers {@apply itempriv before:content-['V']  after:no-underline after:hover:content-['Viewer'] before:text-stone-500 after:text-stone-500  !important}
+.item.item-annotators {@apply itempriv before:content-['A'] after:hover:content-['Annotator'] after:text-secondblue-500 before:text-secondblue-500 !important}
+.item.item-managers {@apply itempriv before:content-['M']  after:hover:content-['Manager'] before:text-stone-800  after:text-stone-600    !important}
+.item.item-viewers {@apply itempriv before:content-['V']  after:no-underline after:hover:content-['Viewer'] before:text-stone-500 after:text-stone-500  !important}
 .rights[data-r] {@apply before:mr-2 before:px-1 before:capitalize  text-sm font-light  before:font-semibold  before:small-caps}
 .rights[data-r="annotators"] {@apply before:content-[attr(data-r)]  before:text-secondblue-500 }
 .rights[data-r="managers"]  {@apply before:content-[attr(data-r)]  font-light   before:text-stone-800}
@@ -858,30 +832,30 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /********************************/
 /* breadcrumbs                 */
 /******************************/
-.breadcrumbs {@apply flex flex-nowrap m-0 p-0 font-light pr-1 text-secondblue-300}
-.breadcrumbs.title {@apply uppercase  font-semibold text-secondblue-200  align-bottom after:px-1}
-.breadcrumbs a {@apply after:content-[">"] hover:text-secondblue-300  after:px-1 after:text-secondblue-200 after:text-sm after:xl:text-lg after:lg:text-base after:inline after:last:content-none ; }
+.breadcrumbs {@apply flex flex-nowrap font-light pr-1 text-secondblue-300}
+.breadcrumbs.title  {@apply uppercase  font-semibold text-secondblue-200 text-xs sm:text-sm xl:text-lg lg:text-base align-bottom tracking-tighter sm:tracking-normal leading-6 align-bottom after:px-1}
+.breadcrumbs a {@apply after:content-[">"] hover:text-secondblue-300  after:text-xs  after:px-1 after:text-secondblue-200 after:sm:text-sm after:xl:text-lg after:lg:text-base after:tracking-tighter after:sm:tracking-normal after:inline after:last:content-none ; }
 
 /*******************************/
 /* navbar notifications        */
 /*******************************/
-.notif {@apply p-1 relative whitespace-nowrap align-text-bottom font-medium border text-xs font-btn rounded-full h-5 w-5 mx-[.1rem] sm:mx-0.5 first:ml-0 last:mr-0 overflow-hidden}
-.notif a {@apply absolute centered text-xs text-inherit}
-.text-error {@apply text-stone-700}
+.notif {@apply relative whitespace-nowrap font-medium text-xs font-btn rounded-full h-5 w-5  mt-1 mb-auto mx-[.1rem] sm:mx-0.5 first:ml-0 last:mr-0 overflow-hidden}
+.notif a {@apply absolute centered text-xs  text-inherit}
+.txt-err {@apply text-stone-700}
 .is-danger {@apply bg-danger-500 text-danger-50 border-danger-500}
 .button.is-danger {@apply hover:bg-danger-400 focus:bg-danger-400}
 .is-success {@apply text-success-50 bg-success-400 border-success-400}
 .is-done {@apply text-done-light bg-done-dark border-done-dark}
-.is-running {@apply text-done-dark bg-stone-50 border-done-dark hover:border-done-light }
-.is-pending {@apply text-done-dark bg-stone-50 border-done-light hover:border-done-dark }
+.is-running {@apply text-done-dark bg-success-200 border-done-dark hover:border-done-light }
+.is-pending {@apply text-done-dark bg-success-50 border-done-light hover:border-done-dark }
 .is-running a, .is-pending a {@apply text-done-dark !important}
 .is-warning {@apply  bg-warning-300 text-stone-800 selection:bg-warning-200  border-warning-400 }
 .button.is-warning {@apply hover:bg-warning-200 focus:bg-warning-200}
 .is-question {@apply text-mainblue-100 bg-stone-600 border-mainblue-100 }
-.is-error {@apply bg-error-500 text-error-50 border-error-500}
+.is-error {@apply bg-err-500 text-err-50 border-err-500}
 .is-warning.inverse {@apply bg-warning-50 selection:bg-warning-100 }
-.is-error.inverse {@apply  bg-error-50 text-error-600 selection:bg-error-100 border-error-200 }
-.is-danger.inverse {@apply  bg-error-50 text-danger-600 selection:bg-error-100 border-danger-200 }
+.is-error.inverse {@apply  bg-err-50 text-err-600 selection:bg-err-100 border-err-200 }
+.is-danger.inverse {@apply  bg-err-50 text-danger-600 selection:bg-err-100 border-danger-200 }
 .is-done.inverse {@apply text-done-dark bg-done-light border-done-dark}
 .is-success.inverse {@apply bg-success-50 text-success-600 selection:bg-success-100 border-success-100}
 .is-info {@apply bg-mainblue-500 text-stone-50 selection:bg-mainblue-400 border-mainblue-400 }
@@ -896,8 +870,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /*.alert-reponse {@apply border  mx-auto block container mb-4 my-0.5 px-4 py-2 font-light w-96  fixed right-0 top-0 z-[5000] drop-shadow-sm}*/
 .alert-reponse {@apply border  mx-auto block container mb-4 my-0.5 px-4 py-2 font-light w-full fixed top-0 z-[50000] drop-shadow-sm  transition transform translate-y-32 }
 .alert-danger {@apply bg-danger-500 text-stone-50 selection:bg-danger-300 border-danger-500 }
-.alert-danger:not(.inverse)::before , .alert-error:not(.inverse)::before {@apply text-danger-600 icon icon-fire }
-.alert-error {@apply bg-error-400 text-stone-800 selection:bg-error-200 border-error-500 }
+.alert-error {@apply bg-err-400 text-stone-800 selection:bg-err-200 border-err-500 }
 .alert-success {@apply bg-success-300 text-stone-800 selection:bg-success-400 border-success-400  }
 .alert-warning {@apply bg-warning-300 text-stone-800 selection:bg-warning-200  border-warning-400}
 .alert-warning:not(.inverse) {@apply icon-alert }
@@ -905,8 +878,8 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alert-info:not(.inverse) {@apply icon-info}
 .alert-success.inverse {@apply bg-success-50 text-success-600 selection:bg-success-100 border-success-600 }
 .alert-danger.inverse  {@apply bg-danger-50 text-danger-500 selection:bg-danger-100 border-danger-400}
-.alert-danger.inverse::before , .alert-error.inverse::before {@apply icon icon-fire-sm }
-.alert-error.inverse {@apply bg-error-50 text-error-500 border-error-400 selection:bg-error-100 }
+.alert-danger.inverse::before , .alert-err.inverse::before {@apply icon icon-fire-sm }
+.alert-error.inverse {@apply bg-err-50 text-err-500 border-err-400 selection:bg-err-100 }
 .alert-warning.inverse {@apply bg-warning-50 selection:bg-warning-100}
 .alert-warning.inverse {@apply icon-alert-sm }
 .alert-info.inverse {@apply bg-mainblue-50 text-mainblue-400 selection:bg-mainblue-100 border-mainblue-400 icon-info-sm}
@@ -914,7 +887,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alert.inverse::before {@apply icon}
 .alert.big-icon::before {@apply w-16 h-16 mx-8 my-8}
 .alert button.close {@apply absolute right-1 top-[50%] -translate-y-[50%] hover:fill-black}
-
+.alert-danger:not(.inverse)::before , .alert-error:not(.inverse)::before {@apply text-danger-600 icon icon-fire }
 /*******************************/
 /* confirm dialog             */
 /*******************************/
@@ -925,8 +898,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alert .is-cancel, .alert .is-ok {@apply shadow-none font-btn text-sm small-caps mr-2 ;}
 .alert .is-cancel {@apply border-stone-800 text-stone-800 bg-transparent}
 .alert .is-ok {@apply border-secondblue-400 text-secondblue-400}
-.hidevscroll {@apply max-h-screen  overflow-y-hidden}
-.hidevscroll {@apply after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-4 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-60; content:''}
+.hidevscroll {@apply max-h-screen overflow-y-hidden after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-4 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-60; content:''}
 /*******************************/
 /* topmessages                */
 /*******************************/
@@ -1049,9 +1021,6 @@ table tbody tr td:before { @apply font-semibold block content-[attr('data-name')
 /*table tbody tr td:last-child {@apply  w-auto inline-block}*/
 .top-title {@apply max-w-[58%]}
 }
-/*tooltips */
-[data-title]:hover:after , [data-title]:active:after {@apply absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 content-[attr(data-title)] block rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
-
 /* licenses */
 
 @media screen {

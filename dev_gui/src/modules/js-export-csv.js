@@ -51,7 +51,7 @@ export const exportCSV = function(state, options = {}, hidden = true) {
       };
       //headings
       if ((hidden === true || !column.hidden) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(column.index) < 0)) {
-        let label = theads[column.index].dataset.name ? theads[column.index].dataset.name : theads[column.index].contentText;
+        let label = theads[column.index].dataset.name ? theads[column.index].dataset.name : theads[column.index].textContent;
         if (!label) label = 'C' + column.index;
         row.push(text_convert(label));
         columns.push(obj);

@@ -1,7 +1,7 @@
 {% from "./v2/macros/macros.html" import modal %}
 {%- macro display_filters(filters) %}
 {% if filters is iterable %}
-<div class="form-box text-sm"><label>Active Project Filters</label>
+<div class="form-box text-sm"><div class="label">Active Project Filters</div>
 <div class="form-group" role="group">
 {% set filtertext = ""%}
 {% for filter in filters %}

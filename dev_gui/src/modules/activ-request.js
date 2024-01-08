@@ -18,6 +18,7 @@ export class ActivRequest {
 
       if (ev === 'load') this.makeRequest(item);
       else item.addEventListener(ev, async (e) => {
+        if (item.tagName.toLowerCase() === "a") e.preventDefault();
         await this.makeRequest(item);
       });
     });

@@ -15,7 +15,9 @@ import {
   AlertBox
 } from "../modules/alert-boxes.js";
 const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
-
+const localcss = {
+  mright: 'mr-4',
+}
 let instance = null;
 export class JsMyFiles {
   alertBox = null;
@@ -567,7 +569,7 @@ export class JsMyFiles {
     const btn = document.getElementById(display);
     if (!btn) {
       parent = (parent) ? parent : this.dropzone;
-      parent.insertAdjacentHTML('beforeend', `<button id="${display}" class="button ${display} ${css.mright} ${css.hide}"></button>`);
+      parent.insertAdjacentHTML('beforeend', `<button id="${display}" class="button ${display} ${localcss.mright} ${css.hide}"></button>`);
       this[btnkey] = document.getElementById(display);
       this[btnkey].addEventListener('click', async (e) => {
         this.emitToZip(e.currentTarget);

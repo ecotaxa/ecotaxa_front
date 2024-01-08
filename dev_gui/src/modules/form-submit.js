@@ -1,8 +1,8 @@
 import validator from 'validator';
 import DOMPurify from 'dompurify';
 const formcss = {
-  invalid: 'invalid',
-  inputvalidate: 'input-validate',
+  invalid: 'input-invalid',
+  inputvalidate: 'input-valid',
 }
 const domselectors = {
   captcha: '.js-captcha'

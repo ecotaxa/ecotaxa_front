@@ -40,12 +40,12 @@ export class JsCaptcha {
     const form = this.form;
     let btnsubmit = this.form.querySelector('button[type="submit"]');
     if (btnsubmit !== null) {
-      const textsubmit = btnsubmit.contentText;
+      const textsubmit = btnsubmit.textContent;
       btnsubmit.classList.add(css.submitslider);
       const textdiv = document.createElement('div');
       textdiv.classList.add(css.helptxt);
-      textdiv.contentText = textsubmit;
-      btnsubmit.contentText = "";
+      textdiv.textContent = textsubmit;
+      btnsubmit.textContent = "";
       btnsubmit.append(textdiv);
       btnsubmit.style.overflow = "hidden";
       const slidermask = document.createElement('div');

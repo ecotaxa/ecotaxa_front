@@ -1,21 +1,21 @@
 {% extends "./v2/layout.html" %}
 {% from "./v2/macros/macros.html" import form_group_radio, checkbox_radio, alertbox with context %}
 {% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
-{%-macro select_export_options(data)-%}
+{%-macro select_export_options(data,extid)-%}
 {% for selectoptions in [formatoptions.options, formatoptions.otheroptions]%}
   {% for selectoption in selectoptions %}
   {% set dataoption = "" if selectoption.name not in data else data[selectoption.name] %}
 {% set dataoption = [dataoption] if dataoption is string else dataoption %}
   {% set value = dataoption[0]  %}
     {% set extra = " readonly onclick='return false;'" if dataoption[1] == True   else "" %}
-  {{ checkbox_radio(selectoption.name,selectoption.name,"1",dataoption[0],selectoption.label, extra=extra) }}
+  {{ checkbox_radio(selectoption.name,selectoption.name+'_'+extid,"1",dataoption[0],selectoption.label, extra=extra) }}
 {%endfor%}
 {%endfor%}
 {%-endmacro-%}
-{%macro select_export_images(params)-%}
+{%macro select_export_images(params,extid)-%}
 {% if "select" in params%}
-<label>{{_('Export images')}}</label>
-<select name="exportimages" class="form-select w-auto">
+<label for="exportimages_{{extid}}">{{_('Export images')}}</label>
+<select name="exportimages" id="exportimages_{{extid}}" class="form-select w-auto">
   {%- for option in params["select"] -%}
   <option value={{option.value}} >{{option.label}}</option>
   {%-endfor-%}
@@ -23,7 +23,7 @@
   <option value="A" {{ 'selected' if formdata.exportimages and formdata.exportimages=='A' }} >{{_('All images of each object')}}</option>-->
 </select>
 {% elif "checkbox" in params %}
-<label>{{params.checkbox.label}} <input type="checkbox" class="ml-2" value={{params.checkbox.value}}></label>
+<label for="exportimages_{{extid}}">{{params.checkbox.label}} <input type="checkbox" name="exportimages" id="exportimages_{{extid}}" class="ml-2" value={{params.checkbox.value}}></label>
 {%endif%}
 {%-endmacro%}
 {% block body %}
@@ -36,14 +36,14 @@
     <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" type="text" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
   <fieldset class="w-full md:w-1/2 tab mb-0 pb-0"><legend class="text-center tab-control" data-what="TSV">{{_("Custom")}} </legend>
-    <div class="tab-content pt-2" id="TSV"><div class="form-box">{{select_export_options(formatoptions.data.TSV)}}</div>
-    <div class="form-box">{{select_export_images(formatoptions.fields.TSV.exportimages)}}</div>
+    <div class="tab-content pt-2" id="TSV"><div class="form-box">{{select_export_options(formatoptions.data.TSV,"tsv")}}</div>
+    <div class="form-box">{{select_export_images(formatoptions.fields.TSV.exportimages,"tsv")}}</div>
     </div></fieldset><fieldset class="w-full md:w-1/2 tab my-0 py-0">
   <legend class="text-center tab-control"  data-what="BAK" >{{_("Backup")}} </legend><div class="tab-content pt-2" id="BAK">
-  <div class="form-box">{{select_export_options(formatoptions.data.BAK)}}</div>
-    <div class="form-box">{{select_export_images(formatoptions.fields.BAK.exportimages)}}
+  <div class="form-box">{{select_export_options(formatoptions.data.BAK,"bak")}}</div>
+    <div class="form-box">{{select_export_images(formatoptions.fields.BAK.exportimages,"bak")}}
       </div></div></fieldset><fieldset class="w-full -mt-4 pt-0 block">
-      <div class="form-box"><label>{{_('Split in multiple files by')}}</label><select name="splitcsvby" class="form-select w-auto ">
+      <div class="form-box"><label for="splitcsvby">{{_('Split in multiple files by')}}</label><select name="splitcsvby" id="splitcsvby" class="form-select w-auto ">
         <option value="">{{_('NOT Active')}}</option>
         <option value="sample" {{ 'selected' if  formdata.splitcsvby and formdata.splitcsvby=='sample' }} >{{_('Sample')}}</option>
         <option value="taxo" {{ 'selected' if formdata.splitcsvby and formdata.splitcsvby=='taxo' }} >{{_('Taxonomy (parent_child)')}}</option>

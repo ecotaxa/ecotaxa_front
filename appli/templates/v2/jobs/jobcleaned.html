@@ -2,8 +2,10 @@
 {% extends "./v2/layout.html" %}
 {% endif %}
 {% block body %}
+<div class="container mx-auto mt-8">
 {% if projid %}
-<a href='/prj/{{projid}}'>{{_('Back to project')}}</a>
+<a href="{{url_for("gui_prj_classify", projid=projid)}}" class="button sm:ml-4">{{_('Back to project')}}</a>
 {%endif %}
-<a href="{{url_for("gui_list_jobs")}}">Back to Task List</a>
+<a href="{{url_for("gui_list_jobs")}}" class="button sm:ml-4">Back to Task List</a>
+</div>
 {% endblock %}

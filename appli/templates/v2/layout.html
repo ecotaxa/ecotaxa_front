@@ -3,18 +3,15 @@
 {%- set title= 'Ecotaxa ' + target_proj.title if target_proj and target_proj.projid else 'Ecotaxa' -%}
 {%- include 'v2/partials/_head.html' -%}
 <body>{%- if not site_error -%}{%- include('v2/partials/_top_messages.html')-%}{%-endif-%}
-  <div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }} flex flex-col">
-    <nav id="main-navbar">
-      <header class="background-top h-12 p-1 pt-3.5 {{ 'solo' if not (target_proj and target_proj.projid) }}">
+  <div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }}">
+    <header class="background-top w-full  js js-fixed {{ 'solo' if not (target_proj and target_proj.projid) }}"><nav id="main-navbar">
         <!--   logo / notifs /user-nav /admin -->
-        {%- include './v2/partials/_topsitebar.html' -%}</header>
-      {%- if target_proj and target_proj.projid -%}
+        {%- include './v2/partials/_topsitebar.html' -%}
       {%- include './v2/partials/_navbar.html' with context -%}
-      {%- endif -%}
-    </nav>
-  <main  {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton'+bg_scale()+'.jpg') + '\');" class="bg-image" '| safe if bg }}>
+  </nav></header>
+  <main  {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton'+bg_scale()+'.jpg') + '\');" class="bg-image" '| safe if bg}}>
   {% include "v2/partials/_maintop.html"%}
-  <div class="w-full">
+  <div class="w-full pb-16">
     {% block body %}{% endblock %}
   </div></main></div>
   {% include "v2/partials/_mainbottom.html" %}

@@ -1,6 +1,6 @@
 /*from https://github.com/lunu-bounir/tree.js/blob/master/tree.js*/
 'use strict';
-import treecss from "../css/js-tree.css";
+import treecss from "../css/components/js-tree.css";
 const Emitter = typeof window.Emitter === 'undefined' ? class Emitter {
   constructor() {
     this.events = {};

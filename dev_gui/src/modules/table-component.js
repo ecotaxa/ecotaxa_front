@@ -455,7 +455,7 @@ export class TableComponent {
     if (obj.nodename === "#text") return document.createTextNode(obj.data);
     const el = document.createElement(obj.nodename);
     if (obj.hasOwnProperty("html")) el.innerHTML = obj.html;
-    else el.contentText = obj.data;
+    else el.textContent = obj.data;
     if (obj.hasOwnProperty("attributes")) {
       for (const attr in obj.attributes) {
         el.setAttribute(attr, obj.attributes[attr]);

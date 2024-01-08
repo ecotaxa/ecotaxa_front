@@ -14,7 +14,7 @@
 <div data-elem="contact" data-title="{{ _('Contact') }}"><input type="radio" name="contact_user_id" id="members_contact_{{index}}" value="{{ member.id }}" {{ 'disabled'
       if privilege !='Manage' }} {{ ' checked=true' if (contact and member.id==contact.id) }}>
 </div>
-<div data-elem="delet"><label for=" members_delet_{{index}}" title="{{ _('remove') }}" data-remove="{{ _('remove') }}" data-restore="{{_('restore')}}"><input type="checkbox" id="members_delet_{{index}}" name="members[delet][{{index}}]" value="{{ index }}"
+<div data-elem="delet"><label for="members_delet_{{index}}" title="{{ _('remove') }}" data-remove="{{ _('remove') }}" data-restore="{{_('restore')}}"><input type="checkbox" id="members_delet_{{index}}" name="members[delet][{{index}}]" value="{{ index }}"
       {{ 'disabled' if (target_proj.contact and member.id==target_proj.contact.id) }} {{ 'hidden' if index == 0  }} data-manage="{{ _('to delete a user with Manage privilege , modify the privilege attribute')}}" class="form-line-delet"></label></div>
 {%- endmacro %}
 
@@ -24,7 +24,7 @@
 <div class="{{ 'w-full -mt-8 ' if new == True else 'w-auto -mt-4  mb-2' }} block">
   {# set the form id to import to and the header include for taxo imports #}
   {% set data = {'form':'#formu','key': key, 'header': './v2/project/_headerimport.html'} if (key == 'taxo' or key == 'privileges') else {'form':'#formu','key': key} %}
-  {% set icon = 'icon-duplicate-sm' if new == False else 'icon-duplicate'%}
+  {% set icon = 'icon-carboncopy-sm' if new == False else 'icon-carboncopy'%}
   {% set btn = {'class':'button is-import is-pick'+(' new' if new == True else ''),'title':modal_title,'icon':icon,'text': _('pick from projects') ,'data':' data-request=settings data-target=unique data-key=' + key + ' data-projid=' + (target_proj.projid|string() if (target_proj and target_proj.projid > 0) else '0')}%}
   {{ modal('importfrom_' + key,  btn = btn,modal_title = modal_title, data=data) }}
 </div>
@@ -33,11 +33,11 @@
 {%- endmacro %}
 
 {% block body %}
-<div class="container mx-auto">
+<div class="container mx-auto ">
   {% set modal_title = _("How to edit a project settings") if target_proj.projid else _("How to create a project")%}
   {% set data = {'file':'_help_projectsettings'} %}
   {{ modal(id='help-editproject',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
-  <form method="post" action="{{request.path}}" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs hide' if (target_proj and target_proj.projid) }} relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}" novalidate>
+  <form method="post" action="{{request.path}}" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs hide' if (target_proj and target_proj.projid) }} relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}" novalidate>
    <input type="hidden" name="crsf_token" value={{ crsf_token }}>  {% if target_proj and target_proj.projid %}
     <span data-dismiss="tabs" class="absolute z-10 top-0 -mt-8 right-[calc(100%-2.5rem)] hidden md:block md:ml-auto  md:mt-0 md:right-12 md:top-5 cursor-pointer fill-stone-900 border-stone-700 hover:border-b-2" title="{{_('click to expand/shrink tabs')}}"><i class="icon-lg tabs-display expand opacity-50 hover:opacity-100"></i></span>
     <input type="hidden" name="id" id="projid" value="{{target_proj.projid}}">
@@ -71,8 +71,8 @@
             {% endif %}
           </div>
           <div class="form-box">
-            <label for="status">{{ _('Status') }} </label>
-            <div class="form-group" role="group">
+            <div class="label">{{ _('Status') }} </div>
+            <div class="form-group" role="group" >
               {% set required = True %}
               {% for st in (("Annotate",_("Annotate")),("ExploreOnly",_("Explore Only")),("Annotate No Prediction",_("Annotate No Prediction"))) %}
               {{ form_group_radio('status_' + loop.index|string(),'status',st[0],st[1],target_proj.status,required=required)}}
@@ -96,7 +96,7 @@
 
           </div>
           <div class="form-box">
-            <label for="proj_license"  >{{ _('License') }}<i data-for="help_proj_license" data-request="help"></i></label>
+            <div class="label">{{ _('License') }}<i data-for="help_proj_license" data-request="help"></i></div>
             <div class="form-group" id="proj_license" role="group">
                 {% set required = True %}
               {% for k in possible_licenses.keys() %}

@@ -11,12 +11,12 @@
 {% set message = messages[msgkey] if messages|length  %}{{messages}}
   <form action="{{request.path}}" method="post" class="js js-submit">
 
-      <div class="form-box"><label>{{msgkey}}  {{_('Message to display : ')}}</label>
-      <textarea name="msg" class="form-input">{{message["content"]}}</textarea>
+      <div class="form-box"><label for="msg">{{msgkey}}  {{_('Message to display : ')}}</label>
+      <textarea name="msg" id="msg" class="form-input">{{message["content"]}}</textarea>
       </div>
 
-            <div class="form-box"><label>{{_('active')}}
-            <input type="checkbox" name="active" value="1" {{ 'checked' if message["active"]==1}}></label>
+            <div class="form-box"><label for="active">{{_('active')}}
+            <input type="checkbox" id="active" name="active" value="1" {{ 'checked' if message["active"]==1}}></label>
             </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
       <button type="submit" class="button is-primary ">{{_('Save')}}</button>  <a href ="/gui/admin/messages" class="button is-secondary inverse">{{_('Cancel')}}</a>

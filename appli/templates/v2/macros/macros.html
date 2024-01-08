@@ -92,7 +92,7 @@
   <label for="{{id}}" class="peer-checked:bg-pchecked-400  peer-checked:text-white  peer-checked:shadow" {{help}}>{{ label }}</label></div>
 {%- endmacro %}
 {% macro checkbox_radio(name, id , checkedvalue, value='', label="",type="checkbox",extra='') -%}
-  <label class="checkbox-label"><input type="{{type}}" name="{{ name }}" id="{{ id }}" class="form-checkbox"
+  <label class="checkbox-label" for="{{id}}"><input type="{{type}}" name="{{ name }}" id="{{ id }}" class="form-checkbox"
          value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }} {{ extra|safe }}> {{ label }}</label>
 {%- endmacro %}
 

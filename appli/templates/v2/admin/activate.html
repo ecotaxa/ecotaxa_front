@@ -4,7 +4,7 @@
 {% from "./v2/macros/macros.html" import  form_group_radio, alertbox with context %}
   {% block body %}
   <div class="container mx-auto">
-    <form method="post" action="{{request.path}}" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch="html"' if createaccount==True and current_user== None }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
+    <form method="post" action="{{request.path}}" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch="html"' if createaccount==True and current_user== None }} data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
      <input type="hidden" name="crsf_token" value={{ crsf_token }}>
     <input type="hidden" name="id" id="id" value="{{user.id if user.id else -1  }}">
 

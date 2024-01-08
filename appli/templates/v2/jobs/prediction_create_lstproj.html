@@ -49,7 +49,7 @@ and be the same as in _all_ source projects, to allow deep features extraction a
     </div>
   </div>
 
-  <div class="js js-datatable"  data-from="prjpredict" data-searchchable=true data-instanceid="prediction_create_lstproj" data-fromid={{target_proj.projid}} data-select="selectmultiple" data-onselect="/gui/job/create/Prediction?projid={{target_proj.projid}}&srcs">
+  <div class="js js-datatable"  data-from="prjpredict" data-searchchable=true data-instanceid="prediction_create_lstproj" data-fromid={{target_proj.projid}} data-select="selectmultiple" data-onselect="{{ url_for("gui_job_create", job_type="Prediction")}}?projid={{target_proj.projid}}&srcs">
   <!--  <table>
       <tr>
         <th></th>

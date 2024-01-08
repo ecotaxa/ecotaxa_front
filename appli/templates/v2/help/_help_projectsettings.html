@@ -1,4 +1,4 @@
-{% extends "./v2/help/_layout.html" %}
+{%- if not partial-%}{% extends "./v2/help/_layout.html" %}{%-endif-%}
 {% block article %}
 <article id="help-editproject">
     <h2 class="help-title">{{_('Project settings')}} </h2>

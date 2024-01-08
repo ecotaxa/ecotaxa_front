@@ -170,7 +170,7 @@ export class JsComponents {
                   if (tim < 30000) tim = 30000;
                   //setTimeout(() => {checkNotifs(tim);}, tim);
                 });
-              }
+              };
               checkNotifs(30000);
               break;
             case 'js-accordion':

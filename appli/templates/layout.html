@@ -79,7 +79,7 @@
             {% if not current_user.is_authenticated %}
               Not logged ( <a href="{{ url_for('gui_login') }}">log in / register</a> )
             {% else %}
-              {% if g.jobs_summary %} <a href="/Jobs/listall">
+              {% if g.jobs_summary %} <a href="{{url_for('gui_list_jobs')}}">
                 {% if g.jobs_summary.Pending %}
                   <span class="label label-default">Pending : {{ g.jobs_summary['Pending'] }}</span>{% endif %}
                 {% if g.jobs_summary.Question %}

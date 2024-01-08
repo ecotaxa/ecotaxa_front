@@ -3,7 +3,6 @@ import {
 } from '../modules/utils.js';
 
 export function jobMonitor(item) {
-  let intervalHandle;
   const jobid = item.dataset.id;
   const jobStates = {
     E: 'Error',
@@ -26,14 +25,11 @@ export function jobMonitor(item) {
   const progress_bar = (state, percent = 0, msg = "") => {
     if (!percent) percent = 0;
     const progressbar = document.getElementById('progressbar');
-    responsediv.contentText = msg;
-    divstate.contentText = msg;
-    console.log(msg, responsediv)
-    if (progressbar) {
-      progressbar.classList.remove('hidden');
-      progressbar.contentText = percent + '%';
+    responsediv.textContent = msg;
+    if (divstate) divstate.textContent = msg;
+    if (progressbar !== null) {
+      progressbar.firstChild.textContent = percent + '%';
       const progressbarsz = progressbar.querySelector('.percent');
-
       if (progressbarsz) {
         progressbarsz.classList.remove(cl);
         cl = 'is-running';
@@ -79,14 +75,8 @@ export function jobMonitor(item) {
   const check_job_status = () => {
 
     fetch("/gui/job/status/" + jobid, fetchSettings).then(response => response.json()).then(job => {
-      if (job.errors.length) {
-        clearInterval(intervalHandle);
-        display_errors(job.errors, job.state);
-      }
-
 
       if (job) {
-
         set_jobstate(job);
         if (spinner) spinner.classList.remove('hidden');
         progress_bar(job.state, job.progress_pct, job.progress_msg);
@@ -95,31 +85,26 @@ export function jobMonitor(item) {
             // question
             stop = true;
             if (spinner) spinner.remove();
-
             //window.location.href = window.location.origin + "/Job/Question/" + job.id;
             responsediv.innerHTML = `Question waiting for an answer ` + go_next(window.location.origin + "/Job/Question/" + job.id, 'Go', 'warning')
-            clearInterval(intervalHandle);
-
             break;
           case "F":
             stop = true;
             if (spinner) spinner.remove();
-            clearInterval(intervalHandle);
             if (job.finalaction) html.push(job.finalaction);
-
             break;
           case "E":
+            if (job.errors.length) {
+              display_errors(job.errors, job.state);
+            }
             stop = true;
             if (spinner) spinner.remove();
-            clearInterval(intervalHandle);
             break;
           case "P":
             // pending
-
             break;
           case "R":
             // running
-            console.log('job', job)
             display_errors(job.errors, job.state);
             break;
         }

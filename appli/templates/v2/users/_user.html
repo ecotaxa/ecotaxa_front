@@ -11,16 +11,16 @@
   {% endif%}
   {% set fieldp="password" if createaccount==True else "newpassword"%}
     <label for="{{fieldp}}">{{_('Password') if createaccount==True else _('New password')}}</label>
-  <input type="password" id="password" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="20"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} data-new="{{_('new')}}" placeholder="{{_('Password')}}">
+  <input type="password" id="{{fieldp}}" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="20"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} data-new="{{_('new')}}" placeholder="{{_('Password')}}">
     {{ password_regexp()}}
-    <label for="password_confirm">{{_('Password confirmation')}}</label>
+    <label for="passwordconfirm">{{_('Password confirmation')}}</label>
     <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern="{{api_password_regexp()}}" data-match="password" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" data-new="{{_('new')}}" placeholder="{{_('Password confirmation')}}">
      {% if user and user.id and user.id>0%}
     </div>
     {% endif%}
     </div>
   {%-endmacro%}
-  <form method="post" action="{{request.url}}" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch=html' if createaccount==True and current_user.is_anonymous else '' }} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
+  <form method="post" action="{{request.url}}" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch=html' if createaccount==True and current_user.is_anonymous else '' }} data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
    <input type="hidden" name="crsf_token" value={{ crsf_token }}>
    {% if token!="" and token!=None %}<input type="hidden" id="token" name="token" value={{ token }}>
    {% endif%}
@@ -58,8 +58,8 @@
             {% if (createaccount==True and user.id==-1 ) or not createaccount %}
                  {{password_box()}}
              {%endif%}
-             <div class="form-box"><label for="">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
-              <div class="form-box"><label for="">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
+             <div class="form-box"><label for="organisation">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
+              <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
           <div class="form-box">
             <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}}</label>
             <textarea id="usercreationreason" name="usercreationreason" class="form-textarea" placeholder="{{_('A few sentences describing how in which context you will use EcoTaxa')}}" rows="4">{{ user.usercreationreason|default('',true) }}</textarea>

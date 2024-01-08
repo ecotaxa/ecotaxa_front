@@ -48,7 +48,7 @@
   </a>
 </li><li><div>{{_('Tools')}}</div>
 <ul aria-expanded=false>
-<li><a href="{{url_for("gui_job_create",job_type="Subset", p =target_proj.projid) }}" {{disabled.value if target_proj.status=='ExploreOnly' or privilege.value==""}}>{{_('<strong>Extract</strong> Subset')}}</a></li>
+<li><a href="{{url_for("gui_job_create",job_type="Subset", projid =target_proj.projid) }}" {{disabled.value if target_proj.status=='ExploreOnly' or privilege.value==""}}>{{_('<strong>Extract</strong> Subset')}}</a></li>
 <li><a href="{{url_for('gui_prj_merge', projid=target_proj.projid)}}"  {{disabled.value  if target_proj.status=="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Merge</strong> another project in this project')}}</a></li>
 <li><a href="{{url_for('gui_prj_editannot', projid=target_proj.projid)}}"  {{disabled.value   if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Edit or erase</strong> annotations massively')}}</a></li>
 <li><a href="{{url_for('gui_prj_edit_datamass', projid=target_proj.projid)}}"   {{disabled.value   if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
@@ -61,6 +61,7 @@
         {{_('About')}}
       </a>
     </li>{%-endmacro-%}
+{% if target_proj and target_proj.projid > 0 %}
 <nav id="secondary-nav" class="js js-nav">
 <div class="w-full relative mt-1 md:mt-0 py-4"><div id="menu-burger" class="burger" data-target="navbar-menu">
 <div class="burger-icon"></div>
@@ -70,4 +71,4 @@
         </a></li>
         {{project_nav()}}
           </ul>
-</div></nav>
+</div></nav>{%-endif-%}

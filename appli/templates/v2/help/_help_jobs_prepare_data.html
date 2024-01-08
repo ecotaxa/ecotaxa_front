@@ -1,4 +1,4 @@
-{% extends "./v2/help/_layout.html" %}
+{%- if not partial-%}{% extends "./v2/help/_layout.html" %}{%-endif-%}
 {% block article %}
 <article>  <h2 class="help-title">{{ _('How to prepare data')}} </h2>
   <h3>{{ _('In a folder place:') }}</h3><dl>

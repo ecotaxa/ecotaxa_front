@@ -1,3 +1,4 @@
+import tomSelectcss from "../css/components/tom-select.css";
 import DOMPurify from 'dompurify';
 import TomSelect from 'tom-select/dist/js/tom-select.base.min.js';
 import TomSelect_remove_button from 'tom-select/dist/js/plugins/remove_button.js';
@@ -6,7 +7,7 @@ import TomSelect_caret_position from 'tom-select/dist/js/plugins/caret_position.
 TomSelect.define('remove_button', TomSelect_remove_button);
 TomSelect.define('clear_button', TomSelect_clear_button);
 TomSelect.define('caret_position', TomSelect_caret_position);
-import tomSelectcss from "../css/tom-select.css";
+
 import {
   fetchSettings
 } from '../modules/utils.js';

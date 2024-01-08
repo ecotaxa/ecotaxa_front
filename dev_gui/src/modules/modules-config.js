@@ -68,8 +68,6 @@ export const css = {
   progress: "progress",
   peerchecked: 'peer-checked',
   hidevscroll: 'hidevscroll',
-  mright: 'mr-4',
-  mleft: 'ml-4',
   component: {
     tabs: {
       name: 'js-tabs'

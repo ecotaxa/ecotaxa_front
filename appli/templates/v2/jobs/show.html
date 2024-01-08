@@ -35,9 +35,9 @@ is-done
     </div>{%-endif%}
   {%if job.state !='E'%}<div id="responsediv" class="mr-2 "></div>{%-endif%}
   </div>
-  <div class="mt-8 flex flex-col mb-2 sm:flex-row  sm:mb-0">  {% if job.state =="E" or job.state=="F" %}
+  <div class="mt-8 flex flex-col mb-2 sm:flex-row  sm:mb-0">
     <a href="{{ url_for('gui_job_cleanup', jobid=job.id)}}" class="button is-danger inverse mb-2 sm:mb-0">{{_('Clean task data')}}</a>
-    <a href="{{url_for('gui_list_jobs')}}" class="button sm:ml-4 ">{{_('Back to tasks list')}}</a> {%- endif -%}
+    <a href="{{url_for('gui_list_jobs')}}" class="button sm:ml-4  mb-2 sm:mb-0">{{_('Back to tasks list')}}</a>
     {%-if projid -%}<a href="{{url_for('gui_prj_classify',projid=projid)}}" class="button sm:ml-4 ">{{_('Back to project')}} {{projid}}</a>{%-endif-%}
 </div>
   {%elif jobid %}
@@ -77,7 +77,7 @@ is-done
     </tr>
     <tr>
       <th>{{_('Progress')}}</th>
-      <td><div id="progressbar" class="w-64" >{{job.progress_pct if job.progress_pct !=None else '0'}}%<data class="relative block before:w-full before:h-2 before:bottom-0 before:bg-stone-100 before:block before:left-0"><span class="percent block h-2 absolute bottom-0 left-0 {{color_state(job.state)}}" style="width:{{job.progress_pct  if job.progress_pct !=None else '0'}}%"></span></data></div>
+      <td><div id="progressbar" class="w-64" >{{job.progress_pct if job.progress_pct!=None else '0'}}%<data class="relative block before:w-full before:h-2 before:bottom-0 before:bg-stone-100 before:block before:left-0"><span class="percent block h-2 absolute bottom-0 left-0 {{color_state(job.state)}}" style="width:{{job.progress_pct  if job.progress_pct !=None else '0'}}%"></span></data></div>
 </td>
     </tr>
     <tr>

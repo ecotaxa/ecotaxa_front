@@ -15,7 +15,7 @@
   <form class="form-horizontal" action="{{ request.path }}" class="js js-submit" method="post" enctype=multipart/form-data>
   <input type="hidden" name="p" value="{{ target_proj.projid }}">
 {{display_filters(filters)}}
-  <div class="form-box js js-tabs" data-selector="input[type='radio']" data-toggledisable=true><label>{{_('Select')}}</label>
+  <div class="form-box js js-tabs" data-selector="input[type='radio']" data-toggledisable=true><div class="label">{{_('Select')}}</div>
     <div class="form-group" role="group">
       {% set vals = [{"label":'% ' + _('of values'),"value":"P"},{"label":_('objects max.'),"value":"V"}]%}
       {% for val in vals %}
@@ -24,8 +24,8 @@
       <div id="Pvaleur" class="flex"><input type="text" class="form-input w-1/6" maxlength="3" size="3" name="pvaleur" id="pvaleur" value="10" {{' disabled' if form.valtype !='P' }}><label for="pvaleur" class="w-5/6 mx-2 mt-4 mb-0">{{'% ' + _('of values')}}</label></div>
     <div id="Vvaleur" class="flex"><input type="text" size="5" class="form-input  w-1/6" name="vvaleur" value="" id="vvaleur" {{' disabled' if form.valtype !='V' }}><label for="vvaleur" class="w-5/6 mx-2 mt-4 mb-0">{{_('objects max.')}}</label></div>
       </div>
-  <div class="form-box"><label for="grptype">{{_('Randomly per')}}</label>
-  <div class="form-group" role="group">
+  <div class="form-box"><div class="label">{{_('Randomly per')}}</div>
+  <div class="form-group" role="group" >
     {% set grps = [{"label":_("category"),"value":"C"},{"label":_("sample"),"value":"S"},{"label":_("acquisition"),"value":"A"}]%}
     {% for grp in grps %}
       {{ form_group_radio('grpType'+grp.value,'grptype',grp.value,grp.label,form.grptype,required=True)}}
@@ -33,7 +33,7 @@
     </div>
 
   </div>
-<div class="form-box flex flex-col"><label for="subsetprojectitle">{{_('Subset project title')}}</label>
+<div class="form-box flex flex-col"><label for="subsetprojecttitle">{{_('Subset project title')}}</label>
   <input name="subsetprojecttitle"  id="subsetprojecttitle"  class="form-input w-1/3" value="{{ form.subsetprojecttitle }}"
                                       maxlength="255"></div>
                                       <div class="block drop-shadow-sm px-4 py-4 my-2 text-stone-800 bg-stone-50 border border-stone-100"><ul>

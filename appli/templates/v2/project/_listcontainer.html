@@ -1,7 +1,7 @@
 {% set tableid ='projects-list'%}
 {% if not partial %}
-<div class="container mx-auto px-4 block mb-16" data-block="projects">
-  <div class="w-100 relative h-auto mx-auto py-4 block" id="{{ tableid }}-header">
+<div class="container mx-auto block" data-block="projects">
+  <div class="w-full h-auto mx-auto block" id="{{ tableid }}-header">
     {% if CanCreate == True %}
     {% set modal_title = _("How to prepare data") %}
   {% set data = {'file':'_help_jobs_prepare_data'} %}
