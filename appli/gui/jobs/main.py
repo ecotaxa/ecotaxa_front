@@ -67,15 +67,18 @@ def gui_job_show(job_id: int):
             rsp = japi.get_job_log_file(job_id=job_id)
         return Response(rsp, mimetype="text/plain")
     target_proj = None
-    # will be added added later
-    # projid = None
-    # if "req" in job.params:
-    #    for idx in ["project_id", "prj_id"]:
-    #        if idx in job.params["req"]:
-    #            projid = job.params["req"][idx]
-    #            break
-    # if projid:
-    #    target_proj = get_target_prj(projid)
+    # added for subnav when there is a projid
+    projid = None
+    if "req" in job.params:
+        for idx in ["project_id", "prj_id"]:
+            if idx in job.params["req"]:
+                projid = job.params["req"][idx]
+                break
+
+    if projid:
+        from appli.gui.project.projectsettings import get_target_prj
+
+        target_proj = get_target_prj(projid)
     steperrors = None
     customdetails = None
     if job.state != "E" and job.state != "F":
@@ -110,8 +113,7 @@ def gui_job_question(job_id: int):
             job: JobModel = japi.get_job(job_id=job_id)
         except ApiException as ae:
             if ae.status in (401, 403):
-                # Not logged in
-                return ""
+                flash(py_messages["notauthorized"], "error")
             elif ae.status == 404:
                 flash(py_messages["upload"]["nofile"], "error")
                 return redirect(url_for("gui_list_jobs"))
@@ -159,25 +161,24 @@ def gui_job_force_restart(job_id: int):
 def gui_job_cleanup(jobid: int):
     py_messages = py_get_messages("jobs")
     with ApiClient(JobsApi, request) as api:
-        try:
-            job: JobModel = api.get_job(job_id=jobid)
-            projid = job.params.get("prj_id")
-            if projid is None and job.params.get("req") is not None:
-                projid = job.params["req"].get("project_id")
-        except ApiException as ae:
-            if ae.status in (401, 403):
-                # Not logged in
-                return ""
-            elif ae.status == 404:
-                flash(py_messages["notfound"], "error")
-    with ApiClient(JobsApi, request) as api:
-        api.erase_job(job_id=jobid)
-
-    if gvg("thengotoproject") == "Y":
-        return redirect("/prj/%d" % projid)
+        job: JobModel = api.get_job(job_id=jobid)
+        projid = job.params.get("prj_id")
+        if projid is None and job.params.get("req") is not None:
+            projid = job.params["req"].get("project_id")
+        # except ApiException as ae:
+        #    if ae.status in (401, 403):
+        #        flash(py_messages["notauthorized"], "error")
+        #    elif ae.status == 404:
+        #        flash(py_messages["notfound"], "error")
+    if job is not None:
+        with ApiClient(JobsApi, request) as api:
+            api.erase_job(job_id=jobid)
+    partial = is_partial_request(request)
+    if not partial and gvg("thengotoproject") == "Y":
+        return redirect(url_for("gui_prj_classify", projid=projid))
     else:
         return render_template(
-            "v2/jobs/jobcleaned.html", partial=is_partial_request, jobid=jobid
+            "v2/jobs/jobcleaned.html", partial=partial, jobid=jobid, projid=projid
         )
 
 
