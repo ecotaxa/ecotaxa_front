@@ -6,31 +6,40 @@ apptree = dict(
     {
         "": "Home",
         "prj": {
-            "root": "Projects",
-            "one": "Project",
+            "root": _("Projects"),
+            "one": _("Project"),
             "children": {
-                "/": "accessible projects",
-                "/listall": "all projects",
-                "create": "create",
-                "edit": "settings",
-                "import": "import",
-                "export": "export",
-                "predict": "predict",
-                "annotate": "annotate",
-                "about": "about",
+                "create": _("create"),
+                "edit": _("settings"),
+                "import": _("import"),
+                "export": _("export"),
+                "predict": _("predict"),
+                "annotate": _("annotate"),
+                "about": _("about"),
+                "merge": _("merge"),
+                "editannot": _("edit or erase"),
+                "editdatamass": _("batch edit"),
+                "resettopredicted": _("reset"),
+                "purge": _("delete"),
+                "taxofix": _("fix"),
             },
         },
-        "jobs": {
-            "root": "Jobs",
-            "one": "Jobs",
+        "jobs": _("Jobs"),
+        "job": {
+            "root": _("Job"),
             "children": {
-                "/": "user jobs",
-                "/listall?seeall=Y": "all users jobs",
+                "show": _("View"),
+                "create": {
+                    "children": {
+                        "GenExport": _("export"),
+                        "SumExport": _("summary export"),
+                        "Subset": _("subset"),
+                    }
+                },
             },
         },
-        "job": "Jobs",
-        "privacy": "Privacy",
-        "about": "About Ecotaxa",
+        "privacy": _("Privacy"),
+        "about": _("About Ecotaxa"),
     }
 )
 # flash and error messages

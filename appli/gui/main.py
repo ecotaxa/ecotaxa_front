@@ -455,7 +455,7 @@ def utility_processor():
     return dict(
         message_translation=message_translation,
         unique_id=unique_id,
-        breadcrumbs=gui_breadcrumbs,
+        gui_breadcrumbs=gui_breadcrumbs,
         g_status=g_status,
         def_language=def_language,
         cap_words=cap_words,
