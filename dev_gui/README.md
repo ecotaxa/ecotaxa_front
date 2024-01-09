@@ -3,8 +3,8 @@ Frontend development of the EcoTaxa application
 ## install
  npm install  
 ##  [webpack.config.js](https://github.com/ecotaxa/ecotaxa_front/blob/master/dev_gui/webpack.config.js)
-replace the dirRoot path by the path of
-## in [package.json](https://github.com/ecotaxa/ecotaxa_front/blob/master/dev_gui/package.json) replace path in "watchstartfront" script
+replace $DEV_PATH in the dirRoot path $DEV_PATH/dev_gui/src  and destRoot path $DEV_PATH/appli 
+## in [package.json](https://github.com/ecotaxa/ecotaxa_front/blob/master/dev_gui/package.json) replace $DEV_PATH path in scripts part
  - cd `ecotaxa_front/dev_gui`
  - use `npm run watchstartfront` enable to launch DB, ecotaxa_back and ecotaxa_front
  - or `npm run watchstarttest` to dev in the new (which is being deployed since 2023-Q4) interface
