@@ -12,4 +12,4 @@ Frontend development of the EcoTaxa application
    - style.css , the bundle main.js --> appli/static/src/main.js (for dev js and css are included in js)  
 #### PRODUCTION
 npm run build
-  - style.css , the bundle main.js --> appli/static/dist/css/main.[contenthash].css appli/static/dist/main.[contenthash].js
+  - style.css , the bundle main.js --> appli/static/dist/main.[contenthash].css appli/static/dist/main.[contenthash].js
