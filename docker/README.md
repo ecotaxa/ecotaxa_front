@@ -2,10 +2,10 @@ Present docker builder exposes a uwsgi port.
 
 Example run command:
 
-    docker run --rm --name ecotaxafront \ 
+    docker run --rm --name ecotaxafront \
     -u 1000:1000 --network host \
-    -v $PWD/../config:/app/config \ 
-    ecotaxa/ecotaxafront 
+    -v $PWD/../config:/app/config \
+    ecotaxa/ecotaxafront
 
 The --network host is necessary for now for the front-end to be able to reach the back-end on same machine.
 
@@ -38,7 +38,7 @@ recreate containers.
     ecotaxa/ecotaxa_back:2.6.2
 
 #### EcoTaxa front:
-
+    
     docker run --rm --name ecotaxafront \
     --network econet -u 1000:1000 \
     -v $PWD/../appli/config:/app/config \
@@ -46,11 +46,10 @@ recreate containers.
 
 #### Nginx reverse proxy:
 
-    docker run --rm --name nginx \ 
+    docker run --rm --name nginx \
     --network econet -p 8082:80 \
     -v $PWD/nginx.conf:/etc/nginx/nginx.conf \
     -v $PWD/../../ecotaxa_back/vault:/eco_data/vault \
     nginx
 
 You can now connect to `localhost:8082`.
-

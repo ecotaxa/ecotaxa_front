@@ -2,14 +2,9 @@
   "scripts": {
     "clean": "rmdir /s /q node_modules",
     "reinstall": "npm run clean && npm install",
-    "watch": "webpack --watch",
-    "startcheck": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_nodockerdb.sh'",
-    "watchstartfront": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa.sh' && webpack --watch",
-    "watchstarttest": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_nodockerdb.sh' && webpack --watch",
-    "startfront": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_dockerfront.sh' ",
-    "starttest": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_nodockerdb.sh' ",
-    "startngnix": "gnome-terminal -- /bin/bash -c 'cd /home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front && bash run_ecotaxa_ngnixh2.sh' && webpack --watch",
-    "build": "webpack build --mode production --config webpack.config.prod.js "
+    "dev": "gnome-terminal -- /bin/bash -c 'cd .. && bash run_ecotaxa.sh' && webpack  --mode development --watch",
+    "devdockerdb": "gnome-terminal -- /bin/bash -c 'cd .. && bash run_ecotaxa.sh -B docker' && webpack  --mode development --watch",
+    "build": "webpack build --mode production --config webpack.config.js "
   },
   "devDependencies": {
     "@babel/core": "^7.17.12",
@@ -30,7 +25,6 @@
     "css-minimizer-webpack-plugin": "^4.0.0",
     "eslint-webpack-plugin": "^3.1.1",
     "file-loader": "^6.2.0",
-    "html-loader": "^3.1.0",
     "html-webpack-plugin": "^5.6.0",
     "mini-css-extract-plugin": "^2.6.0",
     "mocha": "^10.0.0",
@@ -59,6 +53,6 @@
     "validator": "^13.7.0"
   },
   "engines": {
-    "node": ">=16.4.0"
+    "node": ">=20.10.0"
   }
 }

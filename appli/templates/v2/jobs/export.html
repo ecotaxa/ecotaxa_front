@@ -32,14 +32,14 @@
   {% set data = {'file':'_help_job_export'} %}
   {{header_project_job(_('Full export'),data, _('How to export data'))}}
 </div>
-  <form method="post" action="{{request.url}}" class="js js-submit js-tabs " data-event="click" data-selector="[name='what'][data-target]" data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
+  <form method="post" action="{{request.url}}" class="js js-submit js-tabs " data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
     <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" type="text" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
-  <fieldset class="w-full md:w-1/2 tab mb-0 pb-0"><legend class="text-center tab-control" data-what="TSV">{{_("Custom")}} </legend>
-    <div class="tab-content pt-2" id="TSV"><div class="form-box">{{select_export_options(formatoptions.data.TSV,"tsv")}}</div>
+  <fieldset class="w-full md:w-1/2 tab mb-0 pb-0"><legend class="text-center tab-control">{{_("Custom")}} </legend>
+    <div class="tab-content pt-2" id="TSV"  data-what="TSV"><div class="form-box">{{select_export_options(formatoptions.data.TSV,"tsv")}}</div>
     <div class="form-box">{{select_export_images(formatoptions.fields.TSV.exportimages,"tsv")}}</div><input type="hidden" name="what"  value="TSV">
         </div></fieldset><fieldset class="w-full md:w-1/2 tab my-0 py-0">
-  <legend class="text-center tab-control" data-what="BAK" >{{_("Backup")}} </legend><div class="tab-content pt-2" id="BAK">
+  <legend class="text-center tab-control">{{_("Backup")}} </legend><div class="tab-content pt-2" id="BAK"  data-what="BAK">
   <div class="form-box">{{select_export_options(formatoptions.data.BAK,"bak")}}</div>
     <div class="form-box">{{select_export_images(formatoptions.fields.BAK.exportimages,"bak")}}
       </div><input type="hidden" name="what" value="BAK"></div></fieldset><fieldset class="w-full -mt-4 pt-0 block">

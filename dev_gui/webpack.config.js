@@ -1,18 +1,19 @@
 const webpack = require("webpack");
 const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const ESLintPlugin = require('eslint-webpack-plugin');
-const CopyPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const dirRoot = "/home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front/dev_gui/src/";
-const destRoot = '/home/imev/ecotaxa/ecotaxa_dev_current/ecotaxa_front/appli/';
+let destDir = 'src';
 let config = {
+  mode: 'none',
   entry: "./src/index.js",
-  mode: 'development',
   output: {
-    path: path.resolve(__dirname, destRoot + "static/gui/src/"),
-    publicPath: '/static/gui/src/',
+    pathinfo: true,
+    path: path.resolve(__dirname, `../appli/static/gui/${destDir}/`),
+    publicPath: `/static/gui/${destDir}/`,
     filename: (pathData) => {
       return pathData.chunk.name === 'main' ? '[name].js' : 'modules/[name].js';
     },
@@ -21,26 +22,10 @@ let config = {
   },
   module: {
     rules: [{
-        test: /\.(mjs|js)$/,
-        //loader: "babel-loader",
-        exclude: [/\.min\.js$/, /node_modules/, /babel-helpers/],
-      },
-      {
-        test: /\.css$/i,
-        include: path.resolve(__dirname, 'src'),
-        exclude: /node_modules/,
-        use: [
-          "style-loader",
-          'css-loader',
-
-          'postcss-loader'
-        ]
-      },
-      {
-        test: /\.html$/i,
-        use: ["html-loader"],
-      },
-    ],
+      test: /\.(mjs|js)$/,
+      //loader: "babel-loader",
+      exclude: [/\.min\.js$/, /node_modules/, /babel-helpers/],
+    }, ],
   },
   resolve: {
     fallback: {
@@ -61,51 +46,69 @@ let config = {
       new CssMinimizerPlugin(),
     ],
     minimize: true,
-    //  runtimeChunk: 'single',
-    /*splitChunks: {
-      chunks: 'async',
-      cacheGroups: {
-        commons: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          reuseExistingChunk: true,
-        },
-        modules: {
-          test: /[\\/]src[\\/]js[\\/]modules[\\/]/,
-          name: 'modules',
-          reuseExistingChunk: true,
-
-        }
-      },
-
-    },
-*/
-    /*  splitChunks: {
-          chunks: 'async',
-          minSize: 20000,
-          minRemainingSize: 0,
-          minChunks: 1,
-          maxAsyncRequests: 30,
-          maxInitialRequests: 30,
-          enforceSizeThreshold: 50000,
-          cacheGroups: {
-            defaultVendors: {
-              test: /[\\/]node_modules[\\/]/,
-              priority: -10,
-              reuseExistingChunk: true,
-            },
-            default: {
-              minChunks: 2,
-              priority: -20,
-              reuseExistingChunk: true,
-            },
-          },
-        },*/
   },
   plugins: [
     new BundleAnalyzerPlugin(),
+    new HtmlWebpackPlugin({
+      filename: path.resolve(__dirname, '../appli/templates/v2/partials/_head.html'),
+      template: path.resolve(__dirname, '../appli/templates/v2/partials/_head_template.html'),
+      contenthash: true,
+      inject: 'head',
+    })
+
   ],
   devtool: 'eval-source-map'
 }
+module.exports = (env, argv) => {
+  const rulecss = {
+    test: /\.css$/i,
+    include: path.resolve(__dirname, 'src'),
+    exclude: /node_modules/,
+    use: []
+  };
+  let templatecontent;
+  if (argv.mode === 'production') {
+    delete config.devtool;
+    config.mode = argv.mode;
+    config.output.filename = (pathData) => {
+        return pathData.chunk.name === 'main' ? '[name].[contenthash].js' : 'modules/[name].[contenthash].js';
+      },
+      destDir = 'dist/';
+    rulecss.use = [{
+      loader: MiniCssExtractPlugin.loader,
+      /*  options: {
+          esModule: false,
+        },*/
+    }, {
+      loader: 'css-loader',
+      options: {
+        importLoaders: 1,
 
-module.exports = config;
+      }
+    }, "postcss-loader"];
+    config.plugins.push(new MiniCssExtractPlugin({
+      linkType: "text/css",
+      filename: "[name].[contenthash].css"
+    }));
+  } else {
+    config.mode = 'development';
+    config.devtool = 'eval-source-map';
+    destDir = 'src/';
+    rulecss.use = ["style-loader",
+      {
+        loader: 'css-loader',
+        options: {
+          importLoaders: 1,
+
+        }
+      },
+      'postcss-loader'
+    ];
+  };
+  config.output.path = path.resolve(__dirname, '../appli/static/gui/' + destDir);
+  config.output.publicPath = '/static/gui/' + destDir;
+  config.module.rules.unshift(rulecss);
+  console.log('config', config);
+  return config;
+}
+//module.exports = config;

@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+const path = require("path");
 module.exports = {
-  content: ["./src/**/*.{html,js}",
+  content: ["./src/**/*.{html,js}", "../appli/static/gui/dist/**/*.js",
     "../appli/templates/v2/**/*.html"
   ],
   exclude: '/node-modules/',

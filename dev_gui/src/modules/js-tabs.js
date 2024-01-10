@@ -14,6 +14,7 @@ export class JsTabs {
       }
 
       this.toggledisable = (item.dataset.toggledisable) ? true : false;
+      this.togglewhat = (item.dataset.togglewhat) ? item.dataset.togglewhat : null;
       let l = 0;
       btns.forEach((btn, index) => {
         const target = (btn.dataset.target) ? item.querySelector('#' + btn.dataset.target) : btn.closest(domselectors.component.tabs.tab);
@@ -46,7 +47,7 @@ export class JsTabs {
   }
 
   toggleTab(tab, show) {
-    let what = (this.togglewhat) ? document.querySelector(this.togglewhat) : null;
+    let what = (this.togglewhat) ? document.getElementById(this.togglewhat) : null;
     let tabcontents = tab.querySelectorAll(domselectors.component.tabs.tabcontent);
     if (tabcontents.length === 0) tabcontents = [tab];
     tabcontents.forEach(tabcontent => {
@@ -56,9 +57,9 @@ export class JsTabs {
         tabcontent.querySelectorAll('input, select, button, textarea').forEach(el => {
           if (show) {
             el.removeAttribute('disabled');
-            if (what) what.value = el.dataset.what;
           } else el.disabled = true;
         });
+        if (what) what.value = tabcontent.dataset.what;
       }
     });
 

@@ -1,8 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Dosis:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Code+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Dosis:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Code+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
 @layer base {
   html {width:100%;
   height:100%;
@@ -195,8 +194,9 @@ select option[selected="selected"], select option[selected=true], select option[
 select option:active, select option:focus  {@apply font-semibold bg-secondblue-200 }
 .form-select, .form-textarea, .form-input, .form-multiselect {@apply relative valid:z-0 invalid:border-danger-400 invalid:ring-danger-400 valid:mark-input invalid:mark-input invalid:after:content-["✖"] invalid:after:text-danger-400  valid:border-secondblue-300 valid:ring-secondblue-300 valid:after:content-["aaaa"] valid:after:text-secondblue-300}
 /*tom-select*/
-[class^="form-"]:valid + .ts-wrapper {@apply  border-secondblue-300 ring-secondblue-300}
-[class^="form-"]:invalid + .ts-wrapper {@apply  ring-danger-400 border-danger-400}
+[class^="form-"] + .ts-wrapper {@apply border border-stone-300 ring-0}
+[class^="form-"]:valid + .ts-wrapper , [class^="form-"]:valid + .ts-wrapper.multi {@apply  border-secondblue-300 ring-0}
+[class^="form-"]:invalid + .ts-wrapper, [class^="form-"]:invalid + .ts-wrapper.multi {@apply  border-danger-400 ring-0}
 .ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto; }
 .ts-wrapper .item .ts-delet::before {@apply icon-cancel}
 /* todo: simplification*/

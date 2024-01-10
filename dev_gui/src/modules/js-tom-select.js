@@ -1,4 +1,5 @@
-import tomSelectcss from "../css/components/tom-select.css";
+'use strict';
+import tomSelectcss from "../css/tom-select.css";
 import DOMPurify from 'dompurify';
 import TomSelect from 'tom-select/dist/js/tom-select.base.min.js';
 import TomSelect_remove_button from 'tom-select/dist/js/plugins/remove_button.js';

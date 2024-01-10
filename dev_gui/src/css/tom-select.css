@@ -5,8 +5,8 @@
 .ts-wrapper.plugin-drag_drop .ui-sortable-helper {box-shadow : 0 2px 5px rgb(0, 0, 0, 0.2);}
 .plugin-checkbox_options .option input {@apply mr-[.5rem]}
 .plugin-clear_button .ts-control {padding-right : calc(1em + (3 * 6px)) !important ;}
-.plugin-clear_button .clear-button {@apply opacity-0 absolute top-[50%] -translate-y-[50%] right-1 mr-0 bg-transparent z-30 cursor-pointer; transition : opacity 0.5s;}
-.plugin-clear_button.single .clear-button {@apply right-1;}
+.plugin-clear_button .clear-button {@apply opacity-0 absolute top-[50%] -translate-y-[50%] right-1 mr-0 bg-transparent z-30 cursor-pointer; transition : opacity 0.3s;}
+.plugin-clear_button.multi .clear-button {@apply top-1 translate-y-[0%]}
 .plugin-clear_button.focus.has-items .clear-button, .plugin-clear_button:not(.disabled):hover.has-items .clear-button {@apply opacity-100}
 .ts-wrapper .dropdown-header {@apply relative py-[10px] px-[8px] border-b border-stone-50 rounded-t bg-stone-50
 }
@@ -107,7 +107,7 @@ option[disabled][hidden], .ts-control .item[data-value=""] {@apply text-stone-30
 .ts-wrapper.single .item.hide {@apply hidden}
 /* style for multiple */
 .ts-wrapper .ts-control {@apply block  m-0}
-.ts-wrapper.multi .ts-control {@apply border-stone-300 }
+.ts-wrapper.single , .ts-wrapper.multi   {@apply rounded border border-stone-300 ring-0 }
 .ts-wrapper.multi.focus .ts-control {@apply border-transparent ring-0 outline-none  }
 .ts-wrapper.single.focus , .ts-wrapper.multi.focus {@apply rounded border border-secondblue-300 ring-0 outline-none bg-transparent }
 

@@ -2,19 +2,14 @@
 Frontend development of the EcoTaxa application
 ## install
  npm install  
-##  [webpack.config.js](https://github.com/ecotaxa/ecotaxa_front/blob/master/dev_gui/webpack.config.js)
-replace $DEV_PATH in the dirRoot path $DEV_PATH/dev_gui/src  and destRoot path $DEV_PATH/appli 
-## in [package.json](https://github.com/ecotaxa/ecotaxa_front/blob/master/dev_gui/package.json) replace $DEV_PATH path in scripts part
- - cd `ecotaxa_front/dev_gui`
- - use `npm run watchstartfront` enable to launch DB, ecotaxa_back and ecotaxa_front
- - or `npm run watchstarttest` to dev in the new (which is being deployed since 2023-Q4) interface
-## generated and modified files are copied by webpack to ecotaxa /appli
- - images from src/gui/images --> appli/static/images
-### DEVELOPMENT - npm run watchstarttest  
- - style.css , the bundle main.js --> appli/static/src/main.js (for dev js and css are included in js)
- - change file names in in appli/templates/v2/_partials/_head.html after build  (will be automatic soon)
-### PRODUCTION - npm run build
- - style.css , the bundle main.js --> appli/static/dist/css/main.[contenthash].js appli/static/dist/main.[contenthash].js
- - change file names in appli/templates/v2/_partials/_head.html before docker build  (will be automatic soon)
-
-
+## in [package.json](https://github.com/ecotaxa/ecotaxa_front/blob/master/dev_gui/package.json) add '-P pathto/ecotaxa_back' if ecotaxa_back local repo is not  ../ecotaxa_back
+### default Interface
+   ./run_ecotaxa.sh  ( - B docker to user docker ecotaxa_db , -P path/to/ecotaxa_back if ecotaxa_back local dev repo is not ../ecotaxa_back)  
+### New interface (which is being deployed since 2023-Q4)  
+  cd `ecotaxa_front/dev_gui`
+#### DEVELOPMENT
+  npm run dev
+   - style.css , the bundle main.js --> appli/static/src/main.js (for dev js and css are included in js)  
+#### PRODUCTION
+npm run build
+  - style.css , the bundle main.js --> appli/static/dist/css/main.[contenthash].css appli/static/dist/main.[contenthash].js
