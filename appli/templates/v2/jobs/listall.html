@@ -34,7 +34,9 @@
   <a class="button text-sm is-error inverse  mx-1 py-1 mb-1 sm:mb-0  sm:w-auto whitespace-nowrap" href={{url_for("gui_list_jobs")}}?cleanerror=Y{{seeall}}>{{_('Clean all Error')}}</a>
   <a class="button text-sm is-danger mx-1 py-1 mb-1 sm:mb-0 sm:w-auto whitespace-nowrap" data-event="click" data-action="alert-confirm" data-alert=true data-message="{{_('You are about to clean all tasks of the list')}}" href={{url_for("gui_list_jobs")}}?cleanall=Y{{seeall}}>{{_('Clean all')}} <strong>{{'Warning !!!'}}</strong></a>
   {%endif%}
-<a class="button text-sm is-info inverse mx-1 py-1 mb-1 sm:mb-0 sm:w-auto whitespace-nowrap" href={{url_for("gui_list_jobs")}}{{'?' if seeall else '?seeall=Y' }}>{{_('See user tasks') if seeall else _('See all users tasks') }} </a></div>
+  {%-if current_user.is_app_admin -%}
+<a class="button text-sm is-info inverse mx-1 py-1 mb-1 sm:mb-0 sm:w-auto whitespace-nowrap" href={{url_for("gui_list_jobs")}}{{'' if seeall else '?seeall=Y' }}>{{_('See user tasks') if seeall else _('See all users tasks') }} </a>
+{%-endif-%}</div>
 {%if cleanresult|length%}
 <div class="alert alert-info inverse" data-dismissible=true> <strong>{{_('Cleaning process')}} {{cleanresult|length ~ ' ' ~ _('jobs cleaned') }} </strong> {{cleanresult|join(', ')}}</div>
 {% endif %}

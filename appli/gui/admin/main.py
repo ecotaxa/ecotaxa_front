@@ -80,13 +80,6 @@ def _users_list(listall: bool = False, filt: dict = None) -> List[UserModelWithR
     return users
 
 
-def _check_is_admin(user=None):
-    if user == None:
-        user = current_user.api_user
-    thisuser: UserModelWithRights = user
-    return thisuser and (2 in thisuser.can_do)
-
-
 def allusers_list():
     users = _users_list_api()
     from appli.gui.admin.users_list_interface_json import (
@@ -148,6 +141,7 @@ def gui_users_list_page(
         template = "v2/admin/_userslistcontainer.html"
     else:
         template = "v2/admin/users.html"
+
     return render_template(
         template,
         listall=listall,
@@ -225,7 +219,7 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
 
     return render_template(
         "./v2/admin/users.html",
-        isadmin=_check_is_admin(current_user.api_user),
+        isadmin=current_user.is_admin == True,
     )
 
 

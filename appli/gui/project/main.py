@@ -18,8 +18,6 @@ from appli.gui.staticlistes import py_messages
 # TODO - fresh_login_required
 @login_required
 def gui_prj_noright(projid):
-    from appli.project.main import indexPrj
-
     return render_template("v2/project/noright.html", projid=projid)
 
 
@@ -43,7 +41,7 @@ def gui_prj_purge(projid):
     from to_back.ecotaxa_cli_py.models import ObjectSetQueryRsp
 
     user: UserModelWithRights = current_user.api_user
-    isadmin = user and (2 in user.can_do)
+    isadmin = current_user.is_app_admin
     target_proj = get_target_prj(projid)
     if target_proj is None:
         flash(py_messages["selectotherproject"], "info")

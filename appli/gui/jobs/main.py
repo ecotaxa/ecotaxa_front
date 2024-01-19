@@ -189,7 +189,7 @@ def gui_list_jobs():
 
     # TODO: Remove DB dependency
     seeall = ""
-    is_admin = current_user.has_role(appli.constants.AdministratorLabel)
+    is_admin = current_user.is_app_admin
     wantsadmin = gvg("seeall") == "Y"
     if is_admin and wantsadmin:
         seeall = "&seeall=Y"
@@ -233,5 +233,4 @@ def gui_list_jobs():
         seeall=seeall,
         cleanresult=cleanresult,
         partial=partial,
-        IsAdmin=is_admin,
     )

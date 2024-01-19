@@ -130,7 +130,7 @@ def projects_list(
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
-    isadmin = user and (2 in user.can_do)
+    isadmin = current_user.is_app_admin == True
     if typeimport != "":
         listall = False
     if typeimport == "taxo":
@@ -193,7 +193,7 @@ def projects_list_page(
         CanCreate = True
     else:
         CanCreate = False
-    isadmin = user and (2 in user.can_do)
+    isadmin = current_user.is_app_admin == True
 
     from appli.gui.project.projects_list_interface_json import project_table_columns
 
