@@ -22,10 +22,12 @@ from to_back.ecotaxa_cli_py.models import (
 ###############################################common for create && edit  #######################################################################
 
 
-def get_target_prj(prjid) -> ProjectModel:
+def get_target_prj(prjid, for_managing: bool = False) -> ProjectModel:
     with ApiClient(ProjectsApi, request) as api:
         try:
-            target_proj: ProjectModel = api.project_query(prjid, for_managing=True)
+            target_proj: ProjectModel = api.project_query(
+                prjid, for_managing=for_managing
+            )
         except ApiException as ae:
             if ae.status in (401, 403):
                 flash(py_messages["notauthorized"], "error")
@@ -126,7 +128,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
 
     from appli.gui.staticlistes import py_messages
 
-    target_proj = get_target_prj(prjid)
+    target_proj = get_target_prj(prjid, for_managing=True)
     if target_proj is None:
         flash(py_messages["selectotherproject"], "info")
         return redirect(url_for("gui_prj_noright", projid=prjid))

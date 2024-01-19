@@ -42,9 +42,8 @@ def gui_prj_purge(projid):
 
     user: UserModelWithRights = current_user.api_user
     isadmin = current_user.is_app_admin
-    target_proj = get_target_prj(projid)
+    target_proj = get_target_prj(projid, for_managing=True)
     if target_proj is None:
-        flash(py_messages["selectotherproject"], "info")
         return redirect(url_for("gui_prj_noright", projid=projid))
     if gvp("objlist") == "":
         # Extract filter values
@@ -177,19 +176,9 @@ def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list
 def gui_prj_merge(projid):
     # Security & sanity checks
     py_messages = py_get_messages("project")
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            target_proj: ProjectModel = api.project_query(projid, for_managing=True)
-        except ApiException as ae:
-            if ae.status == 404:
-                err = py_messages["notfound"]
-            elif ae.status in (401, 403):
-                err = py_messages["cannotmergeprj"]
-            else:
-                err = ae.status + " " + ae.reason
-            flash(err, "error")
-            return redirect(url_for("gui_prj_noright", projid=projid))
-
+    target_proj = get_target_prj(projid, for_managing=True)
+    if target_proj is None:
+        return redirect(url_for("gui_prj_noright", projid=projid))
     excludeprjs = [target_proj.projid]
     prjstomerge = None
     srcprojid = 0
@@ -290,17 +279,9 @@ def gui_prj_editannot(projid):
         new_author_id = None
         date_filter = dict({"date": None, "hour": "00", "minutes": "00"})
         process = None
-
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            target_proj: ProjectModel = api.project_query(projid, for_managing=True)
-        except ApiException as ae:
-            if ae.status == 404:
-                flash("Project doesn't exist", "warning")
-            elif ae.status in (401, 403):
-                flash("You cannot do mass annotation edition on this project", "error")
-            error = ae.status
-            return redirect(url_for("gui_prj_noright", projid=projid))
+    target_proj = get_target_prj(projid, for_managing=True)
+    if target_proj is None:
+        return redirect(url_for("gui_prj_noright", projid=projid))
     if target_proj.status == "ExploreOnly":
         flash("You cannot do mass annotation edition on this project", "error")
         return redirect(url_for("gui_prj_no_right", projid=target_proj.projid))
@@ -464,16 +445,9 @@ def gui_prj_reset_to_predicted(projid):
     processstep = None
     objectids = None
     # Security & sanity checks
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            target_proj: ProjectModel = api.project_query(projid, for_managing=True)
-        except ApiException as ae:
-            if ae.status == 404:
-                flash("Project doesn't exists", "warning")
-            elif ae.status in (401, 403):
-                flash("You cannot do reset to predicted on this project", "error")
-            error = ae.status
-            return redirect(url_for("gui_prj_noright", projid=projid))
+    target_proj = get_target_prj(projid, for_managing=True)
+    if target_proj is None:
+        return redirect(url_for("gui_prj_noright", projid=projid))
     filters = {}
     for k in sharedfilter.FilterList:
         if gvg(k):
@@ -555,17 +529,9 @@ def gui_prj_edit_datamass(projid):
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
 
     # Security & sanity checks
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            target_proj: ProjectModel = api.project_query(projid, for_managing=True)
-        except ApiException as ae:
-            if ae.status == 404:
-                flash("Project doesn't exists", "warning")
-            elif ae.status in (401, 403):
-                flash("You cannot do mass data edition on this project", "error")
-            error = ae.status
-            return redirect(url_for("gui_prj_noright", projid=projid))
-
+    target_proj = get_target_prj(projid, for_managing=True)
+    if target_proj is None:
+        return redirect(url_for("gui_prj_noright", projid=projid))
     objectids = None
     error = None
     filters = {}
@@ -686,18 +652,9 @@ def gui_deprecation_management(projid):
 
     # Security & sanity checks
     error = None
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            target_proj: ProjectModel = api.project_query(projid)
-        except ApiException as ae:
-            if ae.status == 404:
-                flash("Project doesn't exists", "warning")
-
-            elif ae.status in (401, 403):
-                flash("You cannot do category fix on this project", "error")
-            error = ae.status
-            return redirect(url_for("gui_prj_noright", projid=projid))
-
+    target_proj = get_target_prj(projid)
+    if target_proj is None:
+        return redirect(url_for("gui_prj_noright", projid=projid))
     if request.method == "POST":
         # Posted form
         posted = request.form
