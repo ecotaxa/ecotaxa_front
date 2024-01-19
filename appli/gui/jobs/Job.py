@@ -123,19 +123,18 @@ class Job(object):
             return request.form.get("ServerPath", ""), None
 
     @classmethod
-    def extract_filters_from_url(cls, filters: Dict[str, str]) -> str:
+    def _extract_filters_from_url(cls) -> list:
         # Extract filter values, they are in the URL (GET)
-        filters = list(
+        return list(
             filter(
                 lambda f: f[1] != "",
                 [(k, gvg(k, "")) for k in sharedfilter.FilterList],
             )
         )
-        return filters
 
     @classmethod
-    def extract_filters_from_form(cls, filters: Dict[str, str]) -> str:
-        # Extract filter values, they are in the URL (GET)
+    def _extract_filters_from_form(cls) -> list:
+        # Extract filter values, they are in the POST
         return list(
             filter(
                 lambda f: f[1] != "", [(k, gvp(k, "")) for k in sharedfilter.FilterList]

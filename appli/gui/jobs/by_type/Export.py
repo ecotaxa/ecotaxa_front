@@ -29,8 +29,7 @@ class ExportJob(Job):
             return render_template(cls.NOPROJ_TEMPLATE, projid=prj_id)
         from appli.gui.jobs.job_interface import export_format_options
 
-        filters = {}
-        filtertxt = cls.extract_filters_from_url(filters)
+        filters = cls._extract_filters_from_url()
 
         formatoptions = export_format_options(cls.EXPORT_TYPE)
 
@@ -45,7 +44,7 @@ class ExportJob(Job):
     @classmethod
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page, POST"""
-        prj_id = int(gvg("projid"))
+        prj_id = int(gvp("projid"))
         target_proj = cls.get_target_prj(prj_id)
         what = gvp("what")
         objectdata = "O" if gvp("objectdata") == "1" else ""
@@ -70,8 +69,7 @@ class ExportJob(Job):
         # Check data validity
         # if len(subsetprojecttitle) < 5:
 
-        filters = {}
-        filtertxt = cls.extract_filters_from_url(filters)
+        filters = cls._extract_filters_from_form()
 
         if len(errors) > 0:
             for e in errors:
@@ -80,7 +78,7 @@ class ExportJob(Job):
             return render_template(
                 cls.STEP0_TEMPLATE,
                 form=formdata,
-                filtertxt=filtertxt,
+                filters=filters,
                 target_proj=target_proj,
             )
         else:

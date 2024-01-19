@@ -31,8 +31,7 @@ class SubsetJob(Job):
         target_proj = cls.get_target_prj(projid)
         if target_proj == None:
             return render_template(cls.NOPROJ_TEMPLATE, projid=projid)
-        filters = {}
-        filters = cls.extract_filters_from_url(filters)
+        filters = cls._extract_filters_from_url()
 
         formdata = {
             "subsetprojecttitle": (
@@ -56,7 +55,7 @@ class SubsetJob(Job):
     @classmethod
     def create_or_update(cls):
         """In UI/flask, submit/resubmit, POST"""
-        projid = int(gvp("p"))
+        projid = int(gvp("projid"))
         target_proj = cls.get_target_prj(projid)
         subsetprojecttitle = gvp("subsetprojecttitle")
         valtype = gvp("valtype")
@@ -86,8 +85,7 @@ class SubsetJob(Job):
             errors.append(
                 "You must select the object selection parameter '% of values' or '# of objects'"
             )
-        filters = {}
-        filters = cls.extract_filters_from_form(filters)
+        filters = cls._extract_filters_from_form()
 
         if len(errors) > 0:
             for e in errors:

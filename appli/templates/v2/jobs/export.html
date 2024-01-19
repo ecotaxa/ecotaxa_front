@@ -19,36 +19,41 @@
   {%- for option in params["select"] -%}
   <option value={{option.value}} >{{option.label}}</option>
   {%-endfor-%}
-  <!--<option value="1" {{ 'selected' if formdata.exportimages and  formdata.exportimages=='1' }} >{{_('Only Rank 0 Image')}}</option>
-  <option value="A" {{ 'selected' if formdata.exportimages and formdata.exportimages=='A' }} >{{_('All images of each object')}}</option>-->
-</select>
+  </select>
 {% elif "checkbox" in params %}
 <label for="exportimages_{{extid}}">{{params.checkbox.label}} <input type="checkbox" name="exportimages" id="exportimages_{{extid}}" class="ml-2" value={{params.checkbox.value}}></label>
 {%endif%}
 {%-endmacro%}
+{%- macro splitby(extid)-%}
+{%-if extid == 'bak'-%}
+<input type="text" class="form-input" readonly value="sample" name="splitcsvby" id="splitcsvby">
+{%-else-%}
+<select name="splitcsvby" id="splitcsvby" class="form-select w-auto ">
+  <option value="">{{_('NOT Active')}}</option>
+  <option value="sample" {{ 'selected' if  formdata.splitcsvby and formdata.splitcsvby=='sample' }} >{{_('Sample')}}</option>
+  <option value="taxo" {{ 'selected' if formdata.splitcsvby and formdata.splitcsvby=='taxo' }} >{{_('Taxonomy (parent_child)')}}</option>
+</select>
+{%-endif-%}
+{%-endmacro-%}
 {% block body %}
 <div class="container mx-auto">
-  <div class="w-100 mx-auto py-4 block text-left relative" id="project-subset-header">
+  <div class="w-100 mx-auto block pt-4 text-left relative" id="project-subset-header">
   {% set data = {'file':'_help_job_export'} %}
   {{header_project_job(_('Full export'),data, _('How to export data'))}}
 </div>
-  <form method="post" action="{{request.url}}" class="js js-submit js-tabs " data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
+  <form method="post" action="{{request.path}}" class="js js-submit js-tabs " data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
     <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" type="text" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
   <fieldset class="w-full md:w-1/2 tab mb-0 pb-0"><legend class="text-center tab-control">{{_("Custom")}} </legend>
-    <div class="tab-content pt-2" id="TSV"  data-what="TSV"><div class="form-box">{{select_export_options(formatoptions.data.TSV,"tsv")}}</div>
-    <div class="form-box">{{select_export_images(formatoptions.fields.TSV.exportimages,"tsv")}}</div><input type="hidden" name="what"  value="TSV">
+    <div class="tab-content pt-2" id="TSV"  data-what="TSV"><em class="text-xs">{{_('configurable export for general purposes')}}</em><div class="form-box">{{select_export_options(formatoptions.data.TSV,"tsv")}}</div>
+    <div class="form-box">{{select_export_images(formatoptions.fields.TSV.exportimages,"tsv")}}</div><div class="form-box"><label for="splitcsvby">{{_('Split in multiple files by')}}</label>{{splitby("tsv")}}</div><input type="hidden" name="what"  value="TSV">
         </div></fieldset><fieldset class="w-full md:w-1/2 tab my-0 py-0">
   <legend class="text-center tab-control">{{_("Backup")}} </legend><div class="tab-content pt-2" id="BAK"  data-what="BAK">
+    <em class="text-xs">{{_('ready to re-import datasets, possibly including images')}}</em>
   <div class="form-box">{{select_export_options(formatoptions.data.BAK,"bak")}}</div>
     <div class="form-box">{{select_export_images(formatoptions.fields.BAK.exportimages,"bak")}}
-      </div><input type="hidden" name="what" value="BAK"></div></fieldset><fieldset class="w-full -mt-4 pt-0 block">
-      <div class="form-box"><label for="splitcsvby">{{_('Split in multiple files by')}}</label><select name="splitcsvby" id="splitcsvby" class="form-select w-auto ">
-        <option value="">{{_('NOT Active')}}</option>
-        <option value="sample" {{ 'selected' if  formdata.splitcsvby and formdata.splitcsvby=='sample' }} >{{_('Sample')}}</option>
-        <option value="taxo" {{ 'selected' if formdata.splitcsvby and formdata.splitcsvby=='taxo' }} >{{_('Taxonomy (parent_child)')}}</option>
-      </select>
-  </div></fieldset></div>
+      </div><div class="form-box"><label for="splitcsvby">{{_('Split in multiple files by')}}</label>{{splitby("bak")}}</div><input type="hidden" name="what" value="BAK"></div></fieldset><fieldset class="w-full -mt-4 pt-0 block">
+  </fieldset></div>
             <input type="hidden" name="starttask" value="Y">
       <div class="form-box mb-8 w-auto float-left clear-right">
           <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>  <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>

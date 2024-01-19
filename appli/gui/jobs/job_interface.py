@@ -77,18 +77,18 @@ def export_format_options(type=None):
                             "exportimages": {
                                 "select": [
                                     {"label": _("NO Images"), "value": ""},
-                                    {"label": _("Only Rank 0 Image"), "value": "1"},
-                                    {
-                                        "label": _("All images of each object"),
-                                        "value": "A",
-                                    },
+                                    # {"label": _("Only Rank 0 Image"), "value": "1"},
+                                    # {
+                                    #    "label": _("All images of each object"),
+                                    #    "value": "A",
+                                    # },
                                 ]
                             },
                         },
                         "BAK": {
                             "exportimages": {
                                 "select": [
-                                    {"label": _("NO Images"), "value": ""},
+                                    # {"label": _("NO Images"), "value": ""},
                                     {
                                         "label": _("All images files"),
                                         "value": "A",
@@ -117,7 +117,7 @@ def export_format_options(type=None):
                             "acqdata": ("1", True),
                             "sampledata": ("1", True),
                             "histodata": ("", True),
-                            "commentsdata": ("1", True),
+                            "commentsdata": ("", True),
                             "usecomasepa": ("", True),
                             "formatdates": ("1", True),
                             "internalids": ("1", True),

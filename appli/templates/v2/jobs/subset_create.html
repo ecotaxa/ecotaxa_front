@@ -13,7 +13,7 @@
     {{header_project_job(_('Create subset from project'),data, _('How to create a project subset'))}}
   </div>
   <form class="form-horizontal" action="{{ request.path }}" class="js js-submit" method="post" enctype=multipart/form-data>
-  <input type="hidden" name="p" value="{{ target_proj.projid }}">
+  <input type="hidden" name="projid" value="{{ target_proj.projid }}">
 {{display_filters(filters)}}
   <div class="form-box js js-tabs" data-selector="input[type='radio']" data-toggledisable=true><div class="label">{{_('Select')}}</div>
     <div class="form-group" role="group">

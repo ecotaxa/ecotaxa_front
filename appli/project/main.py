@@ -423,8 +423,9 @@ def indexPrj(PrjId):
         "export": "/gui/job/create/GenExport?projid=%d" % PrjId,
         "exportf": "javascript:GotoWithFilter('/gui/job/create/GenExport')",
         "edit": "/gui/prj/edit/%d" % PrjId,
-        "subset": "/gui/job/create/Subset?p=%d" % PrjId,
-        "subsetf": "javascript:GotoWithFilter('/gui/job/create/Subset?p=%d')" % PrjId,
+        "subset": "/gui/job/create/Subset?projid=%d" % PrjId,
+        "subsetf": "javascript:GotoWithFilter('/gui/job/create/Subset?projid=%d')"
+        % PrjId,
         "merge": "/gui/prj/merge/%d" % PrjId,
         "annot": "/gui/prj/editannot/%d" % PrjId,
         "editamass": "/gui/prj/editdatamass/%d" % PrjId,
