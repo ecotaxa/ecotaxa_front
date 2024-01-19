@@ -1,5 +1,7 @@
 export const models = {
   user: 'user',
+  collection: 'collection',
+  id: 'id',
   project: 'project',
   projid: 'projid',
   sampleid: 'sampleid',

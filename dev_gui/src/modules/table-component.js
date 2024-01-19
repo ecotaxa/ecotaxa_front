@@ -18,6 +18,7 @@ import {
 let instance = [];
 // valid fetch urlparts
 const fetchfroms = {
+  collectionlist: '/gui/collectionlist/',
   prjlist: '/gui/prjlist/',
   prjsamplestats: '/gui/prjsamplestats',
   userslist: '/gui/admin/userslist/',
@@ -210,7 +211,9 @@ export class TableComponent {
       if (this.waitdiv) this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : default_messages.dataloaded);
       if (pagestart === 0) {
         console.log('seconds to fetch', (Date.now() - this.dt) / 1000);
+        console.log('tdef', tabledef)
         this.dt = Date.now();
+        console.log('tabledef', tabledef)
         await this.tableActivate(container, tabledef);
       } else if (tabledef.length) this.domInsertRows(tabledef);
       else pagesize = 0;
@@ -218,6 +221,7 @@ export class TableComponent {
     }).catch((err) => { /* print error from response */ })
   }
   async dataToTable(tabledef) {
+
     if (!tabledef.data) return;
     if (tabledef.columns) {
       await this.convertColumns(tabledef);
@@ -605,6 +609,10 @@ export class TableComponent {
     let tablecustom = null;
 
     switch (this.params.from) {
+      case 'collectionlist':
+        tablecustom = await import('../modules/table-collection.js');
+        this.cellidname = models.id;
+        break;
       case 'prjlist':
         tablecustom = await import('../modules/table-project.js');
         this.cellidname = models.projid;

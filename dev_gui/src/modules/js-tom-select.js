@@ -59,7 +59,8 @@ export class JsTomSelect {
 
     switch (type) {
       case models.project:
-        // for top navigation search
+        // for top navigation search and collections
+        const maxitems = (multiple) ? null : 1;
         option.url = "/gui/prjlist/";
         option.settings = { ...option.settings,
           ...{
@@ -67,12 +68,13 @@ export class JsTomSelect {
             searchField: 'text',
             labelField: 'text',
             openOnFocus: false,
-            maxItems: 1,
+            maxItems: maxitems,
             allowEmptyOption: false,
           }
         };
 
         break;
+
       case models.user:
         option.url = "/api/users/search?by_name=";
         option.settings = { ...option.settings,

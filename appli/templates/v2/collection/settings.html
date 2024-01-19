@@ -1,0 +1,121 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/macros/macros.html" import form_group_radio, inputdict, modal , alertbox with context %}
+{% block body %}
+<div class="container mx-auto ">
+  {% set modal_title = _("How to edit a collection settings") if target_coll.id else _("How to create a collection")%}
+  {% set data = {'file':'_help_collection_settings'} %}
+  {{ modal(id='help-editcollection',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+  <form method="post" action="{{request.path}}" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs hide' if (target_coll and target_coll.id) }} relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}" novalidate>
+   <input type="hidden" name="crsf_token" value={{ crsf_token }}>  {% if target_coll and target_coll.id %}
+    <span data-dismiss="tabs" class="absolute z-10 top-0 -mt-8 right-[calc(100%-2.5rem)] hidden md:block md:ml-auto  md:mt-0 md:right-12 md:top-5 cursor-pointer fill-stone-900 border-stone-700 hover:border-b-2" title="{{_('click to expand/shrink tabs')}}"><i class="icon-lg tabs-display expand opacity-50 hover:opacity-100"></i></span>
+    <input type="hidden" name="id" id="id" value="{{target_coll.id}}">
+    {% endif %}
+    <div class="fieldset-wrapper">
+      <fieldset class="w-full md:flex md:flex-wrap tab">
+        <legend class="tab-control">{{_('collection') + ' ' + target_coll.id|string() if target_coll.id else _('new collection')}}</legend>
+        <div class=" w-full md:w-1/2 md:pr-6 tab-content">
+          <div class="form-box">
+            <label for="title">{{_('Title')}}</label>
+            <input type="text" id="title" name="title" class="form-input" value="{{ target_coll.title }}" required data-required="{{_('a title is required')}}"  placeholder="collection title"></div>
+        <div class="form-box">
+          <label for="short_title">{{_('Short title')}}</label>
+          <input type="text" id="short_title" name="short_title" class="form-input" value="{{ target_coll.short_title }}" placeholder="short title"></div>
+              <div class="form-box">
+                    <label for="external_id">{{_('External Id')}}</label>
+                    <input type="text" id="external_id" name="external_id" class="form-input" value="{{ target_coll.external_id }}"  placeholder="external id"></div>
+                    <div class="form-box">
+                          <label for="external_id_system">{{_('External Id System')}}</label>
+                          <input type="text" id="external_id_system" name="external_id_system" class="form-input" value="{{ target_coll.external_id_system }}"  placeholder="external id system"></div>
+                          <div class="form-box">
+                            <div class="label">{{ _('License') }}<i data-for="help_coll_license" data-request="help"></i></div>
+                            <div class="form-group" id="coll_license" role="group">
+                                {% set required = True %}
+                              {% for k in possible_licenses.keys() %}
+                              {% set label='not choosen' if k=='' else k %}
+                              {{form_group_radio('license_'+ loop.index|string(),'license',k,label,target_coll.license, required=required )}}
+                                {% set required = False %}
+                              {% endfor %}</div>
+                          </div>
+                  </div>
+        <div class=" w-full md:w-1/2 tab-content">
+          <div class="form-box">
+            <label for="project_ids">{{_('Projects')}}<i data-for="help_coll_projects" data-request="help"></i></label>
+            <select id='project_ids' class="form-multiselect js js-autocomplete " name="project_ids[]" data-type="project" data-importfield="{{'project_ids'}}"  placeholder="{{_('select a project')}}" multiple autocomplete="off">
+             {% for p in projectlist %}
+              <option value="{{ p.id }}" selected="selected"> {{ p.title }}</option>
+              {% endfor %}
+            </select>
+
+          </div>
+
+        </div>
+      </fieldset><div class="w-full md:w-1/2 tab"><fieldset>
+        <legend class="tab-control">{{_('Users and organisations')}}</legend><div class="tab-content">
+          <div class="form-box">
+            <label for="provider_user">{{_('Provider user')}}<i data-for="help_coll_provider_user" data-request="help"></i></label>
+            <select id='provider_user' class="form-select js js-autocomplete " name="provider_user" data-type="user" placeholder="{{_('select a provider user')}}"  autocomplete="off">
+               {%if target_coll and target_coll.provider_user%}<option value="{{ target_coll.provider_user.id }}" selected="selected"> {{ target_coll.provider_user.name }}</option>{%-elif not target_coll -%}
+               <option value="{{ current_user.id }}" selected="selected"> {{ current_user.name }}</option>{%-endif-%}
+              </select>
+          </div><div class="form-box">
+            <label for="contact_user">{{_('Contact user')}}<i data-for="help_coll_contact_user" data-request="help"></i></label>
+            <select id='contact_user' class="form-select js js-autocomplete " name="contact_user" data-type="user" placeholder="{{_('select a contact user')}}"  autocomplete="off">
+               {% if target_coll and target_coll.contact_user%}<option value="{{ target_coll.contact_user.id }}" selected="selected"> {{ target_coll.contact_user.name }}</option>{%endif%}
+              </select>
+          </div>
+          <div class="form-box">
+            <label for="creator_users">{{_('Creator users')}}<i data-for="help_coll_projects" data-request="help"></i></label>
+            <select id='creator_users' class="form-multiselect js js-autocomplete " name="creator_users[]" data-type="user"   placeholder="{{_('select a user')}}" multiple autocomplete="off">
+             {% for u in target_coll.creator_users %}
+              <option value="{{ u.id }}" selected="selected"> {{ u.name }}</option>
+              {% endfor %}
+            </select>  </div>
+            <div class="form-box">
+              <label for="creator_organisations">{{_('Creator organisations')}}<i data-for="help_coll_projects" data-request="help"></i></label>
+              <select id='creator_organisations' class="form-multiselect js js-autocomplete " name="creator_organisations[]" data-type="organisation"  data-create=true placeholder="{{_('select an organisation')}}" multiple autocomplete="off">
+               {% for org in target_coll.creator_organisations %}
+                <option value="{{ org }}" selected="selected"> {{ org }}</option>
+                {% endfor %}
+              </select>  </div>
+            <div class="form-box">
+              <label for="associate_users">{{_('Associate users')}}<i data-for="help_coll_projects" data-request="help"></i></label>
+              <select id='associate_users' class="form-multiselect js js-autocomplete " name="associate_users[]" data-type="user"   placeholder="{{_('select a user')}}" multiple autocomplete="off">
+               {% for u in target_coll.associate_users %}
+                <option value="{{ u.id }}" selected="selected"> {{ u.name }}</option>
+                {% endfor %}
+              </select>
+          </div>
+          <div class="form-box">
+            <label for="associate_organisations">{{_('Associate organisations')}}<i data-for="help_coll_projects" data-request="help"></i></label>
+            <select id='associate_organisations' class="form-multiselect js js-autocomplete " name="associate_organisations[]" data-type="organisation" data-create=true placeholder="{{_('select an organisation')}}" multiple autocomplete="off">
+             {% for org in target_coll.associate_organisations %}
+              <option value="{{ org }}" selected="selected"> {{ org }}</option>
+              {% endfor %}
+            </select>  </div>
+      </fieldset>
+    </div>
+    <div class="w-full md:w-1/2 tab"><fieldset><legend class="tab-control">{{_('Descriptions')}}</legend><div class="tab-content">  <div class="form-box">
+          <label for="citation">{{ _('Citation')}}<i data-for="help_coll_citation" data-request="help"></i></label>
+          <textarea id="citation" name="citation" class="form-textarea" placeholder="citation" rows="3">{{ target_coll.citation|default('',true) }}</textarea>
+
+        </div><div class="form-box">
+          <label for="coll_abstract">{{_('Abstract')}} <i data-for="help_coll_abstract" data-request="help"></i></label>
+          <textarea id="coll_abstract" name="abstract" class="form-textarea" placeholder="abstract" rows="4">{{ target_coll.abstract|default('',true) }}</textarea>
+
+        </div>
+        <div class="form-box">
+          <label for="coll_description">{{_('Description')}} <i data-for="help_coll_description" data-request="help"></i></label>
+          <textarea id="coll_description" name="description" class="form-textarea" placeholder="description" rows="6">{{ target_coll.description|default('',true) }}</textarea>
+
+        </div></div></fieldset></div>
+
+
+<div class="w-full text-left my-8"> <input type="hidden" name="save" value="Y">
+  <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{url_for("gui_collection", collection_id= target_coll.id) if target_coll }}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to collection list ') }}">{{ _('Cancel') }}</a>
+</div>
+</form>
+</div>
+{% if redir and redir !='' %}
+<span class="js js-redir" data-redir="{{redir}}"></span>
+{%endif%}
+{% endblock %}

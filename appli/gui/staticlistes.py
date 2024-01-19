@@ -24,6 +24,18 @@ apptree = dict(
                 "taxofix": _("fix"),
             },
         },
+        "collection": {
+            "root": _("Collections"),
+            "one": _("Collection"),
+            "children": {
+                "create": _("create"),
+                "edit": _("settings"),
+                "import": _("import"),
+                "export": _("export"),
+                "about": _("about"),
+                "purge": _("delete"),
+            },
+        },
         "jobs": _("Jobs"),
         "job": {
             "root": _("Job"),
@@ -102,7 +114,6 @@ py_messages = dict(
         "importpriverror": _("Privileges where not imported correctly."),
     }
 )
-
 py_user = dict(
     {
         "invalidpassword": _("Invalid credentials"),
