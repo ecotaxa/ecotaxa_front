@@ -1,11 +1,12 @@
-<script type="text/javascript" defer>
+<script type="text/javascript">
   const formcaptcha= document.getElementById('{{formid}}');
   const formbtn = (formcaptcha)?formcaptcha.querySelector('[type="submit"]'):null;
   if (formbtn) {
     formbtn.classList.add('g-recaptcha');formbtn.dataset.sitekey="{{reCaptchaID}}";
     formbtn.dataset.callback="onSubmit";}
+    let ntry =0;
 function onSubmit(token) {
-          if(formcaptcha.formsubmit) formcaptcha.formsubmit.submitForm(); else formcaptcha.submit();
+        if(formcaptcha.classList.contains('js-submit')) { if(formcaptcha.formsubmit) formcaptcha.formsubmit.submitForm(); else if(ntry<2) setTimeout('onSubmit',500); else console.log('error submit');ntry++;} else formcaptcha.submit();
        }
 </script>
-<script id="google-recaptcha" src=https://www.google.com/recaptcha/api.js defer></script>
+<script id="google-recaptcha" src=https://www.google.com/recaptcha/api.js></script>

@@ -1,45 +1,12 @@
-
 .ts-wrapper.single .ts-control, .ts-wrapper.single .ts-control input {@apply cursor-pointer}
-.ts-wrapper.plugin-drag_drop.multi > .ts-control > div.ui-sortable-placeholder {@apply visible bg-stone-50 ;box-shadow : 0 0 12px 4px #fff inset;}
-.ts-wrapper.plugin-drag_drop .ui-sortable-placeholder{@apply after:hidden after:content-['!']}
-.ts-wrapper.plugin-drag_drop .ui-sortable-helper {box-shadow : 0 2px 5px rgb(0, 0, 0, 0.2);}
-.plugin-checkbox_options .option input {@apply mr-[.5rem]}
-.plugin-clear_button .ts-control {padding-right : calc(1em + (3 * 6px)) !important ;}
-.plugin-clear_button .clear-button {@apply opacity-0 absolute top-[50%] -translate-y-[50%] right-1 mr-0 bg-transparent z-30 cursor-pointer; transition : opacity 0.3s;}
-.plugin-clear_button.multi .clear-button {@apply top-1 translate-y-[0%]}
-.plugin-clear_button.focus.has-items .clear-button, .plugin-clear_button:not(.disabled):hover.has-items .clear-button {@apply opacity-100}
 .ts-wrapper .dropdown-header {@apply relative py-[10px] px-[8px] border-b border-stone-50 rounded-t bg-stone-50
 }
 .ts-wrapper .dropdown-header-close {@apply absolute right-[8px] top-[50%] text-stone-800 opacity-40 -mt-[12px] text-lg;
 }
 .ts-wrapper .dropdown-header-close:hover {@apply text-black}
-.plugin-dropdown_input.focus.dropdown-active .ts-control {@apply shadow-none border border-stone-50}
-.plugin-dropdown_input .dropdown-input {@apply bg-transparent block w-full p-[8px] border-b border-b-stone-50 shadow-none;
-}
-.plugin-dropdown_input .items-placeholder {@apply border-none shadow-none w-full}
-.plugin-dropdown_input.has-items .items-placeholder, .plugin-dropdown_input.dropdown-active .items-placeholder {@apply hidden}
-.ts-wrapper.plugin-input_autogrow.has-items .ts-control > input {@apply min-w-0}
-.ts-wrapper.plugin-input_autogrow.has-items.focus .ts-control > input {@apply flex-none min-w-[4px] placeholder:text-transparent;}
-.ts-dropdown.plugin-optgroup_columns .ts-dropdown-content {@apply flex;}
-.ts-dropdown.plugin-optgroup_columns .optgroup {@apply border-r border-stone-50 flex flex-grow basis-0 min-w-0;}
-.ts-dropdown.plugin-optgroup_columns .optgroup:last-child {@apply border-none}
-.ts-dropdown.plugin-optgroup_columns .optgroup:before {@apply hidden}
-.ts-dropdown.plugin-optgroup_columns .optgroup-header {@apply border-none}
-.ts-wrapper.plugin-remove_button .item {@apply inline-flex items-center pr-0}
-.ts-wrapper.plugin-remove_button .item .remove {@apply text-inherit decoration-0 align-middle inline-block py-0 px-[6px] border-l border-stone-50 rounded-r-lg ml-[6px]
-}
-.ts-wrapper.plugin-remove_button .item .remove:hover {@apply bg-secondblue-50}
-.ts-wrapper.plugin-remove_button .item.active .remove {@apply border-l border-secondblue-50
-}
-.ts-wrapper.plugin-remove_button.disabled .item .remove:hover {@apply bg-transparent;
-}
-.ts-wrapper.plugin-remove_button.disabled .item .remove {@apply border-l border-white
-}
-.ts-wrapper.plugin-remove_button .remove-single {@apply absolute right-0 top-0 text-lg;
-}
 .ts-wrapper {@apply relative py-0 px-0;}
 .ts-dropdown, .ts-control, .ts-control input {@apply text-stone-800;}
-.ts-control, .ts-wrapper.single.input-active .ts-control {@apply bg-white cursor-text;
+.ts-control, .ts-wrapper.single.input-active .ts-control {@apply  cursor-text;
 }
 .ts-control {@apply overflow-hidden w-full relative z-[1] flex flex-wrap p-[8px] shadow-none rounded  border-none border-transparent }
 .ts-wrapper.multi.has-items .ts-control {
@@ -52,7 +19,7 @@ padding : calc(8px - 2px - 0) 8px calc(8px - 2px - 3px - 0);
 .ts-wrapper.multi .ts-control > div {@apply cursor-pointer text-stone-800 mt-0 mb-[3px] ml-0 mr-[3px] px-[6px] py-[2px]  bg-stone-50 border-none;
 }
 .ts-wrapper.multi .ts-control > div.active {@apply font-normal text-stone-800 border-none}
-.ts-wrapper.multi.disabled .ts-control > div, .ts-wrapper.multi.disabled .ts-control > div.active {@apply bg-white border-none text-stone-600}
+.ts-wrapper.multi.disabled .ts-control > div, .ts-wrapper.multi.disabled .ts-control > div.active {@apply  border-none text-stone-600}
 .ts-control > input {@apply inline-block p-0 min-h-0 max-w-full min-w-[7rem] m-0 border-none bg-transparent select-auto shadow-none indent-0 flex-grow flex-shrink basis-auto}
 .ts-control > input::-ms-clear {@apply hidden;}
 .ts-control > input:focus {@apply outline-none}
@@ -62,7 +29,7 @@ padding : calc(8px - 2px - 0) 8px calc(8px - 2px - 3px - 0);
 .ts-control.rtl .ts-control > input {@apply my-0 mr-[4px] -ml-[2px]}
 .disabled .ts-control {@apply opacity-50 bg-stone-50}
 .input-hidden .ts-control > input {@apply opacity-0 absolute -left-[10000px]}
-.ts-dropdown {@apply absolute top-[100%] left-0 z-10 w-full border border-stone-50 border-t-0 mt-2 rounded shadow-sm bg-white;
+.ts-dropdown {@apply absolute top-[100%] left-0 z-30 w-full border border-stone-50 border-t-0 mt-2 rounded shadow-sm bg-white;
 }
 .ts-dropdown [data-selectable] {@apply cursor-pointer  overflow-hidden;
 }
@@ -78,13 +45,8 @@ padding : calc(8px - 2px - 0) 8px calc(8px - 2px - 3px - 0);
 .ts-dropdown .create:hover, .ts-dropdown .option:hover, .ts-dropdown .active {@apply font-normal  text-stone-700}
 .ts-dropdown .create:hover.create, .ts-dropdown .option:hover.create, .ts-dropdown .active.create {@apply text-stone-700}
 .ts-dropdown .create {@apply text-stone-500 }
-.ts-dropdown .spinner {@apply w-[30px] h-[30px] my-[5px] mx-[8px] inline-block after:content-[''] after:block after:w-[24px] after:h-[24px] m-[3px] }
-.ts-dropdown .spinner:after {
-border-radius : 50%;
-border : #d0d0d0 solid 5px;
-border-color : #d0d0d0 transparent #d0d0d0 transparent;
-animation : lds-dual-ring 1.2s linear infinite;
-}
+.ts-dropdown .spinner {@apply w-10 h-10 my-2 mx-4 inline-block after:content-['_'] after:block after:w-6 after:h-6 after:m-1 after:rounded-[50%] after:border-transparent after:border-4  after:border-t-stone-200 after:border-b-stone-200  }
+.ts-dropdown .spinner:after {animation : lds-dual-ring 1.2s linear infinite;}
 @keyframes lds-dual-ring {
 0% {
 transform : rotate(0deg);
@@ -93,8 +55,40 @@ transform : rotate(0deg);
 transform : rotate(360deg);
 }
 }
-.ts-dropdown-content {@apply overflow-y-auto overflow-x-hidden max-h-[200px] scroll-smooth}
+.ts-dropdown-content {@apply overflow-y-auto overflow-x-hidden max-h-[200px] scroll-smooth touch-auto}
 .ts-hidden-accessible {@apply border-none overflow-hidden p-0 absolute w-[1px] whitespace-nowrap;clip-path : inset(50%) !important ;}
+/*********************************/
+/* plugins                       */
+/*********************************/
+.ts-wrapper.plugin-drag_drop.multi > .ts-control > div.ui-sortable-placeholder {@apply visible bg-stone-50 ;box-shadow : 0 0 12px 4px #fff inset;}
+.ts-wrapper.plugin-drag_drop .ui-sortable-placeholder{@apply after:hidden after:content-['!']}
+.ts-wrapper.plugin-drag_drop .ui-sortable-helper {box-shadow : 0 2px 5px rgb(0, 0, 0, 0.2);}
+.plugin-checkbox_options .option input {@apply mr-[.5rem]}
+.plugin-clear_button .ts-control {padding-right : calc(1em + (3 * 6px)) !important ;}
+.plugin-clear_button .clear-button, .ts-wrapper.multi .ts-control > div.clear-button  {@apply opacity-0 absolute top-[50%] -translate-y-[50%] right-1 mr-0 bg-transparent z-50 cursor-pointer transition delay-300;}
+.for-select.plugin-clear_button .clear-button {@apply right-0}
+.plugin-clear_button.multi .clear-button {@apply top-1 translate-y-[0%]}
+.plugin-clear_button.focus.has-items .clear-button, .plugin-clear_button:not(.disabled):hover.has-items .clear-button {@apply opacity-100}
+.plugin-dropdown_input.focus.dropdown-active .ts-control {@apply shadow-none border border-stone-50}
+.plugin-dropdown_input .dropdown-input {@apply bg-transparent block w-full p-[8px] border-b border-b-stone-50 shadow-none;
+}
+.plugin-dropdown_input .items-placeholder {@apply border-none shadow-none w-full}
+.plugin-dropdown_input.has-items .items-placeholder, .plugin-dropdown_input.dropdown-active .items-placeholder {@apply hidden}
+.ts-wrapper.plugin-input_autogrow.has-items .ts-control > input {@apply min-w-0}
+.ts-wrapper.plugin-input_autogrow.has-items.focus .ts-control > input {@apply flex-none min-w-[4px] placeholder:text-transparent;}
+.ts-dropdown.plugin-optgroup_columns .ts-dropdown-content {@apply flex;}
+.ts-dropdown.plugin-optgroup_columns .optgroup {@apply border-r border-stone-50 flex flex-grow basis-0 min-w-0;}
+.ts-dropdown.plugin-optgroup_columns .optgroup:last-child {@apply border-none}
+.ts-dropdown.plugin-optgroup_columns .optgroup:before {@apply hidden}
+.ts-dropdown.plugin-optgroup_columns .optgroup-header {@apply border-none}
+.ts-wrapper.plugin-remove_button .item {@apply inline-flex items-center pr-0}
+.ts-wrapper.plugin-remove_button .item .remove {@apply text-inherit decoration-0 align-middle inline-block py-0 px-[6px] border-l border-stone-50 rounded-r-lg ml-[6px]}
+.ts-wrapper.plugin-remove_button .item .remove:hover {@apply bg-secondblue-50}
+.ts-wrapper.plugin-remove_button .item.active .remove {@apply border-l border-secondblue-50}
+.ts-wrapper.plugin-remove_button.disabled .item .remove:hover {@apply bg-transparent;}
+.ts-wrapper.plugin-remove_button.disabled .item .remove {@apply border-l border-white}
+.ts-wrapper.plugin-remove_button .remove-single {@apply absolute right-0 top-0 text-lg;}
+/********************************/
 /*******************************/
 /* tom-select                  */
 /*******************************/

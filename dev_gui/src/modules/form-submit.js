@@ -69,12 +69,13 @@ export class FormSubmit {
           item.classList.remove(formcss.inputvalidate);
           if (item.value !== itemtarget.value) {
             input.setCustomValidity(invalid);
-            input.dataset.invalid = invalid;
-            if (label) label.classList.add(formcss.invalid);
+            if (label) {
+              label.dataset.invalid = (label.dataset.invalid) ? label.dataset.invalid : invalid;
+              label.classList.add(formcss.invalid);
+            }
             input.classList.add(formcss.inputvalidate);
           } else {
             input.setCustomValidity("");
-            input.dataset.invalid = "";
             if (label) label.classList.remove(formcss.invalid);
             input.classList.remove(formcss.inputvalidate);
           }

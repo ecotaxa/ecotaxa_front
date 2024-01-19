@@ -15,7 +15,7 @@
       <input name="request_password" id="request_password" class="form-input" data-action="wrapeye" placeholder="Your new password" type="password"  pattern="{{api_password_regexp()}}"  required autofocus>
       {{password_regexp()}}
       <label for="request_passwordconfirm">{{_('New password confirmation')}}</label>
-      <input type="password" id="request_passwordconfirm" name="request_passwordconfirm"  class="form-input"  data-action="wrapeye" pattern="{{api_password_regexp()}}"  required data-match="request_password" data-matchinvalid="{{_('password does not match')}}" data-new="{{_('new')}}" placeholder="{{_('New password confirmation')}}">
+      <input type="password" id="request_passwordconfirm" name="request_passwordconfirm"  class="form-input"  data-action="wrapeye" pattern="{{api_password_regexp()}}"  required data-match="request_password" data-matchinvalid="{{_('password does not match')}}"  placeholder="{{_('New password confirmation')}}">
       <input type="hidden" name="request_email" value={{ email }}>
       </div>
   {% else%}

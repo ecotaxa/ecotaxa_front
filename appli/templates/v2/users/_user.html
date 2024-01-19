@@ -11,10 +11,10 @@
   {% endif%}
   {% set fieldp="password" if createaccount==True else "newpassword"%}
     <label for="{{fieldp}}">{{_('Password') if createaccount==True else _('New password')}}</label>
-  <input type="password" id="{{fieldp}}" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="20"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} data-new="{{_('new')}}" placeholder="{{_('Password')}}">
+  <input type="password" id="{{fieldp}}" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="20"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} placeholder="{{_('Password')}}">
     {{ password_regexp()}}
     <label for="passwordconfirm">{{_('Password confirmation')}}</label>
-    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern="{{api_password_regexp()}}" data-match="password" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" data-new="{{_('new')}}" placeholder="{{_('Password confirmation')}}">
+    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern="{{api_password_regexp()}}" data-match="password" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" placeholder="{{_('Password confirmation')}}">
      {% if user and user.id and user.id>0%}
     </div>
     {% endif%}
@@ -36,16 +36,16 @@
             {% for key,label  in {'first':_('First name'),'last':_('Last name')}.items()%}
             <div class="form-box w-[50%]">
             <label for="name">{{label}}</label>
-            <input type="text" id="{{key}}name" name="{{key}}name" class="form-input" value="{{ user[key+'name']}}" required data-required="{{_('this field is required')}}" data-new="{{_('new')}}" placeholder="{{label}}"></div>
+            <input type="text" id="{{key}}name" name="{{key}}name" class="form-input" value="{{ user[key+'name']}}" required data-required="{{_('this field is required')}}" placeholder="{{label}}"></div>
             {%endfor%}</div>
           {% else%}
           <div class="form-box">
           <label for="name">{{_('Name')}}</label>
-          <input type="text" id="name" name="name" class="form-input" value="{{ user.name }}" required data-required="{{_('a name is required')}}" data-new="{{_('new')}}" placeholder="{{_('Name')}}"></div>
+          <input type="text" id="name" name="name" class="form-input" value="{{ user.name }}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}"></div>
           {% endif %}
           <div class="form-box">
             <label for="email">{{_('Email')}}</label>
-            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" data-sub="enable"  {{'  disabled' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" data-new="{{_('new')}}" placeholder="{{_('Email')}}">
+            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" data-sub="enable"  {{' readonly' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" placeholder="{{_('Email')}}">
             {%if createaccount != True or (user and user.email) -%}
             {% set type="warning"-%}
             <input type="hidden" name="currentemail" value="{{user.email}}">

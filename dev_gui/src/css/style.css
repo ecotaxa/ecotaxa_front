@@ -192,7 +192,7 @@ input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] 
 .form-input:focus, .form-select:focus, .form-textarea:focus  {@apply focus:ring-0 focus:ring-transparent focus:border-secondblue-200  focus:selection:bg-secondblue-300 } /* important otherwise field border color on focus does not work correctly */
 select option[selected="selected"], select option[selected=true], select option[selected="true"] , select option[selected=""]  {@apply font-semibold bg-secondblue-200 }
 select option:active, select option:focus  {@apply font-semibold bg-secondblue-200 }
-.form-select, .form-textarea, .form-input, .form-multiselect {@apply relative valid:z-0 invalid:border-danger-400 invalid:ring-danger-400 valid:mark-input invalid:mark-input invalid:after:content-["✖"] invalid:after:text-danger-400  valid:border-secondblue-300 valid:ring-secondblue-300 valid:after:content-["aaaa"] valid:after:text-secondblue-300}
+.form-select, .form-textarea, .form-input, .form-multiselect {@apply relative ring-0 valid:z-0 invalid:border-danger-400 invalid:border-danger-400 valid:mark-input invalid:mark-input invalid:after:content-["✖"] invalid:after:text-danger-400  valid:border-secondblue-300 valid:ring-secondblue-300 valid:after:content-["✓"] valid:after:text-secondblue-300}
 /*tom-select*/
 [class^="form-"] + .ts-wrapper {@apply border border-stone-300 ring-0}
 [class^="form-"]:valid + .ts-wrapper , [class^="form-"]:valid + .ts-wrapper.multi {@apply  border-secondblue-300 ring-0}
@@ -205,9 +205,6 @@ select option:active, select option:focus  {@apply font-semibold bg-secondblue-2
 :not(.group-radio) input[type="radio"]:not(.form-checkbox)  {@apply rounded-full after:absolute relative  checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-secondblue-400 checked:after:rounded-full checked:after:content-[''] ; }
 input[type="checkbox"],  input[type="checkbox"].form-checkbox , :not(.group-radio) input[type="radio"].form-checkbox { @apply ring-offset-0  ring-offset-transparent rounded-none after:absolute checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1 checked:after:h-2  checked:after:border-secondblue-400 checked:after:border-r-2 checked:after:border-b-2 checked:after:rotate-45 checked:after:content-[''] align-baseline;}
 input[type="checkbox"][readonly] {@apply pointer-events-none cursor-not-allowed checked:after:border-stone-800 ring-offset-transparent enabled:hover:ring-transparent enabled:ring-transparent}
-/*labels */
-label.required , .label.required {@apply w-auto inline-block after:content-['_*'] after:text-stone-600 hover:after:text-warning-700  after:inline after:whitespace-nowrap }
-label.input-invalid , .label.input-invalid {@apply after:text-sm after:italic  after:text-danger-500 after:px-1 after:py-1 after:border-danger-500 after:ml-1 after:h-4 after:w-32 rounded-full after:content-[attr(data-isinvalid)] after:inline after:whitespace-nowrap after:text-ellipsis;}
 /*forms specials */
 div.password-wrapper {@apply relative}
 div.password-wrapper input.form-input {@apply pr-12}
@@ -215,7 +212,11 @@ div.password-wrapper i {@apply absolute right-2 top-[50%] -translate-y-[50%] z-[
 legend {@apply bg-transparent text-stone-900 hover:text-stone-800 px-1 py-2 font-btn font-bold  mx-auto block text-sm md:text-base uppercase border-b-2 border-stone-100 }
 fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  md:mr-2 last:mr-0 p-0 }
 .form-box , .submit-box {@apply md:px-2 py-2 mb-2 md:mb-1 mx-0 }
-/*.form-box label , .form-box .label {@apply text-base font-semibold text-stone-900 bg-transparent }*/
+/*labels */
+.form-box label , .form-box .label {@apply text-base font-semibold text-stone-900 bg-transparent}
+.form-box > label.required, .form-box > .label.required {@apply  after:content-['_*'] after:text-stone-600 hover:after:text-warning-700   after:inline-block after:whitespace-nowrap  }
+.form-box > label.required.input-invalid ,.form-box > .label.required.input-invalid {@apply after:text-sm after:italic  after:text-danger-500 after:ml-1 after:w-auto after:content-[attr(data-invalid)] after:inline-block after:whitespace-nowrap after:text-ellipsis;}
+
 .form-box .checkbox-label {@apply text-sm font-normal}
 .form-box.relative label.over , .form-box.relative .label.over {@apply absolute top-0 left-4 z-10 px-1 pt-0.5 pb-0 -mt-1 ml-0.5 w-auto rounded-t align-baseline bg-white max-w-full overflow-hidden text-ellipsis}
 .fieldset-wrapper {@apply w-full flex   flex-wrap}
@@ -232,6 +233,7 @@ fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  m
   .group-radio > input[type="radio"] {@apply w-0 h-0 bg-transparent after:content-none !important}
 
   [data-request="help"] { @apply after:w-5 after:h-5 after:inline-block after:fill-danger-500 after:align-top after:ml-0.5 cursor-pointer }
+
   /* form inputs imported from project */
   .imported {@apply after:content-[attr(data-isimported)] after:rounded after:px-2 after:bg-stone-50 after:text-stone-500 after:text-xs after:h-auto after:inline-block;}
   /*block info in form*/
