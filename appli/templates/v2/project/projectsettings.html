@@ -83,7 +83,7 @@
           <div class="form-box">
             <label for="visible">{{_('Visible for all visitors')}} <span class="text-sm text-info font-light text-stone-700 italic"> ({{_('only validated objects')}})</span>
               <span class="togle ml-1 inline"><input type="checkbox" id="visible" name="visible" value="Y" {{ 'checked=true' if
-              target_proj.visible else '' }}></span></label>
+            new==True or  target_proj.visible else '' }}></span></label>
           </div>
           <div class="form-box">
             <label for="cnn_network_id" >{{_('Deep feature extractor')}}<i data-for="help_cnn_network_id" data-request="help"></i></label>
