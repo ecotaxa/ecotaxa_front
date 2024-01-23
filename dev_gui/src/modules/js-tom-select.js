@@ -18,6 +18,17 @@ import {
 } from '../modules/modules-config.js';
 let users_list = {};
 
+function _get_label(el, labelfield, item = false) {
+  let label = [];
+  if (Object.keys(el).indexOf(labelfield) >= 0) label.push(el[labelfield]);
+  else if (labelfield.indexOf('+') > 0) {
+    if (item === true) label.push(el[labelfield.split('+')[0]]);
+    else labelfield.split('+').forEach(l => {
+      if (l in el) label.push(el[l]);
+    });
+  }
+  return label.join(` `);
+}
 // settings for autocomplete select component - users , instruments , taxons
 export class JsTomSelect {
   applyTo(item, settings = {}, siblings = null) {
@@ -81,7 +92,7 @@ export class JsTomSelect {
           ...{
             valueField: 'id',
             searchField: 'name',
-            labelField: 'name',
+            labelField: 'name+email',
             onInitialize: function() {
               item.tomselect.items.forEach(e => {
                 users_list[e] = true;
@@ -224,7 +235,8 @@ export class JsTomSelect {
           if (el === undefined || el === null) return ``;
           // add optgroup
           const optgroup = (el.hasOwnProperty('optgroup')) ? `data-optgroup=${el.optgroup}` : ``;
-          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } " ${optgroup} data-value="${el[option.settings.valueField]}">${ escape(el[this.settings.labelField]) }</div>`;
+          const label = _get_label(el, option.settings.labelField);
+          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } " ${optgroup} data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
         },
         item: function(el, escape) {
           if (el === undefined || el === null) return ``; // add optgroup
@@ -234,7 +246,8 @@ export class JsTomSelect {
           //  const cancel = ((multiple) ? `<i class="${domselectors.component.tomselect.tsdelet.substr(1)}"></i>` : ``);
           // use ts plugin remove_button
           const cancel = ``;
-          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(el[this.settings.labelField]) } ${ cancel }</div>`);
+          const label = _get_label(el, option.settings.labelField, true);
+          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(label) } ${ cancel }</div>`);
         },
         no_results: function(data, escape) {
           return DOMPurify.sanitize('<div class="no-results">' + ((item.dataset.noresults) ? item.dataset.noresults : 'No result found for ') + escape(data.input) + '</div>');
@@ -331,4 +344,5 @@ export class JsTomSelect {
     } else console.log('noid');
 
   }
+
 }
