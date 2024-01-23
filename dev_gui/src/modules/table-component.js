@@ -171,7 +171,7 @@ export class TableComponent {
 
   waitDesactivate(message = null, type = 'info') {
     if (!this.waitdiv) return;
-    if (message) this.waitdiv.innerHTML = `<div class="${type}">${message}</div>`;
+    if (message) this.waitdiv.innerHTML = `<div class="alert is-${type}">${message}</div>`;
     else this.waitdiv.classList.add(css.hide);
   }
 
@@ -206,19 +206,19 @@ export class TableComponent {
 
     fetch(from, fetchSettings()).then(response => {
       if (response.ok) return response.json();
-      return Promise.reject(response);
+      else return Promise.reject(response);
     }).then(async tabledef => {
       if (this.waitdiv) this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : default_messages.dataloaded);
       if (pagestart === 0) {
         console.log('seconds to fetch', (Date.now() - this.dt) / 1000);
-        console.log('tdef', tabledef)
         this.dt = Date.now();
-        console.log('tabledef', tabledef)
         await this.tableActivate(container, tabledef);
       } else if (tabledef.length) this.domInsertRows(tabledef);
       else pagesize = 0;
       if (pagesize > 0) this.fetchData(container, fromurl, pagestart + pagesize);
-    }).catch((err) => { /* print error from response */ })
+    }).catch((err) => { /* print error from response */
+      this.waitDesactivate(err.status + ` ` + err.statusText, 'error');
+    })
   }
   async dataToTable(tabledef) {
 
@@ -264,7 +264,6 @@ export class TableComponent {
       thead.appendChild(tr);
       const datalastused = (this.params.lastused && this.params.lastused.length > 0) ? [] : null;
       //#TODO lastused reorder
-      console.log('isjon', isjson)
       if (isjson) {
         this.grid.data = [];
         tabledef.data.forEach((data, i) => {
@@ -878,8 +877,8 @@ export class TableComponent {
     });
 
     trs.forEach((tr, index) => {
-      if ((queries.length > 0 && indexes.length === 0) || (indexes.length && indexes.indexOf(tr.dataset.id) < 0)) tr.classList.add('hidden');
-      else tr.classList.remove('hidden');
+      if ((queries.length > 0 && indexes.length === 0) || (indexes.length && indexes.indexOf(tr.dataset.id) < 0)) tr.hidden = true;
+      else tr.hidden = false;
     });
 
   }
