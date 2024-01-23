@@ -708,7 +708,9 @@ a.disabled {@apply pointer-events-none;}
 .prjlist .table-table thead {@apply sticky  top-28 z-20}
 .prjlist .table-table thead tr th {@apply  bg-stone-300 hover:text-secondblue-500 text-secondblue-900  border-secondblue-100 shadow-sm;}
 .prjlist .table-table th .sublabel {@apply text-xs font-light text-stone-500 }
-.prjlist .table-table tr {@apply even:bg-stone-50 odd:bg-stone-100  h-8 max-h-8 overflow-hidden}
+.prjlist .table-table tr {@apply h-8 max-h-8 overflow-hidden}
+.prjlist .table-table tr:nth-child(even of :not([hidden])) {@apply bg-stone-50 }
+.prjlist .table-table tr:nth-child(odd of :not([hidden])) {@apply bg-stone-100 }
 .prjlist .table-table td.tdsmall {@apply uppercase py-[0.1rem];font-size:.625rem;line-height:.575rem}
 /* last_used_project */
 .prjlist .table-table tr.last-used {@apply  bg-white text-stone-900  border-stone-100 }
