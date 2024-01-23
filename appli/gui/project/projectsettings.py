@@ -156,7 +156,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
 
         posted_contact_id = gvp("contact_user_id")
         target_proj.visible = gvp("visible") == "Y"
-        if previous_cnn != target_proj.cnn_network_id:
+        if new != True and previous_cnn != target_proj.cnn_network_id:
             flash("scnerased", "success")
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
         do_update = True
@@ -252,13 +252,12 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                     )
                     # if new == True:
                     # redirect to import after 3 s
-                    # redir = "/Job/Create/FileImport?p=" + str(target_proj.projid)
+                    #    redir = "/Job/Create/FileImport?p=" + str(target_proj.projid)
                     # redir = "/prj/" + str(target_proj.projid) + "?next=import"
                     # else:
                     # redirect to classif
-                    # redir = "/prj/" + str(target_proj.projid) + "?next=classif"
-                    # return redirect(redir)
-                    return redirect(request.referrer)
+                    redir = url_for("gui_prj_edit", prjid=target_proj.projid)
+                    return redirect(redir)
             except ApiException as ae:
                 flash(py_messages["updateexception"] + "%s" % ae.reason)
     lst = [str(tid) for tid in target_proj.init_classif_list]
