@@ -4,9 +4,9 @@
   if (formbtn) {
     formbtn.classList.add('g-recaptcha');formbtn.dataset.sitekey="{{reCaptchaID}}";
     formbtn.dataset.callback="onSubmit";}
-    let ntry =0;
+    let ntry = 0,maxtry=1;
 function onSubmit(token) {
-        if(formcaptcha.classList.contains('js-submit')) { if(formcaptcha.formsubmit) formcaptcha.formsubmit.submitForm(); else if(ntry<2) setTimeout('onSubmit',500); else console.log('error submit');ntry++;} else formcaptcha.submit();
+        if(formcaptcha.classList.contains('js-submit')) { if(formcaptcha.formsubmit) formcaptcha.formsubmit.submitForm(); else if(ntry<maxtry) setTimeout('onSubmit',500); else console.log('error submit');ntry++;} else formcaptcha.submit();
        }
 </script>
 <script id="google-recaptcha" src=https://www.google.com/recaptcha/api.js></script>
