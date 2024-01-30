@@ -231,11 +231,15 @@ def gui_help(filename):
     partial = is_partial_request(request)
     filename = escape(filename)
     if filename[0:1] != "_":
-        return render_template(".v2/help.html", filename=filename)
+        return render_template(
+            "/v2/help/index.html", filename=filename, partial=partial
+        )
     filename = "/v2/help/" + filename + ".html"
     if not exists("appli/templates" + filename):
-        return render_template("v2/help/index.html", notfound=filename, partial=partial)
-    return render_template("." + filename, partial=partial)
+        return render_template(
+            "/v2/help/index.html", notfound=filename, partial=partial
+        )
+    return render_template(filename, partial=partial)
 
 
 # alert boxes xhr
