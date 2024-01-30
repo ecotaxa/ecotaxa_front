@@ -43,8 +43,9 @@ apptree = dict(
                 "show": _("View"),
                 "create": {
                     "children": {
-                        "GenExport": _("export"),
-                        "SumExport": _("summary export"),
+                        "GeneralExport": _("export"),
+                        "BackupExport": _("backup export"),
+                        "SummaryExport": _("summary export"),
                         "Subset": _("subset"),
                     }
                 },
