@@ -60,7 +60,7 @@ function format_license(data, withlink = false) {
     switch (data) {
       case "Copyright":
         return `<span class="txcc"  data-title="${data}">©</span>`;
-      case "not choosen":
+      case "not chosen":
       default:
         return `<span data-title="${data}"></span>`;
     }
