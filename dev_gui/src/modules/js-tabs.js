@@ -21,10 +21,10 @@ export class JsTabs {
         if (!target) return;
         const ev = (item.dataset.event) ? item.dataset.event : 'click';
         btn.style.left = l + 'px';
-        if (index === 0) {
+        if (index === 0 && target.parentElement.querySelectorAll('.' + css.active).length === 0) {
           target.classList.add(css.active);
           this.toggleTab(target, true);
-        } else this.toggleTab(target, false);
+        } else this.toggleTab(target, target.classList.contains(css.active));
         l += parseInt(btn.offsetWidth) + 20;
         btn.addEventListener(ev, (e) => {
           if (e.currentTarget.disabled === true) {
@@ -48,6 +48,7 @@ export class JsTabs {
 
   toggleTab(tab, show) {
     let what = (this.togglewhat) ? document.getElementById(this.togglewhat) : null;
+
     let tabcontents = tab.querySelectorAll(domselectors.component.tabs.tabcontent);
     if (tabcontents.length === 0) tabcontents = [tab];
     tabcontents.forEach(tabcontent => {
@@ -60,6 +61,8 @@ export class JsTabs {
           } else el.disabled = true;
         });
         if (what) what.value = tabcontent.dataset.what;
+        const form = tab.closest('form');
+        if (tabcontent.dataset.path && form !== null) form.setAttribute('action', tabcontent.dataset.path);
       }
     });
 
