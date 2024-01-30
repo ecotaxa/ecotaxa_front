@@ -25,7 +25,7 @@
   {# set the form id to import to and the header include for taxo imports #}
   {% set data = {'form':'#formu','key': key, 'header': './v2/project/_headerimport.html'} if (key == 'taxo' or key == 'privileges') else {'form':'#formu','key': key} %}
   {% set icon = 'icon-carboncopy-sm' if new == False else 'icon-carboncopy'%}
-  {% set btn = {'class':'button is-import is-pick'+(' new' if new == True else ''),'title':modal_title,'icon':icon,'text': _('pick from projects') ,'data':' data-request=settings data-target=unique data-key=' + key + ' data-projid=' + (target_proj.projid|string() if (target_proj and target_proj.projid > 0) else '0')}%}
+  {% set btn = {'class':'button is-import is-pick'+(' new' if new == True else ''),'title':modal_title,'icon':icon,'text': modal_title ,'data':' data-request=settings data-target=unique data-key=' + key + ' data-projid=' + (target_proj.projid|string() if (target_proj and target_proj.projid > 0) else '0')}%}
   {{ modal('importfrom_' + key,  btn = btn,modal_title = modal_title, data=data) }}
 </div>
 {% endif %}
@@ -45,7 +45,7 @@
     <div class="fieldset-wrapper">
       <fieldset class="w-full md:flex md:flex-wrap tab">
         <legend class="tab-control">{{_('project') + ' ' + target_proj.id|string() if target_proj.projid else _('new project')}}</legend>
-        {{ pick_from_other(True) }}
+        {{ pick_from_other(True,key='settings',modal_title=_('Pick all settings from other project')) }}
         <div class=" w-full md:w-1/2 md:pr-6 tab-content">
           <div class="form-box">
             <label for="title" data-required="{{_('a title is required')}}">{{_('Title')}}</label>
@@ -100,7 +100,7 @@
             <div class="form-group" id="proj_license" role="group">
                 {% set required = True %}
               {% for k in possible_licenses.keys() %}
-              {% set label='not choosen' if k=='' else k %}
+              {% set label='not chosen' if k=='' else k %}
               {{form_group_radio('license_'+ loop.index|string(),'license',k,label,target_proj.license, required=required )}}
                 {% set required = False %}
               {% endfor %}</div>
