@@ -49,7 +49,7 @@ export class ActivRequest {
         const modalbox = (modal) ? modal.modal : null;
         if (!modal || !modalbox) return;
         const file = (item.dataset.file) ? ((item.dataset.file !== modalbox.dataset.currentfile) ? item.dataset.file : null) : modalbox.dataset.file;
-        const target = (item.dataset.target) ? document.querySelector('#' + item.dataset.target + ' article') : modalbox.querySelector(domselectors.component.modal.mainhelp + " article");
+        const target = (item.dataset.target) ? document.getElementById(item.dataset.target) : modalbox.querySelector(domselectors.component.modal.mainhelp + ' > div');
         if (!target) return;
         if (target && file) {
           url = '/gui/help/' + file + '?' +
