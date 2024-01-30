@@ -122,7 +122,6 @@ def gui_job_question(job_id: int):
 
     if job.state != "A":
         return ""
-
     job_cls = Job.find_job_class_by_name(Job, job.type)
     assert job_cls is not None, "%s not known as a job UI type" % job.type
     if request.method == "GET":
@@ -140,7 +139,22 @@ def gui_job_status(job_id: int):
     try:
         with ApiClient(JobsApi, request) as api:
             job: JobModel = api.get_job(job_id=job_id)
-        job_cls = Job.find_job_class_by_name(Job, job.type)
+        # convert to new gui/job_type ( GenExport to GeneralExport or BackupExport )
+        new_types = {
+            "TSV": "GeneralExport",
+            "BAK": "BackupExport",
+            "ABO": "SummaryExport",
+            "CNC": "SummaryExport",
+            "BIV": "SummaryExport",
+        }
+        if (
+            job.type == "GenExport"
+            and job.params["req"]["exp_type"] in new_types.keys()
+        ):
+            new_type = new_types[job.params["req"]["exp_type"]]
+        else:
+            new_type = "SummaryExport"
+        job_cls = Job.find_job_class_by_name(Job, new_type)
         rep = job.to_dict()
         rep["finalaction"] = job_cls.final_action(job)
     except ValueError as e:  # Exception as e:

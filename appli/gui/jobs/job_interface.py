@@ -2,133 +2,186 @@ from flask_babel import _
 from typing import Dict
 from flask import request
 from appli.utils import ApiClient
-from appli.gui.jobs.staticlistes import py_messages, JOB_STATE_TO_USER_STATE
+from appli.gui.jobs.staticlistes import JOB_STATE_TO_USER_STATE
 from to_back.ecotaxa_cli_py import ApiException, MinUserModel
-from to_back.ecotaxa_cli_py.api import JobsApi, UsersApi
+from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import JobModel
 
 
 def export_format_options(type=None):
     options = dict(
         {
-            "options": [
-                {
-                    "name": "objectdata",
-                    "label": _("Object Data (median,mean, x, y, ...)"),
+            "general": {
+                "with_images": {
+                    "label": _("Images"),
+                    "options": [
+                        {"label": _("First image"), "value": "first"},
+                        {"label": _("All images"), "value": "all"},
+                        {"label": _("None"), "value": "none"},
+                    ],
+                    "format": "radio",
                 },
-                {
-                    "name": "processdata",
-                    "label": _("Process Data (software,version, ...)"),
+                "with_internal_ids": {
+                    "label": _("Internal database IDs"),
+                    "options": [
+                        {"label": _("Yes"), "value": 1},
+                        {"label": _("No"), "value": 0},
+                    ],
+                    "format": "radio",
                 },
-                {
-                    "name": "acqdata",
-                    "label": _("Acquisition Data (Resolution, ...)"),
+                "with_types_row": {
+                    "label": _("Add an EcoTaxa-compatible second line with types"),
+                    "options": [
+                        {"label": _("Yes"), "value": 1},
+                        {"label": _("No"), "value": 0},
+                    ],
+                    "format": "radio",
                 },
-                {
-                    "name": "sampledata",
-                    "label": _("Sample Data (lat,long, date, ...)"),
+                # "taxo_mapping": {
+                #    "label": _(
+                #        "Mapping from present taxon (key) to output replacement one (value)"
+                #    ),
+                #    "comment": _(
+                #        "Use a null replacement to _discard_ the present taxon"
+                #    ),
+                #    "format": "textarea",
+                # },
+                "only_annotations": {
+                    "label": _("Only save objects' last annotation data"),
+                    "options": [
+                        {"label": _("Yes"), "value": 1},
+                        {"label": _("No"), "value": 0},
+                    ],
+                    "format": "radio",
                 },
-                {
-                    "name": "histodata",
-                    "label": _("Historical Data"),
+                "split_by": {
+                    "label": _("Separate (in ZIP sub-directories) output"),
+                    "options": [
+                        {"label": _("Sample"), "value": "sample"},
+                        {"label": _("Acquisition"), "value": "acquisition"},
+                        {"label": _("Taxon"), "value": "taxon"},
+                        {"label": _("None"), "value": "none"},
+                    ],
+                    "format": "radio",
                 },
-                {
-                    "name": "commentsdata",
-                    "label": _("Comments"),
+                "out_to_ftp": {
+                    "label": _(
+                        "Copy result file to FTP area. Original file is still available"
+                    ),
+                    "options": [
+                        {"label": _("Yes"), "value": 1},
+                        {"label": _("No"), "value": 0},
+                    ],
+                    "format": "radio",
                 },
-            ],
-            "otheroptions": [
-                {
-                    "name": "usecomasepa",
-                    "label": _("Use coma as decimal separator"),
+            }
+        }
+    )
+    formdatas = dict(
+        {
+            "general": {
+                "path": "/gui/job/create/GeneralExport",
+                "title": _("General Export"),
+                "legend": _("Configurable objects export"),
+                "datas": {
+                    "split_by": ("none", False),
+                    "with_images": ("none", False),
+                    "with_internal_ids": (0, False),
+                    "with_types_row": (0, False),
+                    "only_annotations": (0, False),
+                    "out_to_ftp": (0, False),
                 },
-                {
-                    "name": "formatdates",
-                    "label": _("Format dates and times using - and :"),
+            },
+            "backup": {
+                "path": "/gui/job/create/BackupExport",
+                "title": _("Backup Export"),
+                "legend": _("Backup export, for restoring or archiving"),
+                "datas": {
+                    "split_by": ("sample", True),
+                    "with_images": ("all", True),
+                    "with_internal_ids": (False, True),
+                    "with_types_row": (1, True),
+                    "only_annotations": (0, True),
+                    "out_to_ftp": (0, False),
                 },
-                {
-                    "name": "internalids",
-                    "label": _("Internal Ids (including taxonomic source Id)"),
+            },
+            "summary": {
+                "path": "/gui/job/create/SummaryExport",
+                "title": _("Summary Export"),
+                "legend": _("Synthetic taxon-oriented export"),
+                "datas": {
+                    "quantity": ("abundance", False),
+                    "summarise_by": ("none", False),
+                    "taxo_mapping": ({}, False),
+                    "formulae": (0, False),
+                    "out_to_ftp": (0, False),
                 },
-            ],
-            "images": {
-                "name": "exportimages",
-                "label": _("Export image files"),
             },
         }
     )
-    if type == "SUM":
-        return {
-            **dict(
-                {
-                    "data": {
-                        "SUM": {},
-                    }
-                }
-            ),
-            **options,
+
+    options["summary"] = dict(
+        {
+            "quantity": {
+                "label": _("Quantity to compute"),
+                "options": [
+                    {"label": _("Abundance"), "value": "abundance"},
+                    {"label": _("Concentration"), "value": "concentration"},
+                    {"label": _("biovolume"), "value": "biovolume"},
+                ],
+                "format": "radio",
+            },
+            "summarise_by": {
+                "label": _("Computations aggregation level"),
+                "options": [
+                    {"label": _("Sample"), "value": "sample"},
+                    {"label": _("Acquisition"), "value": "acquisition"},
+                    {"label": _("None"), "value": "none"},
+                ],
+                "format": "radio",
+            },
+            "taxo_mapping": {
+                "label": _(
+                    "Mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon."
+                ),
+                "format": "textarea",
+            },
+            "formulae": {
+                "label": _(
+                    "Transitory: How to get values from DB free columns. Python syntax, prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are 'total_water_volume', 'subsample_coef' and 'individual_volume'"
+                ),
+                "example": '{"subsample_coef"->str, "total_water_volume"->str, "individual_volume"->str}',
+                "format": "textarea",
+            },
+            "out_to_ftp": {
+                "label": _(
+                    "Copy result file to FTP area. Original file is still available"
+                ),
+                "options": [
+                    {"label": _("Yes"), "value": 1},
+                    {"label": _("No"), "value": 0},
+                ],
+                "format": "radio",
+            },
         }
+    )
+    if type != None:
+        formdata = dict()
+        option = dict()
+        formdata[type] = formdatas[type]
+        if type == "backup":
+            typoption = "general"
+        else:
+            typoption = type
+        option[type] = options[typoption]
+        export_links = []
+        for key, fdata in formdatas.items():
+            if key != type:
+                export_links.append({"path": fdata["path"], "title": fdata["title"]})
+        return formdata, option, export_links
     else:
-        return {
-            **dict(
-                {
-                    "fields": {
-                        "TSV": {
-                            "exportimages": {
-                                "select": [
-                                    {"label": _("NO Images"), "value": ""},
-                                    # {"label": _("Only Rank 0 Image"), "value": "1"},
-                                    # {
-                                    #    "label": _("All images of each object"),
-                                    #    "value": "A",
-                                    # },
-                                ]
-                            },
-                        },
-                        "BAK": {
-                            "exportimages": {
-                                "select": [
-                                    # {"label": _("NO Images"), "value": ""},
-                                    {
-                                        "label": _("All images files"),
-                                        "value": "A",
-                                    },
-                                ]
-                            }
-                        },
-                    },
-                    "data": {
-                        "TSV": {
-                            "objectdata": ("1", False),
-                            "processdata": ("1", False),
-                            "acqdata": ("1", False),
-                            "sampledata": ("1", False),
-                            "histodata": ("", False),
-                            "commentsdata": ("", False),
-                            "usecomasepa": ("", False),
-                            "formatdates": ("1", False),
-                            "internalids": ("1", False),
-                            "splitcsvby": "",
-                            "exportimages": ("", False),
-                        },
-                        "BAK": {
-                            "objectdata": ("1", True),
-                            "processdata": ("1", True),
-                            "acqdata": ("1", True),
-                            "sampledata": ("1", True),
-                            "histodata": ("", True),
-                            "commentsdata": ("", True),
-                            "usecomasepa": ("", True),
-                            "formatdates": ("1", True),
-                            "internalids": ("1", True),
-                            "splitcsvby": "",
-                            "exportimages": ("", False),
-                        },
-                    },
-                }
-            ),
-            **options,
-        }
+        options["backup"] = options["general"]
+    return formdatas, options, None
 
 
 def display_job(usercache: Dict[int, MinUserModel], ajob: JobModel):

@@ -12,13 +12,14 @@ from to_back.ecotaxa_cli_py.models import ExportReq, ExportRsp, ProjectModel, Jo
 
 class ExportJob(Job):
     """
-        Subset, just GUI here, bulk of job is subcontracted to back-end.
+    Subset, just GUI here, bulk of job is subcontracted to back-end.
     """
+
     UI_NAME = "GenExport"
 
     @classmethod
     def initial_dialog(cls):
-        """ In UI/flask, initial load, GET """
+        """In UI/flask, initial load, GET"""
         prj_id = int(gvg("projid"))
         with ApiClient(ProjectsApi, request) as api:
             try:
@@ -26,26 +27,30 @@ class ExportJob(Job):
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
-        g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_prj.projid, XSSEscape(target_prj.title))
+        g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(
+            target_prj.projid, XSSEscape(target_prj.title)
+        )
 
         filters = {}
         filtertxt = cls._extract_filters_from_url(filters, target_prj)
 
-        formdata = {"what": "TSV",
-                    "objectdata": "1",
-                    "processdata": "1",
-                    "acqdata": "1",
-                    "sampledata": "1",
-                    "splitcsvby": ""
-                    }
+        formdata = {
+            "what": "TSV",
+            "objectdata": "1",
+            "processdata": "1",
+            "acqdata": "1",
+            "sampledata": "1",
+            "splitcsvby": "",
+        }
 
         html = "<h3>Data Export</h3>"
-        return render_template('jobs/export_create.html', header=html,
-                               form=formdata, filtertxt=filtertxt)
+        return render_template(
+            "jobs/export_create.html", header=html, form=formdata, filtertxt=filtertxt
+        )
 
     @classmethod
     def create_or_update(cls):
-        """ In UI/flask, submit/resubmit of initial page, POST """
+        """In UI/flask, submit/resubmit of initial page, POST"""
         prj_id = int(gvg("projid"))
         with ApiClient(ProjectsApi, request) as api:
             try:
@@ -53,15 +58,17 @@ class ExportJob(Job):
             except ApiException as ae:
                 if ae.status in (401, 403):
                     return PrintInCharte("ACCESS DENIED for this project")
-        g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_prj.projid, XSSEscape(target_prj.title))
+        g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(
+            target_prj.projid, XSSEscape(target_prj.title)
+        )
 
         what = gvp("what")
-        objectdata = 'O' if gvp("objectdata") == "1" else ""
-        processdata = 'P' if gvp("processdata") == "1" else ""
-        acqdata = 'A' if gvp("acqdata") == "1" else ""
-        sampledata = 'S' if gvp("sampledata") == "1" else ""
-        histodata = 'H' if gvp("histodata") == "1" else ""
-        commentsdata = 'C' if gvp("commentsdata") == "1" else ""
+        objectdata = "O" if gvp("objectdata") == "1" else ""
+        processdata = "P" if gvp("processdata") == "1" else ""
+        acqdata = "A" if gvp("acqdata") == "1" else ""
+        sampledata = "S" if gvp("sampledata") == "1" else ""
+        histodata = "H" if gvp("histodata") == "1" else ""
+        commentsdata = "C" if gvp("commentsdata") == "1" else ""
         usecomasepa = gvp("usecomasepa") == "1"
         formatdates = gvp("formatdates") == "1"
         sumsubtotal = gvp("sumsubtotal")
@@ -71,7 +78,9 @@ class ExportJob(Job):
         splitcsvby = gvp("splitcsvby")
         putfileonftparea = gvp("putfileonftparea") == "Y"
 
-        tsv_entities = objectdata + processdata + acqdata + sampledata + histodata + commentsdata
+        tsv_entities = (
+            objectdata + processdata + acqdata + sampledata + histodata + commentsdata
+        )
 
         errors = []
         # Check data validity
@@ -86,24 +95,29 @@ class ExportJob(Job):
                 flash(e, "error")
             html = "<h3>Export</h3>"
             formdata = {}
-            return render_template('jobs/export_create.html', header=html,
-                                   form=formdata, filtertxt=filtertxt)
+            return render_template(
+                "jobs/export_create.html",
+                header=html,
+                form=formdata,
+                filtertxt=filtertxt,
+            )
         else:
             # Do the export on back-end side
-            req = ExportReq(project_id=prj_id,
-                            exp_type=what,
-                            split_by=splitcsvby,
-                            coma_as_separator=usecomasepa,
-                            format_dates_times=formatdates,
-                            with_images=exportimages,
-                            with_internal_ids=internalids,
-                            only_first_image=only_first_image,
-                            sum_subtotal=sumsubtotal,
-                            out_to_ftp=putfileonftparea,
-                            tsv_entities=tsv_entities,
-                            use_latin1=False)
-            export_req = {"filters": filters,
-                          "request": req}
+            req = ExportReq(
+                project_id=prj_id,
+                exp_type=what,
+                split_by=splitcsvby,
+                coma_as_separator=usecomasepa,
+                format_dates_times=formatdates,
+                with_images=exportimages,
+                with_internal_ids=internalids,
+                only_first_image=only_first_image,
+                sum_subtotal=sumsubtotal,
+                out_to_ftp=putfileonftparea,
+                tsv_entities=tsv_entities,
+                use_latin1=False,
+            )
+            export_req = {"filters": filters, "request": req}
             with ApiClient(ObjectsApi, request) as api:
                 rsp: ExportRsp = api.export_object_set(export_req)
             return redirect("/Job/Monitor/%d" % rsp.job_id)
