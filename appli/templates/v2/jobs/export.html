@@ -1,60 +1,46 @@
 {% extends "./v2/layout.html" %}
 {% from "./v2/macros/macros.html" import form_group_radio, checkbox_radio, alertbox with context %}
 {% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
-{%-macro select_export_options(data,extid)-%}
-{% for selectoptions in [formatoptions.options, formatoptions.otheroptions]%}
-  {% for selectoption in selectoptions %}
-  {% set dataoption = "" if selectoption.name not in data else data[selectoption.name] %}
-{% set dataoption = [dataoption] if dataoption is string else dataoption %}
-  {% set value = dataoption[0]  %}
-    {% set extra = " readonly onclick='return false;'" if dataoption[1] == True   else "" %}
-  {{ checkbox_radio(selectoption.name,selectoption.name+'_'+extid,"1",dataoption[0],selectoption.label, extra=extra) }}
-{%endfor%}
-{%endfor%}
-{%-endmacro-%}
-{%macro select_export_images(params,extid)-%}
-{% if "select" in params%}
-<label for="exportimages_{{extid}}">{{_('Export images')}}</label>
-<select name="exportimages" id="exportimages_{{extid}}" class="form-select w-auto">
-  {%- for option in params["select"] -%}
-  <option value={{option.value}} >{{option.label}}</option>
-  {%-endfor-%}
-  </select>
-{% elif "checkbox" in params %}
-<label for="exportimages_{{extid}}">{{params.checkbox.label}} <input type="checkbox" name="exportimages" id="exportimages_{{extid}}" class="ml-2" value={{params.checkbox.value}}></label>
-{%endif%}
-{%-endmacro%}
-{%- macro splitby(extid)-%}
-{%-if extid == 'bak'-%}
-<input type="text" class="form-input" readonly value="sample" name="splitcsvby" id="splitcsvby">
-{%-else-%}
-<select name="splitcsvby" id="splitcsvby" class="form-select w-auto ">
-  <option value="">{{_('NOT Active')}}</option>
-  <option value="sample" {{ 'selected' if  formdata.splitcsvby and formdata.splitcsvby=='sample' }} >{{_('Sample')}}</option>
-  <option value="taxo" {{ 'selected' if formdata.splitcsvby and formdata.splitcsvby=='taxo' }} >{{_('Taxonomy (parent_child)')}}</option>
-</select>
-{%-endif-%}
+{%- macro make_part_form(type_export,datas)-%}
+{%-for name,option in formoptions[type_export].items() -%}
+{%- if name in datas.keys() -%}
+<div class="form-box">
+{%- if "options" in option.keys() -%}
+  {% if datas[name][1] == True %}  <span class="mr-2 italic font-normal">{{option.label}} </span>
+  <input type="hidden" name="{{name}}" value={{formdatas[type_export].datas[name][0]}}>
+     {%- for opt in option.options -%}
+    {%-if opt.value == datas[name][0] -%}<span class="bg-stone-50 p-2 rounded font-semibold ">{{opt.label}}</span>{%-endif-%}
+    {%-endfor-%}
+  {%-else -%}
+  {%- if option.format=="checkbox"-%}<label for="{{name+'_'+type_export}}" class="inline-block">{{option.label}} <input type="checkbox" id="{{name+'_'+typexport}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
+  {%-elif option.format=="radio"-%}<div class="label inline-block mr-2 w-auto">{{option.label}} </div><div class="form-group inline-block w-auto">
+    {%- for opt in option.options -%}
+    {{ form_group_radio(name+'_'+type_export+'_'+loop.index|string,name,opt.value,opt.label,datas[name][0])}}
+      {%- endfor -%}</div>{%-endif-%}
+  {%-endif-%}
+  {%- elif option.format=='textarea'-%}
+  <label>{{option.label}}</label>
+  <textarea class="form-textarea">{{datas[name][0] if name in datas}}</textarea>
+  {%-endif%}
+</div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}
 {% block body %}
 <div class="container mx-auto">
   <div class="w-100 mx-auto block pt-4 text-left relative" id="project-subset-header">
-  {% set data = {'file':'_help_job_export'} %}
-  {{header_project_job(_('Full export'),data, _('How to export data'))}}
+  {% set data = {'file':'_help_job_export'} -%}
+  {%- set title=_('Export') if export_type==None else formdatas[export_type].title %}
+{{header_project_job(title ,data, _('How to export data'), nav={"links":export_links,"query":"?projid="+target_proj.projid|string})}}
+	<em class="block text-sm mt-2">{{_('Global export rules')}} <i data-for="help_global_export_rules" data-request="help"></i></em>
 </div>
-  <form method="post" action="{{request.path}}" class="js js-submit js-tabs " data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
-    <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" type="text" name="projid" id="projid" value="{{target_proj.projid}}"></div>
+<form method="post" class="js js-submit js-tabs" action="{{request.path}}" data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
+    <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
-  <fieldset class="w-full md:w-1/2 tab mb-0 pb-0"><legend class="text-center tab-control">{{_("Custom")}} </legend>
-    <div class="tab-content pt-2" id="TSV"  data-what="TSV"><em class="text-xs">{{_('configurable export for general purposes')}}</em><div class="form-box">{{select_export_options(formatoptions.data.TSV,"tsv")}}</div>
-    <div class="form-box">{{select_export_images(formatoptions.fields.TSV.exportimages,"tsv")}}</div><div class="form-box"><label for="splitcsvby">{{_('Split in multiple files by')}}</label>{{splitby("tsv")}}</div><input type="hidden" name="what"  value="TSV">
-        </div></fieldset><fieldset class="w-full md:w-1/2 tab my-0 py-0">
-  <legend class="text-center tab-control">{{_("Backup")}} </legend><div class="tab-content pt-2" id="BAK"  data-what="BAK">
-    <em class="text-xs">{{_('ready to re-import datasets, possibly including images')}}</em>
-  <div class="form-box">{{select_export_options(formatoptions.data.BAK,"bak")}}</div>
-    <div class="form-box">{{select_export_images(formatoptions.fields.BAK.exportimages,"bak")}}
-      </div><div class="form-box"><label for="splitcsvby">{{_('Split in multiple files by')}}</label>{{splitby("bak")}}</div><input type="hidden" name="what" value="BAK"></div></fieldset><fieldset class="w-full -mt-4 pt-0 block">
-  </fieldset></div>
-            <input type="hidden" name="starttask" value="Y">
+      {% for type_export,formdata in formdatas.items() %}
+    <fieldset class="w-full md:w-1/2 my-0 py-0 tab  tab-one {{'active' if export_type == type_export}}">{%- if export_type== None -%}<legend class="text-center tab-control "  data-what="{{type_export}}" >{{formdata.title}} </legend>{%-endif -%}
+      <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help"></i></em>
+      {{ make_part_form(type_export,formdata.datas )}}
+    </div></fieldset>{%-endfor-%}
+  </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
           <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>  <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
             </div>
