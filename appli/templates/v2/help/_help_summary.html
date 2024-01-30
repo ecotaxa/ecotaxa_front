@@ -1,13 +1,4 @@
 {% extends "./v2/help/_layout.html" %}
-{% macro listhelp(helps) -%}
-{% for help in helps %}
-<details><summary>{{ help['name'] }}</summary><div>{% if 'links' in help %}
-  {{ listhelp(help['links']) if 'links' in help}}
-{% else %} <p>{{ help['resume'] }}</p> <a href="#" data-request="help" data-file="{{ help['file'] }}" data-target="main-help" data-title="{{ help['title'] if 'title' in help }}"> {{ _('readmore') }}  </a>
-{% endif%} </div>
-</details>
-{% endfor%}
-{%- endmacro %}
 {% block article %}
 <article class="table-of-contents">
   <h2 class="help-title">{{ _('Help Summary')}} </h2>

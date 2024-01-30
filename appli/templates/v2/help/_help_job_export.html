@@ -1,0 +1,23 @@
+{%- if not partial-%}{% extends "./v2/help/_layout.html" %}{%-endif-%}
+{% block article %}
+<article id="help-job-export">
+  <h2 class="help-title">{{ _('Export')}} </h2>
+  <details id="help_global_export_rules"><summary>{{_('Global export rules')}}</summary><div>
+    <ul class="list-disc list-inside"><li>{{_('character set is <strong>UTF-8</strong>')}}</li>
+<li>numbers have <strong>"."</strong> (dot) as decimal separator</li>
+<li>{{_('dates are in format <strong>YYYY-MM-DD</strong>')}}</li>
+<li>{{_('times are in format <strong>hh:mm:ss</strong>')}}</li></ul></div></details>
+  <details id="help_export_general"><summary>{{_('General Export')}}</summary>
+      <div>
+        <ul class="list-disc list-inside"><li></li><li></li><li></li></ul>
+      </div></details>
+      <details id="help_export_backup"><summary>{{_('Backup Export')}}</summary>
+          <div>
+            <ul class="list-disc list-inside"><li></li><li></li><li></li></ul>
+          </div></details>
+          <details id="help_export_summary"><summary>{{_('Summary Export')}}</summary>
+              <div>
+                <ul class="list-disc list-inside"><li></li><li></li><li></li></ul>
+              </div></details>
+</article>
+{% endblock %}
