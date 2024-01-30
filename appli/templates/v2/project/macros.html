@@ -10,7 +10,11 @@
 </div>
 </div>
 {%-endmacro -%}
-{%-macro header_project_job(action,helpdata,modaltitle) -%}
-  {{ modal(id=helpdata.file|replace('_','-'),modal_title=modaltitle, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = helpdata) }}
-    <h2 class="font-semibold mb-4"><strong>{{action}} </strong>{{ target_proj.title }} </h2>
+{%-macro header_links(nav)-%}
+{%-if nav.links is iterable -%}
+<ul class="inline-block">{%- for link in nav.links -%}<li class="inline pl-2 ml-4"><a href="{{link.path}}{{nav.query}}" class="title-nav">{{link.title}}</a></li>{%-endfor-%}</ul>
+{%-endif-%}{%-endmacro-%}
+{%-macro header_project_job(action,helpdata,modaltitle, nav=None) -%}
+  {{ modal(id=helpdata.file|replace('_','-'),modal_title=modaltitle, type='modal-help',modal_content='/v2/help/'+helpdata.file+'.html',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = helpdata) }}
+    <h2 class="font-semibold mb-4 {{ 'inline-block' if nav!=None}}"><strong>{{action}} </strong>{{ target_proj.title }} {{header_links(nav) if nav!=None}}</h2>
 {%-endmacro-%}
