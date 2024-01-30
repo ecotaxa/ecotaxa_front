@@ -86,6 +86,7 @@ a {@apply no-underline}
 .button , a.button {
    @apply cursor-pointer py-1 sm:py-2 px-4 inline-block text-base sm:text-lg font-btn font-medium  rounded  border drop-shadow-sm hover:drop-shadow-none transform transition duration-300 ease-in-out focus:ring-2 ring-offset-2 ring-transparent ;
  }
+ .button[readonly] {@apply opacity-75 }
 .button.disabled , a.disabled {@apply opacity-50 }
 .is-default {@apply bg-transparent border-none ring-0}
  .is-primary {
@@ -176,6 +177,7 @@ header details.project-search[open] summary i {@apply opacity-0}
 details.project-search[open] summary::after {@apply  fill-stone-50 hover:fill-white  top-0.5 right-0.5  duration-100;}
 
 /* aside-modal help details content */
+i[data-request="help"] {@apply cursor-help}
 details[open].modal-help {@apply z-80  p-0 }
 details[open].modal-help .aside-body  {@apply w-full h-full p-0 m-0 }
 details:not([open]).modal-help {@apply mb-4 }
@@ -278,6 +280,8 @@ form.js-tabs .hide , .modal .hide , table.hide , tr.hide , tbody.hide thead.hide
 form.js-tabs legend.tab-control {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
 form.js-tabs .tab.active legend.tab-control {@apply border-stone-600 text-stone-900  opacity-100 }
 form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2}
+form.js-tabs .tab.tab-one legend.tab-control {@apply border-none font-bold text-lg before:content-["___"] before:text-lg}
+form.js-tabs .tab.tab-one.active legend.tab-control {@apply border-none before:content-["_»_"] before:text-lg}
 /* tabs expand shrink */
 .tabs-display.expand  {@apply icon-chevron-down}
 .tabs-display.shrink {@apply icon-chevron-up}
@@ -974,6 +978,10 @@ div.data-import .ts-wrapper.multi {@apply max-h-full overflow-hidden}
 div.showfull div.zone-import > div.btns-import {@apply max-h-[100%] }
 div.showfull div.data-import .ts-wrapper.multi {@apply absolute -mt-[100%] z-60 overflow-y-visible}/* hover:absolute hover:max-h-full hover:z-60 hover:overflow-y-visible*/
 .import-projects-list .selected {@apply text-stone-200 text-xs max-h-8 bg-secondblue-100}
+/*********************/
+/* job pages title   */
+/*********************/
+.title-nav {@apply text-stone-800  before:content-["_»_"]  before:text-lg  before:text-stone-700 hover:text-mainblue-600 font-semibold text-base sm:text-lg  }
 /********************/
 /* job listall table*/
 /********************/
