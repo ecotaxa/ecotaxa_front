@@ -280,8 +280,9 @@ form.js-tabs .hide , .modal .hide , table.hide , tr.hide , tbody.hide thead.hide
 form.js-tabs legend.tab-control {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
 form.js-tabs .tab.active legend.tab-control {@apply border-stone-600 text-stone-900  opacity-100 }
 form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2}
-form.js-tabs .tab.tab-one legend.tab-control {@apply border-none font-bold text-lg before:content-["___"] before:text-lg}
-form.js-tabs .tab.tab-one.active legend.tab-control {@apply border-none before:content-["_»_"] before:text-lg}
+form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4 shadow-none  }
+form.js-tabs .tab.tab-one.active legend.tab-control {@apply bg-white text-stone-800 font-bold border  border-stone-100 border-b-white z-10 }
+form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-7 px-4 -ml-6}
 /* tabs expand shrink */
 .tabs-display.expand  {@apply icon-chevron-down}
 .tabs-display.shrink {@apply icon-chevron-up}
@@ -981,7 +982,7 @@ div.showfull div.data-import .ts-wrapper.multi {@apply absolute -mt-[100%] z-60 
 /*********************/
 /* job pages title   */
 /*********************/
-.title-nav {@apply text-stone-800  before:content-["_»_"]  before:text-lg  before:text-stone-700 hover:text-mainblue-600 font-semibold text-base sm:text-lg  }
+.title-nav {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4 shadow-none   }
 /********************/
 /* job listall table*/
 /********************/

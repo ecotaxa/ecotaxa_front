@@ -36,7 +36,7 @@
     <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
       {% for type_export,formdata in formdatas.items() %}
-    <fieldset class="w-full md:w-1/2 my-0 py-0 tab  tab-one {{'active' if export_type == type_export}}">{%- if export_type== None -%}<legend class="text-center tab-control "  data-what="{{type_export}}" >{{formdata.title}} </legend>{%-endif -%}
+    <fieldset class="w-full md:w-1/2 my-0 py-0 tab  tab-one {{'active' if export_type == type_export}}">{%- if export_type== None -%}<legend class="text-center tab-control title-nav"  data-what="{{type_export}}" >{{formdata.title}} </legend>{%-endif -%}
       <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help"></i></em>
       {{ make_part_form(type_export,formdata.datas )}}
     </div></fieldset>{%-endfor-%}
