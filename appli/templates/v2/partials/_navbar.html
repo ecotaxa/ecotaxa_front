@@ -38,10 +38,12 @@
 </a>
 </li>
 <li><div>{{_('Export')}}</div><ul aria-expanded=false><li>
-      <a href="{{url_for("gui_job_create",job_type="GenExport", projid=target_proj.projid)}}" {{ disabled.value if privilege.value==""}}>
-      {{_('<strong>Full</strong> export')}}
-      </a></li><li><a href="{{url_for("gui_job_create",job_type="SumExport", projid=target_proj.projid) }}">
-        {{_('<strong>Summary</strong> export')}}
+      <a href="{{url_for("gui_job_create",job_type="GeneralExport", projid=target_proj.projid)}}" {{ disabled.value if privilege.value==""}}>
+      <strong>{{_('General')}}</strong> {{ _('export')}}
+      </a></li><li><a href="{{url_for("gui_job_create",job_type="BackupExport", projid=target_proj.projid) }}">
+      <strong>{{_('Backup')}}</strong> {{ _('export')}}
+        </a></li><li><a href="{{url_for("gui_job_create",job_type="SummaryExport", projid=target_proj.projid) }}">
+      <strong>{{_('Summary')}}</strong> {{ _('export')}}
         </a></li></ul></li><li>
   <a href="{{url_for('gui_prj_edit',prjid=target_proj.projid)}}">
     {{_('Settings')}}
