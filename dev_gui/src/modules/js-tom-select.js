@@ -140,7 +140,7 @@ export class JsTomSelect {
             valueField: 'id',
             labelField: 'text',
             searchField: 'text',
-            closeAfterSelect: false,
+            closeAfterSelect: true,
             onInitialize: () => {
               const wrapper = document.getElementById(id).nextElementSibling;
               if (!wrapper.classList.contains('ts-wrapper')) return;
