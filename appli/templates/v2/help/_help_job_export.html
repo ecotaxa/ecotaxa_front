@@ -8,23 +8,29 @@
 <li>{{_('dates are in format <strong>YYYY-MM-DD</strong>')}}</li>
 <li>{{_('times are in format <strong>hh:mm:ss</strong>')}}</li></ul></div></details>
   <details id="help_export_general"><summary>{{_('General Export')}}</summary>
-      <div>
-        <ul class="list-disc list-inside"><li></li><li></li><li></li></ul>
-      </div></details>
+    <p> {{_('Configurable objects export')}}
+    <ul><li id="help_export_only_annotations"><strong>Only save objects' last annotation data</strong><br>{{_('If chosen will not take into account other parameters, except out to ftp choice.')}}</li>
+      <li id="help_export_with_images"><strong>Images</strong><br>{{_('Add in ZIP first (i.e. visible) image, all images, or no image.⚠️ "all" means maybe several lines per object in TSVs.')}}</li></ul></p>
+      </details>
       <details id="help_export_backup"><summary>{{_('Backup Export')}}</summary>
-          <div>
-            <ul class="list-disc list-inside"><li></li><li></li><li></li></ul>
-          </div></details>
+        <p>{{_('Backup export, for restoring or archiving.')}}<br>{{_('All images, split by sample, add an EcoTaxa-compatible second line with types')}}</p>
+        </details>
           <details id="help_export_summary"><summary>{{_('Summary Export')}}</summary><div>
-            <em>{{_('Synthetic taxon-oriented export')}}</em>
-            <ul> <li id="help_job_export_summary_quantity"><p><strong>{{_('Quantity to compute')}}</strong><br></p></li>
-              <li><details id="help_job_export_summary_formulae"><summary>{{_('Computations aggregation level')}}</summary><p>
+            <p>{{_('Synthetic taxon-oriented export')}}<br>{{('Will produce a tsv file with the following columns:')}}<br><ul><li>project_id</li>
+<li>sample_id: {{_('if summarise_by = sample or acquisition')}} {{_('(NB = acq_orig_id = celle pour le user)')}}</li>
+<li>acq_id: {{_('if summarise_by = acquisition')}} {{_('(NB = acq_orig_id = celle pour le user)')}}</li>
+<li>annotation_category</li>
+<li>abundance: {{_(' if chosen ')}}</li>
+<li>concentration: {{_(' if chosen ')}}</li>
+<li>biovolume: {{_(' if chosen ')}}</li></ul></p>
+            <ul> <li id="help_export_summary_quantity"><p><strong>{{_('Quantity to compute')}}</strong><br>{{_('Abundance is always possible.')}}</p></li>
+              <li><details id="help_export_summary_formulae"><summary>{{_('Formulae')}}</summary><p>
               {{_("Transitory: How to get values from DB free columns. Python syntax, prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are 'total_water_volume', 'subsample_coef' and 'individual_volume' ")}}
               <br>{{_('example:')}}<br><pre>
                 subsample_coef: 1/ssm.sub_part
                 total_water_volume: sam.tot_vol/1000
                 individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3</pre></p></details></li>
-                <li id="help_job_export_summary_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a 0 replacement to _discard_ the present taxon.')}}</li></ul>
+                <li id="help_export_summary_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a 0 replacement to _discard_ the present taxon.')}}</li></ul>
               </div></details>
 </article>
 {% endblock %}

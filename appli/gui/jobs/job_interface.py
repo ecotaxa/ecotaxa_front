@@ -20,6 +20,7 @@ def export_format_options(type=None):
                     ],
                     "format": "radio",
                     "discard": "with_images|none,with_internal_ids|0,with_types_row|0,split_by|none",
+                    "help": "help_export_only_annotations",
                 },
                 "with_images": {
                     "label": _("Images"),
@@ -29,6 +30,7 @@ def export_format_options(type=None):
                         {"label": _("None"), "value": "none"},
                     ],
                     "format": "radio",
+                    "help": "help_export_with_images",
                 },
                 "with_internal_ids": {
                     "label": _("Internal database IDs"),
@@ -137,6 +139,7 @@ def export_format_options(type=None):
                     {"label": _("Biovolume"), "value": "biovolume"},
                 ],
                 "format": "radio",
+                "help": "help_export_summary_quantity",
             },
             "summarise_by": {
                 "label": _("Computations aggregation level"),
@@ -146,18 +149,20 @@ def export_format_options(type=None):
                     {"label": _("None"), "value": "none"},
                 ],
                 "format": "radio",
+                "help": "help_export_summary_summarise_by",
             },
             "taxo_mapping": {
                 "label": _(
-                    "Mapping from present taxon (key) to output replacement one (value). Use a 0 replacement to _discard_ the present taxon."
+                    "Mapping from present taxon (key) to output replacement one (value)"
                 ),
                 "format": "textarea",
+                "help": "help_export_summary_taxo_mapping",
             },
             "formulae": {
-                "label": _("Transitory: How to get values from DB free columns"),
+                "label": _("Formulae"),
                 "example": '{"subsample_coef"->str, "total_water_volume"->str, "individual_volume"->str}',
                 "format": "textarea",
-                "help": "help_job_export_summary_formulae",
+                "help": "help_export_summary_formulae",
             },
             "out_to_ftp": {
                 "label": _(
