@@ -149,7 +149,6 @@ def export_format_options(type=None):
                     {"label": _("None"), "value": "none"},
                 ],
                 "format": "radio",
-                "help": "help_export_summary_summarise_by",
             },
             "taxo_mapping": {
                 "label": _(

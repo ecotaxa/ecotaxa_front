@@ -24,6 +24,7 @@ export class JsTabs {
         if (index === 0 && target.parentElement.querySelectorAll('.' + css.active).length === 0) {
           target.classList.add(css.active);
           this.toggleTab(target, true);
+
         } else this.toggleTab(target, target.classList.contains(css.active));
         l += parseInt(btn.offsetWidth) + 20;
         btn.addEventListener(ev, (e) => {
@@ -58,7 +59,17 @@ export class JsTabs {
         tabcontent.querySelectorAll('input, select, button, textarea').forEach(el => {
           if (show) {
             el.removeAttribute('disabled');
-          } else el.disabled = true;
+            if (el.dataset.checked) {
+              el.checked = el.dataset.checked;
+              delete el.dataset.checked;
+            }
+          } else {
+            el.disabled = true;
+            if (el.checked) {
+              el.dataset.checked = el.checked;
+              el.removeAttribute('checked');
+            }
+          }
         });
         if (what) what.value = tabcontent.dataset.what;
         if (show) {

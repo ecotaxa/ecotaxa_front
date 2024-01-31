@@ -15,7 +15,8 @@
   {%- if option.format=="checkbox"-%}<label for="{{name+'_'+type_export}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+'_'+typexport}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
   {%-elif option.format=="radio"-%}<div class="label inline-block mr-2 w-auto">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if "discard" in option else ''}}>
     {%- for opt in option.options -%}
-    {{ form_group_radio(name+'_'+type_export+'_'+loop.index|string,name,opt.value,opt.label,datas[name][0])}}
+    {%- set extra =' data-checked=true' if opt.value== datas[name][0] else '' -%}
+    {{ form_group_radio(name+'_'+type_export+'_'+loop.index|string,name,opt.value,opt.label,datas[name][0],False,'',extra)}}
       {%- endfor -%}</div>{%-endif-%}
   {%-endif-%}
   {%- elif option.format=='textarea'-%}
