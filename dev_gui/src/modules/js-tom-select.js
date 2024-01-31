@@ -19,6 +19,7 @@ import {
 let users_list = {};
 
 function _get_label(el, labelfield, item = false) {
+  if (!labelfield) return el.text;
   let label = [];
   if (Object.keys(el).indexOf(labelfield) >= 0) label.push(el[labelfield]);
   else if (labelfield.indexOf('+') > 0) {

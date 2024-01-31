@@ -4,7 +4,7 @@
 {%- macro make_part_form(type_export,datas)-%}
 {%-for name,option in formoptions[type_export].items() -%}
 {%- if name in datas.keys() -%}
-<div class="form-box">
+<div class="form-box" data-name={{name}}>
 {%- if "options" in option.keys() -%}
   {% if datas[name][1] == True %}  <span class="mr-2 italic font-normal">{{option.label}} </span>
   <input type="hidden" name="{{name}}" value={{formdatas[type_export].datas[name][0]}}>
@@ -13,14 +13,14 @@
     {%-endfor-%}
   {%-else -%}
   {%- if option.format=="checkbox"-%}<label for="{{name+'_'+type_export}}" class="inline-block">{{option.label}} <input type="checkbox" id="{{name+'_'+typexport}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
-  {%-elif option.format=="radio"-%}<div class="label inline-block mr-2 w-auto">{{option.label}} </div><div class="form-group inline-block w-auto">
+  {%-elif option.format=="radio"-%}<div class="label inline-block mr-2 w-auto">{{option.label}} </div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if "discard" in option else ''}}>
     {%- for opt in option.options -%}
     {{ form_group_radio(name+'_'+type_export+'_'+loop.index|string,name,opt.value,opt.label,datas[name][0])}}
       {%- endfor -%}</div>{%-endif-%}
   {%-endif-%}
   {%- elif option.format=='textarea'-%}
-  <label>{{option.label}}</label>
-  <textarea class="form-textarea" name="{{name}}">{{datas[name][0] if name in datas}}</textarea>
+  <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
+  <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{{datas[name][0] if name in datas}}</textarea>
   {%-endif%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}
@@ -30,15 +30,15 @@
   {% set data = {'file':'_help_job_export'} -%}
   {%- set title=_('Export') if export_type==None else formdatas[export_type].title %}
 {{header_project_job(title ,data, _('How to export data'), nav={"links":export_links,"query":"?projid="+target_proj.projid|string})}}
-	<em class="block text-sm mt-2">{{_('Global export rules')}} <i data-for="help_global_export_rules" data-request="help"></i></em>
+	<em class="block text-sm mt-2">{{_('Global export rules')}} <i data-for="help_global_export_rules" data-request="help" data-what="help"></i></em>
 </div>
 <form method="post" class="js js-submit js-tabs" action="{{request.path}}" data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
     <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
       {% for type_export,formdata in formdatas.items() %}
-    <fieldset class="w-full md:w-1/2 my-0 py-0 tab  tab-one {{'active' if export_type == type_export}}">{%- if export_type== None -%}<legend class="text-center tab-control title-nav"  data-what="{{type_export}}" >{{formdata.title}} </legend>{%-endif -%}
-      <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help"></i></em>
-      {{ make_part_form(type_export,formdata.datas )}}
+    <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if export_type == type_export}}">{%- if export_type== None -%}<legend class="text-center tab-control title-nav"  data-what="{{type_export}}" >{{formdata.title}} </legend>{%-endif -%}
+      <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help" data-what="help"></i></em>
+      {{make_part_form(type_export,formdata.datas)}}
     </div></fieldset>{%-endfor-%}
   </div>
       <div class="form-box mb-8 w-auto float-left clear-right">

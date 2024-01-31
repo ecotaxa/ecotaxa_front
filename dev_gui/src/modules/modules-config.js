@@ -62,6 +62,7 @@ export const css = {
   input: 'form-input',
   selected: 'selected',
   disabled: 'disabled',
+  error: 'err',
   wait: 'wait',
   active: 'active',
   modal: 'modal',

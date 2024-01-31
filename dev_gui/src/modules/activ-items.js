@@ -176,7 +176,7 @@ export class ActivItems {
           item.addEventListener(((item.dataset.event) ? item.dataset.event : 'click'), (e) => {
             e.preventDefault();
           });
-          item.classList.add('disabled');
+          item.classList.add(css.disabled);
           break;
         case 'viewall':
           const target = item.closest(item.dataset.target);
@@ -185,6 +185,38 @@ export class ActivItems {
             if (!target.classList.contains('viewall') && target.firstChild.offsetHeight <= target.offsetHeight) return;
             target.classList.toggle('viewall');
           })
+          break;
+        case 'discard':
+          const inputs = (item.dataset.target) ? item.dataset.target.split(',') : null;
+          if (inputs === null) return;
+          const triggers = (item.dataset.trigger) ? item.parentElement.querySelectorAll('[name="' + item.dataset.trigger + '"]') : null;
+          if (triggers === null) return;
+          triggers.forEach(trigger => trigger.addEventListener('change', (e) => {
+            const targetvalue = parseInt(e.target.value);
+            inputs.forEach(input => {
+              input = input.split('|');
+              const value = (input.length) ? input[1] : 0;
+              input = input[0];
+              item.closest('fieldset').querySelectorAll('[data-name="' + input + '"]').forEach(box => {
+                const els = box.querySelectorAll('input[name="' + input + '"]');
+                if (targetvalue === 1 && e.target.checked) {
+                  box.dataset.keep = (box.querySelector('input[name="' + input + '"]:checked')) ? box.querySelector('input[name="' + input + '"]:checked').value : null;
+                  box.classList.add(css.disabled);
+                  els.forEach(el => {
+                    if (el.value === value) el.checked = true;
+                    else el.checked = false;
+                  });
+                } else if (box.classList.contains(css.disabled)) {
+                  box.classList.remove(css.disabled);
+                  els.forEach(el => {
+                    if (box.dataset.keep === el.value) el.checked = true;
+                    else if (box.dataset.keep) el.checked = false;
+                  });
+                }
+
+              });
+            });
+          }));
           break;
       }
     });

@@ -19,6 +19,7 @@ def export_format_options(type=None):
                         {"label": _("No"), "value": 0},
                     ],
                     "format": "radio",
+                    "discard": "with_images|none,with_internal_ids|0,with_types_row|0,split_by|none",
                 },
                 "with_images": {
                     "label": _("Images"),
@@ -113,10 +114,13 @@ def export_format_options(type=None):
                     "quantity": ("abundance", False),
                     "summarise_by": ("none", False),
                     "taxo_mapping": ({}, False),
-                    "formulae": ("""
+                    "formulae": (
+                        """
     subsample_coef: 1/ssm.sub_part
     total_water_volume: sam.tot_vol/1000
-    individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3 """, False),
+    individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3 """,
+                        False,
+                    ),
                     "out_to_ftp": (0, False),
                 },
             },
@@ -130,7 +134,7 @@ def export_format_options(type=None):
                 "options": [
                     {"label": _("Abundance"), "value": "abundance"},
                     {"label": _("Concentration"), "value": "concentration"},
-                    {"label": _("biovolume"), "value": "biovolume"},
+                    {"label": _("Biovolume"), "value": "biovolume"},
                 ],
                 "format": "radio",
             },
@@ -150,11 +154,10 @@ def export_format_options(type=None):
                 "format": "textarea",
             },
             "formulae": {
-                "label": _(
-                    "Transitory: How to get values from DB free columns. Python syntax, prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are 'total_water_volume', 'subsample_coef' and 'individual_volume'"
-                ),
+                "label": _("Transitory: How to get values from DB free columns"),
                 "example": '{"subsample_coef"->str, "total_water_volume"->str, "individual_volume"->str}',
                 "format": "textarea",
+                "help": "help_job_export_summary_formulae",
             },
             "out_to_ftp": {
                 "label": _(

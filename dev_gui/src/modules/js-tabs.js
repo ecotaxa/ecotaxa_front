@@ -61,11 +61,12 @@ export class JsTabs {
           } else el.disabled = true;
         });
         if (what) what.value = tabcontent.dataset.what;
-        const form = tab.closest('form');
-        if (tabcontent.dataset.path && form !== null) form.setAttribute('action', tabcontent.dataset.path);
+        if (show) {
+          const form = tab.closest('form');
+          if (tabcontent.dataset.path && form !== null) form.setAttribute('action', tabcontent.dataset.path);
+        }
       }
     });
-
   }
   toggleDisplayListener(item, btns) {
     // flat/ tabs display

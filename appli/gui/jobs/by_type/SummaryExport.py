@@ -23,12 +23,14 @@ class ExportSummaryJob(ExportJob):
 
     @classmethod
     def job_req(cls):
+        import json
+
         projid = int(gvp("projid"))
         quantity = gvp("quantity")
         summarise_by = gvp("summarise_by")
-        taxo_mapping = eval(gvp("taxo_mapping"))  # TODO: Bad
+        taxo_mapping = json.loads(gvp("taxo_mapping", "{}"))
         formulae = gvp("formulae")
-        out_to_ftp = gvp("out_to_ftp") == '1'
+        out_to_ftp = gvp("out_to_ftp") == "1"
         formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]
         formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         req = SummaryExportReq(

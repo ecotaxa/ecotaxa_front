@@ -73,9 +73,13 @@ export class ModalContainer {
       siblings.forEach(sibling => {
         if (sibling !== trigger) sibling.removeAttribute('open');
       });
-      const paragraph = this.modal.querySelector('#' + trigger.dataset.for);
-      if (paragraph) paragraph.open = true;
-      else console.log('help ' + trigger.dataset.for+'display error', this.modal);
+      trigger.dataset.for.split('#').forEach(tr => {
+        const paragraph = this.modal.querySelector('#' + tr);
+        if (paragraph) paragraph.open = true;
+        else console.log('help ' + tr + 'display error', this.modal);
+      })
+
+
     }
     this.toggleAction(trigger);
   }

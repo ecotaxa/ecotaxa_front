@@ -171,7 +171,10 @@ export class JsComponents {
                   //setTimeout(() => {checkNotifs(tim);}, tim);
                 });
               };
-              checkNotifs(30000);
+              //checkNotifs(30000);
+              setTimeout(() => {
+                checkNotifs(30000);
+              }, 2000);
               break;
             case 'js-accordion':
               if (!dynamics.JsAccordion) {

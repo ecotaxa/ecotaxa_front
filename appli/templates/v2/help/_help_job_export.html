@@ -15,9 +15,16 @@
           <div>
             <ul class="list-disc list-inside"><li></li><li></li><li></li></ul>
           </div></details>
-          <details id="help_export_summary"><summary>{{_('Summary Export')}}</summary>
-              <div>
-                <ul class="list-disc list-inside"><li></li><li></li><li></li></ul>
+          <details id="help_export_summary"><summary>{{_('Summary Export')}}</summary><div>
+            <em>{{_('Synthetic taxon-oriented export')}}</em>
+            <ul> <li id="help_job_export_summary_quantity"><p><strong>{{_('Quantity to compute')}}</strong><br></p></li>
+              <li><details id="help_job_export_summary_formulae"><summary>{{_('Computations aggregation level')}}</summary><p>
+              {{_("Transitory: How to get values from DB free columns. Python syntax, prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are 'total_water_volume', 'subsample_coef' and 'individual_volume' ")}}
+              <br>{{_('example:')}}<br><pre>
+                subsample_coef: 1/ssm.sub_part
+                total_water_volume: sam.tot_vol/1000
+                individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3</pre></p></details></li>
+                <li id="help_job_export_summary_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a 0 replacement to _discard_ the present taxon.')}}</li></ul>
               </div></details>
 </article>
 {% endblock %}

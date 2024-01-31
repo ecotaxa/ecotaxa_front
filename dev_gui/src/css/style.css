@@ -182,8 +182,9 @@ details[open].modal-help {@apply z-80  p-0 }
 details[open].modal-help .aside-body  {@apply w-full h-full p-0 m-0 }
 details:not([open]).modal-help {@apply mb-4 }
 details:not([open]).modal-help summary {@apply py-1 }
-details.modal-help .modal summary {@apply font-medium text-lg text-help-500  my-2}
-details.modal-help .modal summary::marker {@apply text-help-300 }
+details.modal-help .modal summary {@apply font-medium text-base}
+details.modal-help .modal article > details > summary {@apply font-medium text-lg text-help-500  my-2}
+details.modal-help .modal article > details > summary::marker {@apply text-help-300 }
 details.modal-help:not[open]  .modal summary  {@apply font-medium text-lg text-stone-900 block mb-1 }
 article.table-of-contents > details > summary {@apply text-xl font-bold uppercase}
 article.table-of-contents > details > summary::marker {@apply content-none;}
@@ -214,6 +215,7 @@ div.password-wrapper i {@apply absolute right-2 top-[50%] -translate-y-[50%] z-[
 legend {@apply bg-transparent text-stone-900 hover:text-stone-800 px-1 py-2 font-btn font-bold  mx-auto block text-sm md:text-base uppercase border-b-2 border-stone-100 }
 fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  md:mr-2 last:mr-0 p-0 }
 .form-box , .submit-box {@apply md:px-2 py-2 mb-2 md:mb-1 mx-0 }
+.form-box.disabled {@apply opacity-50}
 /*labels */
 .form-box label , .form-box .label {@apply text-base font-semibold text-stone-900 bg-transparent}
 .form-box > label.required, .form-box > .label.required {@apply  after:content-['_*'] after:text-stone-600 hover:after:text-warning-700   after:inline-block after:whitespace-nowrap  }
@@ -283,6 +285,7 @@ form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2}
 form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4 shadow-none  }
 form.js-tabs .tab.tab-one.active legend.tab-control {@apply bg-white text-stone-800 font-bold border  border-stone-100 border-b-white z-10 }
 form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-7 px-4 -ml-6}
+form.js-tabs .tab.err legend.tab-control {@apply before:content-['_!_'] before:text-danger-500 text-danger-500 }
 /* tabs expand shrink */
 .tabs-display.expand  {@apply icon-chevron-down}
 .tabs-display.shrink {@apply icon-chevron-up}

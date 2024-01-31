@@ -4,13 +4,15 @@ const formcss = {
   invalid: 'input-invalid',
   inputvalidate: 'input-valid',
 }
-const domselectors = {
-  captcha: '.js-captcha'
-}
+import {
+  domselectors,
+  css
+} from '../modules/modules-config.js';
 import {
   fetchSettings,
   decode_HTMLEntities
 } from '../modules/utils.js';
+domselectors["captcha"] = '.js-captcha';
 
 export class FormSubmit {
   handlers = [];
@@ -26,8 +28,10 @@ export class FormSubmit {
       options = Object.assign(options, this.form.dataset);
       this.options = Object.assign(defaultOptions, options);
       if (!this.form) return;
+      this.tabs = this.form.querySelectorAll(domselectors.component.tabs.tab);
       this.validateFields(true);
       this.init();
+
       form.formsubmit = this;
     }
     return form.formsubmit;
@@ -151,9 +155,7 @@ export class FormSubmit {
 
     [...this.form.elements].forEach(field => {
       if (field.name) {
-
         if (init === true) {
-
           if (!field.dataset.listen) {
             if (field.hasAttribute('required') && field.required) {
               const label = field.closest('.form-box') ? field.closest('.form-box').querySelector('label') : field.parentElement.querySelector('label');
@@ -168,7 +170,14 @@ export class FormSubmit {
             field.dataset.listen = true;
           }
         } else resp = (resp && this.validateField(field, init));
+
       }
+    });
+    // add/remove error class on tabs tab-control elements
+
+    this.tabs.forEach(tab => {
+      if (tab.querySelectorAll(':invalid').length) tab.classList.add(css.error);
+      else tab.classList.remove(css.error);
     });
     return resp;
   }
