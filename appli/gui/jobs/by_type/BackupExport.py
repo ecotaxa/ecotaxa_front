@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 from typing import ClassVar
-from flask import render_template, redirect, request, flash, url_for
-from appli import gvg, gvp
-from appli.gui.jobs.staticlistes import py_messages
+
+from flask import request
+
+from appli import gvp
 from appli.gui.jobs.by_type.Export import ExportJob
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
+from to_back.ecotaxa_cli_py.api import ObjectsApi
 from to_back.ecotaxa_cli_py.models import (
     BackupExportReq,
     ExportRsp,
-    ProjectModel,
-    JobModel,
 )
 
 
@@ -26,7 +24,7 @@ class ExportBackupJob(ExportJob):
     @classmethod
     def job_req(cls):
         projid = int(gvp("projid"))
-        out_to_ftp = bool(gvp("out_to_ftp"))
+        out_to_ftp = gvp("out_to_ftp") == '1'
         req = BackupExportReq(
             project_id=projid,
             out_to_ftp=out_to_ftp,

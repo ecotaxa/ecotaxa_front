@@ -20,7 +20,7 @@
   {%-endif-%}
   {%- elif option.format=='textarea'-%}
   <label>{{option.label}}</label>
-  <textarea class="form-textarea">{{datas[name][0] if name in datas}}</textarea>
+  <textarea class="form-textarea" name="{{name}}">{{datas[name][0] if name in datas}}</textarea>
   {%-endif%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}

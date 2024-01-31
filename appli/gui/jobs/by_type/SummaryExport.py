@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 from typing import ClassVar
-from flask import render_template, redirect, request, flash
-from appli import gvg, gvp
-from appli.gui.jobs.staticlistes import py_messages
+
+from flask import request
+
+from appli import gvp
 from appli.gui.jobs.by_type.Export import ExportJob
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, UsersApi
+from to_back.ecotaxa_cli_py.api import ObjectsApi
 from to_back.ecotaxa_cli_py.models import (
     SummaryExportReq,
     ExportRsp,
-    ProjectModel,
-    JobModel,
 )
-
-from appli.back_config import get_app_manager_mail
 
 
 class ExportSummaryJob(ExportJob):
@@ -30,15 +26,18 @@ class ExportSummaryJob(ExportJob):
         projid = int(gvp("projid"))
         quantity = gvp("quantity")
         summarise_by = gvp("summarise_by")
-        taxo_mapping = gvp("taxo_mapping")
+        taxo_mapping = eval(gvp("taxo_mapping"))  # TODO: Bad
         formulae = gvp("formulae")
-        out_to_ftp = bool(gvp("out_to_ftp"))
+        out_to_ftp = gvp("out_to_ftp") == '1'
+        formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]
+        formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         req = SummaryExportReq(
             project_id=projid,
             quantity=quantity,
             summarise_by=summarise_by,
             taxo_mapping=taxo_mapping,
-            formulae=formulae,
+            formulae=formulae_dict,
+            out_to_ftp=out_to_ftp,
         )
         return req
 

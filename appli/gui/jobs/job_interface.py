@@ -12,6 +12,14 @@ def export_format_options(type=None):
     options = dict(
         {
             "general": {
+                "only_annotations": {
+                    "label": _("Only save objects' last annotation data"),
+                    "options": [
+                        {"label": _("Yes"), "value": 1},
+                        {"label": _("No"), "value": 0},
+                    ],
+                    "format": "radio",
+                },
                 "with_images": {
                     "label": _("Images"),
                     "options": [
@@ -46,16 +54,8 @@ def export_format_options(type=None):
                 #    ),
                 #    "format": "textarea",
                 # },
-                "only_annotations": {
-                    "label": _("Only save objects' last annotation data"),
-                    "options": [
-                        {"label": _("Yes"), "value": 1},
-                        {"label": _("No"), "value": 0},
-                    ],
-                    "format": "radio",
-                },
                 "split_by": {
-                    "label": _("Separate (in ZIP sub-directories) output"),
+                    "label": _("Separate (in ZIP sub-directories) output by"),
                     "options": [
                         {"label": _("Sample"), "value": "sample"},
                         {"label": _("Acquisition"), "value": "acquisition"},
@@ -113,7 +113,10 @@ def export_format_options(type=None):
                     "quantity": ("abundance", False),
                     "summarise_by": ("none", False),
                     "taxo_mapping": ({}, False),
-                    "formulae": (0, False),
+                    "formulae": ("""
+    subsample_coef: 1/ssm.sub_part
+    total_water_volume: sam.tot_vol/1000
+    individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3 """, False),
                     "out_to_ftp": (0, False),
                 },
             },
@@ -142,7 +145,7 @@ def export_format_options(type=None):
             },
             "taxo_mapping": {
                 "label": _(
-                    "Mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon."
+                    "Mapping from present taxon (key) to output replacement one (value). Use a 0 replacement to _discard_ the present taxon."
                 ),
                 "format": "textarea",
             },
