@@ -58,7 +58,7 @@ export class JsTabs {
       if (this.toggledisable === true) {
         tabcontent.querySelectorAll('input, select, button, textarea').forEach(el => {
           if (show) {
-            el.removeAttribute('disabled');
+            el.disabled = false;
             if (el.dataset.checked) {
               el.checked = el.dataset.checked;
               delete el.dataset.checked;

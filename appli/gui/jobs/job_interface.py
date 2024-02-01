@@ -151,11 +151,11 @@ def export_format_options(type=None):
                 "format": "radio",
             },
             "taxo_mapping": {
-                "label": _(
-                    "Mapping from present taxon (key) to output replacement one (value)"
-                ),
-                "format": "textarea",
+                "label": _("Mapping from present taxon to output replacement one "),
+                "comment": _(" Type '_discard_' to discard taxon"),
+                "format": "taxoline",
                 "help": "help_export_summary_taxo_mapping",
+                "addoption": "_discard_,0",
             },
             "formulae": {
                 "label": _("Formulae"),

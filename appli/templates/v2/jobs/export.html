@@ -22,6 +22,11 @@
   {%- elif option.format=='textarea'-%}
   <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
   <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{{datas[name][0] if name in datas}}</textarea>
+  {%- elif option.format=='taxoline'-%}
+  <label>{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
+  {%- if "comment" in option-%}<em class="text-sm inline-block">{{option.comment}}</em>{%-endif-%}
+  <div class="flex flex-row w-full md:w-[75%]"><select class="form-select" name="item-select" id="item-select"><option value="">{{_('Select')}}</option>{%- for data in option.datas -%}<option value={{data[0]}}>{{data[1]}}</option>{%-endfor-%}</select>
+    <input type="text" data-maxitems=1 data-empty=true name="item-replace" id="item-replace" data-addoption="{{option.addoption}}"  class="form-input js js-autocomplete ml-4 " autocomplete="off" placeholder="{{_('replace_by')}}" data-projid={{target_proj.projid}} data-type="taxo"><div class="ml-4 btn btn-secondary text-sm whitespace-nowrap cursor-pointer relative w-12" type="button" data-action="addline"  data-name="{{name}}"><i class="icon icon-plus-sm block mx-auto"></i>{{_('Add mapping')}}</div></div>
   {%-endif%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}

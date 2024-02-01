@@ -57,6 +57,15 @@ export class JsTomSelect {
       option.settings.create = true;
       option.settings.addPrecedence = true;
     }
+    if (item.dataset.empty && item.dataset.empty === 'true') {
+      option.settings.allowEmptyOption = true;
+    }
+    if (item.dataset.maxitems) {
+      option.settings.maxItems = parseInt(item.dataset.maxitems);
+    }
+    if (item.dataset.addoption) {
+      option.settings.addoption = item.dataset.addoption.split(',');
+    }
     /*,
           on_clear = function() {
 
@@ -153,6 +162,7 @@ export class JsTomSelect {
 
           }
         }
+
         break;
     }
     const default_settings = {
@@ -191,6 +201,16 @@ export class JsTomSelect {
           case models.instr:
           case models.taxo:
             url = option.url;
+            //
+
+            if (query.indexOf('_') == 0 && option.settings.addoption && query == option.settings.addoption[0]) {
+              url = null;
+              return callback(Object.entries([{
+                text: option.settings.addoption[0],
+                id: option.settings.addoption[1]
+              }]));
+            }
+            //
             if (query) url += '?q=' + encodeURIComponent(query);
 
             break;
@@ -298,6 +318,7 @@ export class JsTomSelect {
             //  el = el.querySelector('.ts-delet');
             //  if (el !== null) init_canceltag(el);
           });
+          //
           break;
         case models.project:
           // add data-noaction just to select a project
