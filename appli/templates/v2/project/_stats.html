@@ -21,7 +21,8 @@
 {% macro proj_settings() -%}
 <div class="block mb-4">
 {%-if target_proj.description != None -%}
-<p class="py-4">{{target_proj.description }}</p>
+<div class="stat-item"><span class="stat-label">{{_('Description')}}</span>
+<div class="stat-info">{{target_proj.description }}</div></div>
 {%-endif-%}
 {% if target_proj.privileges is iterable %}
 <div class="stat-item "><span class="stat-label">{{_('Privileges')}} <i data-for="help_proj_stats_privileges" data-request="help"></i></span>

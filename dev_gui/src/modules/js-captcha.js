@@ -101,7 +101,7 @@ class DragSliderBtn {
     function canMove(x) {
       if (parseInt(slidermask.style.left) >= Math.floor(parseInt(boundingrect.width)) - 4) {
         form.dataset.enabled = true;
-        btn.removeAttribute('disabled');
+        btn.disabled = false;
         slidermask.remove();
         slidermask = null;
         slider.remove();

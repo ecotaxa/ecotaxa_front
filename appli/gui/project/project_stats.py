@@ -4,7 +4,7 @@ from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py import ApiException
 from appli.constants import MappableObjectColumns, MappableParentColumns
 from appli.gui.staticlistes import py_messages
-from to_back.ecotaxa_cli_py.models import ProjectModel
+from to_back.ecotaxa_cli_py.models import ProjectModel, ProjectTaxoStatsModel
 
 
 def prj_stats(prjid: int, partial: bool, params: dict) -> str:

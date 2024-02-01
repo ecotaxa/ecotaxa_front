@@ -72,7 +72,7 @@ class MobileLikeScroller {
       });
       this.childrenEventListeners = [];
       setTimeout(() => { // The event for the change is done after the click event, so we need to wait for the click event to be done before re-enabling the inputs
-        this.$BlockedInputs.prop('disabled', false);
+        this.$BlockedInputs.disabled = false;
         this.$BlockedInputs = [];
       }, 0);
     } else {
@@ -87,7 +87,7 @@ class MobileLikeScroller {
       elem.addEventListener('click', listener, true)
       this.childrenEventListeners.push([elem, listener]);
     });
-    this.$BlockedInputs = $(this.target).find('input:not(:disabled)').prop('disabled', true);
+    this.$BlockedInputs = $(this.target).find('input:not(:disabled)').disabled = true;
     clearInterval(this.blockChildrenTimeout);
     this.blockChildrenTimeout = null;
   }
