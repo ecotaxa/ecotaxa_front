@@ -35,11 +35,13 @@ class ExportJob(Job):
             return render_template(cls.NOPROJ_TEMPLATE, projid=projid)
 
         filters = cls._extract_filters_from_url()
-        formdatas, formoptions, export_links = export_format_options(cls.EXPORT_TYPE)
-        if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
-            from appli.gui.taxonomy.tools import project_used_taxa
+        # always return every export possibilities
+        formdatas, formoptions, export_links = export_format_options()
+        # if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
+        from appli.gui.taxonomy.tools import project_used_taxa
 
-            formoptions["summary"]["taxo_mapping"]["datas"] = project_used_taxa(projid)
+        formoptions["summary"]["taxo_mapping"]["datas"] = project_used_taxa(projid)
+        # hack to have 3 types instead of one page by job export type
         return render_template(
             cls.STEP0_TEMPLATE,
             export_type=cls.EXPORT_TYPE,

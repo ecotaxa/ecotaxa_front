@@ -24,9 +24,9 @@
   <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{{datas[name][0] if name in datas}}</textarea>
   {%- elif option.format=='taxoline'-%}
   <label>{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
-  {%- if "comment" in option-%}<em class="text-sm inline-block">{{option.comment}}</em>{%-endif-%}
-  <div class="flex flex-row w-full md:w-[75%]"><select class="form-select" name="item-select" id="item-select"><option value="">{{_('Select')}}</option>{%- for data in option.datas -%}<option value={{data[0]}}>{{data[1]}}</option>{%-endfor-%}</select>
-    <input type="text" data-maxitems=1 data-empty=true name="item-replace" id="item-replace" data-addoption="{{option.addoption}}"  class="form-input js js-autocomplete ml-4 " autocomplete="off" placeholder="{{_('replace_by')}}" data-projid={{target_proj.projid}} data-type="taxo"><div class="ml-4 btn btn-secondary text-sm whitespace-nowrap cursor-pointer relative w-12" type="button" data-action="addline"  data-name="{{name}}"><i class="icon icon-plus-sm block mx-auto"></i>{{_('Add mapping')}}</div></div>
+  <div class="taxoline js js-taxomapping" data-name="{{name}}" data-addline="addline" data-addtext="{{_('Add mapping')}}" data-notselected="{{_('select values to replace')}}"><select class="form-select" name="item-select" id="item-select"><option value="">{{_('Select')}}</option>{%- for data in option.datas -%}<option value={{data[0]}}>{{data[1]}}</option>{%-endfor-%}</select>
+    <input type="text" data-maxitems=1 data-empty=true name="item-replace" id="item-replace" data-addoption="{{option.addoption}}"  class="form-input js js-autocomplete ml-4 " autocomplete="off" placeholder="{{_('replace_by')}}" data-projid={{target_proj.projid}} data-type="taxo"><div  class="addline ml-4 btn btn-secondary text-sm whitespace-nowrap cursor-pointer relative w-16" type="button"><i class="icon icon-plus-sm block mx-auto"></i>{{_('Add mapping')}}</div></div>
+      {%- if "comment" in option-%}<em class="text-sm inline-block">{{option.comment}}</em>{%-endif-%}
   {%-endif%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}
@@ -34,7 +34,7 @@
 <div class="container mx-auto">
   <div class="w-100 mx-auto block pt-4 text-left relative" id="project-subset-header">
   {% set data = {'file':'_help_job_export'} -%}
-  {%- set title=_('Export') if export_type==None else formdatas[export_type].title %}
+  {%- set title=_('Export')  %}
 {{header_project_job(title ,data, _('How to export data'), nav={"links":export_links,"query":"?projid="+target_proj.projid|string})}}
 	<em class="block text-sm mt-2">{{_('Global export rules')}} <i data-for="help_global_export_rules" data-request="help" data-what="help"></i></em>
 </div>
@@ -42,7 +42,7 @@
     <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}"></div>
     <div class="fieldset-wrapper w-full flex flex-row">
       {% for type_export,formdata in formdatas.items() %}
-    <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if export_type == type_export}}">{%- if export_type== None -%}<legend class="text-center tab-control title-nav"  data-what="{{type_export}}" >{{formdata.title}} </legend>{%-endif -%}
+    <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if export_type == type_export }}"><legend class="text-center tab-control title-nav"  data-what="{{type_export}}" >{{formdata.title}} </legend>
       <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help" data-what="help"></i></em>
       {{make_part_form(type_export,formdata.datas)}}
     </div></fieldset>{%-endfor-%}

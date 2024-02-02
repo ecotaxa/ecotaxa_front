@@ -74,7 +74,16 @@ export class JsTabs {
         if (what) what.value = tabcontent.dataset.what;
         if (show) {
           const form = tab.closest('form');
-          if (tabcontent.dataset.path && form !== null) form.setAttribute('action', tabcontent.dataset.path);
+          if (tabcontent.dataset.path && form !== null) {
+            form.setAttribute('action', tabcontent.dataset.path);
+            // only used in export - to do  generic
+            const projid = (form.querySelector('#projid')) ? '?' + new URLSearchParams({
+              projid: form.querySelector('#projid').value
+            }) : '';
+            window.history.pushState({
+              additionalInformation: 'Updated by jsTabs'
+            }, document.title, window.location.origin + tabcontent.dataset.path + projid);
+          }
         }
       }
     });
