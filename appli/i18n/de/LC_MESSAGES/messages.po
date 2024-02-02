@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-12-13 17:43+0100\n"
+"POT-Creation-Date: 2024-02-02 17:33+0100\n"
 "PO-Revision-Date: 2022-09-23 13:54+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -145,88 +145,204 @@ msgid ""
 "processing of images using EcoTaxa as a quality checking solution."
 msgstr ""
 
+#: appli/gui/staticlistes.py:9 appli/templates/v2/collection/settings.html:42
+#: appli/templates/v2/partials/_topsitebar.html:20
+msgid "Projects"
+msgstr ""
+
+#: appli/gui/staticlistes.py:10 appli/templates/v2/jobs/_import_box.html:7
+#: appli/templates/v2/jobs/_import_form.html:9
+msgid "Project"
+msgstr ""
+
+#: appli/gui/staticlistes.py:12 appli/gui/staticlistes.py:31
+msgid "create"
+msgstr ""
+
+#: appli/gui/staticlistes.py:13 appli/gui/staticlistes.py:32
+msgid "settings"
+msgstr ""
+
+#: appli/gui/staticlistes.py:14 appli/gui/staticlistes.py:33
+#: appli/templates/v2/collection/_listcontainer.html:19
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "import"
+msgstr ""
+
+#: appli/gui/staticlistes.py:15 appli/gui/staticlistes.py:34
+#: appli/gui/staticlistes.py:46 appli/templates/v2/partials/_navbar.html:42
+#: appli/templates/v2/partials/_navbar.html:44
+#: appli/templates/v2/partials/_navbar.html:46
+msgid "export"
+msgstr ""
+
+#: appli/gui/staticlistes.py:16
+msgid "predict"
+msgstr ""
+
+#: appli/gui/staticlistes.py:17
+msgid "annotate"
+msgstr ""
+
+#: appli/gui/staticlistes.py:18 appli/gui/staticlistes.py:35
+#: appli/templates/v2/project/_stats.html:65
+msgid "about"
+msgstr ""
+
+#: appli/gui/staticlistes.py:19
+msgid "merge"
+msgstr ""
+
+#: appli/gui/staticlistes.py:20
+msgid "edit or erase"
+msgstr ""
+
+#: appli/gui/staticlistes.py:21
+msgid "batch edit"
+msgstr ""
+
+#: appli/gui/staticlistes.py:22
+msgid "reset"
+msgstr ""
+
+#: appli/gui/staticlistes.py:23 appli/gui/staticlistes.py:36
+msgid "delete"
+msgstr ""
+
+#: appli/gui/staticlistes.py:24
+msgid "fix"
+msgstr ""
+
+#: appli/gui/staticlistes.py:28
+msgid "Collections"
+msgstr ""
+
+#: appli/gui/staticlistes.py:29
+msgid "Collection"
+msgstr ""
+
 #: appli/gui/staticlistes.py:39
+msgid "Jobs"
+msgstr ""
+
+#: appli/gui/staticlistes.py:41
+msgid "Job"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface_json.py:368
+#: appli/gui/staticlistes.py:43 appli/gui/staticlistes.py:181
+#: appli/templates/v2/jobs/listall.html:60 appli/templates/v2/jobs/show.html:85
+#: appli/templates/v2/jobs/show.html:93
+#: appli/templates/v2/partials/_navbar.html:26
+msgid "View"
+msgstr ""
+
+#: appli/gui/staticlistes.py:47
+msgid "general export"
+msgstr ""
+
+#: appli/gui/staticlistes.py:48
+msgid "backup export"
+msgstr ""
+
+#: appli/gui/staticlistes.py:49
+msgid "summary export"
+msgstr ""
+
+#: appli/gui/staticlistes.py:50
+msgid "subset"
+msgstr ""
+
+#: appli/gui/staticlistes.py:55 appli/templates/v2/partials/_footer.html:13
+msgid "Privacy"
+msgstr ""
+
+#: appli/gui/staticlistes.py:56
+msgid "About Ecotaxa"
+msgstr ""
+
+#: appli/gui/staticlistes.py:62
 msgid "A manager person needs to be designated among the current project persons"
 msgstr ""
 
-#: appli/gui/staticlistes.py:42
+#: appli/gui/staticlistes.py:65
 msgid "One person, at least, needs to be related to the project"
 msgstr ""
 
-#: appli/gui/staticlistes.py:43
+#: appli/gui/staticlistes.py:66
 msgid ""
 "A contact person needs to be designated among the current project "
 "managers."
 msgstr ""
 
-#: appli/gui/staticlistes.py:46
+#: appli/gui/staticlistes.py:69
 msgid ""
 "A privilege is incomplete. Please select a member name or delete the "
 "privilege row"
 msgstr ""
 
-#: appli/gui/staticlistes.py:49
+#: appli/gui/staticlistes.py:72
 msgid ""
 "One member at least is required with Manage privilege and contact "
 "property  "
 msgstr ""
 
-#: appli/gui/staticlistes.py:52
+#: appli/gui/staticlistes.py:75
 msgid "privilege is missing"
 msgstr ""
 
-#: appli/gui/staticlistes.py:53 appli/gui/staticlistes.py:104
+#: appli/gui/staticlistes.py:76 appli/gui/staticlistes.py:126
 msgid "Not authorized"
 msgstr ""
 
-#: appli/gui/staticlistes.py:54
+#: appli/gui/staticlistes.py:77
 msgid ""
 "Taxonomy synchronization and Ecotaxa version check wasn’t done during the"
 " last 7 days. Ask application administrator to do it."
 msgstr ""
 
-#: appli/gui/staticlistes.py:58
+#: appli/gui/staticlistes.py:81
 msgid "Synchronize to check Ecotaxa version"
 msgstr ""
 
-#: appli/gui/staticlistes.py:60
+#: appli/gui/staticlistes.py:83
 msgid "Error retrieving possible models"
 msgstr ""
 
-#: appli/gui/staticlistes.py:61
+#: appli/gui/staticlistes.py:84
 msgid "Error retrieving licenses"
 msgstr ""
 
-#: appli/gui/staticlistes.py:62
+#: appli/gui/staticlistes.py:85
 msgid "Project does not exist"
 msgstr ""
 
-#: appli/gui/staticlistes.py:63
+#: appli/gui/staticlistes.py:86
 msgid "The page does not exists."
 msgstr ""
 
-#: appli/gui/jobs/staticlistes.py:15 appli/gui/staticlistes.py:64
-#: appli/gui/staticlistes.py:142
+#: appli/gui/jobs/staticlistes.py:15 appli/gui/staticlistes.py:87
+#: appli/gui/staticlistes.py:164
 msgid "Access denied "
 msgstr ""
 
-#: appli/gui/staticlistes.py:66
+#: appli/gui/staticlistes.py:89
 msgid "Visible only by managers"
 msgstr ""
 
-#: appli/gui/staticlistes.py:67
+#: appli/gui/staticlistes.py:90
 msgid "Visible only by managers and annotators"
 msgstr ""
 
-#: appli/gui/staticlistes.py:69
+#: appli/gui/staticlistes.py:92
 msgid "You cannot access this information"
 msgstr ""
 
-#: appli/gui/staticlistes.py:70
+#: appli/gui/staticlistes.py:93
 msgid "You cannot edit settings for this project"
 msgstr ""
 
-#: appli/gui/staticlistes.py:71 appli/templates/v2/project/editdatamass.html:12
+#: appli/gui/staticlistes.py:94 appli/templates/v2/project/editdatamass.html:12
 #: appli/templates/v2/project/editdatamass.html:14
 #: appli/templates/v2/project/massannotation.html:11
 #: appli/templates/v2/project/massannotation.html:13
@@ -235,288 +351,281 @@ msgstr ""
 msgid "Select another project"
 msgstr ""
 
-#: appli/gui/staticlistes.py:72
+#: appli/gui/staticlistes.py:95
 msgid "No users list"
 msgstr ""
 
-#: appli/gui/staticlistes.py:73
+#: appli/gui/staticlistes.py:96
 msgid "Not authorized to create a project"
 msgstr ""
 
-#: appli/gui/staticlistes.py:74
+#: appli/gui/staticlistes.py:97
 msgid "Not authorized to edit a project"
 msgstr ""
 
-#: appli/gui/staticlistes.py:75
+#: appli/gui/staticlistes.py:98
 msgid "A project must have a title and instrument"
 msgstr ""
 
-#: appli/gui/staticlistes.py:76
+#: appli/gui/staticlistes.py:99
 msgid ""
 "Changing the instrument associated with a project may affect the "
 "behaviour of EcoTaxa in various ways and should not be done except to "
 "correct a mistake."
 msgstr ""
 
-#: appli/gui/staticlistes.py:79
+#: appli/gui/staticlistes.py:102
 msgid "Error in project creation"
 msgstr ""
 
-#: appli/gui/staticlistes.py:80
+#: appli/gui/staticlistes.py:103
 msgid "SCN features erased"
 msgstr ""
 
-#: appli/gui/staticlistes.py:81
+#: appli/gui/staticlistes.py:104
 msgid "Member already registered with differents privileges "
 msgstr ""
 
-#: appli/gui/staticlistes.py:84
+#: appli/gui/staticlistes.py:107
 msgid "Privileges are not set for member "
 msgstr ""
 
-#: appli/gui/staticlistes.py:85
+#: appli/gui/staticlistes.py:108
 msgid "Error member to be added is no more in users list "
 msgstr ""
 
-#: appli/gui/staticlistes.py:86
+#: appli/gui/staticlistes.py:109
 msgid ""
 "A contact person needs to be designated among the current project "
 "managers. "
 msgstr ""
 
-#: appli/gui/staticlistes.py:89
+#: appli/gui/staticlistes.py:112
 msgid "At least one manager is needed"
 msgstr ""
 
-#: appli/gui/staticlistes.py:90
+#: appli/gui/staticlistes.py:113
 msgid "Update problem: "
 msgstr ""
 
-#: appli/gui/staticlistes.py:91
+#: appli/gui/staticlistes.py:114
 msgid "Project created"
 msgstr ""
 
-#: appli/gui/staticlistes.py:92
+#: appli/gui/staticlistes.py:115
 msgid "Project updated"
 msgstr ""
 
-#: appli/gui/staticlistes.py:93
+#: appli/gui/staticlistes.py:116
 msgid "Privileges where not imported correctly."
 msgstr ""
 
-#: appli/gui/staticlistes.py:99
+#: appli/gui/staticlistes.py:121
 msgid "Invalid credentials"
 msgstr ""
 
-#: appli/gui/staticlistes.py:100
+#: appli/gui/staticlistes.py:122
 msgid "Data are not valid"
 msgstr ""
 
-#: appli/gui/staticlistes.py:101
+#: appli/gui/staticlistes.py:123
 msgid "Not an administrator"
 msgstr ""
 
-#: appli/gui/staticlistes.py:102
+#: appli/gui/staticlistes.py:124
 msgid "Not found"
 msgstr ""
 
-#: appli/gui/staticlistes.py:103
+#: appli/gui/staticlistes.py:125
 msgid "Service is not active"
 msgstr ""
 
-#: appli/gui/staticlistes.py:105
+#: appli/gui/staticlistes.py:127
 #: appli/templates/v2/security/_reply_register.html:14
 msgid ""
 "Please, check spam and junk mails if you can't find this email in your "
 "inbox."
 msgstr ""
 
-#: appli/gui/staticlistes.py:108
+#: appli/gui/staticlistes.py:130
 msgid "Token is not valid"
 msgstr ""
 
-#: appli/gui/staticlistes.py:109
+#: appli/gui/staticlistes.py:131
 msgid "Signature expired"
 msgstr ""
 
-#: appli/gui/staticlistes.py:117
+#: appli/gui/staticlistes.py:139
 msgid "Account created"
 msgstr ""
 
-#: appli/gui/staticlistes.py:118
+#: appli/gui/staticlistes.py:140
 msgid "Account updated"
 msgstr ""
 
-#: appli/gui/staticlistes.py:119
+#: appli/gui/staticlistes.py:141
 msgid "Thank you for the confirmation. You can log in."
 msgstr ""
 
-#: appli/gui/staticlistes.py:121
+#: appli/gui/staticlistes.py:143
 msgid ""
 " A confirmation email has been sent to the email address provided. Click "
 "on the link therein to verify it."
 msgstr ""
 
-#: appli/gui/staticlistes.py:125
+#: appli/gui/staticlistes.py:147
 msgid "Account not created"
 msgstr ""
 
-#: appli/gui/staticlistes.py:126
+#: appli/gui/staticlistes.py:148
 msgid "Account not updated"
 msgstr ""
 
-#: appli/gui/staticlistes.py:127
+#: appli/gui/staticlistes.py:149
 msgid "Account not activated."
 msgstr ""
 
-#: appli/gui/staticlistes.py:129
+#: appli/gui/staticlistes.py:151
 msgid "Confirmation email  not sent."
 msgstr ""
 
-#: appli/gui/staticlistes.py:130
+#: appli/gui/staticlistes.py:152
 msgid "Wrong user id"
 msgstr ""
 
-#: appli/gui/staticlistes.py:131
+#: appli/gui/staticlistes.py:153
 msgid "No action specified"
 msgstr ""
 
-#: appli/gui/staticlistes.py:132
+#: appli/gui/staticlistes.py:154
 msgid "Password required"
 msgstr ""
 
-#: appli/gui/staticlistes.py:133
+#: appli/gui/staticlistes.py:155
 msgid ""
 "An activation request has been sent to the administrator. You will "
 "receive instructions to modify your email which is no longer accepted."
 msgstr ""
 
-#: appli/gui/staticlistes.py:136
+#: appli/gui/staticlistes.py:158
 msgid ""
 "The password must be : - minimum length 8 - 1 or more numeric - 1 or more"
 " uppercase - 1 or more lowercase - 1 or more  "
 msgstr ""
 
-#: appli/gui/staticlistes.py:139
+#: appli/gui/staticlistes.py:161
 msgid "Status value error"
 msgstr ""
 
-#: appli/gui/staticlistes.py:141
+#: appli/gui/staticlistes.py:163
 msgid "Please modify your personal data as requested before by email."
 msgstr ""
 
-#: appli/gui/staticlistes.py:143
+#: appli/gui/staticlistes.py:165
 msgid "Account desactivated."
 msgstr ""
 
-#: appli/gui/staticlistes.py:144
+#: appli/gui/staticlistes.py:166
 msgid "Account desactivated. Could be waiting for email confirmation."
 msgstr ""
 
-#: appli/gui/staticlistes.py:145
+#: appli/gui/staticlistes.py:167
 msgid ""
 "Account waiting for validation. We will verify your informations and "
 "activate your account. You will be informed by email of any issue."
 msgstr ""
 
-#: appli/gui/staticlistes.py:148
+#: appli/gui/staticlistes.py:170
 msgid "Account is waiting for mail confirmation."
 msgstr ""
 
-#: appli/gui/staticlistes.py:149
+#: appli/gui/staticlistes.py:171
 msgid ""
 "You have changed your email address and need to verify this new address. "
 "A confirmation email has been sent to this new address. Click on the link"
 " therein to verify it. "
 msgstr ""
 
-#: appli/gui/staticlistes.py:157
+#: appli/gui/staticlistes.py:179
 msgid "Manage"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:367
-#: appli/gui/staticlistes.py:158 appli/gui/staticlistes.py:171
-#: appli/templates/v2/partials/_navbar.html:34
+#: appli/gui/staticlistes.py:180 appli/gui/staticlistes.py:193
+#: appli/templates/v2/partials/_navbar.html:26
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Annotate"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:368
-#: appli/gui/staticlistes.py:159 appli/templates/v2/jobs/listall.html:58
-#: appli/templates/v2/jobs/show.html:69 appli/templates/v2/jobs/show.html:77
-#: appli/templates/v2/partials/_navbar.html:34
-msgid "View"
-msgstr ""
-
-#: appli/gui/staticlistes.py:164
+#: appli/gui/staticlistes.py:186
 msgid "Manager"
 msgstr ""
 
-#: appli/gui/staticlistes.py:165
+#: appli/gui/staticlistes.py:187
 msgid "Annotator"
 msgstr ""
 
-#: appli/gui/staticlistes.py:166
+#: appli/gui/staticlistes.py:188
 msgid "Viewer"
 msgstr ""
 
-#: appli/gui/staticlistes.py:172
+#: appli/gui/staticlistes.py:194
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Explore Only"
 msgstr ""
 
-#: appli/gui/staticlistes.py:173
+#: appli/gui/staticlistes.py:195
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Annotate No Prediction"
 msgstr ""
 
-#: appli/gui/admin/main.py:503 appli/templates/v2/admin/messages.html:6
+#: appli/gui/admin/main.py:499 appli/templates/v2/admin/messages.html:6
 msgid "Messages"
 msgstr ""
 
-#: appli/gui/admin/main.py:507
+#: appli/gui/admin/main.py:503
 #: appli/templates/v2/help/_help_project_stats.html:41
 #: appli/templates/v2/project/_fullstats.html:78
 msgid "Users"
 msgstr ""
 
-#: appli/gui/admin/main.py:510
+#: appli/gui/admin/main.py:506
 msgid "List"
 msgstr ""
 
-#: appli/gui/admin/main.py:514
+#: appli/gui/admin/main.py:510
 msgid "Create"
 msgstr ""
 
-#: appli/gui/admin/main.py:520
+#: appli/gui/admin/main.py:516
 msgid "Tasks"
 msgstr ""
 
-#: appli/gui/admin/main.py:521
+#: appli/gui/admin/main.py:517
 msgid "View all users tasks"
 msgstr ""
 
-#: appli/gui/admin/main.py:525
+#: appli/gui/admin/main.py:521
 msgid "Database"
 msgstr ""
 
-#: appli/gui/admin/main.py:528
+#: appli/gui/admin/main.py:524
 msgid "View DB Size"
 msgstr ""
 
-#: appli/gui/admin/main.py:532
+#: appli/gui/admin/main.py:528
 msgid "View DB Bloat"
 msgstr ""
 
-#: appli/gui/admin/main.py:536
+#: appli/gui/admin/main.py:532
 msgid "SQL Console"
 msgstr ""
 
-#: appli/gui/admin/main.py:540
+#: appli/gui/admin/main.py:536
 msgid "Recompute Projects and Taxo stat"
 msgstr ""
 
-#: appli/gui/admin/main.py:541
+#: appli/gui/admin/main.py:537
 msgid "can be long"
 msgstr ""
 
@@ -526,10 +635,11 @@ msgid "edit"
 msgstr ""
 
 #: appli/gui/admin/users_list_interface_json.py:21
+#: appli/gui/collection/collections_list_interface_json.py:21
 #: appli/gui/project/projects_list_interface_json.py:22
 #: appli/gui/project/projects_list_interface_json.py:80
-#: appli/templates/v2/jobs/listall.html:44
-#: appli/templates/v2/project/merge.html:30
+#: appli/templates/v2/jobs/listall.html:46
+#: appli/templates/v2/project/merge.html:29
 msgid "ID"
 msgstr ""
 
@@ -558,7 +668,7 @@ msgid "Organisation"
 msgstr ""
 
 #: appli/gui/admin/users_list_interface_json.py:35
-#: appli/templates/v2/jobs/listall.html:51
+#: appli/templates/v2/jobs/listall.html:53
 msgid "Creation date"
 msgstr ""
 
@@ -583,67 +693,206 @@ msgstr ""
 #: appli/gui/admin/users_list_interface_json.py:46
 #: appli/gui/project/projects_list_interface_json.py:40
 #: appli/templates/v2/admin/_activate_status.html:4
-#: appli/templates/v2/project/merge.html:30
+#: appli/templates/v2/project/merge.html:29
 #: appli/templates/v2/project/projectsettings.html:74
 msgid "Status"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:17
-msgid "Object Data (median,mean, x, y, ...)"
+#: appli/gui/collection/collections_list_interface_json.py:25
+#: appli/templates/v2/collection/settings.html:55
+msgid "Provider user"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:21
-msgid "Process Data (software,version, ...)"
+#: appli/gui/collection/collections_list_interface_json.py:27
+#: appli/gui/project/projects_list_interface_json.py:31
+#: appli/gui/project/projects_list_interface_json.py:69
+#: appli/gui/project/projects_list_interface_json.py:88
+#: appli/templates/v2/collection/settings.html:18
+#: appli/templates/v2/project/merge.html:29
+#: appli/templates/v2/project/projectsettings.html:51
+msgid "Title"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:25
-msgid "Acquisition Data (Resolution, ...)"
+#: appli/gui/collection/collections_list_interface_json.py:29
+#: appli/gui/project/projects_list_interface_json.py:36
+#: appli/templates/v2/project/projectsettings.html:14
+#: appli/templates/v2/project/projectsettings.html:149
+msgid "Contact"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:30
+msgid "Creators"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:31
+msgid "Associates"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:33
+#: appli/templates/v2/collection/settings.html:98
+msgid "Citation"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:36
+#: appli/templates/v2/collection/settings.html:102
+msgid "Abstract"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:38
+#: appli/gui/project/projects_list_interface_json.py:46
+#: appli/templates/v2/collection/settings.html:30
+#: appli/templates/v2/project/_fullstats.html:72
+#: appli/templates/v2/project/projectsettings.html:99
+msgid "License"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:39
+msgid "Projects id"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:41
+msgid "External ID"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:45
+msgid "External ID System"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:117
+msgid "Edit"
+msgstr ""
+
+#: appli/gui/collection/staticlistes.py:4
+msgid "Collection created"
+msgstr ""
+
+#: appli/gui/collection/staticlistes.py:5
+msgid "Collection updated"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:16
+msgid "Only save objects' last annotation data"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:18 appli/gui/jobs/job_interface.py:38
+#: appli/gui/jobs/job_interface.py:46 appli/gui/jobs/job_interface.py:75
+#: appli/gui/jobs/job_interface.py:171
+msgid "Yes"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:19 appli/gui/jobs/job_interface.py:39
+#: appli/gui/jobs/job_interface.py:47 appli/gui/jobs/job_interface.py:76
+#: appli/gui/jobs/job_interface.py:172
+msgid "No"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:26
+msgid "Images"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:28
+msgid "First image"
 msgstr ""
 
 #: appli/gui/jobs/job_interface.py:29
-msgid "Sample Data (lat,long, date, ...)"
+msgid "All images"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:33
-msgid "Historical Data"
+#: appli/gui/jobs/job_interface.py:30 appli/gui/jobs/job_interface.py:66
+#: appli/gui/jobs/job_interface.py:149
+msgid "None"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:37
-#: appli/templates/v2/help/_help_projectsettings.html:13
-#: appli/templates/v2/project/projectsettings.html:59
-msgid "Comments"
+#: appli/gui/jobs/job_interface.py:36
+msgid "Internal database IDs"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:43
-msgid "Use coma as decimal separator"
+#: appli/gui/jobs/job_interface.py:44
+msgid "Add an EcoTaxa-compatible second line with types"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:47
-msgid "Format dates and times using - and :"
+#: appli/gui/jobs/job_interface.py:61
+msgid "Separate (in ZIP sub-directories) output by"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:51
-msgid "Internal Ids (including taxonomic source Id)"
+#: appli/gui/jobs/job_interface.py:63 appli/gui/jobs/job_interface.py:147
+msgid "Sample"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:56
-msgid "Export image files"
+#: appli/gui/jobs/job_interface.py:64 appli/gui/jobs/job_interface.py:148
+msgid "Acquisition"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:79 appli/gui/jobs/job_interface.py:91
-msgid "NO Images"
+#: appli/gui/jobs/job_interface.py:65
+#: appli/templates/v2/project/_fullstats.html:8
+msgid "Taxon"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:80 appli/templates/v2/jobs/export.html:22
-msgid "Only Rank 0 Image"
+#: appli/gui/jobs/job_interface.py:71 appli/gui/jobs/job_interface.py:167
+msgid "Copy result file to FTP area. Original file is still available"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:82 appli/templates/v2/jobs/export.html:23
-msgid "All images of each object"
+#: appli/gui/jobs/job_interface.py:87
+#: appli/templates/v2/help/_help_job_export.html:10
+msgid "General Export"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:93
-msgid "All images files"
+#: appli/gui/jobs/job_interface.py:88
+#: appli/templates/v2/help/_help_job_export.html:11
+msgid "Configurable objects export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:100
+#: appli/templates/v2/help/_help_job_export.html:15
+msgid "Backup Export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:101
+msgid "Backup export, for restoring or archiving"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:113
+#: appli/templates/v2/help/_help_job_export.html:18
+msgid "Summary Export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:114
+#: appli/templates/v2/help/_help_job_export.html:19
+msgid "Synthetic taxon-oriented export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:135
+#: appli/templates/v2/help/_help_job_export.html:26
+msgid "Quantity to compute"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:137
+msgid "Abundance"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:138
+msgid "Concentration"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:139
+msgid "Biovolume"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:145
+msgid "Computations aggregation level"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:154
+msgid "Mapping from present taxon to output replacement one "
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:155
+msgid " Type '_discard_' to discard taxon"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:161
+#: appli/templates/v2/help/_help_job_export.html:27
+msgid "Formulae"
 msgstr ""
 
 #: appli/gui/jobs/staticlistes.py:5
@@ -705,24 +954,10 @@ msgstr ""
 #: appli/gui/project/projects_list_interface_json.py:66
 #: appli/gui/project/projects_list_interface_json.py:84
 #: appli/templates/v2/jobs/prediction_create_lstproj.html:34
-#: appli/templates/v2/project/merge.html:30
+#: appli/templates/v2/project/merge.html:29
 #: appli/templates/v2/project/projectsettings.html:66
 #: appli/templates/v2/project/projectsettings.html:68
 msgid "Instrument"
-msgstr ""
-
-#: appli/gui/project/projects_list_interface_json.py:31
-#: appli/gui/project/projects_list_interface_json.py:69
-#: appli/gui/project/projects_list_interface_json.py:88
-#: appli/templates/v2/project/merge.html:30
-#: appli/templates/v2/project/projectsettings.html:51
-msgid "Title"
-msgstr ""
-
-#: appli/gui/project/projects_list_interface_json.py:36
-#: appli/templates/v2/project/projectsettings.html:14
-#: appli/templates/v2/project/projectsettings.html:149
-msgid "Contact"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:37
@@ -739,12 +974,6 @@ msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:42
 msgid "Visibility"
-msgstr ""
-
-#: appli/gui/project/projects_list_interface_json.py:46
-#: appli/templates/v2/project/_fullstats.html:72
-#: appli/templates/v2/project/projectsettings.html:99
-msgid "License"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:47
@@ -810,21 +1039,21 @@ msgstr ""
 #: appli/gui/project/projects_list_interface_json.py:143
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:73
 #: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:56
+#: appli/templates/v2/project/_stats.html:57
 msgid "validated"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:144
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:73
 #: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:57
+#: appli/templates/v2/project/_stats.html:58
 msgid "dubious"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:145
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:72
 #: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:58
+#: appli/templates/v2/project/_stats.html:59
 msgid "predicted"
 msgstr ""
 
@@ -842,7 +1071,7 @@ msgid "Request Access"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:370
-#: appli/templates/v2/partials/_navbar.html:55
+#: appli/templates/v2/partials/_navbar.html:49
 msgid "Settings"
 msgstr ""
 
@@ -1315,18 +1544,21 @@ msgid "Create a user"
 msgstr ""
 
 #: appli/templates/v2/admin/_userslistcontainer.html:11
+#: appli/templates/v2/collection/_listcontainer.html:21
 #: appli/templates/v2/project/_fullstats.html:93
 #: appli/templates/v2/project/_listcontainer.html:22
 msgid "Please wait"
 msgstr ""
 
 #: appli/templates/v2/admin/_userslistcontainer.html:11
+#: appli/templates/v2/collection/_listcontainer.html:21
 #: appli/templates/v2/project/_fullstats.html:93
 #: appli/templates/v2/project/_listcontainer.html:22
 msgid "Data loaded. Displaying..."
 msgstr ""
 
 #: appli/templates/v2/admin/activate.html:7
+#: appli/templates/v2/collection/settings.html:8
 #: appli/templates/v2/jobs/_import_create.html:11
 #: appli/templates/v2/jobs/_import_form.html:7
 #: appli/templates/v2/jobs/import.html:7
@@ -1337,6 +1569,7 @@ msgid "this field is required"
 msgstr ""
 
 #: appli/templates/v2/admin/activate.html:7
+#: appli/templates/v2/collection/settings.html:8
 #: appli/templates/v2/jobs/_import_create.html:11
 #: appli/templates/v2/jobs/_import_form.html:7
 #: appli/templates/v2/jobs/import.html:7
@@ -1352,6 +1585,7 @@ msgstr ""
 
 #: appli/templates/v2/admin/activate.html:18
 #: appli/templates/v2/admin/messages.html:22
+#: appli/templates/v2/collection/settings.html:114
 #: appli/templates/v2/project/projectsettings.html:179
 #: appli/templates/v2/users/_user.html:87
 msgid "Save"
@@ -1364,10 +1598,11 @@ msgstr ""
 
 #: appli/templates/v2/admin/activate.html:18
 #: appli/templates/v2/admin/messages.html:22
-#: appli/templates/v2/jobs/export.html:55
+#: appli/templates/v2/collection/settings.html:114
+#: appli/templates/v2/jobs/export.html:51
 #: appli/templates/v2/jobs/subset_create.html:47
 #: appli/templates/v2/partials/_alertbox.html:21
-#: appli/templates/v2/project/merge.html:49
+#: appli/templates/v2/project/merge.html:48
 #: appli/templates/v2/project/projectsettings.html:179
 #: appli/templates/v2/project/purge.html:27
 #: appli/templates/v2/users/_user.html:87
@@ -1431,11 +1666,228 @@ msgstr ""
 msgid "new user"
 msgstr ""
 
+#: appli/templates/v2/collection/_listcontainer.html:6
+msgid "How to create collection"
+msgstr ""
+
+#: appli/templates/v2/collection/_listcontainer.html:8
+msgid "Create a collection"
+msgstr ""
+
+#: appli/templates/v2/collection/_listcontainer.html:10
+msgid "Access collections"
+msgstr ""
+
+#: appli/templates/v2/collection/_listcontainer.html:19
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "import full settings"
+msgstr ""
+
+#: appli/templates/v2/collection/_listcontainer.html:19
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "preset"
+msgstr ""
+
+#: appli/templates/v2/collection/_listcontainer.html:20
+#: appli/templates/v2/project/_listcontainer.html:21
+msgid "extra"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:5
+msgid "How to edit a collection settings"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:5
+msgid "How to create a collection"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:8
+#: appli/templates/v2/project/projectsettings.html:40
+msgid "imported"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:10
+#: appli/templates/v2/project/projectsettings.html:42
+msgid "click to expand/shrink tabs"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:15
+msgid "collection"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:15
+msgid "new collection"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:19
+#: appli/templates/v2/project/projectsettings.html:51
+msgid "a title is required"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:21
+msgid "Short title"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:24
+msgid "External Id"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:27
+msgid "External Id System"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:43
+msgid "select a project"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:53
+msgid "Users and organisations"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:56
+msgid "select a provider user"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:61
+msgid "Contact user"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:62
+msgid "select a contact user"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:67
+msgid "Creator users"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:68
+#: appli/templates/v2/collection/settings.html:82
+msgid "select a user"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:74
+msgid "Creator organisations"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:75
+#: appli/templates/v2/collection/settings.html:90
+msgid "select an organisation"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:81
+msgid "Associate users"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:89
+msgid "Associate organisations"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:97
+msgid "Descriptions"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:107
+#: appli/templates/v2/project/_stats.html:24
+#: appli/templates/v2/project/projectsettings.html:54
+msgid "Description"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:114
+msgid "Cancel, back to collection list "
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:4
+#: appli/templates/v2/jobs/export.html:37
+#: appli/templates/v2/partials/_navbar.html:40
+msgid "Export"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:5
+#: appli/templates/v2/jobs/export.html:39
+msgid "Global export rules"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:6
+msgid "character set is <strong>UTF-8</strong>"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:8
+msgid "dates are in format <strong>YYYY-MM-DD</strong>"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:9
+msgid "times are in format <strong>hh:mm:ss</strong>"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:12
+msgid ""
+"If chosen will not take into account other parameters, except out to ftp "
+"choice."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:13
+msgid ""
+"Add in ZIP first (i.e. visible) image, all images, or no image.⚠️ \"all\""
+" means maybe several lines per object in TSVs."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:16
+msgid "Backup export, for restoring or archiving."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:16
+msgid ""
+"All images, split by sample, add an EcoTaxa-compatible second line with "
+"types"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:20
+msgid "if summarise_by = sample or acquisition"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:20
+#: appli/templates/v2/help/_help_job_export.html:21
+msgid "(NB = acq_orig_id = celle pour le user)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:21
+msgid "if summarise_by = acquisition"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:23
+#: appli/templates/v2/help/_help_job_export.html:24
+#: appli/templates/v2/help/_help_job_export.html:25
+msgid " if chosen "
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:26
+msgid "Abundance is always possible."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:28
+msgid ""
+"Transitory: How to get values from DB free columns. Python syntax, "
+"prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are "
+"'total_water_volume', 'subsample_coef' and 'individual_volume' "
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:29
+msgid "example:"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:33
+msgid "Mapping from present taxon (key) to output replacement one (value)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:33
+msgid "Use a 0 replacement to _discard_ the present taxon."
+msgstr ""
+
 #: appli/templates/v2/help/_help_job_import.html:4
 #: appli/templates/v2/jobs/_import_box.html:22
 #: appli/templates/v2/jobs/_import_form.html:26
 #: appli/templates/v2/jobs/import.html:21
-#: appli/templates/v2/partials/_navbar.html:45
+#: appli/templates/v2/partials/_navbar.html:37
 #: appli/templates/v2/project/_headerimport.html:6
 msgid "Import"
 msgstr ""
@@ -1846,7 +2298,7 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_project_stats.html:24
 #: appli/templates/v2/help/_help_projectsettings.html:15
-#: appli/templates/v2/project/_stats.html:44
+#: appli/templates/v2/project/_stats.html:45
 #: appli/templates/v2/project/projectsettings.html:89
 msgid "Deep feature extractor"
 msgstr ""
@@ -1896,13 +2348,18 @@ msgid "Project settings"
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:13
+#: appli/templates/v2/project/projectsettings.html:59
+msgid "Comments"
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:13
 msgid ""
 "Any technical, practical details that need to be shared with other users "
 "able to access this target_proj."
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:19
-#: appli/templates/v2/project/_stats.html:41
+#: appli/templates/v2/project/_stats.html:42
 #: appli/templates/v2/project/projectsettings.html:116
 msgid "Definition of preset for manual sorting"
 msgstr ""
@@ -1925,7 +2382,6 @@ msgid "New categories can be added using the auto completion function"
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:25
-#: appli/templates/v2/project/projectsettings.html:128
 msgid "Presets"
 msgstr ""
 
@@ -1963,15 +2419,15 @@ msgid ""
 "      list."
 msgstr ""
 
-#: appli/templates/v2/help/_help_summary.html:6
-msgid "readmore"
-msgstr ""
-
-#: appli/templates/v2/help/_help_summary.html:13
+#: appli/templates/v2/help/_help_summary.html:4
 msgid "Help Summary"
 msgstr ""
 
-#: appli/templates/v2/help/_layout.html:18
+#: appli/templates/v2/help/_layout.html:10
+msgid "readmore"
+msgstr ""
+
+#: appli/templates/v2/help/_layout.html:27
 msgid "Help summary"
 msgstr ""
 
@@ -1979,17 +2435,17 @@ msgstr ""
 msgid "How to register to EcoTaxa"
 msgstr ""
 
-#: appli/templates/v2/help/index.html:5
+#: appli/templates/v2/help/index.html:3
 msgid "Not available for now."
 msgstr ""
 
 #: appli/templates/v2/jobs/_cleanresult.html:1
-#: appli/templates/v2/jobs/listall.html:39
+#: appli/templates/v2/jobs/listall.html:41
 msgid "Cleaning process"
 msgstr ""
 
 #: appli/templates/v2/jobs/_cleanresult.html:1
-#: appli/templates/v2/jobs/listall.html:39
+#: appli/templates/v2/jobs/listall.html:41
 msgid "jobs cleaned"
 msgstr ""
 
@@ -2038,11 +2494,6 @@ msgstr ""
 
 #: appli/templates/v2/jobs/_import_advanced_options.html:13
 msgid "taxonomy"
-msgstr ""
-
-#: appli/templates/v2/jobs/_import_box.html:7
-#: appli/templates/v2/jobs/_import_form.html:9
-msgid "Project"
 msgstr ""
 
 #: appli/templates/v2/jobs/_import_box.html:9
@@ -2134,18 +2585,17 @@ msgid ""
 msgstr ""
 
 #: appli/templates/v2/jobs/_job_final.html:3
-#: appli/templates/v2/jobs/show.html:21
+#: appli/templates/v2/jobs/show.html:45
 msgid "FORCE Delete of "
 msgstr ""
 
 #: appli/templates/v2/jobs/_job_final.html:3
-#: appli/templates/v2/jobs/show.html:21
+#: appli/templates/v2/jobs/show.html:45
 msgid "and back to project"
 msgstr ""
 
 #: appli/templates/v2/jobs/_job_final.html:4
-#: appli/templates/v2/jobs/show.html:22
-msgid "(no danger for the original database)"
+msgid "no danger for the original database"
 msgstr ""
 
 #: appli/templates/v2/jobs/_subset_final.html:1
@@ -2164,71 +2614,32 @@ msgstr ""
 msgid "Total TSV"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:17
-msgid "Export images"
+#: appli/templates/v2/jobs/export.html:27
+#: appli/templates/v2/jobs/export.html:28
+msgid "Add mapping"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:33
-msgid "Full export"
+#: appli/templates/v2/jobs/export.html:27
+msgid "select values to replace"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:33
-msgid "How to export data"
+#: appli/templates/v2/jobs/export.html:27
+#: appli/templates/v2/jobs/subset_create.html:18
+#: appli/templates/v2/project/merge.html:29
+msgid "Select"
+msgstr ""
+
+#: appli/templates/v2/jobs/export.html:28
+msgid "replace_by"
 msgstr ""
 
 #: appli/templates/v2/jobs/export.html:38
-msgid "Custom"
+msgid "How to export data"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:42
-msgid "Backup"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:46
-msgid "Split in multiple files by"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:47
-msgid "NOT Active"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:48
-msgid "Sample"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:49
-msgid "Taxonomy (parent_child)"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:55
+#: appli/templates/v2/jobs/export.html:51
 #: appli/templates/v2/jobs/subset_create.html:47
 msgid "Start Task"
-msgstr ""
-
-#: appli/templates/v2/jobs/export_summary.html:8
-msgid "Summary Export"
-msgstr ""
-
-#: appli/templates/v2/jobs/export_summary.html:8
-msgid "How to export summary data"
-msgstr ""
-
-#: appli/templates/v2/jobs/export_summary.html:9
-msgid "Functionality not active"
-msgstr ""
-
-#: appli/templates/v2/jobs/export_summary.html:12
-#: appli/templates/v2/project/massannotation.html:15
-#: appli/templates/v2/project/massannotation.html:98
-#: appli/templates/v2/security/reply.html:5
-msgid "Back"
-msgstr ""
-
-#: appli/templates/v2/jobs/export_summary.html:13
-#: appli/templates/v2/jobs/jobcleaned.html:6
-#: appli/templates/v2/project/massannotation.html:100
-#: appli/templates/v2/project/resettopredicted.html:31
-msgid "Back to project"
 msgstr ""
 
 #: appli/templates/v2/jobs/import.html:7
@@ -2241,6 +2652,13 @@ msgstr ""
 
 #: appli/templates/v2/jobs/import.html:12
 msgid "File to import"
+msgstr ""
+
+#: appli/templates/v2/jobs/jobcleaned.html:7
+#: appli/templates/v2/jobs/show.html:41
+#: appli/templates/v2/project/massannotation.html:100
+#: appli/templates/v2/project/resettopredicted.html:31
+msgid "Back to project"
 msgstr ""
 
 #: appli/templates/v2/jobs/listall.html:30
@@ -2271,39 +2689,39 @@ msgstr ""
 msgid "Clean all"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:37
+#: appli/templates/v2/jobs/listall.html:38
 msgid "See user tasks"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:37
+#: appli/templates/v2/jobs/listall.html:38
 msgid "See all users tasks"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:45
+#: appli/templates/v2/jobs/listall.html:47
 msgid "Task type"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:46 appli/templates/v2/jobs/show.html:42
+#: appli/templates/v2/jobs/listall.html:48 appli/templates/v2/jobs/show.html:59
 msgid "Owner"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:47 appli/templates/v2/jobs/show.html:46
+#: appli/templates/v2/jobs/listall.html:49 appli/templates/v2/jobs/show.html:63
 msgid "State"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:48 appli/templates/v2/jobs/show.html:59
+#: appli/templates/v2/jobs/listall.html:50 appli/templates/v2/jobs/show.html:75
 msgid "Step"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:50 appli/templates/v2/jobs/show.html:67
+#: appli/templates/v2/jobs/listall.html:52 appli/templates/v2/jobs/show.html:84
 msgid "Message"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:52
+#: appli/templates/v2/jobs/listall.html:54
 msgid "Last update"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:60
+#: appli/templates/v2/jobs/listall.html:62
 msgid "Task"
 msgstr ""
 
@@ -2403,70 +2821,78 @@ msgstr ""
 msgid "PREDICTION: Choice of features and settings "
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:16
-msgid "Clean task data"
-msgstr ""
-
-#: appli/templates/v2/jobs/show.html:17
-msgid "Back to tasks list"
-msgstr ""
-
-#: appli/templates/v2/jobs/show.html:27
+#: appli/templates/v2/jobs/show.html:33
 msgid ""
 "This task has errors. Check the error messages below, fix these errors, "
 "go back to your project and restart\n"
 "        your job."
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:34
+#: appli/templates/v2/jobs/show.html:39
+msgid "Clean task data"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:40
+msgid "Back to tasks list"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:46
+msgid "(no danger for the original database)"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:51
 msgid "Task ID"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:38
+#: appli/templates/v2/jobs/show.html:55
 msgid "Class"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:49
+#: appli/templates/v2/jobs/show.html:66
+msgid " waiting for an answer"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:66
 msgid "Go"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:52
+#: appli/templates/v2/jobs/show.html:69
 msgid "Force restart"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:63
+#: appli/templates/v2/jobs/show.html:79
 msgid "Progress"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:69 appli/templates/v2/jobs/show.html:77
+#: appli/templates/v2/jobs/show.html:85 appli/templates/v2/jobs/show.html:93
 msgid "Hide"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:69
+#: appli/templates/v2/jobs/show.html:85
 msgid " all errors"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:77
+#: appli/templates/v2/jobs/show.html:93
 msgid "internal details"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:79
+#: appli/templates/v2/jobs/show.html:95
 msgid "Input Parameters"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:83
+#: appli/templates/v2/jobs/show.html:99
 msgid "Question Data"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:87
+#: appli/templates/v2/jobs/show.html:103
 msgid "Answer Data"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:91
+#: appli/templates/v2/jobs/show.html:107
 msgid "View log file"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:93
+#: appli/templates/v2/jobs/show.html:109
 msgid "View custom details"
 msgstr ""
 
@@ -2476,11 +2902,6 @@ msgstr ""
 
 #: appli/templates/v2/jobs/subset_create.html:13
 msgid "How to create a project subset"
-msgstr ""
-
-#: appli/templates/v2/jobs/subset_create.html:18
-#: appli/templates/v2/project/merge.html:30
-msgid "Select"
 msgstr ""
 
 #: appli/templates/v2/jobs/subset_create.html:20
@@ -2644,13 +3065,9 @@ msgid "Current language is"
 msgstr ""
 
 #: appli/templates/v2/partials/_footer.html:13
-#: appli/templates/v2/partials/_navbar.html:69
+#: appli/templates/v2/partials/_navbar.html:63
 #: appli/templates/v2/project/_fullstats.html:68
 msgid "About"
-msgstr ""
-
-#: appli/templates/v2/partials/_footer.html:13
-msgid "Privacy"
 msgstr ""
 
 #: appli/templates/v2/partials/_index.html:6
@@ -2758,56 +3175,56 @@ msgstr ""
 msgid "Job monitor."
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:7
-msgid "projects list"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:39
+#: appli/templates/v2/partials/_navbar.html:31
 msgid "Predict"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:48
-msgid "Export"
+#: appli/templates/v2/partials/_navbar.html:42
+msgid "General"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:50
-msgid "<strong>Full</strong> export"
+#: appli/templates/v2/partials/_navbar.html:44
+msgid "Backup"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:52
-msgid "<strong>Summary</strong> export"
+#: appli/templates/v2/partials/_navbar.html:46
+msgid "Summary"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:57
+#: appli/templates/v2/partials/_navbar.html:51
 msgid "Tools"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:59
+#: appli/templates/v2/partials/_navbar.html:53
 msgid "<strong>Extract</strong> Subset"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:60
+#: appli/templates/v2/partials/_navbar.html:54
 msgid "<strong>Merge</strong> another project in this project"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:61
+#: appli/templates/v2/partials/_navbar.html:55
 msgid "<strong>Edit or erase</strong> annotations massively"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:62
+#: appli/templates/v2/partials/_navbar.html:56
 msgid "<strong>Batch</strong> edit metadata"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:63
+#: appli/templates/v2/partials/_navbar.html:57
 msgid "<strong>Reset</strong> status to Predicted"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:64
+#: appli/templates/v2/partials/_navbar.html:58
 msgid "<strong>Delete</strong> object or project"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:65
+#: appli/templates/v2/partials/_navbar.html:59
 msgid "<strong>Fix</strong> category issues"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:71
+msgid "projects list"
 msgstr ""
 
 #: appli/templates/v2/partials/_navuser.html:8
@@ -2815,6 +3232,14 @@ msgstr ""
 #: appli/templates/v2/security/_login.html:22
 #: appli/templates/v2/security/_reply_activate.html:15
 msgid "Log in"
+msgstr ""
+
+#: appli/templates/v2/partials/_navuser.html:14
+msgid "last used projects"
+msgstr ""
+
+#: appli/templates/v2/partials/_navuser.html:14
+msgid "Last Used Projects"
 msgstr ""
 
 #: appli/templates/v2/partials/_navuser.html:18
@@ -2825,20 +3250,28 @@ msgstr ""
 msgid "Files"
 msgstr ""
 
-#: appli/templates/v2/partials/_navuser.html:21
-msgid "last used projects"
-msgstr ""
-
-#: appli/templates/v2/partials/_navuser.html:21
-msgid "Last Used Projects"
-msgstr ""
-
-#: appli/templates/v2/partials/_navuser.html:25
+#: appli/templates/v2/partials/_navuser.html:20
 msgid "logout"
 msgstr ""
 
-#: appli/templates/v2/partials/_navuser.html:25
+#: appli/templates/v2/partials/_navuser.html:20
 msgid "Logout"
+msgstr ""
+
+#: appli/templates/v2/partials/_navuser.html:25
+msgid "Admin"
+msgstr ""
+
+#: appli/templates/v2/partials/_navuser.html:26
+msgid "Browse Taxonomy"
+msgstr ""
+
+#: appli/templates/v2/partials/_navuser.html:26
+msgid "Explore"
+msgstr ""
+
+#: appli/templates/v2/partials/_navuser.html:26
+msgid "Go to Ecopart"
 msgstr ""
 
 #: appli/templates/v2/partials/_top_messages.html:6
@@ -2850,21 +3283,17 @@ msgid "New project"
 msgstr ""
 
 #: appli/templates/v2/partials/_topsitebar.html:14
-msgid "Search project by title"
+msgid "Search"
 msgstr ""
 
-#: appli/templates/v2/partials/_topsitebar.html:19
+#: appli/templates/v2/partials/_topsitebar.html:14
+msgid "project by title"
+msgstr ""
+
+#: appli/templates/v2/partials/_topsitebar.html:20
 #: appli/templates/v2/security/_reply_activate.html:10
 #: appli/templates/v2/security/_reply_activate.html:13
 msgid "Home"
-msgstr ""
-
-#: appli/templates/v2/partials/_topsitebar.html:19
-msgid "Projects"
-msgstr ""
-
-#: appli/templates/v2/project/_fullstats.html:8
-msgid "Taxon"
 msgstr ""
 
 #: appli/templates/v2/project/_fullstats.html:8
@@ -2973,22 +3402,6 @@ msgstr ""
 msgid "Access projects"
 msgstr ""
 
-#: appli/templates/v2/project/_listcontainer.html:20
-msgid "import full settings"
-msgstr ""
-
-#: appli/templates/v2/project/_listcontainer.html:20
-msgid "preset"
-msgstr ""
-
-#: appli/templates/v2/project/_listcontainer.html:20
-msgid "import"
-msgstr ""
-
-#: appli/templates/v2/project/_listcontainer.html:21
-msgid "extra"
-msgstr ""
-
 #: appli/templates/v2/project/_merge_process.html:4
 msgid "Warning: "
 msgstr ""
@@ -3017,20 +3430,16 @@ msgstr ""
 msgid "Fusion Done successfully"
 msgstr ""
 
-#: appli/templates/v2/project/_stats.html:27
+#: appli/templates/v2/project/_stats.html:28
 msgid "Privileges"
 msgstr ""
 
-#: appli/templates/v2/project/_stats.html:54
+#: appli/templates/v2/project/_stats.html:55
 msgid "Classification summary"
 msgstr ""
 
-#: appli/templates/v2/project/_stats.html:59
+#: appli/templates/v2/project/_stats.html:60
 msgid "unclassified"
-msgstr ""
-
-#: appli/templates/v2/project/_stats.html:64
-msgid "about"
 msgstr ""
 
 #: appli/templates/v2/project/editdatamass.html:7
@@ -3132,6 +3541,12 @@ msgstr ""
 
 #: appli/templates/v2/project/massannotation.html:8
 msgid "Mass annotation"
+msgstr ""
+
+#: appli/templates/v2/project/massannotation.html:15
+#: appli/templates/v2/project/massannotation.html:98
+#: appli/templates/v2/security/reply.html:5
+msgid "Back"
 msgstr ""
 
 #: appli/templates/v2/project/massannotation.html:18
@@ -3291,91 +3706,82 @@ msgstr ""
 msgid "Back to project home"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:13
-msgid ""
-"You are allowed to merge projects that you manage and contain images from"
-" the <strong>same</strong> instrument.\n"
-"     (Hint: use the <a href=\"{{ url_for(\"gui_prj_edit\", "
-"projid=target_proj.projid)}}\">projects settings</a> to change this if "
-"needed)."
-msgstr ""
-
-#: appli/templates/v2/project/merge.html:15
+#: appli/templates/v2/project/merge.html:16
 msgid "User privileges from both projects will be added"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:16
+#: appli/templates/v2/project/merge.html:17
 msgid ""
 "This tool allows to merge two projects in a single projet (called Current"
 " project). The added project will then be automatically deleted. If "
 "object data are not consistent between both projects :"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:17
+#: appli/templates/v2/project/merge.html:18
 msgid "New data fields are added to the Current project."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:18
+#: appli/templates/v2/project/merge.html:19
 msgid "The resulting project will thus contain partially documented datafields."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:19
+#: appli/templates/v2/project/merge.html:20
 msgid ""
 "Samples with same sample_id on both sides will <strong>not</strong> be "
 "updated from added project."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:20
+#: appli/templates/v2/project/merge.html:21
 msgid ""
 "Acquisitions with same acq_id on both sides will <strong>not</strong> be "
 "updated from added project."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:21
+#: appli/templates/v2/project/merge.html:22
 msgid ""
 "Note : Next screen will indicate compatibility issues (if exists) and "
 "allow you to Confirm the merging operation."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:25
+#: appli/templates/v2/project/merge.html:24
 msgid "Source project : "
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:25
+#: appli/templates/v2/project/merge.html:24
 msgid " this project will be destroyed"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:30
+#: appli/templates/v2/project/merge.html:29
 msgid "Nbr Obj"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:31
+#: appli/templates/v2/project/merge.html:30
 #, python-format
 msgid "%s Validated"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:31
+#: appli/templates/v2/project/merge.html:30
 #, python-format
 msgid "%s Classified"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:44
+#: appli/templates/v2/project/merge.html:43
 msgid "No matching project found."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:45
+#: appli/templates/v2/project/merge.html:44
 msgid "Back to projects list."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:49
+#: appli/templates/v2/project/merge.html:48
 msgid "Merge"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:49
+#: appli/templates/v2/project/merge.html:48
 msgid "Validate before merge"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:49
+#: appli/templates/v2/project/merge.html:48
 #: appli/templates/v2/project/purge.html:27
 msgid "Cancel and back to project"
 msgstr ""
@@ -3396,24 +3802,12 @@ msgstr ""
 msgid "Pick from other project"
 msgstr ""
 
-#: appli/templates/v2/project/projectsettings.html:28
-msgid "pick from projects"
-msgstr ""
-
 #: appli/templates/v2/project/projectsettings.html:37
 msgid "How to edit a project settings"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:37
 msgid "How to create a project"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:40
-msgid "imported"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:42
-msgid "click to expand/shrink tabs"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:47
@@ -3424,22 +3818,8 @@ msgstr ""
 msgid "new project"
 msgstr ""
 
-#: appli/templates/v2/project/projectsettings.html:52
-msgid "a title is required"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:52
-#: appli/templates/v2/security/forgotten.html:18
-#: appli/templates/v2/users/_user.html:14
-#: appli/templates/v2/users/_user.html:17
-#: appli/templates/v2/users/_user.html:39
-#: appli/templates/v2/users/_user.html:44
-#: appli/templates/v2/users/_user.html:48
-msgid "new"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:54
-msgid "Description"
+#: appli/templates/v2/project/projectsettings.html:48
+msgid "Pick all settings from other project"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:84
@@ -3462,8 +3842,12 @@ msgstr ""
 msgid "select a category"
 msgstr ""
 
+#: appli/templates/v2/project/projectsettings.html:128
+msgid "Sorting tools"
+msgstr ""
+
 #: appli/templates/v2/project/projectsettings.html:129
-msgid "Pick presets from other projects"
+msgid "Pick sorting fields from other projects"
 msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:132
@@ -3660,7 +4044,7 @@ msgid "Welcome, your account has been created."
 msgstr ""
 
 #: appli/templates/v2/security/_reply_register.html:6
-msgid "log in"
+msgid "login"
 msgstr ""
 
 #: appli/templates/v2/security/_reply_register.html:8
@@ -4229,5 +4613,96 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Please detail your answer"
+#~ msgstr ""
+
+#~ msgid "Object Data (median,mean, x, y, ...)"
+#~ msgstr ""
+
+#~ msgid "Process Data (software,version, ...)"
+#~ msgstr ""
+
+#~ msgid "Acquisition Data (Resolution, ...)"
+#~ msgstr ""
+
+#~ msgid "Sample Data (lat,long, date, ...)"
+#~ msgstr ""
+
+#~ msgid "Historical Data"
+#~ msgstr ""
+
+#~ msgid "Use coma as decimal separator"
+#~ msgstr ""
+
+#~ msgid "Format dates and times using - and :"
+#~ msgstr ""
+
+#~ msgid "Internal Ids (including taxonomic source Id)"
+#~ msgstr ""
+
+#~ msgid "Export image files"
+#~ msgstr ""
+
+#~ msgid "NO Images"
+#~ msgstr ""
+
+#~ msgid "Only Rank 0 Image"
+#~ msgstr ""
+
+#~ msgid "All images of each object"
+#~ msgstr ""
+
+#~ msgid "All images files"
+#~ msgstr ""
+
+#~ msgid "Export images"
+#~ msgstr ""
+
+#~ msgid "Full export"
+#~ msgstr ""
+
+#~ msgid "Custom"
+#~ msgstr ""
+
+#~ msgid "Split in multiple files by"
+#~ msgstr ""
+
+#~ msgid "NOT Active"
+#~ msgstr ""
+
+#~ msgid "Taxonomy (parent_child)"
+#~ msgstr ""
+
+#~ msgid "How to export summary data"
+#~ msgstr ""
+
+#~ msgid "Functionality not active"
+#~ msgstr ""
+
+#~ msgid "<strong>Full</strong> export"
+#~ msgstr ""
+
+#~ msgid "<strong>Summary</strong> export"
+#~ msgstr ""
+
+#~ msgid "Search project by title"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You are allowed to merge projects "
+#~ "that you manage and contain images "
+#~ "from the <strong>same</strong> instrument.\n"
+#~ "     (Hint: use the <a href=\"{{ "
+#~ "url_for(\"gui_prj_edit\", "
+#~ "projid=target_proj.projid)}}\">projects settings</a> to"
+#~ " change this if needed)."
+#~ msgstr ""
+
+#~ msgid "pick from projects"
+#~ msgstr ""
+
+#~ msgid "new"
+#~ msgstr ""
+
+#~ msgid "Pick presets from other projects"
 #~ msgstr ""
 

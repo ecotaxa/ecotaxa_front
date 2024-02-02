@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-12-13 17:43+0100\n"
+"POT-Creation-Date: 2024-02-02 17:33+0100\n"
 "PO-Revision-Date: 2022-11-23 10:53+0100\n"
 "Last-Translator: \n"
 "Language: zh\n"
@@ -155,89 +155,217 @@ msgid ""
 "processing of images using EcoTaxa as a quality checking solution."
 msgstr ""
 
+#: appli/gui/staticlistes.py:9 appli/templates/v2/collection/settings.html:42
+#: appli/templates/v2/partials/_topsitebar.html:20
+#, fuzzy
+msgid "Projects"
+msgstr "项目"
+
+#: appli/gui/staticlistes.py:10 appli/templates/v2/jobs/_import_box.html:7
+#: appli/templates/v2/jobs/_import_form.html:9
+#, fuzzy
+msgid "Project"
+msgstr "项目"
+
+#: appli/gui/staticlistes.py:12 appli/gui/staticlistes.py:31
+#, fuzzy
+msgid "create"
+msgstr "阅读更多"
+
+#: appli/gui/staticlistes.py:13 appli/gui/staticlistes.py:32
+#, fuzzy
+msgid "settings"
+msgstr "设置"
+
+#: appli/gui/staticlistes.py:14 appli/gui/staticlistes.py:33
+#: appli/templates/v2/collection/_listcontainer.html:19
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "import"
+msgstr "导入"
+
+#: appli/gui/staticlistes.py:15 appli/gui/staticlistes.py:34
+#: appli/gui/staticlistes.py:46 appli/templates/v2/partials/_navbar.html:42
+#: appli/templates/v2/partials/_navbar.html:44
+#: appli/templates/v2/partials/_navbar.html:46
+#, fuzzy
+msgid "export"
+msgstr "导入"
+
+#: appli/gui/staticlistes.py:16
+#, fuzzy
+msgid "predict"
+msgstr "预测"
+
+#: appli/gui/staticlistes.py:17
+#, fuzzy
+msgid "annotate"
+msgstr "注释"
+
+#: appli/gui/staticlistes.py:18 appli/gui/staticlistes.py:35
+#: appli/templates/v2/project/_stats.html:65
+#, fuzzy
+msgid "about"
+msgstr "关于"
+
+#: appli/gui/staticlistes.py:19
+msgid "merge"
+msgstr ""
+
+#: appli/gui/staticlistes.py:20
+msgid "edit or erase"
+msgstr ""
+
+#: appli/gui/staticlistes.py:21
+msgid "batch edit"
+msgstr ""
+
+#: appli/gui/staticlistes.py:22
+#, fuzzy
+msgid "reset"
+msgstr "预设"
+
+#: appli/gui/staticlistes.py:23 appli/gui/staticlistes.py:36
+#, fuzzy
+msgid "delete"
+msgstr "选择"
+
+#: appli/gui/staticlistes.py:24
+msgid "fix"
+msgstr ""
+
+#: appli/gui/staticlistes.py:28
+msgid "Collections"
+msgstr ""
+
+#: appli/gui/staticlistes.py:29
+#, fuzzy
+msgid "Collection"
+msgstr "预测"
+
 #: appli/gui/staticlistes.py:39
+msgid "Jobs"
+msgstr ""
+
+#: appli/gui/staticlistes.py:41
+msgid "Job"
+msgstr ""
+
+#: appli/gui/project/projects_list_interface_json.py:368
+#: appli/gui/staticlistes.py:43 appli/gui/staticlistes.py:181
+#: appli/templates/v2/jobs/listall.html:60 appli/templates/v2/jobs/show.html:85
+#: appli/templates/v2/jobs/show.html:93
+#: appli/templates/v2/partials/_navbar.html:26
+msgid "View"
+msgstr ""
+
+#: appli/gui/staticlistes.py:47
+msgid "general export"
+msgstr ""
+
+#: appli/gui/staticlistes.py:48
+msgid "backup export"
+msgstr ""
+
+#: appli/gui/staticlistes.py:49
+msgid "summary export"
+msgstr ""
+
+#: appli/gui/staticlistes.py:50
+msgid "subset"
+msgstr ""
+
+#: appli/gui/staticlistes.py:55 appli/templates/v2/partials/_footer.html:13
+msgid "Privacy"
+msgstr "隐私"
+
+#: appli/gui/staticlistes.py:56
+#, fuzzy
+msgid "About Ecotaxa"
+msgstr "项目"
+
+#: appli/gui/staticlistes.py:62
 msgid "A manager person needs to be designated among the current project persons"
 msgstr "需要在现有项目人员中指定一名管理人员"
 
-#: appli/gui/staticlistes.py:42
+#: appli/gui/staticlistes.py:65
 msgid "One person, at least, needs to be related to the project"
 msgstr "至少需要一人与项目相关"
 
-#: appli/gui/staticlistes.py:43
+#: appli/gui/staticlistes.py:66
 msgid ""
 "A contact person needs to be designated among the current project "
 "managers."
 msgstr "需要在目前的项目管理员中指定一名联系人。"
 
-#: appli/gui/staticlistes.py:46
+#: appli/gui/staticlistes.py:69
 msgid ""
 "A privilege is incomplete. Please select a member name or delete the "
 "privilege row"
 msgstr "权限不完整。请选择人员名称或删除权限行"
 
-#: appli/gui/staticlistes.py:49
+#: appli/gui/staticlistes.py:72
 msgid ""
 "One member at least is required with Manage privilege and contact "
 "property  "
 msgstr "至少需要一名人员具有管理权限和联系方式  "
 
-#: appli/gui/staticlistes.py:52
+#: appli/gui/staticlistes.py:75
 msgid "privilege is missing"
 msgstr "权限缺失"
 
-#: appli/gui/staticlistes.py:53 appli/gui/staticlistes.py:104
+#: appli/gui/staticlistes.py:76 appli/gui/staticlistes.py:126
 #, fuzzy
 msgid "Not authorized"
 msgstr "注释"
 
-#: appli/gui/staticlistes.py:54
+#: appli/gui/staticlistes.py:77
 msgid ""
 "Taxonomy synchronization and Ecotaxa version check wasn’t done during the"
 " last 7 days. Ask application administrator to do it."
 msgstr "过去7天内没有进行Taxonomy同步和Ecotaxa版本检查。请应用程序管理员执行此操作。"
 
-#: appli/gui/staticlistes.py:58
+#: appli/gui/staticlistes.py:81
 msgid "Synchronize to check Ecotaxa version"
 msgstr "同步检查Ecotaxa版本"
 
-#: appli/gui/staticlistes.py:60
+#: appli/gui/staticlistes.py:83
 msgid "Error retrieving possible models"
 msgstr "错误检索可能的模型"
 
-#: appli/gui/staticlistes.py:61
+#: appli/gui/staticlistes.py:84
 msgid "Error retrieving licenses"
 msgstr "错误检索许可证"
 
-#: appli/gui/staticlistes.py:62
+#: appli/gui/staticlistes.py:85
 msgid "Project does not exist"
 msgstr "项目不存在"
 
-#: appli/gui/staticlistes.py:63
+#: appli/gui/staticlistes.py:86
 msgid "The page does not exists."
 msgstr "页面不存在。"
 
-#: appli/gui/jobs/staticlistes.py:15 appli/gui/staticlistes.py:64
-#: appli/gui/staticlistes.py:142
+#: appli/gui/jobs/staticlistes.py:15 appli/gui/staticlistes.py:87
+#: appli/gui/staticlistes.py:164
 msgid "Access denied "
 msgstr ""
 
-#: appli/gui/staticlistes.py:66
+#: appli/gui/staticlistes.py:89
 msgid "Visible only by managers"
 msgstr ""
 
-#: appli/gui/staticlistes.py:67
+#: appli/gui/staticlistes.py:90
 msgid "Visible only by managers and annotators"
 msgstr ""
 
-#: appli/gui/staticlistes.py:69
+#: appli/gui/staticlistes.py:92
 msgid "You cannot access this information"
 msgstr "您无法访问此信息"
 
-#: appli/gui/staticlistes.py:70
+#: appli/gui/staticlistes.py:93
 msgid "You cannot edit settings for this project"
 msgstr "您不能编辑此项目的设置"
 
-#: appli/gui/staticlistes.py:71 appli/templates/v2/project/editdatamass.html:12
+#: appli/gui/staticlistes.py:94 appli/templates/v2/project/editdatamass.html:12
 #: appli/templates/v2/project/editdatamass.html:14
 #: appli/templates/v2/project/massannotation.html:11
 #: appli/templates/v2/project/massannotation.html:13
@@ -247,299 +375,292 @@ msgstr "您不能编辑此项目的设置"
 msgid "Select another project"
 msgstr "新项目"
 
-#: appli/gui/staticlistes.py:72
+#: appli/gui/staticlistes.py:95
 msgid "No users list"
 msgstr "无用户列表"
 
-#: appli/gui/staticlistes.py:73
+#: appli/gui/staticlistes.py:96
 msgid "Not authorized to create a project"
 msgstr "未获授权创建项目"
 
-#: appli/gui/staticlistes.py:74
+#: appli/gui/staticlistes.py:97
 msgid "Not authorized to edit a project"
 msgstr "未获授权编辑项目"
 
-#: appli/gui/staticlistes.py:75
+#: appli/gui/staticlistes.py:98
 msgid "A project must have a title and instrument"
 msgstr "项目必须有标题和设备"
 
-#: appli/gui/staticlistes.py:76
+#: appli/gui/staticlistes.py:99
 msgid ""
 "Changing the instrument associated with a project may affect the "
 "behaviour of EcoTaxa in various ways and should not be done except to "
 "correct a mistake."
 msgstr "改变与项目相关的仪器可能会以各种方式影响EcoTaxa的行为，除非纠正错误，否则不应这样做。"
 
-#: appli/gui/staticlistes.py:79
+#: appli/gui/staticlistes.py:102
 msgid "Error in project creation"
 msgstr "创建项目中出错"
 
-#: appli/gui/staticlistes.py:80
+#: appli/gui/staticlistes.py:103
 msgid "SCN features erased"
 msgstr "SCN特性删除"
 
-#: appli/gui/staticlistes.py:81
+#: appli/gui/staticlistes.py:104
 msgid "Member already registered with differents privileges "
 msgstr "会员已使用不同权限注册 "
 
-#: appli/gui/staticlistes.py:84
+#: appli/gui/staticlistes.py:107
 msgid "Privileges are not set for member "
 msgstr "未为会员设置权限 "
 
-#: appli/gui/staticlistes.py:85
+#: appli/gui/staticlistes.py:108
 msgid "Error member to be added is no more in users list "
 msgstr "要添加的错误会员已不在用户列表中 "
 
-#: appli/gui/staticlistes.py:86
+#: appli/gui/staticlistes.py:109
 msgid ""
 "A contact person needs to be designated among the current project "
 "managers. "
 msgstr "需要在当前的项目管理人中指定一个联系人。 "
 
-#: appli/gui/staticlistes.py:89
+#: appli/gui/staticlistes.py:112
 msgid "At least one manager is needed"
 msgstr "至少需要一个管理人员"
 
-#: appli/gui/staticlistes.py:90
+#: appli/gui/staticlistes.py:113
 msgid "Update problem: "
 msgstr "更新问题： "
 
-#: appli/gui/staticlistes.py:91
+#: appli/gui/staticlistes.py:114
 #, fuzzy
 msgid "Project created"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:92
+#: appli/gui/staticlistes.py:115
 msgid "Project updated"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:93
+#: appli/gui/staticlistes.py:116
 msgid "Privileges where not imported correctly."
 msgstr "没有正确导入权限。"
 
-#: appli/gui/staticlistes.py:99
+#: appli/gui/staticlistes.py:121
 msgid "Invalid credentials"
 msgstr ""
 
-#: appli/gui/staticlistes.py:100
+#: appli/gui/staticlistes.py:122
 msgid "Data are not valid"
 msgstr ""
 
-#: appli/gui/staticlistes.py:101
+#: appli/gui/staticlistes.py:123
 msgid "Not an administrator"
 msgstr ""
 
-#: appli/gui/staticlistes.py:102
+#: appli/gui/staticlistes.py:124
 msgid "Not found"
 msgstr ""
 
-#: appli/gui/staticlistes.py:103
+#: appli/gui/staticlistes.py:125
 msgid "Service is not active"
 msgstr ""
 
-#: appli/gui/staticlistes.py:105
+#: appli/gui/staticlistes.py:127
 #: appli/templates/v2/security/_reply_register.html:14
 msgid ""
 "Please, check spam and junk mails if you can't find this email in your "
 "inbox."
 msgstr ""
 
-#: appli/gui/staticlistes.py:108
+#: appli/gui/staticlistes.py:130
 #, fuzzy
 msgid "Token is not valid"
 msgstr "需要一个标题"
 
-#: appli/gui/staticlistes.py:109
+#: appli/gui/staticlistes.py:131
 msgid "Signature expired"
 msgstr ""
 
-#: appli/gui/staticlistes.py:117
+#: appli/gui/staticlistes.py:139
 #, fuzzy
 msgid "Account created"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:118
+#: appli/gui/staticlistes.py:140
 #, fuzzy
 msgid "Account updated"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:119
+#: appli/gui/staticlistes.py:141
 msgid "Thank you for the confirmation. You can log in."
 msgstr ""
 
-#: appli/gui/staticlistes.py:121
+#: appli/gui/staticlistes.py:143
 msgid ""
 " A confirmation email has been sent to the email address provided. Click "
 "on the link therein to verify it."
 msgstr ""
 
-#: appli/gui/staticlistes.py:125
+#: appli/gui/staticlistes.py:147
 msgid "Account not created"
 msgstr ""
 
-#: appli/gui/staticlistes.py:126
+#: appli/gui/staticlistes.py:148
 #, fuzzy
 msgid "Account not updated"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:127
+#: appli/gui/staticlistes.py:149
 msgid "Account not activated."
 msgstr ""
 
-#: appli/gui/staticlistes.py:129
+#: appli/gui/staticlistes.py:151
 msgid "Confirmation email  not sent."
 msgstr ""
 
-#: appli/gui/staticlistes.py:130
+#: appli/gui/staticlistes.py:152
 #, fuzzy
 msgid "Wrong user id"
 msgstr "无用户列表"
 
-#: appli/gui/staticlistes.py:131
+#: appli/gui/staticlistes.py:153
 msgid "No action specified"
 msgstr ""
 
-#: appli/gui/staticlistes.py:132
+#: appli/gui/staticlistes.py:154
 #, fuzzy
 msgid "Password required"
 msgstr "需要一个标题"
 
-#: appli/gui/staticlistes.py:133
+#: appli/gui/staticlistes.py:155
 msgid ""
 "An activation request has been sent to the administrator. You will "
 "receive instructions to modify your email which is no longer accepted."
 msgstr ""
 
-#: appli/gui/staticlistes.py:136
+#: appli/gui/staticlistes.py:158
 msgid ""
 "The password must be : - minimum length 8 - 1 or more numeric - 1 or more"
 " uppercase - 1 or more lowercase - 1 or more  "
 msgstr ""
 
-#: appli/gui/staticlistes.py:139
+#: appli/gui/staticlistes.py:161
 msgid "Status value error"
 msgstr ""
 
-#: appli/gui/staticlistes.py:141
+#: appli/gui/staticlistes.py:163
 msgid "Please modify your personal data as requested before by email."
 msgstr ""
 
-#: appli/gui/staticlistes.py:143
+#: appli/gui/staticlistes.py:165
 #, fuzzy
 msgid "Account desactivated."
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:144
+#: appli/gui/staticlistes.py:166
 msgid "Account desactivated. Could be waiting for email confirmation."
 msgstr ""
 
-#: appli/gui/staticlistes.py:145
+#: appli/gui/staticlistes.py:167
 msgid ""
 "Account waiting for validation. We will verify your informations and "
 "activate your account. You will be informed by email of any issue."
 msgstr ""
 
-#: appli/gui/staticlistes.py:148
+#: appli/gui/staticlistes.py:170
 msgid "Account is waiting for mail confirmation."
 msgstr ""
 
-#: appli/gui/staticlistes.py:149
+#: appli/gui/staticlistes.py:171
 msgid ""
 "You have changed your email address and need to verify this new address. "
 "A confirmation email has been sent to this new address. Click on the link"
 " therein to verify it. "
 msgstr ""
 
-#: appli/gui/staticlistes.py:157
+#: appli/gui/staticlistes.py:179
 msgid "Manage"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:367
-#: appli/gui/staticlistes.py:158 appli/gui/staticlistes.py:171
-#: appli/templates/v2/partials/_navbar.html:34
+#: appli/gui/staticlistes.py:180 appli/gui/staticlistes.py:193
+#: appli/templates/v2/partials/_navbar.html:26
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Annotate"
 msgstr "注释"
 
-#: appli/gui/project/projects_list_interface_json.py:368
-#: appli/gui/staticlistes.py:159 appli/templates/v2/jobs/listall.html:58
-#: appli/templates/v2/jobs/show.html:69 appli/templates/v2/jobs/show.html:77
-#: appli/templates/v2/partials/_navbar.html:34
-msgid "View"
-msgstr ""
-
-#: appli/gui/staticlistes.py:164
+#: appli/gui/staticlistes.py:186
 msgid "Manager"
 msgstr ""
 
-#: appli/gui/staticlistes.py:165
+#: appli/gui/staticlistes.py:187
 #, fuzzy
 msgid "Annotator"
 msgstr "注释"
 
-#: appli/gui/staticlistes.py:166
+#: appli/gui/staticlistes.py:188
 msgid "Viewer"
 msgstr ""
 
-#: appli/gui/staticlistes.py:172
+#: appli/gui/staticlistes.py:194
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Explore Only"
 msgstr "仅检索"
 
-#: appli/gui/staticlistes.py:173
+#: appli/gui/staticlistes.py:195
 #: appli/templates/v2/project/projectsettings.html:77
 msgid "Annotate No Prediction"
 msgstr "注释没有预测"
 
-#: appli/gui/admin/main.py:503 appli/templates/v2/admin/messages.html:6
+#: appli/gui/admin/main.py:499 appli/templates/v2/admin/messages.html:6
 msgid "Messages"
 msgstr ""
 
-#: appli/gui/admin/main.py:507
+#: appli/gui/admin/main.py:503
 #: appli/templates/v2/help/_help_project_stats.html:41
 #: appli/templates/v2/project/_fullstats.html:78
 msgid "Users"
 msgstr ""
 
-#: appli/gui/admin/main.py:510
+#: appli/gui/admin/main.py:506
 msgid "List"
 msgstr ""
 
-#: appli/gui/admin/main.py:514
+#: appli/gui/admin/main.py:510
 #, fuzzy
 msgid "Create"
 msgstr "阅读更多"
 
-#: appli/gui/admin/main.py:520
+#: appli/gui/admin/main.py:516
 #, fuzzy
 msgid "Tasks"
 msgstr "状态"
 
-#: appli/gui/admin/main.py:521
+#: appli/gui/admin/main.py:517
 msgid "View all users tasks"
 msgstr ""
 
-#: appli/gui/admin/main.py:525
+#: appli/gui/admin/main.py:521
 msgid "Database"
 msgstr ""
 
-#: appli/gui/admin/main.py:528
+#: appli/gui/admin/main.py:524
 msgid "View DB Size"
 msgstr ""
 
-#: appli/gui/admin/main.py:532
+#: appli/gui/admin/main.py:528
 msgid "View DB Bloat"
 msgstr ""
 
-#: appli/gui/admin/main.py:536
+#: appli/gui/admin/main.py:532
 msgid "SQL Console"
 msgstr ""
 
-#: appli/gui/admin/main.py:540
+#: appli/gui/admin/main.py:536
 msgid "Recompute Projects and Taxo stat"
 msgstr ""
 
-#: appli/gui/admin/main.py:541
+#: appli/gui/admin/main.py:537
 msgid "can be long"
 msgstr ""
 
@@ -550,10 +671,11 @@ msgid "edit"
 msgstr "预测"
 
 #: appli/gui/admin/users_list_interface_json.py:21
+#: appli/gui/collection/collections_list_interface_json.py:21
 #: appli/gui/project/projects_list_interface_json.py:22
 #: appli/gui/project/projects_list_interface_json.py:80
-#: appli/templates/v2/jobs/listall.html:44
-#: appli/templates/v2/project/merge.html:30
+#: appli/templates/v2/jobs/listall.html:46
+#: appli/templates/v2/project/merge.html:29
 msgid "ID"
 msgstr ""
 
@@ -582,7 +704,7 @@ msgid "Organisation"
 msgstr ""
 
 #: appli/gui/admin/users_list_interface_json.py:35
-#: appli/templates/v2/jobs/listall.html:51
+#: appli/templates/v2/jobs/listall.html:53
 msgid "Creation date"
 msgstr ""
 
@@ -609,71 +731,220 @@ msgstr "状态"
 #: appli/gui/admin/users_list_interface_json.py:46
 #: appli/gui/project/projects_list_interface_json.py:40
 #: appli/templates/v2/admin/_activate_status.html:4
-#: appli/templates/v2/project/merge.html:30
+#: appli/templates/v2/project/merge.html:29
 #: appli/templates/v2/project/projectsettings.html:74
 msgid "Status"
 msgstr "状态"
 
-#: appli/gui/jobs/job_interface.py:17
-msgid "Object Data (median,mean, x, y, ...)"
+#: appli/gui/collection/collections_list_interface_json.py:25
+#: appli/templates/v2/collection/settings.html:55
+msgid "Provider user"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:21
-msgid "Process Data (software,version, ...)"
+#: appli/gui/collection/collections_list_interface_json.py:27
+#: appli/gui/project/projects_list_interface_json.py:31
+#: appli/gui/project/projects_list_interface_json.py:69
+#: appli/gui/project/projects_list_interface_json.py:88
+#: appli/templates/v2/collection/settings.html:18
+#: appli/templates/v2/project/merge.html:29
+#: appli/templates/v2/project/projectsettings.html:51
+msgid "Title"
+msgstr "标题"
+
+#: appli/gui/collection/collections_list_interface_json.py:29
+#: appli/gui/project/projects_list_interface_json.py:36
+#: appli/templates/v2/project/projectsettings.html:14
+#: appli/templates/v2/project/projectsettings.html:149
+msgid "Contact"
+msgstr "联系"
+
+#: appli/gui/collection/collections_list_interface_json.py:30
+#, fuzzy
+msgid "Creators"
+msgstr "阅读更多"
+
+#: appli/gui/collection/collections_list_interface_json.py:31
+msgid "Associates"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:25
-msgid "Acquisition Data (Resolution, ...)"
+#: appli/gui/collection/collections_list_interface_json.py:33
+#: appli/templates/v2/collection/settings.html:98
+#, fuzzy
+msgid "Citation"
+msgstr "描述"
+
+#: appli/gui/collection/collections_list_interface_json.py:36
+#: appli/templates/v2/collection/settings.html:102
+msgid "Abstract"
 msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:38
+#: appli/gui/project/projects_list_interface_json.py:46
+#: appli/templates/v2/collection/settings.html:30
+#: appli/templates/v2/project/_fullstats.html:72
+#: appli/templates/v2/project/projectsettings.html:99
+msgid "License"
+msgstr "许可"
+
+#: appli/gui/collection/collections_list_interface_json.py:39
+#, fuzzy
+msgid "Projects id"
+msgstr "项目列表"
+
+#: appli/gui/collection/collections_list_interface_json.py:41
+#, fuzzy
+msgid "External ID"
+msgstr "额外的"
+
+#: appli/gui/collection/collections_list_interface_json.py:45
+msgid "External ID System"
+msgstr ""
+
+#: appli/gui/collection/collections_list_interface_json.py:117
+#, fuzzy
+msgid "Edit"
+msgstr "预测"
+
+#: appli/gui/collection/staticlistes.py:4
+#, fuzzy
+msgid "Collection created"
+msgstr "项目更新"
+
+#: appli/gui/collection/staticlistes.py:5
+#, fuzzy
+msgid "Collection updated"
+msgstr "项目更新"
+
+#: appli/gui/jobs/job_interface.py:16
+msgid "Only save objects' last annotation data"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:18 appli/gui/jobs/job_interface.py:38
+#: appli/gui/jobs/job_interface.py:46 appli/gui/jobs/job_interface.py:75
+#: appli/gui/jobs/job_interface.py:171
+msgid "Yes"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:19 appli/gui/jobs/job_interface.py:39
+#: appli/gui/jobs/job_interface.py:47 appli/gui/jobs/job_interface.py:76
+#: appli/gui/jobs/job_interface.py:172
+msgid "No"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:26
+#, fuzzy
+msgid "Images"
+msgstr "图像文件"
+
+#: appli/gui/jobs/job_interface.py:28
+#, fuzzy
+msgid "First image"
+msgstr "已导入"
 
 #: appli/gui/jobs/job_interface.py:29
-msgid "Sample Data (lat,long, date, ...)"
-msgstr ""
-
-#: appli/gui/jobs/job_interface.py:33
-msgid "Historical Data"
-msgstr ""
-
-#: appli/gui/jobs/job_interface.py:37
-#: appli/templates/v2/help/_help_projectsettings.html:13
-#: appli/templates/v2/project/projectsettings.html:59
-msgid "Comments"
-msgstr "注解"
-
-#: appli/gui/jobs/job_interface.py:43
-msgid "Use coma as decimal separator"
-msgstr ""
-
-#: appli/gui/jobs/job_interface.py:47
-msgid "Format dates and times using - and :"
-msgstr ""
-
-#: appli/gui/jobs/job_interface.py:51
-msgid "Internal Ids (including taxonomic source Id)"
-msgstr ""
-
-#: appli/gui/jobs/job_interface.py:56
 #, fuzzy
-msgid "Export image files"
+msgid "All images"
 msgstr "图像文件"
 
-#: appli/gui/jobs/job_interface.py:79 appli/gui/jobs/job_interface.py:91
-#, fuzzy
-msgid "NO Images"
-msgstr "图像文件"
-
-#: appli/gui/jobs/job_interface.py:80 appli/templates/v2/jobs/export.html:22
-msgid "Only Rank 0 Image"
+#: appli/gui/jobs/job_interface.py:30 appli/gui/jobs/job_interface.py:66
+#: appli/gui/jobs/job_interface.py:149
+msgid "None"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:82 appli/templates/v2/jobs/export.html:23
-msgid "All images of each object"
+#: appli/gui/jobs/job_interface.py:36
+msgid "Internal database IDs"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:93
+#: appli/gui/jobs/job_interface.py:44
+msgid "Add an EcoTaxa-compatible second line with types"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:61
+msgid "Separate (in ZIP sub-directories) output by"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:63 appli/gui/jobs/job_interface.py:147
 #, fuzzy
-msgid "All images files"
-msgstr "图像文件"
+msgid "Sample"
+msgstr "名称"
+
+#: appli/gui/jobs/job_interface.py:64 appli/gui/jobs/job_interface.py:148
+#, fuzzy
+msgid "Acquisition"
+msgstr "请求"
+
+#: appli/gui/jobs/job_interface.py:65
+#: appli/templates/v2/project/_fullstats.html:8
+#, fuzzy
+msgid "Taxon"
+msgstr "分类法"
+
+#: appli/gui/jobs/job_interface.py:71 appli/gui/jobs/job_interface.py:167
+msgid "Copy result file to FTP area. Original file is still available"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:87
+#: appli/templates/v2/help/_help_job_export.html:10
+msgid "General Export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:88
+#: appli/templates/v2/help/_help_job_export.html:11
+msgid "Configurable objects export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:100
+#: appli/templates/v2/help/_help_job_export.html:15
+msgid "Backup Export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:101
+msgid "Backup export, for restoring or archiving"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:113
+#: appli/templates/v2/help/_help_job_export.html:18
+msgid "Summary Export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:114
+#: appli/templates/v2/help/_help_job_export.html:19
+msgid "Synthetic taxon-oriented export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:135
+#: appli/templates/v2/help/_help_job_export.html:26
+msgid "Quantity to compute"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:137
+msgid "Abundance"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:138
+msgid "Concentration"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:139
+msgid "Biovolume"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:145
+msgid "Computations aggregation level"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:154
+msgid "Mapping from present taxon to output replacement one "
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:155
+msgid " Type '_discard_' to discard taxon"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:161
+#: appli/templates/v2/help/_help_job_export.html:27
+msgid "Formulae"
+msgstr ""
 
 #: appli/gui/jobs/staticlistes.py:5
 #: appli/templates/v2/admin/_activate_status.html:6
@@ -736,25 +1007,11 @@ msgstr ""
 #: appli/gui/project/projects_list_interface_json.py:66
 #: appli/gui/project/projects_list_interface_json.py:84
 #: appli/templates/v2/jobs/prediction_create_lstproj.html:34
-#: appli/templates/v2/project/merge.html:30
+#: appli/templates/v2/project/merge.html:29
 #: appli/templates/v2/project/projectsettings.html:66
 #: appli/templates/v2/project/projectsettings.html:68
 msgid "Instrument"
 msgstr "仪器"
-
-#: appli/gui/project/projects_list_interface_json.py:31
-#: appli/gui/project/projects_list_interface_json.py:69
-#: appli/gui/project/projects_list_interface_json.py:88
-#: appli/templates/v2/project/merge.html:30
-#: appli/templates/v2/project/projectsettings.html:51
-msgid "Title"
-msgstr "标题"
-
-#: appli/gui/project/projects_list_interface_json.py:36
-#: appli/templates/v2/project/projectsettings.html:14
-#: appli/templates/v2/project/projectsettings.html:149
-msgid "Contact"
-msgstr "联系"
 
 #: appli/gui/project/projects_list_interface_json.py:37
 #, fuzzy
@@ -773,12 +1030,6 @@ msgstr "米"
 #: appli/gui/project/projects_list_interface_json.py:42
 msgid "Visibility"
 msgstr ""
-
-#: appli/gui/project/projects_list_interface_json.py:46
-#: appli/templates/v2/project/_fullstats.html:72
-#: appli/templates/v2/project/projectsettings.html:99
-msgid "License"
-msgstr "许可"
 
 #: appli/gui/project/projects_list_interface_json.py:47
 #, fuzzy
@@ -854,21 +1105,21 @@ msgstr ""
 #: appli/gui/project/projects_list_interface_json.py:143
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:73
 #: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:56
+#: appli/templates/v2/project/_stats.html:57
 msgid "validated"
 msgstr "验证"
 
 #: appli/gui/project/projects_list_interface_json.py:144
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:73
 #: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:57
+#: appli/templates/v2/project/_stats.html:58
 msgid "dubious"
 msgstr "可疑"
 
 #: appli/gui/project/projects_list_interface_json.py:145
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:72
 #: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:58
+#: appli/templates/v2/project/_stats.html:59
 msgid "predicted"
 msgstr "预测"
 
@@ -886,7 +1137,7 @@ msgid "Request Access"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:370
-#: appli/templates/v2/partials/_navbar.html:55
+#: appli/templates/v2/partials/_navbar.html:49
 #, fuzzy
 msgid "Settings"
 msgstr "设置"
@@ -1389,6 +1640,7 @@ msgid "Create a user"
 msgstr "创建一个项目"
 
 #: appli/templates/v2/admin/_userslistcontainer.html:11
+#: appli/templates/v2/collection/_listcontainer.html:21
 #: appli/templates/v2/project/_fullstats.html:93
 #: appli/templates/v2/project/_listcontainer.html:22
 #, fuzzy
@@ -1396,12 +1648,14 @@ msgid "Please wait"
 msgstr "请等待"
 
 #: appli/templates/v2/admin/_userslistcontainer.html:11
+#: appli/templates/v2/collection/_listcontainer.html:21
 #: appli/templates/v2/project/_fullstats.html:93
 #: appli/templates/v2/project/_listcontainer.html:22
 msgid "Data loaded. Displaying..."
 msgstr ""
 
 #: appli/templates/v2/admin/activate.html:7
+#: appli/templates/v2/collection/settings.html:8
 #: appli/templates/v2/jobs/_import_create.html:11
 #: appli/templates/v2/jobs/_import_form.html:7
 #: appli/templates/v2/jobs/import.html:7
@@ -1412,6 +1666,7 @@ msgid "this field is required"
 msgstr "此字段必填"
 
 #: appli/templates/v2/admin/activate.html:7
+#: appli/templates/v2/collection/settings.html:8
 #: appli/templates/v2/jobs/_import_create.html:11
 #: appli/templates/v2/jobs/_import_form.html:7
 #: appli/templates/v2/jobs/import.html:7
@@ -1427,6 +1682,7 @@ msgstr ""
 
 #: appli/templates/v2/admin/activate.html:18
 #: appli/templates/v2/admin/messages.html:22
+#: appli/templates/v2/collection/settings.html:114
 #: appli/templates/v2/project/projectsettings.html:179
 #: appli/templates/v2/users/_user.html:87
 msgid "Save"
@@ -1440,10 +1696,11 @@ msgstr "取消，返回项目 "
 
 #: appli/templates/v2/admin/activate.html:18
 #: appli/templates/v2/admin/messages.html:22
-#: appli/templates/v2/jobs/export.html:55
+#: appli/templates/v2/collection/settings.html:114
+#: appli/templates/v2/jobs/export.html:51
 #: appli/templates/v2/jobs/subset_create.html:47
 #: appli/templates/v2/partials/_alertbox.html:21
-#: appli/templates/v2/project/merge.html:49
+#: appli/templates/v2/project/merge.html:48
 #: appli/templates/v2/project/projectsettings.html:179
 #: appli/templates/v2/project/purge.html:27
 #: appli/templates/v2/users/_user.html:87
@@ -1511,11 +1768,246 @@ msgstr ""
 msgid "new user"
 msgstr ""
 
+#: appli/templates/v2/collection/_listcontainer.html:6
+#, fuzzy
+msgid "How to create collection"
+msgstr "如何创建项目"
+
+#: appli/templates/v2/collection/_listcontainer.html:8
+#, fuzzy
+msgid "Create a collection"
+msgstr "创建一个项目"
+
+#: appli/templates/v2/collection/_listcontainer.html:10
+#, fuzzy
+msgid "Access collections"
+msgstr "访问项目"
+
+#: appli/templates/v2/collection/_listcontainer.html:19
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "import full settings"
+msgstr "导入完整设置"
+
+#: appli/templates/v2/collection/_listcontainer.html:19
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "preset"
+msgstr "预设"
+
+#: appli/templates/v2/collection/_listcontainer.html:20
+#: appli/templates/v2/project/_listcontainer.html:21
+msgid "extra"
+msgstr "额外的"
+
+#: appli/templates/v2/collection/settings.html:5
+#, fuzzy
+msgid "How to edit a collection settings"
+msgstr "如何编辑项目设置"
+
+#: appli/templates/v2/collection/settings.html:5
+#, fuzzy
+msgid "How to create a collection"
+msgstr "如何创建项目"
+
+#: appli/templates/v2/collection/settings.html:8
+#: appli/templates/v2/project/projectsettings.html:40
+msgid "imported"
+msgstr "已导入"
+
+#: appli/templates/v2/collection/settings.html:10
+#: appli/templates/v2/project/projectsettings.html:42
+msgid "click to expand/shrink tabs"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:15
+#, fuzzy
+msgid "collection"
+msgstr "预测"
+
+#: appli/templates/v2/collection/settings.html:15
+#, fuzzy
+msgid "new collection"
+msgstr "新项目"
+
+#: appli/templates/v2/collection/settings.html:19
+#: appli/templates/v2/project/projectsettings.html:51
+msgid "a title is required"
+msgstr "需要一个标题"
+
+#: appli/templates/v2/collection/settings.html:21
+msgid "Short title"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:24
+#, fuzzy
+msgid "External Id"
+msgstr "额外的"
+
+#: appli/templates/v2/collection/settings.html:27
+msgid "External Id System"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:43
+#, fuzzy
+msgid "select a project"
+msgstr "新项目"
+
+#: appli/templates/v2/collection/settings.html:53
+msgid "Users and organisations"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:56
+msgid "select a provider user"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:61
+#, fuzzy
+msgid "Contact user"
+msgstr "联系"
+
+#: appli/templates/v2/collection/settings.html:62
+#, fuzzy
+msgid "select a contact user"
+msgstr "选取一个分类"
+
+#: appli/templates/v2/collection/settings.html:67
+#, fuzzy
+msgid "Creator users"
+msgstr "创建一个项目"
+
+#: appli/templates/v2/collection/settings.html:68
+#: appli/templates/v2/collection/settings.html:82
+#, fuzzy
+msgid "select a user"
+msgstr "选取一个分类"
+
+#: appli/templates/v2/collection/settings.html:74
+msgid "Creator organisations"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:75
+#: appli/templates/v2/collection/settings.html:90
+#, fuzzy
+msgid "select an organisation"
+msgstr "选取一个分类"
+
+#: appli/templates/v2/collection/settings.html:81
+msgid "Associate users"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:89
+msgid "Associate organisations"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:97
+#, fuzzy
+msgid "Descriptions"
+msgstr "描述"
+
+#: appli/templates/v2/collection/settings.html:107
+#: appli/templates/v2/project/_stats.html:24
+#: appli/templates/v2/project/projectsettings.html:54
+msgid "Description"
+msgstr "描述"
+
+#: appli/templates/v2/collection/settings.html:114
+#, fuzzy
+msgid "Cancel, back to collection list "
+msgstr "取消，返回项目 "
+
+#: appli/templates/v2/help/_help_job_export.html:4
+#: appli/templates/v2/jobs/export.html:37
+#: appli/templates/v2/partials/_navbar.html:40
+#, fuzzy
+msgid "Export"
+msgstr "导入"
+
+#: appli/templates/v2/help/_help_job_export.html:5
+#: appli/templates/v2/jobs/export.html:39
+msgid "Global export rules"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:6
+msgid "character set is <strong>UTF-8</strong>"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:8
+msgid "dates are in format <strong>YYYY-MM-DD</strong>"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:9
+msgid "times are in format <strong>hh:mm:ss</strong>"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:12
+msgid ""
+"If chosen will not take into account other parameters, except out to ftp "
+"choice."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:13
+msgid ""
+"Add in ZIP first (i.e. visible) image, all images, or no image.⚠️ \"all\""
+" means maybe several lines per object in TSVs."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:16
+msgid "Backup export, for restoring or archiving."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:16
+msgid ""
+"All images, split by sample, add an EcoTaxa-compatible second line with "
+"types"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:20
+msgid "if summarise_by = sample or acquisition"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:20
+#: appli/templates/v2/help/_help_job_export.html:21
+msgid "(NB = acq_orig_id = celle pour le user)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:21
+msgid "if summarise_by = acquisition"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:23
+#: appli/templates/v2/help/_help_job_export.html:24
+#: appli/templates/v2/help/_help_job_export.html:25
+msgid " if chosen "
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:26
+msgid "Abundance is always possible."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:28
+msgid ""
+"Transitory: How to get values from DB free columns. Python syntax, "
+"prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are "
+"'total_water_volume', 'subsample_coef' and 'individual_volume' "
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:29
+#, fuzzy
+msgid "example:"
+msgstr "名称"
+
+#: appli/templates/v2/help/_help_job_export.html:33
+msgid "Mapping from present taxon (key) to output replacement one (value)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:33
+msgid "Use a 0 replacement to _discard_ the present taxon."
+msgstr ""
+
 #: appli/templates/v2/help/_help_job_import.html:4
 #: appli/templates/v2/jobs/_import_box.html:22
 #: appli/templates/v2/jobs/_import_form.html:26
 #: appli/templates/v2/jobs/import.html:21
-#: appli/templates/v2/partials/_navbar.html:45
+#: appli/templates/v2/partials/_navbar.html:37
 #: appli/templates/v2/project/_headerimport.html:6
 msgid "Import"
 msgstr "导入"
@@ -1975,7 +2467,7 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_project_stats.html:24
 #: appli/templates/v2/help/_help_projectsettings.html:15
-#: appli/templates/v2/project/_stats.html:44
+#: appli/templates/v2/project/_stats.html:45
 #: appli/templates/v2/project/projectsettings.html:89
 msgid "Deep feature extractor"
 msgstr "深度特征提取器"
@@ -2028,13 +2520,18 @@ msgid "Project settings"
 msgstr "项目设置"
 
 #: appli/templates/v2/help/_help_projectsettings.html:13
+#: appli/templates/v2/project/projectsettings.html:59
+msgid "Comments"
+msgstr "注解"
+
+#: appli/templates/v2/help/_help_projectsettings.html:13
 msgid ""
 "Any technical, practical details that need to be shared with other users "
 "able to access this target_proj."
 msgstr "可填写需要与能够访问此目标项目的其他用户共享的任何技术和实用细节。"
 
 #: appli/templates/v2/help/_help_projectsettings.html:19
-#: appli/templates/v2/project/_stats.html:41
+#: appli/templates/v2/project/_stats.html:42
 #: appli/templates/v2/project/projectsettings.html:116
 msgid "Definition of preset for manual sorting"
 msgstr "手动排序的预设定义"
@@ -2059,7 +2556,6 @@ msgid "New categories can be added using the auto completion function"
 msgstr "可以使用自动完成功能添加新类别"
 
 #: appli/templates/v2/help/_help_projectsettings.html:25
-#: appli/templates/v2/project/projectsettings.html:128
 msgid "Presets"
 msgstr "预设"
 
@@ -2101,15 +2597,15 @@ msgstr ""
 "浏览者可以查看项目，即使它是私有的；该项目列在项目\n"
 "      列表中。"
 
-#: appli/templates/v2/help/_help_summary.html:6
-msgid "readmore"
-msgstr "阅读更多"
-
-#: appli/templates/v2/help/_help_summary.html:13
+#: appli/templates/v2/help/_help_summary.html:4
 msgid "Help Summary"
 msgstr "帮助汇总"
 
-#: appli/templates/v2/help/_layout.html:18
+#: appli/templates/v2/help/_layout.html:10
+msgid "readmore"
+msgstr "阅读更多"
+
+#: appli/templates/v2/help/_layout.html:27
 msgid "Help summary"
 msgstr "帮助汇总"
 
@@ -2118,17 +2614,17 @@ msgstr "帮助汇总"
 msgid "How to register to EcoTaxa"
 msgstr "如何创建项目"
 
-#: appli/templates/v2/help/index.html:5
+#: appli/templates/v2/help/index.html:3
 msgid "Not available for now."
 msgstr ""
 
 #: appli/templates/v2/jobs/_cleanresult.html:1
-#: appli/templates/v2/jobs/listall.html:39
+#: appli/templates/v2/jobs/listall.html:41
 msgid "Cleaning process"
 msgstr ""
 
 #: appli/templates/v2/jobs/_cleanresult.html:1
-#: appli/templates/v2/jobs/listall.html:39
+#: appli/templates/v2/jobs/listall.html:41
 msgid "jobs cleaned"
 msgstr ""
 
@@ -2182,12 +2678,6 @@ msgstr ""
 #, fuzzy
 msgid "taxonomy"
 msgstr "分类法"
-
-#: appli/templates/v2/jobs/_import_box.html:7
-#: appli/templates/v2/jobs/_import_form.html:9
-#, fuzzy
-msgid "Project"
-msgstr "项目"
 
 #: appli/templates/v2/jobs/_import_box.html:9
 #: appli/templates/v2/jobs/_import_form.html:11
@@ -2283,19 +2773,18 @@ msgid ""
 msgstr ""
 
 #: appli/templates/v2/jobs/_job_final.html:3
-#: appli/templates/v2/jobs/show.html:21
+#: appli/templates/v2/jobs/show.html:45
 msgid "FORCE Delete of "
 msgstr ""
 
 #: appli/templates/v2/jobs/_job_final.html:3
-#: appli/templates/v2/jobs/show.html:21
+#: appli/templates/v2/jobs/show.html:45
 #, fuzzy
 msgid "and back to project"
 msgstr "取消，返回项目 "
 
 #: appli/templates/v2/jobs/_job_final.html:4
-#: appli/templates/v2/jobs/show.html:22
-msgid "(no danger for the original database)"
+msgid "no danger for the original database"
 msgstr ""
 
 #: appli/templates/v2/jobs/_subset_final.html:1
@@ -2317,78 +2806,37 @@ msgstr "显示所有项目"
 msgid "Total TSV"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:17
-msgid "Export images"
+#: appli/templates/v2/jobs/export.html:27
+#: appli/templates/v2/jobs/export.html:28
+msgid "Add mapping"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:33
-msgid "Full export"
+#: appli/templates/v2/jobs/export.html:27
+msgid "select values to replace"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:33
+#: appli/templates/v2/jobs/export.html:27
+#: appli/templates/v2/jobs/subset_create.html:18
+#: appli/templates/v2/project/merge.html:29
+#, fuzzy
+msgid "Select"
+msgstr "选择"
+
+#: appli/templates/v2/jobs/export.html:28
+#, fuzzy
+msgid "replace_by"
+msgstr "更换"
+
+#: appli/templates/v2/jobs/export.html:38
 #, fuzzy
 msgid "How to export data"
 msgstr "如何准备数据"
 
-#: appli/templates/v2/jobs/export.html:38
-msgid "Custom"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:42
-msgid "Backup"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:46
-msgid "Split in multiple files by"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:47
-#, fuzzy
-msgid "NOT Active"
-msgstr "注释"
-
-#: appli/templates/v2/jobs/export.html:48
-#, fuzzy
-msgid "Sample"
-msgstr "名称"
-
-#: appli/templates/v2/jobs/export.html:49
-msgid "Taxonomy (parent_child)"
-msgstr ""
-
-#: appli/templates/v2/jobs/export.html:55
+#: appli/templates/v2/jobs/export.html:51
 #: appli/templates/v2/jobs/subset_create.html:47
 #, fuzzy
 msgid "Start Task"
 msgstr "状态"
-
-#: appli/templates/v2/jobs/export_summary.html:8
-msgid "Summary Export"
-msgstr ""
-
-#: appli/templates/v2/jobs/export_summary.html:8
-#, fuzzy
-msgid "How to export summary data"
-msgstr "如何准备数据"
-
-#: appli/templates/v2/jobs/export_summary.html:9
-msgid "Functionality not active"
-msgstr ""
-
-#: appli/templates/v2/jobs/export_summary.html:12
-#: appli/templates/v2/project/massannotation.html:15
-#: appli/templates/v2/project/massannotation.html:98
-#: appli/templates/v2/security/reply.html:5
-msgid "Back"
-msgstr ""
-
-#: appli/templates/v2/jobs/export_summary.html:13
-#: appli/templates/v2/jobs/jobcleaned.html:6
-#: appli/templates/v2/project/massannotation.html:100
-#: appli/templates/v2/project/resettopredicted.html:31
-#, fuzzy
-msgid "Back to project"
-msgstr "取消，返回项目 "
 
 #: appli/templates/v2/jobs/import.html:7
 msgid "Select from My Files"
@@ -2402,6 +2850,14 @@ msgstr ""
 #, fuzzy
 msgid "File to import"
 msgstr "导入"
+
+#: appli/templates/v2/jobs/jobcleaned.html:7
+#: appli/templates/v2/jobs/show.html:41
+#: appli/templates/v2/project/massannotation.html:100
+#: appli/templates/v2/project/resettopredicted.html:31
+#, fuzzy
+msgid "Back to project"
+msgstr "取消，返回项目 "
 
 #: appli/templates/v2/jobs/listall.html:30
 msgid "Task count"
@@ -2431,41 +2887,41 @@ msgstr ""
 msgid "Clean all"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:37
+#: appli/templates/v2/jobs/listall.html:38
 msgid "See user tasks"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:37
+#: appli/templates/v2/jobs/listall.html:38
 msgid "See all users tasks"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:45
+#: appli/templates/v2/jobs/listall.html:47
 msgid "Task type"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:46 appli/templates/v2/jobs/show.html:42
+#: appli/templates/v2/jobs/listall.html:48 appli/templates/v2/jobs/show.html:59
 msgid "Owner"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:47 appli/templates/v2/jobs/show.html:46
+#: appli/templates/v2/jobs/listall.html:49 appli/templates/v2/jobs/show.html:63
 #, fuzzy
 msgid "State"
 msgstr "注释"
 
-#: appli/templates/v2/jobs/listall.html:48 appli/templates/v2/jobs/show.html:59
+#: appli/templates/v2/jobs/listall.html:50 appli/templates/v2/jobs/show.html:75
 msgid "Step"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:50 appli/templates/v2/jobs/show.html:67
+#: appli/templates/v2/jobs/listall.html:52 appli/templates/v2/jobs/show.html:84
 msgid "Message"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:52
+#: appli/templates/v2/jobs/listall.html:54
 #, fuzzy
 msgid "Last update"
 msgstr "项目更新"
 
-#: appli/templates/v2/jobs/listall.html:60
+#: appli/templates/v2/jobs/listall.html:62
 #, fuzzy
 msgid "Task"
 msgstr "状态"
@@ -2568,71 +3024,79 @@ msgstr ""
 msgid "PREDICTION: Choice of features and settings "
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:16
-msgid "Clean task data"
-msgstr ""
-
-#: appli/templates/v2/jobs/show.html:17
-msgid "Back to tasks list"
-msgstr ""
-
-#: appli/templates/v2/jobs/show.html:27
+#: appli/templates/v2/jobs/show.html:33
 msgid ""
 "This task has errors. Check the error messages below, fix these errors, "
 "go back to your project and restart\n"
 "        your job."
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:34
+#: appli/templates/v2/jobs/show.html:39
+msgid "Clean task data"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:40
+msgid "Back to tasks list"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:46
+msgid "(no danger for the original database)"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:51
 msgid "Task ID"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:38
+#: appli/templates/v2/jobs/show.html:55
 msgid "Class"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:49
+#: appli/templates/v2/jobs/show.html:66
+msgid " waiting for an answer"
+msgstr ""
+
+#: appli/templates/v2/jobs/show.html:66
 msgid "Go"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:52
+#: appli/templates/v2/jobs/show.html:69
 msgid "Force restart"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:63
+#: appli/templates/v2/jobs/show.html:79
 msgid "Progress"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:69 appli/templates/v2/jobs/show.html:77
+#: appli/templates/v2/jobs/show.html:85 appli/templates/v2/jobs/show.html:93
 msgid "Hide"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:69
+#: appli/templates/v2/jobs/show.html:85
 #, fuzzy
 msgid " all errors"
 msgstr "显示所有项目"
 
-#: appli/templates/v2/jobs/show.html:77
+#: appli/templates/v2/jobs/show.html:93
 msgid "internal details"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:79
+#: appli/templates/v2/jobs/show.html:95
 msgid "Input Parameters"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:83
+#: appli/templates/v2/jobs/show.html:99
 msgid "Question Data"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:87
+#: appli/templates/v2/jobs/show.html:103
 msgid "Answer Data"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:91
+#: appli/templates/v2/jobs/show.html:107
 msgid "View log file"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:93
+#: appli/templates/v2/jobs/show.html:109
 msgid "View custom details"
 msgstr ""
 
@@ -2645,12 +3109,6 @@ msgstr "创建一个项目"
 #, fuzzy
 msgid "How to create a project subset"
 msgstr "如何创建项目"
-
-#: appli/templates/v2/jobs/subset_create.html:18
-#: appli/templates/v2/project/merge.html:30
-#, fuzzy
-msgid "Select"
-msgstr "选择"
 
 #: appli/templates/v2/jobs/subset_create.html:20
 #: appli/templates/v2/jobs/subset_create.html:24
@@ -2821,14 +3279,10 @@ msgid "Current language is"
 msgstr ""
 
 #: appli/templates/v2/partials/_footer.html:13
-#: appli/templates/v2/partials/_navbar.html:69
+#: appli/templates/v2/partials/_navbar.html:63
 #: appli/templates/v2/project/_fullstats.html:68
 msgid "About"
 msgstr "关于"
-
-#: appli/templates/v2/partials/_footer.html:13
-msgid "Privacy"
-msgstr "隐私"
 
 #: appli/templates/v2/partials/_index.html:6
 #, fuzzy
@@ -2937,59 +3391,59 @@ msgstr ""
 msgid "Job monitor."
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:7
-msgid "projects list"
-msgstr "项目列表"
-
-#: appli/templates/v2/partials/_navbar.html:39
+#: appli/templates/v2/partials/_navbar.html:31
 #, fuzzy
 msgid "Predict"
 msgstr "预测"
 
-#: appli/templates/v2/partials/_navbar.html:48
+#: appli/templates/v2/partials/_navbar.html:42
+msgid "General"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:44
+msgid "Backup"
+msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:46
 #, fuzzy
-msgid "Export"
-msgstr "导入"
+msgid "Summary"
+msgstr "帮助汇总"
 
-#: appli/templates/v2/partials/_navbar.html:50
-msgid "<strong>Full</strong> export"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:52
-msgid "<strong>Summary</strong> export"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:57
+#: appli/templates/v2/partials/_navbar.html:51
 msgid "Tools"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:59
+#: appli/templates/v2/partials/_navbar.html:53
 msgid "<strong>Extract</strong> Subset"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:60
+#: appli/templates/v2/partials/_navbar.html:54
 msgid "<strong>Merge</strong> another project in this project"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:61
+#: appli/templates/v2/partials/_navbar.html:55
 msgid "<strong>Edit or erase</strong> annotations massively"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:62
+#: appli/templates/v2/partials/_navbar.html:56
 msgid "<strong>Batch</strong> edit metadata"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:63
+#: appli/templates/v2/partials/_navbar.html:57
 msgid "<strong>Reset</strong> status to Predicted"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:64
+#: appli/templates/v2/partials/_navbar.html:58
 msgid "<strong>Delete</strong> object or project"
 msgstr ""
 
-#: appli/templates/v2/partials/_navbar.html:65
+#: appli/templates/v2/partials/_navbar.html:59
 msgid "<strong>Fix</strong> category issues"
 msgstr ""
+
+#: appli/templates/v2/partials/_navbar.html:71
+msgid "projects list"
+msgstr "项目列表"
 
 #: appli/templates/v2/partials/_navuser.html:8
 #: appli/templates/v2/security/_login.html:5
@@ -2998,6 +3452,16 @@ msgstr ""
 #, fuzzy
 msgid "Log in"
 msgstr "登入"
+
+#: appli/templates/v2/partials/_navuser.html:14
+#, fuzzy
+msgid "last used projects"
+msgstr "其他项目"
+
+#: appli/templates/v2/partials/_navuser.html:14
+#, fuzzy
+msgid "Last Used Projects"
+msgstr "其他项目"
 
 #: appli/templates/v2/partials/_navuser.html:18
 msgid "profile"
@@ -3008,24 +3472,33 @@ msgstr "剖面"
 msgid "Files"
 msgstr "剖面"
 
-#: appli/templates/v2/partials/_navuser.html:21
-#, fuzzy
-msgid "last used projects"
-msgstr "其他项目"
-
-#: appli/templates/v2/partials/_navuser.html:21
-#, fuzzy
-msgid "Last Used Projects"
-msgstr "其他项目"
-
-#: appli/templates/v2/partials/_navuser.html:25
+#: appli/templates/v2/partials/_navuser.html:20
 msgid "logout"
 msgstr "退出账户"
 
-#: appli/templates/v2/partials/_navuser.html:25
+#: appli/templates/v2/partials/_navuser.html:20
 #, fuzzy
 msgid "Logout"
 msgstr "退出账户"
+
+#: appli/templates/v2/partials/_navuser.html:25
+msgid "Admin"
+msgstr ""
+
+#: appli/templates/v2/partials/_navuser.html:26
+#, fuzzy
+msgid "Browse Taxonomy"
+msgstr "分类法"
+
+#: appli/templates/v2/partials/_navuser.html:26
+#, fuzzy
+msgid "Explore"
+msgstr "仅检索"
+
+#: appli/templates/v2/partials/_navuser.html:26
+#, fuzzy
+msgid "Go to Ecopart"
+msgstr "如何准备数据"
 
 #: appli/templates/v2/partials/_top_messages.html:6
 msgid "view full message"
@@ -3037,25 +3510,19 @@ msgid "New project"
 msgstr "新项目"
 
 #: appli/templates/v2/partials/_topsitebar.html:14
+msgid "Search"
+msgstr ""
+
+#: appli/templates/v2/partials/_topsitebar.html:14
 #, fuzzy
-msgid "Search project by title"
+msgid "project by title"
 msgstr "新项目"
 
-#: appli/templates/v2/partials/_topsitebar.html:19
+#: appli/templates/v2/partials/_topsitebar.html:20
 #: appli/templates/v2/security/_reply_activate.html:10
 #: appli/templates/v2/security/_reply_activate.html:13
 msgid "Home"
 msgstr ""
-
-#: appli/templates/v2/partials/_topsitebar.html:19
-#, fuzzy
-msgid "Projects"
-msgstr "项目"
-
-#: appli/templates/v2/project/_fullstats.html:8
-#, fuzzy
-msgid "Taxon"
-msgstr "分类法"
 
 #: appli/templates/v2/project/_fullstats.html:8
 msgid "sort on"
@@ -3166,22 +3633,6 @@ msgstr "创建一个项目"
 msgid "Access projects"
 msgstr "访问项目"
 
-#: appli/templates/v2/project/_listcontainer.html:20
-msgid "import full settings"
-msgstr "导入完整设置"
-
-#: appli/templates/v2/project/_listcontainer.html:20
-msgid "preset"
-msgstr "预设"
-
-#: appli/templates/v2/project/_listcontainer.html:20
-msgid "import"
-msgstr "导入"
-
-#: appli/templates/v2/project/_listcontainer.html:21
-msgid "extra"
-msgstr "额外的"
-
 #: appli/templates/v2/project/_merge_process.html:4
 msgid "Warning: "
 msgstr ""
@@ -3212,23 +3663,18 @@ msgstr "新项目"
 msgid "Fusion Done successfully"
 msgstr ""
 
-#: appli/templates/v2/project/_stats.html:27
+#: appli/templates/v2/project/_stats.html:28
 #, fuzzy
 msgid "Privileges"
 msgstr "权限"
 
-#: appli/templates/v2/project/_stats.html:54
+#: appli/templates/v2/project/_stats.html:55
 msgid "Classification summary"
 msgstr ""
 
-#: appli/templates/v2/project/_stats.html:59
+#: appli/templates/v2/project/_stats.html:60
 msgid "unclassified"
 msgstr ""
-
-#: appli/templates/v2/project/_stats.html:64
-#, fuzzy
-msgid "about"
-msgstr "关于"
 
 #: appli/templates/v2/project/editdatamass.html:7
 #, fuzzy
@@ -3333,6 +3779,12 @@ msgstr ""
 
 #: appli/templates/v2/project/massannotation.html:8
 msgid "Mass annotation"
+msgstr ""
+
+#: appli/templates/v2/project/massannotation.html:15
+#: appli/templates/v2/project/massannotation.html:98
+#: appli/templates/v2/security/reply.html:5
+msgid "Back"
 msgstr ""
 
 #: appli/templates/v2/project/massannotation.html:18
@@ -3497,94 +3949,85 @@ msgstr ""
 msgid "Back to project home"
 msgstr "取消，返回项目 "
 
-#: appli/templates/v2/project/merge.html:13
-msgid ""
-"You are allowed to merge projects that you manage and contain images from"
-" the <strong>same</strong> instrument.\n"
-"     (Hint: use the <a href=\"{{ url_for(\"gui_prj_edit\", "
-"projid=target_proj.projid)}}\">projects settings</a> to change this if "
-"needed)."
-msgstr ""
-
-#: appli/templates/v2/project/merge.html:15
+#: appli/templates/v2/project/merge.html:16
 #, fuzzy
 msgid "User privileges from both projects will be added"
 msgstr "从其他项目中选择权限"
 
-#: appli/templates/v2/project/merge.html:16
+#: appli/templates/v2/project/merge.html:17
 msgid ""
 "This tool allows to merge two projects in a single projet (called Current"
 " project). The added project will then be automatically deleted. If "
 "object data are not consistent between both projects :"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:17
+#: appli/templates/v2/project/merge.html:18
 msgid "New data fields are added to the Current project."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:18
+#: appli/templates/v2/project/merge.html:19
 msgid "The resulting project will thus contain partially documented datafields."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:19
+#: appli/templates/v2/project/merge.html:20
 msgid ""
 "Samples with same sample_id on both sides will <strong>not</strong> be "
 "updated from added project."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:20
+#: appli/templates/v2/project/merge.html:21
 msgid ""
 "Acquisitions with same acq_id on both sides will <strong>not</strong> be "
 "updated from added project."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:21
+#: appli/templates/v2/project/merge.html:22
 msgid ""
 "Note : Next screen will indicate compatibility issues (if exists) and "
 "allow you to Confirm the merging operation."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:25
+#: appli/templates/v2/project/merge.html:24
 #, fuzzy
 msgid "Source project : "
 msgstr "新项目"
 
-#: appli/templates/v2/project/merge.html:25
+#: appli/templates/v2/project/merge.html:24
 msgid " this project will be destroyed"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:30
+#: appli/templates/v2/project/merge.html:29
 msgid "Nbr Obj"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:31
+#: appli/templates/v2/project/merge.html:30
 #, fuzzy, python-format
 msgid "%s Validated"
 msgstr "验证"
 
-#: appli/templates/v2/project/merge.html:31
+#: appli/templates/v2/project/merge.html:30
 #, python-format
 msgid "%s Classified"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:44
+#: appli/templates/v2/project/merge.html:43
 msgid "No matching project found."
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:45
+#: appli/templates/v2/project/merge.html:44
 #, fuzzy
 msgid "Back to projects list."
 msgstr "项目列表"
 
-#: appli/templates/v2/project/merge.html:49
+#: appli/templates/v2/project/merge.html:48
 msgid "Merge"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:49
+#: appli/templates/v2/project/merge.html:48
 msgid "Validate before merge"
 msgstr ""
 
-#: appli/templates/v2/project/merge.html:49
+#: appli/templates/v2/project/merge.html:48
 #: appli/templates/v2/project/purge.html:27
 #, fuzzy
 msgid "Cancel and back to project"
@@ -3608,10 +4051,6 @@ msgstr "如需删除具有管理权限的用户，请修改权限属性"
 msgid "Pick from other project"
 msgstr "从其他项目中选取"
 
-#: appli/templates/v2/project/projectsettings.html:28
-msgid "pick from projects"
-msgstr "从项目中选取"
-
 #: appli/templates/v2/project/projectsettings.html:37
 msgid "How to edit a project settings"
 msgstr "如何编辑项目设置"
@@ -3619,14 +4058,6 @@ msgstr "如何编辑项目设置"
 #: appli/templates/v2/project/projectsettings.html:37
 msgid "How to create a project"
 msgstr "如何创建项目"
-
-#: appli/templates/v2/project/projectsettings.html:40
-msgid "imported"
-msgstr "已导入"
-
-#: appli/templates/v2/project/projectsettings.html:42
-msgid "click to expand/shrink tabs"
-msgstr ""
 
 #: appli/templates/v2/project/projectsettings.html:47
 msgid "project"
@@ -3636,23 +4067,10 @@ msgstr "项目"
 msgid "new project"
 msgstr "新项目"
 
-#: appli/templates/v2/project/projectsettings.html:52
-msgid "a title is required"
-msgstr "需要一个标题"
-
-#: appli/templates/v2/project/projectsettings.html:52
-#: appli/templates/v2/security/forgotten.html:18
-#: appli/templates/v2/users/_user.html:14
-#: appli/templates/v2/users/_user.html:17
-#: appli/templates/v2/users/_user.html:39
-#: appli/templates/v2/users/_user.html:44
-#: appli/templates/v2/users/_user.html:48
-msgid "new"
-msgstr "新的"
-
-#: appli/templates/v2/project/projectsettings.html:54
-msgid "Description"
-msgstr "描述"
+#: appli/templates/v2/project/projectsettings.html:48
+#, fuzzy
+msgid "Pick all settings from other project"
+msgstr "从其他项目中选择预设"
 
 #: appli/templates/v2/project/projectsettings.html:84
 msgid "Visible for all visitors"
@@ -3674,9 +4092,14 @@ msgstr "从其他项目中选择分类法"
 msgid "select a category"
 msgstr "选取一个分类"
 
+#: appli/templates/v2/project/projectsettings.html:128
+msgid "Sorting tools"
+msgstr ""
+
 #: appli/templates/v2/project/projectsettings.html:129
-msgid "Pick presets from other projects"
-msgstr "从其他项目中选择预设"
+#, fuzzy
+msgid "Pick sorting fields from other projects"
+msgstr "从其他项目中选择权限"
 
 #: appli/templates/v2/project/projectsettings.html:132
 msgid "Fields available for sorting & Display In the manual classification page"
@@ -3879,7 +4302,7 @@ msgstr ""
 
 #: appli/templates/v2/security/_reply_register.html:6
 #, fuzzy
-msgid "log in"
+msgid "login"
 msgstr "登入"
 
 #: appli/templates/v2/security/_reply_register.html:8
@@ -4351,4 +4774,86 @@ msgstr ""
 
 #~ msgid "Please detail your answer"
 #~ msgstr ""
+
+#~ msgid "Object Data (median,mean, x, y, ...)"
+#~ msgstr ""
+
+#~ msgid "Process Data (software,version, ...)"
+#~ msgstr ""
+
+#~ msgid "Acquisition Data (Resolution, ...)"
+#~ msgstr ""
+
+#~ msgid "Sample Data (lat,long, date, ...)"
+#~ msgstr ""
+
+#~ msgid "Historical Data"
+#~ msgstr ""
+
+#~ msgid "Use coma as decimal separator"
+#~ msgstr ""
+
+#~ msgid "Format dates and times using - and :"
+#~ msgstr ""
+
+#~ msgid "Internal Ids (including taxonomic source Id)"
+#~ msgstr ""
+
+#~ msgid "Export image files"
+#~ msgstr "图像文件"
+
+#~ msgid "NO Images"
+#~ msgstr "图像文件"
+
+#~ msgid "Only Rank 0 Image"
+#~ msgstr ""
+
+#~ msgid "All images of each object"
+#~ msgstr ""
+
+#~ msgid "Export images"
+#~ msgstr ""
+
+#~ msgid "Full export"
+#~ msgstr ""
+
+#~ msgid "Custom"
+#~ msgstr ""
+
+#~ msgid "Split in multiple files by"
+#~ msgstr ""
+
+#~ msgid "NOT Active"
+#~ msgstr "注释"
+
+#~ msgid "Taxonomy (parent_child)"
+#~ msgstr ""
+
+#~ msgid "How to export summary data"
+#~ msgstr "如何准备数据"
+
+#~ msgid "Functionality not active"
+#~ msgstr ""
+
+#~ msgid "<strong>Full</strong> export"
+#~ msgstr ""
+
+#~ msgid "<strong>Summary</strong> export"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You are allowed to merge projects "
+#~ "that you manage and contain images "
+#~ "from the <strong>same</strong> instrument.\n"
+#~ "     (Hint: use the <a href=\"{{ "
+#~ "url_for(\"gui_prj_edit\", "
+#~ "projid=target_proj.projid)}}\">projects settings</a> to"
+#~ " change this if needed)."
+#~ msgstr ""
+
+#~ msgid "pick from projects"
+#~ msgstr "从项目中选取"
+
+#~ msgid "new"
+#~ msgstr "新的"
 
