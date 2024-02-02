@@ -186,6 +186,24 @@ export class ActivRequest {
         }
         return dynamics.jobMonitor(item);
         break;
+      case "taxolineage":
+        url = "/api/taxon_set/query?ids=" + item.dataset.value;
+
+        callback = (response) => {
+          console.log('lineage')
+          const lineage = response[0].lineage;
+          const id_lineage = response[0].id_lineage;
+          /* var click_lineage = lineage.map(function (txo, i) {
+               if (i > 0) {
+                   return "<a href='#' data-tgt='" + taxoid + "' data-txoid='" + id_lineage[i] + "' >" + txo + "</a>";
+               } else {
+                   // The base taxon itself, no use making it selectable
+                   return txo;
+               }
+           });*/
+        }
+
+        break;
       case 'privacy':
         url = '/setprivacy/Y';
         callback = (response) => {

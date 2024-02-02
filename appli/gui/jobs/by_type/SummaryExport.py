@@ -3,7 +3,7 @@ from typing import ClassVar
 
 from flask import request
 
-from appli import gvp, gvpm
+from appli import gvp
 from appli.gui.jobs.by_type.Export import ExportJob
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import ObjectsApi
@@ -28,13 +28,7 @@ class ExportSummaryJob(ExportJob):
         projid = int(gvp("projid"))
         quantity = gvp("quantity")
         summarise_by = gvp("summarise_by")
-        get_taxo_mapping = gvpm("taxo_mapping[]")
-        taxo_mapping = {}
-        if len(get_taxo_mapping):
-            for mapping in get_taxo_mapping:
-                k, v = mapping.split(",")
-                taxo_mapping[k] = v
-
+        taxo_mapping = json.loads(gvp("taxo_mapping", "{}"))
         formulae = gvp("formulae")
         out_to_ftp = gvp("out_to_ftp") == "1"
         formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]

@@ -218,72 +218,7 @@ export class ActivItems {
             });
           }));
           break;
-        case "addline":
-          const keepname = (item.dataset.name) ? item.dataset.name : null;
-          if (keepname === null) return;
-          item.addEventListener('click', e => {
-            const line = (item.dataset.target) ? item.closest(item.dataset.target) : item.parentElement;
-            if (line === null) return;
-            const inputs = line.querySelectorAll('[name^="item-"]');
-            // verify values not "" for select and replace inputs
-            let cando = true;
-            inputs.forEach(input => {
-              cando = cando && (input.value !== "");
-            });
-            if (cando === false) {
-              item.dataset.title = 'select values to replace';
-              return;
-            } else if (item.dataset.title) delete item.dataset.title;
-            const newline = line.cloneNode();
-            const numlines = (item.dataset.numline) ? item.dataset.numline++ : 1;
-            item.dataset.numline = (item.dataset.numline) ? parseInt(item.dataset.numline) + 1 : 1;
-            const keephidden = document.createElement('input');
-            keephidden.type = 'hidden';
-            keephidden.name = keepname + '[]';
-            let k, v;
-            inputs.forEach(input => {
-              const keep = document.createElement('input');
-              keep.classList.add('form-input');
-              keep.classList.add('mr-2');
-              keep.readonly = true;
-              if (input.tomselect) {
-                input = line.querySelector('.ts-control > div');
-                keep.dataset.value = v = input.dataset.value;
-                keep.value = input.textContent;
-                keep.name = keepname + '_1[]';
-                keep.id = keepname + '_1_' + item.dataset.numline;
-                input.dataset.value = "";
-                input.textContent = "";
 
-              } else {
-                keep.dataset.value = k = input.options[input.selectedIndex].value;
-                keep.value = input.options[input.selectedIndex].text;
-                keep.name = keepname + '_0[]';
-                keep.id = keepname + '_0_' + item.dataset.numline;
-                input.selectedIndex = -1;
-
-              }
-              keephidden.value = k + "," + v;
-              newline.append(keephidden);
-              input.parentElement.insertBefore(keep, input);
-              newline.append(keep);
-            });
-            const btn = item.cloneNode();
-            btn.id = 'cancel_' + item.dataset.numline;
-            btn.classList.add('w-12');
-            ['action', 'name'].forEach(data => {
-              delete btn.dataset[data];
-            });
-            btn.insertAdjacentHTML('afterbegin', `<i class="icon icon-cancel mx-auto block"></i>`);
-            btn.textContent = (item.dataset.cancel) ? item.dataset.cancel : 'cancel';
-            newline.append(btn);
-            btn.addEventListener('click', (e) => {
-              newline.remove();
-            });
-            line.parentElement.insertBefore(newline, line);
-
-          });
-          break;
 
       }
 

@@ -9,6 +9,7 @@ import {
 } from '../modules/modules-config.js';
 
 export class JsComponents {
+  defers = [];
   items = {};
   async applyTo(element = document) {
     if (!element) return;
@@ -172,9 +173,10 @@ export class JsComponents {
                 });
               };
               //checkNotifs(30000);
-              setTimeout(() => {
-                checkNotifs(30000);
-              }, 2000);
+              this.defers.push({
+                func: checkNotifs,
+                args: 30000
+              });
               break;
             case 'js-accordion':
               if (!dynamics.JsAccordion) {
@@ -188,6 +190,24 @@ export class JsComponents {
                 const summary = el.querySelector(((item.dataset.summary) ? item.dataset.summary : 'summary'));
                 const jsAccordion = new dynamics.JsAccordion(el, null, null, null, {}, summary);
               })
+              break;
+            case "js-taxomapping":
+              const taxo_mapping = async () => {
+                if (!dynamics.TaxoMapping) {
+                  let {
+                    TaxoMapping
+                  } = await
+                  import(`../modules/js-taxomapping.js`);
+                  dynamics.TaxoMapping = TaxoMapping;
+                }
+
+                const taxomapping = new dynamics.TaxoMapping(item);
+              }
+              this.defers.push({
+                func: taxo_mapping,
+                async: true,
+              });
+              console.log('taxomappingcomponent', this.defers)
               break;
             case 'js-license':
               if (!dynamics.format_license) {
@@ -230,5 +250,24 @@ export class JsComponents {
         }
       })
     });
+    await this.applyDefers();
+  }
+
+  async applyDefers() {
+    if (this.defers.length === 0) return;
+    // series
+    for (const defer of this.defers) {
+
+      if (defer.hasOwnProperty('args')) {
+        if (defer.async) await defer.func(defer.args);
+        else defer.func(defer.args);
+      } else if (defer.async) await defer.func();
+      else defer.func();
+    }
+    /*  // concurrent
+    this.defers.map(defer => {
+         defer();
+      }); */
+    this.defers = [];
   }
 }
