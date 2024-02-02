@@ -47,19 +47,19 @@
                     project. It will be displayed in the object page') }}
                 </li>
                 <li><code>object_link</code>[f] :  {{ _('URL of an associated website') }}</li>
-                <li><code>object_lat</code> [f] : {{ _('latitude') }}, <span class="underline underline-offset-2">{{ _('decimal degrees') }}</span></li>
-                <li><code>object_lon</code> [f] :  {{ _('longitude') }}, <span class="underline underline-offset-2">{{ _('decimal degrees') }}</span></li>
-                <li><code>object_date</code> [f] : ISO8601 <span class="underline underline-offset-2">{{ _('YYYYMMDD') }}</span> UTC</li>
-                <li><code>object_time</code> [f] : ISO8601 <span class="underline underline-offset-2">{{ _('HHMMSS') }}</span> UTC</li>
-                <li><code>object_depth_min</code> [f] : {{ _('minimum depth of object') }}, <span class="underline underline-offset-2">{{ _('meters') }}</span>
+                <li><code>object_lat</code> [f] : {{ _('latitude') }}, <strong>{{ _('decimal degrees') }}</strong></li>
+                <li><code>object_lon</code> [f] :  {{ _('longitude') }}, <strong>{{ _('decimal degrees') }}</strong></li>
+                <li><code>object_date</code> [f] : ISO8601 <strong>{{ _('YYYYMMDD') }}</strong> UTC</li>
+                <li><code>object_time</code> [f] : ISO8601 <strong>{{ _('HHMMSS') }}</strong> UTC</li>
+                <li><code>object_depth_min</code> [f] : {{ _('minimum depth of object') }}, <strong>{{ _('meters') }}</strong>
                 </li>
-                <li><code>object_depth_max</code> [f] : {{ _('maximum depth of object') }}, <span class="underline underline-offset-2">{{ _('meters') }}</span>
+                <li><code>object_depth_max</code> [f] : {{ _('maximum depth of object') }}, <strong>{{ _('meters') }}</strong>
                 </li>
             </ul>
             {{ _('And, for already classified objects') }}
             <ul>
-                <li><code>object_annotation_date</code> [t] : ISO8601 <span class="underline underline-offset-2">{{ _('YYYYMMDD') }}</span> UTC</li>
-                <li><code>object_annotation_time</code> [t] : ISO8601 <span class="underline underline-offset-2">{{ _('YYYYMMDD') }}</span> UTC</li>
+                <li><code>object_annotation_date</code> [t] : ISO8601 <strong>{{ _('YYYYMMDD') }}</strong> UTC</li>
+                <li><code>object_annotation_time</code> [t] : ISO8601 <strong>{{ _('YYYYMMDD') }}</strong> UTC</li>
                 <li><code>object_annotation_category</code> [t] : {{ _('class of the object with optionally its direct parent
                     following separated by left angle bracket without whitespace "Cnidaria&lt;Hydrozoa" or old style
                     between brackets "Cnidaria (Hydrozoa)"') }}
