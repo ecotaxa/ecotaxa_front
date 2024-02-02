@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
 const css = {
   line: 'taxoline',
   mapline: 'mapping-line',
-  cancel: 'form-line-delet'
+  cancel: 'cancel-line'
 };
 export class TaxoMapping {
   // animation and specific display on accordions list / details tag open
