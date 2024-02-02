@@ -65,7 +65,8 @@ transform : rotate(360deg);
 .ts-wrapper.plugin-drag_drop .ui-sortable-helper {box-shadow : 0 2px 5px rgb(0, 0, 0, 0.2);}
 .plugin-checkbox_options .option input {@apply mr-[.5rem]}
 .plugin-clear_button .ts-control {padding-right : calc(1em + (3 * 6px)) !important ;}
-.plugin-clear_button .clear-button, .ts-wrapper.multi .ts-control > div.clear-button  {@apply opacity-0 absolute top-[50%] -translate-y-[50%] right-1 mr-0 bg-transparent z-50 cursor-pointer transition delay-300;}
+.plugin-clear_button .clear-button, .ts-wrapper.multi .ts-control > div.clear-button  {@apply opacity-0 absolute bottom-2 right-8 mr-0 bg-transparent z-50 cursor-pointer transition delay-300;}
+.form-multiselect .plugin-clear_button .clear-button, .ts-wrapper.multi .ts-control > div.clear-button {@apply top-1 right-1}
 .for-select.plugin-clear_button .clear-button {@apply right-0}
 .plugin-clear_button.multi .clear-button {@apply top-1 translate-y-[0%]}
 .plugin-clear_button.focus.has-items .clear-button, .plugin-clear_button:not(.disabled):hover.has-items .clear-button {@apply opacity-100}

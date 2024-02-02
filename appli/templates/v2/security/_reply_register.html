@@ -3,7 +3,7 @@
  <div class="alert is-success">
    {%- if (not api_email_verification  or token) and not api_account_validation -%}
    <h3>{{_('Welcome, your account has been created.')}}</h3>
-   <a href="{{url_for('gui_login')}}">{{_('log in')}}</a>
+   <a href="{{url_for('gui_login')}}" class="button is-primary">{{_('login')}}</a>
     {%- elif token  and api_account_validation-%}
     <h3>{{_('Account created. Waiting for validation')}}</h3>
     <p>{{_('We will verify your informations and activate your account. You will be informed by email of any issue.')}}</p>

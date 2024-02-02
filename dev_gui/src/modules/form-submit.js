@@ -19,8 +19,8 @@ export class FormSubmit {
   form = null;
   listener = null;
   constructor(form, options = {}) {
+    if (!form) return;
     if (!form.formsubmit) {
-      if (!form) return;
       this.form = form instanceof HTMLElement ? form : document.querySelector(form);
       const defaultOptions = {
         fetch: null,
