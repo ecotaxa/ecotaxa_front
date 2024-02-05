@@ -70,14 +70,20 @@ export class JsComponents {
               const projectPrivileges = new dynamics.ProjectPrivileges();
               break;
             case 'js-tabs':
-              if (!dynamics.JsTabs) {
-                let {
-                  JsTabs
-                } = await
-                import(`../modules/js-tabs.js`);
-                dynamics.JsTabs = JsTabs;
+              const jstabs = async () => {
+                if (!dynamics.JsTabs) {
+                  let {
+                    JsTabs
+                  } = await
+                  import(`../modules/js-tabs.js`);
+                  dynamics.JsTabs = JsTabs;
+                }
+                const jsTabs = new dynamics.JsTabs(item);
               }
-              const jsTabs = new dynamics.JsTabs(item);
+              this.defers.unshift({
+                func: jstabs,
+                async: true
+              });
               break;
             case 'js-nav':
               const location = window.location.href.split('?');
@@ -192,22 +198,15 @@ export class JsComponents {
               })
               break;
             case "js-taxomapping":
-              const taxo_mapping = async () => {
-                if (!dynamics.TaxoMapping) {
-                  let {
-                    TaxoMapping
-                  } = await
-                  import(`../modules/js-taxomapping.js`);
-                  dynamics.TaxoMapping = TaxoMapping;
-                }
-
-                const taxomapping = new dynamics.TaxoMapping(item);
+              if (!dynamics.TaxoMapping) {
+                let {
+                  TaxoMapping
+                } = await
+                import(`../modules/js-taxomapping.js`);
+                dynamics.TaxoMapping = TaxoMapping;
               }
-              this.defers.push({
-                func: taxo_mapping,
-                async: true,
-              });
-              console.log('taxomappingcomponent', this.defers)
+              const taxomapping = new dynamics.TaxoMapping(item);
+
               break;
             case 'js-license':
               if (!dynamics.format_license) {
