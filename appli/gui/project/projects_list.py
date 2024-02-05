@@ -132,7 +132,8 @@ def projects_list(
     user: UserModelWithRights = current_user.api_user
     isadmin = current_user.is_app_admin == True
     if typeimport != "":
-        listall = False
+        # full list avaliable to import not_granted = True if not app_admin
+        listall = current_user.is_app_admin == False
     if typeimport == "taxo":
         prjs = _prj_import_taxo_api()
     else:
@@ -229,8 +230,8 @@ def _prj_import_taxo_api(prjid: int = 0, filt: dict = None) -> list:
     #    not_granted = True
     #    for_managing = True
     # else:
-    # full list avaliable to import
-    not_granted = False
+    # full list avaliable to import not_granted = True if not app_admin
+    not_granted = current_user.is_app_admin == False
     for_managing = False
     for an_instrument in qry_filt_instrum:
         with ApiClient(ProjectsApi, request) as apiproj:
