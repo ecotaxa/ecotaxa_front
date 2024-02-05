@@ -2,9 +2,9 @@
 {%- macro display_filters(filters) %}
 {% if filters is iterable %}
 <div class="form-box"><div class="label">Active Project Filters</div>
-<div class="form-group  text-sm" role="group">
+<div class="form-group  text-sm pb-4" role="group">
 {% for filter in filters %}
-  <span class=" text-sm font-light inline mr-2">{{filter[0]}} {{filter[1]}}</span><input type="hidden" name="{{ filter[0] }}" value="{{ filter[1] }}"></span>
+  <span class=" text-sm font-light inline mr-2"><strong>{{filter[0]}}</strong> {{filter[1]}}</span><input type="hidden" name="{{ filter[0] }}" value="{{ filter[1] }}"></span>
 {% endfor %}
 {%endif %}
 </div>

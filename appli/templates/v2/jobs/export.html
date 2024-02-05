@@ -39,8 +39,8 @@
 	<em class="block text-sm mt-2">{{_('Global export rules')}} <i data-for="help_global_export_rules" data-request="help" data-what="help"></i></em>
 </div>
 <form method="post" class="js js-submit js-tabs" action="{{request.path}}" data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
-    <div class="block mb-4">{{display_filters(filters)}}<input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}"></div>
-    <div class="fieldset-wrapper w-full flex flex-row">
+    <div class="block mb-4">{{display_filters(filters)}}</div>
+    <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}">
       {% for type_export,formdata in formdatas.items() %}
     <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if export_type == type_export }}"><legend class="text-center tab-control title-nav"  data-what="{{type_export}}" >{{formdata.title}} </legend>
       <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help" data-what="help"></i></em>
