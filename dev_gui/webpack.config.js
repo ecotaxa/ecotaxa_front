@@ -1,5 +1,8 @@
 const webpack = require("webpack");
 const path = require("path");
+const {
+  WebpackManifestPlugin
+} = require('webpack-manifest-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
@@ -49,6 +52,7 @@ let config = {
   },
   plugins: [
     new BundleAnalyzerPlugin(),
+    new WebpackManifestPlugin(),
     new HtmlWebpackPlugin({
       filename: path.resolve(__dirname, '../appli/templates/v2/partials/_head.html'),
       template: path.resolve(__dirname, '../appli/templates/v2/partials/_head_template.html'),
