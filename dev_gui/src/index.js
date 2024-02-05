@@ -22,21 +22,21 @@ import {
       item.classList.toggle('over');
     });
   });*/
-//window.addEventListener('load', async () => {
-// enhance ui activate components  js js-componentname
-const jsComponents = new JsComponents();
-jsComponents.applyTo();
-/*** activate data-action  **/
-const activItems = new ActivItems(document);
-/* alert boxes */
-const alertBox = new AlertBox();
-/* fetch request -modal - contextual help */
-const activRequest = new ActivRequest();
-activRequest.applyTo(document);
+window.addEventListener('load', async () => {
+  // enhance ui activate components  js js-componentname
+  const jsComponents = new JsComponents();
+  jsComponents.applyTo();
+  /*** activate data-action  **/
+  const activItems = new ActivItems(document);
+  /* alert boxes */
+  const alertBox = new AlertBox();
+  /* fetch request -modal - contextual help */
+  const activRequest = new ActivRequest();
+  activRequest.applyTo(document);
 
-//});
-// 'unload' but 'pagehide'
-window.addEventListener('pagehide', (e) => {
+});
+// 'unload' - reload js when history back
+window.addEventListener('unload', (e) => {
   //  ecotaxaStorage.clear();
 });
 /*

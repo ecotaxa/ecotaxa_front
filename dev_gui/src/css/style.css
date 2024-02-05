@@ -138,7 +138,7 @@ details.modal-container[open] summary > * {@apply hidden}
 details.modal-popup[open] .modal {@apply delay-100  bg-white opacity-100 rounded-lg p-4  shadow-lg z-20 w-full h-full mx-auto  pb-12  }
 details.modal-popup[open] .modal-body {@apply relative flex flex-col h-full w-full max-h-full sm:px-4 md:px-8  overflow-hidden  }
 details.modal-popup[open] .modal-title {@apply w-full my-2}
-details.modal-popup[open] .modal-content {@apply w-full  flex-grow border-t border-stone-200 overflow-y-auto overflow-x-auto}
+details.modal-popup[open] .modal-content {@apply w-full  flex-grow border-t border-stone-200 overflow-y-auto overflow-x-auto  overscroll-none}
 details.modal-popup[open] .modal-title + details.modal-popup[open] .modal-content + details.modal-popup[open] .modal-footer {@apply h-full}
 details.modal-popup[open] .modal-footer {@apply  p-4   }
 details.modal-popup.inside[open] .modal {@apply min-h-[96]}
@@ -847,7 +847,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /********************************/
 .taxoline {@apply flex flex-row w-full md:w-[856px]}
 .mapping-line {@apply p-2 w-32 sm:w-48 md:w-96 mr-6 border-b border-b-stone-200 font-normal }
-.cancel-line {@apply h-8 w-8 align-text-bottom shadow-sm hover:shadow-none border border-stone-100 hover:border-stone-200 rounded-[50%] relative}
+.cancel-line {@apply h-6 w-6 align-text-bottom shadow-sm hover:shadow-none border border-stone-100 hover:border-stone-200 rounded-[50%] relative}
 /********************************/
 /* breadcrumbs                 */
 /******************************/
@@ -967,7 +967,7 @@ details[open].toggle-summary summary span {@apply hidden}
 /*******************************/
 /*details.modal-popup[open] .modal[id^="importfrom_"] .modal-content  {@apply overflow-x-auto !important}*/
 .import-projects-list , .import-projects-list .table-wrapper {@apply min-w-full w-auto}
-.import-projects-list .table-top {@apply  sticky top-0 z-10 h-14 bg-white m-0 p-0 w-full}
+.import-projects-list .table-top {@apply sticky top-0 z-10 h-14 bg-white m-0 p-0 w-full}
 .import-projects-list .table-search {@apply pr-2 pt-0.5 bg-white}
 .import-projects-list .table-table {@apply w-full mb-12}
 .import-projects-list .table-table thead {@apply sticky top-12 z-20 w-full max-w-full}
