@@ -336,11 +336,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.2.3"
+ecotaxa_version = "2.7.3"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2023-12-18"
+    return ecotaxa_version + " 2024-02-06"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -351,6 +351,14 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2024-02-06: V 2.7.3
+    Fix project setting title
+    Mod Change Preset to Sorting tools in porject Settings
+    Feature add email to name in members seach list
+    Fix export filters
+    Feature new export parameters
+    Upgrade tailwindcss
+    Feature dist unique id for js and css  
 2023-12-18: V 2.7.2.3
     Fix _google_captcha
     Fix recaptcha
