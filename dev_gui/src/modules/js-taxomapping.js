@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
 const css = {
   line: 'taxoline',
   mapline: 'mapping-line',
-  cancel: 'cancel-line'
+  cancel: 'cancel-line',
 };
 export class TaxoMapping {
   // animation and specific display on accordions list / details tag open
@@ -56,11 +56,10 @@ export class TaxoMapping {
     // verify values not "" for select and replace inputs
     let cando = true;
     Object.values(this.linecontrols).forEach(input => {
-      console.log('inputvalue', new String(input.value))
-      const inputvalue = new String(input.value);
+      const inputvalue = (input.tomselect) ? input.tomselect.items : new String(input.value);
+
       cando = cando && (inputvalue.length > 0);
     });
-    console.log('cando', cando)
     if (cando === false) {
       this.btn.dataset.title = (line.dataset.notselected) ? line.dataset.notselected : 'select values to replace';
       return;
@@ -75,12 +74,11 @@ export class TaxoMapping {
       keep.classList.add(css.mapline);
       keep.classList.add('mr-2');
       if (input.tomselect) {
-        input = line.querySelector('.ts-control > div');
-        keep.dataset.value = input.dataset.value;
-        keep.textContent = input.textContent;
+        const tsinput = line.querySelector('.ts-control > div');
+        keep.dataset.value = input.value;
+        keep.textContent = tsinput.textContent;
         keep.dataset.replace = this.numlines;
-        input.dataset.value = "";
-        input.textContent = "";
+        input.tomselect.clear(true);
       } else {
         keep.dataset.value = input.options[input.selectedIndex].value;
         keep.textContent = input.options[input.selectedIndex].text;
@@ -114,24 +112,28 @@ export class TaxoMapping {
   beforeSubmit(item) {
     const form = item.closest('form');
     if (form === null) return;
-    const format_mapping_field = async () => {
-      const keephidden = document.createElement('input');
+    const format_mapping_field = () => {
+      let keephidden = form.querySelector('input[name="' + this.keepname + '"]');
+      if (keephidden !== null) keephidden.remove();
+      keephidden = document.createElement('input');
       keephidden.type = 'hidden';
       keephidden.name = this.keepname;
-      const mapping = {};
+      let mapping = {};
       form.querySelectorAll('[data-select]').forEach(el => {
         const replace = el.parentElement.querySelector('[data-replace="' + el.dataset.select + '"]');
         if (replace !== null) mapping[el.dataset.value] = replace.dataset.value;
       });
-      keephidden.value = JSON.stringify(mapping);
       form.append(keephidden);
+      keephidden.value = JSON.stringify(mapping);
       return true;
     };
 
     if (form.formsubmit) {
       form.formsubmit.addHandler(format_mapping_field);
+
     } else form.addEventListener('submit', (e) => {
       format_mapping_field();
+
     });
   }
 }
