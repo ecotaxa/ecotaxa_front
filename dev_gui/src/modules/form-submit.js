@@ -158,7 +158,7 @@ export class FormSubmit {
         if (init === true) {
           if (!field.dataset.listen) {
             if (field.hasAttribute('required') && field.required) {
-              const label = field.closest('.form-box') ? field.closest('.form-box').querySelector('label') : field.parentElement.querySelector('label');
+              const label = field.closest('.form-box') ? ((field.closest('.form-box').querySelector('label')) ? field.closest('.form-box').querySelector('label') : field.parentElement.querySelector('label')) : ((field.closest('.form-box').querySelector('.label')) ? field.closest('.form-box').querySelector('.label') : field.parentElement.querySelector('.label'));
               if (label) label.classList.add('required');
             }
 

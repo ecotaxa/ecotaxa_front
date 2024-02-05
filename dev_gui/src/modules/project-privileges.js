@@ -233,6 +233,10 @@ export class ProjectPrivileges {
     if (priv === rights.manage) {
       contact.disabled = false;
       if (ct === true) contact.checked = true;
+
+    } else {
+      contact.disabled = true;
+      contact.checked = false;
     }
 
   }
@@ -258,13 +262,13 @@ export class ProjectPrivileges {
     try {
       Object.entries(privileges).forEach(([priv, members]) => {
         members.forEach((member) => {
-          if (!lastline) lastline = this.clearAll(true);
+          if (!lastline) lastline = this.clearAll(true, ((replace === true) ? member.id : null));
           else lastline = this.newLine(true, member.id);
           if (lastline) {
             this.setLine(lastline, {
               key: member.id,
               value: member.name,
-            }, priv, (contact && (parseInt(contact.id) === parseInt(member.id))));
+            }, priv, (contact !== null && (parseInt(contact.id) === parseInt(member.id))));
             if (importedtag) importedtag(lastline);
 
           }
@@ -556,9 +560,8 @@ export class ProjectPrivileges {
 
     return privilege;
   }
-
-  clearAll(ret = false) {
-    const lines = this.fieldset.querySelectorAll('[data-block="' + this.options.target + '"]');
+  clearAll(ret = false, replaceid = null) {
+    let lines = this.fieldset.querySelectorAll('[data-block="' + this.options.target + '"]');
     let keepindex = -1;
     lines.forEach((line, index) => {
       const {
@@ -567,16 +570,14 @@ export class ProjectPrivileges {
         contact,
         delet
       } = this.getInputs(line);
-      if (this.current_uid === member.value) keepindex = index;
+      if (this.current_uid === member.value || parseInt(replaceid) === parseInt(member.value)) keepindex = index;
       if (index > 0 || (keepindex > 0 && keepindex !== index)) line.remove();
     });
     //
-    console.log('keepindex', keepindex)
     const line = this.newLine(true);
-    if (keepindex !== 0) {
-      lines[0].remove();
-      console.log('rem line0', lines)
-    }
+    // if (keepindex > 0) {
+    //  lines[0].remove();
+    //}
     if (ret === true) return line;
   }
 
