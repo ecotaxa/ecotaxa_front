@@ -77,12 +77,10 @@ export class JsTabs {
           if (tabcontent.dataset.path && form !== null) {
             form.setAttribute('action', tabcontent.dataset.path);
             // only used in export - to do  generic
-            const projid = (form.querySelector('#projid')) ? '?' + new URLSearchParams({
-              projid: form.querySelector('#projid').value
-            }) : '';
-            window.history.pushState({
+
+            window.history.replaceState({
               additionalInformation: 'Updated by jsTabs'
-            }, document.title, window.location.origin + tabcontent.dataset.path + projid);
+            }, document.title, window.location.origin + tabcontent.dataset.path + window.location.search);
           }
         }
       }
