@@ -33,15 +33,6 @@ a {@apply no-underline}
 /* icon colors */
 .fill-current path {fill:currentcolor;}
 .stroke-current path {stroke:currentcolor}
-  @supports not (-ms-ime-align: auto) {
-    details summary {
-      cursor: pointer;
-    }
-
-    details summary > * {
-      display: inline;
-    }
-}
 
   }
 
@@ -128,11 +119,12 @@ a {@apply no-underline}
 .shadow-inner {box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);}
 /* modal with details tag */
 
-details:not([open]).modal-container {@apply  w-full block }
-details[open].modal-container {@apply fixed z-70 lg:w-1/3 md:w-2/3  w-full h-full}
-details[open].modal-popup {@apply fixed  z-70 md:w-2/3 centered max-h-[80%] }
+details.modal-container {@apply  w-full block open:fixed open:z-70 open:w-full open:h-full open:md:w-2/3  open:lg:w-1/3}
+details.modal-container > summary {@apply list-none marker:hidden}
+/*Safari hide marker */
+details.modal-popup {@apply open:fixed  open:z-70 open:md:w-2/3 open:centered open:max-h-[80%] }
 details .modal {@apply block w-0 h-0 p-0 m-0 transform  duration-500 opacity-0 overflow-hidden}
-details[open] .modal-content { @apply relative  block   w-full overflow-hidden;}
+details[open] .modal-content { @apply relative  block  w-full overflow-hidden;}
 details.modal-container[open] .modal { @apply bg-transparent h-full w-full opacity-100}
 details.modal-container[open] summary > * {@apply hidden}
 details.modal-popup[open] .modal {@apply delay-100  bg-white opacity-100 rounded-lg p-4  shadow-lg z-20 w-full h-full mx-auto  pb-12  }
@@ -142,23 +134,17 @@ details.modal-popup[open] .modal-content {@apply w-full  flex-grow border-t bord
 details.modal-popup[open] .modal-title + details.modal-popup[open] .modal-content + details.modal-popup[open] .modal-footer {@apply h-full}
 details.modal-popup[open] .modal-footer {@apply  p-4   }
 details.modal-popup.inside[open] .modal {@apply min-h-[96]}
-details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-stone-700  drop-shadow-sm opacity-100 mt-0 mr-0  w-full min-w-full h-full min-h-full overflow-hidden;
+details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-stone-700  drop-shadow-sm opacity-100 -mt-2 mr-0  w-full min-w-full h-full min-h-full overflow-hidden;
 }
 details.modal-aside[open]  {@apply overflow-y-auto overscroll-none }
-details.modal-container:not([open]) > summary {@apply block w-auto }
-details summary.aside-label::after, details.modal-popup > summary::after , details.project-search > summary::after {@apply  absolute fill-stone-600 hover:fill-help-500  right-4 top-4  opacity-0 w-0 h-0 transform duration-300;
-content:url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentcolor'><path fill-rule='evenodd' d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z' clip-rule='evenodd' /></svg>");
+details.modal-container:not([open]) > summary {@apply block w-auto marker:hidden list-none}
+details summary.aside-label::after, details.modal-popup > summary::after , details.project-search > summary::after {@apply  absolute fill-stone-600 hover:fill-help-500  right-4 top-4  opacity-0 w-0 h-0 transform duration-300 icon icon-cancel;
 }
 details.modal-right {@apply  w-auto  h-full min-h-full  top-0 right-0  }
-details:not([open]) summary.aside-label {@apply float-right clear-right  mb-0 text-stone-600 font-semibold text-sm font-btn font-medium  pl-0.5 pr-1.5 py-0.5 }
-details:not([open]) summary.aside-label::after {@apply text-base bg-transparent;
-    content:'';
-  }
-details:not([open]) summary.aside-label .summary-title {@apply inline-block}
-details[open] summary.aside-label .summary-title {@apply hidden w-0}
-details.no-marker > summary::marker ,.simple-tree details > summary::marker {@apply w-0 h-0 hidden;content:''}
-details:not([open]) summary.aside-label::before {@apply w-6 h-6 align-text-bottom leading-snug inline-block mr-0.5 ;content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" stroke="currentcolor"  fill="none" viewBox="0 0 24 24"  stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>');
-}
+details:not([open]) summary.aside-label {@apply float-right clear-right  mb-0 text-stone-600 font-semibold text-sm font-btn font-medium  pl-0.5 pr-1.5 py-0.5 after:text-base after:bg-transparent after:content-none}
+details[open] summary.aside-label .summary-title {@apply hidden w-0 h-0}
+details.no-marker > summary ,.simple-tree details > summary {@apply marker:hidden list-none;}
+
 details[open] summary.aside-label::before {@apply absolute bg-stone-100 text-base stroke-help-300 left-0 shadow-inner top-[50%] -translate-y-[50%] w-8 h-8 z-10 ml-0 block py-1.5  px-1.5 rounded-r-full ;
   content:url("data:image/svg+xml;utf8, <svg xmlns='http://www.w3.org/2000/svg'  fill='none' viewBox='0 0 24 24' stroke='currentcolor' stroke-width='2'><path stroke-linecap='round' stroke-linejoin='round' d='M9 5l7 7-7 7' /></svg>");
 }
@@ -173,24 +159,23 @@ details[open] .up {@apply block stroke-stone-700 text-stone-700 bg-transparent}
 /*project-search topbar slide panel */
 header details.project-search:not([open]) {@apply  w-auto inline-block max-w-[2.5rem] ml-2 }
 header details.project-search[open] {@apply fixed z-90 top-0 left-0 w-full max-w-full bg-mainblue-700 h-36 block }
-header details.project-search[open] summary {@apply invert z-[100]}
-header details.project-search[open] summary i {@apply opacity-0}
-details.project-search[open] summary::after {@apply  fill-stone-50 hover:fill-white  top-0.5 right-0.5  duration-100;}
+header details.project-search[open] > summary {@apply invert z-[100] list-none marker:hidden}
+header details.project-search[open] > summary i {@apply opacity-0}
+details.project-search[open] > summary::after {@apply  fill-stone-50 hover:fill-white  top-0.5 right-0.5  duration-100;}
 
 /* aside-modal help details content */
 i[data-request="help"] {@apply cursor-help}
-details[open].modal-help {@apply z-80  p-0 }
-details[open].modal-help .aside-body  {@apply w-full h-full p-0 m-0 }
-details:not([open]).modal-help {@apply mb-4 }
-details:not([open]).modal-help summary {@apply py-1 }
-details.modal-help .modal summary {@apply font-medium text-base}
-details.modal-help .modal article > details > summary {@apply font-medium text-lg text-help-500  my-2}
-details.modal-help .modal article > details > summary::marker {@apply text-help-300 }
-details.modal-help:not[open]  .modal summary  {@apply font-medium text-lg text-stone-900 block mb-1 }
-article.table-of-contents > details > summary {@apply text-xl font-bold uppercase}
-article.table-of-contents > details > summary::marker {@apply content-none;}
-article.table-of-contents > details > summary::before {@apply content-[attr(data-marker)];}
-article.table-of-contents > details[open] > summary::before {@apply content-[attr(data-marker-open)];}
+details.modal-help {@apply mb-4 open:z-[500]  open:p-0 open:mb-0}
+details[open].modal-help .aside-body  {@apply w-full h-full p-0 m-0  }
+details:not([open]).modal-help > summary {@apply py-1 list-none marker:hidden}
+details.modal-help .modal summary {@apply font-medium text-base }
+details.modal-help .modal .modal-content {@apply h-full overflow-y-auto overscroll-none }
+details.modal-help .modal article > details > summary {@apply font-medium text-lg text-help-500  my-2 marker:text-help-300 }
+details.modal-help:not[open]  .modal summary  {@apply font-medium text-lg text-stone-900 block mb-1 ;}
+article.table-of-contents > details > summary {@apply text-xl font-bold uppercase list-none before:content-[attr(data-marker)]}
+article.table-of-contents > details[open] > summary {@apply before:content-[attr(data-marker-open)];}
+/*Safari marker */
+details.no-marker > summary::-webkit-details-marker , details.modal-container > summary::-webkit-details-marker, details.project-search > summary::-webkit-details-marker {@apply hidden}
 /*forms inputs && label */
 input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"] , .form-select, .form-textarea, .form-input, .form-multiselect {@apply global-form-input block w-full selection:bg-mainblue-200 }
 .form-input:focus, .form-select:focus, .form-textarea:focus  {@apply focus:ring-0 focus:ring-transparent focus:border-secondblue-200  focus:selection:bg-secondblue-300 } /* important otherwise field border color on focus does not work correctly */
@@ -917,7 +902,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alert .is-cancel, .alert .is-ok {@apply shadow-none font-btn text-sm small-caps mr-2 ;}
 .alert .is-cancel {@apply border-stone-800 text-stone-800 bg-transparent}
 .alert .is-ok {@apply border-secondblue-400 text-secondblue-400}
-.hidevscroll {@apply max-h-screen overflow-y-hidden after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-4 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-60; content:''}
+.hidevscroll {@apply max-h-screen overflow-y-hidden after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-6 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-60 content-none}
 /*******************************/
 /* topmessages                */
 /*******************************/
@@ -944,8 +929,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 details[open].toggle-summary summary span {@apply hidden}
 #home-registration details.toggle-summary {@apply overflow-hidden }
 #home-registration details .content {@apply overflow-y-auto}
-#home-registration details.toggle-summary summary {@apply relative pr-4}
-#home-registration details.toggle-summary summary::marker {@apply absolute right-0 }
+#home-registration details.toggle-summary summary {@apply relative pr-4 }
 /* welcome info when user has no proj */
 #welcome-info { @apply text-stone-900 font-medium  px-2  w-auto inline text-base}
 #welcome-info a {@apply text-mainblue-700 font-bold font-btn underline}

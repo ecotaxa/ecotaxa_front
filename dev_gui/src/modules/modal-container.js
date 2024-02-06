@@ -32,8 +32,8 @@ export class ModalContainer {
     return this;
   }
   addListeners() {
-    this.modal.addEventListener('toggle', (e) => {
-      const open = e.currentTarget.open;
+    const toggle_modal_background = (open) => {
+
       if (open) document.body.classList.add(css.hidevscroll);
       else document.body.classList.remove(css.hidevscroll);
       const summary = this.modal.querySelector('summary');
@@ -41,6 +41,10 @@ export class ModalContainer {
         summary.setAttribute('aria-hidden', !open);
         this.toggleAction(summary);
       }
+    }
+    toggle_modal_background(this.modal.open);
+    this.modal.addEventListener('toggle', (e) => {
+      toggle_modal_background(e.currentTarget.open);
 
     });
 
