@@ -56,8 +56,7 @@ export class TaxoMapping {
     // verify values not "" for select and replace inputs
     let cando = true;
     Object.values(this.linecontrols).forEach(input => {
-      const inputvalue = (input.tomselect) ? input.tomselect.items : new String(input.value);
-
+      const inputvalue = (input.tomselect) ? ((input.tomselect.items.length) ? input.tomselect.items[0] : '') : new String(input.value);
       cando = cando && (inputvalue.length > 0);
     });
     if (cando === false) {
