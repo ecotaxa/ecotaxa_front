@@ -50,7 +50,7 @@
   {% set pos = pos + prop + '-' + val + ' ' if val!='' %}
   {% endfor %}
   {% endif %}
-  <summary class="aside-label" {{ 'data-request=help' if type=='modal-help' }}  ><span class="summary-title">{{ modal_title }}</span></summary>
+  <summary class="aside-label" {{ 'data-request=help' if type=='modal-help' }}  ><span class="summary-title"><i class="icon icon-help align-text-bottom leading-snug mr-0.5"></i>{{ modal_title }}</span></summary>
   <div class="modal" id="{{ id }}" >
   <div class="aside-body">
       {% set modal_content='./v2/help/index.html' if (modal_content == '' and type=='modal-help') else modal_content %}
