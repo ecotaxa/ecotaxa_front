@@ -132,12 +132,16 @@ def projects_list(
     user: UserModelWithRights = current_user.api_user
     isadmin = current_user.is_app_admin == True
     if typeimport != "":
-        # full list avaliable to import not_granted = True if not app_admin
-        listall = current_user.is_app_admin == False
+        # full list avalaible to import - 2 calls when not app admin
+        listall = False
     if typeimport == "taxo":
-        prjs = _prj_import_taxo_api()
+        prjs = _prj_import_taxo_api(0, filt)
+        if current_user.is_app_admin == False:
+            prjs = prjs + _prj_import_taxo_api(0, filt, not_granted=True)
     else:
         prjs = _prjs_list_api(listall, filt, for_managing=for_managing)
+        if typeimport != "" and current_user.is_app_admin == False:
+            prjs = prjs + _prjs_list_api(True, filt, for_managing=for_managing)
         now = datetime.datetime.now()
         # last_used_projects are put on top of list in the interface
         last_used_projects = list(p.projid for p in current_user.last_used_projects)
@@ -198,8 +202,6 @@ def projects_list_page(
 
     from appli.gui.project.projects_list_interface_json import project_table_columns
 
-    if typeimport != "":
-        listall = False
     if typeimport == "" and not partial:
         template = "v2/project/index.html"
     else:
@@ -219,19 +221,15 @@ def projects_list_page(
 
 
 # new import taxo ( no more separate ids and text)
-def _prj_import_taxo_api(prjid: int = 0, filt: dict = None) -> list:
+def _prj_import_taxo_api(
+    prjid: int = 0, filt: dict = None, not_granted: bool = False
+) -> list:
     import requests
 
     prjs = list([])
     qry_filt_instrum = (
         [""] if (filt == None or len(filt["instrum"]) == 0) else filt["instrum"]
     )
-    # if current_user.is_app_admin == True:
-    #    not_granted = True
-    #    for_managing = True
-    # else:
-    # full list avaliable to import not_granted = True if not app_admin
-    not_granted = current_user.is_app_admin == False
     for_managing = False
     for an_instrument in qry_filt_instrum:
         with ApiClient(ProjectsApi, request) as apiproj:

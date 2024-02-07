@@ -19,7 +19,6 @@
 {%- endmacro %}
 
 {% macro pick_from_other(new, key='settings' , modal_title = _('Pick from other project')) -%}
-{% if current_user.last_used_projects|length > 0 %}
 {% if (new == False and target_proj and target_proj.projid > 0) or (new == True and (not target_proj or target_proj.projid == 0)) %}
 <div class="{{ 'w-full -mt-8 ' if new == True else 'w-auto -mt-4  mb-2' }} block">
   {# set the form id to import to and the header include for taxo imports #}
@@ -28,7 +27,6 @@
   {% set btn = {'class':'button is-import is-pick'+(' new' if new == True else ''),'title':modal_title,'icon':icon,'text': modal_title ,'data':' data-request=settings data-target=unique data-key=' + key + ' data-projid=' + (target_proj.projid|string() if (target_proj and target_proj.projid > 0) else '0')}%}
   {{ modal('importfrom_' + key,  btn = btn,modal_title = modal_title, data=data) }}
 </div>
-{% endif %}
 {% endif %}
 {%- endmacro %}
 
