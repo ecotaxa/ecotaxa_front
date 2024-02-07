@@ -15,6 +15,7 @@ import {
   rights,
   defined_privileges,
   alertconfig,
+  domselectors,
   css
 } from '../modules/modules-config.js';
 const codemessages = {
@@ -443,8 +444,12 @@ export class ProjectPrivileges {
           type: alertconfig.danger,
           parent: this.fieldset_alert_zone,
         });
+        this.tabError(true);
         return false;
-      } else this.alertBox.dismissAlert(codemessages.nomanager);
+      } else {
+        this.alertBox.dismissAlert(codemessages.nomanager);
+        this.tabError(false);
+      }
       // check contact
       const contact = this.fieldset.querySelector('[name="' + this.options.contactfieldname + '"]:checked');
 
@@ -456,9 +461,11 @@ export class ProjectPrivileges {
           type: alertconfig.danger,
           parent: this.fieldset_alert_zone
         });
+        this.tabError(true);
         return false;
       }
       this.alertBox.dismissAlert(codemessages.nocontact);
+      this.tabError(false);
       return true;
     }
     const hasMember = (line) => {
@@ -581,5 +588,10 @@ export class ProjectPrivileges {
     if (ret === true) return line;
   }
 
-
+  tabError(on) {
+    const tab = (this.fieldset.classList.contains(domselectors.component.tabs.tab.substr(1))) ? this.fieldset : ((this.fieldset.parentElement.classList.contains(domselectors.component.tabs.tab.substr(1))) ? this.fieldset.parentElement : null);
+    if (tab === null) return;
+    if (on === true) tab.classList.add(css.error);
+    else tab.classList.remove(css.error);
+  }
 }
