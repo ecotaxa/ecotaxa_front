@@ -14,7 +14,7 @@ body {@apply bg-white text-stone-800 font-light subpixel-antialiased; font-displ
     @apply text-xl font-bold;
   }
   h3 {@apply text-lg font-semibold }
-a {@apply no-underline}
+  a {@apply no-underline}
   label  {@apply block mb-2 text-sm font-medium text-stone-900 dark:text-stone-300}
 
   nav a, nav button, nav span , nav div , nav ul {
@@ -49,7 +49,7 @@ a {@apply no-underline}
   /*container in page with secondnav */
   /* global forms elements input*/
 .mark-input {@apply after:block after:w-6 after:h-6 after:absolute after:top-0 after:left-1 after:z-80}
-.global-form-input {@apply  appearance-none block w-full px-4 py-2  text-stone-900  border  border-stone-300 rounded  read-only:bg-stone-50 font-light m-0 focus:text-secondblue-800 ring-0 outline-none outline-transparent ring-transparent active:border-secondblue-300 focus:font-normal focus:border-secondblue-300}
+.global-form-input {@apply  appearance-none block w-full px-4 py-2  text-stone-900  border  border-stone-300 rounded  read-only:bg-stone-50 font-light m-0  ring-0 outline-none outline-transparent ring-transparent }
 /* icons */
  .icon {@apply h-5 w-5}
 .icon-lg {@apply h-6 w-6  }
@@ -176,12 +176,12 @@ article.table-of-contents > details > summary {@apply text-xl font-bold uppercas
 article.table-of-contents > details[open] > summary {@apply before:content-[attr(data-marker-open)];}
 /*Safari marker */
 details.no-marker > summary::-webkit-details-marker , details.modal-container > summary::-webkit-details-marker, details.project-search > summary::-webkit-details-marker {@apply hidden}
-/*forms inputs && label */
-input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"] , .form-select, .form-textarea, .form-input, .form-multiselect {@apply global-form-input block w-full selection:bg-mainblue-200 }
-.form-input:focus, .form-select:focus, .form-textarea:focus  {@apply focus:ring-0 focus:ring-transparent focus:border-secondblue-200  focus:selection:bg-secondblue-300 } /* important otherwise field border color on focus does not work correctly */
+/*forms inputs && label input[class*="-input"] , textarea[class*="-textarea"], select[class*="-select"] , select[class*="-selector"], select[class*="-multiselect"] ,*/
+.form-select, .form-textarea, .form-input, .form-multiselect {@apply global-form-input block w-full relative ring-0 valid:z-0 invalid:border-danger-400 selection:bg-mainblue-200  active:border-secondblue-300 focus:text-secondblue-800 focus:ring-0 focus:ring-transparent  valid:border-secondblue-200  focus:font-normal focus:border-secondblue-300 invalid:selection:bg-danger-200 invalid:active:border-danger-300 invalid:focus:text-danger-800  invalid:focus:border-danger-300   }
+/*.form-input .form-select, .form-textarea  {@apply focus:ring-0 focus:ring-transparent focus:border-secondblue-200  focus:selection:bg-secondblue-300 } /* important otherwise field border color on focus does not work correctly */
 select option[selected="selected"], select option[selected=true], select option[selected="true"] , select option[selected=""]  {@apply font-semibold bg-secondblue-200 }
-select option:active, select option:focus  {@apply font-semibold bg-secondblue-200 }
-.form-select, .form-textarea, .form-input, .form-multiselect {@apply relative ring-0 valid:z-0 invalid:border-danger-400 invalid:border-danger-400 valid:mark-input invalid:mark-input invalid:after:content-["✖"] invalid:after:text-danger-400  valid:border-secondblue-300 valid:ring-secondblue-300 valid:after:content-["✓"] valid:after:text-secondblue-300}
+select option, select option  {@apply active:font-medium active:bg-secondblue-200 focus:font-semibold focus:bg-secondblue-200}
+/*.form-select, .form-textarea, .form-input, .form-multiselect {@apply relative ring-0 valid:z-0 invalid:border-danger-400 valid:mark-input invalid:mark-input invalid:after:content-["✖"] invalid:after:text-danger-400  valid:border-secondblue-300 valid:ring-secondblue-300 valid:after:content-["✓"] valid:after:text-secondblue-300} */
 /*tom-select*/
 [class^="form-"] + .ts-wrapper {@apply border border-stone-300 ring-0}
 [class^="form-"]:valid + .ts-wrapper , [class^="form-"]:valid + .ts-wrapper.multi {@apply  border-secondblue-300 ring-0}
@@ -203,7 +203,7 @@ fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  m
 .form-box , .submit-box {@apply md:px-2 py-2 mb-2 md:mb-1 mx-0 }
 .form-box.disabled {@apply opacity-50}
 /*labels */
-.form-box label , .form-box .label {@apply text-base font-semibold text-stone-900 bg-transparent}
+.form-box > label , .form-box > .label {@apply text-base font-semibold text-stone-900 bg-transparent}
 .form-box > label.required, .form-box > .label.required {@apply  after:content-['_*'] after:text-stone-600 hover:after:text-warning-700   after:inline-block after:whitespace-nowrap  }
 .form-box > label.required.input-invalid ,.form-box > .label.required.input-invalid {@apply after:text-sm after:italic  after:text-danger-500 after:ml-1 after:w-auto after:content-[attr(data-invalid)] after:inline-block after:whitespace-nowrap after:text-ellipsis;}
 
@@ -271,7 +271,8 @@ form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2}
 form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4 shadow-none  }
 form.js-tabs .tab.tab-one.active legend.tab-control {@apply bg-white text-stone-800 font-bold border  border-stone-100 border-b-white z-10 }
 form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-7 px-4 -ml-6}
-form.js-tabs .tab.err legend.tab-control {@apply before:content-['_!_'] before:text-danger-500 text-danger-500 }
+form.js-tabs .tab.err.active legend.tab-control {@apply border-danger-400}
+form.js-tabs .tab.err legend.tab-control {@apply before:text-xs  before:content-["*"] before:mr-0.5 before:border-none before:align-baseline before:text-danger-400 text-danger-400 }
 /* tabs expand shrink */
 .tabs-display.expand  {@apply icon-chevron-down}
 .tabs-display.shrink {@apply icon-chevron-up}
@@ -538,6 +539,7 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" c
 .icon-fire-sm {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentcolor" class="fill-current"><path fill-rule="evenodd" d="M13.5 4.938a7 7 0 11-9.006 1.737c.202-.257.59-.218.793.039.278.352.594.672.943.954.332.269.786-.049.773-.476a5.977 5.977 0 01.572-2.759 6.026 6.026 0 012.486-2.665c.247-.14.55-.016.677.238A6.967 6.967 0 0013.5 4.938zM14 12a4 4 0 01-4 4c-1.913 0-3.52-1.398-3.91-3.182-.093-.429.44-.643.814-.413a4.043 4.043 0 001.601.564c.303.038.531-.24.51-.544a5.975 5.975 0 011.315-4.192.447.447 0 01.431-.16A4.001 4.001 0 0114 12z" clip-rule="evenodd" /></svg>')
 }
+
 .icon-arrow-pointing-in::before {content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="fill-current" fill="currentcolor">  <path d="M3.28 2.22a.75.75 0 00-1.06 1.06L5.44 6.5H2.75a.75.75 0 000 1.5h4.5A.75.75 0 008 7.25v-4.5a.75.75 0 00-1.5 0v2.69L3.28 2.22zM13.5 2.75a.75.75 0 00-1.5 0v4.5c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-2.69l3.22-3.22a.75.75 0 00-1.06-1.06L13.5 5.44V2.75zM3.28 17.78l3.22-3.22v2.69a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.69l-3.22 3.22a.75.75 0 101.06 1.06zM13.5 14.56l3.22 3.22a.75.75 0 101.06-1.06l-3.22-3.22h2.69a.75.75 0 000-1.5h-4.5a.75.75 0 00-.75.75v4.5a.75.75 0 001.5 0v-2.69z" /></svg>')
 }
 .icon-arrow-pointing-out::before {content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="fill-current" fill="currentcolor"><path d="M13.28 7.78l3.22-3.22v2.69a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.69l-3.22 3.22a.75.75 0 001.06 1.06zM2 17.25v-4.5a.75.75 0 011.5 0v2.69l3.22-3.22a.75.75 0 011.06 1.06L4.56 16.5h2.69a.75.75 0 010 1.5h-4.5a.747.747 0 01-.75-.75zM12.22 13.28l3.22 3.22h-2.69a.75.75 0 000 1.5h4.5a.747.747 0 00.75-.75v-4.5a.75.75 0 00-1.5 0v2.69l-3.22-3.22a.75.75 0 10-1.06 1.06zM3.5 4.56l3.22 3.22a.75.75 0 001.06-1.06L4.56 3.5h2.69a.75.75 0 000-1.5h-4.5a.75.75 0 00-.75.75v4.5a.75.75 0 001.5 0V4.56z" /></svg>')
