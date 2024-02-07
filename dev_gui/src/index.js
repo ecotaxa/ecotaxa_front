@@ -33,12 +33,11 @@ window.addEventListener('load', async () => {
   /* fetch request -modal - contextual help */
   const activRequest = new ActivRequest();
   activRequest.applyTo(document);
-
 });
-// 'unload' - reload js when history back
-window.addEventListener('unload', (e) => {
+// 'unload'do not use for the moment as it changes history back
+/*window.addEventListener('unload', (e) => {
   //  ecotaxaStorage.clear();
-});
+});*/
 /*
 function beforeUnloadListener(event) {
   event.preventDefault();

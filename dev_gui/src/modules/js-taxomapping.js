@@ -41,8 +41,18 @@ export class TaxoMapping {
       });
       this.btn = btn;
     }
+    // adjust historyback
+    window.addEventListener("pageshow", (e) => {
+      const historytraversal = event.persisted ||
+        (typeof window.performance != "undefined" &&
+          window.performance.navigation.type === 2);
+      if (historytraversal) {
+        this.beforeSubmit(line);
+      }
+    });
     this.beforeSubmit(line);
   }
+
   createBtn(line) {
     const btn = document.createElement('div');
     btn.classList.add(line.dataset.addline);
@@ -51,8 +61,8 @@ export class TaxoMapping {
     line.append(btn);
     return btn;
   }
-  addLine(line) {
 
+  addLine(line) {
     // verify values not "" for select and replace inputs
     let cando = true;
     Object.values(this.linecontrols).forEach(input => {
@@ -126,13 +136,12 @@ export class TaxoMapping {
       keephidden.value = JSON.stringify(mapping);
       return true;
     };
-
     if (form.formsubmit) {
       form.formsubmit.addHandler(format_mapping_field);
 
     } else form.addEventListener('submit', (e) => {
       format_mapping_field();
-
     });
   }
+
 }
