@@ -141,6 +141,7 @@ export class DataImport {
     if (!selectcells) return;
     if (what === typeimport.settings) this.imports[models.contact] = this.findContact(thcells, datas[rowindex]);
     const importzone = (what === typeimport.taxo || what === typeimport.privileges) ? this.createImportzone(what) : null;
+
     let ts = null;
     selectcells.forEach((name, index) => {
       index = this.columnIndex('name', name);
@@ -304,6 +305,7 @@ export class DataImport {
         this.showImport(showbtns);
         if (!this.button.dataset.activated && (what === typeimport.taxo || what === typeimport.privileges)) this.activateButtons(what, selectcells);
       } else this.makeImport(null, selectcells, what, true);
+      this.resetSelectors();
     }
     //
 
@@ -392,19 +394,23 @@ export class DataImport {
     const contact = ((this.imports[models.contact]) ? this.imports[models.contact] : null);
     return (projectPrivileges.importPrivileges(privileges, clear, contact, importedtag, dismiss));
   }
+  resetSelectors() {
+    this.selectors.forEach((selector, i) => {
+      if (selector.disabled) {
+        selector.disabled = false;
+        const trs = Array.from(this.dom.querySelectorAll('tbody tr'));
+        trs[i].querySelectorAll('.' + css.selected).forEach(el => {
+          el.classList.remove(css.selected);
+        });
+      }
+    });
+  }
   activateClear() {
     const clearbutton = document.getElementById('clear-' + this.importid);
     if (!clearbutton) return;
     clearbutton.addEventListener('click', (e) => {
       if (!this.importcontainer) return;
-      this.selectors.forEach(selector => {
-        if (selector.disabled) {
-          selector.disabled = false;
-          selector.closest('tr').querySelectorAll('.selected').forEach(el => {
-            el.classList.remove(css.selected);
-          });
-        }
-      });
+      this.resetSelectors();
       this.button.disabled = false;
       this.replacebutton.disabled = false;
       this.showImport(false);
@@ -593,8 +599,9 @@ export class DataImport {
             done = true;
             // set imported tag to fieldbox
             this.setImportedTag(input);
-          } else if (name === 'privileges') {
-            done = this.importPrivileges(this.imports[name], false);
+          } else if (name === typeimport.privileges) {
+            const clearprivileges = (what === typeimport.settings);
+            done = this.importPrivileges(this.imports[name], clearprivileges);
           }
         });
         break;
