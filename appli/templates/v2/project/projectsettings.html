@@ -11,7 +11,7 @@
     {{ form_group_radio('members_privilege_' + index + '_' + pr ,'members[privilege][' + index + ']',pr,pr, privilege)}}
     {%endfor%}</div>
 </div>
-<div data-elem="contact" data-title="{{ _('Contact') }}"><input type="radio" name="contact_user_id" id="members_contact_{{index}}" value="{{ member.id }}" {{ 'disabled'
+<div data-elem="contact" data-title="{{ _('Contact') }}"><input type="radio" name="contact_user_id" id="members_contact_{{index}}" required value="{{ member.id }}" {{ 'disabled'
       if privilege !='Manage' }} {{ ' checked=true' if (contact and member.id==contact.id) }}>
 </div>
 <div data-elem="delet"><label for="members_delet_{{index}}" title="{{ _('remove') }}" data-remove="{{ _('remove') }}" data-restore="{{_('restore')}}"><input type="checkbox" id="members_delet_{{index}}" name="members[delet][{{index}}]" value="{{ index }}"
@@ -142,9 +142,9 @@
               {% endif %} {{ pick_from_other(False,key='privileges',modal_title= _('Pick privileges from other projects')) }}
         <div class="flex flex-col w-full px-4" id="listprivileges" >
             <div class="row" data-headers="true">
-              <div class="th ident">{{ _('Name') }}</div>
-              <div class="th priv label">{{ _('Privilege') }}<i data-for="help_project_privileges" data-request="help"></i></div>
-              <div class="th contact">{{ _('Contact') }}</div>
+              <div class="th ident">{{ _('Name*') }}</div>
+              <div class="th priv">{{ _('Privilege*') }}<i data-for="help_project_privileges" data-request="help"></i></div>
+              <div class="th contact">{{ _('Contact*') }}<i data-for="help_project_privileges#help_project_privileges_contact" data-request="help"></i></div>
             </div>
             {% if members_by_right is iterable and members_by_right|length > 0 %}
             {% set count = namespace(value=0)%}
