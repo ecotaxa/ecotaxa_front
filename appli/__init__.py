@@ -336,11 +336,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.3"
+ecotaxa_version = "2.7.3.1"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2024-02-06"
+    return ecotaxa_version + " 2024-02-08"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -351,6 +351,11 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2024-02-06: V 2.7.3.1
+    Fix list projects to import
+    Fix help scroll
+    Fix form fields error messages
+    Fix Safari bug on details 
 2024-02-06: V 2.7.3
     Fix project setting title
     Mod Change Preset to Sorting tools in porject Settings
@@ -358,7 +363,7 @@ app.jinja_env.globals.update(
     Fix export filters
     Feature new export parameters
     Upgrade tailwindcss
-    Feature dist unique id for js and css  
+    Feature dist unique id for js and css
 2023-12-18: V 2.7.2.3
     Fix _google_captcha
     Fix recaptcha
