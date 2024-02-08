@@ -1,0 +1,13 @@
+/*! ../modules/data-import.js */
+
+/*! ../modules/modules-config.js */
+
+/*! ../modules/utils.js */
+
+/*! deep-equal */
+
+/*! import() */
+
+/*!**************************************!*\
+  !*** ./src/modules/table-project.js ***!
+  \**************************************/
