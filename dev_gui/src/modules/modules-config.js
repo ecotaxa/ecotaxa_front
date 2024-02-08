@@ -118,7 +118,11 @@ export const domselectors = {
     },
     tree: {
       ident: 'simple-tree'
-    }
+    },
+    alert: {
+      ident: '.alert',
+      danger: '.alert-danger'
+    },
   }
 };
 export const default_messages = {

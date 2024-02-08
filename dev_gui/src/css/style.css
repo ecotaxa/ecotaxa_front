@@ -205,8 +205,7 @@ fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  m
 /*labels */
 .form-box > label , .form-box > .label {@apply text-base font-semibold text-stone-900 bg-transparent}
 .form-box > label.required, .form-box > .label.required {@apply  after:content-['_*'] after:text-stone-600 hover:after:text-warning-700   after:inline-block after:whitespace-nowrap  }
-.form-box > label.required.input-invalid ,.form-box > .label.required.input-invalid {@apply after:text-sm after:italic  after:text-danger-500 after:ml-1 after:w-auto after:content-[attr(data-invalid)] after:inline-block after:whitespace-nowrap after:text-ellipsis;}
-
+.form-box > label.required.input-invalid,.form-box > .label.required.input-invalid {@apply after:text-sm after:italic  after:text-danger-500 after:ml-1 after:w-auto after:content-[attr(data-invalid)] after:inline-block after:whitespace-nowrap after:text-ellipsis !important;}
 .form-box .checkbox-label {@apply text-sm font-normal}
 .form-box.relative label.over , .form-box.relative .label.over {@apply absolute top-0 left-4 z-10 px-1 pt-0.5 pb-0 -mt-1 ml-0.5 w-auto rounded-t align-baseline bg-white max-w-full overflow-hidden text-ellipsis}
 .fieldset-wrapper {@apply w-full flex   flex-wrap}

@@ -63,11 +63,10 @@ export class FormSubmit {
         const {
           patternMismatch = false
         } = item.validity;
-        const customvalidity = (patternMismatch) ?
-          this.get_message(item, 'invalid') : '';
+        const customvalidity = (patternMismatch) ? this.get_message(item, 'invalid') : ``;
         if (item.checkValidity() === true) {
           item.dataset.invalid = '';
-          item.setCustomValidity("");
+          item.setCustomValidity('');
           if (item == input && label !== null) label.classList.remove(formcss.invalid);
           else if (labeltarget !== null) labeltarget.classList.remove(formcss.invalid);
           item.classList.remove(formcss.inputvalidate);
@@ -105,7 +104,7 @@ export class FormSubmit {
       const {
         valueMissing = true
       } = field.validity;
-      if (valueMissing) return (field.dataset.required) ? field.dataset.required : ((this.form.dataset.required) ? this.form.dataset.required : 'required');
+      if (valueMissing) return `* ` + ((field.dataset.required) ? field.dataset.required : ((this.form.dataset.required) ? this.form.dataset.required : 'required'));
       else return (field.dataset[type]) ? field.dataset[type] : 'input invalid';
     } else return '';
   }
@@ -126,16 +125,11 @@ export class FormSubmit {
     } else field.value = decode_HTMLEntities(DOMPurify.sanitize(field.value));
 
     const rep = field.checkValidity();
-
-    /*  if (field.classList.contains('select-one')) {
-
-    }*/
-    const label = field.closest('.form-box') ? field.closest('.form-box').querySelector('label') : null;
-
-    if (rep && label) {
-      label.classList.remove(formcss.invalid);
-    } else if (!rep) {
-      if (label) {
+    const label = this.getFieldLabel(field);
+    if (label) {
+      if (rep) {
+        label.classList.remove(formcss.invalid);
+      } else if (!rep) {
         label.dataset.invalid = this.get_message(field);
         label.classList.add(formcss.invalid);
         window.scrollTo({
@@ -147,7 +141,9 @@ export class FormSubmit {
     }
     return rep;
   }
-
+  getFieldLabel(field) {
+    return (field.closest('.form-box')) ? ((field.closest('.form-box').querySelector('.label')) ? field.closest('.form-box').querySelector('.label') : field.closest('.form-box').querySelector('label')) : null;
+  }
   validateFields(init = false) {
     //todo: complete validation foreach field type
     let resp = true;
@@ -158,7 +154,7 @@ export class FormSubmit {
         if (init === true) {
           if (!field.dataset.listen) {
             if (field.hasAttribute('required') && field.required) {
-              const label = field.closest('.form-box') ? ((field.closest('.form-box').querySelector('label')) ? field.closest('.form-box').querySelector('label') : field.parentElement.querySelector('label')) : ((field.closest('.form-box').querySelector('.label')) ? field.closest('.form-box').querySelector('.label') : field.parentElement.querySelector('.label'));
+              const label = this.getFieldLabel(field);
               if (label) label.classList.add('required');
             }
 
@@ -176,7 +172,7 @@ export class FormSubmit {
     // add/remove error class on tabs tab-control elements
 
     this.tabs.forEach(tab => {
-      if (tab.querySelectorAll(':invalid').length) tab.classList.add(css.error);
+      if (tab.querySelector(':invalid') || tab.querySelector(domselectors.component.alert.danger)) tab.classList.add(css.error);
       else tab.classList.remove(css.error);
     });
     return resp;
@@ -188,7 +184,7 @@ export class FormSubmit {
   fieldEnable(enable = true) {
     this.form.querySelectorAll('input[data-sub="enable"]').forEach(input => {
       if (enable === true) {
-        input.removeAttribute("disabled");
+        input.disabled = false;
       } else input.disabled = true;
     });
   }
