@@ -120,7 +120,7 @@ body {@apply bg-white text-stone-800 font-light subpixel-antialiased; font-displ
 /* modal with details tag */
 
 details.modal-container {@apply  w-full block open:fixed open:z-70 open:w-full open:h-full open:md:w-2/3  open:lg:w-1/3}
-details.modal-container > summary {@apply list-none marker:hidden}
+details.modal-container > summary {@apply list-none marker:hidden cursor-pointer}
 /*Safari hide marker */
 details.modal-popup {@apply open:fixed  open:z-70 open:md:w-2/3 open:centered open:max-h-[80%] }
 details .modal {@apply block w-0 h-0 p-0 m-0 transform  duration-500 opacity-0 overflow-hidden}
@@ -138,7 +138,7 @@ details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-sto
 }
 details.modal-aside[open]  {@apply overflow-y-auto overscroll-none }
 details.modal-container:not([open]) > summary {@apply block w-auto marker:hidden list-none}
-details summary.aside-label::after, details.modal-popup > summary::after , details.project-search > summary::after {@apply  absolute fill-stone-600 hover:fill-help-500  right-4 top-4  opacity-0 w-0 h-0 transform duration-300 icon icon-cancel;
+details summary.aside-label::after, details.modal-popup > summary::after , details.project-search > summary::after {@apply  absolute fill-stone-600 hover:fill-help-500  right-4 top-4  opacity-0 w-0 h-0 transform duration-300 icon icon-cancel cursor-pointer;
 }
 details.modal-right {@apply  w-auto  h-full min-h-full  top-0 right-0  }
 details:not([open]) summary.aside-label {@apply float-right clear-right  mb-0 text-stone-600 font-semibold text-sm font-btn font-medium  pl-0.5 pr-1.5 py-0.5 after:text-base after:bg-transparent after:content-none}
