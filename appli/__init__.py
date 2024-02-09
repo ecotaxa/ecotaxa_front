@@ -336,11 +336,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.3.1"
+ecotaxa_version = "2.7.3.2"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2024-02-08"
+    return ecotaxa_version + " 2024-02-09"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -351,11 +351,15 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2024-02-09: V 2.7.3.2
+    Fix && Feature import from projects : re-enable selected rows
+    Feature js-submit prevent form enter submit (needed for modal)
+    Fix webpack config contenthash
 2024-02-06: V 2.7.3.1
     Fix list projects to import
     Fix help scroll
     Fix form fields error messages
-    Fix Safari bug on details 
+    Fix Safari bug on details
 2024-02-06: V 2.7.3
     Fix project setting title
     Mod Change Preset to Sorting tools in porject Settings
