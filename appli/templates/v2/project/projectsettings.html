@@ -112,7 +112,7 @@
 
           <div class="form-box">
             <label for="inittaxo">{{_('Definition of preset for manual sorting')}}<i data-for="help_initclassiflist" data-request="help"></i></label>
-            <select id='inittaxo' class="form-multiselect js js-autocomplete taxolb" name="inittaxo[]" data-type="taxo" data-importfield="{{'taxo' if target_proj.projid else 'init_classif_list' }}" class="form-multiselect" placeholder="{{_('select a category')}}" multiple autocomplete="off">
+            <select id='inittaxo' class="form-multiselect js js-autocomplete taxolb" name="inittaxo[]" data-type="taxo" data-importfield="{{'taxo' if target_proj.projid else 'init_classif_list' }}" class="form-multiselect" placeholder="{{_('select a category')}}" multiple autocomplete=off>
              {% for r in predeftaxo %}
               <option value="{{ r[0] }}" selected="selected"> {{ r[1] }}</option>
               {% endfor %}
