@@ -75,9 +75,17 @@ module.exports = (env, argv) => {
     delete config.devtool;
     config.mode = argv.mode;
     config.output.filename = (pathData) => {
-        return pathData.chunk.name === 'main' ? '[name].[contenthash].js' : 'modules/[name].[contenthash].js';
+        return '[name].[contenthash].js';
       },
       destDir = 'dist/';
+    config.output.chunkFilename = (pathData) => {
+        return "[name].[contenthash].js";
+      },
+      destDir = 'dist/';
+    /*config.output.assetModuleFilename = (pathData) => {
+        return "[contenthash][ext][query]";
+      },
+      destDir = 'dist/';*/
     rulecss.use = [{
       loader: MiniCssExtractPlugin.loader,
       /*  options: {
