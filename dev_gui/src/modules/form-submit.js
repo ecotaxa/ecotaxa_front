@@ -38,6 +38,10 @@ export class FormSubmit {
   }
   init() {
     // init the form ( options like beforeunload etc...)
+    this.form.addEventListener('keypress', (e) => {
+      // prevent enter submit
+      if (e.key === 'Enter' && e.target instanceof HTMLInputElement) e.preventDefault();
+    });
 
     this.form.addEventListener('submit', async (e) => {
       e.preventDefault();
