@@ -1,0 +1,7 @@
+/*! ../modules/modules-config.js */
+
+/*! ../modules/utils.js */
+
+/*!*****************************************!*\
+  !*** ./src/modules/table-collection.js ***!
+  \*****************************************/
