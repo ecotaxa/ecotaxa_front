@@ -305,7 +305,6 @@ export class DataImport {
         this.showImport(showbtns);
         if (!this.button.dataset.activated && (what === typeimport.taxo || what === typeimport.privileges)) this.activateButtons(what, selectcells);
       } else this.makeImport(null, selectcells, what, true);
-      this.resetSelectors();
     }
     //
 
@@ -394,17 +393,16 @@ export class DataImport {
     const contact = ((this.imports[models.contact]) ? this.imports[models.contact] : null);
     return (projectPrivileges.importPrivileges(privileges, clear, contact, importedtag, dismiss));
   }
+
   resetSelectors() {
     this.selectors.forEach((selector, i) => {
-      if (selector.disabled) {
-        selector.disabled = false;
-        const trs = Array.from(this.dom.querySelectorAll('tbody tr'));
-        trs[i].querySelectorAll('.' + css.selected).forEach(el => {
-          el.classList.remove(css.selected);
-        });
-      }
+      if (selector.disabled) selector.disabled = false;
+    });
+    this.dom.querySelectorAll('td.' + css.selected).forEach(td => {
+      td.classList.remove(css.selected);
     });
   }
+
   activateClear() {
     const clearbutton = document.getElementById('clear-' + this.importid);
     if (!clearbutton) return;
