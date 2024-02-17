@@ -318,10 +318,19 @@
             text-decoration: underline;
             color: #00c;
         }
+        .ddsim {
+            text-align: left;
+            font-size: 10px;
+            margin-top: -3px;
+            margin-bottom: -1px;
+            text-decoration: underline;
+            color: #00c;
+        }
 
-        .ddets {
+        .ddets .ddsims {
             cursor: pointer;
         }
+
 
         .categexpander {
             cursor: pointer;
@@ -439,7 +448,7 @@
               LoadRightPane('mail');
       });
 
-      function LoadRightPane(NoAjax, SaveInProfile) {
+      function LoadRightPane(NoAjax, SaveInProfile, seed_object_id) {
           document.activeElement.blur();
           if (Object.keys(PendingChanges).length > 0)
               if (confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?") == false)
@@ -526,6 +535,8 @@
               PrevTxtFilter = TxtFilter;
           }
           req['pageoffset'] = jqpageoffset.val();
+          if (seed_object_id != undefined)
+              req['seed_object_id'] = seed_object_id
           var urlparam = {}, url, k;
           if ((NoAjax === 'mail') || (NoAjax === 'mailN')) {
               delete req["resultwidth"];
@@ -874,6 +885,22 @@
           }, 0);
       }
 
+      function find_first_parent_dragable(elem)
+{
+    console.log(elem)
+    while (elem.className != "ui-draggable ui-draggable-handle")
+    {
+        elem = elem.parentElement
+    }
+    return elem
+}
+
+      function find_object_id(elem)
+{
+      elem_td_object = find_first_parent_dragable(elem)
+      return $(elem_td_object).find("img").attr("id")
+}
+
       function PostAddImages() {
           $(document).scrollTop(0);
           // Required to  have Select2 component working on Bootstrap Popup
@@ -986,6 +1013,12 @@
               $('#PopupDetails').modal(options);
               $("#PopupDetails .modal-content").load(url);
           });
+    
+          $('.ddsim').click(function (e) {
+              console.log("Please do a similiraty search from this photo")
+              seed_object_id = find_object_id(e.target)
+              LoadRightPane(false, false, seed_object_id)
+          })
           $('#PopupDetails').on('hidden.bs.modal', function (e) {
               $("#PopupDetails .modal-content").html("CLEAN");
               $(".zoomContainer").remove();
