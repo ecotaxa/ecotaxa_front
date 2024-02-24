@@ -1,0 +1,25 @@
+<style>
+  #PopupDetails .modal-dialog {width: 1100px;}
+  #PopupDetails .modal-content {width: 1100px;}
+</style>
+<div style='margin:10px;font-size: large;'>
+<span style="font-weight: bold;">Unsupervised Search Help.</span>
+  <hr>
+<u>Definitions</u>
+<ul>
+<li><b>similarity search</b>: Set of object illustrated by photo which seems similar to the human eye.
+<br>
+</li></ul>
+  <u>Expected (as of 20240224 wip) unsupervised behavior search</u>
+    You can select one more many photo as seed.
+    <br>Then, the system will search for similar objects in the database.
+    <br>Expected time : a few seconds.
+  <u>Extension of all categories thanks to kmean algorithm</u>
+    The system will group all the photos in many categories (number of categories defined by the elbow algorithms).
+    Then it will try to associate each automatic category with an already existing category and propose to "expand" this category.
+    <br>Expected time : up to one minute.
+<br>
+<br><button type="button" class="btn btn-default " onclick="$('#PopupDetails').modal('hide');">Close</button>
+<br>
+</div>
+
