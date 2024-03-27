@@ -416,6 +416,7 @@ def indexPrj(PrjId):
         "purgef": "javascript:GotoWithFilter('/prjPurge/%d')" % PrjId,
     }
     arr_url = {
+        "about": "/gui/prj/about/%d" % PrjId,
         "prediction": "/Job/Create/Prediction?projid=%d" % PrjId,
         "predictionf": "javascript:GotoWithFilter('/Job/Create/Prediction')",
         "import": "/Job/Create/FileImport?p=%d" % PrjId,
@@ -451,21 +452,28 @@ def indexPrj(PrjId):
                 )
             )
             g.headmenu.append((arr_url["import"], "Import images and metadata"))
-            g.headmenu.append((arr_url["taxofix"], "Fix category issues"))
+            # g.headmenu.append((arr_url["taxofix"], "Fix category issues"))
         g.headmenu.append((arr_url["export"], "Export"))
         g.headmenuF.append((arr_url["exportf"], "Export"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
-        g.headmenu.append((arr_url["edit"], "Edit project settings"))
-        g.headmenu.append((arr_url["subset"], "Extract Subset"))
-        g.headmenuF.append(
+        g.headmenu.append(
             (
-                arr_url["subsetf"],
-                "Extract Subset",
+                arr_url["about"],
+                "About project",
             )
         )
+        g.headmenu.append((arr_url["edit"], "Edit project settings"))
+
         if proj.status == "Annotate":
+            g.headmenu.append((arr_url["subset"], "Extract Subset"))
+            g.headmenuF.append(
+                (
+                    arr_url["subsetf"],
+                    "Extract Subset",
+                )
+            )
             g.headmenu.append(
                 (arr_url["merge"], "Merge another project in this project")
             )
