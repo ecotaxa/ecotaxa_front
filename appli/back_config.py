@@ -26,20 +26,29 @@ def get_country_names(request) -> List[str]:
         return consts.countries
 
 
-def get_user_constants(request) -> tuple:
+def get_back_constants(request, type) -> tuple:
     from flask import current_app
 
-    if not "API_USER_CONSTANTS" in current_app.config:
+    if not type in current_app.config:
         with ApiClient(MiscApi, request) as api:
             consts: Constants = api.used_constants()
-        current_app.config["API_USER_CONSTANTS"] = (
-            consts.user_status,
-            consts.password_regexp,
-            consts.email_verification,
-            consts.account_validation,
-            consts.short_token_age,
-            consts.profile_token_age,
-            consts.recaptchaid,
-            consts.add_ticket,
-        )
-    return current_app.config["API_USER_CONSTANTS"]
+        if type == "USER":
+            current_app.config["API_" + type + "_CONSTANTS"] = (
+                consts.user_status,
+                consts.password_regexp,
+                consts.email_verification,
+                consts.account_validation,
+                consts.short_token_age,
+                consts.profile_token_age,
+                consts.recaptchaid,
+            )
+        elif type == "LICENSE":
+            current_app.config["API_" + type + "_CONSTANTS"] = consts.license_texts
+        elif type == "MANAGER":
+            current_app.config["API_" + type + "_CONSTANTS"] = consts.app_manager
+    return current_app.config["API_" + type + "_CONSTANTS"]
+
+
+def get_user_constants(request) -> tuple:
+
+    return get_back_constants(request, "USER")
