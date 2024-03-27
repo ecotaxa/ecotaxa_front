@@ -109,6 +109,7 @@ def projects_list(
     filt=None,
     typeimport: str = "",
 ) -> str:
+    # TODO review usage of listall - currently is used for not_granted
     import datetime
     from appli.project.main import _manager_mail
 
@@ -254,7 +255,6 @@ def _prj_import_taxo_api(
                 prjs.extend(r.json())
             else:
                 r.raise_for_status()
-
     prj_ids = " ".join([str(a_prj["projid"]) for a_prj in prjs])
     with ApiClient(ProjectsApi, request) as api:
         stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=prj_ids)
