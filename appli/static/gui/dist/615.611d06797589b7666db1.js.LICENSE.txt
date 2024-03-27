@@ -1,9 +1,0 @@
-/*! ../modules/modules-config.js */
-
-/*! ../modules/utils.js */
-
-/*! dompurify */
-
-/*!************************************!*\
-  !*** ./src/modules/form-submit.js ***!
-  \************************************/
