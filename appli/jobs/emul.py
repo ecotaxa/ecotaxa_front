@@ -11,15 +11,17 @@ from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import UsersApi, JobsApi
 from to_back.ecotaxa_cli_py.models import MinUserModel, JobModel
 
-JOB_STATE_TO_USER_STATE = {'P': 'Pending',
-                           'R': 'Running',
-                           'A': 'Question',
-                           'E': 'Error',
-                           'F': 'Done'}
+JOB_STATE_TO_USER_STATE = {
+    "P": "Pending",
+    "R": "Running",
+    "A": "Question",
+    "E": "Error",
+    "F": "Done",
+}
 
 
 def _enrich_job(user_cache: Dict[int, MinUserModel], a_job: JobModel):
-    """ Enrich back-end job for display """
+    """Enrich back-end job for display"""
     a_job.state = JOB_STATE_TO_USER_STATE.get(a_job.state, a_job.state)
     if "prj_id" in a_job.params:
         # noinspection PyUnresolvedReferences
@@ -47,13 +49,19 @@ def _build_jobs_list(wants_admin):
     return ret
 
 
-def _clean_jobs(clean_all: bool, clean_done: bool, clean_error: bool, wants_admin: bool) -> str:
+def _clean_jobs(
+    clean_all: bool, clean_done: bool, clean_error: bool, wants_admin: bool
+) -> str:
     # Clean some/all jobs depending on request
     ret = []
     with ApiClient(JobsApi, request) as api:
         api_jobs: List[JobModel] = api.list_jobs(for_admin=wants_admin)
         for a_job in api_jobs:
-            if clean_all or (clean_error and a_job.state == 'E') or (clean_done and a_job.state == 'F'):
+            if (
+                clean_all
+                or (clean_error and a_job.state == "E")
+                or (clean_done and a_job.state == "F")
+            ):
                 api.erase_job(job_id=a_job.id)
                 ret.append("Cleaned job %d" % a_job.id)
     return "<br>".join(ret)
@@ -61,6 +69,7 @@ def _clean_jobs(clean_all: bool, clean_done: bool, clean_error: bool, wants_admi
 
 def _build_jobs_summary():
     from appli.utils import ApiClient
+
     ret = {}
     with ApiClient(JobsApi, request) as api:
         try:
