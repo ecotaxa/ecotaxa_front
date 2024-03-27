@@ -36,29 +36,29 @@ class ImageModel(object):
         'imgid': 'int',
         'objid': 'int',
         'imgrank': 'int',
-        'file_name': 'str',
-        'orig_file_name': 'str',
         'width': 'int',
         'height': 'int',
-        'thumb_file_name': 'str',
+        'orig_file_name': 'str',
         'thumb_width': 'int',
-        'thumb_height': 'int'
+        'thumb_height': 'int',
+        'file_name': 'str',
+        'thumb_file_name': 'str'
     }
 
     attribute_map = {
         'imgid': 'imgid',
         'objid': 'objid',
         'imgrank': 'imgrank',
-        'file_name': 'file_name',
-        'orig_file_name': 'orig_file_name',
         'width': 'width',
         'height': 'height',
-        'thumb_file_name': 'thumb_file_name',
+        'orig_file_name': 'orig_file_name',
         'thumb_width': 'thumb_width',
-        'thumb_height': 'thumb_height'
+        'thumb_height': 'thumb_height',
+        'file_name': 'file_name',
+        'thumb_file_name': 'thumb_file_name'
     }
 
-    def __init__(self, imgid=None, objid=None, imgrank=None, file_name=None, orig_file_name=None, width=None, height=None, thumb_file_name=None, thumb_width=None, thumb_height=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, imgid=None, objid=None, imgrank=None, width=None, height=None, orig_file_name=None, thumb_width=None, thumb_height=None, file_name=None, thumb_file_name=None, local_vars_configuration=None):  # noqa: E501
         """ImageModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -67,29 +67,29 @@ class ImageModel(object):
         self._imgid = None
         self._objid = None
         self._imgrank = None
-        self._file_name = None
-        self._orig_file_name = None
         self._width = None
         self._height = None
-        self._thumb_file_name = None
+        self._orig_file_name = None
         self._thumb_width = None
         self._thumb_height = None
+        self._file_name = None
+        self._thumb_file_name = None
         self.discriminator = None
 
-        self.imgid = imgid
-        if objid is not None:
-            self.objid = objid
+        if imgid is not None:
+            self.imgid = imgid
+        self.objid = objid
         self.imgrank = imgrank
-        self.file_name = file_name
-        self.orig_file_name = orig_file_name
         self.width = width
         self.height = height
-        if thumb_file_name is not None:
-            self.thumb_file_name = thumb_file_name
+        self.orig_file_name = orig_file_name
         if thumb_width is not None:
             self.thumb_width = thumb_width
         if thumb_height is not None:
             self.thumb_height = thumb_height
+        self.file_name = file_name
+        if thumb_file_name is not None:
+            self.thumb_file_name = thumb_file_name
 
     @property
     def imgid(self):
@@ -111,8 +111,6 @@ class ImageModel(object):
         :param imgid: The imgid of this ImageModel.  # noqa: E501
         :type: int
         """
-        if self.local_vars_configuration.client_side_validation and imgid is None:  # noqa: E501
-            raise ValueError("Invalid value for `imgid`, must not be `None`")  # noqa: E501
 
         self._imgid = imgid
 
@@ -136,6 +134,8 @@ class ImageModel(object):
         :param objid: The objid of this ImageModel.  # noqa: E501
         :type: int
         """
+        if self.local_vars_configuration.client_side_validation and objid is None:  # noqa: E501
+            raise ValueError("Invalid value for `objid`, must not be `None`")  # noqa: E501
 
         self._objid = objid
 
@@ -163,56 +163,6 @@ class ImageModel(object):
             raise ValueError("Invalid value for `imgrank`, must not be `None`")  # noqa: E501
 
         self._imgrank = imgrank
-
-    @property
-    def file_name(self):
-        """Gets the file_name of this ImageModel.  # noqa: E501
-
-        The file name.  # noqa: E501
-
-        :return: The file_name of this ImageModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._file_name
-
-    @file_name.setter
-    def file_name(self, file_name):
-        """Sets the file_name of this ImageModel.
-
-        The file name.  # noqa: E501
-
-        :param file_name: The file_name of this ImageModel.  # noqa: E501
-        :type: str
-        """
-        if self.local_vars_configuration.client_side_validation and file_name is None:  # noqa: E501
-            raise ValueError("Invalid value for `file_name`, must not be `None`")  # noqa: E501
-
-        self._file_name = file_name
-
-    @property
-    def orig_file_name(self):
-        """Gets the orig_file_name of this ImageModel.  # noqa: E501
-
-        The file name of the original image.  # noqa: E501
-
-        :return: The orig_file_name of this ImageModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._orig_file_name
-
-    @orig_file_name.setter
-    def orig_file_name(self, orig_file_name):
-        """Sets the orig_file_name of this ImageModel.
-
-        The file name of the original image.  # noqa: E501
-
-        :param orig_file_name: The orig_file_name of this ImageModel.  # noqa: E501
-        :type: str
-        """
-        if self.local_vars_configuration.client_side_validation and orig_file_name is None:  # noqa: E501
-            raise ValueError("Invalid value for `orig_file_name`, must not be `None`")  # noqa: E501
-
-        self._orig_file_name = orig_file_name
 
     @property
     def width(self):
@@ -265,27 +215,29 @@ class ImageModel(object):
         self._height = height
 
     @property
-    def thumb_file_name(self):
-        """Gets the thumb_file_name of this ImageModel.  # noqa: E501
+    def orig_file_name(self):
+        """Gets the orig_file_name of this ImageModel.  # noqa: E501
 
-        Generate thumbnail if image is too large. This generated thumbnail file name.  # noqa: E501
+        The file name of the original image.  # noqa: E501
 
-        :return: The thumb_file_name of this ImageModel.  # noqa: E501
+        :return: The orig_file_name of this ImageModel.  # noqa: E501
         :rtype: str
         """
-        return self._thumb_file_name
+        return self._orig_file_name
 
-    @thumb_file_name.setter
-    def thumb_file_name(self, thumb_file_name):
-        """Sets the thumb_file_name of this ImageModel.
+    @orig_file_name.setter
+    def orig_file_name(self, orig_file_name):
+        """Sets the orig_file_name of this ImageModel.
 
-        Generate thumbnail if image is too large. This generated thumbnail file name.  # noqa: E501
+        The file name of the original image.  # noqa: E501
 
-        :param thumb_file_name: The thumb_file_name of this ImageModel.  # noqa: E501
+        :param orig_file_name: The orig_file_name of this ImageModel.  # noqa: E501
         :type: str
         """
+        if self.local_vars_configuration.client_side_validation and orig_file_name is None:  # noqa: E501
+            raise ValueError("Invalid value for `orig_file_name`, must not be `None`")  # noqa: E501
 
-        self._thumb_file_name = thumb_file_name
+        self._orig_file_name = orig_file_name
 
     @property
     def thumb_width(self):
@@ -332,6 +284,54 @@ class ImageModel(object):
         """
 
         self._thumb_height = thumb_height
+
+    @property
+    def file_name(self):
+        """Gets the file_name of this ImageModel.  # noqa: E501
+
+        The file name.  # noqa: E501
+
+        :return: The file_name of this ImageModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._file_name
+
+    @file_name.setter
+    def file_name(self, file_name):
+        """Sets the file_name of this ImageModel.
+
+        The file name.  # noqa: E501
+
+        :param file_name: The file_name of this ImageModel.  # noqa: E501
+        :type: str
+        """
+        if self.local_vars_configuration.client_side_validation and file_name is None:  # noqa: E501
+            raise ValueError("Invalid value for `file_name`, must not be `None`")  # noqa: E501
+
+        self._file_name = file_name
+
+    @property
+    def thumb_file_name(self):
+        """Gets the thumb_file_name of this ImageModel.  # noqa: E501
+
+        If image was too large at import time, the generated thumbnail file name.  # noqa: E501
+
+        :return: The thumb_file_name of this ImageModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._thumb_file_name
+
+    @thumb_file_name.setter
+    def thumb_file_name(self, thumb_file_name):
+        """Sets the thumb_file_name of this ImageModel.
+
+        If image was too large at import time, the generated thumbnail file name.  # noqa: E501
+
+        :param thumb_file_name: The thumb_file_name of this ImageModel.  # noqa: E501
+        :type: str
+        """
+
+        self._thumb_file_name = thumb_file_name
 
     def to_dict(self):
         """Returns the model properties as a dict"""

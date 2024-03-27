@@ -16,7 +16,7 @@ done
 gnome-terminal -- /bin/bash -c 'source venv/bin/activate && python3 runserver.py'
 cd $DEV_BACK
 docker stop ecotaxa_db
-if [ "$DB"=="docker" ]
+if [ "$DB" == docker ]
 then
   echo "DB: $DB  ----- ecotaxa_db docker db running";
   docker start ecotaxa_db

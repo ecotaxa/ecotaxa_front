@@ -42,8 +42,7 @@ class Constants(object):
         'account_validation': 'bool',
         'short_token_age': 'int',
         'profile_token_age': 'int',
-        'recaptchaid': 'bool',
-        'add_ticket': 'str'
+        'recaptchaid': 'bool'
     }
 
     attribute_map = {
@@ -56,11 +55,10 @@ class Constants(object):
         'account_validation': 'account_validation',
         'short_token_age': 'short_token_age',
         'profile_token_age': 'profile_token_age',
-        'recaptchaid': 'recaptchaid',
-        'add_ticket': 'add_ticket'
+        'recaptchaid': 'recaptchaid'
     }
 
-    def __init__(self, license_texts=None, app_manager=["",""], countries=[], user_status=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, add_ticket='', local_vars_configuration=None):  # noqa: E501
+    def __init__(self, license_texts=None, app_manager=["",""], countries=[], user_status=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -76,7 +74,6 @@ class Constants(object):
         self._short_token_age = None
         self._profile_token_age = None
         self._recaptchaid = None
-        self._add_ticket = None
         self.discriminator = None
 
         if license_texts is not None:
@@ -99,8 +96,6 @@ class Constants(object):
             self.profile_token_age = profile_token_age
         if recaptchaid is not None:
             self.recaptchaid = recaptchaid
-        if add_ticket is not None:
-            self.add_ticket = add_ticket
 
     @property
     def license_texts(self):
@@ -198,7 +193,7 @@ class Constants(object):
     def password_regexp(self):
         """Gets the password_regexp of this Constants.  # noqa: E501
 
-        8 char. minimum, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-'   # noqa: E501
+        8 char. minimum, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-+'   # noqa: E501
 
         :return: The password_regexp of this Constants.  # noqa: E501
         :rtype: str
@@ -209,7 +204,7 @@ class Constants(object):
     def password_regexp(self, password_regexp):
         """Sets the password_regexp of this Constants.
 
-        8 char. minimum, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-'   # noqa: E501
+        8 char. minimum, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-+'   # noqa: E501
 
         :param password_regexp: The password_regexp of this Constants.  # noqa: E501
         :type: str
@@ -331,29 +326,6 @@ class Constants(object):
         """
 
         self._recaptchaid = recaptchaid
-
-    @property
-    def add_ticket(self):
-        """Gets the add_ticket of this Constants.  # noqa: E501
-
-        string separator, permits to add ticket number when asking more information before user validation  # noqa: E501
-
-        :return: The add_ticket of this Constants.  # noqa: E501
-        :rtype: str
-        """
-        return self._add_ticket
-
-    @add_ticket.setter
-    def add_ticket(self, add_ticket):
-        """Sets the add_ticket of this Constants.
-
-        string separator, permits to add ticket number when asking more information before user validation  # noqa: E501
-
-        :param add_ticket: The add_ticket of this Constants.  # noqa: E501
-        :type: str
-        """
-
-        self._add_ticket = add_ticket
 
     def to_dict(self):
         """Returns the model properties as a dict"""

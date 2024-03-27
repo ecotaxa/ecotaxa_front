@@ -35,54 +35,48 @@ class ObjectHeaderModel(object):
     openapi_types = {
         'objid': 'int',
         'acquisid': 'int',
-        'orig_id': 'str',
-        'objdate': 'date',
+        'classif_id': 'int',
         'objtime': 'str',
         'latitude': 'float',
         'longitude': 'float',
         'depth_min': 'float',
         'depth_max': 'float',
-        'sunpos': 'str',
-        'classif_id': 'int',
+        'objdate': 'date',
         'classif_qual': 'str',
-        'classif_who': 'int',
+        'sunpos': 'str',
         'classif_when': 'datetime',
+        'classif_who': 'int',
         'classif_auto_id': 'int',
-        'classif_auto_score': 'float',
         'classif_auto_when': 'datetime',
-        'classif_crossvalidation_id': 'int',
-        'complement_info': 'str',
-        'similarity': 'float',
-        'random_value': 'int',
-        'object_link': 'str'
+        'classif_auto_score': 'float',
+        'orig_id': 'str',
+        'object_link': 'str',
+        'complement_info': 'str'
     }
 
     attribute_map = {
         'objid': 'objid',
         'acquisid': 'acquisid',
-        'orig_id': 'orig_id',
-        'objdate': 'objdate',
+        'classif_id': 'classif_id',
         'objtime': 'objtime',
         'latitude': 'latitude',
         'longitude': 'longitude',
         'depth_min': 'depth_min',
         'depth_max': 'depth_max',
-        'sunpos': 'sunpos',
-        'classif_id': 'classif_id',
+        'objdate': 'objdate',
         'classif_qual': 'classif_qual',
-        'classif_who': 'classif_who',
+        'sunpos': 'sunpos',
         'classif_when': 'classif_when',
+        'classif_who': 'classif_who',
         'classif_auto_id': 'classif_auto_id',
-        'classif_auto_score': 'classif_auto_score',
         'classif_auto_when': 'classif_auto_when',
-        'classif_crossvalidation_id': 'classif_crossvalidation_id',
-        'complement_info': 'complement_info',
-        'similarity': 'similarity',
-        'random_value': 'random_value',
-        'object_link': 'object_link'
+        'classif_auto_score': 'classif_auto_score',
+        'orig_id': 'orig_id',
+        'object_link': 'object_link',
+        'complement_info': 'complement_info'
     }
 
-    def __init__(self, objid=None, acquisid=None, orig_id=None, objdate=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, sunpos=None, classif_id=None, classif_qual=None, classif_who=None, classif_when=None, classif_auto_id=None, classif_auto_score=None, classif_auto_when=None, classif_crossvalidation_id=None, complement_info=None, similarity=None, random_value=None, object_link=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, objid=None, acquisid=None, classif_id=None, objtime=None, latitude=None, longitude=None, depth_min=None, depth_max=None, objdate=None, classif_qual=None, sunpos=None, classif_when=None, classif_who=None, classif_auto_id=None, classif_auto_when=None, classif_auto_score=None, orig_id=None, object_link=None, complement_info=None, local_vars_configuration=None):  # noqa: E501
         """ObjectHeaderModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -90,33 +84,29 @@ class ObjectHeaderModel(object):
 
         self._objid = None
         self._acquisid = None
-        self._orig_id = None
-        self._objdate = None
+        self._classif_id = None
         self._objtime = None
         self._latitude = None
         self._longitude = None
         self._depth_min = None
         self._depth_max = None
-        self._sunpos = None
-        self._classif_id = None
+        self._objdate = None
         self._classif_qual = None
-        self._classif_who = None
+        self._sunpos = None
         self._classif_when = None
+        self._classif_who = None
         self._classif_auto_id = None
-        self._classif_auto_score = None
         self._classif_auto_when = None
-        self._classif_crossvalidation_id = None
-        self._complement_info = None
-        self._similarity = None
-        self._random_value = None
+        self._classif_auto_score = None
+        self._orig_id = None
         self._object_link = None
+        self._complement_info = None
         self.discriminator = None
 
         self.objid = objid
         self.acquisid = acquisid
-        self.orig_id = orig_id
-        if objdate is not None:
-            self.objdate = objdate
+        if classif_id is not None:
+            self.classif_id = classif_id
         if objtime is not None:
             self.objtime = objtime
         if latitude is not None:
@@ -127,32 +117,27 @@ class ObjectHeaderModel(object):
             self.depth_min = depth_min
         if depth_max is not None:
             self.depth_max = depth_max
-        if sunpos is not None:
-            self.sunpos = sunpos
-        if classif_id is not None:
-            self.classif_id = classif_id
+        if objdate is not None:
+            self.objdate = objdate
         if classif_qual is not None:
             self.classif_qual = classif_qual
-        if classif_who is not None:
-            self.classif_who = classif_who
+        if sunpos is not None:
+            self.sunpos = sunpos
         if classif_when is not None:
             self.classif_when = classif_when
+        if classif_who is not None:
+            self.classif_who = classif_who
         if classif_auto_id is not None:
             self.classif_auto_id = classif_auto_id
-        if classif_auto_score is not None:
-            self.classif_auto_score = classif_auto_score
         if classif_auto_when is not None:
             self.classif_auto_when = classif_auto_when
-        if classif_crossvalidation_id is not None:
-            self.classif_crossvalidation_id = classif_crossvalidation_id
-        if complement_info is not None:
-            self.complement_info = complement_info
-        if similarity is not None:
-            self.similarity = similarity
-        if random_value is not None:
-            self.random_value = random_value
+        if classif_auto_score is not None:
+            self.classif_auto_score = classif_auto_score
+        self.orig_id = orig_id
         if object_link is not None:
             self.object_link = object_link
+        if complement_info is not None:
+            self.complement_info = complement_info
 
     @property
     def objid(self):
@@ -205,50 +190,27 @@ class ObjectHeaderModel(object):
         self._acquisid = acquisid
 
     @property
-    def orig_id(self):
-        """Gets the orig_id of this ObjectHeaderModel.  # noqa: E501
+    def classif_id(self):
+        """Gets the classif_id of this ObjectHeaderModel.  # noqa: E501
 
-        Original object ID from initial TSV load.  # noqa: E501
+        The classification Id.  # noqa: E501
 
-        :return: The orig_id of this ObjectHeaderModel.  # noqa: E501
-        :rtype: str
+        :return: The classif_id of this ObjectHeaderModel.  # noqa: E501
+        :rtype: int
         """
-        return self._orig_id
+        return self._classif_id
 
-    @orig_id.setter
-    def orig_id(self, orig_id):
-        """Sets the orig_id of this ObjectHeaderModel.
+    @classif_id.setter
+    def classif_id(self, classif_id):
+        """Sets the classif_id of this ObjectHeaderModel.
 
-        Original object ID from initial TSV load.  # noqa: E501
+        The classification Id.  # noqa: E501
 
-        :param orig_id: The orig_id of this ObjectHeaderModel.  # noqa: E501
-        :type: str
-        """
-        if self.local_vars_configuration.client_side_validation and orig_id is None:  # noqa: E501
-            raise ValueError("Invalid value for `orig_id`, must not be `None`")  # noqa: E501
-
-        self._orig_id = orig_id
-
-    @property
-    def objdate(self):
-        """Gets the objdate of this ObjectHeaderModel.  # noqa: E501
-
-
-        :return: The objdate of this ObjectHeaderModel.  # noqa: E501
-        :rtype: date
-        """
-        return self._objdate
-
-    @objdate.setter
-    def objdate(self, objdate):
-        """Sets the objdate of this ObjectHeaderModel.
-
-
-        :param objdate: The objdate of this ObjectHeaderModel.  # noqa: E501
-        :type: date
+        :param classif_id: The classif_id of this ObjectHeaderModel.  # noqa: E501
+        :type: int
         """
 
-        self._objdate = objdate
+        self._classif_id = classif_id
 
     @property
     def objtime(self):
@@ -364,50 +326,25 @@ class ObjectHeaderModel(object):
         self._depth_max = depth_max
 
     @property
-    def sunpos(self):
-        """Gets the sunpos of this ObjectHeaderModel.  # noqa: E501
+    def objdate(self):
+        """Gets the objdate of this ObjectHeaderModel.  # noqa: E501
 
-        Sun position, from date, time and coords.  # noqa: E501
 
-        :return: The sunpos of this ObjectHeaderModel.  # noqa: E501
-        :rtype: str
+        :return: The objdate of this ObjectHeaderModel.  # noqa: E501
+        :rtype: date
         """
-        return self._sunpos
+        return self._objdate
 
-    @sunpos.setter
-    def sunpos(self, sunpos):
-        """Sets the sunpos of this ObjectHeaderModel.
+    @objdate.setter
+    def objdate(self, objdate):
+        """Sets the objdate of this ObjectHeaderModel.
 
-        Sun position, from date, time and coords.  # noqa: E501
 
-        :param sunpos: The sunpos of this ObjectHeaderModel.  # noqa: E501
-        :type: str
+        :param objdate: The objdate of this ObjectHeaderModel.  # noqa: E501
+        :type: date
         """
 
-        self._sunpos = sunpos
-
-    @property
-    def classif_id(self):
-        """Gets the classif_id of this ObjectHeaderModel.  # noqa: E501
-
-        The classification Id.  # noqa: E501
-
-        :return: The classif_id of this ObjectHeaderModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._classif_id
-
-    @classif_id.setter
-    def classif_id(self, classif_id):
-        """Sets the classif_id of this ObjectHeaderModel.
-
-        The classification Id.  # noqa: E501
-
-        :param classif_id: The classif_id of this ObjectHeaderModel.  # noqa: E501
-        :type: int
-        """
-
-        self._classif_id = classif_id
+        self._objdate = objdate
 
     @property
     def classif_qual(self):
@@ -433,27 +370,27 @@ class ObjectHeaderModel(object):
         self._classif_qual = classif_qual
 
     @property
-    def classif_who(self):
-        """Gets the classif_who of this ObjectHeaderModel.  # noqa: E501
+    def sunpos(self):
+        """Gets the sunpos of this ObjectHeaderModel.  # noqa: E501
 
-        The user who manualy classify this object.  # noqa: E501
+        Sun position, from date, time and coords.  # noqa: E501
 
-        :return: The classif_who of this ObjectHeaderModel.  # noqa: E501
-        :rtype: int
+        :return: The sunpos of this ObjectHeaderModel.  # noqa: E501
+        :rtype: str
         """
-        return self._classif_who
+        return self._sunpos
 
-    @classif_who.setter
-    def classif_who(self, classif_who):
-        """Sets the classif_who of this ObjectHeaderModel.
+    @sunpos.setter
+    def sunpos(self, sunpos):
+        """Sets the sunpos of this ObjectHeaderModel.
 
-        The user who manualy classify this object.  # noqa: E501
+        Sun position, from date, time and coords.  # noqa: E501
 
-        :param classif_who: The classif_who of this ObjectHeaderModel.  # noqa: E501
-        :type: int
+        :param sunpos: The sunpos of this ObjectHeaderModel.  # noqa: E501
+        :type: str
         """
 
-        self._classif_who = classif_who
+        self._sunpos = sunpos
 
     @property
     def classif_when(self):
@@ -479,6 +416,29 @@ class ObjectHeaderModel(object):
         self._classif_when = classif_when
 
     @property
+    def classif_who(self):
+        """Gets the classif_who of this ObjectHeaderModel.  # noqa: E501
+
+        The user who manualy classify this object.  # noqa: E501
+
+        :return: The classif_who of this ObjectHeaderModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._classif_who
+
+    @classif_who.setter
+    def classif_who(self, classif_who):
+        """Sets the classif_who of this ObjectHeaderModel.
+
+        The user who manualy classify this object.  # noqa: E501
+
+        :param classif_who: The classif_who of this ObjectHeaderModel.  # noqa: E501
+        :type: int
+        """
+
+        self._classif_who = classif_who
+
+    @property
     def classif_auto_id(self):
         """Gets the classif_auto_id of this ObjectHeaderModel.  # noqa: E501
 
@@ -500,29 +460,6 @@ class ObjectHeaderModel(object):
         """
 
         self._classif_auto_id = classif_auto_id
-
-    @property
-    def classif_auto_score(self):
-        """Gets the classif_auto_score of this ObjectHeaderModel.  # noqa: E501
-
-        Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification auto score is generally between 0 and 1. This is a confidence score, in the fact that, the taxon prediction for this object is correct.  # noqa: E501
-
-        :return: The classif_auto_score of this ObjectHeaderModel.  # noqa: E501
-        :rtype: float
-        """
-        return self._classif_auto_score
-
-    @classif_auto_score.setter
-    def classif_auto_score(self, classif_auto_score):
-        """Sets the classif_auto_score of this ObjectHeaderModel.
-
-        Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification auto score is generally between 0 and 1. This is a confidence score, in the fact that, the taxon prediction for this object is correct.  # noqa: E501
-
-        :param classif_auto_score: The classif_auto_score of this ObjectHeaderModel.  # noqa: E501
-        :type: float
-        """
-
-        self._classif_auto_score = classif_auto_score
 
     @property
     def classif_auto_when(self):
@@ -548,92 +485,52 @@ class ObjectHeaderModel(object):
         self._classif_auto_when = classif_auto_when
 
     @property
-    def classif_crossvalidation_id(self):
-        """Gets the classif_crossvalidation_id of this ObjectHeaderModel.  # noqa: E501
+    def classif_auto_score(self):
+        """Gets the classif_auto_score of this ObjectHeaderModel.  # noqa: E501
 
-        Always NULL in prod.  # noqa: E501
+        Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification auto score is generally between 0 and 1. This is a confidence score, in the fact that, the taxon prediction for this object is correct.  # noqa: E501
 
-        :return: The classif_crossvalidation_id of this ObjectHeaderModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._classif_crossvalidation_id
-
-    @classif_crossvalidation_id.setter
-    def classif_crossvalidation_id(self, classif_crossvalidation_id):
-        """Sets the classif_crossvalidation_id of this ObjectHeaderModel.
-
-        Always NULL in prod.  # noqa: E501
-
-        :param classif_crossvalidation_id: The classif_crossvalidation_id of this ObjectHeaderModel.  # noqa: E501
-        :type: int
-        """
-
-        self._classif_crossvalidation_id = classif_crossvalidation_id
-
-    @property
-    def complement_info(self):
-        """Gets the complement_info of this ObjectHeaderModel.  # noqa: E501
-
-
-        :return: The complement_info of this ObjectHeaderModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._complement_info
-
-    @complement_info.setter
-    def complement_info(self, complement_info):
-        """Sets the complement_info of this ObjectHeaderModel.
-
-
-        :param complement_info: The complement_info of this ObjectHeaderModel.  # noqa: E501
-        :type: str
-        """
-
-        self._complement_info = complement_info
-
-    @property
-    def similarity(self):
-        """Gets the similarity of this ObjectHeaderModel.  # noqa: E501
-
-        Always NULL in prod.  # noqa: E501
-
-        :return: The similarity of this ObjectHeaderModel.  # noqa: E501
+        :return: The classif_auto_score of this ObjectHeaderModel.  # noqa: E501
         :rtype: float
         """
-        return self._similarity
+        return self._classif_auto_score
 
-    @similarity.setter
-    def similarity(self, similarity):
-        """Sets the similarity of this ObjectHeaderModel.
+    @classif_auto_score.setter
+    def classif_auto_score(self, classif_auto_score):
+        """Sets the classif_auto_score of this ObjectHeaderModel.
 
-        Always NULL in prod.  # noqa: E501
+        Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification auto score is generally between 0 and 1. This is a confidence score, in the fact that, the taxon prediction for this object is correct.  # noqa: E501
 
-        :param similarity: The similarity of this ObjectHeaderModel.  # noqa: E501
+        :param classif_auto_score: The classif_auto_score of this ObjectHeaderModel.  # noqa: E501
         :type: float
         """
 
-        self._similarity = similarity
+        self._classif_auto_score = classif_auto_score
 
     @property
-    def random_value(self):
-        """Gets the random_value of this ObjectHeaderModel.  # noqa: E501
+    def orig_id(self):
+        """Gets the orig_id of this ObjectHeaderModel.  # noqa: E501
 
+        Original object ID from initial TSV load.  # noqa: E501
 
-        :return: The random_value of this ObjectHeaderModel.  # noqa: E501
-        :rtype: int
+        :return: The orig_id of this ObjectHeaderModel.  # noqa: E501
+        :rtype: str
         """
-        return self._random_value
+        return self._orig_id
 
-    @random_value.setter
-    def random_value(self, random_value):
-        """Sets the random_value of this ObjectHeaderModel.
+    @orig_id.setter
+    def orig_id(self, orig_id):
+        """Sets the orig_id of this ObjectHeaderModel.
 
+        Original object ID from initial TSV load.  # noqa: E501
 
-        :param random_value: The random_value of this ObjectHeaderModel.  # noqa: E501
-        :type: int
+        :param orig_id: The orig_id of this ObjectHeaderModel.  # noqa: E501
+        :type: str
         """
+        if self.local_vars_configuration.client_side_validation and orig_id is None:  # noqa: E501
+            raise ValueError("Invalid value for `orig_id`, must not be `None`")  # noqa: E501
 
-        self._random_value = random_value
+        self._orig_id = orig_id
 
     @property
     def object_link(self):
@@ -657,6 +554,27 @@ class ObjectHeaderModel(object):
         """
 
         self._object_link = object_link
+
+    @property
+    def complement_info(self):
+        """Gets the complement_info of this ObjectHeaderModel.  # noqa: E501
+
+
+        :return: The complement_info of this ObjectHeaderModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._complement_info
+
+    @complement_info.setter
+    def complement_info(self, complement_info):
+        """Sets the complement_info of this ObjectHeaderModel.
+
+
+        :param complement_info: The complement_info of this ObjectHeaderModel.  # noqa: E501
+        :type: str
+        """
+
+        self._complement_info = complement_info
 
     def to_dict(self):
         """Returns the model properties as a dict"""

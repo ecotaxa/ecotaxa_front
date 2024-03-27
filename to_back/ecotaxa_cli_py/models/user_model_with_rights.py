@@ -42,6 +42,7 @@ class UserModelWithRights(object):
         'status_date': 'datetime',
         'status_admin_comment': 'str',
         'country': 'str',
+        'orcid': 'str',
         'usercreationdate': 'datetime',
         'usercreationreason': 'str',
         'mail_status': 'bool',
@@ -60,6 +61,7 @@ class UserModelWithRights(object):
         'status_date': 'status_date',
         'status_admin_comment': 'status_admin_comment',
         'country': 'country',
+        'orcid': 'orcid',
         'usercreationdate': 'usercreationdate',
         'usercreationreason': 'usercreationreason',
         'mail_status': 'mail_status',
@@ -68,7 +70,7 @@ class UserModelWithRights(object):
         'last_used_projects': 'last_used_projects'
     }
 
-    def __init__(self, id=None, email=None, password=None, name=None, organisation=None, status=None, status_date=None, status_admin_comment=None, country=None, usercreationdate=None, usercreationreason=None, mail_status=None, mail_status_date=None, can_do=[], last_used_projects=[], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, email=None, password=None, name=None, organisation=None, status=None, status_date=None, status_admin_comment=None, country=None, orcid=None, usercreationdate=None, usercreationreason=None, mail_status=None, mail_status_date=None, can_do=[], last_used_projects=[], local_vars_configuration=None):  # noqa: E501
         """UserModelWithRights - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -83,6 +85,7 @@ class UserModelWithRights(object):
         self._status_date = None
         self._status_admin_comment = None
         self._country = None
+        self._orcid = None
         self._usercreationdate = None
         self._usercreationreason = None
         self._mail_status = None
@@ -106,6 +109,8 @@ class UserModelWithRights(object):
             self.status_admin_comment = status_admin_comment
         if country is not None:
             self.country = country
+        if orcid is not None:
+            self.orcid = orcid
         if usercreationdate is not None:
             self.usercreationdate = usercreationdate
         if usercreationreason is not None:
@@ -331,6 +336,29 @@ class UserModelWithRights(object):
         """
 
         self._country = country
+
+    @property
+    def orcid(self):
+        """Gets the orcid of this UserModelWithRights.  # noqa: E501
+
+        The orcid id https://support.orcid.org.  # noqa: E501
+
+        :return: The orcid of this UserModelWithRights.  # noqa: E501
+        :rtype: str
+        """
+        return self._orcid
+
+    @orcid.setter
+    def orcid(self, orcid):
+        """Sets the orcid of this UserModelWithRights.
+
+        The orcid id https://support.orcid.org.  # noqa: E501
+
+        :param orcid: The orcid of this UserModelWithRights.  # noqa: E501
+        :type: str
+        """
+
+        self._orcid = orcid
 
     @property
     def usercreationdate(self):

@@ -275,6 +275,7 @@ class JobsApi(object):
 
         :param async_req bool: execute request asynchronously
         :param int job_id: Internal, the unique numeric id of this job. (required)
+        :param str range:
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -300,6 +301,7 @@ class JobsApi(object):
 
         :param async_req bool: execute request asynchronously
         :param int job_id: Internal, the unique numeric id of this job. (required)
+        :param str range:
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -317,7 +319,8 @@ class JobsApi(object):
         local_var_params = locals()
 
         all_params = [
-            'job_id'
+            'job_id',
+            'range'
         ]
         all_params.extend(
             [
@@ -350,6 +353,8 @@ class JobsApi(object):
         query_params = []
 
         header_params = {}
+        if 'range' in local_var_params:
+            header_params['Range'] = local_var_params['range']  # noqa: E501
 
         form_params = []
         local_var_files = {}
