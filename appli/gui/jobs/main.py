@@ -79,22 +79,14 @@ def gui_job_show(job_id: int):
         from appli.gui.project.projectsettings import get_target_prj
 
         target_proj = get_target_prj(projid)
-    steperrors = None
-    customdetails = None
-    if job.state != "E" and job.state != "F":
-        codemessage = "jobmonitor"
-    else:
-        codemessage = None
+
     return render_template(
         "./v2/jobs/show.html",
         job=job,
         owner=owner,
         partial=is_partial_request(request),
         monitor=gvg("monitor"),
-        steperrors=steperrors,
         target_proj=target_proj,
-        customdetails=customdetails,
-        codemessage=codemessage,
     )
 
 
