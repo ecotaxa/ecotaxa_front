@@ -57,6 +57,9 @@ class ApiUserWrapper(object):
     def get_mail_status(self) -> str:
         return self.api_user.mail_status
 
+    def get_orcid(self) -> int:
+        return self.api_user.orcid
+
     def has_role(self, rolename: str) -> bool:
         rolebynames = {lbl: int(num) for num, lbl in API_GLOBAL_ROLES.items()}
         if rolename in rolebynames:
@@ -127,7 +130,6 @@ def user_from_api(user_id):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-        ADD_TICKET,
     ) = get_user_constants(request)
     try:
         with ApiClient(UsersApi, request) as api:
@@ -158,7 +160,6 @@ def login_validate(email: str, password: str, remember: bool = False):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-        ADD_TICKET,
     ) = get_user_constants(request)
     req = LoginReq(username=email, password=password)
 
