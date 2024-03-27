@@ -1,0 +1,14 @@
+{%from './v2/macros/macros.html' import alerttype %}
+{%-set duration =' data-duration='+message.duration|string if "duration" in message -%}
+<div class=" {{message.type|lower }}"  data-cook="{{message.type+message.cookiename if message.cookiename}}" data-value="{{message.date}}" {{duration}} id="alertmessage-{{message.type}}">
+  <div class="content"><div class="signal hidden sm:block"><i class="icon"></i></div>
+    <div class="message">
+    <strong class="type">{{alerttype(message.type)}}</strong>
+    {%-if message.content!=None -%}{%-if "is_safe" in message and message.is_safe==True%}{{message.content|string()|safe}}{%-else -%}{{message.content|string()}}{%-endif-%}
+    {%-endif-%}
+  </div>
+  {%-if message.dismissible == True -%}
+  <div class="close" data-dismiss="alertmessage-{{message.type}}"  data-title="{{_('close')}}">
+    <i class="icon-sm icon-cancel cursor-pointer"></i>
+  </div>{%-endif-%}</div><div class="showall hide" data-title="{{_('view full message')}}"><i class="icon iconview"></i></div>
+</div>

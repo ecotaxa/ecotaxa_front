@@ -1,10 +1,9 @@
 {% extends "./v2/layout.html" %}
-{% from "./v2/macros/macros.html" import modal , alertbox with context %}
+{% from "./v2/users/_modalhelp.html" import modaluser  with context %}
 {% block body %}
 <div class=" container px-2 mx-auto">
   {% set modal_title = _("How to edit your account")%}
-  {% set data = {'file':'_help_edit_account'} %}
-  {{ modal(id='help-edit_account',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+  {{modaluser(modal_title)}}
 {% if err %}
 <div class="danger">Error {{ err}}</div>
 {% elif waitforvalidation %}

@@ -1,5 +1,5 @@
 {% extends "./v2/admin/layout.html" %}
-{% from "./v2/macros/macros.html" import  inputdict, modal , alertbox with context %}
+{% from "./v2/macros/macros.html" import  inputdict, modal  with context %}
 
 {% block body %}
 <div class="container mx-auto">
@@ -8,11 +8,11 @@
   {{ modal(id='help-sitemessages',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
 
   {% if msgkey %}
-{% set message = messages[msgkey] if messages|length  %}{{messages}}
+{% set message = messages[msgkey] if messages|length  %}
   <form action="{{request.path}}" method="post" class="js js-submit">
 
       <div class="form-box"><label for="msg">{{msgkey}}  {{_('Message to display : ')}}</label>
-      <textarea name="msg" id="msg" class="form-input">{{message["content"]}}</textarea>
+      <textarea name="msg" id="msg" class="form-input h-auto resize-y ">{{message["content"]}}</textarea>
       </div>
 
             <div class="form-box"><label for="active">{{_('active')}}

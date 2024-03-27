@@ -1,0 +1,15 @@
+{% if possible_licenses is iterable %}
+<details id="{{anchor if anchor!=None else 'help_proj_license'}}"><summary>{{_('Licenses')}}</summary>
+  {%-set licenses = license_texts() -%}
+<ul>
+  {% for key,license in licenses.items() -%}
+  {%- set key =_('not chosen') if key=='' else key-%}
+  <li><strong class="text-help-500">{{key}}</strong><br>{{license|safe}}</li>
+  {%-endfor-%}</ul>
+  <div>
+{% for k,v in possible_licenses %}
+<details><summary>{{k}}</summary><div> {{ v | safe }} </div></details>
+{% endfor %}
+</div>
+</details>
+{% endif %}

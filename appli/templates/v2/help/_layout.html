@@ -1,13 +1,13 @@
 {% if current_user %}
-{% set helps =[{'name':'Access','file':'_help_project_req_access','resume':'all info to create and participate to projects'},{'name':'How to prepare data','file':'_help_jobs_prepare_data'},{'name':'Import data','file':'_help_job_import'},{'name':'Export data','file':'_help_job_export'},{'name':'Project settings','file':'_help_projectsettings'},{'name':'Job monitoring','file':'_help_job_monitor'},{'name':'About Project','file':'_help_project_stats'}]%}
+{% set helps =[{'name':'User account','file':'_help_user_profile','title':_('User account')},{'name':'Access projects','file':'_help_project_req_access','resume':'all info to create and participate to projects'},{'name':'How to prepare data','file':'_help_jobs_prepare_data'},{'name':'Import data','file':'_help_job_import'},{'name':'Export data','file':'_help_job_export'},{'name':'Project settings','file':'_help_projectsettings'},{'name':'Job monitoring','file':'_help_job_monitor'},{'name':'About Project','file':'_help_project_stats'}]%}
 {% else %}
 {%- set helps =[{'name':'Access','file':'_help_project_req_access'}]-%}
 {% endif %}
 {% macro listhelp(helps) -%}
 {% for help in helps %}
-<details><summary>{{ help['name'] }}</summary><div>{% if 'links' in help %}
+<details class="open:pb-4"><summary>{{ help['name'] }}</summary><div>{% if 'links' in help %}
   {{ listhelp(help['links']) if 'links' in help}}
-{% else %} <p>{{ help['resume'] }}</p> <a href="#" data-request="help" data-file="{{ help['file'] }}" data-target="target-article" data-title="{{ help['title'] if 'title' in help }}"> {{ _('readmore') }}  </a>
+{% else %} {%- if "resume" in help -%}<p>{{ help['resume'] }}</p>{%-endif-%}<a href="#" data-request="help" data-file="{{ help['file'] }}" data-target="target-article" data-title="{{ help['title'] if 'title' in help }}"> {{ _('readmore') }}  </a>
 {% endif%} </div>
 </details>
 {% endfor%}
@@ -29,7 +29,7 @@
   </svg></div></nav>
 <div id="breadcrumbs-help">{{ breadscrumb }}</div>
 <div id="main-help" class="modal-content">
-  {% endif %}<div class="py-8 pr-12 pl-6 mb-12 prose-invert prose-xs md:prose-sm lg:prose-md prose-stone selection:bg-help-100 selection:text-help-900" id="target-article">
+  {% endif %}<div class="py-8 px-6 md:pl-8 md:pr-12 mb-12 prose-invert prose-sm lg:prose-md prose-stone selection:bg-help-100 selection:text-help-900" id="target-article">
   {% block article %}{% endblock %}</div>
   {% if not partial%}
 </div>

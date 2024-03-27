@@ -3,18 +3,17 @@
   {% from "./v2/users/_profile_macro.html" import promail_required, password_regexp %}
   {%macro password_box()-%}
   {% set disabled=""%}
-
   <div class="form-box">
   {% if user and user.id and user.id>0 %}
   <a class="font-semibold py-2 text-center block cursor-pointer"  data-action="toggle" data-disabled="input">{{_('Password modification')}}<i class="icon icon-chevron-down" data-toggle="icon-chevron-down,icon-chevron-up"></i></a>
     <div id="change-password"  >
   {% endif%}
   {% set fieldp="password" if createaccount==True else "newpassword"%}
-    <label for="{{fieldp}}">{{_('Password') if createaccount==True else _('New password')}}</label>
+    <label for="{{fieldp}}">{{_('Password') if createaccount==True else _('New password')}} <i data-for="help_password" data-request="help"></i></label>
   <input type="password" id="{{fieldp}}" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="20"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} placeholder="{{_('Password')}}">
     {{ password_regexp()}}
     <label for="passwordconfirm">{{_('Password confirmation')}}</label>
-    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern="{{api_password_regexp()}}" data-match="password" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" placeholder="{{_('Password confirmation')}}">
+    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern="{{api_password_regexp()}}" data-match="{{fieldp}}" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" placeholder="{{_('Password confirmation')}}">
      {% if user and user.id and user.id>0%}
     </div>
     {% endif%}
@@ -39,13 +38,20 @@
             <input type="text" id="{{key}}name" name="{{key}}name" class="form-input" value="{{ user[key+'name']}}" required data-required="{{_('this field is required')}}" placeholder="{{label}}"></div>
             {%endfor%}</div>
           {% else%}
+          {%- if createaccount != True and user.id!=-1 and  not current_user.is_admin==True and api_account_validation==True  -%}
+          {%- set dataconfirm = _('Please note that your account will be deactivated before a new validation by our services. Are you sure you want to modify your information?')-%}
+          {%- set dataaction='data-action=confirm'-%}
+          <div class="alert warning inverse text-xs">{{_('Please note that your account will be deactivated if you have modified one or more of the following data: name, email,organisation,country or planned usage of EcoTaxa')}}</div>
+          {%-endif-%}
+          {%-set dataconfirm='' -%}
+          {%-set dataaction=''-%}
           <div class="form-box">
           <label for="name">{{_('Name')}}</label>
           <input type="text" id="name" name="name" class="form-input" value="{{ user.name }}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}"></div>
           {% endif %}
           <div class="form-box">
-            <label for="email">{{_('Email')}}</label>
-            <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" data-sub="enable"  {{' readonly' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" placeholder="{{_('Email')}}">
+            <label for="email">{{_('Email')}} <i data-for="help_profile_email" data-request="help"></i></label>
+            <input type="email" id="email" name="email" class="form-input  read-only:bg-info-50" value="{{ user.email }}"   {{' readonly' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" placeholder="{{_('Email')}}">
             {%if createaccount != True or (user and user.email) -%}
             {% set type="warning"-%}
             <input type="hidden" name="currentemail" value="{{user.email}}">
@@ -55,13 +61,16 @@
             {% if createaccount == True or (user and user.mail_status!=True )-%}
             {{promail_required(type,'text-sm',user)}}
             {%endif-%}</div>
+            <div class="form-box">
+            <label for="orcid">{{_('ORCID ID')}} <i data-for="help_profile_orcid" data-request="help"></i></label>
+            <input type="text" id="orcid" name="orcid" class="form-input" value="{{ user.orcid }}" maxlength=20 placeholder="{{_('ORCID ID')}}"></div>
             {% if (createaccount==True and user.id==-1 ) or not createaccount %}
                  {{password_box()}}
              {%endif%}
-             <div class="form-box"><label for="organisation">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
+             <div class="form-box"><label for="organisation">{{_('Organisation')}} <i data-for="help_profile_organisation" data-request="help"></i></label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
               <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
           <div class="form-box">
-            <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}}</label>
+            <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}} <i data-for="help_profile_planned_usage" data-request="help"></i></label>
             <textarea id="usercreationreason" name="usercreationreason" class="form-textarea" required data-required="{{'this field is required'}}" placeholder="{{_('A few sentences describing how in which context you will use EcoTaxa')}}" rows="4">{{ user.usercreationreason|default('',true) }}</textarea>
           </div>
           {% if createaccount==True and user.id!=-1%}
@@ -84,7 +93,7 @@
       </fieldset>{%-endif-%}</div>
       <fieldset>
 <div class="w-full text-left mb-8"> <input type="hidden" name="save" value="Y">
-  <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{back}}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a>
+  <button type="submit" data-target="#formu" class="button is-primary" {{ dataaction}} data-content="{{dataconfirm}}">{{_('Save')}}</button> <a href="{{back}}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to users list') }}">{{ _('Cancel') }}</a>
 </div></fieldset>{%if createaccount == True and not incadmin %}{%set uid=unique_id()%}
 {{captcha("formu",uid)}}  {%endif%}
 </form>

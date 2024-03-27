@@ -2,20 +2,16 @@
 <html lang="{{lang if lang !='' else 'en'}}">
 {%- set title= 'Ecotaxa ' + target_proj.title if target_proj and target_proj.projid else 'Ecotaxa' -%}
 {%- include 'v2/partials/_head.html' -%}
-<body>{%- if not site_error -%}{%- include('v2/partials/_top_messages.html')-%}{%-endif-%}
-  <div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }}">
-    <header class="background-top w-full  js js-fixed {{ 'solo' if not (target_proj and target_proj.projid) }}"><nav id="main-navbar">
+<body>{%- if not site_error -%}{%- include('v2/partials/_alert_messages.html')-%}{%-endif-%}<div id="layout" class="w-full min-h-screen {{ 'overflow-hidden' if bg }}">
+  <header class="background-top w-full {{ 'solo' if not (target_proj and target_proj.projid) }}"><nav id="main-navbar">
         <!--   logo / notifs /user-nav /admin -->
         {%- include './v2/partials/_topsitebar.html' -%}
-      {%- include './v2/partials/_navbar.html' with context -%}
-  </nav></header>
-  <main  {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton'+bg_scale()+'.jpg') + '\');" class="bg-image" '| safe if bg}}>
-  {% include "v2/partials/_maintop.html"%}
+      {%- include './v2/partials/_navbar.html'  -%}
+  </nav></header><main  {{ ' style="--bg-image:url(\''| safe + url_for('static',filename='gui/images/montage_plankton'+bg_scale()+'.jpg') + '\');" class="bg-image" '| safe if bg}}>
   <div class="w-full pb-16">
     {% block body %}{% endblock %}
   </div></main></div>
   {% include "v2/partials/_mainbottom.html" %}
-
   {% if g_status('google_analytics_id') %}
   {% set cookieGAOK =  g_status('cookieGAOK') %}
   {% if cookieGAOK =='' %}

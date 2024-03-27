@@ -1,11 +1,10 @@
 {% extends "./v2/admin/layout.html" %}
-{% from "./v2/macros/macros.html" import  modal , alertbox with context %}
+{% from "./v2/users/_modalhelp.html" import  modaluser with context %}
 
 {% block body %}
 <div class="container mx-auto">
-  {% set modal_title = _("How to edit a user account") if user.id else _("How to create a user account")%}
-  {% set data = {'file':'_help_user_account'} %}
-  {{ modal(id='help-useraccount',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+    {% set modal_title = _("How to edit a user account") if user.id and user.id>0 else _("How to create a user account")%}
+    {{modaluser(modal_title)}}
   {% set legend = _('user') + ' ' + user.id|string() if user.id else _('new user') %}
   {% set incadmin = "v2/admin/_userroles.html"%}
   {% set redir ="gui/admin/users/"%}

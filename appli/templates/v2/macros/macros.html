@@ -8,11 +8,11 @@
   [{{ target_proj.projid }}] {{ target_proj.title }}
   {% endif %}
 </h3>
-{% endif %}
-{%- endmacro%}
+{%- endif -%}
+{%- endmacro -%}
 
-{% macro modal(id,btn = {'class':'','text':'','data':''},modal_title='',modal_content='',type='modal-popup', position='' ,summary_pos={'float':'','clear':''} ,data='') -%}
-<details {{' id=' + type if type=='modal-help' }} class="modal-container  no-marker {{ type }} {{ position }}" {{ 'data-form=' + data.form if 'form' in data }} {{ 'data-file=' + data.file if 'file' in data and type=='modal-help'}}>
+{%- macro modal(id,btn = {'class':'','text':'','data':''},modal_title='',modal_content='',type='modal-popup', position='' ,summary_pos={'float':'','clear':''} ,data='') -%}
+<details {{' id=' + type if type=='modal-help' }} class="modal-container  no-marker {{ type }} {{ position }}" {{ 'data-form=' + data.form if 'form' in data }} {{ 'data-file=' + data.file if 'file' in data and type=='modal-help'}} >
   {% if type=='modal-popup' %}
   <summary><div class="{{ btn['class'] if btn['class'] else 'button is-action inline-block' }}" data-for="{{ id }}" {{ btn['data'] if btn['data']  }}>
     {#icon#}
@@ -20,7 +20,7 @@
     <i class=" icon {{ btn['icon']|safe }}"></i>
     {% endif%}
     <span>{{btn['text'] if btn['text'] else '' }}</span></div></summary>
-  <div class="modal" id="{{ id }}" aria-modal="true" role="dialog" >
+  <div class="modal" id="{{ id }}" aria-modal="true" role="dialog">
     <div class="modal-body" for="{{ id }}">
       <div class="modal-title">
         <div class="block w-full">
@@ -50,13 +50,12 @@
   {% set pos = pos + prop + '-' + val + ' ' if val!='' %}
   {% endfor %}
   {% endif %}
-  <summary class="aside-label" {{ 'data-request=help' if type=='modal-help' }}  ><span class="summary-title"><i class="icon icon-help align-text-bottom leading-snug mr-0.5"></i>{{ modal_title }}</span></summary>
+  <summary class="aside-label" {{ 'data-request=help' if type=='modal-help' }}  {{ 'data-for=' + data.for if 'for' in data and data.for!='' and type=='modal-help'}}><span class="summary-title"><i class="icon icon-help align-text-bottom leading-snug mr-0.5"></i>{{ modal_title }}</span></summary>
   <div class="modal" id="{{ id }}" >
   <div class="aside-body">
       {% set modal_content='./v2/help/index.html' if (modal_content == '' and type=='modal-help') else modal_content %}
-      {% include modal_content  ignore missing %}
-
-    </div>
+      {%- include modal_content ignore missing -%}
+      </div>
   </div>
   {% endif %}
   <div class="up" data-action="gotop" data-target="{{ id }}"></div>
@@ -91,21 +90,13 @@
 <div class="group-radio"><input type="radio" class="peer" name="{{ name }}" id="{{ id}}" value="{{ value }}" {{'required' if required==True else ''}} {{ 'checked' if val==value }} {{extra}}>
   <label for="{{id}}" class="peer-checked:bg-pchecked-400  peer-checked:text-white  peer-checked:shadow" {{help}}>{{ label }}</label></div>
 {%- endmacro %}
-{% macro checkbox_radio(name, id , checkedvalue, value='', label="",type="checkbox",extra='') -%}
-  <label class="checkbox-label" for="{{id}}"><input type="{{type}}" name="{{ name }}" id="{{ id }}" class="form-checkbox"
-         value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }} {{ extra|safe }}> {{ label }} </label>
+{% macro checkbox_radio(name, id , checkedvalue, value='', label="",type="checkbox",required=False,extra='') -%}
+  <label class="checkbox-label" for="{{id}}"><input type="{{type}}" name="{{ name }}" id="{{ id }}" class="form-checkbox" value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }} {{ extra|safe }}> {{ label }} </label>
 {%- endmacro %}
-
-
-{% macro alertbox(type,message,title='', inverse=False, dismissible = False, codeid= True,extra=False,  is_safe = False,tofetch= False) -%}
-{% include './v2/partials/_alertbox.html' with context%}
+{% macro alerttype(type ="info") -%}
+{% set titles = { 'danger': _('IMPORTANT :'),  'warning': _('WARNING:'),  'info': _('INFORMATION:'),  'success': _('SUCCESS:'),  'error': _('ERROR:'),'maintenance':_('MAINTENANCE')} %}
+{{ titles[type] }}
 {%- endmacro %}
-
-{% macro topalerts() -%}
-{% set messages = get_flashed_messages(true)  %}
-{% if messages|length > 0 %}
-{% for message in messages %}
-{{ alertbox(type=message[0]|replace("message","info"),dismissible = True, message=message[1], is_safe = True  )}}
-{% endfor %}
-{% endif %}
-{%- endmacro %}
+{%- macro alertbox(type,message,title='', inverse=False, dismissible = False, codeid= True,extra=False,  is_safe = False,tofetch= False) -%}
+{%- include './v2/partials/_alertbox.html'-%}
+{%- endmacro -%}

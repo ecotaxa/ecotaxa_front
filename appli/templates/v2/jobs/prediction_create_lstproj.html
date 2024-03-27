@@ -1,5 +1,5 @@
 {% extends "v2/layout.html" %}
-{% from "./v2/macros/macros.html" import inputdict, alertbox with context %}
+{% from "./v2/macros/macros.html" import inputdict with context %}
 {% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
 {% set deep_features = target_proj.cnn_network_id if target_proj else None%}
 {% block body %}

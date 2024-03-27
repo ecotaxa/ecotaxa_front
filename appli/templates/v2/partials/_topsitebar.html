@@ -22,7 +22,6 @@
      {% set crumbs = crumbs %}
      {%-endif%}
      {%- if crumbs is iterable and crumbs|length-%}
-
   <nav class="breadcrumbs {{'all' if all else 'title' }} whitespace-nowrap mr-2">
   {%- for crumb in crumbs -%}
   {%-if loop.index < crumbs|length -%}<a href="{{ crumb.url}}{{crumb.sep if crumb.sep else "/"}}{{crumb.id if crumb.id}}" >{{ crumb.text }}</a>{%-else -%}<span>{{crumb.text}}</span>{%-endif-%}
@@ -30,12 +29,12 @@
     </nav>
   {%-endif%}
   {%-endmacro%}
-  <div class="flex flex-wrap md:flex-nowrap pl-2 xl:pl-8 pr-1 sm:pr-4 w-full  sm:justify-between pt-3.5 h-14">
+  <div class=" flex flex-wrap md:flex-nowrap pl-2 xl:pl-8 pr-1 sm:pr-4 w-full  sm:justify-between pt-3.5 h-14">
     <div class="max-w-[140px]">
         <a href="{{url_for("gui_index")}}"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa_ico.png') }}" class="object-scale-down h-8 py-0.5 mb-1 mr-1 md:hidden" id="ecotaxa-logo-ico" alt="Logo Ecotaxa 3.0"><img src="{{ url_for('static',filename='gui/images/logo_ecotaxa'+logo_special()+'.png') }}" class="hidden md:visible md:inline-block" id="ecotaxa-logo" alt="Logo Ecotaxa 3.0"></a>
     </div><div class="flex flex-row flex-nowrap flex-grow  w-auto max-w-full {{ 'mt-0 font-semibold md:font-light order-2 justify-center' if not target_proj else ' mt-1.5 order-3 z-10 md:mt-0.5 md:order-2 sm:justify-center  ' }} text-secondblue-50 pb-1 md:py-0  md:mt-1 text-sm lg:text-base xl:text-lg">
       {{ show_breadcrumbs(False)}}
       <div class="top-title">{{maketitle()}}</div>
     {%-if current_user.is_app_admin==True -%}{{add_search()}}{%-endif-%}</div>
-    {%- include 'v2/partials/_navuser.html' with context-%}
+    {%- include 'v2/partials/_navuser.html' -%}
  </div>

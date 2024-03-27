@@ -7,11 +7,11 @@
     {{header_project_job(_('Project reset status to predicted'),data, _('Reset status to predicted'))}}
   </div>
   {%if error!=None %}
-  <a href="{{ url_for("gui_prj")}}" class="alert alert-danger">Error {{error}} {{_('Select another project')}}</a>
+  <a href="{{ url_for("gui_prj")}}" class="alert danger">Error {{error}} {{_('Select another project')}}</a>
 {% elif target_proj and target_proj.projid%}
 {% if not proceed%}
-<form method="post" action="{{request.url}}">
-  <div class="alert alert-danger inverse">
+<form method="post" action="{{request.url}}" class="js js-submit">
+  <div class="alert danger inverse">
   {%if warning>0 %}
   {{_('USING Active Project Filters')}} {{objectids|length}} {{_('objects')}}
     {%else%}

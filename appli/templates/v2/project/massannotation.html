@@ -8,23 +8,23 @@
     {{header_project_job(_('Project Edit / Erase annotation massively'),data, _('Mass annotation'))}}
   </div>
 {% if error==404 %}
-<a href="{{ url_for("gui_prj")}}" class="alert alert-warning">{{_('Select another project')}}</a>
+<a href="{{ url_for("gui_prj")}}" class="alert -warning">{{_('Select another project')}}</a>
 {% elif error==401 or error == 403 %}
-<a href="{{ url_for("gui_prj")}}" class="alert alert-danger">{{_('Select another project')}}</a>
+<a href="{{ url_for("gui_prj")}}" class="alert danger">{{_('Select another project')}}</a>
 {%elif error =="nocat"%}
 <a href="javascript:history.back()">{{_('Back')}}</a>
 {%elif target_proj and target_proj.projid%}
 {% if nbrows!=None -%}
-<div class='alert alert-success' role='alert'>{{_('Annotation replacement Done successfully. Updated')}} {{nb_rows}} {{_('Rows')}}</div>
+<div class='alert success' role='alert'>{{_('Annotation replacement Done successfully. Updated')}} {{nb_rows}} {{_('Rows')}}</div>
 <a class="button inverse w-full sm:w-96" href="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}">{{_('Back to target project')}}</a>
 {% else %}
 {% if authors is iterable -%}
 {% if authors|length == 0 %}
-<div class='alert alert-info inverse' role='alert'> {{_('Nothing to replace')}}</div>
+<div class='alert info inverse' role='alert'> {{_('Nothing to replace')}}</div>
 <a class="button inverse w-full sm:w-96" href="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}">{{_('Back to target project')}}</a>
 {%else%}
 {%set optionauthors ={"from":("anyuser",_('Any User')),"to":("lastannot",_('Previous Annotation available, or prediction, or Nothing'))}%}
-<form method="post" action="{{request.url}}" class="my-0 py-0">
+<form method="post" action="{{request.url}}" class="my-0 py-0 js js-submit">
 <fieldset><div class="form-box"><label>{{_('Replace the identification done by:')}}</label>
   {{ inputdict('oldauthor','oldauthor',value ='', label='',type='', placeholder=_('identitification done by'),required= True,autocomplete=True , options=[optionauthors["from"]]+authors) }}
 </div>
@@ -34,9 +34,10 @@
 <div class="form-box">
 <label>{{_('Since the (optional):')}}</label>
 <div class="flex md:flex-row" >
-  <div class="w-48 inline-block"><input type="date" class="form-input  " id="filtdate" name="filtdate" autocomplete="off"></div><div class="w-48 flex flex-row"><span class="h-full align-text-bottom px-2 pb-0">  at </span><input type="text" id="filthour" name="filthour" class="form-input w-8" autocomplete="off"><span class="h-full pb-0 pl-1 pr-2"> h</span>
-                    <input type="text"class="form-input w-8  mx-2" id="filtmin"
-                           name="filtmin" autocomplete="off"><span class="h-full  pb-0 pl-1"> m</span></div>
+  <div class="w-48 inline-block"><input type="date" class="form-input  " id="filtdate" name="filtdate" autocomplete="off"></div><div class="w-48 flex flex-row"><span class="h-full align-text-bottom px-2 pb-0">  at </span><select id="filthour" name="filthour" class="form-select" autocomplete=off>
+    {%-for n in range(0,25) -%}{% set h='%02d' % n%}<option value={{h}}>{{h}}</option>{%-endfor-%}</select><span class="h-full pb-0 pl-1 pr-2"> h</span>
+                      <select class="form-select" id="filtmin"
+                           name="filtmin" autocomplete=off>{%-for n in range(0,60) -%}{% set h='%02d' % n%}<option value={{h}}>{{h}}</option>{%-endfor-%}</select><span class="h-full  pb-0 pl-1"> m</span></div>
 </div></div>
         <button type="submit" class="button is-primary">{{_('Compute an estimation of the impact')}}</button>
         <em>{{_('On the next screen you will be able to apply the change only on some categories')}}</em>

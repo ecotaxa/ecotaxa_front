@@ -8,7 +8,7 @@
     {{header_project_job(_('Fix category issues '),data, _('How to fix category issues'))}}
   </div>
 {% if error==404 %}
-<a href="{{ url_for("gui_prj")}}" class="alert alert-warning">{{_('Select another project')}}</a>
+<a href="{{ url_for("gui_prj")}}" class="alert warning">{{_('Select another project')}}</a>
 {%elif error =="nocat"%}
 <a href="javascript:history.back()">{{_('Back')}}</a>
 {%elif target_proj and target_proj.projid%}

@@ -2,10 +2,10 @@
 {% block body %}
 <div class="container mx-auto pt-2">
   {% if current_user.is_app_admin==True -%}
-    <div class="alert alert-info inverse js js-alert" data-dismissible=true role="alert">{{_('You have Administrator privileges')}}</div>
+    <div class="alert info inverse js js-alert" data-dismissible=true role="alert">{{_('You have Administrator privileges')}}</div>
     {%-endif%}
     {% if current_user.is_users_admin==True -%}
-      <div class="alert alert-info inverse js js-alert" data-dismissible=true role="alert">{{_('You have Users Administrator privileges')}}</div>
+      <div class="alert info inverse js js-alert" data-dismissible=true role="alert">{{_('You have Users Administrator privileges')}}</div>
       {%-endif%}
     {% set list_labels ={"application":_('List of Application Administrators :'),"users":_('List of Users Administrators :')}%}
     {% for key, users in admin_users.items()%}

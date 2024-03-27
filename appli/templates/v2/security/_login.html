@@ -1,18 +1,17 @@
   {% from "./v2/users/_profile_macro.html" import password_regexp %}
 <form id="form-signin" action="{{ url_for('gui_login') }}" method="POST" name="login_user_form">
   {%- set next = get_referrer() -%}
-
-<fieldset class="mb-0.5"><legend>{{ _('Log in') }}</legend>
-    <div class="form-box relative">
+<fieldset class="py-0 mb-0.5"><legend>{{ _('Log in') }}</legend>
+    <div class="form-box md:-mt-4">
     <label for="email" class="over required" >{{_('Email')}}</label>
     <input name="email" id="email" class="form-input" placeholder="Email address" type="email" required autofocus>
     </div>
-    <div class="form-box relative">
+    <div class="form-box md:-mt-4">
     <label for="password" class="over required">Password</label>
     <input type="password" name="password" id="password" class="form-input" data-action="wrapeye" placeholder="your password" required>
     {{password_regexp()}}
     </div>
-    <div class="form-box py-0.5 mb-0.5"><a class="leading-6 text-xs italic float-right clear-right" href="{{url_for('gui_me_forgotten')}}">{{ _('forgot password?')}}</a>
+    <div class="h-6 py-0 -mt-4 mb-0"><a class="leading-6 text-xs italic float-right clear-right" href="{{url_for('gui_me_forgotten')}}">{{ _('forgot password?')}}</a>
       <label for="remember" class="font-normal leading-6">
         <input  id="remember" name="remember" class="ml-1 mr-2" type="checkbox" value="y">{{ _('remember me')}}</label>
     </div>

@@ -1,0 +1,5 @@
+{% from 'v2/macros/macros.html' import modal with context%}
+{%- macro modaluser(modal_title)%}
+{% set data = {'file':'_help_user_profile'} %}
+{{ modal(id='help-edit_account',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+{%-endmacro-%}

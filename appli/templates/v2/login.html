@@ -9,7 +9,7 @@
         <button id="register" class="button mt-2 is-action w-full text-center hover:bg-mainblue-200" type="submit"><span><i class="icon icon-user-plus inline-block w-0 h-0"></i>{{ _('Create your EcoTaxa account')}}</span></button>
         <div class="px-2 py-1">{{_('In case of registration problem or if you want to avoid Google reCaptcha on Account creation page for privacy reasons, please send an email to one the following persons in order to proceed to a manual account creation.')}}
       </div>
-        <details class="leading-snug text-mainblue-900 toggle-summary  px-2 pb-2"><summary class="text-sm">{{_('Contacts')}}</summary><ul class="px-4 pt-2">{{ GetManagerList('Ecotaxa : Account issue')|safe }}</ul>
+        <details class="leading-snug text-mainblue-900 toggle-summary  px-2 pb-2"><summary class="text-sm">{{_('Contacts')}}</summary><ul class="px-4 pt-2">{{ get_manager_list(_('Ecotaxa : Account issue'))|safe }}</ul>
         </details>
         <a href="{{url_for("gui_privacy")}}" class=" px-2 text-white">{{ _('Our privacy statement')}}</a>
       </fieldset>
@@ -19,8 +19,7 @@
     {% include './v2/security/_login.html' %}
     {# include "./v2/security/_menu.html" #}
   </div></div>
-
-  {% if current_user.is_authenticated%}
+  {%- if current_user.is_authenticated-%}
   <div class="w-auto mx-auto p-12 text-sm">
   {{ _('Already authenticated. page should redirect to projects list')}}</div>
   {% endif%}

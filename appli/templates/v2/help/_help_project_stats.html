@@ -25,16 +25,8 @@
     erased.
     <br>New features will be recomputed during the next automatic classification.') | safe }} </div>
   </details>
-
-  {% if possible_licenses is iterable %}
-  <details id="help_proj_stats_license"><summary>{{_('Licenses')}}</summary>
-    <div>
-  {% for k,v in possible_licenses %}
-  <details><summary>{{k}}</summary><div> {{ v | safe }} </div></details>
-  {% endfor %}
-  </div>
-  </details>
-  {% endif %}
+  {%-set anchor = 'help_proj_stats_license'%}
+{%- include('v2/help/_help_licenses.html')-%}
   <details id="help_proj_stats_used_taxa" ><summary>{{_('Used Taxa')}}</summary><div>
   {{_('Taxa used in the projects. Sort by lineage or name . Option : export statistics as CSV.')}}
   </div></details>

@@ -1,5 +1,5 @@
 {% extends "./v2/layout.html" %}
-{% from "./v2/macros/macros.html" import form_group_radio, inputdict, modal , alertbox with context %}
+{% from "./v2/macros/macros.html" import form_group_radio, inputdict, modal  with context %}
 {% block body %}
 <div class="container mx-auto ">
   {% set modal_title = _("How to edit a collection settings") if target_coll.id else _("How to create a collection")%}
@@ -29,11 +29,9 @@
                           <div class="form-box">
                             <div class="label">{{ _('License') }}<i data-for="help_coll_license" data-request="help"></i></div>
                             <div class="form-group" id="coll_license" role="group">
-                                {% set required = True %}
                               {% for k in possible_licenses.keys() %}
                               {% set label='not choosen' if k=='' else k %}
-                              {{form_group_radio('license_'+ loop.index|string(),'license',k,label,target_coll.license, required=required )}}
-                                {% set required = False %}
+                              {{form_group_radio('license_'+ loop.index|string(),'license',k,label,target_coll.license, required=(loop.index==1) )}}
                               {% endfor %}</div>
                           </div>
                   </div>

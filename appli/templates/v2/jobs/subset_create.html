@@ -1,5 +1,5 @@
 {% extends "v2/layout.html" %}
-{% from "./v2/macros/macros.html" import form_group_radio, alertbox with context %}
+{% from "./v2/macros/macros.html" import form_group_radio with context %}
 {% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
 {% macro checkboxinputinlist(name, checkedvalue, value='',extra='') -%}
   <input type="checkbox" name="{{ name }}" id="{{ name }}"
@@ -12,14 +12,14 @@
     {% set data = {'file':'_help_project_subset'} %}
     {{header_project_job(_('Create subset from project'),data, _('How to create a project subset'))}}
   </div>
-  <form class="form-horizontal" action="{{ request.path }}" class="js js-submit" method="post" enctype=multipart/form-data>
+  <form class="form-horizontal js js-submit" action="{{ request.path }}" class="js js-submit" method="post" enctype=multipart/form-data>
   <input type="hidden" name="projid" value="{{ target_proj.projid }}">
 {{display_filters(filters)}}
   <div class="form-box js js-tabs" data-selector="input[type='radio']" data-toggledisable=true><div class="label">{{_('Select')}}</div>
     <div class="form-group" role="group">
       {% set vals = [{"label":'% ' + _('of values'),"value":"P"},{"label":_('objects max.'),"value":"V"}]%}
       {% for val in vals %}
-        {{ form_group_radio('valType'+val.value,'valtype',val.value,val.label,form.valtype,required=True,extra=' data-target='+val.value +'valeur')}}
+        {{ form_group_radio('valType'+val.value,'valtype',val.value,val.label,form.valtype,required=(loop.index==1),extra=' data-target='+val.value +'valeur')}}
           {% endfor%}</div>
       <div id="Pvaleur" class="flex"><input type="text" class="form-input w-1/6" maxlength="3" size="3" name="pvaleur" id="pvaleur" value="10" {{' disabled' if form.valtype !='P' }}><label for="pvaleur" class="w-5/6 mx-2 mt-4 mb-0">{{'% ' + _('of values')}}</label></div>
     <div id="Vvaleur" class="flex"><input type="text" size="5" class="form-input  w-1/6" name="vvaleur" value="" id="vvaleur" {{' disabled' if form.valtype !='V' }}><label for="vvaleur" class="w-5/6 mx-2 mt-4 mb-0">{{_('objects max.')}}</label></div>
@@ -28,7 +28,7 @@
   <div class="form-group" role="group" >
     {% set grps = [{"label":_("category"),"value":"C"},{"label":_("sample"),"value":"S"},{"label":_("acquisition"),"value":"A"}]%}
     {% for grp in grps %}
-      {{ form_group_radio('grpType'+grp.value,'grptype',grp.value,grp.label,form.grptype,required=True)}}
+      {{ form_group_radio('grpType'+grp.value,'grptype',grp.value,grp.label,form.grptype,required=(loop.index==1))}}
         {% endfor%}
     </div>
 

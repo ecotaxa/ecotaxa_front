@@ -1,6 +1,6 @@
   {%block body%}
   {% if response[0]|int == 0 %}
- <div class="alert is-success">
+ <div class="alert success">
    {%- if (not api_email_verification  or token) and not api_account_validation -%}
    <h3>{{_('Welcome, your account has been created.')}}</h3>
    <a href="{{url_for('gui_login')}}" class="button is-primary">{{_('login')}}</a>
@@ -14,7 +14,7 @@
       {{_('Please, check spam and junk mails if you can\'t find this email in your inbox.')}}</p>
       {%-endif-%}
     {% else %}
-     <div class="alert is-danger">
+     <div class="alert is-danger" >
     <h3>{{_('Error')}} {{ response[0]}}</h3> {{response[1] if response|length >1 else ''}}
     {% if (token or not api_email_verification) %}
       <p>{{_('The account has not been created.')}}</p>

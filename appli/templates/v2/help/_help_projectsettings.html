@@ -1,7 +1,20 @@
 {%- if not partial-%}{% extends "./v2/help/_layout.html" %}{%-endif-%}
 {% block article %}
 <article id="help-editproject">
-    <h2 class="help-title">{{_('Project settings')}} </h2>
+  <h2 class="help-title">{{title if title !=None else _('Project settings')}} </h2>
+  <details id="help_proj_create" >
+  <summary>{{_('Definition of a project')}} </summary>
+  <div><p>
+  {{_('A project is the data management unit of EcoTaxa: it is where you import data and list who can access and classify objects.<br>
+  The first data import will determine which metadata fields  are associated with each object. Those will stay the same for all  objects of the project and for all subsequent imports.')}}</p>
+  <p>{{_('A project must therefore contain images taken with the  same instrument, with the same list of metadata fields. It typically  corresponds to deployments of that instrument on a scientific cruise or  along a time series.<br> Within the project, objects are further grouped in  samples, identified in the imported data; samples typically correspond  to a station or a time point in a time series.<br>
+  For EcoTaxa to be most efficient, projects should contain from 10,000 to a million objects, which usually means many samples.')}}</p><p>
+  {{_('A project must therefore contain images taken with the same instrument,  with the same list of metadata fields.<br> It typically corresponds to  deployments of the same sampling or imaging device on a scientific  cruise or along a time series. Within the project, objects are further  grouped in samples, identified in the imported data; samples typically  correspond to a station or a time point in a time series.')}}
+  </p></div></details>
+  <details id="help-pick-settings-from-proj"><summary>{{_('Pick settings from other projects')}}</summary><div><ul id="help-pick-all-from-proj"><li><strong class="text-base">{{_('Project creation:')}}</strong><ul><li>{{_('Copy all settings (title, instrument, status, license, visibility, description, comments, deep features extractor, privileges) from another project. The user creating the project is project manager by default.')}}<br><em>{{_('It is strongly recommended to modify the title to avoid duplicates.')}}</em></li></ul></li>
+  <li id="help-pick-sdata-from-proj"><strong class="text-base">{{_('Project update:')}}</strong><ul><li><strong>{{_('Pick preset from other projects')}}</strong><p>{{_('Add or replace project preset by editable preset of another project or a combinaison of presets from several projects.')}}</p></li>
+    <li id="help-pick-sorting-from-proj"><strong>{{_('Pick sorting fields from other projects')}}</strong><p>{{_('Replace sorting fields by sorting fields of another project.')}}</p></li>
+    <li id="help-pick-privileges-from-proj"><strong>{{_('Pick privileges from other projects')}}</strong><p>{{_('Add or replace privileges by privileges of another project or a combinaison of privileges from several projects.')}}</p></li></ul></li></ul></div></details>
   <details id="help_proj_description"><summary>{{_('description')}}</summary><div>{{ _("A short paragraph describing the dataset, to make it discoverable by others in EcoTaxa and elsewhere.
     It should indicate which organisms are targeted (e.g. mesozooplankton), where (e.g. Bering Sea),
     when (e.g. from 2000 to 2010) and how (e.g. plankton net samples processed with a ZooScan) they were
@@ -22,7 +35,7 @@
     <ul>
       <li>{{_('The list can be directly copied from another project (use Pick from other projects)')}}
       <li>{{_('New categories can be added using the auto completion function')}}    </ul></div></details>
-    <details id="help_classiffieldlist"><summary>{{_('Presets')}}</summary><div>
+    <details id="help_classiffieldlist"><summary>{{_('Sorting Tools')}}</summary><div>
         {{_('Format : Var=var_name (Var : imported variable, var_name : displayed variable name)
         <br>Example : depth_min=minimum depth [m] where')| safe }}
         <ul>
@@ -37,16 +50,10 @@
         Available fields :
           {% for x in maplist %}{{ x }}, {% endfor %}
 </div></details>
-{% if possible_licenses is iterable %}
-<details id="help_proj_license"><summary>{{_('Licenses')}}</summary>
-  <div>
-{% for k,v in possible_licenses %}
-<details><summary>{{k}}</summary><div> {{ v | safe }} </div></details>
-{% endfor %}
-</div>
-</details>
-{% endif %}
-<details  id="help_project_privileges"><summary>{{_('The roles in short:')}}</summary>
+{%-set anchor = 'help_proj_license'%}
+{%-include('v2/help/_help_licenses.html')%}
+<details  id="help_project_privileges"><summary>{{_('Privileges')}}</summary>
+  <p><strong>{{_('The roles in short')}}</strong><br>
   <ul>
     <li>{{_('Viewers can view the project even when it is private; the project is listed in their project
       list.')}}
@@ -56,6 +63,12 @@
     <li>{{_("The contact person is a Manager, displayed in the project table and serving as the contact point for other users and EcoTaxa's managers.")}}
     </li>
   </ul>
-<div id="help_project_privileges_contact"><strong>A selected manager contact is required for each project</stong></div></details>
+<details id="help_project_privileges_contact"><summary>{{_('Contact')}}</summary><div>{{_('A selected manager contact is required for each project.')}}<br>{{_('A "Contact" member cannot be deleted.')}}<br><em>{{_('Select another contact and modify this member privilege to delete it.')}}</em></div></details>
+<ul><li id="help_project_privileges_member_privilege">{{_('All members in the privileges list must have a privilege checked')}}</li>
+<li id="help_project_privilegesdel_line">{{_('Members with "Manage" privilege cannot be deleted.')}}</li>
+<li></li><li>{{_('The list must at least contain one member with "Manage" and "Contact" attributes.')}}</li>
+<li>{{_('privileges are sorted by roles and user name')}}</li>
+</ul></p>
+  </details>
   </article>
   {% endblock %}

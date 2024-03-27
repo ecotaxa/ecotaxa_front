@@ -1,4 +1,4 @@
-{% if notifs is iterable %}
-{% for label,notif in notifs.items() %}
+{%- if notifs is iterable -%}
+{%- for label,notif in notifs.items() -%}
 <span class="notif is-{{ label|lower }}" title="{{label}}"><a href="{{url_for("gui_list_jobs")}}">{{notif|string()}}</a></span>
-{% endfor %} {% endif %}
+{%- endfor -%}{%- endif -%}

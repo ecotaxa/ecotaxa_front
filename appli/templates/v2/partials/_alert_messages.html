@@ -1,0 +1,11 @@
+{%- set messages=global_messages()-%}
+{%- if messages is iterable -%}
+<div id="site-alertmessages" class="site-alertmessages">
+<div class="alertmessages-list">
+{%- for message in messages -%}
+{%- if message.type!="homepage" -%}
+{% include './v2/partials/_alert_message.html' %}
+{%- elif homepage  and  homepage.__class__.__name__=='Namespace'  -%}
+{%- set homepage.value={"message":message,"cookiename":message.cookiename} -%}
+{%-endif-%}{%- endfor -%}
+</div></div>{%- endif -%}

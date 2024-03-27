@@ -2,5 +2,5 @@
   {%-if notfound -%}{%block article%}
   <div class="alert is-info" data-filename="{{notfound}}">{{_('Not available for now.')}}</div>{% endblock %}
   {%-else-%}
-{% include 'v2/help/_help_summary.html' with context %}
+{% include 'v2/help/_help_summary.html'  %}
 {%-endif-%}

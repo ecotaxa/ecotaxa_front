@@ -21,7 +21,7 @@
 <li>{{_('Acquisitions with same acq_id on both sides will <strong>not</strong> be updated from added project.')}}</li>
 </ul></li><li>{{_('Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.')}}</li>
 </ul></div>
-{% if source_proj %}<div class="alert alert-warning">{{_('Source project : ') ~ source_proj.title ~ '['~ source_proj.projid ~']' ~ _(' this project will be destroyed') }}</div>
+{% if source_proj %}<div class="alert warning">{{_('Source project : ') ~ source_proj.title ~ '['~ source_proj.projid ~']' ~ _(' this project will be destroyed') }}</div>
 <input type="hidden" name="merge" value =" Y">
 {% elif prjstomerge is iterable  %}
 <div  id="merge_prjlist" class="js js-datatable my-4 sticky-top block mb-4" data-sortable=true {{ ' data-searchable=true'  if prjstomerge|length > 20 else ''}} data-table=true>

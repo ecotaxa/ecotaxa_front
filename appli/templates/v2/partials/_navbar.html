@@ -56,7 +56,7 @@
 <li><a href="{{url_for('gui_prj_edit_datamass', projid=target_proj.projid)}}"   {{disabled.value   if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
 <li><a href="{{url_for('gui_prj_reset_to_predicted',projid=target_proj.projid)}}"   {{disabled.value   if target_proj.status !="Annotate" or  privilege.value!="Manage"}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
 <li><a href="{{url_for('gui_prj_purge',projid=target_proj.projid)}}"   {{disabled.value  if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Delete</strong> object or project')}}</a></li>
-<li><a href="{{url_for('deprecation_management',prj_id=target_proj.projid)}}"  {{disabled.value  if target_proj.status =="ExploreOnly" or  privilege.value=="View" or privilege.value==""}}>{{_('<strong>Fix</strong> category issues')}}</a></li>
+<!--<li><a href="{{url_for('deprecation_management',prj_id=target_proj.projid)}}"  {{disabled.value  if target_proj.status =="ExploreOnly" or  privilege.value=="View" or privilege.value==""}}>{{_('<strong>Fix</strong> category issues')}}</a></li>-->
 </ul>
 </li><li>
       <a href="{{url_for('gui_prj_about',projid=target_proj.projid)}}" {{disabled.value if privilege.value!="Manage"}}>
