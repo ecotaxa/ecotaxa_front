@@ -8,5 +8,6 @@ py_messages = dict(
         "sourceprjnotfound": _("Source project doesn't exist"),
         "objsnotincurrentprj": _("object(s) are not in current project."),
         "prjdestroyed": _("Project and associated privileges, destroyed"),
+        "objdeleted": _("Objects deleted"),
     }
 )

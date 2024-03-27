@@ -74,6 +74,10 @@ py_messages = dict(
         ),
         "uhasnopriv": _("privilege is missing"),
         "notauthorized": _("Not authorized"),
+        "noduplicate": _(
+            "It is strongly recommended to modify this field to avoid duplicates"
+        ),
+        "modify": _("Modify"),
         "taxosynchro": _(
             "Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days. Ask application administrator to do it."
         )
@@ -114,6 +118,15 @@ py_messages = dict(
         "projectcreated": _("Project created"),
         "projectupdated": _("Project updated"),
         "importpriverror": _("Privileges where not imported correctly."),
+        "viewfull": _("view full message"),
+        "alerttype": {
+            "danger": _("IMPORTANT :"),
+            "warning": _("WARNING:"),
+            "info": _("INFORMATION:"),
+            "success": _("SUCCESS:"),
+            "error": _("ERROR:"),
+            "maintenance": _("MAINTENANCE"),
+        },
     }
 )
 py_user = dict(
@@ -122,6 +135,7 @@ py_user = dict(
         "invaliddata": _("Data are not valid"),
         "notadmin": _("Not an administrator"),
         "notfound": _("Not found"),
+        "exists": _("User exists"),
         "novalidationservices": _("Service is not active"),
         "notauthorized": _("Not authorized"),
         "checkspam": _(
@@ -193,5 +207,17 @@ py_project_status = dict(
         "Annotate": _("Annotate"),
         "ExploreOnly": _("Explore Only"),
         "Annotate No Prediction": _("Annotate No Prediction"),
+    }
+)
+py_messages_titles = dict(
+    {
+        "danger": _("IMPORTANT :"),
+        "warning": _("WARNING:"),
+        "info": _("INFORMATION:"),
+        "success": _("SUCCESS:"),
+        "error": _("ERROR:"),
+        "close": _("Close"),
+        "cancel": _("Cancel"),
+        "ok": _("Ok"),
     }
 )
