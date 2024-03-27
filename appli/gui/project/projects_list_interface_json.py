@@ -104,6 +104,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
             "privileges": dict(
                 {
                     "privileges": {"label": _("Members"), "format": "privileges"},
+                    "contact": {"label": _("contact"), "hidden": True},
                 }
             ),
             "fields": dict(
@@ -114,9 +115,13 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
             "settings": dict(
                 {
                     "status": {"label": _("status")},
+                    "contact": {"label": _("contact"), "hidden": True},
+                    "description": {"label": _("description"), "hidden": True},
+                    "comments": {"label": _("comments"), "hidden": True},
+                    "init_classif_list": {"label": _("preset"), "hidden": True},
                     "privileges": {"label": _("members"), "format": "privileges"},
-                    "license": {"label": _("license"), "format": "license"},
-                    "classiffieldlist": {"label": _("presets"), "format": "text"},
+                    "license": {"label": _("license")},
+                    "classiffieldlist": {"label": _("sorting tools"), "format": "text"},
                     "cnn_network_id": {"label": _("Deep feature ext.")},
                 }
             ),
@@ -188,13 +193,12 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                     "comments",
                     "instrument",
                     "contact",
-                    "cnn_network_id",
-                    "visible",
                     "status",
                     "license",
-                    "classiffieldlist",
                     "init_classif_list",
+                    "classiffieldlist",
                     "privileges",
+                    "cnn_network_id",
                 ],
             },
         },
