@@ -97,13 +97,11 @@ class ExportJob(Job):
     def final_action(cls, job: JobModel):
         if job.state == "F":
             projid = job.params["req"]["project_id"]
-            target_proj = cls.get_target_prj(projid)
             return render_template(
                 cls.STEP1_TEMPLATE,
                 jobid=job.id,
-                projid=projid,
                 outfile=job.result["out_file"],
-                target_proj=target_proj,
+                projid=projid,
             )
         else:
             return ""
