@@ -13,38 +13,15 @@ export const initImport = async (state) => {
   const {
     DataImport
   } = await import('../modules/data-import.js');
-  state.importfields = state.grid.columns.filter(column => (column.selectcells));
-
-  state.importfields = (state.importfields.length) ? state.importfields[0].selectcells : null;
-  state.grid.columns.forEach((column, index) => {
-    const key = column.name;
-    const domheadings = state.dom.querySelectorAll('thead th');
-    if (state.importfields.indexOf(key) >= 0) {
-      domheadings[index].dataset.name = key;
-    }
-    // set headings dataset values for import module
-    if (column.hasOwnProperty('selectcells')) {
-      domheadings[index].dataset.selectcells = column.selectcells;
-
-      if (column.what) domheadings[index].dataset.what = column.what;
-    }
-
-    ['autocomplete', 'parts', 'value'].forEach(prop => {
-      if (column.hasOwnProperty(prop)) domheadings[index].dataset[prop] = column[prop];
-    });
-
-  });
   state.dataImport = new DataImport(state);
+  state.importfields = state.grid.columns.filter(column => (column.selectcells));
+  state.importfields = (state.importfields.length) ? state.importfields[0].selectcells : null;
   state.waitdiv.remove();
 }
 
 
 export default function(state) {
-
-
-
   // get the css fixed length of progress bar
-
   let progressw = 0;
   if (document.styleSheets && document.styleSheets.length && document.styleSheets[0].cssRules) {
     Object.values(document.styleSheets[0].cssRules).forEach((rule, i) => {
@@ -76,6 +53,7 @@ export default function(state) {
   }
   return {
     contact: (value, rowIndex, cellIndex, td = {}) => {
+
       const about = (Array.isArray(value)) ? Boolean(value[1]) : false;
       value = (Array.isArray(value)) ? String(value[0]).trim() : String(value).trim();
       if (value === null) value = ``;
@@ -244,6 +222,7 @@ export default function(state) {
       let rights = [];
       Object.entries(value).forEach(([right, members]) => {
         let mb = [];
+
         if (members.length) {
           members.forEach(member => {
             mb.push(member.name);

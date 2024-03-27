@@ -25,29 +25,51 @@ export const models = {
 export const alertconfig = {
   danger: 'danger',
   info: 'info',
-
   warning: 'warning',
   css: {
     alert: 'alert',
     confirm: 'confirm',
     inverse: 'inverse',
+    viewall: 'viewall',
+    h_auto: 'h-auto',
+    has: {
+      warning: 'has-warning',
+      error: 'has-error',
+      success: 'has-success',
+      info: 'has-info',
+      message: 'has-message',
+      danger: 'has-danger',
+    },
+    icon: {
+      anchor: 'icon-bell-alert'
+    }
   },
   types: {
     confirm: 'confirm',
     info: 'info',
     warning: 'warning',
     danger: 'danger',
-    error: 'error'
+    error: 'error',
+    maintenance: 'maintenance'
   },
   dismiss_selector: '[data-dismiss]',
   selector: '.alert',
   domselectors: {
     alert: '.js-alert',
-    action: '[data-action="alert-confirm"]',
-    buttons: '.btn-group',
+    alertmessages: '.site-alertmessages',
+    messageslist: '.alertmessages-list',
+    alertmessage: '.alertmessage',
+    summary: '[data-summary]',
+    action: '[data-action="confirm"]',
     message: '.message',
+    showall: '.showall',
+    buttons: {
+      group: '.btn-group',
+      ok: '.is-ok',
+      cancel: '.is-cancel'
+    }
   },
-  confirm_selector: '.alert-confirm'
+  confirm_selector: '.alert.confirm'
 
 }
 export const typeimport = {
@@ -66,7 +88,7 @@ export const css = {
   wait: 'wait',
   active: 'active',
   modal: 'modal',
-  centered: 'centered',
+  absolute: 'absolute',
   open: 'open',
   progress: "progress",
   peerchecked: 'peer-checked',
@@ -76,7 +98,8 @@ export const css = {
       name: 'js-tabs'
     },
     autocomplete: {
-      tomselected: 'tomselected'
+      tomselected: 'tomselected',
+
     },
     table: {
       tip: 'tip',
@@ -88,6 +111,10 @@ export const domselectors = {
   close: '.close',
   projid: 'projid',
   component: {
+    form: {
+      ident: '.js-submit',
+      formbox: '.form-box'
+    },
     tabs: {
       ident: 'js-tabs',
       tab: '.tab',
@@ -106,9 +133,13 @@ export const domselectors = {
       popup: '.modal-popup',
     },
     tomselect: {
+      name: 'tom-select',
       ident: 'js-autocomplete',
       item: '.item',
       tsdelet: '.ts-delet'
+    },
+    privileges: {
+      ident: 'js-privileges',
     },
     import: {
       zoneimport: '.zone-import'
@@ -121,7 +152,7 @@ export const domselectors = {
     },
     alert: {
       ident: '.alert',
-      danger: '.alert-danger'
+      danger: '.alert.danger'
     },
   }
 };

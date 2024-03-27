@@ -7,8 +7,7 @@ import {
 } from '../modules/project-privileges.js';
 import {
   fetchSettings,
-  unescape_html,
-
+  unescape_html
 } from '../modules/utils.js';
 import {
   models,
@@ -22,6 +21,7 @@ const key_privileges = Object.keys(defined_privileges).reduce(function(result, k
   return result;
 }, {});
 let instance;
+css.imported = 'imported';
 export class DataImport {
   content_selector = '.modal-content';
   imports = [];
@@ -87,6 +87,7 @@ export class DataImport {
       else {
         const evt = (selector.tagName.toLowerCase() === 'input') ? 'change' : 'click';
         const apply_selection = (e) => {
+          e.stopImmediatePropagation();
           const target = e.currentTarget;
           target.disabled = true;
           this.toImport(target.parentElement, index);
@@ -97,6 +98,7 @@ export class DataImport {
     });
     if (this.button) {
       this.tabbutton.addEventListener('click', (e) => {
+        e.stopImmediatePropagation();
         this.resizeZone(e);
       });
       this.showImport(false);
@@ -107,8 +109,11 @@ export class DataImport {
     else return (th.dataset[name]) ? th.dataset.name : null;
   }
   columnIndex(prop, value) {
+    return Array.from(this.dom.querySelectorAll('thead th')).findIndex(th => (th.dataset[prop] && th.dataset[prop] === value));
+  }
+  gridColumnIndex(prop, value) {
     if (this.tbl) return this.tbl.grid.columns.findIndex(column => (column.hasOwnProperty(prop) && column[prop] === value));
-    else return Array.from(this.dom.querySelectorAll('thead th')).findIndex(th => (th.dataset[prop] && th.dataset[prop] === value));
+    else return this.columnIndex(prop, value);
   }
   rowIndex(td, trs) {
     const ref = (td.parentElement) ? td.parentElement : null;
@@ -119,7 +124,6 @@ export class DataImport {
     const grid = (this.tbl) ? this.tbl.grid : null;
     const thcells = Array.from(this.dom.querySelectorAll('thead th'));
     const trs = Array.from(this.dom.querySelectorAll('tbody tr'));
-
     const datas = (grid) ? grid.data : trs.map(tr => {
       return Array.from(tr.childNodes).forEach(cell => {
         return cell.innerText;
@@ -139,18 +143,19 @@ export class DataImport {
     let selectcells = this.columnProperty('selectcells', cellindex, th);
     selectcells = (selectcells) ? ((parts) ? [parts[whatpart]] : selectcells) : null;
     if (!selectcells) return;
-    if (what === typeimport.settings) this.imports[models.contact] = this.findContact(thcells, datas[rowindex]);
+    if (what === typeimport.settings || what === typeimport.privileges) this.imports[models.contact] = this.findContact(datas[rowindex]);
     const importzone = (what === typeimport.taxo || what === typeimport.privileges) ? this.createImportzone(what) : null;
 
     let ts = null;
     selectcells.forEach((name, index) => {
-      index = this.columnIndex('name', name);
+      index = this.gridColumnIndex('name', name);
       if (index >= 0) {
+        const tdindex = this.columnIndex('name', name);
         // show import buttons if importzone
-        const cell = trs[rowindex].cells[index];
+        const cell = (tdindex >= 0) ? trs[rowindex].cells[tdindex] : null;
+        if (cell) cell.classList.add(css.selected);
         const celldata = datas[rowindex][index];
-        cell.classList.add(css.selected);
-        const thcell = thcells[index];
+        const thcell = (tdindex >= 0) ? thcells[tdindex] : null;
         switch (what) {
           case typeimport.taxo:
             // accumulate and show in import win - move the form field in modal win to view the changes and benefit of tom-select component functs...
@@ -211,7 +216,6 @@ export class DataImport {
             const privs = celldata;
             // set everybody to 'view' if more than one project imported
             const resetpriv = ((ts && ts.items.length > 0) || (importzone.selectedIndex > 0));
-
             if (!importzone.dataset.init) {
               /*    const optgroups = [];
                   Object.keys(privs).forEach(priv => {
@@ -264,7 +268,7 @@ export class DataImport {
                   } else opt.dataset.optgroup = newpriv;
                 }
               });
-              importzone.tomselect.refreshOptions();
+              importzone.tomselect.refreshOptions(true);
             });
 
             showbtns = (((ts) ? ts.items.length : importzone.selectedIndex + 1) > 0);
@@ -272,28 +276,30 @@ export class DataImport {
 
             break;
           default:
+            this.imports[name] = celldata;
+            if (cell !== null) {
+              if (cell.dataset.autocomplete) {
+                // select elements where key / value in different columns
+                this.imports[name] = {
+                  value: celldata,
+                  key: null
+                };
+                let el = null;
+                thcells.every((t, idx) => {
+                  if (t.dataset.name == thcell.dataset.autocomplete) {
+                    el = idx;
+                    return false;
+                  }
+                  return true;
+                });
+                if (el !== null) {
+                  el = datas[rowindex][el];
 
-            if (thcell.dataset.autocomplete) {
-              // select elements where key / value in different columns
-              this.imports[name] = {
-                value: celldata,
-                key: null
-              };
-              let el = null;
-              thcells.every((t, idx) => {
-                if (t.dataset.name == thcell.dataset.autocomplete) {
-                  el = idx;
-                  return false;
+                  this.imports[name].key = el;
                 }
-                return true;
-              });
-              if (el !== null) {
-                el = datas[rowindex][el];
+              } else if (cell.dataset.value) this.imports[name] = cell.dataset.value;
 
-                this.imports[name].key = el;
-              }
-            } else if (thcell.dataset.value) this.imports[name] = thcell.dataset.value;
-            else this.imports[name] = celldata;
+            }
 
             break;
         }
@@ -315,11 +321,13 @@ export class DataImport {
   activateButtons(what, selectcells) {
 
     this.button.addEventListener('click', (e) => {
+      e.stopImmediatePropagation();
       e.preventDefault();
       this.makeImport(e.currentTarget, selectcells, what, true);
 
     });
     this.replacebutton.addEventListener('click', (e) => {
+      e.stopImmediatePropagation();
       e.preventDefault();
       this.makeImport(e.currentTarget, selectcells, what, true);
 
@@ -329,23 +337,17 @@ export class DataImport {
     this.replacebutton.dataset.activated = true;
   }
 
-  findContact(thcells, tds) {
-    let contact = null;
-    thcells.every((t, idx) => {
-      if (t.dataset.name && t.dataset.name === models.contact) {
-        contact = idx;
-        return false;
-      }
-      return true;
-    });
-    if (contact) contact = tds[contact] ? tds[contact] : 0;
+  findContact(tds, name = 'contact') {
+    const index = this.gridColumnIndex('name', name);
+    if (index >= 0) return tds[index] ? tds[index] : null;
 
-    return contact;
+    return null;
   }
 
   renderPrivileges(importzone, replace = false) {
     let privileges = {};
     const tzone = importzone.tomselect;
+
     const pushpriv = (member, priv) => {
       const obj = {
         id: member.id,
@@ -370,9 +372,7 @@ export class DataImport {
       })
     }
 
-
     if (this.importPrivileges(privileges, replace)) {
-
       if (tzone) {
         tzone.clear();
         tzone.clearOptions();
@@ -383,15 +383,17 @@ export class DataImport {
   }
 
   importPrivileges(privileges, clear = false) {
-    const projectPrivileges = new ProjectPrivileges();
+    const projectPrivileges = this.form.querySelector('.' + domselectors.component.privileges.ident);
+
+    if (projectPrivileges === null || !projectPrivileges.jsprivileges) return;
     const importedtag = (input) => {
       this.setImportedTag(input, null);
     }
     const dismiss = () => {
       this.dismiss();
     }
-    const contact = ((this.imports[models.contact]) ? this.imports[models.contact] : null);
-    return (projectPrivileges.importPrivileges(privileges, clear, contact, importedtag, dismiss));
+    const contact = (clear === true && this.imports[models.contact]) ? this.imports[models.contact] : null;
+    return (projectPrivileges.jsprivileges.importPrivileges(privileges, clear, contact, importedtag, dismiss));
   }
 
   resetSelectors() {
@@ -407,6 +409,7 @@ export class DataImport {
     const clearbutton = document.getElementById('clear-' + this.importid);
     if (!clearbutton) return;
     clearbutton.addEventListener('click', (e) => {
+      e.stopImmediatePropagation();
       if (!this.importcontainer) return;
       this.resetSelectors();
       this.button.disabled = false;
@@ -461,9 +464,10 @@ export class DataImport {
   }
 
   makeImport(btn, selectcells, what, close = false) {
-    let done = false,
+    let done = true,
       ts = null;
     const importzone = (this.importcontainer) ? this.importcontainer.querySelector('#' + this.importid) : null;
+
     switch (what) {
       case typeimport.taxo:
 
@@ -506,16 +510,53 @@ export class DataImport {
 
         break;
       default:
+        const ts_add_select_item = function(ts, data) {
+          const el = {};
+          if (typeof(data) == 'string') {
+            el[ts.settings.labelField] = data;
+            el[ts.settings.valueField] = data;
+            el[ts.settings.searchField] = unescape_html(data);
+          } else {
+            el[ts.settings.labelField] = data.key;
+            el[ts.settings.valueField] = data.key;
+            el[ts.settings.searchField] = unescape_html(data.value);
+          }
+          if (!ts.getOption(el[ts.settings.valueField])) ts.addOption(el);
+          if (!ts.getItem(el[ts.settings.valueField])) ts.addItem(el[ts.settings.valueField]);
+        }
+        const add_select_option = function(input, data) {
+          const option = document.createElement('option');
+          if (typeof(data) === 'string') option.value = option.text = data;
+          else {
+            option.value = data.key;
+            option.text = data.value;
+          }
+          option.selected = true;
+          input.append(option);
+        }
+        const add_input_option = function(input, data) {
+          if (input.multiple) {
+            let values = input.value.split(',');
+            values.push(data.key);
+            input.value = values.join(',');
+          } else input.value = data;
+
+        }
         selectcells.forEach((name, index) => {
           let input = ((this.form.querySelector('[data-importfield="' + name + '"]')) ? this.form.querySelector('[data-importfield="' + name + '"]') : this.form.querySelector('[name="' + name + '"]'));
-
+          if (input && input.dataset.noimport) return;
           if (input && this.imports[name] !== undefined) {
+            const type = (input.type) ? input.type : input.tagName.toLowerCase();
             ts = input.tomselect;
-
             if (name === 'init_classif_list') {
               let ids = this.imports[name];
               if (Array.isArray(ids)) ids = ids.join(',');
               else ids = ids.replace('[', '').replace(']', '').replaceAll(' ', '');
+              if (ts) {
+                ts.wrapper.classList.add('wait-for-results');
+                ts.clear(false);
+                ts.clearOptions();
+              }
               if (ids !== '') {
                 if (ts) ts.wrapper.classList.add('wait-for-results');
                 const formData = new FormData();
@@ -527,97 +568,103 @@ export class DataImport {
                 })).then(response =>
                   response.json()
                 ).then(results => {
+                  const ts = input.tomselect;
                   if (ts) {
-                    Object.entries(results).forEach(([key, text]) => {
-                      let el = {};
-                      key = DOMPurify.sanitize(key);
-                      text = DOMPurify.sanitize(text);
-                      el[ts.settings.valueField] = key;
-                      el[ts.settings.searchField] = unescape_html(text);
 
-                      ts.addOption(el);
-                      ts.addItem(el[ts.settings.valueField]);
-                    });
-                  } else {
-                    let options = '';
                     Object.entries(results).forEach(([key, text]) => {
-                      key = DOMPurify.sanitize(key);
-                      text = DOMPurify.sanitize(text);
-                      options += '<option value ="' + key + '" selected>' + text + '</option>';
+                      const el = {
+                        key: DOMPurify.sanitize(key),
+                        value: DOMPurify.sanitize(text)
+                      }
+                      ts_add_select_item(ts, el);
                     });
-                    input.innerHTML = options;
-                    options = '';
+                    ts.wrapper.classList.remove('wait-for-results');
+                  } else if (type.indexOf('select') === 0) {
+
+                    input.querySelectorAll('option').forEach(option => {
+                      option.remove();
+                    });
+                    Object.entries(results).forEach(([key, text]) => {
+                      const el = {
+                        key: DOMPurify.sanitize(key),
+                        value: DOMPurify.sanitize(text)
+                      }
+                      add_input_option(input, el);
+                    });
+
+                  } else {
+                    Object.entries(results).forEach(([key, text]) => {
+                      const el = {
+                        key: DOMPurify.sanitize(key),
+                        value: DOMPurify.sanitize(text)
+                      }
+                      add_select_option(input, el);
+                    });
+
                   }
+
                   results = null;
-                  if (ts) ts.wrapper.classList.remove('wait-for-results');
+                  this.setImportedTag(input);
                 });
               }
             } else if (ts) {
-              let el = {};
-              if (typeof(this.imports[name]) == 'string') {
-                el[ts.settings.labelField] = this.imports[name];
-                el[ts.settings.valueField] = this.imports[name];
-                el[ts.settings.searchField] = unescape_html(this.imports[name]);
-              } else {
-                el[ts.settings.labelField] = this.imports[name]['key'];
-                el[ts.settings.valueField] = this.imports[name]['key'];
-                el[ts.settings.searchField] = unescape_html(this.imports[name]['value']);
-              }
-              ts.addOption(el);
-              ts.addItem(el[input.tomselect.settings.valueField]);
-              //  ts.refreshOptions();
+              ts_add_select_item(ts, this.imports[name]);
+              this.setImportedTag(input);
             } else {
-              const type = (input.type) ? input.type : input.tagName.toLowerCase();
-              switch (input.type) {
+              switch (type) {
                 case 'radio':
                 case 'checkbox':
                   input = this.form.querySelector('[name="' + name + '"][value="' + this.imports[name] + '"]');
                   if (input) input.checked = true;
                   break;
-                  /*case 'checkbox':
-                    // TODO ( multiple selection )
-                    this.form.querySelectorAll('[name="' + field + '"]').forEach(input => {
-                      input.checked = (this.imports[name]['key'] === input.value);
-                    });
-                    break;*/
                 case 'select':
-                  // todo select multiple
-                  let option;
-                  if (this.imports[name]['key']) option = '<option value="' + this.imports[name]['key'] + '" selected >' + this.imports[name]['value'] + '</option>';
-                  else option = '<option value="' + this.imports[name] + '" selected >' + this.imports[name] + '</option>'
-                  input.insertAdjacentHTML('beforeend', option);
+                  if (input.multiple) this.imports[name].forEach(data => {
+                    add_select_option(input, data)
+                  });
+                  else add_select_option(input, this.imports[name]);
+
                   break;
                 default:
-
                   input.value = this.imports[name];
                   break;
               }
+              this.setImportedTag(input);
             }
             if (what !== typeimport.settings) input.focus();
-            done = true;
+            done = done && true;
             // set imported tag to fieldbox
-            this.setImportedTag(input);
+
+
           } else if (name === typeimport.privileges) {
-            const clearprivileges = (what === typeimport.settings);
-            done = this.importPrivileges(this.imports[name], clearprivileges);
+            //const clearprivileges = (what === typeimport.settings);
+            const clearprivileges = false;
+            done = done && this.importPrivileges(this.imports[name], clearprivileges);
           }
         });
         break;
     }
-    if (done === true && close == true) this.dismiss();
+    if (done === true && close == true) {
+      this.dismiss();
+      if (this.form) this.form.dispatchEvent(new CustomEvent('validate'));
+    }
   }
 
-  setImportedTag(input, selector = '.form-box') {
+  setImportedTag(input, selector = domselectors.component.form.formbox) {
     let el = (selector === null) ? input : (input.closest(selector) ? input.closest(selector) : input.closest('fieldset'));
     if (!el) return;
-    el.dataset.isimported = this.form.dataset.isimported;
-    el.classList.add('imported');
     const removetag = (e) => {
-      el.removeAttribute('data-isimported');
-      el.classList.remove('imported');
-      input.removeEventListener('change keydown', removetag);
+      delete el.dataset.isimported;
+      el.classList.remove(css.imported);
+      input.removeEventListener('change', removetag);
     }
-    input.addEventListener('change keydown', removetag);
+    el.dataset.isimported = this.form.dataset.isimported;
+    el.classList.add(css.imported);
+    if (input.dataset.unique !== undefined) {
+      input.dataset.unique = input.value;
+    }
+    setTimeout(function() {
+      input.addEventListener('change', removetag);
+    }, 500);
   }
 
   dismiss(clear = false) {

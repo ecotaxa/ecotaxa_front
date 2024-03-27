@@ -1,7 +1,6 @@
 import DOMPurify from 'dompurify';
 import {
   models,
-  alertconfig,
   domselectors,
   css
 } from '../modules/modules-config.js';
@@ -20,17 +19,11 @@ const localcss = {
   wrap: 'password-wrapper'
 };
 export class ActivItems {
-  /*  activate functions */
-  constructor(element = document) {
+  /*  activate function */
+  applyTo(element = document) {
+    element = (document || element instanceof HTMLElement) ? element : document.querySelector(element);
     if (!element) return;
-    let items;
-    items = element.querySelectorAll('[data-action]');
-    this.activateActions(items);
-
-  }
-
-  async activateActions(items) {
-    items.forEach(async (item) => {
+    element.querySelectorAll('[data-action]').forEach(async (item) => {
       const ev = item.dataset.event || 'click';
       const action = item.dataset.action;
       switch (action) {
@@ -147,23 +140,7 @@ export class ActivItems {
             item.dataset.contentlength = response.headers.get('Content-Length');*/
           });
           break;
-        case 'dismisscook':
-          item.addEventListener('click', (e) => {
-            if (item.dataset.cook && item.dataset.value != undefined) {
-              const params = new FormData();
-              params.append("name", item.dataset.cook);
-              params.append("value", item.dataset.value);
-              fetch('/gui/setmsgcookie', fetchSettings({
-                method: "POST",
-                body: params
-              }));
-            }
-            if (item.dataset.dismiss) {
-              const target = document.getElementById(item.dataset.dismiss);
-              if (target) target.remove();
-            }
-          });
-          break;
+
         case 'togglecheckall':
           if (!item.dataset.target) return;
           item.addEventListener(((item.dataset.event) ? item.dataset.event : 'change'), (e) => {
@@ -177,14 +154,6 @@ export class ActivItems {
             e.preventDefault();
           });
           item.classList.add(css.disabled);
-          break;
-        case 'viewall':
-          const target = item.closest(item.dataset.target);
-          if (target === null) return;
-          item.addEventListener('click', (e) => {
-            if (!target.classList.contains('viewall') && target.firstChild.offsetHeight <= target.offsetHeight) return;
-            target.classList.toggle('viewall');
-          })
           break;
         case 'discard':
           const inputs = (item.dataset.target) ? item.dataset.target.split(',') : null;
@@ -218,7 +187,28 @@ export class ActivItems {
             });
           }));
           break;
+        case 'confirm':
+          item.addEventListener((item.dataset.event) ? item.dataset.event : 'click', async (e) => {
+            e.preventDefault();
+            let rep = false;
+            const message = (item.dataset.content) ? item.dataset.content : `Do you really want to ` + item.textContent + '?';
+            const options = (item.href) ? {
+              href: item.href
+            } : {};
+            if (window.alertbox) {
+              rep = await window.alertbox.createAlert('confirm', message, null, options);
+              if (rep === true && item.form) {
+                if (item.form.formsubmit) {
+                  console.log('formsubmit', item.form.formsubmit);
+                  item.form.formsubmit.submitForm();
+                } else item.form.submit();
+              }
+            } else if (window.confirm(message)) rep = true;
+            //  if (rep === true && e.target.type && e.target.)
 
+            return rep;
+          });
+          break;
 
       }
 

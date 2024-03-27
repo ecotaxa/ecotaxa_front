@@ -2,11 +2,9 @@ import {
   css,
   domselectors
 } from '../modules/modules-config.js';
-let instance = null;
 export class JsTabs {
-
   constructor(item, options = {}) {
-    if (!instance) {
+    if (!item.jstabs) {
       let btns = item.querySelectorAll(domselectors.component.tabs.tabcontrol);
       if (btns.length === 0) {
         btns = item.querySelectorAll(((item.dataset.selector) ? item.dataset.selector : 'legend'));
@@ -42,9 +40,9 @@ export class JsTabs {
         });
       })
       if (!item.dataset.toggle) this.toggleDisplayListener(item, btns);
-      instance = this;
+      item.jstabs = this;
     }
-    return instance;
+    return item.jstabs;
   }
 
   toggleTab(tab, show) {

@@ -1,5 +1,6 @@
 import {
   fetchSettings,
+  html_spinner
 } from '../modules/utils.js';
 
 export function jobMonitor(item) {
@@ -12,7 +13,7 @@ export function jobMonitor(item) {
     P: 'Waiting'
   }
   if (!jobid) return;
-  const spinner = document.getElementById('spinner-icon');
+  if (item.dataset.state && ['E', 'F', 'A'].indexOf(item.dataset.state) >= 0) return;
   const divstate = document.getElementById("divstate");
   let responsediv = document.getElementById("responsediv");
   if (responsediv === null) {
@@ -20,9 +21,10 @@ export function jobMonitor(item) {
     responsediv.id = 'responsediv';
     item.prepend(responsediv);
   }
+
   let stop = false;
   let cl = 'is-pending';
-  const progress_bar = (state, percent = 0, msg = "") => {
+  const progress_bar = function(state, percent = 0, msg = "") {
     if (!percent) percent = 0;
     const progressbar = document.getElementById('progressbar');
     responsediv.textContent = msg;
@@ -50,11 +52,28 @@ export function jobMonitor(item) {
       }
     }
   }
+
+  const spinner_icon = function(state) {
+    const spinner = document.getElementById('spinner-icon');
+    if (spinner === null) return;
+    switch (state) {
+      case 'R':
+      case 'P':
+        if (spinner) spinner.classList.remove('hidden');
+        const svg = spinner.querySelector('svg');
+        if (svg === null) spinner.insertAdjacentHTML('afterbegin', html_spinner('text-stone-700'));
+        break;
+      default:
+        spinner.remove();
+        break;
+    }
+  }
+
   const display_errors = (errors, jobstate) => {
     if (!errors || errors.length === 0) return;
     if (errors.length && jobstate != 'E' && jobstate !== 'F') {
       const divalert = responsediv.querySelector('.alert');
-      if (divalert === null) responsediv.insertAdjacentHTML('beforeend', `<div class="alert alert-danger inverse" data-dismissible="true">${errors.join(`<br>`)}</div> `);
+      if (divalert === null) responsediv.insertAdjacentHTML('beforeend', `<div class="alert danger inverse" data-dismissible="true">${errors.join(`<br>`)}</div> `);
       else divalert.insertAdjacentHTML('beforeend', errors.join(`<br>`));
     }
   }
@@ -67,30 +86,29 @@ export function jobMonitor(item) {
   const go_next = (url, title, type = "secondary") => {
     return `<a href="${url}" class="button  is-${type}">${title}</a>`;
   }
-  const set_jobstate = (job) => {
+  const set_jobstate = (state) => {
     if (!divstate) return;
-    divstate.innerText = jobStates[job.state];
+    divstate.innerText = jobStates[state];
   }
   let html = [];
   const check_job_status = () => {
-
     fetch("/gui/job/status/" + jobid, fetchSettings).then(response => response.json()).then(job => {
 
       if (job) {
-        set_jobstate(job);
-        if (spinner) spinner.classList.remove('hidden');
-        progress_bar(job.state, job.progress_pct, job.progress_msg);
+        if (job.state) {
+          set_jobstate(job.state);
+          spinner_icon(job.state);
+          progress_bar(job.state, job.progress_pct, job.progress_msg);
+        }
         switch (job.state) {
           case "A":
             // question
             stop = true;
-            if (spinner) spinner.remove();
             //window.location.href = window.location.origin + "/Job/Question/" + job.id;
             responsediv.innerHTML = `Question waiting for an answer ` + go_next(window.location.origin + "/Job/Question/" + job.id, 'Go', 'warning')
             break;
           case "F":
             stop = true;
-            if (spinner) spinner.remove();
             if (job.finalaction) html.push(job.finalaction);
             break;
           case "E":
@@ -98,7 +116,6 @@ export function jobMonitor(item) {
               display_errors(job.errors, job.state);
             }
             stop = true;
-            if (spinner) spinner.remove();
             break;
           case "P":
             // pending
@@ -118,7 +135,10 @@ export function jobMonitor(item) {
         }
       }
       if (stop === false) setTimeout(check_job_status, 1000);
+
       return;
+    }).catch((err) => {
+      console.log('err', err);
     });
   }
   check_job_status();

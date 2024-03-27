@@ -24,67 +24,7 @@ export class JsComponents {
       actions.forEach(async (action) => {
         if (action.indexOf('js-') === 0) {
           switch (action) {
-            case 'js-privacy':
-              const opts = document.querySelectorAll('.RDOpt')
-              opts.forEach(opt => opt.addEventListener('click', (e) => {
 
-                fetch('/setprivacy/' + DOMPurify.sanitize(e.target.value), fetchSettings()).then(response => response.text()).then(text => {
-                  window.location.reload(true);
-                });
-              }))
-
-              break;
-
-            case 'js-datatable':
-              if (!dynamics.TableComponent) {
-                const {
-                  TableComponent
-                } = await import('../modules/table-component.js');
-                dynamics.TableComponent = TableComponent;
-              }
-
-              const tbl = new dynamics.TableComponent(item);
-              break;
-            case 'js-hierarchy':
-              break;
-            case 'js-autocomplete':
-              if (!item.hasOwnProperty('tomselect')) {
-                if (!dynamics.JsTomSelect) {
-                  const {
-                    JsTomSelect
-                  } = await
-                  import(`../modules/js-tom-select.js`);
-                  dynamics.JsTomSelect = JsTomSelect;
-                }
-                const jsTomSelect = new dynamics.JsTomSelect();
-                jsTomSelect.applyTo(item);
-              }
-              break;
-            case 'js-privilege':
-              if (!dynamics.ProjectPrivileges) {
-                const {
-                  ProjectPrivileges
-                } = await import('../modules/project-privileges.js');
-                dynamics.ProjectPrivileges = ProjectPrivileges;
-              }
-              const projectPrivileges = new dynamics.ProjectPrivileges();
-              break;
-            case 'js-tabs':
-              const jstabs = async () => {
-                if (!dynamics.JsTabs) {
-                  let {
-                    JsTabs
-                  } = await
-                  import(`../modules/js-tabs.js`);
-                  dynamics.JsTabs = JsTabs;
-                }
-                const jsTabs = new dynamics.JsTabs(item);
-              }
-              this.defers.unshift({
-                func: jstabs,
-                async: true
-              });
-              break;
             case 'js-nav':
               const location = window.location.href.split('?');
               const tag = (item.dataset.tag) ? item.dataset.tag : 'ul';
@@ -108,6 +48,143 @@ export class JsComponents {
               burger.addEventListener('click', (e) => {
                 item.classList.toggle('open');
               });
+              break;
+
+            case 'js-autocomplete':
+              if (!item.hasOwnProperty('tomselect')) {
+                if (!dynamics.JsTomSelect) {
+                  const {
+                    JsTomSelect
+                  } = await
+                  import(`../modules/js-tom-select.js`);
+                  dynamics.JsTomSelect = JsTomSelect;
+                }
+                const jsTomSelect = new dynamics.JsTomSelect();
+                jsTomSelect.applyTo(item);
+              }
+              break;
+            case 'js-datatable':
+              if (!dynamics.TableComponent) {
+                const {
+                  TableComponent
+                } = await import('../modules/table-component.js');
+                dynamics.TableComponent = TableComponent;
+              }
+
+              const tbl = new dynamics.TableComponent(item);
+              break;
+            case 'js-privileges':
+              if (!item.hasOwnProperty('privilege')) {
+                if (!dynamics.ProjectPrivileges) {
+                  const {
+                    ProjectPrivileges
+                  } = await import('../modules/project-privileges.js');
+                  dynamics.ProjectPrivileges = ProjectPrivileges;
+                }
+                const projectPrivileges = new dynamics.ProjectPrivileges(item);
+              }
+              break;
+            case 'js-tabs':
+              const jstabs = async () => {
+                if (!dynamics.JsTabs) {
+                  let {
+                    JsTabs
+                  } = await
+                  import(`../modules/js-tabs.js`);
+                  dynamics.JsTabs = JsTabs;
+                }
+                const jsTabs = new dynamics.JsTabs(item);
+              }
+              this.defers.unshift({
+                func: jstabs,
+                async: true
+              });
+              break;
+
+
+            case "js-submit":
+              if (!dynamics.FormSubmit) {
+                let {
+                  FormSubmit
+                } = await
+                import(`../modules/form-submit.js`);
+                dynamics.FormSubmit = FormSubmit;
+              }
+              const formSubmit = new dynamics.FormSubmit(item);
+              break;
+            case 'js-captcha':
+              if (!dynamics.JsCaptcha) {
+                const {
+                  JsCaptcha
+                } = await import('../modules/js-captcha.js');
+                dynamics.JsCaptcha = JsCaptcha;
+              }
+              const jsCaptcha = new dynamics.JsCaptcha(item);
+              jsCaptcha.init();
+              break;
+            case 'js-alert':
+              if (!item.dataset.message) return;
+              window.alertbox.applyTo(item);
+              break;
+            case 'js-notifications':
+              const checkNotifs = (tim) => {
+                fetch('/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {
+                  item.innerHTML = DOMPurify.sanitize(html);
+                  if (tim < 30000) tim = 30000;
+                  //setTimeout(() => {checkNotifs(tim);}, tim);
+                });
+              };
+              //checkNotifs(30000);
+              this.defers.push({
+                func: checkNotifs,
+                args: 30000
+              });
+              break;
+            case 'js-accordion':
+              if (!dynamics.JsAccordion) {
+                let {
+                  JsAccordion
+                } = await
+                import(`../modules/js-accordion.js`);
+                dynamics.JsAccordion = JsAccordion;
+              }
+              item.querySelectorAll(((item.dataset.detail) ? item.dataset.detail : 'detail')).forEach(el => {
+                const summary = el.querySelector(((item.dataset.summary) ? item.dataset.summary : 'summary'));
+                const jsAccordion = new dynamics.JsAccordion(el, null, null, null, {}, summary);
+              });
+              break;
+            case "js-taxomapping":
+              if (!dynamics.TaxoMapping) {
+                let {
+                  TaxoMapping
+                } = await
+                import(`../modules/js-taxomapping.js`);
+                dynamics.TaxoMapping = TaxoMapping;
+              }
+              const taxomapping = new dynamics.TaxoMapping(item);
+
+              break;
+            case 'js-license':
+              if (!dynamics.format_license) {
+                let {
+                  format_license
+                } = await
+                import(`../modules/utils.js`);
+                dynamics.format_license = format_license;
+              }
+              item.innerHTML = dynamics.format_license(DOMPurify.sanitize(item.innerHTML), (item.dataset.withlink));
+              break;
+            case 'js-privacy':
+              const opts = document.querySelectorAll('.RDOpt')
+              opts.forEach(opt => opt.addEventListener('click', (e) => {
+
+                fetch('/setprivacy/' + DOMPurify.sanitize(e.target.value), fetchSettings()).then(response => response.text()).then(text => {
+                  window.location.reload(true);
+                });
+              }))
+
+              break;
+            case 'js-hierarchy':
               break;
             case 'js-import':
               if (!dynamics.JsImport) {
@@ -139,85 +216,6 @@ export class JsComponents {
               }
               const jsUpload = new dynamics.JsUpload(item);
               break;
-            case "js-submit":
-              if (!dynamics.FormSubmit) {
-                let {
-                  FormSubmit
-                } = await
-                import(`../modules/form-submit.js`);
-                dynamics.FormSubmit = FormSubmit;
-              }
-              const formSubmit = new dynamics.FormSubmit(item);
-              break;
-            case 'js-captcha':
-              if (!dynamics.JsCaptcha) {
-                const {
-                  JsCaptcha
-                } = await import('../modules/js-captcha.js');
-                dynamics.JsCaptcha = JsCaptcha;
-              }
-              const jsCaptcha = new dynamics.JsCaptcha(item);
-              jsCaptcha.init();
-              break;
-            case 'js-alert':
-              if (!item.dataset.message) return;
-              if (!dynamics.AlertBox) {
-                let {
-                  AlertBox
-                } = await
-                import(`../modules/alert-boxes.js`);
-                dynamics.AlertBox = AlertBox;
-              }
-              const alert = new dynamics.AlertBox().build(item);
-              break;
-            case 'js-notifications':
-              const checkNotifs = (tim) => {
-                fetch('/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {
-                  item.innerHTML = DOMPurify.sanitize(html);
-                  if (tim < 30000) tim = 30000;
-                  //setTimeout(() => {checkNotifs(tim);}, tim);
-                });
-              };
-              //checkNotifs(30000);
-              this.defers.push({
-                func: checkNotifs,
-                args: 30000
-              });
-              break;
-            case 'js-accordion':
-              if (!dynamics.JsAccordion) {
-                let {
-                  JsAccordion
-                } = await
-                import(`../modules/js-accordion.js`);
-                dynamics.JsAccordion = JsAccordion;
-              }
-              item.querySelectorAll(((item.dataset.detail) ? item.dataset.detail : 'detail')).forEach(el => {
-                const summary = el.querySelector(((item.dataset.summary) ? item.dataset.summary : 'summary'));
-                const jsAccordion = new dynamics.JsAccordion(el, null, null, null, {}, summary);
-              })
-              break;
-            case "js-taxomapping":
-              if (!dynamics.TaxoMapping) {
-                let {
-                  TaxoMapping
-                } = await
-                import(`../modules/js-taxomapping.js`);
-                dynamics.TaxoMapping = TaxoMapping;
-              }
-              const taxomapping = new dynamics.TaxoMapping(item);
-
-              break;
-            case 'js-license':
-              if (!dynamics.format_license) {
-                let {
-                  format_license
-                } = await
-                import(`../modules/utils.js`);
-                dynamics.format_license = format_license;
-              }
-              item.innerHTML = dynamics.format_license(DOMPurify.sanitize(item.innerHTML), (item.dataset.withlink));
-              break;
             case 'js-observer':
               /*  const observer = new MutationObserver(mutations => {
                   for (const mutation of mutations) {
@@ -241,9 +239,6 @@ export class JsComponents {
                 subtree: true
               });
               this.init(item);*/
-              break;
-            case 'js-addtags':
-
               break;
           }
         }

@@ -1,3 +1,6 @@
+/*icon size for close items multiples*/
+.icon-xs {@apply h-2.5 w-2.5  }
+/**/
 .ts-wrapper.single .ts-control, .ts-wrapper.single .ts-control input {@apply cursor-pointer}
 .ts-wrapper .dropdown-header {@apply relative py-[10px] px-[8px] border-b border-stone-50 rounded-t bg-stone-50
 }
@@ -16,11 +19,8 @@ padding : calc(8px - 2px - 0) 8px calc(8px - 2px - 3px - 0);
 }
 .focus .ts-control {@apply shadow-none}
 .ts-control > * {@apply inline-block align-baseline}
-.ts-wrapper.multi .ts-control > div {@apply cursor-pointer text-stone-800 mt-0 mb-[3px] ml-0 mr-[3px] px-[6px] py-[2px]  bg-stone-50 border-none;
-}
-.ts-wrapper.multi .ts-control > div.active {@apply font-normal text-stone-800 border-none}
 .ts-wrapper.multi.disabled .ts-control > div, .ts-wrapper.multi.disabled .ts-control > div.active {@apply  border-none text-stone-600}
-.ts-control > input {@apply inline-block p-0 min-h-0 max-w-full min-w-[7rem] m-0 border-none bg-transparent select-auto shadow-none indent-0 flex-grow flex-shrink basis-auto}
+.ts-control > input {@apply inline-block p-0 min-h-0 max-w-full min-w-[7rem] m-0 border-none bg-transparent select-auto shadow-none indent-0  flex-grow flex-shrink basis-auto}
 .ts-control > input::-ms-clear {@apply hidden;}
 .ts-control > input:focus {@apply outline-none}
 .has-items .ts-control > input {@apply my-0 mx-[4px]}
@@ -93,31 +93,40 @@ transform : rotate(360deg);
 /*******************************/
 /* tom-select                  */
 /*******************************/
-
-.ts-dropdown, .ts-wrapper .item , .ts-control input {@apply text-stone-700 text-sm md:text-base rounded  leading-normal mr-2 sm:mr-0 !important}
+.ts-wrapper.multi .ts-control > div {@apply cursor-pointer text-stone-800 mt-0 mb-[3px] ml-0 mr-[3px] px-[6px] py-[2px]  bg-stone-50 border-none;
+}
+.ts-wrapper.multi .ts-control > div.active {@apply font-normal text-stone-800 border-none}
+.ts-dropdown, .ts-wrapper .item , .ts-control input {@apply text-stone-700 text-sm md:text-base rounded  leading-normal mr-2 sm:mr-0 }
 .ts-control input {@apply font-normal  text-secondblue-400 py-0 !important}
-option[disabled][hidden], .ts-control .item[data-value=""] {@apply text-stone-300 focus:font-medium !important}
+option[disabled][hidden], .ts-control > div.item[data-value=""] {@apply text-stone-300 focus:font-medium }
 /* style for single */
-.ts-wrapper.single .item {@apply leading-normal bg-white rounded}
-.ts-wrapper.single .item.hide {@apply hidden}
+.ts-wrapper.single .ts-control > div.item {@apply leading-normal bg-white rounded}
+.ts-wrapper.single .ts-control > div.item.hide {@apply hidden}
 /* style for multiple */
 .ts-wrapper .ts-control {@apply block  m-0}
 .ts-wrapper.single , .ts-wrapper.multi   {@apply rounded border border-stone-300 ring-0 }
 .ts-wrapper.multi.focus .ts-control {@apply border-transparent ring-0 outline-none  }
 .ts-wrapper.single.focus , .ts-wrapper.multi.focus {@apply rounded border border-secondblue-300 ring-0 outline-none bg-transparent }
-
-.ts-wrapper.multi  .item  {@apply py-1 flex inline-flex text-xs rounded bg-stone-100 text-stone-900 shadow w-auto inline px-1.5 pl-1 ml-1  my-1 align-middle !important;}
+.ts-wrapper.multi  .ts-control > div.item  {@apply py-1 flex inline-flex text-xs rounded bg-stone-100 text-stone-900 shadow w-auto inline px-1.5 pl-1 ml-1  my-1 align-middle ;}
 .ts-dropdown .option {@apply text-sm text-stone-800 }
 .ts-dropdown .option.active , .ts-dropdown .option:hover, .ts-dropdown .option:active {@apply font-normal text-stone-800 !important}
-.ts-wrapper.multi .item.active {@apply text-stone-700 font-light}
-.ts-wrapper.multi .item.last-active {@apply text-stone-700 bg-stone-50 }
-.ts-wrapper.multi .item.active.last-active {@apply text-stone-900 bg-stone-50 font-medium}
-.ts-wrapper.multi .item.new {@apply border border-stone-300 bg-white text-stone-900  }
-
-select[class*="ts-hidden"] {@apply hidden}
+.ts-wrapper.multi .ts-control > div.item.active {@apply text-stone-700 font-light}
+.ts-wrapper.multi .ts-control > div.item.last-active {@apply text-stone-700 bg-stone-50 }
+.ts-wrapper.multi .ts-control > div.item.active.last-active {@apply text-stone-900 bg-stone-50 font-medium}
 .ts-dropdown-content {@apply block text-base}
 .ts-dropdown-content[type='taxo'] {@apply block text-sm }
+/* form */
+select[class*="ts-hidden"] {@apply hidden}
+/*tom-select*/
+[class^="form-"] + .ts-wrapper {@apply border border-stone-300 ring-0}
+[class^="form-"]:valid + .ts-wrapper , [class^="form-"]:valid + .ts-wrapper.multi {@apply  border-secondblue-300 ring-0}
+[class^="form-"]:invalid + .ts-wrapper, [class^="form-"]:invalid + .ts-wrapper.multi {@apply  border-danger-400 ring-0}
+.ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto; }
+.ts-wrapper .item .ts-delet::before {@apply icon-cancel}
+
 #section-privileges .ts-wrapper.form-select { @apply border-0  }
 #section-privileges .ts-wrapper.form-select.focus { @apply text-secondblue-400 bg-secondblue-50  }
+/* import */
+.ts-wrapper.multi .ts-control > div.item.new {@apply bg-stone-50 font-normal text-stone-900 }
 /* import privileges */
-.ts-wrapper.multi .item[data-inlist] {@apply before:underline  before:underline-offset-2 drop-shadow-none before:decoration-secondblue-500 font-normal bg-stone-50 shadow-none }
+.ts-wrapper.multi .ts-control > div.item[data-inlist] {@apply before:underline  before:underline-offset-2 drop-shadow-none before:decoration-secondblue-500 font-normal bg-stone-50 shadow-none }

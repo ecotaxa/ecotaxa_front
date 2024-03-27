@@ -7,7 +7,7 @@ import {
   string_to_boolean,
   sort_items,
   is_object,
-  debounce
+  debounce,
 } from '../modules/utils.js';
 import {
   css,
@@ -127,7 +127,7 @@ export class TableComponent {
         class: tableselectors.top.substr(1)
       }
     };
-    if (this.params.sortable) top.childnodes = [{
+    if (this.params.searchable) top.childnodes = [{
       nodename: "DIV",
       attributes: {
         class: tableselectors.search.substr(1)
@@ -253,6 +253,12 @@ export class TableComponent {
           th.innerHTML = DOMPurify.sanitize(column.label);
           if (column.sort) th.dataset.sort = column.sort;
           if (column.format) th.dataset.type = column.type;
+          if (column.name) th.dataset.name = column.name;
+          // TODO - find a place to define col import props
+          // set headings dataset values for import module
+          if (this.params.import)['selectcells', 'what', 'autocomplete', 'parts', 'value'].forEach(prop => {
+            if (column.hasOwnProperty(prop)) th.dataset[prop] = column[prop];
+          });
           th.dataset.sortable = (column.sortable) ? true : false;
           tr.appendChild(th);
           this.grid.active.push(index);
@@ -535,7 +541,6 @@ export class TableComponent {
         if (isNaN(value)) value = 0;
         value = parseFloat(value).toFixed(2);
         if (value - parseInt(value) === 0) value = parseInt(value);
-
         if (!td.hasOwnProperty('attributes')) td.attributes = {};
         td.attributes.class = css.number;
         td.childnodes = [this.setTextNode(value)];
@@ -854,7 +859,13 @@ export class TableComponent {
         const found = data.filter(cell => {
           switch (typeof cell) {
             case 'object':
-              cell = (cell) ? Object.values(cell).join(' ') : ``;
+              cell = (cell) ? cell : ``;
+              try {
+                cell = JSON.stringify(cell);
+              } catch (err) {
+                console.log('search', err);
+                cell = ``;
+              }
               break;
             case 'array':
               cell = cell.join(' ');
@@ -1215,20 +1226,31 @@ export class TableComponent {
           tip.classList.remove(tablecss.showfull);
           tip.parentElement.style.minHeight = 'none';
           tip.parentElement.style.height = 'auto';
-          tip.style.maxWidth = tip.dataset.w + 'px';
-          tip.style.padding = tip.dataset.p + 'px';
+          tip.style.maxWidth = tip.style.minWidth = 'none';
+          if (tip.dataset.p) {
+            tip.style.paddingLeft = tip.dataset.p.l;
+            tip.style.paddingRight = tip.dataset.p.r;
+            tip.style.paddingTop = tip.dataset.p.t;
+            tip.style.paddingLeft = tip.dataset.p.b;
+          }
           current = null;
         } else if (tip.scrollHeight > tip.offsetHeight) {
           if (current) current.classList.remove(tablecss.showfull);
+
           const h = parseInt(tip.clientHeight);
           tip.parentElement.style.minHeight = tip.parentElement.style.height = (((h < parseInt(styleparent.maxHeight)) ? h : parseInt(styleparent.maxHeight)) - 2 * parseInt(styleparent.padding)) + 'px';
-          if (!tip.dataset.w) tip.dataset.w = parseInt(tip.clientWidth);
-          if (!tip.dataset.p) tip.dataset.p = parseInt(style.padding);
-          tip.style.maxWidth = parseInt(tip.clientWidth) + 'px';
+
+          if (!tip.dataset.p) tip.dataset.p = {
+            l: style.paddingLeft,
+            r: style.paddingRight,
+            t: style.paddingTop,
+            b: style.paddingBottom
+          };
+          tip.style.maxWidth = tip.style.minWidth = tip.clientWidth + 'px';
           tip.classList.add(tablecss.showfull);
           tip.style.top = (parseInt(tip.offsetTop) - parseInt(styleparent.padding)) + 'px';
-          current = tip;
 
+          current = tip;
         }
 
       });

@@ -132,6 +132,7 @@ module.exports = {
       },
       done: {
         'light': '#F0FDF4',
+        'medium': '#1ffb53',
         'dark': '#0fab33',
       },
       err: {
@@ -860,14 +861,17 @@ module.exports = {
       prose: '65ch',
       ...breakpoints(theme('screens')),
     }),
-    minHeight: {
+    minHeight: ({
+      theme
+    }) => ({
+      ...theme('spacing'),
       0: '0px',
       full: '100%',
       screen: '100vh',
       min: 'min-content',
       max: 'max-content',
       fit: 'fit-content',
-    },
+    }),
     minWidth: {
       0: '0px',
       full: '100%',

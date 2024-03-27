@@ -8,13 +8,14 @@ import TomSelect_caret_position from 'tom-select/dist/js/plugins/caret_position.
 TomSelect.define('remove_button', TomSelect_remove_button);
 TomSelect.define('clear_button', TomSelect_clear_button);
 TomSelect.define('caret_position', TomSelect_caret_position);
-
 import {
   fetchSettings
 } from '../modules/utils.js';
 import {
   models,
-  domselectors
+  domselectors,
+  css,
+  alertconfig
 } from '../modules/modules-config.js';
 let users_list = {};
 
@@ -33,11 +34,9 @@ function _get_label(el, labelfield, item = false) {
 // settings for autocomplete select component - users , instruments , taxons
 export class JsTomSelect {
   applyTo(item, settings = {}, siblings = null) {
-
     const id = item.getAttribute('id');
     const multiple = item.hasAttribute('multiple');
     const type = item.dataset.type;
-
     let option = {
         url: '',
         settings: settings
@@ -53,7 +52,7 @@ export class JsTomSelect {
       }
     if (item.dataset.create && item.dataset.create === 'true') {
       //  option.settings.create = true;
-      //    option.settings.createOnBlur = true;
+      //  option.settings.createOnBlur = true;
       option.settings.create = true;
       option.settings.addPrecedence = true;
     }
@@ -95,8 +94,8 @@ export class JsTomSelect {
         };
 
         break;
-
       case models.user:
+        if (item.currentlist) users_list = item.currentlist;
         option.url = "/api/users/search?by_name=";
         option.settings = { ...option.settings,
           ...{
@@ -105,17 +104,35 @@ export class JsTomSelect {
             labelField: 'name+email',
             onInitialize: function() {
               item.tomselect.items.forEach(e => {
-                users_list[e] = true;
+                if (e !== '' && parseInt(e) > 0) users_list[e] = true;
               });
             },
             onItemAdd: function(e) {
               if (e === "") return;
               if (users_list[e]) {
-                users_list[e] = false;
-                if (multiple || !this.revertSettings || this.revertSettings.tabIndex < 0 || !item.options.length) return;
-                const revert = item.options[this.revertSettings.tabIndex].value;
-                this.removeOption(e);
-                this.addItem(revert);
+                //  if (multiple || !this.revertSettings || this.revertSettings.tabIndex < 0 || !item.options.length) return;
+                if (window.alertbox) {
+                  window.alertbox.addMessage(alertconfig.types.error, item, 'exists');
+                } else {
+                  item.dataset.invalid = 'exists';
+                  item.dispatchEvent(new Event('invalid'));
+                }
+                setTimeout(() => {
+                  this.removeOption(e);
+                  if (this.revertSettings.tabIndex < 0 || !item.options.length || !this.revertSettings) {
+                    this.removeItem(e);
+                    users_list[e] = true;
+                  } else {
+                    const revert = item.options[this.revertSettings.tabIndex].value;
+                    this.addItem(revert);
+                  }
+                  if (window.alertbox) {
+                    window.alertbox.removeMessage(window.alertconfig.types.danger, item, window.alertconfig.i18nmessages.exists);
+                  } else {
+                    delete item.dataset.invalid;
+                    item.dispatchEvent(new Event('undeterminate'));
+                  }
+                }, 1000);
               } else users_list[e] = true;
             },
             onItemRemove: function(e) {
@@ -125,7 +142,6 @@ export class JsTomSelect {
               if (users_list[revert] !== undefined) delete users_list[revert];
 
             }
-
           }
         };
         break;
@@ -306,7 +322,6 @@ export class JsTomSelect {
     option.settings = Object.assign(default_settings, option.settings)
     if (id !== null) {
       const ts = new TomSelect('#' + id, option.settings);
-
       ts.wrapper.classList.remove(domselectors.component.tomselect.ident);
       ts.wrapper.classList.remove('js');
       // add

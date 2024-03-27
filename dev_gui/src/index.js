@@ -11,28 +11,21 @@ import {
 import {
   ActivRequest
 } from "../src/modules/activ-request.js";
-
-
 // initializze tools and triggered tools
-// triggered elements creation and actions
-// dropdowns
-/*  document.querySelectorAll('nav .dropdown').forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      item.classList.toggle('over');
-    });
-  });*/
+
 window.addEventListener('load', async () => {
+  // global alert dialog system
+  window.alertbox = await new AlertBox(document);
   // enhance ui activate components  js js-componentname
   const jsComponents = new JsComponents();
   jsComponents.applyTo();
   /*** activate data-action  **/
-  const activItems = new ActivItems(document);
-  /* alert boxes */
-  const alertBox = new AlertBox();
+  const activItems = new ActivItems();
+  activItems.applyTo(document);
   /* fetch request -modal - contextual help */
   const activRequest = new ActivRequest();
   activRequest.applyTo(document);
+  window.alertbox.alertMessages();
 });
 // 'unload'do not use for the moment as it changes history back
 /*window.addEventListener('unload', (e) => {

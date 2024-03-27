@@ -48,14 +48,17 @@ export class ActivRequest {
 
         const modalbox = (modal) ? modal.modal : null;
         if (!modal || !modalbox) return;
+        if (item.dataset.close) return;
         const file = (item.dataset.file) ? ((item.dataset.file !== modalbox.dataset.currentfile) ? item.dataset.file : null) : modalbox.dataset.file;
         const target = (item.dataset.target) ? document.getElementById(item.dataset.target) : modalbox.querySelector(domselectors.component.modal.mainhelp + ' > div');
         if (!target) return;
         if (target && file) {
+          const params = {
+            partial: true,
+            title: item.textContent,
+          };
           url = '/gui/help/' + file + '?' +
-            new URLSearchParams({
-              partial: true
-            });
+            new URLSearchParams(params);
           callback = (html) => {
             html = html instanceof HTMLElement ? html.outerHTML : html;
             modalbox.dataset.currentfile = file;

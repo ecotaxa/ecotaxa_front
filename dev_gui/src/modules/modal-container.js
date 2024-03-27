@@ -64,23 +64,22 @@ export class ModalContainer {
     return this.modal.querySelector(selector);
   }
   modalOpen(trigger) {
-    if (!this.modal.hasOwnProperty('open')) this.modal.open = true;
+    if (!trigger.dataset.close && !this.modal.open) this.modal.open = true;
     this.openContent(trigger);
   }
 
   openContent(trigger) {
-
     if (!trigger.dataset.for) return;
     if (trigger.dataset.close) return this.dismissModal();
     if (this.modal.classList.contains(domselectors.component.modal.help.substr(1))) {
       const siblings = this.getContentSiblings();
       siblings.forEach(sibling => {
-        if (sibling !== trigger) sibling.removeAttribute('open');
+        if (sibling !== trigger) sibling.open = false;
       });
       trigger.dataset.for.split('#').forEach(tr => {
         const paragraph = this.modal.querySelector('#' + tr);
         if (paragraph) paragraph.open = true;
-        else console.log('help ' + tr + 'display error', this.modal);
+        else console.log('help ' + tr + 'display error');
       })
 
 
@@ -91,8 +90,8 @@ export class ModalContainer {
 
   toggleAction(trigger) {
     const summary = this.modal.querySelector('summary');
-    let action = trigger.dataset.action;
-    if (!action) return;
+    /*  let action = trigger.dataset.action;
+      if (!action) return;*/
     if (trigger.dataset.what) {
       document.querySelectorAll('[data-close]').forEach(sibling => {
         if (sibling !== trigger) delete sibling.dataset.close;

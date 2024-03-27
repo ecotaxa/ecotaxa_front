@@ -137,7 +137,7 @@ export class TaxoMapping {
       return true;
     };
     if (form.formsubmit) {
-      form.formsubmit.addHandler(format_mapping_field);
+      form.formsubmit.addHandler('submit', format_mapping_field);
 
     } else form.addEventListener('submit', (e) => {
       format_mapping_field();

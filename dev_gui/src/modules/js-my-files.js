@@ -10,17 +10,13 @@ import {
 } from '../modules/modules-config.js';
 import {
   generate_uuid,
-} from '../modules/files/file-utils.js';
-import {
-  AlertBox
-} from "../modules/alert-boxes.js";
+} from '../modules/utils.js';
 const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
 const localcss = {
   mright: 'mr-4',
 }
 let instance = null;
 export class JsMyFiles {
-  alertBox = null;
   done = true;
   jsDirToZip = null;
   counters = {};
@@ -339,21 +335,18 @@ export class JsMyFiles {
           switch (e.name) {
             case 'console':
               console.log('console', e);
-              type = 'warning'
+              type = window.alertbox.alertconfig.types.warning;
               break;
             case 'error':
-              type = 'error';
+              type = window.alertbox.alertconfig.types.error;
               console.log('error', e);
             default:
               console.log('message', e);
           }
-          if (this.alertBox === null) this.alertBox = this.alertBox = new AlertBox();
-          await this.alertBox.build({
-            dismissible: true,
-            message: e.message,
-            codeid: true,
-            parent: this.container,
+          window.alertbox.renderMessage({
             type: type,
+            content: e.message,
+            dismissible: true
           });
         });
         const self = this;
