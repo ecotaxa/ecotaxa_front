@@ -8,10 +8,8 @@ import sys
 import traceback
 import urllib.parse
 from typing import List, Optional
-
 from flask import Flask, render_template, Markup, request, g
 from flask_login import current_user, LoginManager
-
 from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 from appli.security_on_backend import user_from_api
@@ -336,11 +334,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.3.2"
+ecotaxa_version = "2.7.4"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2024-02-09"
+    return ecotaxa_version + " 2024-03-26"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -351,6 +349,21 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2024-03-26: V 2.7.4
+    Fix removed "Fix categories issues"
+    Feature Notification module
+    Feature form fields error and warning messages with translations
+    Feature & Fix Maintenance messages
+    Fix removed add_ticket in users
+    Improve Help project settings get licenses def from back
+    Feature spinner icon on save form buttons
+    Fix in filtered delete removed checkbox "delete project"
+    Feature added delete objects and / or project confirmation
+    Fix project privileges no duplicate user
+    Feature project privileges sorted by privilege and name
+    Fix job monitor stayed at 99%
+    Feature link to "About project" in classification page
+    Fix homepage message - active , no expiration  
 2024-02-09: V 2.7.3.2
     Fix && Feature import from projects : re-enable selected rows
     Feature js-submit prevent form enter submit (needed for modal)
