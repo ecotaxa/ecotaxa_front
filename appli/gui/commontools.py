@@ -23,18 +23,23 @@ from appli.constants import (
 def _get_last_refresh() -> str:
     if not current_user.is_authenticated:
         return None
-    import datetime
+    from datetime import datetime
 
     try:
         with ApiClient(TaxonomyTreeApi, request) as apiTaxo:
             status: TaxonomyTreeStatus = apiTaxo.taxa_tree_status()
-            last_refresh = datetime.datetime.strptime(
-                status.last_refresh, "%Y-%m-%dT%H:%M:%S"
-            )
+            last_refresh = datetime.strptime(status.last_refresh, "%Y-%m-%dT%H:%M:%S")
     except (ValueError, TypeError, ApiException):
         last_refresh = None
 
     return last_refresh
+
+
+def possible_licenses() -> dict:
+    from appli.back_config import get_back_constants
+
+    (LICENSE_TEXTS) = get_back_constants(request, "LICENSE")
+    return LICENSE_TEXTS
 
 
 def experimental_header(filename: str = "") -> str:
@@ -115,15 +120,36 @@ def build_mail(emails: str, type: str = "", text: str = "") -> str:
     return render_template("./v2/mail/_mailto.html", emails=emails, type=type)
 
 
-def last_taxo_refresh(partial: bool = False):
-    import datetime
+def last_taxo_refresh(cookiename):
+    if not current_user.is_authenticated:
+        return None
+    from datetime import datetime
 
-    if partial == True:
-        return
+    type = "warning"
+    # cookie for messages  is type+cookiename but for warnings a suffix is needed
+    dailyinfo = request.cookies.get(type + cookiename + "_last_taxo_refresh")
+    dformat = "%Y-%m-%d %H:%M:%S.%f"
+    if dailyinfo != None:
+        if (datetime.strptime(dailyinfo, dformat) - datetime.now()).days < 1:
+            return None
     last_refresh = _get_last_refresh()
-    if last_refresh is None or (datetime.datetime.now() - last_refresh).days > 7:
-
-        flash("taxosynchro", "warning")
+    if (
+        last_refresh != None
+        and (datetime.now() - datetime.strptime(last_refresh, "%Y-%m-%dT%H:%M:%S")).days
+        > 7
+    ):
+        py_messages = py_get_messages()
+        return dict(
+            {
+                "type": type,
+                "content": py_messages["taxosynchro"],
+                "date": last_refresh,
+                "dismissible": True,
+                "is_safe": True,
+                "cookiename": cookiename + "_last_taxo_refresh",
+            }
+        )
+    return None
 
 
 def breadcrumbs(default=None) -> list:
