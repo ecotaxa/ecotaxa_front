@@ -18,6 +18,7 @@ from to_back.ecotaxa_cli_py.models import (
     TaxonModel,
     ProjectTaxoStatsModel,
 )
+from appli.gui.commontools import possible_licenses
 
 ###############################################common for create && edit  #######################################################################
 
@@ -43,13 +44,6 @@ def _possible_models():
 
     scn = {a_model.name: {"name": a_model.name} for a_model in possibles}
     return scn
-
-
-def _possible_licenses():
-    # TODO: Cache of course, it's constants!
-    with ApiClient(MiscApi, request) as api:
-        possibles = api.used_constants().license_texts
-    return possibles
 
 
 def _prj_users_list(ids: list) -> dict:
@@ -111,14 +105,14 @@ def prj_create() -> str:
             rsp: int = api.create_project(req)
         return prj_edit(rsp, new=True)
     scn = _possible_models()
-    possible_licenses = _possible_licenses()
+    licenses = possible_licenses()
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=None,
         members=None,
         new=True,
         scn=scn,
-        possible_licenses=possible_licenses,
+        possible_licenses=licenses,
     )
 
 
@@ -136,6 +130,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
     # data structure used in both display & submit
     redir = ""
     if gvp("save") == "Y":
+
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
         posted_contact_id = None
@@ -157,7 +152,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         posted_contact_id = gvp("contact_user_id")
         target_proj.visible = gvp("visible") == "Y"
         if new != True and previous_cnn != target_proj.cnn_network_id:
-            flash("scnerased", "success")
+            flash(py_messages["scnerased"], "success")
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
         do_update = True
         contact_user = None
@@ -269,7 +264,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
     scn = _possible_models()
 
     # TODO: Cache of course, it's constants!
-    possible_licenses = _possible_licenses()
+    licenses = possible_licenses()
     members_by_right = {
         "Manage": target_proj.managers.copy(),
         "Annotate": target_proj.annotators.copy(),
@@ -284,7 +279,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         scn=scn,
         crsf_token=crsf_token(),
         predeftaxo=predeftaxo,
-        possible_licenses=possible_licenses,
+        possible_licenses=licenses,
         new=new,
         # redir=redir,
     )
