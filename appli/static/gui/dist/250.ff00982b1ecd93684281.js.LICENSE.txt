@@ -1,0 +1,19 @@
+/*! ../modules/form-submit.js */
+
+/*! ../modules/js-my-files.js */
+
+/*! ../modules/modules-config.js */
+
+/*! ../modules/utils.js */
+
+/*! dompurify */
+
+/*! import() */
+
+/*!**********************************!*\
+  !*** ./src/modules/js-import.js ***!
+  \**********************************/
+
+/*!************************************!*\
+  !*** ./src/modules/form-submit.js ***!
+  \************************************/
