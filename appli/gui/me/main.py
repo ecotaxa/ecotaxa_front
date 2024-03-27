@@ -79,13 +79,13 @@ def gui_me_activate(token: str) -> str:
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-        ADD_TICKET,
     ) = get_user_constants(request)
     if request.method == "POST":
 
         from appli.gui.users.users import api_user_activate, _get_value_from_token
 
         partial = is_partial_request(request)
+
         if token:
             err, user_id = _get_value_from_token(token, "id")
             if err == True or user_id == None:
@@ -121,6 +121,9 @@ def gui_me_activate(token: str) -> str:
                 response=response,
                 partial=partial,
             )
+    if token == "no":
+        flash(py_user["profileerror"]["activate"], "warning")
+        return redirect(url_for("gui_login"))
     reCaptchaID = None
     # google recaptcha or homecaptcha
     if RECAPTCHAID == True:
@@ -160,7 +163,6 @@ def gui_me_forgotten(token: str = None) -> str:
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-        ADD_TICKET,
     ) = get_user_constants(request)
     if request.method == "POST":
         partial = True
