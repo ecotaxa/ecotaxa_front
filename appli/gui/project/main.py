@@ -55,7 +55,7 @@ def gui_prj_purge(projid):
             # Query objects, using filters, in project
             with ApiClient(ObjectsApi, request) as api:
                 objectids: List[int] = api.get_object_set(projid, filters).object_ids
-            objlist = (str(r) for r in objectids)
+            objlist = [str(r) for r in objectids]
     else:
         if gvp("objlist") == "DELETEALL":
             # DELETE all objects
@@ -65,6 +65,7 @@ def gui_prj_purge(projid):
                     project_id=projid, only_objects=gvp("destroyproject") != "Y"
                 )
             deleted = dict({"no": no, "noh": noh, "ni": ni, "nf": nbrfile})
+
         else:
             # DELETE some objects in project
             objs = [
@@ -95,7 +96,9 @@ def gui_prj_purge(projid):
 
         if gvp("objlist") == "DELETEALL" and gvp("destroyproject") == "Y":
             backto = True
-            # flash(py_messages["prjdestroyed"], "success")
+            flash(py_messages["prjdestroyed"], "success")
+        elif deleted != None:
+            flash(py_messages["objdeleted"], "success")
 
     return render_template(
         "./v2/project/purge.html",
