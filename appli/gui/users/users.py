@@ -29,7 +29,6 @@ from appli.security_on_backend import ApiUserWrapper
     SHORT_TOKEN_AGE,
     PROFILE_TOKEN_AGE,
     RECAPTCHAID,
-    ADD_TICKET,
 ) = get_user_constants(request)
 
 ACCOUNT_USER_CREATE = "create"
@@ -340,6 +339,7 @@ def _user_posted_data(usrid: int, isfrom: bool, action: str = "create") -> dict:
         "email",
         "organisation",
         "country",
+        "orcid",
         "usercreationreason",
     ]
     if action == "create":
@@ -352,6 +352,7 @@ def _user_posted_data(usrid: int, isfrom: bool, action: str = "create") -> dict:
     posted = {a_field: gvp(a_field).strip() for a_field in fields}
     posted["id"] = usrid
     posted["email"] = posted["email"].strip()
+    posted["orcid"] = posted["orcid"].strip()
     if "lastname" in posted.keys():
         posted["name"] = posted["firstname"] + " " + posted["lastname"]
         del posted["firstname"]
@@ -515,7 +516,6 @@ def account_page(
         createaccount=(action == ACCOUNT_USER_CREATE),
         api_email_verification=API_EMAIL_VERIFICATION,
         api_account_validation=API_ACCOUNT_VALIDATION,
-        add_ticket=ADD_TICKET,
         token=token,
         isfrom=isfrom,
         reCaptchaID=reCaptchaID,
