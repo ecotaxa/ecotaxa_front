@@ -39,7 +39,7 @@ def admins_list(role=None, all=False):
 @app.route("/gui/admin/", methods=["GET"])
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
-def admin_home():
+def gui_admin():
     admin_users = dict(
         {
             "application": admins_list(),
@@ -178,7 +178,6 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-        ADD_TICKET,
     ) = get_user_constants(request)
 
     if request.method == "GET" and status_name != "active":
@@ -186,19 +185,12 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
         if status_name != None and status_name in ApiUserStatus.keys():
             user.status = ApiUserStatus[status_name]
         return render_template(
-            "v2/admin/activate.html",
-            user=user,
-            status_name=status_name,
-            add_ticket=ADD_TICKET,
+            "v2/admin/activate.html", user=user, status_name=status_name
         )
     from appli.gui.users.users import api_user_activate
 
     reason = gvp("status_admin_comment", None)
 
-    if ADD_TICKET != "":
-        ticket = gvp("ticket", None)
-        if ticket != None:
-            reason = ticket + ADD_TICKET + reason
     if reason != None and status_name != "blocked":
         status = ApiUserStatus["pending"]
     else:
@@ -304,7 +296,7 @@ def gui_site_message(msgkey) -> str:
         msg = gvp("msg")
         active = gvp("active", 0)
         messages[msgkey] = {
-            "content": msg,
+            "content": str(msg),
             "active": int(active),
             "date": str(datetime.now()),
         }
