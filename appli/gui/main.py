@@ -2,7 +2,8 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import os
-
+import json
+import urllib
 from flask import request, url_for, render_template, redirect, flash
 from flask_login import current_user, login_required
 from appli import app, gvg, gvp, constants
@@ -11,6 +12,7 @@ from to_back.ecotaxa_cli_py.exceptions import ApiException
 from werkzeug.exceptions import NotFound
 from flask_babel import _
 from appli.gui.staticlistes import py_messages, py_user
+from flask import make_response
 
 login_required.login_view = "gui/login"
 
@@ -23,8 +25,7 @@ HOMEPAGE = "/gui/"
 @app.route("/gui/home")
 @app.route("/gui/index")
 def gui_index():
-    ecoparturl = app.config.get("ECOPART_URL", "")
-    return render_template("v2/index.html", ecoparturl=ecoparturl)
+    return render_template("v2/index.html")
 
 
 @app.route("/gui/logout", methods=["GET", "POST"])
@@ -120,8 +121,7 @@ def gui_prj(listall: bool = False) -> str:
 @login_required
 def gui_prjlist() -> str:
     # gzip not really necessary - jsonifiy with separators
-    from flask import make_response
-    import json
+
     from appli.gui.project.projects_list import projects_list
 
     listall = gvg("listall", False)
@@ -132,11 +132,12 @@ def gui_prjlist() -> str:
     typeimport = gvg("typeimport")
     gz = gvg("gzip")
     gz = True
+    encoding = "utf-8"
     content = json.dumps(
         projects_list(listall=listall, typeimport=typeimport),
         separators=[",", ":"],
-    ).encode("utf-8")
-    encoding = "utf-8"
+    ).encode(encoding)
+
     if gz:
         import gzip
 
@@ -197,16 +198,14 @@ def gui_prj_about(projid):
 @app.route("/gui/prjsamplestats/<int:projid>")
 @login_required
 def gui_prj_aboutsamples(projid):
-    from flask import make_response
-    import json
     from appli.gui.project.project_stats import prj_samples_stats
 
     partial = is_partial_request(request)
     format = gvg("format", "json")
     content = prj_samples_stats(projid, partial=partial, format=format)
     if format == "json":
-        content = json.dumps(content, separators=[",", ":"]).encode("utf-8")
         encoding = "utf-8"
+        content = json.dumps(content, separators=[",", ":"]).encode(encoding)
         response = make_response(content)
         response.headers["Content-length"] = len(content)
         response.headers["Content-Encoding"] = encoding
@@ -219,7 +218,7 @@ def gui_prj_aboutsamples(projid):
 # help
 @app.route("/gui/help/register")
 def gui_help_nologin():
-    return render_template(".v2/help/help_register.html")
+    return render_template(".v2/help/_help_user_profile.html")
 
 
 @app.route("/gui/help/<path:filename>")
@@ -230,16 +229,17 @@ def gui_help(filename):
 
     partial = is_partial_request(request)
     filename = escape(filename)
+    title = gvg("title", None)
     if filename[0:1] != "_":
         return render_template(
-            "/v2/help/index.html", filename=filename, partial=partial
+            "/v2/help/index.html", filename=filename, partial=partial, title=title
         )
     filename = "/v2/help/" + filename + ".html"
     if not exists("appli/templates" + filename):
         return render_template(
             "/v2/help/index.html", notfound=filename, partial=partial
         )
-    return render_template(filename, partial=partial)
+    return render_template(filename, partial=partial, title=title)
 
 
 # alert boxes xhr
@@ -302,12 +302,24 @@ def gui_stream():
 def gui_setmsgcookie():
     cookiename = gvp("name")
     cookievalue = gvp("value")
-    from flask import make_response
-
     response = make_response("")
     if cookiename != "" and cookievalue != "":
         response.set_cookie(cookiename, cookievalue)
     return response, 302
+
+
+# erros messages for js messaging && notifications modules
+@app.route("/gui/i18n", methods=["GET"])
+def gui_i18n():
+    encoding = "utf-8"
+    from appli.gui.staticlistes import py_messages_titles
+
+    content = json.dumps(dict(py_messages, **py_messages_titles)).encode(encoding)
+    response = make_response(content)
+    response.headers["Content-length"] = len(content)
+    response.headers["Content-Encoding"] = encoding
+    response.headers["Content-Type"] = "application/json"
+    return response
 
 
 # @app.route("/gui/adminstream/", methods=["GET", "POST"])
@@ -327,7 +339,6 @@ import appli.gui.collection.main
 # utility display functions for jinja template
 @app.template_filter("urlencode")
 def urlencode_filter(s):
-    import urllib
     from markupsafe import Markup
 
     if type(s) == "Markup":
@@ -398,46 +409,125 @@ def utility_processor():
             referer = HOMEPAGE
         return referrer
 
-    def global_messages() -> str:
+    def get_manager_list(sujet=""):
+        from appli.utils import ApiClient
+        from to_back.ecotaxa_cli_py import (
+            UsersApi,
+            MinUserModel,
+        )
+
+        admin_users: List[MinUserModel]
         if current_user.is_authenticated:
-            from appli.gui.commontools import last_taxo_refresh
+            # With a connected user, return administrators
+            with ApiClient(UsersApi, request) as api:
+                admin_users = api.get_admin_users()
+        else:
+            # With an anonymous user, return user administrators (for account issues)
+            with ApiClient(UsersApi, request) as api:
+                admin_users = api.get_users_admins()
+        if sujet:
+            sujet = "?" + urllib.parse.urlencode({"subject": sujet}).replace("+", "%20")
 
-            last_taxo_refresh()
+        return " ".join(
+            [
+                "<li><a href='mailto:{1}{0}'>{2} ({1})</a></li> ".format(
+                    sujet, r.email, r.name
+                )
+                for r in admin_users
+            ]
+        )
 
-        cookiename = "ecotaxa_userinfo"
+    def global_messages() -> str:
+        listmessages = []
+        taxomessage = None
+        cookiename = app.config.get("APP_GUI_MESSAGE_COOKIE_NAME")
+        from flask import get_flashed_messages
 
-        import json, time
+        # get flashed messages and display in left box
+        flashed = get_flashed_messages(True)
+        if len(flashed):
+            for f in flashed:
+                message = dict(
+                    {
+                        "type": f[0],
+                        "content": f[1],
+                    }
+                )
+                if f[0] == "success":
+                    message["duration"] = 4000
+                else:
+                    message["dismissible"] = True
+                listmessages.append(message)
+        # get maintenance and info messages from admin and display in left box
+        import json
+        from datetime import datetime
 
         file = app.config.get("APP_GUI_MESSAGE_FILE")
-        ret = {}
+
+        content = None
         if os.path.exists(file):
             messages = None
             with open(file, "r", encoding="utf-8") as f:
                 try:
-                    messages = json.loads(f.read())
+                    messages = json.load(f)
                 except json.JSONDecodeError as e:
                     print("Invalid JSON syntax:", e)
+
             if isinstance(messages, dict):
+                # build messages param for template {"type":,"content":,"date":,"dismissible":, duration:}
                 for key, message in messages.items():
                     name = key + cookiename
-                    dailyinfo = request.cookies.get(name)
+                    # homepage active message stays
+                    delta = 0
+                    if key == "homepage":
+                        delta = 10
+                    else:
+                        dailyinfo = request.cookies.get(name)
+                        if dailyinfo != None:
+                            dformat = "%Y-%m-%d %H:%M:%S.%f"
+                            delta = (
+                                datetime.strptime(dailyinfo, dformat)
+                                - datetime.strptime(message["date"], dformat)
+                            ).days
+
                     if isinstance(message, dict) and (
                         "active" in message
                         and message["active"] == 1
                         and "date" in message
-                        and dailyinfo != message["date"]
+                        and delta > 1
                     ):
-                        ret[key] = message
 
-        if len(ret):
-            return {"messages": ret, "cookiename": cookiename}
-        else:
-            return None
+                        if "content" in message:
+                            message["content"] = ("<br>").join(
+                                str(message["content"]).split("\r\n")
+                            )
+                            message["is_safe"] = True
+                        message["type"] = key
+                        message["cookiename"] = cookiename
+                        message["dismissible"] = True
+                        listmessages.append(message)
+            # get taxomessage and display in left box
+            if current_user.is_authenticated:
+                from appli.gui.commontools import last_taxo_refresh
+
+                taxomessage = last_taxo_refresh(cookiename)
+                if isinstance(taxomessage, dict):
+                    listmessages.append(taxomessage)
+
+        return listmessages
+
+    def ecopart_url():
+        return app.config.get("ECOPART_URL", "")
 
     def api_password_regexp():
         from appli.gui.users.users import api_password_regexp
 
         return api_password_regexp()
+
+    def license_texts() -> dict:
+        from appli.gui.commontools import possible_licenses
+
+        return possible_licenses()
 
     def bg_scale():
         bg = str(app.config.get("BG_SCALE") or "")
@@ -467,6 +557,9 @@ def utility_processor():
         get_referrer=get_referrer,
         global_messages=global_messages,
         api_password_regexp=api_password_regexp,
+        license_texts=license_texts,
         bg_scale=bg_scale,
         logo_special=logo_special,
+        get_manager_list=get_manager_list,
+        ecopart_url=ecopart_url,
     )
