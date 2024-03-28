@@ -191,10 +191,7 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
 
     reason = gvp("status_admin_comment", None)
 
-    if reason != None and status_name != "blocked":
-        status = ApiUserStatus["pending"]
-    else:
-        status = int(gvp("status", 1))
+    status = int(gvp("status", 1))
     response = api_user_activate(usrid, status, reason=reason)
     if response[0] == 0:
         type = "success"
