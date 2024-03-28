@@ -128,16 +128,12 @@ def last_taxo_refresh(cookiename):
     type = "warning"
     # cookie for messages  is type+cookiename but for warnings a suffix is needed
     dailyinfo = request.cookies.get(type + cookiename + "_last_taxo_refresh")
-    dformat = "%Y-%m-%d %H:%M:%S.%f"
+    dformat = "%Y-%m-%d %H:%M:%S"
     if dailyinfo != None:
         if (datetime.strptime(dailyinfo, dformat) - datetime.now()).days < 1:
             return None
     last_refresh = _get_last_refresh()
-    if (
-        last_refresh != None
-        and (datetime.now() - datetime.strptime(last_refresh, "%Y-%m-%dT%H:%M:%S")).days
-        > 7
-    ):
+    if last_refresh != None and (datetime.now() - last_refresh).days > 7:
         py_messages = py_get_messages()
         return dict(
             {
