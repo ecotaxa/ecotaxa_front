@@ -478,10 +478,8 @@ def utility_processor():
                 for key, message in messages.items():
                     name = key + cookiename
                     # homepage active message stays
-                    delta = 0
-                    if key == "homepage":
-                        delta = 10
-                    else:
+                    delta = 10
+                    if key != "homepage":
                         dailyinfo = request.cookies.get(name)
                         if dailyinfo != None:
                             dformat = "%Y-%m-%d %H:%M:%S.%f"
@@ -489,7 +487,6 @@ def utility_processor():
                                 datetime.strptime(dailyinfo, dformat)
                                 - datetime.strptime(message["date"], dformat)
                             ).days
-
                     if isinstance(message, dict) and (
                         "active" in message
                         and message["active"] == 1
