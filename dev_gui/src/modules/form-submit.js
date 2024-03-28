@@ -193,6 +193,9 @@ export class FormSubmit {
         buttons: {
           ok: {
             text: window.alertbox.i18nmessages.modify
+          },
+          cancel: {
+            text: window.alertbox.i18nmessages.saveanyway
           }
         }
       });

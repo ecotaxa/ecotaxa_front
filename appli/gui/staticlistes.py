@@ -78,6 +78,7 @@ py_messages = dict(
             "It is strongly recommended to modify this field to avoid duplicates"
         ),
         "modify": _("Modify"),
+        "saveanyway": _("Save anyway"),
         "taxosynchro": _(
             "Taxonomy synchronization and Ecotaxa version check wasn’t done during the last 7 days. Ask application administrator to do it."
         )
