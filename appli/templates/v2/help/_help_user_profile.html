@@ -4,9 +4,7 @@
 <article my-12><h2 class="help-title">{{title if title!=None else _('How to create an account')}} </h2>
   <details id="help_profile_email"><summary>{{_('Email')}}</summary><div>{{ promail_required()}}</div>
   </details>
-  <details id="help_profile_orcid"><summary>{{_('ORCID')}}</summary><div><a href="https://info.orcid.org/what-is-orcid/" class="underline"  target="_blank">{{_('Open Researcher and Contributor ID')}}</a></div>
-  </details>
-  <details id="help_profile_organisation"><summary>{{_('Organisation')}}</summary><div>{{_('A missing organisation can be added in the list.')}}</div>
+  <details id="help_profile_orcid"><summary>{{_('ORCID')}}</summary><div>{{_('Please create your account on orcid organisation website to receive your unique ID.')}} <a href="https://info.orcid.org/what-is-orcid/" class="underline"  target="orcid">{{_('Open Researcher and Contributor ID')}}</a></div>
   </details>
   <details id="help_profile_planned_usage"><summary>{{_('Planned usage of EcoTaxa')}}</summary><div>{{_('A few lines to describe the usage you will make of the tools provided by EcoTaxa.')}}</div>
   </details>
