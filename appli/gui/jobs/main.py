@@ -79,13 +79,18 @@ def gui_job_show(job_id: int):
         from appli.gui.project.projectsettings import get_target_prj
 
         target_proj = get_target_prj(projid)
+    finalaction = ""
+    if job.state == "F":
+        job_cls = Job.find_job_class_by_name(Job, job.type)
+        if job_cls != None:
+            finalaction = job_cls.final_action(job)
 
     return render_template(
         "./v2/jobs/show.html",
         job=job,
         owner=owner,
         partial=is_partial_request(request),
-        monitor=gvg("monitor"),
+        finalaction=finalaction,
         target_proj=target_proj,
     )
 
@@ -131,24 +136,26 @@ def gui_job_status(job_id: int):
     try:
         with ApiClient(JobsApi, request) as api:
             job: JobModel = api.get_job(job_id=job_id)
-        # convert to new gui/job_type ( GenExport to GeneralExport or BackupExport )
-        new_types = {
-            "TSV": "GeneralExport",
-            "BAK": "BackupExport",
-            "ABO": "SummaryExport",
-            "CNC": "SummaryExport",
-            "BIV": "SummaryExport",
-        }
-        if (
-            job.type == "GenExport"
-            and job.params["req"]["exp_type"] in new_types.keys()
-        ):
-            new_type = new_types[job.params["req"]["exp_type"]]
-        else:
-            new_type = "SummaryExport"
-        job_cls = Job.find_job_class_by_name(Job, new_type)
+        job_type = job.type
+        if job.type == "GenExport":
+            # convert to new gui/job_type ( GenExport to GeneralExport or BackupExport )
+            new_types = {
+                "TSV": "GeneralExport",
+                "BAK": "BackupExport",
+                "ABO": "SummaryExport",
+                "CNC": "SummaryExport",
+                "BIV": "SummaryExport",
+            }
+
+            if job.params["req"]["exp_type"] in new_types.keys():
+                job_type = new_types[job.params["req"]["exp_type"]]
+            else:
+                job_type = "SummaryExport"
+
         rep = job.to_dict()
-        rep["finalaction"] = job_cls.final_action(job)
+        job_cls = Job.find_job_class_by_name(Job, job_type)
+        if job_cls != None:
+            rep["finalaction"] = job_cls.final_action(job)
     except ValueError as e:  # Exception as e:
         rep = dict({"errors": [{"err": e.status, "message": str(e)}]})
     return rep

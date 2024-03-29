@@ -37,6 +37,7 @@ class ImportJob(Job):
     UI_NAME: ClassVar = "FileImport"
 
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/import.html"
+    FINAL_TEMPLATE: ClassVar = "v2/jobs/_import_final.html"
 
     @classmethod
     def initial_dialog(cls) -> str:
@@ -232,16 +233,13 @@ class ImportJob(Job):
     def final_action(cls, job: JobModel):
         # si le status est demandé depuis le monitoring ca veut dire que l'utilisateur est devant,
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle ou auto
-        prj_id = job.params["prj_id"]
-        time.sleep(1)
-        # TODO: Remove the commented, but for now we have trace information inside
-        # DoTaskClean(self.task.id)
-        ret = (
-            "Data correctly imported from " + job.params["req"]["source_path"] + "<br/>"
-        )
-        ret += (
-            "<a href='/prj/{0}' class='btn btn-primary btn-sm'  role=button>Go to Manual Classification Screen</a>"
-            "<a href='/Job/Create/Prediction?projid={0}' class='btn btn-primary btn-sm'"
-            "role=button>Go to Automatic Classification Screen</a> ".format(prj_id)
-        )
-        return ret
+        if job.state == "F":
+            time.sleep(1)
+            return render_template(
+                cls.FINAL_TEMPLATE,
+                jobid=job.id,
+                source_path=job.params["req"]["source_path"],
+                projid=job.params["prj_id"],
+            )
+        else:
+            return ""

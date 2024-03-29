@@ -23,7 +23,7 @@ class ExportJob(Job):
 
     UI_NAME: ClassVar = "GenExport"
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/export.html"
-    STEP1_TEMPLATE: ClassVar = "/v2/jobs/_final_download.html"
+    FINAL_TEMPLATE: ClassVar = "/v2/jobs/_final_download.html"
     EXPORT_TYPE: ClassVar = None
 
     @classmethod
@@ -98,7 +98,7 @@ class ExportJob(Job):
         if job.state == "F":
             projid = job.params["req"]["project_id"]
             return render_template(
-                cls.STEP1_TEMPLATE,
+                cls.FINAL_TEMPLATE,
                 jobid=job.id,
                 outfile=job.result["out_file"],
                 projid=projid,

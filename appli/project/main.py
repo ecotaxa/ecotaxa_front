@@ -196,6 +196,7 @@ def _set_prefs_from_filters(filters, prj_id):
     Save user preferences from POSTed variables
     """
     # Read present values
+    user_vals = {}
     with ApiClient(UsersApi, request) as api:
         try:
             prefs: str = api.get_current_user_prefs(project_id=prj_id, key=_FILTERS_KEY)

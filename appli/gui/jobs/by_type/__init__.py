@@ -8,4 +8,4 @@ from . import GeneralExport
 from . import SummaryExport
 from . import BackupExport
 
-# from . import Prediction
+from . import Prediction

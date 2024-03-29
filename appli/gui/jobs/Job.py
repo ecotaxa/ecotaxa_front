@@ -21,6 +21,7 @@ class Job(object):
 
     JOB_ID_POST_PARAM = "job_id"
     NOPROJ_TEMPLATE = "/v2/project/noright.html"
+    FINAL_TEMPLATE = None
 
     def __init__(self):
         pass

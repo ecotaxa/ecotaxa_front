@@ -23,21 +23,16 @@ is-done
 {%-endif-%}
 {%-endmacro-%}
 {% block body %}
-<div class="container mx-auto mt-8">
+<div id="job_monitor" class="container mx-auto mt-8">
     {% if job and job.id  %}
-    {%- if job.state =="F" and job.result and  job.result['out_file'] -%}
-    {%-set jobid=job.id%}
-    {% set outfile = job.result['out_file']%}
-    {%-include('v2/jobs/_final_download.html')-%}
-    {%-endif%}
 <div class="pt-0 pb-8 mx-2">
   <div data-id="{{job.id}}" data-request="monitor" data-event="load" data-state={{job.state}} {{'data-out=true' if job.outfile else ''}}  >
-  {%- if job.state !="E" and job.state!="F" -%}<div id="spinner-icon" class="hidden mx-auto my-8"></div>
+  {%- if job.state !="E" and job.state!="F" -%}<div id="spinner-icon" class="hide mx-auto my-8"></div>
   {%-elif job.state=="E"-%}<div class="alert danger">
       <p>{{_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart
         your job.')}}</p>
     </div>
-  {%elif job.state !='E' %}<div id="responsediv" class="mr-2 "></div>{%-endif%}
+  {%elif job.state !='E' %}<div id="responsediv" class="{{'hide' if job.state!='F'}} mr-2 ">{{finalaction|safe}}</div>{%-endif%}
   </div>
   <div class="mt-8 flex flex-col mb-2 sm:flex-row  sm:mb-0">
     <a href="{{ url_for('gui_job_cleanup', jobid=job.id)}}" class="button is-danger inverse mb-2 sm:mb-0">{{_('Clean task data')}}</a>

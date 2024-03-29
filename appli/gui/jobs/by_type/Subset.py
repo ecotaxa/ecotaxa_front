@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import time
-
+from typing import ClassVar
 from flask import render_template, g, redirect, request, flash, url_for
 from appli import gvg, gvp
 from appli.gui.jobs.Job import Job
@@ -23,6 +23,8 @@ class SubsetJob(Job):
     """
 
     UI_NAME = "Subset"
+    STEP0_TEMPLATE: ClassVar = "/v2/jobs/subset_create.html"
+    STEP1_TEMPLATE: ClassVar = "/v2/jobs/_subset_final.html"
 
     @classmethod
     def initial_dialog(cls):
@@ -46,7 +48,7 @@ class SubsetJob(Job):
         }
 
         return render_template(
-            "./v2/jobs/subset_create.html",
+            cls.STEP0_TEMPLATE,
             form=formdata,
             target_proj=target_proj,
             filters=filters,
@@ -98,7 +100,7 @@ class SubsetJob(Job):
                 "pvaleur": pvaleur if valtype == "P" else "",
             }
             return render_template(
-                "./v2/jobs/subset_create.html",
+                cls.STEP0_TEMPLATE,
                 form=formdata,
                 target_proj=target_proj,
                 filters=filters,
@@ -133,5 +135,5 @@ class SubsetJob(Job):
         time.sleep(1)
         # DoTaskClean(self.task.id)
         return render_template(
-            "/v2/jobs/_subset_final.html", projid=projid, subsetprojid=subsetprojid
+            cls.STEP1_TEMPLATE, projid=projid, subsetprojid=subsetprojid
         )

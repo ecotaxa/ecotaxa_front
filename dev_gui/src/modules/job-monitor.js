@@ -2,6 +2,9 @@ import {
   fetchSettings,
   html_spinner
 } from '../modules/utils.js';
+import {
+  css
+} from '../modules/modules-config.js';
 
 export function jobMonitor(item) {
   const jobid = item.dataset.id;
@@ -21,6 +24,7 @@ export function jobMonitor(item) {
     responsediv.id = 'responsediv';
     item.prepend(responsediv);
   }
+
 
   let stop = false;
   let cl = 'is-pending';
@@ -59,7 +63,7 @@ export function jobMonitor(item) {
     switch (state) {
       case 'R':
       case 'P':
-        if (spinner) spinner.classList.remove('hidden');
+        if (spinner) spinner.classList.remove(css.hide);
         const svg = spinner.querySelector('svg');
         if (svg === null) spinner.insertAdjacentHTML('afterbegin', html_spinner('text-stone-700'));
         break;
@@ -77,12 +81,7 @@ export function jobMonitor(item) {
       else divalert.insertAdjacentHTML('beforeend', errors.join(`<br>`));
     }
   }
-  const display_next = async (url) => {
-    fetch(url, fetchSettings()).then(response => response.text()).then(response => {
-      responsediv.insertAdjacentHTML('beforeend', response);
-    });
 
-  }
   const go_next = (url, title, type = "secondary") => {
     return `<a href="${url}" class="button  is-${type}">${title}</a>`;
   }
@@ -100,6 +99,7 @@ export function jobMonitor(item) {
           spinner_icon(job.state);
           progress_bar(job.state, job.progress_pct, job.progress_msg);
         }
+
         switch (job.state) {
           case "A":
             // question
@@ -126,10 +126,11 @@ export function jobMonitor(item) {
             break;
         }
 
-        if (job.state && job.state == "E" || (job.state == 'F' && !job.out)) {
+        if (job.state && job.state === "E" || job.state === 'F' || job.type === "Prediction") {
+          //  display_final(job.finalaction);
           if (responsediv) {
             responsediv.insertAdjacentHTML('afterbegin', html.join(''));
-            responsediv.classList.remove('hidden');
+            responsediv.classList.remove(css.hide);
           }
           return;
         }
