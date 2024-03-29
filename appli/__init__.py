@@ -334,11 +334,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.7.4"
+ecotaxa_version = "2.7.4.1"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + " 2024-03-26"
+    return ecotaxa_version + " 2024-03-29"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
@@ -349,6 +349,9 @@ app.jinja_env.globals.update(
 )
 
 """Changelog
+2024-03-26: V 2.7.4.1
+    Fix: final action for all jobs types
+    Mod: help user profile
 2024-03-26: V 2.7.4
     Fix removed "Fix categories issues"
     Feature Notification module
@@ -363,7 +366,7 @@ app.jinja_env.globals.update(
     Feature project privileges sorted by privilege and name
     Fix job monitor stayed at 99%
     Feature link to "About project" in classification page
-    Fix homepage message - active , no expiration  
+    Fix homepage message - active , no expiration
 2024-02-09: V 2.7.3.2
     Fix && Feature import from projects : re-enable selected rows
     Feature js-submit prevent form enter submit (needed for modal)
