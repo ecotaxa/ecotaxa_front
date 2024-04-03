@@ -1,3 +1,4 @@
 <a class="up pageup js js-scrollpy" data-threshold="hscreen" data-action="gotop"></a>
+  {%- set ecotaxa_version = GetEcotaxaVersionText().replace(' ','') if GetEcotaxaVersionText is defined else '' -%}
+<div class="text-xs small-caps text-stone-900 fixed bottom-2 left-2 z-[50]">V {{ecotaxa_version}}</div>  
 <footer class="fixed block w-screen bottom-0 z-40 background-bottom pt-1 pb-2">{% include './v2/partials/_footer.html' %}</footer>
-{% set ecotaxa_version = GetEcotaxaVersionText().replace(' ','') if GetEcotaxaVersionText is defined else ''%}
