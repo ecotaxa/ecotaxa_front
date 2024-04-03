@@ -360,9 +360,7 @@ def utility_processor():
 
             if message in py_messages["messages"]:
                 return py_messages["messages"][message]
-        if is_safe:
-            return message
-        return type
+        return message
 
     def unique_id():
         import uuid
@@ -484,8 +482,8 @@ def utility_processor():
                         if dailyinfo != None:
                             dformat = "%Y-%m-%d %H:%M:%S.%f"
                             delta = (
-                                datetime.strptime(dailyinfo, dformat)
-                                - datetime.strptime(message["date"], dformat)
+                                datetime.strptime(message["date"], dformat)
+                                - datetime.strptime(dailyinfo, dformat)
                             ).days
                     if isinstance(message, dict) and (
                         "active" in message
