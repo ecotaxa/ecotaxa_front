@@ -22,6 +22,7 @@ const key_privileges = Object.keys(defined_privileges).reduce(function(result, k
 }, {});
 let instance;
 css.imported = 'imported';
+domselectors.resetbutton = '.import-list-reset';
 export class DataImport {
   content_selector = '.modal-content';
   imports = [];
@@ -145,7 +146,7 @@ export class DataImport {
     if (!selectcells) return;
     if (what === typeimport.settings || what === typeimport.privileges) this.imports[models.contact] = this.findContact(datas[rowindex]);
     const importzone = (what === typeimport.taxo || what === typeimport.privileges) ? this.createImportzone(what) : null;
-
+    this.addResetButton();
     let ts = null;
     selectcells.forEach((name, index) => {
       index = this.gridColumnIndex('name', name);
@@ -216,18 +217,10 @@ export class DataImport {
             const privs = celldata;
             // set everybody to 'view' if more than one project imported
             const resetpriv = ((ts && ts.items.length > 0) || (importzone.selectedIndex > 0));
-            if (!importzone.dataset.init) {
-              /*    const optgroups = [];
-                  Object.keys(privs).forEach(priv => {
-                    //  importzone.insertAdjacentHTML('afterbegin', `<optgroup value="${priv}" label="${priv}"></optgroup>`);
-                    optgroups.push({
-                      value: priv,
-                      label: priv
-                    });
-                  });*/
+            if (!importzone.tomselect) {
+              importzone.currentlist = {};
               const jsTomSelect = new JsTomSelect();
               jsTomSelect.applyTo(importzone);
-              importzone.dataset.init = true;
             }
             ts = importzone.tomselect;
 
@@ -238,34 +231,34 @@ export class DataImport {
               members.forEach(member => {
                 const newpriv = (resetpriv) ? key_privileges.viewers : priv; // viewer if more than one project imported
                 let opt;
-
-                if (ts) {
-                  opt = ts.items.indexOf(member.id);
-                  if (opt >= 0) {
-                    ts.removeItem(member.id);
-                    ts.removeOption(member.id);
+                if (!importzone.currentlist || !importzone.currentlist[member.id]) {
+                  if (ts) {
+                    opt = ts.items.indexOf(member.id);
+                    //TODO - test - opt should always be 0
+                    if (opt >= 0) {
+                      ts.removeItem(member.id);
+                      ts.removeOption(member.id);
+                    }
+                    // addoption && addItem
+                    opt = {
+                      optgroup: newpriv
+                    }
+                    opt[ts.settings.valueField] = member.id;
+                    opt[ts.settings.searchField] = member.name;
+                    opt[ts.settings.labelField] = member.name;
+                    ts.addOption(opt);
+                    ts.addItem(member.id);
+                  } else {
+                    opt = importzone.querySelector('option[value="' + member.id + '"]');
+                    if (opt === null) {
+                      opt = document.createElement('option');
+                      opt.value = member.id;
+                      opt.dataset.optgroup = newpriv;
+                      opt.selected = opt.defaultSelected = true;
+                      opt.text = member.name;
+                      importzone.add(opt);
+                    } else opt.dataset.optgroup = newpriv;
                   }
-
-                  // addoption && addItem
-                  opt = {
-                    optgroup: newpriv
-                  }
-                  opt[ts.settings.valueField] = member.id;
-                  opt[ts.settings.searchField] = member.name;
-                  opt[ts.settings.labelField] = member.name;
-                  ts.addOption(opt);
-                  ts.addItem(member.id);
-                } else {
-                  opt = importzone.querySelector('option[value="' + member.id + '"]');
-                  if (opt === null) {
-                    opt = document.createElement('option');
-                    opt.value = member.id;
-                    opt.dataset.optgroup = newpriv;
-                    opt.selected = opt.defaultSelected = true;
-                    opt.text = member.name;
-                    importzone.add(opt);
-
-                  } else opt.dataset.optgroup = newpriv;
                 }
               });
               importzone.tomselect.refreshOptions(true);
@@ -452,7 +445,6 @@ export class DataImport {
           importzone = this.importcontainer.querySelector('#' + this.importid);
           const jsTomSelect = new JsTomSelect();
           jsTomSelect.applyTo(importzone);
-
         }
         this.activateClear();
 
@@ -499,15 +491,13 @@ export class DataImport {
           if (btn.dataset.replace && btn.dataset.replace === 'replace') import_target.innerHTML = ``;
           import_target.innerHTML = DOMPurify.sanitize(importzone.innerHTML);
           importzone.innerHTML = ``;
-
         }
-
         done = true;
         break;
       case typeimport.privileges:
         if (!importzone) return false;
         done = this.renderPrivileges(importzone, (btn.dataset.replace && btn.dataset.replace === 'replace'));
-
+        if (importzone.currentlist) importzone.currentlist = {};
         break;
       default:
         const ts_add_select_item = function(ts, data) {
@@ -691,6 +681,28 @@ export class DataImport {
       });
       return indextocheck;
     }
+
+  }
+  addResetButton() {
+    if (!this.tbl || !this.tbl.params.hasOwnProperty("reset")) return;
+    let resetbtn = this.dom.parentElement.querySelector(domselectors.resetbutton);
+    if (resetbtn === null) {
+      resetbtn = document.createElement('a');
+      resetbtn.classList.add(domselectors.resetbutton.substr(1));
+      resetbtn.textContent = this.tbl.params.reset;
+      this.dom.parentElement.firstChild.prepend(resetbtn);
+    }
+    resetbtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const selectors = this.selectors = this.dom.querySelectorAll('[' + this.selector + '] button:disabled, [' + this.selector + '] input:disabled');
+      selectors.forEach(selector => {
+        selector.disabled = false;
+        const sel = selector.closest('tr').querySelector('.' + css.selected);
+        console.log('sel' + css.selected, sel)
+        if (sel) sel.classList.remove(css.selected);
+      });
+    });
 
   }
   // show / hide importzone and buttons
