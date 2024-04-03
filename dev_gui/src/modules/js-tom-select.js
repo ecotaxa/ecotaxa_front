@@ -15,7 +15,6 @@ import {
   models,
   domselectors,
   css,
-  alertconfig
 } from '../modules/modules-config.js';
 let users_list = {};
 
@@ -95,7 +94,6 @@ export class JsTomSelect {
 
         break;
       case models.user:
-        if (item.currentlist) users_list = item.currentlist;
         option.url = "/api/users/search?by_name=";
         option.settings = { ...option.settings,
           ...{
@@ -103,7 +101,8 @@ export class JsTomSelect {
             searchField: 'name',
             labelField: 'name+email',
             onInitialize: function() {
-              item.tomselect.items.forEach(e => {
+              if (item.currentlist) users_list = item.currentlist;
+              else item.tomselect.items.forEach(e => {
                 if (e !== '' && parseInt(e) > 0) users_list[e] = true;
               });
             },
@@ -112,9 +111,9 @@ export class JsTomSelect {
               if (users_list[e]) {
                 //  if (multiple || !this.revertSettings || this.revertSettings.tabIndex < 0 || !item.options.length) return;
                 if (window.alertbox) {
-                  window.alertbox.addMessage(alertconfig.types.error, item, 'exists');
+                  window.alertbox.addItemMessage(window.alertbox.alertconfig.types.danger, item, window.alertbox.i18nmessages.exists);
                 } else {
-                  item.dataset.invalid = 'exists';
+                  item.dataset.invalid = window.alertbox.i18nmessages.exists;
                   item.dispatchEvent(new Event('invalid'));
                 }
                 setTimeout(() => {
@@ -127,12 +126,12 @@ export class JsTomSelect {
                     this.addItem(revert);
                   }
                   if (window.alertbox) {
-                    window.alertbox.removeMessage(window.alertconfig.types.danger, item, window.alertconfig.i18nmessages.exists);
+                    window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, item, window.alertbox.i18nmessages.exists);
                   } else {
                     delete item.dataset.invalid;
                     item.dispatchEvent(new Event('undeterminate'));
                   }
-                }, 1000);
+                }, 2000);
               } else users_list[e] = true;
             },
             onItemRemove: function(e) {
@@ -381,5 +380,7 @@ export class JsTomSelect {
     } else console.log('noid');
 
   }
-
+  getUserList() {
+    return users_list;
+  }
 }
