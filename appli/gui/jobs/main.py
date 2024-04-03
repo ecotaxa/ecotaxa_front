@@ -45,7 +45,10 @@ def gui_job_show(job_id: int):
     Used from full job display (GET) and in self-submitted POST.
     """
     # from appli.gui.project.projectsettings import get_target_prj
-
+    if job_id and gvg("log") == "Y":
+        with ApiClient(JobsApi, request) as japi:
+            rsp = japi.get_job_log_file(job_id=job_id)
+        return Response(rsp, mimetype="text/plain")
     py_messages = py_get_messages("jobs")
     job = None
     with ApiClient(JobsApi, request) as api:
@@ -60,12 +63,7 @@ def gui_job_show(job_id: int):
 
     with ApiClient(UsersApi, request) as uapi:
         owner: MinUserModel = uapi.get_user(user_id=job.owner_id)
-
     txt = ""
-    if job and gvg("log") == "Y":
-        with ApiClient(JobsApi, request) as japi:
-            rsp = japi.get_job_log_file(job_id=job_id)
-        return Response(rsp, mimetype="text/plain")
     target_proj = None
     # added for subnav when there is a projid
     projid = None
