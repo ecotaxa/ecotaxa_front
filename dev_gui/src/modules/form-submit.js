@@ -35,7 +35,6 @@ export class FormSubmit {
       this.tabs = this.form.querySelectorAll(domselectors.component.tabs.tab);
       this.validateFields(true);
       this.init();
-
       form.formsubmit = this;
     }
     return form.formsubmit;
@@ -150,7 +149,6 @@ export class FormSubmit {
     } else field.value = decode_HTMLEntities(DOMPurify.sanitize(field.value));
     if (field.tomselect) field.classList.remove(css.tshidden);
     let rep = field.checkValidity();
-    console.log(field.name, rep)
     if (field.tomselect) field.classList.add(css.tshidden);
     if (rep && field.dataset.unique !== undefined) {
       rep = this.validateFieldUnique(field);
@@ -188,7 +186,7 @@ export class FormSubmit {
           delete label.dataset.confirm;
         }
       }
-      const confirm = window.alertbox.createAlert(window.alertbox.alertconfig.types.confirm, ((label) ? label.textContent + ` : ` : ``) + window.alertbox.i18nmessages.noduplicate, null, {
+      const confirm = window.alertbox.createConfirm(((label) ? label.textContent + ` : ` : ``) + window.alertbox.i18nmessages.noduplicate, {
         callback_cancel: callback_cancel,
         buttons: {
           ok: {
@@ -234,12 +232,14 @@ export class FormSubmit {
       }
 
     });
-    // add/remove error class on tabs tab-control elements
-    this.tabs.forEach(tab => {
-      if (tab.querySelector(':invalid') || tab.querySelector(domselectors.component.alert.danger)) tab.classList.add(css.error);
-      else tab.classList.remove(css.error);
-    });
-    r = await this.execHandler('validate');
+    if (init === false) {
+      // add/remove error class on tabs tab-control elements
+      this.tabs.forEach(tab => {
+        if (tab.querySelector(':invalid') || tab.querySelector(domselectors.component.alert.danger)) tab.classList.add(css.error);
+        else tab.classList.remove(css.error);
+      });
+      r = await this.execHandler('validate');
+    }
     return (r && resp);
   }
 

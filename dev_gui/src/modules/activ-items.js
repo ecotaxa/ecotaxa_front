@@ -196,16 +196,13 @@ export class ActivItems {
               href: item.href
             } : {};
             if (window.alertbox) {
-              rep = await window.alertbox.createAlert('confirm', message, null, options);
+              rep = await window.alertbox.createConfirm(message, null, options);
               if (rep === true && item.form) {
                 if (item.form.formsubmit) {
-                  console.log('formsubmit', item.form.formsubmit);
                   item.form.formsubmit.submitForm();
                 } else item.form.submit();
               }
             } else if (window.confirm(message)) rep = true;
-            //  if (rep === true && e.target.type && e.target.)
-
             return rep;
           });
           break;
