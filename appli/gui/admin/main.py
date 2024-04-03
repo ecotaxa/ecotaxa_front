@@ -500,6 +500,7 @@ def utility_admin_processor():
                             "url": url_for("gui_user_create"),
                         },
                     },
+                    "url": url_for("gui_users_list_page"),
                 },
                 "job": {
                     "label": _("Tasks"),
@@ -527,6 +528,7 @@ def utility_admin_processor():
                             "url": url_for("gui_dbadmin_recomputestat"),
                         },
                     },
+                    "url": url_for("gui_admin"),
                 },
             }
         )
