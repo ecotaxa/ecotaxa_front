@@ -12,6 +12,7 @@ from to_back.ecotaxa_cli_py.models import ProjectModel, ObjectSetQueryRsp, Merge
 from appli.gui.commontools import is_partial_request, py_get_messages
 from appli.gui.project.projectsettings import get_target_prj
 from appli.gui.staticlistes import py_messages
+from flask_babel import _
 
 
 @app.route("/gui/prj/noright/<int:projid>")
@@ -367,7 +368,7 @@ def gui_prj_editannot(projid):
             selected_taxa = ",".join((x[4:] for x in request.form if x[0:4] == "taxo"))
             if selected_taxa == "":
                 flash(
-                    "You must select at least one category to do the replacement",
+                    _("You must select at least one category to do the replacement"),
                     "error",
                 )
                 error = "nocat"
@@ -382,7 +383,7 @@ def gui_prj_editannot(projid):
                         dry_run=False,
                     )
                     # Display change outcome
-                nbrows = (len(res2.last_entries),)
+                nbrows = len(res2.last_entries)
         else:
             nbrows = None
     return render_template(
