@@ -199,7 +199,7 @@ input[type="checkbox"][readonly] {@apply pointer-events-none cursor-not-allowed 
 div.password-wrapper {@apply relative}
 div.password-wrapper input.form-input {@apply pr-12}
 div.password-wrapper i {@apply absolute right-2 top-[50%] -translate-y-[50%] z-[2]}
-legend {@apply bg-transparent text-stone-900 hover:text-stone-800 px-1 py-2 font-btn font-bold  mx-auto block text-sm md:text-base uppercase border-b-2 border-stone-100 mb-6}
+legend {@apply bg-transparent text-stone-900 hover:text-stone-800 px-1 py-2 font-btn font-bold  mx-auto block text-sm md:text-base uppercase border-b-2 border-stone-100 mb-6 }
 fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  md:mr-2 last:mr-0 p-0 }
 .form-box , .submit-box {@apply md:px-2 py-2 mb-2 md:mb-1 mx-0 }
 .form-box.disabled {@apply opacity-50}
@@ -260,23 +260,24 @@ button.submitslider {@apply min-w-[200px]}
 .entries [data-name$=".tsv"] .entryF {@apply font-normal}
 .entryF .icon-image-sm {@apply opacity-80}
 /* form with tabs */
+form.js-tabs {@apply transition-opacity duration-[1000] ease-in }
 form.js-tabs  .fieldset-wrapper {@apply relative }
+form.js-tabs fieldset {@apply mt-4}
 form.js-tabs .tab-control {@apply absolute top-0 left-0 -mt-6 md:-mt-4}
 form.js-tabs .tab {@apply md:w-full last:md:w-full h-0 bg-inherit }
+form.js-tabs fieldset.tab {@apply mr-4}
 form.js-tabs .tab.active {@apply h-auto }
-
-form.js-tabs .hide , .modal .hide , table.hide , tr.hide , tbody.hide thead.hide , tfoot.hide, div.hide , input.hide , select.hide button.hide, a.hide{@apply hidden h-0;content-visibility: hidden;}
 form.js-tabs legend.tab-control {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
 form.js-tabs .tab.active legend.tab-control {@apply  border-stone-600 text-stone-900  opacity-100 }
-form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2}
+form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2 }
 form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4 shadow-none  }
 form.js-tabs .tab.tab-one.active legend.tab-control {@apply bg-white text-stone-800 font-bold border  border-stone-100 border-b-white z-10 }
 form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-7 px-4 -ml-6}
 form.js-tabs .tab.err.active legend.tab-control {@apply border-danger-400}
 form.js-tabs .tab.err legend.tab-control {@apply before:text-xs  before:content-["*"] before:mr-0.5 before:border-none before:align-baseline before:text-danger-400 text-danger-400 }
 /* tabs expand shrink */
-.tabs-display.expand  {@apply icon-chevron-down}
-.tabs-display.shrink {@apply icon-chevron-up}
+.tabs-display.expand  {@apply icon-arrows-pointing-out}
+.tabs-display.shrink {@apply icon-arrows-pointing-in}
 /* list prjs */
 a.contact {
 @apply inline-block py-[0.5] px-0.5 sm:px-1.5 leading-none text-xs small-caps whitespace-nowrap font-light text-left underline underline-offset-2 ;}
@@ -400,7 +401,8 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" c
 }
 .icon-plus-sm {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" class="fill-current" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" /></svg>')
 }
-
+.icon-plus-micro {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm.75-10.25v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5a.75.75 0 0 1 1.5 0Z" clip-rule="evenodd" /></svg>');
+}
 .icon-folder {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>')
 }
@@ -454,7 +456,10 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg"  
 }
 .icon-chart-bar-square-w {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg>');
 }
-
+.icon-squares {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" /></svg>');
+}
+.icon-squares-stack {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v8.25A2.25 2.25 0 0 0 6 16.5h2.25m8.25-8.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-7.5A2.25 2.25 0 0 1 8.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 0 0-2.25 2.25v6" /></svg>');
+}
 .icon-chevron-down {
 content:url('data:image/svg+xml; utf8,  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>');
 }
@@ -551,9 +556,9 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" c
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M13.5 4.938a7 7 0 11-9.006 1.737c.202-.257.59-.218.793.039.278.352.594.672.943.954.332.269.786-.049.773-.476a5.977 5.977 0 01.572-2.759 6.026 6.026 0 012.486-2.665c.247-.14.55-.016.677.238A6.967 6.967 0 0013.5 4.938zM14 12a4 4 0 01-4 4c-1.913 0-3.52-1.398-3.91-3.182-.093-.429.44-.643.814-.413a4.043 4.043 0 001.601.564c.303.038.531-.24.51-.544a5.975 5.975 0 011.315-4.192.447.447 0 01.431-.16A4.001 4.001 0 0114 12z" clip-rule="evenodd" /></svg>')
 }
 
-.icon-arrow-pointing-in {content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="fill-current" fill="currentColor">  <path d="M3.28 2.22a.75.75 0 00-1.06 1.06L5.44 6.5H2.75a.75.75 0 000 1.5h4.5A.75.75 0 008 7.25v-4.5a.75.75 0 00-1.5 0v2.69L3.28 2.22zM13.5 2.75a.75.75 0 00-1.5 0v4.5c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-2.69l3.22-3.22a.75.75 0 00-1.06-1.06L13.5 5.44V2.75zM3.28 17.78l3.22-3.22v2.69a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.69l-3.22 3.22a.75.75 0 101.06 1.06zM13.5 14.56l3.22 3.22a.75.75 0 101.06-1.06l-3.22-3.22h2.69a.75.75 0 000-1.5h-4.5a.75.75 0 00-.75.75v4.5a.75.75 0 001.5 0v-2.69z" /></svg>')
+.icon-arrows-pointing-in {content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="fill-current" fill="currentColor">  <path d="M3.28 2.22a.75.75 0 00-1.06 1.06L5.44 6.5H2.75a.75.75 0 000 1.5h4.5A.75.75 0 008 7.25v-4.5a.75.75 0 00-1.5 0v2.69L3.28 2.22zM13.5 2.75a.75.75 0 00-1.5 0v4.5c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-2.69l3.22-3.22a.75.75 0 00-1.06-1.06L13.5 5.44V2.75zM3.28 17.78l3.22-3.22v2.69a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.69l-3.22 3.22a.75.75 0 101.06 1.06zM13.5 14.56l3.22 3.22a.75.75 0 101.06-1.06l-3.22-3.22h2.69a.75.75 0 000-1.5h-4.5a.75.75 0 00-.75.75v4.5a.75.75 0 001.5 0v-2.69z" /></svg>')
 }
-.icon-arrow-pointing-out {content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="fill-current" fill="currentColor"><path d="M13.28 7.78l3.22-3.22v2.69a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.69l-3.22 3.22a.75.75 0 001.06 1.06zM2 17.25v-4.5a.75.75 0 011.5 0v2.69l3.22-3.22a.75.75 0 011.06 1.06L4.56 16.5h2.69a.75.75 0 010 1.5h-4.5a.747.747 0 01-.75-.75zM12.22 13.28l3.22 3.22h-2.69a.75.75 0 000 1.5h4.5a.747.747 0 00.75-.75v-4.5a.75.75 0 00-1.5 0v2.69l-3.22-3.22a.75.75 0 10-1.06 1.06zM3.5 4.56l3.22 3.22a.75.75 0 001.06-1.06L4.56 3.5h2.69a.75.75 0 000-1.5h-4.5a.75.75 0 00-.75.75v4.5a.75.75 0 001.5 0V4.56z" /></svg>')
+.icon-arrows-pointing-out {content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="fill-current" fill="currentColor"><path d="M13.28 7.78l3.22-3.22v2.69a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.69l-3.22 3.22a.75.75 0 001.06 1.06zM2 17.25v-4.5a.75.75 0 011.5 0v2.69l3.22-3.22a.75.75 0 011.06 1.06L4.56 16.5h2.69a.75.75 0 010 1.5h-4.5a.747.747 0 01-.75-.75zM12.22 13.28l3.22 3.22h-2.69a.75.75 0 000 1.5h4.5a.747.747 0 00.75-.75v-4.5a.75.75 0 00-1.5 0v2.69l-3.22-3.22a.75.75 0 10-1.06 1.06zM3.5 4.56l3.22 3.22a.75.75 0 001.06-1.06L4.56 3.5h2.69a.75.75 0 000-1.5h-4.5a.75.75 0 00-.75.75v4.5a.75.75 0 001.5 0V4.56z" /></svg>')
 }
 .icon-arrow-right {content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M12.97 3.97a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 1 1-1.06-1.06l6.22-6.22H3a.75.75 0 0 1 0-1.5h16.19l-6.22-6.22a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>');
 }
@@ -885,7 +890,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /* alerts                      */
 /*******************************/
 .alert {@apply mx-auto container block mb-4 my-0.5 px-4 py-1 font-light drop-shadow-sm rounded-sm relative}
-.alert:not(.inverse) {@apply drop-shadow}
+.alert:not(.inverse) {@apply drop-shadow }
 /*.alert-reponse {@apply border  mx-auto block container mb-4 my-0.5 px-4 py-2 font-light w-96  fixed right-0 top-0 z-[5000] drop-shadow-sm}*/
 .alert.reponse , .alert-reponse{@apply border  container mx-auto block  mb-4 my-0.5 px-4 py-2 font-light w-full fixed top-0 z-[50000] drop-shadow-sm  transition transform translate-y-32 }
 .alert.danger {@apply bg-danger-500 text-stone-50 selection:bg-danger-300 border-danger-500 }
@@ -908,15 +913,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alert.danger:not(.inverse) i , .alert.error:not(.inverse) i {@apply  icon-fire}
 .alert.danger.inverse i , .alert.error.inverse i {@apply icon-fire-sm}
 
-/*******************************/
-/* confirm dialog             */
-/*******************************/
-.button[data-type="confirm"] {@apply cursor-pointer}
-.alert.confirm {@apply bg-white border border-stone-100 pt-8 w-full sm:w-96 md:w-[48rem] fixed transform duration-500 topcentered z-80 shadow-lg h-auto max-h-64 md:max-h-96  overflow-y-auto}
-.alert.confirm .close {@apply  absolute top-2 right-2 -translate-y-[0] opacity-60}
-.alert.confirm .btn-group {@apply my-4 border-t border-stone-200 pt-2 }
-.alert .is-cancel, .alert .is-ok {@apply shadow-none font-btn text-sm mr-2 ;}
-.alert .is-ok {@apply is-primary}
+
 .hidevscroll {@apply max-h-screen overflow-y-hidden after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-6 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-40 content-none}
 
 /*******************************/
@@ -956,6 +953,18 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alertmessage.danger.inverse .type {@apply text-danger-400}
 .alertmessage.danger.inverse  {@apply bg-danger-50 text-danger-600 selection:bg-danger-100 border-danger-600}
 
+/*******************************/
+/* confirm dialog             */
+/*******************************/
+.button[data-type="confirm"] {@apply cursor-pointer}
+.alertmessage.confirm {@apply bg-white  border-mainblue-700 pt-8 w-full sm:w-96 md:w-[48rem] fixed  hcentered z-80 shadow-lg h-auto max-h-64 md:max-h-96  overflow-y-auto rounded-sm}
+.alertmessage.confirm .signal {@apply h-full pt-2}
+.alertmessage.confirm .signal i {@apply icon-alert}
+.alertmessage.confirm .close {@apply  absolute top-2 right-2 -translate-y-[0] opacity-60 w-8}
+.alertmessage.confirm .btn-group {@apply my-4 border-t border-stone-200 pt-2 }
+.alertmessage.confirm .showall {@apply relative block }
+.alertmessage .is-cancel, .alertmessage .is-ok {@apply shadow-none font-btn text-sm mr-2 ;}
+.alertmessage .is-ok {@apply is-primary}
 /*******************************/
 /* small hacks and adjustments */
 /*******************************/
@@ -1018,6 +1027,11 @@ div.data-import .ts-wrapper.multi {@apply max-h-full overflow-hidden}
 div.showfull div.zone-import > div.btns-import {@apply max-h-[100%] }
 div.showfull div.data-import .ts-wrapper.multi {@apply absolute -mt-[100%] z-60 overflow-y-visible}/* hover:absolute hover:max-h-full hover:z-60 hover:overflow-y-visible*/
 .import-projects-list .selected {@apply text-stone-200 text-xs max-h-8 bg-secondblue-100}
+.import-list-reset {@apply cursor-pointer  h-6 mt-1 text-stone-800 small-caps px-2 font-normal rounded hover:bg-stone-200 border border-stone-200 bg-transparent shadow-sm}
+/**********************/
+/* tools pages       */
+/**********************/
+.back-button {@apply button w-full sm:w-96 hover:drop-shadow-none text-stone-700 hover:text-stone-900 border-stone-300 hover:border-stone-900}
 /*********************/
 /* job pages title   */
 /*********************/
@@ -1049,6 +1063,8 @@ td .tipover {@apply absolute z-10 rounded bg-stone-400 text-stone-50 text-xs px-
 .tree_link {fill: none; stroke: #A0A0A0; stroke-width: 0.5;}
 .node_circle {fill: #707070;}
 .node_label {font-size: 10px; font-family: sans-serif;}
+/* global  hide */
+.hide {@apply hidden h-0 !important;}
 @media only screen and (max-width: 767px)  {
 /* list breadcrumbs length */
 .top-title {@apply max-w-[85%]}
