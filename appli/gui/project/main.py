@@ -14,6 +14,8 @@ from appli.gui.project.projectsettings import get_target_prj
 from appli.gui.staticlistes import py_messages
 from flask_babel import _
 
+ExploreOnly = "ExploreOnly"
+
 
 @app.route("/gui/prj/noright/<int:projid>")
 # TODO - fresh_login_required
@@ -46,6 +48,12 @@ def gui_prj_purge(projid):
     target_proj = get_target_prj(projid, for_managing=True)
     if target_proj is None:
         return redirect(url_for("gui_prj_noright", projid=projid))
+    if target_proj.status == ExploreOnly:
+        flash(
+            "Project status is Explore Only. You cannot do a delete action on this project",
+            "error",
+        )
+        return redirect(url_for("gui_prj_noright", projid=target_proj.projid))
     if gvp("objlist") == "":
         # Extract filter values
         filters = {}
@@ -157,9 +165,11 @@ def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list
         filt=dict({"title": None, "instrum": [target_proj.instrument], "subset": None}),
         for_managing=True,
     )
+    remlist = []
     for prj in prjs:
         r = True
         if prj["projid"] not in excludeprjs:
+            # del not granted
             if current_user.is_admin == True:
                 r = False
             elif len(prj["managers"]):
@@ -167,10 +177,14 @@ def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list
                     if u["id"] == current_user.id:
                         r = False
                         break
-        # del not granted
+        if prj["status"] == ExploreOnly:
+            r = True
+
         if r == True:
-            prjs.remove(prj)
+            remlist.append(prj)
         # return prjs to merge
+    for prj in remlist:
+        prjs.remove(prj)
     return prjs
 
 
@@ -183,6 +197,12 @@ def gui_prj_merge(projid):
     target_proj = get_target_prj(projid, for_managing=True)
     if target_proj is None:
         return redirect(url_for("gui_prj_noright", projid=projid))
+    if target_proj.status == ExploreOnly:
+        flash(
+            "Project status is Explore Only. You cannot do this action on this project",
+            "error",
+        )
+        return redirect(url_for("gui_prj_noright", projid=target_proj.projid))
     excludeprjs = [target_proj.projid]
     prjstomerge = None
     srcprojid = 0
@@ -216,13 +236,13 @@ def gui_prj_merge(projid):
                             processstep="ask",
                         )
                     else:
-                        flash("Pick another source project.", "info")
+                        flash(_("Pick another source project."), "info")
                         excludeprjs.append(source_proj.projid)
             except ApiException as ae:
                 if ae.status == 404:
-                    flash("Source project doesn't exist", "warning")
+                    flash(_("Source project doesn't exist"), "warning")
                 elif ae.status in (401, 403):
-                    flash("You cannot merge from this project", "error")
+                    flash(_("You cannot merge from this project"), "error")
                     excludeprjs.append(srcprojid)
             if gvp("merge") == "Y" and source_proj:
                 # Do the real merge
@@ -252,6 +272,19 @@ def gui_prj_merge(projid):
 # TODO - fresh_login_required
 @login_required
 def gui_prj_editannot(projid):
+    # check existence && status
+    target_proj = get_target_prj(projid, for_managing=True)
+    if target_proj is None:
+        return redirect(url_for("gui_prj_noright", projid=projid))
+    if target_proj.status == ExploreOnly:
+        flash(
+            _(
+                "Project status is Explore Only. You cannot do mass annotation edition on this project"
+            ),
+            "error",
+        )
+        return redirect(url_for("gui_prj_noright", projid=target_proj.projid))
+
     from to_back.ecotaxa_cli_py.api import UsersApi
 
     # Security & sanity checks
@@ -283,12 +316,7 @@ def gui_prj_editannot(projid):
         new_author_id = None
         date_filter = dict({"date": None, "hour": "00", "minutes": "00"})
         process = None
-    target_proj = get_target_prj(projid, for_managing=True)
-    if target_proj is None:
-        return redirect(url_for("gui_prj_noright", projid=projid))
-    if target_proj.status == "ExploreOnly":
-        flash("You cannot do mass annotation edition on this project", "error")
-        return redirect(url_for("gui_prj_no_right", projid=target_proj.projid))
+
     # ############### 1er Ecran
     if not (old_author_id and new_author_id):
 
@@ -443,15 +471,25 @@ def _gui_digest_changes(api_result):
 # TODO - fresh_login_required
 @login_required
 def gui_prj_reset_to_predicted(projid):
+    # check existence && status
+    target_proj = get_target_prj(projid, for_managing=True)
+    if target_proj is None:
+        return redirect(url_for("gui_prj_noright", projid=projid))
+    if target_proj.status == ExploreOnly:
+        flash(
+            _(
+                "Project status is Explore Only. You cannot do this action on this project"
+            ),
+            "error",
+        )
+        return redirect(url_for("gui_prj_noright", projid=target_proj.projid))
     # noinspection PyStatementEffect
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
     error = None
     processstep = None
     objectids = None
     # Security & sanity checks
-    target_proj = get_target_prj(projid, for_managing=True)
-    if target_proj is None:
-        return redirect(url_for("gui_prj_noright", projid=projid))
+
     filters = {}
     for k in sharedfilter.FilterList:
         if gvg(k):
@@ -529,13 +567,22 @@ def _get_field_list(prj_model: ProjectModel) -> list:
 # TODO - fresh_login_required
 @login_required
 def gui_prj_edit_datamass(projid):
+    # check existence && status
+    target_proj = get_target_prj(projid, for_managing=True)
+    if target_proj is None:
+        return redirect(url_for("gui_prj_noright", projid=projid))
+    if target_proj.status == ExploreOnly:
+        flash(
+            _(
+                "Project status is Explore Only. You cannot do this action on this project"
+            ),
+            "error",
+        )
+        return redirect(url_for("gui_prj_noright", projid=target_proj.projid))
     # noinspection PyStatementEffect
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
 
     # Security & sanity checks
-    target_proj = get_target_prj(projid, for_managing=True)
-    if target_proj is None:
-        return redirect(url_for("gui_prj_noright", projid=projid))
     objectids = None
     error = None
     filters = {}
@@ -654,11 +701,21 @@ def gui_deprecation_management(projid):
     from to_back.ecotaxa_cli_py.api import ObjectsApi, TaxonomyTreeApi
     from to_back.ecotaxa_cli_py.models import TaxonModel, ProjectTaxoStatsModel
 
-    # Security & sanity checks
-    error = None
+    # check existence && status
     target_proj = get_target_prj(projid)
     if target_proj is None:
         return redirect(url_for("gui_prj_noright", projid=projid))
+    if target_proj.status == ExploreOnly:
+        flash(
+            _(
+                "Project status is Explore Only. You cannot do this action on this project"
+            ),
+            "error",
+        )
+        return redirect(url_for("gui_prj_noright", projid=target_proj.projid))
+    # Security & sanity checks
+    error = None
+
     if request.method == "POST":
         # Posted form
         posted = request.form

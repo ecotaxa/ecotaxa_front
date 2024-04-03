@@ -30,7 +30,7 @@
 <table>
 <thead><tr><th data-type="html">{{_('Select')}}</th><th>{{_('ID')}}</th><th>{{_('Instrument')}}</th><th>{{_('Title')}}</th><th>{{_('Status')}}</th><th>{{_('Nbr Obj')}}</th>
             <th>{{_('%s Validated').format('%')}}</th><th>{{_('%s Classified').format('%')}}</th></tr></thead><tbody>
-        {%for prj in prjstomerge -%}
+        {%for prj in prjstomerge -%}  
         <tr><td><input type="radio" name="src" value="{{prj.projid}}" class="form-radio" required></td><td>{{prj.projid}}</td>
             <td>{{prj.instrument}}</td>
             <td>{{prj.title}}</td>
