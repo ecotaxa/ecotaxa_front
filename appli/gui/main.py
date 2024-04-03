@@ -312,9 +312,11 @@ def gui_setmsgcookie():
 @app.route("/gui/i18n", methods=["GET"])
 def gui_i18n():
     encoding = "utf-8"
-    from appli.gui.staticlistes import py_messages_titles
+    from appli.gui.staticlistes import py_messages_titles, py_user
 
-    content = json.dumps(dict(py_messages, **py_messages_titles)).encode(encoding)
+    content = json.dumps(dict(py_messages, **py_user, **py_messages_titles)).encode(
+        encoding
+    )
     response = make_response(content)
     response.headers["Content-length"] = len(content)
     response.headers["Content-Encoding"] = encoding

@@ -89,11 +89,14 @@ export class ProjectPrivileges {
     return item.jsprivileges;
   }
 
-  newLine(ret = false, check = 0) {
+  newLine(ret = false, check = 0, replace = false) {
     const lines = this.linecontainer.children;
     let newline;
     if (lines.length && check > 0) newline = this.getLinePrivilege(check);
-    if (newline) return newline;
+    if (newline) {
+      if (replace === true) return newline;
+      else return null;
+    }
     newline = this.linemodel.cloneNode(true);
     newline.classList.remove(css.hide);
     if (newline) {
@@ -277,7 +280,7 @@ export class ProjectPrivileges {
       this.orderRows();
       return true;
     } catch (err) {
-      window.alertbox.renderMessage({
+      window.alertbox.renderAlert({
         type: window.alertbox.alertconfig.types.error,
         content: this.keymessages.importpriverror,
         dismissible: true,
@@ -311,7 +314,7 @@ export class ProjectPrivileges {
     const lineSettings = (pr, ct, dl, synchro = false) => {
       if (pr && pr.checked) {
         pr.checked = true;
-        if (window.alertbox.hasMessages(line)) window.alertbox.removeMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
+        if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
       }
       if (pr && pr.value === rights.manage) {
         // manager - can't delete line - can choose as contact
@@ -335,7 +338,7 @@ export class ProjectPrivileges {
       // dismiss alerts
       if (!dl.ckecked) {
         window.alertbox.dismissAlert(this.keymessages.nobody);
-        if (window.alertbox.hasMessages(line)) window.alertbox.removeMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.oneatleast);
+        if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.oneatleast);
       }
     }
     const synchroSiblings = (line) => {
@@ -350,7 +353,7 @@ export class ProjectPrivileges {
     }
     member.addEventListener('change', (e) => {
       contact.value = member.value;
-      if (parseInt(member.value) > 0 && window.alertbox.hasMessages(member)) window.alertbox.removeMessage(window.alertbox.alertconfig.types.danger, member, this.keymessages.emptyname);
+      if (parseInt(member.value) > 0 && window.alertbox.hasItemMessages(member)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, member, this.keymessages.emptyname);
     })
     privs.forEach((priv) => {
       priv.addEventListener('change', (e) => {
@@ -380,10 +383,10 @@ export class ProjectPrivileges {
         line.removeAttribute('data-mod');
         member.disabled = false;
         e.target.disabled = true;
-        window.alertbox.addMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.oneatleast, 3000);
+        window.alertbox.addItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.oneatleast, 3000);
         return;
       } else if (e.target.checked) {
-        if (window.alertbox.hasMessages(member)) window.alertbox.removeMessage(window.alertbox.alertconfig.types.danger, member);
+        if (window.alertbox.hasItemMessages(member)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, member);
         if (line.classList.contains('new')) {
           line.remove();
         } else {
@@ -428,8 +431,8 @@ export class ProjectPrivileges {
       // check if one manager at least
       const managers = this.fieldset.querySelectorAll('[name*="[' + this.options.privilege + ']"][value="' + rights.manage + '"]:checked');
       if (managers.length === 0) {
-        window.alertbox.renderMessage({
-          type: window.alertbox.alertconfig.types.error,
+        window.alertbox.renderAlert({
+          type: window.alertbox.alertconfig.types.danger,
           content: this.keymessages.nomanager,
           dismissible: true,
           inverse: true
@@ -444,7 +447,7 @@ export class ProjectPrivileges {
 
       const contact = this.fieldset.querySelector('[name="' + this.options.contactfieldname + '"]:checked');
       if (contact === null) {
-        window.alertbox.renderMessage({
+        window.alertbox.renderAlert({
           type: window.alertbox.alertconfig.types.danger,
           content: this.keymessages.nocontact,
           dismissible: true,
@@ -476,7 +479,7 @@ export class ProjectPrivileges {
           n--;
         } else return false;
       } else if (!has_member(member)) {
-        window.alertbox.addMessage(window.alertbox.alertconfig.types.danger, member, this.keymessages.emptyname);
+        window.alertbox.addItemMessage(window.alertbox.alertconfig.types.danger, member, this.keymessages.emptyname);
         member.focus();
         const resp = false; // no confimbox just wait for user action
         // callback if confirmbox response is chosen if 'confirm'
@@ -488,13 +491,13 @@ export class ProjectPrivileges {
         } else return false;
       }
       if (!has_priv(line)) {
-        window.alertbox.addMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
+        window.alertbox.addItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
         verif = false;
-      } else if (window.alertbox.hasMessages(line)) window.alertbox.removeMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
+      } else if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
 
     }
     if (n === 0) {
-      window.alertbox.renderMessage({
+      window.alertbox.renderAlert({
         type: window.alertbox.alertconfig.types.danger,
         content: this.keymessages.nobody,
         dismissible: true,

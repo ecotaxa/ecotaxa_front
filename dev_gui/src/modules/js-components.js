@@ -122,10 +122,6 @@ export class JsComponents {
               const jsCaptcha = new dynamics.JsCaptcha(item);
               jsCaptcha.init();
               break;
-            case 'js-alert':
-              if (!item.dataset.message) return;
-              window.alertbox.applyTo(item);
-              break;
             case 'js-notifications':
               const checkNotifs = (tim) => {
                 fetch('/gui/jobssummary/', fetchSettings()).then(response => response.text()).then(html => {

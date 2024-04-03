@@ -1,10 +1,10 @@
 import stylecss from './css/style.css';
 import {
-  JsComponents
-} from '../src/modules/js-components.js';
-import {
   AlertBox
 } from '../src/modules/alert-boxes.js';
+import {
+  JsComponents
+} from '../src/modules/js-components.js';
 import {
   ActivItems
 } from '../src/modules/activ-items.js';
@@ -25,7 +25,7 @@ window.addEventListener('load', async () => {
   /* fetch request -modal - contextual help */
   const activRequest = new ActivRequest();
   activRequest.applyTo(document);
-  window.alertbox.alertMessages();
+  window.alertbox.activateAll();
 });
 // 'unload'do not use for the moment as it changes history back
 /*window.addEventListener('unload', (e) => {
