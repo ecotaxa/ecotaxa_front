@@ -97,6 +97,6 @@
 {% set titles = { 'danger': _('IMPORTANT :'),  'warning': _('WARNING:'),  'info': _('INFORMATION:'),  'success': _('SUCCESS:'),  'error': _('ERROR:'),'maintenance':_('MAINTENANCE')} %}
 {{ titles[type] }}
 {%- endmacro %}
-{%- macro alertbox(type,message,title='', inverse=False, dismissible = False, codeid= True,extra=False,  is_safe = False,tofetch= False) -%}
+{%- macro alertbox(type,message,title='', inverse=False, dismissible = False, codeid= True,extra=False,  is_safe = False) -%}
 {%- include './v2/partials/_alertbox.html'-%}
 {%- endmacro -%}

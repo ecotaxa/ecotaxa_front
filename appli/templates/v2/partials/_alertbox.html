@@ -1,9 +1,6 @@
 {%from './v2/macros/macros.html' import alerttype %}
 {%set alertid = unique_id()%}
-{% if tofetch == True %}
-<div class="js js-alert" data-what="alert" data-type={{type}} id ={{alertid }}  {{'data-message='+ message  if message }} data-extra={{extra}} {{ "data-dismissible=true" if dismissible }}  {{'data-codeid=true' if codeid }}></div>
-{% else %}
-<div class="alert {{ type if type else 'info'}}  {{ 'text-xs' if extra and 'small' in extra }} {{ 'inverse' if inverse == True else '' }} {{ 'md:w-3/4 lg:w-1/2 mx-2' if (extra and extra.inset == True) }}  {{ 'mt-1 text-sm' if (extra and extra.small == True) }}" id ={{alertid }} {{'data-message=' + message if message }} {{'data-codeid=true' if codeid }} data-type={{type}} {{ "data-dismissible=true" if dismissible }} role="alert">
+<div class="alert {{ type if type else 'info'}}  {{ 'text-xs' if extra and 'small' in extra }} {{ 'inverse' if inverse == True else '' }} {{ 'md:w-3/4 lg:w-1/2 mx-2 md:ml-0 md:mr-auto' if (extra and extra.inset == True) }}  {{ 'mt-1 text-sm' if (extra and extra.small == True) }}" id ={{alertid }} {{'data-message=' + message if message }} {{'data-codeid=true' if codeid }} data-type={{type}} {{ "data-dismissible=true" if dismissible }} role="alert">
 {% if dismissible == True %}
   <button type="button" class="close" data-dismiss="{{alertid }}" aria-label="{{ _('Close') }}"><span aria-hidden="true">&times;</span></button>
 {% endif %}
@@ -19,4 +16,3 @@
   <div class="btn-group flex justify-end"><button class="button is-cancel"  value=false>{{_('Cancel') }}</button><button class="button is-ok"  value=true>{{_('Ok')}}</button></div>
 {% endif %}
 </div>
-{% endif %}
