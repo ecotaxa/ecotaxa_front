@@ -14,7 +14,7 @@
 <a href="{{ url_for("gui_prj")}}" class="alert danger">{{_('Select another project')}}</a>
 {% elif target_proj and target_proj.projid %}
 
-<form method=post action="{{request.url}}" class="mb-0 pb-0 js js-submit">  <fieldset><div class="alert warning inverse">
+<form method=post action="{{request.url}}" class="mb-0 pb-0 js js-submit">  <fieldset>  <div class="block-info text-danger-500 font-normal text-lg mx-auto">
 {%if warning >0 %}
 {{_('USING Active Project Filters')}} {{objectids|length}} {{_('objects')}}
   {%else%}

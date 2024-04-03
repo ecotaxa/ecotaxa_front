@@ -1,4 +1,5 @@
 {% extends "./v2/layout.html" %}
+{% from "./v2/macros/macros.html" import alertbox with context %}
 {% from "./v2/project/macros.html" import header_project_job with context %}
 {%block body%}
 <div class="container mx-auto px-4 block" data-block="project_merge" >
@@ -8,7 +9,7 @@
   </div>
   {% if processstep  %}
   {% include('/v2/project/_merge_process.html') with context%}
-<a class="button is-secondary inverse w-full sm:w-96 text-center" href="{{url_for("gui_prj_merge",projid= target_proj.projid) if processstep=='ask' else url_for("gui_prj",projid=target_proj.projid)}}">{{ _("Back to list") if processstep =="ask" else  _('Back to target project') if (processstep=="end")  else  _("Back to project home")}}</a>
+<a class="back-button" href="{{url_for("gui_prj_merge",projid= target_proj.projid) if processstep=='ask' else url_for("gui_prj",projid=target_proj.projid)}}">{{ _("Back to list") if processstep =="ask" else  _('Back to target project') if (processstep=="end")  else  _("Back to project home")}}</a>
 {% else %}
   <form action={{request.path}} method="post" id="form-merge" class="js js-submit relative">
 <div class="block-info text-sm md:text-base"><ul><li>{{_('You are allowed to merge projects that you manage and contain images from the <strong>same</strong> instrument.
@@ -21,7 +22,8 @@
 <li>{{_('Acquisitions with same acq_id on both sides will <strong>not</strong> be updated from added project.')}}</li>
 </ul></li><li>{{_('Note : Next screen will indicate compatibility issues (if exists) and allow you to Confirm the merging operation.')}}</li>
 </ul></div>
-{% if source_proj %}<div class="alert warning">{{_('Source project : ') ~ source_proj.title ~ '['~ source_proj.projid ~']' ~ _(' this project will be destroyed') }}</div>
+{% if source_proj %}{%-set message = _('Source project : ') ~ source_proj.title ~ '['~ source_proj.projid ~']' ~ _(' this project will be destroyed')-%}
+{{alertbox('warning',message=message,dismissible=False)}}
 <input type="hidden" name="merge" value =" Y">
 {% elif prjstomerge is iterable  %}
 <div  id="merge_prjlist" class="js js-datatable my-4 sticky-top block mb-4" data-sortable=true {{ ' data-searchable=true'  if prjstomerge|length > 20 else ''}} data-table=true>
@@ -40,8 +42,8 @@
           {%-endfor%}
           </tbody>
   </table></div>
-  {% else %}<strong>{{_('No matching project found.')}}</strong>
-  <a href="{{url_for("gui_prj")}}">{{_('Back to projects list.')}}</a>
+  {% else %}{{alertbox('info',message=_('No matching project found.'),inverse=True, dismissible=False, extra={"inset":True})}}
+  <a href="{{url_for("gui_prj")}}" class="back-button">{{_('Back to projects list.')}}</a>
   {% endif%}
   {%endif%}
     {% if prjstomerge|length > 0 or source_proj%}

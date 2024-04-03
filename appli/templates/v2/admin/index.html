@@ -1,11 +1,12 @@
 {% extends 'v2/admin/layout.html' %}
+{% from 'v2/macros/macros.html' import alertbox with context %}
 {% block body %}
 <div class="container mx-auto pt-2">
   {% if current_user.is_app_admin==True -%}
-    <div class="alert info inverse js js-alert" data-dismissible=true role="alert">{{_('You have Administrator privileges')}}</div>
+    {{ alertbox(type='info', message=_('You have Administrator privileges'),inverse = True,dismissible=True,extra = {'inset': True} )}}
     {%-endif%}
     {% if current_user.is_users_admin==True -%}
-      <div class="alert info inverse js js-alert" data-dismissible=true role="alert">{{_('You have Users Administrator privileges')}}</div>
+      {{ alertbox(type='info', message=_('You have Users Administrator privileges'),inverse = True,dismissible=True,extra = {'inset': True} )}}
       {%-endif%}
     {% set list_labels ={"application":_('List of Application Administrators :'),"users":_('List of Users Administrators :')}%}
     {% for key, users in admin_users.items()%}

@@ -19,7 +19,7 @@
 
 {% macro pick_from_other(new, key='settings' , modal_title = _('Pick from other project')) -%}
 {% if (new == False and target_proj and target_proj.projid > 0) or (new == True and (not target_proj or target_proj.projid == 0)) %}
-<div class="{{ 'w-full -mt-8 ' if new == True else 'w-auto -mt-4  mb-2' }} block">
+<div class="{{ 'w-full -mt-8 mb-6' if new == True else 'w-auto -mt-4  mb-2' }} block">
   {# set the form id to import to and the header include for taxo imports #}
   {% set data = {'form':'#formu','key': key, 'header': './v2/project/_headerimport.html'} if (key == 'taxo' or key == 'privileges') else {'form':'#formu','key': key} %}
   {% set icon = 'icon-carboncopy-sm' if new == False else 'icon-carboncopy'%}
@@ -34,15 +34,16 @@
   {% set modal_title = _("How to edit a project settings") if target_proj.projid else _("How to create a project")%}
   {% set data = {'file':'_help_projectsettings','for':'' if target_proj.projid else 'help_proj_create'} %}
   {{ modal(id='help-editproject',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
-  <form method="post" action="{{request.path}}" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs hide' if (target_proj and target_proj.projid) }} relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}" novalidate>
-   <input type="hidden" name="crsf_token" value={{ crsf_token }}>  {% if target_proj and target_proj.projid %}
-    <span data-dismiss="tabs" class="absolute z-10 top-0 -mt-8 right-[calc(100%-2.5rem)] hidden md:block md:ml-auto  md:mt-0 md:right-12 md:top-5 cursor-pointer fill-stone-900 border-stone-700 hover:border-b-2" data-title="{{_('click to expand/shrink tabs')}}"><i class="icon-lg tabs-display expand opacity-50 hover:opacity-100"></i></span>
-    <input type="hidden" name="id" id="projid" value="{{target_proj.projid}}">
+  <form method="post" action="{{request.path}}" id="formu" autocomplete="off" class="js js-submit js-tabs relative mt-12 md:mt-8 "  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}" novalidate>
+   <input type="hidden" name="crsf_token" value={{ crsf_token }}>
+    <span data-dismiss="tabs" class="absolute z-10 top-0 -mt-8 right-[calc(100%-2.5rem)] hidden md:block md:ml-auto  md:mt-0 md:right-12 md:top-5 cursor-pointer fill-stone-900 " data-title="{{_('click to expand/shrink tabs')}}"><i class="icon tabs-display expand opacity-50 hover:opacity-100"></i></span>
+     {% if target_proj and target_proj.projid %}<input type="hidden" name="id" id="projid" value="{{target_proj.projid}}">
     {% endif %}
+    {{ pick_from_other(True,key='settings',modal_title=_('Pick all settings from other project')) }}
     <div class="fieldset-wrapper">
-      <fieldset class="w-full md:flex md:flex-wrap tab">
-        <legend class="tab-control">{{_('project') + ' ' + target_proj.id|string() if target_proj.projid else _('new project')}}</legend>
-        {{ pick_from_other(True,key='settings',modal_title=_('Pick all settings from other project')) }}
+      <div class="w-full tab">
+        <fieldset class="w-full md:flex ">
+          <legend class="tab-control">{{_('project') + ' ' + target_proj.id|string() if target_proj.projid else _('new project')}}</legend>
         <div class=" w-full md:w-1/2 md:pr-6 tab-content">
           <div class="form-box">
             <label for="title" data-required="{{_('a title is required')}}">{{_('Title')}}</label>
@@ -58,11 +59,10 @@
 
           </div>
         </div>
-        <div class=" w-full md:w-1/2 tab-content">
+        <div class=" w-full md:w-1/2  md:pr-6 tab-content">
           <div class="form-box">
             <label for="instrument">{{_('Instrument')}} </label>
-            {# ,data= ( ' data-action=confirm data-event=change  data-alert=true data-message="' + _('Changing the instrument associated with a project may affect the behaviour of EcoTaxa in various ways and should not be done except to correct a mistake.') + '"' if target_proj.projid else '')#}
-            {{ inputdict('instrument','instrument',value = target_proj.instrument, label=target_proj.instrument,type='instr', placeholder=_('Instrument'),required= True,autocomplete=True ) }}
+            {{ inputdict('instrument','instrument',value = target_proj.instrument, label=target_proj.instrument,type='instr', placeholder=_('Instrument'),required= True,autocomplete=True) }}
             {% if target_proj.projid  %}
             {{ alertbox(type='warning', message="modinstrumentwarning",inverse = True,extra = {'small': True} )}}
             {% endif %}
@@ -70,8 +70,9 @@
           <div class="form-box">
             <div class="label" data-for="status">{{ _('Status') }} </div>
             <div class="form-group" role="group" >
+              {%- set status = target_proj.status if target_proj else "Annotate"-%}
               {% for st in (("Annotate",_("Annotate")),("ExploreOnly",_("Explore Only")),("Annotate No Prediction",_("Annotate No Prediction"))) %}
-              {{ form_group_radio('status_' + loop.index|string(),'status',st[0],st[1],target_proj.status,required=(loop.index==1))}}
+              {{ form_group_radio('status_' + loop.index|string(),'status',st[0],st[1],status,required=(loop.index==1))}}
               {% endfor %}
             </div>
           </div>
@@ -93,15 +94,16 @@
           <div class="form-box">
             <div class="label" data-for="license">{{ _('License') }}<i data-for="help_proj_license" data-request="help"></i></div>
             <div class="form-group" id="proj_license" role="group">
+              {%- set license = target_proj.license if target_proj else "CC0 1.0" -%}
               {% for k in possible_licenses.keys() %}
               {% set label='not chosen' if k=='' else k %}
-              {{form_group_radio('license_'+ loop.index|string(),'license',k,label,target_proj.license, required=(loop.index==1) )}}
+              {{form_group_radio('license_'+ loop.index|string(),'license',k,label,license, required=(loop.index==1) )}}
                   {% endfor %}</div>
           </div>
         </div>
-      </fieldset>
-      <div class="w-full flex md:w-1/2 tab">
-        <fieldset class="w-full  md:pr-6 ">
+      </fieldset></div>
+      <div class="w-full flex md:mt-8  md:w-1/2 tab">
+        <fieldset class="w-full md:pr-6">
           <legend class="tab-control">{{_('Taxonomy')}}</legend><div class=" tab-content">{{
             pick_from_other(False,key='taxo',modal_title= _('Pick taxonomy from other projects')) }}
 
@@ -116,25 +118,21 @@
           </div>
         </fieldset>
       </div>
-      <div class="w-full md:w-1/2 tab">
-        <fieldset>
+      <div class="w-full md:mt-8  md:w-1/2 tab">
+        <fieldset  class="w-full md:pr-10">
           <legend class="tab-control">{{_('Sorting tools')}}</legend><div class="tab-content">{{
             pick_from_other(False,key='fields',modal_title= _('Pick sorting fields from other projects')) }}
-
           <div class="form-box">
             <label for="classiffieldlist">{{_('Fields available for sorting & Display In the manual classification page')}}<i data-for="help_classiffieldlist" data-request="help"></i></label>
             <textarea id="classiffieldlist" name="classiffieldlist" class="form-textarea" rows="8">{{ target_proj.classiffieldlist|default('',true) }}</textarea>
             </div>
           </div>
-
         </fieldset>
       </div>
-      <div class="w-full md:w-1/2 last:mx-auto last:md:w-full tab">
+      <div class="w-full md:w-1/2 last:mx-auto last:md:w-full md:mt-8  tab">
         <fieldset id="section-privileges" class="js js-privileges" data-u="{{ current_user.id|string() }}" data-alert="true">
           <legend class="tab-control">Privileges</legend>
-        <div class="tab-content">{% if target_proj.projid and not target_proj.contact %}
-          {{ alertbox(type='danger', message="nocontact",dismissible = True, inverse = True, extra = {'small': True})}}
-              {% endif %} {{ pick_from_other(False,key='privileges',modal_title= _('Pick privileges from other projects')) }}
+        <div class="tab-content">{{ pick_from_other(False,key='privileges',modal_title= _('Pick privileges from other projects')) }}
         <div class="flex flex-col w-full px-4" id="listprivileges" >
             <div class="row" data-headers="true">
               <div class="th ident label">{{ _('Name') }}</div>

@@ -26,7 +26,7 @@ is-done
 <div id="job_monitor" class="container mx-auto mt-8">
     {% if job and job.id  %}
 <div class="pt-0 pb-8 mx-2">
-  <div data-id="{{job.id}}" data-request="monitor" data-event="load" data-state={{job.state}} {{'data-out=true' if job.outfile else ''}}  >
+  <div data-id="{{job.id}}" data-request="monitor" data-event="load" data-state="{{job.state}}" {{'data-out=true' if job.outfile else ''}}  >
   {%- if job.state !="E" and job.state!="F" -%}<div id="spinner-icon" class="hide mx-auto my-8"></div>
   {%-elif job.state=="E"-%}<div class="alert danger">
       <p>{{_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart
@@ -59,9 +59,9 @@ is-done
       <td ><span id="divstate" >{{ state2label[job.state]|safe }}</span>
         {% if job.state=="A" %}
           {{_(' waiting for an answer')}} <a href="/Job/Question/{{job.id}}" class="button is-warning">{{_('Go')}}</a>
-        {% elif job.state in ("E", "R") %}
+        {% elif job.state in ("E") %}
           <a href="{{url_for("gui_job_force_restart", job_id=job.id)}}">
-            <button class="btn btn-danger btn-sm">{{_('Force restart')}}</button>
+            <button class="button text-xs py-.5 ml-1 inverse btn-sm">{{_('Force restart')}}</button>
           </a>
         {% endif %}
       </td>

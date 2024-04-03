@@ -11,7 +11,7 @@
 {% elif target_proj and target_proj.projid%}
 {% if not proceed%}
 <form method="post" action="{{request.url}}" class="js js-submit">
-  <div class="alert danger inverse">
+<div class="block-info text-danger-500 font-normal text-lg mx-auto">
   {%if warning>0 %}
   {{_('USING Active Project Filters')}} {{objectids|length}} {{_('objects')}}
     {%else%}
@@ -28,7 +28,7 @@
 </div></form>
 {% elif proceed =="Y"%}
 {%endif%}
-<a href="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button inverse w-full sm:w-96 mt-2 ml-4 text-center">{{_('Back to project')}}</a>
+<a href="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="back-button">{{_('Back to project')}}</a>
 {% endif %}
 </div>
 {%endblock%}
