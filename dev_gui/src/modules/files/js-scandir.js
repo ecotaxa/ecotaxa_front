@@ -22,7 +22,7 @@ export class JsScanDir {
     add_custom_events(this);
 
     this.on(this.eventnames.error, (e) => {
-      consoile.log('scandir recevie error messgae', e)
+      consoile.log('scandir recevie error message', e)
     })
     this.on(this.eventnames.processed, async (e) => {
       console.log('e', e)
@@ -90,7 +90,7 @@ export class JsScanDir {
       } else if (!errored) {
         const complete = async function() {
           if (oncomplete && direntries.length === 0) {
-            //console.log('dircomplete', dir.name);
+            console.log('dircomplete', dir.name);
             oncomplete();
           } else {
             const entry = direntries.shift();

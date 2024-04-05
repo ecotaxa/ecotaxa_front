@@ -742,14 +742,16 @@ td details:not([open]) summary {@apply mr-0.5  text-ellipsis truncate whitespace
 td details:not([open]) summary > a {@apply float-right text-sm}
 td details.open summary {@apply text-stone-800 font-semibold whitespace-normal overflow-hidden !important}
 td details.open {@apply static;}
+/*about */
+.prjlist td details summary {@apply hover:font-normal cursor-pointer  }
 /* progress bar */
 /*data.progress {@apply relative before:float-right after:text-left after:text-xs after:text-stone-700 before:bg-stone-700 before:h-0.5 before:bottom-0  before:overflow-x-hidden before:absolute z-10 before:block after:block after:content-[attr(data-v)] after:z-20 after:absolute after:bottom-0.5 after:left-0 after:overflow-x-visible max-w-[64px] before:w-full bg-stone-200 h-0.5 block overflow-hidden }*/
 td.progress {@apply min-w-[96px] }
 .progress data {@apply relative before:bg-stone-200 before:h-0.5 before:left-0  before:bottom-0 overflow-x-visible before:block before:z-[2] block max-w-[64px] before:w-[64px]  before:max-w-[64px] before:absolute after:absolute after:bg-stone-700 after:h-0.5 after:block  after:left-0 after:bottom-0 after:z-[4] after:overflow-x-hidden bg-transparent after:w-full h-full}
 
 /* taxa list expand/shrink*/
-td > .tip, td > .static-tip {@apply max-h-24 overflow-hidden block truncate whitespace-normal p-1 py-4}
-td > .static-tip {@apply hover:h-auto hover:max-h-full}
+td > .tip, td > .static-tip {@apply max-h-24  overflow-hidden block truncate break-all whitespace-normal p-1 py-4}
+td > .static-tip {@apply hover:h-auto hover:z-10  hover:break-words hover:max-h-full}
 td > .tip.showfull {@apply  max-h-96  overflow-y-auto will-change-scroll overscroll-contain z-10 absolute shadow-sm bg-stone-100 rounded-sm m-0 p-4}
 td div[data-num] {@apply before:font-normal before:mr-1 before:bg-stone-600 before:rounded before:text-stone-50 before:text-xs before:px-1 before:content-[attr(data-num)] before:w-auto before:inline-block}
 /* samples select */
@@ -943,7 +945,8 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alertmessage.warning .signal i {@apply stroke-warning-500 icon-alert }
 .alertmessage.error {@apply bg-err-400 font-sans  selection:bg-err-200  border-err-500 ring-err-500 }
 .alertmessage.error .signal i {@apply stroke-err-500 icon-fire  }
-.alertmessage.info {@apply  border-info-400 ring-info-400}
+.alertmessage.info {@apply  border-info-400 ring-info-400 bg-info-100}
+.alertmessage.inverse {@apply bg-white }
 .alertmessage.info .type {@apply text-info-400}
 .alertmessage.info .signal i {@apply  icon-info }
 .alertmessage.success .signal i {@apply  icon-check }
@@ -1039,13 +1042,14 @@ div.showfull div.data-import .ts-wrapper.multi {@apply absolute -mt-[100%] z-60 
 /********************/
 /* job listall table*/
 /********************/
-.jobs.table-table thead {@apply sticky top-0 z-10}
-.jobs.table-table  th {@apply  shadow-none capitalize text-base text-stone-700 py-0.5 bg-stone-50 ;}
-.jobs.table-table tr {@apply border-b border-stone-100 h-[4rem] max-h-[4rem] }
-.jobs.table-table td {@apply bg-white align-middle text-left text-stone-900 }
-.jobs.table-table.table-condensed tr {@apply h-[2.5rem] max-h-[2.5rem] bg-white}
-.jobs.table-table.table-condensed tr th {@apply max-w-[15%] text-left pl-4 bg-transparent}
-.jobs.table-table.table-condensed td {@apply text-base font-normal text-stone-700}
+.table-table.jobs {@apply max-w-full}
+.table-table.jobs thead {@apply sticky top-0 z-10}
+.table-table.jobs  th {@apply  shadow-none capitalize text-base text-stone-700 py-0.5 bg-stone-50;}
+.table-table.jobs tr {@apply border-b border-stone-100 h-[4rem] max-h-[4rem]}
+.table-table.jobs td {@apply bg-white align-middle text-left text-stone-900 }
+.table-table.jobs.table-condensed tr {@apply h-[2.5rem] max-h-[2.5rem] bg-white}
+.table-table.jobs.table-condensed tr th {@apply max-w-[15%] text-left pl-4 bg-transparent}
+.table-table.jobs.table-condensed td {@apply text-base font-normal text-stone-700}
 .triggershow {@apply font-semibold before:content-[attr(data-show)] before:mr-1}
 .triggerhide {@apply font-normal before:content-[attr(data-hide)] before:mr-1}
 /*tip*/

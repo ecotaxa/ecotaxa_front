@@ -502,6 +502,8 @@ def utility_processor():
                         message["type"] = key
                         message["cookiename"] = cookiename
                         message["dismissible"] = True
+                        # for white bg
+                        message["inverse"] = True
                         listmessages.append(message)
             # get taxomessage and display in left box
             if current_user.is_authenticated:

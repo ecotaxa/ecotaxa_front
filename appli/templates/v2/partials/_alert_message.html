@@ -1,6 +1,6 @@
 {%from './v2/macros/macros.html' import alerttype %}
 {%-set duration =' data-duration='+message.duration|string if "duration" in message -%}
-<div class=" {{message.type|lower }}"  data-cook="{{message.type+message.cookiename if message.cookiename}}" data-value="{{message.date}}" {{duration}} id="alertmessage-{{message.type}}">
+<div class=" {{message.type|lower }} {{'inverse' if message.inverse }}"  data-cook="{{message.type+message.cookiename if message.cookiename}}" data-value="{{message.date}}" {{duration}} id="alertmessage-{{message.type}}">
   <div class="content"><div class="signal hidden sm:block"><i class="icon"></i></div>
     <div class="message">
     <strong class="type">{{alerttype(message.type)}}</strong>

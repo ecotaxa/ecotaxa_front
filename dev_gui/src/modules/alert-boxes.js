@@ -78,7 +78,7 @@ export class AlertBox {
     box.classList.add(message.type);
     if (message.hasOwnProperty('cookiename')) box.dataset.cook = message.type + message.cookiename;
     if (message.hasOwnProperty('date')) box.dataset.value = message.date;
-    if (message.hasOwnProperty('inverse') && message.inverse) box.classList.add('inverse');
+    if (message.hasOwnProperty('inverse') && message.inverse === true) box.classList.add('inverse');
     let buttons = ``;
     let showall = `<div class="showall hide" data-title="${i18nmessages.viewfull}"><i class="icon iconview"></i></div>`;
     if (message.type === alertconfig.types.confirm) {

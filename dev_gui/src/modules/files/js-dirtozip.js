@@ -25,6 +25,7 @@ export class JsDirToZip {
     ready: 'ready',
     endzip: 'endzip',
     complete: 'complete',
+    endreaddir: 'endreaddir',
     gzip: 'gzipfile',
     sendfile: 'sendfile',
     bigfile: 'bigfile',
@@ -43,6 +44,10 @@ export class JsDirToZip {
   sizetozip = 0;
   part = 0;
   continue = null;
+  counter = {
+    scan: 0,
+    zip: 0
+  }
   constructor(options = {}) {
     if (instance) return instance;
     const defaultOptions = {
@@ -64,11 +69,11 @@ export class JsDirToZip {
     add_custom_events(this);
     this.initStorage();
     this.on(this.eventnames.ready, () => {
-      //this.initZip();
       console.log('ready')
     });
   }
   reset() {
+    console.log('reset');
     this.zip = null;
     this.zipname = null;
     this.filestream = null;
@@ -79,36 +84,62 @@ export class JsDirToZip {
     this.continue = null;
     this.initStorage();
   }
-  initZip() {
+  async initZip() {
+    console.log('initzip')
     const self = this;
     this.pos = 0;
     this.sizetozip = 0;
-    this.zip = new Zip(
-      (error, chunk, final) => {
-        if (error) {
-          console.log('error', error);
-          return false;
-        } else {
-          self.streamhandle.write(chunk, {
-            at: self.pos
-          });
-          self.pos += chunk.length;
-          if (final) {
-            self.streamhandle.close();
-            console.log('final-----------------------------*******************************-', this.part);
-
-          }
+    this.zip = new Zip((error, chunk, final) => {
+      if (error) {
+        console.log('error', error);
+        return false;
+      } else {
+        self.streamhandle.write(chunk, {
+          at: self.pos
+        });
+        self.pos += chunk.length;
+        if (final) {
+          self.streamhandle.close();
+          console.log('final-----------------------------*******************************-', self.pos);
 
         }
-      });
-    if (this.continue) this.continue();
+
+      }
+    });
+    /*  const fflToRS = fflateStream =>
+        new ReadableStream({
+          start(controller) {
+            // Push to the ReadableStream whenever the fflate
+            // stream gets data
+            fflateStream.ondata = (err, data, final) => {
+              if (err) controller.error(err);
+              else {
+                controller.enqueue(data);
+                // End the stream on the final chunk
+                if (final) {
+                  controller.close();
+                  console.log('final-----------------------------******************************-');
+                }
+              }
+            }
+          },
+          cancel() {
+            // We can stop working if the stream is cancelled
+            // This may happen if the user cancels the download
+            fflateStream.terminate();
+          }
+        });
+      const zipstream = fflToRS(this.zip);
+      zipstream.pipeTo(self.streamhandle);*/
+    if (this.continue) await this.continue();
     else {
       // events
       this.on(this.eventnames.endzip, (e) => {
-
         if (!e.bigfile && this.zip) {
-          console.log('zipend', this.zip)
+
           this.zip.end();
+          console.log('zipend', this.zip)
+          console.log('fstrem', this.filestream)
         } else if (e.bigfile && this.gzipped) console.log('-------------------------gzipped end ', this.gzipped)
         const message = {
           name: this.eventnames.sendfile
@@ -133,6 +164,23 @@ export class JsDirToZip {
       this.on(this.eventnames.bigfile, (e) => {
         console.log('onsendchunk', e)
         this.sendChunk((e.path ? e.path : ''));
+      });
+      this.on(this.eventnames.endreaddir, (e) => {
+        this.endreaddir = true;
+        console.log('endreaddir', this.counter)
+        if (this.counter.scan === this.counter.zip) {
+          console.log(this.endreaddir, this.counter)
+          console.log('endzip', this.zip)
+          this.emit(this.eventnames.complete, {
+            name: this.eventnames.endzip
+          });
+        }
+      });
+      this.on(this.eventnames.counter, async (e) => {
+        this.counter[e.name] += 1;
+        if (this.counter.scan === this.counter.zip) console.log('this end', this.endreaddir)
+
+        if (e.name === 'zip' && this.callback) await this.callback();
       });
     }
   }
@@ -180,8 +228,7 @@ export class JsDirToZip {
     console.log('this.zip', this.zip)
     if (this.zip === null) {
       const type = (options && options.type) ? options.type : '.zip';
-      this.zipname = ((options.zipname) ? options.zipname : dir.name) + type;
-      //
+      this.zipname = ((options.zipname) ? options.zipname : dir.name) + type; //
 
       const {
         filestream,
@@ -192,8 +239,7 @@ export class JsDirToZip {
       this.streamhandle = streamhandle;
       let size = 0;
       this.part = 0;
-      this.initZip();
-      console
+      await this.initZip();
       const zip = this.zip;
       if (!this.jsScanDir) {
         const {
@@ -201,18 +247,20 @@ export class JsDirToZip {
         } = await import('../files/js-scandir.js');
         this.jsScanDir = new JsScanDir();
       }
-      this.jsScanDir.processFile = (entry, callback) => {
-        this.processFile(entry, callback);
-      };
-      await this.jsScanDir.readDirectory(dir, () => {
-        this.emit(this.eventnames.complete, {
-          name: this.eventnames.endzip
-        });
+      this.jsScanDir.processFile = async (entry, callback) => {
+        this.callback = callback;
+        await this.processFile(entry);
 
-      });
+      };
     }
+    this.endreaddir = false;
+    this.counter.scan = this.counter.zip = 0;
+    await this.jsScanDir.readDirectory(dir, () => {
+      this.emit(this.eventnames.endreaddir);
+    });
+
   }
-  async sendBigFile(file, callback, filepath) {
+  async sendBigFile(file, filepath) {
     console.log('sendbigfilepath', filepath)
     this.dt = Date.now();
     filepath = (filepath.indexOf('/') === 0) ? filepath.substr(1) : filepath;
@@ -260,7 +308,7 @@ export class JsDirToZip {
             bigfile: filepath
 
           });
-          console.log('callbackbig', callback)
+
           streamhandle.close();
           console.log('timetozip', (Date.now() - this.dt) / 1000)
           selfi.gzipped = filestream;
@@ -273,7 +321,7 @@ export class JsDirToZip {
           pos += data.length;
         }
       };
-      await this.readFile(file, filepath, gzipped, callback);
+      await this.readFile(file, filepath, gzipped);
     }
 
 
@@ -285,8 +333,14 @@ export class JsDirToZip {
       part: this.part
     });
   }
-  async readFile(file, filepath, zippedstream, callback = null) {
+  async readFile(file, filepath, zippedstream) {
+    const self = this;
     const reader = file.stream().getReader();
+    let pause = false;
+    /*  onBackpressure(zippedstream, this.streamhandle, should_apply_backpressure => {
+        if (should_apply_backpressure) pause = true;
+        else if (pause) pause = false;
+      });*/
     while (true) {
       const {
         done,
@@ -294,31 +348,49 @@ export class JsDirToZip {
       } = await reader.read();
       if (done) {
         zippedstream.push(new Uint8Array(0), true);
-        this.emit(this.eventnames.counter, {
+        self.emit(self.eventnames.counter, {
           name: 'zip',
           filepath: filepath,
           size: (zippedstream.size) ? zippedstream.size : file.size
         });
-        if (zippedstream.terminate) zippedstream.terminate();
-        if (callback) callback();
-        return done;
+        break;
       }
       zippedstream.push(value);
     }
   }
-  async zipStream(file, filepath, callback) {
+  async zipStream(file, filepath) {
+    const self = this;
     const ext = filepath.slice(filepath.lastIndexOf('.') + 1);
     const iscompressed = already_compressed.has(ext);
     const zippedstream = (iscompressed) ? new ZipPassThrough(filepath) : file.size > this.options.largefile ?
       new AsyncZipDeflate(filepath, {
-        level: 9
+        level: 6,
       }) : new ZipDeflate(filepath, {
         level: 6
       });
     this.zip.add(zippedstream);
-    await this.readFile(file, filepath, zippedstream, callback);
+    /*zippedstream.ondata = (err, data, final) => {
+      if (err) {
+        console.log('err async', err);
+      } else if (final === true) {
+        console.log('final', zippedstream)
+        self.emit(self.eventnames.counter, {
+          name: 'zip',
+          filepath: filepath,
+          size: (zippedstream.size) ? zippedstream.size : file.size
+        });
+
+      } else {
+        self.streamhandle.write(data, {
+          at: self.pos
+        });
+        self.pos += data.length;
+      }
+    }*/
+    //  console.log(zippedstream instanceof(AsyncZipDeflate), zippedstream.ondata);
+    await this.readFile(file, filepath, zippedstream);
   }
-  async processFile(entry, callback = null) {
+  async processFile(entry) {
     const self = this;
     const filepath = entry.fullPath;
     const ext = filepath.slice(filepath.lastIndexOf('.') + 1);
@@ -327,8 +399,8 @@ export class JsDirToZip {
       return;
     }
     if (entry.isDirectory) {
-      //  console.log('zipdir', callback)
-      if (callback) callback();
+      console.log('zipdir', this.callback)
+      if (this.callback !== null) await this.callback();
     } else {
       entry.file(async file => {
         this.emit(this.eventnames.counter, {
@@ -339,17 +411,17 @@ export class JsDirToZip {
         this.continue = null;
         // check file size > max post size
         if (file.size >= MAXSIZE) {
-          this.sendBigFile(file, callback, filepath);
+          await this.sendBigFile(file, filepath);
         } else {
           // check zip file size > total zip size
           this.sizetozip += file.size;
           if (this.sizetozip >= MAXSIZE) {
             this.continue = async () => {
-              await this.zipStream(file, filepath, callback);
+              await this.zipStream(file, filepath);
             }
             this.partZip();
           } else {
-            await this.zipStream(file, filepath, callback);
+            await this.zipStream(file, filepath);
           }
         }
       });
@@ -380,11 +452,13 @@ export class JsDirToZip {
       message.bigfile !== false && message.bigfile !== null) {
       message["bigfile"] = this.gzipped.name;
       this.gzipped = null;
-    } else if (this.continue) {
-      console.log('continue')
-      this.streamhandle = await this.filestream.createWritable();
-      this.initZip();
-    } else if (clean === true) await this.cleanStorage();
+    } else {
+      if (this.continue) {
+        this.streamhandle = await this.filestream.createWritable();
+        await this.initZip();
+      } else this.reset();
+      if (this.continue === null && clean === true) await this.cleanStorage();
+    }
     this.emit(this.eventnames.complete, message);
     console.log('continue', this.continue)
   }
@@ -442,8 +516,8 @@ export class JsDirToZip {
       console.log('response----------------------', response);
       console.log('callbackchunk-------------------------------', callbackchunk)
       if (callbackchunk !== null) {
-        callbackchunk();
-      } else this.endFetch(message);
+        await callbackchunk();
+      } else await this.endFetch(message);
     });
   }
 }

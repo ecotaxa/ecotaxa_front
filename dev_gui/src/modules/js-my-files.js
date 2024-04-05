@@ -335,7 +335,7 @@ export class JsMyFiles {
           switch (e.name) {
             case 'console':
               console.log('console', e);
-              type = window.alertbox.alertconfig.types.warning;
+              type = window.alertbox.alertconfig.types.info;
               break;
             case 'error':
               type = window.alertbox.alertconfig.types.error;
@@ -343,10 +343,11 @@ export class JsMyFiles {
             default:
               console.log('message', e);
           }
-          window.alertbox.renderMessage({
+          window.alertbox.renderAlert({
             type: type,
             content: e.message,
-            dismissible: true
+            dismissible: true,
+            inverse: false
           });
         });
         const self = this;
@@ -357,7 +358,6 @@ export class JsMyFiles {
           self.fileCounter(e.name, e.filepath, e.size);
         });
         this.jsDirToZip.on(this.jsDirToZip.eventnames.complete, (e) => {
-
           if (!e || !e.name) {
             console.log('no emit complete name');
             return;
@@ -528,7 +528,6 @@ export class JsMyFiles {
         break;
       case this.jsDirToZip.eventnames.terminate:
         console.log('terminate ' + ((target !== 'zip') ? 'bigfile' : ''));
-
         this.serverList();
         //default:
         btn.dataset.message = JSON.stringify({
