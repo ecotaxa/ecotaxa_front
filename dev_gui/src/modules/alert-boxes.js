@@ -340,38 +340,40 @@ export class AlertBox {
     }
     return false;
   }
-  addItemMessage(type, el, message, tim = null) {
-    if (this.allowedtypes.indexOf(type) < 0) return;
-    if (el === null) return;
-    el = this.realTarget(el);
+  addItemMessage(message) {
+    // message {type:, parent:  ,content:, duration:}
+    if (this.allowedtypes.indexOf(message.type) < 0) return;
+    if (message.parent === null) return;
+    const el = this.realTarget(message.parent);
     el.classList.add('relative');
-    const messages = (el.dataset[type]) ? el.dataset[type].split(', ') : [];
-    message = (this.i18nmessages[message]) ? this.i18nmessages[message] : message;
-    if (messages.indexOf(message) < 0) {
-      messages.push(message);
-      el.dataset[type] = messages.join(this.separator);
-      el.classList.add(this.alertconfig.css.has[type]);
+    const messages = (el.dataset[message.type]) ? el.dataset[message.type].split(', ') : [];
+    message.content = (this.i18nmessages[message.content]) ? this.i18nmessages[message.content] : message.content;
+    if (messages.indexOf(message.content) < 0) {
+      messages.push(message.content);
+      el.dataset[message.type] = messages.join(this.separator);
+      el.classList.add(this.alertconfig.css.has[message.type]);
     } else this.refreshAlert(el);
-    if (tim !== null) {
+    if (message.duration && message.duration !== null) {
       setTimeout(() => {
-        this.removeItemMessage(type, el, message);
-      }, tim);
+        this.removeItemMessage(message);
+      }, message.duration);
     }
   }
 
-  removeItemMessage(type, el, message = null) {
-    if (this.allowedtypes.indexOf(type) < 0) return;
-    el = this.realTarget(el);
-    if (el === null || !el.dataset[type]) return;
-    if (message !== null) {
-      message = (this.i18nmessages[message]) ? this.i18nmessages[message] : message;
-      const messages = el.dataset[type].split(this.separator);
-      const i = messages.indexOf(message);
+  removeItemMessage(message) {
+    // message {type:, parent:  ,content:null}
+    if (this.allowedtypes.indexOf(message.type) < 0) return;
+    el = this.realTarget(message.parent);
+    if (el === null || !el.dataset[message.type]) return;
+    if (message.content !== null) {
+      message.content = (this.i18nmessages[message.content]) ? this.i18nmessages[message.content] : message.content;
+      const messages = el.dataset[message.type].split(this.separator);
+      const i = messages.indexOf(message.content);
       if (i >= 0) delete messages[i];
-      if (messages.length === 0) delete el.dataset[type];
-      else el.dataset[type] = messages.join(this.separator);
-    } else delete el.dataset[type];
-    if (!el.dataset[type]) el.classList.remove(this.alertconfig.css.has[type]);
+      if (messages.length === 0) delete el.dataset[message.type];
+      else el.dataset[message.type] = messages.join(this.separator);
+    } else delete el.dataset[message.type];
+    if (!el.dataset[message.type]) el.classList.remove(this.alertconfig.css.has[message.type]);
   }
   classError() {
     return false;

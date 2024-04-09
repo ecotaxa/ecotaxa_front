@@ -314,7 +314,11 @@ export class ProjectPrivileges {
     const lineSettings = (pr, ct, dl, synchro = false) => {
       if (pr && pr.checked) {
         pr.checked = true;
-        if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
+        if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage({
+          type: window.alertbox.alertconfig.types.danger,
+          parent: line,
+          content: this.keymessages.uhasnopriv
+        });
       }
       if (pr && pr.value === rights.manage) {
         // manager - can't delete line - can choose as contact
@@ -338,7 +342,11 @@ export class ProjectPrivileges {
       // dismiss alerts
       if (!dl.ckecked) {
         window.alertbox.dismissAlert(this.keymessages.nobody);
-        if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.oneatleast);
+        if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage({
+          type: window.alertbox.alertconfig.types.danger,
+          parent: line,
+          content: this.keymessages.oneatleast
+        });
       }
     }
     const synchroSiblings = (line) => {
@@ -353,7 +361,11 @@ export class ProjectPrivileges {
     }
     member.addEventListener('change', (e) => {
       contact.value = member.value;
-      if (parseInt(member.value) > 0 && window.alertbox.hasItemMessages(member)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, member, this.keymessages.emptyname);
+      if (parseInt(member.value) > 0 && window.alertbox.hasItemMessages(member)) window.alertbox.removeItemMessage({
+        type: window.alertbox.alertconfig.types.danger,
+        parent: member,
+        content: this.keymessages.emptyname
+      });
     })
     privs.forEach((priv) => {
       priv.addEventListener('change', (e) => {
@@ -383,10 +395,18 @@ export class ProjectPrivileges {
         line.removeAttribute('data-mod');
         member.disabled = false;
         e.target.disabled = true;
-        window.alertbox.addItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.oneatleast, 3000);
+        window.alertbox.addItemMessage({
+          type: window.alertbox.alertconfig.types.danger,
+          parent: line,
+          content: this.keymessages.oneatleast,
+          duration: 3000
+        });
         return;
       } else if (e.target.checked) {
-        if (window.alertbox.hasItemMessages(member)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, member);
+        if (window.alertbox.hasItemMessages(member)) window.alertbox.removeItemMessage({
+          type: window.alertbox.alertconfig.types.danger,
+          parent: member
+        });
         if (line.classList.contains('new')) {
           line.remove();
         } else {
@@ -479,7 +499,11 @@ export class ProjectPrivileges {
           n--;
         } else return false;
       } else if (!has_member(member)) {
-        window.alertbox.addItemMessage(window.alertbox.alertconfig.types.danger, member, this.keymessages.emptyname);
+        window.alertbox.addItemMessage({
+          type: window.alertbox.alertconfig.types.danger,
+          parent: member,
+          content: this.keymessages.emptyname
+        });
         member.focus();
         const resp = false; // no confimbox just wait for user action
         // callback if confirmbox response is chosen if 'confirm'
@@ -491,9 +515,19 @@ export class ProjectPrivileges {
         } else return false;
       }
       if (!has_priv(line)) {
-        window.alertbox.addItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
+        window.alertbox.addItemMessage({
+          type: window.alertbox.alertconfig.types.danger,
+          parent: line,
+          content: this.keymessages.uhasnopriv
+        });
         verif = false;
-      } else if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, line, this.keymessages.uhasnopriv);
+      } else if (window.alertbox.hasItemMessages(line)) {
+        window.alertbox.removeItemMessage({
+          type: window.alertbox.alertconfig.types.danger,
+          parent: line,
+          content: this.keymessages.uhasnopriv
+        });
+      }
 
     }
     if (n === 0) {

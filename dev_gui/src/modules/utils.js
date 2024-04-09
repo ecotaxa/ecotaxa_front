@@ -102,6 +102,14 @@ function download_url(data, filename, hide = false) {
   //  a.remove();
 }
 
+function format_bytes(bytes, decimals = 2) {
+  if (!+bytes) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
 /* debounce */
 function debounce(func, wait, immediate) {
   let timeout;
@@ -125,7 +133,6 @@ function is_object(obj) {
 }
 
 function add_custom_events(self) {
-
   /**
    * Add custom event listener
    * @param  {String} event
@@ -164,7 +171,7 @@ function create_box(tag, attrs, parent, sep = ` / `) {
   Object.entries(attrs).forEach(([attr, value]) => {
     switch (attr) {
       case 'text':
-        el.textContent = DOMPurify.sanitize(text);
+        el.textContent = DOMPurify.sanitize(value);
         break;
       default:
         el.setAttribute(attr, value);
@@ -223,5 +230,6 @@ export {
   dom_purify,
   create_box,
   decode_HTMLEntities,
-  html_spinner
+  html_spinner,
+  format_bytes
 }

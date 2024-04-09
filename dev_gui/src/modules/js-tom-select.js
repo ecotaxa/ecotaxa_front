@@ -111,7 +111,12 @@ export class JsTomSelect {
               if (users_list[e]) {
                 //  if (multiple || !this.revertSettings || this.revertSettings.tabIndex < 0 || !item.options.length) return;
                 if (window.alertbox) {
-                  window.alertbox.addItemMessage(window.alertbox.alertconfig.types.danger, item, window.alertbox.i18nmessages.exists);
+                  console.log('itemtoms', item)
+                  window.alertbox.addItemMessage({
+                    type: window.alertbox.alertconfig.types.danger,
+                    parent: item,
+                    content: window.alertbox.i18nmessages.exists
+                  });
                 } else {
                   item.dataset.invalid = window.alertbox.i18nmessages.exists;
                   item.dispatchEvent(new Event('invalid'));
@@ -126,7 +131,11 @@ export class JsTomSelect {
                     this.addItem(revert);
                   }
                   if (window.alertbox) {
-                    window.alertbox.removeItemMessage(window.alertbox.alertconfig.types.danger, item, window.alertbox.i18nmessages.exists);
+                    window.alertbox.removeItemMessage({
+                      type: window.alertbox.alertconfig.types.danger,
+                      parent: item,
+                      content: window.alertbox.i18nmessages.exists
+                    });
                   } else {
                     delete item.dataset.invalid;
                     item.dispatchEvent(new Event('undeterminate'));
