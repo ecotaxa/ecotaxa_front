@@ -6,8 +6,12 @@ import {
 } from '../modules/modules-config.js';
 import {
   fetchSettings,
-  get_catcha_reponse
+  get_catcha_reponse,
+  decode_HTMLEntities
 } from '../modules/utils.js';
+import {
+  export_html2word
+} from '../modules/export-html2word.js';
 const localcss = {
   trigger: {
     show: 'triggershow',
@@ -205,6 +209,14 @@ export class ActivItems {
             } else if (window.confirm(message)) rep = true;
             return rep;
           });
+          break;
+        case 'astext':
+          const article = item.parentElement.querySelector('article');
+          if (article) {
+            item.addEventListener('click', (e) => {
+              export_html2word(article, item.parentElement);
+            });
+          }
           break;
 
       }
