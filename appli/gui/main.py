@@ -63,6 +63,7 @@ def gui_login() -> str:
                     if next.strip() != "":
                         next = safe_url_redir(next)
                         return redirect(next)
+                return redirect(HOMEPAGE)
             elif isinstance(userdata, dict):
                 redir = url_for("gui_me_activate", token="no")
                 return redirect(redir)
