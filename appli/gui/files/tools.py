@@ -7,11 +7,14 @@ from appli.utils import ApiClient
 from appli.gui.jobs.staticlistes import py_messages
 
 
-def dir_list(subdir):
+def dir_list(subpath=None):
+    if subpath == None:
+        subpath = "/"
+
     with ApiClient(FilesApi, request) as api:
         try:
             #: DirectoryModel
-            dirlist = api.list_user_files(subdir)
+            dirlist = api.list_user_files(subpath)
         except ApiException as ae:
             if ae.status in (401, 403):
                 ae.reason = py_messages["dirlist"]["nopermission"]
@@ -22,7 +25,7 @@ def dir_list(subdir):
     return dirlist, None
 
 
-def upload_file(subdir):
+def upload_file(subpath=None):
     import json
     import requests
 
@@ -30,7 +33,6 @@ def upload_file(subdir):
     # print(body)
     # uploaded = gvp("file")
     dirpath = gvp("path")
-    tag = gvp("tag")
     uploaded: FileStorage = request.files.get("file")
     reqheaders = json.loads(json.dumps({k: v for k, v in request.headers.items()}))
     # Relay the file to back-end
@@ -49,7 +51,7 @@ def upload_file(subdir):
         uploaded.name = uploaded.filename
         rsp = requests.post(
             url,
-            data={"tag": tag, "path": dirpath},
+            data={"subpath": subpath, "path": dirpath},
             files={"file": uploaded},
             headers=headers,
         )

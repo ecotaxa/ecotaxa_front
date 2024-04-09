@@ -1,7 +1,8 @@
 'use strict';
 import {
   add_custom_events,
-  fetchSettings
+  fetchSettings,
+  format_bytes
 } from '../../modules/utils.js';
 
 import {
@@ -48,6 +49,8 @@ export class JsDirToZip {
     scan: 0,
     zip: 0
   }
+  // uses https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system
+  //# alternative (not supported in Safari) for .createWritable
   constructor(options = {}) {
     if (instance) return instance;
     const defaultOptions = {
@@ -89,6 +92,7 @@ export class JsDirToZip {
     const self = this;
     this.pos = 0;
     this.sizetozip = 0;
+
     this.zip = new Zip((error, chunk, final) => {
       if (error) {
         console.log('error', error);
@@ -167,10 +171,7 @@ export class JsDirToZip {
       });
       this.on(this.eventnames.endreaddir, (e) => {
         this.endreaddir = true;
-        console.log('endreaddir', this.counter)
-        if (this.counter.scan === this.counter.zip) {
-          console.log(this.endreaddir, this.counter)
-          console.log('endzip', this.zip)
+        if (e.hasOwnProperty('name') && e.name === this.eventnames.endzip) {
           this.emit(this.eventnames.complete, {
             name: this.eventnames.endzip
           });
@@ -178,28 +179,37 @@ export class JsDirToZip {
       });
       this.on(this.eventnames.counter, async (e) => {
         this.counter[e.name] += 1;
-        if (this.counter.scan === this.counter.zip) console.log('this end', this.endreaddir)
-
+        if (this.endreaddir && e.name === 'zip' && this.counter.scan === this.counter.zip) {
+          console.log('end', this.counter)
+          this.emit(this.eventnames.complete, {
+            name: this.eventnames.endzip
+          });
+        }
         if (e.name === 'zip' && this.callback) await this.callback();
       });
     }
   }
+
+  async quotaEstimate() {
+
+    if (navigator && navigator.storage && navigator.storage.estimate) {
+      navigator.storage.estimate().then((quota) => {
+        const percentageUsed = ((quota.usage / quota.quota) * 100).toFixed(2);
+        const remaining = format_bytes(quota.quota - quota.usage);
+        this.emit(this.eventnames.message, {
+          id: "quota",
+          name: "console",
+          message: "you've used " + percentageUsed + "% of the available storage (" + remaining + ")."
+        });
+      });
+    }
+  }
+
   async initStorage() {
     if (navigator && navigator.storage && navigator.storage.estimate) {
       await this.cleanStorage();
       this.emit(this.eventnames.ready);
-      navigator.storage.estimate().then((quota) => {
-        const percentageUsed = (quota.usage / quota.quota) * 100;
-        const remaining = quota.quota - quota.usage;
-        this.emit(this.eventnames.message, {
-          name: "console",
-          message: "You can write up to " + remaining + " more bytes."
-        });
-        this.emit(this.eventnames.message, {
-          name: "console",
-          message: "you've used " + percentageUsed + "% of the available storage."
-        });
-      });
+      this.quotaEstimate();
     } else this.emit(this.eventnames.message, {
       name: "error",
       message: "no navigator storage"
@@ -223,24 +233,24 @@ export class JsDirToZip {
       streamhandle
     };
   }
-
-  async scanHandle(dir, options = {}) {
-    console.log('this.zip', this.zip)
+  async scanCommon(is_dir, zipname, options = {}) {
+    this.endreaddir = false;
+    this.counter.scan = this.counter.zip = 0;
     if (this.zip === null) {
       const type = (options && options.type) ? options.type : '.zip';
-      this.zipname = ((options.zipname) ? options.zipname : dir.name) + type; //
-
+      this.zipname = ((options.zipname) ? options.zipname : zipname) + type; //
+      const zipinstorage = await this.searchStorage(this.zipname);
+      if (zipinstorage) this.zipname = '1_' + this.zipname;
       const {
         filestream,
         streamhandle
       } = await this.createLocalStream(this.zipname);
-      console.log('streamhandle', streamhandle)
+
       this.filestream = filestream;
       this.streamhandle = streamhandle;
       let size = 0;
       this.part = 0;
       await this.initZip();
-      const zip = this.zip;
       if (!this.jsScanDir) {
         const {
           JsScanDir
@@ -253,10 +263,26 @@ export class JsDirToZip {
 
       };
     }
-    this.endreaddir = false;
-    this.counter.scan = this.counter.zip = 0;
+  }
+
+  async scanFiles(files, options = {}) {
+    if (files.length === 0) return;
+    const zipname = files[0].webkitRelativePath.split("/")[0];
+    console.log(zipname, files[0]);
+    await this.scanCommon(false, zipname, options);
+    for (let n = 0; n < files.length; n++) {
+      if (n === files.length - 1) this.emit(this.eventnames.endreaddir, {});
+      await this.addFileToZipStream(files[n], files[n].webkitRelativePath);
+    }
+
+  }
+
+  async scanHandle(dir, options = {}) {
+    await this.scanCommon(true, dir.name, options);
     await this.jsScanDir.readDirectory(dir, () => {
-      this.emit(this.eventnames.endreaddir);
+      this.emit(this.eventnames.endreaddir, {
+        name: this.eventnames.endzip
+      });
     });
 
   }
@@ -369,27 +395,34 @@ export class JsDirToZip {
         level: 6
       });
     this.zip.add(zippedstream);
-    /*zippedstream.ondata = (err, data, final) => {
-      if (err) {
-        console.log('err async', err);
-      } else if (final === true) {
-        console.log('final', zippedstream)
-        self.emit(self.eventnames.counter, {
-          name: 'zip',
-          filepath: filepath,
-          size: (zippedstream.size) ? zippedstream.size : file.size
-        });
-
-      } else {
-        self.streamhandle.write(data, {
-          at: self.pos
-        });
-        self.pos += data.length;
-      }
-    }*/
-    //  console.log(zippedstream instanceof(AsyncZipDeflate), zippedstream.ondata);
     await this.readFile(file, filepath, zippedstream);
   }
+
+  async addFileToZipStream(file, filepath) {
+    console.log('emitscan', this.counter)
+    this.emit(this.eventnames.counter, {
+      name: 'scan',
+      filepath: filepath,
+      size: file.size
+    });
+    this.continue = null;
+    // check file size > max post size
+    if (file.size >= MAXSIZE) {
+      await this.sendBigFile(file, filepath);
+    } else {
+      // check zip file size > total zip size
+      this.sizetozip += file.size;
+      if (this.sizetozip >= MAXSIZE) {
+        this.continue = async () => {
+          await this.zipStream(file, filepath);
+        }
+        this.partZip();
+      } else {
+        await this.zipStream(file, filepath);
+      }
+    }
+  }
+
   async processFile(entry) {
     const self = this;
     const filepath = entry.fullPath;
@@ -403,27 +436,7 @@ export class JsDirToZip {
       if (this.callback !== null) await this.callback();
     } else {
       entry.file(async file => {
-        this.emit(this.eventnames.counter, {
-          name: 'scan',
-          filepath: filepath,
-          size: file.size
-        });
-        this.continue = null;
-        // check file size > max post size
-        if (file.size >= MAXSIZE) {
-          await this.sendBigFile(file, filepath);
-        } else {
-          // check zip file size > total zip size
-          this.sizetozip += file.size;
-          if (this.sizetozip >= MAXSIZE) {
-            this.continue = async () => {
-              await this.zipStream(file, filepath);
-            }
-            this.partZip();
-          } else {
-            await this.zipStream(file, filepath);
-          }
-        }
+        await this.addFileToZipStream(file, filepath);
       });
 
     }
@@ -434,14 +447,27 @@ export class JsDirToZip {
       name: "reload"
     });
   }
+  async searchStorage(search) {
+    const entry = await navigator.storage.getDirectory();
+    for await (const [key, value] of entry.entries()) {
+      if (search === key) {
+        console.log('key', key);
+        return true;
+        false
+        break;
+      }
+    }
+    return false;
+  }
   async cleanStorage(entry = null) {
+    return;
     entry = (entry) ? entry : await navigator.storage.getDirectory();
     for await (const [key, value] of entry.entries()) {
-      console.log('keyval', {
-        key,
-        value
-      });
-      await entry.removeEntry(key);
+      try {
+        await entry.removeEntry(key);
+      } catch (error) {
+        console.log(' remove storage ' + key, error);
+      }
     }
 
   }
@@ -457,7 +483,6 @@ export class JsDirToZip {
         this.streamhandle = await this.filestream.createWritable();
         await this.initZip();
       } else this.reset();
-      if (this.continue === null && clean === true) await this.cleanStorage();
     }
     this.emit(this.eventnames.complete, message);
     console.log('continue', this.continue)
@@ -500,9 +525,9 @@ export class JsDirToZip {
     } : {};
     this.emit(this.eventnames.pending, message);
     console.log('file', file)
+    console.log('path', path)
     console.log('callbackchunk---sendzip', callbackchunk)
     const formdata = new FormData();
-    formdata.append('tag', 'ecotaxa_import');
     formdata.append('path', path + file.name);
     formdata.append('file', file, file.name);
     if (this.part) formdata.append('part', this.part);

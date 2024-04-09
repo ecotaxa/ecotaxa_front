@@ -2,7 +2,8 @@ import {
   dom_purify,
   fetchSettings,
   add_custom_events,
-  create_box
+  create_box,
+  format_bytes
 } from '../modules/utils.js';
 import {
   css,
@@ -43,6 +44,12 @@ export class JsMyFiles {
           id: 'display-file-counters',
         },
         controls: {
+          scan: {
+            display: {
+              counter: 'counter',
+              size: 'size',
+            }
+          },
           zip: {
             btn: {
               zip: 'makezip',
@@ -53,12 +60,7 @@ export class JsMyFiles {
               counter: 'counterzipped',
             }
           },
-          scan: {
-            display: {
-              counter: 'counter',
-              size: 'size',
-            }
-          },
+
         },
         upload: {
           label: 'upload'
@@ -73,6 +75,22 @@ export class JsMyFiles {
           entries: '.entries',
           uploadfile: 'uploadfile',
           displayresult: 'results',
+
+        },
+        entrycontrols: {
+          selector: '.entrycontrols',
+          url: 'gui/me/my_files/',
+          controls: [{
+              action: 'rename',
+              text: 'rename',
+              icon: 'icon-pencil'
+            },
+            {
+              action: 'delete',
+              text: 'delete',
+              icon: 'icon-trash'
+            },
+          ]
         },
         display: {
 
@@ -103,10 +121,10 @@ export class JsMyFiles {
       this.container.append(el)
     }
     if (this.options.btnfilelist) {
-      const btnfiles = create_box('div', el, {
+      const btnfiles = create_box('div', {
         class: 'button is-secondary',
         text: this.options.btnfilelist
-      });
+      }, el);
       btnfiles.addEventListener('click', (e) => {
         this.serverList(el);
         this.classList.toggle(css.hide);
@@ -141,16 +159,17 @@ export class JsMyFiles {
     droptarget.addEventListener('drop', async (e) => {
       this.handleDrop(e);
     });
-    this.container.querySelector(this.options.selector.trigger).addEventListener('click', (e) => {
-      let datatransfer = e;
-      this.openDirDialog(accept, (e) => {
-        console.log('edrop', datatransfer)
+    this.container.querySelector(this.options.selector.trigger).addEventListener('click', async (e) => {
+      this.openDirDialog(accept, async (e) => {
+        const files = e.target.files;
+        this.toggleCounters(true);
+        await this.jsDirToZip.scanFiles(files);
       });
     });
     add_custom_events(this);
 
     this.on(this.eventnames.error, (e) => {
-      consoile.log('scandir recevie error messgae', e)
+      consoile.log('scandir receive error message', e)
     })
     this.on(this.eventnames.processed, async (e) => {
       if (this.nextaction) await this.nextaction();
@@ -169,18 +188,73 @@ export class JsMyFiles {
   async addDirList(source) {
 
   }
+
+
   serverList(parent = null, subdir = null, tag = null) {
     parent = parent ? parent : this.container.querySelector(this.options.selector.dirlist);
     if (!parent) return;
-    parent.classList.add('wait');
+    // remove, move
+    const entry_controls = () => {
+      let box = this.container.querySelector(this.options.entrycontrols.selector);
+      if (box === null) {
+        box = document.createElement('div');
+        box.classList.add(this.options.entrycontrols.selector);
+        this.options.entrycontrols.controls.forEach(control => {
+          const el = document.createElement('span');
+          if (control.icon) {
+            el.insertAdjacentHTML('afterbegin', `<i class="icon ${control.icon}"></i>`);
+            el.dataset.title = control.text;
+          } else el.textContent = control.text;
+          box.append(el);
+          el.addEventListener('click', async (e) => {
+            if (el.parentElement.classList.contains('entryD') || el.parentElement.classList.contains('entryD')) {
+              const name = (el.parentElement.dataset.name) ? new URLSearchParams({
+                entry: el.parentElement.dataset.name
+              }) : null;
+              if (name === null) return false;
+              const response = await fetch(this.options.entrycontrols.url + control.action + name, fetchSettings());
+              const json = await response.json();
+              if (json.success) {
+                switch (json.action) {
+                  case 'rename':
+                    el.parentElement.textContent = json.name;
+                    break;
+                  case 'delete':
+                    el.parentElement.remove();
+                    break;
+                }
+                return true;
+              } else {
+                console.log('err', json)
 
+              }
+            }
+            return false;
+          });
+        });
+        //  box.classList.add(css.hide);
+        //  box.classList.add(css.absolute);
+        this.container.append(box);
+      }
+      return box;
+    }
+    const entrycontrols = entry_controls();
+    const attach_controls = (el) => {
+      if (!el.dataset.name) return false;
+      el.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        el.append(entrycontrols);
+        el.classList.remove(css.hide);
+      });
+
+    }
+    parent.classList.add('wait');
     const el = parent.querySelector(this.options.selector.entries);
     if (el) el.remove();
     tag = (tag) ? ((tag === 'select') ? 'optiongroup' : tag) : 'ul';
     const subtag = (tag === 'ul') ? 'li' : 'option';
     console.log('list subdir', subdir)
     fetch(this.options.url + ((subdir) ? subdir : ''), fetchSettings()).then(response => response.json()).then(async json => {
-      console.log('jspn', json)
       if (json.entries && json.entries.length) {
         if (parent.dataset.label) parent.insertAdjacentHTML('afterbegin', `<label>${parent.dataset.label}</label>`);
         let html = [`<${tag} class="${this.options.selector.entries.slice(1)}">`],
@@ -205,7 +279,9 @@ export class JsMyFiles {
         });
         html.push(`</${tag}>`);
         parent.insertAdjacentHTML('beforeend', html.join(``));
-
+        parent.querySelectorAll('.entryF').forEach(file => {
+          attach_controls(file.parentElement);
+        });
         parent.querySelectorAll('.entryD').forEach(dir => {
           dir.addEventListener('click', (e) => {
             e.stopImmediatePropagation();
@@ -223,22 +299,8 @@ export class JsMyFiles {
               }
             }
           });
-          dir.querySelectorAll('.entryF').forEach(file => {
-            const del_file = () => {
-              alert('del', delfile.parentElement.dataset.name);
-            }
-            const trash = e.currentTarget.parentElement.querySelector('.delentry');
-            console.log('trash', trash)
-            file.addEventListener('mouseenter', (e) => {
-              console.log('file', e)
-              trash.classList.remove('hidden');
-              file.addEventListener('click', del_file);
-            });
-            file.addEventListener('mouseout', (e) => {
-              trash.classList.add('hidden');
-              file.removeEventListener('click', del_file);
-            });
-          });
+          //attach_controls(dir.querySelector('summary'));
+
         });
 
       }
@@ -291,8 +353,7 @@ export class JsMyFiles {
       await items.forEach(async item => {
         if (item.kind === "file") {
           item = await item.webkitGetAsEntry();
-          console.log('itemtoread', item)
-
+          this.toggleCounters(true);
           await this.readEntry(item);
         }
       })
@@ -316,6 +377,23 @@ export class JsMyFiles {
 
   }
 
+  addConsoleMessage(message) {
+    //message {message:, parent:}
+    const tag = 'p';
+    let el = message.parent.querySelector('.' + css.console);
+    if (el === null) {
+      el = document.createElement('div');
+      el.classList.add(css.console);
+      message.parent.prepend(el);
+    }
+    if (message.id) {
+      const msg = el.querySelector(`${tag}[data-id="${message.id}"]`);
+      if (msg) msg.innerHTML = message.content;
+      else el.insertAdjacentHTML('beforeend', `<${tag} data-id="${message.id}">${message.content}</${tag}>`);
+    } else el.insertAdjacentHTML('beforeend', `<${tag}>${message.content}</${tag}>`);
+
+  }
+
   async addUploadDialog(item) {
     item = (item) ? item : this.container;
     if (this.options.controls.scan) {
@@ -331,25 +409,33 @@ export class JsMyFiles {
         });
         this.jsDirToZip.on(this.jsDirToZip.eventnames.message, async (e) => {
           console.log('e', e);
-          let type = 'info';
           switch (e.name) {
             case 'console':
-              console.log('console', e);
-              type = window.alertbox.alertconfig.types.info;
+              this.addConsoleMessage({
+                id: (e.id) ? e.id : null,
+                content: e.message,
+                parent: item
+              });
               break;
-            case 'error':
-              type = window.alertbox.alertconfig.types.error;
+            case window.alertbox.alertconfig.types.error:
+            case window.alertbox.alertconfig.types.success:
+            case window.alertbox.alertconfig.types.danger:
+            case window.alertbox.alertconfig.types.info:
+              window.alertbox.renderAlert({
+                type: e.name,
+                content: e.message,
+                dismissible: true,
+                inverse: false
+              });
               console.log('error', e);
+              break;
             default:
               console.log('message', e);
+              break;
           }
-          window.alertbox.renderAlert({
-            type: type,
-            content: e.message,
-            dismissible: true,
-            inverse: false
-          });
-        });
+        })
+
+
         const self = this;
         this.jsDirToZip.on(this.jsDirToZip.eventnames.ready, (e) => {
           self.showControl(this.jsDirToZip.eventnames.ready);
@@ -362,7 +448,6 @@ export class JsMyFiles {
             console.log('no emit complete name');
             return;
           }
-
           self.showControl(e.name, ((e.hasOwnProperty('bigfile') && e.bigfile) ? 'zipped' : 'zip'), (e.hasOwnProperty('part')) ? e.part : ((e.hasOwnProperty('bigfile')) ? e.bigfile : null));
         });
         this.jsDirToZip.on(this.jsDirToZip.eventnames.pending, (e) => {
@@ -382,7 +467,6 @@ export class JsMyFiles {
 
   }
   async readEntry(entry) {
-    this.toggleCounters(true);
     await this.jsDirToZip.scanHandle(entry);
   }
 
@@ -407,8 +491,10 @@ export class JsMyFiles {
     counters.counter++;
     if (size !== null) counters.size += parseInt(size);
     counters.display.counter.textContent = counters.counter;
-    if (counters.display.size) counters.display.size.textContent = counters.size;
+    if (counters.display.size) counters.display.size.textContent = format_bytes(counters.size);
+    this.jsDirToZip.quotaEstimate();
   }
+
   resetCounter(item) {
     const counters = this.counters[item];
     ['counter', 'size'].forEach(el => {
@@ -416,6 +502,7 @@ export class JsMyFiles {
     });
     this.toggleCounters(false);
   }
+
   toggleCounters(show = true) {
     const el = document.getElementById(this.options.counters.id);
     if (!el) return;
@@ -439,15 +526,23 @@ export class JsMyFiles {
     };
     Object.entries(opts).forEach(([k, val]) => {
       const cl = k + 's';
+      const txt = {
+        counter: ' read',
+        size: ' read',
+        counterzipped: ' compressed',
+        sizezipped: ' compressed'
+      }
       let elinsert = boxcounters.querySelector('.' + cl);
       if (!elinsert) elinsert = create_box('div', {
         class: cl
       }, boxcounters, ``);
       let el = elinsert.querySelector('.' + val);
       if (!el) {
+        console.log('insert class' + k, val)
         el = create_box('span', {
-          class: val
+          class: val,
         }, elinsert);
+        if (txt.hasOwnProperty(val)) elinsert.append(document.createTextNode(txt[val]));
       } else this.resetCounter(item);
       itemopts.display[k] = el;
       itemopts[k] = 0;
@@ -459,12 +554,11 @@ export class JsMyFiles {
       }
     };
   }
-  showControl(action, target = 'zip', opts = null) {
 
+  showControl(action, target = 'zip', opts = null) {
     let message, text = null;
     // 'zip' ---only btn for zip actions for the moment
     const btn = this[this.options.btnprefix + 'zip' + target];
-    console.log('shoiwcontrol', btn)
     if (!btn) return;
     btn.removeAttribute("disabled");
     switch (action) {

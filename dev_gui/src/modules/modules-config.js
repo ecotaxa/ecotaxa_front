@@ -85,6 +85,7 @@ export const css = {
   selected: 'selected',
   disabled: 'disabled',
   error: 'err',
+  console: 'console',
   wait: 'wait',
   active: 'active',
   modal: 'modal',
