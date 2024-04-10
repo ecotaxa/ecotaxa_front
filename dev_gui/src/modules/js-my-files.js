@@ -83,12 +83,12 @@ export class JsMyFiles {
           controls: [{
               action: 'rename',
               text: 'rename',
-              icon: 'icon-pencil'
+              icon: 'icon-pencil-sm'
             },
             {
               action: 'delete',
               text: 'delete',
-              icon: 'icon-trash'
+              icon: 'icon-trash-sm'
             },
           ]
         },
@@ -137,7 +137,7 @@ export class JsMyFiles {
     this.dropzone = document.createElement('div');
     this.dropzone.id = this.options.display.dropzone;
     this.dropzone.innerHTML = `<input type="file" class="hidden"  name="${this.options.selector.uploadfile}" id="${this.options.selector.uploadfile}">
-            <div class="${this.options.selector.droptarget.slice(1)}">
+            <div class="${this.options.selector.droptarget.substr(1)}">
             <div id="${this.options.display.boxtitle}"><span class="${this.options.selector.trigger.slice(1)}">${this.container.dataset.textbrowse}</span>  ${this.container.dataset.textdrop}</div>
           </div>`;
     this.container.append(this.dropzone);
@@ -198,7 +198,7 @@ export class JsMyFiles {
       let box = this.container.querySelector(this.options.entrycontrols.selector);
       if (box === null) {
         box = document.createElement('div');
-        box.classList.add(this.options.entrycontrols.selector);
+        box.classList.add(this.options.entrycontrols.selector.substr(1));
         this.options.entrycontrols.controls.forEach(control => {
           const el = document.createElement('span');
           if (control.icon) {
@@ -232,8 +232,7 @@ export class JsMyFiles {
             return false;
           });
         });
-        //  box.classList.add(css.hide);
-        //  box.classList.add(css.absolute);
+        box.classList.add(css.hide);
         this.container.append(box);
       }
       return box;
@@ -241,19 +240,17 @@ export class JsMyFiles {
     const entrycontrols = entry_controls();
     const attach_controls = (el) => {
       if (!el.dataset.name) return false;
-      el.addEventListener('dblclick', (e) => {
-        e.preventDefault();
-        el.append(entrycontrols);
-        el.classList.remove(css.hide);
-      });
-
+      console.log('entrycontrols parent', entrycontrols.parentElement)
+      entrycontrols.parentElement.classList.remove('has-controls');
+      el.insertBefore(entrycontrols, el.firstElementChild);
+      el.classList.add('has-controls');
+      entrycontrols.classList.remove(css.hide);
     }
     parent.classList.add('wait');
     const el = parent.querySelector(this.options.selector.entries);
     if (el) el.remove();
     tag = (tag) ? ((tag === 'select') ? 'optiongroup' : tag) : 'ul';
     const subtag = (tag === 'ul') ? 'li' : 'option';
-    console.log('list subdir', subdir)
     fetch(this.options.url + ((subdir) ? subdir : ''), fetchSettings()).then(response => response.json()).then(async json => {
       if (json.entries && json.entries.length) {
         if (parent.dataset.label) parent.insertAdjacentHTML('afterbegin', `<label>${parent.dataset.label}</label>`);
@@ -271,22 +268,23 @@ export class JsMyFiles {
         [directories, files].forEach(entries => {
           entries.forEach((entry) => {
             const ext = entry.name.split('.').pop();
-            const del = `<i class="icon-sm icon-trash delentry ml-2 hidden" alt="delete"></i>`;
             const entrydetail = `<span class="entry${entry.type}"><i class="icon p-[0.125rem] icon-${((entry.type === "D") ? 'folder-sm' : ((filter_files.images.split(',').indexOf(ext)>=0)?'image-sm':'document-sm'))} align-text-bottom mb-0.5 mr-0.5"></i>${entry.name}</span>`;
             html.push(`<${subtag} ${(entry.type==='D')?`draggable="true"`:``} data-name="${entry.name}" ${(tag==='select')?` class="entry${entry.type}"`:``}>${entrydetail}`);
-            html.push(`${del}</${subtag}>`);
+            html.push(`</${subtag}>`);
           });
         });
         html.push(`</${tag}>`);
         parent.insertAdjacentHTML('beforeend', html.join(``));
         parent.querySelectorAll('.entryF').forEach(file => {
-          attach_controls(file.parentElement);
+          file.addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            attach_controls(file.parentElement);
+          });
         });
         parent.querySelectorAll('.entryD').forEach(dir => {
           dir.addEventListener('click', (e) => {
             e.stopImmediatePropagation();
-            const dirlist = e.currentTarget.parentElement;
-
+            const dirlist = dir.parentElement;
             dirlist.classList.toggle('on');
             const ico = e.currentTarget.querySelector('i.icon');
             if (ico) {
@@ -296,6 +294,7 @@ export class JsMyFiles {
             if (dirlist.classList.contains('on')) {
               if (!dirlist.dataset.load) {
                 this.serverList(dirlist, ((subdir) ? subdir + '/' : '/') + dirlist.dataset.name, tag);
+
               }
             }
           });
@@ -304,10 +303,14 @@ export class JsMyFiles {
         });
 
       }
-      await this.addUploadDialog(this.container);
+      await this.addUploadDialog((subdir === null) ? this.container : parent);
       parent.classList.remove('wait');
       parent.dataset.loaded = true;
 
+      if (subdir) {
+        console.log('subdir attach', parent);
+        attach_controls(parent);
+      }
     });
 
   }
@@ -538,7 +541,6 @@ export class JsMyFiles {
       }, boxcounters, ``);
       let el = elinsert.querySelector('.' + val);
       if (!el) {
-        console.log('insert class' + k, val)
         el = create_box('span', {
           class: val,
         }, elinsert);

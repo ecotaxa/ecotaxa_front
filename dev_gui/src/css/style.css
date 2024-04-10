@@ -247,7 +247,7 @@ button.submitslider {@apply min-w-[200px]}
 .counters, .sizes {@apply p-2 rounded-sm text-sm border-mainblue-200 bg-mainblue-100 my-2 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
 /*js upload dropzone*/
-#dropzone .droptarget {@apply mx-auto p-8 bg-stone-50 border border-stone-200 rounded font-normal }
+#dropzone .droptarget {@apply mx-auto p-8 bg-transparent  border border-stone-200 rounded font-normal}
 #dropzone .trigger {@apply button text-sm shadow-sm py-0.5 mr-2  bg-stone-100 hover:bg-secondblue-300  focus:bg-secondblue-400 focus:text-stone-50 hover:shadow-none }
 #dropzone:not(.enabled) .droptarget {@apply hidden}
 .displayresults {@apply  border border-stone-200 rounded  text-base font-normal w-full h-auto min-h-[2rem] px-2 py-1 focus:bg-success-50}
@@ -255,15 +255,17 @@ button.submitslider {@apply min-w-[200px]}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-50}
 .dirlist > .entries {@apply h-auto max-h-[50%] block overflow-y-hidden }
-.dirlist [data-name] {@apply ml-4}
-.entryD, .entryF {@apply relative}
+.dirlist [data-name] {@apply ml-4 relative py-0.5}
+.dirlist [data-name] .droptarget {@apply  w-full h-full z-10 bg-transparent border-none  absolute top-0 left-0}
 .entryD {@apply text-base font-normal}
 .on > .entryD {@apply font-semibold }
 .dirlist .wait .entryD {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
 .entries .entryF {@apply text-sm font-light}
 .entries [data-name$=".tsv"] .entryF {@apply font-normal}
 .entryF .icon-image-sm {@apply opacity-80}
-.entrycontrols {@apply text-sm drop-shadow w-36 h-8 border-stone-50 bg-white p-2 inline-block}
+.entrycontrols {@apply text-sm  w-36 h-6 ml-4 absolute right-4 top-1 z-20}
+.entrycontrols span {@apply mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5   hover:drop-shadow-sm bg-transparent hover:bg-white  cursor-pointer}
+.has-controls {@apply  border-b border-stone-200 w-auto font-bold bg-mainblue-50}
 /* form with tabs */
 form.js-tabs {@apply transition-opacity duration-[1000] ease-in }
 form.js-tabs  .fieldset-wrapper {@apply relative }
@@ -382,7 +384,9 @@ content:url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg'  
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg"  class="fill-current"  viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>')
 }
 .icon-trash-sm {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" class="fill-current"  viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>')
+content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" /></svg>')
+}
+.icon-pencil-sm {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" /></svg>');
 }
 .icon-minus {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>')
