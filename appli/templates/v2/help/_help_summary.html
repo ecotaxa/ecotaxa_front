@@ -1,8 +1,8 @@
 {% extends "./v2/help/_layout.html" %}
 {% block article %}
-<article class="table-of-contents">
+<article id="table-of-contents" class="table-of-contents">
   <h2 class="help-title">{{ _('Help Summary')}} </h2>
 {{ listhelp(helps) }}
-  {%-if current_user.is_app_admin and type=='modal-help' -%}<div data-action="astext" data-title="{{_('View as Text')}}" class="fixed bottom-4 ml-2 z-100 cursor-pointer"><i class="icon icon-document-text"></i></div>{%-endif-%}
-</article>
+</article>{%-if current_user.is_app_admin -%}<div data-action="astext" data-target="table-of-contents" data-title="{{_('Download help as doc')}}" class="fixed bottom-4 ml-2 z-100 cursor-pointer"><i class="icon icon-document-text"></i></div>{%-endif-%}
+
 {% endblock%}
