@@ -161,6 +161,7 @@ export class JsDirToZip {
         console.log('eventsendfile', e)
         let file = (e.bigfile) ? await this.getFile(this.gzipped): await this.getFile();
         console.log('sendfile', file)
+
         /* if (e.bigfile) this.sendChunk((e.path ? e.path : ''));
           else */
         this.sendZipFile(file, (e.path ? e.path : ''), null, (e.bigfile ? e.bigfile : false));
@@ -399,7 +400,6 @@ export class JsDirToZip {
   }
 
   async addFileToZipStream(file, filepath) {
-    console.log('emitscan', this.counter)
     this.emit(this.eventnames.counter, {
       name: 'scan',
       filepath: filepath,

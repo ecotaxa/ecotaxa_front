@@ -80,7 +80,7 @@ export class FormSubmit {
         const {
           patternMismatch = false
         } = item.validity;
-        const customvalidity = (patternMismatch) ? this.get_message(item, 'invalid') : ``;
+        const customvalidity = (patternMismatch) ? this.getMessage(item, 'invalid') : ``;
         if (item.checkValidity() === true) {
           item.setCustomValidity('');
           if (item == input && label !== null) label.classList.remove(css.invalid);
@@ -116,7 +116,7 @@ export class FormSubmit {
 
     });
   }
-  get_message(field, type = 'invalid') {
+  getMessage(field, type = 'invalid') {
     const {
       valueMissing = true
     } = field.validity;
@@ -129,7 +129,7 @@ export class FormSubmit {
     if (valid === true) {
       label.classList.remove(css.invalid);
     } else {
-      label.dataset.invalid = this.get_message(field);
+      label.dataset.invalid = this.getMessage(field);
       label.classList.add(css.invalid);
       const rect = label.getBoundingClientRect();
       const x = rect.left;

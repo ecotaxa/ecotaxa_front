@@ -16,19 +16,18 @@ const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
 const localcss = {
   mright: 'mr-4',
 }
-let instance = null;
+const dirseparator = "/";
 export class JsMyFiles {
   done = true;
   jsDirToZip = null;
   counters = {};
-  path = '';
   _events = {};
   eventnames = {
     complete: 'complete',
     error: 'error',
   }
   constructor(container, options = {}) {
-    if (!instance) {
+    if (!container.jsmyfiles) {
       container = (container instanceof HTMLElement) ? container : document.querySelector(container);
       if (!container) return;
       dom_purify(container, 'dataset');
@@ -39,9 +38,6 @@ export class JsMyFiles {
         url: "/gui/files/list",
         compress: {
           label: 'compress'
-        },
-        counters: {
-          id: 'display-file-counters',
         },
         controls: {
           scan: {
@@ -71,16 +67,20 @@ export class JsMyFiles {
           doupload: '.target-upload',
           droptarget: '.droptarget',
           trigger: '.trigger',
-          dirlist: '.dirlist',
           entries: '.entries',
+          dirlist: '.dirlist',
           uploadfile: 'uploadfile',
           displayresult: 'results',
-
         },
         entrycontrols: {
           selector: '.entrycontrols',
           url: 'gui/me/my_files/',
           controls: [{
+              action: 'newfolder',
+              text: 'new folder',
+              icon: 'icon-folder-plus-sm',
+              typentry: 'entryD'
+            }, {
               action: 'rename',
               text: 'rename',
               icon: 'icon-pencil-sm'
@@ -93,103 +93,117 @@ export class JsMyFiles {
           ]
         },
         display: {
-
-          local: 'local-list',
-          server: 'server-list',
+          progression: 'display-progression',
           dropzone: 'dropzone',
-          dirlist: 'dirlist',
           boxtitle: 'boxtitle',
+          counters: 'counters',
+          sizes: 'sizes',
+          timers: 'timers'
         },
 
-
-        css: {
-          enabled: 'enabled'
-        }
       };
       this.options = Object.assign(defaultOptions, options);
       this.init();
-      instance = this;
+      container.jsmyfiles = this;
     }
-    return instance;
+    return container.jsmyfiles;
   }
   init() {
     // create dirlist box
-    let el = this.container.querySelector(this.options.selector.dirlist);
-    if (!el) {
-      el = document.createElement('div');
-      el.classList.add(this.options.selector.dirlist.slice(1));
-      this.container.append(el)
-    }
-    if (this.options.btnfilelist) {
-      const btnfiles = create_box('div', {
-        class: 'button is-secondary',
-        text: this.options.btnfilelist
-      }, el);
-      btnfiles.addEventListener('click', (e) => {
-        this.serverList(el);
-        this.classList.toggle(css.hide);
-      });
-    } else this.serverList(el);
-
-
-    //
-    // create a filepicker depends on browser
-    this.dropzone = document.createElement('div');
-    this.dropzone.id = this.options.display.dropzone;
-    this.dropzone.innerHTML = `<input type="file" class="hidden"  name="${this.options.selector.uploadfile}" id="${this.options.selector.uploadfile}">
-            <div class="${this.options.selector.droptarget.substr(1)}">
-            <div id="${this.options.display.boxtitle}"><span class="${this.options.selector.trigger.slice(1)}">${this.container.dataset.textbrowse}</span>  ${this.container.dataset.textdrop}</div>
-          </div>`;
-    this.container.append(this.dropzone);
-    // add counters
-    el = document.getElementById(this.options.counters.id);
-    if (!el) {
-      console.log('counterscreate')
-      el = document.createElement('div');
-      el.id = this.options.counters.id;
-      el.innerHTML = `<div class="counters"></div><div class="sizes"></div><div class="progresss"></div><div class="timers"></div>`;
-      this.container.append(el);
-
-    }
-    this.displaylist = document.getElementById(this.options.display.dirlist);
-    const droptarget = this.container.querySelector(this.options.selector.droptarget);
-    droptarget.addEventListener('dragover', (e) => {
-      this.handleDragOver(e);
-    });
-    droptarget.addEventListener('drop', async (e) => {
-      this.handleDrop(e);
-    });
-    this.container.querySelector(this.options.selector.trigger).addEventListener('click', async (e) => {
-      this.openDirDialog(accept, async (e) => {
-        const files = e.target.files;
-        this.toggleCounters(true);
-        await this.jsDirToZip.scanFiles(files);
-      });
-    });
+    this.addDropzone();
+    this.addDisplayProgression();
+    this.addDirList();
+    this.initEvents();
+  }
+  initTimer() {
+    this.timer = new Date();
+  }
+  initEvents() {
     add_custom_events(this);
 
-    this.on(this.eventnames.error, (e) => {
-      consoile.log('scandir receive error message', e)
-    })
+    //To be refactored - for steppers )
     this.on(this.eventnames.processed, async (e) => {
       if (this.nextaction) await this.nextaction();
     })
-
+    // alerts on error
+    this.on(this.eventnames.error, (e) => {
+      console.log('scandir receive error message', e)
+      if (window.alertbox) {
+        window.alertbox.renderAlert({
+          type: window.alertbox.alertconfig.types.error,
+          content: e,
+          inverse: true,
+          dismissible: true
+        });
+      }
+    })
     window.addEventListener('beforeunload', (e) => {
       if (!this.done) {
         e.preventDefault();
         e.returnValue = (this.options.preventclose) ? this.options.preventclose : `Some work is in progress in this window.\nAre you sure you want to leave?`;
       }
 
+
     });
-
-
   }
-  async addDirList(source) {
-
+  addDropzone() { //
+    this.dropzone = document.createElement('div');
+    this.dropzone.id = this.options.display.dropzone;
+    this.dropzone.innerHTML = `<input type="file" class="hidden"  name="${this.options.selector.uploadfile}" id="${this.options.selector.uploadfile}">
+            <div class="${this.options.selector.droptarget.substr(1)}">
+            <div class="${this.options.display.boxtitle}"><span class="${this.options.selector.trigger.slice(1)}">${this.container.dataset.textbrowse}</span>  ${this.container.dataset.textdrop}</div>
+          </div>`;
+    this.container.append(this.dropzone);
+    this.setDropTarget(this.dropzone.querySelector(this.options.selector.droptarget));
+    this.container.querySelector(this.options.selector.trigger).addEventListener('click', async (e) => {
+      this.handleBrowse();
+    });
   }
-
-
+  setDropTarget(droptarget) {
+    const dropclass = this.options.selector.droptarget.substr(1);
+    const target_dragover = (e) => {
+      this.handleDragOver(e);
+    }
+    const target_drop = async (e) => {
+      this.handleDrop(e);
+    }
+    // set events and css for new dropzone
+    if (!this.droptarget || this.droptarget != droptarget) {
+      if (this.droptarget) {
+        this.droptarget.removeEventListener('dragover', target_dragover);
+        this.droptarget.removeEventListener('drop', target_drop);
+        this.droptarget.classList.remove(dropclass);
+      }
+      this.droptarget = droptarget;
+      this.droptarget.addEventListener('dragover', target_dragover);
+      this.droptarget.addEventListener('drop', target_drop);
+      this.droptarget.classList.add(dropclass);
+    }
+  }
+  async addDirList(source = null) {
+    let el = this.container.querySelector(this.options.selector.dirlist);
+    console.log('el dirlist', el)
+    if (!el) {
+      el = document.createElement('div');
+      el.classList.add(this.options.selector.dirlist.substr(1));
+      this.container.append(el);
+      this.displaylist = el;
+    }
+    this.serverList();
+  }
+  addDisplayProgression() {
+    // add counters
+    if (this.displayprogression) return;
+    let el = document.getElementById(this.options.display.progression);
+    if (!el) {
+      console.log('counterscreate')
+      el = document.createElement('div');
+      el.id = this.options.display.progression;
+      el.innerHTML = `<div class="flex sm:flex-row"><div class="${this.options.display.counters}"></div><div class="${this.options.display.sizes}"></div><div class="${css.progress}"></div><div class="${this.options.display.timers}"></div></div>`;
+      this.container.prepend(el);
+      this.displayprogression = el;
+    }
+  }
   serverList(parent = null, subdir = null, tag = null) {
     parent = parent ? parent : this.container.querySelector(this.options.selector.dirlist);
     if (!parent) return;
@@ -201,6 +215,7 @@ export class JsMyFiles {
         box.classList.add(this.options.entrycontrols.selector.substr(1));
         this.options.entrycontrols.controls.forEach(control => {
           const el = document.createElement('span');
+          if (control.typentry) el.dataset.typentry = control.typentry;
           if (control.icon) {
             el.insertAdjacentHTML('afterbegin', `<i class="icon ${control.icon}"></i>`);
             el.dataset.title = control.text;
@@ -238,13 +253,18 @@ export class JsMyFiles {
       return box;
     }
     const entrycontrols = entry_controls();
-    const attach_controls = (el) => {
+    const attach_controls = (el, typentry = null) => {
       if (!el.dataset.name) return false;
       console.log('entrycontrols parent', entrycontrols.parentElement)
       entrycontrols.parentElement.classList.remove('has-controls');
       el.insertBefore(entrycontrols, el.firstElementChild);
+      entrycontrols.querySelectorAll('[data-typentry]').forEach(ctrl => {
+        if (!ctrl.dataset.typentry || typentry === ctrl.dataset.typentry) ctrl.classList.remove(css.hide);
+        else ctrl.classList.add(css.hide);
+      });
       el.classList.add('has-controls');
       entrycontrols.classList.remove(css.hide);
+
     }
     parent.classList.add('wait');
     const el = parent.querySelector(this.options.selector.entries);
@@ -279,6 +299,7 @@ export class JsMyFiles {
           file.addEventListener('click', (e) => {
             e.stopImmediatePropagation();
             attach_controls(file.parentElement);
+            this.detachDropzone();
           });
         });
         parent.querySelectorAll('.entryD').forEach(dir => {
@@ -292,13 +313,13 @@ export class JsMyFiles {
               ico.classList.toggle('icon-folder-open-sm');
             }
             if (dirlist.classList.contains('on')) {
+              console.log('is on', dirlist)
               if (!dirlist.dataset.load) {
                 this.serverList(dirlist, ((subdir) ? subdir + '/' : '/') + dirlist.dataset.name, tag);
 
               }
             }
           });
-          //attach_controls(dir.querySelector('summary'));
 
         });
 
@@ -306,24 +327,27 @@ export class JsMyFiles {
       await this.addUploadDialog((subdir === null) ? this.container : parent);
       parent.classList.remove('wait');
       parent.dataset.loaded = true;
-
+      parent.classList.add('on');
       if (subdir) {
         console.log('subdir attach', parent);
-        attach_controls(parent);
+        attach_controls(parent, 'entryD');
+        this.setDropTarget(parent);
       }
     });
 
   }
 
   attachDropzone(target) {
-    this.targetdir = (target.parentElement.dataset.name) ? target.parentElement.dataset.name : '';
-    this.dropzone.classList.add(this.options.css.enabled);
-    target.append(this.dropzone);
+    if (this.dropzone.dataset.enabled) {
+      this.targetdir = target;
+      target.append(this.dropzone);
+    }
   }
   detachDropzone() {
-    this.targetdir = null;
-    this.container.classList.remove(this.options.css.enabled);
-
+    if (this.dropzone.dataset.enabled) {
+      this.targetdir = null;
+      this.container.append(this.dropzone);
+    }
   }
 
   openDirDialog(accept, callback) {
@@ -341,7 +365,16 @@ export class JsMyFiles {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   }
-
+  // browse
+  async handleBrowse() {
+    this.initTimer();
+    this.openDirDialog(accept, async (e) => {
+      const files = e.target.files;
+      this.toggleCounters(true);
+      await this.jsDirToZip.scanFiles(files);
+    });
+  }
+  // or drag&drop
   async handleDrop(e) {
     let dataTransfer;
     if (e.dataTransfer) {
@@ -349,7 +382,7 @@ export class JsMyFiles {
       dataTransfer = e.dataTransfer;
     } else dataTransfer = e;
     this.done = false;
-    this.timer = new Date();
+    this.initTimer();
     const items = [...((dataTransfer.items) ? dataTransfer.items : dataTransfer.files)];
     if (items.length) {
       this.enableDropzone(false);
@@ -375,8 +408,8 @@ export class JsMyFiles {
 
   enableDropzone(enable = true, destroy = false) {
     if (destroy) this.dropzone.classList.add(css.hide);
-    if (enable) this.dropzone.classList.add(this.options.css.enabled);
-    else this.dropzone.classList.remove(this.options.css.enabled);
+    if (enable) this.dropzone.dataset.enabled = true;
+    else delete this.dropzone.dataset.enabled;
 
   }
 
@@ -400,6 +433,7 @@ export class JsMyFiles {
   async addUploadDialog(item) {
     item = (item) ? item : this.container;
     if (this.options.controls.scan) {
+      this.enableDropzone(true);
       this.attachDropzone(item);
       if (this.options.controls.zip) {
         const {
@@ -408,16 +442,15 @@ export class JsMyFiles {
         this.jsDirToZip = new JsDirToZip();
         this.jsDirToZip.on(this.jsDirToZip.eventnames.ready, (e) => {
           console.log('ready')
-          this.initDisplays();
+          this.initControls();
         });
         this.jsDirToZip.on(this.jsDirToZip.eventnames.message, async (e) => {
-          console.log('e', e);
           switch (e.name) {
             case 'console':
               this.addConsoleMessage({
                 id: (e.id) ? e.id : null,
                 content: e.message,
-                parent: item
+                parent: (e.parent) ? item : this.container
               });
               break;
             case window.alertbox.alertconfig.types.error:
@@ -472,7 +505,23 @@ export class JsMyFiles {
   async readEntry(entry) {
     await this.jsDirToZip.scanHandle(entry);
   }
+  getCurrentDirPath() {
+    if (this.targetdir === null) return '';
+    const current_path = (el, dirs = []) => {
 
+      if (el != null) {
+        dirs.push(el.dataset.name);
+        el = el.closest('.entryD');
+        if (el !== null) {
+          el = el.parentElement;
+          if (el !== null && el.dataset.name) current_path(el, dirs);
+        }
+      }
+      return dirs;
+    }
+    const dirs = current_path(this.targetdir);
+    return dirs.join(dirseparator);
+  }
 
   async addFilesStore(name, callback) {
     name = (name) ? name : this.options.dbname;
@@ -507,7 +556,7 @@ export class JsMyFiles {
   }
 
   toggleCounters(show = true) {
-    const el = document.getElementById(this.options.counters.id);
+    const el = document.getElementById(this.options.display.progression);
     if (!el) return;
     if (show) el.classList.remove(css.hide);
     else el.classList.add(css.hide);
@@ -522,7 +571,7 @@ export class JsMyFiles {
     // create dom display elements
 
 
-    let boxcounters = document.getElementById(this.options.counters.id);
+    let boxcounters = document.getElementById(this.options.display.progression);
     const itemopts = {
       display: {},
 
@@ -567,7 +616,7 @@ export class JsMyFiles {
       case this.jsDirToZip.eventnames.ready:
         if (btn.dataset.message) delete btn.dataset.message;
         btn.classList.add(css.hide);
-        this.initDisplays();
+        this.initControls();
         break;
       case this.jsDirToZip.eventnames.endzip:
         const part = opts;
@@ -577,7 +626,7 @@ export class JsMyFiles {
         message = {
           name: this.jsDirToZip.eventnames.endzip,
           part: part,
-          bigfile: (target !== 'zip')
+          bigfile: (target !== 'zip'),
         };
         if (part) message["part"] = part;
         btn.dataset.message = JSON.stringify(message);
@@ -586,7 +635,7 @@ export class JsMyFiles {
         btn.textContent = `Upload big File separately`;
         message = {
           name: this.jsDirToZip.eventnames.bigfile,
-          path: this.path,
+          path: this.getCurrentDirPath(),
           bigfile: true
         };
 
@@ -598,8 +647,8 @@ export class JsMyFiles {
       case this.jsDirToZip.eventnames.sendfile:
         message = {
           name: this.jsDirToZip.eventnames.sendfile,
-          path: this.path,
-          bigfile: opts
+          path: this.getCurrentDirPath(),
+          bigfile: opts,
         };
         btn.textContent = `Upload zip file`;
         if (message.bigfile !== null) btn.textContent += ` ` + opts;
@@ -619,12 +668,12 @@ export class JsMyFiles {
         btn.dataset.message = JSON.stringify({
           name: this.jsDirToZip.eventnames.endzip,
           path: (opts.hasOwnProperty("bigfile")) ? opts.bigfile : e.path,
-          bigfile: (opts.hasOwnProperty("bigfile") && opts.bigfile !== "")
+          bigfile: (opts.hasOwnProperty("bigfile") && opts.bigfile !== ""),
         });
         break;
       case this.jsDirToZip.eventnames.terminate:
         console.log('terminate ' + ((target !== 'zip') ? 'bigfile' : ''));
-        this.serverList();
+        this.serverList(this.targetdir);
         //default:
         btn.dataset.message = JSON.stringify({
           name: 'ready',
@@ -638,7 +687,6 @@ export class JsMyFiles {
   }
   emitToZip(btn) {
     const message = (btn.dataset.message) ? JSON.parse(btn.dataset.message) : null;
-    console.log('message', message)
     if (!message) btn.classList.add(css.hide);
     if (message) {
       if (message.name) {
@@ -650,29 +698,28 @@ export class JsMyFiles {
     }
     if (name === this.jsDirToZip.eventnames.sendfile) btn.disabled = true;
   }
-  getBtn(item, target, parent = null) {
+  getBtn(item, target) {
     const btnkey = this.options.btnprefix + item + target;
     if (this[btnkey]) return this[btnkey];
     const display = this.options.controls[item].btn[target];
     const btn = document.getElementById(display);
+    const parent = (this.targetdir) ? this.targetdir : this.displayprogression;
     if (!btn) {
-      parent = (parent) ? parent : this.dropzone;
       parent.insertAdjacentHTML('beforeend', `<button id="${display}" class="button ${display} ${localcss.mright} ${css.hide}"></button>`);
       this[btnkey] = document.getElementById(display);
       this[btnkey].addEventListener('click', async (e) => {
+        e.stopImmediatePropagation();
         this.emitToZip(e.currentTarget);
       });
-    }
+    } else parent.append(btn);
     return this[btnkey];
   }
 
-  initDisplays() {
-    console.log('initdispay', this.options.controls)
-    Object.entries(this.options.controls).forEach(([key, item], i) => {
-      this.initFileCounter(key, item.display, i);
-      if (item.btn) this.activateControls(key, item.btn);
+  initControls(item = null) {
+    Object.entries(this.options.controls).forEach(([key, control], i) => {
+      this.initFileCounter(key, control.display, i);
+      if (control.btn) this.activateControls(key, control.btn);
     });
-
   }
   activateControls(key, btns) {
     Object.keys(btns).forEach((btn) => {

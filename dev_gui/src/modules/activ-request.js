@@ -45,7 +45,6 @@ export class ActivRequest {
       case models.help:
         item.dataset.what = models.help;
         modal = await this.callModal(item);
-
         const modalbox = (modal) ? modal.modal : null;
         if (!modal || !modalbox) return;
         if (item.dataset.close) return;
@@ -53,6 +52,13 @@ export class ActivRequest {
         const target = (item.dataset.target) ? document.getElementById(item.dataset.target) : modalbox.querySelector(domselectors.component.modal.mainhelp + ' > div');
         if (!target) return;
         if (target && file) {
+          if (!dynamics.ActivItems) {
+            const {
+              ActivItems
+            } = await import('../modules/activ-items.js');
+            dynamics.ActivItems = ActivItems;
+          }
+          const activItems = new dynamics.ActivItems();
           const params = {
             partial: true,
             title: item.textContent,
@@ -64,6 +70,7 @@ export class ActivRequest {
             modalbox.dataset.currentfile = file;
             target.innerHTML = html;
             this.applyTo(target);
+            activItems.applyTo(target);
             //open and open only the selected info
             if (item.dataset.for) modal.modalOpen(item);
           }

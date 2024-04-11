@@ -90,7 +90,7 @@ body {@apply bg-white text-stone-800 font-light subpixel-antialiased; font-displ
  }
 
  .is-secondary {
-   @apply  bg-stone-600 border font-semibold   border-stone-600 text-stone-50 ;
+   @apply  bg-stone-600 border font-semibold   border-stone-600 text-stone-50  hover:bg-stone-800 ;
  }
 .is-secondary.inverse, .is-cancel   {
    @apply  text-stone-600 bg-transparent hover:text-stone-800 hover:border-stone-800;
@@ -248,8 +248,8 @@ button.submitslider {@apply min-w-[200px]}
 .counters span, .sizes span {@apply font-normal}
 /*js upload dropzone*/
 #dropzone .droptarget {@apply mx-auto p-8 bg-transparent  border border-stone-200 rounded font-normal}
-#dropzone .trigger {@apply button text-sm shadow-sm py-0.5 mr-2  bg-stone-100 hover:bg-secondblue-300  focus:bg-secondblue-400 focus:text-stone-50 hover:shadow-none }
-#dropzone:not(.enabled) .droptarget {@apply hidden}
+#dropzone .trigger {@apply button text-sm shadow-sm py-0.5 mr-2  is-secondary inverse hover:shadow-none }
+#dropzone:not([data-enabled]) .droptarget {@apply hidden}
 .displayresults {@apply  border border-stone-200 rounded  text-base font-normal w-full h-auto min-h-[2rem] px-2 py-1 focus:bg-success-50}
 .displayresults.active {@apply  bg-success-50}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
@@ -263,9 +263,11 @@ button.submitslider {@apply min-w-[200px]}
 .entries .entryF {@apply text-sm font-light}
 .entries [data-name$=".tsv"] .entryF {@apply font-normal}
 .entryF .icon-image-sm {@apply opacity-80}
-.entrycontrols {@apply text-sm  w-36 h-6 ml-4 absolute right-4 top-1 z-20}
-.entrycontrols span {@apply mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5   hover:drop-shadow-sm bg-transparent hover:bg-white  cursor-pointer}
+.entrycontrols {@apply text-sm  w-24 h-6 mr-1 absolute right-40 top-1 z-20 }
+.entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5   hover:drop-shadow-sm bg-transparent hover:bg-white  cursor-pointer}
 .has-controls {@apply  border-b border-stone-200 w-auto font-bold bg-mainblue-50}
+/* browse or drop in a subdir*/
+.has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
 /* form with tabs */
 form.js-tabs {@apply transition-opacity duration-[1000] ease-in }
 form.js-tabs  .fieldset-wrapper {@apply relative }
