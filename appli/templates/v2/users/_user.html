@@ -1,4 +1,4 @@
-  {% from "./v2/macros/macros.html" import inputdict %}
+  {% from "./v2/macros/macros.html" import inputdict, alertbox with context %}
   {% from "./v2/macros/_captcha.html" import captcha with context%}
   {% from "./v2/users/_profile_macro.html" import promail_required, password_regexp %}
   {%macro password_box()-%}
@@ -25,7 +25,7 @@
    {% endif%}
       <input type="hidden" name="id" id="id" value="{{user.id if user.id else -1  }}">
       {% if user and  user.status_admin_comment and user.status_admin_comment.strip() !="" %}
-        {{ alertbox(type='info', message=user.status.admin_comment,inverse = True,extra = {'small': True} )}}
+      {{ alertbox(type='info', message=user.status.admin_comment,inverse = True,extra = {'small': True} )}}
       {%endif%}
     <div class="fieldset-wrapper md:flex-row md:flex-nowrap">
       <fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 md:w-1/2'}}">
