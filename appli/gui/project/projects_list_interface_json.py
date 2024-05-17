@@ -32,6 +32,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                     "request": "about",
                     "subfield": "contact",
                     "sublabel": " - manager or contact",
+                    "trim": True,
                 },
                 "contact": {"label": _("Contact"), "hidden": True},
                 "annotators": {"label": _("Annotators"), "hidden": True},
@@ -65,9 +66,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                 "instrument": {
                     "label": _("Instrument"),
                 },
-                "title": {
-                    "label": _("Title"),
-                },
+                "title": {"label": _("Title"), "trim": True},
                 "validated_nb": {"label": _("Validated nb"), "format": "number"},
                 "matching_nb": {"label": _("Matching nb"), "format": "number"},
                 "deep_model": {"label": _("Deep features")},
@@ -84,9 +83,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                         "label": _("Instrument"),
                         "autocomplete": "instrument",
                     },
-                    "title": {
-                        "label": _("Title"),
-                    },
+                    "title": {"label": _("Title"), "trim": True},
                 }
             ),
             "taxo": dict(
@@ -282,8 +279,15 @@ def render_samples_stats(
     return samples
 
 
+def _strip_if(key, value):
+    yes_strip = ["title"]
+    if key in yes_strip:
+        return value.strip()
+    return value
+
+
 def _extract_items(prj, keepkeys):
-    return {k: v for k, v in prj.items() if k in keepkeys}
+    return {k: _strip_if(v) for k, v in prj.items() if k in keepkeys}
 
 
 def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
@@ -291,7 +295,7 @@ def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
         return dict(
             {
                 "projid": prj.projid,
-                "title": prj.title,
+                "title": prj.title.strip(),
                 "status": prj.status,
                 "description": prj.description,
                 "privileges": _render_privileges(prj),
@@ -303,7 +307,7 @@ def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
         return dict(
             {
                 "projid": prj.projid,
-                "title": prj.title,
+                "title": prj.title.strip(),
                 "status": prj.status,
                 "description": prj.description,
                 "comments": prj.comments,
@@ -381,7 +385,6 @@ def render_for_js(prjs: list, columns: list, can_access: list) -> list:
         jsonprj = list([])
 
         for key, column in columns.items():
-
             if key == "privileges":
                 jsonprj.append(
                     dict(
@@ -394,7 +397,6 @@ def render_for_js(prjs: list, columns: list, can_access: list) -> list:
                 )
 
             else:
-                # if subfield  append object which will be formatted by the js component
                 if key == "select":
                     if "select" in column and column["select"] == "controls":
                         select = dict({})
@@ -434,6 +436,8 @@ def render_for_js(prjs: list, columns: list, can_access: list) -> list:
                             attrvalue = translations[key][attrvalue]
                     if isinstance(attrvalue, datetime):
                         attrvalue = attrvalue.isoformat()
+                if "trim" in column:
+                    attrvalue = attrvalue.strip()
                 if "request" in column:
                     if column["request"] == "about":
                         if (
@@ -473,7 +477,7 @@ def render_prj_summary(prj: ProjectModel) -> dict:
     return dict(
         {
             "projid": prj.projid,
-            "title": prj.title,
+            "title": prj.title.strip(),
             "contact": prj.contact,
         }
     )
