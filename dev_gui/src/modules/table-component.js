@@ -342,8 +342,8 @@ export class TableComponent {
     });
     const cellid = this.getCellId(this.cellidname);
     trs.forEach((tr, i) => {
-      if (cellid < 0) tr.dataset.id = i;
-      else if (i === cellid) tr.dataset.id = this.getCellData(i, this.cellidname, cellid);
+      if (cellid < 0) tr.dataset[this.cellidname] = i;
+      else if (i === cellid) tr.dataset[this.cellidname] = this.getCellData(i, this.cellidname, cellid);
       const data = [];
       tr.querySelectorAll('th,td').forEach((td, index) => {
         if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add('hidden');
@@ -436,7 +436,7 @@ export class TableComponent {
 
   rowAttributes(tr, index) {
     const id = this.getCellData(index, this.cellidname);
-    tr.dataset.id = id;
+    tr.dataset[this.cellidname] = id;
     if (this.setRowAttributes) tr = this.setRowAttributes(this, tr, id);
     return tr;
   }
@@ -764,10 +764,6 @@ export class TableComponent {
     dir = (dir === null) ? ((th.classList.contains(tablecss.ascending)) ? false : (th.classList.contains(tablecss.descending)) ? true : ((th.dataset.sort) ? false : true)) : dir;
     th.classList.toggle(tablecss.ascending);
     th.classList.toggle(tablecss.descending);
-    // get the real index of cell data
-
-    //  console.log(th.cellIndex, this.grid.columns[index])
-    //  index = this.grid.columns[index].index;
     this.emit(this.eventnames.sorting, dir, th.cellIndex);
     let rows = this.grid.data.map((row, i) => {
       const cell = is_object(row[index]) ? JSON.stringify(row[index]) : ((Array.isArray(row[index])) ? row[index][0] : row[index]);
@@ -780,10 +776,11 @@ export class TableComponent {
     const compare_coldata = function(a, b) {
       const x = (dir ? a.value : b.value);
       const y = (dir ? b.value : a.value);
-      //  const temp = (y === null) - (x === null) || +(parseFloat(x) > parseFloat(y)) || -(parseFloat(x) < parseFloat(y));
-      const temp = parseFloat(x) - parseFloat(y);
-      const bool = isNaN(temp) ? (isNaN(x) ? x.localeCompare(y) : temp) : temp;
-      return bool;
+      return x.localeCompare(y, undefined, {
+        numeric: true,
+        sensitivity: 'base'
+      });
+
     };
 
     if (dir === false) {
@@ -805,10 +802,16 @@ export class TableComponent {
 
     }
     this.dom.dataset.lastth = th.cellIndex;
-
+    const collator = new Intl.Collator(undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    })
     rows.sort((a, b) => {
-      return compare_coldata(a, b);
+      return collator.compare((dir ? a.value : b.value), (dir ? b.value : a.value))
     });
+    /*rows.sort((a, b) => {
+      return compare_coldata(a, b);
+    });*/
     const tbody = this.dom.querySelector('tbody');
     const clone = tbody.cloneNode();
     const trs = tbody.querySelectorAll('tr');
@@ -875,7 +878,7 @@ export class TableComponent {
               break;
           }
 
-          return ((casesensitive) ? cell.indexOf(qry) : cell.toLowerCase().indexOf(qry)) > -1;
+          return ((casesensitive) ? cell.indexOf(qry) > -1 : cell.toLowerCase().indexOf(qry)) > -1;
         });
 
         if (found.length > 0) {
@@ -884,11 +887,11 @@ export class TableComponent {
           return data;
         }
       });
-
     });
 
     trs.forEach((tr, index) => {
-      if ((queries.length > 0 && indexes.length === 0) || (indexes.length && indexes.indexOf(tr.dataset.id) < 0)) tr.hidden = true;
+      const val = (tr.dataset[this.cellidname] !== null) ? tr.dataset[this.cellidname] : tr.cells[cellid].textContent;
+      if ((queries.length > 0 && indexes.length === 0) || indexes.indexOf(val) < 0) tr.hidden = true;
       else tr.hidden = false;
     });
 
@@ -1145,7 +1148,6 @@ export class TableComponent {
     if (showfull) showfull.click();
   }
   makeExpandable(container) {
-    console.log(container.offsetHeight, container.getBoundingClientRect())
     if (container.querySelector('table').offsetHeight < container.offsetHeight) return;
     const btn = document.createElement('div');
     btn.classList.add('button-expand');
