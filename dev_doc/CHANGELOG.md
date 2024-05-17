@@ -1,3 +1,11 @@
+## 2024-05-17 : Hot fixes
+  Fix: strip project title in projects list job_interface
+  Fix: templates/v2/project/merge.html table search add cellidname to th
+  Mod: templates/v2/project/purge.html  remove "DELETE ALL" btn when filters are "on"
+  Fix: templates/v2/users/_user.html code error
+  Add: new key in config.cfg APP_GUI_MESSAGE_COOKIE_NAME
+  Fix: modules/table-component.js manage cellid variable name
+  Fix: modules/table-component.js sorting function
 ## 2024-04-03: V 2.7.4.2
     Fix: import privileges users list
     Fix: bug tom select alert message
