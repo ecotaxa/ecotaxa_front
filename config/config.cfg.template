@@ -1,21 +1,20 @@
 #Flask application debug, set to True to see more traces
-DEBUG = True# The key is used
-for signing exchanges b / w navigator and present server(cookies)
+DEBUG = True
+# The key is used for signing exchanges b / w navigator and present server(cookies)
 SECRET_KEY = 'THIS KEY MUST BE CHANGED'
 BACKEND_URL = 'http://localhost:8000'
-ECOPART_URL = 'http://localhost:5002'#
-If you want to enable Google analytics tracking, enter your ID here, #it will be served in pages.
-GOOGLE_ANALYTICS_ID = "UA-XXXXXXX-1"#
-If you want to enable reCaptcha during user creation# NOTE: The corresponding secret must be present in back - end configuration.
+ECOPART_URL = 'http://localhost:5002'
+#If you want to enable Google analytics tracking, enter your ID here, #it will be served in pages.
+GOOGLE_ANALYTICS_ID = "UA-XXXXXXX-1"
+#If you want to enable reCaptcha during user creation# NOTE: The corresponding secret must be present in back - end configuration.
 RECAPTCHAID = "xxx"
-
 #message filesfor maintenance or global info
 APP_GUI_MESSAGE_FILE = "pathto/messages.json"#
-shared key
-for mailservice Token
+APP_GUI_MESSAGE_COOKIE_NAME = "ecotaxa_cookiename"
+# shared key for mailservice Token
 MAILSERVICE_SECRET_KEY = "THIS KEY MUST BE CHANGED ANS IS ONLY FOR TOKENS SENT BY MAIL"
 MAILSERVICE_SALT = "xxxxx"
-#for UI bg_scale bacground - image suffix - type always jpg
+#for UI bg_scale background - image suffix - type is always jpg
 BG_SCALE = ''
 #special logo suffix(christmas, easter...)
 LOGO_SPECIAL = '_noel'
