@@ -26,14 +26,14 @@
 {{alertbox('warning',message=message,dismissible=False)}}
 <input type="hidden" name="merge" value =" Y">
 {% elif prjstomerge is iterable  %}
-<div  id="merge_prjlist" class="js js-datatable my-4 sticky-top block mb-4" data-sortable=true {{ ' data-searchable=true'  if prjstomerge|length > 20 else ''}} data-table=true>
+<div  id="merge_prjlist" class="js js-datatable my-4 sticky-top block mb-4" {{ ' data-searchable=true'  if prjstomerge|length > 20 else ''}} data-table=true>
 <table>
-<thead><tr><th data-type="html">{{_('Select')}}</th><th>{{_('ID')}}</th><th>{{_('Instrument')}}</th><th>{{_('Title')}}</th><th>{{_('Status')}}</th><th>{{_('Nbr Obj')}}</th>
-            <th>{{_('%s Validated').format('%')}}</th><th>{{_('%s Classified').format('%')}}</th></tr></thead><tbody>
-        {%for prj in prjstomerge -%}  
-        <tr><td><input type="radio" name="src" value="{{prj.projid}}" class="form-radio" required></td><td>{{prj.projid}}</td>
+<thead><tr><th data-type="html">{{_('Select')}}</th><th data-name="id" data-sortable=true >{{_('ID')}}</th><th data-name="instrument" data-sortable=true >{{_('Instrument')}}</th><th data-name="title" data-sortable=true >{{_('Title')}}</th><th data-name="status" data-sortable=true >{{_('Status')}}</th><th data-sortable=true >{{_('Nbr Obj')}}</th>
+            <th data-sortable=true >{{_('%s Validated').format('%')}}</th><th data-sortable=true >{{_('%s Classified').format('%')}}</th></tr></thead><tbody>
+        {%for prj in prjstomerge -%}
+        <tr data-id={{prj.projid}}><td><input type="radio" name="src" value="{{prj.projid}}" class="form-radio" required></td><td>{{prj.projid}}</td>
             <td>{{prj.instrument}}</td>
-            <td>{{prj.title}}</td>
+            <td>{{prj.title.strip()}}</td>
             <td>{{prj.status}}</td>
             <td>{{'' if prj.ojbcount== None else "%.0f"|format(prj.objcount|int) }}</td>
             <td>{{"%.2f"|format(prj.pctvalidated|float) if prj.pctvalidated != None else '0'}}</td>
