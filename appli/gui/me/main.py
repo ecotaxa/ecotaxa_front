@@ -18,7 +18,6 @@ def gui_me():
 
 
 @app.route("/gui/me/files", methods=["GET"])
-@app.route("/gui/me/files/", methods=["GET"])
 @login_required
 def gui_me_files(subdir: str = "") -> str:
     return render_template("/v2/my_files/list.html")
