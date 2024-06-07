@@ -22,7 +22,7 @@ from to_back.ecotaxa_cli_py.models import (
     MinUserModel,
     TaxonModel,
 )
-from appli.gui.project.projectsettings import _possible_licenses
+from appli.gui.commontools import possible_licenses
 
 ###############################################common for create && edit  #######################################################################
 def _user_format(uid: int) -> dict:
@@ -64,8 +64,8 @@ def collection_create() -> str:
     to_save = gvp("save")
     if to_save == "Y":
         title = gvp("title")
-        project_ids = gvpm("project_ids[]")
-
+        project_ids = [int(p) for p in gvpm("project_ids[]")]
+        print("--------------------project_ids", project_ids)
         if title == "" or len(project_ids) == 0:
             flash("title and project id are required", "error")
             to_save = False
@@ -77,13 +77,13 @@ def collection_create() -> str:
             rsp: int = api.create_collection(req)
 
         return collection_edit(rsp, new=True)
-    possible_licenses = _possible_licenses()
+    licenses = possible_licenses()
     return render_template(
         "v2/collection/settings.html",
         target_coll=None,
         members=None,
         new=True,
-        possible_licenses=possible_licenses,
+        possible_licenses=licenses,
     )
 
 
@@ -116,10 +116,12 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
                 if a_var[0:-2] in ["creator_users", "associate_users"]:
                     ulist = [_user_format(int(u)) for u in gvpm(a_var)]
                     setattr(collection, a_var[0:-2], ulist)
+                elif a_var[0:-2] in ["project_ids"]:
+
+                    setattr(collection, a_var[0:-2], [int(p) for p in gvpm(a_var)])
                 else:
                     setattr(collection, a_var[0:-2], gvpm(a_var))
         do_update = True
-
         if do_update:
             try:
                 with ApiClient(CollectionsApi, request) as api:
@@ -138,10 +140,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
             except ApiException as ae:
                 flash(py_messages["updateexception"] + "%s" % ae.reason)
 
-    # TODO: Cache of course, it's constants!
-    from appli.gui.project.projectsettings import _possible_licenses
-
-    possible_licenses = _possible_licenses()
+    licenses = possible_licenses()
 
     from appli.gui.commontools import crsf_token
 
@@ -152,7 +151,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
         target_coll=collection,
         projectlist=projectlist,
         crsf_token=crsf_token(),
-        possible_licenses=possible_licenses,
+        possible_licenses=licenses,
         new=new,
         # redir=redir,
     )

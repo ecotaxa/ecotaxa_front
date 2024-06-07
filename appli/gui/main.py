@@ -8,8 +8,6 @@ from flask import request, url_for, render_template, redirect, flash
 from flask_login import current_user, login_required
 from appli import app, gvg, gvp, constants
 from appli.gui.commontools import is_partial_request
-from to_back.ecotaxa_cli_py.exceptions import ApiException
-from werkzeug.exceptions import NotFound
 from flask_babel import _
 from appli.gui.staticlistes import py_messages, py_user
 from flask import make_response

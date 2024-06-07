@@ -65,7 +65,10 @@ def _get_projects_filters() -> dict:
 
 
 def _prjs_list_api(
-    listall: bool = False, filt: dict = {}, for_managing: bool = False
+    listall: bool = False,
+    filt: dict = {},
+    for_managing: bool = False,
+    summary: bool = False,
 ) -> list:
     import requests
 
@@ -85,9 +88,11 @@ def _prjs_list_api(
                 "for_managing": for_managing,
             }
         )
+        if summary == True:
+            payload.update({"summary": True})
         with ApiClient(ProjectsApi, request) as apiproj:
             url = (
-                apiproj.api_client.configuration.host + "/projects/search/"
+                apiproj.api_client.configuration.host + "/projects/search"
             )  # endpoint is nowhere available as a const :(
             token = apiproj.api_client.configuration.access_token
             headers = {
@@ -140,7 +145,7 @@ def projects_list(
         if current_user.is_app_admin == False:
             prjs = prjs + _prj_import_taxo_api(0, filt, not_granted=True)
     else:
-        prjs = _prjs_list_api(listall, filt, for_managing=for_managing)
+        prjs = _prjs_list_api(listall, filt, for_managing=for_managing, summary=True)
         if typeimport != "" and current_user.is_app_admin == False:
             prjs = prjs + _prjs_list_api(True, filt, for_managing=for_managing)
         now = datetime.datetime.now()
