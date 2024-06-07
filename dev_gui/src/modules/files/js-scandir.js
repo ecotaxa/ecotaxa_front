@@ -20,9 +20,8 @@ export class JsScanDir {
 
   init(container) {
     add_custom_events(this);
-
     this.on(this.eventnames.error, (e) => {
-      consoile.log('scandir recevie error message', e)
+      console.log('scandir receive error message', e)
     })
     this.on(this.eventnames.processed, async (e) => {
       console.log('e', e)
@@ -31,6 +30,7 @@ export class JsScanDir {
   }
 
   async processFile(entry, callback = null) {
+    console.log('process scandir', entry)
     if (callback) await callback();
   }
 
@@ -83,6 +83,7 @@ export class JsScanDir {
       }
     };
     const reader = dir.createReader();
+    console.log('reader', reader)
     const on_read = async function(ents) {
       if (ents.length && !errored) {
         direntries = [...direntries, ...ents];
@@ -103,11 +104,39 @@ export class JsScanDir {
         console.log('treat error readdir');
       }
     }
-
     await reader.readEntries(on_read, on_error);
-
-
   }
 
+  async processEntries(entries, path, oncomplete) {
+    // showDirectoryPicker
+    const self = this;
+    const complete = async () => {
+      if (entries.length) {
+        const entry = await entries.shift();
+        const nestedpath = `${path}/${entry.name}`;
+        const kind = (entry.kind) ? entry.kind : (entry instanceof File) ? "file" : "directory";
+        if (kind === "file") {
+          if (!entry.webkitRelativePath) Object.defineProperty(entry, "webkitRelativePath", {
+            configurable: true,
+            enumerable: true,
+            get: () => nestedpath,
+          });
+          if (entry instanceof File) entry.file = async (func) => {
+            await func(entry, nestedpath);
+          }
+          else entry.file = async (func) => {
+            entry.getFile().then(async file => {
+              await func(file, nestedpath);
+            });
+          }
+          await self.processFile(entry, complete);
+        } else if (kind === "directory") {
+          const direntries = await Array.fromAsync(entry.values());
+          await self.processEntries(direntries, nestedpath, complete);
+        }
+      } else if (oncomplete) oncomplete();
+    }
+    await complete();
+  }
 
 }

@@ -279,6 +279,10 @@ export class FormSubmit {
         body: formdata,
       }))
       .then(response => {
+        if (response.redirected) {
+          window.location = response.url;
+          return null;
+        }
         switch (format) {
           case "text":
           case "html":

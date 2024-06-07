@@ -2,6 +2,24 @@ import DOMPurify from 'dompurify';
 import {
   v4 as uuidv4
 } from 'uuid';
+const dirseparator = "/";
+const urlseparator = "/";
+
+
+function browser_version() {
+  const user_agent = navigator.userAgent;
+
+  console.log(user_agent);
+}
+
+function browser_accept(accepted) {
+  const user_agent = browser_version();
+  // accepted = {name:version, name:version } ... {chrome:86, firefox:72}
+  Object.keys(accepted).forEach(browser => {
+
+  });
+  return false;
+}
 
 function generate_uuid() {
   return uuidv4();
@@ -144,43 +162,57 @@ function add_custom_events(self) {
     this._events[event] = this._events[event] || []
     this._events[event].push(callback)
   }
-
-  /**
-   * Remove custom event listener
-   * @param  {String} event
-   * @param  {Function} callback
-   * @return {Void}
-   */
+  self.once = function(event, callback) {
+    callback.once = true;
+    self.on(event, callback);
+  }
   self.off = function(event, callback) {
     this._events = this._events || {}
-    if (event in this._events === false) return
+    if (event in this._events === false) return;
     this._events[event].splice(this._events[event].indexOf(callback), 1)
   }
   self.emit = function(event, ...args) {
     if (event in this._events === false) return;
-    for (let i = 0; i < this._events[event].length; i++) {
-      this._events[event][i](...args);
+    else {
+      for (const action of this._events[event]) {
+        action(...args);
+        if (action.once) break;
+      }
     }
-
   }
   return self;
 }
 
-function create_box(tag, attrs, parent, sep = ` / `) {
+function create_box(tag, attrs, parent = null, sep = ``) {
   let el = document.createElement(tag);
+
   Object.entries(attrs).forEach(([attr, value]) => {
     switch (attr) {
+      case 'dataset':
+        Object.entries(value).forEach(([k, v]) => {
+          el.dataset[k] = v;
+        });
+        break;
       case 'text':
         el.textContent = DOMPurify.sanitize(value);
+        break;
+      case 'class':
+        if (Array.isArray(value)) {
+          value.forEach(cl => {
+            el.classList.add(cl);
+          })
+        } else el.classList.add(value);
         break;
       default:
         el.setAttribute(attr, value);
         break;
     }
   });
-  sep = (parent.children.length) ? sep : null;
-  parent.append(el);
-  if (sep) sep = parent.insertBefore(document.createTextNode(sep), el);
+  if (parent !== null) {
+    sep = (parent.children.length) ? sep : null;
+    parent.append(el);
+    if (sep) sep = parent.insertBefore(document.createTextNode(sep), el);
+  }
   return el;
 }
 
@@ -214,10 +246,14 @@ function html_spinner(addons = 'text-white', size = 'h-5 w-5') {
     .map(word => word.replace(word[0], word[0].toString().toUpperCase()))
     .join('')
 }*/
-
+function stop_on_error(message, callback = null) {
+  if (callback) callback;
+  throw new Error(message);
+}
 
 export {
   generate_uuid,
+  browser_accept,
   fetchSettings,
   unescape_html,
   format_license,
@@ -231,5 +267,8 @@ export {
   create_box,
   decode_HTMLEntities,
   html_spinner,
-  format_bytes
+  format_bytes,
+  stop_on_error,
+  dirseparator,
+  urlseparator
 }

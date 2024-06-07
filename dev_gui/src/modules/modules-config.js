@@ -171,8 +171,3 @@ export const defined_privileges = {
   viewers: rights.view,
   annotators: rights.annotate
 }
-
-export const filter_files = {
-  images: "png,jpeg,jpg,gif",
-  tsv: "txt,tsv,zip, gzip,gz"
-}

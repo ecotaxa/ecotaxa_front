@@ -247,27 +247,43 @@ button.submitslider {@apply min-w-[200px]}
 .counters, .sizes {@apply p-2 rounded-sm text-sm border-mainblue-200 bg-mainblue-100 my-2 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
 /*js upload dropzone*/
-#dropzone .droptarget {@apply mx-auto p-8 bg-transparent  border border-stone-200 rounded font-normal}
-#dropzone .trigger {@apply button text-sm shadow-sm py-0.5 mr-2  is-secondary inverse hover:shadow-none }
-#dropzone:not([data-enabled]) .droptarget {@apply hidden}
+#dropzone {@apply w-auto ml-4 inline-block small-caps font-light}
+#dropzone .trigger {@apply  before:mr-1 small-caps shadow-sm py-0 mr-2 hover:shadow-none w-6 hover:w-auto overflow-x-hidden }
+#dropzone .trigger[data-type="directory"]  {@apply before:icon before:icon-arrow-up-tray-sm}
+#dropzone .trigger[data-type="file"]  {@apply before:icon before:icon-arrow-up-square-sm}
+#dropzone span:not(.trigger) {@apply ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
 .displayresults {@apply  border border-stone-200 rounded  text-base font-normal w-full h-auto min-h-[2rem] px-2 py-1 focus:bg-success-50}
 .displayresults.active {@apply  bg-success-50}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-50}
-.dirlist > .entries {@apply h-auto max-h-[50%] block overflow-y-hidden }
-.dirlist [data-name] {@apply ml-4 relative py-0.5}
-.dirlist [data-name] .droptarget {@apply  w-full h-full z-10 bg-transparent border-none  absolute top-0 left-0}
-.entryD {@apply text-base font-normal}
-.on > .entryD {@apply font-semibold }
-.dirlist .wait .entryD {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
-.entries .entryF {@apply text-sm font-light}
-.entries [data-name$=".tsv"] .entryF {@apply font-normal}
-.entryF .icon-image-sm {@apply opacity-80}
-.entrycontrols {@apply text-sm  w-24 h-6 mr-1 absolute right-40 top-1 z-20 }
-.entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5   hover:drop-shadow-sm bg-transparent hover:bg-white  cursor-pointer}
 .has-controls {@apply  border-b border-stone-200 w-auto font-bold bg-mainblue-50}
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
+.dirlist {@apply h-full }
+.dirlist [data-name] {@apply ml-4 relative py-0.5}
+.dirlist [data-name][data-type="R"] {@apply ml-0 }
+.dirlist [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
+.dirlist [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
+.dirlist [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100}
+.dirlist [data-name].droptarget.dragover {@apply hover:drop-shadow}
+.dirlist [data-name].dragover .entrycontrols , .dirlist [data-name].dragover #dropzone {@apply hide}
+.on {@apply  block sm:max-h-[50v]  overflow-y-hidden relative}
+.on > .entries  {@apply block  overflow-y-auto }
+.entryF {@apply text-sm font-light }
+.entries [data-name$=".tsv"] .entryF {@apply font-normal}
+.entryD, .entryT, .entryR, .entryF.img, .entryF.doc {@apply  before:opacity-80 before:icon-md before:absolute before:block before:top-1.5 before:left-0 pl-5}
+.entryF.img {@apply  before:icon-image-sm }
+.entryF.doc {@apply  before:icon-document-sm}
+.entryD, .entryR {@apply text-base font-normal before:icon-folder-sm}
+.entryT {@apply text-base font-normal before:icon-trash-sm}
+.entryD, .entryF, .entryR, .entryT  {@apply align-text-bottom mb-0.5 mr-0.5}
+.on > .entryD, .on > .entryR {@apply font-semibold before:icon-folder-open}
+.on > .entryT {@apply font-semibold}
+.dirlist .wait > .entryD, .dirlist .wait > .entryT, .dirlist .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
+.entries .editable {@apply font-normal border border-stone-300 ellipsis min-w-[3rem]}
+.entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right}
+.entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5   hover:drop-shadow-sm bg-transparent hover:bg-white  cursor-pointer}
+
 /* form with tabs */
 form.js-tabs {@apply transition-opacity duration-[1000] ease-in }
 form.js-tabs  .fieldset-wrapper {@apply relative }
@@ -584,11 +600,20 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 .icon-cpu {
   content:url('data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" /></svg>')}
 .icon-cpu-sm {
-  content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" stroke="currentColor" class="fill-current"><path d="M14 6H6v8h8V6Z" /><path fill-rule="evenodd" d="M9.25 3V1.75a.75.75 0 0 1 1.5 0V3h1.5V1.75a.75.75 0 0 1 1.5 0V3h.5A2.75 2.75 0 0 1 17 5.75v.5h1.25a.75.75 0 0 1 0 1.5H17v1.5h1.25a.75.75 0 0 1 0 1.5H17v1.5h1.25a.75.75 0 0 1 0 1.5H17v.5A2.75 2.75 0 0 1 14.25 17h-.5v1.25a.75.75 0 0 1-1.5 0V17h-1.5v1.25a.75.75 0 0 1-1.5 0V17h-1.5v1.25a.75.75 0 0 1-1.5 0V17h-.5A2.75 2.75 0 0 1 3 14.25v-.5H1.75a.75.75 0 0 1 0-1.5H3v-1.5H1.75a.75.75 0 0 1 0-1.5H3v-1.5H1.75a.75.75 0 0 1 0-1.5H3v-.5A2.75 2.75 0 0 1 5.75 3h.5V1.75a.75.75 0 0 1 1.5 0V3h1.5ZM4.5 5.75c0-.69.56-1.25 1.25-1.25h8.5c.69 0 1.25.56 1.25 1.25v8.5c0 .69-.56 1.25-1.25 1.25h-8.5c-.69 0-1.25-.56-1.25-1.25v-8.5Z" clip-rule="evenodd" /></svg>')}
-}
+  content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" stroke="currentColor" class="fill-current"><path d="M14 6H6v8h8V6Z" /><path fill-rule="evenodd" d="M9.25 3V1.75a.75.75 0 0 1 1.5 0V3h1.5V1.75a.75.75 0 0 1 1.5 0V3h.5A2.75 2.75 0 0 1 17 5.75v.5h1.25a.75.75 0 0 1 0 1.5H17v1.5h1.25a.75.75 0 0 1 0 1.5H17v1.5h1.25a.75.75 0 0 1 0 1.5H17v.5A2.75 2.75 0 0 1 14.25 17h-.5v1.25a.75.75 0 0 1-1.5 0V17h-1.5v1.25a.75.75 0 0 1-1.5 0V17h-1.5v1.25a.75.75 0 0 1-1.5 0V17h-.5A2.75 2.75 0 0 1 3 14.25v-.5H1.75a.75.75 0 0 1 0-1.5H3v-1.5H1.75a.75.75 0 0 1 0-1.5H3v-1.5H1.75a.75.75 0 0 1 0-1.5H3v-.5A2.75 2.75 0 0 1 5.75 3h.5V1.75a.75.75 0 0 1 1.5 0V3h1.5ZM4.5 5.75c0-.69.56-1.25 1.25-1.25h8.5c.69 0 1.25.56 1.25 1.25v8.5c0 .69-.56 1.25-1.25 1.25h-8.5c-.69 0-1.25-.56-1.25-1.25v-8.5Z" clip-rule="evenodd" /></svg>');}
+
 .icon-document-text {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>');
-
+}
+.icon-arrow-up-tray {
+  content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>');
+}
+.icon-arrow-up-tray-sm {
+  content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="M9.25 13.25a.75.75 0 0 0 1.5 0V4.636l2.955 3.129a.75.75 0 0 0 1.09-1.03l-4.25-4.5a.75.75 0 0 0-1.09 0l-4.25 4.5a.75.75 0 1 0 1.09 1.03L9.25 4.636v8.614Z" /><path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" /></svg>');
+}
+.icon-arrow-up-square-sm {
+  content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M13.75 7h-3V3.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0L6.2 4.74a.75.75 0 0 0 1.1 1.02l1.95-2.1V7h-3A2.25 2.25 0 0 0 4 9.25v7.5A2.25 2.25 0 0 0 6.25 19h7.5A2.25 2.25 0 0 0 16 16.75v-7.5A2.25 2.25 0 0 0 13.75 7Zm-3 0h-1.5v5.25a.75.75 0 0 0 1.5 0V7Z" clip-rule="evenodd" /></svg>');
+}
 }
 /*thin scrollbar chrome && safari */
 ::-webkit-scrollbar {

@@ -1,7 +1,8 @@
 import DOMPurify from 'dompurify';
 import {
   generate_uuid,
-  fetchSettings
+  fetchSettings,
+  create_box
 } from '../modules/utils.js';
 import {
   alertconfig,
@@ -70,15 +71,20 @@ export class AlertBox {
     let box = this.getBoxById(message.content);
     if (box) return this.refreshAlert(box);
     const i18nmessages = this.i18nmessages;
-    box = document.createElement('div');
-    box.id = generate_uuid();
-    box.dataset.type = message.type;
-    box.dataset.message = message.content;
-    if (message.hasOwnProperty('duration') && message.duration) box.dataset.duration = message.duration;
-    box.classList.add(message.type);
-    if (message.hasOwnProperty('cookiename')) box.dataset.cook = message.type + message.cookiename;
-    if (message.hasOwnProperty('date')) box.dataset.value = message.date;
-    if (message.hasOwnProperty('inverse') && message.inverse === true) box.classList.add('inverse');
+    const dataset = {
+      type: message.type,
+      message: message.content
+    };
+    const classlist = [message.type];
+    if (message.hasOwnProperty('duration') && message.duration) dataset.duration = message.duration;
+    if (message.hasOwnProperty('cookiename')) dataset.cook = message.type + message.cookiename;
+    if (message.hasOwnProperty('date')) dataset.value = message.date;
+    if (message.hasOwnProperty('inverse') && message.inverse === true) classlist.push('inverse');
+    box = create_box('div', {
+      id: generate_uuid(),
+      dataset: dataset,
+      class: classlist
+    })
     let buttons = ``;
     let showall = `<div class="showall hide" data-title="${i18nmessages.viewfull}"><i class="icon iconview"></i></div>`;
     if (message.type === alertconfig.types.confirm) {
@@ -130,9 +136,9 @@ export class AlertBox {
       }), fetchSettings()).then(response => response.text()).then(response => {
         let responsebox = box.querySelector(alertconfig.domselectors.message);
         if (!responsebox) {
-          responsebox = document.createElement('div');
-          box.classList.add(alertconfig.domselectors.message.substr(1));
-          box.append(responsebox);
+          responsebox = create_box('div', {
+            class: alertconfig.domselectors.message.substr(1)
+          }, responsebox);
         };
         responsebox.innerHTML = DOMPurify.sanitize(response);
         const btns = box.querySelector(alertconfig.domselectors.buttons.group);
@@ -165,12 +171,12 @@ export class AlertBox {
   messagesContainer() {
     let item = document.getElementById(this.alertconfig.domselectors.alertmessages.substr(1));
     if (item === null) {
-      item = document.createElement('div');
-      item.classList.add(this.alertconfig.domselectors.alertmessages.substr(1));
-      document.body.append(item);
-      const container = document.createElement('div');
-      container.classList.add(this.alertconfig.domselectors.messageslist.substr(1));
-      item.append(container);
+      item = create_box('div', {
+        class: this.alertconfig.domselectors.alertmessages.substr(1)
+      }, item);
+      const container = create_box('div', {
+        class: this.alertconfig.domselectors.messageslist.substr(1)
+      }, container);
     }
     this.messages_container = (!this.messages_container) ? item.querySelector(this.alertconfig.domselectors.messageslist) : this.messages_container;
   }
@@ -375,6 +381,24 @@ export class AlertBox {
     } else delete el.dataset[message.type];
     if (!el.dataset[message.type]) el.classList.remove(this.alertconfig.css.has[message.type]);
   }
+
+  addConsoleMessage(message) {
+    if (message.parent === null) return;
+    const tag = 'p';
+    let el = message.parent.querySelector('.' + css.console);
+    if (el === null) {
+      el = create_box('div', {
+        class: [css.console]
+      });
+      message.parent.prepend(el);
+    }
+    if (message.id) {
+      const msg = el.querySelector(`${tag}[data-id="${message.id}"]`);
+      if (msg) msg.innerHTML = message.content;
+      else el.insertAdjacentHTML('beforeend', `<${tag} data-id="${message.id}">${message.content}</${tag}>`);
+    } else el.insertAdjacentHTML('beforeend', `<${tag}>${message.content}</${tag}>`);
+  }
+
   classError() {
     return false;
   }
