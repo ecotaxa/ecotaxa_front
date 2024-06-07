@@ -55,11 +55,11 @@ def gui_admin():
 def _users_list_api(listall: bool = False, filt: dict = None) -> list:
     import requests
 
-    payload = dict({})
+    payload = dict({"summary": True})
     users = list([])
     with ApiClient(UsersApi, request) as apiusr:
         url = (
-            apiusr.api_client.configuration.host + "/users/"
+            apiusr.api_client.configuration.host + "/users"
         )  # endpoint is nowhere available as a const :(
         token = apiusr.api_client.configuration.access_token
 

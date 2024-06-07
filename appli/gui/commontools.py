@@ -396,3 +396,7 @@ def safe_url_redir(url: str) -> str:
         + str("#" + redir.fragment if redir.fragment != "" else "")
     )
     return url
+
+
+def make_response(status: int, message: dict) -> dict:
+    return dict({"status": status, "message": message})

@@ -40,7 +40,7 @@ def user_table_columns(selection: str = "list") -> list:
             "country": {
                 "label": _("Country"),
             },
-            "can_do": {"label": _("Auth"), "hidden": "true"},
+            # "can_do": {"label": _("Auth"), "hidden": "true"},
             "mail_status": {"label": _("@Status"), "format": "check"},
             "status": {
                 "label": _("Status"),
@@ -58,6 +58,7 @@ def render_for_js(users: list, columns: list) -> list:
 
     jsonusers = list([])
     translations = dict({})
+    status_label = [_("blocked"), _("inactive"), _("active"), _("pending")]
     for user in users:
 
         jsonuser = list([])
@@ -67,6 +68,8 @@ def render_for_js(users: list, columns: list) -> list:
             attrvalue = ""
             if key == "select":
                 attrvalue = user[column["field"]]
+            elif key == "status":
+                attrvalue = status_label[user[key] + 1]
             else:
                 attrvalue = user[key]
 
