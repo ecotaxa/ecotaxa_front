@@ -75,7 +75,7 @@ def gui_login() -> str:
 @app.route("/gui/register/<token>", methods=["GET", "POST"])
 def gui_register(token=None) -> str:
 
-    if current_user.is_authenticated:
+    if token is None and current_user.is_authenticated:
         return redirect(url_for("index"))
     partial = is_partial_request(request)
     from appli.gui.users.users import user_register

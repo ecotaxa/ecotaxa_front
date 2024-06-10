@@ -56,7 +56,7 @@ def make_user_response(code, message: str) -> tuple:
 
 
 def user_register(token: str = None, partial: bool = False) -> str:
-    if current_user.is_authenticated:
+    if token is None and current_user.is_authenticated:
         raise UnprocessableEntity()
     reCaptchaID = None
     # google recaptcha or homecaptcha
@@ -185,21 +185,19 @@ def user_create(
         }
         resp = api_user_create(posted, token)
 
-    redir = "gui_index"
+    redir = url_for("gui_index")
     if token is None:
         if resp[0] == 0:
             message = py_user["mailsuccess"] + py_user["checkspam"]
-            redir = "gui_index"
             type = "success"
         else:
-            redir = "gui_register"
+            redir = url_for("gui_register")
             message = resp[1] + " " + py_user["mailerror"]
             type = "error"
     else:
         if resp[0] == 0:
             if len(resp) <= 3 or resp[3] == False:
                 message = py_user["profilesuccess"]["create"]
-                redir = "gui_index"
             elif len(resp) >= 3 and resp[3] == True:
                 message = py_user["statusnotauthorized"]["01"]
             else:
@@ -207,8 +205,11 @@ def user_create(
 
             type = "success"
         else:
-            message = resp[1] + py_user["profileerror"]["create"]
-
+            redir = url_for("gui_register") + "/" + token
+            err, action = _get_value_from_token(token, "action", age=PROFILE_TOKEN_AGE)
+            if str(action or "") != "update":
+                action = create
+            message = resp[1] + py_user["profileerror"][action]
             type = "error"
     if partial:
         response = (resp[0], message, resp[2], resp[3])
@@ -230,8 +231,6 @@ def user_create(
         )
     else:
         flash(message, type)
-        if redir != "gui_prj":
-            redir = url_for(redir)
         return redirect(redir)
 
 
