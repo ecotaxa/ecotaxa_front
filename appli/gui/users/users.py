@@ -429,15 +429,15 @@ def user_account(
                         current_user.is_anonymous or not current_user.active
                     ):
                         message = (
-                            py_user["statusnotauthorized"]["emailchanged"]
-                            + py_user["checkspam"]
+                            message
+                            + " "
+                            + (
+                                py_user["statusnotauthorized"]["emailchanged"]
+                                + py_user["checkspam"]
+                            )
                         )
-                    elif (
-                        token
-                        and API_ACCOUNT_VALIDATION != False
-                        and api_user != before_user
-                    ):
-                        message = py_user["statusnotauthorized"]["0"]
+                    elif API_ACCOUNT_VALIDATION != False:
+                        message = message + " " + py_user["statusnotauthorized"]["01"]
                     else:
                         # should not comme here
                         pass
