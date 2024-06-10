@@ -200,11 +200,9 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
 
     message = "User " + str(usrid) + " " + response[1]
     flash(message, type)
-    if type == "error":
-        return redirect(
-            url_for("gui_user_activate", usrid=usrid, status_name=status_name)
-        )
-    return redirect(url_for("gui_users_list_page"))
+    # always return to user profile
+    return redirect(url_for("gui_user_activate", usrid=usrid, status_name=status_name))
+    # return redirect(url_for("gui_users_list_page"))
 
     return render_template(
         "./v2/admin/users.html",
