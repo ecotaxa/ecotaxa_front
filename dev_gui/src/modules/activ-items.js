@@ -211,12 +211,9 @@ export class ActivItems {
           });
           break;
         case 'astext':
-          console.log('astext');
           const article = (item.dataset.target) ? document.getElementById(item.dataset.target) : item.parentElement.querySelector('article');
           if (article) {
-            console.log('articlehelp', item)
             item.addEventListener((item.dataset.event) ? item.dataset.event : 'click', (e) => {
-              console.log('helptodocarticle ')
               export_html2word(article, item.parentElement);
             });
           }
