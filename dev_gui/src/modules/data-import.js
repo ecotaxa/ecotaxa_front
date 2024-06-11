@@ -40,22 +40,23 @@ export class DataImport {
     if (!tbl) return;
     // tbl is a TableComponent  ?
     this.tbl = (typeof(tbl) === 'object') ? tbl : null;
+    selector = (selector === null) ? ((this.tbl.cellidname) ? "data-" + this.tbl.cellidname : "data-id") : selector;
     // get the table from table component or html table element id
     this.dom = (this.tbl) ? this.tbl.dom : document.getElementById(tbl);
     if (!this.dom) return;
     what = (what) ? DOMPurify.sanitize(what) : (tbl && tbl.params && tbl.params.import) ? tbl.params.import : (this.dom.dataset.import) ? DOMPurify.sanitize(this.dom.dataset.import) : null;
     if (!instance || instance.doc !== this.dom) {
       // defaultoptions - keep like that
+
       const options = {
         importcontainer: '#data-import-' + what,
         btns: '.btns-imports',
         button: '#add-import-' + what,
         replacebutton: '#replace-import-' + what,
         tabbutton: '#tab-import-' + what,
-        selector: 'data-id',
-
       };
-      this.selector = (selector) ? selector : options.selector;
+      this.selector = selector;
+
       this.importcontainer = options.importcontainer instanceof HTMLElement ? options.importcontainer : document.querySelector(options.importcontainer);
       this.form = (options.form) ? ((options.form) instanceof HTMLElement ? options.form : document.querySelector(options.form)) : this.dom.closest('form');
       this.button = options.button instanceof HTMLElement ? options.button : document.querySelector(options.button);
@@ -83,7 +84,6 @@ export class DataImport {
     this.selectors.forEach(selector => {
       // checkbox possible
       const index = Array.from(selector.parentElement.children).indexOf((selector));
-
       if (indextocheck && selector.closest('tr').children[indextocheck[index]].innerHTML === '') selector.disabled = true;
       else {
         const evt = (selector.tagName.toLowerCase() === 'input') ? 'change' : 'click';
