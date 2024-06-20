@@ -25,7 +25,6 @@ export class JsScanDir {
     })
     this.on(this.eventnames.processed, async (e) => {
       console.log('e', e)
-      //  if (this.nextaction) await this.nextaction();
     })
   }
 
@@ -83,7 +82,6 @@ export class JsScanDir {
       }
     };
     const reader = dir.createReader();
-    console.log('reader', reader)
     const on_read = async function(ents) {
       if (ents.length && !errored) {
         direntries = [...direntries, ...ents];
@@ -91,7 +89,6 @@ export class JsScanDir {
       } else if (!errored) {
         const complete = async function() {
           if (oncomplete && direntries.length === 0) {
-            console.log('dircomplete', dir.name);
             oncomplete();
           } else {
             const entry = direntries.shift();

@@ -5,14 +5,12 @@ import {
   add_custom_events,
   create_box,
   format_bytes,
+  generate_uuid,
   dirseparator
 } from '../modules/utils.js';
 import {
   css,
 } from '../modules/modules-config.js';
-import {
-  generate_uuid,
-} from '../modules/utils.js';
 import {
   JsDirList,
   defaultOptions
@@ -41,14 +39,14 @@ export class JsMyFiles {
   eventnames = {
     complete: 'complete',
     error: 'error',
-  }
+  };
+  rejected = [];
   constructor(container, options = {}) {
     if (!container.jsmyfiles) {
       container = (container instanceof HTMLElement) ? container : document.querySelector(container);
       if (!container) return;
       dom_purify(container, 'dataset');
       this.container = container;
-      console.log("/gui/files/list")
       const defaultOptions = {
         controls: {
           scan: {
@@ -67,7 +65,11 @@ export class JsMyFiles {
               counter: 'counterzipped',
             }
           },
-
+          reject: {
+            display: {
+              counter: 'counterrejected'
+            }
+          }
         },
         upload: {
           label: 'upload'
@@ -118,7 +120,6 @@ export class JsMyFiles {
   }
   async initEvents() {
     add_custom_events(this);
-    console.log(' init events%%%%%%%%%%%%%%%%%%%%%%%ù)')
     //To be refactored - for steppers )
     this.on(this.eventnames.processed, async (e) => {
       if (this.nextaction) await this.nextaction();
@@ -145,16 +146,24 @@ export class JsMyFiles {
         this.eventnames[key] = this.jsDirToZip.eventnames[key];
         this.jsDirToZip.on(key, (e) => {
           switch (key) {
-            case 'counter':
+            case this.eventnames.counter:
               self.fileCounter(e);
               break;
-            case 'complete':
+            case this.eventnames.reject:
+              this.rejected.push(e.path);
+              this.fileCounter({
+                name: 'reject',
+                path: e.path,
+              });
+              break;
+            case this.eventnames.complete:
               if (!e || !e.name) {
                 console.log('no emit complete name');
                 return;
               }
               self.showControl(e.name, e);
-            case 'message':
+              break;
+            case this.eventnames.message:
               switch (e.name) {
                 case 'console':
                   this.addConsoleMessage({
@@ -180,15 +189,16 @@ export class JsMyFiles {
                   break;
               }
               break;
-            case 'terminate':
+            case this.eventnames.terminate:
               console.log('terminate', e)
+              break;
             default:
+              console.log('showcontrol ' + key, e)
               self.showControl(key, e);
               break;
           }
         });
       });
-
     }
     window.addEventListener('beforeunload', (e) => {
       if (!this.done) {
@@ -204,7 +214,6 @@ export class JsMyFiles {
       if (message.name) {
         const name = message.name;
         delete message.name;
-        console.log('emit ----' + name, message)
         this.jsDirToZip.emit(name, message);
       }
     }
@@ -287,14 +296,13 @@ export class JsMyFiles {
   toggleDropTarget(on = true) {
     const self = this;
     const droptarget = (this.activentry) ? this.activentry.container : null;
-
     if (droptarget === null) return;
     const cssdragover = (this.jsDirList) ? this.jsDirList.options.entry.css.dragover : this.options.css.dragover;
     const target_dragover = (e) => {
       if (!this.dragover && this.activentry && this.activentry.container === e.currentTarget) {
         droptarget.classList.add(cssdragover);
       }
-      //self.handleDragOver(e);
+      self.handleDragOver(e);
     }
     const target_drop = async (e) => {
       droptarget.classList.remove(cssdragover);
@@ -314,7 +322,6 @@ export class JsMyFiles {
   }
 
   async addDirList() {
-    console.log('dirlist add addDILRLLLL', this.container)
     this.jsDirList = new JsDirList(this.container);
     this.activentry = this.jsDirList.root;
     this.rootitem = this.targetitem = this.activentry.container;
@@ -323,23 +330,16 @@ export class JsMyFiles {
       this.detachDropzone();
       this.activentry = e.entry;
       this.targetitem = this.activentry.container;
-      this.addUploadDialog();
+      if ([this.activentry.options.type.directory, this.activentry.options.type.root].indexOf(this.activentry.type) >= 0) this.addUploadDialog();
     });
     this.jsDirList.on(this.jsDirList.eventnames.detach, (e) => {
-      console.log('myfiles dirlist event', e)
-      this.enableDropzone();
       this.detachDropzone();
       this.activentry = null;
       this.targetitem = null;
     });
     this.jsDirList.on(this.jsDirList.eventnames.action, (e) => {
-      console.log('action not managed', e)
-      switch (e.action) {
-        case 'drop':
-          e.target = e.entry.container;
-          this.handleDrop(e.event);
-          break;
-      }
+      if (e.detail.action === "drop") this.handleDrop(e.detail.event);
+      console.log('action not managed ' + e.detail.action, e.detail)
     });
     this.activentry.label.dispatchEvent(new Event('click'));
   }
@@ -357,29 +357,22 @@ export class JsMyFiles {
     }
   }
   enableDropzone(enable = true, destroy = false) {
-    if (destroy) this.dropzone.classList.add(css.hide);
-    if (enable) this.dropzone.dataset.enabled = true;
-    else delete this.dropzone.dataset.enabled;
+    if (destroy || enable === false) this.dropzone.classList.add(css.hide);
+    if (enable) {
+      this.dropzone.dataset.enabled = true;
+      this.dropzone.classList.remove(css.hide);
+    } else delete this.dropzone.dataset.enabled;
   }
   //
   attachDropzone() {
     if (this.dropzone.dataset.enabled) {
-      this.targetitem.insertBefore(this.dropzone, this.activentry.label.nextSibling);
+      this.targetitem.insertBefore(this.dropzone, this.activentry.label.nextElementSibling);
       this.toggleDropTarget(true);
     }
   }
   detachDropzone() {
-    if (this.dropzone.dataset.enabled) {
-      this.targetitem = null;
-      if (this.rootitem !== this.targetitem) {
-        this.rootitem.append(this.dropzone);
-
-      } else {
-        this.container.append(this.dropzone);
-        this.toggleDropTarget(false);
-      }
-    }
-
+    this.enableDropzone(false);
+    this.toggleDropTarget(false);
   }
 
   openDirDialog(type, callback) {
@@ -403,6 +396,7 @@ export class JsMyFiles {
 
   //  drag&drop
   async handleDrop(e) {
+    this.uploadentry = this.activentry;
     let dataTransfer;
     if (e.dataTransfer) {
       e.preventDefault();
@@ -428,20 +422,12 @@ export class JsMyFiles {
   }
   showComplete() {
     this.timer = (new Date() - this.timer) / 1000;
-    console.log('item-------------------------------------' + parseInt(this.timer / 60) + ' --- ' + (
-      this.timer - (parseInt(this.timer / 60) * 60)));
+    console.log('item-------------------------------------' + parseInt(this.timer / 60) + ' --- ' + (this.timer - (parseInt(this.timer / 60) * 60)));
     this.enableDropzone();
   }
 
   stopOnError(err) {
     console.log('err', err);
-  }
-
-  enableDropzone(enable = true, destroy = false) {
-    console.log('thisdropzone', this.dropzone)
-    if (destroy) this.dropzone.classList.add(css.hide);
-    if (enable) this.dropzone.dataset.enabled = true;
-    else delete this.dropzone.dataset.enabled;
   }
 
   addConsoleMessage(message) {
@@ -484,8 +470,10 @@ export class JsMyFiles {
   resetCounter(item) {
     const counters = this.counters[item];
     ['counter', 'size'].forEach(el => {
-      this.counters[item][el] = 0;
-      counters.display[el].textContent = 0;
+      if (counters.display[el]) {
+        this.counters[item][el] = 0;
+        counters.display[el].textContent = 0;
+      }
     });
     this.toggleCounters(false);
   }
@@ -521,7 +509,8 @@ export class JsMyFiles {
         counter: ' read',
         size: ' read',
         counterzipped: ' compressed',
-        sizezipped: ' compressed'
+        sizezipped: ' compressed',
+        counterrejected: ' rejected',
       }
       let elinsert = boxcounters.querySelector('.' + cl);
       if (!elinsert) elinsert = create_box('div', {
@@ -532,7 +521,20 @@ export class JsMyFiles {
         el = create_box('span', {
           class: val,
         }, elinsert, ` / `);
-        if (txt.hasOwnProperty(val)) elinsert.append(document.createTextNode(txt[val]));
+        if (txt.hasOwnProperty(val)) {
+          // add a link to display the rejected files list
+          if (val === 'counterrejected') {
+            const link = create_box('a', {
+              text: txt[val],
+              class: 'text-error',
+              title: `Click to display the list of rejected files`
+            }, elinsert);
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              this.displayReject(link);
+            });
+          } else elinsert.append(document.createTextNode(txt[val]));
+        }
       } else this.resetCounter(item);
       itemopts.display[k] = el;
       itemopts[k] = 0;
@@ -544,9 +546,21 @@ export class JsMyFiles {
       }
     };
   }
-
+  displayReject(el) {
+    const message = {
+      type: window.alertbox.alertconfig.types.warning,
+      parent: el,
+      content: `Files ${this.rejected.join('<br>')} type rejected`,
+    };
+    if (el.dataset.hasmessage) {
+      window.alertbox.removeItemMessage(message);
+      delete el.dataset.hasmessage;
+    } else {
+      el.dataset.hasmessage = true;
+      window.alertbox.addItemMessage(message);
+    }
+  }
   showControl(action, opts) {
-    console.log('opts', opts)
     const target = ((opts.hasOwnProperty('bigfile') && opts.bigfile) ? 'zipped' : 'zip');
     let message, text = null;
     // 'zip' ---only btn for zip actions for the moment
@@ -555,12 +569,14 @@ export class JsMyFiles {
     btn.removeAttribute("disabled");
     const part = (opts && opts.part) ? opts.part : false;
     const bigfile = (opts && opts.bigfile) ? opts.bigfile : false;
-    const filepath = (opts && opts.path) ? opts.path : this.activentry.getCurrentDirPath();
-    console.log('filepath', filepath)
+    console.log('opts', opts);
+    console.log('activentry', this.activentry)
+    console.log('uploadentry', this.uploadentry)
+    const filepath = (opts && opts.path) ? opts.path : this.uploadentry.getCurrentDirPath();
     switch (action) {
       case this.eventnames.ready:
         this.resetCounters();
-        this.activentry.list();
+        this.uploadentry.list();
         if (btn.dataset.message) delete btn.dataset.message;
         btn.classList.add(css.hide);
         break;
@@ -570,26 +586,29 @@ export class JsMyFiles {
         break;
       case this.eventnames.endzip:
         if (!part) this.showComplete();
-        btn.textContent = `Close zip file` + ((part) ? part : ``);
+        btn.textContent = `Close zip file` + ((part) ? ` ` + part : ``);
         btn.title = (part) ? `Your file is too big - you have to send this part before continuing to process the directory` : `Click to end zip file`;
         message = {
           name: this.eventnames.endzip,
           part: part,
-          path: filepath,
+          filepath: filepath,
           bigfile: (target !== 'zip') ? bigfile : false,
         };
         btn.dataset.message = JSON.stringify(message);
         break;
-      case this.eventnames.bigfile:
-        btn.textContent = `Upload big File separately`;
-        message = {
-          name: this.eventnames.bigfile,
-          path: filepath,
-          part: part,
-          bigfile: bigfile
-        };
-        btn.dataset.message = JSON.stringify(message);
-        console.log('bigfile', message)
+      case this.eventnames.complete:
+        console.log('complete', opts)
+        if (bigfile && bigfile !== '') {
+          btn.textContent = `Upload big File separately`;
+          message = {
+            name: this.eventnames.bigfile,
+            path: filepath,
+            part: part,
+            bigfile: bigfile
+          };
+          btn.dataset.message = JSON.stringify(message);
+          console.log('bigfile', message)
+        }
         break;
       case this.eventnames.sendfile:
         console.log('opts sendfile', opts)
@@ -600,10 +619,8 @@ export class JsMyFiles {
           bigfile: bigfile
         };
         btn.textContent = `Upload zip file`;
-        console.log('message -sendfile- Upload zip file', message)
         if (message.bigfile && message.bigfile !== '') btn.textContent += ` ` + opts;
         btn.dataset.message = JSON.stringify(message);
-        console.log('messageup', message)
         break;
       case this.eventnames.pending:
         btn.textContent = ` Pending ` + ((target !== 'zip') ? ' big file' : '');
@@ -611,10 +628,9 @@ export class JsMyFiles {
         btn.setAttribute("disabled", true);
         break;
       case this.eventnames.gzip:
-        text = `compressing separately big file :${(opts && opts.bigfile)?opts.bigfile:``} ${(opts && opts.size)?opts.size:``}`;
+        text = `compressing separately big file :${(opts && opts.bigfile)?filepath:``} ${(opts && opts.size)?opts.size:``}`;
         btn.textContent = text;
         btn.setAttribute("disabled", true);
-        console.log('optsbigfl', opts)
         btn.dataset.message = JSON.stringify({
           name: this.eventnames.endzip,
           path: filepath,
@@ -624,8 +640,6 @@ export class JsMyFiles {
         break;
       case this.eventnames.terminate:
         console.log('terminate ' + ((target !== 'zip') ? 'bigfile' : ''));
-
-        //default:
         btn.dataset.message = JSON.stringify({
           name: 'ready',
           bigfile: (target !== 'zip')

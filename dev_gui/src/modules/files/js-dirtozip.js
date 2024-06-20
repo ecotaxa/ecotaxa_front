@@ -20,7 +20,7 @@ const already_compressed = new Set([
 ]);
 const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
 let instance = null;
-const MAXSIZE = 1073741824; ////maxfilesize: 1073741824,
+const MAXSIZE = 4294967296; //1073741824; //4294967296; //1073741824; ////maxfilesize: 1073741824,
 export class JsDirToZip {
   _events = {};
   eventnames = {
@@ -29,13 +29,14 @@ export class JsDirToZip {
     endzip: 'endzip',
     complete: 'complete',
     endreaddir: 'endreaddir',
-    gzip: 'gzipfile',
+    gzip: 'gzip',
     sendfile: 'sendfile',
     bigfile: 'bigfile',
     terminate: 'terminate',
     pending: 'pending',
     getfile: 'getzipfile',
     counter: 'counter',
+    reject: 'reject',
     message: 'message',
     error: 'error'
   }
@@ -54,7 +55,7 @@ export class JsDirToZip {
     if (instance) return instance;
     const defaultOptions = {
       uploadurl: '/gui/files/upload',
-      largefile: 4194304,
+      largefile: 4294967296, // 4194304,1073741824
       accept: accept.split(',')
     }
     this.options = { ...defaultOptions,
@@ -68,6 +69,7 @@ export class JsDirToZip {
   }
   init() {
     add_custom_events(this);
+
     this.initStorage();
     this.reset();
     this.on(this.eventnames.ready, (e) => {
@@ -89,7 +91,8 @@ export class JsDirToZip {
     console.log(' dirzip reset')
     this.counter = {
       scan: 0,
-      zip: 0
+      zip: 0,
+      reject: 0
     }
     this.initStorage();
   }
@@ -120,30 +123,24 @@ export class JsDirToZip {
       // events
       this.on(this.eventnames.endzip, (e) => {
         if (!e.bigfile && this.zip) {
-
           this.zip.end();
-          console.log('zipend', this.zip)
-          console.log('fstrem', this.filestream)
         } else if (e.bigfile && this.gzipped) console.log('-------------------------gzipped end ', this.gzipped)
         const message = {
           name: this.eventnames.sendfile
         };
         if (e.part) {
-          message["part"] = e.part;
+          message.part = e.part;
         } else this.part = 0;
-        if (e.hasOwnProperty("bigfile")) message["bigfile"] = e.bigfile;
-        if (e.hasOwnProperty("path")) message["path"] = e.path;
+        if (e.hasOwnProperty("bigfile")) message.bigfile = e.bigfile;
+        if (e.hasOwnProperty("path")) message.path = e.path;
         console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%', e)
         this.emit(this.eventnames.complete, message);
       });
 
       this.on(this.eventnames.sendfile, async (e) => {
-        console.log('eventsendfile', e)
         let file = (e.bigfile) ? await this.getFile(this.gzipped): await this.getFile();
-        console.log('sendfile', file)
-
         /* if (e.bigfile) this.sendChunk((e.path ? e.path : ''));
-          else */
+        else */
         this.sendZipFile(file, (e.path ? e.path : ''), null, (e.bigfile ? e.bigfile : null));
       });
       this.on(this.eventnames.bigfile, (e) => {
@@ -243,22 +240,19 @@ export class JsDirToZip {
         if (this.acceptFile(entry)) {
           this.callback = callback;
           await this.processFile(entry);
-        } else this.rejectFile(entry);
+        } else this.rejectFile(entry, callback);
       }
     }
   }
 
   async scanBrowse(pick, options = {}) {
-    console.log('pick', pick)
     const entries = (pick instanceof FileList) ? Array.from(pick) : (pick.kind === "directory") ? await Array.fromAsync(pick.values()): (Array.isArray(pick)) ? pick : [pick];
-    console.log('entr' + typeof(pick), entries[0]);
     const name = entries[0].name;
     let relpath = (pick instanceof FileList) ? entries[0].webkitRelativePath : null;
     relpath = (relpath) ? relpath.split(dirseparator) : [``];
     if (relpath.length) relpath.pop();
     relpath = relpath.join(dirseparator)
     const path = (pick instanceof FileList) ? relpath : (pick.kind === "directory") ? pick.name : ``;
-    console.log('dirtozip^path', path);
     await this.scanCommon(path, options);
     await this.jsScanDir.processEntries(entries, path, () => {
       this.dirComplete();
@@ -279,7 +273,6 @@ export class JsDirToZip {
   }
 
   dirComplete() {
-    console.log('direcomplete')
     this.emit(this.eventnames.endreaddir, {
       name: this.eventnames.endzip
     });
@@ -294,23 +287,26 @@ export class JsDirToZip {
       this.gzipped = file;
       this.emit(this.eventnames.counter, {
         name: 'zip',
-        filepath: filepath,
+        path: filepath,
         size: file.size
       });
       this.emit(this.eventnames.complete, {
         name: this.eventnames.bigfile,
-        bigfile: filepath
+        bigfile: true,
+        path: filepath,
       });
     } else {
+
       this.emit(this.eventnames.gzip, {
         name: this.eventnames.gzip,
-        bigfile: filepath,
+        bigfile: true,
+        path: filepath,
         size: file.size
       });
       let zipname = file.name.split(ext);
+      console.log("zipnamze ", zipname)
       zipname.pop();
       zipname = zipname.join(ext) + 'gz';
-      console.log('bigfile ext=' + ext, zipname)
       const {
         filestream,
         streamhandle
@@ -328,8 +324,8 @@ export class JsDirToZip {
           console.log('final BIGFILE%%%%%%%%%%%%%%%%%%%%' + selfi.eventnames.bigfile, filepath)
           selfi.emit(selfi.eventnames.complete, {
             name: selfi.eventnames.bigfile,
-            bigfile: filepath
-
+            bigfile: true,
+            path: filepath
           });
 
           streamhandle.close();
@@ -373,7 +369,7 @@ export class JsDirToZip {
         zippedstream.push(new Uint8Array(0), true);
         self.emit(self.eventnames.counter, {
           name: 'zip',
-          filepath: filepath,
+          path: filepath,
           size: (zippedstream.size) ? zippedstream.size : file.size
         });
         break;
@@ -383,7 +379,6 @@ export class JsDirToZip {
   }
 
   async zipStream(file, filepath) {
-    console.log('filepath', filepath)
     const ext = filepath.slice(filepath.lastIndexOf('.') + 1);
     const iscompressed = already_compressed.has(ext);
     const zippedstream = (iscompressed) ? new ZipPassThrough(filepath) : file.size > this.options.largefile ?
@@ -399,7 +394,7 @@ export class JsDirToZip {
   async addFileToZipStream(file, filepath) {
     this.emit(this.eventnames.counter, {
       name: 'scan',
-      filepath: filepath,
+      path: filepath,
       size: file.size
     });
     this.continue = null;
@@ -426,8 +421,14 @@ export class JsDirToZip {
     return accept.includes(ext);
   }
 
-  rejectFile(file) {
-    console.log('reject', file);
+  rejectFile(file, callback = null) {
+    const path = (file.fullPath) ? file.fullPath : file.webkitRelativePath;
+    this.counter.reject += 1;
+    this.emit(this.eventnames.reject, {
+      name: this.eventnames.reject,
+      path: path,
+    });
+    if (callback !== null) callback();
   }
   async processFile(entry) {
     const path = (entry.fullPath) ? entry.fullPath : entry.webkitRelativePath;
@@ -446,7 +447,6 @@ export class JsDirToZip {
     const entry = await navigator.storage.getDirectory();
     for await (const [key, value] of entry.entries()) {
       if (search === key) {
-        console.log('key', key);
         return true;
         break;
       }
@@ -468,13 +468,13 @@ export class JsDirToZip {
 
   async endFetch(message, clean = false) {
     message.name = this.eventnames.terminate;
-    if (message.hasOwnProperty("bigfile") && message.bigfile !== "" &&
-      message.bigfile) {
-      message["bigfile"] = this.gzipped.name;
+    if (message.hasOwnProperty("bigfile") && message.bigfile !== false) {
+      message.bigfile = true;
+      message.path = this.gzipped;
       this.gzipped = null;
     } else if (this.continue) {
       this.streamhandle = await this.filestream.createWritable();
-      this.emit(this.eventnames.follow);
+      this.emit(this.eventnames.follow, message);
       await this.initZip();
       return;
     }
@@ -483,9 +483,7 @@ export class JsDirToZip {
 
   async sendChunk(path, start = 0, chunknum = 0, chunksize = MAXSIZE) {
     console.log('send chunk ', this.gzipped)
-    console.log('chunkpath', path)
     const file = (this.gzipped) ? await this.getFile(this.gzipped): await this.getFile();
-    console.log('file', file)
     path = path.split('/');
     path.pop();
     path = path.join('/');
@@ -514,10 +512,10 @@ export class JsDirToZip {
   async sendZipFile(file, path, callbackchunk = null, isbigfile = false) {
     console.log('sendzipfile------------_______________________' + isbigfile, file)
     const message = (isbigfile) ? {
-      bigfile: file.name
+      bigfile: true,
+      path: file.name
     } : {};
     this.emit(this.eventnames.pending, message);
-    console.log('callbackchunk---sendzip', callbackchunk)
     const formdata = new FormData();
     formdata.append('path', path + ((path.slice(-1) === dirseparator) ? `` : dirseparator) + file.name);
     formdata.append('file', file, file.name);

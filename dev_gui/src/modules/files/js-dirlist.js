@@ -209,7 +209,7 @@ class Entry {
   }
 
   getEntries() {
-    return this.entries();
+    return this.entries;
   }
   getEntriesElement(create = false) {
     let entries = this.container.querySelector(this.options.selectors.entries);
@@ -223,7 +223,6 @@ class Entry {
 
   appendEntry(entry) {
     if (entry.parent) {
-      console.log('this', entry)
       const n = entry.parent.entries.indexOf(entry);
       delete entry.parent.entries[n];
     }
@@ -237,6 +236,14 @@ class Entry {
     const new_entry = new Entry(entry);
     this.appendEntry(new_entry);
   }
+
+  findEntry(name) {
+    const entries = this.getEntries();
+    for (const entry of entries) {
+      if (entry.name === name) return entry;
+    }
+    return null;
+  }
   //
   createListEntries(listentries) {
     const direntry = this.getEntriesElement(true);
@@ -247,11 +254,16 @@ class Entry {
       });
     });
   }
-
+  removeEntries() {
+    this.entries = [];
+    const el = this.getEntriesElement();
+    if (el) el.remove();
+  }
   isOn() {
     return this.active;
 
   }
+
   toggleOn() {
     this.active = !(this.active);
     this.container.classList.toggle(this.options.css.on);
@@ -272,14 +284,14 @@ class Entry {
   }
   moveHandlers() {
     return [{
-      name: 'dragover',
+      name: 'dragstart',
       func: (e) => {
-        this.handleDragOver(e);
+        this.handleDragStart(e);
       }
     }, {
-      name: 'drop',
+      name: 'dragend',
       func: (e) => {
-        this.handleDrop(e);
+        this.handleDragEnd(e);
       }
     }];
   }
@@ -297,7 +309,7 @@ class Entry {
     }];
   }
   handleDrop(e) {
-
+    e.stopPropagation();
   }
   addListeners() {
     let func = (e) => {
@@ -308,7 +320,6 @@ class Entry {
     };
     let listeners = []
     if ([this.options.type.root, this.options.type.trash].indexOf(this.type) < 0) {
-      if (this.isInTrash()) console.log(' isintrash ' + this.name, this.isInTrash())
       listeners = this.moveHandlers();
       if (this.type === this.options.type.file) {
         func = (e) => {
@@ -320,7 +331,7 @@ class Entry {
         this.type = this.options.type.trashed;
       } else listeners = listeners.concat(this.dropHandlers());
       this.listenRename();
-    }
+    } else listeners = listeners.concat(this.dropHandlers());
     listeners.unshift({
       name: 'click',
       target: 'label',
@@ -342,21 +353,22 @@ class Entry {
   }
 
   handleDragStart(e) {
+    e.stopImmediatePropagation();
     this.container.classList.add(this.options.css.dragging);
     e.dataTransfer.effectAllowed = 'move';
-    this.emitEvent('dragstart');
+    this.emitEvent('dragstart', e);
   }
   handleDragOver(e) {
     e.stopPropagation();
     e.preventDefault();
-    this.emitEvent('dragover');
+    this.emitEvent('dragover', e);
     return;
   }
   handleDragEnd(e) {
     e.stopPropagation();
     e.preventDefault();
     if (this.container.classList.contains(this.options.css.dragging)) this.container.classList.remove(this.options.css.dragging);
-    this.emitEvent('dragend');
+    this.emitEvent('dragend', e);
   }
   resetDragOver() {
     document.querySelectorAll('.' + this.options.css.dragover).forEach(el => {
@@ -365,6 +377,7 @@ class Entry {
   }
   handleDrop(e) {
     /***/
+    e.stopImmediatePropagation();
     this.emitEvent('drop', e);
   }
 
@@ -444,8 +457,9 @@ class EntryAction extends Entry {
     switch (action) {
       case this.options.actions.create:
         if (label === null) return;
-        entrypath = entrypath + dirseparator + label.textContent;
-        if (entrypath.trim() !== "") data.append(api_parameters.entry, entrypath);
+        entrypath = entrypath.split(dirseparator);
+        entrypath[entrypath.length - 1] = label.textContent;
+        if (entrypath !== "") data.set(api_parameters.entry, entrypath.join(dirseparator));
         break;
       case this.options.actions.move:
         // get new path - append item to drop directory
@@ -457,7 +471,6 @@ class EntryAction extends Entry {
             return;
           }
           data.append(api_parameters.dest, destpath);
-          console.log(entrypath + ' destmove ', destpath)
         } else return;
         break;
       case this.options.actions.rename:
@@ -472,7 +485,6 @@ class EntryAction extends Entry {
       body: data
     }));
     const json = await response.json();
-    console.log('responsejson', json)
     if (json.status === 200) {
       if (callback) callback(json.message);
       return true;
@@ -482,9 +494,14 @@ class EntryAction extends Entry {
     }
   }
   listenRename(evt = 'dblclick') {
+
     const entry = this;
     const label = entry.getLabelElement();
     label.addEventListener(evt, (e) => {
+      if (this.type === this.options.type.trash) {
+        e.preventDefault();
+        return;
+      }
       const send_rename = async (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -504,7 +521,6 @@ class EntryAction extends Entry {
             delete entry.container.dataset.action;
           }
           const action = (entry.container.dataset.action) ? entry.container.dataset.action : entry.options.actions.rename;
-          console.log('action entry_rename ' + action, entry.container)
           await entry.fetchAction(action, callback);
         }
       }
@@ -524,21 +540,33 @@ class EntryAction extends Entry {
     const cl = (entry.type === options.type.file) ? (filter_files.images.split(',').indexOf(ext) >= 0) ? options.icons.image : options.icons.document : null;
     if (cl !== null) options.class.push(cl);
     const new_entry = new EntryAction(entry, options);
-    if (entry.type === this.options.type.trash) new_entry.emitEvent(this.eventnames.istrashdir);
     this.appendEntry(new_entry);
     new_entry.addListeners();
+    if (entry.type === this.options.type.trash) new_entry.emitEvent(this.eventnames.istrashdir);
     return new_entry;
   }
-
+  findEntry(name, type) {
+    const entries = this.getEntries();
+    for (const entry of entries) {
+      if (entry.name === name && entry.type === type) return entry;
+    }
+    return null;
+  }
   async list() {
     if (this.type === this.options.type.file) return;
     const tag = this.options.tags.tag;
     const subtag = this.options.tags.subtag;
     const subdir = (this.name) ? this.getCurrentDirPath() : null;
     this.setWait();
-    const el = this.getEntriesElement();
-    if (el) el.remove();
-    fetch(this.options.url + urlseparator + this.options.actions.list + ((subdir) ? dirseparator + subdir : ''), fetchSettings()).then(response => response.json()).then(async json => {
+    this.removeEntries();
+    const fetchoptions = {
+      headers: new Headers({
+        'content-type': 'application/json'
+      })
+    }
+    const response = await fetch(this.options.url + urlseparator + this.options.actions.list + ((subdir) ? dirseparator + subdir : ''), fetchSettings(fetchoptions));
+    const json = await response.json();
+    if (response.ok) {
       if (json.entries && json.entries.length) {
         let files = [],
           directories = [],
@@ -553,14 +581,20 @@ class EntryAction extends Entry {
         this.createListEntries([directories, files]);
       }
       this.setLoaded();
-    });
+    } else {
+      window.alertbox.addItemMessage({
+        parent: this.container,
+        type: "error",
+        content: json.error + ' ' + json.text
+      })
+    }
+
   }
   remove() {
     if (this.isTrashDir()) return;
-    const from = this.getCurrentDirPath();
+
     this.fetchAction(this.options.actions.remove).then(ret => {
-      console.log('remove ', this)
-      this.from = from;
+      this.setParent(null);
       this.removeListeners(this.dropHandlers());
       this.setOff();
       this.container.animate({
@@ -580,6 +614,9 @@ class EntryAction extends Entry {
       type: 'D',
       name: 'NewFolder'
     });
+    // move new entry to top of the list
+    const entries = this.getEntriesElement();
+    entries.prepend(new_entry.container);
     new_entry.container.dataset.action = this.options.actions.create;
     new_entry.label.dispatchEvent(new Event('dblclick'));
   }
@@ -590,17 +627,30 @@ class EntryAction extends Entry {
     });
   }
 
-  move(dest) {
+  move(dest, callback = null) {
     if (this.isTrashDir()) return;
-    const from = this.getCurrentDirPath();
-
+    if ([this.options.type.trash, this.options.type.trashed].indexOf(dest.type) >= 0) return this.remove();
     this.fetchAction(this.options.actions.move, () => {
-      return dest.getCurrentDirPath();
+      return dest.getCurrentDirPath() + dirseparator + this.name;
     }).then(() => {
-      this.from = from;
+      this.setParent(dest);
+      if (callback !== null) callback();
+    }).catch(err => {
+      console.log('errmove', err)
+    });
+  }
+  setParent(dest) {
+    this.from = this.getCurrentDirPath();
+    if (dest !== null) {
+      dest.entries.push(this);
+      this.parent = dest;
       const entries = dest.getEntriesElement(true);
       entries.append(this.container);
-    }).catch(err => {});
+    }
+    const i = this.parent.entries.indexOf(this);
+    if (i >= 0) delete this.parent.entries[i];
+    else console.log('entry not found in parent entries', this.parent);
+
   }
 }
 
@@ -746,7 +796,6 @@ class JsDirList {
 
   }
   initEvents() {
-    console.log(' init events%%%%%%%%%%%%%%%%%%%%%%%ù)', this.entrycontrols)
     // events controls on entries
     const self = this;
     // alerts on error
@@ -765,33 +814,31 @@ class JsDirList {
       const eventnames = e.detail.entry.eventnames;
       switch (e.detail.action) {
         case eventnames.istrashdir:
+          if (this.trashdir) this.trashdir.container.remove();
           this.trashdir = e.detail.entry;
+          this.root.container.parentElement.insertBefore(e.detail.entry.container, this.root.container);
           break;
         case eventnames.trashed:
-          console.log(' trashed from---------', e.detail.entry.from)
-          if (e.detail.entry.isInTrash(e.detail.entry.from)) this.detachControls();
-          else {
-            this.trashdir.appendEntry(e.detail.entry, this.trashdir);
-            e.detail.entry.from = e.detail.entry.getCurrentDirPath();
-            console.log(' new path after trashed from---------', e.detail.entry.from);
-            this.attachControls(e.detail.entry);
+          let parent = e.detail.entry.parent;
+          if (e.detail.entry.isInTrash(e.detail.entry.from)) {
+            parent = this.root;
+          } else {
+            this.moveEntry(e.detail.entry, this.trashdir);
             e.detail.entry.container.classList.add('bg-danger-100');
           }
-          this.emit(this.eventnames.detach, e.detail);
+          this.attachControls(parent);
           break;
-        case eventnames.detach:
-          this.detachControls();
         case eventnames.attach:
           // no upload on trash dir
           const type = (e.detail.entry.isInTrash()) ? e.detail.entry.options.type.trashed : e.detail.entry.container.dataset.type;
           if (type === e.detail.entry.options.type.trash) return;
           if (e.detail.action === eventnames.attach && type === e.detail.entry.options.type.trashed) return;
-          this.emit(this.eventnames[e.detail.action], e.detail);
+          this.attachControls(e.detail.entry);
           break;
         case "dragstart":
-          this.detachControls();
           this.dragentry = this.activentry = e.detail.entry;
           e.detail.entry.container.classList.add(e.detail.entry.options.css.dragging);
+          this.detachControls();
           break;
         case "dragover":
           if (!this.dragentry) return;
@@ -808,50 +855,69 @@ class JsDirList {
           break;
         case "drop":
           if (!this.dragentry) {
-            console.log(' drop upload ', e)
             this.emit(this.eventnames.action, e);
             return true;
           } else {
-            console.log(' dragentry drop', e);
+            console.log(' dragentry drop', e.detail.entry.name);
           }
-          e.stopPropagation();
+          //e.stopPropagation();
           const el = this.dragentry.container;
           const dest_entry = e.detail.entry;
           dest_entry.resetDragOver();
           if (this.dragentry !== null) {
-            console.log("move file or dir", this.dragendentry)
             if (this.dragentry.options.actions.move) {
               try {
                 this.dragentry.move(dest_entry);
-                parent.append(el);
+                if ([this.dragentry.options.type.trashed].indexOf(dest_entry.type) >= 0) this.attachControls(dest_entry);
               } catch (error) {
+                console.log('errordrop ', error)
                 this.dragentry.unMove();
               }
             } else console.log('noactionon drop');
+
           } else console.log(' parent===null or dragitem===null or dragitem===parent', this.dragentry)
-          return;
+
           break;
         default:
-          if (e.detail.entry.active) this.attachControls(e.detail.entry);
-          else {
-            this.attachControls(this.root);
-          }
+          if (e.detail.entry.active) {
+            this.attachControls(e.detail.entry);
+          } else this.attachControls(this.root);
           break;
       }
     });
   }
+  moveEntry(entry, dest) {
+    entry.from = entry.getCurrentDirPath();
+    const trdirs = entry.from.split(dirseparator);
+    trdirs.pop();
+    trdirs.forEach((trdir, index) => {
+      const type = (dest.type === dest.options.type.trash) ? dest.options.type.trashed : dest.type;
+      let subdest = dest.findEntry(trdir, type);
+      if (subdest === null) {
+        subdest = dest.createEntry({
+          type: entry.options.type.directory,
+          name: trdir
+        });
+      }
+      dest = subdest;
+    });
+    if (dest.findEntry(entry.name, entry.type) === null) dest.appendEntry(entry);
+  }
   attachControls(entry) {
-
-    this.detachControls();
-    if (this.entrycontrols) {
-      this.entrycontrols.attachControls(entry);
-    } else this.detachControls();
+    if (this.entrycontrols) this.entrycontrols.attachControls(entry);
     this.activentry = entry;
+    this.emit(this.eventnames.attach, {
+      entry: this.activentry
+    });
   }
 
   detachControls() {
-    if (this.entrycontrols) this.entrycontrols.attachControls(this.root);
-    this.activentry = this.root;
+    const dest = (this.activentry) ? ((this.activentry.parent) ? this.activentry.parent : this.root) : this.root;
+    if (this.entrycontrols) this.entrycontrols.attachControls(dest);
+    this.activentry = dest;
+    this.emit(this.eventnames.attach, {
+      entry: dest
+    });
   }
 }
 export {
