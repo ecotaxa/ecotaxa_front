@@ -188,22 +188,30 @@ export class TableComponent {
   fetchData(container, fromurl, pagestart = 0) {
     this.waitActivate(container);
     const pagesize = (this.params.pagesize) ? this.params.pagesize : 0;
+    let from = fromurl;
+    if (this.params.fromid) from += '/' + this.params.fromid;
 
-    let from = (this.params.import) ? fromurl + '?' + new URLSearchParams({
+    let query = (this.params.import) ? {
       typeimport: DOMPurify.sanitize(this.params.import),
       window_start: pagestart,
       window_size: pagesize,
       gz: true,
-    }) : ((pagesize) ? fromurl + '?' + new URLSearchParams({
+    } : ((pagesize) ? {
       window_start: pagestart,
       window_size: pagesize,
       listall: ((this.params.listall) ? this.params.listall : false)
-    }) : ((this.params.listall) ? fromurl + '?' + new URLSearchParams({
+    } : ((this.params.listall) ? {
       listall: ((this.params.listall) ? this.params.listall : false)
-    }) : fromurl));
-    if (this.params.fromid) from += '/' + this.params.fromid;
+    } : {}));
+    const queryparams = new URLSearchParams(window.location.search);
+    const querykeys = this.cellidname + 's';
+    if (querykeys.length) {
+      for (const entry of queryparams.entries()) {
+        if (querykeys.indexOf(entry[0]) >= 0) query[entry[0]] = entry[1];
+      }
+    }
+    if (Object.keys(query).length) from += '?' + new URLSearchParams(query);
     this.dt = Date.now();
-
     fetch(from, fetchSettings()).then(response => {
       if (response.ok) return response.json();
       else return Promise.reject(response);
