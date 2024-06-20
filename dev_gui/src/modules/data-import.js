@@ -699,7 +699,6 @@ export class DataImport {
       selectors.forEach(selector => {
         selector.disabled = false;
         const sel = selector.closest('tr').querySelector('.' + css.selected);
-        console.log('sel' + css.selected, sel)
         if (sel) sel.classList.remove(css.selected);
       });
     });

@@ -369,7 +369,7 @@ export class AlertBox {
   removeItemMessage(message) {
     // message {type:, parent:  ,content:null}
     if (this.allowedtypes.indexOf(message.type) < 0) return;
-    el = this.realTarget(message.parent);
+    const el = this.realTarget(message.parent);
     if (el === null || !el.dataset[message.type]) return;
     if (message.content !== null) {
       message.content = (this.i18nmessages[message.content]) ? this.i18nmessages[message.content] : message.content;
