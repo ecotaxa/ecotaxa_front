@@ -19,6 +19,7 @@ from to_back.ecotaxa_cli_py import (
     UserModelWithRights,
     ApiException,
 )
+from appli.gui.commontools import is_partial_request
 from appli.security_on_backend import gui_roles_accepted
 from markupsafe import Markup
 
@@ -52,10 +53,12 @@ def gui_admin():
     )
 
 
-def _users_list_api(listall: bool = False, filt: dict = None) -> list:
+def _users_list_api(ids: str = None, filt: dict = None) -> list:
     import requests
 
     payload = dict({"summary": True})
+    if ids != None:
+        payload.update({"ids": ids})
     users = list([])
     with ApiClient(UsersApi, request) as apiusr:
         url = (
@@ -80,8 +83,8 @@ def _users_list(listall: bool = False, filt: dict = None) -> List[UserModelWithR
     return users
 
 
-def allusers_list():
-    users = _users_list_api()
+def allusers_list(ids: str = None):
+    users = _users_list_api(ids)
     from appli.gui.admin.users_list_interface_json import (
         user_table_columns,
         render_for_js,
@@ -100,14 +103,14 @@ def allusers_list():
 @app.route("/gui/admin/userslist/", methods=["GET"])
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
-def gui_userlist(listall: bool = False) -> str:
-
+def gui_userlist() -> str:
+    ids = gvg("ids", None)
     # gzip not really necessary - jsonifiy with separators
     from flask import make_response
     import json
 
     gz = gvg("gzip")
-    content = json.dumps(allusers_list(), separators=[",", ":"]).encode("utf-8")
+    content = json.dumps(allusers_list(ids), separators=[",", ":"]).encode("utf-8")
 
     encoding = "utf-8"
     if gz:
@@ -128,25 +131,19 @@ def gui_userlist(listall: bool = False) -> str:
 @app.route("/gui/admin/users", methods=["GET"])
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
-def gui_users_list_page(
-    listall: bool = False,
-    partial: bool = False,
-) -> str:
-
+def gui_users_list_page() -> str:
     if not current_user.is_authenticated:
         from appli.gui.staticlistes import py_user
 
         raise Forbidden(py_user["notauthorized"])
+    ids = gvg("ids", "")
+    partial = is_partial_request(request)
     if partial == True:
         template = "v2/admin/_userslistcontainer.html"
     else:
         template = "v2/admin/users.html"
 
-    return render_template(
-        template,
-        listall=listall,
-        partial=partial,
-    )
+    return render_template(template, partial=partial, ids=ids)
 
 
 @app.route(
@@ -179,8 +176,7 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
     ) = get_user_constants(request)
-
-    if request.method == "GET" and status_name != "active":
+    if request.method == "GET" and status_name != ApiUserStatus["active"]:
         user = api_get_user(usrid)
         if status_name != None and status_name in ApiUserStatus.keys():
             user.status = ApiUserStatus[status_name]
@@ -191,7 +187,8 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
 
     reason = gvp("status_admin_comment", None)
 
-    status = int(gvp("status", 1))
+    status = int(gvp("status"))
+
     response = api_user_activate(usrid, status, reason=reason)
     if response[0] == 0:
         type = "success"
@@ -200,14 +197,8 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
 
     message = "User " + str(usrid) + " " + response[1]
     flash(message, type)
-    # always return to user profile
-    return redirect(url_for("gui_user_activate", usrid=usrid, status_name=status_name))
-    # return redirect(url_for("gui_users_list_page"))
-
-    return render_template(
-        "./v2/admin/users.html",
-        isadmin=current_user.is_admin == True,
-    )
+    # show only user infos
+    return redirect(url_for("gui_users_list_page", ids=usrid))
 
 
 @app.route("/gui/admin/users/create", methods=["GET", "POST"])
@@ -253,7 +244,7 @@ def gui_user_edit(usrid):
         reponse = user_edit(usrid, isfrom=True)
         if reponse[0] == 0:
             flash(reponse[1], "success")
-            return redirect(url_for("gui_user_edit", usrid=usrid))
+            return redirect(url_for("gui_users_list_page", ids=usrid))
         else:
             message = reponse[1]
             flash(message, "error")
