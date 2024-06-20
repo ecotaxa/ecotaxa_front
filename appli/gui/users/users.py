@@ -425,19 +425,20 @@ def user_account(
             message = py_user["profilesuccess"]["update"]
             if not isfrom:
                 if API_EMAIL_VERIFICATION != False:
-                    if api_user["email"] != currentemail and (
-                        current_user.is_anonymous or not current_user.active
-                    ):
-                        message = (
-                            message
-                            + " "
-                            + (
-                                py_user["statusnotauthorized"]["emailchanged"]
-                                + py_user["checkspam"]
+                    if current_user.is_anonymous or not current_user.active:
+                        if api_user["email"] != currentemail:
+                            message = (
+                                message
+                                + " "
+                                + (
+                                    py_user["statusnotauthorized"]["emailchanged"]
+                                    + py_user["checkspam"]
+                                )
                             )
-                        )
-                    elif API_ACCOUNT_VALIDATION != False:
-                        message = message + " " + py_user["statusnotauthorized"]["01"]
+                        else:
+                            message = (
+                                message + " " + py_user["statusnotauthorized"]["01"]
+                            )
                     else:
                         # should not comme here
                         pass
