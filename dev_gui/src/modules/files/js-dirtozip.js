@@ -20,7 +20,7 @@ const already_compressed = new Set([
 ]);
 const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
 let instance = null;
-const MAXSIZE = 4294967296; //1073741824; //4294967296; //1073741824; ////maxfilesize: 1073741824,
+const MAXSIZE = 2147483648; //3221225472; // 1073741824; //1073741824; //4294967296; //1073741824; ////maxfilesize: 1073741824,
 export class JsDirToZip {
   _events = {};
   eventnames = {
@@ -55,7 +55,7 @@ export class JsDirToZip {
     if (instance) return instance;
     const defaultOptions = {
       uploadurl: '/gui/files/upload',
-      largefile: 4294967296, // 4194304,1073741824
+      largefile: 2147483648, //1073741824, //4294967296, // 4194304,
       accept: accept.split(',')
     }
     this.options = { ...defaultOptions,
@@ -68,9 +68,8 @@ export class JsDirToZip {
     return instance;
   }
   init() {
-    add_custom_events(this);
 
-    this.initStorage();
+    add_custom_events(this);
     this.reset();
     this.on(this.eventnames.ready, (e) => {
       if (!e.bigfile && !e.part) {
@@ -88,7 +87,6 @@ export class JsDirToZip {
     this.sizetozip = 0;
     this.part = 0;
     this.continue = null;
-    console.log(' dirzip reset')
     this.counter = {
       scan: 0,
       zip: 0,
@@ -100,7 +98,7 @@ export class JsDirToZip {
     const self = this;
     this.pos = 0;
     this.sizetozip = 0;
-    console.log('==================newzip')
+    console.log('==================newzip');
     this.zip = new Zip((error, chunk, final) => {
       if (error) {
         console.log('error', error);
@@ -196,6 +194,7 @@ export class JsDirToZip {
   async createLocalStream(name, accept = {
     'application/zip': ['.zip'],
   }) {
+    await this.cleanStorage();
     const root = await navigator.storage.getDirectory();
     const opts = {
       types: [{
@@ -304,7 +303,6 @@ export class JsDirToZip {
         size: file.size
       });
       let zipname = file.name.split(ext);
-      console.log("zipnamze ", zipname)
       zipname.pop();
       zipname = zipname.join(ext) + 'gz';
       const {
@@ -438,9 +436,10 @@ export class JsDirToZip {
   }
 
   onError() {
-    this.cleanStorage();
-    this.emit(this.eventnames.error, {
-      name: "reload"
+    this.cleanStorage().then(() => {
+      this.emit(this.eventnames.error, {
+        name: "reload"
+      });
     });
   }
   async searchStorage(search) {
@@ -454,13 +453,13 @@ export class JsDirToZip {
     return false;
   }
   async cleanStorage(entry = null) {
-    return;
     entry = (entry) ? entry : await navigator.storage.getDirectory();
     for await (const [key, value] of entry.entries()) {
       try {
         await entry.removeEntry(key);
+        console.log(' Success remove storage ', key);
       } catch (error) {
-        console.log(' remove storage ' + key, error);
+        console.log(' error remove storage ' + key, error);
       }
     }
 

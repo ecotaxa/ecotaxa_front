@@ -41,6 +41,7 @@ export class JsMyFiles {
     error: 'error',
   };
   rejected = [];
+
   constructor(container, options = {}) {
     if (!container.jsmyfiles) {
       container = (container instanceof HTMLElement) ? container : document.querySelector(container);
@@ -240,10 +241,10 @@ export class JsMyFiles {
   }
 
   addDropzone() { //
+    this.uploadentry = null;
     this.dropzone = create_box('div', {
       id: this.options.display.dropzone
     });
-
     const input = (this.haspicker) ? null : create_box('input', {
       type: "file",
       name: this.options.selectors.uploadfile,
@@ -339,7 +340,7 @@ export class JsMyFiles {
     });
     this.jsDirList.on(this.jsDirList.eventnames.action, (e) => {
       if (e.detail.action === "drop") this.handleDrop(e.detail.event);
-      console.log('action not managed ' + e.detail.action, e.detail)
+      else console.log('action not managed ' + e.detail.action, e.detail)
     });
     this.activentry.label.dispatchEvent(new Event('click'));
   }
@@ -396,6 +397,7 @@ export class JsMyFiles {
 
   //  drag&drop
   async handleDrop(e) {
+    if (this.uploadentry !== null) return;
     this.uploadentry = this.activentry;
     let dataTransfer;
     if (e.dataTransfer) {
@@ -437,6 +439,8 @@ export class JsMyFiles {
   }
 
   addUploadDialog() {
+    console.log(' uploadentry ', this.uploadentry)
+    if (this.uploadentry !== null) return;
     if (this.options.controls.scan) {
       this.enableDropzone(true);
       this.attachDropzone();
@@ -569,9 +573,6 @@ export class JsMyFiles {
     btn.removeAttribute("disabled");
     const part = (opts && opts.part) ? opts.part : false;
     const bigfile = (opts && opts.bigfile) ? opts.bigfile : false;
-    console.log('opts', opts);
-    console.log('activentry', this.activentry)
-    console.log('uploadentry', this.uploadentry)
     const filepath = (opts && opts.path) ? opts.path : this.uploadentry.getCurrentDirPath();
     switch (action) {
       case this.eventnames.ready:
@@ -645,6 +646,7 @@ export class JsMyFiles {
           bigfile: (target !== 'zip')
         });
         btn.click();
+        this.uploadentry = null;
         break;
     }
     if (btn.dataset.message) btn.classList.remove(css.hide);
