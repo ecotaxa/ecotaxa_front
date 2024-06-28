@@ -498,6 +498,7 @@ class EntryAction extends Entry {
     const entry = this;
     const label = entry.getLabelElement();
     label.addEventListener(evt, (e) => {
+      const oldname = label.textContent;
       if (this.type === this.options.type.trash) {
         e.preventDefault();
         return;
@@ -506,22 +507,24 @@ class EntryAction extends Entry {
         if (e.key === 'Enter') {
           e.preventDefault();
           label.contentEditable = false;
-          entry.container.draggable = (this.options.specialdirs.indexOf(entry.type) < 0);
-          const callback = (txt) => {
-            label.classList.remove(entry.options.css.editable);
-            if (txt === "") window.alertbox.addItemMessage(label, {
-              type: 'error',
-              content: window.alertbox.i18nmessages.exists,
-              duration: 2000
-            });
-            else txt = txt.split(dirseparator).pop();
-            label.removeEventListener('keydown', send_rename);
-            label.textContent = txt;
-            if (entry.type === entry.options.type.directory) entry.dirControls();
-            delete entry.container.dataset.action;
+          label.classList.remove(entry.options.css.editable);
+          if (oldname !== label.textContent) {
+            const callback = (txt) => {
+              if (txt === "") window.alertbox.addItemMessage(label, {
+                type: 'error',
+                content: window.alertbox.i18nmessages.exists,
+                duration: 2000
+              });
+              else txt = txt.split(dirseparator).pop();
+              label.removeEventListener('keydown', send_rename);
+              label.textContent = txt;
+              if (entry.type === entry.options.type.directory) entry.dirControls();
+              delete entry.container.dataset.action;
+            }
+            const action = (entry.container.dataset.action) ? entry.container.dataset.action : entry.options.actions.rename;
+            await entry.fetchAction(action, callback);
           }
-          const action = (entry.container.dataset.action) ? entry.container.dataset.action : entry.options.actions.rename;
-          await entry.fetchAction(action, callback);
+          entry.container.draggable = (this.options.specialdirs.indexOf(entry.type) < 0);
         }
       }
       label.contentEditable = true;

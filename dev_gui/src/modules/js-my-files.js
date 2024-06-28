@@ -6,7 +6,8 @@ import {
   create_box,
   format_bytes,
   generate_uuid,
-  dirseparator
+  dirseparator,
+  html_spinner
 } from '../modules/utils.js';
 import {
   css,
@@ -41,6 +42,7 @@ export class JsMyFiles {
     error: 'error',
   };
   rejected = [];
+  errorfile = [];
 
   constructor(container, options = {}) {
     if (!container.jsmyfiles) {
@@ -69,6 +71,11 @@ export class JsMyFiles {
           reject: {
             display: {
               counter: 'counterrejected'
+            }
+          },
+          errorfile: {
+            display: {
+              counter: 'countererrorfile'
             }
           }
         },
@@ -439,7 +446,6 @@ export class JsMyFiles {
   }
 
   addUploadDialog() {
-    console.log(' uploadentry ', this.uploadentry)
     if (this.uploadentry !== null) return;
     if (this.options.controls.scan) {
       this.enableDropzone(true);
@@ -515,7 +521,9 @@ export class JsMyFiles {
         counterzipped: ' compressed',
         sizezipped: ' compressed',
         counterrejected: ' rejected',
+        countererrorfile: ' error',
       }
+      const displaylist = ['counterrejected', 'countererrorfile'];
       let elinsert = boxcounters.querySelector('.' + cl);
       if (!elinsert) elinsert = create_box('div', {
         class: cl
@@ -527,15 +535,15 @@ export class JsMyFiles {
         }, elinsert, ` / `);
         if (txt.hasOwnProperty(val)) {
           // add a link to display the rejected files list
-          if (val === 'counterrejected') {
+          if (displaylist.indexOf(val) >= 0) {
             const link = create_box('a', {
               text: txt[val],
               class: 'text-error',
-              title: `Click to display the list of rejected files`
+              title: `Click to display the list of ${txt[val]} files`
             }, elinsert);
             link.addEventListener('click', (e) => {
               e.preventDefault();
-              this.displayReject(link);
+              this.displayExcept(link, val);
             });
           } else elinsert.append(document.createTextNode(txt[val]));
         }
@@ -550,11 +558,17 @@ export class JsMyFiles {
       }
     };
   }
-  displayReject(el) {
+  displayExcept(el, type) {
+    type = type.replace('counter', '');
+    const textval = {
+      rejected: ` type rejected`,
+      errorfile: ` in error`
+    };
+    if (Object.keys(textval).indexOf(type) < 0) return;
     const message = {
       type: window.alertbox.alertconfig.types.warning,
       parent: el,
-      content: `Files ${this.rejected.join('<br>')} type rejected`,
+      content: `Files ${this.rejected.join('<br>')} ${textval[type]}`,
     };
     if (el.dataset.hasmessage) {
       window.alertbox.removeItemMessage(message);
@@ -564,26 +578,36 @@ export class JsMyFiles {
       window.alertbox.addItemMessage(message);
     }
   }
+
   showControl(action, opts) {
-    const target = ((opts.hasOwnProperty('bigfile') && opts.bigfile) ? 'zipped' : 'zip');
+    const part = (opts && opts.part) ? opts.part : false;
+    const bigfile = (opts && opts.bigfile) ? opts.bigfile : false;
+    const filepath = (opts && opts.path) ? opts.path : this.uploadentry.getCurrentDirPath();
+    const target = ((opts.hasOwnProperty('bigfile') && bigfile !== false) ? 'zipped' : 'zip');
     let message, text = null;
     // 'zip' ---only btn for zip actions for the moment
     const btn = this[this.options.btnprefix + 'zip' + target];
     if (!btn) return;
-    btn.removeAttribute("disabled");
-    const part = (opts && opts.part) ? opts.part : false;
-    const bigfile = (opts && opts.bigfile) ? opts.bigfile : false;
-    const filepath = (opts && opts.path) ? opts.path : this.uploadentry.getCurrentDirPath();
+    btn.disabled = false;
     switch (action) {
       case this.eventnames.ready:
-        this.resetCounters();
-        this.uploadentry.list();
-        if (btn.dataset.message) delete btn.dataset.message;
-        btn.classList.add(css.hide);
+        if (this.jsDirToZip.isActive() === false) {
+          this.resetCounters();
+          this.uploadentry.list();
+          this.uploadentry = null;
+        }
+        console.log('btn --- ', btn)
+        message = null;
         break;
       case this.eventnames.follow:
-        if (btn.dataset.message) delete btn.dataset.message;
-        btn.classList.add(css.hide);
+        console.log('opts FOLLOW', opts)
+        if (bigfile) {
+          console.log(' follow', opts);
+          message = {};
+          btn.textContent = `Wait for next operation`;
+          btn.disabled = true;
+        } else message = null;
+
         break;
       case this.eventnames.endzip:
         if (!part) this.showComplete();
@@ -593,11 +617,11 @@ export class JsMyFiles {
           name: this.eventnames.endzip,
           part: part,
           filepath: filepath,
-          bigfile: (target !== 'zip') ? bigfile : false,
+          bigfile: bigfile,
         };
-        btn.dataset.message = JSON.stringify(message);
+
         break;
-      case this.eventnames.complete:
+      case this.eventnames.bigfile:
         console.log('complete', opts)
         if (bigfile && bigfile !== '') {
           btn.textContent = `Upload big File separately`;
@@ -607,8 +631,8 @@ export class JsMyFiles {
             part: part,
             bigfile: bigfile
           };
-          btn.dataset.message = JSON.stringify(message);
-          console.log('bigfile', message)
+
+          console.log('bigfile ----', message)
         }
         break;
       case this.eventnames.sendfile:
@@ -625,31 +649,55 @@ export class JsMyFiles {
         break;
       case this.eventnames.pending:
         btn.textContent = ` Pending ` + ((target !== 'zip') ? ' big file' : '');
-        btn.dataset.message = '';
-        btn.setAttribute("disabled", true);
+        btn.disabled = true;
         break;
       case this.eventnames.gzip:
-        text = `compressing separately big file :${(opts && opts.bigfile)?filepath:``} ${(opts && opts.size)?opts.size:``}`;
+        console.log('eventgzipp', opts)
+        text = `compressing big file :${(opts && opts.bigfile)?filepath :``} ${(opts && opts.size)?format_bytes(opts.size):``}`;
         btn.textContent = text;
-        btn.setAttribute("disabled", true);
-        btn.dataset.message = JSON.stringify({
-          name: this.eventnames.endzip,
-          path: filepath,
-          part: part,
-          bigfile: bigfile
-        });
+        btn.disabled = true;
+        message = {};
         break;
       case this.eventnames.terminate:
         console.log('terminate ' + ((target !== 'zip') ? 'bigfile' : ''));
         btn.dataset.message = JSON.stringify({
           name: 'ready',
-          bigfile: (target !== 'zip')
+          bigfile: bigfile,
+          part: part,
+          path: filepath
         });
         btn.click();
-        this.uploadentry = null;
+        return;
+        break;
+      case this.eventnames.errorfile:
+        this.errorfile.push(filepath);
+      case this.eventnames.error:
+        btn.textContent = (opts.text) ? opts.text : `Error`;
+        message = {
+          name: opts.name,
+          path: filepath,
+          part: part,
+          bigfile: bigfile
+        };
+        break;
+      default:
+        console.log('??????????????????????????????????????????????----default control ' + action, opts);
+        return;
         break;
     }
-    if (btn.dataset.message) btn.classList.remove(css.hide);
+    console.log(' btn.message', message);
+    if (message === null) {
+      delete btn.dataset.message;
+      btn.classList.add(css.hide)
+    } else {
+      console.log(' btn is ', btn)
+      btn.dataset.message = JSON.stringify(message);
+      btn.classList.remove(css.hide);
+      if (btn.disabled) {
+        btn.classList.add(css.console);
+        btn.insertAdjacentHTML('afterbegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
+      } else btn.classList.remove(css.console);
+    };
   }
 
   getBtn(item, target) {

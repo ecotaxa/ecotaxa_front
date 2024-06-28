@@ -244,6 +244,7 @@ button.submitslider {@apply min-w-[200px]}
 /* my_files list*/
 li:not(.on) ul.entries {@apply hidden}
 .console {@apply rounded-sm border border-mainblue-100 bg-mainblue-50 text-stone-900 text-sm p-4 my-2}
+.button.console {@apply py-2 text-base rounded border-none bg-transparent}
 .counters, .sizes {@apply p-2 rounded-sm text-sm border-mainblue-200 bg-mainblue-100 my-2 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
 /*js upload dropzone*/
