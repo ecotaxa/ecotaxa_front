@@ -1,20 +1,33 @@
 {% extends "./v2/layout.html" %}
-{% from "./v2/macros/macros.html" import modal with context %}
+{% from "./v2/macros/macros.html" import modal, inputdict with context %}
 {% block body %}
     <div class="container mx-auto">
       {% set data = {'file':'_help_job_import'} %}
       {{ modal(id='help-job-import',modal_title= _("How to import data"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
       <form class="js js-submit js-import" method="post" action=""  id="formupload" data-displayselection="dirlist" data-showfiles="{{_('Select from My Files')}}" enctype="multipart/form-data" data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}" onsubmit="return false" >
-        <div class="flex flex-row">
-            <div class="form-box md:basis-1/3"><label>{{_('Select a file or a directory to import')}}<i data-for="help_upload_file" data-request="help"></i></label>
+        <div class="flex flex-col w-full">
+      <details open><summary class=" rounded text-lg font-black uppercase rounded-sm bg-secondblue-50 border border-secondblue-100">{{_('Select from my files')}}</summary>
+            <div class="form-box"><label>{{_('Select a file or a directory to import')}}<i data-for="help_upload_file" data-request="help"></i></label>
                {%include("./v2/my_files/_list.html")%}
-            </div>
-<div class="form-box md:basis-1/3"><div><label for="file_to_load">{{_('File to import')}}<i data-for="help_import_options" data-request="help"></i></label><ul id="results" class="displayresults"></ul><input type="hidden" id="file_to_load" name="file_to_load" class="form-input" value="{{ file_to_load }}" required >{%include('/v2/jobs/_to_import_summary.html')%}
-<div class="form-box"  id="import_options">{%include('/v2/jobs/_import_options.html')%}</div>
-</div>
+               </div><div class="form-box"><div><label for="file_to_load">{{_('File to import')}}<i data-for="help_import_options" data-request="help"></i></label><ul id="results" class="displayresults"></ul><input type="hidden" id="file_to_load" name="file_to_load" class="form-input" value="{{ file_to_load }}" required >{%include('/v2/jobs/_to_import_summary.html')%}
+                    </div></details>
+               <details><!-- current import  -->
+     <!--////--><summary  class="rounded text-lg font-black uppercase rounded-sm bg-secondblue-50 border border-secondblue-100">{{_('Or choose a folder or zip file on the server')}}</summary>
+         <div class="form-box">
+           <label>{{_('Choose a folder or zip file on the server')}}<i data-for="help_import_server" data-request="help"></i></label>
+           <div class="flex flex-row">
+             <input type="text" class="form-input" id="ServerPath" name="ServerPath"
+                    value="{{ ServerPath }}">
+             <button class="btn w-12" type="button" data-toggle="modal" data-target="#FileModal">
+               <i class="icon icon-folder-open" aria-hidden="true"></i></button>
+           </div>
+           <p class="blockquote">{{_('Contact the')}} <a href="mailto:{{prjmanagermailto}}" class="text-secondblue-600">{{_('project manager')}}</a> {{_('to know where and how to upload your data.')}}
+             {{_('Once the import is complete, all data folders/files can be safely erased on the server.')}}</p>
+         </div></details>
+        <div class="form-box flex flex-row"  id="import_options">{%include('/v2/jobs/_import_options.html')%}</div>
+          <div class="form-box " id="import_options">{%include('/v2/jobs/_import_advanced_options.html')%}</div>
+               </div>
 
-</div>
-          </div>  <div class="form-box md:basis-1/3" id="import_options">{%include('/v2/jobs/_import_advanced_options.html')%}</div>
 <div class="flex justify-end">
         <div class="form-box ">
             <input type="hidden" name="starttask" value="Y">
