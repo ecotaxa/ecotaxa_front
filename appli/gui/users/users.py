@@ -208,7 +208,7 @@ def user_create(
             redir = url_for("gui_register") + "/" + token
             err, action = _get_value_from_token(token, "action", age=PROFILE_TOKEN_AGE)
             if str(action or "") != "update":
-                action = create
+                action = "create"
             message = resp[1] + py_user["profileerror"][action]
             type = "error"
     if partial:
