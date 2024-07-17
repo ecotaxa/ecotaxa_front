@@ -250,8 +250,8 @@ li:not(.on) ul.entries {@apply hidden}
 /*js upload dropzone*/
 #dropzone {@apply w-auto ml-4 inline-block small-caps font-light}
 #dropzone .trigger {@apply  before:mr-1 small-caps shadow-sm py-0 mr-2 hover:shadow-none w-6 hover:w-auto overflow-x-hidden }
-#dropzone .trigger[data-type="directory"]  {@apply before:icon before:icon-arrow-up-tray-sm}
-#dropzone .trigger[data-type="file"]  {@apply before:icon before:icon-arrow-up-square-sm}
+#dropzone .trigger[data-type="directory"]  {@apply before:icon before:icon-arrow-up-tray}
+#dropzone .trigger[data-type="file"]  {@apply before:icon before:icon-arrow-up-square}
 #dropzone span:not(.trigger) {@apply ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
 .displayresults {@apply  border border-stone-200 rounded  text-base font-normal w-full h-auto min-h-[2rem] px-2 py-1 focus:bg-success-50}
 .displayresults.active {@apply  bg-success-50}
@@ -277,11 +277,12 @@ li:not(.on) ul.entries {@apply hidden}
 .entryF.doc {@apply  before:icon-document-sm}
 .entryD, .entryR {@apply text-base font-normal before:icon-folder-sm}
 .entryT {@apply text-base font-normal before:icon-trash-sm}
+.on > .entryT {@apply before:icon-trash before:icon-sm}
 .entryD, .entryF, .entryR, .entryT  {@apply align-text-bottom mb-0.5 mr-0.5}
 .on > .entryD, .on > .entryR {@apply font-semibold before:icon-folder-open}
 .on > .entryT {@apply font-semibold}
 .dirlist .wait > .entryD, .dirlist .wait > .entryT, .dirlist .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
-.entries .editable {@apply font-normal border border-stone-300 ellipsis min-w-[3rem]}
+.entries .editable {@apply font-normal border border-x-0 border-stone-300 ellipsis min-w-[3rem] outline-transparent outline-none}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right}
 .entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5   hover:drop-shadow-sm bg-transparent hover:bg-white  cursor-pointer}
 /* form with tabs */
@@ -398,7 +399,7 @@ content: url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg' 
 .icon-cancel {content:url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg'  class='fill-current' viewBox='0 0 20 20' fill='currentColor'><path fill-rule='evenodd' d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z' clip-rule='evenodd' /></svg>")
 }
 .icon-trash {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg"  class="fill-current"  viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>')
+content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>')
 }
 .icon-trash-sm {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" /></svg>')
@@ -609,6 +610,9 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 }
 .icon-arrow-up-tray-sm {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="M9.25 13.25a.75.75 0 0 0 1.5 0V4.636l2.955 3.129a.75.75 0 0 0 1.09-1.03l-4.25-4.5a.75.75 0 0 0-1.09 0l-4.25 4.5a.75.75 0 1 0 1.09 1.03L9.25 4.636v8.614Z" /><path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" /></svg>');
+}
+.icon-arrow-up-square {
+  content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" /></svg>');
 }
 .icon-arrow-up-square-sm {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M13.75 7h-3V3.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0L6.2 4.74a.75.75 0 0 0 1.1 1.02l1.95-2.1V7h-3A2.25 2.25 0 0 0 4 9.25v7.5A2.25 2.25 0 0 0 6.25 19h7.5A2.25 2.25 0 0 0 16 16.75v-7.5A2.25 2.25 0 0 0 13.75 7Zm-3 0h-1.5v5.25a.75.75 0 0 0 1.5 0V7Z" clip-rule="evenodd" /></svg>');

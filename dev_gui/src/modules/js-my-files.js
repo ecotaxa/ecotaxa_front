@@ -154,8 +154,8 @@ export class JsMyFiles {
         this.eventnames[key] = this.jsDirToZip.eventnames[key];
         this.jsDirToZip.on(key, (e) => {
           switch (key) {
-            case this.eventnames.counter:
-              self.fileCounter(e);
+            case this.eventnames.clientcounter:
+              this.fileCounter(e);
               break;
             case this.eventnames.reject:
               this.rejected.push(e.path);
@@ -164,9 +164,10 @@ export class JsMyFiles {
                 path: e.path,
               });
               break;
+            case this.eventnames.follow:
             case this.eventnames.complete:
-              if (!e || !e.name) {
-                console.log('no emit complete name');
+              if (!e || !e.hasOwnProperty("name") || e.name === "") {
+                console.log('no emit complete name' + key, e);
                 return;
               }
               self.showControl(e.name, e);
@@ -196,13 +197,6 @@ export class JsMyFiles {
                   console.log('message', e);
                   break;
               }
-              break;
-            case this.eventnames.terminate:
-              console.log('terminate', e)
-              break;
-            default:
-              console.log('showcontrol ' + key, e)
-              self.showControl(key, e);
               break;
           }
         });
@@ -239,6 +233,7 @@ export class JsMyFiles {
     return this.jsDirToZip.scanHandle(dir, options);
   }
   async handleBrowse(e) {
+    if (!this.setUploadEntry()) return;
     this.initTimer();
     this.toggleCounters(true);
     if (!this.haspicker) e = e.target.files;
@@ -248,7 +243,6 @@ export class JsMyFiles {
   }
 
   addDropzone() { //
-    this.uploadentry = null;
     this.dropzone = create_box('div', {
       id: this.options.display.dropzone
     });
@@ -401,11 +395,14 @@ export class JsMyFiles {
       callback(pick);
     });
   }
-
-  //  drag&drop
-  async handleDrop(e) {
-    if (this.uploadentry !== null) return;
+  setUploadEntry() {
+    if (this.uploadentry) return false;
     this.uploadentry = this.activentry;
+    return true;
+  }
+  // drag&drop
+  async handleDrop(e) {
+    if (!this.setUploadEntry()) return;
     let dataTransfer;
     if (e.dataTransfer) {
       e.preventDefault();
@@ -446,7 +443,6 @@ export class JsMyFiles {
   }
 
   addUploadDialog() {
-    if (this.uploadentry !== null) return;
     if (this.options.controls.scan) {
       this.enableDropzone(true);
       this.attachDropzone();
@@ -470,7 +466,7 @@ export class JsMyFiles {
 
   fileCounter(e) {
     const counters = this.counters[e.name];
-    counters.counter += 1
+    counters.counter += 1;
     if (e.size !== null) counters.size += parseInt(e.size);
     counters.display.counter.textContent = counters.counter;
     if (counters.display.size) counters.display.size.textContent = format_bytes(counters.size);
@@ -481,16 +477,16 @@ export class JsMyFiles {
     const counters = this.counters[item];
     ['counter', 'size'].forEach(el => {
       if (counters.display[el]) {
-        this.counters[item][el] = 0;
+        counters[el] = 0;
         counters.display[el].textContent = 0;
       }
     });
-    this.toggleCounters(false);
   }
   resetCounters() {
     Object.keys(this.options.controls).forEach(key => {
       this.resetCounter(key);
-    })
+    });
+    this.toggleCounters(false);
   }
   toggleCounters(show = true) {
     const el = document.getElementById(this.options.display.progression);
@@ -509,9 +505,9 @@ export class JsMyFiles {
 
 
     let boxcounters = document.getElementById(this.options.display.progression);
+
     const itemopts = {
       display: {},
-
     };
     Object.entries(opts).forEach(([k, val]) => {
       const cl = k + 's';
@@ -557,6 +553,7 @@ export class JsMyFiles {
         [item]: itemopts
       }
     };
+
   }
   displayExcept(el, type) {
     type = type.replace('counter', '');
@@ -591,16 +588,14 @@ export class JsMyFiles {
     btn.disabled = false;
     switch (action) {
       case this.eventnames.ready:
-        if (this.jsDirToZip.isActive() === false) {
-          this.resetCounters();
+        this.resetCounters();
+        if (this.uploadentry) {
           this.uploadentry.list();
           this.uploadentry = null;
         }
-        console.log('btn --- ', btn)
         message = null;
         break;
       case this.eventnames.follow:
-        console.log('opts FOLLOW', opts)
         if (bigfile) {
           console.log(' follow', opts);
           message = {};
@@ -619,10 +614,8 @@ export class JsMyFiles {
           filepath: filepath,
           bigfile: bigfile,
         };
-
         break;
       case this.eventnames.bigfile:
-        console.log('complete', opts)
         if (bigfile && bigfile !== '') {
           btn.textContent = `Upload big File separately`;
           message = {
@@ -631,12 +624,9 @@ export class JsMyFiles {
             part: part,
             bigfile: bigfile
           };
-
-          console.log('bigfile ----', message)
         }
         break;
       case this.eventnames.sendfile:
-        console.log('opts sendfile', opts)
         message = {
           name: this.eventnames.sendfile,
           path: filepath,
@@ -650,22 +640,22 @@ export class JsMyFiles {
       case this.eventnames.pending:
         btn.textContent = ` Pending ` + ((target !== 'zip') ? ' big file' : '');
         btn.disabled = true;
+        message = {};
         break;
       case this.eventnames.gzip:
-        console.log('eventgzipp', opts)
         text = `compressing big file :${(opts && opts.bigfile)?filepath :``} ${(opts && opts.size)?format_bytes(opts.size):``}`;
         btn.textContent = text;
         btn.disabled = true;
         message = {};
         break;
       case this.eventnames.terminate:
-        console.log('terminate ' + ((target !== 'zip') ? 'bigfile' : ''));
         btn.dataset.message = JSON.stringify({
-          name: 'ready',
+          name: this.eventnames.init,
           bigfile: bigfile,
           part: part,
           path: filepath
         });
+        btn.classList.add(css.hide);
         btn.click();
         return;
         break;
@@ -679,18 +669,17 @@ export class JsMyFiles {
           part: part,
           bigfile: bigfile
         };
+        console.log('????????ERROR??????????????????????????????????????--- errorcontrol' + action, message);
         break;
       default:
         console.log('??????????????????????????????????????????????----default control ' + action, opts);
         return;
         break;
     }
-    console.log(' btn.message', message);
     if (message === null) {
       delete btn.dataset.message;
       btn.classList.add(css.hide)
     } else {
-      console.log(' btn is ', btn)
       btn.dataset.message = JSON.stringify(message);
       btn.classList.remove(css.hide);
       if (btn.disabled) {

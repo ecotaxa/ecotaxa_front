@@ -102,13 +102,13 @@ const defaultOptions = {
       create: {
         action: 'create',
         text: 'new folder',
-        icon: 'icon-folder-plus-sm',
+        icon: 'icon-folder-plus',
         typentries: ['D', 'R']
       },
       remove: {
         action: 'remove',
         text: 'delete',
-        icon: 'icon-trash-sm',
+        icon: 'icon-trash',
         typentries: ['D', 'F', 'X']
       },
       move: {
