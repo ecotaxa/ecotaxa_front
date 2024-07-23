@@ -245,30 +245,31 @@ button.submitslider {@apply min-w-[200px]}
 li:not(.on) ul.entries {@apply hidden}
 .console {@apply rounded-sm border border-mainblue-100 bg-mainblue-50 text-stone-900 text-sm p-4 my-2}
 .button.console {@apply py-2 text-base rounded border-none bg-transparent}
-.counters, .sizes {@apply p-2 rounded-sm text-sm border-mainblue-200 bg-mainblue-100 my-2 w-auto w-1/2 inline-block }
+.display-progression {@apply flex sm:flex-row border border-secondblue-100 drop-shadow-sm p-2 mb-2}
+.counters, .sizes {@apply p-2 rounded-sm text-sm  my-1 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
 /*js upload dropzone*/
 #dropzone {@apply w-auto ml-4 inline-block small-caps font-light}
-#dropzone .trigger {@apply  before:mr-1 small-caps shadow-sm py-0 mr-2 hover:shadow-none w-6 hover:w-auto overflow-x-hidden }
-#dropzone .trigger[data-type="directory"]  {@apply before:icon before:icon-arrow-up-tray}
-#dropzone .trigger[data-type="file"]  {@apply before:icon before:icon-arrow-up-square}
+#dropzone .trigger {@apply  before:mr-0 small-caps text-black bg-stone-50 py-0.5 px-1.5 mr-3 w-6 overflow-x-hidden rounded drop-shadow hover:bg-secondblue-200 hover:drop-shadow-none before:p-0.5 before:icon }
+#dropzone .trigger[data-type="directory"]  {@apply before:icon-arrow-up-tray }
+#dropzone .trigger[data-type="file"]  {@apply before:icon-arrow-up-square}
 #dropzone span:not(.trigger) {@apply ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
-.displayresults {@apply  border border-stone-200 rounded  text-base font-normal w-full h-auto min-h-[2rem] px-2 py-1 focus:bg-success-50}
-.displayresults.active {@apply  bg-success-50}
+.displayimport {@apply  border border-secondblue-200 rounded  text-base font-normal w-full h-auto min-h-24 px-2 py-1  hover:bg-secondblue-50}
+.displayimport.active {@apply  bg-success-50}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-50}
-.has-controls {@apply  border-b border-stone-200 w-auto font-bold bg-mainblue-50}
+.has-controls {@apply  border-b border-stone-200 font-bold bg-mainblue-50}
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
-.dirlist {@apply h-full }
-.dirlist [data-name] {@apply ml-4 relative py-0.5}
-.dirlist [data-name][data-type="R"] {@apply ml-0 }
+.dirlist {@apply h-full mt-2 }
+.dirlist [data-name] {@apply ml-4 py-0.5 relative}
+.dirlist [data-name][data-type="R"] , .dirlist [data-name][data-type="T"] {@apply ml-0 }
 .dirlist [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
 .dirlist [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
-.dirlist [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100}
+.dirlist [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
 .dirlist [data-name].droptarget.dragover {@apply hover:drop-shadow pb-4}
 .dirlist [data-name].dragover .entrycontrols , .dirlist [data-name].dragover #dropzone {@apply hide}
-.on {@apply  block sm:max-h-[50v]  overflow-y-hidden relative}
+.on {@apply  block sm:max-h-[50v]  overflow-y-hidden}
 .on > .entries  {@apply block  overflow-y-auto }
 .entryF {@apply text-sm font-light }
 .entries [data-name$=".tsv"] .entryF {@apply font-normal}
@@ -277,28 +278,29 @@ li:not(.on) ul.entries {@apply hidden}
 .entryF.doc {@apply  before:icon-document-sm}
 .entryD, .entryR {@apply text-base font-normal before:icon-folder-sm}
 .entryT {@apply text-base font-normal before:icon-trash-sm}
-.on > .entryT {@apply before:icon-trash before:icon-sm}
+.on > .entryT {@apply before:icon-trash}
 .entryD, .entryF, .entryR, .entryT  {@apply align-text-bottom mb-0.5 mr-0.5}
-.on > .entryD, .on > .entryR {@apply font-semibold before:icon-folder-open}
+.on > .entryD, .on > .entryR {@apply font-semibold before:icon-folder-open }
 .on > .entryT {@apply font-semibold}
 .dirlist .wait > .entryD, .dirlist .wait > .entryT, .dirlist .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
-.entries .editable {@apply font-normal border border-x-0 border-stone-300 ellipsis min-w-[3rem] outline-transparent outline-none}
-.entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right}
-.entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5   hover:drop-shadow-sm bg-transparent hover:bg-white  cursor-pointer}
+.entries .editable {@apply font-normal border border-stone-300 border-dashed ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
+.entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
+.entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5 bg-transparent hover:bg-white cursor-pointer  static}
+.intrash {@apply bg-danger-100}
+
 /* form with tabs */
 form.js-tabs {@apply transition-opacity duration-[1000] ease-in }
-form.js-tabs  .fieldset-wrapper {@apply relative }
-form.js-tabs fieldset {@apply mt-4}
-form.js-tabs .tab-control {@apply absolute top-0 left-0 -mt-6 md:-mt-4}
-form.js-tabs .tab {@apply md:w-full last:md:w-full h-0 bg-inherit }
-form.js-tabs fieldset.tab {@apply mr-4}
+form.js-tabs  .fieldset-wrapper {@apply relative block}
+form.js-tabs .tab-control {@apply absolute top-0 left-0 -mt-6 mb-0}
+form.js-tabs .tab {@apply md:w-full my-0 h-0 py-0 bg-inherit block}
+form.js-tabs fieldset.tab {@apply   mr-4  h-0 }
 form.js-tabs .tab.active {@apply h-auto }
 form.js-tabs legend.tab-control {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
-form.js-tabs .tab.active legend.tab-control {@apply  border-stone-600 text-stone-900  opacity-100 }
-form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2 }
-form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4 shadow-none  }
+form.js-tabs .tab.active legend.tab-control {@apply  border-stone-600 text-stone-900  opacity-100  }
+form.js-tabs .tab.active .tab-content {@apply mt-10 -ml-6 mb-0  h-auto px-2}
+form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4  }
 form.js-tabs .tab.tab-one.active legend.tab-control {@apply bg-white text-stone-800 font-bold border  border-stone-100 border-b-white z-10 }
-form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-7 px-4 -ml-6}
+form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-5 px-4 -ml-6 mb-0}
 form.js-tabs .tab.err.active legend.tab-control {@apply border-danger-400}
 form.js-tabs .tab.err legend.tab-control {@apply before:text-xs  before:content-["*"] before:mr-0.5 before:border-none before:align-baseline before:text-danger-400 text-danger-400 }
 /* tabs expand shrink */
@@ -323,9 +325,10 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
 .up.scrollspy {@apply opacity-100}
 .pageup {@apply bottom-16}
 /*tooltips */
-[data-title]:hover:after , [data-title]:active:after {@apply absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-50 content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
+/*[data-title]:hover:after , [data-title]:active:after, .tip {@apply  absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-100 content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
+*/
+.tip {@apply  absolute top-0 left-0   whitespace-nowrap w-auto block z-100 rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
 }
-
 @layer utilities {
  /**********************************************/
 /* all icons                                 */
@@ -477,7 +480,8 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg"  
 }
 .icon-arrow-down-on-square {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="M13.75 7h-3v5.296l1.943-2.048a.75.75 0 011.114 1.004l-3.25 3.5a.75.75 0 01-1.114 0l-3.25-3.5a.75.75 0 111.114-1.004l1.943 2.048V7h1.5V1.75a.75.75 0 00-1.5 0V7h-3A2.25 2.25 0 004 9.25v7.5A2.25 2.25 0 006.25 19h7.5A2.25 2.25 0 0016 16.75v-7.5A2.25 2.25 0 0013.75 7z" /></svg>');
 }
-
+.icon-arrow-down-on-square-stack {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" /></svg>');
+}
 .icon-chart-bar-square {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 002 4.25v11.5A2.25 2.25 0 004.25 18h11.5A2.25 2.25 0 0018 15.75V4.25A2.25 2.25 0 0015.75 2H4.25zM15 5.75a.75.75 0 00-1.5 0v8.5a.75.75 0 001.5 0v-8.5zm-8.5 6a.75.75 0 00-1.5 0v2.5a.75.75 0 001.5 0v-2.5zM8.584 9a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5a.75.75 0 01.75-.75zm3.58-1.25a.75.75 0 00-1.5 0v6.5a.75.75 0 001.5 0v-6.5z" clip-rule="evenodd" /></svg>');
 
 }
@@ -957,12 +961,10 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alert.info.inverse i {@apply  icon-info-sm }
 .alert.danger:not(.inverse) i , .alert.error:not(.inverse) i {@apply  icon-fire}
 .alert.danger.inverse i , .alert.error.inverse i {@apply icon-fire-sm}
-
-
 .hidevscroll {@apply max-h-screen overflow-y-hidden after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-6 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-40 content-none}
 
 /*******************************/
-/* alertmessages                */
+/* alertmessages               */
 /*******************************/
 #site-alertmessages {@apply max-w-0 fixed max-h-0  z-80 overflow-visible bottom-0 right-[360px] md:right-[480px] sm:top-0 }
 .alertmessages-list {@apply  mt-auto mb-0 sm:mt-0 sm:mb-auto relative h-auto max-h-full z-[120] w-[360px] max-w-[360px] md:w-[480px] md:max-w-[480px]}

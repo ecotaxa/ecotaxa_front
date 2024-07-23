@@ -52,7 +52,7 @@ export class JsTabs {
     if (tabcontents.length === 0) tabcontents = [tab];
     tabcontents.forEach(tabcontent => {
       if (show === true) tabcontent.classList.remove(css.hide);
-      else if (!tab.classList.contains('active')) tabcontent.classList.add(css.hide);
+      else if (!tab.classList.contains(css.active)) tabcontent.classList.add(css.hide);
       if (this.toggledisable === true) {
         tabcontent.querySelectorAll('input, select, button, textarea').forEach(el => {
           if (show) {

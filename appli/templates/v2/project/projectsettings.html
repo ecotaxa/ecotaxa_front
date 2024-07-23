@@ -41,10 +41,10 @@
     {% endif %}
     {{ pick_from_other(True,key='settings',modal_title=_('Pick all settings from other project')) }}
     <div class="fieldset-wrapper">
-      <div class="w-full tab">
-        <fieldset class="w-full md:flex ">
+        <fieldset class="w-full tab ">
           <legend class="tab-control">{{_('project') + ' ' + target_proj.id|string() if target_proj.projid else _('new project')}}</legend>
-        <div class=" w-full md:w-1/2 md:pr-6 tab-content">
+          <div class=" md:flex md:flex-row tab-content">
+        <div class=" w-full md:w-1/2 ">
           <div class="form-box">
             <label for="title" data-required="{{_('a title is required')}}">{{_('Title')}}</label>
             <input type="text" id="title" name="title" class="form-input" value="{{ target_proj.title }}" required data-unique placeholder="project title"></div>
@@ -56,10 +56,9 @@
           <div class="form-box">
             <label for="comments">{{ _('Comments')}}<i data-for="help_comments" data-request="help"></i></label>
             <textarea id="comments" name="comments" class="form-textarea" placeholder="project comments" rows="4">{{ target_proj.comments|default('',true) }}</textarea>
-
           </div>
         </div>
-        <div class=" w-full md:w-1/2  md:pr-6 tab-content">
+        <div class=" w-full md:w-1/2 ">
           <div class="form-box">
             <label for="instrument">{{_('Instrument')}} </label>
             {{ inputdict('instrument','instrument',value = target_proj.instrument, label=target_proj.instrument,type='instr', placeholder=_('Instrument'),required= True,autocomplete=True) }}
@@ -100,10 +99,8 @@
               {{form_group_radio('license_'+ loop.index|string(),'license',k,label,license, required=(loop.index==1) )}}
                   {% endfor %}</div>
           </div>
-        </div>
-      </fieldset></div>
-      <div class="w-full flex md:mt-8  md:w-1/2 tab">
-        <fieldset class="w-full md:pr-6">
+        </div></div>
+      </fieldset><fieldset class="w-full md:w-1/2 tab">
           <legend class="tab-control">{{_('Taxonomy')}}</legend><div class=" tab-content">{{
             pick_from_other(False,key='taxo',modal_title= _('Pick taxonomy from other projects')) }}
 
@@ -117,9 +114,7 @@
 
           </div>
         </fieldset>
-      </div>
-      <div class="w-full md:mt-8  md:w-1/2 tab">
-        <fieldset  class="w-full md:pr-10">
+        <fieldset  class="w-full md:w-1/2 tab">
           <legend class="tab-control">{{_('Sorting tools')}}</legend><div class="tab-content">{{
             pick_from_other(False,key='fields',modal_title= _('Pick sorting fields from other projects')) }}
           <div class="form-box">
@@ -128,9 +123,7 @@
             </div>
           </div>
         </fieldset>
-      </div>
-      <div class="w-full md:w-1/2 last:mx-auto last:md:w-full md:mt-8  tab">
-        <fieldset id="section-privileges" class="js js-privileges" data-u="{{ current_user.id|string() }}" data-alert="true">
+        <fieldset id="section-privileges" class="js js-privileges w-full tab" data-u="{{ current_user.id|string() }}" data-alert="true">
           <legend class="tab-control">Privileges</legend>
         <div class="tab-content">{{ pick_from_other(False,key='privileges',modal_title= _('Pick privileges from other projects')) }}
         <div class="flex flex-col w-full px-4" id="listprivileges" >
@@ -166,7 +159,7 @@
           <!-- add privilege -->
           <div class="w-full block">
             <button id="addmember" type="button" class="button is-new float-right clear-right text-left" data-target="member" data-add="block" data-title="{{ _('New privilege') }}"><i class="icon icon-plus-sm align-bottom mr-1"></i>{{ _('New privilege') }}</button>
-          </div>  </div>  </fieldset></div>
+          </div>  </div>  </fieldset>
 
     </div>
 
