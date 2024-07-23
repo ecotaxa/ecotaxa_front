@@ -13,7 +13,7 @@ export class TaxoMapping {
   numlines = 0;
 
   constructor(line) {
-    if (!line instanceof HTMLElement) return;
+    if (!line || !(line instanceof HTMLElement)) return;
     if (!line.taxomapping) {
       const keepname = (line.dataset.name) ? line.dataset.name : null;
       if (keepname === null) return null;
@@ -24,7 +24,6 @@ export class TaxoMapping {
     }
     return line.taxomapping;
   }
-
 
   init(line) {
     if (line.dataset.addline) {
