@@ -1,3 +1,131 @@
+/*! ./ */
+
+/*! ./implementation */
+
+/*! ./isArguments */
+
+/*! ./polyfill */
+
+/*! ./shams */
+
+/*! ./shim */
+
+/*! ./util.inspect */
+
+/*! array-buffer-byte-length */
+
+/*! available-typed-arrays */
+
+/*! call-bind */
+
+/*! call-bind/callBound */
+
+/*! define-data-property */
+
+/*! define-properties */
+
+/*! es-define-property */
+
+/*! es-errors */
+
+/*! es-errors/eval */
+
+/*! es-errors/range */
+
+/*! es-errors/ref */
+
+/*! es-errors/syntax */
+
+/*! es-errors/type */
+
+/*! es-errors/uri */
+
+/*! es-get-iterator */
+
+/*! for-each */
+
+/*! function-bind */
+
+/*! functions-have-names */
+
+/*! get-intrinsic */
+
+/*! gopd */
+
+/*! has-bigints */
+
+/*! has-property-descriptors */
+
+/*! has-proto */
+
+/*! has-symbols */
+
+/*! has-symbols/shams */
+
+/*! has-tostringtag/shams */
+
+/*! hasown */
+
+/*! internal-slot */
+
+/*! is-arguments */
+
+/*! is-array-buffer */
+
+/*! is-bigint */
+
+/*! is-boolean-object */
+
+/*! is-callable */
+
+/*! is-date-object */
+
+/*! is-map */
+
+/*! is-number-object */
+
+/*! is-regex */
+
+/*! is-set */
+
+/*! is-shared-array-buffer */
+
+/*! is-string */
+
+/*! is-symbol */
+
+/*! is-weakmap */
+
+/*! is-weakset */
+
+/*! isarray */
+
+/*! object-inspect */
+
+/*! object-is */
+
+/*! object-keys */
+
+/*! object.assign */
+
+/*! possible-typed-array-names */
+
+/*! regexp.prototype.flags */
+
+/*! set-function-length */
+
+/*! set-function-name */
+
+/*! side-channel */
+
+/*! stop-iteration-iterator */
+
+/*! which-boxed-primitive */
+
+/*! which-collection */
+
+/*! which-typed-array */
+
 /*!************************************!*\
   !*** ./node_modules/gopd/index.js ***!
   \************************************/
