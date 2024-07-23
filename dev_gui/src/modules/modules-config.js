@@ -86,6 +86,7 @@ export const css = {
   disabled: 'disabled',
   error: 'err',
   console: 'console',
+  icon: 'icon',
   wait: 'wait',
   active: 'active',
   modal: 'modal',
@@ -94,6 +95,7 @@ export const css = {
   progress: "progress",
   peerchecked: 'peer-checked',
   hidevscroll: 'hidevscroll',
+  tip: 'tip',
   component: {
     tabs: {
       name: 'js-tabs'

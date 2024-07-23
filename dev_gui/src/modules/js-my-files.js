@@ -25,7 +25,7 @@ const objaccept = {
   "application/x-bzip2": [".bz2"]
 }
 const accept = Object.values(objaccept).reduce((a, b) => a.concat(b));
-css.mright = 'mr-4';
+css.button = 'button p-1 mx-auto sm:mr-4 mb-4';
 const filter_files = {
   images: "png,jpeg,jpg,gif",
   tsv: "txt,tsv,zip, gzip,gz"
@@ -354,7 +354,7 @@ export class JsMyFiles {
       el = create_box('div', {
         id: this.options.display.progression
       }, this.container);
-      el.innerHTML = `<div class="flex sm:flex-row"><div class="${this.options.display.counters}"></div><div class="${this.options.display.sizes}"></div><div class="${css.progress}"></div><div class="${this.options.display.timers}"></div></div>`;
+      el.innerHTML = `<div class="${this.options.display.progression}"><div class="${this.options.display.counters}"></div><div class="${this.options.display.sizes}"></div><div class="${css.progress}"></div><div class="${this.options.display.timers}"></div></div>`;
       this.displayprogression = el;
     }
   }
@@ -696,10 +696,11 @@ export class JsMyFiles {
     const btn = document.getElementById(display);
     const parent = this.displayprogression;
     if (!btn) {
-      parent.insertAdjacentHTML('beforeend', `<button id="${display}" class="button ${display} ${css.mright} ${css.hide}"></button>`);
+      parent.insertAdjacentHTML('beforeend', `<button id="${display}" class="${display} ${css.button} ${css.hide}"></button>`);
       this[btnkey] = document.getElementById(display);
       this[btnkey].addEventListener('click', async (e) => {
         e.stopImmediatePropagation();
+        e.preventDefault();
         this.emitToZip(e.currentTarget);
       });
     } else parent.append(btn);

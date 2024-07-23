@@ -5,17 +5,22 @@ import {
   dirseparator,
   urlseparator,
   add_custom_events,
-  stop_on_error
+  stop_on_error,
+  //  global_event_dispatcher
 }
 from '../../modules/utils.js';
 import {
   css,
 } from '../../modules/modules-config.js';
+/*import {
+  tooltips_eventnames
+} from '../../modules/tooltips.js';*/
 const filter_files = {
   images: "png,jpeg,jpg,gif",
   tsv: "txt,tsv,zip, gzip,gz"
 }
-
+// local css
+css.intrash = 'intrash'
 const eventEntry = new CustomEvent('eventEntry', {
   detail: () => {
     console.log('customevent', this.entry)
@@ -24,7 +29,8 @@ const eventEntry = new CustomEvent('eventEntry', {
 const defaultOptions = {
   api_parameters: {
     entry: 'entry',
-    dest: 'dest'
+    dest: 'dest',
+    rootname: 'My Files'
   },
   url: '/gui/files',
   controls: {
@@ -131,7 +137,7 @@ const defaultOptions = {
     droptarget: '.droptarget',
     dirlist: '.dirlist',
     uploadfile: 'uploadfile',
-    displayresult: 'results',
+    displayimport: 'displayimport',
     trigger: '.trigger',
   },
 }
@@ -396,6 +402,7 @@ class EntryAction extends Entry {
     detach: 'detach',
     istrashdir: 'istrashdir',
     trashed: 'trashed',
+    editable: 'editable'
   }
   isTrashDir(name = null) {
     return ((name === null) ? this.name : name).indexOf(this.options.trash_dir_name) === 0;
@@ -479,6 +486,14 @@ class EntryAction extends Entry {
         if (destpath.join(dirseparator) === entrypath) return;
         data.append(api_parameters.dest, destpath.join(dirseparator));
         break;
+      default:
+        this.emit('EventEntry', {
+          entry: this,
+          detail: {
+            action: action
+          }
+        });
+        break;
     }
     const response = await fetch(this.options.url + urlseparator + action, fetchSettings({
       method: "POST",
@@ -494,46 +509,60 @@ class EntryAction extends Entry {
     }
   }
   listenRename(evt = 'dblclick') {
-
     const entry = this;
     const label = entry.getLabelElement();
     label.addEventListener(evt, (e) => {
-      const oldname = label.textContent;
+      label.dataset.oldname = label.textContent;
       if (this.type === this.options.type.trash) {
         e.preventDefault();
         return;
       }
-      const send_rename = async (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          label.contentEditable = false;
-          label.classList.remove(entry.options.css.editable);
-          if (oldname !== label.textContent) {
-            const callback = (txt) => {
-              if (txt === "") window.alertbox.addItemMessage(label, {
-                type: 'error',
-                content: window.alertbox.i18nmessages.exists,
-                duration: 2000
-              });
-              else txt = txt.split(dirseparator).pop();
-              label.removeEventListener('keydown', send_rename);
-              label.textContent = txt;
-              if (entry.type === entry.options.type.directory) entry.dirControls();
-              delete entry.container.dataset.action;
-            }
-            const action = (entry.container.dataset.action) ? entry.container.dataset.action : entry.options.actions.rename;
-            await entry.fetchAction(action, callback);
+      entry.setEditable();
+    });
+    // remove editable when click on entry
+    entry.container.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      entry.setEditable(false);
+      if (entry.container.dataset.action === entry.options.actions.create) entry.container.remove();
+    });
+  }
+  setEditable(on = true) {
+    const entry = this;
+    const label = entry.getLabelElement();
+    const send_rename = async (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (label.dataset.oldname && label.dataset.oldname !== label.textContent) {
+          const callback = (txt) => {
+            if (txt === "") window.alertbox.addItemMessage(label, {
+              type: 'error',
+              content: window.alertbox.i18nmessages.exists,
+              duration: 2000
+            });
+            else txt = txt.split(dirseparator).pop();
+            label.textContent = txt;
+            if (entry.type === entry.options.type.directory) entry.dirControls();
+            delete entry.container.dataset.action;
           }
-          entry.container.draggable = (this.options.specialdirs.indexOf(entry.type) < 0);
+          const action = (entry.container.dataset.action) ? entry.container.dataset.action : entry.options.actions.rename;
+          await entry.fetchAction(action, callback);
         }
+        entry.setEditable(false);
       }
+    }
+    if (on === true) {
       label.contentEditable = true;
       entry.container.draggable = false;
       label.classList.add(entry.options.css.editable);
       label.addEventListener('keydown', send_rename);
-    });
+    } else {
+      label.contentEditable = false;
+      label.classList.remove(entry.options.css.editable);
+      label.removeEventListener('keydown', send_rename);
+      entry.container.draggable = (entry.options.specialdirs.indexOf(entry.type) < 0);
+    }
   }
-
   createEntry(entry) {
     const ext = entry.name.split('.').pop();
     const options = this.options;
@@ -679,39 +708,47 @@ class JsEntryControls {
   }
   init() {
     add_custom_events(this);
-    this.box = this.createControls();
+    this.createControls();
     this.initEvents();
-
+    /*global_event_dispatcher.emit(tooltips_eventnames.tooltips, {
+      target: this.box
+    });*/
+  }
+  addControl(control, position = null) {
+    const ctrl = create_box('span', {});
+    const l = this.box.children.length;
+    if (position === null || l < position + 1) this.box.append(ctrl);
+    else if (position === 0 || l === 0) this.box.prepend(ctrl);
+    else this.box.inserBefore(crtl, this.box.children[position]);
+    if (control.typentries) ctrl.dataset.typentries = control.typentries;
+    if (control.icon) {
+      const icon = create_box('i', {
+        class: ['icon', control.icon]
+      }, ctrl);
+      ctrl.dataset.title = control.text;
+    } else ctrl.textContent = control.text;
+    //add listener
+    const evt = (control.trigger) ? control.trigger : 'click';
+    const func = (e) => {
+      if (this.entry === null) return;
+      const detail = {
+        callback: () => {
+          console.log('done', control.action);
+        }
+      }
+      this.entry.emit(control.action, detail);
+    }
+    ctrl.addEventListener(evt, func);
+    //
+    control.ctrl = ctrl;
   }
   createControls() {
-    const box = create_box('div', {
+    this.box = create_box('div', {
       class: [this.options.css.entrycontrols, css.hide]
     });
     Object.values(this.options.controls).filter(control => (control.icon || control.text)).forEach(control => {
-      const ctrl = create_box('span', {}, box);
-      if (control.typentries) ctrl.dataset.typentries = control.typentries;
-      if (control.icon) {
-        const icon = create_box('i', {
-          class: ['icon', control.icon]
-        }, ctrl);
-        ctrl.dataset.title = control.text;
-      } else ctrl.textContent = control.text;
-      //add listener
-      const evt = (control.trigger) ? control.trigger : 'click';
-      const func = (e) => {
-        if (this.entry === null) return;
-        const detail = {
-          callback: () => {
-            console.log('done', control.action);
-          }
-        }
-        this.entry.emit(control.action, detail);
-      }
-      ctrl.addEventListener(evt, func);
-      //
-      control.ctrl = ctrl;
+      this.addControl(control);
     });
-    return box;
   }
   initEvents() {}
   detachControls() {
@@ -732,18 +769,20 @@ class JsEntryControls {
     this.box.classList.remove(css.hide);
     delete this.box.disabled;
   }
-
+  activateControl(control, isintrash) {
+    const ctrl = control.ctrl;
+    const typentries = (ctrl.dataset.typentries) ? ctrl.dataset.typentries.split(',') : [];
+    const type = (isintrash) ? this.entry.options.type.trashed : this.entry.container.dataset.type;
+    if (typentries.indexOf(type) >= 0) {
+      ctrl.classList.remove(css.hide);
+    } else ctrl.classList.add(css.hide);
+  }
   activateControls() {
     if (this.entry === null) return;
     // add btns
     const isintrash = this.entry.isInTrash();
     Object.values(this.options.controls).filter(control => (control.icon || control.text)).forEach(control => {
-      const ctrl = control.ctrl;
-      const typentries = (ctrl.dataset.typentries) ? ctrl.dataset.typentries.split(',') : [];
-      const type = (isintrash) ? this.entry.options.type.trashed : this.entry.container.dataset.type;
-      if (typentries.indexOf(type) >= 0) {
-        ctrl.classList.remove(css.hide);
-      } else ctrl.classList.add(css.hide);
+      this.activateControl(control, isintrash);
     });
     //
   }
@@ -791,7 +830,7 @@ class JsDirList {
     this.root = new EntryAction({
       type: type,
       name: '',
-      label: '..',
+      label: this.options.api_parameters.rootname,
       root: this
     }, options);
 
@@ -820,6 +859,7 @@ class JsDirList {
           if (this.trashdir) this.trashdir.container.remove();
           this.trashdir = e.detail.entry;
           this.root.container.parentElement.insertBefore(e.detail.entry.container, this.root.container);
+          this.root.container.append(e.detail.entry.container);
           break;
         case eventnames.trashed:
           let parent = e.detail.entry.parent;
@@ -827,7 +867,7 @@ class JsDirList {
             parent = this.root;
           } else {
             this.moveEntry(e.detail.entry, this.trashdir);
-            e.detail.entry.container.classList.add('bg-danger-100');
+            e.detail.entry.container.classList.add(css.intrash);
           }
           this.attachControls(parent);
           break;
@@ -881,7 +921,17 @@ class JsDirList {
           } else console.log(' parent===null or dragitem===null or dragitem===parent', this.dragentry)
 
           break;
+        case eventnames.editable:
+          if (this.editable) this.editable.setEditable(false);
+          break;
+
         default:
+
+          if (e.detail.action && this[e.detail.action]) {
+            console.log('edtailaction', e.detail.action)
+            console.log(' function exists', this[e.detail.action]);
+            return;
+          }
           if (e.detail.entry.active) {
             this.attachControls(e.detail.entry);
           } else this.attachControls(this.root);
@@ -906,6 +956,7 @@ class JsDirList {
     });
     if (dest.findEntry(entry.name, entry.type) === null) dest.appendEntry(entry);
   }
+
   attachControls(entry) {
     if (this.entrycontrols) this.entrycontrols.attachControls(entry);
     this.activentry = entry;
