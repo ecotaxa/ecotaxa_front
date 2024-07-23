@@ -1,4 +1,4 @@
-{%-if not partial-%}{% extends "./v2/help/_layout.html" %}{%-endif-%}
+{% extends "./v2/help/_layout.html" %}
   {%-if notfound -%}{%block article%}
   <div class="alert info" data-filename="{{notfound}}">{{_('Not available for now.')}}</div>{% endblock %}
   {%-else-%}
