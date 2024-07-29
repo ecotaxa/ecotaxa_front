@@ -1,5 +1,6 @@
 import {test, expect, Page} from '@playwright/test';
 import * as path from "node:path";
+import {assertInNewUI, delay, readableUniqueId} from './utils';
 
 const user = {
     login: 'laurent.salinas@ik.me',
@@ -8,13 +9,7 @@ const user = {
 }
 
 const project = {
-    title: 'PR test' + Date.now()
-}
-
-function delay(milliseconds) {
-    return new Promise(resolve => {
-        setTimeout(resolve, milliseconds);
-    });
+    title: 'PR test ' + readableUniqueId()
 }
 
 async function siteIsUp(page: Page, url: string) {
@@ -112,11 +107,33 @@ async function gotoProjectAnnotation(page: Page, usr: typeof user, prj: typeof p
     await expect(page.locator('#titledivtitle')).toContainText(prj.title);
 }
 
-async function gotoProjectSettings(page: Page, usr: typeof user, prj: typeof project) {
+async function gotoProjectAbout(page: Page, usr: typeof user, prj: typeof project) {
     await gotoProjectAnnotation(page, usr, prj);
     await page.getByRole('button', {name: 'Project'}).click();
     await page.getByRole('link', {name: 'About project'}).click();
     await expect(page.getByRole('heading', {name: 'About ' + prj.title})).toBeVisible();
+}
+
+async function gotoProjectSettings(page: Page, usr: typeof user, prj: typeof project) {
+    // Navigate from home
+    await page.getByRole('link', {name: 'Logo Ecotaxa'}).click(); // The logo is in both UIs
+    await page.getByRole('link', {name: 'Contribute to a project'}).click();
+    await page.getByPlaceholder('Search...').fill(prj.title);
+    await page.getByRole('row', {name: /Annotate Settings.*/}).getByRole('link').nth(1).click();
+}
+
+async function deleteCurrentProject(page: Page, usr: typeof user, prj: typeof project) {
+    await assertInNewUI(page);
+    await page.getByText('Tools', {exact: true}).hover({force: true});
+    await page.getByRole('link', { name: 'Delete object or project' }).click()
+    await page.getByText('"DELETEALL"', {exact: true}).click();
+    await page.getByLabel('DELETE project after "').check();
+    await page.getByRole('button', {name: 'ERASE THESE OBJECTS !!!'}).click();
+    await page.getByRole('button', {name: 'Ok'}).click();
+    // Ensure green notif of OK
+    const okMessage = page.getByText('SUCCESS:');
+    await expect(okMessage).toBeVisible();
+    await expect(okMessage).toHaveCount(0, {timeout:10000});
 }
 
 async function answerQuestion(page: Page, url: string) {
@@ -161,6 +178,7 @@ async function viewAnImage(page: Page) {
 
 test('smoke', async ({page}) => {
     const url = 'http://localhost:5001/';
+    test.slow(); // 36s
     //const url = 'https://ecotaxa.obs-vlfr.fr/';
     await siteIsUp(page, url);
     await logIn(page, user);
@@ -168,10 +186,13 @@ test('smoke', async ({page}) => {
     // await logIn(page, user);
     await createProject(page, url, project);
     await gotoProjectAnnotation(page, user, project);
-    await gotoProjectSettings(page, user, project);
+    await gotoProjectAbout(page, user, project);
     await uploadData(page, url, user, project)
     await gotoProjectAnnotation(page, user, project);
     await viewAnImage(page);
+    await gotoProjectAbout(page, user, project);
+    await gotoProjectSettings(page, user, project);
+    await deleteCurrentProject(page, user, project);
     await logOut(page, user);
-    await delay(1000);
+    await delay(1000); // Just for video :)
 });
