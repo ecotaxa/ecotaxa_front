@@ -6,7 +6,7 @@ EcoTaxa is a web application destined to process the large number of images gene
 
 ### Run EcoTaxa
 
-This is the front-end part of the application, which is (nearly) stateless and takes/writes all data from/to a back-end (in https://github.com/ecotaxa/ecotaxa_back). 
+This is the front-end part of the application, which is (nearly) stateless and takes/writes all data from/to a [back-end](https://github.com/ecotaxa/ecotaxa_back). 
 
 To run a simple set up see the [all_in_one instructions](https://github.com/ecotaxa/ecotaxa_front/tree/master/docker/all_in_one). This will give you a running solution but probably not scale to be a production environment.
 
@@ -26,7 +26,7 @@ This project is tested with BrowserStack.
 
 If you use EcoTaxa in your work, please cite it as
 
-Marc Picheral, Sébastien Colin, and Jean-Olivier Irisson (2017) *EcoTaxa, a tool for the taxonomic classification of images*. http://ecotaxa.obs-vlfr.fr
+> Marc Picheral, Sébastien Colin, and Jean-Olivier Irisson (2017) *EcoTaxa, a tool for the taxonomic classification of images*. http://ecotaxa.obs-vlfr.fr
 
 ### License
 
