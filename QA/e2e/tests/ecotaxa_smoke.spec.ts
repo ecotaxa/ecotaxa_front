@@ -39,9 +39,9 @@ async function logIn(page: Page, usr: typeof user) {
 }
 
 async function logOut(page: Page, usr: typeof user) {
-    const newMenu = page.getByRole('link', {name: usr.name});
-    if (await newMenu.isVisible()) {
-        await newMenu.hover();
+    const userMenu = page.locator("#main-navbar").getByRole('link', {name: usr.name});
+    if (await userMenu.isVisible()) {
+        await userMenu.hover();
         await page.getByRole('link', {name: 'logout Logout'}).click();
     } else {
         // Legacy app, there is a direct link
@@ -93,10 +93,10 @@ async function createProject(page: Page, url: string, prj: typeof project) {
 }
 
 async function gotoProjectAnnotation(page: Page, usr: typeof user, prj: typeof project) {
-    const newMenu = page.getByRole('link', {name: usr.name});
+    const userMenu = page.getByRole('link', {name: usr.name});
     const prjRe = new RegExp(prj.title);
-    if (await newMenu.isVisible()) {
-        await newMenu.hover();
+    if (await userMenu.isVisible()) {
+        await userMenu.hover();
         await page.getByRole('link', {name: prjRe}).click();
     } else {
         // Legacy app, there is a direct link
@@ -118,14 +118,49 @@ async function gotoProjectSettings(page: Page, usr: typeof user, prj: typeof pro
     // Navigate from home
     await page.getByRole('link', {name: 'Logo Ecotaxa'}).click(); // The logo is in both UIs
     await page.getByRole('link', {name: 'Contribute to a project'}).click();
-    await page.getByPlaceholder('Search...').fill(prj.title);
+    const searchBox = page.getByPlaceholder('Search...');
+    await searchBox.fill(prj.title);
+    await searchBox.click(); // The box needs an event to trigger the search
+    // Ensure there is a single visible row
+    await expect(page.locator('#table-projects-list').getByRole('link', { name: 'Annotate' })).toHaveCount(1, {timeout:10000});
     await page.getByRole('row', {name: /Annotate Settings.*/}).getByRole('link').nth(1).click();
+}
+
+async function exportGeneral(page: Page, usr: typeof user, prj: typeof project) {
+    await assertInNewUI(page);
+    await page.getByText('Export', {exact: true}).hover({force: true});
+    await page.getByRole('link', {name: 'General export'}).click();
+    await expect(page.getByRole('heading')).toContainText('Export ' + prj.title);
+    await page.getByRole('group', {name: 'General Export'}).locator('legend').click();
+    // There are several "Yes" or "No" in the page, attempt below to specialize the click on a given section of the form
+    // await page.locator('[class="group-radio"]').locator('[name="with_internal_ids"]').nth(0).setChecked(true);
+    // _It doesn't work_: Call log:
+    //   - waiting for locator('[class="group-radio"]').locator('[name="with_internal_ids"]').first()
+    //   -   locator resolved to <input value="1" required="" type="radio" class="peer" data-listen="true" name="with_internal_ids" id="with_internal_ids_general_1"/>
+    //   - attempting click action
+    //   -   waiting for element to be visible, enabled and stable
+    //   -   element is not visible
+    await page.locator('#general').getByText('No', { exact: true }).nth(0).click();
+    await page.locator('#general').getByText('All images').click();
+    await page.locator('#general').getByText('None').nth(0).click();
+    await page.locator('#general').getByText('No', { exact: true }).nth(1).click(); // Internal DB Ids
+    await page.locator('#general').getByText('No', { exact: true }).nth(2).click(); // Second line
+    await page.locator('#general').getByText('Sample').click(); // Separate by
+    await page.locator('#general').getByText('No', { exact: true }).nth(3).click(); // Copy to FTP
+    await page.getByRole('button', {name: 'Start Task'}).click();
+    // The task appears right away, wait for some sign it's finished
+    await expect(page.locator('#progressbar')).toContainText('100%',{timeout:5000});
+    // await delay(50*1000);
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Get file' }).click();
+    const download = await downloadPromise;
+    download.saveAs(path.join(__dirname,download.suggestedFilename()));
 }
 
 async function deleteCurrentProject(page: Page, usr: typeof user, prj: typeof project) {
     await assertInNewUI(page);
     await page.getByText('Tools', {exact: true}).hover({force: true});
-    await page.getByRole('link', { name: 'Delete object or project' }).click()
+    await page.getByRole('link', {name: 'Delete object or project'}).click()
     await page.getByText('"DELETEALL"', {exact: true}).click();
     await page.getByLabel('DELETE project after "').check();
     await page.getByRole('button', {name: 'ERASE THESE OBJECTS !!!'}).click();
@@ -133,7 +168,7 @@ async function deleteCurrentProject(page: Page, usr: typeof user, prj: typeof pr
     // Ensure green notif of OK
     const okMessage = page.getByText('SUCCESS:');
     await expect(okMessage).toBeVisible();
-    await expect(okMessage).toHaveCount(0, {timeout:10000});
+    await expect(okMessage).toHaveCount(0, {timeout: 10000});
 }
 
 async function answerQuestion(page: Page, url: string) {
@@ -172,7 +207,7 @@ async function uploadData(page: Page, url: string, usr: typeof user, prj: typeof
 
 async function viewAnImage(page: Page) {
     await page.locator('td:nth-child(4) > .ddet > .ddets > .glyphicon').first().click();
-    await delay(2000);
+    await delay(1000);
     await page.getByRole('cell', {name: 'Close', exact: true}).getByRole('button').click();
 }
 
@@ -192,6 +227,7 @@ test('smoke', async ({page}) => {
     await viewAnImage(page);
     await gotoProjectAbout(page, user, project);
     await gotoProjectSettings(page, user, project);
+    await exportGeneral(page, user, project);
     await deleteCurrentProject(page, user, project);
     await logOut(page, user);
     await delay(1000); // Just for video :)
