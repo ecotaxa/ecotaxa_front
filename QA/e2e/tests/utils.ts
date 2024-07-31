@@ -5,6 +5,10 @@ export async function assertInNewUI(page: Page) {
     await expect(page.locator('#tool-item').getByRole('link').first()).toBeVisible();
 }
 
+export async function assertInOldUI(page: Page) {
+    await expect(page.locator('#divheadinfo').getByRole('link').first()).toBeVisible();
+}
+
 export function delay(milliseconds: number) {
     return new Promise(resolve => {
         setTimeout(resolve, milliseconds);

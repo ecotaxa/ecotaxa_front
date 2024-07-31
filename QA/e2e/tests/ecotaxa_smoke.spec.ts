@@ -1,6 +1,6 @@
 import {test, expect, Page} from '@playwright/test';
 import * as path from "node:path";
-import {assertInNewUI, delay, readableUniqueId} from './utils';
+import {assertInNewUI, assertInOldUI, delay, readableUniqueId} from './utils';
 
 const user = {
     login: 'laurent.salinas@ik.me',
@@ -11,6 +11,10 @@ const user = {
 const project = {
     title: 'PR test ' + readableUniqueId()
 }
+
+const baseUrl = 'http://localhost:5001/';
+
+//const baseUrl = 'https://ecotaxa.obs-vlfr.fr/';
 
 async function siteIsUp(page: Page, url: string) {
     await page.goto(url);
@@ -38,20 +42,21 @@ async function logIn(page: Page, usr: typeof user) {
     await getRidOfTaxoWarning(page);
 }
 
-async function logOut(page: Page, usr: typeof user) {
+async function logOutFromNewUI(page: Page, usr: typeof user) {
     const userMenu = page.locator("#main-navbar").getByRole('link', {name: usr.name});
-    if (await userMenu.isVisible()) {
+    // if (await userMenu.isVisible()) {
         await userMenu.hover();
         await page.getByRole('link', {name: 'logout Logout'}).click();
-    } else {
-        // Legacy app, there is a direct link
-        await page.getByRole('link', {name: 'log out'}).click();
-    }
+    // } else {
+    //     Legacy app, there is a direct link
+        // await page.getByRole('link', {name: 'log out'}).click();
+    // }
+    // TODO an assert here
 }
 
-async function createProject(page: Page, url: string, prj: typeof project) {
+async function createProject(page: Page, prj: typeof project) {
     // There is an issue with too long project list
-    await page.goto(url + "/gui/prj/create");
+    await page.goto(baseUrl + "/gui/prj/create");
     await getRidOfTaxoWarning(page);
     await page.getByPlaceholder('project title').click();
     await page.getByPlaceholder('project title').fill(prj.title);
@@ -89,6 +94,7 @@ async function createProject(page: Page, url: string, prj: typeof project) {
     // Ensure green notif of OK
     await expect(page.getByText('SUCCESS:')).toBeVisible();
     await expect(page.getByText('SUCCESS:')).toBeHidden({timeout: 10000});
+    // await delay(500000);
 
 }
 
@@ -107,23 +113,51 @@ async function gotoProjectAnnotation(page: Page, usr: typeof user, prj: typeof p
     await expect(page.locator('#titledivtitle')).toContainText(prj.title);
 }
 
-async function gotoProjectAbout(page: Page, usr: typeof user, prj: typeof project) {
-    await gotoProjectAnnotation(page, usr, prj);
+async function gotoProjectAboutFromOldUI(page: Page, usr: typeof user, prj: typeof project) {
+    await assertInOldUI(page);
     await page.getByRole('button', {name: 'Project'}).click();
     await page.getByRole('link', {name: 'About project'}).click();
     await expect(page.getByRole('heading', {name: 'About ' + prj.title})).toBeVisible();
 }
 
-async function gotoProjectSettings(page: Page, usr: typeof user, prj: typeof project) {
-    // Navigate from home
-    await page.getByRole('link', {name: 'Logo Ecotaxa'}).click(); // The logo is in both UIs
+async function gotoProjectAbout(page: Page, usr: typeof user, prj: typeof project) {
+    await assertInNewUI(page);
+    await page.getByRole('button', {name: 'Project'}).click();
+    await page.getByRole('link', {name: 'About project'}).click();
+    await expect(page.getByRole('heading', {name: 'About ' + prj.title})).toBeVisible();
+}
+
+async function filterInProjectPage(page, prj: { title: string }) {
+    await page.goto(baseUrl)
     await page.getByRole('link', {name: 'Contribute to a project'}).click();
     const searchBox = page.getByPlaceholder('Search...');
     await searchBox.fill(prj.title);
     await searchBox.click(); // The box needs an event to trigger the search
     // Ensure there is a single visible row
-    await expect(page.locator('#table-projects-list').getByRole('link', { name: 'Annotate' })).toHaveCount(1, {timeout:10000});
+    await expect(page.locator('#table-projects-list').getByRole('link', {name: 'Annotate'})).toHaveCount(1, {timeout: 10000});
+}
+
+async function gotoProjectSettings(page: Page, usr: typeof user, prj: typeof project) {
+    // Navigate from home
+    // await page.getByRole('link', {name: 'Logo Ecotaxa'}).click(); // The logo is in NOT the same in both UIs
+    await filterInProjectPage(page, prj);
     await page.getByRole('row', {name: /Annotate Settings.*/}).getByRole('link').nth(1).click();
+}
+
+async function extractSubset(page: Page, prj: typeof project) {
+    await assertInNewUI(page);
+    await page.getByText('Tools', {exact: true}).hover({force: true});
+    await page.getByRole('link', {name: 'Extract Subset'}).click();
+    await expect(page.locator('#main-navbar')).toContainText(prj.title);
+    await page.getByText('objects max.').first().click();
+    await page.getByRole('textbox', {name: 'objects max.'}).fill('1000');
+    await page.getByRole('textbox', {name: 'objects max.'}).press('Tab');
+    await page.getByText('sample').click();
+    await page.getByLabel('Subset project title').fill('Subset of ' + prj.title);
+    await page.getByRole('button', {name: 'Start Task'}).click();
+    // When taks is done we can go to subset
+    await page.getByRole('link', {name: 'Go to Subset Project'}).click();
+
 }
 
 async function exportGeneral(page: Page, usr: typeof user, prj: typeof project) {
@@ -140,27 +174,28 @@ async function exportGeneral(page: Page, usr: typeof user, prj: typeof project) 
     //   - attempting click action
     //   -   waiting for element to be visible, enabled and stable
     //   -   element is not visible
-    await page.locator('#general').getByText('No', { exact: true }).nth(0).click();
+    await page.locator('#general').getByText('No', {exact: true}).nth(0).click(); // Only save objects' annotation
     await page.locator('#general').getByText('All images').click();
     await page.locator('#general').getByText('None').nth(0).click();
-    await page.locator('#general').getByText('No', { exact: true }).nth(1).click(); // Internal DB Ids
-    await page.locator('#general').getByText('No', { exact: true }).nth(2).click(); // Second line
+    await page.locator('#general').getByText('No', {exact: true}).nth(1).click(); // Internal DB Ids
+    await page.locator('#general').getByText('No', {exact: true}).nth(2).click(); // Second line with types
     await page.locator('#general').getByText('Sample').click(); // Separate by
-    await page.locator('#general').getByText('No', { exact: true }).nth(3).click(); // Copy to FTP
+    await page.locator('#general').getByText('No', {exact: true}).nth(3).click(); // Copy to FTP
     await page.getByRole('button', {name: 'Start Task'}).click();
     // The task appears right away, wait for some sign it's finished
-    await expect(page.locator('#progressbar')).toContainText('100%',{timeout:5000});
-    // await delay(50*1000);
+    await expect(page.locator('#progressbar')).toContainText('100%', {timeout: 5000});
     const downloadPromise = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Get file' }).click();
+    await page.getByRole('button', {name: 'Get file'}).click();
     const download = await downloadPromise;
-    download.saveAs(path.join(__dirname,download.suggestedFilename()));
+    const filePath = path.join(__dirname, download.suggestedFilename());
+    download.saveAs(filePath);
 }
 
-async function deleteCurrentProject(page: Page, usr: typeof user, prj: typeof project) {
+async function deleteCurrentProject(page: Page, prj: typeof project) {
     await assertInNewUI(page);
     await page.getByText('Tools', {exact: true}).hover({force: true});
     await page.getByRole('link', {name: 'Delete object or project'}).click()
+    await expect(page.getByRole('heading')).toContainText('Erase objects tool ' + prj.title);
     await page.getByText('"DELETEALL"', {exact: true}).click();
     await page.getByLabel('DELETE project after "').check();
     await page.getByRole('button', {name: 'ERASE THESE OBJECTS !!!'}).click();
@@ -171,19 +206,19 @@ async function deleteCurrentProject(page: Page, usr: typeof user, prj: typeof pr
     await expect(okMessage).toHaveCount(0, {timeout: 10000});
 }
 
-async function answerQuestion(page: Page, url: string) {
+async function answerImportQuestion(page: Page) {
     // This export has an unknown user
-    await page.goto(url + '/gui/jobs/listall');
+    await page.goto(baseUrl + '/gui/jobs/listall');
     const maybePending = page.getByRole('button', {name: 'Pending'});
     if (await maybePending.isVisible()) {
         await delay(1000);
-        await answerQuestion(page, url);
+        await answerImportQuestion(page);
         return;
     }
     const maybeRunning = page.getByRole('button', {name: 'Running'});
     if (await maybeRunning.isVisible()) {
         await delay(1000);
-        await answerQuestion(page, url);
+        await answerImportQuestion(page);
         return;
     }
     await page.getByRole('button', {name: 'Question'}).click();
@@ -193,15 +228,15 @@ async function answerQuestion(page: Page, url: string) {
     await page.getByRole('button', {name: 'Continue'}).click();
 }
 
-async function uploadData(page: Page, url: string, usr: typeof user, prj: typeof project) {
-    await gotoProjectAnnotation(page, usr, prj);
+async function uploadData(page: Page, usr: typeof user, prj: typeof project) {
+    await assertInOldUI(page);
     await page.getByRole('button', {name: 'Project'}).click();
     await page.getByRole('link', {name: 'Import images and metadata'}).click();
     await page.locator('#uploadfile').setInputFiles(path.join(__dirname, 'export_13539_20240728_0803.zip'));
     await page.getByRole('button', {name: 'Start import Images and TSV'}).click();
-    await answerQuestion(page, url);
-    const classifBtn = page.getByRole('button', {name: 'Go to Manual Classification'});
+    await answerImportQuestion(page);
     // There is an auto-wait, the button will appear when task is OK
+    const classifBtn = page.getByRole('button', {name: 'Go to Manual Classification'});
     await classifBtn.click();
 }
 
@@ -212,23 +247,35 @@ async function viewAnImage(page: Page) {
 }
 
 test('smoke', async ({page}) => {
-    const url = 'http://localhost:5001/';
     test.slow(); // 36s
-    //const url = 'https://ecotaxa.obs-vlfr.fr/';
-    await siteIsUp(page, url);
+    await siteIsUp(page, baseUrl);
     await logIn(page, user);
     // await logOut(page, user);
     // await logIn(page, user);
-    await createProject(page, url, project);
+    await createProject(page, project);
     await gotoProjectAnnotation(page, user, project);
+    await gotoProjectSettings(page, user, project);
     await gotoProjectAbout(page, user, project);
-    await uploadData(page, url, user, project)
+    await uploadData(page, user, project)
     await gotoProjectAnnotation(page, user, project);
     await viewAnImage(page);
-    await gotoProjectAbout(page, user, project);
+    await gotoProjectAboutFromOldUI(page, user, project);
     await gotoProjectSettings(page, user, project);
     await exportGeneral(page, user, project);
-    await deleteCurrentProject(page, user, project);
-    await logOut(page, user);
-    await delay(1000); // Just for video :)
+    await extractSubset(page, project);
+    await deleteCurrentProject(page, project);
+    await logOutFromNewUI(page, user);
+    await delay(1000); // Just for the video :)
+});
+
+test('show_inactive_menu_bug', async ({page}) => {
+    await siteIsUp(page, baseUrl);
+    await logIn(page, user);
+    await createProject(page, project);
+    await gotoProjectAnnotation(page, user, project);
+    await gotoProjectAboutFromOldUI(page, user, project);
+    await page.getByText('Tools', {exact: true}).hover({force: true});
+    // Bug here, for some reason the menu is not clickable
+    await expect(page.getByRole('link', {name: 'Extract Subset'})).toHaveClass('disabled');
+    await logOutFromNewUI(page, user);
 });
