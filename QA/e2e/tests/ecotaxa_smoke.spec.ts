@@ -114,6 +114,14 @@ async function gotoProjectAnnotation(page: Page, usr: typeof user, prj: Project)
     await expect(page.locator('#titledivtitle')).toContainText(prj.title);
 }
 
+async function gotoProjectAnnotationFromNewUI(page: Page, usr: typeof user, prj: Project) {
+    const userMenu = page.getByRole('link', {name: usr.name});
+    const prjRe = new RegExp(prj.title);
+    await userMenu.hover();
+    await page.getByRole('link', {name: prjRe}).click();
+    await expect(page.locator('#titledivtitle')).toContainText(prj.title);
+}
+
 async function gotoProjectAboutFromOldUI(page: Page, usr: typeof user, prj: Project) {
     await assertInOldUI(page, "About");
     await page.getByRole('button', {name: 'Project'}).click();
@@ -159,7 +167,7 @@ async function extractSubset(page: Page, prj: Project, subs: Project) {
     await page.getByText('sample', { exact: true }).click();
     await page.getByLabel('Subset project title').fill(subs.title);
     await page.getByRole('button', {name: 'Start Task'}).click();
-    // When task is done we can go to subset
+    // When task is done we can go to subset project Settings in new UI, and we do it
     await page.getByRole('link', {name: 'Go to Subset Project'}).click();
 
 }
@@ -302,7 +310,7 @@ test('extract_reclassify_merge', async ({page}) => {
     }
 
     const subsetProject = {
-        title: project.title + " subset"
+        title: project.title.replace('test','subset test')
     }
     test.slow(); // 36s
     await siteIsUp(page, baseUrl);
@@ -314,6 +322,29 @@ test('extract_reclassify_merge', async ({page}) => {
     await page.getByRole('button', { name: 'Filtered' }).click();
     await page.getByRole('link', { name: 'Extract Subset' }).click();
     await extractSubset(page, project, subsetProject);
+    await gotoProjectAnnotationFromNewUI(page, user, project);
+    await filterToSample(page, 'tara_oceans_2009_030_d_regent_680');
+    await page.getByRole('button', { name: 'Filtered' }).click();
+    await page.getByRole('link', { name: 'Delete objects' }).click();
+    await expect(page.getByRole('main')).toContainText('USING Active Project Filters 13 objects');
+    await page.getByRole('button', { name: 'ERASE THESE OBJECTS !!!' }).click();
+    await page.getByRole('button', { name: 'Ok' }).click();
+    // Ensure green notif of OK
+    const okMessage = page.getByText('SUCCESS:');
+    await expect(okMessage).toBeVisible();
+    await expect(okMessage).toHaveCount(0, {timeout: 10000});
+    await gotoProjectAnnotationFromNewUI(page, user, subsetProject);
+    await expect(page.locator('#titlediv')).toContainText(subsetProject.title+' (3 , 10 , 0 , 0 / 13)');
+    for (const aRow of await page.getByRole('cell', { name: '.' }).all()) {
+        await aRow.click();
+    };
+    await expect(page.locator('#topbar')).toContainText('13 Selected');
+    await page.locator('#myTabs').getByLabel('', { exact: true }).click();
+    await page.getByRole('textbox').fill('orth');
+    await page.getByRole('treeitem', { name: 'Orthasterias', exact: true }).click();
+    await page.getByRole('button', { name: ' Save pending changes [Ctrl+' }).click();
+    await expect(page.locator('#titlediv')).toContainText(subsetProject.title+' (13 , 0 , 0 , 0 / 13)');
+    await expect(page.locator('#categtree')).toContainText('Orthasterias 13');
 });
 
 test('show_inactive_menu_bug', async ({page}) => {
