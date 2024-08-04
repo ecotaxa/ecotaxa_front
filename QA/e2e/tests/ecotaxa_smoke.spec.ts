@@ -129,26 +129,44 @@ async function gotoProjectAboutFromOldUI(page: Page, usr: typeof user, prj: Proj
     await expect(page.getByRole('heading', {name: 'About ' + prj.title})).toBeVisible();
 }
 
+async function mergeProject(page: Page, destPrj: Project, sourcePrj: Project) {
+    await assertInNewUI(page, "Merge");
+    await page.getByText('Tools', {exact: true}).hover({force: true});
+    await page.getByRole('link', {name: 'Merge another project in this'}).click();
+    await expect(page.getByRole('heading')).toContainText('Project Merge / Fusion '+destPrj.title);
+    await page.getByPlaceholder('Search...').fill(sourcePrj.title);
+    await page.getByPlaceholder('Search...').click(); // Search needs an event
+    await page.getByRole('row', {name: sourcePrj.title}).getByRole('radio').check();
+    await page.getByRole('button', {name: 'Validate before merge'}).click();
+    await page.getByRole('button', {name: 'Start Project Fusion'}).click();
+    // TODO: Bug here, it gets back to project home
+    await page.getByRole('link', {name: 'Back to target project'}).click();
+}
+
 async function gotoProjectAboutFromNewUI(page: Page, usr: typeof user, prj: Project) {
     await assertInNewUI(page, "About");
     await page.locator('#navbar-menu').getByRole('link', {name: 'About'}).click();
     await expect(page.getByRole('heading', {name: 'About ' + prj.title})).toBeVisible();
 }
 
-async function filterInProjectPage(page, prj: { title: string }) {
+async function filterInProjectPage(page: Page, prj: Project, nb_expected: number) {
     await page.goto(baseUrl)
     await page.getByRole('link', {name: 'Contribute to a project'}).click();
     const searchBox = page.getByPlaceholder('Search...');
     await searchBox.fill(prj.title);
     await searchBox.click(); // The box needs an event to trigger the search
-    // Ensure there is a single visible row
-    await expect(page.locator('#table-projects-list').getByRole('link', {name: 'Annotate'})).toHaveCount(1, {timeout: 10000});
+    // Ensure the exact number of expected row
+    await expect(page.locator('#table-projects-list').getByRole('link', {name: 'Annotate'})).toHaveCount(nb_expected, {timeout: 10000});
+}
+
+async function ensureProjectGone(page: Page, prj: Project) {
+    await filterInProjectPage(page, prj, 0);
 }
 
 async function gotoProjectSettings(page: Page, usr: typeof user, prj: Project) {
     // Navigate from home
     // await page.getByRole('link', {name: 'Logo Ecotaxa'}).click(); // The logo is in NOT the same in both UIs
-    await filterInProjectPage(page, prj);
+    await filterInProjectPage(page, prj, 1);
     await page.getByRole('row', {name: /Annotate Settings.*/}).getByRole('link').nth(1).click();
 }
 
@@ -164,7 +182,7 @@ async function extractSubset(page: Page, prj: Project, subs: Project) {
     await page.getByText('objects max.').first().click();
     await page.getByRole('textbox', {name: 'objects max.'}).fill('1000');
     await page.getByRole('textbox', {name: 'objects max.'}).press('Tab');
-    await page.getByText('sample', { exact: true }).click();
+    await page.getByText('sample', {exact: true}).click();
     await page.getByLabel('Subset project title').fill(subs.title);
     await page.getByRole('button', {name: 'Start Task'}).click();
     // When task is done we can go to subset project Settings in new UI, and we do it
@@ -221,14 +239,8 @@ async function deleteCurrentProject(page: Page, prj: Project) {
 async function answerImportQuestion(page: Page) {
     // This export has an unknown user
     await page.goto(baseUrl + '/gui/jobs/listall');
-    const maybePending = page.getByRole('button', {name: 'Pending'});
-    if (await maybePending.isVisible()) {
-        await delay(1000);
-        await answerImportQuestion(page);
-        return;
-    }
-    const maybeRunning = page.getByRole('button', {name: 'Running'});
-    if (await maybeRunning.isVisible()) {
+    const pendingOrRunning = page.getByRole('button', {name: 'Pending'}).or(page.getByRole('button', {name: 'Running'}));
+    if (await pendingOrRunning.isVisible()) {
         await delay(1000);
         await answerImportQuestion(page);
         return;
@@ -262,11 +274,11 @@ async function viewAnImage(page: Page) {
 
 async function filterToSample(page: Page, sampleName: string) {
     await assertInOldUI(page, "filterToSample");
-    await page.getByRole('tab', { name: 'Other filters' }).click();
+    await page.getByRole('tab', {name: 'Other filters'}).click();
     await page.getByRole('list').first().click();
-    await page.getByRole('treeitem', { name:  sampleName}).click();
-    await page.getByRole('cell', { name: 'Update view & apply filter' }).getByRole('button').click();
-    await expect(page.getByRole('button', { name: 'Samples=' })).toBeVisible();
+    await page.getByRole('treeitem', {name: sampleName}).click();
+    await page.getByRole('cell', {name: 'Update view & apply filter'}).getByRole('button').click();
+    await expect(page.getByRole('button', {name: 'Samples='})).toBeVisible();
 }
 
 test('smoke', async ({page}) => {
@@ -305,12 +317,14 @@ test('smoke', async ({page}) => {
 });
 
 test('extract_reclassify_merge', async ({page}) => {
+    const testId = readableUniqueId();
     const project: Project = {
-        title: 'RECLASSIF test ' + readableUniqueId()
+        title: 'RECLASSIF test ' + testId
     }
 
     const subsetProject = {
-        title: project.title.replace('test','subset test')
+        // Due to project list search tolerance, subset must _not_ contain words from test project
+        title: 'SUBSET of ' + testId
     }
     test.slow(); // 36s
     await siteIsUp(page, baseUrl);
@@ -319,32 +333,35 @@ test('extract_reclassify_merge', async ({page}) => {
     await gotoProjectAnnotation(page, user, project);
     await uploadData(page, 'export_12576_20240802_0841.zip', false)
     await filterToSample(page, 'tara_oceans_2009_030_d_regent_680');
-    await page.getByRole('button', { name: 'Filtered' }).click();
-    await page.getByRole('link', { name: 'Extract Subset' }).click();
+    await page.getByRole('button', {name: 'Filtered'}).click();
+    await page.getByRole('link', {name: 'Extract Subset'}).click();
     await extractSubset(page, project, subsetProject);
     await gotoProjectAnnotationFromNewUI(page, user, project);
     await filterToSample(page, 'tara_oceans_2009_030_d_regent_680');
-    await page.getByRole('button', { name: 'Filtered' }).click();
-    await page.getByRole('link', { name: 'Delete objects' }).click();
+    await page.getByRole('button', {name: 'Filtered'}).click();
+    await page.getByRole('link', {name: 'Delete objects'}).click();
     await expect(page.getByRole('main')).toContainText('USING Active Project Filters 13 objects');
-    await page.getByRole('button', { name: 'ERASE THESE OBJECTS !!!' }).click();
-    await page.getByRole('button', { name: 'Ok' }).click();
+    await page.getByRole('button', {name: 'ERASE THESE OBJECTS !!!'}).click();
+    await page.getByRole('button', {name: 'Ok'}).click();
     // Ensure green notif of OK
     const okMessage = page.getByText('SUCCESS:');
     await expect(okMessage).toBeVisible();
     await expect(okMessage).toHaveCount(0, {timeout: 10000});
     await gotoProjectAnnotationFromNewUI(page, user, subsetProject);
-    await expect(page.locator('#titlediv')).toContainText(subsetProject.title+' (3 , 10 , 0 , 0 / 13)');
-    for (const aRow of await page.getByRole('cell', { name: '.' }).all()) {
+    await expect(page.locator('#titlediv')).toContainText(subsetProject.title + ' (3 , 10 , 0 , 0 / 13)');
+    for (const aRow of await page.getByRole('cell', {name: '.'}).all()) {
         await aRow.click();
-    };
+    }
     await expect(page.locator('#topbar')).toContainText('13 Selected');
-    await page.locator('#myTabs').getByLabel('', { exact: true }).click();
+    await page.locator('#myTabs').getByLabel('', {exact: true}).click();
     await page.getByRole('textbox').fill('orth');
-    await page.getByRole('treeitem', { name: 'Orthasterias', exact: true }).click();
-    await page.getByRole('button', { name: ' Save pending changes [Ctrl+' }).click();
-    await expect(page.locator('#titlediv')).toContainText(subsetProject.title+' (13 , 0 , 0 , 0 / 13)');
+    await page.getByRole('treeitem', {name: 'Orthasterias', exact: true}).click();
+    await page.getByRole('button', {name: ' Save pending changes [Ctrl+'}).click();
+    await expect(page.locator('#titlediv')).toContainText(subsetProject.title + ' (13 , 0 , 0 , 0 / 13)');
     await expect(page.locator('#categtree')).toContainText('Orthasterias 13');
+    await gotoProjectSettings(page, user, project);
+    await mergeProject(page, project, subsetProject);
+    await ensureProjectGone(page, subsetProject);
 });
 
 test('show_inactive_menu_bug', async ({page}) => {
