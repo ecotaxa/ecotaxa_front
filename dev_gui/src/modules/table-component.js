@@ -391,7 +391,6 @@ export class TableComponent {
     this.on(this.eventnames.init, () => {
       // hide and move waitdiv in the wrapper for inner elements display
       this.dom.classList.remove(tablecss.hide);
-      this.waitDesactivate();
       if (this.afterLoad) this.afterLoad();
       // move import zones and/or search zone - reorg the page display
       //container.style.top = container.offsetTop + 'px';
@@ -404,6 +403,7 @@ export class TableComponent {
       this.initSort();
       this.initPlugins(container);
       console.log('plugin loaded', (Date.now() - this.dt) / 1000);
+      this.waitDesactivate();
     });
     // dismiss table when dismiss modal
     this.on(this.eventnames.dismiss, (e) => {
@@ -709,7 +709,7 @@ export class TableComponent {
   }
   initEvents() {
     this.on(this.eventnames.update, () => {
-      if (this.dom.classList.contains(tablecss.hide)) this.dom.classList.remove(tablecss.hide);
+      this.dom.classList.remove(tablecss.hide);
 
     });
   }
@@ -924,21 +924,24 @@ export class TableComponent {
     if (!searchinput) return;
     let searchstring = ``;
     const search_terms = debounce((el, value) => {
-      if (searchstring !== value) {
-        searchstring = value;
-        this.tableSearch(el, value);
-      }
+      this.tableSearch(el, value);
     }, 300);
     searchinput.addEventListener("keyup", (e) => {
       e.preventDefault();
       const el = e.currentTarget;
       const value = el.value;
-      search_terms(el, value);
+      if (searchstring !== value) {
+        searchstring = value;
+        search_terms(el, value);
+      }
     })
     searchinput.addEventListener("click", (e) => {
       const el = e.currentTarget
       const value = el.value;
-      if (searchstring !== value) search_terms(el, value);
+      if (searchstring !== value) {
+        searchstring = value;
+        search_terms(el, value);
+      }
     })
     let timesearch = false;
     this.on(this.eventnames.search, (query, matched) => {
@@ -1073,7 +1076,7 @@ export class TableComponent {
     }
 
     const refresh_details = () => {
-      if (this.dom.classList.contains(tablecss.hide)) this.dom.classList.remove(tablecss.hide);
+      this.dom.classList.remove(tablecss.hide);
       const details = this.dom.querySelectorAll(tableselectors.details);
       if (!details) return;
       details.forEach(item => {
@@ -1105,12 +1108,11 @@ export class TableComponent {
       let todir;
       // keep the same dir if sort on col changes
       if (parseInt(col.dataset.sortactive) === parseInt(coltosort)) {
-        todir = (col.classList.contains(tablecss.ascending)) ? 'desc' : ((col.classList.contains(tablecss.descending)) ? 'asc' : 'asc');
-      } else todir = (col.classList.contains(tablecss.ascending)) ? 'asc' : (col.classList.contains(tablecss.descending)) ? 'desc' : 'asc';
-      //  this.grid.columns.sort(coltosort, todir);
-
+        const asc = col.classList.contains(tablecss.ascending);
+        const desc = col.classList.contains(tablecss.descending);
+        todir = (asc) ? 'desc' : ((desc) ? 'asc' : 'asc');
+      } else todir = (asc) ? 'asc' : (desc) ? 'desc' : 'asc';
       this.sortColumn(col, coltosort, todir);
-
     }
     cols.forEach(col => {
       const altsort = (col.dataset.altsort) ? col.dataset.altsort.split(',') : null;
@@ -1185,19 +1187,22 @@ export class TableComponent {
     container.classList.add('max-h-[' + h + 'px]');
     container.style.height = h + 'px';
     btn.addEventListener('click', (e) => {
-      this.closeShowfull();
-      btn.classList.toggle(tablecss.bordert);
-      btn.classList.toggle(tablecss.borderb);
-      const ico = btn.querySelector('i');
-      ico.classList.toggle(tablecss.icochevrondown);
-      ico.classList.toggle(tablecss.iconchevronup);
-      container.classList.toggle(tablecss.overflowyhidden);
-      container.classList.toggle('max-h-[' + h + 'px]');
-      btn.querySelectorAll('span').forEach(span => {
-        span.classList.toggle('hidden');
+      const ishidden = container.classList.contains(tablecss.overflowyhidden);
+      requestAnimationFrame(() => {
+        this.closeShowfull();
+        btn.classList.toggle(tablecss.bordert);
+        btn.classList.toggle(tablecss.borderb);
+        const ico = btn.querySelector('i');
+        ico.classList.toggle(tablecss.icochevrondown);
+        ico.classList.toggle(tablecss.iconchevronup);
+        container.classList.toggle(tablecss.overflowyhidden);
+        container.classList.toggle('max-h-[' + h + 'px]');
+        btn.querySelectorAll('span').forEach(span => {
+          span.classList.toggle('hidden');
+        });
+        if (ishidden) container.style.height = h + 'px';
+        else container.style.height = 'auto';
       });
-      if (container.classList.contains(tablecss.overflowyhidden)) container.style.height = h + 'px';
-      else container.style.height = 'auto';
     });
   }
   makeExportable(container) {
@@ -1268,7 +1273,6 @@ export class TableComponent {
         });
       });
     });
-
   }
   toggleAddOns(list = null, on = false) {
     list = (list) ? list : [tableselectors.search + ' input', tableselectors.export];
