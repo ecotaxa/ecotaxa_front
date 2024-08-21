@@ -37,6 +37,13 @@ const tablecss = {
   tipover: 'tipover absolute z-10 text-stone-50 rounded bg-stone-600 px-2 py-0.5 -mt-5 ml-12 ',
   hide: 'hide',
   nowrap: 'truncate',
+  buttonexpand: 'button-expand',
+  bordert: 'border-t',
+  borderb: 'border-b',
+  maxtabstath: 'max-tabstat-h',
+  overflowyhidden: 'overflow-y-hidden',
+  icochevrondown: 'icon-chevron-down',
+  iconchevronup: 'icon-chevron-up',
 };
 const tableselectors = {
   table: '.table-table',
@@ -316,10 +323,12 @@ export class TableComponent {
     const datalastused = (this.params.lastused && this.params.lastused.length > 0) ? [] : null;
     this.dom.classList.add(tablecss.hide);
     const cell_to_obj = (cell) => {
+      const celltext = cell.innerText;
       const obj = {
-        data: cell.innerText,
+        data: celltext,
       }
-      if (cell.innerText !== cell.innerHTML) obj.html = cell.innerHTML;
+      const cellhtml = cell.innerHTML;
+      if (celltext !== cellhtml) obj.html = cellhtml;
       return obj;
     }
     const ths = (this.dom.querySelectorAll('thead tr th').length) ? this.dom.querySelectorAll('thead tr th') : this.dom.querySelectorAll('thead tr td');
@@ -712,7 +721,6 @@ export class TableComponent {
     if (this.params.details || this.dom.querySelector(tableselectors.details)) this.initDetails();
     else this.initEvents();
     if (this.params.onselect) this.initSelect(container);
-    if (this.dom.querySelector(tableselectors.tip)) this.initTips();
     if (this.dom.querySelectorAll('thead [data-altsort]').length) this.initAlternateSort(this.dom.querySelectorAll('thead [data-altsort]'));
     if (this.params.filters) {
       const top = this.wrapper.querySelector(tableselectors.top);
@@ -722,6 +730,8 @@ export class TableComponent {
         if (filters) top.prepend(filters);
       }
     }
+    if (this.dom.querySelector(tableselectors.tip)) this.initTips();
+
   }
   initSort() {
 
@@ -838,10 +848,10 @@ export class TableComponent {
 
   }
 
-  tableSearch(input, casesensitive = false) {
+  tableSearch(input, searchstring, casesensitive = false) {
     function search_string(str, casesensitive) {
       str = (casesensitive) ? str : str.toLowerCase();
-      return str; // str.replace(/[-[\]{}()*+?.,\\^$|#]/g, '\\$&');
+      return str;
     }
 
     function search_queries(str, casesensitive) {
@@ -859,7 +869,7 @@ export class TableComponent {
       return strs;
     }
 
-    let queries = search_queries(input.value);
+    let queries = search_queries(searchstring);
     let datas = this.grid.data,
       indexes = [];
     const trs = this.dom.querySelectorAll('tbody tr');
@@ -913,18 +923,22 @@ export class TableComponent {
     const searchinput = this.wrapper.querySelector(tableselectors.search + ' input');
     if (!searchinput) return;
     let searchstring = ``;
-    const search_terms = debounce((el) => {
-      searchstring = el.value;
-      this.tableSearch(el);
-    }, 500);
+    const search_terms = debounce((el, value) => {
+      if (searchstring !== value) {
+        searchstring = value;
+        this.tableSearch(el, value);
+      }
+    }, 300);
     searchinput.addEventListener("keyup", (e) => {
       e.preventDefault();
-      search_terms(e.currentTarget);
+      const el = e.currentTarget;
+      const value = el.value;
+      search_terms(el, value);
     })
     searchinput.addEventListener("click", (e) => {
-
-      if (searchstring !== e.currentTarget.value) search_terms(e.currentTarget);
-
+      const el = e.currentTarget
+      const value = el.value;
+      if (searchstring !== value) search_terms(el, value);
     })
     let timesearch = false;
     this.on(this.eventnames.search, (query, matched) => {
@@ -942,7 +956,7 @@ export class TableComponent {
           refresh_details();
           delete this.dom.dataset.issearching;
           timesearch = false;
-        }, 300);
+        }, 200);
       }
     });
   }
@@ -1158,31 +1172,31 @@ export class TableComponent {
   makeExpandable(container) {
     if (container.querySelector('table').offsetHeight < container.offsetHeight) return;
     const btn = document.createElement('div');
-    btn.classList.add('button-expand');
-    btn.classList.add('border-t');
+    btn.classList.add(tablecss.buttonexpand);
+    btn.classList.add(tablecss.bordert);
     btn.title = this.params.expand;
     btn.innerHTML = `<span class="small-caps block mx-auto p-0">${this.params.expand}</span><i class="clear-both p-0 mx-auto icon icon-chevron-down hover:fill-secondblue-500"></i><span class="small-caps block mx-auto p-0 hidden">${
                   this.params.shrink}</span>`;
     container.parentElement.insertBefore(btn, container.nextElementSibling);
-    container.classList.add('overflow-y-hidden');
-    container.classList.remove('max-tabstat-h');
+    container.classList.add(tablecss.overflowyhidden);
+    container.classList.remove(tablecss.maxtabstath);
     container.parentElement.style.height = 'auto';
     const h = parseInt(this.wrapper.querySelector('tbody tr').offsetHeight) * ((this.params.maxrows) ? this.params.maxrows : 20);
     container.classList.add('max-h-[' + h + 'px]');
     container.style.height = h + 'px';
     btn.addEventListener('click', (e) => {
       this.closeShowfull();
-      btn.classList.toggle('border-t');
-      btn.classList.toggle('border-b');
+      btn.classList.toggle(tablecss.bordert);
+      btn.classList.toggle(tablecss.borderb);
       const ico = btn.querySelector('i');
-      ico.classList.toggle('icon-chevron-down');
-      ico.classList.toggle('icon-chevron-up');
-      container.classList.toggle('overflow-y-hidden');
+      ico.classList.toggle(tablecss.icochevrondown);
+      ico.classList.toggle(tablecss.iconchevronup);
+      container.classList.toggle(tablecss.overflowyhidden);
       container.classList.toggle('max-h-[' + h + 'px]');
       btn.querySelectorAll('span').forEach(span => {
         span.classList.toggle('hidden');
       });
-      if (container.classList.contains('overflow-y-hidden')) container.style.height = h + 'px';
+      if (container.classList.contains(tablecss.overflowyhidden)) container.style.height = h + 'px';
       else container.style.height = 'auto';
     });
   }
@@ -1224,47 +1238,37 @@ export class TableComponent {
     // show big cell content
     let current = null;
     this.dom.querySelectorAll(tableselectors.tip).forEach(tip => {
-      tip.addEventListener('mouseenter', (e) => {
-        if (tip.classList.contains(tablecss.showfull) || (tip.scrollHeight > tip.offsetHeight)) {
-          tip.style.cursor = 'pointer';
-        }
+      const scrollheight = tip.scrollHeight;
+      const parent = tip.parentElement;
+      const maxh = parent.offsetHeight;
+      const showmore = (scrollheight > maxh);
+      if (showmore === false) return;
+      requestAnimationFrame(() => {
+        tip.style.cursor = 'pointer';
       });
       tip.addEventListener('click', (e) => {
-        const styleparent = window.getComputedStyle(tip.parentElement);
-        const style = window.getComputedStyle(tip.parentElement);
-        if (tip.classList.contains(tablecss.showfull)) {
-          tip.classList.remove(tablecss.showfull);
-          tip.parentElement.style.minHeight = 'none';
-          tip.parentElement.style.height = 'auto';
-          tip.style.maxWidth = tip.style.minWidth = 'none';
-          if (tip.dataset.p) {
-            tip.style.paddingLeft = tip.dataset.p.l;
-            tip.style.paddingRight = tip.dataset.p.r;
-            tip.style.paddingTop = tip.dataset.p.t;
-            tip.style.paddingLeft = tip.dataset.p.b;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const refresh_tip = (showfull, maxw) => {
+          if (showfull) {
+            parent.classList.remove(tablecss.showfull);
+            tip.style.width = 'auto';
+            current = null;
+          } else {
+            if (current) current.classList.remove(tablecss.showfull);
+            parent.classList.add(tablecss.showfull);
+            tip.style.width = maxw + 'px';
+            current = parent;
           }
-          current = null;
-        } else if (tip.scrollHeight > tip.offsetHeight) {
-          if (current) current.classList.remove(tablecss.showfull);
-
-          const h = parseInt(tip.clientHeight);
-          tip.parentElement.style.minHeight = tip.parentElement.style.height = (((h < parseInt(styleparent.maxHeight)) ? h : parseInt(styleparent.maxHeight)) - 2 * parseInt(styleparent.padding)) + 'px';
-
-          if (!tip.dataset.p) tip.dataset.p = {
-            l: style.paddingLeft,
-            r: style.paddingRight,
-            t: style.paddingTop,
-            b: style.paddingBottom
-          };
-          tip.style.maxWidth = tip.style.minWidth = tip.clientWidth + 'px';
-          tip.classList.add(tablecss.showfull);
-          tip.style.top = (parseInt(tip.offsetTop) - parseInt(styleparent.padding)) + 'px';
-
-          current = tip;
         }
-
+        const showfull = parent.classList.contains(tablecss.showfull);
+        const maxw = parseInt(parent.offsetWidth);
+        requestAnimationFrame(() => {
+          refresh_tip(showfull, maxw);
+        });
       });
     });
+
   }
   toggleAddOns(list = null, on = false) {
     list = (list) ? list : [tableselectors.search + ' input', tableselectors.export];
