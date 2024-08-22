@@ -8,6 +8,7 @@ import {
   sort_items,
   is_object,
   debounce,
+  html_spinner
 } from '../modules/utils.js';
 import {
   css,
@@ -44,6 +45,8 @@ const tablecss = {
   overflowyhidden: 'overflow-y-hidden',
   icochevrondown: 'icon-chevron-down',
   iconchevronup: 'icon-chevron-up',
+  pointer: 'cursor-pointer',
+  hidden: 'hidden',
 };
 const tableselectors = {
   table: '.table-table',
@@ -176,10 +179,13 @@ export class TableComponent {
     this.waitdiv = waitdiv;
   }
 
-  waitDesactivate(message = null, type = 'info') {
+  waitDeactivate(message = null, type = 'info') {
     if (!this.waitdiv) return;
-    if (message) this.waitdiv.innerHTML = `<div class="alert is-${type}">${message}</div>`;
-    else this.waitdiv.classList.add(css.hide);
+    if (message) {
+      this.waitdiv.classList.remove(css.hide);
+      if (type === null) this.waitdiv.innerHTML = `${message}`;
+      this.waitdiv.innerHTML = `<div class="alert is-${type}">${message}</div>`;
+    } else this.waitdiv.classList.add(css.hide);
   }
 
   deferLoad(container, from) {
@@ -225,14 +231,19 @@ export class TableComponent {
     }).then(async tabledef => {
       if (this.waitdiv) this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : default_messages.dataloaded);
       if (pagestart === 0) {
+        let now = Date.now();
         console.log('seconds to fetch', (Date.now() - this.dt) / 1000);
-        this.dt = Date.now();
+        this.dt = now;
         await this.tableActivate(container, tabledef);
+        now = Date.now();
+        console.log('plugins loaded', (Date.now() - this.dt) / 1000);
+        this.dt = now;
       } else if (tabledef.length) this.domInsertRows(tabledef);
       else pagesize = 0;
       if (pagesize > 0) this.fetchData(container, fromurl, pagestart + pagesize);
     }).catch((err) => { /* print error from response */
-      this.waitDesactivate(err.status + ` ` + err.statusText, 'error');
+      console.log('error', err)
+      this.waitDeactivate(err.status + ` ` + err.statusText, 'error');
     })
   }
   async dataToTable(tabledef) {
@@ -342,7 +353,7 @@ export class TableComponent {
     }
     ths.forEach((th, index) => {
       const col = Object.assign({}, th.dataset);
-      if (col.mask) th.classList.add('hidden');
+      if (col.mask) th.classList.add(tablecss.hidden);
       if (col.hidden && string_to_boolean(col.hidden)) {
         col.hidden = true;
         th.remove();
@@ -363,7 +374,7 @@ export class TableComponent {
       else if (i === cellid) tr.dataset[this.cellidname] = this.getCellData(i, this.cellidname, cellid);
       const data = [];
       tr.querySelectorAll('th,td').forEach((td, index) => {
-        if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add('hidden');
+        if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add(tablecss.hidden);
         if (this.grid.hidden.indexOf(index) >= 0) td.remove();
         data.push(td.innerText);
       });
@@ -371,7 +382,7 @@ export class TableComponent {
     });
 
     this.dom.querySelectorAll('tfoot tr th').forEach((td, index) => {
-      if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add('hidden');
+      if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add(tablecss.hidden);
       if (this.grid.hidden.indexOf(index) >= 0) td.remove();
     });
     this.dom.classList.remove(tablecss.hide);
@@ -388,36 +399,28 @@ export class TableComponent {
 
   }
   async tableActivate(container, tabledef = null) {
-    this.on(this.eventnames.init, () => {
+    this.on(this.eventnames.load, () => {
+      this.initPlugins(container);
+      this.initSearch();
+      this.initSort();
+      this.waitDeactivate();
       // hide and move waitdiv in the wrapper for inner elements display
       this.dom.classList.remove(tablecss.hide);
       if (this.afterLoad) this.afterLoad();
       // move import zones and/or search zone - reorg the page display
-      //container.style.top = container.offsetTop + 'px';
       // fetch once the same table
       container.dataset.table = this.params.table = true;
-
-    });
-    this.on(this.eventnames.load, () => {
-      this.initSearch();
-      this.initSort();
-      this.initPlugins(container);
-      console.log('plugin loaded', (Date.now() - this.dt) / 1000);
-      this.waitDesactivate();
+      this.initialized = true;
     });
     // dismiss table when dismiss modal
     this.on(this.eventnames.dismiss, (e) => {
       this.destroy();
     });
+
     if (tabledef) tabledef = await this.dataToTable(tabledef);
     else await this.tableToData();
     if (this.grid.data.length) this.emit(this.eventnames.load);
-    setTimeout(() => {
-      this.emit(this.eventnames.init);
-      this.initialized = true;
-    }, 10)
     instance[this.instanceid] = this;
-
   }
 
   tableAppendRows(rows) {
@@ -710,7 +713,6 @@ export class TableComponent {
   initEvents() {
     this.on(this.eventnames.update, () => {
       this.dom.classList.remove(tablecss.hide);
-
     });
   }
   initPlugins(container) {
@@ -718,8 +720,9 @@ export class TableComponent {
     if (this.params.import && this.initImport) this.initImport(this);
     if (this.params.expand) this.makeExpandable(container);
     if (this.params.export) this.makeExportable(container);
-    if (this.params.details || this.dom.querySelector(tableselectors.details)) this.initDetails();
-    else this.initEvents();
+    if (this.params.details || this.dom.querySelector(tableselectors.details)) {
+      this.initDetails();
+    } else this.initEvents();
     if (this.params.onselect) this.initSelect(container);
     if (this.dom.querySelectorAll('thead [data-altsort]').length) this.initAlternateSort(this.dom.querySelectorAll('thead [data-altsort]'));
     if (this.params.filters) {
@@ -730,7 +733,9 @@ export class TableComponent {
         if (filters) top.prepend(filters);
       }
     }
-    if (this.dom.querySelector(tableselectors.tip)) this.initTips();
+    if (this.dom.querySelector(tableselectors.tip)) {
+      this.initTips();
+    }
 
   }
   initSort() {
@@ -848,7 +853,8 @@ export class TableComponent {
 
   }
 
-  tableSearch(input, searchstring, casesensitive = false) {
+
+  tableSearch(searchstring, casesensitive = false) {
     function search_string(str, casesensitive) {
       str = (casesensitive) ? str : str.toLowerCase();
       return str;
@@ -868,11 +874,10 @@ export class TableComponent {
       if (str.length) strs = strs.concat(str.split(/\s+/));
       return strs;
     }
-
-    let queries = search_queries(searchstring);
+    const queries = search_queries(searchstring);
+    this.emit(this.eventnames.search, searchstring, queries);
     let datas = this.grid.data,
       indexes = [];
-    const trs = this.dom.querySelectorAll('tbody tr');
     const cellid = this.getCellId(this.cellidname);
     queries.forEach(qry => {
       indexes = [];
@@ -907,11 +912,7 @@ export class TableComponent {
       });
     });
 
-    trs.forEach((tr, index) => {
-      const val = (tr.dataset[this.cellidname] !== null) ? tr.dataset[this.cellidname] : tr.cells[cellid].textContent;
-      if ((queries.length > 0 && indexes.length === 0) || indexes.indexOf(val) < 0) tr.hidden = true;
-      else tr.hidden = false;
-    });
+    this.emit(this.eventnames.searchend, queries, indexes, cellid);
 
   }
 
@@ -922,46 +923,54 @@ export class TableComponent {
     // search items
     const searchinput = this.wrapper.querySelector(tableselectors.search + ' input');
     if (!searchinput) return;
+    searchinput.classList.add(css.hide);
     let searchstring = ``;
-    const search_terms = debounce((el, value) => {
-      this.tableSearch(el, value);
+    const display_search = function(queries, indexes, table, cellidname, cellid) {
+      const trs = table.querySelectorAll('tbody tr');
+      trs.forEach((tr, index) => {
+        const val = (tr.dataset[cellidname] !== null) ? tr.dataset[cellidname] : tr.cells[cellid].textContent;
+        if ((queries.length > 0 && indexes.length === 0) || indexes.indexOf(val) < 0) tr.hidden = true;
+        else tr.hidden = false;
+      });
+    };
+    const clear_search = function(table) {
+      const trs = table.querySelectorAll('tbody tr[hidden=""]');
+      trs.forEach(tr => {
+        tr.hidden = false;
+      });
+    }
+    const search_terms = debounce((value) => {
+      this.tableSearch(value);
     }, 300);
-    searchinput.addEventListener("keyup", (e) => {
-      e.preventDefault();
-      const el = e.currentTarget;
-      const value = el.value;
-      if (searchstring !== value) {
+    searchinput.addEventListener("input", (e) => {
+      const value = e.target.value;
+      if (value !== searchstring) {
         searchstring = value;
-        search_terms(el, value);
+        if (value === '') clear_search(this.dom);
+        else if (value.length > 2) search_terms(value);
       }
-    })
+    });
     searchinput.addEventListener("click", (e) => {
-      const el = e.currentTarget
-      const value = el.value;
-      if (searchstring !== value) {
-        searchstring = value;
-        search_terms(el, value);
+      if (e.target.value !== searchstring) search_terms(e.target, this.dom);
+    });
+    this.on(this.eventnames.search, (searchstring, queries) => {
+      if (this.searching === false) {
+        if (this.plugins.hasOwnProperty('jsDetail')) this.plugins['jsDetail'].activeDetail(false);
       }
-    })
-    let timesearch = false;
-    this.on(this.eventnames.search, (query, matched) => {
-      if (this.plugins.hasOwnProperty('jsDetail')) this.plugins['jsDetail'].activeDetail(false);
       this.searching = true;
     });
-    this.on(this.eventnames.searchend, (query, matched) => {
-
+    this.on(this.eventnames.searchend, (queries, indexes, cellid) => {
+      display_search(queries, indexes, this.dom, this.cellidname, cellid);
       this.searching = false;
     });
     this.on(this.eventnames.update, () => {
-      if (timesearch === false) {
-        timesearch = true;
+      if (this.searching === false) {
         setTimeout(() => {
           refresh_details();
-          delete this.dom.dataset.issearching;
-          timesearch = false;
-        }, 200);
+        }, 300);
       }
     });
+    searchinput.classList.remove(css.hide);
   }
   initSelect(container) {
     const inputs = this.dom.querySelectorAll('input[name^="' + this.instanceid + '"]');
@@ -991,7 +1000,7 @@ export class TableComponent {
     const popup_selected = (top = null, left = null, forceclose = false) => {
       if (selectaction.dataset.close) {
         document.body.append(selectaction);
-        close.classList.remove('hidden');
+        close.classList.remove(tablecss.hidden);
         selectaction.classList.add(tablecss.absinput);
       }
       if (top !== null && left !== null) {
@@ -1005,7 +1014,7 @@ export class TableComponent {
           delete selectaction.dataset.close;
         } else {
           selectaction.dataset.close = true;
-          close.classList.add('hidden');
+          close.classList.add(tablecss.hidden);
           const toptable = this.wrapper.querySelector(tableselectors.top) ? this.wrapper.querySelector(tableselectors.top) : this.wrapper;
           toptable.prepend(selectaction);
           selectaction.classList.remove(tablecss.absinput);
@@ -1163,14 +1172,8 @@ export class TableComponent {
         });
       }
     });
-
   }
 
-
-  closeShowfull() {
-    const showfull = document.querySelector('.' + css.component.table.tip + '.' + tablecss.showfull);
-    if (showfull) showfull.click();
-  }
   makeExpandable(container) {
     if (container.querySelector('table').offsetHeight < container.offsetHeight) return;
     const btn = document.createElement('div');
@@ -1188,8 +1191,7 @@ export class TableComponent {
     container.style.height = h + 'px';
     btn.addEventListener('click', (e) => {
       const ishidden = container.classList.contains(tablecss.overflowyhidden);
-      requestAnimationFrame(() => {
-        this.closeShowfull();
+      const make_expand = debounce(() => {
         btn.classList.toggle(tablecss.bordert);
         btn.classList.toggle(tablecss.borderb);
         const ico = btn.querySelector('i');
@@ -1198,11 +1200,12 @@ export class TableComponent {
         container.classList.toggle(tablecss.overflowyhidden);
         container.classList.toggle('max-h-[' + h + 'px]');
         btn.querySelectorAll('span').forEach(span => {
-          span.classList.toggle('hidden');
+          span.classList.toggle(tablecss.hidden);
         });
         if (ishidden) container.style.height = h + 'px';
         else container.style.height = 'auto';
-      });
+      }, 100);
+      make_expand();
     });
   }
   makeExportable(container) {
@@ -1245,31 +1248,33 @@ export class TableComponent {
     this.dom.querySelectorAll(tableselectors.tip).forEach(tip => {
       const scrollheight = tip.scrollHeight;
       const parent = tip.parentElement;
-      const maxh = parent.offsetHeight;
-      const showmore = (scrollheight > maxh);
+      const offsetHeight = tip.offsetHeight;
+      const showmore = (scrollheight > offsetHeight);
       if (showmore === false) return;
       requestAnimationFrame(() => {
-        tip.style.cursor = 'pointer';
+        tip.classList.add(tablecss.pointer);
       });
+      let clicked = false;
+      const refresh_tip = (showfull) => {
+        if (showfull) {
+          parent.classList.remove(tablecss.showfull);
+          current = null;
+        } else {
+          if (current) current.classList.remove(tablecss.showfull);
+          parent.classList.add(tablecss.showfull);
+          current = parent;
+        }
+
+      }
       tip.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        const refresh_tip = (showfull, maxw) => {
-          if (showfull) {
-            parent.classList.remove(tablecss.showfull);
-            tip.style.width = 'auto';
-            current = null;
-          } else {
-            if (current) current.classList.remove(tablecss.showfull);
-            parent.classList.add(tablecss.showfull);
-            tip.style.width = maxw + 'px';
-            current = parent;
-          }
-        }
+        if (clicked) return;
         const showfull = parent.classList.contains(tablecss.showfull);
-        const maxw = parseInt(parent.offsetWidth);
+        clicked = true;
         requestAnimationFrame(() => {
-          refresh_tip(showfull, maxw);
+          refresh_tip(showfull);
+          clicked = false;
         });
       });
     });
