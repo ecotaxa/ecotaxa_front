@@ -1,15 +1,17 @@
 import DOMPurify from 'dompurify';
 import equal from 'deep-equal';
 import {
-  add_custom_events,
   fetchSettings,
   download_url,
   string_to_boolean,
   sort_items,
   is_object,
-  debounce,
   html_spinner
 } from '../modules/utils.js';
+import debounce from 'debounce';
+import {
+  EventEmitter
+} from '../modules/event-emitter.js';
 import {
   css,
   models,
@@ -121,7 +123,7 @@ export class TableComponent {
 
   }
   init(container) {
-    add_custom_events(this);
+    this.eventEmitter = new EventEmitter();
     this.params = container.dataset;
     let table = container.querySelector('table');
     if (!table) {
@@ -142,7 +144,7 @@ export class TableComponent {
       attributes: {
         class: tableselectors.search.substr(1)
       },
-      html: `<input type="search" name="table-search" placeholder="${this.labels.placeholder}" class="${tableselectors.input.substr(1)}  ${css.input} ${css.hide}">`
+      html: `<input type="search" name="table-search" placeholder="${this.labels.placeholder}" class="${tableselectors.input.substr(1)}  ${css.input}" hidden="">`
     }];
     let wrapper = this.objToElement({
       nodename: 'DIV',
@@ -332,7 +334,7 @@ export class TableComponent {
   tableToData() {
     if (!this.dom.querySelector('thead')) return;
     const datalastused = (this.params.lastused && this.params.lastused.length > 0) ? [] : null;
-    this.dom.classList.add(tablecss.hide);
+    this.dom.classList.add(css.hide);
     const cell_to_obj = (cell) => {
       const celltext = cell.innerText;
       const obj = {
@@ -385,7 +387,7 @@ export class TableComponent {
       if (this.grid.columns[index].hasOwnProperty('mask')) td.classList.add(tablecss.hidden);
       if (this.grid.hidden.indexOf(index) >= 0) td.remove();
     });
-    this.dom.classList.remove(tablecss.hide);
+    this.dom.classList.remove(css.hide);
     return;
   }
   renderTbody(tbody) {
@@ -399,13 +401,13 @@ export class TableComponent {
 
   }
   async tableActivate(container, tabledef = null) {
-    this.on(this.eventnames.load, () => {
+    this.eventEmitter.on(this.eventnames.load, () => {
       this.initPlugins(container);
       this.initSearch();
       this.initSort();
       this.waitDeactivate();
       // hide and move waitdiv in the wrapper for inner elements display
-      this.dom.classList.remove(tablecss.hide);
+      this.dom.classList.remove(css.hide);
       if (this.afterLoad) this.afterLoad();
       // move import zones and/or search zone - reorg the page display
       // fetch once the same table
@@ -413,13 +415,13 @@ export class TableComponent {
       this.initialized = true;
     });
     // dismiss table when dismiss modal
-    this.on(this.eventnames.dismiss, (e) => {
+    this.eventEmitter.on(this.eventnames.dismiss, (e) => {
       this.destroy();
     });
 
     if (tabledef) tabledef = await this.dataToTable(tabledef);
     else await this.tableToData();
-    if (this.grid.data.length) this.emit(this.eventnames.load);
+    if (this.grid.data.length) this.eventEmitter.emit(this.eventnames.load);
     instance[this.instanceid] = this;
   }
 
@@ -711,8 +713,8 @@ export class TableComponent {
     this.grid.columns = Object.entries(columns).map(([key, column], index) => map_column(key, column, index));
   }
   initEvents() {
-    this.on(this.eventnames.update, () => {
-      this.dom.classList.remove(tablecss.hide);
+    this.eventEmitter.on(this.eventnames.update, () => {
+      this.dom.classList.remove(css.hide);
     });
   }
   initPlugins(container) {
@@ -767,7 +769,7 @@ export class TableComponent {
     });
     this.sorting = false;
     // remove details when sorting
-    this.on(this.eventnames.sorting, (direction, index) => {
+    this.eventEmitter.on(this.eventnames.sorting, (direction, index) => {
 
       if (this.plugins.hasOwnProperty('jsDetail')) this.plugins['jsDetail'].activeDetail(false);
       this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
@@ -776,7 +778,7 @@ export class TableComponent {
       this.sorting = true;
     });
     // remove details when sorting
-    this.on(this.eventnames.sorted, (direction, index) => {
+    this.eventEmitter.on(this.eventnames.sorted, (direction, index) => {
       this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
         a.classList.remove(((i === index) ? css.wait : css.disabled))
       });
@@ -787,7 +789,7 @@ export class TableComponent {
     dir = (dir === null) ? ((th.classList.contains(tablecss.ascending)) ? false : (th.classList.contains(tablecss.descending)) ? true : ((th.dataset.sort) ? false : true)) : dir;
     th.classList.toggle(tablecss.ascending);
     th.classList.toggle(tablecss.descending);
-    this.emit(this.eventnames.sorting, dir, th.cellIndex);
+    this.eventEmitter.emit(this.eventnames.sorting, dir, th.cellIndex);
     let rows = this.grid.data.map((row, i) => {
       const cell = is_object(row[index]) ? JSON.stringify(row[index]) : ((Array.isArray(row[index])) ? row[index][0] : row[index]);
       return {
@@ -848,7 +850,7 @@ export class TableComponent {
     this.grid.data = sorted;
     this.dom.replaceChild(clone, tbody);
 
-    this.emit(this.eventnames.sorted, dir, th.cellIndex);
+    this.eventEmitter.emit(this.eventnames.sorted, dir, th.cellIndex);
 
 
   }
@@ -875,7 +877,7 @@ export class TableComponent {
       return strs;
     }
     const queries = search_queries(searchstring);
-    this.emit(this.eventnames.search, searchstring, queries);
+    this.eventEmitter.emit(this.eventnames.search, searchstring, queries);
     let datas = this.grid.data,
       indexes = [];
     const cellid = this.getCellId(this.cellidname);
@@ -911,9 +913,7 @@ export class TableComponent {
         }
       });
     });
-
-    this.emit(this.eventnames.searchend, queries, indexes, cellid);
-
+    this.eventEmitter.emit(this.eventnames.searchend, queries, indexes, cellid);
   }
 
   initSearch() {
@@ -923,16 +923,15 @@ export class TableComponent {
     // search items
     const searchinput = this.wrapper.querySelector(tableselectors.search + ' input');
     if (!searchinput) return;
-    searchinput.classList.add(css.hide);
     let searchstring = ``;
-    const display_search = function(queries, indexes, table, cellidname, cellid) {
+    const display_search = debounce(function(queries, indexes, table, cellidname, cellid) {
       const trs = table.querySelectorAll('tbody tr');
       trs.forEach((tr, index) => {
         const val = (tr.dataset[cellidname] !== null) ? tr.dataset[cellidname] : tr.cells[cellid].textContent;
         if ((queries.length > 0 && indexes.length === 0) || indexes.indexOf(val) < 0) tr.hidden = true;
         else tr.hidden = false;
       });
-    };
+    }, 50);
     const clear_search = function(table) {
       const trs = table.querySelectorAll('tbody tr[hidden=""]');
       trs.forEach(tr => {
@@ -946,24 +945,32 @@ export class TableComponent {
       const value = e.target.value;
       if (value !== searchstring) {
         searchstring = value;
-        if (value === '') clear_search(this.dom);
-        else if (value.length > 2) search_terms(value);
+        if (value === '') {
+          search_terms.clear();
+          clear_search(this.dom);
+        } else if (value.length > 2) {
+          search_terms(value);
+        }
       }
     });
     searchinput.addEventListener("click", (e) => {
-      if (e.target.value !== searchstring) search_terms(e.target, this.dom);
+      if (e.target.value !== searchstring) {
+        search_terms(e.target, this.dom);
+        search_terms.clear();
+      } else search_terms.flush();
+
     });
-    this.on(this.eventnames.search, (searchstring, queries) => {
+    this.eventEmitter.on(this.eventnames.search, (searchstring, queries) => {
       if (this.searching === false) {
         if (this.plugins.hasOwnProperty('jsDetail')) this.plugins['jsDetail'].activeDetail(false);
       }
       this.searching = true;
     });
-    this.on(this.eventnames.searchend, (queries, indexes, cellid) => {
+    this.eventEmitter.on(this.eventnames.searchend, (queries, indexes, cellid) => {
       display_search(queries, indexes, this.dom, this.cellidname, cellid);
       this.searching = false;
     });
-    this.on(this.eventnames.update, () => {
+    this.eventEmitter.on(this.eventnames.update, () => {
       if (this.searching === false) {
         setTimeout(() => {
           refresh_details();
@@ -1085,7 +1092,7 @@ export class TableComponent {
     }
 
     const refresh_details = () => {
-      this.dom.classList.remove(tablecss.hide);
+      this.dom.classList.remove(css.hide);
       const details = this.dom.querySelectorAll(tableselectors.details);
       if (!details) return;
       details.forEach(item => {
@@ -1258,10 +1265,15 @@ export class TableComponent {
       const refresh_tip = (showfull) => {
         if (showfull) {
           parent.classList.remove(tablecss.showfull);
+          delete parent.dataset.showfull;
           current = null;
         } else {
-          if (current) current.classList.remove(tablecss.showfull);
+          if (current) {
+            current.classList.remove(tablecss.showfull);
+            delete current.dataset.showfull;
+          }
           parent.classList.add(tablecss.showfull);
+          parent.dataset.showfull = true;
           current = parent;
         }
 
@@ -1270,7 +1282,7 @@ export class TableComponent {
         e.preventDefault();
         e.stopImmediatePropagation();
         if (clicked) return;
-        const showfull = parent.classList.contains(tablecss.showfull);
+        const showfull = parent.dataset.showfull;
         clicked = true;
         requestAnimationFrame(() => {
           refresh_tip(showfull);
@@ -1286,7 +1298,7 @@ export class TableComponent {
     list.forEach(addon => {
       addon = this.wrapper.querySelector(addon);
       if (addon) {
-        if (on) addon.classList.remove(css.hide)
+        if (on) addon.classList.remove(css.hide);
         else addon.classList.add(css.hide);
       }
     });

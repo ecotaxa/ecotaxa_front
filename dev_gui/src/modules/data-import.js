@@ -7,8 +7,10 @@ import {
 } from '../modules/project-privileges.js';
 import {
   fetchSettings,
-  unescape_html
+  unescape_html,
+  create_box
 } from '../modules/utils.js';
+import debounce from 'debounce';
 import {
   models,
   typeimport,
@@ -22,6 +24,10 @@ const key_privileges = Object.keys(defined_privileges).reduce(function(result, k
 }, {});
 let instance;
 css.imported = 'imported';
+css.tomselected = 'tomselected';
+css.hiddenaccessible = 'ts-hidden-accessible';
+css.arrowout = 'icon-arrow-pointing-out';
+css.arrowin = 'icon-arrow-pointing-in';
 domselectors.resetbutton = '.import-list-reset';
 export class DataImport {
   content_selector = '.modal-content';
@@ -76,8 +82,7 @@ export class DataImport {
     let projid = this.form.querySelector('#' + domselectors.projid);
     if (projid && projid.value) {
       projid = this.dom.querySelector('[' + this.selector + '="' + projid.value + '"]');
-      if (projid) projid.classList.add(css.hide);
-
+      if (projid) projid.hidden = true;
     }
     const indextocheck = this.indexToCheck();
     this.selectors = this.dom.querySelectorAll('[' + this.selector + '] button, [' + this.selector + '] input');
@@ -88,6 +93,7 @@ export class DataImport {
       else {
         const evt = (selector.tagName.toLowerCase() === 'input') ? 'change' : 'click';
         const apply_selection = (e) => {
+          e.preventDefault();
           e.stopImmediatePropagation();
           const target = e.currentTarget;
           target.disabled = true;
@@ -100,9 +106,9 @@ export class DataImport {
     if (this.button) {
       this.tabbutton.addEventListener('click', (e) => {
         e.stopImmediatePropagation();
+        e.preventDefault();
         this.resizeZone(e);
       });
-      this.showImport(false);
     }
   }
   columnProperty(name, index, th) {
@@ -159,6 +165,7 @@ export class DataImport {
         const thcell = (tdindex >= 0) ? thcells[tdindex] : null;
         switch (what) {
           case typeimport.taxo:
+            if (!importzone) return;
             // accumulate and show in import win - move the form field in modal win to view the changes and benefit of tom-select component functs...
             ts = importzone.tomselect;
             let taxons = celldata;
@@ -251,11 +258,20 @@ export class DataImport {
                   } else {
                     opt = importzone.querySelector('option[value="' + member.id + '"]');
                     if (opt === null) {
-                      opt = document.createElement('option');
-                      opt.value = member.id;
-                      opt.dataset.optgroup = newpriv;
-                      opt.selected = opt.defaultSelected = true;
-                      opt.text = member.name;
+                      opt = create_box('option', {
+                        value: member.id,
+                        dataset: {
+                          optgroup: newpriv
+                        },
+                        selected: true,
+                        defaultSelected: true,
+                        text: member.name
+                      })
+                      /*  opt = document.createElement('option');
+                        opt.value = member.id;
+                        opt.dataset.optgroup = newpriv;
+                        opt.selected = opt.defaultSelected = true;
+                        opt.text = member.name;*/
                       importzone.add(opt);
                     } else opt.dataset.optgroup = newpriv;
                   }
@@ -301,8 +317,9 @@ export class DataImport {
 
     if (thcells.length) {
       if (this.button) {
+        const activate = (!this.button.dataset.activated && (what === typeimport.taxo || what === typeimport.privileges));
         this.showImport(showbtns);
-        if (!this.button.dataset.activated && (what === typeimport.taxo || what === typeimport.privileges)) this.activateButtons(what, selectcells);
+        if (activate) this.activateButtons(what, selectcells);
       } else this.makeImport(null, selectcells, what, true);
     }
     //
@@ -403,6 +420,7 @@ export class DataImport {
     if (!clearbutton) return;
     clearbutton.addEventListener('click', (e) => {
       e.stopImmediatePropagation();
+      e.preventDefault();
       if (!this.importcontainer) return;
       this.resetSelectors();
       this.button.disabled = false;
@@ -413,42 +431,47 @@ export class DataImport {
   createImportzone(name) {
     this.showImport(true);
     let importzone = this.importcontainer.querySelector('#' + this.importid);
-
-
     if (name === typeimport.privileges) {
       if (!importzone) {
-        importzone = document.createElement('select');
-        this.importid = importzone.id = this.importid + '-' + name;
-        importzone.dataset.type = models.user;
-        importzone.multiple = true;
-        importzone.dataset.priv = true;
-        this.importcontainer.append(importzone);
-
+        this.importid = this.importid + '-' + name;
+        importzone = create_box('select', {
+          id: this.importid,
+          dataset: {
+            type: models.user,
+            priv: true
+          },
+          multiple: true
+        }, this.importcontainer);
+        /*  importzone = document.createElement('select');
+          this.importid = importzone.id = this.importid + '-' + name;
+          importzone.dataset.type = models.user;
+          importzone.multiple = true;
+          importzone.dataset.priv = true;
+          this.importcontainer.append(importzone);*/
       }
-    } else {
+    } else if (!importzone) {
       const import_target = (this.form.querySelector('[name="' + name + '"]')) ? this.form.querySelector('[name="' + name + '"]') : this.form.querySelector('[data-importfield="' + name + '"]');
+      if (!import_target) return;
       const ts = import_target.tomselect;
-
-      if (!importzone) {
-        if (!import_target) return;
-        this.importzoneid = import_target.id;
-        // tomselect ?
-        importzone = import_target.cloneNode();
-        importzone.classList.remove('tomselected');
-        importzone.classList.remove('ts-hidden-accessible');
-        // keep original id to replace data on apply import
-        importzone.dataset.origin = importzone.id;
-        importzone.id = this.importid;
-        importzone.name = this.importid + '_' + importzone.name;
-        this.importcontainer.insertAdjacentHTML('afterbegin', importzone.outerHTML);
-        if (ts) {
-          importzone = this.importcontainer.querySelector('#' + this.importid);
-          const jsTomSelect = new JsTomSelect();
-          jsTomSelect.applyTo(importzone);
-        }
-        this.activateClear();
-
+      this.importzoneid = import_target.id;
+      // tomselect ?
+      const temp = create_box('div', {});
+      temp.innerHTML = import_target.outerHTML;
+      importzone = temp.firstChild;
+      temp.remove();
+      importzone.classList.remove(css.tomselected);
+      importzone.classList.remove(css.hiddenaccessible);
+      // keep original id to replace data on apply import
+      importzone.dataset.origin = importzone.id;
+      importzone.id = this.importid;
+      importzone.name = this.importid + '_' + importzone.name;
+      this.importcontainer.prepend(importzone);
+      if (ts) {
+        importzone = this.importcontainer.querySelector('#' + this.importid);
+        const jsTomSelect = new JsTomSelect();
+        jsTomSelect.applyTo(importzone);
       }
+      this.activateClear();
     }
 
     return importzone;
@@ -515,14 +538,23 @@ export class DataImport {
           if (!ts.getItem(el[ts.settings.valueField])) ts.addItem(el[ts.settings.valueField]);
         }
         const add_select_option = function(input, data) {
-          const option = document.createElement('option');
-          if (typeof(data) === 'string') option.value = option.text = data;
+          let attr = {
+            selected: true
+          };
+          if (typeof(data) === 'string') attr.value = attr.text = data;
           else {
-            option.value = data.key;
-            option.text = data.value;
+            attr.value = data.key;
+            attr.text = data.value;
           }
-          option.selected = true;
-          input.append(option);
+          const option = create_box('option', attr, input);
+          /*  const option = document.createElement('option');
+            if (typeof(data) === 'string') option.value = option.text = data;
+            else {
+              option.value = data.key;
+              option.text = data.value;
+            }
+            option.selected = true;
+            input.append(option);*/
         }
         const add_input_option = function(input, data) {
           if (input.multiple) {
@@ -687,10 +719,14 @@ export class DataImport {
     if (!this.tbl || !this.tbl.params.hasOwnProperty("reset")) return;
     let resetbtn = this.dom.parentElement.querySelector(domselectors.resetbutton);
     if (resetbtn === null) {
-      resetbtn = document.createElement('a');
-      resetbtn.classList.add(domselectors.resetbutton.substr(1));
-      resetbtn.textContent = this.tbl.params.reset;
-      this.dom.parentElement.firstChild.prepend(resetbtn);
+      resetbtn = create_box('a', {
+        class: domselectors.resetbutton.substr(1),
+        text: this.tbl.params.reset
+      }, this.dom.parentElement.firstChild);
+      /*  resetbtn = document.createElement('a');
+        resetbtn.classList.add(domselectors.resetbutton.substr(1));
+        resetbtn.textContent = this.tbl.params.reset;
+        this.dom.parentElement.firstChild.prepend(resetbtn);*/
     }
     resetbtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -707,25 +743,26 @@ export class DataImport {
   // show / hide importzone and buttons
   showImport(show) {
     if (!this.button) return;
-
     if (show === false) {
       this.button.classList.add(css.hide);
       this.replacebutton.classList.add(css.hide);
       this.importcontainer.classList.add(css.hide);
       this.tabbutton.classList.add(css.hide);
-
     } else {
-      this.button.classList.remove(css.hide);
-      this.replacebutton.classList.remove(css.hide);
-
-      this.importcontainer.classList.remove(css.hide);
-      this.button.disabled = false;
       const importzone = this.importcontainer.querySelector('#' + this.importid);
       if (importzone) {
-        this.tabbutton.classList.remove(css.hide);
-        if (importzone.tomselect && importzone.tomselect.control.offsetHeight < importzone.tomselect.control.scrollHeight) {
-          this.tabbutton.disabled = false;
-        } else this.tabbutton.disabled = true;
+        const offseth = importzone.tomselect.control.offsetHeight;
+        const scrollh = importzone.tomselect.control.scrollHeight;
+        requestAnimationFrame(() => {
+          this.button.classList.remove(css.hide);
+          this.replacebutton.classList.remove(css.hide);
+          this.importcontainer.classList.remove(css.hide);
+          this.tabbutton.classList.remove(css.hide);
+          this.button.disabled = false;
+          if (importzone.tomselect && offseth < scrollh) {
+            this.tabbutton.disabled = false;
+          } else this.tabbutton.disabled = true;
+        });
       }
     }
   }
@@ -736,8 +773,8 @@ export class DataImport {
     div.parentElement.classList.toggle(css.showfull);
     const icon = e.currentTarget.querySelector('i');
     if (icon) {
-      icon.classList.toggle('icon-arrow-pointing-out');
-      icon.classList.toggle('icon-arrow-pointing-in');
+      icon.classList.toggle(css.arrowout);
+      icon.classList.toggle(css.arrowin);
     }
   }
 }

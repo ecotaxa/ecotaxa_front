@@ -795,10 +795,9 @@ td.progress {@apply min-w-[96px] }
 .progress data {@apply relative before:bg-stone-200 before:h-0.5 before:left-0  before:bottom-0 overflow-x-visible before:block before:z-[2] block max-w-[64px] before:w-[64px]  before:max-w-[64px] before:absolute after:absolute after:bg-stone-700 after:h-0.5 after:block  after:left-0 after:bottom-0 after:z-[4] after:overflow-x-hidden bg-transparent after:w-full h-full}
 
 /* taxa list expand/shrink*/
-td > .tip, td > .static-tip {@apply max-h-24  overflow-hidden block truncate break-all whitespace-normal p-1 py-4}
-td > .static-tip {@apply hover:h-auto hover:z-10  hover:break-words hover:max-h-full}
-td.showfull {@apply  max-h-24}
-td.showfull > .tip {@apply  max-h-96 max-w-max overflow-y-auto h-auto absolute z-[2] bg-stone-100 rounded-sm drop-shadow p-4}
+#table-import-projects-list td {@apply max-h-24 overflow-y-hidden}
+#table-import-projects-list td > .tip {@apply max-h-24 block truncate break-all whitespace-normal p-1 py-4 }
+#table-import-projects-list td.showfull , #table-import-projects-list td.showfull > .tip {@apply max-h-fit }
 td div[data-num] {@apply before:font-normal before:mr-1 before:bg-stone-600 before:rounded before:text-stone-50 before:text-xs before:px-1 before:content-[attr(data-num)] before:w-auto before:inline-block}
 /* samples select */
 .absinput {@apply absolute z-10 ml-8 -mt-6}
@@ -1112,7 +1111,7 @@ td .tipover {@apply absolute z-10 rounded bg-stone-400 text-stone-50 text-xs px-
 .node_circle {fill: #707070;}
 .node_label {font-size: 10px; font-family: sans-serif;}
 /* global  hide */
-.hide {@apply hidden h-0 !important;}
+.hide {@apply hidden !important;}
 @media only screen and (max-width: 767px)  {
 /* list breadcrumbs length */
 .top-title {@apply max-w-[85%]}

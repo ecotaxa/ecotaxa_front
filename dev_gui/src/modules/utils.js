@@ -128,28 +128,6 @@ function format_bytes(bytes, decimals = 2) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
-/* debounce */
-function debounce(func, delay, now) {
-  var timeout;
-  now = now || false;
-  return function() {
-    var obj = this,
-      args = arguments;
-
-    function delayed() {
-      if (!now) {
-        func.apply(obj, args);
-      }
-      timeout = null;
-    }
-    if (timeout) {
-      clearTimeout(timeout);
-    } else if (now) {
-      func.apply(obj, args);
-    }
-    timeout = setTimeout(delayed, delay || 100);
-  }
-}
 
 function is_object(obj) {
   return (!Array.isArray(obj) && typeof obj === 'object' && obj !== null);
@@ -267,7 +245,6 @@ export {
   download_url,
   string_to_boolean,
   is_object,
-  debounce,
   add_custom_events,
   dom_purify,
   create_box,
