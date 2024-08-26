@@ -236,7 +236,8 @@ export class TableComponent {
         let now = Date.now();
         console.log('seconds to fetch', (Date.now() - this.dt) / 1000);
         this.dt = now;
-        await this.tableActivate(container, tabledef);
+        if (tabledef.data.length) await this.tableActivate(container, tabledef);
+        else this.waitDeactivate();
         now = Date.now();
         console.log('plugins loaded', (Date.now() - this.dt) / 1000);
         this.dt = now;
@@ -422,7 +423,7 @@ export class TableComponent {
     if (tabledef) tabledef = await this.dataToTable(tabledef);
     else await this.tableToData();
     if (this.grid.data.length) this.eventEmitter.emit(this.eventnames.load);
-    instance[this.instanceid] = this;
+    instance[this.instanceid] = true;
   }
 
   tableAppendRows(rows) {
@@ -924,32 +925,33 @@ export class TableComponent {
     const searchinput = this.wrapper.querySelector(tableselectors.search + ' input');
     if (!searchinput) return;
     let searchstring = ``;
-    const display_search = debounce(function(queries, indexes, table, cellidname, cellid) {
+    const display_search = function(queries, indexes, table, cellidname, cellid) {
       const trs = table.querySelectorAll('tbody tr');
       trs.forEach((tr, index) => {
         const val = (tr.dataset[cellidname] !== null) ? tr.dataset[cellidname] : tr.cells[cellid].textContent;
         if ((queries.length > 0 && indexes.length === 0) || indexes.indexOf(val) < 0) tr.hidden = true;
         else tr.hidden = false;
       });
-    }, 50);
+    };
     const clear_search = function(table) {
       const trs = table.querySelectorAll('tbody tr[hidden=""]');
       trs.forEach(tr => {
         tr.hidden = false;
       });
-    }
+    };
     const search_terms = debounce((value) => {
       this.tableSearch(value);
-    }, 300);
+    }, 200);
     searchinput.addEventListener("input", (e) => {
       const value = e.target.value;
       if (value !== searchstring) {
         searchstring = value;
         if (value === '') {
-          search_terms.clear();
+          if (this.searching) search_terms.flush();
           clear_search(this.dom);
         } else if (value.length > 2) {
           search_terms(value);
+
         }
       }
     });
@@ -1123,9 +1125,9 @@ export class TableComponent {
     const sortalternate = (col) => {
       let todir;
       // keep the same dir if sort on col changes
+      const asc = col.classList.contains(tablecss.ascending);
+      const desc = col.classList.contains(tablecss.descending);
       if (parseInt(col.dataset.sortactive) === parseInt(coltosort)) {
-        const asc = col.classList.contains(tablecss.ascending);
-        const desc = col.classList.contains(tablecss.descending);
         todir = (asc) ? 'desc' : ((desc) ? 'asc' : 'asc');
       } else todir = (asc) ? 'asc' : (desc) ? 'desc' : 'asc';
       this.sortColumn(col, coltosort, todir);

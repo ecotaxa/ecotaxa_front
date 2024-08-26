@@ -2,7 +2,7 @@
 <div id="zone-import" class="zone-import">{# args data.key data.form #}
 <div id="data-import-{{data.key}}" class="data-import"></div>
 <div class="btns-import mt-1">
-<button id="replace-import-{{data.key}}"  data-replace="replace" class="button is-preset inverse text-base hide disabled:opacity-60">{{ _('Replace taxonomy') if data.key == 'taxo' else _('Replace privileges') if data.key =='privileges' else _('Replace')}}</button>
-<button id="add-import-{{data.key}}"  class="button is-extra inverse text-base hide disabled:opacity-60">{{ _('Add to taxonomy') if data.key == 'taxo' else _('Add to privileges') if data.key =='privileges' else _('Import')}}</button>
-<a id="tab-import-{{data.key}}" href="#" class="float-right text-sm hide btn hidden shadow-sm" data-expand="{{_('expand importzone')}}" data-shrink="{{_('shrink importzone')}}"><i class="icon icon-chevron-down p-1"></i></a></div>
+<button id="replace-import-{{data.key}}"  data-replace="replace" class="button is-preset inverse hide text-base disabled:opacity-60">{{ _('Replace taxonomy') if data.key == 'taxo' else _('Replace privileges') if data.key =='privileges' else _('Replace')}}</button>
+<button id="add-import-{{data.key}}"  class="button is-extra inverse text-base disabled:opacity-60 hide">{{ _('Add to taxonomy') if data.key == 'taxo' else _('Add to privileges') if data.key =='privileges' else _('Import')}}</button>
+<!--<a id="tab-import-{{data.key}}" href="#" class="float-right text-sm btn hide shadow-sm" data-expand="{{_('expand importzone')}}" data-shrink="{{_('shrink importzone')}}" ><i class="icon icon-chevron-down p-1"></i></a>--></div>
 </div>
