@@ -194,7 +194,7 @@ function create_box(tag, attrs, parent = null, sep = ``) {
   });
   if (parent !== null) {
     sep = (parent.children.length) ? sep : null;
-    parent.append(el);
+    parent.insertAdjacentHTML('beforeend', el.outerHTML);
     if (sep) sep = parent.insertBefore(document.createTextNode(sep), el);
   }
   return el;
