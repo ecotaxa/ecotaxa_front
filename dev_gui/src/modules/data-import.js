@@ -1,7 +1,7 @@
 import DOMPurify from 'dompurify';
 import {
   JsTomSelect
-} from "../modules/js-tom-select.js";
+} from "../modules/module-tom-select.js";
 import {
   ProjectPrivileges
 } from '../modules/project-privileges.js';
@@ -68,6 +68,7 @@ export class DataImport {
       this.button = options.button instanceof HTMLElement ? options.button : document.querySelector(options.button);
       this.replacebutton = options.replacebutton instanceof HTMLElement ? options.replacebutton : document.querySelector(options.replacebutton);
       this.tabbutton = options.tabbutton instanceof HTMLElement ? options.tabbutton : document.querySelector(options.tabbutton);
+      this.importid = this.importid + '_' + what;
       this.init(options);
       instance = this;
 
@@ -103,7 +104,7 @@ export class DataImport {
         selector.addEventListener(evt, apply_selection, false);
       };
     });
-    if (this.button) {
+    if (this.tabbutton) {
       this.tabbutton.addEventListener('click', (e) => {
         e.stopImmediatePropagation();
         e.preventDefault();
@@ -152,6 +153,7 @@ export class DataImport {
     if (!selectcells) return;
     if (what === typeimport.settings || what === typeimport.privileges) this.imports[models.contact] = this.findContact(datas[rowindex]);
     const importzone = (what === typeimport.taxo || what === typeimport.privileges) ? this.createImportzone(what) : null;
+
     this.addResetButton();
     let ts = null;
     selectcells.forEach((name, index) => {
@@ -212,7 +214,13 @@ export class DataImport {
                 });
                 importzone.innerHTML = ``;
                 taxons.forEach(([key, text]) => {
-                  if (!importzone.querySelector('option[value="' + key + '"]')) importzone.insertAdjacentHTML('beforeend', '<option value="' + key + '" selected>' + text + '</option>');
+                  if (!importzone.querySelector('option[value="' + key + '"]')) {
+                    const o = create_box('option', {
+                      value: key,
+                      selected: 'selected',
+                      text: text
+                    }, importzone);
+                  }
                 });
               }
               showbtns = (taxons.length > 0);
@@ -226,11 +234,10 @@ export class DataImport {
             const resetpriv = ((ts && ts.items.length > 0) || (importzone.selectedIndex > 0));
             if (!importzone.tomselect) {
               importzone.currentlist = {};
-              const jsTomSelect = new JsTomSelect();
+              const jsTomSelect = JsTomSelect();
               jsTomSelect.applyTo(importzone);
             }
             ts = importzone.tomselect;
-
             Object.entries(privs).forEach(([priv, members]) => {
               members.sort((a, b) => {
                 return (b.name > a.name);
@@ -277,7 +284,7 @@ export class DataImport {
                   }
                 }
               });
-              importzone.tomselect.refreshOptions(true);
+              if (ts) ts.refreshOptions(true);
             });
 
             showbtns = (((ts) ? ts.items.length : importzone.selectedIndex + 1) > 0);
@@ -429,51 +436,42 @@ export class DataImport {
     });
   }
   createImportzone(name) {
-    this.showImport(true);
-    let importzone = this.importcontainer.querySelector('#' + this.importid);
-    if (name === typeimport.privileges) {
-      if (!importzone) {
-        this.importid = this.importid + '-' + name;
+    let importzone = this.showImport(true),
+      ts = false;
+    if (!importzone) {
+      if (name === typeimport.privileges) {
         importzone = create_box('select', {
           id: this.importid,
           dataset: {
             type: models.user,
-            priv: true
+            priv: true,
           },
           multiple: true
         }, this.importcontainer);
-        /*  importzone = document.createElement('select');
-          this.importid = importzone.id = this.importid + '-' + name;
-          importzone.dataset.type = models.user;
-          importzone.multiple = true;
-          importzone.dataset.priv = true;
-          this.importcontainer.append(importzone);*/
+        importzone = document.getElementById(this.importid);
+        ts = true;
+      } else {
+        const import_target = (this.form.querySelector('[name="' + name + '"]')) ? this.form.querySelector('[name="' + name + '"]') : this.form.querySelector('[data-importfield="' + name + '"]');
+        if (!import_target) return;
+        ts = import_target.tomselect;
+        this.importzoneid = import_target.id;
+        // tomselect ?
+        importzone = import_target.cloneNode();
+        importzone.classList.remove(css.tomselected);
+        importzone.classList.remove(css.hiddenaccessible);
+        // keep original id to replace data on apply import
+        importzone.dataset.origin = importzone.id;
+        importzone.id = this.importid;
+        importzone.name = this.importid + '_' + importzone.name;
+        this.importcontainer.prepend(importzone);
+        if (ts) {
+          const jsTomSelect = JsTomSelect();
+          jsTomSelect.applyTo(importzone);
+        }
+        this.activateClear();
       }
-    } else if (!importzone) {
-      const import_target = (this.form.querySelector('[name="' + name + '"]')) ? this.form.querySelector('[name="' + name + '"]') : this.form.querySelector('[data-importfield="' + name + '"]');
-      if (!import_target) return;
-      const ts = import_target.tomselect;
-      this.importzoneid = import_target.id;
-      // tomselect ?
-      const temp = create_box('div', {});
-      temp.innerHTML = import_target.outerHTML;
-      importzone = temp.firstChild;
-      temp.remove();
-      importzone.classList.remove(css.tomselected);
-      importzone.classList.remove(css.hiddenaccessible);
-      // keep original id to replace data on apply import
-      importzone.dataset.origin = importzone.id;
-      importzone.id = this.importid;
-      importzone.name = this.importid + '_' + importzone.name;
-      this.importcontainer.prepend(importzone);
-      if (ts) {
-        importzone = this.importcontainer.querySelector('#' + this.importid);
-        const jsTomSelect = new JsTomSelect();
-        jsTomSelect.applyTo(importzone);
-      }
-      this.activateClear();
-    }
 
+    }
     return importzone;
 
   }
@@ -497,7 +495,6 @@ export class DataImport {
             ts.clear();
             ts.clearOptions();
           }
-
           const tzone = importzone.tomselect;
           const items = [...tzone.items];
           const options = Object.assign({}, tzone.options);
@@ -547,14 +544,7 @@ export class DataImport {
             attr.text = data.value;
           }
           const option = create_box('option', attr, input);
-          /*  const option = document.createElement('option');
-            if (typeof(data) === 'string') option.value = option.text = data;
-            else {
-              option.value = data.key;
-              option.text = data.value;
-            }
-            option.selected = true;
-            input.append(option);*/
+
         }
         const add_input_option = function(input, data) {
           if (input.multiple) {
@@ -747,24 +737,26 @@ export class DataImport {
       this.button.classList.add(css.hide);
       this.replacebutton.classList.add(css.hide);
       this.importcontainer.classList.add(css.hide);
-      this.tabbutton.classList.add(css.hide);
+      if (this.tabbutton) this.tabbutton.classList.add(css.hide);
     } else {
       const importzone = this.importcontainer.querySelector('#' + this.importid);
       if (importzone) {
-        const offseth = importzone.tomselect.control.offsetHeight;
-        const scrollh = importzone.tomselect.control.scrollHeight;
-        requestAnimationFrame(() => {
-          this.button.classList.remove(css.hide);
-          this.replacebutton.classList.remove(css.hide);
-          this.importcontainer.classList.remove(css.hide);
+        //  const offseth = importzone.tomselect.control.offsetHeight;
+        //  const scrollh = importzone.tomselect.control.scrollHeight;
+        this.button.classList.remove(css.hide);
+        this.replacebutton.classList.remove(css.hide);
+        this.importcontainer.classList.remove(css.hide);
+        this.button.disabled = false;
+        if (this.tabbutton) {
           this.tabbutton.classList.remove(css.hide);
-          this.button.disabled = false;
-          if (importzone.tomselect && offseth < scrollh) {
+          if (importzone.tomselect) {
             this.tabbutton.disabled = false;
           } else this.tabbutton.disabled = true;
-        });
+        }
       }
+      return importzone;
     }
+    return null;
   }
   // resize importzone
   resizeZone(e) {
