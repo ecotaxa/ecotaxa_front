@@ -1256,7 +1256,13 @@ export class TableComponent {
       tip.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        e.target.parentElement.classList.toggle(tablecss.showfull);
+        const parent = e.target.parentElement;
+        if (current !== null) current.classList.remove(tablecss.showfull);
+        if (current !== parent) {
+          parent.classList.add(tablecss.showfull);
+          current = parent;
+        } else current = null;
+
       });
     });
   }
