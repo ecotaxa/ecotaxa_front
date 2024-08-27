@@ -30,33 +30,35 @@ def gui_taxotree_root_json():
     else:
         # Children of the requested parent_id, when opening the tree
         # Fetch the parent for getting its children
+        children_ids = ""
         with ApiClient(TaxonomyTreeApi, request) as api:
             parents: List[TaxonModel] = api.query_taxa_set(ids=str(parent))
         if len(parents):
             children_ids = "+".join([str(child_id) for child_id in parents[0].children])
-        # Fetch children, for their names and to know if they have children
-        with ApiClient(TaxonomyTreeApi, request) as api:
-            children: List[TaxonModel] = api.query_taxa_set(ids=children_ids)
-        res = [
-            (
-                r.id,
-                r.name,
-                parent,
-                r.nb_objects + r.nb_children_objects,
-                len(r.children) > 0,
+            # Fetch children, for their names and to know if they have children
+            with ApiClient(TaxonomyTreeApi, request) as api:
+                children: List[TaxonModel] = api.query_taxa_set(ids=children_ids)
+            res = [
+                (
+                    r.id,
+                    r.name,
+                    parent,
+                    r.nb_objects + r.nb_children_objects,
+                    len(r.children) > 0,
+                )
+                for r in children
+            ]
+            res.sort(key=lambda r: r[1])
+            return json.dumps(
+                [
+                    dict(
+                        id=str(r[0]),
+                        parent=r[2] or "#",
+                        name=r[1],
+                        num=r[3],
+                        children=r[4],
+                    )
+                    for r in res
+                ]
             )
-            for r in children
-        ]
-    res.sort(key=lambda r: r[1])
-    return json.dumps(
-        [
-            dict(
-                id=str(r[0]),
-                parent=r[2] or "#",
-                name=r[1],
-                num=r[3],
-                children=r[4],
-            )
-            for r in res
-        ]
-    )
+    return "[]"
