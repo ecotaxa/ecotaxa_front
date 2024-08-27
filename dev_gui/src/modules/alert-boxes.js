@@ -93,7 +93,7 @@ export class AlertBox {
       showall = ``;
     }
     let html = `<div class="content"><div class="signal hidden sm:block"><i class="icon"></i></div><div class="message"><strong class="type">${(i18nmessages.alerttype && i18nmessages.alerttype[message.type])?i18nmessages.alerttype[message.type]:message.type}</strong>${(i18nmessages[message.content]) ? i18nmessages[message.content] : message.content} ${buttons}</div>`;
-    if (message.dismissible) html += `<div class="close" data-dismiss="${box.id}"  aria-label="${i18nmessages.close}"><i class="icon-sm icon-cancel cursor-pointer"></i></div>`;
+    if (message.dismissible) html += `<div class="close" data-dismiss="${box.id}"  aria-label="${i18nmessages.close}"><i class="icon-sm icon-x-mark cursor-pointer"></i></div>`;
 
     box.insertAdjacentHTML('afterbegin', html + `${showall} </div>`);
     const ret = this.alertMessage(box, true);

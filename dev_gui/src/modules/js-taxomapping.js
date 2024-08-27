@@ -110,7 +110,7 @@ export class TaxoMapping {
       delete cancel.dataset[data];
     });
     item.append(cancel);
-    cancel.insertAdjacentHTML('afterbegin', `<i class="icon icon-cancel absolute centered"></i>`);
+    cancel.insertAdjacentHTML('afterbegin', `<i class="icon icon-x-mark absolute centered"></i>`);
     cancel.addEventListener('click', (e) => {
       this.linecontrols.select.options[item.dataset.index].disabled = false;
       item.remove();

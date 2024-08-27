@@ -8,10 +8,10 @@ import {
   is_object,
   html_spinner
 } from '../modules/utils.js';
-import debounce from 'debounce';
 import {
   EventEmitter
 } from '../modules/event-emitter.js';
+import debounce from 'debounce';
 import {
   css,
   models,
@@ -65,11 +65,10 @@ const tableselectors = {
   wait: 'wait-please',
   sorton: '.sorton',
 };
-
 Object.freeze(tablecss);
 Object.freeze(tableselectors);
 const dynamics = {};
-
+const NOTFOUND = '#NOTFOUND#';
 export class TableComponent {
   instanceid = null;
   grid = {
@@ -109,7 +108,7 @@ export class TableComponent {
   searching = false;
   sorting = false;
   initialized = false;
-  plugins = {};
+  plugins = [];
   constructor(container, options = {}) {
     if (!container) return;
     container = container instanceof HTMLElement ? container : document.querySelector(container);
@@ -772,7 +771,7 @@ export class TableComponent {
     // remove details when sorting
     this.eventEmitter.on(this.eventnames.sorting, (direction, index) => {
 
-      if (this.plugins.hasOwnProperty('jsDetail')) this.plugins['jsDetail'].activeDetail(false);
+      if (this.plugins.indexOf('jsDetail') >= 0) this.plugins['jsDetail'].activeDetail(false);
       this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
         a.classList.add(((i === index) ? css.wait : css.disabled));
       });
@@ -857,119 +856,119 @@ export class TableComponent {
   }
 
 
-  tableSearch(searchstring, casesensitive = false) {
-    function search_string(str, casesensitive) {
-      str = (casesensitive) ? str : str.toLowerCase();
-      return str;
-    }
-
-    function search_queries(str, casesensitive) {
-      str = search_string(str, casesensitive);
-      let strs = [];
-      let phrase;
-      while ((phrase = str.match(/"([^"]+)"/)) !== null) {
-
-        strs.push(phrase[1]);
-        str = str.substring(0, phrase.index) + str.substring(phrase.index + phrase[0].length);
-      }
-      // Get remaining space-separated words (if any)
-      str = str.trim();
-      if (str.length) strs = strs.concat(str.split(/\s+/));
-      return strs;
-    }
-    const queries = search_queries(searchstring);
-    this.eventEmitter.emit(this.eventnames.search, searchstring, queries);
-    let datas = this.grid.data,
-      indexes = [];
-    const cellid = this.getCellId(this.cellidname);
-    queries.forEach(qry => {
-      indexes = [];
-      datas = datas.filter((data, j) => {
-        const found = data.filter(cell => {
-          switch (typeof cell) {
-            case 'object':
-              cell = (cell) ? cell : ``;
-              try {
-                cell = JSON.stringify(cell);
-              } catch (err) {
-                console.log('search', err);
-                cell = ``;
-              }
-              break;
-            case 'array':
-              cell = cell.join(' ');
-              break;
-            default:
-              cell = String(cell);
-              break;
-          }
-
-          return ((casesensitive) ? cell.indexOf(qry) > -1 : cell.toLowerCase().indexOf(qry)) > -1;
-        });
-
-        if (found.length > 0) {
-          if (cellid < 0) indexes.push(String(j));
-          else indexes.push(String(data[cellid]));
-          return data;
-        }
-      });
-    });
-    this.eventEmitter.emit(this.eventnames.searchend, queries, indexes, cellid);
-  }
 
   initSearch() {
     if (this.grid.data.length < 10) return this.toggleAddOns();
     else this.toggleAddOns([tableselectors.search + ' input'], true);
     this.searching = false;
+    const cellid = this.getCellId(this.cellidname);
     // search items
     const searchinput = this.wrapper.querySelector(tableselectors.search + ' input');
     if (!searchinput) return;
     let searchstring = ``;
-    const display_search = function(queries, indexes, table, cellidname, cellid) {
-      const trs = table.querySelectorAll('tbody tr');
+    const table_search = debounce((searchstring, casesensitive = false) => {
+      function search_string(str, casesensitive) {
+        str = (casesensitive) ? str : str.toLowerCase();
+        return str;
+      }
+
+      function search_queries(str, casesensitive) {
+        str = search_string(str, casesensitive);
+        let strs = [];
+        let phrase;
+        while ((phrase = str.match(/"([^"]+)"/)) !== null) {
+
+          strs.push(phrase[1]);
+          str = str.substring(0, phrase.index) + str.substring(phrase.index + phrase[0].length);
+        }
+        // Get remaining space-separated words (if any)
+        str = str.trim();
+        if (str.length) strs = strs.concat(str.split(/\s+/));
+        return strs;
+      }
+      const queries = search_queries(searchstring);
+      this.eventEmitter.emit(this.eventnames.search, searchstring, queries);
+      let datas = this.grid.data,
+        indexes = [];
+      queries.forEach(qry => {
+        indexes = [];
+        datas = datas.filter((data, j) => {
+          const found = data.filter(cell => {
+            switch (typeof cell) {
+              case 'object':
+                cell = (cell) ? cell : ``;
+                try {
+                  cell = JSON.stringify(cell);
+                } catch (err) {
+                  console.log('search', err);
+                  cell = ``;
+                }
+                break;
+              case 'array':
+                cell = cell.join(' ');
+                break;
+              default:
+                cell = String(cell);
+                break;
+            }
+
+            return ((casesensitive) ? cell.indexOf(qry) > -1 : cell.toLowerCase().indexOf(qry)) > -1;
+          });
+
+          if (found.length > 0) {
+            if (cellid < 0) indexes.push(String(j));
+            else indexes.push(String(data[cellid]));
+            return data;
+          }
+        });
+      });
+      this.eventEmitter.emit(this.eventnames.searchend, queries, indexes, cellid);
+    }, 300);
+    const display_search = (queries, indexes, cellid) => {
+      const trs = this.dom.querySelectorAll('tbody tr');
       trs.forEach((tr, index) => {
-        const val = (tr.dataset[cellidname] !== null) ? tr.dataset[cellidname] : tr.cells[cellid].textContent;
-        if ((queries.length > 0 && indexes.length === 0) || indexes.indexOf(val) < 0) tr.hidden = true;
+        const val = (queries.length > 0 && indexes.length === 0) ? NOTFOUND : (tr.dataset[this.cellidname] !== null) ? tr.dataset[this.cellidname] : tr.cells[cellid].textContent;
+        if (indexes.indexOf(val) < 0) tr.hidden = true;
         else tr.hidden = false;
       });
     };
-    const clear_search = function(table) {
-      const trs = table.querySelectorAll('tbody tr[hidden=""]');
-      trs.forEach(tr => {
+    const clear_search = debounce(() => {
+      this.searching = true;
+      const trs = this.dom.querySelectorAll('tbody tr[hidden=""]');
+      trs.forEach((tr, index) => {
         tr.hidden = false;
       });
-    };
-    const search_terms = debounce((value) => {
-      this.tableSearch(value);
-    }, 200);
-    searchinput.addEventListener("input", (e) => {
-      const value = e.target.value;
+      this.searching = false;
+      searchinput.classList.remove(css.wait);
+    }, 500);
+
+    const search_input = (value) => {
       if (value !== searchstring) {
+        searchinput.classList.add(css.wait);
         searchstring = value;
         if (value === '') {
-          if (this.searching) search_terms.flush();
-          clear_search(this.dom);
+          clear_search();
         } else if (value.length > 2) {
-          search_terms(value);
-
+          table_search(value);
         }
+
       }
+    }
+    searchinput.addEventListener("input", (e) => {
+      search_input(e.target.value);
     });
     searchinput.addEventListener("click", (e) => {
-      if (e.target.value !== searchstring) {
-        search_terms(e.target, this.dom);
-        search_terms.clear();
-      } else search_terms.flush();
-
+      search_input(e.target.value);
     });
     this.eventEmitter.on(this.eventnames.search, (searchstring, queries) => {
       if (this.searching === false) {
-        if (this.plugins.hasOwnProperty('jsDetail')) this.plugins['jsDetail'].activeDetail(false);
+        if (this.plugins.indexOf('jsDetail') >= 0) this.plugins['jsDetail'].activeDetail(false);
       }
       this.searching = true;
     });
     this.eventEmitter.on(this.eventnames.searchend, (queries, indexes, cellid) => {
-      display_search(queries, indexes, this.dom, this.cellidname, cellid);
+      display_search(queries, indexes, cellid);
+      searchinput.classList.remove(css.wait);
       this.searching = false;
     });
     this.eventEmitter.on(this.eventnames.update, () => {
@@ -1045,7 +1044,6 @@ export class TableComponent {
   async initDetails() { // TODO : generic
     // about - one div to display cell details make it appear as table row expanding
     const wrapper = this.wrapper;
-
     const about = wrapper.querySelector('#' + tablecss.tipinline) ? wrapper.querySelector('#' + tablecss.tipinline) : tablecss.tipinline;
     if (!dynamics.JsDetail) {
       const {
@@ -1255,41 +1253,10 @@ export class TableComponent {
     // show big cell content
     let current = null;
     this.dom.querySelectorAll(tableselectors.tip).forEach(tip => {
-      const scrollheight = tip.scrollHeight;
-      const parent = tip.parentElement;
-      const offsetHeight = tip.offsetHeight;
-      const showmore = (scrollheight > offsetHeight);
-      if (showmore === false) return;
-      requestAnimationFrame(() => {
-        tip.classList.add(tablecss.pointer);
-      });
-      let clicked = false;
-      const refresh_tip = (showfull) => {
-        if (showfull) {
-          parent.classList.remove(tablecss.showfull);
-          delete parent.dataset.showfull;
-          current = null;
-        } else {
-          if (current) {
-            current.classList.remove(tablecss.showfull);
-            delete current.dataset.showfull;
-          }
-          parent.classList.add(tablecss.showfull);
-          parent.dataset.showfull = true;
-          current = parent;
-        }
-
-      }
       tip.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        if (clicked) return;
-        const showfull = parent.dataset.showfull;
-        clicked = true;
-        requestAnimationFrame(() => {
-          refresh_tip(showfull);
-          clicked = false;
-        });
+        e.target.parentElement.classList.toggle(tablecss.showfull);
       });
     });
   }

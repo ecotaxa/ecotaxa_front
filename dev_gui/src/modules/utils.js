@@ -25,7 +25,6 @@ function generate_uuid() {
   return uuidv4();
 }
 
-
 function fetchSettings(options) {
   options = options || {};
   options.headers = options.headers || {};
