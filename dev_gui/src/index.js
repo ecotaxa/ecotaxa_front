@@ -1,7 +1,7 @@
 import stylecss from './css/style.css';
 import {
   AlertBox
-} from '../src/modules/alert-boxes.js';
+} from '../src/modules/alert-box.js';
 import {
   JsComponents
 } from '../src/modules/js-components.js';
@@ -12,21 +12,25 @@ import {
   ActivRequest
 } from "../src/modules/activ-request.js";
 // initializze tools and triggered tools
-
-window.addEventListener('load', async () => {
-  // global alert dialog system
-  window.alertbox = await new AlertBox(document);
-  // enhance ui activate components  js js-componentname
-  const jsComponents = new JsComponents();
-  jsComponents.applyTo();
-  /*** activate data-action  **/
-  const activItems = new ActivItems();
-  activItems.applyTo(document);
-  /* fetch request -modal - contextual help */
-  const activRequest = new ActivRequest();
-  activRequest.applyTo(document);
-  window.alertbox.activateAll();
-});
+function loadUI() {
+  async function handler() {
+    // enhance ui activate components  js js-componentname
+    await JsComponents.applyTo(document);
+    /* fetch request -modal - contextual help */
+    ActivRequest.applyTo(document);
+    /*** activate data-action  **/
+    ActivItems.applyTo(document);
+    // global alert dialog system
+    AlertBox.applyTo(document);
+  };
+  if (document.readyState === "complete") {
+    handler();
+  } else {
+    window.addEventListener('load', handler);
+    return () => window.removeEventListener('load', handler);
+  }
+}
+loadUI();
 // 'unload'do not use for the moment as it changes history back
 /*window.addEventListener('unload', (e) => {
   //  ecotaxaStorage.clear();
