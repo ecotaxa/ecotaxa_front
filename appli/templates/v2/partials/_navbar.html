@@ -32,9 +32,16 @@
       </a></li>
       {% endif %}
     <li>
-<!--  <a href="/gui/job/create/FileImport?p={{target_proj.projid}}">-->
-<a href="{{url_for("jobCreate",job_type="FileImport", p=target_proj.projid) }}" {{disabled.value  if target_proj.status=="ExploreOnly" or privilege.value=="View" or privilege.value==""}}>
-  {{_('Import')}}
+      <div>{{_('Import')}}</div><ul aria-expanded=false><li>
+            <a href="{{url_for("gui_job_create",job_type="GeneralImport", projid=target_proj.projid)}}" {{ disabled.value if privilege.value==""}}>
+            <strong>{{_('General')}}</strong> {{ _('import')}}
+            </a></li><li><a href="{{url_for("gui_job_create",job_type="SimpleImport", projid=target_proj.projid) }}">
+            <strong>{{_('Images')}}</strong> {{ _('import')}}
+              </a></li><li><a href="{{url_for("gui_job_create",job_type="UpdateImport", projid=target_proj.projid) }}">
+            <strong>{{_('Metadata')}}</strong> {{ _('import')}}
+              </a></li></ul>
+<a href="{{url_for("gui_job_create",job_type="FileImport", projid=target_proj.projid) }}" {{disabled.value  if target_proj.status=="ExploreOnly" or privilege.value=="View" or privilege.value==""}}>
+
 </a>
 </li>
 <li><div>{{_('Export')}}</div><ul aria-expanded=false><li>

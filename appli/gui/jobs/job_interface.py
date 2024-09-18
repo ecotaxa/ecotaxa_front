@@ -194,6 +194,74 @@ def export_format_options(type=None):
     return formdatas, options, None
 
 
+def import_format_options(type=None) -> dict:
+    taxomapping = dict(
+        {
+            "taxo_mapping": {
+                "label": _("Mapping from present taxon to output replacement one "),
+                "comment": _(" Type '_discard_' to discard taxon"),
+                "format": "taxoline",
+                "help": "help_import_summary_taxo_mapping",
+                "addoption": "_discard_,0",
+            }
+        },
+    )
+    formdatas = dict(
+        {
+            "images_tsv": {
+                "path": "/gui/job/create/GeneralImport",
+                "title": _("General Import"),
+                "legend": _("Import Images and TSV files"),
+                "datas": {
+                    "skiploaded": False,
+                    "skipobjectduplicate": False,
+                },
+            },
+            "images": {
+                "path": "/gui/job/create/SimpleImport",
+                "title": _("Simple Import"),
+                "legend": _(
+                    "Import images in jpg, png, gif (possibly animated) formats and associate a fixed & reduced set of metadata, that you can enter below."
+                ),
+            },
+            "tsv": {
+                "path": "/gui/job/create/UpdateImport",
+                "title": _("Update Metadata"),
+                "legend": _("Update metada associated to already importer images"),
+                "datas": {"updateclassif": False},
+            },
+        }
+    )
+
+    options = dict(
+        {
+            "images_tsv": {
+                "skiploaded": {
+                    "label": _("Skip tsv that have already been imported"),
+                    "format": "checkbox",
+                    "value": "Y",
+                },
+                "skipobjectduplicate": {
+                    "label": _("Skip objects that have already been imported"),
+                    "format": "checkbox",
+                    "value": "Y",
+                },
+                "advanced_options": taxomapping,
+            },
+            "images": {"metadata": {"label": _("Metadata"), "format": "array"}},
+            "tsv": {
+                "updateclassif": {
+                    "label": _("Allow update of classification data"),
+                    "format": "checkbox",
+                    "value": "Y",
+                },
+                "advanced_options": taxomapping,
+            },
+        }
+    )
+    return formdatas, options, None
+
+
 def display_job(usercache: Dict[int, MinUserModel], ajob: JobModel):
     """Enrich back-end job for display"""
     job = ajob.to_dict()
