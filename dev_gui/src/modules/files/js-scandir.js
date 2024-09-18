@@ -1,42 +1,32 @@
 import {
-  add_custom_events
-} from '../../modules/utils.js';
+  ModuleEventEmitter
+} from '../../modules/module-event-emitter.js';
 let instance = null;
 
-export class JsScanDir {
-  _events = {};
-  eventnames = {
-    complete: 'complete',
-    processed: 'file.processed',
-    error: 'file.error',
+export function JsScanDir(process_file = null) {
+  const eventnames = {
+    complete: 'scan.complete',
+    processed: 'scan.processed',
+    error: 'scan.error',
   }
-  nextaction;
-  constructor() {
-    if (instance) return instance;
-    this.init();
-    instance = this;
-    return instance;
+  let nextaction;
+  ModuleEventEmitter.on(eventnames.error, (e) => {
+    console.log('scandir receive error message', e)
+  });
+  ModuleEventEmitter.on(eventnames.processed, async (e) => {
+    console.log('e', e)
+  });
+
+  async function processFile(entry, callback = null) {
+    if (process_file) process_file(entry, callback);
+    else if (callback) await callback();
   }
 
-  init(container) {
-    add_custom_events(this);
-    this.on(this.eventnames.error, (e) => {
-      console.log('scandir receive error message', e)
-    })
-    this.on(this.eventnames.processed, async (e) => {
-      console.log('e', e)
-    })
-  }
-
-  async processFile(entry, callback = null) {
-    console.log('process scandir', entry)
-    if (callback) await callback();
-  }
-
-  stopOnError(err) {
+  function stopOnError(err) {
     console.log('err', err);
   }
-  fileType(data) {
+
+  function fileType(data) {
     const mime_type = (signature) => {
       switch (signature) {
         case '89504E47':
@@ -71,8 +61,7 @@ export class JsScanDir {
   }
 
 
-  async readDirectory(dir, oncomplete) {
-    const self = this;
+  async function readDirectory(dir, oncomplete) {
     let errored = false;
     let direntries = [];
     const on_error = onerror ? onerror : (err) => {
@@ -92,8 +81,8 @@ export class JsScanDir {
             oncomplete();
           } else {
             const entry = direntries.shift();
-            if (entry.isDirectory) await self.readDirectory(entry, complete);
-            else await self.processFile(entry, complete);
+            if (entry.isDirectory) await readDirectory(entry, complete);
+            else await processFile(entry, complete);
           }
         }
         await complete();
@@ -104,9 +93,8 @@ export class JsScanDir {
     await reader.readEntries(on_read, on_error);
   }
 
-  async processEntries(entries, path, oncomplete) {
+  async function processEntries(entries, path, oncomplete) {
     // showDirectoryPicker
-    const self = this;
     const complete = async () => {
       if (entries.length) {
         const entry = await entries.shift();
@@ -126,14 +114,19 @@ export class JsScanDir {
               await func(file, nestedpath);
             });
           }
-          await self.processFile(entry, complete);
+          await processFile(entry, complete);
         } else if (kind === "directory") {
           const direntries = await Array.fromAsync(entry.values());
-          await self.processEntries(direntries, nestedpath, complete);
+          await processEntries(direntries, nestedpath, complete);
         }
       } else if (oncomplete) oncomplete();
     }
     await complete();
   }
-
+  return {
+    eventnames,
+    processFile,
+    processEntries,
+    readDirectory
+  }
 }

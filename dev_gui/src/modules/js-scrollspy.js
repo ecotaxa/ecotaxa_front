@@ -1,43 +1,35 @@
-export class ScrollSpy {
-  pos = 0;
-  throttle = false;
-  menu = null;
-  constructor(callback, options = {}) {
-    if (!callback) return;
-    if (typeof options !== 'object') return;
-    const defaultOptions = {
-      menu: null,
-      container: null,
-      offset: 0,
-      activeClass: 'active',
-      menuItemClass: 'nav-item',
-      smoothScroll: {}
+function ScrollSpy(callback, options = {}) {
+  let pos = 0;
+  let throttle = false;
+  let menu = null;
+  if (!callback) return;
+  if (typeof options !== 'object') return;
+  const defaultOptions = {
+    menu: null,
+    container: null,
+    offset: 0,
+    activeClass: 'active',
+    menuItemClass: 'nav-item',
+    smoothScroll: {}
+  }
+  options = Object.assign({}, defaultOptions, options);
+  options.smoothScroll = (options.smoothScroll === true && {}) || options.smoothScroll;
+
+  this.options = Object.assign({}, defaultOptions, options);
+  this.menu = options.menu instanceof HTMLElement ? options.menu : document.querySelector(options.menu);
+
+  this.scrolltarget = (this.options.container) ? this.options.container instanceof HTMLElement ? this.options.container : document.querySelector(this.options.container) : window;
+
+  scrolltarget.addEventListener('scroll', (e) => {
+    pos = scrolltarget.scrollY;
+    if (!throttle) {
+      scrolltarget.requestAnimationFrame(() => {
+        callback(pos);
+        throttle = false;
+      });
     }
-    options = Object.assign({}, defaultOptions, options);
-    options.smoothScroll = (options.smoothScroll === true && {}) || options.smoothScroll;
-
-    this.options = Object.assign({}, defaultOptions, options);
-    this.menu = options.menu instanceof HTMLElement ? options.menu : document.querySelector(options.menu);
-
-    this.scrolltarget = (this.options.container) ? this.options.container instanceof HTMLElement ? this.options.container : document.querySelector(this.options.container) : window;
-
-    this.scrollListener(callback);
-  }
-
-  scrollListener(callback) {
-    this.scrolltarget.addEventListener('scroll', (e) => {
-      this.pos = this.scrolltarget.scrollY;
-      if (!this.throttle) {
-        this.scrolltarget.requestAnimationFrame(() => {
-          callback(this.pos);
-          this.throttle = false;
-        });
-      }
-      this.throttle = true;
-    })
-
-  }
-
+    throttle = true;
+  });
 }
 
 

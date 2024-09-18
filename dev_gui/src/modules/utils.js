@@ -184,7 +184,9 @@ function create_box(tag, attrs, parent = null, sep = ``) {
           value.forEach(cl => {
             el.classList.add(cl);
           })
-        } else el.classList.add(value);
+        } else {
+          el.classList.add(value);
+        }
         break;
       default:
         el.setAttribute(attr, value);
@@ -193,8 +195,8 @@ function create_box(tag, attrs, parent = null, sep = ``) {
   });
   if (parent !== null) {
     sep = (parent.children.length) ? sep : null;
-    parent.insertAdjacentHTML('beforeend', el.outerHTML);
-    if (sep) sep = parent.insertBefore(document.createTextNode(sep), el);
+    parent.append(el);
+    if (sep) parent.insertBefore(document.createTextNode(sep), el);
   }
   return el;
 }

@@ -120,7 +120,6 @@ module.exports = (env, argv) => {
   config.output.path = path.resolve(__dirname, '../appli/static/gui/' + destDir);
   config.output.publicPath = '/static/gui/' + destDir;
   config.module.rules.unshift(rulecss);
-  console.log('config', config);
   return config;
 }
 //module.exports = config;

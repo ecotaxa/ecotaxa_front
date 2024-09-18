@@ -16,6 +16,9 @@ import {
   domselectors,
   css,
 } from '../modules/modules-config.js';
+import {
+  AlertBox
+} from '../modules/alert-box.js';
 let users_list = {};
 
 function _get_label(el, labelfield, item = false) {
@@ -31,8 +34,8 @@ function _get_label(el, labelfield, item = false) {
   return label.join(` `);
 }
 // settings for autocomplete select component - users , instruments , taxons
-export class JsTomSelect {
-  applyTo(item, settings = {}, siblings = null) {
+function createJsTomSelect() {
+  function applyTo(item, settings = {}, siblings = null) {
     const id = item.getAttribute('id');
     const multiple = item.hasAttribute('multiple');
     const type = item.dataset.type;
@@ -110,17 +113,11 @@ export class JsTomSelect {
               if (e === "") return;
               if (users_list[e]) {
                 //  if (multiple || !this.revertSettings || this.revertSettings.tabIndex < 0 || !item.options.length) return;
-                if (window.alertbox) {
-                  console.log('itemtoms', item)
-                  window.alertbox.addItemMessage({
-                    type: window.alertbox.alertconfig.types.danger,
-                    parent: item,
-                    content: window.alertbox.i18nmessages.exists
-                  });
-                } else {
-                  item.dataset.invalid = window.alertbox.i18nmessages.exists;
-                  item.dispatchEvent(new Event('invalid'));
-                }
+                AlertBox.addMessage({
+                  type: AlertBox.alertconfig.types.danger,
+                  parent: item,
+                  content: AlertBox.i18nmessages.exists
+                });
                 setTimeout(() => {
                   this.removeOption(e);
                   if (this.revertSettings.tabIndex < 0 || !item.options.length || !this.revertSettings) {
@@ -130,16 +127,12 @@ export class JsTomSelect {
                     const revert = item.options[this.revertSettings.tabIndex].value;
                     this.addItem(revert);
                   }
-                  if (window.alertbox) {
-                    window.alertbox.removeItemMessage({
-                      type: window.alertbox.alertconfig.types.danger,
-                      parent: item,
-                      content: window.alertbox.i18nmessages.exists
-                    });
-                  } else {
-                    delete item.dataset.invalid;
-                    item.dispatchEvent(new Event('undeterminate'));
-                  }
+                  AlertBox.addMessage({
+                    type: AlertBox.alertconfig.types.danger,
+                    parent: item,
+                    content: AlertBox.i18nmessages.exists
+                  });
+
                 }, 2000);
               } else users_list[e] = true;
             },
@@ -389,7 +382,15 @@ export class JsTomSelect {
     } else console.log('noid');
 
   }
-  getUserList() {
+
+  function getUserList() {
     return users_list;
   }
+  return {
+    applyTo
+  }
+}
+const JsTomSelect = createJsTomSelect();
+export {
+  JsTomSelect
 }

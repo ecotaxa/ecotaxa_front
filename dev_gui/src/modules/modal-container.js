@@ -38,7 +38,7 @@ export class ModalContainer {
       else document.body.classList.remove(css.hidevscroll);
       const summary = this.modal.querySelector('summary');
       if (summary) {
-        summary.setAttribute('aria-hidden', !open);
+        //  summary.setAttribute('aria-hidden', !open);
         this.toggleAction(summary);
       }
     }

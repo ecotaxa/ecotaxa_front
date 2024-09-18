@@ -9,8 +9,8 @@ import {
   html_spinner
 } from '../modules/utils.js';
 import {
-  EventEmitter
-} from '../modules/event-emitter.js';
+  ModuleEventEmitter
+} from '../modules/module-event-emitter.js';
 import debounce from 'debounce';
 import {
   css,
@@ -67,7 +67,6 @@ const tableselectors = {
 };
 Object.freeze(tablecss);
 Object.freeze(tableselectors);
-const dynamics = {};
 const NOTFOUND = '#NOTFOUND#';
 export class TableComponent {
   instanceid = null;
@@ -108,7 +107,7 @@ export class TableComponent {
   searching = false;
   sorting = false;
   initialized = false;
-  plugins = [];
+  plugins = {};
   constructor(container, options = {}) {
     if (!container) return;
     container = container instanceof HTMLElement ? container : document.querySelector(container);
@@ -122,7 +121,6 @@ export class TableComponent {
 
   }
   init(container) {
-    this.eventEmitter = new EventEmitter();
     this.params = container.dataset;
     let table = container.querySelector('table');
     if (!table) {
@@ -138,13 +136,7 @@ export class TableComponent {
         class: tableselectors.top.substr(1)
       }
     };
-    if (this.params.searchable) top.childnodes = [{
-      nodename: "DIV",
-      attributes: {
-        class: tableselectors.search.substr(1)
-      },
-      html: `<input type="search" name="table-search" placeholder="${this.labels.placeholder}" class="${tableselectors.input.substr(1)}  ${css.input}" hidden="">`
-    }];
+
     let wrapper = this.objToElement({
       nodename: 'DIV',
       attributes: {
@@ -155,13 +147,11 @@ export class TableComponent {
     container.appendChild(wrapper);
     wrapper.appendChild(table);
     this.wrapper = wrapper;
-
     this.labels = (this.params.labels) ? this.params.labels : this.labels;
     // cellid
     this.cellidname = (this.params.hasOwnProperty("cellid")) ? this.params.cellid : this.cellidname;
     // only valid from values - fetchfroms
     this.params.from = (this.params.from) ? DOMPurify.sanitize(this.params.from) : null;
-
     const from = (this.params.from) ? ((Object.keys(fetchfroms).indexOf(this.params.from) >= 0) ? fetchfroms[this.params.from] : null) : null;
     if (from) {
       if (this.params.defer) this.deferLoad(container, from);
@@ -204,7 +194,6 @@ export class TableComponent {
     const pagesize = (this.params.pagesize) ? this.params.pagesize : 0;
     let from = fromurl;
     if (this.params.fromid) from += '/' + this.params.fromid;
-
     let query = (this.params.import) ? {
       typeimport: DOMPurify.sanitize(this.params.import),
       window_start: pagestart,
@@ -233,10 +222,10 @@ export class TableComponent {
       if (this.waitdiv) this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : default_messages.dataloaded);
       if (pagestart === 0) {
         let now = Date.now();
-        console.log('seconds to fetch', (Date.now() - this.dt) / 1000);
+        console.log('seconds to fetch ', (Date.now() - this.dt) / 1000);
         this.dt = now;
         if (tabledef.data.length) await this.tableActivate(container, tabledef);
-        else this.waitDeactivate();
+        else this.waitDeactivate('no result', 'default');
         now = Date.now();
         console.log('plugins loaded', (Date.now() - this.dt) / 1000);
         this.dt = now;
@@ -244,9 +233,9 @@ export class TableComponent {
       else pagesize = 0;
       if (pagesize > 0) this.fetchData(container, fromurl, pagestart + pagesize);
     }).catch((err) => { /* print error from response */
-      console.log('error', err)
+      console.log('error', err);
       this.waitDeactivate(err.status + ` ` + err.statusText, 'error');
-    })
+    });
   }
   async dataToTable(tabledef) {
 
@@ -401,7 +390,7 @@ export class TableComponent {
 
   }
   async tableActivate(container, tabledef = null) {
-    this.eventEmitter.on(this.eventnames.load, () => {
+    ModuleEventEmitter.on(this.eventnames.load, () => {
       this.initPlugins(container);
       this.initSearch();
       this.initSort();
@@ -415,13 +404,12 @@ export class TableComponent {
       this.initialized = true;
     });
     // dismiss table when dismiss modal
-    this.eventEmitter.on(this.eventnames.dismiss, (e) => {
+    ModuleEventEmitter.on(this.eventnames.dismiss, (e) => {
       this.destroy();
     });
-
     if (tabledef) tabledef = await this.dataToTable(tabledef);
     else await this.tableToData();
-    if (this.grid.data.length) this.eventEmitter.emit(this.eventnames.load);
+    if (this.grid.data.length) ModuleEventEmitter.emit(this.eventnames.load);
     instance[this.instanceid] = true;
   }
 
@@ -713,7 +701,7 @@ export class TableComponent {
     this.grid.columns = Object.entries(columns).map(([key, column], index) => map_column(key, column, index));
   }
   initEvents() {
-    this.eventEmitter.on(this.eventnames.update, () => {
+    ModuleEventEmitter.on(this.eventnames.update, () => {
       this.dom.classList.remove(css.hide);
     });
   }
@@ -769,16 +757,16 @@ export class TableComponent {
     });
     this.sorting = false;
     // remove details when sorting
-    this.eventEmitter.on(this.eventnames.sorting, (direction, index) => {
+    ModuleEventEmitter.on(this.eventnames.sorting, (direction, index) => {
 
-      if (this.plugins.indexOf('jsDetail') >= 0) this.plugins['jsDetail'].activeDetail(false);
+      if (this.plugins.jsDetail) this.plugins.jsDetail.activeDetail(false);
       this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
         a.classList.add(((i === index) ? css.wait : css.disabled));
       });
       this.sorting = true;
     });
     // remove details when sorting
-    this.eventEmitter.on(this.eventnames.sorted, (direction, index) => {
+    ModuleEventEmitter.on(this.eventnames.sorted, (direction, index) => {
       this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
         a.classList.remove(((i === index) ? css.wait : css.disabled))
       });
@@ -789,7 +777,7 @@ export class TableComponent {
     dir = (dir === null) ? ((th.classList.contains(tablecss.ascending)) ? false : (th.classList.contains(tablecss.descending)) ? true : ((th.dataset.sort) ? false : true)) : dir;
     th.classList.toggle(tablecss.ascending);
     th.classList.toggle(tablecss.descending);
-    this.eventEmitter.emit(this.eventnames.sorting, dir, th.cellIndex);
+    ModuleEventEmitter.emit(this.eventnames.sorting, dir, th.cellIndex);
     let rows = this.grid.data.map((row, i) => {
       const cell = is_object(row[index]) ? JSON.stringify(row[index]) : ((Array.isArray(row[index])) ? row[index][0] : row[index]);
       return {
@@ -850,7 +838,7 @@ export class TableComponent {
     this.grid.data = sorted;
     this.dom.replaceChild(clone, tbody);
 
-    this.eventEmitter.emit(this.eventnames.sorted, dir, th.cellIndex);
+    ModuleEventEmitter.emit(this.eventnames.sorted, dir, th.cellIndex);
 
 
   }
@@ -858,12 +846,30 @@ export class TableComponent {
 
 
   initSearch() {
+    const top = this.wrapper.querySelector(tableselectors.top);
+    if (!this.params.searchable || top === null) return;
     if (this.grid.data.length < 10) return this.toggleAddOns();
-    else this.toggleAddOns([tableselectors.search + ' input'], true);
+    else this.toggleAddOns([tableselectors.search + ' input'], false);
     this.searching = false;
     const cellid = this.getCellId(this.cellidname);
     // search items
-    const searchinput = this.wrapper.querySelector(tableselectors.search + ' input');
+    const searchbox = this.objToElement({
+      nodename: 'DIV',
+      attributes: {
+        class: tableselectors.search.substr(1)
+      },
+      childnodes: [{
+        nodename: 'input',
+        attributes: {
+          type: 'search',
+          name: 'table-search',
+          placeholder: this.labels.placeholder,
+          class: `${tableselectors.input.substr(1)} ${css.input}`
+        }
+      }]
+    });
+    top.appendChild(searchbox);
+    const searchinput = searchbox.querySelector('input');
     if (!searchinput) return;
     let searchstring = ``;
     const table_search = debounce((searchstring, casesensitive = false) => {
@@ -887,7 +893,7 @@ export class TableComponent {
         return strs;
       }
       const queries = search_queries(searchstring);
-      this.eventEmitter.emit(this.eventnames.search, searchstring, queries);
+      ModuleEventEmitter.emit(this.eventnames.search, searchstring, queries);
       let datas = this.grid.data,
         indexes = [];
       queries.forEach(qry => {
@@ -922,7 +928,7 @@ export class TableComponent {
           }
         });
       });
-      this.eventEmitter.emit(this.eventnames.searchend, queries, indexes, cellid);
+      ModuleEventEmitter.emit(this.eventnames.searchend, queries, indexes, cellid);
     }, 300);
     const display_search = (queries, indexes, cellid) => {
       const trs = this.dom.querySelectorAll('tbody tr');
@@ -960,25 +966,25 @@ export class TableComponent {
     searchinput.addEventListener("click", (e) => {
       search_input(e.target.value);
     });
-    this.eventEmitter.on(this.eventnames.search, (searchstring, queries) => {
+    ModuleEventEmitter.on(this.eventnames.search, (searchstring, queries) => {
       if (this.searching === false) {
-        if (this.plugins.indexOf('jsDetail') >= 0) this.plugins['jsDetail'].activeDetail(false);
+        if (this.plugins.jsDetail) this.plugins.jsDetail.activeDetail(false);
       }
       this.searching = true;
     });
-    this.eventEmitter.on(this.eventnames.searchend, (queries, indexes, cellid) => {
+    ModuleEventEmitter.on(this.eventnames.searchend, (queries, indexes, cellid) => {
       display_search(queries, indexes, cellid);
       searchinput.classList.remove(css.wait);
       this.searching = false;
     });
-    this.eventEmitter.on(this.eventnames.update, () => {
+    ModuleEventEmitter.on(this.eventnames.update, () => {
       if (this.searching === false) {
         setTimeout(() => {
           refresh_details();
         }, 300);
       }
     });
-    searchinput.classList.remove(css.hide);
+    this.toggleAddOns([tableselectors.search + ' input'], true);
   }
   initSelect(container) {
     const inputs = this.dom.querySelectorAll('input[name^="' + this.instanceid + '"]');
@@ -1045,38 +1051,47 @@ export class TableComponent {
     // about - one div to display cell details make it appear as table row expanding
     const wrapper = this.wrapper;
     const about = wrapper.querySelector('#' + tablecss.tipinline) ? wrapper.querySelector('#' + tablecss.tipinline) : tablecss.tipinline;
-    if (!dynamics.JsDetail) {
+    if (!this.plugins.JsDetail) {
       const {
         JsDetail
       } = await
       import('../modules/js-detail.js');
-      dynamics.JsDetail = JsDetail;
+      this.plugins.JsDetail = JsDetail;
     }
-    const jsDetail = new dynamics.JsDetail(about, wrapper, {
+
+    if (!this.plugins.JsAccordion) {
+      const {
+        JsAccordion
+      } = await import('../modules/js-accordion.js');
+      this.plugins.JsAccordion = JsAccordion;
+    }
+    const jsDetail = this.plugins.JsDetail({
       waitdiv: this.waitdiv
-    }); // specific to about details in table
+    });
+
+    const detail = jsDetail.applyTo(about, wrapper); // specific to about details in table
     // hide / show disable details zone
     const callbackclose = (el, callback = null) => {
-      jsDetail.activeDetail(false);
+      const current = jsDetail.activeDetail(false);
       if (callback) callback();
     }
 
     const callbackopen = (el, callback = null) => {
-      jsDetail.activeDetail(true);
-      if (jsDetail.current && jsDetail.current === el) {
-        jsDetail.expandDetail(el);
+      let current = jsDetail.activeDetail(true);
+      if (current && current === el) {
+        current = jsDetail.expandDetail(el);
+        console.log('callbackopen', current)
         if (callback) callback();
       } else {
-        if (jsDetail.current) jsDetail.current.querySelector('summary').click();
+        if (current) current.querySelector('summary').click();
         const url = this.params.detailsurl + el.dataset.id + '?' +
           new URLSearchParams({
             partial: true
           });
-        jsDetail.activeDetail(true);
+        current = jsDetail.activeDetail(true);
         // append to cell details and display
-
         fetch(url, fetchSettings()).then(response => response.text()).then(html => {
-          jsDetail.expandDetail(el, html);
+          current = jsDetail.expandDetail(el, html);
           if (callback) callback();
         }).catch(err => {
           console.log('request', err);
@@ -1084,24 +1099,16 @@ export class TableComponent {
       }
 
     }
-    if (!dynamics.JsAccordion) {
-      const {
-        JsAccordion
-      } = await import('../modules/js-accordion.js');
-      dynamics.JsAccordion = JsAccordion;
-    }
 
     const refresh_details = () => {
-      this.dom.classList.remove(css.hide);
       const details = this.dom.querySelectorAll(tableselectors.details);
       if (!details) return;
-      details.forEach(item => {
+      /*details.forEach(item => {
         if (!item.dataset.id) return;
-
-        item = new dynamics.JsAccordion(item, callbackopen, callbackclose, jsDetail.detail);
-      });
+        item =new this.plugins.JsAccordion(item, callbackopen, callbackclose, detail);
+      });*/
+      this.plugins.JsAccordion.applyTo(details, callbackopen, callbackclose, detail);
     }
-    this.plugins['jsDetail'] = jsDetail;
     refresh_details();
   }
 
@@ -1228,16 +1235,15 @@ export class TableComponent {
     });
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
-      if (!this.dynamics) this.dynamics = {};
-      if (!this.dynamics.exportCSV) {
+      if (!this.plugins.exportCSV) {
         const {
           exportCSV // or exportJSON, exportSQL
         } = await
-        import("../modules/js-export-csv.js");
+        import("../modules/export-csv.js");
 
-        this.dynamics.exportCSV = exportCSV;
+        this.plugins.exportCSV = exportCSV;
       }
-      let str = this.dynamics.exportCSV(this, {
+      let str = this.plugins.exportCSV(this, {
         download: false,
         linedelimiter: "\n",
         columndelimiter: "\t",

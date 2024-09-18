@@ -6,160 +6,211 @@ import {
 import {
   css,
 } from '../modules/modules-config.js';
+import {
+  entryTypes,
+} from '../modules/entry.js';
 css.displayimport = 'displayimport';
-export class JsImport {
-  typeimport;
-  myFiles;
-  eventnames = {
-    import: 'import'
-  };
-  url = {};
-  constructor(container, options = {}) {
-    container = (container instanceof HTMLElement) ? container : document.querySelector(container);
-    if (!container) return;
-    this.container = container;
-    const defaultOptions = {
-      selector: {
-        typeimport: "typeimport",
-        importzone: "file_to_load",
-        showfiles: ".showfiles",
-      },
-      url: {
-        import: "gui/import",
-        dirlist: "gui/files"
-      },
+export function JsImport(container, options = {}) {
+  const defaultOptions = {
+    selectors: {
+      typeimport: "typeimport",
+      inputname: "file_to_load",
+      showfiles: ".showfiles",
       importzone: "import-list",
       sourcezone: "dirlist"
-    };
+    },
+    url: {
+      import: "gui/import",
+      dirlist: "gui/files"
+    },
 
-    this.options = Object.assign(defaultOptions, options);
-    this.url.dirlist = (container.dataset.dirlist) ? container.dataset.dirlist : this.options.url.dirlist;
-    this.url.import = (container.dataset.import) ? container.dataset.import : this.options.url.import;
-    const importzoneid = (container.dataset.importzone) ? container.dataset.importzone : this.options.importzone;
-    console.log('container ' + importzoneid, container)
-    this.init(importzoneid);
-  }
+  };
+  options = { ...defaultOptions,
+    ...options
+  };
+  container = (container instanceof HTMLElement) ? container : document.querySelector(container);
+  if (!container) return;
+  let url = {};
+  url.dirlist = (container.dataset.dirlist) ? container.dataset.dirlist : options.url.dirlist;
+  url.import = (container.dataset.import) ? container.dataset.import : options.url.import;
+  const submitbtn = container.querySelector('[type="submit"]');
+  let typeimport;
+  let myFiles;
+  let eventnames = {
+    import: 'import'
+  };
+  let importliste = "";
+  let filetoload;
+  let importzone = null;
+  let dragentry = null;
 
-  init(importzoneid) {
+  function init() {
     // init steps to display import sequence
-    this.addImportZone(importzoneid);
-    this.container.querySelectorAll('input[name="' + this.options.selector.typeimport + '"]').forEach(typeimport => {
+    addImportZone();
+    container.querySelectorAll('input[name="' + options.selectors.typeimport + '"]').forEach(typeimport => {
       typeimport.addEventListener('change', (e) => {
         if (e.currentTarget.checked) {
           console.log(e.currentTarget)
-          this.typeimport = e.currentTarget.value;
-          this.showSelection(true);
+          typeimport = e.currentTarget.value;
+          showSelection(true);
         }
       })
     });
-    this.showSelection();
+    container.formsubmit.addHandler('submit', async () => {
+      return processImport();
+    });
+    showSelection();
   }
-  addImportZone(importzoneid) {
-    let importzone = document.getElementById(importzoneid);
-    console.log('importzone ' + importzoneid, importzone)
-    importzone.classList.add(css.displayimport);
-    if (importzone === null) return;
-    if (importzone.children.length === 0) {
-      const input = create_box('input', {
+
+  function addImportZone() {
+    if (!importzone) {
+      const importzoneid = (container.dataset.importzone) ? container.dataset.importzone : options.selectors.importzone;
+      const zone = document.getElementById(importzoneid);
+      if (zone === null) return;
+      filetoload = create_box('input', {
         type: "hidden",
-        id: "files_to_load",
-        name: "files_to_load",
+        id: options.selectors.inputname,
+        name: options.selectors.inputname,
         class: "form-input",
         required: true
-      })
+      }, zone);
+
       const response = create_box('div', {
         class: "response-summary"
       }, );
       create_box('div', {
         id: "total-objects",
-        class: "info",
+        class: css.info,
         data: {
           text: "Total objects"
         }
       }, response);
       create_box('div', {
         id: "total-tsv",
-        class: "info",
+        class: css.info,
         data: {
           text: "Total TSV"
         }
       }, response);
+      importzone = create_box('ul', {
+        class: css.displayimport,
+      }, zone);
     }
-    return importzone;
+
   }
-  async showSelection(refresh = false) {
-    console.log('showselection')
+  async function showSelection(refresh = false) {
     const apply_filters = () => {
-      let filters = this.typeimport.split('-');
+      let filters = typeimport.split('-');
       filters = filters.map(filter => {
         return new Set([...(filter_files[filter] ? filter_files[filter] : [])]);
       });
-      this.myFiles.container.querySelectorAll('[data-ftype]').forEach(entry => {
+      myFiles.container.querySelectorAll('[data-ftype]').forEach(entry => {
         if (filters.has(entry.dataset.ftype)) entry.classList.remove('disabled');
         else entry.classList.add('disabled');
       });
     }
-    const displayselection = document.getElementById(this.options.sourcezone);
-    const displayresult = document.getElementById(this.options.importzone);
-    if (!displayselection || !displayresult) return;
-    console.log('displayselection', displayselection)
-    if (!this.myFiles) {
-
+    const displayselection = document.getElementById(options.selectors.sourcezone);
+    if (!displayselection) return;
+    if (!myFiles) {
       const {
         JsMyFiles
-      } =
-      await import('../modules/js-my-files.js');
-
-
-      this.myFiles = new JsMyFiles(displayselection, {
-        import: this.url.toimport,
-        url: this.url.dirlist,
+      } = await import('../modules/js-my-files.js');
+      myFiles = new JsMyFiles(displayselection, {
+        import: url.toimport,
+        url: url.dirlist,
         upload: {
           label: (displayselection.dataset.uploadlabel) ? (displayselection.dataset.uploadlabel) : 'upload',
           callback: () => {
-            this.showSubmit();
+            showSubmit(false);
           }
         }
       });
-      this.addImportControls();
+      addImportControls();
     }
 
     if (refresh === true) apply_filters();
 
   }
-  addImportPath(value) {
-    document.getElementById(this.options.selector.importzone).value = value;
-    const displayresult = document.getElementById(this.options.selector.displayresult);
-    if (displayresult) displayresult.innerHTML = `<li>${value.split('/').pop()}</li>`;
-    const options = this.container.querySelector('#' + this.options.selector.importoptions);
-  }
-  addImportControls() {
-    const import_entry = (entry) => {
 
+  function addImportPath(value) {
+    document.getElementById(options.selector.importzone).value = value;
+    const displayresult = document.getElementById(options.selector.displayresult);
+    if (displayresult) displayresult.innerHTML = `<li>${value.split('/').pop()}</li>`;
+    const options = container.querySelector('#' + options.selector.importoptions);
+  }
+
+  function addImportEntry(entry) {
+    // remove dir or file controls
+    myFiles.jsDirList.detachControls();
+    importliste = entry;
+    console.log('entryimp', entry)
+    const toimport = entry.container.cloneNode(true);
+    Array.from(importzone.children).forEach(child => {
+      child.remove();
+    });
+    importzone.append(toimport);
+    showSubmit();
+  }
+
+  function addImportControls() {
+    function add_remove_import(e) {
+      console.log('e removeimport callback', myFiles.jsDirList.dragentry)
+      console.log('e removeimportevent', e)
     }
     const control = {
       import: {
         action: 'import',
         icon: 'icon-arrow-down-on-square-stack',
-        typentries: ['D', 'F'],
+        typentries: [entryTypes.branch],
         text: 'import into project',
-        callback: import_entry
+        callback: add_remove_import
       }
     };
-    this.myFiles.jsDirList.options.entrycontrols.controls = { ...control,
-      ...this.myFiles.jsDirList.options.entrycontrols.controls
+    myFiles.jsDirList.entrycontrols.options.controls = { ...control,
+      ...myFiles.jsDirList.entrycontrols.options.controls
     };
-    this.myFiles.jsDirList.import = (entry) => {
-      console.log('yes good , very googd', entry);
+    console.log('entrycontrols', myFiles.jsDirList.entrycontrols.options.controls)
 
+    function import_action(entry) {
+      addImportEntry(entry);
     }
+    console.log(' entrycontrols', myFiles.jsDirList.entrycontrols)
+    myFiles.jsDirList.entrycontrols.addControl(control.import, 0, import_action);
+    myFiles.jsDirList.entrycontrols.activateControls();
+    importzone.addEventListener('drop', (e) => {
+      e.stopPropagation();
+      dragentry.container.classList.remove(dragentry.options.css.dragging);
+      addImportEntry(dragentry);
+      importzone.classList.remove(dragentry.options.css.dragover);
+      add_remove_import(e);
+      dragentry = myFiles.jsDirList.dragentry = null;
+    });
+    importzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (!dragentry) {
+        dragentry = myFiles.jsDirList.dragentry;
+        dragentry.setOff();
+        importzone.classList.add(dragentry.options.css.dragover);
+      }
+    });
+
   }
-  showSubmit(show = true) {
-    const submit = this.container.querySelector('[type="submit"]');
-    console.log('sub', submit)
+
+  function showSubmit(show = true) {
+    const submit = container.querySelector('[type="submit"]');
     if (show) {
       submit.classList.remove('hide');
       submit.disabled = false;
     } else submit.disabled = true;
   }
+
+  function processImport() {
+    if (importliste === "") {
+      alert('nothing to upload');
+      return false;
+    }
+    filetoload.value = importliste.getCurrentDirPath();
+    return true;
+  }
+  init();
 }

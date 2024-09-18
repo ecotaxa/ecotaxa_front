@@ -9,6 +9,9 @@ import {
   decode_HTMLEntities,
   html_spinner,
 } from '../modules/utils.js';
+import {
+  AlertBox
+} from '../modules/alert-box.js';
 
 domselectors.captcha = '.js-captcha';
 css.invalid = 'invalid';
@@ -173,33 +176,33 @@ export class FormSubmit {
   validateFieldUnique(field) {
     const label = this.getFieldLabel(field);
     if (String(field.dataset.unique).toLowerCase() === String(field.value).toLowerCase()) {
-      //field.dataset.invalid = window.alertbox.i18nmessages.noduplicate;
+      //field.dataset.invalid = AlertBox.i18nmessages.noduplicate;
       // just send a warning for the moment
       if (label) {
-        label.dataset.confirm = window.alertbox.i18nmessages.noduplicate;
-        label.classList.add(window.alertbox.alertconfig.css.confirm);
+        label.dataset.confirm = AlertBox.i18nmessages.noduplicate;
+        label.classList.add(AlertBox.alertconfig.css.confirm);
       }
       const callback_cancel = function() {
         field.dataset.unique = false;
         if (label) {
-          label.classList.remove(window.alertbox.alertconfig.css.confirm);
+          label.classList.remove(AlertBox.alertconfig.css.confirm);
           delete label.dataset.confirm;
         }
       }
-      const confirm = window.alertbox.createConfirm(((label) ? label.textContent + ` : ` : ``) + window.alertbox.i18nmessages.noduplicate, {
+      const confirm = AlertBox.createConfirm(((label) ? label.textContent + ` : ` : ``) + AlertBox.i18nmessages.noduplicate, {
         callback_cancel: callback_cancel,
         buttons: {
           ok: {
-            text: window.alertbox.i18nmessages.modify
+            text: AlertBox.i18nmessages.modify
           },
           cancel: {
-            text: window.alertbox.i18nmessages.saveanyway
+            text: AlertBox.i18nmessages.saveanyway
           }
         }
       });
       return confirm;
     } else if (label.dataset.confirm) {
-      label.classList.remove(window.alertbox.alertconfig.css.confirm);
+      label.classList.remove(AlertBox.alertconfig.css.confirm);
       delete label.dataset.confirm;
     }
     return true;

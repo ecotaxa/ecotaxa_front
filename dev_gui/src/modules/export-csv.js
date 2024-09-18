@@ -9,7 +9,7 @@ import {
  * @return {Array}
  */
 
-export const exportCSV = function(state, options = {}, hidden = true) {
+export function exportCSV(state, options = {}, hidden = true) {
 
   if (!state.grid.columns.length || (hidden === true && !state.grid.data.length)) return false;
   const defaults = {

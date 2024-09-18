@@ -1,4 +1,4 @@
-export function EventEmitter(event, callback) {
+function createModuleEventEmitter(event, callback) {
   /**
    * Add custom event listener
    * @param  {String} event
@@ -37,4 +37,8 @@ export function EventEmitter(event, callback) {
     off,
     emit
   }
+}
+const ModuleEventEmitter = await createModuleEventEmitter();
+export {
+  ModuleEventEmitter
 }

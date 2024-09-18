@@ -1,7 +1,3 @@
-//from css tricks
-// used in tables about project stats details
-// used in tables imports when cells contains lots of data
-// apply mostly to details tags
 import DOMPurify from 'dompurify';
 const css = {
   line: 'taxoline',
@@ -29,7 +25,8 @@ export class TaxoMapping {
     if (line.dataset.addline) {
       let controls = {};
       ['select', 'replace'].forEach(selector => {
-        controls[selector] = line.querySelector('[name="item-' + selector + '"]');
+        controls[selector] = line.querySelector('[data-role="' + selector + '"]');
+
       });
       this.linecontrols = controls;
       controls = null;
@@ -81,21 +78,24 @@ export class TaxoMapping {
       const keep = document.createElement('div');
       keep.classList.add(css.mapline);
       keep.classList.add('mr-2');
+      const role = input.dataset.role;
       if (input.tomselect) {
-        const tsinput = line.querySelector('.ts-control > div');
+        const replaceline = input.nextElementSibling;
+        const tsinput = replaceline.querySelector('.ts-control > div');
         keep.dataset.value = input.value;
         keep.textContent = tsinput.textContent;
-        keep.dataset.replace = this.numlines;
+        keep.dataset[role] = this.numlines;
         input.tomselect.clear(true);
-      } else {
+      } else if (input.tagName.toLowerCase() === "select") {
         keep.dataset.value = input.options[input.selectedIndex].value;
         keep.textContent = input.options[input.selectedIndex].text;
         newline.dataset.index = input.selectedIndex;
-        keep.dataset.select = this.numlines;
+        keep.dataset[role] = this.numlines;
         input.options[input.selectedIndex].disabled = true;
         input.selectedIndex = -1;
       }
       input.parentElement.insertBefore(keep, input);
+
       newline.append(keep);
     });
     this.btnCancel(newline, (line.dataset.cancel) ? line.dataset.cancel : 'cancel');
@@ -112,7 +112,7 @@ export class TaxoMapping {
     item.append(cancel);
     cancel.insertAdjacentHTML('afterbegin', `<i class="icon icon-x-mark absolute centered"></i>`);
     cancel.addEventListener('click', (e) => {
-      this.linecontrols.select.options[item.dataset.index].disabled = false;
+      if (this.linecontrols.select.options) this.linecontrols.select.options[item.dataset.index].disabled = false;
       item.remove();
     });
   }
@@ -142,5 +142,4 @@ export class TaxoMapping {
       format_mapping_field();
     });
   }
-
 }

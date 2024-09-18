@@ -13,9 +13,15 @@ import {
   css,
 } from '../modules/modules-config.js';
 import {
+  AlertBox
+} from '../modules/alert-box.js';
+import {
   JsDirList,
-  defaultOptions
+  dirlistOptions
 } from '../modules/files/js-dirlist.js';
+import {
+  ModuleEventEmitter
+} from '../modules/module-event-emitter.js';
 const objaccept = {
   "image/*": [".png", ".jpeg", ".jpg"],
   "text/tab-separated-values": [".tsv"],
@@ -46,6 +52,7 @@ export class JsMyFiles {
 
   constructor(container, options = {}) {
     if (!container.jsmyfiles) {
+      console.log('build myfiles')
       container = (container instanceof HTMLElement) ? container : document.querySelector(container);
       if (!container) return;
       dom_purify(container, 'dataset');
@@ -135,24 +142,23 @@ export class JsMyFiles {
     // alerts on error
     this.on(this.eventnames.error, (e) => {
       console.log('scandir receive error message', e)
-      if (window.alertbox) {
-        window.alertbox.renderAlert({
-          type: window.alertbox.alertconfig.types.error,
-          content: e,
-          inverse: true,
-          dismissible: true
-        });
-      }
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.error,
+        content: e,
+        inverse: true,
+        dismissible: true
+      });
+
     });
     const self = this;
     if (this.options.controls.zip) {
       const {
         JsDirToZip
       } = await import('../modules/files/js-dirtozip.js');
-      this.jsDirToZip = new JsDirToZip();
+      this.jsDirToZip = JsDirToZip();
       Object.keys(this.jsDirToZip.eventnames).forEach((key) => {
         this.eventnames[key] = this.jsDirToZip.eventnames[key];
-        this.jsDirToZip.on(key, (e) => {
+        ModuleEventEmitter.on(key, (e) => {
           switch (key) {
             case this.eventnames.clientcounter:
               this.fileCounter(e);
@@ -181,11 +187,11 @@ export class JsMyFiles {
                     parent: this.container
                   });
                   break;
-                case window.alertbox.alertconfig.types.error:
-                case window.alertbox.alertconfig.types.success:
-                case window.alertbox.alertconfig.types.danger:
-                case window.alertbox.alertconfig.types.info:
-                  window.alertbox.renderAlert({
+                case AlertBox.alertconfig.types.error:
+                case AlertBox.alertconfig.types.success:
+                case AlertBox.alertconfig.types.danger:
+                case AlertBox.alertconfig.types.info:
+                  AlertBox.addAlert({
                     type: e.name,
                     content: e.message,
                     dismissible: true,
@@ -216,7 +222,7 @@ export class JsMyFiles {
       if (message.name) {
         const name = message.name;
         delete message.name;
-        this.jsDirToZip.emit(name, message);
+        ModuleEventEmitter.emit(name, message);
       }
     }
     if (name === this.eventnames.sendfile) btn.disabled = true;
@@ -299,7 +305,7 @@ export class JsMyFiles {
     const self = this;
     const droptarget = (this.activentry) ? this.activentry.container : null;
     if (droptarget === null) return;
-    const cssdragover = (this.jsDirList) ? this.jsDirList.options.entry.css.dragover : this.options.css.dragover;
+    const cssdragover = (this.jsDirList) ? (this.jsDirList.options.entry) ? this.jsDirList.options.entry.css.dragover : this.options.css.dragover : this.options.css.dragover;
     const target_dragover = (e) => {
       if (!this.dragover && this.activentry && this.activentry.container === e.currentTarget) {
         droptarget.classList.add(cssdragover);
@@ -308,7 +314,7 @@ export class JsMyFiles {
     }
     const target_drop = async (e) => {
       droptarget.classList.remove(cssdragover);
-      self.handleDrop(e);
+      await self.handleDrop(e);
     }
 
     // set events and css for new dropzone
@@ -327,19 +333,19 @@ export class JsMyFiles {
     this.jsDirList = new JsDirList(this.container);
     this.activentry = this.jsDirList.root;
     this.rootitem = this.targetitem = this.activentry.container;
-    this.jsDirList.on(this.jsDirList.eventnames.attach, (e) => {
+    ModuleEventEmitter.on(this.jsDirList.eventnames.attach, (e) => {
       if (!e.entry) return;
       this.detachDropzone();
       this.activentry = e.entry;
       this.targetitem = this.activentry.container;
-      if ([this.activentry.options.type.directory, this.activentry.options.type.root].indexOf(this.activentry.type) >= 0) this.addUploadDialog();
+      if (this.activentry.isBranch(true)) this.addUploadDialog();
     });
-    this.jsDirList.on(this.jsDirList.eventnames.detach, (e) => {
+    ModuleEventEmitter.on(this.jsDirList.eventnames.detach, (e) => {
       this.detachDropzone();
       this.activentry = null;
       this.targetitem = null;
     });
-    this.jsDirList.on(this.jsDirList.eventnames.action, (e) => {
+    ModuleEventEmitter.on(this.jsDirList.eventnames.action, (e) => {
       if (e.detail.action === "drop") this.handleDrop(e.detail.event);
       else console.log('action not managed ' + e.detail.action, e.detail)
     });
@@ -354,7 +360,7 @@ export class JsMyFiles {
       el = create_box('div', {
         id: this.options.display.progression
       }, this.container);
-      el.innerHTML = `<div class="${this.options.display.progression}"><div class="${this.options.display.counters}"></div><div class="${this.options.display.sizes}"></div><div class="${css.progress}"></div><div class="${this.options.display.timers}"></div></div>`;
+      el.insertAdjacentHTML('afterbegin', `<div class="${this.options.display.progression}"><div class="${this.options.display.counters}"></div><div class="${this.options.display.sizes}"></div><div class="${css.progress}"></div><div class="${this.options.display.timers}"></div></div>`);
       this.displayprogression = el;
     }
   }
@@ -439,7 +445,7 @@ export class JsMyFiles {
   addConsoleMessage(message) {
     //message {message:, parent:}
     message.parent = (message.parent) ? message.parent : this.container;
-    window.alertbox.addConsoleMessage(message);
+    AlertBox.addConsole(message);
   }
 
   addUploadDialog() {
@@ -563,16 +569,16 @@ export class JsMyFiles {
     };
     if (Object.keys(textval).indexOf(type) < 0) return;
     const message = {
-      type: window.alertbox.alertconfig.types.warning,
+      type: AlertBox.alertconfig.types.warning,
       parent: el,
       content: `Files ${this.rejected.join('<br>')} ${textval[type]}`,
     };
     if (el.dataset.hasmessage) {
-      window.alertbox.removeItemMessage(message);
+      AlertBox.removeMessage(message);
       delete el.dataset.hasmessage;
     } else {
       el.dataset.hasmessage = true;
-      window.alertbox.addItemMessage(message);
+      AlertBox.addMessage(message);
     }
   }
 
@@ -696,8 +702,10 @@ export class JsMyFiles {
     const btn = document.getElementById(display);
     const parent = this.displayprogression;
     if (!btn) {
-      parent.insertAdjacentHTML('beforeend', `<button id="${display}" class="${display} ${css.button} ${css.hide}"></button>`);
-      this[btnkey] = document.getElementById(display);
+      this[btnkey] = create_box('button', {
+        id: display,
+        class: [display, css.hide].concat(css.button.split(' '))
+      }, parent);
       this[btnkey].addEventListener('click', async (e) => {
         e.stopImmediatePropagation();
         e.preventDefault();

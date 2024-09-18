@@ -2,17 +2,21 @@ import {
   css,
   domselectors
 } from '../modules/modules-config.js';
-export class JsTabs {
-  constructor(item, options = {}) {
+domselectors.shared = '[data-shared]';
+
+function createJsTabs() {
+  let togglewhat, toggledisable, toggleshared;
+
+  function applyTo(item) {
     if (!item.jstabs) {
       let btns = item.querySelectorAll(domselectors.component.tabs.tabcontrol);
       if (btns.length === 0) {
         btns = item.querySelectorAll(((item.dataset.selector) ? item.dataset.selector : 'legend'));
 
       }
-
-      this.toggledisable = (item.dataset.toggledisable) ? true : false;
-      this.togglewhat = (item.dataset.togglewhat) ? item.dataset.togglewhat : null;
+      toggledisable = (item.dataset.toggledisable) ? true : false;
+      togglewhat = (item.dataset.togglewhat) ? item.dataset.togglewhat : null;
+      toggleshared = (item.dataset.toggleshared) ? true : false;
       let l = 0;
       btns.forEach((btn, index) => {
         const target = (btn.dataset.target) ? item.querySelector('#' + btn.dataset.target) : btn.closest(domselectors.component.tabs.tab);
@@ -21,9 +25,9 @@ export class JsTabs {
         btn.style.left = l + 'px';
         if (index === 0 && target.parentElement.querySelectorAll('.' + css.active).length === 0) {
           target.classList.add(css.active);
-          this.toggleTab(target, true);
+          toggleTab(target, true);
 
-        } else this.toggleTab(target, target.classList.contains(css.active));
+        } else toggleTab(target, target.classList.contains(css.active));
         l += parseInt(btn.offsetWidth) + 20;
         btn.addEventListener(ev, (e) => {
           if (e.currentTarget.disabled === true) {
@@ -33,27 +37,26 @@ export class JsTabs {
           const oldactive = item.dataset.selector ? target.parentElement.querySelector('.' + css.active) : item.querySelector(domselectors.component.tabs.tab + '.' + css.active);
           if (oldactive !== null) {
             oldactive.classList.remove(css.active);
-            this.toggleTab(oldactive, false);
+            toggleTab(oldactive, false);
           }
           target.classList.add(css.active);
-          this.toggleTab(target, true);
+          toggleTab(target, true);
         });
       })
-      if (!item.dataset.toggle) this.toggleDisplayListener(item, btns);
-      item.jstabs = this;
+      if (!item.dataset.toggle) toggleDisplayListener(item, btns);
+      item.jstabs = true;
     }
-    return item.jstabs;
   }
 
-  toggleTab(tab, show) {
-    let what = (this.togglewhat) ? document.getElementById(this.togglewhat) : null;
+  function toggleTab(tab, show) {
+    let what = (togglewhat) ? document.getElementById(togglewhat) : null;
 
     let tabcontents = tab.querySelectorAll(domselectors.component.tabs.tabcontent);
     if (tabcontents.length === 0) tabcontents = [tab];
     tabcontents.forEach(tabcontent => {
       if (show === true) tabcontent.classList.remove(css.hide);
       else if (!tab.classList.contains(css.active)) tabcontent.classList.add(css.hide);
-      if (this.toggledisable === true) {
+      if (toggledisable === true) {
         tabcontent.querySelectorAll('input, select, button, textarea').forEach(el => {
           if (show) {
             el.disabled = false;
@@ -82,14 +85,33 @@ export class JsTabs {
           }
         }
       }
+      if (toggleshared) {
+        // for elements shared between tabs and displayed on tab activation
+        tab.querySelectorAll(domselectors.shared).forEach(shared => {
+          const sharedcontent = tab.parentElement.querySelector('#' + shared.dataset.shared);
+          sharedcontent.parent = sharedcontent.parentElement;
+
+          if (show) {
+            sharedcontent.classList.remove(css.hide);
+            shared.append(sharedcontent);
+          } else {
+            sharedcontent.classList.add(css.hide);
+            if (sharedcontent.parent) {
+              sharedcontent.parent.append(sharedcontent);
+              delete sharedcontent.parent;
+            }
+          }
+        });
+      }
     });
   }
-  toggleDisplayListener(item, btns) {
+
+  function toggleDisplayListener(item, btns) {
     // flat/ tabs display
     const dismiss = item.querySelector('[data-dismiss="tabs"]');
     const toggle_tab = ((index, btn, show) => {
       btn.disabled = show;
-      this.toggleTab(btn.closest(domselectors.component.tabs.tab), show);
+      toggleTab(btn.closest(domselectors.component.tabs.tab), show);
     })
     if (dismiss) dismiss.addEventListener('click', (e) => {
       const icon = item.querySelector('.tabs-display');
@@ -99,4 +121,11 @@ export class JsTabs {
       icon.classList.toggle('shrink');
     });
   }
+  return {
+    applyTo
+  }
+}
+const JsTabs = createJsTabs();
+export {
+  JsTabs
 }

@@ -1,7 +1,7 @@
 import DOMPurify from 'dompurify';
 import {
   JsTomSelect
-} from "../modules/module-tom-select.js";
+} from "../modules/js-tom-select.js";
 import {
   ProjectPrivileges
 } from '../modules/project-privileges.js';
@@ -234,8 +234,7 @@ export class DataImport {
             const resetpriv = ((ts && ts.items.length > 0) || (importzone.selectedIndex > 0));
             if (!importzone.tomselect) {
               importzone.currentlist = {};
-              const jsTomSelect = JsTomSelect();
-              jsTomSelect.applyTo(importzone);
+              JsTomSelect.applyTo(importzone);
             }
             ts = importzone.tomselect;
             Object.entries(privs).forEach(([priv, members]) => {
@@ -465,8 +464,7 @@ export class DataImport {
         importzone.name = this.importid + '_' + importzone.name;
         this.importcontainer.prepend(importzone);
         if (ts) {
-          const jsTomSelect = JsTomSelect();
-          jsTomSelect.applyTo(importzone);
+          JsTomSelect.applyTo(importzone);
         }
         this.activateClear();
       }
