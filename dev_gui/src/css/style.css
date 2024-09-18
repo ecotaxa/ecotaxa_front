@@ -248,14 +248,15 @@ li:not(.on) ul.entries {@apply hidden}
 .display-progression {@apply flex sm:flex-row border border-secondblue-100 drop-shadow-sm p-2 mb-2}
 .counters, .sizes {@apply p-2 rounded-sm text-sm  my-1 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
-/*js upload dropzone*/
+/*js import */
 #dropzone {@apply w-auto ml-4 inline-block small-caps font-light}
 #dropzone .trigger {@apply  before:mr-0 small-caps text-black bg-stone-50 py-0.5 px-1.5 mr-3 w-6 overflow-x-hidden rounded drop-shadow hover:bg-secondblue-200 hover:drop-shadow-none before:p-0.5 before:icon }
 #dropzone .trigger[data-type="directory"]  {@apply before:icon-arrow-up-tray }
 #dropzone .trigger[data-type="file"]  {@apply before:icon-arrow-up-square}
-#dropzone span:not(.trigger) {@apply ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
-.displayimport {@apply  border border-secondblue-200 rounded  text-base font-normal w-full h-auto min-h-24 px-2 py-1  hover:bg-secondblue-50}
+#dropzone span:not(.trigger) {@apply text-ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
+.displayimport {@apply  border border-secondblue-200 rounded  text-base font-normal w-full h-auto min-h-8 px-2 py-1 overflow-y-visible hover:bg-secondblue-50 }
 .displayimport.active {@apply  bg-success-50}
+.displayimport li {@apply relative}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-50}
 .has-controls {@apply  border-b border-stone-200 font-bold bg-mainblue-50}
@@ -263,7 +264,7 @@ li:not(.on) ul.entries {@apply hidden}
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
 .dirlist {@apply h-full mt-2 }
 .dirlist [data-name] {@apply ml-4 py-0.5 relative}
-.dirlist [data-name][data-type="R"] , .dirlist [data-name][data-type="T"] {@apply ml-0 }
+.dirlist [data-name][data-type="R"] , .dirlist [data-name][data-type="D"] {@apply ml-0 }
 .dirlist [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
 .dirlist [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
 .dirlist [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
@@ -271,19 +272,19 @@ li:not(.on) ul.entries {@apply hidden}
 .dirlist [data-name].dragover .entrycontrols , .dirlist [data-name].dragover #dropzone {@apply hide}
 .on {@apply  block sm:max-h-[50v]  overflow-y-hidden}
 .on > .entries  {@apply block  overflow-y-auto }
-.entryF {@apply text-sm font-light }
-.entries [data-name$=".tsv"] .entryF {@apply font-normal}
-.entryD, .entryT, .entryR, .entryF.img, .entryF.doc {@apply  before:opacity-80 before:icon-md before:absolute before:block before:top-1.5 before:left-0 pl-5}
-.entryF.img {@apply  before:icon-image-sm }
-.entryF.doc {@apply  before:icon-document-sm}
-.entryD, .entryR {@apply text-base font-normal before:icon-folder-sm}
-.entryT {@apply text-base font-normal before:icon-trash-sm}
-.on > .entryT {@apply before:icon-trash}
-.entryD, .entryF, .entryR, .entryT  {@apply align-text-bottom mb-0.5 mr-0.5}
-.on > .entryD, .on > .entryR {@apply font-semibold before:icon-folder-open }
-.on > .entryT {@apply font-semibold}
-.dirlist .wait > .entryD, .dirlist .wait > .entryT, .dirlist .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
-.entries .editable {@apply font-normal border border-stone-300 border-dashed ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
+.entries [data-name$=".tsv"] .entryN {@apply font-normal}
+.entryD, .entryB, .entryR, .entryN.img, .entryN.doc {@apply  before:opacity-80 before:icon-md before:absolute before:block before:top-1.5 before:left-0 pl-5}
+.entryN.img {@apply  before:icon-image-sm }
+.entryN.doc {@apply  before:icon-document-sm}
+.entryB, .entryR {@apply text-base font-normal before:icon-folder-sm}
+.entryD {@apply text-base font-normal before:icon-trash-sm}
+.entryB, .entryN, .entryR, .entryD  {@apply align-text-bottom mb-0.5 mr-0.5}
+.on > .entryB, .on > .entryR {@apply font-semibold before:icon-folder-open }
+.on > .entryD {@apply font-semibold before:icon-trash}
+.on > .entryN {@apply font-semibold}
+.on .entryN , .entryN {@apply  text-sm font-light}
+.dirlist .wait > .entryB, .dirlist .wait > .entryD, .dirlist .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
+.entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
 .entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5 bg-transparent hover:bg-white cursor-pointer  static}
 .intrash {@apply bg-danger-100}
@@ -710,8 +711,8 @@ body::-webkit-scrollbar {
 
 /* selection background*/
 /*custom tables*/
-.table-table {@apply w-full bg-transparent border-collapse max-w-full;contain:'strict' }
-.table-table thead  {@apply w-full max-w-full}
+.table-table {@apply w-full bg-transparent border-collapse max-w-full; }
+.table-table thead, .table-table tbody , .table-table tfoot  {@apply w-full max-w-[100%]}
 .table-table thead tr th {@apply border-b bg-stone-50 truncate max-h-8 p-4 pl-6 pb-3 text-base text-left font-btn font-semibold capitalize text-secondblue-700 relative;}
 .table-table th[scope="row"] {@apply text-left}
 .table-table th:not([data-sortable="false"]).table-ascending {@apply text-secondblue-800}
@@ -730,14 +731,15 @@ body::-webkit-scrollbar {
 .table-search .table-input::placeholder {@apply pl-8;}
 .table-search .table-input {@apply bg-transparent relative  ml-0.5 }
 .table-table.wait {@apply hidden}
-/* search input cancel icon */
+/* search input wait */
+input[type="search"], .form-input[type="search"] {@apply relative valid:after:bg-success-500 valid:after:content-[''] valid:after:icon-sm valid:after:icon-x-mark valid:after:absolute valid:after:hover:z-[1] valid:after:-right-1 }
 input[type="search"]::-webkit-search-cancel-button , .form-input[type="search"]::-webkit-search-cancel-button{@apply right-1  icon-sm icon-x-mark ; -webkit-appearance: none;}
-input[type="search"].wait,form-input[type="search"].wait {@apply cursor-wait disabled bg-stone-500}
+input[type="search"].wait, .form-input[type="search"].wait {@apply cursor-wait disabled bg-stone-50}
 /**/
 .table-pagination-list li {@apply inline-block border rounded bg-stone-50 border-secondblue-100 text-secondblue-600 px-2  mr-1.5}
 .table-pagination-list li.pager {@apply bg-white border-none}
 .table-pagination-list li.active {@apply bg-white shadow}
-.table-wrapper {@apply h-full w-full block max-w-full ;}
+.table-wrapper {@apply h-full w-full block max-w-full;}
 .large-table .table-wrapper {@apply overflow-x-auto will-change-scroll;contain: strict;  contain-intrinsic-height: 300px;}
 .table-top , .table-bottom {@apply flex md:flex-row w-full justify-between pb-1 pr-1 z-20;}
 .table-info {@apply py-4}
@@ -773,6 +775,7 @@ a.disabled {@apply pointer-events-none;}
 .prjlist .table-table thead tr th {@apply  bg-stone-300 hover:text-secondblue-500 text-secondblue-900  border-secondblue-100 shadow-sm;}
 .prjlist .table-table th .sublabel {@apply text-xs font-light text-stone-500 }
 .prjlist .table-table tr {@apply h-8 max-h-8 overflow-hidden}
+.prjlist .table-table td {@apply  max-w-[22%]}
 .prjlist .table-table tr:nth-child(even of :not([hidden])) {@apply bg-stone-50 }
 .prjlist .table-table tr:nth-child(odd of :not([hidden])) {@apply bg-stone-100 }
 .prjlist .table-table td.tdsmall {@apply uppercase py-[0.1rem];font-size:.625rem;line-height:.575rem}
@@ -805,6 +808,10 @@ td.progress {@apply min-w-[96px] }
 td div[data-num] {@apply before:font-normal cursor-pointer before:mr-1 before:bg-stone-600 before:rounded before:text-stone-50 before:text-xs before:px-1 before:content-[attr(data-num)] before:w-auto before:inline-block}
 /* samples select */
 .absinput {@apply absolute z-10 ml-8 -mt-6}
+/*********************************/
+/* accordion                     */
+/*********************************/
+.open {@apply bg-secondblue-400 font-semibold text-stone-50}
 /*********************************/
 /* classification mandatory colors */
 /*********************************/
@@ -940,7 +947,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /*******************************/
 /* alerts                      */
 /*******************************/
-.alert {@apply mx-auto container block mb-4 my-0.5 px-4 py-1 font-light drop-shadow-sm rounded-sm relative}
+.alert {@apply mx-auto container block mb-4 my-0.5 px-4 py-1 font-light text-sm drop-shadow-sm rounded-sm relative}
 .alert:not(.inverse) {@apply drop-shadow }
 /*.alert-reponse {@apply border  mx-auto block container mb-4 my-0.5 px-4 py-2 font-light w-96  fixed right-0 top-0 z-[5000] drop-shadow-sm}*/
 .alert.reponse , .alert-reponse{@apply border  container mx-auto block  mb-4 my-0.5 px-4 py-2 font-light w-full fixed top-0 z-[50000] drop-shadow-sm  transition transform translate-y-32 }
