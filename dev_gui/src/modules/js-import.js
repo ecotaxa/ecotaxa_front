@@ -16,7 +16,7 @@ export function JsImport(container, options = {}) {
       typeimport: "typeimport",
       inputname: "file_to_load",
       showfiles: ".showfiles",
-      importzone: "import-list",
+      importzoneid: "import-list",
       sourcezone: "dirlist"
     },
     url: {
@@ -25,14 +25,16 @@ export function JsImport(container, options = {}) {
     },
 
   };
+  container = (container instanceof HTMLElement) ? container : document.querySelector(container);
+  if (!container) return;
   options = { ...defaultOptions,
     ...options
   };
-  container = (container instanceof HTMLElement) ? container : document.querySelector(container);
-  if (!container) return;
   let url = {};
   url.dirlist = (container.dataset.dirlist) ? container.dataset.dirlist : options.url.dirlist;
   url.import = (container.dataset.import) ? container.dataset.import : options.url.import;
+  options.selectors.importzoneid = (container.dataset.importzoneid) ? container.dataset.importzoneid : options.selectors.importzoneid;
+
   const submitbtn = container.querySelector('[type="submit"]');
   let typeimport;
   let myFiles;
@@ -63,7 +65,7 @@ export function JsImport(container, options = {}) {
   }
 
   function addImportZone() {
-    if (!importzone) {
+    if (!filetoload) {
       const importzoneid = (container.dataset.importzone) ? container.dataset.importzone : options.selectors.importzone;
       const zone = document.getElementById(importzoneid);
       if (zone === null) return;
@@ -92,9 +94,7 @@ export function JsImport(container, options = {}) {
           text: "Total TSV"
         }
       }, response);
-      importzone = create_box('ul', {
-        class: css.displayimport,
-      }, zone);
+
     }
 
   }
@@ -142,13 +142,7 @@ export function JsImport(container, options = {}) {
   function addImportEntry(entry) {
     // remove dir or file controls
     myFiles.jsDirList.detachControls();
-    importliste = entry;
-    console.log('entryimp', entry)
-    const toimport = entry.container.cloneNode(true);
-    Array.from(importzone.children).forEach(child => {
-      child.remove();
-    });
-    importzone.append(toimport);
+    filetoload.value = entry.getCurrentDirPath();
     showSubmit();
   }
 
@@ -166,33 +160,17 @@ export function JsImport(container, options = {}) {
         callback: add_remove_import
       }
     };
-    myFiles.jsDirList.entrycontrols.options.controls = { ...control,
-      ...myFiles.jsDirList.entrycontrols.options.controls
+    myFiles.jsDirList.entrycontrols.options.controls = {
+      ...myFiles.jsDirList.entrycontrols.options.controls,
+      ...control
     };
     console.log('entrycontrols', myFiles.jsDirList.entrycontrols.options.controls)
 
     function import_action(entry) {
       addImportEntry(entry);
     }
-    console.log(' entrycontrols', myFiles.jsDirList.entrycontrols)
     myFiles.jsDirList.entrycontrols.addControl(control.import, 0, import_action);
     myFiles.jsDirList.entrycontrols.activateControls();
-    importzone.addEventListener('drop', (e) => {
-      e.stopPropagation();
-      dragentry.container.classList.remove(dragentry.options.css.dragging);
-      addImportEntry(dragentry);
-      importzone.classList.remove(dragentry.options.css.dragover);
-      add_remove_import(e);
-      dragentry = myFiles.jsDirList.dragentry = null;
-    });
-    importzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      if (!dragentry) {
-        dragentry = myFiles.jsDirList.dragentry;
-        dragentry.setOff();
-        importzone.classList.add(dragentry.options.css.dragover);
-      }
-    });
 
   }
 
@@ -205,11 +183,10 @@ export function JsImport(container, options = {}) {
   }
 
   function processImport() {
-    if (importliste === "") {
+    if (filetoload.value === "") {
       alert('nothing to upload');
       return false;
     }
-    filetoload.value = importliste.getCurrentDirPath();
     return true;
   }
   init();

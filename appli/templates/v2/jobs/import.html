@@ -41,7 +41,7 @@
 {{header_project_job(title ,data, _('How to import data'), nav={"links":action_links,"query":"?projid="+target_proj.projid|string})}}
 	<em class="block text-sm mt-2">{{_('Global import rules')}} <i data-for="help_global_import_rules" data-request="help" data-what="help"></i></em>
 </div>
-<form method="post" class="js js-submit js-tabs js-import" action="{{request.path}}" data-event="click"  data-toggle=true  data-toggledisable=true data-toggleshared=true enctype=multipart/form-data>
+<form method="post" class="js js-submit js-tabs js-import" action="{{request.path}}" data-event="click"  data-importzoneid="import-list" data-toggle=true  data-toggledisable=true data-toggleshared=true enctype=multipart/form-data>
     <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}">
       {% for type_tab,formdata in formdatas.items() %}
     <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if selected_type == type_tab }}"><legend class="text-center tab-control title-nav"  data-what="{{type_tab}}" >{{formdata.title}} </legend>
@@ -51,8 +51,8 @@
     <!--files to import -->
     {%- set name="source" -%}
     <div id="shared" class="hide w-full">
-      <div id="import-files" class="hide w-full flex md:flex-row">
-      <div class="form-box js js-accordion  md:basis-2/3" data-detail="[data-summary]"><div class="flex flex-row">
+      <div id="import-files" class="hide w-full">
+      <div class="form-box js js-accordion" data-detail="[data-summary]"><div class="flex flex-row">
           {%- set data = '{"tree":"commonserver","droptarget":"file_to_load"}' -%}{%- for opt in [{"name":"myfiles","label":_("Select from my files"),"help":"help_import_myfiles"},{"name":"server","label":_("Choose a folder or zip file on the server"),"help":"help_import_server","data":"  data-request=commonserver data-url=gui/common/ServerFolderSelectJSON data-where=#import-server  data-selectors="+ data|string +" data-target=unique "}] -%}
      <div class="first:rounded-l-md last:rounded-r-md px-4 py-2 w-auto bg-stone-100 mr-0.5 font-normal" data-summary="#label_{{name+'_'+opt.name}}" data-content="#{{name+'_'+opt.name}}" {{opt.data if 'data' in opt.keys()}}><div id="label_{{name+'_'+opt.name}}">{{opt.label}}<i  data-for="{{opt.help}}" data-request="help"></i></div></div>
       {%- endfor -%}</div>
@@ -68,14 +68,13 @@
             </div>
           <em class="blockquote text-sm">{{_('Contact the')}} <a href="mailto:{{prjmanagermailto}}" class="text-secondblue-600">{{_('project manager')}}</a> {{_('to know where and how to upload your data.')}}
             {{_('Once the import is complete, all data folders/files can be safely erased on the server.')}}</em>
-        </div></div><div class="form-box md:basis-1/3"><div class="label">{{_('File to import')}}<i data-for="help_import_options" data-request="help"></i></div>
-                   <div id="import-list" class="mt-2 "></div>
-                  </div></div>
+        </div></div></div>
         <div id="import_taxo-mapping">
         {%include('/v2/taxonomy/_import_taxo_mapping.html')%}
         </div>
         </div>
     <!-- end files to import -->
+    <div id="import-list"><input type="hidden" name="file_to_load" id="file_to_load"></div>
   </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
           <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>  <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>

@@ -489,9 +489,10 @@ export function EntryControls(container = document, options = {}) {
           console.log('done', control.action);
         }
       }
+
       if (!activentry[control.action] && action !== null) {
         action(activentry);
-      } else activentry.emitEvent(control.action, detail);
+      } else if (activentry[control.action]) activentry[control.action](detail);
     };
     ctrl.addEventListener(evt, func);
     //
@@ -532,7 +533,6 @@ export function EntryControls(container = document, options = {}) {
     const ctrl = control.ctrl;
     const typentries = (ctrl.dataset.typentries) ? ctrl.dataset.typentries.split(',') : [];
     const type = (isdiscarded) ? entryTypes.discarded : activentry.container.dataset.type;
-
     if (typentries.indexOf(type) >= 0) {
       ctrl.classList.remove(css.hide);
     } else ctrl.classList.add(css.hide);
@@ -543,7 +543,6 @@ export function EntryControls(container = document, options = {}) {
     // add btns
     const isdiscarded = activentry.isDiscarded();
     Object.values(options.controls).filter(control => (control.icon || control.text)).forEach(control => {
-      console.log('control acti', control)
       activateControl(control, isdiscarded);
     });
     //

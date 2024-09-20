@@ -306,6 +306,7 @@ function EntryAction(args, options) {
   }
 
   entryaction.remove = function() {
+    console.log('remove ', entryaction)
     if (this.isTrashDir()) return;
     this.fetchAction(this.options.actions.remove).then(ret => {
       this.setParent(null);
