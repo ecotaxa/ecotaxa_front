@@ -208,7 +208,7 @@ def import_format_options(type=None) -> dict:
     )
     formdatas = dict(
         {
-            "images_tsv": {
+            "general": {
                 "path": "/gui/job/create/GeneralImport",
                 "title": _("General Import"),
                 "legend": _("Import Images and TSV files"),
@@ -217,14 +217,14 @@ def import_format_options(type=None) -> dict:
                     "skipobjectduplicate": False,
                 },
             },
-            "images": {
+            "simple": {
                 "path": "/gui/job/create/SimpleImport",
                 "title": _("Simple Import"),
                 "legend": _(
                     "Import images in jpg, png, gif (possibly animated) formats and associate a fixed & reduced set of metadata, that you can enter below."
                 ),
             },
-            "tsv": {
+            "update": {
                 "path": "/gui/job/create/UpdateImport",
                 "title": _("Update Metadata"),
                 "legend": _("Update metada associated to already importer images"),
@@ -235,7 +235,7 @@ def import_format_options(type=None) -> dict:
 
     options = dict(
         {
-            "images_tsv": {
+            "general": {
                 "skiploaded": {
                     "label": _("Skip tsv that have already been imported"),
                     "format": "checkbox",
@@ -248,8 +248,8 @@ def import_format_options(type=None) -> dict:
                 },
                 "advanced_options": taxomapping,
             },
-            "images": {"metadata": {"label": _("Metadata"), "format": "array"}},
-            "tsv": {
+            "simple": {"metadata": {"label": _("Metadata"), "format": "array"}},
+            "update": {
                 "updateclassif": {
                     "label": _("Allow update of classification data"),
                     "format": "checkbox",

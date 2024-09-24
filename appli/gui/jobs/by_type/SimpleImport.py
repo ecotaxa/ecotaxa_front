@@ -26,8 +26,8 @@ class SimpleImportJob(ImportJob):
     PREFS_KEY: Final = "img_import"
 
     @classmethod
-    def job_req(cls):
-        file_to_load, errors = cls._get_file_to_load()
+    def job_req(cls) -> SimpleImportReq:
+        file_to_load = gvp("file_to_load")
         update_classification = cls._update_mode(gvp("updateclassif"))
         taxo_map = json.loads(gvp("taxo_mapping", "{}"))
         values = {}
@@ -43,22 +43,25 @@ class SimpleImportJob(ImportJob):
             rsp: SimpleImportRsp = api.simple_import(
                 project_id=projid, simple_import_req=req, dry_run=True
             )
-        errors.extend(rsp.errors)
+        errors = rsp.errors
         # Check for errors. If any, stay in current state.
         if not cls.flash_any_error(errors):
             # Save preferences
             with ApiClient(UsersApi, request) as api:
                 val_to_write = json.dumps(values)
                 api.set_current_user_prefs(projid, cls.PREFS_KEY, val_to_write)
-
-        return req, errors
+        else:
+            for error in errors:
+                flash(error, "error")
+            req = None
+        return req
 
     @classmethod
     def api_job_call(cls, import_req: SimpleImportReq) -> str:
         projid = int(gvp("projid"))
-        with ApiClient(ProjectsApi, request) as papi:
-            rsp: SimpleImportRsp = papi.simple_import(
-                project_id=projid, simple_import_req=req, dry_run=False
+        with ApiClient(ProjectsApi, request) as api:
+            rsp: SimpleImportRsp = api.simple_import(
+                project_id=projid, simple_import_req=import_req, dry_run=False
             )
         return rsp
 

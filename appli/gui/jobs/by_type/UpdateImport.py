@@ -21,8 +21,8 @@ class UpdateImportJob(ImportJob):
     IMPORT_TYPE: ClassVar = "update"
 
     @classmethod
-    def job_req(cls):
-        file_to_load, errors = cls._get_file_to_load()
+    def job_req(cls) -> ImportReq:
+        file_to_load = gvp("file_to_load")
         update_classification = cls._update_mode(gvp("updateclassif"))
         taxo_map = json.loads(gvp("taxo_mapping", "{}"))
         req = ImportReq(
@@ -30,7 +30,7 @@ class UpdateImportJob(ImportJob):
             taxo_mappings=taxo_map,
             update_mode=update_classification,
         )
-        return req, None
+        return req
 
     @classmethod
     def _must_skip_existing_objects(cls) -> bool:

@@ -215,10 +215,10 @@ async function createAlertBox() {
     if (item === null) {
       item = create_box('div', {
         class: alertconfig.domselectors.alertmessages.substr(1)
-      }, item);
+      }, document.body);
       const container = create_box('div', {
         class: alertconfig.domselectors.messageslist.substr(1)
-      }, container);
+      }, item);
     }
     messages_container = (!messages_container) ? item.querySelector(alertconfig.domselectors.messageslist) : messages_container;
   }

@@ -5,7 +5,7 @@ from typing import List, ClassVar
 
 from flask import render_template, redirect, request, flash, url_for
 
-from appli import PrintInCharte, gvg, gvp, app
+from appli import gvg, gvp, app
 from appli.back_config import get_app_manager_mail
 from appli.gui.jobs.Job import Job
 from appli.gui.jobs.staticlistes import py_messages
@@ -27,6 +27,7 @@ from to_back.ecotaxa_cli_py.models import (
     DirectoryModel,
 )
 from appli.gui.jobs.job_interface import import_format_options
+from appli.gui.commontools import is_partial_request
 
 
 class ImportJob(Job):
@@ -45,17 +46,14 @@ class ImportJob(Job):
     @classmethod
     def initial_dialog(cls) -> str:
         """In UI/flask, initial load, GET"""
-        prj_id = int(gvg("projid"))
-        target_proj = cls.get_target_prj(prj_id, full=True)
+        projid = int(gvg("projid", "0"))
+        target_proj = cls.get_target_prj(projid, full=True)
         if target_proj == None:
-            return render_template(cls.NOPROJ_TEMPLATE, projid=prj_id)
+            return render_template(cls.NOPROJ_TEMPLATE, projid=projid)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
-            server_path = uapi.get_current_user_prefs(prj_id, "cwd")
+            server_path = uapi.get_current_user_prefs(projid, "cwd")
         formdatas, formoptions, import_links = import_format_options()
-        # if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
-
-        # hack to have 3 types instead of one page by job export type
         return render_template(
             cls.STEP0_TEMPLATE,
             selected_type=cls.IMPORT_TYPE,
@@ -75,50 +73,43 @@ class ImportJob(Job):
     def api_job_call(cls, req: ImportReq) -> str:
         # second phase after upload to my_files - put follwing code elsewhere
         projid = int(gvp("projid"))
-        rsp = None
         with ApiClient(ProjectsApi, request) as api:
             try:
-                rsp: ImportRsp = api.import_file(projid, req)
+                rsp: ImportRsp = api.import_file(projid, import_req=req)
+                return rsp
             except ApiException as ae:
                 if ae.status in (401, 403):
                     ae.reason = py_messages["access403"]
-        return rsp
+        return None
 
     @classmethod
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page, POST"""
-        projid = int(gvp("projid"))
+        projid = int(gvp("projid", None))
         target_proj = cls.get_target_prj(projid)
         # Save preferences
         server_path = gvp("ServerPath")
+
         if server_path != "":
             with ApiClient(UsersApi, request) as api:
                 # Compute directory to open next time, we pick the parent to avoid double import of the same
                 # directory or zip.
                 cwd = str(Path(server_path).parent)
-                api.set_current_user_prefs(prj_id, "cwd", cwd)
-        req, errors = cls.job_req()
-        if errors != None and len(errors) > 0 or cls.IMPORT_TYPE == None:
-            for e in errors:
-                flash(e, "error")
-
-            formdatas, formoptions, export_links = import_format_options(
-                cls.IMPORT_TYPE
-            )
-            formdatas[cls.IMPORT_TYPE].datas.options = req.__to_dict__
-            return render_template(
-                cls.STEP0_TEMPLATE,
-                selected_type=cls.IMPORT_TYPE,
-                formdatas=formdatas,
-                formoptions=formoptions,
-                action_links=import_links,
-                target_proj=target_proj,
-                action=cls.ACTION,
-            )
-        else:
-            import_req = {"request": req}
-            rsp = cls.api_job_call(import_req)
+                api.set_current_user_prefs(projid, "cwd", cwd)
+        req = cls.job_req()
+        rsp = cls.api_job_call(req)
+        if rsp != None:
             return redirect(url_for("gui_job_show", job_id=rsp.job_id))
+        formdatas, formoptions, import_links = import_format_options(cls.IMPORT_TYPE)
+        return render_template(
+            cls.STEP0_TEMPLATE,
+            selected_type=cls.IMPORT_TYPE,
+            formdatas=formdatas,
+            formoptions=formoptions,
+            action_links=import_links,
+            target_proj=target_proj,
+            action=cls.ACTION,
+        )
 
     @classmethod
     def _get_file_to_load(cls):
@@ -144,8 +135,8 @@ class ImportJob(Job):
     def initial_question_dialog(cls, job: JobModel):
         """The back-end need some data for proceeding"""
         txt = "<h1>Text File Importation Task</h1>"
-        prj_id = job.params["prj_id"]
-        target_proj = cls.get_target_prj(prj_id)
+        projid = job.params["prj_id"]
+        target_proj = cls.get_target_prj(projid)
 
         # Feed local values
         not_found_taxo = job.question["missing_taxa"]

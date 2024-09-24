@@ -22,13 +22,14 @@ class ImportGeneralJob(ImportJob):
     IMPORT_TYPE: ClassVar = "general"
 
     @classmethod
-    def job_req(cls):
-        file_to_load, errors = cls._get_file_to_load()
+    def job_req(cls) -> ImportReq:
+        file_to_load = gvp("file_to_load")
         # Decode posted variables & load defaults from class
         skip_already_loaded_file = gvp("skiploaded") == "Y"
         skip_object_duplicate = (
             gvp("skipobjectduplicate") == "Y" or cls._must_skip_existing_objects()
         )
+
         # Categories/taxonomy mapping
         taxo_map = json.loads(gvp("taxo_mapping", "{}"))
         req = ImportReq(
@@ -36,6 +37,6 @@ class ImportGeneralJob(ImportJob):
             taxo_mappings=taxo_map,
             skip_loaded_files=skip_already_loaded_file,
             skip_existing_objects=skip_object_duplicate,
-            update_mode=False,
+            update_mode="",
         )
-        return req, errors
+        return req

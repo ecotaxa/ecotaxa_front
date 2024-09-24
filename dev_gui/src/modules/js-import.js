@@ -42,7 +42,7 @@ export function JsImport(container, options = {}) {
     import: 'import'
   };
   let importliste = "";
-  let filetoload;
+  let filetoload = document.getElementById(options.selectors.inputname);
   let importzone = null;
   let dragentry = null;
 
@@ -67,8 +67,12 @@ export function JsImport(container, options = {}) {
   function addImportZone() {
     if (!filetoload) {
       const importzoneid = (container.dataset.importzone) ? container.dataset.importzone : options.selectors.importzone;
-      const zone = document.getElementById(importzoneid);
-      if (zone === null) return;
+      let zone = document.getElementById(importzoneid);
+      if (zone === null) {
+        zone = create_box('div', {
+          id: importzoneid
+        }, container);
+      };
       filetoload = create_box('input', {
         type: "hidden",
         id: options.selectors.inputname,
@@ -76,10 +80,9 @@ export function JsImport(container, options = {}) {
         class: "form-input",
         required: true
       }, zone);
-
       const response = create_box('div', {
         class: "response-summary"
-      }, );
+      }, zone);
       create_box('div', {
         id: "total-objects",
         class: css.info,
@@ -166,7 +169,7 @@ export function JsImport(container, options = {}) {
     };
     console.log('entrycontrols', myFiles.jsDirList.entrycontrols.options.controls)
 
-    function import_action(entry) {
+    const import_action = function(entry) {
       addImportEntry(entry);
     }
     myFiles.jsDirList.entrycontrols.addControl(control.import, 0, import_action);
