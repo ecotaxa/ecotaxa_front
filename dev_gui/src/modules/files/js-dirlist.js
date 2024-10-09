@@ -5,7 +5,7 @@ import {
   dirseparator,
   urlseparator,
   stop_on_error,
-  global_event_dispatcher
+  generate_uuid
 }
 from '../../modules/utils.js';
 import {
@@ -15,7 +15,7 @@ import {
   AlertBox
 } from '../../modules/alert-box.js';
 import {
-  ModuleEventEmitter
+  ModuleEventEmitter,
 } from '../../modules/module-event-emitter.js';
 import {
   entryTypes,
@@ -127,8 +127,9 @@ function EntryAction(args, options) {
     isdiscard: 'isdiscard',
     discarded: 'discarded',
     editable: 'editable'
-  }
+  };
   entryaction.newEntry = function(entry) {
+
     return EntryAction(entry, this.options);
   }
   entryaction.isTrashDir = function(name = null) {
@@ -148,6 +149,7 @@ function EntryAction(args, options) {
       this.emitEvent();
     });
   }
+
   entryaction.getCurrentDirPath = function() {
     return this.getCurrentPath().join(dirseparator);
   }
@@ -306,7 +308,6 @@ function EntryAction(args, options) {
   }
 
   entryaction.remove = function() {
-    console.log('remove ', entryaction)
     if (this.isTrashDir()) return;
     this.fetchAction(this.options.actions.remove).then(ret => {
       this.setParent(null);
@@ -373,7 +374,6 @@ function EntryAction(args, options) {
 }
 
 export class JsDirList {
-  _events = {};
   eventnames = {
     attach: 'attach',
     detach: 'detach',
@@ -382,7 +382,7 @@ export class JsDirList {
     error: 'error',
   }
   options;
-
+  uuid;
   constructor(parent, options = {}) {
     if (!parent.jsdirlist) {
       parent = (parent instanceof HTMLElement) ? parent : document.querySelector(parent);
@@ -399,13 +399,15 @@ export class JsDirList {
         this.options.entry.tags.tag, {
           class: this.options.selectors.dirlist.substr(1)
         }, parent);
+      // unique id to communicate ModuleEventEmitter
+      this.uuid = generate_uuid();
       this.init();
       this.container.append(this.root.container);
+
       parent.jsdirlist = this;
     }
     return parent.jsdirlist;
   }
-
   init() {
     const type = entryTypes.root;
     const obj = {};
@@ -414,88 +416,78 @@ export class JsDirList {
       obj[key] = control.action;
     });
     this.options.entry.actions = obj;
-    this.initEvents();
+
     const options = { ...this.options.entry,
       ...{
         api_parameters: this.options.api_parameters
       }
     };
-    options.event = {
-      name: this.options.entry.event.name,
-      listener: this.container
-    }
+    options.listener = this.uuid;
     this.root = EntryAction({
       type: type,
       name: '',
       label: this.options.api_parameters.rootname,
 
     }, options);
+    this.initEvents();
     this.root.addListeners();
   }
-  initEvents() {
+
+  initEvents(options) {
     // events controls on entries
     const self = this;
-    // alerts on error
-    ModuleEventEmitter.on(this.eventnames.error, (e) => {
-      AlertBox.renderAlert({
-        type: AlertBox.alertconfig.types.error,
-        content: e,
-        inverse: true,
-        dismissible: true
-      });
-    });
-    this.container.addEventListener(this.options.entry.event.name, (e) => {
-      const evtnames = e.detail.entry.eventnames;
-      switch (e.detail.action) {
+    ModuleEventEmitter.on(this.options.entry.event.name, (e) => {
+      const evtnames = e.entry.eventnames;
+      switch (e.action) {
         case evtnames.isdiscard:
           if (this.trashdir) this.trashdir.container.remove();
-          this.trashdir = e.detail.entry;
-          this.root.container.parentElement.insertBefore(e.detail.entry.container, this.root.container);
-          this.root.container.append(e.detail.entry.container);
+          this.trashdir = e.entry;
+          this.root.container.parentElement.insertBefore(e.entry.container, this.root.container);
+          this.root.container.append(e.entry.container);
           break;
         case evtnames.discarded:
-          let parent = e.detail.entry.parent;
-          if (e.detail.entry.isInTrash()) {
-            e.detail.entry.container.remove();
+          let parent = e.entry.parent;
+          if (e.entry.isInTrash()) {
+            e.entry.container.remove();
             parent = this.root;
           } else {
-            e.detail.entry.moveTo(this.trashdir);
-            e.detail.entry.container.classList.add(css.intrash);
+            e.entry.moveTo(this.trashdir);
+            e.entry.container.classList.add(css.intrash);
           }
           this.attachControls(parent);
           break;
         case evtnames.attach:
           // no upload on trash dir
-          const type = (e.detail.entry.isInTrash()) ? entryTypes.discarded : e.detail.entry.container.dataset.type;
+          const type = (e.entry.isInTrash()) ? entryTypes.discarded : e.entry.container.dataset.type;
           if (type === entryTypes.discard) return;
-          if (e.detail.action === evtnames.attach && type === entryTypes.discarded) return;
-          this.attachControls(e.detail.entry);
+          if (e.action === evtnames.attach && type === entryTypes.discarded) return;
+          this.attachControls(e.entry);
           break;
         case "dragstart":
-          this.dragentry = this.activentry = e.detail.entry;
-          e.detail.entry.container.classList.add(e.detail.entry.options.css.dragging);
+          this.dragentry = this.activentry = e.entry;
+          e.entry.container.classList.add(e.entry.options.css.dragging);
           this.detachControls();
           break;
         case "dragover":
           if (!this.dragentry) return;
-          if (this.overitem !== e.detail.entry.container) {
-            if (this.overitem) this.overitem.classList.remove(e.detail.entry.options.css.dragover);
-            e.detail.entry.container.classList.add(e.detail.entry.options.css.dragover);
-            this.overitem = e.detail.entry.container;
+          if (this.overitem !== e.entry.container) {
+            if (this.overitem) this.overitem.classList.remove(e.entry.options.css.dragover);
+            e.entry.container.classList.add(e.entry.options.css.dragover);
+            this.overitem = e.entry.container;
           }
           break;
         case "dragend":
           this.dragentry = null;
-          if (this.overitem) this.overitem.classList.remove(e.detail.entry.options.css.dragover);
+          if (this.overitem) this.overitem.classList.remove(e.entry.options.css.dragover);
           this.overitem = null;
           break;
         case "drop":
           if (!this.dragentry) {
-            ModuleEventEmitter.emit(this.eventnames.action, e);
+            ModuleEventEmitter.emit(this.eventnames.action, e, this.uuid);
             return true;
           }
           const el = this.dragentry.container;
-          const dest_entry = e.detail.entry;
+          const dest_entry = e.entry;
           dest_entry.resetDragOver();
           if (this.dragentry !== null) {
             if (this.dragentry.options.actions.move) {
@@ -516,12 +508,12 @@ export class JsDirList {
           break;
 
         default:
-          if (e.detail.entry.active) {
-            this.attachControls(e.detail.entry);
+          if (e.entry.active) {
+            this.attachControls(e.entry);
           } else this.attachControls(this.root);
           break;
       }
-    });
+    }, this.uuid);
   }
 
   attachControls(entry) {
@@ -529,7 +521,7 @@ export class JsDirList {
     this.activentry = entry;
     ModuleEventEmitter.emit(this.eventnames.attach, {
       entry: this.activentry
-    });
+    }, this.uuid);
   }
 
   detachControls() {
@@ -538,6 +530,6 @@ export class JsDirList {
     this.activentry = dest;
     ModuleEventEmitter.emit(this.eventnames.attach, {
       entry: dest
-    });
+    }, this.uuid);
   }
 }

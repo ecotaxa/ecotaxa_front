@@ -204,7 +204,7 @@ function createActivItems() {
             const options = (item.href) ? {
               href: item.href
             } : {};
-            rep = await AlertBox.addConfirm(message, null, options);
+            rep = await AlertBox.addConfirm(message, options);
             if (rep === true && item.form) {
               if (item.form.formsubmit) {
                 item.form.formsubmit.submitForm();
@@ -221,7 +221,6 @@ function createActivItems() {
             });
           }
           break;
-
       }
 
     });

@@ -3,7 +3,7 @@ import {
   dirseparator,
   urlseparator,
   fetchSettings,
-  global_event_dispatcher
+  generate_uuid
 }
 from '../modules/utils.js';
 import {
@@ -43,7 +43,8 @@ export const entryOptions = {
     editable: 'editable',
     dragging: 'dragging',
     dragover: 'dragover',
-    dragitem: 'dragitem'
+    dragitem: 'dragitem',
+    selected: 'selected',
   },
   event: {
     name: 'eventEntry'
@@ -77,13 +78,16 @@ export class Entry {
     this.options = { ...entryOptions,
       ...options
     };
-    this.event = { ...this.event,
-      ...options.event
-    };
+    this.uuid = generate_uuid;
+
     this.eventnames = { ...this.eventnames,
       ...this.options.eventnames
     };
     this.label = (options.label) ? options.label : null;
+    this.event = {
+      name: entryOptions.event.name,
+      listener: (options.listener) ? options.listener : this.uuid
+    };
     this.init(entry);
     return this;
   }
@@ -106,14 +110,7 @@ export class Entry {
     this.container = el;
     this.initEvents();
   }
-  initEvents() {
-    Object.entries(this.options.actions).forEach(([key, action]) => {
-      ModuleEventEmitter.on(action, (e) => {
-        if (this[key]) this[key](e);
-        else this.emitEvent(key);
-      });
-    });
-  }
+  initEvents() {}
   getParent() {
     return this.parent;
   }
@@ -198,9 +195,19 @@ export class Entry {
     this.active = !(this.active);
     this.container.classList.toggle(this.options.css.on);
   }
+  setSelected(selected = true) {
+    const cl = this.options.css.selected;
+    if (selected === true) this.container.classList.add(cl);
+    else this.container.classList.remove(cl);
+    this.setOn(selected);
+  }
+  setOn(on = true) {
+    this.active = on;
+    if (on === true) this.container.classList.add(this.options.css.on);
+    else this.container.classList.remove(this.options.css.on);
+  }
   setOff() {
-    this.active = false;
-    this.container.classList.remove(this.options.css.on);
+    this.setOn(false);
   }
   getListeners() {
     let listeners = [];
@@ -211,7 +218,6 @@ export class Entry {
         this.emitEvent(this.eventnames.attach);
       });
     };
-
     if ([entryTypes.root, entryTypes.discard].indexOf(this.type) < 0) {
       if (this.type === entryTypes.node) {
         func = (e) => {
@@ -228,6 +234,7 @@ export class Entry {
     });
     return listeners;
   }
+
   isBranch(checkroot = true) {
     const branchtypes = [entryTypes.branch];
     if (checkroot) branchtypes.push(entryTypes.root);
@@ -244,10 +251,7 @@ export class Entry {
     if (action) detail.action = action;
     if (ev) detail.event = ev;
     else ev = this.eventnames.control;
-    const eventEntry = new CustomEvent(this.event.name, {
-      detail: detail,
-    })
-    this.event.listener.dispatchEvent(eventEntry);
+    ModuleEventEmitter.emit(this.event.name, detail, this.event.listener);
   }
   moveHandlers() {
     return [{
@@ -493,6 +497,7 @@ export function EntryControls(container = document, options = {}) {
       if (!activentry[control.action] && action !== null) {
         action(activentry);
       } else if (activentry[control.action]) activentry[control.action](detail);
+      if (control.callback) control.callback(e);
     };
     ctrl.addEventListener(evt, func);
     //
@@ -529,6 +534,12 @@ export function EntryControls(container = document, options = {}) {
     delete box.disabled;
   }
 
+  function showControls(show = true) {
+    if (show === true) box.classList.remove(css.hide);
+    else box.classList.add(css.hide);
+    box.disabled = !show;
+  }
+
   function activateControl(control, isdiscarded = false) {
     const ctrl = control.ctrl;
     const typentries = (ctrl.dataset.typentries) ? ctrl.dataset.typentries.split(',') : [];
@@ -552,6 +563,7 @@ export function EntryControls(container = document, options = {}) {
     addControl,
     attachControls,
     detachControls,
+    showControls,
     activateControls
   }
 }

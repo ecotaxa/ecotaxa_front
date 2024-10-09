@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import {
   css,
   domselectors
@@ -23,14 +24,12 @@ function createJsTabs() {
         if (!target) return;
         const ev = (item.dataset.event) ? item.dataset.event : 'click';
         btn.style.left = l + 'px';
-        if (index === 0 && target.parentElement.querySelectorAll('.' + css.active).length === 0) {
-          target.classList.add(css.active);
-          toggleTab(target, true);
 
-        } else toggleTab(target, target.classList.contains(css.active));
+
         l += parseInt(btn.offsetWidth) + 20;
         btn.addEventListener(ev, (e) => {
           if (e.currentTarget.disabled === true) {
+            console.log('disabled', index)
             e.preventDefault();
             return;
           }
@@ -42,15 +41,22 @@ function createJsTabs() {
           target.classList.add(css.active);
           toggleTab(target, true);
         });
-      })
+        if ((index === 0 && target.parentElement.querySelectorAll('.' + css.active).length === 0) || target.classList.contains(css.active)) {
+          target.classList.add(css.active);
+          toggleTab(target, true);
+        } else {
+          target.classList.remove(css.active);
+          toggleTab(target, false);
+        }
+      });
       if (!item.dataset.toggle) toggleDisplayListener(item, btns);
       item.jstabs = true;
+
     }
   }
 
   function toggleTab(tab, show) {
     let what = (togglewhat) ? document.getElementById(togglewhat) : null;
-
     let tabcontents = tab.querySelectorAll(domselectors.component.tabs.tabcontent);
     if (tabcontents.length === 0) tabcontents = [tab];
     tabcontents.forEach(tabcontent => {
@@ -83,27 +89,45 @@ function createJsTabs() {
               additionalInformation: 'Updated by jsTabs'
             }, document.title, window.location.origin + tabcontent.dataset.path + window.location.search);
           }
+          if (toggleshared) {
+            // for elements shared between tabs and displayed on tab activation
+            tab.querySelectorAll(domselectors.shared).forEach(shared => {
+              const sharedcontent = tab.parentElement.querySelector('#' + shared.dataset.shared);
+              sharedcontent.parent = sharedcontent.parentElement;
+
+              if (show) {
+                sharedcontent.classList.remove(css.hide);
+                shared.append(sharedcontent);
+                replaceLabels(shared, sharedcontent);
+              } else {
+                sharedcontent.classList.add(css.hide);
+                if (sharedcontent.parent) {
+                  sharedcontent.parent.append(sharedcontent);
+                  delete sharedcontent.parent;
+                }
+              }
+            });
+          }
         }
       }
-      if (toggleshared) {
-        // for elements shared between tabs and displayed on tab activation
-        tab.querySelectorAll(domselectors.shared).forEach(shared => {
-          const sharedcontent = tab.parentElement.querySelector('#' + shared.dataset.shared);
-          sharedcontent.parent = sharedcontent.parentElement;
-
-          if (show) {
-            sharedcontent.classList.remove(css.hide);
-            shared.append(sharedcontent);
-          } else {
-            sharedcontent.classList.add(css.hide);
-            if (sharedcontent.parent) {
-              sharedcontent.parent.append(sharedcontent);
-              delete sharedcontent.parent;
-            }
-          }
-        });
-      }
     });
+  }
+
+  function replaceLabels(shared, sharedcontent) {
+    // sort of a hack to set every option and label in import my files
+    const separator = '|';
+    const replaces = (shared.dataset.replaces) ? shared.dataset.replaces.split(separator) : null;
+    const values = (shared.dataset.values) ? shared.dataset.values.split(separator) : null;
+    if (replaces !== null && values !== null) {
+      replaces.forEach((rep, index) => {
+        let target = sharedcontent.querySelector(rep);
+        if (target) target.innerHTML = DOMPurify.sanitize(values[index]);
+        else {
+          target = sharedcontent.querySelector('[data-' + rep + ']');
+          if (target) target.dataset[rep] = DOMPurify.sanitize(values[index]);
+        }
+      });
+    }
   }
 
   function toggleDisplayListener(item, btns) {

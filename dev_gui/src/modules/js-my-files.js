@@ -2,7 +2,6 @@ import {
   browser_accept,
   dom_purify,
   fetchSettings,
-  add_custom_events,
   create_box,
   format_bytes,
   generate_uuid,
@@ -112,7 +111,7 @@ export class JsMyFiles {
       this.options = Object.assign(defaultOptions, options);
       this.options.browse = (container.dataset.browse) ? container.dataset.browse.split(',') : ['directory', 'file'];
       this.haspicker = (window.showDirectoryPicker);
-      this.options.browse = (container.dataset.browse) ? container.dataset.browse.split(',') : ['directory', 'file'];
+      this.uuid = generate_uuid();
       this.init();
       container.jsmyfiles = this;
     }
@@ -120,9 +119,7 @@ export class JsMyFiles {
   }
   init() {
     // create dirlist box
-    add_custom_events(this);
     this.addDisplayProgression();
-
     this.addDirList();
     this.addDropzone();
     this.initControls();
@@ -134,33 +131,26 @@ export class JsMyFiles {
     this.timer = new Date();
   }
   async initEvents() {
-    add_custom_events(this);
-    //To be refactored - for steppers )
-    this.on(this.eventnames.processed, async (e) => {
-      if (this.nextaction) await this.nextaction();
-    });
-    // alerts on error
-    this.on(this.eventnames.error, (e) => {
-      console.log('scandir receive error message', e)
-      AlertBox.addAlert({
-        type: AlertBox.alertconfig.types.error,
-        content: e,
-        inverse: true,
-        dismissible: true
-      });
 
-    });
+    //To be refactored - for steppers )
+    ModuleEventEmitter.on(this.eventnames.processed, async (e) => {
+      if (this.nextaction) await this.nextaction();
+    }, this.uuid);
+    // alerts on error
+
     const self = this;
     if (this.options.controls.zip) {
       const {
         JsDirToZip
       } = await import('../modules/files/js-dirtozip.js');
-      this.jsDirToZip = JsDirToZip();
+      this.jsDirToZip = JsDirToZip({
+        listener: this.uuid
+      });
       Object.keys(this.jsDirToZip.eventnames).forEach((key) => {
         this.eventnames[key] = this.jsDirToZip.eventnames[key];
         ModuleEventEmitter.on(key, (e) => {
           switch (key) {
-            case this.eventnames.clientcounter:
+            case this.eventnames.counter:
               this.fileCounter(e);
               break;
             case this.eventnames.reject:
@@ -205,7 +195,7 @@ export class JsMyFiles {
               }
               break;
           }
-        });
+        }, this.uuid);
       });
     }
     window.addEventListener('beforeunload', (e) => {
@@ -222,7 +212,8 @@ export class JsMyFiles {
       if (message.name) {
         const name = message.name;
         delete message.name;
-        ModuleEventEmitter.emit(name, message);
+        ModuleEventEmitter.emit(name, message, this.jsDirToZip.uuid);
+        //ModuleEventEmitter.emit(name, message);
       }
     }
     if (name === this.eventnames.sendfile) btn.disabled = true;
@@ -276,6 +267,7 @@ export class JsMyFiles {
         },
         text: text
       }, btns);
+
       btn.addEventListener('click', async (e) => {
         if (this.haspicker) {
           this.openDirDialog(opt, (e) => {
@@ -339,16 +331,16 @@ export class JsMyFiles {
       this.activentry = e.entry;
       this.targetitem = this.activentry.container;
       if (this.activentry.isBranch(true)) this.addUploadDialog();
-    });
+    }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.detach, (e) => {
       this.detachDropzone();
       this.activentry = null;
       this.targetitem = null;
-    });
+    }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.action, (e) => {
-      if (e.detail.action === "drop") this.handleDrop(e.detail.event);
-      else console.log('action not managed ' + e.detail.action, e.detail)
-    });
+      if (e.action === "drop") this.handleDrop(e.event);
+      else console.log('action not managed ' + e.action, e);
+    }, this.jsDirList.uuid);
     this.activentry.label.dispatchEvent(new Event('click'));
   }
 

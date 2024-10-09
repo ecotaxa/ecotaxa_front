@@ -149,11 +149,9 @@ function createJsComponents() {
                   window.location.reload(true);
                 });
               }))
-
               break;
             case 'js-hierarchy':
               break;
-
             case 'js-my-files':
               if (!dynamics.JsMyFiles) {
                 const {
@@ -191,13 +189,13 @@ function createJsComponents() {
                 dynamics.JsTabs = JsTabs;
               }
               dynamics.JsTabs.applyTo(item);
-              /*const jstabs = async () => {
-                dynamics.JsTabs.applyTo(item);
-              }
-              defers.unshift({
-                func: jstabs,
-                async: true
-              });*/
+              /*  const jstabs = async () => {
+                  await dynamics.JsTabs.applyTo(item);
+                }
+                defers.unshift({
+                  func: jstabs,
+                  async: true
+                });*/
               break;
             case 'js-observer':
               /*  const observer = new MutationObserver(mutations => {

@@ -279,10 +279,14 @@ li:not(.on) ul.entries {@apply hidden}
 .entryB, .entryR {@apply text-base font-normal before:icon-folder-sm}
 .entryD {@apply text-base font-normal before:icon-trash-sm}
 .entryB, .entryN, .entryR, .entryD  {@apply align-text-bottom mb-0.5 mr-0.5}
-.on > .entryB, .on > .entryR {@apply font-semibold before:icon-folder-open }
+.on > .entryB, .on > .entryR {@apply font-semibold }
+.on  > .entryB,  .on > .entryR {@apply before:icon-folder-open }
 .on > .entryD {@apply font-semibold before:icon-trash}
 .on > .entryN {@apply font-semibold}
 .on .entryN , .entryN {@apply  text-sm font-light}
+/* entry selected */
+.selected > .entryB, .selected > .entryN {@apply font-semibold  after:content-[attr(data-selected)] after:small-caps after:text-sm after:absolute after:top-0.5 after:bg-stone-700 after:text-stone-50 after:right-1 after:py-0.5 after:px-2 after:h-auto after:rounded}
+.selected .entries  {@apply hidden}
 .dirlist .wait > .entryB, .dirlist .wait > .entryD, .dirlist .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
 .entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}

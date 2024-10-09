@@ -2,7 +2,8 @@ import DOMPurify from 'dompurify';
 import {
   fetchSettings,
   unescape_html,
-  create_box
+  create_box,
+  format_html_options
 } from '../modules/utils.js';
 import {
   domselectors,
@@ -106,13 +107,7 @@ function createActivRequest() {
       case models.taxotree:
         modal = await callModal(item);
       case models.commonserver:
-        console.log(' here  is commonserver ' + item.dataset.request, item.dataset.where)
-        const treeoptions = {
-          url: 'common/ServerFolderSelectJSON',
-          root: ''
-        };
         modal = (modal) ? modal : ((item.dataset && item.dataset.where) ? document.querySelector(item.dataset.where) : null);
-        console.log('modal', modal)
         if (!modal) return;
         const modalcontent = (modal.modalcontent) ? modal.modalcontent : modal;
         if (!dynamics.jsTree) {
@@ -122,8 +117,13 @@ function createActivRequest() {
           import(`../modules/js-tree.js`);
           dynamics.JsTree = JsTree;
         }
-        const options = item.dataset;
-        console.log('-------------------------options', options)
+        const options = format_html_options(item.dataset);
+        if (options.request === models.commonserver) options.entry = {
+          icons: {
+            image: 'img',
+            document: 'doc'
+          }
+        };
         delete options.request;
         modalcontent.jstree = dynamics.JsTree(modalcontent, { ...{
             trigger: modal.trigger
@@ -144,7 +144,6 @@ function createActivRequest() {
         url = "/api/taxon_set/query?ids=" + item.dataset.value;
 
         callback = (response) => {
-          console.log('lineage')
           const lineage = response[0].lineage;
           const id_lineage = response[0].id_lineage;
           /* var click_lineage = lineage.map(function (txo, i) {

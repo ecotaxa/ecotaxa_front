@@ -138,10 +138,14 @@ async function createAlertBox() {
 
     box.insertAdjacentHTML('afterbegin', html + `${showall} </div>`);
     const ret = alertMessage(box, true);
-    if (ret === true && message.type === alertconfig.types.confirm) return waitForAnswer(box, options.callback, options.callback_cancel);
+    if (ret === true && message.type === alertconfig.types.confirm) {
+      activateConfirm(box, options);
+      return waitForAnswer(box, options.callback, options.callback_cancel);
+    }
   }
 
   function addConfirm(content, options = {}) {
+    console.log('options add confirm', options)
     let box = getBoxById(content);
     if (box == null) {
       const message = {
@@ -152,6 +156,8 @@ async function createAlertBox() {
           title: ``,
           callback: null,
           callback_cancel: null,
+          partial: true,
+
         },
         ...options
       }
@@ -159,6 +165,7 @@ async function createAlertBox() {
       message.dismissible = true;
       message.title = options.title;
       return addAlert(message, options);
+
     } else {
       // alert exists animate it
       refreshAlert(box);
@@ -175,15 +182,18 @@ async function createAlertBox() {
     if (options.href) callback = () => {
       fetch(options.href + '&' + new URLSearchParams({
         partial: true
-      }), fetchSettings()).then(response => response.text()).then(response => {
+      }), fetchSettings()).then(response => {
+
         let responsebox = box.querySelector(alertconfig.domselectors.message);
         if (!responsebox) {
           responsebox = create_box('div', {
             class: alertconfig.domselectors.message.substr(1)
           }, responsebox);
+
         };
-        responsebox.innerHTML = DOMPurify.sanitize(response);
+        responsebox.innerHTML = DOMPurify.sanitize(response.text());
         const btns = box.querySelector(alertconfig.domselectors.buttons.group);
+        console.log('btns', btns)
         if (btns) {
           btns.innerHTML = `< button class = "button is-close text-base"  value = false >${i18nmessages.close} </button>`;
           btns.querySelector('.is-close').addEventListener('click', (e) => {
@@ -360,16 +370,15 @@ async function createAlertBox() {
         resolve(false);
         e.stopImmediatePropagation();
         if (callback_cancel !== null) callback_cancel();
-        dismissAlert(box);
-
+        else dismissAlert(box);
       }, {
         once: true
       });
-      ok.addEventListener('click', (e) => {
+      ok.addEventListener('click', async (e) => {
         resolve(true);
         e.stopImmediatePropagation();
         if (callback !== null) callback();
-        dismissAlert(box);
+        else dismissAlert(box);
       }, {
         once: true
       });

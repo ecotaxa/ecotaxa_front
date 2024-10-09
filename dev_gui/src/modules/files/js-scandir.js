@@ -1,22 +1,4 @@
-import {
-  ModuleEventEmitter
-} from '../../modules/module-event-emitter.js';
-let instance = null;
-
 export function JsScanDir(process_file = null) {
-  const eventnames = {
-    complete: 'scan.complete',
-    processed: 'scan.processed',
-    error: 'scan.error',
-  }
-  let nextaction;
-  ModuleEventEmitter.on(eventnames.error, (e) => {
-    console.log('scandir receive error message', e)
-  });
-  ModuleEventEmitter.on(eventnames.processed, async (e) => {
-    console.log('e', e)
-  });
-
   async function processFile(entry, callback = null) {
     if (process_file) process_file(entry, callback);
     else if (callback) await callback();
@@ -124,7 +106,6 @@ export function JsScanDir(process_file = null) {
     await complete();
   }
   return {
-    eventnames,
     processFile,
     processEntries,
     readDirectory

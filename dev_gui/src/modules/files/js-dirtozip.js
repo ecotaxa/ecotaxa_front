@@ -2,7 +2,8 @@
 import {
   fetchSettings,
   format_bytes,
-  dirseparator
+  dirseparator,
+  generate_uuid
 } from '../../modules/utils.js';
 
 import {
@@ -36,7 +37,6 @@ export function JsDirToZip(options = {}) {
     pending: 'pending',
     errorfile: 'errorfile',
     counter: 'counter',
-    clientcounter: 'clientcounter',
     reject: 'reject',
     message: 'message',
     error: 'error',
@@ -53,11 +53,13 @@ export function JsDirToZip(options = {}) {
   options = { ...defaultOptions,
     ...options
   };
+  // other module receiving events
+  const _listener = (options.listener) ? options.listener : uuid;
   Object.freeze(options);
+  const uuid = generate_uuid();
   init();
 
   function init() {
-
     properties = initProps();
     ModuleEventEmitter.on(eventnames.init, async (e) => {
       //  if (!e.bigfile && !e.part) {
@@ -66,50 +68,48 @@ export function JsDirToZip(options = {}) {
         await reset();
         ModuleEventEmitter.emit(eventnames.complete, {
           name: eventnames.ready
-        });
+        }, _listener);
         properties.endreaddir = false;
       } else console.log(' partly finshed ', e);
-    });
+    }, uuid);
     ModuleEventEmitter.on(eventnames.endzip, (e) => {
-
       if (!e.bigfile && properties.zip) {
         properties.zip.end();
       } else if (e.bigfile && properties.gzipped) {
-        console.log(' -------------------------gzipped end ', properties.gzipped);
+        console.log('-------------------------gzipped end', properties.gzipped);
       }
       const message = buildMessage(e, {
         name: eventnames.sendfile,
       });
       console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%', message)
-      ModuleEventEmitter.emit(eventnames.complete, message);
-    });
-
+      ModuleEventEmitter.emit(eventnames.complete, message, _listener);
+    }, uuid);
     ModuleEventEmitter.on(eventnames.sendfile, async (e) => {
       const file = (e.bigfile) ? await properties.gzipped.getFile(): await getFile();
       if (e.bigfile) {
         const path = (e.path ? e.path : '').replace(e.bigfile, '');
         sendChunk(path);
       } else sendZipFile(file, (e.path ? e.path : ''), null);
-    });
+    }, uuid);
     ModuleEventEmitter.on(eventnames.bigfile, (e) => {
       console.log('onsendchunk', e)
       const path = (e.path ? e.path : '').replace(e.bigfile, '');
       sendChunk(path);
-    });
+    }, uuid);
     ModuleEventEmitter.on(eventnames.endreaddir, (e) => {
       properties.endreaddir = true;
       checkProcessed(e);
-    });
+    }, uuid);
     ModuleEventEmitter.on(eventnames.counter, async (e) => {
       properties.endcounter = false;
       properties.counter[e.name] += 1;
-      ModuleEventEmitter.emit(eventnames.clientcounter, e);
+      ModuleEventEmitter.emit(eventnames.counter, e, _listener);
       if (e.name === 'zip' && properties.counter.scan === properties.counter.zip) {
         properties.endcounter = true;
         checkProcessed(e);
       }
       if (e.name === 'zip' && properties.callback) await properties.callback();
-    });
+    }, uuid);
 
   }
 
@@ -175,7 +175,7 @@ export function JsDirToZip(options = {}) {
       const message = buildMessage(e, {
         name: eventnames.endzip
       });
-      ModuleEventEmitter.emit(eventnames.complete, message);
+      ModuleEventEmitter.emit(eventnames.complete, message, _listener);
     }
   }
 
@@ -208,7 +208,7 @@ export function JsDirToZip(options = {}) {
           id: "quota",
           name: "console",
           message: "you've used " + percentageUsed + "% of the available storage (" + remaining + ").",
-        });
+        }, _listener);
       });
     }
   }
@@ -220,7 +220,7 @@ export function JsDirToZip(options = {}) {
     } else ModuleEventEmitter.emit(eventnames.message, {
       name: "error",
       message: "no navigator storage"
-    });
+    }, uuid);
   }
   async function createLocalStream(name, accept = {
     'application/zip': ['.zip'],
@@ -303,7 +303,7 @@ export function JsDirToZip(options = {}) {
   function dirComplete() {
     ModuleEventEmitter.emit(eventnames.endreaddir, {
       name: eventnames.endreaddir
-    });
+    }, uuid);
   }
 
   function addHandler(handler) {
@@ -331,19 +331,18 @@ export function JsDirToZip(options = {}) {
     filepath.pop();
     filepath = filepath.join(dirseparator);*/
     const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
-
     if (already_compressed.has(ext)) {
       properties.gzipped = file;
       ModuleEventEmitter.emit(eventnames.counter, {
         name: 'zip',
         path: filepath,
         size: file.size
-      });
+      }, uuid);
       ModuleEventEmitter.emit(eventnames.complete, {
         name: eventnames.bigfile,
         bigfile: file.name,
         path: filepath,
-      });
+      }, _listener);
     } else {
       let zipname = file.name + '.gz';
       ModuleEventEmitter.emit(eventnames.complete, {
@@ -351,7 +350,7 @@ export function JsDirToZip(options = {}) {
         bigfile: file.name,
         path: filepath,
         size: file.size
-      });
+      }, _listener);
       const {
         filestream,
         streamhandle
@@ -389,12 +388,12 @@ export function JsDirToZip(options = {}) {
               name: 'zip',
               path: filepath,
               size: file.size
-            });
+            }, uuid);
             ModuleEventEmitter.emit(eventnames.complete, {
               name: eventnames.bigfile,
               bigfile: file.name,
               path: filepath
-            });
+            }, _listener);
           }
         }
       };
@@ -409,7 +408,7 @@ export function JsDirToZip(options = {}) {
     ModuleEventEmitter.emit(eventnames.complete, {
       name: eventnames.endzip,
       part: properties.part
-    });
+    }, _listener);
   }
   async function readFile(file, filepath, zippedstream, count = true) {
     const reader = file.stream().getReader();
@@ -429,7 +428,7 @@ export function JsDirToZip(options = {}) {
           name: 'zip',
           path: filepath,
           size: (zippedstream.size) ? zippedstream.size : file.size
-        });
+        }, uuid);
         break;
       }
       zippedstream.push(value);
@@ -454,7 +453,7 @@ export function JsDirToZip(options = {}) {
       name: 'scan',
       path: filepath,
       size: file.size
-    });
+    }, uuid);
     properties.follow = null;
     // check file size > max post size
     if (file.size >= MAXSIZE) {
@@ -485,7 +484,7 @@ export function JsDirToZip(options = {}) {
     ModuleEventEmitter.emit(eventnames.reject, {
       name: eventnames.reject,
       path: path,
-    });
+    }, _listener);
     if (callback !== null) callback();
   }
   async function processFile(entry) {
@@ -507,7 +506,7 @@ export function JsDirToZip(options = {}) {
         message.name = eventnames.follow;
         break;
     }
-    ModuleEventEmitter.emit(eventnames.error, message);
+    ModuleEventEmitter.emit(eventnames.error, message, _listener);
   }
   async function searchStorage(search) {
     const entry = await navigator.storage.getDirectory();
@@ -537,7 +536,7 @@ export function JsDirToZip(options = {}) {
     if (properties.follow) {
       properties.streamhandle = await properties.filestream.createWritable();
       message.name = eventnames.follow;
-      ModuleEventEmitter.emit(eventnames.follow, message);
+      ModuleEventEmitter.emit(eventnames.follow, message, _listener)
       await initZip();
       return;
     } else if (message.hasOwnProperty("bigfile") && message.bigfile !== false) {
@@ -545,13 +544,13 @@ export function JsDirToZip(options = {}) {
 
       if (properties.handlers.length > 0) {
         message.name = eventnames.follow;
-        ModuleEventEmitter.emit(eventnames.follow, message);
+        ModuleEventEmitter.emit(eventnames.follow, message, _listener);
         console.log(' handlers to do', message);
         if (properties.handlers.length > 0) await execHandler();
         return;
       }
     } else properties.zip = null;
-    ModuleEventEmitter.emit(eventnames.complete, message);
+    ModuleEventEmitter.emit(eventnames.complete, message, _listener);
   }
 
   async function sendChunk(path, start = 0, chunknum = 0, chunksize = MAXSIZE) {
@@ -583,7 +582,7 @@ export function JsDirToZip(options = {}) {
       path: path
     }
     if (bigfile) message.bigfile = file.name;
-    ModuleEventEmitter.emit(eventnames.complete, message);
+    ModuleEventEmitter.emit(eventnames.complete, message, _listener);
     const formdata = new FormData();
     path = path + ((path.slice(-1) === dirseparator) ? `` : dirseparator) + file.name;
     formdata.append('path', path);
@@ -609,6 +608,7 @@ export function JsDirToZip(options = {}) {
     });
   }
   return {
+    uuid,
     eventnames,
     scanBrowse,
     scanHandle,

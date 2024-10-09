@@ -5,8 +5,7 @@ import {
   create_box,
   dirseparator,
   urlseparator,
-  stop_on_error,
-  global_event_dispatcher
+  generate_uuid
 }
 from '../modules/utils.js';
 import {
@@ -49,7 +48,7 @@ const jstreeOptions = {
         action: 'select',
         text: 'select entry',
         icon: 'icon-check',
-        typentries: [entryTypes.branch, entryTypes.node]
+        typentries: [entryTypes.branch, entryTypes.node],
       },
     },
   },
@@ -64,7 +63,7 @@ export function JsTree(parent, options = {}) {
   options = { ...jstreeOptions,
     ...options
   };
-
+  const uuid = generate_uuid();
   if (!parent || parent.querySelector('.' + options.selectors.tree) !== null) return;
   options.entry = { ...entryOptions,
     ...options.entry
@@ -88,9 +87,7 @@ export function JsTree(parent, options = {}) {
   const container = create_box(options.entry.tags.tag, {
     class: options.selectors.tree
   }, parent);
-  options.entry.event = {
-    listener: container
-  };
+  options.listener = uuid;
   let root, activentry, dragentry, overitem, entrycontrols = null;
   init(parent);
   container.append(root.container);
@@ -106,6 +103,9 @@ export function JsTree(parent, options = {}) {
     entryaction.newEntry = function(entry) {
       return EntryAction(entry, this.options);
     }
+    entryaction.select = function(entry) {
+      console.log('entry selected', entry);
+    }
     entryaction.getUrl = function() {
       return this.options.url + '?' + new URLSearchParams({
         id: this.id
@@ -119,6 +119,7 @@ export function JsTree(parent, options = {}) {
       entry.parent = this;
       return entry;
     }
+
     return entryaction;
   }
 
@@ -130,6 +131,7 @@ export function JsTree(parent, options = {}) {
       obj[key] = control.action;
     });
     options.entry.actions = obj;
+    console.log('actions', obj)
     initEvents();
 
     root = EntryAction({
@@ -144,47 +146,38 @@ export function JsTree(parent, options = {}) {
 
   function initEvents() {
     // events controls on entries
-    // alerts on error
-    ModuleEventEmitter.on(eventnames.error, (e) => {
-      AlertBox.renderAlert({
-        type: AlertBox.alertconfig.types.error,
-        content: e,
-        inverse: true,
-        dismissible: true
-      });
-    });
-    container.addEventListener('eventEntry', (e) => {
-      const evtnames = e.detail.entry.eventnames;
+    ModuleEventEmitter.on(options.entry.event.name, (e) => {
+      const evtnames = e.entry.eventnames;
       let dragentry, activentry;
-      switch (e.detail.action) {
+      switch (e.action) {
         case evtnames.attach:
-          attachControls(e.detail.entry);
+          attachControls(e.entry);
           break;
         case "dragstart":
-          dragentry = activentry = e.detail.entry;
-          e.detail.entry.container.classList.add(e.detail.entry.options.css.dragging);
+          dragentry = activentry = e.entry;
+          e.entry.container.classList.add(e.entry.options.css.dragging);
           detachControls();
           break;
         case "dragover":
           if (!dragentry) return;
-          if (overitem !== e.detail.entry.container) {
-            if (overitem) overitem.classList.remove(e.detail.entry.options.css.dragover);
-            e.detail.entry.container.classList.add(e.detail.entry.options.css.dragover);
-            overitem = e.detail.entry.container;
+          if (overitem !== e.entry.container) {
+            if (overitem) overitem.classList.remove(e.entry.options.css.dragover);
+            e.entry.container.classList.add(e.entry.options.css.dragover);
+            overitem = e.entry.container;
           }
           break;
         case "dragend":
           dragentry = null;
-          if (overitem) overitem.classList.remove(e.detail.entry.options.css.dragover);
+          if (overitem) overitem.classList.remove(e.entry.options.css.dragover);
           overitem = null;
           break;
         case "drop":
           if (!dragentry) {
-            ModuleEventEmitter.emit(eventnames.action, e);
+            ModuleEventEmitter.emit(eventnames.action, e, uuid);
             return true;
           }
           const el = dragentry.container;
-          const dest_entry = e.detail.entry;
+          const dest_entry = e.entry;
           dest_entry.resetDragOver();
           if (dragentry !== null) {
             if (dragentry.options.actions.move) {
@@ -206,23 +199,23 @@ export function JsTree(parent, options = {}) {
           else {
             if (droptarget.tomselect) {
               const ts = droptarget.tomselect;
-              let obj = ts.getOption(e.detail.entry.id);
+              let obj = ts.getOption(e.entry.id);
               if (!obj) {
                 obj = {};
-                obj[ts.settings.valueField] = e.detail.entry.id;
-                obj[ts.settings.searchField] = e.detail.entry.name;
+                obj[ts.settings.valueField] = e.entry.id;
+                obj[ts.settings.searchField] = e.entry.name;
                 ts.addOption(obj);
               }
-              ts.addItem(e.detail.entry.id);
+              ts.addItem(e.entry.id);
             } else {
               switch (droptarget.tagName.toLowerCase()) {
                 case 'input':
                 case 'textarea':
-                  droptarget.value = e.detail.entry.id;
+                  droptarget.value = e.entry.id;
 
                   break;
                 default:
-                  droptarget.textContent = e.detail.entry.id;
+                  droptarget.textContent = e.entry.id;
                   break;
               }
             }
@@ -231,12 +224,12 @@ export function JsTree(parent, options = {}) {
           }
           break;
         default:
-          if (e.detail.entry.active) {
-            attachControls(e.detail.entry);
+          if (e.entry.active) {
+            attachControls(e.entry);
           } else attachControls(root);
           break;
       }
-    });
+    }, uuid);
   }
 
   function search(name) {
@@ -249,7 +242,7 @@ export function JsTree(parent, options = {}) {
     activentry = entry;
     ModuleEventEmitter.emit(eventnames.attach, {
       entry: activentry
-    });
+    }, options.listener);
   }
 
   function detachControls() {
@@ -257,7 +250,7 @@ export function JsTree(parent, options = {}) {
     if (entrycontrols) entrycontrols.attachControls(dest);
     ModuleEventEmitter.emit(eventnames.detach, {
       entry: activentry
-    });
+    }, options.listener);
     activentry = dest;
   }
 }

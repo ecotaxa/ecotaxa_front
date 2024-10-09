@@ -133,38 +133,7 @@ function is_object(obj) {
 
 }
 
-function add_custom_events(self) {
-  /**
-   * Add custom event listener
-   * @param  {String} event
-   * @param  {Function} callback
-   * @return {Void}
-   */
-  self.on = function(event, callback) {
-    this._events = this._events || {}
-    this._events[event] = this._events[event] || []
-    this._events[event].push(callback)
-  }
-  self.once = function(event, callback) {
-    callback.once = true;
-    self.on(event, callback);
-  }
-  self.off = function(event, callback) {
-    this._events = this._events || {}
-    if (event in this._events === false) return;
-    this._events[event].splice(this._events[event].indexOf(callback), 1)
-  }
-  self.emit = function(event, ...args) {
-    if (event in this._events === false) return;
-    else {
-      for (const action of this._events[event]) {
-        action(...args);
-        if (action.once) break;
-      }
-    }
-  }
-  return self;
-}
+
 
 function create_box(tag, attrs, parent = null, sep = ``) {
   let el = document.createElement(tag);
@@ -224,6 +193,15 @@ function html_spinner(addons = 'text-white', size = 'h-5 w-5') {
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
     </svg>`
 }
+
+function format_html_options(obj) {
+  Object.entries(obj).forEach(([k, v]) => {
+    v = JSON.parse(JSON.stringify(v));
+    obj[k] == v;
+    if (k === 'selectors') console.log('select v[tree]', v.tree)
+  });
+  return obj;
+}
 /*function toCamelCase(str) {
   return str.toLowerCase()
     .trim()
@@ -246,7 +224,6 @@ export {
   download_url,
   string_to_boolean,
   is_object,
-  add_custom_events,
   dom_purify,
   create_box,
   decode_HTMLEntities,
@@ -254,5 +231,6 @@ export {
   format_bytes,
   stop_on_error,
   dirseparator,
-  urlseparator
+  urlseparator,
+  format_html_options
 }
