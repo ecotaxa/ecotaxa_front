@@ -301,18 +301,16 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
     partial = is_partial_request(request)
     if isinstance(e, ApiException):
         if request.content_type == resp_json:
-            return {"error": e.status, "text": e.reason}, e.status
+            return {"error": e.status, "text": e.reason, "body": e.body}, e.status
         code = e.status
         exception = format_exception(e)
         if code != 500:
             if partial:
-                return alert_box(
-                    type="error",
-                    title="error",
-                    dismissible=True,
-                    codemessage=str(code),
-                    message=exception[1],
-                )
+                return {
+                    "error": e.status,
+                    "text": e.reason,
+                    "body": e.body,
+                }, e.status
             elif code not in [403, 401]:
                 flash(exception[1], "error")
                 return redirect(request.referrer)

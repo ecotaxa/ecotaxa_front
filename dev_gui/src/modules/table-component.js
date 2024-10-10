@@ -6,7 +6,8 @@ import {
   string_to_boolean,
   sort_items,
   is_object,
-  html_spinner
+  html_spinner,
+  generate_uuid
 } from '../modules/utils.js';
 import {
   ModuleEventEmitter
@@ -113,7 +114,7 @@ export class TableComponent {
     container = container instanceof HTMLElement ? container : document.querySelector(container);
     if (!container) return;
     //can select multiples tables in one page  or load data in the same table
-    this.instanceid = (container.dataset.instanceid) ? container.dataset.instanceid : document.querySelectorAll('table').length;
+    this.instanceid = (container.dataset.instanceid) ? container.dataset.instanceid : generate_uuid;
     if (!instance[this.instanceid] || !equal(container.dataset, instance[this.instanceid].params)) {
       this.init(container);
     } else this.refresh();
@@ -238,7 +239,6 @@ export class TableComponent {
     });
   }
   async dataToTable(tabledef) {
-
     if (!tabledef.data) return;
     if (tabledef.columns) {
       await this.convertColumns(tabledef);
@@ -390,7 +390,7 @@ export class TableComponent {
 
   }
   async tableActivate(container, tabledef = null) {
-    ModuleEventEmitter.on(this.eventnames.load, () => {
+    ModuleEventEmitter.once(this.eventnames.load, () => {
       this.initPlugins(container);
       this.initSearch();
       this.initSort();
@@ -402,14 +402,14 @@ export class TableComponent {
       // fetch once the same table
       container.dataset.table = this.params.table = true;
       this.initialized = true;
-    });
+    }, this.instanceid);
     // dismiss table when dismiss modal
-    ModuleEventEmitter.on(this.eventnames.dismiss, (e) => {
+    ModuleEventEmitter.once(this.eventnames.dismiss, (e) => {
       this.destroy();
-    });
+    }, this.instanceid);
     if (tabledef) tabledef = await this.dataToTable(tabledef);
     else await this.tableToData();
-    if (this.grid.data.length) ModuleEventEmitter.emit(this.eventnames.load);
+    if (this.grid.data.length) ModuleEventEmitter.emit(this.eventnames.load, {}, this.instanceid);
     instance[this.instanceid] = true;
   }
 
@@ -701,9 +701,10 @@ export class TableComponent {
     this.grid.columns = Object.entries(columns).map(([key, column], index) => map_column(key, column, index));
   }
   initEvents() {
+
     ModuleEventEmitter.on(this.eventnames.update, () => {
       this.dom.classList.remove(css.hide);
-    });
+    }, this.instanceid);
   }
   initPlugins(container) {
     if (!this.grid.data.length) return;
@@ -757,27 +758,31 @@ export class TableComponent {
     });
     this.sorting = false;
     // remove details when sorting
-    ModuleEventEmitter.on(this.eventnames.sorting, (direction, index) => {
-
+    ModuleEventEmitter.on(this.eventnames.sorting, (req) => {
+      // req {dir:direction, index:index}
       if (this.plugins.jsDetail) this.plugins.jsDetail.activeDetail(false);
       this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
-        a.classList.add(((i === index) ? css.wait : css.disabled));
+        a.classList.add(((i === req.index) ? css.wait : css.disabled));
       });
       this.sorting = true;
-    });
+    }, this.instanceid);
     // remove details when sorting
-    ModuleEventEmitter.on(this.eventnames.sorted, (direction, index) => {
+    ModuleEventEmitter.on(this.eventnames.sorted, (req) => {
+      // req {dir:direction, index:index}
       this.dom.querySelectorAll('.table-sorter').forEach((a, i) => {
-        a.classList.remove(((i === index) ? css.wait : css.disabled))
+        a.classList.remove(((i === req.index) ? css.wait : css.disabled))
       });
       this.sorting = false;
-    });
+    }, this.instanceid);
   }
   sortColumn(th, index, dir = null) {
     dir = (dir === null) ? ((th.classList.contains(tablecss.ascending)) ? false : (th.classList.contains(tablecss.descending)) ? true : ((th.dataset.sort) ? false : true)) : dir;
     th.classList.toggle(tablecss.ascending);
     th.classList.toggle(tablecss.descending);
-    ModuleEventEmitter.emit(this.eventnames.sorting, dir, th.cellIndex);
+    ModuleEventEmitter.emit(this.eventnames.sorting, {
+      dir: dir,
+      index: th.cellIndex
+    }, this.instanceid);
     let rows = this.grid.data.map((row, i) => {
       const cell = is_object(row[index]) ? JSON.stringify(row[index]) : ((Array.isArray(row[index])) ? row[index][0] : row[index]);
       return {
@@ -838,7 +843,10 @@ export class TableComponent {
     this.grid.data = sorted;
     this.dom.replaceChild(clone, tbody);
 
-    ModuleEventEmitter.emit(this.eventnames.sorted, dir, th.cellIndex);
+    ModuleEventEmitter.emit(this.eventnames.sorted, {
+      dir: dir,
+      index: th.cellIndex
+    }, this.instanceid);
 
 
   }
@@ -853,22 +861,25 @@ export class TableComponent {
     this.searching = false;
     const cellid = this.getCellId(this.cellidname);
     // search items
-    const searchbox = this.objToElement({
-      nodename: 'DIV',
-      attributes: {
-        class: tableselectors.search.substr(1)
-      },
-      childnodes: [{
-        nodename: 'input',
+    let searchbox = top.querySelector(tableselectors.search);
+    if (searchbox === null) {
+      searchbox = this.objToElement({
+        nodename: 'DIV',
         attributes: {
-          type: 'search',
-          name: 'table-search',
-          placeholder: this.labels.placeholder,
-          class: `${tableselectors.input.substr(1)} ${css.input}`
-        }
-      }]
-    });
-    top.appendChild(searchbox);
+          class: tableselectors.search.substr(1)
+        },
+        childnodes: [{
+          nodename: 'input',
+          attributes: {
+            type: 'search',
+            name: 'table-search',
+            placeholder: this.labels.placeholder,
+            class: `${tableselectors.input.substr(1)} ${css.input}`
+          }
+        }]
+      });
+      top.appendChild(searchbox);
+    }
     const searchinput = searchbox.querySelector('input');
     if (!searchinput) return;
     let searchstring = ``;
@@ -893,7 +904,10 @@ export class TableComponent {
         return strs;
       }
       const queries = search_queries(searchstring);
-      ModuleEventEmitter.emit(this.eventnames.search, searchstring, queries);
+      ModuleEventEmitter.emit(this.eventnames.search, {
+        searchstring: searchstring,
+        queries: queries
+      }, this.instanceid);
       let datas = this.grid.data,
         indexes = [];
       queries.forEach(qry => {
@@ -928,7 +942,11 @@ export class TableComponent {
           }
         });
       });
-      ModuleEventEmitter.emit(this.eventnames.searchend, queries, indexes, cellid);
+      ModuleEventEmitter.emit(this.eventnames.searchend, {
+        queries: queries,
+        indexes: indexes,
+        cellid: cellid
+      }, this.instanceid);
     }, 300);
     const display_search = (queries, indexes, cellid) => {
       const trs = this.dom.querySelectorAll('tbody tr');
@@ -966,24 +984,26 @@ export class TableComponent {
     searchinput.addEventListener("click", (e) => {
       search_input(e.target.value);
     });
-    ModuleEventEmitter.on(this.eventnames.search, (searchstring, queries) => {
+    ModuleEventEmitter.on(this.eventnames.search, (req) => {
+      //  request {searchstring:searchstring, queries:queries}
       if (this.searching === false) {
         if (this.plugins.jsDetail) this.plugins.jsDetail.activeDetail(false);
       }
       this.searching = true;
-    });
-    ModuleEventEmitter.on(this.eventnames.searchend, (queries, indexes, cellid) => {
-      display_search(queries, indexes, cellid);
+    }, this.instanceid);
+    ModuleEventEmitter.on(this.eventnames.searchend, (req) => {
+      // req {queries:queries,indexes: indexes, cellid:cellid}
+      display_search(req.queries, req.indexes, req.cellid);
       searchinput.classList.remove(css.wait);
       this.searching = false;
-    });
+    }, this.instanceid);
     ModuleEventEmitter.on(this.eventnames.update, () => {
       if (this.searching === false) {
         setTimeout(() => {
           refresh_details();
         }, 300);
       }
-    });
+    }, this.instanceid);
     this.toggleAddOns([tableselectors.search + ' input'], true);
   }
   initSelect(container) {

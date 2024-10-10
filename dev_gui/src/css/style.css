@@ -1087,7 +1087,7 @@ div.showfull div.data-import  {@apply max-h-[80%] }
 div.data-import .ts-wrapper.multi {@apply max-h-full overflow-hidden}
 div.showfull div.zone-import > div.btns-import {@apply max-h-[100%] }
 div.showfull div.data-import .ts-wrapper.multi {@apply absolute -mt-[100%] z-60 overflow-y-visible}/* hover:absolute hover:max-h-full hover:z-60 hover:overflow-y-visible*/
-.import-projects-list .selected {@apply text-stone-200 text-xs max-h-8 bg-secondblue-100}
+.import-projects-list .selected {@apply text-stone-600 text-xs max-h-8 bg-secondblue-100}
 .import-list-reset {@apply cursor-pointer  h-6 mt-1 text-stone-800 small-caps px-2 font-normal rounded hover:bg-stone-200 border border-stone-200 bg-transparent shadow-sm}
 /**********************/
 /* tools pages       */

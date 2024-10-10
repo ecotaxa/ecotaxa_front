@@ -186,15 +186,25 @@ function EntryAction(args, options) {
     }
     const response = await fetch(this.options.url + urlseparator + action, fetchSettings({
       method: "POST",
-      body: data
+      body: data,
     }));
     const json = await response.json();
-    if (json.status === 200) {
+    if (response.status === 200) {
       if (callback) callback(json.message);
       return true;
     } else {
-      if (callback_error) callback_error(json);
-      else stop_on_error(json);
+      if (callback_error) {
+        callback_error(json);
+      } else {
+        if (typeof json.body === 'string') json.body = JSON.parse(json.body);
+        const detail = (json.body.detail) ? json.body.detail : json.body;
+        AlertBox.addAlert({
+          type: "error",
+          content: response.status + ' ' + json.text + ' ' + detail,
+          dismiss: true
+        })
+      }
+      return false;
     }
   }
   entryaction.listenRename = function(evt = 'dblclick') {
@@ -310,21 +320,26 @@ function EntryAction(args, options) {
   entryaction.remove = function() {
     if (this.isTrashDir()) return;
     this.fetchAction(this.options.actions.remove).then(ret => {
-      this.setParent(null);
-      this.removeListeners(this.dropHandlers());
-      this.setOff();
-      this.container.animate({
-        transform: "translateX(-100%) scale(0)"
-      }, {
-        duration: 1000
-      });
-      setTimeout(() => {
-        if (this.from && this.from.isInTrash()) this.destroy();
-        else this.emitEvent(this.eventnames.discarded);
-      }, 1000);
-
+      if (ret === true) {
+        this.setParent(null);
+        this.removeListeners(this.dropHandlers());
+        this.setOff();
+        this.container.animate({
+          transform: "translateX(-100%) scale(0)"
+        }, {
+          duration: 1000
+        });
+        setTimeout(() => {
+          if (this.from && this.from.isInTrash()) this.destroy();
+          else this.emitEvent(this.eventnames.discarded);
+        }, 1000);
+      }
     }).catch(error => {
-      console.log('err', error);
+      AlertBox.addMessage({
+        parent: this.container,
+        type: "error",
+        content: error.error + ' ' + error.text
+      })
     });
   }
   entryaction.create = function() {
