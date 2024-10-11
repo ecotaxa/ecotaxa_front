@@ -3,7 +3,7 @@ import {
   fetchSettings,
   unescape_html,
   create_box,
-  format_html_options
+  dataset_to_json
 } from '../modules/utils.js';
 import {
   domselectors,
@@ -110,6 +110,23 @@ function createActivRequest() {
         modal = (modal) ? modal : ((item.dataset && item.dataset.where) ? document.querySelector(item.dataset.where) : null);
         if (!modal) return;
         const modalcontent = (modal.modalcontent) ? modal.modalcontent : modal;
+        Object.entries(item.dataset).forEach(([k, v]) => {
+          console.log(' item.dataset ' + k, v)
+        });
+        let options = dataset_to_json(item.dataset);
+        console.log('option request', options)
+        console.log('optentry', options.entry)
+        if (options.request === models.commonserver) {
+          options.entry = {
+            icons: {
+              image: 'img',
+              document: 'doc'
+            }
+          };
+        }
+        delete options.request;
+        options.trigger = modal.trigger;
+        console.log('    options ser ', options)
         if (!dynamics.jsTree) {
           let {
             JsTree
@@ -117,19 +134,8 @@ function createActivRequest() {
           import(`../modules/js-tree.js`);
           dynamics.JsTree = JsTree;
         }
-        const options = format_html_options(item.dataset);
-        if (options.request === models.commonserver) options.entry = {
-          icons: {
-            image: 'img',
-            document: 'doc'
-          }
-        };
-        delete options.request;
-        modalcontent.jstree = dynamics.JsTree(modalcontent, { ...{
-            trigger: modal.trigger
-          },
-          ...options
-        });
+
+        modalcontent.jstree = dynamics.JsTree(modalcontent, options);
         break;
       case "monitor":
         if (!dynamics.jobMonitor) {

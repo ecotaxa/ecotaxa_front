@@ -308,7 +308,6 @@ export class JsMyFiles {
       droptarget.classList.remove(cssdragover);
       await self.handleDrop(e);
     }
-
     // set events and css for new dropzone
     if (on === false) {
       droptarget.removeEventListener('dragover', target_dragover);
@@ -327,7 +326,7 @@ export class JsMyFiles {
     this.rootitem = this.targetitem = this.activentry.container;
     ModuleEventEmitter.on(this.jsDirList.eventnames.attach, (e) => {
       if (!e.entry) return;
-      this.detachDropzone();
+      if (e.entry !== this.activentry && this.activentry.isBranch(true)) this.detachDropzone();
       this.activentry = e.entry;
       this.targetitem = this.activentry.container;
       if (this.activentry.isBranch(true)) this.addUploadDialog();
@@ -335,6 +334,7 @@ export class JsMyFiles {
     ModuleEventEmitter.on(this.jsDirList.eventnames.detach, (e) => {
       this.detachDropzone();
       this.activentry = null;
+      this.uploadentry = null;
       this.targetitem = null;
     }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.action, (e) => {
@@ -359,18 +359,19 @@ export class JsMyFiles {
   enableDropzone(enable = true, destroy = false) {
     if (destroy || enable === false) this.dropzone.classList.add(css.hide);
     if (enable) {
-      this.dropzone.dataset.enabled = true;
+      this.dropzone.dataset.active = true;
       this.dropzone.classList.remove(css.hide);
-    } else delete this.dropzone.dataset.enabled;
+    } else delete this.dropzone.dataset.active;
   }
   //
   attachDropzone() {
-    if (this.dropzone.dataset.enabled) {
+    if (this.dropzone.dataset.active) {
       this.targetitem.insertBefore(this.dropzone, this.activentry.label.nextElementSibling);
       this.toggleDropTarget(true);
     }
   }
   detachDropzone() {
+    console.log('detachdropz')
     this.enableDropzone(false);
     this.toggleDropTarget(false);
   }
@@ -394,16 +395,24 @@ export class JsMyFiles {
     });
   }
   setUploadEntry() {
-    if (this.uploadentry) return false;
+    if (this.uploadentry && this.uploadentry !== this.activentry) {
+      AlertBox.addAlert({
+        type: "error",
+        content: 'Only one upload destination authorized. Close and upload the current zipfile.',
+        dismissible: true,
+        inverse: true
+      });
+      return false;
+    }
     this.uploadentry = this.activentry;
     return true;
   }
   // drag&drop
   async handleDrop(e) {
+    e.preventDefault();
     if (!this.setUploadEntry()) return;
     let dataTransfer;
     if (e.dataTransfer) {
-      e.preventDefault();
       dataTransfer = e.dataTransfer;
     } else dataTransfer = e;
     this.done = false;
@@ -427,7 +436,7 @@ export class JsMyFiles {
   showComplete() {
     this.timer = (new Date() - this.timer) / 1000;
     console.log('item-------------------------------------' + parseInt(this.timer / 60) + ' --- ' + (this.timer - (parseInt(this.timer / 60) * 60)));
-    this.enableDropzone();
+    this.enableDropzone(true);
   }
 
   stopOnError(err) {

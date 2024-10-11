@@ -63,6 +63,8 @@ export function JsTree(parent, options = {}) {
   options = { ...jstreeOptions,
     ...options
   };
+  console.log('new tree ', parent);
+  console.log('optitreee ', options)
   const uuid = generate_uuid();
   if (!parent || parent.querySelector('.' + options.selectors.tree) !== null) return;
   options.entry = { ...entryOptions,
@@ -131,7 +133,6 @@ export function JsTree(parent, options = {}) {
       obj[key] = control.action;
     });
     options.entry.actions = obj;
-    console.log('actions', obj)
     initEvents();
 
     root = EntryAction({
@@ -252,5 +253,9 @@ export function JsTree(parent, options = {}) {
       entry: activentry
     }, options.listener);
     activentry = dest;
+  }
+  return {
+    attachControls,
+    detachControls,
   }
 }

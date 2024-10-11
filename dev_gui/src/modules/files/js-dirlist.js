@@ -499,12 +499,10 @@ export class JsDirList {
         case "drop":
           if (!this.dragentry) {
             ModuleEventEmitter.emit(this.eventnames.action, e, this.uuid);
-            return true;
           }
-          const el = this.dragentry.container;
           const dest_entry = e.entry;
           dest_entry.resetDragOver();
-          if (this.dragentry !== null) {
+          if (this.dragentry) {
             if (this.dragentry.options.actions.move) {
               try {
                 this.dragentry.move(dest_entry);
@@ -514,9 +512,7 @@ export class JsDirList {
                 this.dragentry.unMove();
               }
             } else console.log('noactionon drop');
-
-          } else console.log(' parent===null or dragitem===null or dragitem===parent', this.dragentry)
-
+          }
           break;
         case evtnames.editable:
           if (this.editable) this.editable.setEditable(false);

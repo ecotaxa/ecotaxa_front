@@ -237,7 +237,7 @@ export class Entry {
 
   isBranch(checkroot = true) {
     const branchtypes = [entryTypes.branch];
-    if (checkroot) branchtypes.push(entryTypes.root);
+    if (checkroot && branchtypes.indexOf(entryTypes.root) < 0) branchtypes.push(entryTypes.root);
     return (branchtypes.indexOf(this.type) >= 0)
   }
   isDiscarded() {
