@@ -39,7 +39,7 @@ export const dirlistOptions = {
   api_parameters: {
     entry: 'entry',
     dest: 'dest',
-    rootname: 'My Files'
+    rootname: 'My Files',
   },
   url: '/gui/files',
   controls: {
@@ -293,7 +293,6 @@ function EntryAction(args, options) {
   }
   entryaction.setAttributes = function(entry) {
     // convert attributes
-
     entry.type = (entry.type === json_types.directory) ? entryTypes.branch : entryTypes.node;
     if (this.isTrashDir(entry.name)) entry.type = entryTypes.discard;
     entry.parent = this;
@@ -302,7 +301,6 @@ function EntryAction(args, options) {
   entryaction.extraStyles = function(entry) {
     const ext = entry.name.split('.').pop();
     const cl = (entry.type === entryTypes.node) ? (filter_files.images.split(',').indexOf(ext) >= 0) ? this.options.icons.image : this.options.icons.document : null;
-    if (cl !== null) this.options.css.icons.push(cl);
   }
   entryaction.setDiscard = function() {
     if (this.type === entryTypes.discard) this.emitEvent(this.eventnames.isdiscard);
@@ -442,6 +440,7 @@ export class JsDirList {
       type: type,
       name: '',
       label: this.options.api_parameters.rootname,
+      class: this.options.api_parameters.rootclass
 
     }, options);
     this.initEvents();

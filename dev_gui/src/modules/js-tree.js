@@ -11,7 +11,6 @@ from '../modules/utils.js';
 import {
   css,
 } from '../modules/modules-config.js';
-css.forminput = 'form-input';
 import {
   ModuleEventEmitter
 } from '../modules/module-event-emitter.js';
@@ -52,21 +51,48 @@ const jstreeOptions = {
       },
     },
   },
-  selectors: {
-    droptarget: 'droptarget',
-    tree: 'taxotree',
-  },
+  droptarget: 'droptarget',
+  tree: 'taxotree',
+
 }
 
+function EntryAction(entry, options) {
+  const entryaction = new Entry(entry, options);
+  entryaction.eventnames = {
+    attach: 'attach',
+    detach: 'detach',
+    select: 'select',
+  };
+  entryaction.newEntry = function(entry) {
+    return EntryAction(entry, this.options);
+  }
+  entryaction.select = function() {
+    this.emitEvent(this.eventnames.select);
+  }
+  entryaction.getUrl = function() {
+    return this.options.url + '?' + new URLSearchParams({
+      id: this.id
+    });
+  }
+  entryaction.setAttributes = function(entry) {
+    entry.type = (entry.type) ? entry.type : ((entry.children === true) ? entryTypes.branch : entryTypes.node);
+    entry.data = {
+      parent: entry.parent
+    };
+    entry.parent = this;
+    return entry;
+  }
+
+  return entryaction;
+}
 export function JsTree(parent, options = {}) {
   parent = (parent instanceof HTMLElement) ? parent : document.querySelector(parent);
+  parent.innerHTML = '';
   options = { ...jstreeOptions,
     ...options
   };
-  console.log('new tree ', parent);
-  console.log('optitreee ', options)
   const uuid = generate_uuid();
-  if (!parent || parent.querySelector('.' + options.selectors.tree) !== null) return;
+  if (!parent || parent.querySelector('.' + options.tree) !== null) return;
   options.entry = { ...entryOptions,
     ...options.entry
   };
@@ -87,43 +113,12 @@ export function JsTree(parent, options = {}) {
   if (selectors) options.selectors = selectors;
   options.entry.draggable = false;
   const container = create_box(options.entry.tags.tag, {
-    class: options.selectors.tree
+    class: options.tree
   }, parent);
-  options.listener = uuid;
+
   let root, activentry, dragentry, overitem, entrycontrols = null;
   init(parent);
   container.append(root.container);
-
-
-  function EntryAction(entry, options) {
-    const entryaction = new Entry(entry, options);
-    entryaction.eventnames = {
-      attach: 'attach',
-      detach: 'detach',
-      select: 'select',
-    };
-    entryaction.newEntry = function(entry) {
-      return EntryAction(entry, this.options);
-    }
-    entryaction.select = function(entry) {
-      console.log('entry selected', entry);
-    }
-    entryaction.getUrl = function() {
-      return this.options.url + '?' + new URLSearchParams({
-        id: this.id
-      });
-    }
-    entryaction.setAttributes = function(entry) {
-      entry.type = (entry.type) ? entry.type : ((entry.children === true) ? entryTypes.branch : entryTypes.node);
-      entry.data = {
-        parent: entry.parent
-      };
-      entry.parent = this;
-      return entry;
-    }
-
-    return entryaction;
-  }
 
   function init() {
     const type = entryTypes.root;
@@ -133,13 +128,13 @@ export function JsTree(parent, options = {}) {
       obj[key] = control.action;
     });
     options.entry.actions = obj;
+    options.entry.listener = uuid;
     initEvents();
-
     root = EntryAction({
       type: type,
       name: '',
       id: options.entry.root,
-      label: (options.title) ? options.title : 'Tree',
+      label: options.api_parameters.rootname,
     }, options.entry);
     root.addListeners();
     root.label.click();
@@ -195,33 +190,34 @@ export function JsTree(parent, options = {}) {
 
           break;
         case evtnames.select:
-          const droptarget = (options.selectors.droptarget) ? document.getElementById(options.selectors.droptarget) : null;
-          if (!droptarget) console.log('no-target');
+          if (options.actions && options.actions.select) options.actions.select(entry);
           else {
-            if (droptarget.tomselect) {
-              const ts = droptarget.tomselect;
-              let obj = ts.getOption(e.entry.id);
-              if (!obj) {
-                obj = {};
-                obj[ts.settings.valueField] = e.entry.id;
-                obj[ts.settings.searchField] = e.entry.name;
-                ts.addOption(obj);
+            const droptarget = (options.droptarget) ? document.getElementById(options.droptarget) : null;
+            if (!droptarget) console.log('no-target');
+            else {
+              if (droptarget.tomselect) {
+                const ts = droptarget.tomselect;
+                let obj = ts.getOption(e.entry.id);
+                if (!obj) {
+                  obj = {};
+                  obj[ts.settings.valueField] = e.entry.id;
+                  obj[ts.settings.searchField] = e.entry.name;
+                  ts.addOption(obj);
+                }
+                ts.addItem(e.entry.id);
+              } else {
+                switch (droptarget.tagName.toLowerCase()) {
+                  case 'input':
+                  case 'textarea':
+                    droptarget.value = e.entry.id;
+                    break;
+                  default:
+                    droptarget.textContent = e.entry.id;
+                    break;
+                }
               }
-              ts.addItem(e.entry.id);
-            } else {
-              switch (droptarget.tagName.toLowerCase()) {
-                case 'input':
-                case 'textarea':
-                  droptarget.value = e.entry.id;
-
-                  break;
-                default:
-                  droptarget.textContent = e.entry.id;
-                  break;
-              }
+              if (options.trigger) options.trigger.click();
             }
-            if (options.trigger) options.trigger.click();
-
           }
           break;
         default:

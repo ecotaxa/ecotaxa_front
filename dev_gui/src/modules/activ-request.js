@@ -2,8 +2,7 @@ import DOMPurify from 'dompurify';
 import {
   fetchSettings,
   unescape_html,
-  create_box,
-  dataset_to_json
+  create_box
 } from '../modules/utils.js';
 import {
   domselectors,
@@ -107,26 +106,23 @@ function createActivRequest() {
       case models.taxotree:
         modal = await callModal(item);
       case models.commonserver:
-        modal = (modal) ? modal : ((item.dataset && item.dataset.where) ? document.querySelector(item.dataset.where) : null);
+        modal = (modal) ? modal : (item.dataset && item.dataset.where) ? document.getElementById(item.dataset.where) : null;
         if (!modal) return;
         const modalcontent = (modal.modalcontent) ? modal.modalcontent : modal;
-        Object.entries(item.dataset).forEach(([k, v]) => {
-          console.log(' item.dataset ' + k, v)
-        });
-        let options = dataset_to_json(item.dataset);
-        console.log('option request', options)
-        console.log('optentry', options.entry)
-        if (options.request === models.commonserver) {
+        let options = JSON.parse(JSON.stringify(item.dataset));
+        if (item.dataset.request === models.commonserver) {
+          options.api_parameters = {
+            rootname: (options.rootname) ? options.rootname : 'Server'
+          };
           options.entry = {
             icons: {
               image: 'img',
               document: 'doc'
-            }
+            },
           };
-        }
+          item.dataset.import = true;
+        } else options.trigger = modal.trigger;
         delete options.request;
-        options.trigger = modal.trigger;
-        console.log('    options ser ', options)
         if (!dynamics.jsTree) {
           let {
             JsTree
@@ -134,8 +130,8 @@ function createActivRequest() {
           import(`../modules/js-tree.js`);
           dynamics.JsTree = JsTree;
         }
-
         modalcontent.jstree = dynamics.JsTree(modalcontent, options);
+        callback = null;
         break;
       case "monitor":
         if (!dynamics.jobMonitor) {
@@ -185,7 +181,6 @@ function createActivRequest() {
             if (!content) {
               content = document.createElement('div');
               item.parentElement.append(content);
-
             }
             content.innerHTML = html;
           }

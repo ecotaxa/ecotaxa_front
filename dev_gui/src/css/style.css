@@ -262,32 +262,32 @@ li:not(.on) ul.entries {@apply hidden}
 .has-controls {@apply  border-b border-stone-200 font-bold bg-mainblue-50}
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
+[data-name][data-type="R"] [data-name] {@apply ml-4 relative}
 .dirlist {@apply h-full mt-2 }
-.dirlist [data-name] {@apply ml-4 py-0.5 relative}
-.dirlist [data-name][data-type="R"] , .dirlist [data-name][data-type="D"] {@apply ml-0 }
-.dirlist [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
-.dirlist [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
-.dirlist [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
-.dirlist [data-name].droptarget.dragover {@apply hover:drop-shadow pb-4}
-.dirlist [data-name].dragover .entrycontrols , .dirlist [data-name].dragover #dropzone {@apply hide}
+[data-name][data-type="R"] , [data-name][data-type="D"] {@apply ml-0  py-0.5  relative}
+.folders [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
+.folders [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
+.folders [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
+.folders [data-name].droptarget.dragover {@apply hover:drop-shadow pb-4}
+.folders [data-name].dragover .entrycontrols , .folders [data-name].dragover #dropzone {@apply hide}
 .on {@apply  block sm:max-h-[50v]  overflow-y-hidden}
 .on > .entries  {@apply block  overflow-y-auto }
-.entries [data-name$=".tsv"] .entryN {@apply font-normal}
-.entryD, .entryB, .entryR, .entryN.img, .entryN.doc {@apply  before:opacity-80 before:icon-md before:absolute before:block before:top-1.5 before:left-0 pl-5}
-.entryN.img {@apply  before:icon-image-sm }
-.entryN.doc {@apply  before:icon-document-sm}
-.entryB, .entryR {@apply text-base font-normal before:icon-folder-sm}
-.entryD {@apply text-base font-normal before:icon-trash-sm}
-.entryB, .entryN, .entryR, .entryD  {@apply align-text-bottom mb-0.5 mr-0.5}
-.on > .entryB, .on > .entryR {@apply font-semibold }
-.on  > .entryB,  .on > .entryR {@apply before:icon-folder-open }
+.entryN, .entryB, .entryR, .entryD  {@apply text-base font-normal align-text-bottom mb-0.5 mr-0.5}
+.folders .entryD, .folders .entryR, .folders .entryB, .folders .entryN {@apply before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
+.folders .entryR, .folders .entryB {@apply  before:icon-folder-sm}
+.folders .entryD {@apply text-base font-normal  before:icon-trash-sm}
+.folders .on > .entryR, .folders .on > .entryB {@apply font-semibold   before:icon-folder-open}
+.folders .entryN {@apply  before:icon-document-sm}
+.entryN.img {@apply before:icon-image-sm }
+.entryN.doc {@apply before:icon-document-sm}
 .on > .entryD {@apply font-semibold before:icon-trash}
 .on > .entryN {@apply font-semibold}
 .on .entryN , .entryN {@apply  text-sm font-light}
+.entries [data-name$=".tsv"] .entryN {@apply font-normal}
 /* entry selected */
 .selected > .entryB, .selected > .entryN {@apply font-semibold  after:content-[attr(data-selected)] after:small-caps after:text-sm after:absolute after:top-0.5 after:bg-stone-700 after:text-stone-50 after:right-1 after:py-0.5 after:px-2 after:h-auto after:rounded}
 .selected .entries  {@apply hidden}
-.dirlist .wait > .entryB, .dirlist .wait > .entryD, .dirlist .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
+.folders .wait > .entryB, .folders .wait > .entryD, .folders .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
 .entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
 .entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5 bg-transparent hover:bg-white cursor-pointer  static}

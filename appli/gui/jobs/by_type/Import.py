@@ -28,6 +28,7 @@ from to_back.ecotaxa_cli_py.models import (
 )
 from appli.gui.jobs.job_interface import import_format_options
 from appli.gui.commontools import is_partial_request
+from flask_babel import _
 
 
 class ImportJob(Job):
@@ -61,6 +62,23 @@ class ImportJob(Job):
             formoptions=formoptions,
             action_links=import_links,
             target_proj=target_proj,
+            sourcedata=[
+                dict(
+                    {
+                        "name": "myfiles",
+                        "label": _("Upload or select from my files"),
+                        "help": "help_import_myfiles",
+                    }
+                ),
+                dict(
+                    {
+                        "name": "server",
+                        "label": _("Choose a folder or zip file on the server"),
+                        "help": "help_import_server",
+                        "data": " data-request=commonserver data-url=gui/common/ServerFolderSelectJSON data-where=import-server data-tree=commonserver data-target=unique",
+                    }
+                ),
+            ],
             action=cls.ACTION,
         )
 

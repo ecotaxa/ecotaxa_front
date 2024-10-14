@@ -78,7 +78,7 @@ export class Entry {
     this.options = { ...entryOptions,
       ...options
     };
-    this.uuid = generate_uuid;
+    this.uuid = generate_uuid();
 
     this.eventnames = { ...this.eventnames,
       ...this.options.eventnames
@@ -101,8 +101,7 @@ export class Entry {
       draggable: this.isDraggable(),
       dataset: dataset,
     });
-    const cl = (this.options.css.icons) ? this.options.css.icons : [];
-    cl.unshift(`${this.options.prefix}${this.type}`);
+    const cl = `${this.options.prefix}${this.type}`;
     this.label = create_box(this.options.tags.label, {
       class: cl,
       text: (entry.label) ? entry.label : entry.name
@@ -332,10 +331,10 @@ export class Entry {
   }
   setWait() {
     this.loaded = this.container.dataset.loaded = false;
-    this.container.classList.add('wait');
+    this.container.classList.add(css.wait);
   }
   setLoaded() {
-    this.container.classList.remove('wait');
+    this.container.classList.remove(css.wait);
     this.loaded = this.container.dataset.loaded = true;
   }
   findEntry(name, type) {

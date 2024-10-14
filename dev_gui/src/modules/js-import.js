@@ -1,7 +1,11 @@
 import DOMPurify from 'dompurify';
 import {
+  ActivRequest
+} from "../modules/activ-request.js";
+import {
   fetchSettings,
-  create_box
+  create_box,
+  dirseparator
 } from '../modules/utils.js';
 import {
   css,
@@ -145,7 +149,7 @@ export function JsImport(container, options = {}) {
   function addImportEntry(entry) {
     // remove dir or file controls
     //  myFiles.jsDirList.detachControls();
-    filetoload.value = entry.getCurrentDirPath();
+    filetoload.value = entry.getCurrentPath().join(dirseparator);
     showSubmit();
   }
 
@@ -184,11 +188,20 @@ export function JsImport(container, options = {}) {
       ...control
     };
     const import_action = function(entry) {
+      console.log('imoortentry', entry)
       addImportEntry(entry);
     }
     myFiles.jsDirList.entrycontrols.addControl(control.import, 0, import_action);
     myFiles.jsDirList.entrycontrols.activateControls();
-
+    container.querySelectorAll('[data-import]').forEach(async (item) => {
+      item.dataset.request = item.dataset.import;
+      await ActivRequest.makeRequest(item);
+      control.typentries = [entryTypes.branch, entryTypes.node];
+      item.jstree.entrycontrols.options.controls = control;
+      item.jstree.entrycontrols.addControl(control.import, 0, import_action);
+      console.log('item.jstree', item.jstree)
+      item.jstree.entrycontrols.activateControls();
+    })
   }
 
   function showSubmit(show = true) {
