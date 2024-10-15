@@ -206,7 +206,7 @@ export class Entry {
     else this.container.classList.remove(this.options.css.on);
   }
   setOff() {
-    this.setOn(false);
+    this.setSelected(false);
   }
   getListeners() {
     let listeners = [];
@@ -563,6 +563,7 @@ export function EntryControls(container = document, options = {}) {
     attachControls,
     detachControls,
     showControls,
-    activateControls
+    activateControls,
+    activateControl
   }
 }

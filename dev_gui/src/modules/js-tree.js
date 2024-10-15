@@ -233,9 +233,16 @@ export function JsTree(parent, options = {}) {
 
   }
 
+  function getActiventry() {
+    return activentry;
+  }
+
+  function setActiventry(entry = null) {
+    activentry = entry;
+  }
+
   function attachControls(entry) {
     if (entrycontrols) entrycontrols.attachControls(entry);
-
     activentry = entry;
     ModuleEventEmitter.emit(eventnames.attach, {
       entry: activentry
@@ -251,6 +258,10 @@ export function JsTree(parent, options = {}) {
     activentry = dest;
   }
   return {
+    uuid,
+    getActiventry,
+    setActiventry,
+    entrycontrols,
     attachControls,
     detachControls,
   }

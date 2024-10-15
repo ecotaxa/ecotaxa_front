@@ -416,7 +416,6 @@ export class JsDirList {
       this.uuid = generate_uuid();
       this.init();
       this.container.append(this.root.container);
-
       parent.jsdirlist = this;
     }
     return parent.jsdirlist;
@@ -525,7 +524,12 @@ export class JsDirList {
       }
     }, this.uuid);
   }
-
+  getActiventry() {
+    return this.activentry;
+  }
+  setActiventry(entry = null) {
+    this.activentry = entry;
+  }
   attachControls(entry) {
     if (this.entrycontrols) this.entrycontrols.attachControls(entry);
     this.activentry = entry;

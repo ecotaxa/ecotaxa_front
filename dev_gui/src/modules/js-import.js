@@ -11,6 +11,9 @@ import {
   css,
 } from '../modules/modules-config.js';
 import {
+  ModuleEventEmitter
+} from '../modules/module-event-emitter.js';
+import {
   entryTypes,
 } from '../modules/entry.js';
 css.displayimport = 'displayimport';
@@ -45,7 +48,8 @@ export function JsImport(container, options = {}) {
   let typeimport;
   let myFiles;
   let eventnames = {
-    import: 'import'
+    import: 'import',
+    select: 'select'
   };
   let importliste = "";
   let filetoload = document.getElementById(options.selectors.inputname);
@@ -133,7 +137,17 @@ export function JsImport(container, options = {}) {
           }
         }
       });
-      addImportControls();
+      ModuleEventEmitter.on(eventnames.select, (e) => {
+        myFiles.detachDropzone();
+      }, myFiles.uuid);
+      addImportControls(myFiles.jsDirList, myFiles.uuid);
+      container.querySelectorAll('[data-import]').forEach(async (item) => {
+        item.dataset.request = item.dataset.import;
+        await ActivRequest.makeRequest(item);
+
+        item.jstree.entrycontrols.options.controls = {};
+        addImportControls(item.jstree, item.jstree.uuid, [entryTypes.branch, entryTypes.node]);
+      })
     }
     if (refresh === true) apply_filters();
 
@@ -147,13 +161,11 @@ export function JsImport(container, options = {}) {
   }
 
   function addImportEntry(entry) {
-    // remove dir or file controls
-    //  myFiles.jsDirList.detachControls();
     filetoload.value = entry.getCurrentPath().join(dirseparator);
     showSubmit();
   }
 
-  function addImportControls() {
+  function addImportControls(entrylist, uploaduuid, typentries = null) {
     let selected = null;
 
     function add_remove_import(e) {
@@ -162,46 +174,43 @@ export function JsImport(container, options = {}) {
         selected.setSelected(false);
 
       }
-      if (selected === myFiles.jsDirList.activentry) {
+      const activentry = entrylist.getActiventry();
+      if (selected === activentry) {
         selected = null;
         return;
       }
-      const cl = myFiles.jsDirList.activentry.options.css.selected;
-      myFiles.jsDirList.activentry.setSelected(true);
-      myFiles.jsDirList.activentry.label.dataset.selected = options.textimport;
-      myFiles.jsDirList.entrycontrols.showControls(false);
-      myFiles.enableDropzone(false);
-      selected = myFiles.jsDirList.activentry;
+      const cl = activentry.options.css.selected;
+      activentry.setSelected(true);
+      activentry.label.dataset.selected = options.textimport;
+      entrylist.entrycontrols.showControls(false);
+      selected = activentry;
     }
-
     const control = {
       import: {
         action: 'import',
         icon: 'icon-check',
-        typentries: [entryTypes.branch],
+        typentries: (typentries) ? typentries : [entryTypes.branch],
         text: 'import into project',
         callback: add_remove_import
       }
     };
-    myFiles.jsDirList.entrycontrols.options.controls = {
-      ...myFiles.jsDirList.entrycontrols.options.controls,
+
+    entrylist.entrycontrols.options.controls = {
+      ...entrylist.entrycontrols.options.controls,
       ...control
     };
     const import_action = function(entry) {
-      console.log('imoortentry', entry)
+      if (entrylist.activentry) entrylist.activentry.setSelected(false);
       addImportEntry(entry);
+      ModuleEventEmitter.emit(eventnames.select, {
+        value: false
+      }, uploaduuid);
+
     }
-    myFiles.jsDirList.entrycontrols.addControl(control.import, 0, import_action);
-    myFiles.jsDirList.entrycontrols.activateControls();
-    container.querySelectorAll('[data-import]').forEach(async (item) => {
-      item.dataset.request = item.dataset.import;
-      await ActivRequest.makeRequest(item);
-      control.typentries = [entryTypes.branch, entryTypes.node];
-      item.jstree.entrycontrols.options.controls = control;
-      item.jstree.entrycontrols.addControl(control.import, 0, import_action);
-      console.log('item.jstree', item.jstree)
-      item.jstree.entrycontrols.activateControls();
-    })
+    entrylist.entrycontrols.addControl(control.import, 0, import_action);
+    entrylist.entrycontrols.activateControl(control.import);
+    console.log('entrylist controls ', entrylist.entrycontrols)
+
   }
 
   function showSubmit(show = true) {

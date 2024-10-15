@@ -130,7 +130,7 @@ function createActivRequest() {
           import(`../modules/js-tree.js`);
           dynamics.JsTree = JsTree;
         }
-        modalcontent.jstree = dynamics.JsTree(modalcontent, options);
+        item.jstree = dynamics.JsTree(modalcontent, options);
         callback = null;
         break;
       case "monitor":
@@ -215,7 +215,8 @@ function createActivRequest() {
     }
   }
   return {
-    applyTo
+    applyTo,
+    makeRequest
   }
 }
 const ActivRequest = createActivRequest();

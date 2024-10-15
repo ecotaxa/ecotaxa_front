@@ -136,8 +136,6 @@ export class JsMyFiles {
     ModuleEventEmitter.on(this.eventnames.processed, async (e) => {
       if (this.nextaction) await this.nextaction();
     }, this.uuid);
-    // alerts on error
-
     const self = this;
     if (this.options.controls.zip) {
       const {
@@ -338,8 +336,15 @@ export class JsMyFiles {
       this.targetitem = null;
     }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.action, (e) => {
-      if (e.action === "drop") this.handleDrop(e.event);
-      else console.log('action not managed ' + e.action, e);
+      switch (e.action) {
+        case "drop":
+          this.handleDrop(e.event);
+          break;
+
+        default:
+          console.log('action not managed ' + e.action, e);
+          break;
+      }
     }, this.jsDirList.uuid);
     this.activentry.label.dispatchEvent(new Event('click'));
   }
@@ -371,7 +376,6 @@ export class JsMyFiles {
     }
   }
   detachDropzone() {
-    console.log('detachdropz')
     this.enableDropzone(false);
     this.toggleDropTarget(false);
   }
@@ -394,6 +398,7 @@ export class JsMyFiles {
       callback(pick);
     });
   }
+
   setUploadEntry() {
     if (this.uploadentry && this.uploadentry !== this.activentry) {
       AlertBox.addAlert({
