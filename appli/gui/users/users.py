@@ -64,6 +64,7 @@ def user_register(token: str = None, partial: bool = False) -> str:
         reCaptchaID = app.config.get("RECAPTCHAID")
     action = ACCOUNT_USER_CREATE
     usrid = -1
+    user = {"id": -1}
     if token is not None:
         err, resp = _get_value_from_token(token, "id", age=PROFILE_TOKEN_AGE)
         if err == True:
@@ -87,6 +88,9 @@ def user_register(token: str = None, partial: bool = False) -> str:
                     usrid=int(usrid),
                     isfrom=False,
                     template="v2/register.html",
+                    api_email_verification=API_EMAIL_VERIFICATION,
+                    api_account_validation=API_ACCOUNT_VALIDATION,
+                    reCaptchaID=reCaptchaID,
                     token=token,
                 )
     if request.method == "POST":
@@ -103,12 +107,20 @@ def user_register(token: str = None, partial: bool = False) -> str:
             reCaptchaID=reCaptchaID,
             token=token,
         )
-
+    with ApiClient(UsersApi, request) as api:
+        organisations = api.search_organizations(name="%%")
+        organisations.sort()
+    country_list = get_country_list(request)
+    countries = sorted(country_list)
     return render_template(
         "v2/register.html",
         bg=True,
         token=token,
         usrid=usrid,
+        user=user,
+        createaccount=True,
+        organisations=organisations,
+        countries=countries,
         api_email_verification=API_EMAIL_VERIFICATION,
         api_account_validation=API_ACCOUNT_VALIDATION,
         reCaptchaID=reCaptchaID,
@@ -166,7 +178,7 @@ def user_create(
         age = SHORT_TOKEN_AGE
     else:
         age = PROFILE_TOKEN_AGE
-    if isfrom == True or API_EMAIL_VERIFICATION == False:
+    if isfrom == True:
         resp = user_account(-1, isfrom, action=action, token=token)
         return resp
     elif token != None or API_EMAIL_VERIFICATION == False:
@@ -184,7 +196,6 @@ def user_create(
             "name": "",
         }
         resp = api_user_create(posted, token)
-
     redir = url_for("gui_index")
     if token is None:
         if resp[0] == 0:
