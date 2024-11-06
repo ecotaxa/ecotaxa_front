@@ -118,6 +118,8 @@ FilterList: Dict[str, str] = {
     "zoom": "100",
     "magenabled": "0",
     "popupenabled": "0",
+    "seed_object_id": "",
+    "seed_object_ids": ""
 }
 FilterListAutoSave = (
     "statusfilter",
@@ -588,6 +590,13 @@ def FormatNameForVignetteDisplay(
 @app.route("/prj/LoadRightPane", methods=["GET", "POST"])
 def LoadRightPane():
     PrjId: str = gvp("projid")
+    seed_object_id: str = gvp("seed_object_id")
+    print(request)
+    if seed_object_id:
+        print(" Here we want to do a similiraty search !")
+        import logging
+        logger = logging.getLogger()
+        logger.info(" Here we want to do a similiraty search logger ! !")
     return LoadRightPaneForProj(int(PrjId), False, False)
 
 
@@ -631,6 +640,9 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     images_per_page = int(Filt["ipp"])
     zoom = int(Filt["zoom"])
     popup_enabled = Filt["popupenabled"] == "1"
+
+    seed_object_id = Filt["seed_object_id"]
+    seed_object_ids = Filt["seed_object_ids"]
 
     # Fit to page envoie un ipp de 0 donc on se comporte comme du 200 d'un point de vue DB
     ippdb = images_per_page if images_per_page > 0 else 200
@@ -726,6 +738,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                 order_field=sort_col_signed,
                 window_size=ippdb,
                 window_start=pageoffset * ippdb,
+                sim_search=(seed_object_id != "" or seed_object_ids != ""),
             )
             pagecount = math.ceil(objs.total_ids / ippdb)
             if pageoffset < pagecount:
@@ -910,7 +923,13 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         txt += """<div class='subimg status-{0}' {1}>
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
-<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div></td>""".format(
+<div class='ddet'><span class='ddets'>
+<span class='glyphicon glyphicon-eye-open'>
+</span></div>
+<div class='ddsim'><span class='ddsims'>
+<span class='glyphicon glyphicon-search'>
+</span>{4} {5}</div>
+</td>""".format(
             ClassifQual.get(dtl["obj.classif_qual"], "unknown"),
             popattribute,
             name_chunk,

@@ -340,4 +340,35 @@ textarea.parsley-error {
 .ui-datepicker { z-index: 10000 !important; } /*Requis pour fonctionnement dans une popup*/
 .ui-front { z-index: 10000 !important; } /*Requis pour fonctionnement dans une popup de autocomplete*/
 
+#listunsupervisedsearch td {
+	border-width:1px;
+	border-style:solid;
+	border-color:#eee;
+	padding: 2px;
+	vertical-align: middle;
+	height: 27px;
+}
+
+td.unsupervisedsearch-info {
+    display: table-cell;
+}
+td.unsupervisedsearch-info span {
+    display: table-cell;
+}
+td.unsupervisedsearch-info div {
+    display: table-cell;
+}
+
+
+
+td.unsupervisedsearch-info img {
+    display: none;
+}
+
+td.unsupervisedsearch-info:hover img {
+    position: absolute;
+    display: block;
+    margin: 10px 0 0 10px;
+}
+
 

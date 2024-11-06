@@ -226,6 +226,12 @@
             <li role="presentation">
               <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Other filters</a>
             </li>
+            <li role="presentation">
+              <a href="#TabC" aria-controls="profile" role="tab" data-toggle="tab">SS filters
+                <span title="Taxo filter help" class="glyphicon glyphicon-info-sign" style="color: black"
+                      onclick="DispUnsupervisedSearchHelp()"></span>
+              </a>
+            </li>
           </ul>
           <div class="tab-content">
             <!-- Tab panes -->
@@ -298,6 +304,24 @@
                 </div>
               </div>
             </div>
+            {# SimSearch and associated Filters #}
+            <div role="tabpanel" class="tab-pane" id="TabC">
+              <div id="TabCInner" style="width: 240px;">
+                {{ leftc|safe }}
+                <div id='divssclassiftab' style="width: 255px;overflow-y:auto;">
+                <div id="listunsupervisedsearch"> <!-- categtree -->
+                  <!-- content from XHR call, same as refresh -->
+                  Start searching by clicking on the loop on photos.
+                </div>
+                <div style="margin-top: 3px;">
+                  <!-- copied from RefreshClassifTab -->
+                  <a href="javascript:DeleteUnsupervisedSearch();" class="btn btn-primary btn-xs" style="width: 45%;"
+                     >Del Unsupervised Search<span
+                      class="glyphicon glyphicon-repeat"></span></a>
+                </div>
+              </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -318,10 +342,19 @@
             text-decoration: underline;
             color: #00c;
         }
+        .ddsim {
+            text-align: left;
+            font-size: 10px;
+            margin-top: -3px;
+            margin-bottom: -1px;
+            text-decoration: underline;
+            color: #00c;
+        }
 
-        .ddets {
+        .ddets .ddsims {
             cursor: pointer;
         }
+
 
         .categexpander {
             cursor: pointer;
@@ -439,7 +472,7 @@
               LoadRightPane('mail');
       });
 
-      function LoadRightPane(NoAjax, SaveInProfile) {
+      function LoadRightPane(NoAjax, SaveInProfile, seed_object_id) {
           document.activeElement.blur();
           if (Object.keys(PendingChanges).length > 0)
               if (confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?") == false)
@@ -526,6 +559,11 @@
               PrevTxtFilter = TxtFilter;
           }
           req['pageoffset'] = jqpageoffset.val();
+          if (seed_object_id != undefined)
+          {
+              req['seed_object_id'] = seed_object_id
+              req['seed_object_ids'] = seed_object_id
+          }
           var urlparam = {}, url, k;
           if ((NoAjax === 'mail') || (NoAjax === 'mailN')) {
               delete req["resultwidth"];
@@ -716,6 +754,49 @@
           //return false;
       }
 
+      function DeleteUnsupervisedSearch(){
+          $('#listunsupervisedsearch').html("Start searching by clicking on the loop on photos");
+      }
+
+      function removeOneSimSearch(elem){
+          $(elem).closest('tr').remove();
+      }
+
+      function addClickBehaviorOnSimSearch(){
+          $('#listunsupervisedsearch').on('click', 'tr', function(){
+              var seed_object_id = $(this).find('td').data('seed');
+              LoadRightPane(false, false, seed_object_id);
+          });
+      }
+
+      function CreateSimilaritySearch(seed_object_id, datatooltipimage, cat_name){
+            // Add an entry in listunsupervisedsearch like a category in categtree with name SS and seed_object_id
+            // Create a table if it doesn't exists
+            if ($("#listunsupervisedsearch table").length == 0){
+                $('#listunsupervisedsearch').html('<table width="98%" ></table>');
+            }
+            // Add a row with seed_object_id
+         var newSS = $('<tr><td id="ss-' + seed_object_id + '"  data-seed="' + seed_object_id + '" \
+                class="ui-droppable taxodrop unsupervisedsearch-info" style="margin-left: 1.0em"\
+                data-tooltipimage="'+ datatooltipimage + '" width="240px" >\n\
+                <img src="'+ datatooltipimage + '" alt="Useless if image present."/>\n\
+                <span>\n\
+                SS ' + seed_object_id + ' ' + cat_name + '\n\
+                 </span>\n\
+                <div class="counterarea">\n\
+                <span class="counter label label-success">1</span>\n\
+                <span class="counternotv label" style="background-color:purple">99</span>\n\
+                </div>\n\
+                <span class="glyphicon glyphicon-remove" onclick="removeOneSimSearch(this)">\n\
+                </td></tr>');
+//                newSS.attr('data-tooltipimage', datatooltipimage);
+// tooltipimage est inutile !
+            $('#listunsupervisedsearch').append(newSS);
+            addClickBehaviorOnSimSearch();
+      }
+
+
+
       function gotopage(nopage) {
           $("#pageoffset").val(nopage);
           LoadRightPane();
@@ -874,6 +955,22 @@
           }, 0);
       }
 
+      function find_first_parent_dragable(elem)
+{
+    console.log(elem)
+    while (elem.className != "ui-draggable ui-draggable-handle")
+    {
+        elem = elem.parentElement
+    }
+    return elem
+}
+
+      function find_object(elem)
+{
+      elem_td_object = find_first_parent_dragable(elem)
+      return elem_td_object
+}
+
       function PostAddImages() {
           $(document).scrollTop(0);
           // Required to  have Select2 component working on Bootstrap Popup
@@ -986,6 +1083,16 @@
               $('#PopupDetails').modal(options);
               $("#PopupDetails .modal-content").load(url);
           });
+
+          $('.ddsim').click(function (e) {
+              console.log("Please do a similiraty search from this photo")
+              obj = find_object(e.target)
+      seed_object_id = $(obj).find("img").attr("id")
+      cat_name = $(obj).find("span.cat_name").text()
+              datatooltipimage = $("img#"+seed_object_id).attr("src")
+              LoadRightPane(false, false, seed_object_id)
+              CreateSimilaritySearch(seed_object_id, datatooltipimage, cat_name)
+          })
           $('#PopupDetails').on('hidden.bs.modal', function (e) {
               $("#PopupDetails .modal-content").html("CLEAN");
               $(".zoomContainer").remove();
@@ -1489,6 +1596,11 @@
 
       function DispClassificationHelp(projid) {
           $("#PopupDetails .modal-content").load("/static/taxofilterhelp_20211001.html");
+          $('#PopupDetails').modal({});
+      }
+
+      function DispUnsupervisedSearchHelp(projid) {
+          $("#PopupDetails .modal-content").load("/static/unsupervisedsearchhelp_20240224.html");
           $('#PopupDetails').modal({});
       }
 
