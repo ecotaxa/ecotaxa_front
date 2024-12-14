@@ -2,6 +2,9 @@
 // line with member name , priviliege , is contact , and delete functionality
 import DOMPurify from 'dompurify';
 import {
+  AlertBox
+} from '../modules/alert-box.js';
+import {
   FormSubmit,
 } from "../modules/form-submit.js";
 import {
@@ -51,17 +54,17 @@ export class ProjectPrivileges {
       this.options = Object.assign({}, defaultOptions, options);
       // attach messages for fields and alerts system
       this.fieldset = item;
-      if (!this.fieldset) return window.alertbox.classError();
+      if (!this.fieldset) return AlertBox.error();
       this.fieldset_alert_zone = item.querySelector(this.options.domselectors.tabcontent) ? item.querySelector(this.options.domselectors.tabcontent) : item;
       this.options.separ = this.options.separ instanceof HTMLElement ? this.options.separ : (document.querySelector(this.options.separ) ? document.querySelector(this.options.separ) : null);
       this.options.addbtn = this.options.addbtn instanceof HTMLElement ? this.options.addbtn : document.querySelector(this.options.addbtn);
       if (this.options.addbtn) this.addListener();
       const lines = this.fieldset.querySelectorAll('[data-block="' + this.options.target + '"]');
-      if (lines.length === 0) return window.alertbox.classError();
+      if (lines.length === 0) return AlertBox.error();
       this.linemodel = this.clearLine(lines[0].cloneNode(true), 0, -1);
       this.linemodel.classList.add(css.hide);
       this.linecontainer = lines[0].parentElement;
-      if (this.linecontainer === null) return window.alertbox.classError();
+      if (this.linecontainer === null) return AlertBox.error();
       this.current_uid = this.fieldset.dataset.u;
       lines.forEach((line, i) => {
         line.dataset.n = i;
@@ -229,8 +232,7 @@ export class ProjectPrivileges {
     }
     option.selected = true;
     if (!member.tomselect) {
-      const jsTomSelect = new JsTomSelect();
-      jsTomSelect.applyTo(member);
+      JsTomSelect.applyTo(member);
     }
     privs.checked = true;
     contact.value = mb.key;
@@ -275,13 +277,13 @@ export class ProjectPrivileges {
         });
       });
       if (dismiss) dismiss();
-      window.alertbox.dismissAlert(this.keymessages.importpriverror);
+      AlertBox.dismissAlert(this.keymessages.importpriverror);
 
       this.orderRows();
       return true;
     } catch (err) {
-      window.alertbox.renderAlert({
-        type: window.alertbox.alertconfig.types.error,
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.error,
         content: this.keymessages.importpriverror,
         dismissible: true,
         inverse: true
@@ -308,14 +310,13 @@ export class ProjectPrivileges {
     if (!member.currentlist) member.currentlist = this.currentlist;
     if (member.value && !this.currentlist[member.value]) this.currentlist[member.value] = true;
     if (ts === true && !member.tomselect) {
-      const jsTomSelect = new JsTomSelect();
-      jsTomSelect.applyTo(member);
+      JsTomSelect.applyTo(member);
     }
     const lineSettings = (pr, ct, dl, synchro = false) => {
       if (pr && pr.checked) {
         pr.checked = true;
-        if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage({
-          type: window.alertbox.alertconfig.types.danger,
+        if (AlertBox.hasMessage(line)) AlertBox.removeMessage({
+          type: AlertBox.alertconfig.types.danger,
           parent: line,
           content: this.keymessages.uhasnopriv
         });
@@ -324,9 +325,9 @@ export class ProjectPrivileges {
         // manager - can't delete line - can choose as contact
         dl.disabled = true;
         ct.disabled = false;
-        window.alertbox.dismissAlert(this.keymessages.nomanager);
+        AlertBox.dismissAlert(this.keymessages.nomanager);
         if (ct.checked) {
-          window.alertbox.dismissAlert(this.keymessages.nocontact);
+          AlertBox.dismissAlert(this.keymessages.nocontact);
           ct.dispatchEvent(new Event('valid'));
         }
       } else {
@@ -341,9 +342,9 @@ export class ProjectPrivileges {
       }
       // dismiss alerts
       if (!dl.ckecked) {
-        window.alertbox.dismissAlert(this.keymessages.nobody);
-        if (window.alertbox.hasItemMessages(line)) window.alertbox.removeItemMessage({
-          type: window.alertbox.alertconfig.types.danger,
+        AlertBox.dismissAlert(this.keymessages.nobody);
+        if (AlertBox.hasMessage(line)) AlertBox.removeMessage({
+          type: AlertBox.alertconfig.types.danger,
           parent: line,
           content: this.keymessages.oneatleast
         });
@@ -361,8 +362,8 @@ export class ProjectPrivileges {
     }
     member.addEventListener('change', (e) => {
       contact.value = member.value;
-      if (parseInt(member.value) > 0 && window.alertbox.hasItemMessages(member)) window.alertbox.removeItemMessage({
-        type: window.alertbox.alertconfig.types.danger,
+      if (parseInt(member.value) > 0 && AlertBox.hasMessage(member)) AlertBox.removeMessage({
+        type: AlertBox.alertconfig.types.danger,
         parent: member,
         content: this.keymessages.emptyname
       });
@@ -395,16 +396,16 @@ export class ProjectPrivileges {
         line.removeAttribute('data-mod');
         member.disabled = false;
         e.target.disabled = true;
-        window.alertbox.addItemMessage({
-          type: window.alertbox.alertconfig.types.danger,
+        AlertBox.addMessage({
+          type: AlertBox.alertconfig.types.danger,
           parent: line,
           content: this.keymessages.oneatleast,
           duration: 3000
         });
         return;
       } else if (e.target.checked) {
-        if (window.alertbox.hasItemMessages(member)) window.alertbox.removeItemMessage({
-          type: window.alertbox.alertconfig.types.danger,
+        if (AlertBox.hasMessage(member)) AlertBox.removeMessage({
+          type: AlertBox.alertconfig.types.danger,
           parent: member
         });
         if (line.classList.contains('new')) {
@@ -451,8 +452,8 @@ export class ProjectPrivileges {
       // check if one manager at least
       const managers = this.fieldset.querySelectorAll('[name*="[' + this.options.privilege + ']"][value="' + rights.manage + '"]:checked');
       if (managers.length === 0) {
-        window.alertbox.renderAlert({
-          type: window.alertbox.alertconfig.types.danger,
+        AlertBox.addAlert({
+          type: AlertBox.alertconfig.types.danger,
           content: this.keymessages.nomanager,
           dismissible: true,
           inverse: true
@@ -460,15 +461,15 @@ export class ProjectPrivileges {
         this.tabError(true);
         return false;
       } else {
-        window.alertbox.dismissAlert(this.keymessages.nomanager);
+        AlertBox.dismissAlert(this.keymessages.nomanager);
         this.tabError(false);
       }
       // check contact
 
       const contact = this.fieldset.querySelector('[name="' + this.options.contactfieldname + '"]:checked');
       if (contact === null) {
-        window.alertbox.renderAlert({
-          type: window.alertbox.alertconfig.types.danger,
+        AlertBox.addAlert({
+          type: AlertBox.alertconfig.types.danger,
           content: this.keymessages.nocontact,
           dismissible: true,
           inverse: true
@@ -476,7 +477,7 @@ export class ProjectPrivileges {
         this.tabError(true);
         return false;
       }
-      window.alertbox.dismissAlert(this.keymessages.nocontact);
+      AlertBox.dismissAlert(this.keymessages.nocontact);
       this.tabError(false);
       return true;
     }
@@ -499,8 +500,8 @@ export class ProjectPrivileges {
           n--;
         } else return false;
       } else if (!has_member(member)) {
-        window.alertbox.addItemMessage({
-          type: window.alertbox.alertconfig.types.danger,
+        AlertBox.addMessage({
+          type: AlertBox.alertconfig.types.danger,
           parent: member,
           content: this.keymessages.emptyname
         });
@@ -515,15 +516,15 @@ export class ProjectPrivileges {
         } else return false;
       }
       if (!has_priv(line)) {
-        window.alertbox.addItemMessage({
-          type: window.alertbox.alertconfig.types.danger,
+        AlertBox.addMessage({
+          type: AlertBox.alertconfig.types.danger,
           parent: line,
           content: this.keymessages.uhasnopriv
         });
         verif = false;
-      } else if (window.alertbox.hasItemMessages(line)) {
-        window.alertbox.removeItemMessage({
-          type: window.alertbox.alertconfig.types.danger,
+      } else if (AlertBox.hasMessage(line)) {
+        AlertBox.removeMessage({
+          type: AlertBox.alertconfig.types.danger,
           parent: line,
           content: this.keymessages.uhasnopriv
         });
@@ -531,14 +532,14 @@ export class ProjectPrivileges {
 
     }
     if (n === 0) {
-      window.alertbox.renderAlert({
-        type: window.alertbox.alertconfig.types.danger,
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
         content: this.keymessages.nobody,
         dismissible: true,
         inverse: true
       });
       return false;
-    } else window.alertbox.dismissAlert(this.keymessages.nobody);
+    } else AlertBox.dismissAlert(this.keymessages.nobody);
     const hascontact = check_contact();
     return (hascontact && verif);
   }

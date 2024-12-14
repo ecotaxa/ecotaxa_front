@@ -55,7 +55,7 @@ class Configuration(object):
 
     _default = None
 
-    def __init__(self, host="http://localhost/api",
+    def __init__(self, host="https://raw.githubusercontent.com/api",
                  api_key=None, api_key_prefix=None,
                  username=None, password=None,
                  discard_unknown_keys=False,
@@ -346,11 +346,11 @@ class Configuration(object):
         """
         return [
             {
-                'url': "/api",
+                'url': "https://raw.githubusercontent.com/api",
                 'description': "External access",
             },
             {
-                'url': "/",
+                'url': "https://raw.githubusercontent.com/",
                 'description': "Local access",
             }
         ]

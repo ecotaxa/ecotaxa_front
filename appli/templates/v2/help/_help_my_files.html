@@ -1,0 +1,26 @@
+{% extends "./v2/help/_layout.html" %}
+{% block article %}
+<article my-12><h2 class="help-title">{{title if title!=None else _('How to use My Files service')}} </h2>
+  <div class="console"><strong>{{_('Browser compatibility: ')}}</strong>{{_('Chrome 86, Edge 86, Firefox 111, Opera 72, Safari 15.2 (si trouvé alternative à createWritable sinon sortir de la liste)')}}</div>
+  <details id="help_list_myfiles"><summary>{{_('List')}}</summary><div>{{_('List directories and files by clicking on a directory name.')}}<br>{{_('The directory or file becomes "active" and operations like move, rename , remove, add new directory or upload inside can be done.')}}</div>
+  </details>
+  <details id="help_upload_myfiles"><summary>{{_('Upload')}}</summary><div>{{_('Browse or drag and drop directories. A zip file is open and files are added, click on close the zip file and then upload.')}}<br>{{_('Directories and /or files bigger than 4 Go are sent in several parts, files bigger than 4 Go are sent by chunks.')}}<br> {{_('Accepted files: .tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2')}}
+    <br><em>{{_('The following operations: move, create, rename, remove can be processed on others directories of files while compressing and uploading.')}}</em></div>
+  </details>
+  <details id="help_create_myfiles"><summary>{{_('Create')}}</summary><div>{{_('Click on the "new folder" icon <i class="icon icon-folder-plus-sm"></i>, a new directory that can be immediately renamed is created.')}}</div>
+  </details>
+  <details id="help_rename_myfiles"><summary>{{_('Rename')}}</summary><div>{{_('Double Click on the directory or file name to modify it , then click ENTER to apply the new name.')}}</div>
+  </details>
+  <details id="help_move_myfiles"><summary>{{_('Move')}}</summary><div>{{_('Drag & drop the file or directory.')}}</div>
+  </details>
+  <details id="help_move_myfiles"><summary>{{_('Remove')}}</summary><div>{{_('Click on the trash icon <i class="icon icon-trash-sm"></i> next to the directory or file name or Drag & drop it in the trash directory.')}}<br>{{_('To completely remove a directory or file, remove it from the trash directory. Content of the Trash directory is suppressed every 24h.')}}</div></details>
+  <details id="help_quota_myfiles"><summary>{{_('Quota')}}</summary><div>{{_('Space for this User Files Directory is limited to 10 Go.')}}<br></div>
+  </details>
+  <details id="help_errors_myfiles"><summary>{{_('Errors and limitations')}}</summary><div>{{_('As all the operations are done in the browser, recent versions are recommended. Space available for compression operations is displayed and updated.')}}<br><strong>4GB limit</strong><ul>
+    <li>{{_('Files (tsv) starting from 4Gb that can be compressed are compressed (gzip) and sent to the server in 4GB chunks.')}}
+      <br>{{_('Other files from 4GB size , are sent, as well, in 4GB chunks.(both are serial operations).')}}<br>{{_('When the main zip file attains 4GB size it is closed and sent to the server. A new zip is created and files continue to be compressed up to 4GB and sent.')}}</li>
+      <li>{{_('A previously deleted directory or files, still in trash generates an error when deleted again , remove it from trash before deleting again. No restore process developped.')}}</li>
+      <li>{{_('Clean the browser cache to solve crashing events like "Error code : SIGILL".')}}</li></ul></div>
+  </details>
+</article>
+{% endblock %}

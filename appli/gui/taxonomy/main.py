@@ -12,7 +12,7 @@ from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel
 @login_required
 @app.route("/gui/search/taxotreejson")
 def gui_taxotree_root_json():
-    parent = gvg("id")
+    parent = gvg("id", "")
     if parent == "#":
         # Root nodes
         with ApiClient(TaxonomyTreeApi, request) as api:
@@ -27,9 +27,12 @@ def gui_taxotree_root_json():
             )
             for r in roots
         ]
+    elif parent.strip() == "":
+        res = []
     else:
         # Children of the requested parent_id, when opening the tree
         # Fetch the parent for getting its children
+        children_ids = ""
         with ApiClient(TaxonomyTreeApi, request) as api:
             parents: List[TaxonModel] = api.query_taxa_set(ids=str(parent))
         if len(parents):

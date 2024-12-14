@@ -20,58 +20,9 @@ export const models = {
   jobs: 'jobs,',
   controls: "controls",
   imports: "imports",
+  commonserver: 'commonserver'
 };
-// to remove
-export const alertconfig = {
-  danger: 'danger',
-  info: 'info',
-  warning: 'warning',
-  css: {
-    alert: 'alert',
-    confirm: 'confirm',
-    inverse: 'inverse',
-    viewall: 'viewall',
-    h_auto: 'h-auto',
-    has: {
-      warning: 'has-warning',
-      error: 'has-error',
-      success: 'has-success',
-      info: 'has-info',
-      message: 'has-message',
-      danger: 'has-danger',
-    },
-    icon: {
-      anchor: 'icon-bell-alert'
-    }
-  },
-  types: {
-    confirm: 'confirm',
-    info: 'info',
-    warning: 'warning',
-    danger: 'danger',
-    error: 'error',
-    maintenance: 'maintenance'
-  },
-  dismiss_selector: '[data-dismiss]',
-  selector: '.alert',
-  domselectors: {
-    alert: '.js-alert',
-    alertmessages: '.site-alertmessages',
-    messageslist: '.alertmessages-list',
-    alertmessage: '.alertmessage',
-    summary: '[data-summary]',
-    action: '[data-action="confirm"]',
-    message: '.message',
-    showall: '.showall',
-    buttons: {
-      group: '.btn-group',
-      ok: '.is-ok',
-      cancel: '.is-cancel'
-    }
-  },
-  confirm_selector: '.alert.confirm'
 
-}
 export const typeimport = {
   taxo: models.taxo,
   privileges: models.privileges,
@@ -80,12 +31,14 @@ export const typeimport = {
 export const css = {
   hide: 'hide',
   right: 'align-right',
+  relative: 'relative',
   number: "number",
   input: 'form-input',
   selected: 'selected',
   disabled: 'disabled',
   error: 'err',
   console: 'console',
+  icon: 'icon',
   wait: 'wait',
   active: 'active',
   modal: 'modal',
@@ -94,6 +47,7 @@ export const css = {
   progress: "progress",
   peerchecked: 'peer-checked',
   hidevscroll: 'hidevscroll',
+  tip: 'tip',
   component: {
     tabs: {
       name: 'js-tabs'

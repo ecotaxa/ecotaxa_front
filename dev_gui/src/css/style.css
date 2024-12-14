@@ -14,7 +14,7 @@ body {@apply bg-white text-stone-800 font-light subpixel-antialiased; font-displ
     @apply text-xl font-bold;
   }
   h3 {@apply text-lg font-semibold }
-  a {@apply no-underline}
+  a {@apply no-underline cursor-pointer}
   label  {@apply block mb-2 text-sm font-medium text-stone-900 dark:text-stone-300}
 
   nav a, nav button, nav span , nav div , nav ul {
@@ -148,7 +148,7 @@ details.no-marker > summary, .simple-tree details > summary {@apply marker:hidde
 details[open] summary.aside-label::before {@apply absolute bg-stone-100 text-base stroke-help-300 left-0 shadow-inner top-[50%] -translate-y-[50%] w-8 h-8 z-10 ml-0 block py-1.5  px-1.5 rounded-r-full ;
   content:url("data:image/svg+xml;utf8, <svg xmlns='http://www.w3.org/2000/svg'  fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'><path stroke-linecap='round' stroke-linejoin='round' d='M9 5l7 7-7 7' /></svg>");
 }
-details[open] summary.aside-label, details.modal-popup[open] summary, details.project-search[open] summary {@apply after:absolute after:opacity-60 after:right-4 after:top-4 after:w-5 after:h-5 after:z-10 after:block p-0.5 after:icon after:icon-cancel after:cursor-pointer;}
+details[open] summary.aside-label, details.modal-popup[open] summary, details.project-search[open] summary {@apply after:absolute after:opacity-60 after:right-4 after:top-4 after:w-5 after:h-5 after:z-10 after:block p-0.5 after:icon after:icon-x-mark after:cursor-pointer;}
 details:not([open]) .up {@apply hidden}
 details[open] .up {@apply block stroke-stone-700 text-stone-700 bg-transparent}
 .modal-title {@apply block text-stone-700 px-1.5 py-2 pointer-events-auto ;
@@ -242,62 +242,70 @@ button.submitslider {@apply min-w-[200px]}
 /*special for safari bug*/
 
 /* my_files list*/
-.entries li:not(.on) ul {@apply hidden}
+li:not(.on) ul.entries {@apply hidden}
 .console {@apply rounded-sm border border-mainblue-100 bg-mainblue-50 text-stone-900 text-sm p-4 my-2}
-.counters, .sizes {@apply p-2 rounded-sm text-sm border-mainblue-200 bg-mainblue-100 my-2 w-auto w-1/2 inline-block }
+.button.console {@apply py-2 text-base rounded border-none bg-transparent}
+.display-progression {@apply flex sm:flex-row border border-secondblue-100 drop-shadow-sm p-2 mb-2}
+.counters, .sizes {@apply p-2 rounded-sm text-sm  my-1 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
-/*js upload dropzone*/
+/*js import */
 #dropzone {@apply w-auto ml-4 inline-block small-caps font-light}
-#dropzone .trigger {@apply  before:mr-1 small-caps shadow-sm py-0 mr-2 hover:shadow-none w-6 hover:w-auto overflow-x-hidden }
-#dropzone .trigger[data-type="directory"]  {@apply before:icon before:icon-arrow-up-tray-sm}
-#dropzone .trigger[data-type="file"]  {@apply before:icon before:icon-arrow-up-square-sm}
-#dropzone span:not(.trigger) {@apply ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
-.displayresults {@apply  border border-stone-200 rounded  text-base font-normal w-full h-auto min-h-[2rem] px-2 py-1 focus:bg-success-50}
-.displayresults.active {@apply  bg-success-50}
+#dropzone .trigger {@apply  before:mr-0 small-caps text-black bg-stone-50 py-0.5 px-1.5 mr-3 w-6 overflow-x-hidden rounded drop-shadow hover:bg-secondblue-200 hover:drop-shadow-none before:p-0.5 before:icon }
+#dropzone .trigger[data-type="directory"]  {@apply before:icon-arrow-up-tray }
+#dropzone .trigger[data-type="file"]  {@apply before:icon-arrow-up-square}
+#dropzone span:not(.trigger) {@apply text-ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
+.displayimport {@apply  border border-secondblue-200 rounded  text-base font-normal w-full h-auto min-h-8 px-2 py-1 overflow-y-visible hover:bg-secondblue-50 }
+.displayimport.active {@apply  bg-success-50}
+.displayimport li {@apply relative}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-50}
-.has-controls {@apply  border-b border-stone-200 w-auto font-bold bg-mainblue-50}
+.has-controls {@apply  border-b border-stone-200 font-bold bg-mainblue-50}
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
-.dirlist {@apply h-full }
-.dirlist [data-name] {@apply ml-4 relative py-0.5}
-.dirlist [data-name][data-type="R"] {@apply ml-0 }
-.dirlist [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
-.dirlist [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
-.dirlist [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100}
-.dirlist [data-name].droptarget.dragover {@apply hover:drop-shadow}
-.dirlist [data-name].dragover .entrycontrols , .dirlist [data-name].dragover #dropzone {@apply hide}
-.on {@apply  block sm:max-h-[50v]  overflow-y-hidden relative}
+[data-name][data-type="R"] [data-name] {@apply ml-4 relative}
+.dirlist {@apply h-full mt-2 }
+[data-name][data-type="R"] , [data-name][data-type="D"] {@apply ml-0  py-0.5  relative}
+.folders [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
+.folders [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
+.folders [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
+.folders [data-name].droptarget.dragover {@apply hover:drop-shadow pb-4}
+.folders [data-name].dragover .entrycontrols , .folders [data-name].dragover #dropzone {@apply hide}
+.on {@apply  block sm:max-h-[50v]  overflow-y-hidden}
 .on > .entries  {@apply block  overflow-y-auto }
-.entryF {@apply text-sm font-light }
-.entries [data-name$=".tsv"] .entryF {@apply font-normal}
-.entryD, .entryT, .entryR, .entryF.img, .entryF.doc {@apply  before:opacity-80 before:icon-md before:absolute before:block before:top-1.5 before:left-0 pl-5}
-.entryF.img {@apply  before:icon-image-sm }
-.entryF.doc {@apply  before:icon-document-sm}
-.entryD, .entryR {@apply text-base font-normal before:icon-folder-sm}
-.entryT {@apply text-base font-normal before:icon-trash-sm}
-.entryD, .entryF, .entryR, .entryT  {@apply align-text-bottom mb-0.5 mr-0.5}
-.on > .entryD, .on > .entryR {@apply font-semibold before:icon-folder-open}
-.on > .entryT {@apply font-semibold}
-.dirlist .wait > .entryD, .dirlist .wait > .entryT, .dirlist .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
-.entries .editable {@apply font-normal border border-stone-300 ellipsis min-w-[3rem]}
-.entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right}
-.entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5   hover:drop-shadow-sm bg-transparent hover:bg-white  cursor-pointer}
+.entryN, .entryB, .entryR, .entryD  {@apply text-base font-normal align-text-bottom mb-0.5 mr-0.5}
+.folders .entryD, .folders .entryR, .folders .entryB, .folders .entryN {@apply before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
+.folders .entryR, .folders .entryB {@apply  before:icon-folder-sm}
+.folders .entryD {@apply text-base font-normal  before:icon-trash-sm}
+.folders .on > .entryR, .folders .on > .entryB {@apply font-semibold   before:icon-folder-open}
+.folders .entryN {@apply  before:icon-document-sm}
+.entryN.img {@apply before:icon-image-sm }
+.entryN.doc {@apply before:icon-document-sm}
+.on > .entryD {@apply font-semibold before:icon-trash}
+.on > .entryN {@apply font-semibold}
+.on .entryN , .entryN {@apply  text-sm font-light}
+.entries [data-name$=".tsv"] .entryN {@apply font-normal}
+/* entry selected */
+.selected > .entryB, .selected > .entryN {@apply font-semibold  after:content-[attr(data-selected)] after:small-caps after:text-sm after:absolute after:top-0.5 after:bg-stone-700 after:text-stone-50 after:right-1 after:py-0.5 after:px-2 after:h-auto after:rounded}
+.selected .entries  {@apply hidden}
+.folders .wait > .entryB, .folders .wait > .entryD, .folders .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm }
+.entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
+.entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
+.entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5 bg-transparent hover:bg-white cursor-pointer  static}
+.intrash {@apply bg-danger-100}
 
 /* form with tabs */
 form.js-tabs {@apply transition-opacity duration-[1000] ease-in }
-form.js-tabs  .fieldset-wrapper {@apply relative }
-form.js-tabs fieldset {@apply mt-4}
-form.js-tabs .tab-control {@apply absolute top-0 left-0 -mt-6 md:-mt-4}
-form.js-tabs .tab {@apply md:w-full last:md:w-full h-0 bg-inherit }
-form.js-tabs fieldset.tab {@apply mr-4}
+form.js-tabs  .fieldset-wrapper {@apply relative block}
+form.js-tabs .tab-control {@apply absolute top-0 left-0 -mt-6 mb-0}
+form.js-tabs .tab {@apply md:w-full my-0 h-0 py-0 bg-inherit block}
+form.js-tabs fieldset.tab {@apply   mr-4  h-0 }
 form.js-tabs .tab.active {@apply h-auto }
 form.js-tabs legend.tab-control {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
-form.js-tabs .tab.active legend.tab-control {@apply  border-stone-600 text-stone-900  opacity-100 }
-form.js-tabs .tab.active .tab-content {@apply mt-4 md:mt-2 }
-form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4 shadow-none  }
+form.js-tabs .tab.active legend.tab-control {@apply  border-stone-600 text-stone-900  opacity-100  }
+form.js-tabs .tab.active .tab-content {@apply mt-10 -ml-6 mb-0  h-auto px-2}
+form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4  }
 form.js-tabs .tab.tab-one.active legend.tab-control {@apply bg-white text-stone-800 font-bold border  border-stone-100 border-b-white z-10 }
-form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-7 px-4 -ml-6}
+form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-5 px-4 -ml-6 mb-0}
 form.js-tabs .tab.err.active legend.tab-control {@apply border-danger-400}
 form.js-tabs .tab.err legend.tab-control {@apply before:text-xs  before:content-["*"] before:mr-0.5 before:border-none before:align-baseline before:text-danger-400 text-danger-400 }
 /* tabs expand shrink */
@@ -322,9 +330,8 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
 .up.scrollspy {@apply opacity-100}
 .pageup {@apply bottom-16}
 /*tooltips */
-[data-title]:hover:after , [data-title]:active:after {@apply absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-50 content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
+[data-title]:hover:after , [data-title]:active:after {@apply  absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-100 content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light text-stone-50 rounded bg-stone-700 px-1 py-0.5;}
 }
-
 @layer utilities {
  /**********************************************/
 /* all icons                                 */
@@ -395,11 +402,8 @@ content: url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" 
 content: url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg'  class='fill-current' viewBox='0 0 20 20' fill='currentColor'><path fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' /></svg>");
 }
 .icon-no-check {@apply block; content:''}
-.icon-cancel {
-content:url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg'  class='fill-current' viewBox='0 0 20 20' fill='currentColor'><path fill-rule='evenodd' d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z' clip-rule='evenodd' /></svg>")
-}
 .icon-trash {
-content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg"  class="fill-current"  viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>')
+content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>')
 }
 .icon-trash-sm {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" /></svg>')
@@ -477,7 +481,8 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg"  
 }
 .icon-arrow-down-on-square {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="M13.75 7h-3v5.296l1.943-2.048a.75.75 0 011.114 1.004l-3.25 3.5a.75.75 0 01-1.114 0l-3.25-3.5a.75.75 0 111.114-1.004l1.943 2.048V7h1.5V1.75a.75.75 0 00-1.5 0V7h-3A2.25 2.25 0 004 9.25v7.5A2.25 2.25 0 006.25 19h7.5A2.25 2.25 0 0016 16.75v-7.5A2.25 2.25 0 0013.75 7z" /></svg>');
 }
-
+.icon-arrow-down-on-square-stack {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" /></svg>');
+}
 .icon-chart-bar-square {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 002 4.25v11.5A2.25 2.25 0 004.25 18h11.5A2.25 2.25 0 0018 15.75V4.25A2.25 2.25 0 0015.75 2H4.25zM15 5.75a.75.75 0 00-1.5 0v8.5a.75.75 0 001.5 0v-8.5zm-8.5 6a.75.75 0 00-1.5 0v2.5a.75.75 0 001.5 0v-2.5zM8.584 9a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5a.75.75 0 01.75-.75zm3.58-1.25a.75.75 0 00-1.5 0v6.5a.75.75 0 001.5 0v-6.5z" clip-rule="evenodd" /></svg>');
 
 }
@@ -611,6 +616,9 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 .icon-arrow-up-tray-sm {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="M9.25 13.25a.75.75 0 0 0 1.5 0V4.636l2.955 3.129a.75.75 0 0 0 1.09-1.03l-4.25-4.5a.75.75 0 0 0-1.09 0l-4.25 4.5a.75.75 0 1 0 1.09 1.03L9.25 4.636v8.614Z" /><path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" /></svg>');
 }
+.icon-arrow-up-square {
+  content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" /></svg>');
+}
 .icon-arrow-up-square-sm {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M13.75 7h-3V3.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0L6.2 4.74a.75.75 0 0 0 1.1 1.02l1.95-2.1V7h-3A2.25 2.25 0 0 0 4 9.25v7.5A2.25 2.25 0 0 0 6.25 19h7.5A2.25 2.25 0 0 0 16 16.75v-7.5A2.25 2.25 0 0 0 13.75 7Zm-3 0h-1.5v5.25a.75.75 0 0 0 1.5 0V7Z" clip-rule="evenodd" /></svg>');
 }
@@ -619,6 +627,10 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 ::-webkit-scrollbar {
   width: 3px;
   height:3px;
+}
+::-webkit-scrollbar::hover {
+  width: 5px;
+  height:5px;
 }
 body::-webkit-scrollbar {
   width: 5px;
@@ -703,8 +715,8 @@ body::-webkit-scrollbar {
 
 /* selection background*/
 /*custom tables*/
-.table-table {@apply w-full bg-transparent border-collapse max-w-full;contain:'strict' }
-.table-table thead  {@apply w-full max-w-full}
+.table-table {@apply w-full bg-transparent border-collapse max-w-full; }
+.table-table thead, .table-table tbody , .table-table tfoot  {@apply w-full max-w-[100%]}
 .table-table thead tr th {@apply border-b bg-stone-50 truncate max-h-8 p-4 pl-6 pb-3 text-base text-left font-btn font-semibold capitalize text-secondblue-700 relative;}
 .table-table th[scope="row"] {@apply text-left}
 .table-table th:not([data-sortable="false"]).table-ascending {@apply text-secondblue-800}
@@ -722,13 +734,16 @@ body::-webkit-scrollbar {
 .table-search {@apply md:basis-1/4 ml-auto order-2 w-96 my-2;}
 .table-search .table-input::placeholder {@apply pl-8;}
 .table-search .table-input {@apply bg-transparent relative  ml-0.5 }
-/* search input cancel icon */
-input[type="search"]::-webkit-search-cancel-button{@apply relative right-1  icon-sm icon-cancel ; -webkit-appearance: none;}
+.table-table.wait {@apply hidden}
+/* search input wait */
+input[type="search"], .form-input[type="search"] {@apply relative valid:after:bg-success-500 valid:after:content-[''] valid:after:icon-sm valid:after:icon-x-mark valid:after:absolute valid:after:hover:z-[1] valid:after:-right-1 }
+input[type="search"]::-webkit-search-cancel-button , .form-input[type="search"]::-webkit-search-cancel-button{@apply right-1  icon-sm icon-x-mark ; -webkit-appearance: none;}
+input[type="search"].wait, .form-input[type="search"].wait {@apply cursor-wait disabled bg-stone-50}
 /**/
 .table-pagination-list li {@apply inline-block border rounded bg-stone-50 border-secondblue-100 text-secondblue-600 px-2  mr-1.5}
 .table-pagination-list li.pager {@apply bg-white border-none}
 .table-pagination-list li.active {@apply bg-white shadow}
-.table-wrapper {@apply h-full w-full block max-w-full ;}
+.table-wrapper {@apply h-full w-full block max-w-full;}
 .large-table .table-wrapper {@apply overflow-x-auto will-change-scroll;contain: strict;  contain-intrinsic-height: 300px;}
 .table-top , .table-bottom {@apply flex md:flex-row w-full justify-between pb-1 pr-1 z-20;}
 .table-info {@apply py-4}
@@ -764,6 +779,7 @@ a.disabled {@apply pointer-events-none;}
 .prjlist .table-table thead tr th {@apply  bg-stone-300 hover:text-secondblue-500 text-secondblue-900  border-secondblue-100 shadow-sm;}
 .prjlist .table-table th .sublabel {@apply text-xs font-light text-stone-500 }
 .prjlist .table-table tr {@apply h-8 max-h-8 overflow-hidden}
+.prjlist .table-table td {@apply  max-w-[22%]}
 .prjlist .table-table tr:nth-child(even of :not([hidden])) {@apply bg-stone-50 }
 .prjlist .table-table tr:nth-child(odd of :not([hidden])) {@apply bg-stone-100 }
 .prjlist .table-table td.tdsmall {@apply uppercase py-[0.1rem];font-size:.625rem;line-height:.575rem}
@@ -790,12 +806,16 @@ td.progress {@apply min-w-[96px] }
 .progress data {@apply relative before:bg-stone-200 before:h-0.5 before:left-0  before:bottom-0 overflow-x-visible before:block before:z-[2] block max-w-[64px] before:w-[64px]  before:max-w-[64px] before:absolute after:absolute after:bg-stone-700 after:h-0.5 after:block  after:left-0 after:bottom-0 after:z-[4] after:overflow-x-hidden bg-transparent after:w-full h-full}
 
 /* taxa list expand/shrink*/
-td > .tip, td > .static-tip {@apply max-h-24  overflow-hidden block truncate break-all whitespace-normal p-1 py-4}
-td > .static-tip {@apply hover:h-auto hover:z-10  hover:break-words hover:max-h-full}
-td > .tip.showfull {@apply  max-h-96  overflow-y-auto will-change-scroll overscroll-contain z-10 absolute shadow-sm bg-stone-100 rounded-sm m-0 p-4}
-td div[data-num] {@apply before:font-normal before:mr-1 before:bg-stone-600 before:rounded before:text-stone-50 before:text-xs before:px-1 before:content-[attr(data-num)] before:w-auto before:inline-block}
+#table-import-projects-list td ,#table-import-projects-list td > .tip {@apply max-h-24 overflow-y-hidden}
+#table-import-projects-list td.showfull  {@apply max-h-fit overflow-y-auto }
+#table-import-projects-list td.showfull > .tip {@apply max-h-96 overflow-y-auto absolute p-4 bg-stone-50 drop-shadow}
+td div[data-num] {@apply before:font-normal cursor-pointer before:mr-1 before:bg-stone-600 before:rounded before:text-stone-50 before:text-xs before:px-1 before:content-[attr(data-num)] before:w-auto before:inline-block}
 /* samples select */
 .absinput {@apply absolute z-10 ml-8 -mt-6}
+/*********************************/
+/* accordion                     */
+/*********************************/
+.open {@apply bg-secondblue-400 font-semibold text-stone-50}
 /*********************************/
 /* classification mandatory colors */
 /*********************************/
@@ -931,7 +951,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /*******************************/
 /* alerts                      */
 /*******************************/
-.alert {@apply mx-auto container block mb-4 my-0.5 px-4 py-1 font-light drop-shadow-sm rounded-sm relative}
+.alert {@apply mx-auto container block mb-4 my-0.5 px-4 py-1 font-light text-sm drop-shadow-sm rounded-sm relative}
 .alert:not(.inverse) {@apply drop-shadow }
 /*.alert-reponse {@apply border  mx-auto block container mb-4 my-0.5 px-4 py-2 font-light w-96  fixed right-0 top-0 z-[5000] drop-shadow-sm}*/
 .alert.reponse , .alert-reponse{@apply border  container mx-auto block  mb-4 my-0.5 px-4 py-2 font-light w-full fixed top-0 z-[50000] drop-shadow-sm  transition transform translate-y-32 }
@@ -954,12 +974,10 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alert.info.inverse i {@apply  icon-info-sm }
 .alert.danger:not(.inverse) i , .alert.error:not(.inverse) i {@apply  icon-fire}
 .alert.danger.inverse i , .alert.error.inverse i {@apply icon-fire-sm}
-
-
 .hidevscroll {@apply max-h-screen overflow-y-hidden after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-6 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-40 content-none}
 
 /*******************************/
-/* alertmessages                */
+/* alertmessages               */
 /*******************************/
 #site-alertmessages {@apply max-w-0 fixed max-h-0  z-80 overflow-visible bottom-0 right-[360px] md:right-[480px] sm:top-0 }
 .alertmessages-list {@apply  mt-auto mb-0 sm:mt-0 sm:mb-auto relative h-auto max-h-full z-[120] w-[360px] max-w-[360px] md:w-[480px] md:max-w-[480px]}
@@ -1069,7 +1087,7 @@ div.showfull div.data-import  {@apply max-h-[80%] }
 div.data-import .ts-wrapper.multi {@apply max-h-full overflow-hidden}
 div.showfull div.zone-import > div.btns-import {@apply max-h-[100%] }
 div.showfull div.data-import .ts-wrapper.multi {@apply absolute -mt-[100%] z-60 overflow-y-visible}/* hover:absolute hover:max-h-full hover:z-60 hover:overflow-y-visible*/
-.import-projects-list .selected {@apply text-stone-200 text-xs max-h-8 bg-secondblue-100}
+.import-projects-list .selected {@apply text-stone-600 text-xs max-h-8 bg-secondblue-100}
 .import-list-reset {@apply cursor-pointer  h-6 mt-1 text-stone-800 small-caps px-2 font-normal rounded hover:bg-stone-200 border border-stone-200 bg-transparent shadow-sm}
 /**********************/
 /* tools pages       */
@@ -1108,7 +1126,7 @@ td .tipover {@apply absolute z-10 rounded bg-stone-400 text-stone-50 text-xs px-
 .node_circle {fill: #707070;}
 .node_label {font-size: 10px; font-family: sans-serif;}
 /* global  hide */
-.hide {@apply hidden h-0 !important;}
+.hide {@apply hidden !important;}
 @media only screen and (max-width: 767px)  {
 /* list breadcrumbs length */
 .top-title {@apply max-w-[85%]}

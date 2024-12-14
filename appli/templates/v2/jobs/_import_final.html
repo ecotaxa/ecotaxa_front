@@ -1,0 +1,3 @@
+<em class="mb-2 block">{{_('Data correctly imported from ')}} {{source_path}}</em>
+<a href="{{url_for("gui_prj_classify", projid=projid)}}" class="button is-primary">{{_('Go to Manual Classification Screen')}}</a>
+<a href="{{url_for("gui_job_create", job_type="Prediction", projid=projid)}}" class="button is-primary">{{_('Go to Automatic Classification Screen')}}</a>

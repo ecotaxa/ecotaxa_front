@@ -7,24 +7,19 @@ import {
   domselectors,
   css
 } from '../modules/modules-config.js';
+let dynamics = {};
+let defers = [];
 
-export class JsComponents {
-  defers = [];
-  items = {};
-  async applyTo(element = document) {
+function createJsComponents() {
+  async function applyTo(element = document) {
     if (!element) return;
-    await this.activate(element);
-  }
-  async activate(element) {
     const items = element.querySelectorAll('.js');
     // dynamic import of necessary modules
-    let dynamics = {};
     items.forEach(async item => {
       let actions = item.classList;
       actions.forEach(async (action) => {
         if (action.indexOf('js-') === 0) {
           switch (action) {
-
             case 'js-nav':
               const location = window.location.href.split('?');
               const tag = (item.dataset.tag) ? item.dataset.tag : 'ul';
@@ -59,8 +54,7 @@ export class JsComponents {
                   import(`../modules/js-tom-select.js`);
                   dynamics.JsTomSelect = JsTomSelect;
                 }
-                const jsTomSelect = new dynamics.JsTomSelect();
-                jsTomSelect.applyTo(item);
+                dynamics.JsTomSelect.applyTo(item);
               }
               break;
             case 'js-datatable':
@@ -70,7 +64,6 @@ export class JsComponents {
                 } = await import('../modules/table-component.js');
                 dynamics.TableComponent = TableComponent;
               }
-
               const tbl = new dynamics.TableComponent(item);
               break;
             case 'js-privileges':
@@ -84,24 +77,6 @@ export class JsComponents {
                 const projectPrivileges = new dynamics.ProjectPrivileges(item);
               }
               break;
-            case 'js-tabs':
-              const jstabs = async () => {
-                if (!dynamics.JsTabs) {
-                  let {
-                    JsTabs
-                  } = await
-                  import(`../modules/js-tabs.js`);
-                  dynamics.JsTabs = JsTabs;
-                }
-                const jsTabs = new dynamics.JsTabs(item);
-              }
-              this.defers.unshift({
-                func: jstabs,
-                async: true
-              });
-              break;
-
-
             case "js-submit":
               if (!dynamics.FormSubmit) {
                 let {
@@ -131,7 +106,7 @@ export class JsComponents {
                 });
               };
               //checkNotifs(30000);
-              this.defers.push({
+              defers.push({
                 func: checkNotifs,
                 args: 30000
               });
@@ -144,10 +119,7 @@ export class JsComponents {
                 import(`../modules/js-accordion.js`);
                 dynamics.JsAccordion = JsAccordion;
               }
-              item.querySelectorAll(((item.dataset.detail) ? item.dataset.detail : 'detail')).forEach(el => {
-                const summary = el.querySelector(((item.dataset.summary) ? item.dataset.summary : 'summary'));
-                const jsAccordion = new dynamics.JsAccordion(el, null, null, null, {}, summary);
-              });
+              dynamics.JsAccordion.applyTo(item);
               break;
             case "js-taxomapping":
               if (!dynamics.TaxoMapping) {
@@ -158,7 +130,6 @@ export class JsComponents {
                 dynamics.TaxoMapping = TaxoMapping;
               }
               const taxomapping = new dynamics.TaxoMapping(item);
-
               break;
             case 'js-license':
               if (!dynamics.format_license) {
@@ -178,19 +149,8 @@ export class JsComponents {
                   window.location.reload(true);
                 });
               }))
-
               break;
             case 'js-hierarchy':
-              break;
-            case 'js-import':
-              if (!dynamics.JsImport) {
-                const {
-                  JsImport
-                } = await
-                import(`../modules/js-import.js`);
-                dynamics.JsImport = JsImport;
-              }
-              const jsImport = new dynamics.JsImport(item);
               break;
             case 'js-my-files':
               if (!dynamics.JsMyFiles) {
@@ -202,15 +162,40 @@ export class JsComponents {
               }
               const jsMyFiles = new dynamics.JsMyFiles(item);
               break;
-            case 'js-upload':
-              if (!dynamics.JsUpload) {
-                let {
-                  JsUpload
+            case 'js-import':
+              // depends on  js-submit
+              if (!dynamics.FormSubmit) {
+                const {
+                  FormSubmit
                 } = await
-                import(`../modules/js-upload.js`);
-                dynamics.JsUpload = JsUpload;
+                import(`../modules/form-submit.js`);
+                dynamics.FormSubmit = FormSubmit;
               }
-              const jsUpload = new dynamics.JsUpload(item);
+              if (!dynamics.JsImport) {
+                const {
+                  JsImport
+                } = await
+                import(`../modules/js-import.js`);
+                dynamics.JsImport = JsImport;
+              }
+              dynamics.JsImport(item);
+              break;
+            case 'js-tabs':
+              if (!dynamics.JsTabs) {
+                let {
+                  JsTabs
+                } = await
+                import(`../modules/js-tabs.js`);
+                dynamics.JsTabs = JsTabs;
+              }
+              dynamics.JsTabs.applyTo(item);
+              /*  const jstabs = async () => {
+                  await dynamics.JsTabs.applyTo(item);
+                }
+                defers.unshift({
+                  func: jstabs,
+                  async: true
+                });*/
               break;
             case 'js-observer':
               /*  const observer = new MutationObserver(mutations => {
@@ -240,14 +225,12 @@ export class JsComponents {
         }
       })
     });
-    await this.applyDefers();
+    await applyDefers();
   }
 
-  async applyDefers() {
-    if (this.defers.length === 0) return;
-    // series
-    for (const defer of this.defers) {
-
+  async function applyDefers() {
+    if (defers.length === 0) return;
+    for (const defer of defers) {
       if (defer.hasOwnProperty('args')) {
         if (defer.async) await defer.func(defer.args);
         else defer.func(defer.args);
@@ -255,9 +238,16 @@ export class JsComponents {
       else defer.func();
     }
     /*  // concurrent
-    this.defers.map(defer => {
+    defers.map(defer => {
          defer();
       }); */
-    this.defers = [];
+
   }
+  return {
+    applyTo,
+  }
+}
+const JsComponents = createJsComponents();
+export {
+  JsComponents
 }

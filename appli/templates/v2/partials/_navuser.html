@@ -15,7 +15,7 @@
 </li>
 {%-endif-%}<li><a href="{{url_for("gui_list_jobs")}}"><i class="icon icon-cpu  p-.5 opacity-80"></i> {{_('Tasks')}}</a></li>
 <li><a href="{{url_for("gui_me_profile")}}"><i class="icon icon-user p-.5 opacity-80" title="{{_('profile')}}"></i> {{ _('Profile') }}</a>{{has_to_mod_profile(current_user)}}{{ current_user.name }}</li>
-<!--<li><a href="{{url_for("gui_me_files")}}"><i class="icon icon-document-text" class="p-1 opacity-80" title="{{_('My Files')}}"></i> {{ _('Files') }}</a></li>-->
+<li><a href="{{url_for("gui_me_files")}}"><i class="icon icon-document-text p-.5 opacity-80" title="{{_('My Files')}}"></i> {{ _('Files') }}</a></li>
 <li class="separ"><a href="{{ url_for("gui_logout")}}"><i class="icon icon-arrow-right-on-rectangle-sm opacity-80" title="{{_('logout')}}"></i> {{ _('Logout') }}</a></li></ul></div>
 <div id="tool-item" class=" h-full order-4 ml-.5 sm:ml-1.5 w-6"><a href="{{url_for("gui_admin")}}" target="winadmin"><i class="icon-lg icon-admin align-middle invert cursor-pointer"></i></a>
 <ul class="u-menu" >

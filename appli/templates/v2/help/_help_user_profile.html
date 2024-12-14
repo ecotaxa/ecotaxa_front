@@ -1,4 +1,4 @@
-{%- if not partial-%}{% extends "./v2/help/_layout.html" %}{%-endif-%}
+{% extends "./v2/help/_layout.html" %}
   {% from "./v2/users/_profile_macro.html" import promail_required %}
 {% block article %}
 <article my-12><h2 class="help-title">{{title if title!=None else _('How to create an account')}} </h2>

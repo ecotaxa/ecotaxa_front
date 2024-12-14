@@ -7,6 +7,8 @@
     {{ modal(id='help-user-access',modal_title=modal_title,type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'},data = {'file':'help_users.html'}) }}
   </div>
   {% endif%}
+  {%- if ids !=""-%}  <div class=" is-title text-center md:-mt-4"><a href="{{url_for('gui_users_list_page')}}">{{ _('List all users')}}</a></div>
+  {%-endif-%}
     <div id="{{ tableid }}" data-from="userslist" class="w-full shadow-1 mt-4 mb-8 js js-datatable  userslist"  data-current="{{current_user.id|string}}" data-is={{current_user.is_users_admin}} data-paging=false data-sortable=true data-searchable=true>
 <div id="wait-please" data-wait="{{_('Please wait')}}" data-loaded="{{_( 'Data loaded. Displaying...')}}"> {{ _('Please wait')}}...</div>
 <table class="hide"></table>

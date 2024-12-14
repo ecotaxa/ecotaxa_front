@@ -25,7 +25,6 @@ function generate_uuid() {
   return uuidv4();
 }
 
-
 function fetchSettings(options) {
   options = options || {};
   options.headers = options.headers || {};
@@ -128,60 +127,13 @@ function format_bytes(bytes, decimals = 2) {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
-/* debounce */
-function debounce(func, wait, immediate) {
-  let timeout;
-  return function() {
-    const context = this,
-      args = arguments;
-    const later = function() {
-      timeout = null;
-      if (!immediate) func.apply(context, args);
-    };
-    const callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    if (callNow) func.apply(context, args);
-  };
-}
 
 function is_object(obj) {
   return (!Array.isArray(obj) && typeof obj === 'object' && obj !== null);
 
 }
 
-function add_custom_events(self) {
-  /**
-   * Add custom event listener
-   * @param  {String} event
-   * @param  {Function} callback
-   * @return {Void}
-   */
-  self.on = function(event, callback) {
-    this._events = this._events || {}
-    this._events[event] = this._events[event] || []
-    this._events[event].push(callback)
-  }
-  self.once = function(event, callback) {
-    callback.once = true;
-    self.on(event, callback);
-  }
-  self.off = function(event, callback) {
-    this._events = this._events || {}
-    if (event in this._events === false) return;
-    this._events[event].splice(this._events[event].indexOf(callback), 1)
-  }
-  self.emit = function(event, ...args) {
-    if (event in this._events === false) return;
-    else {
-      for (const action of this._events[event]) {
-        action(...args);
-        if (action.once) break;
-      }
-    }
-  }
-  return self;
-}
+
 
 function create_box(tag, attrs, parent = null, sep = ``) {
   let el = document.createElement(tag);
@@ -201,7 +153,9 @@ function create_box(tag, attrs, parent = null, sep = ``) {
           value.forEach(cl => {
             el.classList.add(cl);
           })
-        } else el.classList.add(value);
+        } else {
+          el.classList.add(value);
+        }
         break;
       default:
         el.setAttribute(attr, value);
@@ -211,7 +165,7 @@ function create_box(tag, attrs, parent = null, sep = ``) {
   if (parent !== null) {
     sep = (parent.children.length) ? sep : null;
     parent.append(el);
-    if (sep) sep = parent.insertBefore(document.createTextNode(sep), el);
+    if (sep) parent.insertBefore(document.createTextNode(sep), el);
   }
   return el;
 }
@@ -239,6 +193,37 @@ function html_spinner(addons = 'text-white', size = 'h-5 w-5') {
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
     </svg>`
 }
+
+function dataset_to_json(obj) {
+  //from jquery
+  function get_json(data) {
+    if (data === "true") {
+      return true;
+    }
+
+    if (data === "false") {
+      return false;
+    }
+
+    if (data === "null") {
+      return null;
+    }
+    // Only convert to a number if it doesn't change the string
+    if (data === +data + "") {
+      return +data;
+    }
+    //Replaced rbrace with regex value.
+    if (/^(?:\{[\w\W]*\}|\[[\w\W]*\])$/.test(data)) {
+      console.log(' parse data v', data)
+      return JSON.parse(data);
+    }
+    return data;
+  }
+  Object.entries(obj).forEach(([key, data]) => {
+    obj[key] = get_json(data);
+  })
+  return obj;
+}
 /*function toCamelCase(str) {
   return str.toLowerCase()
     .trim()
@@ -261,8 +246,6 @@ export {
   download_url,
   string_to_boolean,
   is_object,
-  debounce,
-  add_custom_events,
   dom_purify,
   create_box,
   decode_HTMLEntities,
@@ -270,5 +253,6 @@ export {
   format_bytes,
   stop_on_error,
   dirseparator,
-  urlseparator
+  urlseparator,
+  dataset_to_json
 }

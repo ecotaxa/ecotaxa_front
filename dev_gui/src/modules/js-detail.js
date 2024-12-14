@@ -3,62 +3,71 @@ import {
   css,
   default_messages
 } from '../modules/modules-config.js';
-let instance = null;
+import {
+  create_box
+} from '../modules/utils.js';
 //special details info - about in project lists
-export class JsDetail {
-  current = null; // this.current item - only one this.current at a time  / toggle when accordion style
-  constructor(detail, wrapper, options = {}) {
-    if (instance === null) {
-      const defaultOptions = {
-        istable: true, //called by element in table cell
-        over: false, // display over or "inline vertical"
-        waitdiv: null
-      }
-      this.options = Object.assign(defaultOptions, options);
-      Object.freeze(this.options);
-      this.wrapper = wrapper;
-      this.detail = detail;
-      this.init();
-      instance = this;
-    }
-    return instance;
+export function JsDetail(options) {
+  let current = null; // current item - only one this.current at a time  / toggle when accordion style
+  let wrapper, detail, content;
+  const defaultOptions = {
+    istable: true, //called by element in table cell
+    over: false, // display over or "inline vertical"
+    waitdiv: null
   }
-  init() {
-    if (this.detail instanceof HTMLElement) return;
-    const detail = document.createElement('div');
-    detail.id = this.detail;
-    detail.classList.add(css.hide);
-    if (this.options.waitdiv) {
-      this.options.waitdiv.textContent = (this.options.waitdiv.dataset.wait) ? this.options.waitdiv.dataset.wait : default_messages.wait;
-      detail.append(this.options.waitdiv);
+  options = { ...defaultOptions,
+    ...options
+  };
+  Object.freeze(options);
+
+  function applyTo(item, container) {
+    if (!(container instanceof HTMLElement)) return;
+    wrapper = container;
+    wrapper.classList.add(css.relative);
+    // item is either an id or the element
+    if (item instanceof HTMLElement) return;
+    detail = create_box('div', {
+      id: item,
+      class: css.hide
+    }, wrapper);
+    if (options.waitdiv) {
+      options.waitdiv.textContent = (options.waitdiv.dataset.wait) ? options.waitdiv.dataset.wait : default_messages.wait;
+      detail.append(options.waitdiv);
     }
-    detail.append(document.createElement('div'));
-    this.detail = detail;
-    this.wrapper.classList.add('relative');
-    this.wrapper.append(this.detail);
+    content = create_box('div', {}, detail);
     // todo : listener window resize
+    return detail;
   }
 
-  expandDetail(el, html = null) {
+  function expandDetail(el, html = null) {
     // illusion of row expanding
-    if (this.current && this.current !== el) this.shrinkDetail(this.current);
-    this.current = el;
-    if (this.options.waitdiv) this.options.waitdiv.classList.add(css.hide);
-    if (html !== null) this.detail.lastElementChild.innerHTML = DOMPurify.sanitize(html);
-    const padding = 6;
-    const cell = (this.options.istable) ? el.closest('td') : el;
-    const t = (this.options.istable) ? parseInt(this.wrapper.querySelector('table').offsetTop) : 0;
-    const h = parseInt(cell.offsetHeight) + parseInt(this.detail.offsetHeight) + padding;
-    const w = parseInt(this.wrapper.offsetWidth);
-    this.detail.style.minWidth = this.detail.style.width = w + 'px';
-    cell.style.overflow = el.style.overflowX = 'visible';
-    this.detail.style.top = t + parseInt(cell.offsetTop) + parseInt(el.offsetHeight) + padding + 'px';
-    cell.style.minHeight = cell.style.height = h + 'px';
 
+    if (current && current !== el) shrinkDetail(current);
+    current = el;
+    if (options.waitdiv) options.waitdiv.classList.add(css.hide);
+    if (html !== null) content.innerHTML = DOMPurify.sanitize(html);
+    el.append(detail);
+    const padding = 6;
+    const cell = (options.istable) ? el.closest('td') : el;
+    let t = (options.istable) ? parseInt(wrapper.querySelector('table').offsetTop) : 0;
+    t = t + (parseInt(cell.offsetTop) + parseInt(el.offsetHeight) + padding) + 'px';
+    const h = (parseInt(cell.offsetHeight) + parseInt(detail.offsetHeight) + padding) + 'px';
+    const w = (parseInt(wrapper.offsetWidth)) + 'px';
+    requestAnimationFrame(() => {
+      detail.style.minWidth = w;
+      detail.style.width = w;
+      cell.style.overflow = 'visible';
+      el.style.overflowX = 'visible';
+      detail.style.top = t;
+      cell.style.minHeight = h;
+      cell.style.height = h;
+    });
+    return current;
   }
-  shrinkDetail(el) {
+
+  function shrinkDetail(el) {
     // illusion of row shrink
-    const cell = (this.options.istable) ? el.closest('td') : el;
+    const cell = (options.istable) ? el.closest('td') : el;
     //cell.style.maxHeight = cell.dataset.maxh;
     const ellipsis = el.closest('.overflow');
     if (ellipsis) {
@@ -68,24 +77,30 @@ export class JsDetail {
     cell.style.minHeight = 'none';
     cell.style.height = 'auto';
     cell.style.overflow = el.style.overflowX = el.parentElement.style.overflowX = 'hidden';
-    this.detail.classList.add(css.hide);
-    this.wrapper.append(this.detail);
-    this.current = null;
-
+    detail.classList.add(css.hide);
+    wrapper.append(detail);
+    current = null;
+    return current;
   }
-  activeDetail(activ, clear = false) {
+
+  function activeDetail(activ, clear = false) {
     if (activ === true) {
-      this.detail.lastElementChild.innerHTML = ``;
-      this.detail.classList.remove(css.hide);
-      if (this.options.waitdiv) this.options.waitdiv.classList.remove(css.hide);
+      detail.lastElementChild.innerHTML = ``;
+      detail.classList.remove(css.hide);
+      if (options.waitdiv) options.waitdiv.classList.remove(css.hide);
 
     } else {
-      this.detail.classList.add(css.hide);
-      if (this.options.waitdiv) this.options.waitdiv.classList.add(css.hide);
-      if (this.current) this.shrinkDetail(this.current);
-      if (clear === true) this.detail.lastElementChild.innerHTML = ``;
-      this.current = null;
+      detail.classList.add(css.hide);
+      if (options.waitdiv) options.waitdiv.classList.add(css.hide);
+      if (current) shrinkDetail(current);
+      if (clear === true) detail.lastElementChild.innerHTML = ``;
+      current = null;
     }
+    return current;
   }
-
+  return {
+    applyTo,
+    activeDetail,
+    expandDetail,
+  }
 }

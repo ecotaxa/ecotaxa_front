@@ -1,5 +1,8 @@
 import DOMPurify from 'dompurify';
 import {
+  AlertBox
+} from '../modules/alert-box.js';
+import {
   models,
   domselectors,
   css
@@ -22,9 +25,10 @@ const localcss = {
   iconeye: 'icon-eye-dark',
   wrap: 'password-wrapper'
 };
-export class ActivItems {
+
+function createActivItems() {
   /*  activate function */
-  applyTo(element = document) {
+  function applyTo(element = document) {
     element = (document || element instanceof HTMLElement) ? element : document.querySelector(element);
     if (!element) return;
     element.querySelectorAll('[data-action]').forEach(async (item) => {
@@ -46,6 +50,7 @@ export class ActivItems {
             };
           }
           item.addEventListener(ev, (e) => {
+            console.log('targets', e)
             targets.forEach(t => {
               toggle_target(t);
             });
@@ -199,14 +204,12 @@ export class ActivItems {
             const options = (item.href) ? {
               href: item.href
             } : {};
-            if (window.alertbox) {
-              rep = await window.alertbox.createConfirm(message, null, options);
-              if (rep === true && item.form) {
-                if (item.form.formsubmit) {
-                  item.form.formsubmit.submitForm();
-                } else item.form.submit();
-              }
-            } else if (window.confirm(message)) rep = true;
+            rep = await AlertBox.addConfirm(message, options);
+            if (rep === true && item.form) {
+              if (item.form.formsubmit) {
+                item.form.formsubmit.submitForm();
+              } else item.form.submit();
+            }
             return rep;
           });
           break;
@@ -218,11 +221,16 @@ export class ActivItems {
             });
           }
           break;
-
       }
 
     });
   }
+  return {
+    applyTo
+  }
 
-
+}
+const ActivItems = createActivItems();
+export {
+  ActivItems
 }

@@ -194,6 +194,147 @@ def export_format_options(type=None):
     return formdatas, options, None
 
 
+def import_format_options(type=None) -> dict:
+    taxomapping = dict(
+        {
+            "taxo_mapping": {
+                "label": _("Mapping from present taxon to output replacement one "),
+                "comment": _(" Type '_discard_' to discard taxon"),
+                "format": "taxoline",
+                "help": "help_import_summary_taxo_mapping",
+                "addoption": "_discard_,0",
+            }
+        },
+    )
+    formdatas = dict(
+        {
+            "general": {
+                "path": "/gui/job/create/GeneralImport",
+                "title": _("General Import"),
+                "legend": _("Import Images and TSV files"),
+                "browse_label": _("Select one directory to import"),
+                "browse": "directory,file",
+                "textdrop": _("or Drop Files or Directories Here"),
+                "datas": {
+                    "skiploaded": False,
+                    "skipobjectduplicate": False,
+                },
+            },
+            "simple": {
+                "path": "/gui/job/create/SimpleImport",
+                "title": _("Images Import"),
+                "browse_label": _("Select one directory to import"),
+                "browse": "directory,file",
+                "textdrop": _("or Drop Files or Directories Here"),
+                "legend": _(
+                    "Import images in jpg, png, gif (possibly animated) formats and associate a fixed & reduced set of metadata, that you can enter below."
+                ),
+            },
+            "update": {
+                "path": "/gui/job/create/UpdateImport",
+                "title": _("Update Metadata"),
+                "legend": _("Update metada associated to already importer images"),
+                "browse_label": _("Select one file or directory to import"),
+                "browse": "directory, file",
+                "textdrop": _("or Drop Files or Directories Here"),
+                "datas": {"updateclassif": False},
+            },
+        }
+    )
+
+    options = dict(
+        {
+            "general": {
+                "skiploaded": {
+                    "label": _("Skip tsv that have already been imported"),
+                    "format": "checkbox",
+                    "value": "Y",
+                },
+                "skipobjectduplicate": {
+                    "label": _("Skip objects that have already been imported"),
+                    "format": "checkbox",
+                    "value": "Y",
+                },
+                "advanced_options": taxomapping,
+            },
+            "simple": {
+                "metadata": {
+                    "label": _("Metadata"),
+                    "format": "fieldset",
+                    "fields": {
+                        "imgdate": {
+                            "label": _("Image DATE (YYYYMMDD, UTC)"),
+                            "format": "text",
+                            "class": "basis-1/2",
+                        },
+                        "imgtime": {
+                            "label": _("Image TIME (HHMM, UTC)"),
+                            "format": "text",
+                            "class": "basis-1/2",
+                        },
+                        "latitude": {
+                            "label": _(
+                                "latitude (type in -12°06.398 or -12.1066 for 12°06.398 S)"
+                            ),
+                            "format": "text",
+                            "class": "basis-1/2",
+                        },
+                        "longitude": {
+                            "label": _(
+                                "longitude (type in -135°05.325 or -135.08875 for 135°05.325 W)"
+                            ),
+                            "format": "text",
+                            "class": "basis-1/2",
+                        },
+                        "depthmin": {
+                            "label": _("Object Depth min (m)"),
+                            "format": "text",
+                            "class": "basis-1/2",
+                        },
+                        "depthmax": {
+                            "label": _("Object Depth max (m)"),
+                            "format": "text",
+                            "class": "basis-1/2",
+                        },
+                        "taxolb": {
+                            "label": _("Optional annotation category for ALL images"),
+                            "format": "autocomplete",
+                            "type": "taxo",
+                            "class": "w-full",
+                        },
+                        "userlb": {
+                            "label": _("Optional annotator"),
+                            "format": "autocomplete",
+                            "type": "user",
+                            "class": "basis-1/2",
+                        },
+                        "status": {
+                            "label": _("Optional status"),
+                            "format": "select",
+                            "class": "basis-1/2",
+                            "options": {
+                                "": "",
+                                "P": "predicted",
+                                "D": "dubious",
+                                "V": "validated",
+                            },
+                        },
+                    },
+                },
+            },
+            "update": {
+                "updateclassif": {
+                    "label": _("Allow update of classification data"),
+                    "format": "checkbox",
+                    "value": "Y",
+                },
+                "advanced_options": taxomapping,
+            },
+        }
+    )
+    return formdatas, options, None
+
+
 def display_job(usercache: Dict[int, MinUserModel], ajob: JobModel):
     """Enrich back-end job for display"""
     job = ajob.to_dict()

@@ -2,13 +2,22 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 from typing import List, Dict, Optional
-from flask import render_template, request, redirect, flash, session, url_for, Markup
+from flask import (
+    render_template,
+    request,
+    redirect,
+    flash,
+    session,
+    url_for,
+    Markup,
+)
 from flask_login import current_user
 from appli.constants import GUI_PATH
 
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py import ApiException
+from werkzeug.exceptions import HTTPException
 from to_back.ecotaxa_cli_py.models import (
     ProjectModel,
     UserModelWithRights,
@@ -280,10 +289,10 @@ def alert_box(
 
 # new_ui_error
 def new_ui_error(e, is_exception: bool = False, trace: str = None):
+    resp_json = "application/json"
     new_ui = request.path.find("/gui/") >= 0
     description = []
     code = 500
-
     if is_exception or not hasattr(e, "code"):
         if trace:
             description.append(str(trace))
@@ -291,22 +300,25 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
         code = e.code
     partial = is_partial_request(request)
     if isinstance(e, ApiException):
+        if request.content_type == resp_json:
+            return {"error": e.status, "text": e.reason, "body": e.body}, e.status
         code = e.status
         exception = format_exception(e)
         if code != 500:
             if partial:
-                return alert_box(
-                    type="error",
-                    title="error",
-                    dismissible=True,
-                    codemessage=str(code),
-                    message=exception[1],
-                )
+                return {
+                    "error": e.status,
+                    "text": e.reason,
+                    "body": e.body,
+                }, e.status
             elif code not in [403, 401]:
                 flash(exception[1], "error")
                 return redirect(request.referrer)
         description.append(exception[1])
-
+    elif isinstance(e, HTTPException):
+        response = e.get_response()
+        if response.content_type == resp_json:
+            return e
     else:
         py_messages = py_get_messages()
         if hasattr(e, "name") and e.name != None:
@@ -330,6 +342,8 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
             ),
             code,
         )
+    elif request.content_type == resp_json:
+        return {"error": code, "text": description}, code
     else:
         temp = render_template(
             "/v2/error.html",

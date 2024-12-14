@@ -26,12 +26,10 @@ is-done
 <div id="job_monitor" class="container mx-auto mt-8">
     {% if job and job.id  %}
 <div class="pt-0 pb-8 mx-2">
-  <div data-id="{{job.id}}" data-request="monitor" data-event="load" data-state="{{job.state}}" {{'data-out=true' if job.outfile else ''}}  >
+  {%set texterrors =_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart your job.') %}
+  <div data-id="{{job.id}}" data-request="monitor" data-event="load" data-state="{{job.state}}" data-errors={{texterrors}} {{'data-out=true' if job.outfile else ''}} data-populate='{"errors":"job-errors","state":"job-state","taskstep":"job-taskstep","questiondata":"job-questiondata","answerdata":"job-answerdata"}'>
   {%- if job.state !="E" and job.state!="F" -%}<div id="spinner-icon" class="hide mx-auto my-8"></div>
-  {%-elif job.state=="E"-%}<div class="alert danger">
-      <p>{{_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart
-        your job.')}}</p>
-    </div>
+  {%elif job.state =='E' %}<div class="alert danger "><p>{{texterrors}}</p></div>
   {%elif job.state !='E' %}<div id="responsediv" class="{{'hide' if job.state!='F'}} mr-2 ">{{finalaction|safe}}</div>{%-endif%}
   </div>
   <div class="mt-8 flex flex-col mb-2 sm:flex-row  sm:mb-0">
@@ -56,9 +54,9 @@ is-done
     </tr>
     <tr>
       <th>{{_('State')}}</th>
-      <td ><span id="divstate" >{{ state2label[job.state]|safe }}</span>
+      <td>{%set statetext = _(' waiting for an answer') %}<span id="job-state" data-text="{{statetext}}">{{ state2label[job.state]|safe }}</span>
         {% if job.state=="A" %}
-          {{_(' waiting for an answer')}} <a href="/Job/Question/{{job.id}}" class="button is-warning">{{_('Go')}}</a>
+          {{statetext}} <a href="/Job/Question/{{job.id}}" class="button is-warning">{{_('Go')}}</a>
         {% elif job.state in ("E") %}
           <a href="{{url_for("gui_job_force_restart", job_id=job.id)}}">
             <button class="button text-xs py-.5 ml-1 inverse btn-sm">{{_('Force restart')}}</button>
@@ -68,7 +66,7 @@ is-done
     </tr>
     <tr>
       <th>{{_('Step')}}</th>
-      <td>{{ job.taskstep }}</td>
+      <td><span id="job-taskstep">{{ job.taskstep if job.taskstep else ''}}</span></td>
     </tr>
     <tr>
       <th>{{_('Progress')}}</th>
@@ -77,13 +75,13 @@ is-done
     </tr>
     <tr>
       <th>{{_('Message')}} </th>
-      <td>{% if job.errors|length%}<a class="font-btn triggershow block" data-action="toggle"  data-target=".collapseerrors" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_(' all errors')}}</a>{%endif%}
-        <div  class="collapseerrors">
+      <td><div id="job-errors">{{job.errors.length}}<a class="font-btn triggershow block {{'hide' if job.state!='E' else ''}}" data-action="toggle"  data-target=".collapseerrors" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_(' all errors')}}</a>
+        <div id="collapseerrors" class="collapseerrors">
         <ul>
           {% for e in job.errors %}
             <li >{{ e }}</li>
           {% endfor %}
-        </ul></div>
+        </ul></div></div>
       </td>
     </tr><tr><td colspan="2" class="ml-2 text-left ""><a class="font-btn triggershow" data-action="toggle"  data-target=".togglecollapse" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_('internal details')}}</a></td></tr>
     <tr class="togglecollapse">
@@ -92,11 +90,11 @@ is-done
     </tr>
     <tr class="togglecollapse">
       <th>{{_('Question Data')}}</th>
-      <td>{{ job.questiondata|string }}</td>
+      <td><span id="job-questiondata">{{ job.questiondata|string }}</span></td>
     </tr>
     <tr class="togglecollapse">
       <th>{{_('Answer Data')}}</th>
-      <td>{{ job.answerdata|string }}</td>
+      <td><span id="job-answerdata">{{ job.answerdata|string }}</span></td>
     </tr></tbody>
   </table>
   <details class="overflow-hidden px-2 mb-24"><summary class="text-lg font-btn font-semibold py-0.5 is-default inverse" data-request="logfile" data-href="{{url_for("gui_job_show", job_id=job.id)}}?log=Y">{{_('View log file')}} </summary><pre id="joblog" class="w-full my-4 break-all text-sm text-stone-900  whitespace-pre-line"></pre></details>

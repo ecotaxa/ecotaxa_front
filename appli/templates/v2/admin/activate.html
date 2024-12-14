@@ -8,7 +8,7 @@
     <input type="hidden" name="id" id="id" value="{{user.id if user.id else -1  }}">
 
       <div class="px-2 pb-8 border-b border-stone-50 mb-4">
-    {% for  prop,label in {"name":_("Name"),"email":_("Email"),"orcid":_("Open Researcher and Contributor ID"),"country":_("Country"),"organisation":_("Organisation"),"creationreason":_("Planned usage of EcoTaxa")}.items() %}
+    {% for  prop,label in {"name":_("Name"),"email":_("Email"),"orcid":_("Open Researcher and Contributor ID"),"country":_("Country"),"organisation":_("Organisation"),"usercreationreason":_("Planned usage of EcoTaxa")}.items() %}
       <div class="grid w-full py-1">
       <div class="font-semibold">{{label}}:</div><div class="text-base">{{user[prop]}}</div>
       </div>

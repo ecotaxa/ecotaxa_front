@@ -121,8 +121,7 @@ select[class*="ts-hidden"] {@apply hidden}
 [class^="form-"] + .ts-wrapper {@apply border border-stone-300 ring-0}
 [class^="form-"]:valid + .ts-wrapper , [class^="form-"]:valid + .ts-wrapper.multi {@apply  border-secondblue-300 ring-0}
 [class^="form-"]:invalid + .ts-wrapper, [class^="form-"]:invalid + .ts-wrapper.multi {@apply  border-danger-400 ring-0}
-.ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto; }
-.ts-wrapper .item .ts-delet::before {@apply icon-cancel}
+.ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto before:icon-x-mark; }
 #section-privileges .ts-wrapper.form-select {@apply border-0  }
 #section-privileges .ts-wrapper.form-select.focus {@apply text-secondblue-400 bg-secondblue-50  }
 /* import */

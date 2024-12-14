@@ -296,6 +296,64 @@ def gui_stream():
     )
 
 
+# import from server - list
+@app.route("/gui/common/ServerFolderSelectJSON")
+def gui_server_folder_select_json():
+    # Get posted vars
+    parent = gvg("id")
+    zip_only = gvg("ZipOnly") == "Y"
+    # The explored part
+    if parent == "#":
+        current_path = ""  # root
+    else:
+        current_path = parent
+    # Call back-end for directory content
+    from appli.utils import ApiClient
+    from to_back.ecotaxa_cli_py.api import FilesApi
+
+    with ApiClient(FilesApi, request) as api:
+        # List files remotely
+        dir_desc: DirectoryModel = api.list_common_files(path=current_path)
+        entries_in_dir: List[DirectoryEntryModel] = dir_desc.entries
+    res = []
+    for entry in entries_in_dir:
+        path_to_root = (current_path + "/" if current_path else "") + entry.name
+        entry_name = entry.name
+        if entry.type == "D":
+            if zip_only:
+                res.append(
+                    dict(
+                        id=path_to_root,
+                        name=entry_name,
+                        parent=parent,
+                        children=True,
+                    )
+                )
+            else:
+                res.append(
+                    dict(
+                        id=path_to_root,
+                        name=entry_name,
+                        parent=parent,
+                        children=True,
+                    )
+                )
+        if entry.name.lower().endswith(".zip"):
+            # For zip files we have details, the date is a bit too precise however
+            fmt = (entry_name, entry.size / 1048576, entry.mtime[:-7])
+            res.append(
+                dict(
+                    id=path_to_root,
+                    name=entry_name,
+                    size="%s (%.1f Mb : %s)" % fmt,
+                    parent=parent,
+                    children=False,
+                )
+            )
+    res.sort(key=lambda val: str.upper(val["id"]), reverse=False)
+    return json.dumps(res)
+
+
 # cookie for sitemessaging
 @app.route("/gui/setmsgcookie", methods=["POST"])
 def gui_setmsgcookie():

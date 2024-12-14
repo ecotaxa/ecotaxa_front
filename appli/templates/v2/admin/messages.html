@@ -24,7 +24,7 @@
       </form>
   {% elif messages is iterable %}
   <div class="js js-datatable" id="admin-messages-list">
-  <table ><thead><tr><th></th><th>{{_('type')}}</th><th>{{_('message')}}</th><th>{{_('active')}}</th><th>{{_('date')}}</th></tr></thead>
+  <table><thead><tr><th></th><th>{{_('type')}}</th><th>{{_('message')}}</th><th>{{_('active')}}</th><th>{{_('date')}}</th></tr></thead>
     <tbody>
       {% for key,message in messages.items()%}
       <tr><td><div class="is-controls"><a class="btn is-edit order-2" href="{{ request.path }}{{key}}">{{_('edit')}}</a></div></td><td>{{key}}</td><td>{{message["content"]}}</td><td>{{'<i class="icon-sm icon-check"></i>'|safe if message["active"]==1 else '' }}</td><td>{{message["date"]}}</td></tr>

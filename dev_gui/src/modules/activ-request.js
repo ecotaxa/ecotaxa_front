@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify';
 import {
   fetchSettings,
   unescape_html,
+  create_box
 } from '../modules/utils.js';
 import {
   domselectors,
@@ -9,24 +10,23 @@ import {
   models,
 } from '../modules/modules-config.js';
 let dynamics = {};
-export class ActivRequest {
-  applyTo(element = document) {
+
+function createActivRequest() {
+  function applyTo(element = document) {
     element = (document || element instanceof HTMLElement) ? element : document.querySelector(element);
     if (!element) return;
     element.querySelectorAll('[data-request]').forEach(item => {
       const ev = item.dataset.event || 'click';
-
-      if (ev === 'load') this.makeRequest(item);
+      if (ev === 'load') makeRequest(item);
       else item.addEventListener(ev, async (e) => {
         if (item.tagName.toLowerCase() === "a") e.preventDefault();
-        await this.makeRequest(item);
+        await makeRequest(item);
       });
     });
 
   }
-
   /* fetch data in a modal - contextual help or any other type */
-  async callModal(item) {
+  async function callModal(item) {
     if (!dynamics || !dynamics.ModalContainer) {
       const {
         ModalContainer
@@ -36,7 +36,7 @@ export class ActivRequest {
 
     return new dynamics.ModalContainer(item);
   }
-  async makeRequest(item) {
+  async function makeRequest(item) {
     let url, format = (item.dataset.format) ? item.dataset.format : 'html',
       modal,
       callback = null;
@@ -44,7 +44,7 @@ export class ActivRequest {
     switch (item.dataset.request) {
       case models.help:
         item.dataset.what = models.help;
-        modal = await this.callModal(item);
+        modal = await callModal(item);
         const modalbox = (modal) ? modal.modal : null;
         if (!modal || !modalbox) return;
         if (item.dataset.close) return;
@@ -58,7 +58,6 @@ export class ActivRequest {
             } = await import('../modules/activ-items.js');
             dynamics.ActivItems = ActivItems;
           }
-          const activItems = new dynamics.ActivItems();
           const params = {
             partial: true,
             title: item.textContent,
@@ -69,8 +68,8 @@ export class ActivRequest {
             html = html instanceof HTMLElement ? html.outerHTML : html;
             modalbox.dataset.currentfile = file;
             target.innerHTML = html;
-            this.applyTo(target);
-            activItems.applyTo(target);
+            applyTo(target);
+            dynamics.ActivItems.applyTo(target);
             //open and open only the selected info
             if (item.dataset.for) modal.modalOpen(item);
           }
@@ -80,7 +79,7 @@ export class ActivRequest {
         break;
 
       case models.settings:
-        modal = await this.callModal(item);
+        modal = await callModal(item);
         if (!modal) return;
         const container = modal.modalcontent ? modal.modalcontent.querySelector('[data-import]') : null;
         if (!container || (item.dataset.key !== container.dataset.import || !container.dataset.table)) {
@@ -97,95 +96,42 @@ export class ActivRequest {
               } = await import('../modules/js-components.js');
               dynamics.JsComponents = JsComponents;
             }
-            const jsComponents = new dynamics.JsComponents();
-            jsComponents.applyTo(modalcontent, modal);
+            dynamics.JsComponents.applyTo(modalcontent);
 
           }
         } else {
           callback = url = null;
         }
         break;
-
       case models.taxotree:
-        modal = await this.callModal(item);
-
+        modal = await callModal(item);
+      case models.commonserver:
+        modal = (modal) ? modal : (item.dataset && item.dataset.where) ? document.getElementById(item.dataset.where) : null;
         if (!modal) return;
-
-        if (!dynamics.JSONTree) {
+        const modalcontent = (modal.modalcontent) ? modal.modalcontent : modal;
+        let options = JSON.parse(JSON.stringify(item.dataset));
+        if (item.dataset.request === models.commonserver) {
+          options.api_parameters = {
+            rootname: (options.rootname) ? options.rootname : 'Server'
+          };
+          options.entry = {
+            icons: {
+              image: 'img',
+              document: 'doc'
+            },
+          };
+          item.dataset.import = true;
+        } else options.trigger = modal.trigger;
+        delete options.request;
+        if (!dynamics.jsTree) {
           let {
-            JSONTree
+            JsTree
           } = await
           import(`../modules/js-tree.js`);
-          dynamics.JSONTree = JSONTree;
+          dynamics.JsTree = JsTree;
         }
-        const tree = document.createElement('div');
-        modal.setContent('');
-        modal.modalcontent.append(tree);
-        modal.modalOpen(item);
-        const jsontree = new dynamics.JSONTree(tree);
-        const fetch_tree = function(element = null, node = null) {
-          const id = (node === null) ? "#" : parseInt(node.id);
-          const treeurl = '/gui/search/taxotreejson?' + new URLSearchParams({
-            id: id
-          });;
-          fetch(treeurl, fetchSettings()).then(response => response.text()).then(json => {
-            if (element === null) jsontree.json(JSON.parse(json));
-            else {
-              jsontree.json(JSON.parse(json), element);
-              element.resolve();
-            }
-          }).catch(err => {
-            console.log('err', err)
-          });
-
-        }
-        jsontree.once('fetch', function(element, node) {
-          node.loaded = true;
-          fetch_tree(element, node);
-        });
-        jsontree.on('select', function(element) {
-          if (!element || !element.id) return;
-          if (item.dataset.targetid) {
-            const opt = document.getElementById(item.dataset.targetid) ? document.getElementById(item.dataset.targetid) : null;
-            let value;
-            if (opt && opt.tomselect) {
-              const ts = opt.tomselect;
-              const key = element.id;
-              const text = element.textContent;
-              if (!ts.getItem(key)) {
-                if (!ts.getOption(key)) {
-                  let obj = {};
-                  obj[ts.settings.valueField] = key;
-                  obj[ts.settings.labelField] = unescape_html(text.trim());
-                  ts.addOption(obj);
-                }
-              }
-              ts.addItem(key);
-              value = key;
-            } else value = element.id;
-            modal.modal.open = false;
-          }
-        });
-        fetch_tree();
-        break;
-      default:
-        if (item.dataset.href) {
-          url = item.dataset.href;
-          if (url.substr(0, 1) === '?') {
-            url = window.location.href.split('?');
-            if (url.length > 1) url = url.join('?') + '&' + item.dataset.href.substr(1);
-            else url = url[0] + item.dataset.href;
-          }
-          callback = (html) => {
-            let content = item.nextElementSibling;
-            if (!content) {
-              content = document.createElement('div');
-              item.parentElement.append(content);
-
-            }
-            content.innerHTML = html;
-          }
-        }
+        item.jstree = dynamics.JsTree(modalcontent, options);
+        callback = null;
         break;
       case "monitor":
         if (!dynamics.jobMonitor) {
@@ -200,7 +146,6 @@ export class ActivRequest {
         url = "/api/taxon_set/query?ids=" + item.dataset.value;
 
         callback = (response) => {
-          console.log('lineage')
           const lineage = response[0].lineage;
           const id_lineage = response[0].id_lineage;
           /* var click_lineage = lineage.map(function (txo, i) {
@@ -223,18 +168,38 @@ export class ActivRequest {
           if (id) id.remove();
         }
         break;
+      default:
+        if (item.dataset.href) {
+          url = item.dataset.href;
+          if (url.substr(0, 1) === '?') {
+            url = window.location.href.split('?');
+            if (url.length > 1) url = url.join('?') + '&' + item.dataset.href.substr(1);
+            else url = url[0] + item.dataset.href;
+          }
+          callback = (html) => {
+            let content = item.nextElementSibling;
+            if (!content) {
+              content = document.createElement('div');
+              item.parentElement.append(content);
+            }
+            content.innerHTML = html;
+          }
+        }
+        break;
+
     }
 
-    this.fetchRequest(format, url, callback);
+    fetchRequest(format, url, callback);
   }
 
-  makeCloseRequest(item) {
+  function makeCloseRequest(item) {
     item.addEventListener(ev, async (e) => {
-      const modal = await this.callModal(item);
+      const modal = await callModal(item);
       if (modal) modal.dismissModal();
     });
   }
-  fetchRequest(format, url, callback) {
+
+  function fetchRequest(format, url, callback) {
     if (!callback) return;
     if (format === 'json') {
       fetch(url, fetchSettings()).then(response => response.json()).then(json => {
@@ -249,5 +214,12 @@ export class ActivRequest {
       });
     }
   }
-
+  return {
+    applyTo,
+    makeRequest
+  }
 }
+const ActivRequest = createActivRequest();
+export {
+  ActivRequest
+};

@@ -1,52 +1,97 @@
 {% extends "./v2/layout.html" %}
-{% from "./v2/macros/macros.html" import modal with context %}
+{% from "./v2/macros/macros.html" import modal,form_group_radio with context %}
+{% from "./v2/project/macros.html" import header_project_job with context %}
+{%-macro make_field(name,option, suffix=None)-%}
+{%- set suffix='_'+suffix if suffix!=None else ''-%}
+<div class="form-box">
+{%- if option.format=="checkbox"-%}<label for="{{name+suffix}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+suffix}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
+{%-elif option.format=="radio"-%}<div class="label inline-block mr-2 w-auto">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if "discard" in option else ''}}>
+     {%- if "options" in option.keys() -%}  {%- for opt in option.options -%}
+    {%- set extra =' data-checked=true' if opt.value== datas[name][0] else '' -%}
+    {{ form_group_radio(name+suffix+'_'+loop.index|string(),name,opt.value,opt.label,datas[name][0],required=(loop.index==1),help='',extra=extra)}}
+     {%- endfor -%}{%endif%}
+</div>
+{%- elif option.format in ['select','autocomplete']-%}
+<label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
+<select class="form-select {{option.class if 'class' in option}} {{ 'js js-autocomplete' if option.format=='autocomplete' }}" name="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" {{'data-type='+option.type if 'type' in option}}>{%- if 'options' in option-%}{%- for k,v in option.options.items() -%}<option value="{{k}}" {{ 'selected' if name in datas and datas[name][0]==k }}>{{v}}</option>{%-endfor-%}{%-endif-%}</select>
+{%- elif option.format=='text'-%}
+<label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
+<input class="form-input {{option.class if 'class' in option}}" name="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" value="{{datas[name][0] if name in datas}}">
+{%- elif option.format=='textarea'-%}
+<label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
+<textarea class="form-textarea {{option.class if 'class' in option}}" name="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" rows="{{option.rows if 'rows' in options else 1}}">{{datas[name][0] if name in datas}}</textarea>
+{%- elif name=="advanced_options"-%}
+{%- set comment = option.taxo_mapping.comment if "taxo_mapping" in option and "comment" in option.taxo_mapping -%}
+<div class="form-box " id="import_options"><details>
+  <summary class="font-semibold">{{_('Advanced options')}}</summary>
+  <div id="advanced" data-shared="import_taxo-mapping"></div></details></div>
+  {%-elif option.format=='fieldset'%}
+  <details><summary>{{option.label}}</summary><div class="flex md:flex-row flex-wrap w-full">{%- for name,field in option.fields.items() -%}{{ make_field(name,field)}}
+    {%-endfor-%}</div></details>
+{%-endif%}
+</div>
+{%-endmacro-%}
+{%- macro make_part_form(type_tab)-%}
+{%- set datas = formdata.datas if "datas" in formdata else None-%}
+{%-for name,option in formoptions[type_tab].items() -%}
+<div class="form-box" data-name={{name}}>
+  {% if datas and datas[name][1] == True %}  <span class="mr-2 italic font-normal">{{option.label}} </span>
+  <input type="hidden" name="{{name}}" value={{formdatas[type_tab].datas[name][0]}}>
+  {%- if "options" in option.keys() -%}
+     {%- for opt in option.options -%}
+    {%-if opt.value == formdata.datas[name][0] -%}<span class="bg-stone-50 p-2 rounded font-semibold ">{{opt.label}}</span>{%-endif-%}
+    {%-endfor-%}{%endif%}
+  {%-else -%}{{make_field(name,option,type_tab)}}
+  {%-endif-%}
+</div>{%-endfor%}
+{%-endmacro-%}
 {% block body %}
-    <div class="container mx-auto">
-      {% set data = {'file':'_help_job_import'} %}
-      {{ modal(id='help-job-import',modal_title= _("How to import data"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
-      <form class="js js-submit js-import" method="post" action=""  id="formupload" data-displayselection="dirlist" data-showfiles="{{_('Select from My Files')}}" enctype="multipart/form-data" data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}" onsubmit="return false" >
-        <div class="flex flex-row">
-            <div class="form-box md:basis-1/3"><label>{{_('Select a file or a directory to import')}}<i data-for="help_upload_file" data-request="help"></i></label>
-               {%include("./v2/my_files/_list.html")%}
+<div class="container mx-auto mb-8">
+  <div class="w-100 mx-auto block pt-4 text-left relative mb-8" id="project-subset-header">
+{% set data = {'file':'_help_job_import'} -%}
+{%- set title=_('Import')  %}
+{{header_project_job(title ,data, _('How to import data'), nav={"links":action_links,"query":"?projid="+target_proj.projid|string})}}
+	<em class="block text-sm mt-2">{{_('Global import rules')}} <i data-for="help_global_import_rules" data-request="help" data-what="help"></i></em>
+</div>
+<form method="post" class="js js-submit js-tabs js-import" action="{{request.path}}" data-event="click" data-importzoneid="import-list" data-toggle=true  data-textimport="{{_('selected to import')}}" data-toggledisable=true data-toggleshared=true enctype=multipart/form-data>
+    <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}">
+      {% for type_tab,formdata in formdatas.items() %}
+    <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if selected_type == type_tab }}"><legend class="text-center tab-control title-nav"  data-what="{{type_tab}}" >{{formdata.title}} </legend>
+      <div class="tab-content {{'pt-8' if selected_type==None}}" id="{{type_tab}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="{{'help_'+action+'_'+type_tab}}" data-request="help" data-what="help"></i></em>
+      <div data-shared="import-files" data-values="{{formdata.browse_label}}|{{formdata.browse}}|{{formdata.textdrop}}" data-replaces="#browse-replace|browse|textdrop" data-browse="{{formdata.browse}}"></div>{{make_part_form(type_tab)}}
+    </div></fieldset>{%-endfor-%}
+    <!--files to import -->
+    {%- set name="source" -%}
+    <div id="shared" class="hide w-full">
+      <div id="import-files" class="hide w-full">
+      <div class="form-box js js-accordion" data-detail="[data-summary]"><div class="flex flex-row">
+          {%- set data ='{"tree":"commonserver","droptarget":"file_to_load"}' -%}{%- set dataicon = '{"image": "img","document": "doc"}' -%}
+          {%- for opt in [{"name":"myfiles","label":_("Upload or select from my files"),"help":"help_import_myfiles"},{"name":"server","label":_("Choose a folder or zip file on the server"),"help":"help_import_server","data":"  data-request=commonserver data-url=gui/common/ServerFolderSelectJSON data-where=#import-server  data-icons="+dataicon+" data-selectors="+ data +" data-target=unique "}] -%}
+     <div class="first:rounded-l-md last:rounded-r-md px-4 py-2 w-auto bg-stone-100 mr-0.5 font-normal" data-summary="#label_{{name+'_'+opt.name}}" data-content="#{{name+'_'+opt.name}}" {{opt.data if 'data' in opt.keys()}}><div id="label_{{name+'_'+opt.name}}">{{opt.label}}<i  data-for="{{opt.help}}" data-request="help"></i></div></div>
+      {%- endfor -%}</div>
+      <!-- from myfiles -->
+    <div class="form-box hide" id="{{name}}_myfiles"><div class="label"><span id="browse-replace"></span> by clicking on <i class="icon icon-check"></i><i data-for="help_upload_file" data-request="help"></i></div>
+    {%include('/v2/my_files/_list.html')%}
+      <!--<div id="dirlist" class="w-full " data-ended="{{_('upload')}}" data-browse="directory,file" data-textbrowsedirectory="{{_('Browse directories')}}" data-textbrowsefile="{{_('Browse files')}}" data-textdrop="{{_('or Drop Files or Directories Here')}}" data-label="{{_('My Files')}}" data-upload-label="{{_('Add entire folder(s) or compressed folder(s)')}}"></div>-->
+      </div>
+        <!-- from server -->
+        <div class="form-box hide" id="{{name}}_server">
+          <div >
+            <div id="import-server"></div>
             </div>
-<div class="form-box md:basis-1/3"><div><label for="file_to_load">{{_('File to import')}}<i data-for="help_import_options" data-request="help"></i></label><ul id="results" class="displayresults"></ul><input type="hidden" id="file_to_load" name="file_to_load" class="form-input" value="{{ file_to_load }}" required >{%include('/v2/jobs/_to_import_summary.html')%}
-<div class="form-box"  id="import_options">{%include('/v2/jobs/_import_options.html')%}</div>
-</div>
-
-</div>
-          </div>  <div class="form-box md:basis-1/3" id="import_options">{%include('/v2/jobs/_import_advanced_options.html')%}</div>
-<div class="flex justify-end">
-        <div class="form-box ">
-            <input type="hidden" name="starttask" value="Y">
-            <button type="submit" id="import" disabled class="button is-primary hide">{{_('Import')}}
-            </button>
-        </div></div>
-      </form></div>
-<!--
-  <div class="panel panel-default" style="margin: 20px 5px">
-    <div class="panel-heading">
-      <h3 class="panel-title">Image Only import </h3>
-    </div>
-    <div class="panel-body">
-      If you have only image and no data file you can use the simple import here.
-      <div class="col-sm-8 col-sm-offset-2">
-        <a href="/Job/Create/SimpleImport?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start
-          Images only</a>
-      </div>
-    </div>
+          <em class="blockquote text-sm">{{_('Contact the')}} <a href="mailto:{{prjmanagermailto}}" class="text-secondblue-600">{{_('project manager')}}</a> {{_('to know where and how to upload your data.')}}
+            {{_('Once the import is complete, all data folders/files can be safely erased on the server.')}}</em>
+        </div></div></div>
+        <div id="import_taxo-mapping">
+        {%include('/v2/taxonomy/_import_taxo_mapping.html')%}
+        </div>
+        </div>
+    <!-- end files to import -->
+    <div id="import-list"><input type="hidden" name="file_to_load" id="file_to_load"></div>
   </div>
-
-
-  <div class="panel panel-default" style="margin: 20px 5px">
-    <div class="panel-heading">
-      <h3 class="panel-title">Re-import and Update Metadata</h3>
-    </div>
-    <div class="panel-body">
-      If you have already loaded your images and you want update your metadata.
-      <div class="col-sm-8 col-sm-offset-2">
-        <a href="/Job/Create/ImportUpdate?p={{ g.prjprojid }}" class="btn btn-lg btn-block btn-primary">Start
-          re-import TSV files to update metadata and data</a>
-      </div>
-    </div>
-  </div>-->
-{% endblock %}
+      <div class="form-box mb-8 w-auto float-left clear-right">
+          <button type="submit" class="button is-primary hide">{{_('Start Task')}}</button>  <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
+            </div>
+        </form>
+        </div>
+  {% endblock %}
