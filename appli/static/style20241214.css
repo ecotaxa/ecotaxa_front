@@ -162,6 +162,14 @@ code {
 	text-decoration: none;
 	font-size: 100%;
 }
+#column-right .simsrch {
+	position: absolute;
+	top: 0px;
+	right: 2px;
+	color: #999;
+	text-decoration: none;
+	font-size: 100%;
+}
 #column-right .ddet:hover {
 	color: #428bca;
 }
@@ -352,16 +360,20 @@ textarea.parsley-error {
 }
 
 td.unsupervisedsearch-info {
-    display: table-cell;
+    /*display: table-cell;*/
 }
 td.unsupervisedsearch-info span {
-    display: table-cell;
+    /*display: table-cell;*/
 }
 td.unsupervisedsearch-info div {
-    display: table-cell;
+    /*display: table-cell;*/
 }
-
-
+td.unsupervisedsearch-info div {
+    /*display: table-cell;*/
+}
+.unsupervisedsearch-info .counterarea {
+	float:right;
+}
 
 td.unsupervisedsearch-info img {
     display: none;

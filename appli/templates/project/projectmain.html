@@ -227,8 +227,8 @@
               <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Other filters</a>
             </li>
             <li role="presentation">
-              <a href="#TabC" aria-controls="profile" role="tab" data-toggle="tab">SS filters
-                <span title="Taxo filter help" class="glyphicon glyphicon-info-sign" style="color: black"
+              <a href="#TabC" aria-controls="profile" role="tab" data-toggle="tab">Similarity
+                <span title="Similarity searches help" class="glyphicon glyphicon-info-sign" style="color: black"
                       onclick="DispUnsupervisedSearchHelp()"></span>
               </a>
             </li>
@@ -306,18 +306,19 @@
             </div>
             {# SimSearch and associated Filters #}
             <div role="tabpanel" class="tab-pane" id="TabC">
-              <div id="TabCInner" style="width: 240px;">
+              <div id="TabCInner" style="width: 255px;">
                 {{ leftc|safe }}
                 <div id='divssclassiftab' style="width: 255px;overflow-y:auto;">
                 <div id="listunsupervisedsearch"> <!-- categtree -->
                   <!-- content from XHR call, same as refresh -->
-                  Start searching by clicking on the loop on photos.
+                  Click an image magnifying glass to add a search result here.
                 </div>
                 <div style="margin-top: 3px;">
                   <!-- copied from RefreshClassifTab -->
-                  <a href="javascript:DeleteUnsupervisedSearch();" class="btn btn-primary btn-xs" style="width: 45%;"
-                     >Del Unsupervised Search<span
-                      class="glyphicon glyphicon-repeat"></span></a>
+                  <a href="javascript:DeleteAllUnsupervisedSearches();" class="pull-right label label-default" style="width: 45%;font-size: 90%"
+                     >Clear All
+                  </a>
+<!--<a class="pull-right label label-default" style="padding: 1px 3px 3px 3px; margin-top: 5px;font-size: 90%;" href="#" onclick="ClearDates();return false;">Clear</a>-->
                 </div>
               </div>
               </div>
@@ -342,14 +343,14 @@
             text-decoration: underline;
             color: #00c;
         }
-        .ddsim {
-            text-align: left;
-            font-size: 10px;
-            margin-top: -3px;
-            margin-bottom: -1px;
-            text-decoration: underline;
-            color: #00c;
-        }
+        /*.ddsim {*/
+        /*    text-align: left;*/
+        /*    font-size: 10px;*/
+        /*    margin-top: -3px;*/
+        /*    margin-bottom: -1px;*/
+        /*    text-decoration: underline;*/
+        /*    color: #00c;*/
+        /*}*/
 
         .ddets .ddsims {
             cursor: pointer;
@@ -751,8 +752,8 @@
           //return false;
       }
 
-      function DeleteUnsupervisedSearch(){
-          $('#listunsupervisedsearch').html("Start searching by clicking on the loop on photos");
+      function DeleteAllUnsupervisedSearches(){
+          $('#listunsupervisedsearch').html("Click an image magnifying glass to add a search result here.");
       }
 
       function removeOneSimSearch(elem){
@@ -774,8 +775,8 @@
             }
             // Add a row with seed_object_id
          var newSS = $('<tr><td id="ss-' + seed_object_id + '"  data-seed="' + seed_object_id + '" \
-                class="ui-droppable taxodrop unsupervisedsearch-info" style="margin-left: 1.0em"\
-                data-tooltipimage="'+ datatooltipimage + '" width="240px" >\n\
+                class="unsupervisedsearch-info" style="margin-left: 1.0em; width: 255px"\
+                data-tooltipimage="'+ datatooltipimage + '>\n\
                 <img src="'+ datatooltipimage + '" alt="Useless if image present."/>\n\
                 <span>\n\
                 SS ' + seed_object_id + ' ' + cat_name + '\n\
@@ -783,8 +784,8 @@
                 <div class="counterarea">\n\
                 <span class="counter label label-success">1</span>\n\
                 <span class="counternotv label" style="background-color:purple">99</span>\n\
-                </div>\n\
                 <span class="glyphicon glyphicon-remove" onclick="removeOneSimSearch(this)">\n\
+                </div>\n\
                 </td></tr>');
 //                newSS.attr('data-tooltipimage', datatooltipimage);
 // tooltipimage est inutile !
@@ -1081,8 +1082,8 @@
               $("#PopupDetails .modal-content").load(url);
           });
     
-          $('.ddsim').click(function (e) {
-              console.log("Please do a similiraty search from this photo")
+          $('.simsrch').click(function (e) {
+              console.log("Similarity search from this photo")
               obj = find_object(e.target)
       seed_object_id = $(obj).find("img").attr("id")
       cat_name = $(obj).find("span.cat_name").text()
