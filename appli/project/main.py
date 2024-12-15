@@ -592,19 +592,20 @@ def LoadRightPane():
     seed_object_id: str = gvp("seed_object_id")
     if seed_object_id:
         # User clicked on the magnifying glass, do the search
-        seed_object_id_i = int(seed_object_id[1:])
-        filters = build_filters_from_posted(False)
-        with ApiClient(ObjectsApi, request) as api:
-            try:
-                rsp: SimilaritySearchRsp = api.get_object_set_similarity_search(project_id=int(PrjId),
-                                                                                object_id=seed_object_id_i,
-                                                                                project_filters=filters)
-            except ApiException as ae:
-                if ae.status == 404:
-                    return "Invalid project"
-                elif ae.status in (401, 403):
-                    return "Access Denied"
-        print(str(rsp.neighbor_ids))
+        pass
+        # seed_object_id_i = int(seed_object_id[1:])
+        # filters = build_filters_from_posted(False)
+        # with ApiClient(ObjectsApi, request) as api:
+        #     try:
+        #         rsp: SimilaritySearchRsp = api.get_object_set_similarity_search(project_id=int(PrjId),
+        #                                                                         object_id=seed_object_id_i,
+        #                                                                         project_filters=filters)
+        #     except ApiException as ae:
+        #         if ae.status == 404:
+        #             return "Invalid project"
+        #         elif ae.status in (401, 403):
+        #             return "Access Denied"
+        # print(str(rsp.neighbor_ids))
     return LoadRightPaneForProj(int(PrjId), False, False)
 
 
@@ -923,8 +924,8 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         txt += """<div class='subimg status-{0}' {1}>
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
-<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span></div>
-<div class='simsrch'><span title='Search similar objects' class='ddsims'><span class='glyphicon glyphicon-search'></span>{4} {5}</div></td>""".format(
+<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span>{4} {5}</div>
+<div class='simsrch'><span title='Search similar objects' class='ddsims'><span class='glyphicon glyphicon-search'></span></div></td>""".format(
             ClassifQual.get(dtl["obj.classif_qual"], "unknown"),
             popattribute,
             name_chunk,
