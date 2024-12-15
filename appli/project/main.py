@@ -26,7 +26,7 @@ from appli.search.leftfilters import getcommonfilters
 
 ######################################################################################################################
 from appli.utils import ApiClient, format_date_time, ScaleForDisplay, DecodeEqualList
-from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py import ApiException, SimilaritySearchRsp
 from to_back.ecotaxa_cli_py.api import (
     ProjectsApi,
     ObjectsApi,
@@ -85,7 +85,7 @@ def GetFieldListFromModel(
     return ret
 
 
-# Contient la liste des filtres & parametres de cet écran avec les valeurs par défaut
+# Contient la liste des filtres & paramètres de cet écran avec les valeurs par défaut
 # noinspection SpellCheckingInspection
 FilterList: Dict[str, str] = {
     "MapN": "",
@@ -119,7 +119,6 @@ FilterList: Dict[str, str] = {
     "magenabled": "0",
     "popupenabled": "0",
     "seed_object_id": "",
-    "seed_object_ids": "",
 }
 FilterListAutoSave = (
     "statusfilter",
@@ -591,12 +590,21 @@ def FormatNameForVignetteDisplay(
 def LoadRightPane():
     PrjId: str = gvp("projid")
     seed_object_id: str = gvp("seed_object_id")
-    print(request)
     if seed_object_id:
-        print(" Here we want to do a similiraty search !")
-        import logging
-        logger = logging.getLogger()
-        logger.info(" Here we want to do a similiraty search logger ! !")
+        # User clicked on the magnifying glass, do the search
+        seed_object_id_i = int(seed_object_id[1:])
+        filters = build_filters_from_posted(False)
+        with ApiClient(ObjectsApi, request) as api:
+            try:
+                rsp: SimilaritySearchRsp = api.get_object_set_similarity_search(project_id=int(PrjId),
+                                                                                object_id=seed_object_id_i,
+                                                                                project_filters=filters)
+            except ApiException as ae:
+                if ae.status == 404:
+                    return "Invalid project"
+                elif ae.status in (401, 403):
+                    return "Access Denied"
+        print(str(rsp.neighbor_ids))
     return LoadRightPaneForProj(int(PrjId), False, False)
 
 
@@ -621,14 +629,8 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     g.PublicViewMode = proj.highest_right == ""
     user_can_modify = proj.highest_right in ("Manage", "Annotate") and not read_only
 
-    # récupération des parametres d'affichage
-    filtres = {}
-    for col in sharedfilter.FilterList:
-        filtres[col] = gvp(col, "")
-    if (
-        g.PublicViewMode or read_only
-    ):  # Si c'est une lecture publique, ou dans la page Explore
-        filtres["statusfilter"] = "V"  # Ne voir que les objets validés
+    filtres = build_filters_from_posted(
+        g.PublicViewMode or read_only)  # Si c'est une lecture publique, ou dans la page Explore
 
     pageoffset = int(gvp("pageoffset", "0"))
     sortby = Filt["sortby"]
@@ -642,7 +644,6 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     popup_enabled = Filt["popupenabled"] == "1"
 
     seed_object_id = Filt["seed_object_id"]
-    seed_object_ids = Filt["seed_object_ids"]
 
     # Fit to page envoie un ipp de 0 donc on se comporte comme du 200 d'un point de vue DB
     ippdb = images_per_page if images_per_page > 0 else 200
@@ -738,7 +739,6 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                 order_field=sort_col_signed,
                 window_size=ippdb,
                 window_start=pageoffset * ippdb,
-                sim_search=(seed_object_id != "" or seed_object_ids != ""),
             )
             pagecount = math.ceil(objs.total_ids / ippdb)
             if pageoffset < pagecount:
@@ -924,7 +924,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
 <div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span></div>
-<div class='simsrch'><span title='Similarity Search' class='ddsims'><span class='glyphicon glyphicon-search'></span>{4} {5}</div></td>""".format(
+<div class='simsrch'><span title='Search similar objects' class='ddsims'><span class='glyphicon glyphicon-search'></span>{4} {5}</div></td>""".format(
             ClassifQual.get(dtl["obj.classif_qual"], "unknown"),
             popattribute,
             name_chunk,
@@ -965,6 +965,16 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     # Add stats-rendering HTML
     html.append(ClassificationPageStats.render(filtres, PrjId))
     return "\n".join(html)
+
+
+def build_filters_from_posted(read_only: bool):
+    # récupération des paramètres d'affichage
+    filtres = {}
+    for col in sharedfilter.FilterList:
+        filtres[col] = gvp(col, "")
+    if read_only:
+        filtres["statusfilter"] = "V"  # Ne voir que les objets validés
+    return filtres
 
 
 ######################################################################################################################
