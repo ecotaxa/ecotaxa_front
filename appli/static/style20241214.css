@@ -164,14 +164,19 @@ code {
 }
 #column-right .simsrch {
 	position: absolute;
-	top: 0px;
+	top: 0;
 	right: 2px;
 	color: #999;
 	text-decoration: none;
 	font-size: 100%;
+	opacity: 20%;
 }
 #column-right .ddet:hover {
 	color: #428bca;
+}
+#column-right .simsrch:hover {
+	color: #428bca;
+	opacity: 100%;
 }
 
 .classiftab td {

@@ -226,12 +226,13 @@
             <li role="presentation">
               <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Other filters</a>
             </li>
-            <li role="presentation">
-              <a href="#TabC" aria-controls="profile" role="tab" data-toggle="tab">Similarity
-                <span title="Similarity searches help" class="glyphicon glyphicon-info-sign" style="color: black"
-                      onclick="DispUnsupervisedSearchHelp()"></span>
-              </a>
-            </li>
+<!--            Move to sort-->
+<!--            <li role="presentation">-->
+<!--              <a href="#TabC" aria-controls="profile" role="tab" data-toggle="tab">Similarity-->
+<!--                <span title="Similarity searches help" class="glyphicon glyphicon-info-sign" style="color: black"-->
+<!--                      onclick="DispUnsupervisedSearchHelp()"></span>-->
+<!--              </a>-->
+<!--            </li>-->
           </ul>
           <div class="tab-content">
             <!-- Tab panes -->
@@ -352,10 +353,9 @@
         /*    color: #00c;*/
         /*}*/
 
-        .ddets .ddsims {
+        .ddets .simsrchs {
             cursor: pointer;
         }
-
 
         .categexpander {
             cursor: pointer;
@@ -790,6 +790,14 @@
             AddClickBehaviorOnSimSearch();
       }
 
+      function CreateSimilarityOrder(seed_object_id, datatooltipimage, cat_name, nb_sims){
+          // Add an entry in sort order select, to view images like selected ones
+          const newSort = $('<option value="ss-' + seed_object_id + '">Similar to ' + seed_object_id
+              + ' (' + cat_name + ')</option>');
+          $('#sortby').append(newSort);
+            AddClickBehaviorOnSimSearch();
+      }
+
 
 
       function gotopage(nopage) {
@@ -1080,6 +1088,7 @@
           });
     
           $('.simsrch').click(function (e) {
+              e.stopPropagation();
               const obj = find_object(e.target);
               seed_object_id = $(obj).find("img").attr("id")
               const cat_name = $(obj).find("span.cat_name").text();
@@ -1099,7 +1108,7 @@
                       } else {
                           $("#PendingChanges2").html("")
                           const nb_sims = rsp.neighbor_ids.length;
-                          CreateSimilaritySearch(seed_object_id, datatooltipimage, cat_name, nb_sims)
+                          CreateSimilarityOrder(seed_object_id, datatooltipimage, cat_name, nb_sims)
                       }
                   },
                   error: function (jqXHR, textStatus, errorThrown) {

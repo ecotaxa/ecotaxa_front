@@ -731,6 +731,10 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                 sort_col_signed = (
                     "-" if sortorder.lower() == "desc" else ""
                 ) + api_sortby
+            else:
+                if sortby.startswith("ss-"):
+                    seed_object_id = sortby[3:]
+                    filtres["seed_object_id"] = seed_object_id
         needed_fields = ",".join(api_cols)
         while True:
             objs: ObjectSetQueryRsp = api.get_object_set(
@@ -925,7 +929,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
 <div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span>{4} {5}</div>
-<div class='simsrch'><span title='Search similar objects' class='ddsims'><span class='glyphicon glyphicon-search'></span></div></td>""".format(
+<div class='simsrch'><span title='Search similar objects' class='simsrchs'><span class='glyphicon glyphicon-screenshot'></span></div></td>""".format(
             ClassifQual.get(dtl["obj.classif_qual"], "unknown"),
             popattribute,
             name_chunk,
