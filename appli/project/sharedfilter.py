@@ -8,7 +8,7 @@ FilterList = ("MapN", "MapW", "MapE", "MapS",
               'freetxt', 'freetxtval', 'filt_annot',
               'freenum', 'freenumst', 'freenumend',
               "statusfilter",
-              'taxo', 'taxochild', 'seed_object_id')
+              'taxo', 'taxochild')
 
 
 def GetTextFilter(filtres):

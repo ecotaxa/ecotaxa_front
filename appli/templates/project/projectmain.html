@@ -795,7 +795,6 @@
           const newSort = $('<option value="ss-' + seed_object_id + '">Similar to ' + seed_object_id
               + ' (' + cat_name + ')</option>');
           $('#sortby').append(newSort);
-            AddClickBehaviorOnSimSearch();
       }
 
 
@@ -820,6 +819,7 @@
           var PreviousSort = $('#sortby').val();
           {# Si on choisit un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields #}
           $('#sortby').change(function () {
+              // TODO not for ss
               $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
               $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
               PreviousSort = $(this).val();
@@ -1094,9 +1094,10 @@
               const cat_name = $(obj).find("span.cat_name").text();
               const datatooltipimage = $("img#" + seed_object_id).attr("src");
               $("#PendingChanges2").html("Searching similar images...")
+              // Probe usability of simsearch in the project. We assume it's all or nothing for a given project.
               $.ajax({
                   type: "POST",
-                  url: "/api/object_set/" + $("#projid").val() + "/similarity_search/" + seed_object_id.substring(1),
+                  url: "/api/object_set/" + $("#projid").val() + "/similarity_search/" + seed_object_id.substring(1)+ "?size=0",
                   data: JSON.stringify({"filters": {}}),
                   contentType: "application/json; charset=utf-8",
                   dataType: "json",

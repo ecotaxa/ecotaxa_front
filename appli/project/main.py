@@ -118,7 +118,6 @@ FilterList: Dict[str, str] = {
     "zoom": "100",
     "magenabled": "0",
     "popupenabled": "0",
-    "seed_object_id": "",
 }
 FilterListAutoSave = (
     "statusfilter",
@@ -215,6 +214,9 @@ def _set_prefs_from_filters(filters, prj_id):
     save_all = gvp("saveinprofile") == "Y"
     for a_filter, val in filters.items():
         if save_all or (a_filter in FilterListAutoSave):
+            # Don't persist simsearch order
+            if a_filter == "sortby" and val.startswith("ss-"):
+                continue
             if user_vals.get(a_filter) != val:
                 prefs_update[a_filter] = val
     if len(prefs_update) > 0:
@@ -367,6 +369,10 @@ def indexPrj(PrjId):
     # All displayable fields are sortable
     for k, v in displayable_fields.items():
         sortlist[k] = v
+    # Add implied simsearch field
+    sortby = data["sortby"]
+    if sortby.startswith("ss-"):
+        sortlist[sortby] = "Similar to "+sortby[3:]
 
     statuslist = collections.OrderedDict({"": "All"})
     statuslist.update(STATUSES)
@@ -589,23 +595,6 @@ def FormatNameForVignetteDisplay(
 @app.route("/prj/LoadRightPane", methods=["GET", "POST"])
 def LoadRightPane():
     PrjId: str = gvp("projid")
-    seed_object_id: str = gvp("seed_object_id")
-    if seed_object_id:
-        # User clicked on the magnifying glass, do the search
-        pass
-        # seed_object_id_i = int(seed_object_id[1:])
-        # filters = build_filters_from_posted(False)
-        # with ApiClient(ObjectsApi, request) as api:
-        #     try:
-        #         rsp: SimilaritySearchRsp = api.get_object_set_similarity_search(project_id=int(PrjId),
-        #                                                                         object_id=seed_object_id_i,
-        #                                                                         project_filters=filters)
-        #     except ApiException as ae:
-        #         if ae.status == 404:
-        #             return "Invalid project"
-        #         elif ae.status in (401, 403):
-        #             return "Access Denied"
-        # print(str(rsp.neighbor_ids))
     return LoadRightPaneForProj(int(PrjId), False, False)
 
 
@@ -643,8 +632,6 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     images_per_page = int(Filt["ipp"])
     zoom = int(Filt["zoom"])
     popup_enabled = Filt["popupenabled"] == "1"
-
-    seed_object_id = Filt["seed_object_id"]
 
     # Fit to page envoie un ipp de 0 donc on se comporte comme du 200 d'un point de vue DB
     ippdb = images_per_page if images_per_page > 0 else 200
