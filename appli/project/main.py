@@ -26,7 +26,7 @@ from appli.search.leftfilters import getcommonfilters
 
 ######################################################################################################################
 from appli.utils import ApiClient, format_date_time, ScaleForDisplay, DecodeEqualList
-from to_back.ecotaxa_cli_py import ApiException, SimilaritySearchRsp
+from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (
     ProjectsApi,
     ObjectsApi,
@@ -619,8 +619,14 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     g.PublicViewMode = proj.highest_right == ""
     user_can_modify = proj.highest_right in ("Manage", "Annotate") and not read_only
 
-    filtres = build_filters_from_posted(
-        g.PublicViewMode or read_only)  # Si c'est une lecture publique, ou dans la page Explore
+    # récupération des parametres d'affichage
+    filtres = {}
+    for col in sharedfilter.FilterList:
+        filtres[col] = gvp(col, "")
+    if (
+        g.PublicViewMode or read_only
+    ):  # Si c'est une lecture publique, ou dans la page Explore
+        filtres["statusfilter"] = "V"  # Ne voir que les objets validés
 
     pageoffset = int(gvp("pageoffset", "0"))
     sortby = Filt["sortby"]
@@ -957,16 +963,6 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     # Add stats-rendering HTML
     html.append(ClassificationPageStats.render(filtres, PrjId))
     return "\n".join(html)
-
-
-def build_filters_from_posted(read_only: bool):
-    # récupération des paramètres d'affichage
-    filtres = {}
-    for col in sharedfilter.FilterList:
-        filtres[col] = gvp(col, "")
-    if read_only:
-        filtres["statusfilter"] = "V"  # Ne voir que les objets validés
-    return filtres
 
 
 ######################################################################################################################

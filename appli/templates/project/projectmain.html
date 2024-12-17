@@ -226,13 +226,6 @@
             <li role="presentation">
               <a href="#TabB" aria-controls="profile" role="tab" data-toggle="tab">Other filters</a>
             </li>
-<!--            Move to sort-->
-<!--            <li role="presentation">-->
-<!--              <a href="#TabC" aria-controls="profile" role="tab" data-toggle="tab">Similarity-->
-<!--                <span title="Similarity searches help" class="glyphicon glyphicon-info-sign" style="color: black"-->
-<!--                      onclick="DispUnsupervisedSearchHelp()"></span>-->
-<!--              </a>-->
-<!--            </li>-->
           </ul>
           <div class="tab-content">
             <!-- Tab panes -->
@@ -344,14 +337,6 @@
             text-decoration: underline;
             color: #00c;
         }
-        /*.ddsim {*/
-        /*    text-align: left;*/
-        /*    font-size: 10px;*/
-        /*    margin-top: -3px;*/
-        /*    margin-bottom: -1px;*/
-        /*    text-decoration: underline;*/
-        /*    color: #00c;*/
-        /*}*/
 
         .ddets .simsrchs {
             cursor: pointer;
@@ -473,7 +458,7 @@
               LoadRightPane('mail');
       });
 
-      function LoadRightPane(NoAjax, SaveInProfile, seed_object_id) {
+      function LoadRightPane(NoAjax, SaveInProfile) {
           document.activeElement.blur();
           if (Object.keys(PendingChanges).length > 0)
               if (confirm("Some changes are pending, if you continue they will be discarded !\n\nWould you still like to continue ?") == false)
@@ -560,8 +545,6 @@
               PrevTxtFilter = TxtFilter;
           }
           req['pageoffset'] = jqpageoffset.val();
-          if (seed_object_id !== undefined)
-              req['seed_object_id'] = seed_object_id
           var urlparam = {}, url, k;
           if ((NoAjax === 'mail') || (NoAjax === 'mailN')) {
               delete req["resultwidth"];
