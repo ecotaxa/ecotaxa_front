@@ -215,7 +215,7 @@ def _set_prefs_from_filters(filters, prj_id):
     for a_filter, val in filters.items():
         if save_all or (a_filter in FilterListAutoSave):
             # Don't persist simsearch order
-            if a_filter == "sortby" and val.startswith("ss-"):
+            if a_filter == "sortby" and val.startswith("ss-I"):
                 continue
             if user_vals.get(a_filter) != val:
                 prefs_update[a_filter] = val
@@ -371,7 +371,7 @@ def indexPrj(PrjId):
         sortlist[k] = v
     # Add implied simsearch field
     sortby = data["sortby"]
-    if sortby.startswith("ss-"):
+    if sortby.startswith("ss-I"):
         sortlist[sortby] = "Similar to "+sortby[3:]
 
     statuslist = collections.OrderedDict({"": "All"})
@@ -725,9 +725,8 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                     "-" if sortorder.lower() == "desc" else ""
                 ) + api_sortby
             else:
-                if sortby.startswith("ss-"):
-                    seed_object_id = sortby[3:]
-                    filtres["seed_object_id"] = seed_object_id
+                if sortby.startswith("ss-I"):
+                    sort_col_signed = sortby
         needed_fields = ",".join(api_cols)
         while True:
             objs: ObjectSetQueryRsp = api.get_object_set(

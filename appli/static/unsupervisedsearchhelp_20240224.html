@@ -1,23 +1,34 @@
 <style>
-  #PopupDetails .modal-dialog {width: 1100px;}
-  #PopupDetails .modal-content {width: 1100px;}
+    #PopupDetails .modal-dialog {
+        width: 1100px;
+    }
+
+    #PopupDetails .modal-content {
+        width: 1100px;
+    }
 </style>
 <div style='margin:10px;font-size: large;'>
-<span style="font-weight: bold;">Similarity Search Help</span>
+  <span style="font-weight: bold;">Similarity Search Help</span>
   <hr>
-Similarity search function will find, in EcoTaxa, objects which are visually similar to a given (called 'seed') one.
-<br>
-This tab contains similarity search results.
-<br>You can:
-<ul>
-<li>Add a search by clicking on the magnifying glass of any image.
-</li>
-<li>Remove a search result with the black cross on the right.
-</li>
-<li>Remove all results with 'Clear All' button.
-</li>
-</ul>
-<br><button type="button" class="btn btn-default " onclick="$('#PopupDetails').modal('hide');">Close</button>
-<br>
+  Similarity search function will find, in EcoTaxa, objects which are visually similar to a given (called 'seed') one.
+  <br>
+  Each search result materializes as an added <i>sort order</i> <span class="glyphicon glyphicon-sort"></span> option. When this option is selected, visually similar objects will be displayed near the seed.
+  <br>
+  <br>Notes:
+  <ul>
+    <li>The added sort orders are not sensitive to sort direction <span class="glyphicon glyphicon-sort-by-attributes"></span>.
+    </li>
+    <li>Searches are not saved in your preferences, they vanish if the page is reloaded.
+    </li>
+    <li>Like any other sort order, similarity search can be sent via 'Share Page' option.
+    </li>
+    <li>If not filtered out, the 'seed' appears as the first (top left) image of the result.
+    </li>
+    <li>If filtered, the 'seed' does not appear in the result, but it can be useful in some situations.
+    </li>
+  </ul>
+  <br>
+  <button type="button" class="btn btn-default " onclick="$('#PopupDetails').modal('hide');">Close</button>
+  <br>
 </div>
 
