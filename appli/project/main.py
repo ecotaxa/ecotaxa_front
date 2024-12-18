@@ -85,7 +85,7 @@ def GetFieldListFromModel(
     return ret
 
 
-# Contient la liste des filtres & parametres de cet écran avec les valeurs par défaut
+# Contient la liste des filtres & paramètres de cet écran avec les valeurs par défaut
 # noinspection SpellCheckingInspection
 FilterList: Dict[str, str] = {
     "MapN": "",
@@ -214,6 +214,9 @@ def _set_prefs_from_filters(filters, prj_id):
     save_all = gvp("saveinprofile") == "Y"
     for a_filter, val in filters.items():
         if save_all or (a_filter in FilterListAutoSave):
+            # Don't persist simsearch order
+            if a_filter == "sortby" and val.startswith("ss-I"):
+                continue
             if user_vals.get(a_filter) != val:
                 prefs_update[a_filter] = val
     if len(prefs_update) > 0:
@@ -366,6 +369,10 @@ def indexPrj(PrjId):
     # All displayable fields are sortable
     for k, v in displayable_fields.items():
         sortlist[k] = v
+    # Add implied simsearch field
+    sortby = data["sortby"]
+    if sortby.startswith("ss-I"):
+        sortlist[sortby] = "Similar to "+sortby[3:]
 
     statuslist = collections.OrderedDict({"": "All"})
     statuslist.update(STATUSES)
@@ -717,6 +724,9 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                 sort_col_signed = (
                     "-" if sortorder.lower() == "desc" else ""
                 ) + api_sortby
+            else:
+                if sortby.startswith("ss-I"):
+                    sort_col_signed = sortby
         needed_fields = ",".join(api_cols)
         while True:
             objs: ObjectSetQueryRsp = api.get_object_set(
@@ -910,7 +920,8 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         txt += """<div class='subimg status-{0}' {1}>
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
-<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div></td>""".format(
+<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span>{4} {5}</div>
+<div class='simsrch'><span title='Search similar objects' class='simsrchs'><span class='glyphicon glyphicon-screenshot'></span></div></td>""".format(
             ClassifQual.get(dtl["obj.classif_qual"], "unknown"),
             popattribute,
             name_chunk,
