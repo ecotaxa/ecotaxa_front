@@ -9,11 +9,14 @@
 <li>{{_('times are in format <strong>hh:mm:ss</strong>')}}</li></ul></div></details>
   <details id="help_export_general"><summary>{{_('General Export')}}</summary>
     <p> {{_('Configurable objects export')}}
-    <ul><li id="help_export_only_annotations"><strong>Only save objects' last annotation data</strong><br>{{_('If chosen will not take into account other parameters, except out to ftp choice.')}}</li>
-      <li id="help_export_with_images"><strong>Images</strong><br>{{_('Add in ZIP first (i.e. visible) image, all images, or no image.⚠️ "all" means maybe several lines per object in TSVs.')}}</li></ul></p>
+    <ul>
+      <li id="help_export_with_images"><strong>Images</strong><br>{{_('Add in ZIP first (i.e. visible) image, all images, or no image.⚠️ "all" means maybe several lines per object in TSVs.')}}</li></ul>
+    </p>
+      {%-if target_type=="collection"-%}<p>{{_('Collection general export produces a single TSV file.')}}</p>{%-endif-%}
       </details>
       <details id="help_export_backup"><summary>{{_('Backup Export')}}</summary>
         <p>{{_('Backup export, for restoring or archiving.')}}<br>{{_('All images, split by sample, add an EcoTaxa-compatible second line with types')}}</p>
+        {%-if target_type=="collection"-%}<em>{{_('Collection backup export produces a single zip file containing each project backup export zip file belonging to the collection.')}}</em>{%-endif-%}
         </details>
           <details id="help_export_summary"><summary>{{_('Summary Export')}}</summary><div>
             <p>{{_('Synthetic taxon-oriented export')}}<br>{{('Will produce a tsv file with the following columns:')}}<br><ul><li>project_id</li>
@@ -22,7 +25,7 @@
 <li>annotation_category</li>
 <li>abundance: {{_(' if chosen ')}}</li>
 <li>concentration: {{_(' if chosen ')}}</li>
-<li>biovolume: {{_(' if chosen ')}}</li></ul></p>
+<li>biovolume: {{_(' if chosen ')}}</li></ul></p>{%-if target_type=="collection"-%}<p>{{_('Collection summary export produces a single TSV file.')}}</p>{%-endif-%}
             <ul> <li id="help_export_summary_quantity"><p><strong>{{_('Quantity to compute')}}</strong><br>{{_('Abundance is always possible.')}}</p></li>
               <li><details id="help_export_summary_formulae"><summary>{{_('Formulae')}}</summary><p>
               {{_("Transitory: How to get values from DB free columns. Python syntax, prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are 'total_water_volume', 'subsample_coef' and 'individual_volume' ")}}
@@ -32,5 +35,10 @@
                 individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3</pre></p></details></li>
                 <li id="help_export_summary_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a 0 replacement to _discard_ the present taxon.')}}</li></ul>
               </div></details>
+              <details id="help_export_identification"><summary>{{_('Classification Export')}}</summary>
+                <p>
+                <strong>Only save objects' last classification data</strong></p>
+                    {%-if target_type=="collection"-%}<p>{{_('Collection classification export produces a single TSV file.')}}</p>{%-endif-%}
+                  </details>
 </article>
 {% endblock %}

@@ -16,7 +16,12 @@ import {
   domselectors,
   css
 } from '../modules/modules-config.js';
+import {
+  input_read_only
+} from "../modules/utils.js";
 const dynamics = {};
+//add local selector
+domselectors.memberline = '[data-block="member"]';
 export class ProjectPrivileges {
   //TODO: rewrite to not depend on DOM select
   options;
@@ -93,7 +98,7 @@ export class ProjectPrivileges {
   }
 
   newLine(ret = false, check = 0, replace = false) {
-    const lines = this.linecontainer.children;
+    const lines = this.linecontainer.querySelectorAll(domselectors.memberline);
     let newline;
     if (lines.length && check > 0) newline = this.getLinePrivilege(check);
     if (newline) {
@@ -103,8 +108,8 @@ export class ProjectPrivileges {
     newline = this.linemodel.cloneNode(true);
     newline.classList.remove(css.hide);
     if (newline) {
-      this.linecontainer.append(newline);
       const nn = (this.fieldset.dataset.n) ? parseInt(this.fieldset.dataset.n) + 1 : lines.length;
+      this.linecontainer.append(newline);
       newline = this.clearLine(newline, -1, nn, (this.options.separ ? this.options.separ : null));
       newline.dataset.n = nn;
       this.fieldset.dataset.n = nn;
@@ -160,7 +165,7 @@ export class ProjectPrivileges {
       // clean and reset events
       const els = elem.querySelectorAll('input, select, label, div');
       els.forEach((el) => {
-        el.disabled = false;
+        if (!el.dataset.hasOwnProperty('readnly')) el.disabled = false;
         if (n !== null) { // change names and id when adding a new row - not if clear only
           nn = (nn === null) ? n + 1 : nn;
           el = this.indexElement(el, n, nn);
@@ -360,6 +365,7 @@ export class ProjectPrivileges {
 
       })
     }
+
     member.addEventListener('change', (e) => {
       contact.value = member.value;
       if (parseInt(member.value) > 0 && AlertBox.hasMessage(member)) AlertBox.removeMessage({
@@ -369,13 +375,14 @@ export class ProjectPrivileges {
       });
     })
     privs.forEach((priv) => {
+      if (priv.dataset.hasOwnProperty("readonly")) input_read_only(priv);
       priv.addEventListener('change', (e) => {
         if (priv.checked) lineSettings(priv, contact, delet, false);
       });
 
       if (priv.checked) lineSettings(priv, contact, delet, false);
     })
-
+    if (contact.dataset.hasOwnProperty("readonly")) input_read_only(contact);
     contact.addEventListener('change', (e) => {
       if (contact.checked) {
         delet.disabled = true;

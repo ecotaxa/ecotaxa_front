@@ -42,8 +42,13 @@ def get_back_constants(request, type) -> tuple:
                 consts.profile_token_age,
                 consts.recaptchaid,
             )
+        elif type == "ACCESS":
+            current_app.config["API_" + type + "_CONSTANTS"] = consts.access
         elif type == "LICENSE":
-            current_app.config["API_" + type + "_CONSTANTS"] = consts.license_texts
+            current_app.config["API_" + type + "_CONSTANTS"] = (
+                consts.license_texts,
+                consts.license_restrictions,
+            )
         elif type == "MANAGER":
             current_app.config["API_" + type + "_CONSTANTS"] = consts.app_manager
     return current_app.config["API_" + type + "_CONSTANTS"]

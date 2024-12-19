@@ -1,5 +1,5 @@
 from typing import List
-from flask import flash, request, render_template, redirect, url_for
+from flask import flash, request, render_template, redirect, url_for, make_response
 from flask_login import current_user, login_required, fresh_login_required
 from werkzeug.exceptions import NotFound, Unauthorized, Forbidden
 from appli import app, gvp, gvg
@@ -25,50 +25,34 @@ def gui_collection_noright(collection_id):
 # TODO - fresh_login_required
 @login_required
 def gui_collection_view(collection_id):
-    return None
+    from appli.gui.collection.settings import collection_edit
 
-
-@app.route("/gui/collection/purge/<int:collection_id>", methods=["GET", "POST"])
-# TODO - fresh_login_required
-@login_required
-def gui_collection_purge(collection_id):
-    return render_template(
-        "./v2/collection/purge.html",
-        isadmin=current_user.is_app_admin == True,
-        partial=is_partial_request(request),
-        target_coll=target_coll,
-    )
+    return collection_edit(collection_id)
 
 
 @app.route("/collection/", methods=["GET"])
 @app.route("/gui/collection/", methods=["GET"])
 @login_required
-def gui_collection(listall: bool = False) -> str:
+def gui_collection() -> str:
     partial = False
 
     from appli.gui.collection.collections_list import collections_list_page
 
-    return collections_list_page(listall=listall, partial=partial)
+    return collections_list_page(partial=partial)
 
 
 @app.route("/gui/collectionlist/", methods=["GET"])
 @login_required
 def gui_collections_list() -> str:
     # gzip not really necessary - jsonifiy with separators
-    from flask import make_response
     import json
     from appli.gui.collection.collections_list import collections_list
 
-    listall = gvg("listall", False)
-    if listall == "False" or not listall:
-        listall = False
-    else:
-        listall = True
-    typeimport = gvg("typeimport")
+    project_ids = gvg("project_ids", None)
     gz = gvg("gzip")
     gz = True
     content = json.dumps(
-        collections_list(listall=listall, typeimport=typeimport),
+        collections_list(project_ids),
         separators=[",", ":"],
     ).encode("utf-8")
     encoding = "utf-8"
@@ -93,6 +77,19 @@ def gui_collection_create():
     return collection_create()
 
 
+@app.route("/gui/collection/aggregated", methods=["GET"])
+@login_required
+def gui_collection_simulate():
+    from appli.gui.collection.settings import collection_aggregated
+
+    project_ids = gvg("project_ids")
+
+    content = collection_aggregated(project_ids)
+    import json
+
+    return json.dumps(content)
+
+
 @app.route("/gui/collection/edit/<int:collection_id>", methods=["GET", "POST"])
 # TODO - fresh_login_required
 @login_required
@@ -102,10 +99,31 @@ def gui_collection_edit(collection_id):
     return collection_edit(collection_id)
 
 
-@app.route("/gui/collection/listall/", methods=["GET"])
+@app.route("/gui/collection/<int:collection_id>", methods=["GET"])
+# TODO - fresh_login_required
 @login_required
-def gui_collection_all():
-    return gui_collection(listall=True)
+def gui_collection_classify(collection_id):
+    from appli.gui.collection.settings import collection_classify
+
+    return collection_classify(collection_id)
+
+
+@app.route("/gui/collection/export_darwin_core/<int:collection_id>", methods=["GET"])
+# TODO - fresh_login_required
+@login_required
+def gui_collection_export_darwin_core(collection_id):
+    from appli.gui.collection.settings import collection_export_darwin_core
+
+    return collection_export_darwin_core(collection_id)
+
+
+@app.route("/gui/collection/purge/<int:collection_id>", methods=["GET", "POST"])
+# TODO - fresh_login_required
+@login_required
+def gui_collection_purge(collection_id):
+    from appli.gui.collection.settings import collection_purge
+
+    return collection_purge(collection_id)
 
 
 @app.route("/gui/collection/about/<int:collection_id>", methods=["GET"])

@@ -47,10 +47,10 @@ class ImportJob(Job):
     @classmethod
     def initial_dialog(cls) -> str:
         """In UI/flask, initial load, GET"""
-        projid = int(gvg("projid", "0"))
-        target_proj = cls.get_target_prj(projid, full=True)
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid)
         if target_proj == None:
-            return render_template(cls.NOPROJ_TEMPLATE, projid=projid)
+            return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
             server_path = uapi.get_current_user_prefs(projid, "cwd")
@@ -75,7 +75,7 @@ class ImportJob(Job):
                         "name": "server",
                         "label": _("Choose a folder or zip file on the server"),
                         "help": "help_import_server",
-                        "data": " data-request=commonserver data-url=gui/common/ServerFolderSelectJSON data-where=import-server data-tree=commonserver data-target=unique",
+                        "data": " data-import=commonserver data-url=gui/common/ServerFolderSelectJSON data-where=import-server data-tree=commonserver data-target=unique",
                     }
                 ),
             ],
@@ -103,8 +103,8 @@ class ImportJob(Job):
     @classmethod
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page, POST"""
-        projid = int(gvp("projid", None))
-        target_proj = cls.get_target_prj(projid)
+        projid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid)
         # Save preferences
         server_path = gvp("ServerPath")
 
@@ -154,7 +154,7 @@ class ImportJob(Job):
         """The back-end need some data for proceeding"""
         txt = "<h1>Text File Importation Task</h1>"
         projid = job.params["prj_id"]
-        target_proj = cls.get_target_prj(projid)
+        target_proj = cls.get_target_obj(projid)
 
         # Feed local values
         not_found_taxo = job.question["missing_taxa"]

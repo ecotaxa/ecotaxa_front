@@ -17,13 +17,14 @@ from to_back.ecotaxa_cli_py.models import (
     MinUserModel,
     TaxonModel,
     ProjectTaxoStatsModel,
+    MinimalCollectionBO,
 )
-from appli.gui.commontools import possible_licenses
+from appli.gui.commontools import possible_licenses, possible_access, possible_models
 
 ###############################################common for create && edit  #######################################################################
 
 
-def get_target_prj(prjid, for_managing: bool = False) -> ProjectModel:
+def get_target_prj(prjid: int, for_managing: bool = False, full=True) -> ProjectModel:
     with ApiClient(ProjectsApi, request) as api:
         try:
             target_proj: ProjectModel = api.project_query(
@@ -35,15 +36,32 @@ def get_target_prj(prjid, for_managing: bool = False) -> ProjectModel:
             elif ae.status == 404:
                 flash(py_messages["project404"], "error")
             return None
-    return target_proj
+    if target_proj != None:
+        if full == True:
+            return target_proj
+        return dict(
+            {
+                "title": target_proj.title,
+                "projid": target_proj.projid,
+                "managers": target_proj.managers,
+                "annotators": target_proj.annotators,
+                "viewers": target_proj.viewers,
+                "status": target_proj.status,
+                "license": target_proj.license,
+            }
+        )
+    return None
 
 
-def _possible_models():
-    with ApiClient(MiscApi, request) as api:
-        possibles = api.query_ml_models()
+def _get_prj_collections(prjid: int) -> List[MinimalCollectionBO]:
+    collections = list([])
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            collections: List[MinimalCollectionBO] = api.project_collections(prjid)
+        except ApiException as ae:
+            pass
 
-    scn = {a_model.name: {"name": a_model.name} for a_model in possibles}
-    return scn
+    return collections
 
 
 def _prj_users_list(ids: list) -> dict:
@@ -104,15 +122,17 @@ def prj_create() -> str:
             req = CreateProjectReq(title=title, instrument=instrument)
             rsp: int = api.create_project(req)
         return prj_edit(rsp, new=True)
-    scn = _possible_models()
+    scn = possible_models()
     licenses = possible_licenses()
+    access = possible_access()
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=None,
         members=None,
         new=True,
         scn=scn,
-        possible_licenses=licenses,
+        possible_licenses=licenses[0],
+        possible_access=access,
     )
 
 
@@ -230,7 +250,6 @@ def prj_edit(prjid: int, new: bool = False) -> str:
             do_update = False
 
         # Update on back-end
-
         if do_update:
             try:
                 with ApiClient(ProjectsApi, request) as api:
@@ -261,17 +280,30 @@ def prj_edit(prjid: int, new: bool = False) -> str:
 
     predeftaxo = taxo_with_names(lst)
 
-    scn = _possible_models()
+    scn = possible_models()
 
     # TODO: Cache of course, it's constants!
     licenses = possible_licenses()
+    access = possible_access()
     members_by_right = {
         "Manage": target_proj.managers.copy(),
         "Annotate": target_proj.annotators.copy(),
         "View": target_proj.viewers.copy(),
     }
+    collections = _get_prj_collections(prjid)
     from appli.gui.commontools import crsf_token
 
+    defcols = dict(
+        {
+            "mappingobj": "obj",
+            "mappingsample": "sample",
+            "mappingprocess": "process",
+            "mappingacq": "acquisition",
+        }
+    )
+    freecols = {}
+    for column, prefix in defcols.items():
+        freecols[column] = getattr(target_proj, prefix + "_free_cols")
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=target_proj,
@@ -279,7 +311,10 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         scn=scn,
         crsf_token=crsf_token(),
         predeftaxo=predeftaxo,
-        possible_licenses=licenses,
+        freecols=freecols,
+        possible_licenses=licenses[0],
+        possible_access=access,
+        collections=collections,
         new=new,
         # redir=redir,
     )

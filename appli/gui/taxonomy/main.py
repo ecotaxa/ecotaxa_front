@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from json import JSONEncoder
 from typing import List
-from flask import render_template, json, jsonify, request
+from flask import render_template, json, jsonify, request, make_response
 from flask_login import current_user, login_required
 from appli import app, gvg, gvp
 from appli.utils import ApiClient
@@ -63,3 +63,54 @@ def gui_taxotree_root_json():
             for r in res
         ]
     )
+
+
+@login_required
+@app.route("/gui/taxonomy/graph")
+def gui_taxonomy_graph():
+    import csv
+    from pathlib import Path
+
+    dirpath = "appli/static/gui/data/"
+    csvpath = dirpath + "worms.csv"
+    jsonpath = dirpath + "graphsmall_worms.json"
+
+    if not Path(jsonpath).is_file():
+        nodes = []
+        data = {"nodes": [], "edges": []}
+        {
+            "nodes": [{"id": "node1"}, {"id": "node2"}],
+            "edges": [{"source": "node1", "target": "node2"}],
+        }
+        with open(csvpath, encoding="utf-8") as csvf:
+            csvreader = csv.DictReader(csvf)
+            i = 0
+            for rows in csvreader:
+                key = rows["aphia_id"]
+                data["nodes"].append({"id": key, "name": rows["name"]})
+                i = i + 1
+                nodes.append(key)
+                if i == 10000:
+                    break
+            for rows in csvreader:
+                key = rows["aphia_id"]
+                if rows["parent_aphia_id"] != "NA" and key in nodes:
+                    data["edges"].append(
+                        {"source": key, "target": rows["parent_aphia_id"]}
+                    )
+
+        with open(jsonpath, "w", encoding="utf-8") as jsonf:
+            jsonf.write(json.dumps(data, indent=4))
+    with open(jsonpath, encoding="utf-8") as json_file:
+        content = json_file.read()
+    response = make_response(content)
+    response.headers["Content-length"] = len(content)
+    response.headers["Content-Encoding"] = "utf-8"
+    response.headers["Content-Type"] = "application/json"
+    return response
+
+
+@login_required
+@app.route("/gui/taxonomy/worms")
+def gui_taxonomy_worms():
+    return render_template("v2/taxonomy/worms.html")

@@ -1,5 +1,6 @@
 from typing import List
-from flask import flash, request, render_template, redirect, url_for
+import json
+from flask import flash, request, render_template, redirect, url_for, make_response
 from flask_login import current_user, login_required, fresh_login_required
 from werkzeug.exceptions import NotFound, Unauthorized, Forbidden
 from appli import app, gvp, gvg
@@ -7,7 +8,12 @@ from appli.project import sharedfilter
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
-from to_back.ecotaxa_cli_py.models import ProjectModel, ObjectSetQueryRsp, MergeRsp
+from to_back.ecotaxa_cli_py.models import (
+    ProjectModel,
+    ObjectSetQueryRsp,
+    MergeRsp,
+    ProjectColumnsModel,
+)
 
 from appli.gui.commontools import is_partial_request, py_get_messages
 from appli.gui.project.projectsettings import get_target_prj
@@ -21,7 +27,7 @@ ExploreOnly = "ExploreOnly"
 # TODO - fresh_login_required
 @login_required
 def gui_prj_noright(projid):
-    return render_template("v2/project/noright.html", projid=projid)
+    return render_template("v2/project/noright.html", id=projid)
 
 
 @app.route("/gui/prj/<int:projid>", methods=["GET", "POST"])
@@ -134,9 +140,6 @@ def gui_prj_list_for_prediction(projid) -> list:
 
     tabledef = dict({"columns": columns, "data": prjs, "type": "json"})
     # gzip not really necessary - jsonifiy with separators
-    from flask import make_response
-    import json
-
     gz = gvg("gzip")
     content = json.dumps(
         tabledef,
@@ -786,3 +789,20 @@ def gui_deprecation_management(projid):
             advised_targets=advised_targets,
             community_targets=community_targets,
         )
+
+
+#######################Project set##########################################
+@app.route("/gui/projectset/projects", methods=["GET"])
+# TODO - fresh_login_required
+def gui_projectset_projects():
+    ids = gvg("project_ids")
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            prjs: List[ProjectColumnsModel] = api.project_set_get_projects(ids)
+            ret = [prj.to_dict() for prj in prjs]
+            return make_response(json.dumps(ret))
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                err = py_messages["projectnotyours"]
+            else:
+                raise

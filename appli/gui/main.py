@@ -110,7 +110,6 @@ def gui_privacy() -> str:
 @login_required
 def gui_prj(listall: bool = False) -> str:
     partial = False
-
     from appli.gui.project.projects_list import projects_list_page
 
     return projects_list_page(listall=listall, partial=partial)
@@ -124,6 +123,7 @@ def gui_prjlist() -> str:
     from appli.gui.project.projects_list import projects_list
 
     listall = gvg("listall", False)
+    for_managing = gvg("for_managing", False)
     if listall == "False" or not listall:
         listall = False
     else:
@@ -133,7 +133,9 @@ def gui_prjlist() -> str:
     gz = True
     encoding = "utf-8"
     content = json.dumps(
-        projects_list(listall=listall, typeimport=typeimport),
+        projects_list(
+            listall=listall, for_managing=for_managing, typeimport=typeimport
+        ),
         separators=[",", ":"],
     ).encode(encoding)
 
@@ -201,7 +203,7 @@ def gui_prj_aboutsamples(projid):
 
     partial = is_partial_request(request)
     format = gvg("format", "json")
-    content = prj_samples_stats(projid, partial=partial, format=format)
+    content = prj_samples_stats(str(projid), partial=partial, format=format)
     if format == "json":
         encoding = "utf-8"
         content = json.dumps(content, separators=[",", ":"]).encode(encoding)
@@ -583,7 +585,17 @@ def utility_processor():
     def license_texts() -> dict:
         from appli.gui.commontools import possible_licenses
 
-        return possible_licenses()
+        licenses = possible_licenses()
+        return licenses[0]
+
+    def license_restriction(tostring: bool = False) -> dict:
+        from appli.gui.commontools import possible_licenses
+
+        licenses = possible_licenses()
+        if tostring == True:
+            return json.dumps(licenses[1])
+        else:
+            return licenses[1]
 
     def bg_scale():
         bg = str(app.config.get("BG_SCALE") or "")
@@ -614,6 +626,7 @@ def utility_processor():
         global_messages=global_messages,
         api_password_regexp=api_password_regexp,
         license_texts=license_texts,
+        license_restriction=license_restriction,
         bg_scale=bg_scale,
         logo_special=logo_special,
         get_manager_list=get_manager_list,

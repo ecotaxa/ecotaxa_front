@@ -13,7 +13,7 @@
     {{header_project_job(_('Create subset from project'),data, _('How to create a project subset'))}}
   </div>
   <form class="form-horizontal js js-submit" action="{{ request.path }}" class="js js-submit" method="post" enctype=multipart/form-data>
-  <input type="hidden" name="projid" value="{{ target_proj.projid }}">
+  <input type="hidden" name="projid" value="{{ targetid }}">
 {{display_filters(filters)}}
   <div class="form-box js js-tabs" data-selector="input[type='radio']" data-toggledisable=true><div class="label">{{_('Select')}}</div>
     <div class="form-group" role="group">
@@ -44,7 +44,7 @@
     </li>
   </ul></div>
 
-    <div class="form-box float-left"><button type="submit" class="button is-primary ">{{_('Start Task')}}</button> <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>  </div>
+    <div class="form-box float-left"><button type="submit" class="button is-primary ">{{_('Start Task')}}</button> <a href ="{{ url_for("gui_prj_classify",projid=targetid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>  </div>
 
   </form></div>
 

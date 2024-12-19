@@ -113,8 +113,8 @@ def render_for_js(colljs: list, columns: list) -> list:
             else:
                 # if subfield  append object which will be formatted by the js component
                 if key == "select":
-                    if "select" in column and column["select"] == "edit":
-                        select = dict({"edit": _("Edit")})
+                    if "select" in column and column["select"] == "select":
+                        select = dict({"edit": _("Edit"), "erase": _("Erase")})
                         attrvalue = select
                     else:
                         attrvalue = ""

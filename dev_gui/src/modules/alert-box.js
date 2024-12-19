@@ -406,9 +406,10 @@ async function createAlertBox() {
     if (allowedtypes.indexOf(message.type) < 0) return;
     if (message.parent === null) return;
     const el = realTarget(message.parent);
-    el.classList.add('relative');
+    el.classList.add(css.relative);
     const messages = (el.dataset[message.type]) ? el.dataset[message.type].split(', ') : [];
     message.content = (i18nmessages[message.content]) ? i18nmessages[message.content] : message.content;
+    console.log('messagecontent', message.content)
     if (messages.indexOf(message.content) < 0) {
       messages.push(message.content);
       el.dataset[message.type] = messages.join(separator);

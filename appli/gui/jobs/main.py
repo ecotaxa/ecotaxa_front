@@ -23,9 +23,13 @@ def gui_job_create(job_type: str):
     Used from menu (GET) and in self-submitted POST.
     """
     py_messages = py_get_messages("jobs")
+    target_type = gvg("target_type" or None)
     try:
         job_cls = Job.find_job_class_by_name(Job, job_type)
+        if target_type == "collection":
+            job_cls.TARGET_TYPE = target_type
         assert job_cls is not None, "%s not known as a job UI type" % job_type
+
     except:
         raise ApiException(
             status=404,
@@ -67,16 +71,20 @@ def gui_job_show(job_id: int):
     target_proj = None
     # added for subnav when there is a projid
     projid = None
+    collection_id = 0
     if "req" in job.params:
         for idx in ["project_id", "prj_id"]:
             if idx in job.params["req"]:
                 projid = job.params["req"][idx]
                 break
-
-    if projid:
+        if "collection_id" in job.params["req"]:
+            collection_id = job.params["req"]["collection_id"]
+    projids = str(projid).split(",")
+    if projid and len(projids) == 1:
         from appli.gui.project.projectsettings import get_target_prj
 
         target_proj = get_target_prj(projid)
+
     finalaction = ""
     if job.state == "F":
         job_cls = Job.find_job_class_by_name(Job, job.type)
@@ -90,6 +98,8 @@ def gui_job_show(job_id: int):
         partial=is_partial_request(request),
         finalaction=finalaction,
         target_proj=target_proj,
+        projid=projid,
+        collection_id=collection_id,
     )
 
 
@@ -171,16 +181,26 @@ def gui_job_force_restart(job_id: int):
 @login_required
 def gui_job_cleanup(jobid: int):
     py_messages = py_get_messages("jobs")
-    with ApiClient(JobsApi, request) as api:
-        job: JobModel = api.get_job(job_id=jobid)
-        projid = job.params.get("prj_id")
-        if projid is None and job.params.get("req") is not None:
-            projid = job.params["req"].get("project_id")
-        # except ApiException as ae:
-        #    if ae.status in (401, 403):
-        #        flash(py_messages["notauthorized"], "error")
-        #    elif ae.status == 404:
-        #        flash(py_messages["notfound"], "error")
+    job = None
+    projid = None
+    collection_id = 0
+    try:
+        with ApiClient(JobsApi, request) as api:
+            job: JobModel = api.get_job(job_id=jobid)
+            projid = job.params.get("prj_id")
+            if job.params.get("req") is not None:
+                if projid is None:
+                    projid = job.params["req"].get("project_id")
+                collection_id = job.params["req"].get("collection_id")
+                if collection_id is None:
+                    collection_id = 0
+
+    except ApiException as ae:
+        if ae.status in (401, 403):
+            flash(py_messages["notauthorized"], "error")
+        elif ae.status == 404:
+            flash(py_messages["notfound"], "error")
+
     if job is not None:
         with ApiClient(JobsApi, request) as api:
             api.erase_job(job_id=jobid)
@@ -189,7 +209,11 @@ def gui_job_cleanup(jobid: int):
         return redirect(url_for("gui_prj_classify", projid=projid))
     else:
         return render_template(
-            "v2/jobs/jobcleaned.html", partial=partial, jobid=jobid, projid=projid
+            "v2/jobs/jobcleaned.html",
+            partial=partial,
+            jobid=jobid,
+            projid=projid,
+            collection_id=collection_id,
         )
 
 
@@ -222,10 +246,7 @@ def gui_list_jobs():
                     cleanresult.append(ajob.id)
 
     if partial:
-        return render_template(
-            "/v2/jobs/_cleanresult.html",
-            cleanresult=cleanresult,
-        )
+        return render_template("/v2/jobs/_cleanresult.html", cleanresult=cleanresult)
     tasks = []
     from appli.gui.jobs.job_interface import display_job
 

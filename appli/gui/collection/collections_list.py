@@ -24,19 +24,26 @@ from appli.gui.staticlistes import py_messages
 from appli.gui.collection.staticlistes import py_collection_messages
 
 
-def _collections_list_api(title: str = "") -> list:
+def _collections_list_api_toback(project_ids: str = None) -> list:
+    with ApiClient(CollectionsApi, request) as apicoll:
+
+        colls: list[CollectionModel] = apicoll.list_collections(project_ids=project_ids)
+    return colls
+
+
+def _collections_list_api(project_ids: str = None) -> list:
     import requests
 
     colls = list([])
 
     payload = dict(
         {
-            "title": title,
+            "project_ids": project_ids,
         }
     )
     with ApiClient(CollectionsApi, request) as apicoll:
         url = (
-            apicoll.api_client.configuration.host + "/collections/search"
+            apicoll.api_client.configuration.host + "/collections"
         )  # endpoint is nowhere available as a const :(
         token = apicoll.api_client.configuration.access_token
         headers = {
@@ -52,10 +59,9 @@ def _collections_list_api(title: str = "") -> list:
 
 
 def collections_list(
-    listall: bool = False,
     partial: bool = False,
     selection="list",
-    title: str = "",
+    project_ids: str = None,
     typeimport: str = "",
 ) -> str:
     import datetime
@@ -77,9 +83,7 @@ def collections_list(
     # but we're in @login_required, so
     user: UserModelWithRights = current_user.api_user
     isadmin = current_user.is_app_admin == True
-    if typeimport != "":
-        listall = False
-    colls = _collections_list_api(title)
+    colls = _collections_list_api(project_ids=project_ids)
     # from appli.gui.collection.collist import colls
 
     now = datetime.datetime.now()
@@ -102,7 +106,6 @@ def collections_list(
 
 
 def collections_list_page(
-    listall: bool = False,
     partial: bool = False,
     typeimport: str = "",
 ) -> str:
@@ -125,8 +128,6 @@ def collections_list_page(
         collection_table_columns,
     )
 
-    if typeimport != "":
-        listall = False
     if typeimport == "" and not partial:
         template = "v2/collection/index.html"
     else:
@@ -135,7 +136,6 @@ def collections_list_page(
     return render_template(
         template,
         CanCreate=CanCreate,
-        listall=listall,
         partial=partial,
         isadmin=isadmin,
         # columns=json.dumps(columns),

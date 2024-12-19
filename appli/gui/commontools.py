@@ -44,70 +44,31 @@ def _get_last_refresh() -> str:
     return last_refresh
 
 
-def possible_licenses() -> dict:
+def possible_licenses() -> tuple:
     from appli.back_config import get_back_constants
 
-    (LICENSE_TEXTS) = get_back_constants(request, "LICENSE")
-    return LICENSE_TEXTS
+    licenses = get_back_constants(request, "LICENSE")
+    return licenses
 
 
-def experimental_header(filename: str = "") -> str:
-    # Add experimental URL for vips ------ keep to use again with classification tests
+def possible_access() -> tuple:
+    from appli.back_config import get_back_constants
 
-    # 2 Marc ,4 JO ,5 Amanda, 75 Laetitia, 1267 & 1604 Julie, 760 & 1080 & 878 Laurent, 193 Louis , 847 Zoe,768 Camille, 1001 Lucas , Bea 1562, 358 Solène // 1601 pour test sur db test
-    vip_list = [2, 4, 5, 75, 1001, 847, 1267, 1604, 358, 1562, 1601, 760, 1080]
-    # paths
-    newpath = [
-        "login",
-        "prj",
-        "prj/edit",
-        "prj/",
-        "prj/about",
-        "prj/listall",
-        "prj/listall/",
-        "jobs/listall/",
-        "jobs/listall",
-        "job/show",
-        "about",
-        "privacy",
-    ]
+    consts = get_back_constants(request, "ACCESS")
+    access = {}
+    for k, v in consts.items():
+        access[v] = k
+    return access
 
-    path = request.path
 
-    if not current_user.is_authenticated or current_user.id not in vip_list:
-        return ""
-    if path.find(GUI_PATH) < 0:
-        keypath = path.split("/")
-        del keypath[0]
-        checkpath = keypath[0]
-        if len(keypath) > 1:
-            checkpath = checkpath + "/" + keypath[1]
-        if checkpath not in newpath:
-            return ""
-        hint = "A new version of this page is available."
-        session["oldpath"] = path
-        experimental = (
-            "<a class="
-            + '"inline-block py-2 px-3 text-center whitespace-nowrap align-baseline" style="margin-top:0;margin-right:175px;z-index:100;color:#d6544b;font-weight:bold;font-size:0.925rempadding:.25rem .5rem;text-shadow:2px 2px 6px #FFaa00;" href="'
-            + GUI_PATH
-            + path
-            + '" title="'
-            + hint
-            + '">'
-            + "New!</a>"
-        )
+def possible_models():
+    from to_back.ecotaxa_cli_py.api import MiscApi
 
-    else:
-        hint = "Back to current version."
-        oldpath = session.get("oldpath", path.replace(GUI_PATH, ""))
-        experimental = (
-            '<a  class="experimental" href="'
-            + oldpath
-            + '"  title="'
-            + hint
-            + '">Back</a>'
-        )
-    return experimental
+    with ApiClient(MiscApi, request) as api:
+        possibles = api.query_ml_models()
+
+    scn = {a_model.name: {"name": a_model.name} for a_model in possibles}
+    return scn
 
 
 def jobs_summary_data() -> Dict:
@@ -313,7 +274,9 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
                 }, e.status
             elif code not in [403, 401]:
                 flash(exception[1], "error")
-                return redirect(request.referrer)
+                if request.referrer:
+                    return redirect(request.referrer)
+
         description.append(exception[1])
     elif isinstance(e, HTTPException):
         response = e.get_response()

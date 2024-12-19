@@ -8,20 +8,22 @@ from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import JobModel
 
 
-def export_format_options(type=None):
+def export_format_options(type=None, target="project"):
+    out_to_ftp = {
+        "out_to_ftp": {
+            "label": _(
+                "Copy result file to FTP area. Original file is still available"
+            ),
+            "options": [
+                {"label": _("Yes"), "value": 1},
+                {"label": _("No"), "value": 0},
+            ],
+            "format": "radio",
+        }
+    }
     options = dict(
         {
             "general": {
-                "only_annotations": {
-                    "label": _("Only save objects' last annotation data"),
-                    "options": [
-                        {"label": _("Yes"), "value": 1},
-                        {"label": _("No"), "value": 0},
-                    ],
-                    "format": "radio",
-                    "discard": "with_images|none,with_internal_ids|0,with_types_row|0,split_by|none",
-                    "help": "help_export_only_annotations",
-                },
                 "with_images": {
                     "label": _("Images"),
                     "options": [
@@ -67,17 +69,7 @@ def export_format_options(type=None):
                     ],
                     "format": "radio",
                 },
-                "out_to_ftp": {
-                    "label": _(
-                        "Copy result file to FTP area. Original file is still available"
-                    ),
-                    "options": [
-                        {"label": _("Yes"), "value": 1},
-                        {"label": _("No"), "value": 0},
-                    ],
-                    "format": "radio",
-                },
-            }
+            },
         }
     )
     formdatas = dict(
@@ -126,6 +118,15 @@ def export_format_options(type=None):
                     "out_to_ftp": (0, False),
                 },
             },
+            "identification": {
+                "path": "/gui/job/create/IdentificationExport",
+                "title": _("Classification Export"),
+                "legend": _("Objects' identifications only (no metadata)"),
+                "datas": {
+                    "only_annotations": (1, True),
+                    "out_to_ftp": (0, False),
+                },
+            },
         }
     )
 
@@ -163,18 +164,98 @@ def export_format_options(type=None):
                 "format": "textarea",
                 "help": "help_export_summary_formulae",
             },
-            "out_to_ftp": {
-                "label": _(
-                    "Copy result file to FTP area. Original file is still available"
-                ),
+        }
+    )
+    options["identification"] = dict(
+        {
+            "only_annotations": {
+                "label": _("Export objects' identifications only (no metadata)"),
                 "options": [
                     {"label": _("Yes"), "value": 1},
                     {"label": _("No"), "value": 0},
                 ],
                 "format": "radio",
+                "discard": "with_images|none,with_internal_ids|0,with_types_row|0,split_by|none",
+                "help": "help_export_only_annotations",
             },
         }
     )
+    if target == "collection":
+        options.update(
+            {
+                "darwincore": {
+                    "include_predicted": {
+                        "label": _("Include predicted"),
+                        "options": [
+                            {"label": _("Yes"), "value": 1},
+                            {"label": _("No"), "value": 0},
+                        ],
+                        "format": "radio",
+                    },
+                    "with_absent": {
+                        "label": _("With absent"),
+                        "options": [
+                            {"label": _("Yes"), "value": 1},
+                            {"label": _("No"), "value": 0},
+                        ],
+                        "format": "radio",
+                    },
+                    "with_computations": {
+                        "label": _("With computations"),
+                        "options": [
+                            {"label": _("Abundance"), "value": "ABO"},
+                            {"label": _("Concentration"), "value": "CNC"},
+                            {"label": _("Biovolume"), "value": "BIV"},
+                        ],
+                        "format": "checkbox",
+                        "help": "help_export_with_computations",
+                    },
+                    "taxo_mapping": {
+                        "label": _("Computations pre mapping"),
+                        "comment": _(" Type '_discard_' to discard taxon"),
+                        "format": "taxoline",
+                        "help": "help_export_computations_pre_mapping",
+                        "addoption": "_discard_,0",
+                    },
+                    "formulae": {
+                        "label": _("Formulae"),
+                        "example": '{"subsample_coef"->str, "total_water_volume"->str, "individual_volume"->str}',
+                        "format": "textarea",
+                        "help": "help_export_summary_formulae",
+                    },
+                    "extra_xml": {
+                        "label": _("Extra XML block"),
+                        "format": "text",
+                    },
+                }
+            }
+        )
+        forms = dict(
+            {
+                "darwincore": {
+                    "path": "/gui/job/create/DarwinCoreExport",
+                    "title": _("Darwin Core Export"),
+                    "legend": _(
+                        "Export the collection in Darwin Core format, e.g. for EMODnet portal, @see https://www.emodnet-ingestion.eu"
+                    ),
+                    "datas": {
+                        "include_predicted": False,
+                        "with_absent": False,
+                        "with_computations": ("ABO", False),
+                        "taxo_mapping": ({}, False),
+                        "formulae": (
+                            """
+                    subsample_coef: 1/ssm.sub_part
+                    total_water_volume: sam.tot_vol/1000
+                    individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3 """,
+                            False,
+                        ),
+                    },
+                }
+            }
+        )
+        forms.update(formdatas)
+        formdatas = forms
     if type != None:
         formdata = dict()
         option = dict()
@@ -184,6 +265,8 @@ def export_format_options(type=None):
         else:
             typoption = type
         option[type] = options[typoption]
+        if type != "darwincore":
+            option.update(out_to_ftp)
         export_links = []
         for key, fdata in formdatas.items():
             if key != type:

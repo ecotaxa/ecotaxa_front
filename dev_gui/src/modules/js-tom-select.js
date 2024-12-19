@@ -66,18 +66,7 @@ function createJsTomSelect() {
     }
     if (item.dataset.addoption) {
       option.settings.addoption = item.dataset.addoption.split(',');
-    }
-    /*,
-          on_clear = function() {
-
-            if (item.tagName.toLowerCase() === 'select')
-              item.querySelectorAll('option:checked').forEach(option => {
-                option.removeAttribute('selected');
-              });
-            item.selectedIndex = -1;
-            return true;
-          }*/
-    ;
+    };
 
     switch (type) {
       case models.project:
@@ -91,6 +80,19 @@ function createJsTomSelect() {
             labelField: 'text',
             openOnFocus: false,
             maxItems: maxitems,
+            allowEmptyOption: false,
+          }
+        };
+
+        break;
+      case models.organisation:
+        option.url = "/api/organizations/search?name=";
+        option.settings = { ...option.settings,
+          ...{
+            valueField: 'id',
+            searchField: 'text',
+            labelField: 'text',
+            openOnFocus: false,
             allowEmptyOption: false,
           }
         };
@@ -213,6 +215,7 @@ function createJsTomSelect() {
         let url = '';
         switch (type) {
           case models.user:
+          case models.organisation:
             url = option.url + encodeURIComponent('%' + query + '%');
             break;
           case models.instr:
@@ -238,6 +241,7 @@ function createJsTomSelect() {
             break;
         }
         if (url !== null) fetch(url, fetchSettings()).then(response => response.json()).then(json => {
+          console.log('json', json)
           if (type === models.project) {
 
             if (json.data && json.data.length) json = json.data.map(row => {
@@ -248,8 +252,7 @@ function createJsTomSelect() {
               }
 
             });
-          }
-          if (type === models.instr && json.length) json = json.reduce((result, a, v) => {
+          } else if ([models.instr, models.organisation].indexOf(type) >= 0 && json.length) json = json.reduce((result, a, v) => {
             a = DOMPurify.sanitize(a);
             let obj = {
               id: a,
@@ -293,32 +296,33 @@ function createJsTomSelect() {
 
       }
     }
-
-    option.settings.plugins = {
-      'clear_button': {
-        title: (item.dataset.clear) ? item.dataset.clear : 'Clear all',
-        html: (data) => {
-          return `<div class="${data.className}" id="clear-${id}" title="${data.title}"><i class="icon ${(multiple)?``:'p-[0.125rem]'} icon-x-circle-sm ${(multiple)?``:` opacity-50`}"></i></div>`;
+    if (item.getAttribute('readonly') === null) {
+      option.settings.plugins = {
+        'clear_button': {
+          title: (item.dataset.clear) ? item.dataset.clear : 'Clear all',
+          html: (data) => {
+            return `<div class="${data.className}" id="clear-${id}" title="${data.title}"><i class="icon ${(multiple)?``:'p-[0.125rem]'} icon-x-circle-sm ${(multiple)?``:` opacity-50`}"></i></div>`;
+          }
         }
       }
-    }
-    option.settings.onClear = function() {
-      item.tomselect.clear();
-      return true;
-    }
-    if (multiple) {
-      option.settings.plugins = { ...option.settings.plugins,
-        ...{
-          'remove_button': {}
-        }
+      option.settings.onClear = function() {
+        item.tomselect.clear();
+        return true;
+      }
+      if (multiple) {
+        option.settings.plugins = { ...option.settings.plugins,
+          ...{
+            'remove_button': {}
+          }
 
-      };
-      option.settings.plugins = { ...option.settings.plugins,
-        ...{
-          'caret_position': {}
-        }
+        };
+        option.settings.plugins = { ...option.settings.plugins,
+          ...{
+            'caret_position': {}
+          }
 
-      };
+        };
+      }
     }
     option.settings = Object.assign(default_settings, option.settings)
     if (id !== null) {
@@ -327,19 +331,19 @@ function createJsTomSelect() {
       ts.wrapper.classList.remove('js');
       // add
       ts.wrapper.setAttribute('data-component', 'tom-select');
+      if (item.getAttribute('readonly') !== null) {
+        ts.disable();
+      }
       switch (type) {
         case models.taxo:
           ts.on('item_add', (v, el) => {
             if (el !== null) el.classList.add('new');
-            //  el = el.querySelector('.ts-delet');
-            //  if (el !== null) init_canceltag(el);
           });
           //
           break;
         case models.project:
           // add data-noaction just to select a project
           if (item.dataset.dest) {
-
             ts.on('item_add', (v, el) => {
               if (v != item.dataset.value && ts.options[v] && !el.querySelector('a')) {
                 const links = {
@@ -371,12 +375,6 @@ function createJsTomSelect() {
             });
           }
           break;
-          /*  case 'user':
-              if (item.dataset.priv) ts.on("item_add", function(v, el) {
-                el = el.querySelector(domselectors.component.tomselect.tsdelet);
-                if (el !== null) init_canceltag(el);
-              });
-              break;*/
       }
       return ts;
     } else console.log('noid');

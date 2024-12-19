@@ -151,6 +151,15 @@ function createJsComponents() {
               }))
               break;
             case 'js-hierarchy':
+              console.log(' js-hierarchy', item)
+              if (!dynamics.g6_graph) {
+                let {
+                  g6_graph
+                } = await import('../modules/g6-graph.js');
+                console.log('g6-graph', g6_graph);
+                dynamics.g6_graph = g6_graph;
+              }
+              dynamics.g6_graph(item);
               break;
             case 'js-my-files':
               if (!dynamics.JsMyFiles) {

@@ -4,7 +4,11 @@ from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py import ApiException
 from appli.constants import MappableObjectColumns, MappableParentColumns
 from appli.gui.staticlistes import py_messages
-from to_back.ecotaxa_cli_py.models import ProjectModel, ProjectTaxoStatsModel
+from to_back.ecotaxa_cli_py.models import (
+    ProjectModel,
+    ProjectTaxoStatsModel,
+    MinimalCollectionBO,
+)
 
 
 def prj_stats(prjid: int, partial: bool, params: dict) -> str:
@@ -35,6 +39,7 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
     annotators = None
     samples = None
     initclassiflist = None
+    collections = list([])
     if partial == True:
         req_taxa = ""
     else:
@@ -55,6 +60,8 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
                 taxastats = taxo_stats[0]
                 used_taxa.extend([str(t) for t in taxastats.used_taxa])
                 taxastats = [taxastats.to_dict()]
+        collections: List[MinimalCollectionBO] = api.project_collections(prjid)
+
         from appli.gui.taxonomy.tools import taxo_with_names, taxo_with_lineage
         from markupsafe import escape
 
@@ -135,6 +142,7 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
         initclassiflist=initclassiflist,
         annotators=annotators,
         used_taxa=usedtaxa,
+        collections=collections,
         translations=dict(
             {
                 "roles": py_user_roles,
@@ -145,12 +153,12 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
     )
 
 
-def prj_samples_stats(prjid: int, partial: bool, format: str = "json") -> str:
+def prj_samples_stats(project_ids: str, partial: bool, format: str = "json") -> str:
     from to_back.ecotaxa_cli_py.api import SamplesApi
 
     with ApiClient(SamplesApi, request) as api:
         samples: List[SampleModel] = api.samples_search(
-            project_ids=prjid, id_pattern=""
+            project_ids=project_ids, id_pattern=""
         )
     sample_ids = ",".join(list([str(sample.sampleid) for sample in samples]))
     with ApiClient(SamplesApi, request) as api:

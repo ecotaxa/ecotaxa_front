@@ -56,7 +56,7 @@ def gui_admin():
 def _users_list_api(ids: str = None, filt: dict = None) -> list:
     import requests
 
-    payload = dict({"summary": True})
+    payload = dict({"fields": "*default"})
     if ids != None:
         payload.update({"ids": ids})
     users = list([])

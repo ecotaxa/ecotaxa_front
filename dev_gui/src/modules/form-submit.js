@@ -14,10 +14,13 @@ import {
 } from '../modules/alert-box.js';
 
 domselectors.captcha = '.js-captcha';
+domselectors.formbox = ".form-box";
+domselectors.messagepos = ".messagepos";
 css.invalid = 'invalid';
 css.inputvalid = 'valid';
 css.required = 'required';
 css.tshidden = 'ts-hidden-accessible';
+
 export class FormSubmit {
   handlers = {
     validate: [],
@@ -65,8 +68,28 @@ export class FormSubmit {
       const res = await this.submitForm();
       return res;
     });
+    this.hotModifs();
     this.specialFields();
   }
+
+  hotModifs() {
+    // display a message when one og this fields is modified
+    this.form.querySelectorAll('[data-hotmodif]').forEach(field => {
+      const evt = (field.tagName.toLowerCase() == 'input' && field.type === 'text') ? 'keydown' : 'change';
+      const message = (field.dataset.modifmessage) ? field.dataset.modifmessage : this.options.modifmessage;
+      let parent = field.closest(domselectors.formbox);
+      parent = (parent) ? parent : field.closest(domselectors.messagepos);
+      field.addEventListener(evt, () => {
+        AlertBox.addMessage({
+          type: AlertBox.alertconfig.types.warning,
+          parent: parent,
+          content: message,
+          duration: 4000
+        })
+      })
+    })
+  }
+
   specialFields() {
     // check if there is a password confirm input
     // add show text for password fields
@@ -150,11 +173,18 @@ export class FormSubmit {
         option.value = decode_HTMLEntities(DOMPurify.sanitize(option.value));
       });
     } else field.value = decode_HTMLEntities(DOMPurify.sanitize(field.value));
-    if (field.tomselect) field.classList.remove(css.tshidden);
     let rep = field.checkValidity();
     if (field.tomselect) field.classList.add(css.tshidden);
     if (rep && field.dataset.unique !== undefined) {
       rep = this.validateFieldUnique(field);
+    } else if (field.type == "checkbox") {
+      rep = true;
+      if (field.required) {
+        const targets = (field.name) ? field.closest('div').querySelectorAll(field.name) : [field];
+        targets.forEach(target => {
+          rep = rep || field.checkValidity(target);
+        });
+      }
     }
     const evt = document.createEvent("Event");
     evt.initEvent(((rep) ? 'valid' : 'invalid'), true, true);
@@ -189,7 +219,7 @@ export class FormSubmit {
           delete label.dataset.confirm;
         }
       }
-      const confirm = AlertBox.createConfirm(((label) ? label.textContent + ` : ` : ``) + AlertBox.i18nmessages.noduplicate, {
+      const confirm = AlertBox.addConfirm(((label) ? label.textContent + ` : ` : ``) + AlertBox.i18nmessages.noduplicate, {
         callback_cancel: callback_cancel,
         buttons: {
           ok: {

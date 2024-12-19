@@ -6,5 +6,6 @@ from . import Subset
 from . import GeneralExport
 from . import SummaryExport
 from . import BackupExport
-
+from . import IdentificationExport
+from . import DarwinCoreExport
 from . import Prediction

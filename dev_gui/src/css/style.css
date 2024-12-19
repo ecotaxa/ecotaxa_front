@@ -78,8 +78,8 @@ body {@apply bg-white text-stone-800 font-light subpixel-antialiased; font-displ
 .button , a.button {
    @apply cursor-pointer py-1 sm:py-2 px-4 inline-block text-base sm:text-lg font-btn font-medium  rounded  border drop-shadow-sm hover:drop-shadow-none transform transition duration-300 ease-in-out focus:ring-2 ring-offset-2 ring-transparent ;
  }
- .button[readonly] {@apply opacity-75 }
-.button.disabled , a.disabled {@apply opacity-50 }
+ .button[readonly] {@apply opacity-90 }
+.button.disabled , a.disabled {@apply opacity-80 }
 .is-default {@apply bg-transparent border-none ring-0}
  .is-primary {
    @apply  bg-mainblue-700 text-white font-normal disabled:opacity-70 disabled:bg-stone-700 hover:bg-mainblue-600 border border-mainblue-700 font-semibold focus:ring-mainblue-600 ring-mainblue-600;
@@ -113,12 +113,8 @@ body {@apply bg-white text-stone-800 font-light subpixel-antialiased; font-displ
 .is-pick {@apply  text-sm text-stone-800 ;}
 .is-pick.is-import {@apply bg-mainblue-100;}
 .is-import:not(.new) {@apply inline-block whitespace-nowrap w-auto clear-right}
-
- a.experimental {@apply inline-block py-1 px-1.5 text-xs leading-none text-center whitespace-nowrap align-baseline bg-warning-100 text-coral-500  hover:bg-warning-200 text-xs small-caps font-light rounded-lg ml-2;}
-
 .shadow-inner {box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);}
 /* modal with details tag */
-
 details.modal-container {@apply  w-full block open:fixed open:z-70 open:w-full open:h-full open:md:w-2/3  open:lg:w-1/3}
 details.modal-container > summary {@apply list-none marker:hidden cursor-pointer}
 /*Safari hide marker */
@@ -188,6 +184,8 @@ details.no-marker > summary::-webkit-details-marker , details.modal-container > 
 :not(.group-radio) input[type="radio"]:not(.form-checkbox)  {@apply rounded-full after:absolute relative  checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1.5 checked:after:h-1.5 checked:after:bg-secondblue-400 checked:after:rounded-full checked:after:content-[''] ; }
 input[type="checkbox"],  input[type="checkbox"].form-checkbox , :not(.group-radio) input[type="radio"].form-checkbox { @apply ring-offset-0  ring-offset-transparent rounded-none after:absolute checked:after:top-[50%] checked:after:left-[50%] checked:after:-translate-x-[50%] checked:after:-translate-y-[50%] checked:after:w-1 checked:after:h-2  checked:after:border-secondblue-400 checked:after:border-r-2 checked:after:border-b-2 checked:after:rotate-45 checked:after:content-[''] align-baseline;}
 input[type="checkbox"][readonly] {@apply pointer-events-none cursor-not-allowed checked:after:border-stone-800 ring-offset-transparent enabled:hover:ring-transparent enabled:ring-transparent}
+[readonly] {@apply border-stone-50 active:border-stone-50 focus:border-stone-50}
+[readonly] .item  {@apply py-1 flex inline-flex text-xs rounded bg-stone-100 text-stone-900 shadow w-auto inline px-1.5 pl-1 ml-1  my-1 align-middle ;}
 /*forms specials */
 .has-message {@apply absolute top-0 -mt-6 -ml-6 whitespace-nowrap w-auto left-0 block z-50 font-sans tracking-normal text-xs font-light rounded  px-1 py-0.5 shadow ;}
 .has-warning {@apply after:has-message after:text-stone-700 after:bg-warning-200 after:content-[attr(data-warning)]}
@@ -199,10 +197,9 @@ input[type="checkbox"][readonly] {@apply pointer-events-none cursor-not-allowed 
 div.password-wrapper {@apply relative}
 div.password-wrapper input.form-input {@apply pr-12}
 div.password-wrapper i {@apply absolute right-2 top-[50%] -translate-y-[50%] z-[2]}
-legend {@apply bg-transparent text-stone-900 hover:text-stone-800 px-1 py-2 font-btn font-bold  mx-auto block text-sm md:text-base uppercase border-b-2 border-stone-100 mb-6 }
+legend, form.js-tabs .legend {@apply bg-transparent text-stone-900 hover:text-stone-800 px-1 py-2 font-btn font-bold  mx-auto block text-sm md:text-base uppercase border-b-2 border-stone-100 mb-6 }
 fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  md:mr-2 last:mr-0 p-0 }
 .form-box , .submit-box {@apply md:px-2 py-2 mb-2 md:mb-1 mx-0 }
-.form-box.disabled {@apply opacity-50}
 /*labels */
 
 .form-box  label , .form-box .label {@apply text-base font-semibold text-stone-900 bg-transparent}
@@ -221,8 +218,12 @@ fieldset, .fieldset {@apply bg-transparent m-2 p-2 lg:p-4 block h-full w-full  m
 .group-sm .group-radio > label {@apply py-1.5 px-3  font-light text-xs}
 .group-radio:first-child > label {@apply rounded-l-full }
 .group-radio:last-child > label  {@apply rounded-r-full  border-none }
+.group-radio.checkbox:first-child > label {@apply rounded-l }
+.group-radio.checkbox:last-child > label  {@apply rounded-r  border-none }
 .group-radio > input[type="radio"] {@apply appearance-none w-0 h-0 ring-0 enabled:ring-0 disabled:ring-0 ring-offset-0}
 .group-radio > input[type="radio"] {@apply w-0 h-0 bg-transparent after:content-none !important}
+.group-radio > input[type="checkbox"] {@apply appearance-none w-0 h-0 ring-0 enabled:ring-0 disabled:ring-0 ring-offset-0}
+.group-radio > input[type="checkbox"] {@apply w-0 h-0 bg-transparent after:content-none !important}
 [data-request="help"] { @apply after:w-5 after:h-5 after:inline-block after:fill-danger-500 after:align-top after:ml-0.5 cursor-pointer }
 /* form inputs imported from project */
 .imported {@apply after:content-[attr(data-isimported)] after:rounded after:px-2 after:bg-stone-50 after:text-stone-500 after:text-xs after:h-auto after:inline-block;}
@@ -258,7 +259,8 @@ li:not(.on) ul.entries {@apply hidden}
 .displayimport.active {@apply  bg-success-50}
 .displayimport li {@apply relative}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
-.disabled {@apply opacity-50}
+.disabled {@apply opacity-90}
+tr.disabled {@apply opacity-70}
 .has-controls {@apply  border-b border-stone-200 font-bold bg-mainblue-50}
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
@@ -300,7 +302,8 @@ form.js-tabs .tab-control {@apply absolute top-0 left-0 -mt-6 mb-0}
 form.js-tabs .tab {@apply md:w-full my-0 h-0 py-0 bg-inherit block}
 form.js-tabs fieldset.tab {@apply   mr-4  h-0 }
 form.js-tabs .tab.active {@apply h-auto }
-form.js-tabs legend.tab-control {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
+form.js-tabs legend.tab-control, form.js-tabs .legend {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
+form.js-tabs .legend {@apply text-center mt-4}
 form.js-tabs .tab.active legend.tab-control {@apply  border-stone-600 text-stone-900  opacity-100  }
 form.js-tabs .tab.active .tab-content {@apply mt-10 -ml-6 mb-0  h-auto px-2}
 form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4  }
@@ -707,6 +710,8 @@ body::-webkit-scrollbar {
   .is-controls .btn, .btn {@apply font-normal text-xs small-caps rounded py-[0.25] px-1 mr-0.5 shadow-sm hover:shadow-none  disabled:opacity-50 ring-1 ring-inset; }
   .is-manage {@apply bg-stone-600 text-stone-50  px-2 ring-stone-600 hover:ring-stone-700 hover:bg-stone-700 hover:text-white}
   .is-annotate {@apply bg-secondblue-500 px-2 text-secondblue-50 ring-secondblue-500 hover:ring-secondblue-600 hover:bg-secondblue-600  hover:text-white}
+  .is-edit {@apply bg-mainblue-600 px-2 text-mainblue-50 ring-mainblue-600 hover:ring-mainblue-700 hover:bg-mainblue-700  hover:text-white}
+  .is-erase {@apply bg-stone-600 px-2 text-stone-50 ring-stone-600 hover:ring-stone-700 hover:bg-stone-700  hover:text-white}
   .is-request {@apply hover:ring-secondblue-500 px-2 hover:text-secondblue-500 ring-stone-500 text-stone-500 bg-transparent}
   .is-about {@apply hover:text-stone-50 px-2 hover:bg-info-600 hover:ring-info-600 ring-info-500 text-stone-50 bg-info-500}
   .is-view {@apply  ring-secondblue-400 text-secondblue-50 px-2 hover:bg-secondblue-400 hover:ring-secondblue-500 bg-transparent text-secondblue-400 hover:text-white  }

@@ -1,0 +1,12 @@
+{%-macro collection_info(collection)-%}
+{{collection.title}} {{' - '+ collection.external_id if collection.external_id !='' }} (
+{%-if collection.provider_user_id==current_user.id -%}
+<a href="{{url_for('gui_collection_edit', collection_id=collection.id)}}">{{collection.id}}</a>
+{%-else-%}
+<a href="{{url_for('gui_collection_about', collection_id=collection.id)}}">{{collection.id}}</a>
+{%-endif-%}) {%-if collection.contact_user.id -%} &lt;{{collection.contact_user.name}}: <a href=mailto:{{collection.contact_user.email}} title="{{_('mail the collection contact')}}" class="font-normal">{{collection.contact_user.email}}</a>&gt;{%-endif-%}
+{%-endmacro-%}
+{%-macro collection_user_cell(index,user={id: 0,name:'',email:'',delet:false}, autocomplete=False, prefix='',extra='', readonly=False) -%}
+<div data-elem="ident"  data-title=" {{ _('Name') }}">
+  {{ inputdict(prefix+'_users_' + index,prefix+'[users][' + index + ']',value = user.id, label=user.name,type='user',required=required,autocomplete=autocomplete,data=extra,options=[(user.id,user.name)],readonly=readonly) }}</div>
+{%-endmacro-%}

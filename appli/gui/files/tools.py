@@ -24,7 +24,6 @@ def create_dir_file(source_path: str) -> str:
 
     with ApiClient(MyfilesApi, request) as api:
         ret = api.create_my_file(source_path=source_path)
-    print("sourcepath creat %s" % ret)
     return ret
 
 
@@ -50,9 +49,6 @@ def upload_file():
     import json
     import requests
 
-    # body = request.get_data()
-    # print(body)
-    # uploaded = gvp("file")
     dirpath = gvp("path")
     uploaded: FileStorage = request.files.get("file")
     reqheaders = json.loads(json.dumps({k: v for k, v in request.headers.items()}))

@@ -3,22 +3,54 @@ import {
 } from '../modules/utils.js';
 import {
   models,
-  css
+  css,
+  typeimport
 } from '../modules/modules-config.js';
 
 import equal from 'deep-equal';
 css.lastused = "last-used";
-css.small = "tdsmall"
+css.small = "tdsmall";
+
 export const initImport = async (state) => {
+
+  function itemRemove(value, item) {
+    if (state.params.import) {
+      switch (state.params.import) {
+        case typeimport.project:
+          function remove_from_imports(name, value) {
+            const idx = state.dataImport.imports[name].indexOf(value);
+            if (idx > -1) state.dataImport.imports[name].splice(idx, 1);
+          }
+          const selector = state.dom.querySelector('[' + state.dataImport.selector + '="' + value + '"]');
+          const indextocheck = state.dataImport.indexToCheck();
+
+          if (selector) {
+            const tr = selector.closest('tr');
+            const resets = state.dataImport.resetSelector(tr);
+            selector.parentElement.querySelectorAll('button, input').forEach((el, index) => {
+              this.disableSelector(selector, false);
+              this.toImport(el.parentElement, index, false);
+            });
+          };
+          break;
+      }
+    }
+  }
   const {
     DataImport
   } = await import('../modules/data-import.js');
   state.dataImport = new DataImport(state);
   state.importfields = state.grid.columns.filter(column => (column.selectcells));
   state.importfields = (state.importfields.length) ? state.importfields[0].selectcells : null;
+  state.dataImport.itemRemove = itemRemove;
+  if (state.params.import && state.params.import === typeimport.project) {
+    const {
+      ImportList
+    } = await import('../modules/table-projects-tools.js');
+    ImportList(state, state.dataImport);
+  }
   state.waitdiv.remove();
 }
-
 
 export default function(state) {
   // get the css fixed length of progress bar
@@ -125,6 +157,17 @@ export default function(state) {
                   childnodes: []
                 }, state.setTextNode(txt)]
               });
+            });
+            break;
+          case models.project:
+            btns.push({
+              nodename: "INPUT",
+              attributes: {
+                type: "checkbox",
+                name: `${models.project}[]`,
+                class: "form-checkbox",
+                value: id
+              },
             });
             break;
           case models.settings:

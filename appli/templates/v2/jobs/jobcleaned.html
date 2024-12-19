@@ -3,8 +3,10 @@
 {% endif %}
 {% block body %}
 <div class="container mx-auto mt-8">
-{% if projid %}
-<a href="{{url_for("gui_prj_classify", projid=projid)}}" class="button sm:ml-4">{{_('Back to project')}}</a>
+  {% if collection_id and collection_id!=0 %}
+  <a href="{{url_for('gui_collection_classify',collection_id=collection_id)}}" class="button sm:ml-4">{{_('Back to collection')}} {{collection_id}}</a>
+{% elif projid %}
+<a href="{{url_for("gui_prj_classify", projid=projid)}}" class="button sm:ml-4">{{_('Back to project')}} {{projid}}</a>
 {%endif %}
 <a href="{{url_for("gui_list_jobs")}}" class="button sm:ml-4">Back to Task List</a>
 </div>

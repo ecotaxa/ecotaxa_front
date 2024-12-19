@@ -1,3 +1,4 @@
+{% from "./v2/collection/macros.html" import collection_info with context %}
 {# project  about : stats display #}
 {% macro taxo_list(taxa) -%}
 {%-if taxa is iterable-%}
@@ -20,10 +21,6 @@
 
 {% macro proj_settings() -%}
 <div class="block mb-4">
-{%-if target_proj.description != None -%}
-<div class="stat-item"><span class="stat-label">{{_('Description')}}</span>
-<div class="stat-info">{{target_proj.description }}</div></div>
-{%-endif-%}
 {% if target_proj.privileges is iterable %}
 <div class="stat-item "><span class="stat-label">{{_('Privileges')}} <i data-for="help_proj_stats_privileges" data-request="help"></i></span>
   <div class="stat-info">
@@ -35,9 +32,14 @@
   {% endfor %}
 </div></div>
 {% endfor %}
-
 </div></div>
 {% endif %}
+<div class="stat-item"><span class="stat-label">{{_('Collections')}}</span>
+<div class="stat-info text-sm">{%- if collections and  collections is iterable %}{%-for collection in collections-%}<span>{{collection_info(collection)}}</span>{{', ' if loop.index < collections|length else ''}}{%-endfor-%}{%-endif-%}</div></div>
+<div class="stat-item"><span class="stat-label">{{_('Description')}}</span>
+<div class="stat-info">{{target_proj.description if target_proj.description != None else '' }}</div></div>
+<div class="stat-item"><span class="stat-label">{{_('Comments')}}</span>
+<div class="stat-info">{{target_proj.comments if target_proj.comments != None else '' }}</div></div>
 {% if initclassiflist %}
 <div class="stat-item"><span class="stat-label">{{_('Definition of preset for manual sorting')}}</span><span class="stat-info">{{taxo_list(initclassiflist)}}</span></div>
 {% endif%}

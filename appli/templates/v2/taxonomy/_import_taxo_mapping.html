@@ -3,8 +3,8 @@
           <div  class="w-[47%]  mr-4"><label>{{_('Imported name:')}} <input  type="text"  data-maxitems=1 class="form-input js js-autocomplete" name="item-select" id="item-select" data-type="taxo" autocomplete="off" placeholder="{{_('imported name')}}" data-create=true data-role="select"></label></div>
           <div class="w-[47%]  mr-4 "><label>{{_('UniEuk name:')}} <input type="text" data-maxitems=1 data-empty=true name="item-replace" id="item-replace"  class="form-input js js-autocomplete" autocomplete="off" placeholder="{{_('replace by')}}"  data-type="taxo" data-role="replace" data-addoption="_discard_,0"></label></div><div class="align-end">
     {% set modal_title = _('taxo pick') %}
-    {% set data = '{"tree":"taxotree","droptarget":"item-replace"}' %}
-    {% set btn = {'class':'button is-pick','title':modal_title,'icon':'icon-bars-4-sm','text': _('taxonomy') ,'data':' data-request=taxotree  data-root=# data-selectors='+data|string+' data-target=unique '}%}
+    {% set data = " data-tree=taxotree  data-droptarget=item-replace data-url=/gui/search/taxotreejson" %}
+    {% set btn = {'class':'button is-pick','title':modal_title,'icon':'icon-bars-4-sm','text': _('taxonomy') ,'data':' data-request=taxotree  data-root=# '+data+' data-target=unique '}%}
     {{ modal('taxotree',  btn = btn,modal_title = modal_title, data=data) }}
   </div><div  class="addline btn btn-secondary text-sm whitespace-nowrap cursor-pointer relative w-auto h-auto " type="button" data-title="{{_('Add mapping')}}"><i class="icon icon-plus-sm m-auto"></i></div>
     </div>  {%- if comment -%}<em class="text-sm inline-block">{{comment}}</em>{%-endif-%}

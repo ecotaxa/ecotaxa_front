@@ -122,6 +122,16 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                     "cnn_network_id": {"label": _("Deep feature ext.")},
                 }
             ),
+            "project": dict(
+                {
+                    "title": {"label": _("title")},
+                    "status": {"label": _("status")},
+                    "contact": {"label": _("contact"), "hidden": True},
+                    "privileges": {"label": _("members"), "format": "privileges"},
+                    "visible": {"label": _("Accès")},
+                    "license": {"label": _("license")},
+                }
+            ),
         },
         "samples": dict(
             {
@@ -198,6 +208,23 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
                     "cnn_network_id",
                 ],
             },
+        },
+        "project": {
+            "select": {
+                "label": _("select"),
+                "what": "project",
+                "selectcells": [
+                    "projid",
+                    "creator_users",
+                    "creator_organisations",
+                    "init_classif_list",
+                    "classiffieldlist",
+                    "privileges",
+                    "cnn_network_id",
+                    "status",
+                    "access",
+                ],
+            }
         },
     }
 
@@ -383,7 +410,6 @@ def render_for_js(prjs: list, columns: list, can_access: list) -> list:
     )
     for prj in prjs:
         jsonprj = list([])
-
         for key, column in columns.items():
             if key == "privileges":
                 jsonprj.append(

@@ -30,7 +30,6 @@ def gui_files_dirlist(subpath: str = None):
 @login_required
 def gui_files_create() -> str:
     entry = gvp("entry", None)
-    print("----create %s" % entry)
     if entry == None:
         return ""
     from appli.gui.files.tools import create_dir_file
@@ -57,7 +56,6 @@ def gui_files_remove() -> int:
 def gui_files_move() -> str:
     entry = gvp("entry", None)
     dest = gvp("dest", None)
-    print(" -------***%%%%front send ---- rename %s to %s " % (entry, dest))
     if entry == None or dest == None:
         return None
     from appli.gui.files.tools import move_dir_file

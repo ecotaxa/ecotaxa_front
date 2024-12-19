@@ -1,0 +1,63 @@
+{%-macro collection_nav()-%}
+{%-set privilege = namespace(value='') %}
+{%- if current_user.is_app_admin==True -%}
+{%- set privilege.value="Manage"  -%}
+{%-else -%}
+{% for manager in target_coll.managers -%}
+{%if current_user.id|int == manager.id|int -%}
+  {%- set privilege.value ="Manage" -%}
+  {%-endif%}
+  {%-endfor%}
+  {% for annotator in target_coll.annotators -%}
+  {%if current_user.id|int == annotator.id|int -%}
+    {%- set privilege.value ="Annotate" -%}
+    {%-endif%}
+    {%-endfor%}
+    {% for viewer in target_coll.viewers -%}
+    {%if current_user.id|int == viewer.id|int -%}
+      {%- set privilege.value ="View" -%}
+      {%-endif%}
+      {%-endfor%}
+{% set disabled = namespace(value=" class=disabled disabled=disabled") %}
+  <li>
+      <a href="{{ url_for('indexPrj',PrjId=target_coll.id)}}">
+        {{_('Annotate') if target_coll.status!='ExploreOnly' and privilege.value!="View" and  privilege.value!="" else _("View")}}
+      </a>
+    </li>
+    <li>
+      <a href="{{url_for("jobCreate",job_type="Prediction",collectionid=target_coll.id) }}" >
+        {{_('Predict')}}
+      </a></li>
+      {% endif %}
+
+<li><div>{{_('Export')}}</div><ul aria-expanded=false><li>
+  <li>
+        <a href="{{url_for("gui_job_create",job_type="DarwinCoreExport",target_type='collection',collection_id=target_coll.id)}}" >
+        <strong>{{_('DarwinCore')}}</strong> {{ _('export')}}
+        </a></li><li>
+      <a href="{{url_for("gui_job_create",job_type="GeneralExport",target_type='collection',collection_id=target_coll.id)}}" >
+      <strong>{{_('General')}}</strong> {{ _('export')}}
+      </a></li><li><a href="{{url_for("gui_job_create",job_type="BackupExport",target_type='collection', collection_id=target_coll.id) }}">
+      <strong>{{_('Backup')}}</strong> {{ _('export')}}
+        </a></li><li><a href="{{url_for("gui_job_create",job_type="SummaryExport",target_type='collection', collection_id=target_coll.id) }}">
+      <strong>{{_('Summary')}}</strong> {{ _('export')}}
+        </a></li><li><a href="{{url_for("gui_job_create",job_type="IdentificationExport",target_type='collection', collection_id=target_coll.id) }}">
+      <strong>{{_('Classification')}}</strong> {{ _('export')}}
+        </a></li></ul></li><li>
+  <a href="{{url_for('gui_collection_edit',collection_id=target_coll.id)}}">
+    {{_('Settings')}}
+  </a>
+</li><li>  <a href="{{url_for("gui_collection_purge",collection_id=target_coll.id) }}" >
+    {{_('Erase')}}
+  </a>
+</li><li>
+      <a href="{{url_for('gui_collection_about',collection_id=target_coll.id)}}" >
+        {{_('About')}}
+      </a>
+    </li>{%-endmacro-%}
+{% if target_coll and target_coll.id > 0 %}
+        <a href="{{ url_for("gui_collection")}}" title="{{_('collections list')}}" class="text-lg uppercase">
+          &laquo;
+        </a></li>
+        {{collection_nav()}}
+        {%-endif-%}
