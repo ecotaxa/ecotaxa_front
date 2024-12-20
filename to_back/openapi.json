@@ -2,7 +2,7 @@
   "openapi":"3.0.2",
   "info":{
     "title":"EcoTaxa",
-    "version":"0.0.37"
+    "version":"0.0.39"
   },
   "servers":[
     {
@@ -82,15 +82,16 @@
             "in":"query"
           },
           {
-            "description":"Return users except rights and last_used_projects if set to True. For users list display purpose.",
+            "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
             "required":false,
             "schema":{
-              "title":"Summary",
-              "type":"boolean",
-              "description":"Return users except rights and last_used_projects if set to True. For users list display purpose."
+              "title":"Fields",
+              "type":"string",
+              "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
+              "default":"*default"
             },
-            "example":true,
-            "name":"summary",
+            "example":"*default,fieldlist",
+            "name":"fields",
             "in":"query"
           }
         ],
@@ -816,6 +817,20 @@
         "summary":"Create Collection",
         "description":"**Create a collection** with at least one project inside.\n\nReturns the created collection Id.\n\nNote: 'manage' right is required on all underlying projects.",
         "operationId":"create_collection",
+        "parameters":[
+          {
+            "description":"If set, then only a diagnostic of doability will be done. In this case, plain value check. If no dry_run, this call will create a background job.",
+            "required":true,
+            "schema":{
+              "title":"Dry run",
+              "type":"boolean",
+              "description":"If set, then only a diagnostic of doability will be done. In this case, plain value check. If no dry_run, this call will create a background job."
+            },
+            "example":true,
+            "name":"dry_run",
+            "in":"query"
+          }
+        ],
         "requestBody":{
           "content":{
             "application/json":{
@@ -857,6 +872,74 @@
         ]
       }
     },
+    "/collections":{
+      "get":{
+        "tags":[
+          "collections"
+        ],
+        "summary":"List Collections",
+        "description":"**Search for collections.**\n\nNote: Only manageable collections are returned.",
+        "operationId":"list_collections",
+        "parameters":[
+          {
+            "description":"limit the list to a set of ids.",
+            "required":false,
+            "schema":{
+              "title":"Collection Ids",
+              "type":"string",
+              "description":"limit the list to a set of ids."
+            },
+            "example":"123,45",
+            "name":"collection_ids",
+            "in":"query"
+          },
+          {
+            "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
+            "required":false,
+            "schema":{
+              "title":"Fields",
+              "type":"string",
+              "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
+              "default":"*default"
+            },
+            "example":"*default,fieldlist",
+            "name":"fields",
+            "in":"query"
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "title":"Response List Collections Collections Get",
+                  "type":"array",
+                  "items":{
+                    "$ref":"#/components/schemas/CollectionModel"
+                  }
+                }
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
+      }
+    },
     "/collections/search":{
       "get":{
         "tags":[
@@ -876,6 +959,19 @@
             },
             "example":"%coll%",
             "name":"title",
+            "in":"query"
+          },
+          {
+            "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
+            "required":false,
+            "schema":{
+              "title":"Fields",
+              "type":"string",
+              "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
+              "default":"*default"
+            },
+            "example":"*default,fieldlist",
+            "name":"fields",
             "in":"query"
           }
         ],
@@ -1002,6 +1098,58 @@
             }
           }
         }
+      }
+    },
+    "/collections/aggregated_projects_properties":{
+      "get":{
+        "tags":[
+          "collections"
+        ],
+        "summary":"Collection Aggregated Projects Properties",
+        "description":"**returns projectset calculated selected fields values  projects and list of rejected projects id.\nNote: 'manage' right is required on all underlying projects.",
+        "operationId":"collection_aggregated_projects_properties",
+        "parameters":[
+          {
+            "description":"String containing the list of one or more project id separated by non-num char. \n .",
+            "required":true,
+            "schema":{
+              "title":"Project Ids",
+              "type":"string",
+              "description":"String containing the list of one or more project id separated by non-num char. \n ."
+            },
+            "example":"1",
+            "name":"project_ids",
+            "in":"query"
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/CollectionAggregatedBO"
+                },
+                "example":{}
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
       }
     },
     "/collections/{collection_id}":{
@@ -1319,6 +1467,136 @@
         ]
       }
     },
+    "/projects":{
+      "get":{
+        "tags":[
+          "projects"
+        ],
+        "summary":"List Projects",
+        "description":"Returns **projects which the current user has explicit permission to access, with fields options.**\n\nNote that, for performance reasons, in returned ProjectModels, field 'highest_rank' is NOT valued\n(unlike in simple query). The same information can be found in 'managers', 'annotators' and 'viewers' lists.",
+        "operationId":"list_projects",
+        "parameters":[
+          {
+            "description":"Limit the list to a set of ids.",
+            "required":false,
+            "schema":{
+              "title":"Project Ids",
+              "type":"string",
+              "description":"Limit the list to a set of ids."
+            },
+            "example":"123,45",
+            "name":"project_ids",
+            "in":"query"
+          },
+          {
+            "description":"Return projects on which the current user has _no permission_, but visible to him/her.",
+            "required":false,
+            "schema":{
+              "title":"Not granted",
+              "type":"boolean",
+              "description":"Return projects on which the current user has _no permission_, but visible to him/her.",
+              "default":false
+            },
+            "example":false,
+            "name":"not_granted",
+            "in":"query"
+          },
+          {
+            "description":"Return projects that can be written to (including erased) by the current user.",
+            "required":false,
+            "schema":{
+              "title":"For managing",
+              "type":"boolean",
+              "description":"Return projects that can be written to (including erased) by the current user.",
+              "default":false
+            },
+            "example":false,
+            "name":"for_managing",
+            "in":"query"
+          },
+          {
+            "description":"One of ['instrument', 'instrument_url', 'highest_right', 'projid', 'title', 'visible', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'description', 'rf_models_used', 'cnn_network_id']",
+            "required":false,
+            "schema":{
+              "title":"Order field",
+              "type":"string",
+              "description":"One of ['instrument', 'instrument_url', 'highest_right', 'projid', 'title', 'visible', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'description', 'rf_models_used', 'cnn_network_id']"
+            },
+            "example":"instrument",
+            "name":"order_field",
+            "in":"query"
+          },
+          {
+            "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
+            "required":false,
+            "schema":{
+              "title":"Fields",
+              "type":"string",
+              "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
+              "default":"*default"
+            },
+            "example":"*default,fieldlist",
+            "name":"fields",
+            "in":"query"
+          },
+          {
+            "description":"Skip `window_start` before returning data.",
+            "required":false,
+            "schema":{
+              "title":"Window start",
+              "type":"integer",
+              "description":"Skip `window_start` before returning data."
+            },
+            "example":"0",
+            "name":"window_start",
+            "in":"query"
+          },
+          {
+            "description":"Return only `window_size` lines.",
+            "required":false,
+            "schema":{
+              "title":"Window size",
+              "type":"integer",
+              "description":"Return only `window_size` lines."
+            },
+            "example":"100",
+            "name":"window_size",
+            "in":"query"
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "title":"Response List Projects Projects Get",
+                  "type":"array",
+                  "items":{
+                    "$ref":"#/components/schemas/ProjectModel"
+                  }
+                }
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
+      }
+    },
     "/projects/search":{
       "get":{
         "tags":[
@@ -1418,15 +1696,16 @@
             "in":"query"
           },
           {
-            "description":"Return projects except somme fields like bodc_variables if set to True. For projects list display purpose.",
+            "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
             "required":false,
             "schema":{
-              "title":"Summary",
-              "type":"boolean",
-              "description":"Return projects except somme fields like bodc_variables if set to True. For projects list display purpose."
+              "title":"Fields",
+              "type":"string",
+              "description":"Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.",
+              "default":"*default"
             },
-            "example":true,
-            "name":"summary",
+            "example":"*default,fieldlist",
+            "name":"fields",
             "in":"query"
           },
           {
@@ -1785,6 +2064,129 @@
         ]
       }
     },
+    "/projects/{project_id}/collections":{
+      "get":{
+        "tags":[
+          "projects"
+        ],
+        "summary":"Project Collections",
+        "description":"**Returns project collections list of id, title",
+        "operationId":"project_collections",
+        "parameters":[
+          {
+            "description":"Internal, numeric id of the project.",
+            "required":true,
+            "schema":{
+              "title":"Project Id",
+              "type":"integer",
+              "description":"Internal, numeric id of the project."
+            },
+            "example":1,
+            "name":"project_id",
+            "in":"path"
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "title":"Response Project Collections Projects  Project Id  Collections Get",
+                  "type":"array",
+                  "items":{
+                    "$ref":"#/components/schemas/MinimalCollectionBO"
+                  }
+                }
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
+      }
+    },
+    "/project_set/projects":{
+      "get":{
+        "tags":[
+          "projects"
+        ],
+        "summary":"Project Set Get Projects",
+        "description":"**Returns projects statistics**, i.e. used taxa and classification states.",
+        "operationId":"project_set_get_projects",
+        "parameters":[
+          {
+            "description":"String containing the list of one or more project id separated by non-num char. \n \n **If several ids are provided**, one stat record will be returned per project.",
+            "required":true,
+            "schema":{
+              "title":"Ids",
+              "type":"string",
+              "description":"String containing the list of one or more project id separated by non-num char. \n \n **If several ids are provided**, one stat record will be returned per project."
+            },
+            "example":"1",
+            "name":"ids",
+            "in":"query"
+          },
+          {
+            "description":"Return the default fields (typically used in conjunction with an additional field list). To return selected fields.",
+            "required":false,
+            "schema":{
+              "title":"Fields",
+              "type":"string",
+              "description":"Return the default fields (typically used in conjunction with an additional field list). To return selected fields.",
+              "default":"*default"
+            },
+            "example":"*default,fieldlist",
+            "name":"fields",
+            "in":"query"
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "title":"Response Project Set Get Projects Project Set Projects Get",
+                  "type":"array",
+                  "items":{
+                    "$ref":"#/components/schemas/ProjectColumnsModel"
+                  }
+                }
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
+      }
+    },
     "/project_set/taxo_stats":{
       "get":{
         "tags":[
@@ -1999,7 +2401,7 @@
                   ],
                   "total":54169,
                   "columns":[
-                    "fre.area",
+                    "calssif",
                     "obj.depth_min"
                   ],
                   "counts":[
@@ -3095,12 +3497,12 @@
             "in":"path"
           },
           {
-            "description":"\n\nSpecify the needed object (and ancillary entities) fields.\n\nIt follows the naming convention 'prefix.field' : Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.\n\nThe column obj.imgcount contains the total count of images for the object.\n\nUse a comma to separate fields.\n\n💡 More help :\n\nYou can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.\n\n**Note that the following fields must be prefixed with the header \"obj.\"** (for example → obj.orig_id):\n\nacquisid classif_auto_id, classif_auto_score, classif_auto_when, classif_crossvalidation_id,\nclassif_id, classif_qual, classif_who, classif_when, complement_info, depth_max, depth_min,\nlatitude, longitude, objdate, object_link, objid, objtime, orig_id, random_value, similarity, sunpos.\n\n**Note that the following fields must be prefixed with the header \"img.\"** (for example → img.file_name):\n\nfile_name, height, imgid, imgrank, file_name, orig, objid, file_name thumb_file_name, thumb_height, thumb_width, width.\n\n**Note that the following fields must be prefixed with the header \"txo.\"** (for example → txo.display_name):\n\ncreation_datetime, creator_email, display_name, id, id_instance, id_source, lastupdate_datetime,\nname, nbrobj, nbrobjcum, parent_id, rename_to source_desc, source_url, taxostatus, taxotype.\n\n**All other fields must be prefixed by the header \"fre.\"** (for example → fre.circ.).\n                   ",
+            "description":"\n\nSpecify the needed object (and ancillary entities) fields.\n\nIt follows the naming convention 'prefix.field' : Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.\n\nThe column obj.imgcount contains the total count of images for the object.\n\nUse a comma to separate fields.\n\n���� More help :\n\nYou can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.\n\n**Note that the following fields must be prefixed with the header \"obj.\"** (for example → obj.orig_id):\n\nacquisid classif_auto_id, classif_auto_score, classif_auto_when, classif_crossvalidation_id,\nclassif_id, classif_qual, classif_who, classif_when, complement_info, depth_max, depth_min,\nlatitude, longitude, objdate, object_link, objid, objtime, orig_id, random_value, similarity, sunpos.\n\n**Note that the following fields must be prefixed with the header \"img.\"** (for example → img.file_name):\n\nfile_name, height, imgid, imgrank, file_name, objid, orig_file_name, thumb_file_name, thumb_height, thumb_width, width.\n\n**Note that the following fields must be prefixed with the header \"txo.\"** (for example → txo.display_name):\n\ncreation_datetime, creator_email, display_name, id, id_instance, id_source, lastupdate_datetime,\nname, nbrobj, nbrobjcum, parent_id, rename_to, source_desc, source_url, taxostatus, taxotype.\n\n**All other fields must be prefixed by the header \"fre.\"** (for example → fre.circ.).\n                   ",
             "required":false,
             "schema":{
               "title":"Fields",
               "type":"string",
-              "description":"\n\nSpecify the needed object (and ancillary entities) fields.\n\nIt follows the naming convention 'prefix.field' : Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.\n\nThe column obj.imgcount contains the total count of images for the object.\n\nUse a comma to separate fields.\n\n💡 More help :\n\nYou can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.\n\n**Note that the following fields must be prefixed with the header \"obj.\"** (for example → obj.orig_id):\n\nacquisid classif_auto_id, classif_auto_score, classif_auto_when, classif_crossvalidation_id,\nclassif_id, classif_qual, classif_who, classif_when, complement_info, depth_max, depth_min,\nlatitude, longitude, objdate, object_link, objid, objtime, orig_id, random_value, similarity, sunpos.\n\n**Note that the following fields must be prefixed with the header \"img.\"** (for example → img.file_name):\n\nfile_name, height, imgid, imgrank, file_name, orig, objid, file_name thumb_file_name, thumb_height, thumb_width, width.\n\n**Note that the following fields must be prefixed with the header \"txo.\"** (for example → txo.display_name):\n\ncreation_datetime, creator_email, display_name, id, id_instance, id_source, lastupdate_datetime,\nname, nbrobj, nbrobjcum, parent_id, rename_to source_desc, source_url, taxostatus, taxotype.\n\n**All other fields must be prefixed by the header \"fre.\"** (for example → fre.circ.).\n                   "
+              "description":"\n\nSpecify the needed object (and ancillary entities) fields.\n\nIt follows the naming convention 'prefix.field' : Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.\n\nThe column obj.imgcount contains the total count of images for the object.\n\nUse a comma to separate fields.\n\n���� More help :\n\nYou can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.\n\n**Note that the following fields must be prefixed with the header \"obj.\"** (for example → obj.orig_id):\n\nacquisid classif_auto_id, classif_auto_score, classif_auto_when, classif_crossvalidation_id,\nclassif_id, classif_qual, classif_who, classif_when, complement_info, depth_max, depth_min,\nlatitude, longitude, objdate, object_link, objid, objtime, orig_id, random_value, similarity, sunpos.\n\n**Note that the following fields must be prefixed with the header \"img.\"** (for example → img.file_name):\n\nfile_name, height, imgid, imgrank, file_name, objid, orig_file_name, thumb_file_name, thumb_height, thumb_width, width.\n\n**Note that the following fields must be prefixed with the header \"txo.\"** (for example → txo.display_name):\n\ncreation_datetime, creator_email, display_name, id, id_instance, id_source, lastupdate_datetime,\nname, nbrobj, nbrobjcum, parent_id, rename_to, source_desc, source_url, taxostatus, taxotype.\n\n**All other fields must be prefixed by the header \"fre.\"** (for example → fre.circ.).\n                   "
             },
             "example":"obj.longitude,fre.feret",
             "name":"fields",
@@ -3259,8 +3661,8 @@
         "tags":[
           "objects"
         ],
-        "summary":"Reset Object Set To Predicted",
-        "description":"**Reset to Predicted** all objects for the given project with the filters.\n\nReturn **NULL upon success.**",
+        "summary":"Force Object Set To Predicted",
+        "description":"**Force to Predicted** all objects for the given project with the filters.\n\nReturn **NULL upon success.**",
         "operationId":"reset_object_set_to_predicted",
         "parameters":[
           {
@@ -3633,6 +4035,55 @@
         ]
       }
     },
+    "/object_set/classify_auto_multiple":{
+      "post":{
+        "tags":[
+          "objects"
+        ],
+        "summary":"Classify Auto Mult Object Set",
+        "description":"**Set automatic classification** of a set of objects.\n\n**Returns the number of updated entities.**",
+        "operationId":"classify_auto_mult_object_set",
+        "requestBody":{
+          "content":{
+            "application/json":{
+              "schema":{
+                "$ref":"#/components/schemas/ClassifyAutoReqMult"
+              }
+            }
+          },
+          "required":true
+        },
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "title":"Response Classify Auto Mult Object Set Object Set Classify Auto Multiple Post",
+                  "type":"integer"
+                },
+                "example":3
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
+      }
+    },
     "/object_set/parents":{
       "post":{
         "tags":[
@@ -3903,6 +4354,63 @@
               "application/json":{
                 "schema":{
                   "$ref":"#/components/schemas/PredictionRsp"
+                }
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
+      }
+    },
+    "/object_set/predictions":{
+      "post":{
+        "tags":[
+          "objects"
+        ],
+        "summary":"Query Object Set Predictions",
+        "description":"** Return last prediction information for a set of objects, by their IDs.",
+        "operationId":"predict_object_set",
+        "requestBody":{
+          "content":{
+            "application/json":{
+              "schema":{
+                "title":"Object IDs list",
+                "type":"array",
+                "items":{
+                  "type":"integer"
+                },
+                "description":"The list of object ids."
+              },
+              "example":[
+                634509,
+                6234516,
+                976544
+              ]
+            }
+          },
+          "required":true
+        },
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/PredictionInfoRsp"
                 }
               }
             }
@@ -5505,7 +6013,7 @@
           "Myfiles"
         ],
         "summary":"Remove File",
-        "description":"**Remove a file, files list , files filtered list, or directory in the current user files directory.**",
+        "description":"**Remove a file, or directory in the current user files directory.**",
         "operationId":"remove_my_file",
         "requestBody":{
           "content":{
@@ -5784,10 +6292,23 @@
         ],
         "type":"object",
         "properties":{
+          "collection_id":{
+            "title":"Collection Id",
+            "type":"integer",
+            "description":"The Collection to export if requested.",
+            "example":1
+          },
           "project_id":{
             "title":"Project Id",
-            "type":"integer",
-            "description":"The project to export.",
+            "anyOf":[
+              {
+                "type":"integer"
+              },
+              {
+                "type":"string"
+              }
+            ],
+            "description":"The project(int) or projects (str, project ids list) to export.",
             "example":1
           },
           "out_to_ftp":{
@@ -5888,12 +6409,12 @@
           "source_path":{
             "title":"Source Path",
             "type":"string",
-            "description":"The client-side full path of the file, files list , files filter or directory to be moved."
+            "description":"The client-side full path of the file or directory to be moved."
           },
           "dest_path":{
             "title":"Destination Path",
             "type":"string",
-            "description":"The client-side full path of the destination file, destination files or directory."
+            "description":"The client-side full path of the destination file or directory."
           }
         }
       },
@@ -5963,7 +6484,7 @@
           "source_path":{
             "title":"Source Path",
             "type":"string",
-            "description":"The client-side full path of the file , files list or file filter, or directory to be removed."
+            "description":"The client-side full path of the file  or directory to be removed."
           }
         }
       },
@@ -6005,7 +6526,7 @@
         }
       },
       "ClassifyAutoReq":{
-        "title":"Classify auto request Model",
+        "title":"ClassifyAutoReq",
         "required":[
           "target_ids",
           "classifications",
@@ -6043,6 +6564,53 @@
             "type":"boolean",
             "description":"Set if former automatic classification history is needed."
           }
+        }
+      },
+      "ClassifyAutoReqMult":{
+        "title":"Classify auto request Model",
+        "required":[
+          "target_ids",
+          "classifications",
+          "scores",
+          "keep_log"
+        ],
+        "type":"object",
+        "properties":{
+          "target_ids":{
+            "title":"Target Ids",
+            "type":"array",
+            "items":{
+              "type":"integer"
+            },
+            "description":"The IDs of the target objects."
+          },
+          "classifications":{
+            "title":"Classifications",
+            "type":"array",
+            "items":{
+              "type":"array",
+              "items":{
+                "type":"integer"
+              }
+            },
+            "description":"The wanted new classifications, i.e. taxon ID, one list for each object."
+          },
+          "scores":{
+            "title":"Scores",
+            "type":"array",
+            "items":{
+              "type":"array",
+              "items":{
+                "type":"number"
+              }
+            },
+            "description":"The classification scores, between 0 and 1. Each indicates the probability that the taxon prediction of this object for this category is correct."
+          },
+          "keep_log":{
+            "title":"Keep log",
+            "type":"boolean",
+            "description":"Set if former automatic classification history is needed. Deprecated, always True."
+          }
         },
         "example":{
           "target_ids":[
@@ -6051,14 +6619,28 @@
             976544
           ],
           "classifications":[
-            7546,
-            3421,
-            788
+            [
+              7546
+            ],
+            [
+              3421,
+              5614
+            ],
+            [
+              788
+            ]
           ],
           "scores":[
-            0.4,
-            0.56,
-            0.38
+            [
+              0.4
+            ],
+            [
+              0.56,
+              0.3333
+            ],
+            [
+              0.38
+            ]
           ],
           "keep_log":false
         }
@@ -6121,6 +6703,90 @@
           "uval":{
             "title":"Uval",
             "type":"string"
+          }
+        }
+      },
+      "CollectionAggregatedBO":{
+        "title":"CollectionAggregatedBO",
+        "required":[
+          "can_be_administered",
+          "instrument",
+          "access",
+          "initclassiflist",
+          "classiffieldlist",
+          "cnn_network_id",
+          "status",
+          "creator_users",
+          "privileges",
+          "freecols",
+          "excluded"
+        ],
+        "type":"object",
+        "properties":{
+          "can_be_administered":{
+            "title":"Can Be Administered",
+            "type":"boolean"
+          },
+          "instrument":{
+            "title":"Instrument",
+            "type":"string"
+          },
+          "access":{
+            "title":"Access",
+            "type":"string"
+          },
+          "initclassiflist":{
+            "title":"Initclassiflist",
+            "type":"string"
+          },
+          "classiffieldlist":{
+            "title":"Classiffieldlist",
+            "type":"string"
+          },
+          "cnn_network_id":{
+            "title":"Cnn Network Id",
+            "type":"string"
+          },
+          "status":{
+            "title":"Status",
+            "type":"string"
+          },
+          "creator_users":{
+            "title":"Creator Users",
+            "type":"array",
+            "items":{
+              "$ref":"#/components/schemas/ContactUserBO"
+            }
+          },
+          "privileges":{
+            "title":"Privileges",
+            "type":"object",
+            "additionalProperties":{
+              "type":"array",
+              "items":{
+                "type":"integer"
+              }
+            }
+          },
+          "freecols":{
+            "title":"Freecols",
+            "type":"object",
+            "additionalProperties":{
+              "type":"object",
+              "additionalProperties":{
+                "type":"string"
+              }
+            }
+          },
+          "excluded":{
+            "title":"Excluded",
+            "type":"object",
+            "additionalProperties":{
+              "type":"array",
+              "items":{
+                "type":"integer"
+              }
+            }
           }
         }
       },
@@ -6284,6 +6950,46 @@
               "":"Not chosen"
             }
           },
+          "license_restrictions":{
+            "title":"License restrictions",
+            "type":"object",
+            "additionalProperties":{
+              "type":"string"
+            },
+            "description":"License sorted by restriction.",
+            "default":{
+              "0":"CC0 1.0",
+              "1":"CC BY 4.0",
+              "3":"CC BY-NC 4.0",
+              "7":"Copyright",
+              "8":""
+            },
+            "example":{
+              "0":"CC0 1.0",
+              "1":"CC BY 4.0",
+              "3":"CC BY-NC 4.0",
+              "7":"Copyright",
+              "8":""
+            }
+          },
+          "access":{
+            "title":"Projects access",
+            "type":"object",
+            "additionalProperties":{
+              "type":"string"
+            },
+            "description":"Projects access levels.",
+            "default":{
+              "PUBLIC":"1",
+              "OPEN":"2",
+              "PRIVATE":"0"
+            },
+            "example":{
+              "public":"",
+              "open":"O",
+              "private":"P"
+            }
+          },
           "app_manager":{
             "title":"Application manager",
             "maxItems":2,
@@ -6373,6 +7079,39 @@
           }
         },
         "description":"Values which can be considered identical over the lifetime of the back-end."
+      },
+      "ContactUserBO":{
+        "title":"ContactUserBO",
+        "required":[
+          "id",
+          "name",
+          "email",
+          "orcid",
+          "organisation"
+        ],
+        "type":"object",
+        "properties":{
+          "id":{
+            "title":"Id",
+            "type":"integer"
+          },
+          "name":{
+            "title":"Name",
+            "type":"string"
+          },
+          "email":{
+            "title":"Email",
+            "type":"string"
+          },
+          "orcid":{
+            "title":"Orcid",
+            "type":"string"
+          },
+          "organisation":{
+            "title":"Organisation",
+            "type":"string"
+          }
+        }
       },
       "CreateCollectionReq":{
         "title":"Create collection request Model",
@@ -6607,10 +7346,23 @@
         ],
         "type":"object",
         "properties":{
+          "collection_id":{
+            "title":"Collection Id",
+            "type":"integer",
+            "description":"The Collection to export if requested.",
+            "example":1
+          },
           "project_id":{
             "title":"Project Id",
-            "type":"integer",
-            "description":"The project to export.",
+            "anyOf":[
+              {
+                "type":"integer"
+              },
+              {
+                "type":"string"
+              }
+            ],
+            "description":"The project(int) or projects (str, project ids list) to export.",
             "example":1
           },
           "exp_type":{
@@ -6778,7 +7530,7 @@
             "example":12376
           }
         },
-        "description":"Export response, for all export jobs, either on Project or Collection"
+        "description":"Export response, for all export jobs, either on Project or Collection."
       },
       "ExportSplitOptionsEnum":{
         "title":"ExportSplitOptionsEnum",
@@ -6812,10 +7564,23 @@
         ],
         "type":"object",
         "properties":{
+          "collection_id":{
+            "title":"Collection Id",
+            "type":"integer",
+            "description":"The Collection to export if requested.",
+            "example":1
+          },
           "project_id":{
             "title":"Project Id",
-            "type":"integer",
-            "description":"The project to export.",
+            "anyOf":[
+              {
+                "type":"integer"
+              },
+              {
+                "type":"string"
+              }
+            ],
+            "description":"The project(int) or projects (str, project ids list) to export.",
             "example":1
           },
           "split_by":{
@@ -6978,17 +7743,17 @@
             "format":"date-time",
             "example":"2021-09-21T14:59:01.007110"
           },
-          "histo_classif_type":{
-            "title":"Historical last classification type",
-            "type":"string",
-            "description":"The type of classification. Could be **A** for Automatic or **M** for Manual.",
-            "example":"M"
-          },
           "histo_classif_id":{
             "title":"Historical last classification Id",
             "type":"integer",
             "description":"The classification Id.",
             "example":56
+          },
+          "histo_classif_type":{
+            "title":"Historical last classification type",
+            "type":"string",
+            "description":"The type of classification. Could be **A** for Automatic or **M** for Manual.",
+            "example":"M"
           },
           "histo_classif_qual":{
             "title":"Historical last classification qualification",
@@ -6999,14 +7764,19 @@
           "histo_classif_who":{
             "title":"Historical last classification who",
             "type":"integer",
-            "description":"The user who manualy classify this object.",
+            "description":"The user who manually classified this object.",
             "example":3876
+          },
+          "histo_classif_score":{
+            "title":"Histo Classif Score",
+            "type":"number"
           }
         }
       },
       "ImageModel":{
         "title":"ImageModel",
         "required":[
+          "imgid",
           "objid",
           "imgrank",
           "width",
@@ -7390,6 +8160,52 @@
           }
         }
       },
+      "MinimalCollectionBO":{
+        "title":"MinimalCollectionBO",
+        "required":[
+          "id",
+          "external_id",
+          "title",
+          "short_title",
+          "provider_user_id",
+          "contact_user",
+          "project_ids"
+        ],
+        "type":"object",
+        "properties":{
+          "id":{
+            "title":"Id",
+            "type":"integer"
+          },
+          "external_id":{
+            "title":"External Id",
+            "type":"string"
+          },
+          "title":{
+            "title":"Title",
+            "type":"string"
+          },
+          "short_title":{
+            "title":"Short Title",
+            "type":"string"
+          },
+          "provider_user_id":{
+            "title":"Provider User Id",
+            "type":"integer"
+          },
+          "contact_user":{
+            "title":"Contact User",
+            "type":"object"
+          },
+          "project_ids":{
+            "title":"Project Ids",
+            "type":"array",
+            "items":{
+              "type":"integer"
+            }
+          }
+        }
+      },
       "MinimalUserBO":{
         "title":"MinimalUserBO",
         "type":"object",
@@ -7413,6 +8229,31 @@
         ],
         "type":"object",
         "properties":{
+          "classif_when":{
+            "title":"Classification when",
+            "type":"string",
+            "description":"The human classification date, if **P** or **V**.",
+            "format":"date-time",
+            "example":"2021-09-21T14:59:01.007110"
+          },
+          "classif_auto_id":{
+            "title":"Classification auto Id",
+            "type":"integer",
+            "description":"Set if the object was ever predicted, remains forever with these value. Reflect the 'last state' only if classif_qual is 'P'. "
+          },
+          "classif_auto_score":{
+            "title":"Classification auto score",
+            "type":"number",
+            "description":"Set if the object was ever predicted, remains forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification auto score is generally between 0 and 1. This is a confidence score, in the fact that, the taxon prediction for this object is correct.",
+            "example":0.085
+          },
+          "classif_auto_when":{
+            "title":"Classification auto when",
+            "type":"string",
+            "description":"Set if the object was ever predicted, remains forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification date.",
+            "format":"date-time",
+            "example":"2021-09-21T14:59:01.007110"
+          },
           "objid":{
             "title":"Object Id",
             "type":"integer",
@@ -7477,36 +8318,17 @@
             "description":"Sun position, from date, time and coords.",
             "example":"N"
           },
-          "classif_when":{
-            "title":"Classification when",
-            "type":"string",
-            "description":"The classification date.",
-            "format":"date-time",
-            "example":"2021-09-21T14:59:01.007110"
+          "classif_score":{
+            "title":"Classification score",
+            "type":"number",
+            "description":"The ML score for this object, if **P**.",
+            "example":"null"
           },
           "classif_who":{
             "title":"Classification who",
             "type":"integer",
-            "description":"The user who manualy classify this object.",
+            "description":"The user who manually classified this object, if **V** or **D**.",
             "example":"null"
-          },
-          "classif_auto_id":{
-            "title":"Classification auto Id",
-            "type":"integer",
-            "description":"Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. "
-          },
-          "classif_auto_when":{
-            "title":"Classification auto when",
-            "type":"string",
-            "description":"Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification date.",
-            "format":"date-time",
-            "example":"2021-09-21T14:59:01.007110"
-          },
-          "classif_auto_score":{
-            "title":"Classification auto score",
-            "type":"number",
-            "description":"Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification auto score is generally between 0 and 1. This is a confidence score, in the fact that, the taxon prediction for this object is correct.",
-            "example":0.085
           },
           "orig_id":{
             "title":"Original id",
@@ -7539,6 +8361,31 @@
         ],
         "type":"object",
         "properties":{
+          "classif_when":{
+            "title":"Classification when",
+            "type":"string",
+            "description":"The human classification date, if **P** or **V**.",
+            "format":"date-time",
+            "example":"2021-09-21T14:59:01.007110"
+          },
+          "classif_auto_id":{
+            "title":"Classification auto Id",
+            "type":"integer",
+            "description":"Set if the object was ever predicted, remains forever with these value. Reflect the 'last state' only if classif_qual is 'P'. "
+          },
+          "classif_auto_score":{
+            "title":"Classification auto score",
+            "type":"number",
+            "description":"Set if the object was ever predicted, remains forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification auto score is generally between 0 and 1. This is a confidence score, in the fact that, the taxon prediction for this object is correct.",
+            "example":0.085
+          },
+          "classif_auto_when":{
+            "title":"Classification auto when",
+            "type":"string",
+            "description":"Set if the object was ever predicted, remains forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification date.",
+            "format":"date-time",
+            "example":"2021-09-21T14:59:01.007110"
+          },
           "objid":{
             "title":"Object Id",
             "type":"integer",
@@ -7603,36 +8450,17 @@
             "description":"Sun position, from date, time and coords.",
             "example":"N"
           },
-          "classif_when":{
-            "title":"Classification when",
-            "type":"string",
-            "description":"The classification date.",
-            "format":"date-time",
-            "example":"2021-09-21T14:59:01.007110"
+          "classif_score":{
+            "title":"Classification score",
+            "type":"number",
+            "description":"The ML score for this object, if **P**.",
+            "example":"null"
           },
           "classif_who":{
             "title":"Classification who",
             "type":"integer",
-            "description":"The user who manualy classify this object.",
+            "description":"The user who manually classified this object, if **V** or **D**.",
             "example":"null"
-          },
-          "classif_auto_id":{
-            "title":"Classification auto Id",
-            "type":"integer",
-            "description":"Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. "
-          },
-          "classif_auto_when":{
-            "title":"Classification auto when",
-            "type":"string",
-            "description":"Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification date.",
-            "format":"date-time",
-            "example":"2021-09-21T14:59:01.007110"
-          },
-          "classif_auto_score":{
-            "title":"Classification auto score",
-            "type":"number",
-            "description":"Set if the object was ever predicted, remain forever with these value. Reflect the 'last state' only if classif_qual is 'P'. The classification auto score is generally between 0 and 1. This is a confidence score, in the fact that, the taxon prediction for this object is correct.",
-            "example":0.085
           },
           "orig_id":{
             "title":"Original id",
@@ -7878,6 +8706,47 @@
         },
         "description":"Classification summary from object set."
       },
+      "PredictionInfoRsp":{
+        "title":"PredictionInfoRsp",
+        "type":"object",
+        "properties":{
+          "result":{
+            "title":"Result",
+            "type":"array",
+            "items":{
+              "maxItems":3,
+              "minItems":3,
+              "type":"array",
+              "items":[
+                {
+                  "type":"integer"
+                },
+                {
+                  "type":"integer"
+                },
+                {
+                  "type":"number"
+                }
+              ]
+            },
+            "description":"List of lists [object ID, category ID, score for category].",
+            "default":[],
+            "example":[
+              [
+                23456,
+                1234,
+                0.7
+              ],
+              [
+                23457,
+                768,
+                0.2
+              ]
+            ]
+          }
+        },
+        "description":"Prediction information for a set of objects."
+      },
       "PredictionReq":{
         "title":"Prediction Request",
         "required":[
@@ -8020,6 +8889,33 @@
               "software":"zooprocess_pid_to_ecotaxa_7.26_2017/12/19",
               "pressure_gain":"10"
             }
+          }
+        }
+      },
+      "ProjectColumnsModel":{
+        "title":"ProjectColumnsModel",
+        "type":"object",
+        "properties":{
+          "projid":{
+            "title":"Project ID",
+            "type":"integer",
+            "description":"Project ID from the call."
+          },
+          "columns":{
+            "title":"Columns",
+            "type":"array",
+            "items":{
+              "type":"string"
+            },
+            "description":"Column names from the call."
+          },
+          "values":{
+            "title":"All rows",
+            "type":"array",
+            "items":{
+              "type":"string"
+            },
+            "description":"All rows regardless of emptiness."
           }
         }
       },
@@ -8999,10 +9895,23 @@
         ],
         "type":"object",
         "properties":{
+          "collection_id":{
+            "title":"Collection Id",
+            "type":"integer",
+            "description":"The Collection to export if requested.",
+            "example":1
+          },
           "project_id":{
             "title":"Project Id",
-            "type":"integer",
-            "description":"The project to export.",
+            "anyOf":[
+              {
+                "type":"integer"
+              },
+              {
+                "type":"string"
+              }
+            ],
+            "description":"The project(int) or projects (str, project ids list) to export.",
             "example":1
           },
           "quantity":{

@@ -89,7 +89,7 @@ def _prjs_list_api(
             }
         )
         if summary == True:
-            payload.update({"summary": True})
+            payload.update({"fields": "*default"})
         with ApiClient(ProjectsApi, request) as apiproj:
             url = (
                 apiproj.api_client.configuration.host + "/projects/search"

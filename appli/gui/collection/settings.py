@@ -94,13 +94,15 @@ def collection_aggregated(project_ids: str) -> tuple:
         from appli.gui.staticlistes import py_user
 
         raise Forbidden(py_user["notauthorized"])
-    aggregated = ()
+    aggregated = {}
     if len(project_ids):
         with ApiClient(CollectionsApi, request) as api:
             aggregated: tuple = api.collection_aggregated_projects_properties(
                 project_ids
             )
-    return {"aggregated": aggregated[0], "excluded": aggregated[1]}
+    excluded = aggregated.excluded
+    del aggregated.excluded
+    return {"aggregated": aggregated, "excluded": excluded}
 
 
 def collection_edit(collection_id: int, new: bool = False) -> str:
