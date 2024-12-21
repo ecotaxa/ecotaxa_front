@@ -171,6 +171,14 @@ code {
 	font-size: 100%;
 	opacity: 20%;
 }
+#column-right .simsrchseed {
+	position: absolute;
+	top: 0;
+	right: 2px;
+	color: #999;
+	text-decoration: none;
+	font-size: 100%;
+}
 #column-right .ddet:hover {
 	color: #428bca;
 }

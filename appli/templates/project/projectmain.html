@@ -563,6 +563,10 @@
           // Launch real load
           AsyncSingleLoadRightPane(jqcolumnright, req);
           $('#headersubtitle').html(TxtFilter);
+          if ($("#sortby").val().startsWith("ss-I")) {
+              // Force desc order as the query returns the distance to seed
+              $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title", "Current Sort : Descending");
+          }
       }
 
       function UpdateRightPaneProgress(req) {
@@ -754,7 +758,7 @@
           var PreviousSort = $('#sortby').val();
           {# Si on choisit un champ pour le tri, ca l'ajoute automatiquement dans les displayed fields #}
           $('#sortby').change(function () {
-              // TODO not for ss
+              // Note: not for simsearch, the sort value (distance) is not shown
               $("#dispfield_" + PreviousSort + "  .glyphicon:not(.ManualAdd)").removeClass('glyphicon-ok');
               $("#dispfield_" + $(this).val() + " .glyphicon").addClass('glyphicon-ok');
               PreviousSort = $(this).val();

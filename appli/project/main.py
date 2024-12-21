@@ -630,6 +630,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
 
     pageoffset = int(gvp("pageoffset", "0"))
     sortby = Filt["sortby"]
+    simsearch_seed = int(sortby[4:]) if sortby and sortby.startswith("ss-I") else None
     sortorder = Filt["sortorder"]
     # The fields AKA DB columns needed under each image, a space-separated list of
     # DB column names, with dispfield_ prefix, e.g. ' dispfield_orig_id dispfield_classif_auto_score dispfield_n33'
@@ -725,7 +726,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                     "-" if sortorder.lower() == "desc" else ""
                 ) + api_sortby
             else:
-                if sortby.startswith("ss-I"):
+                if simsearch_seed is not None:
                     sort_col_signed = sortby
         needed_fields = ",".join(api_cols)
         while True:
@@ -917,17 +918,23 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         )
 
         name_chunk = FormatNameForVignetteDisplay(display_name, hyphenator, categ_cache)
+        if g.PublicViewMode:
+            simsrch_btn = ""
+        else:
+            simsrch_btn = "\n<div class='simsrch'><span title='Search similar objects' class='simsrchs'><span class='glyphicon glyphicon-screenshot'></span></div></td>"
+        if dtl["obj.objid"] == simsearch_seed:
+            simsrch_btn = "\n<div class='simsrchseed'><span title='Similarity search seed' class='simsrchs'><span class='glyphicon glyphicon-grain'></span></div></td>"
         txt += """<div class='subimg status-{0}' {1}>
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
-<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span>{4} {5}</div>
-<div class='simsrch'><span title='Search similar objects' class='simsrchs'><span class='glyphicon glyphicon-screenshot'></span></div></td>""".format(
+<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span>{4} {5}</div>{6}""".format(
             ClassifQual.get(dtl["obj.classif_qual"], "unknown"),
             popattribute,
             name_chunk,
             bottomtxt,
             imgcount_lbl,
             comment_present,
+            simsrch_btn
         )
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins
