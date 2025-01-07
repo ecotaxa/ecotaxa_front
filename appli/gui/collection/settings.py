@@ -22,6 +22,9 @@ from to_back.ecotaxa_cli_py.models import (
     MinUserModel,
     TaxonModel,
 )
+from to_back.ecotaxa_cli_py.models.collection_aggregated_rsp import (
+    CollectionAggregatedRsp,
+)
 from appli.gui.commontools import possible_licenses, possible_models, possible_access
 
 ###############################################common for create && edit  #######################################################################
@@ -65,6 +68,7 @@ def collection_create() -> str:
     if to_save == "Y":
         title = gvp("title")
         project_ids = [int(p) for p in gvpm("project_ids[]")]
+
         if title == "" or len(project_ids) == 0:
             flash("title and project id are required", "error")
             to_save = False
@@ -87,7 +91,7 @@ def collection_create() -> str:
     )
 
 
-def collection_aggregated(project_ids: str) -> tuple:
+def collection_aggregated(project_ids: str) -> dict:
     # who has the right to create a collection
     if not True:
         from werkzeug.exceptions import Forbidden
@@ -97,12 +101,24 @@ def collection_aggregated(project_ids: str) -> tuple:
     aggregated = {}
     if len(project_ids):
         with ApiClient(CollectionsApi, request) as api:
-            aggregated: tuple = api.collection_aggregated_projects_properties(
-                project_ids
+            aggregated: CollectionAggregatedRsp = (
+                api.collection_aggregated_projects_properties(project_ids)
             )
-    excluded = aggregated.excluded
-    del aggregated.excluded
-    return {"aggregated": aggregated, "excluded": excluded}
+    privileges = {}
+    ret = aggregated.to_dict()
+    if "creator_users" in ret:
+        creator_users = []
+        for u in ret["creator_users"]:
+            creator_users.append(u.to_dict())
+        ret["creator_users"] = creator_users
+    if "privileges" in ret:
+        for key, privs in ret["privileges"].items():
+            privlist = []
+            for u in privs:
+                privlist.append(u.to_dict())
+            privileges[key] = privlist
+        ret["privileges"] = privileges
+    return ret
 
 
 def collection_edit(collection_id: int, new: bool = False) -> str:
@@ -165,23 +181,23 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
     projectlist = [_prj_format(int(p)) for p in collection.project_ids]
     prjlist = [str(p) for p in collection.project_ids]
     aggregated = collection_aggregated(",".join(prjlist))
-    if "initclassiflist" in aggregated["aggregated"]:
-        initclassiflist = aggregated["aggregated"]["initclassiflist"].split(",")
+    if hasattr(aggregated, "initclassiflist"):
+        initclassiflist = aggregated.initclassiflist.split(",")
     else:
         initclassiflist = []
     lst = [str(tid) for tid in initclassiflist]
-    if "classiffieldlist" in aggregated["aggregated"]:
-        classiffieldlist = aggregated["aggregated"]["classiffieldlist"]
+    if hasattr(aggregated, "classiffieldlist"):
+        classiffieldlist = aggregated.classiffieldlist
     else:
         classiffieldlist = ""
 
-    if "privileges" in aggregated["aggregated"]:
-        privileges = aggregated["aggregated"]["privileges"]
+    if hasattr(aggregated, "privileges"):
+        privileges = aggregated.privileges
 
     else:
         privileges = None
-    if "freecols" in aggregated["aggregated"]:
-        freecols = aggregated["aggregated"]["freecols"]
+    if hasattr(aggregated, "freecols"):
+        freecols = aggregated.freecols
     else:
         freecols = None
     # common func used in project stats

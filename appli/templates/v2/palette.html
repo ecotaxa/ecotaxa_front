@@ -1,4 +1,5 @@
-<!DOCTYPE html><html><head><link rel=stylesheet rel="preload" type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}?v={{ ecotaxa_version  }}"></head>
+<!DOCTYPE html><html><!--<head><link rel=stylesheet rel="preload" type=text/css href="{{ url_for('static', filename='gui/css/main.css') }}?v={{ ecotaxa_version  }}"></head>-->
+{%- include 'v2/partials/_head.html' -%}
 <body>{% set palette = {"mainblue": {
     '50': '#f3f7f8',
     '100': '#d8f0f9',

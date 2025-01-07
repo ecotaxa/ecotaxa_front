@@ -31,7 +31,8 @@ function ImportList(state, attach = null) {
       method: 'GET',
     }))
     let results = await response.json();
-    results = results.aggregated;
+    const excluded = results.excluded;
+    delete results.excluded;
     const collator = new Intl.Collator(undefined, {
       numeric: true,
       sensitivity: 'base'

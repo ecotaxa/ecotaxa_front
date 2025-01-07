@@ -152,7 +152,7 @@
                        {% endfor %}</div>
                </div>
       </div>
-      <div id="section-privileges" class="js js-privileges w-full" data-u="{{ current_user.id|string() }}" data-alert="true">
+      <div id="section-privileges" class="js js-privileges w-full" data-readonly data-u="{{ current_user.id|string() }}" data-alert="true">
         <div class="legend">Privileges</div>
       <div class="flex flex-col w-full px-4" id="listprivileges" >
           <div class="row" data-headers="true">
@@ -165,8 +165,8 @@
           {%-set priv={"managers":"Manage","annotators":"Annotate","viewers":"View"}-%}
           {% for k,members in members_by_right.items() %}
           {% for member in members %}
-          <div class="row messagepos" data-block="member">
-            {{ member_cells(count.value|string(),member= member,privilege=priv[k],autocomplete=True, required=(count and count.value==0 and k=='Manage'), extra='',readonly=True) }}
+          <div class="row messagepos" data-readonly data-block="member">
+            {{ member_cells(count.value|string(),member= member,privilege=priv[k],autocomplete=True, required=False, extra='',readonly=True) }}
           </div>
           {% set count.value = count.value + 1 %}
           {% endfor %}
@@ -174,8 +174,8 @@
           {% set required = False %}
           {% else %}
           {# new project admin is project creator #}
-        <div class="row hide" data-block="member">
-            {{ member_cells('0',member = {id:0,name:'',email:'',delet:''},privilege='Manage', autocomplete=True,required=True,readonly=True) }}
+        <div class="row hide" data-model data-block="member">
+            {{ member_cells('0',member = {id:0,name:'',email:'',delet:''},privilege='Manage', autocomplete=True,required=False,readonly=True) }}
           </div>
           {% endif %}
           </div>

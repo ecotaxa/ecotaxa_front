@@ -87,7 +87,8 @@ def gui_collection_simulate():
     content = collection_aggregated(project_ids)
     import json
 
-    return json.dumps(content)
+    ret = json.dumps(content)
+    return ret
 
 
 @app.route("/gui/collection/edit/<int:collection_id>", methods=["GET", "POST"])
