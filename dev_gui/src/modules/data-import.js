@@ -208,8 +208,8 @@ export class DataImport {
       //ts.clearOptions();
       // add ts items
       if (add) items.forEach(([key, text]) => {
-        if (!ts.getItem(key)) {
-          if (!ts.getOption(key)) {
+        if (ts.getItem(key) === null) {
+          if (ts.getOption(key) === null) {
             let obj = {};
             obj[ts.settings.valueField] = key;
             obj[ts.settings.labelField] = unescape_html(text.trim());
@@ -385,7 +385,7 @@ export class DataImport {
         const activate = (!this.button.dataset.activated && ([typeimport.taxo, typeimport.privileges, typeimport.project].indexOf(what) >= 0));
         this.showImport(showbtns);
         if (activate) this.activateButtons(what, selectcells);
-      } else this.waitImport(null, selectcells, what, true);
+      } else this.makeImport(null, selectcells, what, true);
     }
   }
   messageZone(item) {
@@ -585,9 +585,11 @@ export class DataImport {
       items.forEach((e) => {
         let el = {};
         el[ts.settings.valueField] = e;
-        el[ts.settings.searchField] = unescape_html(options[e][ts.settings.searchField]);
-        if (!ts.getOption(e)) ts.addOption(el);
-        ts.addItem(e);
+        el[ts.settings.labelField] = unescape_html(options[e][ts.settings.labelField]);
+        el[ts.settings.searchField] = unescape_html(options[e][ts.settings.labelField]);
+        if (ts.getOption(el[ts.settings.valueField]) === null) ts.addOption(el);
+        if (ts.getItem(el[ts.settings.valueField]) === null) ts.addItem(el[ts.settings.valueField]);
+        console.log('ts.items', ts.items)
       });
       //  tzone.clearOptions();
     } else {
@@ -634,8 +636,8 @@ export class DataImport {
             el[ts.settings.valueField] = data.key;
             el[ts.settings.searchField] = unescape_html(data.value);
           }
-          if (!ts.getOption(el[ts.settings.valueField])) ts.addOption(el);
-          if (!ts.getItem(el[ts.settings.valueField])) ts.addItem(el[ts.settings.valueField]);
+          if (ts.getOption(el[ts.settings.valueField]) === null) ts.addOption(el);
+          if (ts.getItem(el[ts.settings.valueField]) === null) ts.addItem(el[ts.settings.valueField]);
         }
         const add_select_option = function(input, data) {
           let attr = {
@@ -718,6 +720,7 @@ export class DataImport {
               }
             } else if (ts) {
               if (input.multiple) this.imports[name].forEach(data => {
+                console.log('data', data)
                 ts_add_select_item(ts, data)
               });
               else ts_add_select_item(ts, this.imports[name]);
@@ -732,7 +735,7 @@ export class DataImport {
                 case 'select-multiple':
                 case 'select':
                   if (input.multiple) this.imports[name].forEach(data => {
-                    add_select_option(input, data)
+                    add_select_option(input, data);
                   });
                   else add_select_option(input, this.imports[name]);
                   break;

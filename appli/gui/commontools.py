@@ -211,9 +211,10 @@ def py_get_messages(type=None):
         return {**py_messages}
     if type == "project":
         from appli.gui.project.staticlistes import py_messages as py_messages_type
+    elif type == "collection":
+        from appli.gui.collection.staticlistes import py_messages as py_messages_type
     elif type == "jobs":
         from appli.gui.jobs.staticlistes import py_messages as py_messages_type
-
     return {**py_messages, **py_messages_type}
 
 

@@ -241,7 +241,6 @@ function createJsTomSelect() {
             break;
         }
         if (url !== null) fetch(url, fetchSettings()).then(response => response.json()).then(json => {
-          console.log('json', json)
           if (type === models.project) {
 
             if (json.data && json.data.length) json = json.data.map(row => {

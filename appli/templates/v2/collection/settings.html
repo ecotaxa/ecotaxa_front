@@ -68,7 +68,7 @@
               <div class="w-full tab-content mt-0">
           <div class="form-box">
             <div >{{ pick_from_other(True,key='project',modal_title=_('Pick projects'), sourceid=sourceid) }}<label for="project_ids">{{_('Projects')}}<i data-for="help_coll_projects" data-request="help"></i></label></div>
-            <select id="project_ids" name="project_ids[]" data-type="project"  data-importfield="projid" class="js js-autocomplete form-multiselect project" multiple readonly autocomplete=off><option value="0">{{_('Select projects')}}</option>
+            <select id="project_ids" name="project_ids[]" data-type="project"  data-importfield="projid" class="js js-autocomplete form-multiselect project" multiple autocomplete=off><option value="0">{{_('Select projects')}}</option>
      {% for p in projectlist %}
               <option value="{{ p.id }}"  selected="selected">{{ p.title }}</option>
               {% endfor %}
@@ -137,7 +137,7 @@
               <div class="form-box">
                 <div class="label" data-for="status" >{{ _('Status') }} </div>
                 <div class="form-group" role="group" >
-                  {%- set status = ""-%}
+                  {%- set status = status or ""-%}
                   {% for st in (("Annotate",_("Annotate")),("ExploreOnly",_("Explore Only")),("Annotate No Prediction",_("Annotate No Prediction"))) %}
                   {{ form_group_radio('status_' + loop.index|string(),'status',st[0],st[1],status,required=(loop.index==1), extra=extra)}}
                   {% endfor %}
@@ -146,7 +146,7 @@
               <div class="form-box">
                  <div class="label" data-for="access">{{ _('Access') }}<i data-for="help_proj_access" data-request="help"></i></div>
                  <div class="form-group" id="proj_license" role="group">
-                   {%- set access = "" -%}{{possible_access}}
+                   {%- set access = access or "" -%}{{possible_access}}
                    {% for k,v in possible_access.items() %}
                    {{form_group_radio('access_'+ loop.index|string(),'access',k,v,access, required=(loop.index==1), extra=extra )}}
                        {% endfor %}</div>
@@ -187,7 +187,7 @@
   {{ display_freecols()}}</div>{%-endif-%}
     </div></div></div>
 
-
+{{excluded}}
 <div class="w-full text-left my-8"> <input type="hidden" name="save" value="Y">
   <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{url_for("gui_collection", collection_id= target_coll.id) if target_coll }}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to collection list ') }}">{{ _('Cancel') }}</a>
 </div>

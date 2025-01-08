@@ -25,7 +25,12 @@ from to_back.ecotaxa_cli_py.models import (
 from to_back.ecotaxa_cli_py.models.collection_aggregated_rsp import (
     CollectionAggregatedRsp,
 )
-from appli.gui.commontools import possible_licenses, possible_models, possible_access
+from appli.gui.commontools import (
+    possible_licenses,
+    possible_models,
+    possible_access,
+    py_get_messages,
+)
 
 ###############################################common for create && edit  #######################################################################
 def _user_format(uid: int) -> dict:
@@ -181,23 +186,23 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
     projectlist = [_prj_format(int(p)) for p in collection.project_ids]
     prjlist = [str(p) for p in collection.project_ids]
     aggregated = collection_aggregated(",".join(prjlist))
-    if hasattr(aggregated, "initclassiflist"):
-        initclassiflist = aggregated.initclassiflist.split(",")
+    if "initclassiflist" in aggregated:
+        initclassiflist = aggregated["initclassiflist"].split(",")
     else:
         initclassiflist = []
     lst = [str(tid) for tid in initclassiflist]
-    if hasattr(aggregated, "classiffieldlist"):
-        classiffieldlist = aggregated.classiffieldlist
+    if "classiffieldlist" in aggregated:
+        classiffieldlist = aggregated["classiffieldlist"]
     else:
         classiffieldlist = ""
 
-    if hasattr(aggregated, "privileges"):
-        privileges = aggregated.privileges
+    if "privileges" in aggregated:
+        privileges = aggregated["privileges"]
 
     else:
         privileges = None
-    if hasattr(aggregated, "freecols"):
-        freecols = aggregated.freecols
+    if "freecols" in aggregated:
+        freecols = aggregated["freecols"]
     else:
         freecols = None
     # common func used in project stats
@@ -213,6 +218,9 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
         projectlist=projectlist,
         classiffieldlist=classiffieldlist,
         predeftaxo=predeftaxo,
+        status=aggregated["status"],
+        access=aggregated["access"],
+        excluded=aggregated["excluded"],
         members_by_right=privileges,
         freecols=freecols,
         crsf_token=crsf_token(),
@@ -222,42 +230,40 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
         # redir=redir,
     )
 
-    ######################################################################################################################
-    #     properties evaluation from  projects list                                                                   #
-    ######################################################################################################################    backto = False
-    def collection_erase(collection_id: int, new: bool = False) -> str:
-        objlist = []
-        deleted = None
-        py_messages = py_get_messages("collection")
-        from to_back.ecotaxa_cli_py.models import ObjectSetQueryRsp
 
-        user: UserModelWithRights = current_user.api_user
-        isadmin = current_user.is_app_admin
+######################################################################################################################
+#     properties evaluation from  projects list                                                                   #
+######################################################################################################################    backto = False
+def collection_erase(collection_id: int, erase: bool = False) -> str:
 
-    target_coll = get_collection(collection_id, for_managing=True)
+    py_messages = py_get_messages("collection")
+    user: UserModelWithRights = current_user.api_user
+    isadmin = current_user.is_app_admin
+    target_coll = get_collection(collection_id)
     if target_coll is None:
-        return redirect(url_for("gui_coll_noright", collection_id=collection_id))
+        return redirect(url_for("gui_collection_noright", collection_id=collection_id))
     if target_coll.external_id is not None:
         flash(
             "Collection is published. Modifications and Erase are forbidden.",
             "error",
         )
-        return redirect(url_for("gui_coll_noright", collection_id=collection_id))
-    with ApiClient(CollectionApi, request) as api:
-        try:
-            res: int = api.erase_collection(collection_id)
-        except ApiException as ae:
-            if ae.status in (401, 403):
-                err = py_messages["collectionnotyours"]
-            else:
-                raise
+        return redirect(url_for("gui_collection_noright", collection_id=collection_id))
+    if erase == True:
+        with ApiClient(CollectionApi, request) as api:
+            try:
+                res: int = api.erase_collection(collection_id)
+            except ApiException as ae:
+                if ae.status in (401, 403):
+                    err = py_messages["collectionnotyours"]
+                else:
+                    raise
 
     return render_template(
-        "./v2/collection/purge.html",
+        "./v2/collection/erase.html",
         isadmin=isadmin,
         partial=is_partial_request(request),
         target_coll=target_coll,
-        deleted=deleted,
+        erase=erase,
     )
 
 

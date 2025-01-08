@@ -1,0 +1,6 @@
+{% extends "./v2/layout.html" %}
+{% block body %}
+<div class="container mx-auto">
+<a href ="{{ url_for("gui_collection")}}" class="button is-secondary inverse block mt-4" data-title="{{_('Select another collection')}}">{{_('Select another collection')}}</a>
+</div>
+{% endblock %}

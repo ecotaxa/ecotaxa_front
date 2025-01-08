@@ -18,7 +18,7 @@ from appli.gui.staticlistes import py_messages
 # TODO - fresh_login_required
 @login_required
 def gui_collection_noright(collection_id):
-    return render_template("v2/collection/noright.html", collection=collection)
+    return render_template("v2/collection/noright.html", collection=collection_id)
 
 
 @app.route("/gui/collection/<int:collection_id>", methods=["GET", "POST"])
@@ -118,13 +118,16 @@ def gui_collection_export_darwin_core(collection_id):
     return collection_export_darwin_core(collection_id)
 
 
-@app.route("/gui/collection/purge/<int:collection_id>", methods=["GET", "POST"])
+@app.route("/gui/collection/erase/<int:collection_id>", methods=["GET", "POST"])
 # TODO - fresh_login_required
 @login_required
-def gui_collection_purge(collection_id):
-    from appli.gui.collection.settings import collection_purge
+def gui_collection_erase(collection_id):
+    from appli.gui.collection.settings import collection_erase
 
-    return collection_purge(collection_id)
+    erase = False
+    if request.method == "post":
+        erase = True
+    return collection_erase(collection_id, erase=erase)
 
 
 @app.route("/gui/collection/about/<int:collection_id>", methods=["GET"])

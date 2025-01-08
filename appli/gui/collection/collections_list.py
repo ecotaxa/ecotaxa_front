@@ -21,7 +21,6 @@ from to_back.ecotaxa_cli_py.models import (
 
 # flash and errors messages translated
 from appli.gui.staticlistes import py_messages
-from appli.gui.collection.staticlistes import py_collection_messages
 
 
 def _collections_list_api_toback(project_ids: str = None) -> list:
