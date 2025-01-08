@@ -723,7 +723,8 @@
       function CreateSimilarityOrder(seed_object_id, cat_name){
           // Add an entry in sort order select, to view images like selected one
           const newValue = 'ss-' + seed_object_id;
-          const newSort = $('<option value="' + newValue + '">Similar to ' + seed_object_id
+          const newValueItem = '#' + seed_object_id.substring(1);
+          const newSort = $('<option value="' + newValue + '">Similar to ' + newValueItem
               + ' (' + cat_name + ')</option>');
           let message;
           const orderby = $('#sortby');

@@ -372,7 +372,7 @@ def indexPrj(PrjId):
     # Add implied simsearch field
     sortby = data["sortby"]
     if sortby.startswith("ss-I"):
-        sortlist[sortby] = "Similar to "+sortby[3:]
+        sortlist[sortby] = "Similar to #"+sortby[4:]
 
     statuslist = collections.OrderedDict({"": "All"})
     statuslist.update(STATUSES)
@@ -923,7 +923,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         else:
             simsrch_btn = "\n<div class='simsrch'><span title='Search similar objects' class='simsrchs'><span class='glyphicon glyphicon-screenshot'></span></div></td>"
         if dtl["obj.objid"] == simsearch_seed:
-            simsrch_btn = "\n<div class='simsrchseed'><span title='Similarity search seed' class='simsrchs'><span class='glyphicon glyphicon-grain'></span></div></td>"
+            simsrch_btn = "\n<div class='simsrchseed'><span title='Similarity search seed' class='simsrchs'><span class='glyphicon glyphicon-star'></span></div></td>"
         txt += """<div class='subimg status-{0}' {1}>
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
