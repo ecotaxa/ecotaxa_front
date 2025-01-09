@@ -21,6 +21,8 @@ from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     MinUserModel,
     TaxonModel,
+    CreateCollectionReq,
+    CollectionReq,
 )
 from to_back.ecotaxa_cli_py.models.collection_aggregated_rsp import (
     CollectionAggregatedRsp,
@@ -78,7 +80,6 @@ def collection_create() -> str:
             flash("title and project id are required", "error")
             to_save = False
     if to_save:
-        from to_back.ecotaxa_cli_py.models import CreateCollectionReq
 
         with ApiClient(CollectionsApi, request) as api:
             req = CreateCollectionReq(title=title, project_ids=project_ids)
@@ -132,7 +133,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
 
     from appli.gui.staticlistes import py_messages
 
-    collection = get_collection(collection_id)
+    collection = CollectionReq()
     # from appli.gui.collection.collist import collection
 
     if collection is None:
@@ -165,7 +166,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
             try:
                 with ApiClient(CollectionsApi, request) as api:
                     api.update_collection(
-                        collection_id=collection.id, collection_model=collection
+                        collection_id=collection_id, collection_req=collection
                     )
                     if new == True:
                         message = py_messages["collectioncreated"]
