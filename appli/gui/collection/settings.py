@@ -92,7 +92,7 @@ def collection_create() -> str:
         "v2/collection/settings.html",
         target_coll=None,
         new=True,
-        possible_licenses=licenses[0],
+        possible_licenses=licenses,
         possible_access=access,
     )
 
@@ -133,7 +133,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
 
     from appli.gui.staticlistes import py_messages
 
-    collection = CollectionReq()
+    collection = get_collection(collection_id)
     # from appli.gui.collection.collist import collection
 
     if collection is None:
@@ -150,7 +150,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
                     u = gvp(a_var, "")
                     if u != "":
                         setattr(collection, a_var, _user_format(int(u)))
-                else:
+                elif a_var != "id":
                     setattr(collection, a_var, gvp(a_var))
             elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in dir(collection):
                 if a_var[0:-2] in ["creator_users", "associate_users"]:
@@ -161,24 +161,22 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
                     setattr(collection, a_var[0:-2], [int(p) for p in gvpm(a_var)])
                 else:
                     setattr(collection, a_var[0:-2], gvpm(a_var))
-        do_update = True
-        if do_update:
-            try:
-                with ApiClient(CollectionsApi, request) as api:
-                    api.update_collection(
-                        collection_id=collection_id, collection_req=collection
-                    )
-                    if new == True:
-                        message = py_messages["collectioncreated"]
-                    else:
-                        message = py_messages["collectionupdated"]
-                    flash(
-                        message + " " + collection.title,
-                        "success",
-                    )
-                return redirect(request.referrer)
-            except ApiException as ae:
-                flash(py_messages["updateexception"] + "%s" % ae.reason)
+        try:
+            with ApiClient(CollectionsApi, request) as api:
+                api.update_collection(
+                    collection_id=collection_id, collection_req=collection
+                )
+                if new == True:
+                    message = py_messages["collectioncreated"]
+                else:
+                    message = py_messages["collectionupdated"]
+                flash(
+                    message + " " + collection.title,
+                    "success",
+                )
+            return redirect(request.referrer)
+        except ApiException as ae:
+            flash(py_messages["updateexception"] + "%s" % ae.reason)
 
     licenses = possible_licenses()
     # licenses[0] licenses texts , licenses[1] licenses restriction
@@ -225,7 +223,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
         members_by_right=privileges,
         freecols=freecols,
         crsf_token=crsf_token(),
-        possible_licenses=licenses[0],
+        possible_licenses=licenses,
         possible_access=access,
         new=new,
         # redir=redir,

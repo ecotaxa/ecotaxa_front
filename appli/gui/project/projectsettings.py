@@ -131,7 +131,7 @@ def prj_create() -> str:
         members=None,
         new=True,
         scn=scn,
-        possible_licenses=licenses[0],
+        possible_licenses=licenses,
         possible_access=access,
     )
 
@@ -312,7 +312,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         crsf_token=crsf_token(),
         predeftaxo=predeftaxo,
         freecols=freecols,
-        possible_licenses=licenses[0],
+        possible_licenses=licenses,
         possible_access=access,
         collections=collections,
         new=new,

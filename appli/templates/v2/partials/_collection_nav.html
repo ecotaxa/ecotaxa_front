@@ -55,7 +55,7 @@
         {{_('About')}}
       </a>
     </li>{%-endmacro-%}
-{% if target_coll and target_coll.id > 0 %}
+{% if target_coll and target_coll.id|int > 0 %}
         <a href="{{ url_for("gui_collection")}}" title="{{_('collections list')}}" class="text-lg uppercase">
           &laquo;
         </a></li>

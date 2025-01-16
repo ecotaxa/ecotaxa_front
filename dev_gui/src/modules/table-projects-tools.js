@@ -20,7 +20,7 @@ function ImportList(state, attach = null) {
       }*/
   }
 
-  async function compileProjectRecords() {
+  async function compileProjectRecords(newone = true) {
     const ts = state.dataImport.importzone.tomselect;
     const ids = (ts) ? ts.items : Array.from(state.dataImport.importzone.selectedOptions).map(option => option.value);
     if (ids.length === 0) return null;
@@ -38,7 +38,7 @@ function ImportList(state, attach = null) {
       sensitivity: 'base'
     })
 
-    if (Object.keys(results).indexOf("creator_users") >= 0) {
+    if (Object.keys(results).indexOf("creator_users") >= 0 && newone === true) {
       results.creator_organisations = results.creator_users.map(u => u.organisation);
       results.creator_organisations.sort();
       const creator_users = results.creator_users.map(u => ({
@@ -53,6 +53,20 @@ function ImportList(state, attach = null) {
     }
 
     return results;
+  }
+
+  function initList() {
+    const plugin = state.dataImport;
+    if (plugin.targetimport) {
+      let selected = null;
+      if (plugin.targetimport.tagName.toLowerCase() === 'select') {
+        selected = [...plugin.targetimport.options].filter(opt => opt.selected);
+        selected = selected.map(opt => parseInt(opt.value));
+      } else selected = plugin.targetimport.value;
+      plugin.selectors.forEach(selector => {
+        if (selected.indexOf(parseInt(selector.value)) >= 0) selector.click();
+      });
+    }
   }
 
   function filterByRecord(record, recordindex) {
@@ -86,9 +100,11 @@ function ImportList(state, attach = null) {
     attach.filterByRecord = filterByRecord;
     attach.resetFilter = resetFilter;
     attach.compileProjectRecords = compileProjectRecords;
+    attach.initList = initList;
   } else return {
     filterByRecord,
     resetFilter,
+    initList
   }
 
 }

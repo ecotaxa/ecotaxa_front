@@ -221,23 +221,28 @@ export class TableComponent {
       else return Promise.reject(response);
     }).then(async tabledef => {
       if (this.waitdiv) this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : default_messages.dataloaded);
-      if (pagestart === 0) {
+      if (pagestart > 0) {
+        if (tabledef.data.length) {
+          this.domInsertRows(tabledef);
+        } else pagesize = 0;
+      }
+      if (pagesize === 0) {
         let now = Date.now();
         console.log('seconds to fetch ', (Date.now() - this.dt) / 1000);
         this.dt = now;
-        if (tabledef.data.length) await this.tableActivate(container, tabledef);
+        if (tabledef.data.length || pagestart > 0) await this.tableActivate(container, tabledef);
         else this.waitDeactivate('no result', 'default');
         now = Date.now();
         console.log('plugins loaded', (Date.now() - this.dt) / 1000);
         this.dt = now;
-      } else if (tabledef.length) this.domInsertRows(tabledef);
-      else pagesize = 0;
-      if (pagesize > 0) this.fetchData(container, fromurl, pagestart + pagesize);
+      } else this.fetchData(container, fromurl, pagestart + pagesize);
+
     }).catch((err) => { /* print error from response */
       console.log('error', err);
       this.waitDeactivate(err.status + ` ` + err.statusText, 'error');
     });
   }
+
   async dataToTable(tabledef) {
     if (!tabledef.data) return;
     if (tabledef.columns) {

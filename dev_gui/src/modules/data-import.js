@@ -82,9 +82,9 @@ export class DataImport {
       this.replacebutton = options.replacebutton instanceof HTMLElement ? options.replacebutton : document.querySelector(options.replacebutton);
       this.tabbutton = options.tabbutton instanceof HTMLElement ? options.tabbutton : document.querySelector(options.tabbutton);
       this.importid = this.importid + '_' + what;
+      this.targetimport = (this.form.querySelector('[name="' + what + '"]')) ? this.form.querySelector('[name="' + what + '"]') : this.form.querySelector('[data-type="' + what + '"]');
       this.init(options);
       instance = this;
-
     }
     return instance;
   }
@@ -109,7 +109,6 @@ export class DataImport {
         const apply_selection = (e) => {
           e.preventDefault();
           e.stopImmediatePropagation();
-
           const target = e.currentTarget;
           const add = (evt === 'click' || target.checked === true);
           this.disableSelector(target, add);
@@ -126,6 +125,7 @@ export class DataImport {
         this.resizeZone(e);
       });
     }
+
   }
 
   columnProperty(name, index) {
@@ -188,7 +188,6 @@ export class DataImport {
   }
 
   populateImportZone(add, items) {
-
     if (!this.importzone) return;
     const ts = this.importzone.tomselect;
     if (ts) {
@@ -365,7 +364,6 @@ export class DataImport {
               this.populateImportZone(add, items);
             }
             if (ln === 0) {
-              console.log('filterbyrecord ', Object.keys(this.imports))
               if (add) this.filterByRecord(rowdata, rowindex);
               else this.resetFilter();
             }
@@ -524,6 +522,7 @@ export class DataImport {
       this.showImport(false);
     });
   }
+
   createImportzone(name) {
     this.showImport(true);
     let ts = false;
@@ -539,12 +538,12 @@ export class DataImport {
         }, this.importcontainer);
         ts = true;
       } else {
-        const import_target = (this.form.querySelector('[name="' + name + '"]')) ? this.form.querySelector('[name="' + name + '"]') : this.form.querySelector('[data-type="' + name + '"]');
-        if (!import_target) return;
-        ts = import_target.tomselect;
-        this.importzoneid = import_target.id;
+
+        if (!this.targetimport) return;
+        this.importzoneid = this.targetimport.id;
+        ts = this.targetimport.tomselect;
         // tomselect ?
-        const importzone = import_target.cloneNode();
+        const importzone = this.targetimport.cloneNode();
         importzone.classList.remove(css.tomselected);
         importzone.classList.remove(css.hiddenaccessible);
         // keep original id to replace data on apply import
@@ -589,7 +588,6 @@ export class DataImport {
         el[ts.settings.searchField] = unescape_html(options[e][ts.settings.labelField]);
         if (ts.getOption(el[ts.settings.valueField]) === null) ts.addOption(el);
         if (ts.getItem(el[ts.settings.valueField]) === null) ts.addItem(el[ts.settings.valueField]);
-        console.log('ts.items', ts.items)
       });
       //  tzone.clearOptions();
     } else {
@@ -616,7 +614,8 @@ export class DataImport {
         break;
       case typeimport.project:
         if (!this.importzone) return false;
-        const results = await this.compileProjectRecords();
+        const newone = (this.form.dataset.id) ? parseInt(this.form.dataset.id) : 0;
+        const results = await this.compileProjectRecords(newone);
         done = this.cloneImport(btn);
         const idx = selectcells.indexOf(models.projid);
         if (idx >= 0) selectcells.splice(idx, 1);
@@ -720,7 +719,6 @@ export class DataImport {
               }
             } else if (ts) {
               if (input.multiple) this.imports[name].forEach(data => {
-                console.log('data', data)
                 ts_add_select_item(ts, data)
               });
               else ts_add_select_item(ts, this.imports[name]);

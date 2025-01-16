@@ -44,11 +44,11 @@ def _get_last_refresh() -> str:
     return last_refresh
 
 
-def possible_licenses() -> tuple:
+def possible_licenses() -> list:
     from appli.back_config import get_back_constants
 
     licenses = get_back_constants(request, "LICENSE")
-    return licenses
+    return licenses[0]
 
 
 def possible_access() -> tuple:

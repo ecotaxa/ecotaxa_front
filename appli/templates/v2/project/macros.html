@@ -20,7 +20,7 @@
     <h2 class="font-semibold mb-4 {{ 'inline-block' if nav!=None}}"><strong>{{action}} </strong>{{ _('Collection')+' ' if target_type=='collection'}}{{title }} {{header_links(nav) if nav!=None}}</h2>
 {%-endmacro-%}
 {% macro pick_from_other(new, key='settings' , modal_title = _('Pick from other project'), sourceid=0 ) -%}
-{% if (new == False and sourceid > 0) or (new == True and (sourceid == 0)) %}
+{% if sourceid > 0 or new == True  %}
 <div class="{{ 'w-full -mt-8 mb-6' if new == True else 'w-auto -mt-4  mb-2' }} block">
   {# set the form id to import to and the header include for taxo imports #}
   {% set data = {'form':'#formu','key': key, 'header': './v2/project/_headerimport.html'} if (key in ['taxo','privileges','project'] ) else {'form':'#formu','key': key} %}

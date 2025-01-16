@@ -6,7 +6,7 @@
   {% set modal_title = _("How to edit a collection settings") if target_coll.id else _("How to create a collection")%}
   {% set data = {'file':'_help_collection_settings'} %}
   {{ modal(id='help-editcollection',modal_title=modal_title, type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
-  <form method="post" action="{{request.path}}" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs ' if (target_coll and target_coll.id) }} relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}" novalidate>
+  <form method="post" action="{{request.path}}" id="formu" autocomplete="off" class="js js-submit {{ 'js-tabs ' if (target_coll and target_coll.id) }} relative mt-12 md:mt-8" data-id={{target_coll.id if target_coll else 0}} data-required="{{_('this field is required')}}" data-invalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" data-isimported="{{_('imported')}}" novalidate>
    <input type="hidden" name="crsf_token" value={{ crsf_token }}>  {% if target_coll and target_coll.id %}
     <span data-dismiss="tabs" class="absolute z-10 top-0 -mt-8 right-[calc(100%-2.5rem)] hidden md:block md:ml-auto  md:mt-0 md:right-12 md:top-5 cursor-pointer fill-stone-900 border-stone-700 hover:border-b-2" title="{{_('click to expand/shrink tabs')}}"><i class="icon-lg tabs-display expand opacity-50 hover:opacity-100"></i></span>
     <input type="hidden" name="id" id="id" value="{{target_coll.id}}">

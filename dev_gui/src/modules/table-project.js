@@ -49,6 +49,7 @@ export const initImport = async (state) => {
     } = await import('../modules/table-projects-tools.js');
     ImportList(state, state.dataImport);
   }
+  if (state.dataImport.initList) state.dataImport.initList();
   state.waitdiv.remove();
 }
 

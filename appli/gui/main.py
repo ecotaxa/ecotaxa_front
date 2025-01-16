@@ -588,15 +588,6 @@ def utility_processor():
         licenses = possible_licenses()
         return licenses[0]
 
-    def license_restriction(tostring: bool = False) -> dict:
-        from appli.gui.commontools import possible_licenses
-
-        licenses = possible_licenses()
-        if tostring == True:
-            return json.dumps(licenses[1])
-        else:
-            return licenses[1]
-
     def bg_scale():
         bg = str(app.config.get("BG_SCALE") or "")
         if bg != "" and os.path.exists(
@@ -626,7 +617,6 @@ def utility_processor():
         global_messages=global_messages,
         api_password_regexp=api_password_regexp,
         license_texts=license_texts,
-        license_restriction=license_restriction,
         bg_scale=bg_scale,
         logo_special=logo_special,
         get_manager_list=get_manager_list,
