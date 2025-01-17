@@ -35,6 +35,7 @@ def get_back_constants(request, type) -> tuple:
         if type == "USER":
             current_app.config["API_" + type + "_CONSTANTS"] = (
                 consts.user_status,
+                consts.user_type,
                 consts.password_regexp,
                 consts.email_verification,
                 consts.account_validation,

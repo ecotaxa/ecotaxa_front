@@ -23,6 +23,7 @@ from appli.security_on_backend import ApiUserWrapper
 
 (
     ApiUserStatus,
+    ApiUserType,
     API_PASSWORD_REGEXP,
     API_EMAIL_VERIFICATION,
     API_ACCOUNT_VALIDATION,

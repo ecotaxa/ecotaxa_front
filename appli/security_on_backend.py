@@ -124,6 +124,7 @@ anon_user = MinUserModel(id=-1, email="", name="Anonymous")
 def user_from_api(user_id):
     (
         ApiUserStatus,
+        ApiUserType,
         API_PASSWORD_REGEXP,
         API_EMAIL_VERIFICATION,
         API_ACCOUNT_VALIDATION,
@@ -154,6 +155,7 @@ def login_validate(email: str, password: str, remember: bool = False):
 
     (
         ApiUserStatus,
+        ApiUserType,
         API_PASSWORD_REGEXP,
         API_EMAIL_VERIFICATION,
         API_ACCOUNT_VALIDATION,

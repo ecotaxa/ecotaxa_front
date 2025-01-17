@@ -169,6 +169,7 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
 
     (
         ApiUserStatus,
+        ApiUserType,
         API_PASSWORD_REGEXP,
         API_EMAIL_VERIFICATION,
         API_ACCOUNT_VALIDATION,

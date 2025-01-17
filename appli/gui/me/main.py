@@ -72,6 +72,7 @@ def gui_me_activate(token: str) -> str:
 
     (
         ApiUserStatus,
+        ApiUserType,
         API_PASSWORD_REGEXP,
         API_EMAIL_VERIFICATION,
         API_ACCOUNT_VALIDATION,
@@ -156,6 +157,7 @@ def gui_me_forgotten(token: str = None) -> str:
 
     (
         ApiUserStatus,
+        ApiUserType,
         API_PASSWORD_REGEXP,
         API_EMAIL_VERIFICATION,
         API_ACCOUNT_VALIDATION,
