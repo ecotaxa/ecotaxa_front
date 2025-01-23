@@ -18,7 +18,7 @@ def deprecation_management(prj_id):
             target_proj: ProjectModel = api.project_query(prj_id)
         except ApiException as ae:
             if ae.status == 404:
-                return "Project doesn't exists"
+                return "Project doesn't exist"
             elif ae.status in (401, 403):
                 flash('You cannot do category fix on this project', 'error')
                 return PrintInCharte("<a href=/prj/>Select another project</a>")
@@ -36,15 +36,16 @@ def deprecation_management(prj_id):
         nb_objs = 0
         for a_todo in reclassifs:
             src_id, tgt_id = a_todo
-            with ApiClient(ObjectsApi, request) as api:
-                filters = {"taxo": str(src_id)}
-                nb_ok = api.reclassify_object_set(project_id=prj_id,
-                                                  forced_id=tgt_id,
-                                                  project_filters=filters,
-                                                  reason='W')
-            nb_objs += nb_ok
+            for a_qual in ('V', 'D'):
+                with ApiClient(ObjectsApi, request) as api:
+                    filters = {"taxo": str(src_id), "statusfilter": a_qual}
+                    nb_ok = api.reclassify_object_set(project_id=prj_id,
+                                                      forced_id=tgt_id,
+                                                      project_filters=filters,
+                                                      reason='W')
+                nb_objs += nb_ok
         # Tell user
-        flash("%d objects fixed." % nb_objs)
+        flash("%d object(s) fixed." % nb_objs)
 
     if True:
         g.headcenter = "<h4><a href='/prj/{0}'>{1}</a></h4>".format(target_proj.projid, XSSEscape(target_proj.title))
