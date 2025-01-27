@@ -727,7 +727,9 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                 ) + api_sortby
             else:
                 if simsearch_seed is not None:
-                    sort_col_signed = sortby
+                    sort_col_signed = (
+                        "-" if sortorder.lower() != "desc" else ""
+                    ) + sortby
         needed_fields = ",".join(api_cols)
         while True:
             objs: ObjectSetQueryRsp = api.get_object_set(

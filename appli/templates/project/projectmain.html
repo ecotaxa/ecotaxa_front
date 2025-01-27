@@ -563,10 +563,6 @@
           // Launch real load
           AsyncSingleLoadRightPane(jqcolumnright, req);
           $('#headersubtitle').html(TxtFilter);
-          if ($("#sortby").val().startsWith("ss-I")) {
-              // Force desc order as the query returns the distance to seed
-              $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title", "Current Sort : Descending");
-          }
       }
 
       function UpdateRightPaneProgress(req) {
@@ -734,6 +730,8 @@
               orderby.append(newSort);
               message = 'Use added sort option to search again';
           }
+          // Force descending
+          $('#sortorder').removeClass("glyphicon-sort-by-attributes").addClass("glyphicon-sort-by-attributes-alt").closest('button').prop("title", "Current Sort : Descending");
           // Activate right away to toggle reload
           orderby.val(newValue).change();
           return message;
