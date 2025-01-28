@@ -496,8 +496,8 @@ def indexPrj(PrjId):
             )
             g.headmenu.append((arr_url["purge"], "Delete objects or project"))
             g.headmenuF.append((arr_url["purgef"], "Delete objects"))
-            g.headmenu.append(("", "SEP"))
     if g.PrjAnnotate or g.PrjManager:
+        g.headmenu.append(("", "SEP"))
         g.headmenu.append((arr_url["taxofix"], "Fix deprecated categories"))
         # EMODNet Audit & Export
         # g.headmenu.append(("", "SEP"))
