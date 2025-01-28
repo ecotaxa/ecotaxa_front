@@ -36,14 +36,13 @@ def deprecation_management(prj_id):
         nb_objs = 0
         for a_todo in reclassifs:
             src_id, tgt_id = a_todo
-            for a_qual in ('V', 'D'):
-                with ApiClient(ObjectsApi, request) as api:
-                    filters = {"taxo": str(src_id), "statusfilter": a_qual}
-                    nb_ok = api.reclassify_object_set(project_id=prj_id,
-                                                      forced_id=tgt_id,
-                                                      project_filters=filters,
-                                                      reason='W')
-                nb_objs += nb_ok
+            with ApiClient(ObjectsApi, request) as api:
+                filters = {"taxo": str(src_id)}
+                nb_ok = api.reclassify_object_set(project_id=prj_id,
+                                                  forced_id=tgt_id,
+                                                  project_filters=filters,
+                                                  reason='W')
+            nb_objs += nb_ok
         # Tell user
         flash("%d object(s) fixed." % nb_objs)
 
