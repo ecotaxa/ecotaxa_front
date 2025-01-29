@@ -455,6 +455,8 @@ def indexPrj(PrjId):
             g.headmenu.append((arr_url["import"], "Import images and metadata"))
         g.headmenu.append((arr_url["export"], "Export"))
         g.headmenuF.append((arr_url["exportf"], "Export"))
+        if proj.status == "Annotate":
+            g.headmenu.append((arr_url["taxofix"], "Fix deprecated categories"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
@@ -496,9 +498,6 @@ def indexPrj(PrjId):
             )
             g.headmenu.append((arr_url["purge"], "Delete objects or project"))
             g.headmenuF.append((arr_url["purgef"], "Delete objects"))
-    if g.PrjAnnotate or g.PrjManager:
-        g.headmenu.append(("", "SEP"))
-        g.headmenu.append((arr_url["taxofix"], "Fix deprecated categories"))
         # EMODNet Audit & Export
         # g.headmenu.append(("", "SEP"))
         # g.headmenu.append(("/prj/emodnet/%d" % PrjId, "EMODnet export"))
