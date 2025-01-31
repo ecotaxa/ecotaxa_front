@@ -5,7 +5,7 @@
 <div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_massannotation" >
   <div class="w-100 mx-auto py-4 block text-left relative" id="project-massannotation-header">
     {% set data = {'file':'_help_project_fix_category_issues'} %}
-    {{header_project_job(_('Fix category issues '),data, _('How to fix category issues'))}}
+    {{header_project_job(_('Fix Deprecated Categories '),data, _('How to fix deprecated categories'))}}
   </div>
 {% if error==404 %}
 <a href="{{ url_for("gui_prj")}}" class="alert warning">{{_('Select another project')}}</a>

@@ -460,9 +460,10 @@ def indexPrj(PrjId):
                 )
             )
             g.headmenu.append((arr_url["import"], "Import images and metadata"))
-            # g.headmenu.append((arr_url["taxofix"], "Fix category issues"))
         g.headmenu.append((arr_url["export"], "Export"))
         g.headmenuF.append((arr_url["exportf"], "Export"))
+        if proj.status == "Annotate":
+            g.headmenu.append((arr_url["taxofix"], "Fix deprecated categories"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
