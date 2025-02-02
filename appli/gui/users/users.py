@@ -88,9 +88,9 @@ def user_register(token: str = None, partial: bool = False) -> str:
                     usrid=int(usrid),
                     isfrom=False,
                     template="v2/register.html",
-                    api_email_verification=API_EMAIL_VERIFICATION,
-                    api_account_validation=API_ACCOUNT_VALIDATION,
-                    reCaptchaID=reCaptchaID,
+                    # api_email_verification=API_EMAIL_VERIFICATION,
+                    # api_account_validation=API_ACCOUNT_VALIDATION,
+                    # reCaptchaID=reCaptchaID,
                     token=token,
                 )
     if request.method == "POST":
@@ -102,9 +102,9 @@ def user_register(token: str = None, partial: bool = False) -> str:
             usrid=int(usrid),
             isfrom=False,
             template="v2/register.html",
-            api_email_verification=API_EMAIL_VERIFICATION,
-            api_account_validation=API_ACCOUNT_VALIDATION,
-            reCaptchaID=reCaptchaID,
+            # api_email_verification=API_EMAIL_VERIFICATION,
+            # api_account_validation=API_ACCOUNT_VALIDATION,
+            # reCaptchaID=reCaptchaID,
             token=token,
         )
     with ApiClient(UsersApi, request) as api:
