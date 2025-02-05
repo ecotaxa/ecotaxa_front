@@ -5,7 +5,7 @@ on:
     tags: [ v* ]
 
 jobs:
-  docker_back:
+  docker_front:
     runs-on: ubuntu-latest
     steps:
       - name: Login to Docker Hub
@@ -21,5 +21,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: grololo06/ecotaxa_front:${{github.ref_name}}
+          tags: ecotaxa/ecotaxa_front:${{github.ref_name}}
           file: ./docker/prod_image/Dockerfile
