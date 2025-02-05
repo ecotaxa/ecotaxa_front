@@ -30,8 +30,8 @@ WORKDIR /app/
 COPY py ./
 
 # Get starting script and fixed config
-COPY prod_image/start.sh /app
-COPY prod_image/uwsgi.ini /app
+COPY docker/prod_image/start.sh /app
+COPY docker/prod_image/uwsgi.ini /app
 
 ## For /app/*.log and **/__pycache__, allow non-root user to create inside dirs
 ## and fix startup script rights
