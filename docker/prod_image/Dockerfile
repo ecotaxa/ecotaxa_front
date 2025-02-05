@@ -10,24 +10,21 @@ RUN apt-get install \
     python3.8 python3.8-venv \
     --no-install-recommends --yes
 
-# Get reqs from host
-COPY py/requirements.txt ./reqs.txt
+# Get source
+WORKDIR /app/
+COPY . ./
 
 # Create venv
 RUN python3.8 -m venv /venv
 # Install wheel & upgrade pip
 RUN PATH=/venv/bin pip3 install --upgrade pip wheel
-RUN PATH=/venv/bin:$PATH pip3 install -r reqs.txt
+RUN PATH=/venv/bin:$PATH pip3 install -r requirements.txt
 
 # Strip a bit...
 RUN find /venv -name "*.pyc" -delete && \
 rm -rf /venv/share/* && \
 find /venv -name tests -type d -exec rm -rf {} + && \
 find /venv/lib/python3.8/site-packages -name "*.exe" -delete
-
-# Get source
-WORKDIR /app/
-COPY py ./
 
 # Get starting script and fixed config
 COPY docker/prod_image/start.sh /app
