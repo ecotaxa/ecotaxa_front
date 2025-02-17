@@ -1,27 +1,29 @@
 from flask_babel import _
-from typing import Dict
+from typing import Dict, Optional
 from flask import request
 from appli.utils import ApiClient
 from appli.gui.jobs.staticlistes import JOB_STATE_TO_USER_STATE
-from to_back.ecotaxa_cli_py import ApiException, MinUserModel
+from to_back.ecotaxa_cli_py import MinUserModel
 from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import JobModel
 
 
-def export_format_options(type=None):
+def export_format_options(_type=None, target="project"):
+    out_to_ftp = {
+        "out_to_ftp": {
+            "label": _(
+                "Copy result file to FTP area. Original file is still available"
+            ),
+            "options": [
+                {"label": _("Yes"), "value": 1},
+                {"label": _("No"), "value": 0},
+            ],
+            "format": "radio",
+        }
+    }
     options = dict(
         {
             "general": {
-                "only_annotations": {
-                    "label": _("Only save objects' last annotation data"),
-                    "options": [
-                        {"label": _("Yes"), "value": 1},
-                        {"label": _("No"), "value": 0},
-                    ],
-                    "format": "radio",
-                    "discard": "with_images|none,with_internal_ids|0,with_types_row|0,split_by|none",
-                    "help": "help_export_only_annotations",
-                },
                 "with_images": {
                     "label": _("Images"),
                     "options": [
@@ -67,17 +69,7 @@ def export_format_options(type=None):
                     ],
                     "format": "radio",
                 },
-                "out_to_ftp": {
-                    "label": _(
-                        "Copy result file to FTP area. Original file is still available"
-                    ),
-                    "options": [
-                        {"label": _("Yes"), "value": 1},
-                        {"label": _("No"), "value": 0},
-                    ],
-                    "format": "radio",
-                },
-            }
+            },
         }
     )
     formdatas = dict(
@@ -126,6 +118,15 @@ def export_format_options(type=None):
                     "out_to_ftp": (0, False),
                 },
             },
+            "identification": {
+                "path": "/gui/job/create/IdentificationExport",
+                "title": _("Classification Export"),
+                "legend": _("Objects' identifications only (no metadata)"),
+                "datas": {
+                    "only_annotations": (1, True),
+                    "out_to_ftp": (0, False),
+                },
+            },
         }
     )
 
@@ -163,38 +164,120 @@ def export_format_options(type=None):
                 "format": "textarea",
                 "help": "help_export_summary_formulae",
             },
-            "out_to_ftp": {
-                "label": _(
-                    "Copy result file to FTP area. Original file is still available"
-                ),
+        }
+    )
+    options["identification"] = dict(
+        {
+            "only_annotations": {
+                "label": _("Export objects' identifications only (no metadata)"),
                 "options": [
                     {"label": _("Yes"), "value": 1},
                     {"label": _("No"), "value": 0},
                 ],
                 "format": "radio",
+                "discard": "with_images|none,with_internal_ids|0,with_types_row|0,split_by|none",
+                "help": "help_export_only_annotations",
             },
         }
     )
-    if type != None:
+    if target == "collection":
+        options.update(
+            {
+                "darwincore": {
+                    "include_predicted": {
+                        "label": _("Include predicted"),
+                        "options": [
+                            {"label": _("Yes"), "value": 1},
+                            {"label": _("No"), "value": 0},
+                        ],
+                        "format": "radio",
+                    },
+                    "with_absent": {
+                        "label": _("With absent"),
+                        "options": [
+                            {"label": _("Yes"), "value": 1},
+                            {"label": _("No"), "value": 0},
+                        ],
+                        "format": "radio",
+                    },
+                    "with_computations": {
+                        "label": _("With computations"),
+                        "options": [
+                            {"label": _("Abundance"), "value": "ABO"},
+                            {"label": _("Concentration"), "value": "CNC"},
+                            {"label": _("Biovolume"), "value": "BIV"},
+                        ],
+                        "format": "checkbox",
+                        "help": "help_export_with_computations",
+                    },
+                    "taxo_mapping": {
+                        "label": _("Computations pre mapping"),
+                        "comment": _(" Type '_discard_' to discard taxon"),
+                        "format": "taxoline",
+                        "help": "help_export_computations_pre_mapping",
+                        "addoption": "_discard_,0",
+                    },
+                    "formulae": {
+                        "label": _("Formulae"),
+                        "example": '{"subsample_coef"->str, "total_water_volume"->str, "individual_volume"->str}',
+                        "format": "textarea",
+                        "help": "help_export_summary_formulae",
+                    },
+                    "extra_xml": {
+                        "label": _("Extra XML block"),
+                        "format": "text",
+                    },
+                }
+            }
+        )
+        forms = dict(
+            {
+                "darwincore": {
+                    "path": "/gui/job/create/DarwinCoreExport",
+                    "title": _("Darwin Core Export"),
+                    "legend": _(
+                        "Export the collection in Darwin Core format, e.g. for EMODnet portal, @see https://www.emodnet-ingestion.eu"
+                    ),
+                    "datas": {
+                        "include_predicted": False,
+                        "with_absent": False,
+                        "with_computations": ("ABO", False),
+                        "taxo_mapping": ({}, False),
+                        "formulae": (
+                            """
+                    subsample_coef: 1/ssm.sub_part
+                    total_water_volume: sam.tot_vol/1000
+                    individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3 """,
+                            False,
+                        ),
+                    },
+                }
+            }
+        )
+        forms.update(formdatas)
+        formdatas = forms
+    if _type is not None:
         formdata = dict()
         option = dict()
-        formdata[type] = formdatas[type]
-        if type == "backup":
+        formdata[_type] = formdatas[_type]
+        if _type == "backup":
             typoption = "general"
         else:
-            typoption = type
-        option[type] = options[typoption]
+            typoption = _type
+        option[_type] = options[typoption]
+        if _type != "darwincore":
+            option.update(out_to_ftp)
         export_links = []
         for key, fdata in formdatas.items():
-            if key != type:
+            if key != _type:
                 export_links.append({"path": fdata["path"], "title": fdata["title"]})
         return formdata, option, export_links
     else:
-        options["backup"] = options["general"]
+        options.update({"backup": options["general"]})
     return formdatas, options, None
 
 
-def import_format_options(type=None) -> dict:
+def import_format_options(_type=None) -> dict:
     taxomapping = dict(
         {
             "taxo_mapping": {
@@ -337,18 +420,18 @@ def import_format_options(type=None) -> dict:
 
 def display_job(usercache: Dict[int, MinUserModel], ajob: JobModel):
     """Enrich back-end job for display"""
+    params = ajob.params
     job = ajob.to_dict()
     job["state"] = JOB_STATE_TO_USER_STATE.get(ajob.state, ajob.state)
-
     if "prj_id" in job["params"]:
-        job["projid"] = str(ajob.params["prj_id"])
-    if (
+        job["projid"] = str(params["prj_id"])
+    elif (
         ("projid" not in job or job["projid"] is None)
-        and "req" in ajob.params
-        and "project_id" in ajob.params["req"]
+        and "req" in params
+        and "project_id" in params["req"]
     ):
         # noinspection PyUnresolvedReferences
-        projid = str(ajob.params["req"]["project_id"])
+        job["projid"] = str(params["req"]["project_id"])
 
     owner: Optional[MinUserModel] = usercache.get(ajob.owner_id)
     if owner is None:

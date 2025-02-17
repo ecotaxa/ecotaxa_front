@@ -25,7 +25,7 @@ class ExportSummaryJob(ExportJob):
     def job_req(cls):
         import json
 
-        projid = int(gvp("projid"))
+        projid, collid = cls.get_target_id()
         quantity = gvp("quantity")
         summarise_by = gvp("summarise_by")
         taxo_mapping = json.loads(gvp("taxo_mapping", "{}"))
@@ -34,6 +34,7 @@ class ExportSummaryJob(ExportJob):
         formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]
         formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         req = SummaryExportReq(
+            collection_id=collid,
             project_id=projid,
             quantity=quantity,
             summarise_by=summarise_by,
@@ -44,7 +45,7 @@ class ExportSummaryJob(ExportJob):
         return req
 
     @classmethod
-    def api_job_call(cls, export_req: SummaryExportReq) -> str:
+    def api_job_call(cls, export_req: SummaryExportReq) -> ExportRsp:
         with ApiClient(ObjectsApi, request) as api:
             rsp: ExportRsp = api.export_object_set_summary(export_req)
         return rsp

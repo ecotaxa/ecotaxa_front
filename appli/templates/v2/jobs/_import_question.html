@@ -28,7 +28,7 @@
         </p><div class="mt-4">{{modal('taxomodal',btn={'class':'hidden'})}}
           {% for T in taxo %}<input type="hidden" name="orig{{ loop.index }}" value="{{ T }}">
                 <div class="flex flex-row w-full lg:w-[50%] mb-1">
-                <div class="basis-1/2 md:basis-1/3 ">{{ T }} : </div><div class="flex flex-row flex-grow">
+                <div class="basis-1/2 md:basis-1/3 ">{{ T }} : </div><div class="flex flex-row grow">
                 <select id="taxolb{{ loop.index }}" name="taxolb{{ loop.index }}"  class='form-select basis-10/12 inline mr-1 js js-autocomplete taxolb'  data-type="taxo" data-create=true autocomplete="off"> </select>
                 <button class="button inline" type="button" data-request="taxotree" data-target="taxomodal" data-targetid="taxolb{{ loop.index }}"><i class="icon icon-list-bullet"></i></button>
 

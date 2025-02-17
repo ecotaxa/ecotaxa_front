@@ -1,11 +1,10 @@
 {% macro nav_header(target_proj,headcenter) -%}
 {#write central header - project title or page main action title#}
-
-{% if target_proj or headcenter !='' %}
+{% if target_obj or headcenter !='' %}
 <h3>
   {{ headcenter }}
-  {% if target_proj and target_proj.projid != 0 %}
-  [{{ target_proj.projid }}] {{ target_proj.title }}
+  {% if target_obj and targetid != 0 %}
+  {{target_type}} [{{ targetid }}] {{ target_obj.title }}
   {% endif %}
 </h3>
 {%- endif -%}
@@ -61,11 +60,9 @@
   <div class="up" data-action="gotop" data-target="{{ id }}"></div>
 </details>
 {%- endmacro %}
-{% macro inputdict(id,name,value=0, label='', type = '', multiple = False,placeholder='Select', required = False, autocomplete=False,data='',options=None) -%}
+{% macro inputdict(id,name,value=0, label='', type = '', multiple = False,placeholder='Select', required = False, autocomplete=False,data='',options=None, readonly=False) -%}
 {% if autocomplete == True %}
-
-<select {{ 'multiple' if multiple }} name="{{ name }}" id="{{ id }}" class="form-select js js-autocomplete" data-placeholder="{{ placeholder }}" data-type="{{ type }}" {{ 'required' if required }}  {{ data if data }}>
-
+<select {{ 'multiple' if multiple }} name="{{ name }}" id="{{ id }}" class="form-select js js-autocomplete" data-placeholder="{{ placeholder }}" data-type="{{ type }}" {{ 'required' if required }} {{ 'readonly' if readonly==True }} {{ data if data }}>
   {% if options != None and options is iterable%}
       <option value='' {{ 'selected' if value =='' or value==0 }} {{ 'disabled hidden' if value == 0  }}>{{ placeholder +'...'}}</option>
   {% for option in options%}
@@ -81,17 +78,17 @@
 </select>
 {% else %}
 <div class="form-box">
-
-  <input type="hidden" name="{{ name }}" id="{{ id }}" data-type="{{ type }}" {{ 'required' if required }} value="{{ value }}"> <input type="text" class="form-input" value="{{ label }}" readonly></div>
+  <input type="hidden" name="{{ name }}" id="{{ id }}" data-type="{{ type }}" {{ 'required' if required}}  value="{{ value }}"> <input type="text" class="form-input" value="{{ label }}" {{'readonly' if readonly==True}} ></div>
 {% endif %}
 {%- endmacro %}
 
-{% macro form_group_radio(id,name,value,label,val,required=False,help='',extra='') -%}
-<div class="group-radio"><input type="radio" class="peer" name="{{ name }}" id="{{ id}}" value="{{ value }}" {{'required' if required==True else ''}} {{ 'checked' if val==value }} {{extra}}>
+{% macro form_group_radio(id,name,value,label,val,required=False,help='',extra='',readonly=False, radio=True) -%}
+{%- set type='radio' if radio==True else 'checkbox'-%}
+<div class="group-radio {{type}}"><input type="{{type}}" class="peer" name="{{ name }}" id="{{ id}}" value="{{ value }}" {{'required' if required==True }}  {{'data-readonly' if readonly==True}} {{ 'checked' if val==value }} {{extra}}>
   <label for="{{id}}" class="peer-checked:bg-pchecked-400  peer-checked:text-white  peer-checked:shadow" {{help}}>{{ label }}</label></div>
 {%- endmacro %}
-{% macro checkbox_radio(name, id , checkedvalue, value='', label="",type="checkbox",required=False,extra='') -%}
-  <label class="checkbox-label" for="{{id}}"><input type="{{type}}" name="{{ name }}" id="{{ id }}" class="form-checkbox" value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }} {{ extra|safe }}> {{ label }} </label>
+{% macro checkbox_radio(name, id , checkedvalue, value='', label="",type="checkbox",required=False,extra='', readonly=False) -%}
+  <label class="checkbox-label" for="{{id}}"><input type="{{type}}" name="{{ name }}" id="{{ id }}" class="form-checkbox" value="{{ checkedvalue }}"  {{ 'checked' if value==checkedvalue }}  {{'data-readonly' if readonly==True}}  {{ extra|safe }}> {{ label }} </label>
 {%- endmacro %}
 {% macro alerttype(type ="info") -%}
 {% set titles = { 'danger': _('IMPORTANT :'),  'warning': _('WARNING:'),  'info': _('INFORMATION:'),  'success': _('SUCCESS:'),  'error': _('ERROR:'),'maintenance':_('MAINTENANCE')} %}

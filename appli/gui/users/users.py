@@ -1,10 +1,8 @@
-import flask
-from flask import request, render_template, flash, redirect, url_for
+from flask import request, render_template, flash, redirect, url_for, Response, jsonify
 from werkzeug.exceptions import NotFound, Forbidden, UnprocessableEntity
+from typing import Union, Optional, List, Dict
 from flask_login import current_user
-from flask_babel import _
-from typing import List
-from appli import app, gvg, gvp, gvpm, constants
+from appli import app, gvp, gvpm, constants
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import (
     UsersApi,
@@ -14,15 +12,14 @@ from to_back.ecotaxa_cli_py import (
     ApiException,
     MiscApi,
 )
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from appli.gui.commontools import html_to_text, format_exception
-from appli.gui.staticlistes import py_user
+from to_back.ecotaxa_cli_py.models import Constants
+from appli.gui.commontools import format_exception
+from appli.gui.staticlistes import py_user, py_messages
 from appli.back_config import get_user_constants
-from appli.security_on_backend import ApiUserWrapper
 
 (
     ApiUserStatus,
+    ApiUserType,
     API_PASSWORD_REGEXP,
     API_EMAIL_VERIFICATION,
     API_ACCOUNT_VALIDATION,
@@ -36,8 +33,8 @@ ACCOUNT_USER_EDIT = "edit"
 
 
 def _get_captcha() -> list:
-    if RECAPTCHAID == True:
-        response = gvp("g-recaptcha-response", None)
+    if RECAPTCHAID:
+        response = gvp("g-recaptcha-response", "")
     else:
         response = encode_homecaptcha()
 
@@ -58,59 +55,52 @@ def make_user_response(code, message: str) -> tuple:
 def user_register(token: str = None, partial: bool = False) -> str:
     if token is None and current_user.is_authenticated:
         raise UnprocessableEntity()
-    reCaptchaID = None
+    recaptchaid = None
     # google recaptcha or homecaptcha
-    if RECAPTCHAID == True:
-        reCaptchaID = app.config.get("RECAPTCHAID")
+    if RECAPTCHAID:
+        recaptchaid = app.config.get("RECAPTCHAID")
     action = ACCOUNT_USER_CREATE
     usrid = -1
     user = {"id": -1}
     if token is not None:
-        err, resp = _get_value_from_token(token, "id", age=PROFILE_TOKEN_AGE)
-        if err == True:
+        err, resp = get_value_from_token(token, "id", age=PROFILE_TOKEN_AGE)
+        if err:
             raise Forbidden(resp)
         else:
             usrid = int(resp)
         if usrid == -1:
             # short token life for account creation
-            err, resp = _get_value_from_token(token, "id", age=SHORT_TOKEN_AGE)
-            if err == True:
+            err, resp = get_value_from_token(token, "id", age=SHORT_TOKEN_AGE)
+            if err:
                 raise Forbidden(resp)
             elif int(resp) != usrid:
                 raise UnprocessableEntity(py_user["invaliddata"])
-            pwd = None
 
         if request.method == "POST" or int(usrid) == -1:
-            id = gvp("id", -1)
-            if id == -1:
+            _id = int(gvp("id", "-1"))
+            if _id == -1:
                 return account_page(
                     action=action,
-                    usrid=int(usrid),
+                    usrid=usrid,
                     isfrom=False,
                     template="v2/register.html",
-                    api_email_verification=API_EMAIL_VERIFICATION,
-                    api_account_validation=API_ACCOUNT_VALIDATION,
-                    reCaptchaID=reCaptchaID,
                     token=token,
                 )
     if request.method == "POST":
-        id = gvp("id", -1)
-        if int(id) == int(usrid):
-            return user_create(int(id), isfrom=False, token=token, partial=partial)
+        _id = int(gvp("id", "-1"))
+        if _id == usrid:
+            return user_create(int(_id), isfrom=False, token=token, partial=partial)
         return account_page(
             action=action,
             usrid=int(usrid),
             isfrom=False,
             template="v2/register.html",
-            api_email_verification=API_EMAIL_VERIFICATION,
-            api_account_validation=API_ACCOUNT_VALIDATION,
-            reCaptchaID=reCaptchaID,
             token=token,
         )
     with ApiClient(UsersApi, request) as api:
         organisations = api.search_organizations(name="%%")
         organisations.sort()
-    country_list = get_country_list(request)
+    country_list = get_country_list()
     countries = sorted(country_list)
     return render_template(
         "v2/register.html",
@@ -123,15 +113,15 @@ def user_register(token: str = None, partial: bool = False) -> str:
         countries=countries,
         api_email_verification=API_EMAIL_VERIFICATION,
         api_account_validation=API_ACCOUNT_VALIDATION,
-        reCaptchaID=reCaptchaID,
+        reCaptchaID=recaptchaid,
     )
 
 
 def _verifiy_validation_throw(
     usrid: int, isfrom: bool, action: str, age: int = SHORT_TOKEN_AGE
 ) -> tuple:
-    token = gvp("token", None)
-    if isfrom == True:
+    token = gvp("token", "")
+    if isfrom:
         if not check_is_users_admin():
             description = py_user["notadmin"]
             raise Forbidden(description=description)
@@ -139,9 +129,9 @@ def _verifiy_validation_throw(
         if API_EMAIL_VERIFICATION == True or (
             API_ACCOUNT_VALIDATION == True and usrid != -1
         ):
-            if token != None:
-                err, resp = _get_value_from_token(token, "id", age)
-                if err == True:
+            if token != "":
+                err, resp = get_value_from_token(token, "id", age)
+                if err:
                     raise Forbidden(resp)
                 else:
                     usrid = int(resp)
@@ -151,38 +141,39 @@ def _verifiy_validation_throw(
     return usrid, token
 
 
-def _verify_pending_user_throw(id: int, email: str):
-    pwd = gvp("password", None)
-    if id != -1 and pwd != None:
+def _verify_pending_user_throw(_id: int, email: str):
+    pwd = gvp("password", "")
+    if _id != -1 and pwd != "":
         from appli.security_on_backend import login_validate
 
         yes, userdata = login_validate(email, pwd)
         if yes == True and userdata is not None:
             user = UserModelWithRights(**userdata)
-            reason = (
-                user.status_admin_comment or user.status == ApiUserStatus["pending"]
-            )
+            # TODO check why reason
+            # reason = (user.status_admin_comment or user.status == ApiUserStatus["pending"])
             return user
-    elif id == -1:
-        return dict({"id": int(id), "email": email, "status_admin_comment": None})
+    elif _id == -1:
+        return dict({"id": int(_id), "email": email, "status_admin_comment": None})
     else:
         raise Forbidden(py_user["notauthorized"])
 
 
 def user_create(
-    usrid: int, isfrom: bool = False, token: str = None, partial: bool = False
-) -> tuple:
+    usrid: int, isfrom: bool = False, token: str = "", partial: bool = False
+) -> Union[str, tuple, Response]:
     action = ACCOUNT_USER_CREATE
     posted = {}
+    token = token.strip()
+    resp = []
     if usrid == -1:
         age = SHORT_TOKEN_AGE
     else:
         age = PROFILE_TOKEN_AGE
-    if isfrom == True:
+    if isfrom:
         resp = user_account(-1, isfrom, action=action, token=token)
         return resp
-    elif token != None or API_EMAIL_VERIFICATION == False:
-        if token != None:
+    elif token != "" or API_EMAIL_VERIFICATION == False:
+        if token != "":
             usrid, token = _verifiy_validation_throw(
                 usrid, isfrom, action=action, age=age
             )
@@ -197,14 +188,14 @@ def user_create(
         }
         resp = api_user_create(posted, token)
     redir = url_for("gui_index")
-    if token is None:
+    if token == "":
         if resp[0] == 0:
             message = py_user["mailsuccess"] + py_user["checkspam"]
-            type = "success"
+            typ = "success"
         else:
             redir = url_for("gui_register")
             message = resp[1] + " " + py_user["mailerror"]
-            type = "error"
+            typ = "error"
     else:
         if resp[0] == 0:
             if len(resp) <= 3 or resp[3] == False:
@@ -214,14 +205,14 @@ def user_create(
             else:
                 message = resp[1]
 
-            type = "success"
+            typ = "success"
         else:
             redir = url_for("gui_register") + "/" + token
-            err, action = _get_value_from_token(token, "action", age=PROFILE_TOKEN_AGE)
+            err, action = get_value_from_token(token, "action", age=PROFILE_TOKEN_AGE)
             if str(action or "") != "update":
                 action = "create"
             message = resp[1] + py_user["profileerror"][action]
-            type = "error"
+            typ = "error"
     if partial:
         response = (resp[0], message, resp[2], resp[3])
         if posted and "email" in posted:
@@ -241,7 +232,7 @@ def user_create(
             partial=partial,
         )
     else:
-        flash(message, type)
+        flash(message, typ)
         return redirect(redir)
 
 
@@ -253,7 +244,7 @@ def user_edit(usrid: int, isfrom: bool = False) -> tuple:
     return user_account(usrid, isfrom, action=ACCOUNT_USER_EDIT)
 
 
-def api_get_user(usrid: int) -> UserModelWithRights:
+def api_get_user(usrid: int) -> Optional[UserModelWithRights]:
     with ApiClient(UsersApi, request) as api:
         if isinstance(usrid, int) and usrid > 0:
             if usrid == current_user.id:
@@ -275,7 +266,7 @@ def api_user_create(posted: dict, token: str = None) -> tuple:
             )
             if user_id == -1:
                 return make_user_response(1, py_user["profileerror"]["create"])
-            elif API_ACCOUNT_VALIDATION == True:
+            elif API_ACCOUNT_VALIDATION:
                 message = py_user["statusnotauthorized"]["01"]
             else:
                 message = py_user["profilesuccess"]["create"]
@@ -296,13 +287,13 @@ def api_user_activate(
 ) -> tuple:
     if API_EMAIL_VERIFICATION != True and API_ACCOUNT_VALIDATION != True:
         return make_user_response(403, py_user["novalidationservices"])
-    password = None
     message = ""
     if bot:
         no_bot = _get_captcha()
         st = ["n"]
-        password = gvp("password", None)
-        if password is None:
+        password = gvp("password", "")
+        password = password.strip()
+        if password == "":
             return 1, py_user["passwordrequired"]
         else:
             activatereq = UserActivateReq(token=token, password=password)
@@ -310,6 +301,7 @@ def api_user_activate(
         no_bot = None
         st = [k for k, v in ApiUserStatus.items() if v == status]
         activatereq = UserActivateReq(reason=reason)
+    status_name = ""
     if len(st):
         status_name = st[0]
     with ApiClient(UsersApi, request) as api:
@@ -359,8 +351,9 @@ def _user_posted_data(usrid: int, isfrom: bool, action: str = "create") -> dict:
             fields = ["name", "password"] + fields
     else:
         fields = ["name", "newpassword"] + fields
-    posted = {a_field: gvp(a_field).strip() for a_field in fields}
-    posted["id"] = usrid
+    posted: Dict = {}
+    posted.update({a_field: gvp(a_field).strip() for a_field in fields})
+    posted["id"] = str(usrid)
     posted["email"] = posted["email"].strip()
     posted["orcid"] = posted["orcid"].strip()
     if "lastname" in posted.keys():
@@ -373,24 +366,23 @@ def _user_posted_data(usrid: int, isfrom: bool, action: str = "create") -> dict:
             posted["password"] = posted["newpassword"]
         else:
             del posted["newpassword"]
-    if isfrom == True:
-        posted["status"] = int(gvp("status", 0))
-        posted["can_do"] = gvpm("can_do")
+    if isfrom:
+        posted["status"] = gvp("status", "0")
+        posted["can_do"]: List[str] = gvpm("can_do")
     return posted
 
 
 def user_account(
-    usrid: int, isfrom: bool = False, action: str = None, token: str = None
+    usrid: int, isfrom: bool = False, action: str = "", token: str = None
 ) -> tuple:
-    if isfrom == True and (not check_is_users_admin()):
+    if isfrom and (not check_is_users_admin()):
         return None, py_user["notadmin"]
-    if action != None:
-        if isinstance(usrid, int) == False:
+    if action != "":
+        if not isinstance(usrid, int):
             return make_user_response(None, py_user["invaliddata"])
     posted = _user_posted_data(usrid, isfrom, action)
-    response = None
-    redir = None
-    currentemail = gvp("currentemail", None)
+    currentemail = gvp("currentemail", "")
+    currentemail = currentemail.strip()
     if action == ACCOUNT_USER_EDIT:
         if "newpassword" in posted:
             del posted["newpassword"]
@@ -405,8 +397,8 @@ def user_account(
             api_user = UserModelWithRights(**posted).to_dict()
         if "password" not in posted and "password" in api_user:
             del api_user["password"]
-        if isfrom == True:
-            if current_user.is_admin == True and current_user.id == usrid:
+        if isfrom:
+            if current_user.is_admin and current_user.id == usrid:
                 api_user["status"] = current_user.api_user.status
                 api_user["status_date"] = current_user.api_user.status_date
         else:
@@ -465,42 +457,34 @@ def user_account(
         return make_user_response(1, py_user["usernoaction"])
 
 
-# def create_verifreq(recipient, token, link):
-#    return dict(
-#        {"recipient": recipient, "ip": _public_ip(), "token": token, "link": link}
-#    )
-
-
-def account_page(
-    action: str, usrid: int, isfrom: bool, template: str, token: str = None
-) -> str:
-    reCaptchaID = None
+def account_page(action: str, usrid: int, isfrom: bool, template: str, token: str = ""):
+    recaptchaid = None
     if action != ACCOUNT_USER_CREATE and not isinstance(usrid, int):
         raise NotFound()
     if action == ACCOUNT_USER_CREATE:
         user = {"id": -1}
-        if isfrom != True:
+        if not isfrom:
             # google recaptcha or homecaptcha
-            if RECAPTCHAID == True:
-                reCaptchaID = app.config.get("RECAPTCHAID")
-            if token is not None:
-                err, resp = _get_value_from_token(token, "id", age=PROFILE_TOKEN_AGE)
-                if err == True:
+            if RECAPTCHAID:
+                recaptchaid = app.config.get("RECAPTCHAID")
+            if token != "":
+                err, resp = get_value_from_token(token, "id", age=PROFILE_TOKEN_AGE)
+                if err:
                     raise Forbidden(resp)
                 else:
-                    id = int(resp)
+                    _id = int(resp)
                 err, resp = _get_mail_from_token(token, age=PROFILE_TOKEN_AGE)
-                if err == True:
+                if err:
                     raise Forbidden(resp)
                 else:
                     email = resp
-                    if email is None or id is None:
+                    if email is None or _id is None:
                         return redirect(url_for("gui_register"))
-                    user = _verify_pending_user_throw(id, email)
+                    user = _verify_pending_user_throw(_id, email)
 
     else:
         user = api_get_user(usrid)
-        if user == None:
+        if user is None:
             raise NotFound(description=py_user["notfound"])
 
     if (
@@ -512,7 +496,7 @@ def account_page(
             organisations = api.search_organizations(name="%%")
             organisations.sort()
         roles = [(str(num), lbl) for num, lbl in constants.API_GLOBAL_ROLES.items()]
-        country_list = get_country_list(request)
+        country_list = get_country_list()
         countries = sorted(country_list)
     else:
         roles = (None,)
@@ -529,14 +513,11 @@ def account_page(
         api_account_validation=API_ACCOUNT_VALIDATION,
         token=token,
         isfrom=isfrom,
-        reCaptchaID=reCaptchaID,
+        reCaptchaID=recaptchaid,
     )
 
 
-def reset_password(
-    email: str, token: str = None, pwd: str = None, url: str = None
-) -> str:
-    err = None
+def reset_password(email: str, token: str = None, pwd: str = None) -> tuple:
     no_bot = _get_captcha()
     if token:
         email = None
@@ -544,14 +525,16 @@ def reset_password(
     with ApiClient(UsersApi, request) as api:
         try:
             api.reset_user_password(resetreq, no_bot=no_bot, token=token)
-            return 0, None
+            message = ""
+            code = 200
         except ApiException as ae:
             code = ae.status
             if ae.status in (401, 403, 404):
                 message = py_user["notauthorized"]
             else:
                 # dont give too much infos
-                return make_user_response(code, "")
+                message = ""
+    return make_user_response(code, message)
 
 
 def _public_ip() -> str:
@@ -561,16 +544,17 @@ def _public_ip() -> str:
         return request.environ["HTTP_X_FORWARDED_FOR"]
 
 
-def get_country_list(request) -> list:
+def get_country_list() -> list:
     with ApiClient(MiscApi, request) as api:
         consts: Constants = api.used_constants()
         return consts.countries
 
 
-def _get_value_from_token(
+def get_value_from_token(
     token: str, name: str, age: int = SHORT_TOKEN_AGE, salt: str = None, verifip=False
-) -> list:
-    if token == None:
+) -> tuple:
+    token = token.strip()
+    if token == "":
         raise Forbidden(py_user["notauthorized"])
     from itsdangerous import (
         TimestampSigner,
@@ -583,7 +567,7 @@ def _get_value_from_token(
         BadHeader,
     )
 
-    if salt == None:
+    if salt is None:
         salt = app.config["MAILSERVICE_SALT"].encode("UTF-8")
     auths = URLSafeTimedSerializer(
         app.config["MAILSERVICE_SECRET_KEY"],
@@ -592,28 +576,25 @@ def _get_value_from_token(
     )
     description = []
     try:
-        max_age = age * 3600
         value = auths.loads(token, max_age=age * 3600)
-    except SignatureExpired as e:
+        if value.get(name):
+            if verifip == False or (value.get("ip") == _public_ip()):
+                return False, value.get(name)
+        if name == "id":
+            return False, str(-1)
+    except SignatureExpired:
         description.append(py_user["signexpired"])
-    except (BadSignature, BadHeader, BadData, BadTimeSignature, BadPayload) as e:
-        description.append(py_user["badsignature"])
-    except:
+    except (BadSignature, BadHeader, BadData, BadTimeSignature, BadPayload):
         description.append(py_user["badsignature"])
     # return None
     if len(description):
         description = set(description)
         return True, ", ".join(description)
-    if value.get(name):
-        if verifip == False or (value.get("ip") == _public_ip()):
-            return False, value.get(name)
-    if name == "id":
-        return False, str(-1)
     return False, None
 
 
-def _get_mail_from_token(token: str, verifip=False, age: int = SHORT_TOKEN_AGE) -> str:
-    err, email = _get_value_from_token(token, "email", age)
+def _get_mail_from_token(token: str, age: int = SHORT_TOKEN_AGE) -> tuple:
+    err, email = get_value_from_token(token, "email", age)
     if email is None:
         flash("Error invalid token", "error")
     return err, email
@@ -628,7 +609,7 @@ def api_current_user(redir: bool = True):
         if redir:
             return redirect(url_for("gui_login"))
     else:
-        from appli.security_on_backend import user_from_api, anon_user
+        from appli.security_on_backend import user_from_api
 
         curr_user = user_from_api(current_user.id)
         from flask_login import logout_user, confirm_login
@@ -672,13 +653,13 @@ def encode_homecaptcha() -> str:
 
 
 # replace googlecaptcha with homemade captcha
-def check_homecaptcha(token: str) -> dict:
-    from flask import jsonify, make_response
+def check_homecaptcha(token: str) -> Response:
+    from flask import make_response
 
-    err, verif_ip = _get_value_from_token(
-        token, "ip", age=0.01, salt=app.config["MAILSERVICE_SECRET_KEY"]
+    err, verif_ip = get_value_from_token(
+        token, "ip", age=1, salt=app.config["MAILSERVICE_SECRET_KEY"]
     )
-    err, verif_response = _get_value_from_token(
+    err, verif_response = get_value_from_token(
         token, "action", salt=app.config["MAILSERVICE_SECRET_KEY"]
     )
     code = 403

@@ -153,8 +153,7 @@ def PrjEditAnnot(PrjId):
             return PrintInCharte("<a href='#' onclick='history.back();'>Back</a>")
         filters["taxo"] = selected_taxa
         with ApiClient(ObjectsApi, request) as api:
-            call = api.revert_object_set_to_history
-            res2: ObjectSetRevertToHistoryRsp = call(
+            res2: ObjectSetRevertToHistoryRsp = api.revert_object_set_to_history(
                 project_id=PrjId,
                 project_filters=filters,
                 target=target_for_api,

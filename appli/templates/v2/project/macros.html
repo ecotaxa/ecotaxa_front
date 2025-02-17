@@ -15,6 +15,38 @@
 <ul class="inline-block">{%- for link in nav.links -%}<li class="inline pl-2 ml-4"><a href="{{link.path}}{{nav.query}}" class="title-nav">{{link.title}}</a></li>{%-endfor-%}</ul>
 {%-endif-%}{%-endmacro-%}
 {%-macro header_project_job(action,helpdata,modaltitle, nav=None) -%}
+{%-set title = target_obj.title if target_obj else target_proj.title -%}
   {{ modal(id=helpdata.file|replace('_','-'),modal_title=modaltitle, type='modal-help',modal_content='/v2/help/'+helpdata.file+'.html',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = helpdata) }}
-    <h2 class="font-semibold mb-4 {{ 'inline-block' if nav!=None}}"><strong>{{action}} </strong>{{ target_proj.title }} {{header_links(nav) if nav!=None}}</h2>
+    <h2 class="font-semibold mb-4 {{ 'inline-block' if nav!=None}}"><strong>{{action}} </strong>{{ _('Collection')+' ' if target_type=='collection'}}{{title }} {{header_links(nav) if nav!=None}}</h2>
+{%-endmacro-%}
+{% macro pick_from_other(new, key='settings' , modal_title = _('Pick from other project'), sourceid=0 ) -%}
+{% if sourceid > 0 or new == True  %}
+<div class="{{ 'w-full -mt-8 mb-6' if new == True else 'w-auto -mt-4  mb-2' }} block">
+  {# set the form id to import to and the header include for taxo imports #}
+  {% set data = {'form':'#formu','key': key, 'header': './v2/project/_headerimport.html'} if (key in ['taxo','privileges','project'] ) else {'form':'#formu','key': key} %}
+  {% set icon = 'icon-carboncopy-sm' if new == False else 'icon-carboncopy'%}
+  {% set btn = {'class':'button is-import is-pick'+(' new' if new == True else ''),'title':modal_title,'icon':icon,'text': modal_title ,'data':' data-request=settings data-target=unique data-key=' + key + ' data-projid=' + (sourceid|string() )}%}
+  {{ modal('importfrom_' + key,  btn = btn,modal_title = modal_title, data=data) }}
+</div>
+{% endif %}
+{%- endmacro %}
+{% macro member_cells(index,member = {id: 0,name:'',email:'',delet:false},privilege = ''  ,autocomplete = False,required = False,contact=None,prefix='members', extra='', readonly=False) -%}
+<div data-elem="ident"  data-title=" {{ _('Name') }}">
+  {{ inputdict(prefix+'_member_' + index,prefix+'[member][' + index + ']',value = member.id, label=member.name,type='user',required=required,autocomplete=autocomplete,data=extra,options=[(member.id,member.name)],readonly=readonly) }}</div>
+<div data-elem="priv" data-title="{{ _('Privilege') }}">
+  <div class="form-group group-sm">{% for pr in ('View','Annotate','Manage')  %}
+    {{ form_group_radio(prefix+'_privilege_' + index + '_' + pr ,prefix+'[privilege][' + index + ']',pr,pr, privilege,required=(loop.index==1),extra=extra, readonly=readonly)}}
+    {%endfor%}</div>
+</div>
+<div data-elem="contact" data-title="{{ _('Contact') }}"><input type="radio" name="contact_user_id" id="{{prefix}}_contact_{{index}}"  {{'required' if required }} value="{{ member.id }}" {{ 'disabled'
+      if privilege !='Manage' }} {{ ' checked=true' if (contact and member.id==contact.id) }} {{'data-readonly' if readonly==True}}>
+</div>
+<div data-elem="delet"><label for="{{prefix}}_delet_{{index}}" title="{{ _('remove') }}" data-remove="{{ _('remove') }}" data-restore="{{_('restore')}}"><input type="checkbox" id="{{prefix}}_delet_{{index}}" name="{{prefix}}[delet][{{index}}]" value="{{ index }}"
+      {{ 'disabled' if (contact!=None and member.id==contact.id) }} {{ 'hidden' if index == 0  }} data-manage="{{ _('to delete a user with Manage privilege , modify the privilege attribute')}}" class="form-line-delet {{'hide' if readonly==True}} " {{'disabled' if readonly==True}} {{extra}}></label></div>
+{%- endmacro %}
+{%-macro display_freecols()-%}
+{%-if freecols -%}
+<div id="section_freecols" class="flex flex-wrap w-full" id="listfreecols" > {%- for column, values in freecols.items()-%}<div class="form-box md:basis-1/2"><div class="label">{{column}}</div><div class="flex flex-wrap text-xs">
+  {%-for k,value in values.items()-%}<span class="w-96 md:w-48 mr-4">{{k}} : {{value}}</span> {%-endfor-%}</div></div>{%-endfor%}</div>
+  {%-endif-%}
 {%-endmacro-%}

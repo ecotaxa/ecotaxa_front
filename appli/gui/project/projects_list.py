@@ -8,19 +8,21 @@
 
 from typing import List
 
-from flask import session, request, render_template
+from flask import request, render_template
 from flask_login import current_user
 
 from appli.utils import ApiClient
 from werkzeug.exceptions import Forbidden
-from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi, AuthentificationApi
+from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import (
-    ProjectModel,
     UserModelWithRights,
+    ProjectTaxoStatsModel,
+    TaxonModel,
 )
 
 # flash and errors messages translated
 from appli.gui.staticlistes import py_messages
+
 
 # list of project privileges
 def list_privileges() -> dict:
@@ -35,7 +37,7 @@ def _get_mailto_manager(request, type: str = "") -> str:
         mgr_coords = consts.app_manager
         from appli.gui.commontools import build_mail
 
-        return build_mail(emails=mgr_coords[1], type=type, text=mgr_coords[0])
+        return build_mail(emails=mgr_coords[1], typ=type, text=mgr_coords[0])
 
 
 def _get_mailto_instrument() -> str:
@@ -45,7 +47,7 @@ def _get_mailto_instrument() -> str:
 
     admin_users = get_managers()
     emails = ";".join([usr.email for usr in admin_users])
-    return build_mail(emails=emails, type="instrument_not_in_the_list")
+    return build_mail(emails=emails, typ="instrument_not_in_the_list")
 
 
 def _get_projects_filters() -> dict:
@@ -89,7 +91,7 @@ def _prjs_list_api(
             }
         )
         if summary == True:
-            payload.update({"summary": True})
+            payload.update({"fields": "*default"})
         with ApiClient(ProjectsApi, request) as apiproj:
             url = (
                 apiproj.api_client.configuration.host + "/projects/search"
@@ -113,10 +115,9 @@ def projects_list(
     selection="list",
     filt=None,
     typeimport: str = "",
-) -> str:
+) -> dict:
     # TODO review usage of listall - currently is used for not_granted
     import datetime
-    from appli.project.main import _manager_mail
 
     # projects ids and rights for current_user
     if not current_user.is_authenticated:

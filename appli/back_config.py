@@ -35,6 +35,7 @@ def get_back_constants(request, type) -> tuple:
         if type == "USER":
             current_app.config["API_" + type + "_CONSTANTS"] = (
                 consts.user_status,
+                consts.user_type,
                 consts.password_regexp,
                 consts.email_verification,
                 consts.account_validation,
@@ -42,10 +43,16 @@ def get_back_constants(request, type) -> tuple:
                 consts.profile_token_age,
                 consts.recaptchaid,
             )
+        elif type == "ACCESS":
+            current_app.config["API_" + type + "_CONSTANTS"] = consts.access
         elif type == "LICENSE":
-            current_app.config["API_" + type + "_CONSTANTS"] = consts.license_texts
+            current_app.config["API_" + type + "_CONSTANTS"] = (consts.license_texts,)
         elif type == "MANAGER":
             current_app.config["API_" + type + "_CONSTANTS"] = consts.app_manager
+        elif type == "PEOPLEORG":
+            current_app.config[
+                "API_" + type + "_CONSTANTS"
+            ] = consts.people_organization_directories
     return current_app.config["API_" + type + "_CONSTANTS"]
 
 

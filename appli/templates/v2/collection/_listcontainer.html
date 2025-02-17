@@ -15,9 +15,7 @@
     {{ modal(id='help-project-import-data',modal_title=modal_title,type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'},data = data) }}
   </div>
   {% endif%}
-
-  {% set textbtn =  _('import full settings') if typeimport and typeimport =='settings' else _('preset') if typeimport == 'taxo' else _('import') %}
-  <div id="{{'import-' + tableid if typeimport else tableid }}" data-from="collectionlist" data-columns="{{columns}}" data-current="{{current_user.id|string}}" data-is={{current_user.is_app_admin}} data-cellid="id" data-listall={{listall}} class="{{ 'import-collections-list' if typeimport }} w-full shadow-1 mb-8 js js-datatable  collectionlist"  {{ 'data-tips=true data-import=' + typeimport if typeimport else 'data-details=true data-detailsurl=/gui/collection/about/'}} {{ 'data-btn=' + textbtn if typeimport }} {{ 'data-btn1=' + _('extra') if typeimport and typeimport =='taxo' }} data-paging=false data-sortable=true data-searchable=true  data-filters="filt_title,filt_instrum,filt_subset">
+  <div id="{{'import-' + tableid if typeimport else tableid }}" data-from="collectionlist" data-columns="{{columns}}" data-current="{{current_user.id|string}}" data-is={{current_user.is_app_admin}} data-cellid="id" class="{{ 'import-collections-list' if typeimport }} w-full shadow-1 mb-8 js js-datatable  collectionlist"  {{ 'data-tips=true data-import=' + typeimport if typeimport else 'data-details=true data-detailsurl=/gui/collection/about/'}} {{ 'data-btn=' + _('Add') if typeimport }} data-paging=false data-sortable=true data-searchable=true>
 <div id="wait-please" data-wait="{{_('Please wait')}}" data-loaded="{{_( 'Data loaded. Displaying...')}}"> {{ _('Please wait')}}...</div>
 <table></table>
   </div>

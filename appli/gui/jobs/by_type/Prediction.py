@@ -3,7 +3,6 @@ import time
 from typing import List, Any, Final, Tuple, Optional, Dict, ClassVar
 
 from flask import render_template, g, redirect, flash, request
-
 from appli import PrintInCharte, gvg, XSSEscape, gvp, app
 from appli.gui.jobs.Job import Job
 from appli.utils import ApiClient, DecodeEqualList, EncodeEqualList
@@ -59,21 +58,17 @@ class PredictionJob(Job):
             return cls.start_task()
 
     @classmethod
-    def get_target_project(cls) -> Tuple[Optional[ProjectModel], str]:
-        # The project is in the URL, get it and check access
-        prj_id = int(gvg("projid"))
-        target_proj = cls.get_target_prj(prj_id, True)
+    def get_target_filters(cls) -> str:
 
-        # Compute filters for telling the user
-        filters: Dict[str, str] = {}
-        filters_html = cls.GetFilterText(cls._extract_filters_from_url())
         return target_proj, filters_html
 
     @classmethod
     def base_projects_select_page(cls):
         # First configuration page, choose base projects
         # This page is called from initial GET or POSTs to iself when project filters are used
-        target_proj, filters_html = cls.get_target_project()
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid, collid)
+        filters_html = cls.GetFilterText(cls._extract_filters_from_url())
         if target_proj is None:
             return PrintInCharte(filters_html)
         # The page reloads itself (POST) when using the "Search" button
@@ -131,7 +126,9 @@ class PredictionJob(Job):
 
     @classmethod
     def validate_task(cls):
-        target_proj, filters_html = cls.get_target_project()
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid, collid)
+        filters_html = cls.GetFilterText(cls._extract_filters_from_url())
 
         (
             src_prj_ids,
@@ -180,7 +177,9 @@ class PredictionJob(Job):
     @classmethod
     def start_task(cls):
         # Launch Job on back-end
-        target_proj, filters_html = cls.get_target_project()
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid, collid)
+        filters_html = cls.GetFilterText(cls._extract_filters_from_url())
         if target_proj is None:
             return PrintInCharte(filters_html)
         filters = cls._extract_filters_from_url()
@@ -255,7 +254,9 @@ class PredictionJob(Job):
     @classmethod
     def categories_config_page(cls):
         # Configuration of categories for the prediction.
-        target_proj, filters_html = cls.get_target_project()
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid, collid)
+        filters_html = cls.GetFilterText(cls._extract_filters_from_url())
         if target_proj is None:
             return PrintInCharte(filters_html)
 
@@ -366,7 +367,9 @@ class PredictionJob(Job):
     @classmethod
     def features_config_page(cls):
         # Third page of the wizard, proceed
-        target_proj, filters_html = cls.get_target_project()
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid, collid)
+        filters_html = cls.GetFilterText(cls._extract_filters_from_url())
         if target_proj is None:
             return PrintInCharte(filters_html)
 

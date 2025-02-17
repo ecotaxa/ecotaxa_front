@@ -3,7 +3,7 @@ from flask_babel import _
 from flask import url_for
 
 
-def user_table_columns(selection: str = "list") -> list:
+def user_table_columns(selection: str = "list") -> dict:
     columns = {
         "list": {
             "select": {
@@ -53,7 +53,47 @@ def user_table_columns(selection: str = "list") -> list:
     return columns[selection]
 
 
-def render_for_js(users: list, columns: list) -> list:
+def guest_table_columns(selection: str = "list") -> dict:
+    columns = {
+        "list": {
+            "select": {
+                "select": "controls",
+                "field": "id",
+                "actions": {
+                    "edit": {
+                        "link": url_for("gui_guest_edit", usrid=-1),
+                        "label": _("edit"),
+                        "type": "button",
+                    }
+                },
+            },
+            "id": {
+                "label": _("ID"),
+                "sortable": "desc",
+                "format": "number",
+            },
+            "name": {
+                "label": _("Name"),
+            },
+            "email": {
+                "label": _("Email"),
+            },
+            "organisation": {
+                "label": _("Organisation"),
+            },
+            "usercreationdate": {
+                "label": _("Creation date"),
+            },
+            "country": {
+                "label": _("Country"),
+            },
+        },
+    }
+
+    return columns[selection]
+
+
+def render_for_js(users: list, columns: dict) -> list:
     from datetime import datetime
 
     jsonusers = list([])
@@ -65,7 +105,6 @@ def render_for_js(users: list, columns: list) -> list:
 
         for key, column in columns.items():
             # if subfield  append object which will be formatted by the js component
-            attrvalue = ""
             if key == "select":
                 attrvalue = user[column["field"]]
             elif key == "status":

@@ -1,17 +1,21 @@
-from typing import List
-from flask import flash, request, render_template, redirect, url_for
-from flask_login import current_user, login_required, fresh_login_required
-from werkzeug.exceptions import NotFound, Unauthorized, Forbidden
+from typing import List, Dict
+import json
+from flask import flash, request, render_template, redirect, url_for, make_response
+from flask_login import current_user, login_required
 from appli import app, gvp, gvg
 from appli.project import sharedfilter
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
-from to_back.ecotaxa_cli_py.models import ProjectModel, ObjectSetQueryRsp, MergeRsp
+from to_back.ecotaxa_cli_py.models import (
+    ProjectModel,
+    MergeRsp,
+    ProjectColumnsModel,
+    ProjectUserStatsModel,
+)
 
 from appli.gui.commontools import is_partial_request, py_get_messages
 from appli.gui.project.projectsettings import get_target_prj
-from appli.gui.staticlistes import py_messages
 from flask_babel import _
 
 ExploreOnly = "ExploreOnly"
@@ -21,7 +25,7 @@ ExploreOnly = "ExploreOnly"
 # TODO - fresh_login_required
 @login_required
 def gui_prj_noright(projid):
-    return render_template("v2/project/noright.html", projid=projid)
+    return render_template("v2/project/noright.html", id=projid)
 
 
 @app.route("/gui/prj/<int:projid>", methods=["GET", "POST"])
@@ -43,7 +47,7 @@ def gui_prj_purge(projid):
     py_messages = py_get_messages("project")
     from to_back.ecotaxa_cli_py.models import ObjectSetQueryRsp
 
-    user: UserModelWithRights = current_user.api_user
+    # user: UserModelWithRights = current_user.api_user
     isadmin = current_user.is_app_admin
     target_proj = get_target_prj(projid, for_managing=True)
     if target_proj is None:
@@ -106,7 +110,7 @@ def gui_prj_purge(projid):
         if gvp("objlist") == "DELETEALL" and gvp("destroyproject") == "Y":
             backto = True
             flash(py_messages["prjdestroyed"], "success")
-        elif deleted != None:
+        elif deleted is not None:
             flash(py_messages["objdeleted"], "success")
 
     return render_template(
@@ -122,7 +126,7 @@ def gui_prj_purge(projid):
 
 @app.route("/gui/prjsforprediction/<int:projid>", methods=["GET", "POST"])
 @login_required
-def gui_prj_list_for_prediction(projid) -> list:
+def gui_prj_list_for_prediction(projid):
     from appli.gui.jobs.prediction_lists import projects_for_prediction_list
 
     prjs = projects_for_prediction_list(projid)
@@ -134,13 +138,10 @@ def gui_prj_list_for_prediction(projid) -> list:
 
     tabledef = dict({"columns": columns, "data": prjs, "type": "json"})
     # gzip not really necessary - jsonifiy with separators
-    from flask import make_response
-    import json
-
     gz = gvg("gzip")
     content = json.dumps(
         tabledef,
-        separators=[",", ":"],
+        separators=(",", ":"),
     ).encode("utf-8")
     encoding = "utf-8"
     if gz:
@@ -157,8 +158,8 @@ def gui_prj_list_for_prediction(projid) -> list:
     return response
 
 
-def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list:
-    from appli.gui.project.projects_list import _prjs_list_api, list_privileges
+def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list) -> list:
+    from appli.gui.project.projects_list import _prjs_list_api
 
     prjs = _prjs_list_api(
         listall=False,
@@ -170,7 +171,7 @@ def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list
         r = True
         if prj["projid"] not in excludeprjs:
             # del not granted
-            if current_user.is_admin == True:
+            if current_user.is_admin:
                 r = False
             elif len(prj["managers"]):
                 for u in prj["managers"]:
@@ -180,7 +181,7 @@ def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list
         if prj["status"] == ExploreOnly:
             r = True
 
-        if r == True:
+        if r:
             remlist.append(prj)
         # return prjs to merge
     for prj in remlist:
@@ -193,7 +194,6 @@ def prj_list_to_merge(target_proj: ProjectModel, excludeprjs: list = []) -> list
 @login_required
 def gui_prj_merge(projid):
     # Security & sanity checks
-    py_messages = py_get_messages("project")
     target_proj = get_target_prj(projid, for_managing=True)
     if target_proj is None:
         return redirect(url_for("gui_prj_noright", projid=projid))
@@ -204,11 +204,9 @@ def gui_prj_merge(projid):
         )
         return redirect(url_for("gui_prj_noright", projid=target_proj.projid))
     excludeprjs = [target_proj.projid]
-    prjstomerge = None
     srcprojid = 0
-    source_proj = None
     if gvp("src"):
-        srcprojid = int(gvp("src", 0))
+        srcprojid = int(gvp("src", "0"))
     if srcprojid > 0:
         with ApiClient(ProjectsApi, request) as api:
             try:
@@ -218,8 +216,8 @@ def gui_prj_merge(projid):
 
                 if not gvp("merge"):  # Ici la src à été choisie et vérifiée
                     # Validate the merge
-                    with ApiClient(ProjectsApi, request.cookies.get("session")) as api:
-                        rsp2: MergeRsp = api.project_merge(
+                    with ApiClient(ProjectsApi, request.cookies.get("session")) as mapi:
+                        rsp2: MergeRsp = mapi.project_merge(
                             project_id=target_proj.projid,
                             source_project_id=source_proj.projid,
                             dry_run=True,
@@ -238,25 +236,27 @@ def gui_prj_merge(projid):
                     else:
                         flash(_("Pick another source project."), "info")
                         excludeprjs.append(source_proj.projid)
+                if gvp("merge") == "Y" and source_proj:
+                    # Do the real merge
+
+                    with ApiClient(ProjectsApi, request.cookies.get("session")) as papi:
+                        _rsp: MergeRsp = papi.project_merge(
+                            project_id=target_proj.projid,
+                            source_project_id=source_proj.projid,
+                            dry_run=False,
+                        )
+                    return render_template(
+                        "/v2/project/merge.html",
+                        target_proj=target_proj,
+                        processstep="end",
+                    )
             except ApiException as ae:
                 if ae.status == 404:
                     flash(_("Source project doesn't exist"), "warning")
                 elif ae.status in (401, 403):
                     flash(_("You cannot merge from this project"), "error")
                     excludeprjs.append(srcprojid)
-            if gvp("merge") == "Y" and source_proj:
-                # Do the real merge
 
-                with ApiClient(ProjectsApi, request.cookies.get("session")) as api:
-                    _rsp: MergeRsp = api.project_merge(
-                        project_id=target_proj.projid,
-                        source_project_id=source_proj.projid,
-                        dry_run=False,
-                    )
-                    prjstomerge = None
-                return render_template(
-                    "/v2/project/merge.html", target_proj=target_proj, processstep="end"
-                )
     # Fetch the potential merge sources
     prjstomerge = prj_list_to_merge(target_proj, excludeprjs=excludeprjs)
     return render_template(
@@ -315,7 +315,6 @@ def gui_prj_editannot(projid):
         old_author_id = None
         new_author_id = None
         date_filter = dict({"date": None, "hour": "00", "minutes": "00"})
-        process = None
 
     # ############### 1er Ecran
     if not (old_author_id and new_author_id):
@@ -339,13 +338,13 @@ def gui_prj_editannot(projid):
                 # Complete selection lists
                 for usr in annotators:
                     authors.append((usr.id, usr.name))
-                authors.sort(key=lambda usr: usr[1].strip())
+                authors.sort(key=lambda u: u[1].strip())
 
     # Use filtering on target
     filters: Dict[str, str] = {}
 
     # Define the to-be-modified set of objects
-    if old_author_id != None and old_author_id != "anyuser":
+    if old_author_id is not None and old_author_id != "anyuser":
         with ApiClient(UsersApi, request) as api:
             # Let the eventual 404 propagate
             old_author: MinUserModel = api.get_user(user_id=int(old_author_id))
@@ -353,7 +352,7 @@ def gui_prj_editannot(projid):
         filters["filt_last_annot"] = old_author_id
         fromto["from"] = old_author.name
 
-    if date_filter["date"] != None and date_filter["date"] != "":
+    if date_filter["date"] is not None and date_filter["date"] != "":
         filters["validfromdate"] = (
             date_filter["date"]
             + " "
@@ -367,7 +366,7 @@ def gui_prj_editannot(projid):
     # Define how to modify them
     if new_author_id == "lastannot":
         target_for_api = None
-    elif new_author_id != None:
+    elif new_author_id is not None:
         with ApiClient(UsersApi, request) as api:
             # Let the eventual 404 propagate
             new_author: MinUserModel = api.get_user(user_id=int(new_author_id))
@@ -375,13 +374,12 @@ def gui_prj_editannot(projid):
         fromto["to"] = new_author.name
 
     # ############### 2nd Ecran, affichage liste des categories & estimations
-    if new_author_id != None:
+    if new_author_id is not None:
         if not gvp("process"):
             # Query the filtered list in project, if no filter then it's the whole project
             with ApiClient(ObjectsApi, request) as api:
                 # TODO: It's getting long these primitive names...
-                call = api.revert_object_set_to_history
-                res: ObjectSetRevertToHistoryRsp = call(
+                res: ObjectSetRevertToHistoryRsp = api.revert_object_set_to_history(
                     project_id=projid,
                     project_filters=filters,
                     target=target_for_api,
@@ -486,8 +484,7 @@ def gui_prj_reset_to_predicted(projid):
     # noinspection PyStatementEffect
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
     error = None
-    processstep = None
-    objectids = None
+    objectids: List[int] = []
     # Security & sanity checks
 
     filters = {}
@@ -525,7 +522,7 @@ def _get_field_list(prj_model: ProjectModel) -> list:
 
     from to_back.ecotaxa_cli_py.models import ObjectHeaderModel
 
-    fieldlist = []
+    fieldlist: List = []
 
     excluded = set()
     for k in ObjectHeaderModel.openapi_types.keys():
@@ -583,7 +580,7 @@ def gui_prj_edit_datamass(projid):
     request.form  # Force la lecture des données POST sinon il y a une erreur 504
 
     # Security & sanity checks
-    objectids = None
+    objectids: List[int] = []
     error = None
     filters = {}
     for k in sharedfilter.FilterList:
@@ -656,7 +653,7 @@ def gui_prj_edit_datamass(projid):
             except ApiException as ae:
                 flash(ae.reason, "error")
                 error = ae.status
-        if error == None:
+        if error is None:
             flash("%s data rows updated" % nb_rows, "success")
 
     if field == "latitude" or field == "longitude" or gvp("recompute") == "Y":
@@ -714,8 +711,6 @@ def gui_deprecation_management(projid):
         )
         return redirect(url_for("gui_prj_noright", projid=target_proj.projid))
     # Security & sanity checks
-    error = None
-
     if request.method == "POST":
         # Posted form
         posted = request.form
@@ -732,7 +727,7 @@ def gui_deprecation_management(projid):
             with ApiClient(ObjectsApi, request) as api:
                 filters = {"taxo": str(src_id)}
                 nb_ok = api.reclassify_object_set(
-                    project_id=prj_id,
+                    project_id=projid,
                     forced_id=tgt_id,
                     project_filters=filters,
                     reason="W",
@@ -786,3 +781,21 @@ def gui_deprecation_management(projid):
             advised_targets=advised_targets,
             community_targets=community_targets,
         )
+
+
+#######################Project set##########################################
+@app.route("/gui/projectset/projects", methods=["GET"])
+# TODO - fresh_login_required
+def gui_projectset_projects():
+    ids = gvg("project_ids")
+    py_messages = py_get_messages("project")
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            prjs: List[ProjectColumnsModel] = api.project_set_get_projects(ids)
+            ret = [prj.to_dict() for prj in prjs]
+            return make_response(json.dumps(ret))
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                err = py_messages["projectnotyours"]
+            else:
+                raise

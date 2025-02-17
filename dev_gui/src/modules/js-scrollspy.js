@@ -1,4 +1,4 @@
-function ScrollSpy(callback, options = {}) {
+export function ScrollSpy(callback, options = {}) {
   let pos = 0;
   let throttle = false;
   let menu = null;
@@ -15,10 +15,10 @@ function ScrollSpy(callback, options = {}) {
   options = Object.assign({}, defaultOptions, options);
   options.smoothScroll = (options.smoothScroll === true && {}) || options.smoothScroll;
 
-  this.options = Object.assign({}, defaultOptions, options);
-  this.menu = options.menu instanceof HTMLElement ? options.menu : document.querySelector(options.menu);
+  options = Object.assign({}, defaultOptions, options);
+  menu = options.menu instanceof HTMLElement ? options.menu : document.querySelector(options.menu);
 
-  this.scrolltarget = (this.options.container) ? this.options.container instanceof HTMLElement ? this.options.container : document.querySelector(this.options.container) : window;
+  scrolltarget = (options.container) ? options.container instanceof HTMLElement ? options.container : document.querySelector(options.container) : window;
 
   scrolltarget.addEventListener('scroll', (e) => {
     pos = scrolltarget.scrollY;

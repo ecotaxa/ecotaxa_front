@@ -39,7 +39,7 @@
   <input type="hidden" name="{{name}}" value={{formdatas[type_tab].datas[name][0]}}>
   {%- if "options" in option.keys() -%}
      {%- for opt in option.options -%}
-    {%-if opt.value == formdata.datas[name][0] -%}<span class="bg-stone-50 p-2 rounded font-semibold ">{{opt.label}}</span>{%-endif-%}
+    {%-if opt.value == formdata.datas[name][0] -%}<span class="bg-stone-50 p-2 rounded-sm font-semibold ">{{opt.label}}</span>{%-endif-%}
     {%-endfor-%}{%endif%}
   {%-else -%}{{make_field(name,option,type_tab)}}
   {%-endif-%}
@@ -65,8 +65,7 @@
     <div id="shared" class="hide w-full">
       <div id="import-files" class="hide w-full">
       <div class="form-box js js-accordion" data-detail="[data-summary]"><div class="flex flex-row">
-          {%- set data ='{"tree":"commonserver","droptarget":"file_to_load"}' -%}{%- set dataicon = '{"image": "img","document": "doc"}' -%}
-          {%- for opt in [{"name":"myfiles","label":_("Upload or select from my files"),"help":"help_import_myfiles"},{"name":"server","label":_("Choose a folder or zip file on the server"),"help":"help_import_server","data":"  data-request=commonserver data-url=gui/common/ServerFolderSelectJSON data-where=#import-server  data-icons="+dataicon+" data-selectors="+ data +" data-target=unique "}] -%}
+          {%- for opt in sourcedata -%}
      <div class="first:rounded-l-md last:rounded-r-md px-4 py-2 w-auto bg-stone-100 mr-0.5 font-normal" data-summary="#label_{{name+'_'+opt.name}}" data-content="#{{name+'_'+opt.name}}" {{opt.data if 'data' in opt.keys()}}><div id="label_{{name+'_'+opt.name}}">{{opt.label}}<i  data-for="{{opt.help}}" data-request="help"></i></div></div>
       {%- endfor -%}</div>
       <!-- from myfiles -->
@@ -76,8 +75,8 @@
       </div>
         <!-- from server -->
         <div class="form-box hide" id="{{name}}_server">
-          <div >
-            <div id="import-server"></div>
+          <div class="folders" >
+            <div id="import-server"  ></div>
             </div>
           <em class="blockquote text-sm">{{_('Contact the')}} <a href="mailto:{{prjmanagermailto}}" class="text-secondblue-600">{{_('project manager')}}</a> {{_('to know where and how to upload your data.')}}
             {{_('Once the import is complete, all data folders/files can be safely erased on the server.')}}</em>

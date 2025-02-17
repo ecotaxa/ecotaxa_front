@@ -1,17 +1,16 @@
 import json
 
-from typing import Optional, Dict
-
+from typing import Optional, ClassVar, Union, Tuple
 import requests
-from flask import flash
+from flask import flash, request
 from werkzeug.datastructures import FileStorage
-
 from appli import gvg, gvp
 from appli.project import sharedfilter
 from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import FilesApi
+from to_back.ecotaxa_cli_py.api import FilesApi, JobsApi
 from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
+from appli.gui.jobs.staticlistes import py_messages
 
 
 class Job(object):
@@ -19,12 +18,19 @@ class Job(object):
     UI for long-running process on back-end side.
     """
 
-    JOB_ID_POST_PARAM = "job_id"
-    NOPROJ_TEMPLATE = "/v2/project/noright.html"
-    FINAL_TEMPLATE = None
+    JOB_ID_POST_PARAM: ClassVar = "job_id"
+    NOOBJ_TEMPLATE: ClassVar = "/v2/project/noright.html"
+    FINAL_TEMPLATE: ClassVar = None
+    TARGET_TYPE: ClassVar = None
+    # for loop in collection projects
+    DONE: ClassVar = []
+    params: ClassVar = []
 
     def __init__(self):
         pass
+
+    def __getitem___(self, item: str):
+        return getattr(self, item)
 
     @staticmethod
     def find_job_class_by_name(clazz, name: str):
@@ -54,41 +60,49 @@ class Job(object):
         return ""
 
     @classmethod
-    def get_target_prj(cls, prj_id: int, full: bool = False):
-        from flask import request
-        from to_back.ecotaxa_cli_py.api import ProjectsApi
-        from to_back.ecotaxa_cli_py.models import ProjectModel
-
-        target_proj = None
-        with ApiClient(ProjectsApi, request) as api:
-            try:
-                target_proj: ProjectModel = api.project_query(
-                    prj_id, for_managing=False
-                )
-            except ApiException as ae:
-                if ae.status in (401, 403):
-                    from appli.gui.staticlistes import py_messages
-
-                    ae.reason = py_messages["access403"]
-
-        if target_proj != None:
-            if full == True:
-                return target_proj
-            return dict(
-                {
-                    "title": target_proj.title,
-                    "projid": target_proj.projid,
-                    "managers": target_proj.managers,
-                    "annotators": target_proj.annotators,
-                    "viewers": target_proj.viewers,
-                    "status": target_proj.status,
-                    "license": target_proj.license,
-                }
-            )
-        return None
+    def get_project_id(cls, collection_id: int = 0) -> Union[int, str]:
+        if collection_id != 0:
+            coll = cls.get_target_obj(0, collection_id)
+            if coll is not None:
+                projs = [str(prj) for prj in coll.project_ids]
+                return ",".join(projs)
+            else:
+                raise
+        else:
+            if request.method == "GET":
+                prjid = gvg("projid" or "0")
+            else:
+                prjid = gvp("projid" or "0")
+            projid = int(prjid)
+            return projid
 
     @classmethod
-    def get_file_from_form(cls, request):
+    def get_target_id(cls) -> Tuple[Union[int, str], int]:
+        if request.method == "GET":
+            collid = gvg("collection_id" or "")
+        else:
+            collid = gvp("collection_id" or "")
+        if collid != "":
+            cls.TARGET_TYPE = "collection"
+            collection_id = int(collid)
+        else:
+            collection_id = 0
+        projid = cls.get_project_id(collection_id)
+        return projid, collection_id
+
+    @classmethod
+    def get_target_obj(cls, projid: int, collection_id: Optional[int] = 0):
+        if collection_id != 0:
+            from appli.gui.collection.settings import get_collection
+
+            return get_collection(collection_id)
+        else:
+            from appli.gui.project.projectsettings import get_target_prj
+
+            return get_target_prj(projid, full=False)
+
+    @classmethod
+    def get_file_from_form(cls, _request: request):
         """
         Common treatment of "file" fields in several tasks.
         We have either:
@@ -97,14 +111,10 @@ class Job(object):
             or
             - request.files posted, with the full file content inside.
         """
-
-        # timestamp = str(int(time.time() * 1000000000))
-        # uploaded.filename = request.get("filename")
-        # print(uploaded.filename)
         uploaded_file: FileStorage = request.files.get("uploadfile")
         if uploaded_file is not None and uploaded_file.filename != "":
             # Relay the file to back-end
-            with ApiClient(FilesApi, request) as api:
+            with ApiClient(FilesApi, _request) as api:
                 # Call using requests, as the generated openapi wrapper only reads the full file in memory.
                 url = (
                     api.api_client.configuration.host + "/my_files/"
@@ -151,13 +161,25 @@ class Job(object):
         else:
             return False
 
+    @classmethod
+    def get_job(cls) -> Optional[JobModel]:
+        try:
+            with ApiClient(JobsApi, request) as api:
+                job: JobModel = api.get_job(job_id=int(cls.JOB_ID_POST_PARAM))
+            return job
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                flash(py_messages["notauthorized"], "error")
+            elif ae.status == 404:
+                flash(py_messages["notfound"], "error")
 
-def load_from_json(str, clazz):
+
+def load_from_json(txt, clazz):
     """deserialize a json value of expected class"""
     from json import JSONDecodeError
 
     try:
-        ret = json.loads(str)
+        ret = json.loads(txt)
     except JSONDecodeError:
         ret = clazz()
     if not isinstance(ret, clazz):

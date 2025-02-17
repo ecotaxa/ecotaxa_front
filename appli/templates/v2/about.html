@@ -13,9 +13,9 @@
 {%- endmacro %}
 
 {% block body %}
-<div class="container px-8 py-12 pt-24 md:pt-64 mb-24 mx-auto bg-gradient-to-b  from-transparent to-mainblue-50 shadow"  id="page">
+<div class="container px-8 py-12 pt-24 md:pt-64 mb-24 mx-auto bg-linear-to-b  from-transparent to-mainblue-50 shadow"  id="page">
 
-  <section data-elem="usage" class="max-w-screen-md prose prose-stone min-w-[80%]">
+  <section data-elem="usage" class="max-w-(--breakpoint-md) prose prose-stone min-w-[80%]">
       <h1>{{_('Welcome to Ecotaxa')}}</h1>
     <p class="prose prose-md min-w-full">{{_("If you use EcoTaxa in your work, we would appreciate if you cite it as:")}}<br><blockquote class='text-base md:whitespace-nowrap'>{{_('Picheral M, Colin S, Irisson J-O (2017).')}} {{_('EcoTaxa, a tool for the taxonomic classification of images :')}} <a href='http://ecotaxa.obs-vlfr.fr'>http://ecotaxa.obs-vlfr.fr</a></blockquote></p>
 
@@ -28,7 +28,7 @@
       {% if 'sponsors' in sponsor.keys() %}
       {% set h = '64' if ('text' in sponsor.keys() and sponsor.text !='') else '96' %}
         {% set w=((4*67*sponsor.sponsors|length))|string() if h == '64' else '64' %}
-        <div class="h-auto  overflow-hidden  h-min-96 md:h-96 md:overflow-y-hidden rounded bg-white shadow md:px-3 " style="width:{{w}}px">
+        <div class="h-auto  overflow-hidden  h-min-96 md:h-96 md:overflow-y-hidden rounded-sm bg-white shadow-sm md:px-3 " style="width:{{w}}px">
         <div class="p-0 m-0 flex flex-row ">
         {% for sponsor in sponsor.sponsors %}
         {{ card(sponsor,' md:border-r border-transparent ','',h)}}
@@ -40,7 +40,7 @@
       {% endif %}
       </div>
       {% else %}
-      <div class="w-64  h-min-96 md:h-96 bg-white rounded shadow ">
+      <div class="w-64  h-min-96 md:h-96 bg-white rounded-sm shadow-sm ">
         {{ card(sponsor) }}
       </div>
       {% endif %}
@@ -59,7 +59,7 @@
       <li class="prose prose-li:li">{{_("Simon-Martin Schröder, Benjamin Graham: deep learning implementation")}}</li>
       <li class="prose prose-li:li">{{_("Amanda Elineau, Corinne Desnos, Laetitia Jalabert and the COMPLEx team of the <a href='https://lov.imev-mer.fr/' target='_blank'>Laboratoire d'Océanographie de Villefranche</a> (LOV): testing and feedback")|safe}}</li>
     </ul>
-    <div class="prose prose-sm mt-4 min-w-[80%] border-stone-100 rounded-sm p-4"><strong>{{_('Disclaimer :')}}</strong>{{_("If you annotate images in EcoTaxa you cannot claim for any retribution from the application managers but you can then download and use the results of your work. Even if they make their best to keep the application stable and secure, the managers of the EcoTaxa application are not liable for the safekeeping of the images and associated data it hosts. You are responsible for performing regular backups.")}}</div></section>
+    <div class="prose prose-sm mt-4 min-w-[80%] border-stone-100 rounded-xs p-4"><strong>{{_('Disclaimer :')}}</strong>{{_("If you annotate images in EcoTaxa you cannot claim for any retribution from the application managers but you can then download and use the results of your work. Even if they make their best to keep the application stable and secure, the managers of the EcoTaxa application are not liable for the safekeeping of the images and associated data it hosts. You are responsible for performing regular backups.")}}</div></section>
 </div>
 
 {% endblock %}

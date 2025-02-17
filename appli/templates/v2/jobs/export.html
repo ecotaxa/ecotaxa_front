@@ -8,14 +8,14 @@
   {% if datas[name][1] == True %}  <span class="mr-2 italic font-normal">{{option.label}} </span>
   <input type="hidden" name="{{name}}" value={{formdatas[type_export].datas[name][0]}}>
     {%- for opt in option.options -%}
-    {%-if opt.value == datas[name][0] -%}<span class="bg-stone-50 p-2 rounded font-semibold ">{{opt.label}}</span>{%-endif-%}
+    {%-if opt.value == datas[name][0] -%}<span class="bg-stone-50 p-2 rounded-sm font-semibold ">{{opt.label}}</span>{%-endif-%}
     {%-endfor-%}
   {%-else -%}
-  {%- if option.format=="checkbox"-%}<label for="{{name+'_'+type_export}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+'_'+typexport}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
-  {%-elif option.format=="radio"-%}<div class="label inline-block mr-2 w-auto">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if "discard" in option else ''}}>
+  {%- if option.format=="checkbox" and "options" not in option.keys() -%}<label for="{{name+'_'+type_export}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+'_'+type_export}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
+  {%-elif "options" in option.keys() -%}<div class="label inline-block mr-2 w-auto">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if "discard" in option else ''}}>
     {%-if "options" in option.keys() -%}  {%- for opt in option.options -%}
       {%- set extra =' data-checked=true' if opt.value== datas[name][0] else '' -%}
-      {{ form_group_radio(name+'_'+type_export+'_'+loop.index|string(),name,opt.value,opt.label,datas[name][0],required=(loop.index==1),help='',extra=extra)}}
+      {{ form_group_radio(name+'_'+type_export+'_'+loop.index|string(),name,opt.value,opt.label,datas[name][0],required=(loop.index==1),help='',extra=extra,radio= option.format=="radio")}}
        {%- endfor -%}{%-endif-%}
   </div>
   {%- elif option.format=='textarea'-%}
@@ -24,7 +24,7 @@
   {%- elif option.format=='taxoline'-%}
   <label>{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
   <div class="taxoline js js-taxomapping" data-name="{{name}}" data-addline="addline" data-addtext="{{_('Add mapping')}}" data-notselected="{{_('select values to replace')}}"><select class="form-select" name="item-select" id="item-select" data-role="select"><option value="">{{_('Select')}}</option>{%- for data in option.datas -%}<option value={{data[0]}}>{{data[1]}}</option>{%-endfor-%}</select>
-    <input type="text" data-maxitems=1 data-empty=true name="item-replace" id="item-replace" data-addoption="{{option.addoption}}"  class="form-input js js-autocomplete ml-4 " autocomplete="off" placeholder="{{_('replace_by')}}" data-projid={{target_proj.projid}} data-type="taxo" data-role="replace"><div  class="addline ml-4 btn btn-secondary text-sm whitespace-nowrap cursor-pointer relative w-16" type="button" data-title="{{_('Add mapping')}}"><i class="icon icon-plus-sm center"></i></div></div>
+    <input type="text" data-maxitems=1 data-empty=true name="item-replace" id="item-replace" data-addoption="{{option.addoption}}"  class="form-input js js-autocomplete ml-4 " autocomplete="off" placeholder="{{_('replace_by')}}" data-projid={{projid}} data-collection_id={{collection_id}}  data-type="taxo" data-role="replace"><div  class="addline ml-4 btn btn-secondary text-sm whitespace-nowrap cursor-pointer relative w-16" type="button" data-title="{{_('Add mapping')}}"><i class="icon icon-plus-sm center"></i></div></div>
       {%- if "comment" in option-%}<em class="text-sm inline-block">{{option.comment}}</em>{%-endif-%}
   {%-endif-%}{%-endif-%}
 </div>{%-endif-%}{%-endfor%}
@@ -34,12 +34,12 @@
   <div class="w-100 mx-auto block pt-4 text-left relative" id="project-subset-header">
   {% set data = {'file':'_help_job_export'} -%}
   {%- set title=_('Export')  %}
-{{header_project_job(title ,data, _('How to export data'), nav={"links":export_links,"query":"?projid="+target_proj.projid|string})}}
+{{header_project_job(title ,data, _('How to export data'), nav={"links":export_links,"query":"?target_type=collection&collection_id="+collection_id|string if collection_id|string!="0" and target_type=="collection" else "?projid="+projid|string})}}
 	<em class="block text-sm mt-2">{{_('Global export rules')}} <i data-for="help_global_export_rules" data-request="help" data-what="help"></i></em>
 </div>
 <form method="post" class="js js-submit js-tabs" action="{{request.path}}" data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
     <div class="block mb-4">{{display_filters(filters)}}</div>
-    <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}">
+    <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="collection_id" value="{{collection_id}}"><input type="hidden" name="projid" id="projid" value="{{projid}}">
       {% for type_export,formdata in formdatas.items() %}
     <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if export_type == type_export }}"><legend class="text-center tab-control title-nav"  data-what="{{type_export}}" >{{formdata.title}} </legend>
       <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help" data-what="help"></i></em>
@@ -47,7 +47,8 @@
     </div></fieldset>{%-endfor-%}
   </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
-          <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>  <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
+          <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>
+          <a href ="{{url_for("gui_collection_classify",collection_id=collection_id) if collection_id|string!="0" else  url_for("gui_prj_classify",projid=projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
             </div>
         </form>
         </div>

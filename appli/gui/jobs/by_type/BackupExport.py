@@ -23,16 +23,17 @@ class ExportBackupJob(ExportJob):
 
     @classmethod
     def job_req(cls):
-        projid = int(gvp("projid"))
-        out_to_ftp = gvp("out_to_ftp") == '1'
+        projid, collid = cls.get_target_id()
+        out_to_ftp = gvp("out_to_ftp") == "1"
         req = BackupExportReq(
+            collection_id=collid,
             project_id=projid,
             out_to_ftp=out_to_ftp,
         )
         return req
 
     @classmethod
-    def api_job_call(cls, export_req: BackupExportReq) -> str:
+    def api_job_call(cls, export_req: BackupExportReq) -> ExportRsp:
         with ApiClient(ObjectsApi, request) as api:
             rsp: ExportRsp = api.export_object_set_backup(export_req)
         return rsp

@@ -16,8 +16,8 @@ import debounce from 'debounce';
 import {
   css,
   models,
-  domselectors,
-  default_messages
+  default_messages,
+  typeimport,
 } from '../modules/modules-config.js';
 let instance = [];
 // valid fetch urlparts
@@ -26,6 +26,7 @@ const fetchfroms = {
   prjlist: '/gui/prjlist/',
   prjsamplestats: '/gui/prjsamplestats',
   userslist: '/gui/admin/userslist/',
+  guestslist:'/gui/admin/guestslist/',
   prjpredict: '/gui/prjsforprediction/'
 };
 // specifc css
@@ -38,7 +39,7 @@ const tablecss = {
   disabled: 'table-disabled',
   ascending: 'table-ascending',
   descending: 'table-descending',
-  tipover: 'tipover absolute z-10 text-stone-50 rounded bg-stone-600 px-2 py-0.5 -mt-5 ml-12 ',
+  tipover: 'tipover absolute z-10 text-stone-50 rounded-sm bg-stone-600 px-2 py-0.5 -mt-5 ml-12 ',
   hide: 'hide',
   nowrap: 'truncate',
   buttonexpand: 'button-expand',
@@ -70,7 +71,7 @@ Object.freeze(tablecss);
 Object.freeze(tableselectors);
 const NOTFOUND = '#NOTFOUND#';
 export class TableComponent {
-  instanceid = null;
+  uuid = null;
   grid = {
     columns: [],
     active: [],
@@ -114,11 +115,11 @@ export class TableComponent {
     container = container instanceof HTMLElement ? container : document.querySelector(container);
     if (!container) return;
     //can select multiples tables in one page  or load data in the same table
-    this.instanceid = (container.dataset.instanceid) ? container.dataset.instanceid : generate_uuid;
-    if (!instance[this.instanceid] || !equal(container.dataset, instance[this.instanceid].params)) {
+    this.uuid = (container.dataset.uuid) ? container.dataset.uuid : generate_uuid();
+    if (!instance[this.uuid] || !equal(container.dataset, instance[this.uuid].params)) {
       this.init(container);
     } else this.refresh();
-    return instance[this.instanceid];
+    return instance[this.uuid];
 
   }
   init(container) {
@@ -197,16 +198,13 @@ export class TableComponent {
     if (this.params.fromid) from += '/' + this.params.fromid;
     let query = (this.params.import) ? {
       typeimport: DOMPurify.sanitize(this.params.import),
-      window_start: pagestart,
-      window_size: pagesize,
       gz: true,
-    } : ((pagesize) ? {
-      window_start: pagestart,
-      window_size: pagesize,
-      listall: ((this.params.listall) ? this.params.listall : false)
-    } : ((this.params.listall) ? {
-      listall: ((this.params.listall) ? this.params.listall : false)
-    } : {}));
+    } : {};
+    if (pagesize) {
+      query.window_start = pagestart;
+      query.window_size = pagesize;
+    }
+    if (this.params.listall) query.listall = this.params.listall;
     const queryparams = new URLSearchParams(window.location.search);
     const querykeys = this.cellidname + 's';
     if (querykeys.length) {
@@ -221,23 +219,28 @@ export class TableComponent {
       else return Promise.reject(response);
     }).then(async tabledef => {
       if (this.waitdiv) this.waitdiv.innerHTML = ((this.waitdiv.dataset.loaded) ? DOMPurify.sanitize(this.waitdiv.dataset.loaded) : default_messages.dataloaded);
-      if (pagestart === 0) {
+      if (pagestart > 0) {
+        if (tabledef.data.length) {
+          this.domInsertRows(tabledef);
+        } else pagesize = 0;
+      }
+      if (pagesize === 0) {
         let now = Date.now();
         console.log('seconds to fetch ', (Date.now() - this.dt) / 1000);
         this.dt = now;
-        if (tabledef.data.length) await this.tableActivate(container, tabledef);
+        if (tabledef.data.length || pagestart > 0) await this.tableActivate(container, tabledef);
         else this.waitDeactivate('no result', 'default');
         now = Date.now();
         console.log('plugins loaded', (Date.now() - this.dt) / 1000);
         this.dt = now;
-      } else if (tabledef.length) this.domInsertRows(tabledef);
-      else pagesize = 0;
-      if (pagesize > 0) this.fetchData(container, fromurl, pagestart + pagesize);
+      } else this.fetchData(container, fromurl, pagestart + pagesize);
+
     }).catch((err) => { /* print error from response */
       console.log('error', err);
       this.waitDeactivate(err.status + ` ` + err.statusText, 'error');
     });
   }
+
   async dataToTable(tabledef) {
     if (!tabledef.data) return;
     if (tabledef.columns) {
@@ -402,15 +405,15 @@ export class TableComponent {
       // fetch once the same table
       container.dataset.table = this.params.table = true;
       this.initialized = true;
-    }, this.instanceid);
+    }, this.uuid);
     // dismiss table when dismiss modal
     ModuleEventEmitter.once(this.eventnames.dismiss, (e) => {
       this.destroy();
-    }, this.instanceid);
+    }, this.uuid);
     if (tabledef) tabledef = await this.dataToTable(tabledef);
     else await this.tableToData();
-    if (this.grid.data.length) ModuleEventEmitter.emit(this.eventnames.load, {}, this.instanceid);
-    instance[this.instanceid] = true;
+    if (this.grid.data.length) ModuleEventEmitter.emit(this.eventnames.load, {}, this.uuid);
+    instance[this.uuid] = true;
   }
 
   tableAppendRows(rows) {
@@ -419,12 +422,11 @@ export class TableComponent {
   destroy() {
     if (this.dataImport) this.dataImport = null;
     this.dom = null;
-    delete instance[this.instanceid];
+    delete instance[this.uuid];
   }
+
   refresh(e) {
-    if (this.dataImport && this.dataImport.selectors) this.dataImport.selectors.forEach(selector => {
-      if (this.disabled) this.disabled = false;
-    });
+    if (this.dataImport) this.dataImport.resetSelectors();
   }
   labelFormatter(column) {
     let align = ``;
@@ -433,7 +435,7 @@ export class TableComponent {
     else if (column.label) return `<span class="${align}">${column.label}</span>`;
     else return ``;
   }
-  getCellId(name, state = null) {
+  getCellId(name) {
     let cols = this.grid.columns.filter(column => (column.name === name));
     return (cols.length) ? cols[0].index : -1;
   }
@@ -528,7 +530,7 @@ export class TableComponent {
           nodename: "INPUT",
           attributes: {
             type: "radio",
-            name: `${this.instanceid}select`,
+            name: `${this.uuid}select`,
             value: String(value)
           }
         }];
@@ -541,7 +543,7 @@ export class TableComponent {
           nodename: "INPUT",
           attributes: {
             type: "checkbox",
-            name: `${this.instanceid}select[]`,
+            name: `${this.uuid}select[]`,
             value: String(value)
           }
         }];
@@ -704,7 +706,7 @@ export class TableComponent {
 
     ModuleEventEmitter.on(this.eventnames.update, () => {
       this.dom.classList.remove(css.hide);
-    }, this.instanceid);
+    }, this.uuid);
   }
   initPlugins(container) {
     if (!this.grid.data.length) return;
@@ -765,7 +767,7 @@ export class TableComponent {
         a.classList.add(((i === req.index) ? css.wait : css.disabled));
       });
       this.sorting = true;
-    }, this.instanceid);
+    }, this.uuid);
     // remove details when sorting
     ModuleEventEmitter.on(this.eventnames.sorted, (req) => {
       // req {dir:direction, index:index}
@@ -773,7 +775,7 @@ export class TableComponent {
         a.classList.remove(((i === req.index) ? css.wait : css.disabled))
       });
       this.sorting = false;
-    }, this.instanceid);
+    }, this.uuid);
   }
   sortColumn(th, index, dir = null) {
     dir = (dir === null) ? ((th.classList.contains(tablecss.ascending)) ? false : (th.classList.contains(tablecss.descending)) ? true : ((th.dataset.sort) ? false : true)) : dir;
@@ -782,7 +784,7 @@ export class TableComponent {
     ModuleEventEmitter.emit(this.eventnames.sorting, {
       dir: dir,
       index: th.cellIndex
-    }, this.instanceid);
+    }, this.uuid);
     let rows = this.grid.data.map((row, i) => {
       const cell = is_object(row[index]) ? JSON.stringify(row[index]) : ((Array.isArray(row[index])) ? row[index][0] : row[index]);
       return {
@@ -846,12 +848,27 @@ export class TableComponent {
     ModuleEventEmitter.emit(this.eventnames.sorted, {
       dir: dir,
       index: th.cellIndex
-    }, this.instanceid);
+    }, this.uuid);
 
 
   }
 
-
+  displaySelected(queries, indexes, cellid, toggle = null) {
+    const trs = this.dom.querySelectorAll('tbody tr');
+    if (toggle === null) toggle = function(tr, value, idx) {
+      tr.hidden = value;
+    }
+    const reset = (queries.length === 0 && indexes.length === 0);
+    trs.forEach((tr, index) => {
+      if (reset) toggle(tr, false);
+      else {
+        const val = (queries.length > 0 && indexes.length === 0) ? NOTFOUND : (tr.dataset[this.cellidname] !== null) ? tr.dataset[this.cellidname] : tr.cells[cellid].textContent;
+        const idx = indexes.indexOf(val);
+        if (idx < 0) toggle(tr, true, idx);
+        else toggle(tr, false, idx);
+      }
+    });
+  };
 
   initSearch() {
     const top = this.wrapper.querySelector(tableselectors.top);
@@ -907,7 +924,7 @@ export class TableComponent {
       ModuleEventEmitter.emit(this.eventnames.search, {
         searchstring: searchstring,
         queries: queries
-      }, this.instanceid);
+      }, this.uuid);
       let datas = this.grid.data,
         indexes = [];
       queries.forEach(qry => {
@@ -931,7 +948,6 @@ export class TableComponent {
                 cell = String(cell);
                 break;
             }
-
             return ((casesensitive) ? cell.indexOf(qry) > -1 : cell.toLowerCase().indexOf(qry)) > -1;
           });
 
@@ -946,15 +962,10 @@ export class TableComponent {
         queries: queries,
         indexes: indexes,
         cellid: cellid
-      }, this.instanceid);
+      }, this.uuid);
     }, 300);
     const display_search = (queries, indexes, cellid) => {
-      const trs = this.dom.querySelectorAll('tbody tr');
-      trs.forEach((tr, index) => {
-        const val = (queries.length > 0 && indexes.length === 0) ? NOTFOUND : (tr.dataset[this.cellidname] !== null) ? tr.dataset[this.cellidname] : tr.cells[cellid].textContent;
-        if (indexes.indexOf(val) < 0) tr.hidden = true;
-        else tr.hidden = false;
-      });
+      this.displaySelected(queries, indexes, cellid);
     };
     const clear_search = debounce(() => {
       this.searching = true;
@@ -990,24 +1001,24 @@ export class TableComponent {
         if (this.plugins.jsDetail) this.plugins.jsDetail.activeDetail(false);
       }
       this.searching = true;
-    }, this.instanceid);
+    }, this.uuid);
     ModuleEventEmitter.on(this.eventnames.searchend, (req) => {
       // req {queries:queries,indexes: indexes, cellid:cellid}
       display_search(req.queries, req.indexes, req.cellid);
       searchinput.classList.remove(css.wait);
       this.searching = false;
-    }, this.instanceid);
+    }, this.uuid);
     ModuleEventEmitter.on(this.eventnames.update, () => {
       if (this.searching === false) {
         setTimeout(() => {
           refresh_details();
         }, 300);
       }
-    }, this.instanceid);
+    }, this.uuid);
     this.toggleAddOns([tableselectors.search + ' input'], true);
   }
   initSelect(container) {
-    const inputs = this.dom.querySelectorAll('input[name^="' + this.instanceid + '"]');
+    const inputs = this.dom.querySelectorAll('input[name^="' + this.uuid + '"]');
     if (inputs.length === 0) return;
     const inputname = inputs[0].name;
     let selectaction = container.querySelector('.' + tablecss.selectaction);
@@ -1059,10 +1070,10 @@ export class TableComponent {
     inputs.forEach(input => {
       input.addEventListener('change', (e) => {
         if (input.checked) popup_selected(input.offsetTop, input.offsetLeft);
-        else if (this.dom.querySelectorAll('input[name^="' + this.instanceid + '"]:checked').length === 0) popup_selected(null, null, true);
+        else if (this.dom.querySelectorAll('input[name^="' + this.uuid + '"]:checked').length === 0) popup_selected(null, null, true);
       });
     });
-    if (this.dom.querySelectorAll('input[name^="' + this.instanceid + '"]:checked').length > 0) {
+    if (this.dom.querySelectorAll('input[name^="' + this.uuid + '"]:checked').length > 0) {
       selectaction.classList.remove(css.hide);
       popup_selected(null, null);
     }
@@ -1100,7 +1111,6 @@ export class TableComponent {
       let current = jsDetail.activeDetail(true);
       if (current && current === el) {
         current = jsDetail.expandDetail(el);
-        console.log('callbackopen', current)
         if (callback) callback();
       } else {
         if (current) current.querySelector('summary').click();

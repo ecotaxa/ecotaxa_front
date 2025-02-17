@@ -6,12 +6,12 @@
 
 <div class=" w-full lg:w-6/12  mx-auto mt-18 pt-8 px-2">
   {% if current_user.is_authenticated%}  <div class="w-auto mx-auto p-12 text-sm">
-  {{ _('Already authenticated.')}}<div class="text-center my-2"><a href="/gui/" class="p-1 rounded-sm font-normal">{{_('Back to home page')}}</a></div></div>
+  {{ _('Already authenticated.')}}<div class="text-center my-2"><a href="/gui/" class="p-1 rounded-xs font-normal">{{_('Back to home page')}}</a></div></div>
   {% else %}
   {% set modal_title = _("How to register to Ecotaxa")%}
 
   {{ modal(id='help-registertoecotaxa',modal_title=modal_title,modal_content='v2/help/help_register.html', type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'}) }}
-<div id="home-registration" class=" w-full mb-12 -mt-8 overflow-hidden border border-transparent shadow px-2 mx-auto sm:px-4">
+<div id="home-registration" class=" w-full mb-12 -mt-8 overflow-hidden border border-transparent shadow-sm px-2 mx-auto sm:px-4">
 {% if sentmail %}
 <div class="info inverse mt-48 px-8  py-8">{{_('A validation link has been sent to')}} <strong>{{sentmail}}</strong><br>{{_('Please, check your email (and junk mail if necessary) and click the link to validate and continue your account creation process.')}}</div>
 {% elif token or not api_email_verification %}

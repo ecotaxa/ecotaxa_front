@@ -5,7 +5,7 @@ export default function(state) {
   console.log('fromid', state.params.fromid)
   if (state.params.fromid) {
     state.afterLoad = () => {
-      const tocheck = state.dom.querySelector('input[name="' + state.instanceid + 'select[]"][value="' + state.params.fromid + '"]');
+      const tocheck = state.dom.querySelector('input[name="' + state.uuid + 'select[]"][value="' + state.params.fromid + '"]');
       if (tocheck) tocheck.checked = true;
     }
   }
@@ -17,7 +17,7 @@ export default function(state) {
         nodename: "INPUT",
         attributes: {
           type: "checkbox",
-          name: `${state.instanceid}select[]`,
+          name: `${state.uuid}select[]`,
           value: String(value)
         }
       }];

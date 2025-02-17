@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
 from typing import ClassVar
-from flask import request
-
 from appli import gvp
 from appli.gui.jobs.by_type.Import import ImportJob
-from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py.models import (
-    ImportReq,
-    ImportRsp,
-)
+from to_back.ecotaxa_cli_py.models import ImportReq
 
 
 class UpdateImportJob(ImportJob):

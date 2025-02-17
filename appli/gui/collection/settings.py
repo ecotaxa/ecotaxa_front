@@ -5,7 +5,7 @@ from typing import List
 
 from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user, login_required
-from appli import app, gvp, gvpm
+from appli import app, gvg, gvp, gvpm
 from appli.gui.staticlistes import py_messages
 
 ######################################################################################################################
@@ -21,8 +21,18 @@ from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     MinUserModel,
     TaxonModel,
+    CreateCollectionReq,
+    CollectionReq,
 )
-from appli.gui.commontools import possible_licenses
+from to_back.ecotaxa_cli_py.models.collection_aggregated_rsp import (
+    CollectionAggregatedRsp,
+)
+from appli.gui.commontools import (
+    possible_licenses,
+    possible_models,
+    possible_access,
+    py_get_messages,
+)
 
 ###############################################common for create && edit  #######################################################################
 def _user_format(uid: int) -> dict:
@@ -38,7 +48,7 @@ def _prj_format(projid: int) -> dict:
     if prj != None:
         return dict({"id": prj.projid, "title": prj.title})
     else:
-        return dict({"id": p, "title": None})
+        return dict({"id": None, "title": None})
 
 
 def get_collection(collection_id) -> CollectionModel:
@@ -65,12 +75,11 @@ def collection_create() -> str:
     if to_save == "Y":
         title = gvp("title")
         project_ids = [int(p) for p in gvpm("project_ids[]")]
-        print("--------------------project_ids", project_ids)
+
         if title == "" or len(project_ids) == 0:
             flash("title and project id are required", "error")
             to_save = False
     if to_save:
-        from to_back.ecotaxa_cli_py.models import CreateCollectionReq
 
         with ApiClient(CollectionsApi, request) as api:
             req = CreateCollectionReq(title=title, project_ids=project_ids)
@@ -78,13 +87,44 @@ def collection_create() -> str:
 
         return collection_edit(rsp, new=True)
     licenses = possible_licenses()
+    access = possible_access()
     return render_template(
         "v2/collection/settings.html",
         target_coll=None,
-        members=None,
         new=True,
         possible_licenses=licenses,
+        possible_access=access,
     )
+
+
+def collection_aggregated(project_ids: str) -> dict:
+    # who has the right to create a collection
+    if not True:
+        from werkzeug.exceptions import Forbidden
+        from appli.gui.staticlistes import py_user
+
+        raise Forbidden(py_user["notauthorized"])
+    aggregated = {}
+    if len(project_ids):
+        with ApiClient(CollectionsApi, request) as api:
+            aggregated: CollectionAggregatedRsp = (
+                api.collection_aggregated_projects_properties(project_ids)
+            )
+    privileges = {}
+    ret = aggregated.to_dict()
+    if "creator_users" in ret:
+        creator_users = []
+        for u in ret["creator_users"]:
+            creator_users.append(u.to_dict())
+        ret["creator_users"] = creator_users
+    if "privileges" in ret:
+        for key, privs in ret["privileges"].items():
+            privlist = []
+            for u in privs:
+                privlist.append(u.to_dict())
+            privileges[key] = privlist
+        ret["privileges"] = privileges
+    return ret
 
 
 def collection_edit(collection_id: int, new: bool = False) -> str:
@@ -110,7 +150,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
                     u = gvp(a_var, "")
                     if u != "":
                         setattr(collection, a_var, _user_format(int(u)))
-                else:
+                elif a_var != "id":
                     setattr(collection, a_var, gvp(a_var))
             elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in dir(collection):
                 if a_var[0:-2] in ["creator_users", "associate_users"]:
@@ -121,40 +161,133 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
                     setattr(collection, a_var[0:-2], [int(p) for p in gvpm(a_var)])
                 else:
                     setattr(collection, a_var[0:-2], gvpm(a_var))
-        do_update = True
-        if do_update:
-            try:
-                with ApiClient(CollectionsApi, request) as api:
-                    api.update_collection(
-                        collection_id=collection.id, collection_model=collection
-                    )
-                    if new == True:
-                        message = py_messages["collectioncreated"]
-                    else:
-                        message = py_messages["collectionupdated"]
-                    flash(
-                        message + " " + collection.title,
-                        "success",
-                    )
-                return redirect(request.referrer)
-            except ApiException as ae:
-                flash(py_messages["updateexception"] + "%s" % ae.reason)
+        try:
+            with ApiClient(CollectionsApi, request) as api:
+                api.update_collection(
+                    collection_id=collection_id, collection_req=collection
+                )
+                if new == True:
+                    message = py_messages["collectioncreated"]
+                else:
+                    message = py_messages["collectionupdated"]
+                flash(
+                    message + " " + collection.title,
+                    "success",
+                )
+            return redirect(request.referrer)
+        except ApiException as ae:
+            flash(py_messages["updateexception"] + "%s" % ae.reason)
 
     licenses = possible_licenses()
-
+    # licenses[0] licenses texts , licenses[1] licenses restriction
     from appli.gui.commontools import crsf_token
 
     projectlist = [_prj_format(int(p)) for p in collection.project_ids]
+    prjlist = [str(p) for p in collection.project_ids]
+    aggregated = collection_aggregated(",".join(prjlist))
+    if "initclassiflist" in aggregated:
+        initclassiflist = aggregated["initclassiflist"].split(",")
+    else:
+        initclassiflist = []
+    lst = [str(tid) for tid in initclassiflist]
+    if "classiffieldlist" in aggregated:
+        classiffieldlist = aggregated["classiffieldlist"]
+    else:
+        classiffieldlist = ""
 
+    if "privileges" in aggregated:
+        privileges = aggregated["privileges"]
+
+    else:
+        privileges = None
+    if "freecols" in aggregated:
+        freecols = aggregated["freecols"]
+    else:
+        freecols = None
+    # common func used in project stats
+    from appli.gui.taxonomy.tools import taxo_with_names
+
+    predeftaxo = taxo_with_names(lst)
+
+    scn = possible_models()
+    access = possible_access()
     return render_template(
         "v2/collection/settings.html",
         target_coll=collection,
         projectlist=projectlist,
+        classiffieldlist=classiffieldlist,
+        predeftaxo=predeftaxo,
+        status=aggregated["status"],
+        access=aggregated["access"],
+        excluded=aggregated["excluded"],
+        members_by_right=privileges,
+        freecols=freecols,
         crsf_token=crsf_token(),
         possible_licenses=licenses,
+        possible_access=access,
         new=new,
         # redir=redir,
     )
 
 
 ######################################################################################################################
+#     properties evaluation from  projects list                                                                   #
+######################################################################################################################    backto = False
+def collection_erase(collection_id: int, erase: bool = False) -> str:
+
+    py_messages = py_get_messages("collection")
+    user: UserModelWithRights = current_user.api_user
+    isadmin = current_user.is_app_admin
+    target_coll = get_collection(collection_id)
+    if target_coll is None:
+        return redirect(url_for("gui_collection_noright", collection_id=collection_id))
+    if target_coll.external_id is not None:
+        flash(
+            "Collection is published. Modifications and Erase are forbidden.",
+            "error",
+        )
+        return redirect(url_for("gui_collection_noright", collection_id=collection_id))
+    if erase == True:
+        with ApiClient(CollectionApi, request) as api:
+            try:
+                res: int = api.erase_collection(collection_id)
+            except ApiException as ae:
+                if ae.status in (401, 403):
+                    err = py_messages["collectionnotyours"]
+                else:
+                    raise
+
+    return render_template(
+        "./v2/collection/erase.html",
+        isadmin=isadmin,
+        partial=is_partial_request(request),
+        target_coll=target_coll,
+        erase=erase,
+    )
+
+
+######################################################################################################################
+#     properties evaluation from  projects list                                                                   #
+######################################################################################################################
+def collection_status(project_ids: List[int]) -> str:
+    return status
+
+
+def collection_license(project_ids: List[int]) -> str:
+    return license
+
+
+def collection_creators(project_ids: List[int]) -> str:
+    return creators
+
+
+def collection_creators_organisations(project_ids: List[int]) -> str:
+    return creators_organisations
+
+
+def collection_associates(project_ids: List[int]) -> str:
+    return associates
+
+
+def collection_associates_organisations(project_ids: List[int]) -> str:
+    return associates_organisations

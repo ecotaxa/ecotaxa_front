@@ -20,13 +20,15 @@ export const models = {
   jobs: 'jobs,',
   controls: "controls",
   imports: "imports",
-  commonserver: 'commonserver'
+  commonserver: 'commonserver',
+  organisation: 'organisation'
 };
 
 export const typeimport = {
   taxo: models.taxo,
   privileges: models.privileges,
-  settings: models.settings
+  settings: models.settings,
+  project: models.project
 };
 export const css = {
   hide: 'hide',

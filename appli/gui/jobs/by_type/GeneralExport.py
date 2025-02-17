@@ -13,7 +13,7 @@ from to_back.ecotaxa_cli_py.models import (
 )
 
 
-class ExportBackupJob(ExportJob):
+class ExportGeneralJob(ExportJob):
     """
     Subset, just GUI here, bulk of job is subcontracted to back-end.
     """
@@ -23,15 +23,16 @@ class ExportBackupJob(ExportJob):
 
     @classmethod
     def job_req(cls):
-        projid = int(gvp("projid"))
+        projid, collid = cls.get_target_id()
         split_by = gvp("split_by")
         with_images = gvp("with_images")
-        with_internal_ids = gvp("with_internal_ids") == '1'
-        with_types_row = gvp("with_types_row") == '1'
-        only_annotations = gvp("only_annotations") == '1'
-        taxo_mapping = gvp("taxo_mapping")
-        out_to_ftp = gvp("out_to_ftp") == '1'
+        with_internal_ids = gvp("with_internal_ids") == "1"
+        with_types_row = gvp("with_types_row") == "1"
+        only_annotations = "0"
+        # taxo_mapping = gvp("taxo_mapping")
+        out_to_ftp = gvp("out_to_ftp") == "1"
         req = GeneralExportReq(
+            collection_id=collid,
             project_id=projid,
             split_by=split_by,
             with_images=with_images,
@@ -44,7 +45,7 @@ class ExportBackupJob(ExportJob):
         return req
 
     @classmethod
-    def api_job_call(cls, export_req: GeneralExportReq) -> str:
+    def api_job_call(cls, export_req: GeneralExportReq) -> ExportRsp:
         with ApiClient(ObjectsApi, request) as api:
             rsp: ExportRsp = api.export_object_set_general(export_req)
         return rsp

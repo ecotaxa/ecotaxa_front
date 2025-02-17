@@ -30,7 +30,7 @@
           <div class="form-box"><label>{{_('# Matching features >')}}</label>
           <input class="form-input" name="filt_featurenbr" id="filt_featurenbr"
                  value="{{ filt_features_nbr }}" type="text"></div>
-                 <div class="form-box flex-grow"><label>{{_('Instrument:')}}</label>
+                 <div class="form-box grow"><label>{{_('Instrument:')}}</label>
             {{ inputdict('filt_instrum','filt_instrum',value = target_proj.instrument, label=target_proj.instrument,type='instr', placeholder=_('Instrument'),required= True,autocomplete=True ) }}
         </div><div class="form-box flex items-end">
           <button type="button"  class="button is-secondary">Filter
@@ -75,7 +75,7 @@ and be the same as in _all_ source projects, to allow deep features extraction a
       {% endfor %}
       {{ TblBody|safe }}
     </table>-->
-    <div class="selectaction absinput rounded shadow-sm w-auto p-4 font-normal text-secondblue-50 bg-stone-700  hide" data-input="search_srcs" data-form="search"><i class="icon icon-cancel p-1 -mt-3 -mr-3 invert float-right" data-dismiss=".selectaction"></i><a class="text-sm small-caps ">{{_('Next: Choose objects in selected projects')}}</a></div>
+    <div class="selectaction absinput rounded-sm shadow-xs w-auto p-4 font-normal text-secondblue-50 bg-stone-700  hide" data-input="search_srcs" data-form="search"><i class="icon icon-x-mark p-1 -mt-3 -mr-3 invert float-right" data-dismiss=".selectaction"></i><a class="text-sm small-caps ">{{_('Next: Choose objects in selected projects')}}</a></div>
 
   </div></div>
   <script>

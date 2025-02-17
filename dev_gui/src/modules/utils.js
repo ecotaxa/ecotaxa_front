@@ -133,7 +133,13 @@ function is_object(obj) {
 
 }
 
-
+function input_read_only(item) {
+  item.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return false;
+  });
+}
 
 function create_box(tag, attrs, parent = null, sep = ``) {
   let el = document.createElement(tag);
@@ -194,36 +200,6 @@ function html_spinner(addons = 'text-white', size = 'h-5 w-5') {
     </svg>`
 }
 
-function dataset_to_json(obj) {
-  //from jquery
-  function get_json(data) {
-    if (data === "true") {
-      return true;
-    }
-
-    if (data === "false") {
-      return false;
-    }
-
-    if (data === "null") {
-      return null;
-    }
-    // Only convert to a number if it doesn't change the string
-    if (data === +data + "") {
-      return +data;
-    }
-    //Replaced rbrace with regex value.
-    if (/^(?:\{[\w\W]*\}|\[[\w\W]*\])$/.test(data)) {
-      console.log(' parse data v', data)
-      return JSON.parse(data);
-    }
-    return data;
-  }
-  Object.entries(obj).forEach(([key, data]) => {
-    obj[key] = get_json(data);
-  })
-  return obj;
-}
 /*function toCamelCase(str) {
   return str.toLowerCase()
     .trim()
@@ -231,6 +207,7 @@ function dataset_to_json(obj) {
     .map(word => word.replace(word[0], word[0].toString().toUpperCase()))
     .join('')
 }*/
+
 function stop_on_error(message, callback = null) {
   if (callback) callback;
   throw new Error(message);
@@ -246,6 +223,7 @@ export {
   download_url,
   string_to_boolean,
   is_object,
+  input_read_only,
   dom_purify,
   create_box,
   decode_HTMLEntities,
@@ -253,6 +231,5 @@ export {
   format_bytes,
   stop_on_error,
   dirseparator,
-  urlseparator,
-  dataset_to_json
+  urlseparator
 }

@@ -2,17 +2,15 @@
 import datetime
 import time
 from typing import ClassVar
-from flask import render_template, g, redirect, request, flash, url_for
-from appli import gvg, gvp
+from flask import render_template, redirect, request, flash, url_for
+from appli import gvp
 from appli.gui.jobs.Job import Job
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py.models import (
     CreateProjectReq,
     SubsetReq,
     SubsetRsp,
-    ProjectModel,
     JobModel,
 )
 
@@ -29,10 +27,10 @@ class SubsetJob(Job):
     @classmethod
     def initial_dialog(cls):
         """In UI/flask, initial load, GET"""
-        projid = int(gvg("projid"))
-        target_proj = cls.get_target_prj(projid)
-        if target_proj == None:
-            return render_template(cls.NOPROJ_TEMPLATE, projid=projid)
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid, collid)
+        if target_proj is None:
+            return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
         filters = cls._extract_filters_from_url()
 
         formdata = {
@@ -50,22 +48,23 @@ class SubsetJob(Job):
         return render_template(
             cls.STEP0_TEMPLATE,
             form=formdata,
-            target_proj=target_proj,
+            target_obj=target_proj,
+            targetid=projid,
             filters=filters,
         )
 
     @classmethod
     def create_or_update(cls):
         """In UI/flask, submit/resubmit, POST"""
-        projid = int(gvp("projid"))
-        target_proj = cls.get_target_prj(projid)
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid, collid)
         subsetprojecttitle = gvp("subsetprojecttitle")
         valtype = gvp("valtype")
         vvaleur = gvp("vvaleur")
         pvaleur = gvp("pvaleur")
         grptype = gvp("grptype")
-
         errors = []
+        valeur = ""
         # Check data validity
         if len(subsetprojecttitle) < 5:
             errors.append("Project name too short")
@@ -102,7 +101,8 @@ class SubsetJob(Job):
             return render_template(
                 cls.STEP0_TEMPLATE,
                 form=formdata,
-                target_proj=target_proj,
+                target_obj=target_proj,
+                targetid=projid,
                 filters=filters,
             )
         else:

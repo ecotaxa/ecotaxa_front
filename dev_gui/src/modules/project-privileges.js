@@ -16,7 +16,12 @@ import {
   domselectors,
   css
 } from '../modules/modules-config.js';
+import {
+  input_read_only
+} from "../modules/utils.js";
 const dynamics = {};
+//add local selector
+domselectors.memberline = '[data-block="member"]';
 export class ProjectPrivileges {
   //TODO: rewrite to not depend on DOM select
   options;
@@ -61,8 +66,8 @@ export class ProjectPrivileges {
       if (this.options.addbtn) this.addListener();
       const lines = this.fieldset.querySelectorAll('[data-block="' + this.options.target + '"]');
       if (lines.length === 0) return AlertBox.error();
-      this.linemodel = this.clearLine(lines[0].cloneNode(true), 0, -1);
-      this.linemodel.classList.add(css.hide);
+      this.linemodel = lines[0];
+
       this.linecontainer = lines[0].parentElement;
       if (this.linecontainer === null) return AlertBox.error();
       this.current_uid = this.fieldset.dataset.u;
@@ -93,23 +98,24 @@ export class ProjectPrivileges {
   }
 
   newLine(ret = false, check = 0, replace = false) {
-    const lines = this.linecontainer.children;
+    const lines = this.linecontainer.querySelectorAll(domselectors.memberline);
     let newline;
     if (lines.length && check > 0) newline = this.getLinePrivilege(check);
     if (newline) {
       if (replace === true) return newline;
       else return null;
     }
-    newline = this.linemodel.cloneNode(true);
+    const clone = this.linemodel.cloneNode(true);
+    if (clone.dataset.hasOwnProperty("model")) delete clone.dataset.model;
+    newline = this.clearLine(clone, 0, -1);
     newline.classList.remove(css.hide);
     if (newline) {
-      this.linecontainer.append(newline);
       const nn = (this.fieldset.dataset.n) ? parseInt(this.fieldset.dataset.n) + 1 : lines.length;
+      this.linecontainer.append(newline);
       newline = this.clearLine(newline, -1, nn, (this.options.separ ? this.options.separ : null));
       newline.dataset.n = nn;
       this.fieldset.dataset.n = nn;
       this.activateEvents(newline, (check === 0));
-
       if (ret === true) return newline;
     }
     return null;
@@ -160,7 +166,7 @@ export class ProjectPrivileges {
       // clean and reset events
       const els = elem.querySelectorAll('input, select, label, div');
       els.forEach((el) => {
-        el.disabled = false;
+        if (!el.dataset.hasOwnProperty('readnly')) el.disabled = false;
         if (n !== null) { // change names and id when adding a new row - not if clear only
           nn = (nn === null) ? n + 1 : nn;
           el = this.indexElement(el, n, nn);
@@ -360,6 +366,7 @@ export class ProjectPrivileges {
 
       })
     }
+
     member.addEventListener('change', (e) => {
       contact.value = member.value;
       if (parseInt(member.value) > 0 && AlertBox.hasMessage(member)) AlertBox.removeMessage({
@@ -369,13 +376,14 @@ export class ProjectPrivileges {
       });
     })
     privs.forEach((priv) => {
+      if (priv.dataset.hasOwnProperty("readonly")) input_read_only(priv);
       priv.addEventListener('change', (e) => {
         if (priv.checked) lineSettings(priv, contact, delet, false);
       });
 
       if (priv.checked) lineSettings(priv, contact, delet, false);
     })
-
+    if (contact.dataset.hasOwnProperty("readonly")) input_read_only(contact);
     contact.addEventListener('change', (e) => {
       if (contact.checked) {
         delet.disabled = true;
@@ -494,7 +502,7 @@ export class ProjectPrivileges {
     let verif = true;
     for (const line of lines) {
       const member = line.querySelector('[name*="[' + this.options.ident + ']"]');
-      if (line.dataset.mod && line.dataset.mod === 'remove') {
+      if (line.dataset.hasOwnProperty("model") || line.dataset.mod && line.dataset.mod === 'remove') {
         if (n > 1) {
           line.remove();
           n--;
@@ -529,7 +537,6 @@ export class ProjectPrivileges {
           content: this.keymessages.uhasnopriv
         });
       }
-
     }
     if (n === 0) {
       AlertBox.addAlert({
@@ -540,7 +547,7 @@ export class ProjectPrivileges {
       });
       return false;
     } else AlertBox.dismissAlert(this.keymessages.nobody);
-    const hascontact = check_contact();
+    const hascontact = this.fieldset.dataset.hasOwnProperty("readonly") || check_contact();
     return (hascontact && verif);
   }
 

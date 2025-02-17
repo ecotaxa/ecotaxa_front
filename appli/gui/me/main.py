@@ -1,7 +1,6 @@
-import flask
 from flask import request, url_for, render_template, redirect, flash
-from flask_login import current_user, login_required, fresh_login_required
-from appli import app, gvp, gvg
+from flask_login import current_user, login_required
+from appli import app, gvp
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_user
 
@@ -19,24 +18,24 @@ def gui_me():
 
 @app.route("/gui/me/files", methods=["GET"])
 @login_required
-def gui_me_files(subdir: str = "") -> str:
+def gui_me_files() -> str:
     return render_template("/v2/my_files/list.html")
 
 
 @app.route("/gui/me/upload", methods=["GET"])
 @login_required
-async def gui_me_upload(subdir: str = "") -> str:
+async def gui_me_upload() -> dict:
 
     from appli.gui.files.tools import upload_file
 
-    response, err = await upload_file(subdir, request)
+    response, err = await upload_file()
 
     return {"err": err, "response": response}
 
 
 @app.route("/gui/me/profile", methods=["GET", "POST"])
 @login_required
-def gui_me_profile() -> str:
+def gui_me_profile():
     from appli.gui.users.users import user_edit, account_page, ACCOUNT_USER_EDIT
 
     if not current_user:
@@ -51,7 +50,8 @@ def gui_me_profile() -> str:
         if current_user.is_authenticated:
             redir = "gui_me_profile"
         else:
-            return redirect(url_for("gui_login"))
+            redir = "gui_login"
+        return redirect(url_for(redir))
 
     return account_page(
         action=ACCOUNT_USER_EDIT,
@@ -64,7 +64,7 @@ def gui_me_profile() -> str:
 # ask for account reactivation
 @app.route("/gui/me/activate/", defaults={"token": None}, methods=["GET", "POST"])
 @app.route("/gui/me/activate/<token>", methods=["GET", "POST"])
-def gui_me_activate(token: str) -> str:
+def gui_me_activate(token: str):
     if current_user.is_authenticated:
         return redirect(url_for("gui_me_profile"))
     user_id = -1
@@ -72,6 +72,7 @@ def gui_me_activate(token: str) -> str:
 
     (
         ApiUserStatus,
+        ApiUserType,
         API_PASSWORD_REGEXP,
         API_EMAIL_VERIFICATION,
         API_ACCOUNT_VALIDATION,
@@ -81,13 +82,13 @@ def gui_me_activate(token: str) -> str:
     ) = get_user_constants(request)
     if request.method == "POST":
 
-        from appli.gui.users.users import api_user_activate, _get_value_from_token
+        from appli.gui.users.users import api_user_activate, get_value_from_token
 
         partial = is_partial_request(request)
 
         if token:
-            err, user_id = _get_value_from_token(token, "id")
-            if err == True or user_id == None:
+            err, user_id = get_value_from_token(token, "id")
+            if err == True or user_id is None:
                 if partial:
                     response = (
                         1,
@@ -123,17 +124,17 @@ def gui_me_activate(token: str) -> str:
     if token == "no":
         flash(py_user["profileerror"]["activate"], "warning")
         return redirect(url_for("gui_login"))
-    reCaptchaID = None
+    recaptchaid = None
     # google recaptcha or homecaptcha
-    if RECAPTCHAID == True:
-        reCaptchaID = app.config.get("RECAPTCHAID")
+    if RECAPTCHAID:
+        recaptchaid = app.config.get("RECAPTCHAID")
     return render_template(
         "v2/security/activate.html",
         bg=True,
         token=token,
         api_email_verification=API_EMAIL_VERIFICATION,
         api_account_validation=API_ACCOUNT_VALIDATION,
-        reCaptchaID=reCaptchaID,
+        reCaptchaID=recaptchaid,
         user_id=user_id,
     )
 
@@ -149,13 +150,14 @@ def gui_me_activate(token: str) -> str:
     methods=["GET", "POST"],
 )
 @app.route("/gui/me/forgotten/<token>", methods=["GET", "POST"])
-def gui_me_forgotten(token: str = None) -> str:
+def gui_me_forgotten(token: str = ""):
     if current_user.is_authenticated:
         return redirect(url_for("gui_me_profile"))
     from appli.back_config import get_user_constants
 
     (
         ApiUserStatus,
+        ApiUserType,
         API_PASSWORD_REGEXP,
         API_EMAIL_VERIFICATION,
         API_ACCOUNT_VALIDATION,
@@ -165,11 +167,11 @@ def gui_me_forgotten(token: str = None) -> str:
     ) = get_user_constants(request)
     if request.method == "POST":
         partial = True
-        email = gvp("request_email", None)
-        pwd = gvp("request_password", None)
+        email = gvp("request_email")
+        pwd = gvp("request_password")
         from appli.gui.users.users import reset_password
 
-        response = reset_password(email, token, pwd, url="gui_me_forgotten")
+        response = reset_password(email, token, pwd)
         return render_template(
             "./v2/security/reply.html",
             bg=True,
@@ -179,14 +181,14 @@ def gui_me_forgotten(token: str = None) -> str:
             partial=partial,
             response=response,
         )
-    reCaptchaID = None
+    recaptchaid = None
     # google recaptcha or homecaptha
 
-    if RECAPTCHAID == True:
-        reCaptchaID = app.config.get("RECAPTCHAID")
+    if RECAPTCHAID:
+        recaptchaid = app.config.get("RECAPTCHAID")
     return render_template(
         "./v2/security/forgotten.html",
         bg=True,
         token=token,
-        reCaptchaID=reCaptchaID,
+        reCaptchaID=recaptchaid,
     )

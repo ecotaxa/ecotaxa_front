@@ -4,7 +4,7 @@
   {% from "./v2/macros/_captcha.html" import captcha with context%}
 {%block body%}
 <div class=" w-full  lg:w-96 mx-auto mt-24 md:mt-48 pt-8 px-2">
-<div id="home-activate" class=" w-full mb-12 overflow-hidden border border-transparent shadow px-2 mx-auto sm:px-4">
+<div id="home-activate" class=" w-full mb-12 overflow-hidden border border-transparent shadow-sm px-2 mx-auto sm:px-4">
    {% if token %}
 <form id="form-activate" action="{{ url_for('gui_me_activate', token=token) }}" data-fetch="html"  class="js js-submit" method="POST" name="activate_user_form" >
      <input type="hidden" name="crsf_token" value={{ crsf_token }}>

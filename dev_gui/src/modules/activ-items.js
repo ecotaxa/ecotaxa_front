@@ -50,11 +50,9 @@ function createActivItems() {
             };
           }
           item.addEventListener(ev, (e) => {
-            console.log('targets', e)
             targets.forEach(t => {
               toggle_target(t);
             });
-
             item.classList.toggle(localcss.trigger.show);
             item.classList.toggle(localcss.trigger.hide);
             item.querySelectorAll('i[data-toggle]').forEach(ico => {

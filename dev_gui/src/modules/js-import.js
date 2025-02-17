@@ -62,11 +62,10 @@ export function JsImport(container, options = {}) {
     container.querySelectorAll('input[name="' + options.selectors.typeimport + '"]').forEach(typeimport => {
       typeimport.addEventListener('change', (e) => {
         if (e.currentTarget.checked) {
-          console.log(e.currentTarget)
           typeimport = e.currentTarget.value;
           showSelection(true);
         }
-      })
+      });
     });
     container.formsubmit.addHandler('submit', async () => {
       return processImport();
@@ -144,7 +143,13 @@ export function JsImport(container, options = {}) {
       container.querySelectorAll('[data-import]').forEach(async (item) => {
         item.dataset.request = item.dataset.import;
         await ActivRequest.makeRequest(item);
-
+        item.addEventListener('click',(e) => {
+        showSubmit();
+        });
+        const other= item.previousElementSibling || item.nextElementSibling;
+        if (other && other.dataset.summary) other.addEventListener('click',(e) => {
+        showSubmit(false);
+        });
         item.jstree.entrycontrols.options.controls = {};
         addImportControls(item.jstree, item.jstree.uuid, [entryTypes.branch, entryTypes.node]);
       })

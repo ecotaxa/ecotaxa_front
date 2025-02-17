@@ -1,83 +1,10 @@
-{%-macro project_nav()-%}
-{% if target_proj and target_proj.projid > 0 %}
-{%-set privilege = namespace(value='') %}
-{%- if current_user.is_app_admin==True -%}
-{%- set privilege.value="Manage"  -%}
-{%-else -%}
-{% for manager in target_proj.managers -%}
-{%if current_user.id|int == manager.id|int -%}
-  {%- set privilege.value ="Manage" -%}
-  {%-endif%}
-  {%-endfor%}
-  {% for annotator in target_proj.annotators -%}
-  {%if current_user.id|int == annotator.id|int -%}
-    {%- set privilege.value ="Annotate" -%}
-    {%-endif%}
-    {%-endfor%}
-    {% for viewer in target_proj.viewers -%}
-    {%if current_user.id|int == viewer.id|int -%}
-      {%- set privilege.value ="View" -%}
-      {%-endif%}
-      {%-endfor%}
-      {%-endif-%}
-{% set disabled = namespace(value=" class=disabled disabled=disabled") %}
-  <li>
-      <a href="{{ url_for('indexPrj',PrjId=target_proj.projid)}}">
-        {{_('Annotate') if target_proj.status!='ExploreOnly' and privilege.value!="View" and  privilege.value!="" else _("View")}}
-      </a>
-    </li>
-    <li>
-      <a href="{{url_for("jobCreate",job_type="Prediction",projid=target_proj.projid) }}" {{disabled.value if target_proj.status !="Annotate" or  privilege.value=="View" or privilege.value==""}}>
-        {{_('Predict')}}
-      </a></li>
-      {% endif %}
-    <li>
-      <div>{{_('Import')}}</div><ul aria-expanded=false><li>
-            <a href="{{url_for("gui_job_create",job_type="GeneralImport", projid=target_proj.projid)}}" {{ disabled.value if privilege.value==""}}>
-            <strong>{{_('General')}}</strong> {{ _('import')}}
-            </a></li><li><a href="{{url_for("gui_job_create",job_type="SimpleImport", projid=target_proj.projid) }}">
-            <strong>{{_('Images')}}</strong> {{ _('import')}}
-              </a></li><li><a href="{{url_for("gui_job_create",job_type="UpdateImport", projid=target_proj.projid) }}">
-            <strong>{{_('Metadata')}}</strong> {{ _('import')}}
-              </a></li></ul>
-<a href="{{url_for("gui_job_create",job_type="FileImport", projid=target_proj.projid) }}" {{disabled.value  if target_proj.status=="ExploreOnly" or privilege.value=="View" or privilege.value==""}}>
-
-</a>
-</li>
-<li><div>{{_('Export')}}</div><ul aria-expanded=false><li>
-      <a href="{{url_for("gui_job_create",job_type="GeneralExport", projid=target_proj.projid)}}" {{ disabled.value if privilege.value==""}}>
-      <strong>{{_('General')}}</strong> {{ _('export')}}
-      </a></li><li><a href="{{url_for("gui_job_create",job_type="BackupExport", projid=target_proj.projid) }}">
-      <strong>{{_('Backup')}}</strong> {{ _('export')}}
-        </a></li><li><a href="{{url_for("gui_job_create",job_type="SummaryExport", projid=target_proj.projid) }}">
-      <strong>{{_('Summary')}}</strong> {{ _('export')}}
-        </a></li></ul></li><li>
-  <a href="{{url_for('gui_prj_edit',prjid=target_proj.projid)}}">
-    {{_('Settings')}}
-  </a>
-</li><li><div>{{_('Tools')}}</div>
-<ul aria-expanded=false>
-<li><a href="{{url_for("gui_job_create",job_type="Subset", projid =target_proj.projid) }}" {{disabled.value if target_proj.status=='ExploreOnly' or privilege.value==""}}>{{_('<strong>Extract</strong> Subset')}}</a></li>
-<li><a href="{{url_for('gui_prj_merge', projid=target_proj.projid)}}"  {{disabled.value  if target_proj.status=="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Merge</strong> another project in this project')}}</a></li>
-<li><a href="{{url_for('gui_prj_editannot', projid=target_proj.projid)}}"  {{disabled.value   if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Edit or erase</strong> annotations massively')}}</a></li>
-<li><a href="{{url_for('gui_prj_edit_datamass', projid=target_proj.projid)}}"   {{disabled.value   if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}} >{{_('<strong>Batch</strong> edit metadata')}}</a></li>
-<li><a href="{{url_for('gui_prj_reset_to_predicted',projid=target_proj.projid)}}"   {{disabled.value   if target_proj.status !="Annotate" or  privilege.value!="Manage"}}>{{_('<strong>Reset</strong> status to Predicted')}}</a></li>
-<li><a href="{{url_for('gui_prj_purge',projid=target_proj.projid)}}"   {{disabled.value  if target_proj.status =="ExploreOnly" or  privilege.value!="Manage"}}>{{_('<strong>Delete</strong> object or project')}}</a></li>
-<!--<li><a href="{{url_for('deprecation_management',prj_id=target_proj.projid)}}"  {{disabled.value  if target_proj.status =="ExploreOnly" or  privilege.value=="View" or privilege.value==""}}>{{_('<strong>Fix</strong> category issues')}}</a></li>-->
-</ul>
-</li><li>
-      <a href="{{url_for('gui_prj_about',projid=target_proj.projid)}}" {{disabled.value if privilege.value!="Manage"}}>
-        {{_('About')}}
-      </a>
-    </li>{%-endmacro-%}
-{% if target_proj and target_proj.projid > 0 %}
-<nav id="secondary-nav" class="js js-nav">
+{%- if (target_proj and target_proj.projid > 0) or (target_coll and target_coll.id |int> 0) -%}<nav id="secondary-nav" class="js js-nav">
 <div class="w-full relative mt-1 md:mt-0 py-4"><div id="menu-burger" class="burger" data-target="navbar-menu">
 <div class="burger-icon"></div>
 </div><ul id="navbar-menu"><li class="hidden sm:visible">
-        <a href="{{ url_for("gui_prj")}}" title="{{_('projects list')}}" class="text-lg uppercase">
-          &laquo;
-        </a></li>
-        {{project_nav()}}
-          </ul>
-</div></nav>{%-endif-%}
+  {%- if target_proj  -%}
+      {% include 'v2/partials/_project_nav.html'%}
+{%- elif target_coll -%}
+  {% include 'v2/partials/_collection_nav.html'%}
+{%-endif-%}
+</ul></div></nav>{%-endif-%}

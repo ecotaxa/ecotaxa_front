@@ -1,33 +1,24 @@
 # -*- coding: utf-8 -*-
 import time
 from pathlib import Path
-from typing import List, ClassVar
-
-from flask import render_template, redirect, request, flash, url_for
-
-from appli import gvg, gvp, app
-from appli.back_config import get_app_manager_mail
+from typing import ClassVar
+from flask import render_template, redirect, request, url_for
+from appli import gvp, app
 from appli.gui.jobs.Job import Job
 from appli.gui.jobs.staticlistes import py_messages
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (
-    FilesApi,
     ProjectsApi,
     UsersApi,
-    TaxonomyTreeApi,
     JobsApi,
 )
 from to_back.ecotaxa_cli_py.models import (
     ImportReq,
     ImportRsp,
-    TaxonModel,
-    ProjectModel,
     JobModel,
-    DirectoryModel,
 )
 from appli.gui.jobs.job_interface import import_format_options
-from appli.gui.commontools import is_partial_request
 from flask_babel import _
 
 
@@ -47,10 +38,10 @@ class ImportJob(Job):
     @classmethod
     def initial_dialog(cls) -> str:
         """In UI/flask, initial load, GET"""
-        projid = int(gvg("projid", "0"))
-        target_proj = cls.get_target_prj(projid, full=True)
-        if target_proj == None:
-            return render_template(cls.NOPROJ_TEMPLATE, projid=projid)
+        projid, collid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid)
+        if target_proj is None:
+            return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
             server_path = uapi.get_current_user_prefs(projid, "cwd")
@@ -75,7 +66,7 @@ class ImportJob(Job):
                         "name": "server",
                         "label": _("Choose a folder or zip file on the server"),
                         "help": "help_import_server",
-                        "data": " data-request=commonserver data-url=gui/common/ServerFolderSelectJSON data-where=import-server data-tree=commonserver data-target=unique",
+                        "data": " data-import=commonserver data-url=gui/common/ServerFolderSelectJSON data-where=import-server data-tree=commonserver data-target=unique",
                     }
                 ),
             ],
@@ -83,12 +74,12 @@ class ImportJob(Job):
         )
 
     @classmethod
-    def job_req(cls):
+    def job_req(cls) -> ImportReq:
         """get post params and create api request object"""
-        return None
+        pass
 
     @classmethod
-    def api_job_call(cls, req: ImportReq) -> str:
+    def api_job_call(cls, req: ImportReq):
         # second phase after upload to my_files - put follwing code elsewhere
         projid = int(gvp("projid"))
         with ApiClient(ProjectsApi, request) as api:
@@ -103,8 +94,8 @@ class ImportJob(Job):
     @classmethod
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page, POST"""
-        projid = int(gvp("projid", None))
-        target_proj = cls.get_target_prj(projid)
+        projid = cls.get_target_id()
+        target_proj = cls.get_target_obj(projid)
         # Save preferences
         server_path = gvp("ServerPath")
 
@@ -116,7 +107,7 @@ class ImportJob(Job):
                 api.set_current_user_prefs(projid, "cwd", cwd)
         req = cls.job_req()
         rsp = cls.api_job_call(req)
-        if rsp != None:
+        if rsp is not None:
             return redirect(url_for("gui_job_show", job_id=rsp.job_id))
         formdatas, formoptions, import_links = import_format_options(cls.IMPORT_TYPE)
         return render_template(
@@ -154,7 +145,7 @@ class ImportJob(Job):
         """The back-end need some data for proceeding"""
         txt = "<h1>Text File Importation Task</h1>"
         projid = job.params["prj_id"]
-        target_proj = cls.get_target_prj(projid)
+        target_proj = cls.get_target_obj(projid)
 
         # Feed local values
         not_found_taxo = job.question["missing_taxa"]
