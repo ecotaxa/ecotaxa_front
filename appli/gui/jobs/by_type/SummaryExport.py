@@ -45,7 +45,7 @@ class ExportSummaryJob(ExportJob):
         return req
 
     @classmethod
-    def api_job_call(cls, export_req: SummaryExportReq) -> str:
+    def api_job_call(cls, export_req: SummaryExportReq) -> ExportRsp:
         with ApiClient(ObjectsApi, request) as api:
             rsp: ExportRsp = api.export_object_set_summary(export_req)
         return rsp

@@ -2,7 +2,7 @@
 {% block body %}
 
 <div class="md:justify-items-center flex flex-col mb-8  md:flex-row  w-full lg:w-10/12 xl:w-2/3 mt-24  md:mt-64 px-2 lg:mx-auto">
-  <div id="home-registration" class=" w-full mb-12 md:mb-0 md:w-1/2 -mt-8 overflow-hidden border border-transparent background-register shadow px-2 mr-8 sm:px-4 ">
+  <div id="home-registration" class=" w-full mb-12 md:mb-0 md:w-1/2 -mt-8 overflow-hidden border border-transparent background-register shadow-sm px-2 mr-8 sm:px-4 ">
     <form method="get" action="{{url_for("gui_register")}}">
       <fieldset >
         <legend >{{_('Register')}}</legend>
@@ -15,7 +15,7 @@
       </fieldset>
     </form>
   </div>
-  <div id="home-login" class=" w-full h-auto md:h-96 md:w-1/2  border border-stone-300 -mt-8 shadow px-2 sm:px-4 ">
+  <div id="home-login" class=" w-full h-auto md:h-96 md:w-1/2  border border-stone-300 -mt-8 shadow-sm px-2 sm:px-4 ">
     {% include './v2/security/_login.html' %}
     {# include "./v2/security/_menu.html" #}
   </div></div>

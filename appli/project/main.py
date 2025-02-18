@@ -85,7 +85,7 @@ def GetFieldListFromModel(
     return ret
 
 
-# Contient la liste des filtres & parametres de cet écran avec les valeurs par défaut
+# Contient la liste des filtres & paramètres de cet écran avec les valeurs par défaut
 # noinspection SpellCheckingInspection
 FilterList: Dict[str, str] = {
     "MapN": "",
@@ -214,6 +214,9 @@ def _set_prefs_from_filters(filters, prj_id):
     save_all = gvp("saveinprofile") == "Y"
     for a_filter, val in filters.items():
         if save_all or (a_filter in FilterListAutoSave):
+            # Don't persist simsearch order
+            if a_filter == "sortby" and val.startswith("ss-I"):
+                continue
             if user_vals.get(a_filter) != val:
                 prefs_update[a_filter] = val
     if len(prefs_update) > 0:
@@ -366,6 +369,10 @@ def indexPrj(PrjId):
     # All displayable fields are sortable
     for k, v in displayable_fields.items():
         sortlist[k] = v
+    # Add implied simsearch field
+    sortby = data["sortby"]
+    if sortby.startswith("ss-I"):
+        sortlist[sortby] = "Similar to #"+sortby[4:]
 
     statuslist = collections.OrderedDict({"": "All"})
     statuslist.update(STATUSES)
@@ -453,9 +460,10 @@ def indexPrj(PrjId):
                 )
             )
             g.headmenu.append((arr_url["import"], "Import images and metadata"))
-            # g.headmenu.append((arr_url["taxofix"], "Fix category issues"))
         g.headmenu.append((arr_url["export"], "Export"))
         g.headmenuF.append((arr_url["exportf"], "Export"))
+        if proj.status == "Annotate":
+            g.headmenu.append((arr_url["taxofix"], "Fix deprecated categories"))
     if g.PrjManager:
         g.headmenu.append(("", "SEP"))
         g.headmenuF.append(("", "SEP"))
@@ -623,6 +631,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
 
     pageoffset = int(gvp("pageoffset", "0"))
     sortby = Filt["sortby"]
+    simsearch_seed = int(sortby[4:]) if sortby and sortby.startswith("ss-I") else None
     sortorder = Filt["sortorder"]
     # The fields AKA DB columns needed under each image, a space-separated list of
     # DB column names, with dispfield_ prefix, e.g. ' dispfield_orig_id dispfield_classif_auto_score dispfield_n33'
@@ -717,6 +726,11 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                 sort_col_signed = (
                     "-" if sortorder.lower() == "desc" else ""
                 ) + api_sortby
+            else:
+                if simsearch_seed is not None:
+                    sort_col_signed = (
+                        "-" if sortorder.lower() != "desc" else ""
+                    ) + sortby
         needed_fields = ",".join(api_cols)
         while True:
             objs: ObjectSetQueryRsp = api.get_object_set(
@@ -907,16 +921,23 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         )
 
         name_chunk = FormatNameForVignetteDisplay(display_name, hyphenator, categ_cache)
+        if g.PublicViewMode:
+            simsrch_btn = ""
+        else:
+            simsrch_btn = "\n<div class='simsrch'><span title='Search similar objects' class='simsrchs'><span class='glyphicon glyphicon-screenshot'></span></div></td>"
+        if dtl["obj.objid"] == simsearch_seed:
+            simsrch_btn = "\n<div class='simsrchseed'><span title='Similarity search seed' class='simsrchs'><span class='glyphicon glyphicon-star'></span></div></td>"
         txt += """<div class='subimg status-{0}' {1}>
 <div class='taxo'>{2}</div>
 <div class='displayedFields'>{3}</div></div>
-<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span> {4} {5}</div></td>""".format(
+<div class='ddet'><span class='ddets'><span class='glyphicon glyphicon-eye-open'></span>{4} {5}</div>{6}""".format(
             ClassifQual.get(dtl["obj.classif_qual"], "unknown"),
             popattribute,
             name_chunk,
             bottomtxt,
             imgcount_lbl,
             comment_present,
+            simsrch_btn
         )
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins

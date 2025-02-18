@@ -1,37 +1,28 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from typing import List, Dict, Optional
+from typing import Dict
 from flask import (
     render_template,
     request,
     redirect,
     flash,
-    session,
-    url_for,
     Markup,
 )
 from flask_login import current_user
-from appli.constants import GUI_PATH
 
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py import ApiException
 from werkzeug.exceptions import HTTPException
 from to_back.ecotaxa_cli_py.models import (
-    ProjectModel,
-    UserModelWithRights,
     TaxonomyTreeStatus,
 )
-from appli.constants import (
-    AdministratorLabel,
-    UserAdministratorLabel,
-)
 
 
-def _get_last_refresh() -> str:
+def _get_last_refresh() -> int:
     if not current_user.is_authenticated:
-        return None
+        return 0
     from datetime import datetime
 
     try:
@@ -39,7 +30,7 @@ def _get_last_refresh() -> str:
             status: TaxonomyTreeStatus = apiTaxo.taxa_tree_status()
             last_refresh = datetime.strptime(status.last_refresh, "%Y-%m-%dT%H:%M:%S")
     except (ValueError, TypeError, ApiException):
-        last_refresh = None
+        last_refresh = 0
 
     return last_refresh
 
@@ -51,7 +42,7 @@ def possible_licenses() -> list:
     return licenses[0]
 
 
-def possible_access() -> tuple:
+def possible_access() -> dict:
     from appli.back_config import get_back_constants
 
     consts = get_back_constants(request, "ACCESS")
@@ -80,14 +71,14 @@ def jobs_summary_data() -> Dict:
         from appli.jobs.emul import _build_jobs_summary
 
         return _build_jobs_summary()
-    return ""
+    return {}
 
 
-def build_mail(emails: str, type: str = "", text: str = "") -> str:
+def build_mail(emails: str, typ: str = "", text: str = "") -> str:
     """
     Build a mailto link .
     """
-    return render_template("./v2/mail/_mailto.html", emails=emails, type=type)
+    return render_template("./v2/mail/_mailto.html", emails=emails, type=typ, text=text)
 
 
 def last_taxo_refresh(cookiename):
@@ -95,19 +86,19 @@ def last_taxo_refresh(cookiename):
         return None
     from datetime import datetime
 
-    type = "warning"
+    typ = "warning"
     # cookie for messages  is type+cookiename but for warnings a suffix is needed
-    dailyinfo = request.cookies.get(type + cookiename + "_last_taxo_refresh")
+    dailyinfo = request.cookies.get(typ + cookiename + "_last_taxo_refresh")
     dformat = "%Y-%m-%d %H:%M:%S"
-    if dailyinfo != None:
+    if dailyinfo is not None:
         if (datetime.strptime(dailyinfo, dformat) - datetime.now()).days < 1:
             return None
     last_refresh = _get_last_refresh()
-    if last_refresh != None and (datetime.now() - last_refresh).days > 7:
+    if last_refresh != 0 and (datetime.now() - last_refresh).days > 7:
         py_messages = py_get_messages()
         return dict(
             {
-                "type": type,
+                "type": typ,
                 "content": py_messages["taxosynchro"],
                 "date": last_refresh,
                 "dismissible": True,
@@ -124,20 +115,19 @@ def breadcrumbs(default=None) -> list:
     crumbs = request.path.split("?")
     crumbs = crumbs[0].split("/")
     if "static" in crumbs:
-        return {}
+        return []
     if "gui" in crumbs:
         crumbs.remove("gui")
-    if default != None:
+    if default is not None:
         crumbs.append(default)
     crumblist = []
-    parent = ""
     url = []
     tree = apptree
     for i, crumb in enumerate(crumbs):
         if crumb != "" or (i == 0):
             crumbvalue, childtree = breadcrumb(tree, crumb)
             url.append(crumb)
-            if crumbvalue != None:
+            if crumbvalue is not None:
                 crumbdict = dict({"url": "/".join(url), "text": crumbvalue})
                 if (
                     i + 2 == len(crumbs)
@@ -146,7 +136,7 @@ def breadcrumbs(default=None) -> list:
                 ):
                     crumbdict.update(dict({"id": crumbs[i + 1]}))
                 crumblist.append(crumbdict)
-            if childtree != None:
+            if childtree is not None:
                 tree = childtree
 
     return crumblist
@@ -204,17 +194,19 @@ def todict(obj):
 # messages
 
 
-def py_get_messages(type=None):
+def py_get_messages(_type=None):
     from appli.gui.staticlistes import py_messages
 
-    if type == None:
+    if _type is None:
         return {**py_messages}
-    if type == "project":
+    if _type == "project":
         from appli.gui.project.staticlistes import py_messages as py_messages_type
-    elif type == "collection":
+    elif _type == "collection":
         from appli.gui.collection.staticlistes import py_messages as py_messages_type
-    elif type == "jobs":
+    elif _type == "jobs":
         from appli.gui.jobs.staticlistes import py_messages as py_messages_type
+    else:
+        return {**py_messages}
     return {**py_messages, **py_messages_type}
 
 
@@ -226,7 +218,7 @@ def is_partial_request(request):
 
 
 def alert_box(
-    type: str,
+    _type: str,
     title: str,
     codemessage: str,
     message: str,
@@ -237,7 +229,7 @@ def alert_box(
 ):
     return render_template(
         "v2/partials/_alertbox.html",
-        type=type,
+        type=_type,
         title=title,
         message=message,
         codemessage=codemessage,
@@ -285,14 +277,14 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
             return e
     else:
         py_messages = py_get_messages()
-        if hasattr(e, "name") and e.name != None:
+        if hasattr(e, "name") and e.name is not None:
             description.append(str(e.name))
-        if hasattr(e, "description") and e.description != None:
+        if hasattr(e, "description") and e.description is not None:
             if e.description.find("v2/help/_") <= 0:
                 description.append(str(e.description))
             else:
                 description.append(py_messages["page404"])
-        if hasattr(e, "response") and e.response != None:
+        if hasattr(e, "response") and e.response is not None:
             description.append(str(e.response))
         if code == 403 or code == 401:
             message = py_messages["access403"]
@@ -335,7 +327,7 @@ def crsf_token():
     return "".join(secrets.choice(alphabet) for i in range(45))
 
 
-def format_exception(ae, partial=True) -> tuple:
+def format_exception(ae) -> tuple:
     if hasattr(ae, "status"):
         msg = str(ae.status)
     else:
@@ -357,14 +349,13 @@ def format_exception(ae, partial=True) -> tuple:
         return ae.status, msg
 
 
-def safe_url_redir(url: str) -> str:
+def safe_url_redir(url: str):
     """
     remove domain from redirect
     """
-    if url is not None:
-        url = url.strip()
-    if not url:
-        return False
+    url = url.strip()
+    if url == "":
+        return ""
     from urllib.parse import urlparse
 
     redir = urlparse(url)
@@ -373,8 +364,8 @@ def safe_url_redir(url: str) -> str:
         + str("?" + redir.query if redir.query != "" else "")
         + str("#" + redir.fragment if redir.fragment != "" else "")
     )
-    return url
+    return redirect(url)
 
 
-def make_response(status: int, message: dict) -> dict:
+def make_response(status: int, message: str) -> dict:
     return dict({"status": status, "message": message})

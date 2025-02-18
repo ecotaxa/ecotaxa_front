@@ -12,7 +12,7 @@ export default function(state) {
       const id = state.getCellData(rowIndex, models.id);
       const html = [];
       Object.entries(value).forEach(([k, v]) => {
-        html.push(`<a href="/gui/collection/${k}/${id}" class="small-caps text-stone-50 rounded p-1 shadow bg-mainblue-700 btn is-${k}">${v}</a>`)
+        html.push(`<a href="/gui/collection/${k}/${id}" class="small-caps text-stone-50 rounded-sm p-1 shadow bg-mainblue-700 btn is-${k}">${v}</a>`)
       })
       td.html = html.join(``);
       return td;

@@ -1,14 +1,14 @@
 from flask_babel import _
-from typing import Dict
+from typing import Dict, Optional
 from flask import request
 from appli.utils import ApiClient
 from appli.gui.jobs.staticlistes import JOB_STATE_TO_USER_STATE
-from to_back.ecotaxa_cli_py import ApiException, MinUserModel
+from to_back.ecotaxa_cli_py import MinUserModel
 from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import JobModel
 
 
-def export_format_options(type=None, target="project"):
+def export_format_options(_type=None, target="project"):
     out_to_ftp = {
         "out_to_ftp": {
             "label": _(
@@ -256,28 +256,28 @@ def export_format_options(type=None, target="project"):
         )
         forms.update(formdatas)
         formdatas = forms
-    if type != None:
+    if _type is not None:
         formdata = dict()
         option = dict()
-        formdata[type] = formdatas[type]
-        if type == "backup":
+        formdata[_type] = formdatas[_type]
+        if _type == "backup":
             typoption = "general"
         else:
-            typoption = type
-        option[type] = options[typoption]
-        if type != "darwincore":
+            typoption = _type
+        option[_type] = options[typoption]
+        if _type != "darwincore":
             option.update(out_to_ftp)
         export_links = []
         for key, fdata in formdatas.items():
-            if key != type:
+            if key != _type:
                 export_links.append({"path": fdata["path"], "title": fdata["title"]})
         return formdata, option, export_links
     else:
-        options["backup"] = options["general"]
+        options.update({"backup": options["general"]})
     return formdatas, options, None
 
 
-def import_format_options(type=None) -> dict:
+def import_format_options(_type=None) -> dict:
     taxomapping = dict(
         {
             "taxo_mapping": {
@@ -420,18 +420,18 @@ def import_format_options(type=None) -> dict:
 
 def display_job(usercache: Dict[int, MinUserModel], ajob: JobModel):
     """Enrich back-end job for display"""
+    params = ajob.params
     job = ajob.to_dict()
     job["state"] = JOB_STATE_TO_USER_STATE.get(ajob.state, ajob.state)
-
     if "prj_id" in job["params"]:
-        job["projid"] = str(ajob.params["prj_id"])
-    if (
+        job["projid"] = str(params["prj_id"])
+    elif (
         ("projid" not in job or job["projid"] is None)
-        and "req" in ajob.params
-        and "project_id" in ajob.params["req"]
+        and "req" in params
+        and "project_id" in params["req"]
     ):
         # noinspection PyUnresolvedReferences
-        projid = str(ajob.params["req"]["project_id"])
+        job["projid"] = str(params["req"]["project_id"])
 
     owner: Optional[MinUserModel] = usercache.get(ajob.owner_id)
     if owner is None:

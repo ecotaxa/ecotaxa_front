@@ -8,7 +8,7 @@
   {% if datas[name][1] == True %}  <span class="mr-2 italic font-normal">{{option.label}} </span>
   <input type="hidden" name="{{name}}" value={{formdatas[type_export].datas[name][0]}}>
     {%- for opt in option.options -%}
-    {%-if opt.value == datas[name][0] -%}<span class="bg-stone-50 p-2 rounded font-semibold ">{{opt.label}}</span>{%-endif-%}
+    {%-if opt.value == datas[name][0] -%}<span class="bg-stone-50 p-2 rounded-sm font-semibold ">{{opt.label}}</span>{%-endif-%}
     {%-endfor-%}
   {%-else -%}
   {%- if option.format=="checkbox" and "options" not in option.keys() -%}<label for="{{name+'_'+type_export}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+'_'+type_export}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>

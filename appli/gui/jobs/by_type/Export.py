@@ -1,18 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import ClassVar
-from flask import render_template, redirect, request, flash, url_for
-from appli import gvg, gvp
-from appli.gui.jobs.staticlistes import py_messages
+from flask import render_template, redirect, flash, url_for
 from appli.gui.jobs.Job import Job
-from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
-from to_back.ecotaxa_cli_py.models import (
-    GeneralExportReq,
-    ExportRsp,
-    ProjectModel,
-    JobModel,
-)
+from to_back.ecotaxa_cli_py.models import JobModel, ExportRsp
 from appli.gui.jobs.job_interface import export_format_options
 
 
@@ -37,7 +27,7 @@ class ExportJob(Job):
             cls.TARGET_TYPE = "collection"
         else:
             targetid = projid
-        if target_obj == None:
+        if target_obj is None:
             return render_template(
                 cls.NOOBJ_TEMPLATE, id=targetid, target_type=cls.TARGET_TYPE
             )
@@ -83,9 +73,9 @@ class ExportJob(Job):
         return None
 
     @classmethod
-    def api_job_call(cls, export_req) -> str:
+    def api_job_call(cls, export_req) -> ExportRsp:
         """call api method depending on export type"""
-        return ""
+        pass
 
     @classmethod
     def create_or_update(cls):
@@ -94,14 +84,18 @@ class ExportJob(Job):
         errors = []
         filters = cls._extract_filters_from_form()
         req = cls.job_req()
-        if len(errors) > 0 or cls.EXPORT_TYPE == None:
+        if len(errors) > 0 or cls.EXPORT_TYPE is None:
             for e in errors:
                 flash(e, "error")
 
             formdatas, formoptions, export_links = export_format_options(
                 cls.EXPORT_TYPE
             )
-            formdatas[cls.EXPORT_TYPE].datas.options = req.__to_dict__
+            if req is None:
+                req_dict = req
+            else:
+                req_dict = req.__dict__
+            formdatas[cls.EXPORT_TYPE].datas.options = req_dict
             return render_template(
                 cls.STEP0_TEMPLATE,
                 export_type=cls.EXPORT_TYPE,
@@ -114,7 +108,7 @@ class ExportJob(Job):
             )
         else:
             export_req = {"filters": filters, "request": req}
-            rsp = cls.api_job_call(export_req)
+            rsp: ExportRsp = cls.api_job_call(export_req)
             return redirect(url_for("gui_job_show", job_id=rsp.job_id))
 
     # noinspection PyUnresolvedReferences

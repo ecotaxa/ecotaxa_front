@@ -98,6 +98,8 @@ function createJsTomSelect() {
         };
 
         break;
+      case models.persons:
+        option.url = "/api/users/search?all=y&by_name=";
       case models.user:
         option.url = "/api/users/search?by_name=";
         option.settings = { ...option.settings,

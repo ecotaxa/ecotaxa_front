@@ -22,6 +22,7 @@ py_messages = dict(
             "nopermission": _("no permission to upload"),
             "nofile": _("no file to upload"),
         },
+        "jobiderror": _("job_id error"),
         "dirlist": {"nopermission": _("no permission to list")},
         "messages": {"jobmonitor": _("this is an asynchronous process")},
     }

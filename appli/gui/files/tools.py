@@ -1,16 +1,15 @@
-from flask import flash, request
-from appli import gvg, gvp
-from to_back.ecotaxa_cli_py import ApiException
+import requests
+from flask import request
+from appli import gvp
 from to_back.ecotaxa_cli_py.api import MyfilesApi
-
 from appli.utils import ApiClient
-from appli.gui.jobs.staticlistes import py_messages
+from werkzeug.datastructures import FileStorage
 
 file_service = "/user_files/"
 
 
 def dir_list(sub_path=None):
-    if sub_path == None:
+    if sub_path is None:
         sub_path = "/"
 
     with ApiClient(MyfilesApi, request) as api:
@@ -46,12 +45,12 @@ def move_dir_file(source_path: str, dest_path: str) -> str:
 
 
 def upload_file():
-    import json
+    # import json
     import requests
 
     dirpath = gvp("path")
     uploaded: FileStorage = request.files.get("file")
-    reqheaders = json.loads(json.dumps({k: v for k, v in request.headers.items()}))
+    # reqheaders = json.loads(json.dumps({k: v for k, v in request.headers.items()}))
     # Relay the file to back-end
     with ApiClient(MyfilesApi, request) as api:
         # Call using requests, as the generated openapi wrapper only reads the full file in memory.
@@ -73,38 +72,3 @@ def upload_file():
             headers=headers,
         )
     return rsp.json()
-
-
-# TODO - what is this ?
-def get_file_from_request():
-    uploaded_file: FileStorage = request.files.get("uploadfile")
-    if uploaded_file is not None and uploaded_file.filename != "":
-        # Relay the file to back-end
-        with ApiClient(MyfilesApi, request) as api:
-            # Call using requests, as the generated openapi wrapper only reads the full file in memory.
-            url = (
-                api.api_client.configuration.host + file_service
-            )  # endpoint is nowhere available as a const :(
-            token = api.api_client.configuration.access_token
-            headers = {"Authorization": "Bearer " + token}
-            # 'requests' lib sends fine the name to back-end
-            uploaded_file.name = uploaded_file.filename
-            file_rsp = requests.post(
-                url, files={"file": uploaded_file}, headers=headers
-            )
-            if file_rsp.status_code != 200:
-                return None, file_rsp.text
-            else:
-                return file_rsp.json(), None
-    else:
-        return request.form.get("ServerPath", ""), None
-
-
-# TODO - what is this ?
-def read_in_chunks(file_object, CHUNK_SIZE):
-    while True:
-        data = file_object.read(CHUNK_SIZE)
-        if not data:
-            break
-        yield data
-    # END GENERATOR

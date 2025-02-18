@@ -1,3 +1,3 @@
-from flask_babel import _
+# from flask_babel import _
 
 py_messages = dict({})

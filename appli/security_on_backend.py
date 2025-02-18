@@ -118,7 +118,7 @@ class ApiUserWrapper(object):
         return None
 
 
-anon_user = MinUserModel(id=-1, email="", name="Anonymous")
+anon_user = MinUserModel(id=-1, email="", name="Anonymous",organisation="")
 
 
 def user_from_api(user_id):

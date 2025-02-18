@@ -29,7 +29,7 @@ class ExportGeneralJob(ExportJob):
         with_internal_ids = gvp("with_internal_ids") == "1"
         with_types_row = gvp("with_types_row") == "1"
         only_annotations = "0"
-        taxo_mapping = gvp("taxo_mapping")
+        # taxo_mapping = gvp("taxo_mapping")
         out_to_ftp = gvp("out_to_ftp") == "1"
         req = GeneralExportReq(
             collection_id=collid,
@@ -45,7 +45,7 @@ class ExportGeneralJob(ExportJob):
         return req
 
     @classmethod
-    def api_job_call(cls, export_req: GeneralExportReq) -> str:
+    def api_job_call(cls, export_req: GeneralExportReq) -> ExportRsp:
         with ApiClient(ObjectsApi, request) as api:
             rsp: ExportRsp = api.export_object_set_general(export_req)
         return rsp

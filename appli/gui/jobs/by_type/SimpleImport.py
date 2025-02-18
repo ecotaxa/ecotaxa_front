@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
-import time
 from typing import Dict, List, Final, ClassVar
-from flask import request
+from flask import request, flash
 from appli import gvp
 from appli.gui.jobs.by_type.Import import ImportJob
 from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi
@@ -10,7 +9,6 @@ from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.models import (
     SimpleImportReq,
     SimpleImportRsp,
-    ProjectModel,
     MinUserModel,
     TaxonModel,
 )
@@ -28,8 +26,8 @@ class SimpleImportJob(ImportJob):
     @classmethod
     def job_req(cls) -> SimpleImportReq:
         file_to_load = gvp("file_to_load")
-        update_classification = cls._update_mode(gvp("updateclassif"))
-        taxo_map = json.loads(gvp("taxo_mapping", "{}"))
+        # update_classification = cls._update_mode(gvp("updateclassif"))
+        # taxo_map = json.loads(gvp("taxo_mapping", "{}"))
         values = {}
         req = SimpleImportReq(source_path=file_to_load, values=values)
         for fld in req.possible_values:
@@ -57,7 +55,7 @@ class SimpleImportJob(ImportJob):
         return req
 
     @classmethod
-    def api_job_call(cls, import_req: SimpleImportReq) -> str:
+    def api_job_call(cls, import_req: SimpleImportReq) -> SimpleImportRsp:
         projid = int(gvp("projid"))
         with ApiClient(ProjectsApi, request) as api:
             rsp: SimpleImportRsp = api.simple_import(

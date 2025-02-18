@@ -1,4 +1,4 @@
-import stylecss from './css/style.css';
+import stylecss from '../src/css/style.css';
 import {
   AlertBox
 } from '../src/modules/alert-box.js';

@@ -4,13 +4,14 @@
 import os
 import json
 import urllib
+from typing import List
 from flask import request, url_for, render_template, redirect, flash
 from flask_login import current_user, login_required
-from appli import app, gvg, gvp, constants
+from appli import app, gvg, gvp
 from appli.gui.commontools import is_partial_request
-from flask_babel import _
 from appli.gui.staticlistes import py_messages, py_user
 from flask import make_response
+from to_back.ecotaxa_cli_py.models import DirectoryModel, DirectoryEntryModel
 
 login_required.login_view = "gui/login"
 
@@ -38,29 +39,26 @@ def gui_logout():
 
 @app.route("/gui/login", methods=["GET", "POST"])
 @app.route("/gui/login/", methods=["GET", "POST"])
-def gui_login() -> str:
+def gui_login():
     if current_user.is_authenticated:
-        # return old interface projects list
-        # return redirect(url_for("gui_prj"))
         return redirect(HOMEPAGE)
 
     if request.method == "POST":
         from appli.security_on_backend import login_validate
         from appli.gui.commontools import safe_url_redir
 
-        email = gvp("email", None)
-        password = gvp("password", None)
-        remember = gvp("remember", None)
-        if email == None or password == None:
+        email = gvp("email", "")
+        password = gvp("password", "")
+        remember = gvp("remember", "")
+        if email == "" or password == "":
             flash(py_user["invaliddata"], "error")
         else:
             resp, userdata = login_validate(email, password, (remember == "y"))
             if resp:
-                next = gvp("next", None)
-                if next != None:
-                    if next.strip() != "":
-                        next = safe_url_redir(next)
-                        return redirect(next)
+                _next = gvp("next", "")
+                _next = _next.strip()
+                if _next != "":
+                    return safe_url_redir(_next)
                 return redirect(HOMEPAGE)
             elif isinstance(userdata, dict):
                 redir = url_for("gui_me_activate", token="no")
@@ -73,7 +71,7 @@ def gui_login() -> str:
 @app.route("/gui/register", defaults={"token": None}, methods=["GET", "POST"])
 @app.route("/gui/register/", defaults={"token": None}, methods=["GET", "POST"])
 @app.route("/gui/register/<token>", methods=["GET", "POST"])
-def gui_register(token=None) -> str:
+def gui_register(token=None):
 
     if token is None and current_user.is_authenticated:
         return redirect(url_for("index"))
@@ -84,23 +82,23 @@ def gui_register(token=None) -> str:
 
 
 @app.route("/gui/about/")
-def gui_about() -> str:
+def gui_about():
     from appli.gui.sponsorslist import sponsors
 
     return render_template("v2/about.html", sponsors=sponsors, bg=True)
 
 
 @app.route("/gui/checkcaptcha")
-def gui_check_captcha() -> str:
+def gui_check_captcha():
     from appli.gui.users.users import check_homecaptcha
 
-    token = gvg("r", None)
+    token = gvg("r", "")
     return check_homecaptcha(token)
 
 
 @app.route("/gui/privacy")
 @app.route("/gui/privacy/")
-def gui_privacy() -> str:
+def gui_privacy():
 
     return render_template("v2/privacy.html")
 
@@ -117,26 +115,27 @@ def gui_prj(listall: bool = False) -> str:
 
 @app.route("/gui/prjlist/", methods=["GET"])
 @login_required
-def gui_prjlist() -> str:
+def gui_prjlist():
     # gzip not really necessary - jsonifiy with separators
 
     from appli.gui.project.projects_list import projects_list
 
-    listall = gvg("listall", False)
-    for_managing = gvg("for_managing", False)
-    if listall == "False" or not listall:
-        listall = False
+    listall = gvg("listall", "False")
+    managing = gvg("for_managing", "False")
+    if listall == "False":
+        _all = False
     else:
-        listall = True
+        _all = True
+    if managing == "False":
+        for_managing = False
+    else:
+        for_managing = True
     typeimport = gvg("typeimport")
-    gz = gvg("gzip")
     gz = True
     encoding = "utf-8"
     content = json.dumps(
-        projects_list(
-            listall=listall, for_managing=for_managing, typeimport=typeimport
-        ),
-        separators=[",", ":"],
+        projects_list(listall=_all, for_managing=for_managing, typeimport=typeimport),
+        separators=(",", ":"),
     ).encode(encoding)
 
     if gz:
@@ -154,7 +153,7 @@ def gui_prjlist() -> str:
 
 @app.route("/gui/prj/importsettings", methods=["GET"])
 @login_required
-def gui_importsettings(prjid: int = 0) -> str:
+def gui_importsettings():
     typeimport = gvg("typeimport")
     from appli.gui.project.projects_list import projects_list_page
 
@@ -190,10 +189,11 @@ def gui_prj_all():
 def gui_prj_about(projid):
     from appli.gui.project.project_stats import prj_stats
 
-    params = dict({"limit": "5000"})
+    # TODO limit stats
+    # params = dict({"limit": "5000"})
     partial = is_partial_request(request)
 
-    return prj_stats(projid, partial=partial, params=params)
+    return prj_stats(projid, partial=partial)  # , params=params)
 
 
 @app.route("/gui/prjsamplestats/<int:projid>")
@@ -202,11 +202,11 @@ def gui_prj_aboutsamples(projid):
     from appli.gui.project.project_stats import prj_samples_stats
 
     partial = is_partial_request(request)
-    format = gvg("format", "json")
-    content = prj_samples_stats(str(projid), partial=partial, format=format)
-    if format == "json":
+    _format = gvg("format", "json")
+    content = prj_samples_stats(str(projid), partial=partial, _format=_format)
+    if _format == "json":
         encoding = "utf-8"
-        content = json.dumps(content, separators=[",", ":"]).encode(encoding)
+        content = json.dumps(content, separators=(",", ":")).encode(encoding)
         response = make_response(content)
         response.headers["Content-length"] = len(content)
         response.headers["Content-Encoding"] = encoding
@@ -230,7 +230,7 @@ def gui_help(filename):
 
     partial = is_partial_request(request)
     filename = escape(filename)
-    title = gvg("title", None)
+    title = gvg("title", "")
     if filename[0:1] != "_":
         return render_template(
             "/v2/help/index.html", filename=filename, partial=partial, title=title
@@ -246,24 +246,24 @@ def gui_help(filename):
 # alert boxes xhr
 @app.route("/gui/alertbox", methods=["GET", "POST"])
 def gui_alert():
-    inverse = gvp("inverse", False)
-    dismissible = gvp("dismissible", False)
-    codemessage = gvp("codemessage")
-    is_safe = gvp("is_safe", False)
+    inverse = gvp("inverse", "False")
+    dismissible = gvp("dismissible", "False")
+    codemessage = gvp("codemessage", "")
+    is_safe = gvp("is_safe", "False")
     is_safe = bool(is_safe)
     inverse = bool(inverse)
     dismissible = bool(dismissible)
     message = gvp("message")
-    type = gvp("type")
+    _type = gvp("type")
     title = gvp("title")
     from appli.gui.commontools import alert_box
 
     return alert_box(
-        type=type,
+        _type=_type,
         title=title,
         inverse=inverse,
         dismissible=dismissible,
-        codemessage=str(codemessage),
+        codemessage=codemessage,
         is_safe=is_safe,
         message=message,
     )
@@ -397,6 +397,7 @@ import appli.gui.admin.main
 import appli.gui.taxonomy.main
 import appli.gui.collection.main
 
+
 # utility display functions for jinja template
 @app.template_filter("urlencode")
 def urlencode_filter(s):
@@ -411,7 +412,7 @@ def urlencode_filter(s):
 
 @app.context_processor
 def utility_processor():
-    def message_translation(message: str, type: str, is_safe: bool = False) -> dict:
+    def message_translation(message: str, _type: str, is_safe: bool = False) -> str:
         from appli.gui.staticlistes import py_messages
 
         if message in py_messages:
@@ -428,8 +429,8 @@ def utility_processor():
 
         return str(uuid.uuid1())
 
-    def cap_words(str):
-        return str.title()
+    def cap_words(text: str):
+        return text.title()
 
     def def_language():
         from appli import get_locale
@@ -445,11 +446,11 @@ def utility_processor():
             }
         )
 
-        if key != None:
+        if key is not None:
             if key in g_data:
                 return g_data[key]
             else:
-                return ""
+                return {}
         return g_data
 
     def gui_breadcrumbs() -> list:
@@ -460,12 +461,12 @@ def utility_processor():
     def get_referrer() -> str:
         import functools
 
-        GO_INDEX = ["gui_login", "gui_forgotten", "gui_register"]
+        go = ["gui_login", "gui_forgotten", "gui_register"]
         referrer = gvp("next", request.referrer)
-        goindex = functools.reduce(lambda a, b: a or referrer == url_for(b), GO_INDEX)
-        if referrer == None or goindex:
+        goindex = functools.reduce(lambda a, b: a or referrer == url_for(b), go)
+        if referrer is None or goindex:
             # referrer = url_for("gui_index")
-            referer = HOMEPAGE
+            referrer = HOMEPAGE
         return referrer
 
     def get_manager_list(sujet=""):
@@ -496,9 +497,8 @@ def utility_processor():
             ]
         )
 
-    def global_messages() -> str:
+    def global_messages() -> list:
         listmessages = []
-        taxomessage = None
         cookiename = app.config.get("APP_GUI_MESSAGE_COOKIE_NAME")
         from flask import get_flashed_messages
 
@@ -522,8 +522,6 @@ def utility_processor():
         from datetime import datetime
 
         file = app.config.get("APP_GUI_MESSAGE_FILE")
-
-        content = None
         if os.path.exists(file):
             messages = None
             with open(file, "r", encoding="utf-8") as f:
@@ -540,7 +538,7 @@ def utility_processor():
                     delta = 10
                     if key != "homepage":
                         dailyinfo = request.cookies.get(name)
-                        if dailyinfo != None:
+                        if dailyinfo is not None:
                             dformat = "%Y-%m-%d %H:%M:%S.%f"
                             delta = (
                                 datetime.strptime(message["date"], dformat)
@@ -554,7 +552,7 @@ def utility_processor():
                     ):
 
                         if "content" in message:
-                            message["content"] = ("<br>").join(
+                            message["content"] = "<br>".join(
                                 str(message["content"]).split("\r\n")
                             )
                             message["is_safe"] = True
@@ -586,7 +584,8 @@ def utility_processor():
         from appli.gui.commontools import possible_licenses
 
         licenses = possible_licenses()
-        return licenses[0]
+        print(" licences-------", licenses)
+        return licenses
 
     def bg_scale():
         bg = str(app.config.get("BG_SCALE") or "")

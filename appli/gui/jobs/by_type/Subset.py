@@ -2,17 +2,15 @@
 import datetime
 import time
 from typing import ClassVar
-from flask import render_template, g, redirect, request, flash, url_for
-from appli import gvg, gvp
+from flask import render_template, redirect, request, flash, url_for
+from appli import gvp
 from appli.gui.jobs.Job import Job
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py.models import (
     CreateProjectReq,
     SubsetReq,
     SubsetRsp,
-    ProjectModel,
     JobModel,
 )
 
@@ -31,7 +29,7 @@ class SubsetJob(Job):
         """In UI/flask, initial load, GET"""
         projid, collid = cls.get_target_id()
         target_proj = cls.get_target_obj(projid, collid)
-        if target_proj == None:
+        if target_proj is None:
             return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
         filters = cls._extract_filters_from_url()
 
@@ -65,8 +63,8 @@ class SubsetJob(Job):
         vvaleur = gvp("vvaleur")
         pvaleur = gvp("pvaleur")
         grptype = gvp("grptype")
-
         errors = []
+        valeur = ""
         # Check data validity
         if len(subsetprojecttitle) < 5:
             errors.append("Project name too short")

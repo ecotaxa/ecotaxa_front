@@ -1,17 +1,16 @@
 import json
 
-from typing import Optional, Dict, ClassVar, Union, Tuple
-
+from typing import Optional, ClassVar, Union, Tuple
 import requests
 from flask import flash, request
 from werkzeug.datastructures import FileStorage
-
 from appli import gvg, gvp
 from appli.project import sharedfilter
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import FilesApi, JobsApi
 from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
+from appli.gui.jobs.staticlistes import py_messages
 
 
 class Job(object):
@@ -25,9 +24,13 @@ class Job(object):
     TARGET_TYPE: ClassVar = None
     # for loop in collection projects
     DONE: ClassVar = []
+    params: ClassVar = []
 
     def __init__(self):
         pass
+
+    def __getitem___(self, item: str):
+        return getattr(self, item)
 
     @staticmethod
     def find_job_class_by_name(clazz, name: str):
@@ -67,11 +70,10 @@ class Job(object):
                 raise
         else:
             if request.method == "GET":
-                prjid = gvg("projid" or 0)
+                prjid = gvg("projid" or "0")
             else:
-                prjid = gvp("projid" or 0)
-            if prjid != 0:
-                projid = int(prjid)
+                prjid = gvp("projid" or "0")
+            projid = int(prjid)
             return projid
 
     @classmethod
@@ -81,7 +83,7 @@ class Job(object):
         else:
             collid = gvp("collection_id" or "")
         if collid != "":
-            cls.TARGET_TYPE == "collection"
+            cls.TARGET_TYPE = "collection"
             collection_id = int(collid)
         else:
             collection_id = 0
@@ -100,7 +102,7 @@ class Job(object):
             return get_target_prj(projid, full=False)
 
     @classmethod
-    def get_file_from_form(cls, request):
+    def get_file_from_form(cls, _request: request):
         """
         Common treatment of "file" fields in several tasks.
         We have either:
@@ -112,7 +114,7 @@ class Job(object):
         uploaded_file: FileStorage = request.files.get("uploadfile")
         if uploaded_file is not None and uploaded_file.filename != "":
             # Relay the file to back-end
-            with ApiClient(FilesApi, request) as api:
+            with ApiClient(FilesApi, _request) as api:
                 # Call using requests, as the generated openapi wrapper only reads the full file in memory.
                 url = (
                     api.api_client.configuration.host + "/my_files/"
@@ -163,7 +165,8 @@ class Job(object):
     def get_job(cls) -> Optional[JobModel]:
         try:
             with ApiClient(JobsApi, request) as api:
-                job: JobModel = api.get_job(job_id=cls.JOB_ID_POST_PARAM)
+                job: JobModel = api.get_job(job_id=int(cls.JOB_ID_POST_PARAM))
+            return job
         except ApiException as ae:
             if ae.status in (401, 403):
                 flash(py_messages["notauthorized"], "error")
@@ -171,12 +174,12 @@ class Job(object):
                 flash(py_messages["notfound"], "error")
 
 
-def load_from_json(str, clazz):
+def load_from_json(txt, clazz):
     """deserialize a json value of expected class"""
     from json import JSONDecodeError
 
     try:
-        ret = json.loads(str)
+        ret = json.loads(txt)
     except JSONDecodeError:
         ret = clazz()
     if not isinstance(ret, clazz):

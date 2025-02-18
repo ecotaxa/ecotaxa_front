@@ -1,22 +1,17 @@
-import collections
-import os
-from pathlib import Path
-from typing import List
-
+from typing import List, Union, Dict
 from flask import render_template, flash, request, redirect, url_for
-from flask_login import current_user, login_required
-from appli import app, gvp, gvpm
+from flask_login import current_user
+from appli import gvp, gvpm
 from appli.gui.staticlistes import py_messages
 
 ######################################################################################################################
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi, MiscApi
+from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi
 from to_back.ecotaxa_cli_py.models import (
     ProjectModel,
     MinUserModel,
-    TaxonModel,
-    ProjectTaxoStatsModel,
+    UserModelWithRights,
     MinimalCollectionBO,
 )
 from appli.gui.commontools import possible_licenses, possible_access, possible_models
@@ -24,32 +19,34 @@ from appli.gui.commontools import possible_licenses, possible_access, possible_m
 ###############################################common for create && edit  #######################################################################
 
 
-def get_target_prj(prjid: int, for_managing: bool = False, full=True) -> ProjectModel:
+def get_target_prj(
+    prjid: int, for_managing: bool = False, full=True
+) -> Union[ProjectModel, Dict, None]:
     with ApiClient(ProjectsApi, request) as api:
         try:
             target_proj: ProjectModel = api.project_query(
                 prjid, for_managing=for_managing
             )
+            if target_proj is not None:
+                if full:
+                    return target_proj
+                else:
+                    return dict(
+                        {
+                            "title": target_proj.title,
+                            "projid": target_proj.projid,
+                            "managers": target_proj.managers,
+                            "annotators": target_proj.annotators,
+                            "viewers": target_proj.viewers,
+                            "status": target_proj.status,
+                            "license": target_proj.license,
+                        }
+                    )
         except ApiException as ae:
             if ae.status in (401, 403):
                 flash(py_messages["notauthorized"], "error")
             elif ae.status == 404:
                 flash(py_messages["project404"], "error")
-            return None
-    if target_proj != None:
-        if full == True:
-            return target_proj
-        return dict(
-            {
-                "title": target_proj.title,
-                "projid": target_proj.projid,
-                "managers": target_proj.managers,
-                "annotators": target_proj.annotators,
-                "viewers": target_proj.viewers,
-                "status": target_proj.status,
-                "license": target_proj.license,
-            }
-        )
     return None
 
 
@@ -58,7 +55,7 @@ def _get_prj_collections(prjid: int) -> List[MinimalCollectionBO]:
     with ApiClient(ProjectsApi, request) as api:
         try:
             collections: List[MinimalCollectionBO] = api.project_collections(prjid)
-        except ApiException as ae:
+        except ApiException:
             pass
 
     return collections
@@ -72,10 +69,6 @@ def _prj_users_list(ids: list) -> dict:
             if (str(a_user.id)) in ids:
                 users_list[str(a_user.id)] = a_user
     return users_list
-
-
-def _proj_privileges(prjid):
-    return []
 
 
 def _cannot_do_message(autho, prjid=0):
@@ -110,18 +103,17 @@ def prj_create() -> str:
         raise Forbidden(py_user["notauthorized"])
     to_save = gvp("save")
     if to_save == "Y":
-        title = gvp("title")
-        instrument = gvp("instrument")
+        title = gvp("title" or "")
+        instrument = gvp("instrument" or "")
         if title == "" or instrument == "":
             flash("titleinstrumentrequired", "error")
-            to_save = False
-    if to_save:
-        from to_back.ecotaxa_cli_py.models import CreateProjectReq
+        else:
+            from to_back.ecotaxa_cli_py.models import CreateProjectReq
 
-        with ApiClient(ProjectsApi, request) as api:
-            req = CreateProjectReq(title=title, instrument=instrument)
-            rsp: int = api.create_project(req)
-        return prj_edit(rsp, new=True)
+            with ApiClient(ProjectsApi, request) as api:
+                req = CreateProjectReq(title=title, instrument=instrument)
+                rsp: int = api.create_project(req)
+            return prj_edit(rsp, new=True)
     scn = possible_models()
     licenses = possible_licenses()
     access = possible_access()
@@ -136,7 +128,7 @@ def prj_create() -> str:
     )
 
 
-def prj_edit(prjid: int, new: bool = False) -> str:
+def prj_edit(prjid: int, new: bool = False):
     # Security & sanity checks
     # get target_proj
 
@@ -148,12 +140,10 @@ def prj_edit(prjid: int, new: bool = False) -> str:
         return redirect(url_for("gui_prj_noright", projid=prjid))
     # Reconstitute members list with privs
     # data structure used in both display & submit
-    redir = ""
     if gvp("save") == "Y":
-
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
-        posted_contact_id = None
+        # posted_contact_id = None
         # Update the project (from API call) with posted variables
 
         # same names as in target_proj
@@ -235,7 +225,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                 do_update = False
         for msg in err_msg:
             flash(msg, "error")
-        if contact_user == None:
+        if contact_user is None:
             flash(
                 "getcontactuserinmanagers",
                 "error",
@@ -256,7 +246,7 @@ def prj_edit(prjid: int, new: bool = False) -> str:
                     api.update_project(
                         project_id=target_proj.projid, project_model=target_proj
                     )
-                    if new == True:
+                    if new:
                         message = py_messages["projectcreated"]
                     else:
                         message = py_messages["projectupdated"]

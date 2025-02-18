@@ -29,6 +29,7 @@ const fetchfroms = {
   prjlist: '/gui/prjlist/',
   prjsamplestats: '/gui/prjsamplestats',
   userslist: '/gui/admin/userslist/',
+  guestslist:'/gui/admin/guestslist/',
   prjpredict: '/gui/prjsforprediction/'
 };
 // specifc css
@@ -41,7 +42,7 @@ const tablecss = {
   disabled: 'table-disabled',
   ascending: 'table-ascending',
   descending: 'table-descending',
-  tipover: 'tipover absolute z-10 text-stone-50 rounded bg-stone-600 px-2 py-0.5 -mt-5 ml-12 ',
+  tipover: 'tipover absolute z-10 text-stone-50 rounded-sm bg-stone-600 px-2 py-0.5 -mt-5 ml-12 ',
   hide: 'hide',
   nowrap: 'truncate',
   buttonexpand: 'button-expand',

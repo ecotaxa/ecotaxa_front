@@ -92,7 +92,7 @@
     <div id="stats_{{target_proj.projid}}_samples" class="js js-datatable block w-full max-tabstat-h" data-instanceid="samplestats" data-select="selectmultiple" data-cellid="sampleid" data-searchable="true"  data-onselect="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}?samples=" data-expand="{{_('show all rows')}}" data-shrink="{{_('hide rows')}}" data-from="prjsamplestats" data-fromid="{{target_proj.projid}}" data-defer="a.is-pick" data-export="tsv" data-sortable=true>
     <div id="wait-please" data-wait="{{_('Please wait')}}" data-loaded="{{_( 'Data loaded. Displaying...')}}" class="hide"> {{ _('Please wait')}}...</div>
     <a class="is-pick cursor-pointer mx-auto"><i class="icon-lg icon-chart-bar-square"></i> <span class="small-caps">{{_('Load samples stats')}}</span></a>
-    <div class="selectaction absinput rounded shadow-sm w-auto p-4 font-normal text-secondblue-50 bg-stone-700  hide"><i class="icon icon-x-mark p-1 -mt-3 -mr-3 invert float-right" data-dismiss=".selectaction"></i><a class="text-sm small-caps ">{{_('go to classification filtered on selected samples')}}</a></div>
+    <div class="selectaction absinput rounded-sm shadow-xs w-auto p-4 font-normal text-secondblue-50 bg-stone-700  hide"><i class="icon icon-x-mark p-1 -mt-3 -mr-3 invert float-right" data-dismiss=".selectaction"></i><a class="text-sm small-caps ">{{_('go to classification filtered on selected samples')}}</a></div>
   </div></div>
   </div></section>
 

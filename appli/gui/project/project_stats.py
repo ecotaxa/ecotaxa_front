@@ -1,23 +1,21 @@
 from flask import request, render_template, flash, redirect, url_for
-from appli.utils import ApiClient, DecodeEqualList
+from typing import List
+from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py import ApiException
-from appli.constants import MappableObjectColumns, MappableParentColumns
+
 from appli.gui.staticlistes import py_messages
 from to_back.ecotaxa_cli_py.models import (
-    ProjectModel,
     ProjectTaxoStatsModel,
     MinimalCollectionBO,
+    SampleModel,
 )
 
 
-def prj_stats(prjid: int, partial: bool, params: dict) -> str:
+def prj_stats(prjid: int, partial: bool):
 
     from collections.abc import Iterable
 
-    limit = 5000
-    if "limit" in params:
-        limit = params["limit"]
     # Stats for about infos in table partial = True or full about page partial = False
     from appli.gui.project.projectsettings import get_target_prj
 
@@ -37,10 +35,8 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
     used_taxa = list([])
     taxastats = list(dict({}))
     annotators = None
-    samples = None
     initclassiflist = None
-    collections = list([])
-    if partial == True:
+    if partial:
         req_taxa = ""
     else:
         req_taxa = "all"
@@ -61,9 +57,7 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
                 used_taxa.extend([str(t) for t in taxastats.used_taxa])
                 taxastats = [taxastats.to_dict()]
         collections: List[MinimalCollectionBO] = api.project_collections(prjid)
-
         from appli.gui.taxonomy.tools import taxo_with_names, taxo_with_lineage
-        from markupsafe import escape
 
         usedtaxa = taxo_with_lineage(used_taxa)
     if not partial:
@@ -82,36 +76,36 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
 
         with ApiClient(ProjectsApi, request) as api:
             try:
-                annotators_stats: List[
-                    ProjectUserStatsModel
-                ] = api.project_set_get_user_stats(ids=str(prjid))
+                annotators_stats: List[ProjectUserStatsModel] = (
+                    api.project_set_get_user_stats(ids=str(prjid))
+                )
+                if isinstance(annotators_stats, Iterable) and len(annotators_stats) > 0:
+                    for r in annotators_stats[0].annotators:
+                        f = list(
+                            filter(
+                                lambda a: (a.id == r.id),
+                                annotators_stats[0].activities,
+                            )
+                        )
+                        if len(f):
+                            nb_actions = f[0].nb_actions
+                            last_annot = f[0].last_annot
+                        else:
+                            nb_actions = 0
+                            last_annot = None
+                        annotators.append(
+                            dict(
+                                {
+                                    "id": r.id,
+                                    "name": r.name,
+                                    "nb_actions": nb_actions,
+                                    "last_annot": last_annot,
+                                }
+                            )
+                        )
             except ApiException as ae:
-                annotators_stats = None
                 flash("error in getting user stats " + str(ae.status), "error")
-        if isinstance(annotators_stats, Iterable) and len(annotators_stats) > 0:
-            for r in annotators_stats[0].annotators:
-                f = list(
-                    filter(
-                        lambda a: (a.id == r.id),
-                        annotators_stats[0].activities,
-                    )
-                )
-                if len(f):
-                    nb_actions = f[0].nb_actions
-                    last_annot = f[0].last_annot
-                else:
-                    nb_actions = 0
-                    last_annot = None
-                annotators.append(
-                    dict(
-                        {
-                            "id": r.id,
-                            "name": r.name,
-                            "nb_actions": nb_actions,
-                            "last_annot": last_annot,
-                        }
-                    )
-                )
+
         # to have a full list of users
         for right, members in statproj["privileges"].items():
             for member in members:
@@ -153,7 +147,7 @@ def prj_stats(prjid: int, partial: bool, params: dict) -> str:
     )
 
 
-def prj_samples_stats(project_ids: str, partial: bool, format: str = "json") -> str:
+def prj_samples_stats(project_ids: str, partial: bool, _format: str = "json"):
     from to_back.ecotaxa_cli_py.api import SamplesApi
 
     with ApiClient(SamplesApi, request) as api:
@@ -175,11 +169,11 @@ def prj_samples_stats(project_ids: str, partial: bool, format: str = "json") -> 
     tabledef = dict(
         {
             "columns": columns,
-            "data": render_samples_stats(samples, samplestats, partial, format),
+            "data": render_samples_stats(samples, samplestats, partial, _format),
             "type": "json",
         }
     )
-    if format == "json":
+    if _format == "json":
         return tabledef
     else:
         return render_template(

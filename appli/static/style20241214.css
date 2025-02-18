@@ -162,8 +162,29 @@ code {
 	text-decoration: none;
 	font-size: 100%;
 }
+#column-right .simsrch {
+	position: absolute;
+	top: 0;
+	right: 2px;
+	color: #999;
+	text-decoration: none;
+	font-size: 100%;
+	opacity: 20%;
+}
+#column-right .simsrchseed {
+	position: absolute;
+	top: 0;
+	right: 2px;
+	color: #999;
+	text-decoration: none;
+	font-size: 100%;
+}
 #column-right .ddet:hover {
 	color: #428bca;
+}
+#column-right .simsrch:hover {
+	color: #428bca;
+	opacity: 100%;
 }
 
 .classiftab td {
@@ -339,5 +360,3 @@ textarea.parsley-error {
 .At2PopupContent {  padding:10px; }
 .ui-datepicker { z-index: 10000 !important; } /*Requis pour fonctionnement dans une popup*/
 .ui-front { z-index: 10000 !important; } /*Requis pour fonctionnement dans une popup de autocomplete*/
-
-

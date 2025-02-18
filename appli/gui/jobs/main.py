@@ -1,8 +1,6 @@
-import flask
+from typing import List
 from flask import request, render_template, Response, redirect, url_for, flash
 from flask_login import current_user, login_required
-
-import appli.constants
 from appli import app, gvg
 from appli.gui.jobs.Job import Job
 from appli.gui.commontools import is_partial_request, py_get_messages
@@ -11,14 +9,13 @@ from appli.gui.commontools import is_partial_request, py_get_messages
 from appli.gui.jobs.by_type import *
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException, MinUserModel
-from to_back.ecotaxa_cli_py.api import JobsApi, UsersApi, ProjectsApi
-from to_back.ecotaxa_cli_py.models import JobModel, ProjectModel
+from to_back.ecotaxa_cli_py.api import JobsApi, UsersApi
+from to_back.ecotaxa_cli_py.models import JobModel
 
 
 @app.route("/gui/job/create/<job_type>", methods=["GET", "POST"])
 @login_required
 def gui_job_create(job_type: str):
-
     """
     Used from menu (GET) and in self-submitted POST.
     """
@@ -54,7 +51,6 @@ def gui_job_show(job_id: int):
             rsp = japi.get_job_log_file(job_id=job_id)
         return Response(rsp, mimetype="text/plain")
     py_messages = py_get_messages("jobs")
-    job = None
     with ApiClient(JobsApi, request) as api:
         try:
             job: JobModel = api.get_job(job_id=job_id)
@@ -67,18 +63,18 @@ def gui_job_show(job_id: int):
 
     with ApiClient(UsersApi, request) as uapi:
         owner: MinUserModel = uapi.get_user(user_id=job.owner_id)
-    txt = ""
     target_proj = None
     # added for subnav when there is a projid
     projid = None
     collection_id = 0
-    if "req" in job.params:
+    params = job.params
+    if "req" in params:
         for idx in ["project_id", "prj_id"]:
-            if idx in job.params["req"]:
-                projid = job.params["req"][idx]
+            if idx in params["req"]:
+                projid = params["req"][idx]
                 break
-        if "collection_id" in job.params["req"]:
-            collection_id = job.params["req"]["collection_id"]
+        if "collection_id" in params["req"]:
+            collection_id = params["req"]["collection_id"]
     projids = str(projid).split(",")
     if projid and len(projids) == 1:
         from appli.gui.project.projectsettings import get_target_prj
@@ -88,7 +84,7 @@ def gui_job_show(job_id: int):
     finalaction = ""
     if job.state == "F":
         job_cls = Job.find_job_class_by_name(Job, job.type)
-        if job_cls != None:
+        if job_cls is not None:
             finalaction = job_cls.final_action(job)
 
     return render_template(
@@ -141,11 +137,13 @@ def gui_job_status(job_id: int):
     """
     Ajax entry point for getting a job status. Called only from view jobs/show.html.
     """
+    py_messages = py_get_messages("jobs")
     try:
         with ApiClient(JobsApi, request) as api:
             job: JobModel = api.get_job(job_id=job_id)
         job_type = job.type
         if job.type == "GenExport":
+            params = job.params
             # convert to new gui/job_type ( GenExport to GeneralExport or BackupExport )
             new_types = {
                 "TSV": "GeneralExport",
@@ -155,17 +153,17 @@ def gui_job_status(job_id: int):
                 "BIV": "SummaryExport",
             }
 
-            if job.params["req"]["exp_type"] in new_types.keys():
-                job_type = new_types[job.params["req"]["exp_type"]]
+            if params["req"]["exp_type"] in new_types.keys():
+                job_type = new_types[params["req"]["exp_type"]]
             else:
                 job_type = "SummaryExport"
 
         rep = job.to_dict()
         job_cls = Job.find_job_class_by_name(Job, job_type)
-        if job_cls != None:
+        if job_cls is not None:
             rep["finalaction"] = job_cls.final_action(job)
-    except ValueError as e:  # Exception as e:
-        rep = dict({"errors": [{"err": e.status, "message": str(e)}]})
+    except ValueError:
+        rep = dict({"errors": [{"err": 422, "message": py_messages["jobiderror"]}]})
     return rep
 
 
@@ -181,19 +179,22 @@ def gui_job_force_restart(job_id: int):
 @login_required
 def gui_job_cleanup(jobid: int):
     py_messages = py_get_messages("jobs")
-    job = None
-    projid = None
+    projid = 0
     collection_id = 0
     try:
         with ApiClient(JobsApi, request) as api:
             job: JobModel = api.get_job(job_id=jobid)
-            projid = job.params.get("prj_id")
-            if job.params.get("req") is not None:
+            params = job.params
+            projid = params["prj_id"]
+            if params["req"] is not None:
                 if projid is None:
-                    projid = job.params["req"].get("project_id")
-                collection_id = job.params["req"].get("collection_id")
+                    projid = params["req"]["project_id"]
+                collection_id = params["req"]["collection_id"]
                 if collection_id is None:
                     collection_id = 0
+        if job is not None:
+            with ApiClient(JobsApi, request) as api:
+                api.erase_job(job_id=jobid)
 
     except ApiException as ae:
         if ae.status in (401, 403):
@@ -201,9 +202,6 @@ def gui_job_cleanup(jobid: int):
         elif ae.status == 404:
             flash(py_messages["notfound"], "error")
 
-    if job is not None:
-        with ApiClient(JobsApi, request) as api:
-            api.erase_job(job_id=jobid)
     partial = is_partial_request(request)
     if not partial and gvg("thengotoproject") == "Y":
         return redirect(url_for("gui_prj_classify", projid=projid))

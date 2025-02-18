@@ -39,7 +39,7 @@
   <input type="hidden" name="{{name}}" value={{formdatas[type_tab].datas[name][0]}}>
   {%- if "options" in option.keys() -%}
      {%- for opt in option.options -%}
-    {%-if opt.value == formdata.datas[name][0] -%}<span class="bg-stone-50 p-2 rounded font-semibold ">{{opt.label}}</span>{%-endif-%}
+    {%-if opt.value == formdata.datas[name][0] -%}<span class="bg-stone-50 p-2 rounded-sm font-semibold ">{{opt.label}}</span>{%-endif-%}
     {%-endfor-%}{%endif%}
   {%-else -%}{{make_field(name,option,type_tab)}}
   {%-endif-%}

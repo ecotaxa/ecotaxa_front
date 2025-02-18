@@ -1,33 +1,24 @@
 # -*- coding: utf-8 -*-
 import time
 from pathlib import Path
-from typing import List, ClassVar
-
-from flask import render_template, redirect, request, flash, url_for
-
-from appli import gvg, gvp, app
-from appli.back_config import get_app_manager_mail
+from typing import ClassVar
+from flask import render_template, redirect, request, url_for
+from appli import gvp, app
 from appli.gui.jobs.Job import Job
 from appli.gui.jobs.staticlistes import py_messages
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (
-    FilesApi,
     ProjectsApi,
     UsersApi,
-    TaxonomyTreeApi,
     JobsApi,
 )
 from to_back.ecotaxa_cli_py.models import (
     ImportReq,
     ImportRsp,
-    TaxonModel,
-    ProjectModel,
     JobModel,
-    DirectoryModel,
 )
 from appli.gui.jobs.job_interface import import_format_options
-from appli.gui.commontools import is_partial_request
 from flask_babel import _
 
 
@@ -49,7 +40,7 @@ class ImportJob(Job):
         """In UI/flask, initial load, GET"""
         projid, collid = cls.get_target_id()
         target_proj = cls.get_target_obj(projid)
-        if target_proj == None:
+        if target_proj is None:
             return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
@@ -83,12 +74,12 @@ class ImportJob(Job):
         )
 
     @classmethod
-    def job_req(cls):
+    def job_req(cls) -> ImportReq:
         """get post params and create api request object"""
-        return None
+        pass
 
     @classmethod
-    def api_job_call(cls, req: ImportReq) -> str:
+    def api_job_call(cls, req: ImportReq):
         # second phase after upload to my_files - put follwing code elsewhere
         projid = int(gvp("projid"))
         with ApiClient(ProjectsApi, request) as api:
@@ -116,7 +107,7 @@ class ImportJob(Job):
                 api.set_current_user_prefs(projid, "cwd", cwd)
         req = cls.job_req()
         rsp = cls.api_job_call(req)
-        if rsp != None:
+        if rsp is not None:
             return redirect(url_for("gui_job_show", job_id=rsp.job_id))
         formdatas, formoptions, import_links = import_format_options(cls.IMPORT_TYPE)
         return render_template(

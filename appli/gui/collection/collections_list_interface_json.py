@@ -1,15 +1,12 @@
 # list : full project list table def - homepage
 # import-[...] settings table def - projectsettings page create or update
 
-from to_back.ecotaxa_cli_py.models import (
-    CollectionModel,
-    MinUserModel,
-)
+from to_back.ecotaxa_cli_py.models import CollectionModel
 
 from flask_babel import _
 
 
-def collection_table_columns(typeimport: str, selection: str = "list") -> list:
+def collection_table_columns(typeimport: str, selection: str = "list") -> dict:
     if typeimport == "":
         selection = selection
     else:
@@ -79,12 +76,12 @@ def _extract_items(prj, keepkeys):
     return {k: v for k, v in prj.items() if k in keepkeys}
 
 
-def render_for_js(colljs: list, columns: list) -> list:
-    from appli.gui.staticlistes import py_project_status
+def render_for_js(colljs: list, columns: dict) -> list:
     from datetime import datetime
-    from flask_login import current_user
 
-    isadmin = current_user.is_authenticated and current_user.is_app_admin == True
+    # from flask_login import current_user
+
+    # isadmin = current_user.is_authenticated and current_user.is_app_admin == True
     jsoncolljs = list([])
     for coll in colljs:
 

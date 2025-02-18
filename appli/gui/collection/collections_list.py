@@ -5,15 +5,12 @@
 #
 # V2 new font interface projects list
 #
-
-from typing import List
-
-from flask import session, request, render_template
+from flask import request, render_template
 from flask_login import current_user
 
 from appli.utils import ApiClient
 from werkzeug.exceptions import Forbidden
-from to_back.ecotaxa_cli_py.api import CollectionsApi, AuthentificationApi
+from to_back.ecotaxa_cli_py.api import CollectionsApi
 from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     UserModelWithRights,

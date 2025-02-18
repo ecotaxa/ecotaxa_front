@@ -1,6 +1,13 @@
 import os
-import flask
-from flask import request, url_for, render_template, redirect, flash, escape
+from flask import (
+    request,
+    url_for,
+    render_template,
+    redirect,
+    flash,
+    escape,
+    make_response,
+)
 from werkzeug.exceptions import Forbidden
 from flask_login import current_user, login_required
 from flask_babel import _
@@ -9,27 +16,29 @@ from appli import app, gvg, gvp
 from appli.constants import (
     AdministratorLabel,
     UserAdministratorLabel,
-    API_GLOBAL_ROLES,
 )
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import (
     AdminApi,
     UsersApi,
+    GuestsApi,
+)
+from to_back.ecotaxa_cli_py.models import (
     MinUserModel,
     UserModelWithRights,
-    ApiException,
+    GuestModel,
 )
 from appli.gui.commontools import is_partial_request
 from appli.security_on_backend import gui_roles_accepted
 from markupsafe import Markup
 
 
-def admins_list(role=None, all=False):
+def admins_list(role=None):
     admin_users: List[MinUserModel]
     if not current_user.is_authenticated:
         return None
     with ApiClient(UsersApi, request) as api:
-        if role == None or role == AdministratorLabel:
+        if role is None or role == AdministratorLabel:
             admin_users = api.get_admin_users()
         elif role == UserAdministratorLabel:
             admin_users = api.get_users_admins()
@@ -53,38 +62,48 @@ def gui_admin():
     )
 
 
-def _users_list_api(ids: str = None, filt: dict = None) -> list:
+def _persons_list_api(ids: str = "", is_guest: bool = False) -> list:
     import requests
 
     payload = dict({"fields": "*default"})
-    if ids != None:
+    if ids != "":
         payload.update({"ids": ids})
-    users = list([])
-    with ApiClient(UsersApi, request) as apiusr:
+    persons = list([])
+    client_api = UsersApi
+    url = "/users"
+    if is_guest:
+        client_api = GuestsApi
+        url = "/guests"
+    with ApiClient(client_api, request) as apiperson:
         url = (
-            apiusr.api_client.configuration.host + "/users"
+            apiperson.api_client.configuration.host + url
         )  # endpoint is nowhere available as a const :(
-        token = apiusr.api_client.configuration.access_token
+        token = apiperson.api_client.configuration.access_token
 
         headers = {
             "Authorization": "Bearer " + token,
         }
         r = requests.get(url, headers=headers, params=payload)
         if r.status_code == 200:
-            users.extend(r.json())
+            persons.extend(r.json())
         else:
             r.raise_for_status()
+    return persons
+
+
+def _users_list_api(ids: str = None) -> list:
+    users = _persons_list_api(ids)
     return users
 
 
-def _users_list(listall: bool = False, filt: dict = None) -> List[UserModelWithRights]:
+def _users_list() -> List[UserModelWithRights]:
     with ApiClient(UsersApi, request) as api:
         users: List[UserModelWithRights] = api.get_users()
     return users
 
 
-def allusers_list(ids: str = None):
-    users = _users_list_api(ids)
+def allusers_list():
+    users = _users_list_api()
     from appli.gui.admin.users_list_interface_json import (
         user_table_columns,
         render_for_js,
@@ -100,17 +119,34 @@ def allusers_list(ids: str = None):
     return tabledef
 
 
+def _persons_list_page(is_guest=False) -> str:
+    print("current_user", current_user)
+    if not current_user.is_authenticated:
+        from appli.gui.staticlistes import py_user
+
+        raise Forbidden(py_user["notauthorized"])
+    ids = gvg("ids", "")
+    partial = is_partial_request(request)
+    persontype = "user"
+    if is_guest:
+        persontype = "guest"
+    if partial:
+        template = "v2/admin/_personslistcontainer.html"
+    else:
+        template = "v2/admin/" + persontype + "s.html"
+
+    return render_template(template, partial=partial, ids=ids, person=persontype)
+
+
 @app.route("/gui/admin/userslist/", methods=["GET"])
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
-def gui_userlist() -> str:
-    ids = gvg("ids", None)
+def gui_userlist():
     # gzip not really necessary - jsonifiy with separators
-    from flask import make_response
     import json
 
     gz = gvg("gzip")
-    content = json.dumps(allusers_list(ids), separators=[",", ":"]).encode("utf-8")
+    content = json.dumps(allusers_list(), separators=(",", ":")).encode("utf-8")
 
     encoding = "utf-8"
     if gz:
@@ -132,18 +168,7 @@ def gui_userlist() -> str:
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
 def gui_users_list_page() -> str:
-    if not current_user.is_authenticated:
-        from appli.gui.staticlistes import py_user
-
-        raise Forbidden(py_user["notauthorized"])
-    ids = gvg("ids", "")
-    partial = is_partial_request(request)
-    if partial == True:
-        template = "v2/admin/_userslistcontainer.html"
-    else:
-        template = "v2/admin/users.html"
-
-    return render_template(template, partial=partial, ids=ids)
+    return _persons_list_page()
 
 
 @app.route(
@@ -159,7 +184,7 @@ def gui_users_list_page() -> str:
 )
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
-def gui_user_activate(usrid: int, status_name: str = None) -> str:
+def gui_user_activate(usrid: int, status_name: str = ""):
     if not current_user.is_authenticated:
         from appli.gui.staticlistes import py_user
 
@@ -179,25 +204,25 @@ def gui_user_activate(usrid: int, status_name: str = None) -> str:
     ) = get_user_constants(request)
     if request.method == "GET" and status_name != ApiUserStatus["active"]:
         user = api_get_user(usrid)
-        if status_name != None and status_name in ApiUserStatus.keys():
+        if status_name != "" and status_name in ApiUserStatus.keys():
             user.status = ApiUserStatus[status_name]
         return render_template(
             "v2/admin/activate.html", user=user, status_name=status_name
         )
     from appli.gui.users.users import api_user_activate
 
-    reason = gvp("status_admin_comment", None)
+    reason = gvp("status_admin_comment", "")
 
     status = int(gvp("status"))
 
     response = api_user_activate(usrid, status, reason=reason)
     if response[0] == 0:
-        type = "success"
+        typ = "success"
     else:
-        type = "error"
+        typ = "error"
 
     message = "User " + str(usrid) + " " + response[1]
-    flash(message, type)
+    flash(message, typ)
     # show only user infos
     return redirect(url_for("gui_users_list_page", ids=usrid))
 
@@ -263,7 +288,7 @@ def gui_user_edit(usrid):
 @app.route("/gui/admin/messages/<msgkey>", methods=["GET", "POST"])
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
-def gui_site_message(msgkey) -> str:
+def gui_site_message(msgkey):
     import json
 
     file = app.config.get("APP_GUI_MESSAGE_FILE")
@@ -281,7 +306,7 @@ def gui_site_message(msgkey) -> str:
         from datetime import datetime
 
         msg = gvp("msg")
-        active = gvp("active", 0)
+        active = gvp("active", "0")
         messages[msgkey] = {
             "content": str(msg),
             "active": int(active),
@@ -290,7 +315,6 @@ def gui_site_message(msgkey) -> str:
         with open(file, "w", encoding="utf-8", newline="\n") as f:
             f.write(json.dumps(messages))
         flash("message saved", "success")
-        msgkey = ""
         return redirect(request.referrer)
 
     return render_template("v2/admin/messages.html", msgkey=msgkey, messages=messages)
@@ -492,6 +516,20 @@ def utility_admin_processor():
                     },
                     "url": url_for("gui_users_list_page"),
                 },
+                "guests": {
+                    "label": _("Guests"),
+                    "links": {
+                        "list": {
+                            "label": _("List"),
+                            "url": url_for("gui_guests_list_page"),
+                        },
+                        "create": {
+                            "label": _("Create"),
+                            "url": url_for("gui_guest_create"),
+                        },
+                    },
+                    "url": url_for("gui_guests_list_page"),
+                },
                 "job": {
                     "label": _("Tasks"),
                     "comment": _("View all users tasks"),
@@ -523,10 +561,123 @@ def utility_admin_processor():
             }
         )
 
-        if current_user.is_app_admin != True:
+        if not current_user.is_app_admin:
             del menu["database"]
             del menu["job"]
             del menu["messages"]
         return menu
 
     return dict(admin_menu=admin_menu)
+
+
+#################### Guests ##############################
+def _guests_list_api(ids: str = "") -> list:
+    guests = _persons_list_api(ids, is_guest=True)
+    return guests
+
+
+def _guests_list() -> List[GuestModel]:
+    with ApiClient(GuestsApi, request) as api:
+        guests: List[GuestModel] = api.get_guests()
+    return guests
+
+
+def allguests_list(ids: str = ""):
+    guests = _guests_list_api(ids)
+    from appli.gui.admin.users_list_interface_json import (
+        guest_table_columns,
+        render_for_js,
+    )
+
+    columns = guest_table_columns()
+    tabledef = dict(
+        {
+            "columns": columns,
+            "data": render_for_js(guests, columns),
+        }
+    )
+    return tabledef
+
+
+@app.route("/gui/admin/guestslist/", methods=["GET"])
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
+@login_required
+def gui_guestlist():
+    # gzip not really necessary - jsonifiy with separators
+    from flask import make_response
+    import json
+
+    gz = gvg("gzip")
+    content = json.dumps(allguests_list(), separators=(",", ":")).encode("utf-8")
+    encoding = "utf-8"
+    if gz:
+        import gzip
+
+        content = gzip.compress(content, 7)
+        encoding = "gzip"
+    response = make_response(content)
+
+    response.headers["Content-length"] = len(content)
+    response.headers["Content-Encoding"] = encoding
+    response.headers["Content-Type"] = "application/json"
+
+    return response
+
+
+@app.route("/gui/admin/guests/", methods=["GET"])
+@app.route("/gui/admin/guests", methods=["GET"])
+@login_required
+def gui_guests_list_page() -> str:
+    return _persons_list_page(is_guest=True)
+
+
+@app.route("/gui/admin/guests/create", methods=["GET", "POST"])
+@app.route("/gui/admin/guests/create/", methods=["GET", "POST"])
+@login_required
+def gui_guest_create():
+    from appli.gui.guests.guests import guest_create, ACCOUNT_CREATE, account_page
+
+    if request.method == "POST":
+
+        response = guest_create()
+        if response[0] == 0:
+            flash("guest created", "success")
+        else:
+            flash(response[1], "error")
+            return redirect(url_for("gui_guests_list_page"))
+    return account_page(
+        action=ACCOUNT_CREATE,
+        usrid=-1,
+        isfrom=True,
+        template="v2/admin/user.html",
+    )
+
+
+@app.route("/gui/admin/guests/edit/", defaults={"usrid": -1}, methods=["GET", "POST"])
+@app.route("/gui/admin/guests/edit/<int:usrid>", methods=["GET", "POST"])
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
+@login_required
+def gui_guest_edit(guestid: int):
+    if guestid == -1:
+        return redirect(url_for("gui_guest_create"))
+    from appli.gui.guests.guests import (
+        guest_edit,
+        account_page,
+        ACCOUNT_EDIT,
+    )
+
+    if request.method == "POST":
+        reponse = guest_edit(guestid, isfrom=True)
+        if reponse[0] == 0:
+            flash(reponse[1], "success")
+            return redirect(url_for("gui_guests_list_page", ids=guestid))
+        else:
+            message = reponse[1]
+            flash(message, "error")
+            return redirect(url_for("gui_guests_list_page"))
+    return account_page(
+        action=ACCOUNT_EDIT,
+        usrid=guestid,
+        isfrom=True,
+        template="v2/admin/guest.html",
+    )

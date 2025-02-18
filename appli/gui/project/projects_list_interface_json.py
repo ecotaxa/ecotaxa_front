@@ -1,15 +1,12 @@
 # list : full project list table def - homepage
 # import-[...] settings table def - projectsettings page create or update
 
-from to_back.ecotaxa_cli_py.models import (
-    ProjectModel,
-    MinUserModel,
-)
-
+from to_back.ecotaxa_cli_py.models import ProjectModel
+from typing import List, Dict
 from flask_babel import _
 
 
-def project_table_columns(typeimport: str, selection: str = "list") -> list:
+def project_table_columns(typeimport: str, selection: str = "list") -> dict:
     if typeimport == "":
         selection = selection
     else:
@@ -256,10 +253,10 @@ def project_table_columns(typeimport: str, selection: str = "list") -> list:
 def render_samples_stats(
     samples: list,
     samplestats: list,
-    partial: bool = True,
-    format: str = "json",
     withtaxa: bool = True,
-) -> dict:
+    partial: bool = True,
+    _format: str = "json",
+) -> List[Dict]:
 
     from appli.gui.taxonomy.tools import taxo_with_names
 
@@ -275,7 +272,7 @@ def render_samples_stats(
                 "orig_id": sampleslist[str(samplestat.sample_id)].orig_id,
             }
         )
-        if withtaxa == True:
+        if withtaxa:
             taxa = [str(t) for t in samplestat.used_taxa]
             sampledict.update({"used_taxa": samplestat.used_taxa})
             used_taxa.extend(taxa)
@@ -290,7 +287,7 @@ def render_samples_stats(
 
         samples.append(sampledict)
     # replace taxa ids by their names
-    if withtaxa == True:
+    if withtaxa:
         if len(used_taxa) > 0:
             usedtaxa = dict({})
             for t in taxo_with_names(list(set(used_taxa))):
@@ -314,11 +311,11 @@ def _strip_if(key, value):
 
 
 def _extract_items(prj, keepkeys):
-    return {k: _strip_if(v) for k, v in prj.items() if k in keepkeys}
+    return {k: _strip_if(k, v) for k, v in prj.items() if k in keepkeys}
 
 
 def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
-    if partial == True:
+    if partial:
         return dict(
             {
                 "projid": prj.projid,
@@ -351,7 +348,7 @@ def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
 
 
 def render_stat_proj_json(prj: dict, partial: bool = True) -> dict:
-    if partial == True:
+    if partial:
         keepkeys = [
             "projid",
             "title",
@@ -388,7 +385,7 @@ def render_stat_proj_json(prj: dict, partial: bool = True) -> dict:
     return _extract_items(prj, keepkeys)
 
 
-def render_for_js(prjs: list, columns: list, can_access: list) -> list:
+def render_for_js(prjs: list, columns: dict, can_access: dict) -> list:
     from appli.gui.staticlistes import py_project_status
     from datetime import datetime
     from flask_login import current_user
