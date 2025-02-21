@@ -34,56 +34,76 @@ class Constants(object):
     """
     openapi_types = {
         'license_texts': 'dict(str, str)',
+        'access': 'dict(str, str)',
         'app_manager': 'list[str]',
         'countries': 'list[str]',
+        'people_organization_directories': 'dict(str, str)',
         'user_status': 'dict(str, int)',
+        'user_type': 'dict(str, str)',
         'password_regexp': 'str',
         'email_verification': 'bool',
         'account_validation': 'bool',
         'short_token_age': 'int',
         'profile_token_age': 'int',
-        'recaptchaid': 'bool'
+        'recaptchaid': 'bool',
+        'formulae': 'str'
     }
 
     attribute_map = {
         'license_texts': 'license_texts',
+        'access': 'access',
         'app_manager': 'app_manager',
         'countries': 'countries',
+        'people_organization_directories': 'people_organization_directories',
         'user_status': 'user_status',
+        'user_type': 'user_type',
         'password_regexp': 'password_regexp',
         'email_verification': 'email_verification',
         'account_validation': 'account_validation',
         'short_token_age': 'short_token_age',
         'profile_token_age': 'profile_token_age',
-        'recaptchaid': 'recaptchaid'
+        'recaptchaid': 'recaptchaid',
+        'formulae': 'formulae'
     }
 
-    def __init__(self, license_texts=None, app_manager=["",""], countries=[], user_status=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, license_texts=None, access=None, app_manager=["",""], countries=[], people_organization_directories=None, user_status=None, user_type=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, formulae='''subsample_coef: 1/ssm.sub_part
+total_water_volume: sam.tot_vol/1000
+individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._license_texts = None
+        self._access = None
         self._app_manager = None
         self._countries = None
+        self._people_organization_directories = None
         self._user_status = None
+        self._user_type = None
         self._password_regexp = None
         self._email_verification = None
         self._account_validation = None
         self._short_token_age = None
         self._profile_token_age = None
         self._recaptchaid = None
+        self._formulae = None
         self.discriminator = None
 
         if license_texts is not None:
             self.license_texts = license_texts
+        if access is not None:
+            self.access = access
         if app_manager is not None:
             self.app_manager = app_manager
         if countries is not None:
             self.countries = countries
+        if people_organization_directories is not None:
+            self.people_organization_directories = people_organization_directories
         if user_status is not None:
             self.user_status = user_status
+        if user_type is not None:
+            self.user_type = user_type
         if password_regexp is not None:
             self.password_regexp = password_regexp
         if email_verification is not None:
@@ -96,6 +116,8 @@ class Constants(object):
             self.profile_token_age = profile_token_age
         if recaptchaid is not None:
             self.recaptchaid = recaptchaid
+        if formulae is not None:
+            self.formulae = formulae
 
     @property
     def license_texts(self):
@@ -119,6 +141,29 @@ class Constants(object):
         """
 
         self._license_texts = license_texts
+
+    @property
+    def access(self):
+        """Gets the access of this Constants.  # noqa: E501
+
+        Projects access levels.  # noqa: E501
+
+        :return: The access of this Constants.  # noqa: E501
+        :rtype: dict(str, str)
+        """
+        return self._access
+
+    @access.setter
+    def access(self, access):
+        """Sets the access of this Constants.
+
+        Projects access levels.  # noqa: E501
+
+        :param access: The access of this Constants.  # noqa: E501
+        :type: dict(str, str)
+        """
+
+        self._access = access
 
     @property
     def app_manager(self):
@@ -167,6 +212,29 @@ class Constants(object):
         self._countries = countries
 
     @property
+    def people_organization_directories(self):
+        """Gets the people_organization_directories of this Constants.  # noqa: E501
+
+        Available directories to identify people and organizations in collections settings  # noqa: E501
+
+        :return: The people_organization_directories of this Constants.  # noqa: E501
+        :rtype: dict(str, str)
+        """
+        return self._people_organization_directories
+
+    @people_organization_directories.setter
+    def people_organization_directories(self, people_organization_directories):
+        """Sets the people_organization_directories of this Constants.
+
+        Available directories to identify people and organizations in collections settings  # noqa: E501
+
+        :param people_organization_directories: The people_organization_directories of this Constants.  # noqa: E501
+        :type: dict(str, str)
+        """
+
+        self._people_organization_directories = people_organization_directories
+
+    @property
     def user_status(self):
         """Gets the user_status of this Constants.  # noqa: E501
 
@@ -188,6 +256,29 @@ class Constants(object):
         """
 
         self._user_status = user_status
+
+    @property
+    def user_type(self):
+        """Gets the user_type of this Constants.  # noqa: E501
+
+        Application User type values  # noqa: E501
+
+        :return: The user_type of this Constants.  # noqa: E501
+        :rtype: dict(str, str)
+        """
+        return self._user_type
+
+    @user_type.setter
+    def user_type(self, user_type):
+        """Sets the user_type of this Constants.
+
+        Application User type values  # noqa: E501
+
+        :param user_type: The user_type of this Constants.  # noqa: E501
+        :type: dict(str, str)
+        """
+
+        self._user_type = user_type
 
     @property
     def password_regexp(self):
@@ -326,6 +417,29 @@ class Constants(object):
         """
 
         self._recaptchaid = recaptchaid
+
+    @property
+    def formulae(self):
+        """Gets the formulae of this Constants.  # noqa: E501
+
+        Project default concentration formulae  # noqa: E501
+
+        :return: The formulae of this Constants.  # noqa: E501
+        :rtype: str
+        """
+        return self._formulae
+
+    @formulae.setter
+    def formulae(self, formulae):
+        """Sets the formulae of this Constants.
+
+        Project default concentration formulae  # noqa: E501
+
+        :param formulae: The formulae of this Constants.  # noqa: E501
+        :type: str
+        """
+
+        self._formulae = formulae
 
     def to_dict(self):
         """Returns the model properties as a dict"""

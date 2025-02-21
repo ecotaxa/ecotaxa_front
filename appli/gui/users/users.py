@@ -6,6 +6,7 @@ from appli import app, gvp, gvpm, constants
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import (
     UsersApi,
+    GuestsApi,
     ResetPasswordReq,
     UserActivateReq,
     UserModelWithRights,
@@ -26,10 +27,18 @@ from appli.back_config import get_user_constants
     SHORT_TOKEN_AGE,
     PROFILE_TOKEN_AGE,
     RECAPTCHAID,
-) = get_user_constants(request)
+) = get_user_constants()
 
 ACCOUNT_USER_CREATE = "create"
 ACCOUNT_USER_EDIT = "edit"
+
+USER_FIELDS = [
+    "email",
+    "organisation",
+    "country",
+    "orcid",
+    "usercreationreason",
+]
 
 
 def _get_captcha() -> list:
@@ -48,8 +57,18 @@ def check_is_users_admin() -> bool:
     return current_user.is_authenticated and current_user.is_admin == True
 
 
-def make_user_response(code, message: str) -> tuple:
-    return code, message, API_EMAIL_VERIFICATION, API_ACCOUNT_VALIDATION
+def make_person_response(code, message: str, ae=None, _type="user") -> tuple:
+    if ae is not None:
+        if ae.status in (401, 403):
+            message = py_messages["notauthorized"]
+        elif ae.status == 404:
+            message = py_messages["notfound"]
+        else:
+            code, message = format_exception(ae)
+    if _type == "user":
+        return code, message, API_EMAIL_VERIFICATION, API_ACCOUNT_VALIDATION
+    else:
+        return code, message
 
 
 def user_register(token: str = None, partial: bool = False) -> str:
@@ -177,7 +196,8 @@ def user_create(
             usrid, token = _verifiy_validation_throw(
                 usrid, isfrom, action=action, age=age
             )
-        posted = _user_posted_data(usrid, isfrom, action)
+        fields = ["password"]
+        posted = person_posted_data(usrid, isfrom, action, fields + USER_FIELDS)
         resp = api_user_create(posted, token)
     # verify email before register to get a token or verify pass
     elif usrid == -1:
@@ -238,9 +258,9 @@ def user_create(
 
 def user_edit(usrid: int, isfrom: bool = False) -> tuple:
     if isfrom == True and (not check_is_users_admin()):
-        return make_user_response(None, py_user["notadmin"])
+        return make_person_response(None, py_user["notadmin"])
     elif usrid != current_user.api_user.id and isfrom != True:
-        return make_user_response(None, py_user["notauthorized"])
+        return make_person_response(None, py_user["notauthorized"])
     return user_account(usrid, isfrom, action=ACCOUNT_USER_EDIT)
 
 
@@ -265,28 +285,21 @@ def api_user_create(posted: dict, token: str = None) -> tuple:
                 user_model_with_rights=new_user, no_bot=no_bot, token=token
             )
             if user_id == -1:
-                return make_user_response(1, py_user["profileerror"]["create"])
+                return make_person_response(1, py_user["profileerror"]["create"])
             elif API_ACCOUNT_VALIDATION:
                 message = py_user["statusnotauthorized"]["01"]
             else:
                 message = py_user["profilesuccess"]["create"]
-            return make_user_response(0, message)
+            return make_person_response(0, message)
         except ApiException as ae:
-            code = ae.status
-            if ae.status in (401, 403):
-                message = py_user["notauthorized"]
-            elif ae.status == 404:
-                message = py_user["notfound"]
-            else:
-                code, message = format_exception(ae)
-            return make_user_response(code, message)
+            return make_person_response(None, "", ae)
 
 
 def api_user_activate(
     user_id: int, status: int, token: str = None, reason: str = None, bot: bool = False
 ) -> tuple:
     if API_EMAIL_VERIFICATION != True and API_ACCOUNT_VALIDATION != True:
-        return make_user_response(403, py_user["novalidationservices"])
+        return make_person_response(403, py_user["novalidationservices"])
     message = ""
     if bot:
         no_bot = _get_captcha()
@@ -317,7 +330,7 @@ def api_user_activate(
             #   message = None
             status = gvp("status", "None")
             if token:
-                if API_ACCOUNT_VALIDATION != False:
+                if API_ACCOUNT_VALIDATION:
                     message = py_user["statusnotauthorized"]["0"]
                 else:
                     message = py_user["profilesuccess"]["activate"]
@@ -329,28 +342,17 @@ def api_user_activate(
                 message = py_user["status"]["inactive"]
             elif status == ApiUserStatus["blocked"]:
                 message = py_user["status"]["blocked"]
-            return make_user_response(0, message)
+            return make_person_response(0, message)
 
         except ApiException as ae:
-            exception = format_exception(ae)
-            return make_user_response(ae.status, exception[1])
+            return make_person_response(None, "", ae)
 
 
-def _user_posted_data(usrid: int, isfrom: bool, action: str = "create") -> dict:
-    fields = [
-        "email",
-        "organisation",
-        "country",
-        "orcid",
-        "usercreationreason",
-    ]
-    if action == "create":
-        if usrid == -1:
-            fields = ["firstname", "lastname", "password"] + fields
-        else:
-            fields = ["name", "password"] + fields
+def person_posted_data(usrid: int, isfrom: bool, action: str, fields: list) -> dict:
+    if usrid == -1:
+        fields = ["firstname", "lastname"] + fields
     else:
-        fields = ["name", "newpassword"] + fields
+        fields = ["name"] + fields
     posted: Dict = {}
     posted.update({a_field: gvp(a_field).strip() for a_field in fields})
     posted["id"] = str(usrid)
@@ -379,8 +381,12 @@ def user_account(
         return None, py_user["notadmin"]
     if action != "":
         if not isinstance(usrid, int):
-            return make_user_response(None, py_user["invaliddata"])
-    posted = _user_posted_data(usrid, isfrom, action)
+            return make_person_response(None, py_user["invaliddata"])
+    if action == ACCOUNT_USER_CREATE:
+        fields = ["password"]
+    else:
+        fields = ["newpassword"]
+    posted = person_posted_data(usrid, isfrom, action, fields + USER_FIELDS)
     currentemail = gvp("currentemail", "")
     currentemail = currentemail.strip()
     if action == ACCOUNT_USER_EDIT:
@@ -420,14 +426,14 @@ def user_account(
                     message = py_messages["notfound"]
                 else:
                     message = format_exception(ae)[1]
-                return make_user_response(code, message)
+                return make_person_response(code, message)
         if user_id == -1:
-            return make_user_response(1, py_user["notmodified"])
+            return make_person_response(1, py_user["notmodified"])
         else:
             api_current_user()
             message = py_user["profilesuccess"]["update"]
             if not isfrom:
-                if API_EMAIL_VERIFICATION != False:
+                if API_EMAIL_VERIFICATION:
                     if current_user.is_anonymous or not current_user.active:
                         if api_user["email"] != currentemail:
                             message = (
@@ -445,16 +451,16 @@ def user_account(
                     else:
                         # should not comme here
                         pass
-            return make_user_response(0, message)
+            return make_person_response(0, message)
     elif action == ACCOUNT_USER_CREATE:
         if usrid != -1:
-            return make_user_response(1, py_user["errusrid"])
+            return make_person_response(1, py_user["errusrid"])
         else:
             response = api_user_create(posted, token)
             return response
 
     else:
-        return make_user_response(1, py_user["usernoaction"])
+        return make_person_response(1, py_user["usernoaction"])
 
 
 def account_page(action: str, usrid: int, isfrom: bool, template: str, token: str = ""):
@@ -534,7 +540,7 @@ def reset_password(email: str, token: str = None, pwd: str = None) -> tuple:
             else:
                 # dont give too much infos
                 message = ""
-    return make_user_response(code, message)
+    return make_person_response(code, message)
 
 
 def _public_ip() -> str:

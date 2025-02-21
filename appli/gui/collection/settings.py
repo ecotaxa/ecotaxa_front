@@ -1,41 +1,32 @@
-import collections
-import os
-from pathlib import Path
-from typing import List
-
+from typing import Optional
 from flask import render_template, flash, request, redirect, url_for
-from flask_login import current_user, login_required
-from appli import app, gvg, gvp, gvpm
+from flask_login import current_user
+from appli import gvp, gvpm
 from appli.gui.staticlistes import py_messages
 
 ######################################################################################################################
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import (
-    CollectionsApi,
-    UsersApi,
-    TaxonomyTreeApi,
-    MiscApi,
-)
+from to_back.ecotaxa_cli_py.api import CollectionsApi, UsersApi
 from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     MinUserModel,
-    TaxonModel,
     CreateCollectionReq,
     CollectionReq,
-)
-from to_back.ecotaxa_cli_py.models.collection_aggregated_rsp import (
     CollectionAggregatedRsp,
 )
+
 from appli.gui.commontools import (
     possible_licenses,
     possible_models,
     possible_access,
     py_get_messages,
+    is_partial_request,
 )
 
+
 ###############################################common for create && edit  #######################################################################
-def _user_format(uid: int) -> dict:
+def _user_format(uid: int) -> MinUserModel:
     with ApiClient(UsersApi, request) as api:
         user: MinUserModel = api.get_user(uid)
     return user
@@ -45,13 +36,13 @@ def _prj_format(projid: int) -> dict:
     from appli.gui.project.projectsettings import get_target_prj
 
     prj = get_target_prj(projid)
-    if prj != None:
+    if prj is not None:
         return dict({"id": prj.projid, "title": prj.title})
     else:
         return dict({"id": None, "title": None})
 
 
-def get_collection(collection_id) -> CollectionModel:
+def get_collection(collection_id) -> Optional[CollectionModel]:
     with ApiClient(CollectionsApi, request) as api:
         try:
             collection: CollectionModel = api.get_collection(collection_id)
@@ -72,6 +63,8 @@ def collection_create() -> str:
 
         raise Forbidden(py_user["notauthorized"])
     to_save = gvp("save")
+    title = ""
+    project_ids = []
     if to_save == "Y":
         title = gvp("title")
         project_ids = [int(p) for p in gvpm("project_ids[]")]
@@ -104,7 +97,6 @@ def collection_aggregated(project_ids: str) -> dict:
         from appli.gui.staticlistes import py_user
 
         raise Forbidden(py_user["notauthorized"])
-    aggregated = {}
     if len(project_ids):
         with ApiClient(CollectionsApi, request) as api:
             aggregated: CollectionAggregatedRsp = (
@@ -127,7 +119,7 @@ def collection_aggregated(project_ids: str) -> dict:
     return ret
 
 
-def collection_edit(collection_id: int, new: bool = False) -> str:
+def collection_edit(collection_id: int, new: bool = False):
     # Security & sanity checks
     # get target_proj
 
@@ -141,7 +133,6 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
         return redirect(url_for("gui_collection_noright", collection_id=collection_id))
     # Reconstitute members list with privs
     # data structure used in both display & submit
-    redir = ""
     if gvp("save") == "Y":
         # Load posted variables
         for a_var in request.form:
@@ -163,10 +154,11 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
                     setattr(collection, a_var[0:-2], gvpm(a_var))
         try:
             with ApiClient(CollectionsApi, request) as api:
+                print("collection ---", collection)
                 api.update_collection(
-                    collection_id=collection_id, collection_req=collection
+                    collection_id=collection_id, collection=collection
                 )
-                if new == True:
+                if new:
                     message = py_messages["collectioncreated"]
                 else:
                     message = py_messages["collectionupdated"]
@@ -225,6 +217,7 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
         crsf_token=crsf_token(),
         possible_licenses=licenses,
         possible_access=access,
+        scn_network_id=scn,
         new=new,
         # redir=redir,
     )
@@ -233,10 +226,9 @@ def collection_edit(collection_id: int, new: bool = False) -> str:
 ######################################################################################################################
 #     properties evaluation from  projects list                                                                   #
 ######################################################################################################################    backto = False
-def collection_erase(collection_id: int, erase: bool = False) -> str:
+def collection_erase(collection_id: int, erase: bool = False):
 
-    py_messages = py_get_messages("collection")
-    user: UserModelWithRights = current_user.api_user
+    messages = py_get_messages("collection")
     isadmin = current_user.is_app_admin
     target_coll = get_collection(collection_id)
     if target_coll is None:
@@ -247,13 +239,13 @@ def collection_erase(collection_id: int, erase: bool = False) -> str:
             "error",
         )
         return redirect(url_for("gui_collection_noright", collection_id=collection_id))
-    if erase == True:
-        with ApiClient(CollectionApi, request) as api:
+    if erase:
+        with ApiClient(CollectionsApi, request) as api:
             try:
-                res: int = api.erase_collection(collection_id)
+                _ = api.erase_collection(collection_id)
             except ApiException as ae:
                 if ae.status in (401, 403):
-                    err = py_messages["collectionnotyours"]
+                    err = messages["collectionnotyours"]
                 else:
                     raise
 
@@ -269,25 +261,20 @@ def collection_erase(collection_id: int, erase: bool = False) -> str:
 ######################################################################################################################
 #     properties evaluation from  projects list                                                                   #
 ######################################################################################################################
-def collection_status(project_ids: List[int]) -> str:
-    return status
+# def collection_status(project_ids: List[int]) -> str:
+#    return status
 
+# def collection_license(project_ids: List[int]) -> str:
+#    return license
 
-def collection_license(project_ids: List[int]) -> str:
-    return license
+# def collection_creators(project_ids: List[int]) -> str:
+#    return creators
 
+# def collection_creators_organisations(project_ids: List[int]) -> str:
+#    return creators_organisations
 
-def collection_creators(project_ids: List[int]) -> str:
-    return creators
+# def collection_associates(project_ids: List[int]) -> str:
+#    return associates
 
-
-def collection_creators_organisations(project_ids: List[int]) -> str:
-    return creators_organisations
-
-
-def collection_associates(project_ids: List[int]) -> str:
-    return associates
-
-
-def collection_associates_organisations(project_ids: List[int]) -> str:
-    return associates_organisations
+# def collection_associates_organisations(project_ids: List[int]) -> str:
+#    return associates_organisations

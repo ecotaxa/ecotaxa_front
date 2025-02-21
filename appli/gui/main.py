@@ -396,6 +396,7 @@ import appli.gui.files.main
 import appli.gui.admin.main
 import appli.gui.taxonomy.main
 import appli.gui.collection.main
+import appli.gui.guests.main
 
 
 # utility display functions for jinja template

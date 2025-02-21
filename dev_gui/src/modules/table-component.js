@@ -29,7 +29,7 @@ const fetchfroms = {
   prjlist: '/gui/prjlist/',
   prjsamplestats: '/gui/prjsamplestats',
   userslist: '/gui/admin/userslist/',
-  guestslist:'/gui/admin/guestslist/',
+  guestslist:'/gui/guestslist/',
   prjpredict: '/gui/prjsforprediction/'
 };
 // specifc css

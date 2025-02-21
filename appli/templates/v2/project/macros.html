@@ -5,7 +5,7 @@
 <div class="form-group  text-sm pb-4" role="group">
 {% for filter in filters %}
   <span class=" text-sm font-light inline mr-2"><strong>{{filter[0]}}</strong> {{filter[1]}}</span><input type="hidden" name="{{ filter[0] }}" value="{{ filter[1] }}"></span>
-{% endfor %}
+{%endfor%}
 {%endif %}
 </div>
 </div>
@@ -20,7 +20,7 @@
     <h2 class="font-semibold mb-4 {{ 'inline-block' if nav!=None}}"><strong>{{action}} </strong>{{ _('Collection')+' ' if target_type=='collection'}}{{title }} {{header_links(nav) if nav!=None}}</h2>
 {%-endmacro-%}
 {% macro pick_from_other(new, key='settings' , modal_title = _('Pick from other project'), sourceid=0 ) -%}
-{% if sourceid > 0 or new == True  %}
+{% if (sourceid > 0 and not new) or (sourceid==0 and new)  %}
 <div class="{{ 'w-full -mt-8 mb-6' if new == True else 'w-auto -mt-4  mb-2' }} block">
   {# set the form id to import to and the header include for taxo imports #}
   {% set data = {'form':'#formu','key': key, 'header': './v2/project/_headerimport.html'} if (key in ['taxo','privileges','project'] ) else {'form':'#formu','key': key} %}
@@ -46,7 +46,7 @@
 {%- endmacro %}
 {%-macro display_freecols()-%}
 {%-if freecols -%}
-<div id="section_freecols" class="flex flex-wrap w-full" id="listfreecols" > {%- for column, values in freecols.items()-%}<div class="form-box md:basis-1/2"><div class="label">{{column}}</div><div class="flex flex-wrap text-xs">
+<div id="section_freecols" class="flex flex-wrap w-full" > {%- for column, values in freecols.items()-%}<div class="form-box md:basis-1/2"><div class="label">{{column}}</div><div class="flex flex-wrap text-xs">
   {%-for k,value in values.items()-%}<span class="w-96 md:w-48 mr-4">{{k}} : {{value}}</span> {%-endfor-%}</div></div>{%-endfor%}</div>
   {%-endif-%}
 {%-endmacro-%}

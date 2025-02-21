@@ -1,0 +1,15 @@
+{% extends "./v2/admin/layout.html" %}
+{% from "./v2/users/_modalhelp.html" import  modaluser with context %}
+
+{% block body %}
+<div class="container mx-auto">
+    {% set modal_title = _("How to edit a guest account") if guest.id and guest.id>0 else _("How to create a guest account")%}
+    {{modaluser(modal_title)}}
+  {% set legend = _('guest') + ' ' + guest.id|string() if guest.id else _('new guest') %}
+  {% set redir ="gui/admin/guests/"%}
+{% include('v2/guests/_guest.html')%}
+</div>
+{% if redir and redir !='' %}
+<span class="js js-redir" data-redir="{{redir}}"></span>
+{%endif%}
+{% endblock %}

@@ -50,10 +50,10 @@
         Available fields :
           {% for x in maplist %}{{ x }}, {% endfor %}
 </div></details>
-{%-set anchor = 'help_proj_license'%}
-{%-include('v2/help/_help_licenses.html')%}
+   <details id="help_project_access" ><summary>{{_('Access')}}</summary><div>{{ _('Project access combines the visibility and license of a project.') | safe}} </div>
+  </details>
 <details  id="help_project_privileges"><summary>{{_('Privileges')}}</summary>
-  <p><strong>{{_('The roles in short')}}</strong><br>
+  <div><strong>{{_('The roles in short')}}</strong><br>
   <ul>
     <li>{{_('Viewers can view the project even when it is private; the project is listed in their project
       list.')}}
@@ -68,7 +68,9 @@
 <li id="help_project_privilegesdel_line">{{_('Members with "Manage" privilege cannot be deleted.')}}</li>
 <li></li><li>{{_('The list must at least contain one member with "Manage" and "Contact" attributes.')}}</li>
 <li>{{_('privileges are sorted by roles and user name')}}</li>
-</ul></p>
+</ul></div>
+</details>
+   <details id="help_project_formulae" ><summary>{{_('Formulae')}}</summary><div>{{ _('Formulae used to calculate concentration and biovolume for the project. Used in export summary and export DarwinCore when the project belongs to a collection.') | safe}} </div>
   </details>
   </article>
   {% endblock %}

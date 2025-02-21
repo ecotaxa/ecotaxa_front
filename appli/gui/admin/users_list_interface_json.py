@@ -61,7 +61,7 @@ def guest_table_columns(selection: str = "list") -> dict:
                 "field": "id",
                 "actions": {
                     "edit": {
-                        "link": url_for("gui_guest_edit", usrid=-1),
+                        "link": url_for("gui_guest_edit", guestid=-1),
                         "label": _("edit"),
                         "type": "button",
                     }
@@ -81,9 +81,6 @@ def guest_table_columns(selection: str = "list") -> dict:
             "organisation": {
                 "label": _("Organisation"),
             },
-            "usercreationdate": {
-                "label": _("Creation date"),
-            },
             "country": {
                 "label": _("Country"),
             },
@@ -96,13 +93,11 @@ def guest_table_columns(selection: str = "list") -> dict:
 def render_for_js(users: list, columns: dict) -> list:
     from datetime import datetime
 
-    jsonusers = list([])
-    translations = dict({})
+    jsonusers: list = []
+    translations: dict = {}
     status_label = [_("blocked"), _("inactive"), _("active"), _("pending")]
     for user in users:
-
-        jsonuser = list([])
-
+        jsonuser: list = []
         for key, column in columns.items():
             # if subfield  append object which will be formatted by the js component
             if key == "select":

@@ -221,7 +221,7 @@ def objectdetails(objid):
  <span id=PendingChangesPop></span></td><td width=30px></td><td valign=top>
     <button type="button" class="btn btn-success btn-xs" onclick="Save1Object('V');">Save as Validated</button>
     <button type="button" class="btn btn-warning btn-xs" onclick="Save1Object('D');">Save as dubious</button>
-    <button id=btenableedit type="button" class="btn btn-gris btn-xs" onclick="EnableEdit();">Enable Editing</button>
+    <!-- --functionality disabled--<button id=btenableedit type="button" class="btn btn-gris btn-xs" onclick="EnableEdit();">Enable Editing</button>-->
     <button type="button" class="btn btn-default btn-xs"  onclick="$('#PopupDetails').modal('hide');">Close</button>
     </td></tr></table>
     """

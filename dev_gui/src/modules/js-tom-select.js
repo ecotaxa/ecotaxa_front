@@ -98,8 +98,53 @@ function createJsTomSelect() {
         };
 
         break;
-      case models.persons:
-        option.url = "/api/users/search?all=y&by_name=";
+      case models.person:
+        option.url = "/gui/search_persons?name=";
+        option.settings = { ...option.settings,
+          ...{
+            valueField: 'id',
+            searchField: 'name',
+            labelField: 'name+email',
+            onInitialize: function() {
+              if (item.currentlist) persons_list = item.currentlist;
+              else item.tomselect.items.forEach(e => {
+                if (e !== '' && parseInt(e) > 0) persons_list[e] = true;
+              });
+            },
+            onItemAdd: function(e) {
+              if (e === "") return;
+              if (persons_list[e]) {
+                //  if (multiple || !this.revertSettings || this.revertSettings.tabIndex < 0 || !item.options.length) return;
+                AlertBox.addMessage({
+                  type: AlertBox.alertconfig.types.danger,
+                  parent: item,
+                  content: AlertBox.i18nmessages.exists
+                });
+                setTimeout(() => {
+                  this.removeOption(e);
+                  if (this.revertSettings.tabIndex < 0 || !item.options.length || !this.revertSettings) {
+                    this.removeItem(e);
+                    persons_list[e] = true;
+                  } else {
+                    const revert = item.options[this.revertSettings.tabIndex].value;
+                    this.addItem(revert);
+                  }
+                  AlertBox.addMessage({
+                    type: AlertBox.alertconfig.types.danger,
+                    parent: item,
+                    content: AlertBox.i18nmessages.exists
+                  });
+
+                }, 2000);
+              } else persons_list[e] = true;},
+             onItemRemove: function(e) {
+              if (persons_list[e]) delete persons_list[e];
+              if (multiple || !this.revertSettings || (this.revertSettings.innerHTML === '' && this.revertSettings.tabIndex === 0) || this.revertSettings.tabIndex < 0) return;
+              const revert = item.options[this.revertSettings.tabIndex].value;
+              if (persons_list[revert] !== undefined) delete persons_list[revert];
+
+            }}}
+        break;
       case models.user:
         option.url = "/api/users/search?by_name=";
         option.settings = { ...option.settings,
@@ -218,6 +263,7 @@ function createJsTomSelect() {
         switch (type) {
           case models.user:
           case models.organisation:
+          case models.person:
             url = option.url + encodeURIComponent('%' + query + '%');
             break;
           case models.instr:
@@ -244,7 +290,6 @@ function createJsTomSelect() {
         }
         if (url !== null) fetch(url, fetchSettings()).then(response => response.json()).then(json => {
           if (type === models.project) {
-
             if (json.data && json.data.length) json = json.data.map(row => {
               return {
                 id: row[1],
@@ -289,7 +334,8 @@ function createJsTomSelect() {
           // use ts plugin remove_button
           const cancel = ``;
           const label = _get_label(el, option.settings.labelField, true);
-          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(label) } ${ cancel }</div>`);
+          const org =(el[this.settings.valueField]==="org")?"org":"";
+          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${org} ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(label) } ${ cancel }</div>`);
         },
         no_results: function(data, escape) {
           return DOMPurify.sanitize('<div class="no-results">' + ((item.dataset.noresults) ? item.dataset.noresults : 'No result found for ') + escape(data.input) + '</div>');

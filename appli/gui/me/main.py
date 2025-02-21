@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 from appli import app, gvp
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_user
+from appli.back_config import get_user_constants
 
 NO_STATUS = 10
 
@@ -68,7 +69,6 @@ def gui_me_activate(token: str):
     if current_user.is_authenticated:
         return redirect(url_for("gui_me_profile"))
     user_id = -1
-    from appli.back_config import get_user_constants
 
     (
         ApiUserStatus,
@@ -79,7 +79,7 @@ def gui_me_activate(token: str):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-    ) = get_user_constants(request)
+    ) = get_user_constants()
     if request.method == "POST":
 
         from appli.gui.users.users import api_user_activate, get_value_from_token
@@ -153,8 +153,6 @@ def gui_me_activate(token: str):
 def gui_me_forgotten(token: str = ""):
     if current_user.is_authenticated:
         return redirect(url_for("gui_me_profile"))
-    from appli.back_config import get_user_constants
-
     (
         ApiUserStatus,
         ApiUserType,
@@ -164,7 +162,7 @@ def gui_me_forgotten(token: str = ""):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-    ) = get_user_constants(request)
+    ) = get_user_constants()
     if request.method == "POST":
         partial = True
         email = gvp("request_email")
@@ -183,7 +181,6 @@ def gui_me_forgotten(token: str = ""):
         )
     recaptchaid = None
     # google recaptcha or homecaptha
-
     if RECAPTCHAID:
         recaptchaid = app.config.get("RECAPTCHAID")
     return render_template(

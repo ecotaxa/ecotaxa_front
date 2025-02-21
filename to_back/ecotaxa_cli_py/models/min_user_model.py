@@ -35,16 +35,18 @@ class MinUserModel(object):
     openapi_types = {
         'id': 'int',
         'email': 'str',
-        'name': 'str'
+        'name': 'str',
+        'organisation': 'str'
     }
 
     attribute_map = {
         'id': 'id',
         'email': 'email',
-        'name': 'name'
+        'name': 'name',
+        'organisation': 'organisation'
     }
 
-    def __init__(self, id=None, email=None, name=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, email=None, name=None, organisation=None, local_vars_configuration=None):  # noqa: E501
         """MinUserModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -53,11 +55,13 @@ class MinUserModel(object):
         self._id = None
         self._email = None
         self._name = None
+        self._organisation = None
         self.discriminator = None
 
         self.id = id
         self.email = email
         self.name = name
+        self.organisation = organisation
 
     @property
     def id(self):
@@ -133,6 +137,31 @@ class MinUserModel(object):
             raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
+
+    @property
+    def organisation(self):
+        """Gets the organisation of this MinUserModel.  # noqa: E501
+
+        User's organisation name, as text.  # noqa: E501
+
+        :return: The organisation of this MinUserModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._organisation
+
+    @organisation.setter
+    def organisation(self, organisation):
+        """Sets the organisation of this MinUserModel.
+
+        User's organisation name, as text.  # noqa: E501
+
+        :param organisation: The organisation of this MinUserModel.  # noqa: E501
+        :type: str
+        """
+        if self.local_vars_configuration.client_side_validation and organisation is None:  # noqa: E501
+            raise ValueError("Invalid value for `organisation`, must not be `None`")  # noqa: E501
+
+        self._organisation = organisation
 
     def to_dict(self):
         """Returns the model properties as a dict"""

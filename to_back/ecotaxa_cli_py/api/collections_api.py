@@ -36,6 +36,120 @@ class CollectionsApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
+    def collection_aggregated_projects_properties(self, project_ids, **kwargs):  # noqa: E501
+        """Collection Aggregated Projects Properties  # noqa: E501
+
+        **returns projectset calculated selected fields values  projects and list of rejected projects id. Note: 'manage' right is required on all underlying projects.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.collection_aggregated_projects_properties(project_ids, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str project_ids: String containing the list of one or more project id separated by non-num char.   . (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: CollectionAggregatedRsp
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.collection_aggregated_projects_properties_with_http_info(project_ids, **kwargs)  # noqa: E501
+
+    def collection_aggregated_projects_properties_with_http_info(self, project_ids, **kwargs):  # noqa: E501
+        """Collection Aggregated Projects Properties  # noqa: E501
+
+        **returns projectset calculated selected fields values  projects and list of rejected projects id. Note: 'manage' right is required on all underlying projects.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.collection_aggregated_projects_properties_with_http_info(project_ids, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str project_ids: String containing the list of one or more project id separated by non-num char.   . (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(CollectionAggregatedRsp, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'project_ids'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method collection_aggregated_projects_properties" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'project_ids' is set
+        if self.api_client.client_side_validation and ('project_ids' not in local_var_params or  # noqa: E501
+                                                        local_var_params['project_ids'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_ids` when calling `collection_aggregated_projects_properties`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'project_ids' in local_var_params and local_var_params['project_ids'] is not None:  # noqa: E501
+            query_params.append(('project_ids', local_var_params['project_ids']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/collections/aggregated_projects_properties', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='CollectionAggregatedRsp',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def collection_by_short_title(self, q, **kwargs):  # noqa: E501
         """Collection By Short Title  # noqa: E501
 
@@ -842,6 +956,248 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
+    def list_collections(self, **kwargs):  # noqa: E501
+        """List Collections  # noqa: E501
+
+        **Search for collections.**  Note: Only manageable collections are returned.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.list_collections(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str collection_ids: limit the list to a set of ids.
+        :param str fields: Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: list[CollectionModel]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.list_collections_with_http_info(**kwargs)  # noqa: E501
+
+    def list_collections_with_http_info(self, **kwargs):  # noqa: E501
+        """List Collections  # noqa: E501
+
+        **Search for collections.**  Note: Only manageable collections are returned.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.list_collections_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str collection_ids: limit the list to a set of ids.
+        :param str fields: Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(list[CollectionModel], status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'collection_ids',
+            'fields'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method list_collections" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'collection_ids' in local_var_params and local_var_params['collection_ids'] is not None:  # noqa: E501
+            query_params.append(('collection_ids', local_var_params['collection_ids']))  # noqa: E501
+        if 'fields' in local_var_params and local_var_params['fields'] is not None:  # noqa: E501
+            query_params.append(('fields', local_var_params['fields']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/collections', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='list[CollectionModel]',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def patch_collection(self, collection_id, collection_req, **kwargs):  # noqa: E501
+        """Patch Collection  # noqa: E501
+
+        **Partial Update of the collection**. Note that some updates are silently failing when not compatible  with the composing projects.   **Returns NULL upon success.**   Note: The collection is partiallly updated only if manageable.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.patch_collection(collection_id, collection_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param int collection_id: Internal, the unique numeric id of this collection. (required)
+        :param CollectionReq collection_req: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: object
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.patch_collection_with_http_info(collection_id, collection_req, **kwargs)  # noqa: E501
+
+    def patch_collection_with_http_info(self, collection_id, collection_req, **kwargs):  # noqa: E501
+        """Patch Collection  # noqa: E501
+
+        **Partial Update of the collection**. Note that some updates are silently failing when not compatible  with the composing projects.   **Returns NULL upon success.**   Note: The collection is partiallly updated only if manageable.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.patch_collection_with_http_info(collection_id, collection_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param int collection_id: Internal, the unique numeric id of this collection. (required)
+        :param CollectionReq collection_req: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'collection_id',
+            'collection_req'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method patch_collection" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'collection_id' is set
+        if self.api_client.client_side_validation and ('collection_id' not in local_var_params or  # noqa: E501
+                                                        local_var_params['collection_id'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `collection_id` when calling `patch_collection`")  # noqa: E501
+        # verify the required parameter 'collection_req' is set
+        if self.api_client.client_side_validation and ('collection_req' not in local_var_params or  # noqa: E501
+                                                        local_var_params['collection_req'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `collection_req` when calling `patch_collection`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'collection_id' in local_var_params:
+            path_params['collection_id'] = local_var_params['collection_id']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'collection_req' in local_var_params:
+            body_params = local_var_params['collection_req']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/collections/{collection_id}', 'PATCH',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='object',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def search_collections(self, title, **kwargs):  # noqa: E501
         """Search Collections  # noqa: E501
 
@@ -853,6 +1209,7 @@ class CollectionsApi(object):
 
         :param async_req bool: execute request asynchronously
         :param str title: Search by title, use % for searching with 'any char'. (required)
+        :param str fields: Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -878,6 +1235,7 @@ class CollectionsApi(object):
 
         :param async_req bool: execute request asynchronously
         :param str title: Search by title, use % for searching with 'any char'. (required)
+        :param str fields: Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -895,7 +1253,8 @@ class CollectionsApi(object):
         local_var_params = locals()
 
         all_params = [
-            'title'
+            'title',
+            'fields'
         ]
         all_params.extend(
             [
@@ -926,6 +1285,8 @@ class CollectionsApi(object):
         query_params = []
         if 'title' in local_var_params and local_var_params['title'] is not None:  # noqa: E501
             query_params.append(('title', local_var_params['title']))  # noqa: E501
+        if 'fields' in local_var_params and local_var_params['fields'] is not None:  # noqa: E501
+            query_params.append(('fields', local_var_params['fields']))  # noqa: E501
 
         header_params = {}
 

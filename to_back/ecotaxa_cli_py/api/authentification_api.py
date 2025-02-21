@@ -39,7 +39,7 @@ class AuthentificationApi(object):
     def login(self, login_req, **kwargs):  # noqa: E501
         """Login  # noqa: E501
 
-        **Login barrier,**  If successful, the login will returns a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  # noqa: E501
+        **Login barrier,**  If successful, the login will return a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.login(login_req, async_req=True)
@@ -64,7 +64,7 @@ class AuthentificationApi(object):
     def login_with_http_info(self, login_req, **kwargs):  # noqa: E501
         """Login  # noqa: E501
 
-        **Login barrier,**  If successful, the login will returns a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  # noqa: E501
+        **Login barrier,**  If successful, the login will return a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.login_with_http_info(login_req, async_req=True)

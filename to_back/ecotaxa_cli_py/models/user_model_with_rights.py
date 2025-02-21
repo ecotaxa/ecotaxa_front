@@ -35,15 +35,15 @@ class UserModelWithRights(object):
     openapi_types = {
         'id': 'int',
         'email': 'str',
-        'password': 'str',
         'name': 'str',
-        'organisation': 'str',
-        'status': 'int',
-        'status_date': 'datetime',
-        'status_admin_comment': 'str',
         'country': 'str',
         'orcid': 'str',
         'usercreationdate': 'datetime',
+        'organisation': 'str',
+        'password': 'str',
+        'status': 'int',
+        'status_date': 'datetime',
+        'status_admin_comment': 'str',
         'usercreationreason': 'str',
         'mail_status': 'bool',
         'mail_status_date': 'datetime',
@@ -54,15 +54,15 @@ class UserModelWithRights(object):
     attribute_map = {
         'id': 'id',
         'email': 'email',
-        'password': 'password',
         'name': 'name',
-        'organisation': 'organisation',
-        'status': 'status',
-        'status_date': 'status_date',
-        'status_admin_comment': 'status_admin_comment',
         'country': 'country',
         'orcid': 'orcid',
         'usercreationdate': 'usercreationdate',
+        'organisation': 'organisation',
+        'password': 'password',
+        'status': 'status',
+        'status_date': 'status_date',
+        'status_admin_comment': 'status_admin_comment',
         'usercreationreason': 'usercreationreason',
         'mail_status': 'mail_status',
         'mail_status_date': 'mail_status_date',
@@ -70,7 +70,7 @@ class UserModelWithRights(object):
         'last_used_projects': 'last_used_projects'
     }
 
-    def __init__(self, id=None, email=None, password=None, name=None, organisation=None, status=None, status_date=None, status_admin_comment=None, country=None, orcid=None, usercreationdate=None, usercreationreason=None, mail_status=None, mail_status_date=None, can_do=[], last_used_projects=[], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, email=None, name=None, country=None, orcid=None, usercreationdate=None, organisation=None, password=None, status=None, status_date=None, status_admin_comment=None, usercreationreason=None, mail_status=None, mail_status_date=None, can_do=[], last_used_projects=[], local_vars_configuration=None):  # noqa: E501
         """UserModelWithRights - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -78,15 +78,15 @@ class UserModelWithRights(object):
 
         self._id = None
         self._email = None
-        self._password = None
         self._name = None
-        self._organisation = None
-        self._status = None
-        self._status_date = None
-        self._status_admin_comment = None
         self._country = None
         self._orcid = None
         self._usercreationdate = None
+        self._organisation = None
+        self._password = None
+        self._status = None
+        self._status_date = None
+        self._status_admin_comment = None
         self._usercreationreason = None
         self._mail_status = None
         self._mail_status_date = None
@@ -96,23 +96,22 @@ class UserModelWithRights(object):
 
         self.id = id
         self.email = email
-        if password is not None:
-            self.password = password
         self.name = name
-        if organisation is not None:
-            self.organisation = organisation
-        if status is not None:
-            self.status = status
-        if status_date is not None:
-            self.status_date = status_date
-        if status_admin_comment is not None:
-            self.status_admin_comment = status_admin_comment
         if country is not None:
             self.country = country
         if orcid is not None:
             self.orcid = orcid
         if usercreationdate is not None:
             self.usercreationdate = usercreationdate
+        self.organisation = organisation
+        if password is not None:
+            self.password = password
+        if status is not None:
+            self.status = status
+        if status_date is not None:
+            self.status_date = status_date
+        if status_admin_comment is not None:
+            self.status_admin_comment = status_admin_comment
         if usercreationreason is not None:
             self.usercreationreason = usercreationreason
         if mail_status is not None:
@@ -175,29 +174,6 @@ class UserModelWithRights(object):
         self._email = email
 
     @property
-    def password(self):
-        """Gets the password of this UserModelWithRights.  # noqa: E501
-
-        Encrypted (or not) password.  # noqa: E501
-
-        :return: The password of this UserModelWithRights.  # noqa: E501
-        :rtype: str
-        """
-        return self._password
-
-    @password.setter
-    def password(self, password):
-        """Sets the password of this UserModelWithRights.
-
-        Encrypted (or not) password.  # noqa: E501
-
-        :param password: The password of this UserModelWithRights.  # noqa: E501
-        :type: str
-        """
-
-        self._password = password
-
-    @property
     def name(self):
         """Gets the name of this UserModelWithRights.  # noqa: E501
 
@@ -221,98 +197,6 @@ class UserModelWithRights(object):
             raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
-
-    @property
-    def organisation(self):
-        """Gets the organisation of this UserModelWithRights.  # noqa: E501
-
-        User's organisation name, as text.  # noqa: E501
-
-        :return: The organisation of this UserModelWithRights.  # noqa: E501
-        :rtype: str
-        """
-        return self._organisation
-
-    @organisation.setter
-    def organisation(self, organisation):
-        """Sets the organisation of this UserModelWithRights.
-
-        User's organisation name, as text.  # noqa: E501
-
-        :param organisation: The organisation of this UserModelWithRights.  # noqa: E501
-        :type: str
-        """
-
-        self._organisation = organisation
-
-    @property
-    def status(self):
-        """Gets the status of this UserModelWithRights.  # noqa: E501
-
-        Status of the user : 1 for active, 0 for inactive ,2 for pending, -1 for blocked  # noqa: E501
-
-        :return: The status of this UserModelWithRights.  # noqa: E501
-        :rtype: int
-        """
-        return self._status
-
-    @status.setter
-    def status(self, status):
-        """Sets the status of this UserModelWithRights.
-
-        Status of the user : 1 for active, 0 for inactive ,2 for pending, -1 for blocked  # noqa: E501
-
-        :param status: The status of this UserModelWithRights.  # noqa: E501
-        :type: int
-        """
-
-        self._status = status
-
-    @property
-    def status_date(self):
-        """Gets the status_date of this UserModelWithRights.  # noqa: E501
-
-        Timestamp status modification date  # noqa: E501
-
-        :return: The status_date of this UserModelWithRights.  # noqa: E501
-        :rtype: datetime
-        """
-        return self._status_date
-
-    @status_date.setter
-    def status_date(self, status_date):
-        """Sets the status_date of this UserModelWithRights.
-
-        Timestamp status modification date  # noqa: E501
-
-        :param status_date: The status_date of this UserModelWithRights.  # noqa: E501
-        :type: datetime
-        """
-
-        self._status_date = status_date
-
-    @property
-    def status_admin_comment(self):
-        """Gets the status_admin_comment of this UserModelWithRights.  # noqa: E501
-
-        Optional Users admininistrator comment about the account status.  # noqa: E501
-
-        :return: The status_admin_comment of this UserModelWithRights.  # noqa: E501
-        :rtype: str
-        """
-        return self._status_admin_comment
-
-    @status_admin_comment.setter
-    def status_admin_comment(self, status_admin_comment):
-        """Sets the status_admin_comment of this UserModelWithRights.
-
-        Optional Users admininistrator comment about the account status.  # noqa: E501
-
-        :param status_admin_comment: The status_admin_comment of this UserModelWithRights.  # noqa: E501
-        :type: str
-        """
-
-        self._status_admin_comment = status_admin_comment
 
     @property
     def country(self):
@@ -382,6 +266,123 @@ class UserModelWithRights(object):
         """
 
         self._usercreationdate = usercreationdate
+
+    @property
+    def organisation(self):
+        """Gets the organisation of this UserModelWithRights.  # noqa: E501
+
+        User's organisation name, as text.  # noqa: E501
+
+        :return: The organisation of this UserModelWithRights.  # noqa: E501
+        :rtype: str
+        """
+        return self._organisation
+
+    @organisation.setter
+    def organisation(self, organisation):
+        """Sets the organisation of this UserModelWithRights.
+
+        User's organisation name, as text.  # noqa: E501
+
+        :param organisation: The organisation of this UserModelWithRights.  # noqa: E501
+        :type: str
+        """
+        if self.local_vars_configuration.client_side_validation and organisation is None:  # noqa: E501
+            raise ValueError("Invalid value for `organisation`, must not be `None`")  # noqa: E501
+
+        self._organisation = organisation
+
+    @property
+    def password(self):
+        """Gets the password of this UserModelWithRights.  # noqa: E501
+
+        Encrypted (or not) password.  # noqa: E501
+
+        :return: The password of this UserModelWithRights.  # noqa: E501
+        :rtype: str
+        """
+        return self._password
+
+    @password.setter
+    def password(self, password):
+        """Sets the password of this UserModelWithRights.
+
+        Encrypted (or not) password.  # noqa: E501
+
+        :param password: The password of this UserModelWithRights.  # noqa: E501
+        :type: str
+        """
+
+        self._password = password
+
+    @property
+    def status(self):
+        """Gets the status of this UserModelWithRights.  # noqa: E501
+
+        Status of the user : 1 for active, 0 for inactive ,2 for pending, -1 for blocked  # noqa: E501
+
+        :return: The status of this UserModelWithRights.  # noqa: E501
+        :rtype: int
+        """
+        return self._status
+
+    @status.setter
+    def status(self, status):
+        """Sets the status of this UserModelWithRights.
+
+        Status of the user : 1 for active, 0 for inactive ,2 for pending, -1 for blocked  # noqa: E501
+
+        :param status: The status of this UserModelWithRights.  # noqa: E501
+        :type: int
+        """
+
+        self._status = status
+
+    @property
+    def status_date(self):
+        """Gets the status_date of this UserModelWithRights.  # noqa: E501
+
+        Timestamp status modification date  # noqa: E501
+
+        :return: The status_date of this UserModelWithRights.  # noqa: E501
+        :rtype: datetime
+        """
+        return self._status_date
+
+    @status_date.setter
+    def status_date(self, status_date):
+        """Sets the status_date of this UserModelWithRights.
+
+        Timestamp status modification date  # noqa: E501
+
+        :param status_date: The status_date of this UserModelWithRights.  # noqa: E501
+        :type: datetime
+        """
+
+        self._status_date = status_date
+
+    @property
+    def status_admin_comment(self):
+        """Gets the status_admin_comment of this UserModelWithRights.  # noqa: E501
+
+        Optional Users admininistrator comment about the account status.  # noqa: E501
+
+        :return: The status_admin_comment of this UserModelWithRights.  # noqa: E501
+        :rtype: str
+        """
+        return self._status_admin_comment
+
+    @status_admin_comment.setter
+    def status_admin_comment(self, status_admin_comment):
+        """Sets the status_admin_comment of this UserModelWithRights.
+
+        Optional Users admininistrator comment about the account status.  # noqa: E501
+
+        :param status_admin_comment: The status_admin_comment of this UserModelWithRights.  # noqa: E501
+        :type: str
+        """
+
+        self._status_admin_comment = status_admin_comment
 
     @property
     def usercreationreason(self):

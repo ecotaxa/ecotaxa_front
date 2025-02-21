@@ -12,6 +12,7 @@ from flask import (
 from flask_login import current_user
 
 from appli.utils import ApiClient
+from appli.back_config import get_back_constants
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py import ApiException
 from werkzeug.exceptions import HTTPException
@@ -36,16 +37,14 @@ def _get_last_refresh() -> int:
 
 
 def possible_licenses() -> list:
-    from appli.back_config import get_back_constants
 
-    licenses = get_back_constants(request, "LICENSE")
+    licenses = get_back_constants("LICENSE")
     return licenses[0]
 
 
 def possible_access() -> dict:
-    from appli.back_config import get_back_constants
 
-    consts = get_back_constants(request, "ACCESS")
+    consts = get_back_constants("ACCESS")
     access = {}
     for k, v in consts.items():
         access[v] = k
