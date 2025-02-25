@@ -15,9 +15,10 @@
 <ul class="inline-block">{%- for link in nav.links -%}<li class="inline pl-2 ml-4"><a href="{{link.path}}{{nav.query}}" class="title-nav">{{link.title}}</a></li>{%-endfor-%}</ul>
 {%-endif-%}{%-endmacro-%}
 {%-macro header_project_job(action,helpdata,modaltitle, nav=None) -%}
-{%-set title = target_obj.title if target_obj else target_proj.title -%}
+{%-set title = target_obj.title if target_obj else  target_proj.title if target_proj else target_coll.title -%}
+{%-set _id = target_obj.id if target_obj else  target_proj.projid if target_proj else target_coll.id -%}
   {{ modal(id=helpdata.file|replace('_','-'),modal_title=modaltitle, type='modal-help',modal_content='/v2/help/'+helpdata.file+'.html',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = helpdata) }}
-    <h2 class="font-semibold mb-4 {{ 'inline-block' if nav!=None}}"><strong>{{action}} </strong>{{ _('Collection')+' ' if target_type=='collection'}}{{title }} {{header_links(nav) if nav!=None}}</h2>
+    <h2 class="font-semibold mb-4 {{ 'inline-block' if nav!=None}}"><strong>{{action}} </strong>{{ _('Collection')+' ' if target_type=='collection'}}{{title }} ({{_id}}) {{header_links(nav) if nav!=None}}</h2>
 {%-endmacro-%}
 {% macro pick_from_other(new, key='settings' , modal_title = _('Pick from other project'), sourceid=0 ) -%}
 {% if (sourceid > 0 and not new) or (sourceid==0 and new)  %}

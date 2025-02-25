@@ -845,9 +845,7 @@ export class TableComponent {
       sorted.push(this.grid.data[r.row]);
 
     });
-    this.grid.data = sorted;
     this.dom.replaceChild(clone, tbody);
-
     ModuleEventEmitter.emit(this.eventnames.sorted, {
       dir: dir,
       index: th.cellIndex

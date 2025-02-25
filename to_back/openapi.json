@@ -2,7 +2,7 @@
   "openapi":"3.0.2",
   "info":{
     "title":"EcoTaxa",
-    "version":"0.0.40"
+    "version":"0.0.41"
   },
   "servers":[
     {
@@ -1094,7 +1094,7 @@
           "collections"
         ],
         "summary":"List Collections",
-        "description":"**Search for collections.**\n\nNote: Only manageable collections are returned.",
+        "description":"**Search for collections.**\n\nNote: Only collections where the current user is manager are returned. All collections are returned if the user is application administrator",
         "operationId":"list_collections",
         "parameters":[
           {

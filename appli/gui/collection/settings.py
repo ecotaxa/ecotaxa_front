@@ -12,7 +12,6 @@ from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     MinUserModel,
     CreateCollectionReq,
-    CollectionReq,
     CollectionAggregatedRsp,
 )
 
@@ -74,11 +73,18 @@ def collection_create() -> str:
             to_save = False
     if to_save:
 
-        with ApiClient(CollectionsApi, request) as api:
-            req = CreateCollectionReq(title=title, project_ids=project_ids)
-            rsp: int = api.create_collection(req)
-
-        return collection_edit(rsp, new=True)
+        try:
+            with ApiClient(CollectionsApi, request) as api:
+                req = CreateCollectionReq(title=title, project_ids=project_ids)
+                rsp: int = api.create_collection(req)
+            return collection_edit(rsp, new=True)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                flash(py_messages["notauthorized"], "error")
+            elif ae.status == 404:
+                flash(py_messages["project404"], "error")
+            else:
+                flash(py_messages["project404"], "error")
     licenses = possible_licenses()
     access = possible_access()
     return render_template(
@@ -123,7 +129,7 @@ def collection_edit(collection_id: int, new: bool = False):
     # Security & sanity checks
     # get target_proj
 
-    from appli.gui.staticlistes import py_messages
+    from appli.gui.collection.staticlistes import py_messages
 
     collection = get_collection(collection_id)
     # from appli.gui.collection.collist import collection
@@ -141,6 +147,12 @@ def collection_edit(collection_id: int, new: bool = False):
                     u = gvp(a_var, "")
                     if u != "":
                         setattr(collection, a_var, _user_format(int(u)))
+                elif a_var == "short_title":
+                    short_title = gvp(a_var)
+                    if short_title.strip() != "":
+                        old_short_title = gvp("old_short_title")
+                        if old_short_title.strip() == "":
+                            setattr(collection, "short_title", short_title)
                 elif a_var != "id":
                     setattr(collection, a_var, gvp(a_var))
             elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in dir(collection):
@@ -154,9 +166,8 @@ def collection_edit(collection_id: int, new: bool = False):
                     setattr(collection, a_var[0:-2], gvpm(a_var))
         try:
             with ApiClient(CollectionsApi, request) as api:
-                print("collection ---", collection)
-                api.update_collection(
-                    collection_id=collection_id, collection=collection
+                api.patch_collection(
+                    collection_id=collection_id, collection_req=collection
                 )
                 if new:
                     message = py_messages["collectioncreated"]
@@ -227,33 +238,34 @@ def collection_edit(collection_id: int, new: bool = False):
 #     properties evaluation from  projects list                                                                   #
 ######################################################################################################################    backto = False
 def collection_erase(collection_id: int, erase: bool = False):
-
     messages = py_get_messages("collection")
     isadmin = current_user.is_app_admin
     target_coll = get_collection(collection_id)
     if target_coll is None:
         return redirect(url_for("gui_collection_noright", collection_id=collection_id))
-    if target_coll.external_id is not None:
-        flash(
-            "Collection is published. Modifications and Erase are forbidden.",
-            "error",
-        )
-        return redirect(url_for("gui_collection_noright", collection_id=collection_id))
+    print("will erase " + target_coll.title, erase)
     if erase:
         with ApiClient(CollectionsApi, request) as api:
             try:
                 _ = api.erase_collection(collection_id)
             except ApiException as ae:
                 if ae.status in (401, 403):
-                    err = messages["collectionnotyours"]
+                    message = messages["collectionnotyours"]
+                elif ae.status == 409:
+                    message = messages["collectionpublished"]
                 else:
-                    raise
-
+                    message = messages["collectioneraseerror"] + " - " + str(ae.status)
+                flash(message, "error")
+                return redirect(
+                    url_for("gui_collection_noright", collection_id=collection_id)
+                )
+    published = target_coll.external_id != "?" or target_coll.short_title is not None
     return render_template(
         "./v2/collection/erase.html",
         isadmin=isadmin,
         partial=is_partial_request(request),
         target_coll=target_coll,
+        published=published,
         erase=erase,
     )
 

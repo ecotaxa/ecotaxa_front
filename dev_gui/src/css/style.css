@@ -120,16 +120,17 @@ details.modal-container > summary {@apply list-none marker:hidden cursor-pointer
 /*Safari hide marker */
 details.modal-popup {@apply open:fixed  open:z-70 open:md:w-2/3 open:centered open:max-h-[80%] }
 details .modal {@apply block w-0 h-0 p-0 m-0 transform  duration-500 opacity-0 overflow-hidden}
-details[open] .modal-content { @apply relative  block  w-full overflow-hidden;}
 details.modal-container[open] .modal { @apply bg-transparent h-full w-full opacity-100}
+details.modal-popup[open] {@apply h-[96%] my-auto}
 details.modal-container[open] summary > * {@apply hidden}
-details.modal-popup[open] .modal {@apply delay-100  bg-white opacity-100 rounded-lg p-4  shadow-lg z-20 w-full h-full mx-auto  pb-12  }
+details.modal-popup[open] .modal-footer {@apply  p-4   }
+details[open] .modal-content { @apply relative  block  w-full  overflow-hidden;}
+details.modal-popup[open] .modal {@apply delay-100  bg-white opacity-100 rounded-lg p-4  shadow-lg z-20 w-full h-[100%] mx-auto  pb-12  }
+details.modal-popup[open] .modal-title + details.modal-popup[open] .modal-content + details.modal-popup[open] .modal-footer {@apply h-full }
 details.modal-popup[open] .modal-body {@apply relative flex flex-col h-full w-full max-h-full sm:px-4 md:px-8  overflow-hidden  }
 details.modal-popup[open] .modal-title {@apply w-full my-2}
-details.modal-popup[open] .modal-content {@apply w-full  flex-grow border-t border-stone-200 overflow-y-auto overflow-x-auto  overscroll-none}
-details.modal-popup[open] .modal-title + details.modal-popup[open] .modal-content + details.modal-popup[open] .modal-footer {@apply h-full}
-details.modal-popup[open] .modal-footer {@apply  p-4   }
-details.modal-popup.inside[open] .modal {@apply min-h-[96]}
+details.modal-popup[open] .modal-content {@apply w-full  border-t border-stone-200 overflow-y-auto overflow-x-auto  overscroll-none h-[calc(100vh-100px)]}
+details.modal-popup.inside[open] .modal {@apply min-h-[96%]}
 details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-stone-700  drop-shadow-sm opacity-100 -mt-2 mr-0  w-full min-w-full h-full min-h-full overflow-hidden;
 }
 details.modal-aside[open]  {@apply overflow-y-auto overscroll-none }

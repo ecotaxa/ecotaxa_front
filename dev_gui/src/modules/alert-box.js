@@ -140,12 +140,11 @@ async function createAlertBox() {
     const ret = alertMessage(box, true);
     if (ret === true && message.type === alertconfig.types.confirm) {
       activateConfirm(box, options);
-      return waitForAnswer(box, options.callback, options.callback_cancel);
+      waitForAnswer(box, options.callback, options.callback_cancel);
     }
   }
 
   function addConfirm(content, options = {}) {
-    console.log('options add confirm', options)
     let box = getBoxById(content);
     if (box == null) {
       const message = {
@@ -193,7 +192,6 @@ async function createAlertBox() {
         };
         responsebox.innerHTML = DOMPurify.sanitize(response.text());
         const btns = box.querySelector(alertconfig.domselectors.buttons.group);
-        console.log('btns', btns)
         if (btns) {
           btns.innerHTML = `< button class = "button is-close text-base"  value = false >${i18nmessages.close} </button>`;
           btns.querySelector('.is-close').addEventListener('click', (e) => {
@@ -203,7 +201,7 @@ async function createAlertBox() {
         box.dataset.refresh = true;
       });
     };
-    return waitForAnswer(box, callback, callback_cancel);
+    waitForAnswer(box, callback, callback_cancel);
   }
 
   function activateAlert(type, box, options) {
@@ -409,7 +407,6 @@ async function createAlertBox() {
     el.classList.add(css.relative);
     const messages = (el.dataset[message.type]) ? el.dataset[message.type].split(', ') : [];
     message.content = (i18nmessages[message.content]) ? i18nmessages[message.content] : message.content;
-    console.log('messagecontent', message.content)
     if (messages.indexOf(message.content) < 0) {
       messages.push(message.content);
       el.dataset[message.type] = messages.join(separator);

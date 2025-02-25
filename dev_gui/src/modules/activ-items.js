@@ -197,18 +197,16 @@ function createActivItems() {
         case 'confirm':
           item.addEventListener((item.dataset.event) ? item.dataset.event : 'click', async (e) => {
             e.preventDefault();
-            let rep = false;
             const message = (item.dataset.content) ? item.dataset.content : `Do you really want to ` + item.textContent + '?';
             const options = (item.href) ? {
-              href: item.href
-            } : {};
-            rep = await AlertBox.addConfirm(message, options);
-            if (rep === true && item.form) {
-              if (item.form.formsubmit) {
+              callback: function() {window.location.href=item.href;}
+            } : { callback: function() {
+            if (item.form) {
+             if (item.form.formsubmit) { console.log('itemform',item.form.formsubmit)
                 item.form.formsubmit.submitForm();
               } else item.form.submit();
-            }
-            return rep;
+            }}};
+            await AlertBox.addConfirm(message, options);
           });
           break;
         case 'astext':
