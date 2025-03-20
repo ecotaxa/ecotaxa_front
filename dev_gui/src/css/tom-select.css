@@ -116,7 +116,7 @@ option[disabled][hidden], .ts-control > div.item[data-value=""] {@apply text-sto
 .ts-wrapper.multi .ts-control > div.item.active.last-active {@apply text-stone-900 bg-stone-50 font-medium}
 .ts-dropdown-content {@apply block text-base}
 .ts-dropdown-content[type='taxo'] {@apply block text-sm }
-.ts-wrapper.multi.liste .ts-control > div.item {@apply min-w-[30%] text-stone-900 text-sm bg-white }
+.ts-wrapper.multi.liste .ts-control > div.item {@apply text-stone-900 text-sm bg-white }
 /* form */
 select[class*="ts-hidden"] {@apply hidden}
 /*tom-select*/

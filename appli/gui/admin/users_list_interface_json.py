@@ -90,6 +90,34 @@ def guest_table_columns(selection: str = "list") -> dict:
     return columns[selection]
 
 
+def organization_table_columns(selection: str = "list") -> dict:
+    columns = {
+        "list": {
+            "select": {
+                "select": "controls",
+                "field": "id",
+                "actions": {
+                    "edit": {
+                        "link": url_for("gui_organization_edit", id=-1),
+                        "label": _("edit"),
+                        "type": "button",
+                    }
+                },
+            },
+            "id": {
+                "label": _("ID"),
+                "sortable": "desc",
+                "format": "number",
+            },
+            "name": {
+                "label": _("Name"),
+            },
+        },
+    }
+
+    return columns[selection]
+
+
 def render_for_js(users: list, columns: dict) -> list:
     from datetime import datetime
 

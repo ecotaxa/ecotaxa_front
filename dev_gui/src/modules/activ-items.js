@@ -8,7 +8,6 @@ import {
   css
 } from '../modules/modules-config.js';
 import {
-  fetchSettings,
   get_catcha_reponse,
   decode_HTMLEntities
 } from '../modules/utils.js';

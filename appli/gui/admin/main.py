@@ -18,7 +18,7 @@ from appli.constants import (
     UserAdministratorLabel,
 )
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import AdminApi, UsersApi, GuestsApi
+from to_back.ecotaxa_cli_py import AdminApi, UsersApi
 from to_back.ecotaxa_cli_py.models import (
     MinUserModel,
     UserModelWithRights,
@@ -27,7 +27,7 @@ from appli.gui.commontools import is_partial_request
 from appli.back_config import get_user_constants
 from appli.security_on_backend import gui_roles_accepted
 from markupsafe import Markup
-from appli.gui.guests.main import all_guests_json
+from appli.gui.guests.main import all_guests_json, all_organizations_json
 
 
 def admins_list(role=None):
@@ -90,7 +90,7 @@ def _persons_list_page(is_guest=False) -> str:
 
         raise Forbidden(py_user["notauthorized"])
     ids = gvg("ids", "")
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     persontype = "user"
     if is_guest:
         persontype = "guest"
@@ -100,6 +100,20 @@ def _persons_list_page(is_guest=False) -> str:
         template = "v2/admin/" + persontype + "s.html"
 
     return render_template(template, partial=partial, ids=ids, person=persontype)
+
+
+def _organizations_list_page() -> str:
+    if not current_user.is_authenticated:
+        from appli.gui.staticlistes import py_user
+
+        raise Forbidden(py_user["notauthorized"])
+    partial = is_partial_request()
+    if partial:
+        template = "v2/admin/_personslistcontainer.html"
+    else:
+        template = "v2/admin/organizations.html"
+
+    return render_template(template, partial=partial, person="organization")
 
 
 @app.route("/gui/admin/userslist/", methods=["GET"])
@@ -493,6 +507,20 @@ def utility_admin_processor():
                     },
                     "url": url_for("gui_guests_list_page"),
                 },
+                "organizations": {
+                    "label": _("Organizations"),
+                    "links": {
+                        "list": {
+                            "label": _("List"),
+                            "url": url_for("gui_organizations_list_page"),
+                        },
+                        "create": {
+                            "label": _("Create"),
+                            "url": url_for("gui_organization_create"),
+                        },
+                    },
+                    "url": url_for("gui_organizations_list_page"),
+                },
                 "job": {
                     "label": _("Tasks"),
                     "comment": _("View all users tasks"),
@@ -597,4 +625,69 @@ def gui_guest_edit(guestid: int):
         action=ACCOUNT_EDIT,
         guestid=guestid,
         template="v2/admin/guest.html",
+    )
+
+
+@app.route("/gui/admin/organizations/", methods=["GET"])
+@app.route("/gui/admin/organizations", methods=["GET"])
+@login_required
+def gui_organizations_list_page() -> str:
+    return _organizations_list_page()
+
+
+@app.route("/gui/admin/organizations/create", methods=["GET", "POST"])
+@app.route("/gui/admin/organizations/create/", methods=["GET", "POST"])
+@login_required
+def gui_organization_create():
+    from appli.gui.organizations.organizations import (
+        organization_create,
+        ACCOUNT_CREATE,
+        account_page,
+    )
+
+    if request.method == "POST":
+
+        response = organization_create()
+        if response[0] == 0:
+            flash("organization created", "success")
+        else:
+            flash(response[1], "error")
+            return redirect(url_for("gui_organizations_list_page"))
+    return account_page(
+        action=ACCOUNT_CREATE,
+        id=-1,
+        template="v2/admin/organization.html",
+    )
+
+
+@app.route(
+    "/gui/admin/organizations/edit/",
+    defaults={"id": -1},
+    methods=["GET", "POST"],
+)
+@app.route("/gui/admin/organizations/edit/<int:id>", methods=["GET", "POST"])
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
+@login_required
+def gui_organization_edit(id: int):
+    if id == -1:
+        return redirect(url_for("gui_organization_create"))
+    from appli.gui.organizations.organizations import (
+        organization_edit,
+        account_page,
+        ACCOUNT_EDIT,
+    )
+
+    if request.method == "POST":
+        reponse = organization_edit(id)
+        if reponse[0] == 0:
+            flash(reponse[1], "success")
+            return redirect(url_for("gui_organizations_list_page", ids=id))
+        else:
+            message = reponse[1]
+            flash(message, "error")
+            return redirect(url_for("gui_organizations_list_page"))
+    return account_page(
+        action=ACCOUNT_EDIT,
+        id=id,
+        template="v2/admin/organization.html",
     )

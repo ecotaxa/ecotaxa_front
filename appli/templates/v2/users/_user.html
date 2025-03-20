@@ -67,7 +67,7 @@
             {% if (createaccount==True and user.id==-1 ) or not createaccount %}
                  {{password_box()}}
              {%endif%}
-             <div class="form-box"><label for="organisation">{{_('Organisation')}} </label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
+             <div class="form-box"><label for="organisation">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
               <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
           <div class="form-box">
             <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}} <i data-for="help_profile_planned_usage" data-request="help"></i></label>

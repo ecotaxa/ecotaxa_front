@@ -1317,18 +1317,18 @@ class CollectionsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def update_collection(self, collection_id, collection_model, **kwargs):  # noqa: E501
+    def update_collection(self, collection_id, collection_req, **kwargs):  # noqa: E501
         """Update Collection  # noqa: E501
 
         **Update the collection**. Note that some updates are silently failing when not compatible  with the composing projects.   **Returns NULL upon success.**   Note: The collection is updated only if manageable.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_collection(collection_id, collection_model, async_req=True)
+        >>> thread = api.update_collection(collection_id, collection_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param int collection_id: Internal, the unique numeric id of this collection. (required)
-        :param CollectionModel collection_model: (required)
+        :param CollectionReq collection_req: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -1341,20 +1341,20 @@ class CollectionsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.update_collection_with_http_info(collection_id, collection_model, **kwargs)  # noqa: E501
+        return self.update_collection_with_http_info(collection_id, collection_req, **kwargs)  # noqa: E501
 
-    def update_collection_with_http_info(self, collection_id, collection_model, **kwargs):  # noqa: E501
+    def update_collection_with_http_info(self, collection_id, collection_req, **kwargs):  # noqa: E501
         """Update Collection  # noqa: E501
 
         **Update the collection**. Note that some updates are silently failing when not compatible  with the composing projects.   **Returns NULL upon success.**   Note: The collection is updated only if manageable.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_collection_with_http_info(collection_id, collection_model, async_req=True)
+        >>> thread = api.update_collection_with_http_info(collection_id, collection_req, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param int collection_id: Internal, the unique numeric id of this collection. (required)
-        :param CollectionModel collection_model: (required)
+        :param CollectionReq collection_req: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -1373,7 +1373,7 @@ class CollectionsApi(object):
 
         all_params = [
             'collection_id',
-            'collection_model'
+            'collection_req'
         ]
         all_params.extend(
             [
@@ -1396,10 +1396,10 @@ class CollectionsApi(object):
         if self.api_client.client_side_validation and ('collection_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['collection_id'] is None):  # noqa: E501
             raise ApiValueError("Missing the required parameter `collection_id` when calling `update_collection`")  # noqa: E501
-        # verify the required parameter 'collection_model' is set
-        if self.api_client.client_side_validation and ('collection_model' not in local_var_params or  # noqa: E501
-                                                        local_var_params['collection_model'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `collection_model` when calling `update_collection`")  # noqa: E501
+        # verify the required parameter 'collection_req' is set
+        if self.api_client.client_side_validation and ('collection_req' not in local_var_params or  # noqa: E501
+                                                        local_var_params['collection_req'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `collection_req` when calling `update_collection`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1415,8 +1415,8 @@ class CollectionsApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'collection_model' in local_var_params:
-            body_params = local_var_params['collection_model']
+        if 'collection_req' in local_var_params:
+            body_params = local_var_params['collection_req']
         # HTTP header `Accept`
         header_params['Accept'] = self.api_client.select_header_accept(
             ['application/json'])  # noqa: E501

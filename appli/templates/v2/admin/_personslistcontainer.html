@@ -1,4 +1,4 @@
-{%-set person=person if person=="guest" else "user" -%} {% set tableid =person+'s-list'%}
+{%-set person=person if person=="guest" or person=="organization" else "user" -%} {% set tableid =person+'s-list'%}
 {% if not partial %}
 <div class="container mx-auto px-4  block" data-block="{{person}}s">
   <div class="w-100 relative h-auto mx-auto py-4 block text-left " id="{{ tableid }}-header">
@@ -7,7 +7,7 @@
     {{ modal(id='help-'+person+'-access',modal_title=modal_title,type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'},data = {'file':'help_'+person+'s.html'}) }}
   </div>
   {% endif%}
-  {%- if ids !=""-%}  <div class=" is-title text-center md:-mt-4"><a href="{{url_for('gui_'+person+'s_list_page')}}">{{ _('List all users')}}</a></div>
+  {%- if ids !=""-%}  <div class=" is-title text-center md:-mt-4"><a href="{{url_for('gui_'+person+'s_list_page')}}">{{ _('List all ')}}</a></div>
   {%-endif-%}
     <div id="{{ tableid }}" data-from="{{person}}slist" class="w-full shadow-1 mt-4 mb-8 js js-datatable  {{person}}slist"  data-current="{{current_user.id|string}}" data-is={{current_user.is_users_admin}} data-paging=false data-sortable=true data-searchable=true>
 <div id="wait-please" data-wait="{{_('Please wait')}}" data-loaded="{{_( 'Data loaded. Displaying...')}}"> {{ _('Please wait')}}...</div>

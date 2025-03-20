@@ -46,9 +46,9 @@ class CollectionModel(object):
         'provider_user': 'MinUserModel',
         'contact_user': 'MinUserModel',
         'creator_users': 'list[MinUserModel]',
-        'creator_organisations': 'list[str]',
+        'creator_organisations': 'list[OrganizationModel]',
         'associate_users': 'list[MinUserModel]',
-        'associate_organisations': 'list[str]'
+        'associate_organisations': 'list[OrganizationModel]'
     }
 
     attribute_map = {
@@ -438,7 +438,7 @@ class CollectionModel(object):
         All         organisations who are responsible for the creation of the collection. Data creators should         receive credit for their work and should therefore be included in the citation.  # noqa: E501
 
         :return: The creator_organisations of this CollectionModel.  # noqa: E501
-        :rtype: list[str]
+        :rtype: list[OrganizationModel]
         """
         return self._creator_organisations
 
@@ -449,7 +449,7 @@ class CollectionModel(object):
         All         organisations who are responsible for the creation of the collection. Data creators should         receive credit for their work and should therefore be included in the citation.  # noqa: E501
 
         :param creator_organisations: The creator_organisations of this CollectionModel.  # noqa: E501
-        :type: list[str]
+        :type: list[OrganizationModel]
         """
 
         self._creator_organisations = creator_organisations
@@ -484,7 +484,7 @@ class CollectionModel(object):
         Other         organisation(s) associated with the collection.  # noqa: E501
 
         :return: The associate_organisations of this CollectionModel.  # noqa: E501
-        :rtype: list[str]
+        :rtype: list[OrganizationModel]
         """
         return self._associate_organisations
 
@@ -495,7 +495,7 @@ class CollectionModel(object):
         Other         organisation(s) associated with the collection.  # noqa: E501
 
         :param associate_organisations: The associate_organisations of this CollectionModel.  # noqa: E501
-        :type: list[str]
+        :type: list[OrganizationModel]
         """
 
         self._associate_organisations = associate_organisations

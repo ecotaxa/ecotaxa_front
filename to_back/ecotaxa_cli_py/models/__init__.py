@@ -69,6 +69,7 @@ from to_back.ecotaxa_cli_py.models.object_model import ObjectModel
 from to_back.ecotaxa_cli_py.models.object_set_query_rsp import ObjectSetQueryRsp
 from to_back.ecotaxa_cli_py.models.object_set_revert_to_history_rsp import ObjectSetRevertToHistoryRsp
 from to_back.ecotaxa_cli_py.models.object_set_summary_rsp import ObjectSetSummaryRsp
+from to_back.ecotaxa_cli_py.models.organization_model import OrganizationModel
 from to_back.ecotaxa_cli_py.models.prediction_info_rsp import PredictionInfoRsp
 from to_back.ecotaxa_cli_py.models.prediction_info_t import PredictionInfoT
 from to_back.ecotaxa_cli_py.models.prediction_req import PredictionReq
@@ -103,6 +104,5 @@ from to_back.ecotaxa_cli_py.models.taxonomy_recast import TaxonomyRecast
 from to_back.ecotaxa_cli_py.models.taxonomy_tree_status import TaxonomyTreeStatus
 from to_back.ecotaxa_cli_py.models.user_activate_req import UserActivateReq
 from to_back.ecotaxa_cli_py.models.user_activity import UserActivity
-from to_back.ecotaxa_cli_py.models.user_collection_model import UserCollectionModel
 from to_back.ecotaxa_cli_py.models.user_model_with_rights import UserModelWithRights
 from to_back.ecotaxa_cli_py.models.validation_error import ValidationError

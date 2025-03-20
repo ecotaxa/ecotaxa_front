@@ -39,7 +39,6 @@ class UserModelWithRights(object):
         'country': 'str',
         'orcid': 'str',
         'usercreationdate': 'datetime',
-        'organisation': 'str',
         'password': 'str',
         'status': 'int',
         'status_date': 'datetime',
@@ -47,6 +46,7 @@ class UserModelWithRights(object):
         'usercreationreason': 'str',
         'mail_status': 'bool',
         'mail_status_date': 'datetime',
+        'organisation': 'str',
         'can_do': 'list[int]',
         'last_used_projects': 'list[ProjectSummaryModel]'
     }
@@ -58,7 +58,6 @@ class UserModelWithRights(object):
         'country': 'country',
         'orcid': 'orcid',
         'usercreationdate': 'usercreationdate',
-        'organisation': 'organisation',
         'password': 'password',
         'status': 'status',
         'status_date': 'status_date',
@@ -66,11 +65,12 @@ class UserModelWithRights(object):
         'usercreationreason': 'usercreationreason',
         'mail_status': 'mail_status',
         'mail_status_date': 'mail_status_date',
+        'organisation': 'organisation',
         'can_do': 'can_do',
         'last_used_projects': 'last_used_projects'
     }
 
-    def __init__(self, id=None, email=None, name=None, country=None, orcid=None, usercreationdate=None, organisation=None, password=None, status=None, status_date=None, status_admin_comment=None, usercreationreason=None, mail_status=None, mail_status_date=None, can_do=[], last_used_projects=[], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, email=None, name=None, country=None, orcid=None, usercreationdate=None, password=None, status=None, status_date=None, status_admin_comment=None, usercreationreason=None, mail_status=None, mail_status_date=None, organisation=None, can_do=[], last_used_projects=[], local_vars_configuration=None):  # noqa: E501
         """UserModelWithRights - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -82,7 +82,6 @@ class UserModelWithRights(object):
         self._country = None
         self._orcid = None
         self._usercreationdate = None
-        self._organisation = None
         self._password = None
         self._status = None
         self._status_date = None
@@ -90,6 +89,7 @@ class UserModelWithRights(object):
         self._usercreationreason = None
         self._mail_status = None
         self._mail_status_date = None
+        self._organisation = None
         self._can_do = None
         self._last_used_projects = None
         self.discriminator = None
@@ -103,7 +103,6 @@ class UserModelWithRights(object):
             self.orcid = orcid
         if usercreationdate is not None:
             self.usercreationdate = usercreationdate
-        self.organisation = organisation
         if password is not None:
             self.password = password
         if status is not None:
@@ -118,6 +117,7 @@ class UserModelWithRights(object):
             self.mail_status = mail_status
         if mail_status_date is not None:
             self.mail_status_date = mail_status_date
+        self.organisation = organisation
         if can_do is not None:
             self.can_do = can_do
         if last_used_projects is not None:
@@ -266,31 +266,6 @@ class UserModelWithRights(object):
         """
 
         self._usercreationdate = usercreationdate
-
-    @property
-    def organisation(self):
-        """Gets the organisation of this UserModelWithRights.  # noqa: E501
-
-        User's organisation name, as text.  # noqa: E501
-
-        :return: The organisation of this UserModelWithRights.  # noqa: E501
-        :rtype: str
-        """
-        return self._organisation
-
-    @organisation.setter
-    def organisation(self, organisation):
-        """Sets the organisation of this UserModelWithRights.
-
-        User's organisation name, as text.  # noqa: E501
-
-        :param organisation: The organisation of this UserModelWithRights.  # noqa: E501
-        :type: str
-        """
-        if self.local_vars_configuration.client_side_validation and organisation is None:  # noqa: E501
-            raise ValueError("Invalid value for `organisation`, must not be `None`")  # noqa: E501
-
-        self._organisation = organisation
 
     @property
     def password(self):
@@ -452,6 +427,31 @@ class UserModelWithRights(object):
         """
 
         self._mail_status_date = mail_status_date
+
+    @property
+    def organisation(self):
+        """Gets the organisation of this UserModelWithRights.  # noqa: E501
+
+        User's organisation name, as text.  # noqa: E501
+
+        :return: The organisation of this UserModelWithRights.  # noqa: E501
+        :rtype: str
+        """
+        return self._organisation
+
+    @organisation.setter
+    def organisation(self, organisation):
+        """Sets the organisation of this UserModelWithRights.
+
+        User's organisation name, as text.  # noqa: E501
+
+        :param organisation: The organisation of this UserModelWithRights.  # noqa: E501
+        :type: str
+        """
+        if self.local_vars_configuration.client_side_validation and organisation is None:  # noqa: E501
+            raise ValueError("Invalid value for `organisation`, must not be `None`")  # noqa: E501
+
+        self._organisation = organisation
 
     @property
     def can_do(self):

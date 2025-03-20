@@ -1,0 +1,16 @@
+<form method="post" action="{{request.url}}" id="formuorg" class="js js-submit relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}">
+   {%-if not partial-%} <input type="hidden" name="crsf_token" value="{{ crsf_token }}">{%-endif-%}
+    <fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 md:w-1/2'}}">
+        <legend class="tab-control">{{legend if legend else ''}}</legend>
+          <div class="form-box">
+          <label for="name">{{_('Name')}}</label>
+          <input type="text" id="name" name="name" class="form-input" value="{{ organization.name if organization}}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}"></div>
+          <div class="form-box">
+            <label for="edmo">{{_('EDMO ID')}} <i data-for="help_profile_orcid" data-request="help"></i></label>
+            <input type="text" id="edmo" name="edmo" class="form-input" value="{{ organization.edmo if organization }}" maxlength=250 placeholder="{{_('EDMO ID')}}"></div>
+           </fieldset>
+      <fieldset>
+<div class="w-full text-left mb-8">
+  <button type="submit" data-target="#formuorg" class="button is-primary" >{{_('Save')}}</button> {%-if not partial-%}<a href="{{back}}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to guests list') }}">{{ _('Cancel') }}</a>{%-endif-%}
+</div></fieldset>
+</form>

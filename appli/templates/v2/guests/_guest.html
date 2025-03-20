@@ -1,6 +1,6 @@
   {% from "./v2/macros/macros.html" import inputdict, alertbox with context %}
-   <form method="post" action="{{request.url}}" id="formu" class="js js-submit relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
-   <input type="hidden" name="crsf_token" value={{ crsf_token }}>
+   <form method="post" action="{{request.url}}" id="formuguest" class="js js-submit relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}"  >
+   {%-if not partial-%}<input type="hidden" name="crsf_token" value={{ crsf_token }}>{%-endif-%}
 
       <input type="hidden" name="id" id="id" value="{{guest.id if guest.id else -1  }}">
 
@@ -44,7 +44,7 @@
 {%endif%}
       </fieldset>{%-endif-%}</div>
       <fieldset>
-<div class="w-full text-left mb-8"> <input type="hidden" name="save" value="Y">
-  <button type="submit" data-target="#formu" class="button is-primary" >{{_('Save')}}</button> <a href="{{back}}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to guests list') }}">{{ _('Cancel') }}</a>
+<div class="w-full text-left mb-8">
+  <button type="submit" data-target="#formuguest" class="button is-primary" >{{_('Save')}}</button> {%-if not partial-%}<a href="{{back}}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to guests list') }}">{{ _('Cancel') }}</a>{%-endif-%}
 </div></fieldset>
 </form>

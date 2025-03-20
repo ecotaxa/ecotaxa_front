@@ -136,6 +136,6 @@ def gui_collection_erase(collection_id):
 @login_required
 def gui_collection_about(collection_id):
     params = dict({"limit": "5000"})
-    partial = is_partial_request(request)
+    partial = is_partial_request()
 
     return collection_stats(projid, partial=partial, params=params)

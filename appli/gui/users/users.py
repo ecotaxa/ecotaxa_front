@@ -4,14 +4,12 @@ from typing import Union, Optional, List, Dict
 from flask_login import current_user
 from appli import app, gvp, gvpm, constants
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import (
-    UsersApi,
-    GuestsApi,
+from to_back.ecotaxa_cli_py import ApiException
+from to_back.ecotaxa_cli_py.api import UsersApi, OrganizationsApi, MiscApi
+from to_back.ecotaxa_cli_py.models import (
     ResetPasswordReq,
     UserActivateReq,
     UserModelWithRights,
-    ApiException,
-    MiscApi,
 )
 from to_back.ecotaxa_cli_py.models import Constants
 from appli.gui.commontools import format_exception
@@ -52,12 +50,22 @@ def _get_captcha() -> list:
     return no_bot
 
 
+def get_organizations() -> list:
+    with ApiClient(OrganizationsApi, request) as api:
+        orgs = api.get_organizations()
+        orgs = sorted(orgs, key=lambda org: org.name)
+        organisations = [[org.name, org.name] for org in orgs]
+    return organisations
+
+
 def check_is_users_admin() -> bool:
     # app admins are users admins
     return current_user.is_authenticated and current_user.is_admin == True
 
 
-def make_person_response(code, message: str, ae=None, _type="user") -> tuple:
+def make_person_response(
+    code, message: str, ae=None, _type="user", person: Optional[Dict] = None
+) -> tuple:
     if ae is not None:
         if ae.status in (401, 403):
             message = py_messages["notauthorized"]
@@ -68,7 +76,7 @@ def make_person_response(code, message: str, ae=None, _type="user") -> tuple:
     if _type == "user":
         return code, message, API_EMAIL_VERIFICATION, API_ACCOUNT_VALIDATION
     else:
-        return code, message
+        return code, message, person
 
 
 def user_register(token: str = None, partial: bool = False) -> str:
@@ -116,9 +124,7 @@ def user_register(token: str = None, partial: bool = False) -> str:
             template="v2/register.html",
             token=token,
         )
-    with ApiClient(UsersApi, request) as api:
-        organisations = api.search_organizations(name="%%")
-        organisations.sort()
+    organisations = get_organizations()
     country_list = get_country_list()
     countries = sorted(country_list)
     return render_template(
@@ -197,7 +203,7 @@ def user_create(
                 usrid, isfrom, action=action, age=age
             )
         fields = ["password"]
-        posted = person_posted_data(usrid, isfrom, action, fields + USER_FIELDS)
+        posted = person_posted_data(usrid, isfrom, fields + USER_FIELDS)
         resp = api_user_create(posted, token)
     # verify email before register to get a token or verify pass
     elif usrid == -1:
@@ -205,6 +211,7 @@ def user_create(
             "id": -1,
             "email": gvp("register_email"),
             "name": "",
+            "organisation": "",
         }
         resp = api_user_create(posted, token)
     redir = url_for("gui_index")
@@ -348,7 +355,7 @@ def api_user_activate(
             return make_person_response(None, "", ae)
 
 
-def person_posted_data(usrid: int, isfrom: bool, action: str, fields: list) -> dict:
+def person_posted_data(usrid: int, isfrom: bool, fields: list) -> dict:
     if usrid == -1:
         fields = ["firstname", "lastname"] + fields
     else:
@@ -386,7 +393,8 @@ def user_account(
         fields = ["password"]
     else:
         fields = ["newpassword"]
-    posted = person_posted_data(usrid, isfrom, action, fields + USER_FIELDS)
+    posted = person_posted_data(usrid, isfrom, fields + USER_FIELDS)
+    print("----posted", posted)
     currentemail = gvp("currentemail", "")
     currentemail = currentemail.strip()
     if action == ACCOUNT_USER_EDIT:
@@ -498,9 +506,7 @@ def account_page(action: str, usrid: int, isfrom: bool, template: str, token: st
         or isfrom == True
         or action == ACCOUNT_USER_EDIT
     ):
-        with ApiClient(UsersApi, request) as api:
-            organisations = api.search_organizations(name="%%")
-            organisations.sort()
+        organisations = get_organizations()
         roles = [(str(num), lbl) for num, lbl in constants.API_GLOBAL_ROLES.items()]
         country_list = get_country_list()
         countries = sorted(country_list)

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Union
 from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user
 from appli import gvp, gvpm
@@ -7,10 +7,11 @@ from appli.gui.staticlistes import py_messages
 ######################################################################################################################
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import CollectionsApi, UsersApi
+from to_back.ecotaxa_cli_py.api import CollectionsApi, UsersApi, GuestsApi
 from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     MinUserModel,
+    GuestModel,
     CreateCollectionReq,
     CollectionAggregatedRsp,
 )
@@ -25,10 +26,28 @@ from appli.gui.commontools import (
 
 
 ###############################################common for create && edit  #######################################################################
-def _user_format(uid: int) -> MinUserModel:
-    with ApiClient(UsersApi, request) as api:
-        user: MinUserModel = api.get_user(uid)
-    return user
+orgprefix = "org_"
+
+
+def _user_format(uid: int) -> Union[MinUserModel, GuestModel]:
+    try:
+        with ApiClient(UsersApi, request) as api:
+            user: MinUserModel = api.get_user(uid)
+        return user
+    except ApiException:
+        with ApiClient(GuestsApi, request) as api:
+            guest: GuestModel = api.get_guest(uid)
+        return guest
+
+
+def _set_persons(persons: list) -> Dict[str, list]:
+    plist = {"users": [], "organisations": []}
+    for person in persons:
+        if person[0 : len(orgprefix)] == orgprefix:
+            plist["organisations"].append(int(person[len(orgprefix) :]))
+        else:
+            plist["users"].append(_user_format(int(person)))
+    return plist
 
 
 def _prj_format(projid: int) -> dict:
@@ -93,6 +112,7 @@ def collection_create() -> str:
         new=True,
         possible_licenses=licenses,
         possible_access=access,
+        orgprefix=orgprefix,
     )
 
 
@@ -110,11 +130,15 @@ def collection_aggregated(project_ids: str) -> dict:
             )
     privileges = {}
     ret = aggregated.to_dict()
-    if "creator_users" in ret:
-        creator_users = []
-        for u in ret["creator_users"]:
-            creator_users.append(u.to_dict())
-        ret["creator_users"] = creator_users
+    for attrname in [
+        "creator_users",
+        "creator_organisations",
+        "associate_users",
+        "associate_organisations",
+    ]:
+        if attrname in ret:
+            ret[attrname] = [u.to_dict() for u in ret[attrname]]
+
     if "privileges" in ret:
         for key, privs in ret["privileges"].items():
             privlist = []
@@ -141,8 +165,13 @@ def collection_edit(collection_id: int, new: bool = False):
     # data structure used in both display & submit
     if gvp("save") == "Y":
         # Load posted variables
+        varlist = dir(collection)
+        for prefix in ["creator_", "associate_"]:
+            varlist.remove(prefix + "users")
+            varlist.remove(prefix + "organisations")
+        varlist.extend(["creator_persons", "associate_persons"])
         for a_var in request.form:
-            if a_var in dir(collection):
+            if a_var in varlist:
                 if a_var in ["provider_user", "contact_user"]:
                     u = gvp(a_var, "")
                     if u != "":
@@ -155,15 +184,23 @@ def collection_edit(collection_id: int, new: bool = False):
                             setattr(collection, "short_title", short_title)
                 elif a_var != "id":
                     setattr(collection, a_var, gvp(a_var))
-            elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in dir(collection):
-                if a_var[0:-2] in ["creator_users", "associate_users"]:
-                    ulist = [_user_format(int(u)) for u in gvpm(a_var)]
-                    setattr(collection, a_var[0:-2], ulist)
+            elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in varlist:
+                if a_var[0:-2] in ["creator_persons", "associate_persons"]:
+                    plist = _set_persons(gvpm(a_var))
+
+                    for attrname in ["users", "organisations"]:
+                        print(a_var[0:-2].replace("persons", attrname), plist[attrname])
+                        setattr(
+                            collection,
+                            a_var[0:-2].replace("persons", attrname),
+                            plist[attrname],
+                        )
                 elif a_var[0:-2] in ["project_ids"]:
 
                     setattr(collection, a_var[0:-2], [int(p) for p in gvpm(a_var)])
                 else:
                     setattr(collection, a_var[0:-2], gvpm(a_var))
+
         try:
             with ApiClient(CollectionsApi, request) as api:
                 api.patch_collection(
@@ -230,7 +267,7 @@ def collection_edit(collection_id: int, new: bool = False):
         possible_access=access,
         scn_network_id=scn,
         new=new,
-        # redir=redir,
+        orgprefix=orgprefix,
     )
 
 
@@ -263,7 +300,7 @@ def collection_erase(collection_id: int, erase: bool = False):
     return render_template(
         "./v2/collection/erase.html",
         isadmin=isadmin,
-        partial=is_partial_request(request),
+        partial=is_partial_request(),
         target_coll=target_coll,
         published=published,
         erase=erase,

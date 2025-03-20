@@ -30,6 +30,7 @@ const fetchfroms = {
   prjsamplestats: '/gui/prjsamplestats',
   userslist: '/gui/admin/userslist/',
   guestslist:'/gui/guestslist/',
+  organizationslist:'/gui/organizationslist/',
   prjpredict: '/gui/prjsforprediction/'
 };
 // specifc css
@@ -158,6 +159,7 @@ export class TableComponent {
     // only valid from values - fetchfroms
     this.params.from = (this.params.from) ? DOMPurify.sanitize(this.params.from) : null;
     const from = (this.params.from) ? ((Object.keys(fetchfroms).indexOf(this.params.from) >= 0) ? fetchfroms[this.params.from] : null) : null;
+    this.dom.classList.add(css.hide);
     if (from) {
       if (this.params.defer) this.deferLoad(container, from);
       else this.fetchData(container, from);

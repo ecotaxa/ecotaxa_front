@@ -953,7 +953,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .is-info {@apply bg-mainblue-500 text-stone-50 selection:bg-mainblue-400 border-mainblue-400 }
 .is-info.inverse {@apply bg-mainblue-50 text-mainblue-400 selection:bg-mainblue-100 border-mainblue-100}
 .is-new {@apply bg-stone-50 text-stone-700 border-stone-200 hover:border-secondblue-400 hover:text-secondblue-500}
-
+.close {@apply absolute top-2 right-2 w-6 h-6 }
 /*******************************/
 /* alerts                      */
 /*******************************/
@@ -1055,6 +1055,7 @@ details[open].toggle-summary summary span {@apply hidden}
 #welcome-info a {@apply text-mainblue-700 font-bold font-btn underline}
 /* wait please box to wait when fecthing datas  */
 #wait-please {@apply w-full h-auto text-lg sm:text-xl font-bold text-center my-4 }
+.org {@apply before:content-['org'] before:small-caps before:mr-1 before:text-stone-900}
 /********************************/
 /* help                         */
 /*******************************/

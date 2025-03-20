@@ -75,7 +75,7 @@ def gui_register(token=None):
 
     if token is None and current_user.is_authenticated:
         return redirect(url_for("index"))
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     from appli.gui.users.users import user_register
 
     return user_register(token, partial=partial)
@@ -157,7 +157,7 @@ def gui_importsettings():
     typeimport = gvg("typeimport")
     from appli.gui.project.projects_list import projects_list_page
 
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     return projects_list_page(listall=False, partial=partial, typeimport=typeimport)
 
 
@@ -191,7 +191,7 @@ def gui_prj_about(projid):
 
     # TODO limit stats
     # params = dict({"limit": "5000"})
-    partial = is_partial_request(request)
+    partial = is_partial_request()
 
     return prj_stats(projid, partial=partial)  # , params=params)
 
@@ -201,7 +201,7 @@ def gui_prj_about(projid):
 def gui_prj_aboutsamples(projid):
     from appli.gui.project.project_stats import prj_samples_stats
 
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     _format = gvg("format", "json")
     content = prj_samples_stats(str(projid), partial=partial, _format=_format)
     if _format == "json":
@@ -228,7 +228,7 @@ def gui_help(filename):
     from os.path import exists
     from markupsafe import escape
 
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     filename = escape(filename)
     title = gvg("title", "")
     if filename[0:1] != "_":
@@ -275,7 +275,7 @@ def gui_other(filename):
     from markupsafe import escape
     from os.path import exists
 
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     if partial:
         template = "partials/_error"
     else:

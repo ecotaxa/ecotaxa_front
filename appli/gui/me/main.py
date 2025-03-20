@@ -13,7 +13,7 @@ NO_STATUS = 10
 def gui_me():
     return render_template(
         "/v2/me/index.html",
-        partial=is_partial_request(request),
+        partial=is_partial_request(),
     )
 
 
@@ -84,7 +84,7 @@ def gui_me_activate(token: str):
 
         from appli.gui.users.users import api_user_activate, get_value_from_token
 
-        partial = is_partial_request(request)
+        partial = is_partial_request()
 
         if token:
             err, user_id = get_value_from_token(token, "id")

@@ -18,10 +18,7 @@ import re  # noqa: F401
 import six
 
 from to_back.ecotaxa_cli_py.api_client import ApiClient
-from to_back.ecotaxa_cli_py.exceptions import (  # noqa: F401
-    ApiTypeError,
-    ApiValueError
-)
+from to_back.ecotaxa_cli_py.exceptions import ApiTypeError, ApiValueError  # noqa: F401
 
 
 class GuestsApi(object):
@@ -58,7 +55,7 @@ class GuestsApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
+        kwargs["_return_http_data_only"] = True
         return self.create_guest_with_http_info(guest_model, **kwargs)  # noqa: E501
 
     def create_guest_with_http_info(self, guest_model, **kwargs):  # noqa: E501
@@ -88,30 +85,32 @@ class GuestsApi(object):
 
         local_var_params = locals()
 
-        all_params = [
-            'guest_model'
-        ]
+        all_params = ["guest_model"]
         all_params.extend(
             [
-                'async_req',
-                '_return_http_data_only',
-                '_preload_content',
-                '_request_timeout'
+                "async_req",
+                "_return_http_data_only",
+                "_preload_content",
+                "_request_timeout",
             ]
         )
 
-        for key, val in six.iteritems(local_var_params['kwargs']):
+        for key, val in six.iteritems(local_var_params["kwargs"]):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method create_guest" % key
                 )
             local_var_params[key] = val
-        del local_var_params['kwargs']
+        del local_var_params["kwargs"]
         # verify the required parameter 'guest_model' is set
-        if self.api_client.client_side_validation and ('guest_model' not in local_var_params or  # noqa: E501
-                                                        local_var_params['guest_model'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `guest_model` when calling `create_guest`")  # noqa: E501
+        if self.api_client.client_side_validation and (
+            "guest_model" not in local_var_params  # noqa: E501
+            or local_var_params["guest_model"] is None
+        ):  # noqa: E501
+            raise ApiValueError(
+                "Missing the required parameter `guest_model` when calling `create_guest`"
+            )  # noqa: E501
 
         collection_formats = {}
 
@@ -125,34 +124,163 @@ class GuestsApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'guest_model' in local_var_params:
-            body_params = local_var_params['guest_model']
+        if "guest_model" in local_var_params:
+            body_params = local_var_params["guest_model"]
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/json'])  # noqa: E501
+        header_params["Content-Type"] = (
+            self.api_client.select_header_content_type(  # noqa: E501
+                ["application/json"]
+            )
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+        auth_settings = ["BearerOrCookieAuth"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/guests/create', 'POST',
+            "/guests/create",
+            "POST",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='object',  # noqa: E501
+            response_type="object",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=local_var_params.get('async_req'),
-            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
-            _preload_content=local_var_params.get('_preload_content', True),
-            _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=local_var_params.get("async_req"),
+            _return_http_data_only=local_var_params.get(
+                "_return_http_data_only"
+            ),  # noqa: E501
+            _preload_content=local_var_params.get("_preload_content", True),
+            _request_timeout=local_var_params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
+
+    def get_guest(self, guest_id, **kwargs):  # noqa: E501
+        """Get Guest  # noqa: E501
+
+        Returns **information about the user** corresponding to the given id.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_guest(guest_id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param int guest_id: Internal, the unique numeric id of this guest. (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: GuestModel
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs["_return_http_data_only"] = True
+        return self.get_guest_with_http_info(guest_id, **kwargs)  # noqa: E501
+
+    def get_guest_with_http_info(self, guest_id, **kwargs):  # noqa: E501
+        """Get Guest  # noqa: E501
+
+        Returns **information about the user** corresponding to the given id.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_guest_with_http_info(guest_id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param int guest_id: Internal, the unique numeric id of this guest. (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(GuestModel, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = ["guest_id"]
+        all_params.extend(
+            [
+                "async_req",
+                "_return_http_data_only",
+                "_preload_content",
+                "_request_timeout",
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params["kwargs"]):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_guest" % key
+                )
+            local_var_params[key] = val
+        del local_var_params["kwargs"]
+        # verify the required parameter 'guest_id' is set
+        if self.api_client.client_side_validation and (
+            "guest_id" not in local_var_params  # noqa: E501
+            or local_var_params["guest_id"] is None
+        ):  # noqa: E501
+            raise ApiValueError(
+                "Missing the required parameter `guest_id` when calling `get_guest`"
+            )  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if "guest_id" in local_var_params:
+            path_params["guest_id"] = local_var_params["guest_id"]  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ["BearerOrCookieAuth"]  # noqa: E501
+
+        return self.api_client.call_api(
+            "/guests/{guest_id}",
+            "GET",
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type="GuestModel",  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get("async_req"),
+            _return_http_data_only=local_var_params.get(
+                "_return_http_data_only"
+            ),  # noqa: E501
+            _preload_content=local_var_params.get("_preload_content", True),
+            _request_timeout=local_var_params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def get_guests(self, **kwargs):  # noqa: E501
         """Get Guests  # noqa: E501
@@ -177,7 +305,7 @@ class GuestsApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
+        kwargs["_return_http_data_only"] = True
         return self.get_guests_with_http_info(**kwargs)  # noqa: E501
 
     def get_guests_with_http_info(self, **kwargs):  # noqa: E501
@@ -208,37 +336,38 @@ class GuestsApi(object):
 
         local_var_params = locals()
 
-        all_params = [
-            'ids',
-            'fields'
-        ]
+        all_params = ["ids", "fields"]
         all_params.extend(
             [
-                'async_req',
-                '_return_http_data_only',
-                '_preload_content',
-                '_request_timeout'
+                "async_req",
+                "_return_http_data_only",
+                "_preload_content",
+                "_request_timeout",
             ]
         )
 
-        for key, val in six.iteritems(local_var_params['kwargs']):
+        for key, val in six.iteritems(local_var_params["kwargs"]):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method get_guests" % key
                 )
             local_var_params[key] = val
-        del local_var_params['kwargs']
+        del local_var_params["kwargs"]
 
         collection_formats = {}
 
         path_params = {}
 
         query_params = []
-        if 'ids' in local_var_params and local_var_params['ids'] is not None:  # noqa: E501
-            query_params.append(('ids', local_var_params['ids']))  # noqa: E501
-        if 'fields' in local_var_params and local_var_params['fields'] is not None:  # noqa: E501
-            query_params.append(('fields', local_var_params['fields']))  # noqa: E501
+        if (
+            "ids" in local_var_params and local_var_params["ids"] is not None
+        ):  # noqa: E501
+            query_params.append(("ids", local_var_params["ids"]))  # noqa: E501
+        if (
+            "fields" in local_var_params and local_var_params["fields"] is not None
+        ):  # noqa: E501
+            query_params.append(("fields", local_var_params["fields"]))  # noqa: E501
 
         header_params = {}
 
@@ -247,27 +376,32 @@ class GuestsApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+        auth_settings = ["BearerOrCookieAuth"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/guests', 'GET',
+            "/guests",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[GuestModel]',  # noqa: E501
+            response_type="list[GuestModel]",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=local_var_params.get('async_req'),
-            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
-            _preload_content=local_var_params.get('_preload_content', True),
-            _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=local_var_params.get("async_req"),
+            _return_http_data_only=local_var_params.get(
+                "_return_http_data_only"
+            ),  # noqa: E501
+            _preload_content=local_var_params.get("_preload_content", True),
+            _request_timeout=local_var_params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def search_guest(self, **kwargs):  # noqa: E501
         """Search Guest  # noqa: E501
@@ -291,7 +425,7 @@ class GuestsApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
+        kwargs["_return_http_data_only"] = True
         return self.search_guest_with_http_info(**kwargs)  # noqa: E501
 
     def search_guest_with_http_info(self, **kwargs):  # noqa: E501
@@ -321,34 +455,34 @@ class GuestsApi(object):
 
         local_var_params = locals()
 
-        all_params = [
-            'by_name'
-        ]
+        all_params = ["by_name"]
         all_params.extend(
             [
-                'async_req',
-                '_return_http_data_only',
-                '_preload_content',
-                '_request_timeout'
+                "async_req",
+                "_return_http_data_only",
+                "_preload_content",
+                "_request_timeout",
             ]
         )
 
-        for key, val in six.iteritems(local_var_params['kwargs']):
+        for key, val in six.iteritems(local_var_params["kwargs"]):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method search_guest" % key
                 )
             local_var_params[key] = val
-        del local_var_params['kwargs']
+        del local_var_params["kwargs"]
 
         collection_formats = {}
 
         path_params = {}
 
         query_params = []
-        if 'by_name' in local_var_params and local_var_params['by_name'] is not None:  # noqa: E501
-            query_params.append(('by_name', local_var_params['by_name']))  # noqa: E501
+        if (
+            "by_name" in local_var_params and local_var_params["by_name"] is not None
+        ):  # noqa: E501
+            query_params.append(("by_name", local_var_params["by_name"]))  # noqa: E501
 
         header_params = {}
 
@@ -357,27 +491,32 @@ class GuestsApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+        auth_settings = ["BearerOrCookieAuth"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/guests/search', 'GET',
+            "/guests/search",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[GuestModel]',  # noqa: E501
+            response_type="list[GuestModel]",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=local_var_params.get('async_req'),
-            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
-            _preload_content=local_var_params.get('_preload_content', True),
-            _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=local_var_params.get("async_req"),
+            _return_http_data_only=local_var_params.get(
+                "_return_http_data_only"
+            ),  # noqa: E501
+            _preload_content=local_var_params.get("_preload_content", True),
+            _request_timeout=local_var_params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def update_guest(self, guest_id, guest_model, **kwargs):  # noqa: E501
         """Update Guests  # noqa: E501
@@ -402,10 +541,14 @@ class GuestsApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        return self.update_guest_with_http_info(guest_id, guest_model, **kwargs)  # noqa: E501
+        kwargs["_return_http_data_only"] = True
+        return self.update_guest_with_http_info(
+            guest_id, guest_model, **kwargs
+        )  # noqa: E501
 
-    def update_guest_with_http_info(self, guest_id, guest_model, **kwargs):  # noqa: E501
+    def update_guest_with_http_info(
+        self, guest_id, guest_model, **kwargs
+    ):  # noqa: E501
         """Update Guests  # noqa: E501
 
         **Update the guest**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator or manager user can change any field with respect of consistency.  # noqa: E501
@@ -433,41 +576,46 @@ class GuestsApi(object):
 
         local_var_params = locals()
 
-        all_params = [
-            'guest_id',
-            'guest_model'
-        ]
+        all_params = ["guest_id", "guest_model"]
         all_params.extend(
             [
-                'async_req',
-                '_return_http_data_only',
-                '_preload_content',
-                '_request_timeout'
+                "async_req",
+                "_return_http_data_only",
+                "_preload_content",
+                "_request_timeout",
             ]
         )
 
-        for key, val in six.iteritems(local_var_params['kwargs']):
+        for key, val in six.iteritems(local_var_params["kwargs"]):
             if key not in all_params:
                 raise ApiTypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method update_guest" % key
                 )
             local_var_params[key] = val
-        del local_var_params['kwargs']
+        del local_var_params["kwargs"]
         # verify the required parameter 'guest_id' is set
-        if self.api_client.client_side_validation and ('guest_id' not in local_var_params or  # noqa: E501
-                                                        local_var_params['guest_id'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `guest_id` when calling `update_guest`")  # noqa: E501
+        if self.api_client.client_side_validation and (
+            "guest_id" not in local_var_params  # noqa: E501
+            or local_var_params["guest_id"] is None
+        ):  # noqa: E501
+            raise ApiValueError(
+                "Missing the required parameter `guest_id` when calling `update_guest`"
+            )  # noqa: E501
         # verify the required parameter 'guest_model' is set
-        if self.api_client.client_side_validation and ('guest_model' not in local_var_params or  # noqa: E501
-                                                        local_var_params['guest_model'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `guest_model` when calling `update_guest`")  # noqa: E501
+        if self.api_client.client_side_validation and (
+            "guest_model" not in local_var_params  # noqa: E501
+            or local_var_params["guest_model"] is None
+        ):  # noqa: E501
+            raise ApiValueError(
+                "Missing the required parameter `guest_model` when calling `update_guest`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'guest_id' in local_var_params:
-            path_params['guest_id'] = local_var_params['guest_id']  # noqa: E501
+        if "guest_id" in local_var_params:
+            path_params["guest_id"] = local_var_params["guest_id"]  # noqa: E501
 
         query_params = []
 
@@ -477,31 +625,39 @@ class GuestsApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'guest_model' in local_var_params:
-            body_params = local_var_params['guest_model']
+        if "guest_model" in local_var_params:
+            body_params = local_var_params["guest_model"]
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/json'])  # noqa: E501
+        header_params["Content-Type"] = (
+            self.api_client.select_header_content_type(  # noqa: E501
+                ["application/json"]
+            )
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+        auth_settings = ["BearerOrCookieAuth"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/guests/{guest_id}', 'PUT',
+            "/guests/{guest_id}",
+            "PUT",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='object',  # noqa: E501
+            response_type="object",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=local_var_params.get('async_req'),
-            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
-            _preload_content=local_var_params.get('_preload_content', True),
-            _request_timeout=local_var_params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=local_var_params.get("async_req"),
+            _return_http_data_only=local_var_params.get(
+                "_return_http_data_only"
+            ),  # noqa: E501
+            _preload_content=local_var_params.get("_preload_content", True),
+            _request_timeout=local_var_params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )

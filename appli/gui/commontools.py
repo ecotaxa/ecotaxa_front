@@ -210,7 +210,7 @@ def py_get_messages(_type=None):
 
 
 # partial request - fetch - XHR
-def is_partial_request(request):
+def is_partial_request():
     return request.headers.get("X-Requested-With") and (
         request.headers.get("X-Requested-With") == "XMLHttpRequest"
     )
@@ -251,7 +251,7 @@ def new_ui_error(e, is_exception: bool = False, trace: str = None):
             description.append(str(trace))
     else:
         code = e.code
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     if isinstance(e, ApiException):
         if request.content_type == resp_json:
             return {"error": e.status, "text": e.reason, "body": e.body}, e.status
