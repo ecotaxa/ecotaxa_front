@@ -60,6 +60,10 @@ def _prj_format(projid: int) -> dict:
         return dict({"id": None, "title": None})
 
 
+def _is_published(target_coll: CollectionModel) -> bool:
+    return target_coll.short_title is not None and target_coll.short_title != ""
+
+
 def get_collection(collection_id) -> Optional[CollectionModel]:
     with ApiClient(CollectionsApi, request) as api:
         try:
@@ -177,13 +181,14 @@ def collection_edit(collection_id: int, new: bool = False):
                     if u != "":
                         setattr(collection, a_var, _user_format(int(u)))
                 elif a_var == "short_title":
-                    short_title = gvp(a_var)
+                    short_title = gvp(a_var, "")
                     if short_title.strip() != "":
                         old_short_title = gvp("old_short_title")
-                        if old_short_title.strip() == "":
+                        # TODO - check why "None" is set for short_title
+                        if old_short_title.strip() == "" and short_title != "None":
                             setattr(collection, "short_title", short_title)
                 elif a_var != "id":
-                    setattr(collection, a_var, gvp(a_var))
+                    setattr(collection, a_var, gvp(a_var, ""))
             elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in varlist:
                 if a_var[0:-2] in ["creator_persons", "associate_persons"]:
                     plist = _set_persons(gvpm(a_var))
@@ -296,7 +301,7 @@ def collection_erase(collection_id: int, erase: bool = False):
                 return redirect(
                     url_for("gui_collection_noright", collection_id=collection_id)
                 )
-    published = target_coll.external_id != "?" or target_coll.short_title is not None
+    published = _is_published(target_coll)
     return render_template(
         "./v2/collection/erase.html",
         isadmin=isadmin,

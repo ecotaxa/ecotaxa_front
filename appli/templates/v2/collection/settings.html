@@ -22,7 +22,7 @@
             <input type="text" id="title" name="title" class="form-input" value="{{ target_coll.title }}" required data-required="{{_('a title is required')}}"  placeholder="collection title"></div>
         <div class="form-box">
           <label for="short_title">{{_('Short title')}}<i data-for="help_collection_short_title" data-request="help"></i></label>
-          <input type="text" id="short_title" name="short_title" class="form-input" value="{{ target_coll.short_title }}" {{'disabled' if target_coll and target_coll.short_title !=""  and target_coll.short_title!= None }} placeholder="short title"></div>
+          <input type="text" id="short_title" name="short_title" class="form-input" value="{{ target_coll.short_title if target_coll.short_title!= None }}" {{'disabled' if target_coll and target_coll.short_title !=""  and target_coll.short_title!= None }} placeholder="short title"></div>
               <div class="form-box">
                     <label for="external_id">{{_('External Id')}}<i data-for="help_collection_external_id" data-request="help"></i></label>
                     <input type="text" id="external_id" name="external_id" class="form-input" value="{{ target_coll.external_id }}"  placeholder="external id"></div>
@@ -98,7 +98,7 @@
              <option value="{{associate_user.id}}" selected="selected">{{associate_user.name}} &lt;{{associate_user.email}}&gt;</option>
               {% endfor %}
                  {% for org in target_coll.associate_organisations %}
-                 <option value="{{orgprefix}}{{org}}" selected="selected">{{ org }}</option>
+                 <option value="{{orgprefix}}{{org.id}}" selected="selected">{{ org.name }}</option>
             {% endfor %}
             </select>
         </div>
