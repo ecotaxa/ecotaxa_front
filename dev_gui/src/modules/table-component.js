@@ -164,6 +164,7 @@ export class TableComponent {
       if (this.params.defer) this.deferLoad(container, from);
       else this.fetchData(container, from);
     } else this.tableActivate(container);
+
     this.dt = Date.now();
   }
 
@@ -329,7 +330,7 @@ export class TableComponent {
   }
 
   tableToData() {
-    if (!this.dom.querySelector('thead')) return;
+    if (!this.dom.querySelector('thead')) {this.dom.classList.remove(css.hide);return;}
     const datalastused = (this.params.lastused && this.params.lastused.length > 0) ? [] : null;
     this.dom.classList.add(css.hide);
     const cell_to_obj = (cell) => {
