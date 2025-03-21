@@ -28,14 +28,14 @@ export default function(state) {
       };
 
       Object.entries(value).forEach(([k, vals]) => {
-        if (k.indexOf('_users') > 0) {
+       if (k.indexOf('_users') > 0) {
           vals.forEach(v => {
             const t = (v.email) ? `<a href="mailto:${v.email}" class="font-normal text-stone-700">${v.name}</a>` : v.name;
             html.users.push(t);
           });
         } else {
           vals.forEach(v => {
-            html.orgs.push(v);
+            html.orgs.push(v.name);
           });
         }
 
@@ -43,6 +43,7 @@ export default function(state) {
       td.html = `users : ${html.users.join(', ')} <br>organisations : ${html.orgs.join(', ')}`;
       return td;
     },
+
     project_list: (value, rowIndex, cellIndex, td = {}) => {
       value = (Array.isArray(value)) ? value : [];
       let html = [];
