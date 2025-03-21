@@ -10,7 +10,7 @@
      <input type="hidden" name="crsf_token" value={{ crsf_token }}>
 
      <div class="form-box"><label for="password">{{_('Enter your password to confirm your new email address') }}</label>
-       <input type="password" id="password" name="password" class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern={{api_password_regexp()}} required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">
+       <input type="password" id="password" name="password" class="form-input" data-action="wrapeye" minlength="8" maxlength="20" required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">
        </div>
   <div class="submit-box">
     <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-activate"><i class="icon icon-check invert mr-2.5"></i>{{ _('Confirm my email address') }}</button>
