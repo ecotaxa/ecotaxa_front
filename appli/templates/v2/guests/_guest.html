@@ -1,0 +1,50 @@
+  {% from "./v2/macros/macros.html" import inputdict, alertbox with context %}
+   <form method="post" action="{{request.url}}" id="formuguest" class="js js-submit relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}"  >
+   {%-if not partial-%}<input type="hidden" name="crsf_token" value={{ crsf_token }}>{%-endif-%}
+
+      <input type="hidden" name="id" id="id" value="{{guest.id if guest.id else -1  }}">
+
+    <div class="fieldset-wrapper md:flex-row md:flex-nowrap">
+      <fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 md:w-1/2'}}">
+        <legend class="tab-control">{{legend if legend else ''}}</legend>
+          {% if guest.id==-1 and createaccount==True%}
+          <div class="flex flex-row">
+            {% for key,label  in {'first':_('First name'),'last':_('Last name')}.items()%}
+            <div class="form-box w-[50%]">
+            <label for="name">{{label}}</label>
+            <input type="text" id="{{key}}name" name="{{key}}name" class="form-input" value="{{ guest[key+'name']}}" required data-required="{{_('this field is required')}}" placeholder="{{label}}"></div>
+            {%endfor%}</div>
+           {%-else-%}
+          <div class="form-box">
+          <label for="name">{{_('Name')}}</label>
+          <input type="text" id="name" name="name" class="form-input" value="{{ guest.name }}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}"></div>
+     {%-endif-%}
+          <div class="form-box">
+            <label for="email">{{_('Email')}} <i data-for="help_profile_email" data-request="help"></i></label>
+            <input type="email" id="email" name="email" class="form-input  read-only:bg-info-50" value="{{ guest.email }}"   required data-required="{{_('an email is required')}}" placeholder="{{_('Email')}}">
+            {%if createaccount != True or (guest and guest.email) -%}
+            {% set type="warning"-%}
+            <input type="hidden" name="currentemail" value="{{guest.email}}">
+            {% else -%}
+            {%- set type="info"%}
+            {%-endif-%}
+            </div>
+            <div class="form-box">
+            <label for="orcid">{{_('ORCID ID')}} <i data-for="help_profile_orcid" data-request="help"></i></label>
+            <input type="text" id="orcid" name="orcid" class="form-input" value="{{ guest.orcid }}" maxlength=20 placeholder="{{_('ORCID ID')}}"></div>
+             <div class="form-box"><label for="organisation">{{_('Organisation')}} </label>{{inputdict('organisation','organisation',guest.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
+              <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',guest.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
+
+
+            </fieldset>{%-if incprofile-%}<fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 pl-4 md:w-1/2'}}">
+
+        {%if incprofile  %}
+        <legend class="tab-control">{{_('Account info')}}</legend>
+{% include(incprofile) with context %}
+{%endif%}
+      </fieldset>{%-endif-%}</div>
+      <fieldset>
+<div class="w-full text-left mb-8">
+  <button type="submit" data-target="#formuguest" class="button is-primary" >{{_('Save')}}</button> {%-if not partial-%}<a href="{{back}}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to guests list') }}">{{ _('Cancel') }}</a>{%-endif-%}
+</div></fieldset>
+</form>

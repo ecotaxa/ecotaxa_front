@@ -1,0 +1,22 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/project/macros.html" import header_project_job with context %}
+{%block body%}
+<div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="collection_erase" >
+  <div class=" w-100 mx-auto py-4 block text-left relative" id="collection-erase-header">
+    {% set data = {'file':'_help_collection_erase'} %}
+    {{header_project_job(_('Erase collection'),data, _('Erase collection'))}}
+  </div>
+  {% if erase==True %}
+  <div class="alert success font-normal py-4 px-4">
+   {{ _('%s Collection erased') }}
+</div>
+<div class="mx-auto"><a class="button is-secondary inverse" href="{{ url_for("gui_collection")}}">{{ _("Back to collections list") }}</a></div>
+    {%-elif published  -%}
+    <div class="text-lg font-semibold">{{_('The collection is published and cannot be erased.')}}</div>
+    <div class="mx-auto"><a class="button is-secondary inverse" href="{{ url_for("gui_collection")}}">{{ _("Back to collections list") }}</a></div>
+{% else %}
+        <form method="post" action="{{request.url}}" id="form-erase" class="js js-submit">
+        <button type="submit" data-action="confirm" data-content="{{_('This action is irreversible.Do you really want to delete this collection ?')}}" class="button is-danger">{{_('ERASE THIS COLLECTION !!! IRREVERSIBLE !!!!!')}}</button> <a href ="{{ url_for("gui_collection")}}" class="button is-secondary inverse" data-title="{{_('Cancel and back to collections list')}}">{{_('Cancel')}}</a>
+        </form>
+              {%endif%}
+      {%endblock%}

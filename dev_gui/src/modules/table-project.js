@@ -1,7 +1,4 @@
 import {
-  format_license
-} from '../modules/utils.js';
-import {
   models,
   css,
   typeimport
@@ -250,8 +247,8 @@ export default function(state) {
       td.childnodes = [state.setTextNode(String(value) + '%'), node];
       return td;
     },
-    license: (value, rowIndex, cellIndex, td = {}) => {
-      td.html = format_license(value, true);
+    access: (value, rowIndex, cellIndex, td = {}) => {
+      td.html = value;
       return td;
     },
     status: (value, rowIndex, cellIndex, td = {}) => {

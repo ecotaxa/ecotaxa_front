@@ -12,6 +12,9 @@ import {
 import {
   ModuleEventEmitter
 } from '../modules/module-event-emitter.js';
+import {
+  TextHighlight
+} from '../modules/text-highlight.js';
 import debounce from 'debounce';
 import {
   css,
@@ -26,7 +29,8 @@ const fetchfroms = {
   prjlist: '/gui/prjlist/',
   prjsamplestats: '/gui/prjsamplestats',
   userslist: '/gui/admin/userslist/',
-  guestslist:'/gui/admin/guestslist/',
+  guestslist:'/gui/guestslist/',
+  organizationslist:'/gui/organizationslist/',
   prjpredict: '/gui/prjsforprediction/'
 };
 // specifc css
@@ -155,6 +159,7 @@ export class TableComponent {
     // only valid from values - fetchfroms
     this.params.from = (this.params.from) ? DOMPurify.sanitize(this.params.from) : null;
     const from = (this.params.from) ? ((Object.keys(fetchfroms).indexOf(this.params.from) >= 0) ? fetchfroms[this.params.from] : null) : null;
+    this.dom.classList.add(css.hide);
     if (from) {
       if (this.params.defer) this.deferLoad(container, from);
       else this.fetchData(container, from);
@@ -842,9 +847,7 @@ export class TableComponent {
       sorted.push(this.grid.data[r.row]);
 
     });
-    this.grid.data = sorted;
     this.dom.replaceChild(clone, tbody);
-
     ModuleEventEmitter.emit(this.eventnames.sorted, {
       dir: dir,
       index: th.cellIndex

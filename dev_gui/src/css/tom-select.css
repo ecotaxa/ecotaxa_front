@@ -27,7 +27,7 @@ padding : calc(8px - 2px - 0) 8px calc(8px - 2px - 3px - 0);
 .ts-control.rtl {@apply text-right}
 .ts-control.rtl.single .ts-control {@apply after:left-[15px] after:right-auto }
 .ts-control.rtl .ts-control > input {@apply my-0 mr-[4px] -ml-[2px]}
-.disabled .ts-control {@apply opacity-50 bg-stone-50}
+.disabled .ts-control {@apply opacity-90 bg-stone-50}
 .input-hidden .ts-control > input {@apply opacity-0 absolute -left-[10000px]}
 .ts-dropdown {@apply absolute top-[100%] left-0 z-30 w-full border border-stone-50 border-t-0 mt-2 rounded shadow-sm bg-white;
 }
@@ -47,6 +47,7 @@ padding : calc(8px - 2px - 0) 8px calc(8px - 2px - 3px - 0);
 .ts-dropdown .create {@apply text-stone-500 }
 .ts-dropdown .spinner {@apply w-10 h-10 my-2 mx-4 inline-block after:content-['_'] after:block after:w-6 after:h-6 after:m-1 after:rounded-[50%] after:border-transparent after:border-4  after:border-t-stone-200 after:border-b-stone-200  }
 .ts-dropdown .spinner:after {animation : lds-dual-ring 1.2s linear infinite;}
+
 @keyframes lds-dual-ring {
 0% {
 transform : rotate(0deg);
@@ -115,15 +116,18 @@ option[disabled][hidden], .ts-control > div.item[data-value=""] {@apply text-sto
 .ts-wrapper.multi .ts-control > div.item.active.last-active {@apply text-stone-900 bg-stone-50 font-medium}
 .ts-dropdown-content {@apply block text-base}
 .ts-dropdown-content[type='taxo'] {@apply block text-sm }
+.ts-wrapper.multi.liste .ts-control > div.item {@apply text-stone-900 text-sm bg-white }
 /* form */
 select[class*="ts-hidden"] {@apply hidden}
 /*tom-select*/
 [class^="form-"] + .ts-wrapper {@apply border border-stone-300 ring-0}
 [class^="form-"]:valid + .ts-wrapper , [class^="form-"]:valid + .ts-wrapper.multi {@apply  border-secondblue-300 ring-0}
 [class^="form-"]:invalid + .ts-wrapper, [class^="form-"]:invalid + .ts-wrapper.multi {@apply  border-danger-400 ring-0}
-.ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto before:icon-x-mark; }
+.icon-x-mark {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>');
+}
+.ts-wrapper .item .ts-delet {@apply opacity-75 w-2 h-2 mr-0 ml-1.5 inline-block icon-xs hover:fill-danger-400 hover:fill-danger-500 cursor-pointer pointer-events-auto before:icon-x-mark;}
 #section-privileges .ts-wrapper.form-select {@apply border-0  }
-#section-privileges .ts-wrapper.form-select.focus {@apply text-secondblue-400 bg-secondblue-50  }
+#section-privileges .ts-wrapper.form-select.focus {@apply text-secondblue-400 bg-secondblue-50}
 /* import */
 .ts-wrapper.multi .ts-control > div.item.new {@apply bg-stone-50 font-normal text-stone-900 }
 /* import privileges */

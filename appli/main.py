@@ -9,8 +9,6 @@ from flask_login import current_user
 from appli import app, PrintInCharte, ecopart_url
 from appli.api_proxy import proxy_request
 from appli.constants import (
-    AdministratorLabel,
-    UserAdministratorLabel,
     is_static_unprotected,
     APP_MANAGER_MESSAGE_FILE,
     CUSTOM_HOME_TOP,
@@ -79,7 +77,6 @@ def before_request_security() -> Optional[ResponseReturnValue]:
     # app.logger.info("URL="+request.url)
     if is_static_unprotected(request.path):
         return None
-    mru_projects = []
     # current_user is either an ApiUserWrapper or an anonymous one from flask
     g.cookieGAOK = request.cookies.get("GAOK", "")
     if not current_user.is_authenticated:
@@ -110,10 +107,10 @@ def before_request_security() -> Optional[ResponseReturnValue]:
         )
     else:
         menu.append(("javascript:PostDynForm('/taxo/browse/');", "Browse Taxonomy"))
-    if current_user.is_admin == True:
+    if current_user.is_admin:
         menu.append(("", "SEP"))
         menu.append(("/gui/admin/", "Admin Screen"))
-        if current_user.is_app_admin == True:
+        if current_user.is_app_admin:
             menu.append(("/gui/jobs/listall", "Task Manager"))
 
     menu.append(("", "SEP"))

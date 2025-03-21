@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 from flask import request
 

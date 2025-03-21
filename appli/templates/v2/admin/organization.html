@@ -1,0 +1,12 @@
+{%-if not partial -%}
+{% extends "./v2/admin/layout.html" %}
+{% set redir ="gui/admin/organizations/"%}
+{%-endif-%}
+{% block body %}
+<div class="container mx-auto ">
+  {% set legend = _('organization') + ' ' + organization.name|string() if organization.name!="" else _('new organization') %}
+{% include('v2/organizations/_organization.html')%}</div>
+{% if redir and redir !='' %}
+<span class="js js-redir" data-redir="{{redir}}"></span>
+{%endif%}
+{% endblock %}

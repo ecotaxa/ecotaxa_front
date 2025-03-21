@@ -78,7 +78,7 @@
             <td width="140px"><a href="/"><img height="30" src="/static/logo_ecotaxa_27.png" style="margin: 10px 0"></a>
             </td>
             <td>{{ g.headcenter |safe }}{% block headcenter %}{% endblock %}</td>
-            <td align="right">{{ g.experimental |safe}}</td>
+            <td align="right"></td>
             <td align="right" width="300px">
               {% if not current_user.is_authenticated %}
               Not logged ( <a href="{{ url_for_security('login') }}">log in / register</a> )
@@ -122,7 +122,7 @@
             </td>
           </tr>
         </table>
-        <!--label for="curLang">Language:</label>        
+        <!--label for="curLang">Language:</label>
         <select name="curLang" id="curLang">
           <option value="en">en</option>
           <option value="fr">fr</option>
@@ -130,7 +130,7 @@
           <option value="pt">pt</option>
         </select>
         <br>
-        <br-->        
+        <br-->
       </div>
     </div>
     {% for message in get_flashed_messages(true) %}

@@ -24,5 +24,5 @@ else
   echo "db server"
 fi
 cd py
-source venv/bin/activate
+source myvenv/bin/activate
 python3.8 run.py uvicorn

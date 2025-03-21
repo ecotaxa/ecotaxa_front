@@ -9,7 +9,7 @@ TomSelect.define('remove_button', TomSelect_remove_button);
 TomSelect.define('clear_button', TomSelect_clear_button);
 TomSelect.define('caret_position', TomSelect_caret_position);
 import {
-  fetchSettings
+  fetchSettings, create_box
 } from '../modules/utils.js';
 import {
   models,
@@ -19,8 +19,10 @@ import {
 import {
   AlertBox
 } from '../modules/alert-box.js';
+import {
+  FormSubmit
+} from '../modules/form-submit.js';
 let users_list = {};
-
 function _get_label(el, labelfield, item = false) {
   if (!labelfield) return el.text;
   let label = [];
@@ -98,8 +100,79 @@ function createJsTomSelect() {
         };
 
         break;
-      case models.persons:
-        option.url = "/api/users/search?all=y&by_name=";
+      case models.person:
+        option.url = "/gui/search_persons?name=";
+        const personurl="gui/persons/create";
+        if (item.dataset.prefix) option.settings.itemprefix=item.dataset.prefix;
+        const open_new_person= async function() {
+        const response = await fetch(personurl,fetchSettings);
+        return response;
+        }
+        const wait_for_input=async function(resp,newone,callback) {
+               let response;
+            const reply=(resp.ok) ?await resp.text():await Promise.reject(resp);
+        const parent=item.form.parentElement;
+        const pos=parseInt(parent.offsetTop)+parseInt(document.documentElement.scrollTop);
+        console.log('pos',pos);
+        parent.classList.remove("relative");
+        document.body.classList.add(css.hidevscroll);
+        const popup =create_box("div", {class:["absolute","z-[100]","bg-white","w-96","h-48","p-8","rounded","drop-shadow","centered"],src:personurl},parent);
+        parent.disabled=true;
+        const close=create_box("div",{class:[domselectors.close.substr(1)],text:"x"},popup);
+        const content=create_box("div",{class:["h-full","w-full"]},popup);
+        close.addEventListener('click', (e)=> {popup.remove();delete parent.disabled;  document.body.classList.remove(css.hidevscroll); });
+        content.insertAdjacentHTML('afterbegin',reply);
+        popup.querySelectorAll('[data-href]').forEach(btn=> {
+        popup.classList.remove('h-48');
+        popup.classList.add('h-auto');
+        btn.addEventListener('click',async(e)=>{
+        const url=btn.dataset.href + '?type=' + btn.dataset.type;
+        response =await fetch(url,fetchSettings);
+        const reply=(response.ok) ?await response.text():await Promise.reject(response);
+        content.innerHTML=reply;
+        const form2submit=popup.querySelector('form');
+        form2submit.dataset.fetch=true;
+        const formSubmit = new FormSubmit(form2submit);
+        let namefield=popup.querySelector("[id='name']");
+        if (namefield !==null) namefield.value=newone;
+        else {
+            namefield=popup.querySelector("[id='lastname']");
+            if (namefield !==null) namefield.value=newone;
+        }
+        content.querySelector("[type='submit']").addEventListener('click', async(e) => {
+        e.preventDefault();
+        response=await formSubmit.submitForm();
+        if (response.success) {
+        newone=response[btn.dataset.type];
+        const newitem={id:newone.id, "name":newone.name};
+        if (btn.dataset.type=="guest") newitem["name+email"]= newone.name+" "+newone.email;
+        else if(option.settings.itemprefix) newitem.id=option.settings.itemprefix+newitem.id;
+         if(callback) callback(newitem);
+        popup.remove();
+        document.body.classList.remove(css.hidevscroll);
+        } else popup.insertAdjacentHTML('afterbegin',response.message);
+
+         })
+        })})
+        }
+        option.settings = { ...option.settings,
+          ...{
+            valueField: 'id',
+            searchField: 'name',
+            labelField: 'name+email',
+            onItemRemove: function(e) {
+              if (multiple || !this.revertSettings || (this.revertSettings.innerHTML === '' && this.revertSettings.tabIndex === 0) || this.revertSettings.tabIndex < 0) return;
+              const revert = item.options[this.revertSettings.tabIndex].value;
+            }},
+              onItemAdd: function(e) {
+              }}
+        if (item.dataset.create ) {
+            option.settings.create=function(e,callback) {
+              open_new_person(e).then(response => { wait_for_input(response,e,callback);
+              });
+            }
+           }
+        break;
       case models.user:
         option.url = "/api/users/search?by_name=";
         option.settings = { ...option.settings,
@@ -218,6 +291,7 @@ function createJsTomSelect() {
         switch (type) {
           case models.user:
           case models.organisation:
+          case models.person:
             url = option.url + encodeURIComponent('%' + query + '%');
             break;
           case models.instr:
@@ -244,7 +318,6 @@ function createJsTomSelect() {
         }
         if (url !== null) fetch(url, fetchSettings()).then(response => response.json()).then(json => {
           if (type === models.project) {
-
             if (json.data && json.data.length) json = json.data.map(row => {
               return {
                 id: row[1],
@@ -260,7 +333,6 @@ function createJsTomSelect() {
               text: a
             }
             result.push(obj);
-
             return result;
           }, []);
 
@@ -278,18 +350,17 @@ function createJsTomSelect() {
           // add optgroup
           const optgroup = (el.hasOwnProperty('optgroup')) ? `data-optgroup=${el.optgroup}` : ``;
           const label = _get_label(el, option.settings.labelField);
-          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } " ${optgroup} data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
+          const itemprefix =(this.settings.itemprefix  && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].substr(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
+          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } ${itemprefix} " ${optgroup} data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
         },
         item: function(el, escape) {
           if (el === undefined || el === null) return ``; // add optgroup
           const optgroup = (el.optgroup) ? `item-${el.optgroup}` : ``;
           const inlist = (users_list[el[this.settings.valueField]]) ? `data-inlist` : ``;
-          // add cancel icon for multiple selections
-          //  const cancel = ((multiple) ? `<i class="${domselectors.component.tomselect.tsdelet.substr(1)}"></i>` : ``);
-          // use ts plugin remove_button
           const cancel = ``;
           const label = _get_label(el, option.settings.labelField, true);
-          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(label) } ${ cancel }</div>`);
+          const itemprefix =(this.settings.itemprefix && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].substr(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
+          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${itemprefix} ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(label) } ${ cancel }</div>`);
         },
         no_results: function(data, escape) {
           return DOMPurify.sanitize('<div class="no-results">' + ((item.dataset.noresults) ? item.dataset.noresults : 'No result found for ') + escape(data.input) + '</div>');

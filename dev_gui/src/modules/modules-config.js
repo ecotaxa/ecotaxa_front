@@ -1,5 +1,6 @@
 export const models = {
   user: 'user',
+  person:'person',
   collection: 'collection',
   id: 'id',
   project: 'project',

@@ -78,8 +78,8 @@ body {@apply bg-white text-stone-800 font-light subpixel-antialiased; font-displ
 .button , a.button {
    @apply cursor-pointer py-1 sm:py-2 px-4 inline-block text-base sm:text-lg font-btn font-medium  rounded  border drop-shadow-sm hover:drop-shadow-none transform transition duration-300 ease-in-out focus:ring-2 ring-offset-2 ring-transparent ;
  }
- .button[readonly] {@apply opacity-75 }
-.button.disabled , a.disabled {@apply opacity-50 }
+ .button[readonly] {@apply opacity-90 }
+.button.disabled , a.disabled {@apply opacity-80 }
 .is-default {@apply bg-transparent border-none ring-0}
  .is-primary {
    @apply  bg-mainblue-700 text-white font-normal disabled:opacity-70 disabled:bg-stone-700 hover:bg-mainblue-600 border border-mainblue-700 font-semibold focus:ring-mainblue-600 ring-mainblue-600;
@@ -120,16 +120,17 @@ details.modal-container > summary {@apply list-none marker:hidden cursor-pointer
 /*Safari hide marker */
 details.modal-popup {@apply open:fixed  open:z-70 open:md:w-2/3 open:centered open:max-h-[80%] }
 details .modal {@apply block w-0 h-0 p-0 m-0 transform  duration-500 opacity-0 overflow-hidden}
-details[open] .modal-content { @apply relative  block  w-full overflow-hidden;}
 details.modal-container[open] .modal { @apply bg-transparent h-full w-full opacity-100}
+details.modal-popup[open] {@apply h-[96%] my-auto}
 details.modal-container[open] summary > * {@apply hidden}
-details.modal-popup[open] .modal {@apply delay-100  bg-white opacity-100 rounded-lg p-4  shadow-lg z-20 w-full h-full mx-auto  pb-12  }
+details.modal-popup[open] .modal-footer {@apply  p-4   }
+details[open] .modal-content { @apply relative  block  w-full  overflow-hidden;}
+details.modal-popup[open] .modal {@apply delay-100  bg-white opacity-100 rounded-lg p-4  shadow-lg z-20 w-full h-[100%] mx-auto  pb-12  }
+details.modal-popup[open] .modal-title + details.modal-popup[open] .modal-content + details.modal-popup[open] .modal-footer {@apply h-full }
 details.modal-popup[open] .modal-body {@apply relative flex flex-col h-full w-full max-h-full sm:px-4 md:px-8  overflow-hidden  }
 details.modal-popup[open] .modal-title {@apply w-full my-2}
-details.modal-popup[open] .modal-content {@apply w-full  flex-grow border-t border-stone-200 overflow-y-auto overflow-x-auto  overscroll-none}
-details.modal-popup[open] .modal-title + details.modal-popup[open] .modal-content + details.modal-popup[open] .modal-footer {@apply h-full}
-details.modal-popup[open] .modal-footer {@apply  p-4   }
-details.modal-popup.inside[open] .modal {@apply min-h-[96]}
+details.modal-popup[open] .modal-content {@apply w-full  border-t border-stone-200 overflow-y-auto overflow-x-auto  overscroll-none h-[calc(100vh-100px)]}
+details.modal-popup.inside[open] .modal {@apply min-h-[96%]}
 details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-stone-700  drop-shadow-sm opacity-100 -mt-2 mr-0  w-full min-w-full h-full min-h-full overflow-hidden;
 }
 details.modal-aside[open]  {@apply overflow-y-auto overscroll-none }
@@ -952,7 +953,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .is-info {@apply bg-mainblue-500 text-stone-50 selection:bg-mainblue-400 border-mainblue-400 }
 .is-info.inverse {@apply bg-mainblue-50 text-mainblue-400 selection:bg-mainblue-100 border-mainblue-100}
 .is-new {@apply bg-stone-50 text-stone-700 border-stone-200 hover:border-secondblue-400 hover:text-secondblue-500}
-
+.close {@apply absolute top-2 right-2 w-6 h-6 }
 /*******************************/
 /* alerts                      */
 /*******************************/
@@ -1054,6 +1055,7 @@ details[open].toggle-summary summary span {@apply hidden}
 #welcome-info a {@apply text-mainblue-700 font-bold font-btn underline}
 /* wait please box to wait when fecthing datas  */
 #wait-please {@apply w-full h-auto text-lg sm:text-xl font-bold text-center my-4 }
+.org {@apply before:content-['org'] before:small-caps before:mr-1 before:text-stone-900}
 /********************************/
 /* help                         */
 /*******************************/

@@ -109,7 +109,9 @@ def gui_collection_classify(collection_id):
     return collection_classify(collection_id)
 
 
-@app.route("/gui/collection/export_darwin_core/<int:collection_id>", methods=["GET"])
+@app.route(
+    "/gui/collection/export_darwin_core/<int:collection_id>", methods=["GET", "POST"]
+)
 # TODO - fresh_login_required
 @login_required
 def gui_collection_export_darwin_core(collection_id):
@@ -125,7 +127,7 @@ def gui_collection_erase(collection_id):
     from appli.gui.collection.settings import collection_erase
 
     erase = False
-    if request.method == "post":
+    if request.method == "POST":
         erase = True
     return collection_erase(collection_id, erase=erase)
 
@@ -134,6 +136,6 @@ def gui_collection_erase(collection_id):
 @login_required
 def gui_collection_about(collection_id):
     params = dict({"limit": "5000"})
-    partial = is_partial_request(request)
+    partial = is_partial_request()
 
     return collection_stats(projid, partial=partial, params=params)

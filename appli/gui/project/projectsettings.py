@@ -15,6 +15,7 @@ from to_back.ecotaxa_cli_py.models import (
     MinimalCollectionBO,
 )
 from appli.gui.commontools import possible_licenses, possible_access, possible_models
+from appli.back_config import get_back_constants
 
 ###############################################common for create && edit  #######################################################################
 
@@ -40,6 +41,8 @@ def get_target_prj(
                             "viewers": target_proj.viewers,
                             "status": target_proj.status,
                             "license": target_proj.license,
+                            "access": target_proj.access,
+                            "formulae": target_proj.formulae,
                         }
                     )
         except ApiException as ae:
@@ -117,6 +120,7 @@ def prj_create() -> str:
     scn = possible_models()
     licenses = possible_licenses()
     access = possible_access()
+    formulae = get_back_constants("FORMULAE")
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=None,
@@ -125,6 +129,7 @@ def prj_create() -> str:
         scn=scn,
         possible_licenses=licenses,
         possible_access=access,
+        formulae=formulae,
     )
 
 

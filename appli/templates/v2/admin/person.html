@@ -1,0 +1,8 @@
+{%-if not partial-%}
+{% extends "./v2/admin/layout.html" %}
+{%-endif-%}
+{% block body %}
+<div class="container mx-auto " id="target-person">
+  <span data-href="{{request.url}}" data-type="guest" class="button is-primary" >{{_('Add a guest')}}</span>  <span data-href="{{request.url}}" data-type="organization" class="button is-primary" >{{_('Add an organization')}}</span>
+</div>
+{% endblock %}

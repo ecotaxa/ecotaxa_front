@@ -91,7 +91,7 @@ def gui_job_show(job_id: int):
         "./v2/jobs/show.html",
         job=job,
         owner=owner,
-        partial=is_partial_request(request),
+        partial=is_partial_request(),
         finalaction=finalaction,
         target_proj=target_proj,
         projid=projid,
@@ -202,7 +202,7 @@ def gui_job_cleanup(jobid: int):
         elif ae.status == 404:
             flash(py_messages["notfound"], "error")
 
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     if not partial and gvg("thengotoproject") == "Y":
         return redirect(url_for("gui_prj_classify", projid=projid))
     else:
@@ -227,7 +227,7 @@ def gui_list_jobs():
     if is_admin and wantsadmin:
         seeall = "&seeall=Y"
     cleanresult = []
-    partial = is_partial_request(request)
+    partial = is_partial_request()
     if gvg("cleandone") == "Y" or gvg("cleanerror") == "Y" or gvg("cleanall") == "Y":
         cleanall = gvg("cleanall") == "Y"
         cleandone = gvg("cleandone") == "Y"

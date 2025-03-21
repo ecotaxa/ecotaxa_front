@@ -304,36 +304,36 @@ export class FormSubmit {
     return resp;
   }
   // no redirection when using data-fetch
-  formFetch(format = null) {
+  async formFetch(format = null) {
     const formdata = new FormData(this.form);
     formdata["fetch"] = true;
-    fetch(this.form.action, fetchSettings({
+
+    let response= await fetch(this.form.action, fetchSettings({
         method: 'POST',
         body: formdata,
-      }))
-      .then(response => {
-        if (response.redirected) {
-          window.location = response.url;
-          return null;
-        }
-        switch (format) {
-          case "text":
-          case "html":
-            return response.text();
-            break;
-          default:
-            return response.json();
-        }
-      })
-      .then(response => {
-        this.displayResponse(response);
-      })
-      .catch(err => {
+      })).catch(err => {
         this.displayResponse(err, true)
       }).finally(response => {
         this.form.disabled = true;
       });
-    return false;
+    if (response.redirected) {
+          window.location = response.url;
+          return null;
+        }
+    switch (format) {
+          case "text":
+          case "html":
+           response= await response.text();
+            return this.displayResponse(response,false);
+            break;
+          default:
+            response= await response.json();
+            return response;
+            this.form.remove();
+            break;
+        }
+
+
   }
 
   async submitForm() {
@@ -346,7 +346,7 @@ export class FormSubmit {
       if (isbot === true) return false;
       const yessubmit = await this.execHandler('submit');
       if (yessubmit) {
-        if (this.options.fetch) this.formFetch(this.options.fetch);
+        if (this.options.fetch) return await this.formFetch(this.options.fetch);
         else this.form.submit();
         this.disableForm();
         return true;
@@ -367,9 +367,11 @@ export class FormSubmit {
   }
   displayResponse(response, error = false) {
     const el = document.createElement('div');
-    el.insertAdjacentHTML('afterbegin', response);
-    if (error !== false) el.classList.add('is-error');
-    this.form.parentElement.insertBefore(el, this.form);
-    this.form.remove();
+    el.id="response_"+this.form.id;
+       el.insertAdjacentHTML('afterbegin', response);
+         if (error !== false) el.classList.add('is-error');
+        this.form.parentElement.insertBefore(el, this.form);
+        this.form.parentElement.insertBefore(el, this.form);
+        this.form.remove();
   }
 }
