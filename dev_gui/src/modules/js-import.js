@@ -214,8 +214,6 @@ export function JsImport(container, options = {}) {
     }
     entrylist.entrycontrols.addControl(control.import, 0, import_action);
     entrylist.entrycontrols.activateControl(control.import);
-    console.log('entrylist controls ', entrylist.entrycontrols)
-
   }
 
   function showSubmit(show = true) {

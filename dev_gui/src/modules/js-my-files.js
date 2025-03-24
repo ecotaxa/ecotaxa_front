@@ -51,7 +51,6 @@ export class JsMyFiles {
 
   constructor(container, options = {}) {
     if (!container.jsmyfiles) {
-      console.log('build myfiles')
       container = (container instanceof HTMLElement) ? container : document.querySelector(container);
       if (!container) return;
       dom_purify(container, 'dataset');
@@ -440,7 +439,6 @@ export class JsMyFiles {
   }
   showComplete() {
     this.timer = (new Date() - this.timer) / 1000;
-    console.log('item-------------------------------------' + parseInt(this.timer / 60) + ' --- ' + (this.timer - (parseInt(this.timer / 60) * 60)));
     this.enableDropzone(true);
   }
 
