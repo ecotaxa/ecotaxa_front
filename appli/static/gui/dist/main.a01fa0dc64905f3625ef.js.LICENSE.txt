@@ -1,0 +1,87 @@
+/*! ../modules/activ-items.js */
+
+/*! ../modules/alert-box.js */
+
+/*! ../modules/export-html2word.js */
+
+/*! ../modules/form-submit.js */
+
+/*! ../modules/job-monitor.js */
+
+/*! ../modules/js-accordion.js */
+
+/*! ../modules/js-captcha.js */
+
+/*! ../modules/js-components.js */
+
+/*! ../modules/js-import.js */
+
+/*! ../modules/js-my-files.js */
+
+/*! ../modules/js-tabs.js */
+
+/*! ../modules/js-taxomapping.js */
+
+/*! ../modules/js-tom-select.js */
+
+/*! ../modules/js-tree.js */
+
+/*! ../modules/modal-container.js */
+
+/*! ../modules/modules-config.js */
+
+/*! ../modules/project-privileges.js */
+
+/*! ../modules/table-component.js */
+
+/*! ../modules/utils.js */
+
+/*! ../src/modules/activ-items.js */
+
+/*! ../src/modules/activ-request.js */
+
+/*! ../src/modules/alert-box.js */
+
+/*! ../src/modules/js-components.js */
+
+/*! @license DOMPurify 2.5.8 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/2.5.8/LICENSE */
+
+/*! dompurify */
+
+/*! import() */
+
+/*!**********************!*\
+  !*** ./src/index.js ***!
+  \**********************/
+
+/*!**********************************!*\
+  !*** ./src/modules/alert-box.js ***!
+  \**********************************/
+
+/*!************************************!*\
+  !*** ./src/modules/activ-items.js ***!
+  \************************************/
+
+/*!**************************************!*\
+  !*** ./src/modules/activ-request.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./src/modules/js-components.js ***!
+  \**************************************/
+
+/*!***************************************!*\
+  !*** ./src/modules/modules-config.js ***!
+  \***************************************/
+
+/*!*****************************************!*\
+  !*** ./src/modules/export-html2word.js ***!
+  \*****************************************/
+
+/*!******************************************!*\
+  !*** ./src/modules/utils.js + 4 modules ***!
+  \******************************************/
+
+/*!***********************************************!*\
+  !*** ./node_modules/dompurify/dist/purify.js ***!
+  \***********************************************/

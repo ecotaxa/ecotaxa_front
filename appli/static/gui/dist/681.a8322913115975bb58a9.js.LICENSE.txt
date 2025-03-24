@@ -1,0 +1,13 @@
+/*! ../../modules/module-event-emitter.js */
+
+/*! ../../modules/utils.js */
+
+/*! ../files/js-scandir.js */
+
+/*! fflate */
+
+/*! import() */
+
+/*!******************************************!*\
+  !*** ./src/modules/files/js-dirtozip.js ***!
+  \******************************************/
