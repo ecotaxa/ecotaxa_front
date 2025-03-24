@@ -1,0 +1,41 @@
+/*! ../../modules/alert-box.js */
+
+/*! ../../modules/entry.js */
+
+/*! ../../modules/module-event-emitter.js */
+
+/*! ../../modules/modules-config.js */
+
+/*! ../../modules/utils.js */
+
+/*! ../modules/alert-box.js */
+
+/*! ../modules/files/js-dirlist.js */
+
+/*! ../modules/files/js-dirtozip.js */
+
+/*! ../modules/files/js-filesystem.js */
+
+/*! ../modules/module-event-emitter.js */
+
+/*! ../modules/modules-config.js */
+
+/*! ../modules/utils.js */
+
+/*! import() */
+
+/*!******************************!*\
+  !*** ./src/modules/entry.js ***!
+  \******************************/
+
+/*!************************************!*\
+  !*** ./src/modules/js-my-files.js ***!
+  \************************************/
+
+/*!*****************************************!*\
+  !*** ./src/modules/files/js-dirlist.js ***!
+  \*****************************************/
+
+/*!*********************************************!*\
+  !*** ./src/modules/module-event-emitter.js ***!
+  \*********************************************/
