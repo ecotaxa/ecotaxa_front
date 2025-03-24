@@ -51,7 +51,7 @@ function createJsComponents() {
                   const {
                     JsTomSelect
                   } = await
-                  import(`../modules/js-tom-select.js`);
+                  import('../modules/js-tom-select.js');
                   dynamics.JsTomSelect = JsTomSelect;
                 }
                 dynamics.JsTomSelect.applyTo(item);
@@ -82,7 +82,7 @@ function createJsComponents() {
                 let {
                   FormSubmit
                 } = await
-                import(`../modules/form-submit.js`);
+                import('../modules/form-submit.js');
                 dynamics.FormSubmit = FormSubmit;
               }
               const formSubmit = new dynamics.FormSubmit(item);
@@ -116,7 +116,7 @@ function createJsComponents() {
                 let {
                   JsAccordion
                 } = await
-                import(`../modules/js-accordion.js`);
+                import('../modules/js-accordion.js');
                 dynamics.JsAccordion = JsAccordion;
               }
               dynamics.JsAccordion.applyTo(item);
@@ -126,7 +126,7 @@ function createJsComponents() {
                 let {
                   TaxoMapping
                 } = await
-                import(`../modules/js-taxomapping.js`);
+                import('../modules/js-taxomapping.js');
                 dynamics.TaxoMapping = TaxoMapping;
               }
               const taxomapping = new dynamics.TaxoMapping(item);
@@ -136,7 +136,7 @@ function createJsComponents() {
                 let {
                   format_license
                 } = await
-                import(`../modules/utils.js`);
+                import('../modules/utils.js');
                 dynamics.format_license = format_license;
               }
               item.innerHTML = dynamics.format_license(DOMPurify.sanitize(item.innerHTML), (item.dataset.withlink));
@@ -166,7 +166,7 @@ function createJsComponents() {
                 const {
                   JsMyFiles
                 } = await
-                import(`../modules/js-my-files.js`);
+                import('../modules/js-my-files.js');
                 dynamics.JsMyFiles = JsMyFiles;
               }
               const jsMyFiles = new dynamics.JsMyFiles(item);
@@ -177,14 +177,14 @@ function createJsComponents() {
                 const {
                   FormSubmit
                 } = await
-                import(`../modules/form-submit.js`);
+                import('../modules/form-submit.js');
                 dynamics.FormSubmit = FormSubmit;
               }
               if (!dynamics.JsImport) {
                 const {
                   JsImport
                 } = await
-                import(`../modules/js-import.js`);
+                import('../modules/js-import.js');
                 dynamics.JsImport = JsImport;
               }
               dynamics.JsImport(item);
@@ -194,7 +194,7 @@ function createJsComponents() {
                 let {
                   JsTabs
                 } = await
-                import(`../modules/js-tabs.js`);
+                import('../modules/js-tabs.js');
                 dynamics.JsTabs = JsTabs;
               }
               dynamics.JsTabs.applyTo(item);
