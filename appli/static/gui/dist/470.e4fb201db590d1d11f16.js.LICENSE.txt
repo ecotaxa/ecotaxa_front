@@ -1,9 +1,0 @@
-/*! ../modules/files/js-dirtozip.js */
-
-/*! ../modules/files/js-filesystem.js */
-
-/*! import() */
-
-/*!************************************************!*\
-  !*** ./src/modules/js-my-files.js + 1 modules ***!
-  \************************************************/

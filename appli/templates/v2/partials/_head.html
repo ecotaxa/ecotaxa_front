@@ -1,12 +1,1 @@
-<head>
-  <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=yes">
-   <base href="/" >
-<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='/gui/images/apple-touch-icon.png') }}">
-<link rel="shortcut icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='/gui/images/favicon-32x32.png')}}">
-<link rel="shortcut icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='/gui/images/favicon-16x16.png')}}">
-<link rel="manifest" href="{{ url_for('static', filename='gui/images/site.webmanifest')}}">
-<title>{{title}}</title>
-{% include "v2/partials/_google_analytics.html" with context %}
-<script defer src="/static/gui/src/main.js"></script></head>
+<head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes"><base href="/"><link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='/gui/images/apple-touch-icon.png') }}"><link rel="shortcut icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='/gui/images/favicon-32x32.png')}}"><link rel="shortcut icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='/gui/images/favicon-16x16.png')}}"><link rel="manifest" href="{{ url_for('static', filename='gui/images/site.webmanifest')}}"><title>{{title}}</title><link href="/static/gui/dist/main.4ce2c1092d3a94bf9450.css" rel="stylesheet">{% include "v2/partials/_google_analytics.html" with context %}<script defer="defer" src="/static/gui/dist/main.a01fa0dc64905f3625ef.js"></script></head>
