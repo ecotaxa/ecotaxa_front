@@ -47,7 +47,7 @@
     "dayjs": "^1.11.7",
     "debounce": "^2.1.0",
     "deep-equal": "^2.0.5",
-    "dompurify": "^2.4.0",
+    "dompurify": "^3.2.4",
     "fflate": "^0.8.0",
     "n": "^10.1.0",
     "path": "^0.12.7",
