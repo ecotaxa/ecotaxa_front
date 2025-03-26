@@ -24,7 +24,7 @@ find /venv/lib/python3.8/site-packages -name "*.exe" -delete
 
 # Get source
 WORKDIR /app/
-COPY py ./
+COPY . ./
 # Get starting script and fixed config
 COPY docker/prod_image/start.sh /app
 COPY docker/prod_image/uwsgi.ini /app
