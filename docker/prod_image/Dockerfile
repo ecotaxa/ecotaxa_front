@@ -10,7 +10,7 @@ RUN apt-get install \
     python3.8 python3.8-venv \
     --no-install-recommends --yes
 
-
+COPY . ./
 # Create venv
 RUN python3.8 -m venv /venv
 # Install wheel & upgrade pip
@@ -25,7 +25,7 @@ find /venv/lib/python3.8/site-packages -name "*.exe" -delete
 
 # Get source
 WORKDIR /app/
-COPY . ./
+
 # Get starting script and fixed config
 COPY docker/prod_image/start.sh /app
 COPY docker/prod_image/uwsgi.ini /app
