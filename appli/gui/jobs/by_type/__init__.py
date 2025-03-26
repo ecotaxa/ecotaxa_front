@@ -8,4 +8,5 @@ from . import SummaryExport
 from . import BackupExport
 from . import IdentificationExport
 from . import DarwinCoreExport
-from . import Prediction
+
+# from . import Prediction
