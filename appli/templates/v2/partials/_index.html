@@ -10,25 +10,29 @@
         </div>
         </div><!-- For projects -->
         <div class="md:mr-4 flex flex-col">
-        <a href="{{url_for("gui_prj")}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-500 to-mainblue-700 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Contribute to a project')}}</a>
+        <a href="{{url_for('gui_prj')}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-500 to-mainblue-700 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Contribute to a project')}}</a>
         <div class="mt-2 p-4 pt-2 text-sm border-r bg-gradient-to-b  from-transparent to-mainblue-50 background-register shadow flex-grow">
           <p>{{_('As a scientist, you can contribute to the richness of this image database and/or to the collaborative taxonomic annotation effort. Images are organised in projects which should be consistent in terms of sampling and imaging techniques. We provide tools to support the annotation of large image datasets by supervised machine learning prediction.')}}</p>
         </div>
-        </div><!-- For particule -->
-        <div class="flex flex-col">
-        <a href="{{ecopart_url()}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-700 to-mainblue-500 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Particle module')}}</a>
+        </div><!-- For collections -->
+          <div class="flex flex-col">
+        <a href="{{url_for('gui_collection')}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-700 to-mainblue-500 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Contribute to a collection')}}</a>
         <div class="mt-2 p-4 pt-2 text-sm border-r bg-gradient-to-b  from-transparent to-mainblue-50 shadow flex-grow">
-          <p>{{_('The PARTICLE module of ECOTAXA is designed to host data from the Underwater Vision Profiler (UVP) and the LIIST instruments.')}}
-            <br>{{_('It permits to:')}}
-      <ul class="list-disc list-inside"><li>{{_('Load particle data and associate them with CTD data and zooplankton images loaded and annotated in Ecotaxa')}}</li>
-        <li>{{ _('Process size spectra from the particle data')}}</li>
-      <li>{{ _('Download the resulting particle spectra, the CTD and the zooplankton data according to defined permissions')}}</li>
-      <li>{{ _('Visualize data and permit their promotion thanks to the internet access')}}</li>          </p>
+          <p>{{_('A collection is a set of projects ready to be exported and published in DarwinCore format.')}}
+          </p>
         </div>
-
         </div>
     </div>
-    <div id="disclaimer" class="text-xs p-4 mt-6 md:mt-12 mb-12 ">
+      <div class="my-6 mx-2 p-8 pt-6 text-sm shadow bg-mainblue-50">
+          <p>{{_('The')}} <a href="{{ecopart_url()}}" class="button py-0 px-0 m-0 sm:py-0 bg-transparent shadow-none border-none text-center">ECOPART</a>{{_('application is designed to manage data from Underwater Vision Profiler (UVP) instruments.')}}
+          <br>{{_('Its features include:')}}
+      <ul class="list-disc list-inside"><li>{{_('Importing particle data and linking them with CTD data and zooplankton images annotated in Ecotaxa.')}}</li>
+        <li>{{ _(' Processing size spectra from particle data.')}}</li>
+      <li>{{ _(' Enabling the download of particle spectra, CTD data, and zooplankton records based on user permissions.')}}</li>
+            <li>{{ _('Providing data visualization and facilitating data sharing via internet access.')}}</li></ul></p>
+        </div>
+
+    <div id="disclaimer" class="text-xs p-4 mb-12 ">
 <p>{{_('EcoTaxa is not responsible for the safekeeping of the images and data it stores. Even if the application managers make their best to secure them. We advise you to perform your own backups.')}}</p>
 <p>{{_('People annotating images in EcoTaxa cannot claim for any retribution but they can download and use the results of their work. The application can be freely downloaded and installed for scientific usage.')}}
 </p>

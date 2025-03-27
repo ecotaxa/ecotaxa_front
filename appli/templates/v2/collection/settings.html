@@ -126,9 +126,12 @@
                 <div class="label" data-for="status" >{{ _('Status') }} </div>
                 <div class="form-group" role="group" >
                   {%- set status = status or ""-%}
+
                   {% for st in (("Annotate",_("Annotate")),("ExploreOnly",_("Explore Only")),("Annotate No Prediction",_("Annotate No Prediction"))) %}
+                       {%-if status == st[0]-%}
                     {%set required=(loop.index==1) and target_coll %}
                   {{ form_group_radio('status_' + loop.index|string(),'status',st[0],st[1],status,required=required, extra=extra,readonly=True)}}
+                       {%-endif-%}
                   {% endfor %}
                 </div>
               </div>
@@ -137,8 +140,10 @@
                  <div class="form-group" id="proj_access" role="group">
                    {%- set access = access or "" -%}
                    {% for k,v in possible_access.items() %}
+                     {%- if access==k -%}
                       {%set required=(loop.index==1) and target_coll %}
                    {{form_group_radio('access_'+ loop.index|string(),'access',k,v,access, required=required, extra=extra ,readonly=True)}}
+                     {%-endif-%}
                        {% endfor %}</div>
                </div>
       </div>
@@ -174,7 +179,8 @@
         <!--  <div class="w-full block">
           <button id="addmember" type="button" class="button is-new float-right clear-right text-left" data-target="member" data-add="block" data-title="{{ _('New privilege') }}"><i class="icon icon-plus-sm align-bottom mr-1"></i>{{ _('New privilege') }}</button>
         </div>--></div>  {%-if target_coll-%}<div><div class="legend">{{_('Mapping')}}</div>
-  {{ display_freecols()}}</div>{%-endif-%}
+          <div><div>Common imported columns and their column identifier <i data-for="help_collection_mapping" data-request="help"></i></div>
+  {{ display_freecols()}}</div></div>{%-endif-%}
     </div></fieldset></div></div>
 
 {{excluded}}

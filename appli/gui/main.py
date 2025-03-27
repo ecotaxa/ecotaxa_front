@@ -233,7 +233,11 @@ def gui_help(filename):
     title = gvg("title", "")
     if filename[0:1] != "_":
         return render_template(
-            "/v2/help/index.html", filename=filename, partial=partial, title=title
+            "/v2/help/index.html",
+            filename=filename,
+            partial=partial,
+            title=title,
+            notfound=None,
         )
     filename = "/v2/help/" + filename + ".html"
     if not exists("appli/templates" + filename):

@@ -80,7 +80,7 @@ export class ProjectPrivileges {
       if (form) {
         if (form.formsubmit) {
           form.formsubmit.addHandler('validate', () => {
-            return this.validateFields();
+             return this.validateFields();
           });
           form.formsubmit.addHandler('submit', () => {
             return this.formatPrivileges();
@@ -490,7 +490,7 @@ export class ProjectPrivileges {
       return true;
     }
     const has_member = (member) => {
-      return (member.value);
+        return (member.value && parseInt(member.value)>0);
     }
     const has_priv = (line) => {
       const priv = line.querySelector('[name*="[' + this.options.privilege + ']"]:checked');
@@ -507,7 +507,8 @@ export class ProjectPrivileges {
           line.remove();
           n--;
         } else return false;
-      } else if (!has_member(member)) {
+      } else {
+      if (!has_member(member)) {
         AlertBox.addMessage({
           type: AlertBox.alertconfig.types.danger,
           parent: member,
@@ -523,6 +524,7 @@ export class ProjectPrivileges {
           } else return false;
         } else return false;
       }
+
       if (!has_priv(line)) {
         AlertBox.addMessage({
           type: AlertBox.alertconfig.types.danger,
@@ -530,12 +532,13 @@ export class ProjectPrivileges {
           content: this.keymessages.uhasnopriv
         });
         verif = false;
-      } else if (AlertBox.hasMessage(line)) {
+      }  else if (AlertBox.hasMessage(line)) {
         AlertBox.removeMessage({
           type: AlertBox.alertconfig.types.danger,
           parent: line,
           content: this.keymessages.uhasnopriv
         });
+      }
       }
     }
     if (n === 0) {
@@ -567,7 +570,6 @@ export class ProjectPrivileges {
 
       });
     }
-
     lines.forEach(line => {
       format_privilege(line);
     });

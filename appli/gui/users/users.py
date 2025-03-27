@@ -50,9 +50,12 @@ def _get_captcha() -> list:
     return no_bot
 
 
-def get_organizations() -> list:
+def get_organizations(isuser=True) -> list:
     with ApiClient(OrganizationsApi, request) as api:
-        orgs = api.get_organizations()
+        if isuser:
+            orgs = api.get_organizations()
+        else:
+            orgs = api.search_organizations("")
         orgs = sorted(orgs, key=lambda org: org.name)
         organisations = [[org.name, org.name] for org in orgs]
     return organisations
@@ -124,7 +127,7 @@ def user_register(token: str = None, partial: bool = False) -> str:
             template="v2/register.html",
             token=token,
         )
-    organisations = get_organizations()
+    organisations = get_organizations(False)
     country_list = get_country_list()
     countries = sorted(country_list)
     return render_template(
@@ -188,6 +191,8 @@ def user_create(
 ) -> Union[str, tuple, Response]:
     action = ACCOUNT_USER_CREATE
     posted = {}
+    if token is None:
+        token = ""
     token = token.strip()
     resp = []
     if usrid == -1:

@@ -37,7 +37,6 @@ class ProjectModel(object):
         'title': 'str',
         'visible': 'bool',
         'access': 'str',
-        'license': 'str',
         'status': 'str',
         'objcount': 'float',
         'pctvalidated': 'float',
@@ -70,7 +69,6 @@ class ProjectModel(object):
         'title': 'title',
         'visible': 'visible',
         'access': 'access',
-        'license': 'license',
         'status': 'status',
         'objcount': 'objcount',
         'pctvalidated': 'pctvalidated',
@@ -98,7 +96,7 @@ class ProjectModel(object):
         'highest_right': 'highest_right'
     }
 
-    def __init__(self, projid=None, title=None, visible=None, access=None, license=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, description=None, rf_models_used=None, cnn_network_id=None, formulae=None, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, bodc_variables=None, init_classif_list=[], managers=[], annotators=[], viewers=[], contact=None, instrument=None, instrument_url=None, highest_right='', local_vars_configuration=None):  # noqa: E501
+    def __init__(self, projid=None, title=None, visible=None, access=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, description=None, rf_models_used=None, cnn_network_id=None, formulae=None, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, bodc_variables=None, init_classif_list=[], managers=[], annotators=[], viewers=[], contact=None, instrument=None, instrument_url=None, highest_right='', local_vars_configuration=None):  # noqa: E501
         """ProjectModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -108,7 +106,6 @@ class ProjectModel(object):
         self._title = None
         self._visible = None
         self._access = None
-        self._license = None
         self._status = None
         self._objcount = None
         self._pctvalidated = None
@@ -141,7 +138,6 @@ class ProjectModel(object):
         if visible is not None:
             self.visible = visible
         self.access = access
-        self.license = license
         if status is not None:
             self.status = status
         if objcount is not None:
@@ -290,31 +286,6 @@ class ProjectModel(object):
             raise ValueError("Invalid value for `access`, must not be `None`")  # noqa: E501
 
         self._access = access
-
-    @property
-    def license(self):
-        """Gets the license of this ProjectModel.  # noqa: E501
-
-        Data licence.  # noqa: E501
-
-        :return: The license of this ProjectModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._license
-
-    @license.setter
-    def license(self, license):
-        """Sets the license of this ProjectModel.
-
-        Data licence.  # noqa: E501
-
-        :param license: The license of this ProjectModel.  # noqa: E501
-        :type: str
-        """
-        if self.local_vars_configuration.client_side_validation and license is None:  # noqa: E501
-            raise ValueError("Invalid value for `license`, must not be `None`")  # noqa: E501
-
-        self._license = license
 
     @property
     def status(self):

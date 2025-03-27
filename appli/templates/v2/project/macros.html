@@ -36,7 +36,9 @@
   {{ inputdict(prefix+'_member_' + index,prefix+'[member][' + index + ']',value = member.id, label=member.name,type='user',required=required,autocomplete=autocomplete,data=extra,options=[(member.id,member.name)],readonly=readonly) }}</div>
 <div data-elem="priv" data-title="{{ _('Privilege') }}">
   <div class="form-group group-sm">{% for pr in ('View','Annotate','Manage')  %}
+      {%-if not readonly or pr==privilege -%}
     {{ form_group_radio(prefix+'_privilege_' + index + '_' + pr ,prefix+'[privilege][' + index + ']',pr,pr, privilege,required=(loop.index==1),extra=extra, readonly=readonly)}}
+    {%-endif-%}
     {%endfor%}</div>
 </div>
 <div data-elem="contact" data-title="{{ _('Contact') }}"><input type="radio" name="contact_user_id" id="{{prefix}}_contact_{{index}}"  {{'required' if required }} value="{{ member.id }}" {{ 'disabled'

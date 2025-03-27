@@ -1,5 +1,5 @@
 {% extends "./v2/help/_layout.html" %}
-  {%-if notfound -%}{%block article%}
+  {%-if notfound!=None and notfound !='' -%}{%block article%}
   <div class="alert info" data-filename="{{notfound}}">{{_('Not available for now.')}}</div>{% endblock %}
   {%-else-%}
 {% include 'v2/help/_help_summary.html'  %}

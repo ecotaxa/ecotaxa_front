@@ -27,10 +27,10 @@
           <div class="form-box">
             <label for="comments">{{ _('Comments')}}<i data-for="help_comments" data-request="help"></i></label>
             <textarea id="comments" name="comments" class="form-textarea" placeholder="project comments" rows="6">{{ target_proj.comments|default('',true) }}</textarea>
-          </div>
+          </div>{%-if target_proj and target_proj.projid-%}
           <div class="form-box"><span class="label">{{_('Collections')}}<i data-for="help_collections" data-request="help"></i></span>
           <div class="stat-info text-sm">{%- if is_in_collections %}{%-for collection in collections-%}<span>({{collection_info(collection)}} )</span>{{', ' if loop.index < collections|length else ''}}{%-endfor-%}{%-endif-%}</div></div>
-            </div>
+           {%-endif-%} </div>
         <div class=" w-full md:w-1/2 messagepos" >
           <div class="form-box">
             <label for="instrument">{{_('Instrument')}} </label>
@@ -56,7 +56,7 @@
               {% endfor %}
             </select></div>
          <div class="form-box">
-            <div class="label" data-for="access">{{ _('Access') }}<i data-for="help_proj_access" data-request="help"></i></div>
+            <div class="label" data-for="access">{{ _('Access') }}<i data-for="help_project_access" data-request="help"></i></div>
             <div class="form-group" id="proj_license" role="group">access={{ target_proj.access}}
               {%- set access = target_proj.access if target_proj else "" -%}
               {% for k,v in possible_access.items() %}
@@ -129,7 +129,7 @@
           {%-if target_proj-%}
           <fieldset id="section-freecols" class="w-full tab" >
             <legend class="tab-control">{{_('Mapping')}}</legend>
-          <div class="tab-content">{{display_freecols()}}</div>
+          <div class="tab-content"><div>Imported columns and their column identifier <i data-for="help_project_mapping" data-request="help"></i></div>{{display_freecols()}}</div>
           </fieldset>{%-endif-%}
     </div>
 

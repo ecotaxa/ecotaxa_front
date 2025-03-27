@@ -288,19 +288,13 @@ export class FormSubmit {
   }
 
   async execHandler(type) {
-    if (this.handlers[type].length === 0) return true;
+    if (this.handlers.length ===0 || this.handlers[type].length === 0) return true;
     let resp = true;
-    // series
-    /*  for (const handler of this.handlers) {
-          const rep = await handler()
-          resp = (resp && rep)
-      }*/
     // concurrent
     await Promise.all(this.handlers[type].map(async handler => {
       const rep = await handler();
       resp = (resp && rep);
     }));
-    //  if (resp === true) this.handlers[type] = [];
     return resp;
   }
   // no redirection when using data-fetch
@@ -340,7 +334,6 @@ export class FormSubmit {
     this.fieldEnable();
     // important async
     const valid = await this.validateFields(false);
-
     if (valid) {
       const isbot = (this.form.querySelector(domselectors.captcha)) ? (this.form.dataset.isbot ? (this.form.dataset.isbot === true) : true) : false;
       if (isbot === true) return false;
