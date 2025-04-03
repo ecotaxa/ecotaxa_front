@@ -401,12 +401,16 @@ def objectdetails(objid):
         classif_date=dte,
         classif_qual=obj.classif_qual,
         user_name=classifier_name,
-        classif_type=taxon_type,
+        classif_type=None,
         taxon_name=taxon_name,
     )
     history.sort(key=lambda r: r.classif_date, reverse=True)
     history.insert(0, current)
     for classif_desc in history:
+        if classif_desc.user_name is None:
+            classif_desc.classif_type = "Automatic"
+        else:
+            classif_desc.classif_type = "Manual"
         vals = [
             getattr(classif_desc, fld)
             for fld in (
