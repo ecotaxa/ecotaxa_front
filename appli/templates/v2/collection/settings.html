@@ -1,6 +1,6 @@
 {% extends "./v2/layout.html" %}
 {% from "./v2/macros/macros.html" import form_group_radio, modal,inputdict  with context %}
-{% from "./v2/project/macros.html" import pick_from_other, member_cells, display_freecols with context %}
+{% from "./v2/project/macros.html" import pick_from_other with context %}
 {% block body %}
 <div class="container mx-auto">
   {% set modal_title = _("How to edit a collection settings") if target_coll.id else _("How to create a collection")%}
@@ -19,15 +19,15 @@
         <div class="w-full md:w-1/2 md:pr-6 ">
           <div class="form-box">
             <label for="title">{{_('Title')}}</label>
-            <input type="text" id="title" name="title" class="form-input" value="{{ target_coll.title }}" required data-required="{{_('a title is required')}}"  placeholder="collection title"></div>
+            <input type="text" id="title" name="title" class="form-input" value="{{ target_coll.title }}" required {{'data-action=normalize data-target=short_title' if not published }} data-required="{{_('a title is required')}}"  placeholder="Records of the kraken communities in the strait of Antlantis"></div>
         <div class="form-box">
-          <label for="short_title">{{_('Short title')}}<i data-for="help_collection_short_title" data-request="help"></i></label>
-          <input type="text" id="short_title" name="short_title" class="form-input" value="{{ target_coll.short_title if target_coll.short_title!= None }}" {{'disabled' if target_coll and target_coll.short_title !=""  and target_coll.short_title!= None }} placeholder="short title"></div>
+          <label for="short_title">{{_('Short title')}}<i data-for="help_collection_short-title" data-request="help"></i></label>
+          <input type="text" id="short_title" name="short_title" class="form-input" value="{{ target_coll.short_title if target_coll.short_title!= None }}" {{'disabled' if target_coll and target_coll.short_title !=""  and target_coll.short_title!= None }} placeholder="records_of_the_kraken_communities_in_the_strait_of_antlantis"></div>
               <div class="form-box">
-                    <label for="external_id">{{_('External Id')}}<i data-for="help_collection_external_id" data-request="help"></i></label>
-                    <input type="text" id="external_id" name="external_id" class="form-input" value="{{ target_coll.external_id }}"  placeholder="external id"></div>
+                    <label for="external_id">{{_('Digital Object Identifier')}}<i data-for="help_collection_external_id" data-request="help"></i></label>
+                    <input type="text" id="external_id" name="external_id" class="form-input" value="{{ target_coll.external_id }}"  {{'data-action=replace data-toreplace='+doi_url if doi_url!=None}} placeholder="10.foo23/bar.456"></div>
                           <div class="form-box">
-                            <label for="provider_user">{{_('Provider user')}}<i data-for="help_coll_provider_user" data-request="help"></i></label>
+                            <label for="provider_user">{{_('Metadata provider')}}<i data-for="help_coll_provider_user" data-request="help"></i></label>
                             <select id='provider_user' class="form-select js js-autocomplete " name="provider_user" data-type="user" placeholder="{{_('select a provider user')}}"  autocomplete="off">
                                {%if target_coll and target_coll.provider_user%}<option value="{{ target_coll.provider_user.id }}" selected="selected"> {{ target_coll.provider_user.name }}</option>{%-elif not target_coll -%}
                                <option value="{{ current_user.id }}" selected="selected"> {{ current_user.name }}</option>{%-endif-%}
@@ -39,21 +39,42 @@
                                <option value="{{ current_user.id }}" selected="selected"> {{ current_user.name }}</option>{%-endif-%}
                               </select>
                           </div>
+            <div class="form-box"  id="section-creators" class="w-full tab" data-u="{{ current_user.id|string() }}" data-alert="true">
+            <label for="creator_persons">{{_('Creator users  and organisations')}}<i data-for="help_collection_creator" data-request="help"></i></label>
+              <select id='creator_persons' class="form-multiselect js js-autocomplete liste" name="creator_persons[]" data-type="person"  data-prefix="{{orgprefix}}" data-create=true data-importfield="creator_persons" placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off"><option value="0"></option>
+              {%-if target_coll-%}{%- for creator_user in target_coll.creator_users -%}
+              <option value="{{creator_user.id}}" selected="selected">
+              {{creator_user.name}} &lt;{{creator_user.email}}&gt;</option>
+              {%- endfor -%}{%- for org in target_coll.creator_organisations -%}
+              <option value="{{orgprefix}}{{org.id}}" selected="selected">{{org.name}}</option>
+              {%- endfor -%}{%-endif-%}
+                </select>
+               </div> <div class="form-box">
+            <label for="associate_persons">{{_('Associate users and organisations')}}<i data-for="help_collection_associate" data-request="help"></i></label>
+            <select id='associate_persons' class="form-multiselect js js-autocomplete liste" name="associate_persons[]" data-type="person" data-prefix="{{orgprefix}}" data-create=true  data-importfield="associate_persons"  placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off">
+             {% for associate_user in target_coll.associate_users %}
+             <option value="{{associate_user.id}}" selected="selected">{{associate_user.name}} &lt;{{associate_user.email}}&gt;</option>
+              {% endfor %}
+                 {% for org in target_coll.associate_organisations %}
+                 <option value="{{orgprefix}}{{org.id}}" selected="selected">{{ org.name }}</option>
+            {% endfor %}
+            </select>
+        </div>
                   </div><div class="w-full md:w-1/2"><div class="form-box">
-                        <label for="citation">{{ _('Citation')}}<i data-for="help_coll_citation" data-request="help"></i></label>
-                        <textarea id="citation" name="citation" class="form-textarea" placeholder="citation" rows="3">{{ target_coll.citation|default('',true) }}</textarea>
+                        <label for="citation">{{ _('Citation')}}<i data-for="help_collection_citation" data-request="help"></i></label>
+                        <textarea id="citation" name="citation" class="form-textarea" placeholder="Doe, John (2010) Records of the kraken communities in the strait of Antlantis" rows="4">{{ target_coll.citation|default('',true) }}</textarea>
 
                       </div><div class="form-box">
-                        <label for="coll_abstract">{{_('Abstract')}} <i data-for="help_coll_abstract" data-request="help"></i></label>
-                        <textarea id="coll_abstract" name="abstract" class="form-textarea" placeholder="abstract" rows="4" maxlength="1000">{{ target_coll.abstract|default('',true) }}</textarea>
+                        <label for="coll_abstract">{{_('Abstract')}} <i data-for="help_collection_abstract" data-request="help"></i></label>
+                        <textarea id="coll_abstract" name="abstract" class="form-textarea" placeholder="abstract" rows="5" maxlength="1000">{{ target_coll.abstract|default('',true) }}</textarea>
 
                       </div>
                       <div class="form-box">
-                        <label for="coll_description">{{_('Description')}} <i data-for="help_coll_description" data-request="help"></i></label>
-                        <textarea id="coll_description" name="description" class="form-textarea" placeholder="description" rows="6">{{ target_coll.description|default('',true) }}</textarea>
+                        <label for="coll_description">{{_('Description')}} <i data-for="help_collection_description" data-request="help"></i></label>
+                        <textarea id="coll_description" name="description" class="form-textarea" placeholder="description" rows="8">{{ target_coll.description|default('',true) }}</textarea>
 
                       </div><div class="form-box">
-                        <div class="label">{{ _('License') }}<i data-for="help_coll_license" data-request="help"></i></div>
+                        <div class="label">{{ _('License') }}<i data-for="help_collection_license" data-request="help"></i></div>
                         <div class="form-group" id="coll_license" role="group">
                           {% for k in possible_licenses.keys() %}
                           {% set label='not choosen' if k=='' else k %}
@@ -64,8 +85,8 @@
               <legend class="tab-control">{{_('Projects')}} </legend>
               <div class="w-full tab-content mt-0">
           <div class="form-box">
-            <div >{{ pick_from_other( (sourceid == 0),key='project',modal_title=_('Pick projects'), sourceid=sourceid) }}<label for="project_ids">{{_('Projects')}}<i data-for="help_coll_projects" data-request="help"></i></label></div>
-            <select id="project_ids" name="project_ids[]" data-type="project"  data-importfield="projid" class="js js-autocomplete form-multiselect project" multiple autocomplete=off><option value="0">{{_('Select projects')}}</option>
+            <div >{{ pick_from_other( (sourceid == 0),key='project',modal_title=_('Add or remove projects'), sourceid=sourceid) }}<label for="project_ids">{{_('Projects')}}<i data-for="help_collection_projects" data-request="help"></i></label></div>
+            <select id="project_ids" name="project_ids[]" data-type="project" data-refresh="refresh_aggregated" data-importfield="projid" class="js js-autocomplete form-multiselect project" multiple autocomplete=off><option value="0">{{_('Select projects')}}</option>
      {% for p in projectlist %}
               <option value="{{ p.id }}"  selected="selected">{{ p.title }}</option>
               {% endfor %}
@@ -73,7 +94,7 @@
           </div>
 
         </div>
-      </fieldset><div class="w-full md:w-1/2 tab"><fieldset>
+      </fieldset><!--<div class="w-full md:w-1/2 tab"><fieldset>
         <legend class="tab-control">{{_('Creator Users and organisations')}}</legend><div class="tab-content">
           <div class="form-box"  id="section-creators" class="w-full tab" data-u="{{ current_user.id|string() }}" data-alert="true">
             <label for="creator_persons">{{_('Creator users  and organisations')}}<i data-for="help_coll_projects" data-request="help"></i></label>
@@ -104,86 +125,10 @@
         </div>
       </div>
     </fieldset>
-    </div><div class="w-full tab"><fieldset><legend class="tab-control">{{_('Aggregated projects properties')}}</legend><div class="tab-content flex flex-wrap"><div class="w-full md:basis-1/2">
-    <div class="form-box">
-          <label for="inittaxo">{{_('Definition of preset for manual sorting')}}<i data-for="help_initclassiflist" data-request="help"></i></label>
-          <select id='inittaxo' class="form-multiselect js js-autocomplete" name="inittaxo[]" data-importfield="init_classif_list"  data-type="taxo" multiple readonly  autocomplete=off>
-           {% for r in predeftaxo %}
-            <option value="{{ r[0] }}" selected="selected"> {{ r[1] }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-      </div>
-      <div  class="w-full md:basis-1/2">
-        <div class="form-box">
-          <label for="classiffieldlist">{{_('Fields available for sorting & Display In the manual classification page')}}<i data-for="help_classiffieldlist" data-request="help"></i></label>
-          <textarea id="classiffieldlist" name="classiffieldlist" class="form-textarea" readonly rows="8">{{ classiffieldlist|default('',true)  }}</textarea>
-          </div>
-            <div class="form-box">
-              <label for="cnn_network_id" >{{_('Deep feature extractor')}}<i data-for="help_cnn_network_id" data-request="help"></i></label><input type="text" class="form-input" readonly name="cnn_network_id" id="cnn_network_id"></div>
-              <div class="form-box">
-                <div class="label" data-for="status" >{{ _('Status') }} </div>
-                <div class="form-group" role="group" >
-                  {%- set status = status or ""-%}
-
-                  {% for st in (("Annotate",_("Annotate")),("ExploreOnly",_("Explore Only")),("Annotate No Prediction",_("Annotate No Prediction"))) %}
-                       {%-if status == st[0]-%}
-                    {%set required=(loop.index==1) and target_coll %}
-                  {{ form_group_radio('status_' + loop.index|string(),'status',st[0],st[1],status,required=required, extra=extra,readonly=True)}}
-                       {%-endif-%}
-                  {% endfor %}
-                </div>
-              </div>
-              <div class="form-box">
-                 <div class="label" data-for="access">{{ _('Access') }}<i data-for="help_proj_access" data-request="help"></i></div>
-                 <div class="form-group" id="proj_access" role="group">
-                   {%- set access = access or "" -%}
-                   {% for k,v in possible_access.items() %}
-                     {%- if access==k -%}
-                      {%set required=(loop.index==1) and target_coll %}
-                   {{form_group_radio('access_'+ loop.index|string(),'access',k,v,access, required=required, extra=extra ,readonly=True)}}
-                     {%-endif-%}
-                       {% endfor %}</div>
-               </div>
-      </div>
-      <div id="section-privileges" class="js js-privileges w-full" data-readonly data-u="{{ current_user.id|string() }}" data-alert="true">
-        <div class="legend">Privileges</div>
-      <div class="flex flex-col w-full px-4" id="listprivileges" >
-          <div class="row" data-headers="true">
-            <div class="th ident label">{{ _('Name') }}</div>
-            <div class="th priv label">{{ _('Privilege') }}<i data-for="help_collection_privileges" data-request="help"></i></div>
-            <div class="th contact label">{{ _('Contact') }}<i data-for="help_collection_privileges#help_collection_privileges_contact" data-request="help"></i></div>
-          </div>
-          {% set count = namespace(value=0)%}
-          {% if members_by_right is iterable and members_by_right|length > 0 %}
-          {%-set priv={"managers":"Manage","annotators":"Annotate","viewers":"View"}-%}
-          {% for k,members in members_by_right.items() %}
-          {% for member in members %}
-          <div class="row messagepos" data-readonly data-block="member">
-            {{ member_cells(count.value|string(),member= member,privilege=priv[k],autocomplete=True, required=False, extra='',readonly=True) }}
-          </div>
-          {% set count.value = count.value + 1 %}
-          {% endfor %}
-          {% endfor %}
-          {% set required = False %}
-          {% else %}
-          {# new project admin is project creator #}
-        <div class="row hide" data-model data-block="member">
-            {{ member_cells('0',member = {id:0,name:'',email:'',delet:''},privilege='Manage', autocomplete=True,required=False,readonly=True) }}
-          </div>
-          {% endif %}
-          </div>
-
-        <!-- add privilege -->
-        <!--  <div class="w-full block">
-          <button id="addmember" type="button" class="button is-new float-right clear-right text-left" data-target="member" data-add="block" data-title="{{ _('New privilege') }}"><i class="icon icon-plus-sm align-bottom mr-1"></i>{{ _('New privilege') }}</button>
-        </div>--></div>  {%-if target_coll-%}<div><div class="legend">{{_('Mapping')}}</div>
-          <div><div>Common imported columns and their column identifier <i data-for="help_collection_mapping" data-request="help"></i></div>
-  {{ display_freecols()}}</div></div>{%-endif-%}
+    </div>--><div class="w-full tab"><fieldset><legend class="tab-control">{{_('Aggregated projects properties')}}</legend><div class="tab-content flex flex-wrap">
+         <a id="refresh_aggregated" data-href="{{url_for('gui_collection_aggregated',project_ids=target_coll.project_ids|join(','))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 {{'hide' if new}}">{{_('Display aggregated projects properties')}} <i data-for="help_collection_aggregated_properties" data-request="help"></i></a>
     </div></fieldset></div></div>
 
-{{excluded}}
 <div class="w-full text-left my-8"> <input type="hidden" name="save" value="Y">
   <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{url_for('gui_collection', collection_id= target_coll.id) if target_coll }}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to collection list ') }}">{{ _('Cancel') }}</a>
 </div>

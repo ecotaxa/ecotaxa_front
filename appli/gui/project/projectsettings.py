@@ -40,7 +40,6 @@ def get_target_prj(
                             "annotators": target_proj.annotators,
                             "viewers": target_proj.viewers,
                             "status": target_proj.status,
-                            "license": target_proj.license,
                             "access": target_proj.access,
                             "formulae": target_proj.formulae,
                         }

@@ -1,0 +1,42 @@
+{%if not partial%}
+{% extends "./v2/layout.html" %}
+{%endif%}
+{% macro collection_settings() -%}
+<div class="block mb-4">
+  <div class="stat-item"><span class="stat-label">{{_('Citation')}}</span>
+<div class="stat-info">{{target_coll.citation if target_coll.citation != None else '' }}</div></div>
+    <div class="stat-item"><span class="stat-label">{{_('License')}}</span>
+<div class="stat-info">{{target_coll.license if target_coll.license != None else '' }}</div></div>
+  <div class="stat-item"><span class="stat-label">{{_('Contact')}}</span>
+<div class="stat-info"><span class="font-normal">{{target_coll.contact_user.name}}</span> <a href="mailto:{{target_coll.contact_user.email}}" class="hover:underline">{{target_coll.contact_user.email}}</a></div></div>
+{%-set by_role= {"creator":_('Creator users  and organisations'),"associate":_('Associate users and organisations')}-%}
+  {%-for role,title in by_role.items()-%}
+<div class="stat-item "><span class="stat-label">{{title}} <i data-for="help_collection_{{role}}s" data-request="help"></i></span>
+  <div class="stat-info">
+  {% for item in target_coll[role+'_users'] %}
+  <div class="pr-2 inline-block"><span class="font-normal">{{item.name }}</span> <a href="mailto:{{item.email}}" class="hover:underline">{{item.email}}</a></div>
+  {% endfor %}
+    {% for item in target_coll[role+'_organisations'] %}
+    <div class="pr-2 inline-block"><span class="font-normal">{{item.name }}</span></div>
+    {%endfor%}
+</div>
+</div>
+{% endfor %}
+<div class="stat-item"><span class="stat-label">{{_('Metadata provider')}}</span>
+<div class="stat-info"><span class="font-normal">{{target_coll.provider_user.name}}</span> <a href="mailto:{{target_coll.provider_user.email}}" class="hover:underline">{{target_coll.provider_user.email}}</a></div></div>
+  <div class="stat-item"><span class="stat-label">{{_('Abstract')}}</span>
+<div class="stat-info">{{target_coll.abstract if target_coll.abstract != None else '' }}</div></div>
+    <div class="stat-item"><span class="stat-label">{{_('Description')}}</span>
+<div class="stat-info">{{target_coll.description if target_coll.description != None else '' }}</div></div>
+   {%if (target_coll.system_id != None and target_coll.system_id!='?')%}
+    <div class="stat-item"><span class="stat-label">{{_('DOI')}}</span>
+<div class="stat-info">{{target_coll.system_id }}</div></div>
+<div class="stat-item"><span class="stat-label">{{_('Permanent URL')}}</span>
+<div class="stat-info">{{target_coll.short_title  }}</div></div>{%-endif%}
+{%-endmacro -%}
+{%- if  partial  -%}
+{{ collection_settings() }}
+<!--
+<span class="w-auto ml-auto float-right clear-both  mb-6">
+<a href="{{url_for("gui_prj_about",projid=target_coll.id )}}" class="btn is-about" >{{_('about')}}</a></span>-->
+{%- endif -%}

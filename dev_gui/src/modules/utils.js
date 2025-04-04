@@ -5,7 +5,6 @@ import {
 const dirseparator = "/";
 const urlseparator = "/";
 
-
 function browser_version() {
   const user_agent = navigator.userAgent;
 
@@ -93,7 +92,6 @@ function format_license(data, withlink = false) {
   }
 
 }
-
 function download_blob(data, filename, mimetype) {
   let blob, url;
   if (!Array.isArray(data)) data = [data];
@@ -231,5 +229,5 @@ export {
   format_bytes,
   stop_on_error,
   dirseparator,
-  urlseparator
+  urlseparator,
 }

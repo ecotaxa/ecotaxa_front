@@ -37,6 +37,7 @@ function _get_label(el, labelfield, item = false) {
 }
 // settings for autocomplete select component - users , instruments , taxons
 function createJsTomSelect() {
+const funcselector='.js-autocomplete';
   function applyTo(item, settings = {}, siblings = null) {
     const id = item.getAttribute('id');
     const multiple = item.hasAttribute('multiple');
@@ -112,8 +113,6 @@ function createJsTomSelect() {
                let response;
             const reply=(resp.ok) ?await resp.text():await Promise.reject(resp);
         const parent=item.form.parentElement;
-        const pos=parseInt(parent.offsetTop)+parseInt(document.documentElement.scrollTop);
-        console.log('pos',pos);
         parent.classList.remove("relative");
         document.body.classList.add(css.hidevscroll);
         const popup =create_box("div", {class:["absolute","z-[100]","bg-white","w-96","h-48","p-8","rounded","drop-shadow","centered"],src:personurl},parent);
@@ -125,11 +124,14 @@ function createJsTomSelect() {
         popup.querySelectorAll('[data-href]').forEach(btn=> {
         popup.classList.remove('h-48');
         popup.classList.add('h-auto');
+        popup.classList.add('overflow-y-auto');
+        popup.classList.add('max-h-full');
         btn.addEventListener('click',async(e)=>{
         const url=btn.dataset.href + '?type=' + btn.dataset.type;
         response =await fetch(url,fetchSettings);
         const reply=(response.ok) ?await response.text():await Promise.reject(response);
         content.innerHTML=reply;
+        content.querySelectorAll(funcselector).forEach(el=> {applyTo(el);});
         const form2submit=popup.querySelector('form');
         form2submit.dataset.fetch=true;
         const formSubmit = new FormSubmit(form2submit);
@@ -397,7 +399,7 @@ function createJsTomSelect() {
       }
     }
     option.settings = Object.assign(default_settings, option.settings)
-    if (id !== null) {
+    if (id !== null ) {
       const ts = new TomSelect('#' + id, option.settings);
       ts.wrapper.classList.remove(domselectors.component.tomselect.ident);
       ts.wrapper.classList.remove('js');
@@ -415,6 +417,7 @@ function createJsTomSelect() {
           break;
         case models.project:
           // add data-noaction just to select a project
+
           if (item.dataset.dest) {
             ts.on('item_add', (v, el) => {
               if (v != item.dataset.value && ts.options[v] && !el.querySelector('a')) {
@@ -444,6 +447,25 @@ function createJsTomSelect() {
                   }
                 }
               }
+            });} else if (item.dataset.refresh ) {
+                 const refresh = function(e) {
+        const el=document.getElementById(item.dataset.refresh);
+        if (el===null) return;
+        const href=el.dataset.href.split('?');
+        if (href.length>1) {
+            href[1]=href[1].split("=");
+            if (href[1].length>1) {
+            href[1][1]=item.tomselect.items.join(',');
+            }
+            href[1]=href[1].join('=');}
+            el.dataset.href=href.join('?');
+            el.click();
+        } ;
+        ts.on('item_add', (v,el)=> {
+            if(refresh!==null) refresh(ts.items.join(','));
+            });
+            ts.on('item_remove', (v,el)=> {
+            if(refresh!==null) refresh(ts.items.join(','));
             });
           }
           break;

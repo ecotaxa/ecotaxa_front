@@ -1,0 +1,80 @@
+{% from "./v2/macros/macros.html" import form_group_radio , inputdict with context %}
+{% from "./v2/project/macros.html" import  member_cells, display_freecols with context %}
+<div class="w-full md:basis-1/2">
+    <div class="form-box">
+          <label for="inittaxo">{{_('Definition of preset for manual sorting')}}<i data-for="help_initclassiflist" data-request="help"></i></label>
+          <select id='inittaxo' class="form-multiselect js js-autocomplete" name="inittaxo[]" data-importfield="init_classif_list"  data-type="taxo" multiple readonly  autocomplete=off>
+           {% for r in agg.predeftaxo %}
+            <option value="{{ r[0] }}" selected="selected"> {{ r[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+<div  class="w-full md:basis-1/2">
+        <div class="form-box">
+          <label for="classiffieldlist">{{_('Fields available for sorting & Display In the manual classification page')}}<i data-for="help_classiffieldlist" data-request="help"></i></label>
+          <textarea id="classiffieldlist" name="classiffieldlist" class="form-textarea" readonly rows="8">{{ agg.classiffieldlist|default('',true)  }}</textarea>
+          </div>
+            <div class="form-box">
+              <label for="cnn_network_id" >{{_('Deep feature extractor')}}<i data-for="help_cnn_network_id" data-request="help"></i></label><input type="text" class="form-input" readonly name="cnn_network_id" id="cnn_network_id" value="{{agg.cnn_network_id}}"></div>
+              <div class="form-box">
+                <div class="label" data-for="status" >{{ _('Status') }} </div>
+                <div class="form-group" role="group" >
+                  {%- set status = agg.status or ""-%}
+                  {% for st in (("Annotate",_("Annotate")),("ExploreOnly",_("Explore Only")),("Annotate No Prediction",_("Annotate No Prediction"))) %}
+                       {%-if status == st[0] or new -%}
+                    {%set required=(loop.index==1) and target_coll %}
+                  {{ form_group_radio('status_' + loop.index|string(),'status',st[0],st[1],status,required=required, extra=extra,readonly=True)}}
+                       {%-endif-%}
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="form-box">
+                 <div class="label" data-for="access">{{ _('Access') }}<i data-for="help_proj_access" data-request="help"></i></div>
+                 <div class="form-group" id="proj_access" role="group">
+                     {%- set access = agg.access or "" -%}
+                   {% for k,v in agg.possible_access.items() %}
+                     {%- if access==k or new -%}
+                      {%set required=(loop.index==1) and target_coll %}
+                   {{form_group_radio('access_'+ loop.index|string(),'access',k,v,access, required=required, extra=extra ,readonly=True)}}
+                     {%-endif-%}
+                       {% endfor %}</div>
+               </div>
+      </div>
+    <div id="section-privileges" class="js js-privileges w-full" data-readonly data-u="{{ current_user.id|string() }}" data-alert="true">
+        <div class="legend">Privileges</div>
+      <div class="flex flex-col w-full px-4" id="listprivileges" >
+          <div class="row" data-headers="true">
+            <div class="th ident label">{{ _('Name') }}</div>
+            <div class="th priv label">{{ _('Privilege') }}<i data-for="help_collection_privileges" data-request="help"></i></div>
+            <div class="th contact label">{{ _('Contact') }}<i data-for="help_collection_privileges#help_collection_privileges_contact" data-request="help"></i></div>
+          </div>
+          {% set count = namespace(value=0)%}
+          {% set readonly=False if new else True%}
+          {% if agg.privileges is iterable and agg.privileges|length > 0 %}
+          {%-set priv={"managers":"Manage","annotators":"Annotate","viewers":"View"}-%}
+          {% for k,members in agg.privileges.items() %}
+          {% for member in members %}
+          <div class="row messagepos" data-readonly data-block="member">
+            {{ member_cells(count.value|string(),member= member,privilege=priv[k],autocomplete=True, required=False, extra='',readonly=readonly) }}
+          </div>
+          {% set count.value = count.value + 1 %}
+          {% endfor %}
+          {% endfor %}
+          {% set required = False %}
+          {% else %}
+          {# new project admin is project creator #}
+        <div class="row hide" data-model data-block="member">
+            {{ member_cells('0',member = {id:0,name:'',email:'',delet:''},privilege='Manage', autocomplete=True,required=False,readonly=True) }}
+          </div>
+          {% endif %}
+          </div>
+
+        <!-- add privilege -->
+        <!--  <div class="w-full block">
+          <button id="addmember" type="button" class="button is-new float-right clear-right text-left" data-target="member" data-add="block" data-title="{{ _('New privilege') }}"><i class="icon icon-plus-sm align-bottom mr-1"></i>{{ _('New privilege') }}</button>
+        </div>--></div>
+<div><div class="legend">{{_('Mapping')}}</div>
+          <div><div>Common imported columns and their column identifier <i data-for="help_collection_mapping" data-request="help"></i></div>
+  {{ display_freecols(agg.freecols)}}</div></div>
+{{excluded}}

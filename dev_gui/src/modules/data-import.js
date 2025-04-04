@@ -75,7 +75,6 @@ export class DataImport {
         tabbutton: '#tab-import-' + what,
       };
       this.selector = selector;
-
       this.importcontainer = options.importcontainer instanceof HTMLElement ? options.importcontainer : document.querySelector(options.importcontainer);
       this.form = (options.form) ? ((options.form) instanceof HTMLElement ? options.form : document.querySelector(options.form)) : this.dom.closest('form');
       this.button = options.button instanceof HTMLElement ? options.button : document.querySelector(options.button);
@@ -129,9 +128,8 @@ export class DataImport {
   }
 
   columnProperty(name, index) {
-    const th = this.thcells[index];
     if (this.tbl) return (this.tbl.grid.columns[index].hasOwnProperty(name)) ? this.tbl.grid.columns[index][name] : null;
-    else return (th.dataset[name]) ? th.dataset.name : null;
+    else { const th = this.thcells[index]; return (th.dataset.hasOwnProperty(name)) ? th.dataset.name : null;}
   }
   columnIndex(prop, value) {
     return Array.from(this.dom.querySelectorAll('thead th')).findIndex(th => (th.dataset[prop] && th.dataset[prop] === value));
@@ -345,7 +343,6 @@ export class DataImport {
             break;
           case typeimport.project:
             const ln = Object.keys(this.imports).length;
-
             if (!this.imports[name]) this.imports[name] = [];
             const data = this.getDataToImport(cell, celldata);
             if (add) this.imports[name].push(data);
@@ -458,7 +455,8 @@ export class DataImport {
       this.dismiss();
     }
     const contact = (clear === true && this.imports[models.contact]) ? this.imports[models.contact] : null;
-    return (projectPrivileges.jsprivileges.importPrivileges(privileges, clear, contact, importedtag, dismiss));
+    const done= (projectPrivileges.jsprivileges.importPrivileges(privileges, clear, contact, importedtag, dismiss));
+    return done;
   }
 
   resetSelector(tr) {
@@ -538,7 +536,6 @@ export class DataImport {
         }, this.importcontainer);
         ts = true;
       } else {
-
         if (!this.targetimport) return;
         this.importzoneid = this.targetimport.id;
         ts = this.targetimport.tomselect;
@@ -614,15 +611,16 @@ export class DataImport {
         break;
       case typeimport.project:
         if (!this.importzone) return false;
-        const newone = (this.form.dataset.id) ? parseInt(this.form.dataset.id) : 0;
-        const results = await this.compileProjectRecords(newone);
         done = this.cloneImport(btn);
         const idx = selectcells.indexOf(models.projid);
-        if (idx >= 0) selectcells.splice(idx, 1);
-        ["creator_users", "creator_organisations", "classiffieldlist", "privileges", "access", "status", "cnn_network_id"].forEach(result => {
+        const newone = (this.form.dataset.id) ? parseInt(this.form.dataset.id) : 0;
+        if (newone==0) {
+        if(selectcells.indexOf("creator_users") <0) selectcells.concat(["creator_users","creator_organisations"]);
+        const results = await this.compileProjectRecords(newone,selectcells);
+        selectcells.forEach(result => {
           this.imports[result] = results[result];
         });
-        this.imports["init_classif_list"] = results.initclassiflist;
+        }
       default:
         const ts_add_select_item = function(ts, data) {
           const el = {};
@@ -748,7 +746,6 @@ export class DataImport {
 
 
           } else if (name === typeimport.privileges) {
-            //const clearprivileges = (what === typeimport.settings);
             const clearprivileges = false;
             done = done && this.importPrivileges(this.imports[name], clearprivileges);
           }

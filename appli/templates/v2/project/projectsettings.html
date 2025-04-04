@@ -129,7 +129,7 @@
           {%-if target_proj-%}
           <fieldset id="section-freecols" class="w-full tab" >
             <legend class="tab-control">{{_('Mapping')}}</legend>
-          <div class="tab-content"><div>Imported columns and their column identifier <i data-for="help_project_mapping" data-request="help"></i></div>{{display_freecols()}}</div>
+          <div class="tab-content"><div>Imported columns and their column identifier <i data-for="help_project_mapping" data-request="help"></i></div>{{display_freecols(freecols) if freecols }}</div>
           </fieldset>{%-endif-%}
     </div>
 

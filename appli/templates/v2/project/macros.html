@@ -47,7 +47,7 @@
 <div data-elem="delet"><label for="{{prefix}}_delet_{{index}}" title="{{ _('remove') }}" data-remove="{{ _('remove') }}" data-restore="{{_('restore')}}"><input type="checkbox" id="{{prefix}}_delet_{{index}}" name="{{prefix}}[delet][{{index}}]" value="{{ index }}"
       {{ 'disabled' if (contact!=None and member.id==contact.id) }} {{ 'hidden' if index == 0  }} data-manage="{{ _('to delete a user with Manage privilege , modify the privilege attribute')}}" class="form-line-delet {{'hide' if readonly==True}} " {{'disabled' if readonly==True}} {{extra}}></label></div>
 {%- endmacro %}
-{%-macro display_freecols()-%}
+{%-macro display_freecols(freecols)-%}
 {%-if freecols -%}
 <div id="section_freecols" class="flex flex-wrap w-full" > {%- for column, values in freecols.items()-%}<div class="form-box md:basis-1/2"><div class="label">{{column}}</div><div class="flex flex-wrap text-xs">
   {%-for k,value in values.items()-%}<span class="w-96 md:w-48 mr-4">{{k}} : {{value}}</span> {%-endfor-%}</div></div>{%-endfor%}</div>

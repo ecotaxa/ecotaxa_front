@@ -1,0 +1,9 @@
+{%-if animated!="" -%}<span class="flex absolute top-0 end-0 size-3 -mt-1.5 -me-1.5">
+    <span class="animate-ping absolute inline-flex size-full rounded-full bg-{{color}}-400 opacity-75 dark:bg-{{color}}-600"></span>
+    <span class="relative inline-flex rounded-full size-3 bg-{{color}}-500"></span>
+  </span>
+{%-else -%}
+<span class="absolute top-0 end-0 inline-flex items-center size-3.5 rounded-full border-2 border-white text-xs font-medium transform -translate-y-1/2 translate-x-1/2 bg-{{color}}-500 text-white dark:border-neutral-900">
+   {%-if text!=''%}<span class="sr-only">{{text}}</span>{%-endif-%}
+  </span>
+{%-endif-%}

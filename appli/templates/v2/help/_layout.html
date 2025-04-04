@@ -1,5 +1,5 @@
 {% if current_user %}
-{% set helps =[{'name':'User account','file':'_help_user_profile','title':_('User account')},{'name':'Access projects','file':'_help_project_req_access','resume':'all info to create and participate to projects'},{'name':'How to prepare data','file':'_help_jobs_prepare_data'},{'name':'Import data','file':'_help_job_import'},{'name':'Export data','file':'_help_job_export'},{'name':'Project settings','file':'_help_projectsettings'},{'name':'Job monitoring','file':'_help_job_monitor'},{'name':'About Project','file':'_help_project_stats'}]%}
+{% set helps =[{'name':'User account','file':'_help_user_profile','title':_('User account')},{'name':'Access projects','file':'_help_project_req_access','resume':'all info to create and participate to projects'},{'name':'How to prepare data','file':'_help_jobs_prepare_data'},{'name':'Import data','file':'_help_job_import'},{'name':'Export data','file':'_help_job_export'},{'name':'Project settings','file':'_help_projectsettings'},{'name':'Collection settings','file':'_help_collection_settings'},{'name':'Job monitoring','file':'_help_job_monitor'},{'name':'About Project','file':'_help_project_stats'}]%}
 {% else %}
 {%- set helps =[{'name':'Access','file':'_help_project_req_access'}]-%}
 {% endif %}

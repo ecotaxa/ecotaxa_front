@@ -9,7 +9,7 @@ import {
 } from '../modules/modules-config.js';
 import {
   get_catcha_reponse,
-  decode_HTMLEntities
+  decode_HTMLEntities,fetchSettings
 } from '../modules/utils.js';
 import {
   export_html2word
@@ -75,6 +75,31 @@ function createActivItems() {
               top: 0,
               behavior: 'smooth'
             });
+          });
+          break;
+          case "normalize":
+           const target = (item.dataset.target) ? document.getElementById(item.dataset.target) : item;
+          if (target===null) return;
+          const normalize_title= function(value) {
+            // space replaced by _ , and only alfanumeric lowercase
+            value=value.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gu, '').toLowerCase();
+            return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_");
+          }
+           if(target!==item ) {
+           item.addEventListener("input",(e)=> {
+           if (item.value!=="") target.value=normalize_title(item.value);
+          });}
+           target.addEventListener("input",(e)=> {
+           if (target.value.trim()!=="") target.value=normalize_title(target.value); else target.value=target.value.trim();
+          });
+          if (item.value.trim()!=="") target.value=normalize_title(item.value);
+          break;
+          case "replace":
+          const toreplace=(item.dataset.replace)?item.dataset.replace:null;
+          const replaceby=(item.dataset.replaceby)?item.dataset.replaceby:"";
+          if(toreplace===null) return;
+           item.addEventListener("input",(e)=> {
+           if (item.value!=="") item.value=item.value.replace(toreplace,replaceby,g);
           });
           break;
         case 'wrapeye':
@@ -215,6 +240,14 @@ function createActivItems() {
               export_html2word(article, item.parentElement);
             });
           }
+          break;
+          case "badge":
+          const queryurls={new:"animated=y&color=success",info:"color=info"};
+          const as=(item.dataset.as)?item.dataset.as:"info";
+          let url=(Object.keys(queryurls).indexOf(as)>=0)?queryurls[as]:"";
+          url+=(item.dataset.btext)?"&text="+item.dataset.btext:"";
+          url="/gui/badge?"+ new URLSearchParams(url);
+          fetch(url,fetchSettings()).then(response=>response.text()).then(response=> item.insertAdjacentHTML('beforeend',response))
           break;
       }
 

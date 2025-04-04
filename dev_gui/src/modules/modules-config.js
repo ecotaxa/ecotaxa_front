@@ -7,6 +7,7 @@ export const models = {
   projid: 'projid',
   sampleid: 'sampleid',
   contact: 'contact',
+  contact_user:'contact_user',
   managers: 'managers',
   annotators: 'annotators',
   about: 'about',

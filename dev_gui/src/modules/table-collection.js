@@ -8,6 +8,45 @@ import {
 
 export default function(state) {
   return {
+    contact_user: (value, rowIndex, cellIndex, td = {}) => {
+      const about = (Array.isArray(value)) ? Boolean(value[1]) : false;
+      value = (Array.isArray(value)) ? String(value[0]).trim() : String(value).trim();
+      if (value === null) value = ``;
+      let node = [];
+      //cell value is an array with title and  boolean which tells if about is autho or not
+      // display stats and info about the project if ok
+      const id = state.getCellData(rowIndex, models.id);
+      // contact
+      let contact = state.getCellData(rowIndex, models.contact_user);
+      const iscontact = (contact!==null);
+      if (contact) {
+        const nodecontact = {
+          nodename: "A",
+          attributes: {
+            href: `mailto:${contact.email}`,
+            class: "contact",
+            target: "_blank"
+          },
+          childnodes: [state.setTextNode(contact.name)]
+        };
+        if (iscontact) nodecontact.attributes["data-contact"] = iscontact;
+        node = [state.setTextNode(value), nodecontact];
+      } else node = [state.setTextNode(value)];
+      if (about === true) {
+        td.childnodes = [{
+          nodename: "DETAILS",
+          attributes: {
+            "data-id": id,
+            "data-what": models.about
+          },
+          childnodes: [{
+            nodename: "SUMMARY",
+            childnodes: node
+          }]
+        }];
+      } else td.childnodes = node;
+      return td;
+    },
     select: (value, rowIndex, cellIndex, td = {}) => {
       const id = state.getCellData(rowIndex, models.id);
       const html = [];
@@ -58,5 +97,6 @@ export default function(state) {
       td.html = format_license(value, true);
       return td;
     },
+
   }
 }

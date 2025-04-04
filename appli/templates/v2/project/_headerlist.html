@@ -1,7 +1,7 @@
-<div id="table-filters" class="order-3 sm:order-1 w-full clear-both md:clear-none block md:inline-block text-center">
-  {% if current_user.last_used_projects|length == 0 %}
+<div id="table-filters" class=" w-full md:w-auto text-center pt-4">
+  {%- if current_user.last_used_projects|length == 0 -%}
   <div id="welcome-info">{{_('To start using EcoTaxa, you need to <a href="'+url_for('gui_prj_create')+'">Create a project</a> or ask for permission in the list of <a href="'+url_for("gui_prj_all")+'">projects</a>')}}</div>
   {% else %}
- <div class=" is-title inline   md:-mt-8 ">{{ _('Other projects') if listall==True else  _('Accessible projects') }}</div>
-  <a href="{{url_for("gui_prj_all") if listall != True else url_for("gui_prj") }}" class="is-filter inline" data-action="add-filters" data-noprev=true>{{ _('Show only accessible projects') if listall == True else  _('Show other projects')}}<i class="icon icon-chevron-right"></i></a> {% endif %}
+ <div class=" is-title inline ">{{ _('Other projects') if listall==True else  _('Accessible projects') }}</div>
+  <a href="{{url_for("gui_prj_all") if listall != True else url_for("gui_prj") }}" class="is-filter inline" data-action="add-filters" data-noprev=true>{{ _('Show only accessible projects') if listall == True else  _('Show other projects')}}<i class="icon icon-chevron-right"></i></a> {%- endif -%}
   </div>

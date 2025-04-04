@@ -47,14 +47,15 @@
   <a href="{{url_for('gui_collection_edit',collection_id=target_coll.id)}}">
     {{_('Settings')}}
   </a>
-</li><li>  <a href="{{url_for("gui_collection_erase",collection_id=target_coll.id) }}" >
-    {{_('Erase')}}
+</li><li><div>{{_('Tools')}}</div>
+<ul aria-expanded=false><li>  <a href="{{url_for("gui_collection_erase",collection_id=target_coll.id) }}" >
+    {{_('Erase collection')}}
   </a>
-</li><li>
+</li></ul></li><!--<li>
       <a href="{{url_for('gui_collection_about',collection_id=target_coll.id)}}" >
         {{_('About')}}
       </a>
-    </li>{%-endmacro-%}
+    </li>-->{%-endmacro-%}
 {% if target_coll and target_coll.id|int > 0 %}
         <a href="{{ url_for("gui_collection")}}" title="{{_('collections list')}}" class="text-lg uppercase">
           &laquo;

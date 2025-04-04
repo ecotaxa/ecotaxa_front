@@ -37,7 +37,7 @@ export const initImport = async (state) => {
     DataImport
   } = await import('../modules/data-import.js');
   state.dataImport = new DataImport(state);
-  state.importfields = state.grid.columns.filter(column => (column.selectcells));
+  state.importfields = state.grid.columns.filter(column => (column.hasOwnProperty('selectcells')));
   state.importfields = (state.importfields.length) ? state.importfields[0].selectcells : null;
   state.dataImport.itemRemove = itemRemove;
   if (state.params.import && state.params.import === typeimport.project) {
@@ -83,7 +83,6 @@ export default function(state) {
   }
   return {
     contact: (value, rowIndex, cellIndex, td = {}) => {
-
       const about = (Array.isArray(value)) ? Boolean(value[1]) : false;
       value = (Array.isArray(value)) ? String(value[0]).trim() : String(value).trim();
       if (value === null) value = ``;
@@ -247,8 +246,9 @@ export default function(state) {
       td.childnodes = [state.setTextNode(String(value) + '%'), node];
       return td;
     },
-    access: (value, rowIndex, cellIndex, td = {}) => {
-      td.html = value;
+    access:(value, rowIndex, cellIndex, td = {}) => {
+      const possible_access={"0":"Private","1":"Public","2":"Open"}
+      td.html = possible_access[value];
       return td;
     },
     status: (value, rowIndex, cellIndex, td = {}) => {

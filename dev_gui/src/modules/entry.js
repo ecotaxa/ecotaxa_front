@@ -471,7 +471,7 @@ export function EntryControls(container = document, options = {}) {
   }
 
   function addControl(control, position = null, action = null) {
-    const ctrl = create_box('span', {});
+    const ctrl = create_box('span', (control.class)?{class:control.class}:{});
     const l = box.children.length;
     if (position === null || l < position + 1) box.append(ctrl);
     else if (position === 0 || l === 0) box.prepend(ctrl);

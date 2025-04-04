@@ -1,17 +1,8 @@
-from typing import List
-from flask import flash, request, render_template, redirect, url_for, make_response
-from flask_login import current_user, login_required, fresh_login_required
-from werkzeug.exceptions import NotFound, Unauthorized, Forbidden
-from appli import app, gvp, gvg
-from appli.project import sharedfilter
-from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import CollectionsApi, ProjectsApi
-from to_back.ecotaxa_cli_py.models import CollectionModel
-
-from appli.gui.commontools import is_partial_request, py_get_messages
-from appli.gui.collection.settings import get_collection
-from appli.gui.staticlistes import py_messages
+from flask import request, render_template, make_response
+from flask_login import login_required
+from appli import app, gvg
+from appli.gui.commontools import is_partial_request
+from appli.gui.collection.settings import collection_about
 
 
 @app.route("/gui/collection/noright/<int:collection_id>")
@@ -79,16 +70,21 @@ def gui_collection_create():
 
 @app.route("/gui/collection/aggregated", methods=["GET"])
 @login_required
-def gui_collection_simulate():
+def gui_collection_aggregated():
     from appli.gui.collection.settings import collection_aggregated
 
     project_ids = gvg("project_ids")
+    simulate = gvg("simulate", "")
+    aggregated = collection_aggregated(project_ids, simulate)
+    if simulate == "y":
+        import json
 
-    content = collection_aggregated(project_ids)
-    import json
-
-    ret = json.dumps(content)
-    return ret
+        return json.dumps(aggregated)
+    else:
+        partial = is_partial_request()
+        return render_template(
+            "v2/collection/_settings_aggregated.html", agg=aggregated, partial=partial
+        )
 
 
 @app.route("/gui/collection/edit/<int:collection_id>", methods=["GET", "POST"])
@@ -109,17 +105,6 @@ def gui_collection_classify(collection_id):
     return collection_classify(collection_id)
 
 
-@app.route(
-    "/gui/collection/export_darwin_core/<int:collection_id>", methods=["GET", "POST"]
-)
-# TODO - fresh_login_required
-@login_required
-def gui_collection_export_darwin_core(collection_id):
-    from appli.gui.collection.settings import collection_export_darwin_core
-
-    return collection_export_darwin_core(collection_id)
-
-
 @app.route("/gui/collection/erase/<int:collection_id>", methods=["GET", "POST"])
 # TODO - fresh_login_required
 @login_required
@@ -135,7 +120,6 @@ def gui_collection_erase(collection_id):
 @app.route("/gui/collection/about/<int:collection_id>", methods=["GET"])
 @login_required
 def gui_collection_about(collection_id):
-    params = dict({"limit": "5000"})
     partial = is_partial_request()
 
-    return collection_stats(projid, partial=partial, params=params)
+    return collection_about(collection_id, partial=partial)

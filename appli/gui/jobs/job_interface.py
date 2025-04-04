@@ -278,6 +278,7 @@ def export_format_options(_type=None, target="project"):
 
 
 def import_format_options(_type=None) -> dict:
+
     taxomapping = dict(
         {
             "taxo_mapping": {
@@ -297,7 +298,7 @@ def import_format_options(_type=None) -> dict:
                 "legend": _("Import Images and TSV files"),
                 "browse_label": _("Select one directory to import"),
                 "browse": "directory,file",
-                "textdrop": _("or Drop Files or Directories Here"),
+                "textdrop": _("or Drop Files or Folders Here"),
                 "datas": {
                     "skiploaded": False,
                     "skipobjectduplicate": False,
@@ -306,9 +307,9 @@ def import_format_options(_type=None) -> dict:
             "simple": {
                 "path": "/gui/job/create/SimpleImport",
                 "title": _("Images Import"),
-                "browse_label": _("Select one directory to import"),
+                "browse_label": _("Select one folder to import"),
                 "browse": "directory,file",
-                "textdrop": _("or Drop Files or Directories Here"),
+                "textdrop": _("or Drop Files or Folders Here"),
                 "legend": _(
                     "Import images in jpg, png, gif (possibly animated) formats and associate a fixed & reduced set of metadata, that you can enter below."
                 ),
@@ -317,9 +318,9 @@ def import_format_options(_type=None) -> dict:
                 "path": "/gui/job/create/UpdateImport",
                 "title": _("Update Metadata"),
                 "legend": _("Update metada associated to already importer images"),
-                "browse_label": _("Select one file or directory to import"),
+                "browse_label": _("Select one file or folder to import"),
                 "browse": "directory, file",
-                "textdrop": _("or Drop Files or Directories Here"),
+                "textdrop": _("or Drop Files or Folders Here"),
                 "datas": {"updateclassif": False},
             },
         }

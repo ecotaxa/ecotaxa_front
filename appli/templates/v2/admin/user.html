@@ -5,7 +5,7 @@
 <div class="container mx-auto">
     {% set modal_title = _("How to edit a user account") if user.id and user.id>0 else _("How to create a user account")%}
     {{modaluser(modal_title)}}
-  {% set legend = _('user') + ' ' + user.id|string() if user.id else _('new user') %}
+  {% set legend = _('user') + ' ' + user.id|string() if user.id>0  else _('new user') %}
   {% set incadmin = "v2/admin/_userroles.html"%}
   {% set redir ="gui/admin/users/"%}
 {% include('v2/users/_user.html')%}

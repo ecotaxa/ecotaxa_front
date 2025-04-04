@@ -193,9 +193,10 @@ export function JsImport(container, options = {}) {
     const control = {
       import: {
         action: 'import',
-        icon: 'icon-check',
+        class:["control-select"],
+        //icon: 'icon-check',
         typentries: (typentries) ? typentries : [entryTypes.branch],
-        text: 'import into project',
+        text: (options.toselect)?(options.toselect):'select to import',
         callback: add_remove_import
       }
     };

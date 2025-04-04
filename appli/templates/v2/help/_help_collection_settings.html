@@ -1,0 +1,46 @@
+{% extends "./v2/help/_layout.html" %}
+{% block article %}
+<article id="help-editcollection">
+  <h2 class="help-title">{{title if title !=None else _('Collection settings')}} </h2>
+  <details id="help_collection_create" >
+  <summary>{{_('Definition of a collection')}} </summary>
+  <div><p>
+  {{_('A project is the data management unit of EcoTaxa: it is where you import data and list who can access and classify objects.<br>
+  The first data import will determine which metadata fields  are associated with each object. Those will stay the same for all  objects of the project and for all subsequent imports.')}}</p>
+  <p>{{_('A project must therefore contain images taken with the  same instrument, with the same list of metadata fields. It typically  corresponds to deployments of that instrument on a scientific cruise or  along a time series.<br> Within the project, objects are further grouped in  samples, identified in the imported data; samples typically correspond  to a station or a time point in a time series.<br>
+  For EcoTaxa to be most efficient, projects should contain from 10,000 to a million objects, which usually means many samples.')}}</p><p>
+  {{_('A project must therefore contain images taken with the same instrument,  with the same list of metadata fields.<br> It typically corresponds to  deployments of the same sampling or imaging device on a scientific  cruise or along a time series. Within the project, objects are further  grouped in samples, identified in the imported data; samples typically  correspond to a station or a time point in a time series.')}}
+  </p></div></details>
+     <details id="help_collection_short-title" ><summary>{{_('Short title')}}</summary><div>{{ _('The short title will be used as the universal and permanent url of the collection. As many other fields, it cannot be changed once the collection is published and a Digital Object Identifier is added.') }} </div>
+          </details> <details id="help_collection_external_id"><summary>{{_('Digital Object Identifier')}}</summary><div>{{_('Once you publish your collection, you can get a Digital Object Identifier (GBIF provides them for example). Once you have one and fill it here, some aspects of the collection will be locked to ensure that it can always be found and continues to match the DOI.')}}</div>
+  </details>
+
+  <details id="help_collection_provider_user" ><summary>{{_('Metadata provider')}}</summary><div>{{ _('Person who is responsible for the content of this metadata record.') }} </div>
+  </details>
+  <details id="help_collection_contact_user" ><summary>{{_('Contact user')}}</summary><div>{{ _(' Name of the person that should be contacted by a user of the data to obtain more information about the dataset.') }} </div>
+  </details>
+
+  <details id="help_collection_citation" ><summary>{{_('Citation')}}</summary><div>{{_('Any technical, practical details that need to be shared with other users able to access this target_proj.')}}</div>
+  </details>
+  <details id="help_collection_abstract" ><summary>{{_('Abstract')}}</summary><div>{{ _('SCN Network used for prediction, if you change it, existing features computed with this network will be
+    erased.
+    <br>New features will be recomputed during the next automatic classification.') | safe }} </div>
+  </details>
+
+  <details id="help_collection_description" ><summary>{{_('Description')}}</summary><div>{{_('Any technical, practical details that need to be shared with other users able to access this target_proj.')}}</div>
+  </details>
+   <details id="help_collection_license" ><summary>{{_('License')}}</summary><div>{{ _('.') | safe}} </div>
+  </details>
+<details  id="help_collection_creator"><summary>{{_('Creator')}}</summary>
+  <div>{{_('Name of persons or organisations who are responsible for the creation / maintenance of the dataset. These persons will be mentioned in the citation.')}}</div>
+  </details>
+  <details  id="help_collection_associate"><summary>{{_('Associate')}}</summary>
+  <div>{{_('Name of persons or organisations who are responsible for the creation / maintenance of the dataset but to an extent that does not justify their inclusions as authors. These persons will not be mentioned in the citation.')}}</div>
+  </details><details id="help_collection_projects"><summary>{{_('Contact')}}</summary><div>{{_('A selected manager contact is required for each project.')}}</div>
+</details>
+  <details  id="help_collection_aggregated_properties"><summary>{{_('Aggregated properties')}}</summary>
+    <div>_('Common collection projects properties')
+    <ul><li></li></ul></div>
+  </details>
+  </article>
+  {% endblock %}

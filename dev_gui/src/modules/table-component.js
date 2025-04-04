@@ -271,7 +271,6 @@ export class TableComponent {
         this.dom.appendChild(tbody);
       }
       const isjson = (!tabledef.hasOwnProperty('data') || (tabledef.hasOwnProperty('type') && tabledef.type === "json"));
-
       this.grid.columns.forEach((column, index) => {
 
         if (!column.hidden) {
@@ -283,7 +282,7 @@ export class TableComponent {
           // TODO - find a place to define col import props
           // set headings dataset values for import module
           if (this.params.import)['selectcells', 'what', 'autocomplete', 'parts', 'value'].forEach(prop => {
-            if (column.hasOwnProperty(prop)) th.dataset[prop] = column[prop];
+            if (column.hasOwnProperty(prop))  th.dataset[prop] = column[prop];
           });
           th.dataset.sortable = (column.sortable) ? true : false;
           tr.appendChild(th);
@@ -676,7 +675,6 @@ export class TableComponent {
         name: key,
         label: this.labelFormatter(column),
         sortable: true,
-
       };
       col.index = (column.hasOwnProperty('emptydata')) ? fields.indexOf(column.emptydata) : fields.indexOf(key);
       if (column.notsortable) col.sortable = false;
@@ -860,7 +858,7 @@ export class TableComponent {
   displaySelected(queries, indexes, cellid, toggle = null) {
     const trs = this.dom.querySelectorAll('tbody tr');
     if (toggle === null) toggle = function(tr, value, idx) {
-      tr.hidden = value;
+     tr.hidden = value;
     }
     const reset = (queries.length === 0 && indexes.length === 0);
     trs.forEach((tr, index) => {

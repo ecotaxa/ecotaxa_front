@@ -41,7 +41,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> dict:
                     "format": "check",
                     "value": "Y",
                 },
-                "access": {"label": _("Access")},
+                "access": {"label": _("Access"), "format": "access"},
                 "objcount": {"label": _("Nb objects"), "format": "number"},
                 "pctvalidated": {
                     "label": _("%validated"),
@@ -209,17 +209,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> dict:
             "select": {
                 "label": _("select"),
                 "what": "project",
-                "selectcells": [
-                    "projid",
-                    "creator_users",
-                    "creator_organisations",
-                    "init_classif_list",
-                    "classiffieldlist",
-                    "privileges",
-                    "cnn_network_id",
-                    "status",
-                    "access",
-                ],
+                "selectcells": ["projid"],
             }
         },
     }

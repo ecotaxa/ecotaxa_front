@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Union
+from typing import Optional, Dict, Union, List, Iterable
 from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user
 from appli import gvp, gvpm
@@ -7,13 +7,14 @@ from appli.gui.staticlistes import py_messages
 ######################################################################################################################
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import CollectionsApi, UsersApi, GuestsApi
+from to_back.ecotaxa_cli_py.api import CollectionsApi, ProjectsApi, UsersApi, GuestsApi
 from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     MinUserModel,
     GuestModel,
     CreateCollectionReq,
     CollectionAggregatedRsp,
+    ProjectUserStatsModel,
 )
 
 from appli.gui.commontools import (
@@ -27,6 +28,7 @@ from appli.gui.commontools import (
 
 ###############################################common for create && edit  #######################################################################
 orgprefix = "org_"
+doi_url = "https://doi.org/"
 
 
 def _user_format(uid: int) -> Union[MinUserModel, GuestModel]:
@@ -61,7 +63,10 @@ def _prj_format(projid: int) -> dict:
 
 
 def _is_published(target_coll: CollectionModel) -> bool:
-    return target_coll.short_title is not None and target_coll.short_title != ""
+    return (
+        target_coll.external_id is not None
+        and target_coll.external_id.strip() not in ["", "?"]
+    )
 
 
 def get_collection(collection_id) -> Optional[CollectionModel]:
@@ -75,6 +80,13 @@ def get_collection(collection_id) -> Optional[CollectionModel]:
             elif ae.status == 404:
                 flash(py_messages["project404"], "error")
             return None
+
+
+def collection_about(collection_id, partial: bool = True) -> Optional[CollectionModel]:
+    collection = get_collection(collection_id)
+    return render_template(
+        "v2/collection/about.html", target_coll=collection, partial=partial
+    )
 
 
 def collection_create() -> str:
@@ -110,30 +122,55 @@ def collection_create() -> str:
                 flash(py_messages["project404"], "error")
     licenses = possible_licenses()
     access = possible_access()
+    aggregated = dict({"possible_access": access})
     return render_template(
         "v2/collection/settings.html",
         target_coll=None,
         new=True,
         possible_licenses=licenses,
-        possible_access=access,
         orgprefix=orgprefix,
+        doi_url=doi_url,
+        agg=aggregated,
     )
 
 
-def collection_aggregated(project_ids: str) -> dict:
+def collection_aggregated(project_ids: str, simulate: str = "") -> dict:
     # who has the right to create a collection
     if not True:
         from werkzeug.exceptions import Forbidden
         from appli.gui.staticlistes import py_user
 
         raise Forbidden(py_user["notauthorized"])
-    if len(project_ids):
-        with ApiClient(CollectionsApi, request) as api:
-            aggregated: CollectionAggregatedRsp = (
-                api.collection_aggregated_projects_properties(project_ids)
-            )
-    privileges = {}
+    if len(project_ids) == 0:
+        return {}
+    if simulate == "y":
+        with ApiClient(ProjectsApi, request) as api:
+            try:
+                annotators: List[ProjectUserStatsModel] = (
+                    api.project_set_get_user_stats(ids=project_ids)
+                )
+                if isinstance(annotators, Iterable) and len(annotators) > 0:
+                    return {
+                        "creator_users": [
+                            {
+                                "id": r.id,
+                                "name": r.name,
+                                "email": r.email,
+                                "organisation": r.organisation,
+                            }
+                            for r in annotators
+                        ]
+                    }
+
+            except ApiException as ae:
+                flash("error in getting user stats " + str(ae.status), "error")
+
+    with ApiClient(CollectionsApi, request) as api:
+        aggregated: CollectionAggregatedRsp = (
+            api.collection_aggregated_projects_properties(project_ids)
+        )
     ret = aggregated.to_dict()
+    privileges = {}
     for attrname in [
         "creator_users",
         "creator_organisations",
@@ -150,6 +187,19 @@ def collection_aggregated(project_ids: str) -> dict:
                 privlist.append(u.to_dict())
             privileges[key] = privlist
         ret["privileges"] = privileges
+    # other props
+    if not aggregated or not hasattr(aggregated, "initclassiflist"):
+        ret["initclassiflist"] = []
+    else:
+        from appli.gui.taxonomy.tools import taxo_with_names
+
+        ret["initclassiflist"] = ret["initclassiflist"].split(",")
+        lst = [str(tid) for tid in aggregated.initclassiflist]
+        ret["predeftaxo"] = taxo_with_names(lst)
+    if not aggregated or not hasattr(aggregated, "classiffieldlist"):
+        ret["classiffieldlist"] = ""
+    ret["scn"] = possible_models()
+    ret["possible_access"] = possible_access()
     return ret
 
 
@@ -228,51 +278,19 @@ def collection_edit(collection_id: int, new: bool = False):
     from appli.gui.commontools import crsf_token
 
     projectlist = [_prj_format(int(p)) for p in collection.project_ids]
-    prjlist = [str(p) for p in collection.project_ids]
-    aggregated = collection_aggregated(",".join(prjlist))
-    if "initclassiflist" in aggregated:
-        initclassiflist = aggregated["initclassiflist"].split(",")
-    else:
-        initclassiflist = []
-    lst = [str(tid) for tid in initclassiflist]
-    if "classiffieldlist" in aggregated:
-        classiffieldlist = aggregated["classiffieldlist"]
-    else:
-        classiffieldlist = ""
-
-    if "privileges" in aggregated:
-        privileges = aggregated["privileges"]
-
-    else:
-        privileges = None
-    if "freecols" in aggregated:
-        freecols = aggregated["freecols"]
-    else:
-        freecols = None
-    # common func used in project stats
-    from appli.gui.taxonomy.tools import taxo_with_names
-
-    predeftaxo = taxo_with_names(lst)
-
-    scn = possible_models()
-    access = possible_access()
+    published = _is_published(collection)
+    aggregated = {}
     return render_template(
         "v2/collection/settings.html",
         target_coll=collection,
         projectlist=projectlist,
-        classiffieldlist=classiffieldlist,
-        predeftaxo=predeftaxo,
-        status=aggregated["status"],
-        access=aggregated["access"],
-        excluded=aggregated["excluded"],
-        members_by_right=privileges,
-        freecols=freecols,
         crsf_token=crsf_token(),
         possible_licenses=licenses,
-        possible_access=access,
-        scn_network_id=scn,
         new=new,
         orgprefix=orgprefix,
+        published=published,
+        agg=aggregated,
+        doi_url=doi_url,
     )
 
 

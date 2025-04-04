@@ -11,6 +11,7 @@ def collection_table_columns(typeimport: str, selection: str = "list") -> dict:
         selection = selection
     else:
         selection = "import"
+
     columns = {
         "list": dict(
             {
@@ -19,29 +20,15 @@ def collection_table_columns(typeimport: str, selection: str = "list") -> dict:
                     "sortable": "desc",
                     "format": "number",
                 },
-                "provider_user": {"label": _("Provider user"), "format": "user"},
                 "title": {
                     "label": _("Title"),
+                    "request": "about",
+                    "subfield": "contact_user",
+                    "sublabel": " - contact",
+                    "trim": True,
                 },
-                "contact": {"label": _("Contact"), "hidden": True},
-                "creators": {"label": _("Creators"), "format": "user_list"},
-                "associates": {"label": _("Associates"), "format": "user_list"},
-                "citation": {
-                    "label": _("Citation"),
-                },
-                "abstract": {
-                    "label": _("Abstract"),
-                },
+                "contact_user": {"label": _("Contact"), "hidden": True},
                 "license": {"label": _("License"), "format": "license"},
-                "project_ids": {"label": _("Projects id"), "format": "project_list"},
-                "external_id": {
-                    "label": _("External ID"),
-                    "sortable": "asc",
-                },
-                "external_id_system": {
-                    "label": _("External ID System"),
-                    "sortable": "asc",
-                },
             }
         ),
         "import": {},
@@ -111,7 +98,7 @@ def render_for_js(colljs: list, columns: dict) -> list:
                 # if subfield  append object which will be formatted by the js component
                 if key == "select":
                     if "select" in column and column["select"] == "select":
-                        select = dict({"edit": _("Edit"), "erase": _("Erase")})
+                        select = dict({"edit": _("Edit")})
                         attrvalue = select
                     else:
                         attrvalue = ""

@@ -9,12 +9,10 @@
 {% from "./v2/users/_modalhelp.html" import  modaluser with context %}
 {% block body %}
 <div class="container mx-auto ">
-    {%-if person -%}
-    {% set legend = _('person') + ' ' + guest.id|string() if guest.id else _('new person') %}
-    {%-else-%}
+     {% set legend = _('guest user') + ' ' + guest.id|string() if guest.id>0 else _('new guest user') %}
+    {%-if not partial -%}
     {% set modal_title = _("How to edit a guest account") if guest.id and guest.id>0 else _("How to create a guest account")%}
     {{modaluser(modal_title)}}
-  {% set legend = _('guest') + ' ' + guest.id|string() if guest.id else _('new guest') %}
     {%-endif-%}
 {% include('v2/guests/_guest.html')%}
 {% if redir and redir !='' %}

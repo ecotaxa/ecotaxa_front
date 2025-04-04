@@ -51,7 +51,7 @@
           {% endif %}
           <div class="form-box">
             <label for="email">{{_('Email')}} <i data-for="help_profile_email" data-request="help"></i></label>
-            <input type="email" id="email" name="email" class="form-input  read-only:bg-info-50" value="{{ user.email }}"   {{' readonly' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" placeholder="{{_('Email')}}">
+            <input type="email" id="email" name="email" class="form-input  read-only:bg-info-50" value="{{ user.email }}"   {{' readonly' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" placeholder="john@plankton.org">
             {%if createaccount != True or (user and user.email) -%}
             {% set type="warning"-%}
             <input type="hidden" name="currentemail" value="{{user.email}}">
@@ -62,13 +62,13 @@
             {{promail_required(type,'text-sm',user)}}
             {%endif-%}</div>
             <div class="form-box">
-            <label for="orcid">{{_('ORCID ID')}} <i data-for="help_profile_orcid" data-request="help"></i></label>
-            <input type="text" id="orcid" name="orcid" class="form-input" value="{{ user.orcid }}" maxlength=20 placeholder="{{_('ORCID ID')}}"></div>
+            <label for="orcid">{{_('ORCID')}} <i data-for="help_profile_orcid" data-request="help"></i></label>
+            <input type="text" id="orcid" name="orcid" class="form-input" value="{{ user.orcid }}" maxlength=20 placeholder="0000-0000-0000-0000"></div>
             {% if (createaccount==True and user.id==-1 ) or not createaccount %}
                  {{password_box()}}
              {%endif%}
              <div class="form-box"><label for="organisation">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
-              <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
+              <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True, data=" data-create=true ",options=countries)}}</div>
           <div class="form-box">
             <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}} <i data-for="help_profile_planned_usage" data-request="help"></i></label>
             <textarea id="usercreationreason" name="usercreationreason" class="form-textarea" required data-required="{{'this field is required'}}" placeholder="{{_('A few sentences describing how in which context you will use EcoTaxa')}}" rows="4">{{ user.usercreationreason|default('',true) }}</textarea>

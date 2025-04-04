@@ -20,12 +20,13 @@ function ImportList(state, attach = null) {
       }*/
   }
 
-  async function compileProjectRecords(newone = true) {
+  async function compileProjectRecords(newone = true,selectcells=["creator_users","creator_organisations"]) {
     const ts = state.dataImport.importzone.tomselect;
     const ids = (ts) ? ts.items : Array.from(state.dataImport.importzone.selectedOptions).map(option => option.value);
     if (ids.length === 0) return null;
     const url = '/gui/collection/aggregated' + '?' + new URLSearchParams({
-      project_ids: ids.join(',')
+      project_ids: ids.join(','),
+      simulate:"y"
     });
     const response = await fetch(url, fetchSettings({
       method: 'GET',
@@ -37,21 +38,19 @@ function ImportList(state, attach = null) {
       numeric: true,
       sensitivity: 'base'
     })
-
-    if (Object.keys(results).indexOf("creator_users") >= 0 && newone === true) {
-      results.creator_organisations = results.creator_users.map(u => u.organisation);
-      results.creator_organisations.sort();
-      const creator_users = results.creator_users.map(u => ({
+    ["creator"].forEach(key=> {    if (Object.keys(results).indexOf(key+"_users") >= 0 && newone === true) {
+      results[key+"_organisations"] = results[key+"_users"].map(u => u.organisation);
+      results[key+"_organisations"].sort();
+      const users = results[key+"_users"].map(u => ({
         key: u.id,
         value: u.name,
         text: u.name + ' ' + u.email
       }));
-      results.creator_users = creator_users
-      results.creator_users.sort((a, b) => {
+      results[key+"_users"] = users
+      results[key+"_users"].sort((a, b) => {
         return collator.compare(a.value, b.value)
       });
-    }
-
+    };})
     return results;
   }
 
@@ -71,7 +70,7 @@ function ImportList(state, attach = null) {
 
   function filterByRecord(record, recordindex) {
     // display only lines with fields values equals to record fields values - criteria is a list of cellnames
-    const criteria_names = ['instrument', 'visible'];
+    const criteria_names = ['instrument', 'access'];
     const criteria_ids = [];
     criteria_names.forEach(colname => {
       const index = state.getCellId(colname);

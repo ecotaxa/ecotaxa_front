@@ -3,7 +3,6 @@
    {%-if not partial-%}<input type="hidden" name="crsf_token" value={{ crsf_token }}>{%-endif-%}
 
       <input type="hidden" name="id" id="id" value="{{guest.id if guest.id else -1  }}">
-
     <div class="fieldset-wrapper md:flex-row md:flex-nowrap">
       <fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 md:w-1/2'}}">
         <legend class="tab-control">{{legend if legend else ''}}</legend>
@@ -21,7 +20,7 @@
      {%-endif-%}
           <div class="form-box">
             <label for="email">{{_('Email')}} <i data-for="help_profile_email" data-request="help"></i></label>
-            <input type="email" id="email" name="email" class="form-input  read-only:bg-info-50" value="{{ guest.email }}"   required data-required="{{_('an email is required')}}" placeholder="{{_('Email')}}">
+            <input type="email" id="email" name="email" class="form-input  read-only:bg-info-50" value="{{ guest.email }}"   required data-required="{{_('an email is required')}}" placeholder="john@plankton.org">
             {%if createaccount != True or (guest and guest.email) -%}
             {% set type="warning"-%}
             <input type="hidden" name="currentemail" value="{{guest.email}}">
@@ -30,10 +29,10 @@
             {%-endif-%}
             </div>
             <div class="form-box">
-            <label for="orcid">{{_('ORCID ID')}} <i data-for="help_profile_orcid" data-request="help"></i></label>
-            <input type="text" id="orcid" name="orcid" class="form-input" value="{{ guest.orcid }}" maxlength=20 placeholder="{{_('ORCID ID')}}"></div>
+            <label for="orcid">{{_('ORCID')}} <i data-for="help_profile_orcid" data-request="help"></i></label>
+            <input type="text" id="orcid" name="orcid" class="form-input" value="{{ guest.orcid }}" maxlength=20 placeholder="0000-0000-0000-0000"></div>
              <div class="form-box"><label for="organisation">{{_('Organisation')}} </label>{{inputdict('organisation','organisation',guest.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
-              <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',guest.country,type="country",label=_('Country'),required=True, autocomplete=True,options=countries)}}</div>
+              <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',guest.country,type="country",label=_('Country'),required=True, autocomplete=True, data=" data-create=true ",options=countries)}}</div>
 
 
             </fieldset>{%-if incprofile-%}<fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 pl-4 md:w-1/2'}}">

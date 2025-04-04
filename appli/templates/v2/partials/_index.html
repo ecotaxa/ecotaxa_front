@@ -5,31 +5,32 @@
         <div class="md:mr-4 flex flex-col">
         <a href="/explore/" class="button bg-gradient-to-r hover:bg-gradient-to-l from-mainblue-700 to-mainblue-500 border-none shadow-sm hover:shadow-none  text-stone-50  block w-full text-center">{{_('Explore images')}}</a>
         <div class="mt-2 p-4 pt-2 text-sm border-r bg-gradient-to-t  from-transparent to-mainblue-50 shadow flex-grow">
-          <p>{{_('As a visitor, you have free access to the specimens that have been already identified by taxonomist experts.')}}</p>
-          <p>{{_('You can explore the database by navigating along the UniEuk taxonomic tree which aims at unifying taxonomic names and tree according to reliable and curated molecular phylogenies. It encompasses the whole Eukaryotic and Prokaryotic lineages (Viruses coming soon) that have been molecularly described. Then images can be filtered according to several sample criteria: geographic location, depth, date and time of sampling, and imaging instrument.')}}</p>
+          <p>{{_('As a visitor, you have free access to a subset of the images that have been already identified by users.')}}</p>
+          <p>{{_(' Images can be filtered according to several criteria: taxonomy, geographic location, depth, date and time of sampling, and imaging instrument.')}}</p>
         </div>
         </div><!-- For projects -->
         <div class="md:mr-4 flex flex-col">
         <a href="{{url_for('gui_prj')}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-500 to-mainblue-700 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Contribute to a project')}}</a>
         <div class="mt-2 p-4 pt-2 text-sm border-r bg-gradient-to-b  from-transparent to-mainblue-50 background-register shadow flex-grow">
-          <p>{{_('As a scientist, you can contribute to the richness of this image database and/or to the collaborative taxonomic annotation effort. Images are organised in projects which should be consistent in terms of sampling and imaging techniques. We provide tools to support the annotation of large image datasets by supervised machine learning prediction.')}}</p>
+          <p>{{_('You can contribute to the richness of this image database and/or to the collaborative taxonomic annotation effort.Images are organised in projects which should be consistent in terms of sampling and imaging techniques.  We provide tools to support the quick annotation of large image datasets, such as supervised machine learning prediction and visual similarity search.')}}</p>
         </div>
         </div><!-- For collections -->
-          <div class="flex flex-col">
-        <a href="{{url_for('gui_collection')}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-700 to-mainblue-500 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Contribute to a collection')}}</a>
+        <div class="flex flex-col">
+        <a href="{{url_for('gui_collection')}}" data-action="badge" data-as="new" data-btext="{{_('new')}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-700 to-mainblue-500 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Browse the collections')}}</a>
         <div class="mt-2 p-4 pt-2 text-sm border-r bg-gradient-to-b  from-transparent to-mainblue-50 shadow flex-grow">
-          <p>{{_('A collection is a set of projects ready to be exported and published in DarwinCore format.')}}
+          <p>{{_('A collection is a set of similar projects that can be explored together (legs of a cruise, years of a time series, etc.) or a single project that constitutes a full dataset.')}}<br>
+              {{_('After adding metadata and choosing a license, the data is ready to be exported and published in DarwinCore archive format, <a href="https://obis.org/" class="text-mainblue-700 hover:text-secondblue-400">OBIS</a> or <a href="https://www.gbif.org/" class="text-mainblue-700 hover:text-secondblue-400">GBIF</a>.')}}
           </p>
         </div>
         </div>
     </div>
       <div class="my-6 mx-2 p-8 pt-6 text-sm shadow bg-mainblue-50">
-          <p>{{_('The')}} <a href="{{ecopart_url()}}" class="button py-0 px-0 m-0 sm:py-0 bg-transparent shadow-none border-none text-center">ECOPART</a>{{_('application is designed to manage data from Underwater Vision Profiler (UVP) instruments.')}}
-          <br>{{_('Its features include:')}}
-      <ul class="list-disc list-inside"><li>{{_('Importing particle data and linking them with CTD data and zooplankton images annotated in Ecotaxa.')}}</li>
-        <li>{{ _(' Processing size spectra from particle data.')}}</li>
-      <li>{{ _(' Enabling the download of particle spectra, CTD data, and zooplankton records based on user permissions.')}}</li>
-            <li>{{ _('Providing data visualization and facilitating data sharing via internet access.')}}</li></ul></p>
+          <p>{{_('The')}} <a href="{{ecopart_url()}}" title="EcoPart - {{ecopart_url()}}" class="text-lg font-medium text-mainblue-700 hover:text-secondblue-400 bg-transparent shadow-none border-none text-center">EcoPart</a> {{_('application is designed to manage data from Underwater Vision Profiler (UVP) instruments.')}}
+          <br>{{_(' It allows:')}}
+      <ul class="list-square list-inside ml-4"><li>{{_('Importing particle data and linking them with CTD data and zooplankton images annotated in Ecotaxa.')}}</li>
+        <li>{{ _('Computing size spectra from particle data.')}}</li>
+      <li>{{ _('Downloading particle spectra, CTD data, and zooplankton records based on user permissions.')}}</li></ul>
+           {{ _('EcoPart also provides simple data visualization and facilitates data sharing.')}}</p>
         </div>
 
     <div id="disclaimer" class="text-xs p-4 mb-12 ">

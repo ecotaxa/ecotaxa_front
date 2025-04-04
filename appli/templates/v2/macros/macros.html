@@ -84,7 +84,7 @@
 
 {% macro form_group_radio(id,name,value,label,val,required=False,help='',extra='',readonly=False, radio=True) -%}
 {%- set type='radio' if radio==True else 'checkbox'-%}
-<div class="group-radio {{type}}"><input type="{{type}}" class="peer" name="{{ name }}" id="{{ id}}" value="{{ value }}" {{'required' if required==True }}  {{'data-readonly' if readonly==True}} {{ 'checked' if val==value }} {{extra}}>
+<div class="group-radio {{type}}"><input type="{{type}}" class="peer" name="{{ name }}" id="{{ id}}" value="{{ value }}" {{'required' if required==True }}  {{'disabled data-readonly' if readonly==True}} {{ 'checked' if val==value }} {{extra}}>
   <label for="{{id}}" class="peer-checked:bg-pchecked-400  peer-checked:text-white  peer-checked:shadow" {{help}}>{{ label }}</label></div>
 {%- endmacro %}
 {% macro checkbox_radio(name, id , checkedvalue, value='', label="",type="checkbox",required=False,extra='', readonly=False) -%}
