@@ -45,10 +45,11 @@ export class JsMyFiles {
   eventnames = {
     complete: 'complete',
     error: 'error',
+
   };
   rejected = [];
   errorfile = [];
-
+  listener;
   constructor(container, options = {}) {
     if (!container.jsmyfiles) {
       container = (container instanceof HTMLElement) ? container : document.querySelector(container);
@@ -210,7 +211,6 @@ export class JsMyFiles {
         const name = message.name;
         delete message.name;
         ModuleEventEmitter.emit(name, message, this.jsDirToZip.uuid);
-        //ModuleEventEmitter.emit(name, message);
       }
     }
     if (name === this.eventnames.sendfile) btn.disabled = true;
@@ -281,7 +281,8 @@ export class JsMyFiles {
           input.dispatchEvent(new MouseEvent("click"));
 
         }
-
+        // if other functionalities add controls ( like import) clear
+        if(this.eventnames.clearother) ModuleEventEmitter.emit(this.eventnames.clearother,{},this.uuid);
       });
     });
     const spandrop = create_box('span', {
@@ -292,26 +293,53 @@ export class JsMyFiles {
 
   toggleDropTarget(on = true) {
     const self = this;
-    const droptarget = (this.activentry) ? this.activentry.container : null;
+     const droptarget = (this.activentry) ? this.activentry.container : null;
     if (droptarget === null) return;
+    function prevent_defaults(e)  {
+        e.preventDefault();
+        e.stopImmediatePropagation();}
+    function highlight(e) {
+        droptarget.classList.add(cssdragover)
+    }
+    function unhighlight(e) {
+        droptarget.classList.remove(cssdragover);
+    }
     const cssdragover = (this.jsDirList) ? (this.jsDirList.options.entry) ? this.jsDirList.options.entry.css.dragover : this.options.css.dragover : this.options.css.dragover;
-    const target_dragover = (e) => {
+    const target_dragover = (e) => {e.preventDefault();
       if (!this.dragover && this.activentry && this.activentry.container === e.currentTarget) {
         droptarget.classList.add(cssdragover);
       }
-      self.handleDragOver(e);
+    e.dataTransfer.dropEffect = "move";
     }
-    const target_drop = async (e) => {
-      droptarget.classList.remove(cssdragover);
-      await self.handleDrop(e);
-    }
+    const target_drop = async (e) => { await self.handleDrop(e);}
     // set events and css for new dropzone
     if (on === false) {
-      droptarget.removeEventListener('dragover', target_dragover);
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventname => {
+        droptarget.addEventListener(eventname, prevent_defaults, false);
+     });
+     ['dragenter', 'dragover'].forEach(eventname => {
+        droptarget.removeEventListener(eventname, highlight, false);
+    });
+    ['dragleave', 'drop'].forEach(eventname => {
+        droptarget.removeEventListener(eventname, unhighlight, false);
+    });
       droptarget.removeEventListener('drop', target_drop);
       droptarget.classList.remove(this.options.selectors.droptarget.substr(1));
     } else {
-      droptarget.addEventListener('dragover', target_dragover);
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventname => {
+     droptarget.addEventListener(eventname, prevent_defaults, false);
+     document.body.addEventListener(eventname, prevent_defaults, false);
+    });
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventname => {
+     droptarget.addEventListener(eventname, prevent_defaults, false);
+     document.body.addEventListener(eventname, prevent_defaults, false);
+    });
+    ['dragenter', 'dragover'].forEach(eventname => {
+        droptarget.addEventListener(eventname, highlight, false);
+    });
+    ['dragleave', 'drop'].forEach(eventname => {
+    droptarget.addEventListener(eventname, unhighlight, false);
+    });
       droptarget.addEventListener('drop', target_drop);
       droptarget.classList.add(this.options.selectors.droptarget.substr(1));
     }
@@ -412,8 +440,9 @@ export class JsMyFiles {
     return true;
   }
   // drag&drop
+
+
   async handleDrop(e) {
-    e.preventDefault();
     if (!this.setUploadEntry()) return;
     let dataTransfer;
     if (e.dataTransfer) {
@@ -433,11 +462,7 @@ export class JsMyFiles {
       })
     }
   }
-  handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  }
-  showComplete() {
+   showComplete() {
     this.timer = (new Date() - this.timer) / 1000;
     this.enableDropzone(true);
   }
@@ -596,6 +621,7 @@ export class JsMyFiles {
     const btn = this[this.options.btnprefix + 'zip' + target];
     if (!btn) return;
     btn.disabled = false;
+    let click_btn=false;
     switch (action) {
       case this.eventnames.ready:
         this.resetCounters();
@@ -614,17 +640,6 @@ export class JsMyFiles {
         } else message = null;
 
         break;
-      case this.eventnames.endzip:
-        if (!part) this.showComplete();
-        btn.textContent = `Close zip file` + ((part) ? ` ` + part : ``);
-        btn.title = (part) ? `Your file is too big - you have to send this part before continuing to process the directory` : `Click to end zip file`;
-        message = {
-          name: this.eventnames.endzip,
-          part: part,
-          filepath: filepath,
-          bigfile: bigfile,
-        };
-        break;
       case this.eventnames.bigfile:
         if (bigfile && bigfile !== '') {
           btn.textContent = `Upload big File separately`;
@@ -636,16 +651,33 @@ export class JsMyFiles {
           };
         }
         break;
-      case this.eventnames.sendfile:
+        case this.eventnames.endzip:
+        if (!part) this.showComplete();
+        // combine endzip and upload for prod
+        btn.textContent = `Upload zip file` + ((part) ? ` ` + part : ``);
+        btn.title = (part) ? `Your file is too big - you have to send this part before continuing to process the directory` : `Click to send zip file`;
+       /* btn.textContent = `Close zip file` + ((part) ? ` ` + part : ``);
+        btn.title = (part) ? `Your file is too big - you have to send this part before continuing to process the directory` : `Click to end zip file`;*/
         message = {
+          name: this.eventnames.endzip,
+          part: part,
+          filepath: filepath,
+          path: filepath,
+          bigfile: bigfile,
+        };
+        break;
+    case this.eventnames.sendfile:
+        btn.dataset.message = JSON.stringify({
           name: this.eventnames.sendfile,
           path: filepath,
           part: part,
           bigfile: bigfile
-        };
-        btn.textContent = `Upload zip file`;
-        if (message.bigfile && message.bigfile !== '') btn.textContent += ` ` + opts;
-        btn.dataset.message = JSON.stringify(message);
+        });
+        // send file , 2 steps are for tests - timeout for zip.end() in dirtozip
+        setTimeout( () => {this.emitToZip(btn);},1000);
+        return;
+        //btn.textContent = `Upload zip file`;
+        //if (message.bigfile && message.bigfile !== '') btn.textContent += ` ` + opts;
         break;
       case this.eventnames.pending:
         btn.textContent = ` Pending ` + ((target !== 'zip') ? ' big file' : '');
@@ -659,6 +691,7 @@ export class JsMyFiles {
         message = {};
         break;
       case this.eventnames.terminate:
+      console.log('terminate')
         btn.dataset.message = JSON.stringify({
           name: this.eventnames.init,
           bigfile: bigfile,
@@ -697,6 +730,7 @@ export class JsMyFiles {
         btn.insertAdjacentHTML('afterbegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
       } else btn.classList.remove(css.console);
     };
+
   }
 
   getBtn(item, target) {

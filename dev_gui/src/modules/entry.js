@@ -330,6 +330,7 @@ export class Entry {
     this.emitEvent('drop', e);
   }
   setWait() {
+
     this.loaded = this.container.dataset.loaded = false;
     this.container.classList.add(css.wait);
   }

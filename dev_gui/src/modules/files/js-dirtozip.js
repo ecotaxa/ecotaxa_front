@@ -22,15 +22,15 @@ const already_compressed = new Set([
   'mp4', 'mov', 'mp3', 'aifc'
 ]);
 const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
-const MAXSIZE = 1073741824; //4294967296; //// 3221225472; // 2147483648; // 1073741824;   // ////1073741824; ////maxfilesize: 1073741824,
+const MAXSIZE = 1073741824; //4294967296; //// 3221225472; // 2147483648;
 export function JsDirToZip(options = {}) {
   const eventnames = {
     ready: 'ready',
     follow: 'follow',
-    endzip: 'endzip',
     complete: 'complete',
     endreaddir: 'endreaddir',
     gzip: 'gzip',
+    endzip: 'endzip',
     sendfile: 'sendfile',
     bigfile: 'bigfile',
     terminate: 'terminate',
@@ -64,24 +64,20 @@ export function JsDirToZip(options = {}) {
     ModuleEventEmitter.on(eventnames.init, async (e) => {
       //  if (!e.bigfile && !e.part) {
       if (isActive() === false) {
-        console.log('reset terminate event end')
         await reset();
         ModuleEventEmitter.emit(eventnames.complete, {
           name: eventnames.ready
         }, _listener);
         properties.endreaddir = false;
-      } else console.log(' partly finshed ', e);
+      } else console.log('partly finshed ', e);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endzip, (e) => {
-      if (!e.bigfile && properties.zip) {
-        properties.zip.end();
-      } else if (e.bigfile && properties.gzipped) {
-        console.log('-------------------------gzipped end', properties.gzipped);
-      }
+      if (!e.bigfile && properties.zip) properties.zip.end();
+      else if (e.bigfile && properties.gzipped) console.log('--gzipped end', properties.gzipped);
+      console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
       const message = buildMessage(e, {
         name: eventnames.sendfile,
       });
-      console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%', message)
       ModuleEventEmitter.emit(eventnames.complete, message, _listener);
     }, uuid);
     ModuleEventEmitter.on(eventnames.sendfile, async (e) => {
@@ -90,11 +86,6 @@ export function JsDirToZip(options = {}) {
         const path = (e.path ? e.path : '').replace(e.bigfile, '');
         sendChunk(path);
       } else sendZipFile(file, (e.path ? e.path : ''), null);
-    }, uuid);
-    ModuleEventEmitter.on(eventnames.bigfile, (e) => {
-      console.log('onsendchunk', e)
-      const path = (e.path ? e.path : '').replace(e.bigfile, '');
-      sendChunk(path);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endreaddir, (e) => {
       properties.endreaddir = true;
@@ -173,7 +164,7 @@ export function JsDirToZip(options = {}) {
   function checkProcessed(e) {
     if (properties.endreaddir === true && properties.endcounter === true) {
       const message = buildMessage(e, {
-        name: eventnames.endzip
+       name: eventnames.endzip
       });
       ModuleEventEmitter.emit(eventnames.complete, message, _listener);
     }
@@ -406,7 +397,7 @@ export function JsDirToZip(options = {}) {
   async function partZip() {
     properties.part += 1;
     ModuleEventEmitter.emit(eventnames.complete, {
-      name: eventnames.endzip,
+     name: eventnames.endzip,
       part: properties.part
     }, _listener);
   }
@@ -558,15 +549,15 @@ export function JsDirToZip(options = {}) {
     const file = await properties.gzipped.getFile();
     const end = Math.min(start + chunksize, file.size);
     if (end === file.size) {
-      sendZipFile(file, path, null, true);
+     await sendZipFile(file, path, null, true);
     } else {
       const partfile = file.slice(start, end);
       partfile.name = chunknum + '_' + file.name;
-      sendZipfile(partfile, path, () => {
+      await sendZipfile(partfile, path, async () => {
         start += end;
         chunknum++;
 
-        if (start <= file.size) sendChunk(path, start, chunknum, chunksize);
+        if (start <= file.size) await sendChunk(path, start, chunknum, chunksize);
       }, true)
     }
     return chunknum;
@@ -602,7 +593,7 @@ export function JsDirToZip(options = {}) {
         onError(eventnames.error, message);
         return;
       }
-      if (callbackchunk !== null) {
+      if (callbackchunk !== null) { console.log('callbackchunk not null')
         await callbackchunk();
       } else await endFetch(message);
     });

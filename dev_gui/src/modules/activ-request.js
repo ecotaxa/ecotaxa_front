@@ -10,7 +10,9 @@ import {
   models,css
 } from '../modules/modules-config.js';
 let dynamics = {};
-
+import {
+  ModuleEventEmitter
+} from '../modules/module-event-emitter.js';
 function createActivRequest() {
   function applyTo(element = document) {
     element = (document || element instanceof HTMLElement) ? element : document.querySelector(element);
@@ -121,6 +123,7 @@ function createActivRequest() {
             },
           };
           item.dataset.import = true;
+
         } else options.trigger = modal.trigger;
         delete options.request;
         if (!dynamics.jsTree) {

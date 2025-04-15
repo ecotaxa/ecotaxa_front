@@ -216,7 +216,6 @@ def PrjEdit(PrjId, privs_only=False):
         privs_only=privs_only,
         maplist=maplist,
         predeftaxo=predeftaxo,
-        possible_licenses=possible_licenses,
     )
 
 

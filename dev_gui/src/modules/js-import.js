@@ -33,6 +33,7 @@ export function JsImport(container, options = {}) {
     browse: ['directory', 'file'],
     textimport: 'to import'
   };
+  let selected=null;
   container = (container instanceof HTMLElement) ? container : document.querySelector(container);
   if (!container) return;
   options = { ...defaultOptions,
@@ -49,7 +50,7 @@ export function JsImport(container, options = {}) {
   let myFiles;
   let eventnames = {
     import: 'import',
-    select: 'select'
+    select: 'select',
   };
   let importliste = "";
   let filetoload = document.getElementById(options.selectors.inputname);
@@ -136,6 +137,8 @@ export function JsImport(container, options = {}) {
           }
         }
       });
+       myFiles.eventnames.clearother='clearother';
+        ModuleEventEmitter.on(myFiles.eventnames.clearother, (e) => {deSelect();},myFiles.uuid);
       ModuleEventEmitter.on(eventnames.select, (e) => {
         myFiles.detachDropzone();
       }, myFiles.uuid);
@@ -153,11 +156,20 @@ export function JsImport(container, options = {}) {
         item.jstree.entrycontrols.options.controls = {};
         addImportControls(item.jstree, item.jstree.uuid, [entryTypes.branch, entryTypes.node]);
       })
+          // detach entry controls if accordion or tabs when not active
+        const accordion=container.querySelector('.js-accordion')?container.querySelector('.js-accordion'):container.querySelector('.js-tabs');
+        if (accordion && accordion.dataset.detail) {
+        accordion.querySelectorAll(accordion.dataset.detail).forEach(summary=> {
+         summary.emitevent= () => {  deSelect();}
+        });
+        }
+       //
     }
     if (refresh === true) apply_filters();
-
   }
-
+  function deSelect() {
+  if(selected!==null) {selected.setSelected(false);selected.active=true;selected.emitEvent();selected=null;}
+  }
   function addImportPath(value) {
     document.getElementById(options.selector.importzone).value = value;
     const displayresult = document.getElementById(options.selector.displayresult);
@@ -171,13 +183,11 @@ export function JsImport(container, options = {}) {
   }
 
   function addImportControls(entrylist, uploaduuid, typentries = null) {
-    let selected = null;
 
     function add_remove_import(e) {
       if (selected) {
         delete selected.label.dataset.selected;
         selected.setSelected(false);
-
       }
       const activentry = entrylist.getActiventry();
       if (selected === activentry) {

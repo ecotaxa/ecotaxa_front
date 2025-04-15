@@ -133,7 +133,8 @@ details.modal-popup[open] .modal-content {@apply w-full  border-t border-stone-2
 details.modal-popup.inside[open] .modal {@apply min-h-[96%]}
 details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-stone-700  drop-shadow-sm opacity-100 -mt-2 mr-0  w-full min-w-full h-full min-h-full overflow-hidden;
 }
-details.modal-aside[open]  {@apply overflow-y-auto overscroll-none }
+details.modal-aside[open] .modal + details.modal-aside[open] summary {@apply   h-full min-h-full}
+details.modal-aside[open]  {@apply overflow-y-auto overscroll-none}
 details.modal-container:not([open]) > summary {@apply block w-auto marker:hidden list-none}
 details summary.aside-label, details.modal-popup > summary , details.project-search > summary {@apply  after:absolute after:fill-stone-600 after:hover:fill-help-500  after:right-4 after:top-4  after:opacity-0 after:w-0 after:h-0 after:transform after:duration-300;
 }
@@ -245,13 +246,13 @@ button.submitslider {@apply min-w-[200px]}
 
 /* my_files list*/
 li:not(.on) ul.entries {@apply hidden}
-.console {@apply rounded-sm border border-mainblue-100 bg-mainblue-50 text-stone-900 text-sm p-4 my-2}
+.console {@apply rounded-sm border border-info-50 text-info-600 text-xs px-4 py-1 my-2 }
 .button.console {@apply py-2 text-base rounded border-none bg-transparent}
 .display-progression {@apply flex sm:flex-row border border-secondblue-100 drop-shadow-sm p-2 mb-2}
 .counters, .sizes {@apply p-2 rounded-sm text-sm  my-1 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
 /*js import */
-#dropzone {@apply w-auto ml-4 inline-block small-caps font-light}
+#dropzone {@apply w-auto min-w-[50%] inline-block small-caps font-light}
 #dropzone .trigger {@apply  before:mr-0 small-caps text-black bg-stone-50 py-0.5 px-1.5 mr-3 w-6 overflow-x-hidden rounded drop-shadow hover:bg-secondblue-200 hover:drop-shadow-none before:p-0.5 before:icon }
 #dropzone .trigger[data-type="directory"]  {@apply before:icon-arrow-up-tray }
 #dropzone .trigger[data-type="file"]  {@apply before:icon-arrow-up-square}

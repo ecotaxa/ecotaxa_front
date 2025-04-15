@@ -71,14 +71,14 @@ function createJsAccordion() {
       // Check if the element is being closed or is already closed
 
       if (current.isclosing || !isOpen(current)) {
+
         // for fetching data or other op.
         if (callbackopen) {
           callbackopen(current.element, () => {
             open(current);
           });
         } else open(current);
-        //close previous item
-        if (activitem !== null) shrink(activitem);
+        if (activitem !== null)  shrink(activitem);
         activitem = current;
         // Check if the element is being openned or is already open
       } else if (current.isexpanding || isOpen(current)) {
@@ -88,6 +88,8 @@ function createJsAccordion() {
     }
     // close the content with an animation
     function shrink(current = currentitem) {
+    //close previous item
+      if (current.summary.emitevent) current.summary.emitevent();
       current.isclosing = true;
       if (current.animation) current.animation.cancel();
       // Start a WAAPI animation
