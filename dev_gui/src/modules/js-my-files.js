@@ -1,5 +1,4 @@
 import {
-  browser_accept,
   dom_purify,
   fetchSettings,
   create_box,
@@ -131,7 +130,6 @@ export class JsMyFiles {
     this.timer = new Date();
   }
   async initEvents() {
-
     //To be refactored - for steppers )
     ModuleEventEmitter.on(this.eventnames.processed, async (e) => {
       if (this.nextaction) await this.nextaction();
@@ -144,6 +142,7 @@ export class JsMyFiles {
       this.jsDirToZip = JsDirToZip({
         listener: this.uuid
       });
+
       Object.keys(this.jsDirToZip.eventnames).forEach((key) => {
         this.eventnames[key] = this.jsDirToZip.eventnames[key];
         ModuleEventEmitter.on(key, (e) => {
@@ -175,6 +174,14 @@ export class JsMyFiles {
                     parent: this.container
                   });
                   break;
+                  case 'browser':
+                   AlertBox.addAlert({
+                    type: AlertBox.alertconfig.types.danger,
+                    content: e.message,
+                    dismissible: false,
+                    inverse: false
+                  });
+                  break;
                 case AlertBox.alertconfig.types.error:
                 case AlertBox.alertconfig.types.success:
                 case AlertBox.alertconfig.types.danger:
@@ -195,6 +202,7 @@ export class JsMyFiles {
           }
         }, this.uuid);
       });
+            this.jsDirToZip.browserRequired() ;
     }
     window.addEventListener('beforeunload', (e) => {
       if (!this.done) {
@@ -295,9 +303,7 @@ export class JsMyFiles {
     const self = this;
      const droptarget = (this.activentry) ? this.activentry.container : null;
     if (droptarget === null) return;
-    function prevent_defaults(e)  {
-        e.preventDefault();
-        e.stopImmediatePropagation();}
+
     function highlight(e) {
         droptarget.classList.add(cssdragover)
     }
@@ -314,9 +320,6 @@ export class JsMyFiles {
     const target_drop = async (e) => { await self.handleDrop(e);}
     // set events and css for new dropzone
     if (on === false) {
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventname => {
-        droptarget.addEventListener(eventname, prevent_defaults, false);
-     });
      ['dragenter', 'dragover'].forEach(eventname => {
         droptarget.removeEventListener(eventname, highlight, false);
     });
@@ -326,14 +329,6 @@ export class JsMyFiles {
       droptarget.removeEventListener('drop', target_drop);
       droptarget.classList.remove(this.options.selectors.droptarget.substr(1));
     } else {
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventname => {
-     droptarget.addEventListener(eventname, prevent_defaults, false);
-     document.body.addEventListener(eventname, prevent_defaults, false);
-    });
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventname => {
-     droptarget.addEventListener(eventname, prevent_defaults, false);
-     document.body.addEventListener(eventname, prevent_defaults, false);
-    });
     ['dragenter', 'dragover'].forEach(eventname => {
         droptarget.addEventListener(eventname, highlight, false);
     });
@@ -401,6 +396,9 @@ export class JsMyFiles {
       this.targetitem.insertBefore(this.dropzone, this.activentry.label.nextElementSibling);
       this.toggleDropTarget(true);
     }
+    ['dragover', 'dragenter'].forEach(eventname => {
+     window.addEventListener(eventname, function(e) {e.preventDefault();}, false);
+    });
   }
   detachDropzone() {
     this.enableDropzone(false);
@@ -443,6 +441,8 @@ export class JsMyFiles {
 
 
   async handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
     if (!this.setUploadEntry()) return;
     let dataTransfer;
     if (e.dataTransfer) {

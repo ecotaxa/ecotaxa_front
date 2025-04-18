@@ -3,7 +3,6 @@
 .openapi-generator-ignore
 .run
 dev_doc
-docker
 mypy.ini
 runserver*.py
 setup.py
@@ -21,3 +20,5 @@ to_back/ecotaxa_cli_py/test
 to_back/ecotaxa_cli_py/docs
 dev_gui
 messages
+QA
+*.tar.gz

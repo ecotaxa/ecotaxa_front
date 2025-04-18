@@ -26,7 +26,7 @@
   "src_modules_files_js-scandir_js.js": "/static/gui/src/src_modules_files_js-scandir_js.js",
   "vendors-node_modules_tom-select_dist_js_plugins_caret_position_js-node_modules_tom-select_dis-6094fa.js": "/static/gui/src/vendors-node_modules_tom-select_dist_js_plugins_caret_position_js-node_modules_tom-select_dis-6094fa.js",
   "vendors-node_modules_debounce_index_js-node_modules_deep-equal_index_js.js": "/static/gui/src/vendors-node_modules_debounce_index_js-node_modules_deep-equal_index_js.js",
-  "vendors-node_modules_fflate_esm_browser_js.js": "/static/gui/src/vendors-node_modules_fflate_esm_browser_js.js",
+  "vendors-node_modules_detect-browser_es_index_js-node_modules_fflate_esm_browser_js.js": "/static/gui/src/vendors-node_modules_detect-browser_es_index_js-node_modules_fflate_esm_browser_js.js",
   "src_modules_entry_js.js": "/static/gui/src/src_modules_entry_js.js",
   "cc-icons.ttf": "/static/gui/src/57b41cd1b83261ab6725.ttf",
   "../../../templates/v2/partials/_head.html": "/static/gui/src/../../../templates/v2/partials/_head.html"

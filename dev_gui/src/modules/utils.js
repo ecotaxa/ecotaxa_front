@@ -11,15 +11,6 @@ function browser_version() {
   console.log(user_agent);
 }
 
-function browser_accept(accepted) {
-  const user_agent = browser_version();
-  // accepted = {name:version, name:version } ... {chrome:86, firefox:72}
-  Object.keys(accepted).forEach(browser => {
-
-  });
-  return false;
-}
-
 function generate_uuid() {
   return uuidv4();
 }
@@ -213,7 +204,6 @@ function stop_on_error(message, callback = null) {
 
 export {
   generate_uuid,
-  browser_accept,
   fetchSettings,
   unescape_html,
   format_license,

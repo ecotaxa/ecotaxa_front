@@ -396,6 +396,7 @@ export class JsDirList {
   }
   options;
   uuid;
+  detachcallback=null;
   constructor(parent, options = {}) {
     if (!parent.jsdirlist) {
       parent = (parent instanceof HTMLElement) ? parent : document.querySelector(parent);
@@ -470,6 +471,7 @@ export class JsDirList {
           this.attachControls(parent);
           break;
         case evtnames.attach:
+         if (this.detachcallback) this.detachcallback();
           // no upload on trash dir
           const type = (e.entry.isInTrash()) ? entryTypes.discarded : e.entry.container.dataset.type;
           if (type === entryTypes.discard) return;

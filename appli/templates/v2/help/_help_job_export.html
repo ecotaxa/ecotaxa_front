@@ -27,12 +27,7 @@
 <li>concentration: {{_(' if chosen ')}}</li>
 <li>biovolume: {{_(' if chosen ')}}</li></ul></p>{%-if target_type=="collection"-%}<p>{{_('Collection summary export produces a single TSV file.')}}</p>{%-endif-%}
             <ul> <li id="help_export_summary_quantity"><p><strong>{{_('Quantity to compute')}}</strong><br>{{_('Abundance is always possible.')}}</p></li>
-              <li><details id="help_export_summary_formulae"><summary>{{_('Formulae')}}</summary><p>
-              {{_("Transitory: How to get values from DB free columns. Python syntax, prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are 'total_water_volume', 'subsample_coef' and 'individual_volume' ")}}
-              <br>{{_('example:')}}<br><pre>
-                subsample_coef: 1/ssm.sub_part
-                total_water_volume: sam.tot_vol/1000
-                individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3</pre></p></details></li>
+              <li><details id="help_export_summary_formulae"><summary>{{_('Formulae')}}</summary><p>{% include 'v2/help/_help_detail_project_formulae.html'%}</p></details></li>
                 <li id="help_export_summary_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a 0 replacement to _discard_ the present taxon.')}}</li></ul>
               </div></details>
               <details id="help_export_identification"><summary>{{_('Classification Export')}}</summary>
@@ -40,5 +35,8 @@
                 <strong>Only save objects' last classification data</strong></p>
                     {%-if target_type=="collection"-%}<p>{{_('Collection classification export produces a single TSV file.')}}</p>{%-endif-%}
                   </details>
+   <details id="help_export_darwincore"><summary>{{_('DarwinCore Export')}}</summary>
+        <p>{{_('Export data ready to be published in DarwinCore archive format, OBIS or GBIF.')}}</p>
+        </details>
 </article>
 {% endblock %}

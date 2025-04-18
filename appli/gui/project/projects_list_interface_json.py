@@ -36,11 +36,6 @@ def project_table_columns(typeimport: str, selection: str = "list") -> dict:
                 "managers": {"label": _("Managers"), "hidden": True},
                 "viewers": {"label": _("Viewers"), "hidden": True},
                 "status": {"label": _("Status"), "format": "status"},
-                "visible": {
-                    "label": _("Visibility"),
-                    "format": "check",
-                    "value": "Y",
-                },
                 "access": {"label": _("Access"), "format": "access"},
                 "objcount": {"label": _("Nb objects"), "format": "number"},
                 "pctvalidated": {
@@ -425,8 +420,6 @@ def render_for_js(prjs: list, columns: dict, can_access: dict) -> list:
                         ):
                             select.update(translations["controls"]["V"])
                         else:
-                            if prj["visible"]:
-                                select.update(translations["controls"]["V"])
                             select.update(translations["controls"]["R"])
                         if prj["projid"] in can_access["Manage"] or isadmin:
                             select.update(translations["controls"]["M"])

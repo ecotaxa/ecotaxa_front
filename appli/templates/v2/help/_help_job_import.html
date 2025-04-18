@@ -19,7 +19,6 @@
           </li>
           <li>Load the "ecotaxa” folder on the server</li>
         </ul>
-
         <h5>Importation from unvalidated samples <small>(on-going projects)</small></h5>
         <ul>
           <li>Check that ALL metadata are correct</li>
@@ -34,15 +33,22 @@
           <li>When importing, tick the "Skip <code>tsv</code> files" option</li>
         </ul>
       </div></details>
-<details id="help_image_only_import"><summary>{{_('Image Only import')}}</summary>
+  <details id="help_import_general"><summary>{{_('General import')}}</summary>
+    <div>{{_('Import images and tsv files')}}</div></details>
+<details id="help_import_simple"><summary>{{_('Image Only import')}}</summary>
   <div>
 {{_('If you have only image and no data file you can use the simple import here.')}}</div></details>
-<details id="help_metadata_update"><summary>{{_('Re-import and Update Metadata')}}</summary>
+<details id="help_import_update"><summary>{{_('Re-import and Update Metadata')}}</summary>
   <div>
 {{_('If you have already loaded your images and you want update your metadata.')}}</div></details>
 <details id="help_taxonomy_mapping"><summary>{{_('Optional taxonomy mapping')}}</summary>
   <div>{{_('This allows to change the name of the categories of previously classified objects to match the names in the UniEuk taxonomic framework included in the application.')}}
-    <div>{{_('Examples:')}}<br>{{ _('crust_cop = Copepoda')}}<br>{{_('gelatinous medusae = Cnidaria (Hydrozoa) ')}}</div></div>
-  </details>
+    <div>{{_('Examples:')}}<br>{{ _('crust_cop = Copepoda')}}<br>{{_('gelatinous medusae = Cnidaria (Hydrozoa)')}}</div></div>
+  </details><details id="help_import_my_files"><summary>{{_('My Files')}}</summary>{{_(
+        'My Files is your storage space on the EcoTaxa server. From your computer, you can upload folders and files to this storage space using the "browse directories" and "browse files" buttons, or by dragging and dropping. Once uploaded, folders can be imported into your project by clicking the "select to import" button.'
+    )}}</details>
+  <details id="help_import_server"><summary>{{_('Import from FTP or Server')}}</summary>{{_(
+        'Contact the project manager to know where and how to upload your data. Once the import is complete, all data folders/files can be safely erased on the server.'
+    )}}</details>
 </article>
 {% endblock %}

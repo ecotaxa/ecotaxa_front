@@ -70,7 +70,7 @@
 <li>{{_('privileges are sorted by roles and user name')}}</li>
 </ul></div>
 </details>
-   <details id="help_project_formulae" ><summary>{{_('Formulae')}}</summary><div>{{ _('Formulae used to calculate concentration and biovolume for the project. Used in export summary and export DarwinCore when the project belongs to a collection.') | safe}} </div>
+   <details id="help_project_formulae" ><summary>{{_('Formulae')}}</summary><div><p>{% include 'v2/help/_help_detail_project_formulae.html'%}</p></div>
   </details>
      <details id="help_project_mapping" ><summary>{{_('Mapping')}}</summary><div>{{ _('List of the project free cols, there are free cols in the object, sample, acquisition and process sections.') }}<br>
      {{_('The list display the free column name and its associated column identifier in the database.')}}</div>

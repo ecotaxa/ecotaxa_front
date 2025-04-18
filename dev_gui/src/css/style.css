@@ -6,7 +6,7 @@
   html {width:100%;
   height:100%;
 font-size:100%}
-body {@apply bg-white text-stone-800 font-light subpixel-antialiased; font-display: optional}
+body {@apply bg-white text-stone-800 font-light h-full min-h-full subpixel-antialiased; font-display: optional}
   h1 {
     @apply text-2xl font-black;
   }
@@ -133,12 +133,12 @@ details.modal-popup[open] .modal-content {@apply w-full  border-t border-stone-2
 details.modal-popup.inside[open] .modal {@apply min-h-[96%]}
 details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-stone-700  drop-shadow-sm opacity-100 -mt-2 mr-0  w-full min-w-full h-full min-h-full overflow-hidden;
 }
-details.modal-aside[open] .modal + details.modal-aside[open] summary {@apply   h-full min-h-full}
-details.modal-aside[open]  {@apply overflow-y-auto overscroll-none}
+details.modal-aside[open] .modal, details.modal-aside[open] .modal-content,details.modal-aside[open] .aside-body {@apply   h-full min-h-full }
+details.modal-aside[open]  {@apply overflow-y-auto overscroll-none  h-full min-h-full }
 details.modal-container:not([open]) > summary {@apply block w-auto marker:hidden list-none}
 details summary.aside-label, details.modal-popup > summary , details.project-search > summary {@apply  after:absolute after:fill-stone-600 after:hover:fill-help-500  after:right-4 after:top-4  after:opacity-0 after:w-0 after:h-0 after:transform after:duration-300;
 }
-details.modal-right {@apply  w-auto  h-full min-h-full  top-0 right-0  }
+details.modal-right {@apply  w-auto  h-full min-h-full  top-0 right-0 }
 details:not([open]) summary.aside-label {@apply float-right clear-right  mb-0 text-stone-600 font-semibold text-sm font-btn font-medium  pl-0.5 pr-1.5 py-0.5 after:text-base after:bg-transparent after:content-none}
 details[open] summary.aside-label .summary-title {@apply hidden w-0 h-0}
 details.no-marker > summary, .simple-tree details > summary {@apply marker:hidden list-none;}
@@ -164,10 +164,10 @@ details.project-search[open] > summary::after {@apply  fill-stone-50 hover:fill-
 /* aside-modal help details content */
 i[data-request="help"] {@apply cursor-help}
 details.modal-help {@apply mb-4 open:z-[500]  open:p-0 open:mb-0}
-details[open].modal-help .aside-body  {@apply w-full h-full p-0 m-0  }
+details[open].modal-help .modal  , details[open].modal-help .modal-content  {@apply max-h-screen h-screen min-h-screen }
 details:not([open]).modal-help > summary {@apply py-1 list-none marker:hidden}
 details.modal-help .modal summary {@apply font-medium text-base }
-details.modal-help .modal .modal-content {@apply h-full overflow-y-auto overscroll-none }
+details.modal-help .modal .modal-content {@apply overflow-y-auto overscroll-none}
 details.modal-help .modal article > details > summary {@apply font-medium text-lg text-help-500  my-2 marker:text-help-300 }
 details.modal-help:not[open]  .modal summary  {@apply font-medium text-lg text-stone-900 block mb-1 ;}
 article.table-of-contents > details > summary {@apply text-xl font-bold uppercase list-none before:content-[attr(data-marker)]}
@@ -289,13 +289,13 @@ tr.disabled {@apply opacity-70}
 .on .entryN , .entryN {@apply  text-sm font-light}
 .entries [data-name$=".tsv"] .entryN {@apply font-normal}
 /* entry selected */
-.selected > .entryB, .selected > .entryN {@apply font-semibold  after:content-[attr(data-selected)] after:small-caps after:text-sm after:absolute after:top-0.5 after:bg-stone-700 after:text-stone-50 after:right-1 after:py-0.5 after:px-2 after:h-auto after:rounded}
+.selected > .entryB, .selected > .entryN {@apply font-semibold  after:content-[attr(data-selected)] after:small-caps after:text-sm after:absolute after:top-0 after:bg-secondblue-400 after:text-stone-50 after:right-0 after:py-0 after:px-2 after:h-7 after:max-h-7 after:rounded-sm}
 .selected .entries  {@apply hidden}
 .folders .wait > .entryB, .folders .wait > .entryD, .folders .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm}
 .entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
 .entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5 bg-transparent hover:bg-white cursor-pointer  static}
-.entrycontrols span.control-select , .control-select {@apply text-xs small-caps font-bold bg-stone-50 hover:text-secondblue-500 drop-shadow-sm hover:drop-shadow-none rounded-sm p-1}
+.entrycontrols span.control-select , .control-select {@apply text-sm small-caps bg-stone-700 font-semibold hover:bg-secondblue-400 h-5 max-h-5 text-stone-50 drop-shadow-sm hover:drop-shadow-none rounded-sm p-1}
 .intrash {@apply bg-danger-100}
 
 /* form with tabs */
@@ -303,24 +303,23 @@ form.js-tabs {@apply transition-opacity duration-[1000] ease-in }
 form.js-tabs  .fieldset-wrapper {@apply relative block}
 form.js-tabs .tab-control {@apply absolute top-0 left-0 -mt-6 mb-0}
 form.js-tabs .tab {@apply md:w-full my-0 h-0 py-0 bg-inherit block}
-form.js-tabs fieldset.tab {@apply   mr-4  h-0 }
-form.js-tabs .tab.active {@apply h-auto }
-form.js-tabs legend.tab-control, form.js-tabs .legend {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100 }
+form.js-tabs fieldset.tab {@apply mr-4 h-0 }
+form.js-tabs .tab.active {@apply h-auto}
+form.js-tabs legend.tab-control, form.js-tabs .legend {@apply border-transparent text-stone-400 hover:text-stone-900  mr-2 md:mr-8  opacity-100}
 form.js-tabs .legend {@apply text-center mt-4}
-form.js-tabs .tab.active legend.tab-control {@apply  border-stone-600 text-stone-900  opacity-100  }
+form.js-tabs .tab.active legend.tab-control {@apply  border-stone-600 text-stone-900 opacity-100}
 form.js-tabs .tab.active .tab-content {@apply mt-10 -ml-6 mb-0  h-auto px-2}
 form.js-tabs .tab.tab-one legend.tab-control {@apply font-sans font-normal text-base sm:text-lg hover:text-stone-600 hover:font-semibold bg-transparent rounded hover:border  hover:border-stone-50 hover:border-b-transparent  py-2 px-4  }
-form.js-tabs .tab.tab-one.active legend.tab-control {@apply bg-white text-stone-800 font-bold border  border-stone-100 border-b-white z-10 }
+form.js-tabs .tab.tab-one.active legend.tab-control {@apply bg-white text-stone-800 font-bold border  border-stone-100 border-b-white z-10}
 form.js-tabs .tab.tab-one.active .tab-content {@apply border  border-stone-100  mt-5 px-4 -ml-6 mb-0}
 form.js-tabs .tab.err.active legend.tab-control {@apply border-danger-400}
-form.js-tabs .tab.err legend.tab-control {@apply before:text-xs  before:content-["*"] before:mr-0.5 before:border-none before:align-baseline before:text-danger-400 text-danger-400 }
+form.js-tabs .tab.err legend.tab-control {@apply before:text-xs  before:content-["*"] before:mr-0.5 before:border-none before:align-baseline before:text-danger-400 text-danger-400}
 /* tabs expand shrink */
 .tabs-display.expand  {@apply icon-arrows-pointing-out}
 .tabs-display.shrink {@apply icon-arrows-pointing-in}
 /* list prjs */
-a.contact {
-@apply inline-block py-[0.5] px-0.5 sm:px-1.5 leading-none text-xs small-caps whitespace-nowrap font-light text-left underline underline-offset-2 ;}
-a.contact:not([data-contact]) {@apply  no-underline hover:underline}
+a.contact {@apply inline-block py-[0.5] px-0.5 sm:px-1.5 leading-none text-xs small-caps whitespace-nowrap font-light text-left underline underline-offset-2}
+a.contact:not([data-contact]) {@apply no-underline hover:underline}
 a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hover:no-underline bg-transparent rounded font-medium bg-transparent transform duration-300}
 .contact[data-contact]::before {@apply h-full ml-0.5 inline-block py-[0.25] align-middle;content:'@'}
 /* nav effects */
@@ -328,7 +327,7 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
 .animate.active {@apply after:bg-secondblue-100 after:opacity-90 after:w-2.5 after:h-0.5 after:top-0 after:translate-y-6 after:left-0}
 /* footer */
 #nav-footer {@apply sticky bottom-0 left-0}
-#nav-footer a { @apply text-xs font-btn  uppercase px-3 py-1 flex items-center font-medium text-stone-800}
+#nav-footer a { @apply text-xs font-btn uppercase px-3 py-1 flex items-center font-medium text-stone-800}
 #nav-footer li.submenu:hover > a , #nav-footer li.submenu:active > a {@apply opacity-0}
 #nav-footer li.submenu:hover > ul, #nav-footer li.submenu:active > ul {@apply block -translate-y-[100%] absolute}
 /* go to top */
@@ -982,7 +981,7 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .alert.info.inverse i {@apply  icon-info-sm }
 .alert.danger:not(.inverse) i , .alert.error:not(.inverse) i {@apply  icon-fire}
 .alert.danger.inverse i , .alert.error.inverse i {@apply icon-fire-sm}
-.hidevscroll {@apply max-h-screen overflow-y-hidden after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-6 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-40 content-none}
+.hidevscroll {@apply max-h-screen h-screen min-h-screen overflow-y-hidden after:opacity-50 after:bg-stone-900 after:w-screen after:min-h-screen after:py-6 after:-mt-6 after:block after:sticky after:top-0 after:bottom-0 after:left-0 after:z-40 content-none}
 
 /*******************************/
 /* alertmessages               */

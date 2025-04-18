@@ -143,24 +143,30 @@ export function JsImport(container, options = {}) {
         myFiles.detachDropzone();
       }, myFiles.uuid);
       addImportControls(myFiles.jsDirList, myFiles.uuid);
+      const detachcallback=function() {deSelect();showSubmit(false);}
+      myFiles.jsDirList.detachcallback=detachcallback;
       container.querySelectorAll('[data-import]').forEach(async (item) => {
         item.dataset.request = item.dataset.import;
         await ActivRequest.makeRequest(item);
         item.addEventListener('click',(e) => {
-        showSubmit();
+        showSubmit((selected!==null));
         });
         const other= item.previousElementSibling || item.nextElementSibling;
         if (other && other.dataset.summary) other.addEventListener('click',(e) => {
         showSubmit(false);
         });
-        item.jstree.entrycontrols.options.controls = {};
-        addImportControls(item.jstree, item.jstree.uuid, [entryTypes.branch, entryTypes.node]);
+        if (item.jstree) {
+            item.jstree.entrycontrols.options.controls = {};
+            item.jstree.setDetachcallback(detachcallback);
+         addImportControls(item.jstree, item.jstree.uuid, [entryTypes.branch, entryTypes.node]);
+         }
       })
-          // detach entry controls if accordion or tabs when not active
+        // detach entry controls if accordion or tabs when not active
         const accordion=container.querySelector('.js-accordion')?container.querySelector('.js-accordion'):container.querySelector('.js-tabs');
         if (accordion && accordion.dataset.detail) {
-        accordion.querySelectorAll(accordion.dataset.detail).forEach(summary=> {
-         summary.emitevent= () => {  deSelect();}
+        const summaries=accordion.querySelectorAll(accordion.dataset.detail);
+        summaries.forEach(summary=> {
+         summary.emitevent= () => { deSelect();}
         });
         }
        //
@@ -183,7 +189,6 @@ export function JsImport(container, options = {}) {
   }
 
   function addImportControls(entrylist, uploaduuid, typentries = null) {
-
     function add_remove_import(e) {
       if (selected) {
         delete selected.label.dataset.selected;
@@ -200,7 +205,7 @@ export function JsImport(container, options = {}) {
       entrylist.entrycontrols.showControls(false);
       selected = activentry;
     }
-    const control = {
+      const control = {
       import: {
         action: 'import',
         class:["control-select"],
@@ -210,11 +215,11 @@ export function JsImport(container, options = {}) {
         callback: add_remove_import
       }
     };
-
     entrylist.entrycontrols.options.controls = {
       ...entrylist.entrycontrols.options.controls,
       ...control
     };
+
     const import_action = function(entry) {
       if (entrylist.activentry) entrylist.activentry.setSelected(false);
       addImportEntry(entry);
@@ -229,7 +234,7 @@ export function JsImport(container, options = {}) {
 
   function showSubmit(show = true) {
     const submit = container.querySelector('[type="submit"]');
-    if (show) {
+      if (show) {
       submit.classList.remove('hide');
       submit.disabled = false;
     } else submit.disabled = true;

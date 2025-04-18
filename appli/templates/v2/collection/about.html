@@ -11,7 +11,7 @@
 <div class="stat-info"><span class="font-normal">{{target_coll.contact_user.name}}</span> <a href="mailto:{{target_coll.contact_user.email}}" class="hover:underline">{{target_coll.contact_user.email}}</a></div></div>
 {%-set by_role= {"creator":_('Creator users  and organisations'),"associate":_('Associate users and organisations')}-%}
   {%-for role,title in by_role.items()-%}
-<div class="stat-item "><span class="stat-label">{{title}} <i data-for="help_collection_{{role}}s" data-request="help"></i></span>
+<div class="stat-item "><span class="stat-label">{{title}} </span>
   <div class="stat-info">
   {% for item in target_coll[role+'_users'] %}
   <div class="pr-2 inline-block"><span class="font-normal">{{item.name }}</span> <a href="mailto:{{item.email}}" class="hover:underline">{{item.email}}</a></div>

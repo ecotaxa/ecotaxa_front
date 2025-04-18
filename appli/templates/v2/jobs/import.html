@@ -46,11 +46,7 @@
 </div>{%-endfor%}
 {%-endmacro-%}
 {%-macro import_comments()-%}
- {%-set browse_help_text = _(
-        'My Files is your storage space on the EcoTaxa server. From your computer, you can upload folders and files to this storage space using the "browse directories" and "browse files" buttons, or by dragging and dropping. Once uploaded, folders can be imported into your project by clicking the "select to import" button.'
-    )-%}
 <div class="label"><span id="browse-replace"></span> by clicking on <span class="control-select my-1">{{_('select to import')}}</span>
-        <details class="inline-block no-marker relative max-w-96"><summary><i class="icon icon-info"></i></summary><div class="w-96 h-auto p-4 rounded-sm drop-shadow absolute z-10 bg-white"><p class="text-xs prose">{{browse_help_text}}</p></div></details>
 </div>
 {%-endmacro-%}
 {% block body %}
@@ -59,7 +55,6 @@
 {% set data = {'file':'_help_job_import'} -%}
 {%- set title=_('Import')  %}
 {{header_project_job(title ,data, _('How to import data'), nav={"links":action_links,"query":"?projid="+target_proj.projid|string})}}
-	<em class="block text-sm mt-2">{{_('Global import rules')}} <i data-for="help_global_import_rules" data-request="help" data-what="help"></i></em>
 </div>
 <form method="post" class="js js-submit js-tabs js-import" action="{{request.path}}" data-event="click" data-importzoneid="import-list" data-toggle=true data-toselect="{{_('select to import')}}" data-textimport="{{_('selected to import')}}" data-toggledisable=true data-toggleshared=true enctype=multipart/form-data>
     <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}">

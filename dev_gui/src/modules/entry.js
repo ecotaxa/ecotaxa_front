@@ -497,7 +497,7 @@ export function EntryControls(container = document, options = {}) {
       if (!activentry[control.action] && action !== null) {
         action(activentry);
       } else if (activentry[control.action]) activentry[control.action](detail);
-      if (control.callback) control.callback(e);
+      if (control.callback)  control.callback(e);
     };
     ctrl.addEventListener(evt, func);
     //

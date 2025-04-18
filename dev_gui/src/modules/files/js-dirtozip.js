@@ -16,6 +16,8 @@ import {
 import {
   ModuleEventEmitter
 } from '../../modules/module-event-emitter.js';
+import { detect } from 'detect-browser';
+
 const already_compressed = new Set([
   'zip', 'gz', 'png', 'jpg', 'jpeg', 'pdf', 'doc', 'docx', 'ppt', 'pptx',
   'xls', 'xlsx', 'heic', 'heif', '7z', 'bz2', 'rar', 'gif', 'webp', 'webm',
@@ -59,6 +61,21 @@ export function JsDirToZip(options = {}) {
   const uuid = generate_uuid();
   init();
 
+function browserRequired() {
+const browser = detect();
+     const accepted={android:{chrome:109,opera:74,firefox:111,samsungbrowser:21,webview:109}, ios:false,other:{chrome:86,edge:86,opera:72,firefox:111}};
+        let os =browser.os.toLowerCase();
+        os=(os in ['android','ios'])?os:'other';
+     const name=browser.name.toLowerCase();
+     const version = parseInt(browser.version.split('.')[0]);
+ if ((accepted[os] && accepted[os][name] && accepted[os][name]<= version))  {
+     ModuleEventEmitter.emit(eventnames.message, {
+          id: "browser",
+          name: "browser",
+          message: "your browser does not have a required functionnality. Please upgrade or use a valid browser and version :"+  JSON.stringify(accepted).replaceAll('"',''),
+        }, _listener);
+     }
+     }
   function init() {
     properties = initProps();
     ModuleEventEmitter.on(eventnames.init, async (e) => {
@@ -101,7 +118,6 @@ export function JsDirToZip(options = {}) {
       }
       if (e.name === 'zip' && properties.callback) await properties.callback();
     }, uuid);
-
   }
 
   function initProps() {
@@ -190,6 +206,7 @@ export function JsDirToZip(options = {}) {
     if (e.hasOwnProperty("path")) message.path = e.path;
     return message;
   }
+
   async function quotaEstimate() {
     if (navigator && navigator.storage && navigator.storage.estimate) {
       navigator.storage.estimate().then((quota) => {
@@ -213,6 +230,7 @@ export function JsDirToZip(options = {}) {
       message: "no navigator storage"
     }, uuid);
   }
+
   async function createLocalStream(name, accept = {
     'application/zip': ['.zip'],
   }) {
@@ -603,6 +621,7 @@ export function JsDirToZip(options = {}) {
     eventnames,
     scanBrowse,
     scanHandle,
-    quotaEstimate
+    quotaEstimate,
+    browserRequired
   }
 }

@@ -36,11 +36,15 @@
   </details>
   <details  id="help_collection_associate"><summary>{{_('Associate')}}</summary>
   <div>{{_('Name of persons or organisations who are responsible for the creation / maintenance of the dataset but to an extent that does not justify their inclusions as authors. These persons will not be mentioned in the citation.')}}</div>
-  </details><details id="help_collection_projects"><summary>{{_('Contact')}}</summary><div>{{_('A selected manager contact is required for each project.')}}</div>
+  </details><details id="help_collection_projects"><summary>{{_('Projects')}}</summary><div>{{_('List of projects id. The collection projects share somme common properties:')}}
+  <ul><li>{{_('The creator or editor has to be a manager of all the projects of the collection.')}}</li>
+  <li>{{_('The projects have the same instrument.')}}</li><li>{{_('The projects share the same access property.')}}</li></ul></div>
 </details>
   <details  id="help_collection_aggregated_properties"><summary>{{_('Aggregated properties')}}</summary>
-    <div>_('Common collection projects properties')
-    <ul><li></li></ul></div>
+    <div>{{_('Display of the collection projects common properties:')}}
+      <ul><li>{{_('Privileges with lower common role')}}</li><li>{{_('Lower common status')}}</li><li>{{_('Lower common access')}}</li>
+        <li>{{_('Common taxonomy presets')}}</li><li>{{_('Common sorting tools')}}</li><li>{{_('Common deep features extractor')}}</li><li>{{_('Common imported columns')}}</li></ul>
+    </div>
   </details>
   </article>
   {% endblock %}

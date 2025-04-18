@@ -4,6 +4,8 @@
 
 /*! ../files/js-scandir.js */
 
+/*! detect-browser */
+
 /*! fflate */
 
 /*! import() */

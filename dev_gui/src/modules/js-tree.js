@@ -91,6 +91,7 @@ export function JsTree(parent, options = {}) {
   options = { ...jstreeOptions,
     ...options
   };
+  let detachcallback=null;
   const uuid = generate_uuid();
   if (!parent || parent.querySelector('.' + options.tree) !== null) return;
   options.entry = { ...entryOptions,
@@ -147,6 +148,7 @@ export function JsTree(parent, options = {}) {
       let dragentry, activentry;
       switch (e.action) {
         case evtnames.attach:
+        if (detachcallback) detachcallback();
           attachControls(e.entry);
           break;
         case "dragstart":
@@ -221,7 +223,7 @@ export function JsTree(parent, options = {}) {
           }
           break;
         default:
-          if (e.entry.active) {
+            if (e.entry.active) {
             attachControls(e.entry);
           } else attachControls(root);
           break;
@@ -257,8 +259,11 @@ export function JsTree(parent, options = {}) {
     }, options.listener);
     activentry = dest;
   }
-  return {
+  function setDetachcallback(callback) {
+  detachcallback=callback;}
+   return {
     uuid,
+    setDetachcallback,
     getActiventry,
     setActiventry,
     entrycontrols,
