@@ -68,7 +68,7 @@ const browser = detect();
         os=(os in ['android','ios'])?os:'other';
      const name=browser.name.toLowerCase();
      const version = parseInt(browser.version.split('.')[0]);
- if ((accepted[os] && accepted[os][name] && accepted[os][name]<= version))  {
+ if ((accepted[os] && accepted[os][name] && accepted[os][name]<= version)===false)  {
      ModuleEventEmitter.emit(eventnames.message, {
           id: "browser",
           name: "browser",
