@@ -192,7 +192,7 @@ export function JsTree(parent, options = {}) {
 
           break;
         case evtnames.select:
-          if (options.actions && options.actions.select) options.actions.select(entry);
+           if (options.actions && options.actions.select) options.actions.select(entry);
           else {
             const droptarget = (options.droptarget) ? document.getElementById(options.droptarget) : null;
             if (!droptarget) console.log('no-target');
@@ -223,7 +223,7 @@ export function JsTree(parent, options = {}) {
           }
           break;
         default:
-            if (e.entry.active) {
+           if (e.entry.active) {
             attachControls(e.entry);
           } else attachControls(root);
           break;
@@ -242,7 +242,6 @@ export function JsTree(parent, options = {}) {
   function setActiventry(entry = null) {
     activentry = entry;
   }
-
   function attachControls(entry) {
     if (entrycontrols) entrycontrols.attachControls(entry);
     activentry = entry;

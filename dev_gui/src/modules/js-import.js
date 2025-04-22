@@ -158,7 +158,8 @@ export function JsImport(container, options = {}) {
         if (item.jstree) {
             item.jstree.entrycontrols.options.controls = {};
             item.jstree.setDetachcallback(detachcallback);
-         addImportControls(item.jstree, item.jstree.uuid, [entryTypes.branch, entryTypes.node]);
+            const exclude = (item.dataset.exclude)?item.dataset.exclude.split(','):[];
+         addImportControls(item.jstree, item.jstree.uuid, [entryTypes.branch, entryTypes.node],exclude);
          }
       })
         // detach entry controls if accordion or tabs when not active
@@ -188,14 +189,15 @@ export function JsImport(container, options = {}) {
     showSubmit();
   }
 
-  function addImportControls(entrylist, uploaduuid, typentries = null) {
+  function addImportControls(entrylist, uploaduuid, typentries = null,exclude=[]) {
+
     function add_remove_import(e) {
-      if (selected) {
+        if (selected) {
         delete selected.label.dataset.selected;
         selected.setSelected(false);
-      }
+        }
       const activentry = entrylist.getActiventry();
-      if (selected === activentry) {
+      if (selected === activentry  ) {
         selected = null;
         return;
       }
@@ -209,7 +211,7 @@ export function JsImport(container, options = {}) {
       import: {
         action: 'import',
         class:["control-select"],
-        //icon: 'icon-check',
+        exclude:exclude,
         typentries: (typentries) ? typentries : [entryTypes.branch],
         text: (options.toselect)?(options.toselect):'select to import',
         callback: add_remove_import
@@ -219,14 +221,12 @@ export function JsImport(container, options = {}) {
       ...entrylist.entrycontrols.options.controls,
       ...control
     };
-
     const import_action = function(entry) {
       if (entrylist.activentry) entrylist.activentry.setSelected(false);
       addImportEntry(entry);
       ModuleEventEmitter.emit(eventnames.select, {
         value: false
       }, uploaduuid);
-
     }
     entrylist.entrycontrols.addControl(control.import, 0, import_action);
     entrylist.entrycontrols.activateControl(control.import);

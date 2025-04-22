@@ -16,7 +16,7 @@
         </div>
         </div><!-- For collections -->
         <div class="flex flex-col">
-        <a href="{{url_for('gui_collection')}}" data-action="badge" data-as="new" data-btext="{{_('new')}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-700 to-mainblue-500 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Browse the collections')}}</a>
+        <a href="{{url_for('gui_collection')}}" class="button bg-gradient-to-r hover:bg-gradient-to-l  from-mainblue-700 to-mainblue-500 border-none shadow-sm hover:shadow-none text-stone-50 hover:bg-mainblue-500 block w-full text-center">{{_('Browse the collections')}}{{badge('success',_('new'),False,True)}}</a>
         <div class="mt-2 p-4 pt-2 text-sm border-r bg-gradient-to-b  from-transparent to-mainblue-50 shadow flex-grow">
           <p>{{_('A collection is a set of similar projects that can be explored together (legs of a cruise, years of a time series, etc.) or a single project that constitutes a full dataset.')}}<br>
               {{_('After adding metadata and choosing a license, the data is ready to be exported and published in DarwinCore archive format, <a href="https://obis.org/" class="text-mainblue-700 hover:text-secondblue-400">OBIS</a> or <a href="https://www.gbif.org/" class="text-mainblue-700 hover:text-secondblue-400">GBIF</a>.')}}

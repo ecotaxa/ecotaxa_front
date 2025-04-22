@@ -525,6 +525,7 @@ export function EntryControls(container = document, options = {}) {
   }
 
   function attachControls(entry) {
+
     detachControls();
     activentry = entry;
     activentry.container.prepend(box);
@@ -542,6 +543,7 @@ export function EntryControls(container = document, options = {}) {
 
   function activateControl(control, isdiscarded = false) {
     const ctrl = control.ctrl;
+    if (control.exclude && activentry !==null && control.exclude.indexOf(activentry.name)>=0) {ctrl.classList.add(css.hide);return;}
     const typentries = (ctrl.dataset.typentries) ? ctrl.dataset.typentries.split(',') : [];
     const type = (isdiscarded) ? entryTypes.discarded : activentry.container.dataset.type;
     if (typentries.indexOf(type) >= 0) {
@@ -553,8 +555,8 @@ export function EntryControls(container = document, options = {}) {
     if (activentry === null) return;
     // add btns
     const isdiscarded = activentry.isDiscarded();
-    Object.values(options.controls).filter(control => (control.icon || control.text)).forEach(control => {
-      activateControl(control, isdiscarded);
+     Object.values(options.controls).filter(control => (control.icon || control.text)).forEach(control => {
+     activateControl(control, isdiscarded);
     });
     //
   }

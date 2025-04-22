@@ -241,15 +241,7 @@ function createActivItems() {
             });
           }
           break;
-          case "badge":
-          const queryurls={new:"animated=y&color=success",info:"color=info"};
-          const as=(item.dataset.as)?item.dataset.as:"info";
-          let url=(Object.keys(queryurls).indexOf(as)>=0)?queryurls[as]:"";
-          url+=(item.dataset.btext)?"&text="+item.dataset.btext:"";
-          url="/gui/badge?"+ new URLSearchParams(url);
-          fetch(url,fetchSettings()).then(response=>response.text()).then(response=> item.insertAdjacentHTML('beforeend',response))
-          break;
-      }
+          }
 
     });
   }

@@ -1,7 +1,7 @@
 {% extends "./v2/help/_layout.html" %}
 {% block article %}
 <article my-12><h2 class="help-title">{{title if title!=None else _('How to use My Files service')}} </h2>
-  <div class="console"><strong>{{_('Browser compatibility: ')}}</strong>{{_('Chrome 86, Edge 86, Firefox 111, Opera 72, Safari 15.2 (si trouvé alternative à createWritable sinon sortir de la liste)')}}</div>
+  <div class="console"><strong>{{_('Browser compatibility: ')}}</strong>{{_('Chrome 86, Edge 86, Firefox 111, Opera 72')}}</div>
   <details id="help_list_myfiles"><summary>{{_('List')}}</summary><div>{{_('List directories and files by clicking on a directory name.')}}<br>{{_('The directory or file becomes "active" and operations like move, rename , remove, add new directory or upload inside can be done.')}}</div>
   </details>
   <details id="help_upload_myfiles"><summary>{{_('Upload')}}</summary><div>{{_('Browse or drag and drop directories. A zip file is open and files are added, click on close the zip file and then upload.')}}<br>{{_('Directories and /or files bigger than 4 Go are sent in several parts, files bigger than 4 Go are sent by chunks.')}}<br> {{_('Accepted files: .tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2')}}
