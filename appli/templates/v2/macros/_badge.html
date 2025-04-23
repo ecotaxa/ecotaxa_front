@@ -1,8 +1,8 @@
 {%-macro badge(color,text,small=False,animated=True)-%}
-{%-if small-%}<span class="relative inline-flex rounded-full size-1 bg-{{color}}-500 "></span>
+{%-if small-%}<span class="relative inline-flex rounded-full size-1 bg-success-500 "></span>
 {%-else-%}<span class="flex absolute top-0 end-0 size-2 -mt-1 -mr-1 ">
-    {%-if animated!=''-%}<span class="animate-ping absolute inline-flex size-full rounded-full bg-{{color}}-600 opacity-75"></span>{%-endif-%}
-    <span class="relative inline-flex rounded-full size-2 bg-{{color}}-500 ">{%-if text!=''-%}<span class="sr-only">{{text}}</span>{%-endif-%}</span>
+    {%-if animated!=''-%}<span class="animate-ping absolute inline-flex size-full rounded-full bg-success-600 opacity-75"></span>{%-endif-%}
+    <span class="relative inline-flex rounded-full size-2 bg-success-500 ">{%-if text!=''-%}<span class="sr-only">{{text}}</span>{%-endif-%}</span>
   </span>
 {%-endif-%}
 {%-endmacro-%}
