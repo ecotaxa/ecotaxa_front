@@ -45,9 +45,11 @@ class ExportJob(Job):
             if cls.EXPORT_TYPE in ["summary", "darwincore"]:
                 taxalist = formoptions[cls.EXPORT_TYPE]["taxo_mapping"]
                 if "datas" not in taxalist:
-                    taxalist["datas"] = {}
+                    taxalist["datas"] = []
                 for projid in target_obj.project_ids:
-                    taxalist.update(project_used_taxa(projid))
+                    taxalist["datas"] = list(
+                        set(taxalist["datas"] + project_used_taxa(projid))
+                    )
         elif cls.EXPORT_TYPE == "summary":
             formoptions[cls.EXPORT_TYPE]["taxo_mapping"]["datas"] = project_used_taxa(
                 projid

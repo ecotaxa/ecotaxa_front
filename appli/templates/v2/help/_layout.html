@@ -23,14 +23,15 @@
 {% endfor%}
 
 {%- endmacro %}
+<div class="modal-title max-h-48 h-auto" id="title-help">
 <nav id="nav-help">
   <div data-request="help" data-file="_help_summary" data-title="{{_('Help summary')}}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-4 ml-4 fill-help-200" viewBox="0 0 20 20">
     <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
   </svg></div></nav>
-<div id="breadcrumbs-help">{{ breadscrumb }}</div>
+<div id="breadcrumbs-help">{{ breadscrumb }}</div></div>
 <div id="main-help" class="modal-content"> {% endif %}<div class="py-8 px-6 md:pl-8 md:pr-12 mb-12 prose-invert prose-sm lg:prose-md prose-stone selection:bg-help-100 selection:text-help-900" id="target-article">
   {% block article %}{% endblock %}</div>
   {% if not partial%}
 </div>
-<div class="modal-footer"><div class="font-italic text-sm flex">{{_('New features are marked with a green dot')}} <span class="relative inline-flex rounded-full size-1 bg-success-500 "></span></div></div>
-  {% endif %}
+<div class="modal-footer flex" id="footer-help"><div class="font-italic text-sm flex-grow relative">{{_('New features are marked with a green dot')}} <span class=" inline-flex rounded-full size-1 bg-success-500 "></span></div></div>
+{% endif %}

@@ -121,7 +121,7 @@ details.modal-container > summary {@apply list-none marker:hidden cursor-pointer
 details.modal-popup {@apply open:fixed  open:z-70 open:md:w-2/3 open:centered open:max-h-[80%] }
 details .modal {@apply block w-0 h-0 p-0 m-0 transform  duration-500 opacity-0 overflow-hidden}
 details.modal-container[open] .modal { @apply bg-transparent h-full w-full opacity-100}
-details modal-footer {@apply max-h-[48px]   w-full}
+details modal-footer {@apply max-h-[32px]   w-full}
 details.modal-popup[open] {@apply h-[96%] my-auto}
 details.modal-container[open] summary > * {@apply hidden}
 details.modal-popup[open] .modal-footer {@apply  p-4  }
@@ -137,7 +137,7 @@ details.modal-aside[open] .modal {@apply transition-[width]  bg-help-50 text-sto
 }
 details.modal-aside[open]  {@apply overflow-y-auto overscroll-none  h-full min-h-full }
 details.modal-aside[open] .modal, details.modal-aside[open] .modal-content  ,details.modal-aside[open] .aside-body {@apply h-screen min-h-screen }
-details.modal-aside[open] .modal-footer {@apply absolute bottom-0 z-10 max-h-[48px] p-4}
+details.modal-aside[open] .modal-footer {@apply absolute bottom-0 w-full max-h-[48px] p-4}
 details.modal-container:not([open]) > summary {@apply block w-auto marker:hidden list-none}
 details summary.aside-label, details.modal-popup > summary , details.project-search > summary {@apply  after:absolute after:fill-stone-600 after:hover:fill-help-500  after:right-4 after:top-4  after:opacity-0 after:w-0 after:h-0 after:transform after:duration-300;
 }
@@ -1070,7 +1070,7 @@ details[open].toggle-summary summary span {@apply hidden}
 #main-help a:not([data-request]) {@apply text-stone-900 font-normal}
 /*help files main title */
 #main-help article > h2 , article .help-title {@apply text-center uppercase text-xl font-bold text-stone-700}
-
+#footer-help {@apply bg-help-50 text-help-800}
 /*******************************/
 /* table import add styles    */
 /*******************************/

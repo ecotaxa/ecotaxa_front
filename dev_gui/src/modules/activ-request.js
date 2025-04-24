@@ -62,7 +62,7 @@ function createActivRequest() {
           }
           const params = {
             partial: true,
-            title: item.textContent,
+            title: (item.dataset.title && item.dataset.title!=='')?item.dataset.title: item.textContent,
           };
           url = '/gui/help/' + file + '?' +
             new URLSearchParams(params);

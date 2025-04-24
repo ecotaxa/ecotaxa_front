@@ -234,12 +234,10 @@ function createActivItems() {
           });
           break;
         case 'astext':
-          const article = (item.dataset.target) ? document.getElementById(item.dataset.target) : item.parentElement.querySelector('article');
-          if (article) {
-            item.addEventListener((item.dataset.event) ? item.dataset.event : 'click', (e) => {
-              export_html2word(article, item.parentElement);
+             item.addEventListener((item.dataset.event) ? item.dataset.event : 'click', (e) => {
+                const article = (item.dataset.target) ? document.getElementById(item.dataset.target) : document.body.querySelector('article');
+                if (article)  export_html2word(article, item.parentElement);
             });
-          }
           break;
           }
 

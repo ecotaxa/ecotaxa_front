@@ -36,7 +36,13 @@
                     {%-if target_type=="collection"-%}<p>{{_('Collection classification export produces a single TSV file.')}}</p>{%-endif-%}
                   </details>
    <details id="help_export_darwincore"><summary>{{_('DarwinCore Export')}}</summary>
-        <p>{{_('Export data ready to be published in DarwinCore archive format, OBIS or GBIF.')}}</p>
+     <div>
+       <p>{{_('Export data ready to be published in DarwinCore archive format, OBIS or GBIF.')}}</p>
+       <ul><li id="help_export_darwincore_with_absent"><p><strong>{{_('With absent')}}</strong><br>{{_('Export taxa with zero occurences (default).')}}</p></li>
+         <li id="help_export_darwincore_quantity"><p><strong>{{_('Quantity to compute')}}</strong><br>{{_('Abundance is always possible.')}}</p></li>
+              <li><details id="help_export_darwincore_formulae"><summary>{{_('Formulae')}}</summary><p>{% include 'v2/help/_help_detail_project_formulae.html'%}</p></details></li>
+                <li id="help_export_darwincore_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a 0 replacement to _discard_ the present taxon.')}}</li></ul>
+     </div>
         </details>
 </article>
 {% endblock %}

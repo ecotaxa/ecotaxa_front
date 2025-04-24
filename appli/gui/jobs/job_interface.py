@@ -199,6 +199,7 @@ def export_format_options(_type=None, target="project"):
                             {"label": _("No"), "value": 0},
                         ],
                         "format": "radio",
+                        "help": "help_export_darwincore_with_absent",
                     },
                     "with_computations": {
                         "label": _("With computations"),
@@ -208,20 +209,21 @@ def export_format_options(_type=None, target="project"):
                             {"label": _("Biovolume"), "value": "BIV"},
                         ],
                         "format": "checkbox",
-                        "help": "help_export_with_computations",
+                        "help": "help_export_darwincore_quantity",
                     },
                     "taxo_mapping": {
+                        "id": "darwincore_taxo_mapping",
                         "label": _("Computations pre mapping"),
                         "comment": _(" Type '_discard_' to discard taxon"),
                         "format": "taxoline",
-                        "help": "help_export_computations_pre_mapping",
+                        "help": "help_export_darwincore_taxo_mapping",
                         "addoption": "_discard_,0",
                     },
                     "formulae": {
                         "label": _("Formulae"),
                         "example": '{"subsample_coef"->str, "total_water_volume"->str, "individual_volume"->str}',
                         "format": "textarea",
-                        "help": "help_export_summary_formulae",
+                        "help": "help_export_darwincore_formulae",
                     },
                     "extra_xml": {
                         "label": _("Extra XML block"),
@@ -239,8 +241,8 @@ def export_format_options(_type=None, target="project"):
                         "Export the collection in Darwin Core format, e.g. for EMODnet portal, @see https://www.emodnet-ingestion.eu"
                     ),
                     "datas": {
-                        "include_predicted": False,
-                        "with_absent": False,
+                        "include_predicted": True,
+                        "with_absent": True,
                         "with_computations": ("ABO", False),
                         "taxo_mapping": ({}, False),
                         "formulae": (
