@@ -244,6 +244,7 @@ def prefix_db_col(a_col: str, col_2_free: Dict[str, str]) -> Optional[str]:
 
 ######################################################################################################################
 
+
 # noinspection PyPep8Naming
 @app.route("/prj/<int:PrjId>")
 def indexPrj(PrjId):
@@ -300,7 +301,7 @@ def indexPrj(PrjId):
 
     data["month_for_select"] = ""
     # print("%s",data['month'])
-    for (a_filter, default) in enumerate(MONTH_LABELS, start=1):
+    for a_filter, default in enumerate(MONTH_LABELS, start=1):
         data["month_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
             "selected" if str(a_filter) in data.get("month", "").split(",") else "",
             a_filter,
@@ -308,7 +309,7 @@ def indexPrj(PrjId):
         )
 
     data["daytime_for_select"] = ""
-    for (a_filter, default) in DayTimeList.items():
+    for a_filter, default in DayTimeList.items():
         data["daytime_for_select"] += "\n<option value='{1}' {0}>{2}</option> ".format(
             "selected" if str(a_filter) in data.get("daytime", "").split(",") else "",
             a_filter,
@@ -320,10 +321,10 @@ def indexPrj(PrjId):
     if data.get("freenum", "") != "":
         for r in PrjGetFieldListFromModel(proj, "n", ""):
             if r["id"] == data["freenum"]:
-                data[
-                    "filt_freenum_for_select"
-                ] = "\n<option value='{0}' selected>{1}</option> ".format(
-                    r["id"], r["text"]
+                data["filt_freenum_for_select"] = (
+                    "\n<option value='{0}' selected>{1}</option> ".format(
+                        r["id"], r["text"]
+                    )
                 )
 
     # Generate the selection if the parameter is set in the URL - free textual column
@@ -331,10 +332,10 @@ def indexPrj(PrjId):
     if data.get("freetxt", "") != "":
         for r in PrjGetFieldListFromModel(proj, "t", ""):
             if r["id"] == data["freetxt"]:
-                data[
-                    "filt_freetxt_for_select"
-                ] = "\n<option value='{0}' selected>{1}</option> ".format(
-                    r["id"], r["text"]
+                data["filt_freetxt_for_select"] = (
+                    "\n<option value='{0}' selected>{1}</option> ".format(
+                        r["id"], r["text"]
+                    )
                 )
 
     # Generate the selection if the parameter is set in the URL - annotators filter
@@ -372,7 +373,7 @@ def indexPrj(PrjId):
     # Add implied simsearch field
     sortby = data["sortby"]
     if sortby.startswith("ss-I"):
-        sortlist[sortby] = "Similar to #"+sortby[4:]
+        sortlist[sortby] = "Similar to #" + sortby[4:]
 
     statuslist = collections.OrderedDict({"": "All"})
     statuslist.update(STATUSES)
@@ -427,7 +428,7 @@ def indexPrj(PrjId):
         "about": "/gui/prj/about/%d" % PrjId,
         "prediction": "/Job/Create/Prediction?projid=%d" % PrjId,
         "predictionf": "javascript:GotoWithFilter('/Job/Create/Prediction')",
-        "import": "/Job/Create/FileImport?p=%d" % PrjId,
+        "import": "/gui/job/create/GeneralImport?projid=%d" % PrjId,
         "taxofix": "/prj/taxo_fix/%d" % PrjId,
         "export": "/gui/job/create/GenExport?projid=%d" % PrjId,
         "exportf": "javascript:GotoWithFilter('/gui/job/create/GenExport')",
@@ -937,7 +938,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
             bottomtxt,
             imgcount_lbl,
             comment_present,
-            simsrch_btn
+            simsrch_btn,
         )
 
         # WidthOnRow+=max(cellwidth,80) # on ajoute au moins 80 car avec les label c'est rarement moins

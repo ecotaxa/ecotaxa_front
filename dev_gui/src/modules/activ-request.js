@@ -178,15 +178,17 @@ function createActivRequest() {
             url = window.location.href.split('?');
             if (url.length > 1) url = url.join('?') + '&' + item.dataset.href.substr(1);
             else url = url[0] + item.dataset.href;
-          }let content =item.nextElementSibling;
+          } let content =item.nextElementSibling;
             if (!content) {
            content = document.createElement('div');
             item.parentElement.append(content);            }
             else content.innerHTML="";
             content.classList.add(css.wait);
+            const tab=item.closest(domselectors.component.tabs.tab);
           callback = async (html) => {
             content.classList.remove(css.wait);
             content.innerHTML = html;
+             if(tab) tab.classList.remove(css.hide);
               if (!dynamics.JsComponents) {
               const {
                 JsComponents

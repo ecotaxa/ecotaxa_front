@@ -321,7 +321,7 @@ form.js-tabs .tab.err legend.tab-control {@apply before:text-xs  before:content-
 .tabs-display.expand  {@apply icon-arrows-pointing-out}
 .tabs-display.shrink {@apply icon-arrows-pointing-in}
 /* list prjs */
-a.contact {@apply inline-block py-[0.5] px-0.5 sm:px-1.5 leading-none text-xs small-caps whitespace-nowrap font-light text-left underline underline-offset-2}
+a.contact {@apply inline-block px-0.5 sm:px-1.5 text-xs small-caps whitespace-nowrap font-light text-left underline underline-offset-2}
 a.contact:not([data-contact]) {@apply no-underline hover:underline}
 a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hover:no-underline bg-transparent rounded font-medium bg-transparent transform duration-300}
 .contact[data-contact]::before {@apply h-full ml-0.5 inline-block py-[0.25] align-middle;content:'@'}

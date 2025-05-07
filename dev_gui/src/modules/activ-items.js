@@ -226,7 +226,7 @@ function createActivItems() {
               callback: function() {window.location.href=item.href;}
             } : { callback: function() {
             if (item.form) {
-             if (item.form.formsubmit) { console.log('itemform',item.form.formsubmit)
+             if (item.form.formsubmit) {
                 item.form.formsubmit.submitForm();
               } else item.form.submit();
             }}};
@@ -239,6 +239,25 @@ function createActivItems() {
                 if (article)  export_html2word(article, item.parentElement);
             });
           break;
+        case 'not_empty':
+           if(!item.dataset.target || !item.dataset.message) return;
+           let targetinputs=document.getElementById(item.dataset.target).querySelectorAll('.line input');
+           let form =(targetinputs.length>0) ?targetinputs[0].form:null;
+           if (form===null ) return;
+            const not_empty=async function() {
+            const inputs=[...targetinputs].filter(input=> (!input.disabled) );
+            if (inputs.length===0) return true;
+           let empty=true;
+           inputs.forEach(input => {
+            empty=(empty && input.value.trim()==='');
+           });
+           if (empty) empty = await AlertBox.addConfirm(item.dataset.message);
+           return empty;
+           }
+           if (form.formsubmit) { form.formsubmit.addHandler('submit',not_empty)} else {
+           form.addEventListener('submit',async (e) => {e.preventDefault();
+           return await not_empty();})}
+        break;
           }
 
     });

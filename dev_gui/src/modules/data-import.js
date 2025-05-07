@@ -614,13 +614,13 @@ export class DataImport {
         done = this.cloneImport(btn);
         const idx = selectcells.indexOf(models.projid);
         const newone = (this.form.dataset.id) ? parseInt(this.form.dataset.id) : 0;
-        if (newone==0) {
-        if(selectcells.indexOf("creator_users") <0) selectcells.concat(["creator_users","creator_organisations"]);
-        const results = await this.compileProjectRecords(newone,selectcells);
+        if (newone===0) {
+        if(selectcells.indexOf("creator_persons") <0) selectcells = selectcells.concat(["creator_persons"]);
+        const results = await this.compileProjectRecords(newone);
         selectcells.forEach(result => {
           this.imports[result] = results[result];
-        });
-        }
+        });}
+
       default:
         const ts_add_select_item = function(ts, data) {
           const el = {};
@@ -814,7 +814,6 @@ export class DataImport {
     }
     resetbtn.addEventListener('click', (e) => {
       e.preventDefault();
-      e.stopImmediatePropagation();
       this.resetSelectors();
       this.resetImports();
     });

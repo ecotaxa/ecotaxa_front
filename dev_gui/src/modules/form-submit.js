@@ -42,7 +42,7 @@ export class FormSubmit {
       this.validateFields(true);
       this.init();
       form.formsubmit = this;
-    }
+       }
     return form.formsubmit;
   }
   init() {
@@ -243,7 +243,7 @@ export class FormSubmit {
       r = true;
     [...this.form.elements].forEach(field => {
       if (init === true) {
-        if (!field.dataset.listen) {
+        if (!field.dataset.listen && !field.disabled) {
           if (field.required) {
             const label = this.getFieldLabel(field);
             if (label) label.classList.add(css.required);
@@ -259,9 +259,9 @@ export class FormSubmit {
             this.setLabelState(field, true);
           });
         }
-      } else if (field.name && field.type && (['submit', 'hidden'].indexOf(field.type) < 0 && (['radio', 'checkbox'].indexOf(field.type) < 0 || field.required))) {
+      } else if (!field.disabled && !field.readonly && !field.dataset.readonly && field.name && field.type && (['submit', 'hidden'].indexOf(field.type) < 0 && (['radio', 'checkbox'].indexOf(field.type) < 0 || field.required))) {
         r = this.validateField(field, false);
-        resp = (resp && r);
+         resp = (resp && r);
       }
 
     });
@@ -306,9 +306,10 @@ export class FormSubmit {
         method: 'POST',
         body: formdata,
       })).catch(err => {
-        this.displayResponse(err, true)
+        this.displayResponse(err, true);
+        this.enableForm()
       }).finally(response => {
-        this.form.disabled = true;
+        this.disableForm();
       });
     if (response.redirected) {
           window.location = response.url;

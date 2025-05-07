@@ -93,7 +93,7 @@ async function createAlertBox() {
         },
         ...item.dataset
       }
-      activateAlert(type, item, options);
+      return activateAlert(type, item, options);
     }
     items.forEach(item => {
       const options = item.dataset;
@@ -133,14 +133,14 @@ async function createAlertBox() {
       buttons = `${showall}<div class="btn-group flex justify-end max-w-full"><button class="button text-base ${alertconfig.domselectors.buttons.ok.substr(1)}"  value=true>${(options.buttons && options.buttons.ok && options.buttons.ok.text)?options.buttons.ok.text:i18nmessages.ok}</button><button class="button ${alertconfig.domselectors.buttons.cancel.substr(1)} text-base"  value=false>${(options.buttons && options.buttons.cancel && options.buttons.cancel.text)?options.buttons.cancel.text:i18nmessages.cancel}</button></div>`;
       showall = ``;
     }
-    let html = `<div class="content"><div class="signal hidden sm:block"><i class="icon"></i></div><div class="message"><strong class="type">${(i18nmessages.alerttype && i18nmessages.alerttype[message.type])?i18nmessages.alerttype[message.type]:message.type}</strong>${(i18nmessages[message.content]) ? i18nmessages[message.content] : message.content} ${buttons}</div>`;
+    let html = `<div class="content"><div class="signal hidden sm:block"><i class="icon"></i></div><div class="message"><strong class="type">${(i18nmessages.alerttype && i18nmessages.alerttype[message.type])?i18nmessages.alerttype[message.type]:message.type}</strong>${unescape((i18nmessages[message.content]) ? i18nmessages[message.content] : message.content)} ${buttons}</div>`;
     if (message.dismissible) html += `<div class="close" data-dismiss="${box.id}"  aria-label="${i18nmessages.close}"><i class="icon-sm icon-x-mark cursor-pointer"></i></div>`;
 
     box.insertAdjacentHTML('afterbegin', html + `${showall} </div>`);
     const ret = alertMessage(box, true);
     if (ret === true && message.type === alertconfig.types.confirm) {
       activateConfirm(box, options);
-      waitForAnswer(box, options.callback, options.callback_cancel);
+     return waitForAnswer(box, options.callback, options.callback_cancel);
     }
   }
 
@@ -201,7 +201,7 @@ async function createAlertBox() {
         box.dataset.refresh = true;
       });
     };
-    waitForAnswer(box, callback, callback_cancel);
+    //waitForAnswer(box, callback, callback_cancel);
   }
 
   function activateAlert(type, box, options) {
@@ -213,7 +213,8 @@ async function createAlertBox() {
       }, options.duration);
     } else if (options.dismissible) dismissListener(box);
     if (type === alertconfig.types.confirm) {
-      return activateConfirm(box, options);
+     activateConfirm(box, options);
+      return waitForAnswer(box, options.callback, options.callback_cancel);
     }
     return true;
   }
@@ -283,6 +284,7 @@ async function createAlertBox() {
   }
 
   function getBoxById(id, parent = document) {
+    id=escape(unescape(id));
     return (id !== '' && document.getElementById(id)) ? document.getElementById(id) : parent.querySelector('[data-message="' + id + '"]');
   }
 
@@ -368,7 +370,7 @@ async function createAlertBox() {
         resolve(false);
         e.stopImmediatePropagation();
         if (callback_cancel !== null) callback_cancel();
-        else dismissAlert(box);
+        dismissAlert(box);
       }, {
         once: true
       });
@@ -376,7 +378,7 @@ async function createAlertBox() {
         resolve(true);
         e.stopImmediatePropagation();
         if (callback !== null) callback();
-        else dismissAlert(box);
+        dismissAlert(box);
       }, {
         once: true
       });
@@ -447,9 +449,9 @@ async function createAlertBox() {
     }
     if (message.id) {
       const msg = el.querySelector(`${tag}[data-id="${message.id}"]`);
-      if (msg) msg.innerHTML = message.content;
-      else el.insertAdjacentHTML('beforeend', `<${tag} data-id="${message.id}">${message.content}</${tag}>`);
-    } else el.insertAdjacentHTML('beforeend', `<${tag}>${message.content}</${tag}>`);
+      if (msg) msg.innerHTML = unescape(message.content);
+      else el.insertAdjacentHTML('beforeend', `<${tag} data-id="${message.id}">${unescape(message.content)}</${tag}>`);
+    } else el.insertAdjacentHTML('beforeend', `<${tag}>${unescape(message.content)}</${tag}>`);
   }
 
   function error() {

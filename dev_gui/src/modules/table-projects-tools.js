@@ -20,7 +20,7 @@ function ImportList(state, attach = null) {
       }*/
   }
 
-  async function compileProjectRecords(newone = true,selectcells=["creator_users","creator_organisations"]) {
+  async function compileProjectRecords(newone = 0) {
     const ts = state.dataImport.importzone.tomselect;
     const ids = (ts) ? ts.items : Array.from(state.dataImport.importzone.selectedOptions).map(option => option.value);
     if (ids.length === 0) return null;
@@ -38,19 +38,19 @@ function ImportList(state, attach = null) {
       numeric: true,
       sensitivity: 'base'
     })
-    ["creator"].forEach(key=> {    if (Object.keys(results).indexOf(key+"_users") >= 0 && newone === true) {
-      results[key+"_organisations"] = results[key+"_users"].map(u => u.organisation);
-      results[key+"_organisations"].sort();
+   const key='creator';
+   if (newone === 0 && Object.keys(results).indexOf(key+"_users") >= 0) {
       const users = results[key+"_users"].map(u => ({
         key: u.id,
         value: u.name,
         text: u.name + ' ' + u.email
       }));
-      results[key+"_users"] = users
-      results[key+"_users"].sort((a, b) => {
+      results[key+"_persons"] = users
+      delete results[key+"_users"];
+      results[key+"_persons"].sort((a, b) => {
         return collator.compare(a.value, b.value)
       });
-    };})
+    };
     return results;
   }
 

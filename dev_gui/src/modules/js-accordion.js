@@ -46,6 +46,7 @@ function createJsAccordion() {
     if (!summary) return;
     const content = (elcontent) ? ((elcontent instanceof HTMLElement) ? elcontent : el.querySelector(elcontent)) : element.nextElementSibling;
     if (!content) return;
+    summary.querySelectorAll('a').forEach(el=> {el.addEventListener('click',(e)=> {e.stopImmediatePropagation();});});
     summary.addEventListener('click', (e) => {
       if (currentitem === null || currentitem.element !== element) currentitem = setItem(element, summary, content);
       onClick(e);

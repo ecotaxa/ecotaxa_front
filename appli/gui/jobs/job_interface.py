@@ -406,6 +406,14 @@ def import_format_options(_type=None) -> dict:
                             },
                         },
                     },
+                    "onsubmit": {
+                        "confirm": {
+                            "name": "not_empty",
+                            "message": _(
+                                "We encourage you to fill geographic(Lat/Long) and temporal (date/time) data !\n Do you really want to import ?"
+                            ),
+                        }
+                    },
                 },
             },
             "update": {

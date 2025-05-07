@@ -15,9 +15,9 @@ function createJsComponents() {
     if (!element) return;
     const items = element.querySelectorAll('.js');
     // dynamic import of necessary modules
-    items.forEach(async item => {
-      let actions = item.classList;
-      actions.forEach(async (action) => {
+  for await (const item of items) {
+   let actions = item.classList;
+     for  await ( const action of actions)  {
         if (action.indexOf('js-') === 0) {
           switch (action) {
             case 'js-nav':
@@ -232,8 +232,8 @@ function createJsComponents() {
               break;
           }
         }
-      })
-    });
+      }
+    };
     await applyDefers();
   }
 

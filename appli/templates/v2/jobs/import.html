@@ -1,16 +1,18 @@
 {% extends "./v2/layout.html" %}
 {% from "./v2/macros/macros.html" import modal,form_group_radio with context %}
 {% from "./v2/project/macros.html" import header_project_job with context %}
+{%-macro on_submit(target,option)-%}
+{%-if option.onsubmit -%}{%-for typalert,action in option.onsubmit.items()-%}<div class="hide" data-action="{{action.name}}" data-format="{{option.format}}" data-target="{{target}}" data-message="{{action.message}}"></div>{%-endfor-%}{%-endif-%}
+{%-endmacro-%}
 {%-macro make_field(name,option, suffix=None)-%}
 {%- set suffix='_'+suffix if suffix!=None else ''-%}
-<div class="form-box">
 {%- if option.format=="checkbox"-%}<label for="{{name+suffix}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+suffix}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
 {%-elif option.format=="radio"-%}<div class="label inline-block mr-2 w-auto">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if "discard" in option else ''}}>
      {%- if "options" in option.keys() -%}  {%- for opt in option.options -%}
     {%- set extra =' data-checked=true' if opt.value== datas[name][0] else '' -%}
     {{ form_group_radio(name+suffix+'_'+loop.index|string(),name,opt.value,opt.label,datas[name][0],required=(loop.index==1),help='',extra=extra)}}
      {%- endfor -%}{%endif%}
-</div>
+
 {%- elif option.format in ['select','autocomplete']-%}
 <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
 <select class="form-select {{option.class if 'class' in option}} {{ 'js js-autocomplete' if option.format=='autocomplete' }}" name="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" {{'data-type='+option.type if 'type' in option}}>{%- if 'options' in option-%}{%- for k,v in option.options.items() -%}<option value="{{k}}" {{ 'selected' if name in datas and datas[name][0]==k }}>{{v}}</option>{%-endfor-%}{%-endif-%}</select>
@@ -26,10 +28,11 @@
   <summary class="font-semibold">{{_('Advanced options')}}</summary>
   <div id="advanced" data-shared="import_taxo-mapping"></div></details></div>
   {%-elif option.format=='fieldset'%}
-  <details><summary>{{option.label}}</summary><div class="flex md:flex-row flex-wrap w-full">{%- for name,field in option.fields.items() -%}{{ make_field(name,field)}}
+  <details><summary>{{option.label}}</summary><div id="{{name+'_'+option.format}}" class="flex md:flex-row flex-wrap w-full">{%- for name,field in option.fields.items() -%}<div class="form-box line">{{ make_field(name,field)}}</div>
     {%-endfor-%}</div></details>
 {%-endif%}
-</div>
+{%if option.format and option.onsubmit%}
+{{on_submit(name+'_'+option.format,option)}}{%endif%}
 {%-endmacro-%}
 {%- macro make_part_form(type_tab)-%}
 {%- set datas = formdata.datas if "datas" in formdata else None-%}
@@ -49,6 +52,7 @@
 <div class="label"><span id="browse-replace"></span> by clicking on <span class="control-select my-1">{{_('select to import')}}</span>
 </div>
 {%-endmacro-%}
+
 {% block body %}
 <div class="container mx-auto mb-8">
   <div class="w-100 mx-auto block pt-4 text-left relative mb-8" id="project-subset-header">
@@ -61,7 +65,8 @@
       {% for type_tab,formdata in formdatas.items() %}
     <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if selected_type == type_tab }}"><legend class="text-center tab-control title-nav"  data-what="{{type_tab}}" >{{formdata.title}} </legend>
       <div class="tab-content {{'pt-8' if selected_type==None}}" id="{{type_tab}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="{{'help_'+action+'_'+type_tab}}" data-request="help" data-what="help"></i></em>
-      <div data-shared="import-files" data-values="{{formdata.browse_label}}|{{formdata.browse}}|{{formdata.textdrop}}" data-replaces="#browse-replace|browse|textdrop" data-browse="{{formdata.browse}}"></div>{{make_part_form(type_tab)}}
+      <div data-shared="import-files" data-values="{{formdata.browse_label}}|{{formdata.browse}}|{{formdata.textdrop}}" data-replaces="#browse-replace|browse|textdrop" data-browse="{{formdata.browse}}"></div>
+          {{make_part_form(type_tab)}}
     </div></fieldset>{%-endfor-%}
     <!--files to import -->
     {%- set name="source" -%}

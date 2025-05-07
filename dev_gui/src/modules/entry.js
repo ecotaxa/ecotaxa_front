@@ -545,7 +545,7 @@ export function EntryControls(container = document, options = {}) {
     const ctrl = control.ctrl;
     if (control.exclude && activentry !==null && control.exclude.indexOf(activentry.name)>=0) {ctrl.classList.add(css.hide);return;}
     const typentries = (ctrl.dataset.typentries) ? ctrl.dataset.typentries.split(',') : [];
-    const type = (isdiscarded) ? entryTypes.discarded : activentry.container.dataset.type;
+    const type = (isdiscarded) ? entryTypes.discarded : (activentry)?activentry.container.dataset.type:null;
     if (typentries.indexOf(type) >= 0) {
       ctrl.classList.remove(css.hide);
     } else ctrl.classList.add(css.hide);

@@ -97,9 +97,9 @@ export default function(state) {
         contact = state.getCellData(rowIndex, models.managers);
         contact = (contact && contact.length) ? contact[0] : null;
       } else iscontact = true;
-
+      let nodecontact=null;
       if (contact) {
-        const nodecontact = {
+        nodecontact = {
           nodename: "A",
           attributes: {
             href: `mailto:${contact.email}`,
@@ -109,7 +109,7 @@ export default function(state) {
           childnodes: [state.setTextNode(contact.name)]
         };
         if (iscontact) nodecontact.attributes["data-contact"] = iscontact;
-        node = [state.setTextNode(value), nodecontact];
+        node = [state.setTextNode(value),nodecontact];
       } else node = [state.setTextNode(value)];
       if (about === true) {
         td.childnodes = [{
@@ -117,10 +117,11 @@ export default function(state) {
           attributes: {
             "data-id": id,
             "data-what": models.about
+
           },
           childnodes: [{
             nodename: "SUMMARY",
-            childnodes: node
+            childnodes: node,
           }]
         }];
       } else td.childnodes = node;

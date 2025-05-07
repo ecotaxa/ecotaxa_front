@@ -23,6 +23,7 @@ from appli.gui.commontools import (
     possible_access,
     py_get_messages,
     is_partial_request,
+    new_ui_error,
 )
 
 
@@ -78,7 +79,7 @@ def get_collection(collection_id) -> Optional[CollectionModel]:
             if ae.status in (401, 403):
                 flash(py_messages["notauthorized"], "error")
             elif ae.status == 404:
-                flash(py_messages["project404"], "error")
+                flash(py_messages["collection404"], "error")
             return None
 
 
@@ -99,37 +100,62 @@ def collection_create() -> str:
     to_save = gvp("save")
     title = ""
     project_ids = []
+    target_coll = None
     if to_save == "Y":
         title = gvp("title")
         project_ids = [int(p) for p in gvpm("project_ids[]")]
 
-        if title == "" or len(project_ids) == 0:
-            flash("title and project id are required", "error")
-            to_save = False
-    if to_save:
+    if title.strip() != "" and len(project_ids) > 0:
 
         try:
             with ApiClient(CollectionsApi, request) as api:
                 req = CreateCollectionReq(title=title, project_ids=project_ids)
-                rsp: int = api.create_collection(req)
+                rsp: Union[str, int] = api.create_collection(req)
             return collection_edit(rsp, new=True)
         except ApiException as ae:
             if ae.status in (401, 403):
                 flash(py_messages["notauthorized"], "error")
-            elif ae.status == 404:
-                flash(py_messages["project404"], "error")
             else:
-                flash(py_messages["project404"], "error")
+                new_ui_error(ae)
+        external_id = gvp("external_id", "?")
+        target_coll = CollectionModel(
+            0, external_id, "", title, "", "", "", "", "", project_ids
+        )
+        setattr(target_coll, "project_ids", project_ids)
+        for key in [
+            "short_title",
+            "citation",
+            "license",
+            "description",
+            "abstract",
+            "provider_user",
+            "contact_user",
+        ]:
+            setattr(target_coll, key, gvp(key, ""))
+        persons = {}
+        # for prefix in ["creator", "associate"]:
+        #    persons[prefix] = {"users": [], "organisations": []}
+        #    for person in gvpm(prefix + "_persons[]"):
+        #        if person[0 : len(orgprefix)] == orgprefix:
+        #            persons[prefix]["organisations"].append(
+        #                {"id": int(person[len(orgprefix)])}
+        #            )
+        #        else:
+        #            persons[prefix]["users"].append({"id": int(person)})
+        #        for _typ in ["users", "organisations"]:
+        #            setattr(target_coll, prefix + "_" + _typ, persons[prefix][_typ])
+    projectlist = [_prj_format(int(p)) for p in project_ids]
     licenses = possible_licenses()
     access = possible_access()
     aggregated = dict({"possible_access": access})
     return render_template(
         "v2/collection/settings.html",
-        target_coll=None,
+        target_coll=target_coll,
         new=True,
         possible_licenses=licenses,
         orgprefix=orgprefix,
         doi_url=doi_url,
+        projectlist=projectlist,
         agg=aggregated,
     )
 
@@ -146,17 +172,23 @@ def collection_aggregated(project_ids: str, simulate: str = "") -> dict:
     if simulate == "y":
         with ApiClient(ProjectsApi, request) as api:
             try:
-                annotators: List[ProjectUserStatsModel] = (
-                    api.project_set_get_user_stats(ids=project_ids)
+                prjstats: List[ProjectUserStatsModel] = api.project_set_get_user_stats(
+                    ids=project_ids
                 )
+                annotators = []
+                for prjst in prjstats:
+                    annotators = list(set(annotators + prjst.annotators))
                 if isinstance(annotators, Iterable) and len(annotators) > 0:
+
                     return {
                         "creator_users": [
                             {
                                 "id": r.id,
                                 "name": r.name,
-                                "email": r.email,
-                                "organisation": r.organisation,
+                                "email": "",
+                                "organisation": "",
+                                # "email": r.email,
+                                # "organisation": r.organisation,
                             }
                             for r in annotators
                         ]
@@ -244,7 +276,6 @@ def collection_edit(collection_id: int, new: bool = False):
                     plist = _set_persons(gvpm(a_var))
 
                     for attrname in ["users", "organisations"]:
-                        print(a_var[0:-2].replace("persons", attrname), plist[attrname])
                         setattr(
                             collection,
                             a_var[0:-2].replace("persons", attrname),
@@ -271,7 +302,7 @@ def collection_edit(collection_id: int, new: bool = False):
                 )
             return redirect(request.referrer)
         except ApiException as ae:
-            flash(py_messages["updateexception"] + "%s" % ae.reason)
+            new_ui_error(ae)
 
     licenses = possible_licenses()
     # licenses[0] licenses texts , licenses[1] licenses restriction
@@ -286,7 +317,7 @@ def collection_edit(collection_id: int, new: bool = False):
         projectlist=projectlist,
         crsf_token=crsf_token(),
         possible_licenses=licenses,
-        new=new,
+        new=False,
         orgprefix=orgprefix,
         published=published,
         agg=aggregated,
@@ -303,7 +334,6 @@ def collection_erase(collection_id: int, erase: bool = False):
     target_coll = get_collection(collection_id)
     if target_coll is None:
         return redirect(url_for("gui_collection_noright", collection_id=collection_id))
-    print("will erase " + target_coll.title, erase)
     if erase:
         with ApiClient(CollectionsApi, request) as api:
             try:
