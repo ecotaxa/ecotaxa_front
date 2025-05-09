@@ -33,12 +33,13 @@
                  <div class="label" data-for="access">{{ _('Access') }}<i data-for="help_proj_access" data-request="help"></i></div>
                  <div class="form-group" id="proj_access" role="group">
                      {%- set access = agg.access or "" -%}
+                     {%- if 'possible_access' in agg -%}
                    {% for k,v in agg.possible_access.items() %}
                      {%- if access==k or new -%}
                       {%set required=(loop.index==1) and target_coll %}
                    {{form_group_radio('access_'+ loop.index|string(),'access',k,v,access, required=required, extra=extra ,readonly=True)}}
                      {%-endif-%}
-                       {% endfor %}</div>
+                       {% endfor %}{%-endif-%}</div>
                </div>
       </div>
     <div id="section-privileges" class="js js-privileges w-full" data-readonly data-u="{{ current_user.id|string() }}" data-alert="true">

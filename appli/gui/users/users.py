@@ -187,13 +187,14 @@ def _verify_pending_user_throw(_id: int, email: str):
 
 
 def user_create(
-    usrid: int, isfrom: bool = False, token: str = "", partial: bool = False
+    usrid: int, isfrom: bool = False, token: Optional[str] = None, partial: bool = False
 ) -> Union[str, tuple, Response]:
     action = ACCOUNT_USER_CREATE
     posted = {}
-    if token is None:
-        token = ""
-    token = token.strip()
+    if token is not None:
+        token = token.strip()
+        if token == "":
+            token = None
     resp = []
     if usrid == -1:
         age = SHORT_TOKEN_AGE
@@ -202,13 +203,14 @@ def user_create(
     if isfrom:
         resp = user_account(-1, isfrom, action=action, token=token)
         return resp
-    elif token != "" or API_EMAIL_VERIFICATION == False:
-        if token != "":
+    elif token is not None or API_EMAIL_VERIFICATION == False:
+        if token is not None:
             usrid, token = _verifiy_validation_throw(
                 usrid, isfrom, action=action, age=age
             )
         fields = ["password"]
         posted = person_posted_data(usrid, isfrom, fields + USER_FIELDS)
+
         resp = api_user_create(posted, token)
     # verify email before register to get a token or verify pass
     elif usrid == -1:
@@ -220,7 +222,8 @@ def user_create(
         }
         resp = api_user_create(posted, token)
     redir = url_for("gui_index")
-    if token == "":
+
+    if token is None:
         if resp[0] == 0:
             message = py_user["mailsuccess"] + py_user["checkspam"]
             typ = "success"
@@ -288,7 +291,7 @@ def api_get_user(usrid: int) -> Optional[UserModelWithRights]:
     return None
 
 
-def api_user_create(posted: dict, token: str = None) -> tuple:
+def api_user_create(posted: dict, token: Optional[str] = None) -> tuple:
     no_bot = _get_captcha()
     new_user = UserModelWithRights(**posted)
     with ApiClient(UsersApi, request) as api:
@@ -399,7 +402,6 @@ def user_account(
     else:
         fields = ["newpassword"]
     posted = person_posted_data(usrid, isfrom, fields + USER_FIELDS)
-    print("----posted", posted)
     currentemail = gvp("currentemail", "")
     currentemail = currentemail.strip()
     if action == ACCOUNT_USER_EDIT:

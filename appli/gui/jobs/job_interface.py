@@ -386,7 +386,7 @@ def import_format_options(_type=None) -> dict:
                             "label": _("Optional annotation category for ALL images"),
                             "format": "autocomplete",
                             "type": "taxo",
-                            "class": "w-full",
+                            "class": " basis-3/4",
                         },
                         "userlb": {
                             "label": _("Optional annotator"),

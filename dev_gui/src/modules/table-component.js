@@ -796,17 +796,6 @@ export class TableComponent {
         row: i
       }
     });
-
-    const compare_coldata = function(a, b) {
-      const x = (dir ? a.value : b.value);
-      const y = (dir ? b.value : a.value);
-      return x.localeCompare(y, undefined, {
-        numeric: true,
-        sensitivity: 'base'
-      });
-
-    };
-
     if (dir === false) {
       th.classList.remove(tablecss.ascending);
       th.classList.add(tablecss.descending);
@@ -833,9 +822,6 @@ export class TableComponent {
     rows.sort((a, b) => {
       return collator.compare((dir ? a.value : b.value), (dir ? b.value : a.value))
     });
-    /*rows.sort((a, b) => {
-      return compare_coldata(a, b);
-    });*/
     const tbody = this.dom.querySelector('tbody');
     const clone = tbody.cloneNode();
     const trs = tbody.querySelectorAll('tr');
@@ -844,8 +830,8 @@ export class TableComponent {
     rows.forEach((r, i) => {
       clone.appendChild(trs[r.row]);
       sorted.push(this.grid.data[r.row]);
-
     });
+    this.grid.data=sorted;
     this.dom.replaceChild(clone, tbody);
     ModuleEventEmitter.emit(this.eventnames.sorted, {
       dir: dir,

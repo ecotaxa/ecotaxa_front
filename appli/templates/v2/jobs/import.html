@@ -15,13 +15,18 @@
 
 {%- elif option.format in ['select','autocomplete']-%}
 <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
-<select class="form-select {{option.class if 'class' in option}} {{ 'js js-autocomplete' if option.format=='autocomplete' }}" name="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" {{'data-type='+option.type if 'type' in option}}>{%- if 'options' in option-%}{%- for k,v in option.options.items() -%}<option value="{{k}}" {{ 'selected' if name in datas and datas[name][0]==k }}>{{v}}</option>{%-endfor-%}{%-endif-%}</select>
+{%- if option.format=="select"-%}<select class="form-select {{option.class if 'class' in option}} " name="{{name}}"  id="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" {{'data-type='+option.type if 'type' in option}}>{%- if 'options' in option-%}{%- for k,v in option.options.items() -%}<option value="{{k}}" {{ 'selected' if name in datas and datas[name][0]==k }}>{{v}}</option>{%-endfor-%}{%-endif-%}</select>
+{%-else-%}{%-if option.type=="taxo"-%}<div class="flex flex-row  w-full">{%-endif-%}<input type="text" data-maxitems=1 data-empty=true class="form-input min-w-[75%] {{option.class if 'class' in option}}"  {{ 'js js-autocomplete' if option.format=='autocomplete' }}" name="{{name}}"  id="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" {{'data-type='+option.type if 'type' in option}}>
+{%-if option.type=="taxo"-%}{% set modal_title = _('taxo pick') %}
+    {% set data = " data-tree=taxotree  data-droptarget="+name+" data-url=/gui/search/taxotreejson" %}
+    {% set btn = {'class':'button is-pick  w-12 mx-1','title':modal_title,'icon':'icon-bars-4-sm','text': _('taxonomy') ,'data':' data-request=taxotree  data-root=# '+data+' data-target=unique '}%}
+    {{ modal('taxotree',  btn = btn,modal_title = modal_title, data=data) }}{%-endif-%}{%-endif-%}{%-if option.type=="taxo"-%}</div>{%-endif-%}
 {%- elif option.format=='text'-%}
 <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
-<input class="form-input {{option.class if 'class' in option}}" name="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" value="{{datas[name][0] if name in datas}}">
+<input class="form-input {{option.class if 'class' in option}}" name="{{name}}"   id="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" value="{{datas[name][0] if name in datas}}">
 {%- elif option.format=='textarea'-%}
 <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
-<textarea class="form-textarea {{option.class if 'class' in option}}" name="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" rows="{{option.rows if 'rows' in options else 1}}">{{datas[name][0] if name in datas}}</textarea>
+<textarea class="form-textarea {{option.class if 'class' in option}}" name="{{name}}"   id="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" rows="{{option.rows if 'rows' in options else 1}}">{{datas[name][0] if name in datas}}</textarea>
 {%- elif name=="advanced_options"-%}
 {%- set comment = option.taxo_mapping.comment if "taxo_mapping" in option and "comment" in option.taxo_mapping -%}
 <div class="form-box " id="import_options"><details>

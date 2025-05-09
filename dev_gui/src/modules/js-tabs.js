@@ -29,7 +29,6 @@ function createJsTabs() {
         l += parseInt(btn.offsetWidth) + 20;
         btn.addEventListener(ev, (e) => {
           if (e.currentTarget.disabled === true) {
-            console.log('disabled', index)
             e.preventDefault();
             return;
           }
@@ -51,7 +50,6 @@ function createJsTabs() {
       });
       if (!item.dataset.toggle) toggleDisplayListener(item, btns);
       item.jstabs = true;
-
     }
   }
 
