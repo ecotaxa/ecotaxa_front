@@ -135,13 +135,17 @@ function createJsTabs() {
       btn.disabled = show;
       toggleTab(btn.closest(domselectors.component.tabs.tab), show);
     })
-    if (dismiss) dismiss.addEventListener('click', (e) => {
+    if (dismiss)  {
+    dismiss.addEventListener('click', (e) => {
       const icon = item.querySelector('.tabs-display');
       btns.forEach((btn, index) => toggle_tab(index, btn, (item.classList.contains(css.component.tabs.name))));
       item.classList.toggle(css.component.tabs.name);
       icon.classList.toggle('expand');
       icon.classList.toggle('shrink');
     });
+    if (item.dataset.expandall) dismiss.click();
+     }
+
   }
   return {
     applyTo
