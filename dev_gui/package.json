@@ -42,7 +42,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.18.3",
-    "@floating-ui/dom": "^1.6.7",
     "core-js": "^3.22.8",
     "dayjs": "^1.11.7",
     "debounce": "^2.1.0",
