@@ -4,8 +4,7 @@ import {
   urlseparator,
   fetchSettings,
   generate_uuid
-}
-from '../modules/utils.js';
+} from '../modules/utils.js';
 import {
   css
 } from '../modules/modules-config.js';
@@ -15,6 +14,8 @@ import {
 import {
   ModuleEventEmitter
 } from '../modules/module-event-emitter.js';
+import {ToolTip} from '../modules/tooltip.js';
+const toolTip=ToolTip();
 export const entryTypes = Object.freeze({
   node: "N",
   branch: "B",
@@ -102,14 +103,16 @@ export class Entry {
       dataset: dataset,
     });
     const cl = `${this.options.prefix}${this.type}`;
+    if([entryTypes.branch,entryTypes.root,entryTypes.discard].indexOf(this.type)>=0 ) this.icon= create_box('span',{class:'ico-'+cl},el);
     this.label = create_box(this.options.tags.label, {
       class: cl,
       text: (entry.label) ? entry.label : entry.name
     }, el);
     this.container = el;
+    this.loaded = this.container.dataset.loaded = false;
     this.initEvents();
   }
-  initEvents() {}
+  initEvents() {this.addListeners();}
   getParent() {
     return this.parent;
   }
@@ -191,9 +194,13 @@ export class Entry {
   }
 
   toggleActive() {
-    this.active = !(this.active);
-    this.container.classList.toggle(this.options.css.on);
+    this.setOn(!this.active);
+    }
+
+  toggleOpen() {
+    this.setOpen(!this.open);
   }
+
   setSelected(selected = true) {
     const cl = this.options.css.selected;
     if (selected === true) this.container.classList.add(cl);
@@ -202,35 +209,57 @@ export class Entry {
   }
   setOn(on = true) {
     this.active = on;
-    if (on === true) this.container.classList.add(this.options.css.on);
-    else this.container.classList.remove(this.options.css.on);
   }
+
+  setOpen(on = true) {
+  const set_open= () => {
+    this.open = on;
+    if (on === true) this.container.classList.add(this.options.css.on);
+    else this.container.classList.remove(this.options.css.on);}
+    if (!this.loaded && on)  this.list().then(() => {
+        set_open();
+    }); else set_open();
+
+  }
+
   setOff() {
     this.setSelected(false);
   }
   getListeners() {
     let listeners = [];
     const self = this;
-    let func = (e) => {
-      e.stopImmediatePropagation();
-      this.branchListener(() => {
-        this.emitEvent(this.eventnames.attach);
-      });
-    };
-    if ([entryTypes.root, entryTypes.discard].indexOf(this.type) < 0) {
+    let func;
       if (this.type === entryTypes.node) {
         func = (e) => {
           e.stopImmediatePropagation();
           this.toggleActive();
           this.emitEvent();
         }
-      }
-    }
+      } else {
+      func = (e) => {
+      e.stopImmediatePropagation();
+      this.branchListener(() => {
+        this.emitEvent(this.eventnames.attach);
+      });
+    };}
     listeners.unshift({
       name: 'click',
       target: 'label',
       func: func
     });
+    if ([entryTypes.root, entryTypes.branch, entryTypes.discard].indexOf(this.type)>=0) {
+          // display list only on  icon click
+    func = (e) => {
+          e.stopImmediatePropagation();
+          this.toggleOpen();
+     }
+    listeners.unshift({
+      name: 'click',
+      target: 'icon',
+      func: func
+    });
+    toolTip.applyTo(this.icon,'click to display children of this entry');}
+    toolTip.applyTo(this.label,'click to activate tools on this entry', () => {return (this.active!==true);});
     return listeners;
   }
 
@@ -240,7 +269,7 @@ export class Entry {
     return (branchtypes.indexOf(this.type) >= 0)
   }
   isDiscarded() {
-    return ([entryTypes.discard, entryTypes.discarded].indexOf(this.type) >= 0)
+    return ([entryTypes.discarded].indexOf(this.type) >= 0)
   }
   emitEvent(action = null, ev = null) {
     const self = this;
@@ -287,7 +316,7 @@ export class Entry {
   addListeners() {
     const listeners = this.getListeners();
     for (const listener of listeners) {
-      const el = (listener.target === 'label') ? this.getLabelElement() : this.container;
+      const el = (listener.target === 'label') ? this.getLabelElement() : ((listener.target=='icon')? this.icon : this.container);
       el.addEventListener(listener.name, listener.func);
     }
   }
@@ -347,10 +376,10 @@ export class Entry {
   }
 
   async branchActivate(callback = null) {
-    if (!this.loaded) this.list().then(() => {
+   /* if (!this.loaded) this.list().then(() => {
       if (callback) callback(this);
     });
-    else if (callback) callback(this);
+    else */if (callback) callback(this);
   }
   getCurrentPath() {
     const current_path = (entry, branchs = []) => {
@@ -472,6 +501,7 @@ export function EntryControls(container = document, options = {}) {
   }
 
   function addControl(control, position = null, action = null) {
+
     const ctrl = create_box('span', (control.class)?{class:control.class}:{});
     const l = box.children.length;
     if (position === null || l < position + 1) box.append(ctrl);
@@ -482,7 +512,7 @@ export function EntryControls(container = document, options = {}) {
       const icon = create_box('i', {
         class: ['icon', control.icon]
       }, ctrl);
-      ctrl.dataset.title = control.text;
+      toolTip.applyTo(ctrl, control.text);
     } else ctrl.textContent = control.text;
     //add listener
     const evt = (control.trigger) ? control.trigger : 'click';
@@ -502,7 +532,7 @@ export function EntryControls(container = document, options = {}) {
     ctrl.addEventListener(evt, func);
     //
     control.ctrl = ctrl;
-  }
+   }
 
   function createControls() {
     box = create_box('div', {

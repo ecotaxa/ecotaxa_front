@@ -81,6 +81,7 @@ function EntryAction(entry, options) {
     };
     entry.parent = this;
     return entry;
+
   }
 
   return entryaction;
@@ -116,15 +117,13 @@ export function JsTree(parent, options = {}) {
   const container = create_box(options.entry.tags.tag, {
     class: options.tree
   }, parent);
-
-  let root, activentry, dragentry, overitem, entrycontrols = null;
+  let root, activentry, dragentry, overitem = null;
+  const entrycontrols = EntryControls(container, options.entrycontrols) ;
   init(parent);
   container.append(root.container);
-
   function init() {
     const type = entryTypes.root;
     const obj = {};
-    entrycontrols = (entrycontrols === null) ? EntryControls(container, options.entrycontrols) : null;
     Object.entries(options.entrycontrols.controls).forEach(([key, control]) => {
       obj[key] = control.action;
     });
@@ -223,9 +222,8 @@ export function JsTree(parent, options = {}) {
           }
           break;
         default:
-           if (e.entry.active) {
-            attachControls(e.entry);
-          } else attachControls(root);
+           if (e.entry.active) attachControls(e.entry);
+           else attachControls(root);
           break;
       }
     }, uuid);

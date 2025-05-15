@@ -119,8 +119,8 @@ export class JsMyFiles {
   init() {
     // create dirlist box
     this.addDisplayProgression();
-    this.addDirList();
     this.addDropzone();
+    this.addDirList();
     this.initControls();
     this.initEvents().then(() => {
       this.resetCounters();
@@ -625,10 +625,7 @@ export class JsMyFiles {
     switch (action) {
       case this.eventnames.ready:
         this.resetCounters();
-        if (this.uploadentry) {
-          this.uploadentry.list();
-          this.uploadentry = null;
-        }
+        if (this.uploadentry)  this.uploadentry.list().then(()=>{ this.uploadentry.setOpen(true);this.uploadentry = null;});
         message = null;
         break;
       case this.eventnames.follow:
@@ -691,7 +688,6 @@ export class JsMyFiles {
         message = {};
         break;
       case this.eventnames.terminate:
-      console.log('terminate')
         btn.dataset.message = JSON.stringify({
           name: this.eventnames.init,
           bigfile: bigfile,
@@ -712,10 +708,10 @@ export class JsMyFiles {
           part: part,
           bigfile: bigfile
         };
-        console.log('????????ERROR??????????????????????????????????????--- errorcontrol' + action, message);
+        console.log('error control' + action, message);
         break;
       default:
-        console.log('??????????????????????????????????????????????----default control ' + action, opts);
+        console.log('default control' + action, opts);
         return;
         break;
     }

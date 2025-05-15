@@ -134,6 +134,8 @@ function createActivRequest() {
           dynamics.JsTree = JsTree;
         }
         item.jstree = dynamics.JsTree(modalcontent, options);
+        // load only once
+        item.dataset.request=null;
         callback = null;
         break;
       case "monitor":

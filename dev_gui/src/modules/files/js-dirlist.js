@@ -5,7 +5,8 @@ import {
   dirseparator,
   urlseparator,
   stop_on_error,
-  generate_uuid
+  generate_uuid,
+  set_cursor_editable
 }
 from '../../modules/utils.js';
 import {
@@ -217,6 +218,7 @@ function EntryAction(args, options) {
         return;
       }
       entry.setEditable();
+      set_cursor_editable(entry.label);
     });
     // remove editable when click on entry
     entry.container.addEventListener('click', (e) => {
@@ -345,11 +347,17 @@ function EntryAction(args, options) {
       type: json_types.directory,
       name: 'NewFolder'
     });
-    // move new entry to top of the list
+    const create_entry=() => {
     const entries = this.getEntriesElement();
+     // move new entry to top of the list
     entries.prepend(new_entry.container);
     new_entry.container.dataset.action = this.options.actions.create;
-    new_entry.label.dispatchEvent(new Event('dblclick'));
+    new_entry.label.dispatchEvent(new Event('dblclick'));}
+    if(!this.loaded) this.list().then(()=>{
+    this.setOpen(true);
+    create_entry();
+    }); else create_entry();
+
   }
   entryaction.rename = function() {
     if (this.isTrashDir()) return;
@@ -367,7 +375,7 @@ function EntryAction(args, options) {
       this.setParent(dest);
       if (callback !== null) callback();
     }).catch(err => {
-      console.log('errmove', err)
+      console.log('err move', err)
     });
   }
   entryaction.setParent = function(dest) {
@@ -508,10 +516,10 @@ export class JsDirList {
                 this.dragentry.move(dest_entry);
                 if ([entryTypes.discarded].indexOf(dest_entry.type) >= 0) this.attachControls(dest_entry);
               } catch (error) {
-                console.log('errordrop ', error)
+                console.log('error drop ', error)
                 this.dragentry.unMove();
               }
-            } else console.log('noactionon drop');
+            } else console.log('no action on drop');
           }
           break;
         case evtnames.editable:

@@ -52,6 +52,7 @@ export const css = {
   peerchecked: 'peer-checked',
   hidevscroll: 'hidevscroll',
   tip: 'tip',
+  tooltip:'tooltip',
   component: {
     tabs: {
       name: 'js-tabs'

@@ -81,7 +81,7 @@ function createActivItems() {
            const target = (item.dataset.target) ? document.getElementById(item.dataset.target) : item;
           if (target===null) return;
           const normalize_title= function(value) {
-            // space replaced by _ , and only alfanumeric lowercase
+            // space replaced by _ , and only alfa-numeric lowercase
             value=value.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gu, '').toLowerCase();
             return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_");
           }
@@ -156,13 +156,11 @@ function createActivItems() {
             item.classList.remove(css.disabled);
           }
           item.addEventListener('click', (e) => {
-
             if (item.classList.contains(css.disabled)) {
               e.preventDefault();
               return;
             }
             item.classList.add(css.disabled);
-
             setTimeout(enable_link, 4000);
             /*response.headers.forEach(function(val, key) {
               console.log(key + ' -> ' + val);
