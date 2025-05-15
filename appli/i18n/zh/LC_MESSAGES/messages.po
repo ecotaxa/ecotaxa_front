@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-15 13:42+0200\n"
+"POT-Creation-Date: 2025-05-15 15:03+0200\n"
 "PO-Revision-Date: 2022-11-23 10:53+0100\n"
 "Last-Translator: \n"
 "Language: zh\n"
@@ -3575,13 +3575,24 @@ msgid "only LOWER CASE"
 msgstr "仅小写"
 
 #: appli/templates/v2/help/_help_projectsettings.html:53
-msgid "Project access combines the visibility and license of a project."
+msgid ""
+"Project access combines the previous project properties of visibility and"
+" license."
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:54
-#, fuzzy
-msgid "Members only"
-msgstr "米"
+msgid "Only members can view project objects."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:54
+msgid ""
+"The user must have \"viewer privilege\" on the project to see the project"
+" objects."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:54
+msgid "Registered EcoTaxa users can view all project objects."
+msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:56
 #: appli/templates/v2/project/_stats.html:25
@@ -6253,4 +6264,10 @@ msgstr "忘记密码？"
 
 #~ msgid "ORCID ID"
 #~ msgstr ""
+
+#~ msgid "Project access combines the visibility and license of a project."
+#~ msgstr ""
+
+#~ msgid "Members only"
+#~ msgstr "米"
 

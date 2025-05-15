@@ -50,7 +50,8 @@
         Available fields :
           {% for x in maplist %}{{ x }}, {% endfor %}
 </div></details>
-   <details id="help_project_access" ><summary>{{_('Access')}}</summary><div>{{ _('Project access combines the visibility and license of a project.') | safe}} </div>
+   <details id="help_project_access" ><summary>{{_('Access')}}</summary><div>{{ _('Project access combines the previous project properties of visibility and license.') | safe}}
+     <ul><li><strong>PRIVATE</strong><p>{{_('Only members can view project objects.')}}</p></li><li><strong>PUBLIC</strong><p>{{_('The user must have "viewer privilege" on the project to see the project objects.')}}</p></li><li><strong>OPEN</strong><p>{{_('Registered EcoTaxa users can view all project objects.')}}</p></li></ul></div>
   </details>
 <details  id="help_project_privileges"><summary>{{_('Privileges')}}</summary>
   <div><strong>{{_('The roles in short')}}</strong><br>
