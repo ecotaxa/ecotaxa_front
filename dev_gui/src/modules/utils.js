@@ -24,6 +24,45 @@ function fetchSettings(options) {
   options.cache = "no-cache";
   return options;
 }
+function set_cursor_editable(el,chars=0) {
+function create_range(node, chars, range) {
+    if (!range) {
+        range = document.createRange();
+        range.selectNode(node);
+        range.setStart(node, 0);
+    }
+    if (chars.count === 0) {
+        range.setEnd(node, chars.count);
+    } else if (node && chars.count >0) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (node.textContent.length < chars.count) {
+                chars.count -= node.textContent.length;
+            } else {
+                 range.setEnd(node, chars.count);
+                 chars.count = 0;
+            }
+        } else {
+            for (const lp = 0; lp < node.childNodes.length; lp++) {
+                range = createRange(node.childNodes[lp], chars, range);
+                if (chars.count === 0) {
+                   break;
+                }
+            }
+        }
+   }
+   return range;
+};
+    if (chars >= 0) {
+        const selection = window.getSelection();
+        const range = create_range(el, { count: chars });
+        if (range) {
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+
+}
 
 function string_to_boolean(str) {
   if (typeof str === 'boolean') return str;
@@ -189,14 +228,6 @@ function html_spinner(addons = 'text-white', size = 'h-5 w-5') {
     </svg>`
 }
 
-/*function toCamelCase(str) {
-  return str.toLowerCase()
-    .trim()
-    .split(/[ -_]/g)
-    .map(word => word.replace(word[0], word[0].toString().toUpperCase()))
-    .join('')
-}*/
-
 function stop_on_error(message, callback = null) {
   if (callback) callback;
   throw new Error(message);
@@ -220,4 +251,5 @@ export {
   stop_on_error,
   dirseparator,
   urlseparator,
+  set_cursor_editable
 }
