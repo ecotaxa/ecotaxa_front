@@ -109,7 +109,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> dict:
                     "comments": {"label": _("comments"), "hidden": True},
                     "init_classif_list": {"label": _("preset"), "hidden": True},
                     "privileges": {"label": _("members"), "format": "privileges"},
-                    "access": {"label": _("access")},
+                    "access": {"label": _("access"), "format": "access"},
                     "classiffieldlist": {"label": _("sorting tools"), "format": "text"},
                     "cnn_network_id": {"label": _("Deep feature ext.")},
                 }
@@ -120,7 +120,7 @@ def project_table_columns(typeimport: str, selection: str = "list") -> dict:
                     "status": {"label": _("status")},
                     "contact": {"label": _("contact"), "hidden": True},
                     "privileges": {"label": _("members"), "format": "privileges"},
-                    "access": {"label": _("Access")},
+                    "access": {"label": _("Access"), "format": "access"},
                 }
             ),
         },
