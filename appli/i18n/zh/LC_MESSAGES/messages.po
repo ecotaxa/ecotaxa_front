@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-07-23 15:50+0200\n"
+"POT-Creation-Date: 2025-05-15 13:42+0200\n"
 "PO-Revision-Date: 2022-11-23 10:53+0100\n"
 "Last-Translator: \n"
 "Language: zh\n"
@@ -16,23 +16,23 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.10.1\n"
+"Generated-By: Babel 2.10.3\n"
 
-#: appli/gui/sponsorslist.py:7
+#: appli/gui/sponsorslist.py:8
 msgid "Sorbonne Universite and CNRS"
 msgstr "索邦大学和CNRS"
 
-#: appli/gui/sponsorslist.py:20
+#: appli/gui/sponsorslist.py:21
 msgid ""
 "Sorbonne University and the CNRS, which pay the salaries of the permanent"
 " staff responsible for supervising its development."
 msgstr "索邦大学(Sorbonne University)和法国国家科学研究中心(CNRS)为开发人员支付工资。"
 
-#: appli/gui/sponsorslist.py:25
+#: appli/gui/sponsorslist.py:28
 msgid "The Future Investments Program"
 msgstr ""
 
-#: appli/gui/sponsorslist.py:28
+#: appli/gui/sponsorslist.py:31
 #, fuzzy
 msgid ""
 "which financed the development of the original version of the application"
@@ -42,11 +42,11 @@ msgstr ""
 "The Future Investments项目最初版本应用程序的开发，由海洋经济学项目资助，本项目致力于对Tara "
 "Oceans样品进行分析[45000欧元]。"
 
-#: appli/gui/sponsorslist.py:33
+#: appli/gui/sponsorslist.py:38
 msgid "The Partner University Fund"
 msgstr "The Partner University基金"
 
-#: appli/gui/sponsorslist.py:36
+#: appli/gui/sponsorslist.py:41
 msgid ""
 "funded the hardware on which EcoTaxa ran for several years and the "
 "machine learning solution it permitted, through a joint project between "
@@ -54,66 +54,88 @@ msgid ""
 "University of Miami."
 msgstr ""
 
-#: appli/gui/sponsorslist.py:41
+#: appli/gui/sponsorslist.py:48
 msgid "The CNRS LEFE program"
 msgstr "CNRS LEFE计划"
 
-#: appli/gui/sponsorslist.py:44
+#: appli/gui/sponsorslist.py:51
 #, fuzzy
 msgid ""
 "which allowed to renew the machine learning backend, through the project "
 "DL-PIC."
 msgstr "CNRS LEFE计划可以通过DL-PIC项目更新机器学习后端[10k€]。"
 
-#: appli/gui/sponsorslist.py:49
+#: appli/gui/sponsorslist.py:58
 msgid "The Belmont Forum"
 msgstr "贝尔蒙特论坛"
 
-#: appli/gui/sponsorslist.py:52
+#: appli/gui/sponsorslist.py:61
 #, fuzzy
 msgid ""
-"which funds an overall review of the application through the WWWPIC "
-"project."
+"which that funded an overall review of the application through the WWWPIC"
+" project."
 msgstr "贝尔蒙论坛通过WWWPIC项目资助对申请进行全面审查[50万欧元]。"
 
-#: appli/gui/sponsorslist.py:57
+#: appli/gui/sponsorslist.py:68
 msgid "The Watertools company"
 msgstr "Watertools公司"
 
-#: appli/gui/sponsorslist.py:60
+#: appli/gui/sponsorslist.py:71
 #, fuzzy
 msgid ""
 "which donated money to make the interface of EcoTaxa easier to translate,"
 " in Chinese in particular."
 msgstr "Watertools公司，他们的捐款使EcoTaxa的界面更容易翻译，特别是中文[30k€]。"
 
-#: appli/gui/sponsorslist.py:65
+#: appli/gui/sponsorslist.py:78
+msgid "The France Relance program"
+msgstr ""
+
+#: appli/gui/sponsorslist.py:81
+msgid ""
+"that funded a joint project with the company FOTONOWER "
+"[https://fotonower.com/], which explored machine learning solutions to "
+"improve the automatic classification system in EcoTaxa as well as "
+"implement visual similarity search."
+msgstr ""
+
+#: appli/gui/sponsorslist.py:88
+msgid "The European Commission"
+msgstr ""
+
+#: appli/gui/sponsorslist.py:91
+msgid ""
+"that funded EcoTaxa's development through the Horizon programs, via the "
+"projects presented thereafter."
+msgstr ""
+
+#: appli/gui/sponsorslist.py:98
 #, fuzzy
 msgid "The JERICO-S3 project"
 msgstr "其他项目"
 
-#: appli/gui/sponsorslist.py:68
+#: appli/gui/sponsorslist.py:101
 msgid ""
 "which allowed the development of software pipelines to input data in "
 "EcoTaxa and supported the overall running of the service."
 msgstr ""
 
-#: appli/gui/sponsorslist.py:73
+#: appli/gui/sponsorslist.py:108
 #, fuzzy
 msgid "The Blue-Cloud project"
 msgstr "其他项目"
 
-#: appli/gui/sponsorslist.py:76
+#: appli/gui/sponsorslist.py:111
 msgid ""
 "which funded the extension of EcoTaxa's Application Programming Interface"
 " to allow it to interact with their data querying system."
 msgstr ""
 
-#: appli/gui/sponsorslist.py:81
+#: appli/gui/sponsorslist.py:118
 msgid "The Blue-Cloud2026 project"
 msgstr ""
 
-#: appli/gui/sponsorslist.py:84
+#: appli/gui/sponsorslist.py:121
 msgid ""
 "which extended the work of the first Blue-Cloud project to allow finer "
 "querying of EcoTaxa's data through its Application Programming Interface "
@@ -121,41 +143,31 @@ msgid ""
 "vocabularies."
 msgstr ""
 
-#: appli/gui/sponsorslist.py:89
-#, fuzzy
-msgid "The LOVNOWER project"
-msgstr "其他项目"
-
-#: appli/gui/sponsorslist.py:92
-msgid ""
-"with the company FOTONOWER, which explored machine learning solutions to "
-"improve the automatic classification system in EcoTaxa as well as "
-"implement a visual similarity search feature."
-msgstr ""
-
-#: appli/gui/sponsorslist.py:97
+#: appli/gui/sponsorslist.py:128
 msgid "The DTO-BioFlow project"
 msgstr ""
 
-#: appli/gui/sponsorslist.py:100
+#: appli/gui/sponsorslist.py:131
 msgid ""
 "which facilitated the flow of high quality data from EcoTaxa to the "
 "Digital Twin of the Ocean by improving quality control procedures before "
 "EcoTaxa and in its output as a DarwinCore Archive files."
 msgstr ""
 
-#: appli/gui/sponsorslist.py:105
+#: appli/gui/sponsorslist.py:138
 #, fuzzy
 msgid "The ANERIS project"
 msgstr "其他项目"
 
-#: appli/gui/sponsorslist.py:108
+#: appli/gui/sponsorslist.py:141
 msgid ""
 "which funded the development of dedicated pipelines for the automatic "
 "processing of images using EcoTaxa as a quality checking solution."
 msgstr ""
 
-#: appli/gui/staticlistes.py:9 appli/templates/v2/collection/settings.html:40
+#: appli/gui/staticlistes.py:9 appli/templates/v2/collection/settings.html:81
+#: appli/templates/v2/collection/settings.html:84
+#: appli/templates/v2/help/_help_collection_settings.html:39
 #: appli/templates/v2/partials/_topsitebar.html:20
 #, fuzzy
 msgid "Projects"
@@ -178,15 +190,24 @@ msgid "settings"
 msgstr "设置"
 
 #: appli/gui/staticlistes.py:14 appli/gui/staticlistes.py:33
-#: appli/templates/v2/collection/_listcontainer.html:19
-#: appli/templates/v2/project/_listcontainer.html:20
+#: appli/templates/v2/partials/_project_nav.html:36
+#: appli/templates/v2/partials/_project_nav.html:38
+#: appli/templates/v2/partials/_project_nav.html:40
+#: appli/templates/v2/project/_listcontainer.html:19
 msgid "import"
 msgstr "导入"
 
 #: appli/gui/staticlistes.py:15 appli/gui/staticlistes.py:34
-#: appli/gui/staticlistes.py:46 appli/templates/v2/partials/_navbar.html:42
-#: appli/templates/v2/partials/_navbar.html:44
-#: appli/templates/v2/partials/_navbar.html:46
+#: appli/gui/staticlistes.py:46
+#: appli/templates/v2/partials/_collection_nav.html:36
+#: appli/templates/v2/partials/_collection_nav.html:39
+#: appli/templates/v2/partials/_collection_nav.html:41
+#: appli/templates/v2/partials/_collection_nav.html:43
+#: appli/templates/v2/partials/_collection_nav.html:45
+#: appli/templates/v2/partials/_project_nav.html:48
+#: appli/templates/v2/partials/_project_nav.html:50
+#: appli/templates/v2/partials/_project_nav.html:52
+#: appli/templates/v2/partials/_project_nav.html:54
 #, fuzzy
 msgid "export"
 msgstr "导入"
@@ -202,7 +223,8 @@ msgid "annotate"
 msgstr "注释"
 
 #: appli/gui/staticlistes.py:18 appli/gui/staticlistes.py:35
-#: appli/templates/v2/project/_stats.html:65
+#: appli/templates/v2/collection/about.html:41
+#: appli/templates/v2/project/_stats.html:67
 #, fuzzy
 msgid "about"
 msgstr "关于"
@@ -234,10 +256,13 @@ msgid "fix"
 msgstr ""
 
 #: appli/gui/staticlistes.py:28
+#: appli/templates/v2/help/_help_projectsettings.html:79
+#: appli/templates/v2/project/_stats.html:37
+#: appli/templates/v2/project/projectsettings.html:31
 msgid "Collections"
 msgstr ""
 
-#: appli/gui/staticlistes.py:29
+#: appli/gui/staticlistes.py:29 appli/templates/v2/project/macros.html:21
 #, fuzzy
 msgid "Collection"
 msgstr "预测"
@@ -250,11 +275,12 @@ msgstr ""
 msgid "Job"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:376
+#: appli/gui/project/projects_list_interface_json.py:384
 #: appli/gui/staticlistes.py:43 appli/gui/staticlistes.py:196
-#: appli/templates/v2/jobs/listall.html:61 appli/templates/v2/jobs/show.html:80
-#: appli/templates/v2/jobs/show.html:88
-#: appli/templates/v2/partials/_navbar.html:26
+#: appli/templates/v2/jobs/listall.html:61 appli/templates/v2/jobs/show.html:87
+#: appli/templates/v2/jobs/show.html:95
+#: appli/templates/v2/partials/_collection_nav.html:24
+#: appli/templates/v2/partials/_project_nav.html:25
 msgid "View"
 msgstr ""
 
@@ -463,31 +489,31 @@ msgid "view full message"
 msgstr ""
 
 #: appli/gui/staticlistes.py:124 appli/gui/staticlistes.py:215
-#: appli/templates/v2/macros/macros.html:97
+#: appli/templates/v2/macros/macros.html:94
 msgid "IMPORTANT :"
 msgstr "重要提示："
 
 #: appli/gui/staticlistes.py:125 appli/gui/staticlistes.py:216
-#: appli/templates/v2/macros/macros.html:97
+#: appli/templates/v2/macros/macros.html:94
 msgid "WARNING:"
 msgstr ""
 
 #: appli/gui/staticlistes.py:126 appli/gui/staticlistes.py:217
-#: appli/templates/v2/macros/macros.html:97
+#: appli/templates/v2/macros/macros.html:94
 msgid "INFORMATION:"
 msgstr "信息："
 
 #: appli/gui/staticlistes.py:127 appli/gui/staticlistes.py:218
-#: appli/templates/v2/macros/macros.html:97
+#: appli/templates/v2/macros/macros.html:94
 msgid "SUCCESS:"
 msgstr "成功："
 
 #: appli/gui/staticlistes.py:128 appli/gui/staticlistes.py:219
-#: appli/templates/v2/macros/macros.html:97
+#: appli/templates/v2/macros/macros.html:94
 msgid "ERROR:"
 msgstr "错误："
 
-#: appli/gui/staticlistes.py:129 appli/templates/v2/macros/macros.html:97
+#: appli/gui/staticlistes.py:129 appli/templates/v2/macros/macros.html:94
 msgid "MAINTENANCE"
 msgstr ""
 
@@ -633,10 +659,12 @@ msgstr ""
 msgid "Manage"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:375
+#: appli/gui/project/projects_list_interface_json.py:383
 #: appli/gui/staticlistes.py:195 appli/gui/staticlistes.py:208
-#: appli/templates/v2/partials/_navbar.html:26
-#: appli/templates/v2/project/projectsettings.html:73
+#: appli/templates/v2/collection/_settings_aggregated.html:24
+#: appli/templates/v2/partials/_collection_nav.html:24
+#: appli/templates/v2/partials/_project_nav.html:25
+#: appli/templates/v2/project/projectsettings.html:46
 msgid "Annotate"
 msgstr "注释"
 
@@ -654,12 +682,14 @@ msgid "Viewer"
 msgstr ""
 
 #: appli/gui/staticlistes.py:209
-#: appli/templates/v2/project/projectsettings.html:73
+#: appli/templates/v2/collection/_settings_aggregated.html:24
+#: appli/templates/v2/project/projectsettings.html:46
 msgid "Explore Only"
 msgstr "仅检索"
 
 #: appli/gui/staticlistes.py:210
-#: appli/templates/v2/project/projectsettings.html:73
+#: appli/templates/v2/collection/_settings_aggregated.html:24
+#: appli/templates/v2/project/projectsettings.html:46
 msgid "Annotate No Prediction"
 msgstr "注释没有预测"
 
@@ -669,12 +699,17 @@ msgstr "关闭"
 
 #: appli/gui/staticlistes.py:221 appli/templates/v2/admin/activate.html:17
 #: appli/templates/v2/admin/messages.html:22
-#: appli/templates/v2/collection/settings.html:112
-#: appli/templates/v2/jobs/export.html:52
+#: appli/templates/v2/collection/erase.html:19
+#: appli/templates/v2/collection/settings.html:96
+#: appli/templates/v2/guests/_guest.html:47
+#: appli/templates/v2/jobs/collection_darwincore_export.html:50
+#: appli/templates/v2/jobs/export.html:51
+#: appli/templates/v2/jobs/import.html:107
 #: appli/templates/v2/jobs/subset_create.html:47
+#: appli/templates/v2/organizations/_organization.html:14
 #: appli/templates/v2/partials/_alertbox.html:16
 #: appli/templates/v2/project/merge.html:50
-#: appli/templates/v2/project/projectsettings.html:167
+#: appli/templates/v2/project/projectsettings.html:137
 #: appli/templates/v2/project/purge.html:27
 #: appli/templates/v2/users/_user.html:96
 msgid "Cancel"
@@ -684,94 +719,120 @@ msgstr "取消"
 msgid "Ok"
 msgstr "Ok"
 
-#: appli/gui/admin/main.py:477 appli/templates/v2/admin/messages.html:6
+#: appli/gui/admin/main.py:479 appli/templates/v2/admin/messages.html:6
 msgid "Messages"
 msgstr ""
 
-#: appli/gui/admin/main.py:481
+#: appli/gui/admin/main.py:483
 #: appli/templates/v2/help/_help_project_stats.html:33
 #: appli/templates/v2/project/_fullstats.html:78
 msgid "Users"
 msgstr ""
 
-#: appli/gui/admin/main.py:484 appli/templates/v2/help/_help_my_files.html:5
+#: appli/gui/admin/main.py:486 appli/gui/admin/main.py:500
+#: appli/gui/admin/main.py:514 appli/templates/v2/help/_help_my_files.html:5
 msgid "List"
 msgstr ""
 
-#: appli/gui/admin/main.py:488 appli/templates/v2/help/_help_my_files.html:10
+#: appli/gui/admin/main.py:490 appli/gui/admin/main.py:504
+#: appli/gui/admin/main.py:518 appli/templates/v2/help/_help_my_files.html:10
 #, fuzzy
 msgid "Create"
 msgstr "阅读更多"
 
-#: appli/gui/admin/main.py:495 appli/templates/v2/partials/_navuser.html:16
+#: appli/gui/admin/main.py:497
+msgid "Guests"
+msgstr ""
+
+#: appli/gui/admin/main.py:511
+#, fuzzy
+msgid "Organizations"
+msgstr "选取一个分类"
+
+#: appli/gui/admin/main.py:525 appli/templates/v2/partials/_navuser.html:16
 #, fuzzy
 msgid "Tasks"
 msgstr "状态"
 
-#: appli/gui/admin/main.py:496
+#: appli/gui/admin/main.py:526
 msgid "View all users tasks"
 msgstr ""
 
-#: appli/gui/admin/main.py:500
+#: appli/gui/admin/main.py:530
 msgid "Database"
 msgstr ""
 
-#: appli/gui/admin/main.py:503
+#: appli/gui/admin/main.py:533
 msgid "View DB Size"
 msgstr ""
 
-#: appli/gui/admin/main.py:507
+#: appli/gui/admin/main.py:537
 msgid "View DB Bloat"
 msgstr ""
 
-#: appli/gui/admin/main.py:511
+#: appli/gui/admin/main.py:541
 msgid "SQL Console"
 msgstr ""
 
-#: appli/gui/admin/main.py:515
+#: appli/gui/admin/main.py:545
 msgid "Recompute Projects and Taxo stat"
 msgstr ""
 
-#: appli/gui/admin/main.py:516
+#: appli/gui/admin/main.py:546
 msgid "can be long"
 msgstr ""
 
 #: appli/gui/admin/users_list_interface_json.py:15
+#: appli/gui/admin/users_list_interface_json.py:65
+#: appli/gui/admin/users_list_interface_json.py:102
 #: appli/templates/v2/admin/messages.html:30
 #, fuzzy
 msgid "edit"
 msgstr "预测"
 
 #: appli/gui/admin/users_list_interface_json.py:21
-#: appli/gui/collection/collections_list_interface_json.py:21
-#: appli/gui/project/projects_list_interface_json.py:22
-#: appli/gui/project/projects_list_interface_json.py:79
+#: appli/gui/admin/users_list_interface_json.py:71
+#: appli/gui/admin/users_list_interface_json.py:108
+#: appli/gui/collection/collections_list_interface_json.py:19
+#: appli/gui/project/projects_list_interface_json.py:19
+#: appli/gui/project/projects_list_interface_json.py:71
 #: appli/templates/v2/jobs/listall.html:47
 #: appli/templates/v2/project/merge.html:31
 msgid "ID"
 msgstr ""
 
 #: appli/gui/admin/users_list_interface_json.py:26
+#: appli/gui/admin/users_list_interface_json.py:76
+#: appli/gui/admin/users_list_interface_json.py:113
 #: appli/templates/v2/admin/activate.html:11
-#: appli/templates/v2/project/projectsettings.html:5
-#: appli/templates/v2/project/projectsettings.html:131
+#: appli/templates/v2/collection/_settings_aggregated.html:49
+#: appli/templates/v2/collection/macros.html:10
+#: appli/templates/v2/guests/_guest.html:18
+#: appli/templates/v2/guests/_guest.html:19
+#: appli/templates/v2/organizations/_organization.html:6
+#: appli/templates/v2/organizations/_organization.html:7
+#: appli/templates/v2/project/macros.html:35
+#: appli/templates/v2/project/projectsettings.html:94
 #: appli/templates/v2/users/_user.html:49
 #: appli/templates/v2/users/_user.html:50
 msgid "Name"
 msgstr "名称"
 
 #: appli/gui/admin/users_list_interface_json.py:29
+#: appli/gui/admin/users_list_interface_json.py:79
 #: appli/templates/v2/admin/activate.html:11
+#: appli/templates/v2/guests/_guest.html:22
 #: appli/templates/v2/help/_help_user_profile.html:5
 #: appli/templates/v2/security/_login.html:6
 #: appli/templates/v2/security/forgotten.html:24
 #: appli/templates/v2/users/_user.html:53
-#: appli/templates/v2/users/_user.html:54
 msgid "Email"
 msgstr "电子邮件"
 
 #: appli/gui/admin/users_list_interface_json.py:32
+#: appli/gui/admin/users_list_interface_json.py:82
 #: appli/templates/v2/admin/activate.html:11
+#: appli/templates/v2/guests/_guest.html:34
 #: appli/templates/v2/users/_user.html:70
 msgid "Organisation"
 msgstr ""
@@ -786,7 +847,9 @@ msgid "Creation reason"
 msgstr ""
 
 #: appli/gui/admin/users_list_interface_json.py:41
+#: appli/gui/admin/users_list_interface_json.py:85
 #: appli/templates/v2/admin/activate.html:11
+#: appli/templates/v2/guests/_guest.html:35
 #: appli/templates/v2/users/_user.html:71
 msgid "Country"
 msgstr ""
@@ -797,99 +860,63 @@ msgid "@Status"
 msgstr "状态"
 
 #: appli/gui/admin/users_list_interface_json.py:46
-#: appli/gui/project/projects_list_interface_json.py:41
+#: appli/gui/project/projects_list_interface_json.py:38
 #: appli/templates/v2/admin/_activate_status.html:5
+#: appli/templates/v2/collection/_settings_aggregated.html:21
 #: appli/templates/v2/project/merge.html:31
-#: appli/templates/v2/project/projectsettings.html:70
+#: appli/templates/v2/project/projectsettings.html:43
 msgid "Status"
 msgstr "状态"
 
-#: appli/gui/admin/users_list_interface_json.py:61
+#: appli/gui/admin/users_list_interface_json.py:126
 msgid "blocked"
 msgstr ""
 
-#: appli/gui/admin/users_list_interface_json.py:61
+#: appli/gui/admin/users_list_interface_json.py:126
 #, fuzzy
 msgid "inactive"
 msgstr "保存"
 
-#: appli/gui/admin/users_list_interface_json.py:61
+#: appli/gui/admin/users_list_interface_json.py:126
 #: appli/templates/v2/admin/messages.html:18
 #: appli/templates/v2/admin/messages.html:27
 #, fuzzy
 msgid "active"
 msgstr "保存"
 
-#: appli/gui/admin/users_list_interface_json.py:61
+#: appli/gui/admin/users_list_interface_json.py:126
 msgid "pending"
 msgstr ""
 
-#: appli/gui/collection/collections_list_interface_json.py:25
-#: appli/templates/v2/collection/settings.html:53
-msgid "Provider user"
-msgstr ""
-
-#: appli/gui/collection/collections_list_interface_json.py:27
-#: appli/gui/project/projects_list_interface_json.py:31
-#: appli/gui/project/projects_list_interface_json.py:69
-#: appli/gui/project/projects_list_interface_json.py:86
-#: appli/templates/v2/collection/settings.html:18
+#: appli/gui/collection/collections_list_interface_json.py:24
+#: appli/gui/project/projects_list_interface_json.py:28
+#: appli/gui/project/projects_list_interface_json.py:61
+#: appli/gui/project/projects_list_interface_json.py:78
+#: appli/templates/v2/collection/settings.html:21
 #: appli/templates/v2/project/merge.html:31
-#: appli/templates/v2/project/projectsettings.html:49
+#: appli/templates/v2/project/projectsettings.html:25
 msgid "Title"
 msgstr "标题"
 
-#: appli/gui/collection/collections_list_interface_json.py:29
-#: appli/gui/project/projects_list_interface_json.py:37
-#: appli/templates/v2/help/_help_projectsettings.html:66
-#: appli/templates/v2/project/projectsettings.html:13
-#: appli/templates/v2/project/projectsettings.html:133
+#: appli/gui/collection/collections_list_interface_json.py:30
+#: appli/gui/project/projects_list_interface_json.py:34
+#: appli/templates/v2/collection/_settings_aggregated.html:51
+#: appli/templates/v2/collection/about.html:10
+#: appli/templates/v2/help/_help_projectsettings.html:67
+#: appli/templates/v2/project/macros.html:44
+#: appli/templates/v2/project/projectsettings.html:96
 msgid "Contact"
 msgstr "联系"
 
-#: appli/gui/collection/collections_list_interface_json.py:30
-#, fuzzy
-msgid "Creators"
-msgstr "阅读更多"
-
 #: appli/gui/collection/collections_list_interface_json.py:31
-msgid "Associates"
-msgstr ""
-
-#: appli/gui/collection/collections_list_interface_json.py:33
-#: appli/templates/v2/collection/settings.html:96
-#, fuzzy
-msgid "Citation"
-msgstr "描述"
-
-#: appli/gui/collection/collections_list_interface_json.py:36
-#: appli/templates/v2/collection/settings.html:100
-msgid "Abstract"
-msgstr ""
-
-#: appli/gui/collection/collections_list_interface_json.py:38
-#: appli/gui/project/projects_list_interface_json.py:47
-#: appli/templates/v2/collection/settings.html:30
+#: appli/templates/v2/collection/about.html:8
+#: appli/templates/v2/collection/settings.html:73
+#: appli/templates/v2/help/_help_collection_settings.html:32
 #: appli/templates/v2/project/_fullstats.html:72
-#: appli/templates/v2/project/projectsettings.html:94
 msgid "License"
 msgstr "许可"
 
-#: appli/gui/collection/collections_list_interface_json.py:39
-#, fuzzy
-msgid "Projects id"
-msgstr "项目列表"
-
-#: appli/gui/collection/collections_list_interface_json.py:41
-#, fuzzy
-msgid "External ID"
-msgstr "额外的"
-
-#: appli/gui/collection/collections_list_interface_json.py:45
-msgid "External ID System"
-msgstr ""
-
-#: appli/gui/collection/collections_list_interface_json.py:117
+#: appli/gui/collection/collections_list_interface_json.py:101
 #, fuzzy
 msgid "Edit"
 msgstr "预测"
@@ -904,135 +931,305 @@ msgstr "项目更新"
 msgid "Collection updated"
 msgstr "项目更新"
 
-#: appli/gui/jobs/job_interface.py:16
-msgid "Only save objects' last annotation data"
+#: appli/gui/collection/staticlistes.py:6
+#, fuzzy
+msgid "Uou cannot manage this collection."
+msgstr "您不能编辑此项目的设置"
+
+#: appli/gui/collection/staticlistes.py:7
+msgid "Collection is published. Modifications and Erase are forbidden."
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:18 appli/gui/jobs/job_interface.py:38
-#: appli/gui/jobs/job_interface.py:46 appli/gui/jobs/job_interface.py:75
-#: appli/gui/jobs/job_interface.py:171
+#: appli/gui/collection/staticlistes.py:10
+#, fuzzy
+msgid "error in erasing collection "
+msgstr "新项目"
+
+#: appli/gui/jobs/job_interface.py:14
+msgid "Copy result file to FTP area. Original file is still available"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:18 appli/gui/jobs/job_interface.py:40
+#: appli/gui/jobs/job_interface.py:48 appli/gui/jobs/job_interface.py:174
+#: appli/gui/jobs/job_interface.py:190 appli/gui/jobs/job_interface.py:198
 msgid "Yes"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:19 appli/gui/jobs/job_interface.py:39
-#: appli/gui/jobs/job_interface.py:47 appli/gui/jobs/job_interface.py:76
-#: appli/gui/jobs/job_interface.py:172
+#: appli/gui/jobs/job_interface.py:19 appli/gui/jobs/job_interface.py:41
+#: appli/gui/jobs/job_interface.py:49 appli/gui/jobs/job_interface.py:175
+#: appli/gui/jobs/job_interface.py:191 appli/gui/jobs/job_interface.py:199
 msgid "No"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:26
+#: appli/gui/jobs/job_interface.py:28
+#: appli/templates/v2/partials/_project_nav.html:38
 #, fuzzy
 msgid "Images"
 msgstr "图像文件"
 
-#: appli/gui/jobs/job_interface.py:28
+#: appli/gui/jobs/job_interface.py:30
 #, fuzzy
 msgid "First image"
 msgstr "已导入"
 
-#: appli/gui/jobs/job_interface.py:29
+#: appli/gui/jobs/job_interface.py:31
 #, fuzzy
 msgid "All images"
 msgstr "图像文件"
 
-#: appli/gui/jobs/job_interface.py:30 appli/gui/jobs/job_interface.py:66
-#: appli/gui/jobs/job_interface.py:149
+#: appli/gui/jobs/job_interface.py:32 appli/gui/jobs/job_interface.py:68
+#: appli/gui/jobs/job_interface.py:150
 msgid "None"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:36
+#: appli/gui/jobs/job_interface.py:38
 msgid "Internal database IDs"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:44
+#: appli/gui/jobs/job_interface.py:46
 msgid "Add an EcoTaxa-compatible second line with types"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:61
+#: appli/gui/jobs/job_interface.py:63
 msgid "Separate (in ZIP sub-directories) output by"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:63 appli/gui/jobs/job_interface.py:147
+#: appli/gui/jobs/job_interface.py:65 appli/gui/jobs/job_interface.py:148
 #, fuzzy
 msgid "Sample"
 msgstr "名称"
 
-#: appli/gui/jobs/job_interface.py:64 appli/gui/jobs/job_interface.py:148
+#: appli/gui/jobs/job_interface.py:66 appli/gui/jobs/job_interface.py:149
 #, fuzzy
 msgid "Acquisition"
 msgstr "请求"
 
-#: appli/gui/jobs/job_interface.py:65
+#: appli/gui/jobs/job_interface.py:67
 #: appli/templates/v2/project/_fullstats.html:8
 #, fuzzy
 msgid "Taxon"
 msgstr "分类法"
 
-#: appli/gui/jobs/job_interface.py:71 appli/gui/jobs/job_interface.py:167
-msgid "Copy result file to FTP area. Original file is still available"
-msgstr ""
-
-#: appli/gui/jobs/job_interface.py:87
+#: appli/gui/jobs/job_interface.py:79
 #: appli/templates/v2/help/_help_job_export.html:10
 msgid "General Export"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:88
+#: appli/gui/jobs/job_interface.py:80
 #: appli/templates/v2/help/_help_job_export.html:11
 msgid "Configurable objects export"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:100
-#: appli/templates/v2/help/_help_job_export.html:15
+#: appli/gui/jobs/job_interface.py:92
+#: appli/templates/v2/help/_help_job_export.html:17
 msgid "Backup Export"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:101
+#: appli/gui/jobs/job_interface.py:93
 msgid "Backup export, for restoring or archiving"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:113
-#: appli/templates/v2/help/_help_job_export.html:18
+#: appli/gui/jobs/job_interface.py:105
+#: appli/templates/v2/help/_help_job_export.html:21
 msgid "Summary Export"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:114
-#: appli/templates/v2/help/_help_job_export.html:19
+#: appli/gui/jobs/job_interface.py:106
+#: appli/templates/v2/help/_help_job_export.html:22
 msgid "Synthetic taxon-oriented export"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:135
-#: appli/templates/v2/help/_help_job_export.html:26
+#: appli/gui/jobs/job_interface.py:123
+#: appli/templates/v2/help/_help_job_export.html:33
+msgid "Classification Export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:124
+msgid "Objects' identifications only (no metadata)"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:136
+#: appli/templates/v2/help/_help_job_export.html:29
+#: appli/templates/v2/help/_help_job_export.html:42
 msgid "Quantity to compute"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:137
+#: appli/gui/jobs/job_interface.py:138 appli/gui/jobs/job_interface.py:207
 msgid "Abundance"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:138
+#: appli/gui/jobs/job_interface.py:139 appli/gui/jobs/job_interface.py:208
 msgid "Concentration"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:139
+#: appli/gui/jobs/job_interface.py:140 appli/gui/jobs/job_interface.py:209
 msgid "Biovolume"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:145
+#: appli/gui/jobs/job_interface.py:146
 msgid "Computations aggregation level"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:154
+#: appli/gui/jobs/job_interface.py:155 appli/gui/jobs/job_interface.py:287
 msgid "Mapping from present taxon to output replacement one "
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:155
+#: appli/gui/jobs/job_interface.py:156 appli/gui/jobs/job_interface.py:217
+#: appli/gui/jobs/job_interface.py:288
 msgid " Type '_discard_' to discard taxon"
 msgstr ""
 
-#: appli/gui/jobs/job_interface.py:161
-#: appli/templates/v2/help/_help_job_export.html:27
+#: appli/gui/jobs/job_interface.py:162 appli/gui/jobs/job_interface.py:223
+#: appli/templates/v2/help/_help_job_export.html:30
+#: appli/templates/v2/help/_help_job_export.html:43
+#: appli/templates/v2/help/_help_projectsettings.html:74
+#: appli/templates/v2/project/projectsettings.html:123
+#: appli/templates/v2/project/projectsettings.html:125
 msgid "Formulae"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:172
+msgid "Export objects' identifications only (no metadata)"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:188
+#, fuzzy
+msgid "Include predicted"
+msgstr "预测"
+
+#: appli/gui/jobs/job_interface.py:196
+#: appli/templates/v2/help/_help_job_export.html:41
+msgid "With absent"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:205
+msgid "With computations"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:216
+msgid "Computations pre mapping"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:229
+msgid "Extra XML block"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:239
+#: appli/templates/v2/jobs/collection_darwincore_export.html:36
+msgid "Darwin Core Export"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:240
+msgid ""
+"Export the collection in Darwin Core format, e.g. for EMODnet portal, "
+"@see https://www.emodnet-ingestion.eu"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:299
+#, fuzzy
+msgid "General Import"
+msgstr "导入"
+
+#: appli/gui/jobs/job_interface.py:300
+msgid "Import Images and TSV files"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:301
+msgid "Select one directory to import"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:303 appli/gui/jobs/job_interface.py:314
+#: appli/gui/jobs/job_interface.py:325
+msgid "or Drop Files or Folders Here"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:311
+#, fuzzy
+msgid "Images Import"
+msgstr "导入"
+
+#: appli/gui/jobs/job_interface.py:312
+msgid "Select one folder to import"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:315
+msgid ""
+"Import images in jpg, png, gif (possibly animated) formats and associate "
+"a fixed & reduced set of metadata, that you can enter below."
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:321
+msgid "Update Metadata"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:322
+msgid "Update metada associated to already importer images"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:323
+msgid "Select one file or folder to import"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:335
+msgid "Skip tsv that have already been imported"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:340
+msgid "Skip objects that have already been imported"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:348
+#: appli/templates/v2/partials/_project_nav.html:40
+msgid "Metadata"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:352
+msgid "Image DATE (YYYYMMDD, UTC)"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:357
+msgid "Image TIME (HHMM, UTC)"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:362
+msgid "latitude (type in -12°06.398 or -12.1066 for 12°06.398 S)"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:369
+msgid "longitude (type in -135°05.325 or -135.08875 for 135°05.325 W)"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:376
+msgid "Object Depth min (m)"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:381
+#, fuzzy
+msgid "Object Depth max (m)"
+msgstr "新项目"
+
+#: appli/gui/jobs/job_interface.py:386
+msgid "Optional annotation category for ALL images"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:392
+msgid "Optional annotator"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:398
+#, fuzzy
+msgid "Optional status"
+msgstr "状态"
+
+#: appli/gui/jobs/job_interface.py:412
+msgid ""
+"We encourage you to fill geographic(Lat/Long) and temporal (date/time) "
+"data !\n"
+" Do you really want to import ?"
+msgstr ""
+
+#: appli/gui/jobs/job_interface.py:421
+msgid "Allow update of classification data"
 msgstr ""
 
 #: appli/gui/jobs/staticlistes.py:5
@@ -1084,25 +1281,37 @@ msgid "no file to upload"
 msgstr ""
 
 #: appli/gui/jobs/staticlistes.py:25
+msgid "job_id error"
+msgstr ""
+
+#: appli/gui/jobs/staticlistes.py:26
 #, fuzzy
 msgid "no permission to list"
 msgstr "不在列表中"
 
-#: appli/gui/jobs/staticlistes.py:26
+#: appli/gui/jobs/staticlistes.py:27
 msgid "this is an asynchronous process"
 msgstr ""
 
-#: appli/gui/project/main.py:239
+#: appli/gui/jobs/by_type/Import.py:60
+msgid "Upload or select from my files"
+msgstr ""
+
+#: appli/gui/jobs/by_type/Import.py:67
+msgid "Choose a folder or zip file on the server"
+msgstr ""
+
+#: appli/gui/project/main.py:237
 #, fuzzy
 msgid "Pick another source project."
 msgstr "新项目"
 
-#: appli/gui/project/main.py:243 appli/gui/project/staticlistes.py:8
+#: appli/gui/project/main.py:255 appli/gui/project/staticlistes.py:8
 #, fuzzy
 msgid "Source project doesn't exist"
 msgstr "项目不存在"
 
-#: appli/gui/project/main.py:245 appli/gui/project/staticlistes.py:7
+#: appli/gui/project/main.py:257 appli/gui/project/staticlistes.py:7
 #, fuzzy
 msgid "You cannot merge from this project"
 msgstr "您不能编辑此项目的设置"
@@ -1113,172 +1322,184 @@ msgid ""
 "this project"
 msgstr ""
 
-#: appli/gui/project/main.py:399
+#: appli/gui/project/main.py:397
 msgid "You must select at least one category to do the replacement"
 msgstr ""
 
-#: appli/gui/project/main.py:480 appli/gui/project/main.py:576
-#: appli/gui/project/main.py:710
+#: appli/gui/project/main.py:478 appli/gui/project/main.py:573
+#: appli/gui/project/main.py:707
 msgid "Project status is Explore Only. You cannot do this action on this project"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:27
-#: appli/gui/project/projects_list_interface_json.py:67
-#: appli/gui/project/projects_list_interface_json.py:83
+#: appli/gui/project/projects_list_interface_json.py:24
+#: appli/gui/project/projects_list_interface_json.py:59
+#: appli/gui/project/projects_list_interface_json.py:75
 #: appli/templates/v2/jobs/prediction_create_lstproj.html:34
 #: appli/templates/v2/project/merge.html:31
-#: appli/templates/v2/project/projectsettings.html:63
-#: appli/templates/v2/project/projectsettings.html:64
+#: appli/templates/v2/project/projectsettings.html:36
+#: appli/templates/v2/project/projectsettings.html:37
 msgid "Instrument"
 msgstr "仪器"
 
-#: appli/gui/project/projects_list_interface_json.py:38
+#: appli/gui/project/projects_list_interface_json.py:35
 #, fuzzy
 msgid "Annotators"
 msgstr "注释"
 
-#: appli/gui/project/projects_list_interface_json.py:39
+#: appli/gui/project/projects_list_interface_json.py:36
 msgid "Managers"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:40
+#: appli/gui/project/projects_list_interface_json.py:37
 #, fuzzy
 msgid "Viewers"
 msgstr "米"
 
-#: appli/gui/project/projects_list_interface_json.py:43
-msgid "Visibility"
+#: appli/gui/project/projects_list_interface_json.py:39
+#: appli/gui/project/projects_list_interface_json.py:123
+#: appli/templates/v2/collection/_settings_aggregated.html:33
+#: appli/templates/v2/help/_help_projectsettings.html:53
+#: appli/templates/v2/project/projectsettings.html:59
+msgid "Access"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:48
+#: appli/gui/project/projects_list_interface_json.py:40
 #, fuzzy
 msgid "Nb objects"
 msgstr "新项目"
 
-#: appli/gui/project/projects_list_interface_json.py:50
+#: appli/gui/project/projects_list_interface_json.py:42
 #, fuzzy
 msgid "%validated"
 msgstr "验证"
 
-#: appli/gui/project/projects_list_interface_json.py:70
+#: appli/gui/project/projects_list_interface_json.py:62
 #, fuzzy
 msgid "Validated nb"
 msgstr "验证"
 
-#: appli/gui/project/projects_list_interface_json.py:71
+#: appli/gui/project/projects_list_interface_json.py:63
 msgid "Matching nb"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:72
+#: appli/gui/project/projects_list_interface_json.py:64
 #, fuzzy
 msgid "Deep features"
 msgstr "深度特征提取器"
 
-#: appli/gui/project/projects_list_interface_json.py:92
+#: appli/gui/project/projects_list_interface_json.py:84
 #, fuzzy
 msgid "Preset categories"
 msgstr "选取一个分类"
 
-#: appli/gui/project/projects_list_interface_json.py:96
+#: appli/gui/project/projects_list_interface_json.py:88
 msgid "Extra categories used"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:103
+#: appli/gui/project/projects_list_interface_json.py:95
 #, fuzzy
 msgid "Members"
 msgstr "米"
 
-#: appli/gui/project/projects_list_interface_json.py:104
-#: appli/gui/project/projects_list_interface_json.py:115
+#: appli/gui/project/projects_list_interface_json.py:96
+#: appli/gui/project/projects_list_interface_json.py:107
+#: appli/gui/project/projects_list_interface_json.py:121
 #, fuzzy
 msgid "contact"
 msgstr "联系"
 
-#: appli/gui/project/projects_list_interface_json.py:114
+#: appli/gui/project/projects_list_interface_json.py:106
+#: appli/gui/project/projects_list_interface_json.py:120
 #, fuzzy
 msgid "status"
 msgstr "状态"
 
-#: appli/gui/project/projects_list_interface_json.py:116
+#: appli/gui/project/projects_list_interface_json.py:108
 #: appli/templates/v2/help/_help_project_stats.html:15
 #: appli/templates/v2/help/_help_projectsettings.html:18
 msgid "description"
 msgstr "描述"
 
-#: appli/gui/project/projects_list_interface_json.py:117
+#: appli/gui/project/projects_list_interface_json.py:109
 #, fuzzy
 msgid "comments"
 msgstr "注解"
 
-#: appli/gui/project/projects_list_interface_json.py:118
-#: appli/templates/v2/collection/_listcontainer.html:19
-#: appli/templates/v2/project/_listcontainer.html:20
+#: appli/gui/project/projects_list_interface_json.py:110
+#: appli/templates/v2/project/_listcontainer.html:19
 msgid "preset"
 msgstr "预设"
 
-#: appli/gui/project/projects_list_interface_json.py:119
+#: appli/gui/project/projects_list_interface_json.py:111
+#: appli/gui/project/projects_list_interface_json.py:122
 #, fuzzy
 msgid "members"
 msgstr "米"
 
-#: appli/gui/project/projects_list_interface_json.py:120
-#, fuzzy
-msgid "license"
-msgstr "许可"
+#: appli/gui/project/projects_list_interface_json.py:112
+msgid "access"
+msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:121
+#: appli/gui/project/projects_list_interface_json.py:113
 msgid "sorting tools"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:122
+#: appli/gui/project/projects_list_interface_json.py:114
 #, fuzzy
 msgid "Deep feature ext."
 msgstr "深度特征提取器"
 
-#: appli/gui/project/projects_list_interface_json.py:135
+#: appli/gui/project/projects_list_interface_json.py:119
+#, fuzzy
+msgid "title"
+msgstr "标题"
+
+#: appli/gui/project/projects_list_interface_json.py:136
 msgid "Sample ID"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:138
+#: appli/gui/project/projects_list_interface_json.py:139
 msgid "used taxa"
 msgstr ""
-
-#: appli/gui/project/projects_list_interface_json.py:145
-#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
-#: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:57
-msgid "validated"
-msgstr "验证"
 
 #: appli/gui/project/projects_list_interface_json.py:146
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:73
 #: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:58
+#: appli/templates/v2/project/_stats.html:59
+msgid "validated"
+msgstr "验证"
+
+#: appli/gui/project/projects_list_interface_json.py:147
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:73
+#: appli/templates/v2/project/_macrostats.html:16
+#: appli/templates/v2/project/_stats.html:60
 msgid "dubious"
 msgstr "可疑"
 
-#: appli/gui/project/projects_list_interface_json.py:147
+#: appli/gui/project/projects_list_interface_json.py:148
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:72
 #: appli/templates/v2/project/_macrostats.html:16
-#: appli/templates/v2/project/_stats.html:59
+#: appli/templates/v2/project/_stats.html:61
 msgid "predicted"
 msgstr "预测"
 
-#: appli/gui/project/projects_list_interface_json.py:149
+#: appli/gui/project/projects_list_interface_json.py:150
 #: appli/templates/v2/project/_macrostats.html:16
 msgid "none"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:184
+#: appli/gui/project/projects_list_interface_json.py:185
+#: appli/gui/project/projects_list_interface_json.py:205
 msgid "select"
 msgstr "选择"
 
-#: appli/gui/project/projects_list_interface_json.py:377
+#: appli/gui/project/projects_list_interface_json.py:385
 msgid "Request Access"
 msgstr ""
 
-#: appli/gui/project/projects_list_interface_json.py:378
-#: appli/templates/v2/partials/_navbar.html:49
+#: appli/gui/project/projects_list_interface_json.py:386
+#: appli/templates/v2/partials/_collection_nav.html:48
+#: appli/templates/v2/partials/_project_nav.html:57
 #, fuzzy
 msgid "Settings"
 msgstr "设置"
@@ -1358,7 +1579,8 @@ msgid "Sébastien Colin: initial specification"
 msgstr "Sébastien Colin：初始规范"
 
 #: appli/templates/v2/about.html:58
-msgid "Altidev, Laurent Salinas, Laurent Reese: development"
+#, fuzzy
+msgid "Altidev, Laurent Salinas, Laurent Reese, Béatrice Caraveo: development"
 msgstr "Altidev，Laurent Salinas，Laurent Reese：开发"
 
 #: appli/templates/v2/about.html:59
@@ -1768,52 +1990,60 @@ msgstr ""
 msgid "Comment about required modifications"
 msgstr ""
 
+#: appli/templates/v2/admin/_personslistcontainer.html:5
+#, fuzzy
+msgid "Create a user"
+msgstr "创建一个项目"
+
+#: appli/templates/v2/admin/_personslistcontainer.html:5
+#, fuzzy
+msgid "Create a guest"
+msgstr "创建一个项目"
+
+#: appli/templates/v2/admin/_personslistcontainer.html:10
+#, fuzzy
+msgid "List all "
+msgstr "选取一个分类"
+
+#: appli/templates/v2/admin/_personslistcontainer.html:13
+#: appli/templates/v2/collection/_listcontainer.html:20
+#: appli/templates/v2/project/_fullstats.html:93
+#: appli/templates/v2/project/_listcontainer.html:21
+#, fuzzy
+msgid "Please wait"
+msgstr "请等待"
+
+#: appli/templates/v2/admin/_personslistcontainer.html:13
+#: appli/templates/v2/collection/_listcontainer.html:20
+#: appli/templates/v2/project/_fullstats.html:93
+#: appli/templates/v2/project/_listcontainer.html:21
+msgid "Data loaded. Displaying..."
+msgstr ""
+
 #: appli/templates/v2/admin/_userroles.html:3
 #: appli/templates/v2/me/_withrights.html:2
 #, fuzzy
 msgid "Roles"
 msgstr "剖面"
 
-#: appli/templates/v2/admin/_userslistcontainer.html:5
-#, fuzzy
-msgid "Create a user"
-msgstr "创建一个项目"
-
-#: appli/templates/v2/admin/_userslistcontainer.html:10
-#, fuzzy
-msgid "List all users"
-msgstr "选取一个分类"
-
-#: appli/templates/v2/admin/_userslistcontainer.html:13
-#: appli/templates/v2/collection/_listcontainer.html:21
-#: appli/templates/v2/project/_fullstats.html:93
-#: appli/templates/v2/project/_listcontainer.html:22
-#, fuzzy
-msgid "Please wait"
-msgstr "请等待"
-
-#: appli/templates/v2/admin/_userslistcontainer.html:13
-#: appli/templates/v2/collection/_listcontainer.html:21
-#: appli/templates/v2/project/_fullstats.html:93
-#: appli/templates/v2/project/_listcontainer.html:22
-msgid "Data loaded. Displaying..."
-msgstr ""
-
 #: appli/templates/v2/admin/activate.html:6
-#: appli/templates/v2/collection/settings.html:8
+#: appli/templates/v2/collection/settings.html:9
+#: appli/templates/v2/guests/_guest.html:2
+#: appli/templates/v2/guests/_guest.html:14
 #: appli/templates/v2/jobs/_import_form.html:7
-#: appli/templates/v2/jobs/import.html:7
-#: appli/templates/v2/project/projectsettings.html:37
+#: appli/templates/v2/organizations/_organization.html:1
+#: appli/templates/v2/project/projectsettings.html:12
 #: appli/templates/v2/users/_user.html:22
 #: appli/templates/v2/users/_user.html:38
 msgid "this field is required"
 msgstr "此字段必填"
 
 #: appli/templates/v2/admin/activate.html:6
-#: appli/templates/v2/collection/settings.html:8
+#: appli/templates/v2/collection/settings.html:9
+#: appli/templates/v2/guests/_guest.html:2
 #: appli/templates/v2/jobs/_import_form.html:7
-#: appli/templates/v2/jobs/import.html:7
-#: appli/templates/v2/project/projectsettings.html:37
+#: appli/templates/v2/organizations/_organization.html:1
+#: appli/templates/v2/project/projectsettings.html:12
 #: appli/templates/v2/users/_user.html:22
 msgid "this field is invalid"
 msgstr "此字段无效"
@@ -1831,8 +2061,10 @@ msgstr ""
 
 #: appli/templates/v2/admin/activate.html:17
 #: appli/templates/v2/admin/messages.html:22
-#: appli/templates/v2/collection/settings.html:112
-#: appli/templates/v2/project/projectsettings.html:167
+#: appli/templates/v2/collection/settings.html:96
+#: appli/templates/v2/guests/_guest.html:47
+#: appli/templates/v2/organizations/_organization.html:14
+#: appli/templates/v2/project/projectsettings.html:137
 #: appli/templates/v2/users/_user.html:96
 msgid "Save"
 msgstr "保存"
@@ -1842,6 +2074,25 @@ msgstr "保存"
 #, fuzzy
 msgid "Cancel, back to users list"
 msgstr "取消，返回项目 "
+
+#: appli/templates/v2/admin/guest.html:12
+#, fuzzy
+msgid "guest user"
+msgstr "选取一个分类"
+
+#: appli/templates/v2/admin/guest.html:12
+msgid "new guest user"
+msgstr ""
+
+#: appli/templates/v2/admin/guest.html:14
+#, fuzzy
+msgid "How to edit a guest account"
+msgstr "如何创建项目"
+
+#: appli/templates/v2/admin/guest.html:14
+#, fuzzy
+msgid "How to create a guest account"
+msgstr "如何创建项目"
 
 #: appli/templates/v2/admin/index.html:6
 msgid "You have Administrator privileges"
@@ -1881,6 +2132,25 @@ msgstr ""
 msgid "date"
 msgstr "注释"
 
+#: appli/templates/v2/admin/organization.html:7
+#, fuzzy
+msgid "organization"
+msgstr "选取一个分类"
+
+#: appli/templates/v2/admin/organization.html:7
+#, fuzzy
+msgid "new organization"
+msgstr "选取一个分类"
+
+#: appli/templates/v2/admin/person.html:6
+msgid "Add a guest user"
+msgstr ""
+
+#: appli/templates/v2/admin/person.html:6
+#, fuzzy
+msgid "Add an organization"
+msgstr "选取一个分类"
+
 #: appli/templates/v2/admin/user.html:6
 msgid "How to edit a user account"
 msgstr ""
@@ -1898,156 +2168,479 @@ msgstr ""
 msgid "new user"
 msgstr ""
 
-#: appli/templates/v2/collection/_listcontainer.html:6
+#: appli/templates/v2/collection/_listcontainer.html:7
+#: appli/templates/v2/collection/settings.html:6
 #, fuzzy
-msgid "How to create collection"
+msgid "How to create a collection"
 msgstr "如何创建项目"
 
-#: appli/templates/v2/collection/_listcontainer.html:8
+#: appli/templates/v2/collection/_listcontainer.html:9
 #, fuzzy
 msgid "Create a collection"
 msgstr "创建一个项目"
 
-#: appli/templates/v2/collection/_listcontainer.html:10
+#: appli/templates/v2/collection/_listcontainer.html:11
 #, fuzzy
 msgid "Access collections"
 msgstr "访问项目"
 
 #: appli/templates/v2/collection/_listcontainer.html:19
-#: appli/templates/v2/project/_listcontainer.html:20
-msgid "import full settings"
-msgstr "导入完整设置"
+msgid "Add"
+msgstr ""
 
-#: appli/templates/v2/collection/_listcontainer.html:20
-#: appli/templates/v2/project/_listcontainer.html:21
-msgid "extra"
-msgstr "额外的"
+#: appli/templates/v2/collection/_settings_aggregated.html:5
+#: appli/templates/v2/help/_help_projectsettings.html:32
+#: appli/templates/v2/project/_stats.html:44
+#: appli/templates/v2/project/projectsettings.html:72
+msgid "Definition of preset for manual sorting"
+msgstr "手动排序的预设定义"
 
-#: appli/templates/v2/collection/settings.html:5
+#: appli/templates/v2/collection/_settings_aggregated.html:15
+#: appli/templates/v2/project/projectsettings.html:84
+msgid "Fields available for sorting & Display In the manual classification page"
+msgstr ""
+
+#: appli/templates/v2/collection/_settings_aggregated.html:19
+#: appli/templates/v2/help/_help_project_stats.html:24
+#: appli/templates/v2/help/_help_projectsettings.html:28
+#: appli/templates/v2/project/_stats.html:47
+#: appli/templates/v2/project/projectsettings.html:51
+msgid "Deep feature extractor"
+msgstr "深度特征提取器"
+
+#: appli/templates/v2/collection/_settings_aggregated.html:50
+#: appli/templates/v2/project/_fullstats.html:81
+#: appli/templates/v2/project/macros.html:37
+#: appli/templates/v2/project/projectsettings.html:95
+msgid "Privilege"
+msgstr "权限"
+
+#: appli/templates/v2/collection/_settings_aggregated.html:76
+#: appli/templates/v2/project/projectsettings.html:120
+msgid "New privilege"
+msgstr "新的权限"
+
+#: appli/templates/v2/collection/_settings_aggregated.html:78
+#: appli/templates/v2/help/_help_projectsettings.html:76
+#: appli/templates/v2/project/projectsettings.html:131
+msgid "Mapping"
+msgstr ""
+
+#: appli/templates/v2/collection/about.html:6
+#: appli/templates/v2/collection/settings.html:63
+#: appli/templates/v2/help/_help_collection_settings.html:23
+#, fuzzy
+msgid "Citation"
+msgstr "描述"
+
+#: appli/templates/v2/collection/about.html:12
+#: appli/templates/v2/collection/settings.html:43
+#, fuzzy
+msgid "Creator users  and organisations"
+msgstr "选取一个分类"
+
+#: appli/templates/v2/collection/about.html:12
+#: appli/templates/v2/collection/settings.html:53
+#, fuzzy
+msgid "Associate users and organisations"
+msgstr "选取一个分类"
+
+#: appli/templates/v2/collection/about.html:25
+#: appli/templates/v2/collection/settings.html:30
+#: appli/templates/v2/help/_help_collection_settings.html:18
+msgid "Metadata provider"
+msgstr ""
+
+#: appli/templates/v2/collection/about.html:27
+#: appli/templates/v2/collection/settings.html:66
+#: appli/templates/v2/help/_help_collection_settings.html:25
+msgid "Abstract"
+msgstr ""
+
+#: appli/templates/v2/collection/about.html:29
+#: appli/templates/v2/collection/settings.html:70
+#: appli/templates/v2/help/_help_collection_settings.html:30
+#: appli/templates/v2/project/_stats.html:39
+msgid "Description"
+msgstr "描述"
+
+#: appli/templates/v2/collection/about.html:32
+msgid "DOI"
+msgstr ""
+
+#: appli/templates/v2/collection/about.html:34
+msgid "Permanent URL"
+msgstr ""
+
+#: appli/templates/v2/collection/erase.html:7
+#: appli/templates/v2/partials/_collection_nav.html:52
+#, fuzzy
+msgid "Erase collection"
+msgstr "新项目"
+
+#: appli/templates/v2/collection/erase.html:11
+#, fuzzy, python-format
+msgid "%s Collection erased"
+msgstr "项目更新"
+
+#: appli/templates/v2/collection/erase.html:13
+#: appli/templates/v2/collection/erase.html:16
+#, fuzzy
+msgid "Back to collections list"
+msgstr "取消，返回项目 "
+
+#: appli/templates/v2/collection/erase.html:15
+msgid "The collection is published and cannot be erased."
+msgstr ""
+
+#: appli/templates/v2/collection/erase.html:19
+msgid "This action is irreversible.Do you really want to delete this collection ?"
+msgstr ""
+
+#: appli/templates/v2/collection/erase.html:19
+msgid "ERASE THIS COLLECTION !!! IRREVERSIBLE !!!!!"
+msgstr ""
+
+#: appli/templates/v2/collection/erase.html:19
+#, fuzzy
+msgid "Cancel and back to collections list"
+msgstr "取消，返回项目 "
+
+#: appli/templates/v2/collection/macros.html:7
+msgid "mail the collection contact"
+msgstr ""
+
+#: appli/templates/v2/collection/noright.html:4
+#, fuzzy
+msgid "Select another collection"
+msgstr "新项目"
+
+#: appli/templates/v2/collection/settings.html:6
 #, fuzzy
 msgid "How to edit a collection settings"
 msgstr "如何编辑项目设置"
 
-#: appli/templates/v2/collection/settings.html:5
-#, fuzzy
-msgid "How to create a collection"
-msgstr "如何创建项目"
-
-#: appli/templates/v2/collection/settings.html:8
-#: appli/templates/v2/project/projectsettings.html:37
+#: appli/templates/v2/collection/settings.html:9
+#: appli/templates/v2/project/projectsettings.html:12
 msgid "imported"
 msgstr "已导入"
 
-#: appli/templates/v2/collection/settings.html:10
-#: appli/templates/v2/project/projectsettings.html:39
+#: appli/templates/v2/collection/settings.html:11
+#: appli/templates/v2/project/projectsettings.html:14
 msgid "click to expand/shrink tabs"
 msgstr ""
 
-#: appli/templates/v2/collection/settings.html:15
+#: appli/templates/v2/collection/settings.html:17
 #, fuzzy
 msgid "collection"
 msgstr "预测"
 
-#: appli/templates/v2/collection/settings.html:15
+#: appli/templates/v2/collection/settings.html:17
 #, fuzzy
 msgid "new collection"
 msgstr "新项目"
 
-#: appli/templates/v2/collection/settings.html:19
-#: appli/templates/v2/project/projectsettings.html:49
+#: appli/templates/v2/collection/settings.html:22
+#: appli/templates/v2/project/projectsettings.html:25
 msgid "a title is required"
 msgstr "需要一个标题"
 
-#: appli/templates/v2/collection/settings.html:21
+#: appli/templates/v2/collection/settings.html:24
+#: appli/templates/v2/help/_help_collection_settings.html:14
 msgid "Short title"
 msgstr ""
 
-#: appli/templates/v2/collection/settings.html:24
-#, fuzzy
-msgid "External Id"
-msgstr "额外的"
-
 #: appli/templates/v2/collection/settings.html:27
-msgid "External Id System"
+#: appli/templates/v2/help/_help_collection_settings.html:15
+msgid "Digital Object Identifier"
 msgstr ""
 
-#: appli/templates/v2/collection/settings.html:41
-#, fuzzy
-msgid "select a project"
-msgstr "新项目"
-
-#: appli/templates/v2/collection/settings.html:51
-msgid "Users and organisations"
-msgstr ""
-
-#: appli/templates/v2/collection/settings.html:54
+#: appli/templates/v2/collection/settings.html:31
 msgid "select a provider user"
 msgstr ""
 
-#: appli/templates/v2/collection/settings.html:59
+#: appli/templates/v2/collection/settings.html:36
+#: appli/templates/v2/help/_help_collection_settings.html:20
 #, fuzzy
 msgid "Contact user"
 msgstr "联系"
 
-#: appli/templates/v2/collection/settings.html:60
+#: appli/templates/v2/collection/settings.html:37
 #, fuzzy
 msgid "select a contact user"
 msgstr "选取一个分类"
 
-#: appli/templates/v2/collection/settings.html:65
+#: appli/templates/v2/collection/settings.html:44
+#: appli/templates/v2/collection/settings.html:54
 #, fuzzy
-msgid "Creator users"
-msgstr "创建一个项目"
-
-#: appli/templates/v2/collection/settings.html:66
-#: appli/templates/v2/collection/settings.html:80
-#, fuzzy
-msgid "select a user"
+msgid "select a user or organisation"
 msgstr "选取一个分类"
 
-#: appli/templates/v2/collection/settings.html:72
-msgid "Creator organisations"
-msgstr ""
-
-#: appli/templates/v2/collection/settings.html:73
-#: appli/templates/v2/collection/settings.html:88
+#: appli/templates/v2/collection/settings.html:84
 #, fuzzy
-msgid "select an organisation"
-msgstr "选取一个分类"
+msgid "Add or remove projects"
+msgstr "如何创建项目"
 
-#: appli/templates/v2/collection/settings.html:79
-msgid "Associate users"
-msgstr ""
-
-#: appli/templates/v2/collection/settings.html:87
-msgid "Associate organisations"
-msgstr ""
-
-#: appli/templates/v2/collection/settings.html:95
+#: appli/templates/v2/collection/settings.html:85
 #, fuzzy
-msgid "Descriptions"
-msgstr "描述"
+msgid "Select projects"
+msgstr "新项目"
 
-#: appli/templates/v2/collection/settings.html:105
-#: appli/templates/v2/project/_stats.html:24
-#: appli/templates/v2/project/projectsettings.html:52
-msgid "Description"
-msgstr "描述"
+#: appli/templates/v2/collection/settings.html:92
+msgid "Aggregated projects properties"
+msgstr ""
 
-#: appli/templates/v2/collection/settings.html:112
+#: appli/templates/v2/collection/settings.html:93
+msgid "Display aggregated projects properties"
+msgstr ""
+
+#: appli/templates/v2/collection/settings.html:96
 #, fuzzy
 msgid "Cancel, back to collection list "
 msgstr "取消，返回项目 "
 
+#: appli/templates/v2/guests/_guest.html:11
+#: appli/templates/v2/users/_user.html:35
+#, fuzzy
+msgid "First name"
+msgstr "已导入"
+
+#: appli/templates/v2/guests/_guest.html:11
+#: appli/templates/v2/users/_user.html:35
+#, fuzzy
+msgid "Last name"
+msgstr "名称"
+
+#: appli/templates/v2/guests/_guest.html:19
+#: appli/templates/v2/organizations/_organization.html:7
+#: appli/templates/v2/users/_user.html:50
+#, fuzzy
+msgid "a name is required"
+msgstr "需要一个标题"
+
+#: appli/templates/v2/guests/_guest.html:23
+#: appli/templates/v2/users/_user.html:54
+#, fuzzy
+msgid "an email is required"
+msgstr "需要一个标题"
+
+#: appli/templates/v2/guests/_guest.html:32
+#: appli/templates/v2/help/_help_user_profile.html:7
+#: appli/templates/v2/users/_user.html:65
+msgid "ORCID"
+msgstr ""
+
+#: appli/templates/v2/guests/_guest.html:41
+#: appli/templates/v2/users/_user.html:90
+msgid "Account info"
+msgstr ""
+
+#: appli/templates/v2/guests/_guest.html:47
+#: appli/templates/v2/organizations/_organization.html:14
+#, fuzzy
+msgid "Cancel, back to guests list"
+msgstr "取消，返回项目 "
+
+#: appli/templates/v2/help/_help_collection_settings.html:4
+#, fuzzy
+msgid "Collection settings"
+msgstr "项目设置"
+
+#: appli/templates/v2/help/_help_collection_settings.html:6
+#, fuzzy
+msgid "Definition of a collection"
+msgstr "新项目"
+
+#: appli/templates/v2/help/_help_collection_settings.html:8
+#: appli/templates/v2/help/_help_projectsettings.html:8
+msgid ""
+"A project is the data management unit of EcoTaxa: it is where you import "
+"data and list who can access and classify objects.<br>\n"
+"  The first data import will determine which metadata fields  are "
+"associated with each object. Those will stay the same for all  objects of"
+" the project and for all subsequent imports."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:10
+#: appli/templates/v2/help/_help_projectsettings.html:10
+msgid ""
+"A project must therefore contain images taken with the  same instrument, "
+"with the same list of metadata fields. It typically  corresponds to "
+"deployments of that instrument on a scientific cruise or  along a time "
+"series.<br> Within the project, objects are further grouped in  samples, "
+"identified in the imported data; samples typically correspond  to a "
+"station or a time point in a time series.<br>\n"
+"  For EcoTaxa to be most efficient, projects should contain from 10,000 "
+"to a million objects, which usually means many samples."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:12
+#: appli/templates/v2/help/_help_projectsettings.html:12
+msgid ""
+"A project must therefore contain images taken with the same instrument,  "
+"with the same list of metadata fields.<br> It typically corresponds to  "
+"deployments of the same sampling or imaging device on a scientific  "
+"cruise or along a time series. Within the project, objects are further  "
+"grouped in samples, identified in the imported data; samples typically  "
+"correspond to a station or a time point in a time series."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:14
+msgid ""
+"The short title will be used as the universal and permanent url of the "
+"collection. As many other fields, it cannot be changed once the "
+"collection is published and a Digital Object Identifier is added."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:15
+msgid ""
+"Once you publish your collection, you can get a Digital Object Identifier"
+" (GBIF provides them for example). Once you have one and fill it here, "
+"some aspects of the collection will be locked to ensure that it can "
+"always be found and continues to match the DOI."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:18
+msgid "Person who is responsible for the content of this metadata record."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:20
+msgid ""
+" Name of the person that should be contacted by a user of the data to "
+"obtain more information about the dataset."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:23
+#: appli/templates/v2/help/_help_collection_settings.html:30
+#: appli/templates/v2/help/_help_projectsettings.html:26
+msgid ""
+"Any technical, practical details that need to be shared with other users "
+"able to access this target_proj."
+msgstr "可填写需要与能够访问此目标项目的其他用户共享的任何技术和实用细节。"
+
+#: appli/templates/v2/help/_help_collection_settings.html:25
+#: appli/templates/v2/help/_help_project_stats.html:24
+#: appli/templates/v2/help/_help_projectsettings.html:28
+msgid ""
+"SCN Network used for prediction, if you change it, existing features "
+"computed with this network will be\n"
+"    erased.\n"
+"    <br>New features will be recomputed during the next automatic "
+"classification."
+msgstr ""
+"用于预测的SCN网络，如果您更改它，则使用该网络计算的现有特征将被\n"
+"    删除。\n"
+"    <br>新的特征将在下一次自动分类中重新计算。"
+
+#: appli/templates/v2/help/_help_collection_settings.html:32
+msgid "."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:34
+#, fuzzy
+msgid "Creator"
+msgstr "阅读更多"
+
+#: appli/templates/v2/help/_help_collection_settings.html:35
+msgid ""
+"Name of persons or organisations who are responsible for the creation / "
+"maintenance of the dataset. These persons will be mentioned in the "
+"citation."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:37
+msgid "Associate"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:38
+msgid ""
+"Name of persons or organisations who are responsible for the creation / "
+"maintenance of the dataset but to an extent that does not justify their "
+"inclusions as authors. These persons will not be mentioned in the "
+"citation."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:39
+msgid ""
+"List of projects id. The collection projects share somme common "
+"properties:"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:40
+msgid ""
+"The creator or editor has to be a manager of all the projects of the "
+"collection."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:41
+#, fuzzy
+msgid "The projects have the same instrument."
+msgstr "项目必须有标题和设备"
+
+#: appli/templates/v2/help/_help_collection_settings.html:41
+msgid "The projects share the same access property."
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:43
+msgid "Aggregated properties"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:44
+msgid "Display of the collection projects common properties:"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:45
+msgid "Privileges with lower common role"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:45
+msgid "Lower common status"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:45
+msgid "Lower common access"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:46
+msgid "Common taxonomy presets"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:46
+msgid "Common sorting tools"
+msgstr ""
+
+#: appli/templates/v2/help/_help_collection_settings.html:46
+#, fuzzy
+msgid "Common deep features extractor"
+msgstr "深度特征提取器"
+
+#: appli/templates/v2/help/_help_collection_settings.html:46
+msgid "Common imported columns"
+msgstr ""
+
+#: appli/templates/v2/help/_help_detail_project_formulae.html:1
+msgid ""
+"Transitory: How to get values from DB free columns. Python syntax, "
+"prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are "
+"'total_water_volume', 'subsample_coef' and 'individual_volume' "
+msgstr ""
+
+#: appli/templates/v2/help/_help_detail_project_formulae.html:2
+#, fuzzy
+msgid "example:"
+msgstr "名称"
+
 #: appli/templates/v2/help/_help_job_export.html:4
-#: appli/templates/v2/jobs/export.html:38
-#: appli/templates/v2/partials/_navbar.html:40
+#: appli/templates/v2/jobs/export.html:36
+#: appli/templates/v2/partials/_collection_nav.html:33
+#: appli/templates/v2/partials/_project_nav.html:46
 #, fuzzy
 msgid "Export"
 msgstr "导入"
 
 #: appli/templates/v2/help/_help_job_export.html:5
-#: appli/templates/v2/jobs/export.html:40
+#: appli/templates/v2/jobs/collection_darwincore_export.html:38
+#: appli/templates/v2/jobs/export.html:38
 msgid "Global export rules"
 msgstr ""
 
@@ -2063,83 +2656,100 @@ msgstr ""
 msgid "times are in format <strong>hh:mm:ss</strong>"
 msgstr ""
 
-#: appli/templates/v2/help/_help_job_export.html:12
-msgid ""
-"If chosen will not take into account other parameters, except out to ftp "
-"choice."
-msgstr ""
-
 #: appli/templates/v2/help/_help_job_export.html:13
 msgid ""
 "Add in ZIP first (i.e. visible) image, all images, or no image.⚠️ \"all\""
 " means maybe several lines per object in TSVs."
 msgstr ""
 
-#: appli/templates/v2/help/_help_job_export.html:16
+#: appli/templates/v2/help/_help_job_export.html:15
+msgid "Collection general export produces a single TSV file."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:18
 msgid "Backup export, for restoring or archiving."
 msgstr ""
 
-#: appli/templates/v2/help/_help_job_export.html:16
+#: appli/templates/v2/help/_help_job_export.html:18
 msgid ""
 "All images, split by sample, add an EcoTaxa-compatible second line with "
 "types"
 msgstr ""
 
-#: appli/templates/v2/help/_help_job_export.html:20
+#: appli/templates/v2/help/_help_job_export.html:19
+msgid ""
+"Collection backup export produces a single zip file containing each "
+"project backup export zip file belonging to the collection."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:23
 msgid "if summarise_by = sample or acquisition"
-msgstr ""
-
-#: appli/templates/v2/help/_help_job_export.html:20
-#: appli/templates/v2/help/_help_job_export.html:21
-msgid "(NB = acq_orig_id = celle pour le user)"
-msgstr ""
-
-#: appli/templates/v2/help/_help_job_export.html:21
-msgid "if summarise_by = acquisition"
 msgstr ""
 
 #: appli/templates/v2/help/_help_job_export.html:23
 #: appli/templates/v2/help/_help_job_export.html:24
-#: appli/templates/v2/help/_help_job_export.html:25
-msgid " if chosen "
+msgid "(NB = acq_orig_id = celle pour le user)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:24
+msgid "if summarise_by = acquisition"
 msgstr ""
 
 #: appli/templates/v2/help/_help_job_export.html:26
-msgid "Abundance is always possible."
+#: appli/templates/v2/help/_help_job_export.html:27
+#: appli/templates/v2/help/_help_job_export.html:28
+msgid " if chosen "
 msgstr ""
 
 #: appli/templates/v2/help/_help_job_export.html:28
-msgid ""
-"Transitory: How to get values from DB free columns. Python syntax, "
-"prefixes are 'sam', 'ssm' and 'obj'.Variables used in computations are "
-"'total_water_volume', 'subsample_coef' and 'individual_volume' "
+msgid "Collection summary export produces a single TSV file."
 msgstr ""
 
 #: appli/templates/v2/help/_help_job_export.html:29
-#, fuzzy
-msgid "example:"
-msgstr "名称"
+#: appli/templates/v2/help/_help_job_export.html:42
+msgid "Abundance is always possible."
+msgstr ""
 
-#: appli/templates/v2/help/_help_job_export.html:33
+#: appli/templates/v2/help/_help_job_export.html:31
+#: appli/templates/v2/help/_help_job_export.html:44
 msgid "Mapping from present taxon (key) to output replacement one (value)"
 msgstr ""
 
-#: appli/templates/v2/help/_help_job_export.html:33
+#: appli/templates/v2/help/_help_job_export.html:31
+#: appli/templates/v2/help/_help_job_export.html:44
 msgid "Use a 0 replacement to _discard_ the present taxon."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:36
+msgid "Collection classification export produces a single TSV file."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:38
+msgid "DarwinCore Export"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:40
+msgid ""
+"Export data ready to be published in DarwinCore archive format, OBIS or "
+"GBIF."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_export.html:41
+msgid "Export taxa with zero occurences (default)."
 msgstr ""
 
 #: appli/templates/v2/help/_help_job_import.html:4
 #: appli/templates/v2/jobs/_import_box.html:22
 #: appli/templates/v2/jobs/_import_form.html:26
-#: appli/templates/v2/jobs/import.html:34
-#: appli/templates/v2/partials/_navbar.html:37
+#: appli/templates/v2/jobs/import.html:65
+#: appli/templates/v2/partials/_project_nav.html:34
 #: appli/templates/v2/project/_headerimport.html:6
 msgid "Import"
 msgstr "导入"
 
 #: appli/templates/v2/help/_help_job_import.html:5
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:3
-#: appli/templates/v2/project/_listcontainer.html:6
+#: appli/templates/v2/project/_listcontainer.html:7
 msgid "How to prepare data"
 msgstr "如何准备数据"
 
@@ -2149,22 +2759,92 @@ msgid ""
 "   zooprocess"
 msgstr ""
 
+#: appli/templates/v2/help/_help_job_import.html:36
+#, fuzzy
+msgid "General import"
+msgstr "导入"
+
 #: appli/templates/v2/help/_help_job_import.html:37
+msgid "Import images and tsv files"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:38
 msgid "Image Only import"
 msgstr ""
 
-#: appli/templates/v2/help/_help_job_import.html:39
+#: appli/templates/v2/help/_help_job_import.html:40
 msgid ""
 "If you have only image and no data file you can use the simple import "
 "here."
 msgstr ""
 
-#: appli/templates/v2/help/_help_job_import.html:40
+#: appli/templates/v2/help/_help_job_import.html:41
 msgid "Re-import and Update Metadata"
 msgstr ""
 
-#: appli/templates/v2/help/_help_job_import.html:42
+#: appli/templates/v2/help/_help_job_import.html:43
 msgid "If you have already loaded your images and you want update your metadata."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:44
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:1
+msgid "Optional taxonomy mapping"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:45
+msgid ""
+"This allows to change the name of the categories of previously classified"
+" objects to match the names in the UniEuk taxonomic framework included in"
+" the application."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:46
+msgid "Examples:"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:46
+msgid "crust_cop = Copepoda"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:46
+msgid "gelatinous medusae = Cnidaria (Hydrozoa)"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:47
+#: appli/templates/v2/jobs/import.html:89
+#: appli/templates/v2/my_files/list.html:7
+#: appli/templates/v2/partials/_navuser.html:18
+#, fuzzy
+msgid "My Files"
+msgstr "图像文件"
+
+#: appli/templates/v2/help/_help_job_import.html:47
+msgid ""
+"My Files is your storage space on the EcoTaxa server. From your computer,"
+" you can upload folders and files to this storage space using the "
+"\"browse directories\" and \"browse files\" buttons, or by dragging and "
+"dropping. Once uploaded, folders can be imported into your project by "
+"clicking the \"select to import\" button.\n"
+"  If the import was successful the directory is moved to trash."
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:49
+msgid "Get full help about"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:49
+msgid "Full help about My Files"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:50
+msgid "Import from FTP or Server"
+msgstr ""
+
+#: appli/templates/v2/help/_help_job_import.html:50
+msgid ""
+"Contact the project manager to know where and how to upload your data. "
+"Once the import is complete, all data folders/files can be safely erased "
+"on the server."
 msgstr ""
 
 #: appli/templates/v2/help/_help_job_monitor.html:4
@@ -2334,13 +3014,13 @@ msgstr "经度"
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:52
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:61
-#: appli/templates/v2/help/_help_jobs_prepare_data.html:62
-msgid "YYYYMMDD"
-msgstr "YYYYMMDD"
+msgid "UTC date, ISO8601 <strong>YYYY-MM-DD</strong> (or YYYYMMDD"
+msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:53
-msgid "HHMMSS"
-msgstr "HHMMSS"
+#: appli/templates/v2/help/_help_jobs_prepare_data.html:62
+msgid "UTC time, ISO8601 <strong>HH:MM:SS</strong> (or HHMMSS"
+msgstr ""
 
 #: appli/templates/v2/help/_help_jobs_prepare_data.html:54
 msgid "minimum depth of object"
@@ -2523,9 +3203,7 @@ msgid "Browser compatibility: "
 msgstr ""
 
 #: appli/templates/v2/help/_help_my_files.html:4
-msgid ""
-"Chrome 86, Edge 86, Firefox 111, Opera 72, Safari 15.2 (si trouvé "
-"alternative à createWritable sinon sortir de la liste)"
+msgid "Chrome 86, Edge 86, Firefox 111, Opera 72"
 msgstr ""
 
 #: appli/templates/v2/help/_help_my_files.html:5
@@ -2567,7 +3245,8 @@ msgstr ""
 #: appli/templates/v2/help/_help_my_files.html:10
 msgid ""
 "Click on the \"new folder\" icon <i class=\"icon icon-folder-plus-"
-"sm\"></i>, a new directory that can be immediately renamed is created."
+"sm\"></i>, a new directory that can be immediately renamed is created. "
+"click ENTER to apply the new name."
 msgstr ""
 
 #: appli/templates/v2/help/_help_my_files.html:12
@@ -2701,17 +3380,17 @@ msgstr ""
 "      列表中。"
 
 #: appli/templates/v2/help/_help_project_stats.html:10
-#: appli/templates/v2/help/_help_projectsettings.html:61
+#: appli/templates/v2/help/_help_projectsettings.html:62
 msgid "Annotators can classify objects."
 msgstr "分类人可以给对象分类。"
 
 #: appli/templates/v2/help/_help_project_stats.html:11
-#: appli/templates/v2/help/_help_projectsettings.html:62
+#: appli/templates/v2/help/_help_projectsettings.html:63
 msgid "Managers can import and delete data, as well as change project settings."
 msgstr "管理人员可以导入和删除数据，以及更改项目设置。"
 
 #: appli/templates/v2/help/_help_project_stats.html:12
-#: appli/templates/v2/help/_help_projectsettings.html:63
+#: appli/templates/v2/help/_help_projectsettings.html:64
 msgid ""
 "The contact person is a Manager, displayed in the project table and "
 "serving as the contact point for other users and EcoTaxa's managers."
@@ -2736,26 +3415,6 @@ msgstr ""
 "    应说明目标生物（如中型浮游动物）、地点（如白令海）、\n"
 "    采集的时间（如2000年至2010年）和方式（如用ZooScan处理浮游生物网样本）、\n"
 "    推动这项工作的科学计划以及由谁来实施（如由法国LOV实验室协调的SCOR计划）"
-
-#: appli/templates/v2/help/_help_project_stats.html:24
-#: appli/templates/v2/help/_help_projectsettings.html:28
-#: appli/templates/v2/project/_stats.html:45
-#: appli/templates/v2/project/projectsettings.html:84
-msgid "Deep feature extractor"
-msgstr "深度特征提取器"
-
-#: appli/templates/v2/help/_help_project_stats.html:24
-#: appli/templates/v2/help/_help_projectsettings.html:28
-msgid ""
-"SCN Network used for prediction, if you change it, existing features "
-"computed with this network will be\n"
-"    erased.\n"
-"    <br>New features will be recomputed during the next automatic "
-"classification."
-msgstr ""
-"用于预测的SCN网络，如果您更改它，则使用该网络计算的现有特征将被\n"
-"    删除。\n"
-"    <br>新的特征将在下一次自动分类中重新计算。"
 
 #: appli/templates/v2/help/_help_project_stats.html:30
 msgid "Used Taxa"
@@ -2790,37 +3449,6 @@ msgstr "项目设置"
 #, fuzzy
 msgid "Definition of a project"
 msgstr "新项目"
-
-#: appli/templates/v2/help/_help_projectsettings.html:8
-msgid ""
-"A project is the data management unit of EcoTaxa: it is where you import "
-"data and list who can access and classify objects.<br>\n"
-"  The first data import will determine which metadata fields  are "
-"associated with each object. Those will stay the same for all  objects of"
-" the project and for all subsequent imports."
-msgstr ""
-
-#: appli/templates/v2/help/_help_projectsettings.html:10
-msgid ""
-"A project must therefore contain images taken with the  same instrument, "
-"with the same list of metadata fields. It typically  corresponds to "
-"deployments of that instrument on a scientific cruise or  along a time "
-"series.<br> Within the project, objects are further grouped in  samples, "
-"identified in the imported data; samples typically correspond  to a "
-"station or a time point in a time series.<br>\n"
-"  For EcoTaxa to be most efficient, projects should contain from 10,000 "
-"to a million objects, which usually means many samples."
-msgstr ""
-
-#: appli/templates/v2/help/_help_projectsettings.html:12
-msgid ""
-"A project must therefore contain images taken with the same instrument,  "
-"with the same list of metadata fields.<br> It typically corresponds to  "
-"deployments of the same sampling or imaging device on a scientific  "
-"cruise or along a time series. Within the project, objects are further  "
-"grouped in samples, identified in the imported data; samples typically  "
-"correspond to a station or a time point in a time series."
-msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:14
 #, fuzzy
@@ -2860,7 +3488,7 @@ msgid ""
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:16
-#: appli/templates/v2/project/projectsettings.html:119
+#: appli/templates/v2/project/projectsettings.html:82
 #, fuzzy
 msgid "Pick sorting fields from other projects"
 msgstr "从其他项目中选择权限"
@@ -2871,7 +3499,7 @@ msgid "Replace sorting fields by sorting fields of another project."
 msgstr "从其他项目中选择权限"
 
 #: appli/templates/v2/help/_help_projectsettings.html:17
-#: appli/templates/v2/project/projectsettings.html:128
+#: appli/templates/v2/project/projectsettings.html:91
 msgid "Pick privileges from other projects"
 msgstr "从其他项目中选择权限"
 
@@ -2889,21 +3517,10 @@ msgid ""
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:26
-#: appli/templates/v2/project/projectsettings.html:57
+#: appli/templates/v2/project/_stats.html:41
+#: appli/templates/v2/project/projectsettings.html:28
 msgid "Comments"
 msgstr "注解"
-
-#: appli/templates/v2/help/_help_projectsettings.html:26
-msgid ""
-"Any technical, practical details that need to be shared with other users "
-"able to access this target_proj."
-msgstr "可填写需要与能够访问此目标项目的其他用户共享的任何技术和实用细节。"
-
-#: appli/templates/v2/help/_help_projectsettings.html:32
-#: appli/templates/v2/project/_stats.html:42
-#: appli/templates/v2/project/projectsettings.html:108
-msgid "Definition of preset for manual sorting"
-msgstr "手动排序的预设定义"
 
 #: appli/templates/v2/help/_help_projectsettings.html:33
 msgid ""
@@ -2957,18 +3574,28 @@ msgstr "该表可以从另一个项目中复制（在不同的选项卡中打开
 msgid "only LOWER CASE"
 msgstr "仅小写"
 
-#: appli/templates/v2/help/_help_projectsettings.html:55
-#: appli/templates/v2/project/_stats.html:28
+#: appli/templates/v2/help/_help_projectsettings.html:53
+msgid "Project access combines the visibility and license of a project."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:54
+#, fuzzy
+msgid "Members only"
+msgstr "米"
+
+#: appli/templates/v2/help/_help_projectsettings.html:56
+#: appli/templates/v2/project/_stats.html:25
+#: appli/templates/v2/project/projectsettings.html:90
 #, fuzzy
 msgid "Privileges"
 msgstr "权限"
 
-#: appli/templates/v2/help/_help_projectsettings.html:56
+#: appli/templates/v2/help/_help_projectsettings.html:57
 #, fuzzy
 msgid "The roles in short"
 msgstr "人员角色介绍如下："
 
-#: appli/templates/v2/help/_help_projectsettings.html:58
+#: appli/templates/v2/help/_help_projectsettings.html:59
 msgid ""
 "Viewers can view the project even when it is private; the project is "
 "listed in their project\n"
@@ -2977,52 +3604,78 @@ msgstr ""
 "浏览者可以查看项目，即使它是私有的；该项目列在项目\n"
 "      列表中。"
 
-#: appli/templates/v2/help/_help_projectsettings.html:66
+#: appli/templates/v2/help/_help_projectsettings.html:67
 msgid "A selected manager contact is required for each project."
 msgstr ""
 
-#: appli/templates/v2/help/_help_projectsettings.html:66
+#: appli/templates/v2/help/_help_projectsettings.html:67
 msgid "A \"Contact\" member cannot be deleted."
 msgstr ""
 
-#: appli/templates/v2/help/_help_projectsettings.html:66
+#: appli/templates/v2/help/_help_projectsettings.html:67
 msgid "Select another contact and modify this member privilege to delete it."
 msgstr ""
 
-#: appli/templates/v2/help/_help_projectsettings.html:67
+#: appli/templates/v2/help/_help_projectsettings.html:68
 msgid "All members in the privileges list must have a privilege checked"
 msgstr ""
 
-#: appli/templates/v2/help/_help_projectsettings.html:68
+#: appli/templates/v2/help/_help_projectsettings.html:69
 msgid "Members with \"Manage\" privilege cannot be deleted."
 msgstr ""
 
-#: appli/templates/v2/help/_help_projectsettings.html:69
+#: appli/templates/v2/help/_help_projectsettings.html:70
 msgid ""
 "The list must at least contain one member with \"Manage\" and \"Contact\""
 " attributes."
 msgstr ""
 
-#: appli/templates/v2/help/_help_projectsettings.html:70
+#: appli/templates/v2/help/_help_projectsettings.html:71
 msgid "privileges are sorted by roles and user name"
 msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:76
+msgid ""
+"List of the project free cols, there are free cols in the object, sample,"
+" acquisition and process sections."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:77
+msgid ""
+"The list display the free column name and its associated column "
+"identifier in the database."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:79
+msgid "List of collections to which the project belongs."
+msgstr ""
+
+#: appli/templates/v2/help/_help_projectsettings.html:79
+#, fuzzy
+msgid "Full help about Collections"
+msgstr "创建一个项目"
+
+#: appli/templates/v2/help/_help_projectsettings.html:80
+#, fuzzy
+msgid "collections."
+msgstr "预测"
 
 #: appli/templates/v2/help/_help_summary.html:4
 msgid "Help Summary"
 msgstr "帮助汇总"
 
-#: appli/templates/v2/help/_help_summary.html:6
+#: appli/templates/v2/help/_help_summary.html:7
 msgid "Download help as doc"
+msgstr ""
+
+#: appli/templates/v2/help/_help_summary.html:7
+msgid "print full help"
 msgstr ""
 
 #: appli/templates/v2/help/_help_user_profile.html:4
 #, fuzzy
 msgid "How to create an account"
 msgstr "如何创建项目"
-
-#: appli/templates/v2/help/_help_user_profile.html:7
-msgid "ORCID"
-msgstr ""
 
 #: appli/templates/v2/help/_help_user_profile.html:7
 msgid ""
@@ -3045,9 +3698,13 @@ msgstr "创建您的EcoTaxa账户"
 msgid "readmore"
 msgstr "阅读更多"
 
-#: appli/templates/v2/help/_layout.html:27
+#: appli/templates/v2/help/_layout.html:28
 msgid "Help summary"
 msgstr "帮助汇总"
+
+#: appli/templates/v2/help/_layout.html:36
+msgid "New features are marked with a green dot"
+msgstr ""
 
 #: appli/templates/v2/help/index.html:3
 msgid "Not available for now."
@@ -3063,56 +3720,26 @@ msgstr ""
 msgid "jobs cleaned"
 msgstr ""
 
+#: appli/templates/v2/jobs/_collection_final_download.html:1
 #: appli/templates/v2/jobs/_final_download.html:1
 #, fuzzy
 msgid "Get file"
 msgstr "图像文件"
 
-#: appli/templates/v2/jobs/_import_advanced_options.html:2
-msgid "Advanced options"
+#: appli/templates/v2/jobs/_collection_job_final.html:3
+#: appli/templates/v2/jobs/_job_final.html:4
+msgid "FORCE Delete of "
 msgstr ""
 
-#: appli/templates/v2/jobs/_import_advanced_options.html:4
-msgid "Optional taxonomy mapping"
-msgstr ""
-
-#: appli/templates/v2/jobs/_import_advanced_options.html:5
-msgid ""
-"This allows to change the name of the categories of previously classified"
-" objects to match the names in the UniEuk taxonomic framework included in"
-" the application."
-msgstr ""
-
-#: appli/templates/v2/jobs/_import_advanced_options.html:6
-msgid "Examples:"
-msgstr ""
-
-#: appli/templates/v2/jobs/_import_advanced_options.html:6
-msgid "crust_cop = Copepoda"
-msgstr ""
-
-#: appli/templates/v2/jobs/_import_advanced_options.html:6
-msgid "gelatinous medusae = Cnidaria (Hydrozoa) "
-msgstr ""
-
-#: appli/templates/v2/jobs/_import_advanced_options.html:8
+#: appli/templates/v2/jobs/_collection_job_final.html:3
 #, fuzzy
-msgid "Imported name"
-msgstr "已导入"
+msgid "and back to collection"
+msgstr "取消，返回项目 "
 
-#: appli/templates/v2/jobs/_import_advanced_options.html:8
-#, fuzzy
-msgid "imported name"
-msgstr "已导入"
-
-#: appli/templates/v2/jobs/_import_advanced_options.html:11
-msgid "taxo pick"
+#: appli/templates/v2/jobs/_collection_job_final.html:4
+#: appli/templates/v2/jobs/_job_final.html:5
+msgid "no danger for the original database"
 msgstr ""
-
-#: appli/templates/v2/jobs/_import_advanced_options.html:13
-#, fuzzy
-msgid "taxonomy"
-msgstr "分类法"
 
 #: appli/templates/v2/jobs/_import_box.html:9
 #: appli/templates/v2/jobs/_import_form.html:11
@@ -3137,12 +3764,17 @@ msgstr "图像文件"
 msgid "TSV files only"
 msgstr ""
 
-#: appli/templates/v2/jobs/_import_options.html:3
-msgid "Skip <code>tsv</code> files that have already been imported"
+#: appli/templates/v2/jobs/_import_final.html:1
+msgid "Data correctly imported from "
 msgstr ""
 
-#: appli/templates/v2/jobs/_import_options.html:8
-msgid "Skip objects that have already been imported"
+#: appli/templates/v2/jobs/_import_final.html:2
+#: appli/templates/v2/jobs/_prediction_final.html:1
+msgid "Go to Manual Classification Screen"
+msgstr ""
+
+#: appli/templates/v2/jobs/_import_final.html:3
+msgid "Go to Automatic Classification Screen"
 msgstr ""
 
 #: appli/templates/v2/jobs/_import_question.html:9
@@ -3189,22 +3821,10 @@ msgid ""
 "        created category."
 msgstr ""
 
-#: appli/templates/v2/jobs/_job_final.html:3
-msgid "FORCE Delete of "
-msgstr ""
-
-#: appli/templates/v2/jobs/_job_final.html:3
-#, fuzzy
-msgid "and back to project"
-msgstr "取消，返回项目 "
-
 #: appli/templates/v2/jobs/_job_final.html:4
-msgid "no danger for the original database"
-msgstr ""
-
-#: appli/templates/v2/jobs/_prediction_final.html:1
-msgid "Go to Manual Classification Screen"
-msgstr ""
+#, fuzzy
+msgid "and back to "
+msgstr "取消，返回项目 "
 
 #: appli/templates/v2/jobs/_subset_final.html:1
 #, fuzzy
@@ -3225,90 +3845,132 @@ msgstr "显示所有项目"
 msgid "Total TSV"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:28
-#: appli/templates/v2/jobs/export.html:29
+#: appli/templates/v2/jobs/collection_darwincore_export.html:26
+#: appli/templates/v2/jobs/collection_darwincore_export.html:27
+#: appli/templates/v2/jobs/export.html:26
+#: appli/templates/v2/jobs/export.html:27
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:2
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:9
 msgid "Add mapping"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:28
+#: appli/templates/v2/jobs/collection_darwincore_export.html:26
+#: appli/templates/v2/jobs/export.html:26
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:2
 msgid "select values to replace"
 msgstr ""
 
-#: appli/templates/v2/jobs/export.html:28
+#: appli/templates/v2/jobs/collection_darwincore_export.html:26
+#: appli/templates/v2/jobs/export.html:26
 #: appli/templates/v2/jobs/subset_create.html:18
 #: appli/templates/v2/project/merge.html:31
 #, fuzzy
 msgid "Select"
 msgstr "选择"
 
-#: appli/templates/v2/jobs/export.html:29
+#: appli/templates/v2/jobs/collection_darwincore_export.html:27
+#: appli/templates/v2/jobs/export.html:27
 #, fuzzy
 msgid "replace_by"
 msgstr "更换"
 
-#: appli/templates/v2/jobs/export.html:39
+#: appli/templates/v2/jobs/collection_darwincore_export.html:37
+#: appli/templates/v2/jobs/export.html:37
 #, fuzzy
 msgid "How to export data"
 msgstr "如何准备数据"
 
-#: appli/templates/v2/jobs/export.html:52
+#: appli/templates/v2/jobs/collection_darwincore_export.html:50
+#: appli/templates/v2/jobs/export.html:50
+#: appli/templates/v2/jobs/import.html:107
 #: appli/templates/v2/jobs/subset_create.html:47
 #, fuzzy
 msgid "Start Task"
 msgstr "状态"
 
-#: appli/templates/v2/jobs/import.html:6
+#: appli/templates/v2/jobs/import.html:20
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:5
+msgid "taxo pick"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:22
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:7
+#, fuzzy
+msgid "taxonomy"
+msgstr "分类法"
+
+#: appli/templates/v2/jobs/import.html:33
+msgid "Advanced options"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:57
+#: appli/templates/v2/jobs/import.html:68
+#, fuzzy
+msgid "select to import"
+msgstr "导入"
+
+#: appli/templates/v2/jobs/import.html:66
 #, fuzzy
 msgid "How to import data"
 msgstr "如何准备数据"
 
-#: appli/templates/v2/jobs/import.html:7
-msgid "Select from My Files"
-msgstr ""
-
-#: appli/templates/v2/jobs/import.html:9
-msgid "Select from my files"
-msgstr ""
-
-#: appli/templates/v2/jobs/import.html:10
-msgid "Select a file or a directory to import"
-msgstr ""
-
-#: appli/templates/v2/jobs/import.html:12
+#: appli/templates/v2/jobs/import.html:68
 #, fuzzy
-msgid "File to import"
+msgid "selected to import"
 msgstr "导入"
 
-#: appli/templates/v2/jobs/import.html:15
-msgid "Or choose a folder or zip file on the server"
+#: appli/templates/v2/jobs/import.html:89
+#: appli/templates/v2/my_files/_list.html:1
+msgid "upload"
 msgstr ""
 
-#: appli/templates/v2/jobs/import.html:17
-msgid "Choose a folder or zip file on the server"
+#: appli/templates/v2/jobs/import.html:89
+msgid "Browse directories"
 msgstr ""
 
-#: appli/templates/v2/jobs/import.html:24
+#: appli/templates/v2/jobs/import.html:89
+#, fuzzy
+msgid "Browse files"
+msgstr "剖面"
+
+#: appli/templates/v2/jobs/import.html:89
+#: appli/templates/v2/my_files/_list.html:1
+msgid "or Drop Files or Directories Here"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:89
+#: appli/templates/v2/my_files/_list.html:1
+msgid "Add entire folder(s) or compressed folder(s)"
+msgstr ""
+
+#: appli/templates/v2/jobs/import.html:96
 #, fuzzy
 msgid "Contact the"
 msgstr "联系"
 
-#: appli/templates/v2/jobs/import.html:24
+#: appli/templates/v2/jobs/import.html:96
 #, fuzzy
 msgid "project manager"
 msgstr "项目"
 
-#: appli/templates/v2/jobs/import.html:24
+#: appli/templates/v2/jobs/import.html:96
 msgid "to know where and how to upload your data."
 msgstr ""
 
-#: appli/templates/v2/jobs/import.html:25
+#: appli/templates/v2/jobs/import.html:97
 msgid ""
 "Once the import is complete, all data folders/files can be safely erased "
 "on the server."
 msgstr ""
 
 #: appli/templates/v2/jobs/jobcleaned.html:7
-#: appli/templates/v2/jobs/show.html:40
+#: appli/templates/v2/jobs/show.html:42
+#, fuzzy
+msgid "Back to collection"
+msgstr "取消，返回项目 "
+
+#: appli/templates/v2/jobs/jobcleaned.html:9
+#: appli/templates/v2/jobs/show.html:43
 #: appli/templates/v2/project/massannotation.html:102
 #: appli/templates/v2/project/resettopredicted.html:31
 #, fuzzy
@@ -3363,20 +4025,20 @@ msgstr ""
 msgid "Task type"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:49 appli/templates/v2/jobs/show.html:54
+#: appli/templates/v2/jobs/listall.html:49 appli/templates/v2/jobs/show.html:57
 msgid "Owner"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:50 appli/templates/v2/jobs/show.html:58
+#: appli/templates/v2/jobs/listall.html:50 appli/templates/v2/jobs/show.html:65
 #, fuzzy
 msgid "State"
 msgstr "注释"
 
-#: appli/templates/v2/jobs/listall.html:51 appli/templates/v2/jobs/show.html:70
+#: appli/templates/v2/jobs/listall.html:51 appli/templates/v2/jobs/show.html:77
 msgid "Step"
 msgstr ""
 
-#: appli/templates/v2/jobs/listall.html:53 appli/templates/v2/jobs/show.html:79
+#: appli/templates/v2/jobs/listall.html:53 appli/templates/v2/jobs/show.html:86
 msgid "Message"
 msgstr ""
 
@@ -3478,71 +4140,75 @@ msgstr ""
 msgid "Next: Choose objects in selected projects"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:32
+#: appli/templates/v2/jobs/show.html:33
 msgid ""
 "This task has errors. Check the error messages below, fix these errors, "
-"go back to your project and restart\n"
-"        your job."
+"go back to your project and restart your job."
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:38
+#: appli/templates/v2/jobs/show.html:40
 msgid "Clean task data"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:39
+#: appli/templates/v2/jobs/show.html:41
 msgid "Back to tasks list"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:46
+#: appli/templates/v2/jobs/show.html:49
 msgid "Task ID"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:50
+#: appli/templates/v2/jobs/show.html:53
 msgid "Class"
 msgstr ""
 
 #: appli/templates/v2/jobs/show.html:61
+#, fuzzy
+msgid "Object"
+msgstr "新项目"
+
+#: appli/templates/v2/jobs/show.html:66
 msgid " waiting for an answer"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:61
+#: appli/templates/v2/jobs/show.html:68
 msgid "Go"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:64
+#: appli/templates/v2/jobs/show.html:71
 msgid "Force restart"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:74
+#: appli/templates/v2/jobs/show.html:81
 msgid "Progress"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:80 appli/templates/v2/jobs/show.html:88
+#: appli/templates/v2/jobs/show.html:87 appli/templates/v2/jobs/show.html:95
 msgid "Hide"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:80
+#: appli/templates/v2/jobs/show.html:87
 #, fuzzy
 msgid " all errors"
 msgstr "显示所有项目"
 
-#: appli/templates/v2/jobs/show.html:88
+#: appli/templates/v2/jobs/show.html:95
 msgid "internal details"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:90
+#: appli/templates/v2/jobs/show.html:97
 msgid "Input Parameters"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:94
+#: appli/templates/v2/jobs/show.html:101
 msgid "Question Data"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:98
+#: appli/templates/v2/jobs/show.html:105
 msgid "Answer Data"
 msgstr ""
 
-#: appli/templates/v2/jobs/show.html:102
+#: appli/templates/v2/jobs/show.html:109
 msgid "View log file"
 msgstr ""
 
@@ -3616,7 +4282,7 @@ msgstr ""
 msgid "home-captcha-response"
 msgstr ""
 
-#: appli/templates/v2/macros/macros.html:38
+#: appli/templates/v2/macros/macros.html:37
 msgid "Please wait ..."
 msgstr "请等待..."
 
@@ -3658,37 +4324,77 @@ msgid " error no user "
 msgstr ""
 
 #: appli/templates/v2/my_files/_list.html:1
-msgid "upload"
-msgstr ""
-
-#: appli/templates/v2/my_files/_list.html:1
-msgid "Browse directories"
+msgid "Browse local directories"
 msgstr ""
 
 #: appli/templates/v2/my_files/_list.html:1
 #, fuzzy
-msgid "Browse files"
+msgid "Browse local files"
 msgstr "剖面"
 
 #: appli/templates/v2/my_files/_list.html:1
-msgid "or Drop Files or Directories Here"
-msgstr ""
-
-#: appli/templates/v2/my_files/_list.html:1
-#: appli/templates/v2/my_files/list.html:7
-#: appli/templates/v2/partials/_navuser.html:18
 #, fuzzy
-msgid "My Files"
-msgstr "图像文件"
+msgid "My remote Files"
+msgstr "剖面"
 
-#: appli/templates/v2/my_files/_list.html:1
-msgid "Add entire folder(s) or compressed folder(s)"
+#: appli/templates/v2/organizations/_organization.html:9
+#: appli/templates/v2/organizations/_organization.html:10
+msgid "EDMO ID"
 msgstr ""
 
 #: appli/templates/v2/partials/_alert_message.html:11
 #, fuzzy
 msgid "close"
 msgstr "关闭"
+
+#: appli/templates/v2/partials/_collection_nav.html:29
+#: appli/templates/v2/partials/_project_nav.html:30
+#, fuzzy
+msgid "Predict"
+msgstr "预测"
+
+#: appli/templates/v2/partials/_collection_nav.html:36
+msgid "DarwinCore"
+msgstr ""
+
+#: appli/templates/v2/partials/_collection_nav.html:39
+#: appli/templates/v2/partials/_project_nav.html:36
+#: appli/templates/v2/partials/_project_nav.html:48
+msgid "General"
+msgstr ""
+
+#: appli/templates/v2/partials/_collection_nav.html:41
+#: appli/templates/v2/partials/_project_nav.html:50
+msgid "Backup"
+msgstr ""
+
+#: appli/templates/v2/partials/_collection_nav.html:43
+#: appli/templates/v2/partials/_project_nav.html:52
+#, fuzzy
+msgid "Summary"
+msgstr "帮助汇总"
+
+#: appli/templates/v2/partials/_collection_nav.html:45
+#: appli/templates/v2/partials/_project_nav.html:54
+msgid "Classification"
+msgstr ""
+
+#: appli/templates/v2/partials/_collection_nav.html:50
+#: appli/templates/v2/partials/_project_nav.html:59
+msgid "Tools"
+msgstr ""
+
+#: appli/templates/v2/partials/_collection_nav.html:56
+#: appli/templates/v2/partials/_footer.html:13
+#: appli/templates/v2/partials/_project_nav.html:71
+#: appli/templates/v2/project/_fullstats.html:68
+msgid "About"
+msgstr "关于"
+
+#: appli/templates/v2/partials/_collection_nav.html:60
+#, fuzzy
+msgid "collections list"
+msgstr "预测"
 
 #: appli/templates/v2/partials/_error.html:5
 msgid "error"
@@ -3706,12 +4412,6 @@ msgstr ""
 msgid "Current language is"
 msgstr ""
 
-#: appli/templates/v2/partials/_footer.html:13
-#: appli/templates/v2/partials/_navbar.html:63
-#: appli/templates/v2/project/_fullstats.html:68
-msgid "About"
-msgstr "关于"
-
 #: appli/templates/v2/partials/_index.html:6
 #, fuzzy
 msgid "Explore images"
@@ -3719,19 +4419,15 @@ msgstr "图像文件"
 
 #: appli/templates/v2/partials/_index.html:8
 msgid ""
-"As a visitor, you have free access to the specimens that have been "
-"already identified by taxonomist experts."
+"As a visitor, you have free access to a subset of the images that have "
+"been already identified by users."
 msgstr ""
 
 #: appli/templates/v2/partials/_index.html:9
 msgid ""
-"You can explore the database by navigating along the UniEuk taxonomic "
-"tree which aims at unifying taxonomic names and tree according to "
-"reliable and curated molecular phylogenies. It encompasses the whole "
-"Eukaryotic and Prokaryotic lineages (Viruses coming soon) that have been "
-"molecularly described. Then images can be filtered according to several "
-"sample criteria: geographic location, depth, date and time of sampling, "
-"and imaging instrument."
+" Images can be filtered according to several criteria: taxonomy, "
+"geographic location, depth, date and time of sampling, and imaging "
+"instrument."
 msgstr ""
 
 #: appli/templates/v2/partials/_index.html:13
@@ -3741,133 +4437,135 @@ msgstr "创建一个项目"
 
 #: appli/templates/v2/partials/_index.html:15
 msgid ""
-"As a scientist, you can contribute to the richness of this image database"
-" and/or to the collaborative taxonomic annotation effort. Images are "
-"organised in projects which should be consistent in terms of sampling and"
-" imaging techniques. We provide tools to support the annotation of large "
-"image datasets by supervised machine learning prediction."
+"You can contribute to the richness of this image database and/or to the "
+"collaborative taxonomic annotation effort.Images are organised in "
+"projects which should be consistent in terms of sampling and imaging "
+"techniques.  We provide tools to support the quick annotation of large "
+"image datasets, such as supervised machine learning prediction and visual"
+" similarity search."
 msgstr ""
 
 #: appli/templates/v2/partials/_index.html:19
-msgid "Particle module"
+#, fuzzy
+msgid "Browse the collections"
+msgstr "如何创建项目"
+
+#: appli/templates/v2/partials/_index.html:19
+#: appli/templates/v2/project/projectsettings.html:31
+#: appli/templates/v2/project/projectsettings.html:59
+#: appli/templates/v2/project/projectsettings.html:125
+#: appli/templates/v2/project/projectsettings.html:132
+msgid "new"
 msgstr ""
 
 #: appli/templates/v2/partials/_index.html:21
 msgid ""
-"The PARTICLE module of ECOTAXA is designed to host data from the "
-"Underwater Vision Profiler (UVP) and the LIIST instruments."
+"A collection is a set of similar projects that can be explored together "
+"(legs of a cruise, years of a time series, etc.) or a single project that"
+" constitutes a full dataset."
 msgstr ""
 
 #: appli/templates/v2/partials/_index.html:22
-msgid "It permits to:"
-msgstr ""
-
-#: appli/templates/v2/partials/_index.html:23
 msgid ""
-"Load particle data and associate them with CTD data and zooplankton "
-"images loaded and annotated in Ecotaxa"
+"After adding metadata and choosing a license, the data is ready to be "
+"exported and published in DarwinCore archive format, <a "
+"href=\"https://obis.org/\" class=\"text-mainblue-700 hover:text-"
+"secondblue-400\">OBIS</a> or <a href=\"https://www.gbif.org/\" class"
+"=\"text-mainblue-700 hover:text-secondblue-400\">GBIF</a>."
 msgstr ""
 
-#: appli/templates/v2/partials/_index.html:24
-msgid "Process size spectra from the particle data"
+#: appli/templates/v2/partials/_index.html:28
+msgid "The"
 msgstr ""
 
-#: appli/templates/v2/partials/_index.html:25
+#: appli/templates/v2/partials/_index.html:28
 msgid ""
-"Download the resulting particle spectra, the CTD and the zooplankton data"
-" according to defined permissions"
+"application is designed to manage data from Underwater Vision Profiler "
+"(UVP) instruments."
 msgstr ""
 
-#: appli/templates/v2/partials/_index.html:26
-msgid "Visualize data and permit their promotion thanks to the internet access"
+#: appli/templates/v2/partials/_index.html:29
+#, fuzzy
+msgid " It allows:"
+msgstr "显示所有项目"
+
+#: appli/templates/v2/partials/_index.html:30
+msgid ""
+"Importing particle data and linking them with CTD data and zooplankton "
+"images annotated in Ecotaxa."
+msgstr ""
+
+#: appli/templates/v2/partials/_index.html:31
+msgid "Computing size spectra from particle data."
 msgstr ""
 
 #: appli/templates/v2/partials/_index.html:32
+msgid ""
+"Downloading particle spectra, CTD data, and zooplankton records based on "
+"user permissions."
+msgstr ""
+
+#: appli/templates/v2/partials/_index.html:33
+msgid ""
+"EcoPart also provides simple data visualization and facilitates data "
+"sharing."
+msgstr ""
+
+#: appli/templates/v2/partials/_index.html:34
+msgid ""
+"In addition to the Ecotaxa application, the new <a "
+"href=\"https://ecotaxoguide.imev-mer.fr/\" class=\"text-lg font-medium "
+"text-mainblue-700 hover:text-secondblue-400 bg-transparent shadow-none "
+"border-none text-center\">EcoTaxoGuide</a> application explains how to "
+"taxonomically classify images acquired through various instruments and "
+"how to disambiguate similar-looking objects. These will become available "
+"directly from EcoTaxa in the future\n"
+"This is a beta version and improvements are ongoing."
+msgstr ""
+
+#: appli/templates/v2/partials/_index.html:35
+msgid ""
+"We have already filled the information for many taxa seen on ZooScan "
+"images and have begun for images of the UVP and Flowcam/Planktoscope.If "
+"you do not find your taxon/instrument of interest, you can register and "
+"create it. Be sure to read the embedded HOW TO page first and please "
+"contact piqv@imev-mer.fr for better coordination.\n"
+"\n"
+"We hope that this resource will prove useful!"
+msgstr ""
+
+#: appli/templates/v2/partials/_index.html:40
 msgid ""
 "EcoTaxa is not responsible for the safekeeping of the images and data it "
 "stores. Even if the application managers make their best to secure them. "
 "We advise you to perform your own backups."
 msgstr ""
 
-#: appli/templates/v2/partials/_index.html:33
+#: appli/templates/v2/partials/_index.html:41
 msgid ""
 "People annotating images in EcoTaxa cannot claim for any retribution but "
 "they can download and use the results of their work. The application can "
 "be freely downloaded and installed for scientific usage."
 msgstr ""
 
-#: appli/templates/v2/partials/_index.html:35
+#: appli/templates/v2/partials/_index.html:43
 msgid ""
 "If you use EcoTaxa in your work, we would appreciate that you cite it as:"
 " Picheral M, Colin S, Irisson J-O. EcoTaxa, a tool for the taxonomic "
 "classification of images. http://ecotaxa.obs-vlfr.fr"
 msgstr ""
 
-#: appli/templates/v2/partials/_index.html:36
+#: appli/templates/v2/partials/_index.html:44
 msgid ""
 "For any problem please contact <a href=\"mailto:piqv@imev-mer.fr\">piqv"
 "@imev-mer.fr</a>."
 msgstr ""
 
-#: appli/templates/v2/partials/_index.html:37
+#: appli/templates/v2/partials/_index.html:45
 msgid ""
 "EcoTaxa has been developped thanks to the <a href=\"/gui/about\">support "
 "of many organisations and projects</a>."
 msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:31
-#, fuzzy
-msgid "Predict"
-msgstr "预测"
-
-#: appli/templates/v2/partials/_navbar.html:42
-msgid "General"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:44
-msgid "Backup"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:46
-#, fuzzy
-msgid "Summary"
-msgstr "帮助汇总"
-
-#: appli/templates/v2/partials/_navbar.html:51
-msgid "Tools"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:53
-msgid "<strong>Extract</strong> Subset"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:54
-msgid "<strong>Merge</strong> another project in this project"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:55
-msgid "<strong>Edit or erase</strong> annotations massively"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:56
-msgid "<strong>Batch</strong> edit metadata"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:57
-msgid "<strong>Reset</strong> status to Predicted"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:58
-msgid "<strong>Delete</strong> object or project"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:59
-msgid "<strong>Fix</strong> category issues"
-msgstr ""
-
-#: appli/templates/v2/partials/_navbar.html:71
-msgid "projects list"
-msgstr "项目列表"
 
 #: appli/templates/v2/partials/_navuser.html:8
 #: appli/templates/v2/security/_login.html:4
@@ -3923,6 +4621,38 @@ msgstr "仅检索"
 #, fuzzy
 msgid "Go to Ecopart"
 msgstr "如何准备数据"
+
+#: appli/templates/v2/partials/_project_nav.html:61
+msgid "<strong>Extract</strong> Subset"
+msgstr ""
+
+#: appli/templates/v2/partials/_project_nav.html:62
+msgid "<strong>Merge</strong> another project in this project"
+msgstr ""
+
+#: appli/templates/v2/partials/_project_nav.html:63
+msgid "<strong>Edit or erase</strong> annotations massively"
+msgstr ""
+
+#: appli/templates/v2/partials/_project_nav.html:64
+msgid "<strong>Batch</strong> edit metadata"
+msgstr ""
+
+#: appli/templates/v2/partials/_project_nav.html:65
+msgid "<strong>Reset</strong> status to Predicted"
+msgstr ""
+
+#: appli/templates/v2/partials/_project_nav.html:66
+msgid "<strong>Delete</strong> object or project"
+msgstr ""
+
+#: appli/templates/v2/partials/_project_nav.html:67
+msgid "<strong>Fix</strong> category issues"
+msgstr ""
+
+#: appli/templates/v2/partials/_project_nav.html:75
+msgid "projects list"
+msgstr "项目列表"
 
 #: appli/templates/v2/partials/_topsitebar.html:7
 #, fuzzy
@@ -3983,12 +4713,6 @@ msgid "User"
 msgstr ""
 
 #: appli/templates/v2/project/_fullstats.html:81
-#: appli/templates/v2/project/projectsettings.html:8
-#: appli/templates/v2/project/projectsettings.html:132
-msgid "Privilege"
-msgstr "权限"
-
-#: appli/templates/v2/project/_fullstats.html:81
 msgid "number of actions"
 msgstr ""
 
@@ -4045,18 +4769,30 @@ msgstr "仅显示可访问的项目"
 msgid "Show other projects"
 msgstr "其他项目"
 
-#: appli/templates/v2/project/_listcontainer.html:8
+#: appli/templates/v2/project/_listcontainer.html:9
 msgid "Create a project"
 msgstr "创建一个项目"
 
-#: appli/templates/v2/project/_listcontainer.html:10
+#: appli/templates/v2/project/_listcontainer.html:11
 msgid "Access projects"
 msgstr "访问项目"
 
-#: appli/templates/v2/project/_listcontainer.html:21
+#: appli/templates/v2/project/_listcontainer.html:19
+msgid "import full settings"
+msgstr "导入完整设置"
+
+#: appli/templates/v2/project/_listcontainer.html:19
+msgid "add"
+msgstr ""
+
+#: appli/templates/v2/project/_listcontainer.html:20
 #, fuzzy
-msgid "Reset list"
-msgstr "项目列表"
+msgid "Reset selection"
+msgstr "创建一个项目"
+
+#: appli/templates/v2/project/_listcontainer.html:20
+msgid "extra"
+msgstr "额外的"
 
 #: appli/templates/v2/project/_merge_process.html:4
 msgid "Warning: "
@@ -4088,11 +4824,11 @@ msgstr "新项目"
 msgid "Fusion Done successfully"
 msgstr ""
 
-#: appli/templates/v2/project/_stats.html:55
+#: appli/templates/v2/project/_stats.html:57
 msgid "Classification summary"
 msgstr ""
 
-#: appli/templates/v2/project/_stats.html:60
+#: appli/templates/v2/project/_stats.html:62
 msgid "unclassified"
 msgstr ""
 
@@ -4192,6 +4928,24 @@ msgstr ""
 #: appli/templates/v2/project/editdatamass.html:51
 msgid "Recompute sun position (VERY LONG)"
 msgstr ""
+
+#: appli/templates/v2/project/macros.html:23
+msgid "Pick from other project"
+msgstr "从其他项目中选取"
+
+#: appli/templates/v2/project/macros.html:47
+#, fuzzy
+msgid "remove"
+msgstr "移除"
+
+#: appli/templates/v2/project/macros.html:47
+#, fuzzy
+msgid "restore"
+msgstr "阅读更多"
+
+#: appli/templates/v2/project/macros.html:48
+msgid "to delete a user with Manage privilege , modify the privilege attribute"
+msgstr "如需删除具有管理权限的用户，请修改权限属性"
 
 #: appli/templates/v2/project/massannotation.html:8
 msgid "Project Edit / Erase annotation massively"
@@ -4453,78 +5207,50 @@ msgstr ""
 msgid "Cancel and back to project"
 msgstr "取消，返回项目 "
 
-#: appli/templates/v2/project/projectsettings.html:16
-#, fuzzy
-msgid "remove"
-msgstr "移除"
-
-#: appli/templates/v2/project/projectsettings.html:16
-#, fuzzy
-msgid "restore"
-msgstr "阅读更多"
-
-#: appli/templates/v2/project/projectsettings.html:17
-msgid "to delete a user with Manage privilege , modify the privilege attribute"
-msgstr "如需删除具有管理权限的用户，请修改权限属性"
-
-#: appli/templates/v2/project/projectsettings.html:20
-msgid "Pick from other project"
-msgstr "从其他项目中选取"
-
-#: appli/templates/v2/project/projectsettings.html:34
+#: appli/templates/v2/project/projectsettings.html:7
 msgid "How to edit a project settings"
 msgstr "如何编辑项目设置"
 
-#: appli/templates/v2/project/projectsettings.html:34
+#: appli/templates/v2/project/projectsettings.html:7
 msgid "How to create a project"
 msgstr "如何创建项目"
 
-#: appli/templates/v2/project/projectsettings.html:42
+#: appli/templates/v2/project/projectsettings.html:12
+msgid ""
+"Changing this item may affect the behaviour of the collections this "
+"project is included in. Proceed with caution."
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:18
 #, fuzzy
 msgid "Pick all settings from other project"
 msgstr "从其他项目中选择预设"
 
-#: appli/templates/v2/project/projectsettings.html:45
+#: appli/templates/v2/project/projectsettings.html:21
 msgid "project"
 msgstr "项目"
 
-#: appli/templates/v2/project/projectsettings.html:45
+#: appli/templates/v2/project/projectsettings.html:21
 msgid "new project"
 msgstr "新项目"
 
-#: appli/templates/v2/project/projectsettings.html:79
-msgid "Visible for all visitors"
-msgstr "对所有访问者可见"
-
-#: appli/templates/v2/project/projectsettings.html:79
-msgid "only validated objects"
-msgstr "仅验证过的对象"
-
-#: appli/templates/v2/project/projectsettings.html:104
+#: appli/templates/v2/project/projectsettings.html:68
 msgid "Taxonomy"
 msgstr "分类法"
 
-#: appli/templates/v2/project/projectsettings.html:105
+#: appli/templates/v2/project/projectsettings.html:70
 msgid "Pick taxonomy from other projects"
 msgstr "从其他项目中选择分类法"
 
-#: appli/templates/v2/project/projectsettings.html:109
+#: appli/templates/v2/project/projectsettings.html:73
 msgid "select a category"
 msgstr "选取一个分类"
 
-#: appli/templates/v2/project/projectsettings.html:118
+#: appli/templates/v2/project/projectsettings.html:81
 msgid "Sorting tools"
 msgstr ""
 
-#: appli/templates/v2/project/projectsettings.html:121
-msgid "Fields available for sorting & Display In the manual classification page"
-msgstr ""
-
-#: appli/templates/v2/project/projectsettings.html:161
-msgid "New privilege"
-msgstr "新的权限"
-
-#: appli/templates/v2/project/projectsettings.html:167
+#: appli/templates/v2/project/projectsettings.html:137
 msgid "Cancel, back to project "
 msgstr "取消，返回项目 "
 
@@ -4781,6 +5507,25 @@ msgstr ""
 msgid "Reset Password request"
 msgstr "需要一个标题"
 
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:3
+#, fuzzy
+msgid "Imported name:"
+msgstr "已导入"
+
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:3
+#, fuzzy
+msgid "imported name"
+msgstr "已导入"
+
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:4
+msgid "UniEuk name:"
+msgstr ""
+
+#: appli/templates/v2/taxonomy/_import_taxo_mapping.html:4
+#, fuzzy
+msgid "replace by"
+msgstr "更换"
+
 #: appli/templates/v2/users/_acceptconditions.html:3
 msgid "I agree with the following usage conditions:"
 msgstr ""
@@ -4834,16 +5579,6 @@ msgstr ""
 msgid "password match"
 msgstr "忘记密码？"
 
-#: appli/templates/v2/users/_user.html:35
-#, fuzzy
-msgid "First name"
-msgstr "已导入"
-
-#: appli/templates/v2/users/_user.html:35
-#, fuzzy
-msgid "Last name"
-msgstr "名称"
-
 #: appli/templates/v2/users/_user.html:42
 msgid ""
 "Please note that your account will be deactivated before a new validation"
@@ -4857,21 +5592,6 @@ msgid ""
 "planned usage of EcoTaxa"
 msgstr ""
 
-#: appli/templates/v2/users/_user.html:50
-#, fuzzy
-msgid "a name is required"
-msgstr "需要一个标题"
-
-#: appli/templates/v2/users/_user.html:54
-#, fuzzy
-msgid "an email is required"
-msgstr "需要一个标题"
-
-#: appli/templates/v2/users/_user.html:65
-#: appli/templates/v2/users/_user.html:66
-msgid "ORCID ID"
-msgstr ""
-
 #: appli/templates/v2/users/_user.html:74
 msgid "A few sentences describing how in which context you will use EcoTaxa"
 msgstr ""
@@ -4880,10 +5600,6 @@ msgstr ""
 #, fuzzy
 msgid "Your password"
 msgstr "忘记密码？"
-
-#: appli/templates/v2/users/_user.html:90
-msgid "Account info"
-msgstr ""
 
 #~ msgid ""
 #~ "To start using EcoTaxa, you need "
@@ -5345,5 +6061,196 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "you want to delete or"
+#~ msgstr ""
+
+#~ msgid "The LOVNOWER project"
+#~ msgstr "其他项目"
+
+#~ msgid ""
+#~ "with the company FOTONOWER, which "
+#~ "explored machine learning solutions to "
+#~ "improve the automatic classification system"
+#~ " in EcoTaxa as well as implement "
+#~ "a visual similarity search feature."
+#~ msgstr ""
+
+#~ msgid "Provider user"
+#~ msgstr ""
+
+#~ msgid "Associates"
+#~ msgstr ""
+
+#~ msgid "Projects id"
+#~ msgstr "项目列表"
+
+#~ msgid "External ID"
+#~ msgstr "额外的"
+
+#~ msgid "External ID System"
+#~ msgstr ""
+
+#~ msgid "Only save objects' last annotation data"
+#~ msgstr ""
+
+#~ msgid "Visibility"
+#~ msgstr ""
+
+#~ msgid "license"
+#~ msgstr "许可"
+
+#~ msgid "External Id"
+#~ msgstr "额外的"
+
+#~ msgid "External Id System"
+#~ msgstr ""
+
+#~ msgid "Users and organisations"
+#~ msgstr ""
+
+#~ msgid "Creator users"
+#~ msgstr "创建一个项目"
+
+#~ msgid "Creator organisations"
+#~ msgstr ""
+
+#~ msgid "Associate users"
+#~ msgstr ""
+
+#~ msgid "Associate organisations"
+#~ msgstr ""
+
+#~ msgid "Descriptions"
+#~ msgstr "描述"
+
+#~ msgid ""
+#~ "If chosen will not take into "
+#~ "account other parameters, except out to"
+#~ " ftp choice."
+#~ msgstr ""
+
+#~ msgid "YYYYMMDD"
+#~ msgstr "YYYYMMDD"
+
+#~ msgid "HHMMSS"
+#~ msgstr "HHMMSS"
+
+#~ msgid ""
+#~ "Chrome 86, Edge 86, Firefox 111, "
+#~ "Opera 72, Safari 15.2 (si trouvé "
+#~ "alternative à createWritable sinon sortir "
+#~ "de la liste)"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Click on the \"new folder\" icon "
+#~ "<i class=\"icon icon-folder-plus-"
+#~ "sm\"></i>, a new directory that can "
+#~ "be immediately renamed is created."
+#~ msgstr ""
+
+#~ msgid "gelatinous medusae = Cnidaria (Hydrozoa) "
+#~ msgstr ""
+
+#~ msgid "Imported name"
+#~ msgstr "已导入"
+
+#~ msgid "Skip <code>tsv</code> files that have already been imported"
+#~ msgstr ""
+
+#~ msgid "Select from My Files"
+#~ msgstr ""
+
+#~ msgid "Select from my files"
+#~ msgstr ""
+
+#~ msgid "Select a file or a directory to import"
+#~ msgstr ""
+
+#~ msgid "Or choose a folder or zip file on the server"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "This task has errors. Check the "
+#~ "error messages below, fix these errors,"
+#~ " go back to your project and "
+#~ "restart\n"
+#~ "        your job."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "As a visitor, you have free access"
+#~ " to the specimens that have been "
+#~ "already identified by taxonomist experts."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "You can explore the database by "
+#~ "navigating along the UniEuk taxonomic "
+#~ "tree which aims at unifying taxonomic"
+#~ " names and tree according to reliable"
+#~ " and curated molecular phylogenies. It "
+#~ "encompasses the whole Eukaryotic and "
+#~ "Prokaryotic lineages (Viruses coming soon) "
+#~ "that have been molecularly described. "
+#~ "Then images can be filtered according"
+#~ " to several sample criteria: geographic "
+#~ "location, depth, date and time of "
+#~ "sampling, and imaging instrument."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "As a scientist, you can contribute "
+#~ "to the richness of this image "
+#~ "database and/or to the collaborative "
+#~ "taxonomic annotation effort. Images are "
+#~ "organised in projects which should be"
+#~ " consistent in terms of sampling and"
+#~ " imaging techniques. We provide tools "
+#~ "to support the annotation of large "
+#~ "image datasets by supervised machine "
+#~ "learning prediction."
+#~ msgstr ""
+
+#~ msgid "Particle module"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The PARTICLE module of ECOTAXA is "
+#~ "designed to host data from the "
+#~ "Underwater Vision Profiler (UVP) and the"
+#~ " LIIST instruments."
+#~ msgstr ""
+
+#~ msgid "It permits to:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Load particle data and associate them"
+#~ " with CTD data and zooplankton images"
+#~ " loaded and annotated in Ecotaxa"
+#~ msgstr ""
+
+#~ msgid "Process size spectra from the particle data"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Download the resulting particle spectra, "
+#~ "the CTD and the zooplankton data "
+#~ "according to defined permissions"
+#~ msgstr ""
+
+#~ msgid "Visualize data and permit their promotion thanks to the internet access"
+#~ msgstr ""
+
+#~ msgid "Reset list"
+#~ msgstr "项目列表"
+
+#~ msgid "Visible for all visitors"
+#~ msgstr "对所有访问者可见"
+
+#~ msgid "only validated objects"
+#~ msgstr "仅验证过的对象"
+
+#~ msgid "ORCID ID"
 #~ msgstr ""
 
