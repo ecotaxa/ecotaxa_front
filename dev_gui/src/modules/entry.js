@@ -403,7 +403,6 @@ export class Entry {
   }
   async list() {
     if (this.type === entryTypes.node) return;
-
     const url = (this.getUrl) ? this.getUrl() : null;
     if (url === null) return;
     const tag = this.options.tags.tag;

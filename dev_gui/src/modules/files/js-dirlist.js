@@ -239,7 +239,8 @@ function EntryAction(args, options) {
             if (txt === "") AlertBox.addMessage(label, {
               type: 'error',
               content: AlertBox.i18nmessages.exists,
-              duration: 2000
+              duration: 2000,
+              dismiss:true
             });
             else txt = txt.split(dirseparator).pop();
             label.textContent = txt;
@@ -338,7 +339,8 @@ function EntryAction(args, options) {
       AlertBox.addMessage({
         parent: this.container,
         type: "error",
-        content: error.error + ' ' + error.text
+        content: (error.message)?error.message:error.error+' '+error.text,
+        dismiss:true
       })
     });
   }
@@ -357,8 +359,7 @@ function EntryAction(args, options) {
     this.setOpen(true);
     create_entry();
     }); else create_entry();
-
-  }
+   }
   entryaction.rename = function() {
     if (this.isTrashDir()) return;
     this.fetchAction(this.options.actions.rename).then(() => {
@@ -374,8 +375,13 @@ function EntryAction(args, options) {
     }).then(() => {
       this.setParent(dest);
       if (callback !== null) callback();
-    }).catch(err => {
-      console.log('err move', err)
+    }).catch(error => {
+         AlertBox.addMessage({
+        parent: this.container,
+        type: "error",
+        content: (error.message)?error.message:error.error+' '+error.text,
+        dismiss:true
+      })
     });
   }
   entryaction.setParent = function(dest) {
