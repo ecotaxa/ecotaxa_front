@@ -69,7 +69,8 @@
   <section  class="separate">
   {{ proj_settings() }}
   <div class="stat-item">
-  <span class="stat-label ">{{_('License')}} <i data-for="help_proj_stats_license" data-request="help"></i></span><span class="stat-info js js-license" data-withlink=true>{{target_proj.license}}</span></div>
+      {%-set access={"0":"Private","1":"Public","2":"Open"}-%}
+  <span class="stat-label ">{{_('Access')}} <i data-for="help_proj_stats_access" data-request="help"></i></span><span class="stat-info" data-withlink=true>{{access[target_proj.access]}}</span></div>
   </section>
   {{ tabstats() }}
   {% if annotators  is iterable %}

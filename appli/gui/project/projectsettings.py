@@ -14,7 +14,7 @@ from to_back.ecotaxa_cli_py.models import (
     UserModelWithRights,
     MinimalCollectionBO,
 )
-from appli.gui.commontools import possible_licenses, possible_access, possible_models
+from appli.gui.commontools import possible_access, possible_models
 from appli.back_config import get_back_constants
 
 ###############################################common for create && edit  #######################################################################
@@ -117,7 +117,6 @@ def prj_create() -> str:
                 rsp: int = api.create_project(req)
             return prj_edit(rsp, new=True)
     scn = possible_models()
-    licenses = possible_licenses()
     access = possible_access()
     formulae = get_back_constants("FORMULAE")
     return render_template(
@@ -126,7 +125,6 @@ def prj_create() -> str:
         members=None,
         new=True,
         scn=scn,
-        possible_licenses=licenses,
         possible_access=access,
         formulae=formulae,
     )
@@ -277,7 +275,6 @@ def prj_edit(prjid: int, new: bool = False):
     scn = possible_models()
 
     # TODO: Cache of course, it's constants!
-    licenses = possible_licenses()
     access = possible_access()
     members_by_right = {
         "Manage": target_proj.managers.copy(),
@@ -306,7 +303,6 @@ def prj_edit(prjid: int, new: bool = False):
         crsf_token=crsf_token(),
         predeftaxo=predeftaxo,
         freecols=freecols,
-        possible_licenses=licenses,
         possible_access=access,
         collections=collections,
         new=new,

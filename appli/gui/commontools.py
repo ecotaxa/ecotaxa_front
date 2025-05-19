@@ -46,7 +46,8 @@ def possible_access() -> dict:
 
     consts = get_back_constants("ACCESS")
     access = {}
-    for k, v in consts.items():
+    sorted_access = dict(sorted(consts.items(), key=lambda x: x[1]))
+    for k, v in sorted_access.items():
         access[v] = k
     return access
 
