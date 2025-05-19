@@ -181,7 +181,7 @@ function EntryAction(args, options) {
       case this.options.actions.rename:
         const destpath = entrypath.split(dirseparator);
         destpath[destpath.length - 1] = label.textContent;
-        if (destpath.join(dirseparator) === entrypath) return;
+        if (destpath.join(dirseparator) === entrypath)   return;
         data.append(api_parameters.dest, destpath.join(dirseparator));
         break;
     }
@@ -202,7 +202,7 @@ function EntryAction(args, options) {
         AlertBox.addAlert({
           type: "error",
           content: response.status + ' ' + json.text + ' ' + detail,
-          dismiss: true
+          dismissible: true
         })
       }
       return false;
@@ -240,7 +240,7 @@ function EntryAction(args, options) {
               type: 'error',
               content: AlertBox.i18nmessages.exists,
               duration: 2000,
-              dismiss:true
+              dismissible:true
             });
             else txt = txt.split(dirseparator).pop();
             label.textContent = txt;
@@ -249,7 +249,11 @@ function EntryAction(args, options) {
           }
           const action = (entry.container.dataset.action) ? entry.container.dataset.action : entry.options.actions.rename;
           await entry.fetchAction(action, callback);
-        }
+        } else AlertBox.addAlert({
+        type: "warning",
+        content: (entry.isnew)?"Entry not created. Modify the folder name.":"Name not modified. Modify the entry name.",
+        dismissible:true
+      });
         entry.setEditable(false);
       }
     }
@@ -340,7 +344,7 @@ function EntryAction(args, options) {
         parent: this.container,
         type: "error",
         content: (error.message)?error.message:error.error+' '+error.text,
-        dismiss:true
+        dismissible:true
       })
     });
   }
@@ -354,6 +358,7 @@ function EntryAction(args, options) {
      // move new entry to top of the list
     entries.prepend(new_entry.container);
     new_entry.container.dataset.action = this.options.actions.create;
+    new_entry.isnew=true;
     new_entry.label.dispatchEvent(new Event('dblclick'));}
     if(!this.loaded) this.list().then(()=>{
     this.setOpen(true);
@@ -380,7 +385,7 @@ function EntryAction(args, options) {
         parent: this.container,
         type: "error",
         content: (error.message)?error.message:error.error+' '+error.text,
-        dismiss:true
+        dismissible:true
       })
     });
   }

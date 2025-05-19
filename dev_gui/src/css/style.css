@@ -279,14 +279,8 @@ tr.disabled {@apply opacity-70}
 .folders [data-name].dragover .entrycontrols , .folders [data-name].dragover #dropzone {@apply hide}
 .on {@apply  block sm:max-h-[50v]  overflow-y-hidden}
 .on > .entries  {@apply block  overflow-y-auto }
-/*
-.folders .entryD, .folders .entryR, .folders .entryB, .folders .entryN {@apply before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
-.folders .entryR, .folders .entryB {@apply  before:icon-folder-sm}
-.folders .entryD {@apply text-base font-normal  before:icon-trash-sm}
-.folders .on > .entryR, .folders .on > .entryB {@apply font-semibold   before:icon-folder-open}
-.on > .entryD {@apply font-semibold before:icon-trash}*/
 .folders .entryN {@apply before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
-.entryN, .entryB, .entryR, .entryD  {@apply text-base font-normal align-text-bottom mb-0.5 mr-0.5 cursor-pointer ml-1}
+.entryN, .entryB, .entryR, .entryD  {@apply text-base font-normal align-text-bottom mb-0.5 mr-0.5 cursor-pointer}
 .folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB {@apply w-4 h-4 inline-block before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  mr-0.5  pl-5 cursor-pointer }
 .folders .ico-entryR, .folders .ico-entryB {@apply before:icon-folder-sm}
 .folders .entryD {@apply text-base font-normal}
@@ -295,7 +289,7 @@ tr.disabled {@apply opacity-70}
 .folders .on > .ico-entryR, .folders .on > .ico-entryB {@apply before:icon-folder-open}
 .on > .entryD {@apply font-semibold}
 .on > .ico-entryD {@apply  before:icon-trash}
-.folders .entryN {@apply  before:icon-document-sm}
+.folders .entryN {@apply before:icon-document-sm}
 .entryN.img {@apply before:icon-image-sm }
 .entryN.doc {@apply before:icon-document-sm}
 .on > .entryN {@apply font-semibold}
@@ -348,7 +342,7 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
 .up.scrollspy {@apply opacity-100}
 .pageup {@apply bottom-16}
 /*tooltips */
-[data-title]:hover:after , [data-title]:active:after, .tooltip {@apply  absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-[999999999] content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light text-stone-800 rounded bg-info-50 px-2 py-0.5 drop-shadow;}
+[data-title]:hover:after , [data-title]:active:after, .tooltip {@apply  absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-[999999999] content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light bg-info-900 rounded text-stone-50 px-2 py-0.5 drop-shadow;}
 }
 @layer utilities {
  /**********************************************/
