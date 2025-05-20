@@ -55,7 +55,7 @@ def get_organizations(isuser=True) -> list:
         if isuser:
             orgs = api.get_organizations()
         else:
-            orgs = api.search_organizations("")
+            orgs = api.search_organizations("%")
         orgs = sorted(orgs, key=lambda org: org.name)
         organisations = [[org.name, org.name] for org in orgs]
     return organisations
@@ -513,7 +513,7 @@ def account_page(action: str, usrid: int, isfrom: bool, template: str, token: st
         or isfrom == True
         or action == ACCOUNT_USER_EDIT
     ):
-        organisations = get_organizations()
+        organisations = get_organizations(False)
         roles = [(str(num), lbl) for num, lbl in constants.API_GLOBAL_ROLES.items()]
         country_list = get_country_list()
         countries = sorted(country_list)
