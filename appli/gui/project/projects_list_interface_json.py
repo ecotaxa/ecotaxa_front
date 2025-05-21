@@ -6,14 +6,16 @@ from typing import List, Dict
 from flask_babel import _
 
 
-def project_table_columns(typeimport: str, selection: str = "list") -> dict:
+def project_table_columns(
+    typeimport: str, selection: str = "list", listall: bool = False
+) -> dict:
     if typeimport == "":
         selection = selection
     else:
         selection = "import"
     # return only visible columns names and display props
-    columns = {
-        "list": dict(
+    if not listall:
+        columns_list = dict(
             {
                 "projid": {
                     "label": _("ID"),
@@ -44,7 +46,39 @@ def project_table_columns(typeimport: str, selection: str = "list") -> dict:
                     "default": "0.0",
                 },
             }
-        ),
+        )
+    else:
+        columns_list = dict(
+            {
+                "projid": {
+                    "label": _("ID"),
+                    "sortable": "desc",
+                    "format": "number",
+                },
+                "instrument": {
+                    "label": _("Instrument"),
+                    "autocomplete": "instrument",
+                },
+                "title": {
+                    "label": _("Title"),
+                    "request": "about",
+                    "subfield": "contact",
+                    "sublabel": " - manager or contact",
+                    "trim": True,
+                },
+                "contact": {"label": _("Contact"), "hidden": True},
+                "status": {"label": _("Status"), "format": "status"},
+                "access": {"label": _("Access"), "format": "access"},
+                "objcount": {"label": _("Nb objects"), "format": "number"},
+                "pctvalidated": {
+                    "label": _("%validated"),
+                    "format": "progress",
+                    "default": "0.0",
+                },
+            }
+        )
+    columns = {
+        "list": columns_list,
         "prediction": dict(
             {
                 "select": {

@@ -68,7 +68,7 @@ def _get_projects_filters() -> dict:
 
 def _prjs_list_api(
     listall: bool = False,
-    filt: dict = {},
+    filt: dict = dict({}),
     for_managing: bool = False,
     summary: bool = False,
 ) -> list:
@@ -90,7 +90,7 @@ def _prjs_list_api(
                 "for_managing": for_managing,
             }
         )
-        if summary == True:
+        if summary:
             payload.update({"fields": "*default"})
         with ApiClient(ProjectsApi, request) as apiproj:
             url = (
@@ -131,13 +131,11 @@ def projects_list(
         )
 
     can_access = {}
-    if filt == None:
+    if filt is None:
         filt = _get_projects_filters()
-    prjs = []
+
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
-    user: UserModelWithRights = current_user.api_user
-    isadmin = current_user.is_app_admin == True
     if typeimport != "":
         # full list avalaible to import - 2 calls when not app admin
         listall = False
@@ -149,7 +147,6 @@ def projects_list(
         prjs = _prjs_list_api(listall, filt, for_managing=for_managing, summary=True)
         if typeimport != "" and current_user.is_app_admin == False:
             prjs = prjs + _prjs_list_api(True, filt, for_managing=for_managing)
-        now = datetime.datetime.now()
         # last_used_projects are put on top of list in the interface
         last_used_projects = list(p.projid for p in current_user.last_used_projects)
         if len(last_used_projects):
@@ -172,7 +169,7 @@ def projects_list(
         render_for_js,
     )
 
-    columns = project_table_columns(typeimport, selection=selection)
+    columns = project_table_columns(typeimport, selection=selection, listall=listall)
     tabledef = dict(
         {
             "columns": columns,
@@ -190,7 +187,6 @@ def projects_list_page(
     partial: bool = False,
     typeimport: str = "",
 ) -> str:
-    from appli.project.main import _manager_mail
 
     # projects ids and rights for current_user
     if not current_user.is_authenticated:
@@ -207,8 +203,6 @@ def projects_list_page(
         CanCreate = False
     isadmin = current_user.is_app_admin == True
 
-    from appli.gui.project.projects_list_interface_json import project_table_columns
-
     if typeimport == "" and not partial:
         template = "v2/project/index.html"
     else:
@@ -221,7 +215,6 @@ def projects_list_page(
         listall=listall,
         partial=partial,
         isadmin=isadmin,
-        # columns=json.dumps(columns),
         last_used_projects=lastprjs,
         typeimport=typeimport,
     )
@@ -235,7 +228,7 @@ def _prj_import_taxo_api(
 
     prjs = list([])
     qry_filt_instrum = (
-        [""] if (filt == None or len(filt["instrum"]) == 0) else filt["instrum"]
+        [""] if (filt is None or len(filt["instrum"]) == 0) else filt["instrum"]
     )
     for_managing = False
     for an_instrument in qry_filt_instrum:
@@ -279,7 +272,6 @@ def _prj_import_taxo_api(
     with ApiClient(TaxonomyTreeApi, request) as api:
         res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))
     taxo_map = {taxon_rec.id: taxon_rec.display_name for taxon_rec in res}
-    txt = ""
     prjs_pojo = []
     for a_prj in prjs:
         # exclude current prj
