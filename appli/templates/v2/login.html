@@ -16,8 +16,8 @@
     </form>
   </div>
   <div id="home-login" class=" w-full h-auto md:h-96 md:w-1/2  border border-stone-300 -mt-8 shadow-sm px-2 sm:px-4 ">
-    {% include './v2/security/_login.html' %}
-    {# include "./v2/security/_menu.html" #}
+    {% include './v2/security/_login.html' with context %}
+    {# include "./v2/security/_menu.html" with context #}
   </div></div>
   {%- if current_user.is_authenticated-%}
   <div class="w-auto mx-auto p-12 text-sm">

@@ -65,7 +65,12 @@ def gui_login():
                 return redirect(redir)
             else:
                 return redirect(url_for("gui_login"))
-    return render_template("v2/login.html", bg=True)
+    referer = request.referrer
+
+    if referer in [url_for("gui_login"), url_for("gui_index")]:
+        referer = ""
+    print("referer", referer)
+    return render_template("v2/login.html", next=referer, bg=True)
 
 
 @app.route("/gui/register", defaults={"token": None}, methods=["GET", "POST"])
@@ -464,13 +469,12 @@ def utility_processor():
         return breadcrumbs()
 
     def get_referrer() -> str:
-        import functools
-
-        go = ["gui_login", "gui_forgotten", "gui_register"]
         referrer = gvp("next", request.referrer)
-        goindex = functools.reduce(lambda a, b: a or referrer == url_for(b), go)
-        if referrer is None or goindex:
-            # referrer = url_for("gui_index")
+        if referrer is None or referrer in [
+            url_for("gui_login"),
+            url_for("gui_me_forgotten"),
+            url_for("gui_register"),
+        ]:
             referrer = HOMEPAGE
         return referrer
 
