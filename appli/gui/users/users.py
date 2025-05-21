@@ -106,20 +106,11 @@ def user_register(token: str = None, partial: bool = False) -> str:
             elif int(resp) != usrid:
                 raise UnprocessableEntity(py_user["invaliddata"])
 
-        if request.method == "POST" or int(usrid) == -1:
-            _id = int(gvp("id", "-1"))
-            if _id == -1:
-                return account_page(
-                    action=action,
-                    usrid=usrid,
-                    isfrom=False,
-                    template="v2/register.html",
-                    token=token,
-                )
     if request.method == "POST":
         _id = int(gvp("id", "-1"))
         if _id == usrid:
             return user_create(int(_id), isfrom=False, token=token, partial=partial)
+    if token is not None:
         return account_page(
             action=action,
             usrid=int(usrid),
@@ -175,7 +166,7 @@ def _verify_pending_user_throw(_id: int, email: str):
         from appli.security_on_backend import login_validate
 
         yes, userdata = login_validate(email, pwd)
-        if yes == True and userdata is not None:
+        if yes and userdata is not None:
             user = UserModelWithRights(**userdata)
             # TODO check why reason
             # reason = (user.status_admin_comment or user.status == ApiUserStatus["pending"])
