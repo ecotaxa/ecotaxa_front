@@ -318,7 +318,7 @@ export class FormSubmit {
     switch (format) {
           case "text":
           case "html":
-           response= await response.text();
+            response= await response.text();
             return this.displayResponse(response,false);
             break;
           default:
