@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-05-15 15:03+0200\n"
+"POT-Creation-Date: 2025-05-21 11:19+0200\n"
 "PO-Revision-Date: 2022-09-23 13:54+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -692,7 +692,7 @@ msgstr ""
 
 #: appli/gui/admin/main.py:483
 #: appli/templates/v2/help/_help_project_stats.html:33
-#: appli/templates/v2/project/_fullstats.html:78
+#: appli/templates/v2/project/_fullstats.html:79
 msgid "Users"
 msgstr ""
 
@@ -872,7 +872,6 @@ msgstr ""
 #: appli/templates/v2/collection/about.html:8
 #: appli/templates/v2/collection/settings.html:73
 #: appli/templates/v2/help/_help_collection_settings.html:32
-#: appli/templates/v2/project/_fullstats.html:72
 msgid "License"
 msgstr ""
 
@@ -1296,6 +1295,7 @@ msgstr ""
 #: appli/gui/project/projects_list_interface_json.py:123
 #: appli/templates/v2/collection/_settings_aggregated.html:33
 #: appli/templates/v2/help/_help_projectsettings.html:53
+#: appli/templates/v2/project/_fullstats.html:73
 #: appli/templates/v2/project/projectsettings.html:59
 msgid "Access"
 msgstr ""
@@ -1901,14 +1901,14 @@ msgstr ""
 
 #: appli/templates/v2/admin/_personslistcontainer.html:13
 #: appli/templates/v2/collection/_listcontainer.html:20
-#: appli/templates/v2/project/_fullstats.html:93
+#: appli/templates/v2/project/_fullstats.html:94
 #: appli/templates/v2/project/_listcontainer.html:21
 msgid "Please wait"
 msgstr ""
 
 #: appli/templates/v2/admin/_personslistcontainer.html:13
 #: appli/templates/v2/collection/_listcontainer.html:20
-#: appli/templates/v2/project/_fullstats.html:93
+#: appli/templates/v2/project/_fullstats.html:94
 #: appli/templates/v2/project/_listcontainer.html:21
 msgid "Data loaded. Displaying..."
 msgstr ""
@@ -2088,7 +2088,7 @@ msgid "Deep feature extractor"
 msgstr ""
 
 #: appli/templates/v2/collection/_settings_aggregated.html:50
-#: appli/templates/v2/project/_fullstats.html:81
+#: appli/templates/v2/project/_fullstats.html:82
 #: appli/templates/v2/project/macros.html:37
 #: appli/templates/v2/project/projectsettings.html:95
 msgid "Privilege"
@@ -3227,7 +3227,7 @@ msgid ""
 msgstr ""
 
 #: appli/templates/v2/help/_help_project_stats.html:36
-#: appli/templates/v2/project/_fullstats.html:90
+#: appli/templates/v2/project/_fullstats.html:91
 msgid "Samples"
 msgstr ""
 
@@ -4071,6 +4071,12 @@ msgid " error no user "
 msgstr ""
 
 #: appli/templates/v2/my_files/_list.html:1
+msgid ""
+"Old files will be deleted after a while. Do not consider this as a "
+"permanent storage."
+msgstr ""
+
+#: appli/templates/v2/my_files/_list.html:1
 msgid "Browse local directories"
 msgstr ""
 
@@ -4418,14 +4424,14 @@ msgid "Total"
 msgstr ""
 
 #: appli/templates/v2/project/_fullstats.html:47
-#: appli/templates/v2/project/_fullstats.html:80
-#: appli/templates/v2/project/_fullstats.html:92
+#: appli/templates/v2/project/_fullstats.html:81
+#: appli/templates/v2/project/_fullstats.html:93
 msgid "show all rows"
 msgstr ""
 
 #: appli/templates/v2/project/_fullstats.html:47
-#: appli/templates/v2/project/_fullstats.html:80
-#: appli/templates/v2/project/_fullstats.html:92
+#: appli/templates/v2/project/_fullstats.html:81
+#: appli/templates/v2/project/_fullstats.html:93
 msgid "hide rows"
 msgstr ""
 
@@ -4433,23 +4439,23 @@ msgstr ""
 msgid "Used taxa"
 msgstr ""
 
-#: appli/templates/v2/project/_fullstats.html:81
+#: appli/templates/v2/project/_fullstats.html:82
 msgid "User"
 msgstr ""
 
-#: appli/templates/v2/project/_fullstats.html:81
+#: appli/templates/v2/project/_fullstats.html:82
 msgid "number of actions"
 msgstr ""
 
-#: appli/templates/v2/project/_fullstats.html:81
+#: appli/templates/v2/project/_fullstats.html:82
 msgid "last annotation date"
 msgstr ""
 
-#: appli/templates/v2/project/_fullstats.html:94
+#: appli/templates/v2/project/_fullstats.html:95
 msgid "Load samples stats"
 msgstr ""
 
-#: appli/templates/v2/project/_fullstats.html:95
+#: appli/templates/v2/project/_fullstats.html:96
 msgid "go to classification filtered on selected samples"
 msgstr ""
 

@@ -1,3 +1,5 @@
+/*! ../modules/alert-box.js */
+
 /*! ../modules/export-csv.js */
 
 /*! ../modules/js-accordion.js */
