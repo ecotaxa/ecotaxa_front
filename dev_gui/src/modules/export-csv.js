@@ -23,14 +23,29 @@ export function exportCSV(state, options = {}, hidden = true) {
   };
 
   function text_convert(text) {
-    if (text === null || text === undefined) return null;
-    text = text.trim();
-    text = text.replace(/\s{2,}/g, " ");
-    text = text.replace(/\n/g, "  ");
-    text = text.replace(/"/g, "\"\"");
-    //have to manually encode "#" as encodeURI leaves it as is.
-    text = text.replace(/#/g, "%23");
-    if (text.includes(",")) text = `"${text}"`;
+     if (text === null || text === undefined) return null;
+    const make_text=function(text) {
+       text = text.trim();
+       text = text.replace(/\s{2,}/g, " ");
+       text = text.replace(/\n/g, "  ");
+       text = text.replace(/"/g, "\"\"");
+       //have to manually encode "#" as encodeURI leaves it as is.
+       text = text.replace(/#/g, "%23");
+       if (text.includes(",")) text = `"${text}"`
+       return text;
+    }
+    if (typeof(text) ==='object') {
+        const stringify= function(obj) {
+        const txt=[];
+        ['name','email','label'].forEach(k => {if(obj.hasOwnProperty(k)) txt.push(k+': '+obj[k]);});
+         return txt.join(', ');}
+         if (Array.isArray(text)) {
+         const newtext=[];
+         text.forEach((t,i)=> {newtext.push(stringify(t));});
+         text=newtext.join('; ');  } else text=stringify(text);
+        }
+        text=make_text(text);
+
     return text;
   }
 
@@ -42,38 +57,38 @@ export function exportCSV(state, options = {}, hidden = true) {
     row = [];
   const columns = [];
   const theads = state.dom.querySelectorAll('thead th');
+  let j=0;
   state.grid.columns.forEach(column => {
     if ((hidden === true || !column.hasOwnProperty('hidden')) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(column.index) < 0)) {
       const obj = {
-        name: (column.name) ? column.name : ((column.label) ? column.label : String(column.index)),
+        name: (column.hidden)?(column.name) ? column.name : ((column.label) ? column.label : String(column.index)):theads[j].textContent,
         hidden: (column.hasOwnProperty('hidden')) ? true : false,
         index: column.index
       };
       //headings
-      if ((hidden === true || !column.hidden) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(column.index) < 0)) {
-        let label = theads[column.index].dataset.name ? theads[column.index].dataset.name : theads[column.index].textContent;
+        let label =obj.name;
+        console.log('obj.name',label)
         if (!label) label = 'C' + column.index;
         row.push(text_convert(label));
         columns.push(obj);
-      }
     }
+     if (!column.hidden ) j++;
   });
   rows.push(make_line(row));
   const trs = state.dom.querySelectorAll('tbody tr');
 
   for (let i = 0; i < trs.length; i++) {
     row = [];
-
+    j=0;
     const tds = trs[i].querySelectorAll('th,td');
     state.grid.columns.forEach((column) => {
       const index = column.index;
       if ((hidden === true || !column.hidden) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(index) < 0)) {
-        const value = (column.hidden) ? state.grid.data[i][index] : (tds[index]) ? tds[index].innerText : 'None';
+        const value = (column.hidden) ? state.grid.data[i][index] : (tds[j]) ? tds[j].innerText : 'None';
         row.push(text_convert(value));
-
       }
+      if(!column.hidden) j++;
     });
-
     rows.push(make_line(row));
   }
 

@@ -15,6 +15,9 @@ import {
 import {
   TextHighlight
 } from '../modules/text-highlight.js';
+import {
+  AlertBox
+} from '../modules/alert-box.js';
 import debounce from 'debounce';
 import {
   css,
@@ -242,7 +245,10 @@ export class TableComponent {
       } else this.fetchData(container, fromurl, pagestart + pagesize);
 
     }).catch((err) => { /* print error from response */
-      console.log('error', err);
+      AlertBox.addAlert({type: AlertBox.alertconfig.types.danger,
+                    content:err,
+                    dismissible: false,
+                    })
       this.waitDeactivate(err.status + ` ` + err.statusText, 'error');
     });
   }
@@ -1248,9 +1254,13 @@ export class TableComponent {
     this.wrapper.prepend(btn);
     const columns = this.grid.columns;
     let exclude_columns = [];
+    const noexport=(this.params.noexport)?(this.params.noexport.split(',')):[];
+    noexport.forEach((v,k) => {noexport[k]=v.trim();});
+    noexport.push('select');
     this.grid.columns.forEach((column, index) => {
-      if (column.name === 'select') exclude_columns.push(column.index);
+      if (noexport.indexOf(column.name) >=0) exclude_columns.push(column.index);
     });
+    const exporthidden=(this.params.exportvisible)?false:true;
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       if (!this.plugins.exportCSV) {
@@ -1266,7 +1276,7 @@ export class TableComponent {
         linedelimiter: "\n",
         columndelimiter: "\t",
         skipcolumns: exclude_columns
-      });
+      },exporthidden);
       str = encodeURI(`data:text/tsv;charset=utf-8,${str}`);
 
       download_url(str, ((container.id) ? container.id : 'stats_proj') + '.tsv');
