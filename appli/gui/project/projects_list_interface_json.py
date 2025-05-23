@@ -407,6 +407,7 @@ def render_for_js(prjs: list, columns: dict, can_access: dict) -> list:
     from appli.gui.staticlistes import py_project_status
     from datetime import datetime
     from flask_login import current_user
+    from to_back.ecotaxa_cli_py.models.access_level_enum import AccessLevelEnum
 
     isadmin = current_user.is_authenticated and current_user.is_app_admin == True
     jsonprjs = list([])
@@ -449,8 +450,11 @@ def render_for_js(prjs: list, columns: dict, can_access: dict) -> list:
                             or isadmin
                         ):
                             select.update(translations["controls"]["A"])
-                        elif isadmin or prj["projid"] in (
-                            can_access["View"] + can_access["Manage"]
+                        elif (
+                            isadmin
+                            or prj["projid"]
+                            in (can_access["View"] + can_access["Manage"])
+                            or prj["access"] in [AccessLevelEnum._1, AccessLevelEnum._2]
                         ):
                             select.update(translations["controls"]["V"])
                         else:
