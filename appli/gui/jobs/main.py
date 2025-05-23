@@ -187,9 +187,10 @@ def gui_job_cleanup(jobid: int):
             params = job.params
             projid = params["prj_id"]
             if params["req"] is not None:
-                if projid is None:
+                if projid is None and "project_id" in params["req"]:
                     projid = params["req"]["project_id"]
-                collection_id = params["req"]["collection_id"]
+                if "collection_id" in params["req"]:
+                    collection_id = params["req"]["collection_id"]
                 if collection_id is None:
                     collection_id = 0
         if job is not None:
