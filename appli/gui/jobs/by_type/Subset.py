@@ -109,7 +109,7 @@ class SubsetJob(Job):
             # Create the destination project
             with ApiClient(ProjectsApi, request) as api:
                 req = CreateProjectReq(
-                    clone_of_id=projid, title=subsetprojecttitle, visible=False
+                    clone_of_id=projid, title=subsetprojecttitle, access="0"
                 )
                 # TODO: The new project has status ANNOTATE. Is it important?
                 new_prj_id: int = api.create_project(req)
