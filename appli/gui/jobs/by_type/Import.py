@@ -66,7 +66,7 @@ class ImportJob(Job):
                         "name": "server",
                         "label": _("Choose a folder or zip file on the server"),
                         "help": "help_import_server",
-                        "data": " data-import=commonserver data-exclude=FTP,ftp_plankton,plankton,Ecotaxa_Data_to_import  data-url=gui/common/ServerFolderSelectJSON data-where=import-server data-tree=commonserver data-target=unique",
+                        "data": " data-import=commonserver data-exclude=FTP,ftp_plankton,plankton,Ecotaxa_Data_to_import,Ecotaxa_Exported_data  data-url=gui/common/ServerFolderSelectJSON data-where=import-server data-tree=commonserver data-target=unique",
                     }
                 ),
             ],
