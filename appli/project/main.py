@@ -428,7 +428,7 @@ def indexPrj(PrjId):
         "about": "/gui/prj/about/%d" % PrjId,
         "prediction": "/Job/Create/Prediction?projid=%d" % PrjId,
         "predictionf": "javascript:GotoWithFilter('/Job/Create/Prediction')",
-        "import": "/Job/Create/FileImport?p=%d" % PrjId,
+        "import": "/gui/job/create/FileImport?projid=%d" % PrjId,
         "taxofix": "/prj/taxo_fix/%d" % PrjId,
         "export": "/gui/job/create/GenExport?projid=%d" % PrjId,
         "exportf": "javascript:GotoWithFilter('/gui/job/create/GenExport')",
