@@ -1,5 +1,5 @@
   {%block body%}
-  {% if response != None and response|length and  response[0]|int == 0 %}
+  {% if response != None and response|length and  (response[0]|int == 0 or response[0]|int == 200 )%}
    <div class="alert is-success">
 {% if token %}
 <strong>{{_('Your password has been modified')}}</strong>
