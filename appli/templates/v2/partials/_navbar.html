@@ -1,10 +1,10 @@
-{%- if (target_proj and target_proj.projid > 0) or (target_coll and target_coll.id |int> 0) -%}<nav id="secondary-nav" class="js js-nav">
+{%- if (target_proj and target_proj.projid > 0) or (target_coll and target_coll.id |int> 0) or (target_obj ) -%}<nav id="secondary-nav" class="js js-nav">
 <div class="w-full relative mt-1 md:mt-0 py-4"><div id="menu-burger" class="burger" data-target="navbar-menu">
 <div class="burger-icon"></div>
 </div><ul id="navbar-menu"><li class="hidden sm:visible">
-  {%- if target_proj  -%}
+  {%- if target_proj or (target_obj and "projid" in target_obj) -%}
       {% include 'v2/partials/_project_nav.html'%}
-{%- elif target_coll -%}
+{%- elif target_coll or (target_obj and "projid" in target_obj)-%}
   {% include 'v2/partials/_collection_nav.html'%}
 {%-endif-%}
 </ul></div></nav>{%-endif-%}

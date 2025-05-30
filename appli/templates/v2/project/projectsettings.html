@@ -28,8 +28,8 @@
             <label for="comments">{{ _('Comments')}}<i data-for="help_comments" data-request="help"></i></label>
             <textarea id="comments" name="comments" class="form-textarea" placeholder="project comments" rows="6">{{ target_proj.comments|default('',true) }}</textarea>
           </div>{%-if target_proj and target_proj.projid-%}
-          <div class="form-box"><span class="label">{{_('Collections')}}<i data-for="help_project_collections" data-request="help"></i> {{badge('success',_('new'),True)}}</span>
-          <div class="stat-info text-sm">{%- if is_in_collections %}{%-for collection in collections-%}<span>({{collection_info(collection)}} )</span>{{', ' if loop.index < collections|length else ''}}{%-endfor-%}{%-endif-%}</div></div>
+          {%- if is_in_collections %}<div class="form-box"><span class="label">{{_('Collections')}}<i data-for="help_project_collections" data-request="help"></i> {{badge('success',_('new'),True)}}</span>
+          <div class="stat-info text-sm">{%-for collection in collections-%}<span>({{collection_info(collection)}} )</span>{{', ' if loop.index < collections|length else ''}}{%-endfor-%}</div></div>{%-endif-%}
            {%-endif-%} </div>
         <div class=" w-full md:w-1/2 messagepos" >
           <div class="form-box">

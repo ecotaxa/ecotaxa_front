@@ -136,6 +136,7 @@ def projects_list(
 
     # current_user is either an ApiUserWrapper or an anonymous one from flask,
     # but we're in @login_required, so
+
     if typeimport != "":
         # full list avalaible to import - 2 calls when not app admin
         listall = False
@@ -143,6 +144,8 @@ def projects_list(
         prjs = _prj_import_taxo_api(0, filt)
         if current_user.is_app_admin == False:
             prjs = prjs + _prj_import_taxo_api(0, filt, not_granted=True)
+    elif typeimport == "project":
+        prjs = _prjs_list_api(listall, filt, for_managing=True, summary=True)
     else:
         prjs = _prjs_list_api(listall, filt, for_managing=for_managing, summary=True)
         if typeimport != "" and current_user.is_app_admin == False:
