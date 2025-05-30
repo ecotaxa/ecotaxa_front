@@ -338,7 +338,7 @@ ecotaxa_version = "2.8.2"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + ".2025-05-27"
+    return ecotaxa_version + ".2025-05-30"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
