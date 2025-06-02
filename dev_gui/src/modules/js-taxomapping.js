@@ -26,7 +26,6 @@ export class TaxoMapping {
       let controls = {};
       ['select', 'replace'].forEach(selector => {
         controls[selector] = line.querySelector('[data-role="' + selector + '"]');
-
       });
       this.linecontrols = controls;
       controls = null;
@@ -73,7 +72,6 @@ export class TaxoMapping {
     newline.classList.add(css.line);
     newline.classList.add('pb-2');
     this.numlines++;
-
     Object.values(this.linecontrols).forEach(input => {
       const keep = document.createElement('div');
       keep.classList.add(css.mapline);
@@ -95,9 +93,9 @@ export class TaxoMapping {
         input.selectedIndex = -1;
       }
       input.parentElement.insertBefore(keep, input);
-
       newline.append(keep);
     });
+
     this.btnCancel(newline, (line.dataset.cancel) ? line.dataset.cancel : 'cancel');
     line.parentElement.insertBefore(newline, line);
   }
@@ -121,6 +119,7 @@ export class TaxoMapping {
     const form = item.closest('form');
     if (form === null) return;
     const format_mapping_field = () => {
+    if (this.numlines===0 && this.btn) this.btn.click();
       let keephidden = form.querySelector('input[name="' + this.keepname + '"]');
       if (keephidden !== null) keephidden.remove();
       keephidden = document.createElement('input');
@@ -128,11 +127,13 @@ export class TaxoMapping {
       keephidden.name = this.keepname;
       let mapping = {};
       form.querySelectorAll('[data-select]').forEach(el => {
+      if (el.value!=="") {
         const replace = el.parentElement.querySelector('[data-replace="' + el.dataset.select + '"]');
-        if (replace !== null) mapping[el.dataset.value] = replace.dataset.value;
+        if (replace !== null) mapping[el.dataset.value] = replace.dataset.value;}
       });
       form.append(keephidden);
       keephidden.value = JSON.stringify(mapping);
+
       return true;
     };
     if (form.formsubmit) {

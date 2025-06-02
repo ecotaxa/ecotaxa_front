@@ -42,7 +42,6 @@ function createActivRequest() {
     let url, format = (item.dataset.format) ? item.dataset.format : 'html',
       modal,
       callback = null;
-
     switch (item.dataset.request) {
       case models.help:
         item.dataset.what = models.help;
@@ -123,9 +122,10 @@ function createActivRequest() {
             },
           };
           item.dataset.import = true;
+        item.dataset.request=null;
 
-        } else options.trigger = modal.trigger;
         delete options.request;
+        } else options.trigger = modal.trigger;
         if (!dynamics.jsTree) {
           let {
             JsTree
@@ -135,8 +135,8 @@ function createActivRequest() {
         }
         item.jstree = dynamics.JsTree(modalcontent, options);
         // load only once
-        item.dataset.request=null;
         callback = null;
+
         break;
       case "monitor":
         if (!dynamics.jobMonitor) {

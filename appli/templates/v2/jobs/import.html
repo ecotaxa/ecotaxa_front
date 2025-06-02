@@ -97,6 +97,7 @@
             {{_('Once the import is complete, all data folders/files can be safely erased on the server.')}}</em>
         </div></div></div>
         <div id="import_taxo-mapping">
+            {%-set name="taxo_mapping"-%}
         {%include('/v2/taxonomy/_import_taxo_mapping.html')%}
         </div>
         </div>

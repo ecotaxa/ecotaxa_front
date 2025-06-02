@@ -2,9 +2,9 @@
 <div class="w-full relative mt-1 md:mt-0 py-4"><div id="menu-burger" class="burger" data-target="navbar-menu">
 <div class="burger-icon"></div>
 </div><ul id="navbar-menu"><li class="hidden sm:visible">
-  {%- if target_proj or (target_obj and "projid" in target_obj) -%}
+  {%- if (not collection_id or collection_id==0) -%}
       {% include 'v2/partials/_project_nav.html'%}
-{%- elif target_coll or (target_obj and "projid" in target_obj)-%}
+{%- elif (collection_id and collection_id>0) or target_coll or (target_obj and target_obj.collection_id)-%}
   {% include 'v2/partials/_collection_nav.html'%}
 {%-endif-%}
 </ul></div></nav>{%-endif-%}

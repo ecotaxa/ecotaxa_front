@@ -136,8 +136,8 @@ export function JsTree(parent, options = {}) {
       id: options.entry.root,
       label: options.api_parameters.rootname,
     }, options.entry);
-    root.addListeners();
-    root.label.click();
+    root.addListeners();root.icon.dispatchEvent(new Event('click'));
+
   }
 
   function initEvents() {

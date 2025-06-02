@@ -22,11 +22,12 @@ class ExportJob(Job):
         idname = "projid"
         projid, collection_id = cls.get_target_id()
         target_obj = cls.get_target_obj(projid, collection_id)
-        if collection_id != 0:
+        if collection_id > 0:
             targetid = collection_id
             cls.TARGET_TYPE = "collection"
         else:
             targetid = projid
+            cls.TARGET_TYPE = None
         if target_obj is None:
             return render_template(
                 cls.NOOBJ_TEMPLATE, id=targetid, target_type=cls.TARGET_TYPE
@@ -40,6 +41,7 @@ class ExportJob(Job):
         # if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
         from appli.gui.taxonomy.tools import project_used_taxa
 
+        print("type", cls.TARGET_TYPE)
         if cls.TARGET_TYPE == "collection":
             idname = "collection_id"
             if cls.EXPORT_TYPE in ["summary", "darwincore"]:

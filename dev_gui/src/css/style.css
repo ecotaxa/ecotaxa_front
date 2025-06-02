@@ -281,12 +281,14 @@ tr.disabled {@apply opacity-70}
 .on > .entries  {@apply block  overflow-y-auto }
 .folders .entryN {@apply before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
 .entryN, .entryB, .entryR, .entryD  {@apply text-base font-normal align-text-bottom mb-0.5 mr-0.5 cursor-pointer}
-.folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB {@apply w-4 h-4 inline-block before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  mr-0.5  pl-5 cursor-pointer }
+.folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB , .taxotree .ico-entryR , .taxotree .ico-entryB  {@apply w-4 h-4 inline-block before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  mr-0.5  pl-5 cursor-pointer }
 .folders .ico-entryR, .folders .ico-entryB {@apply before:icon-folder-sm}
 .folders .entryD {@apply text-base font-normal}
 .folders .ico-entryD {@apply before:icon-trash-sm}
 .folders .on > .entryR, .folders .on > .entryB {@apply font-semibold}
 .folders .on > .ico-entryR, .folders .on > .ico-entryB {@apply before:icon-folder-open}
+.taxotree .ico-entryR, .taxotree .ico-entryB  {@apply before:icon-plus}
+.taxotree .on > .ico-entryR, .taxotree .on > .ico-entryB  {@apply before:icon-minus}
 .on > .entryD {@apply font-semibold}
 .on > .ico-entryD {@apply  before:icon-trash}
 .folders .entryN {@apply before:icon-document-sm}

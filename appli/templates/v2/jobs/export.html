@@ -1,5 +1,5 @@
 {% extends "./v2/layout.html" %}
-{% from "./v2/macros/macros.html" import form_group_radio with context %}
+{% from "./v2/macros/macros.html" import form_group_radio , modal with context %}
 {% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
 {%- macro make_part_form(type_export,datas)-%}
 {%-for name,option in formoptions[type_export].items() -%}
@@ -22,11 +22,9 @@
   <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
   <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{{datas[name][0] if name in datas}}</textarea>
   {%- elif option.format=='taxoline'-%}
-  <label>{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
-  <div class="taxoline js js-taxomapping" data-name="{{name}}" data-addline="addline" data-addtext="{{_('Add mapping')}}" data-notselected="{{_('select values to replace')}}"><select class="form-select" name="item-select" id="{{ option.id if 'id' in option.keys() else 'item-select'}}" data-role="select"><option value="">{{_('Select')}}</option>{%- for data in option.datas -%}<option value={{data[0]}}>{{data[1]}}</option>{%-endfor-%}</select>
-    <input type="text" data-maxitems=1 data-empty=true name="item-replace" id="{{ option.id + '-replace' if 'id' in option.keys() else 'item-replace'}}" data-addoption="{{option.addoption}}"  class="form-input js js-autocomplete ml-4 " autocomplete="off" placeholder="{{_('replace_by')}}" data-projid={{projid}} data-collection_id={{collection_id}}  data-type="taxo" data-role="replace"><div  class="addline ml-4 btn btn-secondary text-sm whitespace-nowrap cursor-pointer relative w-16" type="button" data-title="{{_('Add mapping')}}"><i class="icon icon-plus-sm center"></i></div></div>
-      {%- if "comment" in option-%}<em class="text-sm inline-block">{{option.comment}}</em>{%-endif-%}
-  {%-endif-%}{%-endif-%}
+{%-set comment = option.comment if "comment" in option else None-%}
+{%include('/v2/taxonomy/_import_taxo_mapping.html')%}
+ {%-endif-%}{%-endif-%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}
 {% block body %}
