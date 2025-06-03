@@ -1,5 +1,5 @@
 {%-macro project_nav()-%}
-{%-set projid = target_proj.projid if target_proj else target_obj["projid"] if target_obj else "0" -%}
+{%-set projid = projid if prodjid else target_proj.projid if target_proj else target_obj["projid"] if target_obj else  "0" -%}
 {%-set access = target_proj.access if target_proj else target_obj["access"] if target_obj else "0" -%}
 {%-set status = target_proj.status if target_proj else target_obj["status"] if target_obj else "" -%}
 {%-set managers = target_proj.managers if target_proj else target_obj["managers"] if target_obj else [] -%}
@@ -70,7 +70,7 @@
         {{_('About')}}
       </a>
     </li>      {% endif %}{%-endmacro-%}
-{% if target_proj and target_proj.projid > 0 or target_obj %}
+{% if target_proj and target_proj.projid > 0 or target_obj or projid %}
         <a href="{{ url_for("gui_prj")}}" title="{{_('projects list')}}" class="text-lg uppercase">
           &laquo;
         </a></li>

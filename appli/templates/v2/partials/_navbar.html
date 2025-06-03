@@ -2,7 +2,7 @@
 <div class="w-full relative mt-1 md:mt-0 py-4"><div id="menu-burger" class="burger" data-target="navbar-menu">
 <div class="burger-icon"></div>
 </div><ul id="navbar-menu"><li class="hidden sm:visible">
-  {%- if (not collection_id or collection_id==0) and not target_coll and not target_obj and not target_obj.id -%}
+  {%- if (not collection_id or collection_id==0) and not target_coll and (not target_obj or (target_obj.__class__.__name__ == "dict"  and "projid" in target_obj)  ) -%}
       {% include 'v2/partials/_project_nav.html'%}
 {%- elif  target_coll or (target_obj and target_obj.id)-%}
     {%-set targetcoll=target_obj if (not target_coll or target_coll.id==0) else target_coll -%}
