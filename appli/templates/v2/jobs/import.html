@@ -6,7 +6,7 @@
 {%-endmacro-%}
 {%-macro make_field(name,option, suffix=None)-%}
 {%- set suffix='_'+suffix if suffix!=None else ''-%}
-{%- if option.format=="checkbox"-%}<label for="{{name+suffix}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+suffix}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
+{%- if option.format=="checkbox"-%}<label for="{{name+suffix}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+suffix}}" name="{{name}}" class="form-checkbox ml-2" value={{option.value}}></label>
 {%-elif option.format=="radio"-%}<div class="label inline-block mr-2 w-auto">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if "discard" in option else ''}}>
      {%- if "options" in option.keys() -%}  {%- for opt in option.options -%}
     {%- set extra =' data-checked=true' if opt.value== datas[name][0] else '' -%}

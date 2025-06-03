@@ -69,7 +69,6 @@ def gui_login():
 
     if referer in [url_for("gui_login"), url_for("gui_index")]:
         referer = ""
-    print("referer", referer)
     return render_template("v2/login.html", next=referer, bg=True)
 
 
@@ -593,7 +592,6 @@ def utility_processor():
         from appli.gui.commontools import possible_licenses
 
         licenses = possible_licenses()
-        print(" licences-------", licenses)
         return licenses
 
     def bg_scale():
