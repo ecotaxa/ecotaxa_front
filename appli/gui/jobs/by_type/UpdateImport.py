@@ -22,6 +22,7 @@ class UpdateImportJob(ImportJob):
         req = ImportReq(
             source_path=file_to_load,
             taxo_mappings=taxo_map,
+            skip_existing_objects=cls._must_skip_existing_objects(),
             update_mode=update_classification,
         )
         return req
