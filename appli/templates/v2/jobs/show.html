@@ -1,7 +1,7 @@
 {%-set collection_id = target_coll.id if (target_coll and target_coll.id) else 0-%}
 {%-set collection_id = job.params.collection_id if (collection_id==0 and job.params and "collection_id" in job.params) else collection_id-%}
 {%-set collection_id = job.params.req.collection_id if (collection_id==0 and job.params.req and "collection_id" in job.params.req) else collection_id-%}
-{%-if collection_id==0-%}{%- set projid = target_proj.projid if (target_proj and target_proj.projid) else 0 -%}
+{%-if collection_id is None or collection_id==0-%}{%- set projid = target_proj.projid if (target_proj and target_proj.projid) else 0 -%}
 {%  set projid = job.params.prj_id if (projid==0 and job.params and "prj_id" in job.params) else projid %}
 {%  set projid = job.params.req.project_id if (projid==0 and job.params and job.params.req and "project_id" in  job.params.req) else projid %}
 {%-endif-%}
@@ -39,7 +39,7 @@ is-done
   <div class="mt-8 flex flex-col mb-2 sm:flex-row  sm:mb-0">
     <a href="{{ url_for('gui_job_cleanup', jobid=job.id)}}" class="button is-danger inverse mb-2 sm:mb-0">{{_('Clean task data')}}</a>
     <a href="{{url_for('gui_list_jobs')}}" class="button sm:ml-4  mb-2 sm:mb-0">{{_('Back to tasks list')}}</a>
-    {%if collection_id != 0 %}<a href="{{url_for('gui_collection_classify',collection_id=collection_id)}}" class="button sm:ml-4 ">{{_('Back to collection')}} {{collection_id}}</a>
+    {%if collection_id and collection_id != 0  %}<a href="{{url_for('gui_collection_classify',collection_id=collection_id)}}" class="button sm:ml-4 ">{{_('Back to collection')}} {{collection_id}}</a>
     {%- else-%}<a href="{{url_for('gui_prj_classify',projid=projid)}}" class="button sm:ml-4 ">{{_('Back to project')}} {{projid}}</a>{%-endif-%}
 </div>
 
