@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 from typing import Dict, List, Final, ClassVar
+
 from flask import request, flash
 from appli import gvp
 from appli.gui.jobs.by_type.Import import ImportJob
@@ -28,13 +29,13 @@ class SimpleImportJob(ImportJob):
         file_to_load = gvp("file_to_load")
         # update_classification = cls._update_mode(gvp("updateclassif"))
         # taxo_map = json.loads(gvp("taxo_mapping", "{}"))
-        values = {}
-        req = SimpleImportReq(source_path=file_to_load, values=values)
+        req = SimpleImportReq(source_path=file_to_load, values={})
         for fld in req.possible_values:
             a_val = gvp(fld)
             if a_val == "":
                 continue
-            values[fld] = a_val
+            req.values[fld] = a_val
+
         # dry run call for checking input
         projid = int(gvp("projid"))
         with ApiClient(ProjectsApi, request) as api:
@@ -46,7 +47,7 @@ class SimpleImportJob(ImportJob):
         if not cls.flash_any_error(errors):
             # Save preferences
             with ApiClient(UsersApi, request) as api:
-                val_to_write = json.dumps(values)
+                val_to_write = json.dumps(req.values)
                 api.set_current_user_prefs(projid, cls.PREFS_KEY, val_to_write)
         else:
             for error in errors:

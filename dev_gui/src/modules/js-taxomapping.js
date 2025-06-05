@@ -133,14 +133,13 @@ export class TaxoMapping {
       });
       form.append(keephidden);
       keephidden.value = JSON.stringify(mapping);
-
       return true;
     };
     if (form.formsubmit) {
       form.formsubmit.addHandler('submit', format_mapping_field);
 
     } else form.addEventListener('submit', (e) => {
-      format_mapping_field();
+       format_mapping_field();
     });
   }
 }

@@ -249,8 +249,8 @@ function createActivItems() {
            inputs.forEach(input => {
             empty=(empty && input.value.trim()==='');
            });
-           if (empty) empty = await AlertBox.addConfirm(item.dataset.message);
-           return empty;
+           if (empty) return await AlertBox.addConfirm(item.dataset.message);
+           else return true;
            }
            if (form.formsubmit) { form.formsubmit.addHandler('submit',not_empty)} else {
            form.addEventListener('submit',async (e) => {e.preventDefault();

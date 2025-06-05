@@ -2,6 +2,7 @@
 import time
 from pathlib import Path
 from typing import ClassVar
+from werkzeug.exceptions import UnprocessableEntity
 from flask import render_template, redirect, request, url_for
 from appli import gvp, app
 from appli.gui.jobs.Job import Job
@@ -106,7 +107,10 @@ class ImportJob(Job):
                 cwd = str(Path(server_path).parent)
                 api.set_current_user_prefs(projid, "cwd", cwd)
         req = cls.job_req()
-        rsp = cls.api_job_call(req)
+        if req is not None:
+            rsp = cls.api_job_call(req)
+        else:
+            raise UnprocessableEntity()
         if rsp is not None:
             return redirect(url_for("gui_job_show", job_id=rsp.job_id))
         formdatas, formoptions, import_links = import_format_options(cls.IMPORT_TYPE)
