@@ -1,7 +1,7 @@
-{%-set collection_id = target_coll.id if (target_coll and target_coll.id) else 0-%}
+{%-set collection_id = collection_id if collection_id else target_coll.id if (target_coll and target_coll.id) else 0 -%}
 {%-set collection_id = job.params.collection_id if (collection_id==0 and job.params and "collection_id" in job.params) else collection_id-%}
 {%-set collection_id = job.params.req.collection_id if (collection_id==0 and job.params.req and "collection_id" in job.params.req) else collection_id-%}
-{%-if collection_id is None or collection_id==0-%}{%- set projid = target_proj.projid if (target_proj and target_proj.projid) else 0 -%}
+{%-if not collection_id or collection_id==0-%}{%- set projid = target_proj.projid if (target_proj and target_proj.projid) else 0 -%}
 {%  set projid = job.params.prj_id if (projid==0 and job.params and "prj_id" in job.params) else projid %}
 {%  set projid = job.params.req.project_id if (projid==0 and job.params and job.params.req and "project_id" in  job.params.req) else projid %}
 {%-endif-%}
