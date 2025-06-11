@@ -156,7 +156,7 @@ class Job(object):
     def flash_any_error(cls, errors):
         if len(errors) > 0:
             for e in errors:
-                flash(e, "error")
+                raise ApiException(e, "error")
             return True
         else:
             return False

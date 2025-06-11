@@ -5,6 +5,7 @@ from typing import Dict, List, Final, ClassVar
 from flask import request, flash
 from appli import gvp
 from appli.gui.jobs.by_type.Import import ImportJob
+from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi, TaxonomyTreeApi
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.models import (
@@ -49,10 +50,6 @@ class SimpleImportJob(ImportJob):
             with ApiClient(UsersApi, request) as api:
                 val_to_write = json.dumps(req.values)
                 api.set_current_user_prefs(projid, cls.PREFS_KEY, val_to_write)
-        else:
-            for error in errors:
-                flash(error, "error")
-            req = None
         return req
 
     @classmethod

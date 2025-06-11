@@ -44,7 +44,7 @@ class SimpleImportReq(object):
         'possible_values': 'possible_values'
     }
 
-    def __init__(self, source_path=None, values=None, possible_values=["imgdate","imgtime","latitude","longitude","depthmin","depthmax","taxolb","userlb","status"], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, source_path=None, values=None, possible_values=["imgdate","imgtime","latitude","longitude","depthmin","depthmax","taxolb","userlb","datelb","status"], local_vars_configuration=None):  # noqa: E501
         """SimpleImportReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -89,7 +89,7 @@ class SimpleImportReq(object):
     def values(self):
         """Gets the values of this SimpleImportReq.  # noqa: E501
 
-        :imgdate, imgtime, latitude, longitude, depthmin, depthmax, taxolb, userlb, status  # noqa: E501
+        :imgdate, imgtime, latitude, longitude, depthmin, depthmax, taxolb, userlb, datelb, status  # noqa: E501
 
         :return: The values of this SimpleImportReq.  # noqa: E501
         :rtype: dict(str, str)
@@ -100,7 +100,7 @@ class SimpleImportReq(object):
     def values(self, values):
         """Sets the values of this SimpleImportReq.
 
-        :imgdate, imgtime, latitude, longitude, depthmin, depthmax, taxolb, userlb, status  # noqa: E501
+        :imgdate, imgtime, latitude, longitude, depthmin, depthmax, taxolb, userlb, datelb, status  # noqa: E501
 
         :param values: The values of this SimpleImportReq.  # noqa: E501
         :type: dict(str, str)

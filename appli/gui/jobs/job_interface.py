@@ -405,6 +405,11 @@ def import_format_options(_type=None) -> dict:
                                 "V": "validated",
                             },
                         },
+                        "datelb": {
+                            "label": _("Optional annotation date (YYYYMMDD, UTC)"),
+                            "format": "text",
+                            "class": " basis-1/2",
+                        },
                     },
                     "onsubmit": {
                         "confirm": {

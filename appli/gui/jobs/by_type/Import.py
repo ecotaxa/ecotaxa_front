@@ -109,10 +109,8 @@ class ImportJob(Job):
         req = cls.job_req()
         if req is not None:
             rsp = cls.api_job_call(req)
-        else:
-            raise UnprocessableEntity()
-        if rsp is not None:
-            return redirect(url_for("gui_job_show", job_id=rsp.job_id))
+            if rsp is not None:
+                return redirect(url_for("gui_job_show", job_id=rsp.job_id))
         formdatas, formoptions, import_links = import_format_options(cls.IMPORT_TYPE)
         return render_template(
             cls.STEP0_TEMPLATE,
