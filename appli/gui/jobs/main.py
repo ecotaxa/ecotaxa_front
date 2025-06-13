@@ -185,7 +185,10 @@ def gui_job_cleanup(jobid: int):
         with ApiClient(JobsApi, request) as api:
             job: JobModel = api.get_job(job_id=jobid)
             params = job.params
-            projid = params["prj_id"]
+            if "prj_id" in params:
+                projid = params["prj_id"]
+            else:
+                projid = None
             if params["req"] is not None:
                 if projid is None and "project_id" in params["req"]:
                     projid = params["req"]["project_id"]
