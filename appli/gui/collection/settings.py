@@ -47,8 +47,10 @@ def _set_persons(persons: list) -> Dict[str, list]:
     plist = {"users": [], "organisations": []}
     for person in persons:
         if person[0 : len(orgprefix)] == orgprefix:
-            plist["organisations"].append(int(person[len(orgprefix) :]))
-        else:
+            orga = person[len(orgprefix) :]
+            if len(orga.strip()):
+                plist["organisations"].append(int(orga))
+        elif len(person.strip()):
             plist["users"].append(_user_format(int(person)))
     return plist
 

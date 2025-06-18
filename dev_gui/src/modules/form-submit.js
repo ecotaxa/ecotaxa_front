@@ -301,7 +301,6 @@ export class FormSubmit {
   async formFetch(format = null) {
     const formdata = new FormData(this.form);
     formdata["fetch"] = true;
-
     let response= await fetch(this.form.action, fetchSettings({
         method: 'POST',
         body: formdata,
@@ -346,6 +345,12 @@ export class FormSubmit {
         return true;
       }
     }
+    AlertBox.addAlert({
+          type: AlertBox.alertconfig.types.warning,
+          parent: this.form,
+          content: 'Form not submitted, please check required fields and warning messages',
+          dismissible: true
+        });
     return false;
   }
   enableForm() {

@@ -500,7 +500,6 @@ export function EntryControls(container = document, options = {}) {
   }
 
   function addControl(control, position = null, action = null) {
-
     const ctrl = create_box('span', (control.class)?{class:control.class}:{});
     const l = box.children.length;
     if (position === null || l < position + 1) box.append(ctrl);
@@ -522,8 +521,10 @@ export function EntryControls(container = document, options = {}) {
           console.log('done', control.action);
         }
       }
-
-      if (!activentry[control.action] && action !== null) {
+       if (typeof control.action==='function') {
+       control.action(activentry);
+      }
+      else if (!activentry[control.action] && action !== null) {
         action(activentry);
       } else if (activentry[control.action]) activentry[control.action](detail);
       if (control.callback)  control.callback(e);
@@ -532,7 +533,9 @@ export function EntryControls(container = document, options = {}) {
     //
     control.ctrl = ctrl;
    }
-
+   function removeControl(control) {
+   control.ctrl.remove();
+   }
   function createControls() {
     box = create_box('div', {
       class: [options.css.entrycontrols, css.hide]
@@ -541,7 +544,11 @@ export function EntryControls(container = document, options = {}) {
       addControl(control);
     });
   }
-
+  function removeControls() {
+    Object.values(options.controls).filter(control => (control.icon || control.text)).forEach(control => {
+      removeControl(control);
+    });
+  }
   function initEvents() {}
 
   function detachControls() {
@@ -596,6 +603,8 @@ export function EntryControls(container = document, options = {}) {
     detachControls,
     showControls,
     activateControls,
-    activateControl
+    activateControl,
+    createControls,
+    removeControls
   }
 }

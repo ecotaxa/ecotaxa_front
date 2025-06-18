@@ -215,7 +215,7 @@ const browser = detect();
         ModuleEventEmitter.emit(eventnames.message, {
           id: "quota",
           name: "console",
-          message: "you've used " + percentageUsed + "% of the available storage (" + remaining + ").",
+          message: "you've used " + percentageUsed + "% of the available browser storage necessary to locally compress files (" + remaining + ").",
         }, _listener);
       });
     }

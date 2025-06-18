@@ -207,6 +207,7 @@ export function JsImport(container, options = {}) {
       entrylist.entrycontrols.showControls(false);
       selected = activentry;
     }
+      entrylist.entrycontrols.removeControls();
       const control = {
       import: {
         action: 'import',
@@ -217,20 +218,21 @@ export function JsImport(container, options = {}) {
         callback: add_remove_import
       }
     };
-    entrylist.entrycontrols.options.controls = {
-      ...entrylist.entrycontrols.options.controls,
-      ...control
-    };
-    const import_action = function(entry) {
+     control.import.action = function(entry) {
       if (entrylist.activentry) entrylist.activentry.setSelected(false);
       addImportEntry(entry);
       ModuleEventEmitter.emit(eventnames.select, {
         value: false
       }, uploaduuid);
     }
-    entrylist.entrycontrols.addControl(control.import, 0, import_action);
-    entrylist.entrycontrols.activateControl(control.import);
-  }
+   entrylist.entrycontrols.options.controls = { ...control,
+      ...entrylist.entrycontrols.options.controls,
+
+    };
+
+    entrylist.entrycontrols.createControls();
+    entrylist.entrycontrols.activateControls();
+    }
 
   function showSubmit(show = true) {
     const submit = container.querySelector('[type="submit"]');

@@ -448,7 +448,6 @@ export class JsMyFiles {
     if (e.dataTransfer) {
       dataTransfer = e.dataTransfer;
     } else dataTransfer = e;
-    this.done = false;
     this.initTimer();
     const items = [...((dataTransfer.items) ? dataTransfer.items : dataTransfer.files)];
     if (items.length) {
@@ -664,6 +663,7 @@ export class JsMyFiles {
         };
         break;
     case this.eventnames.sendfile:
+        this.done=false;
         btn.dataset.message = JSON.stringify({
           name: this.eventnames.sendfile,
           path: filepath,
@@ -694,6 +694,7 @@ export class JsMyFiles {
           part: part,
           path: filepath
         });
+        this.done=true;
         btn.classList.add(css.hide);
         btn.click();
         return;

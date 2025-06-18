@@ -22,7 +22,7 @@ import {
 import {
   FormSubmit
 } from '../modules/form-submit.js';
-let users_list = {};
+let users_list = null;
 function _get_label(el, labelfield, item = false) {
   if (!labelfield) return el.text;
   let label = [];
@@ -184,13 +184,13 @@ const funcselector='.js-autocomplete';
             labelField: 'name+email',
             onInitialize: function() {
               if (item.currentlist) users_list = item.currentlist;
-              else item.tomselect.items.forEach(e => {
+              else if(item.name.indexOf('[')>=0) { users_list = {}; item.tomselect.items.forEach(e => {
                 if (e !== '' && parseInt(e) > 0) users_list[e] = true;
-              });
+              });}
             },
             onItemAdd: function(e) {
               if (e === "") return;
-              if (users_list[e]) {
+              if (users_list!==null  && users_list[e] ) {
                 //  if (multiple || !this.revertSettings || this.revertSettings.tabIndex < 0 || !item.options.length) return;
                 AlertBox.addMessage({
                   type: AlertBox.alertconfig.types.danger,
@@ -213,13 +213,13 @@ const funcselector='.js-autocomplete';
                   });
 
                 }, 2000);
-              } else users_list[e] = true;
+              } else if (users_list!==null) users_list[e] = true;
             },
             onItemRemove: function(e) {
-              if (users_list[e]) delete users_list[e];
+              if (users_list!==null && users_list[e]) delete users_list[e];
               if (multiple || !this.revertSettings || (this.revertSettings.innerHTML === '' && this.revertSettings.tabIndex === 0) || this.revertSettings.tabIndex < 0) return;
               const revert = item.options[this.revertSettings.tabIndex].value;
-              if (users_list[revert] !== undefined) delete users_list[revert];
+              if (users_list!==null && users_list[revert] !== undefined) delete users_list[revert];
 
             }
           }
@@ -358,7 +358,7 @@ const funcselector='.js-autocomplete';
         item: function(el, escape) {
           if (el === undefined || el === null) return ``; // add optgroup
           const optgroup = (el.optgroup) ? `item-${el.optgroup}` : ``;
-          const inlist = (users_list[el[this.settings.valueField]]) ? `data-inlist` : ``;
+          const inlist = (users_list!==null && users_list[el[this.settings.valueField]]) ? `data-inlist` : ``;
           const cancel = ``;
           const label = _get_label(el, option.settings.labelField, true);
           const itemprefix =(this.settings.itemprefix && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].substr(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
