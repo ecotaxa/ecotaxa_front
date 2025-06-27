@@ -235,6 +235,11 @@ def gui_help(filename):
     partial = is_partial_request()
     filename = escape(filename)
     title = gvg("title", "")
+    args = {}
+    if filename.find("_collection_settings") >= 0:
+        from appli.gui.commontools import possible_licenses
+
+        args.update({"licenses": possible_licenses()})
     if filename[0:1] != "_":
         return render_template(
             "/v2/help/index.html",
@@ -242,13 +247,14 @@ def gui_help(filename):
             partial=partial,
             title=title,
             notfound=None,
+            args=args,
         )
     filename = "/v2/help/" + filename + ".html"
     if not exists("appli/templates" + filename):
         return render_template(
             "/v2/help/index.html", notfound=filename, partial=partial
         )
-    return render_template(filename, partial=partial, title=title)
+    return render_template(filename, partial=partial, title=title, args=args)
 
 
 # alert boxes xhr

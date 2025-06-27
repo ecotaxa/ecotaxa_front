@@ -29,7 +29,7 @@
 
   <details id="help_collection_description" ><summary>{{_('Description')}}</summary><div>{{_('Any technical, practical details that need to be shared with other users able to access this target_proj.')}}</div>
   </details>
-   <details id="help_collection_license" ><summary>{{_('License')}}</summary><div>{{ _('.') | safe}} </div>
+   <details id="help_collection_license" ><summary>{{_('License')}}</summary><div>{%if args and "licenses" in args%}<ul>{%-for key,license in args.licenses.items()-%}<li><strong>{{key}}</strong><p>{{ license | safe }}</p></li>{%-endfor-%}</ul>{%-endif-%}</div>
   </details>
 <details  id="help_collection_creator"><summary>{{_('Creator')}}</summary>
   <div>{{_('Name of persons or organisations who are responsible for the creation / maintenance of the dataset. These persons will be mentioned in the citation.')}}</div>
