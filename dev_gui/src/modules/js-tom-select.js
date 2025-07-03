@@ -206,21 +206,19 @@ const funcselector='.js-autocomplete';
                     const revert = item.options[this.revertSettings.tabIndex].value;
                     this.addItem(revert);
                   }
-                  AlertBox.addMessage({
+                 /* AlertBox.addMessage({
                     type: AlertBox.alertconfig.types.danger,
                     parent: item,
                     content: AlertBox.i18nmessages.exists
-                  });
-
+                  });*/
                 }, 2000);
               } else if (users_list!==null) users_list[e] = true;
             },
             onItemRemove: function(e) {
               if (users_list!==null && users_list[e]) delete users_list[e];
-              if (multiple || !this.revertSettings || (this.revertSettings.innerHTML === '' && this.revertSettings.tabIndex === 0) || this.revertSettings.tabIndex < 0) return;
+              if (multiple || !this.revertSettings || (this.revertSettings.innerHTML === '' && this.revertSettings.tabIndex === 0) || this.revertSettings.tabIndex < 0) {console.log('this revet',this.revertSettings);return;}
               const revert = item.options[this.revertSettings.tabIndex].value;
               if (users_list!==null && users_list[revert] !== undefined) delete users_list[revert];
-
             }
           }
         };
@@ -285,7 +283,6 @@ const funcselector='.js-autocomplete';
 
         const self = this;
         if (self.loading > 10) {
-
           callback();
           return;
         }
@@ -300,7 +297,6 @@ const funcselector='.js-autocomplete';
           case models.taxo:
             url = option.url;
             //
-
             if (query.indexOf('_') == 0 && option.settings.addoption && query == option.settings.addoption[0]) {
               url = null;
               return callback(Object.entries([{
@@ -310,7 +306,6 @@ const funcselector='.js-autocomplete';
             }
             //
             if (query) url += '?q=' + encodeURIComponent(query);
-
             break;
           case models.project:
             url = option.url;
@@ -318,6 +313,7 @@ const funcselector='.js-autocomplete';
             if (query) url += '?filt_title=' + encodeURIComponent(query); //+ '&filt_instrum=' + encodeURIComponent(query);
             break;
         }
+
         if (url !== null) fetch(url, fetchSettings()).then(response => response.json()).then(json => {
           if (type === models.project) {
             if (json.data && json.data.length) json = json.data.map(row => {
@@ -339,7 +335,8 @@ const funcselector='.js-autocomplete';
           }, []);
 
           if (json.length && typeof json == 'object') json = Object.entries(json);
-          return callback(json);
+          console.log('thisoptions', this.options)
+          return this.options + (callback)?callback(json):json;
 
         }).catch(err => {
           console.log('tomselect-err', err);
