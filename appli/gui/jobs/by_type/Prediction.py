@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import time
-from typing import List, Any, Final, Tuple, Optional, Dict, ClassVar
+from typing import List, Any, Final, ClassVar
 
 from flask import render_template, g, redirect, flash, request
-from appli import PrintInCharte, gvg, XSSEscape, gvp, app
+from appli import PrintInCharte, gvg, gvp
 from appli.gui.jobs.Job import Job
 from appli.utils import ApiClient, DecodeEqualList, EncodeEqualList
 from to_back.ecotaxa_cli_py import (
-    ApiException,
     ObjectsApi,
     ObjectSetQueryRsp,
     ProjectSetColumnStatsModel,
@@ -320,9 +319,11 @@ class PredictionJob(Job):
                 r[1],
                 r[2],
                 round(100 * r[2] / total_validated, 1),
-                "checked"
-                if len(settings_taxo_set) == 0 or r[0] in settings_taxo_set
-                else "",
+                (
+                    "checked"
+                    if len(settings_taxo_set) == 0 or r[0] in settings_taxo_set
+                    else ""
+                ),
             ]
             for r in taxo_table
         ]  # Add object % and 'checked' or not
