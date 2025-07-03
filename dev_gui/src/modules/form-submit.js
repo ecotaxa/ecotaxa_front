@@ -346,7 +346,7 @@ export class FormSubmit {
       }
     }
     AlertBox.addAlert({
-          type: AlertBox.alertconfig.types.warning,
+          type: AlertBox.alertconfig.types.error,
           parent: this.form,
           content: 'Form not submitted, please check required fields and warning messages',
           dismissible: true
