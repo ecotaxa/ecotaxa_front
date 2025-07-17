@@ -45,6 +45,7 @@ export function JsDirToZip(options = {}) {
     init: 'init'
   };
   let jsScanDir, properties;
+  let trydelete=0;
   const defaultOptions = {
     uploadurl: '/gui/files/upload',
     largefile: MAXSIZE,
@@ -59,6 +60,7 @@ export function JsDirToZip(options = {}) {
   const _listener = (options.listener) ? options.listener : uuid;
   Object.freeze(options);
   const uuid = generate_uuid();
+  initStorage();
   init();
 
 function browserRequired() {
@@ -80,6 +82,7 @@ const browser = detect();
     properties = initProps();
     ModuleEventEmitter.on(eventnames.init, async (e) => {
       //  if (!e.bigfile && !e.part) {
+      console.log('event init', e)
       if (isActive() === false) {
         await reset();
         ModuleEventEmitter.emit(eventnames.complete, {
@@ -88,14 +91,19 @@ const browser = detect();
         properties.endreaddir = false;
       } else console.log('partly finshed ', e);
     }, uuid);
-    ModuleEventEmitter.on(eventnames.endzip, (e) => {
+    ModuleEventEmitter.on(eventnames.endzip, async(e) => {
       if (!e.bigfile && properties.zip) properties.zip.end();
       else if (e.bigfile && properties.gzipped) console.log('--gzipped end', properties.gzipped);
-      console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+      console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%',);
+      const evtsend=async function() {
+      const zipclosed = await listStorage(null,properties.zipname);
+      if (zipclosed === true) { 
       const message = buildMessage(e, {
         name: eventnames.sendfile,
       });
-      ModuleEventEmitter.emit(eventnames.complete, message, _listener);
+      ModuleEventEmitter.emit(eventnames.complete, message, _listener);}
+      else setTimeout(async function() {await evtsend();},2000);}
+      evtsend();
     }, uuid);
     ModuleEventEmitter.on(eventnames.sendfile, async (e) => {
       const file = (e.bigfile) ? await properties.gzipped.getFile(): await getFile();
@@ -166,7 +174,6 @@ const browser = detect();
         if (final) {
           properties.streamhandle.close();
           console.log('final-----------------------------*******************************-', properties.pos);
-
         }
 
       }
@@ -243,7 +250,7 @@ const browser = detect();
       create: true
     };
     const filestream = await root.getFileHandle(name, opts);
-    const streamhandle = await filestream.createWritable();
+    const streamhandle = await filestream.createWritable({mode:"exclusive"});
     return {
       filestream,
       streamhandle
@@ -529,21 +536,33 @@ const browser = detect();
   }
   async function cleanStorage(entry = null) {
     entry = (entry) ? entry : await navigator.storage.getDirectory();
-    for await (const [key, value] of entry.entries()) {
+     for await (const [key, value] of entry.entries()) {
       try {
         await entry.removeEntry(key);
         console.log(' Success remove storage ', key);
       } catch (error) {
         console.log(' error remove storage ' + key, error);
+        }
       }
     }
-
-  }
-
+async function listStorage(entry = null,name=null) {
+    entry = (entry) ? entry : await navigator.storage.getDirectory();
+    let rep=true;
+     for await (const [key, value] of entry.entries()) {
+        if (name!==null) {
+            const parts = key.split('.');
+            if (parts.pop()==='crswap' && parts.join('.') ===name) {
+            rep=false;
+            break;
+            }
+        }
+        }
+      return rep;
+    }
   async function endFetch(message, clean = false) {
     message.name = eventnames.terminate;
     if (properties.follow) {
-      properties.streamhandle = await properties.filestream.createWritable();
+      properties.streamhandle = await properties.filestream.createWritable({mode:"exclusive"});
       message.name = eventnames.follow;
       ModuleEventEmitter.emit(eventnames.follow, message, _listener)
       await initZip();
