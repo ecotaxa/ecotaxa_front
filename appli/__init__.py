@@ -31,6 +31,7 @@ from appli.constants import KNOWN_LANGUAGES, TRANSLATION_PATH
 from flask_babel import Babel
 
 app.config["BABEL_TRANSLATION_DIRECTORIES"] = TRANSLATION_PATH
+app.config["PREFERRED_URL_SCHEME"] = "https"
 babel = Babel(app)
 # set up login manager
 login_manager = LoginManager()
@@ -338,7 +339,7 @@ ecotaxa_version = "2.8.3"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + ".2025-07-03"
+    return ecotaxa_version + ".2025-07-17"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
