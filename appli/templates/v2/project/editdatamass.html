@@ -14,7 +14,7 @@
 <a href="{{ url_for("gui_prj")}}" class="alert danger">{{_('Select another project')}}</a>
 {% elif target_proj and target_proj.projid %}
 
-<form method=post action="{{request.url}}" class="mb-0 pb-0 js js-submit">  <fieldset>  <div class="block-info text-danger-500 font-normal text-lg mx-auto">
+<form method=post action="{{url_for(request.endpoint)}}" class="mb-0 pb-0 js js-submit">  <fieldset>  <div class="block-info text-danger-500 font-normal text-lg mx-auto">
 {%if warning >0 %}
 {{_('USING Active Project Filters')}} {{objectids|length}} {{_('objects')}}
   {%else%}
@@ -46,7 +46,7 @@
   </ul>
 </div></fieldset>
 </form>
-<form method="post" action="{{request.url}}" class="my-0 py-0"><fieldset>
+<form method="post" action="{{url_for(request.endpoint)}}" class="my-0 py-0"><fieldset>
   <button name="recompute" value="Y" type="submit" class="button is-primary inverse w-full sm:w-96 sm:mr-4">{{_('Recompute sample latitude and longitude')}} </button>
   <button name="recompute2" value="Y" type="submit" class="button is-primary inverse w-full sm:w-96">{{_('Recompute sun position (VERY LONG)')}}</button></fieldset>
 </form>

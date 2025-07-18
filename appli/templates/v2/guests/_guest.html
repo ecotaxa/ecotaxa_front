@@ -1,5 +1,5 @@
   {% from "./v2/macros/macros.html" import inputdict, alertbox with context %}
-   <form method="post" action="{{request.url}}" id="formuguest" class="js js-submit relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}"  >
+   <form method="post" action="{{url_for(request.endpoint)}}" id="formuguest" class="js js-submit relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}"  >
    {%-if not partial-%}<input type="hidden" name="crsf_token" value={{ crsf_token }}>{%-endif-%}
 
       <input type="hidden" name="id" id="id" value="{{guest.id if guest.id else -1  }}">

@@ -25,7 +25,7 @@
 <a class="back-button" href="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}">{{_('Back to target project')}}</a>
 {%else%}
 {%set optionauthors ={"from":("anyuser",_('Any User')),"to":("lastannot",_('Previous Annotation available, or prediction, or Nothing'))}%}
-<form method="post" action="{{request.url}}" class="my-0 py-0 js js-submit">
+<form method="post" action="{{url_for(request.endpoint)}}" class="my-0 py-0 js js-submit">
 <fieldset><div class="form-box"><label>{{_('Replace the identification done by:')}}</label>
   {{ inputdict('oldauthor','oldauthor',value ='', label='',type='', placeholder=_('identitification done by'),required= True,autocomplete=True , options=[optionauthors["from"]]+authors) }}
 </div>
@@ -56,7 +56,7 @@
     {%endif%}
   {% elif oldauthor != None  -%}
     {% if taxoimpact is iterable and taxoimpact|length%}
-  <form method="post" action="{{request.url}}" class="my-0 py-0">
+  <form method="post" action="{{url_for(request.endpoint)}}" class="my-0 py-0">
     <fieldset>
       <div class="py-2">
   {%if oldauthor == "anyuser" %}

@@ -30,7 +30,7 @@ def gui_files_create() -> dict:
     entry = gvp("entry", "")
     entry = entry.strip()
     if entry == "":
-        return make_response(422,"")
+        return make_response(422, "")
     from appli.gui.files.tools import create_dir_file
 
     ret = create_dir_file(entry)
@@ -43,7 +43,7 @@ def gui_files_remove() -> dict:
     entry = gvp("entry", "")
     entry = entry.strip()
     if entry == "":
-        return make_response(422,"1")
+        return make_response(422, "1")
     from appli.gui.files.tools import remove_dir_file
 
     ret = remove_dir_file(entry)
@@ -57,9 +57,9 @@ def gui_files_move() -> dict:
     entry = gvp("entry", "")
     entry = entry.strip()
     dest = gvp("dest", "")
-    dest=dest.strip()
+    dest = dest.strip()
     if entry == "" or dest == "":
-        return make_response(422,"")
+        return make_response(422, "")
     from appli.gui.files.tools import move_dir_file
 
     ret = move_dir_file(entry, dest)

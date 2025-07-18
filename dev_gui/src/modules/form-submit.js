@@ -351,6 +351,7 @@ export class FormSubmit {
           content: 'Form not submitted, please check required fields and warning messages',
           dismissible: true
         });
+    this.enableForm();
     return false;
   }
   enableForm() {

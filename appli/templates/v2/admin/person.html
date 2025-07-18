@@ -3,6 +3,6 @@
 {%-endif-%}
 {% block body %}
 <div class="container mx-auto " id="target-person">
-  <span data-href="{{request.url}}" data-type="guest" class="button text-sm is-primary" >{{_('Add a guest user')}}</span>  <span data-href="{{request.url}}" data-type="organization" class="button text-sm is-primary" >{{_('Add an organization')}}</span>
+  <span data-href="{{url_for(request.endpoint)}}" data-type="guest" class="button text-sm is-primary" >{{_('Add a guest user')}}</span>  <span data-href="{{url_for(request.endpoint)}}" data-type="organization" class="button text-sm is-primary" >{{_('Add an organization')}}</span>
 </div>
 {% endblock %}
