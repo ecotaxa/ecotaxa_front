@@ -20,7 +20,7 @@
 {%if usrid==-1 or user %}
 {% include('v2/users/_user.html')%}
 {% elif usrid !=-1 and api_account_validation==True %}
-<form method="post" action={{url_for(request.endpoint)}} class="js js-submit mt-24 pt-24">
+<form method="post" action={{request.full_path}} class="js js-submit mt-24 pt-24">
   <input type="hidden" name="token" value="{{token}}"
 <div class="form-box"><label for="password">{{_('Enter your password to get access to your profile')}}</label>
   <input type="password" id="password" name="password" class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern={{api_password_regexp()}} required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">

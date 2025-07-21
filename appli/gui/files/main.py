@@ -42,8 +42,6 @@ def gui_files_create() -> dict:
 def gui_files_remove() -> dict:
     entry = gvp("entry", "")
     entry = entry.strip()
-    if entry == "":
-        return make_response(422, "1")
     from appli.gui.files.tools import remove_dir_file
 
     ret = remove_dir_file(entry)

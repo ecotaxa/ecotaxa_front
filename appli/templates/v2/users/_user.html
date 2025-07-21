@@ -19,7 +19,7 @@
     {% endif%}
     </div>
   {%-endmacro%}
-  <form method="post" action="{{url_for(request.endpoint) }}" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch=html' if createaccount==True and current_user.is_anonymous else '' }} data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
+  <form method="post" action="{{request.full_path}}" id="formu" class="js js-submit relative mt-12 md:mt-8" {{'data-fetch=html' if createaccount==True and current_user.is_anonymous else '' }} data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}" data-import=true onsubmit="return false" >
    <input type="hidden" name="crsf_token" value={{ crsf_token }}>
    {% if token!="" and token!=None %}<input type="hidden" id="token" name="token" value={{ token }}>
    {% endif%}

@@ -81,8 +81,6 @@ const browser = detect();
   function init() {
     properties = initProps();
     ModuleEventEmitter.on(eventnames.init, async (e) => {
-      //  if (!e.bigfile && !e.part) {
-      console.log('event init', e)
       if (isActive() === false) {
         await reset();
         ModuleEventEmitter.emit(eventnames.complete, {

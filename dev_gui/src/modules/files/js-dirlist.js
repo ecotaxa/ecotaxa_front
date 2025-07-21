@@ -93,7 +93,7 @@ export const dirlistOptions = {
         action: 'remove',
         text: 'delete',
         icon: 'icon-trash',
-        typentries: [entryTypes.branch, entryTypes.node, entryTypes.discarded]
+        typentries: [entryTypes.branch, entryTypes.node, entryTypes.root, entryTypes.discarded]
       },
       move: {
         action: 'move',
@@ -159,7 +159,7 @@ function EntryAction(args, options) {
     const api_parameters = this.options.api_parameters;
     const label = this.getLabelElement();
     let entrypath = this.getCurrentDirPath();
-    if (entrypath === '') return;
+    if (entrypath === '' && action!==this.options.actions.remove) return;
     const data = new FormData();
     data.append(api_parameters.entry, entrypath);
     switch (action) {
@@ -178,6 +178,9 @@ function EntryAction(args, options) {
           data.append(api_parameters.dest, destpath);
         } else return;
         break;
+      case this.options.actions.remove:
+      if (entrypath==='') callback=() => {this.loaded=false;this.setOff();this.setOpen();}
+      break;
       case this.options.actions.rename:
         const destpath = entrypath.split(dirseparator);
         destpath[destpath.length - 1] = label.textContent;

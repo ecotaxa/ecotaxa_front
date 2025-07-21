@@ -21,7 +21,7 @@
       <div class="text-sm pt-2"><p><i class="icon icon-alert align-text-bottom p-0.5"></i> {{_('Around 10000 objects are deleted per second, so on a big project it can be long,
       a NGinx Error may happen, but erase process is still working in background.')}}. {{ _('Statistics are not updated during erase project.')}}</p></div>
     </div>
-        <form method="post" action="{{url_for(request.endpoint)}}" id="form-purge" class="js js-submit">
+        <form method="post" action="{{request.full_path}}" id="form-purge" class="js js-submit">
         <div class="form-box"><textarea name="objlist" id="objlist" class="form-textarea" cols="15" rows="20" autocomplete=off>{{objlist|join("\n")}}</textarea></div>
         {%- if  objlist|length == 0 -%}<div class="form-box"><label><input type=checkbox name="destroyproject" value=Y> {{_('DELETE project after "DELETEALL" action')}}</label></div>{%-endif-%}
         <button type="submit" data-action="confirm" data-content="{{_('This action is irreversible.Do you really want to delete these objects ?')}}" class="button is-danger">{{_('ERASE THESE OBJECTS !!! IRREVERSIBLE !!!!!')}}</button> <a href ="{{ url_for("gui_prj_classify",projid=target_proj.projid)}}" class="button is-secondary inverse" data-title="{{_('Cancel and back to project')}}">{{_('Cancel')}}</a>

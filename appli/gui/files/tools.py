@@ -28,7 +28,7 @@ def create_dir_file(source_path: str) -> str:
 
 def remove_dir_file(source_path: str) -> int:
     if source_path == "" or source_path == "/":
-        return 0
+        source_path = "*"
 
     with ApiClient(MyfilesApi, request) as api:
         ret = api.remove_my_file(source_path=source_path)
