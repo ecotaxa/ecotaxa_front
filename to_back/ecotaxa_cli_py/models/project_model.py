@@ -35,7 +35,6 @@ class ProjectModel(object):
     openapi_types = {
         'projid': 'int',
         'title': 'str',
-        'visible': 'bool',
         'access': 'str',
         'status': 'str',
         'objcount': 'float',
@@ -67,7 +66,6 @@ class ProjectModel(object):
     attribute_map = {
         'projid': 'projid',
         'title': 'title',
-        'visible': 'visible',
         'access': 'access',
         'status': 'status',
         'objcount': 'objcount',
@@ -96,7 +94,7 @@ class ProjectModel(object):
         'highest_right': 'highest_right'
     }
 
-    def __init__(self, projid=None, title=None, visible=None, access=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, description=None, rf_models_used=None, cnn_network_id=None, formulae=None, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, bodc_variables=None, init_classif_list=[], managers=[], annotators=[], viewers=[], contact=None, instrument=None, instrument_url=None, highest_right='', local_vars_configuration=None):  # noqa: E501
+    def __init__(self, projid=None, title=None, access=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, description=None, rf_models_used=None, cnn_network_id=None, formulae=None, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, bodc_variables=None, init_classif_list=[], managers=[], annotators=[], viewers=[], contact=None, instrument=None, instrument_url=None, highest_right='', local_vars_configuration=None):  # noqa: E501
         """ProjectModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -104,7 +102,6 @@ class ProjectModel(object):
 
         self._projid = None
         self._title = None
-        self._visible = None
         self._access = None
         self._status = None
         self._objcount = None
@@ -135,8 +132,6 @@ class ProjectModel(object):
 
         self.projid = projid
         self.title = title
-        if visible is not None:
-            self.visible = visible
         self.access = access
         if status is not None:
             self.status = status
@@ -238,29 +233,6 @@ class ProjectModel(object):
             raise ValueError("Invalid value for `title`, must not be `None`")  # noqa: E501
 
         self._title = title
-
-    @property
-    def visible(self):
-        """Gets the visible of this ProjectModel.  # noqa: E501
-
-        The project visibility. (deprecated)   # noqa: E501
-
-        :return: The visible of this ProjectModel.  # noqa: E501
-        :rtype: bool
-        """
-        return self._visible
-
-    @visible.setter
-    def visible(self, visible):
-        """Sets the visible of this ProjectModel.
-
-        The project visibility. (deprecated)   # noqa: E501
-
-        :param visible: The visible of this ProjectModel.  # noqa: E501
-        :type: bool
-        """
-
-        self._visible = visible
 
     @property
     def access(self):

@@ -119,6 +119,7 @@ def prj_create() -> str:
     scn = possible_models()
     access = possible_access()
     formulae = get_back_constants("FORMULAE")
+    default_access = get_back_constants("DEFAULT_ACCESS")
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=None,
@@ -126,6 +127,7 @@ def prj_create() -> str:
         new=True,
         scn=scn,
         possible_access=access,
+        default_access=default_access,
         formulae=formulae,
     )
 
@@ -162,7 +164,6 @@ def prj_edit(prjid: int, new: bool = False):
         ]
 
         posted_contact_id = gvp("contact_user_id")
-        target_proj.visible = gvp("visible") == "Y"
         if new != True and previous_cnn != target_proj.cnn_network_id:
             flash(py_messages["scnerased"], "success")
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
