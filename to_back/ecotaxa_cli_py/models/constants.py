@@ -46,7 +46,10 @@ class Constants(object):
         'short_token_age': 'int',
         'profile_token_age': 'int',
         'recaptchaid': 'bool',
-        'formulae': 'str'
+        'formulae': 'str',
+        'default_project_access': 'str',
+        'max_upload_size': 'int',
+        'time_to_live': 'int'
     }
 
     attribute_map = {
@@ -63,12 +66,15 @@ class Constants(object):
         'short_token_age': 'short_token_age',
         'profile_token_age': 'profile_token_age',
         'recaptchaid': 'recaptchaid',
-        'formulae': 'formulae'
+        'formulae': 'formulae',
+        'default_project_access': 'default_project_access',
+        'max_upload_size': 'max_upload_size',
+        'time_to_live': 'time_to_live'
     }
 
     def __init__(self, license_texts=None, access=None, app_manager=["",""], countries=[], people_organization_directories=None, user_status=None, user_type=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, formulae='''subsample_coef: 1/ssm.sub_part
 total_water_volume: sam.tot_vol/1000
-individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', local_vars_configuration=None):  # noqa: E501
+individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=60, local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -88,6 +94,9 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         self._profile_token_age = None
         self._recaptchaid = None
         self._formulae = None
+        self._default_project_access = None
+        self._max_upload_size = None
+        self._time_to_live = None
         self.discriminator = None
 
         if license_texts is not None:
@@ -118,6 +127,12 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
             self.recaptchaid = recaptchaid
         if formulae is not None:
             self.formulae = formulae
+        if default_project_access is not None:
+            self.default_project_access = default_project_access
+        if max_upload_size is not None:
+            self.max_upload_size = max_upload_size
+        if time_to_live is not None:
+            self.time_to_live = time_to_live
 
     @property
     def license_texts(self):
@@ -440,6 +455,75 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         """
 
         self._formulae = formulae
+
+    @property
+    def default_project_access(self):
+        """Gets the default_project_access of this Constants.  # noqa: E501
+
+        Project default access level  # noqa: E501
+
+        :return: The default_project_access of this Constants.  # noqa: E501
+        :rtype: str
+        """
+        return self._default_project_access
+
+    @default_project_access.setter
+    def default_project_access(self, default_project_access):
+        """Sets the default_project_access of this Constants.
+
+        Project default access level  # noqa: E501
+
+        :param default_project_access: The default_project_access of this Constants.  # noqa: E501
+        :type: str
+        """
+
+        self._default_project_access = default_project_access
+
+    @property
+    def max_upload_size(self):
+        """Gets the max_upload_size of this Constants.  # noqa: E501
+
+        My Files max file upload size (bytes)  # noqa: E501
+
+        :return: The max_upload_size of this Constants.  # noqa: E501
+        :rtype: int
+        """
+        return self._max_upload_size
+
+    @max_upload_size.setter
+    def max_upload_size(self, max_upload_size):
+        """Sets the max_upload_size of this Constants.
+
+        My Files max file upload size (bytes)  # noqa: E501
+
+        :param max_upload_size: The max_upload_size of this Constants.  # noqa: E501
+        :type: int
+        """
+
+        self._max_upload_size = max_upload_size
+
+    @property
+    def time_to_live(self):
+        """Gets the time_to_live of this Constants.  # noqa: E501
+
+        My Files number of days before deleting directories  # noqa: E501
+
+        :return: The time_to_live of this Constants.  # noqa: E501
+        :rtype: int
+        """
+        return self._time_to_live
+
+    @time_to_live.setter
+    def time_to_live(self, time_to_live):
+        """Sets the time_to_live of this Constants.
+
+        My Files number of days before deleting directories  # noqa: E501
+
+        :param time_to_live: The time_to_live of this Constants.  # noqa: E501
+        :type: int
+        """
+
+        self._time_to_live = time_to_live
 
     def to_dict(self):
         """Returns the model properties as a dict"""

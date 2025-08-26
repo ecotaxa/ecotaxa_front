@@ -56,9 +56,25 @@ def get_back_constants(_type) -> tuple:
             )
         elif _type == "FORMULAE":
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.formulae
+        elif _type == "DEFAULT_ACCESS":
+            current_app.config["API_" + _type + "_CONSTANTS"] = (
+                consts.default_project_access
+            )
+        elif _type == "MAX_UPLOAD_SIZE":
+            current_app.config["API_" + _type + "_CONSTANTS"] = consts.max_upload_size
+        elif _type == "TIME_TO_LIVE":
+            current_app.config["API_" + _type + "_CONSTANTS"] = consts.time_to_live
     return current_app.config["API_" + _type + "_CONSTANTS"]
 
 
 def get_user_constants() -> tuple:
 
     return get_back_constants("USER")
+
+
+def bytes_to_human_readable(num, suffix="B"):
+    for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
