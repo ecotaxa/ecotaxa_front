@@ -8,8 +8,7 @@ from appli.gui.commontools import make_response
 def gui_files_upload():
     from appli.gui.files.tools import upload_file
 
-    response = upload_file()
-    return response
+    return upload_file()
 
 
 @app.route("/gui/files/list", defaults={"subpath": None}, methods=["GET"])
