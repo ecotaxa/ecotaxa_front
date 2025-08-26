@@ -10,6 +10,7 @@ from flask_login import current_user, login_required
 from appli import app, gvg, gvp
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_messages, py_user
+from appli.back_config import get_back_constants, bytes_to_human_readable
 from flask import make_response
 from to_back.ecotaxa_cli_py.models import DirectoryModel, DirectoryEntryModel
 
@@ -618,6 +619,13 @@ def utility_processor():
         else:
             return ""
 
+    def max_upload_size():
+        ttl = get_back_constants("MAX_UPLOAD_SIZE")
+        return bytes_to_human_readable(ttl)
+
+    def days_to_live():
+        return get_back_constants("TIME_TO_LIVE")
+
     return dict(
         message_translation=message_translation,
         unique_id=unique_id,
@@ -633,4 +641,6 @@ def utility_processor():
         logo_special=logo_special,
         get_manager_list=get_manager_list,
         ecopart_url=ecopart_url,
+        max_upload_size=max_upload_size,
+        days_to_live=days_to_live,
     )
