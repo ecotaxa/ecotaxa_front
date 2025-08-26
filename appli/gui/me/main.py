@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from appli import app, gvp
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_user
-from appli.back_config import get_user_constants
+from appli.back_config import get_user_constants, get_back_constants
 
 NO_STATUS = 10
 
