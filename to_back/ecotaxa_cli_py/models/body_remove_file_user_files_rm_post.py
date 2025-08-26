@@ -56,7 +56,7 @@ class BodyRemoveFileUserFilesRmPost(object):
     def source_path(self):
         """Gets the source_path of this BodyRemoveFileUserFilesRmPost.  # noqa: E501
 
-        The client-side full path of the file  or directory to be removed.  # noqa: E501
+        The path of the file  or directory to be removed. * for all files and directories  # noqa: E501
 
         :return: The source_path of this BodyRemoveFileUserFilesRmPost.  # noqa: E501
         :rtype: str
@@ -67,7 +67,7 @@ class BodyRemoveFileUserFilesRmPost(object):
     def source_path(self, source_path):
         """Sets the source_path of this BodyRemoveFileUserFilesRmPost.
 
-        The client-side full path of the file  or directory to be removed.  # noqa: E501
+        The path of the file  or directory to be removed. * for all files and directories  # noqa: E501
 
         :param source_path: The source_path of this BodyRemoveFileUserFilesRmPost.  # noqa: E501
         :type: str

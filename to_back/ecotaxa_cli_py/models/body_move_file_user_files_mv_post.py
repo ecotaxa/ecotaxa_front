@@ -61,7 +61,7 @@ class BodyMoveFileUserFilesMvPost(object):
     def source_path(self):
         """Gets the source_path of this BodyMoveFileUserFilesMvPost.  # noqa: E501
 
-        The client-side full path of the file or directory to be moved.  # noqa: E501
+        The  path of the file or directory to be moved.  # noqa: E501
 
         :return: The source_path of this BodyMoveFileUserFilesMvPost.  # noqa: E501
         :rtype: str
@@ -72,7 +72,7 @@ class BodyMoveFileUserFilesMvPost(object):
     def source_path(self, source_path):
         """Sets the source_path of this BodyMoveFileUserFilesMvPost.
 
-        The client-side full path of the file or directory to be moved.  # noqa: E501
+        The  path of the file or directory to be moved.  # noqa: E501
 
         :param source_path: The source_path of this BodyMoveFileUserFilesMvPost.  # noqa: E501
         :type: str
@@ -84,7 +84,7 @@ class BodyMoveFileUserFilesMvPost(object):
     def dest_path(self):
         """Gets the dest_path of this BodyMoveFileUserFilesMvPost.  # noqa: E501
 
-        The client-side full path of the destination file or directory.  # noqa: E501
+        The path of the destination file or directory.  # noqa: E501
 
         :return: The dest_path of this BodyMoveFileUserFilesMvPost.  # noqa: E501
         :rtype: str
@@ -95,7 +95,7 @@ class BodyMoveFileUserFilesMvPost(object):
     def dest_path(self, dest_path):
         """Sets the dest_path of this BodyMoveFileUserFilesMvPost.
 
-        The client-side full path of the destination file or directory.  # noqa: E501
+        The path of the destination file or directory.  # noqa: E501
 
         :param dest_path: The dest_path of this BodyMoveFileUserFilesMvPost.  # noqa: E501
         :type: str

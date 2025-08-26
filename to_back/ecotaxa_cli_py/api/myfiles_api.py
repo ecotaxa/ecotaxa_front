@@ -46,7 +46,7 @@ class MyfilesApi(object):
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str source_path: The client-side full path of the file or directory to be moved.
+        :param str source_path: The path of the file or directory to be moved.
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -71,7 +71,7 @@ class MyfilesApi(object):
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str source_path: The client-side full path of the file or directory to be moved.
+        :param str source_path: The path of the file or directory to be moved.
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -274,8 +274,8 @@ class MyfilesApi(object):
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str source_path: The client-side full path of the file or directory to be moved.
-        :param str dest_path: The client-side full path of the destination file or directory.
+        :param str source_path: The  path of the file or directory to be moved.
+        :param str dest_path: The path of the destination file or directory.
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -300,8 +300,8 @@ class MyfilesApi(object):
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str source_path: The client-side full path of the file or directory to be moved.
-        :param str dest_path: The client-side full path of the destination file or directory.
+        :param str source_path: The  path of the file or directory to be moved.
+        :param str dest_path: The path of the destination file or directory.
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -394,7 +394,7 @@ class MyfilesApi(object):
 
         :param async_req bool: execute request asynchronously
         :param file file: (required)
-        :param str path: The client-side full path of the file.
+        :param str path: The destination path of the file.
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -420,7 +420,7 @@ class MyfilesApi(object):
 
         :param async_req bool: execute request asynchronously
         :param file file: (required)
-        :param str path: The client-side full path of the file.
+        :param str path: The destination path of the file.
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -516,7 +516,7 @@ class MyfilesApi(object):
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str source_path: The client-side full path of the file  or directory to be removed.
+        :param str source_path: The path of the file  or directory to be removed. * for all files and directories
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -541,7 +541,7 @@ class MyfilesApi(object):
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str source_path: The client-side full path of the file  or directory to be removed.
+        :param str source_path: The path of the file  or directory to be removed. * for all files and directories
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will

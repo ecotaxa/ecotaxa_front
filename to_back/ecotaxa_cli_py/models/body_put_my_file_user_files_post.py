@@ -83,7 +83,7 @@ class BodyPutMyFileUserFilesPost(object):
     def path(self):
         """Gets the path of this BodyPutMyFileUserFilesPost.  # noqa: E501
 
-        The client-side full path of the file.  # noqa: E501
+        The destination path of the file.  # noqa: E501
 
         :return: The path of this BodyPutMyFileUserFilesPost.  # noqa: E501
         :rtype: str
@@ -94,7 +94,7 @@ class BodyPutMyFileUserFilesPost(object):
     def path(self, path):
         """Sets the path of this BodyPutMyFileUserFilesPost.
 
-        The client-side full path of the file.  # noqa: E501
+        The destination path of the file.  # noqa: E501
 
         :param path: The path of this BodyPutMyFileUserFilesPost.  # noqa: E501
         :type: str
