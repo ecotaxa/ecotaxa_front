@@ -20,6 +20,7 @@ from to_back.ecotaxa_cli_py.models import (
     JobModel,
 )
 from appli.gui.jobs.job_interface import import_format_options
+from appli.back_config import get_back_constants
 from flask_babel import _
 
 
