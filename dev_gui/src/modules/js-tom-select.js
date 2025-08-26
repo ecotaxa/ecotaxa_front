@@ -335,7 +335,6 @@ const funcselector='.js-autocomplete';
           }, []);
 
           if (json.length && typeof json == 'object') json = Object.entries(json);
-          console.log('thisoptions', this.options)
           return this.options + (callback)?callback(json):json;
 
         }).catch(err => {
