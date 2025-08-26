@@ -182,6 +182,10 @@ export class JsMyFiles {
                     inverse: false
                   });
                   break;
+                case this.eventnames.errorfile:
+                    self.showControl(e.name, e);
+                    e.name=AlertBox.alertconfig.types.error;
+                    e.message+=(e.path)?' '+e.path:'';
                 case AlertBox.alertconfig.types.error:
                 case AlertBox.alertconfig.types.success:
                 case AlertBox.alertconfig.types.danger:
@@ -192,7 +196,6 @@ export class JsMyFiles {
                     dismissible: true,
                     inverse: false
                   });
-                  console.log('error', e);
                   break;
                 default:
                   console.log('message', e);
@@ -218,6 +221,7 @@ export class JsMyFiles {
       if (message.name) {
         const name = message.name;
         delete message.name;
+        console.log('name'+name,message)
         ModuleEventEmitter.emit(name, message, this.jsDirToZip.uuid);
       }
     }
@@ -640,7 +644,7 @@ export class JsMyFiles {
         if (bigfile && bigfile !== '') {
           btn.textContent = `Upload big File separately`;
           message = {
-            name: this.eventnames.bigfile,
+            name: this.eventnames.endzip,
             path: filepath,
             part: part,
             bigfile: bigfile
@@ -677,7 +681,7 @@ export class JsMyFiles {
         //if (message.bigfile && message.bigfile !== '') btn.textContent += ` ` + opts;
         break;
       case this.eventnames.pending:
-        btn.textContent = ` Pending ` + ((target !== 'zip') ? ' big file' : '');
+        btn.textContent = ` Uploading ` + ((target !== 'zip') ? ' big file' : '');
         btn.disabled = true;
         message = {};
         break;
@@ -700,16 +704,11 @@ export class JsMyFiles {
         return;
         break;
       case this.eventnames.errorfile:
-        this.errorfile.push(filepath);
       case this.eventnames.error:
-        btn.textContent = (opts.text) ? opts.text : `Error`;
-        message = {
-          name: opts.name,
-          path: filepath,
-          part: part,
-          bigfile: bigfile
-        };
-        console.log('error control' + action, message);
+        btn.textContent = (opts.text) ? opts.text : `Error `+JSON.stringify(message);
+        btn.classList.add(css.console);
+        btn.disabled=true;
+        message=null;
         break;
       default:
         console.log('default control' + action, opts);
@@ -718,13 +717,13 @@ export class JsMyFiles {
     }
     if (message === null) {
       delete btn.dataset.message;
-      btn.classList.add(css.hide)
+      btn.classList.add(css.hide);
     } else {
       btn.dataset.message = JSON.stringify(message);
       btn.classList.remove(css.hide);
       if (btn.disabled) {
         btn.classList.add(css.console);
-        btn.insertAdjacentHTML('afterbegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
+       if(!btn.classList.contains(css.console)) btn.insertAdjacentHTML('afterbegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
       } else btn.classList.remove(css.console);
     };
 
