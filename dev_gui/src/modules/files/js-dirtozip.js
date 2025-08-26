@@ -24,8 +24,9 @@ const already_compressed = new Set([
   'mp4', 'mov', 'mp3', 'aifc'
 ]);
 const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
-const MAXSIZE = 1073741824; //4294967296; //// 3221225472; // 2147483648;
+
 export function JsDirToZip(options = {}) {
+  const MAXSIZE = (document.querySelector('[data-max_upload_size]'))?parseInt(document.querySelector('[data-max_upload_size]').dataset['max_upload_size']):1073741824;//681574400;//681574400; // 650M //1073741824; //4294967296; //// 3221225472; // 2147483648;
   const eventnames = {
     ready: 'ready',
     follow: 'follow',
@@ -124,6 +125,7 @@ const browser = detect();
       }
       if (e.name === 'zip' && properties.callback) await properties.callback();
     }, uuid);
+    ModuleEventEmitter.on(eventnames.error,  (e) => {});
   }
 
   function initProps() {
@@ -512,15 +514,14 @@ const browser = detect();
     message = (message) ? message : {};
     switch (action) {
       case eventnames.init:
-        message.name = eventnames.init;
-        break;
       case eventnames.errorfile:
-        console.log('errorfile', message);
+        message.name=action;
+        break;
       default:
         message.name = eventnames.follow;
         break;
     }
-    ModuleEventEmitter.emit(eventnames.error, message, _listener);
+    ModuleEventEmitter.emit(eventnames.message, message, _listener);
   }
   async function searchStorage(search) {
     const entry = await navigator.storage.getDirectory();
@@ -615,23 +616,22 @@ async function listStorage(entry = null,name=null) {
     formdata.append('file', file, file.name);
     if (properties.part) formdata.append('part', properties.part);
     else if (callbackchunk !== null) formdata.append('ischunk', true);
-    fetch(options.uploadurl, {
+    message.path = path;
+    const response = await fetch(options.uploadurl, {
       //  mode: 'cors',
       method: "POST",
       credentials: "include",
       body: formdata,
-    }).then(async (response) => {
-      console.log('response----------------------', response);
-      console.log('callbackchunk-------------------------------', callbackchunk)
-      message.path = path;
-      if (response.status !== 200) {
-        onError(eventnames.error, message);
-        return;
-      }
-      if (callbackchunk !== null) { console.log('callbackchunk not null')
-        await callbackchunk();
-      } else await endFetch(message);
     });
+    const body=await response.text()
+    console.log('response', body)
+      if (response.ok) {
+      if (callbackchunk) {
+        await callbackchunk();
+      } else await endFetch(message);} else {
+      properties.follow=null;
+      await endFetch(message);
+        onError(eventnames.errorfile, message);    }
   }
   return {
     uuid,
