@@ -14,6 +14,7 @@ async function createAlertBox() {
     danger: 'danger',
     info: 'info',
     warning: 'warning',
+    success:'success',
     css: {
       alert: 'alert',
       confirm: 'confirm',
@@ -38,7 +39,8 @@ async function createAlertBox() {
       warning: 'warning',
       danger: 'danger',
       error: 'error',
-      maintenance: 'maintenance'
+      maintenance: 'maintenance',
+      success:'success'
     },
     dismiss_selector: '[data-dismiss]',
     selector: '.alert',

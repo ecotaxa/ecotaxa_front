@@ -619,9 +619,11 @@ def utility_processor():
         else:
             return ""
 
-    def max_upload_size():
+    def max_upload_size(human=True):
         ttl = get_back_constants("MAX_UPLOAD_SIZE")
-        return bytes_to_human_readable(ttl)
+        if human:
+            return bytes_to_human_readable(ttl)
+        return ttl
 
     def days_to_live():
         return get_back_constants("TIME_TO_LIVE")

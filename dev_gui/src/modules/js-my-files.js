@@ -175,6 +175,7 @@ export class JsMyFiles {
                   });
                   break;
                   case 'browser':
+                  if (this.activentry) this.detachDropzone();
                    AlertBox.addAlert({
                     type: AlertBox.alertconfig.types.danger,
                     content: e.message,
@@ -198,7 +199,12 @@ export class JsMyFiles {
                   });
                   break;
                 default:
-                  console.log('message', e);
+                  AlertBox.addAlert({
+                    type: AlertBox.alertconfig.types.info,
+                    content: e.message,
+                    dismissible: true,
+                    inverse: true
+                  });
                   break;
               }
               break;
@@ -221,7 +227,6 @@ export class JsMyFiles {
       if (message.name) {
         const name = message.name;
         delete message.name;
-        console.log('name'+name,message)
         ModuleEventEmitter.emit(name, message, this.jsDirToZip.uuid);
       }
     }
@@ -232,8 +237,8 @@ export class JsMyFiles {
     return this.jsDirToZip.quotaEstimate();
   }
   scanBrowse(e, options) {
-    return this.jsDirToZip.scanBrowse(e, options);
 
+    return this.jsDirToZip.scanBrowse(e, options);
   }
   scanHandle(dir, options) {
     return this.jsDirToZip.scanHandle(dir, options);
@@ -297,10 +302,12 @@ export class JsMyFiles {
         if(this.eventnames.clearother) ModuleEventEmitter.emit(this.eventnames.clearother,{},this.uuid);
       });
     });
+
     const spandrop = create_box('span', {
       text: this.container.dataset.textdrop
     }, btns);
-
+    const browselink = create_box('a', {
+    text:this.container.dataset.textbrowse,class:'modal', spandrop})
   }
 
   toggleDropTarget(on = true) {
@@ -439,6 +446,7 @@ export class JsMyFiles {
       return false;
     }
     this.uploadentry = this.activentry;
+     ModuleEventEmitter.emit(this.jsDirToZip.eventnames.setuploadpath, {name:this.jsDirToZip.eventnames.setuploadpath, path:this.uploadentry.getCurrentDirPath()}, this.jsDirToZip.uuid);
     return true;
   }
   // drag&drop
@@ -461,6 +469,7 @@ export class JsMyFiles {
           item = await item.webkitGetAsEntry();
           this.toggleCounters(true);
           await this.scanHandle(item);
+
         }
       })
     }
@@ -633,7 +642,6 @@ export class JsMyFiles {
         break;
       case this.eventnames.follow:
         if (bigfile) {
-          console.log(' follow', opts);
           message = {};
           btn.textContent = `Wait for next operation`;
           btn.disabled = true;
@@ -654,17 +662,15 @@ export class JsMyFiles {
         case this.eventnames.endzip:
         if (!part) this.showComplete();
         // combine endzip and upload for prod
-        btn.textContent = `Upload zip file` + ((part) ? ` ` + part : ``);
-        btn.title = (part) ? `Your file is too big - you have to send this part before continuing to process the directory` : `Click to send zip file`;
-       /* btn.textContent = `Close zip file` + ((part) ? ` ` + part : ``);
-        btn.title = (part) ? `Your file is too big - you have to send this part before continuing to process the directory` : `Click to end zip file`;*/
-        message = {
+        btn.textContent = `Uploading file` + ((part) ? ` ` + part : ``);
+        btn.dataset.message = JSON.stringify({
           name: this.eventnames.endzip,
           part: part,
-          filepath: filepath,
           path: filepath,
           bigfile: bigfile,
-        };
+        });
+         setTimeout( () => {this.emitToZip(btn);},1000);
+         return;
         break;
     case this.eventnames.sendfile:
         this.done=false;
@@ -674,8 +680,8 @@ export class JsMyFiles {
           part: part,
           bigfile: bigfile
         });
-        // send file , 2 steps are for tests - timeout for zip.end() in dirtozip
         setTimeout( () => {this.emitToZip(btn);},1000);
+        btn.insertAdjacentHTML('beforebegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
         return;
         //btn.textContent = `Upload zip file`;
         //if (message.bigfile && message.bigfile !== '') btn.textContent += ` ` + opts;
@@ -725,8 +731,7 @@ export class JsMyFiles {
         btn.classList.add(css.console);
        if(!btn.classList.contains(css.console)) btn.insertAdjacentHTML('afterbegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
       } else btn.classList.remove(css.console);
-    };
-
+    }
   }
 
   getBtn(item, target) {
@@ -751,7 +756,7 @@ export class JsMyFiles {
 
   initControls() {
     Object.entries(this.options.controls).forEach(([key, control], i) => {
-      this.initFileCounter(key, control.display, i);
+       this.initFileCounter(key, control.display, i);
       if (control.btn) this.activateControls(key, control.btn);
     });
   }

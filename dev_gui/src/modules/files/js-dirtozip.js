@@ -17,7 +17,7 @@ import {
   ModuleEventEmitter
 } from '../../modules/module-event-emitter.js';
 import { detect } from 'detect-browser';
-
+import {AlertBox} from '../../modules/alert-box.js';
 const already_compressed = new Set([
   'zip', 'gz', 'png', 'jpg', 'jpeg', 'pdf', 'doc', 'docx', 'ppt', 'pptx',
   'xls', 'xlsx', 'heic', 'heif', '7z', 'bz2', 'rar', 'gif', 'webp', 'webm',
@@ -43,9 +43,10 @@ export function JsDirToZip(options = {}) {
     reject: 'reject',
     message: 'message',
     error: 'error',
-    init: 'init'
+    init: 'init',
+    setuploadpath:'setuploadpath'
   };
-  let jsScanDir, properties;
+  let jsScanDir, properties,uploadpath;
   let trydelete=0;
   const defaultOptions = {
     uploadurl: '/gui/files/upload',
@@ -71,7 +72,7 @@ const browser = detect();
         os=(os in ['android','ios'])?os:'other';
      const name=browser.name.toLowerCase();
      const version = parseInt(browser.version.split('.')[0]);
- if ((accepted[os] && accepted[os][name] && accepted[os][name]<= version)===false)  {
+     if (Object.keys(accepted).indexOf(os)<0 || Object.keys(accepted[os]).indexOf(name)<0 || parseInt(accepted[os][name])>parseInt(version))  {
      ModuleEventEmitter.emit(eventnames.message, {
           id: "browser",
           name: "browser",
@@ -81,35 +82,49 @@ const browser = detect();
      }
   function init() {
     properties = initProps();
+     ModuleEventEmitter.on(eventnames.setuploadpath, async(e) => {
+    uploadpath=e.path;},uuid);
     ModuleEventEmitter.on(eventnames.init, async (e) => {
-      if (isActive() === false) {
+      if (!isActive()) {
         await reset();
         ModuleEventEmitter.emit(eventnames.complete, {
           name: eventnames.ready
         }, _listener);
+          ModuleEventEmitter.emit(eventnames.message, {
+          name: AlertBox.alertconfig.types.success,
+          message: "Upload of "+ e.path +" is done",
+        }, _listener);
         properties.endreaddir = false;
-      } else console.log('partly finshed ', e);
+      } else console.log('partly finished '+properties.hashandlers+ 'follow='+properties.follow, e);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endzip, async(e) => {
       if (!e.bigfile && properties.zip) properties.zip.end();
-      else if (e.bigfile && properties.gzipped) console.log('--gzipped end', properties.gzipped);
-      console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%',);
+      console.log('endzip%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
       const evtsend=async function() {
       const zipclosed = await listStorage(null,properties.zipname);
-      if (zipclosed === true) { 
+      if (zipclosed === true) {
       const message = buildMessage(e, {
-        name: eventnames.sendfile,
-      });
+        name: eventnames.sendfile,      });
+
       ModuleEventEmitter.emit(eventnames.complete, message, _listener);}
       else setTimeout(async function() {await evtsend();},2000);}
       evtsend();
     }, uuid);
     ModuleEventEmitter.on(eventnames.sendfile, async (e) => {
-      const file = (e.bigfile) ? await properties.gzipped.getFile(): await getFile();
-      if (e.bigfile) {
-        const path = (e.path ? e.path : '').replace(e.bigfile, '');
-        sendChunk(path);
-      } else sendZipFile(file, (e.path ? e.path : ''), null);
+    const message = buildMessage(e, {
+        name: eventnames.pending,
+      });
+    if (properties.hashandlers) message.bigfile =true;
+    ModuleEventEmitter.emit(eventnames.complete, message, _listener);
+      if (properties.hashandlers) {
+        const message = buildMessage(e, {
+            name: eventnames.follow,
+        });
+        ModuleEventEmitter.emit(eventnames.follow, message, _listener);
+        await execHandler();
+      }
+      const file = await getFile();
+       sendZipFile(file, (e.path ? e.path : uploadpath), null);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endreaddir, (e) => {
       properties.endreaddir = true;
@@ -147,8 +162,9 @@ const browser = detect();
         zip: 0,
         reject: 0
       },
-      handlers: []
-    }
+      handlers: [],
+      hashandlers:false,
+     }
   }
   async function reset() {
     properties = initProps();
@@ -156,15 +172,17 @@ const browser = detect();
   }
 
   function isActive() {
-    return (properties.zip !== null || properties.follow !== null || properties.gzipped !== null || properties.endreaddir !== true);
+    return (properties.zip !== null || properties.follow !== null || properties.hashandlers || properties.endreaddir !== true);
   }
+
   async function initZip() {
     properties.pos = 0;
     properties.sizetozip = 0;
-    console.log('==================newzip');
     properties.zip = new Zip((error, chunk, final) => {
       if (error) {
-        console.log('error', error);
+        onError(eventnames.errorfile, {
+                name: eventnames.error,
+                message: error}, _listener);
         return false;
       } else {
         properties.streamhandle.write(chunk, {
@@ -173,14 +191,11 @@ const browser = detect();
         properties.pos += chunk.length;
         if (final) {
           properties.streamhandle.close();
-          console.log('final-----------------------------*******************************-', properties.pos);
         }
-
       }
     });
     // hack for memory usage
     zipOnData();
-
     if (properties.follow) await properties.follow();
   }
 
@@ -200,7 +215,7 @@ const browser = detect();
       ondata(error, data, final);
       if (final) {
         zip.d = null;
-        zip.u.at(-1).d = null; // Object created in `zip.add()`
+        if (zip.u && zip.u.at(-1)) zip.u.at(-1).d = null; // Object created in `zip.add()`
       }
     }
   }
@@ -295,7 +310,7 @@ const browser = detect();
     let relpath = (pick instanceof FileList) ? entries[0].webkitRelativePath : null;
     relpath = (relpath) ? relpath.split(dirseparator) : [``];
     if (relpath.length) relpath.pop();
-    relpath = relpath.join(dirseparator)
+    relpath = relpath.join(dirseparator);
     const path = (pick instanceof FileList) ? relpath : (pick.kind === "directory") ? pick.name : ``;
     await scanCommon(path, options);
     await jsScanDir.processEntries(entries, path, () => {
@@ -324,49 +339,36 @@ const browser = detect();
 
   function addHandler(handler) {
     properties.handlers.push(handler);
+    properties.hashandlers= (properties.handlers.length>0)
   }
 
   async function execHandler() {
     // serie
-    if (properties.handlers.length > 0) {
+    if (properties.hashandlers) {
       const handler = properties.handlers.shift();
       await handler();
+     properties.hashandlers = (properties.handlers.length>0)
     }
     return;
   }
   async function gzipBigFile(file, filepath) {
-    if (properties.gzipped !== null) {
-      await addHandler(async () => {
-        await gzipBigFile(file, filepath);
-      });
-      return;
-    }
     let dt = Date.now();
     filepath = (filepath.indexOf(dirseparator) === 0) ? filepath.substr(1) : filepath;
-    /*filepath = filepath.split(dirseparator);
-    filepath.pop();
-    filepath = filepath.join(dirseparator);*/
+    const parts = filepath.split(dirseparator);
+    parts.pop();
+    const sendpath = uploadpath + dirseparator +parts.join(dirseparator);
     const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
     if (already_compressed.has(ext)) {
-      properties.gzipped = file;
-      ModuleEventEmitter.emit(eventnames.counter, {
+       ModuleEventEmitter.emit(eventnames.counter, {
         name: 'zip',
         path: filepath,
         size: file.size
       }, uuid);
-      ModuleEventEmitter.emit(eventnames.complete, {
-        name: eventnames.bigfile,
-        bigfile: file.name,
-        path: filepath,
-      }, _listener);
+      addHandler(async () => {
+        await sendChunk(sendpath,file);
+      });
     } else {
       let zipname = file.name + '.gz';
-      ModuleEventEmitter.emit(eventnames.complete, {
-        name: eventnames.gzip,
-        bigfile: file.name,
-        path: filepath,
-        size: file.size
-      }, _listener);
       const {
         filestream,
         streamhandle
@@ -380,12 +382,21 @@ const browser = detect();
         filename: filepath
       });
       gzipped.ondata = (err, data, final) => {
+       if(pos > MAXSIZE)  {
+              onError(eventnames.errorfile, {
+                name: eventnames.error,
+                bigfile:file.name,
+                path:filepath,
+                message:'File '+file.name+' size exceeds maxsize. Cannot be sent in chunks for the moment.'}, _listener);
+          streamhandle.close();gzipped.ondata= (err, data, final) => {}; return false;
+          }
         if (err) {
-          console.log('gzip err', err);
           onError(eventnames.errorfile, {
+            name: eventnames.error,
             bigfile: file.name,
             path: filepath,
-            size: file.size
+            size: file.size,
+            message: 'Error compressing file '+ file.name +' '+err
           });
         } else {
           streamhandle.write(data, {
@@ -394,22 +405,16 @@ const browser = detect();
           pos += data.length;
 
           if (final) {
-            console.log('final BIGFILE%%%%%%%%%%%%%%%%%%%%' + eventnames.bigfile, filepath)
-
-            console.log('timetogzzip', (Date.now() - dt) / 1000);
-
             streamhandle.close();
-            properties.gzipped = filestream;
             ModuleEventEmitter.emit(eventnames.counter, {
               name: 'zip',
               path: filepath,
               size: file.size
             }, uuid);
-            ModuleEventEmitter.emit(eventnames.complete, {
-              name: eventnames.bigfile,
-              bigfile: file.name,
-              path: filepath
-            }, _listener);
+          filepath+='.gz';
+         addHandler(async () => {
+         await sendChunk(sendpath,filestream);
+      });
           }
         }
       };
@@ -460,7 +465,7 @@ const browser = detect();
       }) : new ZipDeflate(filepath, {
         level: 6
       });
-    properties.zip.add(zippedstream);
+      properties.zip.add(zippedstream);
     await readFile(file, filepath, zippedstream);
   }
 
@@ -477,8 +482,8 @@ const browser = detect();
     } else {
       // check zip file size > total zip size
       properties.sizetozip += file.size;
-      if (properties.sizetozip >= MAXSIZE) {
-        properties.follow = async () => {
+      if (properties.sizetozip > MAXSIZE) {
+     properties.follow = async () => {
           await zipStream(file, filepath);
         }
         partZip();
@@ -504,9 +509,9 @@ const browser = detect();
     if (callback !== null) callback();
   }
   async function processFile(entry) {
-    const path = (entry.fullPath) ? entry.fullPath : entry.webkitRelativePath;
+    const entrypath = (entry.fullPath) ? entry.fullPath : entry.webkitRelativePath;
     entry.file(async file => {
-      await addFileToZipStream(file, path);
+      await addFileToZipStream(file, entrypath);
     });
   }
 
@@ -559,41 +564,35 @@ async function listStorage(entry = null,name=null) {
       return rep;
     }
   async function endFetch(message, clean = false) {
-    message.name = eventnames.terminate;
     if (properties.follow) {
       properties.streamhandle = await properties.filestream.createWritable({mode:"exclusive"});
       message.name = eventnames.follow;
-      ModuleEventEmitter.emit(eventnames.follow, message, _listener)
+      ModuleEventEmitter.emit(eventnames.follow, message, _listener);
       await initZip();
       return;
-    } else if (message.hasOwnProperty("bigfile") && message.bigfile !== false) {
-      properties.gzipped = null;
-
-      if (properties.handlers.length > 0) {
-        message.name = eventnames.follow;
-        ModuleEventEmitter.emit(eventnames.follow, message, _listener);
-        console.log(' handlers to do', message);
-        if (properties.handlers.length > 0) await execHandler();
-        return;
-      }
     } else properties.zip = null;
-    ModuleEventEmitter.emit(eventnames.complete, message, _listener);
+    if (!properties.hashandlers) {message.name = eventnames.terminate;ModuleEventEmitter.emit(eventnames.complete, message, _listener);}
   }
 
-  async function sendChunk(path, start = 0, chunknum = 0, chunksize = MAXSIZE) {
-    console.log('send chunk ', properties.gzipped)
-    const file = await properties.gzipped.getFile();
+  async function sendChunk(path,gzipped, start = 0, chunknum = 0, chunksize = MAXSIZE) {
+    const file = await gzipped.getFile();
     const end = Math.min(start + chunksize, file.size);
     if (end === file.size) {
-     await sendZipFile(file, path, null, true);
+    path=path.replace(file.name,'')
+    await sendZipFile(file, path, null, true);
     } else {
+    ModuleEventEmitter.emit(eventnames.error, {
+          name: eventnames.errorfile,
+          message:'File size exceeds capacity. Chunk functionality not supported for the moment.'
+        }, _listener);
+    return;
+    // for the moment ecotaxaback does not support chunks
       const partfile = file.slice(start, end);
       partfile.name = chunknum + '_' + file.name;
-      await sendZipfile(partfile, path, async () => {
+      await sendZipFile(partfile, path, async () => {
         start += end;
         chunknum++;
-
-        if (start <= file.size) await sendChunk(path, start, chunknum, chunksize);
+        if (start <= file.size) await sendChunk(path, gzipped,start, chunknum, chunksize);
       }, true)
     }
     return chunknum;
@@ -608,8 +607,6 @@ async function listStorage(entry = null,name=null) {
       name: eventnames.pending,
       path: path
     }
-    if (bigfile) message.bigfile = file.name;
-    ModuleEventEmitter.emit(eventnames.complete, message, _listener);
     const formdata = new FormData();
     path = path + ((path.slice(-1) === dirseparator) ? `` : dirseparator) + file.name;
     formdata.append('path', path);
@@ -623,14 +620,13 @@ async function listStorage(entry = null,name=null) {
       credentials: "include",
       body: formdata,
     });
-    const body=await response.text()
-    console.log('response', body)
+    const body=await response.text();
       if (response.ok) {
       if (callbackchunk) {
         await callbackchunk();
-      } else await endFetch(message);} else {
-      properties.follow=null;
-      await endFetch(message);
+      } else if(!bigfile || !properties.hashandlers) await endFetch(message);} else {
+        properties.follow=null;
+        await endFetch(message);
         onError(eventnames.errorfile, message);    }
   }
   return {
