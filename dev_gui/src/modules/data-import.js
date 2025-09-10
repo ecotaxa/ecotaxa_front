@@ -260,11 +260,13 @@ export class DataImport {
     if (!what) return;
     const parts = this.columnProperty('parts', cellindex);
     const selectcells = this.getSelectCells(cellindex, whatpart);
+    console.log('selectcells', selectcells)
     if (!selectcells) return;
     if ([typeimport.settings, typeimport.privileges].indexOf(what) >= 0) this.imports[models.contact] = this.findContact(this.datas[rowindex]);
     if ([typeimport.project, typeimport.taxo, typeimport.privileges].indexOf(what) >= 0) this.createImportzone(what);
     this.addResetButton();
     let ts = null;
+    console.log('this.trs', this.trs)
     selectcells.forEach((name, index) => {
       index = this.gridColumnIndex('name', name);
       if (index >= 0) {
@@ -466,6 +468,7 @@ export class DataImport {
       const celldata = this.datas[rowindex][i];
       const cell = this.trs[rowindex].cells[i];
       const data = this.getDataToImport(cell, celldata);
+      console.log('data ', data)
       if (!resets[name]) resets[name] = [data];
       else if (resets[name].indexOf(data) < 0) resets[name].push(data);
     }

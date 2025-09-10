@@ -168,6 +168,7 @@ export class FormSubmit {
     }
   }
   validateField(field, init = false) {
+   if (field.hasOwnProperty('readonly')) return true;
     if (['select'].indexOf(field.tagName.toLowerCase()) >= 0) {
       field.querySelectorAll('option:checked').forEach(option => {
         option.value = decode_HTMLEntities(DOMPurify.sanitize(option.value));
@@ -175,7 +176,7 @@ export class FormSubmit {
     } else field.value = decode_HTMLEntities(DOMPurify.sanitize(field.value));
     let rep = field.checkValidity();
     if (field.tomselect) field.classList.add(css.tshidden);
-    if (rep && field.dataset.unique !== undefined) {
+    if (rep && field.dataset.hasOwnProperty('unique')) {
       rep = this.validateFieldUnique(field);
     } else if (field.type == "checkbox") {
       rep = true;
@@ -263,7 +264,6 @@ export class FormSubmit {
         r = this.validateField(field, false);
          resp = (resp && r);
       }
-
     });
     if (init === false) {
       // add/remove error class on tabs tab-control elements
@@ -333,7 +333,7 @@ export class FormSubmit {
   async submitForm() {
     this.fieldEnable();
     // important async
-    const valid = await this.validateFields(false);
+    const valid =  await this.validateFields();
     if (valid) {
       const isbot = (this.form.querySelector(domselectors.captcha)) ? (this.form.dataset.isbot ? (this.form.dataset.isbot === true) : true) : false;
       if (isbot === true) return false;

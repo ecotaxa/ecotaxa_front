@@ -205,6 +205,7 @@ const funcselector='.js-autocomplete';
                   } else {
                     const revert = item.options[this.revertSettings.tabIndex].value;
                     this.addItem(revert);
+
                   }
                  /* AlertBox.addMessage({
                     type: AlertBox.alertconfig.types.danger,
@@ -216,9 +217,10 @@ const funcselector='.js-autocomplete';
             },
             onItemRemove: function(e) {
               if (users_list!==null && users_list[e]) delete users_list[e];
-              if (multiple || !this.revertSettings || (this.revertSettings.innerHTML === '' && this.revertSettings.tabIndex === 0) || this.revertSettings.tabIndex < 0) {console.log('this revet',this.revertSettings);return;}
+              if (multiple || !this.revertSettings || (this.revertSettings.innerHTML === '' && this.revertSettings.tabIndex === 0) || this.revertSettings.tabIndex < 0) return;
               const revert = item.options[this.revertSettings.tabIndex].value;
               if (users_list!==null && users_list[revert] !== undefined) delete users_list[revert];
+              if (this.options.url!=="") this.removeOption(e);
             }
           }
         };
@@ -280,7 +282,6 @@ const funcselector='.js-autocomplete';
       },
       load: function(query, callback) {
         query = DOMPurify.sanitize(query);
-
         const self = this;
         if (self.loading > 10) {
           callback();
@@ -333,10 +334,8 @@ const funcselector='.js-autocomplete';
             result.push(obj);
             return result;
           }, []);
-
           if (json.length && typeof json == 'object') json = Object.entries(json);
           return this.options + (callback)?callback(json):json;
-
         }).catch(err => {
           console.log('tomselect-err', err);
         });

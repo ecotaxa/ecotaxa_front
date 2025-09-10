@@ -434,7 +434,7 @@ export class Entry {
         this.createListEntries([branches, nodes]);
       }
       this.setLoaded();
-    } else { console.log('alertbox')
+    } else {
       AlertBox.addMessage({
         parent: this.container,
         type: "error",

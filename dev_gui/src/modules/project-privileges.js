@@ -80,9 +80,11 @@ export class ProjectPrivileges {
       if (form) {
         if (form.formsubmit) {
           form.formsubmit.addHandler('validate', () => {
+             if (this.fieldset.dataset.hasOwnProperty("readonly")) return true;
              return this.validateFields();
           });
           form.formsubmit.addHandler('submit', () => {
+           if (this.fieldset.hasOwnProperty('readonly')) return true;
             return this.formatPrivileges();
           });
         } else form.addEventListener('submit', async (e) => {

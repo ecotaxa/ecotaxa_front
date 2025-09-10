@@ -93,7 +93,7 @@ export const dirlistOptions = {
         action: 'remove',
         text: 'delete',
         icon: 'icon-trash',
-        typentries: [entryTypes.branch, entryTypes.node, entryTypes.root, entryTypes.discarded]
+        typentries: [entryTypes.branch, entryTypes.node, entryTypes.root, entryTypes.discard, entryTypes.discarded]
       },
       move: {
         action: 'move',
@@ -326,8 +326,7 @@ function EntryAction(args, options) {
   }
 
   entryaction.remove = function() {
-    if (this.isTrashDir()) return;
-    this.fetchAction(this.options.actions.remove).then(ret => {
+   this.fetchAction(this.options.actions.remove).then(ret => {
       if (ret === true) {
         this.setParent(null);
         this.removeListeners(this.dropHandlers());
@@ -338,7 +337,8 @@ function EntryAction(args, options) {
           duration: 1000
         });
         setTimeout(() => {
-          if (this.from && this.from.isInTrash()) this.destroy();
+           if (this.from && this.from.isInTrash()) this.destroy();
+            else if(this.isTrashDir() || this.type===entryTypes.root)  this.list();
           else this.emitEvent(this.eventnames.discarded);
         }, 1000);
       }

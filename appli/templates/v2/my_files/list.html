@@ -6,7 +6,7 @@
       {% set data = {'file':'_help_my_files'} %}
       {{ modal(id='help-my-files',modal_title= _("My Files"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
           <div class=" md:w-1/2">
-            <div class="form-box" data-max_upload_size="{{max_upload_size()}}">
+            <div class="form-box">
                 {%include("./v2/my_files/_list.html") %}
             </div>
 <div class="flex flex-col">

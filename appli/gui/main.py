@@ -43,7 +43,7 @@ def gui_logout():
 def gui_login():
     if current_user.is_authenticated:
         return redirect(HOMEPAGE)
-
+    referer = request.referrer
     if request.method == "POST":
         from appli.security_on_backend import login_validate
         from appli.gui.commontools import safe_url_redir
@@ -66,7 +66,8 @@ def gui_login():
                 return redirect(redir)
             else:
                 return redirect(url_for("gui_login"))
-    referer = request.referrer
+    else:
+        referer = gvg("next", "")
 
     if referer in [url_for("gui_login"), url_for("gui_index")]:
         referer = ""
@@ -475,7 +476,7 @@ def utility_processor():
         return breadcrumbs()
 
     def get_referrer() -> str:
-        referrer = gvp("next", request.referrer)
+        referrer = gvg("next", request.referrer)
         if referrer is None or referrer in [
             url_for("gui_login"),
             url_for("gui_me_forgotten"),

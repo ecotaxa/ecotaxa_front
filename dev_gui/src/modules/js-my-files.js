@@ -641,12 +641,8 @@ export class JsMyFiles {
         message = null;
         break;
       case this.eventnames.follow:
-        if (bigfile) {
           message = {};
-          btn.textContent = `Wait for next operation`;
           btn.disabled = true;
-        } else message = null;
-
         break;
       case this.eventnames.bigfile:
         if (bigfile && bigfile !== '') {
@@ -662,7 +658,7 @@ export class JsMyFiles {
         case this.eventnames.endzip:
         if (!part) this.showComplete();
         // combine endzip and upload for prod
-        btn.textContent = `Uploading file` + ((part) ? ` ` + part : ``);
+       // btn.textContent = `Uploading file` + ((part) ? ` ` + part : ``);
         btn.dataset.message = JSON.stringify({
           name: this.eventnames.endzip,
           part: part,
@@ -681,10 +677,8 @@ export class JsMyFiles {
           bigfile: bigfile
         });
         setTimeout( () => {this.emitToZip(btn);},1000);
-        btn.insertAdjacentHTML('beforebegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
+        if(btn.previousElementSibling && btn.previousElementSibling.tagName.toLowerCase()!=="svg")  btn.insertAdjacentHTML('beforebegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
         return;
-        //btn.textContent = `Upload zip file`;
-        //if (message.bigfile && message.bigfile !== '') btn.textContent += ` ` + opts;
         break;
       case this.eventnames.pending:
         btn.textContent = ` Uploading ` + ((target !== 'zip') ? ' big file' : '');
@@ -698,6 +692,7 @@ export class JsMyFiles {
         message = {};
         break;
       case this.eventnames.terminate:
+        if (btn.previousElementSibling && btn.previousElementSibling.tagName.toLowerCase()==="svg")  btn.previousElementSibling.remove();
         btn.dataset.message = JSON.stringify({
           name: this.eventnames.init,
           bigfile: bigfile,
@@ -729,7 +724,7 @@ export class JsMyFiles {
       btn.classList.remove(css.hide);
       if (btn.disabled) {
         btn.classList.add(css.console);
-       if(!btn.classList.contains(css.console)) btn.insertAdjacentHTML('afterbegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
+       if(!btn.classList.contains(css.console) && btn.previousElementSibling && btn.previousElementSibling.tagName.toLowerCase()!=="svg") btn.insertAdjacentHTML('beforebegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
       } else btn.classList.remove(css.console);
     }
   }
