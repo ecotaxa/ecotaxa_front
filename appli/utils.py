@@ -9,27 +9,62 @@ from flask_login import current_user
 from werkzeug.local import LocalProxy
 
 from to_back import booster
-from to_back.ecotaxa_cli_py import ApiClient as _ApiClient, ProjectModel, ApiException, MinUserModel, UsersApi
-from to_back.ecotaxa_cli_py.api import AuthentificationApi, ProjectsApi, UsersApi, ObjectsApi, SamplesApi, \
-    AcquisitionsApi, ProcessesApi, ObjectApi, TaxonomyTreeApi, MiscApi, InstrumentsApi, FilesApi, JobsApi, AdminApi
+from to_back.ecotaxa_cli_py import (
+    ApiClient as _ApiClient,
+    ProjectModel,
+    ApiException,
+    MinUserModel,
+    UsersApi,
+)
+from to_back.ecotaxa_cli_py.api import (
+    AuthentificationApi,
+    ProjectsApi,
+    UsersApi,
+    ObjectsApi,
+    SamplesApi,
+    AcquisitionsApi,
+    ProcessesApi,
+    ObjectApi,
+    TaxonomyTreeApi,
+    MiscApi,
+    InstrumentsApi,
+    FilesApi,
+    JobsApi,
+    AdminApi,
+)
 
 # Lol, generics in python
-A = TypeVar('A', AuthentificationApi, ProjectsApi, UsersApi, ObjectsApi, ObjectApi,
-            SamplesApi, AcquisitionsApi, ProcessesApi, TaxonomyTreeApi,
-            MiscApi, InstrumentsApi, FilesApi, JobsApi, AdminApi)
+A = TypeVar(
+    "A",
+    AuthentificationApi,
+    ProjectsApi,
+    UsersApi,
+    ObjectsApi,
+    ObjectApi,
+    SamplesApi,
+    AcquisitionsApi,
+    ProcessesApi,
+    TaxonomyTreeApi,
+    MiscApi,
+    InstrumentsApi,
+    FilesApi,
+    JobsApi,
+    AdminApi,
+)
 
 
 class ApiClient(Generic[A]):
-    """ A client with guaranteed resource released """
+    """A client with guaranteed resource released"""
 
     def __init__(self, api_class: Type[A], token: Union[str, LocalProxy, Request]):
         api_client = _ApiClient()
         booster.boost(api_client)
         if isinstance(token, LocalProxy):
-            token = token.cookies.get('session')  # type:ignore
+            token = token.cookies.get("session")  # type:ignore
         api_client.configuration.access_token = token
         # Note: No trailing / in URL
         from appli import backend_url
+
         api_client.configuration.host = backend_url
         # Call constructor on base class
         self.under: A = api_class(api_client)
@@ -42,10 +77,14 @@ class ApiClient(Generic[A]):
         pass
 
 
-def format_date_time(rec: Dict[str, str], date_cols: Tuple[str, ...] = (), time_cols: Tuple[str, ...] = ()):
+def format_date_time(
+    rec: Dict[str, str],
+    date_cols: Tuple[str, ...] = (),
+    time_cols: Tuple[str, ...] = (),
+):
     """
-        Format known date & time columns from their JSON representation.
-        Minimal sanity check of the input.
+    Format known date & time columns from their JSON representation.
+    Minimal sanity check of the input.
     """
     val: Optional[str]
     for a_col in date_cols:
@@ -70,7 +109,9 @@ def get_all_visible_projects() -> List[ProjectModel]:
     with ApiClient(ProjectsApi, request) as api:
         try:
             projects: List[ProjectModel] = api.search_projects(title_filter="%")
-            return [prj for prj in projects if prj.visible]  # Narrow to visible ones, even for logged users
+            return [
+                prj for prj in projects if prj.access != "0"
+            ]  # Narrow to visible ones, even for logged users
         except ApiException as ae:
             return []
 
@@ -110,7 +151,7 @@ def DecodeEqualList(txt: Optional[str]) -> Dict[str, str]:
     if txt is None:
         return ret
     for a_line in txt.splitlines():
-        ls = a_line.split('=', 1)
+        ls = a_line.split("=", 1)
         if len(ls) == 2:
             ret[ls[0].strip().lower()] = ls[1].strip().lower()
     return ret
@@ -124,7 +165,7 @@ def EncodeEqualList(map: Dict[str, str]) -> str:
 
 def BuildManagersMail(link_text: str, subject: str = "", body: str = ""):
     """
-        Build a mailto link to all app managers.
+    Build a mailto link to all app managers.
     """
     admin_users = get_managers()
     emails = ";".join([usr.email for usr in admin_users])
@@ -134,7 +175,7 @@ def BuildManagersMail(link_text: str, subject: str = "", body: str = ""):
     if body:
         params["body"] = body
     if params:
-        txt_params = "?" + urllib.parse.urlencode(params).replace('+', '%20')
+        txt_params = "?" + urllib.parse.urlencode(params).replace("+", "%20")
     else:
         txt_params = ""
     return "<a href='mailto:{0}{1}'>{2}</a>".format(emails, txt_params, link_text)
