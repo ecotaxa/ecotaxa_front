@@ -9,3 +9,7 @@ HOWTO:
 In same directory as present file, and a system-native shell (e.g. CMD.exe on windows):
 
 $ sh install_all_in_one.sh
+
+
+TO RUN ALL_IN_ONE EcoTaxa again
+$ sh run_all_in_one.sh
