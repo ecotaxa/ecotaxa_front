@@ -14,6 +14,7 @@ services:
       - ecotaxaback
   ecotaxafront:
     image: ecotaxa/ecotaxa_front:latest
+    container_name: portable_ecotaxafront
     volumes:
       - ./front_config:/app/config
     networks:
@@ -22,6 +23,7 @@ services:
       - ecotaxaback
   ecotaxaback:
     image: ecotaxa/ecotaxa_back:latest
+    container_name: portable_ecotaxaback
     volumes:
       - ./back_config.ini:/config.ini
       - ./ftp_area:/ftp_area
@@ -36,6 +38,7 @@ services:
       - pgdb
   ecotaxagpuback:
     image: ecotaxa/ecotaxa_gpu_back:latest
+    container_name: portable_ecotaxagpuback
     restart: always
     volumes:
       - ./back_config.ini:/config.ini
@@ -48,6 +51,7 @@ services:
       - pgdb
   pgdb:
     image: pgvector/pgvector:pg14
+    container_name: portable_pgdb_1
     networks:
       econet:
     # Uncomment to be able to access the DB, in case.
