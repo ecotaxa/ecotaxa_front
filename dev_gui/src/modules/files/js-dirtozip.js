@@ -23,10 +23,12 @@ const already_compressed = new Set([
   'xls', 'xlsx', 'heic', 'heif', '7z', 'bz2', 'rar', 'gif', 'webp', 'webm',
   'mp4', 'mov', 'mp3', 'aifc'
 ]);
+const can_be_compressed = new Set(['tsv','txt','log','csv']);
 const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
 
 export function JsDirToZip(options = {}) {
   const MAXSIZE = (document.querySelector('[data-max_upload_size]'))?parseInt(document.querySelector('[data-max_upload_size]').dataset['max_upload_size']):1073741824;//681574400;//681574400; // 650M //1073741824; //4294967296; //// 3221225472; // 2147483648;
+  const UPLOADINPARTS = (document.querySelector('[data-uploadinparts]'))?true:false;
   const eventnames = {
     ready: 'ready',
     follow: 'follow',
@@ -122,8 +124,9 @@ const browser = detect();
 
         ModuleEventEmitter.emit(eventnames.complete, message, _listener);
       }
+
       const file = await getFile();
-       sendZipFile(file, (e.path ? e.path : uploadpath), null);
+      sendZipFile(file, (e.path ? e.path : uploadpath), null);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endreaddir, (e) => {
       properties.endreaddir = true;
@@ -159,7 +162,8 @@ const browser = detect();
       counter: {
         scan: 0,
         zip: 0,
-        reject: 0
+        reject: 0,
+        error:0,
       },
       handlers: [],
       hashandlers:false,
@@ -180,7 +184,6 @@ const browser = detect();
     properties.zip = new Zip((error, chunk, final) => {
       if (error) {
         onError(eventnames.errorfile, {
-                name: eventnames.error,
                 message: error}, _listener);
         return false;
       } else {
@@ -199,12 +202,13 @@ const browser = detect();
   }
 
   function checkProcessed(e) {
-    if (properties.endreaddir === true && properties.endcounter === true) {
+    if (properties.endreaddir === true) {
+    if(properties.endcounter === true) {
       const message = buildMessage(e, {
        name: eventnames.endzip
       });
       ModuleEventEmitter.emit(eventnames.complete, message, _listener);
-    }
+    }  else if (properties.counter.error>0) endProcess();}
   }
 
   function zipOnData(zip = null) {
@@ -383,16 +387,19 @@ const browser = detect();
       });
       gzipped.ondata = (err, data, final) => {
        if(pos > MAXSIZE)  {
-              onError(eventnames.errorfile, {
-                name: eventnames.error,
+                properties.counter.error+=1;
+              onError(AlertBox.alertconfig.types.error, {
+
+                name:AlertBox.alertconfig.types.error,
                 bigfile:file.name,
                 path:filepath,
                 message:'File '+file.name+' size exceeds maxsize. Cannot be sent in chunks for the moment.'}, _listener);
-          streamhandle.close();gzipped.ondata= (err, data, final) => {}; return false;
+          streamhandle.close();gzipped.ondata= (err, data, final) => {}; return endProcess();
           }
         if (err) {
-          onError(eventnames.errorfile, {
-            name: eventnames.error,
+            properties.counter.error+=1;
+          onError(AlertBox.alertconfig.types.error, {
+            name:AlertBox.alertconfig.types.error,
             bigfile: file.name,
             path: filepath,
             size: file.size,
@@ -405,13 +412,14 @@ const browser = detect();
           pos += data.length;
           if (final) {
             streamhandle.close();
-            ModuleEventEmitter.emit(eventnames.counter, {
+                 filepath+='.gz';
+                ModuleEventEmitter.emit(eventnames.counter, {
               name: 'zip',
               path: filepath,
               size: file.size,
               bigfile:file.name
             }, uuid);
-          filepath+='.gz';
+
          addHandler(async () => {
          await sendChunk(sendpath,filestream);
             });
@@ -421,8 +429,6 @@ const browser = detect();
       const count = false;
       await readFile(file, filepath, gzipped, count);
     }
-
-
   }
   async function partZip() {
     properties.part += 1;
@@ -468,7 +474,11 @@ const browser = detect();
       properties.zip.add(zippedstream);
     await readFile(file, filepath, zippedstream);
   }
-
+  function compressed_estimate(file) {
+    const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
+    if (can_be_compressed.has(ext)) return Math.floor(file.size/2);
+    return file.size;
+  }
   async function addFileToZipStream(file, filepath, count = true) {
     if (count === true) ModuleEventEmitter.emit(eventnames.counter, {
       name: 'scan',
@@ -476,17 +486,24 @@ const browser = detect();
       size: file.size
     }, uuid);
     properties.follow = null;
+
     // check file size > max post size
-    if (file.size >= MAXSIZE) {
-      gzipBigFile(file, filepath);
+    const compressed_size = compressed_estimate(file);
+    if (compressed_size >= MAXSIZE ) {
+    // to prevent errors and uncomplete zip send error
+      properties.counter.error+=1;
+      if(UPLOADINPARTS) gzipBigFile(file, filepath);
+      else endProcess();
     } else {
       // check zip file size > total zip size
-      properties.sizetozip += file.size;
+      properties.sizetozip += compressed_size;
       if (properties.sizetozip > MAXSIZE) {
-     properties.follow = async () => {
+      if(UPLOADINPARTS) {
+      properties.follow = async () => {
           await zipStream(file, filepath);
         }
         partZip();
+        } else endProcess();
       } else {
         await zipStream(file, filepath);
       }
@@ -523,7 +540,7 @@ const browser = detect();
         message.name=action;
         break;
       default:
-        message.name = eventnames.follow;
+        //message.name = eventnames.error;
         break;
     }
     ModuleEventEmitter.emit(eventnames.message, message, _listener);
@@ -580,14 +597,14 @@ async function listStorage(entry = null,name=null) {
     const end = Math.min(start + chunksize, file.size);
     if (end === file.size) {
     path=path.replace(file.name,'');
-
-    await sendZipFile(file, path, null, true);
+     sendZipFile(file, path, null, true);
     } else {
-    ModuleEventEmitter.emit(eventnames.error, {
-          name: eventnames.errorfile,
-          message:'File size exceeds capacity. Chunk functionality not supported for the moment.'
+        properties.counter.error+=1;
+    onError(eventnames.errorfile, {
+          name: eventnames.error,
+          message:'File '+path+dirseparator+file.name+' size exceeds capacity. Chunk functionality not supported for the moment.'
         }, _listener);
-    return;
+    return endProcess() ;
     // for the moment ecotaxaback does not support chunks
       const partfile = file.slice(start, end);
       partfile.name = chunknum + '_' + file.name;
@@ -605,6 +622,7 @@ async function listStorage(entry = null,name=null) {
     return file;
   }
   async function sendZipFile(file, path, callbackchunk = null, bigfile = false) {
+  if(properties.counter.error>0) return endProcess();
     const message = {
       name: eventnames.pending,
       bigfile:bigfile,
@@ -634,8 +652,23 @@ async function listStorage(entry = null,name=null) {
       } else {
         properties.follow=null;
         await endFetch(message);
-        onError(eventnames.errorfile, message);    }
+         properties.counter.error+=1;
+        onError(eventnames.errorfile, message); if(bigfile || properties.hashandlers) endProcess();    }
   }
+  function endProcess() {
+    properties.follow=null;
+    onError(eventnames.errorfile,{
+            name: AlertBox.alertconfig.types.error,
+            message: "Upload not done. one or more files exceeds max upload size",
+            path:uploadpath,
+            });
+    reset().then(() => {
+        ModuleEventEmitter.emit(eventnames.complete, {
+          name: eventnames.ready
+        }, _listener);
+        properties.endreaddir = false;  });
+    return false;
+    }
   return {
     uuid,
     eventnames,
