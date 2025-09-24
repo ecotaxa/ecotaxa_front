@@ -16,7 +16,7 @@ docker start portable_ecotaxaback  &&
 echo " db created" &&
 docker exec -i portable_ecotaxaback bash -c "PYTHONPATH=. python cmds/manage.py db build" &&
 #replace adminstrator by a "valid" email
-docker exec -i portable_pgdb_1 psql -U postgres -h localhost -d ecotaxa -c "UPDATE users SET email='administrator@mail.test' WHERE id=1;"  &&
+docker exec -i portable_pgdb_1 psql -U postgres -h localhost -d ecotaxa -c "UPDATE users SET email='administrator@mail.test', password='Ecotaxa?1' WHERE id=1;"  &&
 echo "connect with administrator@mail.test" &&
 docker stop portable_ecotaxaback &&
 echo " end install" &&

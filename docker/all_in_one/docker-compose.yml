@@ -32,6 +32,8 @@ services:
       - ./models:/models
       - temp_jobs:/temp_jobs
       - ./eco_users_files:/eco_users_files
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       econet:
     depends_on:
