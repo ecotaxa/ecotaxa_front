@@ -335,11 +335,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.8.3.3"
+ecotaxa_version = "2.8.4"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + ".2025-09-10"
+    return ecotaxa_version + ".2025-09-25"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
