@@ -28,7 +28,7 @@ from to_back.ecotaxa_cli_py.api import (
     TaxonomyTreeApi,
     MiscApi,
     InstrumentsApi,
-    FilesApi,
+    MyfilesApi,
     JobsApi,
     AdminApi,
 )
@@ -47,7 +47,7 @@ A = TypeVar(
     TaxonomyTreeApi,
     MiscApi,
     InstrumentsApi,
-    FilesApi,
+    MyfilesApi,
     JobsApi,
     AdminApi,
 )

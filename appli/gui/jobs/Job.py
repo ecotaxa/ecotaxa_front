@@ -7,7 +7,7 @@ from werkzeug.datastructures import FileStorage
 from appli import gvg, gvp
 from appli.project import sharedfilter
 from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import FilesApi, JobsApi
+from to_back.ecotaxa_cli_py.api import MyfilesApi, JobsApi
 from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
 from appli.gui.jobs.staticlistes import py_messages
@@ -114,10 +114,10 @@ class Job(object):
         uploaded_file: FileStorage = request.files.get("uploadfile")
         if uploaded_file is not None and uploaded_file.filename != "":
             # Relay the file to back-end
-            with ApiClient(FilesApi, _request) as api:
+            with ApiClient(MyfilesApi, _request) as api:
                 # Call using requests, as the generated openapi wrapper only reads the full file in memory.
                 url = (
-                    api.api_client.configuration.host + "/my_files/"
+                    api.api_client.configuration.host + "/user_files/"
                 )  # endpoint is nowhere available as a const :(
                 token = api.api_client.configuration.access_token
                 headers = {"Authorization": "Bearer " + token}

@@ -9,7 +9,7 @@
   </div>
   {% if processstep  %}
   {% include('/v2/project/_merge_process.html') with context%}
-<a class="back-button" href="{{url_for("gui_prj_merge",projid= target_proj.projid) if processstep=='ask' else url_for("gui_prj",projid=target_proj.projid)}}">{{ _("Back to list") if processstep =="ask" else  _('Back to target project') if (processstep=="end")  else  _("Back to project home")}}</a>
+<a class="back-button" href="{{url_for("gui_prj_merge",projid= target_proj.projid) if processstep=='ask' else url_for("gui_prj_classify",projid=target_proj.projid)}}">{{ _("Back to list") if processstep =="ask" else  _('Back to target project') if (processstep=="end")  else  _("Back to project home")}}</a>
 {% else %}
   <form action={{request.path}} method="post" id="form-merge" class="js js-submit relative">
 <div class="block-info text-sm md:text-base"><ul><li>{{_('You are allowed to merge projects that you manage and contain images from the <strong>same</strong> instrument.

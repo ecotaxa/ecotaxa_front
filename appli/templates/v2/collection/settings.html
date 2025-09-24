@@ -29,7 +29,7 @@
                           <div class="form-box">
                             <label for="provider_user">{{_('Metadata provider')}}<i data-for="help_coll_provider_user" data-request="help"></i></label>
                             <select id='provider_user' class="form-select js js-autocomplete " name="provider_user" data-type="user" placeholder="{{_('select a provider user')}}"  autocomplete="off"><option value="">{{_('Select...')}}</option>
-                               {%if target_coll and target_coll.provider_user%}<option value="{{ target_coll.provider_user.id }}" > {{ target_coll.provider_user.name }}</option>{%-elif not target_coll -%}
+                             {%if target_coll and target_coll.provider_user%}<option value="{{ target_coll.provider_user.id }}"  selected="selected"> {{ target_coll.provider_user.name }}</option>{%-elif not target_coll -%}
                                <option value="{{ current_user.id }}" selected="selected"> {{ current_user.name }}</option>{%-endif-%}
                               </select>
                           </div><div class="form-box">

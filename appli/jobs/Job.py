@@ -8,7 +8,7 @@ from werkzeug.datastructures import FileStorage
 
 from appli import gvg, XSSEscape, gvp
 from appli.project import sharedfilter
-from to_back.ecotaxa_cli_py.api import FilesApi
+from to_back.ecotaxa_cli_py.api import MyfilesApi
 from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
 
@@ -91,17 +91,20 @@ class Job(object):
         uploaded_file: FileStorage = request.files.get("uploadfile")
         if uploaded_file is not None and uploaded_file.filename != "":
             # Relay the file to back-end
-            with ApiClient(FilesApi, request) as api:
+            with ApiClient(MyfilesApi, request) as api:
                 # Call using requests, as the generated openapi wrapper only reads the full file in memory.
                 url = (
-                    api.api_client.configuration.host + "/my_files/"
+                    api.api_client.configuration.host + "/user_files/"
                 )  # endpoint is nowhere available as a const :(
                 token = api.api_client.configuration.access_token
                 headers = {"Authorization": "Bearer " + token}
                 # 'requests' lib sends fine the name to back-end
                 uploaded_file.name = uploaded_file.filename
                 file_rsp = requests.post(
-                    url, files={"file": uploaded_file}, headers=headers
+                    url,
+                    files={"file": uploaded_file},
+                    data={"path": uploaded_file.name},
+                    headers=headers,
                 )
             if file_rsp.status_code != 200:
                 return None, file_rsp.text

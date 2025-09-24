@@ -641,8 +641,9 @@ def api_current_user(redir: bool = True):
 
 def _backend_ip() -> str:
     ip = app.config["BACKEND_URL"].split("//")
+    allinone = app.config["ALL_IN_ONE"]
     backendip = ip[1].split(":")[0]
-    if backendip == "localhost":
+    if allinone or backendip == "localhost" or backendip == "ecotaxaback":
         backendip = _public_ip()
     return backendip
 

@@ -416,7 +416,9 @@ def gui_dbadmin_recomputestat():
 @gui_roles_accepted(AdministratorLabel)
 def gui_dbadmin_console():
     sql = gvp("sql")
-    if len(request.form) > 0 and request.referrer != request.full_path.replace(
+    print("req", request.referrer)
+    print("full_path", request.url.replace("http:", "https:"))
+    if len(request.form) > 0 and request.referrer != request.url.replace(
         "http:", "https:"
     ):  # si post doit venir de cette page
         txt = "Invalid referer"

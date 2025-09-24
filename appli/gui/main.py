@@ -327,9 +327,9 @@ def gui_server_folder_select_json():
         current_path = parent
     # Call back-end for directory content
     from appli.utils import ApiClient
-    from to_back.ecotaxa_cli_py.api import FilesApi
+    from to_back.ecotaxa_cli_py.api import CommonFilesApi
 
-    with ApiClient(FilesApi, request) as api:
+    with ApiClient(CommonFilesApi, request) as api:
         # List files remotely
         dir_desc: DirectoryModel = api.list_common_files(path=current_path)
         entries_in_dir: List[DirectoryEntryModel] = dir_desc.entries
@@ -629,6 +629,9 @@ def utility_processor():
     def days_to_live():
         return get_back_constants("TIME_TO_LIVE")
 
+    def upload_in_parts() -> bool:
+        return app.config.get("UPLOAD_IN_PARTS", False)
+
     return dict(
         message_translation=message_translation,
         unique_id=unique_id,
@@ -646,4 +649,5 @@ def utility_processor():
         ecopart_url=ecopart_url,
         max_upload_size=max_upload_size,
         days_to_live=days_to_live,
+        upload_in_parts=upload_in_parts,
     )
