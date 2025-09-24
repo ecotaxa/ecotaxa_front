@@ -49,7 +49,7 @@ class Constants(object):
         'formulae': 'str',
         'default_project_access': 'str',
         'max_upload_size': 'int',
-        'time_to_live': 'int'
+        'time_to_live': 'str'
     }
 
     attribute_map = {
@@ -74,7 +74,7 @@ class Constants(object):
 
     def __init__(self, license_texts=None, access=None, app_manager=["",""], countries=[], people_organization_directories=None, user_status=None, user_type=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, formulae='''subsample_coef: 1/ssm.sub_part
 total_water_volume: sam.tot_vol/1000
-individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=60, local_vars_configuration=None):  # noqa: E501
+individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=None, local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -509,7 +509,7 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         My Files number of days before deleting directories  # noqa: E501
 
         :return: The time_to_live of this Constants.  # noqa: E501
-        :rtype: int
+        :rtype: str
         """
         return self._time_to_live
 
@@ -520,7 +520,7 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         My Files number of days before deleting directories  # noqa: E501
 
         :param time_to_live: The time_to_live of this Constants.  # noqa: E501
-        :type: int
+        :type: str
         """
 
         self._time_to_live = time_to_live

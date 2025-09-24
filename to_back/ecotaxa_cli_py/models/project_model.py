@@ -44,7 +44,6 @@ class ProjectModel(object):
         'classiffieldlist': 'str',
         'popoverfieldlist': 'str',
         'comments': 'str',
-        'description': 'str',
         'rf_models_used': 'str',
         'cnn_network_id': 'str',
         'formulae': 'str',
@@ -75,7 +74,6 @@ class ProjectModel(object):
         'classiffieldlist': 'classiffieldlist',
         'popoverfieldlist': 'popoverfieldlist',
         'comments': 'comments',
-        'description': 'description',
         'rf_models_used': 'rf_models_used',
         'cnn_network_id': 'cnn_network_id',
         'formulae': 'formulae',
@@ -94,7 +92,7 @@ class ProjectModel(object):
         'highest_right': 'highest_right'
     }
 
-    def __init__(self, projid=None, title=None, access=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, description=None, rf_models_used=None, cnn_network_id=None, formulae=None, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, bodc_variables=None, init_classif_list=[], managers=[], annotators=[], viewers=[], contact=None, instrument=None, instrument_url=None, highest_right='', local_vars_configuration=None):  # noqa: E501
+    def __init__(self, projid=None, title=None, access=None, status=None, objcount=None, pctvalidated=None, pctclassified=None, classifsettings=None, classiffieldlist=None, popoverfieldlist=None, comments=None, rf_models_used=None, cnn_network_id=None, formulae=None, obj_free_cols=None, sample_free_cols=None, acquisition_free_cols=None, process_free_cols=None, bodc_variables=None, init_classif_list=[], managers=[], annotators=[], viewers=[], contact=None, instrument=None, instrument_url=None, highest_right='', local_vars_configuration=None):  # noqa: E501
         """ProjectModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -111,7 +109,6 @@ class ProjectModel(object):
         self._classiffieldlist = None
         self._popoverfieldlist = None
         self._comments = None
-        self._description = None
         self._rf_models_used = None
         self._cnn_network_id = None
         self._formulae = None
@@ -149,8 +146,6 @@ class ProjectModel(object):
             self.popoverfieldlist = popoverfieldlist
         if comments is not None:
             self.comments = comments
-        if description is not None:
-            self.description = description
         if rf_models_used is not None:
             self.rf_models_used = rf_models_used
         if cnn_network_id is not None:
@@ -436,29 +431,6 @@ class ProjectModel(object):
         """
 
         self._comments = comments
-
-    @property
-    def description(self):
-        """Gets the description of this ProjectModel.  # noqa: E501
-
-        The project description, i.e. main traits.  # noqa: E501
-
-        :return: The description of this ProjectModel.  # noqa: E501
-        :rtype: str
-        """
-        return self._description
-
-    @description.setter
-    def description(self, description):
-        """Sets the description of this ProjectModel.
-
-        The project description, i.e. main traits.  # noqa: E501
-
-        :param description: The description of this ProjectModel.  # noqa: E501
-        :type: str
-        """
-
-        self._description = description
 
     @property
     def rf_models_used(self):

@@ -413,7 +413,7 @@ class ProjectsApi(object):
         :param str project_ids: Limit the list to a set of ids.
         :param bool not_granted: Return projects on which the current user has _no permission_, but visible to him/her.
         :param bool for_managing: Return projects that can be written to (including erased) by the current user.
-        :param str order_field: One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'description', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']
+        :param str order_field: One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']
         :param str fields: Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.
         :param int window_start: Skip `window_start` before returning data.
         :param int window_size: Return only `window_size` lines.
@@ -444,7 +444,7 @@ class ProjectsApi(object):
         :param str project_ids: Limit the list to a set of ids.
         :param bool not_granted: Return projects on which the current user has _no permission_, but visible to him/her.
         :param bool for_managing: Return projects that can be written to (including erased) by the current user.
-        :param str order_field: One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'description', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']
+        :param str order_field: One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']
         :param str fields: Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.
         :param int window_start: Skip `window_start` before returning data.
         :param int window_size: Return only `window_size` lines.
@@ -1989,7 +1989,7 @@ class ProjectsApi(object):
         :param str title_filter: Use this pattern for matching returned projects names.
         :param str instrument_filter: Only return projects where this instrument was used.
         :param bool filter_subset: Only return projects having 'subset' in their names.
-        :param str order_field: One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'description', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']
+        :param str order_field: One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']
         :param str fields: Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.
         :param int window_start: Skip `window_start` before returning data.
         :param int window_size: Return only `window_size` lines.
@@ -2023,7 +2023,7 @@ class ProjectsApi(object):
         :param str title_filter: Use this pattern for matching returned projects names.
         :param str instrument_filter: Only return projects where this instrument was used.
         :param bool filter_subset: Only return projects having 'subset' in their names.
-        :param str order_field: One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'description', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']
+        :param str order_field: One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']
         :param str fields: Return the default fields (typically used in conjunction with an additional field list). For users list display purpose.
         :param int window_start: Skip `window_start` before returning data.
         :param int window_size: Return only `window_size` lines.

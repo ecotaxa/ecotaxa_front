@@ -17,7 +17,7 @@ from __future__ import absolute_import
 __version__ = "1.0.0"
 
 # import apis into sdk package
-from to_back.ecotaxa_cli_py.api.files_api import FilesApi
+from to_back.ecotaxa_cli_py.api.common_files_api import CommonFilesApi
 from to_back.ecotaxa_cli_py.api.myfiles_api import MyfilesApi
 from to_back.ecotaxa_cli_py.api.taxonomy_tree_api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.api.wip_api import WIPApi
@@ -57,7 +57,6 @@ from to_back.ecotaxa_cli_py.models.body_export_object_set_summary_object_set_exp
 from to_back.ecotaxa_cli_py.models.body_move_file_user_files_mv_post import BodyMoveFileUserFilesMvPost
 from to_back.ecotaxa_cli_py.models.body_predict_object_set_object_set_predict_post import BodyPredictObjectSetObjectSetPredictPost
 from to_back.ecotaxa_cli_py.models.body_put_my_file_user_files_post import BodyPutMyFileUserFilesPost
-from to_back.ecotaxa_cli_py.models.body_put_user_file_my_files_post import BodyPutUserFileMyFilesPost
 from to_back.ecotaxa_cli_py.models.body_remove_file_user_files_rm_post import BodyRemoveFileUserFilesRmPost
 from to_back.ecotaxa_cli_py.models.bulk_update_req import BulkUpdateReq
 from to_back.ecotaxa_cli_py.models.classify_auto_req import ClassifyAutoReq

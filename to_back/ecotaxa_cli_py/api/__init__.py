@@ -3,7 +3,7 @@ from __future__ import absolute_import
 # flake8: noqa
 
 # import apis into api package
-from to_back.ecotaxa_cli_py.api.files_api import FilesApi
+from to_back.ecotaxa_cli_py.api.common_files_api import CommonFilesApi
 from to_back.ecotaxa_cli_py.api.myfiles_api import MyfilesApi
 from to_back.ecotaxa_cli_py.api.taxonomy_tree_api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.api.wip_api import WIPApi
