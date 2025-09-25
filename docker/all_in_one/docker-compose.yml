@@ -2,6 +2,7 @@ version: "3"
 services:
   nginx:
     image: nginx:1.21.6
+    container_name: portable_nginx
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./vault:/vault
@@ -56,9 +57,8 @@ services:
     container_name: portable_pgdb_1
     networks:
       econet:
-    # Uncomment to be able to access the DB, in case.
-    #    ports:
-    #      - 5432:5432
+    ports:
+      - 5432:5432
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
 networks:
