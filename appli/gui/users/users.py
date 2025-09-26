@@ -14,7 +14,7 @@ from to_back.ecotaxa_cli_py.models import (
 from to_back.ecotaxa_cli_py.models import Constants
 from appli.gui.commontools import format_exception
 from appli.gui.staticlistes import py_user, py_messages
-from appli.back_config import get_user_constants
+from appli.back_config import get_user_constants, get_back_constants
 
 (
     ApiUserStatus,
@@ -26,7 +26,7 @@ from appli.back_config import get_user_constants
     PROFILE_TOKEN_AGE,
     RECAPTCHAID,
 ) = get_user_constants()
-
+ALL_IN_ONE = get_back_constants("ALL_IN_ONE")
 ACCOUNT_USER_CREATE = "create"
 ACCOUNT_USER_EDIT = "edit"
 
@@ -220,7 +220,10 @@ def user_create(
             typ = "success"
         else:
             redir = url_for("gui_register")
-            message = resp[1] + " " + py_user["mailerror"]
+            if API_EMAIL_VERIFICATION:
+                message = resp[1] + " " + py_user["mailerror"]
+            else:
+                message = resp[1] + " " + py_user["profileerror"]["create"]
             typ = "error"
     else:
         if resp[0] == 0:
@@ -641,9 +644,9 @@ def api_current_user(redir: bool = True):
 
 def _backend_ip() -> str:
     ip = app.config["BACKEND_URL"].split("//")
-    allinone = app.config["ALL_IN_ONE"]
+
     backendip = ip[1].split(":")[0]
-    if allinone or backendip == "localhost" or backendip == "ecotaxaback":
+    if ALL_IN_ONE or backendip == "localhost" or backendip == "ecotaxaback":
         backendip = _public_ip()
     return backendip
 

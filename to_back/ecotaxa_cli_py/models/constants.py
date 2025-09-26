@@ -49,7 +49,8 @@ class Constants(object):
         'formulae': 'str',
         'default_project_access': 'str',
         'max_upload_size': 'int',
-        'time_to_live': 'str'
+        'time_to_live': 'str',
+        'all_in_one': 'bool'
     }
 
     attribute_map = {
@@ -69,12 +70,13 @@ class Constants(object):
         'formulae': 'formulae',
         'default_project_access': 'default_project_access',
         'max_upload_size': 'max_upload_size',
-        'time_to_live': 'time_to_live'
+        'time_to_live': 'time_to_live',
+        'all_in_one': 'all_in_one'
     }
 
     def __init__(self, license_texts=None, access=None, app_manager=["",""], countries=[], people_organization_directories=None, user_status=None, user_type=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, formulae='''subsample_coef: 1/ssm.sub_part
 total_water_volume: sam.tot_vol/1000
-individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=None, local_vars_configuration=None):  # noqa: E501
+individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=None, all_in_one=False, local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -97,6 +99,7 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         self._default_project_access = None
         self._max_upload_size = None
         self._time_to_live = None
+        self._all_in_one = None
         self.discriminator = None
 
         if license_texts is not None:
@@ -133,6 +136,8 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
             self.max_upload_size = max_upload_size
         if time_to_live is not None:
             self.time_to_live = time_to_live
+        if all_in_one is not None:
+            self.all_in_one = all_in_one
 
     @property
     def license_texts(self):
@@ -524,6 +529,29 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         """
 
         self._time_to_live = time_to_live
+
+    @property
+    def all_in_one(self):
+        """Gets the all_in_one of this Constants.  # noqa: E501
+
+        local install - run without network access  # noqa: E501
+
+        :return: The all_in_one of this Constants.  # noqa: E501
+        :rtype: bool
+        """
+        return self._all_in_one
+
+    @all_in_one.setter
+    def all_in_one(self, all_in_one):
+        """Sets the all_in_one of this Constants.
+
+        local install - run without network access  # noqa: E501
+
+        :param all_in_one: The all_in_one of this Constants.  # noqa: E501
+        :type: bool
+        """
+
+        self._all_in_one = all_in_one
 
     def to_dict(self):
         """Returns the model properties as a dict"""

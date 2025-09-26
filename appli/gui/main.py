@@ -632,6 +632,9 @@ def utility_processor():
     def upload_in_parts() -> bool:
         return app.config.get("UPLOAD_IN_PARTS", False)
 
+    def all_in_one() -> bool:
+        return get_back_constants("ALL_IN_ONE")
+
     return dict(
         message_translation=message_translation,
         unique_id=unique_id,
@@ -650,4 +653,5 @@ def utility_processor():
         max_upload_size=max_upload_size,
         days_to_live=days_to_live,
         upload_in_parts=upload_in_parts,
+        all_in_one=all_in_one,
     )

@@ -1,7 +1,7 @@
 {%-macro captcha(formid,uid)-%}
 {%-if reCaptchaID != None -%}
 {%-include 'v2/macros/_google_captcha.html' with context -%}
-{%-else-%}
+{%-elif not all_in_one() -%}
 <div id="home-captcha" class="js js-captcha" data-url="{{url_for('static',filename='gui/js/botdetect-clean.min.js')}}" data-response="home-captcha-response">
 <div class="comment-captcha">{{_("If you see this field don't modify its content")}}<input type="text" id="home-captcha-response" name="home-captcha-response" value="" placeholder="{{uid}}" alt="{{_('home-captcha-response')}}"></div>
 </div>

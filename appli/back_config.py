@@ -27,10 +27,10 @@ def get_country_names(request) -> List[str]:
         return consts.countries
 
 
-def get_back_constants(_type) -> tuple:
+def get_back_constants(_type):
     from flask import current_app
 
-    if not _type in current_app.config:
+    if not "API_" + _type + "_CONSTANTS" in current_app.config:
         with ApiClient(MiscApi, request) as api:
             consts: Constants = api.used_constants()
         if _type == "USER":
@@ -64,6 +64,8 @@ def get_back_constants(_type) -> tuple:
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.max_upload_size
         elif _type == "TIME_TO_LIVE":
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.time_to_live
+        elif _type == "ALL_IN_ONE":
+            current_app.config["API_" + _type + "_CONSTANTS"] = consts.all_in_one
     return current_app.config["API_" + _type + "_CONSTANTS"]
 
 
