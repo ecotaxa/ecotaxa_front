@@ -205,7 +205,7 @@ class ImportJob(Job):
                     users=not_found_users,
                     job=job,
                 )
-        return redirect("/Job/Monitor/%d" % job.id)
+        return redirect("/gui/job/show/%d" % job.id)
 
     @classmethod
     def _must_skip_existing_objects(cls) -> bool:
