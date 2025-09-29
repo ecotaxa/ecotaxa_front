@@ -36,8 +36,6 @@
 {% endif %}
 <div class="stat-item"><span class="stat-label">{{_('Collections')}}</span>
 <div class="stat-info text-sm">{%- if collections and  collections is iterable %}{%-for collection in collections-%}<span>{{collection_info(collection)}}</span>{{', ' if loop.index < collections|length else ''}}{%-endfor-%}{%-endif-%}</div></div>
-<div class="stat-item"><span class="stat-label">{{_('Description')}}</span>
-<div class="stat-info">{{target_proj.description if target_proj.description != None else '' }}</div></div>
 <div class="stat-item"><span class="stat-label">{{_('Comments')}}</span>
 <div class="stat-info">{{target_proj.comments if target_proj.comments != None else '' }}</div></div>
 {% if initclassiflist %}

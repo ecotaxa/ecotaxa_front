@@ -139,7 +139,6 @@ def project_table_columns(
                 {
                     "status": {"label": _("status")},
                     "contact": {"label": _("contact"), "hidden": True},
-                    "description": {"label": _("description"), "hidden": True},
                     "comments": {"label": _("comments"), "hidden": True},
                     "init_classif_list": {"label": _("preset"), "hidden": True},
                     "privileges": {"label": _("members"), "format": "privileges"},
@@ -221,7 +220,6 @@ def project_table_columns(
                 "field": "projid",
                 "selectcells": [
                     "title",
-                    "description",
                     "comments",
                     "instrument",
                     "contact",
@@ -339,7 +337,7 @@ def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
                 "projid": prj.projid,
                 "title": prj.title.strip(),
                 "status": prj.status,
-                "description": prj.description,
+                "comments": prj.comments,
                 "privileges": _render_privileges(prj),
                 "cnn_network_id": prj.cnn_network_id,
                 "instrument": prj.instrument,
@@ -351,7 +349,6 @@ def render_stat_proj(prj: ProjectModel, partial: bool = True) -> dict:
                 "projid": prj.projid,
                 "title": prj.title.strip(),
                 "status": prj.status,
-                "description": prj.description,
                 "comments": prj.comments,
                 "privileges": _render_privileges(prj),
                 "cnn_network_id": prj.cnn_network_id,
@@ -370,7 +367,7 @@ def render_stat_proj_json(prj: dict, partial: bool = True) -> dict:
         keepkeys = [
             "projid",
             "title",
-            "description",
+            "comments",
             "privileges",
             "cnn_network_id",
             "instrument",
@@ -381,7 +378,6 @@ def render_stat_proj_json(prj: dict, partial: bool = True) -> dict:
         keepkeys = [
             "projid",
             "title",
-            "description",
             "comments",
             "privileges",
             "cnn_network_id",
